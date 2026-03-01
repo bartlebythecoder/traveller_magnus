@@ -1,0 +1,3853 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Traveller Hex Map</title>
+    <style>
+        /* -----------------------------------------------------------------------------
+       Style
+       ----------------------------------------------------------------------------- */
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0b0c10;
+            /* Dark space background */
+            font-family: 'Inter', sans-serif;
+        }
+
+        #map-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+
+        #map-canvas.dragging {
+            cursor: grabbing;
+        }
+
+        /* Context Menu */
+        #context-menu {
+            position: absolute;
+            background-color: #1f2833;
+            border: 1px solid #45a29e;
+            border-radius: 8px;
+            padding: 8px 0;
+            display: none;
+            /* Hidden by default */
+            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+            z-index: 200;
+            min-width: 150px;
+        }
+
+        #context-menu.visible {
+            display: flex;
+        }
+
+        .context-menu-item {
+            color: #c5c6c7;
+            padding: 10px 20px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-align: left;
+            background: none;
+            border: none;
+            width: 100%;
+        }
+
+        .context-menu-item:hover {
+            background-color: #45a29e;
+            color: #0b0c10;
+        }
+
+        /* Context Menu Submenus */
+        .context-menu-item.has-submenu {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .context-menu-item.has-submenu::after {
+            content: '▶';
+            font-size: 10px;
+            color: #45a29e;
+            margin-left: 15px;
+        }
+
+        .submenu {
+            position: absolute;
+            top: 0;
+            left: 100%;
+            /* Open to the right */
+            background-color: #1f2833;
+            border: 1px solid #45a29e;
+            border-radius: 8px;
+            padding: 8px 0;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+            min-width: 180px;
+            z-index: 201;
+            /* Above parent menu */
+        }
+
+        .context-menu-item.has-submenu:hover>.submenu {
+            display: flex;
+        }
+
+        .submenu .context-menu-item {
+            width: 100%;
+        }
+
+        /* Settings Panel */
+        #settings-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(31, 40, 51, 0.8);
+            border: 1px solid #45a29e;
+            border-radius: 8px;
+            padding: 15px;
+            color: #c5c6c7;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            z-index: 100;
+        }
+
+        .setting-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .setting-row input {
+            cursor: pointer;
+        }
+
+        /* Hex Editor Modal */
+        #hex-editor {
+            position: absolute;
+            top: 100px;
+            left: calc(50% - 220px);
+            background-color: #1f2833;
+            border: 2px solid #45a29e;
+            border-radius: 8px;
+            padding: 20px;
+            color: #c5c6c7;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8);
+            z-index: 300;
+            width: 440px;
+            min-width: 320px;
+            min-height: 200px;
+            overflow: visible;
+        }
+
+        #hex-editor h3 {
+            margin: 0;
+            color: #66fcf1;
+            text-align: center;
+            border-bottom: 1px solid #45a29e;
+            padding-bottom: 10px;
+            cursor: move;
+            user-select: none;
+        }
+
+        .editor-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .editor-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .editor-row label {
+            flex: 1;
+        }
+
+        .editor-row input[type="text"],
+        .editor-row input[type="number"] {
+            width: 100px;
+            background-color: #0b0c10;
+            border: 1px solid #45a29e;
+            color: #66fcf1;
+            padding: 4px;
+            border-radius: 4px;
+            text-align: center;
+            font-family: monospace;
+        }
+
+        .editor-full-row {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .editor-full-row input[type="text"] {
+            width: 100%;
+            background-color: #0b0c10;
+            border: 1px solid #45a29e;
+            color: #66fcf1;
+            padding: 4px;
+            border-radius: 4px;
+            font-family: monospace;
+            box-sizing: border-box;
+        }
+
+        .editor-flex-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .editor-flex-row label {
+            flex: 0 0 110px;
+        }
+
+        .editor-flex-row input[type="text"] {
+            flex: 1;
+            background-color: #0b0c10;
+            border: 1px solid #45a29e;
+            color: #66fcf1;
+            padding: 4px;
+            border-radius: 4px;
+            font-family: monospace;
+            min-width: 0;
+        }
+
+        .editor-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            gap: 10px;
+        }
+
+        .editor-buttons button {
+            flex: 1;
+            padding: 8px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        .btn-save {
+            background-color: #45a29e;
+            color: #0b0c10;
+        }
+
+        .btn-cancel {
+            background-color: #c5c6c7;
+            color: #0b0c10;
+        }
+
+        .editor-buttons button:hover {
+            opacity: 0.8;
+        }
+
+        #help-modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(11, 12, 16, 0.95);
+            border: 2px solid #66fcf1;
+            padding: 20px;
+            border-radius: 8px;
+            color: #c5c6c7;
+            font-family: sans-serif;
+            font-size: 14px;
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8);
+            z-index: 300;
+            width: 400px;
+        }
+
+        #help-modal h3 {
+            margin: 0;
+            color: #66fcf1;
+            text-align: center;
+            border-bottom: 1px solid #45a29e;
+            padding-bottom: 10px;
+        }
+
+        .help-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .help-grid strong {
+            color: #45a29e;
+            text-align: right;
+            padding-right: 10px;
+        }
+
+        /* Editor Accordions */
+        .accordion-btn {
+            background-color: #1f2833;
+            color: #45a29e;
+            cursor: pointer;
+            padding: 8px;
+            width: 100%;
+            border: 1px solid #45a29e;
+            text-align: left;
+            outline: none;
+            font-size: 14px;
+            font-weight: bold;
+            transition: 0.3s;
+            margin-top: 10px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion-btn:hover {
+            background-color: #2c3a47;
+        }
+
+        .accordion-btn:after {
+            content: '\002B';
+            /* Plus sign */
+            color: #66fcf1;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .accordion-btn.active:after {
+            content: "\2212";
+            /* Minus sign */
+        }
+
+        .accordion-content {
+            padding: 10px;
+            background-color: #1f2833;
+            display: none;
+            overflow: auto;
+            border: 2px solid #45a29e;
+            border-radius: 8px;
+            position: absolute;
+            left: calc(100% + 10px);
+            top: 0;
+            width: 440px;
+            max-height: 80vh;
+            box-sizing: border-box;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8);
+            z-index: 301;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="map-canvas"></canvas>
+
+    <!-- Settings Panel -->
+    <div id="settings-panel">
+        <div class="settings-row">
+            <input type="checkbox" id="toggle-borders" checked>
+            <label for="toggle-borders">Show Sector/Subsector Borders</label>
+        </div>
+
+        <div style="border-top: 1px solid #45a29e; margin: 10px 0;"></div>
+
+        <div class="settings-row" style="justify-content: space-between;">
+            <button class="menu-btn" id="btn-save-map" style="width: 48%; padding: 6px;">Save Map...</button>
+            <button class="menu-btn" id="btn-load-map" style="width: 48%; padding: 6px;"
+                onclick="document.getElementById('file-load-map').click()">Load Map...</button>
+            <input type="file" id="file-load-map" accept=".json" style="display: none;">
+        </div>
+    </div>
+
+
+
+    <!-- Context Menu -->
+    <div id="context-menu">
+        <!-- SELECT Menu -->
+        <div class="context-menu-item has-submenu">
+            SELECT
+            <div class="submenu">
+                <button class="context-menu-item" id="ctx-select-hex">Toggle Select Hex</button>
+                <button class="context-menu-item" id="ctx-select-subsector">Toggle Select Subsector (Ctrl+B)</button>
+                <button class="context-menu-item" id="ctx-select-sector">Toggle Select Sector (Ctrl+S)</button>
+                <button class="context-menu-item" id="ctx-select-all">Toggle Select All (Ctrl+A)</button>
+                <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
+                <button class="context-menu-item" id="ctx-deselect-all">Cancel Selection (Esc)</button>
+            </div>
+        </div>
+
+        <!-- POPULATE Menu -->
+        <div class="context-menu-item has-submenu">
+            POPULATE
+            <div class="submenu">
+                <button class="context-menu-item" id="ctx-manual-system">Manual: Populate System</button>
+                <button class="context-menu-item" id="ctx-manual-empty">Manual: Set Empty</button>
+                <button class="context-menu-item" id="ctx-manual-clear">Manual: Reset Clear</button>
+                <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
+                <button class="context-menu-item" id="ctx-sparse">Auto: Sparse (2 in 6)</button>
+                <button class="context-menu-item" id="ctx-regular">Auto: Standard (3 in 6)</button>
+                <button class="context-menu-item" id="ctx-dense">Auto: Dense (4 in 6)</button>
+            </div>
+        </div>
+
+        <!-- GENERATE Menu -->
+        <div class="context-menu-item has-submenu">
+            GENERATE MAINWORLD
+            <div class="submenu">
+                <button class="context-menu-item" id="ctx-gen-ct">Classic Traveller (CT)</button>
+                <button class="context-menu-item" id="ctx-gen-mgt2e">Mongoose 2nd Ed (MgT2E)</button>
+                <button class="context-menu-item" id="ctx-gen-t5">Traveller 5 (T5)</button>
+            </div>
+        </div>
+
+        <!-- EXPAND SOCIOECONOMIC Menu -->
+        <div class="context-menu-item has-submenu">
+            EXPAND SOCIOECONOMIC
+            <div class="submenu">
+                <button class="context-menu-item" id="ctx-expand-socio-mgt2e">Mongoose 2nd Ed (MgT2E)</button>
+                <button class="context-menu-item" id="ctx-expand-socio-t5">Traveller 5 (T5)</button>
+            </div>
+        </div>
+
+        <!-- EXPAND MAINWORLD PHYSICAL Menu -->
+        <div class="context-menu-item has-submenu">
+            EXPAND MAINWORLD PHYSICAL
+            <div class="submenu">
+                <button class="context-menu-item" id="ctx-expand-physical-ct">Book 6 (CT)</button>
+                <button class="context-menu-item" id="ctx-expand-physical-mgt2e">Mongoose 2nd Ed (MgT2E)</button>
+                <button class="context-menu-item" id="ctx-expand-physical-t5">Traveller 5 (T5)</button>
+            </div>
+        </div>
+
+        <!-- EXPAND SYSTEM Menu -->
+        <div class="context-menu-item has-submenu">
+            EXPAND SYSTEM
+            <div class="submenu">
+                <button class="context-menu-item" id="ctx-expand-system-ct">Book 6 (CT)</button>
+                <button class="context-menu-item" id="ctx-expand-system-mgt2e">Mongoose 2nd Ed (MgT2E)</button>
+                <button class="context-menu-item" id="ctx-expand-system-t5">Traveller 5 (T5)</button>
+            </div>
+        </div>
+
+        <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
+        <button class="context-menu-item" id="ctx-help">Help / Shortcuts</button>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal">
+        <h3>Controls & Shortcuts</h3>
+        <div class="help-grid">
+            <strong>Left Click + Drag</strong><span>Pan Map</span>
+            <strong>Scroll Wheel</strong><span>Zoom In / Out</span>
+            <strong>Shift + Left Click</strong><span>Toggle Select Hex</span>
+            <strong>Shift + Drag</strong><span>Paint Multiple Hexes</span>
+            <strong>Ctrl + Left Click</strong><span>Open System Editor</span>
+            <strong>Right Click</strong><span>Open Context Menu</span>
+            <strong>Ctrl + A</strong><span>Toggle Select All Hexes</span>
+            <strong>Ctrl + S</strong><span>Toggle Select Sector</span>
+            <strong>Ctrl + B</strong><span>Toggle Select Subsector</span>
+            <strong>Escape</strong><span>Cancel Selection / Close Menu / Close Modals</span>
+        </div>
+        <div class="editor-buttons">
+            <button class="btn-cancel" id="btn-close-help">Close</button>
+        </div>
+    </div>
+
+    <!-- Hex Editor Modal -->
+    <div id="hex-editor">
+        <h3 id="hex-editor-title">Edit System</h3>
+
+        <div class="editor-grid">
+            <div class="editor-row">
+                <label>Starport:</label>
+                <input type="text" id="edit-starport" maxlength="1">
+            </div>
+            <div class="editor-row">
+                <label>Size:</label>
+                <input type="number" id="edit-size" min="0" max="99">
+            </div>
+            <div class="editor-row">
+                <label>Atmosphere:</label>
+                <input type="number" id="edit-atm" min="0" max="99">
+            </div>
+            <div class="editor-row">
+                <label>Hydrographics:</label>
+                <input type="number" id="edit-hydro" min="0" max="99">
+            </div>
+            <div class="editor-row">
+                <label>Population:</label>
+                <input type="number" id="edit-pop" min="0" max="99">
+            </div>
+            <div class="editor-row">
+                <label>Government:</label>
+                <input type="number" id="edit-gov" min="0" max="99">
+            </div>
+            <div class="editor-row">
+                <label>Law Level:</label>
+                <input type="number" id="edit-law" min="0" max="99">
+            </div>
+            <div class="editor-row">
+                <label>Tech Level:</label>
+                <input type="number" id="edit-tl" min="0" max="99">
+            </div>
+        </div>
+
+        <div class="editor-grid">
+            <div class="editor-row">
+                <label>Naval Base:</label>
+                <input type="checkbox" id="edit-naval">
+            </div>
+            <div class="editor-row">
+                <label>Scout Base:</label>
+                <input type="checkbox" id="edit-scout">
+            </div>
+            <div class="editor-row">
+                <label>Military Base:</label>
+                <input type="checkbox" id="edit-military">
+            </div>
+            <div class="editor-row">
+                <label>Corsair Base:</label>
+                <input type="checkbox" id="edit-corsair">
+            </div>
+            <div class="editor-row">
+                <label>Gas Giant:</label>
+                <input type="checkbox" id="edit-gas">
+            </div>
+        </div>
+
+        <div class="editor-full-row">
+            <label>Trade Codes (Space Separated):</label>
+            <input type="text" id="edit-trade-codes">
+        </div>
+
+        <!-- T5 Socioeconomics Accordion -->
+        <button class="accordion-btn" id="acc-btn-t5-socio" style="display: none;">T5 Socioeconomics</button>
+        <div class="accordion-content" id="editor-socio-t5-container">
+            <div class="editor-grid" style="margin-top: 10px;">
+                <div class="editor-row"><label>Pop M:</label><input type="number" id="edit-popm"></div>
+                <div class="editor-row"><label>Belts:</label><input type="number" id="edit-belts"></div>
+                <div class="editor-row"><label>Gas G:</label><input type="number" id="edit-gas-giants"></div>
+                <div class="editor-row"><label>Worlds:</label><input type="number" id="edit-worlds"></div>
+            </div>
+
+            <div class="editor-grid" style="margin-top: 5px;">
+                <div class="editor-row" style="grid-column: span 2;">
+                    <label>Importance:</label>
+                    <input type="number" id="edit-ix">
+                </div>
+                <div class="editor-row" style="grid-column: span 2;">
+                    <label>Resource Pts:</label>
+                    <input type="number" id="edit-ru">
+                </div>
+            </div>
+
+            <div class="editor-grid" style="margin-top: 5px;">
+                <div class="editor-row"><label>Eco (R):</label><input type="number" id="edit-r" min="0"></div>
+                <div class="editor-row"><label>Eco (L):</label><input type="number" id="edit-l" min="0"></div>
+                <div class="editor-row"><label>Eco (I):</label><input type="number" id="edit-i" min="0"></div>
+                <div class="editor-row"><label>Eco (E):</label><input type="number" id="edit-e"></div>
+            </div>
+
+            <div class="editor-grid" style="margin-top: 5px; margin-bottom: 10px;">
+                <div class="editor-row"><label>Cult (H):</label><input type="number" id="edit-h" min="1"></div>
+                <div class="editor-row"><label>Cult (A):</label><input type="number" id="edit-a" min="1"></div>
+                <div class="editor-row"><label>Cult (S):</label><input type="number" id="edit-s" min="1"></div>
+                <div class="editor-row"><label>Cult (Sym):</label><input type="number" id="edit-sym" min="1"></div>
+            </div>
+        </div>
+
+        <!-- MgT2E Socioeconomics Accordion -->
+        <button class="accordion-btn" id="acc-btn-mgt-socio" style="display: none;">MgT2E Socioeconomics</button>
+        <div class="accordion-content" id="editor-socio-mgt-container">
+            <div class="editor-grid" style="margin-top: 10px;">
+                <div class="editor-row">
+                    <label>P-Value:</label>
+                    <input type="number" id="edit-mgt-p" min="0" max="9">
+                </div>
+                <div class="editor-row">
+                    <label>PCR:</label>
+                    <input type="number" id="edit-mgt-pcr" min="0" max="9">
+                </div>
+                <div class="editor-row">
+                    <label>Urbanization %:</label>
+                    <input type="number" id="edit-mgt-urb" min="0" max="100">
+                </div>
+                <div class="editor-row">
+                    <label>Major Cities:</label>
+                    <input type="number" id="edit-mgt-mc" min="0">
+                </div>
+            </div>
+
+            <div style="margin-top: 15px; margin-bottom: 10px;">
+                <div class="editor-flex-row">
+                    <label>MC Pop:</label>
+                    <input type="text" id="edit-mgt-mcp">
+                </div>
+                <div class="editor-flex-row">
+                    <label>Gov Profile:</label>
+                    <input type="text" id="edit-mgt-gov">
+                </div>
+                <div class="editor-flex-row">
+                    <label>Factions:</label>
+                    <input type="text" id="edit-mgt-fac">
+                </div>
+                <div class="editor-flex-row">
+                    <label>Law Profile:</label>
+                    <input type="text" id="edit-mgt-law">
+                </div>
+                <div class="editor-flex-row">
+                    <label>Tech Profile:</label>
+                    <input type="text" id="edit-mgt-tech">
+                </div>
+                <div class="editor-flex-row">
+                    <label>Cultural Profile:</label>
+                    <input type="text" id="edit-mgt-cul">
+                </div>
+                <div class="editor-flex-row">
+                    <label>Economic Profile:</label>
+                    <input type="text" id="edit-mgt-eco">
+                </div>
+                <div class="editor-flex-row">
+                    <label>Starport Profile:</label>
+                    <input type="text" id="edit-mgt-star">
+                </div>
+                <div class="editor-flex-row">
+                    <label>Military Profile:</label>
+                    <input type="text" id="edit-mgt-mil">
+                </div>
+            </div>
+        </div>
+
+        <!-- Physical Stats Accordion -->
+        <button class="accordion-btn" id="acc-btn-physical" style="display: none;">Physical Stats</button>
+        <div class="accordion-content" id="editor-physical-container">
+            <div class="editor-grid" style="margin-top: 10px;">
+                <div class="editor-row" style="grid-column: span 2;">
+                    <label>Homestar:</label>
+                    <input type="text" id="edit-phys-star">
+                </div>
+            </div>
+            <div class="editor-grid" style="margin-top: 5px;">
+                <div class="editor-row">
+                    <label>HZ Variance:</label>
+                    <input type="number" id="edit-phys-hz">
+                </div>
+                <div class="editor-row">
+                    <label>Climate:</label>
+                    <input type="text" id="edit-phys-climate">
+                </div>
+            </div>
+            <div class="editor-grid" style="margin-top: 5px; margin-bottom: 10px;">
+                <div class="editor-row">
+                    <label>World Type:</label>
+                    <input type="text" id="edit-phys-worldtype">
+                </div>
+                <div class="editor-row">
+                    <label>Parent Body:</label>
+                    <input type="text" id="edit-phys-parent">
+                </div>
+                <div class="editor-row" style="grid-column: span 2;">
+                    <label>Sat Orbit:</label>
+                    <input type="text" id="edit-phys-satorbit">
+                </div>
+            </div>
+            <!-- CT Physical Stats (shown when CT physical data exists) -->
+            <div class="editor-grid" style="margin-top: 5px;" id="ct-phys-fields" style="display:none;">
+                <div class="editor-row">
+                    <label>HZ Orbit #:</label>
+                    <input type="number" id="edit-phys-orbit" min="0" max="13">
+                </div>
+                <div class="editor-row">
+                    <label>Distance (AU):</label>
+                    <input type="text" id="edit-phys-dist">
+                </div>
+                <div class="editor-row">
+                    <label>Satellites:</label>
+                    <input type="number" id="edit-phys-sats" min="0">
+                </div>
+                <div class="editor-row">
+                    <label>Gravity (G):</label>
+                    <input type="text" id="edit-phys-grav">
+                </div>
+                <div class="editor-row">
+                    <label>Cloudiness (%):</label>
+                    <input type="number" id="edit-phys-cloud" min="0" max="100">
+                </div>
+                <div class="editor-row">
+                    <label>Albedo:</label>
+                    <input type="text" id="edit-phys-alb">
+                </div>
+                <div class="editor-row">
+                    <label>Greenhouse:</label>
+                    <input type="text" id="edit-phys-gh">
+                </div>
+                <div class="editor-row">
+                    <label>Axial Tilt (°):</label>
+                    <input type="number" id="edit-phys-tilt" min="0" max="90">
+                </div>
+                <div class="editor-row" style="grid-column: span 2;">
+                    <label>Temperature (K):</label>
+                    <input type="number" id="edit-phys-temp">
+                </div>
+            </div>
+        </div>
+
+        <div class="editor-buttons">
+            <button class="btn-cancel" id="btn-editor-cancel">Cancel</button>
+            <button class="btn-save" id="btn-editor-save">Save</button>
+        </div>
+    </div>
+
+    <script>
+        // -----------------------------------------------------------------------------
+        // Application Logic
+        // -----------------------------------------------------------------------------
+        const canvas = document.getElementById('map-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // State
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+
+        let cameraX = 0;
+        let cameraY = 0;
+        let zoom = 1.0;
+
+        let isDragging = false;
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+
+        let currentMouseX = 0;
+        let currentMouseY = 0;
+
+        let selectedHexes = new Set();
+        let isPainting = false;
+        let paintAction = 'select';
+        let lastPaintedHexId = null;
+        let showSubsectorBorders = true;
+        let contextHexId = null;
+        let contextSectorPrefix = null;
+        let contextSubsectorPrefix = null;
+
+        // Hex Populate State (Map of hexId -> STATE)
+        // States: 'EMPTY', 'SYSTEM_PRESENT' (undefined/missing means BLANK)
+        let hexStates = new Map();
+
+        // UI Elements
+        const contextMenu = document.getElementById('context-menu');
+        const hexEditor = document.getElementById('hex-editor');
+
+        // Hex Editor State
+        let editingHexId = null;
+
+        // Make Hex Editor Draggable
+        const hexEditorHeader = hexEditor.querySelector('h3');
+        let isDraggingEditor = false;
+        let editorDragOffsetX = 0;
+        let editorDragOffsetY = 0;
+
+        hexEditorHeader.addEventListener('mousedown', (e) => {
+            isDraggingEditor = true;
+            const style = window.getComputedStyle(hexEditor);
+            editorDragOffsetX = e.clientX - parseInt(style.left, 10);
+            editorDragOffsetY = e.clientY - parseInt(style.top, 10);
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDraggingEditor) return;
+            hexEditor.style.left = (e.clientX - editorDragOffsetX) + 'px';
+            hexEditor.style.top = (e.clientY - editorDragOffsetY) + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDraggingEditor = false;
+        });
+
+        function updateActionPanel() {
+            // Deprecated panel logic removed
+        }
+
+        // Hex properties
+        const baseHexSize = 50;
+
+        // Initialization
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width * window.devicePixelRatio;
+            canvas.height = height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            draw();
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Input Handling
+        function getMouseWorldCoords(e) {
+            return {
+                x: cameraX + e.clientX / zoom,
+                y: cameraY + e.clientY / zoom
+            };
+        }
+
+        // Accordion functionality
+        const accordions = document.querySelectorAll('.accordion-btn');
+        accordions.forEach(acc => {
+            acc.addEventListener('click', function () {
+                const isActive = this.classList.contains('active');
+
+                // Close all first to ensure mutual exclusivity
+                accordions.forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.nextElementSibling) btn.nextElementSibling.style.display = 'none';
+                });
+
+                // If it wasn't active before, open it
+                if (!isActive) {
+                    this.classList.add('active');
+                    this.nextElementSibling.style.display = 'block';
+                }
+            });
+        });
+
+        // Hide context menu on click anywhere
+        window.addEventListener('click', (e) => {
+            if (e.target.closest('#context-menu') === null) {
+                contextMenu.classList.remove('visible');
+            }
+        });
+
+        canvas.addEventListener('contextmenu', (e) => {
+            e.preventDefault(); // Prevent default browser context menu
+
+            // Determine the hex underneath the mouse to target its subsector
+            const world = getMouseWorldCoords(e);
+            const coords = pixelToHex(world.x, world.y, baseHexSize);
+            const hexId = getHexId(coords.q, coords.r);
+
+            if (hexId) {
+                // ID format is "A-A-0101" or "AA-A-0101", split by '-' to be safe
+                const parts = hexId.split('-');
+                contextHexId = hexId;
+                contextSectorPrefix = parts[0];
+                contextSubsectorPrefix = parts[0] + '-' + parts[1];
+                document.getElementById('ctx-select-hex').style.display = 'block';
+                document.getElementById('ctx-select-sector').style.display = 'block';
+                document.getElementById('ctx-select-subsector').style.display = 'block';
+            } else {
+                contextHexId = null;
+                contextSectorPrefix = null;
+                contextSubsectorPrefix = null;
+                document.getElementById('ctx-select-hex').style.display = 'none';
+                document.getElementById('ctx-select-sector').style.display = 'none';
+                document.getElementById('ctx-select-subsector').style.display = 'none';
+            }
+
+            // If nothing is selected, we should maybe disable the populate options? 
+            // Or let them stay and do nothing. For simplicity, let them stay.
+
+            // Position custom context menu
+            contextMenu.style.left = `${e.clientX}px`;
+            contextMenu.style.top = `${e.clientY}px`;
+            contextMenu.classList.add('visible');
+        });
+
+        // Keyboard Shortcuts
+        window.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key.toLowerCase() === 'a') {
+                e.preventDefault();
+                toggleAllHexes();
+            } else if (e.ctrlKey && e.key.toLowerCase() === 's') {
+                e.preventDefault();
+                const world = getMouseWorldCoords({ clientX: currentMouseX, clientY: currentMouseY });
+                const coords = pixelToHex(world.x, world.y, baseHexSize);
+                const hexId = getHexId(coords.q, coords.r);
+                if (hexId) {
+                    const parts = hexId.split('-');
+                    contextSectorPrefix = parts[0];
+                    toggleSectorHexes();
+                }
+            } else if (e.ctrlKey && e.key.toLowerCase() === 'b') {
+                e.preventDefault();
+                const world = getMouseWorldCoords({ clientX: currentMouseX, clientY: currentMouseY });
+                const coords = pixelToHex(world.x, world.y, baseHexSize);
+                const hexId = getHexId(coords.q, coords.r);
+                if (hexId) {
+                    const parts = hexId.split('-');
+                    contextSubsectorPrefix = parts[0] + '-' + parts[1];
+                    toggleSubsectorHexes();
+                }
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                if (hexEditor.style.display === 'flex') {
+                    closeHexEditor();
+                } else if (document.getElementById('help-modal').style.display === 'flex') {
+                    closeHelpModal();
+                } else {
+                    deselectAllHexes();
+                }
+            }
+        });
+
+        function toggleAllHexes() {
+            for (let q = 0; q <= 255; q++) {
+                for (let r = 0; r <= 159; r++) {
+                    const id = getHexId(q, r);
+                    if (id) {
+                        if (selectedHexes.has(id)) selectedHexes.delete(id);
+                        else selectedHexes.add(id);
+                    }
+                }
+            }
+            contextMenu.classList.remove('visible');
+            updateActionPanel();
+            requestAnimationFrame(draw);
+        }
+
+        function deselectAllHexes() {
+            selectedHexes.clear();
+            contextMenu.classList.remove('visible');
+            updateActionPanel();
+            requestAnimationFrame(draw);
+        }
+
+        function toggleSectorHexes() {
+            if (!contextSectorPrefix) return;
+            for (let q = 0; q <= 255; q++) {
+                for (let r = 0; r <= 159; r++) {
+                    const id = getHexId(q, r);
+                    if (id && id.startsWith(contextSectorPrefix + '-')) {
+                        if (selectedHexes.has(id)) selectedHexes.delete(id);
+                        else selectedHexes.add(id);
+                    }
+                }
+            }
+            contextMenu.classList.remove('visible');
+            updateActionPanel();
+            requestAnimationFrame(draw);
+        }
+
+        function toggleSubsectorHexes() {
+            if (!contextSubsectorPrefix) return;
+            for (let q = 0; q <= 255; q++) {
+                for (let r = 0; r <= 159; r++) {
+                    const id = getHexId(q, r);
+                    if (id && id.startsWith(contextSubsectorPrefix)) {
+                        if (selectedHexes.has(id)) selectedHexes.delete(id);
+                        else selectedHexes.add(id);
+                    }
+                }
+            }
+            contextMenu.classList.remove('visible');
+            updateActionPanel();
+            requestAnimationFrame(draw);
+        }
+
+        function toggleSingleHex() {
+            if (!contextHexId) return;
+            if (selectedHexes.has(contextHexId)) {
+                selectedHexes.delete(contextHexId);
+            } else {
+                selectedHexes.add(contextHexId);
+            }
+            contextMenu.classList.remove('visible');
+            updateActionPanel();
+            requestAnimationFrame(draw);
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (e.shiftKey) {
+                if (e.button !== 0) return; // Only allow left-click for selection
+                // Hex selection Mode
+                const world = getMouseWorldCoords(e);
+                const coords = pixelToHex(world.x, world.y, baseHexSize);
+                const hexId = getHexId(coords.q, coords.r);
+
+                if (hexId) {
+                    isPainting = true;
+                    if (selectedHexes.has(hexId)) {
+                        paintAction = 'deselect';
+                        selectedHexes.delete(hexId);
+                    } else {
+                        paintAction = 'select';
+                        selectedHexes.add(hexId);
+                    }
+                    lastPaintedHexId = hexId;
+                    updateActionPanel();
+                    requestAnimationFrame(draw);
+                }
+            } else if (e.ctrlKey && e.button === 0) {
+                // Hex Editor Mode
+                const world = getMouseWorldCoords(e);
+                const coords = pixelToHex(world.x, world.y, baseHexSize);
+                const hexId = getHexId(coords.q, coords.r);
+                if (hexId) openHexEditor(hexId);
+            } else {
+                // Pan Mode
+                isDragging = true;
+                lastMouseX = e.clientX;
+                lastMouseY = e.clientY;
+                canvas.classList.add('dragging');
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+            isPainting = false;
+            lastPaintedHexId = null;
+            canvas.classList.remove('dragging');
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            currentMouseX = e.clientX;
+            currentMouseY = e.clientY;
+
+            if (isPainting && e.shiftKey) {
+                const world = getMouseWorldCoords(e);
+                const coords = pixelToHex(world.x, world.y, baseHexSize);
+                const hexId = getHexId(coords.q, coords.r);
+
+                if (hexId && hexId !== lastPaintedHexId) {
+                    if (paintAction === 'select') {
+                        selectedHexes.add(hexId);
+                    } else {
+                        selectedHexes.delete(hexId);
+                    }
+                    lastPaintedHexId = hexId;
+                    updateActionPanel();
+                    requestAnimationFrame(draw);
+                }
+            } else if (isDragging) {
+                const dx = e.clientX - lastMouseX;
+                const dy = e.clientY - lastMouseY;
+
+                // Pan camera
+                cameraX -= dx / zoom;
+                cameraY -= dy / zoom;
+
+                lastMouseX = e.clientX;
+                lastMouseY = e.clientY;
+
+                requestAnimationFrame(draw);
+            }
+        });
+
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+
+            const zoomFactor = 1.1;
+            const direction = e.deltaY > 0 ? -1 : 1;
+
+            // Calculate mouse position in world space
+            const mouseWorldX = cameraX + e.clientX / zoom;
+            const mouseWorldY = cameraY + e.clientY / zoom;
+
+            // Apply zoom
+            if (direction > 0) {
+                zoom *= zoomFactor;
+            } else {
+                zoom /= zoomFactor;
+            }
+
+            // Clamp zoom
+            zoom = Math.max(0.1, Math.min(zoom, 10));
+
+            // Adjust camera
+            cameraX = mouseWorldX - e.clientX / zoom;
+            cameraY = mouseWorldY - e.clientY / zoom;
+
+            requestAnimationFrame(draw);
+        }, { passive: false });
+
+        function validateSelection(actionType) {
+            if (selectedHexes.size === 0) {
+                alert("Please select one or more hexes first (Shift + Left Click).");
+                contextMenu.classList.remove('visible');
+                return false;
+            }
+
+            if (actionType === 'populate') {
+                let willOverwrite = false;
+                for (let hexId of selectedHexes) {
+                    if (hexStates.has(hexId)) {
+                        willOverwrite = true;
+                        break;
+                    }
+                }
+                if (willOverwrite) {
+                    if (!confirm("Some selected hexes already contain data. Do you want to overwrite them?")) {
+                        contextMenu.classList.remove('visible');
+                        return false;
+                    }
+                }
+            } else if (actionType === 'generate') {
+                let willOverwrite = false;
+                for (let hexId of selectedHexes) {
+                    let state = hexStates.get(hexId);
+                    if (state && (state.ctData || state.mgt2eData || state.t5Data)) {
+                        willOverwrite = true;
+                        break;
+                    }
+                }
+                if (willOverwrite) {
+                    if (!confirm("Some selected hexes already have generated Mainworld data. Do you want to overwrite them?")) {
+                        contextMenu.classList.remove('visible');
+                        return false;
+                    }
+                }
+            } else if (actionType === 'socio') {
+                let willOverwrite = false;
+                for (let hexId of selectedHexes) {
+                    let state = hexStates.get(hexId);
+                    if (state && (state.t5Socio || state.mgtSocio)) {
+                        willOverwrite = true;
+                        break;
+                    }
+                }
+                if (willOverwrite) {
+                    if (!confirm("Some selected hexes already have generated Socioeconomic data. Generating new data will overwrite the existing socioeconomics. Are you sure?")) {
+                        contextMenu.classList.remove('visible');
+                        return false;
+                    }
+                }
+            } else if (actionType === 'physical') {
+                let willOverwrite = false;
+                for (let hexId of selectedHexes) {
+                    let state = hexStates.get(hexId);
+                    if (state && state.t5Physical) {
+                        willOverwrite = true;
+                        break;
+                    }
+                }
+                if (willOverwrite) {
+                    if (!confirm("Some selected hexes already have generated Physical Stats. Generating new data will overwrite the existing physical stats. Are you sure?")) {
+                        contextMenu.classList.remove('visible');
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        // Action Menu Buttons
+        document.getElementById('ctx-manual-empty').addEventListener('click', () => {
+            if (!validateSelection('populate')) return;
+            selectedHexes.forEach(hexId => {
+                hexStates.set(hexId, { type: 'EMPTY' });
+            });
+            contextMenu.classList.remove('visible');
+            requestAnimationFrame(draw);
+        });
+
+        document.getElementById('ctx-manual-system').addEventListener('click', () => {
+            if (!validateSelection('populate')) return;
+            selectedHexes.forEach(hexId => {
+                hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
+            });
+            contextMenu.classList.remove('visible');
+            requestAnimationFrame(draw);
+        });
+
+        document.getElementById('ctx-manual-clear').addEventListener('click', () => {
+            if (!validateSelection('clear')) return;
+            selectedHexes.forEach(hexId => {
+                hexStates.delete(hexId);
+            });
+            contextMenu.classList.remove('visible');
+            requestAnimationFrame(draw);
+        });
+
+        // Context Menu Buttons (Auto-Populate)
+        function autoPopulate(chanceOutOfSix) {
+            if (!validateSelection('populate')) return;
+            selectedHexes.forEach(hexId => {
+                const roll = Math.floor(Math.random() * 6) + 1; // 1 to 6
+                if (roll <= chanceOutOfSix) {
+                    hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
+                } else {
+                    hexStates.set(hexId, { type: 'EMPTY' });
+                }
+            });
+            contextMenu.classList.remove('visible');
+            requestAnimationFrame(draw);
+        }
+
+        // GENERATION LOGIC
+        function roll1D() {
+            return Math.floor(Math.random() * 6) + 1;
+        }
+
+        function roll2D() {
+            return Math.floor(Math.random() * 6) + 1 + Math.floor(Math.random() * 6) + 1;
+        }
+
+        function rollFlux() {
+            return roll2D() - 7;
+        }
+
+        // Helper to convert integer to pseudo-hex (skipping I and O)
+        function toUWPChar(val) {
+            if (val < 0) val = 0;
+            if (val <= 9) return val.toString();
+            // 10=A, 11=B, 12=C, 13=D, 14=E, 15=F, 16=G, 17=H, 18=J (skip I), 23=P (skip O)
+            let charCode = 65 + (val - 10);
+            if (charCode >= 73) charCode++; // Skip I (char code 73)
+            if (charCode >= 79) charCode++; // Skip O (char code 79)
+            return String.fromCharCode(charCode);
+        }
+
+        function generateCTMainworld() {
+            let starportRoll = roll2D();
+            let starport = 'X';
+            if (starportRoll <= 4) starport = 'A';
+            else if (starportRoll <= 6) starport = 'B';
+            else if (starportRoll <= 8) starport = 'C';
+            else if (starportRoll === 9) starport = 'D';
+            else if (starportRoll <= 11) starport = 'E';
+
+            let navalBase = false;
+            if (starport === 'A' || starport === 'B') {
+                navalBase = roll2D() >= 8;
+            }
+
+            let scoutBase = false;
+            if (starport !== 'E' && starport !== 'X') {
+                let dm = 0;
+                if (starport === 'A') dm = -3;
+                else if (starport === 'B') dm = -2;
+                else if (starport === 'C') dm = -1;
+                scoutBase = (roll2D() + dm) >= 7;
+            }
+
+            let gasGiant = roll2D() <= 9;
+
+            let size = Math.max(0, roll2D() - 2);
+
+            let atm = 0;
+            if (size > 0) atm = Math.max(0, roll2D() - 7 + size);
+
+            let hydro = 0;
+            if (size > 0) {
+                let hydroDM = 0;
+                if (atm <= 1 || atm >= 10) hydroDM = -4;
+                hydro = Math.max(0, roll2D() - 7 + atm + hydroDM);
+            }
+
+            let pop = Math.max(0, roll2D() - 2);
+
+            let gov = Math.max(0, roll2D() - 7 + pop);
+
+            let law = Math.max(0, roll2D() - 7 + gov);
+
+            let tlDM = 0;
+            // Starport TL DMs
+            if (starport === 'A') tlDM += 6;
+            else if (starport === 'B') tlDM += 4;
+            else if (starport === 'C') tlDM += 2;
+            else if (starport === 'X') tlDM -= 4;
+            // Size TL DMs
+            if (size <= 1) tlDM += 2;
+            else if (size <= 4) tlDM += 1;
+            // Atmosphere TL DMs
+            if (atm <= 3 || (atm >= 10 && atm <= 14)) tlDM += 1;
+            // Hydrographics TL DMs
+            if (hydro === 9) tlDM += 1;
+            else if (hydro === 10) tlDM += 2;
+            // Population TL DMs
+            if (pop >= 1 && pop <= 5) tlDM += 1;
+            else if (pop === 9) tlDM += 2;
+            else if (pop === 10) tlDM += 4;
+            // Government TL DMs
+            if (gov === 0 || gov === 5) tlDM += 1;
+            else if (gov === 13) tlDM -= 2;
+
+            let tl = Math.max(0, Math.floor(Math.random() * 6) + 1 + tlDM);
+
+            const uwp = `${starport}${toUWPChar(size)}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
+
+            let tradeCodes = [];
+            if (atm >= 4 && atm <= 9 && hydro >= 4 && hydro <= 8 && pop >= 5 && pop <= 7) tradeCodes.push("Ag");
+            if (atm <= 3 && hydro <= 3 && pop >= 6) tradeCodes.push("Na");
+            if ([0, 1, 2, 4, 7, 9].includes(atm) && pop >= 9) tradeCodes.push("In");
+            if (pop <= 6) tradeCodes.push("Ni");
+            if (gov >= 4 && gov <= 9 && [6, 8].includes(atm) && pop >= 6 && pop <= 8) tradeCodes.push("Ri");
+            if (atm >= 2 && atm <= 5 && hydro <= 3) tradeCodes.push("Po");
+            if (hydro === 10) tradeCodes.push("Wa");
+            if (hydro === 0) tradeCodes.push("De");
+            if (atm === 0) tradeCodes.push("Va");
+            if (size === 0) tradeCodes.push("As");
+            if ([0, 1].includes(atm) && hydro >= 1) tradeCodes.push("Ic");
+
+            return { uwp, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, gasGiant };
+        }
+
+        document.getElementById('ctx-gen-ct').addEventListener('click', () => {
+            if (!validateSelection('generate')) return;
+            selectedHexes.forEach(hexId => {
+                let stateObj = hexStates.get(hexId);
+                // Convert string to object for backwards compatibility if needed
+                if (typeof stateObj === 'string') {
+                    stateObj = { type: stateObj };
+                }
+
+                // Only generate for SYSTEM_PRESENT hexes
+                if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
+                    stateObj.ctData = generateCTMainworld();
+                    stateObj.mgt2eData = null; // Clear old formatting
+                    hexStates.set(hexId, stateObj);
+                }
+            });
+            contextMenu.classList.remove('visible');
+            requestAnimationFrame(draw);
+        });
+
+        function generateMgT2EMainworld() {
+            let size = Math.max(0, roll2D() - 2);
+            let atm = Math.max(0, roll2D() - 7 + size);
+
+            let hydro = 0;
+            if (size > 1) {
+                let hydroDM = 0;
+                if (atm <= 1 || atm >= 10) hydroDM = -4;
+                hydro = Math.max(0, roll2D() - 7 + atm + hydroDM);
+            }
+
+            let pop = Math.max(0, roll2D() - 2);
+
+            let starportDM = 0;
+            if (pop >= 10) starportDM = 2;
+            else if (pop === 8 || pop === 9) starportDM = 1;
+            else if (pop === 3 || pop === 4) starportDM = -1;
+            else if (pop <= 2) starportDM = -2;
+
+            let spRoll = roll2D() + starportDM;
+            let starport = 'X';
+            if (spRoll <= 2) starport = 'X';
+            else if (spRoll <= 4) starport = 'E';
+            else if (spRoll <= 6) starport = 'D';
+            else if (spRoll <= 8) starport = 'C';
+            else if (spRoll <= 10) starport = 'B';
+            else starport = 'A';
+
+            let gov = 0;
+            let law = 0;
+            let tl = 0;
+
+            if (pop > 0) {
+                gov = Math.max(0, roll2D() - 7 + pop);
+                law = Math.max(0, roll2D() - 7 + gov);
+
+                let tlDM = 0;
+                if (starport === 'A') tlDM += 6;
+                else if (starport === 'B') tlDM += 4;
+                else if (starport === 'C') tlDM += 2;
+                else if (starport === 'X') tlDM -= 4;
+
+                if (size <= 1) tlDM += 2;
+                else if (size <= 4) tlDM += 1;
+
+                if (atm >= 0 && atm <= 3) tlDM += 1;
+                else if (atm >= 10) tlDM += 1;
+
+                if (hydro === 9) tlDM += 1;
+                else if (hydro === 10) tlDM += 2;
+
+                if (pop >= 1 && pop <= 5) tlDM += 1;
+                else if (pop === 9) tlDM += 2;
+                else if (pop >= 10) tlDM += 4;
+
+                if (gov === 0 || gov === 5) tlDM += 1;
+                else if (gov === 7) tlDM += 2;
+                else if (gov >= 13) tlDM -= 2;
+
+                tl = Math.max(0, Math.floor(Math.random() * 6) + 1 + tlDM);
+            }
+
+            let navalBase = false;
+            let scoutBase = false;
+            let militaryBase = false;
+            let corsairBase = false;
+
+            if (starport === 'A' || starport === 'B') {
+                if (roll2D() >= 8) militaryBase = true;
+                if (roll2D() >= 8) navalBase = true;
+            } else if (starport === 'C') {
+                if (roll2D() >= 10) militaryBase = true;
+            }
+
+            if (starport === 'A') {
+                if (roll2D() >= 10) scoutBase = true;
+            } else if (starport === 'B' || starport === 'C') {
+                if (roll2D() >= 9) scoutBase = true;
+            } else if (starport === 'D') {
+                if (roll2D() >= 8) scoutBase = true;
+            }
+
+            if (starport === 'D' || starport === 'E' || starport === 'X') {
+                let corsairDM = 0;
+                if (law === 0) corsairDM = 2;
+                else if (law >= 2) corsairDM = -2;
+
+                if (starport === 'D') {
+                    if (roll2D() + corsairDM >= 12) corsairBase = true;
+                } else {
+                    if (roll2D() + corsairDM >= 10) corsairBase = true;
+                }
+            }
+
+            let gasGiant = roll2D() <= 9;
+
+            const uwp = `${starport}${toUWPChar(size)}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
+
+            let tradeCodes = [];
+            if (atm >= 4 && atm <= 9 && hydro >= 4 && hydro <= 8 && pop >= 5 && pop <= 7) tradeCodes.push("Ag");
+            if (size === 0 && atm === 0 && hydro === 0) tradeCodes.push("As");
+            if (pop === 0 && gov === 0 && law === 0) tradeCodes.push("Ba");
+            if (atm >= 2 && atm <= 9 && hydro === 0) tradeCodes.push("De");
+            if (atm >= 10 && hydro >= 1) tradeCodes.push("Fl");
+            if (size >= 5 && atm >= 4 && atm <= 9 && hydro >= 4 && hydro <= 8) tradeCodes.push("Ga");
+            if (pop >= 9) tradeCodes.push("Hi");
+            if (tl >= 12) tradeCodes.push("Ht");
+            if (atm <= 1 && hydro >= 1) tradeCodes.push("Ic");
+            if ([0, 1, 2, 4, 7, 9].includes(atm) && pop >= 9) tradeCodes.push("In");
+            if (pop >= 1 && pop <= 3) tradeCodes.push("Lo");
+            if (tl <= 5) tradeCodes.push("Lt");
+            if (atm <= 3 && hydro <= 3 && pop >= 6) tradeCodes.push("Na");
+            if (pop <= 6) tradeCodes.push("Ni");
+            if (atm >= 2 && atm <= 5 && hydro <= 3) tradeCodes.push("Po");
+            if ([6, 8].includes(atm) && pop >= 6 && pop <= 8) tradeCodes.push("Ri");
+            if (atm === 0) tradeCodes.push("Va");
+            if (atm >= 3 && atm <= 9 && hydro >= 10) tradeCodes.push("Wa");
+            return { uwp, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
+        }
+
+        document.getElementById('ctx-gen-mgt2e').addEventListener('click', () => {
+            if (!validateSelection('generate')) return;
+            selectedHexes.forEach(hexId => {
+                let stateObj = hexStates.get(hexId);
+                if (typeof stateObj === 'string') stateObj = { type: stateObj };
+
+                if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
+                    stateObj.mgt2eData = generateMgT2EMainworld();
+                    stateObj.ctData = null; // Clear old formatting
+                    stateObj.t5Data = null;
+                    hexStates.set(hexId, stateObj);
+                }
+            });
+            contextMenu.classList.remove('visible');
+            requestAnimationFrame(draw);
+        });
+
+        function generateT5Mainworld() {
+            let spRoll = roll2D();
+            let starport = 'X';
+            if (spRoll === 2) starport = 'A';
+            else if (spRoll <= 5) starport = 'B';
+            else if (spRoll <= 8) starport = 'C';
+            else if (spRoll === 9) starport = 'D';
+            else if (spRoll <= 11) starport = 'E';
+            else starport = 'X';
+
+            let size = roll2D() - 2;
+            if (size === 10) size = roll1D() + 9;
+            size = Math.max(0, size);
+
+            let atm = 0;
+            if (size > 0) atm = Math.min(15, Math.max(0, rollFlux() + size));
+
+            let hydro = 0;
+            if (size > 1) {
+                let hydroDM = (atm <= 1 || atm >= 10) ? -4 : 0;
+                hydro = Math.min(10, Math.max(0, rollFlux() + atm + hydroDM));
+            }
+
+            let pop = roll2D() - 2;
+            if (pop === 10) pop = roll2D() + 3;
+            pop = Math.max(0, pop);
+
+            let popDigit = pop > 0 ? Math.floor(Math.random() * 9) + 1 : 0;
+
+            let gov = Math.min(15, Math.max(0, rollFlux() + pop));
+
+            let law = Math.max(0, rollFlux() + gov);
+
+            let tlDM = 0;
+            if (starport === 'A') tlDM += 6;
+            else if (starport === 'B') tlDM += 4;
+            else if (starport === 'C') tlDM += 2;
+            else if (starport === 'X') tlDM -= 4;
+
+            if (size <= 1) tlDM += 2;
+            else if (size <= 4) tlDM += 1;
+
+            if (atm <= 3 || (atm >= 10 && atm <= 15)) tlDM += 1;
+
+            if (hydro === 9) tlDM += 1;
+            else if (hydro === 10) tlDM += 2;
+
+            if (pop >= 1 && pop <= 5) tlDM += 1;
+            else if (pop === 9) tlDM += 2;
+            else if (pop >= 10) tlDM += 4;
+
+            if (gov === 0 || gov === 5) tlDM += 1;
+            else if (gov === 13) tlDM -= 2;
+
+            let tl = Math.max(0, roll1D() + tlDM);
+
+            let navalBase = false;
+            let scoutBase = false;
+            if (starport === 'A') {
+                if (roll2D() <= 6 && pop >= 7) navalBase = true;
+                if (roll2D() <= 4) scoutBase = true;
+            } else if (starport === 'B') {
+                if (roll2D() <= 5 && pop >= 8) navalBase = true;
+                let sRoll = roll2D();
+                if (sRoll === 5 || sRoll === 6) scoutBase = true;
+            } else if (starport === 'C') {
+                let sRoll = roll2D();
+                if (sRoll >= 6 && sRoll <= 8) scoutBase = true;
+            } else if (starport === 'D') {
+                if (roll2D() <= 7) scoutBase = true;
+            }
+
+            let gasGiantsCount = Math.max(0, Math.floor(roll2D() / 2) - 2);
+            let planetoidBelts = Math.max(0, roll1D() - 3);
+            let gasGiant = gasGiantsCount > 0; // For easy UI compat
+
+            const uwp = `${starport}${toUWPChar(size)}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
+
+            let tradeCodes = [];
+            if (size === 0 && atm === 0 && hydro === 0) tradeCodes.push("As");
+            if (atm >= 2 && atm <= 9 && hydro === 0) tradeCodes.push("De");
+            if (atm >= 10 && atm <= 12 && hydro >= 1 && hydro <= 10) tradeCodes.push("Fl");
+            if (size >= 6 && size <= 8 && [5, 6, 8].includes(atm) && hydro >= 5 && hydro <= 7) tradeCodes.push("Ga");
+            if (size >= 3 && [2, 4, 7, 9, 10, 11, 12].includes(atm) && hydro <= 2) tradeCodes.push("He");
+            if (atm <= 1 && hydro >= 1 && hydro <= 10) tradeCodes.push("Ic");
+            if (size >= 10 && atm >= 3 && hydro === 10) tradeCodes.push("Oc");
+            if (atm === 0) tradeCodes.push("Va");
+            if (size >= 3 && size <= 9 && atm >= 3 && hydro === 10) tradeCodes.push("Wa");
+
+            if (pop === 0 && gov === 0 && law === 0) { tradeCodes.push("Di"); tradeCodes.push("Ba"); }
+            if (pop >= 1 && pop <= 3) tradeCodes.push("Lo");
+            if (pop >= 4 && pop <= 6) tradeCodes.push("Ni");
+            if (pop === 8) tradeCodes.push("Ph");
+            if (pop >= 9) tradeCodes.push("Hi");
+
+            if (atm >= 4 && atm <= 9 && hydro >= 4 && hydro <= 8 && (pop === 4 || pop === 8)) tradeCodes.push("Pa");
+            if (atm >= 4 && atm <= 9 && hydro >= 4 && hydro <= 8 && pop >= 5 && pop <= 7) tradeCodes.push("Ag");
+            if (atm <= 3 && hydro <= 3 && pop >= 6) tradeCodes.push("Na");
+
+            if ([2, 3, 10, 11].includes(atm) && hydro >= 1 && hydro <= 5 && pop >= 3 && pop <= 6 && law >= 6 && law <= 9) tradeCodes.push("Px");
+            if ([0, 1, 2, 4, 7, 9].includes(atm) && (pop === 7 || pop === 8)) tradeCodes.push("Pi");
+            if ([0, 1, 2, 4, 7, 9, 10, 11, 12].includes(atm) && pop >= 9) tradeCodes.push("In");
+
+            if (atm >= 2 && atm <= 5 && hydro <= 3) tradeCodes.push("Po");
+            if ([6, 8].includes(atm) && (pop === 5 || pop === 9)) tradeCodes.push("Pr");
+            if ([6, 8].includes(atm) && pop >= 6 && pop <= 8) tradeCodes.push("Ri");
+
+            return { uwp, tradeCodes, starport, size, atm, hydro, pop, popDigit, gov, law, tl, navalBase, scoutBase, gasGiant, gasGiantsCount, planetoidBelts };
+        }
+
+        document.getElementById('ctx-gen-t5').addEventListener('click', () => {
+            if (!validateSelection('generate')) return;
+            selectedHexes.forEach(hexId => {
+                let stateObj = hexStates.get(hexId);
+                if (typeof stateObj === 'string') stateObj = { type: stateObj };
+
+                if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
+                    stateObj.t5Data = generateT5Mainworld();
+                    stateObj.ctData = null;
+                    stateObj.mgt2eData = null;
+                    hexStates.set(hexId, stateObj);
+                }
+            });
+            contextMenu.classList.remove('visible');
+            requestAnimationFrame(draw);
+        });
+
+        function generateT5Socioeconomics(base) {
+            if (!base) return null;
+
+            // 1. Importance (Ix)
+            let Ix = 0;
+            if (['A', 'B'].includes(base.starport)) Ix += 1;
+            if (['D', 'E', 'X'].includes(base.starport)) Ix -= 1;
+
+            if (base.tl >= 16) Ix += 1;
+            if (base.tl >= 10) Ix += 1;
+            if (base.tl <= 8) Ix -= 1;
+
+            if (base.tradeCodes) {
+                if (base.tradeCodes.includes("Ag")) Ix += 1;
+                if (base.tradeCodes.includes("Hi")) Ix += 1;
+                if (base.tradeCodes.includes("In")) Ix += 1;
+                if (base.tradeCodes.includes("Ri")) Ix += 1;
+            }
+
+            if (base.pop <= 6) Ix -= 1;
+            if (base.navalBase && base.scoutBase) Ix += 1;
+
+            // 2. Economic (Ex)
+            let R = roll2D();
+            if (base.tl >= 8) R += (base.gasGiantsCount || 0) + (base.planetoidBelts || 0);
+            R = Math.max(0, R);
+
+            let L = Math.max(0, base.pop - 1);
+
+            let I = 0;
+            if (base.pop > 0) {
+                if (base.pop <= 3) I = Ix;
+                else if (base.pop <= 6) I = roll1D() + Ix;
+                else I = roll2D() + Ix;
+            }
+            I = Math.max(0, I);
+
+            let E = rollFlux();
+
+            // 3. Resource Units (RU)
+            let calcR = R === 0 ? 1 : R;
+            let calcL = L === 0 ? 1 : L;
+            let calcI = I === 0 ? 1 : I;
+            let calcE = E === 0 ? 1 : E;
+            let RU = calcR * calcL * calcI * calcE;
+
+            // 4. Cultural (Cx)
+            let H = 0, A = 0, S = 0, Sym = 0;
+            if (base.pop > 0) {
+                H = Math.max(1, base.pop + rollFlux());
+                A = Math.max(1, base.pop + Ix);
+                S = Math.max(1, rollFlux() + 5);
+                Sym = Math.max(1, rollFlux() + base.tl);
+            }
+
+            let ixStr = `{${Ix >= 0 ? '+' : ''}${Ix}}`;
+            let exStr = `(${toUWPChar(R)}${toUWPChar(L)}${toUWPChar(I)}${E >= 0 ? '+' : ''}${E})`;
+            let cxStr = `[${toUWPChar(H)}${toUWPChar(A)}${toUWPChar(S)}${toUWPChar(Sym)}]`;
+
+            return {
+                Ix, R, L, I, E, RU, H, A, S, Sym,
+                ixString: ixStr, exString: exStr, cxString: cxStr,
+                displayString: `${ixStr} ${exStr} ${cxStr} RU:${RU}`,
+                popMultiplier: base.popDigit, // T5 specific
+                belts: base.planetoidBelts, // T5 specific
+                gasGiants: base.gasGiantsCount, // T5 specific
+                worlds: 0, // Placeholder, not generated by default
+                importance: Ix, // For editor
+                resourceUnits: RU, // For editor
+                ecoResources: R, // For editor
+                ecoLabor: L, // For editor
+                ecoInfrastructure: I, // For editor
+                ecoEfficiency: E, // For editor
+                culturalProfile: `${toUWPChar(H)}${toUWPChar(A)}${toUWPChar(S)}${toUWPChar(Sym)}` // For editor
+            };
+        }
+
+        document.getElementById('ctx-expand-socio-t5').addEventListener('click', () => {
+            if (selectedHexes.size === 0) {
+                alert("Please select one or more hexes first (Shift + Left Click).");
+                contextMenu.classList.remove('visible');
+                return;
+            }
+
+            let missingData = false;
+            selectedHexes.forEach(hexId => {
+                let stateObj = hexStates.get(hexId);
+
+                // Extract whatever generated data exists, prioritizing T5 > MgT2E > CT
+                let baseData = null;
+                if (stateObj) {
+                    baseData = stateObj.t5Data || stateObj.mgt2eData || stateObj.ctData;
+                }
+
+                if (baseData) {
+                    // Safe injection: place socio data at the root of the state object
+                    stateObj.t5Socio = generateT5Socioeconomics(baseData);
+                    hexStates.set(hexId, stateObj);
+                } else if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
+                    missingData = true;
+                }
+            });
+
+            if (missingData) {
+                alert("Note: Some selected hexes skipped because they do not have any Mainworld data generated yet. You must run a GENERATE MAINWORLD function first.");
+            }
+
+            contextMenu.classList.remove('visible');
+            requestAnimationFrame(draw);
+        });
+
+        // =====================================================================
+        // BOOK 6 (CT) MAINWORLD PHYSICAL GENERATION
+        // =====================================================================
+        function generateCTPhysical(base) {
+            if (!base) return null;
+
+            // Lookup tables (embedded)
+            // Habitable zone orbit number by [stellarSize][spectralKey]
+            const ZONE_H = {
+                'Ia': { B0: 13, B5: 12, A0: 12, A5: 12, F0: 12, F5: 11, G0: 12, G5: 12, K0: 12, K5: 12, M0: 12, M5: 12 },
+                'Ib': { B0: 13, B5: 11, A0: 11, A5: 10, F0: 10, F5: 10, G0: 10, G5: 10, K0: 10, K5: 11, M0: 11, M5: 12 },
+                'II': { B0: 12, B5: 11, A0: 10, A5: 9, F0: 9, F5: 8, G0: 8, G5: 8, K0: 9, K5: 9, M0: 10, M5: 11 },
+                'III': { B0: 12, B5: 11, A0: 9, A5: 8, F0: 8, F5: 8, G0: 8, G5: 8, K0: 9, K5: 9, M0: 10, M5: 11 },
+                'IV': { B0: 7, B5: 6, A0: 5, A5: 5, F0: 5, F5: 5, G0: 5, G5: 5, K0: 4 },
+                'V': { B0: 7, B5: 6, A0: 5, A5: 4, F0: 4, F5: 3, G0: 3, G5: 2, K0: 1, K5: 0, M0: 0, M5: 0 },
+                'VI': { F0: 3, F5: 2, G0: 2, G5: 1, K0: 1, K5: 0, M0: 0, M5: 0 },
+                'D': { default: 0 }
+            };
+            // Luminosity in solar units by [stellarSize][spectralKey]
+            const LUM = {
+                'Ia': { B0: 560000, B5: 204000, A0: 107000, A5: 81000, F0: 61000, F5: 51000, G0: 67000, G5: 89000, K0: 97000, K5: 107000, M0: 117000, M5: 129000 },
+                'Ib': { B0: 270000, B5: 46700, A0: 15000, A5: 11700, F0: 7400, F5: 5100, G0: 6100, G5: 8100, K0: 11700, K5: 20400, M0: 46000, M5: 89000 },
+                'II': { B0: 170000, B5: 18600, A0: 2200, A5: 850, F0: 600, F5: 510, G0: 560, G5: 740, K0: 890, K5: 2450, M0: 4600, M5: 14900 },
+                'III': { B0: 107000, B5: 6700, A0: 280, A5: 90, F0: 53, F5: 43, G0: 50, G5: 75, K0: 95, K5: 320, M0: 470, M5: 2280 },
+                'IV': { B0: 81000, B5: 2000, A0: 156, A5: 37, F0: 19, F5: 12, G0: 6.5, G5: 4.9, K0: 4.67 },
+                'V': { B0: 56000, B5: 1400, A0: 90, A5: 16, F0: 8.1, F5: 3.5, G0: 1.21, G5: 0.67, K0: 0.42, K5: 0.08, M0: 0.04, M5: 0.007 },
+                'VI': { F0: 0.977, F5: 0.977, G0: 0.322, G5: 0.186, K0: 0.117, K5: 0.025, M0: 0.011, M5: 0.002 },
+                'D': { default: 0.001 }
+            };
+            const ORBIT_AU = [0.2, 0.4, 0.7, 1.0, 1.6, 2.8, 5.2, 10.0, 19.6, 38.8, 77.2];
+
+            // STEP 1: Primary Type and Size
+            // Table result string for rolls 0-12+
+            const SYS_FEAT = [
+                'B Ia', 'B Ib', 'A II', 'M III', 'M IV',
+                'M V', 'M V', 'M V',
+                'K V', 'G V', 'F V', 'F VI', 'F D'
+            ];
+            let roll = roll2D();
+            let dm = 0;
+            if ((base.atm >= 4 && base.atm <= 9) || base.pop >= 8) dm = 4;
+            let idx = Math.max(0, Math.min(12, roll + dm - 2)); // 2D base is 2-12, offset to 0-10 without DM
+            // Actually keep result as raw modified value clamped to index
+            let modRoll = Math.max(0, Math.min(12, (roll + dm) - 2));
+            let starStr = SYS_FEAT[modRoll];
+            let parts = starStr.split(' ');
+            let spectralLetter = parts[0]; // B, A, M, K, G, F
+            let stellarSize = parts[1];    // Ia, Ib, II, III, IV, V, VI, D
+
+            // Spectral Decimal (1D: 1-3 → 0, 4-6 → 5; White Dwarfs get none)
+            let decimal = '';
+            if (stellarSize !== 'D') {
+                decimal = roll1D() <= 3 ? '0' : '5';
+            }
+            let spectralKey = spectralLetter + decimal; // e.g. "G5", "M0"
+            let homestar = stellarSize === 'D' ? `${spectralLetter} D` : `${spectralKey} ${stellarSize}`;
+
+            // STEP 2: Habitable Orbit
+            let hzOrbit = 2; // fallback
+            let zoneRow = ZONE_H[stellarSize];
+            if (zoneRow) {
+                hzOrbit = (zoneRow[spectralKey] !== undefined) ? zoneRow[spectralKey] : (zoneRow.default !== undefined ? zoneRow.default : 2);
+            }
+
+            // STEP 3: Number of Satellites
+            let satellites = Math.max(0, roll1D() - 3);
+
+            // STEP 4: Gravity
+            const GRAV = { S: 0.024, 1: 0.122, 2: 0.240, 3: 0.377, 4: 0.500, 5: 0.625, 6: 0.840, 7: 0.875, 8: 1.000, 9: 1.120, 10: 1.250 };
+            let gravity = GRAV[base.size] !== undefined ? GRAV[base.size] : 1.0;
+
+            // STEP 5: Cloudiness
+            let cloudBase = 0;
+            const h = base.hydro;
+            if (h <= 1) cloudBase = 0;
+            else if (h <= 3) cloudBase = 10;
+            else if (h === 4) cloudBase = 20;
+            else if (h === 5) cloudBase = 30;
+            else if (h === 6) cloudBase = 40;
+            else if (h === 7) cloudBase = 50;
+            else if (h === 8) cloudBase = 60;
+            else cloudBase = 70;
+            let cloudiness = cloudBase;
+            if ([10, 11, 12, 13].includes(base.atm)) cloudiness = Math.min(100, cloudiness + 40);
+            if ([0, 1, 2, 3].includes(base.atm)) cloudiness = Math.min(20, cloudiness);
+            if (base.atm === 14) cloudiness = Math.floor(cloudiness / 2);
+
+            // STEP 6: Albedo
+            let waterPortion = Math.max(0, base.hydro / 10.0 - 0.05);
+            let landPortion = Math.max(0, 1.0 - base.hydro / 10.0 - 0.05);
+            let icePortion = 0.10;
+            const tc = base.tradeCodes || [];
+            if (tc.includes('Ic')) { icePortion = waterPortion + 0.05; waterPortion = 0; }
+            let cloudDec = cloudiness / 100.0;
+            let unobs = 1.0 - cloudDec;
+            let albedo = (waterPortion * unobs * 0.02) + (landPortion * unobs * 0.10) +
+                (icePortion * unobs * 0.85) + (cloudDec * 0.50);
+
+            // STEP 7: Greenhouse Effect multiplier
+            let ghMult = 1.0;
+            const atm = base.atm;
+            if ([0, 1, 2, 3, 15].includes(atm)) ghMult = 1.00;
+            else if ([4, 5].includes(atm)) ghMult = 1.05;
+            else if ([6, 7, 14].includes(atm)) ghMult = 1.10;
+            else if ([8, 9, 13].includes(atm)) ghMult = 1.15;
+            else if (atm === 10) { let r = Math.floor(Math.random() * 51) + 20; ghMult = 1.0 + r / 100; }
+            else if ([11, 12].includes(atm)) { let r = Math.floor(Math.random() * 101) + 20; ghMult = 1.0 + r / 100; }
+
+            // STEP 8: Distance AU from orbit number
+            let distAU = ORBIT_AU[Math.min(hzOrbit, ORBIT_AU.length - 1)];
+
+            // STEP 9: Luminosity lookup + Temperature formula
+            let lumRow = LUM[stellarSize];
+            let luminosity = 1.0;
+            if (lumRow) luminosity = (lumRow[spectralKey] !== undefined) ? lumRow[spectralKey] : (lumRow.default || 1.0);
+            // T = 374.025 * G_mult * (1 - Albedo) * L^0.25 / D^0.5
+            let temperature = Math.round(374.025 * ghMult * (1 - albedo) * Math.pow(luminosity, 0.25) / Math.pow(distAU, 0.5));
+
+            // STEP 10: Axial Tilt
+            let axialTilt = Math.floor(Math.random() * 41); // 0-40
+
+            return {
+                homestar, spectralKey, stellarSize,
+                hzOrbit, distAU, satellites, gravity,
+                cloudiness, albedo: parseFloat(albedo.toFixed(3)),
+                greenhouse: parseFloat(ghMult.toFixed(2)),
+                temperature, axialTilt,
+                worldType: 'Planet',
+                displayString: `${homestar} | Orbit ${hzOrbit} (${distAU}AU) | ${satellites} moons | G:${gravity}g | Clouds:${cloudiness}% | Alb:${albedo.toFixed(3)} | GH:${((ghMult - 1) * 100).toFixed(0)}% | ${temperature}K | Tilt:${axialTilt}°`
+            };
+        }
+
+        function generateMgT2ESocioeconomics(base) {
+
+            if (!base) return null;
+
+            // Prerequisite: Minimum Sustainable Tech Level
+            let minSusTL = 0;
+            if ([0, 1, 10].includes(base.atm)) minSusTL = 8;
+            else if ([2, 3, 13, 14].includes(base.atm)) minSusTL = 5;
+            else if ([4, 7, 9].includes(base.atm)) minSusTL = 3;
+            else if (base.atm === 11) minSusTL = 9;
+            else if (base.atm === 12) minSusTL = 10;
+            else if ([16, 17].includes(base.atm)) minSusTL = 14;
+
+            // 1. Generate Population P Value and Total Population
+            let pValue = 0;
+            let totalWorldPop = 0;
+            if (base.pop > 0) {
+                pValue = roll1D() + Math.floor(Math.random() * 3); // random 1-9
+                totalWorldPop = pValue * Math.pow(10, base.pop);
+            }
+
+            // 2. Generate Population Concentration Rating (PCR)
+            let pcr = 0;
+            let pcrOverride = false;
+            if (base.pop < 6) {
+                if (roll1D() > base.pop) {
+                    pcr = 9;
+                    pcrOverride = true;
+                }
+            }
+
+            if (!pcrOverride && base.pop > 0) {
+                let pcrRoll = roll1D();
+                let pcrDM = 0;
+
+                if (base.size === 1) pcrDM += 2;
+                else if ([2, 3].includes(base.size)) pcrDM += 1;
+
+                if (minSusTL >= 8) pcrDM += 3;
+                else if (minSusTL >= 3 && minSusTL <= 7) pcrDM += 1;
+
+                if (base.pop === 8) pcrDM -= 1;
+                else if (base.pop >= 9) pcrDM -= 2;
+
+                if (base.gov === 7) pcrDM -= 2;
+
+                if ([0, 1].includes(base.tl)) pcrDM -= 2;
+                else if ([2, 3].includes(base.tl)) pcrDM -= 1;
+                else if (base.tl >= 4 && base.tl <= 9) pcrDM += 1;
+
+                const tcs = base.tradeCodes || [];
+                if (tcs.includes("Ag")) pcrDM -= 2;
+                if (tcs.includes("In")) pcrDM += 1;
+                if (tcs.includes("Na")) pcrDM -= 1;
+                if (tcs.includes("Ri")) pcrDM += 1;
+
+                pcr = pcrRoll + pcrDM;
+                let minPCR = base.pop >= 9 ? 1 : 0;
+                pcr = Math.max(minPCR, Math.min(9, pcr));
+            }
+
+            // 3. Generate Urbanisation Percentage
+            let urbanPercent = 0;
+            if (base.pop > 0) {
+                let uRoll = roll2D();
+                let uDM = 0;
+
+                if ([0, 1, 2].includes(pcr)) uDM += (-3 + pcr);
+                else if ([7, 8, 9].includes(pcr)) uDM += (-6 + pcr);
+
+                if (minSusTL >= 0 && minSusTL <= 3) uDM -= 1;
+
+                if (base.size === 0) uDM += 2;
+                if (base.pop === 8) uDM += 1;
+                else if (base.pop === 9) uDM += 2;
+                else if (base.pop >= 10) uDM += 4;
+
+                if (base.gov === 0) uDM -= 2;
+                if (base.law >= 9) uDM += 1;
+
+                if ([0, 1, 2].includes(base.tl)) uDM -= 2;
+                else if (base.tl === 3) uDM -= 1;
+                else if (base.tl === 4) uDM += 1;
+                else if (base.tl >= 5 && base.tl <= 9) uDM += 2;
+                else if (base.tl >= 10) uDM += 1;
+
+                const tcs = base.tradeCodes || [];
+                if (tcs.includes("Ag")) uDM -= 2;
+                if (tcs.includes("Na")) uDM += 2;
+
+                let modURoll = uRoll + uDM;
+
+                // Base Percentage mapping
+                let rolledPercent = 0;
+                if (modURoll <= 0) rolledPercent = 0;
+                else if (modURoll === 1) rolledPercent = roll1D();
+                else if (modURoll === 2) rolledPercent = 6 + roll1D();
+                else if (modURoll === 3) rolledPercent = 12 + roll1D();
+                else if (modURoll === 4) rolledPercent = 18 + roll1D();
+                else if (modURoll === 5) rolledPercent = 22 + (roll1D() * 2) + (Math.floor(Math.random() * 2) + 1);
+                else if (modURoll === 6) rolledPercent = 34 + (roll1D() * 2) + (Math.floor(Math.random() * 2) + 1);
+                else if (modURoll === 7) rolledPercent = 46 + (roll1D() * 2) + (Math.floor(Math.random() * 2) + 1);
+                else if (modURoll === 8) rolledPercent = 58 + (roll1D() * 2) + (Math.floor(Math.random() * 2) + 1);
+                else if (modURoll === 9) rolledPercent = 70 + (roll1D() * 2) + (Math.floor(Math.random() * 2) + 1);
+                else if (modURoll === 10) rolledPercent = 84 + roll1D();
+                else if (modURoll === 11) rolledPercent = 90 + roll1D();
+                else if (modURoll === 12) rolledPercent = 96 + (Math.floor(Math.random() * 3) + 1);
+                else if (modURoll >= 13) rolledPercent = 100;
+
+                // Constraints
+                let minLimit = -1;
+                if (base.pop >= 10) minLimit = 50 + roll1D();
+                else if (base.pop === 9) minLimit = 18 + roll1D();
+
+                let maxLimit = 101;
+                if ([0, 1, 2].includes(base.tl)) maxLimit = Math.min(maxLimit, 20 + roll1D());
+                else if (base.tl === 3) maxLimit = Math.min(maxLimit, 30 + roll1D());
+                else if (base.tl === 4) maxLimit = Math.min(maxLimit, 60 + roll1D());
+                else if (base.tl >= 5 && base.tl <= 9) maxLimit = Math.min(maxLimit, 90 + roll1D());
+
+                if (tcs.includes("Ag")) maxLimit = Math.min(maxLimit, 90 + roll1D());
+
+                if (minLimit !== -1 && rolledPercent < minLimit) urbanPercent = minLimit;
+                else if (maxLimit !== 101 && rolledPercent > maxLimit) urbanPercent = maxLimit;
+                else urbanPercent = rolledPercent;
+
+                urbanPercent = Math.max(0, Math.min(100, urbanPercent));
+            }
+
+            // 4. Calculate Total Urban Population
+            let totalUrbanPop = Math.round(totalWorldPop * (urbanPercent / 100));
+
+            // 5. Determine Major Cities and Total Major City Population
+            let majorCities = 0;
+            let totalMajorCityPop = 0;
+
+            if (pcr === 0) {
+                majorCities = 0;
+                totalMajorCityPop = 0;
+            } else if (base.pop <= 5 && pcr === 9) {
+                majorCities = 1;
+                totalMajorCityPop = totalUrbanPop;
+            } else if (base.pop <= 5 && pcr >= 1 && pcr <= 8) {
+                majorCities = Math.min(9 - pcr, base.pop);
+                totalMajorCityPop = totalUrbanPop;
+            } else if (base.pop >= 6 && pcr === 9) {
+                let mCRoll = roll2D();
+                majorCities = Math.max(base.pop - mCRoll, 1);
+                totalMajorCityPop = totalUrbanPop;
+            } else { // Population >= 6 AND PCR 1-8 (or fallback)
+                let mCRoll = roll2D();
+                let urbanDecimal = urbanPercent / 100;
+                let rawCities = mCRoll - pcr + ((urbanDecimal * 20) / pcr);
+                majorCities = Math.ceil(rawCities);
+
+                if (majorCities < 1) majorCities = 1;
+                if (base.pop < 6 && majorCities > base.pop) majorCities = base.pop;
+
+                let popRoll = roll1D();
+                let calcTotalMCPop = (pcr / (popRoll + 7)) * totalUrbanPop;
+                totalMajorCityPop = Math.ceil(calcTotalMCPop);
+            }
+
+            if (majorCities === 1) {
+                totalMajorCityPop = totalUrbanPop;
+            }
+
+            // 6. Centralisation Code (C)
+            let cRoll = roll2D();
+            let cDM = 0;
+            if (base.gov >= 2 && base.gov <= 5) cDM -= 1;
+            if ([6, 8, 9, 10, 11].includes(base.gov)) cDM += 1;
+            if (base.gov === 7) cDM += 1;
+            if (base.gov >= 12) cDM += 2;
+            if (pcr >= 0 && pcr <= 3) cDM -= 1;
+            if (pcr === 7 || pcr === 8) cDM += 1;
+            if (pcr === 9) cDM += 3;
+
+            let cScore = cRoll + cDM;
+            let centralisation = 'U';
+            if (cScore <= 5) centralisation = 'C';
+            else if (cScore <= 8) centralisation = 'F';
+
+            // 7. Primary Authority Code (A)
+            let aRoll = roll2D();
+            let aDM = 0;
+            if ([1, 6, 10, 13, 14].includes(base.gov)) aDM += 6;
+            if (base.gov === 2) aDM -= 4;
+            if ([3, 5, 12].includes(base.gov)) aDM -= 2;
+            if (base.gov === 11 || base.gov === 15) aDM += 4;
+            if (centralisation === 'C') aDM -= 2;
+            if (centralisation === 'U') aDM += 2;
+
+            let aScore = aRoll + aDM;
+            let authority = 'E';
+            if (aScore <= 4 || aScore === 8) authority = 'L';
+            else if (aScore === 6 || aScore === 11) authority = 'J';
+            else if (aScore === 7 || aScore === 9) authority = 'B';
+
+            // 8. Structure Code (S)
+            function getStructure(gov, auth, branch, isSecondary) {
+                if (gov === 2) return 'D';
+                if (gov === 8 || gov === 9) return 'M';
+                if ([3, 12, 15].includes(gov)) return roll1D() <= 4 ? 'S' : 'M';
+                if ([10, 11, 13, 14].includes(gov)) {
+                    if (!isSecondary) return roll1D() <= 5 ? 'R' : 'S';
+                    // if secondary, fall through to fallback with DM +2
+                } else if (auth === 'L' && !isSecondary) {
+                    let sRoll = roll2D();
+                    if (sRoll <= 3) return 'D';
+                    if (sRoll <= 8) return 'M';
+                    return 'S';
+                }
+
+                let fallbackRoll = roll2D() + (isSecondary && [10, 11, 13, 14].includes(gov) ? 2 : 0);
+                if (fallbackRoll <= 3) return 'D';
+                if (fallbackRoll === 4) return 'S';
+                if (fallbackRoll <= 6) return 'M';
+                if (fallbackRoll <= 8) return 'R';
+                if (fallbackRoll === 9) return 'M';
+                if (fallbackRoll === 10) return 'S';
+                if (fallbackRoll === 11) return 'M';
+                return 'S';
+            }
+
+            let structureStr = "";
+            if (authority === 'B') {
+                structureStr = getStructure(base.gov, authority, 'L', true) +
+                    getStructure(base.gov, authority, 'E', true) +
+                    getStructure(base.gov, authority, 'J', true);
+            } else {
+                structureStr = getStructure(base.gov, authority, authority, false);
+            }
+
+            let govProfile = `${centralisation}-${authority}-${structureStr}`;
+
+            // 9. Factions
+            // Total result = Base_Factions (1D3) + DMs
+            let baseFactions = Math.floor(Math.random() * 3) + 1; // 1 to 3
+            let fDM = 0;
+            if (base.gov === 0 || base.gov === 7) fDM += 1;
+            if (base.gov >= 10) fDM -= 1;
+
+            let totalFactions = baseFactions + fDM;
+            let numExternalFactions = 0;
+            if (totalFactions > 1) {
+                numExternalFactions = totalFactions - 1;
+            }
+
+            let factionsList = [];
+            for (let i = 0; i < numExternalFactions; i++) {
+                let fRoll = roll2D();
+                if (fRoll <= 3) factionsList.push('O');
+                else if (fRoll <= 5) factionsList.push('F');
+                else if (fRoll <= 7) factionsList.push('M');
+                else if (fRoll <= 9) factionsList.push('N');
+                else if (fRoll <= 11) factionsList.push('S');
+                else factionsList.push('P');
+            }
+            let factionsString = factionsList.join('');
+
+            // 10. Law Profile (O-WECPR)
+            function roll2D3() {
+                return (Math.floor(Math.random() * 3) + 1) + (Math.floor(Math.random() * 3) + 1);
+            }
+
+            let overallLaw = base.law; // Base UWP Law Level is the generic 'O'
+
+            // Determine Judicial System
+            // Base Rules check: "If you have not generated this yet... 5 or less is Inquisitorial"
+            let judRoll = roll2D();
+            let isInquisitorial = judRoll <= 5;
+
+            // Weapons and Armour (W)
+            let wDM = 0;
+            if (pcr >= 0 && pcr <= 3) wDM -= 1;
+            if (pcr === 8 || pcr === 9) wDM += 1;
+            let lawW = overallLaw + roll2D3() - 4 + wDM;
+            lawW = Math.max(0, Math.min(18, lawW));
+
+            // Economic Law (E)
+            let eDM = 0;
+            if (base.gov === 0) eDM -= 2;
+            if (base.gov === 1) eDM += 2;
+            if (base.gov === 2) eDM -= 1;
+            if (base.gov === 9) eDM += 1;
+            let lawE = overallLaw + roll2D3() - 4 + eDM;
+            lawE = Math.max(0, Math.min(18, lawE));
+
+            // Criminal Law (C)
+            let cLawDM = 0;
+            if (isInquisitorial) cLawDM += 1;
+            let lawC = overallLaw + roll2D3() - 4 + cLawDM;
+            lawC = Math.max(0, Math.min(18, lawC));
+
+            // Private Law (P)
+            let pLawDM = 0;
+            if (base.gov === 12) pLawDM -= 1; // 12 is Government C
+            let lawP = overallLaw + roll2D3() - 4 + pLawDM;
+            lawP = Math.max(0, Math.min(18, lawP));
+
+            // Personal Rights (R)
+            let rDM = 0;
+            if (base.gov === 0 || base.gov === 2) rDM -= 1;
+            if (base.gov === 1) rDM += 2;
+            let lawR = overallLaw + roll2D3() - 4 + rDM;
+            lawR = Math.max(0, Math.min(18, lawR));
+
+            // Convert >9 values to eHex, skipping 'I' and 'O'
+            function toEHex(val) {
+                if (val <= 9) return val.toString();
+                if (val === 10) return 'A';
+                if (val === 11) return 'B';
+                if (val === 12) return 'C';
+                if (val === 13) return 'D';
+                if (val === 14) return 'E';
+                if (val === 15) return 'F';
+                if (val === 16) return 'G';
+                if (val === 17) return 'H';
+                if (val === 18) return 'J';
+                if (val === 19) return 'K';
+                if (val === 20) return 'L';
+                if (val === 21) return 'M';
+                if (val === 22) return 'N';
+                if (val === 23) return 'P';
+                if (val === 24) return 'Q';
+                if (val === 25) return 'R';
+                if (val === 26) return 'S';
+                if (val === 27) return 'T';
+                if (val === 28) return 'U';
+                if (val === 29) return 'V';
+                if (val === 30) return 'W';
+                if (val === 31) return 'X';
+                if (val === 32) return 'Y';
+                if (val >= 33) return 'Z';
+                return '0';
+            }
+
+            let lawProfile = `${toEHex(overallLaw)}-${toEHex(lawW)}${toEHex(lawE)}${toEHex(lawC)}${toEHex(lawP)}${toEHex(lawR)}`;
+
+            // 11. Tech Profile (H-L-QQQQQ-TTTT-MM-N)
+            function tlm() {
+                let roll = roll2D();
+                if (roll === 2) return -3;
+                if (roll === 3) return -2;
+                if (roll === 4) return -1;
+                if (roll >= 5 && roll <= 9) return 0;
+                if (roll === 10) return 1;
+                if (roll === 11) return 2;
+                if (roll === 12) return 3;
+                return 0; // fallback
+            }
+
+            let tcs = base.tradeCodes || [];
+            let isInd = tcs.includes("In");
+            let isRich = tcs.includes("Ri");
+            let isPoor = tcs.includes("Po");
+            let habRating = 8; // not calculated yet, assume 8
+
+            // Step 1: Common Tech Levels
+            let H = base.tl;
+            let lDM = 0;
+            if (base.pop >= 1 && base.pop <= 5) lDM += 1;
+            if (base.pop >= 9) lDM -= 1;
+            if ([0, 6, 13, 14].includes(base.gov)) lDM -= 1;
+            if (base.gov === 5) lDM += 1;
+            if (base.gov === 7) lDM -= 2;
+            if (pcr >= 0 && pcr <= 2) lDM -= 1;
+            if (pcr >= 7) lDM += 1;
+
+            let L = H + tlm() + lDM;
+            L = Math.max(Math.floor(H / 2), Math.min(H, L));
+
+            // Step 2: Quality of Life Tech Levels (QQQQQ)
+            // Energy TL (Q1)
+            let q1DM = 0;
+            if (base.pop >= 9) q1DM += 1;
+            if (isInd) q1DM += 1;
+            let Q1 = H + tlm() + q1DM;
+            Q1 = Math.max(Math.floor(H / 2), Math.min(Math.floor(H * 1.2), Q1));
+
+            // Electronics TL (Q2)
+            let q2DM = 0;
+            if (base.pop >= 1 && base.pop <= 5) q2DM += 1;
+            if (base.pop >= 9) q2DM -= 1;
+            if (isInd) q2DM += 1;
+            let Q2 = H + tlm() + q2DM;
+            Q2 = Math.max(Q1 - 3, Math.min(Q1 + 1, Q2));
+
+            // Manufacturing TL (Q3)
+            let q3DM = 0;
+            if (base.pop >= 1 && base.pop <= 6) q3DM -= 1;
+            if (base.pop >= 8) q3DM += 1;
+            if (isInd) q3DM += 1;
+            let Q3 = H + tlm() + q3DM;
+            Q3 = Math.max(Q2 - 2, Math.min(Math.max(Q1, Q2), Q3));
+
+            // Medical TL (Q4)
+            let q4DM = 0;
+            if (isRich) q4DM += 1;
+            if (isPoor) q4DM -= 1;
+            let spDM = 0;
+            if (base.starport === 'A') spDM = 6;
+            else if (base.starport === 'B') spDM = 4;
+            else if (base.starport === 'C') spDM = 2;
+            let Q4 = Q2 + tlm() + q4DM;
+            Q4 = Math.max(Math.max(0, spDM), Math.min(Q2, Q4));
+
+            // Environmental TL (Q5)
+            let q5DM = 0;
+            if (habRating < 8) q5DM += (8 - habRating);
+            let Q5 = Q3 + tlm() + q5DM;
+            Q5 = Math.max(Q1 - 5, Math.min(Q1, Q5));
+
+            // Step 3: Transportation Tech Levels (TTTT)
+            // Land Transport TL (T1)
+            let t1DM = 0;
+            if (base.hydro === 10) t1DM -= 1;
+            if (pcr >= 0 && pcr <= 2) t1DM += 1;
+            let T1 = Q1 + tlm() + t1DM;
+            T1 = Math.max(Q2 - 5, Math.min(Q1, T1));
+
+            // Water Transport TL (T2)
+            let t2DM = 0;
+            if (base.hydro === 0) t2DM -= 2;
+            if (base.hydro === 8) t2DM += 1;
+            if (base.hydro >= 9) t2DM += 2;
+            if (pcr >= 0 && pcr <= 2) t2DM += 1;
+            let T2 = Q1 + tlm() + t2DM;
+            if (base.hydro === 0) {
+                T2 = Math.max(0, Math.min(Q1, T2)); // absolute min 0
+            } else {
+                T2 = Math.max(Q2 - 5, Math.min(Q1, T2));
+            }
+
+            // Air Transport TL (T3)
+            let t3DM = 0;
+            if ((base.atm <= 3 || base.atm === 14) && H <= 7) t3DM -= 2;
+            if ((base.atm === 4 || base.atm === 5) && H <= 7) t3DM -= 1; // Used safe/single -1 rule
+            let T3 = Q1 + tlm() + t3DM;
+            T3 = Math.max(Q2 - 5, Math.min(Q1, T3));
+            if (base.atm === 0 && H <= 5) {
+                T3 = 0; // absolute override
+            }
+
+            // Space Transport TL (T4)
+            let t4DM = 0;
+            if (base.size === 0 || base.size === 1) t4DM += 2;
+            if (base.pop >= 1 && base.pop <= 5) t4DM -= 1;
+            if (base.pop >= 9) t4DM += 1;
+            if (base.starport === 'A') t4DM += 2;
+            if (base.starport === 'B') t4DM += 1;
+            let T4 = Q3 + tlm() + t4DM;
+            T4 = Math.max(Math.min(Q1 - 3, Q3 - 3), Math.min(Math.min(Q1, Q3), T4));
+
+            // Step 4: Military Tech Levels (MM)
+            // Personal Military TL (M1)
+            let m1DM = 0;
+            if (base.gov === 0 || base.gov === 7) m1DM += 2;
+            if (overallLaw === 0 || overallLaw >= 13) m1DM += 2;
+            if ((overallLaw >= 1 && overallLaw <= 4) || (overallLaw >= 9 && overallLaw <= 12)) m1DM += 1;
+            let M1 = Q3 + tlm() + m1DM;
+            M1 = Math.max((lawW === 0 ? Q3 : 0), Math.min(Q2, M1));
+
+            // Heavy Military TL (M2)
+            let m2DM = 0;
+            if (base.pop >= 1 && base.pop <= 6) m2DM -= 1;
+            if (base.pop >= 8) m2DM += 1;
+            if ([7, 10, 11, 15].includes(base.gov)) m2DM += 2;
+            if (overallLaw >= 13) m2DM += 2;
+            if (isInd) m2DM += 1;
+            let M2 = Q3 + tlm() + m2DM;
+            M2 = Math.max(0, Math.min(Q3, M2));
+
+            // Step 5: Novelty Tech Level (N)
+            let maxOfAll = Math.max(Q1, Q2, Q3, Q4, Q5, T1, T2, T3, T4, M1, M2);
+            let N = Math.max(maxOfAll, minSusTL, Math.max(H + 2, 12));
+
+            let techProfile = `${toEHex(H)}-${toEHex(L)}-${toEHex(Q1)}${toEHex(Q2)}${toEHex(Q3)}${toEHex(Q4)}${toEHex(Q5)}-${toEHex(T1)}${toEHex(T2)}${toEHex(T3)}${toEHex(T4)}-${toEHex(M1)}${toEHex(M2)}-${toEHex(N)}`;
+
+            // 12. Cultural Profile (DXUS-CPEM)
+            let culD = 0, culX = 0, culU = 0, culS = 0;
+            let culC = 0, culP = 0, culE = 0, culM = 0;
+            let culturalProfile = "0000-0000";
+
+            if (base.pop > 0) {
+                // Step 1: Diversity (D)
+                let cD_DM = 0;
+                if (base.pop >= 1 && base.pop <= 5) cD_DM -= 2;
+                if (base.pop >= 9) cD_DM += 2;
+                if ([0, 1, 2].includes(base.gov)) cD_DM += 1;
+                if (base.gov === 7) cD_DM += 4;
+                if ([13, 14, 15].includes(base.gov)) cD_DM -= 4;
+                if (overallLaw >= 0 && overallLaw <= 4) cD_DM += 1;
+                if (overallLaw >= 10) cD_DM -= 1;
+                if (pcr >= 0 && pcr <= 3) cD_DM += 1;
+                if (pcr >= 7 && pcr <= 9) cD_DM -= 2;
+                culD = Math.max(1, roll2D() + cD_DM);
+
+                // Step 2: Xenophilia (X)
+                let cX_DM = 0;
+                if (base.pop >= 1 && base.pop <= 5) cX_DM -= 1;
+                if (base.pop >= 9) cX_DM += 2;
+                if (base.gov === 13 || base.gov === 14) cX_DM -= 2;
+                if (overallLaw >= 10) cX_DM -= 2;
+                if (base.starport === 'A') cX_DM += 2;
+                if (base.starport === 'B') cX_DM += 1;
+                if (base.starport === 'D') cX_DM -= 1;
+                if (base.starport === 'E') cX_DM -= 2;
+                if (base.starport === 'X') cX_DM -= 4;
+                if (culD >= 1 && culD <= 3) cX_DM -= 2;
+                if (culD >= 12) cX_DM += 1;
+                culX = Math.max(1, roll2D() + cX_DM);
+
+                // Step 3: Uniqueness (U)
+                let cU_DM = 0;
+                if (base.starport === 'A') cU_DM -= 2;
+                if (base.starport === 'B') cU_DM -= 1;
+                if (base.starport === 'D') cU_DM += 1;
+                if (base.starport === 'E') cU_DM += 2;
+                if (base.starport === 'X') cU_DM += 4;
+                if (culD >= 1 && culD <= 3) cU_DM += 2;
+                if ([9, 10, 11].includes(culX)) cU_DM -= 1;
+                if (culX >= 12) cU_DM -= 2;
+                culU = Math.max(1, roll2D() + cU_DM);
+
+                // Step 4: Symbology (S)
+                let cS_DM = 0;
+                if (base.gov === 13 || base.gov === 14) cS_DM += 2;
+                if (H === 0 || H === 1) cS_DM -= 3;
+                if (H === 2 || H === 3) cS_DM -= 1;
+                if ([9, 10, 11].includes(H)) cS_DM += 2;
+                if (H >= 12) cS_DM += 4;
+                if ([9, 10, 11].includes(culU)) cS_DM += 1;
+                if (culU >= 12) cS_DM += 3;
+                culS = Math.max(1, roll2D() + cS_DM);
+
+                // Step 5: Cohesion (C)
+                let cC_DM = 0;
+                if (base.gov === 3 || base.gov === 12) cC_DM += 2;
+                if ([5, 6, 9].includes(base.gov)) cC_DM += 1;
+                if (overallLaw >= 0 && overallLaw <= 2) cC_DM -= 2;
+                if (overallLaw >= 10) cC_DM += 2;
+                if (pcr >= 0 && pcr <= 3) cC_DM -= 2;
+                if (pcr >= 7) cC_DM += 2;
+                if (culD === 1 || culD === 2) cC_DM += 4;
+                if ([3, 4, 5].includes(culD)) cC_DM += 2;
+                if ([9, 10, 11].includes(culD)) cC_DM -= 2;
+                if (culD >= 12) cC_DM -= 4;
+                culC = Math.max(1, roll2D() + cC_DM);
+
+                // Step 6: Progressiveness (P)
+                let cP_DM = 0;
+                if ([6, 7, 8].includes(base.pop)) cP_DM -= 1;
+                if (base.pop >= 9) cP_DM -= 2;
+                if (base.gov === 5) cP_DM += 1;
+                if (base.gov === 11) cP_DM -= 2;
+                if (base.gov === 13 || base.gov === 14) cP_DM -= 6;
+                if ([9, 10, 11].includes(overallLaw)) cP_DM -= 1;
+                if (overallLaw >= 12) cP_DM -= 4;
+                if (culD >= 1 && culD <= 3) cP_DM -= 2;
+                if (culD >= 12) cP_DM += 1;
+                if (culX >= 1 && culX <= 5) cP_DM -= 1;
+                if (culX >= 9) cP_DM += 2;
+                if (culC >= 1 && culC <= 5) cP_DM += 2;
+                if (culC >= 9) cP_DM -= 2;
+                culP = Math.max(1, roll2D() + cP_DM);
+
+                // Step 7: Expansionism (E)
+                let cE_DM = 0;
+                if (base.gov === 10 || base.gov >= 12) cE_DM += 2;
+                if (culD >= 1 && culD <= 3) cE_DM += 3;
+                if (culD >= 12) cE_DM -= 3;
+                if (culX >= 1 && culX <= 5) cE_DM += 1;
+                if (culX >= 9) cE_DM -= 2;
+                culE = Math.max(1, roll2D() + cE_DM);
+
+                // Step 8: Militancy (M)
+                let cM_DM = 0;
+                if (base.gov >= 10) cM_DM += 3;
+                if ([9, 10, 11].includes(overallLaw)) cM_DM += 1;
+                if (overallLaw >= 12) cM_DM += 2;
+                if (culX >= 1 && culX <= 5) cM_DM += 1;
+                if (culX >= 9) cM_DM -= 2;
+                if (culE >= 1 && culE <= 5) cM_DM -= 1;
+                if ([9, 10, 11].includes(culE)) cM_DM += 1;
+                if (culE >= 12) cM_DM += 2;
+                culM = Math.max(1, roll2D() + cM_DM);
+
+                culturalProfile = `${toEHex(culD)}${toEHex(culX)}${toEHex(culU)}${toEHex(culS)}-${toEHex(culC)}${toEHex(culP)}${toEHex(culE)}${toEHex(culM)}`;
+            }
+
+            // 13. Economic Profile (Tc, Im, RLI±E, RU, pcGWP, WTN, IR, DR)
+            let ggCount = base.gasGiant ? 1 : 0;
+            let beltCount = base.size === 0 ? 1 : 0;
+            let basesCount = 0;
+            if (base.navalBase) basesCount++;
+            if (base.scoutBase) basesCount++;
+            if (base.militaryBase) basesCount++;
+
+            let resourceRating = roll2D() - 7 + base.size;
+            resourceRating = Math.max(2, Math.min(12, resourceRating));
+
+            let tcArr = [];
+            if (base.atm >= 4 && base.atm <= 9 && base.hydro >= 4 && base.hydro <= 8 && base.pop >= 5 && base.pop <= 7) tcArr.push("Ag");
+            if (base.size === 0 && base.atm === 0 && base.hydro === 0) tcArr.push("As");
+            if (base.pop === 0 && base.gov === 0 && base.law === 0) tcArr.push("Ba");
+            if (base.atm >= 2 && base.atm <= 9 && base.hydro === 0) tcArr.push("De");
+            if (base.atm >= 10 && base.hydro >= 1) tcArr.push("Fl");
+            if (base.size >= 6 && base.size <= 8 && [5, 6, 8].includes(base.atm) && base.hydro >= 5 && base.hydro <= 7) tcArr.push("Ga");
+            if (base.pop >= 9) tcArr.push("Hi");
+            if (H >= 12) tcArr.push("Ht");
+            if (base.atm <= 1 && base.hydro >= 1) tcArr.push("Ic");
+            if ([0, 1, 2, 4, 7, 9, 10, 11, 12].includes(base.atm) && base.pop >= 9) tcArr.push("In");
+            if (base.pop >= 1 && base.pop <= 3) tcArr.push("Lo");
+            if (H <= 5) tcArr.push("Lt");
+            if (base.atm <= 3 && base.hydro <= 3 && base.pop >= 6) tcArr.push("Na");
+            if (base.pop >= 4 && base.pop <= 6) tcArr.push("Ni");
+            if (base.atm >= 2 && base.atm <= 5 && base.hydro <= 3) tcArr.push("Po");
+            if ([6, 8].includes(base.atm) && base.pop >= 6 && base.pop <= 8) tcArr.push("Ri");
+            if (base.atm === 0) tcArr.push("Va");
+            if (([2, 3, 4, 5, 6, 7, 8, 9, 13, 14].includes(base.atm)) && base.hydro === 10) tcArr.push("Wa");
+
+            tcArr.sort();
+            let Tc = tcArr.join(" ");
+
+            let Im = 0;
+            if (['A', 'B'].includes(base.starport)) Im += 1;
+            if (['D', 'E', 'X'].includes(base.starport)) Im -= 1;
+            if (H <= 8) Im -= 1;
+            if (H >= 10 && H <= 15) Im += 1;
+            if (H >= 16) Im += 2;
+            if (base.pop <= 6) Im -= 1;
+            if (base.pop >= 9) Im += 1;
+            if (tcArr.includes("Ag")) Im += 1;
+            if (tcArr.includes("In")) Im += 1;
+            if (tcArr.includes("Ri")) Im += 1;
+            if (basesCount >= 2) Im += 1;
+
+            let ecoR = resourceRating;
+            if (tcArr.includes("In") || tcArr.includes("Ag")) {
+                ecoR -= Math.floor(Math.random() * 6); // random(1,6)-1
+                ecoR = Math.max(2, ecoR);
+            }
+            if (H >= 8) {
+                ecoR += ggCount + beltCount;
+            }
+            if (ecoR < 2) {
+                ecoR = 2 + ggCount + beltCount;
+            }
+
+            let ecoL = base.pop <= 1 ? 0 : base.pop - 1;
+
+            let ecoI = Im;
+            if (base.pop >= 4 && base.pop <= 6) ecoI += Math.floor(Math.random() * 6) + 1;
+            if (base.pop >= 7) ecoI += roll2D();
+            if (base.pop === 0 || ecoI < 0) ecoI = 0;
+
+            let ecoE = 0;
+            if (base.pop === 0) ecoE = -5;
+            else if (base.pop >= 1 && base.pop <= 6) ecoE = roll2D() - 7;
+            else if (base.pop >= 7) ecoE = roll2D3() - 4;
+
+            let ecoE_DM = 0;
+            if ([0, 3, 6, 9, 11, 12, 15].includes(base.gov)) ecoE_DM -= 1;
+            if ([1, 2, 4, 5, 8].includes(base.gov)) ecoE_DM += 1;
+            if (overallLaw >= 0 && overallLaw <= 4) ecoE_DM += 1;
+            if (overallLaw >= 10) ecoE_DM -= 1;
+            if (pcr >= 0 && pcr <= 3) ecoE_DM -= 1;
+            if (pcr >= 8) ecoE_DM += 1;
+            if (culP >= 1 && culP <= 3) ecoE_DM -= 1;
+            if (culP >= 9) ecoE_DM += 1;
+            if (culE >= 1 && culE <= 3) ecoE_DM -= 1;
+            if (culE >= 9) ecoE_DM += 1;
+
+            if (base.pop > 0) {
+                ecoE += ecoE_DM;
+                ecoE = Math.max(-5, Math.min(5, ecoE));
+                if (ecoE === 0) ecoE = 1;
+            }
+
+            let calcR = ecoR === 0 ? 1 : ecoR;
+            let calcL = ecoL === 0 ? 1 : ecoL;
+            let calcI = ecoI === 0 ? 1 : ecoI;
+            let calcE = ecoE === 0 ? 1 : ecoE;
+            let RU = calcR * calcL * calcI * calcE;
+
+            let gwpBase = Math.max(1, ecoI) + Math.max(1, ecoR);
+            if (base.pop === 0) gwpBase = ecoI + ecoR;
+            let maxGwpBase = Math.max(2, 2 * ecoI);
+            gwpBase = Math.max(2, Math.min(maxGwpBase, gwpBase));
+
+            let tlMod = H === 0 ? 0.05 : H / 10;
+            let portMod = 1.0;
+            switch (base.starport) {
+                case 'A': portMod = 1.5; break;
+                case 'B': portMod = 1.2; break;
+                case 'C': portMod = 1.0; break;
+                case 'D': portMod = 0.8; break;
+                case 'E': portMod = 0.5; break;
+                case 'F': portMod = 0.9; break;
+                case 'G': portMod = 0.7; break;
+                case 'H': portMod = 0.4; break;
+                case 'Y': portMod = 0.2; break;
+                case 'X': portMod = 0.2; break;
+            }
+            let govMod = 1.0;
+            switch (base.gov) {
+                case 1: govMod = 1.5; break;
+                case 2: govMod = 1.2; break;
+                case 3: govMod = 0.8; break;
+                case 4: govMod = 1.2; break;
+                case 5: govMod = 1.3; break;
+                case 6: govMod = 0.6; break;
+                case 7: govMod = 1.0; break;
+                case 8: govMod = 0.9; break;
+                case 9: govMod = 0.8; break;
+                case 11: govMod = 0.7; break;
+                case 13: govMod = 0.6; break;
+                case 14: govMod = 0.5; break;
+                case 15: govMod = 0.8; break;
+            }
+            let tcMod = 1.0;
+            if (tcArr.includes("Ag")) tcMod *= 0.9;
+            if (tcArr.includes("As")) tcMod *= 1.2;
+            if (tcArr.includes("Ga")) tcMod *= 1.2;
+            if (tcArr.includes("In")) tcMod *= 1.1;
+            if (tcArr.includes("Na")) tcMod *= 0.9;
+            if (tcArr.includes("Ni")) tcMod *= 0.9;
+            if (tcArr.includes("Po")) tcMod *= 0.8;
+            if (tcArr.includes("Ri")) tcMod *= 1.2;
+
+            let totalMods = tlMod * portMod * govMod * tcMod;
+            let pcGWP = 0;
+            if (ecoE > 0) {
+                pcGWP = 1000 * gwpBase * totalMods * ecoE;
+            } else if (ecoE < 0) {
+                pcGWP = (1000 * gwpBase * totalMods) / (-(ecoE - 1));
+            }
+            pcGWP = Math.round(pcGWP);
+
+            let wtnBase = base.pop;
+            if (H <= 1) wtnBase -= 1;
+            else if (H >= 5 && H <= 8) wtnBase += 1;
+            else if (H >= 9 && H <= 14) wtnBase += 2;
+            else if (H >= 15) wtnBase += 3;
+
+            let portWtnMod = 0;
+            let wIdx = Math.max(0, wtnBase);
+            if (wIdx <= 1) {
+                if (base.starport === 'A') portWtnMod = 3; else if (['B', 'C'].includes(base.starport)) portWtnMod = 2; else if (['D', 'E'].includes(base.starport)) portWtnMod = 1; else if (base.starport === 'X') portWtnMod = 0;
+            } else if (wIdx <= 3) {
+                if (['A', 'B'].includes(base.starport)) portWtnMod = 2; else if (['C', 'D'].includes(base.starport)) portWtnMod = 1; else portWtnMod = 0;
+            } else if (wIdx <= 5) {
+                if (base.starport === 'A') portWtnMod = 2; else if (['B', 'C'].includes(base.starport)) portWtnMod = 1; else if (base.starport === 'X') portWtnMod = -5; else portWtnMod = 0;
+            } else if (wIdx <= 7) {
+                if (['A', 'B'].includes(base.starport)) portWtnMod = 1; else if (base.starport === 'E') portWtnMod = -1; else if (base.starport === 'X') portWtnMod = -6; else portWtnMod = 0;
+            } else if (wIdx <= 9) {
+                if (base.starport === 'A') portWtnMod = 1; else if (base.starport === 'D') portWtnMod = -1; else if (base.starport === 'E') portWtnMod = -2; else if (base.starport === 'X') portWtnMod = -7; else portWtnMod = 0;
+            } else if (wIdx <= 11) {
+                if (base.starport === 'C') portWtnMod = -1; else if (base.starport === 'D') portWtnMod = -2; else if (base.starport === 'E') portWtnMod = -3; else if (base.starport === 'X') portWtnMod = -8; else portWtnMod = 0;
+            } else if (wIdx <= 13) {
+                if (base.starport === 'B') portWtnMod = -1; else if (base.starport === 'C') portWtnMod = -2; else if (base.starport === 'D') portWtnMod = -3; else if (base.starport === 'E') portWtnMod = -4; else if (base.starport === 'X') portWtnMod = -9; else portWtnMod = 0;
+            } else {
+                if (base.starport === 'B') portWtnMod = -2; else if (base.starport === 'C') portWtnMod = -3; else if (base.starport === 'D') portWtnMod = -4; else if (base.starport === 'E') portWtnMod = -5; else if (base.starport === 'X') portWtnMod = -10; else portWtnMod = 0;
+            }
+
+            let WTN = Math.max(0, wtnBase + portWtnMod);
+
+            let IR = 50 - (ecoE * 5) + ((roll2D() - 7) * 2);
+            if ([6, 11, 15].includes(base.gov)) IR += 10;
+            if ([0, 1, 3, 9, 12].includes(base.gov)) IR += 5;
+            if ([4, 8].includes(base.gov)) IR -= 5;
+            if (base.gov === 2) IR -= 10;
+            if (overallLaw >= 9) IR += (overallLaw - 8);
+            IR += pcr;
+            IR -= ecoI;
+
+            let DR = (pcGWP / 1000) * (1 - (IR / 100));
+            DR = DR.toFixed(2);
+
+            let formatIm = Im >= 0 ? "+" + Im : Im.toString();
+            let formatE = ecoE >= 0 ? "+" + ecoE : ecoE.toString();
+            let rlie = `${toEHex(ecoR)}${toEHex(ecoL)}${toEHex(ecoI)}${formatE}`;
+            let wtnChar = toEHex(WTN);
+
+            let economicProfile = `${Tc}, ${formatIm}, ${rlie}, ${RU}, Cr${pcGWP}, ${wtnChar}, ${IR}, ${DR}`;
+
+            // 14. Starport Profile (C-HX:DX:±#)
+            let spClass = base.starport || 'X';
+            let hxObj = 'HN';
+            if (['A', 'B', 'C', 'D'].includes(spClass)) {
+                let target = 12; // default
+                if (spClass === 'A') target = 6;
+                if (spClass === 'B') target = 8;
+                if (spClass === 'C') target = 10;
+
+                let hxScore = roll2D();
+                if (base.pop >= 9) hxScore += 1;
+                if ([9, 10, 11].includes(H)) hxScore += 1;
+                if (H >= 12) hxScore += 2;
+
+                if (hxScore >= target) hxObj = 'HY';
+            }
+
+            let dxObj = base.gasGiant ? 'DN' : 'DY';
+
+            let spIm = Im;
+            if (WTN >= 10) spIm += 1;
+            if (WTN <= 4) spIm -= 1;
+
+            let formatSpIm = spIm >= 0 ? "+" + spIm : spIm.toString();
+            let starportProfile = `${spClass}-${hxObj}:${dxObj}:${formatSpIm}`;
+
+            // 15. Military Profile (EMAWF-SNM:X.XX%)
+            // Context Defaults:
+            let milRisk = roll2D() >= 10; // 1 in 6 chance of High Risk
+            let milFactional = roll2D() >= 11; // 1 in 12 chance of Uprisings
+            let milReadinessRoll = roll2D();
+            let milReadiness = 'Normal';
+            let readinessMultiplier = 1.0;
+            let milConflictGlobalDM = 0;
+            if (milReadinessRoll <= 2) { milReadiness = 'Complacent'; readinessMultiplier = 0.5; }
+            else if (milReadinessRoll <= 5) { milReadiness = 'Low'; readinessMultiplier = 0.75; }
+            else if (milReadinessRoll <= 8) { milReadiness = 'Normal'; readinessMultiplier = 1.0; }
+            else if (milReadinessRoll <= 10) { milReadiness = 'Heightened'; readinessMultiplier = 1.2; milConflictGlobalDM = 1; }
+            else if (milReadinessRoll === 11) { milReadiness = 'War'; readinessMultiplier = 2.0; milConflictGlobalDM = 4; }
+            else { milReadiness = 'Total War'; readinessMultiplier = 5.0; milConflictGlobalDM = 8; }
+            if (milFactional && readinessMultiplier < 2.0) { readinessMultiplier = 1.2; milConflictGlobalDM = 2; } // Insurgency override if higher
+
+            let globalMilitancyDM = 0;
+            if (culM >= 1 && culM <= 2) globalMilitancyDM = -4;
+            else if (culM >= 3 && culM <= 5) globalMilitancyDM = -1;
+            else if (culM >= 6 && culM <= 8) globalMilitancyDM = 1;
+            else if (culM >= 9 && culM <= 11) globalMilitancyDM = 2;
+            else if (culM >= 12) globalMilitancyDM = 4;
+
+            let globalDM = globalMilitancyDM + milConflictGlobalDM;
+
+            // 15.1 Enforcement
+            let enfDM = 0;
+            if (base.gov === 0) enfDM -= 5;
+            if (base.gov === 11) enfDM += 2;
+            if (overallLaw === 0) enfDM -= 4;
+            if (overallLaw === 1) enfDM -= 2;
+            if (overallLaw === 2) enfDM -= 1;
+            if (overallLaw >= 9 && overallLaw <= 11) enfDM += 2;
+            if (overallLaw >= 12) enfDM += 4;
+            if (pcr >= 0 && pcr <= 4) enfDM += 2;
+            if (milFactional) enfDM += 2;
+            let enfEff = 3 + globalDM + enfDM;
+            if (enfEff < 1) enfEff = 1;
+            if (enfEff > 18) enfEff = 18;
+            let bE = toEHex(enfEff);
+
+            // 15.2 Militia
+            let milM_DM = 0;
+            if (base.gov === 1) milM_DM -= 4;
+            if (base.gov === 2) milM_DM += 2;
+            if (base.gov === 6) milM_DM -= 6;
+            milM_DM -= overallLaw;
+            if (pcr >= 0 && pcr <= 2) milM_DM += 2;
+            if (pcr === 3 || pcr === 4) milM_DM += 1;
+            if (pcr >= 6) milM_DM -= 1;
+            let milMRoll = roll2D() + globalDM + milM_DM;
+            let bM = "0";
+            if (milMRoll >= 4) {
+                let eff = milMRoll - 4;
+                if (eff < 1) eff = 1;
+                if (eff > 18) eff = 18;
+                bM = toEHex(eff);
+            }
+
+            // 15.3 Army
+            let armyDM = 0;
+            if (bM !== "0") armyDM -= 2;
+            if (base.gov === 0) armyDM -= 6;
+            if (base.gov === 7) armyDM += 4;
+            if (base.gov >= 10) armyDM += 4;
+            if (H <= 7) armyDM += 4;
+            if (H >= 8) armyDM -= 2;
+            if (base.militaryBase) armyDM += 6;
+            if (milRisk) armyDM += 2;
+            if (milFactional) armyDM += 2;
+            let armyRoll = roll2D() + globalDM + armyDM;
+            let bA = "0";
+            if (armyRoll >= 4) {
+                let eff = armyRoll - 4;
+                if (eff < 1) eff = 1;
+                if (eff > 18) eff = 18;
+                bA = toEHex(eff);
+            }
+
+            // 15.4 Wet Navy
+            let wetDM = 0;
+            if (base.hydro === 0) wetDM -= 20;
+            if (base.hydro >= 1 && base.hydro <= 3) wetDM -= 5;
+            if (base.hydro === 8) wetDM += 2;
+            if (base.hydro === 9) wetDM += 4;
+            if (base.hydro >= 10) wetDM += 8;
+            if (base.gov === 7) wetDM += 4;
+            if (H === 0) wetDM -= 8;
+            if (H === 8 || H === 9) wetDM -= 2;
+            if (H >= 10) wetDM -= H;
+            let wetRoll = roll2D() + globalDM + wetDM;
+            let bW = "0";
+            if (wetRoll >= 4) {
+                let eff = wetRoll - 4;
+                if (eff < 1) eff = 1;
+                if (eff > 18) eff = 18;
+                bW = toEHex(eff);
+            }
+
+            // 15.5 Air Force
+            let airDM = 0;
+            if (base.atm <= 1 && H <= 8) airDM -= 20;
+            if (([2, 3, 14].includes(base.atm)) && H <= 8) airDM -= 8;
+            if (([4, 5].includes(base.atm)) && H <= 8) airDM -= 2;
+            if (base.gov === 7) airDM += 4;
+            if (H >= 0 && H <= 2) airDM -= 20;
+            if (H === 3) airDM -= 10;
+            if (H >= 10 && H <= 12) airDM -= 4;
+            if (H >= 13) airDM -= 6;
+            let airRoll = roll2D() + globalDM + airDM;
+            let bF = "0";
+            if (airRoll >= 4) {
+                let eff = airRoll - 4;
+                if (eff < 1) eff = 1;
+                if (eff > 18) eff = 18;
+                bF = toEHex(eff);
+            }
+
+            // 15.6 System Defence
+            let sysDM = 0;
+            if (base.pop <= 3) sysDM -= 6;
+            if (base.pop === 4 || base.pop === 5) sysDM -= 2;
+            if (H <= 5) sysDM -= 20;
+            if (H === 6) sysDM -= 8;
+            if (H === 7) sysDM -= 6;
+            if (H === 8) sysDM -= 2;
+            if (base.starport === 'A') sysDM += 4;
+            if (base.starport === 'B') sysDM += 2;
+            if (base.starport === 'C') sysDM += 1;
+            if (base.starport === 'E') sysDM -= 2;
+            if (base.starport === 'X') sysDM -= 8;
+            if (hxObj === 'HY') sysDM += 2;
+            if (base.navalBase) sysDM += 4;
+            if (base.militaryBase) sysDM += 2;
+            if (milRisk) sysDM += 2;
+            let sysRoll = roll2D() + globalDM + sysDM;
+            let bS = "0";
+            if (sysRoll >= 4) {
+                let eff = sysRoll - 4;
+                if (eff < 1) eff = 1;
+                if (eff > 18) eff = 18;
+                bS = toEHex(eff);
+            }
+
+            // 15.7 Navy
+            let navDM = 0;
+            if (base.pop <= 3) navDM -= 6;
+            if (base.pop >= 4 && base.pop <= 6) navDM -= 3;
+            if (H <= 5) navDM -= 20;
+            if (H === 6) navDM -= 12;
+            if (H === 7) navDM -= 8;
+            if (H === 8) navDM -= 6;
+            if (base.starport === 'A') navDM += 4;
+            if (base.starport === 'B') navDM += 1;
+            if (base.starport === 'E') navDM -= 2;
+            if (base.starport === 'X') navDM -= 8;
+            if (hxObj === 'HY') navDM += 2;
+            if (base.navalBase) navDM += 4;
+            if (base.militaryBase) navDM += 2;
+            if (culE >= 1 && culE <= 5) navDM -= 2;
+            if (culE >= 9 && culE <= 11) navDM += 2;
+            if (culE >= 12) navDM += 4;
+            if (milRisk) navDM += 2;
+            let navRoll = roll2D() + globalDM + navDM;
+            let bN = "0";
+            if (navRoll >= 4) {
+                let eff = navRoll - 4;
+                if (eff < 1) eff = 1;
+                if (eff > 18) eff = 18;
+                bN = toEHex(eff);
+            }
+
+            // 15.8 Marines
+            let marDM = 0;
+            if (base.pop <= 5) marDM -= 4;
+            if (H <= 8) marDM -= 6;
+            if (base.navalBase) marDM += 2;
+            if (base.militaryBase) marDM += 2;
+            if (bN === "0") marDM -= 6;
+            if (bS === "0") marDM -= 6;
+            if (culE >= 1 && culE <= 5) marDM -= 4;
+            if (culE >= 9 && culE <= 11) marDM += 1;
+            if (culE >= 12) marDM += 2;
+            if (milRisk) marDM += 2;
+            let marRoll = roll2D() + globalDM + marDM;
+            let bMar = "0";
+            if (marRoll >= 4) {
+                let eff = marRoll - 4;
+                if (eff < 1) eff = 1;
+                if (eff > 18) eff = 18;
+                bMar = toEHex(eff);
+            }
+
+            // Budget
+            let totalEff = enfEff;
+            if (bM !== "0") totalEff += parseInt(bM, 36); // eHex parse trick
+            if (bA !== "0") totalEff += parseInt(bA, 36);
+            if (bW !== "0") totalEff += parseInt(bW, 36);
+            if (bF !== "0") totalEff += parseInt(bF, 36);
+            if (bS !== "0") totalEff += parseInt(bS, 36);
+            if (bN !== "0") totalEff += parseInt(bN, 36);
+            if (bMar !== "0") totalEff += parseInt(bMar, 36);
+
+            let branchDrain = Math.floor(totalEff / 10);
+
+            let budDM = 0;
+            if ([0, 2, 4].includes(base.gov)) budDM -= 2;
+            if (base.gov === 5) budDM += 1;
+            if (base.gov === 9) budDM -= 1;
+            if (base.gov === 10 || base.gov === 15) budDM += 3;
+            if ([11, 12, 14].includes(base.gov)) budDM += 2;
+            if (overallLaw >= 12) budDM += 2;
+            if (base.militaryBase) budDM += 4;
+            if (base.navalBase) budDM += 2;
+            budDM += (culM - 5);
+            budDM += (-4 + branchDrain);
+
+            let rollFactor = roll2D() - 7 + budDM;
+            if (rollFactor < -9) rollFactor = -9;
+
+            let basicBudget = 2.0 * (1 + (ecoE / 10)) * (1 + (rollFactor / 10));
+            let totalBudget = basicBudget * readinessMultiplier;
+            let formatBudget = totalBudget.toFixed(2) + "%";
+
+            let militaryProfile = `${bE}${bM}${bA}${bW}${bF}-${bS}${bN}${bMar}:${formatBudget}`;
+
+            return {
+                pValue,
+                totalWorldPop,
+                pcr,
+                urbanPercent,
+                totalUrbanPop,
+                majorCities,
+                totalMajorCityPop,
+                govProfile,
+                factions: factionsString,
+                lawProfile,
+                techProfile,
+                culturalProfile,
+                economicProfile,
+                starportProfile,
+                militaryProfile,
+                displayString: `Pop: ${pValue}x10^${base.pop} | PCR: ${pcr} | Urb: ${urbanPercent}% | MC: ${majorCities} (${totalMajorCityPop.toLocaleString()})\nGov: ${govProfile} | Fac: ${factionsString} | Law: ${lawProfile}\nTech: ${techProfile} | Cul: ${culturalProfile}\nEco: ${economicProfile} | Sp: ${starportProfile}\nMil: ${militaryProfile}`,
+                displayStrings: [
+                    `Pop: ${pValue}x10^${base.pop} | PCR: ${pcr} | Urb: ${urbanPercent}% | MC: ${majorCities} (${totalMajorCityPop.toLocaleString()})`,
+                    `Gov: ${govProfile} | Fac: ${factionsString} | Law: ${lawProfile}`,
+                    `Tech: ${techProfile} | Cul: ${culturalProfile}`,
+                    `Eco: ${economicProfile} | Sp: ${starportProfile}`,
+                    `Mil: ${militaryProfile}`
+                ]
+            };
+        }
+
+        // =====================================================================
+        // T5 MAINWORLD PHYSICAL GENERATION
+        // =====================================================================
+        function generateT5Physical(base) {
+            if (!base) return null;
+
+            // --- Step 1: Generate Homestar ---
+            // 1A. Spectral Type
+            let spFlux = rollFlux();
+            let spectralType = '';
+            if (spFlux <= -6) {
+                spectralType = (roll1D() <= 3) ? 'O' : 'B';
+            } else if (spFlux <= -4) {
+                spectralType = 'A';
+            } else if (spFlux <= -2) {
+                spectralType = 'F';
+            } else if (spFlux <= 0) {
+                spectralType = 'G';
+            } else if (spFlux <= 2) {
+                spectralType = 'K';
+            } else if (spFlux <= 5) {
+                spectralType = 'M';
+            } else {
+                spectralType = 'BD';
+            }
+
+            // Special Override: Brown Dwarf
+            if (spectralType === 'BD') {
+                let homestar = 'BD Y';
+                // Still generate orbit/climate/world type for the mainworld
+                let hzResult = generateHZAndClimate();
+                let wtResult = generateWorldType(base);
+                return {
+                    homestar,
+                    hzVariance: hzResult.hzVariance,
+                    climate: hzResult.climate,
+                    worldType: wtResult.worldType,
+                    parentBody: wtResult.parentBody,
+                    satOrbit: wtResult.satOrbit,
+                    displayString: `${homestar} | HZ:${hzResult.hzVariance} ${hzResult.climate} | ${wtResult.worldType}${wtResult.parentBody ? ' (' + wtResult.parentBody + ')' : ''}${wtResult.satOrbit ? ' Orbit: ' + wtResult.satOrbit : ''}`
+                };
+            }
+
+            // 1B. Spectral Decimal
+            let spectralDecimal = Math.floor(Math.random() * 10); // 0-9
+
+            // 1C. Stellar Size
+            let sizeFlux = rollFlux();
+            let stellarSize = 'V'; // default
+            let isOB = (spectralType === 'O' || spectralType === 'B');
+            let isA = (spectralType === 'A');
+            let isFGK = (spectralType === 'F' || spectralType === 'G' || spectralType === 'K');
+            let isM = (spectralType === 'M');
+
+            if (sizeFlux <= -5) {
+                stellarSize = (isOB || isA) ? 'Ia' : 'II';
+            } else if (sizeFlux === -4) {
+                if (isOB || isA) stellarSize = 'Ib';
+                else if (isFGK) stellarSize = 'III';
+                else if (isM) stellarSize = 'II';
+            } else if (sizeFlux === -3) {
+                if (isOB || isA) stellarSize = 'II';
+                else if (isFGK) stellarSize = 'IV';
+                else if (isM) stellarSize = 'II';
+            } else if (sizeFlux === -2) {
+                if (isOB || isA || isM) stellarSize = 'III';
+                else if (isFGK) stellarSize = 'V';
+            } else if (sizeFlux === -1) {
+                if (isOB) stellarSize = 'III';
+                else if (isA) stellarSize = 'IV';
+                else stellarSize = 'V';
+            } else if (sizeFlux === 0) {
+                if (isOB) stellarSize = 'III';
+                else stellarSize = 'V';
+            } else if (sizeFlux === 1) {
+                if (spectralType === 'B') stellarSize = 'III';
+                else stellarSize = 'V';
+            } else if (sizeFlux <= 3) {
+                stellarSize = 'V';
+            } else if (sizeFlux === 4) {
+                if (isOB) stellarSize = 'IV';
+                else if (isA) stellarSize = 'V';
+                else stellarSize = 'VI';
+            } else if (sizeFlux === 5) {
+                stellarSize = 'D';
+            } else { // +6 or more
+                if (isOB) stellarSize = 'IV';
+                else if (isA) stellarSize = 'V';
+                else stellarSize = 'VI';
+            }
+
+            // Exceptions/Overrides
+            // IV invalid for K5-K9 or M0-M9
+            if (stellarSize === 'IV') {
+                if ((spectralType === 'K' && spectralDecimal >= 5) || spectralType === 'M') {
+                    stellarSize = 'V';
+                }
+            }
+            // VI invalid for A0-A9 or F0-F4
+            if (stellarSize === 'VI') {
+                if (spectralType === 'A' || (spectralType === 'F' && spectralDecimal <= 4)) {
+                    stellarSize = 'V';
+                }
+            }
+
+            // Format homestar string
+            let homestar = '';
+            if (stellarSize === 'D') {
+                homestar = `${spectralType} D`;
+            } else {
+                homestar = `${spectralType}${spectralDecimal} ${stellarSize}`;
+            }
+
+            // --- Steps 2 & 3 ---
+            let hzResult = generateHZAndClimate();
+            let wtResult = generateWorldType(base);
+
+            return {
+                homestar,
+                hzVariance: hzResult.hzVariance,
+                climate: hzResult.climate,
+                worldType: wtResult.worldType,
+                parentBody: wtResult.parentBody,
+                satOrbit: wtResult.satOrbit,
+                displayString: `${homestar} | HZ:${hzResult.hzVariance} ${hzResult.climate} | ${wtResult.worldType}${wtResult.parentBody ? ' (' + wtResult.parentBody + ')' : ''}${wtResult.satOrbit ? ' Orbit: ' + wtResult.satOrbit : ''}`
+            };
+        }
+
+        // Step 2: HZ Variance & Climate
+        function generateHZAndClimate() {
+            let hzFlux = rollFlux();
+            let hzVariance = 0;
+            if (hzFlux <= -6) hzVariance = -2;
+            else if (hzFlux <= -3) hzVariance = -1;
+            else if (hzFlux <= 2) hzVariance = 0;
+            else if (hzFlux <= 5) hzVariance = 1;
+            else hzVariance = 2;
+
+            let climate = '';
+            if (hzVariance <= -1) climate = 'Hot. Tropic. (Tr)';
+            else if (hzVariance === 0) climate = 'Temperate.';
+            else if (hzVariance === 1) climate = 'Cold. Tundra. (Tu)';
+            else climate = 'Frozen. (Fr)';
+
+            return { hzVariance, climate };
+        }
+
+        // Step 3: World Type & Satellite details
+        function generateWorldType(base) {
+            let wtFlux = rollFlux();
+            let worldType = 'Planet';
+            if (wtFlux <= -4) worldType = 'Far Satellite';
+            else if (wtFlux === -3) worldType = 'Close Satellite';
+            // else: Planet (default)
+
+            if (worldType === 'Planet') {
+                return { worldType, parentBody: null, satOrbit: null };
+            }
+
+            // 3B. Determine Parent Body
+            let parentBody = 'Planet';
+            // If the system has gas giants, roll for parent
+            let hasGasGiants = true; // default assumption
+            if (base && base.gasGiant === false) {
+                hasGasGiants = false;
+            }
+            // Also check t5Socio for gas giant count
+            if (hasGasGiants) {
+                let pbFlux = rollFlux();
+                parentBody = (pbFlux <= 0) ? 'Gas Giant' : 'Planet';
+            }
+
+            // 3C. Satellite Orbit Letter
+            let soFlux = rollFlux();
+            let satOrbit = '';
+            if (worldType === 'Close Satellite') {
+                const closeOrbits = ['Ay', 'Bee', 'Cee', 'Dee', 'Ee', 'Eff', 'Gee', 'Aitch', 'Eye', 'Jay', 'Kay', 'Ell', 'Em'];
+                satOrbit = closeOrbits[soFlux + 6] || 'Gee';
+            } else { // Far Satellite
+                const farOrbits = ['En', 'Oh', 'Pee', 'Que', 'Arr', 'Ess', 'Tee', 'Yu', 'Vee', 'Dub', 'Ex', 'Wye', 'Zee'];
+                satOrbit = farOrbits[soFlux + 6] || 'Tee';
+            }
+
+            return { worldType, parentBody, satOrbit };
+        }
+
+        document.getElementById('ctx-expand-physical-ct').addEventListener('click', () => {
+            if (!validateSelection('physical')) return;
+
+            let missingData = false;
+            selectedHexes.forEach(hexId => {
+                let stateObj = hexStates.get(hexId);
+                let baseData = stateObj ? (stateObj.ctData || stateObj.mgt2eData || stateObj.t5Data) : null;
+
+                if (baseData) {
+                    stateObj.ctPhysical = generateCTPhysical(baseData);
+                    hexStates.set(hexId, stateObj);
+                } else if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
+                    missingData = true;
+                }
+            });
+
+            if (missingData) {
+                alert("Note: Some selected hexes skipped because they do not have any Mainworld data generated yet. You must run a GENERATE MAINWORLD function first.");
+            }
+
+            contextMenu.classList.remove('visible');
+            requestAnimationFrame(draw);
+        });
+
+        document.getElementById('ctx-expand-physical-t5').addEventListener('click', () => {
+
+            if (!validateSelection('physical')) return;
+
+            let missingData = false;
+            selectedHexes.forEach(hexId => {
+                let stateObj = hexStates.get(hexId);
+
+                let baseData = null;
+                if (stateObj) {
+                    baseData = stateObj.t5Data || stateObj.mgt2eData || stateObj.ctData;
+                }
+
+                if (baseData) {
+                    stateObj.t5Physical = generateT5Physical(baseData);
+                    hexStates.set(hexId, stateObj);
+                } else if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
+                    missingData = true;
+                }
+            });
+
+            if (missingData) {
+                alert("Note: Some selected hexes skipped because they do not have any Mainworld data generated yet. You must run a GENERATE MAINWORLD function first.");
+            }
+
+            contextMenu.classList.remove('visible');
+            requestAnimationFrame(draw);
+        });
+
+        document.getElementById('ctx-expand-socio-mgt2e').addEventListener('click', () => {
+            if (!validateSelection('socio')) return;
+
+            let missingData = false;
+            selectedHexes.forEach(hexId => {
+                let stateObj = hexStates.get(hexId);
+
+                let baseData = null;
+                if (stateObj) {
+                    baseData = stateObj.t5Data || stateObj.mgt2eData || stateObj.ctData;
+                }
+
+                if (baseData) {
+                    stateObj.mgtSocio = generateMgT2ESocioeconomics(baseData);
+                    // Clear T5 Socio to ensure only ONE socioeconomic object exists at a time
+                    stateObj.t5Socio = null;
+                    hexStates.set(hexId, stateObj);
+                } else if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
+                    missingData = true;
+                }
+            });
+
+            if (missingData) {
+                alert("Note: Some selected hexes skipped because they do not have any Mainworld data generated yet. You must run a GENERATE MAINWORLD function first.");
+            }
+
+            contextMenu.classList.remove('visible');
+            requestAnimationFrame(draw);
+        });
+
+        document.getElementById('ctx-sparse').addEventListener('click', () => autoPopulate(2));
+        document.getElementById('ctx-regular').addEventListener('click', () => autoPopulate(3));
+        document.getElementById('ctx-dense').addEventListener('click', () => autoPopulate(4));
+        document.getElementById('ctx-select-all').addEventListener('click', toggleAllHexes);
+        document.getElementById('ctx-select-hex').addEventListener('click', toggleSingleHex);
+        document.getElementById('ctx-select-subsector').addEventListener('click', toggleSubsectorHexes);
+        document.getElementById('ctx-select-sector').addEventListener('click', toggleSectorHexes);
+        document.getElementById('ctx-deselect-all').addEventListener('click', deselectAllHexes);
+
+        // Help Modal Logic
+        const helpModal = document.getElementById('help-modal');
+        function openHelpModal() {
+            contextMenu.classList.remove('visible');
+            helpModal.style.display = 'flex';
+        }
+        function closeHelpModal() {
+            helpModal.style.display = 'none';
+        }
+        document.getElementById('ctx-help').addEventListener('click', openHelpModal);
+        document.getElementById('btn-close-help').addEventListener('click', closeHelpModal);
+
+        document.getElementById('toggle-borders').addEventListener('change', (e) => {
+            showSubsectorBorders = e.target.checked;
+            requestAnimationFrame(draw);
+        });
+
+        // Save / Load Logic
+        document.getElementById('btn-save-map').addEventListener('click', async () => {
+            const stateObj = {};
+            hexStates.forEach((value, key) => {
+                stateObj[key] = value;
+            });
+            const jsonStr = JSON.stringify(stateObj, null, 2);
+
+            try {
+                // Try modern File System Access API first (Chrome/Edge/Opera)
+                if (window.showSaveFilePicker) {
+                    const handle = await window.showSaveFilePicker({
+                        suggestedName: 'traveller_map.json',
+                        types: [{
+                            description: 'JSON Files',
+                            accept: { 'application/json': ['.json'] },
+                        }],
+                    });
+                    const writable = await handle.createWritable();
+                    await writable.write(jsonStr);
+                    await writable.close();
+                } else {
+                    // Fallback for Firefox/Safari: create blob and click anchor
+                    const blob = new Blob([jsonStr], { type: "application/json" });
+                    const url = URL.createObjectURL(blob);
+                    const dlAnchorElem = document.createElement('a');
+                    dlAnchorElem.setAttribute("href", url);
+                    dlAnchorElem.setAttribute("download", "traveller_map.json");
+                    document.body.appendChild(dlAnchorElem);
+                    dlAnchorElem.click();
+                    document.body.removeChild(dlAnchorElem);
+                    URL.revokeObjectURL(url);
+                }
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error("Save failed:", err);
+                    alert("Failed to save file. Check console for details.");
+                }
+            }
+        });
+
+        document.getElementById('file-load-map').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                try {
+                    const parsedData = JSON.parse(event.target.result);
+                    hexStates.clear();
+
+                    for (const key in parsedData) {
+                        if (parsedData.hasOwnProperty(key)) {
+                            hexStates.set(key, parsedData[key]);
+                        }
+                    }
+
+                    selectedHexes.clear();
+                    contextMenu.classList.remove('visible');
+                    requestAnimationFrame(draw);
+
+                    alert("Map loaded successfully!");
+                } catch (error) {
+                    alert("Error loading map file. Ensure it is a valid JSON.");
+                    console.error("Parse error:", error);
+                }
+
+                // Reset file input so same file can be loaded again if needed
+                e.target.value = '';
+            };
+            reader.readAsText(file);
+        });
+
+        // Hex Editor Logic
+        function openHexEditor(hexId) {
+            const stateObj = hexStates.get(hexId);
+            if (!stateObj || stateObj.type !== 'SYSTEM_PRESENT' || (!stateObj.ctData && !stateObj.mgt2eData && !stateObj.t5Data)) {
+                return; // Only open for generated systems
+            }
+
+            editingHexId = hexId;
+            const data = stateObj.t5Data || stateObj.mgt2eData || stateObj.ctData;
+
+            document.getElementById('hex-editor-title').innerText = `Edit ${hexId}`;
+            document.getElementById('edit-starport').value = data.starport;
+            document.getElementById('edit-size').value = data.size;
+            document.getElementById('edit-atm').value = data.atm;
+            document.getElementById('edit-hydro').value = data.hydro;
+            document.getElementById('edit-pop').value = data.pop;
+            document.getElementById('edit-gov').value = data.gov;
+            document.getElementById('edit-law').value = data.law;
+            document.getElementById('edit-tl').value = data.tl;
+
+            document.getElementById('edit-naval').checked = data.navalBase || false;
+            document.getElementById('edit-scout').checked = data.scoutBase || false;
+            document.getElementById('edit-military').checked = data.militaryBase || false;
+            document.getElementById('edit-corsair').checked = data.corsairBase || false;
+            document.getElementById('edit-gas').checked = data.gasGiant || false;
+
+            document.getElementById('edit-trade-codes').value = data.tradeCodes ? data.tradeCodes.join(' ') : '';
+
+            // Hide/Show Mongoose specific fields based on ruleset used
+            document.getElementById('edit-military').parentElement.style.display = stateObj.mgt2eData ? 'flex' : 'none';
+            document.getElementById('edit-corsair').parentElement.style.display = stateObj.mgt2eData ? 'flex' : 'none';
+
+            // Reset and hide all accordion elements first
+            document.getElementById('editor-socio-t5-container').style.display = 'none';
+            document.getElementById('acc-btn-t5-socio').style.display = 'none';
+            document.getElementById('acc-btn-t5-socio').classList.remove('active');
+
+            document.getElementById('editor-socio-mgt-container').style.display = 'none';
+            document.getElementById('acc-btn-mgt-socio').style.display = 'none';
+            document.getElementById('acc-btn-mgt-socio').classList.remove('active');
+
+            if (stateObj.t5Socio) {
+                document.getElementById('acc-btn-t5-socio').style.display = 'flex';
+                const soc = stateObj.t5Socio;
+                document.getElementById('edit-popm').value = soc.popMultiplier;
+                document.getElementById('edit-belts').value = soc.belts;
+                document.getElementById('edit-gas-giants').value = soc.gasGiants;
+                document.getElementById('edit-worlds').value = soc.worlds;
+                document.getElementById('edit-ix').value = soc.importance;
+                document.getElementById('edit-ru').value = soc.resourceUnits;
+                document.getElementById('edit-r').value = soc.ecoResources;
+                document.getElementById('edit-l').value = soc.ecoLabor;
+                document.getElementById('edit-i').value = soc.ecoInfrastructure;
+                document.getElementById('edit-e').value = soc.ecoEfficiency;
+                document.getElementById('edit-h').value = parseInt(soc.culturalProfile[0], 36);
+                document.getElementById('edit-a').value = parseInt(soc.culturalProfile[1], 36);
+                document.getElementById('edit-s').value = parseInt(soc.culturalProfile[2], 36);
+                document.getElementById('edit-sym').value = parseInt(soc.culturalProfile[3], 36);
+
+                // Accordions now start closed to prevent overlap on right-side panel
+            }
+
+            if (stateObj.mgtSocio) {
+                document.getElementById('acc-btn-mgt-socio').style.display = 'flex';
+                const soc = stateObj.mgtSocio;
+                document.getElementById('edit-mgt-p').value = soc.pValue;
+                document.getElementById('edit-mgt-pcr').value = soc.pcr;
+                document.getElementById('edit-mgt-urb').value = soc.urbanPercent;
+                document.getElementById('edit-mgt-mc').value = soc.majorCities;
+                document.getElementById('edit-mgt-mcp').value = soc.totalMajorCityPop.toLocaleString();
+                document.getElementById('edit-mgt-gov').value = soc.govProfile || "";
+                document.getElementById('edit-mgt-fac').value = soc.factions || "";
+                document.getElementById('edit-mgt-law').value = soc.lawProfile || "";
+                document.getElementById('edit-mgt-tech').value = soc.techProfile || "";
+                document.getElementById('edit-mgt-cul').value = soc.culturalProfile || "";
+                document.getElementById('edit-mgt-eco').value = soc.economicProfile || "";
+                document.getElementById('edit-mgt-star').value = soc.starportProfile || "";
+                document.getElementById('edit-mgt-mil').value = soc.militaryProfile || "";
+
+                // Accordions now start closed to prevent overlap
+            }
+
+            // Physical Stats Accordion
+            document.getElementById('editor-physical-container').style.display = 'none';
+            document.getElementById('acc-btn-physical').style.display = 'none';
+            document.getElementById('acc-btn-physical').classList.remove('active');
+
+            if (stateObj.t5Physical) {
+                document.getElementById('acc-btn-physical').style.display = 'flex';
+                const phys = stateObj.t5Physical;
+                document.getElementById('edit-phys-star').value = phys.homestar || '';
+                document.getElementById('edit-phys-hz').value = phys.hzVariance != null ? phys.hzVariance : '';
+                document.getElementById('edit-phys-climate').value = phys.climate || '';
+                document.getElementById('edit-phys-worldtype').value = phys.worldType || '';
+                document.getElementById('edit-phys-parent').value = phys.parentBody || '';
+                document.getElementById('edit-phys-satorbit').value = phys.satOrbit || '';
+                document.getElementById('ct-phys-fields').style.display = 'none';
+            } else if (stateObj.ctPhysical) {
+                document.getElementById('acc-btn-physical').style.display = 'flex';
+                const phys = stateObj.ctPhysical;
+                document.getElementById('edit-phys-star').value = phys.homestar || '';
+                document.getElementById('edit-phys-hz').value = '';
+                document.getElementById('edit-phys-climate').value = '';
+                document.getElementById('edit-phys-worldtype').value = phys.worldType || 'Planet';
+                document.getElementById('edit-phys-parent').value = '';
+                document.getElementById('edit-phys-satorbit').value = '';
+                document.getElementById('ct-phys-fields').style.display = 'grid';
+                document.getElementById('edit-phys-orbit').value = phys.hzOrbit != null ? phys.hzOrbit : '';
+                document.getElementById('edit-phys-dist').value = phys.distAU != null ? phys.distAU : '';
+                document.getElementById('edit-phys-sats').value = phys.satellites != null ? phys.satellites : '';
+                document.getElementById('edit-phys-grav').value = phys.gravity != null ? phys.gravity : '';
+                document.getElementById('edit-phys-cloud').value = phys.cloudiness != null ? phys.cloudiness : '';
+                document.getElementById('edit-phys-alb').value = phys.albedo != null ? phys.albedo : '';
+                document.getElementById('edit-phys-gh').value = phys.greenhouse != null ? phys.greenhouse : '';
+                document.getElementById('edit-phys-temp').value = phys.temperature != null ? phys.temperature : '';
+                document.getElementById('edit-phys-tilt').value = phys.axialTilt != null ? phys.axialTilt : '';
+            } else {
+                document.getElementById('ct-phys-fields').style.display = 'none';
+            }
+
+            hexEditor.style.display = 'flex';
+        }
+
+        function closeHexEditor() {
+            editingHexId = null;
+
+            // Hide and reset accordions
+            document.getElementById('editor-socio-t5-container').style.display = 'none';
+            document.getElementById('acc-btn-t5-socio').style.display = 'none';
+            document.getElementById('acc-btn-t5-socio').classList.remove('active');
+
+            document.getElementById('editor-socio-mgt-container').style.display = 'none';
+            document.getElementById('acc-btn-mgt-socio').style.display = 'none';
+            document.getElementById('acc-btn-mgt-socio').classList.remove('active');
+
+            document.getElementById('editor-physical-container').style.display = 'none';
+            document.getElementById('acc-btn-physical').style.display = 'none';
+            document.getElementById('acc-btn-physical').classList.remove('active');
+
+            // Reset Editor position
+            hexEditor.style.left = 'calc(50% - 220px)';
+            hexEditor.style.top = '100px';
+            hexEditor.style.width = '440px';
+            hexEditor.style.height = 'auto';
+            hexEditor.style.display = 'none';
+            editingHexId = null;
+        }
+
+        document.getElementById('btn-editor-cancel').addEventListener('click', closeHexEditor);
+
+        document.getElementById('btn-editor-save').addEventListener('click', () => {
+            if (!editingHexId) return;
+
+            const stateObj = hexStates.get(editingHexId);
+            if (!stateObj || stateObj.type !== 'SYSTEM_PRESENT') return;
+
+            const starport = document.getElementById('edit-starport').value.toUpperCase();
+            const size = parseInt(document.getElementById('edit-size').value, 10) || 0;
+            const atm = parseInt(document.getElementById('edit-atm').value, 10) || 0;
+            const hydro = parseInt(document.getElementById('edit-hydro').value, 10) || 0;
+            const pop = parseInt(document.getElementById('edit-pop').value, 10) || 0;
+            const gov = parseInt(document.getElementById('edit-gov').value, 10) || 0;
+            const law = parseInt(document.getElementById('edit-law').value, 10) || 0;
+            const tl = parseInt(document.getElementById('edit-tl').value, 10) || 0;
+
+            const navalBase = document.getElementById('edit-naval').checked;
+            const scoutBase = document.getElementById('edit-scout').checked;
+            const militaryBase = document.getElementById('edit-military').checked;
+            const corsairBase = document.getElementById('edit-corsair').checked;
+            const gasGiant = document.getElementById('edit-gas').checked;
+
+            const tcString = document.getElementById('edit-trade-codes').value;
+            const tradeCodes = tcString.split(/\s+/).filter(tc => tc.length > 0);
+
+            const uwp = `${starport}${toUWPChar(size)}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
+
+            if (stateObj.t5Data) {
+                stateObj.t5Data = { ...stateObj.t5Data, uwp, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
+            } else if (stateObj.mgt2eData) {
+                stateObj.mgt2eData = { uwp, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
+            } else if (stateObj.ctData) {
+                stateObj.ctData = { uwp, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, gasGiant };
+            }
+
+            if (stateObj.t5Socio) {
+                const popMultiplier = parseInt(document.getElementById('edit-popm').value, 10) || 0;
+                const belts = parseInt(document.getElementById('edit-belts').value, 10) || 0;
+                const gasGiants = parseInt(document.getElementById('edit-gas-giants').value, 10) || 0;
+                const worlds = parseInt(document.getElementById('edit-worlds').value, 10) || 0;
+
+                const Ix = parseInt(document.getElementById('edit-ix').value, 10) || 0;
+                const RU = parseInt(document.getElementById('edit-ru').value, 10) || 0;
+                const R = parseInt(document.getElementById('edit-r').value, 10) || 0;
+                const L = parseInt(document.getElementById('edit-l').value, 10) || 0;
+                const I = parseInt(document.getElementById('edit-i').value, 10) || 0;
+                const E = parseInt(document.getElementById('edit-e').value, 10) || 0;
+                const H = parseInt(document.getElementById('edit-h').value, 10) || 0;
+                const A = parseInt(document.getElementById('edit-a').value, 10) || 0;
+                const S = parseInt(document.getElementById('edit-s').value, 10) || 0;
+                const Sym = parseInt(document.getElementById('edit-sym').value, 10) || 0;
+
+                let ixStr = `{${Ix >= 0 ? '+' : ''}${Ix}}`;
+                let exStr = `(${toUWPChar(R)}${toUWPChar(L)}${toUWPChar(I)}${E >= 0 ? '+' : ''}${E})`;
+                let cxStr = `[${toUWPChar(H)}${toUWPChar(A)}${toUWPChar(S)}${toUWPChar(Sym)}]`;
+                let culturalProfile = `${toUWPChar(H)}${toUWPChar(A)}${toUWPChar(S)}${toUWPChar(Sym)}`;
+
+                stateObj.t5Socio = {
+                    popMultiplier, belts, gasGiants, worlds,
+                    importance: Ix, resourceUnits: RU,
+                    ecoResources: R, ecoLabor: L, ecoInfrastructure: I, ecoEfficiency: E,
+                    culturalProfile,
+                    Ix, R, L, I, E, RU, H, A, S, Sym,
+                    ixString: ixStr, exString: exStr, cxString: cxStr,
+                    displayString: `${ixStr} ${exStr} ${cxStr} RU:${RU}`
+                };
+            } else if (stateObj.mgtSocio) {
+                const pValue = parseInt(document.getElementById('edit-mgt-p').value, 10) || 0;
+                const pcr = parseInt(document.getElementById('edit-mgt-pcr').value, 10) || 0;
+                const urbanPercent = parseInt(document.getElementById('edit-mgt-urb').value, 10) || 0;
+                const majorCities = parseInt(document.getElementById('edit-mgt-mc').value, 10) || 0;
+                const mcpRaw = document.getElementById('edit-mgt-mcp').value.replace(/,/g, '');
+                const totalMajorCityPop = parseInt(mcpRaw, 10) || 0;
+                const govProfile = document.getElementById('edit-mgt-gov').value;
+                const factionsString = document.getElementById('edit-mgt-fac').value;
+                const lawProfile = document.getElementById('edit-mgt-law').value;
+                const techProfile = document.getElementById('edit-mgt-tech').value;
+                const culturalProfile = document.getElementById('edit-mgt-cul').value;
+                const economicProfile = document.getElementById('edit-mgt-eco').value;
+                const starportProfile = document.getElementById('edit-mgt-star').value;
+                const militaryProfile = document.getElementById('edit-mgt-mil').value;
+
+                const totalWorldPop = pValue * Math.pow(10, pop);
+                const totalUrbanPop = Math.round(totalWorldPop * (urbanPercent / 100));
+
+                stateObj.mgtSocio = {
+                    pValue,
+                    totalWorldPop,
+                    pcr,
+                    urbanPercent,
+                    totalUrbanPop,
+                    majorCities,
+                    totalMajorCityPop,
+                    govProfile,
+                    factions: factionsString,
+                    lawProfile,
+                    techProfile,
+                    culturalProfile,
+                    economicProfile,
+                    starportProfile,
+                    militaryProfile,
+                    displayString: `Pop: ${pValue}x10^${pop} | PCR: ${pcr} | Urb: ${urbanPercent}% | MC: ${majorCities} (${totalMajorCityPop.toLocaleString()})\nGov: ${govProfile} | Fac: ${factionsString} | Law: ${lawProfile}\nTech: ${techProfile} | Cul: ${culturalProfile}\nEco: ${economicProfile} | Sp: ${starportProfile}\nMil: ${militaryProfile}`,
+                    displayStrings: [
+                        `Pop: ${pValue}x10^${pop} | PCR: ${pcr} | Urb: ${urbanPercent}% | MC: ${majorCities} (${totalMajorCityPop.toLocaleString()})`,
+                        `Gov: ${govProfile} | Fac: ${factionsString} | Law: ${lawProfile}`,
+                        `Tech: ${techProfile} | Cul: ${culturalProfile}`,
+                        `Eco: ${economicProfile} | Sp: ${starportProfile}`,
+                        `Mil: ${militaryProfile}`
+                    ]
+                };
+            }
+
+            // Save Physical Stats
+            if (stateObj.t5Physical) {
+                const homestar = document.getElementById('edit-phys-star').value;
+                const hzVariance = parseInt(document.getElementById('edit-phys-hz').value, 10);
+                const climate = document.getElementById('edit-phys-climate').value;
+                const worldType = document.getElementById('edit-phys-worldtype').value;
+                const parentBody = document.getElementById('edit-phys-parent').value || null;
+                const satOrbit = document.getElementById('edit-phys-satorbit').value || null;
+
+                stateObj.t5Physical = {
+                    homestar,
+                    hzVariance: isNaN(hzVariance) ? 0 : hzVariance,
+                    climate,
+                    worldType,
+                    parentBody,
+                    satOrbit,
+                    displayString: `${homestar} | HZ:${isNaN(hzVariance) ? 0 : hzVariance} ${climate} | ${worldType}${parentBody ? ' (' + parentBody + ')' : ''}${satOrbit ? ' Orbit: ' + satOrbit : ''}`
+                };
+            }
+
+            if (stateObj.ctPhysical) {
+                const homestar = document.getElementById('edit-phys-star').value;
+                const worldType = document.getElementById('edit-phys-worldtype').value;
+                const hzOrbit = parseInt(document.getElementById('edit-phys-orbit').value, 10);
+                const distAU = parseFloat(document.getElementById('edit-phys-dist').value);
+                const satellites = parseInt(document.getElementById('edit-phys-sats').value, 10);
+                const gravity = parseFloat(document.getElementById('edit-phys-grav').value);
+                const cloudiness = parseInt(document.getElementById('edit-phys-cloud').value, 10);
+                const albedo = parseFloat(document.getElementById('edit-phys-alb').value);
+                const greenhouse = parseFloat(document.getElementById('edit-phys-gh').value);
+                const temperature = parseInt(document.getElementById('edit-phys-temp').value, 10);
+                const axialTilt = parseInt(document.getElementById('edit-phys-tilt').value, 10);
+
+                stateObj.ctPhysical = {
+                    ...stateObj.ctPhysical,
+                    homestar, worldType,
+                    hzOrbit: isNaN(hzOrbit) ? 2 : hzOrbit,
+                    distAU: isNaN(distAU) ? 1.0 : distAU,
+                    satellites: isNaN(satellites) ? 0 : satellites,
+                    gravity: isNaN(gravity) ? 1.0 : gravity,
+                    cloudiness: isNaN(cloudiness) ? 0 : cloudiness,
+                    albedo: isNaN(albedo) ? 0 : albedo,
+                    greenhouse: isNaN(greenhouse) ? 1.0 : greenhouse,
+                    temperature: isNaN(temperature) ? 0 : temperature,
+                    axialTilt: isNaN(axialTilt) ? 0 : axialTilt,
+                    displayString: `${homestar} | Orbit ${hzOrbit} (${distAU}AU) | ${satellites} moons | G:${gravity}g | Clouds:${cloudiness}% | Alb:${albedo} | GH:${((greenhouse - 1) * 100).toFixed(0)}% | ${temperature}K | Tilt:${axialTilt}°`
+                };
+            }
+
+
+            hexStates.set(editingHexId, stateObj);
+
+            closeHexEditor();
+            requestAnimationFrame(draw);
+        });
+
+        // Math & Coordinate Systems
+        function getHexId(q, r) {
+            if (q < 0 || q > 255 || r < 0 || r > 159) return null;
+
+            // Sector
+            const sectorX = Math.floor(q / 32);
+            const sectorY = Math.floor(r / 40);
+            const sectorIndex = sectorY * 8 + sectorX; // 8 sectors wide
+
+            let sectorChar = '';
+            if (sectorIndex < 26) {
+                sectorChar = String.fromCharCode(65 + sectorIndex); // A-Z
+            } else {
+                const char = String.fromCharCode(65 + (sectorIndex - 26)); // A-F
+                sectorChar = char + char; // AA, BB...
+            }
+
+            // Subsector (0 to 3 within the sector)
+            const subsectorX = Math.floor((q % 32) / 8);
+            const subsectorY = Math.floor((r % 40) / 10);
+            const subsectorIndex = subsectorY * 4 + subsectorX;
+            const subsectorChar = String.fromCharCode(65 + subsectorIndex);
+
+            // Local Coord (1 to 32, 1 to 40)
+            const localQ = (q % 32) + 1;
+            const localR = (r % 40) + 1;
+
+            const qStr = localQ.toString().padStart(2, '0');
+            const rStr = localR.toString().padStart(2, '0');
+            return `${sectorChar}-${subsectorChar}-${qStr}${rStr}`;
+        }
+
+        // Convert world pixel to odd-q hex coordinates (flat-topped)
+        function pixelToHex(x, y, size) {
+            const q_frac = (2.0 / 3.0 * x) / size;
+            const r_frac = (-1.0 / 3.0 * x + Math.sqrt(3) / 3.0 * y) / size;
+
+            // Cube round
+            let q = Math.round(q_frac);
+            let r = Math.round(r_frac);
+            let s = Math.round(-q_frac - r_frac);
+
+            const q_diff = Math.abs(q - q_frac);
+            const r_diff = Math.abs(r - r_frac);
+            const s_diff = Math.abs(s - (-q_frac - r_frac));
+
+            if (q_diff > r_diff && q_diff > s_diff) {
+                q = -r - s;
+            } else if (r_diff > s_diff) {
+                r = -q - s;
+            }
+
+            // Convert axial to odd-q offset
+            const col = q;
+            const row = r + (q - (q & 1)) / 2;
+
+            return { q: col, r: row };
+        }
+
+        // Rendering
+        function getHexPath(x, y, size) {
+            const path = new Path2D();
+            for (let i = 0; i < 6; i++) {
+                // Flat-topped hexagons start at 0 degrees instead of 30
+                const angle_deg = 60 * i;
+                const angle_rad = (Math.PI / 180) * angle_deg;
+                const px = x + size * Math.cos(angle_rad);
+                const py = y + size * Math.sin(angle_rad);
+                if (i === 0) {
+                    path.moveTo(px, py);
+                } else {
+                    path.lineTo(px, py);
+                }
+            }
+            path.closePath();
+            return path;
+        }
+
+        function draw() {
+            // Clear screen
+            ctx.fillStyle = '#0b0c10';
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.save();
+
+            // Apply camera transformations
+            ctx.scale(zoom, zoom);
+            ctx.translate(-cameraX, -cameraY);
+
+            // Draw grid
+            ctx.strokeStyle = '#1f2833';
+            ctx.lineWidth = 1 / zoom;
+
+            const size = baseHexSize;
+            // Flat topped hexes
+            const widthStep = (3 / 2) * size;
+            const heightStep = Math.sqrt(3) * size;
+
+            // Calculate visible bounds in world space
+            const viewLeft = cameraX;
+            const viewRight = cameraX + width / zoom;
+            const viewTop = cameraY;
+            const viewBottom = cameraY + height / zoom;
+
+            const qMin = Math.floor(viewLeft / widthStep) - 2;
+            const qMax = Math.ceil(viewRight / widthStep) + 2;
+            const rMin = Math.floor(viewTop / heightStep) - 2;
+            const rMax = Math.ceil(viewBottom / heightStep) + 2;
+
+            ctx.beginPath();
+
+            const MAX_GLOBAL_Q = 255; // 8 sectors * 32 cols - 1
+            const MAX_GLOBAL_R = 159; // 4 sectors * 40 rows - 1
+
+            for (let q = Math.max(0, qMin); q <= Math.min(MAX_GLOBAL_Q, qMax); q++) {
+                for (let r = Math.max(0, rMin); r <= Math.min(MAX_GLOBAL_R, rMax); r++) {
+                    // Odd-q horizontal layout for flat-topped
+                    const offset = (q & 1) ? 0.5 : 0;
+                    let cx = widthStep * q;
+                    let cy = heightStep * (r + offset);
+
+                    const hexId = getHexId(q, r);
+                    if (!hexId) continue;
+
+                    const isSelected = selectedHexes.has(hexId);
+
+                    const path = getHexPath(cx, cy, size);
+
+                    if (isSelected) {
+                        ctx.fillStyle = 'rgba(255, 69, 0, 0.3)'; // OrangeRed transparent
+                        ctx.fill(path);
+                        ctx.strokeStyle = '#ff4500';
+                        ctx.lineWidth = 2 / zoom;
+                    } else {
+                        ctx.strokeStyle = '#1f2833';
+                        ctx.lineWidth = 1 / zoom;
+                    }
+
+                    ctx.stroke(path);
+
+                    // Check Hex State
+                    let stateObj = hexStates.get(hexId);
+                    if (typeof stateObj === 'string') {
+                        // Backwards compatibility
+                        stateObj = { type: stateObj };
+                        hexStates.set(hexId, stateObj);
+                    }
+                    const stateType = stateObj ? stateObj.type : 'BLANK';
+
+                    if (stateType === 'SYSTEM_PRESENT') {
+                        // White dot in center always visible (unless explicitly culled globally)
+                        ctx.beginPath();
+                        // Prevent the dot from getting microscopically small when zoomed way out
+                        // Set a fixed world radius so it shrinks with the map,
+                        // but ensure it never gets smaller than 1.5 screen pixels.
+                        const baseWorldRadius = 10;
+                        const minWorldRadius = 1.5 / zoom;
+                        const dotRadius = Math.max(minWorldRadius, baseWorldRadius);
+                        ctx.arc(cx, cy, dotRadius, 0, 2 * Math.PI);
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fill();
+                        ctx.closePath();
+
+                        // Text at the top, anchored slightly below the top edge
+                        if (zoom > 0.4) {
+                            ctx.textAlign = 'center';
+                            const fontSize = 10 / zoom;
+                            ctx.font = `${fontSize}px 'Inter', sans-serif`;
+                            ctx.fillStyle = isSelected ? '#ffb399' : '#ffffff';
+                            ctx.textBaseline = 'top';
+
+                            let label = hexId;
+                            const data = stateObj.t5Data || stateObj.mgt2eData || stateObj.ctData;
+
+                            if (data && data.uwp) {
+                                let tcs = data.tradeCodes ? data.tradeCodes.join(" ") : "";
+                                if (tcs.length > 0) tcs = " " + tcs;
+                                label += `\n${data.uwp}${tcs}`;
+                                ctx.fillText(hexId, cx, cy - (size * 0.75));
+                                ctx.fillText(data.uwp + tcs, cx, cy - (size * 0.75) + fontSize * 1.2);
+
+                                // Render Socioeconomics if present
+                                if (stateObj.t5Socio) {
+                                    let sStrings = stateObj.t5Socio.displayStrings || [stateObj.t5Socio.displayString];
+                                    for (let si = 0; si < sStrings.length; si++) {
+                                        ctx.fillText(sStrings[si], cx, cy - (size * 0.75) + fontSize * (2.4 + si * 1.2));
+                                    }
+                                } else if (stateObj.mgtSocio) {
+                                    let sStrings = stateObj.mgtSocio.displayStrings || [stateObj.mgtSocio.displayString];
+                                    for (let si = 0; si < sStrings.length; si++) {
+                                        ctx.fillText(sStrings[si], cx, cy - (size * 0.75) + fontSize * (2.4 + si * 1.2));
+                                    }
+                                }
+                            } else if (data) {
+                                label += ` [${data.starport}]`;
+                                ctx.fillText(label, cx, cy - (size * 0.75));
+                            } else {
+                                ctx.fillText(label, cx, cy - (size * 0.75));
+                            }
+                        }
+                    } else if (stateType === 'BLANK') {
+                        // Text in center
+                        if (zoom > 0.4) {
+                            ctx.textAlign = 'center';
+                            const fontSize = 10 / zoom;
+                            ctx.font = `${fontSize}px 'Inter', sans-serif`;
+                            ctx.fillStyle = isSelected ? '#ff4500' : '#45a29e';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(hexId, cx, cy);
+                        }
+                    } else if (stateType === 'EMPTY') {
+                        // Empty hexes have no coordinates or contents shown
+                    }
+                }
+            }
+
+            // Draw Sector & Subsector Borders
+            if (showSubsectorBorders) {
+                const totalWidth = 255 * widthStep + size; // Extend lines to right edge of last hex
+                const totalHeight = 159 * heightStep + (heightStep / 2) + size; // Roughly bottom edge
+
+                // Subsector borders (thinner, darker)
+                ctx.beginPath();
+                for (let i = 1; i <= 31; i++) {
+                    const x = (i * 8 - 0.5) * widthStep;
+                    ctx.moveTo(x, -heightStep);
+                    ctx.lineTo(x, totalHeight);
+                }
+                for (let j = 1; j <= 15; j++) {
+                    const y = (j * 10 - 0.5) * heightStep;
+                    ctx.moveTo(-size, y);
+                    ctx.lineTo(totalWidth, y);
+                }
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+                ctx.lineWidth = 1 / zoom;
+                ctx.stroke();
+
+                // Sector borders (thicker, brighter)
+                ctx.beginPath();
+                for (let i = 4; i <= 28; i += 4) {
+                    const x = (i * 8 - 0.5) * widthStep;
+                    ctx.moveTo(x, -heightStep);
+                    ctx.lineTo(x, totalHeight);
+                }
+                for (let j = 4; j <= 12; j += 4) {
+                    const y = (j * 10 - 0.5) * heightStep;
+                    ctx.moveTo(-size, y);
+                    ctx.lineTo(totalWidth, y);
+                }
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.lineWidth = 3 / zoom;
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        // Initial draw
+        draw();
+
+    </script>
+</body>
+
+</html>

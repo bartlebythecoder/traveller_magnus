@@ -1,0 +1,21 @@
+# Environment & secrets
+.env
+credentials.json
+token.json
+
+# Intermediate / temp files (always regenerated, never committed)
+.tmp/
+!.tmp/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db

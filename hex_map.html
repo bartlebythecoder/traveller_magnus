@@ -309,6 +309,87 @@
             padding-right: 10px;
         }
 
+        /* Editor System Tree */
+        .system-tree {
+            font-size: 13px;
+        }
+
+        .system-tree details {
+            margin-bottom: 4px;
+        }
+
+        .system-tree summary {
+            cursor: pointer;
+            padding: 4px;
+            background-color: #0b0c10;
+            border: 1px solid #45a29e;
+            border-radius: 4px;
+            color: #66fcf1;
+            font-weight: bold;
+            user-select: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .system-tree summary:hover {
+            background-color: #2c3a47;
+        }
+
+        .system-tree summary::before {
+            content: '▶ ';
+            display: inline-block;
+            width: 16px;
+            transition: transform 0.2s;
+        }
+
+        .system-tree details[open]>summary::before {
+            transform: rotate(90deg);
+        }
+
+        /* Hide the marker because we use custom arrows */
+        .system-tree summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .system-node {
+            margin-left: 20px;
+            padding-left: 10px;
+            border-left: 1px dashed #45a29e;
+            margin-top: 4px;
+            margin-bottom: 8px;
+        }
+
+        .system-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+            background-color: rgba(11, 12, 16, 0.5);
+            padding: 6px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            color: #c5c6c7;
+            font-size: 12px;
+        }
+
+        .system-stats span {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .system-stats-full {
+            grid-column: span 2;
+            text-align: center;
+            border-top: 1px dashed #45a29e;
+            padding-top: 4px;
+            margin-top: 2px;
+        }
+
+        .sys-title-info {
+            font-weight: normal;
+            margin-left: auto;
+            color: #c5c6c7;
+        }
+
         /* Editor Accordions */
         .accordion-btn {
             background-color: #1f2833;
@@ -360,7 +441,37 @@
             max-height: 80vh;
             box-sizing: border-box;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8);
-            z-index: 301;
+        }
+
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 999999;
+            pointer-events: none;
+        }
+
+        .toast {
+            background-color: #45a29e;
+            color: #0b0c10;
+            padding: 12px 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
         }
     </style>
 </head>
@@ -396,7 +507,6 @@
                 <button class="context-menu-item" id="ctx-select-hex">Toggle Select Hex</button>
                 <button class="context-menu-item" id="ctx-select-subsector">Toggle Select Subsector (Ctrl+B)</button>
                 <button class="context-menu-item" id="ctx-select-sector">Toggle Select Sector (Ctrl+S)</button>
-                <button class="context-menu-item" id="ctx-select-all">Toggle Select All (Ctrl+A)</button>
                 <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
                 <button class="context-menu-item" id="ctx-deselect-all">Cancel Selection (Esc)</button>
             </div>
@@ -440,7 +550,7 @@
             EXPAND MAINWORLD PHYSICAL
             <div class="submenu">
                 <button class="context-menu-item" id="ctx-expand-physical-ct">Book 6 (CT)</button>
-                <button class="context-menu-item" id="ctx-expand-physical-mgt2e">Mongoose 2nd Ed (MgT2E)</button>
+                <button class="context-menu-item" id="ctx-expand-physical-mgt2e">MgT2E (System & Physical)</button>
                 <button class="context-menu-item" id="ctx-expand-physical-t5">Traveller 5 (T5)</button>
             </div>
         </div>
@@ -450,7 +560,6 @@
             EXPAND SYSTEM
             <div class="submenu">
                 <button class="context-menu-item" id="ctx-expand-system-ct">Book 6 (CT)</button>
-                <button class="context-menu-item" id="ctx-expand-system-mgt2e">Mongoose 2nd Ed (MgT2E)</button>
                 <button class="context-menu-item" id="ctx-expand-system-t5">Traveller 5 (T5)</button>
             </div>
         </div>
@@ -469,7 +578,6 @@
             <strong>Shift + Drag</strong><span>Paint Multiple Hexes</span>
             <strong>Ctrl + Left Click</strong><span>Open System Editor</span>
             <strong>Right Click</strong><span>Open Context Menu</span>
-            <strong>Ctrl + A</strong><span>Toggle Select All Hexes</span>
             <strong>Ctrl + S</strong><span>Toggle Select Sector</span>
             <strong>Ctrl + B</strong><span>Toggle Select Subsector</span>
             <strong>Escape</strong><span>Cancel Selection / Close Menu / Close Modals</span>
@@ -718,11 +826,20 @@
             </div>
         </div>
 
+        <!-- MgT2E System Expand Accordion -->
+        <button class="accordion-btn" id="acc-btn-mgt-system" style="display: none;">MgT2E System</button>
+        <div class="accordion-content" id="editor-mgt-system-root" style="display: none;">
+            <!-- Content will be injected via JS -->
+        </div>
+
         <div class="editor-buttons">
             <button class="btn-cancel" id="btn-editor-cancel">Cancel</button>
             <button class="btn-save" id="btn-editor-save">Save</button>
         </div>
     </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container"></div>
 
     <script>
         // -----------------------------------------------------------------------------
@@ -881,10 +998,7 @@
 
         // Keyboard Shortcuts
         window.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key.toLowerCase() === 'a') {
-                e.preventDefault();
-                toggleAllHexes();
-            } else if (e.ctrlKey && e.key.toLowerCase() === 's') {
+            if (e.ctrlKey && e.key.toLowerCase() === 's') {
                 e.preventDefault();
                 const world = getMouseWorldCoords({ clientX: currentMouseX, clientY: currentMouseY });
                 const coords = pixelToHex(world.x, world.y, baseHexSize);
@@ -904,6 +1018,87 @@
                     contextSubsectorPrefix = parts[0] + '-' + parts[1];
                     toggleSubsectorHexes();
                 }
+            } else if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'm') {
+                e.preventDefault();
+
+                if (selectedHexes.size === 0) {
+                    alert("Please select one or more hexes first (Shift + Left Click).");
+                    return;
+                }
+                if (selectedHexes.size > 1280) {
+                    alert("We are currently limited to generating one sector (1280 hexes) at a time to prevent browser crashes. Please reduce your selection.");
+                    return;
+                }
+
+                if (!confirm("This will completely overwrite ANY existing data in the selected hexes with a Full Mongoose 2E Generation sequence. Proceed?")) {
+                    return;
+                }
+
+                // 1. Auto Populate (Regular Density)
+                selectedHexes.forEach(hexId => {
+                    const roll = Math.floor(Math.random() * 6) + 1; // 1 to 6
+                    if (roll <= 3) {
+                        hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
+                    } else {
+                        hexStates.set(hexId, { type: 'EMPTY' });
+                    }
+                });
+                requestAnimationFrame(draw);
+                showToast(`Populated ${selectedHexes.size} hex(es)...`, 1000);
+
+                // 2. Generate Mainworlds
+                setTimeout(() => {
+                    selectedHexes.forEach(hexId => {
+                        let stateObj = hexStates.get(hexId);
+                        if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
+                            stateObj.mgt2eData = generateMgT2EMainworld();
+                            stateObj.ctData = null;
+                            stateObj.t5Data = null;
+                            hexStates.set(hexId, stateObj);
+                        }
+                    });
+                    requestAnimationFrame(draw);
+                    showToast(`Generated MgT2E Mainworlds...`, 1000);
+
+                    // 3. Socioeconomics
+                    setTimeout(() => {
+                        selectedHexes.forEach(hexId => {
+                            let stateObj = hexStates.get(hexId);
+                            let baseData = stateObj ? (stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData) : null;
+                            if (baseData) {
+                                stateObj.mgtSocio = generateMgT2ESocioeconomics(baseData);
+                                stateObj.t5Socio = null;
+                                hexStates.set(hexId, stateObj);
+                            }
+                        });
+                        requestAnimationFrame(draw);
+                        showToast(`Expanded MgT2E Socioeconomics...`, 1000);
+
+                        // 4. Physical System
+                        setTimeout(() => {
+                            selectedHexes.forEach(hexId => {
+                                let stateObj = hexStates.get(hexId);
+                                let baseData = stateObj ? (stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData) : null;
+                                if (baseData) {
+                                    let chunk1System = generateMgT2ESystemChunk1(baseData);
+                                    let systemWithOrbits = generateMgT2ESystemChunk2(chunk1System, baseData);
+                                    let systemWithSizes = generateMgT2ESystemChunk3(systemWithOrbits, baseData);
+                                    let systemWithAtmosphere = generateMgT2ESystemChunk4(systemWithSizes, baseData);
+                                    let systemWithTemps = generateMgT2ESystemChunk5(systemWithAtmosphere);
+                                    let systemWithRatings = generateMgT2ESystemChunk6(systemWithTemps);
+
+                                    stateObj.mgtSystem = systemWithRatings;
+                                    stateObj.t5Physical = null;
+                                    stateObj.ctPhysical = null;
+                                    hexStates.set(hexId, stateObj);
+                                }
+                            });
+                            requestAnimationFrame(draw);
+                            showToast(`Full MgT2E Generation Complete!`, 4000);
+
+                        }, 500);
+                    }, 500);
+                }, 500);
             } else if (e.key === 'Escape') {
                 e.preventDefault();
                 if (hexEditor.style.display === 'flex') {
@@ -915,22 +1110,6 @@
                 }
             }
         });
-
-        function toggleAllHexes() {
-            for (let q = 0; q <= 255; q++) {
-                for (let r = 0; r <= 159; r++) {
-                    const id = getHexId(q, r);
-                    if (id) {
-                        if (selectedHexes.has(id)) selectedHexes.delete(id);
-                        else selectedHexes.add(id);
-                    }
-                }
-            }
-            contextMenu.classList.remove('visible');
-            updateActionPanel();
-            requestAnimationFrame(draw);
-        }
-
         function deselectAllHexes() {
             selectedHexes.clear();
             contextMenu.classList.remove('visible');
@@ -1086,9 +1265,40 @@
             requestAnimationFrame(draw);
         }, { passive: false });
 
+        function showToast(message, duration = 3000) {
+            console.log("Toast:", message);
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            container.appendChild(toast);
+
+            // Force reflow to ensure the initial state is rendered before adding the transition class
+            void toast.offsetWidth;
+            toast.classList.add('show');
+
+            // Remove after duration
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.addEventListener('transitionend', () => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                });
+            }, duration);
+        }
+
         function validateSelection(actionType) {
             if (selectedHexes.size === 0) {
                 alert("Please select one or more hexes first (Shift + Left Click).");
+                contextMenu.classList.remove('visible');
+                return false;
+            }
+
+            if (actionType !== 'clear' && selectedHexes.size > 1280) {
+                alert("We are currently limited to generating one sector (1280 hexes) at a time to prevent browser crashes. Please reduce your selection.");
                 contextMenu.classList.remove('visible');
                 return false;
             }
@@ -1205,7 +1415,15 @@
         }
 
         function roll2D() {
-            return Math.floor(Math.random() * 6) + 1 + Math.floor(Math.random() * 6) + 1;
+            return roll1D() + roll1D();
+        }
+
+        function roll3D() {
+            return roll1D() + roll1D() + roll1D();
+        }
+
+        function roll4D() {
+            return roll1D() + roll1D() + roll1D() + roll1D();
         }
 
         function rollFlux() {
@@ -1325,6 +1543,7 @@
                 }
             });
             contextMenu.classList.remove('visible');
+            showToast(`Generated Classic Traveller Mainworlds for ${selectedHexes.size} hex(es)`);
             requestAnimationFrame(draw);
         });
 
@@ -1462,6 +1681,7 @@
                 }
             });
             contextMenu.classList.remove('visible');
+            showToast(`Generated MgT2E Mainworlds for ${selectedHexes.size} hex(es)`);
             requestAnimationFrame(draw);
         });
 
@@ -1589,6 +1809,7 @@
                 }
             });
             contextMenu.classList.remove('visible');
+            showToast(`Generated T5 Mainworlds for ${selectedHexes.size} hex(es)`);
             requestAnimationFrame(draw);
         });
 
@@ -1700,6 +1921,7 @@
             }
 
             contextMenu.classList.remove('visible');
+            showToast(`Expanded T5 Socioeconomics for ${selectedHexes.size} hex(es)`);
             requestAnimationFrame(draw);
         });
 
@@ -3030,7 +3252,1178 @@
             };
         }
 
-        // Step 2: HZ Variance & Climate
+        // --- MgT2E System & Physical Generation (Chunk 1) ---
+        const MGT2E_ORBIT_AU = [
+            0, 0.4, 0.7, 1.0, 1.6, 2.8, 5.2, 10, 20, 40, 77, 154, 308, 615, 1230, 2500, 4900, 9800, 19500, 39500, 78700
+        ];
+        function convertAuToOrbit(au) {
+            for (let i = 0; i < MGT2E_ORBIT_AU.length - 1; i++) {
+                if (au >= MGT2E_ORBIT_AU[i] && au < MGT2E_ORBIT_AU[i + 1]) {
+                    let fraction = (au - MGT2E_ORBIT_AU[i]) / (MGT2E_ORBIT_AU[i + 1] - MGT2E_ORBIT_AU[i]);
+                    return i + fraction;
+                }
+            }
+            return 20.0;
+        }
+
+        const MGT2E_STAR_STATS = {
+            'O': { mass: 60, diam: 12, lum: 330000, temp: 40000 },
+            'B': { mass: 10, diam: 3.5, lum: 550, temp: 15000 },
+            'A': { mass: 2.3, diam: 2, lum: 15, temp: 8000 },
+            'F': { mass: 1.5, diam: 1.5, lum: 3.5, temp: 6500 },
+            'G': { mass: 1.1, diam: 1.0, lum: 1.0, temp: 5800 },
+            'K': { mass: 0.7, diam: 0.8, lum: 0.2, temp: 4400 },
+            'M': { mass: 0.3, diam: 0.4, lum: 0.05, temp: 3000 }
+        };
+
+        function rollMgT2EStar() {
+            let roll = roll2D();
+            let sClass = 'V';
+            let sType = '';
+
+            if (roll <= 2) { sType = 'M'; sClass = 'VI'; }
+            else if (roll <= 6) sType = 'M';
+            else if (roll <= 8) sType = 'K';
+            else if (roll <= 10) sType = 'G';
+            else if (roll == 11) sType = 'F';
+            else { sType = 'A'; }
+
+            let subType = roll1D() + roll1D() - 2;
+            if (subType > 9) subType = 9;
+
+            let stats = MGT2E_STAR_STATS[sType];
+            let diam2 = stats.diam * stats.diam;
+            let tempRatio = Math.pow(stats.temp / 5772, 4);
+            let lum = diam2 * tempRatio;
+
+            return { sClass, sType, subType, mass: stats.mass, diam: stats.diam, temp: stats.temp, lum, name: `${sType}${subType} ${sClass}` };
+        }
+
+        function generateMgT2ESystemChunk1(mainworldBase) {
+            let sys = { stars: [], gasGiants: 0, planetoidBelts: 0, terrestrialPlanets: 0, hzco: 0, age: 0 };
+
+            let primary = rollMgT2EStar();
+            sys.stars.push(primary);
+
+            let msLifespan = 10 / Math.pow(primary.mass, 2.5);
+            if (primary.mass < 0.9) {
+                sys.age = (Math.floor(Math.random() * 6) + 1) * 2 + (Math.floor(Math.random() * 3) + 1) - 1 + (Math.floor(Math.random() * 10) / 10);
+            } else {
+                sys.age = msLifespan * ((Math.floor(Math.random() * 100) + 1) / 100);
+            }
+
+            let hzcoAu = Math.sqrt(primary.lum);
+            sys.hzco = convertAuToOrbit(hzcoAu);
+
+            let multiRoll = roll2D();
+            let multiDM = 0;
+            if (['O', 'B', 'A', 'F'].includes(primary.sType) && primary.sClass === 'V') multiDM += 1;
+            if (primary.sType === 'M' && primary.sClass === 'V') multiDM -= 1;
+
+            if (multiRoll + multiDM >= 10) {
+                let secRoll = roll2D();
+                let secType = 'Random';
+                if (secRoll <= 3) secType = 'Other';
+                else if (secRoll <= 5) secType = 'Random';
+                else if (secRoll <= 7) secType = 'Lesser';
+                else if (secRoll <= 9) secType = 'Sibling';
+                else secType = 'Twin';
+
+                let secondary;
+                if (secType === 'Twin') {
+                    secondary = JSON.parse(JSON.stringify(primary));
+                } else if (secType === 'Sibling') {
+                    secondary = JSON.parse(JSON.stringify(primary));
+                    secondary.subType += (Math.floor(Math.random() * 6) + 1);
+                } else {
+                    secondary = rollMgT2EStar();
+                }
+                sys.stars.push(secondary);
+            }
+
+            let existingGG = (mainworldBase && mainworldBase.gasGiant === true);
+            let ggExists = existingGG || (roll2D() <= 9);
+            if (ggExists) {
+                let ggQuantRoll = roll2D();
+                if (sys.stars.length === 1 && primary.sClass === 'V') ggQuantRoll += 1;
+                if (sys.stars.length >= 4) ggQuantRoll -= 1;
+                if (ggQuantRoll <= 4) sys.gasGiants = 1;
+                else if (ggQuantRoll <= 6) sys.gasGiants = 2;
+                else if (ggQuantRoll <= 8) sys.gasGiants = 3;
+                else if (ggQuantRoll <= 11) sys.gasGiants = 4;
+                else if (ggQuantRoll === 12) sys.gasGiants = 5;
+                else sys.gasGiants = 6;
+            }
+
+            let pbExists = (roll2D() >= 8);
+            if (pbExists) {
+                let pbQuantRoll = roll2D() + (ggExists ? 1 : 0) + (sys.stars.length >= 2 ? 1 : 0);
+                if (pbQuantRoll <= 6) sys.planetoidBelts = 1;
+                else if (pbQuantRoll <= 11) sys.planetoidBelts = 2;
+                else sys.planetoidBelts = 3;
+            }
+            if (mainworldBase && mainworldBase.size === 0) sys.planetoidBelts += 1;
+
+            let tpRoll = roll2D() - 2;
+            if (tpRoll < 3) tpRoll = Math.floor(Math.random() * 3) + 1 + 2;
+            else tpRoll += Math.floor(Math.random() * 3);
+            sys.terrestrialPlanets = tpRoll;
+
+            if (mainworldBase && mainworldBase.size >= 1 && mainworldBase.size <= 15) {
+                if (sys.terrestrialPlanets < 1) sys.terrestrialPlanets = 1;
+            }
+
+            return sys;
+        }
+
+        const MGT2E_HZ_DEVIATION = {
+            2: 1.1, 3: 1.0, 4: 0.5, 5: 0.2, 6: 0.1,
+            7: 0.0, 8: -0.1, 9: -0.2, 10: -0.5, 11: -1.0, 12: -1.1
+        };
+
+        const MGT2E_MAO = {
+            'O0': [0.63, 0.60, 0.55, 0.53, Infinity, 0.5, 0.01],
+            'O5': [0.55, 0.50, 0.45, 0.38, Infinity, 0.3, 0.01],
+            'B0': [0.50, 0.35, 0.30, 0.25, 0.20, 0.18, 0.01],
+            'B5': [1.67, 0.63, 0.35, 0.15, 0.13, 0.09, 0.01],
+            'A0': [3.34, 1.40, 0.75, 0.13, 0.10, 0.06, Infinity],
+            'A5': [4.17, 2.17, 1.17, 0.13, 0.07, 0.05, Infinity],
+            'F0': [4.42, 2.50, 1.33, 0.13, 0.07, 0.04, Infinity],
+            'F5': [5.00, 3.25, 1.87, 0.13, 0.06, 0.03, Infinity],
+            'G0': [5.21, 3.59, 2.24, 0.25, 0.07, 0.03, 0.02],
+            'G5': [5.34, 3.84, 2.67, 0.38, 0.10, 0.02, 0.02],
+            'K0': [5.59, 4.17, 3.17, 0.50, 0.15, 0.02, 0.02],
+            'K5': [6.17, 4.84, 4.00, 1.00, Infinity, 0.02, 0.01],
+            'M0': [6.80, 5.42, 4.59, 1.68, Infinity, 0.02, 0.01],
+            'M5': [7.20, 6.17, 5.30, 3.00, Infinity, 0.01, 0.01],
+            'M9': [7.80, 6.59, 5.92, 4.34, Infinity, 0.01, 0.01],
+        };
+        const SCLASS_IDX = { 'Ia': 0, 'Ib': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5, 'VI': 6 };
+
+        function getMAO(sType, subType, sClass) {
+            let key = sType + (subType >= 5 ? '5' : '0');
+            if (sType === 'O' && subType < 5) key = 'O0';
+            let row = MGT2E_MAO[key] || MGT2E_MAO['G0'];
+            let idx = SCLASS_IDX[sClass] !== undefined ? SCLASS_IDX[sClass] : 5;
+            let mao = row[idx];
+            return mao === Infinity ? 0.01 : mao; // Fallback for invalid stellar sizes
+        }
+
+        // --- MgT2E System Gen (Chunk 2) ---
+        function determineMgT2EEccentricity(isStar, orbitsBeyondFirst, sysAgeGyr, orbitNum, isSignificantBody, anomalousEccMod) {
+            let roll = roll2D();
+            let sumRoll = roll;
+            if (isStar) sumRoll += 2;
+            sumRoll += orbitsBeyondFirst;
+            if (sysAgeGyr > 1 && orbitNum < 1.0) sumRoll -= 1;
+            if (isSignificantBody) sumRoll += 1;
+            sumRoll += anomalousEccMod;
+
+            let base = 0, fraction = 0;
+            if (sumRoll <= 5) { base = -0.001; fraction = roll1D() / 1000; }
+            else if (sumRoll <= 7) { base = 0.00; fraction = roll1D() / 200; }
+            else if (sumRoll <= 9) { base = 0.03; fraction = roll1D() / 100; }
+            else if (sumRoll === 10) { base = 0.05; fraction = roll1D() / 20; }
+            else if (sumRoll === 11) { base = 0.05; fraction = roll2D() / 20; }
+            else { base = 0.30; fraction = roll2D() / 20; }
+
+            return Math.max(0, base + fraction);
+        }
+
+        function generateMgT2ESystemChunk2(sys, mainworldBase) {
+            sys.worlds = [];
+
+            let primary = sys.stars[0];
+            let mao = getMAO(primary.sType, primary.subType, primary.sClass);
+
+            let totalWorldsToPlace = sys.gasGiants + sys.planetoidBelts + sys.terrestrialPlanets + 1; // +1 for mainworld
+
+            let blRoll = roll2D();
+            if (sys.stars.length > 1) blRoll -= 2;
+            if (['Ia', 'Ib', 'II'].includes(primary.sClass)) blRoll += 3;
+            else if (primary.sClass === 'III') blRoll += 2;
+            else if (primary.sClass === 'IV') blRoll += 1;
+            else if (primary.sClass === 'VI') blRoll -= 1;
+
+            if (totalWorldsToPlace < 6) blRoll -= 4;
+            else if (totalWorldsToPlace <= 9) blRoll -= 3;
+            else if (totalWorldsToPlace <= 12) blRoll -= 2;
+            else if (totalWorldsToPlace <= 15) blRoll -= 1;
+            else if (totalWorldsToPlace <= 20) blRoll += 1;
+            else blRoll += 2;
+
+            let baselineNumber = blRoll;
+
+            let hzRoll = 7;
+            let mwAtm = mainworldBase ? mainworldBase.atm : 0;
+            let atmDM = 0;
+            if ([2, 3].includes(mwAtm)) atmDM = -2;
+            else if ([4, 5, 14].includes(mwAtm)) atmDM = -1;
+            else if ([6, 7].includes(mwAtm)) atmDM = 0;
+            else if ([8, 9].includes(mwAtm)) atmDM = 1;
+            else if ([10, 13, 15].includes(mwAtm)) atmDM = 2;
+            else if ([11, 12].includes(mwAtm)) atmDM = 6;
+
+            let rawHzRoll = Math.max(2, Math.min(12, hzRoll - atmDM));
+            let hzDeviation = MGT2E_HZ_DEVIATION[rawHzRoll];
+
+            // Add decimal variance
+            let variance = (Math.floor(Math.random() * 10)) / 100;
+            if (hzDeviation < 0) hzDeviation -= variance;
+            else if (hzDeviation > 0) hzDeviation += variance;
+            else hzDeviation += (Math.random() < 0.5 ? 1 : -1) * variance;
+
+            let baselineOrbit = sys.hzco + hzDeviation;
+
+            // Empty Orbits
+            let eRoll = roll2D();
+            let emptyOrbitsCount = (eRoll <= 9) ? 0 : (eRoll - 9);
+            totalWorldsToPlace += emptyOrbitsCount;
+
+            // System Spread
+            let calcTargetNumber = Math.max(1, baselineNumber);
+            let sysSpread = Math.max(0.1, (baselineOrbit - mao) / calcTargetNumber);
+
+            // Generate Slot Sequence
+            let slots = [];
+            let currentOrbit = mao + sysSpread + ((roll2D() - 7) * 0.1 * sysSpread);
+            for (let i = 0; i < totalWorldsToPlace; i++) {
+                slots.push(Math.max(0, currentOrbit));
+                currentOrbit += sysSpread + ((roll2D() - 7) * 0.1 * sysSpread);
+            }
+
+            // Snap closest slot to baseline
+            let closestIdx = 0;
+            let minDiff = Infinity;
+            for (let i = 0; i < slots.length; i++) {
+                let diff = Math.abs(slots[i] - baselineOrbit);
+                if (diff < minDiff) { minDiff = diff; closestIdx = i; }
+            }
+            slots[closestIdx] = Math.max(0, baselineOrbit);
+
+            // Anomalous Orbits
+            let anomRoll = roll2D();
+            let anomCount = (anomRoll <= 9) ? 0 : (anomRoll - 9);
+            sys.terrestrialPlanets += anomCount;
+
+            for (let i = 0; i < anomCount; i++) {
+                let aTypeRoll = roll2D();
+                let aType = 'Random', aEccMod = 0;
+                if (aTypeRoll === 8) { aType = 'Eccentric'; aEccMod = 5; }
+                else if (aTypeRoll === 9) { aType = 'Inclined'; aEccMod = 2; }
+                else if (aTypeRoll === 10 || aTypeRoll === 11) { aType = 'Retrograde'; aEccMod = 2; }
+                else if (aTypeRoll === 12) aType = 'Trojan';
+
+                let anomOrbit = baselineOrbit + (roll2D() - 7);
+                slots.push(Math.max(0, anomOrbit));
+                totalWorldsToPlace++; // Make space for the new Terrestrial Planet
+            }
+            slots.sort((a, b) => a - b);
+
+            // Sort bodies into slots
+            let placedWorlds = [];
+            let unassignedSlots = [...slots];
+
+            // 1. Mainworld nearest baseline
+            let mwSlot = baselineOrbit;
+            let mwIdx = unassignedSlots.findIndex(s => Math.abs(s - baselineOrbit) < 0.01);
+            if (mwIdx !== -1) mwSlot = unassignedSlots.splice(mwIdx, 1)[0];
+            else mwSlot = unassignedSlots.shift();
+
+            let isMWAsteroid = mainworldBase && mainworldBase.size === 0;
+            placedWorlds.push({ type: 'Mainworld', orbitId: mwSlot, isAsteroid: isMWAsteroid });
+
+            function pullRandomSlot() {
+                if (unassignedSlots.length === 0) return slots[slots.length - 1] + 1;
+                let rIdx = Math.floor(Math.random() * unassignedSlots.length);
+                return unassignedSlots.splice(rIdx, 1)[0];
+            }
+
+            // 2. Empty Orbits
+            for (let i = 0; i < emptyOrbitsCount; i++) {
+                placedWorlds.push({ type: 'Empty', orbitId: pullRandomSlot() });
+            }
+            // 3. Gas Giants
+            for (let i = 0; i < sys.gasGiants; i++) {
+                placedWorlds.push({ type: 'Gas Giant', orbitId: pullRandomSlot() });
+            }
+            // 4. Planetoid Belts (Mainworld absorbed +1 rule in Chunk 1, so sys contains the true additional count)
+            for (let i = 0; i < sys.planetoidBelts; i++) {
+                placedWorlds.push({ type: 'Planetoid Belt', orbitId: pullRandomSlot(), isAsteroid: true });
+            }
+            // 5. Terrestrial Planets (Mainworld was a planet, so subtract 1 TP)
+            let actualTPs = sys.terrestrialPlanets;
+            if (mainworldBase && mainworldBase.size >= 1 && mainworldBase.size <= 15) {
+                actualTPs = Math.max(0, actualTPs - 1);
+            }
+            for (let i = 0; i < actualTPs; i++) {
+                placedWorlds.push({ type: 'Terrestrial Planet', orbitId: pullRandomSlot() });
+            }
+
+            // Calculate Eccentricities and Years
+            placedWorlds.sort((a, b) => a.orbitId - b.orbitId);
+            for (let w of placedWorlds) {
+                if (w.type === 'Empty') continue;
+
+                w.eccentricity = w.isAsteroid ? 0 : determineMgT2EEccentricity(false, 0, sys.age, w.orbitId, false, 0);
+
+                let auInt = Math.floor(w.orbitId);
+                let auFrac = w.orbitId - auInt;
+                let maxIdx = MGT2E_ORBIT_AU.length - 1;
+
+                let limitIdx = Math.min(auInt, maxIdx);
+                let auTarget = MGT2E_ORBIT_AU[limitIdx];
+                let auDiff = (limitIdx < maxIdx) ? (MGT2E_ORBIT_AU[limitIdx + 1] - MGT2E_ORBIT_AU[limitIdx]) : auTarget;
+
+                w.au = auTarget + (auFrac * auDiff);
+                w.periodYears = Math.sqrt(Math.pow(w.au, 3) / primary.mass);
+
+                sys.worlds.push(w);
+            }
+
+            return sys;
+        }
+        // --- MgT2E System Gen (Chunk 3) ---
+        function generateMgT2ESystemChunk3(sys, mainworldBase) {
+            let primary = sys.stars[0];
+
+            // 1. Size Terrestrial Planets & Gas Giants
+            for (let i = 0; i < sys.worlds.length; i++) {
+                let w = sys.worlds[i];
+                w.moons = [];
+                w.rings = [];
+
+                if (w.type === 'Empty' || w.type === 'Planetoid Belt') continue;
+
+                if (w.type === 'Gas Giant') {
+                    let catRoll = roll1D();
+                    if (catRoll <= 2) {
+                        w.ggType = 'GS';
+                        w.diameterStr = `${roll1D(3) + roll1D(3)} (GS)`;
+                        w.mass = 5 * (roll1D() + 1);
+                        w.diamKm = parseInt(w.diameterStr.split(' ')[0]) * 12800;
+                    } else if (catRoll <= 4) {
+                        w.ggType = 'GM';
+                        w.diameterStr = `${roll1D() + 6} (GM)`;
+                        w.mass = 20 * (roll3D() - 1);
+                        w.diamKm = parseInt(w.diameterStr.split(' ')[0]) * 12800;
+                    } else {
+                        w.ggType = 'GL';
+                        w.diameterStr = `${roll2D() + 6} (GL)`;
+                        let initMass = roll3D();
+                        let d3Multiplier = Math.floor(Math.random() * 3) + 1;
+                        w.mass = d3Multiplier * 50 * (initMass + 4);
+                        if (w.mass >= 3000 || initMass >= 15) {
+                            w.mass = 4000 - ((roll2D() - 2) * 200);
+                        }
+                        w.diamKm = parseInt(w.diameterStr.split(' ')[0]) * 12800;
+                    }
+                    w.size = 'GG'; // Generic size indicator for UI
+                } else if (w.type === 'Terrestrial Planet' || w.type === 'Mainworld') {
+                    if (w.type === 'Mainworld' && mainworldBase && mainworldBase.size !== undefined) {
+                        w.size = mainworldBase.size;
+                    } else {
+                        let sizeCat = roll1D();
+                        if (sizeCat <= 2) w.size = roll1D(); // 1-6
+                        else if (sizeCat <= 4) w.size = roll2D(); // 2-12
+                        else w.size = roll2D() + 3; // 5-15
+                    }
+                    w.diamKm = w.size * 1600;
+                    // Terrestrial Mass placeholder (needs proper gravity generation later in physical chunk, but for hill spheres assume rough density Earth=1)
+                    // If size 0, mass ~0.
+                    w.mass = w.size === 0 ? 0.0001 : Math.pow(w.size / 8, 3); // rough estimate for Hill Spheres
+                }
+            }
+
+            // 2. Determine Moon Quantities & Sizes
+            for (let i = 0; i < sys.worlds.length; i++) {
+                let w = sys.worlds[i];
+                if (w.type === 'Empty' || w.type === 'Planetoid Belt') continue;
+
+                let qRoll = 0;
+                if (w.type === 'Terrestrial Planet' || w.type === 'Mainworld') {
+                    if (w.size <= 2) qRoll = roll1D();
+                    else if (w.size <= 9) qRoll = roll2D();
+                    else qRoll = roll2D();
+                } else {
+                    if (w.ggType === 'GS') qRoll = roll3D();
+                    else qRoll = roll4D();
+                }
+
+                let qMod = 0;
+                // Base subtract
+                if (w.type === 'Terrestrial Planet' || w.type === 'Mainworld') {
+                    if (w.size <= 2) qMod -= 5;
+                    else if (w.size <= 9) qMod -= 8;
+                    else qMod -= 6;
+                } else {
+                    if (w.ggType === 'GS') qMod -= 7;
+                    else qMod -= 6;
+                }
+
+                // DMs (only pick worst)
+                let dmDiceCount = (w.size <= 2) ? 1 : (w.size <= 9 ? 2 : (w.size <= 15 ? 2 : (w.ggType === 'GS' ? 3 : 4)));
+                let hasPlacementDM = false;
+                if (w.orbitId < 1.0) hasPlacementDM = true;
+                // Simplify adjacent checks for the sandbox
+                if (hasPlacementDM) qMod -= dmDiceCount;
+
+                if (['M', 'L', 'T', 'Y'].includes(primary.sType) && ['V', 'VI'].includes(primary.sClass)) qMod -= 1;
+
+                let moonsToGenerate = qRoll + qMod;
+                if (moonsToGenerate === 0) {
+                    w.rings.push({}); // 1 Ring
+                    moonsToGenerate = 0;
+                } else if (moonsToGenerate < 0) {
+                    moonsToGenerate = 0;
+                }
+
+                for (let m = 0; m < moonsToGenerate; m++) {
+                    let moonSize = '';
+                    let r1 = roll1D();
+                    if (r1 <= 3) moonSize = 'S';
+                    else if (r1 <= 5) {
+                        let ms = Math.floor(Math.random() * 3); // 0-2
+                        if (ms === 0) moonSize = 'R'; else moonSize = ms;
+                    } else { // 6
+                        if (w.type === 'Terrestrial Planet' || w.type === 'Mainworld') {
+                            if (w.size === 1) moonSize = 'S';
+                            else {
+                                let trySize = w.size - 1 - roll1D();
+                                if (trySize < 0) moonSize = 'S';
+                                else if (trySize === 0) moonSize = 'R';
+                                else if (trySize === w.size - 2) {
+                                    let twinRoll = roll2D();
+                                    if (twinRoll === 12) moonSize = w.size;
+                                    else if (twinRoll === 2) moonSize = trySize - 1;
+                                    else moonSize = trySize;
+                                    if (moonSize <= 0) moonSize = 'S';
+                                } else {
+                                    moonSize = trySize;
+                                }
+                            }
+                        } else { // Gas Giant Parent
+                            let specialR = roll1D();
+                            if (specialR <= 3) moonSize = roll1D();
+                            else if (specialR <= 5) {
+                                let z = roll2D() - 2;
+                                moonSize = z === 0 ? 'R' : z;
+                            } else {
+                                let giantMoon = roll2D() + 4;
+                                if (giantMoon >= 16) {
+                                    moonSize = 'GS';
+                                    if (w.ggType === 'GL' && roll2D() === 12) moonSize = 'GM';
+                                } else {
+                                    moonSize = giantMoon;
+                                }
+                            }
+                        }
+                    }
+
+                    if (moonSize === 'R') w.rings.push({});
+                    else w.moons.push({ size: moonSize });
+                }
+
+                // 3. Hill Sphere & Roche Limit
+                if (w.mass > 0 && w.diamKm > 0) {
+                    let solMass = w.mass * 0.000003;
+                    // M is sum of stars int... we assume single star for simple M
+                    let mStar = primary.mass;
+                    let hsAu = w.au * (1 - w.eccentricity) * Math.pow(solMass / (3 * mStar), 0.3333);
+                    let hsPd = hsAu * 149597870.9 / w.diamKm;
+                    let hillLimit = Math.floor(hsPd / 2);
+
+                    w.hillSpanPd = hillLimit;
+
+                    if (hillLimit < 1.5) {
+                        if (w.moons.length > 0) {
+                            w.moons = [];
+                            w.rings.push({}); // first destroyed becomes a ring
+                        }
+                    }
+                    if (hillLimit < 0.5) {
+                        w.rings = [];
+                    }
+
+                    // Place surviving moons
+                    let numM = w.moons.length;
+                    if (numM > 0) {
+                        let mor = hillLimit - 2;
+                        if (mor > 200) mor = 200 + numM;
+
+                        let placementDMW = mor < 60 ? 1 : 0;
+                        for (let mn = 0; mn < numM; mn++) {
+                            let locRoll = roll1D() + placementDMW;
+                            let pdTarget = 0;
+                            let locStr = '';
+                            if (locRoll <= 3) {
+                                pdTarget = ((roll2D() - 2) * mor / 60) + 2; locStr = 'Inner';
+                            } else if (locRoll <= 5) {
+                                pdTarget = ((roll2D() - 2) * mor / 30) + (mor / 6) + 3; locStr = 'Middle';
+                            } else {
+                                pdTarget = ((roll2D() - 2) * mor / 20) + (mor / 2) + 4; locStr = 'Outer';
+                            }
+                            w.moons[mn].pd = pdTarget;
+                            w.moons[mn].pos = locStr;
+
+                            // Ecc, Dir, Period
+                            let eMod = locStr === 'Inner' ? -1 : (locStr === 'Middle' ? 1 : 4);
+                            if (pdTarget > mor) eMod += 6;
+
+                            w.moons[mn].ecc = determineMgT2EEccentricity(false, 0, sys.age, w.orbitId, false, eMod);
+                            w.moons[mn].retrograde = (roll2D() + eMod >= 10);
+
+                            let moonKm = pdTarget * w.diamKm;
+                            w.moons[mn].periodHrs = Math.sqrt(Math.pow(moonKm, 3) / w.mass) / 361730;
+                        }
+
+                        // Overlap resolution
+                        w.moons.sort((a, b) => a.pd - b.pd);
+                        for (let m = 1; m < w.moons.length; m++) {
+                            if (w.moons[m].pd <= w.moons[m - 1].pd) {
+                                w.moons[m].pd = w.moons[m - 1].pd + 1.5;
+                            }
+                        }
+                    }
+
+                    // Place Rings
+                    for (let r = 0; r < w.rings.length; r++) {
+                        w.rings[r].center = 0.4 + (roll2D() / 8);
+                        w.rings[r].span = (roll3D() / 100) + 0.07;
+                    }
+                }
+            }
+
+            return sys;
+        }
+
+        // --- End MgT2E System Gen (Chunk 3) ---
+
+        // --- MgT2E System Gen (Chunk 4) ---
+        const MGT2E_ATM_CODES = {
+            0: { pressStr: "0.00-0.0009", minP: 0.00, spanP: 0.00, gear: "Vacc Suit" },
+            1: { pressStr: "0.001-0.09", minP: 0.001, spanP: 0.089, gear: "Vacc Suit" },
+            2: { pressStr: "0.1-0.42", minP: 0.1, spanP: 0.32, gear: "Respirator and Filter" },
+            3: { pressStr: "0.1-0.42", minP: 0.1, spanP: 0.32, gear: "Respirator" },
+            4: { pressStr: "0.43-0.70", minP: 0.43, spanP: 0.27, gear: "Filter" },
+            5: { pressStr: "0.43-0.70", minP: 0.43, spanP: 0.27, gear: "None" },
+            6: { pressStr: "0.70-1.49", minP: 0.70, spanP: 0.79, gear: "None" },
+            7: { pressStr: "0.70-1.49", minP: 0.70, spanP: 0.79, gear: "Filter" },
+            8: { pressStr: "1.50-2.49", minP: 1.50, spanP: 0.99, gear: "None" },
+            9: { pressStr: "1.50-2.49", minP: 1.50, spanP: 0.99, gear: "Filter" },
+            10: { pressStr: "Varies", minP: 0.0, spanP: 0.0, gear: "Air Supply" }, // A
+            11: { pressStr: "Varies", minP: 0.0, spanP: 0.0, gear: "Vacc Suit" }, // B
+            12: { pressStr: "Varies", minP: 0.0, spanP: 0.0, gear: "Vacc Suit" }, // C
+            13: { pressStr: "2.50-10.0+", minP: 2.50, spanP: 7.50, gear: "Varies" }, // D
+            14: { pressStr: "0.10-0.42", minP: 0.10, spanP: 0.32, gear: "Varies" }, // E
+            15: { pressStr: "Varies", minP: 0.0, spanP: 0.0, gear: "Varies" } // F
+        };
+
+        const MGT2E_TAINT_SUBTYPES = {
+            2: "Low Oxygen", 3: "Radioactivity", 4: "Biologic", 5: "Gas Mix", 6: "Particulates", 7: "Gas Mix",
+            8: "Sulphur Compounds", 9: "Biologic", 10: "Particulates", 11: "Radioactivity", 12: "High Oxygen"
+        };
+        const MGT2E_TAINT_SEVERITY = {
+            1: "Trivial irritant", 2: "Surmountable irritant", 3: "Minor irritant", 4: "Major irritant",
+            5: "Serious irritant", 6: "Hazardous irritant", 7: "Long term lethal", 8: "Inevitably lethal", 9: "Rapidly lethal"
+        };
+
+        const MGT2E_HYDRO_RANGES = {
+            0: 0, 1: 6, 2: 16, 3: 26, 4: 36, 5: 46, 6: 56, 7: 66, 8: 76, 9: 86, 10: 96
+        };
+
+        const MGT2E_SURFACE_DISTS = [
+            "Extremely Dispersed", "Very Dispersed", "Dispersed", "Scattered", "Slightly Scattered", "Mixed",
+            "Slightly Skewed", "Skewed", "Concentrated", "Very Concentrated", "Extremely Concentrated"
+        ];
+
+        function getTempBand(orbitId, hzco) {
+            let diff = orbitId - hzco;
+            if (diff <= -2.01) return "Boiling";
+            if (diff <= -1.01) return "Hot";
+            if (diff <= 1.00) return "Temperate";
+            if (diff <= 3.00) return "Cold";
+            return "Frozen";
+        }
+
+        function generateMgT2ESystemChunk4(sys, mainworldBase) {
+            let processWorld = (w) => {
+                if (w.type === 'Empty' || w.type === 'Gas Giant' || w.type === 'Planetoid Belt') return;
+
+                let tempBand = getTempBand(w.orbitId, sys.hzco);
+
+                // 1. Base Atmosphere Code
+                if (w.size === 'S' || w.size <= 1) {
+                    w.atmCode = 0;
+                } else if (w.type === 'Mainworld' && mainworldBase && mainworldBase.atm !== undefined) {
+                    w.atmCode = mainworldBase.atm;
+                } else {
+                    let baseRoll = roll2D() - 7 + w.size;
+                    let diff = w.orbitId - sys.hzco;
+
+                    if (diff >= -1.00 && diff <= 1.00) {
+                        w.atmCode = Math.max(0, baseRoll);
+                    } else if (diff < -1.00) {
+                        // Hot Atms (Simplified)
+                        w.atmCode = tempBand === "Boiling" ? (baseRoll <= 1 ? 0 : baseRoll <= 3 ? 1 : baseRoll <= 8 ? 10 : baseRoll <= 11 ? 11 : 12)
+                            : (baseRoll <= 0 ? 0 : baseRoll <= 1 ? 1 : baseRoll <= 10 ? 10 : baseRoll <= 11 ? 11 : 12);
+                    } else {
+                        // Cold Atms (Simplified)
+                        w.atmCode = tempBand === "Cold" ? (baseRoll <= 2 ? 1 : baseRoll <= 10 ? 10 : baseRoll <= 11 ? 11 : 12)
+                            : (baseRoll <= 2 ? 1 : baseRoll <= 10 ? 10 : baseRoll <= 11 ? 11 : 12);
+                    }
+                }
+
+                // Cap and Hex chars
+                if (w.atmCode > 15) w.atmCode = 15;
+                if (w.atmCode < 0) w.atmCode = 0;
+
+                // 2. Runaway Greenhouse
+                if (w.atmCode >= 2 && w.atmCode <= 15 && (tempBand === "Hot" || tempBand === "Boiling")) {
+                    let rgDM = Math.ceil(sys.age);
+                    if (tempBand === "Boiling") rgDM += 4;
+                    if ((roll2D() + rgDM) >= 12) {
+                        w.runawayGreenhouse = true;
+                        tempBand = "Boiling";
+                        if ((w.atmCode >= 2 && w.atmCode <= 9) || w.atmCode === 13 || w.atmCode === 14) {
+                            let rRoll = roll1D();
+                            if (w.size >= 2 && w.size <= 5) rRoll -= 2;
+                            if ([2, 4, 7, 9].includes(w.atmCode)) rRoll += 1;
+                            w.atmCode = rRoll <= 1 ? 10 : (rRoll <= 4 ? 11 : 12); // A, B, C
+                        }
+                    }
+                }
+
+                // Temporary Gravity placeholder
+                let gravity = w.size === 0 ? 0 : w.size * 0.125;
+
+                // 3 & 4. Standard Atmospheres (2-9, D, E)
+                if ((w.atmCode >= 2 && w.atmCode <= 9) || w.atmCode === 13 || w.atmCode === 14) {
+                    let cdata = MGT2E_ATM_CODES[w.atmCode];
+                    w.pressureBar = cdata.minP + (cdata.spanP * (Math.random()));
+
+                    let o2Roll = roll1D() - 1 + (sys.age > 4 ? 1 : 0);
+                    w.oxygenFrac = Math.max(0.01, (o2Roll / 20) + (Math.floor(Math.random() * 10) / 100));
+                    w.ppo = w.oxygenFrac * w.pressureBar;
+                    w.scaleHeight = gravity > 0 ? 8.5 / gravity : 0;
+
+                    w.taints = [];
+                    if (w.ppo < 0.1) w.taints.push("Low Oxygen");
+                    if (w.ppo > 0.5) w.taints.push("High Oxygen");
+
+                    if ([2, 4, 7, 9].includes(w.atmCode)) {
+                        let tRoll = roll2D();
+                        if (w.atmCode === 4) tRoll -= 2;
+                        if (w.atmCode === 9) tRoll += 2;
+                        let t = MGT2E_TAINT_SUBTYPES[Math.max(2, Math.min(12, tRoll))];
+                        if (t && !w.taints.includes(t)) w.taints.push(t);
+                    }
+
+                    if (w.taints.length > 0) {
+                        w.taintSeverity = MGT2E_TAINT_SEVERITY[Math.max(1, Math.min(9, roll2D()))];
+                    }
+
+                    if (w.atmCode === 13) { // D
+                        let badRatioO2 = w.oxygenFrac > 0 ? w.ppo / 0.5 : 1;
+                        let badRatioN2 = (w.pressureBar - w.ppo) / 2.0;
+                        let badRatio = Math.max(badRatioO2, badRatioN2);
+                        if (badRatio > 1 && w.scaleHeight > 0) w.safeAlt = Math.log(badRatio) * w.scaleHeight;
+                    }
+                    if (w.atmCode === 14 && w.ppo > 0) { // E
+                        let badRatio = 0.1 / w.ppo;
+                        if (badRatio > 1 && w.scaleHeight > 0) w.safeAltBelowMean = Math.log(badRatio) * w.scaleHeight;
+                    }
+                }
+                // 5. Exotic / Corrosive / Insidious
+                else if (w.atmCode >= 10 && w.atmCode <= 12) {
+                    let exRoll = roll2D(); // simplified pressure handling
+                    let cdata = MGT2E_ATM_CODES[w.atmCode];
+                    w.pressureBar = (roll2D() / 2); // random exotic pressure
+                    w.gases = ["Carbon Dioxide", "Sulphur Dioxide"]; // Simplified gas mix for sandbox
+                } else if (w.atmCode <= 1) {
+                    w.pressureBar = MGT2E_ATM_CODES[w.atmCode].minP;
+                }
+
+                // 6. Hydrographics
+                w.hydroCode = 0;
+                if (w.type === 'Mainworld' && mainworldBase && mainworldBase.hydro !== undefined) {
+                    w.hydroCode = mainworldBase.hydro;
+                } else if (!['S', 0, 1].includes(w.size)) {
+                    let hMod = 0;
+                    if ([0, 1, 10, 11, 12, 15].includes(w.atmCode)) hMod -= 4;
+                    if (tempBand === "Hot" && w.atmCode !== 13) hMod -= 2;
+                    if (tempBand === "Boiling" && w.atmCode !== 13) hMod -= 6;
+
+                    w.hydroCode = Math.max(0, Math.min(10, roll2D() - 7 + w.atmCode + hMod));
+                }
+
+                w.hydroPercent = MGT2E_HYDRO_RANGES[w.hydroCode] + Math.floor(Math.random() * 10);
+                if (w.hydroCode === 0) w.hydroPercent = Math.floor(Math.random() * 6);
+
+                let distRoll = Math.max(0, Math.min(10, roll2D() - 2));
+                w.surfaceDist = MGT2E_SURFACE_DISTS[distRoll];
+                w.liquidType = "Water";
+
+                if (w.atmCode >= 10 && w.atmCode <= 12 && w.hydroPercent > 0) {
+                    if (tempBand === "Boiling" || tempBand === "Hot") w.liquidType = "Sulphuric Acid";
+                    if (tempBand === "Cold" || tempBand === "Frozen") w.liquidType = "Methane";
+                }
+                w.tempBand = tempBand;
+            };
+
+            for (let i = 0; i < sys.worlds.length; i++) {
+                processWorld(sys.worlds[i]);
+                for (let j = 0; j < sys.worlds[i].moons.length; j++) {
+                    // Quick proxy copy for recursive evaluation
+                    let fauxMoon = Object.assign({}, sys.worlds[i].moons[j]);
+                    fauxMoon.orbitId = sys.worlds[i].orbitId; // Share orbit
+                    fauxMoon.type = 'Terrestrial Planet';
+                    processWorld(fauxMoon);
+                    sys.worlds[i].moons[j] = fauxMoon;
+                }
+            }
+
+            return sys;
+        }
+
+        // --- MgT2E System Gen (Chunk 5) ---
+        function getMgT2EAlbedo(w, hzco) {
+            let albedo = 0;
+            let diff = w.orbitId - hzco;
+            let type = "Rocky";
+            if (w.type === 'Gas Giant') type = "Gas Giant";
+            else if (w.type === 'Terrestrial Planet' || w.type === 'Mainworld') {
+                if (w.tempBand === "Cold" || w.tempBand === "Frozen") type = "Icy";
+            }
+            if (type === "Rocky") albedo = 0.04 + (roll2D() - 2) * 0.02;
+            else if (type === "Gas Giant") albedo = 0.05 + roll2D() * 0.05;
+            else if (type === "Icy" && diff <= 2) albedo = 0.2 + (roll2D() - 3) * 0.05;
+            else albedo = 0.25 + (roll2D() - 2) * 0.07;
+
+            // Modifiers
+            if (w.atmCode >= 1 && w.atmCode <= 3 || w.atmCode === 14) albedo += (roll2D() - 3) * 0.01;
+            if (w.atmCode >= 4 && w.atmCode <= 9) albedo += roll2D() * 0.01;
+            if (w.atmCode >= 10 && w.atmCode <= 12 || w.atmCode === 15) albedo += (roll2D() - 2) * 0.05;
+            if (w.atmCode === 13) albedo += roll2D() * 0.03;
+
+            if (w.hydroCode >= 2 && w.hydroCode <= 5) albedo += (roll2D() - 2) * 0.02;
+            if (w.hydroCode >= 6) albedo += (roll2D() - 4) * 0.03;
+
+            if (type === "Icy" && diff > 2 && albedo <= 0.4) {
+                albedo -= (roll1D() - 1) * 0.05;
+            }
+            return Math.max(0.02, Math.min(0.95, albedo));
+        }
+
+        function generateMgT2EAxialTilt() {
+            let roll = roll2D();
+            let tilt = 0;
+            if (roll <= 4) tilt = (roll1D() - 1) / 50;
+            else if (roll === 5) tilt = roll1D() / 5;
+            else if (roll === 6) tilt = roll1D();
+            else if (roll === 7) tilt = 6 + roll1D();
+            else if (roll <= 9) tilt = 5 + roll1D() * 5;
+            else {
+                let ex = roll1D();
+                if (ex <= 2) tilt = 10 + roll1D() * 10;
+                else if (ex === 3) tilt = 30 + roll1D() * 10;
+                else if (ex === 4) tilt = 90 + roll1D();
+                else if (ex === 5) tilt = 180 - roll1D();
+                else tilt = 120 + roll1D() * 10;
+            }
+            return tilt;
+        }
+
+        function generateMgT2ESystemChunk5(sys) {
+            let primary = sys.stars[0];
+            let processBody = (w, parent, isMoon) => {
+                if (w.type === 'Empty' || w.type === 'Planetoid Belt') return;
+
+                // 1. Sidereal Day
+                w.siderealHours = (roll2D() - 2) * 4 + 2 + roll1D() + Math.floor(sys.age / 2);
+                if (w.type === 'Gas Giant' || w.size === 0 || w.size === 'S') w.siderealHours *= 2;
+
+                let extRoll = w.siderealHours;
+                while (extRoll >= 40) {
+                    if (roll1D() >= 5) {
+                        let bonus = (roll2D() - 2) * 4 + 2 + roll1D() + Math.floor(sys.age / 2);
+                        if (w.type === 'Gas Giant' || w.size === 0 || w.size === 'S') bonus *= 2;
+                        w.siderealHours += bonus;
+                        extRoll = bonus;
+                    } else {
+                        break;
+                    }
+                }
+                w.siderealHours += ((roll1D() - 1) / 60) + ((Math.floor(Math.random() * 10)) / 3600);
+
+                // 2. Solar Day
+                let pYears = w.periodYears;
+                if (isMoon) {
+                    if (!w.periodYears) {
+                        w.periodYears = (roll2D() + roll2D()) / 365.25;
+                    }
+                    pYears = w.periodYears;
+                }
+                w.yearHours = pYears * 8760;
+
+                if (w.siderealHours === w.yearHours) {
+                    w.solarDaysInYear = 0;
+                    w.solarDayHours = Infinity;
+                } else {
+                    w.solarDaysInYear = Math.abs((w.yearHours / w.siderealHours) - 1);
+                    if (w.solarDaysInYear !== 0) {
+                        w.solarDayHours = w.yearHours / w.solarDaysInYear;
+                    } else {
+                        w.solarDayHours = Infinity;
+                    }
+                }
+
+                // 3. Axial Tilt
+                w.axialTilt = generateMgT2EAxialTilt();
+
+                // 4. Tidal Lock
+                let lockDM = Math.ceil((w.size === 'GG' ? 10 : w.size) / 3);
+                if (w.eccentricity) lockDM -= Math.floor(w.eccentricity * 10);
+                if (w.pressureBar > 2.5) lockDM -= 2;
+                if (sys.age < 1) lockDM -= 2;
+                else if (sys.age >= 5 && sys.age <= 10) lockDM += 2;
+                else if (sys.age > 10) lockDM += 4;
+
+                if (w.axialTilt > 30) lockDM -= 2;
+                if (w.axialTilt >= 60 && w.axialTilt <= 120) lockDM -= 4;
+                if (w.axialTilt >= 80 && w.axialTilt <= 100) lockDM -= 4;
+
+                if (isMoon) lockDM += 6;
+                else lockDM += (w.orbitId <= 0.5 ? 4 : 0);
+
+                w.tidallyLocked = false;
+                if (lockDM >= 10) {
+                    let forceLock = true;
+                    if (roll2D() === 12 && roll2D() < 12) forceLock = false;
+                    if (forceLock) w.tidallyLocked = true;
+                } else if (lockDM > -10 && !w.tidallyLocked) {
+                    let lockRoll = roll2D() + lockDM;
+                    if (lockRoll >= 12) w.tidallyLocked = true;
+                    else if (lockRoll === 11) w.siderealHours = w.yearHours * (2 / 3);
+                    else if (lockRoll === 10) w.siderealHours = roll1D() * 50 * 24;
+                    else if (lockRoll === 9) w.siderealHours = roll1D() * 10 * 24;
+                    else if (lockRoll === 8) w.siderealHours = roll1D() * 20 * 24;
+                    else if (lockRoll === 7) w.siderealHours = roll1D() * 5 * 24;
+                    else if (lockRoll === 6) w.siderealHours *= 5;
+                    else if (lockRoll === 5) w.siderealHours *= 3;
+                    else if (lockRoll === 4) w.siderealHours *= 2;
+                    else if (lockRoll === 3) w.siderealHours *= 1.5;
+                }
+
+                if (w.tidallyLocked) {
+                    w.siderealHours = w.yearHours;
+                    w.axialTilt = Math.max(0, (roll2D() - 2) / 10);
+                    if (w.eccentricity > 0.1) {
+                        let newEcc = determineMgT2EEccentricity(false, 0, sys.age, w.orbitId, false, -2);
+                        if (newEcc < w.eccentricity) w.eccentricity = newEcc;
+                    }
+                }
+
+                if (w.siderealHours === w.yearHours) {
+                    w.solarDaysInYear = 0;
+                    w.solarDayHours = Infinity;
+                } else {
+                    w.solarDaysInYear = Math.abs((w.yearHours / w.siderealHours) - 1);
+                    if (w.solarDaysInYear !== 0) w.solarDayHours = w.yearHours / w.solarDaysInYear;
+                    else w.solarDayHours = Infinity;
+                }
+
+                // 5. Mean Temperature
+                w.albedo = getMgT2EAlbedo(w, sys.hzco);
+                let initialGF = 0.5 * Math.sqrt(w.pressureBar || 0);
+
+                let gfMod = 0;
+                if ([1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 14].includes(w.atmCode)) gfMod = roll3D() * 0.01;
+                let gfMult = 1;
+                if (w.atmCode === 10 || w.atmCode === 15) gfMult = Math.max(0.5, roll1D() - 1);
+                else if ([11, 12, 16, 17].includes(w.atmCode)) {
+                    let mx = roll1D();
+                    if (mx === 6) gfMult = roll3D();
+                    else gfMult = mx;
+                }
+                w.greenhouseFactor = (initialGF + gfMod) * gfMult;
+
+                // We know AU is provided by Chunk 2
+                let srcLum = primary.luminosity || 1.0;
+                if (w.au > 0) {
+                    let term1 = srcLum * (1 - w.albedo) * (1 + w.greenhouseFactor);
+                    let term2 = (w.au * w.au);
+                    w.meanTempK = 279 * Math.pow(term1 / term2, 0.25);
+                } else {
+                    w.meanTempK = 3;
+                }
+
+                // 6. High/Low Temperatures
+                let tfactor = Math.abs(Math.sin((w.axialTilt || 0) * Math.PI / 180));
+                if (w.yearHours < (36.5 * 24)) tfactor /= 2;
+                if (w.yearHours > (2 * 8760)) tfactor *= 1.5;
+
+                let rfactor = w.solarDayHours <= 0 || w.solarDayHours === Infinity ? 1.0 : Math.sqrt(w.solarDayHours / 50);
+                if (w.tidallyLocked) rfactor = 1.0;
+                if (rfactor > 1.0) rfactor = 1.0;
+
+                let gfactor = (10 - (w.hydroCode || 0)) / 20;
+                if (w.surfaceDist && w.surfaceDist.includes('Concentrated')) gfactor -= 0.1;
+                if (w.surfaceDist && w.surfaceDist.includes('Dispersed')) gfactor += 0.1;
+
+                let afactor = 1 + (w.pressureBar || 0);
+                let vfactor = Math.max(0, Math.min(1.0, tfactor + rfactor + gfactor));
+                let lumMod = vfactor / afactor;
+
+                let highLum = srcLum * (1 + lumMod);
+                let lowLum = srcLum * (1 - lumMod);
+                let nearAu = w.au * (1 - (w.eccentricity || 0));
+                let farAu = w.au * (1 + (w.eccentricity || 0));
+
+                if (nearAu > 0) w.highTempK = 279 * Math.pow(highLum * (1 - w.albedo) * (1 + w.greenhouseFactor) / (nearAu * nearAu), 0.25);
+                if (farAu > 0) w.lowTempK = 279 * Math.pow(lowLum * (1 - w.albedo) * (1 + w.greenhouseFactor) / (farAu * farAu), 0.25);
+            };
+
+            for (let i = 0; i < sys.worlds.length; i++) {
+                processBody(sys.worlds[i], null, false);
+                for (let j = 0; j < sys.worlds[i].moons.length; j++) {
+                    processBody(sys.worlds[i].moons[j], sys.worlds[i], true);
+                }
+            }
+
+            return sys;
+        }
+
+        // --- MgT2E System Gen (Chunk 6) ---
+        const MGT2E_PLATE_INTERACTIONS = {
+            2: "Converging", 3: "Converging", 4: "Converging", 5: "Converging",
+            6: "Transversing", 7: "Transversing", 8: "Transversing",
+            9: "Diverging", 10: "Diverging", 11: "Diverging", 12: "Diverging"
+        };
+        const MGT2E_BIOCOMPLEXITY_RATINGS = {
+            1: "Primitive single-cell organisms", 2: "Advanced cellular organisms",
+            3: "Primitive multicellular organisms", 4: "Differentiated multicellular organisms",
+            5: "Complex multicellular organisms", 6: "Advanced multicellular organisms",
+            7: "Socially advanced organisms", 8: "Mentally advanced organisms",
+            9: "Extant or extinct sophonts", 10: "Ecosystem-wide superorganisms"
+        };
+        const MGT2E_RESOURCE_REMARKS = {
+            2: "No economically extractable resources", 3: "Marginal at best", 4: "Marginal at best", 5: "Marginal at best",
+            6: "Worthwhile with considerable effort", 7: "Worthwhile with considerable effort", 8: "Worthwhile with considerable effort",
+            9: "Priority targets", 10: "Priority targets", 11: "Liable to experience a resource rush", 12: "Liable to experience a resource rush"
+        };
+
+        function generateMgT2ESystemChunk6(sys) {
+            let primary = sys.stars[0];
+            let primaryMassEarths = primary.mass * 333000;
+
+            let processBody = (w, parent, isMoon) => {
+                if (w.type === 'Empty' || w.type === 'Gas Giant' || w.type === 'Planetoid Belt') return;
+
+                // 1. Seismology and Tectonic Plates
+                let wSize = w.size === 'S' ? 0 : w.size;
+                let resBase = wSize - sys.age;
+                if (isMoon) resBase += 1;
+
+                let numLargeMoons = w.moons ? w.moons.filter(m => m.size !== 'S' && m.size > 0).length : 0;
+                if (!isMoon && numLargeMoons > 0) resBase += Math.min(12, numLargeMoons);
+
+                let density = w.density || 1.0;
+                if (density > 1.0) resBase += 2;
+                if (density < 0.5) resBase -= 1;
+
+                resBase = Math.floor(resBase);
+                let resStress = resBase < 1 ? 0 : (resBase * resBase);
+
+                let tidalStressFactor = 0; // Keeping simplified
+
+                let e = w.eccentricity || 0;
+                let distMkm = w.orbitRadius || (w.au * 149.6);
+                let periodDays = w.yearHours / 24;
+                let wMassE = w.mass || 1.0;
+
+                let heatFactor = ((primaryMassEarths * primaryMassEarths) * Math.pow(wSize, 5) * (e * e)) /
+                    (3000 * Math.pow(distMkm, 5) * periodDays * wMassE);
+                if (isNaN(heatFactor) || !isFinite(heatFactor) || heatFactor < 1) heatFactor = 0;
+
+                w.seismicStress = Math.floor(resStress + tidalStressFactor + heatFactor);
+
+                w.tectonicPlates = 0;
+                w.plateInteraction = "None";
+                if (w.seismicStress > 0 && w.hydroPercent >= 1) {
+                    let p = wSize + w.hydroCode - roll2D();
+                    if (w.seismicStress >= 10 && w.seismicStress <= 100) p += 1;
+                    else if (w.seismicStress > 100) p += 2;
+                    if (p > 1) {
+                        w.tectonicPlates = p;
+                        w.plateInteraction = MGT2E_PLATE_INTERACTIONS[roll2D()] || "None";
+                    }
+                }
+
+                // 2. Biomass Rating
+                let biomassBase = 0;
+                if (sys.age >= 0.1) {
+                    biomassBase = roll2D();
+                    let bDm = 0;
+                    if (w.atmCode === 0) bDm -= 6;
+                    else if (w.atmCode === 1) bDm -= 4;
+                    else if ([2, 3, 14].includes(w.atmCode)) bDm -= 3;
+                    else if ([4, 5].includes(w.atmCode)) bDm -= 2;
+                    else if ([8, 9, 13].includes(w.atmCode)) bDm += 2;
+                    else if (w.atmCode === 10) bDm -= 3;
+                    else if (w.atmCode === 11) bDm -= 5;
+                    else if (w.atmCode === 12) bDm -= 7;
+                    else if (w.atmCode >= 15) bDm -= 5;
+
+                    if (w.hydroCode === 0) bDm -= 4;
+                    else if (w.hydroCode >= 1 && w.hydroCode <= 3) bDm -= 2;
+                    else if (w.hydroCode >= 6 && w.hydroCode <= 8) bDm += 1;
+                    else if (w.hydroCode >= 9) bDm += 2;
+
+                    if (sys.age < 0.2) bDm -= 6;
+                    else if (sys.age < 1) bDm -= 2;
+                    else if (sys.age > 4) bDm += 1;
+
+                    if (w.highTempK > 353) bDm -= 2;
+                    else if (w.highTempK < 273) bDm -= 4;
+
+                    if (w.meanTempK > 353) bDm -= 4;
+                    else if (w.meanTempK < 273) bDm -= 2;
+                    else if (w.meanTempK >= 279 && w.meanTempK <= 303) bDm += 2;
+
+                    bDm = Math.max(-12, Math.min(4, bDm));
+                    biomassBase += bDm;
+
+                    if (biomassBase <= 0) biomassBase = 0;
+                    if (w.taints && w.taints.includes("Biologic") && biomassBase === 0) biomassBase = 1;
+
+                    if (biomassBase >= 1 && [0, 1, 10, 11, 12, 15].includes(w.atmCode)) {
+                        let extremophileBonus = 0;
+                        if (w.atmCode === 0) extremophileBonus = 5;
+                        else if (w.atmCode === 1) extremophileBonus = 3;
+                        else if (w.atmCode === 10) extremophileBonus = 2;
+                        else if (w.atmCode === 11) extremophileBonus = 4;
+                        else if (w.atmCode === 12) extremophileBonus = 6;
+                        else if (w.atmCode >= 15) extremophileBonus = 4;
+                        biomassBase += extremophileBonus;
+                    }
+                }
+                w.biomass = biomassBase;
+
+                // 3. Biocomplexity Rating
+                w.biocomplexity = 0;
+                if (w.biomass >= 1) {
+                    let cDm = 0;
+                    if (w.atmCode < 4 || w.atmCode > 9) cDm -= 2;
+                    if (w.taints && w.taints.includes("Low Oxygen")) cDm -= 2;
+                    if (sys.age >= 3 && sys.age < 4) cDm -= 2;
+                    else if (sys.age >= 2 && sys.age < 3) cDm -= 4;
+                    else if (sys.age >= 1 && sys.age < 2) cDm -= 8;
+                    else if (sys.age < 1) cDm -= 10;
+
+                    let effBiomass = w.biomass >= 10 ? 9 : w.biomass;
+                    w.biocomplexity = Math.max(1, roll2D() - 7 + effBiomass + cDm);
+                }
+
+                // 4. Native Sophonts
+                w.nativeSophont = false;
+                w.extinctSophont = false;
+                if (w.biocomplexity >= 8) {
+                    let effBiocomp = w.biocomplexity >= 10 ? 9 : w.biocomplexity;
+                    if ((roll2D() + effBiocomp - 7) >= 13) w.nativeSophont = true;
+
+                    let exDm = sys.age > 5 ? 1 : 0;
+                    if ((roll2D() + effBiocomp - 7 + exDm) >= 13) w.extinctSophont = true;
+                }
+
+                // 5. Biodiversity & Compatibility
+                w.biodiversity = 0;
+                w.compatibility = 0;
+                if (w.biomass >= 1) {
+                    w.biodiversity = Math.max(1, Math.ceil(roll2D() - 7 + ((w.biomass + w.biocomplexity) / 2)));
+
+                    let compDm = 0;
+                    if ([0, 1, 11, 16, 17].includes(w.atmCode)) compDm -= 8;
+                    else if ([2, 4, 7, 9].includes(w.atmCode) || (w.taints && w.taints.length > 0)) compDm -= 2;
+                    else if ([3, 5, 8].includes(w.atmCode)) compDm += 1;
+                    else if (w.atmCode === 6) compDm += 2;
+                    else if ([10, 15].includes(w.atmCode)) compDm -= 6;
+                    else if (w.atmCode === 12) compDm -= 10;
+                    else if ([13, 14].includes(w.atmCode)) compDm -= 1;
+
+                    if (sys.age > 8) compDm -= 2;
+
+                    w.compatibility = Math.max(0, Math.floor(roll2D() - (w.biocomplexity / 2) + compDm));
+                }
+
+                w.lifeProfile = `${w.biomass.toString(16).toUpperCase()}${w.biocomplexity.toString(16).toUpperCase()}${w.biodiversity.toString(16).toUpperCase()}${w.compatibility.toString(16).toUpperCase()}`;
+                if (w.biomass === 0) w.lifeProfile = "0000";
+
+                // 6. Resource Rating
+                let rDm = 0;
+                if (density > 1.12) rDm += 2;
+                if (density < 0.5) rDm -= 2;
+                if (w.biomass >= 3) rDm += 2;
+                if (w.biodiversity >= 8 && w.biodiversity <= 10) rDm += 1;
+                else if (w.biodiversity >= 11) rDm += 2;
+
+                if (w.compatibility >= 0 && w.compatibility <= 3) rDm -= 1;
+                else if (w.compatibility >= 8) rDm += 2;
+
+                w.resourceRating = Math.max(2, Math.min(12, roll2D() - 7 + wSize + rDm));
+
+                // 7. Habitability Rating
+                let hScore = 10;
+                if (wSize >= 0 && wSize <= 4) hScore -= 1;
+                if (wSize >= 9) hScore += 1;
+
+                if ([0, 1, 10].includes(w.atmCode)) hScore -= 8;
+                else if ([2, 14].includes(w.atmCode)) hScore -= 4;
+                else if ([3, 13].includes(w.atmCode)) hScore -= 3;
+                else if ([4, 9].includes(w.atmCode)) hScore -= 2;
+                else if ([5, 7, 8].includes(w.atmCode)) hScore -= 1;
+                else if (w.atmCode === 11) hScore -= 10;
+                else if (w.atmCode === 12 || w.atmCode >= 15) hScore -= 12;
+
+                if (w.taints && w.taints.includes("Low Oxygen")) hScore -= 2;
+
+                if (w.hydroCode === 0) hScore -= 4;
+                else if (w.hydroCode >= 1 && w.hydroCode <= 3) hScore -= 2;
+                else if (w.hydroCode === 9) hScore -= 1;
+                else if (w.hydroCode === 10) hScore -= 2;
+
+                if (w.tidallyLocked) hScore -= 2;
+
+                if (w.highTempK > 323) hScore -= 2;
+                if (w.highTempK < 279) hScore -= 2;
+                if (w.meanTempK > 323) hScore -= 4;
+                else if (w.meanTempK >= 304 && w.meanTempK <= 323) hScore -= 2;
+                else if (w.meanTempK < 273) hScore -= 2;
+
+                if (w.lowTempK < 200) hScore -= 2;
+
+                let grav = w.size === 'S' ? 0 : w.size * 0.125;
+                w.gravity = grav; // Store for display
+                if (grav < 0.2) hScore -= 4;
+                else if (grav >= 0.2 && grav < 0.4) hScore -= 2;
+                else if (grav >= 0.4 && grav < 0.7) hScore -= 1;
+                else if (grav >= 0.7 && grav <= 0.9) hScore += 1;
+                else if (grav >= 1.1 && grav < 1.4) hScore -= 1;
+                else if (grav >= 1.4 && grav <= 2.0) hScore -= 3;
+                else if (grav > 2.0) hScore -= 6;
+
+                w.habitability = Math.max(0, hScore);
+            };
+
+            for (let i = 0; i < sys.worlds.length; i++) {
+                processBody(sys.worlds[i], null, false);
+                for (let j = 0; j < sys.worlds[i].moons.length; j++) {
+                    processBody(sys.worlds[i].moons[j], sys.worlds[i], true);
+                }
+            }
+
+            return sys;
+        }
         function generateHZAndClimate() {
             let hzFlux = rollFlux();
             let hzVariance = 0;
@@ -3098,6 +4491,7 @@
 
                 if (baseData) {
                     stateObj.ctPhysical = generateCTPhysical(baseData);
+                    stateObj.t5Physical = null;
                     hexStates.set(hexId, stateObj);
                 } else if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
                     missingData = true;
@@ -3109,6 +4503,52 @@
             }
 
             contextMenu.classList.remove('visible');
+            requestAnimationFrame(draw);
+        });
+
+        // Note: MgT2E Physical Expansion handler created entirely below to run system explicitly
+        document.getElementById('ctx-expand-physical-mgt2e').addEventListener('click', () => {
+            if (!validateSelection('physical')) return;
+
+            let missingData = false;
+            selectedHexes.forEach(hexId => {
+                let stateObj = hexStates.get(hexId);
+                let baseData = stateObj ? stateObj.mgt2eData : null;
+
+                if (baseData) {
+                    let chunk1System = generateMgT2ESystemChunk1(baseData);
+                    let systemWithOrbits = generateMgT2ESystemChunk2(chunk1System, baseData);
+                    let systemWithSizes = generateMgT2ESystemChunk3(systemWithOrbits, baseData);
+                    let systemWithAtmosphere = generateMgT2ESystemChunk4(systemWithSizes, baseData);
+                    let systemWithTemps = generateMgT2ESystemChunk5(systemWithAtmosphere);
+                    let systemWithRatings = generateMgT2ESystemChunk6(systemWithTemps);
+
+                    console.log(`[MgT2E System Gen] Hex ${hexId} | Age: ${systemWithRatings.age.toFixed(2)} Gyr | HZCO: ${systemWithRatings.hzco.toFixed(2)} | Stars: ${systemWithRatings.stars.map(s => s.name).join(', ')}`);
+                    console.table(systemWithRatings.worlds.map(w => ({
+                        Type: w.type,
+                        Size: w.size,
+                        Atm: w.atmCode !== undefined ? w.atmCode : '-',
+                        Hydro: w.hydroPercent !== undefined ? `${w.hydroPercent}%` : '-',
+                        Day: w.solarDayHours !== undefined ? (w.solarDayHours === Infinity ? "Lock" : `${w.solarDayHours.toFixed(1)}h`) : '-',
+                        MeanTemp: w.meanTempK ? `${(w.meanTempK - 273.15).toFixed(1)}C` : '-',
+                        Life: w.lifeProfile || '-',
+                        Res: w.resourceRating || '-',
+                        Hab: w.habitability !== undefined ? w.habitability : '-',
+                        Seismic: w.seismicStress !== undefined ? w.seismicStress : '-'
+                    })));
+
+                    stateObj.mgtSystem = systemWithRatings;
+                } else if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
+                    missingData = true;
+                }
+            });
+
+            if (missingData) {
+                alert("Note: Some selected hexes skipped because they do not have MgT2E Mainworld data generated yet.");
+            }
+
+            contextMenu.classList.remove('visible');
+            showToast(`Expanded MgT2E Physical system for ${selectedHexes.size} hex(es)`);
             requestAnimationFrame(draw);
         });
 
@@ -3127,6 +4567,7 @@
 
                 if (baseData) {
                     stateObj.t5Physical = generateT5Physical(baseData);
+                    stateObj.ctPhysical = null;
                     hexStates.set(hexId, stateObj);
                 } else if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
                     missingData = true;
@@ -3138,6 +4579,7 @@
             }
 
             contextMenu.classList.remove('visible');
+            showToast(`Expanded T5 Physical system for ${selectedHexes.size} hex(es)`);
             requestAnimationFrame(draw);
         });
 
@@ -3168,13 +4610,13 @@
             }
 
             contextMenu.classList.remove('visible');
+            showToast(`Expanded MgT2E Socioeconomics for ${selectedHexes.size} hex(es)`);
             requestAnimationFrame(draw);
         });
 
         document.getElementById('ctx-sparse').addEventListener('click', () => autoPopulate(2));
         document.getElementById('ctx-regular').addEventListener('click', () => autoPopulate(3));
         document.getElementById('ctx-dense').addEventListener('click', () => autoPopulate(4));
-        document.getElementById('ctx-select-all').addEventListener('click', toggleAllHexes);
         document.getElementById('ctx-select-hex').addEventListener('click', toggleSingleHex);
         document.getElementById('ctx-select-subsector').addEventListener('click', toggleSubsectorHexes);
         document.getElementById('ctx-select-sector').addEventListener('click', toggleSectorHexes);
@@ -3359,6 +4801,7 @@
 
             if (stateObj.t5Physical) {
                 document.getElementById('acc-btn-physical').style.display = 'flex';
+                document.getElementById('acc-btn-physical').textContent = 'T5 Physical Stats';
                 const phys = stateObj.t5Physical;
                 document.getElementById('edit-phys-star').value = phys.homestar || '';
                 document.getElementById('edit-phys-hz').value = phys.hzVariance != null ? phys.hzVariance : '';
@@ -3369,6 +4812,7 @@
                 document.getElementById('ct-phys-fields').style.display = 'none';
             } else if (stateObj.ctPhysical) {
                 document.getElementById('acc-btn-physical').style.display = 'flex';
+                document.getElementById('acc-btn-physical').textContent = 'CT Physical Stats';
                 const phys = stateObj.ctPhysical;
                 document.getElementById('edit-phys-star').value = phys.homestar || '';
                 document.getElementById('edit-phys-hz').value = '';
@@ -3390,6 +4834,142 @@
                 document.getElementById('ct-phys-fields').style.display = 'none';
             }
 
+            // MgT2E System Expansion
+            document.getElementById('editor-mgt-system-root').style.display = 'none';
+            document.getElementById('acc-btn-mgt-system').style.display = 'none';
+            document.getElementById('acc-btn-mgt-system').classList.remove('active');
+            let mgtSysHtml = '';
+
+            if (stateObj.mgtSystem) {
+                document.getElementById('acc-btn-mgt-system').style.display = 'flex';
+                let sys = stateObj.mgtSystem;
+
+                let hzcoNum = sys.hzco.toFixed(2);
+                let ageNum = sys.age.toFixed(2);
+                mgtSysHtml += `<div class="system-stats" style="grid-template-columns: 1fr;">`;
+                mgtSysHtml += `<div style="text-align: center; color: #66fcf1; border-bottom: 1px dotted #45a29e; padding-bottom: 4px;">System Overview</div>`;
+                mgtSysHtml += `<span>Hzco: <strong>${hzcoNum}</strong></span>`;
+                mgtSysHtml += `<span>Age: <strong>${ageNum} Gyr</strong></span>`;
+                mgtSysHtml += `</div>`;
+
+                mgtSysHtml += `<div class="system-tree">`;
+
+                // Stars
+                sys.stars.forEach((s, sIdx) => {
+                    let massStr = s.mass.toFixed(2);
+                    let lumStr = s.luminosity ? s.luminosity.toFixed(2) : (s.lum ? s.lum.toFixed(2) : '-');
+                    let isPrimary = (sIdx === 0);
+                    // Companion orbits
+                    let orbitDesc = "";
+                    if (!isPrimary) {
+                        orbitDesc = ` (Orbit: ${s.orbitDistance ? s.orbitDistance.toFixed(2) : (s.orbitId !== undefined ? s.orbitId : '?')} AU, ${s.eccentricity ? s.eccentricity.toFixed(2) : 'e=0'})`;
+                    }
+
+                    mgtSysHtml += `<details open>`;
+                    mgtSysHtml += `<summary>${isPrimary ? "Primary" : "Companion"} - ${s.name} <span class="sys-title-info">Star</span></summary>`;
+                    mgtSysHtml += `<div class="system-node">`;
+                    mgtSysHtml += `<div class="system-stats">`;
+                    mgtSysHtml += `<span>Mass: <strong>${massStr} M☉</strong></span>`;
+                    mgtSysHtml += `<span>Lum: <strong>${lumStr} L☉</strong></span>`;
+                    if (orbitDesc) mgtSysHtml += `<span class="system-stats-full">${orbitDesc}</span>`;
+                    mgtSysHtml += `</div>`;
+
+                    // Planets around this star
+                    sys.worlds.forEach(w => {
+                        // In MgT2E chunk logic, we didn't explicitly map worlds to companion stars yet, 
+                        // so we assume all worlds orbit the primary for now unless `parentStar` was added
+                        if (!isPrimary) return;
+
+                        mgtSysHtml += `<details open>`;
+
+                        let wTitle = `Orbit ${w.orbitId}`;
+                        let wType = w.type;
+                        if (wType === "Planetoid Belt") wType = "Belt";
+                        else if (wType === "Asteroid Belt") wType = "Belt";
+
+                        mgtSysHtml += `<summary>${wTitle} <span class="sys-title-info">${wType}</span></summary>`;
+                        mgtSysHtml += `<div class="system-node">`;
+
+                        // For the Mainworld, use the authoritative UWP atm/hydro values from
+                        // mainworld data instead of the physical gen w.atmCode/w.hydroCode which
+                        // are stored on the world object and may diverge.
+                        let mwBase = stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData;
+                        let effAtm = (w.type === 'Mainworld' && mwBase) ? mwBase.atm : (w.atmCode || 0);
+                        let effHydro = (w.type === 'Mainworld' && mwBase) ? mwBase.hydro : (w.hydroCode || 0);
+                        let effSize = w.size === 'S' ? 0 : (w.type === 'Mainworld' && mwBase ? mwBase.size : w.size);
+                        let uwpStr = `${toUWPChar(effSize)}${toUWPChar(effAtm)}${toUWPChar(effHydro)}`;
+
+                        mgtSysHtml += `<div class="system-stats">`;
+                        mgtSysHtml += `<span>Dist: <strong>${w.orbitDistance ? w.orbitDistance.toFixed(2) : w.au ? w.au.toFixed(2) : '-'} AU</strong></span>`;
+                        mgtSysHtml += `<span>Ecc: <strong>${w.eccentricity ? w.eccentricity.toFixed(2) : '-'}</strong></span>`;
+
+                        if (wType !== 'Empty') {
+                            mgtSysHtml += `<span>UWP: <strong style="color: #ffb399">${uwpStr}</strong></span>`;
+                            mgtSysHtml += `<span>Grav: <strong>${w.gravity !== undefined ? w.gravity.toFixed(2) : '0'}G</strong></span>`;
+
+                            let dayLen = '-';
+                            if (w.tidallyLocked) dayLen = 'Lock';
+                            else if (w.solarDayHours !== undefined && w.solarDayHours !== Infinity) dayLen = `${w.solarDayHours.toFixed(1)}h`;
+
+                            mgtSysHtml += `<span>Day: <strong>${dayLen}</strong></span>`;
+                            mgtSysHtml += `<span>Tilt: <strong>${w.axialTilt ? w.axialTilt.toFixed(1) : '0'}°</strong></span>`;
+
+                            if (w.meanTempK) {
+                                mgtSysHtml += `<span>Temp: <strong>${(w.meanTempK - 273.15).toFixed(1)}°C</strong></span>`;
+                            }
+                            if (w.habitability !== undefined) {
+                                mgtSysHtml += `<span>Hab: <strong>${w.habitability}</strong></span>`;
+                            }
+                            if (w.lifeProfile) {
+                                mgtSysHtml += `<span class="system-stats-full">Life: <strong>${w.lifeProfile}</strong> (Bio ${w.biomass || 0})</span>`;
+                            }
+                        }
+
+                        mgtSysHtml += `</div>`;
+
+                        // Moons
+                        if (w.moons && w.moons.length > 0) {
+                            w.moons.forEach((m, mIdx) => {
+                                let mType = m.size === 'S' ? 'Small' : m.size === 'R' ? 'Ringlet' : (m.size === 0 ? 'Tiny' : 'Moon');
+                                let muwpStr = `${toUWPChar(m.size === 'S' ? 0 : m.size)}${toUWPChar(m.atmCode || 0)}${toUWPChar(m.hydroCode || 0)}`;
+                                // m.pd = orbital distance in planetary diameters
+                                let mOrbitDist = m.pd !== undefined ? `${m.pd.toFixed(1)} ⌀` : (m.orbitId !== undefined ? `Orb ${m.orbitId.toFixed(2)}` : '-');
+
+                                mgtSysHtml += `<details>`;
+                                mgtSysHtml += `<summary>Moon ${mIdx + 1} <span class="sys-title-info">${mType} | ${mOrbitDist}</span></summary>`;
+                                mgtSysHtml += `<div class="system-node">`;
+                                mgtSysHtml += `<div class="system-stats">`;
+                                mgtSysHtml += `<span>Ecc: <strong>${m.eccentricity ? m.eccentricity.toFixed(2) : '-'}</strong></span>`;
+                                mgtSysHtml += `<span>UWP: <strong style="color: #ffb399">${muwpStr}</strong></span>`;
+                                mgtSysHtml += `<span>Grav: <strong>${m.gravity !== undefined ? m.gravity.toFixed(2) : '0'}G</strong></span>`;
+
+                                let mDayLen = '-';
+                                if (m.tidallyLocked) mDayLen = 'Lock';
+                                else if (m.solarDayHours !== undefined && m.solarDayHours !== Infinity) mDayLen = `${m.solarDayHours.toFixed(1)}h`;
+                                mgtSysHtml += `<span>Day: <strong>${mDayLen}</strong></span>`;
+
+                                if (m.meanTempK) mgtSysHtml += `<span>Temp: <strong>${(m.meanTempK - 273.15).toFixed(1)}°C</strong></span>`;
+                                if (m.habitability !== undefined) mgtSysHtml += `<span>Hab: <strong>${m.habitability}</strong></span>`;
+                                if (m.lifeProfile && m.lifeProfile !== "0000") mgtSysHtml += `<span class="system-stats-full">Life: <strong>${m.lifeProfile}</strong></span>`;
+
+                                mgtSysHtml += `</div>`;
+                                mgtSysHtml += `</div>`;
+                                mgtSysHtml += `</details>`;
+                            });
+                        }
+
+                        mgtSysHtml += `</div>`;
+                        mgtSysHtml += `</details>`;
+                    });
+
+                    mgtSysHtml += `</div>`;
+                    mgtSysHtml += `</details>`;
+                });
+
+                mgtSysHtml += `</div>`;
+                document.getElementById('editor-mgt-system-root').innerHTML = mgtSysHtml;
+            }
+
             hexEditor.style.display = 'flex';
         }
 
@@ -3408,6 +4988,11 @@
             document.getElementById('editor-physical-container').style.display = 'none';
             document.getElementById('acc-btn-physical').style.display = 'none';
             document.getElementById('acc-btn-physical').classList.remove('active');
+
+            document.getElementById('editor-mgt-system-root').style.display = 'none';
+            document.getElementById('editor-mgt-system-root').innerHTML = '';
+            document.getElementById('acc-btn-mgt-system').style.display = 'none';
+            document.getElementById('acc-btn-mgt-system').classList.remove('active');
 
             // Reset Editor position
             hexEditor.style.left = 'calc(50% - 220px)';

@@ -755,6 +755,11 @@
 
     <!-- Help Modal -->
     <div id="help-modal">
+        <div style="text-align: center; border-bottom: 2px solid #45a29e; padding-bottom: 15px; margin-bottom: 20px;">
+            <h2 style="margin: 0 0 5px 0; color: #66fcf1; font-size: 24px;">Traveller Hex Map Generator</h2>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">1.0.0</span></p>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 12px; font-style: italic;">Created by: <span id="app-credits">Your Name Here</span></p>
+        </div>
         <h3>Controls & Shortcuts</h3>
         <div class="help-grid">
             <strong>Left Click + Drag</strong><span>Pan Map</span>
@@ -768,7 +773,7 @@
             <strong>Escape</strong><span>Cancel Selection / Close Menu / Close Modals</span>
         </div>
         <div class="editor-buttons">
-            <button class="btn-cancel" id="btn-close-help">Close</button>
+            <button class="btn-cancel" id="btn-close-help">OK</button>
         </div>
     </div>
 
@@ -6539,6 +6544,11 @@
         }
         document.getElementById('ctx-help').addEventListener('click', openHelpModal);
         document.getElementById('btn-close-help').addEventListener('click', closeHelpModal);
+
+        // Auto-display Help/Shortcut modal on page load
+        window.addEventListener('load', () => {
+            openHelpModal();
+        });
 
         document.getElementById('toggle-borders').addEventListener('change', (e) => {
             showSubsectorBorders = e.target.checked;

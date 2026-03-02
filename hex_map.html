@@ -5,6 +5,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Traveller Hex Map</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Optional: auto-load system names. Generate names.js by running convert_names.ps1 -->
+    <script src="names.js" onerror="console.info('names.js not found — names will not be auto-loaded.')"></script>
     <style>
         /* -----------------------------------------------------------------------------
        Style
@@ -110,18 +114,87 @@
         }
 
         /* Settings Panel */
+        /* Settings Panel Sidebar */
         #settings-panel {
-            position: absolute;
+            position: fixed;
             top: 20px;
-            left: 20px;
-            background-color: rgba(31, 40, 51, 0.8);
+            right: 20px;
+            width: 320px;
+            max-height: calc(100vh - 40px);
+            background: rgba(11, 12, 16, 0.95);
             border: 1px solid #45a29e;
             border-radius: 8px;
-            padding: 15px;
+            padding: 20px;
             color: #c5c6c7;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
             font-family: 'Inter', sans-serif;
             font-size: 14px;
-            z-index: 100;
+        }
+
+        #settings-panel.collapsed {
+            transform: translateX(calc(100% + 40px));
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #settings-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 48px;
+            height: 48px;
+            background: #1f2833;
+            border: 1px solid #45a29e;
+            border-radius: 8px;
+            color: #66fcf1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1001;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        #settings-toggle:hover {
+            background: #45a29e;
+            color: #0b0c10;
+        }
+
+        #settings-toggle i {
+            font-size: 20px;
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #45a29e;
+            padding-bottom: 10px;
+        }
+
+        .settings-header h2 {
+            color: #66fcf1;
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        #btn-close-settings {
+            background: none;
+            border: none;
+            color: #45a29e;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: color 0.2s;
+        }
+
+        #btn-close-settings:hover {
+            color: #66fcf1;
         }
 
         .setting-row {
@@ -226,7 +299,8 @@
             flex: 0 0 110px;
         }
 
-        .editor-flex-row input[type="text"] {
+        .editor-flex-row input[type="text"],
+        .editor-flex-row input[type="number"] {
             flex: 1;
             background-color: #0b0c10;
             border: 1px solid #45a29e;
@@ -473,6 +547,85 @@
             opacity: 1;
             transform: translateY(0);
         }
+
+        /* Generation Log Modal */
+        #gen-log-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #0d1117;
+            border: 1px solid #45a29e;
+            border-radius: 8px;
+            padding: 20px;
+            z-index: 10000;
+            width: 700px;
+            max-width: 95vw;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9);
+            font-family: 'Inter', sans-serif;
+            color: #c5c6c7;
+        }
+
+        #gen-log-modal h3 {
+            color: #66fcf1;
+            margin: 0 0 12px 0;
+            font-size: 16px;
+            border-bottom: 1px solid #45a29e;
+            padding-bottom: 8px;
+        }
+
+        #gen-log-content {
+            max-height: 65vh;
+            overflow-y: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .gl-system-header {
+            color: #66fcf1;
+            font-weight: bold;
+            font-size: 13px;
+            margin: 14px 0 6px;
+            border-top: 1px solid #1f2833;
+            padding-top: 10px;
+        }
+
+        .gl-section {
+            color: #45a29e;
+            font-weight: bold;
+            margin: 8px 0 2px;
+        }
+
+        .gl-roll {
+            color: #f0c040;
+        }
+
+        .gl-dm {
+            color: #a0a8b0;
+        }
+
+        .gl-result {
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .gl-trade {
+            color: #66fcf1;
+        }
+
+        .gl-skip {
+            color: #555;
+            font-style: italic;
+        }
+
+        #gen-log-modal .editor-buttons {
+            margin-top: 14px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
     </style>
 </head>
 
@@ -480,7 +633,22 @@
     <canvas id="map-canvas"></canvas>
 
     <!-- Settings Panel -->
-    <div id="settings-panel">
+    <div id="settings-toggle" title="Toggle Settings">
+        <i class="fas fa-cog"></i>
+    </div>
+
+    <!-- Settings Panel -->
+    <div id="settings-panel" class="collapsed">
+        <div class="settings-header">
+            <h2>Settings</h2>
+            <button id="btn-close-settings"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div class="settings-row">
+            <input type="checkbox" id="toggle-dev-view">
+            <label for="toggle-dev-view">Development View</label>
+        </div>
+
         <div class="settings-row">
             <input type="checkbox" id="toggle-borders" checked>
             <label for="toggle-borders">Show Sector/Subsector Borders</label>
@@ -488,15 +656,41 @@
 
         <div style="border-top: 1px solid #45a29e; margin: 10px 0;"></div>
 
-        <div class="settings-row" style="justify-content: space-between;">
-            <button class="menu-btn" id="btn-save-map" style="width: 48%; padding: 6px;">Save Map...</button>
-            <button class="menu-btn" id="btn-load-map" style="width: 48%; padding: 6px;"
-                onclick="document.getElementById('file-load-map').click()">Load Map...</button>
+        <div class="settings-row" style="flex-direction: column; gap: 8px;">
+            <button class="menu-btn" id="btn-save-map"
+                style="width: 100%; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i class="fas fa-save"></i> Save Map JSON
+            </button>
+            <button class="menu-btn" id="btn-load-map"
+                style="width: 100%; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;"
+                onclick="document.getElementById('file-load-map').click()">
+                <i class="fas fa-file-upload"></i> Load Map JSON
+            </button>
             <input type="file" id="file-load-map" accept=".json" style="display: none;">
+        </div>
+
+        <div style="border-top: 1px solid #45a29e; margin: 10px 0;"></div>
+
+        <div class="settings-row" style="flex-direction: column; gap: 8px;">
+            <button class="menu-btn" id="btn-open-gen-log"
+                style="width: 100%; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i class="fas fa-history"></i> View Generation Log
+            </button>
         </div>
     </div>
 
 
+    <!-- Generation Log Modal -->
+    <div id="gen-log-modal">
+        <h3>&#9881; Generation Log <span id="gen-log-subtitle"
+                style="font-size:12px;color:#a0a8b0;font-weight:normal;"></span></h3>
+        <div id="gen-log-content"><em style="color:#555;">No systems logged yet. Generate up to 5 systems to capture a
+                trace.</em></div>
+        <div class="editor-buttons">
+            <button class="menu-btn" id="btn-copy-gen-log" style="padding:6px 14px;">Copy to Clipboard</button>
+            <button class="btn-cancel" id="btn-close-gen-log">Close</button>
+        </div>
+    </div>
 
     <!-- Context Menu -->
     <div id="context-menu">
@@ -545,22 +739,13 @@
             </div>
         </div>
 
-        <!-- EXPAND MAINWORLD PHYSICAL Menu -->
-        <div class="context-menu-item has-submenu">
-            EXPAND MAINWORLD PHYSICAL
-            <div class="submenu">
-                <button class="context-menu-item" id="ctx-expand-physical-ct">Book 6 (CT)</button>
-                <button class="context-menu-item" id="ctx-expand-physical-mgt2e">MgT2E (System & Physical)</button>
-                <button class="context-menu-item" id="ctx-expand-physical-t5">Traveller 5 (T5)</button>
-            </div>
-        </div>
-
         <!-- EXPAND SYSTEM Menu -->
         <div class="context-menu-item has-submenu">
             EXPAND SYSTEM
             <div class="submenu">
-                <button class="context-menu-item" id="ctx-expand-system-ct">Book 6 (CT)</button>
-                <button class="context-menu-item" id="ctx-expand-system-t5">Traveller 5 (T5)</button>
+                <button class="context-menu-item" id="ctx-expand-physical-mgt2e">MgT2E (System &amp; Physical)</button>
+                <button class="context-menu-item" id="ctx-expand-physical-ct">Book 6 (CT)</button>
+                <button class="context-menu-item" id="ctx-expand-physical-t5">Traveller 5 (T5)</button>
             </div>
         </div>
 
@@ -592,6 +777,10 @@
         <h3 id="hex-editor-title">Edit System</h3>
 
         <div class="editor-grid">
+            <div class="editor-row" style="grid-column: span 2;">
+                <label>System Name:</label>
+                <input type="text" id="edit-name" style="width: 100%; text-align: left;">
+            </div>
             <div class="editor-row">
                 <label>Starport:</label>
                 <input type="text" id="edit-starport" maxlength="1">
@@ -738,8 +927,32 @@
                     <input type="text" id="edit-mgt-cul">
                 </div>
                 <div class="editor-flex-row">
+                    <label>Importance:</label>
+                    <input type="text" id="edit-mgt-im">
+                </div>
+                <div class="editor-flex-row">
                     <label>Economic Profile:</label>
                     <input type="text" id="edit-mgt-eco">
+                </div>
+                <div class="editor-flex-row">
+                    <label>Resource Units:</label>
+                    <input type="number" id="edit-mgt-ru">
+                </div>
+                <div class="editor-flex-row">
+                    <label>GWP per Capita:</label>
+                    <input type="text" id="edit-mgt-gwp">
+                </div>
+                <div class="editor-flex-row">
+                    <label>World Trade No:</label>
+                    <input type="text" id="edit-mgt-wtn">
+                </div>
+                <div class="editor-flex-row">
+                    <label>Income Rating:</label>
+                    <input type="number" id="edit-mgt-ir">
+                </div>
+                <div class="editor-flex-row">
+                    <label>Devel. Rating:</label>
+                    <input type="text" id="edit-mgt-dr">
                 </div>
                 <div class="editor-flex-row">
                     <label>Starport Profile:</label>
@@ -832,6 +1045,12 @@
             <!-- Content will be injected via JS -->
         </div>
 
+        <!-- CT Scouts System Expand Accordion -->
+        <button class="accordion-btn" id="acc-btn-ct-system" style="display: none;">CT Scouts System</button>
+        <div class="accordion-content" id="editor-ct-system-root" style="display: none;">
+            <!-- Content will be injected via JS -->
+        </div>
+
         <div class="editor-buttons">
             <button class="btn-cancel" id="btn-editor-cancel">Cancel</button>
             <button class="btn-save" id="btn-editor-save">Save</button>
@@ -868,6 +1087,7 @@
         let paintAction = 'select';
         let lastPaintedHexId = null;
         let showSubsectorBorders = true;
+        let devView = false;
         let contextHexId = null;
         let contextSectorPrefix = null;
         let contextSubsectorPrefix = null;
@@ -875,6 +1095,27 @@
         // Hex Populate State (Map of hexId -> STATE)
         // States: 'EMPTY', 'SYSTEM_PRESENT' (undefined/missing means BLANK)
         let hexStates = new Map();
+
+        // System Naming State
+        let namePool = [];
+        let usedNames = new Set(JSON.parse(localStorage.getItem('traveller_used_names') || '[]'));
+
+        // Generation Trace State
+        let genTraces = [];   // completed traces
+        let genTraceCount = 0;    // how many systems we have traced so far
+        const MAX_GEN_TRACES = 5;  // stop tracing after this many
+        let activeTrace = null; // trace being built right now
+
+        // Auto-load names from names.js if it was included via <script src>
+        if (window.SYSTEM_NAMES && Array.isArray(window.SYSTEM_NAMES)) {
+            window.SYSTEM_NAMES.forEach(name => {
+                const cleaned = name ? name.trim() : '';
+                if (cleaned && !usedNames.has(cleaned)) {
+                    namePool.push(cleaned);
+                }
+            });
+            console.info(`Auto-loaded ${namePool.length} system names from names.js.`);
+        }
 
         // UI Elements
         const contextMenu = document.getElementById('context-menu');
@@ -997,7 +1238,7 @@
         });
 
         // Keyboard Shortcuts
-        window.addEventListener('keydown', (e) => {
+        window.addEventListener('keydown', async (e) => {
             if (e.ctrlKey && e.key.toLowerCase() === 's') {
                 e.preventDefault();
                 const world = getMouseWorldCoords({ clientX: currentMouseX, clientY: currentMouseY });
@@ -1018,17 +1259,12 @@
                     contextSubsectorPrefix = parts[0] + '-' + parts[1];
                     toggleSubsectorHexes();
                 }
-            } else if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'm') {
+            } else if (e.ctrlKey && e.shiftKey && e.key === 'M') {
                 e.preventDefault();
+                if (!validateSelection('generate')) return;
 
-                if (selectedHexes.size === 0) {
-                    alert("Please select one or more hexes first (Shift + Left Click).");
-                    return;
-                }
-                if (selectedHexes.size > 1280) {
-                    alert("We are currently limited to generating one sector (1280 hexes) at a time to prevent browser crashes. Please reduce your selection.");
-                    return;
-                }
+                console.log("Bulk Generating MgT2E Full System...");
+                await ensureNamesLoaded();
 
                 if (!confirm("This will completely overwrite ANY existing data in the selected hexes with a Full Mongoose 2E Generation sequence. Proceed?")) {
                     return;
@@ -1086,8 +1322,9 @@
                                     let systemWithAtmosphere = generateMgT2ESystemChunk4(systemWithSizes, baseData);
                                     let systemWithTemps = generateMgT2ESystemChunk5(systemWithAtmosphere);
                                     let systemWithRatings = generateMgT2ESystemChunk6(systemWithTemps);
+                                    let systemWithUWP = generateMgT2ESystemChunk7(systemWithRatings, baseData);
 
-                                    stateObj.mgtSystem = systemWithRatings;
+                                    stateObj.mgtSystem = systemWithUWP;
                                     stateObj.t5Physical = null;
                                     stateObj.ctPhysical = null;
                                     hexStates.set(hexId, stateObj);
@@ -1410,6 +1647,74 @@
         }
 
         // GENERATION LOGIC
+        async function ensureNamesLoaded() {
+            if (namePool.length > 0) return;
+            // Try window.SYSTEM_NAMES first (populated by names.js, works on file://)
+            if (window.SYSTEM_NAMES && Array.isArray(window.SYSTEM_NAMES)) {
+                window.SYSTEM_NAMES.forEach(name => {
+                    const cleaned = name ? name.trim() : '';
+                    if (cleaned && !usedNames.has(cleaned)) {
+                        namePool.push(cleaned);
+                    }
+                });
+                if (namePool.length > 0) return;
+            }
+            // Fallback: try fetch (works when served via HTTP, e.g. Live Server)
+            try {
+                const response = await fetch('names.csv');
+                if (response.ok) {
+                    const text = await response.text();
+                    loadNamesCSV(text);
+                }
+            } catch (err) {
+                console.warn("Automatic name loading failed:", err);
+            }
+        }
+        function cleanName(name) {
+            if (!name) return "";
+            // Remove non-English characters (keep A-Z, a-z, 0-9, spaces, hyphens, apostrophes)
+            let cleaned = name.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // Remove accents
+            cleaned = cleaned.replace(/[^a-zA-Z0-9\s\-\']/g, "");
+            // Truncate to 25 chars
+            if (cleaned.length > 25) cleaned = cleaned.substring(0, 25).trim();
+            return cleaned.trim();
+        }
+
+        function getNextSystemName() {
+            if (namePool.length === 0) return null;
+
+            // Pick a random name from the pool
+            const index = Math.floor(Math.random() * namePool.length);
+            const name = namePool.splice(index, 1)[0];
+
+            usedNames.add(name);
+            localStorage.setItem('traveller_used_names', JSON.stringify(Array.from(usedNames)));
+            return name;
+        }
+
+        function loadNamesCSV(content) {
+            const lines = content.split(/\r?\n/);
+            let addedCount = 0;
+            let skippedCount = 0;
+
+            lines.forEach(line => {
+                if (!line.trim()) return;
+                // Simple CSV parse (split by comma, take first column)
+                let name = line.split(',')[0].replace(/^"|"$/g, '').trim();
+                let cleaned = cleanName(name);
+
+                if (cleaned && !usedNames.has(cleaned)) {
+                    namePool.push(cleaned);
+                    addedCount++;
+                } else if (cleaned) {
+                    skippedCount++;
+                }
+            });
+
+            showToast(`Loaded ${addedCount} names into pool. (${skippedCount} already used/skipped)`, 3000);
+            return addedCount;
+        }
+
         function roll1D() {
             return Math.floor(Math.random() * 6) + 1;
         }
@@ -1440,6 +1745,74 @@
             if (charCode >= 79) charCode++; // Skip O (char code 79)
             return String.fromCharCode(charCode);
         }
+
+        // ---- Generation Trace Helpers ----------------------------------------
+        function startTrace(hexId, ruleset) {
+            if (genTraceCount >= MAX_GEN_TRACES) { activeTrace = null; return; }
+            activeTrace = { hexId, ruleset, lines: [] };
+        }
+        function endTrace() {
+            if (!activeTrace) return;
+            genTraces.push(activeTrace);
+            genTraceCount++;
+            activeTrace = null;
+        }
+        function tLine(cssClass, text) {
+            if (activeTrace) activeTrace.lines.push({ cssClass, text });
+        }
+        function tSection(title) { tLine('gl-section', '[ ' + title + ' ]'); }
+        function tDM(label, dm) {
+            if (dm !== 0) tLine('gl-dm', '  DM ' + label + ': ' + (dm >= 0 ? '+' : '') + dm);
+        }
+        function tResult(label, value) { tLine('gl-result', '  => ' + label + ': ' + value); }
+        function tSkip(reason) { tLine('gl-skip', '  (' + reason + ')'); }
+        function tTrade(tc, reason) { tLine('gl-trade', '  [OK] ' + tc + ': ' + reason); }
+        // Traced dice helpers — capture individual die faces
+        function tRoll2D(label) {
+            const d1 = roll1D(), d2 = roll1D();
+            const sum = d1 + d2;
+            tLine('gl-roll', '  ' + label + ': Roll 2D [' + d1 + ' + ' + d2 + '] = ' + sum);
+            return sum;
+        }
+        function tRoll1D(label) {
+            const d = roll1D();
+            tLine('gl-roll', '  ' + label + ': Roll 1D [' + d + ']');
+            return d;
+        }
+
+        // ---- Generation Log Modal --------------------------------------------
+        function renderTracesHTML() {
+            if (genTraces.length === 0) return '<em style="color:#555;">No systems logged yet. Generate up to 5 MgT2E systems to capture a trace.</em>';
+            return genTraces.map(function (trace, idx) {
+                const header = '<div class="gl-system-header">#' + (idx + 1) + ' \u2014 ' + trace.ruleset + ': ' + trace.hexId + '</div>';
+                const body = trace.lines.map(function (l) {
+                    return '<div class="' + l.cssClass + '">' + l.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
+                }).join('');
+                return header + body;
+            }).join('');
+        }
+
+        function openGenLogModal() {
+            document.getElementById('gen-log-content').innerHTML = renderTracesHTML();
+            document.getElementById('gen-log-subtitle').textContent =
+                genTraces.length > 0 ? '(' + genTraces.length + '/' + MAX_GEN_TRACES + ' systems captured)' : '';
+            document.getElementById('gen-log-modal').style.display = 'block';
+        }
+
+        document.getElementById('btn-open-gen-log').addEventListener('click', openGenLogModal);
+        document.getElementById('btn-close-gen-log').addEventListener('click', function () {
+            document.getElementById('gen-log-modal').style.display = 'none';
+        });
+        document.getElementById('btn-copy-gen-log').addEventListener('click', function () {
+            const plain = genTraces.map(function (trace, idx) {
+                return '#' + (idx + 1) + ' \u2014 ' + trace.ruleset + ': ' + trace.hexId + '\n' +
+                    trace.lines.map(function (l) { return l.text; }).join('\n');
+            }).join('\n\n');
+            navigator.clipboard.writeText(plain)
+                .then(function () { showToast('Log copied to clipboard!', 2000); })
+                .catch(function () { showToast('Copy failed - try selecting and copying manually.', 3000); });
+        });
+
 
         function generateCTMainworld() {
             let starportRoll = roll2D();
@@ -1523,11 +1896,12 @@
             if (size === 0) tradeCodes.push("As");
             if ([0, 1].includes(atm) && hydro >= 1) tradeCodes.push("Ic");
 
-            return { uwp, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, gasGiant };
+            return { name: getNextSystemName(), uwp, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, gasGiant };
         }
 
-        document.getElementById('ctx-gen-ct').addEventListener('click', () => {
+        document.getElementById('ctx-gen-ct').addEventListener('click', async () => {
             if (!validateSelection('generate')) return;
+            await ensureNamesLoaded();
             selectedHexes.forEach(hexId => {
                 let stateObj = hexStates.get(hexId);
                 // Convert string to object for backwards compatibility if needed
@@ -1547,134 +1921,195 @@
             requestAnimationFrame(draw);
         });
 
-        function generateMgT2EMainworld() {
-            let size = Math.max(0, roll2D() - 2);
-            let atm = Math.max(0, roll2D() - 7 + size);
+        function generateMgT2EMainworld(hexId) {
+            startTrace(hexId || '??', 'MgT2E');
+            const tracing = genTraceCount < MAX_GEN_TRACES || activeTrace !== null;
 
+            // ── Size ──────────────────────────────────────────────────────
+            tSection('SIZE');
+            let sRaw = tracing ? tRoll2D('Raw') : roll2D();
+            let size = Math.max(0, sRaw - 2);
+            tResult('Size', `${sRaw} − 2 = ${size}`);
+
+            // ── Atmosphere ────────────────────────────────────────────────
+            tSection('ATMOSPHERE');
+            let atmRaw = tracing ? tRoll2D('Raw') : roll2D();
+            let atm = size > 0 ? Math.max(0, atmRaw - 7 + size) : 0;
+            if (size > 0) {
+                tDM('Size', size);
+                tResult('Atm', `${atmRaw} − 7 + ${size} = ${atmRaw - 7 + size} → clamped = ${atm}`);
+            } else {
+                tSkip('size = 0, atmosphere = 0');
+            }
+
+            // ── Hydrographics ─────────────────────────────────────────────
+            tSection('HYDROGRAPHICS');
             let hydro = 0;
             if (size > 1) {
                 let hydroDM = 0;
-                if (atm <= 1 || atm >= 10) hydroDM = -4;
-                hydro = Math.max(0, roll2D() - 7 + atm + hydroDM);
+                if (atm <= 1 || atm >= 10) { hydroDM = -4; tDM('Atm ≤1 or ≥10', -4); }
+                let hydroRaw = tracing ? tRoll2D('Raw') : roll2D();
+                hydro = Math.max(0, hydroRaw - 7 + atm + hydroDM);
+                tResult('Hydro', `${hydroRaw} − 7 + Atm(${atm}) + DM(${hydroDM}) = ${hydroRaw - 7 + atm + hydroDM} → clamped = ${hydro}`);
+            } else {
+                tSkip('size ≤ 1, hydrographics = 0');
             }
 
-            let pop = Math.max(0, roll2D() - 2);
+            // ── Population ────────────────────────────────────────────────
+            tSection('POPULATION');
+            let popRaw = tracing ? tRoll2D('Raw') : roll2D();
+            let pop = Math.max(0, popRaw - 2);
+            tResult('Pop', `${popRaw} − 2 = ${pop}`);
 
+            // ── Starport ──────────────────────────────────────────────────
+            tSection('STARPORT');
             let starportDM = 0;
-            if (pop >= 10) starportDM = 2;
-            else if (pop === 8 || pop === 9) starportDM = 1;
-            else if (pop === 3 || pop === 4) starportDM = -1;
-            else if (pop <= 2) starportDM = -2;
+            if (pop >= 10) { starportDM = 2; tDM('Pop ≥10', 2); }
+            else if (pop === 8 || pop === 9) { starportDM = 1; tDM('Pop 8–9', 1); }
+            else if (pop === 3 || pop === 4) { starportDM = -1; tDM('Pop 3–4', -1); }
+            else if (pop <= 2) { starportDM = -2; tDM('Pop ≤2', -2); }
+            let spRaw = tracing ? tRoll2D('Raw') : roll2D();
+            let spTotal = spRaw + starportDM;
+            let starport = spTotal <= 2 ? 'X' : spTotal <= 4 ? 'E' : spTotal <= 6 ? 'D'
+                : spTotal <= 8 ? 'C' : spTotal <= 10 ? 'B' : 'A';
+            tResult('Starport', `${spRaw} + DM(${starportDM}) = ${spTotal}  →  ${starport}`);
 
-            let spRoll = roll2D() + starportDM;
-            let starport = 'X';
-            if (spRoll <= 2) starport = 'X';
-            else if (spRoll <= 4) starport = 'E';
-            else if (spRoll <= 6) starport = 'D';
-            else if (spRoll <= 8) starport = 'C';
-            else if (spRoll <= 10) starport = 'B';
-            else starport = 'A';
-
-            let gov = 0;
-            let law = 0;
-            let tl = 0;
-
+            // ── Government & Law ──────────────────────────────────────────
+            let gov = 0, law = 0, tl = 0;
             if (pop > 0) {
-                gov = Math.max(0, roll2D() - 7 + pop);
-                law = Math.max(0, roll2D() - 7 + gov);
+                tSection('GOVERNMENT');
+                let govRaw = tracing ? tRoll2D('Raw') : roll2D();
+                gov = Math.max(0, govRaw - 7 + pop);
+                tDM('Pop', pop);
+                tResult('Gov', `${govRaw} − 7 + ${pop} = ${govRaw - 7 + pop} → clamped = ${gov}`);
 
+                tSection('LAW LEVEL');
+                let lawRaw = tracing ? tRoll2D('Raw') : roll2D();
+                law = Math.max(0, lawRaw - 7 + gov);
+                tDM('Gov', gov);
+                tResult('Law', `${lawRaw} − 7 + ${gov} = ${lawRaw - 7 + gov} → clamped = ${law}`);
+
+                // ── Tech Level ────────────────────────────────────────────
+                tSection('TECH LEVEL');
                 let tlDM = 0;
-                if (starport === 'A') tlDM += 6;
-                else if (starport === 'B') tlDM += 4;
-                else if (starport === 'C') tlDM += 2;
-                else if (starport === 'X') tlDM -= 4;
+                if (starport === 'A') { tlDM += 6; tDM('Starport A', 6); }
+                else if (starport === 'B') { tlDM += 4; tDM('Starport B', 4); }
+                else if (starport === 'C') { tlDM += 2; tDM('Starport C', 2); }
+                else if (starport === 'X') { tlDM -= 4; tDM('Starport X', -4); }
 
-                if (size <= 1) tlDM += 2;
-                else if (size <= 4) tlDM += 1;
+                if (size <= 1) { tlDM += 2; tDM('Size ≤1', 2); }
+                else if (size <= 4) { tlDM += 1; tDM('Size 2–4', 1); }
 
-                if (atm >= 0 && atm <= 3) tlDM += 1;
-                else if (atm >= 10) tlDM += 1;
+                if (atm >= 0 && atm <= 3) { tlDM += 1; tDM('Atm 0–3', 1); }
+                else if (atm >= 10) { tlDM += 1; tDM('Atm ≥10', 1); }
 
-                if (hydro === 9) tlDM += 1;
-                else if (hydro === 10) tlDM += 2;
+                if (hydro === 9) { tlDM += 1; tDM('Hydro 9', 1); }
+                else if (hydro === 10) { tlDM += 2; tDM('Hydro A', 2); }
 
-                if (pop >= 1 && pop <= 5) tlDM += 1;
-                else if (pop === 9) tlDM += 2;
-                else if (pop >= 10) tlDM += 4;
+                if (pop >= 1 && pop <= 5) { tlDM += 1; tDM('Pop 1–5', 1); }
+                else if (pop === 9) { tlDM += 2; tDM('Pop 9', 2); }
+                else if (pop >= 10) { tlDM += 4; tDM('Pop ≥10', 4); }
 
-                if (gov === 0 || gov === 5) tlDM += 1;
-                else if (gov === 7) tlDM += 2;
-                else if (gov >= 13) tlDM -= 2;
+                if (gov === 0 || gov === 5) { tlDM += 1; tDM('Gov 0 or 5', 1); }
+                else if (gov === 7) { tlDM += 2; tDM('Gov 7', 2); }
+                else if (gov >= 13) { tlDM -= 2; tDM('Gov ≥13', -2); }
 
-                tl = Math.max(0, Math.floor(Math.random() * 6) + 1 + tlDM);
+                let tlD = tracing ? tRoll1D('Roll 1D') : roll1D();
+                tl = Math.max(0, tlD + tlDM);
+                tResult('TL', `${tlD} + total DM(${tlDM}) = ${tlD + tlDM} → clamped = ${tl}`);
+            } else {
+                tSection('GOVERNMENT / LAW / TL');
+                tSkip('Pop = 0 — Gov, Law, TL all set to 0');
             }
 
-            let navalBase = false;
-            let scoutBase = false;
-            let militaryBase = false;
-            let corsairBase = false;
+            // ── Bases ─────────────────────────────────────────────────────
+            tSection('BASES');
+            let navalBase = false, scoutBase = false, militaryBase = false, corsairBase = false;
 
             if (starport === 'A' || starport === 'B') {
-                if (roll2D() >= 8) militaryBase = true;
-                if (roll2D() >= 8) navalBase = true;
+                let mr = tracing ? tRoll2D('Military Base 2D') : roll2D();
+                militaryBase = mr >= 8; tResult('Military Base', `${mr} ≥ 8?  ${militaryBase}`);
+                let nr = tracing ? tRoll2D('Naval Base 2D') : roll2D();
+                navalBase = nr >= 8; tResult('Naval Base', `${nr} ≥ 8?  ${navalBase}`);
             } else if (starport === 'C') {
-                if (roll2D() >= 10) militaryBase = true;
-            }
+                let mr = tracing ? tRoll2D('Military Base 2D') : roll2D();
+                militaryBase = mr >= 10; tResult('Military Base', `${mr} ≥ 10?  ${militaryBase}`);
+            } else { tSkip('Starport D/E/X — no military or naval base possible'); }
 
             if (starport === 'A') {
-                if (roll2D() >= 10) scoutBase = true;
+                let sr = tracing ? tRoll2D('Scout Base 2D') : roll2D();
+                scoutBase = sr >= 10; tResult('Scout Base', `${sr} ≥ 10?  ${scoutBase}`);
             } else if (starport === 'B' || starport === 'C') {
-                if (roll2D() >= 9) scoutBase = true;
+                let sr = tracing ? tRoll2D('Scout Base 2D') : roll2D();
+                scoutBase = sr >= 9; tResult('Scout Base', `${sr} ≥ 9?  ${scoutBase}`);
             } else if (starport === 'D') {
-                if (roll2D() >= 8) scoutBase = true;
-            }
+                let sr = tracing ? tRoll2D('Scout Base 2D') : roll2D();
+                scoutBase = sr >= 8; tResult('Scout Base', `${sr} ≥ 8?  ${scoutBase}`);
+            } else { tSkip('Starport E/X — no scout base possible'); }
 
             if (starport === 'D' || starport === 'E' || starport === 'X') {
                 let corsairDM = 0;
-                if (law === 0) corsairDM = 2;
-                else if (law >= 2) corsairDM = -2;
+                if (law === 0) { corsairDM = 2; tDM('Law 0', 2); }
+                else if (law >= 2) { corsairDM = -2; tDM('Law ≥2', -2); }
+                let cr = tracing ? tRoll2D('Corsair Base 2D') : roll2D();
+                let threshold = starport === 'D' ? 12 : 10;
+                corsairBase = (cr + corsairDM) >= threshold;
+                tResult('Corsair Base', `${cr} + DM(${corsairDM}) = ${cr + corsairDM} ≥ ${threshold}?  ${corsairBase}`);
+            } else { tSkip(`Starport ${starport} — corsair base not possible`); }
 
-                if (starport === 'D') {
-                    if (roll2D() + corsairDM >= 12) corsairBase = true;
-                } else {
-                    if (roll2D() + corsairDM >= 10) corsairBase = true;
-                }
-            }
+            // ── Gas Giant ─────────────────────────────────────────────────
+            tSection('GAS GIANT');
+            let ggRoll = tracing ? tRoll2D('2D') : roll2D();
+            let gasGiant = ggRoll <= 9;
+            tResult('Gas Giant Present', `${ggRoll} ≤ 9?  ${gasGiant}`);
 
-            let gasGiant = roll2D() <= 9;
-
+            // ── UWP ───────────────────────────────────────────────────────
+            tSection('UWP');
             const uwp = `${starport}${toUWPChar(size)}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
+            tResult('UWP', uwp);
 
+            // ── Trade Codes ───────────────────────────────────────────────
+            tSection('TRADE CODES');
             let tradeCodes = [];
-            if (atm >= 4 && atm <= 9 && hydro >= 4 && hydro <= 8 && pop >= 5 && pop <= 7) tradeCodes.push("Ag");
-            if (size === 0 && atm === 0 && hydro === 0) tradeCodes.push("As");
-            if (pop === 0 && gov === 0 && law === 0) tradeCodes.push("Ba");
-            if (atm >= 2 && atm <= 9 && hydro === 0) tradeCodes.push("De");
-            if (atm >= 10 && hydro >= 1) tradeCodes.push("Fl");
-            if (size >= 5 && atm >= 4 && atm <= 9 && hydro >= 4 && hydro <= 8) tradeCodes.push("Ga");
-            if (pop >= 9) tradeCodes.push("Hi");
-            if (tl >= 12) tradeCodes.push("Ht");
-            if (atm <= 1 && hydro >= 1) tradeCodes.push("Ic");
-            if ([0, 1, 2, 4, 7, 9].includes(atm) && pop >= 9) tradeCodes.push("In");
-            if (pop >= 1 && pop <= 3) tradeCodes.push("Lo");
-            if (tl <= 5) tradeCodes.push("Lt");
-            if (atm <= 3 && hydro <= 3 && pop >= 6) tradeCodes.push("Na");
-            if (pop <= 6) tradeCodes.push("Ni");
-            if (atm >= 2 && atm <= 5 && hydro <= 3) tradeCodes.push("Po");
-            if ([6, 8].includes(atm) && pop >= 6 && pop <= 8) tradeCodes.push("Ri");
-            if (atm === 0) tradeCodes.push("Va");
-            if (atm >= 3 && atm <= 9 && hydro >= 10) tradeCodes.push("Wa");
-            return { uwp, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
+            const tc = (code, cond, reason) => { if (cond) { tradeCodes.push(code); tTrade(code, reason); } };
+            tc('Ag', atm >= 4 && atm <= 9 && hydro >= 4 && hydro <= 8 && pop >= 5 && pop <= 7, `Atm4-9(${atm}) Hyd4-8(${hydro}) Pop5-7(${pop})`);
+            tc('As', size === 0 && atm === 0 && hydro === 0, `Size0 Atm0 Hyd0`);
+            tc('Ba', pop === 0 && gov === 0 && law === 0, `Pop0 Gov0 Law0`);
+            tc('De', atm >= 2 && atm <= 9 && hydro === 0, `Atm2-9(${atm}) Hyd0`);
+            tc('Fl', atm >= 10 && hydro >= 1, `Atm≥10(${atm}) Hyd≥1(${hydro})`);
+            tc('Ga', size >= 5 && atm >= 4 && atm <= 9 && hydro >= 4 && hydro <= 8, `Siz5+(${size}) Atm4-9(${atm}) Hyd4-8(${hydro})`);
+            tc('Hi', pop >= 9, `Pop≥9(${pop})`);
+            tc('Ht', tl >= 12, `TL≥12(${tl})`);
+            tc('Ic', atm <= 1 && hydro >= 1, `Atm≤1(${atm}) Hyd≥1(${hydro})`);
+            tc('In', [0, 1, 2, 4, 7, 9].includes(atm) && pop >= 9, `Atm∈{0,1,2,4,7,9}(${atm}) Pop≥9(${pop})`);
+            tc('Lo', pop >= 1 && pop <= 3, `Pop1-3(${pop})`);
+            tc('Lt', tl <= 5, `TL≤5(${tl})`);
+            tc('Na', atm <= 3 && hydro <= 3 && pop >= 6, `Atm≤3(${atm}) Hyd≤3(${hydro}) Pop≥6(${pop})`);
+            tc('Ni', pop <= 6, `Pop≤6(${pop})`);
+            tc('Po', atm >= 2 && atm <= 5 && hydro <= 3, `Atm2-5(${atm}) Hyd≤3(${hydro})`);
+            tc('Ri', [6, 8].includes(atm) && pop >= 6 && pop <= 8, `Atm6or8(${atm}) Pop6-8(${pop})`);
+            tc('Va', atm === 0, `Atm=0`);
+            tc('Wa', atm >= 3 && atm <= 9 && hydro >= 10, `Atm3-9(${atm}) Hyd10(${hydro})`);
+            if (tradeCodes.length === 0) tSkip('No trade codes qualify');
+
+            // ── Finalise ──────────────────────────────────────────────────
+            const name = getNextSystemName();
+            tSection('NAME');
+            tResult('Assigned', name || '(none — pool empty)');
+            endTrace();
+
+            return { name, uwp, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
         }
 
-        document.getElementById('ctx-gen-mgt2e').addEventListener('click', () => {
+        document.getElementById('ctx-gen-mgt2e').addEventListener('click', async () => {
             if (!validateSelection('generate')) return;
+            await ensureNamesLoaded();
             selectedHexes.forEach(hexId => {
                 let stateObj = hexStates.get(hexId);
                 if (typeof stateObj === 'string') stateObj = { type: stateObj };
 
                 if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
-                    stateObj.mgt2eData = generateMgT2EMainworld();
+                    stateObj.mgt2eData = generateMgT2EMainworld(hexId);
                     stateObj.ctData = null; // Clear old formatting
                     stateObj.t5Data = null;
                     hexStates.set(hexId, stateObj);
@@ -1792,11 +2227,12 @@
             if ([6, 8].includes(atm) && (pop === 5 || pop === 9)) tradeCodes.push("Pr");
             if ([6, 8].includes(atm) && pop >= 6 && pop <= 8) tradeCodes.push("Ri");
 
-            return { uwp, tradeCodes, starport, size, atm, hydro, pop, popDigit, gov, law, tl, navalBase, scoutBase, gasGiant, gasGiantsCount, planetoidBelts };
+            return { name: getNextSystemName(), uwp, tradeCodes, starport, size, atm, hydro, pop, popDigit, gov, law, tl, navalBase, scoutBase, gasGiant, gasGiantsCount, planetoidBelts };
         }
 
-        document.getElementById('ctx-gen-t5').addEventListener('click', () => {
+        document.getElementById('ctx-gen-t5').addEventListener('click', async () => {
             if (!validateSelection('generate')) return;
+            await ensureNamesLoaded();
             selectedHexes.forEach(hexId => {
                 let stateObj = hexStates.get(hexId);
                 if (typeof stateObj === 'string') stateObj = { type: stateObj };
@@ -1924,6 +2360,808 @@
             showToast(`Expanded T5 Socioeconomics for ${selectedHexes.size} hex(es)`);
             requestAnimationFrame(draw);
         });
+
+        // =====================================================================
+        // BOOK 6 (CT) SYSTEM GENERATION — CHUNK 1: STARS & SYSTEM INVENTORY
+        // =====================================================================
+        function generateCTSystemChunk2(sys, mainworldBase) {
+            if (!sys) return null;
+
+            const primary = sys.stars[0];
+            const pType = primary.type;
+            const pSize = primary.size;
+            const pDec = primary.decimal; // 0 or 5 or null
+
+            // --- Zone Tables (From Chunk 1/Images) ---
+            const ZONE_TABLES = {
+                'V': {
+                    'B0': ['-', '-', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'H', 'O', 'O'],
+                    'B5': ['-', '-', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'O', 'O', 'O', 'O', 'O', 'H', 'O'],
+                    'A0': ['I', 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O', 'O', 'O'],
+                    'A5': ['I', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O', 'O', 'O', 'O'],
+                    'F0': ['I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
+                    'F5': ['I', 'I', 'I', 'I', 'H', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
+                    'G0': ['I', 'I', 'I', 'H', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
+                    'G5': ['I', 'I', 'H', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
+                    'K0': ['I', 'H', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
+                    'K5': ['H', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
+                    'M0': ['H', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
+                    'M5': ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
+                    'M9': ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O']
+                },
+                'IV': {
+                    'B0': ['-', '-', '-', 'I', 'I', 'I', 'I', 'I', 'I'],
+                    'B5': ['-', '-', 'I', 'I', 'I', 'I', 'I', 'I', 'I'],
+                    'A0': ['-', '-', 'I', 'I', 'I', 'I', 'I', 'I', 'I'],
+                    'A5': ['I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I'],
+                    'F0': ['I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I'],
+                    'F5': ['I', 'I', 'I', 'I', 'I', 'H', 'H', 'H', 'O'],
+                    'G0': ['I', 'I', 'I', 'I', 'I', 'H', 'H', 'H', 'O'],
+                    'G5': ['I', 'I', 'I', 'I', 'I', 'H', 'H', 'H', 'O'],
+                    'K0': ['I', 'I', 'I', 'I', 'H', 'O', 'O', 'O', 'O']
+                },
+                'III': {
+                    'B0': [null, '-', '-', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', '-'],
+                    'B5': [null, '-', '-', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', '-'],
+                    'A0': [null, 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'O', 'O', 'O'],
+                    'A5': [null, 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O', 'O'],
+                    'F0': [null, 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O', 'O', 'O'],
+                    'F5': [null, 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O', 'O', 'O'],
+                    'G0': [null, 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O', 'O', 'O'],
+                    'G5': [null, 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O', 'O'],
+                    'K0': [null, 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O', 'O'],
+                    'K5': [null, 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O'],
+                    'M0': [null, '-', 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O'],
+                    'M5': [null, '-', '-', '-', '-', 'I', 'I', 'I', 'I', 'H', 'O', 'O'],
+                    'M9': [null, '-', '-', '-', '-', '-', '-', '-', 'I', 'H', 'O', 'O']
+                },
+                'II': {
+                    'B0': [null, '-', '-', '-', '-', '-', '-', 'I', 'I', 'I', 'I', 'I', 'H'],
+                    'B5': [null, '-', '-', '-', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'O'],
+                    'A0': [null, '-', '-', 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O'],
+                    'A5': [null, '-', 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O', 'O'],
+                    'F0': [null, '-', 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O', 'O'],
+                    'F5': [null, 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O', 'O'],
+                    'G0': [null, 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O', 'O'],
+                    'G5': [null, 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O', 'O'],
+                    'K0': [null, 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O'],
+                    'K5': [null, '-', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O'],
+                    'M0': [null, '-', '-', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O'],
+                    'M5': [null, '-', '-', '-', '-', '-', 'I', 'I', 'I', 'I', 'I', 'H', 'O'],
+                    'M9': [null, '-', '-', '-', '-', '-', 'I', 'I', 'I', 'I', 'I', 'H', 'O']
+                },
+                'Ib': {
+                    'B0': [null, null, null, null, '-', '-', '-', '-', 'I', 'I', 'I', 'I', 'I', 'H'],
+                    'B5': [null, null, null, null, '-', '-', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O'],
+                    'A0': [null, null, null, null, '-', 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O'],
+                    'A5': [null, null, null, null, '-', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O'],
+                    'F0': [null, null, null, null, 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O'],
+                    'F5': [null, null, null, null, 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O'],
+                    'G0': [null, null, null, null, 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O'],
+                    'G5': [null, null, null, null, '-', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O'],
+                    'K0': [null, null, null, null, '-', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O', 'O'],
+                    'K5': [null, null, null, null, '-', '-', 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O'],
+                    'M0': [null, null, null, null, '-', '-', '-', 'I', 'I', 'I', 'I', 'H', 'O', 'O'],
+                    'M5': [null, null, null, null, '-', '-', '-', '-', 'I', 'I', 'I', 'I', 'H', 'O'],
+                    'M9': [null, null, null, null, '-', '-', '-', '-', 'I', 'I', 'I', 'I', 'H', 'O']
+                },
+                'Ia': {
+                    'B0': [null, null, null, null, null, null, '-', '-', 'I', 'I', 'I', 'I', 'I', 'H'],
+                    'B5': [null, null, null, null, null, null, '-', 'I', 'I', 'I', 'I', 'I', 'H', 'O'],
+                    'A0': [null, null, null, null, null, null, '-', 'I', 'I', 'I', 'I', 'I', 'H', 'O'],
+                    'A5': [null, null, null, null, null, null, '-', 'I', 'I', 'I', 'I', 'I', 'H', 'O'],
+                    'F0': [null, null, null, null, null, null, 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'O'],
+                    'F5': [null, null, null, null, null, null, 'I', 'I', 'I', 'I', 'I', 'H', 'O', 'O'],
+                    'G0': [null, null, null, null, null, null, '-', 'I', 'I', 'I', 'I', 'I', 'H', 'O'],
+                    'G5': [null, null, null, null, null, null, '-', 'I', 'I', 'I', 'I', 'I', 'H', 'O'],
+                    'K0': [null, null, null, null, null, null, '-', 'I', 'I', 'I', 'I', 'I', 'H', 'O'],
+                    'K5': [null, null, null, null, null, null, '-', 'I', 'I', 'I', 'I', 'I', 'H', 'O'],
+                    'M0': [null, null, null, null, null, null, '-', '-', 'I', 'I', 'I', 'I', 'H', 'O'],
+                    'M5': [null, null, null, null, null, null, '-', '-', 'I', 'I', 'I', 'I', 'H', 'O'],
+                    'M9': [null, null, null, null, null, null, '-', '-', 'I', 'I', 'I', 'I', 'H', 'O']
+                },
+                'VI': {
+                    'F5': ['I', 'I', 'I', 'H', 'O'],
+                    'G0': ['I', 'I', 'H', 'O', 'O'],
+                    'G5': ['I', 'H', 'O', 'O', 'O'],
+                    'K0': ['I', 'H', 'O', 'O', 'O'],
+                    'K5': ['O', 'O', 'O', 'O', 'O'],
+                    'M0': ['O', 'O', 'O', 'O', 'O'],
+                    'M5': ['O', 'O', 'O', 'O', 'O'],
+                    'M9': ['O', 'O', 'O', 'O', 'O']
+                },
+                'D': {
+                    'DB': ['H', 'O', 'O', 'O', 'O'],
+                    'DA': ['O', 'O', 'O', 'O', 'O'],
+                    'DF': ['O', 'O', 'O', 'O', 'O'],
+                    'DG': ['O', 'O', 'O', 'O', 'O'],
+                    'DK': ['O', 'O', 'O', 'O', 'O'],
+                    'DM': ['O', 'O', 'O', 'O', 'O']
+                }
+            };
+
+            function getZoneForOrbit(size, type, decimal, orbitNum) {
+                const table = ZONE_TABLES[size];
+                if (!table) return 'O';
+                const key = size === 'D' ? type : (type + (decimal === null ? '' : decimal));
+                const zoneList = table[key] || table[type + '0'] || table[type + '5'] || Object.values(table)[0];
+                const roundedOrbit = Math.floor(orbitNum);
+                if (roundedOrbit < 0) return '-';
+                if (roundedOrbit >= zoneList.length) return 'O';
+                return zoneList[roundedOrbit] || 'O';
+            }
+
+            // --- Chunk 2 Logic ---
+
+            // Step 1: Map Orbital Zones
+            sys.orbits = [];
+            for (let i = 0; i <= sys.maxOrbits; i++) {
+                sys.orbits.push({
+                    orbit: i,
+                    zone: getZoneForOrbit(pSize, pType, pDec, i),
+                    contents: null
+                });
+            }
+
+            // Step 2 & 3: Table Roll (Captured Planets and Empty Orbits)
+            const anomalyRoll = roll1D() + (['B', 'A'].includes(pType) ? 1 : 0);
+            const anomalyTable = [
+                null, // 0
+                { capPres: false, capQty: 1, empVac: false, empQty: 1 }, // 1
+                { capPres: false, capQty: 1, empVac: false, empQty: 1 }, // 2
+                { capPres: false, capQty: 2, empVac: false, empQty: 2 }, // 3
+                { capPres: false, capQty: 2, empVac: false, empQty: 3 }, // 4
+                { capPres: true, capQty: 3, empVac: true, empQty: 3 },  // 5
+                { capPres: true, capQty: 3, empVac: true, empQty: 3 },  // 6
+                { capPres: true, capQty: 3, empVac: true, empQty: 3 }   // 7 (from DM+1)
+            ];
+            const resultRow = anomalyTable[Math.min(7, anomalyRoll)];
+
+            // Step 2: Empty Orbits
+            if (resultRow.empVac) {
+                const qty = roll1D(); // Image says "roll on Qty column", which is 1-3. 1D clipped to 1-3 is common, but let's assume 1D.
+                // Re-reading image: Qty column has values 1, 1, 2, 3, 3, 3.
+                const qtyTable = [0, 1, 1, 2, 3, 3, 3];
+                const actualQty = qtyTable[roll1D()];
+                for (let i = 0; i < actualQty; i++) {
+                    let attempts = 0;
+                    while (attempts < 20) {
+                        const orbNum = roll2D();
+                        const slot = sys.orbits.find(o => o.orbit === orbNum);
+                        if (slot && !slot.contents) {
+                            slot.contents = { type: 'Empty' };
+                            break;
+                        }
+                        attempts++;
+                    }
+                }
+            }
+
+            // Step 3: Captured Planets
+            if (resultRow.capPres) {
+                const qtyTable = [0, 1, 1, 2, 2, 3, 3];
+                const actualQty = qtyTable[roll1D()];
+                for (let i = 0; i < actualQty; i++) {
+                    const baseline = roll2D();
+                    const deviation = (roll2D() - 7) * 0.1;
+                    const finalOrbit = baseline + deviation;
+                    // For Captured Planets, we add them to a special list as they might occupy 
+                    // fractional orbits not in the base list.
+                    if (!sys.capturedPlanets) sys.capturedPlanets = [];
+                    sys.capturedPlanets.push({
+                        orbit: finalOrbit,
+                        zone: getZoneForOrbit(pSize, pType, pDec, finalOrbit),
+                        type: 'Captured Planet'
+                    });
+                }
+            }
+
+            // Step 4: Place Gas Giants
+            let availableSlots = sys.orbits.filter(o => o.zone !== '-' && !o.contents);
+            const placeGG = (gg) => {
+                // Prefer H and O zones
+                let targets = availableSlots.filter(s => ['H', 'O'].includes(s.zone));
+                if (targets.length === 0) {
+                    // Fail over to I if absolutely no other orbits
+                    targets = availableSlots.filter(s => s.zone === 'I');
+                }
+
+                if (targets.length > 0) {
+                    const target = targets[Math.floor(Math.random() * targets.length)];
+                    target.contents = { type: 'Gas Giant', size: gg.size };
+                    availableSlots = availableSlots.filter(s => s !== target);
+                    return target;
+                } else {
+                    // Overflow Rule: Create new orbit in outer zone
+                    const newOrbitNum = sys.maxOrbits + 1;
+                    sys.maxOrbits = newOrbitNum;
+                    const newSlot = {
+                        orbit: newOrbitNum,
+                        zone: 'O',
+                        contents: { type: 'Gas Giant', size: gg.size }
+                    };
+                    sys.orbits.push(newSlot);
+                    return newSlot;
+                }
+            };
+            sys.gasGiants.forEach(gg => placeGG(gg));
+
+            // Step 5: Place Planetoid Belts
+            availableSlots = sys.orbits.filter(o => o.zone !== '-' && !o.contents);
+            for (let i = 0; i < sys.planetoidBelts; i++) {
+                // Preference: Orbit number minus 1 from a gas giant
+                const ggSlots = sys.orbits.filter(s => s.contents && s.contents.type === 'Gas Giant');
+                let target = null;
+                for (let ggS of ggSlots) {
+                    const prefOrb = ggS.orbit - 1;
+                    const prefSlot = availableSlots.find(s => s.orbit === prefOrb);
+                    if (prefSlot) {
+                        target = prefSlot;
+                        break;
+                    }
+                }
+
+                if (!target && availableSlots.length > 0) {
+                    target = availableSlots[Math.floor(Math.random() * availableSlots.length)];
+                }
+
+                if (target) {
+                    target.contents = { type: 'Planetoid Belt' };
+                    availableSlots = availableSlots.filter(s => s !== target);
+                } else {
+                    // No slots left for belt, just skip (or create orbit? Rule only specifies create for GG)
+                }
+            }
+
+            // Step 6: Place Main World
+            const mwSize = mainworldBase.size;
+            const mwAtm = mainworldBase.atm;
+            const mwIsAsteroid = (mwSize === 0);
+            const mwCanBeAnywhere = mwIsAsteroid || ([0, 1].includes(mwAtm)) || (mwAtm >= 10); // 1- is trace, A+ is exotic. In hex_map, codes 10+ are A+.
+
+            let mwPlaced = false;
+            if (!mwCanBeAnywhere) {
+                // Try Habitable (H) Zone
+                const hCandidates = sys.orbits.filter(o => o.zone === 'H');
+                if (hCandidates.length > 0) {
+                    const target = hCandidates[Math.floor(Math.random() * hCandidates.length)];
+                    if (target.contents && target.contents.type === 'Gas Giant') {
+                        // Satellite Check
+                        if (!target.contents.satellites) target.contents.satellites = [];
+                        target.contents.satellites.push({ type: 'Mainworld' });
+                        mwPlaced = true;
+                    } else if (!target.contents) {
+                        target.contents = { type: 'Mainworld' };
+                        mwPlaced = true;
+                    }
+                }
+            }
+
+            if (!mwPlaced) {
+                // Placeholder/Random placement if H is full or MW can be anywhere
+                availableSlots = sys.orbits.filter(o => o.zone !== '-' && !o.contents);
+                if (availableSlots.length > 0) {
+                    const target = availableSlots[Math.floor(Math.random() * availableSlots.length)];
+                    target.contents = { type: 'Mainworld' };
+                    mwPlaced = true;
+                } else {
+                    // Overflow: Create new orbit if all existing ones are full
+                    const newOrbitNum = sys.maxOrbits + 1;
+                    sys.maxOrbits = newOrbitNum;
+                    const newSlot = {
+                        orbit: newOrbitNum,
+                        zone: 'O',
+                        contents: { type: 'Mainworld' }
+                    };
+                    sys.orbits.push(newSlot);
+                    mwPlaced = true;
+                }
+            }
+
+            return sys;
+        }
+
+        function generateCTSystemChunk5(sys, mainworldBase) {
+            if (!sys) return null;
+
+            const mwGov = mainworldBase.gov;
+            const mwLaw = mainworldBase.law;
+            const mwTL = mainworldBase.tl;
+            const mwAtm = mainworldBase.atm;
+            const mwPop = mainworldBase.pop;
+            const isIndustrial = (mainworldBase.tradeCodes && (mainworldBase.tradeCodes.includes('In') || mainworldBase.tradeCodes.includes('IND')));
+            const isPoor = (mainworldBase.tradeCodes && (mainworldBase.tradeCodes.includes('Po') || mainworldBase.tradeCodes.includes('POR')));
+            const hasBase = (mainworldBase.navalBase || mainworldBase.scoutBase);
+
+            const fleshOutWorld = (w, orbitNum, zone) => {
+                // Skip non-terrestrial/empty nodes
+                if (w.type === 'Empty' || w.size === 0 || w.size === 'R' || w.type === 'Gas Giant' || w.type === 'Planetoid Belt') {
+                    w.gov = 0; w.law = 0; w.spaceport = 'Y';
+                    return;
+                }
+
+                // Step 1: Government
+                let gov = 0;
+                if (w.pop > 0) {
+                    if (mwGov === 6) {
+                        gov = 6;
+                    } else {
+                        let gRoll = roll1D();
+                        if (mwGov >= 7) gRoll += 2;
+                        if (gRoll >= 5) gov = 6;
+                        else gov = Math.max(0, gRoll);
+                    }
+                }
+                w.gov = gov;
+
+                // Step 2: Law Level
+                let law = 0;
+                if (gov > 0) {
+                    law = Math.max(0, roll1D() - 3 + mwLaw);
+                }
+                w.law = law;
+
+                // Step 3: Facilities
+                w.facilities = [];
+                // Farming
+                if (zone === 'H' && w.atm >= 4 && w.atm <= 9 && w.hydro >= 4 && w.hydro <= 8 && w.pop >= 2) {
+                    w.facilities.push('Farming');
+                }
+                // Mining
+                if (isIndustrial && w.pop >= 2) {
+                    w.facilities.push('Mining');
+                }
+                // Colony
+                if (gov === 6 && w.pop >= 5) {
+                    w.facilities.push('Colony');
+                }
+                // Research Lab
+                if (mwTL >= 9 && w.pop > 0) {
+                    let labRoll = roll2D();
+                    if (mwTL >= 10) labRoll += 2;
+                    if (labRoll >= 11) w.facilities.push('Research Laboratory');
+                }
+                // Military Base
+                if (w.pop > 0 && !isPoor) {
+                    let milRoll = roll2D();
+                    if (mwPop >= 8) milRoll += 1;
+                    if (w.atm === mwAtm) milRoll += 2;
+                    if (hasBase) milRoll += 1;
+                    if (milRoll >= 12) w.facilities.push('Military Base');
+                }
+
+                // Step 4: Tech Level
+                let tl = Math.max(0, mwTL - 1);
+                if (w.facilities.includes('Research Laboratory') || w.facilities.includes('Military Base')) {
+                    tl = mwTL;
+                }
+                // Survival Floor
+                if (tl < 7 && ![5, 6, 8].includes(w.atm)) {
+                    tl = 7;
+                }
+                w.tl = tl;
+
+                // Step 5: Spaceport
+                let spRoll = roll1D();
+                if (w.pop >= 6) spRoll += 2;
+                else if (w.pop === 1) spRoll -= 2;
+                else if (w.pop === 0) spRoll -= 3;
+
+                let sp = 'Y';
+                if (spRoll <= 2) sp = 'Y';
+                else if (spRoll === 3) sp = 'H';
+                else if (spRoll <= 5) sp = 'G';
+                else sp = 'F';
+                w.spaceport = sp;
+
+                // Final UWP String Update (Secondary)
+                const sChar = (w.size === 'S' ? 'S' : toUWPChar(w.size));
+                w.uwpSecondary = `${w.spaceport}${sChar}${toUWPChar(w.atm)}${toUWPChar(w.hydro)}${toUWPChar(w.pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
+                if (w.facilities.length > 0) {
+                    w.classifications = w.facilities; // for display
+                }
+            };
+
+            const processNode = (node, orbitNum, zone) => {
+                if (!node) return;
+                fleshOutWorld(node, orbitNum, zone);
+                if (node.satellites) {
+                    node.satellites.forEach(s => fleshOutWorld(s, orbitNum, zone));
+                }
+            };
+
+            sys.orbits.forEach(slot => {
+                if (slot.contents && slot.contents.type !== 'Mainworld') {
+                    processNode(slot.contents, slot.orbit, slot.zone);
+                }
+            });
+            if (sys.capturedPlanets) {
+                sys.capturedPlanets.forEach(p => {
+                    processNode(p, p.orbit, p.zone);
+                });
+            }
+
+            return sys;
+        }
+
+        function generateCTSystemChunk4(sys, mainworldBase) {
+            if (!sys) return null;
+
+            const mwPop = mainworldBase.pop;
+
+            // Satellite Orbits Table (radii)
+            // Indices 1-12. Note: 2D rolls for Close/Far/Extreme (2-12). 1D for Ring (1-6).
+            const SATELLITE_ORBITS = {
+                Ring: [0, 1, 1, 1, 2, 2, 3],
+                Close: [0, 0, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
+                Far: [0, 0, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65],
+                Extreme: [0, 0, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300, 325]
+            };
+
+            const generateMoons = (parent, orbitNum, zone) => {
+                // Skip Size 0 (Belts) and Small Worlds (S)
+                if (parent.size === 0 || parent.size === 'S') return;
+
+                // Step 1: Quantity
+                let qty = 0;
+                if (parent.type === 'Gas Giant') {
+                    if (['LGG', 'Large'].includes(parent.size)) qty = roll2D();
+                    else qty = roll2D() - 4;
+                } else if (parent.type === 'Mainworld' || parent.type === 'Terrestrial Planet') {
+                    qty = roll1D() - 3;
+                }
+                qty = Math.max(0, qty);
+                if (qty <= 0) return;
+
+                // Preserve Pre-existing satellites (like a Mainworld placed in Chunk 2)
+                if (!parent.satellites) parent.satellites = [];
+                const startingSatQty = parent.satellites.length;
+                let usedDistances = new Set();
+                parent.satellites.forEach(s => { if (s.pd) usedDistances.add(s.pd); });
+
+                // Add new satellites up to qty
+                for (let i = startingSatQty; i < qty; i++) {
+                    let moon = { type: 'Satellite' };
+
+                    // Step 2: Size
+                    let sizeRoll;
+                    if (parent.type === 'Gas Giant') {
+                        sizeRoll = (['LGG', 'Large'].includes(parent.size) ? roll2D() - 4 : roll2D() - 6);
+                    } else {
+                        let pSize = parent.size;
+                        if (parent.type === 'Mainworld' && mainworldBase.size !== undefined) {
+                            pSize = mainworldBase.size;
+                        }
+                        sizeRoll = pSize - roll1D();
+                    }
+
+                    if (sizeRoll === 0) moon.size = 'R';
+                    else if (sizeRoll < 0) moon.size = 'S';
+                    else moon.size = Math.min(10, sizeRoll);
+
+                    // Step 3: Orbit distance (Radii)
+                    let dist = null;
+                    let attempt = 0;
+                    while (dist === null && attempt < 15) {
+                        attempt++;
+                        if (moon.size === 'R') {
+                            dist = SATELLITE_ORBITS.Ring[roll1D()];
+                        } else {
+                            // Category: 2D - sequential DM
+                            let catRoll = roll2D() - i;
+                            let cat = 'Close';
+                            if (catRoll >= 12 && parent.type === 'Gas Giant') cat = 'Extreme';
+                            else if (catRoll >= 8) cat = 'Far';
+
+                            let distRoll = roll2D();
+                            dist = SATELLITE_ORBITS[cat][distRoll];
+                        }
+                        if (usedDistances.has(dist)) dist = null;
+                    }
+                    if (dist === null) continue;
+                    usedDistances.add(dist);
+                    moon.pd = dist;
+
+                    // Step 4: Atmosphere
+                    let szVal = (moon.size === 'S' || moon.size === 'R') ? 0 : moon.size;
+                    let atmRoll = roll2D() - 7 + szVal;
+                    if (zone === 'I' || zone === 'O') atmRoll -= 4;
+                    let atm = Math.max(0, Math.min(15, atmRoll));
+                    if (szVal <= 1) atm = 0;
+
+                    // Far-outer rule
+                    const hOrbits = sys.orbits.filter(o => o.zone === 'H').map(o => o.orbit);
+                    if (hOrbits.length > 0) {
+                        const maxH = Math.max(...hOrbits);
+                        if (orbitNum >= maxH + 2 && roll2D() === 12) {
+                            atm = 10;
+                        }
+                    }
+                    moon.atm = atm;
+
+                    // Step 5: Hydrographics
+                    let hydroRoll = roll2D() - 7 + szVal;
+                    if (atm <= 1 || atm >= 10) hydroRoll -= 4;
+                    if (zone === 'O') hydroRoll -= 2;
+                    let hydro = Math.max(0, Math.min(10, hydroRoll));
+                    if (zone === 'I' || szVal <= 1) hydro = 0;
+                    moon.hydro = hydro;
+
+                    // Step 6: Population
+                    let popRoll = roll2D() - 2;
+                    if (zone === 'I') popRoll -= 6;
+                    else if (zone === 'O') popRoll -= 5;
+                    if (![5, 6, 8].includes(atm)) popRoll -= 2;
+                    let pop = Math.max(0, popRoll);
+                    if (moon.size === 'R') pop = 0;
+                    if (pop >= mwPop) pop = Math.max(0, mwPop - 1);
+                    moon.pop = pop;
+
+                    // UWP (Secondary)
+                    const sChar = (moon.size === 'R' ? 'R' : (moon.size === 'S' ? 'S' : toUWPChar(moon.size)));
+                    moon.uwpSecondary = `${sChar}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}00-0`;
+
+                    parent.satellites.push(moon);
+                }
+            };
+
+            // Loop all possible parents
+            sys.orbits.forEach(slot => {
+                if (slot.contents) {
+                    generateMoons(slot.contents, slot.orbit, slot.zone);
+                }
+            });
+            if (sys.capturedPlanets) {
+                sys.capturedPlanets.forEach(p => {
+                    generateMoons(p, p.orbit, p.zone);
+                });
+            }
+
+            return sys;
+        }
+
+        function generateCTSystemChunk3(sys, mainworldBase) {
+            if (!sys) return null;
+
+            const mwPop = mainworldBase.pop;
+            const primary = sys.stars[0];
+            const pType = primary.type;
+
+            const generateWorld = (world, orbitNum, zone) => {
+                // Step 2: Determine World Size
+                let sizeRoll = roll2D() - 2;
+                if (orbitNum === 0) sizeRoll -= 5;
+                else if (orbitNum === 1) sizeRoll -= 4;
+                else if (orbitNum === 2) sizeRoll -= 2;
+
+                if (pType === 'M') sizeRoll -= 2;
+
+                let size;
+                if (sizeRoll <= 0) {
+                    size = 'S'; // Small World
+                } else {
+                    size = Math.min(10, sizeRoll);
+                }
+                world.size = size;
+
+                // Step 3: Determine Atmosphere
+                let atmSizeVal = (size === 'S' ? 0 : size);
+                let atmRoll = roll2D() - 7 + atmSizeVal;
+                if (zone === 'I' || zone === 'O') atmRoll -= 2;
+
+                let atm = Math.max(0, Math.min(15, atmRoll));
+                if (size === 0 || size === 'S') atm = 0;
+
+                // Special Outer Zone Rule
+                const hOrbits = sys.orbits.filter(o => o.zone === 'H').map(o => o.orbit);
+                if (hOrbits.length > 0) {
+                    const maxH = Math.max(...hOrbits);
+                    if (orbitNum >= maxH + 2) {
+                        if (roll2D() === 12) atm = 10; // Atmosphere A (Exotic)
+                    }
+                }
+                world.atm = atm;
+
+                // Step 4: Determine Hydrographics
+                let hydroRoll = roll2D() - 7 + atmSizeVal;
+                if (atm === 0 || atm === 1 || atm >= 10) hydroRoll -= 4;
+                if (zone === 'O') hydroRoll -= 4;
+
+                let hydro = Math.max(0, Math.min(10, hydroRoll));
+                if (zone === 'I' || size === 1 || size === 'S') hydro = 0;
+                world.hydro = hydro;
+
+                // Step 5: Determine Population
+                let popRoll = roll2D() - 2;
+                if (zone === 'I' || zone === 'O') popRoll -= 5;
+                if (![0, 5, 6, 8].includes(atm)) popRoll -= 2;
+
+                let pop = Math.max(0, popRoll);
+                // Continuation Cap
+                if (pop >= mwPop) {
+                    pop = Math.max(0, mwPop - 1);
+                }
+                world.pop = pop;
+
+                // UWP String (Secondary)
+                const sChar = (size === 'S' ? 'S' : toUWPChar(size));
+                world.uwpSecondary = `${sChar}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}00-0`;
+            };
+
+            // Loop standard orbits
+            sys.orbits.forEach(slot => {
+                if (!slot.contents) return;
+                const type = slot.contents.type;
+                if (['Gas Giant', 'Planetoid Belt', 'Mainworld', 'Empty'].includes(type) || type === 'Captured Planet') return;
+                generateWorld(slot.contents, slot.orbit, slot.zone);
+            });
+
+            // Loop captured planets
+            if (sys.capturedPlanets) {
+                sys.capturedPlanets.forEach(cp => {
+                    generateWorld(cp, cp.orbit, cp.zone);
+                });
+            }
+
+            return sys;
+        }
+
+        function generateCTSystemChunk1(mainworldBase) {
+            if (!mainworldBase) return null;
+
+            // -----------------------------------------------------------------
+            // System Features Table — 13 entries indexed 0–12.
+            // Columns used:
+            //   nature      : 'Solo' | 'Binary' | 'Trinary'
+            //   priType/Size: Primary star spectral type and luminosity class
+            //   compType/Size: Companion star type/size (read when a companion
+            //                  roll lands on this row index)
+            //   orbit       : Companion orbit data for Binary companion
+            //   maxOrbits   : Base max planet slots (DMs applied below)
+            //   ggPres/Qty  : Gas giant presence flag and quantity
+            //   beltPres/Qty: Planetoid belt presence flag and quantity
+            // -----------------------------------------------------------------
+            const CT_SYS_FEATURES = [
+                { nature: 'Solo', priType: 'B', priSize: 'Ia', compType: null, compSize: 'Ia', orbit: { base: 'Close', die: false }, maxOrbits: 0, ggPres: false, ggQty: 0, beltPres: true, beltQty: 3 },
+                { nature: 'Solo', priType: 'B', priSize: 'Ib', compType: 'B', compSize: 'Ib', orbit: { base: 'Close', die: false }, maxOrbits: 1, ggPres: true, ggQty: 1, beltPres: true, beltQty: 2 },
+                { nature: 'Solo', priType: 'A', priSize: 'II', compType: 'A', compSize: 'II', orbit: { base: 'Close', die: false }, maxOrbits: 2, ggPres: true, ggQty: 1, beltPres: true, beltQty: 2 },
+                { nature: 'Solo', priType: 'M', priSize: 'III', compType: 'F', compSize: 'III', orbit: { base: 'Close', die: false }, maxOrbits: 3, ggPres: true, ggQty: 1, beltPres: true, beltQty: 2 },
+                { nature: 'Solo', priType: 'M', priSize: 'IV', compType: 'F', compSize: 'IV', orbit: { base: 1, die: false }, maxOrbits: 4, ggPres: true, ggQty: 2, beltPres: true, beltQty: 2 },
+                { nature: 'Solo', priType: 'M', priSize: 'V', compType: 'G', compSize: 'D', orbit: { base: 2, die: false }, maxOrbits: 5, ggPres: true, ggQty: 2, beltPres: true, beltQty: 2 },
+                { nature: 'Solo', priType: 'M', priSize: 'V', compType: 'G', compSize: 'D', orbit: { base: 3, die: false }, maxOrbits: 6, ggPres: true, ggQty: 3, beltPres: true, beltQty: 2 },
+                { nature: 'Solo', priType: 'M', priSize: 'V', compType: 'K', compSize: 'V', orbit: { base: 4, die: true }, maxOrbits: 7, ggPres: true, ggQty: 3, beltPres: false, beltQty: 1 },
+                { nature: 'Binary', priType: 'K', priSize: 'V', compType: 'K', compSize: 'V', orbit: { base: 5, die: true }, maxOrbits: 8, ggPres: true, ggQty: 4, beltPres: false, beltQty: 1 },
+                { nature: 'Binary', priType: 'G', priSize: 'V', compType: 'M', compSize: 'VI', orbit: { base: 6, die: true }, maxOrbits: 9, ggPres: true, ggQty: 4, beltPres: false, beltQty: 1 },
+                { nature: 'Binary', priType: 'F', priSize: 'V', compType: 'M', compSize: 'D', orbit: { base: 7, die: true }, maxOrbits: 10, ggPres: false, ggQty: 0, beltPres: false, beltQty: 1 },
+                { nature: 'Binary', priType: 'F', priSize: 'VI', compType: 'M', compSize: 'D', orbit: { base: 8, die: true }, maxOrbits: 11, ggPres: false, ggQty: 0, beltPres: false, beltQty: 1 },
+                { nature: 'Trinary', priType: 'F', priSize: 'D', compType: 'M', compSize: 'D', orbit: { base: 'Far', die: false }, maxOrbits: 12, ggPres: false, ggQty: 0, beltPres: false, beltQty: 1 },
+            ];
+
+            // Resolve companion orbit number from orbit data object.
+            // trinaryDM: if >0, re-roll the orbit row with that DM (for the 2nd companion in trinary).
+            function rollOrbit(orbitData, trinaryDM) {
+                let od = orbitData;
+                if (trinaryDM > 0) {
+                    let reIdx = Math.max(0, Math.min(12, (roll2D() - 2) + trinaryDM));
+                    od = CT_SYS_FEATURES[reIdx].orbit;
+                }
+                if (od.base === 'Close') return { orbit: 0, label: 'Close' };
+                if (od.base === 'Far') return { orbit: 14, label: 'Far' };
+                let num = od.base + (od.die ? roll1D() : 0);
+                return { orbit: num, label: String(num) };
+            }
+
+            // Max orbits: apply DMs for star type and size to the table base value.
+            // Per rules: DM+8 for Ia/Ib/II, DM+4 for III, DM-4 for M type, DM-2 for K type.
+            function calcMaxOrbits(tableBase, type, size) {
+                let mo = tableBase;
+                if (['Ia', 'Ib', 'II'].includes(size)) mo += 8;
+                else if (size === 'III') mo += 4;
+                if (type === 'M') mo -= 4;
+                else if (type === 'K') mo -= 2;
+                return Math.max(0, mo);
+            }
+
+            // 1D spectral decimal: 1-3 → '0', 4-6 → '5'. D (white dwarf) has none.
+            function spectralDecimal(size) {
+                return size === 'D' ? null : (roll1D() <= 3 ? 0 : 5);
+            }
+
+            function starName(type, size, decimal) {
+                return size === 'D' ? `${type} D` : `${type}${decimal} ${size}`;
+            }
+
+            // ---- STEP A: Primary Star Roll ----
+            let priRoll2D = roll2D();
+            let priRawIdx = priRoll2D - 2;  // raw index 0–10
+            let priDM = 0;
+            if ((mainworldBase.atm >= 4 && mainworldBase.atm <= 9) || mainworldBase.pop >= 8) priDM = 4;
+            let priIdx = Math.max(0, Math.min(12, priRawIdx + priDM));
+            let row = CT_SYS_FEATURES[priIdx];
+
+            let priDecimal = spectralDecimal(row.priSize);
+            let primary = {
+                type: row.priType,
+                size: row.priSize,
+                decimal: priDecimal,
+                name: starName(row.priType, row.priSize, priDecimal),
+                role: 'Primary',
+                orbit: null,
+                orbitLabel: null,
+                maxOrbits: calcMaxOrbits(row.maxOrbits, row.priType, row.priSize),
+            };
+
+            let sys = {
+                nature: row.nature,
+                stars: [primary],
+                gasGiants: [],
+                planetoidBelts: 0,
+                worlds: [],
+                _priIdx: priIdx,
+                _priRawIdx: priRawIdx,
+                _priDM: priDM,
+            };
+
+            // ---- STEP B-C: Companion Stars ----
+            // Companion type/size each rolled separately using priRawIdx as +DM,
+            // then the compType/compSize column is read from the resulting row.
+            function generateCompanion(role, trinaryDM) {
+                let typeIdx = Math.max(0, Math.min(12, (roll2D() - 2) + priRawIdx));
+                let sizeIdx = Math.max(0, Math.min(12, (roll2D() - 2) + priRawIdx));
+                let cType = CT_SYS_FEATURES[typeIdx].compType || 'M';
+                let cSize = CT_SYS_FEATURES[sizeIdx].compSize || 'D';
+                let cDec = spectralDecimal(cSize);
+                let o = rollOrbit(row.orbit, trinaryDM);
+                // If orbit resolves within the star itself, clamp to 'Close'
+                if (typeof o.orbit === 'number' && o.orbit <= 0) o = { orbit: 0, label: 'Close' };
+                return {
+                    type: cType,
+                    size: cSize,
+                    decimal: cDec,
+                    name: starName(cType, cSize, cDec),
+                    role,
+                    orbit: o.orbit,
+                    orbitLabel: o.label,
+                    maxOrbits: calcMaxOrbits(row.maxOrbits, cType, cSize),
+                };
+            }
+
+            if (row.nature === 'Binary' || row.nature === 'Trinary') {
+                sys.stars.push(generateCompanion('Companion', 0));
+                if (row.nature === 'Trinary') {
+                    sys.stars.push(generateCompanion('Companion 2', 4));
+                }
+            }
+
+            // ---- STEP D: System Max Orbits ----
+            sys.maxOrbits = primary.maxOrbits;
+            sys.totalOrbits = sys.stars.reduce((s, st) => s + st.maxOrbits, 0);
+
+            // ---- STEP E: Gas Giants ----
+            // Count capped by primary maxOrbits; each sized by 1D (1-3=Large, 4-6=Small).
+            // Sync with Mainworld generation data: if gasGiant is true, ensure 1+; if false, force 0.
+            let ggCount = 0;
+            if (mainworldBase.gasGiant) {
+                ggCount = row.ggPres ? row.ggQty : 1;
+            } else {
+                ggCount = 0;
+            }
+
+            ggCount = Math.min(ggCount, sys.maxOrbits);
+            for (let i = 0; i < ggCount; i++) {
+                sys.gasGiants.push({ size: roll1D() <= 3 ? 'Large' : 'Small' });
+            }
+
+            // ---- STEPS H-I: Planetoid Belts ----
+            // DM = -(number of gas giants). Capped by orbits remaining after GG placement.
+            if (row.beltPres) {
+                let beltQty = Math.max(0, row.beltQty - sys.gasGiants.length);
+                let remaining = Math.max(0, sys.maxOrbits - sys.gasGiants.length);
+                sys.planetoidBelts = Math.min(beltQty, remaining);
+            }
+
+            return sys;
+        }
 
         // =====================================================================
         // BOOK 6 (CT) MAINWORLD PHYSICAL GENERATION
@@ -2843,7 +4081,7 @@
             let rlie = `${toEHex(ecoR)}${toEHex(ecoL)}${toEHex(ecoI)}${formatE}`;
             let wtnChar = toEHex(WTN);
 
-            let economicProfile = `${Tc}, ${formatIm}, ${rlie}, ${RU}, Cr${pcGWP}, ${wtnChar}, ${IR}, ${DR}`;
+            let economicProfile = `${formatIm}, ${rlie}, ${RU}, Cr${pcGWP}, ${wtnChar}, ${IR}, ${DR}`;
 
             // 14. Starport Profile (C-HX:DX:±#)
             let spClass = base.starport || 'X';
@@ -3113,6 +4351,7 @@
                 economicProfile,
                 starportProfile,
                 militaryProfile,
+                Im, ecoR, ecoL, ecoI, ecoE, RU, pcGWP, WTN, IR, DR,
                 displayString: `Pop: ${pValue}x10^${base.pop} | PCR: ${pcr} | Urb: ${urbanPercent}% | MC: ${majorCities} (${totalMajorCityPop.toLocaleString()})\nGov: ${govProfile} | Fac: ${factionsString} | Law: ${lawProfile}\nTech: ${techProfile} | Cul: ${culturalProfile}\nEco: ${economicProfile} | Sp: ${starportProfile}\nMil: ${militaryProfile}`,
                 displayStrings: [
                     `Pop: ${pValue}x10^${base.pop} | PCR: ${pcr} | Urb: ${urbanPercent}% | MC: ${majorCities} (${totalMajorCityPop.toLocaleString()})`,
@@ -3300,10 +4539,17 @@
         }
 
         function generateMgT2ESystemChunk1(mainworldBase) {
-            let sys = { stars: [], gasGiants: 0, planetoidBelts: 0, terrestrialPlanets: 0, hzco: 0, age: 0 };
+            let sys = { stars: [], gasGiants: 0, planetoidBelts: 0, terrestrialPlanets: 0, totalWorlds: 0, hzco: 0, age: 0 };
 
+            // =====================================================================
+            // Step 1: Primary Star & System Age
+            // =====================================================================
             let primary = rollMgT2EStar();
-            sys.stars.push(primary);
+            primary.role = 'Primary';
+            primary.separation = null;
+            primary.orbitId = null;
+            primary.eccentricity = 0;
+            primary.mao = getMAO(primary.sType, primary.subType, primary.sClass);
 
             let msLifespan = 10 / Math.pow(primary.mass, 2.5);
             if (primary.mass < 0.9) {
@@ -3311,67 +4557,144 @@
             } else {
                 sys.age = msLifespan * ((Math.floor(Math.random() * 100) + 1) / 100);
             }
+            sys.age = Math.max(0.1, sys.age);
 
             let hzcoAu = Math.sqrt(primary.lum);
             sys.hzco = convertAuToOrbit(hzcoAu);
+            sys.stars.push(primary);
 
-            let multiRoll = roll2D();
-            let multiDM = 0;
-            if (['O', 'B', 'A', 'F'].includes(primary.sType) && primary.sClass === 'V') multiDM += 1;
-            if (primary.sType === 'M' && primary.sClass === 'V') multiDM -= 1;
+            // =====================================================================
+            // Step 2: Companion Stars (Close, Near, Far + recursive Companions)
+            // =====================================================================
 
-            if (multiRoll + multiDM >= 10) {
-                let secRoll = roll2D();
-                let secType = 'Random';
-                if (secRoll <= 3) secType = 'Other';
-                else if (secRoll <= 5) secType = 'Random';
-                else if (secRoll <= 7) secType = 'Lesser';
-                else if (secRoll <= 9) secType = 'Sibling';
-                else secType = 'Twin';
-
-                let secondary;
-                if (secType === 'Twin') {
-                    secondary = JSON.parse(JSON.stringify(primary));
-                } else if (secType === 'Sibling') {
-                    secondary = JSON.parse(JSON.stringify(primary));
-                    secondary.subType += (Math.floor(Math.random() * 6) + 1);
-                } else {
-                    secondary = rollMgT2EStar();
-                }
-                sys.stars.push(secondary);
+            // Helper: compute presence roll DM based on a star's type/class
+            function getMultiDM(star) {
+                let dm = 0;
+                if (['Ia', 'Ib', 'II', 'III', 'IV'].includes(star.sClass)) dm += 1;
+                if (['V', 'VI'].includes(star.sClass) && ['O', 'B', 'A', 'F'].includes(star.sType)) dm += 1;
+                if (['V', 'VI'].includes(star.sClass) && star.sType === 'M') dm -= 1;
+                return dm;
             }
 
+            // Helper: generate companion star quality from a parent star
+            function rollCompanionQuality(parentStar) {
+                let secRoll = roll2D();
+                let companion;
+                if (secRoll >= 10) {
+                    // Twin
+                    companion = JSON.parse(JSON.stringify(parentStar));
+                } else if (secRoll >= 8) {
+                    // Sibling
+                    companion = JSON.parse(JSON.stringify(parentStar));
+                    companion.subType = Math.min(9, companion.subType + (Math.floor(Math.random() * 6) + 1));
+                } else {
+                    // Lesser / Random / Other
+                    companion = rollMgT2EStar();
+                }
+                companion.mao = getMAO(companion.sType, companion.subType, companion.sClass);
+                companion.name = `${companion.sType}${companion.subType} ${companion.sClass}`;
+                return companion;
+            }
+
+            // Helper: roll stellar eccentricity (isStar=true adds +2 DM automatically)
+            function rollStellarEcc(orbitId) {
+                return determineMgT2EEccentricity(true, 0, sys.age, orbitId, false, 0);
+            }
+
+            // Class Ia/Ib/II/III primaries cannot have Close companions
+            const canHaveClose = !['Ia', 'Ib', 'II', 'III'].includes(primary.sClass);
+            const primaryDM = getMultiDM(primary);
+
+            // Roll for Close, Near, and Far companion presence independently
+            const separationDefs = [
+                { sep: 'Close', orbitFn: () => { let r = roll1D() - 1; return r === 0 ? 0.5 : r; }, allowed: canHaveClose },
+                { sep: 'Near', orbitFn: () => roll1D() + 5, allowed: true },
+                { sep: 'Far', orbitFn: () => roll1D() + 11, allowed: true },
+            ];
+
+            for (const def of separationDefs) {
+                if (!def.allowed) continue;
+                if (roll2D() + primaryDM < 10) continue; // not present
+
+                let companion = rollCompanionQuality(primary);
+                companion.separation = def.sep;
+                companion.role = `${def.sep} Companion`;
+                companion.parentStarIdx = 0;
+                companion.orbitId = def.orbitFn();
+                companion.eccentricity = rollStellarEcc(companion.orbitId);
+                sys.stars.push(companion);
+
+                // Each Close/Near/Far star also rolls for its own tight Companion
+                let compDM = getMultiDM(companion);
+                if (roll2D() + compDM >= 10) {
+                    let tertiary = rollCompanionQuality(companion);
+                    tertiary.separation = 'Companion';
+                    tertiary.role = `${def.sep} Star's Companion`;
+                    tertiary.parentStarIdx = sys.stars.length - 1;
+                    // Companion formula: (1d6/10) + ((2d6-7)/100)
+                    tertiary.orbitId = (roll1D() / 10) + ((roll2D() - 7) / 100);
+                    tertiary.eccentricity = rollStellarEcc(tertiary.orbitId);
+                    sys.stars.push(tertiary);
+                }
+            }
+
+            // =====================================================================
+            // Step 3: Total Worlds Inventory (GG + PB + TP)
+            // =====================================================================
+            const multiStar = sys.stars.length >= 2;
+            function rollD3() { return Math.ceil(roll1D() / 2); }
+
+            // --- Gas Giants ---
             let existingGG = (mainworldBase && mainworldBase.gasGiant === true);
             let ggExists = existingGG || (roll2D() <= 9);
             if (ggExists) {
-                let ggQuantRoll = roll2D();
-                if (sys.stars.length === 1 && primary.sClass === 'V') ggQuantRoll += 1;
-                if (sys.stars.length >= 4) ggQuantRoll -= 1;
-                if (ggQuantRoll <= 4) sys.gasGiants = 1;
-                else if (ggQuantRoll <= 6) sys.gasGiants = 2;
-                else if (ggQuantRoll <= 8) sys.gasGiants = 3;
-                else if (ggQuantRoll <= 11) sys.gasGiants = 4;
-                else if (ggQuantRoll === 12) sys.gasGiants = 5;
+                let ggQ = roll2D();
+                if (sys.stars.length === 1 && primary.sClass === 'V') ggQ += 1; // single Class V
+                if (sys.stars.length >= 4) ggQ -= 1;
+                if (ggQ <= 4) sys.gasGiants = 1;
+                else if (ggQ <= 6) sys.gasGiants = 2;
+                else if (ggQ <= 8) sys.gasGiants = 3;
+                else if (ggQ <= 11) sys.gasGiants = 4;
+                else if (ggQ === 12) sys.gasGiants = 5;
                 else sys.gasGiants = 6;
             }
 
+            // --- Planetoid Belts ---
             let pbExists = (roll2D() >= 8);
             if (pbExists) {
-                let pbQuantRoll = roll2D() + (ggExists ? 1 : 0) + (sys.stars.length >= 2 ? 1 : 0);
-                if (pbQuantRoll <= 6) sys.planetoidBelts = 1;
-                else if (pbQuantRoll <= 11) sys.planetoidBelts = 2;
+                let pbQ = roll2D();
+                if (ggExists) pbQ += 1; // has gas giants
+                if (multiStar) pbQ += 1; // two or more stars
+                if (pbQ <= 6) sys.planetoidBelts = 1;
+                else if (pbQ <= 11) sys.planetoidBelts = 2;
                 else sys.planetoidBelts = 3;
             }
-            if (mainworldBase && mainworldBase.size === 0) sys.planetoidBelts += 1;
-
-            let tpRoll = roll2D() - 2;
-            if (tpRoll < 3) tpRoll = Math.floor(Math.random() * 3) + 1 + 2;
-            else tpRoll += Math.floor(Math.random() * 3);
-            sys.terrestrialPlanets = tpRoll;
-
-            if (mainworldBase && mainworldBase.size >= 1 && mainworldBase.size <= 15) {
-                if (sys.terrestrialPlanets < 1) sys.terrestrialPlanets = 1;
+            // Continuation: mainworld is an asteroid belt → force at least 1 PB
+            if (mainworldBase && mainworldBase.size === 0) {
+                sys.planetoidBelts = Math.max(1, sys.planetoidBelts + 1);
             }
+
+            // --- Terrestrial Planets ---
+            let tpCount = roll2D() - 2;
+            if (tpCount < 3) {
+                tpCount = rollD3() + 2;   // reroll as D3+2 (range 3–5)
+            } else {
+                tpCount += rollD3() - 1;  // add D3-1 (0–2 more)
+            }
+            // Continuation: standard terrestrial mainworld counts as one TP
+            if (mainworldBase && mainworldBase.size >= 1) {
+                tpCount = Math.max(1, tpCount);
+            }
+            sys.terrestrialPlanets = tpCount;
+
+            // --- Total Worlds ---
+            sys.totalWorlds = sys.gasGiants + sys.planetoidBelts + sys.terrestrialPlanets;
+
+            // --- Combined HZCO for circumbinary P-type worlds (Item #6) ---
+            // Sum all star luminosities → sqrt → convert to Orbit#
+            // For single-star systems this equals sys.hzco.
+            let totalLum = sys.stars.reduce((sum, s) => sum + (s.lum || 0), 0);
+            sys.ptypeHzco = sys.stars.length > 1 ? convertAuToOrbit(Math.sqrt(totalLum)) : sys.hzco;
 
             return sys;
         }
@@ -3401,12 +4724,45 @@
         const SCLASS_IDX = { 'Ia': 0, 'Ib': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5, 'VI': 6 };
 
         function getMAO(sType, subType, sClass) {
-            let key = sType + (subType >= 5 ? '5' : '0');
-            if (sType === 'O' && subType < 5) key = 'O0';
-            let row = MGT2E_MAO[key] || MGT2E_MAO['G0'];
-            let idx = SCLASS_IDX[sClass] !== undefined ? SCLASS_IDX[sClass] : 5;
-            let mao = row[idx];
-            return mao === Infinity ? 0.01 : mao; // Fallback for invalid stellar sizes
+            // Spectral type order for interpolation across type boundaries
+            const sTypeOrder = ['O', 'B', 'A', 'F', 'G', 'K', 'M'];
+            const idx = SCLASS_IDX[sClass] !== undefined ? SCLASS_IDX[sClass] : 5;
+
+            // Find the lower anchor (subtype 0 or 5 of sType)
+            let lowSubtype = subType < 5 ? 0 : 5;
+            let highSubtype = subType < 5 ? 5 : 10; // 10 means next type's 0
+            let lowKey = sType + lowSubtype;
+            if (sType === 'O' && lowSubtype === 0) lowKey = 'O0';
+
+            let lowRow = MGT2E_MAO[lowKey] || MGT2E_MAO['G0'];
+            let lowVal = lowRow[idx];
+            if (lowVal === Infinity) lowVal = null;
+
+            // Exact match: no interpolation needed
+            if (subType === lowSubtype) return lowVal !== null ? lowVal : 0.01;
+
+            // Find the upper anchor (subtype 5 of sType, or subtype 0 of next type)
+            let highVal = null;
+            if (subType < 5) {
+                let highRow = MGT2E_MAO[sType + '5'] || lowRow;
+                let v = highRow[idx];
+                highVal = (v === Infinity) ? null : v;
+            } else {
+                // subtype 5-9: interpolate toward next spectral type's '0'
+                let nextType = sTypeOrder[sTypeOrder.indexOf(sType) + 1];
+                if (nextType) {
+                    let highRow = MGT2E_MAO[nextType + '0'] || lowRow;
+                    let v = highRow[idx];
+                    highVal = (v === Infinity) ? null : v;
+                }
+            }
+
+            if (lowVal === null && highVal === null) return 0.01;
+            if (lowVal === null) return highVal;
+            if (highVal === null) return lowVal;
+
+            let fraction = (subType - lowSubtype) / (highSubtype - lowSubtype);
+            return lowVal + fraction * (highVal - lowVal);
         }
 
         // --- MgT2E System Gen (Chunk 2) ---
@@ -3434,9 +4790,11 @@
             sys.worlds = [];
 
             let primary = sys.stars[0];
-            let mao = getMAO(primary.sType, primary.subType, primary.sClass);
 
-            let totalWorldsToPlace = sys.gasGiants + sys.planetoidBelts + sys.terrestrialPlanets + 1; // +1 for mainworld
+            // =====================================================================
+            // Baseline / HZ orbit (same logic as before)
+            // =====================================================================
+            let totalWorldsToPlace = sys.gasGiants + sys.planetoidBelts + sys.terrestrialPlanets + 1;
 
             let blRoll = roll2D();
             if (sys.stars.length > 1) blRoll -= 2;
@@ -3452,22 +4810,17 @@
             else if (totalWorldsToPlace <= 20) blRoll += 1;
             else blRoll += 2;
 
-            let baselineNumber = blRoll;
-
-            let hzRoll = 7;
             let mwAtm = mainworldBase ? mainworldBase.atm : 0;
             let atmDM = 0;
             if ([2, 3].includes(mwAtm)) atmDM = -2;
             else if ([4, 5, 14].includes(mwAtm)) atmDM = -1;
-            else if ([6, 7].includes(mwAtm)) atmDM = 0;
             else if ([8, 9].includes(mwAtm)) atmDM = 1;
             else if ([10, 13, 15].includes(mwAtm)) atmDM = 2;
             else if ([11, 12].includes(mwAtm)) atmDM = 6;
 
-            let rawHzRoll = Math.max(2, Math.min(12, hzRoll - atmDM));
+            let rawHzRoll = Math.max(2, Math.min(12, 7 - atmDM));
             let hzDeviation = MGT2E_HZ_DEVIATION[rawHzRoll];
 
-            // Add decimal variance
             let variance = (Math.floor(Math.random() * 10)) / 100;
             if (hzDeviation < 0) hzDeviation -= variance;
             else if (hzDeviation > 0) hzDeviation += variance;
@@ -3475,114 +4828,347 @@
 
             let baselineOrbit = sys.hzco + hzDeviation;
 
-            // Empty Orbits
             let eRoll = roll2D();
             let emptyOrbitsCount = (eRoll <= 9) ? 0 : (eRoll - 9);
-            totalWorldsToPlace += emptyOrbitsCount;
 
-            // System Spread
-            let calcTargetNumber = Math.max(1, baselineNumber);
-            let sysSpread = Math.max(0.1, (baselineOrbit - mao) / calcTargetNumber);
+            // =====================================================================
+            // Part 2A: Forbidden Zone Calculation
+            // =====================================================================
+            let mergedFZ = [];
+            let primaryMao = getMAO(primary.sType, primary.subType, primary.sClass);
+            let primaryInnerLimit = primaryMao;
 
-            // Generate Slot Sequence
-            let slots = [];
-            let currentOrbit = mao + sysSpread + ((roll2D() - 7) * 0.1 * sysSpread);
-            for (let i = 0; i < totalWorldsToPlace; i++) {
-                slots.push(Math.max(0, currentOrbit));
-                currentOrbit += sysSpread + ((roll2D() - 7) * 0.1 * sysSpread);
+            // Close/Near/Far companions that directly orbit the primary
+            let directCompanions = sys.stars.filter(s => s.parentStarIdx === 0 && s.separation !== 'Companion');
+            directCompanions.sort((a, b) => a.orbitId - b.orbitId);
+
+            if (directCompanions.length > 0) {
+                let innerPush = 0.50 + (directCompanions[0].eccentricity || 0);
+                if (primaryMao > 0.2) innerPush += primaryMao;
+                primaryInnerLimit = Math.max(primaryInnerLimit, innerPush);
             }
 
-            // Snap closest slot to baseline
-            let closestIdx = 0;
-            let minDiff = Infinity;
-            for (let i = 0; i < slots.length; i++) {
-                let diff = Math.abs(slots[i] - baselineOrbit);
-                if (diff < minDiff) { minDiff = diff; closestIdx = i; }
+            let rawFZ = [];
+            for (let comp of directCompanions) {
+                let co = comp.orbitId;
+                let cm = comp.mao || 0;
+                let ce = comp.eccentricity || 0;
+                let isInner = (comp.separation === 'Close' || comp.separation === 'Near');
+                let fmin = co - 1.00, fmax = co + 1.00;
+                if (cm > 0.2) { fmin -= cm; fmax += cm; }
+                if (ce > 0.2) { fmin -= 1.00; fmax += 1.00; }
+                if (isInner && ce > 0.5) { fmin -= 1.00; fmax += 1.00; }
+                rawFZ.push({ min: fmin, max: fmax });
             }
-            slots[closestIdx] = Math.max(0, baselineOrbit);
-
-            // Anomalous Orbits
-            let anomRoll = roll2D();
-            let anomCount = (anomRoll <= 9) ? 0 : (anomRoll - 9);
-            sys.terrestrialPlanets += anomCount;
-
-            for (let i = 0; i < anomCount; i++) {
-                let aTypeRoll = roll2D();
-                let aType = 'Random', aEccMod = 0;
-                if (aTypeRoll === 8) { aType = 'Eccentric'; aEccMod = 5; }
-                else if (aTypeRoll === 9) { aType = 'Inclined'; aEccMod = 2; }
-                else if (aTypeRoll === 10 || aTypeRoll === 11) { aType = 'Retrograde'; aEccMod = 2; }
-                else if (aTypeRoll === 12) aType = 'Trojan';
-
-                let anomOrbit = baselineOrbit + (roll2D() - 7);
-                slots.push(Math.max(0, anomOrbit));
-                totalWorldsToPlace++; // Make space for the new Terrestrial Planet
+            rawFZ.sort((a, b) => a.min - b.min);
+            for (let fz of rawFZ) {
+                if (mergedFZ.length === 0 || fz.min > mergedFZ[mergedFZ.length - 1].max) {
+                    mergedFZ.push({ ...fz });
+                } else {
+                    mergedFZ[mergedFZ.length - 1].max = Math.max(mergedFZ[mergedFZ.length - 1].max, fz.max);
+                }
             }
-            slots.sort((a, b) => a - b);
+            sys.forbiddenZones = mergedFZ;
 
-            // Sort bodies into slots
-            let placedWorlds = [];
-            let unassignedSlots = [...slots];
+            // =====================================================================
+            // Part 2B: Valid Band Calculation
+            // =====================================================================
+            function calcBands(inner, outer, fzList) {
+                let bands = [{ min: inner, max: outer }];
+                for (let fz of fzList) {
+                    let nb = [];
+                    for (let b of bands) {
+                        if (fz.max <= b.min || fz.min >= b.max) { nb.push(b); continue; }
+                        if (fz.min > b.min) nb.push({ min: b.min, max: fz.min });
+                        if (fz.max < b.max) nb.push({ min: fz.max, max: b.max });
+                    }
+                    bands = nb;
+                }
+                return bands.filter(b => b.max - b.min > 0.01);
+            }
+            function bw(bands) { return bands.reduce((s, b) => s + b.max - b.min, 0); }
 
-            // 1. Mainworld nearest baseline
-            let mwSlot = baselineOrbit;
-            let mwIdx = unassignedSlots.findIndex(s => Math.abs(s - baselineOrbit) < 0.01);
-            if (mwIdx !== -1) mwSlot = unassignedSlots.splice(mwIdx, 1)[0];
-            else mwSlot = unassignedSlots.shift();
+            let primaryBands = calcBands(primaryInnerLimit, 20.0, mergedFZ);
+            let primaryTotalOrbits = Math.max(0, Math.floor(bw(primaryBands) + (directCompanions.length === 0 ? 1 : 0)));
 
-            let isMWAsteroid = mainworldBase && mainworldBase.size === 0;
-            placedWorlds.push({ type: 'Mainworld', orbitId: mwSlot, isAsteroid: isMWAsteroid });
-
-            function pullRandomSlot() {
-                if (unassignedSlots.length === 0) return slots[slots.length - 1] + 1;
-                let rIdx = Math.floor(Math.random() * unassignedSlots.length);
-                return unassignedSlots.splice(rIdx, 1)[0];
+            const sepOrder = ['Close', 'Near', 'Far'];
+            let secondaryMeta = [];
+            for (let si = 1; si < sys.stars.length; si++) {
+                let s = sys.stars[si];
+                if (s.separation === 'Companion') continue;
+                let sInner = s.mao || 0.01;
+                let sTight = sys.stars.find(sc => sc.parentStarIdx === si && sc.separation === 'Companion');
+                if (sTight) sInner = Math.max(sInner, 0.50 + (sTight.eccentricity || 0));
+                let sOuter = (s.orbitId || 0) - 3.00;
+                let sIdx = sepOrder.indexOf(s.separation);
+                for (let aj = 1; aj < sys.stars.length; aj++) {
+                    if (aj === si) continue;
+                    let ot = sys.stars[aj];
+                    if (ot.separation === 'Companion') continue;
+                    let oi = sepOrder.indexOf(ot.separation);
+                    if (Math.abs(sIdx - oi) === 1) {
+                        sOuter -= 1.00;
+                        if ((ot.eccentricity || 0) > 0.2) sOuter -= 1.00;
+                    }
+                }
+                let sEcc = s.eccentricity || 0;
+                if (sEcc > 0.2) sOuter -= 1.00;
+                if (sEcc > 0.5) sOuter -= 1.00;
+                if (sOuter <= sInner) continue;
+                let sBands = [{ min: sInner, max: sOuter }];
+                let sTotalOrbits = Math.max(0, Math.floor(bw(sBands) + 1));
+                secondaryMeta.push({ starIdx: si, star: s, bands: sBands, totalOrbits: sTotalOrbits });
             }
 
-            // 2. Empty Orbits
-            for (let i = 0; i < emptyOrbitsCount; i++) {
-                placedWorlds.push({ type: 'Empty', orbitId: pullRandomSlot() });
-            }
-            // 3. Gas Giants
-            for (let i = 0; i < sys.gasGiants; i++) {
-                placedWorlds.push({ type: 'Gas Giant', orbitId: pullRandomSlot() });
-            }
-            // 4. Planetoid Belts (Mainworld absorbed +1 rule in Chunk 1, so sys contains the true additional count)
-            for (let i = 0; i < sys.planetoidBelts; i++) {
-                placedWorlds.push({ type: 'Planetoid Belt', orbitId: pullRandomSlot(), isAsteroid: true });
-            }
-            // 5. Terrestrial Planets (Mainworld was a planet, so subtract 1 TP)
-            let actualTPs = sys.terrestrialPlanets;
-            if (mainworldBase && mainworldBase.size >= 1 && mainworldBase.size <= 15) {
-                actualTPs = Math.max(0, actualTPs - 1);
-            }
-            for (let i = 0; i < actualTPs; i++) {
-                placedWorlds.push({ type: 'Terrestrial Planet', orbitId: pullRandomSlot() });
+            // =====================================================================
+            // Part 2C: World Distribution
+            // =====================================================================
+            let systemTotalOrbits = Math.max(1, primaryTotalOrbits + secondaryMeta.reduce((s, m) => s + m.totalOrbits, 0));
+            let worldsToDistribute = sys.totalWorlds;
+            let primaryAssigned = Math.ceil(worldsToDistribute * (primaryTotalOrbits / systemTotalOrbits));
+            let distributed = [{ starIdx: 0, bands: primaryBands, mao: primaryInnerLimit, assigned: primaryAssigned, isMainStar: true }];
+            let remaining = worldsToDistribute - primaryAssigned;
+            for (let mi = 0; mi < secondaryMeta.length; mi++) {
+                let meta = secondaryMeta[mi];
+                let assigned = mi === secondaryMeta.length - 1 ? remaining :
+                    Math.floor(worldsToDistribute * (meta.totalOrbits / systemTotalOrbits));
+                remaining -= assigned;
+                distributed.push({ starIdx: meta.starIdx, bands: meta.bands, mao: meta.star.mao || 0.01, assigned: Math.max(0, assigned), isMainStar: false });
             }
 
-            // Calculate Eccentricities and Years
-            placedWorlds.sort((a, b) => a.orbitId - b.orbitId);
-            for (let w of placedWorlds) {
-                if (w.type === 'Empty') continue;
+            // =====================================================================
+            // Part 2D: Slot Generation (forbidden-zone aware)
+            // =====================================================================
+            function skipFZ(orbit, fzList) {
+                for (let pass = 0; pass < 10; pass++) {
+                    let ok = true;
+                    for (let fz of fzList) {
+                        if (orbit >= fz.min && orbit <= fz.max) { orbit = fz.max + 0.01; ok = false; }
+                    }
+                    if (ok) break;
+                }
+                return orbit;
+            }
 
-                w.eccentricity = w.isAsteroid ? 0 : determineMgT2EEccentricity(false, 0, sys.age, w.orbitId, false, 0);
+            function genSlots(bands, maoInner, numSlots, fzList) {
+                if (!bands.length || numSlots <= 0) return [];
+                let outer = bands[bands.length - 1].max;
+                let spread = Math.max(0.1, bw(bands) / Math.max(1, numSlots));
+                let slots = [];
+                let cur = skipFZ(maoInner + spread * 0.5 + ((roll2D() - 7) * 0.05 * spread), fzList);
+                for (let i = 0; i < numSlots * 3 && slots.length < numSlots; i++) {
+                    if (bands.some(b => cur >= b.min && cur <= b.max) && cur <= outer) slots.push(cur);
+                    cur = skipFZ(cur + spread + ((roll2D() - 7) * 0.1 * spread), fzList);
+                    if (cur > outer) break;
+                }
+                return slots;
+            }
 
+            // =====================================================================
+            // Part 2E: Place & Tag Worlds
+            // =====================================================================
+            let allPlacedWorlds = [];
+
+            // =====================================================================
+            // Step 7: Add Anomalous Planets (WBH Step 7)
+            // =====================================================================
+            let anomalyCountRoll = roll2D();
+            let numAnomalies = 0;
+            if (anomalyCountRoll === 10) numAnomalies = 1;
+            else if (anomalyCountRoll === 11) numAnomalies = 2;
+            else if (anomalyCountRoll >= 12) numAnomalies = 3;
+
+            let extraAnomalies = [];
+            for (let i = 0; i < numAnomalies; i++) {
+                let typeRoll = roll2D();
+                let aType = 'Random';
+                if (typeRoll === 8) aType = 'Eccentric';
+                else if (typeRoll === 9) aType = 'Inclined';
+                else if (typeRoll >= 10 && typeRoll <= 11) aType = 'Retrograde';
+                else if (typeRoll === 12) aType = 'Trojan';
+
+                // Count towards inventory (max 13 TP)
+                let bodyType = 'Terrestrial Planet';
+                if (sys.terrestrialPlanets >= 13) bodyType = 'Planetoid Belt';
+                else sys.terrestrialPlanets++;
+
+                extraAnomalies.push({ aType, bodyType });
+            }
+
+            // P-type inner stability limit (WBH formula, Item #5):
+            // Use the OUTERMOST direct companion to define the circumbinary threshold.
+            // Limit = companion.orbitId + 0.50 + companion.eccentricity + (primaryMAO if > 0.2)
+            let ptypeInnerLimit = Infinity;
+            if (directCompanions.length > 0) {
+                let outerComp = directCompanions[directCompanions.length - 1]; // outermost
+                ptypeInnerLimit = outerComp.orbitId + 0.50 + (outerComp.eccentricity || 0)
+                    + (primaryMao > 0.2 ? primaryMao : 0);
+            }
+            sys.ptypeInnerLimit = ptypeInnerLimit;
+
+            function getOrbitType(orbitNum, starIdx) {
+                if (starIdx !== 0) return 'S-Type'; // secondary worlds are always S-Type
+                return orbitNum >= ptypeInnerLimit ? 'P-Type' : 'S-Type';
+            }
+
+            for (let de of distributed) {
+                let { starIdx, bands, mao: starMao, assigned, isMainStar } = de;
+                if (assigned <= 0 && !isMainStar) continue;
+
+                let ggBudget = starIdx === 0 ? sys.gasGiants : Math.min(sys.gasGiants, Math.round(sys.gasGiants * assigned / Math.max(1, worldsToDistribute)));
+                let pbBudget = starIdx === 0 ? sys.planetoidBelts : Math.min(sys.planetoidBelts, Math.round(sys.planetoidBelts * assigned / Math.max(1, worldsToDistribute)));
+                let tpBudget = Math.max(0, assigned - ggBudget - pbBudget);
+
+                let slots = genSlots(bands, starMao, assigned, starIdx === 0 ? mergedFZ : []);
+                let pool = [...slots];
+                function pullSlot() {
+                    if (!pool.length) return bands.length ? bands[bands.length - 1].max + 1 : 99;
+                    return pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
+                }
+
+                // Mainworld (primary star only)
+                if (isMainStar) {
+                    let mwSlot = skipFZ(baselineOrbit, mergedFZ);
+                    if (!primaryBands.some(b => mwSlot >= b.min && mwSlot <= b.max) && primaryBands.length > 0) {
+                        mwSlot = primaryBands.reduce((best, b) => {
+                            let mid = (b.min + b.max) / 2;
+                            return Math.abs(mid - baselineOrbit) < Math.abs(best - baselineOrbit) ? mid : best;
+                        }, (primaryBands[0].min + primaryBands[0].max) / 2);
+                    }
+                    allPlacedWorlds.push({
+                        type: 'Mainworld', orbitId: mwSlot,
+                        isAsteroid: !!(mainworldBase && mainworldBase.size === 0),
+                        parentStarIdx: 0, orbitType: getOrbitType(mwSlot, 0), moons: []
+                    });
+                    let ci = pool.reduce((bi, s, i) => Math.abs(s - mwSlot) < Math.abs(pool[bi] - mwSlot) ? i : bi, 0);
+                    if (pool.length) pool.splice(ci, 1);
+                }
+
+                for (let i = 0; i < emptyOrbitsCount; i++)
+                    allPlacedWorlds.push({ type: 'Empty', orbitId: pullSlot(), parentStarIdx: starIdx, orbitType: 'S-Type', moons: [] });
+
+                for (let i = 0; i < ggBudget; i++) {
+                    let ob = pullSlot();
+                    allPlacedWorlds.push({ type: 'Gas Giant', orbitId: ob, parentStarIdx: starIdx, orbitType: getOrbitType(ob, starIdx), moons: [] });
+                }
+                let finalPBBudget = isMainStar && mainworldBase && mainworldBase.size === 0 ? Math.max(1, pbBudget) : pbBudget;
+                for (let i = 0; i < finalPBBudget; i++) {
+                    let ob = pullSlot();
+                    allPlacedWorlds.push({ type: 'Planetoid Belt', orbitId: ob, isAsteroid: true, parentStarIdx: starIdx, orbitType: getOrbitType(ob, starIdx), moons: [] });
+                }
+                let actualTPs = tpBudget;
+                if (isMainStar && mainworldBase && mainworldBase.size >= 1) actualTPs = Math.max(0, actualTPs - 1);
+                for (let i = 0; i < actualTPs; i++) {
+                    let ob = pullSlot();
+                    allPlacedWorlds.push({ type: 'Terrestrial Planet', orbitId: ob, parentStarIdx: starIdx, orbitType: getOrbitType(ob, starIdx), moons: [] });
+                }
+            }
+
+            // =====================================================================
+            // Part 2E½: Refined Anomalous Orbit Placement (WBH)
+            // =====================================================================
+            for (let anom of extraAnomalies) {
+                if (anom.aType === 'Trojan') {
+                    // Place later after all other worlds are placed
+                    continue;
+                }
+
+                // Pick a candidate star (any star with valid bands)
+                let candidates = distributed.filter(d => d.bands.length > 0);
+                if (candidates.length === 0) continue;
+                let de = candidates[Math.floor(Math.random() * candidates.length)];
+
+                // Placement Rule: (2D-2) + (1D/10)
+                let orbit = (roll2D() - 2) + (roll1D() / 10);
+
+                // Shift if in forbidden zone or below MAO
+                let starFZ = de.starIdx === 0 ? mergedFZ : [];
+                let attempts = 0;
+                while (attempts < 10) {
+                    let inFZ = starFZ.some(fz => orbit >= fz.min && orbit <= fz.max);
+                    if (orbit >= de.mao && !inFZ && orbit <= 20) break;
+
+                    // Shift by +/- 1D (WBH ref)
+                    if (orbit < de.mao) orbit += roll1D();
+                    else orbit += (Math.random() > 0.5 ? 1 : -1) * roll1D();
+                    attempts++;
+                }
+
+                let newWorld = {
+                    type: anom.bodyType,
+                    orbitId: Math.max(de.mao, Math.min(20, orbit)),
+                    parentStarIdx: de.starIdx,
+                    orbitType: getOrbitType(orbit, de.starIdx),
+                    orbitAnomaly: anom.aType,
+                    isAsteroid: anom.bodyType === 'Planetoid Belt',
+                    moons: []
+                };
+
+                // Inclined: (1D+2)*10 + d10
+                if (anom.aType === 'Inclined') {
+                    newWorld.inclination = (roll1D() + 2) * 10 + Math.floor(Math.random() * 10);
+                }
+                if (anom.aType === 'Retrograde') {
+                    newWorld.retrograde = true;
+                }
+
+                allPlacedWorlds.push(newWorld);
+            }
+
+            // Trojans (WBH logic)
+            for (let anom of extraAnomalies) {
+                if (anom.aType !== 'Trojan') continue;
+
+                // Filter potential hosts (placed worlds excluding Trojans)
+                let hosts = allPlacedWorlds.filter(w => w.orbitAnomaly !== 'Trojan' && w.type !== 'Empty' && w.type !== 'Mainworld');
+                if (hosts.length === 0) continue;
+                let host = hosts[Math.floor(Math.random() * hosts.length)];
+
+                let trojanSide = roll1D() <= 3 ? 'L4' : 'L5';
+                allPlacedWorlds.push({
+                    type: anom.bodyType,
+                    orbitId: host.orbitId,
+                    parentStarIdx: host.parentStarIdx,
+                    orbitType: host.orbitType,
+                    orbitAnomaly: 'Trojan',
+                    trojanHostOrbit: host.orbitId,
+                    trojanSide: trojanSide,
+                    isAsteroid: anom.bodyType === 'Planetoid Belt',
+                    moons: []
+                });
+            }
+
+            // =====================================================================
+            // Part 2F: Eccentricities, AU, Orbital Period
+            // =====================================================================
+            allPlacedWorlds.sort((a, b) => a.orbitId - b.orbitId);
+            for (let w of allPlacedWorlds) {
+                if (w.type === 'Empty') { sys.worlds.push(w); continue; }
+
+                // WBH Eccentricity DMs
+                let eccDM = 0;
+                if (w.orbitAnomaly === 'Eccentric') eccDM = 5;
+                else if (w.orbitAnomaly && w.orbitAnomaly !== 'Normal' && w.orbitAnomaly !== 'Trojan') eccDM = 2;
+
+                let baseEcc = w.isAsteroid ? 0 : determineMgT2EEccentricity(false, eccDM, sys.age, w.orbitId, false, 0);
+                w.eccentricity = baseEcc;
                 let auInt = Math.floor(w.orbitId);
                 let auFrac = w.orbitId - auInt;
                 let maxIdx = MGT2E_ORBIT_AU.length - 1;
-
                 let limitIdx = Math.min(auInt, maxIdx);
                 let auTarget = MGT2E_ORBIT_AU[limitIdx];
-                let auDiff = (limitIdx < maxIdx) ? (MGT2E_ORBIT_AU[limitIdx + 1] - MGT2E_ORBIT_AU[limitIdx]) : auTarget;
-
+                let auDiff = limitIdx < maxIdx ? (MGT2E_ORBIT_AU[limitIdx + 1] - MGT2E_ORBIT_AU[limitIdx]) : auTarget;
                 w.au = auTarget + (auFrac * auDiff);
-                w.periodYears = Math.sqrt(Math.pow(w.au, 3) / primary.mass);
-
+                let parentStar = sys.stars[w.parentStarIdx] || primary;
+                w.periodYears = Math.sqrt(Math.pow(w.au, 3) / parentStar.mass);
                 sys.worlds.push(w);
             }
 
             return sys;
         }
+
+
+
         // --- MgT2E System Gen (Chunk 3) ---
         function generateMgT2ESystemChunk3(sys, mainworldBase) {
             let primary = sys.stars[0];
@@ -3632,6 +5218,12 @@
                     // Terrestrial Mass placeholder (needs proper gravity generation later in physical chunk, but for hill spheres assume rough density Earth=1)
                     // If size 0, mass ~0.
                     w.mass = w.size === 0 ? 0.0001 : Math.pow(w.size / 8, 3); // rough estimate for Hill Spheres
+                } else if (w.type === 'Planetoid Belt') {
+                    w.bulk = roll1D();
+                    w.mType = roll1D() * 10;
+                    w.cType = roll1D() * 10;
+                    w.sType = Math.max(0, 100 - w.mType - w.cType);
+                    w.size = 0;
                 }
             }
 
@@ -4424,6 +6016,286 @@
 
             return sys;
         }
+
+        // --- MgT2E System Gen (Chunk 7) — Non-Mainworld UWP ---
+        function generateMgT2ESystemChunk7(sys, mainworldBase) {
+            if (!mainworldBase) return sys;
+
+            const mwPop = mainworldBase.pop || 0;
+            const mwGov = mainworldBase.gov || 0;
+            const mwLaw = mainworldBase.law || 0;
+            const mwTL = mainworldBase.tl || 0;
+            const mwTC = mainworldBase.tradeCodes || [];
+            const mwIsIn = mwTC.includes('In');  // Industrial
+            const mwIsPo = mwTC.includes('Po');  // Poor
+
+            const hzco = sys.hzco;
+
+            // Helper: is a world's orbit in the Habitable Zone?
+            function inHZ(orbitId) {
+                let diff = Math.abs(orbitId - hzco);
+                if (hzco < 1.0 || orbitId < 1.0) {
+                    let smaller = Math.min(hzco, orbitId);
+                    if (smaller <= 0) smaller = 0.01;
+                    diff = diff / smaller;
+                }
+                return diff <= 1.0;
+            }
+
+            function rollD3() { return Math.ceil(roll1D() / 2); }
+
+            function calculateResourceRating(w) {
+                let rr = 0;
+                if (w.type === 'Gas Giant' || w.type === 'Empty') return 0;
+
+                if (w.type === 'Planetoid Belt') {
+                    rr = roll2D() - 7 + (w.bulk || 1);
+                    rr += Math.floor((w.mType || 0) / 10);
+                    rr -= Math.floor((w.cType || 0) / 10);
+                } else {
+                    let sz = (typeof w.size === 'number') ? w.size : 0;
+                    rr = roll2D() - 7 + sz;
+                    if (w.density > 1.12) rr += 2;
+                    else if (w.density < 0.5) rr -= 2;
+
+                    if ((w.biomass || 0) >= 3) rr += 2;
+                    if ([8, 9, 10].includes(w.biodiversity)) rr += 1;
+                    if ((w.biodiversity || 0) >= 11) rr += 2;
+                    if ((w.biomass || 0) >= 1) {
+                        if ((w.compatibility || 0) <= 3) rr -= 1;
+                        if ((w.compatibility || 0) >= 8) rr += 2;
+                    }
+                }
+                return Math.max(2, Math.min(12, rr));
+            }
+
+            // Minimal Sustainable TL from atmosphere code
+            function minSustainableTL(atmCode) {
+                if ([0, 1, 10].includes(atmCode)) return 8;
+                if ([2, 3, 13, 14].includes(atmCode)) return 5;  // D=13, E=14
+                if ([4, 7, 9].includes(atmCode)) return 3;
+                if (atmCode === 11) return 9;   // B
+                if (atmCode === 12) return 10;  // C
+                if (atmCode === 15) return 14;  // G/H exotic
+                return 0;
+            }
+
+            function processSecondaryWorld(w, effectiveOrbit) {
+                if (w.type === 'Mainworld' || w.type === 'Empty' ||
+                    w.type === 'Gas Giant' || w.type === 'Planetoid Belt') {
+                    if (w.type === 'Planetoid Belt') w.resourceRating = calculateResourceRating(w);
+                    return;
+                }
+
+                let isMoon = (w.pd !== undefined);
+                // ----------------------------------------------------------------
+                // Step 1: Population
+                // ----------------------------------------------------------------
+                let popDM = isMoon ? -2 : 0;
+                let pop = Math.max(0, mwPop - roll1D() + popDM);
+                w.secPop = pop;
+
+                // ----------------------------------------------------------------
+                // Step 2: Government (all secondaries are Dependent)
+                // ----------------------------------------------------------------
+                let gov = 0;
+                if (pop > 0) {
+                    let govRoll = roll1D();
+                    if (mwGov === 0) govRoll -= 2;
+                    if (mwGov === 6) govRoll += mwPop;
+                    if (govRoll <= 1) gov = 0;
+                    else if (govRoll === 2) gov = 1;
+                    else if (govRoll === 3) gov = 2;
+                    else if (govRoll === 4) gov = 3;
+                    else gov = 6;
+                }
+                w.secGov = gov;
+
+                // ----------------------------------------------------------------
+                // Step 3: Classifications (all that apply — take highest TL rule)
+                // ----------------------------------------------------------------
+                let classifications = [];
+                let isAsteroidBelt = w.isAsteroid || false;
+                let atmCode = w.atmCode || 0;
+                let hydroCode = w.hydroCode || 0;
+                let isInHZ = inHZ(effectiveOrbit || w.orbitId);
+
+                if (pop > 0) {
+                    // Colony: Pop 5+ and Gov 6
+                    if (pop >= 5 && gov === 6) classifications.push('Colony');
+
+                    // Farming: in HZ, Atm 4-9, Hydro 4-8, Pop 2+
+                    if (pop >= 2 && isInHZ && atmCode >= 4 && atmCode <= 9 && hydroCode >= 4 && hydroCode <= 8)
+                        classifications.push('Farming');
+
+                    // Freeport: Gov 0-5, Mainworld TL 8+, roll 10+
+                    if (gov <= 5 && mwTL >= 8) {
+                        let fpDM = (mwTC.includes('A') || mwTC.includes('B')) ? -2 : 0;
+                        if (roll2D() + fpDM >= 10) classifications.push('Freeport');
+                    }
+
+                    // Military Base: Mainworld TL 8+, not Poor, Gov 6, roll 12+
+                    if (mwTL >= 8 && !mwIsPo && gov === 6) {
+                        let mbDM = 0;
+                        if (mainworldBase.navalBase || mainworldBase.militaryBase || mainworldBase.scoutBase) mbDM += 4;
+                        if (gov === 6) mbDM += 2;
+                        if (roll2D() + mbDM >= 12) classifications.push('Military Base');
+                    }
+
+                    // Mining Facility: Mainworld Industrial, Pop 2+, roll 10+ (or 6+ for belt)
+                    if (mwIsIn && pop >= 2) {
+                        let mineTarget = isAsteroidBelt ? 6 : 10;
+                        if (roll2D() >= mineTarget) classifications.push('Mining Facility');
+                    }
+
+                    // Penal Colony: Mainworld TL 9+, Law 8+, Gov 6, roll 10+
+                    if (mwTL >= 9 && mwLaw >= 8 && gov === 6) {
+                        let penDM = mwLaw >= 8 ? 2 : 0;
+                        if (roll2D() + penDM >= 10) classifications.push('Penal Colony');
+                    }
+
+                    // Research Base: Mainworld Pop 6+, TL 8+, not Poor, roll 10+
+                    if (mwPop >= 6 && mwTL >= 8 && !mwIsPo) {
+                        let resDM = mwTL >= 12 ? 2 : 0;
+                        if (roll2D() + resDM >= 10) classifications.push('Research Base');
+                    }
+                }
+                w.classifications = classifications;
+
+                // ----------------------------------------------------------------
+                // Step 4: Law Level
+                // ----------------------------------------------------------------
+                let law = 0;
+                if (pop > 0) {
+                    if (gov === 6) {
+                        // Case A: Captive Government
+                        let lawRoll = roll1D();
+                        if (classifications.includes('Penal Colony') || classifications.includes('Military Base')) lawRoll += 1;
+                        if (lawRoll <= 2) law = Math.max(0, roll2D() - 7 + 6);
+                        else if (lawRoll <= 4) law = mwLaw;
+                        else if (lawRoll === 5) law = mwLaw + 1;
+                        else law = mwLaw + roll1D();
+                    } else if ([1, 2, 3].includes(gov)) {
+                        // Case B: Dependent Gov 1/2/3
+                        let branchRoll = roll2D() - mwGov;
+                        if (branchRoll <= 0) {
+                            law = mwLaw;
+                        } else {
+                            let subRoll = roll1D();
+                            law = subRoll <= 3 ? roll1D() : Math.max(0, roll2D() - 7 + gov);
+                        }
+                    } else {
+                        // Case C: All others
+                        let lawDM = classifications.includes('Freeport') ? -1 : 0;
+                        law = Math.max(0, roll2D() - 7 + gov + lawDM);
+                    }
+                }
+                w.secLaw = Math.max(0, law);
+
+                // ----------------------------------------------------------------
+                // Step 5: Minimal Sustainable TL
+                // ----------------------------------------------------------------
+                let minTL = minSustainableTL(atmCode);
+
+                // ----------------------------------------------------------------
+                // Step 6: Tech Level (highest rule from all classifications wins)
+                // ----------------------------------------------------------------
+                let tl = 0;
+                if (pop > 0) {
+                    let tlFromClass = 0;
+
+                    if (classifications.includes('Military Base') || classifications.includes('Research Base')) {
+                        tlFromClass = Math.max(tlFromClass, mwTL);
+                    }
+                    if (classifications.includes('Mining Facility')) {
+                        tlFromClass = Math.max(tlFromClass, mwTL, minTL);
+                    }
+                    if (classifications.includes('Freeport')) {
+                        let fpTL = roll1D() + (mwTL >= 12 ? 2 : 0);
+                        tlFromClass = Math.max(tlFromClass, fpTL, minTL);
+                    }
+                    if (classifications.includes('Colony') || classifications.includes('Farming') ||
+                        classifications.includes('Penal Colony') || classifications.length === 0) {
+                        tlFromClass = Math.max(tlFromClass, mwTL - 1, minTL);
+                    }
+                    if (tlFromClass === 0) tlFromClass = Math.max(mwTL - 1, minTL);
+
+                    tl = Math.max(minTL, tlFromClass);
+                }
+                w.secTL = tl;
+
+                // ----------------------------------------------------------------
+                // Step 7: Spaceport
+                // ----------------------------------------------------------------
+                let spRoll = roll1D();
+                if (pop >= 6) spRoll += 2;
+                if (pop === 1) spRoll -= 1;
+                if (pop === 0) spRoll -= 3;
+
+                let spaceport = 'Y';
+                if (spRoll <= 2) spaceport = 'Y';
+                else if (spRoll === 3) spaceport = 'H';
+                else if (spRoll <= 5) spaceport = 'G';
+                else spaceport = 'F';
+                w.secSpaceport = spaceport;
+
+                // ----------------------------------------------------------------
+                // Step 8: Economic Profile (Step 14)
+                // ----------------------------------------------------------------
+                w.resourceRating = calculateResourceRating(w);
+
+                let sIm = 0;
+                if (['A', 'B'].includes(spaceport)) sIm += 1;
+                if (['D', 'E', 'X', 'F', 'G', 'H', 'Y'].includes(spaceport)) sIm -= 1;
+                if (tl <= 8) sIm -= 1;
+                if (tl >= 10 && tl <= 15) sIm += 1;
+                if (tl >= 16) sIm += 2;
+                if (pop <= 6) sIm -= 1;
+                if (pop >= 9) sIm += 1;
+                if (classifications.includes('Farming')) sIm += 1;
+                if (classifications.includes('Mining Facility')) sIm += 1;
+
+                let sEcoI = sIm;
+                if (pop >= 4 && pop <= 6) sEcoI += Math.floor(Math.random() * 6) + 1;
+                if (pop >= 7) sEcoI += roll2D();
+                if (pop === 0 || sEcoI < 0) sEcoI = 0;
+
+                let sEcoE = 0;
+                if (pop === 0) sEcoE = -5;
+                else if (pop >= 1 && pop <= 6) sEcoE = roll2D() - 7;
+                else if (pop >= 7) sEcoE = (rollD3() + rollD3()) - 4;
+
+                let sEcoE_DM = 0;
+                if ([0, 3, 6, 9, 11, 12, 15].includes(gov)) sEcoE_DM -= 1;
+                if ([1, 2, 4, 5, 8].includes(gov)) sEcoE_DM += 1;
+                if (w.secLaw >= 0 && w.secLaw <= 4) sEcoE_DM += 1;
+                if (w.secLaw >= 10) sEcoE_DM -= 1;
+                if (pop > 0) {
+                    sEcoE += sEcoE_DM;
+                    sEcoE = Math.max(-5, Math.min(5, sEcoE));
+                    if (sEcoE === 0) sEcoE = 1;
+                }
+
+                let sEcoL = pop <= 1 ? 0 : pop - 1;
+
+                let cR = w.resourceRating === 0 ? 1 : w.resourceRating;
+                let cL = sEcoL === 0 ? 1 : sEcoL;
+                let cI = sEcoI === 0 ? 1 : sEcoI;
+                let cE = sEcoE === 0 ? 1 : sEcoE;
+                w.secRU = cR * cL * cI * cE;
+
+                // Compose secondary UWP string
+                let sz = (typeof w.size === 'number') ? w.size : (w.size === 'S' || w.size === 'R' ? 0 : 0);
+                w.uwpSecondary = `${spaceport}${toUWPChar(sz)}${toUWPChar(atmCode)}${toUWPChar(hydroCode)}${toUWPChar(pop)}${toUWPChar(gov)}${toUWPChar(w.secLaw)}-${toUWPChar(tl)}`;
+            }
+
+            for (let w of sys.worlds) {
+                processSecondaryWorld(w, w.orbitId);
+                if (w.moons) w.moons.forEach(m => processSecondaryWorld(m, w.orbitId));
+            }
+
+            return sys;
+        }
         function generateHZAndClimate() {
             let hzFlux = rollFlux();
             let hzVariance = 0;
@@ -4490,9 +6362,41 @@
                 let baseData = stateObj ? (stateObj.ctData || stateObj.mgt2eData || stateObj.t5Data) : null;
 
                 if (baseData) {
+                    let chunk1 = generateCTSystemChunk1(baseData);
+                    let chunk2 = generateCTSystemChunk2(chunk1, baseData);
+                    let chunk3 = generateCTSystemChunk3(chunk2, baseData);
+                    let chunk4 = generateCTSystemChunk4(chunk3, baseData);
+                    // Chunk 5: Subordinate Characteristics
+                    let chunk5 = generateCTSystemChunk5(chunk4, baseData);
+                    stateObj.ctSystem = chunk5;
+
                     stateObj.ctPhysical = generateCTPhysical(baseData);
                     stateObj.t5Physical = null;
                     hexStates.set(hexId, stateObj);
+
+                    if (chunk5) {
+                        console.log(`[CT System Chunk 5] Hex ${hexId} | ${chunk5.nature} | Primary: ${chunk5.stars[0].name}`);
+                        const tableData = chunk5.orbits.map(o => ({
+                            Orbit: o.orbit,
+                            Zone: o.zone,
+                            Contents: o.contents ? (o.contents.type + (o.contents.size ? ` (${o.contents.size})` : '')) : 'Empty',
+                            UWP: o.contents ? (o.contents.uwpSecondary || (o.contents.type === 'Mainworld' ? 'Auth' : '-')) : '-',
+                            Satellites: o.contents && o.contents.satellites ? o.contents.satellites.map(s => `${s.size} ${s.uwpSecondary} (${s.pd}r)`).join(', ') : '-'
+                        }));
+                        if (chunk5.capturedPlanets) {
+                            chunk5.capturedPlanets.forEach(p => {
+                                tableData.push({
+                                    Orbit: p.orbit.toFixed(1),
+                                    Zone: p.zone,
+                                    Contents: 'Captured Planet',
+                                    UWP: p.uwpSecondary || '-',
+                                    Satellites: p.satellites ? p.satellites.map(s => `${s.size} ${s.uwpSecondary} (${s.pd}r)`).join(', ') : '-'
+                                });
+                            });
+                            tableData.sort((a, b) => parseFloat(a.Orbit) - parseFloat(b.Orbit));
+                        }
+                        console.table(tableData);
+                    }
                 } else if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
                     missingData = true;
                 }
@@ -4503,6 +6407,7 @@
             }
 
             contextMenu.classList.remove('visible');
+            showToast(`Expanded CT System for ${selectedHexes.size} hex(es)`);
             requestAnimationFrame(draw);
         });
 
@@ -4522,22 +6427,23 @@
                     let systemWithAtmosphere = generateMgT2ESystemChunk4(systemWithSizes, baseData);
                     let systemWithTemps = generateMgT2ESystemChunk5(systemWithAtmosphere);
                     let systemWithRatings = generateMgT2ESystemChunk6(systemWithTemps);
+                    let systemWithUWP = generateMgT2ESystemChunk7(systemWithRatings, baseData);
 
-                    console.log(`[MgT2E System Gen] Hex ${hexId} | Age: ${systemWithRatings.age.toFixed(2)} Gyr | HZCO: ${systemWithRatings.hzco.toFixed(2)} | Stars: ${systemWithRatings.stars.map(s => s.name).join(', ')}`);
-                    console.table(systemWithRatings.worlds.map(w => ({
+                    console.log(`[MgT2E System Gen] Hex ${hexId} | Age: ${systemWithUWP.age.toFixed(2)} Gyr | HZCO: ${systemWithUWP.hzco.toFixed(2)} | Stars: ${systemWithUWP.stars.map(s => s.name).join(', ')}`);
+                    console.table(systemWithUWP.worlds.map(w => ({
                         Type: w.type,
+                        Orbit: typeof w.orbitId === 'number' ? w.orbitId.toFixed(2) : w.orbitId,
                         Size: w.size,
                         Atm: w.atmCode !== undefined ? w.atmCode : '-',
-                        Hydro: w.hydroPercent !== undefined ? `${w.hydroPercent}%` : '-',
-                        Day: w.solarDayHours !== undefined ? (w.solarDayHours === Infinity ? "Lock" : `${w.solarDayHours.toFixed(1)}h`) : '-',
-                        MeanTemp: w.meanTempK ? `${(w.meanTempK - 273.15).toFixed(1)}C` : '-',
-                        Life: w.lifeProfile || '-',
-                        Res: w.resourceRating || '-',
+                        Hydro: w.hydroCode !== undefined ? w.hydroCode : '-',
+                        UWP: w.uwpSecondary || (w.type === 'Mainworld' ? 'MW' : '-'),
+                        Class: w.classifications ? w.classifications.join('/') || 'None' : '-',
                         Hab: w.habitability !== undefined ? w.habitability : '-',
-                        Seismic: w.seismicStress !== undefined ? w.seismicStress : '-'
+                        Parent: w.parentStarIdx !== undefined ? w.parentStarIdx : 0,
+                        OType: w.orbitType || '-'
                     })));
 
-                    stateObj.mgtSystem = systemWithRatings;
+                    stateObj.mgtSystem = systemWithUWP;
                 } else if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
                     missingData = true;
                 }
@@ -4639,6 +6545,11 @@
             requestAnimationFrame(draw);
         });
 
+        document.getElementById('toggle-dev-view').addEventListener('change', (e) => {
+            devView = e.target.checked;
+            requestAnimationFrame(draw);
+        });
+
         // Save / Load Logic
         document.getElementById('btn-save-map').addEventListener('click', async () => {
             const stateObj = {};
@@ -4712,6 +6623,19 @@
             reader.readAsText(file);
         });
 
+        // Settings Panel Toggle
+        const settingsPanel = document.getElementById('settings-panel');
+        const settingsToggle = document.getElementById('settings-toggle');
+        const closeSettings = document.getElementById('btn-close-settings');
+
+        settingsToggle.addEventListener('click', () => {
+            settingsPanel.classList.toggle('collapsed');
+        });
+
+        closeSettings.addEventListener('click', () => {
+            settingsPanel.classList.add('collapsed');
+        });
+
         // Hex Editor Logic
         function openHexEditor(hexId) {
             const stateObj = hexStates.get(hexId);
@@ -4722,7 +6646,9 @@
             editingHexId = hexId;
             const data = stateObj.t5Data || stateObj.mgt2eData || stateObj.ctData;
 
-            document.getElementById('hex-editor-title').innerText = `Edit ${hexId}`;
+            const nameStr = data.name ? `${data.name} [${hexId}]` : `Edit ${hexId}`;
+            document.getElementById('hex-editor-title').innerText = nameStr;
+            document.getElementById('edit-name').value = data.name || '';
             document.getElementById('edit-starport').value = data.starport;
             document.getElementById('edit-size').value = data.size;
             document.getElementById('edit-atm').value = data.atm;
@@ -4766,10 +6692,10 @@
                 document.getElementById('edit-l').value = soc.ecoLabor;
                 document.getElementById('edit-i').value = soc.ecoInfrastructure;
                 document.getElementById('edit-e').value = soc.ecoEfficiency;
-                document.getElementById('edit-h').value = parseInt(soc.culturalProfile[0], 36);
-                document.getElementById('edit-a').value = parseInt(soc.culturalProfile[1], 36);
-                document.getElementById('edit-s').value = parseInt(soc.culturalProfile[2], 36);
-                document.getElementById('edit-sym').value = parseInt(soc.culturalProfile[3], 36);
+                document.getElementById('edit-h').value = soc.culturalProfile ? parseInt(soc.culturalProfile[0], 36) : 0;
+                document.getElementById('edit-a').value = soc.culturalProfile ? parseInt(soc.culturalProfile[1], 36) : 0;
+                document.getElementById('edit-s').value = soc.culturalProfile ? parseInt(soc.culturalProfile[2], 36) : 0;
+                document.getElementById('edit-sym').value = soc.culturalProfile ? parseInt(soc.culturalProfile[3], 36) : 0;
 
                 // Accordions now start closed to prevent overlap on right-side panel
             }
@@ -4777,17 +6703,30 @@
             if (stateObj.mgtSocio) {
                 document.getElementById('acc-btn-mgt-socio').style.display = 'flex';
                 const soc = stateObj.mgtSocio;
-                document.getElementById('edit-mgt-p').value = soc.pValue;
-                document.getElementById('edit-mgt-pcr').value = soc.pcr;
-                document.getElementById('edit-mgt-urb').value = soc.urbanPercent;
-                document.getElementById('edit-mgt-mc').value = soc.majorCities;
-                document.getElementById('edit-mgt-mcp').value = soc.totalMajorCityPop.toLocaleString();
+                document.getElementById('edit-mgt-p').value = soc.pValue !== undefined ? soc.pValue : 0;
+                document.getElementById('edit-mgt-pcr').value = soc.pcr !== undefined ? soc.pcr : 0;
+                document.getElementById('edit-mgt-urb').value = soc.urbanPercent !== undefined ? soc.urbanPercent : 0;
+                document.getElementById('edit-mgt-mc').value = soc.majorCities !== undefined ? soc.majorCities : 0;
+                document.getElementById('edit-mgt-mcp').value = soc.totalMajorCityPop !== undefined ? soc.totalMajorCityPop.toLocaleString() : "0";
                 document.getElementById('edit-mgt-gov').value = soc.govProfile || "";
                 document.getElementById('edit-mgt-fac').value = soc.factions || "";
                 document.getElementById('edit-mgt-law').value = soc.lawProfile || "";
                 document.getElementById('edit-mgt-tech').value = soc.techProfile || "";
                 document.getElementById('edit-mgt-cul').value = soc.culturalProfile || "";
-                document.getElementById('edit-mgt-eco').value = soc.economicProfile || "";
+
+                // Break out Economic Profile components
+                document.getElementById('edit-mgt-im').value = soc.Im !== undefined ? (soc.Im >= 0 ? "+" + soc.Im : soc.Im) : "";
+
+                let formatE = soc.ecoE >= 0 ? "+" + soc.ecoE : (soc.ecoE || "");
+                let rlie = soc.ecoR !== undefined ? `${toUWPChar(soc.ecoR)}${toUWPChar(soc.ecoL)}${toUWPChar(soc.ecoI)}${formatE}` : (soc.economicProfile || "");
+                document.getElementById('edit-mgt-eco').value = rlie;
+
+                document.getElementById('edit-mgt-ru').value = soc.RU || 0;
+                document.getElementById('edit-mgt-gwp').value = soc.pcGWP !== undefined ? "Cr" + soc.pcGWP : "";
+                document.getElementById('edit-mgt-wtn').value = soc.WTN !== undefined ? toUWPChar(soc.WTN) : "";
+                document.getElementById('edit-mgt-ir').value = soc.IR || 0;
+                document.getElementById('edit-mgt-dr').value = soc.DR || "";
+
                 document.getElementById('edit-mgt-star').value = soc.starportProfile || "";
                 document.getElementById('edit-mgt-mil').value = soc.militaryProfile || "";
 
@@ -4848,126 +6787,229 @@
                 let ageNum = sys.age.toFixed(2);
                 mgtSysHtml += `<div class="system-stats" style="grid-template-columns: 1fr;">`;
                 mgtSysHtml += `<div style="text-align: center; color: #66fcf1; border-bottom: 1px dotted #45a29e; padding-bottom: 4px;">System Overview</div>`;
-                mgtSysHtml += `<span>Hzco: <strong>${hzcoNum}</strong></span>`;
+                mgtSysHtml += `<span>HZco (Primary): <strong>${hzcoNum}</strong></span>`;
                 mgtSysHtml += `<span>Age: <strong>${ageNum} Gyr</strong></span>`;
+                mgtSysHtml += `<span>Worlds: <strong>${sys.totalWorlds}</strong> (GG:${sys.gasGiants} PB:${sys.planetoidBelts} TP:${sys.terrestrialPlanets})</span>`;
+                if (sys.stars.length > 1 && sys.ptypeHzco !== undefined) {
+                    let ptypeHzcoStr = sys.ptypeHzco.toFixed(2);
+                    let ptypeLimitStr = sys.ptypeInnerLimit !== undefined && sys.ptypeInnerLimit !== Infinity
+                        ? sys.ptypeInnerLimit.toFixed(2) : 'N/A';
+                    mgtSysHtml += `<span style="color:#aef">P-Type HZco: <strong>${ptypeHzcoStr}</strong></span>`;
+                    mgtSysHtml += `<span style="color:#aef">P-Type Inner Limit: <strong>${ptypeLimitStr}</strong></span>`;
+                }
                 mgtSysHtml += `</div>`;
 
                 mgtSysHtml += `<div class="system-tree">`;
-
-                // Stars
                 sys.stars.forEach((s, sIdx) => {
                     let massStr = s.mass.toFixed(2);
                     let lumStr = s.luminosity ? s.luminosity.toFixed(2) : (s.lum ? s.lum.toFixed(2) : '-');
                     let isPrimary = (sIdx === 0);
-                    // Companion orbits
-                    let orbitDesc = "";
-                    if (!isPrimary) {
-                        orbitDesc = ` (Orbit: ${s.orbitDistance ? s.orbitDistance.toFixed(2) : (s.orbitId !== undefined ? s.orbitId : '?')} AU, ${s.eccentricity ? s.eccentricity.toFixed(2) : 'e=0'})`;
+                    let starRole = s.role || (isPrimary ? 'Primary' : 'Companion');
+                    let orbitDesc = '';
+                    if (!isPrimary && s.orbitId !== undefined) {
+                        let maoStr = s.mao ? ` MAO:${s.mao.toFixed(2)}` : '';
+                        orbitDesc = `Orbit# ${s.orbitId.toFixed(2)} | Ecc: ${(s.eccentricity || 0).toFixed(2)}${maoStr}`;
                     }
-
                     mgtSysHtml += `<details open>`;
-                    mgtSysHtml += `<summary>${isPrimary ? "Primary" : "Companion"} - ${s.name} <span class="sys-title-info">Star</span></summary>`;
+                    mgtSysHtml += `<summary>${starRole} - ${s.name} <span class="sys-title-info">Star</span></summary>`;
                     mgtSysHtml += `<div class="system-node">`;
                     mgtSysHtml += `<div class="system-stats">`;
                     mgtSysHtml += `<span>Mass: <strong>${massStr} M☉</strong></span>`;
                     mgtSysHtml += `<span>Lum: <strong>${lumStr} L☉</strong></span>`;
-                    if (orbitDesc) mgtSysHtml += `<span class="system-stats-full">${orbitDesc}</span>`;
+                    if (orbitDesc) {
+                        let maoPart = s.mao ? ` | MAO: <strong>${s.mao.toFixed(2)}</strong>` : '';
+                        mgtSysHtml += `<span class="system-stats-full">Orbit: <strong>${s.orbitId.toFixed(2)}</strong> | Ecc: <strong>${(s.eccentricity || 0).toFixed(2)}</strong>${maoPart}</span>`;
+                    }
                     mgtSysHtml += `</div>`;
-
-                    // Planets around this star
                     sys.worlds.forEach(w => {
-                        // In MgT2E chunk logic, we didn't explicitly map worlds to companion stars yet, 
-                        // so we assume all worlds orbit the primary for now unless `parentStar` was added
-                        if (!isPrimary) return;
-
+                        let worldParent = (w.parentStarIdx !== undefined) ? w.parentStarIdx : 0;
+                        if (worldParent !== sIdx) return;
                         mgtSysHtml += `<details open>`;
-
-                        let wTitle = `Orbit ${w.orbitId}`;
+                        let orbitLabel = typeof w.orbitId === 'number' ? w.orbitId.toFixed(2) : w.orbitId;
                         let wType = w.type;
                         if (wType === "Planetoid Belt") wType = "Belt";
                         else if (wType === "Asteroid Belt") wType = "Belt";
-
-                        mgtSysHtml += `<summary>${wTitle} <span class="sys-title-info">${wType}</span></summary>`;
+                        let orbitTypeBadge = w.orbitType ? ` <span style="font-size:0.7em;color:#aef;opacity:0.7">(${w.orbitType})</span>` : '';
+                        let anomalyBadge = '';
+                        if (w.orbitAnomaly && w.orbitAnomaly !== 'Normal') {
+                            let anomColor = w.orbitAnomaly === 'Eccentric' ? '#ffd700' :
+                                w.orbitAnomaly === 'Inclined' ? '#ff69b4' :
+                                    w.orbitAnomaly === 'Retrograde' ? '#ff6347' : '#7fffd4';
+                            let anomLabel = w.orbitAnomaly;
+                            if (w.orbitAnomaly === 'Inclined' && w.inclination) {
+                                anomLabel = `Inclined ${w.inclination}°`;
+                            }
+                            if (w.orbitAnomaly === 'Trojan' && w.trojanHostOrbit !== undefined) {
+                                let side = w.trojanSide || 'L4/L5';
+                                anomLabel = `${side} Trojan of GG@${w.trojanHostOrbit.toFixed(2)}`;
+                            }
+                            anomalyBadge = ` <span style="font-size:0.7em;color:${anomColor};font-weight:bold">[${anomLabel}]</span>`;
+                        }
+                        mgtSysHtml += `<summary>Orbit ${orbitLabel}${orbitTypeBadge}${anomalyBadge} <span class="sys-title-info">${wType}</span></summary>`;
                         mgtSysHtml += `<div class="system-node">`;
-
-                        // For the Mainworld, use the authoritative UWP atm/hydro values from
-                        // mainworld data instead of the physical gen w.atmCode/w.hydroCode which
-                        // are stored on the world object and may diverge.
                         let mwBase = stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData;
                         let effAtm = (w.type === 'Mainworld' && mwBase) ? mwBase.atm : (w.atmCode || 0);
                         let effHydro = (w.type === 'Mainworld' && mwBase) ? mwBase.hydro : (w.hydroCode || 0);
                         let effSize = w.size === 'S' ? 0 : (w.type === 'Mainworld' && mwBase ? mwBase.size : w.size);
                         let uwpStr = `${toUWPChar(effSize)}${toUWPChar(effAtm)}${toUWPChar(effHydro)}`;
-
                         mgtSysHtml += `<div class="system-stats">`;
+                        let fullAnom = (w.orbitAnomaly && w.orbitAnomaly !== 'Normal') ? ` [${w.orbitAnomaly}]` : '';
+                        mgtSysHtml += `<span class="system-stats-full">Orbit: <strong>${orbitLabel} (${w.orbitType || 'S-Type'})${fullAnom}</strong></span>`;
                         mgtSysHtml += `<span>Dist: <strong>${w.orbitDistance ? w.orbitDistance.toFixed(2) : w.au ? w.au.toFixed(2) : '-'} AU</strong></span>`;
                         mgtSysHtml += `<span>Ecc: <strong>${w.eccentricity ? w.eccentricity.toFixed(2) : '-'}</strong></span>`;
-
+                        if (w.periodYears) {
+                            let pStr = w.periodYears < 1.0 ? `${(w.periodYears * 365.25).toFixed(1)} days` : `${w.periodYears.toFixed(2)} years`;
+                            mgtSysHtml += `<span>Period: <strong>${pStr}</strong></span>`;
+                        }
+                        if (w.inclination) {
+                            mgtSysHtml += `<span>Incl: <strong>${w.inclination}°</strong></span>`;
+                        }
                         if (wType !== 'Empty') {
-                            mgtSysHtml += `<span>UWP: <strong style="color: #ffb399">${uwpStr}</strong></span>`;
+                            if (w.type === 'Mainworld') {
+                                let mwFullUWP = (mwBase && mwBase.uwp) ? mwBase.uwp : uwpStr;
+                                mgtSysHtml += `<span>UWP: <strong style="color: #ffb399">${mwFullUWP}</strong></span>`;
+                            } else if (w.uwpSecondary) {
+                                mgtSysHtml += `<span>UWP: <strong style="color: #b3ffd9">${w.uwpSecondary}</strong></span>`;
+                                let isUninhabited = (w.secPop === 0);
+                                let classStr = (w.classifications && w.classifications.length > 0)
+                                    ? w.classifications.join(' · ')
+                                    : (isUninhabited ? 'Uninhabited' : 'Inhabited');
+                                mgtSysHtml += `<span class="system-stats-full" style="color:#ccc;font-size:0.8em">${classStr}</span>`;
+                            } else {
+                                mgtSysHtml += `<span>UWP: <strong style="color: #ffb399">${uwpStr}</strong></span>`;
+                            }
                             mgtSysHtml += `<span>Grav: <strong>${w.gravity !== undefined ? w.gravity.toFixed(2) : '0'}G</strong></span>`;
-
                             let dayLen = '-';
                             if (w.tidallyLocked) dayLen = 'Lock';
                             else if (w.solarDayHours !== undefined && w.solarDayHours !== Infinity) dayLen = `${w.solarDayHours.toFixed(1)}h`;
-
                             mgtSysHtml += `<span>Day: <strong>${dayLen}</strong></span>`;
                             mgtSysHtml += `<span>Tilt: <strong>${w.axialTilt ? w.axialTilt.toFixed(1) : '0'}°</strong></span>`;
-
-                            if (w.meanTempK) {
-                                mgtSysHtml += `<span>Temp: <strong>${(w.meanTempK - 273.15).toFixed(1)}°C</strong></span>`;
-                            }
-                            if (w.habitability !== undefined) {
-                                mgtSysHtml += `<span>Hab: <strong>${w.habitability}</strong></span>`;
-                            }
-                            if (w.lifeProfile) {
-                                mgtSysHtml += `<span class="system-stats-full">Life: <strong>${w.lifeProfile}</strong> (Bio ${w.biomass || 0})</span>`;
+                            if (w.meanTempK) mgtSysHtml += `<span>Temp: <strong>${(w.meanTempK - 273.15).toFixed(1)}°C</strong></span>`;
+                            if (w.habitability !== undefined) mgtSysHtml += `<span>Hab: <strong>${w.habitability}</strong></span>`;
+                            if (w.resourceRating) {
+                                let resChar = toUWPChar(w.resourceRating);
+                                let ruPart = w.secRU !== undefined && w.secPop > 0 ? ` | RU: <strong>${w.secRU}</strong>` : '';
+                                mgtSysHtml += `<span class="system-stats-full">Res: <strong>${resChar}</strong>${ruPart}</span>`;
                             }
                         }
-
                         mgtSysHtml += `</div>`;
-
-                        // Moons
                         if (w.moons && w.moons.length > 0) {
                             w.moons.forEach((m, mIdx) => {
                                 let mType = m.size === 'S' ? 'Small' : m.size === 'R' ? 'Ringlet' : (m.size === 0 ? 'Tiny' : 'Moon');
                                 let muwpStr = `${toUWPChar(m.size === 'S' ? 0 : m.size)}${toUWPChar(m.atmCode || 0)}${toUWPChar(m.hydroCode || 0)}`;
-                                // m.pd = orbital distance in planetary diameters
                                 let mOrbitDist = m.pd !== undefined ? `${m.pd.toFixed(1)} ⌀` : (m.orbitId !== undefined ? `Orb ${m.orbitId.toFixed(2)}` : '-');
-
                                 mgtSysHtml += `<details>`;
                                 mgtSysHtml += `<summary>Moon ${mIdx + 1} <span class="sys-title-info">${mType} | ${mOrbitDist}</span></summary>`;
                                 mgtSysHtml += `<div class="system-node">`;
                                 mgtSysHtml += `<div class="system-stats">`;
+                                if (m.uwpSecondary) {
+                                    mgtSysHtml += `<span>UWP: <strong style="color: #b3ffd9">${m.uwpSecondary}</strong></span>`;
+                                    let isUninhabited = (m.secPop === 0);
+                                    let classStr = (m.classifications && m.classifications.length > 0)
+                                        ? m.classifications.join(' · ')
+                                        : (isUninhabited ? 'Uninhabited' : 'Inhabited');
+                                    mgtSysHtml += `<span class="system-stats-full" style="color:#ccc;font-size:0.8em">${classStr}</span>`;
+                                } else {
+                                    mgtSysHtml += `<span>UWP: <strong style="color: #ffb399">${muwpStr}</strong></span>`;
+                                }
                                 mgtSysHtml += `<span>Ecc: <strong>${m.eccentricity ? m.eccentricity.toFixed(2) : '-'}</strong></span>`;
-                                mgtSysHtml += `<span>UWP: <strong style="color: #ffb399">${muwpStr}</strong></span>`;
                                 mgtSysHtml += `<span>Grav: <strong>${m.gravity !== undefined ? m.gravity.toFixed(2) : '0'}G</strong></span>`;
-
                                 let mDayLen = '-';
                                 if (m.tidallyLocked) mDayLen = 'Lock';
                                 else if (m.solarDayHours !== undefined && m.solarDayHours !== Infinity) mDayLen = `${m.solarDayHours.toFixed(1)}h`;
                                 mgtSysHtml += `<span>Day: <strong>${mDayLen}</strong></span>`;
-
                                 if (m.meanTempK) mgtSysHtml += `<span>Temp: <strong>${(m.meanTempK - 273.15).toFixed(1)}°C</strong></span>`;
-                                if (m.habitability !== undefined) mgtSysHtml += `<span>Hab: <strong>${m.habitability}</strong></span>`;
-                                if (m.lifeProfile && m.lifeProfile !== "0000") mgtSysHtml += `<span class="system-stats-full">Life: <strong>${m.lifeProfile}</strong></span>`;
-
-                                mgtSysHtml += `</div>`;
-                                mgtSysHtml += `</div>`;
-                                mgtSysHtml += `</details>`;
+                                mgtSysHtml += `</div></div></details>`;
                             });
                         }
-
-                        mgtSysHtml += `</div>`;
-                        mgtSysHtml += `</details>`;
+                        mgtSysHtml += `</div></details>`;
                     });
-
-                    mgtSysHtml += `</div>`;
-                    mgtSysHtml += `</details>`;
+                    mgtSysHtml += `</div></details>`;
                 });
-
                 mgtSysHtml += `</div>`;
                 document.getElementById('editor-mgt-system-root').innerHTML = mgtSysHtml;
+            }
+
+            // CT Scouts System Expansion
+            document.getElementById('editor-ct-system-root').style.display = 'none';
+            document.getElementById('acc-btn-ct-system').style.display = 'none';
+            document.getElementById('acc-btn-ct-system').classList.remove('active');
+            let ctSysHtml = '';
+
+            if (stateObj.ctSystem) {
+                document.getElementById('acc-btn-ct-system').style.display = 'flex';
+                let sys = stateObj.ctSystem;
+                let mwBase = stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData;
+
+                ctSysHtml += `<div class="system-stats" style="grid-template-columns: 1fr;">`;
+                ctSysHtml += `<div style="text-align: center; color: #66fcf1; border-bottom: 1px dotted #45a29e; padding-bottom: 4px;">CT Scouts Overview</div>`;
+                ctSysHtml += `<span>Nature: <strong>${sys.nature}</strong></span>`;
+                ctSysHtml += `<span>Total Orbits: <strong>${sys.maxOrbits}</strong></span>`;
+                ctSysHtml += `</div>`;
+
+                ctSysHtml += `<div class="system-tree">`;
+                sys.stars.forEach((s, sIdx) => {
+                    ctSysHtml += `<details open>`;
+                    ctSysHtml += `<summary>${sIdx === 0 ? 'Primary' : (sIdx === 1 ? 'Stars' : 'Star')} - ${s.name} <span class="sys-title-info">Star</span></summary>`;
+                    ctSysHtml += `<div class="system-node">`;
+
+                    sys.orbits.forEach(o => {
+                        let content = o.contents;
+                        if (!content) return;
+                        // For now assigning all orbits to Primary tree visual
+                        if (sIdx > 0) return;
+
+                        let uwp = (content.type === 'Mainworld' && mwBase) ? mwBase.uwp : (content.uwpSecondary || '-');
+                        let typeLabel = (content.type === 'Gas Giant' ? (content.size + ' Gas Giant') : (content.type === 'Planetoid Belt' ? 'Belt' : (content.type === 'Mainworld' ? 'Mainworld' : content.type)));
+                        let labelColor = content.type === 'Mainworld' ? '#ffb399' : '#b3ffd9';
+
+                        ctSysHtml += `<details open>`;
+                        ctSysHtml += `<summary>Orbit ${o.orbit} [${o.zone}] <span class="sys-title-info">${typeLabel}</span></summary>`;
+                        ctSysHtml += `<div class="system-node">`;
+                        ctSysHtml += `<div class="system-stats">`;
+                        ctSysHtml += `<span>UWP: <strong style="color: ${labelColor}">${uwp}</strong></span>`;
+                        if (content.classifications && content.classifications.length > 0) {
+                            ctSysHtml += `<span class="system-stats-full" style="color:#ccc;font-size:0.8em">${content.classifications.join(' · ')}</span>`;
+                        }
+                        ctSysHtml += `</div>`;
+
+                        if (content.satellites && content.satellites.length > 0) {
+                            content.satellites.forEach((sat, satIdx) => {
+                                let satType = sat.type === 'Mainworld' ? 'Mainworld' : (sat.size === 'R' ? 'Ring' : (sat.size === 'S' ? 'Small Moon' : 'Moon'));
+                                let satUwp = (sat.type === 'Mainworld' && mwBase) ? mwBase.uwp : (sat.uwpSecondary || '-');
+                                let satLabelColor = sat.type === 'Mainworld' ? '#ffb399' : '#b3ffd9';
+
+                                ctSysHtml += `<details open>`;
+                                ctSysHtml += `<summary>Satellite ${satIdx + 1} <span class="sys-title-info">${satType} | ${sat.pd || '?'}r</span></summary>`;
+                                ctSysHtml += `<div class="system-node">`;
+                                ctSysHtml += `<div class="system-stats">`;
+                                ctSysHtml += `<span>UWP: <strong style="color: ${satLabelColor}">${satUwp}</strong></span>`;
+                                if (sat.classifications && sat.classifications.length > 0) {
+                                    ctSysHtml += `<span class="system-stats-full" style="color:#ccc;font-size:0.8em">${sat.classifications.join(' · ')}</span>`;
+                                }
+                                ctSysHtml += `</div></div></details>`;
+                            });
+                        }
+                        ctSysHtml += `</div></details>`;
+                    });
+
+                    if (sIdx === 0 && sys.capturedPlanets) {
+                        sys.capturedPlanets.forEach(p => {
+                            ctSysHtml += `<details open>`;
+                            ctSysHtml += `<summary>Captured Planet [Orb ${p.orbit}] <span class="sys-title-info">Terrestrial</span></summary>`;
+                            ctSysHtml += `<div class="system-node">`;
+                            ctSysHtml += `<div class="system-stats">`;
+                            ctSysHtml += `<span>UWP: <strong style="color: #b3ffd9">${p.uwpSecondary}</strong></span>`;
+                            if (p.classifications && p.classifications.length > 0) {
+                                ctSysHtml += `<span class="system-stats-full" style="color:#ccc;font-size:0.8em">${p.classifications.join(' · ')}</span>`;
+                            }
+                            ctSysHtml += `</div></div></details>`;
+                        });
+                    }
+                    ctSysHtml += `</div></details>`;
+                });
+                ctSysHtml += `</div>`;
+                document.getElementById('editor-ct-system-root').innerHTML = ctSysHtml;
             }
 
             hexEditor.style.display = 'flex';
@@ -4994,6 +7036,11 @@
             document.getElementById('acc-btn-mgt-system').style.display = 'none';
             document.getElementById('acc-btn-mgt-system').classList.remove('active');
 
+            document.getElementById('editor-ct-system-root').style.display = 'none';
+            document.getElementById('editor-ct-system-root').innerHTML = '';
+            document.getElementById('acc-btn-ct-system').style.display = 'none';
+            document.getElementById('acc-btn-ct-system').classList.remove('active');
+
             // Reset Editor position
             hexEditor.style.left = 'calc(50% - 220px)';
             hexEditor.style.top = '100px';
@@ -5011,6 +7058,7 @@
             const stateObj = hexStates.get(editingHexId);
             if (!stateObj || stateObj.type !== 'SYSTEM_PRESENT') return;
 
+            const name = document.getElementById('edit-name').value.trim();
             const starport = document.getElementById('edit-starport').value.toUpperCase();
             const size = parseInt(document.getElementById('edit-size').value, 10) || 0;
             const atm = parseInt(document.getElementById('edit-atm').value, 10) || 0;
@@ -5032,11 +7080,11 @@
             const uwp = `${starport}${toUWPChar(size)}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
 
             if (stateObj.t5Data) {
-                stateObj.t5Data = { ...stateObj.t5Data, uwp, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
+                stateObj.t5Data = { ...stateObj.t5Data, name, uwp, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
             } else if (stateObj.mgt2eData) {
-                stateObj.mgt2eData = { uwp, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
+                stateObj.mgt2eData = { name, uwp, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
             } else if (stateObj.ctData) {
-                stateObj.ctData = { uwp, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, gasGiant };
+                stateObj.ctData = { name, uwp, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, gasGiant };
             }
 
             if (stateObj.t5Socio) {
@@ -5082,9 +7130,24 @@
                 const lawProfile = document.getElementById('edit-mgt-law').value;
                 const techProfile = document.getElementById('edit-mgt-tech').value;
                 const culturalProfile = document.getElementById('edit-mgt-cul').value;
-                const economicProfile = document.getElementById('edit-mgt-eco').value;
+
+                const ImStr = document.getElementById('edit-mgt-im').value;
+                const Im = parseInt(ImStr.replace('+', ''), 10) || 0;
+                const economicProfileCore = document.getElementById('edit-mgt-eco').value; // rlie part
+                const RU = parseInt(document.getElementById('edit-mgt-ru').value, 10) || 0;
+                const gwpStr = document.getElementById('edit-mgt-gwp').value.replace('Cr', '');
+                const pcGWP = parseInt(gwpStr, 10) || 0;
+                const wtnStr = document.getElementById('edit-mgt-wtn').value;
+                const WTN = parseInt(wtnStr, 36) || 0; // approximate back to int if eHex
+                const IR = parseInt(document.getElementById('edit-mgt-ir').value, 10) || 0;
+                const DR = document.getElementById('edit-mgt-dr').value;
+
                 const starportProfile = document.getElementById('edit-mgt-star').value;
                 const militaryProfile = document.getElementById('edit-mgt-mil').value;
+
+                // Reconstruct full economic profile string
+                const formatIm = Im >= 0 ? "+" + Im : Im.toString();
+                const fullEconomicProfile = `${formatIm}, ${economicProfileCore}, ${RU}, Cr${pcGWP}, ${toUWPChar(WTN)}, ${IR}, ${DR}`;
 
                 const totalWorldPop = pValue * Math.pow(10, pop);
                 const totalUrbanPop = Math.round(totalWorldPop * (urbanPercent / 100));
@@ -5102,15 +7165,16 @@
                     lawProfile,
                     techProfile,
                     culturalProfile,
-                    economicProfile,
+                    economicProfile: fullEconomicProfile,
+                    Im, RU, pcGWP, WTN, IR, DR,
                     starportProfile,
                     militaryProfile,
-                    displayString: `Pop: ${pValue}x10^${pop} | PCR: ${pcr} | Urb: ${urbanPercent}% | MC: ${majorCities} (${totalMajorCityPop.toLocaleString()})\nGov: ${govProfile} | Fac: ${factionsString} | Law: ${lawProfile}\nTech: ${techProfile} | Cul: ${culturalProfile}\nEco: ${economicProfile} | Sp: ${starportProfile}\nMil: ${militaryProfile}`,
+                    displayString: `Pop: ${pValue}x10^${pop} | PCR: ${pcr} | Urb: ${urbanPercent}% | MC: ${majorCities} (${totalMajorCityPop.toLocaleString()})\nGov: ${govProfile} | Fac: ${factionsString} | Law: ${lawProfile}\nTech: ${techProfile} | Cul: ${culturalProfile}\nEco: ${fullEconomicProfile} | Sp: ${starportProfile}\nMil: ${militaryProfile}`,
                     displayStrings: [
                         `Pop: ${pValue}x10^${pop} | PCR: ${pcr} | Urb: ${urbanPercent}% | MC: ${majorCities} (${totalMajorCityPop.toLocaleString()})`,
                         `Gov: ${govProfile} | Fac: ${factionsString} | Law: ${lawProfile}`,
                         `Tech: ${techProfile} | Cul: ${culturalProfile}`,
-                        `Eco: ${economicProfile} | Sp: ${starportProfile}`,
+                        `Eco: ${fullEconomicProfile} | Sp: ${starportProfile}`,
                         `Mil: ${militaryProfile}`
                     ]
                 };
@@ -5322,54 +7386,206 @@
                     const stateType = stateObj ? stateObj.type : 'BLANK';
 
                     if (stateType === 'SYSTEM_PRESENT') {
-                        // White dot in center always visible (unless explicitly culled globally)
-                        ctx.beginPath();
-                        // Prevent the dot from getting microscopically small when zoomed way out
-                        // Set a fixed world radius so it shrinks with the map,
-                        // but ensure it never gets smaller than 1.5 screen pixels.
-                        const baseWorldRadius = 10;
-                        const minWorldRadius = 1.5 / zoom;
-                        const dotRadius = Math.max(minWorldRadius, baseWorldRadius);
-                        ctx.arc(cx, cy, dotRadius, 0, 2 * Math.PI);
-                        ctx.fillStyle = '#ffffff';
-                        ctx.fill();
-                        ctx.closePath();
+                        const data = stateObj.t5Data || stateObj.mgt2eData || stateObj.ctData;
 
-                        // Text at the top, anchored slightly below the top edge
-                        if (zoom > 0.4) {
+                        if (!devView) {
+                            // =============================================
+                            // PRESENTATION VIEW
+                            // =============================================
+                            const baseWorldRadius = 10;
+                            const minWorldRadius = 1.5 / zoom;
+                            const dotRadius = Math.max(minWorldRadius, baseWorldRadius);
+
+                            const pTextColor = isSelected ? '#ffb399' : '#ffffff';
+                            const pFontSmall = 10;  // world-space px (coordinate, UWP)
+                            const pFontName = 12;  // world-space px (system name)
+                            const pFontPort = 18;  // world-space px (starport letter)
+
                             ctx.textAlign = 'center';
-                            const fontSize = 10 / zoom;
-                            ctx.font = `${fontSize}px 'Inter', sans-serif`;
-                            ctx.fillStyle = isSelected ? '#ffb399' : '#ffffff';
                             ctx.textBaseline = 'top';
+                            ctx.fillStyle = pTextColor;
 
-                            let label = hexId;
-                            const data = stateObj.t5Data || stateObj.mgt2eData || stateObj.ctData;
+                            // 1. Hex coordinate — top of hex
+                            ctx.font = `${pFontSmall}px 'Inter', sans-serif`;
+                            ctx.fillText(hexId, cx, cy - (size * 0.75));
 
-                            if (data && data.uwp) {
-                                let tcs = data.tradeCodes ? data.tradeCodes.join(" ") : "";
-                                if (tcs.length > 0) tcs = " " + tcs;
-                                label += `\n${data.uwp}${tcs}`;
-                                ctx.fillText(hexId, cx, cy - (size * 0.75));
-                                ctx.fillText(data.uwp + tcs, cx, cy - (size * 0.75) + fontSize * 1.2);
+                            if (data) {
+                                const isAsteroid = (data.size === 0);
+                                const isWet = (
+                                    data.hydro !== undefined && data.hydro >= 1 &&
+                                    data.atm !== undefined && (
+                                        (data.atm >= 2 && data.atm <= 9) || data.atm >= 13
+                                    )
+                                );
 
-                                // Render Socioeconomics if present
-                                if (stateObj.t5Socio) {
-                                    let sStrings = stateObj.t5Socio.displayStrings || [stateObj.t5Socio.displayString];
-                                    for (let si = 0; si < sStrings.length; si++) {
-                                        ctx.fillText(sStrings[si], cx, cy - (size * 0.75) + fontSize * (2.4 + si * 1.2));
-                                    }
-                                } else if (stateObj.mgtSocio) {
-                                    let sStrings = stateObj.mgtSocio.displayStrings || [stateObj.mgtSocio.displayString];
-                                    for (let si = 0; si < sStrings.length; si++) {
-                                        ctx.fillText(sStrings[si], cx, cy - (size * 0.75) + fontSize * (2.4 + si * 1.2));
-                                    }
+                                // 2. Starport letter — above world dot
+                                if (data.starport) {
+                                    ctx.font = `bold ${pFontPort}px 'Inter', sans-serif`;
+                                    ctx.fillStyle = pTextColor;
+                                    ctx.textBaseline = 'bottom';
+                                    ctx.fillText(data.starport, cx, cy - dotRadius - 2);
+                                    ctx.textBaseline = 'top';
                                 }
-                            } else if (data) {
-                                label += ` [${data.starport}]`;
-                                ctx.fillText(label, cx, cy - (size * 0.75));
+
+                                // 3. World dot (or asteroid cluster)
+                                if (isAsteroid) {
+                                    // Asteroid belt: cluster of small dots
+                                    const aColor = isSelected ? '#ffb399' : '#aaaaaa';
+                                    const aPositions = [
+                                        { dx: -8, dy: -2 }, { dx: 0, dy: -5 }, { dx: 8, dy: -2 },
+                                        { dx: -5, dy: 5 }, { dx: 5, dy: 4 }
+                                    ];
+                                    aPositions.forEach(p => {
+                                        ctx.beginPath();
+                                        ctx.arc(cx + p.dx, cy + p.dy, 2.5, 0, 2 * Math.PI);
+                                        ctx.fillStyle = aColor;
+                                        ctx.fill();
+                                        ctx.closePath();
+                                    });
+                                } else {
+                                    // Normal world dot
+                                    ctx.beginPath();
+                                    ctx.arc(cx, cy, dotRadius, 0, 2 * Math.PI);
+                                    ctx.fillStyle = isWet
+                                        ? (isSelected ? '#a8d8ff' : '#46b4e8')
+                                        : (isSelected ? '#ffb399' : '#ffffff');
+                                    ctx.fill();
+                                    ctx.closePath();
+                                }
+
+                                // 4. UWP string — just below dot
+                                if (data.uwp) {
+                                    ctx.font = `${pFontSmall}px 'Inter', sans-serif`;
+                                    ctx.fillStyle = pTextColor;
+                                    ctx.textBaseline = 'top';
+                                    ctx.fillText(data.uwp, cx, cy + dotRadius + 3);
+                                }
+
+                                // 5. System name — bottom of hex (ALL CAPS for pop >= 9)
+                                if (data.name) {
+                                    const isHighPop = (data.pop !== undefined && data.pop >= 9);
+                                    const displayName = isHighPop ? data.name.toUpperCase() : data.name;
+                                    ctx.font = `${pFontName}px 'Inter', sans-serif`;
+                                    ctx.fillStyle = pTextColor;
+                                    ctx.textBaseline = 'bottom';
+                                    ctx.fillText(displayName, cx, cy + (size * 0.75));
+                                    ctx.textBaseline = 'top';
+                                }
+
+                                // ---- Symbols (relative to dot center) ----
+
+                                const symOffset = dotRadius + 6;
+
+                                // 6. Gas Giant — Saturn ring to the RIGHT of dot
+                                if (data.gasGiant) {
+                                    const gx = cx + symOffset + 8;
+                                    const gy = cy;
+                                    const gr = 5;
+                                    ctx.beginPath();
+                                    ctx.arc(gx, gy, gr, 0, 2 * Math.PI);
+                                    ctx.fillStyle = pTextColor;
+                                    ctx.fill();
+                                    // Ring (ellipse drawn as scaled arc)
+                                    ctx.save();
+                                    ctx.translate(gx, gy);
+                                    ctx.scale(1.8, 0.55);
+                                    ctx.beginPath();
+                                    ctx.arc(0, 0, gr + 2, 0, 2 * Math.PI);
+                                    ctx.strokeStyle = pTextColor;
+                                    ctx.lineWidth = 1.2 / zoom;
+                                    ctx.stroke();
+                                    ctx.restore();
+                                }
+
+                                // 7. Scout Base — filled triangle BOTTOM-LEFT of dot
+                                if (data.scoutBase) {
+                                    const tx = cx - symOffset - 2;
+                                    const ty = cy + symOffset * 0.3;
+                                    const ts = 7;
+                                    ctx.beginPath();
+                                    ctx.moveTo(tx, ty - ts);
+                                    ctx.lineTo(tx + ts, ty + ts * 0.6);
+                                    ctx.lineTo(tx - ts, ty + ts * 0.6);
+                                    ctx.closePath();
+                                    ctx.fillStyle = pTextColor;
+                                    ctx.fill();
+                                }
+
+                                // 8. Naval Base — 6-point star TOP-LEFT of dot
+                                if (data.navalBase) {
+                                    const sx = cx - symOffset - 2;
+                                    const sy = cy - symOffset * 0.5;
+                                    const sr = 7;
+                                    const sir = sr * 0.45;
+                                    const pts = 6;
+                                    ctx.beginPath();
+                                    for (let i = 0; i < pts * 2; i++) {
+                                        const angle = (Math.PI / pts) * i - Math.PI / 2;
+                                        const r = i % 2 === 0 ? sr : sir;
+                                        const px = sx + Math.cos(angle) * r;
+                                        const py = sy + Math.sin(angle) * r;
+                                        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+                                    }
+                                    ctx.closePath();
+                                    ctx.fillStyle = pTextColor;
+                                    ctx.fill();
+                                }
                             } else {
-                                ctx.fillText(label, cx, cy - (size * 0.75));
+                                // No data yet — just draw a white dot and coordinate
+                                ctx.beginPath();
+                                const dotRadius2 = Math.max(1.5 / zoom, 10);
+                                ctx.arc(cx, cy, dotRadius2, 0, 2 * Math.PI);
+                                ctx.fillStyle = '#ffffff';
+                                ctx.fill();
+                                ctx.closePath();
+                            }
+
+                        } else {
+                            // =============================================
+                            // DEVELOPMENT VIEW (existing behaviour)
+                            // =============================================
+                            ctx.beginPath();
+                            const baseWorldRadius = 10;
+                            const minWorldRadius = 1.5 / zoom;
+                            const dotRadius = Math.max(minWorldRadius, baseWorldRadius);
+                            ctx.arc(cx, cy, dotRadius, 0, 2 * Math.PI);
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fill();
+                            ctx.closePath();
+
+                            if (zoom > 0.4) {
+                                ctx.textAlign = 'center';
+                                const fontSize = 10 / zoom;
+                                ctx.font = `${fontSize}px 'Inter', sans-serif`;
+                                ctx.fillStyle = isSelected ? '#ffb399' : '#ffffff';
+                                ctx.textBaseline = 'top';
+
+                                let label = hexId;
+
+                                if (data && data.uwp) {
+                                    let tcs = data.tradeCodes ? data.tradeCodes.join(" ") : "";
+                                    if (tcs.length > 0) tcs = " " + tcs;
+
+                                    const topLabel = data.name ? `${data.name} (${hexId})` : hexId;
+                                    ctx.fillText(topLabel, cx, cy - (size * 0.75));
+                                    ctx.fillText(data.uwp + tcs, cx, cy - (size * 0.75) + fontSize * 1.2);
+
+                                    if (stateObj.t5Socio) {
+                                        let sStrings = stateObj.t5Socio.displayStrings || [stateObj.t5Socio.displayString];
+                                        for (let si = 0; si < sStrings.length; si++) {
+                                            ctx.fillText(sStrings[si], cx, cy - (size * 0.75) + fontSize * (2.4 + si * 1.2));
+                                        }
+                                    } else if (stateObj.mgtSocio) {
+                                        let sStrings = stateObj.mgtSocio.displayStrings || [stateObj.mgtSocio.displayString];
+                                        for (let si = 0; si < sStrings.length; si++) {
+                                            ctx.fillText(sStrings[si], cx, cy - (size * 0.75) + fontSize * (2.4 + si * 1.2));
+                                        }
+                                    }
+                                } else if (data) {
+                                    ctx.fillText(`${label} [${data.starport}]`, cx, cy - (size * 0.75));
+                                } else {
+                                    ctx.fillText(label, cx, cy - (size * 0.75));
+                                }
                             }
                         }
                     } else if (stateType === 'BLANK') {

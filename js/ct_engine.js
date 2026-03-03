@@ -87,6 +87,92 @@ function getRotationStats(w) {
     return { axialTilt, rotationPeriod };
 }
 
+/**
+ * BOOK 6: SCOUT SOCIAL GENERATION
+ * Calculates social UPP for subordinate worlds/moons.
+ */
+function generateSubordinateSocial(world, mainworld) {
+    if (!world || !mainworld) return;
+
+    // Safety: ensure mainworld has basic social data
+    const mwPop = (mainworld.pop !== undefined) ? mainworld.pop : 0;
+    const mwGov = (mainworld.gov !== undefined) ? mainworld.gov : 0;
+    const mwLaw = (mainworld.law !== undefined) ? mainworld.law : 0;
+    const mwTL = (mainworld.tl !== undefined) ? mainworld.tl : 0;
+
+    // --- 1. POPULATION LOGIC ---
+    if (world.size === 'R' || world.size === 0) {
+        world.pop = 0;
+    } else {
+        let popRoll = roll2D() - 2;
+
+        // DMs by location/type
+        if (world.type === 'Satellite') {
+            if (world.zone === 'I') popRoll -= 6;
+            else if (world.zone === 'O') popRoll -= 1;
+        } else { // Terrestrial or Captured Planet
+            if (world.zone === 'I') popRoll -= 5;
+            else if (world.zone === 'O') popRoll -= 3;
+        }
+
+        // Atmo DM: If Atmo is NOT 0, 5, 6, or 8, apply -2
+        if (![0, 5, 6, 8].includes(world.atm)) {
+            popRoll -= 2;
+        }
+
+        let pop = Math.max(0, popRoll);
+
+        // Continuation Cap: If Pop >= Mainworld Pop, set to Mainworld Pop - 1
+        if (pop >= mwPop) {
+            pop = Math.max(0, mwPop - 1);
+        }
+        world.pop = pop;
+    }
+
+    // --- 2. GOVERNMENT LOGIC ---
+    let gov = 0;
+    if (world.pop > 0) {
+        if (mwGov === 6) {
+            gov = 6; // Special: Subordinate Gov matches Mainworld if it's 6
+        } else {
+            let govRoll = roll1D();
+            if (mwGov >= 7) govRoll += 2;
+
+            // Mapping
+            if (govRoll === 1) gov = 1;      // Company
+            else if (govRoll === 2) gov = 2; // Participating Democracy
+            else if (govRoll === 3) gov = 3; // Self-Perpetuating Oligarchy
+            else if (govRoll === 4) gov = 4; // Representative Democracy
+            else gov = 6;                    // Captive Government (5+)
+        }
+    }
+    world.gov = gov;
+
+    // --- 3. LAW LEVEL LOGIC ---
+    let law = 0;
+    if (world.pop > 0 && world.gov > 0) {
+        law = Math.max(0, roll1D() - 3 + mwLaw);
+    }
+    world.law = law;
+
+    // --- 4. TECH LEVEL LOGIC ---
+    let tl = Math.max(0, mwTL - 1);
+
+    // Facility: If 'Research' or 'Military' base present, TL = Mainworld TL
+    const hasSpecialFacility = (world.militaryBase || world.researchBase ||
+        (world.facilities && (world.facilities.includes('Research Laboratory') ||
+            world.facilities.includes('Military Base'))));
+    if (hasSpecialFacility) {
+        tl = mwTL;
+    }
+
+    // Environmental Floor: If TL < 7 AND Atmo is NOT 5, 6, or 8, set TL to 7
+    if (tl < 7 && ![5, 6, 8].includes(world.atm)) {
+        tl = 7;
+    }
+    world.tl = tl;
+}
+
 // CT Mainworld Generation
 function generateCTMainworld() {
     let starportRoll = roll2D();
@@ -171,6 +257,14 @@ function generateCTMainworld() {
     if ([0, 1].includes(atm) && hydro >= 1) tradeCodes.push("Ic");
 
     return { name: getNextSystemName(), uwp, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, gasGiant };
+}
+
+function constructCTUPP(w) {
+    if (!w) return "-------";
+    if (w.type === 'Empty') return "-------";
+    const sp = w.spaceport || 'S';
+    const sChar = (w.size === 'S' ? 'S' : (w.size === 'R' ? 'R' : toUWPChar(w.size)));
+    return `${sp}${sChar}${toUWPChar(w.atm)}${toUWPChar(w.hydro)}${toUWPChar(w.pop)}${toUWPChar(w.gov)}${toUWPChar(w.law)}-${toUWPChar(w.tl)}`;
 }
 
 // =====================================================================
@@ -611,18 +705,10 @@ function generateCTSystemChunk3(sys, mainworldBase) {
         if (zone === 'I' || size === 1 || size === 'S') hydro = 0;
         world.hydro = hydro;
 
-        let popRoll = roll2D() - 2;
-        if (zone === 'I' || zone === 'O') popRoll -= 5;
-        if (![0, 5, 6, 8].includes(atm)) popRoll -= 2;
+        world.zone = zone; // Ensure zone is set for helper
+        generateSubordinateSocial(world, mainworldBase);
 
-        let pop = Math.max(0, popRoll);
-        if (pop >= mwPop) {
-            pop = Math.max(0, mwPop - 1);
-        }
-        world.pop = pop;
-
-        const sChar = (size === 'S' ? 'S' : toUWPChar(size));
-        world.uwpSecondary = `${sChar}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}00-0`;
+        world.uwpSecondary = constructCTUPP(world);
         world.distAU = ORBIT_AU[Math.min(Math.floor(orbitNum), ORBIT_AU.length - 1)];
         world.mass = world.gravity * Math.pow((size === 'S' ? 0.3 : size) / 8, 2);
         world.orbitalPeriod = Math.sqrt(Math.pow(world.distAU, 3) / (sys.stars[0].mass || 1.0));
@@ -745,17 +831,10 @@ function generateCTSystemChunk4(sys, mainworldBase) {
             if (zone === 'I' || szVal <= 1) hydro = 0;
             moon.hydro = hydro;
 
-            let popRoll = roll2D() - 2;
-            if (zone === 'I') popRoll -= 6;
-            else if (zone === 'O') popRoll -= 5;
-            if (![5, 6, 8].includes(atm)) popRoll -= 2;
-            let pop = Math.max(0, popRoll);
-            if (moon.size === 'R') pop = 0;
-            if (pop >= mwPop) pop = Math.max(0, mwPop - 1);
-            moon.pop = pop;
+            moon.zone = zone; // Ensure zone is set for helper
+            generateSubordinateSocial(moon, mainworldBase);
 
-            const sChar = (moon.size === 'R' ? 'R' : (moon.size === 'S' ? 'S' : toUWPChar(moon.size)));
-            moon.uwpSecondary = `${sChar}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}00-0`;
+            moon.uwpSecondary = constructCTUPP(moon);
             moon.distAU = ORBIT_AU[Math.min(Math.floor(orbitNum), ORBIT_AU.length - 1)];
             moon.mass = moon.gravity * Math.pow((moon.size === 'S' ? 0.3 : moon.size) / 8, 2);
             moon.orbitalPeriod = Math.sqrt(Math.pow(moon.distAU, 3) / (sys.stars[0].mass || 1.0));
@@ -803,25 +882,13 @@ function generateCTSystemChunk5(sys, mainworldBase) {
             return;
         }
 
-        let gov = 0;
-        if (w.pop > 0) {
-            if (mwGov === 6) {
-                gov = 6;
-            } else {
-                let gRoll = roll1D();
-                if (mwGov >= 7) gRoll += 2;
-                if (gRoll >= 5) gov = 6;
-                else gov = Math.max(0, gRoll);
-            }
-        }
-        w.gov = gov;
+        // 1. Prepare world object for social helper
+        w.zone = zone;
 
-        let law = 0;
-        if (gov > 0) {
-            law = Math.max(0, roll1D() - 3 + mwLaw);
-        }
-        w.law = law;
+        // 2. Initial Social Generation (Pop, Gov, Law, TL)
+        generateSubordinateSocial(w, mainworldBase);
 
+        // 3. Post-Social Facilities Generation
         w.facilities = [];
         if (zone === 'H' && w.atm >= 4 && w.atm <= 9 && w.hydro >= 4 && w.hydro <= 8 && w.pop >= 2) {
             w.facilities.push('Farming');
@@ -829,7 +896,7 @@ function generateCTSystemChunk5(sys, mainworldBase) {
         if (isIndustrial && w.pop >= 2) {
             w.facilities.push('Mining');
         }
-        if (gov === 6 && w.pop >= 5) {
+        if (w.gov === 6 && w.pop >= 5) {
             w.facilities.push('Colony');
         }
         if (mwTL >= 9 && w.pop > 0) {
@@ -845,14 +912,10 @@ function generateCTSystemChunk5(sys, mainworldBase) {
             if (milRoll >= 12) w.facilities.push('Military Base');
         }
 
-        let tl = Math.max(0, mwTL - 1);
+        // 4. Re-Apply Facility TL Bonuses (if added after helper)
         if (w.facilities.includes('Research Laboratory') || w.facilities.includes('Military Base')) {
-            tl = mwTL;
+            w.tl = mwTL;
         }
-        if (tl < 7 && ![5, 6, 8].includes(w.atm)) {
-            tl = 7;
-        }
-        w.tl = tl;
 
         let spRoll = roll1D();
         if (w.pop >= 6) spRoll += 2;
@@ -867,7 +930,7 @@ function generateCTSystemChunk5(sys, mainworldBase) {
         w.spaceport = sp;
 
         const sChar = (w.size === 'S' ? 'S' : toUWPChar(w.size));
-        w.uwpSecondary = `${w.spaceport}${sChar}${toUWPChar(w.atm)}${toUWPChar(w.hydro)}${toUWPChar(w.pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
+        w.uwpSecondary = constructCTUPP(w);
         if (w.facilities.length > 0) {
             w.classifications = w.facilities;
         }

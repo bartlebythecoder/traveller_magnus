@@ -816,7 +816,7 @@ function setupGenerationHandlers() {
             if (baseData) {
                 let sys = generateT5SystemChunk1(baseData, stateObj.t5System);
                 sys = generateT5SystemChunk2(sys, baseData);
-                sys = generateT5SystemChunk3(sys);
+                sys = generateT5SystemChunk3(sys, baseData);
 
                 stateObj.t5System = sys;
                 stateObj.t5Physical = null; // Clean up old physical object if it exists
@@ -1173,12 +1173,26 @@ function populateEditorAccordions(stateObj) {
                     let worldParent = w.parentStarIdx !== undefined ? w.parentStarIdx : 0;
                     if (worldParent !== starIdx || w.type === 'Empty') return;
 
-                    html += `<details open>`;
-                    html += `<summary>Orbit ${w.orbitId.toFixed(2)} (${w.orbitType || 'S-Type'}) <span class="sys-title-info">${w.type}</span></summary>`;
-                    html += `<div class="system-node">`;
-                    html += `<div class="system-stats">`;
+                    // Physical characteristics (non-gas-giant, non-belt)
+                    let mwBase = stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData;
+                    let uwp = w.type === 'Mainworld' ? (mwBase ? mwBase.uwp : '-') : (w.uwpSecondary || '-');
+                    let labelColor = w.type === 'Mainworld' ? '#ffa500' : '#66fcf1';
+                    let summaryStyle = w.type === 'Mainworld' ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
 
-                    // Orbital mechanics
+                    let classLabel = (w.classifications && w.classifications.length > 0) ? ` | ${w.classifications[0]}` : '';
+
+                    html += `<details open>`;
+                    html += `<summary ${summaryStyle}>Orbit ${w.orbitId.toFixed(2)} (${w.orbitType || 'S-Type'})${classLabel} <span class="sys-title-info">${w.type}</span></summary>`;
+                    html += `<div class="system-node">`;
+
+                    if (w.type !== 'Planetoid Belt' && w.type !== 'Gas Giant' && uwp !== '-') {
+                        html += `<div style="margin-bottom: 6px; font-family: monospace; font-size: 1.1em;">UWP: <strong style="color: ${labelColor}">${uwp}</strong></div>`;
+                    }
+                    if (w.classifications && w.classifications.length > 0) {
+                        html += `<div style="margin-bottom: 6px; font-size: 0.85em; color: #a0a8b0;">Classification: <strong style="color: #66fcf1;">${w.classifications.join(', ')}</strong></div>`;
+                    }
+
+                    html += `<div class="system-stats">`;
                     html += `<span>Orbit ID: <strong>${w.orbitId.toFixed(2)}</strong></span>`;
                     html += `<span>Type: <strong>${w.orbitType || 'S-Type'}</strong></span>`;
                     html += `<span>Distance: <strong>${w.au ? w.au.toFixed(2) : '?'} AU</strong></span>`;
@@ -1210,9 +1224,23 @@ function populateEditorAccordions(stateObj) {
                     // Moons with detailed stats
                     if (w.moons && w.moons.length > 0) {
                         w.moons.forEach((m, midx) => {
+                            let mUwp = m.uwpSecondary || '-';
+                            let mLabelColor = m.type === 'Mainworld' ? '#ffa500' : '#66fcf1';
+                            let mSummaryStyle = m.type === 'Mainworld' ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
+
+                            let mClassLabel = (m.classifications && m.classifications.length > 0) ? ` | ${m.classifications[0]}` : '';
+
                             html += `<details>`;
-                            html += `<summary>Moon ${midx + 1} <span class="sys-title-info">Size ${m.size}</span></summary>`;
+                            html += `<summary ${mSummaryStyle}>Moon ${midx + 1}${mClassLabel} <span class="sys-title-info">Size ${m.size}</span></summary>`;
                             html += `<div class="system-node">`;
+
+                            if (mUwp !== '-') {
+                                html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <strong style="color: ${mLabelColor}">${mUwp}</strong></div>`;
+                            }
+                            if (m.classifications && m.classifications.length > 0) {
+                                html += `<div style="margin-bottom: 6px; font-size: 0.85em; color: #a0a8b0;">Classification: <strong style="color: #66fcf1;">${m.classifications.join(', ')}</strong></div>`;
+                            }
+
                             html += `<div class="system-stats">`;
                             html += `<span>Orbit: <strong>${m.pd ? m.pd.toFixed(1) : '?'} ⌀</strong></span>`;
                             html += `<span>Ecc: <strong>${(m.eccentricity || 0).toFixed(3)}</strong></span>`;
@@ -1295,7 +1323,7 @@ function populateEditorAccordions(stateObj) {
                         let labelColor = w.type === 'Mainworld' ? '#ffa500' : '#66fcf1'; // Orange for Mainworld, Cyan for others
 
                         html += `<details open>`;
-                        html += `<summary>Orbit ${o.orbit} [${o.zone}] <span class="sys-title-info">${typeLabel}</span></summary>`;
+                        html += `<summary>Orbit ${o.orbit} [${o.zone}] <span class="sys-title-info">${typeLabel} | ${uwp}</span></summary>`;
                         html += `<div class="system-node">`;
 
                         // UWP Line
@@ -1336,7 +1364,7 @@ function populateEditorAccordions(stateObj) {
                                 let satLabelColor = sat.type === 'Mainworld' ? '#ffa500' : '#66fcf1';
 
                                 html += `<details>`;
-                                html += `<summary>Satellite ${satIdx + 1} <span class="sys-title-info">${satType} | ${sat.pd || '?'}r</span></summary>`;
+                                html += `<summary>Satellite ${satIdx + 1} <span class="sys-title-info">${satType} | ${sat.pd || '?'}r | ${satUwp}</span></summary>`;
                                 html += `<div class="system-node">`;
                                 html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <strong style="color: ${satLabelColor}">${satUwp}</strong></div>`;
                                 html += `<div class="system-stats">`;
@@ -1359,7 +1387,7 @@ function populateEditorAccordions(stateObj) {
                     if (sys.capturedPlanets && sys.capturedPlanets.length > 0) {
                         sys.capturedPlanets.forEach((p, pIdx) => {
                             html += `<details>`;
-                            html += `<summary>Captured Planet [Orb ${p.orbit.toFixed(1)}] <span class="sys-title-info">Terrestrial</span></summary>`;
+                            html += `<summary>Captured Planet [Orb ${p.orbit.toFixed(1)}] <span class="sys-title-info">Terrestrial | ${p.uwpSecondary || '-'}</span></summary>`;
                             html += `<div class="system-node">`;
                             html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <strong style="color: #66fcf1">${p.uwpSecondary || '-'}</strong></div>`;
                             html += `<div class="system-stats">`;
@@ -1448,6 +1476,11 @@ function populateEditorAccordions(stateObj) {
                         html += `<details style="margin-left: 20px;">`;
                         html += `<summary>Moon ${satIdx + 1} <span class="sys-title-info">Size ${sat.size}</span></summary>`;
                         html += `<div class="system-node">`;
+
+                        if (sat.uwpSecondary) {
+                            html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <strong style="color: #66fcf1">${sat.uwpSecondary}</strong></div>`;
+                        }
+
                         html += `<div class="system-stats">`;
                         html += `<span>Diameter: <strong>${sat.diamKm.toLocaleString()} km</strong></span>`;
                         html += `<span>Gravity: <strong>${sat.gravity.toFixed(2)} G</strong></span>`;
@@ -1944,7 +1977,7 @@ function setupSplashScreen() {
             splash.classList.add('hidden');
             // Give a small toast welcome
             setTimeout(() => {
-                showToast("Welcome to Bartleby's Star System Generator", 3000);
+                showToast("Welcome to As Above So Below", 3000);
             }, 800);
         });
     }

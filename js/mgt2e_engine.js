@@ -197,26 +197,118 @@ function generateMgT2EMainworld(hexId) {
     tResult('Assigned', name || '(none — pool empty)');
     endTrace();
 
-    return { name, uwp, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
+    return { name, uwp, uwpSecondary: uwp, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
 }
 
 // =====================================================================
 // MGT2E SOCIOECONOMICS GENERATION
 // =====================================================================
 
+function getMgT2EMinSusTL(atmCode) {
+    if ([0, 1, 10].includes(atmCode)) return 8;
+    if ([2, 3, 13, 14].includes(atmCode)) return 5;
+    if ([4, 7, 9].includes(atmCode)) return 3;
+    if (atmCode === 11) return 9;
+    if (atmCode === 12) return 10;
+    if ([16, 17].includes(atmCode)) return 14;
+    return 0;
+}
+
+/**
+ * MGT2E SUBORDINATE SOCIAL GENERATOR
+ * Implementation from World Builder's Handbook logic.
+ */
+function generateMgT2ESubordinateSocial(body, mainworld) {
+    if (!body || !mainworld) return;
+
+    // 1. Population (WBH Dependent)
+    const systemLimit = Math.max(0, mainworld.pop - roll1D());
+    const popTypeRoll = roll1D();
+    if (popTypeRoll >= 5) {
+        body.pop = 0;
+    } else {
+        body.pop = Math.min(systemLimit, roll1D());
+    }
+
+    // 2. Government (Dependent)
+    let govRoll = roll1D();
+    if (mainworld.gov === 0) govRoll -= 2;
+    if (mainworld.gov === 6) govRoll += mainworld.pop;
+
+    if (govRoll <= 1) body.gov = 0;
+    else if (govRoll === 2) body.gov = 1;
+    else if (govRoll === 3) body.gov = 2;
+    else if (govRoll === 4) body.gov = 3;
+    else body.gov = 6; // Captive
+
+    // 3. Law Level
+    if (body.gov === 6) {
+        let lRoll = roll1D();
+        if (lRoll <= 2) body.law = mainworld.law; // actually prompt says 3-4 is MW Law. 1-2? Assuming match. 
+        else if (lRoll <= 4) body.law = mainworld.law;
+        else if (lRoll === 5) body.law = mainworld.law + 1;
+        else body.law = mainworld.law + roll1D();
+    } else if (body.gov >= 1 && body.gov <= 3) {
+        let lRoll = roll2D() - mainworld.gov;
+        if (lRoll <= 0) {
+            body.law = mainworld.law;
+        } else {
+            let lawType = roll1D();
+            if (lawType <= 3) body.law = roll1D();
+            else body.law = Math.max(0, roll2D() - 7 + body.gov);
+        }
+    } else {
+        // Fallback for Gov 0 or others not explicitly defined in prompt
+        body.law = Math.max(0, roll2D() - 7 + body.gov);
+    }
+    body.law = Math.max(0, Math.min(18, body.law));
+
+    // 4. Spaceport (Subordinate/Spaceports only)
+    let spDM = 0;
+    if (body.pop >= 6) spDM += 2;
+    if (body.pop === 1) spDM -= 1;
+    if (body.pop === 0) spDM -= 3;
+    let spRoll = roll1D() + spDM;
+
+    if (spRoll <= 2) body.starport = 'Y';
+    else if (spRoll === 3) body.starport = 'H';
+    else if (spRoll <= 5) body.starport = 'G';
+    else body.starport = 'F';
+
+    // 5. Tech Level (Standard T5 Roll as per instructions)
+    let tlDM = 0;
+    // Spaceport DM
+    if (body.starport === 'F') tlDM += 1;
+    // Physical/Social DMs (Mgt2e standard but 1D roll)
+    if (body.size <= 1) tlDM += 2;
+    else if (body.size <= 4) tlDM += 1;
+    if (body.atm <= 3 || body.atm >= 10) tlDM += 1;
+    if (body.hydro === 9) tlDM += 1;
+    else if (body.hydro === 10) tlDM += 2;
+    if (body.pop >= 1 && body.pop <= 5) tlDM += 1;
+    else if (body.pop === 9) tlDM += 2;
+    else if (body.pop >= 10) tlDM += 4;
+    if (body.gov === 0 || body.gov === 5) tlDM += 1;
+    else if (body.gov === 7) tlDM += 2;
+    else if (body.gov >= 13) tlDM -= 2;
+
+    body.tl = Math.max(0, roll1D() + tlDM);
+
+    // Safety check for environmental floor
+    const floor = getMgT2EMinSusTL(body.atm);
+    if (body.tl < floor) body.tl = floor;
+
+    // Final UWP construction
+    const uwp = `${body.starport}${toUWPChar(body.size)}${toUWPChar(body.atm)}${toUWPChar(body.hydro)}${toUWPChar(body.pop)}${toUWPChar(body.gov)}${toUWPChar(body.law)}-${toUWPChar(body.tl)}`;
+    body.uwp = uwp;
+    body.uwpSecondary = uwp;
+}
+
 function generateMgT2ESocioeconomics(base) {
     if (!base) return null;
 
     // Prerequisite: Minimum Sustainable Tech Level
-    let minSusTL = 0;
-    if ([0, 1, 10].includes(base.atm)) minSusTL = 8;
-    else if ([2, 3, 13, 14].includes(base.atm)) minSusTL = 5;
-    else if ([4, 7, 9].includes(base.atm)) minSusTL = 3;
-    else if (base.atm === 11) minSusTL = 9;
-    else if (base.atm === 12) minSusTL = 10;
-    else if ([16, 17].includes(base.atm)) minSusTL = 14;
-
-    // Helper function for 2D3 rolls
+    let minSusTL = getMgT2EMinSusTL(base.atm);
     function roll2D3() {
         return (Math.floor(Math.random() * 3) + 1) + (Math.floor(Math.random() * 3) + 1);
     }
@@ -894,49 +986,49 @@ function generateMgT2ESocioeconomics(base) {
     let portWtnMod = 0;
     let wIdx = Math.max(0, wtnBase);
     if (wIdx <= 1) {
-        if (base.starport === 'A') portWtnMod = 3; 
-        else if (['B', 'C'].includes(base.starport)) portWtnMod = 2; 
-        else if (['D', 'E'].includes(base.starport)) portWtnMod = 1; 
+        if (base.starport === 'A') portWtnMod = 3;
+        else if (['B', 'C'].includes(base.starport)) portWtnMod = 2;
+        else if (['D', 'E'].includes(base.starport)) portWtnMod = 1;
         else if (base.starport === 'X') portWtnMod = 0;
     } else if (wIdx <= 3) {
-        if (['A', 'B'].includes(base.starport)) portWtnMod = 2; 
-        else if (['C', 'D'].includes(base.starport)) portWtnMod = 1; 
+        if (['A', 'B'].includes(base.starport)) portWtnMod = 2;
+        else if (['C', 'D'].includes(base.starport)) portWtnMod = 1;
         else portWtnMod = 0;
     } else if (wIdx <= 5) {
-        if (base.starport === 'A') portWtnMod = 2; 
-        else if (['B', 'C'].includes(base.starport)) portWtnMod = 1; 
-        else if (base.starport === 'X') portWtnMod = -5; 
+        if (base.starport === 'A') portWtnMod = 2;
+        else if (['B', 'C'].includes(base.starport)) portWtnMod = 1;
+        else if (base.starport === 'X') portWtnMod = -5;
         else portWtnMod = 0;
     } else if (wIdx <= 7) {
-        if (['A', 'B'].includes(base.starport)) portWtnMod = 1; 
-        else if (base.starport === 'E') portWtnMod = -1; 
-        else if (base.starport === 'X') portWtnMod = -6; 
+        if (['A', 'B'].includes(base.starport)) portWtnMod = 1;
+        else if (base.starport === 'E') portWtnMod = -1;
+        else if (base.starport === 'X') portWtnMod = -6;
         else portWtnMod = 0;
     } else if (wIdx <= 9) {
-        if (base.starport === 'A') portWtnMod = 1; 
-        else if (base.starport === 'D') portWtnMod = -1; 
-        else if (base.starport === 'E') portWtnMod = -2; 
-        else if (base.starport === 'X') portWtnMod = -7; 
+        if (base.starport === 'A') portWtnMod = 1;
+        else if (base.starport === 'D') portWtnMod = -1;
+        else if (base.starport === 'E') portWtnMod = -2;
+        else if (base.starport === 'X') portWtnMod = -7;
         else portWtnMod = 0;
     } else if (wIdx <= 11) {
-        if (base.starport === 'C') portWtnMod = -1; 
-        else if (base.starport === 'D') portWtnMod = -2; 
-        else if (base.starport === 'E') portWtnMod = -3; 
-        else if (base.starport === 'X') portWtnMod = -8; 
+        if (base.starport === 'C') portWtnMod = -1;
+        else if (base.starport === 'D') portWtnMod = -2;
+        else if (base.starport === 'E') portWtnMod = -3;
+        else if (base.starport === 'X') portWtnMod = -8;
         else portWtnMod = 0;
     } else if (wIdx <= 13) {
-        if (base.starport === 'B') portWtnMod = -1; 
-        else if (base.starport === 'C') portWtnMod = -2; 
-        else if (base.starport === 'D') portWtnMod = -3; 
-        else if (base.starport === 'E') portWtnMod = -4; 
-        else if (base.starport === 'X') portWtnMod = -9; 
+        if (base.starport === 'B') portWtnMod = -1;
+        else if (base.starport === 'C') portWtnMod = -2;
+        else if (base.starport === 'D') portWtnMod = -3;
+        else if (base.starport === 'E') portWtnMod = -4;
+        else if (base.starport === 'X') portWtnMod = -9;
         else portWtnMod = 0;
     } else {
-        if (base.starport === 'B') portWtnMod = -2; 
-        else if (base.starport === 'C') portWtnMod = -3; 
-        else if (base.starport === 'D') portWtnMod = -4; 
-        else if (base.starport === 'E') portWtnMod = -5; 
-        else if (base.starport === 'X') portWtnMod = -10; 
+        if (base.starport === 'B') portWtnMod = -2;
+        else if (base.starport === 'C') portWtnMod = -3;
+        else if (base.starport === 'D') portWtnMod = -4;
+        else if (base.starport === 'E') portWtnMod = -5;
+        else if (base.starport === 'X') portWtnMod = -10;
         else portWtnMod = 0;
     }
 
@@ -2149,133 +2241,101 @@ function generateMgT2ESystemChunk6(sys) {
 // =====================================================================
 
 function generateMgT2ESystemChunk7(sys, mainworldBase) {
-    // Generate UWP strings for all secondary worlds and moons
-    
-    function generateSecondaryUWP(body, isMoon = false) {
-        // Skip empty slots and planetoid belts
-        if (!body || body.type === 'Empty' || body.type === 'Planetoid Belt') {
-            return;
-        }
-        
-        // Skip Gas Giants (they don't get traditional UWPs)
-        if (body.type === 'Gas Giant') {
-            body.uwpSecondary = `GG-${body.ggType || 'GM'}`;
-            body.classifications = ['Gas Giant'];
-            return;
-        }
-        
-        // Generate UWP components for terrestrial worlds and moons
-        let size = body.size === 'S' ? 0 : (typeof body.size === 'number' ? body.size : 0);
-        let atm = body.atmCode !== undefined ? body.atmCode : 0;
-        let hydro = body.hydroCode !== undefined ? body.hydroCode : 0;
-        
-        // Population (secondary worlds are typically uninhabited or have minimal population)
-        let pop = 0;
-        if (body.type === 'Mainworld') {
-            pop = mainworldBase ? mainworldBase.pop : 0;
-        } else {
-            // Barren/Wilderness logic
-            if (body.habitability >= 8 && !isMoon) {
-                // Potentially habitable world - small chance of colonization
-                let popRoll = roll2D();
-                if (popRoll >= 12) pop = roll1D() - 3; // 1-3 population
-                pop = Math.max(0, pop);
-            }
-        }
-        
-        // Government and Law (typically 0 for unpopulated worlds)
-        let gov = 0;
-        let law = 0;
-        if (pop > 0) {
-            let govRoll = roll2D();
-            gov = Math.max(0, govRoll - 7 + pop);
-            if (gov > 0) {
-                let lawRoll = roll2D();
-                law = Math.max(0, lawRoll - 7 + gov);
-            }
-        }
-        
-        // Tech Level (0 for unpopulated, minimal for small populations)
-        let tl = 0;
-        if (pop > 0) {
-            let tlRoll = roll1D();
-            tl = Math.max(0, tlRoll + pop - 4);
-        }
-        
-        // Build UWP string
-        body.uwpSecondary = `X${toUWPChar(size)}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
-        
-        // Classify the world
+    if (!sys || !mainworldBase) return sys;
+
+    const toUWPChar = typeof globalThis.toUWPChar === 'function' ? globalThis.toUWPChar : (val) => val.toString(16).toUpperCase();
+
+    function processBody(body, isMoon = false) {
+        if (!body || body.type === 'Empty') return;
+
+        // Skip Mainworld here (handled in main loop)
+        if (body.type === 'Mainworld') return;
+
+        // 1. Map properties for the Social helper
+        body.size = (body.size === 'S' || body.size === 'R') ? 0 : (typeof body.size === 'number' ? body.size : 0);
+        body.atm = body.atmCode !== undefined ? body.atmCode : 0;
+        body.hydro = body.hydroCode !== undefined ? body.hydroCode : 0;
+
+        // 2. Call the Subordinate Social Generator
+        generateMgT2ESubordinateSocial(body, mainworldBase);
+
+        // 3. Classification Logic (WBH Logic)
         body.classifications = [];
-        
-        // Barren world (no atmosphere, no water)
-        if (atm === 0 && hydro === 0) {
-            body.classifications.push('Barren');
+        const floor = getMgT2EMinSusTL(body.atm);
+        const mw = mainworldBase;
+        const diff = (body.orbitId !== undefined) ? (body.orbitId - sys.hzco) : 99;
+        const isPoor = (mw.tradeCodes && mw.tradeCodes.includes("Po"));
+        const isInd = (mw.tradeCodes && mw.tradeCodes.includes("In"));
+
+        // Farming: HZCO ±1.0, Atm 4–9, Hydro 4–8, Pop 2+
+        if (Math.abs(diff) <= 1.0 && (body.atm >= 4 && body.atm <= 9) && (body.hydro >= 4 && body.hydro <= 8) && body.pop >= 2) {
+            body.classifications.push("Farming");
         }
-        
-        // Wilderness world (habitable but unpopulated)
-        if (pop === 0 && body.habitability >= 6) {
-            body.classifications.push('Wilderness');
+
+        // Mining: MW Industrial, secondary Pop 2+. DM +4 if Planetoid Belt.
+        if (isInd && body.pop >= 2) {
+            let roll = roll2D();
+            if (body.type === 'Planetoid Belt') roll += 4;
+            if (roll >= 8) body.classifications.push("Mining");
         }
-        
-        // Habitable zone classification
-        if (body.habitability >= 8) {
-            body.classifications.push('Habitable');
-        } else if (body.habitability >= 5) {
-            body.classifications.push('Marginally Habitable');
+
+        // Research Base: MW Pop 6+, TL 8+, not "Poor". Occurs on 10+ (DM +2 if MW TL 12+).
+        if (mw.pop >= 6 && mw.tl >= 8 && !isPoor) {
+            let roll = roll2D() + (mw.tl >= 12 ? 2 : 0);
+            if (roll >= 10) body.classifications.push("Research Base");
         }
-        
-        // Life-bearing classification
-        if (body.biomass >= 1) {
-            if (body.biocomplexity >= 8) {
-                body.classifications.push('Complex Life');
-            } else if (body.biocomplexity >= 4) {
-                body.classifications.push('Simple Life');
-            } else {
-                body.classifications.push('Microbial Life');
-            }
+
+        // Military Base: MW TL 8+, not "Poor", secondary Gov 6. Occurs on 12+.
+        if (mw.tl >= 8 && !isPoor && body.gov === 6) {
+            if (roll2D() >= 12) body.classifications.push("Military Base");
         }
-        
-        // Temperature-based classification
-        if (body.tempBand === 'Frozen') {
-            body.classifications.push('Ice World');
-        } else if (body.tempBand === 'Boiling') {
-            body.classifications.push('Inferno');
+
+        // Penal Colony: MW TL 9+, MW Law 8+, secondary Gov 6. Occurs on 10+.
+        if (mw.tl >= 9 && mw.law >= 8 && body.gov === 6) {
+            if (roll2D() >= 10) body.classifications.push("Penal Colony");
         }
-        
-        // Water world
-        if (hydro === 10) {
-            body.classifications.push('Water World');
+
+        // 4. Refine Tech Level (Classification Bonuses)
+        if (body.classifications.includes("Research Base") || body.classifications.includes("Military Base")) {
+            body.tl = mw.tl;
+        } else if (body.classifications.includes("Mining")) {
+            body.tl = Math.max(mw.tl, floor);
+        } else {
+            body.tl = Math.max(mw.tl - 1, floor);
         }
-        
-        // Tidal lock
-        if (body.tidallyLocked) {
-            body.classifications.push('Tidally Locked');
-        }
-        
+
+        // 5. Final UWP Construction
+        // Planetoid Belts usually use size 0
+        const charSize = toUWPChar(body.size);
+        const uwp = `${body.starport}${charSize}${toUWPChar(body.atm)}${toUWPChar(body.hydro)}${toUWPChar(body.pop)}${toUWPChar(body.gov)}${toUWPChar(body.law)}-${toUWPChar(body.tl)}`;
+
+        body.uwp = uwp;
+        body.uwpSecondary = uwp;
+
         // If no classifications, mark as 'Standard'
         if (body.classifications.length === 0) {
             body.classifications.push('Standard');
         }
     }
-    
-    // Process all worlds
-    for (let i = 0; i < sys.worlds.length; i++) {
-        let w = sys.worlds[i];
-        
-        // Generate UWP for the world
-        generateSecondaryUWP(w, false);
-        
-        // Process all moons
-        if (w.moons && w.moons.length > 0) {
-            for (let j = 0; j < w.moons.length; j++) {
-                generateSecondaryUWP(w.moons[j], true);
-            }
+
+    // Process all worlds and their moons
+    (sys.worlds || []).forEach(w => {
+        if (w.type === 'Mainworld') {
+            w.classifications = ['Mainworld'];
+            w.uwpSecondary = mainworldBase.uwp;
+        } else {
+            processBody(w, false);
         }
-    }
-    
+
+        // Every body can have moons in this engine (even GGs)
+        if (w.moons && w.moons.length > 0) {
+            w.moons.forEach(m => processBody(m, true));
+        }
+    });
+
     return sys;
 }
+
 
 // =====================================================================
 // MGT2E SYSTEM GENERATION - CHUNK 4: ATMOSPHERE & HYDROGRAPHICS
@@ -2692,7 +2752,7 @@ function generateMgT2ESystemChunk2(sys, mainworldBase) {
 
         let baseEcc = w.isAsteroid ? 0 : determineMgT2EEccentricity(false, 0, sys.age, w.orbitId, false, 0);
         w.eccentricity = baseEcc;
-        
+
         // Convert orbit number to AU
         let auInt = Math.floor(w.orbitId);
         let auFrac = w.orbitId - auInt;
@@ -2701,7 +2761,7 @@ function generateMgT2ESystemChunk2(sys, mainworldBase) {
         let auTarget = MGT2E_ORBIT_AU[limitIdx];
         let auDiff = limitIdx < maxIdx ? (MGT2E_ORBIT_AU[limitIdx + 1] - MGT2E_ORBIT_AU[limitIdx]) : auTarget;
         w.au = auTarget + (auFrac * auDiff);
-        
+
         let parentStar = sys.stars[w.parentStarIdx] || primary;
         w.periodYears = Math.sqrt(Math.pow(w.au, 3) / parentStar.mass);
         sys.worlds.push(w);

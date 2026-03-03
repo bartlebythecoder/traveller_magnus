@@ -7,6 +7,66 @@ function rollFlux() {
     return (Math.floor(Math.random() * 6) + 1 + Math.floor(Math.random() * 6) + 1) - 7;
 }
 
+/**
+ * T5 SUBORDINATE SOCIAL GENERATOR
+ * Applies Continuation Cap (Pop < MW Pop) and Spaceport restrictions.
+ * Cascades Government and Law from the capped Population.
+ */
+function generateT5SubordinateSocial(world, mainworld) {
+    if (!world) return;
+
+    // 1. Identification: If we don't have a mainworld reference, default to safe ceiling
+    const mwPop = (mainworld && mainworld.pop !== undefined) ? mainworld.pop : 15;
+
+    // 2. Population Continuation Cap (2D-2, results >= MW result are lowered)
+    let popRoll = Math.max(0, (Math.floor(Math.random() * 6) + 1 + Math.floor(Math.random() * 6) + 1) - 2);
+    if (popRoll >= mwPop) {
+        world.pop = Math.max(0, mwPop - 1);
+    } else {
+        world.pop = popRoll;
+    }
+    world.popDigit = world.pop > 0 ? Math.floor(Math.random() * 9) + 1 : 0;
+
+    // 3. Spaceport Restrictions (1-2: Y, 3-4: H, 5: G, 6: F)
+    const spRoll = Math.floor(Math.random() * 6) + 1;
+    if (spRoll <= 2) world.starport = 'Y';
+    else if (spRoll <= 4) world.starport = 'H';
+    else if (spRoll === 5) world.starport = 'G';
+    else world.starport = 'F';
+
+    // 4. Cascading Socials (T5 standard formulas)
+    world.gov = Math.max(0, Math.min(15, rollFlux() + world.pop));
+    world.law = Math.max(0, Math.min(15, rollFlux() + world.gov));
+
+    // 5. Tech Level Roll (1D + Modifiers)
+    let tlDM = 0;
+    // Spaceport DMs
+    if (world.starport === 'F') tlDM += 1;
+    if (world.starport === 'Y') tlDM -= 4;
+    // Physical/Social DMs (T5)
+    if (world.size <= 1) tlDM += 2;
+    else if (world.size <= 4) tlDM += 1;
+    const atm = world.atm || 0;
+    if (atm <= 3 || (atm >= 10 && atm <= 15)) tlDM += 1;
+    const hydro = world.hydro || 0;
+    if (hydro === 9) tlDM += 1;
+    else if (hydro === 10) tlDM += 2;
+    if (world.pop >= 1 && world.pop <= 5) tlDM += 1;
+    else if (world.pop === 9) tlDM += 2;
+    else if (world.pop >= 10) tlDM += 4;
+    if (world.gov === 0 || world.gov === 5) tlDM += 1;
+    else if (world.gov === 13) tlDM -= 2;
+
+    world.tl = Math.max(0, (Math.floor(Math.random() * 6) + 1) + tlDM);
+
+    // Full UWP construction
+    const toUWPChar = typeof globalThis.toUWPChar === 'function' ? globalThis.toUWPChar : (val) => val.toString(16).toUpperCase();
+    const uwp = `${world.starport}${toUWPChar(world.size)}${toUWPChar(world.atm)}${toUWPChar(world.hydro)}${toUWPChar(world.pop)}${toUWPChar(world.gov)}${toUWPChar(world.law)}-${toUWPChar(world.tl)}`;
+
+    world.uwp = uwp;
+    world.uwpSecondary = uwp;
+}
+
 function getT5OrbitAU(orbit) {
     const table = [0.2, 0.4, 0.7, 1.0, 1.6, 2.8, 5.2, 10, 20, 40, 77, 154, 308, 615, 1230, 2500, 4900, 9800, 19500, 39500];
     return table[orbit] || 0;
@@ -246,8 +306,14 @@ function generateT5SystemChunk2(sys, mainworldBase) {
     return sys;
 }
 
-function generateT5SystemChunk3(sys) {
+function generateT5SystemChunk3(sys, mainworldBase) {
     if (!sys || !sys.orbits) return sys;
+
+    // Safety: ensure we have mainworld population for the continuation cap
+    if (!mainworldBase) {
+        let mwOrb = sys.orbits.find(o => o.contents && o.contents.type === 'Mainworld');
+        if (mwOrb) mainworldBase = mwOrb.contents;
+    }
 
     // Determine HZ Orbit for Primary
     const HZ_TABLE = {
@@ -262,11 +328,25 @@ function generateT5SystemChunk3(sys) {
         let w = o.contents;
         if (!w || w.type === 'Empty' || w.type === 'Planetoid Belt') return;
 
-        // Size & Diameter
+        // Size, Atmosphere, Hydrographics
         if (w.type === 'Terrestrial World') {
             let sRoll = roll2D() - 2;
             if (sRoll === 10) sRoll = roll1D() + 9;
             w.size = Math.max(0, sRoll);
+
+            // T5 Atmosphere
+            w.atm = 0;
+            if (w.size > 0) w.atm = Math.min(15, Math.max(0, rollFlux() + w.size));
+
+            // T5 Hydrographics
+            w.hydro = 0;
+            if (w.size > 1) {
+                let hDM = (w.atm <= 1 || w.atm >= 10) ? -4 : 0;
+                w.hydro = Math.min(10, Math.max(0, rollFlux() + w.atm + hDM));
+            }
+
+            // Social & Continuation Cap
+            generateT5SubordinateSocial(w, mainworldBase);
         }
 
         if (w.size !== undefined) {
@@ -329,7 +409,32 @@ function generateT5SystemChunk3(sys) {
             w.satellites = [];
             for (let i = 0; i < moonCount; i++) {
                 let m = { type: 'Moon' };
-                m.size = Math.max(0, roll1D() - 1);
+
+                // 1. Initial Size Roll (1D-1)
+                let rawSize = Math.max(0, roll1D() - 1);
+
+                // 2. Parent-Satellite Size Constraint (Moon < Parent)
+                // GGs have proxies 15 or 12, Terrestrial 0-10+
+                if (rawSize >= w.size) {
+                    m.size = Math.max(0, w.size - 1);
+                } else {
+                    m.size = rawSize;
+                }
+
+                // 3. Atmosphere
+                m.atm = 0;
+                if (m.size > 0) m.atm = Math.min(15, Math.max(0, rollFlux() + m.size));
+
+                // 4. Hydrographics
+                m.hydro = 0;
+                if (m.size > 1) {
+                    let mhDM = (m.atm <= 1 || m.atm >= 10) ? -4 : 0;
+                    m.hydro = Math.min(10, Math.max(0, rollFlux() + m.atm + mhDM));
+                }
+
+                // 5. Social Generation & UWP construction
+                generateT5SubordinateSocial(m, mainworldBase);
+
                 let mSizeVal = m.size === 0 ? 0.3 : m.size;
                 m.diamKm = m.size === 0 ? 500 : m.size * 1600;
                 m.density = w.density || 1.0;

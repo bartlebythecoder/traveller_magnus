@@ -46,16 +46,6 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 4. **Stellar Preservation:** The engine automatically detects imported stellar data and builds the system around the existing "canon" stars.
 
 ---
-
-## Version 0.1.2 Roadmap
-
-### 🛑 Priority One: Markdown & Documentation
-The next milestone focuses on the **Export Suite**. We are building a Markdown generator to create Obsidian-ready system reports, allowing GMs to instantly port generated systems into their personal campaign wikis.
-
-### 🚀 Planned Features
-- **Atmospheric Detailer:** Deep-dive generation of gas mixes and chemical taints.
-- **SQLite Integration:** Permanent browser-side storage for expanded systems.
-- **System Summary Tool:** A cross-engine comparison tool to view economic output across different rule variants.
-
+This tool is an unofficial fan project and is not affiliated with Mongoose Publishing or Far Future Enterprises. All Traveller trademarks and copyrights are used under fair use for fan-created content.
 ---
 *Created by BIAS-CCR. Dedicated to the explorers of the Third Imperium and beyond.*

@@ -31,8 +31,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above So Below</span></h1>
+            <div class="splash-banner">v0.1.3: XBoat and Trade Route System Added</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.1.2</div>
+            <div class="splash-version">v0.1.3</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -41,7 +42,7 @@
                     <div class="shortcut-item"><strong>Scroll Wheel</strong><span>Zoom In / Out</span></div>
                     <div class="shortcut-item"><strong>Shift + Click</strong><span>Toggle Select Hex</span></div>
                     <div class="shortcut-item"><strong>Shift + Drag</strong><span>Paint Multiple Hexes</span></div>
-                    <div class="shortcut-item"><strong>Ctrl + Click</strong><span>Open System Editor</span></div>
+                    <div class="shortcut-item"><strong>Ctrl + Click</strong><span>Open World Details</span></div>
                     <div class="shortcut-item"><strong>Right Click</strong><span>Open Context Menu</span></div>
                     <div class="shortcut-item"><strong>Ctrl + S</strong><span>Toggle Select Sector</span></div>
                     <div class="shortcut-item"><strong>Ctrl + B</strong><span>Toggle Select Subsector</span></div>
@@ -196,6 +197,8 @@
             </div>
         </div>
 
+        <button class="context-menu-item" id="ctx-gen-xboat">GENERATE XBOAT ROUTES</button>
+
         <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
         <button class="context-menu-item" id="ctx-help">Help / Shortcuts</button>
     </div>
@@ -204,21 +207,51 @@
     <div id="help-modal">
         <div style="text-align: center; border-bottom: 2px solid #45a29e; padding-bottom: 15px; margin-bottom: 20px;">
             <h2 style="margin: 0 0 5px 0; color: #66fcf1; font-size: 24px;">As Above So Below</h2>
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.1.2</span></p>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.1.3</span></p>
             <p style="margin: 5px 0; color: #c5c6c7; font-size: 12px; font-style: italic;">Created by: <span
                     id="app-credits">Bartleby the Coder</span></p>
         </div>
-        <h3>Controls & Shortcuts</h3>
-        <div class="help-grid">
-            <strong>Left Click + Drag</strong><span>Pan Map</span>
-            <strong>Scroll Wheel</strong><span>Zoom In / Out</span>
-            <strong>Shift + Click</strong><span>Toggle Select Hex</span>
-            <strong>Shift + Drag</strong><span>Paint Multiple Hexes</span>
-            <strong>Ctrl + Click</strong><span>Open System Editor</span>
-            <strong>Right Click</strong><span>Open Context Menu</span>
-            <strong>Ctrl + S</strong><span>Toggle Select Sector</span>
-            <strong>Ctrl + B</strong><span>Toggle Select Subsector</span>
-            <strong>Escape</strong><span>Cancel / Close All</span>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <h3 style="color: #66fcf1; border-bottom: 1px solid #45a29e; padding-bottom: 5px;">Navigation &
+                    Selection</h3>
+                <div class="help-grid">
+                    <strong>Left Click + Drag</strong><span>Pan Map</span>
+                    <strong>Scroll Wheel</strong><span>Zoom In / Out</span>
+                    <strong>Shift + Click</strong><span>Toggle Select Hex</span>
+                    <strong>Shift + Drag</strong><span>Paint Multiple Hexes</span>
+                    <strong>Ctrl + S</strong><span>Select Sector</span>
+                    <strong>Ctrl + B</strong><span>Select Subsector</span>
+                    <strong>Escape</strong><span>Cancel Selection</span>
+                </div>
+
+                <h3 style="color: #66fcf1; border-bottom: 1px solid #45a29e; padding-bottom: 5px; margin-top: 15px;">
+                    System Editing</h3>
+                <div class="help-grid">
+                    <strong>Ctrl + Click</strong><span>Open World Details</span>
+                    <strong>Right Click</strong><span>Open Context Menu</span>
+                    <strong>Ctrl + Shift + M</strong><span style="color: #ffa500;">Bulk Mongoose Macro</span>
+                    <strong>Ctrl + Z</strong><span>Undo Last Action</span>
+                    <strong>Ctrl + Shift + Z</strong><span>Redo Action</span>
+                </div>
+            </div>
+
+            <div>
+                <h3 style="color: #66fcf1; border-bottom: 1px solid #45a29e; padding-bottom: 5px;">Manual Cartography
+                </h3>
+                <p style="font-size: 11px; color: #888; margin-top: 5px; font-style: italic;">Hold key while dragging
+                    between worlds</p>
+                <div class="help-grid">
+                    <strong style="color: #00FF00;">G + Drag</strong><span>Green Route (Xboat)</span>
+                    <strong style="color: #FF0000;">R + Drag</strong><span>Red Route (Trade)</span>
+                    <strong style="color: #FFFF00;">Y + Drag</strong><span>Yellow Route (Secondary)</span>
+                </div>
+                <div
+                    style="margin-top: 10px; font-size: 12px; color: #c5c6c7; background: rgba(102, 252, 241, 0.05); padding: 8px; border-radius: 4px; border-left: 3px solid #66fcf1;">
+                    <strong>Tip:</strong> Drawing over an existing route will toggle/delete it.
+                </div>
+            </div>
         </div>
         <div class="editor-buttons">
             <button class="btn-cancel" id="btn-close-help">OK</button>
@@ -228,7 +261,7 @@
 
     <!-- Hex Editor Modal -->
     <div id="hex-editor">
-        <h3 id="hex-editor-title">Edit System</h3>
+        <h3 id="hex-editor-title">World Details</h3>
 
         <div class="editor-grid">
             <div class="editor-row" style="grid-column: span 2;">

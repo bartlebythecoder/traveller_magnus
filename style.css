@@ -387,7 +387,7 @@ body {
     gap: 15px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8);
     z-index: 10000;
-    width: 400px;
+    width: 650px;
 }
 
 #help-modal h3 {
@@ -798,6 +798,14 @@ body {
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+}
+
+.splash-banner {
+    color: #ffa500;
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-top: 5px;
+    letter-spacing: 1px;
 }
 
 .splash-subtitle {

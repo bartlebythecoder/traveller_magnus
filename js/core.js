@@ -11,6 +11,18 @@ cameraX = 0;
 cameraY = 0;
 zoom = 1.0;
 
+// Mouse tracking
+currentMouseX = 0;
+currentMouseY = 0;
+
+// Alt+Drag Route Creation State
+isAltDragging = false;
+altDragStartId = null;
+altDragType = 'Trade';
+
+// Key state tracking
+keysDown = new Set();
+
 // Selection state
 selectedHexes = new Set();
 
@@ -20,6 +32,9 @@ devView = false;
 
 // Hex state (Map of hexId -> STATE)
 hexStates = new Map();
+
+// Route state (Global array of route objects)
+window.sectorRoutes = [];
 
 // System Naming State
 namePool = [];
@@ -34,6 +49,21 @@ let genTraces = [];
 let currentTrace = null;
 let genTraceCount = 0;
 let activeTrace = null;
+
+// History state
+window.undoStack = [];
+window.redoStack = [];
+
+function saveHistoryState(actionName) {
+    const stateSnapshot = {
+        action: actionName,
+        routes: JSON.parse(JSON.stringify(window.sectorRoutes || [])),
+        hexStates: JSON.parse(JSON.stringify(Array.from(hexStates.entries())))
+    };
+    window.undoStack.push(stateSnapshot);
+    if (window.undoStack.length > 50) window.undoStack.shift();
+    window.redoStack = []; // Clear redo stack on new action
+}
 
 // -----------------------------------------------------------------------------
 // Coordinate Math Functions
@@ -61,6 +91,37 @@ function pixelToHex(x, y, size) {
     const q_diff = Math.abs(q - q_frac), r_diff = Math.abs(r - r_frac), s_diff = Math.abs(s - (-q_frac - r_frac));
     if (q_diff > r_diff && q_diff > s_diff) q = -r - s; else if (r_diff > s_diff) r = -q - s;
     return { q: q, r: r + (q - (q & 1)) / 2 };
+}
+
+function getHexCoords(hexId) {
+    if (!hexId) return null;
+    const parts = hexId.split('-');
+    if (parts.length < 3) return null;
+    const sChar = parts[0];
+    const sIdx = sChar.length === 1 ? sChar.charCodeAt(0) - 65 : (sChar.charCodeAt(0) - 65) + 26;
+    const sectorX = sIdx % 8;
+    const sectorY = Math.floor(sIdx / 8);
+    const localQ = parseInt(parts[2].substring(0, 2)) - 1;
+    const localR = parseInt(parts[2].substring(2, 4)) - 1;
+    return { q: sectorX * 32 + localQ, r: sectorY * 40 + localR };
+}
+
+function getHexDistance(q1, r1, q2, r2) {
+    const x1 = q1;
+    const z1 = r1 - (q1 - (q1 & 1)) / 2;
+    const y1 = -x1 - z1;
+    const x2 = q2;
+    const z2 = r2 - (q2 - (q2 & 1)) / 2;
+    const y2 = -x2 - z2;
+    return Math.max(Math.abs(x1 - x2), Math.abs(y1 - y2), Math.abs(z1 - z2));
+}
+
+function getHexPixel(q, r) {
+    const size = baseHexSize;
+    const widthStep = (3 / 2) * size;
+    const heightStep = Math.sqrt(3) * size;
+    const offset = (q & 1) ? 0.5 : 0;
+    return { x: widthStep * q, y: heightStep * (r + offset) };
 }
 
 function getMouseWorldCoords(e) {
@@ -167,4 +228,134 @@ function getNextSystemName() {
         return name;
     }
     return "Unnamed System"; // Fallback if no names are available
+}
+
+// =====================================================================
+// INTERSTELLAR CONNECTIVITY (X-BOAT & TRADE)
+// =====================================================================
+
+function calculateT5Ix(base) {
+    if (!base) return -1;
+    let Ix = 0;
+    const starport = base.starport || 'X';
+    const tl = base.tl || 0;
+    const pop = base.pop || 0;
+    const tradeCodes = base.tradeCodes || [];
+    const hasNaval = base.navalBase || false;
+    const hasScout = base.scoutBase || false;
+
+    if (['A', 'B'].includes(starport)) Ix += 1;
+    if (['D', 'E', 'X'].includes(starport)) Ix -= 1;
+    if (tl >= 10) Ix += 1;
+    if (tl >= 16) Ix += 1;
+    if (tl <= 8) Ix -= 1;
+    if (tradeCodes.includes("Ag")) Ix += 1;
+    if (tradeCodes.includes("Hi")) Ix += 1;
+    if (tradeCodes.includes("In")) Ix += 1;
+    if (tradeCodes.includes("Ri")) Ix += 1;
+    if (pop <= 6) Ix -= 1;
+    if (hasNaval && hasScout) Ix += 1;
+    return Ix;
+}
+
+function generateXboatRoutes() {
+    window.sectorRoutes = [];
+    const worlds = [];
+    const importantWorlds = [];
+
+    // Step 1: Identify "Important" Worlds (Ix 4+)
+    hexStates.forEach((state, id) => {
+        if (state.type !== 'SYSTEM_PRESENT') return;
+        const data = state.t5Data || state.mgt2eData || state.ctData;
+        if (!data) return;
+        const ix = calculateT5Ix(data);
+        const coords = getHexCoords(id);
+        const worldInfo = { id, q: coords.q, r: coords.r, ix };
+        worlds.push(worldInfo);
+        if (ix >= 4) importantWorlds.push(worldInfo);
+    });
+
+    if (worlds.length === 0) return;
+
+    const adj = new Map();
+
+    // Step 2: Plot Primary Routes (Jump-4)
+    for (let i = 0; i < importantWorlds.length; i++) {
+        for (let j = i + 1; j < importantWorlds.length; j++) {
+            const w1 = importantWorlds[i];
+            const w2 = importantWorlds[j];
+            const dist = getHexDistance(w1.q, w1.r, w2.q, w2.r);
+
+            if (dist <= 4 && dist > 0) {
+                // Check if there is another important world strictly between them
+                // This prevents line stacking (A-B, B-C, and A-C overlapping)
+                let isRedundant = false;
+                for (let k = 0; k < importantWorlds.length; k++) {
+                    const mid = importantWorlds[k];
+                    if (mid.id === w1.id || mid.id === w2.id) continue;
+
+                    const d1 = getHexDistance(w1.q, w1.r, mid.q, mid.r);
+                    const d2 = getHexDistance(w2.q, w2.r, mid.q, mid.r);
+
+                    // If mid is exactly on the line segment w1-w2
+                    if (d1 + d2 === dist) {
+                        isRedundant = true;
+                        break;
+                    }
+                }
+
+                if (!isRedundant) {
+                    addRoute(w1.id, w2.id, "Xboat", adj);
+                }
+            }
+        }
+    }
+
+    // Step 3: Intermediate Bridging (Recursive Search)
+    importantWorlds.forEach(v => {
+        if (adj.has(v.id) && adj.get(v.id).length > 0) return; // Already connected
+
+        let current = v;
+        const visited = new Set([v.id]);
+        while (true) {
+            let bestW = null, bestIx = -100, bestDist = 100;
+            worlds.forEach(w => {
+                if (w.id === current.id || visited.has(w.id)) return;
+                const dist = getHexDistance(current.q, current.r, w.q, w.r);
+                if (dist <= 4) {
+                    if (w.ix > bestIx) { bestIx = w.ix; bestW = w; bestDist = dist; }
+                    else if (w.ix === bestIx && dist < bestDist) { bestW = w; bestDist = dist; }
+                }
+            });
+            if (!bestW) break;
+            addRoute(current.id, bestW.id, "Xboat", adj);
+            visited.add(bestW.id);
+            // If we hit an Ix 4+ or a node already in the network, we're done
+            if (bestW.ix >= 4 || (adj.has(bestW.id) && adj.get(bestW.id).length > 1)) break;
+            current = bestW;
+        }
+    });
+
+    const uniqueNodes = new Set();
+    window.sectorRoutes.forEach(r => { uniqueNodes.add(r.startId); uniqueNodes.add(r.endId); });
+    console.log(`Routes Generated: ${window.sectorRoutes.length}. Unique Nodes: ${uniqueNodes.size}.`);
+}
+
+/**
+ * Global helper to add a route with duplicate prevention
+ */
+function addRoute(id1, id2, type = "Trade", adjMap = null) {
+    if (!window.sectorRoutes) window.sectorRoutes = [];
+    const sorted = [id1, id2].sort();
+
+    const exists = window.sectorRoutes.some(r => r.startId === sorted[0] && r.endId === sorted[1]);
+    if (!exists) {
+        window.sectorRoutes.push({ startId: sorted[0], endId: sorted[1], type: type });
+        if (adjMap) {
+            if (!adjMap.has(id1)) adjMap.set(id1, []);
+            if (!adjMap.has(id2)) adjMap.set(id2, []);
+            adjMap.get(id1).push(id2);
+            adjMap.get(id2).push(id1);
+        }
+    }
 }

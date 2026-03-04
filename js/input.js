@@ -14,8 +14,7 @@ let hasMoved = false;
 let lastMouseX = 0;
 let lastMouseY = 0;
 
-let currentMouseX = 0;
-let currentMouseY = 0;
+// currentMouseX and currentMouseY are global in core.js
 
 let isPainting = false;
 let paintAction = 'select';
@@ -24,6 +23,8 @@ let lastPaintedHexId = null;
 let contextHexId = null;
 let contextSectorPrefix = null;
 let contextSubsectorPrefix = null;
+
+// routing state is global in core.js
 
 // Hex Editor State
 let editingHexId = null;
@@ -172,6 +173,26 @@ function setupCanvasEvents() {
                 lastPaintedHexId = hexId;
                 requestAnimationFrame(draw);
             }
+        } else if (keysDown.has('g') || keysDown.has('r') || keysDown.has('y')) {
+            // G, R, or Y Key + Left-Click: Start Manual Route Creation
+            if (hexId) {
+                saveHistoryState('Manual Route');
+                isAltDragging = true;
+                altDragStartId = hexId;
+
+                if (keysDown.has('g')) {
+                    altDragType = 'Xboat';
+                    console.log("Routing Mode Active: Green (Xboat)");
+                } else if (keysDown.has('r')) {
+                    altDragType = 'Trade';
+                    console.log("Routing Mode Active: Red (Trade)");
+                } else if (keysDown.has('y')) {
+                    altDragType = 'Secondary';
+                    console.log("Routing Mode Active: Yellow (Secondary)");
+                }
+
+                requestAnimationFrame(draw);
+            }
         } else {
             // Plain Left-Click: ONLY Panning (No selection logic whatsoever)
             isDragging = true;
@@ -206,15 +227,48 @@ function setupCanvasEvents() {
             lastMouseX = e.clientX;
             lastMouseY = e.clientY;
             requestAnimationFrame(draw);
+        } else if (isAltDragging) {
+            // Just request redraw to show the preview line
+            requestAnimationFrame(draw);
         }
     });
 
     // 5. Mouse Up: Stop Actions entirely
     window.addEventListener('mouseup', (e) => {
+        if (isAltDragging && altDragStartId) {
+            const world = getMouseWorldCoords(e);
+            const coords = pixelToHex(world.x, world.y, baseHexSize);
+            const endHexId = getHexId(coords.q, coords.r);
+
+            if (endHexId && endHexId !== altDragStartId) {
+                // Toggle route
+                const sorted = [altDragStartId, endHexId].sort();
+                if (!window.sectorRoutes) window.sectorRoutes = [];
+
+                const existingIndex = window.sectorRoutes.findIndex(r =>
+                    (r.startId === sorted[0] && r.endId === sorted[1])
+                );
+
+                if (existingIndex !== -1) {
+                    window.sectorRoutes.splice(existingIndex, 1);
+                    console.log(`Route Removed: ${sorted[0]} to ${sorted[1]}`);
+                    showToast(`Route removed: ${sorted[0]} -> ${sorted[1]}`, 2000);
+                } else {
+                    window.sectorRoutes.push({ startId: sorted[0], endId: sorted[1], type: altDragType });
+                    console.log(`${altDragType} Route Added: ${sorted[0]} to ${sorted[1]}`);
+                    const colorName = altDragType === 'Xboat' ? 'Green' : (altDragType === 'Trade' ? 'Red' : 'Yellow');
+                    showToast(`${colorName} Route added: ${sorted[0]} -> ${sorted[1]}`, 2000);
+                }
+            }
+        }
+
         isDragging = false;
         isPainting = false;
+        isAltDragging = false;
+        altDragStartId = null;
         lastPaintedHexId = null;
         mapCanvas.classList.remove('dragging');
+        requestAnimationFrame(draw);
     });
 
     // 6. Mouse Wheel: Zoom
@@ -241,7 +295,15 @@ function setupCanvasEvents() {
 
 function setupKeyboardShortcuts() {
     window.addEventListener('keydown', async (e) => {
-        if (e.ctrlKey && e.key.toLowerCase() === 's') {
+        const key = e.key.toLowerCase();
+        keysDown.add(key);
+
+        // Prevent default for routing keys
+        if (['g', 'r', 'y'].includes(key)) {
+            e.preventDefault();
+        }
+
+        if (e.ctrlKey && key === 's') {
             e.preventDefault();
             const world = getMouseWorldCoords({ clientX: currentMouseX, clientY: currentMouseY });
             const coords = pixelToHex(world.x, world.y, baseHexSize);
@@ -265,6 +327,8 @@ function setupKeyboardShortcuts() {
             e.preventDefault();
             if (!validateSelection('generate')) return;
 
+            saveHistoryState('Mongoose Macro');
+
             console.log("Bulk Generating MgT2E Full System...");
             await ensureNamesLoaded();
 
@@ -272,8 +336,11 @@ function setupKeyboardShortcuts() {
                 return;
             }
 
+            // Capture the target hexes NOW so they don't change if the user deselects during the wait
+            const targetHexes = Array.from(selectedHexes);
+
             // Auto Populate
-            selectedHexes.forEach(hexId => {
+            targetHexes.forEach(hexId => {
                 const roll = Math.floor(Math.random() * 6) + 1;
                 if (roll <= 3) {
                     hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
@@ -282,11 +349,11 @@ function setupKeyboardShortcuts() {
                 }
             });
             requestAnimationFrame(draw);
-            showToast(`Populated ${selectedHexes.size} hex(es)...`, 1000);
+            showToast(`Populated ${targetHexes.length} hex(es)...`, 1000);
 
             // Generate Mainworlds
             setTimeout(() => {
-                selectedHexes.forEach(hexId => {
+                targetHexes.forEach(hexId => {
                     let stateObj = hexStates.get(hexId);
                     if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
                         stateObj.mgt2eData = generateMgT2EMainworld(hexId);
@@ -300,7 +367,7 @@ function setupKeyboardShortcuts() {
 
                 // Socioeconomics
                 setTimeout(() => {
-                    selectedHexes.forEach(hexId => {
+                    targetHexes.forEach(hexId => {
                         let stateObj = hexStates.get(hexId);
                         let baseData = stateObj ? (stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData) : null;
                         if (baseData) {
@@ -314,7 +381,7 @@ function setupKeyboardShortcuts() {
 
                     // Physical System
                     setTimeout(() => {
-                        selectedHexes.forEach(hexId => {
+                        targetHexes.forEach(hexId => {
                             let stateObj = hexStates.get(hexId);
                             let baseData = stateObj ? (stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData) : null;
                             if (baseData) {
@@ -348,7 +415,46 @@ function setupKeyboardShortcuts() {
             } else {
                 deselectAllHexes();
             }
+        } else if (e.ctrlKey && key === 'z') {
+            e.preventDefault();
+            if (e.shiftKey) {
+                // REDO
+                if (window.redoStack.length > 0) {
+                    const snap = window.redoStack.pop();
+                    const current = {
+                        action: snap.action,
+                        routes: JSON.parse(JSON.stringify(window.sectorRoutes || [])),
+                        hexStates: JSON.parse(JSON.stringify(Array.from(hexStates.entries())))
+                    };
+                    window.undoStack.push(current);
+                    window.sectorRoutes = snap.routes;
+                    hexStates.clear();
+                    snap.hexStates.forEach(([id, st]) => hexStates.set(id, st));
+                    showToast(`Redid: ${snap.action}`, 2000);
+                    requestAnimationFrame(draw);
+                }
+            } else {
+                // UNDO
+                if (window.undoStack.length > 0) {
+                    const snap = window.undoStack.pop();
+                    const current = {
+                        action: snap.action,
+                        routes: JSON.parse(JSON.stringify(window.sectorRoutes || [])),
+                        hexStates: JSON.parse(JSON.stringify(Array.from(hexStates.entries())))
+                    };
+                    window.redoStack.push(current);
+                    window.sectorRoutes = snap.routes;
+                    hexStates.clear();
+                    snap.hexStates.forEach(([id, st]) => hexStates.set(id, st));
+                    showToast(`Undid: ${snap.action}`, 2000);
+                    requestAnimationFrame(draw);
+                }
+            }
         }
+    });
+
+    window.addEventListener('keyup', (e) => {
+        keysDown.delete(e.key.toLowerCase());
     });
 }
 
@@ -542,12 +648,20 @@ function setupContextMenu() {
 
     document.getElementById('ctx-manual-clear').addEventListener('click', () => {
         if (!validateSelection('clear')) return;
+        saveHistoryState('Batch Clear');
         selectedHexes.forEach(hexId => {
             hexStates.delete(hexId);
+            removeRoutesForHex(hexId);
         });
         document.getElementById('context-menu').classList.remove('visible');
+        showToast(`Cleared ${selectedHexes.size} hex(es) and connected routes.`, 2000);
         requestAnimationFrame(draw);
     });
+
+    function removeRoutesForHex(hexId) {
+        if (!window.sectorRoutes) return;
+        window.sectorRoutes = window.sectorRoutes.filter(r => r.startId !== hexId && r.endId !== hexId);
+    }
 
     document.getElementById('ctx-sparse').addEventListener('click', () => autoPopulate(2));
     document.getElementById('ctx-regular').addEventListener('click', () => autoPopulate(3));
@@ -835,6 +949,15 @@ function setupGenerationHandlers() {
         showToast(`Expanded T5 Physical system for ${selectedHexes.size} hex(es)`);
         requestAnimationFrame(draw);
     });
+
+    // X-Boat Routes
+    document.getElementById('ctx-gen-xboat').addEventListener('click', () => {
+        generateXboatRoutes();
+        const routeCount = window.sectorRoutes ? window.sectorRoutes.length : 0;
+        showToast(`Interstellar Network Generated: ${routeCount} routes.`, 3000);
+        document.getElementById('context-menu').classList.remove('visible');
+        requestAnimationFrame(draw);
+    });
 }
 
 // ============================================================================
@@ -927,9 +1050,12 @@ function renderTracesHTML() {
 
 function setupSaveLoad() {
     document.getElementById('btn-save-map').addEventListener('click', async () => {
-        const stateObj = {};
+        const stateObj = {
+            hexStates: {},
+            routes: window.sectorRoutes || []
+        };
         hexStates.forEach((value, key) => {
-            stateObj[key] = value;
+            stateObj.hexStates[key] = value;
         });
         const jsonStr = JSON.stringify(stateObj, null, 2);
 
@@ -974,8 +1100,14 @@ function setupSaveLoad() {
                 const parsedData = JSON.parse(event.target.result);
                 hexStates.clear();
 
-                for (const key in parsedData) {
-                    if (parsedData.hasOwnProperty(key)) {
+                if (parsedData.hexStates) {
+                    for (const key in parsedData.hexStates) {
+                        hexStates.set(key, parsedData.hexStates[key]);
+                    }
+                    window.sectorRoutes = parsedData.routes || [];
+                } else {
+                    // Fallback for old format
+                    for (const key in parsedData) {
                         hexStates.set(key, parsedData[key]);
                     }
                 }
@@ -1012,7 +1144,7 @@ function openHexEditor(hexId) {
     // Check multiple potential locations for the name
     const systemName = data.name || stateObj.name || "";
 
-    const nameStr = systemName ? `${systemName} [${hexId}]` : `Edit ${hexId}`;
+    const nameStr = systemName ? `${systemName} [${hexId}]` : `${hexId} Details`;
     document.getElementById('hex-editor-title').innerText = nameStr;
     document.getElementById('edit-name').value = systemName;
     document.getElementById('edit-starport').value = data.starport;

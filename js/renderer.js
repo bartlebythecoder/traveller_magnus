@@ -92,14 +92,113 @@ function draw() {
     const rMin = Math.floor(viewTop / heightStep) - 2;
     const rMax = Math.ceil(viewBottom / heightStep) + 2;
 
-    ctx.beginPath();
+    // (Moved to layered pass below)
 
     const MAX_GLOBAL_Q = 255;
     const MAX_GLOBAL_R = 159;
 
+    // =========================================================================
+    // PASS 1: DRAW THE GRID & HEX BACKGROUNDS
+    // =========================================================================
+    ctx.beginPath();
     for (let q = Math.max(0, qMin); q <= Math.min(MAX_GLOBAL_Q, qMax); q++) {
         for (let r = Math.max(0, rMin); r <= Math.min(MAX_GLOBAL_R, rMax); r++) {
-            // Odd-q horizontal layout for flat-topped
+            const offset = (q & 1) ? 0.5 : 0;
+            let cx = widthStep * q;
+            let cy = heightStep * (r + offset);
+
+            const hexId = getHexId(q, r);
+            if (!hexId) continue;
+
+            const path = getHexPath(cx, cy, size);
+
+            // 1. Selection Fill
+            if (selectedHexes.has(hexId)) {
+                ctx.fillStyle = 'rgba(255, 69, 0, 0.3)';
+                ctx.fill(path);
+                ctx.strokeStyle = '#ff4500';
+                ctx.lineWidth = 2 / zoom;
+                ctx.stroke(path);
+            } else {
+                // 2. Standard Grid Line
+                ctx.strokeStyle = '#1f2833';
+                ctx.lineWidth = 1 / zoom;
+                ctx.stroke(path);
+            }
+        }
+    }
+
+    // =========================================================================
+    // LAYER 2: INTERSTELLAR ROUTES (Now safely on top of the grid)
+    // =========================================================================
+    if (window.sectorRoutes && window.sectorRoutes.length > 0) {
+        ctx.save();
+        ctx.lineWidth = 2 / zoom;
+        const gap = 20;
+
+        // Separate routes by type for efficient batching
+        const xboatRoutes = window.sectorRoutes.filter(r => r.type === 'Xboat');
+        const tradeRoutes = window.sectorRoutes.filter(r => r.type === 'Trade');
+        const secondaryRoutes = window.sectorRoutes.filter(r => r.type === 'Secondary');
+
+        const drawBatch = (routes, color) => {
+            ctx.strokeStyle = color;
+            ctx.beginPath();
+            routes.forEach(route => {
+                const startCoords = getHexCoords(route.startId);
+                const endCoords = getHexCoords(route.endId);
+                if (startCoords && endCoords) {
+                    const sPx = getHexPixel(startCoords.q, startCoords.r);
+                    const ePx = getHexPixel(endCoords.q, endCoords.r);
+                    const dx = ePx.x - sPx.x;
+                    const dy = ePx.y - sPx.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist > gap * 2) {
+                        const ux = dx / dist;
+                        const uy = dy / dist;
+                        ctx.moveTo(sPx.x + ux * gap, sPx.y + uy * gap);
+                        ctx.lineTo(ePx.x - ux * gap, ePx.y - uy * gap);
+                    }
+                }
+            });
+            ctx.stroke();
+        };
+
+        if (xboatRoutes.length > 0) drawBatch(xboatRoutes, '#00FF00');     // Bright Green
+        if (tradeRoutes.length > 0) drawBatch(tradeRoutes, '#FF0000');     // Red
+        if (secondaryRoutes.length > 0) drawBatch(secondaryRoutes, '#FFFF00'); // Yellow
+
+        ctx.restore();
+    }
+
+    // Alt+Drag Route Preview
+    if (isAltDragging && altDragStartId) {
+        const startCoords = getHexCoords(altDragStartId);
+        if (startCoords) {
+            const sPx = getHexPixel(startCoords.q, startCoords.r);
+            const worldMouse = { x: cameraX + currentMouseX / zoom, y: cameraY + currentMouseY / zoom };
+
+            let previewColor = 'rgba(0, 255, 0, 0.5)'; // Default green
+            if (altDragType === 'Trade') previewColor = 'rgba(255, 0, 0, 0.5)';
+            else if (altDragType === 'Secondary') previewColor = 'rgba(255, 255, 0, 0.5)';
+
+            ctx.save();
+            ctx.strokeStyle = previewColor;
+            ctx.setLineDash([10, 5]); // Dashed line for preview
+            ctx.lineWidth = 2 / zoom;
+            ctx.beginPath();
+            ctx.moveTo(sPx.x, sPx.y);
+            ctx.lineTo(worldMouse.x, worldMouse.y);
+            ctx.stroke();
+            ctx.restore();
+        }
+    }
+
+    // =========================================================================
+    // PASS 2: DRAW WORLD CONTENT (Icons, Labels, Symbols)
+    // =========================================================================
+    for (let q = Math.max(0, qMin); q <= Math.min(MAX_GLOBAL_Q, qMax); q++) {
+        for (let r = Math.max(0, rMin); r <= Math.min(MAX_GLOBAL_R, rMax); r++) {
             const offset = (q & 1) ? 0.5 : 0;
             let cx = widthStep * q;
             let cy = heightStep * (r + offset);
@@ -108,25 +207,8 @@ function draw() {
             if (!hexId) continue;
 
             const isSelected = selectedHexes.has(hexId);
-
-            const path = getHexPath(cx, cy, size);
-
-            if (isSelected) {
-                ctx.fillStyle = 'rgba(255, 69, 0, 0.3)'; // OrangeRed transparent
-                ctx.fill(path);
-                ctx.strokeStyle = '#ff4500';
-                ctx.lineWidth = 2 / zoom;
-            } else {
-                ctx.strokeStyle = '#1f2833';
-                ctx.lineWidth = 1 / zoom;
-            }
-
-            ctx.stroke(path);
-
-            // Check Hex State
             let stateObj = hexStates.get(hexId);
             if (typeof stateObj === 'string') {
-                // Backwards compatibility
                 stateObj = { type: stateObj };
                 hexStates.set(hexId, stateObj);
             }

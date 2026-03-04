@@ -67,8 +67,8 @@ function getThermalStats(w, luminosity) {
     else if ([4, 5].includes(atm)) ghMult = 1.05;
     else if ([6, 7, 14].includes(atm)) ghMult = 1.10;
     else if ([8, 9, 13].includes(atm)) ghMult = 1.15;
-    else if (atm === 10) ghMult = 1.0 + (Math.floor(Math.random() * 51) + 20) / 100;
-    else if ([11, 12].includes(atm)) ghMult = 1.0 + (Math.floor(Math.random() * 101) + 20) / 100;
+    else if (atm === 10) ghMult = 1.0 + (Math.floor(rng() * 51) + 20) / 100;
+    else if ([11, 12].includes(atm)) ghMult = 1.0 + (Math.floor(rng() * 101) + 20) / 100;
 
     let temperature = Math.round(374.025 * ghMult * (1 - albedo) * Math.pow(luminosity, 0.25) / Math.pow(w.distAU, 0.5));
     return { temperature };
@@ -126,7 +126,7 @@ function generateSubordinateSocial(world, mainworld) {
         if (pop >= mwPop) {
             pop = Math.max(0, mwPop - 1);
         }
-        world.pop = pop;
+        world.pop = clampUWP(pop, 0, 15);
     }
 
     // --- 2. GOVERNMENT LOGIC ---
@@ -146,14 +146,14 @@ function generateSubordinateSocial(world, mainworld) {
             else gov = 6;                    // Captive Government (5+)
         }
     }
-    world.gov = gov;
+    world.gov = clampUWP(gov, 0, 15);
 
     // --- 3. LAW LEVEL LOGIC ---
     let law = 0;
     if (world.pop > 0 && world.gov > 0) {
         law = Math.max(0, roll1D() - 3 + mwLaw);
     }
-    world.law = law;
+    world.law = clampUWP(law, 0, 15);
 
     // --- 4. TECH LEVEL LOGIC ---
     let tl = Math.max(0, mwTL - 1);
@@ -170,11 +170,12 @@ function generateSubordinateSocial(world, mainworld) {
     if (tl < 7 && ![5, 6, 8].includes(world.atm)) {
         tl = 7;
     }
-    world.tl = tl;
+    world.tl = clampUWP(tl, 0, 33);
 }
 
 // CT Mainworld Generation
-function generateCTMainworld() {
+function generateCTMainworld(hexId) {
+    reseedForHex(hexId);
     let starportRoll = roll2D();
     let starport = 'X';
     if (starportRoll <= 4) starport = 'A';
@@ -239,7 +240,16 @@ function generateCTMainworld() {
     if (gov === 0 || gov === 5) tlDM += 1;
     else if (gov === 13) tlDM -= 2;
 
-    let tl = Math.max(0, Math.floor(Math.random() * 6) + 1 + tlDM);
+    let tl = Math.max(0, Math.floor(rng() * 6) + 1 + tlDM);
+
+    // Apply Clamping
+    size = clampUWP(size, 0, 15);
+    atm = clampUWP(atm, 0, 15);
+    hydro = clampUWP(hydro, 0, 10);
+    pop = clampUWP(pop, 0, 15);
+    gov = clampUWP(gov, 0, 15);
+    law = clampUWP(law, 0, 15);
+    tl = clampUWP(tl, 0, 33);
 
     const uwp = `${starport}${toUWPChar(size)}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
 
@@ -256,23 +266,41 @@ function generateCTMainworld() {
     if (size === 0) tradeCodes.push("As");
     if ([0, 1].includes(atm) && hydro >= 1) tradeCodes.push("Ic");
 
-    return { name: getNextSystemName(), uwp, travelZone: 'Green', tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, gasGiant };
+    return { name: getNextSystemName(hexId), uwp, travelZone: 'Green', tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, gasGiant };
 }
 
 function constructCTUPP(w) {
     if (!w) return "-------";
     if (w.type === 'Empty') return "-------";
     const sp = w.spaceport || 'S';
-    const sChar = (w.size === 'S' ? 'S' : (w.size === 'R' ? 'R' : toUWPChar(w.size)));
-    return `${sp}${sChar}${toUWPChar(w.atm)}${toUWPChar(w.hydro)}${toUWPChar(w.pop)}${toUWPChar(w.gov)}${toUWPChar(w.law)}-${toUWPChar(w.tl)}`;
+
+    // Size clamping (handle 'S' and 'R')
+    let sChar = w.size;
+    if (typeof w.size === 'number') {
+        sChar = toUWPChar(clampUWP(w.size, 0, 15));
+    } else if (w.size === 'S' || w.size === 'R') {
+        sChar = w.size;
+    } else {
+        sChar = toUWPChar(0);
+    }
+
+    const atm = clampUWP(w.atm || 0, 0, 15);
+    const hydro = clampUWP(w.hydro || 0, 0, 10);
+    const pop = clampUWP(w.pop || 0, 0, 15);
+    const gov = clampUWP(w.gov || 0, 0, 15);
+    const law = clampUWP(w.law || 0, 0, 15);
+    const tl = clampUWP(w.tl || 0, 0, 33);
+
+    return `${sp}${sChar}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
 }
 
 // =====================================================================
 // BOOK 6 (CT) SYSTEM GENERATION
 // =====================================================================
 
-function generateCTSystemChunk1(mainworldBase) {
+function generateCTSystemChunk1(mainworldBase, hexId) {
     if (!mainworldBase) return null;
+    reseedForHex(hexId);
 
     function rollOrbit(orbitData, trinaryDM) {
         let od = orbitData;
@@ -477,7 +505,7 @@ function generateCTSystemChunk2(sys, mainworldBase) {
         }
 
         if (targets.length > 0) {
-            const target = targets[Math.floor(Math.random() * targets.length)];
+            const target = targets[Math.floor(rng() * targets.length)];
             let ggDist = ORBIT_AU[Math.min(Math.floor(target.orbit), ORBIT_AU.length - 1)];
             let ggThermal = { temperature: 150 }; // GG baseline
             let ggRot = getRotationStats({ size: gg.size });
@@ -537,7 +565,7 @@ function generateCTSystemChunk2(sys, mainworldBase) {
         }
 
         if (!target && availableSlots.length > 0) {
-            target = availableSlots[Math.floor(Math.random() * availableSlots.length)];
+            target = availableSlots[Math.floor(rng() * availableSlots.length)];
         }
 
         if (target) {
@@ -571,7 +599,7 @@ function generateCTSystemChunk2(sys, mainworldBase) {
     if (!mwCanBeAnywhere) {
         const hCandidates = sys.orbits.filter(o => o.zone === 'H');
         if (hCandidates.length > 0) {
-            const target = hCandidates[Math.floor(Math.random() * hCandidates.length)];
+            const target = hCandidates[Math.floor(rng() * hCandidates.length)];
             let mwDist = ORBIT_AU[Math.min(Math.floor(target.orbit), ORBIT_AU.length - 1)];
             if (target.contents && target.contents.type === 'Gas Giant') {
                 if (!target.contents.satellites) target.contents.satellites = [];
@@ -611,7 +639,7 @@ function generateCTSystemChunk2(sys, mainworldBase) {
     if (!mwPlaced) {
         availableSlots = sys.orbits.filter(o => o.zone !== '-' && !o.contents);
         if (availableSlots.length > 0) {
-            const target = availableSlots[Math.floor(Math.random() * availableSlots.length)];
+            const target = availableSlots[Math.floor(rng() * availableSlots.length)];
             let mwDist = ORBIT_AU[Math.min(Math.floor(target.orbit), ORBIT_AU.length - 1)];
             let mwThermal = getThermalStats({ hydro: mainworldBase.hydro, atm: mainworldBase.atm, distAU: mwDist, tradeCodes: mainworldBase.tradeCodes || [] }, sys.stars[0].luminosity || 1.0);
             let mwRot = getRotationStats({ size: mainworldBase.size });
@@ -961,8 +989,9 @@ function generateCTSystemChunk5(sys, mainworldBase) {
 // =====================================================================
 // BOOK 6 (CT) MAINWORLD PHYSICAL GENERATION
 // =====================================================================
-function generateCTPhysical(base) {
+function generateCTPhysical(base, hexId) {
     if (!base) return null;
+    reseedForHex(hexId);
 
     let roll = roll2D();
     let dm = 0;

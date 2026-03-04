@@ -341,7 +341,7 @@ function setupKeyboardShortcuts() {
 
             // Auto Populate
             targetHexes.forEach(hexId => {
-                const roll = Math.floor(Math.random() * 6) + 1;
+                const roll = roll1D();
                 if (roll <= 3) {
                     hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
                 } else {
@@ -630,6 +630,7 @@ function validateSelection(actionType) {
 function setupContextMenu() {
     document.getElementById('ctx-manual-empty').addEventListener('click', () => {
         if (!validateSelection('populate')) return;
+        saveHistoryState('Manual: Set Empty');
         selectedHexes.forEach(hexId => {
             hexStates.set(hexId, { type: 'EMPTY' });
         });
@@ -639,6 +640,7 @@ function setupContextMenu() {
 
     document.getElementById('ctx-manual-system').addEventListener('click', () => {
         if (!validateSelection('populate')) return;
+        saveHistoryState('Manual: Populate System');
         selectedHexes.forEach(hexId => {
             hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
         });
@@ -679,8 +681,10 @@ function setupContextMenu() {
 
 function autoPopulate(chanceOutOfSix) {
     if (!validateSelection('populate')) return;
+    saveHistoryState('Auto Populate');
     selectedHexes.forEach(hexId => {
-        const roll = Math.floor(Math.random() * 6) + 1;
+        reseedForHex(hexId);
+        const roll = roll1D();
         if (roll <= chanceOutOfSix) {
             hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
         } else {
@@ -695,13 +699,14 @@ function setupGenerationHandlers() {
     // CT Generation
     document.getElementById('ctx-gen-ct').addEventListener('click', async () => {
         if (!validateSelection('generate')) return;
+        saveHistoryState('Generate CT Mainworld');
         await ensureNamesLoaded();
         selectedHexes.forEach(hexId => {
             let stateObj = hexStates.get(hexId);
             if (typeof stateObj === 'string') stateObj = { type: stateObj };
 
             if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
-                stateObj.ctData = generateCTMainworld();
+                stateObj.ctData = generateCTMainworld(hexId);
                 stateObj.mgt2eData = null;
                 hexStates.set(hexId, stateObj);
             }
@@ -714,6 +719,7 @@ function setupGenerationHandlers() {
     // MgT2E Generation
     document.getElementById('ctx-gen-mgt2e').addEventListener('click', async () => {
         if (!validateSelection('generate')) return;
+        saveHistoryState('Generate MgT2E Mainworld');
         await ensureNamesLoaded();
         selectedHexes.forEach(hexId => {
             let stateObj = hexStates.get(hexId);
@@ -734,13 +740,14 @@ function setupGenerationHandlers() {
     // T5 Generation
     document.getElementById('ctx-gen-t5').addEventListener('click', async () => {
         if (!validateSelection('generate')) return;
+        saveHistoryState('Generate T5 Mainworld');
         await ensureNamesLoaded();
         selectedHexes.forEach(hexId => {
             let stateObj = hexStates.get(hexId);
             if (typeof stateObj === 'string') stateObj = { type: stateObj };
 
             if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
-                stateObj.t5Data = generateT5Mainworld();
+                stateObj.t5Data = generateT5Mainworld(hexId);
                 stateObj.ctData = null;
                 stateObj.mgt2eData = null;
                 hexStates.set(hexId, stateObj);
@@ -759,6 +766,7 @@ function setupGenerationHandlers() {
             return;
         }
 
+        saveHistoryState('Expand T5 Socioeconomics');
         let missingData = false;
         selectedHexes.forEach(hexId => {
             let stateObj = hexStates.get(hexId);
@@ -768,7 +776,7 @@ function setupGenerationHandlers() {
             }
 
             if (baseData) {
-                stateObj.t5Socio = generateT5Socioeconomics(baseData);
+                stateObj.t5Socio = generateT5Socioeconomics(baseData, hexId);
                 hexStates.set(hexId, stateObj);
             } else if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
                 missingData = true;
@@ -787,6 +795,7 @@ function setupGenerationHandlers() {
     document.getElementById('ctx-expand-socio-mgt2e').addEventListener('click', () => {
         if (!validateSelection('socio')) return;
 
+        saveHistoryState('Expand MgT2E Socioeconomics');
         let missingData = false;
         selectedHexes.forEach(hexId => {
             let stateObj = hexStates.get(hexId);
@@ -796,7 +805,7 @@ function setupGenerationHandlers() {
             }
 
             if (baseData) {
-                stateObj.mgtSocio = generateMgT2ESocioeconomics(baseData);
+                stateObj.mgtSocio = generateMgT2ESocioeconomics(baseData, hexId);
                 stateObj.t5Socio = null;
                 hexStates.set(hexId, stateObj);
             } else if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
@@ -817,19 +826,20 @@ function setupGenerationHandlers() {
     document.getElementById('ctx-expand-physical-ct').addEventListener('click', () => {
         if (!validateSelection('physical')) return;
 
+        saveHistoryState('Expand CT System');
         let missingData = false;
         selectedHexes.forEach(hexId => {
             let stateObj = hexStates.get(hexId);
             let baseData = stateObj ? (stateObj.ctData || stateObj.mgt2eData || stateObj.t5Data) : null;
 
             if (baseData) {
-                let chunk1 = generateCTSystemChunk1(baseData);
+                let chunk1 = generateCTSystemChunk1(baseData, hexId);
                 let chunk2 = generateCTSystemChunk2(chunk1, baseData);
                 let chunk3 = generateCTSystemChunk3(chunk2, baseData);
                 let chunk4 = generateCTSystemChunk4(chunk3, baseData);
                 let chunk5 = generateCTSystemChunk5(chunk4, baseData);
                 stateObj.ctSystem = chunk5;
-                stateObj.ctPhysical = generateCTPhysical(baseData);
+                stateObj.ctPhysical = generateCTPhysical(baseData, hexId);
                 stateObj.t5Physical = null;
                 hexStates.set(hexId, stateObj);
 
@@ -873,13 +883,14 @@ function setupGenerationHandlers() {
     document.getElementById('ctx-expand-physical-mgt2e').addEventListener('click', () => {
         if (!validateSelection('physical')) return;
 
+        saveHistoryState('Expand MgT2E System');
         let missingData = false;
         selectedHexes.forEach(hexId => {
             let stateObj = hexStates.get(hexId);
             let baseData = stateObj ? stateObj.mgt2eData : null;
 
             if (baseData) {
-                let chunk1System = generateMgT2ESystemChunk1(baseData);
+                let chunk1System = generateMgT2ESystemChunk1(baseData, hexId);
                 let systemWithOrbits = generateMgT2ESystemChunk2(chunk1System, baseData);
                 let systemWithSizes = generateMgT2ESystemChunk3(systemWithOrbits, baseData);
                 let systemWithAtmosphere = generateMgT2ESystemChunk4(systemWithSizes, baseData);
@@ -919,6 +930,7 @@ function setupGenerationHandlers() {
     document.getElementById('ctx-expand-physical-t5').addEventListener('click', () => {
         if (!validateSelection('physical')) return;
 
+        saveHistoryState('Expand T5 System');
         let missingData = false;
         selectedHexes.forEach(hexId => {
             let stateObj = hexStates.get(hexId);
@@ -928,7 +940,7 @@ function setupGenerationHandlers() {
             }
 
             if (baseData) {
-                let sys = generateT5SystemChunk1(baseData, stateObj.t5System);
+                let sys = generateT5SystemChunk1(baseData, stateObj.t5System, hexId);
                 sys = generateT5SystemChunk2(sys, baseData);
                 sys = generateT5SystemChunk3(sys, baseData);
 
@@ -952,6 +964,7 @@ function setupGenerationHandlers() {
 
     // X-Boat Routes
     document.getElementById('ctx-gen-xboat').addEventListener('click', () => {
+        saveHistoryState('Generate Xboat Routes');
         generateXboatRoutes();
         const routeCount = window.sectorRoutes ? window.sectorRoutes.length : 0;
         showToast(`Interstellar Network Generated: ${routeCount} routes.`, 3000);
@@ -985,6 +998,29 @@ function setupSettingsPanel() {
     document.getElementById('toggle-dev-view').addEventListener('change', (e) => {
         devView = e.target.checked;
         requestAnimationFrame(draw);
+    });
+
+    // --- Generation Seed ---
+    const seedInput = document.getElementById('input-seed');
+    const randomizeBtn = document.getElementById('btn-randomize-seed');
+
+    // Load initial seed
+    const savedSeed = localStorage.getItem('traveller_gen_seed') || "TravellerMagnus";
+    seedInput.value = savedSeed;
+    setRandomSeed(savedSeed);
+
+    seedInput.addEventListener('input', (e) => {
+        const newSeed = e.target.value;
+        setRandomSeed(newSeed || "TravellerMagnus");
+        localStorage.setItem('traveller_gen_seed', newSeed);
+    });
+
+    randomizeBtn.addEventListener('click', () => {
+        const randomSeed = Math.random().toString(36).substring(2, 10).toUpperCase();
+        seedInput.value = randomSeed;
+        setRandomSeed(randomSeed);
+        localStorage.setItem('traveller_gen_seed', randomSeed);
+        showToast(`Seed randomized: ${randomSeed}`, 2000);
     });
 }
 
@@ -1098,6 +1134,7 @@ function setupSaveLoad() {
         reader.onload = function (event) {
             try {
                 const parsedData = JSON.parse(event.target.result);
+                saveHistoryState('Load Map JSON');
                 hexStates.clear();
 
                 if (parsedData.hexStates) {
@@ -1889,7 +1926,8 @@ function setupSectorPicker() {
                     `;
                     tile.onclick = () => {
                         generateT5TabData(s.id);
-                        showToast(`Exported ${s.name} to .tab file`, 2000);
+                        exportRoutesToXML(s.id);
+                        showToast(`Exported ${s.name} Data and Routes`, 2000);
                         modal.style.display = 'none';
                     };
                     listContainer.appendChild(tile);
@@ -1904,6 +1942,94 @@ function setupSectorPicker() {
             modal.style.display = 'none';
         });
     }
+}
+
+/**
+ * TravellerMap Route XML Export
+ */
+function exportRoutesToXML(sectorID) {
+    if (!window.sectorRoutes || window.sectorRoutes.length === 0) return;
+
+    // Calculate X, Y coordinates for the sector based on its ID
+    // We follow the user's example: Sector A at 0,0, Sector B at 0,1 etc.
+    // This assumes a grid 4 sectors high (A-D, E-H, etc.)
+    const sIdx = sectorID.length === 1 ? sectorID.charCodeAt(0) - 65 : (sectorID.charCodeAt(0) - 65) + 26;
+    const sX = Math.floor(sIdx / 4);
+    const sY = sIdx % 4;
+
+    let xmlLines = [
+        '<?xml version="1.0"?>',
+        '<Sector>',
+        `<Name>Sector ${sectorID}</Name>`,
+        `<X>${sX}</X>`,
+        `<Y>${sY}</Y>`,
+        '<Routes>'
+    ];
+    let count = 0;
+
+    window.sectorRoutes.forEach(route => {
+        const sParts = route.startId.split('-');
+        const eParts = route.endId.split('-');
+
+        // Both ends must be in the same sector for this export
+        if (sParts[0] === sectorID && eParts[0] === sectorID) {
+            const startId = route.startId;
+            const endId = route.endId;
+
+            // Rule: Only include if both hexes exist and are SYSTEM_PRESENT
+            const startState = hexStates.get(startId);
+            const endState = hexStates.get(endId);
+
+            if (startState?.type === 'SYSTEM_PRESENT' && endState?.type === 'SYSTEM_PRESENT') {
+                const startHex = sParts[sParts.length - 1];
+                const endHex = eParts[eParts.length - 1];
+
+                // Validate 4-digit hex format and bounds (Max 3240)
+                const isValidHex = (hex) => {
+                    if (!/^\d{4}$/.test(hex)) return false;
+                    const q = parseInt(hex.substring(0, 2), 10);
+                    const r = parseInt(hex.substring(2, 4), 10);
+                    return q >= 1 && q <= 32 && r >= 1 && r <= 40;
+                };
+
+                if (isValidHex(startHex) && isValidHex(endHex)) {
+                    let type = route.type || "Trade";
+                    let style = "Dashed";
+                    let color = "Gray";
+
+                    if (type === 'Xboat') {
+                        type = "Communication";
+                        style = "Solid";
+                        color = "Green";
+                    } else if (type === 'Trade') {
+                        style = "Dashed";
+                        color = "Red";
+                    } else if (type === 'Secondary') {
+                        style = "Dashed";
+                        color = "Yellow";
+                    }
+
+                    xmlLines.push(`  <Route Start="${startHex}" End="${endHex}" Type="${type}" Style="${style}" Color="${color}" />`);
+                    count++;
+                }
+            }
+        }
+    });
+
+    if (count === 0) return;
+
+    xmlLines.push('</Routes>');
+    xmlLines.push('</Sector>');
+    const content = xmlLines.join('\n');
+    const blob = new Blob([content], { type: 'text/xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Sector_${sectorID}_Routes.xml`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 }
 
 function generateT5TabData(sectorID) {
@@ -2011,6 +2137,7 @@ function setupSectorImporter() {
 }
 
 function importT5Tab(fileContent, fileName) {
+    saveHistoryState('Import Sector');
     const lines = fileContent.split(/\r?\n/);
     if (lines.length < 2) return;
 

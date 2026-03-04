@@ -50,6 +50,44 @@ let currentTrace = null;
 let genTraceCount = 0;
 let activeTrace = null;
 
+// Seeded Random Generation
+let masterSeed = localStorage.getItem('traveller_gen_seed') || "TravellerMagnus";
+let rng = mulberry32(hashString(masterSeed));
+
+function hashString(str) {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < str.length; i++) {
+        h = Math.imul(h ^ str.charCodeAt(i), 16777619);
+    }
+    return h >>> 0;
+}
+
+function mulberry32(a) {
+    return function () {
+        let t = a += 0x6D2B79F5;
+        t = Math.imul(t ^ t >>> 15, t | 1);
+        t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    }
+}
+
+function setRandomSeed(seedString) {
+    masterSeed = seedString || "TravellerMagnus";
+    localStorage.setItem('traveller_gen_seed', masterSeed);
+    rng = mulberry32(hashString(masterSeed));
+    console.log(`Master Seed set to: "${masterSeed}"`);
+}
+
+function reseedForHex(hexId) {
+    const hexSeed = hashString(masterSeed + "-" + (hexId || "0000"));
+    rng = mulberry32(hexSeed);
+    // console.log(`RNG re-seeded for Hex ${hexId} (Hash: ${hexSeed})`);
+}
+
+function clampUWP(val, min, max) {
+    return Math.max(min, Math.min(max, val));
+}
+
 // History state
 window.undoStack = [];
 window.redoStack = [];
@@ -134,10 +172,10 @@ function getMouseWorldCoords(e) {
 
 // --- Core Math & Dice ---
 async function ensureNamesLoaded() { return true; }
-function roll1D() { return Math.floor(Math.random() * 6) + 1; }
+function roll1D() { return Math.floor(rng() * 6) + 1; }
 function roll2D() { return roll1D() + roll1D(); }
 function rollFlux() { return roll1D() - roll1D(); }
-function rollD3() { return Math.floor(Math.random() * 3) + 1; }
+function rollD3() { return Math.floor(rng() * 3) + 1; }
 function rollND(n) {
     let total = 0;
     for (let i = 0; i < n; i++) total += roll1D();
@@ -216,18 +254,29 @@ function endTrace() {
 // =====================================================================
 
 /**
- * Grabs the next available name from the loaded names.js pool.
- * If the pool is empty or not loaded, it returns "Unnamed System".
+ * Grabs a name from the pool.
+ * If hexId is provided, it uses a deterministic hash to pick the name,
+ * ensuring the same hex always gets the same name for a given Master Seed.
  */
-function getNextSystemName() {
-    if (namePool.length > 0) {
-        const index = Math.floor(Math.random() * namePool.length);
+function getNextSystemName(hexId) {
+    if (namePool.length === 0) return "Unnamed System";
+
+    let index;
+    if (hexId) {
+        // Deterministic pick based on location
+        const nameSeed = hashString(masterSeed + "-" + hexId + "-name");
+        index = nameSeed % namePool.length;
         const name = namePool[index];
-        namePool.splice(index, 1);
+        usedNames.add(name);
+        return name;
+    } else {
+        // Fallback to current RNG stream (maintains continuity if called mid-stream)
+        index = Math.floor(rng() * namePool.length);
+        const name = namePool[index];
+        namePool.splice(index, 1); // Only splice if not location-locked
         usedNames.add(name);
         return name;
     }
-    return "Unnamed System"; // Fallback if no names are available
 }
 
 // =====================================================================

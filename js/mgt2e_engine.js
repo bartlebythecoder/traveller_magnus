@@ -21,6 +21,7 @@ function roll4D() {
 // =====================================================================
 
 function generateMgT2EMainworld(hexId) {
+    reseedForHex(hexId);
     startTrace(hexId || '??', 'MgT2E');
     const tracing = genTraceCount < MAX_GEN_TRACES || activeTrace !== null;
 
@@ -164,6 +165,16 @@ function generateMgT2EMainworld(hexId) {
 
     // ── UWP ───────────────────────────────────────────────────────
     tSection('UWP');
+
+    // Apply Clamping
+    size = clampUWP(size, 0, 15);
+    atm = clampUWP(atm, 0, 15);
+    hydro = clampUWP(hydro, 0, 10);
+    pop = clampUWP(pop, 0, 15);
+    gov = clampUWP(gov, 0, 15);
+    law = clampUWP(law, 0, 15);
+    tl = clampUWP(tl, 0, 33);
+
     const uwp = `${starport}${toUWPChar(size)}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
     tResult('UWP', uwp);
 
@@ -210,7 +221,7 @@ function generateMgT2EMainworld(hexId) {
     // Note: Red Zones remain placeholder for referee discretion / manual override.
 
     // ── Finalise ──────────────────────────────────────────────────
-    const name = getNextSystemName();
+    const name = getNextSystemName(hexId);
     tSection('NAME');
     tResult('Assigned', name || '(none — pool empty)');
     endTrace();
@@ -316,26 +327,38 @@ function generateMgT2ESubordinateSocial(body, mainworld) {
     const floor = getMgT2EMinSusTL(body.atm);
     if (body.tl < floor) body.tl = floor;
 
+    // Clamping
+    body.pop = clampUWP(body.pop || 0, 0, 15);
+    body.gov = clampUWP(body.gov || 0, 0, 15);
+    body.law = clampUWP(body.law || 0, 0, 15);
+    body.tl = clampUWP(body.tl || 0, 0, 33);
+
+    // Size, Atm, Hydro (if they exist)
+    const cSize = clampUWP(body.size || 0, 0, 15);
+    const cAtm = clampUWP(body.atm || 0, 0, 15);
+    const cHydro = clampUWP(body.hydro || 0, 0, 10);
+
     // Final UWP construction
-    const uwp = `${body.starport}${toUWPChar(body.size)}${toUWPChar(body.atm)}${toUWPChar(body.hydro)}${toUWPChar(body.pop)}${toUWPChar(body.gov)}${toUWPChar(body.law)}-${toUWPChar(body.tl)}`;
+    const uwp = `${body.starport}${toUWPChar(cSize)}${toUWPChar(cAtm)}${toUWPChar(cHydro)}${toUWPChar(body.pop)}${toUWPChar(body.gov)}${toUWPChar(body.law)}-${toUWPChar(body.tl)}`;
     body.uwp = uwp;
     body.uwpSecondary = uwp;
 }
 
-function generateMgT2ESocioeconomics(base) {
+function generateMgT2ESocioeconomics(base, hexId) {
+    reseedForHex(hexId);
     if (!base) return null;
 
     // Prerequisite: Minimum Sustainable Tech Level
     let minSusTL = getMgT2EMinSusTL(base.atm);
     function roll2D3() {
-        return (Math.floor(Math.random() * 3) + 1) + (Math.floor(Math.random() * 3) + 1);
+        return (Math.floor(rng() * 3) + 1) + (Math.floor(rng() * 3) + 1);
     }
 
     // 1. Generate Population P Value and Total Population
     let pValue = 0;
     let totalWorldPop = 0;
     if (base.pop > 0) {
-        pValue = roll1D() + Math.floor(Math.random() * 3); // random 1-9
+        pValue = roll1D() + Math.floor(rng() * 3); // random 1-9
         totalWorldPop = pValue * Math.pow(10, base.pop);
     }
 
@@ -417,14 +440,14 @@ function generateMgT2ESocioeconomics(base) {
         else if (modURoll === 2) rolledPercent = 6 + roll1D();
         else if (modURoll === 3) rolledPercent = 12 + roll1D();
         else if (modURoll === 4) rolledPercent = 18 + roll1D();
-        else if (modURoll === 5) rolledPercent = 22 + (roll1D() * 2) + (Math.floor(Math.random() * 2) + 1);
-        else if (modURoll === 6) rolledPercent = 34 + (roll1D() * 2) + (Math.floor(Math.random() * 2) + 1);
-        else if (modURoll === 7) rolledPercent = 46 + (roll1D() * 2) + (Math.floor(Math.random() * 2) + 1);
-        else if (modURoll === 8) rolledPercent = 58 + (roll1D() * 2) + (Math.floor(Math.random() * 2) + 1);
-        else if (modURoll === 9) rolledPercent = 70 + (roll1D() * 2) + (Math.floor(Math.random() * 2) + 1);
+        else if (modURoll === 5) rolledPercent = 22 + (roll1D() * 2) + (Math.floor(rng() * 2) + 1);
+        else if (modURoll === 6) rolledPercent = 34 + (roll1D() * 2) + (Math.floor(rng() * 2) + 1);
+        else if (modURoll === 7) rolledPercent = 46 + (roll1D() * 2) + (Math.floor(rng() * 2) + 1);
+        else if (modURoll === 8) rolledPercent = 58 + (roll1D() * 2) + (Math.floor(rng() * 2) + 1);
+        else if (modURoll === 9) rolledPercent = 70 + (roll1D() * 2) + (Math.floor(rng() * 2) + 1);
         else if (modURoll === 10) rolledPercent = 84 + roll1D();
         else if (modURoll === 11) rolledPercent = 90 + roll1D();
-        else if (modURoll === 12) rolledPercent = 96 + (Math.floor(Math.random() * 3) + 1);
+        else if (modURoll === 12) rolledPercent = 96 + (Math.floor(rng() * 3) + 1);
         else if (modURoll >= 13) rolledPercent = 100;
 
         // Constraints
@@ -555,7 +578,7 @@ function generateMgT2ESocioeconomics(base) {
     let govProfile = `${centralisation}-${authority}-${structureStr}`;
 
     // 9. Factions
-    let baseFactions = Math.floor(Math.random() * 3) + 1; // 1 to 3
+    let baseFactions = Math.floor(rng() * 3) + 1; // 1 to 3
     let fDM = 0;
     if (base.gov === 0 || base.gov === 7) fDM += 1;
     if (base.gov >= 10) fDM -= 1;
@@ -895,7 +918,7 @@ function generateMgT2ESocioeconomics(base) {
 
     let ecoR = resourceRating;
     if (tcArr.includes('In') || tcArr.includes('Ag')) {
-        ecoR -= Math.floor(Math.random() * 6);
+        ecoR -= Math.floor(rng() * 6);
         ecoR = Math.max(2, ecoR);
     }
     if (base.tl >= 8) {
@@ -908,7 +931,7 @@ function generateMgT2ESocioeconomics(base) {
     let ecoL = base.pop <= 1 ? 0 : base.pop - 1;
 
     let ecoI = Im;
-    if (base.pop >= 4 && base.pop <= 6) ecoI += Math.floor(Math.random() * 6) + 1;
+    if (base.pop >= 4 && base.pop <= 6) ecoI += Math.floor(rng() * 6) + 1;
     if (base.pop >= 7) ecoI += roll2D();
     if (base.pop === 0 || ecoI < 0) ecoI = 0;
 
@@ -1454,7 +1477,8 @@ function determineMgT2EEccentricity(isStar, orbitsBeyondFirst, sysAgeGyr, orbitN
 // MGT2E SYSTEM GENERATION - CHUNK 1: STARS & SYSTEM INVENTORY
 // =====================================================================
 
-function generateMgT2ESystemChunk1(mainworldBase) {
+function generateMgT2ESystemChunk1(mainworldBase, hexId) {
+    reseedForHex(hexId);
     let sys = { stars: [], gasGiants: 0, planetoidBelts: 0, terrestrialPlanets: 0, totalWorlds: 0, hzco: 0, age: 0 };
 
     // =====================================================================
@@ -1469,9 +1493,9 @@ function generateMgT2ESystemChunk1(mainworldBase) {
 
     let msLifespan = 10 / Math.pow(primary.mass, 2.5);
     if (primary.mass < 0.9) {
-        sys.age = (Math.floor(Math.random() * 6) + 1) * 2 + (Math.floor(Math.random() * 3) + 1) - 1 + (Math.floor(Math.random() * 10) / 10);
+        sys.age = (Math.floor(rng() * 6) + 1) * 2 + (Math.floor(rng() * 3) + 1) - 1 + (Math.floor(rng() * 10) / 10);
     } else {
-        sys.age = msLifespan * ((Math.floor(Math.random() * 100) + 1) / 100);
+        sys.age = msLifespan * ((Math.floor(rng() * 100) + 1) / 100);
     }
     sys.age = Math.max(0.1, sys.age);
 
@@ -1502,7 +1526,7 @@ function generateMgT2ESystemChunk1(mainworldBase) {
         } else if (secRoll >= 8) {
             // Sibling
             companion = JSON.parse(JSON.stringify(parentStar));
-            companion.subType = Math.min(9, companion.subType + (Math.floor(Math.random() * 6) + 1));
+            companion.subType = Math.min(9, companion.subType + (Math.floor(rng() * 6) + 1));
         } else {
             // Lesser / Random / Other
             companion = rollMgT2EStar();
@@ -1646,7 +1670,7 @@ function generateMgT2ESystemChunk3(sys, mainworldBase) {
                 w.ggType = 'GL';
                 w.diameterStr = `${roll2D() + 6} (GL)`;
                 let initMass = roll3D();
-                let d3Multiplier = Math.floor(Math.random() * 3) + 1;
+                let d3Multiplier = Math.floor(rng() * 3) + 1;
                 w.mass = d3Multiplier * 50 * (initMass + 4);
                 if (w.mass >= 3000 || initMass >= 15) {
                     w.mass = 4000 - ((roll2D() - 2) * 200);
@@ -1719,7 +1743,7 @@ function generateMgT2ESystemChunk3(sys, mainworldBase) {
             let r1 = roll1D();
             if (r1 <= 3) moonSize = 'S';
             else if (r1 <= 5) {
-                let ms = Math.floor(Math.random() * 3);
+                let ms = Math.floor(rng() * 3);
                 if (ms === 0) moonSize = 'R'; else moonSize = ms;
             } else {
                 if (w.type === 'Terrestrial Planet' || w.type === 'Mainworld') {
@@ -1899,7 +1923,7 @@ function generateMgT2ESystemChunk5(sys) {
                 break;
             }
         }
-        w.siderealHours += ((roll1D() - 1) / 60) + ((Math.floor(Math.random() * 10)) / 3600);
+        w.siderealHours += ((roll1D() - 1) / 60) + ((Math.floor(rng() * 10)) / 3600);
 
         // 2. Solar Day
         let pYears = w.periodYears;
@@ -2324,8 +2348,15 @@ function generateMgT2ESystemChunk7(sys, mainworldBase) {
 
         // 5. Final UWP Construction
         // Planetoid Belts usually use size 0
-        const charSize = toUWPChar(body.size);
-        const uwp = `${body.starport}${charSize}${toUWPChar(body.atm)}${toUWPChar(body.hydro)}${toUWPChar(body.pop)}${toUWPChar(body.gov)}${toUWPChar(body.law)}-${toUWPChar(body.tl)}`;
+        const cSize = clampUWP(body.size || 0, 0, 15);
+        const cAtm = clampUWP(body.atm || 0, 0, 15);
+        const cHydro = clampUWP(body.hydro || 0, 0, 10);
+        const cPop = clampUWP(body.pop || 0, 0, 15);
+        const cGov = clampUWP(body.gov || 0, 0, 15);
+        const cLaw = clampUWP(body.law || 0, 0, 15);
+        const cTl = clampUWP(body.tl || 0, 0, 33);
+
+        const uwp = `${body.starport}${toUWPChar(cSize)}${toUWPChar(cAtm)}${toUWPChar(cHydro)}${toUWPChar(cPop)}${toUWPChar(cGov)}${toUWPChar(cLaw)}-${toUWPChar(cTl)}`;
 
         body.uwp = uwp;
         body.uwpSecondary = uwp;
@@ -2418,10 +2449,10 @@ function generateMgT2ESystemChunk4(sys, mainworldBase) {
         // 3 & 4. Standard Atmospheres (2-9, D, E)
         if ((w.atmCode >= 2 && w.atmCode <= 9) || w.atmCode === 13 || w.atmCode === 14) {
             let cdata = MGT2E_ATM_CODES[w.atmCode];
-            w.pressureBar = cdata.minP + (cdata.spanP * (Math.random()));
+            w.pressureBar = cdata.minP + (cdata.spanP * (rng()));
 
             let o2Roll = roll1D() - 1 + (sys.age > 4 ? 1 : 0);
-            w.oxygenFrac = Math.max(0.01, (o2Roll / 20) + (Math.floor(Math.random() * 10) / 100));
+            w.oxygenFrac = Math.max(0.01, (o2Roll / 20) + (Math.floor(rng() * 10) / 100));
             w.ppo = w.oxygenFrac * w.pressureBar;
             w.scaleHeight = gravity > 0 ? 8.5 / gravity : 0;
 
@@ -2473,8 +2504,8 @@ function generateMgT2ESystemChunk4(sys, mainworldBase) {
             w.hydroCode = Math.max(0, Math.min(10, roll2D() - 7 + w.atmCode + hMod));
         }
 
-        w.hydroPercent = MGT2E_HYDRO_RANGES[w.hydroCode] + Math.floor(Math.random() * 10);
-        if (w.hydroCode === 0) w.hydroPercent = Math.floor(Math.random() * 6);
+        w.hydroPercent = MGT2E_HYDRO_RANGES[w.hydroCode] + Math.floor(rng() * 10);
+        if (w.hydroCode === 0) w.hydroPercent = Math.floor(rng() * 6);
 
         let distRoll = Math.max(0, Math.min(10, roll2D() - 2));
         w.surfaceDist = MGT2E_SURFACE_DISTS[distRoll];
@@ -2546,10 +2577,10 @@ function generateMgT2ESystemChunk2(sys, mainworldBase) {
     let rawHzRoll = Math.max(2, Math.min(12, 7 - atmDM));
     let hzDeviation = MGT2E_HZ_DEVIATION[rawHzRoll];
 
-    let variance = (Math.floor(Math.random() * 10)) / 100;
+    let variance = (Math.floor(rng() * 10)) / 100;
     if (hzDeviation < 0) hzDeviation -= variance;
     else if (hzDeviation > 0) hzDeviation += variance;
-    else hzDeviation += (Math.random() < 0.5 ? 1 : -1) * variance;
+    else hzDeviation += (rng() < 0.5 ? 1 : -1) * variance;
 
     let baselineOrbit = sys.hzco + hzDeviation;
 
@@ -2720,7 +2751,7 @@ function generateMgT2ESystemChunk2(sys, mainworldBase) {
         let pool = [...slots];
         function pullSlot() {
             if (!pool.length) return bands.length ? bands[bands.length - 1].max + 1 : 99;
-            return pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
+            return pool.splice(Math.floor(rng() * pool.length), 1)[0];
         }
 
         // Mainworld (primary star only)

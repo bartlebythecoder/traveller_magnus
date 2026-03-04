@@ -31,9 +31,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above So Below</span></h1>
-            <div class="splash-banner">v0.1.3: XBoat and Trade Route System Added</div>
+            <div class="splash-banner">v0.1.4: Random optionality added</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.1.3</div>
+            <div class="splash-version">v0.1.4</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -76,6 +76,21 @@
         <div class="settings-row">
             <input type="checkbox" id="toggle-borders" checked>
             <label for="toggle-borders">Show Sector/Subsector Borders</label>
+        </div>
+
+        <div style="border-top: 1px solid #45a29e; margin: 10px 0;"></div>
+
+        <div class="settings-row" style="flex-direction: column; align-items: flex-start; gap: 6px;">
+            <label for="input-seed" style="font-size: 0.8rem; color: #66fcf1; font-weight: bold;">Generation
+                Seed:</label>
+            <div style="display: flex; gap: 4px; width: 100%;">
+                <input type="text" id="input-seed" placeholder="Enter seed..."
+                    style="flex-grow: 1; padding: 6px; background: #1f2833; border: 1px solid #45a29e; color: #fff; font-family: 'Courier New', Courier, monospace; font-size: 0.9rem;">
+                <button id="btn-randomize-seed" title="Randomize Seed"
+                    style="padding: 0 10px; background: #45a29e; border: none; color: #0b0c10; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
         </div>
 
         <div style="border-top: 1px solid #45a29e; margin: 10px 0;"></div>
@@ -207,7 +222,7 @@
     <div id="help-modal">
         <div style="text-align: center; border-bottom: 2px solid #45a29e; padding-bottom: 15px; margin-bottom: 20px;">
             <h2 style="margin: 0 0 5px 0; color: #66fcf1; font-size: 24px;">As Above So Below</h2>
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.1.3</span></p>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.1.4</span></p>
             <p style="margin: 5px 0; color: #c5c6c7; font-size: 12px; font-style: italic;">Created by: <span
                     id="app-credits">Bartleby the Coder</span></p>
         </div>
@@ -583,9 +598,6 @@
             }
         }); 
     </script>
-</body>
-
-</html>
 </body>
 
 </html>

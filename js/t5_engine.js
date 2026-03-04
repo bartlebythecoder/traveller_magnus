@@ -4,7 +4,7 @@
 
 // --- T5 HELPERS ---
 function rollFlux() {
-    return (Math.floor(Math.random() * 6) + 1 + Math.floor(Math.random() * 6) + 1) - 7;
+    return (Math.floor(rng() * 6) + 1 + Math.floor(rng() * 6) + 1) - 7;
 }
 
 /**
@@ -19,16 +19,16 @@ function generateT5SubordinateSocial(world, mainworld) {
     const mwPop = (mainworld && mainworld.pop !== undefined) ? mainworld.pop : 15;
 
     // 2. Population Continuation Cap (2D-2, results >= MW result are lowered)
-    let popRoll = Math.max(0, (Math.floor(Math.random() * 6) + 1 + Math.floor(Math.random() * 6) + 1) - 2);
+    let popRoll = roll2D() - 2;
     if (popRoll >= mwPop) {
         world.pop = Math.max(0, mwPop - 1);
     } else {
         world.pop = popRoll;
     }
-    world.popDigit = world.pop > 0 ? Math.floor(Math.random() * 9) + 1 : 0;
+    world.popDigit = world.pop > 0 ? Math.floor(rng() * 10) : 0;
 
     // 3. Spaceport Restrictions (1-2: Y, 3-4: H, 5: G, 6: F)
-    const spRoll = Math.floor(Math.random() * 6) + 1;
+    const spRoll = roll1D();
     if (spRoll <= 2) world.starport = 'Y';
     else if (spRoll <= 4) world.starport = 'H';
     else if (spRoll === 5) world.starport = 'G';
@@ -57,11 +57,22 @@ function generateT5SubordinateSocial(world, mainworld) {
     if (world.gov === 0 || world.gov === 5) tlDM += 1;
     else if (world.gov === 13) tlDM -= 2;
 
-    world.tl = Math.max(0, (Math.floor(Math.random() * 6) + 1) + tlDM);
+    world.tl = Math.max(0, roll1D() + tlDM);
+
+    // Clamping
+    world.pop = clampUWP(world.pop || 0, 0, 15);
+    world.gov = clampUWP(world.gov || 0, 0, 15);
+    world.law = clampUWP(world.law || 0, 0, 15);
+    world.tl = clampUWP(world.tl || 0, 0, 33); // max 33 (X)
+
+    // Size, Atm, Hydro
+    let cSize = (typeof world.size === 'number') ? clampUWP(world.size, 0, 15) : world.size;
+    let cAtm = clampUWP(world.atm || 0, 0, 15);
+    let cHydro = clampUWP(world.hydro || 0, 0, 10);
 
     // Full UWP construction
     const toUWPChar = typeof globalThis.toUWPChar === 'function' ? globalThis.toUWPChar : (val) => val.toString(16).toUpperCase();
-    const uwp = `${world.starport}${toUWPChar(world.size)}${toUWPChar(world.atm)}${toUWPChar(world.hydro)}${toUWPChar(world.pop)}${toUWPChar(world.gov)}${toUWPChar(world.law)}-${toUWPChar(world.tl)}`;
+    const uwp = `${world.starport}${toUWPChar(cSize)}${toUWPChar(cAtm)}${toUWPChar(cHydro)}${toUWPChar(world.pop)}${toUWPChar(world.gov)}${toUWPChar(world.law)}-${toUWPChar(world.tl)}`;
 
     world.uwp = uwp;
     world.uwpSecondary = uwp;
@@ -90,7 +101,8 @@ function parseT5Stellar(name) {
     return { type, decimal, size };
 }
 
-function generateT5SystemChunk1(mainworldBase, existingSystem) {
+function generateT5SystemChunk1(mainworldBase, existingSystem, hexId) {
+    reseedForHex(hexId);
     let sys = { stars: [] };
 
     function generateStar(role, orbitID, importedName = null) {
@@ -105,7 +117,7 @@ function generateT5SystemChunk1(mainworldBase, existingSystem) {
             // Classification Logic: Spectral Class
             let f = rollFlux();
             type = 'G';
-            if (f <= -6) type = (Math.random() < 0.5) ? 'O' : 'B';
+            if (f <= -6) type = (rng() < 0.5) ? 'O' : 'B';
             else if (f <= -4) type = 'A';
             else if (f <= -2) type = 'F';
             else if (f <= 0) type = 'G';
@@ -113,7 +125,7 @@ function generateT5SystemChunk1(mainworldBase, existingSystem) {
             else if (f <= 5) type = 'M';
             else type = 'BD';
 
-            decimal = Math.floor(Math.random() * 10);
+            decimal = Math.floor(rng() * 10);
 
             // Classification Logic: Size
             let sf = rollFlux();
@@ -165,21 +177,21 @@ function generateT5SystemChunk1(mainworldBase, existingSystem) {
             sys.stars.push(generateStar('Primary Companion', 0, importedStars[1].name));
         }
         if (importedStars.length > 2) {
-            sys.stars.push(generateStar('Close', Math.floor(Math.random() * 6), importedStars[2].name));
+            sys.stars.push(generateStar('Close', Math.floor(rng() * 6), importedStars[2].name));
         }
         if (importedStars.length > 3) {
-            sys.stars.push(generateStar('Near', 5 + (Math.floor(Math.random() * 6) + 1), importedStars[3].name));
+            sys.stars.push(generateStar('Near', 5 + (Math.floor(rng() * 6) + 1), importedStars[3].name));
         }
         if (importedStars.length > 4) {
-            sys.stars.push(generateStar('Far', 11 + (Math.floor(Math.random() * 6) + 1), importedStars[4].name));
+            sys.stars.push(generateStar('Far', 11 + (Math.floor(rng() * 6) + 1), importedStars[4].name));
         }
     } else {
         // Standard Flux Logic (No import found)
         sys.stars.push(generateStar('Primary', 0));
         if (rollFlux() >= 3) sys.stars.push(generateStar('Primary Companion', 0));
-        if (rollFlux() >= 3) sys.stars.push(generateStar('Close', Math.floor(Math.random() * 6)));
-        if (rollFlux() >= 3) sys.stars.push(generateStar('Near', 5 + (Math.floor(Math.random() * 6) + 1)));
-        if (rollFlux() >= 3) sys.stars.push(generateStar('Far', 11 + (Math.floor(Math.random() * 6) + 1)));
+        if (rollFlux() >= 3) sys.stars.push(generateStar('Close', Math.floor(rng() * 6)));
+        if (rollFlux() >= 3) sys.stars.push(generateStar('Near', 5 + (Math.floor(rng() * 6) + 1)));
+        if (rollFlux() >= 3) sys.stars.push(generateStar('Far', 11 + (Math.floor(rng() * 6) + 1)));
 
         let currentStars = [...sys.stars];
         currentStars.forEach((s, idx) => {
@@ -270,7 +282,7 @@ function generateT5SystemChunk2(sys, mainworldBase) {
         let targets = sys.orbits.filter(o => !o.blocked && !o.contents && o.orbit > hzOrbit);
         if (targets.length === 0) targets = sys.orbits.filter(o => !o.blocked && !o.contents);
         if (targets.length > 0) {
-            let slot = targets[Math.floor(Math.random() * targets.length)];
+            let slot = targets[Math.floor(rng() * targets.length)];
             slot.contents = { type: 'Gas Giant', size: (roll1D() <= 3 ? 'Large' : 'Small') };
         }
     }
@@ -279,7 +291,7 @@ function generateT5SystemChunk2(sys, mainworldBase) {
     for (let i = 0; i < beltCount; i++) {
         let targets = sys.orbits.filter(o => !o.blocked && !o.contents);
         if (targets.length > 0) {
-            let slot = targets[Math.floor(Math.random() * targets.length)];
+            let slot = targets[Math.floor(rng() * targets.length)];
             slot.contents = { type: 'Planetoid Belt' };
         }
     }
@@ -288,7 +300,7 @@ function generateT5SystemChunk2(sys, mainworldBase) {
     for (let i = 0; i < worldCount; i++) {
         let targets = sys.orbits.filter(o => !o.blocked && !o.contents);
         if (targets.length > 0) {
-            let slot = targets[Math.floor(Math.random() * targets.length)];
+            let slot = targets[Math.floor(rng() * targets.length)];
             slot.contents = { type: 'Terrestrial World' };
         }
     }
@@ -450,7 +462,8 @@ function generateT5SystemChunk3(sys, mainworldBase) {
     return sys;
 }
 
-function generateT5Mainworld() {
+function generateT5Mainworld(hexId) {
+    reseedForHex(hexId);
     let spRoll = roll2D();
     let starport = 'X';
     if (spRoll === 2) starport = 'A';
@@ -477,7 +490,7 @@ function generateT5Mainworld() {
     if (pop === 10) pop = roll2D() + 3;
     pop = Math.max(0, pop);
 
-    let popDigit = pop > 0 ? Math.floor(Math.random() * 9) + 1 : 0;
+    let popDigit = pop > 0 ? Math.floor(rng() * 10) : 0;
 
     let gov = Math.min(15, Math.max(0, rollFlux() + pop));
 
@@ -526,6 +539,15 @@ function generateT5Mainworld() {
     let planetoidBelts = Math.max(0, roll1D() - 3);
     let gasGiant = gasGiantsCount > 0;
 
+    // Apply Clamping
+    size = clampUWP(size, 0, 15);
+    atm = clampUWP(atm, 0, 15);
+    hydro = clampUWP(hydro, 0, 10);
+    pop = clampUWP(pop, 0, 15);
+    gov = clampUWP(gov, 0, 15);
+    law = clampUWP(law, 0, 15);
+    tl = clampUWP(tl, 0, 33);
+
     const uwp = `${starport}${toUWPChar(size)}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
 
     let tradeCodes = [];
@@ -573,10 +595,11 @@ function generateT5Mainworld() {
         }
     }
 
-    return { name: getNextSystemName(), uwp, travelZone, tradeCodes, starport, size, atm, hydro, pop, popDigit, gov, law, tl, navalBase, scoutBase, gasGiant, gasGiantsCount, planetoidBelts };
+    return { name: getNextSystemName(hexId), uwp, travelZone, tradeCodes, starport, size, atm, hydro, pop, popDigit, gov, law, tl, navalBase, scoutBase, gasGiant, gasGiantsCount, planetoidBelts };
 }
 
-function generateT5Socioeconomics(base) {
+function generateT5Socioeconomics(base, hexId) {
+    reseedForHex(hexId);
     if (!base) return null;
 
     // 1. Importance (Ix)
@@ -653,59 +676,10 @@ function generateT5Socioeconomics(base) {
     };
 }
 
-function generateHZAndClimate() {
-    let hzFlux = rollFlux();
-    let hzVariance = 0;
-    if (hzFlux <= -6) hzVariance = -2;
-    else if (hzFlux <= -3) hzVariance = -1;
-    else if (hzFlux <= 2) hzVariance = 0;
-    else if (hzFlux <= 5) hzVariance = 1;
-    else hzVariance = 2;
 
-    let climate = '';
-    if (hzVariance <= -1) climate = 'Hot. Tropic. (Tr)';
-    else if (hzVariance === 0) climate = 'Temperate.';
-    else if (hzVariance === 1) climate = 'Cold. Tundra. (Tu)';
-    else climate = 'Frozen. (Fr)';
-
-    return { hzVariance, climate };
-}
-
-function generateWorldType(base) {
-    let wtFlux = rollFlux();
-    let worldType = 'Planet';
-    if (wtFlux <= -4) worldType = 'Far Satellite';
-    else if (wtFlux === -3) worldType = 'Close Satellite';
-
-    if (worldType === 'Planet') {
-        return { worldType, parentBody: null, satOrbit: null };
-    }
-
-    let parentBody = 'Planet';
-    let hasGasGiants = true;
-    if (base && base.gasGiant === false) {
-        hasGasGiants = false;
-    }
-    if (hasGasGiants) {
-        let pbFlux = rollFlux();
-        parentBody = (pbFlux <= 0) ? 'Gas Giant' : 'Planet';
-    }
-
-    let soFlux = rollFlux();
-    let satOrbit = '';
-    if (worldType === 'Close Satellite') {
-        const closeOrbits = ['Ay', 'Bee', 'Cee', 'Dee', 'Ee', 'Eff', 'Gee', 'Aitch', 'Eye', 'Jay', 'Kay', 'Ell', 'Em'];
-        satOrbit = closeOrbits[soFlux + 6] || 'Gee';
-    } else {
-        const farOrbits = ['En', 'Oh', 'Pee', 'Que', 'Arr', 'Ess', 'Tee', 'Yu', 'Vee', 'Dub', 'Ex', 'Wye', 'Zee'];
-        satOrbit = farOrbits[soFlux + 6] || 'Tee';
-    }
-
-    return { worldType, parentBody, satOrbit };
-}
-
-function generateT5Physical(base) {
+function generateT5Physical(base, hexId) {
     if (!base) return null;
+    reseedForHex(hexId);
 
     let spFlux = rollFlux();
     let spectralType = '';
@@ -740,7 +714,7 @@ function generateT5Physical(base) {
         };
     }
 
-    let spectralDecimal = Math.floor(Math.random() * 10);
+    let spectralDecimal = Math.floor(rng() * 10);
 
     let sizeFlux = rollFlux();
     let stellarSize = 'V';

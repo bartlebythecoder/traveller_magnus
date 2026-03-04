@@ -1,12 +1,26 @@
-# As Above, So Below (v0.1.3)
+# As Above, So Below (v0.1.4)
 ### Traveller Magnus Star System Generator — The "Social Parity" Update
 
-**"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between galactic-scale sector mapping and the granular physical reality of individual worlds and moons.
+**"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
 This tool is an unofficial fan project and is not affiliated with Mongoose Publishing or Far Future Enterprises. 
 ---
 
 ## 📜 Changelog
+
+### [v0.1.4] - 2026-03-04
+**Added: Coordinate-Based Seeding & Randomization Controls**
+- **Coordinate-Based Seeding (The Gold Standard):** 
+    - Implemented a localized seeding system where every world's generation is tied to its specific hex coordinates and a Master Seed.
+    - Re-seeding occurs at the top of every generation function, ensuring hex 0101 is always identical for a given seed, regardless of generation order.
+- **Randomization Control Panel:**
+    - Added a "Generation Seed" field to the Settings menu.
+    - Included a "Randomize Seed" button for quick universe variation with full persistence via `localStorage`.
+- **Deterministic Name Generation:** Refactored the naming engine to use location-locked hashes, ensuring system names are constant for any given Master Seed.
+- **UWP Clamping & Compliance:** Added the `clampUWP` logic to all engines to ensure generated values stay within standard Traveller limits (e.g., Hydrographics 0-A, TL 0-X), ensuring 100% compatibility with external tools like TravellerMap.com.
+- **Seeded Bulk Generation:** Integrated `reseedForHex` into the "Auto-Populate" tool for deterministic map layouts.
+- **Enhanced TravellerMap XML Export:** Added routes to our export function.
+
 
 ### [v0.1.3] - 2026-03-04
 **Added: Trade/X-Boat Routes & History System**

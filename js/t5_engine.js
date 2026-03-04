@@ -557,7 +557,23 @@ function generateT5Mainworld() {
     if ([6, 8].includes(atm) && (pop === 5 || pop === 9)) tradeCodes.push("Pr");
     if ([6, 8].includes(atm) && pop >= 6 && pop <= 8) tradeCodes.push("Ri");
 
-    return { name: getNextSystemName(), uwp, tradeCodes, starport, size, atm, hydro, pop, popDigit, gov, law, tl, navalBase, scoutBase, gasGiant, gasGiantsCount, planetoidBelts };
+    // --- TRAVEL ZONE & OPPRESSION SCORE (T5 Logic) ---
+    const oppressionScore = gov + law;
+    let travelZone = "Green";
+
+    if (oppressionScore >= 22 || starport === 'X') {
+        travelZone = "Red";
+        if (!tradeCodes.includes("Fo")) tradeCodes.push("Fo");
+    } else if (oppressionScore >= 20) {
+        travelZone = "Amber";
+        if (pop <= 6) {
+            if (!tradeCodes.includes("Da")) tradeCodes.push("Da");
+        } else {
+            if (!tradeCodes.includes("Pz")) tradeCodes.push("Pz");
+        }
+    }
+
+    return { name: getNextSystemName(), uwp, travelZone, tradeCodes, starport, size, atm, hydro, pop, popDigit, gov, law, tl, navalBase, scoutBase, gasGiant, gasGiantsCount, planetoidBelts };
 }
 
 function generateT5Socioeconomics(base) {

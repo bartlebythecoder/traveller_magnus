@@ -256,7 +256,7 @@ function generateCTMainworld() {
     if (size === 0) tradeCodes.push("As");
     if ([0, 1].includes(atm) && hydro >= 1) tradeCodes.push("Ic");
 
-    return { name: getNextSystemName(), uwp, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, gasGiant };
+    return { name: getNextSystemName(), uwp, travelZone: 'Green', tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, gasGiant };
 }
 
 function constructCTUPP(w) {

@@ -1,4 +1,4 @@
-# As Above, So Below (v0.1.1)
+# As Above, So Below (v0.1.2)
 ### Traveller Magnus Star System Generator — The "Social Parity" Update
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between galactic-scale sector mapping and the granular physical reality of individual worlds and moons.
@@ -6,6 +6,12 @@
 ---
 
 ## 📜 Changelog
+
+### [v0.1.2] - 2026-03-03
+**Added: Unified Travel Zone Utility**
+- **Automated Travel Zones:** Implemented automated Travel Zone (Amber/Red) detection for **Mongoose 2e** (Env/Social criteria) and **Traveller 5** (Oppression Score logic).
+- **T5 Oppression Logic:** Integrated mathematical Travel Zone derivation for T5 systems, including automated **Forbidden (Fo)**, **Dangerous (Da)**, and **Puzzling (Pz)** trade classification assignment.
+- **Engine Parity:** Standardized visual highlighting and "Caution" banners across MgT2E, T5, and Classic Traveller system interfaces.
 
 ### [v0.1.1] - 2026-03-03
 **Added: Subordinate System Socials & Engine Parity**
@@ -42,7 +48,7 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 ## Usage
 1. **Launch the App:** Click the [Live Demo](https://bartlebythecoder.github.io/traveller_magnus/hex_map.html) link above.
 2. **Import Data:** Use the "Import Sector" button in the sidebar to load a standard TravellerMap file.
-3. **Expand:** Click any hex on the map and select an expansion engine (CT, Mongoose 2e, or T5).
+3. **Expand:** Click any hex on the map and (1) select a hex or group of hexes (2) populate the hexes automatically or manually (3) generate mainworlds (4) optionally generate socioeconomic data (5) optionally generate system data
 4. **Stellar Preservation:** The engine automatically detects imported stellar data and builds the system around the existing "canon" stars.
 
 ---

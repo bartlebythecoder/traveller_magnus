@@ -845,3 +845,13 @@ body {
     font-size: 0.75rem;
     font-style: italic;
 }
+
+.travel-zone-select {
+    width: 106px;
+    background-color: #0b0c10;
+    border: 1px solid #45a29e;
+    color: #66fcf1;
+    padding: 4px;
+    border-radius: 4px;
+    font-family: monospace;
+}

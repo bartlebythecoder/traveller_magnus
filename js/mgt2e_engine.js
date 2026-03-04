@@ -191,13 +191,31 @@ function generateMgT2EMainworld(hexId) {
     tc('Wa', atm >= 3 && atm <= 9 && hydro >= 10, `Atm3-9(${atm}) Hyd10(${hydro})`);
     if (tradeCodes.length === 0) tSkip('No trade codes qualify');
 
+    // ── Travel Zone ───────────────────────────────────────────────
+    tSection('TRAVEL ZONE');
+    let travelZone = "Green";
+
+    // Amber Zone Criteria (WBH/Core):
+    // 1. Atmosphere 10 (A) or higher
+    // 2. Government 0, 7, or 10
+    // 3. Law Level 0 or 9+
+    const isAmber = (atm >= 10) && ([0, 7, 10].includes(gov)) && (law === 0 || law >= 9);
+
+    if (isAmber) {
+        travelZone = "Amber";
+        tResult('Zone', 'Amber (Dangerous environment/social/legal combo)');
+    } else {
+        tResult('Zone', 'Green');
+    }
+    // Note: Red Zones remain placeholder for referee discretion / manual override.
+
     // ── Finalise ──────────────────────────────────────────────────
     const name = getNextSystemName();
     tSection('NAME');
     tResult('Assigned', name || '(none — pool empty)');
     endTrace();
 
-    return { name, uwp, uwpSecondary: uwp, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
+    return { name, uwp, uwpSecondary: uwp, travelZone, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
 }
 
 // =====================================================================

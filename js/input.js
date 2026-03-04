@@ -1031,6 +1031,7 @@ function openHexEditor(hexId) {
     document.getElementById('edit-gas').checked = data.gasGiant || false;
 
     document.getElementById('edit-trade-codes').value = data.tradeCodes ? data.tradeCodes.join(' ') : '';
+    document.getElementById('edit-travel-zone').value = data.travelZone || 'Green';
 
     document.getElementById('edit-military').parentElement.style.display = stateObj.mgt2eData ? 'flex' : 'none';
     document.getElementById('edit-corsair').parentElement.style.display = stateObj.mgt2eData ? 'flex' : 'none';
@@ -1139,6 +1140,12 @@ function populateEditorAccordions(stateObj) {
                 <span>HZco (Primary): <strong>${sys.hzco.toFixed(2)}</strong></span>
                 <span>Age: <strong>${sys.age.toFixed(2)} Gyr</strong></span>`;
 
+            const mwBase = stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData;
+            if (mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                const zoneColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
+                html += `<span style="color: ${zoneColor};">Travel Zone: <strong>${mwBase.travelZone}</strong></span>`;
+            }
+
             if (sys.stars.length > 1 && sys.ptypeHzco !== undefined) {
                 html += `<span style="color:#66fcf1;">P-Type HZco: <strong>${sys.ptypeHzco.toFixed(2)}</strong></span>`;
                 let ptypeLimit = sys.ptypeInnerLimit !== undefined && sys.ptypeInnerLimit !== Infinity
@@ -1179,10 +1186,16 @@ function populateEditorAccordions(stateObj) {
                     let labelColor = w.type === 'Mainworld' ? '#ffa500' : '#66fcf1';
                     let summaryStyle = w.type === 'Mainworld' ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
 
+                    let zoneLabel = '';
+                    if (w.type === 'Mainworld' && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                        const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
+                        zoneLabel = ` | <span style="color: ${zColor}">${mwBase.travelZone}</span>`;
+                    }
+
                     let classLabel = (w.classifications && w.classifications.length > 0) ? ` | ${w.classifications[0]}` : '';
 
                     html += `<details open>`;
-                    html += `<summary ${summaryStyle}>Orbit ${w.orbitId.toFixed(2)} (${w.orbitType || 'S-Type'})${classLabel} <span class="sys-title-info">${w.type}</span></summary>`;
+                    html += `<summary ${summaryStyle}>Orbit ${w.orbitId.toFixed(2)} (${w.orbitType || 'S-Type'})${classLabel}${zoneLabel} <span class="sys-title-info">${w.type}</span></summary>`;
                     html += `<div class="system-node">`;
 
                     if (w.type !== 'Planetoid Belt' && w.type !== 'Gas Giant' && uwp !== '-') {
@@ -1207,6 +1220,10 @@ function populateEditorAccordions(stateObj) {
 
                     // Physical characteristics (non-gas-giant, non-belt)
                     if (w.type === 'Terrestrial Planet' || w.type === 'Mainworld') {
+                        if (w.type === 'Mainworld' && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                            const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
+                            html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor};">Caution: ${mwBase.travelZone} Zone</div>`;
+                        }
                         html += `<span>Axial Tilt: <strong>${w.axialTilt ? w.axialTilt.toFixed(1) : '0'}°</strong></span>`;
                         html += `<span>Mean Temp: <strong>${w.meanTempK ? (w.meanTempK - 273).toFixed(0) : '?'}°C</strong></span>`;
                         html += `<span>Habitability: <strong>${w.habitability !== undefined ? w.habitability : '?'}/15</strong></span>`;
@@ -1290,8 +1307,13 @@ function populateEditorAccordions(stateObj) {
             let html = `<div class="system-stats" style="grid-template-columns: 1fr;">
                 <div style="text-align: center; color: #66fcf1; border-bottom: 1px dotted #45a29e; padding-bottom: 4px;">CT Scouts Overview</div>
                 <span>Nature: <strong>${sys.nature}</strong></span>
-                <span>Total Orbits: <strong>${sys.maxOrbits}</strong></span>
-            </div>`;
+                <span>Total Orbits: <strong>${sys.maxOrbits}</strong></span>`;
+
+            if (mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                const zoneColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
+                html += `<span style="color: ${zoneColor};">Travel Zone: <strong>${mwBase.travelZone}</strong></span>`;
+            }
+            html += `</div>`;
 
             // System Tree Structure
             html += `<div class="system-tree">`;
@@ -1320,16 +1342,27 @@ function populateEditorAccordions(stateObj) {
                         let typeLabel = w.type === 'Gas Giant'
                             ? (w.size + ' Gas Giant')
                             : (w.type === 'Planetoid Belt' ? 'Belt' : w.type);
-                        let labelColor = w.type === 'Mainworld' ? '#ffa500' : '#66fcf1'; // Orange for Mainworld, Cyan for others
+                        let labelColor = w.type === 'Mainworld' ? '#ffa500' : '#66fcf1';
+                        let summaryStyle = w.type === 'Mainworld' ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
+
+                        let zoneLabel = '';
+                        if (w.type === 'Mainworld' && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                            const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
+                            zoneLabel = ` | <span style="color: ${zColor}">${mwBase.travelZone}</span>`;
+                        }
 
                         html += `<details open>`;
-                        html += `<summary>Orbit ${o.orbit} [${o.zone}] <span class="sys-title-info">${typeLabel} | ${uwp}</span></summary>`;
+                        html += `<summary ${summaryStyle}>Orbit ${o.orbit} [${o.zone}] <span class="sys-title-info">${typeLabel} | ${uwp}${zoneLabel}</span></summary>`;
                         html += `<div class="system-node">`;
 
                         // UWP Line
                         html += `<div style="margin-bottom: 6px; font-family: monospace; font-size: 1.1em;">UWP: <strong style="color: ${labelColor}">${uwp}</strong></div>`;
 
                         // Physical Stats Grid
+                        if (w.type === 'Mainworld' && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                            const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
+                            html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor}; margin-bottom: 8px;">Caution: ${mwBase.travelZone} Zone</div>`;
+                        }
                         html += `<div class="system-stats">`;
 
                         // Orbital Data
@@ -1362,9 +1395,16 @@ function populateEditorAccordions(stateObj) {
                                 let satType = sat.type === 'Mainworld' ? 'Mainworld' : (sat.size === 'R' ? 'Ring' : (sat.size === 'S' ? 'Small Moon' : 'Moon'));
                                 let satUwp = (sat.type === 'Mainworld' && mwBase) ? mwBase.uwp : (sat.uwpSecondary || '-');
                                 let satLabelColor = sat.type === 'Mainworld' ? '#ffa500' : '#66fcf1';
+                                let satSummaryStyle = sat.type === 'Mainworld' ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
+
+                                let satZoneLabel = '';
+                                if (sat.type === 'Mainworld' && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                                    const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
+                                    satZoneLabel = ` | <span style="color: ${zColor}">${mwBase.travelZone}</span>`;
+                                }
 
                                 html += `<details>`;
-                                html += `<summary>Satellite ${satIdx + 1} <span class="sys-title-info">${satType} | ${sat.pd || '?'}r | ${satUwp}</span></summary>`;
+                                html += `<summary ${satSummaryStyle}>Satellite ${satIdx + 1} <span class="sys-title-info">${satType} | ${sat.pd || '?'}r | ${satUwp}${satZoneLabel}</span></summary>`;
                                 html += `<div class="system-node">`;
                                 html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <strong style="color: ${satLabelColor}">${satUwp}</strong></div>`;
                                 html += `<div class="system-stats">`;
@@ -1422,10 +1462,15 @@ function populateEditorAccordions(stateObj) {
 
             // 1. Stellar Header
             let html = `<div class="system-stats" style="grid-template-columns: 1fr;">
-                <div style="text-align: center; color: #66fcf1; border-bottom: 1px dotted #45a29e; padding-bottom: 4px;">T5 Stellar Profile</div>`;
+                <div style="text-align: center; color: #66fcf1; border-bottom: 1px dotted #45a29e; padding-bottom: 4px;">T5: ${mwBase.name} Profile</div>`;
             sys.stars.forEach(star => {
                 html += `<span>${star.role}: <strong>${star.name}</strong> (Lum: ${star.luminosity ? star.luminosity.toFixed(3) : '?'}, Mass: ${star.mass ? star.mass.toFixed(2) : '?'})</span>`;
             });
+
+            if (mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                const zoneColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
+                html += `<span style="color: ${zoneColor}; text-align: center;">Travel Zone: <strong>${mwBase.travelZone}</strong></span>`;
+            }
             html += `</div>`;
 
             // 2. System Tree Structure
@@ -1442,13 +1487,38 @@ function populateEditorAccordions(stateObj) {
                 let typeLabel = w.type;
                 if (w.type === 'Gas Giant') typeLabel = `${w.size === 15 ? 'Large' : 'Small'} Gas Giant`;
                 let labelColor = w.type === 'Mainworld' ? '#ffa500' : '#66fcf1';
+                let summaryStyle = w.type === 'Mainworld' ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
+
+                let zoneLabel = '';
+                if (w.type === 'Mainworld' && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                    const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
+                    zoneLabel = ` | <span style="color: ${zColor}">${mwBase.travelZone}</span>`;
+                }
 
                 html += `<details open>`;
-                html += `<summary>Orbit ${o.orbit} [${w.climateZone || 'Cold'}] <span class="sys-title-info">${typeLabel}</span></summary>`;
+                html += `<summary ${summaryStyle}>Orbit ${o.orbit} [${w.climateZone || 'Cold'}] <span class="sys-title-info">${typeLabel}${zoneLabel}</span></summary>`;
                 html += `<div class="system-node">`;
 
                 if (w.type !== 'Planetoid Belt') {
                     html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <strong style="color: ${labelColor}">${uwp}</strong></div>`;
+                }
+
+                if (w.type === 'Mainworld' && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                    const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
+                    const specialCodes = mwBase.tradeCodes.filter(c => ['Fo', 'Da', 'Pz'].includes(c));
+                    const codeStr = specialCodes.length > 0 ? ` - [${specialCodes.join('/')}]` : '';
+                    html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor}; margin-bottom: 8px;">Caution: ${mwBase.travelZone} Zone${codeStr}</div>`;
+                }
+
+                if (w.type === 'Mainworld') {
+                    html += `<div class="system-stats">`;
+                    html += `<span>Referee Override:</span>`;
+                    html += `<select class="travel-zone-select" style="grid-column: span 2;" onchange="handleT5ZoneChange(this)">
+                        <option value="Green" ${mwBase.travelZone === 'Green' ? 'selected' : ''}>Green</option>
+                        <option value="Amber" ${mwBase.travelZone === 'Amber' ? 'selected' : ''}>Amber</option>
+                        <option value="Red" ${mwBase.travelZone === 'Red' ? 'selected' : ''}>Red</option>
+                    </select>`;
+                    html += `</div>`;
                 }
 
                 html += `<div class="system-stats">`;
@@ -1500,6 +1570,46 @@ function populateEditorAccordions(stateObj) {
         }
     }
 }
+// Global handler for T5 Travel Zone manual overrides
+window.handleT5ZoneChange = function (el) {
+    if (!editingHexId) return;
+    const stateObj = hexStates.get(editingHexId);
+    if (!stateObj || !stateObj.t5Data) return;
+
+    const newZone = el.value;
+    stateObj.t5Data.travelZone = newZone;
+
+    // Sync T5 Trade Classifications (Fo, Da, Pz)
+    let codes = stateObj.t5Data.tradeCodes || [];
+    // Remove existing zone-related codes
+    codes = codes.filter(c => !['Fo', 'Da', 'Pz'].includes(c));
+
+    if (newZone === 'Red') {
+        if (!codes.includes('Fo')) codes.push('Fo');
+    } else if (newZone === 'Amber') {
+        const pop = stateObj.t5Data.pop;
+        if (pop <= 6) {
+            if (!codes.includes('Da')) codes.push('Da');
+        } else {
+            if (!codes.includes('Pz')) codes.push('Pz');
+        }
+    }
+    stateObj.t5Data.tradeCodes = codes;
+
+    // Update the main hex editor dropdown to match
+    const mainSelect = document.getElementById('edit-travel-zone');
+    if (mainSelect) mainSelect.value = newZone;
+
+    // Update the trade codes text field to reflect sync
+    const tcInput = document.getElementById('edit-trade-codes');
+    if (tcInput) tcInput.value = codes.join(' ');
+
+    // Refresh the system expansion tray UI
+    populateEditorAccordions(stateObj);
+
+    // Redraw the map to show the new travel zone halo
+    requestAnimationFrame(draw);
+};
 
 
 function closeHexEditor() {
@@ -1578,13 +1688,16 @@ function saveHexEditorChanges() {
     // Update the appropriate data object and explicitly save the name
     if (stateObj.t5Data) {
         stateObj.t5Data.name = name;
-        stateObj.t5Data = { ...stateObj.t5Data, uwp, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
+        const travelZone = document.getElementById('edit-travel-zone').value;
+        stateObj.t5Data = { ...stateObj.t5Data, uwp, travelZone, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
     } else if (stateObj.mgt2eData) {
         stateObj.mgt2eData.name = name;
-        stateObj.mgt2eData = { ...stateObj.mgt2eData, uwp, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
+        const travelZone = document.getElementById('edit-travel-zone').value;
+        stateObj.mgt2eData = { ...stateObj.mgt2eData, uwp, travelZone, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
     } else if (stateObj.ctData) {
         stateObj.ctData.name = name;
-        stateObj.ctData = { ...stateObj.ctData, uwp, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, gasGiant };
+        const travelZone = document.getElementById('edit-travel-zone').value;
+        stateObj.ctData = { ...stateObj.ctData, uwp, travelZone, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, gasGiant };
     }
 
     // Also save name at the stateObj level for consistency

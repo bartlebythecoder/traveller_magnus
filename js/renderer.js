@@ -32,7 +32,7 @@ function resize() {
     canvas.width = w * window.devicePixelRatio;
     canvas.height = h * window.devicePixelRatio;
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-    
+
     // Trigger initial draw after resize
     draw();
 }
@@ -61,7 +61,7 @@ function draw() {
 
     // 2. Clear the canvas using the actual pixel dimensions
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+
     // 3. Fill the background color
     ctx.fillStyle = '#0b0c10';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -94,7 +94,7 @@ function draw() {
 
     ctx.beginPath();
 
-    const MAX_GLOBAL_Q = 255; 
+    const MAX_GLOBAL_Q = 255;
     const MAX_GLOBAL_R = 159;
 
     for (let q = Math.max(0, qMin); q <= Math.min(MAX_GLOBAL_Q, qMax); q++) {
@@ -142,6 +142,30 @@ function draw() {
                     const baseWorldRadius = 10;
                     const minWorldRadius = 1.5 / zoom;
                     const dotRadius = Math.max(minWorldRadius, baseWorldRadius);
+
+                    // --- Travel Zone Halo (Amber/Red) ---
+                    if (data && data.travelZone && data.travelZone !== 'Green') {
+                        const zoneColor = data.travelZone === 'Red' ? '#FF0000' : '#FFBF00';
+                        ctx.save();
+                        ctx.beginPath();
+                        // Slightly larger than the world dot
+                        const haloRadius = dotRadius + 5;
+                        ctx.arc(cx, cy, haloRadius, 0, 2 * Math.PI);
+
+                        // Faint fill (0.2 opacity)
+                        ctx.globalAlpha = 0.2;
+                        ctx.fillStyle = zoneColor;
+                        ctx.fill();
+
+                        // Solid stroke (2-3px)
+                        ctx.globalAlpha = 1.0;
+                        ctx.strokeStyle = zoneColor;
+                        ctx.lineWidth = 2.5 / zoom;
+                        ctx.stroke();
+
+                        ctx.closePath();
+                        ctx.restore();
+                    }
 
                     const pTextColor = isSelected ? '#ffb399' : '#ffffff';
                     const pFontSmall = 10;  // world-space px (coordinate, UWP)
@@ -295,6 +319,24 @@ function draw() {
                     const baseWorldRadius = 10;
                     const minWorldRadius = 1.5 / zoom;
                     const dotRadius = Math.max(minWorldRadius, baseWorldRadius);
+
+                    // --- Travel Zone Halo (Amber/Red) ---
+                    if (data && data.travelZone && data.travelZone !== 'Green') {
+                        const zoneColor = data.travelZone === 'Red' ? '#FF0000' : '#FFBF00';
+                        ctx.save();
+                        ctx.beginPath();
+                        const haloRadius = dotRadius + 5;
+                        ctx.arc(cx, cy, haloRadius, 0, 2 * Math.PI);
+                        ctx.globalAlpha = 0.2;
+                        ctx.fillStyle = zoneColor;
+                        ctx.fill();
+                        ctx.globalAlpha = 1.0;
+                        ctx.strokeStyle = zoneColor;
+                        ctx.lineWidth = 2.5 / zoom;
+                        ctx.stroke();
+                        ctx.closePath();
+                        ctx.restore();
+                    }
                     ctx.arc(cx, cy, dotRadius, 0, 2 * Math.PI);
                     ctx.fillStyle = '#ffffff';
                     ctx.fill();

@@ -38,7 +38,7 @@ window.sectorRoutes = [];
 
 // System Naming State
 namePool = [];
-usedNames = new Set(JSON.parse(localStorage.getItem('traveller_used_names') || '[]'));
+usedNames = new Set(); // Reset every load for machine-agnostic determinism
 
 // Hex properties - Renderer needs this immediately
 baseHexSize = 50;
@@ -75,7 +75,8 @@ function setRandomSeed(seedString) {
     masterSeed = seedString || "TravellerMagnus";
     localStorage.setItem('traveller_gen_seed', masterSeed);
     rng = mulberry32(hashString(masterSeed));
-    console.log(`Master Seed set to: "${masterSeed}"`);
+    usedNames.clear(); // Important: reset used names on seed change
+    console.log(`Master Seed set to: "${masterSeed}" (RNG and Names Reset)`);
 }
 
 function reseedForHex(hexId) {
@@ -263,17 +264,17 @@ function getNextSystemName(hexId) {
 
     let index;
     if (hexId) {
-        // Deterministic pick based on location
+        // Deterministic pick based on location - absolute determinism
         const nameSeed = hashString(masterSeed + "-" + hexId + "-name");
         index = nameSeed % namePool.length;
         const name = namePool[index];
         usedNames.add(name);
         return name;
     } else {
-        // Fallback to current RNG stream (maintains continuity if called mid-stream)
+        // Fallback to current RNG stream
         index = Math.floor(rng() * namePool.length);
         const name = namePool[index];
-        namePool.splice(index, 1); // Only splice if not location-locked
+        // DO NOT splice here; it breaks determinism based on generation order across the session
         usedNames.add(name);
         return name;
     }

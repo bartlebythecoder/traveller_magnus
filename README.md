@@ -1,12 +1,43 @@
-# As Above, So Below (v0.1.4.1.1)
-### Traveller Magnus Star System Generator — The "Social Parity" Update
+# As Above, So Below (v0.1.4.1.2)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
 This tool is an unofficial fan project and is not affiliated with Mongoose Publishing or Far Future Enterprises. 
+
 ---
 
+## 🚀 [Launch the Generator (Live Web App)](https://bartlebythecoder.github.io/traveller_magnus/hex_map.html)
+*No download required. Runs directly in your browser via GitHub Pages.*
+
+---
+
+## Overview
+This workbench allows Game Masters and world-builders to generate, import, and expand star systems using multiple generations of Traveller logic. Whether you are running a Classic Traveller campaign or a high-crunch Traveller 5 (T5) simulation, this tool ensures that your "expanded" systems remain 100% consistent with your sector-level data.
+
+## Key Features
+- **Multi-Era Engine:** Toggle between **Classic Traveller (Book 6)**, **Mongoose Traveller (2nd Edition)** and **Traveller 5 (T5)** expansion logic.
+- **Interstellar Connectivity:** Automatic generation of X-boat trade lanes based on world Importance {Ix} scores.
+- **Manual Routing:** Draw and color-code custom routes (Xboat, Trade, Secondary) directly on the hex map.
+- **Full System Generation:** Dynamic stellar classification, gravity derivation, and automated moon/satellite inventory.
+
+## Usage
+1. **Launch the App:** Click the [Live Demo](https://bartlebythecoder.github.io/traveller_magnus/hex_map.html) link above.
+2. **Import Data:** Use the "Import Sector" button in the sidebar to load a standard TravellerMap file.
+3. **Advanced Manual Routing:**
+    - **Hold G + Drag:** Draw/Delete Green Routes.
+    - **Hold R + Drag:** Draw/Delete Red Routes.
+    - **Hold Y + Drag:** Draw/Delete Yellow Routes.
+    - **Ctrl + Z / Ctrl + Shift + Z:** Undo and Redo cartography or expansion actions.
+4. **View Details:** Use **Ctrl + Click** on any populated hex to open the **World Details** panel, which provides deep physical and socioeconomic breakdowns for the entire star system.
+5. **Expand:** Select a group of hexes (Shift+Drag) and use the right-click context menu or **Ctrl + Shift + M** to generate full systems.
+---
 ## 📜 Changelog
+
+### [v0.1.4.1.2] - 2026-03-04
+**Added: Machine-Agnostic Naming Determinism**
+- **Eliminated LocalStorage Bias:** The `usedNames` tracking is no longer persisted in `localStorage`. This ensures that a fresh load of the app always produces the same naming sequence for a given seed, regardless of the machine's history.
+- **Strict Order Independence:** Removed the name-splicing logic that made results dependent on the order in which hexes were generated. Naming is now strictly tied to the `masterSeed + hexId` hash.
+- **Alphabetical Pool Standardization:** Added an automatic sort to the name pool on load to ensure cross-browser and cross-environment consistency even if the source `names.js` is modified.
 
 ### [v0.1.4.1.1] - 2026-03-04
 **Fixed: Keyboard Shortcut Input Collision**
@@ -53,33 +84,6 @@ This tool is an unofficial fan project and is not affiliated with Mongoose Publi
 **Added: Subordinate System Socials & Engine Parity**
 - **Unified Engine Parity:** Implemented full UWP (Universal World Profile) generation for all secondary planets and moons across **Classic Traveller (CT)**, **Traveller 5 (T5)**, and **Mongoose Traveller (MgT2E)**.
 - **MgT2E Dependent Logic:** Added the "Environmental Floor" (Minimal Sustainable TL) and "Dependent World" logic from the *World Builder's Handbook*.
-
----
-
-## 🚀 [Launch the Generator (Live Web App)](https://bartlebythecoder.github.io/traveller_magnus/hex_map.html)
-*No download required. Runs directly in your browser via GitHub Pages.*
-
----
-
-## Overview
-This workbench allows Game Masters and world-builders to generate, import, and expand star systems using multiple generations of Traveller logic. Whether you are running a Classic Traveller campaign or a high-crunch Traveller 5 (T5) simulation, this tool ensures that your "expanded" systems remain 100% consistent with your sector-level data.
-
-## Key Features
-- **Multi-Era Engine:** Toggle between **Classic Traveller (Book 6)**, **Mongoose Traveller (2nd Edition)** and **Traveller 5 (T5)** expansion logic.
-- **Interstellar Connectivity:** Automatic generation of X-boat trade lanes based on world Importance {Ix} scores.
-- **Manual Routing:** Draw and color-code custom routes (Xboat, Trade, Secondary) directly on the hex map.
-- **Full System Generation:** Dynamic stellar classification, gravity derivation, and automated moon/satellite inventory.
-
-## Usage
-1. **Launch the App:** Click the [Live Demo](https://bartlebythecoder.github.io/traveller_magnus/hex_map.html) link above.
-2. **Import Data:** Use the "Import Sector" button in the sidebar to load a standard TravellerMap file.
-3. **Advanced Manual Routing:**
-    - **Hold G + Drag:** Draw/Delete Green Routes.
-    - **Hold R + Drag:** Draw/Delete Red Routes.
-    - **Hold Y + Drag:** Draw/Delete Yellow Routes.
-    - **Ctrl + Z / Ctrl + Shift + Z:** Undo and Redo cartography or expansion actions.
-4. **View Details:** Use **Ctrl + Click** on any populated hex to open the **World Details** panel, which provides deep physical and socioeconomic breakdowns for the entire star system.
-5. **Expand:** Select a group of hexes (Shift+Drag) and use the right-click context menu or **Ctrl + Shift + M** to generate full systems.
 
 ---
 This tool is an unofficial fan project and is not affiliated with Mongoose Publishing or Far Future Enterprises. All Traveller trademarks and copyrights are used under fair use for fan-created content.

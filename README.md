@@ -1,4 +1,4 @@
-# As Above, So Below (v0.1.4)
+# As Above, So Below (v0.1.4.1.1)
 ### Traveller Magnus Star System Generator — The "Social Parity" Update
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
@@ -7,6 +7,11 @@ This tool is an unofficial fan project and is not affiliated with Mongoose Publi
 ---
 
 ## 📜 Changelog
+
+### [v0.1.4.1.1] - 2026-03-04
+**Fixed: Keyboard Shortcut Input Collision**
+- **Input Focus Guard:** Implemented a global guard for the `keydown` event listener to prevent routing shortcuts (G, R, Y) from triggering while typing in `input` or `textarea` elements. This fixes a literal "can't type the letter 'r'" bug in the settings panel.
+- **Escape Key Exception:** Refined the logic to ensure the **Escape** key remains functional even when a text field is focused, allowing users to still close modals via the keyboard.
 
 ### [v0.1.4] - 2026-03-04
 **Added: Coordinate-Based Seeding & Randomization Controls**

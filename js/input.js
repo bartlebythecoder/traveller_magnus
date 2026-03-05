@@ -295,6 +295,11 @@ function setupCanvasEvents() {
 
 function setupKeyboardShortcuts() {
     window.addEventListener('keydown', async (e) => {
+        // Skip shortcuts if the user is typing in an input field or textarea, except for Escape
+        if ((e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) && e.key !== 'Escape') {
+            return;
+        }
+
         const key = e.key.toLowerCase();
         keysDown.add(key);
 

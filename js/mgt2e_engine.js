@@ -215,6 +215,9 @@ function generateMgT2EMainworld(hexId) {
     if (isAmber) {
         travelZone = "Amber";
         tResult('Zone', 'Amber (Dangerous environment/social/legal combo)');
+    } else if (starport === 'X') {
+        travelZone = "Red";
+        tResult('Zone', 'Red (Starport X default)');
     } else {
         tResult('Zone', 'Green');
     }

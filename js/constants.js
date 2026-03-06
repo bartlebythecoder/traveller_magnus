@@ -114,21 +114,11 @@ const ZONE_TABLES = {
     }
 };
 
-const CT_SYS_FEATURES = [
-    { nature: 'Solo', priType: 'B', priSize: 'Ia', compType: null, compSize: 'Ia', orbit: { base: 'Close', die: false }, maxOrbits: 0, ggPres: false, ggQty: 0, beltPres: true, beltQty: 3 },
-    { nature: 'Solo', priType: 'B', priSize: 'Ib', compType: 'B', compSize: 'Ib', orbit: { base: 'Close', die: false }, maxOrbits: 1, ggPres: true, ggQty: 1, beltPres: true, beltQty: 2 },
-    { nature: 'Solo', priType: 'A', priSize: 'II', compType: 'A', compSize: 'II', orbit: { base: 'Close', die: false }, maxOrbits: 2, ggPres: true, ggQty: 1, beltPres: true, beltQty: 2 },
-    { nature: 'Solo', priType: 'M', priSize: 'III', compType: 'F', compSize: 'III', orbit: { base: 'Close', die: false }, maxOrbits: 3, ggPres: true, ggQty: 1, beltPres: true, beltQty: 2 },
-    { nature: 'Solo', priType: 'M', priSize: 'IV', compType: 'F', compSize: 'IV', orbit: { base: 1, die: false }, maxOrbits: 4, ggPres: true, ggQty: 2, beltPres: true, beltQty: 2 },
-    { nature: 'Solo', priType: 'M', priSize: 'V', compType: 'G', compSize: 'D', orbit: { base: 2, die: false }, maxOrbits: 5, ggPres: true, ggQty: 2, beltPres: true, beltQty: 2 },
-    { nature: 'Solo', priType: 'M', priSize: 'V', compType: 'G', compSize: 'D', orbit: { base: 3, die: false }, maxOrbits: 6, ggPres: true, ggQty: 3, beltPres: true, beltQty: 2 },
-    { nature: 'Solo', priType: 'M', priSize: 'V', compType: 'K', compSize: 'V', orbit: { base: 4, die: true }, maxOrbits: 7, ggPres: true, ggQty: 3, beltPres: false, beltQty: 1 },
-    { nature: 'Binary', priType: 'K', priSize: 'V', compType: 'K', compSize: 'V', orbit: { base: 5, die: true }, maxOrbits: 8, ggPres: true, ggQty: 4, beltPres: false, beltQty: 1 },
-    { nature: 'Binary', priType: 'G', priSize: 'V', compType: 'M', compSize: 'VI', orbit: { base: 6, die: true }, maxOrbits: 9, ggPres: true, ggQty: 4, beltPres: false, beltQty: 1 },
-    { nature: 'Binary', priType: 'F', priSize: 'V', compType: 'M', compSize: 'D', orbit: { base: 7, die: true }, maxOrbits: 10, ggPres: false, ggQty: 0, beltPres: false, beltQty: 1 },
-    { nature: 'Binary', priType: 'F', priSize: 'VI', compType: 'M', compSize: 'D', orbit: { base: 8, die: true }, maxOrbits: 11, ggPres: false, ggQty: 0, beltPres: false, beltQty: 1 },
-    { nature: 'Trinary', priType: 'F', priSize: 'D', compType: 'M', compSize: 'D', orbit: { base: 'Far', die: false }, maxOrbits: 12, ggPres: false, ggQty: 0, beltPres: false, beltQty: 1 },
-];
+const CT_BASIC_NATURE_TABLE = ['Solo', 'Solo', 'Solo', 'Solo', 'Solo', 'Solo', 'Solo', 'Solo', 'Binary', 'Binary', 'Binary', 'Binary', 'Trinary'];
+const CT_PRI_TYPE_TABLE = ['B', 'B', 'A', 'M', 'M', 'M', 'M', 'M', 'K', 'G', 'F', 'F', 'F'];
+const CT_PRI_SIZE_TABLE = ['Ia', 'Ib', 'II', 'III', 'IV', 'V', 'V', 'V', 'V', 'V', 'V', 'VI', 'D'];
+const CT_COMP_TYPE_TABLE = ['M', 'B', 'A', 'F', 'F', 'G', 'G', 'K', 'K', 'M', 'M', 'M', 'M'];
+const CT_COMP_SIZE_TABLE = ['Ia', 'Ib', 'II', 'III', 'IV', 'D', 'D', 'V', 'V', 'VI', 'D', 'D', 'D'];
 
 // --- MgT2E (Mongoose Traveller 2nd Edition) Constants ---
 

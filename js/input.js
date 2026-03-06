@@ -71,7 +71,7 @@ function initializeInput() {
     setupHexEditor();
     setupHelpModal();
     setupSaveLoad();
-    setupGenerationLog();
+
     setupSectorPicker();
     setupSectorImporter();
     setupSplashScreen();
@@ -359,12 +359,25 @@ function setupKeyboardShortcuts() {
             // Generate Mainworlds
             setTimeout(() => {
                 targetHexes.forEach(hexId => {
-                    let stateObj = hexStates.get(hexId);
-                    if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
-                        stateObj.mgt2eData = generateMgT2EMainworld(hexId);
-                        stateObj.ctData = null;
-                        stateObj.t5Data = null;
-                        hexStates.set(hexId, stateObj);
+                    try {
+                        let stateObj = hexStates.get(hexId);
+                        if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
+                            stateObj.mgt2eData = generateMgT2EMainworld(hexId);
+                            // Clear all variants to ensure fresh generation
+                            stateObj.ctData = null;
+                            stateObj.t5Data = null;
+                            stateObj.ctSystem = null;
+                            stateObj.mgtSystem = null;
+                            stateObj.t5System = null;
+                            stateObj.ctPhysical = null;
+                            stateObj.mgtPhysical = null;
+                            stateObj.t5Physical = null;
+                            stateObj.mgtSocio = null;
+                            stateObj.t5Socio = null;
+                            hexStates.set(hexId, stateObj);
+                        }
+                    } catch (err) {
+                        console.error(`Mongoose Macro Step 2 failed for hex ${hexId}:`, err);
                     }
                 });
                 requestAnimationFrame(draw);
@@ -373,12 +386,16 @@ function setupKeyboardShortcuts() {
                 // Socioeconomics
                 setTimeout(() => {
                     targetHexes.forEach(hexId => {
-                        let stateObj = hexStates.get(hexId);
-                        let baseData = stateObj ? (stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData) : null;
-                        if (baseData) {
-                            stateObj.mgtSocio = generateMgT2ESocioeconomics(baseData);
-                            stateObj.t5Socio = null;
-                            hexStates.set(hexId, stateObj);
+                        try {
+                            let stateObj = hexStates.get(hexId);
+                            let baseData = stateObj ? (stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData) : null;
+                            if (baseData) {
+                                stateObj.mgtSocio = generateMgT2ESocioeconomics(baseData);
+                                stateObj.t5Socio = null;
+                                hexStates.set(hexId, stateObj);
+                            }
+                        } catch (err) {
+                            console.error(`Mongoose Macro Step 3 failed for hex ${hexId}:`, err);
                         }
                     });
                     requestAnimationFrame(draw);
@@ -387,26 +404,125 @@ function setupKeyboardShortcuts() {
                     // Physical System
                     setTimeout(() => {
                         targetHexes.forEach(hexId => {
-                            let stateObj = hexStates.get(hexId);
-                            let baseData = stateObj ? (stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData) : null;
-                            if (baseData) {
-                                let chunk1System = generateMgT2ESystemChunk1(baseData);
-                                let systemWithOrbits = generateMgT2ESystemChunk2(chunk1System, baseData);
-                                let systemWithSizes = generateMgT2ESystemChunk3(systemWithOrbits, baseData);
-                                let systemWithAtmosphere = generateMgT2ESystemChunk4(systemWithSizes, baseData);
-                                let systemWithTemps = generateMgT2ESystemChunk5(systemWithAtmosphere);
-                                let systemWithRatings = generateMgT2ESystemChunk6(systemWithTemps);
-                                let systemWithUWP = generateMgT2ESystemChunk7(systemWithRatings, baseData);
+                            try {
+                                let stateObj = hexStates.get(hexId);
+                                let baseData = stateObj ? (stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData) : null;
+                                if (baseData) {
+                                    let chunk1System = generateMgT2ESystemChunk1(baseData);
+                                    let systemWithOrbits = generateMgT2ESystemChunk2(chunk1System, baseData);
+                                    let systemWithSizes = generateMgT2ESystemChunk3(systemWithOrbits, baseData);
+                                    let systemWithAtmosphere = generateMgT2ESystemChunk4(systemWithSizes, baseData);
+                                    let systemWithTemps = generateMgT2ESystemChunk5(systemWithAtmosphere);
+                                    let systemWithRatings = generateMgT2ESystemChunk6(systemWithTemps);
+                                    let systemWithUWP = generateMgT2ESystemChunk7(systemWithRatings, baseData);
 
-                                stateObj.mgtSystem = systemWithUWP;
-                                stateObj.t5Physical = null;
-                                stateObj.ctPhysical = null;
-                                hexStates.set(hexId, stateObj);
+                                    stateObj.mgtSystem = systemWithUWP;
+                                    stateObj.t5Physical = null;
+                                    stateObj.ctPhysical = null;
+                                    hexStates.set(hexId, stateObj);
+                                }
+                            } catch (err) {
+                                console.error(`Mongoose Macro Step 4 failed for hex ${hexId}:`, err);
                             }
                         });
                         requestAnimationFrame(draw);
                         showToast(`Full MgT2E Generation Complete!`, 4000);
                     }, 500);
+                }, 500);
+            }, 500);
+        } else if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+            e.preventDefault();
+            if (!validateSelection('generate')) return;
+
+            saveHistoryState('CT Macro');
+
+            console.log("Bulk Generating CT Full System...");
+            await ensureNamesLoaded();
+
+            if (!confirm("This will completely overwrite ANY existing data in the selected hexes with a Full Classic Traveller Generation sequence. Proceed?")) {
+                return;
+            }
+
+            // Capture the target hexes NOW
+            const targetHexes = Array.from(selectedHexes);
+
+            // 1. Auto Populate (Standard 3 in 6)
+            targetHexes.forEach(hexId => {
+                reseedForHex(hexId);
+                const roll = roll1D();
+                if (roll <= 3) {
+                    hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
+                } else {
+                    hexStates.set(hexId, { type: 'EMPTY' });
+                }
+            });
+            requestAnimationFrame(draw);
+            showToast(`Populated ${targetHexes.length} hex(es)...`, 1000);
+
+            // 2. Generate Mainworlds
+            setTimeout(() => {
+                if (window.isLoggingEnabled) window.batchLogData = [];
+                targetHexes.forEach(hexId => {
+                    try {
+                        let stateObj = hexStates.get(hexId);
+                        if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
+                            stateObj.ctData = generateCTMainworld(hexId);
+                            // Clear all variants to ensure fresh generation
+                            stateObj.mgt2eData = null;
+                            stateObj.t5Data = null;
+                            stateObj.mgtSystem = null;
+                            stateObj.t5System = null;
+                            stateObj.ctSystem = null;
+                            stateObj.mgtPhysical = null;
+                            stateObj.t5Physical = null;
+                            stateObj.ctPhysical = null;
+                            stateObj.mgtSocio = null;
+                            stateObj.t5Socio = null;
+                            hexStates.set(hexId, stateObj);
+                        }
+                    } catch (err) {
+                        console.error(`Macro Step 2 (Mainworld) failed for hex ${hexId}:`, err);
+                    }
+                });
+                if (window.isLoggingEnabled && window.batchLogData.length > 0) {
+                    downloadBatchLog('CT_Mainworlds_Macro', targetHexes.length);
+                }
+                requestAnimationFrame(draw);
+                showToast(`Generated CT Mainworlds...`, 1000);
+
+                // 3. Expand Book 6 Systems
+                setTimeout(() => {
+                    if (window.isLoggingEnabled) window.batchLogData = [];
+                    targetHexes.forEach(hexId => {
+                        try {
+                            let stateObj = hexStates.get(hexId);
+                            let baseData = stateObj ? stateObj.ctData : null;
+                            if (baseData) {
+                                let systemName = baseData.name || stateObj.name || hexId;
+                                if (window.isLoggingEnabled) startTrace(hexId, 'CT System Macro Expansion', systemName);
+
+                                let chunk1 = generateCTSystemChunk1(baseData, hexId);
+                                let chunk2 = generateCTSystemChunk2(chunk1, baseData);
+                                let chunk3 = generateCTSystemChunk3(chunk2, baseData);
+                                let chunk4 = generateCTSystemChunk4(chunk3, baseData);
+                                let chunk5 = generateCTSystemChunk5(chunk4, baseData);
+                                stateObj.ctSystem = chunk5;
+                                stateObj.ctPhysical = generateCTPhysical(baseData, hexId);
+
+                                // Clean up cross-engine remnants
+                                stateObj.t5Physical = null;
+                                stateObj.mgtSystem = null;
+                                hexStates.set(hexId, stateObj);
+                            }
+                        } catch (err) {
+                            console.error(`Macro Step 3 (Expansion) failed for hex ${hexId}:`, err);
+                        }
+                    });
+                    if (window.isLoggingEnabled && window.batchLogData.length > 0) {
+                        downloadBatchLog('CT_Systems_Macro', targetHexes.length);
+                    }
+                    requestAnimationFrame(draw);
+                    showToast(`Full CT Generation Complete!`, 4000);
                 }, 500);
             }, 500);
         } else if (e.key === 'Escape') {
@@ -706,6 +822,8 @@ function setupGenerationHandlers() {
         if (!validateSelection('generate')) return;
         saveHistoryState('Generate CT Mainworld');
         await ensureNamesLoaded();
+        if (window.isLoggingEnabled) window.batchLogData = [];
+        let count = 0;
         selectedHexes.forEach(hexId => {
             let stateObj = hexStates.get(hexId);
             if (typeof stateObj === 'string') stateObj = { type: stateObj };
@@ -713,11 +831,24 @@ function setupGenerationHandlers() {
             if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
                 stateObj.ctData = generateCTMainworld(hexId);
                 stateObj.mgt2eData = null;
+                stateObj.t5Data = null;
+                stateObj.mgtSystem = null;
+                stateObj.t5System = null;
+                stateObj.mgtPhysical = null;
+                stateObj.t5Physical = null;
                 hexStates.set(hexId, stateObj);
+                count++;
             }
         });
+        if (window.isLoggingEnabled && window.batchLogData.length > 0) {
+            downloadBatchLog('CT_Mainworlds', count);
+        }
         document.getElementById('context-menu').classList.remove('visible');
-        showToast(`Generated Classic Traveller Mainworlds for ${selectedHexes.size} hex(es)`);
+        if (count > 0) {
+            showToast(`Generated Classic Traveller Mainworlds for ${count} hex(es)`);
+        } else {
+            showToast("No populated hexes selected");
+        }
         requestAnimationFrame(draw);
     });
 
@@ -726,6 +857,8 @@ function setupGenerationHandlers() {
         if (!validateSelection('generate')) return;
         saveHistoryState('Generate MgT2E Mainworld');
         await ensureNamesLoaded();
+        if (window.isLoggingEnabled) window.batchLogData = [];
+        let count = 0;
         selectedHexes.forEach(hexId => {
             let stateObj = hexStates.get(hexId);
             if (typeof stateObj === 'string') stateObj = { type: stateObj };
@@ -734,11 +867,23 @@ function setupGenerationHandlers() {
                 stateObj.mgt2eData = generateMgT2EMainworld(hexId);
                 stateObj.ctData = null;
                 stateObj.t5Data = null;
+                stateObj.ctSystem = null;
+                stateObj.t5System = null;
+                stateObj.ctPhysical = null;
+                stateObj.t5Physical = null;
                 hexStates.set(hexId, stateObj);
+                count++;
             }
         });
+        if (window.isLoggingEnabled && window.batchLogData.length > 0) {
+            downloadBatchLog('MgT2E_Mainworlds', count);
+        }
         document.getElementById('context-menu').classList.remove('visible');
-        showToast(`Generated MgT2E Mainworlds for ${selectedHexes.size} hex(es)`);
+        if (count > 0) {
+            showToast(`Generated MgT2E Mainworlds for ${count} hex(es)`);
+        } else {
+            showToast("No populated hexes selected");
+        }
         requestAnimationFrame(draw);
     });
 
@@ -747,6 +892,8 @@ function setupGenerationHandlers() {
         if (!validateSelection('generate')) return;
         saveHistoryState('Generate T5 Mainworld');
         await ensureNamesLoaded();
+        if (window.isLoggingEnabled) window.batchLogData = [];
+        let count = 0;
         selectedHexes.forEach(hexId => {
             let stateObj = hexStates.get(hexId);
             if (typeof stateObj === 'string') stateObj = { type: stateObj };
@@ -755,11 +902,23 @@ function setupGenerationHandlers() {
                 stateObj.t5Data = generateT5Mainworld(hexId);
                 stateObj.ctData = null;
                 stateObj.mgt2eData = null;
+                stateObj.ctSystem = null;
+                stateObj.mgtSystem = null;
+                stateObj.ctPhysical = null;
+                stateObj.mgtPhysical = null;
                 hexStates.set(hexId, stateObj);
+                count++;
             }
         });
+        if (window.isLoggingEnabled && window.batchLogData.length > 0) {
+            downloadBatchLog('T5_Mainworlds', count);
+        }
         document.getElementById('context-menu').classList.remove('visible');
-        showToast(`Generated T5 Mainworlds for ${selectedHexes.size} hex(es)`);
+        if (count > 0) {
+            showToast(`Generated T5 Mainworlds for ${count} hex(es)`);
+        } else {
+            showToast("No populated hexes selected");
+        }
         requestAnimationFrame(draw);
     });
 
@@ -833,11 +992,17 @@ function setupGenerationHandlers() {
 
         saveHistoryState('Expand CT System');
         let missingData = false;
+
+        if (window.isLoggingEnabled) window.batchLogData = [];
+
         selectedHexes.forEach(hexId => {
             let stateObj = hexStates.get(hexId);
             let baseData = stateObj ? (stateObj.ctData || stateObj.mgt2eData || stateObj.t5Data) : null;
 
             if (baseData) {
+                let systemName = baseData.name || stateObj.name || hexId;
+                if (window.isLoggingEnabled) startTrace(hexId, 'Classic Traveller System Expansion', systemName);
+
                 let chunk1 = generateCTSystemChunk1(baseData, hexId);
                 let chunk2 = generateCTSystemChunk2(chunk1, baseData);
                 let chunk3 = generateCTSystemChunk3(chunk2, baseData);
@@ -878,6 +1043,10 @@ function setupGenerationHandlers() {
 
         if (missingData) {
             alert("Note: Some selected hexes skipped because they do not have any Mainworld data generated yet. You must run a GENERATE MAINWORLD function first.");
+        }
+
+        if (window.isLoggingEnabled && window.batchLogData && window.batchLogData.length > 0) {
+            downloadBatchLog('CT_Systems', selectedHexes.size);
         }
 
         document.getElementById('context-menu').classList.remove('visible');
@@ -995,6 +1164,14 @@ function setupSettingsPanel() {
         settingsPanel.classList.add('collapsed');
     });
 
+    const loggingToggle = document.getElementById('toggle-logging');
+    if (loggingToggle) {
+        loggingToggle.addEventListener('change', (e) => {
+            window.isLoggingEnabled = e.target.checked;
+            showToast(window.isLoggingEnabled ? "Batch Logging Enabled" : "Batch Logging Disabled", 2000);
+        });
+    }
+
     document.getElementById('toggle-borders').addEventListener('change', (e) => {
         showSubsectorBorders = e.target.checked;
         requestAnimationFrame(draw);
@@ -1047,47 +1224,36 @@ function setupHelpModal() {
 }
 
 
-// ============================================================================
-// GENERATION LOG
-// ============================================================================
 
-function setupGenerationLog() {
-    document.getElementById('btn-open-gen-log').addEventListener('click', openGenLogModal);
-    document.getElementById('btn-close-gen-log').addEventListener('click', function () {
-        document.getElementById('gen-log-modal').style.display = 'none';
-    });
-    document.getElementById('btn-copy-gen-log').addEventListener('click', function () {
-        const plain = genTraces.map(function (trace, idx) {
-            return '#' + (idx + 1) + ' — ' + trace.ruleset + ': ' + trace.hexId + '\n' +
-                trace.lines.map(function (l) { return l.text; }).join('\n');
-        }).join('\n\n');
-        navigator.clipboard.writeText(plain)
-            .then(function () { showToast('Log copied to clipboard!', 2000); })
-            .catch(function () { showToast('Copy failed - try selecting and copying manually.', 3000); });
-    });
-}
-
-function openGenLogModal() {
-    document.getElementById('gen-log-content').innerHTML = renderTracesHTML();
-    document.getElementById('gen-log-subtitle').textContent =
-        genTraces.length > 0 ? '(' + genTraces.length + '/' + MAX_GEN_TRACES + ' systems captured)' : '';
-    document.getElementById('gen-log-modal').style.display = 'block';
-}
-
-function renderTracesHTML() {
-    if (genTraces.length === 0) return '<em style="color:#555;">No systems logged yet. Generate up to 5 MgT2E systems to capture a trace.</em>';
-    return genTraces.map(function (trace, idx) {
-        const header = '<div class="gl-system-header">#' + (idx + 1) + ' — ' + trace.ruleset + ': ' + trace.hexId + '</div>';
-        const body = trace.lines.map(function (l) {
-            return '<div class="' + l.cssClass + '">' + l.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
-        }).join('');
-        return header + body;
-    }).join('');
-}
 
 // ============================================================================
 // SAVE/LOAD
 // ============================================================================
+
+function downloadBatchLog(actionName, hexCount) {
+    if (!window.batchLogData || window.batchLogData.length === 0) return;
+
+    // Generate Timestamp YYYYMMDD_HHMMSS
+    const now = new Date();
+    const pad = (n) => n.toString().padStart(2, '0');
+    const timestamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+
+    const fileName = `${timestamp}_${actionName}_${hexCount}_Hexes.txt`;
+    const content = window.batchLogData.join('\n');
+
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    // Clear memory
+    window.batchLogData = [];
+}
 
 function setupSaveLoad() {
     document.getElementById('btn-save-map').addEventListener('click', async () => {
@@ -1508,14 +1674,38 @@ function populateEditorAccordions(stateObj) {
                 // Orbits for this star (assign to star based on structure if available, else primary)
                 // Note: Logic simplification: system orbits are handled generally, but nested under the primary star.
                 if (starIdx === 0) {
+                    // Sort standard and captured orbits together
+                    let allBodies = [];
                     sys.orbits.forEach(o => {
-                        if (!o.contents) return;
+                        if (o.contents) {
+                            allBodies.push({
+                                isCaptured: false,
+                                orbit: o.orbit,
+                                zone: o.zone,
+                                contents: o.contents
+                            });
+                        }
+                    });
+                    if (sys.capturedPlanets) {
+                        sys.capturedPlanets.forEach(p => {
+                            allBodies.push({
+                                isCaptured: true,
+                                orbit: p.orbit,
+                                zone: p.zone,
+                                contents: p
+                            });
+                        });
+                    }
+                    allBodies.sort((a, b) => a.orbit - b.orbit);
 
-                        let w = o.contents;
+                    allBodies.forEach(body => {
+                        let w = body.contents;
+                        let o = body; // Simplified reference for orbit/zone
+
                         let uwp = (w.type === 'Mainworld' && mwBase) ? mwBase.uwp : (w.uwpSecondary || '-');
                         let typeLabel = w.type === 'Gas Giant'
                             ? (w.size + ' Gas Giant')
-                            : (w.type === 'Planetoid Belt' ? 'Belt' : w.type);
+                            : (w.type === 'Planetoid Belt' ? 'Belt' : (body.isCaptured ? 'Captured' : w.type));
                         let labelColor = w.type === 'Mainworld' ? '#ffa500' : '#66fcf1';
                         let summaryStyle = w.type === 'Mainworld' ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
 
@@ -1525,8 +1715,12 @@ function populateEditorAccordions(stateObj) {
                             zoneLabel = ` | <span style="color: ${zColor}">${mwBase.travelZone}</span>`;
                         }
 
+                        let orbitLabel = body.isCaptured
+                            ? `Captured [${o.orbit.toFixed(1)}]`
+                            : `Orbit ${o.orbit}`;
+
                         html += `<details open>`;
-                        html += `<summary ${summaryStyle}>Orbit ${o.orbit} [${o.zone}] <span class="sys-title-info">${typeLabel} | ${uwp}${zoneLabel}</span></summary>`;
+                        html += `<summary ${summaryStyle}>${orbitLabel} [${o.zone}] <span class="sys-title-info">${typeLabel} | ${uwp}${zoneLabel}</span></summary>`;
                         html += `<div class="system-node">`;
 
                         // UWP Line
@@ -1540,7 +1734,7 @@ function populateEditorAccordions(stateObj) {
                         html += `<div class="system-stats">`;
 
                         // Orbital Data
-                        html += `<span>Orbit: <strong>${o.orbit}</strong></span>`;
+                        html += `<span>Orbit: <strong>${body.isCaptured ? o.orbit.toFixed(1) : o.orbit}</strong></span>`;
                         if (w.distAU) html += `<span>Distance: <strong>${w.distAU.toFixed(2)} AU</strong></span>`;
                         if (w.orbitalPeriod) {
                             let pStr = w.orbitalPeriod < 1.0
@@ -1565,7 +1759,10 @@ function populateEditorAccordions(stateObj) {
 
                         // Satellites
                         if (w.satellites && w.satellites.length > 0) {
-                            w.satellites.forEach((sat, satIdx) => {
+                            // Sort satellites by distance (pd) before rendering
+                            const sortedSats = [...w.satellites].sort((a, b) => (a.pd || 0) - (b.pd || 0));
+
+                            sortedSats.forEach((sat, satIdx) => {
                                 let satType = sat.type === 'Mainworld' ? 'Mainworld' : (sat.size === 'R' ? 'Ring' : (sat.size === 'S' ? 'Small Moon' : 'Moon'));
                                 let satUwp = (sat.type === 'Mainworld' && mwBase) ? mwBase.uwp : (sat.uwpSecondary || '-');
                                 let satLabelColor = sat.type === 'Mainworld' ? '#ffa500' : '#66fcf1';
@@ -1596,23 +1793,6 @@ function populateEditorAccordions(stateObj) {
 
                         html += `</div></details>`;
                     });
-
-                    // Captured Planets
-                    if (sys.capturedPlanets && sys.capturedPlanets.length > 0) {
-                        sys.capturedPlanets.forEach((p, pIdx) => {
-                            html += `<details>`;
-                            html += `<summary>Captured Planet [Orb ${p.orbit.toFixed(1)}] <span class="sys-title-info">Terrestrial | ${p.uwpSecondary || '-'}</span></summary>`;
-                            html += `<div class="system-node">`;
-                            html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <strong style="color: #66fcf1">${p.uwpSecondary || '-'}</strong></div>`;
-                            html += `<div class="system-stats">`;
-                            html += `<span>Orbit: <strong>${p.orbit.toFixed(1)}</strong></span>`;
-                            html += `<span>Zone: <strong>${p.zone}</strong></span>`;
-                            if (p.distAU) html += `<span>Distance: <strong>${p.distAU.toFixed(2)} AU</strong></span>`;
-                            if (p.gravity !== undefined) html += `<span>Gravity: <strong>${p.gravity.toFixed(2)} G</strong></span>`;
-                            if (p.temperature) html += `<span>Temp: <strong>${p.temperature}K</strong></span>`;
-                            html += `</div></div></details>`;
-                        });
-                    }
                 }
 
                 html += `</div></details>`;
@@ -1864,14 +2044,20 @@ function saveHexEditorChanges() {
         stateObj.t5Data.name = name;
         const travelZone = document.getElementById('edit-travel-zone').value;
         stateObj.t5Data = { ...stateObj.t5Data, uwp, travelZone, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
+        stateObj.mgt2eData = null;
+        stateObj.ctData = null;
     } else if (stateObj.mgt2eData) {
         stateObj.mgt2eData.name = name;
         const travelZone = document.getElementById('edit-travel-zone').value;
         stateObj.mgt2eData = { ...stateObj.mgt2eData, uwp, travelZone, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
+        stateObj.t5Data = null;
+        stateObj.ctData = null;
     } else if (stateObj.ctData) {
         stateObj.ctData.name = name;
         const travelZone = document.getElementById('edit-travel-zone').value;
         stateObj.ctData = { ...stateObj.ctData, uwp, travelZone, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, gasGiant };
+        stateObj.t5Data = null;
+        stateObj.mgt2eData = null;
     }
 
     // Also save name at the stateObj level for consistency

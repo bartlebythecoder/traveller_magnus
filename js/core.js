@@ -198,55 +198,115 @@ function fromUWPChar(char) {
     return 0;
 }
 
-// --- Logging Suite (Fixes all MgT2E Trace Errors) ---
-function startTrace(hexId, ruleset) {
-    currentTrace = { ruleset: ruleset, hexId: hexId, lines: [] };
-    genTraceCount++;
+// =====================================================================
+// BATCH LOGGING ARCHITECTURE
+// =====================================================================
+
+// --- Batch Logging State ---
+window.isLoggingEnabled = false;
+window.batchLogData = [];
+window.logIndentLevel = 0;
+let pendingRoll = null; // Deferred roll for math display
+
+function logIndentIn() { window.logIndentLevel++; }
+function logIndentOut() { window.logIndentLevel = Math.max(0, window.logIndentLevel - 1); }
+
+function _writeRawLogLine(text) {
+    if (!window.isLoggingEnabled) return;
+    const indent = "    ".repeat(window.logIndentLevel);
+    window.batchLogData.push(indent + text);
 }
 
-function tSection(title) {
-    logTrace(`--- ${title.toUpperCase()} ---`, 'gl-system-header');
+function flushPendingRoll() {
+    if (!pendingRoll) return;
+    const p = pendingRoll;
+    pendingRoll = null; // Clear to prevent recursion
+
+    if (!window.isLoggingEnabled) return;
+
+    const totalDM = p.dms.reduce((acc, d) => acc + d.val, 0);
+    const final = p.val + totalDM;
+
+    if (totalDM !== 0) {
+        const sign = totalDM >= 0 ? '+' : '-';
+        _writeRawLogLine(`${p.label}: Rolled ${p.type} for ${p.val} ${sign} ${Math.abs(totalDM)} = ${final}`);
+    } else {
+        _writeRawLogLine(`${p.label}: Rolled ${p.type} for ${p.val}`);
+    }
+
+    p.dms.forEach(d => {
+        _writeRawLogLine(`  DM (${d.label}): ${d.val >= 0 ? '+' : ''}${d.val}`);
+    });
 }
 
-function tResult(label, value) {
-    logTrace(`${label}: ${value}`, 'gl-result');
+function writeLogLine(text) {
+    flushPendingRoll();
+    if (!window.isLoggingEnabled) return;
+    _writeRawLogLine(text);
 }
+
+function startTrace(hexId, ruleset, name = null) {
+    if (!window.isLoggingEnabled) return;
+    writeLogLine(`========================================================`);
+    writeLogLine(`SYSTEM: ${hexId}${name ? ' - ' + name : ''} (${ruleset})`);
+    writeLogLine(`Master Seed: ${masterSeed} | Hex Hash: ${hashString(masterSeed + "-" + hexId)}`);
+    writeLogLine(`========================================================`);
+}
+
+function tSection(title) { writeLogLine(`\n--- ${title.toUpperCase()} ---`); }
+function tResult(label, value) { writeLogLine(`${label}: ${value}`); }
 
 function tDM(label, value) {
-    logTrace(`DM (${label}): ${value >= 0 ? '+' : ''}${value}`, 'gl-dm');
+    if (pendingRoll) {
+        pendingRoll.dms.push({ label, val: value });
+    } else {
+        if (window.isLoggingEnabled) _writeRawLogLine(`  DM (${label}): ${value >= 0 ? '+' : ''}${value}`);
+    }
 }
 
-function tSkip(reason) {
-    logTrace(`Skipped: ${reason}`, 'gl-skip');
-}
-
-function tTrade(code, reason) {
-    logTrace(`Trade Code [${code}]: ${reason}`, 'gl-trade');
-}
+function tSkip(reason) { writeLogLine(`  Skipped: ${reason}`); }
+function tTrade(code, reason) { writeLogLine(`  Trade Code [${code}]: ${reason}`); }
 
 function tRoll1D(label) {
     const roll = roll1D();
-    logTrace(`${label}: Rolled 1D for ${roll}`, 'gl-roll');
+    flushPendingRoll();
+    pendingRoll = { label, val: roll, dms: [], type: '1D' };
     return roll;
 }
 
 function tRoll2D(label) {
     const roll = roll2D();
-    logTrace(`${label}: Rolled 2D6 for ${roll}`, 'gl-roll');
+    flushPendingRoll();
+    pendingRoll = { label, val: roll, dms: [], type: '2D6' };
     return roll;
 }
 
-function logTrace(text, cssClass = 'gl-line') {
-    if (currentTrace) {
-        currentTrace.lines.push({ text: text, cssClass: cssClass });
-    }
+function tRollFlux(label) {
+    const roll = rollFlux();
+    flushPendingRoll();
+    pendingRoll = { label, val: roll, dms: [], type: 'Flux' };
+    return roll;
+}
+
+function tRollND(n, label) {
+    const roll = rollND(n);
+    flushPendingRoll();
+    pendingRoll = { label, val: roll, dms: [], type: `${n}D` };
+    return roll;
+}
+
+function tClamp(label, rolled, clamped) {
+    if (window.isLoggingEnabled) writeLogLine(`  ${label} Rolled: ${rolled} -> Clamped to ${clamped}`);
+}
+
+function tOverride(label, original, newValue, reason) {
+    if (window.isLoggingEnabled) writeLogLine(`  ${label} Override: ${original} -> ${newValue} (${reason})`);
 }
 
 function endTrace() {
-    if (currentTrace) {
-        genTraces.unshift(currentTrace);
-        if (genTraces.length > MAX_GEN_TRACES) genTraces.pop();
-        currentTrace = null;
+    if (window.isLoggingEnabled) {
+        flushPendingRoll();
+        writeLogLine(`\n`);
     }
 }
 
@@ -269,6 +329,9 @@ function getNextSystemName(hexId) {
         index = nameSeed % namePool.length;
         const name = namePool[index];
         usedNames.add(name);
+        if (window.isLoggingEnabled) {
+            writeLogLine(`System Name Selected: ${name}`);
+        }
         return name;
     } else {
         // Fallback to current RNG stream
@@ -276,6 +339,9 @@ function getNextSystemName(hexId) {
         const name = namePool[index];
         // DO NOT splice here; it breaks determinism based on generation order across the session
         usedNames.add(name);
+        if (window.isLoggingEnabled) {
+            writeLogLine(`System Name Selected: ${name}`);
+        }
         return name;
     }
 }

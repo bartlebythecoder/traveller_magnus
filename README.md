@@ -1,9 +1,8 @@
-# As Above, So Below (v0.1.4.1.2)
+# As Above, So Below (v0.1.5)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
 This tool is an unofficial fan project and is not affiliated with Mongoose Publishing or Far Future Enterprises. 
-
 ---
 
 ## 🚀 [Launch the Generator (Live Web App)](https://bartlebythecoder.github.io/traveller_magnus/hex_map.html)
@@ -29,9 +28,20 @@ This workbench allows Game Masters and world-builders to generate, import, and e
     - **Hold Y + Drag:** Draw/Delete Yellow Routes.
     - **Ctrl + Z / Ctrl + Shift + Z:** Undo and Redo cartography or expansion actions.
 4. **View Details:** Use **Ctrl + Click** on any populated hex to open the **World Details** panel, which provides deep physical and socioeconomic breakdowns for the entire star system.
-5. **Expand:** Select a group of hexes (Shift+Drag) and use the right-click context menu or **Ctrl + Shift + M** to generate full systems.
+5. **Bulk Macros:** Select a group of hexes (Shift+Drag) and use the right-click context menu or:
+    - **Ctrl + Shift + M:** Full Mongoose 2E Generation sequence.
+    - **Ctrl + Shift + C:** Full Classic Traveller (Book 6) Generation sequence.
 ---
 ## 📜 Changelog
+
+### [v0.1.5] - 2026-03-05
+**Updated: CT Mainworld and Book 6 Generation**
+- **Bulk CT Macro:** Added **Ctrl + Shift + C** to automate the full Classic Traveller population, mainworld, and Book 6 system expansion sequence for selected hexes.
+- **Improved Book 6 Anomaly Logic:** Refactored system anomalies to use separate independent rolls for "Empty Orbits" and "Captured Planets" with specific DMs for B/A type stars.
+- **Enhanced System Generation Logging:** Instrumented the entire CT generation pipeline with the new Batch Logging Architecture, providing detailed traces of orbital placement, Gas Giant/Planetoid assignments, and subordinate world stats.
+- **CT Tech Level Generation Fix:** Aligned Classic Traveller TL logic with Book 6 rules by including Atmosphere 15 (F) in modifiers and standardizing the 1D roll helper.
+- **Starport X Red Zone Logic:** Updated all three generation engines (CT, MgT2E, T5) to automatically assign a **Red Travel Zone** if the generated mainworld has a Starport of 'X'.
+- **Optional Development System Level Logging:** Incorporated a new Batch Logging Architecture that allows for capturing deterministic plaintext generation traces (including system names and coordinates) via a settings toggle.
 
 ### [v0.1.4.1.2] - 2026-03-04
 **Added: Machine-Agnostic Naming Determinism**

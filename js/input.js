@@ -333,6 +333,7 @@ function setupKeyboardShortcuts() {
             if (!validateSelection('generate')) return;
 
             saveHistoryState('Mongoose Macro');
+            if (window.isLoggingEnabled) window.batchLogData = [];
 
             console.log("Bulk Generating MgT2E Full System...");
             await ensureNamesLoaded();
@@ -425,6 +426,9 @@ function setupKeyboardShortcuts() {
                                 console.error(`Mongoose Macro Step 4 failed for hex ${hexId}:`, err);
                             }
                         });
+                        if (window.isLoggingEnabled && window.batchLogData.length > 0) {
+                            downloadBatchLog('MgT2E_Full_Macro', targetHexes.length);
+                        }
                         requestAnimationFrame(draw);
                         showToast(`Full MgT2E Generation Complete!`, 4000);
                     }, 500);
@@ -484,15 +488,11 @@ function setupKeyboardShortcuts() {
                         console.error(`Macro Step 2 (Mainworld) failed for hex ${hexId}:`, err);
                     }
                 });
-                if (window.isLoggingEnabled && window.batchLogData.length > 0) {
-                    downloadBatchLog('CT_Mainworlds_Macro', targetHexes.length);
-                }
                 requestAnimationFrame(draw);
                 showToast(`Generated CT Mainworlds...`, 1000);
 
                 // 3. Expand Book 6 Systems
                 setTimeout(() => {
-                    if (window.isLoggingEnabled) window.batchLogData = [];
                     targetHexes.forEach(hexId => {
                         try {
                             let stateObj = hexStates.get(hexId);
@@ -519,7 +519,7 @@ function setupKeyboardShortcuts() {
                         }
                     });
                     if (window.isLoggingEnabled && window.batchLogData.length > 0) {
-                        downloadBatchLog('CT_Systems_Macro', targetHexes.length);
+                        downloadBatchLog('CT_Full_Macro', targetHexes.length);
                     }
                     requestAnimationFrame(draw);
                     showToast(`Full CT Generation Complete!`, 4000);
@@ -931,6 +931,7 @@ function setupGenerationHandlers() {
         }
 
         saveHistoryState('Expand T5 Socioeconomics');
+        if (window.isLoggingEnabled) window.batchLogData = [];
         let missingData = false;
         selectedHexes.forEach(hexId => {
             let stateObj = hexStates.get(hexId);
@@ -951,6 +952,10 @@ function setupGenerationHandlers() {
             alert("Note: Some selected hexes skipped because they do not have any Mainworld data generated yet. You must run a GENERATE MAINWORLD function first.");
         }
 
+        if (window.isLoggingEnabled && window.batchLogData.length > 0) {
+            downloadBatchLog('T5_Socio', selectedHexes.size);
+        }
+
         document.getElementById('context-menu').classList.remove('visible');
         showToast(`Expanded T5 Socioeconomics for ${selectedHexes.size} hex(es)`);
         requestAnimationFrame(draw);
@@ -960,6 +965,7 @@ function setupGenerationHandlers() {
         if (!validateSelection('socio')) return;
 
         saveHistoryState('Expand MgT2E Socioeconomics');
+        if (window.isLoggingEnabled) window.batchLogData = [];
         let missingData = false;
         selectedHexes.forEach(hexId => {
             let stateObj = hexStates.get(hexId);
@@ -979,6 +985,10 @@ function setupGenerationHandlers() {
 
         if (missingData) {
             alert("Note: Some selected hexes skipped because they do not have any Mainworld data generated yet. You must run a GENERATE MAINWORLD function first.");
+        }
+
+        if (window.isLoggingEnabled && window.batchLogData.length > 0) {
+            downloadBatchLog('MgT2E_Socio', selectedHexes.size);
         }
 
         document.getElementById('context-menu').classList.remove('visible');
@@ -1058,6 +1068,7 @@ function setupGenerationHandlers() {
         if (!validateSelection('physical')) return;
 
         saveHistoryState('Expand MgT2E System');
+        if (window.isLoggingEnabled) window.batchLogData = [];
         let missingData = false;
         selectedHexes.forEach(hexId => {
             let stateObj = hexStates.get(hexId);
@@ -1096,6 +1107,10 @@ function setupGenerationHandlers() {
             alert("Note: Some selected hexes skipped because they do not have MgT2E Mainworld data generated yet.");
         }
 
+        if (window.isLoggingEnabled && window.batchLogData.length > 0) {
+            downloadBatchLog('MgT2E_Systems', selectedHexes.size);
+        }
+
         document.getElementById('context-menu').classList.remove('visible');
         showToast(`Expanded MgT2E Physical system for ${selectedHexes.size} hex(es)`);
         requestAnimationFrame(draw);
@@ -1105,6 +1120,7 @@ function setupGenerationHandlers() {
         if (!validateSelection('physical')) return;
 
         saveHistoryState('Expand T5 System');
+        if (window.isLoggingEnabled) window.batchLogData = [];
         let missingData = false;
         selectedHexes.forEach(hexId => {
             let stateObj = hexStates.get(hexId);
@@ -1129,6 +1145,10 @@ function setupGenerationHandlers() {
 
         if (missingData) {
             alert("Note: Some selected hexes skipped because they do not have any Mainworld data generated yet. You must run a GENERATE MAINWORLD function first.");
+        }
+
+        if (window.isLoggingEnabled && window.batchLogData.length > 0) {
+            downloadBatchLog('T5_Systems', selectedHexes.size);
         }
 
         document.getElementById('context-menu').classList.remove('visible');
@@ -1413,6 +1433,7 @@ function populateEditorAccordions(stateObj) {
             'edit-mgt-totalmcpop': ms.totalMajorCityPop ? ms.totalMajorCityPop.toLocaleString() : '0',
             'edit-mgt-gov-profile': ms.govProfile,
             'edit-mgt-fac': ms.factions,
+            'edit-mgt-judicial-profile': ms.judicialSystemProfile,
             'edit-mgt-law-profile': ms.lawProfile,
             'edit-mgt-tech-profile': ms.techProfile,
             'edit-mgt-cul-profile': ms.culturalProfile,

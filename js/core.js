@@ -281,6 +281,34 @@ function tRoll2D(label) {
     return roll;
 }
 
+function tRoll1D3(label) {
+    const roll = rollD3();
+    flushPendingRoll();
+    pendingRoll = { label, val: roll, dms: [], type: '1D3' };
+    return roll;
+}
+
+function tRoll2D3(label) {
+    const roll = rollD3() + rollD3();
+    flushPendingRoll();
+    pendingRoll = { label, val: roll, dms: [], type: '2D3' };
+    return roll;
+}
+
+function tRoll3D(label) {
+    const roll = rollND(3);
+    flushPendingRoll();
+    pendingRoll = { label, val: roll, dms: [], type: '3D6' };
+    return roll;
+}
+
+function tRoll4D(label) {
+    const roll = rollND(4);
+    flushPendingRoll();
+    pendingRoll = { label, val: roll, dms: [], type: '4D6' };
+    return roll;
+}
+
 function tRollFlux(label) {
     const roll = rollFlux();
     flushPendingRoll();

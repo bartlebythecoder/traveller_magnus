@@ -1,4 +1,4 @@
-# As Above, So Below (v0.1.5)
+# As Above, So Below (v0.1.6)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -33,6 +33,13 @@ This workbench allows Game Masters and world-builders to generate, import, and e
     - **Ctrl + Shift + C:** Full Classic Traveller (Book 6) Generation sequence.
 ---
 ## 📜 Changelog
+
+### [v0.1.6] - 2026-03-06
+1. **Mongoose Trade Classification Corrections:** Mainworld Generation Trade Codes Ga, In, Ni, Ri, Wa codes had inconsistencies with Core Rulebook.
+2. **Mongoose System Generation:** P-value changed to random 1-9, with high population (10+) using the Mongoose "Population A" variant (starting at 1 and incrementing on 1D6 5+).
+3. **Mongoose System Generation:** Fixed bug in PCR calculation where Pop 9+ penalty was accidentally added instead of subtracted.
+4. **Mongoose Socioeconomics:** Updated Major Cities formula for worlds with Pop 6+ and PCR 1-8 to use the new urbanization-weighted calculation.
+5. **Mongoose Socioeconomics:** Added "Judicial System Profile" field to Mongoose expansion logic and UI, including automated generation and logging of judicial codes.
 
 ### [v0.1.5] - 2026-03-05
 **Updated: CT Mainworld and Book 6 Generation**

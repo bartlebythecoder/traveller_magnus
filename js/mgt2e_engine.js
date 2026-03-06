@@ -13,7 +13,15 @@ function roll3D() {
 }
 
 function roll4D() {
-    return roll1D() + roll1D() + roll1D() + roll1D();
+    return rollND(4);
+}
+
+// Convert to Traveller eHex (skipping I and O)
+function toEHex(val) {
+    if (val === undefined || val === null) return '0';
+    if (val <= 9) return val.toString();
+    const hexChars = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // Skip I and O
+    return hexChars[val - 10] || '0';
 }
 
 // =====================================================================
@@ -21,152 +29,229 @@ function roll4D() {
 // =====================================================================
 
 function generateMgT2EMainworld(hexId) {
+    let name = getNextSystemName(hexId);
+    if (window.isLoggingEnabled) startTrace(hexId, 'MgT2E Mainworld', name);
     reseedForHex(hexId);
-    startTrace(hexId || '??', 'MgT2E');
-    const tracing = genTraceCount < MAX_GEN_TRACES || activeTrace !== null;
 
     // ── Size ──────────────────────────────────────────────────────
-    tSection('SIZE');
-    let sRaw = tracing ? tRoll2D('Raw') : roll2D();
-    let size = Math.max(0, sRaw - 2);
-    tResult('Size', `${sRaw} − 2 = ${size}`);
+    tSection('Planetary Size');
+    let sRoll = tRoll2D('Size');
+    tDM('Standard Size', -2);
+    let rawSize = sRoll - 2;
+    let size = Math.max(0, rawSize);
+    if (rawSize !== size) tClamp('Size', rawSize, size);
+    tResult('Size Code', size);
 
     // ── Atmosphere ────────────────────────────────────────────────
-    tSection('ATMOSPHERE');
-    let atmRaw = tracing ? tRoll2D('Raw') : roll2D();
-    let atm = size > 0 ? Math.max(0, atmRaw - 7 + size) : 0;
+    tSection('Planetary Atmosphere');
+    let atm = 0;
     if (size > 0) {
-        tDM('Size', size);
-        tResult('Atm', `${atmRaw} − 7 + ${size} = ${atmRaw - 7 + size} → clamped = ${atm}`);
+        let atmRoll = tRoll2D('Atmosphere');
+        tDM('Standard Atmo', -7);
+        tDM('Size Code', size);
+        let rawAtm = atmRoll - 7 + size;
+        atm = Math.max(0, rawAtm);
+        if (rawAtm !== atm) tClamp('Atmosphere', rawAtm, atm);
     } else {
-        tSkip('size = 0, atmosphere = 0');
+        tSkip('Size 0 forces Atm 0');
     }
+    tResult('Atmosphere Code', atm);
 
     // ── Hydrographics ─────────────────────────────────────────────
-    tSection('HYDROGRAPHICS');
+    tSection('Hydrographic Percentage');
     let hydro = 0;
     if (size > 1) {
-        let hydroDM = 0;
-        if (atm <= 1 || atm >= 10) { hydroDM = -4; tDM('Atm ≤1 or ≥10', -4); }
-        let hydroRaw = tracing ? tRoll2D('Raw') : roll2D();
-        hydro = Math.max(0, hydroRaw - 7 + atm + hydroDM);
-        tResult('Hydro', `${hydroRaw} − 7 + Atm(${atm}) + DM(${hydroDM}) = ${hydroRaw - 7 + atm + hydroDM} → clamped = ${hydro}`);
+        let hydroRoll = tRoll2D('Hydrographics');
+        tDM('Standard Hydro', -7);
+        tDM('Atmosphere Code', atm);
+        if (atm <= 1 || atm >= 10) {
+            tDM('Atmosphere Extreme', -4);
+        }
+        let hydroDM = (atm <= 1 || atm >= 10) ? -4 : 0;
+        let rawHydro = hydroRoll - 7 + atm + hydroDM;
+        hydro = Math.max(0, rawHydro);
+        if (rawHydro !== hydro) tClamp('Hydrographics', rawHydro, hydro);
     } else {
-        tSkip('size ≤ 1, hydrographics = 0');
+        tSkip('Size ≤ 1 forces Hydro 0');
     }
+    tResult('Hydrographic Code', hydro);
 
     // ── Population ────────────────────────────────────────────────
-    tSection('POPULATION');
-    let popRaw = tracing ? tRoll2D('Raw') : roll2D();
-    let pop = Math.max(0, popRaw - 2);
-    tResult('Pop', `${popRaw} − 2 = ${pop}`);
+    tSection('Population');
+    let popRoll = tRoll2D('Population');
+    tDM('Standard Pop', -2);
+    let rawPop = popRoll - 2;
+    let pop = Math.max(0, rawPop);
+    if (rawPop !== pop) tClamp('Population', rawPop, pop);
+    tResult('Population Code', pop);
 
     // ── Starport ──────────────────────────────────────────────────
-    tSection('STARPORT');
+    tSection('Starport Class');
+    if (pop >= 10) tDM('Population 10+', 2);
+    else if (pop >= 8) tDM('Population 8-9', 1);
+    else if (pop <= 2) tDM('Population 2-', -2);
+    else if (pop <= 4) tDM('Population 3-4', -1);
+
+    let starportRoll = tRoll2D('Starport');
     let starportDM = 0;
-    if (pop >= 10) { starportDM = 2; tDM('Pop ≥10', 2); }
-    else if (pop === 8 || pop === 9) { starportDM = 1; tDM('Pop 8–9', 1); }
-    else if (pop === 3 || pop === 4) { starportDM = -1; tDM('Pop 3–4', -1); }
-    else if (pop <= 2) { starportDM = -2; tDM('Pop ≤2', -2); }
-    let spRaw = tracing ? tRoll2D('Raw') : roll2D();
-    let spTotal = spRaw + starportDM;
+    if (pop >= 10) starportDM = 2;
+    else if (pop >= 8) starportDM = 1;
+    else if (pop <= 2) starportDM = -2;
+    else if (pop <= 4) starportDM = -1;
+
+    let spTotal = starportRoll + starportDM;
     let starport = spTotal <= 2 ? 'X' : spTotal <= 4 ? 'E' : spTotal <= 6 ? 'D'
         : spTotal <= 8 ? 'C' : spTotal <= 10 ? 'B' : 'A';
-    tResult('Starport', `${spRaw} + DM(${starportDM}) = ${spTotal}  →  ${starport}`);
+    tResult('Starport Class', `${starport} (${spTotal})`);
 
     // ── Government & Law ──────────────────────────────────────────
     let gov = 0, law = 0, tl = 0;
     if (pop > 0) {
-        tSection('GOVERNMENT');
-        let govRaw = tracing ? tRoll2D('Raw') : roll2D();
-        gov = Math.max(0, govRaw - 7 + pop);
-        tDM('Pop', pop);
-        tResult('Gov', `${govRaw} − 7 + ${pop} = ${govRaw - 7 + pop} → clamped = ${gov}`);
+        tSection('Government');
+        let govRoll = tRoll2D('Government');
+        tDM('Standard Gov', -7);
+        tDM('Population Code', pop);
+        let rawGov = govRoll - 7 + pop;
+        gov = Math.max(0, rawGov);
+        if (rawGov !== gov) tClamp('Government', rawGov, gov);
+        tResult('Government Code', gov);
 
-        tSection('LAW LEVEL');
-        let lawRaw = tracing ? tRoll2D('Raw') : roll2D();
-        law = Math.max(0, lawRaw - 7 + gov);
-        tDM('Gov', gov);
-        tResult('Law', `${lawRaw} − 7 + ${gov} = ${lawRaw - 7 + gov} → clamped = ${law}`);
+        tSection('Law Level');
+        let lawRoll = tRoll2D('Law Level');
+        tDM('Standard Law', -7);
+        tDM('Government Code', gov);
+        let rawLaw = lawRoll - 7 + gov;
+        law = Math.max(0, rawLaw);
+        if (rawLaw !== law) tClamp('Law Level', rawLaw, law);
+        tResult('Law Level Code', law);
 
         // ── Tech Level ────────────────────────────────────────────
-        tSection('TECH LEVEL');
-        let tlDM = 0;
-        if (starport === 'A') { tlDM += 6; tDM('Starport A', 6); }
-        else if (starport === 'B') { tlDM += 4; tDM('Starport B', 4); }
-        else if (starport === 'C') { tlDM += 2; tDM('Starport C', 2); }
-        else if (starport === 'X') { tlDM -= 4; tDM('Starport X', -4); }
+        tSection('Technological Level');
+        tRoll1D('Tech Level');
 
-        if (size <= 1) { tlDM += 2; tDM('Size ≤1', 2); }
-        else if (size <= 4) { tlDM += 1; tDM('Size 2–4', 1); }
+        if (starport === 'A') tDM('Starport A', 6);
+        else if (starport === 'B') tDM('Starport B', 4);
+        else if (starport === 'C') tDM('Starport C', 2);
+        else if (starport === 'X') tDM('Starport X', -4);
 
-        if (atm >= 0 && atm <= 3) { tlDM += 1; tDM('Atm 0–3', 1); }
-        else if (atm >= 10) { tlDM += 1; tDM('Atm ≥10', 1); }
+        if (size <= 1) tDM('Size 1-', 2);
+        else if (size <= 4) tDM('Size 2-4', 1);
 
-        if (hydro === 9) { tlDM += 1; tDM('Hydro 9', 1); }
-        else if (hydro === 10) { tlDM += 2; tDM('Hydro A', 2); }
+        if (atm <= 3 || atm >= 10) tDM('Atmosphere Extreme', 1);
 
-        if (pop >= 1 && pop <= 5) { tlDM += 1; tDM('Pop 1–5', 1); }
-        else if (pop === 9) { tlDM += 2; tDM('Pop 9', 2); }
-        else if (pop >= 10) { tlDM += 4; tDM('Pop ≥10', 4); }
+        if (hydro === 9) tDM('Hydrographics 9', 1);
+        else if (hydro === 10) tDM('Hydrographics A', 2);
 
-        if (gov === 0 || gov === 5) { tlDM += 1; tDM('Gov 0 or 5', 1); }
-        else if (gov === 7) { tlDM += 2; tDM('Gov 7', 2); }
-        else if (gov >= 13) { tlDM -= 2; tDM('Gov ≥13', -2); }
+        if (pop >= 1 && pop <= 5) tDM('Population 1-5', 1);
+        else if (pop === 9) tDM('Population 9', 2);
+        else if (pop >= 10) tDM('Population 10+', 4);
 
-        let tlD = tracing ? tRoll1D('Roll 1D') : roll1D();
-        tl = Math.max(0, tlD + tlDM);
-        tResult('TL', `${tlD} + total DM(${tlDM}) = ${tlD + tlDM} → clamped = ${tl}`);
+        if (gov === 0 || gov === 5) tDM('Government 0 or 5', 1);
+        else if (gov === 7) tDM('Government 7', 2);
+        else if (gov >= 13) tDM('Government D+', -2);
+
+        const currentDMs = pendingRoll.dms.reduce((a, b) => a + b.val, 0);
+        let rawTl = pendingRoll.val + currentDMs;
+        tl = Math.max(0, rawTl);
+        if (rawTl !== tl) tClamp('Tech Level', rawTl, tl);
+        tResult('Tech Level Code', tl);
     } else {
-        tSection('GOVERNMENT / LAW / TL');
-        tSkip('Pop = 0 — Gov, Law, TL all set to 0');
+        tSection('Government / Law / TL');
+        tSkip('Population 0 forces Gov/Law/TL 0');
     }
 
     // ── Bases ─────────────────────────────────────────────────────
-    tSection('BASES');
+    tSection('Bases');
     let navalBase = false, scoutBase = false, militaryBase = false, corsairBase = false;
 
     if (starport === 'A' || starport === 'B') {
-        let mr = tracing ? tRoll2D('Military Base 2D') : roll2D();
-        militaryBase = mr >= 8; tResult('Military Base', `${mr} ≥ 8?  ${militaryBase}`);
-        let nr = tracing ? tRoll2D('Naval Base 2D') : roll2D();
-        navalBase = nr >= 8; tResult('Naval Base', `${nr} ≥ 8?  ${navalBase}`);
+        let mr = tRoll2D('Military Base (8+)');
+        militaryBase = mr >= 8;
+        tResult('Military Base Present', militaryBase);
+        let nr = tRoll2D('Naval Base (8+)');
+        navalBase = nr >= 8;
+        tResult('Naval Base Present', navalBase);
     } else if (starport === 'C') {
-        let mr = tracing ? tRoll2D('Military Base 2D') : roll2D();
-        militaryBase = mr >= 10; tResult('Military Base', `${mr} ≥ 10?  ${militaryBase}`);
-    } else { tSkip('Starport D/E/X — no military or naval base possible'); }
+        let mr = tRoll2D('Military Base (10+)');
+        militaryBase = mr >= 10;
+        tResult('Military Base Present', militaryBase);
+    } else {
+        tSkip('Military/Naval Bases (Required Starport A-C)');
+    }
 
-    if (starport === 'A') {
-        let sr = tracing ? tRoll2D('Scout Base 2D') : roll2D();
-        scoutBase = sr >= 10; tResult('Scout Base', `${sr} ≥ 10?  ${scoutBase}`);
-    } else if (starport === 'B' || starport === 'C') {
-        let sr = tracing ? tRoll2D('Scout Base 2D') : roll2D();
-        scoutBase = sr >= 9; tResult('Scout Base', `${sr} ≥ 9?  ${scoutBase}`);
-    } else if (starport === 'D') {
-        let sr = tracing ? tRoll2D('Scout Base 2D') : roll2D();
-        scoutBase = sr >= 8; tResult('Scout Base', `${sr} ≥ 8?  ${scoutBase}`);
-    } else { tSkip('Starport E/X — no scout base possible'); }
+    if (['A', 'B', 'C', 'D'].includes(starport)) {
+        let threshold = starport === 'A' ? 10 : starport === 'B' || starport === 'C' ? 9 : 8;
+        let sr = tRoll2D(`Scout Base (${threshold}+)`);
+        scoutBase = sr >= threshold;
+        tResult('Scout Base Present', scoutBase);
+    } else {
+        tSkip('Scout Base (Required Starport A-D)');
+    }
 
-    if (starport === 'D' || starport === 'E' || starport === 'X') {
-        let corsairDM = 0;
-        if (law === 0) { corsairDM = 2; tDM('Law 0', 2); }
-        else if (law >= 2) { corsairDM = -2; tDM('Law ≥2', -2); }
-        let cr = tracing ? tRoll2D('Corsair Base 2D') : roll2D();
+    if (['D', 'E', 'X'].includes(starport)) {
+        if (law === 0) tDM('Law 0', 2);
+        else if (law >= 2) tDM('Law 2+', -2);
+        let cr = tRoll2D('Corsair Base');
         let threshold = starport === 'D' ? 12 : 10;
-        corsairBase = (cr + corsairDM) >= threshold;
-        tResult('Corsair Base', `${cr} + DM(${corsairDM}) = ${cr + corsairDM} ≥ ${threshold}?  ${corsairBase}`);
-    } else { tSkip(`Starport ${starport} — corsair base not possible`); }
+        let finalCR = cr + (law === 0 ? 2 : law >= 2 ? -2 : 0);
+        corsairBase = finalCR >= threshold;
+        tResult('Corsair Base Present', corsairBase);
+    } else {
+        tSkip('Corsair Base (Required Starport D-X)');
+    }
 
     // ── Gas Giant ─────────────────────────────────────────────────
-    tSection('GAS GIANT');
-    let ggRoll = tracing ? tRoll2D('2D') : roll2D();
+    tSection('Gas Giant Presence');
+    let ggRoll = tRoll2D('Gas Giant (9-)');
     let gasGiant = ggRoll <= 9;
-    tResult('Gas Giant Present', `${ggRoll} ≤ 9?  ${gasGiant}`);
+    tResult('Gas Giant Present', gasGiant);
 
-    // ── UWP ───────────────────────────────────────────────────────
-    tSection('UWP');
+    // ── Trade Codes (Corrected for MGT2E Compliance) ───────────────
+    tSection('Trade Classifications');
+    let tradeCodes = [];
+    const tc = (code, cond, reason) => { if (cond) { tradeCodes.push(code); tTrade(code, reason); } };
 
-    // Apply Clamping
+    // Compliant Logic
+    tc('Ag', atm >= 4 && atm <= 9 && hydro >= 4 && hydro <= 8 && pop >= 5 && pop <= 7, `Atm 4-9, Hyd 4-8, Pop 5-7`);
+    tc('As', size === 0 && atm === 0 && hydro === 0, `Size 0, Atm 0, Hyd 0`);
+    tc('Ba', pop === 0 && gov === 0 && law === 0, `Pop 0, Gov 0, Law 0`);
+    tc('De', atm >= 2 && atm <= 9 && hydro === 0, `Atm 2-9, Hyd 0`);
+    tc('Fl', atm >= 10 && hydro >= 1, `Atm 10+, Hyd 1+`);
+    tc('Ga', (size >= 6 && size <= 8) && [5, 6, 8].includes(atm) && (hydro >= 5 && hydro <= 7), `Siz 6-8, Atm 5,6,8, Hyd 5-7`);
+    tc('Hi', pop >= 9, `Pop 9+`);
+    tc('Ht', tl >= 12, `TL 12+`);
+    tc('Ic', atm <= 1 && hydro >= 1, `Atm 0-1, Hyd 1+`);
+    tc('In', [0, 1, 2, 4, 7, 9, 10, 11, 12].includes(atm) && pop >= 9, `Atm 0-2,4,7,9-12, Pop 9+`);
+    tc('Lo', pop >= 1 && pop <= 3, `Pop 1-3`);
+    tc('Lt', tl <= 5, `TL 5-`);
+    tc('Na', atm <= 3 && hydro <= 3 && pop >= 6, `Atm 0-3, Hyd 0-3, Pop 6+`);
+    tc('Ni', pop >= 4 && pop <= 6, `Pop 4-6`);
+    tc('Po', atm >= 2 && atm <= 5 && hydro <= 3, `Atm 2-5, Hyd 0-3`);
+    tc('Ri', [6, 8].includes(atm) && (pop >= 6 && pop <= 8) && (gov >= 4 && gov <= 9), `Atm 6,8, Pop 6-8, Gov 4-9`);
+    tc('Va', atm === 0, `Atm 0`);
+    tc('Wa', (atm >= 3 && atm <= 9 || atm >= 13) && hydro >= 10, `Atm 3-9/13+, Hyd A+`);
+
+    if (tradeCodes.length === 0) tResult('Trade Codes', 'None');
+    else tResult('Final Trade Codes', tradeCodes.join(' '));
+
+    // ── Travel Zone ───────────────────────────────────────────────
+    tSection('Travel Zone');
+    let travelZone = "Green";
+    const isAmber = (atm >= 10) && ([0, 7, 10].includes(gov)) && (law === 0 || law >= 9);
+    if (isAmber) {
+        travelZone = "Amber";
+        tResult('Travel Zone', 'Amber (Environmental/Social hazard)');
+    } else if (starport === 'X') {
+        travelZone = "Red";
+        tResult('Travel Zone', 'Red (Starport X)');
+    } else {
+        tResult('Travel Zone', 'Green');
+    }
+
+    tSection('System Name');
+    tResult('Assigned Name', name);
+
+    // Apply Clamping for final UWP string
     size = clampUWP(size, 0, 15);
     atm = clampUWP(atm, 0, 15);
     hydro = clampUWP(hydro, 0, 10);
@@ -176,58 +261,8 @@ function generateMgT2EMainworld(hexId) {
     tl = clampUWP(tl, 0, 33);
 
     const uwp = `${starport}${toUWPChar(size)}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
-    tResult('UWP', uwp);
 
-    // ── Trade Codes ───────────────────────────────────────────────
-    tSection('TRADE CODES');
-    let tradeCodes = [];
-    const tc = (code, cond, reason) => { if (cond) { tradeCodes.push(code); tTrade(code, reason); } };
-    tc('Ag', atm >= 4 && atm <= 9 && hydro >= 4 && hydro <= 8 && pop >= 5 && pop <= 7, `Atm4-9(${atm}) Hyd4-8(${hydro}) Pop5-7(${pop})`);
-    tc('As', size === 0 && atm === 0 && hydro === 0, `Size0 Atm0 Hyd0`);
-    tc('Ba', pop === 0 && gov === 0 && law === 0, `Pop0 Gov0 Law0`);
-    tc('De', atm >= 2 && atm <= 9 && hydro === 0, `Atm2-9(${atm}) Hyd0`);
-    tc('Fl', atm >= 10 && hydro >= 1, `Atm≥10(${atm}) Hyd≥1(${hydro})`);
-    tc('Ga', size >= 5 && atm >= 4 && atm <= 9 && hydro >= 4 && hydro <= 8, `Siz5+(${size}) Atm4-9(${atm}) Hyd4-8(${hydro})`);
-    tc('Hi', pop >= 9, `Pop≥9(${pop})`);
-    tc('Ht', tl >= 12, `TL≥12(${tl})`);
-    tc('Ic', atm <= 1 && hydro >= 1, `Atm≤1(${atm}) Hyd≥1(${hydro})`);
-    tc('In', [0, 1, 2, 4, 7, 9].includes(atm) && pop >= 9, `Atm∈{0,1,2,4,7,9}(${atm}) Pop≥9(${pop})`);
-    tc('Lo', pop >= 1 && pop <= 3, `Pop1-3(${pop})`);
-    tc('Lt', tl <= 5, `TL≤5(${tl})`);
-    tc('Na', atm <= 3 && hydro <= 3 && pop >= 6, `Atm≤3(${atm}) Hyd≤3(${hydro}) Pop≥6(${pop})`);
-    tc('Ni', pop <= 6, `Pop≤6(${pop})`);
-    tc('Po', atm >= 2 && atm <= 5 && hydro <= 3, `Atm2-5(${atm}) Hyd≤3(${hydro})`);
-    tc('Ri', [6, 8].includes(atm) && pop >= 6 && pop <= 8, `Atm6or8(${atm}) Pop6-8(${pop})`);
-    tc('Va', atm === 0, `Atm=0`);
-    tc('Wa', atm >= 3 && atm <= 9 && hydro >= 10, `Atm3-9(${atm}) Hyd10(${hydro})`);
-    if (tradeCodes.length === 0) tSkip('No trade codes qualify');
-
-    // ── Travel Zone ───────────────────────────────────────────────
-    tSection('TRAVEL ZONE');
-    let travelZone = "Green";
-
-    // Amber Zone Criteria (WBH/Core):
-    // 1. Atmosphere 10 (A) or higher
-    // 2. Government 0, 7, or 10
-    // 3. Law Level 0 or 9+
-    const isAmber = (atm >= 10) && ([0, 7, 10].includes(gov)) && (law === 0 || law >= 9);
-
-    if (isAmber) {
-        travelZone = "Amber";
-        tResult('Zone', 'Amber (Dangerous environment/social/legal combo)');
-    } else if (starport === 'X') {
-        travelZone = "Red";
-        tResult('Zone', 'Red (Starport X default)');
-    } else {
-        tResult('Zone', 'Green');
-    }
-    // Note: Red Zones remain placeholder for referee discretion / manual override.
-
-    // ── Finalise ──────────────────────────────────────────────────
-    const name = getNextSystemName(hexId);
-    tSection('NAME');
-    tResult('Assigned', name || '(none — pool empty)');
-    endTrace();
+    if (window.isLoggingEnabled) endTrace();
 
     return { name, uwp, uwpSecondary: uwp, travelZone, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
 }
@@ -246,232 +281,322 @@ function getMgT2EMinSusTL(atmCode) {
     return 0;
 }
 
-/**
- * MGT2E SUBORDINATE SOCIAL GENERATOR
- * Implementation from World Builder's Handbook logic.
- */
 function generateMgT2ESubordinateSocial(body, mainworld) {
     if (!body || !mainworld) return;
+    tSection(`Subordinate Social: ${body.name || body.type}`);
 
     // 1. Population (WBH Dependent)
+    tSection('Population');
     const systemLimit = Math.max(0, mainworld.pop - roll1D());
-    const popTypeRoll = roll1D();
+    tResult('System Pop Limit (MW Pop - 1D)', systemLimit);
+
+    let popTypeRoll = tRoll1D('Population Presence (5+)');
     if (popTypeRoll >= 5) {
         body.pop = 0;
+        tResult('Population', 0);
     } else {
-        body.pop = Math.min(systemLimit, roll1D());
+        let pRoll = tRoll1D('Population Value (1D)');
+        body.pop = Math.min(systemLimit, pRoll);
+        if (pRoll > systemLimit) tClamp('Population', pRoll, body.pop);
+        tResult('Population', body.pop);
     }
 
     // 2. Government (Dependent)
-    let govRoll = roll1D();
-    if (mainworld.gov === 0) govRoll -= 2;
-    if (mainworld.gov === 6) govRoll += mainworld.pop;
+    if (body.pop > 0) {
+        tSection('Government');
+        let govRoll = tRoll1D('Government');
+        if (mainworld.gov === 0) {
+            tDM('Mainworld Gov 0', -2);
+            govRoll -= 2;
+        }
+        if (mainworld.gov === 6) {
+            tDM(`Mainworld Gov 6 (+MW Pop ${mainworld.pop})`, mainworld.pop);
+            govRoll += mainworld.pop;
+        }
 
-    if (govRoll <= 1) body.gov = 0;
-    else if (govRoll === 2) body.gov = 1;
-    else if (govRoll === 3) body.gov = 2;
-    else if (govRoll === 4) body.gov = 3;
-    else body.gov = 6; // Captive
+        if (govRoll <= 1) body.gov = 0;
+        else if (govRoll === 2) body.gov = 1;
+        else if (govRoll === 3) body.gov = 2;
+        else if (govRoll === 4) body.gov = 3;
+        else body.gov = 6; // Captive
+        tResult('Government Code', body.gov);
 
-    // 3. Law Level
-    if (body.gov === 6) {
-        let lRoll = roll1D();
-        if (lRoll <= 2) body.law = mainworld.law; // actually prompt says 3-4 is MW Law. 1-2? Assuming match. 
-        else if (lRoll <= 4) body.law = mainworld.law;
-        else if (lRoll === 5) body.law = mainworld.law + 1;
-        else body.law = mainworld.law + roll1D();
-    } else if (body.gov >= 1 && body.gov <= 3) {
-        let lRoll = roll2D() - mainworld.gov;
-        if (lRoll <= 0) {
-            body.law = mainworld.law;
+        // 3. Law Level
+        tSection('Law Level');
+        if (body.gov === 6) {
+            let lRoll = tRoll1D('Law (Captive)');
+            if (lRoll <= 4) body.law = mainworld.law;
+            else if (lRoll === 5) body.law = mainworld.law + 1;
+            else {
+                let offset = tRoll1D('Law Offset');
+                body.law = mainworld.law + offset;
+            }
+            tResult('Law Level (Captive)', body.law);
+        } else if (body.gov >= 1 && body.gov <= 3) {
+            tRoll2D('Law (Gov 1-3)');
+            tDM('Mainworld Gov', -mainworld.gov);
+            let lRoll = pendingRoll.val - mainworld.gov;
+            if (lRoll <= 0) {
+                body.law = mainworld.law;
+                tResult('Law Level', 'Matches Mainworld');
+            } else {
+                let lawType = tRoll1D('Law Type');
+                if (lawType <= 3) {
+                    body.law = tRoll1D('Direct Law');
+                } else {
+                    let r = tRoll2D('Relative Law');
+                    tDM('Standard Law', -7);
+                    tDM('Gov', body.gov);
+                    body.law = Math.max(0, r - 7 + body.gov);
+                }
+                tResult('Law Level', body.law);
+            }
         } else {
-            let lawType = roll1D();
-            if (lawType <= 3) body.law = roll1D();
-            else body.law = Math.max(0, roll2D() - 7 + body.gov);
+            let r = tRoll2D('Law Level');
+            tDM('Standard Law', -7);
+            tDM('Gov', body.gov);
+            body.law = Math.max(0, r - 7 + body.gov);
+            tResult('Law Level', body.law);
         }
     } else {
-        // Fallback for Gov 0 or others not explicitly defined in prompt
-        body.law = Math.max(0, roll2D() - 7 + body.gov);
+        tSkip('Pop 0 forces Gov/Law 0');
+        body.gov = 0;
+        body.law = 0;
     }
     body.law = Math.max(0, Math.min(18, body.law));
 
     // 4. Spaceport (Subordinate/Spaceports only)
+    tSection('Spaceport');
     let spDM = 0;
-    if (body.pop >= 6) spDM += 2;
-    if (body.pop === 1) spDM -= 1;
-    if (body.pop === 0) spDM -= 3;
-    let spRoll = roll1D() + spDM;
+    if (body.pop >= 6) { tDM('Pop 6+', 2); spDM += 2; }
+    if (body.pop === 1) { tDM('Pop 1', -1); spDM -= 1; }
+    if (body.pop === 0) { tDM('Pop 0', -3); spDM -= 3; }
 
-    if (spRoll <= 2) body.starport = 'Y';
-    else if (spRoll === 3) body.starport = 'H';
-    else if (spRoll <= 5) body.starport = 'G';
+    let spRoll = tRoll1D('Spaceport Class');
+    let spTotal = spRoll + spDM;
+
+    if (spTotal <= 2) body.starport = 'Y';
+    else if (spTotal === 3) body.starport = 'H';
+    else if (spTotal <= 5) body.starport = 'G';
     else body.starport = 'F';
+    tResult('Spaceport Class', body.starport);
 
-    // 5. Tech Level (Standard T5 Roll as per instructions)
+    // 5. Tech Level
+    tSection('Tech Level');
     let tlDM = 0;
-    // Spaceport DM
-    if (body.starport === 'F') tlDM += 1;
-    // Physical/Social DMs (Mgt2e standard but 1D roll)
-    if (body.size <= 1) tlDM += 2;
-    else if (body.size <= 4) tlDM += 1;
-    if (body.atm <= 3 || body.atm >= 10) tlDM += 1;
-    if (body.hydro === 9) tlDM += 1;
-    else if (body.hydro === 10) tlDM += 2;
-    if (body.pop >= 1 && body.pop <= 5) tlDM += 1;
-    else if (body.pop === 9) tlDM += 2;
-    else if (body.pop >= 10) tlDM += 4;
-    if (body.gov === 0 || body.gov === 5) tlDM += 1;
-    else if (body.gov === 7) tlDM += 2;
-    else if (body.gov >= 13) tlDM -= 2;
+    if (body.starport === 'F') { tDM('Starport F', 1); tlDM += 1; }
+    if (body.size <= 1) { tDM('Size 1-', 2); tlDM += 2; }
+    else if (body.size <= 4) { tDM('Size 2-4', 1); tlDM += 1; }
+    if (body.atm <= 3 || body.atm >= 10) { tDM('Atmosphere Extreme', 1); tlDM += 1; }
+    if (body.hydro === 9) { tDM('Hydro 9', 1); tlDM += 1; }
+    else if (body.hydro === 10) { tDM('Hydro A', 2); tlDM += 2; }
+    if (body.pop >= 1 && body.pop <= 5) { tDM('Pop 1-5', 1); tlDM += 1; }
+    else if (body.pop === 9) { tDM('Pop 9', 2); tlDM += 2; }
+    else if (body.pop >= 10) { tDM('Pop 10+', 4); tlDM += 4; }
+    if (body.gov === 0 || body.gov === 5) { tDM('Gov 0 or 5', 1); tlDM += 1; }
+    else if (body.gov === 7) { tDM('Gov 7', 2); tlDM += 2; }
+    else if (body.gov >= 13) { tDM('Gov D+', -2); tlDM -= 2; }
 
-    body.tl = Math.max(0, roll1D() + tlDM);
+    let tlRoll = tRoll1D('Tech Level');
+    body.tl = Math.max(0, tlRoll + tlDM);
 
-    // Safety check for environmental floor
     const floor = getMgT2EMinSusTL(body.atm);
-    if (body.tl < floor) body.tl = floor;
+    if (body.tl < floor) {
+        tOverride('Environmental Floor', body.tl, floor, `Atm ${body.atm} requires TL ${floor}`);
+        body.tl = floor;
+    }
+    tResult('Final Tech Level', body.tl);
 
-    // Clamping
+    // Clamping & UWP
     body.pop = clampUWP(body.pop || 0, 0, 15);
     body.gov = clampUWP(body.gov || 0, 0, 15);
     body.law = clampUWP(body.law || 0, 0, 15);
     body.tl = clampUWP(body.tl || 0, 0, 33);
-
-    // Size, Atm, Hydro (if they exist)
     const cSize = clampUWP(body.size || 0, 0, 15);
     const cAtm = clampUWP(body.atm || 0, 0, 15);
     const cHydro = clampUWP(body.hydro || 0, 0, 10);
 
-    // Final UWP construction
     const uwp = `${body.starport}${toUWPChar(cSize)}${toUWPChar(cAtm)}${toUWPChar(cHydro)}${toUWPChar(body.pop)}${toUWPChar(body.gov)}${toUWPChar(body.law)}-${toUWPChar(body.tl)}`;
     body.uwp = uwp;
     body.uwpSecondary = uwp;
 }
 
 function generateMgT2ESocioeconomics(base, hexId) {
+    if (window.isLoggingEnabled) startTrace(hexId, 'MgT2E Socioeconomics', base ? base.name : 'Unknown');
     reseedForHex(hexId);
-    if (!base) return null;
-
-    // Prerequisite: Minimum Sustainable Tech Level
-    let minSusTL = getMgT2EMinSusTL(base.atm);
-    function roll2D3() {
-        return (Math.floor(rng() * 3) + 1) + (Math.floor(rng() * 3) + 1);
+    if (!base) {
+        if (window.isLoggingEnabled) endTrace();
+        return null;
     }
 
+    tSection('Socioeconomic Prerequisites');
+    // Prerequisite: Minimum Sustainable Tech Level
+    let minSusTL = getMgT2EMinSusTL(base.atm);
+    tResult('Minimum Sustainable TL', minSusTL);
+
+
     // 1. Generate Population P Value and Total Population
+    tSection('World Population (P-Value)');
     let pValue = 0;
     let totalWorldPop = 0;
+    if (base.pop >= 10) {
+        pValue = 1;
+        tResult('Initial P-Value', 1);
+        while (pValue < 9) {
+            let r = tRoll1D(`P-Value Increment Check (Target 5+, Current: ${pValue})`);
+            if (r >= 5) {
+                pValue++;
+            } else {
+                break;
+            }
+        }
+        tResult('Final P-Value', pValue);
+    } else if (base.pop > 0) {
+        pValue = Math.floor(rng() * 9) + 1;
+        tResult('P-Value (Random 1-9)', pValue);
+    } else {
+        pValue = 0;
+        tResult('P-Value (Population 0)', 0);
+    }
+
     if (base.pop > 0) {
-        pValue = roll1D() + Math.floor(rng() * 3); // random 1-9
         totalWorldPop = pValue * Math.pow(10, base.pop);
+        tResult('Total World Population', totalWorldPop.toLocaleString());
     }
 
     // 2. Generate Population Concentration Rating (PCR)
+    tSection('Population Concentration Rating (PCR)');
     let pcr = 0;
     let pcrOverride = false;
     if (base.pop < 6) {
-        if (roll1D() > base.pop) {
+        tRoll1D('Small Pop PCR Check');
+        if (pendingRoll.val > base.pop) {
             pcr = 9;
             pcrOverride = true;
+            tOverride('PCR (Small Pop)', pendingRoll.val, 9, `Roll > Pop ${base.pop}`);
         }
     }
 
     if (!pcrOverride && base.pop > 0) {
-        let pcrRoll = roll1D();
+        let pcrRoll = tRoll1D('PCR Roll');
         let pcrDM = 0;
 
-        if (base.size === 1) pcrDM += 2;
-        else if ([2, 3].includes(base.size)) pcrDM += 1;
+        if (base.size === 1) { tDM('Size 1', 2); pcrDM += 2; }
+        else if ([2, 3].includes(base.size)) { tDM('Size 2-3', 1); pcrDM += 1; }
 
-        if (minSusTL >= 8) pcrDM += 3;
-        else if (minSusTL >= 3 && minSusTL <= 7) pcrDM += 1;
+        if (minSusTL >= 8) { tDM('MinSusTL 8+', 3); pcrDM += 3; }
+        else if (minSusTL >= 3 && minSusTL <= 7) { tDM('MinSusTL 3-7', 1); pcrDM += 1; }
 
-        if (base.pop === 8) pcrDM -= 1;
-        else if (base.pop >= 9) pcrDM -= 2;
+        if (base.pop === 8) { tDM('Pop 8', -1); pcrDM -= 1; }
+        else if (base.pop >= 9) { tDM('Pop 9+', -2); pcrDM -= 2; }
 
-        if (base.gov === 7) pcrDM -= 2;
+        if (base.gov === 7) { tDM('Gov 7', -2); pcrDM -= 2; }
 
-        if ([0, 1].includes(base.tl)) pcrDM -= 2;
-        else if ([2, 3].includes(base.tl)) pcrDM -= 1;
-        else if (base.tl >= 4 && base.tl <= 9) pcrDM += 1;
+        if ([0, 1].includes(base.tl)) { tDM('TL 0-1', -2); pcrDM -= 2; }
+        else if ([2, 3].includes(base.tl)) { tDM('TL 2-3', -1); pcrDM -= 1; }
+        else if (base.tl >= 4 && base.tl <= 9) { tDM('TL 4-9', 1); pcrDM += 1; }
 
         const tcs = base.tradeCodes || [];
-        if (tcs.includes("Ag")) pcrDM -= 2;
-        if (tcs.includes("In")) pcrDM += 1;
-        if (tcs.includes("Na")) pcrDM -= 1;
-        if (tcs.includes("Ri")) pcrDM += 1;
+        if (tcs.includes("Ag")) { tDM('Ag Trade Code', -2); pcrDM -= 2; }
+        if (tcs.includes("In")) { tDM('In Trade Code', 1); pcrDM += 1; }
+        if (tcs.includes("Na")) { tDM('Na Trade Code', -1); pcrDM -= 1; }
+        if (tcs.includes("Ri")) { tDM('Ri Trade Code', 1); pcrDM += 1; }
 
         pcr = pcrRoll + pcrDM;
         let minPCR = base.pop >= 9 ? 1 : 0;
-        pcr = Math.max(minPCR, Math.min(9, pcr));
+        let finalPcr = Math.max(minPCR, Math.min(9, pcr));
+        if (pcr !== finalPcr) tClamp('PCR', pcr, finalPcr);
+        pcr = finalPcr;
     }
+    tResult('Final PCR', pcr);
+
 
     // 3. Generate Urbanisation Percentage
+    tSection('Urbanization Percentage');
     let urbanPercent = 0;
     if (base.pop > 0) {
-        let uRoll = roll2D();
+        let uRoll = tRoll2D('Urbanization Roll');
         let uDM = 0;
 
-        if ([0, 1, 2].includes(pcr)) uDM += (-3 + pcr);
-        else if ([7, 8, 9].includes(pcr)) uDM += (-6 + pcr);
+        if ([0, 1, 2].includes(pcr)) { tDM('Low PCR', -3 + pcr); uDM += (-3 + pcr); }
+        else if ([7, 8, 9].includes(pcr)) { tDM('High PCR', -6 + pcr); uDM += (-6 + pcr); }
 
-        if (minSusTL >= 0 && minSusTL <= 3) uDM -= 1;
+        if (minSusTL >= 0 && minSusTL <= 3) { tDM('Low MinSusTL', -1); uDM -= 1; }
 
-        if (base.size === 0) uDM += 2;
-        if (base.pop === 8) uDM += 1;
-        else if (base.pop === 9) uDM += 2;
-        else if (base.pop >= 10) uDM += 4;
+        if (base.size === 0) { tDM('Size 0', 2); uDM += 2; }
+        if (base.pop === 8) { tDM('Pop 8', 1); uDM += 1; }
+        else if (base.pop === 9) { tDM('Pop 9', 2); uDM += 2; }
+        else if (base.pop >= 10) { tDM('Pop 10+', 4); uDM += 4; }
 
-        if (base.gov === 0) uDM -= 2;
-        if (base.law >= 9) uDM += 1;
+        if (base.gov === 0) { tDM('Gov 0', -2); uDM -= 2; }
+        if (base.law >= 9) { tDM('Law 9+', 1); uDM += 1; }
 
-        if ([0, 1, 2].includes(base.tl)) uDM -= 2;
-        else if (base.tl === 3) uDM -= 1;
-        else if (base.tl === 4) uDM += 1;
-        else if (base.tl >= 5 && base.tl <= 9) uDM += 2;
-        else if (base.tl >= 10) uDM += 1;
+        if ([0, 1, 2].includes(base.tl)) { tDM('TL 0-2', -2); uDM -= 2; }
+        else if (base.tl === 3) { tDM('TL 3', -1); uDM -= 1; }
+        else if (base.tl === 4) { tDM('TL 4', 1); uDM += 1; }
+        else if (base.tl >= 5 && base.tl <= 9) { tDM('TL 5-9', 2); uDM += 2; }
+        else if (base.tl >= 10) { tDM('TL 10+', 1); uDM += 1; }
 
         const tcs = base.tradeCodes || [];
-        if (tcs.includes("Ag")) uDM -= 2;
-        if (tcs.includes("Na")) uDM += 2;
+        if (tcs.includes("Ag")) { tDM('Ag', -2); uDM -= 2; }
+        if (tcs.includes("Na")) { tDM('Na', 2); uDM += 2; }
 
         let modURoll = uRoll + uDM;
+        tResult('Modified Urbanization Roll', modURoll);
 
         // Base Percentage mapping
         let rolledPercent = 0;
         if (modURoll <= 0) rolledPercent = 0;
-        else if (modURoll === 1) rolledPercent = roll1D();
-        else if (modURoll === 2) rolledPercent = 6 + roll1D();
-        else if (modURoll === 3) rolledPercent = 12 + roll1D();
-        else if (modURoll === 4) rolledPercent = 18 + roll1D();
-        else if (modURoll === 5) rolledPercent = 22 + (roll1D() * 2) + (Math.floor(rng() * 2) + 1);
-        else if (modURoll === 6) rolledPercent = 34 + (roll1D() * 2) + (Math.floor(rng() * 2) + 1);
-        else if (modURoll === 7) rolledPercent = 46 + (roll1D() * 2) + (Math.floor(rng() * 2) + 1);
-        else if (modURoll === 8) rolledPercent = 58 + (roll1D() * 2) + (Math.floor(rng() * 2) + 1);
-        else if (modURoll === 9) rolledPercent = 70 + (roll1D() * 2) + (Math.floor(rng() * 2) + 1);
-        else if (modURoll === 10) rolledPercent = 84 + roll1D();
-        else if (modURoll === 11) rolledPercent = 90 + roll1D();
+        else if (modURoll === 1) rolledPercent = tRoll1D('Urban % mapping (Roll 1D)');
+        else if (modURoll === 2) rolledPercent = 6 + tRoll1D('Urban % mapping (6 + 1D)');
+        else if (modURoll === 3) rolledPercent = 12 + tRoll1D('Urban % mapping (12 + 1D)');
+        else if (modURoll === 4) rolledPercent = 18 + tRoll1D('Urban % mapping (18 + 1D)');
+        else if (modURoll === 5) rolledPercent = 22 + (tRoll1D('Urban % mapping (22 + 2D6 + rng)') * 2) + (Math.floor(rng() * 2) + 1);
+        else if (modURoll === 6) rolledPercent = 34 + (tRoll1D('Urban % mapping (34 + 2D6 + rng)') * 2) + (Math.floor(rng() * 2) + 1);
+        else if (modURoll === 7) rolledPercent = 46 + (tRoll1D('Urban % mapping (46 + 2D6 + rng)') * 2) + (Math.floor(rng() * 2) + 1);
+        else if (modURoll === 8) rolledPercent = 58 + (tRoll1D('Urban % mapping (58 + 2D6 + rng)') * 2) + (Math.floor(rng() * 2) + 1);
+        else if (modURoll === 9) rolledPercent = 70 + (tRoll1D('Urban % mapping (70 + 2D6 + rng)') * 2) + (Math.floor(rng() * 2) + 1);
+        else if (modURoll === 10) rolledPercent = 84 + tRoll1D('Urban % mapping (84 + 1D)');
+        else if (modURoll === 11) rolledPercent = 90 + tRoll1D('Urban % mapping (90 + 1D)');
         else if (modURoll === 12) rolledPercent = 96 + (Math.floor(rng() * 3) + 1);
         else if (modURoll >= 13) rolledPercent = 100;
 
+        tResult('Initial Urbanization Percentage', rolledPercent);
+
         // Constraints
         let minLimit = -1;
-        if (base.pop >= 10) minLimit = 50 + roll1D();
-        else if (base.pop === 9) minLimit = 18 + roll1D();
+        if (base.pop >= 10) {
+            minLimit = 50 + tRoll1D('Min Urbanization constraint (Pop 10+)');
+            tResult('Minimum Urbanization Limit', minLimit);
+        }
+        else if (base.pop === 9) {
+            minLimit = 18 + tRoll1D('Min Urbanization constraint (Pop 9)');
+            tResult('Minimum Urbanization Limit', minLimit);
+        }
 
         let maxLimit = 101;
-        if ([0, 1, 2].includes(base.tl)) maxLimit = Math.min(maxLimit, 20 + roll1D());
-        else if (base.tl === 3) maxLimit = Math.min(maxLimit, 30 + roll1D());
-        else if (base.tl === 4) maxLimit = Math.min(maxLimit, 60 + roll1D());
-        else if (base.tl >= 5 && base.tl <= 9) maxLimit = Math.min(maxLimit, 90 + roll1D());
+        if ([0, 1, 2].includes(base.tl)) { maxLimit = Math.min(maxLimit, 20 + tRoll1D('Max Urbanization constraint (TL 0-2)')); }
+        else if (base.tl === 3) { maxLimit = Math.min(maxLimit, 30 + tRoll1D('Max Urbanization constraint (TL 3)')); }
+        else if (base.tl === 4) { maxLimit = Math.min(maxLimit, 60 + tRoll1D('Max Urbanization constraint (TL 4)')); }
+        else if (base.tl >= 5 && base.tl <= 9) { maxLimit = Math.min(maxLimit, 90 + tRoll1D('Max Urbanization constraint (TL 5-9)')); }
 
-        if (tcs.includes("Ag")) maxLimit = Math.min(maxLimit, 90 + roll1D());
+        if (tcs.includes("Ag")) { maxLimit = Math.min(maxLimit, 90 + tRoll1D('Max Urbanization constraint (Ag)')); }
 
-        if (minLimit !== -1 && rolledPercent < minLimit) urbanPercent = minLimit;
-        else if (maxLimit !== 101 && rolledPercent > maxLimit) urbanPercent = maxLimit;
+        if (maxLimit !== 101) tResult('Maximum Urbanization Limit', maxLimit);
+
+        if (minLimit !== -1 && rolledPercent < minLimit) {
+            tOverride('Urban Percentage', rolledPercent, minLimit, 'Minimum Limit');
+            urbanPercent = minLimit;
+        }
+        else if (maxLimit !== 101 && rolledPercent > maxLimit) {
+            tOverride('Urban Percentage', rolledPercent, maxLimit, 'Maximum Limit');
+            urbanPercent = maxLimit;
+        }
         else urbanPercent = rolledPercent;
 
         urbanPercent = Math.max(0, Math.min(100, urbanPercent));
     }
+    tResult('Final Urbanization Percentage', urbanPercent);
 
     // 4. Calculate Total Urban Population
     let totalUrbanPop = Math.round(totalWorldPop * (urbanPercent / 100));
@@ -483,90 +608,111 @@ function generateMgT2ESocioeconomics(base, hexId) {
     if (pcr === 0) {
         majorCities = 0;
         totalMajorCityPop = 0;
+        tResult('City Formula', 'PCR 0 forces 0 cities');
     } else if (base.pop <= 5 && pcr === 9) {
         majorCities = 1;
         totalMajorCityPop = totalUrbanPop;
+        tResult('City Formula', 'Small Pop + PCR 9 forces 1 city');
     } else if (base.pop <= 5 && pcr >= 1 && pcr <= 8) {
         majorCities = Math.min(9 - pcr, base.pop);
         totalMajorCityPop = totalUrbanPop;
+        tResult('City Formula', `Small Pop + PCR 1-8: min(9 - PCR(${pcr}), PopCode(${base.pop})) = ${majorCities}`);
     } else if (base.pop >= 6 && pcr === 9) {
-        let mCRoll = roll2D();
+        let mCRoll = tRoll2D('Major Cities Roll (2D)');
         majorCities = Math.max(base.pop - mCRoll, 1);
         totalMajorCityPop = totalUrbanPop;
-    } else { // Population >= 6 AND PCR 1-8 (or fallback)
-        let mCRoll = roll2D();
-        let urbanDecimal = urbanPercent / 100;
-        let rawCities = mCRoll - pcr + ((urbanDecimal * 20) / pcr);
-        majorCities = Math.ceil(rawCities);
-
-        if (majorCities < 1) majorCities = 1;
-        if (base.pop < 6 && majorCities > base.pop) majorCities = base.pop;
-
-        let popRoll = roll1D();
-        let calcTotalMCPop = (pcr / (popRoll + 7)) * totalUrbanPop;
-        totalMajorCityPop = Math.ceil(calcTotalMCPop);
-    }
-
-    if (majorCities === 1) {
+        tResult('City Formula', `Pop 6+ + PCR 9: max(PopCode(${base.pop}) - Roll(${mCRoll}), 1) = ${majorCities}`);
+    } else { // Population >= 6 AND PCR 1-8
+        let mCRoll = tRoll2D('Major Cities Roll (2D)');
+        let urbanFactor = ((urbanPercent / 100) * 20) / pcr;
+        let cityFormula = mCRoll - pcr + urbanFactor;
+        majorCities = Math.max(1, Math.round(cityFormula));
         totalMajorCityPop = totalUrbanPop;
+        tResult('City Formula', `Pop 6+ + PCR 1-8: Roll(${mCRoll}) - PCR(${pcr}) + [ (Urban%(${urbanPercent}) * 20) / PCR(${pcr}) ] = ${cityFormula.toFixed(2)} -> ${majorCities}`);
     }
+    tResult('Major Cities Count', majorCities);
+    tResult('Total Major City Pop', totalMajorCityPop.toLocaleString());
+
+    // 6. Government Profile
 
     // 6. Centralisation Code (C)
-    let cRoll = roll2D();
+
+    // 6. Centralisation Code (C)
+    tSection('Government: Centralization');
+    let cRoll = tRoll2D('Centralization Roll');
     let cDM = 0;
-    if (base.gov >= 2 && base.gov <= 5) cDM -= 1;
-    if ([6, 8, 9, 10, 11].includes(base.gov)) cDM += 1;
-    if (base.gov === 7) cDM += 1;
-    if (base.gov >= 12) cDM += 2;
-    if (pcr >= 0 && pcr <= 3) cDM -= 1;
-    if (pcr === 7 || pcr === 8) cDM += 1;
-    if (pcr === 9) cDM += 3;
+    if (base.gov >= 2 && base.gov <= 5) { tDM('Gov 2-5', -1); cDM -= 1; }
+    if ([6, 8, 9, 10, 11].includes(base.gov)) { tDM('Gov 6,8-11', 1); cDM += 1; }
+    if (base.gov === 7) { tDM('Gov 7', 1); cDM += 1; }
+    if (base.gov >= 12) { tDM('Gov 12+', 2); cDM += 2; }
+    if (pcr >= 0 && pcr <= 3) { tDM('PCR 0-3', -1); cDM -= 1; }
+    if (pcr === 7 || pcr === 8) { tDM('PCR 7-8', 1); cDM += 1; }
+    if (pcr === 9) { tDM('PCR 9', 3); cDM += 3; }
 
     let cScore = cRoll + cDM;
     let centralisation = 'U';
     if (cScore <= 5) centralisation = 'C';
     else if (cScore <= 8) centralisation = 'F';
+    tResult('Centralization Code', `${centralisation} (${cScore})`);
 
     // 7. Primary Authority Code (A)
-    let aRoll = roll2D();
+    tSection('Government: Primary Authority');
+    let aRoll = tRoll2D('Authority Roll');
     let aDM = 0;
-    if ([1, 6, 10, 13, 14].includes(base.gov)) aDM += 6;
-    if (base.gov === 2) aDM -= 4;
-    if ([3, 5, 12].includes(base.gov)) aDM -= 2;
-    if (base.gov === 11 || base.gov === 15) aDM += 4;
-    if (centralisation === 'C') aDM -= 2;
-    if (centralisation === 'U') aDM += 2;
+    if ([1, 6, 10, 13, 14].includes(base.gov)) { tDM('Gov 1,6,10,13,14', 6); aDM += 6; }
+    if (base.gov === 2) { tDM('Gov 2', -4); aDM -= 4; }
+    if ([3, 5, 12].includes(base.gov)) { tDM('Gov 3,5,12', -2); aDM -= 2; }
+    if (base.gov === 11 || base.gov === 15) { tDM('Gov 11,15', 4); aDM += 4; }
+    if (centralisation === 'C') { tDM('Centralized', -2); aDM -= 2; }
+    if (centralisation === 'U') { tDM('Unitary', 2); aDM += 2; }
 
     let aScore = aRoll + aDM;
     let authority = 'E';
     if (aScore <= 4 || aScore === 8) authority = 'L';
     else if (aScore === 6 || aScore === 11) authority = 'J';
     else if (aScore === 7 || aScore === 9) authority = 'B';
+    tResult('Authority Code', `${authority} (${aScore})`);
 
     // 8. Structure Code (S)
+    tSection('Government: Structure');
     function getStructure(gov, auth, branch, isSecondary) {
-        if (gov === 2) return 'D';
-        if (gov === 8 || gov === 9) return 'M';
-        if ([3, 12, 15].includes(gov)) return roll1D() <= 4 ? 'S' : 'M';
+        const label = isSecondary ? `Structure (${branch})` : 'Structure';
+        if (gov === 2) { tResult(label, 'D (Gov 2)'); return 'D'; }
+        if (gov === 8 || gov === 9) { tResult(label, 'M (Gov 8-9)'); return 'M'; }
+        if ([3, 12, 15].includes(gov)) {
+            let r = tRoll1D(`${label} (Gov 3,12,15)`);
+            let res = r <= 4 ? 'S' : 'M';
+            tResult(label, res);
+            return res;
+        }
         if ([10, 11, 13, 14].includes(gov)) {
-            if (!isSecondary) return roll1D() <= 5 ? 'R' : 'S';
-            // if secondary, fall through to fallback with DM +2
+            if (!isSecondary) {
+                let r = tRoll1D(`${label} (Gov 10,11,13,14)`);
+                let res = r <= 5 ? 'R' : 'S';
+                tResult(label, res);
+                return res;
+            }
         } else if (auth === 'L' && !isSecondary) {
-            let sRoll = roll2D();
-            if (sRoll <= 3) return 'D';
-            if (sRoll <= 8) return 'M';
-            return 'S';
+            let sRoll = tRoll2D(`${label} (Auth L)`);
+            let res = sRoll <= 3 ? 'D' : sRoll <= 8 ? 'M' : 'S';
+            tResult(label, res);
+            return res;
         }
 
-        let fallbackRoll = roll2D() + (isSecondary && [10, 11, 13, 14].includes(gov) ? 2 : 0);
-        if (fallbackRoll <= 3) return 'D';
-        if (fallbackRoll === 4) return 'S';
-        if (fallbackRoll <= 6) return 'M';
-        if (fallbackRoll <= 8) return 'R';
-        if (fallbackRoll === 9) return 'M';
-        if (fallbackRoll === 10) return 'S';
-        if (fallbackRoll === 11) return 'M';
-        return 'S';
+        let sDM = (isSecondary && [10, 11, 13, 14].includes(gov) ? 2 : 0);
+        if (sDM !== 0) tDM('Secondary Multi-Branch', sDM);
+        let fallbackRoll = tRoll2D(`${label} (Fallback)`);
+        let total = fallbackRoll + sDM;
+        let res = 'S';
+        if (total <= 3) res = 'D';
+        else if (total === 4) res = 'S';
+        else if (total <= 6) res = 'M';
+        else if (total <= 8) res = 'R';
+        else if (total === 9) res = 'M';
+        else if (total === 10) res = 'S';
+        else if (total === 11) res = 'M';
+        tResult(label, res);
+        return res;
     }
 
     let structureStr = "";
@@ -579,14 +725,19 @@ function generateMgT2ESocioeconomics(base, hexId) {
     }
 
     let govProfile = `${centralisation}-${authority}-${structureStr}`;
+    tResult('Final Government Profile', govProfile);
+
 
     // 9. Factions
+    tSection('Factions');
     let baseFactions = Math.floor(rng() * 3) + 1; // 1 to 3
+    tResult('Base Factions (1-3)', baseFactions);
     let fDM = 0;
-    if (base.gov === 0 || base.gov === 7) fDM += 1;
-    if (base.gov >= 10) fDM -= 1;
+    if (base.gov === 0 || base.gov === 7) { tDM('Gov 0 or 7', 1); fDM += 1; }
+    if (base.gov >= 10) { tDM('Gov 10+', -1); fDM -= 1; }
 
     let totalFactions = baseFactions + fDM;
+    tResult('Total Potential Factions', totalFactions);
     let numExternalFactions = 0;
     if (totalFactions > 1) {
         numExternalFactions = totalFactions - 1;
@@ -594,307 +745,459 @@ function generateMgT2ESocioeconomics(base, hexId) {
 
     let factionsList = [];
     for (let i = 0; i < numExternalFactions; i++) {
-        let fRoll = roll2D();
-        if (fRoll <= 3) factionsList.push('O');
-        else if (fRoll <= 5) factionsList.push('F');
-        else if (fRoll <= 7) factionsList.push('M');
-        else if (fRoll <= 9) factionsList.push('N');
-        else if (fRoll <= 11) factionsList.push('S');
-        else factionsList.push('P');
+        let fRoll = tRoll2D(`Faction ${i + 1} Roll`);
+        let fType = 'P';
+        if (fRoll <= 3) fType = 'O';
+        else if (fRoll <= 5) fType = 'F';
+        else if (fRoll <= 7) fType = 'M';
+        else if (fRoll <= 9) fType = 'N';
+        else if (fRoll <= 11) fType = 'S';
+        factionsList.push(fType);
+        tResult(`Faction ${i + 1} Type`, fType);
     }
     let factionsString = factionsList.join('');
 
     // 10. Law Profile (O-WECPR)
+    tSection('Law Profile');
     let overallLaw = base.law;
-    let judRoll = roll2D();
+    tResult('Overall Law Level', overallLaw);
+    let judRoll = tRoll2D('Justice System Roll');
     let isInquisitorial = judRoll <= 5;
+    tResult('Justice System', isInquisitorial ? 'Inquisitorial' : 'Adversarial');
+
+    // Judicial System Profile (JSP)
+    tSection('Judicial System Profile');
+    let jCode = isInquisitorial ? 'I' : 'A';
+    tResult('Judicial System Code', jCode);
+    let uCode = 'U';
+    if (centralisation === 'C') {
+        uCode = 'T';
+        tResult('Law Uniformity (Centralized)', uCode);
+    } else if (centralisation === 'F') {
+        let uniRoll = tRoll1D('Law Uniformity Roll (Federal)');
+        uCode = uniRoll <= 5 ? 'T' : 'P';
+        tResult('Law Uniformity', uCode);
+    } else {
+        let uniRoll = tRoll1D('Law Uniformity Roll');
+        let uniDM = 0;
+        if (base.gov === 3 || base.gov === 5 || base.gov >= 10) {
+            tDM('Gov 3,5,10+', -1);
+            uniDM -= 1;
+        }
+        if (base.gov === 2) {
+            tDM('Gov 2', 1);
+            uniDM += 1;
+        }
+        let total = uniRoll + uniDM;
+        if (total <= 2) uCode = 'P';
+        else if (total === 3) uCode = 'T';
+        else uCode = 'U';
+        tResult('Law Uniformity', uCode);
+    }
+    let pRoll = tRoll2D('Presumption of Innocence Roll');
+    let pDM = 0;
+    tDM('Law Level', -overallLaw);
+    pDM -= overallLaw;
+    if (jCode === 'A') {
+        tDM('Adversarial System', 2);
+        pDM += 2;
+    }
+    let pTotal = pRoll + pDM;
+    let pCode = pTotal >= 0 ? 'Y' : 'N';
+    tResult('Presumption of Innocence', pCode);
+    let dRoll = tRoll2D('Death Penalty Roll');
+    let dDM = 0;
+    if (base.gov === 0) {
+        tDM('Gov 0', -4);
+        dDM -= 4;
+    }
+    if (overallLaw >= 9) {
+        tDM('Law 9+', 4);
+        dDM += 4;
+    }
+    let dTotal = dRoll + dDM;
+    let dCode = dTotal >= 8 ? 'Y' : 'N';
+    tResult('Death Penalty', dCode);
+    let judicialSystemProfile = `${jCode}${uCode}-${pCode}-${dCode}`;
+    tResult('Final Judicial System Profile', judicialSystemProfile);
 
     // Weapons and Armour (W)
+    tSection('Law: Weapons & Armour');
+    let lawWRoll = tRoll2D3('Weapons Law Roll');
+    tDM('Overall Law', overallLaw);
+    tDM('WBH Base', -4);
     let wDM = 0;
-    if (pcr >= 0 && pcr <= 3) wDM -= 1;
-    if (pcr === 8 || pcr === 9) wDM += 1;
-    let lawW = overallLaw + roll2D3() - 4 + wDM;
-    lawW = Math.max(0, Math.min(18, lawW));
+    if (pcr >= 0 && pcr <= 3) { tDM('PCR 0-3', -1); wDM = -1; }
+    if (pcr === 8 || pcr === 9) { tDM('PCR 8-9', 1); wDM = 1; }
+    let rawW = lawWRoll + overallLaw - 4 + wDM;
+    let lawW = Math.max(0, Math.min(18, rawW));
+    if (rawW !== lawW) tClamp('Weapons Law', rawW, lawW);
+    tResult('Weapons Law Code', lawW);
 
     // Economic Law (E)
+    tSection('Law: Economic');
+    let lawERoll = tRoll2D3('Economic Law Roll');
+    tDM('Overall Law', overallLaw);
+    tDM('WBH Base', -4);
     let eDM = 0;
-    if (base.gov === 0) eDM -= 2;
-    if (base.gov === 1) eDM += 2;
-    if (base.gov === 2) eDM -= 1;
-    if (base.gov === 9) eDM += 1;
-    let lawE = overallLaw + roll2D3() - 4 + eDM;
-    lawE = Math.max(0, Math.min(18, lawE));
+    if (base.gov === 0) { tDM('Gov 0', -2); eDM = -2; }
+    if (base.gov === 1) { tDM('Gov 1', 2); eDM = 2; }
+    if (base.gov === 2) { tDM('Gov 2', -1); eDM = -1; }
+    if (base.gov === 9) { tDM('Gov 9', 1); eDM = 1; }
+    let rawE = lawERoll + overallLaw - 4 + eDM;
+    let lawE = Math.max(0, Math.min(18, rawE));
+    if (rawE !== lawE) tClamp('Economic Law', rawE, lawE);
+    tResult('Economic Law Code', lawE);
 
     // Criminal Law (C)
+    tSection('Law: Criminal');
+    let lawCRoll = tRoll2D3('Criminal Law Roll');
+    tDM('Overall Law', overallLaw);
+    tDM('WBH Base', -4);
     let cLawDM = 0;
-    if (isInquisitorial) cLawDM += 1;
-    let lawC = overallLaw + roll2D3() - 4 + cLawDM;
-    lawC = Math.max(0, Math.min(18, lawC));
+    if (isInquisitorial) { tDM('Inquisitorial', 1); cLawDM = 1; }
+    let rawC = lawCRoll + overallLaw - 4 + cLawDM;
+    let lawC = Math.max(0, Math.min(18, rawC));
+    if (rawC !== lawC) tClamp('Criminal Law', rawC, lawC);
+    tResult('Criminal Law Code', lawC);
 
     // Private Law (P)
+    tSection('Law: Private');
+    let lawPRoll = tRoll2D3('Private Law Roll');
+    tDM('Overall Law', overallLaw);
+    tDM('WBH Base', -4);
     let pLawDM = 0;
-    if (base.gov === 12) pLawDM -= 1;
-    let lawP = overallLaw + roll2D3() - 4 + pLawDM;
-    lawP = Math.max(0, Math.min(18, lawP));
+    if (base.gov === 12) { tDM('Gov 12', -1); pLawDM = -1; }
+    let rawP = lawPRoll + overallLaw - 4 + pLawDM;
+    let lawP = Math.max(0, Math.min(18, rawP));
+    if (rawP !== lawP) tClamp('Private Law', rawP, lawP);
+    tResult('Private Law Code', lawP);
 
     // Personal Rights (R)
+    tSection('Law: Personal Rights');
+    let lawRRoll = tRoll2D3('Personal Rights Roll');
+    tDM('Overall Law', overallLaw);
+    tDM('WBH Base', -4);
     let rDM = 0;
-    if (base.gov === 0 || base.gov === 2) rDM -= 1;
-    if (base.gov === 1) rDM += 2;
-    let lawR = overallLaw + roll2D3() - 4 + rDM;
-    lawR = Math.max(0, Math.min(18, lawR));
+    if (base.gov === 0 || base.gov === 2) { tDM('Gov 0 or 2', -1); rDM = -1; }
+    if (base.gov === 1) { tDM('Gov 1', 2); rDM = 2; }
+    let rawR = lawRRoll + overallLaw - 4 + rDM;
+    let lawR = Math.max(0, Math.min(18, rawR));
+    if (rawR !== lawR) tClamp('Personal Rights Law', rawR, lawR);
+    tResult('Personal Rights Law Code', lawR);
 
-    // Convert to eHex
-    function toEHex(val) {
-        if (val <= 9) return val.toString();
-        const hexChars = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // Skip I and O
-        return hexChars[val - 10] || '0';
-    }
 
     let lawProfile = `${toEHex(overallLaw)}-${toEHex(lawW)}${toEHex(lawE)}${toEHex(lawC)}${toEHex(lawP)}${toEHex(lawR)}`;
+    tResult('Final Law Profile', lawProfile);
 
     // 11. Tech Profile (H-L-QQQQQ-TTTT-MM-N)
-    function tlm() {
-        let roll = roll2D();
-        if (roll === 2) return -3;
-        if (roll === 3) return -2;
-        if (roll === 4) return -1;
-        if (roll >= 5 && roll <= 9) return 0;
-        if (roll === 10) return 1;
-        if (roll === 11) return 2;
-        if (roll === 12) return 3;
-        return 0;
+    tSection('Tech Profile');
+    function tlm(label) {
+        let roll = tRoll2D(label || 'Tech Level Modifier');
+        let mod = 0;
+        if (roll === 2) mod = -3;
+        else if (roll === 3) mod = -2;
+        else if (roll === 4) mod = -1;
+        else if (roll >= 5 && roll <= 9) mod = 0;
+        else if (roll === 10) mod = 1;
+        else if (roll === 11) mod = 2;
+        else if (roll === 12) mod = 3;
+        tResult(label || 'TL Modifier', mod);
+        return mod;
     }
 
     let tcs = base.tradeCodes || [];
     let isInd = tcs.includes("In");
     let isRich = tcs.includes("Ri");
     let isPoor = tcs.includes("Po");
-    let habRating = 8; // placeholder
+    let habRating = 8; // placeholder - standard HZ world
 
     // Common TL
+    tSection('Tech: Common TL (H & L)');
     let H = base.tl;
+    tResult('High Tech (H)', H);
     let lDM = 0;
-    if (base.pop >= 1 && base.pop <= 5) lDM += 1;
-    if (base.pop >= 9) lDM -= 1;
-    if ([0, 6, 13, 14].includes(base.gov)) lDM -= 1;
-    if (base.gov === 5) lDM += 1;
-    if (base.gov === 7) lDM -= 2;
-    if (pcr >= 0 && pcr <= 2) lDM -= 1;
-    if (pcr >= 7) lDM += 1;
+    if (base.pop >= 1 && base.pop <= 5) { tDM('Pop 1-5', 1); lDM += 1; }
+    if (base.pop >= 9) { tDM('Pop 9+', -1); lDM -= 1; }
+    if ([0, 6, 13, 14].includes(base.gov)) { tDM('Gov 0,6,13,14', -1); lDM -= 1; }
+    if (base.gov === 5) { tDM('Gov 5', 1); lDM += 1; }
+    if (base.gov === 7) { tDM('Gov 7', -2); lDM -= 2; }
+    if (pcr >= 0 && pcr <= 2) { tDM('PCR 0-2', -1); lDM -= 1; }
+    if (pcr >= 7) { tDM('PCR 7+', 1); lDM += 1; }
 
-    let L = H + tlm() + lDM;
-    L = Math.max(Math.floor(H / 2), Math.min(H, L));
+    let L = H + tlm('Low Tech Roll') + lDM;
+    let finalL = Math.max(Math.floor(H / 2), Math.min(H, L));
+    if (L !== finalL) tClamp('Low Tech', L, finalL);
+    L = finalL;
+    tResult('Low Tech (L)', L);
 
     // Quality of Life TLs
+    tSection('Tech: Quality of Life (Q1-Q5)');
     let q1DM = 0;
-    if (base.pop >= 9) q1DM += 1;
-    if (isInd) q1DM += 1;
-    let Q1 = H + tlm() + q1DM;
-    Q1 = Math.max(Math.floor(H / 2), Math.min(Math.floor(H * 1.2), Q1));
+    if (base.pop >= 9) { tDM('Pop 9+', 1); q1DM += 1; }
+    if (isInd) { tDM('Industrial', 1); q1DM += 1; }
+    let Q1 = H + tlm('Q1: Energy Roll') + q1DM;
+    let fQ1 = Math.max(Math.floor(H / 2), Math.min(Math.floor(H * 1.2), Q1));
+    if (Q1 !== fQ1) tClamp('Q1 TL', Q1, fQ1);
+    Q1 = fQ1;
+    tResult('Q1: Energy', Q1);
 
     let q2DM = 0;
-    if (base.pop >= 1 && base.pop <= 5) q2DM += 1;
-    if (base.pop >= 9) q2DM -= 1;
-    if (isInd) q2DM += 1;
-    let Q2 = H + tlm() + q2DM;
-    Q2 = Math.max(Q1 - 3, Math.min(Q1 + 1, Q2));
+    if (base.pop >= 1 && base.pop <= 5) { tDM('Pop 1-5', 1); q2DM += 1; }
+    if (base.pop >= 9) { tDM('Pop 9+', -1); q2DM -= 1; }
+    if (isInd) { tDM('Industrial', 1); q2DM += 1; }
+    let Q2 = H + tlm('Q2: Computer Roll') + q2DM;
+    let fQ2 = Math.max(Q1 - 3, Math.min(Q1 + 1, Q2));
+    if (Q2 !== fQ2) tClamp('Q2 TL', Q2, fQ2);
+    Q2 = fQ2;
+    tResult('Q2: Computer', Q2);
 
     let q3DM = 0;
-    if (base.pop >= 1 && base.pop <= 6) q3DM -= 1;
-    if (base.pop >= 8) q3DM += 1;
-    if (isInd) q3DM += 1;
-    let Q3 = H + tlm() + q3DM;
-    Q3 = Math.max(Q2 - 2, Math.min(Math.max(Q1, Q2), Q3));
+    if (base.pop >= 1 && base.pop <= 6) { tDM('Pop 1-6', -1); q3DM -= 1; }
+    if (base.pop >= 8) { tDM('Pop 8+', 1); q3DM += 1; }
+    if (isInd) { tDM('Industrial', 1); q3DM += 1; }
+    let Q3 = H + tlm('Q3: Bio/Med Roll') + q3DM;
+    let fQ3 = Math.max(Q2 - 2, Math.min(Math.max(Q1, Q2), Q3));
+    if (Q3 !== fQ3) tClamp('Q3 TL', Q3, fQ3);
+    Q3 = fQ3;
+    tResult('Q3: Bio/Med', Q3);
 
     let q4DM = 0;
-    if (isRich) q4DM += 1;
-    if (isPoor) q4DM -= 1;
+    if (isRich) { tDM('Rich', 1); q4DM += 1; }
+    if (isPoor) { tDM('Poor', -1); q4DM -= 1; }
     let spDM = 0;
     if (base.starport === 'A') spDM = 6;
     else if (base.starport === 'B') spDM = 4;
     else if (base.starport === 'C') spDM = 2;
-    let Q4 = Q2 + tlm() + q4DM;
-    Q4 = Math.max(Math.max(0, spDM), Math.min(Q2, Q4));
+    tDM(`Starport ${base.starport} Minimum`, spDM);
+    let Q4 = Q2 + tlm('Q4: Env Roll') + q4DM;
+    let fQ4 = Math.max(Math.max(0, spDM), Math.min(Q2, Q4));
+    if (Q4 !== fQ4) tClamp('Q4 TL', Q4, fQ4);
+    Q4 = fQ4;
+    tResult('Q4: Env', Q4);
 
     let q5DM = 0;
-    if (habRating < 8) q5DM += (8 - habRating);
-    let Q5 = Q3 + tlm() + q5DM;
-    Q5 = Math.max(Q1 - 5, Math.min(Q1, Q5));
+    if (habRating < 8) { tDM('Habitation < 8', 8 - habRating); q5DM += (8 - habRating); }
+    let Q5 = Q3 + tlm('Q5: Manufacturing Roll') + q5DM;
+    let fQ5 = Math.max(Q1 - 5, Math.min(Q1, Q5));
+    if (Q5 !== fQ5) tClamp('Q5 TL', Q5, fQ5);
+    Q5 = fQ5;
+    tResult('Q5: Mfg', Q5);
 
     // Transportation TLs
+    tSection('Tech: Transportation (T1-T4)');
     let t1DM = 0;
-    if (base.hydro === 10) t1DM -= 1;
-    if (pcr >= 0 && pcr <= 2) t1DM += 1;
-    let T1 = Q1 + tlm() + t1DM;
-    T1 = Math.max(Q2 - 5, Math.min(Q1, T1));
+    if (base.hydro === 10) { tDM('Hydro A', -1); t1DM -= 1; }
+    if (pcr >= 0 && pcr <= 2) { tDM('High Concentration', 1); t1DM += 1; }
+    let T1 = Q1 + tlm('T1: Land Roll') + t1DM;
+    let fT1 = Math.max(Q2 - 5, Math.min(Q1, T1));
+    if (T1 !== fT1) tClamp('T1 TL', T1, fT1);
+    T1 = fT1;
+    tResult('T1: Land', T1);
 
     let t2DM = 0;
-    if (base.hydro === 0) t2DM -= 2;
-    if (base.hydro === 8) t2DM += 1;
-    if (base.hydro >= 9) t2DM += 2;
-    if (pcr >= 0 && pcr <= 2) t2DM += 1;
-    let T2 = Q1 + tlm() + t2DM;
+    if (base.hydro === 0) { tDM('Hydro 0', -2); t2DM -= 2; }
+    if (base.hydro === 8) { tDM('Hydro 8', 1); t2DM += 1; }
+    if (base.hydro >= 9) { tDM('Hydro 9+', 2); t2DM += 2; }
+    if (pcr >= 0 && pcr <= 2) { tDM('High Concentration', 1); t2DM += 1; }
+    let T2 = Q1 + tlm('T2: Water Roll') + t2DM;
+    let fT2 = 0;
     if (base.hydro === 0) {
-        T2 = Math.max(0, Math.min(Q1, T2));
+        fT2 = Math.max(0, Math.min(Q1, T2));
     } else {
-        T2 = Math.max(Q2 - 5, Math.min(Q1, T2));
+        fT2 = Math.max(Q2 - 5, Math.min(Q1, T2));
     }
+    if (T2 !== fT2) tClamp('T2 TL', T2, fT2);
+    T2 = fT2;
+    tResult('T2: Water', T2);
 
     let t3DM = 0;
-    if ((base.atm <= 3 || base.atm === 14) && H <= 7) t3DM -= 2;
-    if ((base.atm === 4 || base.atm === 5) && H <= 7) t3DM -= 1;
-    let T3 = Q1 + tlm() + t3DM;
-    T3 = Math.max(Q2 - 5, Math.min(Q1, T3));
-    if (base.atm === 0 && H <= 5) {
-        T3 = 0;
-    }
+    if ((base.atm <= 3 || base.atm === 14) && H <= 7) { tDM('Atm Extreme & H<=7', -2); t3DM -= 2; }
+    if ((base.atm === 4 || base.atm === 5) && H <= 7) { tDM('Atm Thin & H<=7', -1); t3DM -= 1; }
+    let T3 = Q1 + tlm('T3: Air Roll') + t3DM;
+    let fT3 = Math.max(Q2 - 5, Math.min(Q1, T3));
+    if (base.atm === 0 && H <= 5) fT3 = 0;
+    if (T3 !== fT3) tClamp('T3 TL', T3, fT3);
+    T3 = fT3;
+    tResult('T3: Air', T3);
 
     let t4DM = 0;
-    if (base.size === 0 || base.size === 1) t4DM += 2;
-    if (base.pop >= 1 && base.pop <= 5) t4DM -= 1;
-    if (base.pop >= 9) t4DM += 1;
-    if (base.starport === 'A') t4DM += 2;
-    if (base.starport === 'B') t4DM += 1;
-    let T4 = Q3 + tlm() + t4DM;
-    T4 = Math.max(Math.min(Q1 - 3, Q3 - 3), Math.min(Math.min(Q1, Q3), T4));
+    if (base.size === 0 || base.size === 1) { tDM('Small World', 2); t4DM += 2; }
+    if (base.pop >= 1 && base.pop <= 5) { tDM('Pop 1-5', -1); t4DM -= 1; }
+    if (base.pop >= 9) { tDM('Pop 9+', 1); t4DM += 1; }
+    if (base.starport === 'A') { tDM('Starport A', 2); t4DM += 2; }
+    if (base.starport === 'B') { tDM('Starport B', 1); t4DM += 1; }
+    let T4 = Q3 + tlm('T4: Space Roll') + t4DM;
+    let fT4 = Math.max(Math.min(Q1 - 3, Q3 - 3), Math.min(Math.min(Q1, Q3), T4));
+    if (T4 !== fT4) tClamp('T4 TL', T4, fT4);
+    T4 = fT4;
+    tResult('T4: Space', T4);
 
     // Military TLs
+    tSection('Tech: Military (M1-M2)');
     let m1DM = 0;
-    if (base.gov === 0 || base.gov === 7) m1DM += 2;
-    if (overallLaw === 0 || overallLaw >= 13) m1DM += 2;
-    if ((overallLaw >= 1 && overallLaw <= 4) || (overallLaw >= 9 && overallLaw <= 12)) m1DM += 1;
-    let M1 = Q3 + tlm() + m1DM;
-    M1 = Math.max((lawW === 0 ? Q3 : 0), Math.min(Q2, M1));
+    if (base.gov === 0 || base.gov === 7) { tDM('Gov 0 or 7', 2); m1DM += 2; }
+    if (overallLaw === 0 || overallLaw >= 13) { tDM('Law Extreme', 2); m1DM += 2; }
+    if ((overallLaw >= 1 && overallLaw <= 4) || (overallLaw >= 9 && overallLaw <= 12)) { tDM('Law High/Low', 1); m1DM += 1; }
+    let M1 = Q3 + tlm('M1: Personal Roll') + m1DM;
+    let fM1 = Math.max((lawW === 0 ? Q3 : 0), Math.min(Q2, M1));
+    if (M1 !== fM1) tClamp('M1 TL', M1, fM1);
+    M1 = fM1;
+    tResult('M1: Personal', M1);
 
     let m2DM = 0;
-    if (base.pop >= 1 && base.pop <= 6) m2DM -= 1;
-    if (base.pop >= 8) m2DM += 1;
-    if ([7, 10, 11, 15].includes(base.gov)) m2DM += 2;
-    if (overallLaw >= 13) m2DM += 2;
-    if (isInd) m2DM += 1;
-    let M2 = Q3 + tlm() + m2DM;
-    M2 = Math.max(0, Math.min(Q3, M2));
+    if (base.pop >= 1 && base.pop <= 6) { tDM('Pop 1-6', -1); m2DM -= 1; }
+    if (base.pop >= 8) { tDM('Pop 8+', 1); m2DM += 1; }
+    if ([7, 10, 11, 15].includes(base.gov)) { tDM('Gov 7,10,11,15', 2); m2DM += 2; }
+    if (overallLaw >= 13) { tDM('Law 13+', 2); m2DM += 2; }
+    if (isInd) { tDM('Industrial', 1); m2DM += 1; }
+    let M2 = Q3 + tlm('M2: Heavy Roll') + m2DM;
+    let fM2 = Math.max(0, Math.min(Q3, M2));
+    if (M2 !== fM2) tClamp('M2 TL', M2, fM2);
+    M2 = fM2;
+    tResult('M2: Heavy', M2);
 
     // Novelty TL
+    tSection('Tech: Novelty (N)');
     let maxOfAll = Math.max(Q1, Q2, Q3, Q4, Q5, T1, T2, T3, T4, M1, M2);
     let N = Math.max(maxOfAll, minSusTL, Math.max(H + 2, 12));
+    tResult('Novelty (N)', N);
 
     let techProfile = `${toEHex(H)}-${toEHex(L)}-${toEHex(Q1)}${toEHex(Q2)}${toEHex(Q3)}${toEHex(Q4)}${toEHex(Q5)}-${toEHex(T1)}${toEHex(T2)}${toEHex(T3)}${toEHex(T4)}-${toEHex(M1)}${toEHex(M2)}-${toEHex(N)}`;
+    tResult('Final Tech Profile', techProfile);
 
     // 12. Cultural Profile (DXUS-CPEM)
+    tSection('Cultural Profile');
     let culD = 0, culX = 0, culU = 0, culS = 0;
     let culC = 0, culP = 0, culE = 0, culM = 0;
     let culturalProfile = "0000-0000";
 
     if (base.pop > 0) {
         // Diversity
+        tSection('Culture: Diversity (D)');
         let cD_DM = 0;
-        if (base.pop >= 1 && base.pop <= 5) cD_DM -= 2;
-        if (base.pop >= 9) cD_DM += 2;
-        if ([0, 1, 2].includes(base.gov)) cD_DM += 1;
-        if (base.gov === 7) cD_DM += 4;
-        if ([13, 14, 15].includes(base.gov)) cD_DM -= 4;
-        if (overallLaw >= 0 && overallLaw <= 4) cD_DM += 1;
-        if (overallLaw >= 10) cD_DM -= 1;
-        if (pcr >= 0 && pcr <= 3) cD_DM += 1;
-        if (pcr >= 7 && pcr <= 9) cD_DM -= 2;
-        culD = Math.max(1, roll2D() + cD_DM);
+        if (base.pop >= 1 && base.pop <= 5) { tDM('Pop 1-5', -2); cD_DM -= 2; }
+        if (base.pop >= 9) { tDM('Pop 9+', 2); cD_DM += 2; }
+        if ([0, 1, 2].includes(base.gov)) { tDM('Gov 0,1,2', 1); cD_DM += 1; }
+        if (base.gov === 7) { tDM('Gov 7', 4); cD_DM += 4; }
+        if ([13, 14, 15].includes(base.gov)) { tDM('Gov 13-15', -4); cD_DM -= 4; }
+        if (overallLaw >= 0 && overallLaw <= 4) { tDM('Law 0-4', 1); cD_DM += 1; }
+        if (overallLaw >= 10) { tDM('Law 10+', -1); cD_DM -= 1; }
+        if (pcr >= 0 && pcr <= 3) { tDM('PCR 0-3', 1); cD_DM += 1; }
+        if (pcr >= 7 && pcr <= 9) { tDM('PCR 7-9', -2); cD_DM -= 2; }
+        culD = Math.max(1, tRoll2D('Diversity Roll') + cD_DM);
+        tResult('Diversity Score', culD);
 
         // Xenophilia
+        tSection('Culture: Xenophilia (X)');
         let cX_DM = 0;
-        if (base.pop >= 1 && base.pop <= 5) cX_DM -= 1;
-        if (base.pop >= 9) cX_DM += 2;
-        if (base.gov === 13 || base.gov === 14) cX_DM -= 2;
-        if (overallLaw >= 10) cX_DM -= 2;
-        if (base.starport === 'A') cX_DM += 2;
-        if (base.starport === 'B') cX_DM += 1;
-        if (base.starport === 'D') cX_DM -= 1;
-        if (base.starport === 'E') cX_DM -= 2;
-        if (base.starport === 'X') cX_DM -= 4;
-        if (culD >= 1 && culD <= 3) cX_DM -= 2;
-        if (culD >= 12) cX_DM += 1;
-        culX = Math.max(1, roll2D() + cX_DM);
+        if (base.pop >= 1 && base.pop <= 5) { tDM('Pop 1-5', -1); cX_DM -= 1; }
+        if (base.pop >= 9) { tDM('Pop 9+', 2); cX_DM += 2; }
+        if (base.gov === 13 || base.gov === 14) { tDM('Gov 13,14', -2); cX_DM -= 2; }
+        if (overallLaw >= 10) { tDM('Law 10+', -2); cX_DM -= 2; }
+        if (base.starport === 'A') { tDM('Starport A', 2); cX_DM += 2; }
+        if (base.starport === 'B') { tDM('Starport B', 1); cX_DM += 1; }
+        if (base.starport === 'D') { tDM('Starport D', -1); cX_DM -= 1; }
+        if (base.starport === 'E') { tDM('Starport E', -2); cX_DM -= 2; }
+        if (base.starport === 'X') { tDM('Starport X', -4); cX_DM -= 4; }
+        if (culD >= 1 && culD <= 3) { tDM('Low Diversity', -2); cX_DM -= 2; }
+        if (culD >= 12) { tDM('Extreme Diversity', 1); cX_DM += 1; }
+        culX = Math.max(1, tRoll2D('Xenophilia Roll') + cX_DM);
+        tResult('Xenophilia Score', culX);
 
         // Uniqueness
+        tSection('Culture: Uniqueness (U)');
         let cU_DM = 0;
-        if (base.starport === 'A') cU_DM -= 2;
-        if (base.starport === 'B') cU_DM -= 1;
-        if (base.starport === 'D') cU_DM += 1;
-        if (base.starport === 'E') cU_DM += 2;
-        if (base.starport === 'X') cU_DM += 4;
-        if (culD >= 1 && culD <= 3) cU_DM += 2;
-        if ([9, 10, 11].includes(culX)) cU_DM -= 1;
-        if (culX >= 12) cU_DM -= 2;
-        culU = Math.max(1, roll2D() + cU_DM);
+        if (base.starport === 'A') { tDM('Starport A', -2); cU_DM -= 2; }
+        if (base.starport === 'B') { tDM('Starport B', -1); cU_DM -= 1; }
+        if (base.starport === 'D') { tDM('Starport D', 1); cU_DM += 1; }
+        if (base.starport === 'E') { tDM('Starport E', 2); cU_DM += 2; }
+        if (base.starport === 'X') { tDM('Starport X', 4); cU_DM += 4; }
+        if (culD >= 1 && culD <= 3) { tDM('Low Diversity', 2); cU_DM += 2; }
+        if ([9, 10, 11].includes(culX)) { tDM('High Xenophilia', -1); cU_DM -= 1; }
+        if (culX >= 12) { tDM('Extreme Xenophilia', -2); cU_DM -= 2; }
+        culU = Math.max(1, tRoll2D('Uniqueness Roll') + cU_DM);
+        tResult('Uniqueness Score', culU);
 
         // Symbology
+        tSection('Culture: Symbology (S)');
         let cS_DM = 0;
-        if (base.gov === 13 || base.gov === 14) cS_DM += 2;
-        if (H === 0 || H === 1) cS_DM -= 3;
-        if (H === 2 || H === 3) cS_DM -= 1;
-        if ([9, 10, 11].includes(H)) cS_DM += 2;
-        if (H >= 12) cS_DM += 4;
-        if ([9, 10, 11].includes(culU)) cS_DM += 1;
-        if (culU >= 12) cS_DM += 3;
-        culS = Math.max(1, roll2D() + cS_DM);
+        if (base.gov === 13 || base.gov === 14) { tDM('Gov 13,14', 2); cS_DM += 2; }
+        if (H === 0 || H === 1) { tDM('Low TL (0-1)', -3); cS_DM -= 3; }
+        if (H === 2 || H === 3) { tDM('Low TL (2-3)', -1); cS_DM -= 1; }
+        if ([9, 10, 11].includes(H)) { tDM('High TL (9-11)', 2); cS_DM += 2; }
+        if (H >= 12) { tDM('High TL (12+)', 4); cS_DM += 4; }
+        if ([9, 10, 11].includes(culU)) { tDM('High Uniqueness', 1); cS_DM += 1; }
+        if (culU >= 12) { tDM('Extreme Uniqueness', 3); cS_DM += 3; }
+        culS = Math.max(1, tRoll2D('Symbology Roll') + cS_DM);
+        tResult('Symbology Score', culS);
 
         // Cohesion
+        tSection('Culture: Cohesion (C)');
         let cC_DM = 0;
-        if (base.gov === 3 || base.gov === 12) cC_DM += 2;
-        if ([5, 6, 9].includes(base.gov)) cC_DM += 1;
-        if (overallLaw >= 0 && overallLaw <= 2) cC_DM -= 2;
-        if (overallLaw >= 10) cC_DM += 2;
-        if (pcr >= 0 && pcr <= 3) cC_DM -= 2;
-        if (pcr >= 7) cC_DM += 2;
-        if (culD === 1 || culD === 2) cC_DM += 4;
-        if ([3, 4, 5].includes(culD)) cC_DM += 2;
-        if ([9, 10, 11].includes(culD)) cC_DM -= 2;
-        if (culD >= 12) cC_DM -= 4;
-        culC = Math.max(1, roll2D() + cC_DM);
+        if (base.gov === 3 || base.gov === 12) { tDM('Gov 3,12', 2); cC_DM += 2; }
+        if ([5, 6, 9].includes(base.gov)) { tDM('Gov 5,6,9', 1); cC_DM += 1; }
+        if (overallLaw >= 0 && overallLaw <= 2) { tDM('Low Law', -2); cC_DM -= 2; }
+        if (overallLaw >= 10) { tDM('High Law', 2); cC_DM += 2; }
+        if (pcr >= 0 && pcr <= 3) { tDM('Low PCR', -2); cC_DM -= 2; }
+        if (pcr >= 7) { tDM('High PCR', 2); cC_DM += 2; }
+        if (culD === 1 || culD === 2) { tDM('Extreme Low Diversity', 4); cC_DM += 4; }
+        if ([3, 4, 5].includes(culD)) { tDM('Low Diversity', 2); cC_DM += 2; }
+        if ([9, 10, 11].includes(culD)) { tDM('High Diversity', -2); cC_DM -= 2; }
+        if (culD >= 12) { tDM('Extreme High Diversity', -4); cC_DM -= 4; }
+        culC = Math.max(1, tRoll2D('Cohesion Roll') + cC_DM);
+        tResult('Cohesion Score', culC);
 
         // Progressiveness
+        tSection('Culture: Progressiveness (P)');
         let cP_DM = 0;
-        if ([6, 7, 8].includes(base.pop)) cP_DM -= 1;
-        if (base.pop >= 9) cP_DM -= 2;
-        if (base.gov === 5) cP_DM += 1;
-        if (base.gov === 11) cP_DM -= 2;
-        if (base.gov === 13 || base.gov === 14) cP_DM -= 6;
-        if ([9, 10, 11].includes(overallLaw)) cP_DM -= 1;
-        if (overallLaw >= 12) cP_DM -= 4;
-        if (culD >= 1 && culD <= 3) cP_DM -= 2;
-        if (culD >= 12) cP_DM += 1;
-        if (culX >= 1 && culX <= 5) cP_DM -= 1;
-        if (culX >= 9) cP_DM += 2;
-        if (culC >= 1 && culC <= 5) cP_DM += 2;
-        if (culC >= 9) cP_DM -= 2;
-        culP = Math.max(1, roll2D() + cP_DM);
+        if ([6, 7, 8].includes(base.pop)) { tDM('Pop 6-8', -1); cP_DM -= 1; }
+        if (base.pop >= 9) { tDM('Pop 9+', -2); cP_DM -= 2; }
+        if (base.gov === 5) { tDM('Gov 5', 1); cP_DM += 1; }
+        if (base.gov === 11) { tDM('Gov 11', -2); cP_DM -= 2; }
+        if (base.gov === 13 || base.gov === 14) { tDM('Gov 13,14', -6); cP_DM -= 6; }
+        if ([9, 10, 11].includes(overallLaw)) { tDM('High Law', -1); cP_DM -= 1; }
+        if (overallLaw >= 12) { tDM('Extreme Law', -4); cP_DM -= 4; }
+        if (culD >= 1 && culD <= 3) { tDM('Low Diversity', -2); cP_DM -= 2; }
+        if (culD >= 12) { tDM('Extreme Diversity', 1); cP_DM += 1; }
+        if (culX >= 1 && culX <= 5) { tDM('Low Xenophilia', -1); cP_DM -= 1; }
+        if (culX >= 9) { tDM('High Xenophilia', 2); cP_DM += 2; }
+        if (culC >= 1 && culC <= 5) { tDM('Low Cohesion', 2); cP_DM += 2; }
+        if (culC >= 9) { tDM('High Cohesion', -2); cP_DM -= 2; }
+        culP = Math.max(1, tRoll2D('Progressiveness Roll') + cP_DM);
+        tResult('Progressiveness Score', culP);
 
         // Expansionism
+        tSection('Culture: Expansionism (E)');
         let cE_DM = 0;
-        if (base.gov === 10 || base.gov >= 12) cE_DM += 2;
-        if (culD >= 1 && culD <= 3) cE_DM += 3;
-        if (culD >= 12) cE_DM -= 3;
-        if (culX >= 1 && culX <= 5) cE_DM += 1;
-        if (culX >= 9) cE_DM -= 2;
-        culE = Math.max(1, roll2D() + cE_DM);
+        if (base.gov === 10 || base.gov >= 12) { tDM('Gov 10,12+', 2); cE_DM += 2; }
+        if (culD >= 1 && culD <= 3) { tDM('Low Diversity', 3); cE_DM += 3; }
+        if (culD >= 12) { tDM('Extreme Diversity', -3); cE_DM -= 3; }
+        if (culX >= 1 && culX <= 5) { tDM('Low Xenophilia', 1); cE_DM += 1; }
+        if (culX >= 9) { tDM('High Xenophilia', -2); cE_DM -= 2; }
+        culE = Math.max(1, tRoll2D('Expansionism Roll') + cE_DM);
+        tResult('Expansionism Score', culE);
 
         // Militancy
+        tSection('Culture: Militancy (M)');
         let cM_DM = 0;
-        if (base.gov >= 10) cM_DM += 3;
-        if ([9, 10, 11].includes(overallLaw)) cM_DM += 1;
-        if (overallLaw >= 12) cM_DM += 2;
-        if (culX >= 1 && culX <= 5) cM_DM += 1;
-        if (culX >= 9) cM_DM -= 2;
-        if (culE >= 1 && culE <= 5) cM_DM -= 1;
-        if ([9, 10, 11].includes(culE)) cM_DM += 1;
-        if (culE >= 12) cM_DM += 2;
-        culM = Math.max(1, roll2D() + cM_DM);
+        if (base.gov >= 10) { tDM('Gov 10+', 3); cM_DM += 3; }
+        if ([9, 10, 11].includes(overallLaw)) { tDM('High Law', 1); cM_DM += 1; }
+        if (overallLaw >= 12) { tDM('Extreme Law', 2); cM_DM += 2; }
+        if (culX >= 1 && culX <= 5) { tDM('Low Xenophilia', 1); cM_DM += 1; }
+        if (culX >= 9) { tDM('High Xenophilia', -2); cM_DM -= 2; }
+        if (culE >= 1 && culE <= 5) { tDM('Low Expansionism', -1); cM_DM -= 1; }
+        if ([9, 10, 11].includes(culE)) { tDM('High Expansionism', 1); cM_DM += 1; }
+        if (culE >= 12) { tDM('Extreme Expansionism', 2); cM_DM += 2; }
+        culM = Math.max(1, tRoll2D('Militancy Roll') + cM_DM);
+        tResult('Militancy Score', culM);
 
         culturalProfile = `${toEHex(culD)}${toEHex(culX)}${toEHex(culU)}${toEHex(culS)}-${toEHex(culC)}${toEHex(culP)}${toEHex(culE)}${toEHex(culM)}`;
+        tResult('Final Cultural Profile', culturalProfile);
     }
 
     // 13. Economic Profile
+    tSection('Economic Profile');
     let ggCount = base.gasGiant ? 1 : 0;
     let beltCount = base.size === 0 ? 1 : 0;
     let basesCount = 0;
@@ -902,75 +1205,113 @@ function generateMgT2ESocioeconomics(base, hexId) {
     if (base.scoutBase) basesCount++;
     if (base.militaryBase) basesCount++;
 
-    let resourceRating = roll2D() - 7 + base.size;
-    resourceRating = Math.max(2, Math.min(12, resourceRating));
+    tSection('Eco: Resources (R)');
+    let rRoll = tRoll2D('Resources Roll');
+    let resourceRating = rRoll - 7 + base.size;
+    let fRR = Math.max(2, Math.min(12, resourceRating));
+    if (resourceRating !== fRR) tClamp('Resources Rating', resourceRating, fRR);
+    resourceRating = fRR;
+    tResult('Base Resource Rating', resourceRating);
 
     let tcArr = tcs;
+    tSection('Eco: Importance (Ix)');
     let Im = 0;
-    if (['A', 'B'].includes(base.starport)) Im += 1;
-    if (['D', 'E', 'X'].includes(base.starport)) Im -= 1;
-    if (base.tl <= 8) Im -= 1;
-    if (base.tl >= 10 && base.tl <= 15) Im += 1;
-    if (base.tl >= 16) Im += 2;
-    if (base.pop <= 6) Im -= 1;
-    if (base.pop >= 9) Im += 1;
-    if (tcArr.includes('Ag')) Im += 1;
-    if (tcArr.includes('In')) Im += 1;
-    if (tcArr.includes('Ri')) Im += 1;
-    if (basesCount >= 2) Im += 1;
+    if (['A', 'B'].includes(base.starport)) { tDM('Starport A-B', 1); Im += 1; }
+    if (['D', 'E', 'X'].includes(base.starport)) { tDM('Starport D-X', -1); Im -= 1; }
+    if (base.tl <= 8) { tDM('TL <= 8', -1); Im -= 1; }
+    if (base.tl >= 10 && base.tl <= 15) { tDM('TL 10-15', 1); Im += 1; }
+    if (base.tl >= 16) { tDM('TL 16+', 2); Im += 2; }
+    if (base.pop <= 6) { tDM('Pop <= 6', -1); Im -= 1; }
+    if (base.pop >= 9) { tDM('Pop >= 9', 1); Im += 1; }
+    if (tcArr.includes('Ag')) { tDM('Agricultural', 1); Im += 1; }
+    if (tcArr.includes('In')) { tDM('Industrial', 1); Im += 1; }
+    if (tcArr.includes('Ri')) { tDM('Rich', 1); Im += 1; }
+    if (basesCount >= 2) { tDM('Bases >= 2', 1); Im += 1; }
+    tResult('Importance Index (Ix)', Im);
 
+    tSection('Eco: Resources Final (R)');
     let ecoR = resourceRating;
     if (tcArr.includes('In') || tcArr.includes('Ag')) {
-        ecoR -= Math.floor(rng() * 6);
+        let consumeRoll = Math.floor(rng() * 6);
+        tDM('Industrial/Ag Consumption', -consumeRoll);
+        ecoR -= consumeRoll;
         ecoR = Math.max(2, ecoR);
     }
     if (base.tl >= 8) {
+        tDM('TL 8+ GG/Belt bonus', ggCount + beltCount);
         ecoR += ggCount + beltCount;
     }
     if (ecoR < 2) {
         ecoR = 2 + ggCount + beltCount;
+        tResult('Minimum Resource Floor', ecoR);
     }
+    tResult('Final Resources (R)', ecoR);
 
+    tSection('Eco: Labor (L)');
     let ecoL = base.pop <= 1 ? 0 : base.pop - 1;
+    tResult('Labor (L)', ecoL);
 
+    tSection('Eco: Infrastructure (I)');
     let ecoI = Im;
-    if (base.pop >= 4 && base.pop <= 6) ecoI += Math.floor(rng() * 6) + 1;
-    if (base.pop >= 7) ecoI += roll2D();
+    if (base.pop >= 4 && base.pop <= 6) {
+        let infraBonus = Math.floor(rng() * 6) + 1;
+        tDM('Pop 4-6 Bonus', infraBonus);
+        ecoI += infraBonus;
+    }
+    if (base.pop >= 7) {
+        let infraRoll = tRoll2D('Infrastructure Bonus Roll');
+        ecoI += infraRoll;
+    }
     if (base.pop === 0 || ecoI < 0) ecoI = 0;
+    tResult('Infrastructure (I)', ecoI);
 
+    tSection('Eco: Efficiency (E)');
     let ecoE = 0;
     if (base.pop === 0) ecoE = -5;
-    else if (base.pop >= 1 && base.pop <= 6) ecoE = roll2D() - 7;
-    else if (base.pop >= 7) ecoE = roll2D3() - 4;
+    else if (base.pop >= 1 && base.pop <= 6) {
+        let eRoll = tRoll2D('Efficiency Roll');
+        ecoE = eRoll - 7;
+    }
+    else if (base.pop >= 7) {
+        let eRoll = tRoll2D3('Efficiency Roll Base');
+        ecoE = eRoll - 4;
+    }
 
     let ecoE_DM = 0;
-    if ([0, 3, 6, 9, 11, 12, 15].includes(base.gov)) ecoE_DM -= 1;
-    if ([1, 2, 4, 5, 8].includes(base.gov)) ecoE_DM += 1;
-    if (overallLaw >= 0 && overallLaw <= 4) ecoE_DM += 1;
-    if (overallLaw >= 10) ecoE_DM -= 1;
-    if (pcr >= 0 && pcr <= 3) ecoE_DM -= 1;
-    if (pcr >= 8) ecoE_DM += 1;
-    if (culP >= 1 && culP <= 3) ecoE_DM -= 1;
-    if (culP >= 9) ecoE_DM += 1;
-    if (culE >= 1 && culE <= 3) ecoE_DM -= 1;
-    if (culE >= 9) ecoE_DM += 1;
+    if ([0, 3, 6, 9, 11, 12, 15].includes(base.gov)) { tDM('Gov 0,3,6,9,11,12,15', -1); ecoE_DM -= 1; }
+    if ([1, 2, 4, 5, 8].includes(base.gov)) { tDM('Gov 1,2,4,5,8', 1); ecoE_DM += 1; }
+    if (overallLaw >= 0 && overallLaw <= 4) { tDM('Law 0-4', 1); ecoE_DM += 1; }
+    if (overallLaw >= 10) { tDM('Law 10+', -1); ecoE_DM -= 1; }
+    if (pcr >= 0 && pcr <= 3) { tDM('PCR 0-3', -1); ecoE_DM -= 1; }
+    if (pcr >= 8) { tDM('PCR 8+', 1); ecoE_DM += 1; }
+    if (culP >= 1 && culP <= 3) { tDM('Culture P 1-3', -1); ecoE_DM -= 1; }
+    if (culP >= 9) { tDM('Culture P 9+', 1); ecoE_DM += 1; }
+    if (culE >= 1 && culE <= 3) { tDM('Culture E 1-3', -1); ecoE_DM -= 1; }
+    if (culE >= 9) { tDM('Culture E 9+', 1); ecoE_DM += 1; }
 
     if (base.pop > 0) {
         ecoE += ecoE_DM;
-        ecoE = Math.max(-5, Math.min(5, ecoE));
-        if (ecoE === 0) ecoE = 1;
+        let fEE = Math.max(-5, Math.min(5, ecoE));
+        if (ecoE !== fEE) tClamp('Efficiency', ecoE, fEE);
+        ecoE = fEE;
+        if (ecoE === 0) { tResult('Efficiency 0 Neutralized', 1); ecoE = 1; }
     }
+    tResult('Efficiency (E)', ecoE);
 
+    tSection('Resource Units (RU)');
     let calcR = ecoR === 0 ? 1 : ecoR;
     let calcL = ecoL === 0 ? 1 : ecoL;
     let calcI = ecoI === 0 ? 1 : ecoI;
     let calcE = ecoE === 0 ? 1 : ecoE;
     let RU = calcR * calcL * calcI * calcE;
+    tResult('RU calculation', `${calcR}*${calcL}*${calcI}*${calcE} = ${RU}`);
 
+    tSection('GWP calculation');
     let gwpBase = Math.max(1, ecoI) + Math.max(1, ecoR);
     if (base.pop === 0) gwpBase = ecoI + ecoR;
     let maxGwpBase = Math.max(2, 2 * ecoI);
     gwpBase = Math.max(2, Math.min(maxGwpBase, gwpBase));
+    tResult('GWP Base', gwpBase);
 
     let tlMod = base.tl === 0 ? 0.05 : base.tl / 10;
     let portMod = 1.0;
@@ -1013,6 +1354,7 @@ function generateMgT2ESocioeconomics(base, hexId) {
     if (tcArr.includes('Ri')) tcMod *= 1.2;
 
     let totalMods = tlMod * portMod * govMod * tcMod;
+    tResult('Total GWP Mods', totalMods.toFixed(4));
     let pcGWP = 0;
     if (ecoE > 0) {
         pcGWP = 1000 * gwpBase * totalMods * ecoE;
@@ -1020,12 +1362,14 @@ function generateMgT2ESocioeconomics(base, hexId) {
         pcGWP = (1000 * gwpBase * totalMods) / (-(ecoE - 1));
     }
     pcGWP = Math.round(pcGWP);
+    tResult('GWP per Capita', pcGWP);
 
+    tSection('World Trade Number (WTN)');
     let wtnBase = base.pop;
-    if (base.tl <= 1) wtnBase -= 1;
-    else if (base.tl >= 5 && base.tl <= 8) wtnBase += 1;
-    else if (base.tl >= 9 && base.tl <= 14) wtnBase += 2;
-    else if (base.tl >= 15) wtnBase += 3;
+    if (base.tl <= 1) { tDM('TL <= 1', -1); wtnBase -= 1; }
+    else if (base.tl >= 5 && base.tl <= 8) { tDM('TL 5-8', 1); wtnBase += 1; }
+    else if (base.tl >= 9 && base.tl <= 14) { tDM('TL 9-14', 2); wtnBase += 2; }
+    else if (base.tl >= 15) { tDM('TL 15+', 3); wtnBase += 3; }
 
     let portWtnMod = 0;
     let wIdx = Math.max(0, wtnBase);
@@ -1075,20 +1419,26 @@ function generateMgT2ESocioeconomics(base, hexId) {
         else if (base.starport === 'X') portWtnMod = -10;
         else portWtnMod = 0;
     }
+    if (portWtnMod !== 0) tDM(`Starport ${base.starport} WTN Mod`, portWtnMod);
 
     let WTN = Math.max(0, wtnBase + portWtnMod);
+    tResult('WTN Final', WTN);
 
-    let IR = 50 - (ecoE * 5) + ((roll2D() - 7) * 2);
-    if ([6, 11, 15].includes(base.gov)) IR += 10;
-    if ([0, 1, 3, 9, 12].includes(base.gov)) IR += 5;
-    if ([4, 8].includes(base.gov)) IR -= 5;
-    if (base.gov === 2) IR -= 10;
-    if (overallLaw >= 9) IR += (overallLaw - 8);
-    IR += pcr;
-    IR -= ecoI;
+    tSection('IR & DR');
+    let IRroll = tRoll2D('Income Roll');
+    let IR = 50 - (ecoE * 5) + ((IRroll - 7) * 2);
+    if ([6, 11, 15].includes(base.gov)) { tDM('Gov 6,11,15', 10); IR += 10; }
+    if ([0, 1, 3, 9, 12].includes(base.gov)) { tDM('Gov 0,1,3,9,12', 5); IR += 5; }
+    if ([4, 8].includes(base.gov)) { tDM('Gov 4,8', -5); IR -= 5; }
+    if (base.gov === 2) { tDM('Gov 2', -10); IR -= 10; }
+    if (overallLaw >= 9) { tDM('Law 9+', overallLaw - 8); IR += (overallLaw - 8); }
+    tDM('PCR Bonus', pcr); IR += pcr;
+    tDM('Infrastructure Drain', -ecoI); IR -= ecoI;
+    tResult('Income Rating (IR)', IR);
 
     let DR = (pcGWP / 1000) * (1 - (IR / 100));
     DR = DR.toFixed(2);
+    tResult('Development Rating (DR)', DR);
 
     let formatIm = Im >= 0 ? "+" + Im : Im.toString();
     let formatE = ecoE >= 0 ? "+" + ecoE : ecoE.toString();
@@ -1096,8 +1446,10 @@ function generateMgT2ESocioeconomics(base, hexId) {
     let wtnChar = toEHex(WTN);
 
     let economicProfile = `${formatIm}, ${rlie}, ${RU}, Cr${pcGWP}, ${wtnChar}, ${IR}, ${DR}`;
+    tResult('Final Economic Profile', economicProfile);
 
     // 14. Starport Profile
+    tSection('Starport Profile');
     let spClass = base.starport || 'X';
     let hxObj = 'HN';
     if (['A', 'B', 'C', 'D'].includes(spClass)) {
@@ -1106,27 +1458,40 @@ function generateMgT2ESocioeconomics(base, hexId) {
         if (spClass === 'B') target = 8;
         if (spClass === 'C') target = 10;
 
-        let hxScore = roll2D();
-        if (base.pop >= 9) hxScore += 1;
-        if ([9, 10, 11].includes(base.tl)) hxScore += 1;
-        if (base.tl >= 12) hxScore += 2;
+        let hxSR = tRoll2D('Highport Check');
+        let hxScore = hxSR;
+        if (base.pop >= 9) { tDM('Pop 9+', 1); hxScore += 1; }
+        if ([9, 10, 11].includes(base.tl)) { tDM('TL 9-11', 1); hxScore += 1; }
+        if (base.tl >= 12) { tDM('TL 12+', 2); hxScore += 2; }
 
-        if (hxScore >= target) hxObj = 'HY';
+        if (hxScore >= target) {
+            tResult('Highport Present', 'Yes');
+            hxObj = 'HY';
+        } else {
+            tResult('Highport Present', 'No');
+        }
     }
 
     let dxObj = base.gasGiant ? 'DN' : 'DY';
+    tResult('Downport Status', dxObj === 'DY' ? 'Yes' : 'No (Gas Giant present)');
 
     let spIm = Im;
-    if (WTN >= 10) spIm += 1;
-    if (WTN <= 4) spIm -= 1;
+    if (WTN >= 10) { tDM('WTN 10+', 1); spIm += 1; }
+    if (WTN <= 4) { tDM('WTN 4-', -1); spIm -= 1; }
 
     let formatSpIm = spIm >= 0 ? "+" + spIm : spIm.toString();
     let starportProfile = `${spClass}-${hxObj}:${dxObj}:${formatSpIm}`;
+    tResult('Final Starport Profile', starportProfile);
 
     // 15. Military Profile
-    let milRisk = roll2D() >= 10;
-    let milFactional = roll2D() >= 11;
-    let milReadinessRoll = roll2D();
+    tSection('Military Profile');
+    let milRisk = tRoll2D('Military Risk Check') >= 10;
+    tResult('Military Risk', milRisk);
+    let milFactional = tRoll2D('Factional Conflict Check') >= 11;
+    tResult('Factional Conflict', milFactional);
+
+    tSection('Military Readiness');
+    let milReadinessRoll = tRoll2D('Readiness Roll');
     let milReadiness = 'Normal';
     let readinessMultiplier = 1.0;
     let milConflictGlobalDM = 0;
@@ -1136,7 +1501,13 @@ function generateMgT2ESocioeconomics(base, hexId) {
     else if (milReadinessRoll <= 10) { milReadiness = 'Heightened'; readinessMultiplier = 1.2; milConflictGlobalDM = 1; }
     else if (milReadinessRoll === 11) { milReadiness = 'War'; readinessMultiplier = 2.0; milConflictGlobalDM = 4; }
     else { milReadiness = 'Total War'; readinessMultiplier = 5.0; milConflictGlobalDM = 8; }
-    if (milFactional && readinessMultiplier < 2.0) { readinessMultiplier = 1.2; milConflictGlobalDM = 2; }
+    tResult('Readiness Status', milReadiness);
+
+    if (milFactional && readinessMultiplier < 2.0) {
+        readinessMultiplier = 1.2;
+        milConflictGlobalDM = 2;
+        tOverride('Factional readiness boost', 1.2);
+    }
 
     let globalMilitancyDM = 0;
     if (culM >= 1 && culM <= 2) globalMilitancyDM = -4;
@@ -1144,178 +1515,206 @@ function generateMgT2ESocioeconomics(base, hexId) {
     else if (culM >= 6 && culM <= 8) globalMilitancyDM = 1;
     else if (culM >= 9 && culM <= 11) globalMilitancyDM = 2;
     else if (culM >= 12) globalMilitancyDM = 4;
+    tDM('Cultural Militancy DM', globalMilitancyDM);
 
     let globalDM = globalMilitancyDM + milConflictGlobalDM;
+    tResult('Global Military DM', globalDM);
 
     // Enforcement
+    tSection('Mil: Enforcement');
     let enfDM = 0;
-    if (base.gov === 0) enfDM -= 5;
-    if (base.gov === 11) enfDM += 2;
-    if (overallLaw === 0) enfDM -= 4;
-    if (overallLaw === 1) enfDM -= 2;
-    if (overallLaw === 2) enfDM -= 1;
-    if (overallLaw >= 9 && overallLaw <= 11) enfDM += 2;
-    if (overallLaw >= 12) enfDM += 4;
-    if (pcr >= 0 && pcr <= 4) enfDM += 2;
-    if (milFactional) enfDM += 2;
+    if (base.gov === 0) { tDM('Gov 0', -5); enfDM -= 5; }
+    if (base.gov === 11) { tDM('Gov 11', 2); enfDM += 2; }
+    if (overallLaw === 0) { tDM('Law 0', -4); enfDM -= 4; }
+    if (overallLaw === 1) { tDM('Law 1', -2); enfDM -= 2; }
+    if (overallLaw === 2) { tDM('Law 2', -1); enfDM -= 1; }
+    if (overallLaw >= 9 && overallLaw <= 11) { tDM('Law 9-11', 2); enfDM += 2; }
+    if (overallLaw >= 12) { tDM('Law 12+', 4); enfDM += 4; }
+    if (pcr >= 0 && pcr <= 4) { tDM('High PCR', 2); enfDM += 2; }
+    if (milFactional) { tDM('Factional Conflict', 2); enfDM += 2; }
     let enfEff = 3 + globalDM + enfDM;
-    if (enfEff < 1) enfEff = 1;
-    if (enfEff > 18) enfEff = 18;
+    let finalEnf = Math.max(1, Math.min(18, enfEff));
+    if (enfEff !== finalEnf) tClamp('Enforcement Eff', enfEff, finalEnf);
+    enfEff = finalEnf;
+    tResult('Enforcement Efficiency', enfEff);
     let bE = toEHex(enfEff);
 
     // Militia
+    tSection('Mil: Militia');
     let milM_DM = 0;
-    if (base.gov === 1) milM_DM -= 4;
-    if (base.gov === 2) milM_DM += 2;
-    if (base.gov === 6) milM_DM -= 6;
+    if (base.gov === 1) { tDM('Gov 1', -4); milM_DM -= 4; }
+    if (base.gov === 2) { tDM('Gov 2', 2); milM_DM += 2; }
+    if (base.gov === 6) { tDM('Gov 6', -6); milM_DM -= 6; }
+    tDM('Law Penalty', -overallLaw);
     milM_DM -= overallLaw;
-    if (pcr >= 0 && pcr <= 2) milM_DM += 2;
-    if (pcr === 3 || pcr === 4) milM_DM += 1;
-    if (pcr >= 6) milM_DM -= 1;
-    let milMRoll = roll2D() + globalDM + milM_DM;
+    if (pcr >= 0 && pcr <= 2) { tDM('PCR 0-2', 2); milM_DM += 2; }
+    if (pcr === 3 || pcr === 4) { tDM('PCR 3-4', 1); milM_DM += 1; }
+    if (pcr >= 6) { tDM('PCR 6+', -1); milM_DM -= 1; }
+    let milMRoll = tRoll2D('Militia Roll') + globalDM + milM_DM;
     let bM = "0";
     if (milMRoll >= 4) {
         let eff = milMRoll - 4;
-        if (eff < 1) eff = 1;
-        if (eff > 18) eff = 18;
+        let finalEff = Math.max(1, Math.min(18, eff));
+        if (eff !== finalEff) tClamp('Militia Eff', eff, finalEff);
+        eff = finalEff;
         bM = toEHex(eff);
     }
+    tResult('Militia Efficiency', bM);
 
     // Army
+    tSection('Mil: Army');
     let armyDM = 0;
-    if (bM !== "0") armyDM -= 2;
-    if (base.gov === 0) armyDM -= 6;
-    if (base.gov === 7) armyDM += 4;
-    if (base.gov >= 10) armyDM += 4;
-    if (base.tl <= 7) armyDM += 4;
-    if (base.tl >= 8) armyDM -= 2;
-    if (base.militaryBase) armyDM += 6;
-    if (milRisk) armyDM += 2;
-    if (milFactional) armyDM += 2;
-    let armyRoll = roll2D() + globalDM + armyDM;
+    if (bM !== "0") { tDM('Militia Present', -2); armyDM -= 2; }
+    if (base.gov === 0) { tDM('Gov 0', -6); armyDM -= 6; }
+    if (base.gov === 7) { tDM('Gov 7', 4); armyDM += 4; }
+    if (base.gov >= 10) { tDM('Gov 10+', 4); armyDM += 4; }
+    if (base.tl <= 7) { tDM('TL <= 7', 4); armyDM += 4; }
+    if (base.tl >= 8) { tDM('TL 8+', -2); armyDM -= 2; }
+    if (base.militaryBase) { tDM('Military Base', 6); armyDM += 6; }
+    if (milRisk) { tDM('Military Risk', 2); armyDM += 2; }
+    if (milFactional) { tDM('Factional Conflict', 2); armyDM += 2; }
+    let armyRoll = tRoll2D('Army Roll') + globalDM + armyDM;
     let bA = "0";
     if (armyRoll >= 4) {
         let eff = armyRoll - 4;
-        if (eff < 1) eff = 1;
-        if (eff > 18) eff = 18;
+        let finalEff = Math.max(1, Math.min(18, eff));
+        if (eff !== finalEff) tClamp('Army Eff', eff, finalEff);
+        eff = finalEff;
         bA = toEHex(eff);
     }
+    tResult('Army Efficiency', bA);
 
     // Wet Navy
+    tSection('Mil: Wet Navy');
     let wetDM = 0;
-    if (base.hydro === 0) wetDM -= 20;
-    if (base.hydro >= 1 && base.hydro <= 3) wetDM -= 5;
-    if (base.hydro === 8) wetDM += 2;
-    if (base.hydro === 9) wetDM += 4;
-    if (base.hydro >= 10) wetDM += 8;
-    if (base.gov === 7) wetDM += 4;
-    if (base.tl === 0) wetDM -= 8;
-    if (base.tl === 8 || base.tl === 9) wetDM -= 2;
-    if (base.tl >= 10) wetDM -= base.tl;
-    let wetRoll = roll2D() + globalDM + wetDM;
+    if (base.hydro === 0) { tDM('Hydro 0', -20); wetDM -= 20; }
+    if (base.hydro >= 1 && base.hydro <= 3) { tDM('Hydro 1-3', -5); wetDM -= 5; }
+    if (base.hydro === 8) { tDM('Hydro 8', 2); wetDM += 2; }
+    if (base.hydro === 9) { tDM('Hydro 9', 4); wetDM += 4; }
+    if (base.hydro >= 10) { tDM('Hydro A', 8); wetDM += 8; }
+    if (base.gov === 7) { tDM('Gov 7', 4); wetDM += 4; }
+    if (base.tl === 0) { tDM('TL 0', -8); wetDM -= 8; }
+    if (base.tl === 8 || base.tl === 9) { tDM('TL 8-9', -2); wetDM -= 2; }
+    if (base.tl >= 10) { tDM(`TL ${base.tl} penalty`, -base.tl); wetDM -= base.tl; }
+    let wetRoll = tRoll2D('Wet Navy Roll') + globalDM + wetDM;
     let bW = "0";
     if (wetRoll >= 4) {
         let eff = wetRoll - 4;
-        if (eff < 1) eff = 1;
-        if (eff > 18) eff = 18;
+        let finalEff = Math.max(1, Math.min(18, eff));
+        if (eff !== finalEff) tClamp('Wet Navy Eff', eff, finalEff);
+        eff = finalEff;
         bW = toEHex(eff);
     }
+    tResult('Wet Navy Efficiency', bW);
 
     // Air Force
+    tSection('Mil: Air Force');
     let airDM = 0;
-    if (base.atm <= 1 && base.tl <= 8) airDM -= 20;
-    if (([2, 3, 14].includes(base.atm)) && base.tl <= 8) airDM -= 8;
-    if (([4, 5].includes(base.atm)) && base.tl <= 8) airDM -= 2;
-    if (base.gov === 7) airDM += 4;
-    if (base.tl >= 0 && base.tl <= 2) airDM -= 20;
-    if (base.tl === 3) airDM -= 10;
-    if (base.tl >= 10 && base.tl <= 12) airDM -= 4;
-    if (base.tl >= 13) airDM -= 6;
-    let airRoll = roll2D() + globalDM + airDM;
+    if (base.atm <= 1 && base.tl <= 8) { tDM('Thin/No Atm & TL<=8', -20); airDM -= 20; }
+    if (([2, 3, 14].includes(base.atm)) && base.tl <= 8) { tDM('Atm 2,3,e & TL<=8', -8); airDM -= 8; }
+    if (([4, 5].includes(base.atm)) && base.tl <= 8) { tDM('Atm 4,5 & TL<=8', -2); airDM -= 2; }
+    if (base.gov === 7) { tDM('Gov 7', 4); airDM += 4; }
+    if (base.tl >= 0 && base.tl <= 2) { tDM('TL 0-2', -20); airDM -= 20; }
+    if (base.tl === 3) { tDM('TL 3', -10); airDM -= 10; }
+    if (base.tl >= 10 && base.tl <= 12) { tDM('TL 10-12', -4); airDM -= 4; }
+    if (base.tl >= 13) { tDM('TL 13+', -6); airDM -= 6; }
+    let airRoll = tRoll2D('Air Force Roll') + globalDM + airDM;
     let bF = "0";
     if (airRoll >= 4) {
         let eff = airRoll - 4;
-        if (eff < 1) eff = 1;
-        if (eff > 18) eff = 18;
+        let finalEff = Math.max(1, Math.min(18, eff));
+        if (eff !== finalEff) tClamp('Air Force Eff', eff, finalEff);
+        eff = finalEff;
         bF = toEHex(eff);
     }
+    tResult('Air Force Efficiency', bF);
 
     // System Defence
+    tSection('Mil: System Defence');
     let sysDM = 0;
-    if (base.pop <= 3) sysDM -= 6;
-    if (base.pop === 4 || base.pop === 5) sysDM -= 2;
-    if (base.tl <= 5) sysDM -= 20;
-    if (base.tl === 6) sysDM -= 8;
-    if (base.tl === 7) sysDM -= 6;
-    if (base.tl === 8) sysDM -= 2;
-    if (base.starport === 'A') sysDM += 4;
-    if (base.starport === 'B') sysDM += 2;
-    if (base.starport === 'C') sysDM += 1;
-    if (base.starport === 'E') sysDM -= 2;
-    if (base.starport === 'X') sysDM -= 8;
-    if (hxObj === 'HY') sysDM += 2;
-    if (base.navalBase) sysDM += 4;
-    if (base.militaryBase) sysDM += 2;
-    if (milRisk) sysDM += 2;
-    let sysRoll = roll2D() + globalDM + sysDM;
+    if (base.pop <= 3) { tDM('Pop <= 3', -6); sysDM -= 6; }
+    if (base.pop === 4 || base.pop === 5) { tDM('Pop 4-5', -2); sysDM -= 2; }
+    if (base.tl <= 5) { tDM('TL <= 5', -20); sysDM -= 20; }
+    if (base.tl === 6) { tDM('TL 6', -8); sysDM -= 8; }
+    if (base.tl === 7) { tDM('TL 7', -6); sysDM -= 6; }
+    if (base.tl === 8) { tDM('TL 8', -2); sysDM -= 2; }
+    if (base.starport === 'A') { tDM('Starport A', 4); sysDM += 4; }
+    if (base.starport === 'B') { tDM('Starport B', 2); sysDM += 2; }
+    if (base.starport === 'C') { tDM('Starport C', 1); sysDM += 1; }
+    if (base.starport === 'E') { tDM('Starport E', -2); sysDM -= 2; }
+    if (base.starport === 'X') { tDM('Starport X', -8); sysDM -= 8; }
+    if (hxObj === 'HY') { tDM('Highport Present', 2); sysDM += 2; }
+    if (base.navalBase) { tDM('Naval Base', 4); sysDM += 4; }
+    if (base.militaryBase) { tDM('Military Base', 2); sysDM += 2; }
+    if (milRisk) { tDM('Military Risk', 2); sysDM += 2; }
+    let sysRoll = tRoll2D('System Defence Roll') + globalDM + sysDM;
     let bS = "0";
     if (sysRoll >= 4) {
         let eff = sysRoll - 4;
-        if (eff < 1) eff = 1;
-        if (eff > 18) eff = 18;
+        let finalEff = Math.max(1, Math.min(18, eff));
+        if (eff !== finalEff) tClamp('System Defence Eff', eff, finalEff);
+        eff = finalEff;
         bS = toEHex(eff);
     }
+    tResult('System Defence Efficiency', bS);
 
     // Navy
+    tSection('Mil: Navy');
     let navDM = 0;
-    if (base.pop <= 3) navDM -= 6;
-    if (base.pop >= 4 && base.pop <= 6) navDM -= 3;
-    if (base.tl <= 5) navDM -= 20;
-    if (base.tl === 6) navDM -= 12;
-    if (base.tl === 7) navDM -= 8;
-    if (base.tl === 8) navDM -= 6;
-    if (base.starport === 'A') navDM += 4;
-    if (base.starport === 'B') navDM += 1;
-    if (base.starport === 'E') navDM -= 2;
-    if (base.starport === 'X') navDM -= 8;
-    if (hxObj === 'HY') navDM += 2;
-    if (base.navalBase) navDM += 4;
-    if (base.militaryBase) navDM += 2;
-    if (culE >= 1 && culE <= 5) navDM -= 2;
-    if (culE >= 9 && culE <= 11) navDM += 2;
-    if (culE >= 12) navDM += 4;
-    if (milRisk) navDM += 2;
-    let navRoll = roll2D() + globalDM + navDM;
+    if (base.pop <= 3) { tDM('Pop <= 3', -6); navDM -= 6; }
+    if (base.pop >= 4 && base.pop <= 6) { tDM('Pop 4-6', -3); navDM -= 3; }
+    if (base.tl <= 5) { tDM('TL <= 5', -20); navDM -= 20; }
+    if (base.tl === 6) { tDM('TL 6', -12); navDM -= 12; }
+    if (base.tl === 7) { tDM('TL 7', -8); navDM -= 8; }
+    if (base.tl === 8) { tDM('TL 8', -6); navDM -= 6; }
+    if (base.starport === 'A') { tDM('Starport A', 4); navDM += 4; }
+    if (base.starport === 'B') { tDM('Starport B', 1); navDM += 1; }
+    if (base.starport === 'E') { tDM('Starport E', -2); navDM -= 2; }
+    if (base.starport === 'X') { tDM('Starport X', -8); navDM -= 8; }
+    if (hxObj === 'HY') { tDM('Highport Present', 2); navDM += 2; }
+    if (base.navalBase) { tDM('Naval Base', 4); navDM += 4; }
+    if (base.militaryBase) { tDM('Military Base', 2); navDM += 2; }
+    if (culE >= 1 && culE <= 5) { tDM('Low Expansionism', -2); navDM -= 2; }
+    if (culE >= 9 && culE <= 11) { tDM('High Expansionism', 2); navDM += 2; }
+    if (culE >= 12) { tDM('Extreme Expansionism', 4); navDM += 4; }
+    if (milRisk) { tDM('Military Risk', 2); navDM += 2; }
+    let navRoll = tRoll2D('Navy Roll') + globalDM + navDM;
     let bN = "0";
     if (navRoll >= 4) {
         let eff = navRoll - 4;
-        if (eff < 1) eff = 1;
-        if (eff > 18) eff = 18;
+        let finalEff = Math.max(1, Math.min(18, eff));
+        if (eff !== finalEff) tClamp('Navy Eff', eff, finalEff);
+        eff = finalEff;
         bN = toEHex(eff);
     }
+    tResult('Navy Efficiency', bN);
 
     // Marines
+    tSection('Mil: Marines');
     let marDM = 0;
-    if (base.pop <= 5) marDM -= 4;
-    if (base.tl <= 8) marDM -= 6;
-    if (base.navalBase) marDM += 2;
-    if (base.militaryBase) marDM += 2;
-    if (bN === "0") marDM -= 6;
-    if (bS === "0") marDM -= 6;
-    if (culE >= 1 && culE <= 5) marDM -= 4;
-    if (culE >= 9 && culE <= 11) marDM += 1;
-    if (culE >= 12) marDM += 2;
-    if (milRisk) marDM += 2;
-    let marRoll = roll2D() + globalDM + marDM;
+    if (base.pop <= 5) { tDM('Pop <= 5', -4); marDM -= 4; }
+    if (base.tl <= 8) { tDM('TL <= 8', -6); marDM -= 6; }
+    if (base.navalBase) { tDM('Naval Base', 2); marDM += 2; }
+    if (base.militaryBase) { tDM('Military Base', 2); marDM += 2; }
+    if (bN === "0") { tDM('No Navy', -6); marDM -= 6; }
+    if (bS === "0") { tDM('No System Defence', -6); marDM -= 6; }
+    if (culE >= 1 && culE <= 5) { tDM('Low Expansionism', -4); marDM -= 4; }
+    if (culE >= 9 && culE <= 11) { tDM('High Expansionism', 1); marDM += 1; }
+    if (culE >= 12) { tDM('Extreme Expansionism', 2); marDM += 2; }
+    if (milRisk) { tDM('Military Risk', 2); marDM += 2; }
+    let marRoll = tRoll2D('Marines Roll') + globalDM + marDM;
     let bMar = "0";
     if (marRoll >= 4) {
         let eff = marRoll - 4;
-        if (eff < 1) eff = 1;
-        if (eff > 18) eff = 18;
+        let finalEff = Math.max(1, Math.min(18, eff));
+        if (eff !== finalEff) tClamp('Marines Eff', eff, finalEff);
+        eff = finalEff;
         bMar = toEHex(eff);
     }
+    tResult('Marines Efficiency', bMar);
 
     // Budget
+    tSection('Mil: Budget');
     let totalEff = enfEff;
     if (bM !== "0") totalEff += parseInt(bM, 36);
     if (bA !== "0") totalEff += parseInt(bA, 36);
@@ -1326,28 +1725,32 @@ function generateMgT2ESocioeconomics(base, hexId) {
     if (bMar !== "0") totalEff += parseInt(bMar, 36);
 
     let branchDrain = Math.floor(totalEff / 10);
-
     let budDM = 0;
-    if ([0, 2, 4].includes(base.gov)) budDM -= 2;
-    if (base.gov === 5) budDM += 1;
-    if (base.gov === 9) budDM -= 1;
-    if (base.gov === 10 || base.gov === 15) budDM += 3;
-    if ([11, 12, 14].includes(base.gov)) budDM += 2;
-    if (overallLaw >= 12) budDM += 2;
-    if (base.militaryBase) budDM += 4;
-    if (base.navalBase) budDM += 2;
+    if ([0, 2, 4].includes(base.gov)) { tDM('Gov 0,2,4', -2); budDM -= 2; }
+    if (base.gov === 5) { tDM('Gov 5', 1); budDM += 1; }
+    if (base.gov === 9) { tDM('Gov 9', -1); budDM -= 1; }
+    if (base.gov === 10 || base.gov === 15) { tDM('Gov 10,15', 3); budDM += 3; }
+    if ([11, 12, 14].includes(base.gov)) { tDM('Gov 11,12,14', 2); budDM += 2; }
+    if (overallLaw >= 12) { tDM('Ext Law', 2); budDM += 2; }
+    if (base.militaryBase) { tDM('Mil Base', 4); budDM += 4; }
+    if (base.navalBase) { tDM('Naval Base', 2); budDM += 2; }
+    tDM('Militancy Mod', culM - 5);
     budDM += (culM - 5);
+    tDM('Branch Drain Mod', -4 + branchDrain);
     budDM += (-4 + branchDrain);
 
-    let rollFactor = roll2D() - 7 + budDM;
-    if (rollFactor < -9) rollFactor = -9;
+    let rollFactor = tRoll2D('Budget Roll') - 7 + budDM;
+    if (rollFactor < -9) { tClamp('Budget Floor', rollFactor, -9); rollFactor = -9; }
 
     let basicBudget = 2.0 * (1 + (ecoE / 10)) * (1 + (rollFactor / 10));
     let totalBudget = basicBudget * readinessMultiplier;
     let formatBudget = totalBudget.toFixed(2) + "%";
+    tResult('Final Military Budget', formatBudget);
 
     let militaryProfile = `${bE}${bM}${bA}${bW}${bF}-${bS}${bN}${bMar}:${formatBudget}`;
+    tResult('Final Military Profile', militaryProfile);
 
+    if (window.isLoggingEnabled) endTrace();
     return {
         pValue,
         totalWorldPop,
@@ -1364,11 +1767,12 @@ function generateMgT2ESocioeconomics(base, hexId) {
         economicProfile,
         starportProfile,
         militaryProfile,
+        judicialSystemProfile,
         Im, ecoR, ecoL, ecoI, ecoE, RU, pcGWP, WTN, IR, DR,
-        displayString: `Pop: ${pValue}x10^${base.pop} | PCR: ${pcr} | Urb: ${urbanPercent}% | MC: ${majorCities} (${totalMajorCityPop.toLocaleString()})\nGov: ${govProfile} | Fac: ${factionsString} | Law: ${lawProfile}\nTech: ${techProfile} | Cul: ${culturalProfile}\nEco: ${economicProfile} | Sp: ${starportProfile}\nMil: ${militaryProfile}`,
+        displayString: `Pop: ${pValue}x10^${base.pop} | PCR: ${pcr} | Urb: ${urbanPercent}% | MC: ${majorCities} (${totalMajorCityPop.toLocaleString()})\nGov: ${govProfile} | Fac: ${factionsString} | JSP: ${judicialSystemProfile} | Law: ${lawProfile}\nTech: ${techProfile} | Cul: ${culturalProfile}\nEco: ${economicProfile} | Sp: ${starportProfile}\nMil: ${militaryProfile}`,
         displayStrings: [
             `Pop: ${pValue}x10^${base.pop} | PCR: ${pcr} | Urb: ${urbanPercent}% | MC: ${majorCities} (${totalMajorCityPop.toLocaleString()})`,
-            `Gov: ${govProfile} | Fac: ${factionsString} | Law: ${lawProfile}`,
+            `Gov: ${govProfile} | Fac: ${factionsString} | JSP: ${judicialSystemProfile} | Law: ${lawProfile}`,
             `Tech: ${techProfile} | Cul: ${culturalProfile}`,
             `Eco: ${economicProfile} | Sp: ${starportProfile}`,
             `Mil: ${militaryProfile}`
@@ -1394,8 +1798,8 @@ function convertAuToOrbit(au) {
 
 // Note: MGT2E_STAR_STATS is defined in constants.js
 
-function rollMgT2EStar() {
-    let roll = roll2D();
+function rollMgT2EStar(label = 'Star') {
+    let roll = tRoll2D(`${label} Type Roll`);
     let sClass = 'V';
     let sType = '';
 
@@ -1406,7 +1810,9 @@ function rollMgT2EStar() {
     else if (roll == 11) sType = 'F';
     else { sType = 'A'; }
 
-    let subType = roll1D() + roll1D() - 2;
+    let stRoll = tRoll2D(`${label} Subtype Roll`);
+    let subType = stRoll - 2;
+    if (subType < 0) subType = 0;
     if (subType > 9) subType = 9;
 
     let stats = MGT2E_STAR_STATS[sType];
@@ -1414,7 +1820,9 @@ function rollMgT2EStar() {
     let tempRatio = Math.pow(stats.temp / 5772, 4);
     let lum = diam2 * tempRatio;
 
-    return { sClass, sType, subType, mass: stats.mass, diam: stats.diam, temp: stats.temp, lum, name: `${sType}${subType} ${sClass}` };
+    let star = { sClass, sType, subType, mass: stats.mass, diam: stats.diam, temp: stats.temp, lum, name: `${sType}${toUWPChar(subType)} ${sClass}` };
+    tResult(`${label} Classification`, star.name);
+    return star;
 }
 
 // Note: MGT2E_MAO and SCLASS_IDX are defined in constants.js
@@ -1481,34 +1889,48 @@ function determineMgT2EEccentricity(isStar, orbitsBeyondFirst, sysAgeGyr, orbitN
 // =====================================================================
 
 function generateMgT2ESystemChunk1(mainworldBase, hexId) {
+    if (window.isLoggingEnabled) {
+        let systemName = (mainworldBase && mainworldBase.name) || hexId;
+        startTrace(hexId, 'MgT2E System Expansion', systemName);
+    }
     reseedForHex(hexId);
     let sys = { stars: [], gasGiants: 0, planetoidBelts: 0, terrestrialPlanets: 0, totalWorlds: 0, hzco: 0, age: 0 };
 
+    tSection('Stellar Generation');
     // =====================================================================
     // Step 1: Primary Star & System Age
     // =====================================================================
-    let primary = rollMgT2EStar();
+    let primary = rollMgT2EStar('Primary');
     primary.role = 'Primary';
     primary.separation = null;
     primary.orbitId = null;
     primary.eccentricity = 0;
     primary.mao = getMAO(primary.sType, primary.subType, primary.sClass);
 
+    tSection('System Age');
     let msLifespan = 10 / Math.pow(primary.mass, 2.5);
     if (primary.mass < 0.9) {
-        sys.age = (Math.floor(rng() * 6) + 1) * 2 + (Math.floor(rng() * 3) + 1) - 1 + (Math.floor(rng() * 10) / 10);
+        let r1 = Math.floor(rng() * 6) + 1;
+        let r2 = Math.floor(rng() * 3) + 1;
+        let r3 = Math.floor(rng() * 10) / 10;
+        sys.age = (r1 * 2) + r2 - 1 + r3;
+        tResult('Age (Low Mass Formula)', sys.age.toFixed(2) + " Gyr");
     } else {
-        sys.age = msLifespan * ((Math.floor(rng() * 100) + 1) / 100);
+        let r1 = (Math.floor(rng() * 100) + 1) / 100;
+        sys.age = msLifespan * r1;
+        tResult('Age (Fraction of Lifespan)', sys.age.toFixed(2) + " Gyr");
     }
     sys.age = Math.max(0.1, sys.age);
 
     let hzcoAu = Math.sqrt(primary.lum);
     sys.hzco = convertAuToOrbit(hzcoAu);
+    tResult('Habitable Zone Center (Orbit)', sys.hzco.toFixed(2));
     sys.stars.push(primary);
 
     // =====================================================================
     // Step 2: Companion Stars (Close, Near, Far + recursive Companions)
     // =====================================================================
+    tSection('Companion Stars');
 
     // Helper: compute presence roll DM based on a star's type/class
     function getMultiDM(star) {
@@ -1520,27 +1942,30 @@ function generateMgT2ESystemChunk1(mainworldBase, hexId) {
     }
 
     // Helper: generate companion star quality from a parent star
-    function rollCompanionQuality(parentStar) {
-        let secRoll = roll2D();
+    function rollCompanionQuality(parentStar, label) {
+        let secRoll = tRoll2D(`${label} Quality Roll`);
         let companion;
         if (secRoll >= 10) {
             // Twin
             companion = JSON.parse(JSON.stringify(parentStar));
+            tResult(`${label} Quality`, 'Twin');
         } else if (secRoll >= 8) {
             // Sibling
             companion = JSON.parse(JSON.stringify(parentStar));
-            companion.subType = Math.min(9, companion.subType + (Math.floor(rng() * 6) + 1));
+            let subMod = Math.floor(rng() * 6) + 1;
+            companion.subType = Math.min(9, companion.subType + subMod);
+            tResult(`${label} Quality`, `Sibling (+${subMod} subtypes)`);
         } else {
             // Lesser / Random / Other
-            companion = rollMgT2EStar();
+            companion = rollMgT2EStar(label);
         }
         companion.mao = getMAO(companion.sType, companion.subType, companion.sClass);
-        companion.name = `${companion.sType}${companion.subType} ${companion.sClass}`;
+        companion.name = `${companion.sType}${toUWPChar(companion.subType)} ${companion.sClass}`;
         return companion;
     }
 
     // Helper: roll stellar eccentricity (isStar=true adds +2 DM automatically)
-    function rollStellarEcc(orbitId) {
+    function rollStellarEcc(orbitId, label) {
         return determineMgT2EEccentricity(true, 0, sys.age, orbitId, false, 0);
     }
 
@@ -1550,94 +1975,129 @@ function generateMgT2ESystemChunk1(mainworldBase, hexId) {
 
     // Roll for Close, Near, and Far companion presence independently
     const separationDefs = [
-        { sep: 'Close', orbitFn: () => { let r = roll1D() - 1; return r === 0 ? 0.5 : r; }, allowed: canHaveClose },
-        { sep: 'Near', orbitFn: () => roll1D() + 5, allowed: true },
-        { sep: 'Far', orbitFn: () => roll1D() + 11, allowed: true },
+        { sep: 'Close', orbitFn: () => { let r = tRoll1D('Close Orbit Roll') - 1; return r === 0 ? 0.5 : r; }, allowed: canHaveClose },
+        { sep: 'Near', orbitFn: () => tRoll1D('Near Orbit Roll') + 5, allowed: true },
+        { sep: 'Far', orbitFn: () => tRoll1D('Far Orbit Roll') + 11, allowed: true },
     ];
 
     for (const def of separationDefs) {
-        if (!def.allowed) continue;
-        if (roll2D() + primaryDM < 10) continue; // not present
+        if (!def.allowed) {
+            tSkip(`${def.sep} companion forbidden by primary class`);
+            continue;
+        }
+        let presRoll = tRoll2D(`${def.sep} Presence Roll`);
+        tDM('Primary MultiDM', primaryDM);
+        if (presRoll + primaryDM < 10) {
+            tResult(`${def.sep} Companion`, 'None');
+            continue;
+        }
 
-        let companion = rollCompanionQuality(primary);
+        let companion = rollCompanionQuality(primary, `${def.sep} Companion`);
         companion.separation = def.sep;
         companion.role = `${def.sep} Companion`;
         companion.parentStarIdx = 0;
         companion.orbitId = def.orbitFn();
-        companion.eccentricity = rollStellarEcc(companion.orbitId);
+        tResult(`${def.sep} Orbit`, companion.orbitId);
+        companion.eccentricity = rollStellarEcc(companion.orbitId, `${def.sep} Companion`);
+        tResult(`${def.sep} Eccentricity`, companion.eccentricity.toFixed(3));
         sys.stars.push(companion);
 
         // Each Close/Near/Far star also rolls for its own tight Companion
         let compDM = getMultiDM(companion);
-        if (roll2D() + compDM >= 10) {
-            let tertiary = rollCompanionQuality(companion);
+        if (tRoll2D(`${def.sep} Star's Companion Presence Roll`) + compDM >= 10) {
+            tDM('Companion MultiDM', compDM);
+            let tertiary = rollCompanionQuality(companion, `${def.sep} Sub-Companion`);
             tertiary.separation = 'Companion';
             tertiary.role = `${def.sep} Star's Companion`;
             tertiary.parentStarIdx = sys.stars.length - 1;
             // Companion formula: (1d6/10) + ((2d6-7)/100)
-            tertiary.orbitId = (roll1D() / 10) + ((roll2D() - 7) / 100);
-            tertiary.eccentricity = rollStellarEcc(tertiary.orbitId);
+            let d1 = tRoll1D(`${def.sep} Comp Orbit D1`);
+            let d2 = tRoll2D(`${def.sep} Comp Orbit D2`);
+            tertiary.orbitId = (d1 / 10) + ((d2 - 7) / 100);
+            tResult(`${def.sep} Comp Orbit`, tertiary.orbitId.toFixed(3));
+            tertiary.eccentricity = rollStellarEcc(tertiary.orbitId, `${def.sep} Sub-Companion`);
+            tResult(`${def.sep} Comp Eccentricity`, tertiary.eccentricity.toFixed(3));
             sys.stars.push(tertiary);
+        } else {
+            tResult(`${def.sep} Sub-Companion`, 'None');
         }
     }
 
     // =====================================================================
     // Step 3: Total Worlds Inventory (GG + PB + TP)
     // =====================================================================
+    tSection('System Inventory');
     const multiStar = sys.stars.length >= 2;
-    function rollD3() { return Math.ceil(roll1D() / 2); }
 
     // --- Gas Giants ---
+    tSection('Gas Giants');
     let existingGG = (mainworldBase && mainworldBase.gasGiant === true);
-    let ggExists = existingGG || (roll2D() <= 9);
+    if (existingGG) tResult('Existing Gas Giant', 'Yes (from Mainworld)');
+    let ggRoll = tRoll2D('Gas Giant Presence Roll (<= 9)');
+    let ggExists = existingGG || (ggRoll <= 9);
     if (ggExists) {
-        let ggQ = roll2D();
-        if (sys.stars.length === 1 && primary.sClass === 'V') ggQ += 1; // single Class V
-        if (sys.stars.length >= 4) ggQ -= 1;
+        let ggQ = tRoll2D('Gas Giant Quantity Roll');
+        if (sys.stars.length === 1 && primary.sClass === 'V') { tDM('Single Class V', 1); ggQ += 1; }
+        if (sys.stars.length >= 4) { tDM('4+ Stars', -1); ggQ -= 1; }
+
         if (ggQ <= 4) sys.gasGiants = 1;
         else if (ggQ <= 6) sys.gasGiants = 2;
         else if (ggQ <= 8) sys.gasGiants = 3;
         else if (ggQ <= 11) sys.gasGiants = 4;
         else if (ggQ === 12) sys.gasGiants = 5;
         else sys.gasGiants = 6;
+        tResult('Gas Giants Count', sys.gasGiants);
+    } else {
+        tResult('Gas Giants Count', 0);
     }
 
     // --- Planetoid Belts ---
-    let pbExists = (roll2D() >= 8);
+    tSection('Planetoid Belts');
+    let pbRoll = tRoll2D('Planetoid Belt Presence Roll (>= 8)');
+    let pbExists = (pbRoll >= 8);
     if (pbExists) {
-        let pbQ = roll2D();
-        if (ggExists) pbQ += 1; // has gas giants
-        if (multiStar) pbQ += 1; // two or more stars
+        let pbQ = tRoll2D('Planetoid Belt Quantity Roll');
+        if (ggExists) { tDM('Gas Giant Present', 1); pbQ += 1; }
+        if (multiStar) { tDM('Multi-Star System', 1); pbQ += 1; }
         if (pbQ <= 6) sys.planetoidBelts = 1;
         else if (pbQ <= 11) sys.planetoidBelts = 2;
         else sys.planetoidBelts = 3;
     }
     // Continuation: mainworld is an asteroid belt → force at least 1 PB
     if (mainworldBase && mainworldBase.size === 0) {
+        tResult('Asteroid Mainworld', 'Forcing +1 PB');
         sys.planetoidBelts = Math.max(1, sys.planetoidBelts + 1);
     }
+    tResult('Planetoid Belts Count', sys.planetoidBelts);
 
     // --- Terrestrial Planets ---
-    let tpCount = roll2D() - 2;
+    tSection('Terrestrial Planets');
+    let tpRoll = tRoll2D('Terrestrial Planet Quantity Roll');
+    let tpCount = tpRoll - 2;
     if (tpCount < 3) {
-        tpCount = rollD3() + 2;   // reroll as D3+2 (range 3–5)
+        tDM('Low Roll Reroll', 0);
+        let d3 = Math.ceil(tRoll1D('Reroll D3') / 2);
+        tpCount = d3 + 2;   // range 3–5
     } else {
-        tpCount += rollD3() - 1;  // add D3-1 (0–2 more)
+        let d3 = Math.ceil(tRoll1D('Additional D3') / 2);
+        tpCount += d3 - 1;  // add 0–2 more
     }
     // Continuation: standard terrestrial mainworld counts as one TP
     if (mainworldBase && mainworldBase.size >= 1) {
         tpCount = Math.max(1, tpCount);
     }
     sys.terrestrialPlanets = tpCount;
+    tResult('Terrestrial Planets Count', tpCount);
 
     // --- Total Worlds ---
     sys.totalWorlds = sys.gasGiants + sys.planetoidBelts + sys.terrestrialPlanets;
+    tResult('Total Worlds in System', sys.totalWorlds);
 
     // --- Combined HZCO for circumbinary P-type worlds (Item #6) ---
     // Sum all star luminosities → sqrt → convert to Orbit#
-    // For single-star systems this equals sys.hzco.
     let totalLum = sys.stars.reduce((sum, s) => sum + (s.lum || 0), 0);
     sys.ptypeHzco = sys.stars.length > 1 ? convertAuToOrbit(Math.sqrt(totalLum)) : sys.hzco;
+    if (sys.stars.length > 1) tResult('Circumbinary HZCO', sys.ptypeHzco.toFixed(2));
 
     return sys;
 }
@@ -1648,6 +2108,7 @@ function generateMgT2ESystemChunk1(mainworldBase, hexId) {
 
 function generateMgT2ESystemChunk3(sys, mainworldBase) {
     let primary = sys.stars[0];
+    tSection('World & Moon Sizing');
 
     // 1. Size Terrestrial Planets & Gas Giants
     for (let i = 0; i < sys.worlds.length; i++) {
@@ -1657,47 +2118,60 @@ function generateMgT2ESystemChunk3(sys, mainworldBase) {
 
         if (w.type === 'Empty' || w.type === 'Planetoid Belt') continue;
 
+        tSection(`${w.type} Orbit ${w.orbitId.toFixed(2)} Sizing`);
         if (w.type === 'Gas Giant') {
-            let catRoll = roll1D();
+            let catRoll = tRoll1D('Gas Giant Category');
             if (catRoll <= 2) {
                 w.ggType = 'GS';
-                w.diameterStr = `${roll1D() + roll1D()} (GS)`;
-                w.mass = 5 * (roll1D() + 1);
+                let d1 = tRoll1D('Small GG Diameter (2D)');
+                let d2 = tRoll1D('Small GG Diameter (2D)');
+                w.diameterStr = `${d1 + d2} (GS)`;
+                w.mass = 5 * (tRoll1D('Small GG Mass (1D+1)') + 1);
                 w.diamKm = parseInt(w.diameterStr.split(' ')[0]) * 12800;
             } else if (catRoll <= 4) {
                 w.ggType = 'GM';
-                w.diameterStr = `${roll1D() + 6} (GM)`;
-                w.mass = 20 * (roll3D() - 1);
+                w.diameterStr = `${tRoll1D('Medium GG Diameter (1D+6)') + 6} (GM)`;
+                w.mass = 20 * (tRoll3D('Medium GG Mass (3D-1)') - 1);
                 w.diamKm = parseInt(w.diameterStr.split(' ')[0]) * 12800;
             } else {
                 w.ggType = 'GL';
-                w.diameterStr = `${roll2D() + 6} (GL)`;
-                let initMass = roll3D();
+                w.diameterStr = `${tRoll2D('Large GG Diameter (2D+6)') + 6} (GL) `;
+                let initMass = tRoll3D('Large GG Mass (3D)');
                 let d3Multiplier = Math.floor(rng() * 3) + 1;
                 w.mass = d3Multiplier * 50 * (initMass + 4);
                 if (w.mass >= 3000 || initMass >= 15) {
-                    w.mass = 4000 - ((roll2D() - 2) * 200);
+                    w.mass = 4000 - ((tRoll2D('Mass Cap Adjust') - 2) * 200);
                 }
                 w.diamKm = parseInt(w.diameterStr.split(' ')[0]) * 12800;
             }
             w.size = 'GG';
+            tResult('Type', w.ggType);
+            tResult('Diameter', w.diameterStr);
+            tResult('Mass (Earths)', w.mass);
         } else if (w.type === 'Terrestrial Planet' || w.type === 'Mainworld') {
             if (w.type === 'Mainworld' && mainworldBase && mainworldBase.size !== undefined) {
                 w.size = mainworldBase.size;
+                tResult('Size', `${w.size} (Mainworld Auth)`);
             } else {
-                let sizeCat = roll1D();
-                if (sizeCat <= 2) w.size = roll1D();
-                else if (sizeCat <= 4) w.size = roll2D();
-                else w.size = roll2D() + 3;
+                let sizeCat = tRoll1D('Size Roll Basis (1D)');
+                if (sizeCat <= 2) {
+                    w.size = tRoll1D('Tiny/Small (1D)');
+                } else if (sizeCat <= 4) {
+                    w.size = tRoll2D('Standard (2D)');
+                } else {
+                    w.size = tRoll2D('Large (2D+3)') + 3;
+                }
+                tResult('Size', w.size);
             }
             w.diamKm = w.size * 1600;
             w.mass = w.size === 0 ? 0.0001 : Math.pow(w.size / 8, 3);
         } else if (w.type === 'Planetoid Belt') {
-            w.bulk = roll1D();
-            w.mType = roll1D() * 10;
-            w.cType = roll1D() * 10;
+            w.bulk = tRoll1D('Belt Bulk');
+            w.mType = tRoll1D('M-Type Content') * 10;
+            w.cType = tRoll1D('C-Type Content') * 10;
             w.sType = Math.max(0, 100 - w.mType - w.cType);
             w.size = 0;
+            tResult('Composition', `M:${w.mType}% C:${w.cType}% S:${w.sType}%`);
         }
     }
 
@@ -1706,58 +2180,67 @@ function generateMgT2ESystemChunk3(sys, mainworldBase) {
         let w = sys.worlds[i];
         if (w.type === 'Empty' || w.type === 'Planetoid Belt') continue;
 
+        tSection(`${w.type} Orbit ${w.orbitId.toFixed(2)} Moons`);
         let qRoll = 0;
+        let qLabel = 'Moon Quantity Roll';
         if (w.type === 'Terrestrial Planet' || w.type === 'Mainworld') {
-            if (w.size <= 2) qRoll = roll1D();
-            else if (w.size <= 9) qRoll = roll2D();
-            else qRoll = roll2D();
+            if (w.size <= 2) qRoll = tRoll1D(qLabel);
+            else if (w.size <= 9) qRoll = tRoll2D(qLabel);
+            else qRoll = tRoll2D(qLabel);
         } else {
-            if (w.ggType === 'GS') qRoll = roll3D();
-            else qRoll = roll4D();
+            if (w.ggType === 'GS') qRoll = tRoll3D(qLabel);
+            else qRoll = tRoll4D(qLabel);
         }
 
         let qMod = 0;
         if (w.type === 'Terrestrial Planet' || w.type === 'Mainworld') {
-            if (w.size <= 2) qMod -= 5;
-            else if (w.size <= 9) qMod -= 8;
-            else qMod -= 6;
+            if (w.size <= 2) { tDM('Size 2-', -5); qMod -= 5; }
+            else if (w.size <= 9) { tDM('Size 3-9', -8); qMod -= 8; }
+            else { tDM('Size 10+', -6); qMod -= 6; }
         } else {
-            if (w.ggType === 'GS') qMod -= 7;
-            else qMod -= 6;
+            if (w.ggType === 'GS') { tDM('Small GG', -7); qMod -= 7; }
+            else { tDM('Med/Large GG', -6); qMod -= 6; }
         }
 
         let dmDiceCount = (w.size <= 2) ? 1 : (w.size <= 9 ? 2 : (w.size <= 15 ? 2 : (w.ggType === 'GS' ? 3 : 4)));
-        let hasPlacementDM = false;
-        if (w.orbitId < 1.0) hasPlacementDM = true;
-        if (hasPlacementDM) qMod -= dmDiceCount;
+        if (w.orbitId < 1.0) {
+            tDM('Inner System Orbit (<1.0 AU)', -dmDiceCount);
+            qMod -= dmDiceCount;
+        }
 
-        if (['M', 'L', 'T', 'Y'].includes(primary.sType) && ['V', 'VI'].includes(primary.sClass)) qMod -= 1;
+        if (['M', 'L', 'T', 'Y'].includes(primary.sType) && ['V', 'VI'].includes(primary.sClass)) {
+            tDM('Dim/Dwarf Primary', -1);
+            qMod -= 1;
+        }
 
-        let moonsToGenerate = qRoll + qMod;
-        if (moonsToGenerate === 0) {
+        let moonsToGenerate = Math.max(0, qRoll + qMod);
+        if (qRoll + qMod === 0) {
+            tResult('Result', 'No moons, Adding Ring placeholder');
             w.rings.push({});
-            moonsToGenerate = 0;
-        } else if (moonsToGenerate < 0) {
-            moonsToGenerate = 0;
+        } else {
+            tResult('Moons to Generate', moonsToGenerate);
         }
 
         for (let m = 0; m < moonsToGenerate; m++) {
             let moonSize = '';
-            let r1 = roll1D();
-            if (r1 <= 3) moonSize = 'S';
-            else if (r1 <= 5) {
+            let r1 = tRoll1D(`Satellite ${m + 1} Size Basis`);
+            if (r1 <= 3) {
+                moonSize = 'S';
+            } else if (r1 <= 5) {
                 let ms = Math.floor(rng() * 3);
                 if (ms === 0) moonSize = 'R'; else moonSize = ms;
             } else {
                 if (w.type === 'Terrestrial Planet' || w.type === 'Mainworld') {
-                    if (w.size === 1) moonSize = 'S';
-                    else {
-                        let trySize = w.size - 1 - roll1D();
+                    if (w.size === 1) {
+                        moonSize = 'S';
+                    } else {
+                        let msRoll = tRoll1D(`Satellite ${m + 1} Size (MW/TP)`);
+                        let trySize = w.size - 1 - msRoll;
                         if (trySize < 0) moonSize = 'S';
                         else if (trySize === 0) moonSize = 'R';
                         else if (trySize === w.size - 2) {
-                            let twinRoll = roll2D();
-                            if (twinRoll === 12) moonSize = w.size;
+                            let twinRoll = tRoll2D(`Satellite ${m + 1} Twin Chance`);
+                            if (twinRoll === 12) { tResult(`Satellite ${m + 1}`, 'Twin World'); moonSize = w.size; }
                             else if (twinRoll === 2) moonSize = trySize - 1;
                             else moonSize = trySize;
                             if (moonSize <= 0) moonSize = 'S';
@@ -1766,25 +2249,32 @@ function generateMgT2ESystemChunk3(sys, mainworldBase) {
                         }
                     }
                 } else {
-                    let specialR = roll1D();
-                    if (specialR <= 3) moonSize = roll1D();
-                    else if (specialR <= 5) {
-                        let z = roll2D() - 2;
+                    let specialR = tRoll1D(`Satellite ${m + 1} GG Size Type`);
+                    if (specialR <= 3) {
+                        moonSize = tRoll1D(`Satellite ${m + 1} Tiny Size`);
+                    } else if (specialR <= 5) {
+                        let z = tRoll2D(`Satellite ${m + 1} Standard Size Roll`) - 2;
                         moonSize = z === 0 ? 'R' : z;
                     } else {
-                        let giantMoon = roll2D() + 4;
+                        let giantMoon = tRoll2D(`Satellite ${m + 1} Giant Size Roll`) + 4;
                         if (giantMoon >= 16) {
                             moonSize = 'GS';
-                            if (w.ggType === 'GL' && roll2D() === 12) moonSize = 'GM';
+                            if (w.ggType === 'GL' && tRoll2D(`Satellite ${m + 1} Large Moon Check`) === 12) {
+                                moonSize = 'GM';
+                            }
                         } else {
                             moonSize = giantMoon;
                         }
                     }
                 }
             }
-
-            if (moonSize === 'R') w.rings.push({});
-            else w.moons.push({ size: moonSize });
+            if (moonSize === 'R') {
+                tResult(`Satellite ${m + 1}`, 'Ring System');
+                w.rings.push({});
+            } else {
+                tResult(`Satellite ${m + 1} Size`, moonSize);
+                w.moons.push({ size: moonSize });
+            }
         }
 
         // 3. Hill Sphere & Roche Limit
@@ -1794,8 +2284,8 @@ function generateMgT2ESystemChunk3(sys, mainworldBase) {
             let hsAu = w.au * (1 - w.eccentricity) * Math.pow(solMass / (3 * mStar), 0.3333);
             let hsPd = hsAu * 149597870.9 / w.diamKm;
             let hillLimit = Math.floor(hsPd / 2);
-
             w.hillSpanPd = hillLimit;
+            tResult(`${w.type} Hill Sphere Limit (Diameters/2)`, hillLimit);
 
             if (hillLimit < 1.5) {
                 if (w.moons.length > 0) {
@@ -1908,17 +2398,29 @@ function generateMgT2EAxialTilt() {
 
 function generateMgT2ESystemChunk5(sys) {
     let primary = sys.stars[0];
+    tSection('Temperature & Rotation');
+
     let processBody = (w, parent, isMoon) => {
         if (w.type === 'Empty' || w.type === 'Planetoid Belt') return;
 
+        tSection(`${isMoon ? 'Moon' : w.type} Orbit ${w.orbitId.toFixed(2)} Rotation`);
+
         // 1. Sidereal Day
-        w.siderealHours = (roll2D() - 2) * 4 + 2 + roll1D() + Math.floor(sys.age / 2);
-        if (w.type === 'Gas Giant' || w.size === 0 || w.size === 'S') w.siderealHours *= 2;
+        let sRoll1 = tRoll2D('Base Sidereal Day Roll');
+        let sRoll2 = tRoll1D('Sidereal Day Adjust');
+        w.siderealHours = (sRoll1 - 2) * 4 + 2 + sRoll2 + Math.floor(sys.age / 2);
+        if (w.type === 'Gas Giant' || w.size === 0 || w.size === 'S') {
+            tResult('Modifier', 'GG/Small/Asteroid x2');
+            w.siderealHours *= 2;
+        }
 
         let extRoll = w.siderealHours;
+        let extCount = 0;
         while (extRoll >= 40) {
-            if (roll1D() >= 5) {
-                let bonus = (roll2D() - 2) * 4 + 2 + roll1D() + Math.floor(sys.age / 2);
+            if (tRoll1D(`Extension ${++extCount} Roll (5+)`) >= 5) {
+                let bonusRoll1 = tRoll2D(`Extension ${extCount} Base`);
+                let bonusRoll2 = tRoll1D(`Extension ${extCount} Adjust`);
+                let bonus = (bonusRoll1 - 2) * 4 + 2 + bonusRoll2 + Math.floor(sys.age / 2);
                 if (w.type === 'Gas Giant' || w.size === 0 || w.size === 'S') bonus *= 2;
                 w.siderealHours += bonus;
                 extRoll = bonus;
@@ -1926,13 +2428,14 @@ function generateMgT2ESystemChunk5(sys) {
                 break;
             }
         }
-        w.siderealHours += ((roll1D() - 1) / 60) + ((Math.floor(rng() * 10)) / 3600);
+        w.siderealHours += ((tRoll1D('Fractional Adjustment') - 1) / 60) + ((Math.floor(rng() * 10)) / 3600);
+        tResult('Sidereal Hours', w.siderealHours.toFixed(4));
 
         // 2. Solar Day
         let pYears = w.periodYears;
         if (isMoon) {
             if (!w.periodYears) {
-                w.periodYears = (roll2D() + roll2D()) / 365.25;
+                w.periodYears = (tRoll2D('Moon Period Proxy') + tRoll2D('Moon Period Proxy 2')) / 365.25;
             }
             pYears = w.periodYears;
         }
@@ -1949,47 +2452,61 @@ function generateMgT2ESystemChunk5(sys) {
                 w.solarDayHours = Infinity;
             }
         }
+        tResult('Solar Day (Hours)', (w.solarDayHours === Infinity || w.solarDayHours > 999999) ? 'Infinity' : w.solarDayHours.toFixed(2));
 
         // 3. Axial Tilt
+        tSection('Axial Tilt');
         w.axialTilt = generateMgT2EAxialTilt();
+        tResult('Final Axial Tilt', w.axialTilt + '°');
 
         // 4. Tidal Lock
+        tSection('Tidal Lock Check');
         let lockDM = Math.ceil((w.size === 'GG' ? 10 : w.size) / 3);
-        if (w.eccentricity) lockDM -= Math.floor(w.eccentricity * 10);
-        if (w.pressureBar > 2.5) lockDM -= 2;
-        if (sys.age < 1) lockDM -= 2;
-        else if (sys.age >= 5 && sys.age <= 10) lockDM += 2;
-        else if (sys.age > 10) lockDM += 4;
+        if (w.eccentricity) { tDM('Eccentricity', -Math.floor(w.eccentricity * 10)); lockDM -= Math.floor(w.eccentricity * 10); }
+        if (w.pressureBar > 2.5) { tDM('High Pressure', -2); lockDM -= 2; }
+        if (sys.age < 1) { tDM('Young System', -2); lockDM -= 2; }
+        else if (sys.age >= 5 && sys.age <= 10) { tDM('Old System (5-10)', 2); lockDM += 2; }
+        else if (sys.age > 10) { tDM('Ancient System (10+)', 4); lockDM += 4; }
 
-        if (w.axialTilt > 30) lockDM -= 2;
-        if (w.axialTilt >= 60 && w.axialTilt <= 120) lockDM -= 4;
-        if (w.axialTilt >= 80 && w.axialTilt <= 100) lockDM -= 4;
+        if (w.axialTilt > 30) { tDM('Tilt > 30', -2); lockDM -= 2; }
+        if (w.axialTilt >= 60 && w.axialTilt <= 120) { tDM('Extreme Tilt', -4); lockDM -= 4; }
+        if (w.axialTilt >= 80 && w.axialTilt <= 100) { tDM('Side-on Tilt', -4); lockDM -= 4; }
 
-        if (isMoon) lockDM += 6;
-        else lockDM += (w.orbitId <= 0.5 ? 4 : 0);
+        if (isMoon) { tDM('Satellite', 6); lockDM += 6; }
+        else { if (w.orbitId <= 0.5) { tDM('Near-Star Orbit', 4); lockDM += 4; } }
 
         w.tidallyLocked = false;
         if (lockDM >= 10) {
             let forceLock = true;
-            if (roll2D() === 12 && roll2D() < 12) forceLock = false;
-            if (forceLock) w.tidallyLocked = true;
+            if (tRoll2D('Critical Freedom Check') === 12 && tRoll2D('Freedom Sub-Check') < 12) forceLock = false;
+            if (forceLock) {
+                tResult('Result', 'Forced Lock (DM 10+)');
+                w.tidallyLocked = true;
+            }
         } else if (lockDM > -10 && !w.tidallyLocked) {
-            let lockRoll = roll2D() + lockDM;
-            if (lockRoll >= 12) w.tidallyLocked = true;
-            else if (lockRoll === 11) w.siderealHours = w.yearHours * (2 / 3);
-            else if (lockRoll === 10) w.siderealHours = roll1D() * 50 * 24;
-            else if (lockRoll === 9) w.siderealHours = roll1D() * 10 * 24;
-            else if (lockRoll === 8) w.siderealHours = roll1D() * 20 * 24;
-            else if (lockRoll === 7) w.siderealHours = roll1D() * 5 * 24;
-            else if (lockRoll === 6) w.siderealHours *= 5;
-            else if (lockRoll === 5) w.siderealHours *= 3;
-            else if (lockRoll === 4) w.siderealHours *= 2;
-            else if (lockRoll === 3) w.siderealHours *= 1.5;
+            let lockRoll = tRoll2D('Tidal Lock Roll');
+            tDM('Lock DM', lockDM);
+            let finalLR = lockRoll + lockDM;
+            if (finalLR >= 12) {
+                tResult('Result', 'Tidally Locked');
+                w.tidallyLocked = true;
+            } else if (finalLR === 11) {
+                tResult('Result', '2:3 Resonance');
+                w.siderealHours = w.yearHours * (2 / 3);
+            } else if (finalLR === 10) { tResult('Result', 'Long Day (50-300)'); w.siderealHours = tRoll1D('Long Day Multiplier') * 50 * 24; }
+            else if (finalLR === 9) { tResult('Result', 'Moderate Day (10-60)'); w.siderealHours = tRoll1D('Mod Day Multiplier') * 10 * 24; }
+            else if (finalLR === 8) { tResult('Result', 'Deep Day (20-120)'); w.siderealHours = tRoll1D('Deep Day Multiplier') * 20 * 24; }
+            else if (finalLR === 7) { tResult('Result', 'Soft Day (5-30)'); w.siderealHours = tRoll1D('Soft Day Multiplier') * 5 * 24; }
+            else if (finalLR === 6) { tResult('Result', 'x5 Multiplier'); w.siderealHours *= 5; }
+            else if (finalLR === 5) { tResult('Result', 'x3 Multiplier'); w.siderealHours *= 3; }
+            else if (finalLR === 4) { tResult('Result', 'x2 Multiplier'); w.siderealHours *= 2; }
+            else if (finalLR === 3) { tResult('Result', 'x1.5 Multiplier'); w.siderealHours *= 1.5; }
+            else tResult('Result', 'No Lock');
         }
 
         if (w.tidallyLocked) {
             w.siderealHours = w.yearHours;
-            w.axialTilt = Math.max(0, (roll2D() - 2) / 10);
+            w.axialTilt = Math.max(0, (tRoll2D('Locked Tilt Jitter') - 2) / 10);
             if (w.eccentricity > 0.1) {
                 let newEcc = determineMgT2EEccentricity(false, 0, sys.age, w.orbitId, false, -2);
                 if (newEcc < w.eccentricity) w.eccentricity = newEcc;
@@ -2006,19 +2523,25 @@ function generateMgT2ESystemChunk5(sys) {
         }
 
         // 5. Mean Temperature
+        tSection('Mean Temperature');
         w.albedo = getMgT2EAlbedo(w, sys.hzco);
+        tResult('Bond Albedo', w.albedo.toFixed(3));
         let initialGF = 0.5 * Math.sqrt(w.pressureBar || 0);
 
         let gfMod = 0;
-        if ([1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 14].includes(w.atmCode)) gfMod = roll3D() * 0.01;
+        if ([1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 14].includes(w.atmCode)) {
+            gfMod = tRoll3D('Greenhouse Variability (3D*0.01)') * 0.01;
+        }
         let gfMult = 1;
-        if (w.atmCode === 10 || w.atmCode === 15) gfMult = Math.max(0.5, roll1D() - 1);
-        else if ([11, 12, 16, 17].includes(w.atmCode)) {
-            let mx = roll1D();
-            if (mx === 6) gfMult = roll3D();
+        if (w.atmCode === 10 || w.atmCode === 15) {
+            gfMult = Math.max(0.5, tRoll1D('Exotic Multiplier (1D-1)') - 1);
+        } else if ([11, 12, 16, 17].includes(w.atmCode)) {
+            let mx = tRoll1D('Extreme Multiplier Basis');
+            if (mx === 6) gfMult = tRoll3D('Extreme GG (3D)');
             else gfMult = mx;
         }
         w.greenhouseFactor = (initialGF + gfMod) * gfMult;
+        tResult('GFactor', w.greenhouseFactor.toFixed(3));
 
         let srcLum = primary.lum || 1.0;
         if (w.au > 0) {
@@ -2028,14 +2551,18 @@ function generateMgT2ESystemChunk5(sys) {
         } else {
             w.meanTempK = 3;
         }
+        tResult('Mean Temp (K)', w.meanTempK.toFixed(1) + ' K');
 
         // 6. High/Low Temperatures
+        tSection('Temp Diurnals');
+        w.highTempK = w.meanTempK;
+        w.lowTempK = w.meanTempK;
         let tfactor = Math.abs(Math.sin((w.axialTilt || 0) * Math.PI / 180));
-        if (w.yearHours < (36.5 * 24)) tfactor /= 2;
-        if (w.yearHours > (2 * 8760)) tfactor *= 1.5;
+        if (w.yearHours < (36.5 * 24)) { tSkip('Quick Year Adjust'); tfactor /= 2; }
+        if (w.yearHours > (2 * 8760)) { tSkip('Slow Year Adjust'); tfactor *= 1.5; }
 
         let rfactor = w.solarDayHours <= 0 || w.solarDayHours === Infinity ? 1.0 : Math.sqrt(w.solarDayHours / 50);
-        if (w.tidallyLocked) rfactor = 1.0;
+        if (w.tidallyLocked) { tSkip('Tidal Lock Temp Equalization'); rfactor = 1.0; }
         if (rfactor > 1.0) rfactor = 1.0;
 
         let gfactor = (10 - (w.hydroCode || 0)) / 20;
@@ -2053,6 +2580,8 @@ function generateMgT2ESystemChunk5(sys) {
 
         if (nearAu > 0) w.highTempK = 279 * Math.pow(highLum * (1 - w.albedo) * (1 + w.greenhouseFactor) / (nearAu * nearAu), 0.25);
         if (farAu > 0) w.lowTempK = 279 * Math.pow(lowLum * (1 - w.albedo) * (1 + w.greenhouseFactor) / (farAu * farAu), 0.25);
+        tResult('High Temp (K)', w.highTempK.toFixed(1) + ' K');
+        tResult('Low Temp (K)', w.lowTempK.toFixed(1) + ' K');
     };
 
     for (let i = 0; i < sys.worlds.length; i++) {
@@ -2072,11 +2601,15 @@ function generateMgT2ESystemChunk5(sys) {
 function generateMgT2ESystemChunk6(sys) {
     let primary = sys.stars[0];
     let primaryMassEarths = primary.mass * 333000;
+    tSection('Biomass & Resources');
 
     let processBody = (w, parent, isMoon) => {
         if (w.type === 'Empty' || w.type === 'Gas Giant' || w.type === 'Planetoid Belt') return;
 
+        tSection(`${isMoon ? 'Moon' : w.type} Orbit ${w.orbitId.toFixed(2)} Geology/Biology`);
+
         // 1. Seismology and Tectonic Plates
+        tSection('Seismology');
         let wSize = w.size === 'S' ? 0 : w.size;
         let resBase = wSize - sys.age;
         if (isMoon) resBase += 1;
@@ -2103,55 +2636,64 @@ function generateMgT2ESystemChunk6(sys) {
         if (isNaN(heatFactor) || !isFinite(heatFactor) || heatFactor < 1) heatFactor = 0;
 
         w.seismicStress = Math.floor(resStress + tidalStressFactor + heatFactor);
+        tResult('Seismic Stress', w.seismicStress);
 
         w.tectonicPlates = 0;
         w.plateInteraction = "None";
         if (w.seismicStress > 0 && w.hydroPercent >= 1) {
-            let p = wSize + w.hydroCode - roll2D();
-            if (w.seismicStress >= 10 && w.seismicStress <= 100) p += 1;
-            else if (w.seismicStress > 100) p += 2;
+            let pRoll = tRoll2D('Tectonic Plate Roll');
+            tDM('Size/Hydro Mod', wSize + w.hydroCode - 7);
+            let p = wSize + w.hydroCode - pRoll;
+            if (w.seismicStress >= 10 && w.seismicStress <= 100) { tDM('Stress 10+', 1); p += 1; }
+            else if (w.seismicStress > 100) { tDM('Stress 100+', 2); p += 2; }
             if (p > 1) {
                 w.tectonicPlates = p;
-                w.plateInteraction = MGT2E_PLATE_INTERACTIONS[roll2D()] || "None";
+                w.plateInteraction = MGT2E_PLATE_INTERACTIONS[tRoll2D('Plate Interaction Roll')] || "None";
+                tResult('Tectonic Plates', p);
+                tResult('Interaction', w.plateInteraction);
             }
         }
 
         // 2. Biomass Rating
+        tSection('Biomass Rating');
         let biomassBase = 0;
         if (sys.age >= 0.1) {
-            biomassBase = roll2D();
+            let bioRoll = tRoll2D('Biomass Roll');
             let bDm = 0;
-            if (w.atmCode === 0) bDm -= 6;
-            else if (w.atmCode === 1) bDm -= 4;
-            else if ([2, 3, 14].includes(w.atmCode)) bDm -= 3;
-            else if ([4, 5].includes(w.atmCode)) bDm -= 2;
-            else if ([8, 9, 13].includes(w.atmCode)) bDm += 2;
-            else if (w.atmCode === 10) bDm -= 3;
-            else if (w.atmCode === 11) bDm -= 5;
-            else if (w.atmCode === 12) bDm -= 7;
-            else if (w.atmCode >= 15) bDm -= 5;
+            if (w.atmCode === 0) { tDM('Atm 0', -6); bDm -= 6; }
+            else if (w.atmCode === 1) { tDM('Atm 1', -4); bDm -= 4; }
+            else if ([2, 3, 14].includes(w.atmCode)) { tDM('Thin/Med Binary', -3); bDm -= 3; }
+            else if ([4, 5].includes(w.atmCode)) { tDM('Thin/Standard', -2); bDm -= 2; }
+            else if ([8, 9, 13].includes(w.atmCode)) { tDM('Dense/Thin Cloud', 2); bDm += 2; }
+            else if (w.atmCode === 10) { tDM('Exotic', -3); bDm -= 3; }
+            else if (w.atmCode === 11) { tDM('Exotic Corrosive', -5); bDm -= 5; }
+            else if (w.atmCode === 12) { tDM('Exotic Insid.', -7); bDm -= 7; }
+            else if (w.atmCode >= 15) { tDM('High exotic', -5); bDm -= 5; }
 
-            if (w.hydroCode === 0) bDm -= 4;
-            else if (w.hydroCode >= 1 && w.hydroCode <= 3) bDm -= 2;
-            else if (w.hydroCode >= 6 && w.hydroCode <= 8) bDm += 1;
-            else if (w.hydroCode >= 9) bDm += 2;
+            if (w.hydroCode === 0) { tDM('Desert', -4); bDm -= 4; }
+            else if (w.hydroCode >= 1 && w.hydroCode <= 3) { tDM('Dry', -2); bDm -= 2; }
+            else if (w.hydroCode >= 6 && w.hydroCode <= 8) { tDM('Wet', 1); bDm += 1; }
+            else if (w.hydroCode >= 9) { tDM('Water World', 2); bDm += 2; }
 
-            if (sys.age < 0.2) bDm -= 6;
-            else if (sys.age < 1) bDm -= 2;
-            else if (sys.age > 4) bDm += 1;
+            if (sys.age < 0.2) { tDM('Very Young', -6); bDm -= 6; }
+            else if (sys.age < 1) { tDM('Young', -2); bDm -= 2; }
+            else if (sys.age > 4) { tDM('Mature', 1); bDm += 1; }
 
-            if (w.highTempK > 353) bDm -= 2;
-            else if (w.highTempK < 273) bDm -= 4;
+            if (w.highTempK > 353) { tDM('Hot High', -2); bDm -= 2; }
+            else if (w.highTempK < 273) { tDM('Cold High', -4); bDm -= 4; }
 
-            if (w.meanTempK > 353) bDm -= 4;
-            else if (w.meanTempK < 273) bDm -= 2;
-            else if (w.meanTempK >= 279 && w.meanTempK <= 303) bDm += 2;
+            if (w.meanTempK > 353) { tDM('Hot Mean', -4); bDm -= 4; }
+            else if (w.meanTempK < 273) { tDM('Cold Mean', -2); bDm -= 2; }
+            else if (w.meanTempK >= 279 && w.meanTempK <= 303) { tDM('Temperate Mean', 2); bDm += 2; }
 
             bDm = Math.max(-12, Math.min(4, bDm));
-            biomassBase += bDm;
+            biomassBase = bioRoll + bDm;
 
             if (biomassBase <= 0) biomassBase = 0;
-            if (w.taints && w.taints.includes("Biologic") && biomassBase === 0) biomassBase = 1;
+            if (w.taints && w.taints.includes("Biologic") && biomassBase === 0) {
+                tResult('Biomass (Min)', 1);
+                biomassBase = 1;
+            }
 
             if (biomassBase >= 1 && [0, 1, 10, 11, 12, 15].includes(w.atmCode)) {
                 let extremophileBonus = 0;
@@ -2161,42 +2703,54 @@ function generateMgT2ESystemChunk6(sys) {
                 else if (w.atmCode === 11) extremophileBonus = 4;
                 else if (w.atmCode === 12) extremophileBonus = 6;
                 else if (w.atmCode >= 15) extremophileBonus = 4;
+                tResult('Extremophile Bonus', extremophileBonus);
                 biomassBase += extremophileBonus;
             }
         }
         w.biomass = biomassBase;
+        tResult('Final Biomass', biomassBase);
 
         // 3. Biocomplexity Rating
+        tSection('Biocomplexity');
         w.biocomplexity = 0;
         if (w.biomass >= 1) {
             let cDm = 0;
-            if (w.atmCode < 4 || w.atmCode > 9) cDm -= 2;
-            if (w.taints && w.taints.includes("Low Oxygen")) cDm -= 2;
-            if (sys.age >= 3 && sys.age < 4) cDm -= 2;
-            else if (sys.age >= 2 && sys.age < 3) cDm -= 4;
-            else if (sys.age >= 1 && sys.age < 2) cDm -= 8;
-            else if (sys.age < 1) cDm -= 10;
+            if (w.atmCode < 4 || w.atmCode > 9) { tDM('Harsh Atm', -2); cDm -= 2; }
+            if (w.taints && w.taints.includes("Low Oxygen")) { tDM('Low O2', -2); cDm -= 2; }
+            if (sys.age >= 3 && sys.age < 4) { tDM('Age 3-4', -2); cDm -= 2; }
+            else if (sys.age >= 2 && sys.age < 3) { tDM('Age 2-3', -4); cDm -= 4; }
+            else if (sys.age >= 1 && sys.age < 2) { tDM('Age 1-2', -8); cDm -= 8; }
+            else if (sys.age < 1) { tDM('Age <1', -10); cDm -= 10; }
 
             let effBiomass = w.biomass >= 10 ? 9 : w.biomass;
-            w.biocomplexity = Math.max(1, roll2D() - 7 + effBiomass + cDm);
+            w.biocomplexity = Math.max(1, tRoll2D('Biocomplexity Roll') - 7 + effBiomass + cDm);
+            tResult('Final Biocomplexity', w.biocomplexity);
         }
 
         // 4. Native Sophonts
+        tSection('Sophont Check');
         w.nativeSophont = false;
         w.extinctSophont = false;
         if (w.biocomplexity >= 8) {
             let effBiocomp = w.biocomplexity >= 10 ? 9 : w.biocomplexity;
-            if ((roll2D() + effBiocomp - 7) >= 13) w.nativeSophont = true;
+            if ((tRoll2D('Sophont Emergence Roll') + effBiocomp - 7) >= 13) {
+                tResult('Sophont', 'Native Living');
+                w.nativeSophont = true;
+            }
 
             let exDm = sys.age > 5 ? 1 : 0;
-            if ((roll2D() + effBiocomp - 7 + exDm) >= 13) w.extinctSophont = true;
+            if ((tRoll2D('Extinct Sophont Roll') + effBiocomp - 7 + exDm) >= 13) {
+                tResult('Sophont', 'Extinct Relics');
+                w.extinctSophont = true;
+            }
         }
 
         // 5. Biodiversity & Compatibility
+        tSection('Biodiversity & Compatibility');
         w.biodiversity = 0;
         w.compatibility = 0;
         if (w.biomass >= 1) {
-            w.biodiversity = Math.max(1, Math.ceil(roll2D() - 7 + ((w.biomass + w.biocomplexity) / 2)));
+            w.biodiversity = Math.max(1, Math.ceil(tRoll2D('Biodiversity Roll') - 7 + ((w.biomass + w.biocomplexity) / 2)));
 
             let compDm = 0;
             if ([0, 1, 11, 16, 17].includes(w.atmCode)) compDm -= 8;
@@ -2209,29 +2763,35 @@ function generateMgT2ESystemChunk6(sys) {
 
             if (sys.age > 8) compDm -= 2;
 
-            w.compatibility = Math.max(0, Math.floor(roll2D() - (w.biocomplexity / 2) + compDm));
+            w.compatibility = Math.max(0, Math.floor(tRoll2D('Compatibility Roll') - (w.biocomplexity / 2) + compDm));
+            tResult('Biodiversity', w.biodiversity);
+            tResult('Compatibility', w.compatibility);
         }
 
         w.lifeProfile = `${w.biomass.toString(16).toUpperCase()}${w.biocomplexity.toString(16).toUpperCase()}${w.biodiversity.toString(16).toUpperCase()}${w.compatibility.toString(16).toUpperCase()}`;
         if (w.biomass === 0) w.lifeProfile = "0000";
+        tResult('Life Profile', w.lifeProfile);
 
         // 6. Resource Rating
+        tSection('Resources');
         let rDm = 0;
-        if (density > 1.12) rDm += 2;
-        if (density < 0.5) rDm -= 2;
-        if (w.biomass >= 3) rDm += 2;
-        if (w.biodiversity >= 8 && w.biodiversity <= 10) rDm += 1;
-        else if (w.biodiversity >= 11) rDm += 2;
+        if (density > 1.12) { tDM('High Density', 2); rDm += 2; }
+        if (density < 0.5) { tDM('Low Density', -2); rDm -= 2; }
+        if (w.biomass >= 3) { tDM('Biogenic Res', 2); rDm += 2; }
+        if (w.biodiversity >= 8 && w.biodiversity <= 10) { tDM('Biodiv 8-10', 1); rDm += 1; }
+        else if (w.biodiversity >= 11) { tDM('High Biodiv', 2); rDm += 2; }
 
-        if (w.compatibility >= 0 && w.compatibility <= 3) rDm -= 1;
-        else if (w.compatibility >= 8) rDm += 2;
+        if (w.compatibility >= 0 && w.compatibility <= 3) { tDM('Low Comp', -1); rDm -= 1; }
+        else if (w.compatibility >= 8) { tDM('High Comp', 2); rDm += 2; }
 
-        w.resourceRating = Math.max(2, Math.min(12, roll2D() - 7 + wSize + rDm));
+        w.resourceRating = Math.max(2, Math.min(12, tRoll2D('Resource Roll') - 7 + wSize + rDm));
+        tResult('Resource Rating', w.resourceRating);
 
         // 7. Habitability Rating
+        tSection('Habitability Score');
         let hScore = 10;
-        if (wSize >= 0 && wSize <= 4) hScore -= 1;
-        if (wSize >= 9) hScore += 1;
+        if (wSize >= 0 && wSize <= 4) { tDM('Small', -1); hScore -= 1; }
+        if (wSize >= 9) { tDM('Large', 1); hScore += 1; }
 
         if ([0, 1, 10].includes(w.atmCode)) hScore -= 8;
         else if ([2, 14].includes(w.atmCode)) hScore -= 4;
@@ -2269,6 +2829,7 @@ function generateMgT2ESystemChunk6(sys) {
         else if (grav > 2.0) hScore -= 6;
 
         w.habitability = Math.max(0, hScore);
+        tResult('Habitability Score', w.habitability);
     };
 
     for (let i = 0; i < sys.worlds.length; i++) {
@@ -2287,6 +2848,7 @@ function generateMgT2ESystemChunk6(sys) {
 
 function generateMgT2ESystemChunk7(sys, mainworldBase) {
     if (!sys || !mainworldBase) return sys;
+    tSection('Secondary World UWPs');
 
     const toUWPChar = typeof globalThis.toUWPChar === 'function' ? globalThis.toUWPChar : (val) => val.toString(16).toUpperCase();
 
@@ -2295,6 +2857,8 @@ function generateMgT2ESystemChunk7(sys, mainworldBase) {
 
         // Skip Mainworld here (handled in main loop)
         if (body.type === 'Mainworld') return;
+
+        tSection(`${isMoon ? 'Moon' : body.type} Orbit ${body.orbitId.toFixed(2)} UWP & Class`);
 
         // 1. Map properties for the Social helper
         body.size = (body.size === 'S' || body.size === 'R') ? 0 : (typeof body.size === 'number' ? body.size : 0);
@@ -2305,6 +2869,7 @@ function generateMgT2ESystemChunk7(sys, mainworldBase) {
         generateMgT2ESubordinateSocial(body, mainworldBase);
 
         // 3. Classification Logic (WBH Logic)
+        tSection('Classification Logic');
         body.classifications = [];
         const floor = getMgT2EMinSusTL(body.atm);
         const mw = mainworldBase;
@@ -2314,40 +2879,59 @@ function generateMgT2ESystemChunk7(sys, mainworldBase) {
 
         // Farming: HZCO ±1.0, Atm 4–9, Hydro 4–8, Pop 2+
         if (Math.abs(diff) <= 1.0 && (body.atm >= 4 && body.atm <= 9) && (body.hydro >= 4 && body.hydro <= 8) && body.pop >= 2) {
+            tResult('Classification', 'Farming');
             body.classifications.push("Farming");
         }
 
         // Mining: MW Industrial, secondary Pop 2+. DM +4 if Planetoid Belt.
         if (isInd && body.pop >= 2) {
-            let roll = roll2D();
-            if (body.type === 'Planetoid Belt') roll += 4;
-            if (roll >= 8) body.classifications.push("Mining");
+            let mRoll = tRoll2D('Mining Presence Roll');
+            if (body.type === 'Planetoid Belt') { tDM('Planetoid Belt', 4); mRoll += 4; }
+            if (mRoll >= 8) {
+                tResult('Classification', 'Mining');
+                body.classifications.push("Mining");
+            }
         }
 
         // Research Base: MW Pop 6+, TL 8+, not "Poor". Occurs on 10+ (DM +2 if MW TL 12+).
         if (mw.pop >= 6 && mw.tl >= 8 && !isPoor) {
-            let roll = roll2D() + (mw.tl >= 12 ? 2 : 0);
-            if (roll >= 10) body.classifications.push("Research Base");
+            let rRoll = tRoll2D('Research Base Roll');
+            if (mw.tl >= 12) { tDM('High TL MW', 2); rRoll += 2; }
+            if (rRoll >= 10) {
+                tResult('Classification', 'Research Base');
+                body.classifications.push("Research Base");
+            }
         }
 
         // Military Base: MW TL 8+, not "Poor", secondary Gov 6. Occurs on 12+.
         if (mw.tl >= 8 && !isPoor && body.gov === 6) {
-            if (roll2D() >= 12) body.classifications.push("Military Base");
+            if (tRoll2D('Military Base Roll') >= 12) {
+                tResult('Classification', 'Military Base');
+                body.classifications.push("Military Base");
+            }
         }
 
         // Penal Colony: MW TL 9+, MW Law 8+, secondary Gov 6. Occurs on 10+.
         if (mw.tl >= 9 && mw.law >= 8 && body.gov === 6) {
-            if (roll2D() >= 10) body.classifications.push("Penal Colony");
+            if (tRoll2D('Penal Colony Roll') >= 10) {
+                tResult('Classification', 'Penal Colony');
+                body.classifications.push("Penal Colony");
+            }
         }
 
         // 4. Refine Tech Level (Classification Bonuses)
+        tSection('Tech Level Refinement');
         if (body.classifications.includes("Research Base") || body.classifications.includes("Military Base")) {
+            tResult('TL Bonus', 'MW TL Match');
             body.tl = mw.tl;
         } else if (body.classifications.includes("Mining")) {
+            tResult('TL Bonus', 'Mining Basis');
             body.tl = Math.max(mw.tl, floor);
         } else {
+            tResult('TL Bonus', 'Standard (MW TL-1)');
             body.tl = Math.max(mw.tl - 1, floor);
         }
+        if (body.tl === floor) tClamp('Tech Level', mw.tl - 1, floor);
 
         // 5. Final UWP Construction
         // Planetoid Belts usually use size 0
@@ -2363,6 +2947,7 @@ function generateMgT2ESystemChunk7(sys, mainworldBase) {
 
         body.uwp = uwp;
         body.uwpSecondary = uwp;
+        tResult('Final UWP', uwp);
 
         // If no classifications, mark as 'Standard'
         if (body.classifications.length === 0) {
@@ -2385,6 +2970,7 @@ function generateMgT2ESystemChunk7(sys, mainworldBase) {
         }
     });
 
+    if (window.isLoggingEnabled) endTrace();
     return sys;
 }
 
@@ -2406,15 +2992,21 @@ function generateMgT2ESystemChunk4(sys, mainworldBase) {
     let processWorld = (w) => {
         if (w.type === 'Empty' || w.type === 'Gas Giant' || w.type === 'Planetoid Belt') return;
 
+        tSection(`Atmosphere & Hydro: ${w.type} Orbit ${w.orbitId.toFixed(2)}`);
         let tempBand = getTempBand(w.orbitId, sys.hzco);
+        tResult('Temperature Band', tempBand);
 
         // 1. Base Atmosphere Code
         if (w.size === 'S' || w.size <= 1) {
+            tSkip('Size 1- forces Atmosphere 0');
             w.atmCode = 0;
         } else if (w.type === 'Mainworld' && mainworldBase && mainworldBase.atm !== undefined) {
+            tSkip('Mainworld Atmosphere Inherited');
             w.atmCode = mainworldBase.atm;
         } else {
-            let baseRoll = roll2D() - 7 + w.size;
+            let baseRoll = tRoll2D('Atmosphere Roll');
+            tDM('Size Mod', w.size - 7);
+            baseRoll = baseRoll - 7 + w.size;
             let diff = w.orbitId - sys.hzco;
 
             if (diff >= -1.00 && diff <= 1.00) {
@@ -2428,89 +3020,118 @@ function generateMgT2ESystemChunk4(sys, mainworldBase) {
             }
         }
 
-        if (w.atmCode > 15) w.atmCode = 15;
-        if (w.atmCode < 0) w.atmCode = 0;
+        w.atmCode = Math.max(0, Math.min(15, w.atmCode));
+        tResult('Final Atmosphere Code', toUWPChar(w.atmCode));
 
         // 2. Runaway Greenhouse
         if (w.atmCode >= 2 && w.atmCode <= 15 && (tempBand === "Hot" || tempBand === "Boiling")) {
             let rgDM = Math.ceil(sys.age);
             if (tempBand === "Boiling") rgDM += 4;
-            if ((roll2D() + rgDM) >= 12) {
+            tSection('Runaway Greenhouse Check');
+            if (tRoll2D('Runaway Greenhouse Roll (12+)') + rgDM >= 12) {
+                tResult('Result', 'Runaway Greenhouse Triggered');
                 w.runawayGreenhouse = true;
                 tempBand = "Boiling";
                 if ((w.atmCode >= 2 && w.atmCode <= 9) || w.atmCode === 13 || w.atmCode === 14) {
-                    let rRoll = roll1D();
-                    if (w.size >= 2 && w.size <= 5) rRoll -= 2;
-                    if ([2, 4, 7, 9].includes(w.atmCode)) rRoll += 1;
+                    let rRoll = tRoll1D('New Atmosphere Type');
+                    if (w.size >= 2 && w.size <= 5) { tDM('Size 2-5', -2); rRoll -= 2; }
+                    if ([2, 4, 7, 9].includes(w.atmCode)) { tDM('Binary Atm', 1); rRoll += 1; }
                     w.atmCode = rRoll <= 1 ? 10 : (rRoll <= 4 ? 11 : 12);
+                    tResult('New Atmosphere', toUWPChar(w.atmCode));
                 }
+            } else {
+                tResult('Result', 'Normal');
             }
         }
 
         let gravity = w.size === 0 ? 0 : w.size * 0.125;
+        w.gravity = gravity;
+        tResult('Gravity (G)', gravity.toFixed(3));
 
         // 3 & 4. Standard Atmospheres (2-9, D, E)
         if ((w.atmCode >= 2 && w.atmCode <= 9) || w.atmCode === 13 || w.atmCode === 14) {
+            tSection('Pressure & Composition');
             let cdata = MGT2E_ATM_CODES[w.atmCode];
             w.pressureBar = cdata.minP + (cdata.spanP * (rng()));
+            tResult('Pressure (Bar)', w.pressureBar.toFixed(2));
 
-            let o2Roll = roll1D() - 1 + (sys.age > 4 ? 1 : 0);
+            let o2Roll = tRoll1D('Oxygen Roll') - 1 + (sys.age > 4 ? 1 : 0);
+            if (sys.age > 4) tDM('Old System', 1);
             w.oxygenFrac = Math.max(0.01, (o2Roll / 20) + (Math.floor(rng() * 10) / 100));
             w.ppo = w.oxygenFrac * w.pressureBar;
             w.scaleHeight = gravity > 0 ? 8.5 / gravity : 0;
+            tResult('Oxygen Fraction', (w.oxygenFrac * 100).toFixed(1) + '%');
+            tResult('PPO2', w.ppo.toFixed(3));
 
             w.taints = [];
-            if (w.ppo < 0.1) w.taints.push("Low Oxygen");
-            if (w.ppo > 0.5) w.taints.push("High Oxygen");
+            if (w.ppo < 0.1) { tResult('Taint', 'Low Oxygen'); w.taints.push("Low Oxygen"); }
+            if (w.ppo > 0.5) { tResult('Taint', 'High Oxygen'); w.taints.push("High Oxygen"); }
 
             if ([2, 4, 7, 9].includes(w.atmCode)) {
-                let tRoll = roll2D();
-                if (w.atmCode === 4) tRoll -= 2;
-                if (w.atmCode === 9) tRoll += 2;
+                let tRoll = tRoll2D('Taint Subtype Roll');
+                if (w.atmCode === 4) { tDM('Atm 4', -2); tRoll -= 2; }
+                if (w.atmCode === 9) { tDM('Atm 9', 2); tRoll += 2; }
                 let t = MGT2E_TAINT_SUBTYPES[Math.max(2, Math.min(12, tRoll))];
-                if (t && !w.taints.includes(t)) w.taints.push(t);
+                if (t && !w.taints.includes(t)) {
+                    tResult('Atm Taint', t);
+                    w.taints.push(t);
+                }
             }
 
             if (w.taints.length > 0) {
-                w.taintSeverity = MGT2E_TAINT_SEVERITY[Math.max(1, Math.min(9, roll2D()))];
+                w.taintSeverity = MGT2E_TAINT_SEVERITY[Math.max(1, Math.min(9, tRoll2D('Taint Severity')))];
+                tResult('Taint Severity', w.taintSeverity);
             }
 
             if (w.atmCode === 13) {
                 let badRatioO2 = w.oxygenFrac > 0 ? w.ppo / 0.5 : 1;
                 let badRatioN2 = (w.pressureBar - w.ppo) / 2.0;
                 let badRatio = Math.max(badRatioO2, badRatioN2);
-                if (badRatio > 1 && w.scaleHeight > 0) w.safeAlt = Math.log(badRatio) * w.scaleHeight;
+                if (badRatio > 1 && w.scaleHeight > 0) {
+                    w.safeAlt = Math.log(badRatio) * w.scaleHeight;
+                    tResult('Safe Altitude (km)', w.safeAlt.toFixed(2));
+                }
             }
             if (w.atmCode === 14 && w.ppo > 0) {
                 let badRatio = 0.1 / w.ppo;
-                if (badRatio > 1 && w.scaleHeight > 0) w.safeAltBelowMean = Math.log(badRatio) * w.scaleHeight;
+                if (badRatio > 1 && w.scaleHeight > 0) {
+                    w.safeAltBelowMean = Math.log(badRatio) * w.scaleHeight;
+                    tResult('Safe Depth (km)', w.safeAltBelowMean.toFixed(2));
+                }
             }
         }
         else if (w.atmCode >= 10 && w.atmCode <= 12) {
-            let cdata = MGT2E_ATM_CODES[w.atmCode];
-            w.pressureBar = (roll2D() / 2);
+            tSection('Thin/Exotic Pressure');
+            w.pressureBar = (tRoll2D('Thin/Exotic Pressure Roll') / 2);
             w.gases = ["Carbon Dioxide", "Sulphur Dioxide"];
+            tResult('Pressure (Bar)', w.pressureBar.toFixed(2));
         } else if (w.atmCode <= 1) {
             w.pressureBar = MGT2E_ATM_CODES[w.atmCode].minP;
+            tResult('Pressure', 'Trace/None');
         }
 
         // 6. Hydrographics
+        tSection('Hydrographics');
         w.hydroCode = 0;
         if (w.type === 'Mainworld' && mainworldBase && mainworldBase.hydro !== undefined) {
+            tSkip('Mainworld Hydro Inherited');
             w.hydroCode = mainworldBase.hydro;
         } else if (!['S', 0, 1].includes(w.size)) {
             let hMod = 0;
-            if ([0, 1, 10, 11, 12, 15].includes(w.atmCode)) hMod -= 4;
-            if (tempBand === "Hot" && w.atmCode !== 13) hMod -= 2;
-            if (tempBand === "Boiling" && w.atmCode !== 13) hMod -= 6;
+            if ([0, 1, 10, 11, 12, 15].includes(w.atmCode)) { tDM('Desert Atm', -4); hMod -= 4; }
+            if (tempBand === "Hot" && w.atmCode !== 13) { tDM('Hot', -2); hMod -= 2; }
+            if (tempBand === "Boiling" && w.atmCode !== 13) { tDM('Boiling', -6); hMod -= 6; }
 
-            w.hydroCode = Math.max(0, Math.min(10, roll2D() - 7 + w.atmCode + hMod));
+            w.hydroCode = Math.max(0, Math.min(10, tRoll2D('Hydro Roll') - 7 + w.atmCode + hMod));
+            tDM('Atm Mod', w.atmCode);
         }
 
         w.hydroPercent = MGT2E_HYDRO_RANGES[w.hydroCode] + Math.floor(rng() * 10);
         if (w.hydroCode === 0) w.hydroPercent = Math.floor(rng() * 6);
+        tResult('Final Hydro Code', toEHex(w.hydroCode));
+        tResult('Hydro Percentage', w.hydroPercent + '%');
 
-        let distRoll = Math.max(0, Math.min(10, roll2D() - 2));
+        let distRoll = Math.max(0, Math.min(10, tRoll2D('Surface Liquid Distribution (2D-2)') - 2));
         w.surfaceDist = MGT2E_SURFACE_DISTS[distRoll];
         w.liquidType = "Water";
 
@@ -2519,6 +3140,8 @@ function generateMgT2ESystemChunk4(sys, mainworldBase) {
             if (tempBand === "Cold" || tempBand === "Frozen") w.liquidType = "Methane";
         }
         w.tempBand = tempBand;
+        tResult('Surface Distribution', w.surfaceDist);
+        tResult('Liquid Type', w.liquidType);
     };
 
     for (let i = 0; i < sys.worlds.length; i++) {
@@ -2527,6 +3150,7 @@ function generateMgT2ESystemChunk4(sys, mainworldBase) {
             let fauxMoon = Object.assign({}, sys.worlds[i].moons[j]);
             fauxMoon.orbitId = sys.worlds[i].orbitId;
             fauxMoon.type = 'Terrestrial Planet';
+            // Recursively process moon as a terrestrial body
             processWorld(fauxMoon);
             sys.worlds[i].moons[j] = fauxMoon;
         }
@@ -2541,8 +3165,8 @@ function generateMgT2ESystemChunk4(sys, mainworldBase) {
 
 function generateMgT2ESystemChunk2(sys, mainworldBase) {
     sys.worlds = [];
-
     let primary = sys.stars[0];
+    tSection('Orbital Allocation');
 
     // Helper table for HZ deviation
     const MGT2E_HZ_DEVIATION = {
@@ -2551,23 +3175,23 @@ function generateMgT2ESystemChunk2(sys, mainworldBase) {
     };
 
     // =====================================================================
-    // Baseline / HZ orbit (same logic as before)
+    // Baseline / HZ orbit
     // =====================================================================
+    tSection('HZ Baseline');
     let totalWorldsToPlace = sys.gasGiants + sys.planetoidBelts + sys.terrestrialPlanets + 1;
+    let blRoll = tRoll2D('Baseline Orbit Roll');
+    if (sys.stars.length > 1) { tDM('Multi-Star', -2); blRoll -= 2; }
+    if (['Ia', 'Ib', 'II'].includes(primary.sClass)) { tDM('Giant/Supergiant', 3); blRoll += 3; }
+    else if (primary.sClass === 'III') { tDM('Giant', 2); blRoll += 2; }
+    else if (primary.sClass === 'IV') { tDM('Subgiant', 1); blRoll += 1; }
+    else if (primary.sClass === 'VI') { tDM('Subdwarf', -1); blRoll -= 1; }
 
-    let blRoll = roll2D();
-    if (sys.stars.length > 1) blRoll -= 2;
-    if (['Ia', 'Ib', 'II'].includes(primary.sClass)) blRoll += 3;
-    else if (primary.sClass === 'III') blRoll += 2;
-    else if (primary.sClass === 'IV') blRoll += 1;
-    else if (primary.sClass === 'VI') blRoll -= 1;
-
-    if (totalWorldsToPlace < 6) blRoll -= 4;
-    else if (totalWorldsToPlace <= 9) blRoll -= 3;
-    else if (totalWorldsToPlace <= 12) blRoll -= 2;
-    else if (totalWorldsToPlace <= 15) blRoll -= 1;
-    else if (totalWorldsToPlace <= 20) blRoll += 1;
-    else blRoll += 2;
+    if (totalWorldsToPlace < 6) { tDM('Few Worlds', -4); blRoll -= 4; }
+    else if (totalWorldsToPlace <= 9) { tDM('Size 6-9 Worlds', -3); blRoll -= 3; }
+    else if (totalWorldsToPlace <= 12) { tDM('Size 10-12 Worlds', -2); blRoll -= 2; }
+    else if (totalWorldsToPlace <= 15) { tDM('Size 13-15 Worlds', -1); blRoll -= 1; }
+    else if (totalWorldsToPlace <= 20) { tDM('Size 16-20 Worlds', 1); blRoll += 1; }
+    else { tDM('Many Worlds', 2); blRoll += 2; }
 
     let mwAtm = mainworldBase ? mainworldBase.atm : 0;
     let atmDM = 0;
@@ -2576,35 +3200,42 @@ function generateMgT2ESystemChunk2(sys, mainworldBase) {
     else if ([8, 9].includes(mwAtm)) atmDM = 1;
     else if ([10, 13, 15].includes(mwAtm)) atmDM = 2;
     else if ([11, 12].includes(mwAtm)) atmDM = 6;
+    tDM(`Atm ${toUWPChar(mwAtm)} Target DM`, -atmDM);
 
     let rawHzRoll = Math.max(2, Math.min(12, 7 - atmDM));
     let hzDeviation = MGT2E_HZ_DEVIATION[rawHzRoll];
+    tResult('HZ Deviation Target', hzDeviation);
 
     let variance = (Math.floor(rng() * 10)) / 100;
     if (hzDeviation < 0) hzDeviation -= variance;
     else if (hzDeviation > 0) hzDeviation += variance;
     else hzDeviation += (rng() < 0.5 ? 1 : -1) * variance;
+    tResult('Final HZ Deviation', hzDeviation.toFixed(2));
 
     let baselineOrbit = sys.hzco + hzDeviation;
+    tResult('Baseline Orbit (HZ)', baselineOrbit.toFixed(2));
 
-    let eRoll = roll2D();
+    let eRoll = tRoll2D('Empty Orbits Roll (10+)');
     let emptyOrbitsCount = (eRoll <= 9) ? 0 : (eRoll - 9);
+    if (emptyOrbitsCount > 0) tResult('Empty Orbits to Place', emptyOrbitsCount);
 
     // =====================================================================
     // Part 2A: Forbidden Zone Calculation
     // =====================================================================
+    tSection('Forbidden Zones');
     let mergedFZ = [];
     let primaryMao = getMAO(primary.sType, primary.subType, primary.sClass);
     let primaryInnerLimit = primaryMao;
 
-    // Close/Near/Far companions that directly orbit the primary
     let directCompanions = sys.stars.filter(s => s.parentStarIdx === 0 && s.separation !== 'Companion');
     directCompanions.sort((a, b) => a.orbitId - b.orbitId);
 
     if (directCompanions.length > 0) {
-        let innerPush = 0.50 + (directCompanions[0].eccentricity || 0);
+        let dc = directCompanions[0];
+        let innerPush = 0.50 + (dc.eccentricity || 0);
         if (primaryMao > 0.2) innerPush += primaryMao;
         primaryInnerLimit = Math.max(primaryInnerLimit, innerPush);
+        tResult('Primary Inner Stability Limit', primaryInnerLimit.toFixed(2));
     }
 
     let rawFZ = [];
@@ -2618,6 +3249,7 @@ function generateMgT2ESystemChunk2(sys, mainworldBase) {
         if (ce > 0.2) { fmin -= 1.00; fmax += 1.00; }
         if (isInner && ce > 0.5) { fmin -= 1.00; fmax += 1.00; }
         rawFZ.push({ min: fmin, max: fmax });
+        tResult(`FZ for ${comp.name}`, `${fmin.toFixed(2)} - ${fmax.toFixed(2)}`);
     }
     rawFZ.sort((a, b) => a.min - b.min);
     for (let fz of rawFZ) {
@@ -2648,6 +3280,8 @@ function generateMgT2ESystemChunk2(sys, mainworldBase) {
     function bw(bands) { return bands.reduce((s, b) => s + b.max - b.min, 0); }
 
     let primaryBands = calcBands(primaryInnerLimit, 20.0, mergedFZ);
+    primaryBands.forEach((b, idx) => tResult(`Primary Band ${idx + 1}`, `${b.min.toFixed(2)} - ${b.max.toFixed(2)}`));
+
     let primaryTotalOrbits = Math.max(0, Math.floor(bw(primaryBands) + (directCompanions.length === 0 ? 1 : 0)));
 
     const sepOrder = ['Close', 'Near', 'Far'];
@@ -2677,15 +3311,18 @@ function generateMgT2ESystemChunk2(sys, mainworldBase) {
         let sBands = [{ min: sInner, max: sOuter }];
         let sTotalOrbits = Math.max(0, Math.floor(bw(sBands) + 1));
         secondaryMeta.push({ starIdx: si, star: s, bands: sBands, totalOrbits: sTotalOrbits });
+        tResult(`Bands for ${s.name}`, `${sInner.toFixed(2)} - ${sOuter.toFixed(2)} (${sTotalOrbits} slots)`);
     }
 
     // =====================================================================
     // Part 2C: World Distribution
     // =====================================================================
+    tSection('World Distribution');
     let systemTotalOrbits = Math.max(1, primaryTotalOrbits + secondaryMeta.reduce((s, m) => s + m.totalOrbits, 0));
     let worldsToDistribute = sys.totalWorlds;
     let primaryAssigned = Math.ceil(worldsToDistribute * (primaryTotalOrbits / systemTotalOrbits));
     let distributed = [{ starIdx: 0, bands: primaryBands, mao: primaryInnerLimit, assigned: primaryAssigned, isMainStar: true }];
+    tResult('Primary assigned', primaryAssigned);
     let remaining = worldsToDistribute - primaryAssigned;
     for (let mi = 0; mi < secondaryMeta.length; mi++) {
         let meta = secondaryMeta[mi];
@@ -2693,6 +3330,7 @@ function generateMgT2ESystemChunk2(sys, mainworldBase) {
             Math.floor(worldsToDistribute * (meta.totalOrbits / systemTotalOrbits));
         remaining -= assigned;
         distributed.push({ starIdx: meta.starIdx, bands: meta.bands, mao: meta.star.mao || 0.01, assigned: Math.max(0, assigned), isMainStar: false });
+        tResult(`${meta.star.name} assigned`, Math.max(0, assigned));
     }
 
     // =====================================================================
@@ -2709,15 +3347,17 @@ function generateMgT2ESystemChunk2(sys, mainworldBase) {
         return orbit;
     }
 
-    function genSlots(bands, maoInner, numSlots, fzList) {
+    function genSlots(bands, maoInner, numSlots, fzList, label) {
         if (!bands.length || numSlots <= 0) return [];
         let outer = bands[bands.length - 1].max;
         let spread = Math.max(0.1, bw(bands) / Math.max(1, numSlots));
         let slots = [];
-        let cur = skipFZ(maoInner + spread * 0.5 + ((roll2D() - 7) * 0.05 * spread), fzList);
+        let roll = tRoll2D(`${label} Initial Slot Roll`);
+        let cur = skipFZ(maoInner + spread * 0.5 + ((roll - 7) * 0.05 * spread), fzList);
         for (let i = 0; i < numSlots * 3 && slots.length < numSlots; i++) {
             if (bands.some(b => cur >= b.min && cur <= b.max) && cur <= outer) slots.push(cur);
-            cur = skipFZ(cur + spread + ((roll2D() - 7) * 0.1 * spread), fzList);
+            let sRoll = tRoll2D(`${label} Slot ${slots.length + 1} Step`);
+            cur = skipFZ(cur + spread + ((sRoll - 7) * 0.1 * spread), fzList);
             if (cur > outer) break;
         }
         return slots;
@@ -2726,9 +3366,9 @@ function generateMgT2ESystemChunk2(sys, mainworldBase) {
     // =====================================================================
     // Part 2E: Place & Tag Worlds
     // =====================================================================
+    tSection('Placement');
     let allPlacedWorlds = [];
 
-    // P-type inner stability limit (WBH formula, Item #5):
     let ptypeInnerLimit = Infinity;
     if (directCompanions.length > 0) {
         let outerComp = directCompanions[directCompanions.length - 1]; // outermost
@@ -2736,9 +3376,10 @@ function generateMgT2ESystemChunk2(sys, mainworldBase) {
             + (primaryMao > 0.2 ? primaryMao : 0);
     }
     sys.ptypeInnerLimit = ptypeInnerLimit;
+    tResult('P-type Inner Limit', ptypeInnerLimit.toFixed(2));
 
     function getOrbitType(orbitNum, starIdx) {
-        if (starIdx !== 0) return 'S-Type'; // secondary worlds are always S-Type
+        if (starIdx !== 0) return 'S-Type';
         return orbitNum >= ptypeInnerLimit ? 'P-Type' : 'S-Type';
     }
 
@@ -2746,11 +3387,12 @@ function generateMgT2ESystemChunk2(sys, mainworldBase) {
         let { starIdx, bands, mao: starMao, assigned, isMainStar } = de;
         if (assigned <= 0 && !isMainStar) continue;
 
+        let sName = sys.stars[starIdx].name;
         let ggBudget = starIdx === 0 ? sys.gasGiants : Math.min(sys.gasGiants, Math.round(sys.gasGiants * assigned / Math.max(1, worldsToDistribute)));
         let pbBudget = starIdx === 0 ? sys.planetoidBelts : Math.min(sys.planetoidBelts, Math.round(sys.planetoidBelts * assigned / Math.max(1, worldsToDistribute)));
         let tpBudget = Math.max(0, assigned - ggBudget - pbBudget);
 
-        let slots = genSlots(bands, starMao, assigned, starIdx === 0 ? mergedFZ : []);
+        let slots = genSlots(bands, starMao, assigned, starIdx === 0 ? mergedFZ : [], sName);
         let pool = [...slots];
         function pullSlot() {
             if (!pool.length) return bands.length ? bands[bands.length - 1].max + 1 : 99;
@@ -2771,6 +3413,7 @@ function generateMgT2ESystemChunk2(sys, mainworldBase) {
                 isAsteroid: !!(mainworldBase && mainworldBase.size === 0),
                 parentStarIdx: 0, orbitType: getOrbitType(mwSlot, 0), moons: []
             });
+            tResult('Placed Mainworld', mwSlot.toFixed(2));
             let ci = pool.reduce((bi, s, i) => Math.abs(s - mwSlot) < Math.abs(pool[bi] - mwSlot) ? i : bi, 0);
             if (pool.length) pool.splice(ci, 1);
         }
@@ -2818,6 +3461,5 @@ function generateMgT2ESystemChunk2(sys, mainworldBase) {
         w.periodYears = Math.sqrt(Math.pow(w.au, 3) / parentStar.mass);
         sys.worlds.push(w);
     }
-
     return sys;
 }

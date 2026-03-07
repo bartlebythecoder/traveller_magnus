@@ -1537,7 +1537,8 @@ function populateEditorAccordions(stateObj) {
                 html += `</div>`;
 
                 // Worlds orbiting this star
-                sys.worlds.forEach((w, widx) => {
+                const sortedWorlds = [...sys.worlds].sort((a, b) => (a.orbitId || 0) - (b.orbitId || 0));
+                sortedWorlds.forEach((w, widx) => {
                     let worldParent = w.parentStarIdx !== undefined ? w.parentStarIdx : 0;
                     if (worldParent !== starIdx || w.type === 'Empty') return;
 

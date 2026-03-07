@@ -34,6 +34,16 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 ---
 ## 📜 Changelog
 
+### [v0.1.7] - 2026-03-07
+1. **Mongoose Socioeconomics:** Now available for T5 and CT generation.
+2. **CT System Generation:** Fixed bug that re-rolled mainworld generation details in expanded system.
+3. **CT System Generation:** Enforced Tech Level 0 for any subordinate world with Population 0.
+4. **CT System Generation:** Enforced Spaceport Y for any world or moon with Size 0 or R.
+5. **CT System Generation:** Restored population rolls for Size 0 (Planetoid Belts) while retaining Size R (Rings) at Population 0.
+6. **CT System Generation:** Instrumented detailed gravity, mass, and orbital period logging for all bodies.
+7. **CT System Generation:** Refactored engine to a "Single-Calculation, Two-Pass Update" model for stable demographics and clear facility logging.
+
+
 ### [v0.1.6] - 2026-03-06
 1. **Mongoose Trade Classification Corrections:** Mainworld Generation Trade Codes Ga, In, Ni, Ri, Wa codes had inconsistencies with Core Rulebook.
 2. **Mongoose System Generation:** P-value changed to random 1-9, with high population (10+) using the Mongoose "Population A" variant (starting at 1 and incrementing on 1D6 5+).

@@ -4,7 +4,7 @@
 
 // --- PHYSICAL TABLES ---
 const ORBIT_AU = [0.2, 0.4, 0.7, 1.0, 1.6, 2.8, 5.2, 10.0, 19.6, 38.8, 77.2];
-const GRAV = { S: 0.024, 1: 0.122, 2: 0.240, 3: 0.377, 4: 0.500, 5: 0.625, 6: 0.840, 7: 0.875, 8: 1.000, 9: 1.120, 10: 1.250 };
+const GRAV = { 0: 0, S: 0.024, 1: 0.122, 2: 0.240, 3: 0.377, 4: 0.500, 5: 0.625, 6: 0.840, 7: 0.875, 8: 1.000, 9: 1.120, 10: 1.250 };
 
 const LUM = {
     'Ia': { B0: 560000, B5: 204000, A0: 107000, A5: 81000, F0: 61000, F5: 51000, G0: 67000, G5: 89000, K0: 97000, K5: 107000, M0: 117000, M5: 129000 },
@@ -75,6 +75,9 @@ function getThermalStats(w, luminosity) {
 }
 
 function getRotationStats(w) {
+    if (w.size === 0 || w.size === 'R') {
+        return { axialTilt: 'N/A', rotationPeriod: 'N/A' };
+    }
     let axialTilt = (roll2D() - 2) * 4;
     let rotRoll = roll2D();
     let rotationPeriod = "";
@@ -93,7 +96,12 @@ function getRotationStats(w) {
  */
 function generateSubordinateSocial(world, mainworld) {
     if (!world || !mainworld) return;
-    tSection('Subordinate Social Stats');
+    if (world.type === 'Mainworld') {
+        tSkip('Mainworld social stats (Pop, Gov, Law, TL) pre-generated');
+        return;
+    }
+    // Removal of redundant tSection to keep Pass One/Two clear
+    writeLogLine('Reading Baseline Social Stats...');
 
     // Safety: ensure mainworld has basic social data
     const mwPop = (mainworld.pop !== undefined) ? mainworld.pop : 0;
@@ -102,9 +110,9 @@ function generateSubordinateSocial(world, mainworld) {
     const mwTL = (mainworld.tl !== undefined) ? mainworld.tl : 0;
 
     // --- 1. POPULATION LOGIC ---
-    if (world.size === 'R' || world.size === 0) {
+    if (world.size === 'R') {
         world.pop = 0;
-        tSkip('Size R or 0 forces Pop 0');
+        tSkip('Size R forces Pop 0');
     } else {
         let popRollUnmod = tRoll2D('Population');
         tDM('Standard Pop', -2);
@@ -195,22 +203,28 @@ function generateSubordinateSocial(world, mainworld) {
     tResult('Final Law Level', world.law);
 
     // --- 4. TECH LEVEL LOGIC ---
-    let tl = Math.max(0, mwTL - 1);
-    tResult('Initial TL (Mainworld - 1)', tl);
+    let tl = 0;
+    if (world.pop === 0) {
+        tl = 0;
+        tSkip('Pop 0 forces TL 0');
+    } else {
+        tl = Math.max(0, mwTL - 1);
+        tResult('Initial TL (Mainworld - 1)', tl);
 
-    // Facility: If 'Research' or 'Military' base present, TL = Mainworld TL
-    const hasSpecialFacility = (world.militaryBase || world.researchBase ||
-        (world.facilities && (world.facilities.includes('Research Laboratory') ||
-            world.facilities.includes('Military Base'))));
-    if (hasSpecialFacility) {
-        tl = mwTL;
-        tOverride('Special Facility', tl - Math.max(0, mwTL - 1), mwTL, 'Base matches Mainworld TL');
-    }
+        // Facility: If 'Research' or 'Military' base present, TL = Mainworld TL
+        const hasSpecialFacility = (world.militaryBase || world.researchBase ||
+            (world.facilities && (world.facilities.includes('Research Laboratory') ||
+                world.facilities.includes('Military Base'))));
+        if (hasSpecialFacility) {
+            tl = mwTL;
+            tOverride('Special Facility', tl - Math.max(0, mwTL - 1), mwTL, 'Base matches Mainworld TL');
+        }
 
-    // Environmental Floor: If TL < 7 AND Atmo is NOT 5, 6, or 8, set TL to 7
-    if (tl < 7 && ![5, 6, 8].includes(world.atm)) {
-        tOverride('TL Environmental Floor', tl, 7, 'Low TL in hostile atmo');
-        tl = 7;
+        // Environmental Floor: If TL < 7 AND Atmo is NOT 5, 6, or 8, set TL to 7
+        if (tl < 7 && ![5, 6, 8].includes(world.atm)) {
+            tOverride('TL Environmental Floor', tl, 7, 'Low TL in hostile atmo');
+            tl = 7;
+        }
     }
     world.tl = clampUWP(tl, 0, 33);
     if (world.tl !== tl) tClamp('Tech Level UWP', tl, world.tl);
@@ -994,6 +1008,9 @@ function generateCTSystemChunk2(sys, mainworldBase) {
             let bRot = getRotationStats({ size: 0 });
             target.contents = {
                 type: 'Planetoid Belt',
+                size: 0,
+                atm: 0,
+                hydro: 0,
                 distAU: bDist,
                 gravity: 0,
                 diamKm: 0,
@@ -1020,103 +1037,130 @@ function generateCTSystemChunk3(sys, mainworldBase) {
     const generateWorld = (world, orbitNum, zone) => {
         logIndentIn();
 
-        if (world.type === 'Mainworld') {
+        if (world.type === 'Planetoid Belt') {
+            world.size = 0;
+            tResult('Final Size', 0);
+            tSkip('Planetoid Belt size is automatically 0');
+        } else if (world.type === 'Mainworld') {
             tResult('World Type', 'Mainworld (Stats pre-generated)');
-        } else if (world.type === 'Planetoid Belt') {
-            tResult('World Type', 'Planetoid Belt');
+            world.size = mainworldBase.size;
+            tResult('Final Size', world.size);
+            tSkip('Mainworld size is pre-generated');
         } else {
             tResult('World Type', 'Standard World');
+            let sizeRollUnmodified = tRoll2D('Standard Size');
+            if (orbitNum === 0) tDM('Orbit 0', -5);
+            else if (orbitNum === 1) tDM('Orbit 1', -4);
+            else if (orbitNum === 2) tDM('Orbit 2', -2);
+
+            if (pType === 'M') tDM('M-Class Primary', -2);
+
+            let sizeRoll = sizeRollUnmodified - 2;
+            if (orbitNum === 0) sizeRoll -= 5;
+            else if (orbitNum === 1) sizeRoll -= 4;
+            else if (orbitNum === 2) sizeRoll -= 2;
+
+            if (pType === 'M') sizeRoll -= 2;
+
+            let size;
+            if (sizeRoll <= 0) {
+                size = 'S';
+                if (sizeRoll !== 0) tClamp('Size', sizeRoll, 'S');
+            } else {
+                size = Math.min(10, sizeRoll);
+                if (sizeRoll > 10) tClamp('Size', sizeRoll, 10);
+            }
+            world.size = size;
+            tResult('Final Size', size);
         }
+        world.gravity = GRAV[world.size] !== undefined ? GRAV[world.size] : 1.0;
+        world.diamKm = (world.size === 'S' ? 500 : world.size * 1600);
 
-        let sizeRollUnmodified = tRoll2D('Standard Size');
-        if (orbitNum === 0) tDM('Orbit 0', -5);
-        else if (orbitNum === 1) tDM('Orbit 1', -4);
-        else if (orbitNum === 2) tDM('Orbit 2', -2);
-
-        if (pType === 'M') tDM('M-Class Primary', -2);
-
-        let sizeRoll = sizeRollUnmodified - 2;
-        if (orbitNum === 0) sizeRoll -= 5;
-        else if (orbitNum === 1) sizeRoll -= 4;
-        else if (orbitNum === 2) sizeRoll -= 2;
-
-        if (pType === 'M') sizeRoll -= 2;
-
-        let size;
-        if (sizeRoll <= 0) {
-            size = 'S';
-            if (sizeRoll !== 0) tClamp('Size', sizeRoll, 'S');
+        let atmSizeVal = (world.size === 'S' ? 0 : world.size);
+        if (world.type === 'Planetoid Belt') {
+            world.atm = 0;
+            tResult('Final Atmosphere', 0);
+            tSkip('Planetoid Belt atmosphere is automatically 0');
+        } else if (world.type === 'Mainworld') {
+            world.atm = mainworldBase.atm;
+            tResult('Final Atmosphere', world.atm);
+            tSkip('Mainworld atmosphere is pre-generated');
         } else {
-            size = Math.min(10, sizeRoll);
-            if (sizeRoll > 10) tClamp('Size', sizeRoll, 10);
-        }
-        world.size = size;
-        tResult('Final Size', size);
-        world.gravity = GRAV[size] !== undefined ? GRAV[size] : 1.0;
-        world.diamKm = (size === 'S' ? 500 : size * 1600);
+            let atmRollUnmodified = tRoll2D('Standard Atmosphere');
+            tDM('Size Code', atmSizeVal);
+            tDM('Standard Atm', -7);
+            if (zone === 'I' || zone === 'O') tDM('Zone I/O', -2);
 
-        let atmSizeVal = (size === 'S' ? 0 : size);
-        let atmRollUnmodified = tRoll2D('Standard Atmosphere');
-        tDM('Size Code', atmSizeVal);
-        tDM('Standard Atm', -7);
-        if (zone === 'I' || zone === 'O') tDM('Zone I/O', -2);
+            let atmRoll = atmRollUnmodified - 7 + atmSizeVal;
+            if (zone === 'I' || zone === 'O') atmRoll -= 2;
 
-        let atmRoll = atmRollUnmodified - 7 + atmSizeVal;
-        if (zone === 'I' || zone === 'O') atmRoll -= 2;
+            let atm = Math.max(0, Math.min(15, atmRoll));
+            if (atm !== atmRoll) tClamp('Atmosphere', atmRoll, atm);
 
-        let atm = Math.max(0, Math.min(15, atmRoll));
-        if (atm !== atmRoll) tClamp('Atmosphere', atmRoll, atm);
+            if (world.size === 0 || world.size === 'S') {
+                atm = 0;
+                tOverride('Atmosphere', atmRoll, 0, 'Size 0/S forces Atm 0');
+            }
 
-        if (size === 0 || size === 'S') {
-            atm = 0;
-            tOverride('Atmosphere', atmRoll, 0, 'Size 0/S forces Atm 0');
-        }
-
-        const hOrbits = sys.orbits.filter(o => o.zone === 'H').map(o => o.orbit);
-        if (hOrbits.length > 0) {
-            const maxH = Math.max(...hOrbits);
-            if (orbitNum >= maxH + 2) {
-                let extremeRoll = tRoll2D('Extreme Orbit Atm Check (12)');
-                if (extremeRoll === 12) {
-                    atm = 10;
-                    tOverride('Atmosphere', atmRoll, 10, 'Rolled 12 in extreme outer orbit');
+            const hOrbits = sys.orbits.filter(o => o.zone === 'H').map(o => o.orbit);
+            if (hOrbits.length > 0) {
+                const maxH = Math.max(...hOrbits);
+                if (orbitNum >= maxH + 2) {
+                    let extremeRoll = tRoll2D('Extreme Orbit Atm Check (12)');
+                    if (extremeRoll === 12) {
+                        atm = 10;
+                        tOverride('Atmosphere', atmRoll, 10, 'Rolled 12 in extreme outer orbit');
+                    }
                 }
             }
-        }
-        world.atm = atm;
-        tResult('Final Atmosphere', atm);
-
-        let hydroRollUnmodified = tRoll2D('Standard Hydrographics');
-        tDM('Atm/Size', atmSizeVal);
-        tDM('Standard Hydro', -7);
-        let hydroRoll = hydroRollUnmodified - 7 + atmSizeVal;
-
-        if (atm === 0 || atm === 1 || atm >= 10) {
-            hydroRoll -= 4;
-            tDM('Atmosphere Extreme', -4);
-        }
-        if (zone === 'O') {
-            hydroRoll -= 4;
-            tDM('Zone O', -4);
+            world.atm = atm;
+            tResult('Final Atmosphere', atm);
         }
 
-        let hydro = Math.max(0, Math.min(10, hydroRoll));
-        if (hydro !== hydroRoll) tClamp('Hydrographics', hydroRoll, hydro);
+        if (world.type === 'Planetoid Belt') {
+            world.hydro = 0;
+            tResult('Final Hydrographics', 0);
+            tSkip('Planetoid Belt hydrographics is automatically 0');
+        } else if (world.type === 'Mainworld') {
+            world.hydro = mainworldBase.hydro;
+            tResult('Final Hydrographics', world.hydro);
+            tSkip('Mainworld hydrographics is pre-generated');
+        } else {
+            let hydroRollUnmodified = tRoll2D('Standard Hydrographics');
+            tDM('Atm/Size', atmSizeVal);
+            tDM('Standard Hydro', -7);
+            let hydroRoll = hydroRollUnmodified - 7 + atmSizeVal;
 
-        if (zone === 'I' || size === 1 || size === 'S') {
-            hydro = 0;
-            tOverride('Hydrographics', hydroRoll, 0, 'Zone I or Size 1/S forces Hydro 0');
+            if (world.atm === 0 || world.atm === 1 || world.atm >= 10) {
+                hydroRoll -= 4;
+                tDM('Atmosphere Extreme', -4);
+            }
+            if (zone === 'O') {
+                hydroRoll -= 4;
+                tDM('Zone O', -4);
+            }
+
+            let hydro = Math.max(0, Math.min(10, hydroRoll));
+            if (hydro !== hydroRoll) tClamp('Hydrographics', hydroRoll, hydro);
+
+            if (zone === 'I' || world.size === 1 || world.size === 'S' || world.size === 0) {
+                hydro = 0;
+                tOverride('Hydrographics', hydroRoll, 0, 'Zone I or Size 0/1/S forces Hydro 0');
+            }
+            world.hydro = hydro;
+            tResult('Final Hydrographics', hydro);
         }
-        world.hydro = hydro;
-        tResult('Final Hydrographics', hydro);
 
         world.zone = zone; // Ensure zone is set for helper
         generateSubordinateSocial(world, mainworldBase);
 
         world.uwpSecondary = constructCTUPP(world);
         world.distAU = ORBIT_AU[Math.min(Math.floor(orbitNum), ORBIT_AU.length - 1)];
-        world.mass = world.gravity * Math.pow((size === 'S' ? 0.3 : size) / 8, 2);
+        tResult('Distance to Star', `${world.distAU.toFixed(2)} AU`);
+        world.mass = world.gravity * Math.pow((world.size === 'S' ? 0.3 : world.size) / 8, 2);
+        tResult('Gravity / Mass', `${world.gravity.toFixed(3)} G / ${world.mass.toFixed(4)} M_Earth`);
         world.orbitalPeriod = Math.sqrt(Math.pow(world.distAU, 3) / (sys.stars[0].mass || 1.0));
+        tResult('Orbital Period', `${world.orbitalPeriod.toFixed(2)} Years`);
 
         let luminosity = sys.stars[0].luminosity || 1.0;
         let thermal = getThermalStats(world, luminosity);
@@ -1125,10 +1169,16 @@ function generateCTSystemChunk3(sys, mainworldBase) {
         world.axialTilt = rot.axialTilt;
         world.rotationPeriod = rot.rotationPeriod;
 
+        tResult('Surface Temperature', world.temperature + ' K');
+        tResult('Rotation', world.rotationPeriod + ' / Tilt: ' + world.axialTilt + '°');
+
         logIndentOut();
     };
 
-    tSection('System Orbits & World Placement');
+    tSection('PASS ONE: Physical & Social Baseline');
+    writeLogLine('\n========================================================');
+    writeLogLine('PASS ONE: PHYSICAL & SOCIAL BASELINE');
+    writeLogLine('========================================================');
     sys.orbits.forEach(slot => {
         writeLogLine(`\nEvaluating Orbit: ${slot.orbit}`);
 
@@ -1171,7 +1221,7 @@ function generateCTSystemChunk3(sys, mainworldBase) {
 
 function generateCTSystemChunk4(sys, mainworldBase) {
     if (!sys) return null;
-    tSection('Satellite Generation');
+    writeLogLine('\n--- SATELLITE GENERATION ---');
 
     const mwPop = mainworldBase.pop;
 
@@ -1329,8 +1379,11 @@ function generateCTSystemChunk4(sys, mainworldBase) {
 
             moon.uwpSecondary = constructCTUPP(moon);
             moon.distAU = ORBIT_AU[Math.min(Math.floor(orbitNum), ORBIT_AU.length - 1)];
+            tResult('Distance to Star', `${moon.distAU.toFixed(2)} AU`);
             moon.mass = moon.gravity * Math.pow((moon.size === 'S' ? 0.3 : moon.size) / 8, 2);
+            tResult('Gravity / Mass', `${moon.gravity.toFixed(3)} G / ${moon.mass.toFixed(4)} M_Earth`);
             moon.orbitalPeriod = Math.sqrt(Math.pow(moon.distAU, 3) / (sys.stars[0].mass || 1.0));
+            tResult('Orbital Period', `${moon.orbitalPeriod.toFixed(2)} Years`);
 
             let luminosity = sys.stars[0].luminosity || 1.0;
             let thermal = getThermalStats(moon, luminosity);
@@ -1338,6 +1391,9 @@ function generateCTSystemChunk4(sys, mainworldBase) {
             let rot = getRotationStats(moon);
             moon.axialTilt = rot.axialTilt;
             moon.rotationPeriod = rot.rotationPeriod;
+
+            tResult('Surface Temperature', moon.temperature + ' K');
+            tResult('Rotation', moon.rotationPeriod + ' / Tilt: ' + moon.axialTilt + '°');
 
             parent.satellites.push(moon);
             logIndentOut();
@@ -1360,6 +1416,10 @@ function generateCTSystemChunk4(sys, mainworldBase) {
 
 function generateCTSystemChunk5(sys, mainworldBase) {
     if (!sys) return null;
+    tSection('PASS TWO: Facility & Infrastructure Updates');
+    writeLogLine('\n========================================================');
+    writeLogLine('PASS TWO: FACILITY & INFRASTRUCTURE UPDATES');
+    writeLogLine('========================================================');
 
     const mwGov = mainworldBase.gov;
     const mwLaw = mainworldBase.law;
@@ -1372,19 +1432,29 @@ function generateCTSystemChunk5(sys, mainworldBase) {
 
     const fleshOutWorld = (w, orbitNum, zone) => {
         writeLogLine(`\n--- Fleshing out: ${w.type} (Orbit ${orbitNum}) ---`);
-        if (w.type === 'Empty' || w.size === 0 || w.size === 'R' || w.type === 'Gas Giant' || w.type === 'Planetoid Belt') {
-            tSkip('Non-habitable/Empty body (Gov 0, Law 0, Port Y)');
-            w.gov = 0; w.law = 0; w.spaceport = 'Y';
+
+        if (w.type === 'Mainworld') {
+            tSkip('Mainworld social stats drawn from mainworld generation');
+            w.pop = mainworldBase.pop;
+            w.gov = mainworldBase.gov;
+            w.law = mainworldBase.law;
+            w.tl = mainworldBase.tl;
+            w.spaceport = mainworldBase.port; // Mainworld uses 'port', subordinate logic uses 'spaceport'
+            w.uwpSecondary = mainworldBase.upp;
             return;
         }
 
-        // 1. Prepare world object for social helper
-        w.zone = zone;
+        if (w.type === 'Empty' || w.size === 'R' || w.type === 'Gas Giant') {
+            tSkip('Non-habitable/Empty body (Gov 0, Law 0, Port Y, TL 0)');
+            w.gov = 0; w.law = 0; w.spaceport = 'Y'; w.tl = 0;
+            w.uwpSecondary = constructCTUPP(w); // Ensure final UWP is set
+            return;
+        }
 
-        // 2. Initial Social Generation (Pop, Gov, Law, TL)
-        generateSubordinateSocial(w, mainworldBase);
+        writeLogLine(`\n--- Refining: ${w.type} (Orbit ${orbitNum}) ---`);
 
-        // 3. Post-Social Facilities Generation
+        // 1. Post-Social Facilities Generation
+        // Using locked-in social stats from Pass 1
         w.facilities = [];
         if (zone === 'H' && w.atm >= 4 && w.atm <= 9 && w.hydro >= 4 && w.hydro <= 8 && w.pop >= 2) {
             w.facilities.push('Farming');
@@ -1431,41 +1501,51 @@ function generateCTSystemChunk5(sys, mainworldBase) {
             }
         }
 
-        // 4. Re-Apply Facility TL Bonuses (if added after helper)
+        // 2. Re-Apply Facility TL Bonuses
         if (w.facilities.includes('Research Laboratory') || w.facilities.includes('Military Base')) {
-            if (w.tl !== mwTL) tOverride('Special Facility', w.tl, mwTL, 'Base matches Mainworld TL');
-            w.tl = mwTL;
+            if (w.tl !== mwTL) {
+                tOverride('Special Facility TL Upgrade', w.tl, mwTL, 'Base matches Mainworld TL');
+                w.tl = mwTL;
+            }
         }
 
-        let spRollUnmod = tRoll1D('Spaceport');
-        let spRoll = spRollUnmod;
-        if (w.pop >= 6) {
-            spRoll += 2;
-            tDM('Pop 6+', 2);
-        }
-        else if (w.pop === 1) {
-            spRoll -= 2;
-            tDM('Pop 1', -2);
-        }
-        else if (w.pop === 0) {
-            spRoll -= 3;
-            tDM('Pop 0', -3);
-        }
-
+        // 3. Spaceport Generation
         let sp = 'Y';
-        if (spRoll <= 2) sp = 'Y';
-        else if (spRoll === 3) sp = 'H';
-        else if (spRoll <= 5) sp = 'G';
-        else sp = 'F';
-        w.spaceport = sp;
-        tResult('Spaceport Class', sp);
+        if (w.size === 0 || w.size === 'R') {
+            sp = 'Y';
+            tOverride('Spaceport', 'Roll', 'Y', 'Size 0/R forces Spaceport Y');
+        } else {
+            let spRollUnmod = tRoll1D('Spaceport Quality Roll');
+            let spRoll = spRollUnmod;
+            if (w.pop >= 6) {
+                spRoll += 2;
+                tDM('High Population (6+)', 2);
+            }
+            else if (w.pop === 1) {
+                spRoll -= 2;
+                tDM('Low Population (1)', -2);
+            }
+            else if (w.pop === 0) {
+                spRoll -= 3;
+                tDM('No Population (0)', -3);
+            }
 
-        const sChar = (w.size === 'S' ? 'S' : toUWPChar(w.size));
+            if (spRoll <= 2) sp = 'Y';
+            else if (spRoll === 3) sp = 'H';
+            else if (spRoll <= 5) sp = 'G';
+            else sp = 'F';
+        }
+        w.spaceport = sp;
+        tResult('Final Spaceport Class', sp);
+
+        // 4. Final UWP Construction
         w.uwpSecondary = constructCTUPP(w);
-        tResult('Subordinate UWP', w.uwpSecondary);
+        tResult('Final Subordinate UWP', w.uwpSecondary);
+
         if (w.facilities.length > 0) {
             w.classifications = w.facilities;
         }
+        writeLogLine('Finalized UWP: ' + w.uwpSecondary);
     };
 
     const processNode = (node, orbitNum, zone) => {

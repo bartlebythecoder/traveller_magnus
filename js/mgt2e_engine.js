@@ -893,7 +893,8 @@ function generateMgT2ESocioeconomics(base, hexId) {
     // 11. Tech Profile (H-L-QQQQQ-TTTT-MM-N)
     tSection('Tech Profile');
     function tlm(label) {
-        let roll = tRoll2D(label || 'Tech Level Modifier');
+        let rLabel = label || 'Tech Level Modifier';
+        let roll = tRoll2D(rLabel);
         let mod = 0;
         if (roll === 2) mod = -3;
         else if (roll === 3) mod = -2;
@@ -902,7 +903,9 @@ function generateMgT2ESocioeconomics(base, hexId) {
         else if (roll === 10) mod = 1;
         else if (roll === 11) mod = 2;
         else if (roll === 12) mod = 3;
-        tResult(label || 'TL Modifier', mod);
+
+        let resLabel = rLabel.replace('Roll', 'Result');
+        tResult(resLabel, mod);
         return mod;
     }
 
@@ -933,56 +936,65 @@ function generateMgT2ESocioeconomics(base, hexId) {
 
     // Quality of Life TLs
     tSection('Tech: Quality of Life (Q1-Q5)');
+
+    // Q1 Energy
+    writeLogLine('Q1 Energy');
     let q1DM = 0;
     if (base.pop >= 9) { tDM('Pop 9+', 1); q1DM += 1; }
     if (isInd) { tDM('Industrial', 1); q1DM += 1; }
-    let Q1 = H + tlm('Q1: Energy Roll') + q1DM;
-    let fQ1 = Math.max(Math.floor(H / 2), Math.min(Math.floor(H * 1.2), Q1));
-    if (Q1 !== fQ1) tClamp('Q1 TL', Q1, fQ1);
-    Q1 = fQ1;
+    let rawQ1 = H + tlm('Q1: Energy TLM Roll') + q1DM;
+    let Q1 = Math.max(Math.floor(H / 2), Math.min(Math.floor(H * 1.2), rawQ1));
+    if (rawQ1 !== Q1) tClamp('Q1 TL', rawQ1, Q1);
     tResult('Q1: Energy', Q1);
 
+    // Q2 Electronics
+    writeLogLine('Q2 Electronics');
     let q2DM = 0;
     if (base.pop >= 1 && base.pop <= 5) { tDM('Pop 1-5', 1); q2DM += 1; }
     if (base.pop >= 9) { tDM('Pop 9+', -1); q2DM -= 1; }
     if (isInd) { tDM('Industrial', 1); q2DM += 1; }
-    let Q2 = H + tlm('Q2: Computer Roll') + q2DM;
-    let fQ2 = Math.max(Q1 - 3, Math.min(Q1 + 1, Q2));
-    if (Q2 !== fQ2) tClamp('Q2 TL', Q2, fQ2);
-    Q2 = fQ2;
-    tResult('Q2: Computer', Q2);
+    let rawQ2 = H + tlm('Q2: Electronics TLM Roll') + q2DM;
+    let Q2 = Math.max(Q1 - 3, Math.min(Q1 + 1, rawQ2));
+    if (rawQ2 !== Q2) tClamp('Q2 TL', rawQ2, Q2);
+    tResult('Q2: Electronics', Q2);
 
+    // Q3 Manufacturing
+    writeLogLine('Q3 Manufacturing');
     let q3DM = 0;
     if (base.pop >= 1 && base.pop <= 6) { tDM('Pop 1-6', -1); q3DM -= 1; }
     if (base.pop >= 8) { tDM('Pop 8+', 1); q3DM += 1; }
     if (isInd) { tDM('Industrial', 1); q3DM += 1; }
-    let Q3 = H + tlm('Q3: Bio/Med Roll') + q3DM;
-    let fQ3 = Math.max(Q2 - 2, Math.min(Math.max(Q1, Q2), Q3));
-    if (Q3 !== fQ3) tClamp('Q3 TL', Q3, fQ3);
-    Q3 = fQ3;
-    tResult('Q3: Bio/Med', Q3);
+    let rawQ3 = H + tlm('Q3: Manufacturing TLM Roll') + q3DM;
+    let Q3 = Math.max(Q2 - 2, Math.min(Math.max(Q1, Q2), rawQ3));
+    if (rawQ3 !== Q3) tClamp('Q3 TL', rawQ3, Q3);
+    tResult('Q3: Manufacturing', Q3);
 
+    // Q4 Medical
+    writeLogLine('Q4 Medical');
     let q4DM = 0;
     if (isRich) { tDM('Rich', 1); q4DM += 1; }
     if (isPoor) { tDM('Poor', -1); q4DM -= 1; }
-    let spDM = 0;
-    if (base.starport === 'A') spDM = 6;
-    else if (base.starport === 'B') spDM = 4;
-    else if (base.starport === 'C') spDM = 2;
-    tDM(`Starport ${base.starport} Minimum`, spDM);
-    let Q4 = Q2 + tlm('Q4: Env Roll') + q4DM;
-    let fQ4 = Math.max(Math.max(0, spDM), Math.min(Q2, Q4));
-    if (Q4 !== fQ4) tClamp('Q4 TL', Q4, fQ4);
-    Q4 = fQ4;
-    tResult('Q4: Env', Q4);
+    let rawQ4 = H + tlm('Q4: Medical TLM Roll') + q4DM;
+    let spLowBound = 0;
+    if (base.starport === 'A') spLowBound = 6;
+    else if (base.starport === 'B') spLowBound = 4;
+    else if (base.starport === 'C') spLowBound = 2;
+    let Q4 = Math.max(spLowBound, Math.min(Q2, rawQ4));
+    if (rawQ4 !== Q4) tClamp('Q4 TL', rawQ4, Q4);
+    tResult('Q4: Medical', Q4);
 
+    // Q5 Environment
+    writeLogLine('Q5 Environment');
     let q5DM = 0;
-    if (habRating < 8) { tDM('Habitation < 8', 8 - habRating); q5DM += (8 - habRating); }
-    let Q5 = Q3 + tlm('Q5: Manufacturing Roll') + q5DM;
-    let fQ5 = Math.max(Q1 - 5, Math.min(Q1, Q5));
-    if (Q5 !== fQ5) tClamp('Q5 TL', Q5, fQ5);
-    Q5 = fQ5;
-    tResult('Q5: Mfg', Q5);
+    if (habRating < 8) {
+        let hDM = 8 - habRating;
+        tDM('Habitation < 8', hDM);
+        q5DM += hDM;
+    }
+    let rawQ5 = Q3 + tlm('Q5: Environment TLM Roll') + q5DM;
+    let Q5 = Math.max(Q1 - 5, Math.min(Q1, rawQ5));
+    if (rawQ5 !== Q5) tClamp('Q5 TL', rawQ5, Q5);
+    tResult('Q5: Environment', Q5);
 
     // Transportation TLs
     tSection('Tech: Transportation (T1-T4)');

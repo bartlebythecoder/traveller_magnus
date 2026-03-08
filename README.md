@@ -1,4 +1,4 @@
-# As Above, So Below (v0.1.6)
+# As Above, So Below (v0.1.7.1)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -34,14 +34,15 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 ---
 ## 📜 Changelog
 
-### [v0.1.7] - 2026-03-07
-1. **Mongoose Socioeconomics:** Now available for T5 and CT generation.
-2. **CT System Generation:** Fixed bug that re-rolled mainworld generation details in expanded system.
-3. **CT System Generation:** Enforced Tech Level 0 for any subordinate world with Population 0.
-4. **CT System Generation:** Enforced Spaceport Y for any world or moon with Size 0 or R.
-5. **CT System Generation:** Restored population rolls for Size 0 (Planetoid Belts) while retaining Size R (Rings) at Population 0.
-6. **CT System Generation:** Instrumented detailed gravity, mass, and orbital period logging for all bodies.
-7. **CT System Generation:** Refactored engine to a "Single-Calculation, Two-Pass Update" model for stable demographics and clear facility logging.
+### [v0.1.7.1] - 2026-03-07
+1. **Expanded System Logging:** Added detailed logging for T5 and CT system generation.
+2. **Mongoose Socioeconomics:** Now available for T5 and CT generation.
+3. **CT System Generation:** Fixed bug that re-rolled mainworld generation details in expanded system.
+4. **CT System Generation:** Enforced Tech Level 0 for any subordinate world with Population 0.
+5. **CT System Generation:** Enforced Spaceport Y for any world or moon with Size 0 or R.
+6. **CT System Generation:** Restored population rolls for Size 0 (Planetoid Belts) while retaining Size R (Rings) at Population 0.
+7. **CT System Generation:** Instrumented detailed gravity, mass, and orbital period logging for all bodies.
+8. **CT System Generation:** Refactored engine to a "Single-Calculation, Two-Pass Update" model for stable demographics and clear facility logging.
 
 
 ### [v0.1.6] - 2026-03-06

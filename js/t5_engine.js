@@ -15,49 +15,68 @@ function rollFlux() {
 function generateT5SubordinateSocial(world, mainworld) {
     if (!world) return;
 
+    tSection('Subordinate Social Stats (T5)');
+
     // 1. Identification: If we don't have a mainworld reference, default to safe ceiling
     const mwPop = (mainworld && mainworld.pop !== undefined) ? mainworld.pop : 15;
+    tResult('Mainworld Pop ceiling', mwPop);
 
     // 2. Population Continuation Cap (2D-2, results >= MW result are lowered)
-    let popRoll = roll2D() - 2;
+    let popRoll = tRoll2D('Population Roll') - 2;
     if (popRoll >= mwPop) {
         world.pop = Math.max(0, mwPop - 1);
+        tOverride('Pop capped', world.pop);
     } else {
         world.pop = popRoll;
+        tResult('Population', world.pop);
     }
     world.popDigit = world.pop > 0 ? Math.floor(rng() * 10) : 0;
+    tResult('Pop Multiplier', world.popDigit);
 
     // 3. Spaceport Restrictions (1-2: Y, 3-4: H, 5: G, 6: F)
-    const spRoll = roll1D();
+    const spRoll = tRoll1D('Spaceport Roll');
     if (spRoll <= 2) world.starport = 'Y';
     else if (spRoll <= 4) world.starport = 'H';
     else if (spRoll === 5) world.starport = 'G';
     else world.starport = 'F';
+    tResult('Spaceport', world.starport);
 
     // 4. Cascading Socials (T5 standard formulas)
-    world.gov = Math.max(0, Math.min(15, rollFlux() + world.pop));
-    world.law = Math.max(0, Math.min(15, rollFlux() + world.gov));
+    let govFlux = rollFlux();
+    world.gov = Math.max(0, Math.min(15, govFlux + world.pop));
+    writeLogLine(`Government Roll: Flux (${govFlux >= 0 ? '+' : ''}${govFlux}) + Pop(${world.pop}) = ${world.gov}`);
+
+    let lawFlux = rollFlux();
+    world.law = Math.max(0, Math.min(15, lawFlux + world.gov));
+    writeLogLine(`Law Roll: Flux (${lawFlux >= 0 ? '+' : ''}${lawFlux}) + Gov(${world.gov}) = ${world.law}`);
 
     // 5. Tech Level Roll (1D + Modifiers)
     let tlDM = 0;
     // Spaceport DMs
-    if (world.starport === 'F') tlDM += 1;
-    if (world.starport === 'Y') tlDM -= 4;
-    // Physical/Social DMs (T5)
-    if (world.size <= 1) tlDM += 2;
-    else if (world.size <= 4) tlDM += 1;
-    const atm = world.atm || 0;
-    if (atm <= 3 || (atm >= 10 && atm <= 15)) tlDM += 1;
-    const hydro = world.hydro || 0;
-    if (hydro === 9) tlDM += 1;
-    else if (hydro === 10) tlDM += 2;
-    if (world.pop >= 1 && world.pop <= 5) tlDM += 1;
-    else if (world.pop === 9) tlDM += 2;
-    else if (world.pop >= 10) tlDM += 4;
-    if (world.gov === 0 || world.gov === 5) tlDM += 1;
-    else if (world.gov === 13) tlDM -= 2;
+    if (world.starport === 'F') { tlDM += 1; tDM('Port F', 1); }
+    if (world.starport === 'Y') { tlDM -= 4; tDM('Port Y', -4); }
 
-    world.tl = Math.max(0, roll1D() + tlDM);
+    // Physical/Social DMs (T5)
+    if (world.size <= 1) { tlDM += 2; tDM('Small Size', 2); }
+    else if (world.size <= 4) { tlDM += 1; tDM('Size 2-4', 1); }
+
+    const atm = world.atm || 0;
+    if (atm <= 3 || (atm >= 10 && atm <= 15)) { tlDM += 1; tDM('Extreme Atm', 1); }
+
+    const hydro = world.hydro || 0;
+    if (hydro === 9) { tlDM += 1; tDM('Hydro 9', 1); }
+    else if (hydro === 10) { tlDM += 2; tDM('Hydro 10', 2); }
+
+    if (world.pop >= 1 && world.pop <= 5) { tlDM += 1; tDM('Low Pop', 1); }
+    else if (world.pop === 9) { tlDM += 2; tDM('High Pop (9)', 2); }
+    else if (world.pop >= 10) { tlDM += 4; tDM('High Pop (A+)', 4); }
+
+    if (world.gov === 0 || world.gov === 5) { tlDM += 1; tDM('Anarchy/Feudal', 1); }
+    else if (world.gov === 13) { tlDM -= 2; tDM('Bureaucracy', -2); }
+
+    let rawTL = tRoll1D('TL Roll');
+    world.tl = Math.max(0, rawTL + tlDM);
+    tResult('Final TL', world.tl);
 
     // Clamping
     world.pop = clampUWP(world.pop || 0, 0, 15);
@@ -76,6 +95,7 @@ function generateT5SubordinateSocial(world, mainworld) {
 
     world.uwp = uwp;
     world.uwpSecondary = uwp;
+    tResult('Final Subordinate UWP', uwp);
 }
 
 function getT5OrbitAU(orbit) {
@@ -108,7 +128,10 @@ function generateT5SystemChunk1(mainworldBase, existingSystem, hexId) {
     function generateStar(role, orbitID, importedName = null) {
         let type, decimal, size;
 
+        tSection(`Generating ${role} Star`);
+
         if (importedName) {
+            tResult('Imported Stellar', importedName);
             const parsed = parseT5Stellar(importedName);
             type = parsed.type;
             decimal = parsed.decimal;
@@ -125,7 +148,10 @@ function generateT5SystemChunk1(mainworldBase, existingSystem, hexId) {
             else if (f <= 5) type = 'M';
             else type = 'BD';
 
+            writeLogLine(`Spectral Class Flux: ${f >= 0 ? '+' : ''}${f} -> ${type}`);
+
             decimal = Math.floor(rng() * 10);
+            tResult('Spectral Decimal', decimal);
 
             // Classification Logic: Size
             let sf = rollFlux();
@@ -139,12 +165,16 @@ function generateT5SystemChunk1(mainworldBase, existingSystem, hexId) {
             else if (sf === 1) size = 'VI';
             else size = 'D';
 
+            writeLogLine(`Size Flux: ${sf >= 0 ? '+' : ''}${sf} -> ${size}`);
+
             // Size Constraints
             if (size === 'IV' && ((type === 'K' && decimal >= 5) || type === 'M' || type === 'BD')) {
                 size = 'V';
+                tOverride('Size restricted (IV -> V)', size);
             }
             if (size === 'VI' && (type === 'O' || type === 'B' || type === 'A' || (type === 'F' && decimal <= 4))) {
                 size = 'V';
+                tOverride('Size restricted (VI -> V)', size);
             }
         }
 
@@ -152,6 +182,12 @@ function generateT5SystemChunk1(mainworldBase, existingSystem, hexId) {
         const TYPE_MAP = { 'O': 50, 'B': 10, 'A': 2, 'F': 1.5, 'G': 1.0, 'K': 0.7, 'M': 0.2, 'BD': 0.05, 'D': 1.0 };
         let mass = TYPE_MAP[type] || 1.0;
         let luminosity = Math.pow(mass, 3.5);
+
+        tResult('Mass', mass.toFixed(2) + ' M_Sol');
+        tResult('Luminosity', luminosity.toFixed(3) + ' L_Sol');
+
+        let starName = (size === 'D' || type === 'BD') ? `${type} ${size}` : `${type}${decimal} ${size}`;
+        tResult('Final Stellar', starName);
 
         return {
             type,
@@ -162,7 +198,7 @@ function generateT5SystemChunk1(mainworldBase, existingSystem, hexId) {
             role,
             mass,
             luminosity,
-            name: (size === 'D' || type === 'BD') ? `${type} ${size}` : `${type}${decimal} ${size}`
+            name: starName
         };
     }
 
@@ -208,14 +244,26 @@ function generateT5SystemChunk1(mainworldBase, existingSystem, hexId) {
 function generateT5SystemChunk2(sys, mainworldBase) {
     if (!sys || !mainworldBase) return sys;
 
+    tSection('System Inventory & Placement');
+
     // --- STEP 5A: INVENTORY ---
-    let ggCount = Math.max(0, Math.floor(roll2D() / 2) - 2);
-    if (mainworldBase.gasGiant && ggCount === 0) ggCount = 1;
+    let ggCount = Math.max(0, Math.floor(tRoll2D('Gas Giant Count (2D/2 - 2)') / 2) - 2);
+    if (mainworldBase.gasGiant && ggCount === 0) {
+        ggCount = 1;
+        tOverride('Gas Giant forced by Mainworld', 1);
+    }
+    tResult('Gas Giants', ggCount);
 
-    let beltCount = Math.max(0, roll1D() - 3);
-    if (mainworldBase.size === 0 && beltCount === 0) beltCount = 1;
+    let beltRoll = tRoll1D('Belt Count Roll');
+    let beltCount = Math.max(0, beltRoll - 3);
+    if (mainworldBase.size === 0 && beltCount === 0) {
+        beltCount = 1;
+        tOverride('Belt forced by Mainworld', 1);
+    }
+    tResult('Planetoid Belts', beltCount);
 
-    let worldCount = roll2D();
+    let worldCount = tRoll2D('World Count (2D)');
+    tResult('Other Worlds', worldCount);
 
     // --- STEP 4: PRECLUSION & SLOTS ---
     sys.orbits = [];
@@ -227,7 +275,10 @@ function generateT5SystemChunk2(sys, mainworldBase) {
     sys.stars.forEach(star => {
         if (star.orbitID !== null) {
             let slot = sys.orbits.find(o => o.orbit === star.orbitID);
-            if (slot) slot.blocked = true;
+            if (slot) {
+                slot.blocked = true;
+                writeLogLine(`Orbit ${star.orbitID} blocked by ${star.role} star.`);
+            }
         }
     });
 
@@ -242,6 +293,7 @@ function generateT5SystemChunk2(sys, mainworldBase) {
         else if (star.size === 'V' && ['O', 'B', 'A'].includes(star.type)) preclusionLimit = 0;
 
         if (preclusionLimit >= 0) {
+            writeLogLine(`Stellar Preclusion for ${star.name}: Orbits 0-${preclusionLimit} blocked.`);
             for (let i = 0; i <= preclusionLimit; i++) {
                 let slot = sys.orbits.find(o => o.orbit === i);
                 if (slot) slot.blocked = true;
@@ -261,6 +313,7 @@ function generateT5SystemChunk2(sys, mainworldBase) {
     if (['O', 'B'].includes(sys.stars[0].type)) hzOrbit += 2;
     if (['K', 'M'].includes(sys.stars[0].type)) hzOrbit -= 1;
     hzOrbit = Math.max(0, Math.min(19, hzOrbit));
+    tResult('Primary Habitable Zone', `Orbit ${hzOrbit}`);
 
     // 2. Place Mainworld
     let mwOrbit = hzOrbit;
@@ -275,6 +328,7 @@ function generateT5SystemChunk2(sys, mainworldBase) {
     }
     if (mwOrbit >= 0 && mwOrbit < 20) {
         sys.orbits[mwOrbit].contents = { ...mainworldBase, type: 'Mainworld' };
+        tResult('Mainworld Placement', `Orbit ${mwOrbit}`);
     }
 
     // 3. Place Gas Giants (Outside HZ preferred)
@@ -284,6 +338,7 @@ function generateT5SystemChunk2(sys, mainworldBase) {
         if (targets.length > 0) {
             let slot = targets[Math.floor(rng() * targets.length)];
             slot.contents = { type: 'Gas Giant', size: (roll1D() <= 3 ? 'Large' : 'Small') };
+            writeLogLine(`Placed ${slot.contents.size} Gas Giant at Orbit ${slot.orbit}`);
         }
     }
 
@@ -293,6 +348,7 @@ function generateT5SystemChunk2(sys, mainworldBase) {
         if (targets.length > 0) {
             let slot = targets[Math.floor(rng() * targets.length)];
             slot.contents = { type: 'Planetoid Belt' };
+            writeLogLine(`Placed Planetoid Belt at Orbit ${slot.orbit}`);
         }
     }
 
@@ -302,6 +358,7 @@ function generateT5SystemChunk2(sys, mainworldBase) {
         if (targets.length > 0) {
             let slot = targets[Math.floor(rng() * targets.length)];
             slot.contents = { type: 'Terrestrial World' };
+            writeLogLine(`Placed Terrestrial World at Orbit ${slot.orbit}`);
         }
     }
 
@@ -340,21 +397,34 @@ function generateT5SystemChunk3(sys, mainworldBase) {
         let w = o.contents;
         if (!w || w.type === 'Empty' || w.type === 'Planetoid Belt') return;
 
+        tSection(`Fleshing out Orbit ${o.orbit}: ${w.type}`);
+
         // Size, Atmosphere, Hydrographics
         if (w.type === 'Terrestrial World') {
-            let sRoll = roll2D() - 2;
-            if (sRoll === 10) sRoll = roll1D() + 9;
+            let sRoll = tRoll2D('Size Roll') - 2;
+            if (sRoll === 10) {
+                sRoll = tRoll1D('Size Roll (10 variant)') + 9;
+                tOverride('Extended Size Roll', sRoll);
+            }
             w.size = Math.max(0, sRoll);
+            tResult('Final Size', w.size);
 
             // T5 Atmosphere
             w.atm = 0;
-            if (w.size > 0) w.atm = Math.min(15, Math.max(0, rollFlux() + w.size));
+            if (w.size > 0) {
+                let atmFlux = rollFlux();
+                w.atm = Math.min(15, Math.max(0, atmFlux + w.size));
+                writeLogLine(`Atmosphere Roll: Size(${w.size}) + Flux(${atmFlux >= 0 ? '+' : ''}${atmFlux}) = ${w.atm}`);
+            }
 
             // T5 Hydrographics
             w.hydro = 0;
             if (w.size > 1) {
+                let hFlux = rollFlux();
                 let hDM = (w.atm <= 1 || w.atm >= 10) ? -4 : 0;
-                w.hydro = Math.min(10, Math.max(0, rollFlux() + w.atm + hDM));
+                if (hDM !== 0) tDM('Hydro DM (Atm)', hDM);
+                w.hydro = Math.min(10, Math.max(0, hFlux + w.atm + hDM));
+                writeLogLine(`Hydrographics Roll: Flux(${hFlux >= 0 ? '+' : ''}${hFlux}) + Atm(${w.atm}) + DM(${hDM}) = ${w.hydro}`);
             }
 
             // Social & Continuation Cap
@@ -366,43 +436,65 @@ function generateT5SystemChunk3(sys, mainworldBase) {
             w.diamKm = (w.size === 0 || w.size === 'S') ? 500 : w.size * 1600;
 
             // Density & Gravity
-            let dRoll = roll1D();
+            let dRoll = tRoll1D('Density Roll');
             w.density = dRoll <= 2 ? 0.8 : (dRoll <= 5 ? 1.0 : 1.2);
+            tResult('Density', w.density);
+
             w.gravity = parseFloat((w.density * (sizeVal / 8)).toFixed(2));
+            tResult('Gravity', w.gravity + ' G');
 
             // Mass
             w.mass = parseFloat((w.gravity * Math.pow(sizeVal / 8, 2)).toFixed(3));
+            tResult('Mass', w.mass.toFixed(4) + ' M_Earth');
         }
 
         // Climate & Temperature
         let diff = o.orbit - hzOrbit;
         if (diff < 0) {
             w.climateZone = 'Hot';
-            w.temperature = 350 + (rollFlux() * 10);
+            let tFlux = rollFlux();
+            w.temperature = 350 + (tFlux * 10);
+            writeLogLine(`Climate: Hot | Temp: 350 + Flux(${tFlux})*10 = ${w.temperature}K`);
         } else if (diff === 0) {
             w.climateZone = 'Temperate';
-            w.temperature = 288 + (rollFlux() * 10);
+            let tFlux = rollFlux();
+            w.temperature = 288 + (tFlux * 10);
+            writeLogLine(`Climate: Temperate | Temp: 288 + Flux(${tFlux})*10 = ${w.temperature}K`);
         } else if (diff === 1) {
             w.climateZone = 'Cold';
-            w.temperature = 230 + (rollFlux() * 10);
+            let tFlux = rollFlux();
+            w.temperature = 230 + (tFlux * 10);
+            writeLogLine(`Climate: Cold | Temp: 230 + Flux(${tFlux})*10 = ${w.temperature}K`);
         } else {
             w.climateZone = 'Frozen';
-            w.temperature = 100 + (rollFlux() * 5);
+            let tFlux = rollFlux();
+            w.temperature = 100 + (tFlux * 5);
+            writeLogLine(`Climate: Frozen | Temp: 100 + Flux(${tFlux})*5 = ${w.temperature}K`);
         }
 
         // Rotation & Day Length
         if (o.orbit <= 1) {
             w.rotationPeriod = 'Tidally Locked';
+            tResult('Rotation', 'Tidally Locked');
         } else {
-            let rRoll = roll1D();
-            if (rRoll <= 2) w.rotationPeriod = (4 + roll1D()) + ' hours';
-            else if (rRoll <= 5) w.rotationPeriod = (12 + roll2D()) + ' hours';
-            else w.rotationPeriod = (36 + roll2D() * 2) + ' hours';
+            let rRoll = tRoll1D('Rotation Type Roll');
+            if (rRoll <= 2) {
+                let rr = tRoll1D('Fast Day');
+                w.rotationPeriod = (4 + rr) + ' hours';
+            } else if (rRoll <= 5) {
+                let rr = tRoll2D('Standard Day');
+                w.rotationPeriod = (12 + rr) + ' hours';
+            } else {
+                let rr = tRoll2D('Slow Day');
+                w.rotationPeriod = (36 + rr * 2) + ' hours';
+            }
+            tResult('Final Rotation', w.rotationPeriod);
         }
 
         // Orbital Period (Year Length)
         let starMass = sys.stars[0].mass || 1.0;
         w.orbitalPeriod = Math.sqrt(Math.pow(o.distAU, 3) / starMass);
+        tResult('Year Length', w.orbitalPeriod.toFixed(2) + ' terrestrial years');
 
         // Gas Giant defaults
         if (w.type === 'Gas Giant') {
@@ -415,33 +507,47 @@ function generateT5SystemChunk3(sys, mainworldBase) {
         // Secondary Satellites (Moons)
         if (w.type === 'Mainworld' || w.type === 'Terrestrial World' || w.type === 'Gas Giant') {
             let moonCount = 0;
-            if (w.type === 'Gas Giant') moonCount = roll2D() - 2;
-            else moonCount = Math.max(0, roll1D() - 3);
+            if (w.type === 'Gas Giant') {
+                moonCount = Math.max(0, tRoll2D('GG Moon Count Roll') - 2);
+            } else {
+                moonCount = Math.max(0, tRoll1D('Moon Count Roll') - 3);
+            }
+            tResult('Satellite Count', moonCount);
 
             w.satellites = [];
             for (let i = 0; i < moonCount; i++) {
+                tSection(`Moon ${i + 1} for Orbit ${o.orbit}`);
                 let m = { type: 'Moon' };
 
                 // 1. Initial Size Roll (1D-1)
-                let rawSize = Math.max(0, roll1D() - 1);
+                let rawSize = Math.max(0, tRoll1D('Moon Size Roll') - 1);
 
                 // 2. Parent-Satellite Size Constraint (Moon < Parent)
                 // GGs have proxies 15 or 12, Terrestrial 0-10+
                 if (rawSize >= w.size) {
                     m.size = Math.max(0, w.size - 1);
+                    tOverride('Moon size restricted (< parent)', m.size);
                 } else {
                     m.size = rawSize;
                 }
+                tResult('Final Moon Size', m.size);
 
                 // 3. Atmosphere
                 m.atm = 0;
-                if (m.size > 0) m.atm = Math.min(15, Math.max(0, rollFlux() + m.size));
+                if (m.size > 0) {
+                    let mAtmFlux = rollFlux();
+                    m.atm = Math.min(15, Math.max(0, mAtmFlux + m.size));
+                    writeLogLine(`Moon Atmosphere: Size(${m.size}) + Flux(${mAtmFlux >= 0 ? '+' : ''}${mAtmFlux}) = ${m.atm}`);
+                }
 
                 // 4. Hydrographics
                 m.hydro = 0;
                 if (m.size > 1) {
+                    let mhFlux = rollFlux();
                     let mhDM = (m.atm <= 1 || m.atm >= 10) ? -4 : 0;
-                    m.hydro = Math.min(10, Math.max(0, rollFlux() + m.atm + mhDM));
+                    if (mhDM !== 0) tDM('Moon Hydro DM', mhDM);
+                    m.hydro = Math.min(10, Math.max(0, mhFlux + m.atm + mhDM));
+                    writeLogLine(`Moon Hydro: Flux(${mhFlux >= 0 ? '+' : ''}${mhFlux}) + Atm(${m.atm}) + DM(${mhDM}) = ${m.hydro}`);
                 }
 
                 // 5. Social Generation & UWP construction
@@ -463,8 +569,14 @@ function generateT5SystemChunk3(sys, mainworldBase) {
 }
 
 function generateT5Mainworld(hexId) {
-    reseedForHex(hexId);
-    let spRoll = roll2D();
+    if (hexId) {
+        reseedForHex(hexId);
+        tSection(`T5 Mainworld Generation: Hex ${hexId}`);
+    } else {
+        tSection(`T5 Mainworld Generation`);
+    }
+
+    let spRoll = tRoll2D('Starport Roll');
     let starport = 'X';
     if (spRoll === 2) starport = 'A';
     else if (spRoll <= 5) starport = 'B';
@@ -472,71 +584,106 @@ function generateT5Mainworld(hexId) {
     else if (spRoll === 9) starport = 'D';
     else if (spRoll <= 11) starport = 'E';
     else starport = 'X';
+    tResult('Final Starport', starport);
 
-    let size = roll2D() - 2;
-    if (size === 10) size = roll1D() + 9;
-    size = Math.max(0, size);
+    let sRoll = tRoll2D('Size Roll (Standard)') - 2;
+    if (sRoll === 10) {
+        sRoll = tRoll1D('Size Roll (10 variant)') + 9;
+        tOverride('Extended Size Roll', sRoll);
+    }
+    let size = Math.max(0, sRoll);
+    tResult('Final Size', size);
 
     let atm = 0;
-    if (size > 0) atm = Math.min(15, Math.max(0, rollFlux() + size));
+    if (size > 0) {
+        let atmFlux = rollFlux();
+        atm = Math.min(15, Math.max(0, atmFlux + size));
+        writeLogLine(`Atmosphere Roll: Size(${size}) + Flux(${atmFlux >= 0 ? '+' : ''}${atmFlux}) = ${atm}`);
+    }
+    tResult('Final Atmosphere', toUWPChar(atm));
 
     let hydro = 0;
     if (size > 1) {
+        let hFlux = rollFlux();
         let hydroDM = (atm <= 1 || atm >= 10) ? -4 : 0;
-        hydro = Math.min(10, Math.max(0, rollFlux() + atm + hydroDM));
+        if (hydroDM !== 0) tDM('Hydro DM (Atm)', hydroDM);
+        hydro = Math.min(10, Math.max(0, hFlux + atm + hydroDM));
+        writeLogLine(`Hydrographics Roll: Flux(${hFlux >= 0 ? '+' : ''}${hFlux}) + Atm(${atm}) + DM(${hydroDM}) = ${hydro}`);
     }
+    tResult('Final Hydrographics', toUWPChar(hydro));
 
-    let pop = roll2D() - 2;
-    if (pop === 10) pop = roll2D() + 3;
-    pop = Math.max(0, pop);
+    let rawPop = tRoll2D('Population Roll (Standard)') - 2;
+    if (rawPop === 10) {
+        rawPop = tRoll2D('Population Roll (10 variant)') + 3;
+        tOverride('Extended Population Roll', rawPop);
+    }
+    let pop = Math.max(0, rawPop);
+    tResult('Final Population', toUWPChar(pop));
 
     let popDigit = pop > 0 ? Math.floor(rng() * 10) : 0;
+    tResult('Pop Multiplier', popDigit);
 
-    let gov = Math.min(15, Math.max(0, rollFlux() + pop));
+    let govFlux = rollFlux();
+    let gov = Math.min(15, Math.max(0, govFlux + pop));
+    writeLogLine(`Government Roll: Pop(${pop}) + Flux(${govFlux >= 0 ? '+' : ''}${govFlux}) = ${gov}`);
+    tResult('Final Government', toUWPChar(gov));
 
-    let law = Math.max(0, rollFlux() + gov);
+    let lawFlux = rollFlux();
+    let law = Math.min(15, Math.max(0, lawFlux + gov));
+    writeLogLine(`Law Roll: Gov(${gov}) + Flux(${lawFlux >= 0 ? '+' : ''}${lawFlux}) = ${law}`);
+    tResult('Final Law Level', toUWPChar(law));
 
     let tlDM = 0;
-    if (starport === 'A') tlDM += 6;
-    else if (starport === 'B') tlDM += 4;
-    else if (starport === 'C') tlDM += 2;
-    else if (starport === 'X') tlDM -= 4;
+    if (starport === 'A') { tlDM += 6; tDM('Port A', 6); }
+    else if (starport === 'B') { tlDM += 4; tDM('Port B', 4); }
+    else if (starport === 'C') { tlDM += 2; tDM('Port C', 2); }
+    else if (starport === 'X') { tlDM -= 4; tDM('Port X', -4); }
 
-    if (size <= 1) tlDM += 2;
-    else if (size <= 4) tlDM += 1;
+    if (size <= 1) { tlDM += 2; tDM('Size 0-1', 2); }
+    else if (size <= 4) { tlDM += 1; tDM('Size 2-4', 1); }
 
-    if (atm <= 3 || (atm >= 10 && atm <= 15)) tlDM += 1;
+    if (atm <= 3 || (atm >= 10 && atm <= 15)) { tlDM += 1; tDM('Extreme Atm', 1); }
 
-    if (hydro === 9) tlDM += 1;
-    else if (hydro === 10) tlDM += 2;
+    if (hydro === 9) { tlDM += 1; tDM('Hydro 9', 1); }
+    else if (hydro === 10) { tlDM += 2; tDM('Hydro 10', 2); }
 
-    if (pop >= 1 && pop <= 5) tlDM += 1;
-    else if (pop === 9) tlDM += 2;
-    else if (pop >= 10) tlDM += 4;
+    if (pop >= 1 && pop <= 5) { tlDM += 1; tDM('Low Pop', 1); }
+    else if (pop === 9) { tlDM += 2; tDM('High Pop (9)', 2); }
+    else if (pop >= 10) { tlDM += 4; tDM('High Pop (A+)', 4); }
 
-    if (gov === 0 || gov === 5) tlDM += 1;
-    else if (gov === 13) tlDM -= 2;
+    if (gov === 0 || gov === 5) { tlDM += 1; tDM('Anarchy/Feudal', 1); }
+    else if (gov === 13) { tlDM -= 2; tDM('Bureaucracy', -2); }
 
-    let tl = Math.max(0, roll1D() + tlDM);
+    let rawTLRoll = tRoll1D('TL Roll');
+    let tl = Math.max(0, rawTLRoll + tlDM);
+    tResult('Final Tech Level', toUWPChar(tl));
 
     let navalBase = false;
     let scoutBase = false;
     if (starport === 'A') {
-        if (roll2D() <= 6 && pop >= 7) navalBase = true;
-        if (roll2D() <= 4) scoutBase = true;
+        if (tRoll2D('Naval Base Check') <= 6 && pop >= 7) navalBase = true;
+        if (tRoll2D('Scout Base Check') <= 4) scoutBase = true;
     } else if (starport === 'B') {
-        if (roll2D() <= 5 && pop >= 8) navalBase = true;
-        let sRoll = roll2D();
+        if (tRoll2D('Naval Base Check') <= 5 && pop >= 8) navalBase = true;
+        let sRoll = tRoll2D('Scout Base Check');
         if (sRoll === 5 || sRoll === 6) scoutBase = true;
     } else if (starport === 'C') {
-        let sRoll = roll2D();
+        let sRoll = tRoll2D('Scout Check');
         if (sRoll >= 6 && sRoll <= 8) scoutBase = true;
     } else if (starport === 'D') {
-        if (roll2D() <= 7) scoutBase = true;
+        if (tRoll2D('Scout Check') <= 7) scoutBase = true;
     }
+    if (navalBase) tResult('Bases', 'Naval');
+    if (scoutBase) tResult('Bases', 'Scout');
 
-    let gasGiantsCount = Math.max(0, Math.floor(roll2D() / 2) - 2);
-    let planetoidBelts = Math.max(0, roll1D() - 3);
+    let rawGG = tRoll2D('GG Inventory Roll');
+    let gasGiantsCount = Math.max(0, Math.floor(rawGG / 2) - 2);
+    tResult('Gas Giants Count', gasGiantsCount);
+
+    let rawBelts = tRoll1D('Belt Inventory Roll');
+    let planetoidBelts = Math.max(0, rawBelts - 3);
+    tResult('Planetoid Belts Count', planetoidBelts);
+
     let gasGiant = gasGiantsCount > 0;
 
     // Apply Clamping
@@ -549,6 +696,7 @@ function generateT5Mainworld(hexId) {
     tl = clampUWP(tl, 0, 33);
 
     const uwp = `${starport}${toUWPChar(size)}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
+    tResult('Final UWP', uwp);
 
     let tradeCodes = [];
     if (size === 0 && atm === 0 && hydro === 0) tradeCodes.push("As");
@@ -594,69 +742,108 @@ function generateT5Mainworld(hexId) {
             if (!tradeCodes.includes("Pz")) tradeCodes.push("Pz");
         }
     }
+    tResult('Travel Zone', travelZone);
 
     return { name: getNextSystemName(hexId), uwp, travelZone, tradeCodes, starport, size, atm, hydro, pop, popDigit, gov, law, tl, navalBase, scoutBase, gasGiant, gasGiantsCount, planetoidBelts };
 }
 
 function generateT5Socioeconomics(base, hexId) {
-    reseedForHex(hexId);
+    if (hexId) reseedForHex(hexId);
     if (!base) return null;
 
-    // 1. Importance (Ix)
-    let Ix = 0;
-    if (['A', 'B'].includes(base.starport)) Ix += 1;
-    if (['D', 'E', 'X'].includes(base.starport)) Ix -= 1;
+    tSection('T5 Socioeconomics Expansion');
 
-    if (base.tl >= 16) Ix += 1;
-    if (base.tl >= 10) Ix += 1;
-    if (base.tl <= 8) Ix -= 1;
+    // 1. Importance (Ix)
+    tSection('Importance {Ix}');
+    let Ix = 0;
+    if (['A', 'B'].includes(base.starport)) { Ix += 1; tDM('Port A/B', 1); }
+    if (['D', 'E', 'X'].includes(base.starport)) { Ix -= 1; tDM('Port D/E/X', -1); }
+
+    if (base.tl >= 16) { Ix += 1; tDM('TL 16+', 1); }
+    if (base.tl >= 10) { Ix += 1; tDM('TL 10+', 1); }
+    if (base.tl <= 8) { Ix -= 1; tDM('TL 8-', -1); }
 
     if (base.tradeCodes) {
-        if (base.tradeCodes.includes("Ag")) Ix += 1;
-        if (base.tradeCodes.includes("Hi")) Ix += 1;
-        if (base.tradeCodes.includes("In")) Ix += 1;
-        if (base.tradeCodes.includes("Ri")) Ix += 1;
+        if (base.tradeCodes.includes("Ag")) { Ix += 1; tDM('Agricultural', 1); }
+        if (base.tradeCodes.includes("Hi")) { Ix += 1; tDM('High Pop', 1); }
+        if (base.tradeCodes.includes("In")) { Ix += 1; tDM('Industrial', 1); }
+        if (base.tradeCodes.includes("Ri")) { Ix += 1; tDM('Rich', 1); }
     }
 
-    if (base.pop <= 6) Ix -= 1;
-    if (base.navalBase && base.scoutBase) Ix += 1;
+    if (base.pop <= 6) { Ix -= 1; tDM('Low Pop (6-)', -1); }
+    if (base.navalBase && base.scoutBase) { Ix += 1; tDM('Naval & Scout', 1); }
+    tResult('Final Importance', `{${Ix >= 0 ? '+' : ''}${Ix}}`);
 
     // 2. Economic (Ex)
-    let R = roll2D();
-    if (base.tl >= 8) R += (base.gasGiantsCount || 0) + (base.planetoidBelts || 0);
+    tSection('Economic (Ex)');
+    let rawR = tRoll2D('Resources Roll');
+    let R = rawR;
+    if (base.tl >= 8) {
+        let rMod = (base.gasGiantsCount || 0) + (base.planetoidBelts || 0);
+        R += rMod;
+        tDM('Gas Giants + Belts (TL 8+)', rMod);
+    }
     R = Math.max(0, R);
+    tResult('Resources (R)', toUWPChar(R));
 
     let L = Math.max(0, base.pop - 1);
+    tResult('Labor (L)', toUWPChar(L));
 
     let I = 0;
     if (base.pop > 0) {
-        if (base.pop <= 3) I = Ix;
-        else if (base.pop <= 6) I = roll1D() + Ix;
-        else I = roll2D() + Ix;
+        if (base.pop <= 3) {
+            I = Ix;
+            tResult('Infrastructure (Low Pop)', I);
+        } else if (base.pop <= 6) {
+            let iRoll = tRoll1D('Infra Roll (1D)');
+            I = iRoll + Ix;
+        } else {
+            let iRoll = tRoll2D('Infra Roll (2D)');
+            I = iRoll + Ix;
+        }
     }
     I = Math.max(0, I);
+    tResult('Infrastructure (I)', toUWPChar(I));
 
     let E = rollFlux();
+    writeLogLine(`Efficiency Roll: Flux (${E >= 0 ? '+' : ''}${E})`);
+    tResult('Efficiency (E)', E >= 0 ? `+${E}` : E);
 
     // 3. Resource Units (RU)
+    tSection('Resource Units (RU)');
     let calcR = R === 0 ? 1 : R;
     let calcL = L === 0 ? 1 : L;
     let calcI = I === 0 ? 1 : I;
     let calcE = E === 0 ? 1 : E;
     let RU = calcR * calcL * calcI * calcE;
+    writeLogLine(`Calculation: (R:${calcR} * L:${calcL} * I:${calcI} * E:${calcE})`);
+    tResult('RU', RU);
 
     // 4. Cultural (Cx)
+    tSection('Cultural [Cx]');
     let H = 0, A = 0, S = 0, Sym = 0;
     if (base.pop > 0) {
-        H = Math.max(1, base.pop + rollFlux());
+        let hFlux = rollFlux();
+        H = Math.max(1, base.pop + hFlux);
+        writeLogLine(`Homogeneity Roll: Pop(${base.pop}) + Flux(${hFlux >= 0 ? '+' : ''}${hFlux}) = ${H}`);
+
         A = Math.max(1, base.pop + Ix);
-        S = Math.max(1, rollFlux() + 5);
-        Sym = Math.max(1, rollFlux() + base.tl);
+        writeLogLine(`Acceptance Roll: Pop(${base.pop}) + Ix(${Ix}) = ${A}`);
+
+        let sFlux = rollFlux();
+        S = Math.max(1, sFlux + 5);
+        writeLogLine(`Strangeness Roll: Flux(${sFlux >= 0 ? '+' : ''}${sFlux}) + 5 = ${S}`);
+
+        let symFlux = rollFlux();
+        Sym = Math.max(1, symFlux + base.tl);
+        writeLogLine(`Symbols Roll: Flux(${symFlux >= 0 ? '+' : ''}${symFlux}) + TL(${base.tl}) = ${Sym}`);
     }
 
     let ixStr = `{${Ix >= 0 ? '+' : ''}${Ix}}`;
     let exStr = `(${toUWPChar(R)}${toUWPChar(L)}${toUWPChar(I)}${E >= 0 ? '+' : ''}${E})`;
     let cxStr = `[${toUWPChar(H)}${toUWPChar(A)}${toUWPChar(S)}${toUWPChar(Sym)}]`;
+
+    tResult('T5 Extension Line', `${ixStr} ${exStr} ${cxStr}`);
 
     return {
         Ix, R, L, I, E, RU, H, A, S, Sym,

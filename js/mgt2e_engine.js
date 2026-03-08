@@ -1321,11 +1321,19 @@ function generateMgT2ESocioeconomics(base, hexId) {
     tSection('GWP calculation');
     let gwpBase = Math.max(1, ecoI) + Math.max(1, ecoR);
     if (base.pop === 0) gwpBase = ecoI + ecoR;
+    tResult('Initial GWP Base (I+R)', gwpBase);
+
     let maxGwpBase = Math.max(2, 2 * ecoI);
-    gwpBase = Math.max(2, Math.min(maxGwpBase, gwpBase));
-    tResult('GWP Base', gwpBase);
+    tResult('Max GWP Base (2*I)', maxGwpBase);
+
+    let finalGwpBase = Math.max(2, Math.min(maxGwpBase, gwpBase));
+    if (finalGwpBase !== gwpBase) tClamp('GWP Base', gwpBase, finalGwpBase);
+    gwpBase = finalGwpBase;
+    tResult('Final GWP Base', gwpBase);
 
     let tlMod = base.tl === 0 ? 0.05 : base.tl / 10;
+    tResult('TL multiplier', tlMod.toFixed(2));
+
     let portMod = 1.0;
     switch (base.starport) {
         case 'A': portMod = 1.5; break;
@@ -1339,6 +1347,8 @@ function generateMgT2ESocioeconomics(base, hexId) {
         case 'Y': portMod = 0.2; break;
         case 'X': portMod = 0.2; break;
     }
+    tResult('Starport multiplier', portMod.toFixed(2));
+
     let govMod = 1.0;
     switch (base.gov) {
         case 1: govMod = 1.5; break;
@@ -1355,26 +1365,37 @@ function generateMgT2ESocioeconomics(base, hexId) {
         case 14: govMod = 0.5; break;
         case 15: govMod = 0.8; break;
     }
+    tResult('Government multiplier', govMod.toFixed(2));
+
     let tcMod = 1.0;
-    if (tcArr.includes('Ag')) tcMod *= 0.9;
-    if (tcArr.includes('As')) tcMod *= 1.2;
-    if (tcArr.includes('Ga')) tcMod *= 1.2;
-    if (tcArr.includes('In')) tcMod *= 1.1;
-    if (tcArr.includes('Na')) tcMod *= 0.9;
-    if (tcArr.includes('Ni')) tcMod *= 0.9;
-    if (tcArr.includes('Po')) tcMod *= 0.8;
-    if (tcArr.includes('Ri')) tcMod *= 1.2;
+    if (tcArr.includes('Ag')) { tResult('Ag multiplier', 0.9); tcMod *= 0.9; }
+    if (tcArr.includes('As')) { tResult('As multiplier', 1.2); tcMod *= 1.2; }
+    if (tcArr.includes('Ga')) { tResult('Ga multiplier', 1.2); tcMod *= 1.2; }
+    if (tcArr.includes('In')) { tResult('In multiplier', 1.1); tcMod *= 1.1; }
+    if (tcArr.includes('Na')) { tResult('Na multiplier', 0.9); tcMod *= 0.9; }
+    if (tcArr.includes('Ni')) { tResult('Ni multiplier', 0.9); tcMod *= 0.9; }
+    if (tcArr.includes('Po')) { tResult('Po multiplier', 0.8); tcMod *= 0.8; }
+    if (tcArr.includes('Ri')) { tResult('Ri multiplier', 1.2); tcMod *= 1.2; }
+    if (tcMod !== 1.0) tResult('Total Trade Class multiplier', tcMod.toFixed(2));
 
     let totalMods = tlMod * portMod * govMod * tcMod;
-    tResult('Total GWP Mods', totalMods.toFixed(4));
+    tResult('Combined GWP Multiplier', `${tlMod.toFixed(2)} * ${portMod.toFixed(2)} * ${govMod.toFixed(2)} * ${tcMod.toFixed(2)} = ${totalMods.toFixed(4)}`);
+
     let pcGWP = 0;
     if (ecoE > 0) {
         pcGWP = 1000 * gwpBase * totalMods * ecoE;
+        tResult('GWP Calculation (E>0)', `1000 * ${gwpBase} * ${totalMods.toFixed(4)} * ${ecoE} = ${pcGWP.toFixed(2)}`);
     } else if (ecoE < 0) {
-        pcGWP = (1000 * gwpBase * totalMods) / (-(ecoE - 1));
+        let denomModifier = -(ecoE - 1);
+        pcGWP = (1000 * gwpBase * totalMods) / denomModifier;
+        tResult('GWP Calculation (E<0)', `(1000 * ${gwpBase} * ${totalMods.toFixed(4)}) / ${denomModifier} = ${pcGWP.toFixed(2)}`);
+    } else {
+        // Pop 0 or neutralized
+        pcGWP = 1000 * gwpBase * totalMods * 1;
+        tResult('GWP Calculation (Neutral)', `1000 * ${gwpBase} * ${totalMods.toFixed(4)} * 1 = ${pcGWP.toFixed(2)}`);
     }
     pcGWP = Math.round(pcGWP);
-    tResult('GWP per Capita', pcGWP);
+    tResult('GWP per Capita (Rounded)', pcGWP);
 
     tSection('World Trade Number (WTN)');
     let wtnBase = base.pop;
@@ -1436,21 +1457,51 @@ function generateMgT2ESocioeconomics(base, hexId) {
     let WTN = Math.max(0, wtnBase + portWtnMod);
     tResult('WTN Final', WTN);
 
-    tSection('IR & DR');
-    let IRroll = tRoll2D('Income Roll');
+    tSection('Inequality Rating (IR)');
+    let IRroll = tRoll2D('Inequality Roll');
     let IR = 50 - (ecoE * 5) + ((IRroll - 7) * 2);
-    if ([6, 11, 15].includes(base.gov)) { tDM('Gov 6,11,15', 10); IR += 10; }
-    if ([0, 1, 3, 9, 12].includes(base.gov)) { tDM('Gov 0,1,3,9,12', 5); IR += 5; }
-    if ([4, 8].includes(base.gov)) { tDM('Gov 4,8', -5); IR -= 5; }
-    if (base.gov === 2) { tDM('Gov 2', -10); IR -= 10; }
-    if (overallLaw >= 9) { tDM('Law 9+', overallLaw - 8); IR += (overallLaw - 8); }
-    tDM('PCR Bonus', pcr); IR += pcr;
-    tDM('Infrastructure Drain', -ecoI); IR -= ecoI;
-    tResult('Income Rating (IR)', IR);
+    tResult('Step 1: Base Inequality (50 - E*5 + (Roll-7)*2)', `50 - (${ecoE}*5) + (${IRroll}-7)*2 = ${IR}`);
 
-    let DR = (pcGWP / 1000) * (1 - (IR / 100));
+    if ([6, 11, 15].includes(base.gov)) {
+        tResult('Inequality DM: Gov 6,11,15', '+10');
+        IR += 10;
+    }
+    if ([0, 1, 3, 9, 12].includes(base.gov)) {
+        tResult('Inequality DM: Gov 0,1,3,9,12', '+5');
+        IR += 5;
+    }
+    if ([4, 8].includes(base.gov)) {
+        tResult('Inequality DM: Gov 4,8', '-5');
+        IR -= 5;
+    }
+    if (base.gov === 2) {
+        tResult('Inequality DM: Gov 2', '-10');
+        IR -= 10;
+    }
+    if (overallLaw >= 9) {
+        let lawBonus = overallLaw - 8;
+        tResult(`Inequality DM: Law ${overallLaw} (Law-8)`, `+${lawBonus}`);
+        IR += lawBonus;
+    }
+    if (pcr !== 0) {
+        tResult('Inequality DM: PCR Bonus', `+${pcr}`);
+        IR += pcr;
+    }
+    if (ecoI !== 0) {
+        tResult('Inequality DM: Infrastructure Drain', `-${ecoI}`);
+        IR -= ecoI;
+    }
+    tResult('Final Inequality Rating (IR)', IR);
+
+    tSection('Development Rating (DR)');
+    let drFactor1 = pcGWP / 1000;
+    let drFactor2 = 1 - (IR / 100);
+    let DR = drFactor1 * drFactor2;
+    tResult('Step 1: GWP Factor (GWP / 1000)', `${pcGWP} / 1000 = ${drFactor1.toFixed(2)}`);
+    tResult('Step 2: Inequality Factor (1 - IR/100)', `1 - (${IR} / 100) = ${drFactor2.toFixed(2)}`);
+    tResult('Step 3: Preliminary DR', `${drFactor1.toFixed(2)} * ${drFactor2.toFixed(2)} = ${DR.toFixed(4)}`);
     DR = DR.toFixed(2);
-    tResult('Development Rating (DR)', DR);
+    tResult('Final Development Rating (DR)', DR);
 
     let formatIm = Im >= 0 ? "+" + Im : Im.toString();
     let formatE = ecoE >= 0 ? "+" + ecoE : ecoE.toString();
@@ -1484,8 +1535,8 @@ function generateMgT2ESocioeconomics(base, hexId) {
         }
     }
 
-    let dxObj = base.gasGiant ? 'DN' : 'DY';
-    tResult('Downport Status', dxObj === 'DY' ? 'Yes' : 'No (Gas Giant present)');
+    let dxObj = (spClass === 'X') ? 'DN' : 'DY';
+    tResult('Downport Status', dxObj === 'DY' ? 'Yes' : 'No');
 
     let spIm = Im;
     if (WTN >= 10) { tDM('WTN 10+', 1); spIm += 1; }
@@ -1497,29 +1548,10 @@ function generateMgT2ESocioeconomics(base, hexId) {
 
     // 15. Military Profile
     tSection('Military Profile');
-    let milRisk = tRoll2D('Military Risk Check') >= 10;
-    tResult('Military Risk', milRisk);
-    let milFactional = tRoll2D('Factional Conflict Check') >= 11;
-    tResult('Factional Conflict', milFactional);
 
-    tSection('Military Readiness');
-    let milReadinessRoll = tRoll2D('Readiness Roll');
-    let milReadiness = 'Normal';
-    let readinessMultiplier = 1.0;
-    let milConflictGlobalDM = 0;
-    if (milReadinessRoll <= 2) { milReadiness = 'Complacent'; readinessMultiplier = 0.5; }
-    else if (milReadinessRoll <= 5) { milReadiness = 'Low'; readinessMultiplier = 0.75; }
-    else if (milReadinessRoll <= 8) { milReadiness = 'Normal'; readinessMultiplier = 1.0; }
-    else if (milReadinessRoll <= 10) { milReadiness = 'Heightened'; readinessMultiplier = 1.2; milConflictGlobalDM = 1; }
-    else if (milReadinessRoll === 11) { milReadiness = 'War'; readinessMultiplier = 2.0; milConflictGlobalDM = 4; }
-    else { milReadiness = 'Total War'; readinessMultiplier = 5.0; milConflictGlobalDM = 8; }
-    tResult('Readiness Status', milReadiness);
+    tSection('Military Profile');
 
-    if (milFactional && readinessMultiplier < 2.0) {
-        readinessMultiplier = 1.2;
-        milConflictGlobalDM = 2;
-        tOverride('Factional readiness boost', 1.2);
-    }
+
 
     let globalMilitancyDM = 0;
     if (culM >= 1 && culM <= 2) globalMilitancyDM = -4;
@@ -1529,7 +1561,7 @@ function generateMgT2ESocioeconomics(base, hexId) {
     else if (culM >= 12) globalMilitancyDM = 4;
     tDM('Cultural Militancy DM', globalMilitancyDM);
 
-    let globalDM = globalMilitancyDM + milConflictGlobalDM;
+    let globalDM = globalMilitancyDM;
     tResult('Global Military DM', globalDM);
 
     // Enforcement
@@ -1543,12 +1575,13 @@ function generateMgT2ESocioeconomics(base, hexId) {
     if (overallLaw >= 9 && overallLaw <= 11) { tDM('Law 9-11', 2); enfDM += 2; }
     if (overallLaw >= 12) { tDM('Law 12+', 4); enfDM += 4; }
     if (pcr >= 0 && pcr <= 4) { tDM('High PCR', 2); enfDM += 2; }
-    if (milFactional) { tDM('Factional Conflict', 2); enfDM += 2; }
+
+    writeLogLine(`Calculation: 3 (Base) + ${globalDM} (Global DM) + ${enfDM} (Enforcement DMs) = ${3 + globalDM + enfDM}`);
     let enfEff = 3 + globalDM + enfDM;
     let finalEnf = Math.max(1, Math.min(18, enfEff));
-    if (enfEff !== finalEnf) tClamp('Enforcement Eff', enfEff, finalEnf);
+    if (enfEff !== finalEnf) tClamp('Enforcement Effect', enfEff, finalEnf);
     enfEff = finalEnf;
-    tResult('Enforcement Efficiency', enfEff);
+    tResult('Enforcement Effect', enfEff);
     let bE = toEHex(enfEff);
 
     // Militia
@@ -1567,11 +1600,11 @@ function generateMgT2ESocioeconomics(base, hexId) {
     if (milMRoll >= 4) {
         let eff = milMRoll - 4;
         let finalEff = Math.max(1, Math.min(18, eff));
-        if (eff !== finalEff) tClamp('Militia Eff', eff, finalEff);
+        if (eff !== finalEff) tClamp('Militia Effect', eff, finalEff);
         eff = finalEff;
         bM = toEHex(eff);
     }
-    tResult('Militia Efficiency', bM);
+    tResult('Militia Effect', bM);
 
     // Army
     tSection('Mil: Army');
@@ -1583,18 +1616,17 @@ function generateMgT2ESocioeconomics(base, hexId) {
     if (base.tl <= 7) { tDM('TL <= 7', 4); armyDM += 4; }
     if (base.tl >= 8) { tDM('TL 8+', -2); armyDM -= 2; }
     if (base.militaryBase) { tDM('Military Base', 6); armyDM += 6; }
-    if (milRisk) { tDM('Military Risk', 2); armyDM += 2; }
-    if (milFactional) { tDM('Factional Conflict', 2); armyDM += 2; }
+
     let armyRoll = tRoll2D('Army Roll') + globalDM + armyDM;
     let bA = "0";
     if (armyRoll >= 4) {
         let eff = armyRoll - 4;
         let finalEff = Math.max(1, Math.min(18, eff));
-        if (eff !== finalEff) tClamp('Army Eff', eff, finalEff);
+        if (eff !== finalEff) tClamp('Army Effect', eff, finalEff);
         eff = finalEff;
         bA = toEHex(eff);
     }
-    tResult('Army Efficiency', bA);
+    tResult('Army Effect', bA);
 
     // Wet Navy
     tSection('Mil: Wet Navy');
@@ -1613,11 +1645,11 @@ function generateMgT2ESocioeconomics(base, hexId) {
     if (wetRoll >= 4) {
         let eff = wetRoll - 4;
         let finalEff = Math.max(1, Math.min(18, eff));
-        if (eff !== finalEff) tClamp('Wet Navy Eff', eff, finalEff);
+        if (eff !== finalEff) tClamp('Wet Navy Effect', eff, finalEff);
         eff = finalEff;
         bW = toEHex(eff);
     }
-    tResult('Wet Navy Efficiency', bW);
+    tResult('Wet Navy Effect', bW);
 
     // Air Force
     tSection('Mil: Air Force');
@@ -1635,11 +1667,11 @@ function generateMgT2ESocioeconomics(base, hexId) {
     if (airRoll >= 4) {
         let eff = airRoll - 4;
         let finalEff = Math.max(1, Math.min(18, eff));
-        if (eff !== finalEff) tClamp('Air Force Eff', eff, finalEff);
+        if (eff !== finalEff) tClamp('Air Force Effect', eff, finalEff);
         eff = finalEff;
         bF = toEHex(eff);
     }
-    tResult('Air Force Efficiency', bF);
+    tResult('Air Force Effect', bF);
 
     // System Defence
     tSection('Mil: System Defence');
@@ -1658,17 +1690,17 @@ function generateMgT2ESocioeconomics(base, hexId) {
     if (hxObj === 'HY') { tDM('Highport Present', 2); sysDM += 2; }
     if (base.navalBase) { tDM('Naval Base', 4); sysDM += 4; }
     if (base.militaryBase) { tDM('Military Base', 2); sysDM += 2; }
-    if (milRisk) { tDM('Military Risk', 2); sysDM += 2; }
+
     let sysRoll = tRoll2D('System Defence Roll') + globalDM + sysDM;
     let bS = "0";
     if (sysRoll >= 4) {
         let eff = sysRoll - 4;
         let finalEff = Math.max(1, Math.min(18, eff));
-        if (eff !== finalEff) tClamp('System Defence Eff', eff, finalEff);
+        if (eff !== finalEff) tClamp('System Defence Effect', eff, finalEff);
         eff = finalEff;
         bS = toEHex(eff);
     }
-    tResult('System Defence Efficiency', bS);
+    tResult('System Defence Effect', bS);
 
     // Navy
     tSection('Mil: Navy');
@@ -1689,17 +1721,17 @@ function generateMgT2ESocioeconomics(base, hexId) {
     if (culE >= 1 && culE <= 5) { tDM('Low Expansionism', -2); navDM -= 2; }
     if (culE >= 9 && culE <= 11) { tDM('High Expansionism', 2); navDM += 2; }
     if (culE >= 12) { tDM('Extreme Expansionism', 4); navDM += 4; }
-    if (milRisk) { tDM('Military Risk', 2); navDM += 2; }
+
     let navRoll = tRoll2D('Navy Roll') + globalDM + navDM;
     let bN = "0";
     if (navRoll >= 4) {
         let eff = navRoll - 4;
         let finalEff = Math.max(1, Math.min(18, eff));
-        if (eff !== finalEff) tClamp('Navy Eff', eff, finalEff);
+        if (eff !== finalEff) tClamp('Navy Effect', eff, finalEff);
         eff = finalEff;
         bN = toEHex(eff);
     }
-    tResult('Navy Efficiency', bN);
+    tResult('Navy Effect', bN);
 
     // Marines
     tSection('Mil: Marines');
@@ -1713,17 +1745,17 @@ function generateMgT2ESocioeconomics(base, hexId) {
     if (culE >= 1 && culE <= 5) { tDM('Low Expansionism', -4); marDM -= 4; }
     if (culE >= 9 && culE <= 11) { tDM('High Expansionism', 1); marDM += 1; }
     if (culE >= 12) { tDM('Extreme Expansionism', 2); marDM += 2; }
-    if (milRisk) { tDM('Military Risk', 2); marDM += 2; }
+
     let marRoll = tRoll2D('Marines Roll') + globalDM + marDM;
     let bMar = "0";
     if (marRoll >= 4) {
         let eff = marRoll - 4;
-        let finalEff = Math.max(1, Math.min(18, eff));
-        if (eff !== finalEff) tClamp('Marines Eff', eff, finalEff);
+        let finalEff = Math.max(0, Math.min(18, eff));
+        if (eff !== finalEff) tClamp('Marines Effect', eff, finalEff);
         eff = finalEff;
         bMar = toEHex(eff);
     }
-    tResult('Marines Efficiency', bMar);
+    tResult('Marines Effect', bMar);
 
     // Budget
     tSection('Mil: Budget');
@@ -1754,8 +1786,7 @@ function generateMgT2ESocioeconomics(base, hexId) {
     let rollFactor = tRoll2D('Budget Roll') - 7 + budDM;
     if (rollFactor < -9) { tClamp('Budget Floor', rollFactor, -9); rollFactor = -9; }
 
-    let basicBudget = 2.0 * (1 + (ecoE / 10)) * (1 + (rollFactor / 10));
-    let totalBudget = basicBudget * readinessMultiplier;
+    let totalBudget = 2.0 * (1 + (ecoE / 10)) * (1 + (rollFactor / 10));
     let formatBudget = totalBudget.toFixed(2) + "%";
     tResult('Final Military Budget', formatBudget);
 

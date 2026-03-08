@@ -1,4 +1,4 @@
-# As Above, So Below (v0.1.7.1)
+# As Above, So Below (v0.1.7.6)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -34,7 +34,31 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 ---
 ## 📜 Changelog
 
+### [v0.1.7.6] - 2026-03-08
+1. **Mongoose Socioeconomics:** Updated Downport logic - all starports except 'X' now have downports present.
+2. **Mongoose Socioeconomics:** Removed Military Risk and Factional Conflict rolls and associated modifiers.
+3. **Mongoose Socioeconomics:** Removed Military Readiness rolls and its impact on the final military budget.
+4. **Mongoose Socioeconomics:** Renamed "Efficiency" to "Effect" for all military branches and expanded Enforcement calculation logs.
+5. **Mongoose Socioeconomics:** Clamped minimum Marines Effect to 0 (previously 1).
+
+### [v0.1.7.5] - 2026-03-08
+1. **Mongoose Socioeconomics:** Expanded "Development Rating" (DR) logging to show full formula and intermediate math.
+
+
+### [v0.1.7.4] - 2026-03-08
+1. **Mongoose Socioeconomics:** Renamed "Income Rating (IR)" to "Inequality Rating" and expanded calculation logs.
+2. **Mongoose Socioeconomics:** Expanded details in log for GWP and DR calculations.
+
+
+### [v0.1.7.3] - 2026-03-08
+1. **Mongoose Socioeconomics:** Added logging clarifications to MgT2E Socioeconomic Expansion
+
 ### [v0.1.7.1] - 2026-03-07
+1. **T5 System Generation:** Added detailed logging for T5 system generation.
+2. **Mongoose Socioeconomics:** Corrected errors and updated logging in Expanded TL calculations
+
+
+### [v0.1.7.0] - 2026-03-07
 1. **Expanded System Logging:** Added detailed logging for T5 and CT system generation.
 2. **Mongoose Socioeconomics:** Now available for T5 and CT generation.
 3. **CT System Generation:** Fixed bug that re-rolled mainworld generation details in expanded system.

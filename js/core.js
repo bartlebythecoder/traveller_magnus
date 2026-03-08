@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.1.7.1";
-const APP_BANNER = "T5 Expanded System Logging Added";
+const APP_VERSION = "v0.1.7.6";
+const APP_BANNER = "Corrected Mongoose Socioeconomic Stats and Logs";
 
 // -----------------------------------------------------------------------------
 // Application State

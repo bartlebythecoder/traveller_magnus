@@ -1851,12 +1851,16 @@ function rollMgT2EStar(label = 'Star') {
     else if (roll <= 8) sType = 'K';
     else if (roll <= 10) sType = 'G';
     else if (roll == 11) sType = 'F';
-    else { sType = 'A'; }
+    else {
+        // A 12 was rolled, check for even hotter stars
+        let hotRoll = tRoll2D(`${label} Hot Star Roll`);
+        if (hotRoll <= 9) sType = 'A';
+        else if (hotRoll <= 11) sType = 'B';
+        else sType = 'O';
+    }
 
-    let stRoll = tRoll2D(`${label} Subtype Roll`);
-    let subType = stRoll - 2;
-    if (subType < 0) subType = 0;
-    if (subType > 9) subType = 9;
+    let subType = Math.floor(rng() * 10);
+    tResult(`${label} Subtype (0-9)`, subType);
 
     let stats = MGT2E_STAR_STATS[sType];
     let diam2 = stats.diam * stats.diam;
@@ -1865,6 +1869,10 @@ function rollMgT2EStar(label = 'Star') {
 
     let star = { sClass, sType, subType, mass: stats.mass, diam: stats.diam, temp: stats.temp, lum, name: `${sType}${toUWPChar(subType)} ${sClass}` };
     tResult(`${label} Classification`, star.name);
+    tResult(`${label} Mass (Sol)`, star.mass);
+    tResult(`${label} Temperature (K)`, star.temp);
+    tResult(`${label} Diameter (Sol)`, star.diam);
+    tResult(`${label} Luminosity (Sol)`, star.lum.toFixed(4));
     return star;
 }
 
@@ -1908,23 +1916,24 @@ function getMAO(sType, subType, sClass) {
 }
 
 function determineMgT2EEccentricity(isStar, orbitsBeyondFirst, sysAgeGyr, orbitNum, isSignificantBody, anomalousEccMod) {
-    let roll = roll2D();
+    let roll = tRoll2D('Eccentricity Roll');
     let sumRoll = roll;
-    if (isStar) sumRoll += 2;
-    sumRoll += orbitsBeyondFirst;
-    if (sysAgeGyr > 1 && orbitNum < 1.0) sumRoll -= 1;
-    if (isSignificantBody) sumRoll += 1;
-    sumRoll += anomalousEccMod;
+    if (isStar) { tDM('Is Star', 2); sumRoll += 2; }
+    if (orbitsBeyondFirst > 0) { tDM('Orbits Beyond First', orbitsBeyondFirst); sumRoll += orbitsBeyondFirst; }
+    if (sysAgeGyr > 1 && orbitNum < 1.0) { tDM('Aged Inner System', -1); sumRoll -= 1; }
+    if (isSignificantBody) { tDM('Significant Body', 1); sumRoll += 1; }
+    if (anomalousEccMod !== 0) { tDM('Anomalous Mod', anomalousEccMod); sumRoll += anomalousEccMod; }
 
     let base = 0, fraction = 0;
-    if (sumRoll <= 5) { base = -0.001; fraction = roll1D() / 1000; }
-    else if (sumRoll <= 7) { base = 0.00; fraction = roll1D() / 200; }
-    else if (sumRoll <= 9) { base = 0.03; fraction = roll1D() / 100; }
-    else if (sumRoll === 10) { base = 0.05; fraction = roll1D() / 20; }
-    else if (sumRoll === 11) { base = 0.05; fraction = roll2D() / 20; }
-    else { base = 0.30; fraction = roll2D() / 20; }
+    if (sumRoll <= 5) { base = -0.001; fraction = tRoll1D('Ecc Jitter (Small)') / 1000; }
+    else if (sumRoll <= 7) { base = 0.00; fraction = tRoll1D('Ecc Jitter (Low)') / 200; }
+    else if (sumRoll <= 9) { base = 0.03; fraction = tRoll1D('Ecc Jitter (Mod)') / 100; }
+    else if (sumRoll === 10) { base = 0.05; fraction = tRoll1D('Ecc Jitter (High)') / 20; }
+    else if (sumRoll === 11) { base = 0.05; fraction = tRoll2D('Ecc Jitter (Extreme)') / 20; }
+    else { base = 0.30; fraction = tRoll2D('Ecc Jitter (Chaos)') / 20; }
 
-    return Math.max(0, base + fraction);
+    let finalEcc = Math.max(0, base + fraction);
+    return finalEcc;
 }
 
 // =====================================================================
@@ -1952,16 +1961,18 @@ function generateMgT2ESystemChunk1(mainworldBase, hexId) {
 
     tSection('System Age');
     let msLifespan = 10 / Math.pow(primary.mass, 2.5);
+    tResult('Main Sequence Lifespan (10 / mass^2.5)', msLifespan.toFixed(2) + " Gyr");
+
     if (primary.mass < 0.9) {
-        let r1 = Math.floor(rng() * 6) + 1;
-        let r2 = Math.floor(rng() * 3) + 1;
-        let r3 = Math.floor(rng() * 10) / 10;
+        let r1 = tRoll1D('Age Base (2 * 1D)');
+        let r2 = Math.ceil(tRoll1D('Age Offset (1D3)') / 2);
+        let r3 = (Math.floor(rng() * 10) / 10);
         sys.age = (r1 * 2) + r2 - 1 + r3;
-        tResult('Age (Low Mass Formula)', sys.age.toFixed(2) + " Gyr");
+        tResult('Age Formula', `(BaseRoll(${r1}) * 2) + Offset(${r2}) - 1 + Jitter(${r3}) = ${sys.age.toFixed(2)} Gyr`);
     } else {
         let r1 = (Math.floor(rng() * 100) + 1) / 100;
         sys.age = msLifespan * r1;
-        tResult('Age (Fraction of Lifespan)', sys.age.toFixed(2) + " Gyr");
+        tResult('Age Formula', `Lifespan(${msLifespan.toFixed(2)}) * RandomFraction(${r1}) = ${sys.age.toFixed(2)} Gyr`);
     }
     sys.age = Math.max(0.1, sys.age);
 
@@ -1971,9 +1982,9 @@ function generateMgT2ESystemChunk1(mainworldBase, hexId) {
     sys.stars.push(primary);
 
     // =====================================================================
-    // Step 2: Companion Stars (Close, Near, Far + recursive Companions)
+    // Step 2: Additional Stars (Close, Near, Far + recursive Companions)
     // =====================================================================
-    tSection('Companion Stars');
+    tSection('Additional Stars');
 
     // Helper: compute presence roll DM based on a star's type/class
     function getMultiDM(star) {
@@ -1981,30 +1992,60 @@ function generateMgT2ESystemChunk1(mainworldBase, hexId) {
         if (['Ia', 'Ib', 'II', 'III', 'IV'].includes(star.sClass)) dm += 1;
         if (['V', 'VI'].includes(star.sClass) && ['O', 'B', 'A', 'F'].includes(star.sType)) dm += 1;
         if (['V', 'VI'].includes(star.sClass) && star.sType === 'M') dm -= 1;
+        // DM -1 for Brown Dwarfs (L,T,Y), White Dwarfs (D), or other compact objects
+        if (star.sClass === 'D' || ['L', 'T', 'Y'].includes(star.sType)) dm -= 1;
         return dm;
     }
 
-    // Helper: generate companion star quality from a parent star
-    function rollCompanionQuality(parentStar, label) {
-        let secRoll = tRoll2D(`${label} Quality Roll`);
-        let companion;
-        if (secRoll >= 10) {
-            // Twin
-            companion = JSON.parse(JSON.stringify(parentStar));
-            tResult(`${label} Quality`, 'Twin');
-        } else if (secRoll >= 8) {
-            // Sibling
-            companion = JSON.parse(JSON.stringify(parentStar));
-            let subMod = Math.floor(rng() * 6) + 1;
-            companion.subType = Math.min(9, companion.subType + subMod);
-            tResult(`${label} Quality`, `Sibling (+${subMod} subtypes)`);
+    // Helper: generate non-primary star determination from a parent star
+    function determineNonPrimaryStar(parentStar, orbitType, label) {
+        const column = (orbitType === 'Companion' ? 'Companion' : 'Secondary');
+        let dm = 0;
+        // DM -1 for Brown Dwarfs (L,T,Y), White Dwarfs (D), or other compact objects
+        if (parentStar.sClass === 'D' || ['L', 'T', 'Y'].includes(parentStar.sType)) dm = -1;
+
+        let roll = tRoll2D(`Non-Primary Star Determination (${column} Column)`);
+        if (dm !== 0) tDM('Exotic Parent', dm);
+        let total = roll + dm;
+
+        let star;
+        if (column === 'Secondary') {
+            if (total >= 11) {
+                // Twin
+                star = JSON.parse(JSON.stringify(parentStar));
+                tResult(`${label} Determination`, 'Twin');
+            } else if (total >= 9) {
+                // Sibling
+                star = JSON.parse(JSON.stringify(parentStar));
+                let subMod = tRoll1D(`${label} Sibling Offset (1D6)`);
+                star.subType = Math.min(9, star.subType + subMod);
+                tResult(`${label} Determination`, `Sibling (+${subMod} subtypes)`);
+            } else {
+                // Other
+                star = rollMgT2EStar(label);
+                tResult(`${label} Determination`, 'Other');
+            }
         } else {
-            // Lesser / Random / Other
-            companion = rollMgT2EStar(label);
+            // Companion column
+            if (total >= 10) {
+                // Twin
+                star = JSON.parse(JSON.stringify(parentStar));
+                tResult(`${label} Determination`, 'Twin');
+            } else if (total >= 8) {
+                // Sibling
+                star = JSON.parse(JSON.stringify(parentStar));
+                let subMod = tRoll1D(`${label} Sibling Offset (1D6)`);
+                star.subType = Math.min(9, star.subType + subMod);
+                tResult(`${label} Determination`, `Sibling (+${subMod} subtypes)`);
+            } else {
+                // Other
+                star = rollMgT2EStar(label);
+                tResult(`${label} Determination`, 'Other');
+            }
         }
-        companion.mao = getMAO(companion.sType, companion.subType, companion.sClass);
-        companion.name = `${companion.sType}${toUWPChar(companion.subType)} ${companion.sClass}`;
-        return companion;
+        star.mao = getMAO(star.sType, star.subType, star.sClass);
+        star.name = `${star.sType}${toUWPChar(star.subType)} ${star.sClass}`;
+        return star;
     }
 
     // Helper: roll stellar eccentricity (isStar=true adds +2 DM automatically)
@@ -2025,44 +2066,44 @@ function generateMgT2ESystemChunk1(mainworldBase, hexId) {
 
     for (const def of separationDefs) {
         if (!def.allowed) {
-            tSkip(`${def.sep} companion forbidden by primary class`);
+            tSkip(`${def.sep} orbit forbidden by primary class`);
             continue;
         }
-        let presRoll = tRoll2D(`${def.sep} Presence Roll`);
+        let presRoll = tRoll2D(`${def.sep} Orbit Presence Roll`);
         tDM('Primary MultiDM', primaryDM);
         if (presRoll + primaryDM < 10) {
-            tResult(`${def.sep} Companion`, 'None');
+            tResult(`${def.sep} Orbit`, 'None');
             continue;
         }
 
-        let companion = rollCompanionQuality(primary, `${def.sep} Companion`);
-        companion.separation = def.sep;
-        companion.role = `${def.sep} Companion`;
-        companion.parentStarIdx = 0;
-        companion.orbitId = def.orbitFn();
-        tResult(`${def.sep} Orbit`, companion.orbitId);
-        companion.eccentricity = rollStellarEcc(companion.orbitId, `${def.sep} Companion`);
-        tResult(`${def.sep} Eccentricity`, companion.eccentricity.toFixed(3));
-        sys.stars.push(companion);
+        let starInOrbit = determineNonPrimaryStar(primary, def.sep, def.sep);
+        starInOrbit.separation = def.sep;
+        starInOrbit.role = def.sep;
+        starInOrbit.parentStarIdx = 0;
+        starInOrbit.orbitId = def.orbitFn();
+        tResult(`${def.sep} Orbit`, starInOrbit.orbitId);
+        starInOrbit.eccentricity = rollStellarEcc(starInOrbit.orbitId, def.sep);
+        tResult(`${def.sep} Eccentricity`, starInOrbit.eccentricity.toFixed(3));
+        sys.stars.push(starInOrbit);
 
         // Each Close/Near/Far star also rolls for its own tight Companion
-        let compDM = getMultiDM(companion);
-        if (tRoll2D(`${def.sep} Star's Companion Presence Roll`) + compDM >= 10) {
-            tDM('Companion MultiDM', compDM);
-            let tertiary = rollCompanionQuality(companion, `${def.sep} Sub-Companion`);
-            tertiary.separation = 'Companion';
-            tertiary.role = `${def.sep} Star's Companion`;
-            tertiary.parentStarIdx = sys.stars.length - 1;
+        let orbitStarDM = getMultiDM(starInOrbit);
+        if (tRoll2D(`${def.sep} Star Companion Presence Roll`) + orbitStarDM >= 10) {
+            tDM('Stellar MultiDM', orbitStarDM);
+            let tightCompanion = determineNonPrimaryStar(starInOrbit, 'Companion', 'Companion');
+            tightCompanion.separation = 'Companion';
+            tightCompanion.role = 'Companion';
+            tightCompanion.parentStarIdx = sys.stars.length - 1;
             // Companion formula: (1d6/10) + ((2d6-7)/100)
             let d1 = tRoll1D(`${def.sep} Comp Orbit D1`);
             let d2 = tRoll2D(`${def.sep} Comp Orbit D2`);
-            tertiary.orbitId = (d1 / 10) + ((d2 - 7) / 100);
-            tResult(`${def.sep} Comp Orbit`, tertiary.orbitId.toFixed(3));
-            tertiary.eccentricity = rollStellarEcc(tertiary.orbitId, `${def.sep} Sub-Companion`);
-            tResult(`${def.sep} Comp Eccentricity`, tertiary.eccentricity.toFixed(3));
-            sys.stars.push(tertiary);
+            tightCompanion.orbitId = (d1 / 10) + ((d2 - 7) / 100);
+            tResult('Companion Orbit', tightCompanion.orbitId.toFixed(3));
+            tightCompanion.eccentricity = rollStellarEcc(tightCompanion.orbitId, 'Companion');
+            tResult('Companion Eccentricity', tightCompanion.eccentricity.toFixed(3));
+            sys.stars.push(tightCompanion);
         } else {
-            tResult(`${def.sep} Sub-Companion`, 'None');
+            tResult(`Companion to ${def.sep}`, 'None');
         }
     }
 
@@ -2075,9 +2116,14 @@ function generateMgT2ESystemChunk1(mainworldBase, hexId) {
     // --- Gas Giants ---
     tSection('Gas Giants');
     let existingGG = (mainworldBase && mainworldBase.gasGiant === true);
-    if (existingGG) tResult('Existing Gas Giant', 'Yes (from Mainworld)');
-    let ggRoll = tRoll2D('Gas Giant Presence Roll (<= 9)');
-    let ggExists = existingGG || (ggRoll <= 9);
+    let ggExists = false;
+    if (existingGG) {
+        tResult('Gas Giant Presence', 'Yes (from Mainworld)');
+        ggExists = true;
+    } else {
+        let ggRoll = tRoll2D('Gas Giant Presence Roll (<= 9)');
+        ggExists = (ggRoll <= 9);
+    }
     if (ggExists) {
         let ggQ = tRoll2D('Gas Giant Quantity Roll');
         if (sys.stars.length === 1 && primary.sClass === 'V') { tDM('Single Class V', 1); ggQ += 1; }

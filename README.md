@@ -1,4 +1,4 @@
-# As Above, So Below (v0.1.8.3)
+# As Above, So Below (v0.1.8.5)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -34,6 +34,13 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 ---
 ## 📜 Changelog
 
+### [v0.1.8.5] - 2026-03-09
+1. **Mongoose System Generation:** Enhanced terrestrial planet logging to include full formulas for composition, density, gravity, mass, and escape/orbital velocity.
+2. **System Interface:** Added Gravity, Mass, and Temperature fields to the Star System accordion view for all worlds and moons.
+
+### [v0.1.8.4] - 2026-03-09
+1. **Mongoose System Generation:** Updated automated testing for mainworlds as moons.
+
 ### [v0.1.8.3] - 2026-03-09
 1. **Moon Quantity Refactor (Step 3):** Implemented "Per Dice" penalties for worlds in unstable environments (Orbit < 1.0, star adjacency, forbidden zones).
 2. **System Spread & Dim Primary DMs:** Added global quantity modifiers for low-spread systems and dim M-Type/Brown Dwarf primaries.
@@ -52,6 +59,7 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 9. **Updated Eccentricity (Step 9):** Implemented the 2D-roll-based eccentricity table with modifiers for P-Type orbits, old inner systems, and planetoid belts.
 10. **Precision Orbital Periods:** Implemented high-precision period calculations factoring in interior stellar mass (P-Type) and planetary bulk (Solar unit conversion).
 11. **Stellar & Orbital Audit:** Added an automated system-wide validation function (`runStellarAudit`) to verify orbital sequence, period accuracy, baseline anchoring, and gravity stability.
+12. **Audit Capture Rule:** Updated anchor validation to correctly account for Mainworlds captured as moons by using parent body orbits.
 
 ### [v0.1.8.1] - 2026-03-09
 1. **Mongoose Stellar Generation:** Implemented specialized generation for White Dwarfs (D) including progenitor mass/lifespan and Mass-adjusted interpolation from official aging tables.

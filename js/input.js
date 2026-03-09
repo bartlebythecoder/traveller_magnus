@@ -1578,16 +1578,22 @@ function populateEditorAccordions(stateObj) {
                             ? `${(w.periodYears * 365.25).toFixed(1)} days`
                             : `${w.periodYears.toFixed(2)} years`;
                         html += `<span class="system-stats-full">Period: <strong>${periodStr}</strong></span>`;
+                        html += `<span>Composition: <strong>${w.composition || '?'}</strong></span>`;
+                        html += `<span>Density: <strong>${w.density !== undefined ? w.density.toFixed(2) : '?'}</strong></span>`;
                     }
 
-                    // Physical characteristics (non-gas-giant, non-belt)
+                    // Physical Characteristics
+                    html += `<span>Gravity: <strong>${w.gravity !== undefined ? w.gravity.toFixed(2) : '?'} G</strong></span>`;
+                    html += `<span>Mass: <strong>${w.mass !== undefined ? w.mass.toFixed(4) : '?'} M⊕</strong></span>`;
+                    html += `<span>Temp: <strong>${w.meanTempK !== undefined ? (w.meanTempK - 273).toFixed(0) : '?'}°C</strong></span>`;
+
+                    // Physical characteristics (additional stats for terrestrial planets)
                     if (w.type === 'Terrestrial Planet' || w.type === 'Mainworld') {
                         if (w.type === 'Mainworld' && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
                             const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
                             html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor};">Caution: ${mwBase.travelZone} Zone</div>`;
                         }
                         html += `<span>Axial Tilt: <strong>${w.axialTilt ? w.axialTilt.toFixed(1) : '0'}°</strong></span>`;
-                        html += `<span>Mean Temp: <strong>${w.meanTempK ? (w.meanTempK - 273).toFixed(0) : '?'}°C</strong></span>`;
                         html += `<span>Habitability: <strong>${w.habitability !== undefined ? w.habitability : '?'}/15</strong></span>`;
 
                         if (w.resourceRating) {
@@ -1596,24 +1602,42 @@ function populateEditorAccordions(stateObj) {
                         if (w.secRU !== undefined && w.secPop > 0) {
                             html += `<span>RU: <strong>${w.secRU}</strong></span>`;
                         }
+                    } else if (w.type === 'Planetoid Belt') {
+                        if (w.beltProfileString) {
+                            html += `<div class="system-stats-full" style="color: #66fcf1; font-family: monospace;">Profile: ${w.beltProfileString}</div>`;
+                            html += `<span>Span: <strong>${w.span ? w.span.toFixed(2) : '?'}</strong></span>`;
+                            html += `<span>Bulk: <strong>${w.bulk !== undefined ? w.bulk : '?'}</strong></span>`;
+                            html += `<span>Resource: <strong>${w.resourceRating !== undefined ? toUWPChar(w.resourceRating) : '?'}</strong></span>`;
+                            html += `<span>Sig Size 1: <strong>${w.size1Count || 0}</strong></span>`;
+                            html += `<span>Sig Size S: <strong>${w.sizeSCount || 0}</strong></span>`;
+                            html += `<div class="system-stats-full">Comp: M:${w.mType}% S:${w.sType}% C:${w.cType}% O:${w.oType}%</div>`;
+                        } else {
+                            html += `<div class="system-stats-full" style="color: #a0a8b0;">No profile data generated.</div>`;
+                        }
                     }
 
                     html += `</div>`;
 
-                    // Moons with detailed stats
-                    if (w.moons && w.moons.length > 0) {
-                        w.moons.forEach((m, midx) => {
+                    // Moons and Significant Bodies
+                    let subBodies = [];
+                    if (w.moons && w.moons.length > 0) subBodies = subBodies.concat(w.moons);
+                    if (w.significantBodies && w.significantBodies.length > 0) subBodies = subBodies.concat(w.significantBodies);
+
+                    if (subBodies.length > 0) {
+                        subBodies.forEach((m, midx) => {
+                            let isSigBody = m.type === 'Planetoid Belt Body';
                             let mUwp = m.uwpSecondary || '-';
                             let mLabelColor = m.type === 'Mainworld' ? '#ffa500' : '#66fcf1';
                             let mSummaryStyle = m.type === 'Mainworld' ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
 
                             let mClassLabel = (m.classifications && m.classifications.length > 0) ? ` | ${m.classifications[0]}` : '';
+                            let titlePrefix = isSigBody ? 'Sig Body' : 'Moon';
 
                             html += `<details>`;
-                            html += `<summary ${mSummaryStyle}>Moon ${midx + 1}${mClassLabel} <span class="sys-title-info">Size ${m.size}</span></summary>`;
+                            html += `<summary ${mSummaryStyle}>${titlePrefix} ${midx + 1}${mClassLabel} <span class="sys-title-info">Size ${m.size}</span></summary>`;
                             html += `<div class="system-node">`;
 
-                            if (mUwp !== '-') {
+                            if (!isSigBody && mUwp !== '-') {
                                 html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <strong style="color: ${mLabelColor}">${mUwp}</strong></div>`;
                             }
                             if (m.classifications && m.classifications.length > 0) {
@@ -1621,7 +1645,13 @@ function populateEditorAccordions(stateObj) {
                             }
 
                             html += `<div class="system-stats">`;
-                            html += `<span>Orbit: <strong>${m.pd ? m.pd.toFixed(1) : '?'} ⌀</strong></span>`;
+
+                            if (isSigBody) {
+                                html += `<span>Orbit: <strong>${m.orbitId ? m.orbitId.toFixed(2) : '?'}</strong></span>`;
+                            } else {
+                                html += `<span>Orbit: <strong>${m.pd ? m.pd.toFixed(1) : '?'} ⌀</strong></span>`;
+                            }
+
                             html += `<span>Ecc: <strong>${(m.eccentricity || 0).toFixed(3)}</strong></span>`;
 
                             if (m.periodHrs) {
@@ -1631,7 +1661,13 @@ function populateEditorAccordions(stateObj) {
                                 html += `<span>Period: <strong>${pStr}</strong></span>`;
                             }
 
-                            if (m.meanTempK) {
+                            // Moon/SigBody Physical Stats
+                            if (m.composition) html += `<span>Comp: <strong>${m.composition}</strong></span>`;
+                            if (m.density !== undefined) html += `<span>Density: <strong>${m.density.toFixed(2)}</strong></span>`;
+                            html += `<span>Gravity: <strong>${m.gravity !== undefined ? m.gravity.toFixed(2) : '?'} G</strong></span>`;
+                            html += `<span>Mass: <strong>${m.mass !== undefined ? m.mass.toFixed(4) : '?'} M⊕</strong></span>`;
+
+                            if (m.meanTempK !== undefined) {
                                 html += `<span>Temp: <strong>${(m.meanTempK - 273).toFixed(0)}°C</strong></span>`;
                             }
 

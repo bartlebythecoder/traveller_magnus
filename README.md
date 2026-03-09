@@ -1,4 +1,4 @@
-# As Above, So Below (v0.1.8.1)
+# As Above, So Below (v0.1.8.3)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -34,11 +34,31 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 ---
 ## 📜 Changelog
 
+### [v0.1.8.3] - 2026-03-09
+1. **Moon Quantity Refactor (Step 3):** Implemented "Per Dice" penalties for worlds in unstable environments (Orbit < 1.0, star adjacency, forbidden zones).
+2. **System Spread & Dim Primary DMs:** Added global quantity modifiers for low-spread systems and dim M-Type/Brown Dwarf primaries.
+3. **Gas Giant Special Sizing (Step 4):** Implemented the Scenario B Special Sizing table for Gas Giant moons (Tiny, Standard, and Special brackets).
+4. **Extreme Moon Constraint:** Implemented the "Sub-Stellar Companion" rule where moons resulting in Size G (16) are automatically converted into Small Gas Giants (GS), with potential Medium Gas Giant (GM) upgrades for Large Gas Giant parents.
+
+### [v0.1.8.2] - 2026-03-09
+1. **HZCO Calculation:** Implemented star-specific HZCO for S-Type worlds and summed luminosity derivation for P-Type circumbinary worlds.
+2. **Effective Deviation:** Implemented non-linear "Effective Deviation" formulas for inner system orbits ($HZCO < 1.0$) to ensure realistic orbital crowding.
+3. **Baseline Orbit Refinement:** Updated Step 3 logic with dynamic DMs for system complexity and branching formulas (multiplication/division) for dim-star habitable zones.
+4. **Orbital Placement Refactor:** Implemented global empty orbit distribution and dynamic spread calculation based on baseline density.
+5. **Slot Generation Loop:** Unified placement logic using a slot generation loop with a `baselineNumber` override to anchor the Mainworld.
+6. **Forbidden Zone Jumps:** Replaced static forbidden zone logic with a dynamic "jump" method that preserves orbital spacing across gravitational gaps.
+7. **Anomalous Planets (Step 7):** Added 2D-roll-based generation of anomalous orbits (up to $+3$ worlds) during system inventory.
+8. **Global Placement Sequence (Step 8):** Implemented strict ordering (Mainworld -> Empty -> GG -> Belt -> TP) with specific Capture rules for Mainworlds being taken as Gas Giant moons.
+9. **Updated Eccentricity (Step 9):** Implemented the 2D-roll-based eccentricity table with modifiers for P-Type orbits, old inner systems, and planetoid belts.
+10. **Precision Orbital Periods:** Implemented high-precision period calculations factoring in interior stellar mass (P-Type) and planetary bulk (Solar unit conversion).
+11. **Stellar & Orbital Audit:** Added an automated system-wide validation function (`runStellarAudit`) to verify orbital sequence, period accuracy, baseline anchoring, and gravity stability.
+
 ### [v0.1.8.1] - 2026-03-09
 1. **Mongoose Stellar Generation:** Implemented specialized generation for White Dwarfs (D) including progenitor mass/lifespan and Mass-adjusted interpolation from official aging tables.
 2. **Mongoose Stellar Generation:** Implemented specialized generation for Brown Dwarfs (BD) featuring baseline L/T/Y type determination and mass-dependent cooling/aging logic (1-2 subtypes per Gyr).
 3. **Mongoose System Generation:** Refined Non-Primary Star algorithms (Twin, Sibling, Random, Lesser, Other) with distinct logic paths and detailed audit logging.
-4. **System Age Integration:** Improved Age logic for post-stellar and substellar primary objects.
+4. **Mongoose System Generation:** Improved Age logic for post-stellar and substellar primary objects.
+5. **Mongoose System Generation:** Added detailed logging for allowable orbit calculation.
 
 ### [v0.1.8] - 2026-03-08
 1. **Mongoose Stellar Generation:** Added Hot Star types

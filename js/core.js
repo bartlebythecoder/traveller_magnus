@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.1.8.1";
-const APP_BANNER = "v.0.1.8.1 Updated Mongoose Non-Primary Algorithm";
+const APP_VERSION = "v0.1.8.3";
+const APP_BANNER = "v0.1.8.3 Updated the Planetary Size Algorithms.";
 
 // -----------------------------------------------------------------------------
 // Application State

@@ -133,7 +133,9 @@ const MGT2E_STAR_STATS = {
     'F': { mass: 1.5, diam: 1.5, lum: 3.5, temp: 6500 },
     'G': { mass: 1.1, diam: 1.0, lum: 1.0, temp: 5800 },
     'K': { mass: 0.7, diam: 0.8, lum: 0.2, temp: 4400 },
-    'M': { mass: 0.3, diam: 0.4, lum: 0.05, temp: 3000 }
+    'M': { mass: 0.3, diam: 0.4, lum: 0.05, temp: 3000 },
+    'BD': { mass: 0.05, diam: 0.1, lum: 0.0001, temp: 1500 },
+    'D': { mass: 0.6, diam: 0.01, lum: 0.001, temp: 10000 }
 };
 
 const MGT2E_HZ_DEVIATION = {

@@ -1,4 +1,4 @@
-# As Above, So Below (v0.1.8)
+# As Above, So Below (v0.1.8.1)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -33,6 +33,12 @@ This workbench allows Game Masters and world-builders to generate, import, and e
     - **Ctrl + Shift + C:** Full Classic Traveller (Book 6) Generation sequence.
 ---
 ## 📜 Changelog
+
+### [v0.1.8.1] - 2026-03-09
+1. **Mongoose Stellar Generation:** Implemented specialized generation for White Dwarfs (D) including progenitor mass/lifespan and Mass-adjusted interpolation from official aging tables.
+2. **Mongoose Stellar Generation:** Implemented specialized generation for Brown Dwarfs (BD) featuring baseline L/T/Y type determination and mass-dependent cooling/aging logic (1-2 subtypes per Gyr).
+3. **Mongoose System Generation:** Refined Non-Primary Star algorithms (Twin, Sibling, Random, Lesser, Other) with distinct logic paths and detailed audit logging.
+4. **System Age Integration:** Improved Age logic for post-stellar and substellar primary objects.
 
 ### [v0.1.8] - 2026-03-08
 1. **Mongoose Stellar Generation:** Added Hot Star types

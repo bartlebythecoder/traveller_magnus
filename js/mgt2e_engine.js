@@ -1839,7 +1839,179 @@ function convertAuToOrbit(au) {
     return 20.0;
 }
 
-// Note: MGT2E_STAR_STATS is defined in constants.js
+function getMgT2ESmallStarAge(label = 'Small Star') {
+    let r1 = tRoll1D(`${label} Age Base (1D6 * 2)`);
+    let r2 = Math.ceil(tRoll1D(`${label} Age Offset (1D3)`) / 2);
+    let r3 = (Math.floor(rng() * 10) / 10);
+    let age = (r1 * 2) + r2 - 1 + r3;
+    return { age, display: `(BaseRoll(${r1}) * 2) + Offset(${r2}) - 1 + Jitter(${r3}) = ${age.toFixed(2)} Gyr` };
+}
+
+function getMgT2ELargeStarAge(msLifespan, label = 'Large Star') {
+    let r1 = (Math.floor(rng() * 100) + 1) / 100;
+    let age = msLifespan * r1;
+    return { age, display: `Lifespan(${msLifespan.toFixed(2)}) * RandomFraction(${r1}) = ${age.toFixed(2)} Gyr` };
+}
+
+function generateMgT2EWhiteDwarf(label, forceWDTime = null) {
+    tSection(`${label} (White Dwarf) Details`);
+    let d1 = tRoll2D(`${label} Mass 2D6`);
+    let d2 = Math.floor(rng() * 10) + 1; // 1D10
+    let mass = (d1 - 1) / 10 + d2 / 100;
+    tResult(`${label} Mass (ʘ)`, mass.toFixed(2));
+
+    let diam = (1 / mass) * 0.01;
+    tResult(`${label} Diameter (ʘ)`, diam.toFixed(4));
+
+    let wdTime = forceWDTime;
+    if (wdTime === null) {
+        let ageResult = getMgT2ESmallStarAge(`${label} Cooling Time`);
+        wdTime = ageResult.age;
+        writeLogLine(`  WD Cooling Age Formula: ${ageResult.display}`);
+    } else {
+        writeLogLine(`  WD Cooling Age Fixed: ${wdTime.toFixed(2)} Gyr`);
+    }
+
+    // Progenitor calc
+    let progMod = 2 + (Math.floor(rng() * 3) + 1); // 2 + 1D3
+    let progMass = mass * progMod;
+    let progMSLifespan = 10 / Math.pow(progMass, 2.5);
+    let progTotalLife = progMSLifespan * 1.1; // 10% for giant phase
+    let sysAge = progTotalLife + wdTime;
+
+    // Temperature from Aging Table
+    const agingTable = [
+        { yrs: 0, temp: 100000 },
+        { yrs: 0.1, temp: 25000 },
+        { yrs: 0.5, temp: 10000 },
+        { yrs: 1.0, temp: 8000 },
+        { yrs: 1.5, temp: 7000 },
+        { yrs: 2.5, temp: 5500 },
+        { yrs: 5.0, temp: 5000 },
+        { yrs: 10.0, temp: 4000 },
+        { yrs: 13.0, temp: 3800 }
+    ];
+
+    let baseTemp = 3800;
+    if (wdTime <= 0) baseTemp = 100000;
+    else if (wdTime >= 13) baseTemp = 3800;
+    else {
+        for (let i = 0; i < agingTable.length - 1; i++) {
+            if (wdTime >= agingTable[i].yrs && wdTime < agingTable[i + 1].yrs) {
+                let f = (wdTime - agingTable[i].yrs) / (agingTable[i + 1].yrs - agingTable[i].yrs);
+                baseTemp = agingTable[i].temp + f * (agingTable[i + 1].temp - agingTable[i].temp);
+                break;
+            }
+        }
+    }
+    let temp = baseTemp * (mass / 0.6);
+    tResult(`${label} Temperature (K)`, `${Math.round(temp)} (Base: ${Math.round(baseTemp)})`);
+
+    let lum = (diam * diam) * Math.pow(temp / 5772, 4);
+    tResult(`${label} Luminosity (ʘ)`, lum.toFixed(6));
+
+    return {
+        sType: 'D', subType: 0, sClass: 'D', mass, diam, temp, lum,
+        wdTime, progMass, progMSLifespan, progTotalLife, sysAge,
+        name: `D0 D`
+    };
+}
+
+function generateMgT2EBrownDwarf(label, forceAge = null) {
+    tSection(`${label} (Brown Dwarf) Details`);
+    let d1 = tRoll2D(`${label} Mass 4D6`, 4); // Sum 4D6
+    let d2 = tRoll1D(`${label} Mass 1D6`);
+    let mass = (d1 - 1) / 1000 + d2 / 100;
+    tResult(`${label} Mass (ʘ)`, mass.toFixed(4));
+
+    let diam = 0.1; // baseline
+
+    let age = forceAge;
+    if (age === null) {
+        let ageResult = getMgT2ESmallStarAge(`${label} Age`);
+        age = ageResult.age;
+        writeLogLine(`  BD Age Formula: ${ageResult.display}`);
+    }
+
+    // Baseline stats from Mass (at 1 Gyr)
+    const baselineTypes = [
+        { mass: 0.080, type: 'L', sub: 0, temp: 2400 },
+        { mass: 0.060, type: 'L', sub: 5, temp: 1850 },
+        { mass: 0.050, type: 'T', sub: 0, temp: 1300 },
+        { mass: 0.040, type: 'T', sub: 5, temp: 900 },
+        { mass: 0.025, type: 'Y', sub: 0, temp: 550 },
+        { mass: 0.013, type: 'Y', sub: 5, temp: 300 }
+    ];
+
+    let bType = 'Y', bSub = 5, bTemp = 300;
+    if (mass >= 0.080) { bType = 'L'; bSub = 0; bTemp = 2400; }
+    else if (mass <= 0.013) { bType = 'Y'; bSub = 5; bTemp = 300; }
+    else {
+        for (let i = 0; i < baselineTypes.length - 1; i++) {
+            if (mass <= baselineTypes[i].mass && mass > baselineTypes[i + 1].mass) {
+                let f = (mass - baselineTypes[i + 1].mass) / (baselineTypes[i].mass - baselineTypes[i + 1].mass);
+                let subTotalLow = (baselineTypes[i + 1].type === 'L' ? 0 : (baselineTypes[i + 1].type === 'T' ? 10 : 20)) + baselineTypes[i + 1].sub;
+                let subTotalHigh = (baselineTypes[i].type === 'L' ? 0 : (baselineTypes[i].type === 'T' ? 10 : 20)) + baselineTypes[i].sub;
+                let subTotal = subTotalLow + f * (subTotalHigh - subTotalLow);
+
+                bTemp = baselineTypes[i + 1].temp + f * (baselineTypes[i].temp - baselineTypes[i + 1].temp);
+
+                let sIdx = Math.round(subTotal);
+                if (sIdx < 10) { bType = 'L'; bSub = sIdx; }
+                else if (sIdx < 20) { bType = 'T'; bSub = sIdx - 10; }
+                else { bType = 'Y'; bSub = sIdx - 20; }
+                break;
+            }
+        }
+    }
+
+    writeLogLine(`  Baseline Type (1 Gyr): ${bType}${bSub} (${Math.round(bTemp)}K)`);
+
+    // Aging/Cooling
+    let coolingRate = (mass > 0.05) ? 1 : 2;
+    let agePastBaseline = age - 1;
+    let totalSubShift = Math.max(0, Math.floor(agePastBaseline * coolingRate));
+
+    let currentSubTotal = (bType === 'L' ? 0 : (bType === 'T' ? 10 : 20)) + bSub + totalSubShift;
+    let sType, subType;
+    if (currentSubTotal < 10) { sType = 'L'; subType = currentSubTotal; }
+    else if (currentSubTotal < 20) { sType = 'T'; subType = currentSubTotal - 10; }
+    else { sType = 'Y'; subType = Math.min(9, currentSubTotal - 20); }
+
+    // Final Temperature approx (Logarithmic cooling scale rough mapping)
+    // T_final = T_baseline * (Age / Age_baseline)^-0.3 is a common astrophys approx, 
+    // but we'll interpolate based on the table's spread for consistency.
+    let temp = bTemp * Math.pow(age / 1, -0.4);
+    if (age < 1) temp = bTemp * (1 + (1 - age) * 0.5);
+
+    tResult(`${label} Type (Aged)`, `${sType}${subType} (Initial: ${bType}${bSub})`);
+    tResult(`${label} Temperature (K)`, Math.round(temp));
+
+    let lum = (diam * diam) * Math.pow(temp / 5772, 4);
+    tResult(`${label} Luminosity (ʘ)`, lum.toFixed(6));
+
+    return { sType, subType, sClass: 'V', mass, diam, temp, lum, age, name: `${sType}${toUWPChar(subType)} V` };
+}
+
+function generateMgT2EStarObject(sType, subType, sClass, label = 'Star') {
+    if (sType === 'D') return generateMgT2EWhiteDwarf(label);
+    if (sType === 'BD' || ['L', 'T', 'Y'].includes(sType)) return generateMgT2EBrownDwarf(label);
+
+    let stats = MGT2E_STAR_STATS[sType];
+    if (!stats) stats = MGT2E_STAR_STATS['M']; // fallback
+
+    let diam2 = stats.diam * stats.diam;
+    let tempRatio = Math.pow(stats.temp / 5772, 4);
+    let lum = diam2 * tempRatio;
+
+    let star = { sClass, sType, subType, mass: stats.mass, diam: stats.diam, temp: stats.temp, lum, name: `${sType}${toUWPChar(subType)} ${sClass}` };
+    tResult(`${label} Classification`, star.name);
+    tResult(`${label} Mass (Sol)`, star.mass);
+    tResult(`${label} Temperature (K)`, star.temp);
+    tResult(`${label} Diameter (Sol)`, star.diam);
+    tResult(`${label} Luminosity (Sol)`, star.lum.toFixed(4));
+    return star;
+}
 
 function rollMgT2EStar(label = 'Star') {
     let roll = tRoll2D(`${label} Type Roll`);
@@ -1862,18 +2034,7 @@ function rollMgT2EStar(label = 'Star') {
     let subType = Math.floor(rng() * 10);
     tResult(`${label} Subtype (0-9)`, subType);
 
-    let stats = MGT2E_STAR_STATS[sType];
-    let diam2 = stats.diam * stats.diam;
-    let tempRatio = Math.pow(stats.temp / 5772, 4);
-    let lum = diam2 * tempRatio;
-
-    let star = { sClass, sType, subType, mass: stats.mass, diam: stats.diam, temp: stats.temp, lum, name: `${sType}${toUWPChar(subType)} ${sClass}` };
-    tResult(`${label} Classification`, star.name);
-    tResult(`${label} Mass (Sol)`, star.mass);
-    tResult(`${label} Temperature (K)`, star.temp);
-    tResult(`${label} Diameter (Sol)`, star.diam);
-    tResult(`${label} Luminosity (Sol)`, star.lum.toFixed(4));
-    return star;
+    return generateMgT2EStarObject(sType, subType, sClass, label);
 }
 
 // Note: MGT2E_MAO and SCLASS_IDX are defined in constants.js
@@ -1913,6 +2074,17 @@ function getMAO(sType, subType, sClass) {
 
     let fraction = (subType - lowSubtype) / (highSubtype - lowSubtype);
     return lowVal + fraction * (highVal - lowVal);
+}
+
+function isMgT2EStarHotter(s1, s2) {
+    const order = ['O', 'B', 'A', 'F', 'G', 'K', 'M', 'BD', 'L', 'T', 'Y', 'D'];
+    let idx1 = order.indexOf(s1.sType);
+    let idx2 = order.indexOf(s2.sType);
+    if (idx1 === -1) idx1 = 99;
+    if (idx2 === -1) idx2 = 99;
+    if (idx1 < idx2) return true;
+    if (idx1 > idx2) return false;
+    return s1.subType < s2.subType;
 }
 
 function determineMgT2EEccentricity(isStar, orbitsBeyondFirst, sysAgeGyr, orbitNum, isSignificantBody, anomalousEccMod) {
@@ -1963,16 +2135,17 @@ function generateMgT2ESystemChunk1(mainworldBase, hexId) {
     let msLifespan = 10 / Math.pow(primary.mass, 2.5);
     tResult('Main Sequence Lifespan (10 / mass^2.5)', msLifespan.toFixed(2) + " Gyr");
 
-    if (primary.mass < 0.9) {
-        let r1 = tRoll1D('Age Base (2 * 1D)');
-        let r2 = Math.ceil(tRoll1D('Age Offset (1D3)') / 2);
-        let r3 = (Math.floor(rng() * 10) / 10);
-        sys.age = (r1 * 2) + r2 - 1 + r3;
-        tResult('Age Formula', `(BaseRoll(${r1}) * 2) + Offset(${r2}) - 1 + Jitter(${r3}) = ${sys.age.toFixed(2)} Gyr`);
+    if (primary.sType === 'D') {
+        sys.age = primary.sysAge;
+        tResult('System Age (WD Progenitor + Cooling)', sys.age.toFixed(2) + " Gyr");
+    } else if (primary.mass < 0.9 || ['BD', 'L', 'T', 'Y'].includes(primary.sType)) {
+        let ageResult = getMgT2ESmallStarAge('System');
+        sys.age = ageResult.age;
+        tResult('Age Formula', ageResult.display);
     } else {
-        let r1 = (Math.floor(rng() * 100) + 1) / 100;
-        sys.age = msLifespan * r1;
-        tResult('Age Formula', `Lifespan(${msLifespan.toFixed(2)}) * RandomFraction(${r1}) = ${sys.age.toFixed(2)} Gyr`);
+        let ageResult = getMgT2ELargeStarAge(msLifespan, 'System');
+        sys.age = ageResult.age;
+        tResult('Age Formula', ageResult.display);
     }
     sys.age = Math.max(0.1, sys.age);
 
@@ -2004,45 +2177,161 @@ function generateMgT2ESystemChunk1(mainworldBase, hexId) {
         // DM -1 for Brown Dwarfs (L,T,Y), White Dwarfs (D), or other compact objects
         if (parentStar.sClass === 'D' || ['L', 'T', 'Y'].includes(parentStar.sType)) dm = -1;
 
-        let roll = tRoll2D(`Non-Primary Star Determination (${column} Column)`);
+        let roll = tRoll2D(`${label} Determination Roll (${column} Column)`);
         if (dm !== 0) tDM('Exotic Parent', dm);
         let total = roll + dm;
+        let clampedTotal = Math.max(2, Math.min(12, total));
 
-        let star;
+        // Identify result based on the five types
+        let determination = '';
         if (column === 'Secondary') {
-            if (total >= 11) {
-                // Twin
-                star = JSON.parse(JSON.stringify(parentStar));
-                tResult(`${label} Determination`, 'Twin');
-            } else if (total >= 9) {
-                // Sibling
-                star = JSON.parse(JSON.stringify(parentStar));
-                let subMod = tRoll1D(`${label} Sibling Offset (1D6)`);
-                star.subType = Math.min(9, star.subType + subMod);
-                tResult(`${label} Determination`, `Sibling (+${subMod} subtypes)`);
-            } else {
-                // Other
-                star = rollMgT2EStar(label);
-                tResult(`${label} Determination`, 'Other');
-            }
+            if (clampedTotal <= 3) determination = 'Other';
+            else if (clampedTotal <= 6) determination = 'Random';
+            else if (clampedTotal <= 8) determination = 'Lesser';
+            else if (clampedTotal <= 10) determination = 'Sibling';
+            else determination = 'Twin';
         } else {
             // Companion column
-            if (total >= 10) {
-                // Twin
-                star = JSON.parse(JSON.stringify(parentStar));
-                tResult(`${label} Determination`, 'Twin');
-            } else if (total >= 8) {
-                // Sibling
-                star = JSON.parse(JSON.stringify(parentStar));
-                let subMod = tRoll1D(`${label} Sibling Offset (1D6)`);
-                star.subType = Math.min(9, star.subType + subMod);
-                tResult(`${label} Determination`, `Sibling (+${subMod} subtypes)`);
+            if (clampedTotal <= 3) determination = 'Other';
+            else if (clampedTotal <= 5) determination = 'Random';
+            else if (clampedTotal <= 7) determination = 'Lesser';
+            else if (clampedTotal <= 9) determination = 'Sibling';
+            else determination = 'Twin';
+        }
+        tResult(`${label} Determination Result`, determination);
+
+        // Articulate algorithm before determining
+        if (determination === 'Twin') {
+            writeLogLine(`  Algorithm (Twin): Class, Type, and Subtype are copied from parent star (${parentStar.name}). Apply optional 1D-1% mass/diameter reduction.`);
+        } else if (determination === 'Sibling') {
+            writeLogLine(`  Algorithm (Sibling): Slightly cooler than parent. Subtract 1D6 from subtype. If negative, move to cooler type and add 10.`);
+        } else if (determination === 'Random') {
+            writeLogLine(`  Algorithm (Random): Generate Type and Subtype as a Primary star. If hotter than parent, change result to Lesser.`);
+        } else if (determination === 'Lesser') {
+            writeLogLine(`  Algorithm (Lesser): Discard results hotter than Parent. Cooler class, one type cooler, reroll Subtype.`);
+        } else if (determination === 'Other') {
+            writeLogLine(`  Algorithm (Other): Roll 2D6. 2-7: White Dwarf (D), 8-12: Brown Dwarf (BD).`);
+        }
+
+        let star;
+        if (determination === 'Twin') {
+            star = JSON.parse(JSON.stringify(parentStar));
+            let varRoll = tRoll1D(`${label} Twin Variation (1D6-1)`);
+            let varPct = varRoll - 1;
+            if (varPct > 0) {
+                let factor = 1 - (varPct / 100);
+                star.mass *= factor;
+                star.diam *= factor;
+                // Update luminosity since diameter changed (lum = diam^2 * tempRatio)
+                let stats = MGT2E_STAR_STATS[star.sType] || MGT2E_STAR_STATS['M'];
+                let tempRatio = Math.pow(stats.temp / 5772, 4);
+                star.lum = (star.diam * star.diam) * tempRatio;
+                tResult(`${label} Twin Variation`, `-${varPct}% mass/diameter`);
+            }
+            // Repopulate with audit results
+            star = generateMgT2EStarObject(star.sType, star.subType, star.sClass, label);
+            if (varPct > 0) {
+                // Manually re-apply and log change since generateMgT2EStarObject uses table defaults
+                let factor = 1 - (varPct / 100);
+                star.mass *= factor;
+                star.diam *= factor;
+                let stats = MGT2E_STAR_STATS[star.sType] || MGT2E_STAR_STATS['M'];
+                let tempRatio = Math.pow(stats.temp / 5772, 4);
+                star.lum = (star.diam * star.diam) * tempRatio;
+                tOverride(`${label} Mass (Var)`, star.mass.toFixed(2));
+                tOverride(`${label} Diam (Var)`, star.diam.toFixed(2));
+                tOverride(`${label} Lum (Var)`, star.lum.toFixed(4));
+            }
+            tResult(`${label} Selection`, `Twin (${star.name})`);
+        } else if (determination === 'Sibling') {
+            star = JSON.parse(JSON.stringify(parentStar));
+            if (star.sType === 'D') {
+                // Post-stellar mass reduction
+                let massReductionPct = tRoll1D(`${label} Mass Reduction (1D6 * 10%)`) * 0.1;
+                let originalMass = star.mass;
+                star.mass = Math.max(0.1, originalMass * (1 - massReductionPct));
+                tResult(`${label} Mass Reduction`, `-${(massReductionPct * 100).toFixed(0)}% (${originalMass.toFixed(2)} -> ${star.mass.toFixed(2)})`);
             } else {
-                // Other
-                star = rollMgT2EStar(label);
-                tResult(`${label} Determination`, 'Other');
+                const types = ['O', 'B', 'A', 'F', 'G', 'K', 'M'];
+                let subRoll = tRoll1D(`${label} Sibling Offset (1D6)`);
+                let newSub = star.subType + subRoll; // Adding because a "cooler" star has a HIGHER subtype digit
+
+                if (newSub > 9) {
+                    let parentIdx = types.indexOf(star.sType);
+                    if (parentIdx !== -1 && parentIdx < types.length - 1) {
+                        star.sType = types[parentIdx + 1];
+                        star.subType = newSub - 10;
+                        writeLogLine(`  Notice: Subtype ${newSub} overflow. Cooling to ${star.sType}${star.subType}`);
+                    } else if (star.sType === 'M') {
+                        // M already coolest main sequence, stays M9 or becomes BD
+                        star.subType = 9;
+                        writeLogLine(`  Notice: Subtype ${newSub} capped at M9`);
+                    } else {
+                        star.subType = 9;
+                    }
+                } else {
+                    star.subType = newSub;
+                }
+            }
+            // Regerate star object with updated type/subtype/mass
+            star = generateMgT2EStarObject(star.sType, star.subType, star.sClass, label);
+            tResult(`${label} Selection`, `Sibling (${star.name})`);
+        } else if (determination === 'Random') {
+            let tempStar = rollMgT2EStar(label);
+            writeLogLine(`  Random Generation Attempt: ${tempStar.name}`);
+            if (isMgT2EStarHotter(tempStar, parentStar)) {
+                writeLogLine(`  Notice: ${tempStar.name} is hotter than parent ${parentStar.name}. Changing result to Lesser.`);
+                determination = 'Lesser';
+                tResult(`${label} Override`, 'Random -> Lesser');
+            } else {
+                star = tempStar;
+                tResult(`${label} Selection`, `Random (${star.name})`);
             }
         }
+
+        // Handle Lesser (potentially changed from Random) or Other
+        if (determination === 'Lesser') {
+            const types = ['O', 'B', 'A', 'F', 'G', 'K', 'M'];
+            let parentIdx = types.indexOf(parentStar.sType);
+            let sType, sClass, subType;
+            sClass = parentStar.sClass;
+
+            if (parentStar.sType === 'M') {
+                sType = 'M';
+                subType = Math.floor(rng() * 10);
+                writeLogLine(`  Lesser Generation (M-Parent): New subtype ${subType}`);
+                if (subType > parentStar.subType) {
+                    sType = 'BD';
+                    writeLogLine(`  Notice: Subtype ${subType} > parent ${parentStar.subType}. Changing to Brown Dwarf (BD).`);
+                }
+            } else if (parentIdx !== -1 && parentIdx < types.length - 1) {
+                sType = types[parentIdx + 1];
+                subType = Math.floor(rng() * 10);
+                writeLogLine(`  Lesser Generation: parent ${parentStar.sType} -> ${sType}, Subtype: ${subType}`);
+            } else {
+                sType = parentStar.sType;
+                subType = Math.floor(rng() * 10);
+                writeLogLine(`  Lesser Generation (Exotic Parent): Keeping Type ${sType}, New Subtype: ${subType}`);
+            }
+            star = generateMgT2EStarObject(sType, subType, sClass, label);
+            tResult(`${label} Selection`, `Lesser (${star.name})`);
+        } else if (determination === 'Other') {
+            writeLogLine(`  Algorithm (Other): Roll 2D6. 2-7: White Dwarf (D), 8-12: Brown Dwarf (BD).`);
+            let otherRoll = tRoll2D(`${label} Other Roll`);
+            let sType, sClass, subType = 0;
+            if (otherRoll <= 7) {
+                sType = 'D';
+                sClass = 'D';
+                writeLogLine(`  Other Result (${otherRoll}): White Dwarf (D)`);
+            } else {
+                sType = 'BD';
+                sClass = 'V';
+                writeLogLine(`  Other Result (${otherRoll}): Brown Dwarf (BD)`);
+            }
+            star = generateMgT2EStarObject(sType, subType, sClass, label);
+            tResult(`${label} Selection`, `Other (${star.name})`);
+        }
+
         star.mao = getMAO(star.sType, star.subType, star.sClass);
         star.name = `${star.sType}${toUWPChar(star.subType)} ${star.sClass}`;
         return star;
@@ -2057,7 +2346,6 @@ function generateMgT2ESystemChunk1(mainworldBase, hexId) {
     const canHaveClose = !['Ia', 'Ib', 'II', 'III'].includes(primary.sClass);
     const primaryDM = getMultiDM(primary);
 
-    // Roll for Close, Near, and Far companion presence independently
     const separationDefs = [
         { sep: 'Close', orbitFn: () => { let r = tRoll1D('Close Orbit Roll') - 1; return r === 0 ? 0.5 : r; }, allowed: canHaveClose },
         { sep: 'Near', orbitFn: () => tRoll1D('Near Orbit Roll') + 5, allowed: true },
@@ -3329,16 +3617,32 @@ function generateMgT2ESystemChunk2(sys, mainworldBase) {
 
     let rawFZ = [];
     for (let comp of directCompanions) {
+        let reasons = [];
         let co = comp.orbitId;
         let cm = comp.mao || 0;
         let ce = comp.eccentricity || 0;
         let isInner = (comp.separation === 'Close' || comp.separation === 'Near');
+
         let fmin = co - 1.00, fmax = co + 1.00;
-        if (cm > 0.2) { fmin -= cm; fmax += cm; }
-        if (ce > 0.2) { fmin -= 1.00; fmax += 1.00; }
-        if (isInner && ce > 0.5) { fmin -= 1.00; fmax += 1.00; }
+        reasons.push(`Base exclusion \u00b11.00 (\u2192 ${fmin.toFixed(2)} to ${fmax.toFixed(2)})`);
+
+        if (cm > 0.2) {
+            fmin -= cm; fmax += cm;
+            reasons.push(`High MAO (${cm.toFixed(2)} > 0.2) expands by \u00b1${cm.toFixed(2)} (\u2192 ${fmin.toFixed(2)} to ${fmax.toFixed(2)})`);
+        }
+        if (ce > 0.2) {
+            fmin -= 1.00; fmax += 1.00;
+            reasons.push(`High Ecc (${ce.toFixed(2)} > 0.2) expands by \u00b11.00 (\u2192 ${fmin.toFixed(2)} to ${fmax.toFixed(2)})`);
+        }
+        if (isInner && ce > 0.5) {
+            fmin -= 1.00; fmax += 1.00;
+            reasons.push(`Extreme Ecc (${ce.toFixed(2)} > 0.5) on Inner Orbit expands by \u00b11.00 (\u2192 ${fmin.toFixed(2)} to ${fmax.toFixed(2)})`);
+        }
         rawFZ.push({ min: fmin, max: fmax });
-        tResult(`FZ for ${comp.name}`, `${fmin.toFixed(2)} - ${fmax.toFixed(2)}`);
+
+        writeLogLine(`  Exclusion Zone for ${comp.name} at Orbit ${co.toFixed(2)}:`);
+        for (let reason of reasons) writeLogLine(`    - ${reason}`);
+        tResult(`    Final FZ`, `${fmin.toFixed(2)} - ${fmax.toFixed(2)}`);
     }
     rawFZ.sort((a, b) => a.min - b.min);
     for (let fz of rawFZ) {
@@ -3378,10 +3682,25 @@ function generateMgT2ESystemChunk2(sys, mainworldBase) {
     for (let si = 1; si < sys.stars.length; si++) {
         let s = sys.stars[si];
         if (s.separation === 'Companion') continue;
+
+        let logLines = [];
+        logLines.push(`  Calculating valid bounds for ${s.name}:`);
+
         let sInner = s.mao || 0.01;
+        logLines.push(`    - Base Inner Limit (MAO): ${sInner.toFixed(2)}`);
+
         let sTight = sys.stars.find(sc => sc.parentStarIdx === si && sc.separation === 'Companion');
-        if (sTight) sInner = Math.max(sInner, 0.50 + (sTight.eccentricity || 0));
+        if (sTight) {
+            let tightPush = 0.50 + (sTight.eccentricity || 0);
+            if (tightPush > sInner) {
+                sInner = tightPush;
+                logLines.push(`    - Inner Limit extended by Tight Companion (${sTight.name}) Ecc: ${sInner.toFixed(2)}`);
+            }
+        }
+
         let sOuter = (s.orbitId || 0) - 3.00;
+        logLines.push(`    - Base Outer Limit (Own Orbit - 3): ${sOuter.toFixed(2)}`);
+
         let sIdx = sepOrder.indexOf(s.separation);
         for (let aj = 1; aj < sys.stars.length; aj++) {
             if (aj === si) continue;
@@ -3390,17 +3709,35 @@ function generateMgT2ESystemChunk2(sys, mainworldBase) {
             let oi = sepOrder.indexOf(ot.separation);
             if (Math.abs(sIdx - oi) === 1) {
                 sOuter -= 1.00;
-                if ((ot.eccentricity || 0) > 0.2) sOuter -= 1.00;
+                logLines.push(`    - Outer Limit reduced by adjacent star (${ot.name}): -1.00 (\u2192 ${sOuter.toFixed(2)})`);
+                if ((ot.eccentricity || 0) > 0.2) {
+                    sOuter -= 1.00;
+                    logLines.push(`    - Outer Limit reduced further by ${ot.name}'s high Ecc (${(ot.eccentricity || 0).toFixed(2)}): -1.00 (\u2192 ${sOuter.toFixed(2)})`);
+                }
             }
         }
+
         let sEcc = s.eccentricity || 0;
-        if (sEcc > 0.2) sOuter -= 1.00;
-        if (sEcc > 0.5) sOuter -= 1.00;
-        if (sOuter <= sInner) continue;
+        if (sEcc > 0.2) {
+            sOuter -= 1.00;
+            logLines.push(`    - Outer Limit reduced by own high Ecc (${sEcc.toFixed(2)} > 0.2): -1.00 (\u2192 ${sOuter.toFixed(2)})`);
+        }
+        if (sEcc > 0.5) {
+            sOuter -= 1.00;
+            logLines.push(`    - Outer Limit reduced by own extreme Ecc (${sEcc.toFixed(2)} > 0.5): -1.00 (\u2192 ${sOuter.toFixed(2)})`);
+        }
+
+        for (let l of logLines) writeLogLine(l);
+
+        if (sOuter <= sInner) {
+            writeLogLine(`    --> FAILED: Outer Limit (${sOuter.toFixed(2)}) <= Inner Limit (${sInner.toFixed(2)}). Orbits unavailable.`);
+            continue;
+        }
+
         let sBands = [{ min: sInner, max: sOuter }];
         let sTotalOrbits = Math.max(0, Math.floor(bw(sBands) + 1));
         secondaryMeta.push({ starIdx: si, star: s, bands: sBands, totalOrbits: sTotalOrbits });
-        tResult(`Bands for ${s.name}`, `${sInner.toFixed(2)} - ${sOuter.toFixed(2)} (${sTotalOrbits} slots)`);
+        tResult(`    Valid Bands for ${s.name}`, `${sInner.toFixed(2)} - ${sOuter.toFixed(2)} (${sTotalOrbits} slots)`);
     }
 
     // =====================================================================

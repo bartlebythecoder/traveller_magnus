@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.1.8.6";
-const APP_BANNER = "v0.1.8.6 Atmosphere Validation";
+const APP_VERSION = "v0.1.8.7";
+const APP_BANNER = "v0.1.8.7 Non-Habitable Atmospheres";
 
 // -----------------------------------------------------------------------------
 // Application State

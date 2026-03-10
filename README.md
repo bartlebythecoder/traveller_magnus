@@ -1,4 +1,4 @@
-# As Above, So Below (v0.1.8.6)
+# As Above, So Below (v0.1.8.7)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -34,17 +34,24 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 ---
 ## 📜 Changelog
 +
-+### [v0.1.8.6] - 2026-03-09
-+1. **Planetoid Belt Integrity Audit:** Added a new validation phase to `runStellarAudit` to verify belt composition totals (100%), resource rating clamping (2-12), significant body containment (within belt span), and bulk integrity (min 1).
-+2. **System Interface:** Updated splash screen and help menu to reflect the latest validation engineering.
-+
+### [v0.1.8.7] - 2026-03-09
+1. **Atmosphere Physics Logging:** Implemented comprehensive structural logging for terrestrial world atmosphere generation (Modules 1-6), covering pressure math, oxygen fraction/ppo, scale height, and detailed taint subtype/severity/persistence rolls.
+2. **Forbidden Zone Resolution:** Refactored the Baseline Orbit (Mainworld) conflict resolution logic to use official tabletop variance rules (`2D-7 / 10`) when an anchor falls within a gas giant's Forbidden Zone.
+3. **Stability Bug Fixes:** Fixed a physical boundary error in Planetoid Belt Significant Body placement where orbits were incorrectly calculated at 8x instead of 10x span.
+4. **Stellar Audit Enhancements:** Updated the system audit to account for randomized atmospheric mechanics and dynamic orbital shifting for mainworld anchors.
+5. **Atmosphere Generation:** Implemented automated audit checks for physical constraint validation (Vacuum/Size, ppo math, Taint loopbacks, and Gas physics).
+
+### [v0.1.8.6] - 2026-03-09
+1. **System Interface:** Updated Atmosphere logic.
+2. **Non-Habitable Atmosphere Refinement:** Refactored the base atmosphere generation logic to fully implement official Hot and Cold Atmosphere tables, including deviation scaling for inner orbits and automated hazard/taint flags for extreme environments.
+3. **Atmosphere Audit Logic:** Added post-roll checks for Extreme Heat and Irritant edge cases during system expansion.
 
 ### [v0.1.8.5] - 2026-03-09
 1. **Mongoose System Generation:** Enhanced terrestrial planet logging to include full formulas for composition, density, gravity, mass, and escape/orbital velocity, as well as a physics audit and planetoid belt generation.
 2. **System Interface:** Added Gravity, Mass, and Temperature fields to the Star System accordion view for all worlds and moons.
 3. **System Interface:** Added composition and density to the Star System accordion view for all worlds and moons.
 4. **Mongoose System Generation:** Added physics audit to the Star System accordion view for all worlds and moons.
-5. **Mongoose System Generation:** Added planetoid belt generation to the Star System accordion view for all worlds and moons.
+5. **Mongoose System Generation:** Added planetoid belt generation to the Star System accordion view for all worlds and moons and associated automated testing.
 
 ### [v0.1.8.4] - 2026-03-09
 1. **Mongoose System Generation:** Updated automated testing for mainworlds as moons.

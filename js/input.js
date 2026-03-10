@@ -1580,6 +1580,17 @@ function populateEditorAccordions(stateObj) {
                         html += `<span class="system-stats-full">Period: <strong>${periodStr}</strong></span>`;
                         html += `<span>Composition: <strong>${w.composition || '?'}</strong></span>`;
                         html += `<span>Density: <strong>${w.density !== undefined ? w.density.toFixed(2) : '?'}</strong></span>`;
+
+                        let atmComp = 'None';
+                        if (w.gases && w.gases.length > 0) {
+                            atmComp = w.gases.join(', ');
+                        } else if (w.oxygenFraction !== undefined) {
+                            atmComp = `N2/O2 (${(w.oxygenFraction * 100).toFixed(1)}% O2)`;
+                        }
+                        if (w.taints && w.taints.length > 0) {
+                            atmComp += ` [Taint: ${w.taints.join(', ')}]`;
+                        }
+                        html += `<span class="system-stats-full">Atmosphere: <strong>${atmComp}</strong></span>`;
                     }
 
                     // Physical Characteristics
@@ -1664,6 +1675,18 @@ function populateEditorAccordions(stateObj) {
                             // Moon/SigBody Physical Stats
                             if (m.composition) html += `<span>Comp: <strong>${m.composition}</strong></span>`;
                             if (m.density !== undefined) html += `<span>Density: <strong>${m.density.toFixed(2)}</strong></span>`;
+
+                            let mAtmComp = 'None';
+                            if (m.gases && m.gases.length > 0) {
+                                mAtmComp = m.gases.join(', ');
+                            } else if (m.oxygenFraction !== undefined) {
+                                mAtmComp = `N2/O2 (${(m.oxygenFraction * 100).toFixed(1)}% O2)`;
+                            }
+                            if (m.taints && m.taints.length > 0) {
+                                mAtmComp += ` [Taint: ${m.taints.join(', ')}]`;
+                            }
+                            html += `<span class="system-stats-full">Atmosphere: <strong>${mAtmComp}</strong></span>`;
+
                             html += `<span>Gravity: <strong>${m.gravity !== undefined ? m.gravity.toFixed(2) : '?'} G</strong></span>`;
                             html += `<span>Mass: <strong>${m.mass !== undefined ? m.mass.toFixed(4) : '?'} M⊕</strong></span>`;
 

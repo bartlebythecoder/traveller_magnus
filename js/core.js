@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.1.8.3";
-const APP_BANNER = "v0.1.8.3 Updated the Planetary Size Algorithms.";
+const APP_VERSION = "v0.1.8.6";
+const APP_BANNER = "v0.1.8.6 Atmosphere Validation";
 
 // -----------------------------------------------------------------------------
 // Application State

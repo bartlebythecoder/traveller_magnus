@@ -1,4 +1,4 @@
-# As Above, So Below (v0.1.8.5)
+# As Above, So Below (v0.1.8.6)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -33,10 +33,18 @@ This workbench allows Game Masters and world-builders to generate, import, and e
     - **Ctrl + Shift + C:** Full Classic Traveller (Book 6) Generation sequence.
 ---
 ## 📜 Changelog
++
++### [v0.1.8.6] - 2026-03-09
++1. **Planetoid Belt Integrity Audit:** Added a new validation phase to `runStellarAudit` to verify belt composition totals (100%), resource rating clamping (2-12), significant body containment (within belt span), and bulk integrity (min 1).
++2. **System Interface:** Updated splash screen and help menu to reflect the latest validation engineering.
++
 
 ### [v0.1.8.5] - 2026-03-09
-1. **Mongoose System Generation:** Enhanced terrestrial planet logging to include full formulas for composition, density, gravity, mass, and escape/orbital velocity.
+1. **Mongoose System Generation:** Enhanced terrestrial planet logging to include full formulas for composition, density, gravity, mass, and escape/orbital velocity, as well as a physics audit and planetoid belt generation.
 2. **System Interface:** Added Gravity, Mass, and Temperature fields to the Star System accordion view for all worlds and moons.
+3. **System Interface:** Added composition and density to the Star System accordion view for all worlds and moons.
+4. **Mongoose System Generation:** Added physics audit to the Star System accordion view for all worlds and moons.
+5. **Mongoose System Generation:** Added planetoid belt generation to the Star System accordion view for all worlds and moons.
 
 ### [v0.1.8.4] - 2026-03-09
 1. **Mongoose System Generation:** Updated automated testing for mainworlds as moons.

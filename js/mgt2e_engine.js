@@ -3957,9 +3957,26 @@ function generateMgT2ESystemChunk4(sys, mainworldBase) {
         let tempBand = getTempBand(w.orbitId, w.worldHzco || sys.hzco);
         tResult('Temperature Band', tempBand);
 
+        // Preliminary Temperature Estimation (Module 4)
+        if (w.meanTempK === undefined) {
+            let pIdx = w.parentStarIdx !== undefined ? w.parentStarIdx : 0;
+            let lum = (sys.stars[pIdx] || sys.stars[0]).lum || 1.0;
+            if (w.orbitType === 'P-Type') {
+                lum = sys.stars.reduce((s, star) => star.orbitId < w.orbitId ? s + (star.lum || 0) : s, 0);
+            }
+            // Estimate using 0.3 albedo and a small greenhouse factor baseline
+            w.meanTempK = 279 * Math.pow(lum / (w.au * w.au), 0.25) * 0.93;
+        }
+
+        // Gas Retention Physics
+        w.diameterTerra = (w.diamKm || (w.size * 1600)) / 12742;
+        let bodyMass = w.mass !== undefined ? w.mass : Math.pow(w.size / 8, 3);
+        w.maxEscapeValue = 1000 * (bodyMass / (w.diameterTerra * w.meanTempK));
+        tResult('Max Escape Value', w.maxEscapeValue.toFixed(3));
+
         // 1. Base Atmosphere Code
-        if (w.size === 'S' || w.size <= 1) {
-            tSkip('Size 1- forces Atmosphere 0');
+        if (w.size === 'S' || w.size === 0 || w.size === 1) {
+            tSkip('Size 0, 1, S forces Atmosphere 0');
             w.atmCode = 0;
         } else if (w.type === 'Mainworld' && mainworldBase && mainworldBase.atm !== undefined) {
             tSkip('Mainworld Atmosphere Inherited');
@@ -3968,16 +3985,78 @@ function generateMgT2ESystemChunk4(sys, mainworldBase) {
             let baseRoll = tRoll2D('Atmosphere Roll');
             tDM('Size Mod', w.size - 7);
             baseRoll = baseRoll - 7 + w.size;
+            if (w.size >= 2 && w.size <= 4) {
+                tDM('Size Variant (2-4)', -2);
+                baseRoll -= 2;
+            }
+            // 1a. Refined Deviation Logic (Phase 1)
             let diff = getEffectiveHzcoDeviation(w.orbitId, w.worldHzco || sys.hzco);
+            let hzco = w.worldHzco || sys.hzco;
+            if (hzco < 1.0 && diff < 0) {
+                // Scale negative deviation thresholds for inner orbits where bands are physically compressed
+                diff = diff * 10;
+            }
+
+            // Flags for Phase 4 Checks
+            w._atmHazardFlag = false;
+            w._atmExtremeHeatFlag = false;
 
             if (diff >= -1.00 && diff <= 1.00) {
                 w.atmCode = Math.max(0, baseRoll);
             } else if (diff < -1.00) {
-                w.atmCode = tempBand === "Boiling" ? (baseRoll <= 1 ? 0 : baseRoll <= 3 ? 1 : baseRoll <= 8 ? 10 : baseRoll <= 11 ? 11 : 12)
-                    : (baseRoll <= 0 ? 0 : baseRoll <= 1 ? 1 : baseRoll <= 10 ? 10 : baseRoll <= 11 ? 11 : 12);
+                // Hot Atmospheres Table (Phase 2)
+                tSection('Non-Habitable Zone: Hot Atmospheres');
+                let bracketRoll = Math.max(0, Math.min(17, baseRoll));
+
+                if (diff >= -2.0) { // Bracket -1.01 to -2.0
+                    let bracket1 = [0, 1, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 12, 11, 12, 15, 16, 17 /*H*/];
+                    let hazard1 = [false, false, true, false, true, false, false, true, false, true, "Check", false, false, false, false, false, false, false];
+
+                    w.atmCode = bracket1[bracketRoll];
+                    w._atmHazardFlag = hazard1[bracketRoll];
+                } else { // Bracket -2.01 or less
+                    let bracket2 = [0, 0, 1, 1, 10, 10, 10, 10, 10, 11, 11, 11, 12, 11, 12, 15, 16, 17 /*H*/];
+                    let hazard2 = [false, false, false, false, "Check", "Check", "Check", "Check", "Check", false, false, false, false, false, false, false, false, false];
+
+                    w.atmCode = bracket2[bracketRoll];
+                    w._atmHazardFlag = hazard2[bracketRoll];
+                    w._atmExtremeHeatFlag = (diff <= -3.0 && (w.atmCode === 8 || w.atmCode === 9 || w.atmCode === 10)); // Explicit Dense/Very Dense Exotic check
+                }
+
+                // Process Exotic Sub-codes (Pressure ranges mapped back to standard UWP for code 10 bases)
+                if (w.atmCode === 10) {
+                    if (bracketRoll >= 2 && bracketRoll <= 3) w.atmCode = 10; // Very Thin Exotic (Stays 10 but will generate low p)
+                    // (We leave it as 10 since the profile generation handles "A" and dynamically sets pressure in Module 2)
+                }
             } else {
-                w.atmCode = tempBand === "Cold" ? (baseRoll <= 2 ? 1 : baseRoll <= 10 ? 10 : baseRoll <= 11 ? 11 : 12)
-                    : (baseRoll <= 2 ? 1 : baseRoll <= 10 ? 10 : baseRoll <= 11 ? 11 : 12);
+                // Cold Atmospheres Table (Phase 3)
+                tSection('Non-Habitable Zone: Cold Atmospheres');
+                let bracketRoll = Math.max(0, Math.min(17, baseRoll));
+
+                if (diff <= 3.0) { // Bracket +1.01 to +3.0
+                    let bracket3 = [0, 1, 1, 10, 10, 10, 10, 10, 10, 10, 10, 11, 12, 13 /*D*/, 11, 15, 16, 17 /*H*/];
+                    let hazard3 = [false, false, false, "Check", true, false, false, true, false, true, "Check", false, false, false, false, false, false, false];
+
+                    w.atmCode = bracket3[bracketRoll];
+                    w._atmHazardFlag = hazard3[bracketRoll];
+                } else { // Bracket +3.01 or more
+                    let bracket4 = [0, 1, 1, 10, 10, 10, 10, 10, 10, 10, 10, 11, 12, 16 /*G*/, 17 /*H*/, 15, 17 /*H*/, 17 /*H*/];
+                    let hazard4 = [false, false, false, "Check", true, false, false, true, false, true, "Check", false, false, false, false, false, false, false];
+
+                    w.atmCode = bracket4[bracketRoll];
+                    w._atmHazardFlag = hazard4[bracketRoll];
+                }
+            }
+            // Clamp atmospheric codes to valid UWP max for our generation purposes before hazard checks
+            if (w.atmCode > 15 && w.atmCode !== 16 && w.atmCode !== 17) w.atmCode = 15;
+
+            // 4a. Edge Case: Extreme Heat Check
+            if (w._atmExtremeHeatFlag) {
+                let heatRoll = tRoll1D('Extreme Heat Check') + 1;
+                if (heatRoll === 1) { w.atmCode = 1; tResult('Extreme Heat', 'Code 1 (Trace)'); }
+                else if (heatRoll >= 3 && heatRoll <= 5) { w.atmCode = 11; tResult('Extreme Heat', 'Code B (Corrosive)'); }
+                else if (heatRoll >= 6) { w.atmCode = 12; tResult('Extreme Heat', 'Code C (Insidious)'); }
+                else { tResult('Extreme Heat', 'Unchanged'); }
             }
         }
 
@@ -3985,19 +4064,43 @@ function generateMgT2ESystemChunk4(sys, mainworldBase) {
         tResult('Final Atmosphere Code', toUWPChar(w.atmCode));
 
         // 2. Runaway Greenhouse
-        if (w.atmCode >= 2 && w.atmCode <= 15 && (tempBand === "Hot" || tempBand === "Boiling")) {
-            let rgDM = Math.ceil(sys.age);
-            if (tempBand === "Boiling") rgDM += 4;
+        let tempState = w.tempStatus || tempBand;
+        if (w.atmCode >= 2 && w.atmCode <= 15 && (tempState === "Hot" || tempState === "Boiling" || tempState === "Temperate")) {
+            let rgDM = Math.ceil(sys.ageGyr || sys.age || 0);
+            if (w.meanTempK > 303) {
+                let preciseDM = Math.floor((w.meanTempK - 303) / 10);
+                tDM('Precise Temp', preciseDM);
+                rgDM += preciseDM;
+            } else if (tempState === "Boiling") {
+                tDM('Boiling', 4);
+                rgDM += 4;
+            }
+
+            let currentOrbit = w.orbit !== undefined ? w.orbit : w.orbitId;
+            let hzco = w.worldHzco || sys.hzco;
+
+            if (currentOrbit < hzco && tempState === 'Temperate') {
+                tDM('Targeted Temperate Penalty', -2);
+                rgDM -= 2;
+            }
+
             tSection('Runaway Greenhouse Check');
             if (tRoll2D('Runaway Greenhouse Roll (12+)') + rgDM >= 12) {
                 tResult('Result', 'Runaway Greenhouse Triggered');
                 w.runawayGreenhouse = true;
                 tempBand = "Boiling";
-                if ((w.atmCode >= 2 && w.atmCode <= 9) || w.atmCode === 13 || w.atmCode === 14) {
+                if (w.tempStatus) w.tempStatus = "Boiling"; // Force to Boiling immediately
+
+                let isStandardRange = (w.atmCode >= 2 && w.atmCode <= 9) || w.atmCode === 13 || w.atmCode === 14;
+                if (isStandardRange) {
                     let rRoll = tRoll1D('New Atmosphere Type');
                     if (w.size >= 2 && w.size <= 5) { tDM('Size 2-5', -2); rRoll -= 2; }
-                    if ([2, 4, 7, 9].includes(w.atmCode)) { tDM('Binary Atm', 1); rRoll += 1; }
-                    w.atmCode = rRoll <= 1 ? 10 : (rRoll <= 4 ? 11 : 12);
+                    if ([2, 4, 7, 9].includes(w.atmCode)) { tDM('Tainted Atm', 1); rRoll += 1; }
+
+                    if (rRoll <= 1) w.atmCode = 10;
+                    else if (rRoll <= 4) w.atmCode = 11;
+                    else w.atmCode = 12;
+
                     tResult('New Atmosphere', toUWPChar(w.atmCode));
                 }
             } else {
@@ -4010,66 +4113,488 @@ function generateMgT2ESystemChunk4(sys, mainworldBase) {
         }
         tResult('Gravity (G)', w.gravity.toFixed(3));
 
-        // 3 & 4. Standard Atmospheres (2-9, D, E)
-        if ((w.atmCode >= 2 && w.atmCode <= 9) || w.atmCode === 13 || w.atmCode === 14) {
-            tSection('Pressure & Composition');
+        // 3. Seeded Atmospheric Pressure (Step 1)
+        if (w.atmCode >= 1 && w.atmCode <= 15) {
             let cdata = MGT2E_ATM_CODES[w.atmCode];
-            w.pressureBar = cdata.minP + (cdata.spanP * (rng()));
-            tResult('Pressure (Bar)', w.pressureBar.toFixed(2));
+            let seededFraction = rng(); // rng is seeded per hex in mainworld/system generation, but adding pseudo-reseed if requested
+            if (sys.hexId) {
+                seededFraction = rng();
+            }
+            w.totalPressureBar = cdata.minP + (cdata.spanP * seededFraction);
+            w.pressureBar = w.totalPressureBar; // Keep legacy property for compatibility
+            tResult('Total Pressure (Bar)', w.totalPressureBar.toFixed(2));
+        } else if (w.atmCode === 0) {
+            w.totalPressureBar = 0;
+            w.pressureBar = 0;
+            tResult('Total Pressure (Bar)', 'Trace/None');
+        }
 
-            let o2Roll = tRoll1D('Oxygen Roll') - 1 + (sys.age > 4 ? 1 : 0);
-            if (sys.age > 4) tDM('Old System', 1);
+        // 4. Oxygen Fraction & ppo (Step 2)
+        if ((w.atmCode >= 2 && w.atmCode <= 9) || w.atmCode === 13 || w.atmCode === 14) {
+            tSection('Composition & Scale Height');
+
+            let ageDM = 0;
+            let sysAge = sys.ageGyr || sys.age || 0;
+            if (sysAge > 4.0) ageDM = 1;
+            else if (sysAge >= 3.0 && sysAge <= 3.5) ageDM = -1;
+            else if (sysAge >= 2.0 && sysAge <= 2.99) ageDM = -2;
+            else if (sysAge < 2.0) ageDM = -4;
+
+            let o2Roll = tRoll1D('Oxygen Roll') - 1 + ageDM;
+            if (ageDM !== 0) tDM('Age DM', ageDM);
+
             w.oxygenFrac = Math.max(0.01, (o2Roll / 20) + (Math.floor(rng() * 10) / 100));
-            w.ppo = w.oxygenFrac * w.pressureBar;
-            w.scaleHeight = w.gravity > 0 ? 8.5 / w.gravity : 0;
-            tResult('Oxygen Fraction', (w.oxygenFrac * 100).toFixed(1) + '%');
-            tResult('PPO2', w.ppo.toFixed(3));
+            w.oxygenFraction = w.oxygenFrac; // Store as requested
+            w.ppoBar = w.oxygenFraction * w.totalPressureBar;
+            w.ppo = w.ppoBar; // Keep legacy property
 
+            tResult('Oxygen Fraction', (w.oxygenFraction * 100).toFixed(1) + '%');
+            tResult('ppo (Bar)', w.ppoBar.toFixed(3));
+
+            // The UWP "Auto-Taint" Loopback
             w.taints = [];
-            if (w.ppo < 0.1) { tResult('Taint', 'Low Oxygen'); w.taints.push("Low Oxygen"); }
-            if (w.ppo > 0.5) { tResult('Taint', 'High Oxygen'); w.taints.push("High Oxygen"); }
+            let isLowO2 = w.ppoBar < 0.1;
+            let isHighO2 = w.ppoBar > 0.5;
 
-            if ([2, 4, 7, 9].includes(w.atmCode)) {
+            if (isLowO2) { tResult('Taint', 'Low Oxygen'); w.taints.push("Low Oxygen"); }
+            if (isHighO2) { tResult('Taint', 'High Oxygen'); w.taints.push("High Oxygen"); }
+
+            if (isLowO2 || isHighO2) {
+                if (w.atmCode === 5) { tResult('Auto-Taint Loopback', '5 -> 4'); w.atmCode = 4; }
+                else if (w.atmCode === 6) { tResult('Auto-Taint Loopback', '6 -> 7'); w.atmCode = 7; }
+                else if (w.atmCode === 8) { tResult('Auto-Taint Loopback', '8 -> 9'); w.atmCode = 9; }
+            }
+
+            let generateAtmosphericTaints = () => {
                 let tRoll = tRoll2D('Taint Subtype Roll');
                 if (w.atmCode === 4) { tDM('Atm 4', -2); tRoll -= 2; }
                 if (w.atmCode === 9) { tDM('Atm 9', 2); tRoll += 2; }
                 let t = MGT2E_TAINT_SUBTYPES[Math.max(2, Math.min(12, tRoll))];
+
+                // Temperature Precision for Sulphur
+                if (t === "Sulphur Compounds" && w.meanTempK !== undefined && w.meanTempK < 273) {
+                    tResult('Taint Precision', 'Temp < 273K: Sulphur freezes to Particulates');
+                    t = "Particulates";
+                }
+
                 if (t && !w.taints.includes(t)) {
                     tResult('Atm Taint', t);
                     w.taints.push(t);
+
+                    // ppo Retroactive Recalculation
+                    if (t === "Low Oxygen") {
+                        w.ppoBar = 0.10 - (tRoll1D('Retroactive Low ppo Roll') / 100);
+                        w.ppo = w.ppoBar;
+                        tResult('Retro ppoBar (L O2)', w.ppoBar.toFixed(3));
+                    } else if (t === "High Oxygen") {
+                        w.ppoBar = 0.50 + (tRoll1D('Retroactive High ppo Roll') / 10);
+                        w.ppo = w.ppoBar;
+                        tResult('Retro ppoBar (H O2)', w.ppoBar.toFixed(3));
+                    }
                 }
+
+                let sevRoll = tRoll2D('Taint Severity');
+                let sevIdx = Math.max(1, Math.min(9, sevRoll));
+                w.taintSeverity = MGT2E_TAINT_SEVERITY[sevIdx];
+                tResult('Taint Severity', w.taintSeverity);
+
+                // Lethal Persistence Check
+                let pRoll = tRoll2D('Taint Persistence');
+                let pDM = 0;
+                if (sevIdx === 8 || sevIdx === 9) {
+                    let hasOxygenTaint = w.taints.includes("Low Oxygen") || w.taints.includes("High Oxygen");
+                    if (hasOxygenTaint) {
+                        tDM('Lethal L/H Oxygen', 6);
+                        pDM = 6;
+                    } else {
+                        tDM('Lethal Taint', 4);
+                        pDM = 4;
+                    }
+                }
+                w.taintPersistence = Math.max(2, pRoll + pDM);
+                tResult('Taint Persistence', w.taintPersistence);
+            };
+
+            // 4b. Edge Case: Irritant Check
+            if (w._atmHazardFlag || w._atmHazardFlag === "Check") {
+                tResult('Hazard Flag', 'Irritant/Check Present');
+                if (tRoll1D('Irritant Taint Roll') >= 4) {
+                    generateAtmosphericTaints();
+                }
+            } else if ([2, 4, 7, 9].includes(w.atmCode)) {
+                generateAtmosphericTaints(); // Legacy standard taint call
             }
 
-            if (w.taints.length > 0) {
-                w.taintSeverity = MGT2E_TAINT_SEVERITY[Math.max(1, Math.min(9, tRoll2D('Taint Severity')))];
-                tResult('Taint Severity', w.taintSeverity);
+            // Advanced Scale Height
+            w.scaleHeight = 0;
+            if (w.gravity && w.gravity > 0 && w.meanTempK) {
+                w.scaleHeight = (8.5 / w.gravity) * (w.meanTempK / 288);
+            } else if (w.gravity && w.gravity > 0) {
+                w.scaleHeight = (8.5 / w.gravity); // Fallback if meanTempK is not available yet
             }
+            tResult('Scale Height (km)', w.scaleHeight.toFixed(2));
 
             if (w.atmCode === 13) {
-                let badRatioO2 = w.oxygenFrac > 0 ? w.ppo / 0.5 : 1;
-                let badRatioN2 = (w.pressureBar - w.ppo) / 2.0;
+                let badRatioO2 = w.oxygenFraction > 0 ? w.ppoBar / 0.5 : 1;
+                let badRatioN2 = (w.totalPressureBar - w.ppoBar) / 2.0;
                 let badRatio = Math.max(badRatioO2, badRatioN2);
                 if (badRatio > 1 && w.scaleHeight > 0) {
                     w.safeAlt = Math.log(badRatio) * w.scaleHeight;
                     tResult('Safe Altitude (km)', w.safeAlt.toFixed(2));
+
+                    // Code D Edge Case
+                    let newPressure = w.totalPressureBar / Math.exp(w.safeAlt / w.scaleHeight);
+                    let newPpo = w.oxygenFraction * newPressure;
+                    if (newPpo < 0.1) {
+                        w.noSafeAltitude = true;
+                        tResult('No Safe Altitude', 'True');
+                        if (tRoll1D('Safe Alt Taint Check') >= 4) {
+                            generateAtmosphericTaints();
+                        }
+                    }
                 }
             }
-            if (w.atmCode === 14 && w.ppo > 0) {
-                let badRatio = 0.1 / w.ppo;
+            if (w.atmCode === 14 && w.ppoBar > 0) {
+                let badRatio = 0.1 / w.ppoBar;
                 if (badRatio > 1 && w.scaleHeight > 0) {
                     w.safeAltBelowMean = Math.log(badRatio) * w.scaleHeight;
                     tResult('Safe Depth (km)', w.safeAltBelowMean.toFixed(2));
+
+                    // Code E Edge Case
+                    let newPressure = w.totalPressureBar * Math.exp(w.safeAltBelowMean / w.scaleHeight);
+                    let newN2 = (1 - w.oxygenFraction) * newPressure;
+                    if (newN2 > 2.0) {
+                        w.nitrogenNarcosisDepth = true;
+                        tResult('Nitrogen Narcosis', 'True');
+                        if (tRoll1D('Narcosis Taint Check') >= 4) {
+                            generateAtmosphericTaints();
+                        }
+                    }
                 }
             }
+
+            // Integration & Profile String
+            w.atmProfile = `${toUWPChar(w.atmCode)}-${w.totalPressureBar.toFixed(2)}-${w.ppoBar.toFixed(3)}`;
+            tResult('Atm Profile', w.atmProfile);
+
         }
         else if (w.atmCode >= 10 && w.atmCode <= 12) {
-            tSection('Thin/Exotic Pressure');
-            w.pressureBar = (tRoll2D('Thin/Exotic Pressure Roll') / 2);
-            w.gases = ["Carbon Dioxide", "Sulphur Dioxide"];
-            tResult('Pressure (Bar)', w.pressureBar.toFixed(2));
+            tSection('Exotic Gas Retention');
+            let diff = getEffectiveHzcoDeviation(w.orbitId, w.worldHzco || sys.hzco);
+
+            const gasData = [
+                { id: "SO2", name: "Sulphur Dioxide", mw: 64, bp: 263 },
+                { id: "CO2", name: "Carbon Dioxide", mw: 44, bp: 194 },
+                { id: "N2", name: "Nitrogen", mw: 28, bp: 77 },
+                { id: "O2", name: "Oxygen", mw: 32, bp: 90 },
+                { id: "CH4", name: "Methane", mw: 16, bp: 111 },
+                { id: "He", name: "Helium", mw: 4, bp: 4 },
+                { id: "H2", name: "Hydrogen", mw: 2, bp: 20 },
+                { id: "H2O", name: "Water Vapour", mw: 18, bp: 373 }
+            ];
+
+            // Potentially retained list for fallback and context checks
+            let potentiallyRetained = gasData.filter(g => w.meanTempK > g.bp && w.maxEscapeValue > (g.mw <= 4 ? 12.0 : 24.0 / g.mw)).map(g => g.name);
+
+            let mix = [];
+            if (w.meanTempK >= 453 || diff <= -2.01) {
+                tSection('Boiling Atmosphere Mix (453K+)');
+                let roll = tRoll2D('Boiling Mix Roll');
+                let dm = 0;
+                if (w.size >= 1 && w.size <= 7) { tDM('Size 1-7', -1); dm -= 1; }
+                if (w.size >= 10) { tDM('Size A+', 1); dm += 1; }
+                if (w.meanTempK >= 700 && w.meanTempK <= 2000) { tDM('Temp 700-2000K', -2); dm -= 2; }
+                if (w.meanTempK > 2000) { tDM('Temp 2000K+', -5); dm -= 5; }
+
+                let resultRoll = Math.max(-2, Math.min(13, roll + dm));
+                const chart1 = {
+                    "-2": ["Silicates (SO, SO2)", "Silicates (SO, SO2)", "Metal Vapours"],
+                    "-1": ["Sodium", "Sodium", "Silicates (SO, SO2)"],
+                    "0": ["Krypton", "Krypton", "Sodium"],
+                    "1": ["Argon", "Argon", "Sulphuric Acid"],
+                    "2": ["Sulphur Dioxide", "Sulphur Dioxide", "Hydrochloric Acid"],
+                    "3": ["Carbon Monoxide", "Hydrogen Cyanide", "Chlorine"],
+                    "4": ["Carbon Dioxide", "Formamide", "Fluorine"],
+                    "5": ["Nitrogen", "Carbon Dioxide", "Formic Acid"],
+                    "6": ["Carbon Dioxide", "Nitrogen", "Water Vapour"],
+                    "7": ["Nitrogen", "Carbon Dioxide", "Nitrogen"],
+                    "8": ["Water Vapour", "Sulphur Dioxide", "Carbon Dioxide"],
+                    "9": ["Sulphur Dioxide", "Water Vapour", "Sulphur Dioxide"],
+                    "10": ["Nitrogen", "Nitrogen", "Hydrogen Cyanide"],
+                    "11": ["Methane", "Ammonia", "Ammonia"],
+                    "12": ["Water Vapour", "Ammonia", "Hydrofluoric Acid"],
+                    "13": ["Methane", "Methane", "Methane"]
+                };
+                let row = chart1[resultRoll.toString()];
+                let resGas = row[w.atmCode - 10];
+                if (resGas === "Carbon Monoxide" && potentiallyRetained.includes("Water Vapour")) {
+                    resGas = "Carbon Dioxide";
+                    tResult('CO Constraint', 'Water present -> Carbon Dioxide');
+                }
+                mix = [resGas];
+            } else if (w.meanTempK >= 353 || diff <= -1.01) {
+                tSection('Boiling Atmosphere Mix (353-453K)');
+                let roll = tRoll2D('Boiling Mix Roll');
+                let dm = 0;
+                if (w.size >= 1 && w.size <= 7) { tDM('Size 1-7', -1); dm -= 1; }
+                if (w.size >= 10) { tDM('Size A+', 1); dm += 1; }
+
+                let resultRoll = Math.max(1, Math.min(13, roll + dm));
+                const chart2 = {
+                    "1": ["Krypton", "Argon", "Hydrochloric Acid"],
+                    "2": ["Argon", "Sulphur Dioxide", "Chlorine"],
+                    "3": ["Sulphur Dioxide", "Hydrogen Cyanide", "Fluorine"],
+                    "4": ["Ethane", "Ethane", "Formic Acid"],
+                    "5": ["Carbon Dioxide", "Carbon Dioxide", "Water Vapour"],
+                    "6": ["Nitrogen", "Nitrogen", "Nitrogen"],
+                    "7": ["Carbon Dioxide", "Carbon Dioxide", "Carbon Dioxide"],
+                    "8": ["Nitrogen", "Sulphur Dioxide", "Sulphur Dioxide"],
+                    "9": ["Water Vapour", "Water Vapour", "Hydrogen Cyanide"],
+                    "10": ["Sulphur Dioxide", "Nitrogen", "Ammonia"],
+                    "11": ["Methane", "Ammonia", "Methane"],
+                    "12": ["Neon", "Ammonia", "Hydrofluoric Acid"],
+                    "13": ["Methane", "Methane", "Methane"]
+                };
+                let row = chart2[resultRoll.toString()];
+                mix = [row[w.atmCode - 10]];
+            } else if (w.meanTempK >= 303) {
+                tSection('Hot Atmosphere Mix (303-353K)');
+                let roll = tRoll2D('Hot Mix Roll');
+                let dm = 0;
+                if (w.size >= 1 && w.size <= 7) { tDM('Size 1-7', -1); dm -= 1; }
+                if (w.size >= 10) { tDM('Size A+', 1); dm += 1; }
+
+                let resultRoll = Math.max(1, Math.min(13, roll + dm));
+                const chart3 = {
+                    "1": ["Krypton", "Argon", "Hydrochloric Acid"],
+                    "2": ["Argon", "Sulphur Dioxide", "Chlorine"],
+                    "3": ["Sulphur Dioxide", "Hydrogen Cyanide", "Fluorine"],
+                    "4": ["Ethane", "Ethane", "Sulphur Dioxide"],
+                    "5": ["Carbon Dioxide", "Carbon Dioxide", "Carbon Monoxide"],
+                    "6": ["Nitrogen", "Nitrogen", "Nitrogen"],
+                    "7": ["Carbon Dioxide", "Carbon Dioxide", "Carbon Dioxide"],
+                    "8": ["Nitrogen", "Sulphur Dioxide", "Ethane"],
+                    "9": ["Carbon Monoxide", "Carbon Monoxide", "Hydrogen Cyanide"],
+                    "10": ["Sulphur Dioxide", "Nitrogen", "Ammonia"],
+                    "11": ["Methane", "Ammonia", "Methane"],
+                    "12": ["Neon", "Ammonia", "Hydrofluoric Acid"],
+                    "13": ["Methane", "Methane", "Helium"]
+                };
+                let row = chart3[resultRoll.toString()];
+                let resGas = row[w.atmCode - 10];
+                if (resGas === "Carbon Monoxide" && w.hydroPercent > 0 && w.liquidType === "Water") {
+                    resGas = "Carbon Dioxide";
+                    tResult('CO Constraint', 'Water present -> Carbon Dioxide');
+                }
+                mix = [resGas];
+            } else if (w.meanTempK >= 273) {
+                tSection('Temperate Atmosphere Mix (273-303K)');
+                let roll = tRoll2D('Temperate Mix Roll');
+                let dm = 0;
+                if (w.size >= 1 && w.size <= 7) { tDM('Size 1-7', -1); dm -= 1; }
+                if (w.size >= 10) { tDM('Size A+', 1); dm += 1; }
+
+                let resultRoll = Math.max(1, Math.min(13, roll + dm));
+                const chart4 = {
+                    "1": ["Krypton", "Krypton", "Argon"],
+                    "2": ["Argon", "Chlorine", "Chlorine"],
+                    "3": ["Sulphur Dioxide", "Argon", "Fluorine"],
+                    "4": ["Nitrogen", "Sulphur Dioxide", "Sulphur Dioxide"],
+                    "5": ["Carbon Monoxide", "Carbon Monoxide", "Carbon Monoxide"],
+                    "6": ["Nitrogen", "Nitrogen", "Nitrogen"],
+                    "7": ["Carbon Dioxide", "Carbon Dioxide", "Carbon Dioxide"],
+                    "8": ["Ethane", "Ethane", "Ethane"],
+                    "9": ["Nitrogen", "Ammonia", "Ammonia"],
+                    "10": ["Neon", "Ammonia", "Ammonia"],
+                    "11": ["Methane", "Methane", "Methane"],
+                    "12": ["Methane", "Helium", "Helium"],
+                    "13": ["Helium", "Hydrogen", "Hydrogen"]
+                };
+                let row = chart4[resultRoll.toString()];
+                let resGas = row[w.atmCode - 10];
+                if (resGas === "Carbon Monoxide" && w.hydroPercent > 0 && w.liquidType === "Water") {
+                    resGas = "Carbon Dioxide";
+                    tResult('CO Constraint', 'Water present -> Carbon Dioxide');
+                }
+                mix = [resGas];
+            } else if (w.meanTempK >= 223) {
+                tSection('Cold Atmosphere Mix (223-273K)');
+                let roll = tRoll2D('Cold Mix Roll');
+                let dm = 0;
+                if (w.size >= 1 && w.size <= 7) { tDM('Size 1-7', -1); dm -= 1; }
+                if (w.size >= 10) { tDM('Size A+', 1); dm += 1; }
+
+                let resultRoll = Math.max(1, Math.min(13, roll + dm));
+                const chart5 = {
+                    "1": ["Krypton", "Krypton", "Argon"],
+                    "2": ["Argon", "Chlorine", "Chlorine"],
+                    "3": ["Ethane", "Argon", "Fluorine"],
+                    "4": ["Nitrogen", "Nitrogen", "Ethane"],
+                    "5": ["Carbon Monoxide", "Carbon Monoxide", "Carbon Monoxide"],
+                    "6": ["Nitrogen", "Nitrogen", "Nitrogen"],
+                    "7": ["Carbon Dioxide", "Carbon Dioxide", "Carbon Dioxide"],
+                    "8": ["Nitrogen", "Nitrogen", "Nitrogen"],
+                    "9": ["Ethane", "Ethane", "Ethane"],
+                    "10": ["Methane", "Ammonia", "Ammonia"],
+                    "11": ["Neon", "Methane", "Methane"],
+                    "12": ["Methane", "Helium", "Helium"],
+                    "13": ["Helium", "Hydrogen", "Hydrogen"]
+                };
+                let row = chart5[resultRoll.toString()];
+                let resGas = row[w.atmCode - 10];
+                if (resGas === "Carbon Monoxide" && w.hydroPercent > 0 && w.liquidType === "Water") {
+                    resGas = "Carbon Dioxide";
+                    tResult('CO Constraint', 'Water present -> Carbon Dioxide');
+                }
+                mix = [resGas];
+            } else if (w.meanTempK >= 123 || (diff >= 1.01 && diff <= 3.0)) {
+                tSection('Frozen Atmosphere Mix (123-223K)');
+                let roll = tRoll2D('Frozen Mix Roll');
+                let dm = 0;
+                if (w.size >= 1 && w.size <= 7) { tDM('Size 1-7', -2); dm -= 2; }
+                if (w.size >= 10) { tDM('Size A+', 1); dm += 1; }
+
+                let resultRoll = Math.max(1, Math.min(13, roll + dm));
+                const chart6 = {
+                    "1": ["Krypton", "Krypton", "Krypton"],
+                    "2": ["Argon", "Argon", "Argon"],
+                    "3": ["Argon", "Argon", "Fluorine"],
+                    "4": ["Nitrogen", "Nitrogen", "Nitrogen"],
+                    "5": ["Nitrogen", "Nitrogen", "Nitrogen"],
+                    "6": ["Carbon Monoxide", "Carbon Monoxide", "Carbon Monoxide"],
+                    "7": ["Nitrogen", "Nitrogen", "Nitrogen"],
+                    "8": ["Methane", "Methane", "Methane"],
+                    "9": ["Methane", "Methane", "Methane"],
+                    "10": ["Methane", "Neon", "Neon"],
+                    "11": ["Neon", "Methane", "Helium"],
+                    "12": ["Methane", "Helium", "Hydrogen"],
+                    "13": ["Helium", "Hydrogen", "Hydrogen"]
+                };
+                let row = chart6[resultRoll.toString()];
+                let resGas = row[w.atmCode - 10];
+                if (resGas === "Carbon Monoxide" && w.hydroPercent > 0 && w.liquidType === "Water") {
+                    resGas = "Nitrogen";
+                    tResult('CO Constraint', 'Water present -> Nitrogen');
+                }
+                mix = [resGas];
+            } else {
+                tSection('Deep Frozen Atmosphere Mix (<123K)');
+                let roll = tRoll2D('Deep Frozen Mix Roll');
+                let dm = 0;
+                if (w.size >= 1 && w.size <= 7) { tDM('Size 1-7', -3); dm -= 3; }
+                if (w.size >= 10) { tDM('Size A+', 1); dm += 1; }
+                if (w.meanTempK >= 70 && w.meanTempK <= 100) { tDM('Temp 70-100K', 3); dm += 3; }
+                if (w.meanTempK < 70) { tDM('Temp <70K', 5); dm += 5; }
+
+                let resultRoll = Math.max(1, Math.min(13, roll + dm));
+                const chart7 = {
+                    "1": ["Krypton", "Krypton", "Krypton"],
+                    "2": ["Argon", "Argon", "Argon"],
+                    "3": ["Argon", "Argon", "Fluorine"],
+                    "4": ["Methane", "Methane", "Methane"],
+                    "5": ["Carbon Monoxide", "Carbon Monoxide", "Carbon Monoxide"],
+                    "6": ["Nitrogen", "Nitrogen", "Nitrogen"],
+                    "7": ["Nitrogen", "Nitrogen", "Nitrogen"],
+                    "8": ["Neon", "Neon", "Neon"],
+                    "9": ["Helium", "Helium", "Helium"],
+                    "10": ["Helium", "Helium", "Helium"],
+                    "11": ["Hydrogen", "Hydrogen", "Hydrogen"],
+                    "12": ["Hydrogen", "Hydrogen", "Hydrogen"],
+                    "13": ["Hydrogen", "Hydrogen", "Hydrogen"]
+                };
+                let row = chart7[resultRoll.toString()];
+                let resGas = row[w.atmCode - 10];
+                if (resGas === "Carbon Monoxide" && w.hydroPercent > 0 && w.liquidType === "Water") {
+                    resGas = "Nitrogen";
+                    tResult('CO Constraint', 'Water present -> Nitrogen');
+                }
+                mix = [resGas];
+            }
+
+            if (mix.length === 0) {
+                if (w.maxEscapeValue > 0.2) mix = ["Heavy Gases"];
+                else mix = ["Trace Gases"];
+            }
+
+            w.gases = mix;
+            tResult('Gas Mix', w.gases.join(', '));
+
+            w.atmProfile = `${toUWPChar(w.atmCode)}-${w.totalPressureBar.toFixed(2)}-0.000`;
+            tResult('Atm Profile', w.atmProfile);
+        } else if (w.atmCode === 15) {
+            tSection('Unusual Atmosphere (Code F)');
+
+            // D26 Roll (Tens 1-2, Ones 1-6)
+            let tens = tRoll1D('First Die (1-2)');
+            tens = (tens <= 3) ? 1 : 2; // Split 1-3 -> 1, 4-6 -> 2 to simulate D2
+            let ones = tRoll1D('Second Die (1-6)');
+            let d26 = (tens * 10) + ones;
+
+            let subtypeName = "Unusual";
+            let subtypeCode = "F";
+
+            switch (d26) {
+                case 11: subtypeName = "Dense, Extreme"; subtypeCode = "1"; break;
+                case 12: subtypeName = "Dense, Very Extreme"; subtypeCode = "2"; break;
+                case 13: subtypeName = "Dense, Crushing"; subtypeCode = "3"; break;
+                case 14: subtypeName = "Ellipsoid"; subtypeCode = "4"; break;
+                case 15: subtypeName = "High Radiation"; subtypeCode = "5"; break;
+                case 16: subtypeName = "Layered"; subtypeCode = "6"; break;
+                case 21: subtypeName = "Panthalassic"; subtypeCode = "7"; break;
+                case 22: subtypeName = "Steam"; subtypeCode = "8"; break;
+                case 23: subtypeName = "Variable Pressure"; subtypeCode = "9"; break;
+                case 24: subtypeName = "Variable Composition"; subtypeCode = "A"; break;
+                case 25: subtypeName = "Combination"; subtypeCode = "-"; break;
+                case 26: subtypeName = "Other"; subtypeCode = "F"; break;
+            }
+
+            tResult('Unusual Subtype', `${d26} - ${subtypeName}`);
+
+            // Enforce Prerequisites programmatically
+            if (subtypeCode === "1") {
+                if (w.totalPressureBar < 10) {
+                    w.totalPressureBar = 10 + (rng() * 90);
+                    tResult('Constraint', 'Dense Extreme forces pressure 10-100 bar');
+                }
+            } else if (subtypeCode === "2") {
+                if (w.totalPressureBar < 100) {
+                    w.totalPressureBar = 100 + (rng() * 900);
+                    tResult('Constraint', 'Dense Very Extreme forces pressure 100-1000 bar');
+                }
+            } else if (subtypeCode === "3") {
+                if (w.totalPressureBar < 1000) {
+                    w.totalPressureBar = 1000 + (rng() * 2000);
+                    tResult('Constraint', 'Dense Crushing forces pressure 1000+ bar');
+                }
+            } else if (subtypeCode === "6") {
+                if (w.gravity <= 1.2) {
+                    w.gravity = 1.21 + (rng() * 0.5);
+                    tResult('Constraint', 'Layered forces Gravity > 1.2');
+                }
+            } else if (subtypeCode === "7") {
+                w.hydroCode = 10;
+                tResult('Constraint', 'Panthalassic forces Hydro 10');
+                if (w.totalPressureBar < 1.0) {
+                    w.totalPressureBar = 1.1 + (rng() * 2.0);
+                    tResult('Constraint', 'Panthalassic forces Pressure 1.0+');
+                }
+            } else if (subtypeCode === "8") {
+                if (w.hydroCode < 5) {
+                    w.hydroCode = 5 + Math.floor(rng() * 5);
+                    tResult('Constraint', 'Steam forces Hydro 5+');
+                }
+                if (w.totalPressureBar < 2.5) {
+                    w.totalPressureBar = 2.5 + (rng() * 5.0);
+                    tResult('Constraint', 'Steam forces Pressure 2.5+ bar');
+                }
+            }
+
+            w.pressureBar = w.totalPressureBar;
+            w.atmProfile = `F-St${subtypeCode}`;
+            tResult('Atm Profile', w.atmProfile);
         } else if (w.atmCode <= 1) {
-            w.pressureBar = MGT2E_ATM_CODES[w.atmCode].minP;
-            tResult('Pressure', 'Trace/None');
+            w.atmProfile = `${toUWPChar(w.atmCode)}-None-0.000`;
+            tResult('Atm Profile', w.atmProfile);
         }
 
         // 6. Hydrographics

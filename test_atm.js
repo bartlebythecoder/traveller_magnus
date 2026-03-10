@@ -43,7 +43,9 @@ stubIds.forEach(id => {
 
 let coreData = fs.readFileSync(path.join(__dirname, 'js/core.js'), 'utf8');
 let constantsData = fs.readFileSync(path.join(__dirname, 'js/constants.js'), 'utf8');
-let mgt2eData = fs.readFileSync(path.join(__dirname, 'js/mgt2e_engine.js'), 'utf8');
+let mgt2eMainworldData = fs.readFileSync(path.join(__dirname, 'js/mgt2e_mainworld.js'), 'utf8');
+let mgt2eSocioeconomicsData = fs.readFileSync(path.join(__dirname, 'js/mgt2e_socioeconomics.js'), 'utf8');
+let mgt2eSystemData = fs.readFileSync(path.join(__dirname, 'js/mgt2e_system.js'), 'utf8');
 
 // Basic mock for rng
 global.rng = Math.random;
@@ -51,7 +53,9 @@ global.rng = Math.random;
 // Eval the files in the context of globals
 eval(constantsData);
 eval(coreData);
-eval(mgt2eData);
+eval(mgt2eMainworldData);
+eval(mgt2eSocioeconomicsData);
+eval(mgt2eSystemData);
 
 // Reroute writeLogLine to capture it
 let capturedLogs = [];

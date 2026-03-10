@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.1.8.7";
-const APP_BANNER = "v0.1.8.7 Non-Habitable Atmospheres";
+const APP_VERSION = "v0.1.8.8";
+const APP_BANNER = "v0.1.8.8 Refactored Mongsoose System Build";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -187,6 +187,22 @@ function rollND(n) {
     let total = 0;
     for (let i = 0; i < n; i++) total += roll1D();
     return total;
+}
+
+function roll3D() {
+    return roll1D() + roll1D() + roll1D();
+}
+
+function roll4D() {
+    return rollND(4);
+}
+
+// Convert to Traveller eHex (skipping I and O)
+function toEHex(val) {
+    if (val === undefined || val === null) return '0';
+    if (val <= 9) return val.toString();
+    const hexChars = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // Skip I and O
+    return hexChars[val - 10] || '0';
 }
 
 // --- Traveller Translators ---

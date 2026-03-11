@@ -308,7 +308,7 @@ function setupKeyboardShortcuts() {
             e.preventDefault();
         }
 
-        if (e.ctrlKey && key === 's') {
+        if (e.ctrlKey && !e.altKey && key === 's') {
             e.preventDefault();
             const world = getMouseWorldCoords({ clientX: currentMouseX, clientY: currentMouseY });
             const coords = pixelToHex(world.x, world.y, baseHexSize);
@@ -328,7 +328,7 @@ function setupKeyboardShortcuts() {
                 contextSubsectorPrefix = parts[0] + '-' + parts[1];
                 toggleSubsectorHexes();
             }
-        } else if (e.ctrlKey && e.shiftKey && e.key === 'M') {
+        } else if (e.ctrlKey && e.altKey && key === 'm') {
             e.preventDefault();
             if (!validateSelection('generate')) return;
 
@@ -384,15 +384,24 @@ function setupKeyboardShortcuts() {
                 requestAnimationFrame(draw);
                 showToast(`Generated MgT2E Mainworlds...`, 1000);
 
-                // Socioeconomics
+                // Physical System
                 setTimeout(() => {
                     targetHexes.forEach(hexId => {
                         try {
                             let stateObj = hexStates.get(hexId);
                             let baseData = stateObj ? (stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData) : null;
                             if (baseData) {
-                                stateObj.mgtSocio = generateMgT2ESocioeconomics(baseData);
-                                stateObj.t5Socio = null;
+                                let chunk1System = generateMgT2ESystemChunk1(baseData);
+                                let systemWithOrbits = generateMgT2ESystemChunk2(chunk1System, baseData);
+                                let systemWithSizes = generateMgT2ESystemChunk3(systemWithOrbits, baseData);
+                                let systemWithAtmosphere = generateMgT2ESystemChunk4(systemWithSizes, baseData);
+                                let systemWithTemps = generateMgT2ESystemChunk5(systemWithAtmosphere);
+                                let systemWithRatings = generateMgT2ESystemChunk6(systemWithTemps);
+                                let systemWithUWP = generateMgT2ESystemChunk7(systemWithRatings, baseData);
+
+                                stateObj.mgtSystem = systemWithUWP;
+                                stateObj.t5Physical = null;
+                                stateObj.ctPhysical = null;
                                 hexStates.set(hexId, stateObj);
                             }
                         } catch (err) {
@@ -400,26 +409,19 @@ function setupKeyboardShortcuts() {
                         }
                     });
                     requestAnimationFrame(draw);
-                    showToast(`Expanded MgT2E Socioeconomics...`, 1000);
+                    showToast(`Expanded MgT2E Physical System...`, 1000);
 
-                    // Physical System
+                    // Socioeconomics
                     setTimeout(() => {
+                        showToast(`Expanding MgT2E Socioeconomics...`, 1000);
                         targetHexes.forEach(hexId => {
                             try {
                                 let stateObj = hexStates.get(hexId);
                                 let baseData = stateObj ? (stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData) : null;
                                 if (baseData) {
-                                    let chunk1System = generateMgT2ESystemChunk1(baseData);
-                                    let systemWithOrbits = generateMgT2ESystemChunk2(chunk1System, baseData);
-                                    let systemWithSizes = generateMgT2ESystemChunk3(systemWithOrbits, baseData);
-                                    let systemWithAtmosphere = generateMgT2ESystemChunk4(systemWithSizes, baseData);
-                                    let systemWithTemps = generateMgT2ESystemChunk5(systemWithAtmosphere);
-                                    let systemWithRatings = generateMgT2ESystemChunk6(systemWithTemps);
-                                    let systemWithUWP = generateMgT2ESystemChunk7(systemWithRatings, baseData);
-
-                                    stateObj.mgtSystem = systemWithUWP;
-                                    stateObj.t5Physical = null;
-                                    stateObj.ctPhysical = null;
+                                    // Use baseData because generateMgT2ESocioeconomics can accept it or check .mgtSystem inside? Wait, actually generateMgT2ESocioeconomics(baseData) has historically just taken the mainworld. But our baseData is just the Mainworld. Let's make sure it still references `baseData` since `generateMgT2ESocioeconomics(baseData)` passes the base.
+                                    stateObj.mgtSocio = generateMgT2ESocioeconomics(baseData);
+                                    stateObj.t5Socio = null;
                                     hexStates.set(hexId, stateObj);
                                 }
                             } catch (err) {
@@ -434,7 +436,7 @@ function setupKeyboardShortcuts() {
                     }, 500);
                 }, 500);
             }, 500);
-        } else if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+        } else if (e.ctrlKey && e.altKey && key === 's') {
             e.preventDefault();
             if (!validateSelection('generate')) return;
 

@@ -33,9 +33,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above So Below</span></h1>
-            <div class="splash-banner">v0.1.8.11 Updated Mongoose Temperature Calcs</div>
+            <div class="splash-banner">v0.1.8.12 Mongoose Main World Tech level updates</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.1.8.11</div>
+            <div class="splash-version">v0.1.8.12</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -48,7 +48,8 @@
                     <div class="shortcut-item"><strong>Right Click</strong><span>Open Context Menu</span></div>
                     <div class="shortcut-item"><strong>Ctrl + S</strong><span>Toggle Select Sector</span></div>
                     <div class="shortcut-item"><strong>Ctrl + B</strong><span>Toggle Select Subsector</span></div>
-                    <div class="shortcut-item"><strong>Ctrl + Shift + C</strong><span>Full CT Macro</span></div>
+                    <div class="shortcut-item"><strong>Ctrl + Alt + M</strong><span>Full MgT2E Macro</span></div>
+                    <div class="shortcut-item"><strong>Ctrl + Alt + S</strong><span>Full CT Macro</span></div>
                     <div class="shortcut-item"><strong>Escape</strong><span>Cancel / Close All</span></div>
                 </div>
             </div>
@@ -217,7 +218,7 @@
     <div id="help-modal">
         <div style="text-align: center; border-bottom: 2px solid #45a29e; padding-bottom: 15px; margin-bottom: 20px;">
             <h2 style="margin: 0 0 5px 0; color: #66fcf1; font-size: 24px;">As Above So Below</h2>
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.1.8.11</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.1.8.12</span>
             <p style="margin: 5px 0; color: #c5c6c7; font-size: 12px; font-style: italic;">Created by: <span
                     id="app-credits">Bartleby the Coder</span></p>
         </div>
@@ -241,8 +242,8 @@
                 <div class="help-grid">
                     <strong>Ctrl + Click</strong><span>Open World Details</span>
                     <strong>Right Click</strong><span>Open Context Menu</span>
-                    <strong>Ctrl + Shift + M</strong><span style="color: #ffa500;">Bulk Mongoose Macro</span>
-                    <strong>Ctrl + Shift + C</strong><span style="color: #66fcf1;">Bulk CT / Book 6 Macro</span>
+                    <strong>Ctrl + Alt + M</strong><span style="color: #ffa500;">Bulk Mongoose Macro</span>
+                    <strong>Ctrl + Alt + S</strong><span style="color: #66fcf1;">Bulk CT / Book 6 Macro</span>
                     <strong>Ctrl + Z</strong><span>Undo Last Action</span>
                     <strong>Ctrl + Shift + Z</strong><span>Redo Action</span>
                 </div>
@@ -355,6 +356,12 @@
             <!-- Content will be injected via JS -->
         </div>
 
+        <!-- MgT2E System Expand Accordion -->
+        <button class="accordion-btn" id="acc-btn-mgt-system" style="display: none;">MgT2E System</button>
+        <div class="accordion-content" id="editor-mgt-system-root" style="display: none;">
+            <!-- Content will be injected via JS -->
+        </div>
+
         <!-- MgT2E Socioeconomics Accordion -->
         <button class="accordion-btn" id="acc-btn-mgt-socio" style="display: none;">MgT2E Socioeconomics</button>
         <div class="accordion-content" id="editor-socio-mgt-container">
@@ -453,9 +460,9 @@
             </div>
         </div>
 
-        <!-- MgT2E System Expand Accordion -->
-        <button class="accordion-btn" id="acc-btn-mgt-system" style="display: none;">MgT2E System</button>
-        <div class="accordion-content" id="editor-mgt-system-root" style="display: none;">
+        <!-- T5 System Expand Accordion -->
+        <button class="accordion-btn" id="acc-btn-t5-system" style="display: none;">T5 System</button>
+        <div class="accordion-content" id="editor-t5-system-root" style="display: none;">
             <!-- Content will be injected via JS -->
         </div>
 
@@ -493,12 +500,6 @@
                 <div class="editor-row"><label>Cult (S):</label><input type="number" id="edit-s" min="1"></div>
                 <div class="editor-row"><label>Cult (Sym):</label><input type="number" id="edit-sym" min="1"></div>
             </div>
-        </div>
-
-        <!-- T5 System Expand Accordion -->
-        <button class="accordion-btn" id="acc-btn-t5-system" style="display: none;">T5 System</button>
-        <div class="accordion-content" id="editor-t5-system-root" style="display: none;">
-            <!-- Content will be injected via JS -->
         </div>
 
         <!-- Physical Stats Accordion -->

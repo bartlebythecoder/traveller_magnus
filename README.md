@@ -1,4 +1,4 @@
-# As Above, So Below (v0.1.8.11)
+# As Above, So Below (v0.1.8.12)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -29,10 +29,17 @@ This workbench allows Game Masters and world-builders to generate, import, and e
     - **Ctrl + Z / Ctrl + Shift + Z:** Undo and Redo cartography or expansion actions.
 4. **View Details:** Use **Ctrl + Click** on any populated hex to open the **World Details** panel, which provides deep physical and socioeconomic breakdowns for the entire star system.
 5. **Bulk Macros:** Select a group of hexes (Shift+Drag) and use the right-click context menu or:
-    - **Ctrl + Shift + M:** Full Mongoose 2E Generation sequence.
-    - **Ctrl + Shift + C:** Full Classic Traveller (Book 6) Generation sequence.
+    - **Ctrl + Alt + M:** Full Mongoose 2E Generation sequence.
+    - **Ctrl + Alt + S:** Full Classic Traveller (Book 6) Generation sequence.
 ---
 ## 📜 Changelog
+
+### [v0.1.8.12] - 2026-03-11
+1. **Mongoose Socioeconomics:** Updated Resource and PCR formulas to incorporate values from Mongoose System Generation.
+2. **Mongoose System Generation:** Updated Tech Level Refinement to incorporate values from Mongoose System Generation.
+3. **Mongoose Bulk Macro Overview:** Now runs System Expand before Socioeconomic Expand
+4. **Mongoose Mainworld Generation:** Added logic to ensure TL followed Core Rulebook including environmental minimums.
+5. **Macros:** Changed bulk macros from Ctrl+Shift to Ctrl+Alt to avoid conflicts with Browser shortcuts.
 
 ### [v0.1.8.11] - 2026-03-11
 1. **Thermal & Seismic Overhaul:** Implemented the World Builder's Handbook 4th-power temperature addition model, combining solar luminosity with inherent geological/tidal heat.
@@ -44,16 +51,6 @@ This workbench allows Game Masters and world-builders to generate, import, and e
     - **UI Integration:** 
         - Added "Native Life" field to the Mongoose system accordion (4-digit ehex profile).
         - Integrated "Res" (Resource) rating for all terrestrial worlds and moons, placed after Habitability for consistent system navigation.
-
-### [v0.1.8.10] - 2026-03-11
-1. **Physical Generation Formulas:** MgT2e: Adjusted `mgt2e_calculateTerrestrialPhysical` and corresponding validators to conform exactly to the Continuation Method's strict dimensional formulas (0.001 tolerance testing).
-2. **Tidal Lock Logic Integration:** MgT2e: Implemented an overarching celestial orbit gate checking for primary tidal locking and subsequent spin state overwrites for moons and mainworlds within tight binary orbits.
-3. **Tidal Amplitude Engine:** Implemented comprehensive tidal effect calculations (Scenarios A-E) and integrated "Tidal Amp" readouts into the star system accordion UI.
-
-
-### [v0.1.8.9] - 2026-03-10
-1. **Day Length Refinement:** MgT2e: Fully integrated World Builder's Handbooks rules for computing rotation multipliers (x2 for small/gas giants vs x4) and added secure processing for >90 degree retrograde solar day fractions.
-2. **Atmosphere Composition Interface:** MgT2e: Clamped accordion atmospheric gas readouts to explicitly display the top 3 dominant planetary gases out of consideration for UI space.
 
 
 ---

@@ -1,5 +1,11 @@
 # Changelog
 
+### [v0.1.8.12] - 2026-03-11
+1. **Geological & Thermal Integration:** Finalized the integration of Inherent Heat from tidal and radioactive sources, using the 4th-power Stefan-Boltzmann summation for final blackbody temperatures.
+2. **Atmospheric Greenhouse Refinement:** Updated Greenhouse Factor (GF) logic to scale dynamically with atmospheric pressure and composition, ensuring realistic heat retention for dense or runaway environments.
+3. **Advanced Albedo Models:** Refactored planetary albedo calculations to account for transitional "Icy-Rocky" states and atmospheric scattering (Rayleigh/Mie) effects.
+4. **Seismic Activity Engine:** Completed the three-component Seismic Stress model (Residual, Tidal Stress, Tidal Heating) to determine planetary volcanic and tectonic classifications.
+
 ### [v0.1.8.11] - 2026-03-11
 1. **Thermal & Seismic Overhaul:** Implemented the World Builder's Handbook 4th-power temperature addition model, combining solar luminosity with inherent geological/tidal heat.
 2. **Advanced Albedo & Greenhouse Logic:** Refactored albedo scaling for Rocky/Icy transitions and implemented atmosphere-specific Greenhouse Factor (GF) variance.
@@ -120,7 +126,7 @@
 
 ### [v0.1.5] - 2026-03-05
 **Updated: CT Mainworld and Book 6 Generation**
-- **Bulk CT Macro:** Added **Ctrl + Shift + C** to automate the full Classic Traveller population, mainworld, and Book 6 system expansion sequence for selected hexes.
+- **Bulk CT Macro:** Added **Ctrl + Alt + S** to automate the full Classic Traveller population, mainworld, and Book 6 system expansion sequence for selected hexes.
 - **Improved Book 6 Anomaly Logic:** Refactored system anomalies to use separate independent rolls for "Empty Orbits" and "Captured Planets" with specific DMs for B/A type stars.
 - **Enhanced System Generation Logging:** Instrumented the entire CT generation pipeline with the new Batch Logging Architecture, providing detailed traces of orbital placement, Gas Giant/Planetoid assignments, and subordinate world stats.
 - **CT Tech Level Generation Fix:** Aligned Classic Traveller TL logic with Book 6 rules by including Atmosphere 15 (F) in modifiers and standardizing the 1D roll helper.

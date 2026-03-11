@@ -99,31 +99,61 @@ function generateMgT2EMainworld(hexId) {
         tSection('Technological Level');
         tRoll1D('Tech Level');
 
+        // Starport DMs
         if (starport === 'A') tDM('Starport A', 6);
         else if (starport === 'B') tDM('Starport B', 4);
         else if (starport === 'C') tDM('Starport C', 2);
+        else if (starport === 'D' || starport === 'E') tDM('Starport D/E', 1);
         else if (starport === 'X') tDM('Starport X', -4);
 
+        // Size DMs
         if (size <= 1) tDM('Size 1-', 2);
-        else if (size <= 4) tDM('Size 2-4', 1);
+        else if (size >= 2 && size <= 4) tDM('Size 2-4', 1);
 
+        // Atmosphere DMs
         if (atm <= 3 || atm >= 10) tDM('Atmosphere Extreme', 1);
 
-        if (hydro === 9) tDM('Hydrographics 9', 1);
+        // Hydrographics DMs
+        if (hydro === 0) tDM('Hydrographics 0', 1);
+        else if (hydro === 9) tDM('Hydrographics 9', 1);
         else if (hydro === 10) tDM('Hydrographics A', 2);
 
+        // Population DMs
         if (pop >= 1 && pop <= 5) tDM('Population 1-5', 1);
+        else if (pop === 8) tDM('Population 8', 1);
         else if (pop === 9) tDM('Population 9', 2);
         else if (pop >= 10) tDM('Population 10+', 4);
 
+        // Government DMs
         if (gov === 0 || gov === 5) tDM('Government 0 or 5', 1);
         else if (gov === 7) tDM('Government 7', 2);
         else if (gov >= 13) tDM('Government D+', -2);
 
+        // Calculate Base TL
         const currentDMs = pendingRoll.dms.reduce((a, b) => a + b.val, 0);
         let rawTl = pendingRoll.val + currentDMs;
-        tl = Math.max(0, rawTl);
-        if (rawTl !== tl) tClamp('Tech Level', rawTl, tl);
+        let baseTl = Math.max(0, rawTl);
+
+        // Enforce Environmental Limits (Minimum TL)
+        let minTl = 0;
+        if ([0, 1, 10, 15].includes(atm)) minTl = 8;
+        else if ([2, 3, 13, 14].includes(atm)) minTl = 5;
+        else if ([4, 7, 9].includes(atm)) minTl = 3;
+        else if (atm === 11) minTl = 9;
+        else if (atm === 12) minTl = 10;
+        else if ([16, 17].includes(atm)) minTl = 14;
+
+        // Final TL is the higher of the generated base or the environmental minimum
+        tl = Math.max(baseTl, minTl);
+
+        // Log the clamp if the environment forced the TL higher
+        if (rawTl !== tl) {
+            tResult('Environmental Minimum Override', `Raised to TL ${minTl}`);
+            tClamp('Tech Level', rawTl, tl);
+        } else {
+            if (rawTl !== baseTl) tClamp('Tech Level', rawTl, baseTl); // Standard floor clamp
+        }
+
         tResult('Tech Level Code', tl);
     } else {
         tSection('Government / Law / TL');

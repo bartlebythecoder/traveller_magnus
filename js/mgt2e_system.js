@@ -2066,7 +2066,6 @@ function generateMgT2ESystemChunk7(sys, mainworldBase) {
         // 3. Classification Logic (WBH Logic)
         tSection('Classification Logic');
         body.classifications = [];
-        const floor = getMgT2EMinSusTL(body.atm);
         const mw = mainworldBase;
         const diff = (body.orbitId !== undefined) ? getEffectiveHzcoDeviation(body.orbitId, body.worldHzco || sys.hzco) : 99;
         const isPoor = (mw.tradeCodes && mw.tradeCodes.includes("Po"));
@@ -2114,19 +2113,60 @@ function generateMgT2ESystemChunk7(sys, mainworldBase) {
             }
         }
 
-        // 4. Refine Tech Level (Classification Bonuses)
+        // 4. Tech Level Requirements and Viability Check
         tSection('Tech Level Refinement');
-        if (body.classifications.includes("Research Base") || body.classifications.includes("Military Base")) {
-            tResult('TL Bonus', 'MW TL Match');
-            body.tl = mw.tl;
-        } else if (body.classifications.includes("Mining")) {
-            tResult('TL Bonus', 'Mining Basis');
-            body.tl = Math.max(mw.tl, floor);
-        } else {
-            tResult('TL Bonus', 'Standard (MW TL-1)');
-            body.tl = Math.max(mw.tl - 1, floor);
+
+        // A. Calculate Minimal Sustainable Tech Level (MSTL)
+        let mstlAtm = 3; // Default for standard atmospheres
+        if ([0, 1, 10, 15].includes(body.atm)) mstlAtm = 8; // 10 is 'A', 15 is 'F'
+        else if ([2, 3, 13, 14].includes(body.atm)) mstlAtm = 5; // 13 is 'D', 14 is 'E'
+        else if (body.atm === 11) mstlAtm = 9; // 'B'
+        else if (body.atm === 12) mstlAtm = 10; // 'C'
+        else if ([16, 17].includes(body.atm)) mstlAtm = 14; // 'G', 'H'
+
+        let mstlHab = 0;
+        let hab = body.habitability || 0;
+        if (hab >= 3 && hab <= 7) mstlHab = 3;
+        else if (hab >= 1 && hab <= 2) mstlHab = 5;
+        else if (hab === 0) mstlHab = 8;
+
+        const floor = Math.max(mstlAtm, mstlHab);
+        tResult('Minimal Sustainable TL', floor);
+
+        // B. Viability Check (Dependency Constraint)
+        // Ensure Mainworld Env TL fallback exists in case it wasn't tracked
+        const mwEnvTl = mw.envTl !== undefined ? mw.envTl : mw.tl;
+
+        if (floor > Math.max(mw.tl, mwEnvTl)) {
+            tResult('Viability', 'Failed: Mainworld cannot support');
+            writeLogLine(`  [VIABILITY FAIL] Secondary world requires TL ${floor} to survive, but Mainworld is only TL ${Math.max(mw.tl, mwEnvTl)}.`);
+            body.pop = 0;
+            body.tl = 0;
+            body.classifications = ["Uninhabited/Failed Outpost"];
         }
-        if (body.tl === floor) tClamp('Tech Level', mw.tl - 1, floor);
+
+        // C. Determine Overall Secondary World TL
+        if (body.pop > 0) {
+            if (body.classifications.includes("Research Base") || body.classifications.includes("Military Base")) {
+                tResult('TL Bonus', 'MW TL Match');
+                body.tl = mw.tl;
+            } else if (body.classifications.includes("Mining")) {
+                tResult('TL Bonus', 'Mining Basis');
+                body.tl = Math.max(mw.tl, floor);
+            } else {
+                tResult('TL Bonus', 'Standard (MW TL-1)');
+                body.tl = Math.max(mw.tl - 1, floor);
+            }
+
+            // Clamp to ensure it doesn't fall below survival requirements
+            if (body.tl === floor) tClamp('Tech Level', mw.tl - 1, floor);
+
+            // Note: If adding detailed Subcategory TLs later, clamp them to Mainworld_Subcategory_TLs here.
+
+        } else {
+            tSkip('Population 0 forces Tech Level 0');
+            body.tl = 0;
+        }
 
         // 5. Final UWP Construction
         // Planetoid Belts usually use size 0

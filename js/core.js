@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.1.8.11";
-const APP_BANNER = "v0.1.8.11 Updated Mongoose Temperature Calcs";
+const APP_VERSION = "v0.1.8.12";
+const APP_BANNER = "v0.1.8.12 Mongoose Main World Tech level updates";
 
 // -----------------------------------------------------------------------------
 // Application State

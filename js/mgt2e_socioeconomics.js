@@ -114,27 +114,32 @@ function generateMgT2ESubordinateSocial(body, mainworld) {
 
     // 5. Tech Level
     tSection('Tech Level');
-    let tlDM = 0;
-    if (body.starport === 'F') { tDM('Starport F', 1); tlDM += 1; }
-    if (body.size <= 1) { tDM('Size 1-', 2); tlDM += 2; }
-    else if (body.size <= 4) { tDM('Size 2-4', 1); tlDM += 1; }
-    if (body.atm <= 3 || body.atm >= 10) { tDM('Atmosphere Extreme', 1); tlDM += 1; }
-    if (body.hydro === 9) { tDM('Hydro 9', 1); tlDM += 1; }
-    else if (body.hydro === 10) { tDM('Hydro A', 2); tlDM += 2; }
-    if (body.pop >= 1 && body.pop <= 5) { tDM('Pop 1-5', 1); tlDM += 1; }
-    else if (body.pop === 9) { tDM('Pop 9', 2); tlDM += 2; }
-    else if (body.pop >= 10) { tDM('Pop 10+', 4); tlDM += 4; }
-    if (body.gov === 0 || body.gov === 5) { tDM('Gov 0 or 5', 1); tlDM += 1; }
-    else if (body.gov === 7) { tDM('Gov 7', 2); tlDM += 2; }
-    else if (body.gov >= 13) { tDM('Gov D+', -2); tlDM -= 2; }
+    if (body.pop > 0) {
+        let tlDM = 0;
+        if (body.starport === 'F') { tDM('Starport F', 1); tlDM += 1; }
+        if (body.size <= 1) { tDM('Size 1-', 2); tlDM += 2; }
+        else if (body.size <= 4) { tDM('Size 2-4', 1); tlDM += 1; }
+        if (body.atm <= 3 || body.atm >= 10) { tDM('Atmosphere Extreme', 1); tlDM += 1; }
+        if (body.hydro === 9) { tDM('Hydro 9', 1); tlDM += 1; }
+        else if (body.hydro === 10) { tDM('Hydro A', 2); tlDM += 2; }
+        if (body.pop >= 1 && body.pop <= 5) { tDM('Pop 1-5', 1); tlDM += 1; }
+        else if (body.pop === 9) { tDM('Pop 9', 2); tlDM += 2; }
+        else if (body.pop >= 10) { tDM('Pop 10+', 4); tlDM += 4; }
+        if (body.gov === 0 || body.gov === 5) { tDM('Gov 0 or 5', 1); tlDM += 1; }
+        else if (body.gov === 7) { tDM('Gov 7', 2); tlDM += 2; }
+        else if (body.gov >= 13) { tDM('Gov D+', -2); tlDM -= 2; }
 
-    let tlRoll = tRoll1D('Tech Level');
-    body.tl = Math.max(0, tlRoll + tlDM);
+        let tlRoll = tRoll1D('Tech Level');
+        body.tl = Math.max(0, tlRoll + tlDM);
 
-    const floor = getMgT2EMinSusTL(body.atm);
-    if (body.tl < floor) {
-        tOverride('Environmental Floor', body.tl, floor, `Atm ${body.atm} requires TL ${floor}`);
-        body.tl = floor;
+        const floor = getMgT2EMinSusTL(body.atm);
+        if (body.tl < floor) {
+            tOverride('Environmental Floor', body.tl, floor, `Atm ${body.atm} requires TL ${floor}`);
+            body.tl = floor;
+        }
+    } else {
+        tSkip('Population 0 forces Tech Level 0');
+        body.tl = 0;
     }
     tResult('Final Tech Level', body.tl);
 
@@ -226,6 +231,8 @@ function generateMgT2ESocioeconomics(base, hexId) {
         if ([0, 1].includes(base.tl)) { tDM('TL 0-1', -2); pcrDM -= 2; }
         else if ([2, 3].includes(base.tl)) { tDM('TL 2-3', -1); pcrDM -= 1; }
         else if (base.tl >= 4 && base.tl <= 9) { tDM('TL 4-9', 1); pcrDM += 1; }
+
+        if (base.tidallyLocked === true) { tDM('Tidally Locked', 2); pcrDM += 2; }
 
         const tcs = base.tradeCodes || [];
         if (tcs.includes("Ag")) { tDM('Ag Trade Code', -2); pcrDM -= 2; }
@@ -949,12 +956,18 @@ function generateMgT2ESocioeconomics(base, hexId) {
     if (base.militaryBase) basesCount++;
 
     tSection('Eco: Resources (R)');
-    let rRoll = tRoll2D('Resources Roll');
-    let resourceRating = rRoll - 7 + base.size;
-    let fRR = Math.max(2, Math.min(12, resourceRating));
-    if (resourceRating !== fRR) tClamp('Resources Rating', resourceRating, fRR);
-    resourceRating = fRR;
-    tResult('Base Resource Rating', resourceRating);
+    let resourceRating = 0;
+    if (base.resourceRating !== undefined) {
+        resourceRating = base.resourceRating;
+        tResult('Base Resource Rating (Prior Generation)', resourceRating);
+    } else {
+        let rRoll = tRoll2D('Resources Roll');
+        resourceRating = rRoll - 7 + base.size;
+        let fRR = Math.max(2, Math.min(12, resourceRating));
+        if (resourceRating !== fRR) tClamp('Resources Rating', resourceRating, fRR);
+        resourceRating = fRR;
+        tResult('Base Resource Rating', resourceRating);
+    }
 
     let tcArr = tcs;
     tSection('Eco: Importance (Ix)');

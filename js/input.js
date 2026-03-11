@@ -1583,7 +1583,8 @@ function populateEditorAccordions(stateObj) {
 
                         let atmComp = 'None';
                         if (w.gases && w.gases.length > 0) {
-                            atmComp = w.gases.join(', ');
+                            atmComp = w.gases.slice(0, 3).join(', ');
+                            if (w.gases.length > 3) atmComp += ', ...';
                         } else if (w.oxygenFraction !== undefined) {
                             atmComp = `N2/O2 (${(w.oxygenFraction * 100).toFixed(1)}% O2)`;
                         }
@@ -1597,6 +1598,18 @@ function populateEditorAccordions(stateObj) {
                     html += `<span>Gravity: <strong>${w.gravity !== undefined ? w.gravity.toFixed(2) : '?'} G</strong></span>`;
                     html += `<span>Mass: <strong>${w.mass !== undefined ? w.mass.toFixed(4) : '?'} M⊕</strong></span>`;
                     html += `<span>Temp: <strong>${w.meanTempK !== undefined ? (w.meanTempK - 273).toFixed(0) : '?'}°C</strong></span>`;
+
+                    if (w.solarDayHours !== undefined) {
+                        let dayStr = '';
+                        if (w.solarDayHours === Infinity || w.isTwilightZone) {
+                            dayStr = 'Twilight Zone';
+                        } else if (w.solarDayHours >= 24) {
+                            dayStr = `${(w.solarDayHours / 24).toFixed(1)}d`;
+                        } else {
+                            dayStr = `${w.solarDayHours.toFixed(1)}h`;
+                        }
+                        html += `<span>Day: <strong>${dayStr}</strong></span>`;
+                    }
 
                     // Physical characteristics (additional stats for terrestrial planets)
                     if (w.type === 'Terrestrial Planet' || w.type === 'Mainworld') {
@@ -1678,7 +1691,8 @@ function populateEditorAccordions(stateObj) {
 
                             let mAtmComp = 'None';
                             if (m.gases && m.gases.length > 0) {
-                                mAtmComp = m.gases.join(', ');
+                                mAtmComp = m.gases.slice(0, 3).join(', ');
+                                if (m.gases.length > 3) mAtmComp += ', ...';
                             } else if (m.oxygenFraction !== undefined) {
                                 mAtmComp = `N2/O2 (${(m.oxygenFraction * 100).toFixed(1)}% O2)`;
                             }
@@ -1692,6 +1706,18 @@ function populateEditorAccordions(stateObj) {
 
                             if (m.meanTempK !== undefined) {
                                 html += `<span>Temp: <strong>${(m.meanTempK - 273).toFixed(0)}°C</strong></span>`;
+                            }
+
+                            if (m.solarDayHours !== undefined) {
+                                let mDayStr = '';
+                                if (m.solarDayHours === Infinity || m.isTwilightZone) {
+                                    mDayStr = 'Twilight Zone';
+                                } else if (m.solarDayHours >= 24) {
+                                    mDayStr = `${(m.solarDayHours / 24).toFixed(1)}d`;
+                                } else {
+                                    mDayStr = `${m.solarDayHours.toFixed(1)}h`;
+                                }
+                                html += `<span>Day: <strong>${mDayStr}</strong></span>`;
                             }
 
                             if (m.habitability !== undefined) {

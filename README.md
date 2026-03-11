@@ -1,4 +1,4 @@
-# As Above, So Below (v0.1.8.10)
+# As Above, So Below (v0.1.8.11)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -33,6 +33,17 @@ This workbench allows Game Masters and world-builders to generate, import, and e
     - **Ctrl + Shift + C:** Full Classic Traveller (Book 6) Generation sequence.
 ---
 ## 📜 Changelog
+
+### [v0.1.8.11] - 2026-03-11
+1. **Thermal & Seismic Overhaul:** Implemented the World Builder's Handbook 4th-power temperature addition model, combining solar luminosity with inherent geological/tidal heat.
+2. **Advanced Albedo & Greenhouse Logic:** Refactored albedo scaling for Rocky/Icy transitions and implemented atmosphere-specific Greenhouse Factor (GF) variance.
+3. **Seismic Stress Model:** Integrated a three-component stress engine (Residual, Tidal Stress, Tidal Heating) to drive planetary volcanism and tectonic activity.
+4. **Life Profile Logic Refinement:** 
+    - **Biodiversity:** Implemented the strict `2D - 7 + CEILING((Biomass + Biocomplexity) / 2)` formula.
+    - **Compatibility:** Refactored DMs to prioritize atmospheric taints and age penalties (8.0+ Gyr), ensuring mandatory floor rounding for final ratings.
+    - **UI Integration:** 
+        - Added "Native Life" field to the Mongoose system accordion (4-digit ehex profile).
+        - Integrated "Res" (Resource) rating for all terrestrial worlds and moons, placed after Habitability for consistent system navigation.
 
 ### [v0.1.8.10] - 2026-03-11
 1. **Physical Generation Formulas:** MgT2e: Adjusted `mgt2e_calculateTerrestrialPhysical` and corresponding validators to conform exactly to the Continuation Method's strict dimensional formulas (0.001 tolerance testing).

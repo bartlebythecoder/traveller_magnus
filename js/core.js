@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.1.8.10";
-const APP_BANNER = "v0.1.8.10 Corrected Tidal Lock and Density Calculations";
+const APP_VERSION = "v0.1.8.11";
+const APP_BANNER = "v0.1.8.11 Updated Mongoose Temperature Calcs";
 
 // -----------------------------------------------------------------------------
 // Application State

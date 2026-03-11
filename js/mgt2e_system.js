@@ -1102,30 +1102,57 @@ function getEffectiveHzcoDeviation(orbitId, hzco) {
 
 function getMgT2EAlbedo(w, hzco) {
     let albedo = 0;
-    let diff = getEffectiveHzcoDeviation(w.orbitId, hzco);
-    let type = "Rocky";
-    if (w.type === 'Gas Giant') type = "Gas Giant";
-    else if (w.type === 'Terrestrial Planet' || w.type === 'Mainworld') {
-        if (w.tempBand === "Cold" || w.tempBand === "Frozen") type = "Icy";
+    const orbit = w.orbitId;
+
+    // 1. Determine Base Albedo (Step 2a)
+    if (w.type === 'Gas Giant') {
+        albedo = 0.05 + (tRoll2D('Base Albedo (Gas Giant)') * 0.05);
+    } else {
+        if (orbit <= hzco + 2) {
+            // Rocky Terrestrial
+            albedo = 0.04 + ((tRoll2D('Base Albedo (Rocky)') - 2) * 0.02);
+        } else if (orbit > hzco + 2 && orbit <= hzco + 4) {
+            // Icy Terrestrial (Near)
+            albedo = 0.20 + ((tRoll2D('Base Albedo (Icy Near)') - 3) * 0.05);
+        } else {
+            // Icy Terrestrial (Far)
+            albedo = 0.25 + ((tRoll2D('Base Albedo (Icy Far)') - 2) * 0.07);
+        }
+
+        // Special Constraint
+        if (albedo <= 0.40) {
+            albedo -= ((tRoll1D('Albedo Constraint Subtract') - 1) * 0.05);
+        }
     }
-    if (type === "Rocky") albedo = 0.04 + (roll2D() - 2) * 0.02;
-    else if (type === "Gas Giant") albedo = 0.05 + roll2D() * 0.05;
-    else if (type === "Icy" && diff <= 2) albedo = 0.2 + (roll2D() - 3) * 0.05;
-    else albedo = 0.25 + (roll2D() - 2) * 0.07;
 
-    // Modifiers
-    if (w.atmCode >= 1 && w.atmCode <= 3 || w.atmCode === 14) albedo += (roll2D() - 3) * 0.01;
-    if (w.atmCode >= 4 && w.atmCode <= 9) albedo += roll2D() * 0.01;
-    if (w.atmCode >= 10 && w.atmCode <= 12 || w.atmCode === 15) albedo += (roll2D() - 2) * 0.05;
-    if (w.atmCode === 13) albedo += roll2D() * 0.03;
-
-    if (w.hydroCode >= 2 && w.hydroCode <= 5) albedo += (roll2D() - 2) * 0.02;
-    if (w.hydroCode >= 6) albedo += (roll2D() - 4) * 0.03;
-
-    if (type === "Icy" && diff > 2 && albedo <= 0.4) {
-        albedo -= (roll1D() - 1) * 0.05;
+    // 2. Albedo Modifiers (Step 2b)
+    // Atmosphere 1-3 or E (14)
+    if ((w.atmCode >= 1 && w.atmCode <= 3) || w.atmCode === 14) {
+        albedo += ((tRoll2D('Albedo Mod (Atm 1-3/E)') - 3) * 0.01);
     }
-    return Math.max(0.02, Math.min(0.95, albedo));
+    // Atmosphere 4-9
+    else if (w.atmCode >= 4 && w.atmCode <= 9) {
+        albedo += (tRoll2D('Albedo Mod (Atm 4-9)') * 0.01);
+    }
+    // Atmosphere A-C (10-12) or F (15)
+    else if ((w.atmCode >= 10 && w.atmCode <= 12) || w.atmCode === 15) {
+        albedo += ((tRoll2D('Albedo Mod (Atm A-C/F)') - 2) * 0.05);
+    }
+    // Atmosphere D (13)
+    else if (w.atmCode === 13) {
+        albedo += (tRoll2D('Albedo Mod (Atm D)') * 0.03);
+    }
+
+    // Hydrographics
+    if (w.hydroCode >= 2 && w.hydroCode <= 5) {
+        albedo += ((tRoll2D('Albedo Mod (Hydro 2-5)') - 2) * 0.02);
+    }
+    else if (w.hydroCode >= 6) {
+        albedo += ((tRoll2D('Albedo Mod (Hydro 6+)') - 4) * 0.03);
+    }
+
+    // Clamp: Final Albedo must be between 0.02 and 0.98.
+    return Math.max(0.02, Math.min(0.98, albedo));
 }
 
 function generateMgT2EAxialTilt() {
@@ -1519,21 +1546,33 @@ function generateMgT2ESystemChunk5(sys) {
         tSection('Mean Temperature');
         w.albedo = getMgT2EAlbedo(w, w.worldHzco || sys.hzco);
         tResult('Bond Albedo', w.albedo.toFixed(3));
-        let initialGF = 0.5 * Math.sqrt(w.pressureBar || 0);
+        let initialGF = 0.5 * Math.sqrt(w.totalPressureBar || w.pressureBar || 0);
+        let finalGF = 0;
 
-        let gfMod = 0;
-        if ([1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 14].includes(w.atmCode)) {
-            gfMod = tRoll3D('Greenhouse Variability (3D*0.01)') * 0.01;
-        }
-        let gfMult = 1;
-        if (w.atmCode === 10 || w.atmCode === 15) {
-            gfMult = Math.max(0.5, tRoll1D('Exotic Multiplier (1D-1)') - 1);
+        if (w.atmCode === 0) {
+            finalGF = 0;
+        } else if ([1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 14].includes(w.atmCode)) {
+            // Atmosphere 1-9, D, or E
+            finalGF = initialGF + (tRoll3D('Greenhouse Factor Roll (3D*0.01)') * 0.01);
+        } else if (w.atmCode === 10 || w.atmCode === 15) {
+            // Atmosphere A or F
+            let mult = tRoll1D('GF Multiplier (1D-1)') - 1;
+            if (mult < 0.5) mult = 0.5;
+            finalGF = initialGF * mult;
         } else if ([11, 12, 16, 17].includes(w.atmCode)) {
-            let mx = tRoll1D('Extreme Multiplier Basis');
-            if (mx === 6) gfMult = tRoll3D('Extreme GG (3D)');
-            else gfMult = mx;
+            // Atmosphere B, C, G, or H
+            let d1 = tRoll1D('GF Basis (1D)');
+            if (d1 <= 5) {
+                finalGF = initialGF * tRoll1D('GF Multiplier (1D)');
+            } else {
+                finalGF = initialGF * tRoll3D('GF Multiplier (3D)');
+            }
+        } else {
+            // Fallback for codes not explicitly mentioned in the prompt
+            finalGF = initialGF;
         }
-        w.greenhouseFactor = (initialGF + gfMod) * gfMult;
+
+        w.greenhouseFactor = finalGF;
         tResult('GFactor', w.greenhouseFactor.toFixed(3));
 
         let srcLum = primary.lum || 1.0;
@@ -1593,31 +1632,35 @@ function generateMgT2ESystemChunk5(sys) {
 
 function generateMgT2ESystemChunk6(sys) {
     let primary = sys.stars[0];
-    let primaryMassEarths = primary.mass * 333000;
+    primary.massEarths = (primary.mass || 1.0) * 333000; // Establish massEarths on star
     tSection('Biomass & Resources');
 
     let processBody = (w, parent, isMoon) => {
-        if (w.type === 'Empty' || w.type === 'Gas Giant' || w.type === 'Planetoid Belt') return;
+        if (w.type === 'Empty') return;
 
-        tSection(`${isMoon ? 'Moon' : w.type} Orbit ${w.orbitId.toFixed(2)} Geology/Biology`);
+        // Establish common math properties
+        let sizeValue = w.size === 'S' ? 0.375 : (typeof w.size === 'number' ? w.size : 0);
+        let wSize = w.size === 'S' ? 0 : (typeof w.size === 'number' ? w.size : 0);
+        let density = w.density || 1.0;
+        w.massEarths = w.mass || 0.0001;
+        w.distMkm = isMoon ? (w.pd * parent.diamKm / 1000000) : (w.au * 149.6);
+        w.periodDays = (w.yearHours || 8760) / 24;
 
-        // Tidal Amplitude Engine
+        // Tidal Amplitude Engine (Calculated first to feed Seismic Stress)
         let calculateTidalAmplitudes = (body, sys, parent, isMoon) => {
-            let sizeValue = body.size === 'S' ? 0.375 : (typeof body.size === 'string' ? parseInt(body.size, 16) : body.size);
+            let sVal = body.size === 'S' ? 0.375 : (typeof body.size === 'string' ? parseInt(body.size, 16) : body.size);
             let total = 0;
-            const primary = sys.stars[0];
+            const star = sys.stars[0];
+            const dist = isMoon ? (body.pd * parent.diamKm / 1000000) : (body.au * 149.6);
 
             if (isMoon) {
-                // distMkm for the moon relative to its parent
-                let bodyDistMkm = (body.pd * parent.diamKm) / 1000000;
-
                 // Scenario B (Star on Moon)
-                let StarOnMoonEffect = (primary.mass * sizeValue) / (32 * Math.pow(body.au, 3));
+                let StarOnMoonEffect = (star.mass * sVal) / (32 * Math.pow(body.au, 3));
                 total += StarOnMoonEffect;
 
                 // Scenario D (Planet on Moon)
                 if (!body.tidallyLocked || body.Selected_Case !== 'Case B') {
-                    let PlanetEffect = (parent.mass * sizeValue) / (3.2 * Math.pow(bodyDistMkm, 3));
+                    let PlanetEffect = (parent.mass * sVal) / (3.2 * Math.pow(dist, 3));
                     total += PlanetEffect;
                 }
 
@@ -1626,9 +1669,9 @@ function generateMgT2ESystemChunk6(sys) {
                     parent.moons.forEach(otherMoon => {
                         if (otherMoon === body || otherMoon.size === 0 || otherMoon.size === 'R') return;
                         let otherDistMkm = (otherMoon.pd * parent.diamKm) / 1000000;
-                        let Separation_Mkm = Math.abs(bodyDistMkm - otherDistMkm);
+                        let Separation_Mkm = Math.abs(dist - otherDistMkm);
                         if (Separation_Mkm > 0) {
-                            let MoonToMoonEffect = (otherMoon.mass * sizeValue) / (3.2 * Math.pow(Separation_Mkm, 3));
+                            let MoonToMoonEffect = (otherMoon.mass * sVal) / (3.2 * Math.pow(Separation_Mkm, 3));
                             total += MoonToMoonEffect;
                         }
                     });
@@ -1636,7 +1679,7 @@ function generateMgT2ESystemChunk6(sys) {
             } else {
                 // Scenario A (Star on Planet)
                 if (!body.tidallyLocked || body.Selected_Case !== 'Case A') {
-                    let StarEffect = (primary.mass * sizeValue) / (32 * Math.pow(body.au, 3));
+                    let StarEffect = (star.mass * sVal) / (32 * Math.pow(body.au, 3));
                     total += StarEffect;
                 }
 
@@ -1647,7 +1690,7 @@ function generateMgT2ESystemChunk6(sys) {
                             if (moon.size === 0 || moon.size === 'R') return;
                             let moonDistMkm = (moon.pd * body.diamKm) / 1000000;
                             if (moonDistMkm > 0) {
-                                let MoonEffect = (moon.mass * sizeValue) / (3.2 * Math.pow(moonDistMkm, 3));
+                                let MoonEffect = (moon.mass * sVal) / (3.2 * Math.pow(moonDistMkm, 3));
                                 total += MoonEffect;
                             }
                         });
@@ -1660,42 +1703,95 @@ function generateMgT2ESystemChunk6(sys) {
         w.totalTidalAmplitude = calculateTidalAmplitudes(w, sys, parent, isMoon);
         tResult('Tidal Amplitude', w.totalTidalAmplitude.toFixed(2));
 
-        // 1. Seismology and Tectonic Plates
-        tSection('Seismology');
-        let wSize = w.size === 'S' ? 0 : w.size;
-        let resBase = wSize - sys.age;
-        if (isMoon) resBase += 1;
+        // 1. Total Seismic Stress and Inherent Heat
+        tSection('Inherent Heat & Seismology');
+        let inherentK = 0;
 
-        let numLargeMoons = w.moons ? w.moons.filter(m => m.size !== 'S' && m.size > 0).length : 0;
-        if (!isMoon && numLargeMoons > 0) resBase += Math.min(12, numLargeMoons);
+        if (w.type === 'Gas Giant') {
+            // Step 2: Gas Giant Inherent Heat
+            inherentK = 80 * Math.sqrt(w.massEarths / sys.age);
+            tResult('GG Inherent Heat', inherentK.toFixed(1) + ' K');
+        } else if (w.type !== 'Planetoid Belt') {
+            // Step 1: Terrestrial Seismic Stress
+            let dmResidual = 0;
+            if (isMoon) dmResidual += 1;
+            let numLargeMoons = w.moons ? w.moons.filter(m => m.size !== 'S' && m.size > 0).length : 0;
+            dmResidual += Math.min(12, numLargeMoons);
+            if (density > 1.0) dmResidual += 2;
+            if (density < 0.5) dmResidual -= 1;
 
-        let density = w.density || 1.0;
-        if (density > 1.0) resBase += 2;
-        if (density < 0.5) resBase -= 1;
+            // Component A
+            let aBasis = sizeValue - sys.age + dmResidual;
+            let compA = aBasis < 1 ? 0 : Math.pow(aBasis, 2);
 
-        resBase = Math.floor(resBase);
-        let resStress = resBase < 1 ? 0 : (resBase * resBase);
+            // Component B
+            let compB = Math.floor(w.totalTidalAmplitude / 10);
 
-        let tidalStressFactor = w.totalTidalAmplitude;
+            // Component C
+            let compC_val = (Math.pow(primary.massEarths, 2) * Math.pow(sizeValue, 5) * Math.pow(w.eccentricity || 0, 2)) /
+                (3000 * Math.pow(w.distMkm, 5) * w.periodDays * w.massEarths);
+            let compC = compC_val < 1 ? 0 : compC_val;
 
-        let e = w.eccentricity || 0;
-        let distMkm = w.orbitRadius || (w.au * 149.6);
-        let periodDays = w.yearHours / 24;
-        let wMassE = w.mass || 1.0;
+            w.seismicStress = Math.floor(compA + compB + compC);
+            inherentK = w.seismicStress;
 
-        let heatFactor = ((primaryMassEarths * primaryMassEarths) * Math.pow(wSize, 5) * (e * e)) /
-            (3000 * Math.pow(distMkm, 5) * periodDays * wMassE);
-        if (isNaN(heatFactor) || !isFinite(heatFactor) || heatFactor < 1) heatFactor = 0;
+            tResult('Comp A (Residual)', compA.toFixed(2));
+            tResult('Comp B (Tidal Stress)', compB.toFixed(2));
+            tResult('Comp C (Tidal Heat)', compC.toFixed(2));
+            tResult('Total Seismic Stress', w.seismicStress);
+        }
 
-        w.seismicStress = Math.floor(resStress + tidalStressFactor + heatFactor);
-        tResult('Seismic Stress', w.seismicStress);
+        // 3. 4th-Power Temperature Addition
+        let solarK = w.meanTempK || 3;
+        w.meanTempK = Math.pow(Math.pow(solarK, 4) + Math.pow(inherentK, 4), 0.25);
+        w.meanTempC = w.meanTempK - 273;
+        tResult('Final Mean Temp', w.meanTempK.toFixed(1) + ' K (' + w.meanTempC.toFixed(0) + '°C)');
+
+        // 4. Recalculate Diurnals
+        let srcLum = primary.lum || 1.0;
+        let tfactor = Math.abs(Math.sin((w.axialTilt || 0) * Math.PI / 180));
+        if (w.yearHours < (36.5 * 24)) tfactor /= 2;
+        if (w.yearHours > (2 * 8760)) tfactor *= 1.5;
+
+        let rfactor = w.solarDayHours <= 0 || w.solarDayHours === Infinity ? 1.0 : Math.sqrt(w.solarDayHours / 50);
+        if (w.tidallyLocked) rfactor = 1.0;
+        if (rfactor > 1.0) rfactor = 1.0;
+
+        let gfactor = (10 - (w.hydroCode || 0)) / 20;
+        if (w.surfaceDist && w.surfaceDist.includes('Concentrated')) gfactor -= 0.1;
+        if (w.surfaceDist && w.surfaceDist.includes('Dispersed')) gfactor += 0.1;
+
+        let afactor = 1 + (w.pressureBar || 0);
+        let vfactor = Math.max(0, Math.min(1.0, tfactor + rfactor + gfactor));
+        let lumMod = vfactor / afactor;
+
+        let highLum = srcLum * (1 + lumMod);
+        let lowLum = srcLum * (1 - lumMod);
+        let nearAu = w.au * (1 - (w.eccentricity || 0));
+        let farAu = w.au * (1 + (w.eccentricity || 0));
+
+        // Use the new meanTempK as baseline but maintain the diurnal spread derived from luminosity delta
+        // To strictly "recalculate", we apply the same diurnal formula but the baseline shifted by inherent heat effectively
+        if (nearAu > 0) w.highTempK = 279 * Math.pow(highLum * (1 - w.albedo) * (1 + w.greenhouseFactor) / (nearAu * nearAu), 0.25);
+        if (farAu > 0) w.lowTempK = 279 * Math.pow(lowLum * (1 - w.albedo) * (1 + w.greenhouseFactor) / (farAu * farAu), 0.25);
+
+        // Adjust High/Low to account for inherent heat addition
+        w.highTempK = Math.pow(Math.pow(w.highTempK, 4) + Math.pow(inherentK, 4), 0.25);
+        w.lowTempK = Math.pow(Math.pow(w.lowTempK, 4) + Math.pow(inherentK, 4), 0.25);
+
+        tResult('Recalc High Temp', w.highTempK.toFixed(1) + ' K');
+        tResult('Recalc Low Temp', w.lowTempK.toFixed(1) + ' K');
+
+        if (w.type === 'Gas Giant' || w.type === 'Planetoid Belt') return;
+
+        tSection(`${isMoon ? 'Moon' : w.type} Orbit ${w.orbitId.toFixed(2)} Biology/Sophonts`);
 
         w.tectonicPlates = 0;
         w.plateInteraction = "None";
         if (w.seismicStress > 0 && w.hydroPercent >= 1) {
             let pRoll = tRoll2D('Tectonic Plate Roll');
-            tDM('Size/Hydro Mod', wSize + w.hydroCode - 7);
-            let p = wSize + w.hydroCode - pRoll;
+            tDM('Size/Hydro Mod', sizeValue + w.hydroCode - 7);
+            let p = sizeValue + w.hydroCode - pRoll;
             if (w.seismicStress >= 10 && w.seismicStress <= 100) { tDM('Stress 10+', 1); p += 1; }
             else if (w.seismicStress > 100) { tDM('Stress 100+', 2); p += 2; }
             if (p > 1) {
@@ -1797,26 +1893,74 @@ function generateMgT2ESystemChunk6(sys) {
             }
         }
 
-        // 5. Biodiversity & Compatibility
-        tSection('Biodiversity & Compatibility');
+        // PART 2: BIODIVERSITY RATING
+        tSection('Biodiversity Rating');
         w.biodiversity = 0;
-        w.compatibility = 0;
+
         if (w.biomass >= 1) {
-            w.biodiversity = Math.max(1, Math.ceil(tRoll2D('Biodiversity Roll') - 7 + ((w.biomass + w.biocomplexity) / 2)));
+            // Step 2: Roll and Calculate Rating
+            let roll = tRoll2D('Biodiversity Roll');
 
-            let compDm = 0;
-            if ([0, 1, 11, 16, 17].includes(w.atmCode)) compDm -= 8;
-            else if ([2, 4, 7, 9].includes(w.atmCode) || (w.taints && w.taints.length > 0)) compDm -= 2;
-            else if ([3, 5, 8].includes(w.atmCode)) compDm += 1;
-            else if (w.atmCode === 6) compDm += 2;
-            else if ([10, 15].includes(w.atmCode)) compDm -= 6;
-            else if (w.atmCode === 12) compDm -= 10;
-            else if ([13, 14].includes(w.atmCode)) compDm -= 1;
+            // Formula: 2D - 7 + CEILING((Biomass + Biocomplexity) / 2)
+            // We round the average UP as per requirement
+            let baseCalculationAvg = (w.biomass + w.biocomplexity) / 2;
+            let baseCalculationRounded = Math.ceil(baseCalculationAvg);
 
-            if (sys.age > 8) compDm -= 2;
+            // Apply the full formula
+            w.biodiversity = roll - 7 + baseCalculationRounded;
 
-            w.compatibility = Math.max(0, Math.floor(tRoll2D('Compatibility Roll') - (w.biocomplexity / 2) + compDm));
+            // Constraint: If the result is less than 1, it becomes 1
+            if (w.biodiversity < 1) {
+                w.biodiversity = 1;
+            }
+
             tResult('Biodiversity', w.biodiversity);
+        }
+
+        // PART 3: COMPATIBILITY RATING
+        tSection('Compatibility Rating');
+        w.compatibility = 0;
+
+        if (w.biomass > 0) {
+            let compDm = 0;
+
+            // Step 2: Determine Dice Modifiers (DMs)
+            // Atmosphere DMs: Using the strictest/lowest applicable
+            if (w.atmCode === 12) { // Atmosphere C
+                compDm -= 10;
+            } else if ([0, 1, 11, 16, 17].includes(w.atmCode)) { // Atmosphere 0, 1, B, G, or H
+                compDm -= 8;
+            } else if ([10, 15].includes(w.atmCode)) { // Atmosphere A or F
+                compDm -= 6;
+            } else if ([2, 4, 7, 9].includes(w.atmCode) || (w.taints && w.taints.length > 0)) {
+                // Atmosphere 2, 4, 7, 9 or ANY tainted atmosphere
+                compDm -= 2;
+            } else if ([13, 14].includes(w.atmCode)) { // Atmosphere D or E
+                compDm -= 1;
+            } else if ([3, 5, 8].includes(w.atmCode)) { // Atmosphere 3, 5, or 8
+                compDm += 1;
+            } else if (w.atmCode === 6) { // Atmosphere 6
+                compDm += 2;
+            }
+
+            // Age DMs
+            if (sys.age > 8.0) {
+                compDm -= 2;
+            }
+
+            // Step 3: Roll and Calculate Rating
+            let roll = tRoll2D('Compatibility Roll');
+
+            // Formula: 2D - (Biocomplexity Rating / 2) + DMs
+            // Final result is rounded down (FLOOR)
+            let baseTerm = w.biocomplexity / 2;
+            w.compatibility = Math.floor(roll - baseTerm + compDm);
+
+            // Constraint: 0 or less becomes 0
+            if (w.compatibility <= 0) {
+                w.compatibility = 0;
+            }
+
             tResult('Compatibility', w.compatibility);
         }
 

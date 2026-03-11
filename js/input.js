@@ -1622,10 +1622,13 @@ function populateEditorAccordions(stateObj) {
                             html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor};">Caution: ${mwBase.travelZone} Zone</div>`;
                         }
                         html += `<span>Axial Tilt: <strong>${w.axialTilt ? w.axialTilt.toFixed(1) : '0'}°</strong></span>`;
+                        if (w.lifeProfile) {
+                            html += `<span>Native Life: <strong>${w.lifeProfile}</strong></span>`;
+                        }
                         html += `<span>Habitability: <strong>${w.habitability !== undefined ? w.habitability : '?'}/15</strong></span>`;
 
-                        if (w.resourceRating) {
-                            html += `<span>Resource: <strong>${toUWPChar(w.resourceRating)}</strong></span>`;
+                        if (w.resourceRating !== undefined) {
+                            html += `<span>Res: <strong>${toUWPChar(w.resourceRating)}</strong></span>`;
                         }
                         if (w.secRU !== undefined && w.secPop > 0) {
                             html += `<span>RU: <strong>${w.secRU}</strong></span>`;
@@ -1728,8 +1731,16 @@ function populateEditorAccordions(stateObj) {
                                 html += `<span>Tidal Amp: <strong>${m.totalTidalAmplitude.toFixed(2)}</strong></span>`;
                             }
 
+                            if (m.lifeProfile) {
+                                html += `<span>Native Life: <strong>${m.lifeProfile}</strong></span>`;
+                            }
+
                             if (m.habitability !== undefined) {
                                 html += `<span>Hab: <strong>${m.habitability}/15</strong></span>`;
+                            }
+
+                            if (m.resourceRating !== undefined) {
+                                html += `<span>Res: <strong>${toUWPChar(m.resourceRating)}</strong></span>`;
                             }
 
                             html += `</div></div></details>`;

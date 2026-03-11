@@ -4,76 +4,100 @@
 
 // Note: MGT2E_ORBIT_AU is defined in constants.js
 
-function mgt2e_calculateTerrestrialPhysical(body, label) {
-    if (body.size === 0 || body.size === 'R' || body.size === 'S') {
-        body.density = 1.0;
-        body.gravity = body.size === 'S' ? 0.01 : 0;
-        body.mass = body.size === 'S' ? 0.0001 : 0;
+function mgt2e_calculateTerrestrialPhysical(body, label, sys) {
+    if (body.size === 0 || body.size === 'R') {
+        body.density = 0;
+        body.gravity = 0;
+        body.mass = 0;
         body.escapeVel = 0;
         body.orbitalVelSurface = 0;
         return;
     }
 
     tSection(`${label} Physical Stats`);
-    // 1. Composition
-    let compRoll = tRoll2D('Composition Roll');
-    let coreType = 'Standard Core';
-    let baseDensity = 1.0;
-    let varMult = 0.04;
 
-    if (compRoll <= 2) {
-        coreType = 'Rare Minerals';
-        baseDensity = 1.4;
-        varMult = 0.1;
-    } else if (compRoll <= 4) {
-        coreType = 'Heavy Core';
-        baseDensity = 1.1;
-        varMult = 0.08;
-    } else if (compRoll <= 8) {
-        coreType = 'Standard Core';
-        baseDensity = 0.9;
-        varMult = 0.04;
-    } else if (compRoll <= 10) {
-        coreType = 'Light Core';
-        baseDensity = 0.6;
-        varMult = 0.06;
-    } else {
-        coreType = 'Icy Core';
-        baseDensity = 0.3;
-        varMult = 0.06;
+    // 1. Size 'S' math override
+    let mathSize = body.size;
+    if (body.size === 'S') mathSize = 0.375;
+    else if (typeof body.size === 'string') mathSize = parseInt(body.size, 16);
+
+    // 2. Terrestrial Composition
+    let compRoll = tRoll2D('Composition Roll');
+    let compDM = 0;
+
+    let sVal = mathSize;
+    if (sVal <= 4) { compDM -= 1; tDM('Size 0-4', -1); }
+    else if (sVal >= 6 && sVal <= 9) { compDM += 1; tDM('Size 6-9', 1); }
+    else if (sVal >= 10) { compDM += 3; tDM('Size A-F', 3); }
+
+    let hzco = body.worldHzco || (sys ? (sys.ptypeHzco || sys.hzco) : 0);
+    if (hzco > 0 && body.orbitId !== undefined) {
+        let diff = body.orbitId - hzco;
+        if (diff <= 0) {
+            compDM += 1;
+            tDM('At/Closer than HZCO', 1);
+        } else {
+            let penalty = 1 + Math.floor(diff);
+            compDM -= penalty;
+            tDM(`Further than HZCO (-${penalty})`, -penalty);
+        }
     }
 
-    let dVarRoll = tRoll1D('Density Variance (1D-1)');
-    let density = baseDensity + (dVarRoll - 1) * varMult;
+    if (sys && sys.age > 10) {
+        compDM -= 1;
+        tDM('System Age > 10 Gyr', -1);
+    }
+
+    let compModRoll = compRoll + compDM;
+    let coreType = 'Mostly Rock';
+    if (compModRoll <= -4) coreType = 'Exotic Ice';
+    else if (compModRoll <= 2) coreType = 'Mostly Ice';
+    else if (compModRoll <= 6) coreType = 'Mostly Rock';
+    else if (compModRoll <= 11) coreType = 'Rock and Metal';
+    else if (compModRoll <= 14) coreType = 'Mostly Metal';
+    else coreType = 'Compressed Metal';
+
     body.composition = coreType;
-    body.density = density;
+    tResult('Composition Result', coreType);
 
-    tResult('Composition', coreType);
-    writeLogLine(`  Density Formula: (${coreType} ${baseDensity} + (Roll(${dVarRoll})-1) * ${varMult}) = ${density.toFixed(3)}`);
-    tResult('Density', density.toFixed(3));
+    // 3. Density Lookup
+    let densityRoll = tRoll2D('Density Roll (No DMs)');
+    const densityTable = {
+        "2": { "Exotic Ice": 0.03, "Mostly Ice": 0.18, "Mostly Rock": 0.50, "Rock and Metal": 0.82, "Mostly Metal": 1.15, "Compressed Metal": 1.50 },
+        "3": { "Exotic Ice": 0.06, "Mostly Ice": 0.21, "Mostly Rock": 0.53, "Rock and Metal": 0.85, "Mostly Metal": 1.18, "Compressed Metal": 1.55 },
+        "4": { "Exotic Ice": 0.09, "Mostly Ice": 0.24, "Mostly Rock": 0.56, "Rock and Metal": 0.88, "Mostly Metal": 1.21, "Compressed Metal": 1.60 },
+        "5": { "Exotic Ice": 0.12, "Mostly Ice": 0.27, "Mostly Rock": 0.59, "Rock and Metal": 0.91, "Mostly Metal": 1.24, "Compressed Metal": 1.65 },
+        "6": { "Exotic Ice": 0.15, "Mostly Ice": 0.30, "Mostly Rock": 0.62, "Rock and Metal": 0.94, "Mostly Metal": 1.27, "Compressed Metal": 1.70 },
+        "7": { "Exotic Ice": 0.18, "Mostly Ice": 0.33, "Mostly Rock": 0.65, "Rock and Metal": 0.97, "Mostly Metal": 1.30, "Compressed Metal": 1.75 },
+        "8": { "Exotic Ice": 0.21, "Mostly Ice": 0.36, "Mostly Rock": 0.68, "Rock and Metal": 1.00, "Mostly Metal": 1.33, "Compressed Metal": 1.80 },
+        "9": { "Exotic Ice": 0.24, "Mostly Ice": 0.39, "Mostly Rock": 0.71, "Rock and Metal": 1.03, "Mostly Metal": 1.36, "Compressed Metal": 1.85 },
+        "10": { "Exotic Ice": 0.27, "Mostly Ice": 0.41, "Mostly Rock": 0.74, "Rock and Metal": 1.06, "Mostly Metal": 1.39, "Compressed Metal": 1.90 },
+        "11": { "Exotic Ice": 0.30, "Mostly Ice": 0.44, "Mostly Rock": 0.77, "Rock and Metal": 1.09, "Mostly Metal": 1.42, "Compressed Metal": 1.95 },
+        "12": { "Exotic Ice": 0.33, "Mostly Ice": 0.47, "Mostly Rock": 0.80, "Rock and Metal": 1.12, "Mostly Metal": 1.45, "Compressed Metal": 2.00 }
+    };
 
-    // 2. Gravity
-    let sR = body.size / 8;
-    let gravity = sR * density;
-    body.gravity = gravity;
-    writeLogLine(`  Gravity Formula: (Size(${body.size})/8) * Density(${density.toFixed(3)}) = ${gravity.toFixed(3)} G`);
-    tResult('Gravity (G)', gravity.toFixed(3));
+    let baseDensity = densityTable[densityRoll][coreType];
+    body.density = parseFloat(baseDensity.toFixed(2));
+    tResult('Density', body.density.toFixed(2));
 
-    // 3. Mass
-    let mass = Math.pow(sR, 3) * density;
-    body.mass = mass;
-    writeLogLine(`  Mass Formula: Density(${density.toFixed(3)}) * (Size(${body.size})/8)^3 = ${mass.toFixed(4)} Earths`);
-    tResult('Mass (Earths)', mass.toFixed(4));
+    // 4. Final Calculations
+    let sR = mathSize / 8;
+    let gravity = body.density * sR;
+    body.gravity = parseFloat(gravity.toFixed(3));
+    writeLogLine(`  Gravity Formula: Density(${body.density.toFixed(2)}) * (Size(${mathSize})/8) = ${body.gravity.toFixed(3)} G`);
+    tResult('Gravity (G)', body.gravity.toFixed(3));
 
-    // 4. Escape Velocity
-    // formula: sqrt(Mass / (Size / 8)) * 11186
+    let mass = body.density * Math.pow(sR, 3);
+    body.mass = parseFloat(mass.toFixed(4));
+    writeLogLine(`  Mass Formula: Density(${body.density.toFixed(2)}) * (Size(${mathSize})/8)^3 = ${body.mass.toFixed(4)} Earths`);
+    tResult('Mass (Earths)', body.mass.toFixed(4));
+
+    // 5. Orbital Velocity & Escape Velocity
     let ev = Math.sqrt(body.mass / sR) * 11186;
     body.escapeVel = ev;
-    writeLogLine(`  Escape Velocity Formula: sqrt(Mass(${body.mass.toFixed(4)}) / (Size(${body.size})/8)) * 11186 = ${ev.toFixed(2)} km/s`);
+    writeLogLine(`  Escape Velocity Formula: sqrt(Mass(${body.mass.toFixed(4)}) / (Size(${mathSize})/8)) * 11186 = ${ev.toFixed(2)} km/s`);
     tResult('Escape Velocity (km/s)', ev.toFixed(2));
 
-    // 5. Orbital Velocity
-    // Strictly derive from escapeVel to ensure consistency
     let ov = body.escapeVel / Math.sqrt(2);
     body.orbitalVelSurface = ov;
     writeLogLine(`  Orbital Velocity Formula: EscapeVel(${ev.toFixed(2)}) / sqrt(2) = ${ov.toFixed(2)} km/s`);
@@ -833,7 +857,7 @@ function generateMgT2ESystemChunk3(sys, mainworldBase) {
                 tResult('Size', w.size);
             }
             w.diamKm = w.size * 1600;
-            mgt2e_calculateTerrestrialPhysical(w, w.type);
+            mgt2e_calculateTerrestrialPhysical(w, w.type, sys);
         } else if (w.type === 'Planetoid Belt') {
             w.bulk = tRoll1D('Belt Bulk');
             w.mType = tRoll1D('M-Type Content') * 10;
@@ -992,7 +1016,7 @@ function generateMgT2ESystemChunk3(sys, mainworldBase) {
             } else {
                 tResult(`Satellite ${m + 1} Size`, moonSize);
                 let moonObj = { size: moonSize, type: 'Satellite', worldHzco: w.worldHzco, orbitId: w.orbitId, parentStarIdx: w.parentStarIdx, orbitType: w.orbitType };
-                mgt2e_calculateTerrestrialPhysical(moonObj, `Satellite ${m + 1}`);
+                mgt2e_calculateTerrestrialPhysical(moonObj, `Satellite ${m + 1}`, sys);
                 w.moons.push(moonObj);
             }
         }
@@ -1123,6 +1147,282 @@ function generateMgT2EAxialTilt() {
     return tilt;
 }
 
+function calculateTidalLockDMs(body, sys, parent, isMoon) {
+    let globalDM = 0;
+
+    let bSize = body.size === 'GG' ? 10 : (typeof body.size === 'number' ? body.size : 0);
+    if (bSize >= 1) globalDM += Math.ceil(bSize / 3);
+
+    let ecc = body.eccentricity || 0;
+    if (ecc > 0.1) globalDM -= Math.floor(ecc * 10);
+
+    let tilt = body.axialTilt || 0;
+    if (tilt > 30) globalDM -= 2;
+    if (tilt >= 60 && tilt <= 120) globalDM -= 4;
+    if (tilt >= 80 && tilt <= 100) globalDM -= 4;
+
+    let pressure = body.pressureBar || 0;
+    if (pressure > 2.5) globalDM -= 2;
+
+    let age = sys.age || 0;
+    if (age < 1.0) globalDM -= 2;
+    else if (age >= 5.0 && age <= 10.0) globalDM += 2;
+    else if (age > 10.0) globalDM += 4;
+
+    let highestTotalDM = -9999;
+    let selectedCase = 'None';
+
+    // C. Case B: Moon's Lock to Planet
+    if (isMoon && parent) {
+        let caseBDM = globalDM + 6;
+        let pMass = parent.mass || 0;
+
+        let orbitPD = body.pd || 0;
+        if (orbitPD > 20) caseBDM -= Math.floor(orbitPD / 20);
+
+        if (body.retrograde) caseBDM -= 2;
+
+        if (pMass > 1000) caseBDM += 8;
+        else if (pMass >= 100) caseBDM += 6;
+        else if (pMass >= 10) caseBDM += 4;
+        else if (pMass >= 1) caseBDM += 2;
+
+        if (caseBDM > highestTotalDM) {
+            highestTotalDM = caseBDM;
+            selectedCase = 'Case B';
+        }
+    }
+
+    // B. Case A: Planet's Lock to Star
+    if (!isMoon) {
+        let caseADM = globalDM - 4;
+
+        let oDist = body.orbitId || 0;
+        if (oDist < 1.0) caseADM += 4 + Math.floor(10 * (1 - oDist));
+        else if (oDist >= 1.0 && oDist <= 2.0) caseADM += 4;
+        else if (oDist > 2.0 && oDist <= 3.0) caseADM += 1;
+        else if (oDist > 3.0) caseADM -= (Math.floor(oDist) * 2);
+
+        let starMassSum = 0;
+        let totalStarsOrbited = 0;
+        if (body.orbitType === 'P-Type') {
+            for (let s of sys.stars) {
+                let sOrb = (s.orbitId !== null && s.orbitId !== undefined) ? s.orbitId : 0;
+                if (sOrb < oDist) {
+                    starMassSum += (s.mass || 0);
+                    totalStarsOrbited++;
+                }
+            }
+            if (totalStarsOrbited === 0) {
+                starMassSum = sys.stars[0].mass || 1;
+                totalStarsOrbited = 1;
+            }
+        } else {
+            let pIdx = (body.parentStarIdx !== undefined) ? body.parentStarIdx : 0;
+            starMassSum = (sys.stars[pIdx] || sys.stars[0]).mass || 1;
+            totalStarsOrbited = 1;
+        }
+
+        if (starMassSum < 0.5) caseADM -= 2;
+        else if (starMassSum >= 0.5 && starMassSum <= 1.0) caseADM -= 1;
+        else if (starMassSum >= 2.0 && starMassSum <= 5.0) caseADM += 1;
+        else if (starMassSum > 5.0) caseADM += 2;
+
+        if (totalStarsOrbited > 1) caseADM -= totalStarsOrbited;
+
+        if (body.moons && body.moons.length > 0) {
+            let moonSizeSum = 0;
+            for (let m of body.moons) {
+                let mSize = m.size === 'GG' ? 10 : (typeof m.size === 'number' ? m.size : 0);
+                if (mSize >= 1) moonSizeSum += mSize;
+            }
+            caseADM -= moonSizeSum;
+        }
+
+        if (caseADM > highestTotalDM) {
+            highestTotalDM = caseADM;
+            selectedCase = 'Case A';
+        }
+    }
+
+    // D. Case C: Planet's Lock to Moon
+    if (!isMoon && ['Terrestrial Planet', 'Mainworld'].includes(body.type)) {
+        if (body.moons && body.moons.length > 0) {
+            let lockedMoons = body.moons.filter(m => m.tidallyLocked === true);
+            if (lockedMoons.length > 0) {
+                let totalSig = body.moons.filter(m => {
+                    let mSize = m.size === 'GG' ? 10 : (typeof m.size === 'number' ? m.size : 0);
+                    return mSize >= 1;
+                }).length;
+
+                for (let lm of lockedMoons) {
+                    let caseCDM = globalDM - 10;
+                    let mSize = lm.size === 'GG' ? 10 : (typeof lm.size === 'number' ? lm.size : 0);
+                    caseCDM += mSize;
+
+                    let lmpd = lm.pd || 0;
+                    if (lmpd < 5) caseCDM += 5 + Math.ceil((5 - lmpd) * 5);
+                    else if (lmpd >= 5 && lmpd <= 10) caseCDM += 4;
+                    else if (lmpd > 10 && lmpd <= 20) caseCDM += 2;
+                    else if (lmpd > 20 && lmpd <= 40) caseCDM += 1;
+                    else if (lmpd > 60) caseCDM -= 6;
+
+                    if (totalSig > 1) caseCDM -= (totalSig - 1) * 2;
+
+                    if (caseCDM > highestTotalDM) {
+                        highestTotalDM = caseCDM;
+                        selectedCase = 'Case C';
+                    }
+                }
+            }
+        }
+    }
+
+    return { Global_DM: globalDM, Total_DM: highestTotalDM, Selected_Case: selectedCase };
+}
+
+function executeTidalLockRoll(body, sys, totalDM, selectedCase) {
+    let resultValue = 0;
+    let isMoon = selectedCase === 'Case B';
+    let isPlanetToStar = selectedCase === 'Case A';
+
+    if (totalDM <= -10) {
+        tResult('Tidal Lock Gate', 'No Effect (DM <= -10)');
+    } else if (totalDM >= 10) {
+        tResult('Tidal Lock Gate', 'Automatic 1:1 Lock');
+        resultValue = 12;
+    } else {
+        let r = tRoll2D('Tidal Lock Roll');
+        resultValue = r + totalDM;
+        tResult('Tidal Lock Result', resultValue);
+    }
+
+    let finalResult = resultValue;
+    body.tidallyLocked = false; // default
+
+    if (totalDM > -10) {
+        // 3. Lock Break Check
+        if (resultValue >= 12) {
+            let breakRoll = tRoll2D('Lock Break Check (12 breaks entirely)');
+            if (breakRoll === 12) {
+                let rerollResult = tRoll2D('Tidal Lock Reroll (0 DM)');
+
+                let tempHrs = body.siderealHours;
+                let broken = true;
+
+                if (rerollResult <= 2) {
+                    tempHrs = body.siderealHours;
+                } else if (rerollResult >= 3 && rerollResult <= 6) {
+                    tempHrs = body.siderealHours * [1.5, 2, 3, 5][rerollResult - 3];
+                } else if (rerollResult >= 7 && rerollResult <= 8) {
+                    let d = rerollResult === 7 ? 5 : 20;
+                    // Provide a safe estimate for the constraint check
+                    tempHrs = 3.5 * d * 24;
+                } else if (rerollResult >= 9 && rerollResult <= 10) {
+                    let d = rerollResult === 9 ? 10 : 50;
+                    tempHrs = 3.5 * d * 24;
+                } else if (rerollResult === 11) {
+                    tempHrs = body.yearHours * 0.66;
+                } else if (rerollResult >= 12) {
+                    tempHrs = body.yearHours;
+                }
+
+                if (isMoon && tempHrs > body.yearHours) {
+                    tResult('Lock Break', 'Ignored (Rotation > Orbital Period for Moon)');
+                    broken = false;
+                }
+
+                if (broken) {
+                    tResult('Lock Break', `Broken! Using rerolled result ${rerollResult}`);
+                    finalResult = rerollResult;
+                }
+            }
+        }
+
+        let appliedHrs = null;
+
+        // Apply Status Table based on finalResult
+        if (finalResult <= 2) {
+            tResult('Status', 'No effect');
+        } else if (finalResult >= 3 && finalResult <= 6) {
+            let mult = [1.5, 2, 3, 5][finalResult - 3];
+            appliedHrs = body.siderealHours * mult;
+            tResult('Status', `siderealHours * ${mult}`);
+        } else if (finalResult >= 7 && finalResult <= 8) {
+            let mRoll = tRoll1D('Prograde Days Roll');
+            let d = finalResult === 7 ? 5 : 20;
+            appliedHrs = mRoll * d * 24;
+            tResult('Status', `Prograde: ${appliedHrs} hours`);
+        } else if (finalResult >= 9 && finalResult <= 10) {
+            let mRoll = tRoll1D('Retrograde Days Roll');
+            let d = finalResult === 9 ? 10 : 50;
+            appliedHrs = mRoll * d * 24;
+            if (body.axialTilt < 90) {
+                body.axialTilt = 180 - body.axialTilt;
+                tResult('Retrograde Tilt', body.axialTilt.toFixed(1) + '°');
+            }
+            tResult('Status', `Retrograde: ${appliedHrs} hours`);
+        } else if (finalResult === 11) {
+            appliedHrs = body.yearHours * 0.66;
+            tResult('Status', '3:2 Resonance');
+            if (body.axialTilt > 3.0) {
+                body.axialTilt = (tRoll2D('Resonance Tilt Jitter') - 2) / 10;
+                tResult('Resonance Tilt Override', body.axialTilt.toFixed(1) + '°');
+            }
+        } else if (finalResult >= 12) {
+            appliedHrs = body.yearHours;
+            tResult('Status', '1:1 Lock');
+            body.tidallyLocked = true;
+            if (body.axialTilt > 3.0) {
+                body.axialTilt = (tRoll2D('Locked Tilt Jitter') - 2) / 10;
+                tResult('Locked Tilt Override', body.axialTilt.toFixed(1) + '°');
+            }
+            if (body.eccentricity > 0.1) {
+                let newEcc = determineMgT2EEccentricity(false, 0, sys.age, body.orbitId, false, -2);
+                if (newEcc < body.eccentricity) {
+                    body.eccentricity = newEcc;
+                    tResult('Locked Ecc Override', body.eccentricity.toFixed(3));
+                }
+            }
+        }
+
+        if (appliedHrs !== null) {
+            body.siderealHours = appliedHrs;
+        }
+    }
+
+    // Metadata Snapping
+    if (body.tidallyLocked && finalResult >= 12) {
+        if (isPlanetToStar) {
+            body.isTwilightZone = true;
+            body.solarDayHours = Infinity;
+            writeLogLine(`  Twilight Zone World (1:1 Tidal Lock to Star)`);
+        }
+    }
+
+    // Re-run calculateSolarDay logic 
+    let effectiveSidereal = body.siderealHours;
+    if (body.axialTilt > 90) {
+        effectiveSidereal = -body.siderealHours;
+    }
+
+    if (body.siderealHours === body.yearHours) {
+        body.solarDaysInYear = 0;
+        body.solarDayHours = Infinity;
+        if (body.tidallyLocked && isPlanetToStar) {
+            body.isTwilightZone = true;
+        }
+    } else {
+        body.solarDaysInYear = (body.yearHours / effectiveSidereal) - 1;
+        if (body.solarDaysInYear !== 0) {
+            body.solarDayHours = Math.abs(body.yearHours / body.solarDaysInYear);
+        } else {
+            body.solarDayHours = Infinity;
+        }
+        body.isTwilightZone = false;
+    }
+}
+
 function generateMgT2ESystemChunk5(sys) {
     let primary = sys.stars[0];
     tSection('Temperature & Rotation');
@@ -1204,73 +1504,14 @@ function generateMgT2ESystemChunk5(sys) {
 
             // 4. Tidal Lock
             tSection('Tidal Lock Check');
-            let lockDM = Math.ceil((w.size === 'GG' ? 10 : w.size) / 3);
-            if (w.eccentricity) { tDM('Eccentricity', -Math.floor(w.eccentricity * 10)); lockDM -= Math.floor(w.eccentricity * 10); }
-            if (w.pressureBar > 2.5) { tDM('High Pressure', -2); lockDM -= 2; }
-            if (sys.age < 1) { tDM('Young System', -2); lockDM -= 2; }
-            else if (sys.age >= 5 && sys.age <= 10) { tDM('Old System (5-10)', 2); lockDM += 2; }
-            else if (sys.age > 10) { tDM('Ancient System (10+)', 4); lockDM += 4; }
+            let dmResult = calculateTidalLockDMs(w, sys, parent, isMoon);
+            let lockDM = dmResult.Total_DM;
+            w.Selected_Case = dmResult.Selected_Case;
+            tResult('Global DM', dmResult.Global_DM);
+            tResult('Total Lock DM', lockDM);
+            tResult('Dominant Force', dmResult.Selected_Case);
 
-            if (w.axialTilt > 30) { tDM('Tilt > 30', -2); lockDM -= 2; }
-            if (w.axialTilt >= 60 && w.axialTilt <= 120) { tDM('Extreme Tilt', -4); lockDM -= 4; }
-            if (w.axialTilt >= 80 && w.axialTilt <= 100) { tDM('Side-on Tilt', -4); lockDM -= 4; }
-
-            if (isMoon) { tDM('Satellite', 6); lockDM += 6; }
-            else { if (w.orbitId <= 0.5) { tDM('Near-Star Orbit', 4); lockDM += 4; } }
-
-            w.tidallyLocked = false;
-            if (lockDM >= 10) {
-                let forceLock = true;
-                if (tRoll2D('Critical Freedom Check') === 12 && tRoll2D('Freedom Sub-Check') < 12) forceLock = false;
-                if (forceLock) {
-                    tResult('Result', 'Forced Lock (DM 10+)');
-                    w.tidallyLocked = true;
-                }
-            } else if (lockDM > -10 && !w.tidallyLocked) {
-                let lockRoll = tRoll2D('Tidal Lock Roll');
-                tDM('Lock DM', lockDM);
-                let finalLR = lockRoll + lockDM;
-                if (finalLR >= 12) {
-                    tResult('Result', 'Tidally Locked');
-                    w.tidallyLocked = true;
-                } else if (finalLR === 11) {
-                    tResult('Result', '2:3 Resonance');
-                    w.siderealHours = w.yearHours * (2 / 3);
-                } else if (finalLR === 10) { tResult('Result', 'Long Day (50-300)'); w.siderealHours = tRoll1D('Long Day Multiplier') * 50 * 24; }
-                else if (finalLR === 9) { tResult('Result', 'Moderate Day (10-60)'); w.siderealHours = tRoll1D('Mod Day Multiplier') * 10 * 24; }
-                else if (finalLR === 8) { tResult('Result', 'Deep Day (20-120)'); w.siderealHours = tRoll1D('Deep Day Multiplier') * 20 * 24; }
-                else if (finalLR === 7) { tResult('Result', 'Soft Day (5-30)'); w.siderealHours = tRoll1D('Soft Day Multiplier') * 5 * 24; }
-                else if (finalLR === 6) { tResult('Result', 'x5 Multiplier'); w.siderealHours *= 5; }
-                else if (finalLR === 5) { tResult('Result', 'x3 Multiplier'); w.siderealHours *= 3; }
-                else if (finalLR === 4) { tResult('Result', 'x2 Multiplier'); w.siderealHours *= 2; }
-                else if (finalLR === 3) { tResult('Result', 'x1.5 Multiplier'); w.siderealHours *= 1.5; }
-                else tResult('Result', 'No Lock');
-            }
-
-            if (w.tidallyLocked) {
-                w.siderealHours = w.yearHours;
-                w.axialTilt = Math.max(0, (tRoll2D('Locked Tilt Jitter') - 2) / 10);
-                if (w.eccentricity > 0.1) {
-                    let newEcc = determineMgT2EEccentricity(false, 0, sys.age, w.orbitId, false, -2);
-                    if (newEcc < w.eccentricity) w.eccentricity = newEcc;
-                }
-            }
-
-            let finalEffectiveSidereal = w.siderealHours;
-            if (w.axialTilt > 90) {
-                finalEffectiveSidereal = -w.siderealHours;
-            }
-
-            if (w.siderealHours === w.yearHours) {
-                w.solarDaysInYear = 0;
-                w.solarDayHours = Infinity;
-                w.isTwilightZone = true;
-                writeLogLine(`  Twilight Zone World (Tidally Locked): Sidereal equals Year exactly.`);
-            } else {
-                w.solarDaysInYear = (w.yearHours / finalEffectiveSidereal) - 1;
-                if (w.solarDaysInYear !== 0) w.solarDayHours = Math.abs(w.yearHours / w.solarDaysInYear);
-                else w.solarDayHours = Infinity;
-            }
+            executeTidalLockRoll(w, sys, lockDM, dmResult.Selected_Case);
 
         }
 
@@ -1337,10 +1578,10 @@ function generateMgT2ESystemChunk5(sys) {
     };
 
     for (let i = 0; i < sys.worlds.length; i++) {
-        processBody(sys.worlds[i], null, false);
         for (let j = 0; j < sys.worlds[i].moons.length; j++) {
             processBody(sys.worlds[i].moons[j], sys.worlds[i], true);
         }
+        processBody(sys.worlds[i], null, false);
     }
 
     return sys;
@@ -1360,6 +1601,65 @@ function generateMgT2ESystemChunk6(sys) {
 
         tSection(`${isMoon ? 'Moon' : w.type} Orbit ${w.orbitId.toFixed(2)} Geology/Biology`);
 
+        // Tidal Amplitude Engine
+        let calculateTidalAmplitudes = (body, sys, parent, isMoon) => {
+            let sizeValue = body.size === 'S' ? 0.375 : (typeof body.size === 'string' ? parseInt(body.size, 16) : body.size);
+            let total = 0;
+            const primary = sys.stars[0];
+
+            if (isMoon) {
+                // distMkm for the moon relative to its parent
+                let bodyDistMkm = (body.pd * parent.diamKm) / 1000000;
+
+                // Scenario B (Star on Moon)
+                let StarOnMoonEffect = (primary.mass * sizeValue) / (32 * Math.pow(body.au, 3));
+                total += StarOnMoonEffect;
+
+                // Scenario D (Planet on Moon)
+                if (!body.tidallyLocked || body.Selected_Case !== 'Case B') {
+                    let PlanetEffect = (parent.mass * sizeValue) / (3.2 * Math.pow(bodyDistMkm, 3));
+                    total += PlanetEffect;
+                }
+
+                // Scenario E (Moon on Moon)
+                if (parent && parent.moons) {
+                    parent.moons.forEach(otherMoon => {
+                        if (otherMoon === body || otherMoon.size === 0 || otherMoon.size === 'R') return;
+                        let otherDistMkm = (otherMoon.pd * parent.diamKm) / 1000000;
+                        let Separation_Mkm = Math.abs(bodyDistMkm - otherDistMkm);
+                        if (Separation_Mkm > 0) {
+                            let MoonToMoonEffect = (otherMoon.mass * sizeValue) / (3.2 * Math.pow(Separation_Mkm, 3));
+                            total += MoonToMoonEffect;
+                        }
+                    });
+                }
+            } else {
+                // Scenario A (Star on Planet)
+                if (!body.tidallyLocked || body.Selected_Case !== 'Case A') {
+                    let StarEffect = (primary.mass * sizeValue) / (32 * Math.pow(body.au, 3));
+                    total += StarEffect;
+                }
+
+                // Scenario C (Moon on Planet)
+                if (!body.tidallyLocked || body.Selected_Case !== 'Case C') {
+                    if (body.moons) {
+                        body.moons.forEach(moon => {
+                            if (moon.size === 0 || moon.size === 'R') return;
+                            let moonDistMkm = (moon.pd * body.diamKm) / 1000000;
+                            if (moonDistMkm > 0) {
+                                let MoonEffect = (moon.mass * sizeValue) / (3.2 * Math.pow(moonDistMkm, 3));
+                                total += MoonEffect;
+                            }
+                        });
+                    }
+                }
+            }
+            return parseFloat(total.toFixed(2));
+        };
+
+        w.totalTidalAmplitude = calculateTidalAmplitudes(w, sys, parent, isMoon);
+        tResult('Tidal Amplitude', w.totalTidalAmplitude.toFixed(2));
+
         // 1. Seismology and Tectonic Plates
         tSection('Seismology');
         let wSize = w.size === 'S' ? 0 : w.size;
@@ -1376,7 +1676,7 @@ function generateMgT2ESystemChunk6(sys) {
         resBase = Math.floor(resBase);
         let resStress = resBase < 1 ? 0 : (resBase * resBase);
 
-        let tidalStressFactor = 0;
+        let tidalStressFactor = w.totalTidalAmplitude;
 
         let e = w.eccentricity || 0;
         let distMkm = w.orbitRadius || (w.au * 149.6);
@@ -1791,45 +2091,31 @@ function runMgT2EHzcoAudit(sys) {
  */
 function _validateTerrestrialPhysics(body) {
     let errors = 0;
-    if (body.type !== 'Terrestrial Planet' && body.type !== 'Mainworld') return 0;
 
-    const sR = body.size / 8;
-    if (sR <= 0) return 0;
+    if (body.size === 0 || body.size === 'R') return 0;
 
-    // A. Density Mapping Verification
-    const densityRanges = {
-        'Rare Minerals': { min: 1.4, max: 1.9 },
-        'Heavy Core': { min: 1.1, max: 1.5 },
-        'Standard Core': { min: 0.9, max: 1.1 },
-        'Light Core': { min: 0.6, max: 0.9 },
-        'Icy Core': { min: 0.3, max: 0.6 }
-    };
-    const range = densityRanges[body.composition];
-    if (range) {
-        if (body.density < range.min - 0.001 || body.density > range.max + 0.001) {
-            writeLogLine(`  [PHYSICS FAIL] Density: ${body.type} (${body.composition}) density ${body.density.toFixed(3)} outside range ${range.min}-${range.max}`);
-            errors++;
-        }
-    }
+    let effectiveSize = body.size;
+    if (body.size === 'S') effectiveSize = 0.375;
+    else if (typeof body.size === 'string') effectiveSize = parseInt(body.size, 16);
 
-    // B. Gravity Consistency Check
-    const calcGrav = sR * body.density;
-    if (Math.abs(calcGrav - body.gravity) > 0.01) {
-        writeLogLine(`  [PHYSICS FAIL] Gravity deviation: ${body.type} Exp: ${calcGrav.toFixed(3)}, Found: ${body.gravity.toFixed(3)}`);
+    let expectedMass = body.density * Math.pow(effectiveSize / 8, 3);
+    let expectedGravity = body.density * (effectiveSize / 8);
+
+    const tolerance = 0.001;
+
+    if (Math.abs(expectedGravity - body.gravity) > tolerance) {
+        writeLogLine(`  [PHYSICS FAIL] Gravity Mismatch on ${body.name}. Expected: ${expectedGravity}, Found: ${body.gravity}`);
         errors++;
     }
 
-    // C. Mass-Gravity Ratio Check
-    const calcMass = body.gravity * Math.pow(sR, 2);
-    if (Math.abs(calcMass - body.mass) > 0.01) {
-        writeLogLine(`  [PHYSICS FAIL] Mass identity mismatch: ${body.type} Exp: ${calcMass.toFixed(4)}, Found: ${body.mass.toFixed(4)}`);
+    if (Math.abs(expectedMass - body.mass) > tolerance) {
+        writeLogLine(`  [PHYSICS FAIL] Mass Mismatch on ${body.name}. Expected: ${expectedMass}, Found: ${body.mass}`);
         errors++;
     }
 
-    // D. Velocity Sanity Check (ev = sqrt(2) * ov)
     if (body.escapeVel && body.orbitalVelSurface) {
         let ratio = body.escapeVel / body.orbitalVelSurface;
-        if (Math.abs(ratio - Math.sqrt(2)) > 0.0001) {
+        if (Math.abs(ratio - Math.sqrt(2)) > 0.001) {
             writeLogLine(`  [PHYSICS FAIL] Velocity Ratio: ${ratio.toFixed(4)}, Expected 1.4142`);
             errors++;
         }
@@ -1975,34 +2261,58 @@ function _validateRotation(body) {
     let expectedSolarDays = (body.yearHours / effectiveSidereal) - 1;
     let expectedSolarDayHours = Infinity;
 
+    // Compare with expected solar day hours
     if (Math.abs(expectedSolarDays) > 0.0001) {
         expectedSolarDayHours = Math.abs(body.yearHours / expectedSolarDays);
     }
 
-    // Compare with stored body.solarDayHours (treat Infinity handling carefully)
-    if (body.solarDayHours === Infinity) {
-        if (expectedSolarDayHours !== Infinity && expectedSolarDayHours < 999999) {
-            // Note: Floating point math might make a perfectly locked world have a very high solarDayHours instead of exact Infinity if not explicitly set.
-            writeLogLine(`  [ROTATION FAIL] ${body.type} at Orbit ${body.orbitId} expected finite solar day ${expectedSolarDayHours.toFixed(2)}, found Infinity.`);
-            errors++;
-        }
-    } else if (expectedSolarDayHours === Infinity) {
-        writeLogLine(`  [ROTATION FAIL] ${body.type} at Orbit ${body.orbitId} expected Infinity solar day, found ${body.solarDayHours}.`);
-        errors++;
-    } else if (Math.abs(body.solarDayHours - expectedSolarDayHours) > 0.01) {
-        writeLogLine(`  [ROTATION FAIL] ${body.type} at Orbit ${body.orbitId} solarDayHours mismatch. Exp: ${expectedSolarDayHours.toFixed(4)}, Found: ${body.solarDayHours.toFixed(4)}`);
-        errors++;
-    }
+    // Check if the body is a moon, or a planet locked to a moon (Case B/C)
+    // For our purposes, satellites and special GGs (if evaluated as moons) fall under Case B.
+    // If it's a Terrestrial Planet but is not orbiting a Star, or if it had a Case C dominant lock.
+    let isMoon = body.type === 'Satellite' || body.isSpecialGG === true;
 
     // C. Tidal Lock / Twilight Zone Consistency
     // If sidereal equals year, it's tidally locked (1:1 resonance)
     if (Math.abs(body.siderealHours - body.yearHours) < 0.001) {
-        if (!body.isTwilightZone) {
-            writeLogLine(`  [ROTATION FAIL] ${body.type} at Orbit ${body.orbitId} is tidally locked (sidereal == year) but missing isTwilightZone flag.`);
-            errors++;
+
+        // Condition A (Planet-to-Star)
+        if (!isMoon) {
+            if (!body.isTwilightZone) {
+                writeLogLine(`  [ROTATION FAIL] ${body.type} at Orbit ${body.orbitId} is a Planet 1:1 locked to Star but missing isTwilightZone flag.`);
+                errors++;
+            }
+            if (body.solarDayHours !== Infinity) {
+                writeLogLine(`  [ROTATION FAIL] ${body.type} at Orbit ${body.orbitId} is a Planet 1:1 locked to Star but solarDayHours is not Infinity.`);
+                errors++;
+            }
         }
-        if (body.solarDayHours !== Infinity) {
-            writeLogLine(`  [ROTATION FAIL] ${body.type} at Orbit ${body.orbitId} is tidally locked but solarDayHours is not Infinity.`);
+        // Condition B (Moon-to-Planet or Planet-to-Moon)
+        else {
+            if (body.isTwilightZone) {
+                writeLogLine(`  [ROTATION FAIL] ${body.type} at Orbit ${body.orbitId} is 1:1 locked to a non-Star (Case B/C) but incorrectly has isTwilightZone flag.`);
+                errors++;
+            }
+            // For Case B/C, solarDayHours should be finite, derived from calculation.
+            if (body.solarDayHours === Infinity) {
+                writeLogLine(`  [ROTATION FAIL] ${body.type} at Orbit ${body.orbitId} is 1:1 locked to a non-Star but solarDayHours is Infinity (should be finite).`);
+                errors++;
+            } else if (Math.abs(body.solarDayHours - expectedSolarDayHours) > 0.01) {
+                writeLogLine(`  [ROTATION FAIL] ${body.type} at Orbit ${body.orbitId} Case B/C solarDayHours mismatch. Exp: ${expectedSolarDayHours.toFixed(4)}, Found: ${body.solarDayHours.toFixed(4)}`);
+                errors++;
+            }
+        }
+    } else {
+        // Not 1:1 locked, perform standard check
+        if (body.solarDayHours === Infinity) {
+            if (expectedSolarDayHours !== Infinity && expectedSolarDayHours < 999999) {
+                writeLogLine(`  [ROTATION FAIL] ${body.type} at Orbit ${body.orbitId} expected finite solar day ${expectedSolarDayHours.toFixed(2)}, found Infinity.`);
+                errors++;
+            }
+        } else if (expectedSolarDayHours === Infinity) {
+            writeLogLine(`  [ROTATION FAIL] ${body.type} at Orbit ${body.orbitId} expected Infinity solar day, found ${body.solarDayHours}.`);
+            errors++;
+        } else if (Math.abs(body.solarDayHours - expectedSolarDayHours) > 0.01) {
+            writeLogLine(`  [ROTATION FAIL] ${body.type} at Orbit ${body.orbitId} solarDayHours mismatch. Exp: ${expectedSolarDayHours.toFixed(4)}, Found: ${body.solarDayHours.toFixed(4)}`);
             errors++;
         }
     }
@@ -2296,7 +2606,7 @@ function generateMgT2EBeltProfile(belt, sys, mainworldBase) {
             orbitId: sOrb,
             eccentricity: ecc
         };
-        mgt2e_calculateTerrestrialPhysical(sb, `SigBody [${sSize}]`);
+        mgt2e_calculateTerrestrialPhysical(sb, `SigBody [${sSize}]`, sys);
         belt.significantBodies.push(sb);
     }
 

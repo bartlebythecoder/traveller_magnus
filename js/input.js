@@ -1611,6 +1611,10 @@ function populateEditorAccordions(stateObj) {
                         html += `<span>Day: <strong>${dayStr}</strong></span>`;
                     }
 
+                    if (w.totalTidalAmplitude !== undefined && w.totalTidalAmplitude > 0) {
+                        html += `<span>Tidal Amp: <strong>${w.totalTidalAmplitude.toFixed(2)}</strong></span>`;
+                    }
+
                     // Physical characteristics (additional stats for terrestrial planets)
                     if (w.type === 'Terrestrial Planet' || w.type === 'Mainworld') {
                         if (w.type === 'Mainworld' && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
@@ -1718,6 +1722,10 @@ function populateEditorAccordions(stateObj) {
                                     mDayStr = `${m.solarDayHours.toFixed(1)}h`;
                                 }
                                 html += `<span>Day: <strong>${mDayStr}</strong></span>`;
+                            }
+
+                            if (m.totalTidalAmplitude !== undefined && m.totalTidalAmplitude > 0) {
+                                html += `<span>Tidal Amp: <strong>${m.totalTidalAmplitude.toFixed(2)}</strong></span>`;
                             }
 
                             if (m.habitability !== undefined) {

@@ -37,6 +37,14 @@ Before writing a script, check `execution/` per your directive. Only create new 
 **3. Update directives as you learn**
 
 Directives are living documents. When you discover API constraints, better approaches, common errors, or timing expectations—update the directive. But don't create or overwrite directives without asking unless explicitly told to. Directives are your instruction set and must be preserved (and improved upon over time, not extemporaneously used and then discarded).
+
+**4. Strict Communication Protocol
+
+Zero Assumption Policy: If a task requires a formula, table, or specific data point that is missing, you must stop and request it. Never "do your best" to guess or use placeholders.
+
+No Scope Creep: Do not add unrequested requirements or "helpful" features to scripts or logic. Stick strictly to the Directive.
+
+Clarification First: If a prompt is ambiguous or lacks necessary context for execution, ask for clarification immediately rather than proceeding with a probabilistic guess.
  
 ## Self-annealing loop
   Errors are learning opportunities. When something breaks:

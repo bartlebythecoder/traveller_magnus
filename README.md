@@ -1,4 +1,4 @@
-# As Above, So Below (v0.1.8.9)
+# As Above, So Below (v0.1.8.10)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -34,12 +34,16 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 ---
 ## 📜 Changelog
 
-### [v0.1.8.9] - 2026-03-10
-1. **Day Length Refinement:** Fully integrated World Builder's Handbooks rules for computing rotation multipliers (x2 for small/gas giants vs x4) and added secure processing for >90 degree retrograde solar day fractions.
-2. **Atmosphere Composition Interface:** Clamped accordion atmospheric gas readouts to explicitly display the top 3 dominant planetary gases out of consideration for UI space.
+### [v0.1.8.10] - 2026-03-11
+1. **Physical Generation Formulas:** MgT2e: Adjusted `mgt2e_calculateTerrestrialPhysical` and corresponding validators to conform exactly to the Continuation Method's strict dimensional formulas (0.001 tolerance testing).
+2. **Tidal Lock Logic Integration:** MgT2e: Implemented an overarching celestial orbit gate checking for primary tidal locking and subsequent spin state overwrites for moons and mainworlds within tight binary orbits.
+3. **Tidal Amplitude Engine:** Implemented comprehensive tidal effect calculations (Scenarios A-E) and integrated "Tidal Amp" readouts into the star system accordion UI.
 
-### [v0.1.8.8] - 2026-03-10
-1. **Refactored Mongoose System Build:** Subdivided the 5000+ line `mgt2e_engine.js` into targeted modules (Mainworld, Socioeconomics, and System physics) for easier maintainability and read state initialization.
+
+### [v0.1.8.9] - 2026-03-10
+1. **Day Length Refinement:** MgT2e: Fully integrated World Builder's Handbooks rules for computing rotation multipliers (x2 for small/gas giants vs x4) and added secure processing for >90 degree retrograde solar day fractions.
+2. **Atmosphere Composition Interface:** MgT2e: Clamped accordion atmospheric gas readouts to explicitly display the top 3 dominant planetary gases out of consideration for UI space.
+
 
 ---
 *For a full history of changes, see the [Changelog](changelog.md).*

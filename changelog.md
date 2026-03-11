@@ -1,5 +1,17 @@
 # Changelog
 
+### [v0.1.8.10] - 2026-03-11
+1. **Physical Generation Formulas:** Adjusted `mgt2e_calculateTerrestrialPhysical` and corresponding validators to conform exactly to the Continuation Method's strict dimensional formulas (0.001 tolerance testing).
+2. **Tidal Lock Logic Integration:** Implemented an overarching celestial orbit gate checking for primary tidal locking and subsequent spin state overwrites for moons and mainworlds within tight binary orbits.
+3. **Tidal Amplitude Engine:** Implemented comprehensive tidal effect calculations (Scenarios A-E) and integrated "Tidal Amp" readouts into the star system accordion UI.
+
+### [v0.1.8.9] - 2026-03-10
+1. **Day Length Refinement:** Fully integrated World Builder's Handbooks rules for computing rotation multipliers (x2 for small/gas giants vs x4) and added secure processing for >90 degree retrograde solar day fractions.
+2. **Atmosphere Composition Interface:** Clamped accordion atmospheric gas readouts to explicitly display the top 3 dominant planetary gases out of consideration for UI space.
+
+### [v0.1.8.8] - 2026-03-10
+1. **Refactored Mongoose System Build:** Subdivided the 5000+ line `mgt2e_engine.js` into targeted modules (Mainworld, Socioeconomics, and System physics) for easier maintainability and read state initialization.
+
 ### [v0.1.8.7] - 2026-03-09
 1. **Atmosphere Physics Logging:** Implemented comprehensive structural logging for terrestrial world atmosphere generation (Modules 1-6), covering pressure math, oxygen fraction/ppo, scale height, and detailed taint subtype/severity/persistence rolls.
 2. **Forbidden Zone Resolution:** Refactored the Baseline Orbit (Mainworld) conflict resolution logic to use official tabletop variance rules (`2D-7 / 10`) when an anchor falls within a gas giant's Forbidden Zone.

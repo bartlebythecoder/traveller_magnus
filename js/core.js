@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.1.8.8";
-const APP_BANNER = "v0.1.8.8 Refactored Mongsoose System Build";
+const APP_VERSION = "v0.1.8.10";
+const APP_BANNER = "v0.1.8.10 Corrected Tidal Lock and Density Calculations";
 
 // -----------------------------------------------------------------------------
 // Application State

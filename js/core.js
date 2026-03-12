@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.1.9";
-const APP_BANNER = "v0.1.9 Added RTT Worldgen Engine.";
+const APP_VERSION = "v0.1.9.1";
+const APP_BANNER = "v0.1.9.1 Updated Bases in RTT Engine";
 
 // -----------------------------------------------------------------------------
 // Application State

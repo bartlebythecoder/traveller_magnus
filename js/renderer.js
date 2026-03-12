@@ -263,7 +263,8 @@ function draw() {
                     ctx.fillText(hexId, cx, cy - (size * 0.75));
 
                     if (data) {
-                        const isAsteroid = (data.size === 0);
+                        // Skip asteroid rendering if this is just an empty star system
+                        const isAsteroid = (data.size === 0 && !data.isStellarOnly);
                         const isWet = (
                             data.hydro !== undefined && data.hydro >= 1 &&
                             data.atm !== undefined && (

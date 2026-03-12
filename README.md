@@ -1,4 +1,4 @@
-# As Above, So Below (v0.1.9)
+# As Above, So Below (v0.1.9.1)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -14,7 +14,7 @@ This tool is an unofficial fan project and is not affiliated with Mongoose Publi
 This workbench allows Game Masters and world-builders to generate, import, and expand star systems using multiple generations of Traveller logic. Whether you are running a Classic Traveller campaign or a high-crunch Traveller 5 (T5) simulation, this tool ensures that your "expanded" systems remain 100% consistent with your sector-level data.
 
 ## Key Features
-- **Multi-Era Engine:** Toggle between **Classic Traveller (Book 6)**, **Mongoose Traveller (2nd Edition)** and **Traveller 5 (T5)** expansion logic.
+- **Multi-Era Engine:** Toggle between **Classic Traveller (Book 6)**, **Mongoose Traveller (2nd Edition)**, **Traveller 5 (T5)**  and **RTT** expansion logic.
 - **Interstellar Connectivity:** Automatic generation of X-boat trade lanes based on world Importance {Ix} scores.
 - **Manual Routing:** Draw and color-code custom routes (Xboat, Trade, Secondary) directly on the hex map.
 - **Full System Generation:** Dynamic stellar classification, gravity derivation, and automated moon/satellite inventory.
@@ -29,15 +29,21 @@ This workbench allows Game Masters and world-builders to generate, import, and e
     - **Ctrl + Z / Ctrl + Shift + Z:** Undo and Redo cartography or expansion actions.
 4. **View Details:** Use **Ctrl + Click** on any populated hex to open the **World Details** panel, which provides deep physical and socioeconomic breakdowns for the entire star system.
 5. **Bulk Macros:** Select a group of hexes (Shift+Drag) and use the right-click context menu or:
-    - **Ctrl + Alt + M:** Full Mongoose 2E Generation sequence.
-    - **Ctrl + Alt + C:** Full Classic Traveller (Book 6) Generation sequence.
+    - **Ctrl + Alt + M:** Full Mongoose 2E Generation sequence (includes system population).
+    - **Ctrl + Alt + C:** Full Classic Traveller (Book 6) Generation sequence (includes system population).
+    - **Ctrl + Alt + R:** Full RTT Generation sequence (includes system population).
 ---
 ## 📜 Changelog
+
+### [v0.1.9.1] - 2026-03-12
+1. **RTT Engine:** Removed asteroid symbol from empty stars in the hex map.
 
 ### [v0.1.9] - 2026-03-11
 1. **Bulk Macros:** Changed CT bulk macro to **Ctrl + Alt + C**.
 2. **Dynamic Grid Scaling:** Resized the global map from 8x4 sectors to **7x5 sectors**.
 3. **Context Menu:** Added full system generation macros to the context menu.
+4. **RTT Generation:** Added RTT system generation and macro.
+
 
 
 

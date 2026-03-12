@@ -1796,11 +1796,11 @@ function assignRTTBases(body, star) {
         }
         if (tRoll2D('Naval Roll') >= 8) {
             bases.push('N');
-            if (tRoll2D('Naval Special') >= 11) bases.push('Y or H');
+            if (tRoll2D('Naval Special') >= 11) bases.push(Math.random() < 0.5 ? 'Y' : 'H');
         }
         if (tRoll2D('Research Roll') >= 8) {
             bases.push('R');
-            if (tRoll2D('Research Special') >= 11) bases.push('H, U, or L');
+            if (tRoll2D('Research Special') >= 11) bases.push(['H', 'U', 'L'][Math.floor(Math.random() * 3)]);
         }
         if (tRoll2D('Scout Roll') >= 10) bases.push('S');
         if (tRoll2D('TAS Roll') >= 4) bases.push('T');
@@ -1816,7 +1816,7 @@ function assignRTTBases(body, star) {
         }
         if (tRoll2D('Naval Roll') >= 8) {
             bases.push('N');
-            if (tRoll2D('Naval Special') >= 11) bases.push('Y or H');
+            if (tRoll2D('Naval Special') >= 11) bases.push(Math.random() < 0.5 ? 'Y' : 'H');
         }
         if (tRoll2D('Pirate Roll') >= 12) bases.push('P');
         if (tRoll2D('Research Roll') >= 10) bases.push('R');
@@ -1831,7 +1831,7 @@ function assignRTTBases(body, star) {
         if (tRoll2D('Merchant Roll') >= 10) bases.push('M');
         if (tRoll2D('Naval Roll') >= 8) {
             bases.push('N');
-            if (tRoll2D('Naval Special') >= 11) bases.push('Y or H');
+            if (tRoll2D('Naval Special') >= 11) bases.push(Math.random() < 0.5 ? 'Y' : 'H');
         }
         if (tRoll2D('Pirate Roll') >= 10) bases.push('P');
         if (tRoll2D('Research Roll') >= 10) bases.push('R');

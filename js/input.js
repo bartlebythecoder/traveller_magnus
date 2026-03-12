@@ -1536,17 +1536,56 @@ function openHexEditor(hexId) {
     document.getElementById('edit-law').value = data.law;
     document.getElementById('edit-tl').value = data.tl;
 
-    document.getElementById('edit-naval').checked = data.navalBase || false;
-    document.getElementById('edit-scout').checked = data.scoutBase || false;
-    document.getElementById('edit-military').checked = data.militaryBase || false;
-    document.getElementById('edit-corsair').checked = data.corsairBase || false;
+    const b = data.bases || [];
+    document.getElementById('edit-naval').checked = data.navalBase || b.includes('N') || false;
+    document.getElementById('edit-scout').checked = data.scoutBase || b.includes('S') || false;
+    document.getElementById('edit-military').checked = data.militaryBase || false; // RTT uses M for Merchant
+    document.getElementById('edit-corsair').checked = data.corsairBase || b.includes('P') || false;
+    document.getElementById('edit-research').checked = data.researchBase || b.includes('R') || false;
+    document.getElementById('edit-tas').checked = data.tas || b.includes('T') || false;
+    document.getElementById('edit-waystation').checked = data.wayStation || b.includes('W') || false;
+    document.getElementById('edit-gov-estate').checked = data.govEstate || b.includes('G') || false;
+    document.getElementById('edit-embassy').checked = data.embassy || b.includes('F') || false;
+    document.getElementById('edit-moot').checked = data.moot || b.includes('Moot') || false;
+    document.getElementById('edit-merchant').checked = data.merchantBase || b.includes('M') || false;
+    document.getElementById('edit-shipyard').checked = data.shipyard || b.includes('Y') || false;
+    document.getElementById('edit-megacorp').checked = data.megaCorp || b.includes('MegaCorp HQ') || false;
+    document.getElementById('edit-scout-hostel').checked = data.scoutHostel || b.includes('Scout Hostel') || false;
+    document.getElementById('edit-psionics').checked = data.psionics || b.includes('Z') || false;
+    document.getElementById('edit-sacred').checked = data.sacredSite || b.includes('K') || false;
+    document.getElementById('edit-enclave').checked = data.enclave || b.includes('V') || false;
+    document.getElementById('edit-ancients').checked = data.ancients || b.includes('Q') || false;
     document.getElementById('edit-gas').checked = data.gasGiant || false;
 
     document.getElementById('edit-trade-codes').value = data.tradeCodes ? data.tradeCodes.join(' ') : '';
     document.getElementById('edit-travel-zone').value = data.travelZone || 'Green';
 
-    document.getElementById('edit-military').parentElement.style.display = stateObj.mgt2eData ? 'flex' : 'none';
-    document.getElementById('edit-corsair').parentElement.style.display = stateObj.mgt2eData ? 'flex' : 'none';
+    // Dynamic UI Toggles based on active generation engine
+    const isRTT = !!stateObj.rttData;
+    const isMgT2E = !!stateObj.mgt2eData;
+    const isT5 = !!stateObj.t5Data;
+    const isCT = !!stateObj.ctData;
+
+    // MgT2E / T5 Shared
+    document.getElementById('edit-military').parentElement.style.display = (isMgT2E || isT5) ? 'flex' : 'none';
+    document.getElementById('edit-corsair').parentElement.style.display = (isMgT2E || isT5 || isRTT) ? 'flex' : 'none';
+
+    // T5 / RTT Shared (Research, TAS, Waystation)
+    ['edit-research', 'edit-tas', 'edit-waystation'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.parentElement.style.display = (isT5 || isRTT) ? 'flex' : 'none';
+    });
+
+    // RTT EXCLUSIVE Bases
+    const rttOnlyBases = [
+        'edit-gov-estate', 'edit-embassy', 'edit-moot', 'edit-merchant', 
+        'edit-shipyard', 'edit-megacorp', 'edit-scout-hostel', 
+        'edit-psionics', 'edit-sacred', 'edit-enclave', 'edit-ancients'
+    ];
+    rttOnlyBases.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.parentElement.style.display = isRTT ? 'flex' : 'none';
+    });
 
     // Reset accordions
     document.getElementById('editor-socio-t5-container').style.display = 'none';
@@ -2409,39 +2448,59 @@ function saveHexEditorChanges() {
     const scoutBase = document.getElementById('edit-scout').checked;
     const militaryBase = document.getElementById('edit-military').checked;
     const corsairBase = document.getElementById('edit-corsair').checked;
+    const researchBase = document.getElementById('edit-research').checked;
+    const tas = document.getElementById('edit-tas').checked;
+    const wayStation = document.getElementById('edit-waystation').checked;
+    const govEstate = document.getElementById('edit-gov-estate').checked;
+    const embassy = document.getElementById('edit-embassy').checked;
+    const moot = document.getElementById('edit-moot').checked;
+    const merchantBase = document.getElementById('edit-merchant').checked;
+    const shipyard = document.getElementById('edit-shipyard').checked;
+    const megaCorp = document.getElementById('edit-megacorp').checked;
+    const scoutHostel = document.getElementById('edit-scout-hostel').checked;
+    const psionics = document.getElementById('edit-psionics').checked;
+    const sacredSite = document.getElementById('edit-sacred').checked;
+    const enclave = document.getElementById('edit-enclave').checked;
+    const ancients = document.getElementById('edit-ancients').checked;
     const gasGiant = document.getElementById('edit-gas').checked;
+
+    let bases = [];
+    if (navalBase) bases.push('N');
+    if (scoutBase) bases.push('S');
+    if (corsairBase) bases.push('P');
+    if (researchBase) bases.push('R');
+    if (tas) bases.push('T');
+    if (wayStation) bases.push('W');
+    if (govEstate) bases.push('G');
+    if (embassy) bases.push('F');
+    if (moot) bases.push('Moot');
+    if (merchantBase) bases.push('M');
+    if (shipyard) bases.push('Y');
+    if (megaCorp) bases.push('MegaCorp HQ');
+    if (scoutHostel) bases.push('Scout Hostel');
+    if (psionics) bases.push('Z');
+    if (sacredSite) bases.push('K');
+    if (enclave) bases.push('V');
+    if (ancients) bases.push('Q');
 
     const tcString = document.getElementById('edit-trade-codes').value;
     const tradeCodes = tcString.split(/\s+/).filter(tc => tc.length > 0);
-
     const uwp = `${starport}${toUWPChar(size)}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
 
-    // Update the appropriate data object and explicitly save the name
+    const sharedData = { uwp, travelZone: document.getElementById('edit-travel-zone').value, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, bases, navalBase, scoutBase, militaryBase, corsairBase, researchBase, tas, wayStation, govEstate, embassy, moot, merchantBase, shipyard, megaCorp, scoutHostel, psionics, sacredSite, enclave, ancients, gasGiant };
+
     if (stateObj.t5Data) {
-        stateObj.t5Data.name = name;
-        const travelZone = document.getElementById('edit-travel-zone').value;
-        stateObj.t5Data = { ...stateObj.t5Data, uwp, travelZone, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
-        stateObj.mgt2eData = null;
-        stateObj.ctData = null;
+        stateObj.t5Data = { ...stateObj.t5Data, ...sharedData, name };
+        stateObj.mgt2eData = null; stateObj.ctData = null; stateObj.rttData = null;
     } else if (stateObj.mgt2eData) {
-        stateObj.mgt2eData.name = name;
-        const travelZone = document.getElementById('edit-travel-zone').value;
-        stateObj.mgt2eData = { ...stateObj.mgt2eData, uwp, travelZone, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
-        stateObj.t5Data = null;
-        stateObj.ctData = null;
+        stateObj.mgt2eData = { ...stateObj.mgt2eData, ...sharedData, name };
+        stateObj.t5Data = null; stateObj.ctData = null; stateObj.rttData = null;
     } else if (stateObj.ctData) {
-        stateObj.ctData.name = name;
-        const travelZone = document.getElementById('edit-travel-zone').value;
-        stateObj.ctData = { ...stateObj.ctData, uwp, travelZone, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, gasGiant };
-        stateObj.t5Data = null;
-        stateObj.mgt2eData = null;
+        stateObj.ctData = { ...stateObj.ctData, ...sharedData, name };
+        stateObj.t5Data = null; stateObj.mgt2eData = null; stateObj.rttData = null;
     } else if (stateObj.rttData) {
-        stateObj.rttData.name = name;
-        const travelZone = document.getElementById('edit-travel-zone').value;
-        stateObj.rttData = { ...stateObj.rttData, uwp, travelZone, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
-        stateObj.t5Data = null;
-        stateObj.mgt2eData = null;
-        stateObj.ctData = null;
+        stateObj.rttData = { ...stateObj.rttData, ...sharedData, name };
+        stateObj.t5Data = null; stateObj.mgt2eData = null; stateObj.ctData = null;
     }
 
     // Also save name at the stateObj level for consistency

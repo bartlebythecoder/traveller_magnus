@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.1.8.12";
-const APP_BANNER = "v0.1.8.12 Mongoose Main World Tech level updates";
+const APP_VERSION = "v0.1.9";
+const APP_BANNER = "v0.1.9 Added RTT Worldgen Engine.";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -115,10 +115,10 @@ function saveHistoryState(actionName) {
 // -----------------------------------------------------------------------------
 
 function getHexId(q, r) {
-    if (q < 0 || q > 255 || r < 0 || r > 159) return null;
+    if (q < 0 || q > 223 || r < 0 || r > 199) return null;
     const sectorX = Math.floor(q / 32);
     const sectorY = Math.floor(r / 40);
-    const sectorIndex = sectorY * 8 + sectorX;
+    const sectorIndex = sectorY * 7 + sectorX;
     let sectorChar = sectorIndex < 26 ? String.fromCharCode(65 + sectorIndex) :
         String.fromCharCode(65 + (sectorIndex - 26)) + String.fromCharCode(65 + (sectorIndex - 26));
     const subsectorX = Math.floor((q % 32) / 8);
@@ -144,8 +144,8 @@ function getHexCoords(hexId) {
     if (parts.length < 3) return null;
     const sChar = parts[0];
     const sIdx = sChar.length === 1 ? sChar.charCodeAt(0) - 65 : (sChar.charCodeAt(0) - 65) + 26;
-    const sectorX = sIdx % 8;
-    const sectorY = Math.floor(sIdx / 8);
+    const sectorX = sIdx % 7;
+    const sectorY = Math.floor(sIdx / 7);
     const localQ = parseInt(parts[2].substring(0, 2)) - 1;
     const localR = parseInt(parts[2].substring(2, 4)) - 1;
     return { q: sectorX * 32 + localQ, r: sectorY * 40 + localR };

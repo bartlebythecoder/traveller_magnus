@@ -1,4 +1,4 @@
-# As Above, So Below (v0.1.8.12)
+# As Above, So Below (v0.1.9)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -30,27 +30,15 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 4. **View Details:** Use **Ctrl + Click** on any populated hex to open the **World Details** panel, which provides deep physical and socioeconomic breakdowns for the entire star system.
 5. **Bulk Macros:** Select a group of hexes (Shift+Drag) and use the right-click context menu or:
     - **Ctrl + Alt + M:** Full Mongoose 2E Generation sequence.
-    - **Ctrl + Alt + S:** Full Classic Traveller (Book 6) Generation sequence.
+    - **Ctrl + Alt + C:** Full Classic Traveller (Book 6) Generation sequence.
 ---
 ## 📜 Changelog
 
-### [v0.1.8.12] - 2026-03-11
-1. **Mongoose Socioeconomics:** Updated Resource and PCR formulas to incorporate values from Mongoose System Generation.
-2. **Mongoose System Generation:** Updated Tech Level Refinement to incorporate values from Mongoose System Generation.
-3. **Mongoose Bulk Macro Overview:** Now runs System Expand before Socioeconomic Expand
-4. **Mongoose Mainworld Generation:** Added logic to ensure TL followed Core Rulebook including environmental minimums.
-5. **Macros:** Changed bulk macros from Ctrl+Shift to Ctrl+Alt to avoid conflicts with Browser shortcuts.
+### [v0.1.9] - 2026-03-11
+1. **Bulk Macros:** Changed CT bulk macro to **Ctrl + Alt + C**.
+2. **Dynamic Grid Scaling:** Resized the global map from 8x4 sectors to **7x5 sectors**.
+3. **Context Menu:** Added full system generation macros to the context menu.
 
-### [v0.1.8.11] - 2026-03-11
-1. **Thermal & Seismic Overhaul:** Implemented the World Builder's Handbook 4th-power temperature addition model, combining solar luminosity with inherent geological/tidal heat.
-2. **Advanced Albedo & Greenhouse Logic:** Refactored albedo scaling for Rocky/Icy transitions and implemented atmosphere-specific Greenhouse Factor (GF) variance.
-3. **Seismic Stress Model:** Integrated a three-component stress engine (Residual, Tidal Stress, Tidal Heating) to drive planetary volcanism and tectonic activity.
-4. **Life Profile Logic Refinement:** 
-    - **Biodiversity:** Implemented the strict `2D - 7 + CEILING((Biomass + Biocomplexity) / 2)` formula.
-    - **Compatibility:** Refactored DMs to prioritize atmospheric taints and age penalties (8.0+ Gyr), ensuring mandatory floor rounding for final ratings.
-    - **UI Integration:** 
-        - Added "Native Life" field to the Mongoose system accordion (4-digit ehex profile).
-        - Integrated "Res" (Resource) rating for all terrestrial worlds and moons, placed after Habitability for consistent system navigation.
 
 
 ---

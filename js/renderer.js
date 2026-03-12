@@ -94,8 +94,8 @@ function draw() {
 
     // (Moved to layered pass below)
 
-    const MAX_GLOBAL_Q = 255;
-    const MAX_GLOBAL_R = 159;
+    const MAX_GLOBAL_Q = 223;
+    const MAX_GLOBAL_R = 199;
 
     // =========================================================================
     // PASS 1: DRAW THE GRID & HEX BACKGROUNDS
@@ -215,7 +215,7 @@ function draw() {
             const stateType = stateObj ? stateObj.type : 'BLANK';
 
             if (stateType === 'SYSTEM_PRESENT') {
-                const data = stateObj.t5Data || stateObj.mgt2eData || stateObj.ctData;
+                const data = stateObj.rttData || stateObj.t5Data || stateObj.mgt2eData || stateObj.ctData;
 
                 if (!devView) {
                     // =============================================
@@ -477,17 +477,17 @@ function draw() {
 
     // Draw Sector & Subsector Borders
     if (showSubsectorBorders) {
-        const totalWidth = 255 * widthStep + size; // Extend lines to right edge of last hex
-        const totalHeight = 159 * heightStep + (heightStep / 2) + size; // Roughly bottom edge
+        const totalWidth = 223 * widthStep + size; // Extend lines to right edge of last hex
+        const totalHeight = 199 * heightStep + (heightStep / 2) + size; // Roughly bottom edge
 
         // Subsector borders (thinner, darker)
         ctx.beginPath();
-        for (let i = 1; i <= 31; i++) {
+        for (let i = 1; i <= 27; i++) {
             const x = (i * 8 - 0.5) * widthStep;
             ctx.moveTo(x, -heightStep);
             ctx.lineTo(x, totalHeight);
         }
-        for (let j = 1; j <= 15; j++) {
+        for (let j = 1; j <= 19; j++) {
             const y = (j * 10 - 0.5) * heightStep;
             ctx.moveTo(-size, y);
             ctx.lineTo(totalWidth, y);
@@ -498,12 +498,12 @@ function draw() {
 
         // Sector borders (thicker, brighter)
         ctx.beginPath();
-        for (let i = 4; i <= 28; i += 4) {
+        for (let i = 4; i <= 24; i += 4) {
             const x = (i * 8 - 0.5) * widthStep;
             ctx.moveTo(x, -heightStep);
             ctx.lineTo(x, totalHeight);
         }
-        for (let j = 4; j <= 12; j += 4) {
+        for (let j = 4; j <= 16; j += 4) {
             const y = (j * 10 - 0.5) * heightStep;
             ctx.moveTo(-size, y);
             ctx.lineTo(totalWidth, y);

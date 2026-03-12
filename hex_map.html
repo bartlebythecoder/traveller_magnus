@@ -21,6 +21,7 @@
     <script src="js/mgt2e_socioeconomics.js" defer></script>
     <script src="js/mgt2e_system.js" defer></script>
     <script src="js/t5_engine.js" defer></script>
+    <script src="js/rtt_engine.js" defer></script>
     <!-- Modular JavaScript Input Handling -->
     <script src="js/input.js" defer></script>
     <!-- Optional: auto-load system names. Generate names.js by running convert_names.ps1 -->
@@ -33,9 +34,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above So Below</span></h1>
-            <div class="splash-banner">v0.1.8.12 Mongoose Main World Tech level updates</div>
+            <div class="splash-banner">v0.1.9 Added RTT Worldgen Engine.</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.1.8.12</div>
+            <div class="splash-version">v0.1.9</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -49,7 +50,8 @@
                     <div class="shortcut-item"><strong>Ctrl + S</strong><span>Toggle Select Sector</span></div>
                     <div class="shortcut-item"><strong>Ctrl + B</strong><span>Toggle Select Subsector</span></div>
                     <div class="shortcut-item"><strong>Ctrl + Alt + M</strong><span>Full MgT2E Macro</span></div>
-                    <div class="shortcut-item"><strong>Ctrl + Alt + S</strong><span>Full CT Macro</span></div>
+                    <div class="shortcut-item"><strong>Ctrl + Alt + C</strong><span>Full CT Macro</span></div>
+                    <div class="shortcut-item"><strong>Ctrl + Alt + R</strong><span>Full RTT Macro</span></div>
                     <div class="shortcut-item"><strong>Escape</strong><span>Cancel / Close All</span></div>
                 </div>
             </div>
@@ -179,13 +181,17 @@
             </div>
         </div>
 
+        <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
+
         <!-- GENERATE Menu -->
         <div class="context-menu-item has-submenu">
-            GENERATE MAINWORLD
+            GENERATE (MAINWORLD / SYSTEM)
             <div class="submenu">
                 <button class="context-menu-item" id="ctx-gen-ct">Classic Traveller (CT)</button>
                 <button class="context-menu-item" id="ctx-gen-mgt2e">Mongoose 2nd Ed (MgT2E)</button>
                 <button class="context-menu-item" id="ctx-gen-t5">Traveller 5 (T5)</button>
+                <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
+                <button class="context-menu-item" id="ctx-gen-rtt">RTT (Full System)</button>
             </div>
         </div>
 
@@ -208,6 +214,20 @@
             </div>
         </div>
 
+        <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
+
+        <!-- COMPLETE SYSTEM Menu -->
+        <div class="context-menu-item has-submenu">
+            COMPLETE SYSTEM
+            <div class="submenu">
+                <button class="context-menu-item" id="ctx-macro-ct">CT Continuation (Top Down) Ctrl+Alt+C</button>
+                <button class="context-menu-item" id="ctx-macro-mgt2e">MgT2e Continuation (Top Down) Ctrl+Alt+M</button>
+                <button class="context-menu-item" id="ctx-macro-rtt">RTT Full Generation (Bottom Up) Ctrl+Alt+R</button>
+            </div>
+        </div>
+
+        <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
+
         <button class="context-menu-item" id="ctx-gen-xboat">GENERATE XBOAT ROUTES</button>
 
         <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
@@ -218,7 +238,7 @@
     <div id="help-modal">
         <div style="text-align: center; border-bottom: 2px solid #45a29e; padding-bottom: 15px; margin-bottom: 20px;">
             <h2 style="margin: 0 0 5px 0; color: #66fcf1; font-size: 24px;">As Above So Below</h2>
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.1.8.12</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.1.9</span>
             <p style="margin: 5px 0; color: #c5c6c7; font-size: 12px; font-style: italic;">Created by: <span
                     id="app-credits">Bartleby the Coder</span></p>
         </div>
@@ -243,7 +263,8 @@
                     <strong>Ctrl + Click</strong><span>Open World Details</span>
                     <strong>Right Click</strong><span>Open Context Menu</span>
                     <strong>Ctrl + Alt + M</strong><span style="color: #ffa500;">Bulk Mongoose Macro</span>
-                    <strong>Ctrl + Alt + S</strong><span style="color: #66fcf1;">Bulk CT / Book 6 Macro</span>
+                    <strong>Ctrl + Alt + C</strong><span style="color: #66fcf1;">Bulk CT / Book 6 Macro</span>
+                    <strong>Ctrl + Alt + R</strong><span style="color: #45a29e;">Bulk RTT Macro</span>
                     <strong>Ctrl + Z</strong><span>Undo Last Action</span>
                     <strong>Ctrl + Shift + Z</strong><span>Redo Action</span>
                 </div>
@@ -359,6 +380,12 @@
         <!-- MgT2E System Expand Accordion -->
         <button class="accordion-btn" id="acc-btn-mgt-system" style="display: none;">MgT2E System</button>
         <div class="accordion-content" id="editor-mgt-system-root" style="display: none;">
+            <!-- Content will be injected via JS -->
+        </div>
+
+        <!-- RTT System Expand Accordion -->
+        <button class="accordion-btn" id="acc-btn-rtt-system" style="display: none;">RTT System</button>
+        <div class="accordion-content" id="editor-rtt-system-root" style="display: none;">
             <!-- Content will be injected via JS -->
         </div>
 

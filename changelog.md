@@ -1,10 +1,15 @@
 # Changelog
 
+### [v0.1.9] - 2026-03-11
+1. **Bulk Macros:** Changed CT bulk macro to **Ctrl + Alt + C**.
+2. **Dynamic Grid Scaling:** Resized the global map from 8x4 sectors to **7x5 sectors**.
+3. **Context Menu:** Added full system generation macros to the context menu.
+
 ### [v0.1.8.12] - 2026-03-11
-1. **Geological & Thermal Integration:** Finalized the integration of Inherent Heat from tidal and radioactive sources, using the 4th-power Stefan-Boltzmann summation for final blackbody temperatures.
-2. **Atmospheric Greenhouse Refinement:** Updated Greenhouse Factor (GF) logic to scale dynamically with atmospheric pressure and composition, ensuring realistic heat retention for dense or runaway environments.
-3. **Advanced Albedo Models:** Refactored planetary albedo calculations to account for transitional "Icy-Rocky" states and atmospheric scattering (Rayleigh/Mie) effects.
-4. **Seismic Activity Engine:** Completed the three-component Seismic Stress model (Residual, Tidal Stress, Tidal Heating) to determine planetary volcanic and tectonic classifications.
+1. **Mongoose Socioeconomics:** Updated Resource and PCR formulas to incorporate values from Mongoose System Generation.
+2. **Mongoose System Generation:** Updated Tech Level Refinement to incorporate values from Mongoose System Generation.
+3. **Geological & Thermal Integration:** Finalized the integration of Inherent Heat from tidal and radioactive sources.
+4. **Mongoose Mainworld Generation:** Added logic to ensure TL followed Core Rulebook including environmental minimums.
 
 ### [v0.1.8.11] - 2026-03-11
 1. **Thermal & Seismic Overhaul:** Implemented the World Builder's Handbook 4th-power temperature addition model, combining solar luminosity with inherent geological/tidal heat.

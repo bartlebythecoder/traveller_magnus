@@ -330,203 +330,16 @@ function setupKeyboardShortcuts() {
             }
         } else if (e.ctrlKey && e.altKey && key === 'm') {
             e.preventDefault();
-            if (!validateSelection('generate')) return;
-
-            saveHistoryState('Mongoose Macro');
-            if (window.isLoggingEnabled) window.batchLogData = [];
-
-            console.log("Bulk Generating MgT2E Full System...");
-            await ensureNamesLoaded();
-
-            if (!confirm("This will completely overwrite ANY existing data in the selected hexes with a Full Mongoose 2E Generation sequence. Proceed?")) {
-                return;
-            }
-
-            // Capture the target hexes NOW so they don't change if the user deselects during the wait
-            const targetHexes = Array.from(selectedHexes);
-
-            // Auto Populate
-            targetHexes.forEach(hexId => {
-                const roll = roll1D();
-                if (roll <= 3) {
-                    hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
-                } else {
-                    hexStates.set(hexId, { type: 'EMPTY' });
-                }
-            });
-            requestAnimationFrame(draw);
-            showToast(`Populated ${targetHexes.length} hex(es)...`, 1000);
-
-            // Generate Mainworlds
-            setTimeout(() => {
-                targetHexes.forEach(hexId => {
-                    try {
-                        let stateObj = hexStates.get(hexId);
-                        if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
-                            stateObj.mgt2eData = generateMgT2EMainworld(hexId);
-                            // Clear all variants to ensure fresh generation
-                            stateObj.ctData = null;
-                            stateObj.t5Data = null;
-                            stateObj.ctSystem = null;
-                            stateObj.mgtSystem = null;
-                            stateObj.t5System = null;
-                            stateObj.ctPhysical = null;
-                            stateObj.mgtPhysical = null;
-                            stateObj.t5Physical = null;
-                            stateObj.mgtSocio = null;
-                            stateObj.t5Socio = null;
-                            hexStates.set(hexId, stateObj);
-                        }
-                    } catch (err) {
-                        console.error(`Mongoose Macro Step 2 failed for hex ${hexId}:`, err);
-                    }
-                });
-                requestAnimationFrame(draw);
-                showToast(`Generated MgT2E Mainworlds...`, 1000);
-
-                // Physical System
-                setTimeout(() => {
-                    targetHexes.forEach(hexId => {
-                        try {
-                            let stateObj = hexStates.get(hexId);
-                            let baseData = stateObj ? (stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData) : null;
-                            if (baseData) {
-                                let chunk1System = generateMgT2ESystemChunk1(baseData);
-                                let systemWithOrbits = generateMgT2ESystemChunk2(chunk1System, baseData);
-                                let systemWithSizes = generateMgT2ESystemChunk3(systemWithOrbits, baseData);
-                                let systemWithAtmosphere = generateMgT2ESystemChunk4(systemWithSizes, baseData);
-                                let systemWithTemps = generateMgT2ESystemChunk5(systemWithAtmosphere);
-                                let systemWithRatings = generateMgT2ESystemChunk6(systemWithTemps);
-                                let systemWithUWP = generateMgT2ESystemChunk7(systemWithRatings, baseData);
-
-                                stateObj.mgtSystem = systemWithUWP;
-                                stateObj.t5Physical = null;
-                                stateObj.ctPhysical = null;
-                                hexStates.set(hexId, stateObj);
-                            }
-                        } catch (err) {
-                            console.error(`Mongoose Macro Step 3 failed for hex ${hexId}:`, err);
-                        }
-                    });
-                    requestAnimationFrame(draw);
-                    showToast(`Expanded MgT2E Physical System...`, 1000);
-
-                    // Socioeconomics
-                    setTimeout(() => {
-                        showToast(`Expanding MgT2E Socioeconomics...`, 1000);
-                        targetHexes.forEach(hexId => {
-                            try {
-                                let stateObj = hexStates.get(hexId);
-                                let baseData = stateObj ? (stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData) : null;
-                                if (baseData) {
-                                    // Use baseData because generateMgT2ESocioeconomics can accept it or check .mgtSystem inside? Wait, actually generateMgT2ESocioeconomics(baseData) has historically just taken the mainworld. But our baseData is just the Mainworld. Let's make sure it still references `baseData` since `generateMgT2ESocioeconomics(baseData)` passes the base.
-                                    stateObj.mgtSocio = generateMgT2ESocioeconomics(baseData);
-                                    stateObj.t5Socio = null;
-                                    hexStates.set(hexId, stateObj);
-                                }
-                            } catch (err) {
-                                console.error(`Mongoose Macro Step 4 failed for hex ${hexId}:`, err);
-                            }
-                        });
-                        if (window.isLoggingEnabled && window.batchLogData.length > 0) {
-                            downloadBatchLog('MgT2E_Full_Macro', targetHexes.length);
-                        }
-                        requestAnimationFrame(draw);
-                        showToast(`Full MgT2E Generation Complete!`, 4000);
-                    }, 500);
-                }, 500);
-            }, 500);
-        } else if (e.ctrlKey && e.altKey && key === 's') {
+            keysDown.clear(); // FIX: Prevent 'm' from getting stuck
+            runMgT2EMacro();
+        } else if (e.ctrlKey && e.altKey && key === 'c') {
             e.preventDefault();
-            if (!validateSelection('generate')) return;
-
-            saveHistoryState('CT Macro');
-
-            console.log("Bulk Generating CT Full System...");
-            await ensureNamesLoaded();
-
-            if (!confirm("This will completely overwrite ANY existing data in the selected hexes with a Full Classic Traveller Generation sequence. Proceed?")) {
-                return;
-            }
-
-            // Capture the target hexes NOW
-            const targetHexes = Array.from(selectedHexes);
-
-            // 1. Auto Populate (Standard 3 in 6)
-            targetHexes.forEach(hexId => {
-                reseedForHex(hexId);
-                const roll = roll1D();
-                if (roll <= 3) {
-                    hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
-                } else {
-                    hexStates.set(hexId, { type: 'EMPTY' });
-                }
-            });
-            requestAnimationFrame(draw);
-            showToast(`Populated ${targetHexes.length} hex(es)...`, 1000);
-
-            // 2. Generate Mainworlds
-            setTimeout(() => {
-                if (window.isLoggingEnabled) window.batchLogData = [];
-                targetHexes.forEach(hexId => {
-                    try {
-                        let stateObj = hexStates.get(hexId);
-                        if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
-                            stateObj.ctData = generateCTMainworld(hexId);
-                            // Clear all variants to ensure fresh generation
-                            stateObj.mgt2eData = null;
-                            stateObj.t5Data = null;
-                            stateObj.mgtSystem = null;
-                            stateObj.t5System = null;
-                            stateObj.ctSystem = null;
-                            stateObj.mgtPhysical = null;
-                            stateObj.t5Physical = null;
-                            stateObj.ctPhysical = null;
-                            stateObj.mgtSocio = null;
-                            stateObj.t5Socio = null;
-                            hexStates.set(hexId, stateObj);
-                        }
-                    } catch (err) {
-                        console.error(`Macro Step 2 (Mainworld) failed for hex ${hexId}:`, err);
-                    }
-                });
-                requestAnimationFrame(draw);
-                showToast(`Generated CT Mainworlds...`, 1000);
-
-                // 3. Expand Book 6 Systems
-                setTimeout(() => {
-                    targetHexes.forEach(hexId => {
-                        try {
-                            let stateObj = hexStates.get(hexId);
-                            let baseData = stateObj ? stateObj.ctData : null;
-                            if (baseData) {
-                                let systemName = baseData.name || stateObj.name || hexId;
-                                if (window.isLoggingEnabled) startTrace(hexId, 'CT System Macro Expansion', systemName);
-
-                                let chunk1 = generateCTSystemChunk1(baseData, hexId);
-                                let chunk2 = generateCTSystemChunk2(chunk1, baseData);
-                                let chunk3 = generateCTSystemChunk3(chunk2, baseData);
-                                let chunk4 = generateCTSystemChunk4(chunk3, baseData);
-                                let chunk5 = generateCTSystemChunk5(chunk4, baseData);
-                                stateObj.ctSystem = chunk5;
-                                stateObj.ctPhysical = generateCTPhysical(baseData, hexId);
-
-                                // Clean up cross-engine remnants
-                                stateObj.t5Physical = null;
-                                stateObj.mgtSystem = null;
-                                hexStates.set(hexId, stateObj);
-                            }
-                        } catch (err) {
-                            console.error(`Macro Step 3 (Expansion) failed for hex ${hexId}:`, err);
-                        }
-                    });
-                    if (window.isLoggingEnabled && window.batchLogData.length > 0) {
-                        downloadBatchLog('CT_Full_Macro', targetHexes.length);
-                    }
-                    requestAnimationFrame(draw);
-                    showToast(`Full CT Generation Complete!`, 4000);
-                }, 500);
-            }, 500);
+            keysDown.clear(); // FIX: Prevent 'c' from getting stuck
+            runCTMacro();
+        } else if (e.ctrlKey && e.altKey && key === 'r') {
+            e.preventDefault();
+            keysDown.clear(); // FIX: Prevent 'r' from getting stuck
+            runRTTMacro();
         } else if (e.key === 'Escape') {
             e.preventDefault();
             const hexEditor = document.getElementById('hex-editor');
@@ -579,6 +392,13 @@ function setupKeyboardShortcuts() {
     window.addEventListener('keyup', (e) => {
         keysDown.delete(e.key.toLowerCase());
     });
+
+    // FIX: Safety net to clear all keys if the window loses focus
+    window.addEventListener('blur', () => {
+        if (typeof keysDown !== 'undefined' && keysDown.clear) {
+            keysDown.clear();
+        }
+    });
 }
 
 // ============================================================================
@@ -595,8 +415,8 @@ function deselectAllHexes() {
 function toggleSectorHexes() {
     console.log("Sector Toggle Fired! Prefix:", contextSectorPrefix);
     if (!contextSectorPrefix) return;
-    for (let q = 0; q <= 255; q++) {
-        for (let r = 0; r <= 159; r++) {
+    for (let q = 0; q <= 223; q++) {
+        for (let r = 0; r <= 199; r++) {
             const id = getHexId(q, r);
             if (id && id.startsWith(contextSectorPrefix + '-')) {
                 if (selectedHexes.has(id)) selectedHexes.delete(id);
@@ -612,8 +432,8 @@ function toggleSectorHexes() {
 function toggleSubsectorHexes() {
     console.log("Subsector Toggle Fired! Prefix:", contextSubsectorPrefix);
     if (!contextSubsectorPrefix) return;
-    for (let q = 0; q <= 255; q++) {
-        for (let r = 0; r <= 159; r++) {
+    for (let q = 0; q <= 223; q++) {
+        for (let r = 0; r <= 199; r++) {
             const id = getHexId(q, r);
             if (id && id.startsWith(contextSubsectorPrefix)) {
                 if (selectedHexes.has(id)) selectedHexes.delete(id);
@@ -923,6 +743,46 @@ function setupGenerationHandlers() {
         }
         requestAnimationFrame(draw);
     });
+    
+    // RTT Generation
+    document.getElementById('ctx-gen-rtt').addEventListener('click', async () => {
+        if (!validateSelection('generate')) return;
+        saveHistoryState('Generate RTT System');
+        await ensureNamesLoaded();
+        
+        let count = 0;
+        selectedHexes.forEach(hexId => {
+            let stateObj = hexStates.get(hexId);
+            if (typeof stateObj === 'string') stateObj = { type: stateObj };
+            
+            if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
+                // RTT handles the full system top-to-bottom
+                stateObj.rttSystem = generateRTTSectorStep1(hexId); 
+                if (stateObj.rttSystem) {
+                    stateObj.rttData = extractRTTMainworld(stateObj.rttSystem);
+                }
+                
+                // Clear other engines
+                stateObj.ctData = null;
+                stateObj.mgt2eData = null;
+                stateObj.t5Data = null;
+                stateObj.ctSystem = null;
+                stateObj.mgtSystem = null;
+                stateObj.t5System = null;
+
+                hexStates.set(hexId, stateObj);
+                count++;
+            }
+        });
+        
+        document.getElementById('context-menu').classList.remove('visible');
+        if (count > 0) {
+            showToast(`Generated RTT Systems for ${count} hex(es)`);
+        } else {
+            showToast("No populated hexes selected");
+        }
+        requestAnimationFrame(draw); 
+    });
 
     // Socioeconomics
     document.getElementById('ctx-expand-socio-t5').addEventListener('click', () => {
@@ -1167,6 +1027,296 @@ function setupGenerationHandlers() {
         document.getElementById('context-menu').classList.remove('visible');
         requestAnimationFrame(draw);
     });
+
+    // Macro Continuation Handlers
+    document.getElementById('ctx-macro-ct').addEventListener('click', () => {
+        document.getElementById('context-menu').classList.remove('visible');
+        runCTMacro();
+    });
+
+    document.getElementById('ctx-macro-mgt2e').addEventListener('click', () => {
+        document.getElementById('context-menu').classList.remove('visible');
+        runMgT2EMacro();
+    });
+
+    document.getElementById('ctx-macro-rtt').addEventListener('click', () => {
+        document.getElementById('context-menu').classList.remove('visible');
+        runRTTMacro();
+    });
+}
+
+// ============================================================================
+// BULK MACRO EXECUTION
+// ============================================================================
+
+async function runMgT2EMacro() {
+    if (!validateSelection('generate')) return;
+
+    saveHistoryState('Mongoose Macro');
+    if (window.isLoggingEnabled) window.batchLogData = [];
+
+    console.log("Bulk Generating MgT2E Full System...");
+    await ensureNamesLoaded();
+
+    if (!confirm("This will completely overwrite ANY existing data in the selected hexes with a Full Mongoose 2E Generation sequence. Proceed?")) {
+        return;
+    }
+
+    // Capture the target hexes NOW so they don't change if the user deselects during the wait
+    const targetHexes = Array.from(selectedHexes);
+
+    // Auto Populate
+    targetHexes.forEach(hexId => {
+        const roll = roll1D();
+        if (roll <= 3) {
+            hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
+        } else {
+            hexStates.set(hexId, { type: 'EMPTY' });
+        }
+    });
+    requestAnimationFrame(draw);
+    showToast(`Populated ${targetHexes.length} hex(es)...`, 1000);
+
+    // Generate Mainworlds
+    setTimeout(() => {
+        targetHexes.forEach(hexId => {
+            try {
+                let stateObj = hexStates.get(hexId);
+                if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
+                    stateObj.mgt2eData = generateMgT2EMainworld(hexId);
+                    // Clear all variants to ensure fresh generation
+                    stateObj.ctData = null;
+                    stateObj.t5Data = null;
+                    stateObj.ctSystem = null;
+                    stateObj.mgtSystem = null;
+                    stateObj.t5System = null;
+                    stateObj.ctPhysical = null;
+                    stateObj.mgtPhysical = null;
+                    stateObj.t5Physical = null;
+                    stateObj.mgtSocio = null;
+                    stateObj.t5Socio = null;
+                    hexStates.set(hexId, stateObj);
+                }
+            } catch (err) {
+                console.error(`Mongoose Macro Step 2 failed for hex ${hexId}:`, err);
+            }
+        });
+        requestAnimationFrame(draw);
+        showToast(`Generated MgT2E Mainworlds...`, 1000);
+
+        // Physical System
+        setTimeout(() => {
+            targetHexes.forEach(hexId => {
+                try {
+                    let stateObj = hexStates.get(hexId);
+                    let baseData = stateObj ? (stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData) : null;
+                    if (baseData) {
+                        let chunk1System = generateMgT2ESystemChunk1(baseData);
+                        let systemWithOrbits = generateMgT2ESystemChunk2(chunk1System, baseData);
+                        let systemWithSizes = generateMgT2ESystemChunk3(systemWithOrbits, baseData);
+                        let systemWithAtmosphere = generateMgT2ESystemChunk4(systemWithSizes, baseData);
+                        let systemWithTemps = generateMgT2ESystemChunk5(systemWithAtmosphere);
+                        let systemWithRatings = generateMgT2ESystemChunk6(systemWithTemps);
+                        let systemWithUWP = generateMgT2ESystemChunk7(systemWithRatings, baseData);
+
+                        stateObj.mgtSystem = systemWithUWP;
+                        stateObj.t5Physical = null;
+                        stateObj.ctPhysical = null;
+                        hexStates.set(hexId, stateObj);
+                    }
+                } catch (err) {
+                    console.error(`Mongoose Macro Step 3 failed for hex ${hexId}:`, err);
+                }
+            });
+            requestAnimationFrame(draw);
+            showToast(`Expanded MgT2E Physical System...`, 1000);
+
+            // Socioeconomics
+            setTimeout(() => {
+                showToast(`Expanding MgT2E Socioeconomics...`, 1000);
+                targetHexes.forEach(hexId => {
+                    try {
+                        let stateObj = hexStates.get(hexId);
+                        let baseData = stateObj ? (stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData) : null;
+                        if (baseData) {
+                            stateObj.mgtSocio = generateMgT2ESocioeconomics(baseData);
+                            stateObj.t5Socio = null;
+                            hexStates.set(hexId, stateObj);
+                        }
+                    } catch (err) {
+                        console.error(`Mongoose Macro Step 4 failed for hex ${hexId}:`, err);
+                    }
+                });
+                if (window.isLoggingEnabled && window.batchLogData.length > 0) {
+                    downloadBatchLog('MgT2E_Full_Macro', targetHexes.length);
+                }
+                requestAnimationFrame(draw);
+                showToast(`Full MgT2E Generation Complete!`, 4000);
+            }, 500);
+        }, 500);
+    }, 500);
+}
+
+async function runCTMacro() {
+    if (!validateSelection('generate')) return;
+
+    saveHistoryState('CT Macro');
+
+    console.log("Bulk Generating CT Full System...");
+    await ensureNamesLoaded();
+
+    if (!confirm("This will completely overwrite ANY existing data in the selected hexes with a Full Classic Traveller Generation sequence. Proceed?")) {
+        return;
+    }
+
+    // Capture the target hexes NOW
+    const targetHexes = Array.from(selectedHexes);
+
+    // 1. Auto Populate (Standard 3 in 6)
+    targetHexes.forEach(hexId => {
+        reseedForHex(hexId);
+        const roll = roll1D();
+        if (roll <= 3) {
+            hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
+        } else {
+            hexStates.set(hexId, { type: 'EMPTY' });
+        }
+    });
+    requestAnimationFrame(draw);
+    showToast(`Populated ${targetHexes.length} hex(es)...`, 1000);
+
+    // 2. Generate Mainworlds
+    setTimeout(() => {
+        if (window.isLoggingEnabled) window.batchLogData = [];
+        targetHexes.forEach(hexId => {
+            try {
+                let stateObj = hexStates.get(hexId);
+                if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
+                    stateObj.ctData = generateCTMainworld(hexId);
+                    // Clear all variants to ensure fresh generation
+                    stateObj.mgt2eData = null;
+                    stateObj.t5Data = null;
+                    stateObj.mgtSystem = null;
+                    stateObj.t5System = null;
+                    stateObj.ctSystem = null;
+                    stateObj.mgtPhysical = null;
+                    stateObj.t5Physical = null;
+                    stateObj.ctPhysical = null;
+                    stateObj.mgtSocio = null;
+                    stateObj.t5Socio = null;
+                    hexStates.set(hexId, stateObj);
+                }
+            } catch (err) {
+                console.error(`Macro Step 2 (Mainworld) failed for hex ${hexId}:`, err);
+            }
+        });
+        requestAnimationFrame(draw);
+        showToast(`Generated CT Mainworlds...`, 1000);
+
+        // 3. Expand Book 6 Systems
+        setTimeout(() => {
+            targetHexes.forEach(hexId => {
+                try {
+                    let stateObj = hexStates.get(hexId);
+                    let baseData = stateObj ? stateObj.ctData : null;
+                    if (baseData) {
+                        let systemName = baseData.name || stateObj.name || hexId;
+                        if (window.isLoggingEnabled) startTrace(hexId, 'CT System Macro Expansion', systemName);
+
+                        let chunk1 = generateCTSystemChunk1(baseData, hexId);
+                        let chunk2 = generateCTSystemChunk2(chunk1, baseData);
+                        let chunk3 = generateCTSystemChunk3(chunk2, baseData);
+                        let chunk4 = generateCTSystemChunk4(chunk3, baseData);
+                        let chunk5 = generateCTSystemChunk5(chunk4, baseData);
+                        stateObj.ctSystem = chunk5;
+                        stateObj.ctPhysical = generateCTPhysical(baseData, hexId);
+
+                        // Clean up cross-engine remnants
+                        stateObj.t5Physical = null;
+                        stateObj.mgtSystem = null;
+                        hexStates.set(hexId, stateObj);
+                    }
+                } catch (err) {
+                    console.error(`Macro Step 3 (Expansion) failed for hex ${hexId}:`, err);
+                }
+            });
+            if (window.isLoggingEnabled && window.batchLogData.length > 0) {
+                downloadBatchLog('CT_Full_Macro', targetHexes.length);
+            }
+            requestAnimationFrame(draw);
+            showToast(`Full CT Generation Complete!`, 4000);
+        }, 500);
+    }, 500);
+}
+
+async function runRTTMacro() {
+    if (!validateSelection('generate')) return;
+
+    saveHistoryState('RTT Macro');
+    if (window.isLoggingEnabled) window.batchLogData = [];
+
+    console.log("Bulk Generating RTT Full System...");
+    await ensureNamesLoaded();
+
+    if (!confirm("This will completely overwrite ANY existing data in the selected hexes with a Full RTT Generation sequence. Proceed?")) {
+        return;
+    }
+
+    const targetHexes = Array.from(selectedHexes);
+
+    // 1. Auto Populate (Standard 3 in 6)
+    targetHexes.forEach(hexId => {
+        reseedForHex(hexId);
+        const roll = roll1D();
+        if (roll <= 3) {
+            hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
+        } else {
+            hexStates.set(hexId, { type: 'EMPTY' });
+        }
+    });
+    requestAnimationFrame(draw);
+    showToast(`Populated ${targetHexes.length} hex(es)...`, 1000);
+
+    // 2. Generate Systems
+    setTimeout(() => {
+        targetHexes.forEach(hexId => {
+            try {
+                let stateObj = hexStates.get(hexId);
+                if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
+                    // Start RTT Generation Pipeline
+                    stateObj.rttSystem = generateRTTSectorStep1(hexId);
+                    
+                    // Extract UW for display
+                    if (stateObj.rttSystem) {
+                        stateObj.rttData = extractRTTMainworld(stateObj.rttSystem);
+                    }
+
+                    // Clear other data
+                    stateObj.ctData = null;
+                    stateObj.mgt2eData = null;
+                    stateObj.t5Data = null;
+                    stateObj.ctSystem = null;
+                    stateObj.mgtSystem = null;
+                    stateObj.t5System = null;
+                    stateObj.ctPhysical = null;
+                    stateObj.mgtPhysical = null;
+                    stateObj.t5Physical = null;
+                    stateObj.mgtSocio = null;
+                    stateObj.t5Socio = null;
+                    hexStates.set(hexId, stateObj);
+                }
+            } catch (err) {
+                console.error(`RTT Macro Step 2 failed for hex ${hexId}:`, err);
+            }
+        });
+        
+        if (window.isLoggingEnabled && window.batchLogData.length > 0) {
+            downloadBatchLog('RTT_Full_Macro', targetHexes.length);
+        }
+        
+        requestAnimationFrame(draw);
+        showToast(`Full RTT Generation Complete!`, 4000);
+    }, 500);
 }
 
 // ============================================================================
@@ -1364,12 +1514,12 @@ function setupSaveLoad() {
 
 function openHexEditor(hexId) {
     const stateObj = hexStates.get(hexId);
-    if (!stateObj || stateObj.type !== 'SYSTEM_PRESENT' || (!stateObj.ctData && !stateObj.mgt2eData && !stateObj.t5Data)) {
+    if (!stateObj || stateObj.type !== 'SYSTEM_PRESENT' || (!stateObj.ctData && !stateObj.mgt2eData && !stateObj.t5Data && !stateObj.rttData)) {
         return;
     }
 
     editingHexId = hexId;
-    const data = stateObj.t5Data || stateObj.mgt2eData || stateObj.ctData;
+    const data = stateObj.rttData || stateObj.t5Data || stateObj.mgt2eData || stateObj.ctData;
 
     // Check multiple potential locations for the name
     const systemName = data.name || stateObj.name || "";
@@ -1406,6 +1556,10 @@ function openHexEditor(hexId) {
     document.getElementById('editor-socio-mgt-container').style.display = 'none';
     document.getElementById('acc-btn-mgt-socio').style.display = 'none';
     document.getElementById('acc-btn-mgt-socio').classList.remove('active');
+
+    document.getElementById('editor-rtt-system-root').style.display = 'none';
+    document.getElementById('acc-btn-rtt-system').style.display = 'none';
+    document.getElementById('acc-btn-rtt-system').classList.remove('active');
 
     // Populate accordions if data exists
     populateEditorAccordions(stateObj);
@@ -2051,6 +2205,98 @@ function populateEditorAccordions(stateObj) {
             root.style.display = 'none';
         }
     }
+
+    // RTT Star System Tree (Bottom Up)
+    if (stateObj.rttSystem) {
+        document.getElementById('acc-btn-rtt-system').style.display = 'flex';
+        const root = document.getElementById('editor-rtt-system-root');
+        if (root) {
+            root.innerHTML = '';
+            const sys = stateObj.rttSystem;
+
+            function renderRTTBody(body, isSatellite = false) {
+                const uwp = (body.habitationType !== 'Uninhabited') ?
+                    `${body.starport || 'X'}${toUWPChar(body.size)}${toUWPChar(body.atmosphere)}${toUWPChar(body.hydrosphere)}${toUWPChar(body.population)}${toUWPChar(body.government)}${toUWPChar(body.lawLevel)}-${body.tl || 0}` :
+                    'Uninhabited';
+
+                const isMain = body.habitationType === 'Homeworld' || body.isMainworld;
+                const summaryStyle = isMain ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
+                const uwpColor = isMain ? '#ffa500' : '#66fcf1';
+                
+                // Add the Mainworld prefix if applicable
+                const baseType = body.type || body.worldClass || 'Body';
+                const typeLabel = isMain ? `Mainworld (${baseType})` : baseType;
+                const orbitLabel = isSatellite ? 'Satellite' : `Orbit ${body.orbitNumber || '?'}`;
+
+                let bHtml = `<details ${!isSatellite ? 'open' : ''}>`;
+                bHtml += `<summary ${summaryStyle}>${orbitLabel} (${body.zone || '?'}) <span class="sys-title-info">${typeLabel} | <strong style="color: ${uwpColor}">${uwp}</strong></span></summary>`;
+                bHtml += `<div class="system-node">`;
+
+                bHtml += `<div class="system-stats">`;
+                bHtml += `<span>Type: <strong>${body.type}</strong></span>`;
+                bHtml += `<span>Class: <strong>${body.worldClass}</strong></span>`;
+                
+                // Physical & Environmental Stats
+                if (body.chemistry && body.chemistry !== 'None') bHtml += `<span>Chemistry: <strong>${body.chemistry}</strong></span>`;
+                if (body.biosphere !== undefined) bHtml += `<span>Biosphere: <strong>${body.biosphere}</strong></span>`;
+                if (body.rings && body.rings !== 'None') bHtml += `<span>Rings: <strong>${body.rings}</strong></span>`;
+
+                // Social & Economic Stats
+                bHtml += `<span>Habitation: <strong>${body.habitationType}</strong></span>`;
+                bHtml += `<span>Desirability: <strong>${body.desirability}</strong></span>`;
+                if (body.industry !== undefined && body.habitationType !== 'Uninhabited') bHtml += `<span>Industry: <strong>${body.industry}</strong></span>`;
+
+                if (body.starport && body.habitationType !== 'Uninhabited') bHtml += `<span>Starport: <strong>${body.starport}</strong></span>`;
+                if (body.tradeCodes && body.tradeCodes.length > 0) bHtml += `<span>Trade: <strong>${body.tradeCodes.join(' ')}</strong></span>`;
+                if (body.bases && body.bases.length > 0) bHtml += `<span>Bases: <strong>${body.bases.join('')}</strong></span>`;
+
+                // Special Mechanics
+                if (body.canBeTerraformed) bHtml += `<span class="system-stats-full" style="color: #66fcf1; border-color: #45a29e;">Terraforming Potential: <strong>${body.terraformPoints} pts</strong></span>`;
+
+                bHtml += `</div>`;
+
+                if (body.satellites && body.satellites.length > 0) {
+                    body.satellites.forEach(sat => {
+                        bHtml += renderRTTBody(sat, true);
+                    });
+                }
+
+                bHtml += `</div></details>`;
+                return bHtml;
+            }
+
+            // System Overview Header
+            const mwBase = stateObj.rttData;
+            const sysName = (mwBase && mwBase.name) ? mwBase.name : 'Unknown';
+
+            let html = `<div class="system-stats" style="grid-template-columns: 1fr;">
+                <div style="text-align: center; color: #66fcf1; border-bottom: 1px dotted #45a29e; padding-bottom: 4px;">RTT: ${sysName} Profile</div>
+                <span>Age: <strong>${sys.age.toFixed(1)} Gyr</strong></span>
+                <span>Total Stars: <strong>${sys.stars.length}</strong></span>
+            </div>`;
+
+            html += `<div class="system-tree">`;
+
+            sys.stars.forEach((star, sIdx) => {
+                let starOrbitLabel = star.orbitType && star.role !== 'Primary' ? ` (${star.orbitType} Orbit)` : '';
+                html += `<details open>`;
+                html += `<summary>${star.role}${starOrbitLabel} - ${star.classification} <span class="sys-title-info">Star</span></summary>`;
+                html += `<div class="system-node">`;
+
+                if (star.planetarySystem && star.planetarySystem.orbits) {
+                    star.planetarySystem.orbits.forEach(body => {
+                        html += renderRTTBody(body);
+                    });
+                }
+
+                html += `</div></details>`;
+            });
+
+            html += `</div>`;
+            root.innerHTML = html;
+            root.style.display = 'none';
+        }
+    }
 }
 // Global handler for T5 Travel Zone manual overrides
 window.handleT5ZoneChange = function (el) {
@@ -2124,6 +2370,9 @@ function closeHexEditor() {
     document.getElementById('editor-t5-system-root').innerHTML = '';
     document.getElementById('acc-btn-t5-system').style.display = 'none';
     document.getElementById('acc-btn-t5-system').classList.remove('active');
+    
+    document.getElementById('acc-btn-rtt-system').style.display = 'none';
+    document.getElementById('acc-btn-rtt-system').classList.remove('active');
 
     // Reset position
     const hexEditor = document.getElementById('hex-editor');
@@ -2186,6 +2435,13 @@ function saveHexEditorChanges() {
         stateObj.ctData = { ...stateObj.ctData, uwp, travelZone, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, gasGiant };
         stateObj.t5Data = null;
         stateObj.mgt2eData = null;
+    } else if (stateObj.rttData) {
+        stateObj.rttData.name = name;
+        const travelZone = document.getElementById('edit-travel-zone').value;
+        stateObj.rttData = { ...stateObj.rttData, uwp, travelZone, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
+        stateObj.t5Data = null;
+        stateObj.mgt2eData = null;
+        stateObj.ctData = null;
     }
 
     // Also save name at the stateObj level for consistency

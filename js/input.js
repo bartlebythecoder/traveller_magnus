@@ -1603,6 +1603,27 @@ function openHexEditor(hexId) {
     // Populate accordions if data exists
     populateEditorAccordions(stateObj);
 
+    // --- T5 Quick Stats Handling (Load) ---
+    const t5QuickStatsDiv = document.getElementById('editor-t5-quick-stats');
+    const pbgInput = document.getElementById('edit-pbg');
+    const stellarInput = document.getElementById('edit-stellar');
+    
+    t5QuickStatsDiv.style.display = 'none';
+    pbgInput.value = '';
+    stellarInput.value = '';
+
+    // Check if this world has T5-specific data
+    if (data && data.popDigit !== undefined) {
+        const toHex = (val) => typeof toUWPChar === 'function' ? toUWPChar(val) : val.toString(16).toUpperCase();
+        
+        let belts = data.planetoidBelts !== undefined ? data.planetoidBelts : 0;
+        let gasGiants = data.gasGiantsCount !== undefined ? data.gasGiantsCount : 0;
+        pbgInput.value = `${toHex(data.popDigit)}${toHex(belts)}${toHex(gasGiants)}`;
+        stellarInput.value = data.homestar || (data.stars && data.stars[0] ? data.stars[0].name : '');
+        
+        t5QuickStatsDiv.style.display = 'grid';
+    }
+
     document.getElementById('hex-editor').style.display = 'flex';
 }
 
@@ -2185,16 +2206,7 @@ function populateEditorAccordions(stateObj) {
                     html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor}; margin-bottom: 8px;">Caution: ${mwBase.travelZone} Zone${codeStr}</div>`;
                 }
 
-                if (w.type === 'Mainworld') {
-                    html += `<div class="system-stats">`;
-                    html += `<span>Referee Override:</span>`;
-                    html += `<select class="travel-zone-select" style="grid-column: span 2;" onchange="handleT5ZoneChange(this)">
-                        <option value="Green" ${mwBase.travelZone === 'Green' ? 'selected' : ''}>Green</option>
-                        <option value="Amber" ${mwBase.travelZone === 'Amber' ? 'selected' : ''}>Amber</option>
-                        <option value="Red" ${mwBase.travelZone === 'Red' ? 'selected' : ''}>Red</option>
-                    </select>`;
-                    html += `</div>`;
-                }
+
 
                 html += `<div class="system-stats">`;
                 html += `<span>Distance: <strong>${o.distAU.toFixed(2)} AU</strong></span>`;
@@ -2491,6 +2503,23 @@ function saveHexEditorChanges() {
 
     if (stateObj.t5Data) {
         stateObj.t5Data = { ...stateObj.t5Data, ...sharedData, name };
+
+        // --- T5 Quick Stats Handling (Save) ---
+        const t5QuickStatsDiv = document.getElementById('editor-t5-quick-stats');
+        if (t5QuickStatsDiv.style.display !== 'none') {
+            const pbgVal = document.getElementById('edit-pbg').value.padEnd(3, '0').toUpperCase();
+            const fromHex = (char) => typeof fromUWPChar === 'function' ? fromUWPChar(char) : parseInt(char, 16) || 0;
+            
+            stateObj.t5Data.popDigit = fromHex(pbgVal[0]);
+            stateObj.t5Data.planetoidBelts = fromHex(pbgVal[1]);
+            stateObj.t5Data.gasGiantsCount = fromHex(pbgVal[2]);
+            
+            // Update the boolean gasGiant flag just in case
+            stateObj.t5Data.gasGiant = stateObj.t5Data.gasGiantsCount > 0;
+            
+            stateObj.t5Data.homestar = document.getElementById('edit-stellar').value.trim();
+        }
+
         stateObj.mgt2eData = null; stateObj.ctData = null; stateObj.rttData = null;
     } else if (stateObj.mgt2eData) {
         stateObj.mgt2eData = { ...stateObj.mgt2eData, ...sharedData, name };
@@ -2706,9 +2735,17 @@ function generateT5TabData(sectorID) {
 
             // Stars String
             let stars = "-";
-            const sys = state.t5System || state.mgtSystem || state.ctSystem;
-            if (sys && sys.stars) {
-                stars = sys.stars.map(s => s.name).join(' ');
+            // t5Data now carries a stars array directly from generateT5Mainworld
+            if (state.t5Data && state.t5Data.stars && state.t5Data.stars.length > 0) {
+                stars = state.t5Data.stars.map(s => s.name).join(' ');
+            } else if (state.t5Data && state.t5Data.homestar && state.t5Data.homestar !== 'Unknown') {
+                // Fallback: use homestar string if full array is missing
+                stars = state.t5Data.homestar;
+            } else {
+                const sys = state.t5System || state.mgtSystem || state.ctSystem;
+                if (sys && sys.stars) {
+                    stars = sys.stars.map(s => s.name).join(' ');
+                }
             }
 
             // World Count (W)
@@ -2727,7 +2764,8 @@ function generateT5TabData(sectorID) {
                 data.uwp || "???????-?",
                 bases || "-",
                 (data.tradeCodes || []).join(' ') || "-",
-                data.zone || "-",
+                // Travel Zone (Map to A/R for Traveler Map)
+                (data.travelZone === "Amber" ? "A" : (data.travelZone === "Red" ? "R" : "-")),
                 pbg,
                 data.allegiance || "Im",
                 stars,

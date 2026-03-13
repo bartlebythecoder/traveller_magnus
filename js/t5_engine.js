@@ -7,6 +7,15 @@ function rollFlux() {
     return (Math.floor(rng() * 6) + 1 + Math.floor(rng() * 6) + 1) - 7;
 }
 
+function check(val, array) {
+    if (typeof val === 'string') {
+        // Handle UWP alpha characters
+        let num = fromUWPChar(val);
+        return array.includes(num);
+    }
+    return array.includes(val);
+}
+
 /**
  * T5 SUBORDINATE SOCIAL GENERATOR
  * Applies Continuation Cap (Pop < MW Pop) and Spaceport restrictions.
@@ -113,131 +122,242 @@ function parseT5Stellar(name) {
     let decimal = parseInt(typePart.slice(1)) || 0;
     let size = sizePart;
 
-    if (typePart === 'BD') {
-        type = 'BD'; decimal = 0; size = 'V';
-    } else if (typePart === 'D' || typePart.startsWith('WD')) {
-        type = 'D'; decimal = 0; size = 'D';
+    if (typePart === 'BD' || typePart === 'Brown Dwarf') {
+        return { type: 'BD', decimal: 0, size: 'V' };
+    }
+    if (typePart === 'D' || typePart === 'White Dwarf' || typePart.startsWith('WD')) {
+        return { type: 'D', decimal: 0, size: 'D' };
     }
     return { type, decimal, size };
 }
 
-function generateT5SystemChunk1(mainworldBase, existingSystem, hexId) {
-    reseedForHex(hexId);
-    let sys = { stars: [] };
-
-    function generateStar(role, orbitID, importedName = null) {
-        let type, decimal, size;
-
-        tSection(`Generating ${role} Star`);
-
-        if (importedName) {
-            tResult('Imported Stellar', importedName);
-            const parsed = parseT5Stellar(importedName);
-            type = parsed.type;
-            decimal = parsed.decimal;
-            size = parsed.size;
-        } else {
-            // Classification Logic: Spectral Class
-            let f = rollFlux();
-            type = 'G';
-            if (f <= -6) type = (rng() < 0.5) ? 'O' : 'B';
-            else if (f <= -4) type = 'A';
-            else if (f <= -2) type = 'F';
-            else if (f <= 0) type = 'G';
-            else if (f <= 2) type = 'K';
-            else if (f <= 5) type = 'M';
-            else type = 'BD';
-
-            writeLogLine(`Spectral Class Flux: ${f >= 0 ? '+' : ''}${f} -> ${type}`);
-
-            decimal = Math.floor(rng() * 10);
-            tResult('Spectral Decimal', decimal);
-
-            // Classification Logic: Size
-            let sf = rollFlux();
-            size = 'V';
-            if (sf <= -5) size = 'Ia';
-            else if (sf === -4) size = 'Ib';
-            else if (sf === -3) size = 'II';
-            else if (sf === -2) size = 'III';
-            else if (sf === -1) size = 'IV';
-            else if (sf === 0) size = 'V';
-            else if (sf === 1) size = 'VI';
-            else size = 'D';
-
-            writeLogLine(`Size Flux: ${sf >= 0 ? '+' : ''}${sf} -> ${size}`);
-
-            // Size Constraints
-            if (size === 'IV' && ((type === 'K' && decimal >= 5) || type === 'M' || type === 'BD')) {
-                size = 'V';
-                tOverride('Size restricted (IV -> V)', size);
-            }
-            if (size === 'VI' && (type === 'O' || type === 'B' || type === 'A' || (type === 'F' && decimal <= 4))) {
-                size = 'V';
-                tOverride('Size restricted (VI -> V)', size);
-            }
-        }
-
-        // Mass/Lum Approximate (T5)
-        const TYPE_MAP = { 'O': 50, 'B': 10, 'A': 2, 'F': 1.5, 'G': 1.0, 'K': 0.7, 'M': 0.2, 'BD': 0.05, 'D': 1.0 };
-        let mass = TYPE_MAP[type] || 1.0;
-        let luminosity = Math.pow(mass, 3.5);
-
-        tResult('Mass', mass.toFixed(2) + ' M_Sol');
-        tResult('Luminosity', luminosity.toFixed(3) + ' L_Sol');
-
-        let starName = (size === 'D' || type === 'BD') ? `${type} ${size}` : `${type}${decimal} ${size}`;
-        tResult('Final Stellar', starName);
-
-        return {
-            type,
-            size,
-            decimal,
-            orbitID,
-            distAU: getT5OrbitAU(orbitID),
-            role,
-            mass,
-            luminosity,
-            name: starName
-        };
+function generateT5StellarProfile(isSecondary = false, pTypeFlux = 0, pSizeFlux = 0) {
+    // 1. Spectral Type Roll
+    let tFlux;
+    if (isSecondary) {
+        let roll = Math.floor(rng() * 6) + 1; // 1D
+        tFlux = pTypeFlux + (roll - 1);
+        writeLogLine(`Secondary Spectral Flux: Primary(${pTypeFlux}) + 1D(${roll}) - 1 = ${tFlux}`);
+    } else {
+        tFlux = rollFlux();
+        writeLogLine(`Primary Spectral Flux Roll: ${tFlux >= 0 ? '+' : ''}${tFlux}`);
     }
 
-    // Stellar Presence Logic
-    const importedStars = existingSystem && existingSystem.stars ? existingSystem.stars : null;
+    // Chart 2 Exact Mapping
+    let type = 'G';
+    if (tFlux <= -6) type = rng() < 0.5 ? 'O' : 'B';
+    else if (tFlux === -5 || tFlux === -4) type = 'A';
+    else if (tFlux === -3 || tFlux === -2) type = 'F';
+    else if (tFlux === -1 || tFlux === 0) type = 'G';
+    else if (tFlux === 1 || tFlux === 2) type = 'K';
+    else if (tFlux >= 3 && tFlux <= 5) type = 'M';
+    else type = 'BD'; // +6, +7, +8
 
-    if (importedStars && importedStars.length > 0) {
-        // Use imported constellation
-        sys.stars.push(generateStar('Primary', 0, importedStars[0].name));
+    let decimal = Math.floor(rng() * 10);
 
-        if (importedStars.length > 1) {
-            sys.stars.push(generateStar('Primary Companion', 0, importedStars[1].name));
-        }
-        if (importedStars.length > 2) {
-            sys.stars.push(generateStar('Close', Math.floor(rng() * 6), importedStars[2].name));
-        }
-        if (importedStars.length > 3) {
-            sys.stars.push(generateStar('Near', 5 + (Math.floor(rng() * 6) + 1), importedStars[3].name));
-        }
-        if (importedStars.length > 4) {
-            sys.stars.push(generateStar('Far', 11 + (Math.floor(rng() * 6) + 1), importedStars[4].name));
-        }
+    // 2. Size Roll
+    let sFlux;
+    if (isSecondary) {
+        let roll = Math.floor(rng() * 6) + 1; // 1D
+        sFlux = pSizeFlux + (roll + 2);
+        writeLogLine(`Secondary Size Flux: Primary(${pSizeFlux}) + 1D(${roll}) + 2 = ${sFlux}`);
     } else {
-        // Standard Flux Logic (No import found)
-        sys.stars.push(generateStar('Primary', 0));
-        if (rollFlux() >= 3) sys.stars.push(generateStar('Primary Companion', 0));
-        if (rollFlux() >= 3) sys.stars.push(generateStar('Close', Math.floor(rng() * 6)));
-        if (rollFlux() >= 3) sys.stars.push(generateStar('Near', 5 + (Math.floor(rng() * 6) + 1)));
-        if (rollFlux() >= 3) sys.stars.push(generateStar('Far', 11 + (Math.floor(rng() * 6) + 1)));
+        sFlux = rollFlux();
+        writeLogLine(`Primary Size Flux Roll: ${sFlux >= 0 ? '+' : ''}${sFlux}`);
+    }
 
-        let currentStars = [...sys.stars];
-        currentStars.forEach((s, idx) => {
-            if (idx === 0) return;
-            if (rollFlux() >= 3) {
-                sys.stars.push(generateStar('Secondary Companion', s.orbitID));
+    let size = 'V';
+    const isOBA = ['O', 'B', 'A'].includes(type);
+    const isOB = ['O', 'B'].includes(type);
+    const isFGK = ['F', 'G', 'K'].includes(type);
+    
+    if (sFlux <= -5) size = isOBA ? 'Ia' : 'II';
+    else if (sFlux === -4) {
+        if (isOBA) size = 'Ib';
+        else if (isFGK) size = 'III';
+        else if (type === 'M') size = 'II';
+    }
+    else if (sFlux === -3) {
+        if (isOBA) size = 'II';
+        else if (isFGK) size = 'IV';
+        else if (type === 'M') size = 'II';
+    }
+    else if (sFlux === -2) {
+        if (isOBA) size = 'III';
+        else if (isFGK) size = 'V';
+        else if (type === 'M') size = 'III';
+    }
+    else if (sFlux === -1) {
+        if (isOB) size = 'III';
+        else if (type === 'A') size = 'IV';
+        else size = 'V';
+    }
+    else if (sFlux === 0) {
+        if (isOB) size = 'III';
+        else size = 'V';
+    }
+    else if (sFlux === 1) {
+        if (type === 'B') size = 'III';
+        else size = 'V';
+    }
+    else if (sFlux === 2 || sFlux === 3) size = 'V';
+    else if (sFlux === 4) {
+        if (isOB) size = 'IV';
+        else if (type === 'A') size = 'V';
+        else size = 'VI';
+    }
+    else if (sFlux >= 5) size = 'D';
+
+    // 3. Impossibility Constraints (Force to V)
+    let originalSize = size;
+    if (size === 'IV' && ((type === 'K' && decimal >= 5) || type === 'M')) size = 'V';
+    if (size === 'VI' && (type === 'A' || (type === 'F' && decimal <= 4))) size = 'V';
+    
+    if (size !== originalSize) {
+        writeLogLine(`Constraint Applied: Size ${originalSize} not possible for ${type}${decimal}. Forced to Size V.`);
+    }
+
+    let name = (size === 'D') ? 'D' : (type === 'BD') ? 'BD' : `${type}${decimal} ${size}`;
+    
+    return { type, decimal, size, name, tFlux, sFlux };
+}
+
+function generateStar(role, orbitID, importedName = null, isSecondary = false, pTypeFlux = 0, pSizeFlux = 0) {
+    let type, decimal, size, tFlux, sFlux;
+
+    tSection(`Generating ${role} Star`);
+
+    if (importedName) {
+        tResult('Imported Stellar', importedName);
+        const parsed = parseT5Stellar(importedName);
+        type = parsed.type;
+        decimal = parsed.decimal;
+        size = parsed.size;
+        tFlux = 0; sFlux = 0; // Default for imports
+    } else {
+        const profile = generateT5StellarProfile(isSecondary, pTypeFlux, pSizeFlux);
+        type = profile.type;
+        decimal = profile.decimal;
+        size = profile.size;
+        tFlux = profile.tFlux;
+        sFlux = profile.sFlux;
+    }
+
+    // Mass/Lum Approximate (T5)
+    const TYPE_MAP = { 'O': 50, 'B': 10, 'A': 2, 'F': 1.5, 'G': 1.0, 'K': 0.7, 'M': 0.2, 'BD': 0.05, 'D': 1.0 };
+    let mass = TYPE_MAP[type] || 1.0;
+    let luminosity = Math.pow(mass, 3.5);
+
+    tResult('Mass', mass.toFixed(2) + ' M_Sol');
+    tResult('Luminosity', luminosity.toFixed(3) + ' L_Sol');
+
+    let starName = (size === 'D') ? 'D' : (type === 'BD') ? 'BD' : `${type}${decimal} ${size}`;
+    tResult('Final Stellar', starName);
+
+    return {
+        type,
+        size,
+        decimal,
+        orbitID,
+        distAU: getT5OrbitAU(orbitID),
+        role,
+        mass,
+        luminosity,
+        name: starName,
+        tFlux,
+        sFlux
+    };
+}
+
+function determineStellarConstellation(importedString = null) {
+    let stars = [];
+    let status = "Generated";
+
+    if (importedString) {
+        writeLogLine(`[IMPORT ATTEMPT] Processing stellar string: "${importedString}"`);
+        // Attempt to split and parse multiple stars
+        const starStrings = typeof importedString === 'string' ? importedString.split(',').map(s => s.trim()).filter(s => s.length > 0) : [];
+        if (starStrings.length > 0) {
+            starStrings.forEach((s, idx) => {
+                let role = idx === 0 ? 'Primary' : (idx === 1 ? 'Primary Companion' : 'Star');
+                let orbitID = 0;
+                if (idx === 2) orbitID = 2; // Close default
+                if (idx === 3) orbitID = 8; // Near default
+                if (idx === 4) orbitID = 14; // Far default
+                stars.push(generateStar(role, orbitID, s));
+            });
+            status = "Imported";
+            writeLogLine(`[SUCCESS] Imported ${stars.length} stars.`);
+        } else if (typeof importedString === 'object' && importedString.stars) {
+            // Object format support
+            stars = importedString.stars.map(s => generateStar(s.role, s.orbitID, s.name));
+            status = "Imported";
+            writeLogLine(`[SUCCESS] Imported ${stars.length} stars from object.`);
+        } else {
+            writeLogLine(`[FAILED IMPORT] Malformed or empty stellar string. Falling back to Table 1 Flux rolls.`);
+            status = "Fallback";
+        }
+    }
+
+    if (stars.length === 0) {
+        tSection('Generating System Stars (Table 1, 2 & 3)');
+        
+        const primary = generateStar('Primary', 0);
+        const pTFlux = primary.tFlux;
+        const pSFlux = primary.sFlux;
+        stars.push(primary);
+        writeLogLine(`Primary Star: ${primary.name} (Always Present)`);
+
+        // Helper for Table 1 Flux checks
+        const checkStar = (role, orbitFormula) => {
+            const flux = rollFlux();
+            writeLogLine(`${role} Star Flux Roll: ${flux >= 0 ? '+' : ''}${flux}`);
+            if (flux >= 3) {
+                const orbit = orbitFormula();
+                // Pass true and the primary's fluxes to generate a mathematically linked secondary
+                const star = generateStar(role, orbit, null, true, pTFlux, pSFlux);
+                writeLogLine(`  [YES] ${role} Star present: ${star.name} at Orbit ${orbit}`);
+                return star;
+            }
+            writeLogLine(`  [NO] No ${role} star present.`);
+            return null;
+        };
+
+        // Chart 3 Orbit Placement Formulas
+        const close = checkStar('Close', () => (Math.floor(rng() * 6) + 1) - 1);         // 1D - 1
+        const near = checkStar('Near', () => 5 + (Math.floor(rng() * 6) + 1));           // 5 + 1D
+        const far = checkStar('Far', () => 11 + (Math.floor(rng() * 6) + 1));            // 11 + 1D
+
+        if (close) stars.push(close);
+        if (near) stars.push(near);
+        if (far) stars.push(far);
+
+        // Companions
+        const currentStars = [...stars];
+        currentStars.forEach(parent => {
+            const cFlux = rollFlux();
+            writeLogLine(`Companion check for ${parent.role} (${parent.name}) Flux Roll: ${cFlux >= 0 ? '+' : ''}${cFlux}`);
+            if (cFlux >= 3) {
+                const compProfile = generateStar(`${parent.role} Companion`, 0, null, true, pTFlux, pSFlux);
+                // Chart 3: Companions are inside Orbit 0 (represented here as parent orbit + 0.1 for sorting/clarity)
+                const compOrbit = parent.orbitID + 0.1;
+                compProfile.orbitID = compOrbit;
+                
+                writeLogLine(`  [YES] Companion present for ${parent.role}: ${compProfile.name} at Orbit ${compOrbit}`);
+                stars.push(compProfile);
+            } else {
+                writeLogLine(`  [NO] No companion for ${parent.role}.`);
             }
         });
     }
 
+    return { stars, status };
+}
+
+function generateT5SystemChunk1(mainworldBase, existingSystem, hexId) {
+    reseedForHex(hexId);
+    const constellation = determineStellarConstellation(existingSystem);
+    let sys = { stars: constellation.stars };
     return sys;
 }
 
@@ -316,19 +436,29 @@ function generateT5SystemChunk2(sys, mainworldBase) {
     tResult('Primary Habitable Zone', `Orbit ${hzOrbit}`);
 
     // 2. Place Mainworld
-    let mwOrbit = hzOrbit;
+    let hzResult = generateHZAndClimate(sys.stars[0].type);
+    let mwOrbit = Math.max(0, Math.min(19, hzOrbit + hzResult.hzVariance));
+    
+    // Ensure the target orbit is not blocked, shift outward if necessary
     while (mwOrbit < 20 && (sys.orbits[mwOrbit].blocked || sys.orbits[mwOrbit].contents)) {
         mwOrbit++;
     }
+    // If we hit the outer edge, search inward instead
     if (mwOrbit >= 20) {
-        mwOrbit = hzOrbit;
+        mwOrbit = hzOrbit + hzResult.hzVariance;
         while (mwOrbit >= 0 && (sys.orbits[mwOrbit].blocked || sys.orbits[mwOrbit].contents)) {
             mwOrbit--;
         }
     }
+    
     if (mwOrbit >= 0 && mwOrbit < 20) {
-        sys.orbits[mwOrbit].contents = { ...mainworldBase, type: 'Mainworld' };
-        tResult('Mainworld Placement', `Orbit ${mwOrbit}`);
+        sys.orbits[mwOrbit].contents = { 
+            ...mainworldBase, 
+            type: 'Mainworld',
+            climateZone: hzResult.climate,
+            t5TradeCode: hzResult.tradeCode
+        };
+        tResult('Mainworld Placement', `Orbit ${mwOrbit} (HZ ${hzResult.hzVariance >= 0 ? '+' : ''}${hzResult.hzVariance})`);
     }
 
     // 3. Place Gas Giants (Outside HZ preferred)
@@ -449,27 +579,44 @@ function generateT5SystemChunk3(sys, mainworldBase) {
         }
 
         // Climate & Temperature
-        let diff = o.orbit - hzOrbit;
-        if (diff < 0) {
-            w.climateZone = 'Hot';
+        if (w.type === 'Mainworld' && w.climateZone) {
+            // Keep Table 2B Climate, just generate a matching temperature
             let tFlux = rollFlux();
-            w.temperature = 350 + (tFlux * 10);
-            writeLogLine(`Climate: Hot | Temp: 350 + Flux(${tFlux})*10 = ${w.temperature}K`);
-        } else if (diff === 0) {
-            w.climateZone = 'Temperate';
-            let tFlux = rollFlux();
-            w.temperature = 288 + (tFlux * 10);
-            writeLogLine(`Climate: Temperate | Temp: 288 + Flux(${tFlux})*10 = ${w.temperature}K`);
-        } else if (diff === 1) {
-            w.climateZone = 'Cold';
-            let tFlux = rollFlux();
-            w.temperature = 230 + (tFlux * 10);
-            writeLogLine(`Climate: Cold | Temp: 230 + Flux(${tFlux})*10 = ${w.temperature}K`);
+            if (w.climateZone.includes('Hot')) w.temperature = 350 + (tFlux * 10);
+            else if (w.climateZone.includes('Temperate')) w.temperature = 288 + (tFlux * 10);
+            else if (w.climateZone.includes('Cold')) w.temperature = 230 + (tFlux * 10);
+            else w.temperature = 100 + (tFlux * 5); // Frozen or blank
+            
+            // Append the T5 Table 2B Trade Code if one was generated
+            if (w.t5TradeCode) {
+                if (!w.tradeCodes) w.tradeCodes = [];
+                if (!w.tradeCodes.includes(w.t5TradeCode)) w.tradeCodes.push(w.t5TradeCode);
+            }
+            writeLogLine(`Mainworld Climate: ${w.climateZone} | Temp: ${w.temperature}K`);
         } else {
-            w.climateZone = 'Frozen';
-            let tFlux = rollFlux();
-            w.temperature = 100 + (tFlux * 5);
-            writeLogLine(`Climate: Frozen | Temp: 100 + Flux(${tFlux})*5 = ${w.temperature}K`);
+            // Standard T5 placement logic for non-Mainworlds
+            let diff = o.orbit - hzOrbit;
+            if (diff < 0) {
+                w.climateZone = 'Hot';
+                let tFlux = rollFlux();
+                w.temperature = 350 + (tFlux * 10);
+                writeLogLine(`Climate: Hot | Temp: 350 + Flux(${tFlux})*10 = ${w.temperature}K`);
+            } else if (diff === 0) {
+                w.climateZone = 'Temperate';
+                let tFlux = rollFlux();
+                w.temperature = 288 + (tFlux * 10);
+                writeLogLine(`Climate: Temperate | Temp: 288 + Flux(${tFlux})*10 = ${w.temperature}K`);
+            } else if (diff === 1) {
+                w.climateZone = 'Cold';
+                let tFlux = rollFlux();
+                w.temperature = 230 + (tFlux * 10);
+                writeLogLine(`Climate: Cold | Temp: 230 + Flux(${tFlux})*10 = ${w.temperature}K`);
+            } else {
+                w.climateZone = 'Frozen';
+                let tFlux = rollFlux();
+                w.temperature = 100 + (tFlux * 5);
+                writeLogLine(`Climate: Frozen | Temp: 100 + Flux(${tFlux})*5 = ${w.temperature}K`);
+            }
         }
 
         // Rotation & Day Length
@@ -565,10 +712,15 @@ function generateT5SystemChunk3(sys, mainworldBase) {
         }
     });
 
+    // Populate a flat worlds array for the audit tool
+    sys.worlds = sys.orbits.filter(o => o.contents && o.contents.type !== 'Empty').map(o => o.contents);
+
+    // Run the final system audit
+    runT5SystemAudit(sys);
+
     return sys;
 }
-
-function generateT5Mainworld(hexId) {
+function generateT5Mainworld(hexId, wtResult, hzResult, stellarImport = null) {
     if (hexId) {
         reseedForHex(hexId);
         tSection(`T5 Mainworld Generation: Hex ${hexId}`);
@@ -576,41 +728,113 @@ function generateT5Mainworld(hexId) {
         tSection(`T5 Mainworld Generation`);
     }
 
+    // --- 0. Stellar Situation (Table 1 & 2A) ---
+    const constellationResult = determineStellarConstellation(stellarImport); 
+    const stars = constellationResult.stars;
+    const stellarImportStatus = constellationResult.status;
+    const primary = stars[0];
+
+    writeLogLine(`System Constellation: [${stars.map(s => s.name).join(' ')}]`);
+
+    // Handle Stellar Preclusion (Table 2A)
+    let blockedOrbits = [];
+    stars.forEach(star => {
+        let preclusionLimit = -1;
+        if (star.size === 'Ia') preclusionLimit = 5;
+        else if (star.size === 'Ib') preclusionLimit = 4;
+        else if (star.size === 'II') preclusionLimit = 3;
+        else if (star.size === 'III') preclusionLimit = 2;
+        else if (star.size === 'IV') preclusionLimit = 0;
+        else if (star.size === 'V' && ['O', 'B', 'A'].includes(star.type)) preclusionLimit = 0;
+
+        if (preclusionLimit >= 0) {
+            for (let i = 0; i <= preclusionLimit; i++) {
+                if (!blockedOrbits.includes(i)) blockedOrbits.push(i);
+            }
+        }
+        // Also block the orbit the star actually sits in if it's not the primary
+        if (star.orbitID !== 0 && star.orbitID !== null) {
+            if (!blockedOrbits.includes(star.orbitID)) blockedOrbits.push(star.orbitID);
+        }
+    });
+
     let spRoll = tRoll2D('Starport Roll');
     let starport = 'X';
-    if (spRoll === 2) starport = 'A';
-    else if (spRoll <= 5) starport = 'B';
-    else if (spRoll <= 8) starport = 'C';
-    else if (spRoll === 9) starport = 'D';
-    else if (spRoll <= 11) starport = 'E';
+    if (spRoll <= 4) starport = 'A';
+    else if (spRoll <= 7) starport = 'B';
+    else if (spRoll <= 9) starport = 'C';
+    else if (spRoll === 10) starport = 'D';
+    else if (spRoll === 11) starport = 'E';
     else starport = 'X';
     tResult('Final Starport', starport);
 
-    let sRoll = tRoll2D('Size Roll (Standard)') - 2;
-    if (sRoll === 10) {
-        sRoll = tRoll1D('Size Roll (10 variant)') + 9;
-        tOverride('Extended Size Roll', sRoll);
+    // --- 1. PLANETARY SIZE (Table 3) ---
+    tSection('Planetary Size');
+    let sizeRoll = tRoll2D('Size Roll') - 2;
+    let size = sizeRoll;
+    
+    // Apply 9 + 1D rule for rolls of 10
+    if (sizeRoll >= 10) {
+        let extendedRoll = tRoll1D('Size Extended Roll (9 + 1D)');
+        size = 9 + extendedRoll;
+        writeLogLine(`Size rolled 10+. Applying T5 Rule: 9 + 1D(${extendedRoll}) = ${size}`);
+    } else {
+        size = Math.max(0, size); 
     }
-    let size = Math.max(0, sRoll);
-    tResult('Final Size', size);
+    tResult('Size Code', size);
 
+    // --- 2. PLANETARY ATMOSPHERE (Table 3) ---
+    tSection('Planetary Atmosphere');
     let atm = 0;
-    if (size > 0) {
+    if (size === 0) {
+        tSkip('Size 0 (Asteroid) forces Atmosphere 0');
+        atm = 0;
+    } else {
         let atmFlux = rollFlux();
-        atm = Math.min(15, Math.max(0, atmFlux + size));
-        writeLogLine(`Atmosphere Roll: Size(${size}) + Flux(${atmFlux >= 0 ? '+' : ''}${atmFlux}) = ${atm}`);
+        writeLogLine(`Atmosphere Base Flux: ${atmFlux >= 0 ? '+' : ''}${atmFlux}`);
+        
+        // Apply Table 3 DM: -1 if Size is 0-4
+        let atmDm = 0;
+        if (size >= 0 && size <= 4) {
+            atmDm = -1;
+            tDM('Size 0-4 Penalty', -1);
+        }
+        
+        let rawAtm = atmFlux + size + atmDm;
+        atm = Math.max(0, Math.min(15, rawAtm)); // Clamp to valid UWP codes 0-F
+        
+        writeLogLine(`Atmosphere Calculation: Flux(${atmFlux}) + Size(${size}) + DM(${atmDm}) = ${rawAtm}`);
+        if (rawAtm !== atm) tClamp('Atmosphere', rawAtm, atm);
     }
-    tResult('Final Atmosphere', toUWPChar(atm));
+    tResult('Atmosphere Code', atm);
 
+    // --- 3. PLANETARY HYDROGRAPHICS (Table 3) ---
+    tSection('Planetary Hydrographics');
     let hydro = 0;
-    if (size > 1) {
+
+    // Constraint: If Size is 0 or 1, Hydrographics is 0
+    if (size <= 1) {
+        tSkip(`Size ${size} forces Hydrographics 0`);
+        hydro = 0;
+    } else {
         let hFlux = rollFlux();
-        let hydroDM = (atm <= 1 || atm >= 10) ? -4 : 0;
-        if (hydroDM !== 0) tDM('Hydro DM (Atm)', hydroDM);
-        hydro = Math.min(10, Math.max(0, hFlux + atm + hydroDM));
-        writeLogLine(`Hydrographics Roll: Flux(${hFlux >= 0 ? '+' : ''}${hFlux}) + Atm(${atm}) + DM(${hydroDM}) = ${hydro}`);
+        writeLogLine(`Hydrographics Base Flux: ${hFlux >= 0 ? '+' : ''}${hFlux}`);
+
+        // Apply Table 3 DM: -4 if Atmosphere is 0, 1, A, B, or C
+        let hDm = 0;
+        const desertAtmospheres = [0, 1, 10, 11, 12]; // Codes: 0, 1, A, B, C
+        if (desertAtmospheres.includes(atm)) {
+            hDm = -4;
+            tDM('Desert Atmosphere Penalty', -4);
+        }
+
+        let rawHydro = hFlux + atm + hDm;
+        hydro = Math.max(0, Math.min(10, rawHydro)); // Clamp to 0-10 (A)
+
+        writeLogLine(`Hydrographics Calculation: Flux(${hFlux}) + Atm(${atm}) + DM(${hDm}) = ${rawHydro}`);
+        if (rawHydro !== hydro) tClamp('Hydrographics', rawHydro, hydro);
     }
-    tResult('Final Hydrographics', toUWPChar(hydro));
+    tResult('Hydrographic Code', toUWPChar(hydro));
 
     let rawPop = tRoll2D('Population Roll (Standard)') - 2;
     if (rawPop === 10) {
@@ -620,7 +844,7 @@ function generateT5Mainworld(hexId) {
     let pop = Math.max(0, rawPop);
     tResult('Final Population', toUWPChar(pop));
 
-    let popDigit = pop > 0 ? Math.floor(rng() * 10) : 0;
+    let popDigit = pop > 0 ? Math.floor(rng() * 9) + 1 : 0;
     tResult('Pop Multiplier', popDigit);
 
     let govFlux = rollFlux();
@@ -629,7 +853,7 @@ function generateT5Mainworld(hexId) {
     tResult('Final Government', toUWPChar(gov));
 
     let lawFlux = rollFlux();
-    let law = Math.min(15, Math.max(0, lawFlux + gov));
+    let law = Math.min(17, Math.max(0, lawFlux + gov));
     writeLogLine(`Law Roll: Gov(${gov}) + Flux(${lawFlux >= 0 ? '+' : ''}${lawFlux}) = ${law}`);
     tResult('Final Law Level', toUWPChar(law));
 
@@ -660,31 +884,58 @@ function generateT5Mainworld(hexId) {
 
     let navalBase = false;
     let scoutBase = false;
+    let navalDepot = false;
+    let wayStation = false;
+
+    // Placeholder for trade route logic (can be expanded later)
+    const isOnTradeRoute = false; 
+
     if (starport === 'A') {
-        if (tRoll2D('Naval Base Check') <= 6 && pop >= 7) navalBase = true;
+        if (tRoll2D('Naval Base Check') <= 6) navalBase = true;
         if (tRoll2D('Scout Base Check') <= 4) scoutBase = true;
+        
+        // Special T5 High-End Bases
+        if (Math.random() < 0.001) {
+            navalDepot = true;
+            tResult('Special Base', 'Naval Depot');
+        }
+        if (isOnTradeRoute && Math.random() < 0.02) {
+            wayStation = true;
+            tResult('Special Base', 'Way Station');
+        }
     } else if (starport === 'B') {
-        if (tRoll2D('Naval Base Check') <= 5 && pop >= 8) navalBase = true;
-        let sRoll = tRoll2D('Scout Base Check');
-        if (sRoll === 5 || sRoll === 6) scoutBase = true;
+        if (tRoll2D('Naval Base Check') <= 5) navalBase = true;
+        if (tRoll2D('Scout Base Check') <= 5) scoutBase = true; // Updated from 6 to 5
     } else if (starport === 'C') {
-        let sRoll = tRoll2D('Scout Check');
-        if (sRoll >= 6 && sRoll <= 8) scoutBase = true;
+        if (tRoll2D('Scout Base Check') <= 6) scoutBase = true;
     } else if (starport === 'D') {
-        if (tRoll2D('Scout Check') <= 7) scoutBase = true;
+        if (tRoll2D('Scout Base Check') <= 7) scoutBase = true;
     }
+
     if (navalBase) tResult('Bases', 'Naval');
     if (scoutBase) tResult('Bases', 'Scout');
 
+    // --- System Inventory (Gas Giants & Belts) ---
     let rawGG = tRoll2D('GG Inventory Roll');
     let gasGiantsCount = Math.max(0, Math.floor(rawGG / 2) - 2);
+    
+    // Constraint: If the mainworld orbits a Gas Giant, there must be at least 1
+    if (wtResult && wtResult.parentBody === 'Gas Giant' && gasGiantsCount === 0) {
+        gasGiantsCount = 1;
+        tOverride('Gas Giant forced by Mainworld Satellite status', 1);
+    }
     tResult('Gas Giants Count', gasGiantsCount);
+    let gasGiant = gasGiantsCount > 0; // Boolean flag
 
     let rawBelts = tRoll1D('Belt Inventory Roll');
     let planetoidBelts = Math.max(0, rawBelts - 3);
+    
+    // Constraint: If the mainworld is Size 0 (Asteroid), there must be at least 1 Belt
+    if (size === 0 && planetoidBelts === 0) {
+        planetoidBelts = 1;
+        tOverride('Planetoid Belt forced by Mainworld Size 0', 1);
+    }
     tResult('Planetoid Belts Count', planetoidBelts);
-
-    let gasGiant = gasGiantsCount > 0;
 
     // Apply Clamping
     size = clampUWP(size, 0, 15);
@@ -692,24 +943,38 @@ function generateT5Mainworld(hexId) {
     hydro = clampUWP(hydro, 0, 10);
     pop = clampUWP(pop, 0, 15);
     gov = clampUWP(gov, 0, 15);
-    law = clampUWP(law, 0, 15);
+    law = clampUWP(law, 0, 17);
     tl = clampUWP(tl, 0, 33);
 
     const uwp = `${starport}${toUWPChar(size)}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
     tResult('Final UWP', uwp);
 
-    let tradeCodes = [];
-    if (size === 0 && atm === 0 && hydro === 0) tradeCodes.push("As");
-    if (atm >= 2 && atm <= 9 && hydro === 0) tradeCodes.push("De");
-    if (atm >= 10 && atm <= 12 && hydro >= 1 && hydro <= 10) tradeCodes.push("Fl");
-    if (size >= 6 && size <= 8 && [5, 6, 8].includes(atm) && hydro >= 5 && hydro <= 7) tradeCodes.push("Ga");
-    if (size >= 3 && [2, 4, 7, 9, 10, 11, 12].includes(atm) && hydro <= 2) tradeCodes.push("He");
-    if (atm <= 1 && hydro >= 1 && hydro <= 10) tradeCodes.push("Ic");
-    if (size >= 10 && atm >= 3 && hydro === 10) tradeCodes.push("Oc");
-    if (atm === 0) tradeCodes.push("Va");
-    if (size >= 3 && size <= 9 && atm >= 3 && hydro === 10) tradeCodes.push("Wa");
+    // --- Connect Physical & Stellar Data (Tables 2A, 2B, 2C) ---
+    let homestar = primary.name;
+    // If physical data wasn't passed in from a higher macro, generate it now
+    if (!wtResult || !hzResult) {
+        const physResult = generateT5Physical({ size: size }, hexId);
+        wtResult = physResult; // Maps worldType, parentBody, satOrbit
+        hzResult = physResult; // Maps hzVariance, climate
+        // Note: we've already established the constellation above
+    }
 
-    if (pop === 0 && gov === 0 && law === 0) { tradeCodes.push("Di"); tradeCodes.push("Ba"); }
+    let tradeCodes = [];
+    // --- 1. Planetary Trade Classes (Table D Updated) ---
+    const atmList = [3, 4, 5, 6, 7, 8, 9, 13, 14, 15]; // T5 Codes: 3-9, D, E, F
+
+    if (size === 0 && atm === 0 && hydro === 0) tradeCodes.push("As");
+    if (check(atm, [2, 3, 4, 5, 6, 7, 8, 9]) && hydro === 0) tradeCodes.push("De");
+    if (check(atm, [10, 11, 12]) && hydro >= 1) tradeCodes.push("Fl");
+    if (check(size, [6, 7, 8]) && check(atm, [5, 6, 8]) && check(hydro, [5, 6, 7])) tradeCodes.push("Ga");
+    if (size >= 3 && size <= 12 && check(atm, [2, 4, 7, 9, 10, 11, 12]) && hydro <= 2) tradeCodes.push("He");
+    if (check(atm, [0, 1]) && hydro >= 1) tradeCodes.push("Ic");
+    if (size >= 10 && check(atm, atmList) && hydro === 10) tradeCodes.push("Oc");
+    if (atm === 0) tradeCodes.push("Va");
+    if (size >= 3 && size <= 9 && check(atm, atmList) && hydro === 10) tradeCodes.push("Wa");
+
+    if (pop === 0 && tl > 0) tradeCodes.push("Di");
+    if (pop === 0 && gov === 0 && law === 0) tradeCodes.push("Ba");
     if (pop >= 1 && pop <= 3) tradeCodes.push("Lo");
     if (pop >= 4 && pop <= 6) tradeCodes.push("Ni");
     if (pop === 8) tradeCodes.push("Ph");
@@ -727,7 +992,41 @@ function generateT5Mainworld(hexId) {
     if ([6, 8].includes(atm) && (pop === 5 || pop === 9)) tradeCodes.push("Pr");
     if ([6, 8].includes(atm) && pop >= 6 && pop <= 8) tradeCodes.push("Ri");
 
-    // --- TRAVEL ZONE & OPPRESSION SCORE (T5 Logic) ---
+    // --- Status & Climate Codes (From Steps 2B & 2C) ---
+    // These variables should be derived from the wtResult and hzResult objects in the calling function
+    if (typeof wtResult !== 'undefined' && wtResult !== null) {
+        if (wtResult.worldType === 'Far Satellite') tradeCodes.push("Sa");
+        if (wtResult.worldType === 'Close Satellite' || wtResult.isTidallyLocked) tradeCodes.push("Lk");
+    }
+    // --- Climate Trade Codes (Table D Validation) ---
+    // These require both the correct HZ Variance AND the UWP digits
+    if (typeof hzResult !== 'undefined' && hzResult !== null) {
+        // Tr: HZ -1 AND Size 6-9, Atm 4-9, Hyd 3-7
+        if (hzResult.hzVariance === -1 && 
+            check(size, [6,7,8,9]) && 
+            check(atm, [4,5,6,7,8,9]) && 
+            check(hydro, [3,4,5,6,7])) {
+            if (!tradeCodes.includes("Tr")) tradeCodes.push("Tr");
+        }
+
+        // Tu: HZ +1 AND Size 6-9, Atm 4-9, Hyd 3-7
+        if (hzResult.hzVariance === 1 && 
+            check(size, [6,7,8,9]) && 
+            check(atm, [4,5,6,7,8,9]) && 
+            check(hydro, [3,4,5,6,7])) {
+            if (!tradeCodes.includes("Tu")) tradeCodes.push("Tu");
+        }
+
+        // Fr: HZ +2 or Outer AND Size 2-9, Hyd 1-10
+        if (hzResult.hzVariance >= 2 && 
+            check(size, [2,3,4,5,6,7,8,9]) && 
+            hydro >= 1) {
+            if (!tradeCodes.includes("Fr")) tradeCodes.push("Fr");
+        }
+    }
+
+    // --- Travel Zone & Associated Special Codes ---
+    // (Based strictly on Oppression Score: Gov + Law)
     const oppressionScore = gov + law;
     let travelZone = "Green";
 
@@ -742,9 +1041,22 @@ function generateT5Mainworld(hexId) {
             if (!tradeCodes.includes("Pz")) tradeCodes.push("Pz");
         }
     }
-    tResult('Travel Zone', travelZone);
+    // Note: Political codes (Cp, Cs, Cx, Cy) and other Specials (Ab, An) 
+    // are assigned manually by the referee and excluded from auto-gen.
 
-    return { name: getNextSystemName(hexId), uwp, travelZone, tradeCodes, starport, size, atm, hydro, pop, popDigit, gov, law, tl, navalBase, scoutBase, gasGiant, gasGiantsCount, planetoidBelts };
+    return { 
+        name: getNextSystemName(hexId), 
+        homestar, // From Primary Star
+        stars,
+        stellarImportStatus,
+        blockedOrbits,
+        // NEW: Capture parentage for Lk/Sa codes
+        parentBody: wtResult ? wtResult.parentBody : null,
+        worldType: wtResult ? wtResult.worldType : 'Planet',
+        uwp, travelZone, tradeCodes, starport, size, atm, hydro, pop, popDigit, 
+        gov, law, tl, navalBase, scoutBase, navalDepot, wayStation, 
+        gasGiant, gasGiantsCount, planetoidBelts 
+    };
 }
 
 function generateT5Socioeconomics(base, hexId) {
@@ -772,6 +1084,10 @@ function generateT5Socioeconomics(base, hexId) {
 
     if (base.pop <= 6) { Ix -= 1; tDM('Low Pop (6-)', -1); }
     if (base.navalBase && base.scoutBase) { Ix += 1; tDM('Naval & Scout', 1); }
+    
+    // NEW: T5 rule adds +1 for a Way Station
+    if (base.wayStation) { Ix += 1; tDM('Way Station', 1); }
+    
     tResult('Final Importance', `{${Ix >= 0 ? '+' : ''}${Ix}}`);
 
     // 2. Economic (Ex)
@@ -806,7 +1122,12 @@ function generateT5Socioeconomics(base, hexId) {
     tResult('Infrastructure (I)', toUWPChar(I));
 
     let E = rollFlux();
-    writeLogLine(`Efficiency Roll: Flux (${E >= 0 ? '+' : ''}${E})`);
+    if (E === 0) {
+        E = 1;
+        writeLogLine(`Efficiency Roll: Flux (0) Forced to 1`);
+    } else {
+        writeLogLine(`Efficiency Roll: Flux (${E >= 0 ? '+' : ''}${E})`);
+    }
     tResult('Efficiency (E)', E >= 0 ? `+${E}` : E);
 
     // 3. Resource Units (RU)
@@ -814,7 +1135,7 @@ function generateT5Socioeconomics(base, hexId) {
     let calcR = R === 0 ? 1 : R;
     let calcL = L === 0 ? 1 : L;
     let calcI = I === 0 ? 1 : I;
-    let calcE = E === 0 ? 1 : E;
+    let calcE = E; // Already non-zero
     let RU = calcR * calcL * calcI * calcE;
     writeLogLine(`Calculation: (R:${calcR} * L:${calcL} * I:${calcI} * E:${calcE})`);
     tResult('RU', RU);
@@ -868,27 +1189,13 @@ function generateT5Physical(base, hexId) {
     if (!base) return null;
     reseedForHex(hexId);
 
-    let spFlux = rollFlux();
-    let spectralType = '';
-    if (spFlux <= -6) {
-        spectralType = (roll1D() <= 3) ? 'O' : 'B';
-    } else if (spFlux <= -4) {
-        spectralType = 'A';
-    } else if (spFlux <= -2) {
-        spectralType = 'F';
-    } else if (spFlux <= 0) {
-        spectralType = 'G';
-    } else if (spFlux <= 2) {
-        spectralType = 'K';
-    } else if (spFlux <= 5) {
-        spectralType = 'M';
-    } else {
-        spectralType = 'BD';
-    }
+    const profile = generateT5StellarProfile();
+    let homestar = profile.name;
+    let spectralType = profile.type;
 
     if (spectralType === 'BD') {
         let homestar = 'BD Y';
-        let hzResult = generateHZAndClimate();
+        let hzResult = generateHZAndClimate(spectralType);
         let wtResult = generateWorldType(base);
         return {
             homestar,
@@ -897,75 +1204,11 @@ function generateT5Physical(base, hexId) {
             worldType: wtResult.worldType,
             parentBody: wtResult.parentBody,
             satOrbit: wtResult.satOrbit,
-            displayString: `${homestar} | HZ:${hzResult.hzVariance} ${hzResult.climate} | ${wtResult.worldType}${wtResult.parentBody ? ' (' + wtResult.parentBody + ')' : ''}${wtResult.satOrbit ? ' Orbit: ' + wtResult.satOrbit : ''}`
+            displayString: `${homestar} | HZ:${hzResult.hzVariance >= 0 ? '+' : ''}${hzResult.hzVariance} ${hzResult.climate} | ${wtResult.worldType}${wtResult.parentBody ? ' (' + wtResult.parentBody + ')' : ''}${wtResult.satOrbit ? ' Orbit: ' + wtResult.satOrbit : ''}${wtResult.isTidallyLocked ? ' [Tidally Locked]' : ''}`
         };
     }
 
-    let spectralDecimal = Math.floor(rng() * 10);
-
-    let sizeFlux = rollFlux();
-    let stellarSize = 'V';
-    let isOB = (spectralType === 'O' || spectralType === 'B');
-    let isA = (spectralType === 'A');
-    let isFGK = (spectralType === 'F' || spectralType === 'G' || spectralType === 'K');
-    let isM = (spectralType === 'M');
-
-    if (sizeFlux <= -5) {
-        stellarSize = (isOB || isA) ? 'Ia' : 'II';
-    } else if (sizeFlux === -4) {
-        if (isOB || isA) stellarSize = 'Ib';
-        else if (isFGK) stellarSize = 'III';
-        else if (isM) stellarSize = 'II';
-    } else if (sizeFlux === -3) {
-        if (isOB || isA) stellarSize = 'II';
-        else if (isFGK) stellarSize = 'IV';
-        else if (isM) stellarSize = 'II';
-    } else if (sizeFlux === -2) {
-        if (isOB || isA || isM) stellarSize = 'III';
-        else if (isFGK) stellarSize = 'V';
-    } else if (sizeFlux === -1) {
-        if (isOB) stellarSize = 'III';
-        else if (isA) stellarSize = 'IV';
-        else stellarSize = 'V';
-    } else if (sizeFlux === 0) {
-        if (isOB) stellarSize = 'III';
-        else stellarSize = 'V';
-    } else if (sizeFlux === 1) {
-        if (spectralType === 'B') stellarSize = 'III';
-        else stellarSize = 'V';
-    } else if (sizeFlux <= 3) {
-        stellarSize = 'V';
-    } else if (sizeFlux === 4) {
-        if (isOB) stellarSize = 'IV';
-        else if (isA) stellarSize = 'V';
-        else stellarSize = 'VI';
-    } else if (sizeFlux === 5) {
-        stellarSize = 'D';
-    } else {
-        if (isOB) stellarSize = 'IV';
-        else if (isA) stellarSize = 'V';
-        else stellarSize = 'VI';
-    }
-
-    if (stellarSize === 'IV') {
-        if ((spectralType === 'K' && spectralDecimal >= 5) || spectralType === 'M') {
-            stellarSize = 'V';
-        }
-    }
-    if (stellarSize === 'VI') {
-        if (spectralType === 'A' || (spectralType === 'F' && spectralDecimal <= 4)) {
-            stellarSize = 'V';
-        }
-    }
-
-    let homestar = '';
-    if (stellarSize === 'D') {
-        homestar = `${spectralType} D`;
-    } else {
-        homestar = `${spectralType}${spectralDecimal} ${stellarSize}`;
-    }
-
-    let hzResult = generateHZAndClimate();
+    let hzResult = generateHZAndClimate(spectralType);
     let wtResult = generateWorldType(base);
 
     return {
@@ -975,26 +1218,162 @@ function generateT5Physical(base, hexId) {
         worldType: wtResult.worldType,
         parentBody: wtResult.parentBody,
         satOrbit: wtResult.satOrbit,
-        displayString: `${homestar} | HZ:${hzResult.hzVariance} ${hzResult.climate} | ${wtResult.worldType}${wtResult.parentBody ? ' (' + wtResult.parentBody + ')' : ''}${wtResult.satOrbit ? ' Orbit: ' + wtResult.satOrbit : ''}`
+        displayString: `${homestar} | HZ:${hzResult.hzVariance >= 0 ? '+' : ''}${hzResult.hzVariance} ${hzResult.climate} | ${wtResult.worldType}${wtResult.parentBody ? ' (' + wtResult.parentBody + ')' : ''}${wtResult.satOrbit ? ' Orbit: ' + wtResult.satOrbit : ''}${wtResult.isTidallyLocked ? ' [Tidally Locked]' : ''}`
     };
 }
 
-function generateHZAndClimate() {
+function generateHZAndClimate(spectralType) {
+    tSection('Mainworld Orbit & Climate (Table 2B)');
     let hzFlux = rollFlux();
-    let hzVariance = hzFlux <= -6 ? -2 : hzFlux <= -3 ? -1 : hzFlux <= 2 ? 0 : hzFlux <= 5 ? 1 : 2;
-    let climate = hzVariance <= -1 ? 'Hot. Tropic. (Tr)' : hzVariance === 0 ? 'Temperate.' : hzVariance === 1 ? 'Cold. Tundra. (Tu)' : 'Frozen. (Fr)';
-    return { hzVariance, climate };
+    writeLogLine(`Base HZ Flux Roll: ${hzFlux >= 0 ? '+' : ''}${hzFlux}`);
+    
+    // Apply Table 2B DMs
+    let dm = 0;
+    if (spectralType === 'M') { dm = 2; tDM('Spectral M', 2); }
+    if (spectralType === 'O' || spectralType === 'B') { dm = -2; tDM('Spectral O/B', -2); }
+    
+    hzFlux += dm;
+    hzFlux = Math.max(-6, Math.min(6, hzFlux));
+    writeLogLine(`Modified HZ Flux: ${hzFlux >= 0 ? '+' : ''}${hzFlux}`);
+
+    let hzVariance = 0;
+    let climate = '';
+    let tradeCode = '';
+
+    if (hzFlux === -6) {
+        hzVariance = -2;
+        climate = ''; 
+        tradeCode = '';
+    } else if (hzFlux <= -3) {
+        hzVariance = -1;
+        climate = 'Hot. Tropic.';
+        tradeCode = 'Tr';
+    } else if (hzFlux <= 2) {
+        hzVariance = 0;
+        climate = 'Temperate.';
+        tradeCode = '';
+    } else if (hzFlux <= 5) {
+        hzVariance = 1;
+        climate = 'Cold. Tundra.';
+        tradeCode = 'Tu';
+    } else { // +6
+        hzVariance = 2;
+        climate = 'Frozen.';
+        tradeCode = 'Fr';
+    }
+
+    tResult('HZ Variance', hzVariance >= 0 ? `+${hzVariance}` : hzVariance);
+    tResult('Climate', climate || 'None');
+    if (tradeCode) tResult('Trade Code', tradeCode);
+
+    return { hzVariance, climate, tradeCode };
 }
 
 function generateWorldType(base) {
-    let wtFlux = rollFlux();
-    let worldType = wtFlux <= -4 ? 'Far Satellite' : wtFlux === -3 ? 'Close Satellite' : 'Planet';
-    if (worldType === 'Planet') return { worldType, parentBody: null, satOrbit: null };
+    tSection('World Type & Satellites (Table 2C)');
+    let baseFlux = rollFlux();
+    writeLogLine(`Base World Type Flux Roll: ${baseFlux >= 0 ? '+' : ''}${baseFlux}`);
 
-    let parentBody = (base?.gasGiant === false) ? 'Planet' : (rollFlux() <= 0 ? 'Gas Giant' : 'Planet');
-    let soFlux = rollFlux();
-    let orbits = worldType === 'Close Satellite'
-        ? ['Ay', 'Bee', 'Cee', 'Dee', 'Ee', 'Eff', 'Gee', 'Aitch', 'Eye', 'Jay', 'Kay', 'Ell', 'Em']
-        : ['En', 'Oh', 'Pee', 'Que', 'Arr', 'Ess', 'Tee', 'Yu', 'Vee', 'Dub', 'Ex', 'Wye', 'Zee'];
-    return { worldType, parentBody, satOrbit: orbits[soFlux + 6] || 'Gee' };
+    // Apply Table 2C DMs
+    let dm = 0;
+    if (base && base.size === 0) {
+        dm = -1;
+        tDM('Mainworld is Asteroid (Size 0)', -1);
+    }
+
+    let wtFlux = baseFlux + dm;
+    wtFlux = Math.max(-6, Math.min(6, wtFlux)); // Clamp to table bounds
+    writeLogLine(`Modified World Type Flux: ${wtFlux >= 0 ? '+' : ''}${wtFlux}`);
+
+    let worldType = 'Planet';
+    let parentBody = null;
+    let satOrbit = null;
+    let isTidallyLocked = false;
+
+    // Table 2C Exact Row Mapping
+    if (wtFlux === -6) { worldType = 'Far Satellite'; parentBody = 'Gas Giant'; satOrbit = 'H'; }
+    else if (wtFlux === -5) { worldType = 'Far Satellite'; parentBody = 'Gas Giant'; satOrbit = 'J'; }
+    else if (wtFlux === -4) { worldType = 'Far Satellite'; parentBody = 'Gas Giant'; satOrbit = 'K'; }
+    else if (wtFlux === -3) { worldType = 'Close Satellite'; parentBody = 'Gas Giant'; satOrbit = 'U'; isTidallyLocked = true; }
+    else if (wtFlux === -2) { worldType = 'Close Satellite'; parentBody = 'Planet'; satOrbit = 'T'; isTidallyLocked = true; }
+    else if (wtFlux === -1) { worldType = 'Close Satellite'; parentBody = 'Planet'; satOrbit = 'S'; isTidallyLocked = true; }
+    else if (wtFlux >= 0 && wtFlux <= 2) { worldType = 'Planet'; }
+    else if (wtFlux === 3) { worldType = 'Close Satellite'; parentBody = 'Planet'; satOrbit = 'R'; isTidallyLocked = true; }
+    else if (wtFlux === 4) { worldType = 'Close Satellite'; parentBody = 'Planet'; satOrbit = 'Q'; isTidallyLocked = true; }
+    else if (wtFlux === 5) { worldType = 'Close Satellite'; parentBody = 'Planet'; satOrbit = 'P'; isTidallyLocked = true; }
+    else if (wtFlux >= 6) { worldType = 'Far Satellite'; parentBody = 'Planet'; satOrbit = 'N'; }
+
+    tResult('World Type', worldType);
+    if (parentBody) tResult('Parent Body', parentBody);
+    if (satOrbit) {
+        tResult('Satellite Orbit (Alpha)', satOrbit);
+        if (isTidallyLocked) tResult('Tidal Lock', 'Yes (Close Satellite)');
+    }
+
+    return { worldType, parentBody, satOrbit, isTidallyLocked };
+}
+
+/**
+ * T5 SYSTEM POST-GENERATION AUDIT
+ * Scans the final system data for compliance with Tables 1A, 2A, and 2B.
+ */
+function runT5SystemAudit(sys) {
+    tSection('T5 System Post-Generation Audit');
+    let totalErrors = 0;
+
+    const primary = sys.stars && sys.stars[0];
+    const mw = sys.worlds && sys.worlds.find(w => w.type === 'Mainworld');
+
+    // 1. Stellar Constraint Audit (Table 2A)
+    if (primary) {
+        let { type, decimal, size } = primary;
+        let sErr = false;
+        if (size === 'IV' && ((type === 'K' && decimal >= 5) || type === 'M')) {
+            writeLogLine(`  [FAIL] Stellar: ${type}${decimal} cannot be Size IV.`);
+            sErr = true; totalErrors++;
+        }
+        if (size === 'VI' && (type === 'A' || (type === 'F' && decimal <= 4))) {
+            writeLogLine(`  [FAIL] Stellar: ${type}${decimal} cannot be Size VI.`);
+            sErr = true; totalErrors++;
+        }
+        if (!sErr) writeLogLine(`  [PASS] Stellar: ${type}${decimal} ${size} is a valid T5 constraint combination.`);
+    }
+
+    // 2. Mainworld Bases & Climate Audit (Tables 1A & 2B)
+    if (mw) {
+        let sp = mw.starport;
+        let bErr = false;
+        if (mw.navalBase && !['A', 'B'].includes(sp)) {
+            writeLogLine(`  [FAIL] Bases: Starport ${sp} cannot support a Naval Base.`);
+            bErr = true; totalErrors++;
+        }
+        if (mw.scoutBase && !['A', 'B', 'C', 'D'].includes(sp)) {
+            writeLogLine(`  [FAIL] Bases: Starport ${sp} cannot support a Scout Base.`);
+            bErr = true; totalErrors++;
+        }
+        if ((mw.navalDepot || mw.wayStation) && sp !== 'A') {
+            writeLogLine(`  [FAIL] Special Bases: Depot/Way Station requires Starport A (Found ${sp}).`);
+            bErr = true; totalErrors++;
+        }
+        if (!bErr) writeLogLine(`  [PASS] Bases: Valid base distribution for Starport ${sp}.`);
+
+        let climate = mw.climateZone || '';
+        let tCodes = mw.tradeCodes || [];
+        let cErr = false;
+        if (climate.includes('Hot') && !tCodes.includes('Tr')) { 
+            writeLogLine(`  [FAIL] Climate: Hot world missing 'Tr' trade code.`); 
+            cErr = true; totalErrors++; 
+        }
+        if (climate.includes('Cold') && !tCodes.includes('Tu')) { 
+            writeLogLine(`  [FAIL] Climate: Cold world missing 'Tu' trade code.`); 
+            cErr = true; totalErrors++; 
+        }
+        if (climate.includes('Frozen') && !tCodes.includes('Fr')) { 
+            writeLogLine(`  [FAIL] Climate: Frozen world missing 'Fr' trade code.`); 
+            cErr = true; totalErrors++; 
+        }
+        if (!cErr) writeLogLine(`  [PASS] Climate: Trade codes match climate zone (${climate || 'Temperate/None'}).`);
+    }
+
+    tResult('T5 Audit Summary', totalErrors === 0 ? 'ALL CHECKS PASSED' : `${totalErrors} ERRORS FOUND`);
 }

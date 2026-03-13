@@ -1,9 +1,11 @@
 # Changelog
 
+### [v0.1.10] - 2026-03-12
+
 ### [v0.1.9.1] - 2026-03-12
 1. **RTT Engine:** 
 
-### [v0.1.9] - 2026-03-11
+### [v0.1.9] - 2026-03-12
 1. **Bulk Macros:** Changed CT bulk macro to **Ctrl + Alt + C**.
 2. **Dynamic Grid Scaling:** Resized the global map from 8x4 sectors to **7x5 sectors**.
 3. **Context Menu:** Added full system generation macros to the context menu.

@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.1.9.1";
-const APP_BANNER = "v0.1.9.1 Updated Bases in RTT Engine";
+const APP_VERSION = "v0.1.10";
+const APP_BANNER = "v0.1.10 Updated Bases in RTT Engine";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -205,18 +205,24 @@ function toEHex(val) {
     return hexChars[val - 10] || '0';
 }
 
-// --- Traveller Translators ---
+// --- Traveller Translators (eHex: skips I and O) ---
+const EHEX_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // Skips I and O
+
 function toUWPChar(val) {
     if (val === undefined || val === null || isNaN(val)) return '0';
+    val = Math.floor(val);
+    if (val < 0) return '0';
     if (val < 10) return val.toString();
-    return String.fromCharCode(55 + Math.floor(val));
+    return EHEX_CHARS[val - 10] || 'Z';
 }
 
 function fromUWPChar(char) {
     if (!char) return 0;
-    const code = char.toUpperCase().charCodeAt(0);
+    const c = char.toUpperCase();
+    const code = c.charCodeAt(0);
     if (code >= 48 && code <= 57) return code - 48; // 0-9
-    if (code >= 65 && code <= 90) return code - 55; // A-Z (A=10)
+    const idx = EHEX_CHARS.indexOf(c);
+    if (idx >= 0) return idx + 10;
     return 0;
 }
 

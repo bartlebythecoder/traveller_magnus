@@ -1997,15 +1997,11 @@ function evaluateRTTMainworldCandidate(body) {
 function getEHexLetter(val) {
     if (val === undefined || val === null) return '0';
     if (typeof val === 'string') return val.toUpperCase();
+    if (val < 0) return '0';
     if (val < 10) return val.toString();
-    if (val === 10) return 'A';
-    if (val === 11) return 'B';
-    if (val === 12) return 'C';
-    if (val === 13) return 'D';
-    if (val === 14) return 'E';
-    if (val === 15) return 'F';
-    if (val === 16) return 'G';
-    return '0';
+    // Use the shared eHex lookup (skips I and O)
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+    return chars[val - 10] || 'Z';
 }
 
 function getEHex(char) {

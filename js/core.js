@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.1.10";
-const APP_BANNER = "v0.1.10 Updated Bases in RTT Engine";
+const APP_VERSION = "v0.1.10.1";
+const APP_BANNER = "v0.1.10.1 eHex Skip and T5 Trade Fixes";
 
 // -----------------------------------------------------------------------------
 // Application State

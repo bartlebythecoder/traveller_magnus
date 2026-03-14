@@ -1,9 +1,18 @@
 # Changelog
 
-### [v0.1.10] - 2026-03-12
+### [v0.1.10.1] - 2026-03-13
+1. **T5 System Generation:** Corrected formulas for t5 system generation.
+2. **T5 System Generation:** Added world types for non-mainworlds
+3. **T5 System Generation:** Removed AI house rules for orbital periods, orbital rotation and temperature.
+
+### [v0.1.10] - 2026-03-13
+1. **T5 Mainworld Generation:** Corrected formulas for mainworld generation.
+2. **T5 Mainworld Generation:** Added full stellar details and PBG to T5 mainworld generation.
 
 ### [v0.1.9.1] - 2026-03-12
-1. **RTT Engine:** 
+1. **RTT Engine:** Removed asteroid symbol from empty stars in the hex map.
+2. **RTT Engine:** Now chooses random special base from list instead of providing list
+3. **RTT Engine:** World View now shows check boxes for all bases.
 
 ### [v0.1.9] - 2026-03-12
 1. **Bulk Macros:** Changed CT bulk macro to **Ctrl + Alt + C**.

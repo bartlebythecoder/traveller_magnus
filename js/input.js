@@ -340,6 +340,10 @@ function setupKeyboardShortcuts() {
             e.preventDefault();
             keysDown.clear(); // FIX: Prevent 'r' from getting stuck
             runRTTMacro();
+        } else if (e.ctrlKey && e.altKey && key === '5') {
+            e.preventDefault();
+            keysDown.clear(); 
+            runT5Macro();
         } else if (e.key === 'Escape') {
             e.preventDefault();
             const hexEditor = document.getElementById('hex-editor');
@@ -1043,6 +1047,11 @@ function setupGenerationHandlers() {
         document.getElementById('context-menu').classList.remove('visible');
         runRTTMacro();
     });
+
+    document.getElementById('ctx-macro-t5').addEventListener('click', () => {
+        document.getElementById('context-menu').classList.remove('visible');
+        runT5Macro();
+    });
 }
 
 // ============================================================================
@@ -1316,6 +1325,105 @@ async function runRTTMacro() {
         
         requestAnimationFrame(draw);
         showToast(`Full RTT Generation Complete!`, 4000);
+    }, 500);
+}
+
+async function runT5Macro() {
+    if (!validateSelection('generate')) return;
+
+    saveHistoryState('T5 Macro');
+    if (window.isLoggingEnabled) window.batchLogData = [];
+
+    console.log("Bulk Generating T5 Full System...");
+    await ensureNamesLoaded();
+
+    if (!confirm("This will completely overwrite ANY existing data in the selected hexes with a Full T5 Generation sequence. Proceed?")) {
+        return;
+    }
+
+    const targetHexes = Array.from(selectedHexes);
+
+    // 1. Auto Populate (Standard 3 in 6)
+    targetHexes.forEach(hexId => {
+        reseedForHex(hexId);
+        const roll = roll1D();
+        if (roll <= 3) {
+            hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
+        } else {
+            hexStates.set(hexId, { type: 'EMPTY' });
+        }
+    });
+    requestAnimationFrame(draw);
+    showToast(`Populated ${targetHexes.length} hex(es)...`, 1000);
+
+    // 2. Generate T5 Mainworlds
+    setTimeout(() => {
+        targetHexes.forEach(hexId => {
+            try {
+                let stateObj = hexStates.get(hexId);
+                if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
+                    stateObj.t5Data = generateT5Mainworld(hexId);
+                    // Clear variants to ensure fresh generation
+                    stateObj.ctData = null;
+                    stateObj.mgt2eData = null;
+                    stateObj.ctSystem = null;
+                    stateObj.mgtSystem = null;
+                    stateObj.ctPhysical = null;
+                    stateObj.mgtPhysical = null;
+                    stateObj.t5Physical = null;
+                    stateObj.mgtSocio = null;
+                    stateObj.t5Socio = null;
+                    hexStates.set(hexId, stateObj);
+                }
+            } catch (err) {
+                console.error(`T5 Macro Step 2 (Mainworld) failed for hex ${hexId}:`, err);
+            }
+        });
+        requestAnimationFrame(draw);
+        showToast(`Generated T5 Mainworlds...`, 1000);
+
+        // 3. Expand Systems
+        setTimeout(() => {
+            targetHexes.forEach(hexId => {
+                try {
+                    let stateObj = hexStates.get(hexId);
+                    let baseData = stateObj ? stateObj.t5Data : null;
+                    if (baseData) {
+                        let sys = generateT5SystemChunk1(baseData, stateObj.t5System, hexId);
+                        sys = generateT5SystemChunk2(sys, baseData);
+                        sys = generateT5SystemChunk3(sys, baseData);
+                        stateObj.t5System = sys;
+                        stateObj.t5Physical = null; 
+                        hexStates.set(hexId, stateObj);
+                    }
+                } catch (err) {
+                    console.error(`T5 Macro Step 3 (Expansion) failed for hex ${hexId}:`, err);
+                }
+            });
+            requestAnimationFrame(draw);
+            showToast(`Expanded T5 Systems...`, 1000);
+
+            // 4. Socioeconomics
+            setTimeout(() => {
+                targetHexes.forEach(hexId => {
+                    try {
+                        let stateObj = hexStates.get(hexId);
+                        let baseData = stateObj ? stateObj.t5Data : null;
+                        if (baseData) {
+                            stateObj.t5Socio = generateT5Socioeconomics(baseData, hexId);
+                            hexStates.set(hexId, stateObj);
+                        }
+                    } catch (err) {
+                        console.error(`T5 Macro Step 4 (Socioeconomics) failed for hex ${hexId}:`, err);
+                    }
+                });
+                if (window.isLoggingEnabled && window.batchLogData.length > 0) {
+                     downloadBatchLog('T5_Full_Macro', targetHexes.length);
+                }
+                requestAnimationFrame(draw);
+                showToast(`Full T5 Generation Complete!`, 4000);
+            }, 500);
+        }, 500);
     }, 500);
 }
 
@@ -1827,6 +1935,7 @@ function populateEditorAccordions(stateObj) {
                         html += `<span>Day: <strong>${dayStr}</strong></span>`;
                     }
 
+
                     if (w.totalTidalAmplitude !== undefined && w.totalTidalAmplitude > 0) {
                         html += `<span>Tidal Amp: <strong>${w.totalTidalAmplitude.toFixed(2)}</strong></span>`;
                     }
@@ -1942,6 +2051,7 @@ function populateEditorAccordions(stateObj) {
                                 }
                                 html += `<span>Day: <strong>${mDayStr}</strong></span>`;
                             }
+
 
                             if (m.totalTidalAmplitude !== undefined && m.totalTidalAmplitude > 0) {
                                 html += `<span>Tidal Amp: <strong>${m.totalTidalAmplitude.toFixed(2)}</strong></span>`;
@@ -2160,7 +2270,7 @@ function populateEditorAccordions(stateObj) {
             let html = `<div class="system-stats" style="grid-template-columns: 1fr;">
                 <div style="text-align: center; color: #66fcf1; border-bottom: 1px dotted #45a29e; padding-bottom: 4px;">T5: ${mwBase.name} Profile</div>`;
             sys.stars.forEach(star => {
-                html += `<span>${star.role}: <strong>${star.name}</strong> (Lum: ${star.luminosity ? star.luminosity.toFixed(3) : '?'}, Mass: ${star.mass ? star.mass.toFixed(2) : '?'})</span>`;
+                html += `<span>${star.role}: <strong>${star.name}</strong> (Lum: ${star.luminosity ? star.luminosity.toFixed(3) : '?'})</span>`;
             });
 
             if (mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
@@ -2180,8 +2290,9 @@ function populateEditorAccordions(stateObj) {
                 }
 
                 let uwp = w.type === 'Mainworld' ? mwBase.uwp : (w.uwpSecondary || '-');
-                let typeLabel = w.type;
-                if (w.type === 'Gas Giant') typeLabel = `${w.size === 15 ? 'Large' : 'Small'} Gas Giant`;
+                let typeLabel = w.worldType || w.type;
+                if (w.type === 'Mainworld') typeLabel = `Mainworld (${typeLabel})`;
+                if (w.type === 'Gas Giant' && !w.worldType) typeLabel = `${w.size === 15 ? 'Large' : 'Small'} Gas Giant`;
                 let labelColor = w.type === 'Mainworld' ? '#ffa500' : '#66fcf1';
                 let summaryStyle = w.type === 'Mainworld' ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
 
@@ -2215,35 +2326,37 @@ function populateEditorAccordions(stateObj) {
                     if (w.diamKm) html += `<span>Diameter: <strong>${w.diamKm.toLocaleString()} km</strong></span>`;
                     if (w.density) html += `<span>Density: <strong>${w.density.toFixed(1)}</strong></span>`;
                     if (w.gravity !== undefined) html += `<span>Gravity: <strong>${w.gravity.toFixed(2)} G</strong></span>`;
-                    if (w.mass !== undefined) html += `<span>Mass: <strong>${w.mass.toFixed(4)} M⊕</strong></span>`;
-                    if (w.temperature) html += `<span>Temp: <strong>${w.temperature}K / ${(w.temperature - 273).toFixed(0)}°C</strong></span>`;
-                    if (w.rotationPeriod) html += `<span>Day: <strong>${w.rotationPeriod}</strong></span>`;
-                    if (w.orbitalPeriod) {
-                        let yStr = w.orbitalPeriod < 1.0
-                            ? `${(w.orbitalPeriod * 365.25).toFixed(1)}d`
-                            : `${w.orbitalPeriod.toFixed(2)}y`;
-                        html += `<span>Year: <strong>${yStr}</strong></span>`;
-                    }
                 }
                 html += `</div>`;
 
-                // Satellites
                 if (w.satellites && w.satellites.length > 0) {
                     w.satellites.forEach((sat, satIdx) => {
-                        html += `<details style="margin-left: 20px;">`;
-                        html += `<summary>Moon ${satIdx + 1} <span class="sys-title-info">Size ${sat.size}</span></summary>`;
+                        const isMW = sat.type === 'Mainworld';
+                        const satLabel = isMW ? 'Mainworld' : `Moon ${satIdx + 1} - ${sat.worldType || 'Satellite'}`;
+                        const satUwp = isMW ? (mwBase ? mwBase.uwp : sat.uwp || '-') : (sat.uwpSecondary || '-');
+                        const satColor = isMW ? '#ffa500' : '#66fcf1';
+                        const satSummaryStyle = isMW ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
+
+                        let satZoneLabel = '';
+                        if (isMW && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                            const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
+                            satZoneLabel = ` | <span style="color: ${zColor}">${mwBase.travelZone}</span>`;
+                        }
+
+                        html += `<details style="margin-left: 20px;" ${isMW ? 'open' : ''}>`;
+                        html += `<summary ${satSummaryStyle}>${satLabel} <span class="sys-title-info">Size ${sat.size} | ${satUwp}${satZoneLabel}</span></summary>`;
                         html += `<div class="system-node">`;
 
-                        if (sat.uwpSecondary) {
-                            html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <strong style="color: #66fcf1">${sat.uwpSecondary}</strong></div>`;
+                        html += `<div style="margin-bottom: 6px; font-family: monospace;"><span style="color: ${satColor};">UWP:</span> <strong style="color: ${satColor};">${satUwp}</strong></div>`;
+
+                        if (isMW && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                            const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
+                            html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor}; margin-bottom: 8px;">Caution: ${mwBase.travelZone} Zone</div>`;
                         }
 
                         html += `<div class="system-stats">`;
-                        html += `<span>Diameter: <strong>${sat.diamKm.toLocaleString()} km</strong></span>`;
-                        html += `<span>Gravity: <strong>${sat.gravity.toFixed(2)} G</strong></span>`;
-                        html += `<span>Mass: <strong>${sat.mass.toFixed(6)} M⊕</strong></span>`;
-                        html += `<span>Temp: <strong>${sat.temperature}K</strong></span>`;
-                        html += `<span>Day: <strong>${sat.rotationPeriod}</strong></span>`;
+                        if (sat.diamKm) html += `<span>Diameter: <strong>${sat.diamKm.toLocaleString()} km</strong></span>`;
+                        if (sat.gravity !== undefined) html += `<span>Gravity: <strong>${sat.gravity.toFixed(2)} G</strong></span>`;
                         html += `</div></div></details>`;
                     });
                 }

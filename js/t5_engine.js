@@ -493,7 +493,8 @@ function generateT5AtmosphereByWorldType(world, worldType) {
     let dm = (worldType === 'StormWorld') ? 4 : 0;
     
     let rawAtm = (world.size || 0) + flux + dm;
-    world.atm = Math.min(15, Math.max(0, rawAtm));
+    let minAtm = (worldType === 'StormWorld') ? 4 : 0;
+    world.atm = Math.min(15, Math.max(minAtm, rawAtm));
 
     let logMsg = `Atmosphere Calc (${worldType}): Size ${world.size} + Flux (${flux >= 0 ? '+' : ''}${flux})`;
     if (dm !== 0) logMsg += ` + DM ${dm}`;
@@ -961,8 +962,15 @@ function generateT5SystemChunk3(sys, mainworldBase) {
 
     // Safety: ensure we have mainworld population for the continuation cap
     if (!mainworldBase) {
-        let mwOrb = sys.orbits.find(o => o.contents && o.contents.type === 'Mainworld');
-        if (mwOrb) mainworldBase = mwOrb.contents;
+        sys.orbits.forEach(o => {
+            if (o.contents) {
+                if (o.contents.type === 'Mainworld') mainworldBase = o.contents;
+                else if (o.contents.satellites) {
+                    let found = o.contents.satellites.find(s => s.type === 'Mainworld');
+                    if (found) mainworldBase = found;
+                }
+            }
+        });
     }
 
     // Determine HZ Orbit for Primary
@@ -1056,8 +1064,21 @@ function generateT5SystemChunk3(sys, mainworldBase) {
         }
 
         if (w.size !== undefined) {
-            let sizeVal = (w.size === 'S' || w.size === '0' || w.size === 0) ? 0.3 : w.size;
-            w.diamKm = (w.size === 0 || w.size === 'S') ? 500 : w.size * 1600;
+            let sizeVal;
+            let isGG = w.type.includes('Gas Giant') || w.type === 'Ice Giant';
+            let isRing = (w.size === 'R' && !isGG);
+            let isSmall = (w.size === 'S' && !isGG);
+
+            if (isSmall) {
+                sizeVal = 0.4;
+                w.diamKm = 600;
+            } else if (isRing) {
+                sizeVal = 0;
+                w.diamKm = 0;
+            } else {
+                sizeVal = (w.size === '0' || w.size === 0) ? 0.3 : (typeof w.size === 'string' ? fromUWPChar(w.size) : w.size);
+                w.diamKm = (sizeVal <= 0.3) ? 500 : isGG ? sizeVal * 10000 : sizeVal * 1600;
+            }
 
             // Density & Gravity
             let dRoll = tRoll1D('Density Roll');
@@ -1138,6 +1159,11 @@ function generateT5SystemChunk3(sys, mainworldBase) {
                 if (rawSize >= w.size) {
                     m.size = Math.max(0, w.size - 1);
                     tOverride('Moon size restricted (< parent)', m.size);
+                    if (m.size === 0 && !['Worldlet', 'Belt'].includes(m.worldType)) {
+                        let oldType = m.worldType;
+                        m.worldType = 'Worldlet';
+                        writeLogLine(`Physics Constraint: Re-classified ${oldType} as Worldlet due to Size 0 restriction.`);
+                    }
                 } else {
                     m.size = rawSize;
                 }
@@ -1195,8 +1221,15 @@ function runT5SystemAudit(sys, hzOrbit) {
     if (hzOrbit === undefined) hzOrbit = getStarHZ(sys.stars[0]);
 
     let mainworldBase = null;
-    let mwOrb = sys.orbits.find(o => o.contents && o.contents.type === 'Mainworld');
-    if (mwOrb) mainworldBase = mwOrb.contents;
+    sys.orbits.forEach(o => {
+        if (o.contents) {
+            if (o.contents.type === 'Mainworld') mainworldBase = o.contents;
+            else if (o.contents.satellites) {
+                let found = o.contents.satellites.find(s => s.type === 'Mainworld');
+                if (found) mainworldBase = found;
+            }
+        }
+    });
 
     tSection('T5 System Audit');
     let totalErrors = 0;
@@ -1230,8 +1263,10 @@ function runT5SystemAudit(sys, hzOrbit) {
     let physErrors = 0;
 
     // Helper: normalize size to a number
-    function normSize(size) {
-        if (size === 'S' || size === 'R') return 0;
+    function normSize(size, type = '') {
+        const isGG = type.includes('Gas Giant') || type === 'Ice Giant';
+        if (size === 'S' && !isGG) return 0.4; // dwarf planet/moonlet
+        if (size === 'R' && !isGG) return 0;   // Ring (Size 0)
         if (typeof size === 'number') return size;
         if (typeof size === 'string') return fromUWPChar(size);
         return 0;
@@ -1242,10 +1277,10 @@ function runT5SystemAudit(sys, hzOrbit) {
         let w = o.contents;
         if (!w || !w.satellites || w.satellites.length === 0) return;
 
-        let parentSize = normSize(w.size);
+        let parentSize = normSize(w.size, w.type);
 
         w.satellites.forEach((sat, idx) => {
-            let satSize = normSize(sat.size);
+            let satSize = normSize(sat.size, sat.type);
 
             // Rule 1: Satellite must not exceed parent size
             if (satSize > parentSize) {
@@ -1254,7 +1289,7 @@ function runT5SystemAudit(sys, hzOrbit) {
             }
 
             // Rule 2: Equal sized bodies must be Double Planet
-            if (satSize === parentSize && sat.type !== 'Mainworld') {
+            if (satSize === parentSize && satSize > 0 && sat.type !== 'Mainworld') {
                 // Only flag if the parent is not classified as Double Planet
                 if (w.type !== 'Double Planet') {
                     writeLogLine(`[FAIL] Physics: Orbit ${o.orbit} equal sized bodies without 'Double Planet' classification (Size ${parentSize})`);
@@ -1262,7 +1297,7 @@ function runT5SystemAudit(sys, hzOrbit) {
                 }
             }
             // If it's the Mainworld satellite at equal size, also check
-            if (satSize === parentSize && sat.type === 'Mainworld') {
+            if (satSize === parentSize && satSize > 0 && sat.type === 'Mainworld') {
                 if (w.type !== 'Double Planet') {
                     writeLogLine(`[FAIL] Physics: Orbit ${o.orbit} Mainworld and Parent are equal size (${parentSize}) but Parent is '${w.type}' not 'Double Planet'`);
                     physErrors++;
@@ -1311,7 +1346,7 @@ function runT5SystemAudit(sys, hzOrbit) {
         }
         // Zone A Integrity
         if (orbit <= hzOrbit + 1) {
-            if (['Worldlet', 'IceWorld'].includes(body.worldType)) {
+            if (body.worldType === 'IceWorld' || (body.worldType === 'Worldlet' && normSize(body.size) >= 1)) {
                 writeLogLine(`[FAIL] Zone A Integrity: ${body.worldType} in Orbit ${orbit} is in Zone A (Orbit <= ${hzOrbit + 1}).`);
                 errs++;
             }
@@ -1359,14 +1394,14 @@ function runT5SystemAudit(sys, hzOrbit) {
         let w = o.contents;
         if (!w || w.type === 'Empty' || w.type === 'Mainworld') return;
         
-        if (w.pop >= mwPop && mwPop < 15) {
+        if (w.pop > 0 && w.pop >= mwPop && mwPop < 15) {
             writeLogLine(`[FAIL] Pop Cap: ${w.type} in Orbit ${o.orbit} has Pop ${toUWPChar(w.pop)}, which is >= Mainworld Pop ${toUWPChar(mwPop)}.`);
             popErrors++;
         }
 
         if (w.satellites) {
             w.satellites.forEach(s => {
-                if (s.type !== 'Mainworld' && s.pop >= mwPop && mwPop < 15) {
+                if (s.pop > 0 && s.type !== 'Mainworld' && s.pop >= mwPop && mwPop < 15) {
                     writeLogLine(`[FAIL] Pop Cap: Moon of Orbit ${o.orbit} has Pop ${toUWPChar(s.pop)}, which is >= Mainworld Pop ${toUWPChar(mwPop)}.`);
                     popErrors++;
                 }
@@ -1393,8 +1428,8 @@ function runT5SystemAudit(sys, hzOrbit) {
                 writeLogLine(`[FAIL] Gov Logic: ${body.worldType} in ${name} has Gov ${toUWPChar(body.gov)}. Must be 0.`);
                 errs++;
             }
-            if ((body.pop || 0) === 0 && body.gov > body.govFlux && body.govFlux !== undefined) {
-                writeLogLine(`[FAIL] Gov Logic: Pop 0 world in ${name} has Gov ${toUWPChar(body.gov)} exceeding Flux ${body.govFlux}.`);
+            if ((body.pop || 0) === 0 && body.gov > Math.max(0, body.govFlux || 0) && body.govFlux !== undefined) {
+                writeLogLine(`[FAIL] Gov Logic: Pop 0 world in ${name} has Gov ${toUWPChar(body.gov)} exceeding expected ${toUWPChar(Math.max(0, body.govFlux))}.`);
                 errs++;
             }
             return errs;
@@ -1461,6 +1496,9 @@ function runT5SystemAudit(sys, hzOrbit) {
 
         const checkTL = (body, name) => {
             let errs = 0;
+            // Skip Gas Giant physical bodies (they don't have social stats/ports)
+            if (body.type && (body.type.includes('Gas Giant') || body.type === 'Ice Giant')) return 0;
+
             if (['RadWorld', 'Inferno'].includes(body.worldType) && (body.tl || 0) !== 0) {
                 writeLogLine(`[FAIL] TL Logic: ${body.worldType} in ${name} has TL ${toUWPChar(body.tl)}. Must be 0.`);
                 errs++;

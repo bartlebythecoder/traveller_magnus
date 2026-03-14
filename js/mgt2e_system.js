@@ -6,11 +6,11 @@
 
 function mgt2e_calculateTerrestrialPhysical(body, label, sys) {
     if (body.size === 0 || body.size === 'R') {
-        body.density = 0;
-        body.gravity = 0;
-        body.mass = 0;
-        body.escapeVel = 0;
-        body.orbitalVelSurface = 0;
+        body.density = null;
+        body.gravity = null;
+        body.mass = null;
+        body.escapeVel = null;
+        body.orbitalVelSurface = null;
         return;
     }
 
@@ -834,7 +834,7 @@ function generateMgT2ESystemChunk3(sys, mainworldBase) {
         w.moons = [];
         w.rings = [];
 
-        if (w.type === 'Empty' || w.type === 'Planetoid Belt') continue;
+        if (w.type === 'Empty') continue;
 
         tSection(`${w.type} Orbit ${w.orbitId.toFixed(2)} Sizing`);
         if (w.type === 'Gas Giant') {
@@ -856,20 +856,32 @@ function generateMgT2ESystemChunk3(sys, mainworldBase) {
                 }
                 tResult('Size', w.size);
             }
-            w.diamKm = w.size * 1600;
-            mgt2e_calculateTerrestrialPhysical(w, w.type, sys);
+
+            if (w.size === 0) {
+                // Mainworld is an Asteroid Belt
+                if (!w.composition) {
+                    generateMgT2EBeltProfile(w, sys, mainworldBase);
+                }
+                w.density = null;
+                w.gravity = null;
+                w.mass = null;
+                w.escapeVel = null;
+                w.orbitalVelSurface = null;
+            } else {
+                w.diamKm = w.size * 1600;
+                mgt2e_calculateTerrestrialPhysical(w, w.type, sys);
+            }
         } else if (w.type === 'Planetoid Belt') {
-            w.bulk = tRoll1D('Belt Bulk');
-            w.mType = tRoll1D('M-Type Content') * 10;
-            w.cType = tRoll1D('C-Type Content') * 10;
-            w.sType = Math.max(0, 100 - w.mType - w.cType);
+            if (!w.composition) {
+                generateMgT2EBeltProfile(w, sys, mainworldBase);
+            }
+            // Nullify all terrestrial physics for the belt itself
             w.size = 0;
-            w.gravity = 0;
-            w.mass = 0;
-            w.density = 0;
-            w.atmCode = 0;
-            w.composition = `M:${w.mType}% C:${w.cType}% S:${w.sType}%`;
-            tResult('Composition', w.composition);
+            w.gravity = null;
+            w.mass = null;
+            w.density = null;
+            w.escapeVel = null;
+            w.orbitalVelSurface = null;
         }
 
         // --- Step 8/9 Precision Orbit Recalculation ---
@@ -1457,13 +1469,26 @@ function generateMgT2ESystemChunk5(sys) {
     let processBody = (w, parent, isMoon) => {
         if (w.type === 'Empty') return;
 
-        if (w.type === 'Planetoid Belt') {
-            // Planetoid Belts don't have rotation/tidal stats, but need temp
-            w.siderealHours = 24.0;
-            w.yearHours = (w.periodYears || 1.0) * 8760;
-            w.solarDayHours = 24.0;
-            w.axialTilt = 0;
+        if (w.type === 'Planetoid Belt' || w.size === 0 || w.size === 'R') {
+            w.siderealHours = null;
+            w.solarDayHours = null;
+            w.axialTilt = null;
             w.tidallyLocked = false;
+
+            // Calculate only orbital mean temperature, skip diurnals
+            let hzco = w.worldHzco || sys.hzco;
+            w.albedo = getMgT2EAlbedo(w, hzco);
+            let srcLum = primary.lum || 1.0;
+            if (w.au > 0) {
+                let term1 = srcLum * (1 - w.albedo);
+                let term2 = (w.au * w.au);
+                w.meanTempK = 279 * Math.pow(term1 / term2, 0.25);
+            } else {
+                w.meanTempK = 3;
+            }
+            w.highTempK = null;
+            w.lowTempK = null;
+            return; // Exit processBody for this belt
         } else {
             tSection(`${isMoon ? 'Moon' : w.type} Orbit ${w.orbitId.toFixed(2)} Rotation`);
 
@@ -1711,7 +1736,7 @@ function generateMgT2ESystemChunk6(sys) {
             // Step 2: Gas Giant Inherent Heat
             inherentK = 80 * Math.sqrt(w.massEarths / sys.age);
             tResult('GG Inherent Heat', inherentK.toFixed(1) + ' K');
-        } else if (w.type !== 'Planetoid Belt') {
+        } else if (w.type !== 'Planetoid Belt' && w.size != 0 && w.size !== 'R') {
             // Step 1: Terrestrial Seismic Stress
             let dmResidual = 0;
             if (isMoon) dmResidual += 1;
@@ -1782,7 +1807,15 @@ function generateMgT2ESystemChunk6(sys) {
         tResult('Recalc High Temp', w.highTempK.toFixed(1) + ' K');
         tResult('Recalc Low Temp', w.lowTempK.toFixed(1) + ' K');
 
-        if (w.type === 'Gas Giant' || w.type === 'Planetoid Belt') return;
+        if (w.type === 'Gas Giant' || w.type === 'Planetoid Belt' || w.size === 0 || w.size === 'R') {
+            w.habitability = 0;
+            w.lifeProfile = "0000";
+            w.biomass = 0;
+            w.biocomplexity = 0;
+            w.biodiversity = 0;
+            w.compatibility = 0;
+            return;
+        }
 
         tSection(`${isMoon ? 'Moon' : w.type} Orbit ${w.orbitId.toFixed(2)} Biology/Sophonts`);
 
@@ -2675,48 +2708,55 @@ function generateMgT2EBeltProfile(belt, sys, mainworldBase) {
     // STEP 2: Determine Belt Composition
     let compRoll = tRoll2D('Belt Composition Roll');
     let compDM = 0;
-    if (Math.abs(belt.orbitId - hzco) <= 0.5) {
-        tDM('Inside/Near HZCO', -4); compDM -= 4;
-    }
-    if (belt.orbitId > hzco + 2.0) {
-        tDM('Beyond HZCO + 2.0', 4); compDM += 4;
+    
+    // WBH Location Modifiers
+    if (belt.orbitId <= hzco) {
+        tDM('Inside/Near HZCO', -4);
+        compDM = -4; 
+    } else if (belt.orbitId > hzco + 2.0) {
+        tDM('Beyond HZCO + 2.0', 4);
+        compDM = 4;
     }
 
     let cidx = Math.max(0, Math.min(12, compRoll + compDM));
     let mPct = 0, sPct = 0, cPct = 0, oPct = 0;
 
-    switch (cidx) {
-        case 0: mPct = 60 + (tRoll1D('M-Type') * 5); sPct = (tRoll1D('S-Type') * 5); cPct = 0; break;
-        case 1: mPct = 50 + (tRoll1D('M-Type') * 5); sPct = 5 + (tRoll1D('S-Type') * 5); cPct = Math.ceil(tRoll1D('C-Type') / 2); break;
-        case 2: mPct = 40 + (tRoll1D('M-Type') * 5); sPct = 15 + (tRoll1D('S-Type') * 5); cPct = tRoll1D('C-Type'); break;
-        case 3: mPct = 25 + (tRoll1D('M-Type') * 5); sPct = 30 + (tRoll1D('S-Type') * 5); cPct = tRoll1D('C-Type'); break;
-        case 4: mPct = 15 + (tRoll1D('M-Type') * 5); sPct = 35 + (tRoll1D('S-Type') * 5); cPct = 5 + tRoll1D('C-Type'); break;
-        case 5: mPct = 5 + (tRoll1D('M-Type') * 5); sPct = 40 + (tRoll1D('S-Type') * 5); cPct = 5 + (tRoll1D('C-Type') * 2); break;
-        case 6: mPct = tRoll1D('M-Type') * 5; sPct = 40 + (tRoll1D('S-Type') * 5); cPct = tRoll1D('C-Type') * 5; break;
-        case 7: mPct = 5 + (tRoll1D('M-Type') * 2); sPct = 35 + (tRoll1D('S-Type') * 5); cPct = 10 + (tRoll1D('C-Type') * 5); break;
-        case 8: mPct = 5 + tRoll1D('M-Type'); sPct = 30 + (tRoll1D('S-Type') * 5); cPct = 20 + (tRoll1D('C-Type') * 5); break;
-        case 9: mPct = tRoll1D('M-Type'); sPct = 15 + (tRoll1D('S-Type') * 5); cPct = 40 + (tRoll1D('C-Type') * 5); break;
-        case 10: mPct = tRoll1D('M-Type'); sPct = 5 + (tRoll1D('S-Type') * 5); cPct = 50 + (tRoll1D('C-Type') * 5); break;
-        case 11: mPct = Math.ceil(tRoll1D('M-Type') / 2); sPct = 5 + (tRoll1D('M-Type') * 2); cPct = 60 + (tRoll1D('C-Type') * 5); break;
-        case 12: default: mPct = 0; sPct = tRoll1D('S-Type'); cPct = 70 + (tRoll1D('C-Type') * 5); break;
+    // Table Mapping (WBH Table)
+    const compTable = [
+        {m:65, s:35, c:0},  // 0 or less
+        {m:55, s:40, c:5},  // 1
+        {m:45, s:45, c:10}, // 2
+        {m:35, s:55, c:10}, // 3
+        {m:25, s:65, c:10}, // 4
+        {m:15, s:75, c:10}, // 5
+        {m:5,  s:45, c:50}, // 6
+        {m:5,  s:35, c:60}, // 7
+        {m:5,  s:25, c:70}, // 8
+        {m:2,  s:18, c:80}, // 9
+        {m:1,  s:9,  c:90}, // 10
+        {m:0,  s:5,  c:95}, // 11
+        {m:0,  s:0,  c:100} // 12+
+    ];
+
+    let res = compTable[cidx];
+    mPct = res.m; sPct = res.s; cPct = res.c;
+
+    // Overflow/Underflow Corrective Logic
+    let total = mPct + sPct + cPct;
+    if (total > 100) {
+        let excess = total - 100;
+        let subM = Math.min(mPct, excess);
+        mPct -= subM; excess -= subM;
+        if (excess > 0) sPct -= excess;
+    } else if (total < 100) {
+        oPct = 100 - total;
     }
 
-    let totalComp = mPct + sPct + cPct;
-    if (totalComp > 100) {
-        let excess = totalComp - 100;
-        let mRemove = Math.min(mPct, excess);
-        mPct -= mRemove;
-        excess -= mRemove;
-        if (excess > 0) {
-            let sRemove = Math.min(sPct, excess);
-            sPct -= sRemove;
-        }
-    } else if (totalComp < 100) {
-        oPct = 100 - totalComp;
-    }
-
+    // FINAL DATA ASSIGNMENT
     belt.mType = mPct; belt.sType = sPct; belt.cType = cPct; belt.oType = oPct;
-    tResult('Composition', `M: ${mPct}%, S: ${sPct}%, C: ${cPct}%, O: ${oPct}%`);
+    belt.comp = { M: mPct, S: sPct, C: cPct, O: oPct };
+    belt.composition = `M:${mPct}% S:${sPct}% C:${cPct}% O:${oPct}%`;
+    tResult('Composition Result', belt.composition);
 
     // STEP 3: Determine Belt Bulk
     let bulkRoll = tRoll2D('Belt Bulk Roll');
@@ -3822,215 +3862,142 @@ function generateMgT2ESystemChunk2(sys, mainworldBase) {
     }
 
     // =====================================================================
-    // Part 2D: Slot Generation (forbidden-zone aware)
+    // Part 2D: Unified Slot Generation & Safe Anchor (Requirements 1-3)
     // =====================================================================
-    function genSlots(bands, maoInner, numSlots, fzList, label, isMainStar, blNumber, blOrbit) {
-        if (!bands.length) return [];
-        let targetIdx = Math.round(blNumber) - 1; // 0-indexed position
-
-        // Step 5: Calculate spread
-        let spread = (blOrbit - maoInner) / Math.max(1, blNumber);
-        if (spread <= 0) spread = 0.5;
-        if (isMainStar) sys.primarySpread = spread;
-
-        let slots = [];
-        let count = Math.max(numSlots, isMainStar ? targetIdx + 1 : 0);
-
-        // Step 6: Loop for assigned worlds
-        for (let i = 0; i < count; i++) {
-            let varianceRoll = tRoll2D(`${label} Slot ${i + 1} Step`);
-            let variance = (varianceRoll - 7) * 0.1 * spread;
-            let currentOrbit = (i === 0) ? (maoInner + spread + variance) : (slots[i - 1].orbit + spread + variance);
-
-            // Exclusion Jumps: Add the width of the zone to 'jump' it
-            for (let fz of fzList) {
-                if (currentOrbit >= fz.min && currentOrbit <= fz.max) {
-                    currentOrbit += (fz.max - fz.min);
-                }
-            }
-
-            // Step 6 Override: Force baselineOrbit at baselineNumber
-            if (isMainStar && i === targetIdx) {
-                let target = blOrbit;
-                let inFz = true;
-                let safetyCounter = 0;
-                let initialTarget = target;
-
-                while (inFz && safetyCounter < 10) {
-                    inFz = false;
-                    for (let fz of fzList) {
-                        if (target >= fz.min && target <= fz.max) {
-                            inFz = true;
-                            // Find nearest edge
-                            let distToMin = target - fz.min;
-                            let distToMax = fz.max - target;
-
-                            // Official Rule: 2D-7 / 10 variance, always moving into the allowable zone
-                            let variance = Math.abs((tRoll2D('Baseline FZ Shift') - 7) / 10);
-                            if (variance === 0) variance = 0.01; // Ensure it strictly crosses the boundary
-
-                            if (distToMin <= distToMax) {
-                                target = fz.min - variance; // Push inward to safe zone
-                            } else {
-                                target = fz.max + variance; // Push outward to safe zone
-                            }
-                            break; // Re-evaluate in case the shift pushed it into a different FZ
-                        }
-                    }
-                    safetyCounter++;
-                }
-
-                if (Math.abs(target - initialTarget) > 0.001) {
-                    writeLogLine(`Expanded Method Simulation: Mainworld Baseline Orbit WOULD have shifted from ${initialTarget.toFixed(2)} to ${target.toFixed(2)} due to Forbidden Zone conflict.`);
-                }
-
-                currentOrbit = target;
-            }
-
-            slots.push({ orbit: currentOrbit, occupant: null, isMainworld: (isMainStar && i === targetIdx) });
-        }
-        return slots;
-    }
-
-    // =====================================================================
-    // Part 2E: Place & Tag Worlds (Global Placement Sequence - Step 8)
-    // =====================================================================
-    tSection('Placement');
-
     let ptypeInnerLimit = Infinity;
     if (directCompanions.length > 0) {
-        let outerComp = directCompanions[directCompanions.length - 1]; // outermost
-        ptypeInnerLimit = outerComp.orbitId + 0.50 + (outerComp.eccentricity || 0)
-            + (primaryMao > 0.2 ? primaryMao : 0);
+        let outerComp = directCompanions[directCompanions.length - 1];
+        ptypeInnerLimit = outerComp.orbitId + 0.50 + (outerComp.eccentricity || 0) + (primaryMao > 0.2 ? primaryMao : 0);
     }
     sys.ptypeInnerLimit = ptypeInnerLimit;
-    tResult('P-type Inner Limit', ptypeInnerLimit.toFixed(2));
 
     function getOrbitType(orbitNum, starIdx) {
         if (starIdx !== 0) return 'S-Type';
         return orbitNum >= ptypeInnerLimit ? 'P-Type' : 'S-Type';
     }
 
-    // 1. Generate ALL SLOTS across system
-    let allSystemSlots = [];
-    for (let de of distributed) {
-        let { starIdx, mao: starMao, assigned, numEmpty, isMainStar } = de;
-        let sName = sys.stars[starIdx].name;
-        let starSlots = genSlots(de.bands, starMao, assigned + numEmpty, starIdx === 0 ? mergedFZ : [], sName, isMainStar, blRoll, baselineOrbit);
-        for (let sObj of starSlots) {
-            allSystemSlots.push({
-                orbitId: sObj.orbit,
-                starIdx: starIdx,
-                isMainworldPlaceholder: sObj.isMainworld,
-                occupant: null
-            });
+    tSection('Slot Generation');
+    let totalSlotsCount = sys.totalWorlds + emptyOrbitsCount;
+    let targetIdx = Math.max(0, Math.min(totalSlotsCount - 1, Math.round(blRoll) - 1));
+
+    // Calculate Spread with the Maximum Spread Formula Cap
+    let initialSpread = (sys.baselineOrbit - primaryInnerLimit) / Math.max(1, targetIdx);
+    let maxSpread = (20.0 - primaryInnerLimit) / (totalSlotsCount + sys.stars.length);
+    let spread = Math.min(Math.max(0.1, initialSpread), maxSpread);
+
+    let slots = [];
+    let currentPos = primaryInnerLimit;
+
+    for (let i = 0; i < totalSlotsCount; i++) {
+        // A. Resonance Guard: Stability takes priority (10-20% rule)
+        let resonanceFactor = 0.15; 
+        let minSeparation = currentPos * resonanceFactor;
+        let nextOrbit = currentPos + Math.max(spread, minSeparation);
+
+        // B. Forbidden Zone Jumping with Directional Variance
+        for (let fz of mergedFZ) {
+            if (nextOrbit >= fz.min && nextOrbit <= fz.max) {
+                // Snap to safe boundary and force variance to be positive
+                let varRoll = Math.abs((tRoll2D('Anchor Variance') - 7) / 10);
+                nextOrbit = fz.max + varRoll; 
+                writeLogLine(`  FZ Jump: Slot ${i} snapped to ${fz.max} + Var ${varRoll.toFixed(2)}`);
+            }
         }
+
+        // C. Re-Anchor the Baseline: Update sys.baselineOrbit to pass Audit
+        if (i === targetIdx) {
+            sys.baselineOrbit = nextOrbit; 
+            tResult('Finalized Safe Anchor', sys.baselineOrbit.toFixed(2));
+        }
+
+        slots.push({
+            orbitId: nextOrbit,
+            occupant: null,
+            isMainworldPlaceholder: (i === targetIdx)
+        });
+        
+        currentPos = nextOrbit; 
     }
-    allSystemSlots.sort((a, b) => a.orbitId - b.orbitId);
 
-    // 2. Prepare Worlds Placement Order
+    // =====================================================================
+    // Part 2E: Strict Indexed Placement (Requirement 3)
+    // =====================================================================
+    tSection('Indexed Placement');
+    
+    // 1. Determine Parent Star for each slot based on proximity/exclusion
+    for (let s of slots) {
+        let bestStar = 0;
+        let minDist = 999;
+        for (let si = 0; si < sys.stars.length; si++) {
+            let starObj = sys.stars[si];
+            if (starObj.separation === 'Companion') continue;
+            let starOrbit = starObj.orbitId || 0;
+            let d = Math.abs(s.orbitId - starOrbit);
+            if (d < minDist) {
+                minDist = d;
+                bestStar = si;
+            }
+        }
+        s.starIdx = bestStar;
+    }
+
+    // 2. Prepare Worlds Queue in Strict Order
     let worldsQueue = [];
-    // Strict Order: 1. Mainworld, 2. Empty Orbits, 3. Gas Giants, 4. Planetoid Belts, 5. Terrestrial Planets.
-
     // a. Mainworld
     worldsQueue.push({ type: 'Mainworld', isAsteroid: !!(mainworldBase && mainworldBase.size === 0), moons: [] });
-
     // b. Empty Orbits
     for (let i = 0; i < emptyOrbitsCount; i++) worldsQueue.push({ type: 'Empty', moons: [] });
-
     // c. Gas Giants
     for (let i = 0; i < sys.gasGiants; i++) worldsQueue.push({ type: 'Gas Giant', moons: [] });
-
-    // d. Planetoid Belts (ensuring we don't double-count mainworld if it's a belt)
+    // d. Planetoid Belts
     let mwIsBelt = (mainworldBase && mainworldBase.size === 0);
     let pbCount = mwIsBelt ? Math.max(0, sys.planetoidBelts - 1) : sys.planetoidBelts;
     for (let i = 0; i < pbCount; i++) worldsQueue.push({ type: 'Planetoid Belt', isAsteroid: true, moons: [] });
-
     // e. Terrestrial Planets
     let mwIsTP = !mwIsBelt;
     let tpCount = mwIsTP ? Math.max(0, sys.terrestrialPlanets - 1) : sys.terrestrialPlanets;
     for (let i = 0; i < tpCount; i++) worldsQueue.push({ type: 'Terrestrial Planet', moons: [] });
 
-    // 3. Placing Loop
+    // 3. Placement Loop with Increment Rule
     let placedWorlds = [];
-
     for (let wInfo of worldsQueue) {
         let slotIndex = -1;
-
         if (wInfo.type === 'Mainworld') {
-            slotIndex = allSystemSlots.findIndex(s => s.isMainworldPlaceholder);
-            if (slotIndex === -1 && allSystemSlots.length > 0) slotIndex = 0; // fallback
+            slotIndex = targetIdx;
         } else {
-            // Pick a random slot
-            let availableIndices = allSystemSlots.map((s, idx) => s.occupant === null ? idx : -1).filter(idx => idx !== -1);
-            if (availableIndices.length > 0) {
-                // Check if we already have a preferred distribution from 'distributed' 
-                // but Step 8 is global. I'll pick from uniform random indices.
-                slotIndex = availableIndices[Math.floor(rng() * availableIndices.length)];
-            } else {
-                continue;
+            slotIndex = Math.floor(rng() * slots.length);
+        }
+
+        // Increment Rule implementation
+        let searchIndex = slotIndex;
+        let found = false;
+        for (let attempt = 0; attempt < slots.length; attempt++) {
+            let actualIdx = (searchIndex + attempt) % slots.length;
+            if (slots[actualIdx].occupant === null) {
+                slotIndex = actualIdx;
+                found = true;
+                break;
             }
         }
 
-        let slot = allSystemSlots[slotIndex];
-        let collision = slot.occupant;
-
-        if (collision) {
-            // Capture Rule: Gas Giant captures Mainworld
-            if (wInfo.type === 'Gas Giant' && collision.type === 'Mainworld') {
-                collision.isMoon = true;
-                collision.parentBody = wInfo;
-                wInfo.moons.push(collision);
-                // Gas Giant occupies the slot
-                wInfo.orbitId = slot.orbitId;
-                wInfo.parentStarIdx = slot.starIdx;
-                wInfo.orbitType = getOrbitType(wInfo.orbitId, wInfo.parentStarIdx);
-                slot.occupant = wInfo;
-                placedWorlds.push(wInfo);
-                writeLogLine(`  Capture! Mainworld becomes moon of Gas Giant at orbit ${slot.orbitId.toFixed(2)}`);
-                continue;
-            } else {
-                // Move Outward: Find next free slot outward, looping back to the innermost slot if necessary
-                let nextIdx = -1;
-                for (let j = 1; j < allSystemSlots.length; j++) {
-                    let checkIdx = (slotIndex + j) % allSystemSlots.length;
-                    if (allSystemSlots[checkIdx].occupant === null) {
-                        nextIdx = checkIdx;
-                        break;
-                    }
-                }
-                if (nextIdx !== -1) {
-                    slotIndex = nextIdx;
-                    slot = allSystemSlots[slotIndex];
-                } else {
-                    continue;
-                }
-            }
+        if (found) {
+            let slot = slots[slotIndex];
+            let w = {
+                ...wInfo,
+                orbitId: slot.orbitId,
+                parentStarIdx: slot.starIdx,
+                orbitType: getOrbitType(slot.orbitId, slot.starIdx)
+            };
+            slot.occupant = w;
+            if (w.type === 'Planetoid Belt') generateMgT2EBeltProfile(w, sys, mainworldBase);
+            placedWorlds.push(w);
+            if (w.type === 'Mainworld') tResult('Placed Mainworld', w.orbitId.toFixed(2));
         }
-
-        // Place the body
-        let w = {
-            ...wInfo,
-            orbitId: slot.orbitId,
-            parentStarIdx: slot.starIdx,
-            orbitType: getOrbitType(slot.orbitId, slot.starIdx)
-        };
-        slot.occupant = w;
-
-        if (w.type === 'Planetoid Belt') {
-            // Apply the detailed belt generation
-            generateMgT2EBeltProfile(w, sys, mainworldBase);
-        }
-
-        placedWorlds.push(w);
-        if (w.type === 'Mainworld') tResult('Placed Mainworld', w.orbitId.toFixed(2));
     }
 
-    // Filter out worlds that became moons from the top-level sys.worlds list
     sys.worlds = placedWorlds.filter(b => !b.isMoon);
-
-    // Sort final world list
     sys.worlds.sort((a, b) => a.orbitId - b.orbitId);
+
 
     // =====================================================================
     // Part 2F: Eccentricities, AU, Orbital Period

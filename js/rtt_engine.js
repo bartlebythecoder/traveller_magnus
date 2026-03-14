@@ -203,7 +203,7 @@ function generateRTTSectorStep4(sys, options = {}) {
         startTrace(sys.hexId, 'RTT Engine - Step 4', sys.name || sys.hexId);
     }
 
-    tSection('STEP 4: PHYSICAL WORLD STATS - PART A');
+    tSection('STEP 4: PHYSICAL WORLD STATS - PART A (DEAD/EXTREME)');
 
     for (let star of sys.stars) {
         if (!star.planetarySystem) continue;
@@ -211,12 +211,47 @@ function generateRTTSectorStep4(sys, options = {}) {
         tSection(`Physical Stats for System: ${star.classification} (${star.role})`);
 
         for (let body of star.planetarySystem.orbits) {
-            processRTTPhysicalStats(body, star, sys);
+            processRTTPhysicalStatsPartA(body, star, sys);
 
             // Process satellites
             if (body.satellites) {
                 for (let sat of body.satellites) {
-                    processRTTPhysicalStats(sat, star, sys, body);
+                    processRTTPhysicalStatsPartA(sat, star, sys, body);
+                }
+            }
+        }
+    }
+
+    // Proactively run Step 5
+    generateRTTSectorStep5(sys, options);
+
+    if (window.isLoggingEnabled) {
+        endTrace();
+    }
+}
+
+/**
+ * STEP 5: PHYSICAL WORLD STATS - PART B (ACTIVE & LIFE-BEARING WORLDS)
+ */
+function generateRTTSectorStep5(sys, options = {}) {
+    if (window.isLoggingEnabled) {
+        startTrace(sys.hexId, 'RTT Engine - Step 5', sys.name || sys.hexId);
+    }
+
+    tSection('STEP 5: PHYSICAL WORLD STATS - PART B (ACTIVE/LIFE-BEARING)');
+
+    for (let star of sys.stars) {
+        if (!star.planetarySystem) continue;
+
+        tSection(`Physical Stats for System: ${star.classification} (${star.role})`);
+
+        for (let body of star.planetarySystem.orbits) {
+            processRTTPhysicalStatsPartB(body, star, sys);
+
+            // Process satellites
+            if (body.satellites) {
+                for (let sat of body.satellites) {
+                    processRTTPhysicalStatsPartB(sat, star, sys, body);
                 }
             }
         }
@@ -231,38 +266,40 @@ function generateRTTSectorStep4(sys, options = {}) {
 }
 
 /**
- * HELPER: CALCULATE PHYSICAL STATS FOR A BODY
+ * HELPER: CALCULATE PHYSICAL STATS FOR A BODY (PART A)
  */
-function processRTTPhysicalStats(body, star, sys, parent = null) {
+function processRTTPhysicalStatsPartA(body, star, sys, parent = null) {
     const wc = body.worldClass;
-    const starClass = star.luminosityClass;
-    const sysAge = sys.age;
+    let processed = false;
     
-    // Initialize common fields
-    body.biosphere = 0;
-    body.chemistry = 'None';
-    let chemMod = 0;
+    // Initialize common fields if they don't exist
+    if (body.biosphere === undefined) body.biosphere = 0;
+    if (body.chemistry === undefined) body.chemistry = 'None';
 
     // --- STELLAR EXPANSION CASUALTIES (PART A) ---
     if (wc === 'Acheronian') {
         body.size = tRoll1D('Size Roll (1D6+4)') + 4;
         body.atmosphere = 1;
         body.hydrosphere = 0;
+        processed = true;
     }
     else if (wc === 'Asphodelian') {
         body.size = tRoll1D('Size Roll (1D6+9)') + 9;
         body.atmosphere = 1;
         body.hydrosphere = 0;
+        processed = true;
     }
     else if (wc === 'Chthonian') {
         body.size = 'G';
         body.atmosphere = 1;
         body.hydrosphere = 0;
+        processed = true;
     }
     else if (wc === 'Stygian') {
         body.size = Math.max(0, tRoll1D('Size Roll (1D6-1)') - 1);
         body.atmosphere = 0;
         body.hydrosphere = 0;
+        processed = true;
     }
 
     // --- DWARF AND SMALL BODIES (PART A) ---
@@ -270,6 +307,7 @@ function processRTTPhysicalStats(body, star, sys, parent = null) {
         body.size = (body.type === 'Asteroid Belt') ? 'Y' : 0;
         body.atmosphere = 0;
         body.hydrosphere = 0;
+        processed = true;
     }
     else if (wc === 'Rockball') {
         body.size = Math.max(0, tRoll1D('Size Roll (1D6-1)') - 1);
@@ -279,11 +317,13 @@ function processRTTPhysicalStats(body, star, sys, parent = null) {
         if (body.zone === 'Epistellar') hydroDM -= 2;
         if (body.zone === 'Outer') hydroDM += 2;
         body.hydrosphere = Math.max(0, tRoll2D('Hydrosphere Roll') + (typeof body.size === 'number' ? body.size : 0) - 11 + hydroDM);
+        processed = true;
     }
     else if (wc === 'Meltball') {
         body.size = Math.max(0, tRoll1D('Size Roll (1D6-1)') - 1);
         body.atmosphere = 1;
         body.hydrosphere = 'F';
+        processed = true;
     }
     else if (wc === 'Hebean') {
         body.size = Math.max(0, tRoll1D('Size Roll (1D6-1)') - 1);
@@ -292,6 +332,7 @@ function processRTTPhysicalStats(body, star, sys, parent = null) {
         if (atmosRoll >= 2) body.atmosphere = 'A';
         else body.atmosphere = Math.max(0, atmosRoll);
         body.hydrosphere = Math.max(0, tRoll2D('Hydrosphere Roll') + sVal - 11);
+        processed = true;
     }
 
     // --- JANI-LITHIC & TELLURIC (PART A) ---
@@ -300,16 +341,18 @@ function processRTTPhysicalStats(body, star, sys, parent = null) {
         let atmosRoll = tRoll1D('Atmosphere Roll');
         body.atmosphere = (atmosRoll <= 3) ? 1 : 'A';
         body.hydrosphere = 0;
+        processed = true;
     }
     else if (wc === 'Telluric') {
         body.size = tRoll1D('Size Roll') + 4;
         body.atmosphere = 'C';
         let hydroRoll = tRoll1D('Hydrosphere Roll');
         body.hydrosphere = (hydroRoll <= 4) ? 0 : 'F';
+        processed = true;
     }
 
     // --- HELIAN (PART A) ---
-    else if (wc === 'Helian' && body.type === 'Helian Planet') {
+    else if (wc === 'Helian') {
         body.size = tRoll1D('Size Roll') + 9;
         body.atmosphere = 'D';
         let hydroRoll = tRoll1D('Hydrosphere Roll');
@@ -321,12 +364,37 @@ function processRTTPhysicalStats(body, star, sys, parent = null) {
         } else if (hydroRoll >= 5) {
             body.hydrosphere = 'F';
         }
+        processed = true;
     }
+
+    // For any world processed, log the results
+    if (processed) {
+        if (parent) {
+            writeLogLine(`    Satellite Result: S=${body.size} A=${body.atmosphere} H=${body.hydrosphere} B=${body.biosphere} (${body.chemistry})`);
+        } else {
+            writeLogLine(`  Orbit ${body.orbitNumber} Result: S=${body.size} A=${body.atmosphere} H=${body.hydrosphere} B=${body.biosphere} (${body.chemistry})`);
+        }
+    }
+}
+
+/**
+ * HELPER: CALCULATE PHYSICAL STATS FOR A BODY (PART B)
+ */
+function processRTTPhysicalStatsPartB(body, star, sys, parent = null) {
+    const wc = body.worldClass;
+    const starClass = star.luminosityClass;
+    const sysAge = sys.age;
+    let processed = false;
+    
+    // Initialize common fields if they don't exist
+    if (body.biosphere === undefined) body.biosphere = 0;
+    if (body.chemistry === undefined) body.chemistry = 'None';
+    let chemMod = 0;
 
     // --- PART B: ACTIVE & LIFE-BEARING WORLDS ---
 
     // AREAN
-    else if (wc === 'Arean') {
+    if (wc === 'Arean') {
         body.size = Math.max(0, tRoll1D('Size Roll') - 1);
         let atmosRoll = tRoll1D('Atmosphere Roll');
         if (starClass === 'D') { tDM('White Dwarf', -2); atmosRoll -= 2; }
@@ -347,6 +415,7 @@ function processRTTPhysicalStats(body, star, sys, parent = null) {
         if (sysAge >= (tRoll1D('Life Evol 1') + chemMod) && body.atmosphere === 1) body.biosphere = Math.max(0, tRoll1D('Bio Roll Low') - 4);
         else if (sysAge >= (tRoll1D('Life Evol 2') + chemMod) && body.atmosphere === 'A') body.biosphere = tRoll1D('Bio Roll Mid');
         else if (sysAge >= (4 + chemMod) && body.atmosphere === 'A') body.biosphere = Math.max(0, tRoll1D('Bio Roll High') + body.size - 2);
+        processed = true;
     }
 
     // ARID
@@ -376,6 +445,7 @@ function processRTTPhysicalStats(body, star, sys, parent = null) {
         } else {
             body.atmosphere = 'A';
         }
+        processed = true;
     }
 
     // JOVIAN
@@ -400,6 +470,7 @@ function processRTTPhysicalStats(body, star, sys, parent = null) {
                 body.biosphere = Math.max(0, bioRoll);
             }
         }
+        processed = true;
     }
 
     // OCEANIC
@@ -439,6 +510,7 @@ function processRTTPhysicalStats(body, star, sys, parent = null) {
             else if (aRoll <= 4) body.atmosphere = 'A';
             else body.atmosphere = 'C';
         }
+        processed = true;
     }
 
     // PANTHALASSIC
@@ -466,6 +538,7 @@ function processRTTPhysicalStats(body, star, sys, parent = null) {
         
         if (sysAge >= (tRoll1D('Life Evol 1') + chemMod)) body.biosphere = tRollD3('Bio Roll Low');
         if (sysAge >= (4 + chemMod)) body.biosphere = tRoll2D('Bio Roll High');
+        processed = true;
     }
 
     // PROMETHEAN
@@ -494,6 +567,7 @@ function processRTTPhysicalStats(body, star, sys, parent = null) {
         } else {
             body.atmosphere = 'A';
         }
+        processed = true;
     }
 
     // SNOWBALL
@@ -517,6 +591,7 @@ function processRTTPhysicalStats(body, star, sys, parent = null) {
             if (sysAge >= tRoll1D('Life Evol 1')) body.biosphere = Math.max(0, tRoll1D('Bio Roll Low') - 3);
             if (sysAge >= (6 + chemMod)) body.biosphere = Math.max(0, tRoll1D('Bio Roll High') + body.size - 2);
         }
+        processed = true;
     }
 
     // TECTONIC
@@ -556,6 +631,7 @@ function processRTTPhysicalStats(body, star, sys, parent = null) {
         } else {
             body.atmosphere = 'A';
         }
+        processed = true;
     }
 
     // VESPERIAN
@@ -576,10 +652,11 @@ function processRTTPhysicalStats(body, star, sys, parent = null) {
         } else {
             body.atmosphere = 'A';
         }
+        processed = true;
     }
 
     // For any world processed, log the results
-    if (body.size !== undefined) {
+    if (processed) {
         if (parent) {
             writeLogLine(`    Satellite Result: S=${body.size} A=${body.atmosphere} H=${body.hydrosphere} B=${body.biosphere} (${body.chemistry})`);
         } else {
@@ -613,12 +690,27 @@ function generateRTTSectorStep3(sys, options = {}) {
         // Apply classification to each orbit
         for (let body of star.planetarySystem.orbits) {
             // Check for bake override
+            let overrideTriggered = false;
             if (body.orbitNumber <= affectedOrbits) {
-                if (body.type === 'Dwarf Planet') body.worldClass = 'Stygian';
-                else if (body.type === 'Terrestrial Planet') body.worldClass = 'Acheronian';
-                else if (body.type === 'Helian Planet') body.worldClass = 'Asphodelian';
-                else if (body.type === 'Jovian Planet') body.worldClass = 'Chthonian';
-                
+                if (body.type === 'Dwarf Planet') {
+                    body.worldClass = 'Stygian';
+                    overrideTriggered = true;
+                }
+                else if (body.type === 'Terrestrial Planet') {
+                    body.worldClass = 'Acheronian';
+                    overrideTriggered = true;
+                }
+                else if (body.type === 'Helian Planet') {
+                    body.worldClass = 'Asphodelian';
+                    overrideTriggered = true;
+                }
+                else if (body.type === 'Jovian Planet') {
+                    body.worldClass = 'Chthonian';
+                    overrideTriggered = true;
+                }
+            }
+
+            if (overrideTriggered) {
                 body.overrideApplied = true;
                 writeLogLine(`  Orbit ${body.orbitNumber}: Star Expansion Override -> ${body.worldClass}`);
             } else {
@@ -842,11 +934,16 @@ function generateRTTSectorStep6(sys, options = {}) {
  * HELPER: DESIRABILITY CALCULATION
  */
 function calculateRTTDesirability(body, star, parent = null) {
+    writeLogLine('  --- Desirability Calc: ' + (body.worldClass || body.type) + ' ---');
     let desirability = 0;
     const starClass = star.luminosityClass;
     
     if (body.worldClass === 'Asteroid Belt') {
-        desirability = tRoll1D('Desirability Roll (1D6)') - tRoll1D('Desirability Counter (1D6)');
+        let r1 = tRoll1D('Desirability Roll (+)');
+        let r2 = tRoll1D('Desirability Counter (-)');
+        desirability = r1 - r2;
+        writeLogLine(`  Base Roll (1D6 - 1D6): ${r1} - ${r2} = ${desirability}`);
+
         if (starClass === 'Ve') {
             let penalty = Math.ceil(tRoll1D('Flare Star Penalty (1D3)') / 2);
             tDM('Flare Star (M-Ve)', -penalty);
@@ -854,30 +951,45 @@ function calculateRTTDesirability(body, star, parent = null) {
         }
         
         if (['III', 'D', 'L'].includes(starClass)) {
-            // No change
+            writeLogLine('  Star Type Modifier: +0 (Class III, D, or L)');
         } else if (star.classification.includes('M-V')) {
-             desirability += 1;
+            tDM('Star Type (M-V)', 1);
+            desirability += 1;
         } else {
-             desirability += 2;
+            tDM('Star Type (Other)', 2);
+            desirability += 2;
         }
     } else {
         // Base Environment Penalties
-        if (body.hydrosphere === 0) desirability -= 1;
+        if (body.hydrosphere === 0) {
+            tDM('Dry World (Hydro 0)', -1);
+            desirability -= 1;
+        }
         
         let sHex = getEHex(body.size);
         let aHex = getEHex(body.atmosphere);
         let hHex = getEHex(body.hydrosphere);
         
-        if (sHex >= 13 || aHex >= 12 || body.hydrosphere === 'F') desirability -= 2;
+        if (sHex >= 13 || aHex >= 12 || body.hydrosphere === 'F') {
+            tDM('Extreme Environment (Size D+, Atmos C+, or Hydro F)', -2);
+            desirability -= 2;
+        }
+
         if (starClass === 'Ve') {
              let penalty = Math.ceil(tRoll1D('Flare Star Penalty') / 2);
+             tDM('Flare Star Penalty', -penalty);
              desirability -= penalty;
         }
-        if (sHex === 0) desirability -= 1;
+
+        if (sHex === 0) {
+            tDM('Tiny World (Size 0)', -1);
+            desirability -= 1;
+        }
         
         // High Gravity Check
         if (body.worldClass !== 'Jovian') {
             if (sHex >= 10 && aHex <= 15) { // Size A+ and Atmos F-
+                tDM('High Gravity (Size A+ and Atmos F-)', -1);
                 desirability -= 1;
             }
         }
@@ -886,27 +998,34 @@ function calculateRTTDesirability(body, star, parent = null) {
         if (sHex >= 1 && sHex <= 11 && aHex >= 2 && aHex <= 9 && hHex >= 0 && hHex <= 11) {
             // Garden World (Size 5-A, Atmos 4-9, Hydro 4-8)
             if (sHex >= 5 && sHex <= 10 && aHex >= 4 && aHex <= 9 && hHex >= 4 && hHex <= 8) {
+                tDM('Garden World Tier', 5);
                 desirability += 5;
             } else if (hHex >= 10 && hHex <= 11) {
+                tDM('Water World Tier', 3);
                 desirability += 3;
             } else if (aHex >= 2 && aHex <= 6 && hHex >= 0 && hHex <= 3) {
+                tDM('Pre-Garden World Tier', 2);
                 desirability += 2;
             } else {
+                tDM('Habitable World Matrix', 4);
                 desirability += 4;
             }
         }
         
         // Star Type Modifiers
         if (['III', 'D', 'L'].includes(starClass)) {
-            // No change
+            writeLogLine('  Star Type Modifier: +0 (Class III, D, or L)');
         } else if (star.classification.includes('M-V')) {
+            tDM('Star Type (M-V)', 1);
             desirability += 1;
         } else {
+            tDM('Star Type (Other)', 2);
             desirability += 2;
         }
     }
     
     body.desirability = desirability;
+    tResult('Final Desirability', body.desirability);
 }
 
 /**
@@ -1229,8 +1348,6 @@ function generateRTTSectorStep7(sys, options = {}) {
         }
     }
 
-    // Proactively run Step 7
-    generateRTTSectorStep7(sys, options);
 
     if (window.isLoggingEnabled) {
         endTrace();
@@ -1240,7 +1357,7 @@ function generateRTTSectorStep7(sys, options = {}) {
 /**
  * HELPER: PROCESS SOCIAL AND ECONOMIC STATS
  */
-function processRTTSocialStats(body, star, dominantTL, settlementCenturies) {
+function processRTTSocialStats(body, star, dominantTL, settlementCenturies, options = {}) {
     if (body.habitationType === 'Uninhabited') {
         body.population = 0;
         body.government = 0;
@@ -1260,7 +1377,7 @@ function processRTTSocialStats(body, star, dominantTL, settlementCenturies) {
             body.population = tRoll2D('Homeworld Population');
         }
         
-        let nativeTL = tRoll1D('Native TL Base') + 4;
+        let nativeTL = typeof options.nativeTL !== 'undefined' ? options.nativeTL : tRoll1D('Native TL Base') + 4;
         if (nativeTL === 0) {
             body.government = 0;
         } else {
@@ -1532,349 +1649,6 @@ function assignRTTBases(body, star) {
     body.bases = bases;
 }
 
-/**
- * STEP 7: SOCIAL STATS, TRADE, & BASES
- */
-function generateRTTSectorStep7(sys, options = {}) {
-    if (window.isLoggingEnabled) {
-        startTrace(sys.hexId, 'RTT Engine - Step 7', sys.name || sys.hexId);
-    }
-
-    tSection('STEP 7: SOCIAL STATS, TRADE, & BASES');
-
-    const dominantTL = options.dominantTL || 12;
-    const settlementCenturies = options.settlementCenturies || 2;
-
-    // Process each body in the system
-    for (let star of sys.stars) {
-        if (!star.planetarySystem) continue;
-        for (let body of star.planetarySystem.orbits) {
-            processRTTSocialStats(body, star, dominantTL, settlementCenturies);
-            if (body.satellites) {
-                for (let sat of body.satellites) {
-                    processRTTSocialStats(sat, star, dominantTL, settlementCenturies);
-                }
-            }
-        }
-    }
-
-    // Ancients Site (Q): Roll once per system. 12+ assigns to random world.
-    if (tRoll2D('Ancients Site Roll') >= 12) {
-        let allInhabited = [];
-        for (let star of sys.stars) {
-            if (!star.planetarySystem) continue;
-            for (let body of star.planetarySystem.orbits) {
-                allInhabited.push(body);
-                if (body.satellites) allInhabited.push(...body.satellites);
-            }
-        }
-        if (allInhabited.length > 0) {
-            let target = allInhabited[Math.floor(Math.random() * allInhabited.length)];
-            target.bases = target.bases || [];
-            target.bases.push('Q');
-            tResult('Ancient Site Found', target.orbitNumber ? `Orbit ${target.orbitNumber}` : 'Satellite');
-        }
-    }
-
-    if (window.isLoggingEnabled) {
-        endTrace();
-    }
-}
-
-/**
- * HELPER: PROCESS SOCIAL AND ECONOMIC STATS
- */
-function processRTTSocialStats(body, star, dominantTL, settlementCenturies, options = {}) {
-    if (body.habitationType === 'Uninhabited') {
-        body.population = 0;
-        body.government = 0;
-        body.lawLevel = 0;
-        body.industry = 0;
-        body.tradeCodes = [];
-        body.starport = 'X';
-        body.bases = [];
-        return;
-    }
-
-    // 1. POPULATION AND GOVERNMENT
-    if (body.habitationType === 'Homeworld') {
-        if (body.chemistry === 'Water') {
-            body.population = Math.max(0, (body.desirability || 0) + (tRollD3('Pop Var') - tRollD3('Pop Var')));
-        } else {
-            body.population = tRoll2D('Homeworld Population');
-        }
-        
-        let nativeTL = typeof options.nativeTL !== 'undefined' ? options.nativeTL : tRoll1D('Native TL Base') + 4;
-        if (nativeTL === 0) {
-            body.government = 0;
-        } else {
-            if (tRoll1D('Government Type Roll') <= (nativeTL - 9)) {
-                body.government = 7; // Balkanized
-            } else {
-                body.government = Math.max(0, body.population + tRoll2D('Gov Roll') - 7);
-            }
-        }
-    } else if (body.habitationType === 'Colony') {
-        let maxPop = Math.max(0, (body.desirability || 0) + (tRollD3('Pop Var') - tRollD3('Pop Var')));
-        let pop = dominantTL + settlementCenturies - 9;
-        body.population = Math.max(0, Math.min(pop, maxPop));
-        body.population = Math.max(4, body.population); // CLAMP(pop, 4, Max_Pop)
-        if (body.population > maxPop) body.population = Math.max(0, maxPop);
-        
-        body.government = Math.max(0, body.population + tRoll2D('Gov Roll') - 7);
-        
-        // Seeding Friendly Lifeforms
-        let sHex = getEHex(body.size);
-        let aHex = getEHex(body.atmosphere);
-        if (sHex >= 1 && sHex <= 11 && aHex >= 2 && aHex <= 9) {
-            if (getEHex(body.biosphere) <= 2) {
-                body.biosphere = tRoll1D('Biosphere Seed') + 5;
-            }
-        }
-    } else if (body.habitationType === 'Outpost') {
-        body.population = Math.max(0, Math.min(4, tRollD3('Outpost Pop Base') + (body.desirability || 0)));
-        if (body.population === 0) {
-            body.government = 0;
-        } else {
-            body.government = Math.max(0, Math.min(6, body.population + tRoll2D('Gov Roll') - 7));
-        }
-    }
-
-    // 2. LAW LEVEL AND INDUSTRY
-    body.lawLevel = (body.government === 0) ? 0 : Math.max(0, body.government + tRoll2D('Law Roll') - 7);
-    
-    // Calculate Industry Base
-    if (body.population === 0) {
-        body.industry = 0;
-    } else {
-        let indDM = 0;
-        let l = body.lawLevel;
-        if (l >= 1 && l <= 3) indDM += 1;
-        else if (l >= 6 && l <= 9) indDM -= 1;
-        else if (l >= 10 && l <= 12) indDM -= 2;
-        else if (l >= 13) indDM -= 3;
-        
-        let a = getEHex(body.atmosphere);
-        if (a >= 10 || a >= 9 || body.hydrosphere === 'F') indDM += 1; // Unsafe environment
-        
-        if (dominantTL >= 12 && dominantTL <= 14) indDM += 1;
-        else if (dominantTL >= 15) indDM += 2;
-        
-        body.industry = Math.max(0, body.population + tRoll2D('Industry Roll') - 7 + indDM);
-    }
-
-    // Apply Effects of Local Industry
-    if (body.industry === 0) {
-        body.population = Math.max(0, body.population - 1);
-    } else if (body.industry >= 4 && body.industry <= 9) {
-        body.population += 1;
-        if (body.atmosphere === 3) body.atmosphere = 2;
-        else if (body.atmosphere === 5) body.atmosphere = 4;
-        else if (body.atmosphere === 6) body.atmosphere = 7;
-        else if (body.atmosphere === 8) body.atmosphere = 9;
-    } else if (body.industry >= 10) {
-        if (tRoll1D('Industry Impact Choice') <= 3) {
-            body.population += 1;
-        } else {
-            body.population += 2;
-            if (body.atmosphere === 3) body.atmosphere = 2;
-            else if (body.atmosphere === 5) body.atmosphere = 4;
-            else if (body.atmosphere === 6) body.atmosphere = 7;
-            else if (body.atmosphere === 8) body.atmosphere = 9;
-        }
-    }
-    body.population = Math.max(0, body.population);
-
-    // 3. TRADE CODES
-    assignRTTTradeCodes(body, dominantTL);
-
-    // 4. STARPORT
-    body.starport = determineRTTStarport(body, dominantTL);
-
-    // 5. BASES
-    assignRTTBases(body, star);
-
-    let loc = body.orbitNumber ? `Orbit ${body.orbitNumber}` : 'Satellite';
-    writeLogLine(`  ${loc} (Social): Pop=${body.population}, Gov=${body.government}, Law=${body.lawLevel}, Ind=${body.industry}, Port=${body.starport}, Codes=[${body.tradeCodes.join(',')}]`);
-}
-
-/**
- * HELPER: ASSIGN TRADE CODES
- */
-function assignRTTTradeCodes(body, dominantTL) {
-    let codes = [];
-    let s = getEHex(body.size);
-    let a = getEHex(body.atmosphere);
-    let h = getEHex(body.hydrosphere);
-    let p = body.population;
-    let i = body.industry;
-    let b = getEHex(body.biosphere);
-
-    if (a >= 4 && a <= 9 && h >= 4 && h <= 8 && p >= 5 && p <= 7) codes.push('Ag');
-    if (body.worldClass === 'Asteroid Belt') codes.push('As');
-    if (a >= 2 && a <= 13 && h === 0) codes.push('De');
-    if ((a >= 10 || body.chemistry !== 'Water') && h >= 1 && h <= 11) codes.push('Fl');
-    if (s >= 5 && s <= 10 && a >= 4 && a <= 9 && h >= 4 && h <= 8) codes.push('Ga');
-    if (p >= 9) codes.push('Hi');
-    if (i >= (dominantTL - 3)) codes.push('Ht');
-    if (a <= 1 && h >= 1) codes.push('Ic');
-    if (p >= 9 && i >= 6) codes.push('In');
-    if (p >= 1 && p <= 3) codes.push('Lo');
-    if (i <= 5) codes.push('Lt');
-    if ((a <= 3 || a >= 11) && (h <= 3 || h >= 11) && p >= 6) codes.push('Na');
-    if (p >= 4 && p <= 6) codes.push('Ni');
-    if (a >= 2 && a <= 5 && h <= 3) codes.push('Po');
-    if ((a === 6 || a === 8) && p >= 6 && p <= 8) codes.push('Ri');
-    if (b === 0) codes.push('St');
-    if (a >= 2 && h >= 10 && h <= 11) codes.push('Wa');
-    if (a === 0) codes.push('Va');
-    if (b >= 7) codes.push('Zo');
-
-    body.tradeCodes = codes;
-}
-
-/**
- * HELPER: DETERMINE STARPORT
- */
-function determineRTTStarport(body, dominantTL) {
-    let portDM = 0;
-    const codes = body.tradeCodes;
-    if (codes.includes('Ag')) portDM += 1;
-    if (codes.includes('Ga')) portDM += 1;
-    if (codes.includes('Hi')) portDM += 1;
-    if (codes.includes('Ht')) portDM += 1;
-    if (codes.includes('In')) portDM += 1;
-    if (codes.includes('Na')) portDM += 1;
-    if (codes.includes('Ri')) portDM += 1;
-    
-    if (dominantTL >= 12 && dominantTL <= 14) portDM += 1;
-    else if (dominantTL >= 15) portDM += 2;
-    
-    if (codes.includes('Lo')) portDM -= 1;
-    if (codes.includes('Po')) portDM -= 1;
-    if (dominantTL <= 9) portDM -= 1;
-    
-    let roll = tRoll2D('Starport Roll') + body.industry - 7 + portDM;
-    let port = 'X';
-    if (roll <= 2) port = 'X';
-    else if (roll <= 4) port = 'E';
-    else if (roll <= 6) port = 'D';
-    else if (roll <= 8) port = 'C';
-    else if (roll <= 10) port = 'B';
-    else port = 'A';
-    
-    // Overrides
-    if (body.habitationType === 'Outpost' && body.population === 0) port = 'E';
-    if (body.industry >= 5 && port === 'X') port = 'E';
-    let a = getEHex(body.atmosphere);
-    let h = getEHex(body.hydrosphere);
-    if ((a <= 3 || a >= 10 || h >= 12) && body.population >= 1 && port === 'X') port = 'E';
-    
-    return port;
-}
-
-/**
- * HELPER: ASSIGN BASES
- */
-function assignRTTBases(body, star) {
-    let bases = [];
-    let port = body.starport;
-    let roll;
-
-    if (port === 'A') {
-        if (tRoll2D('Gov Estate Roll') >= 6) {
-            bases.push('G');
-            roll = tRoll2D('Embassy Check');
-            if (roll >= 9) bases.push('F');
-            if (roll >= 12) bases.push('Moot');
-        }
-        if (tRoll2D('Merchant Roll') >= 6) {
-            bases.push('M');
-            roll = tRoll2D('Shipyard Check');
-            if (roll >= 9) bases.push('Y');
-            if (roll >= 12) bases.push('MegaCorp HQ');
-        }
-        if (tRoll2D('Naval Roll') >= 8) {
-            bases.push('N');
-            if (tRoll2D('Naval Special') >= 11) bases.push(Math.random() < 0.5 ? 'Y' : 'H');
-        }
-        if (tRoll2D('Research Roll') >= 8) {
-            bases.push('R');
-            if (tRoll2D('Research Special') >= 11) bases.push(['H', 'U', 'L'][Math.floor(Math.random() * 3)]);
-        }
-        if (tRoll2D('Scout Roll') >= 10) bases.push('S');
-        if (tRoll2D('TAS Roll') >= 4) bases.push('T');
-    }
-    else if (port === 'B') {
-        if (tRoll2D('Gov Estate Roll') >= 8) {
-            bases.push('G');
-            if (tRoll2D('Embassy Check') >= 11) bases.push('F');
-        }
-        if (tRoll2D('Merchant Roll') >= 8) {
-            bases.push('M');
-            if (tRoll2D('Shipyard Check') >= 11) bases.push('Y');
-        }
-        if (tRoll2D('Naval Roll') >= 8) {
-            bases.push('N');
-            if (tRoll2D('Naval Special') >= 11) bases.push(Math.random() < 0.5 ? 'Y' : 'H');
-        }
-        if (tRoll2D('Pirate Roll') >= 12) bases.push('P');
-        if (tRoll2D('Research Roll') >= 10) bases.push('R');
-        if (tRoll2D('Scout Roll') >= 8) {
-            bases.push('S');
-            if (tRoll2D('Scout Special') >= 11) bases.push('Scout Hostel');
-        }
-        if (tRoll2D('TAS Roll') >= 6) bases.push('T');
-    }
-    else if (port === 'C') {
-        if (tRoll2D('Gov Estate Roll') >= 10) bases.push('G');
-        if (tRoll2D('Merchant Roll') >= 10) bases.push('M');
-        if (tRoll2D('Naval Roll') >= 8) {
-            bases.push('N');
-            if (tRoll2D('Naval Special') >= 11) bases.push(Math.random() < 0.5 ? 'Y' : 'H');
-        }
-        if (tRoll2D('Pirate Roll') >= 10) bases.push('P');
-        if (tRoll2D('Research Roll') >= 10) bases.push('R');
-        if (tRoll2D('Scout Roll') >= 8) {
-            bases.push('S');
-            if (tRoll2D('Scout Special') >= 11) bases.push('Scout Hostel');
-        }
-        if (tRoll2D('TAS Roll') >= 10) bases.push('T');
-    }
-    else if (port === 'D') {
-        if (tRoll2D('Pirate Roll') >= 12) bases.push('P');
-        if (tRoll2D('Scout Roll') >= 7) {
-            bases.push('S');
-            if (tRoll2D('Scout Special') >= 10) bases.push('Scout Hostel');
-        }
-    }
-    else if (port === 'E') {
-        if (tRoll2D('Pirate Roll') >= 12) bases.push('P');
-    }
-
-    // Special Condition Bases
-    if (body.population >= 1) {
-        if (tRoll2D('Psionics Roll') >= 12) bases.push('Z');
-        if (tRoll2D('Sacred Site Roll') <= body.population) bases.push('K');
-    }
-    
-    if (body.habitationType === 'Outpost') {
-        if (tRoll2D('Outpost Research Roll') >= 9) {
-            bases.push('R');
-            if (tRoll2D('Research Special') >= 12) bases.push('L');
-        }
-    }
-    
-    if (body.population >= 1 || getEHex(body.biosphere) >= 1) {
-        if (tRoll2D('Special Enclave Roll') >= 10) bases.push('V');
-    }
-    
-    if (body.canBeTerraformed) {
-        bases.push('W');
-    }
-
-    body.bases = bases;
-}
 
 /**
  * HELPER: EXTRACT MAINWORLD DATA
@@ -1885,12 +1659,15 @@ function extractRTTMainworld(sys) {
     let bestWorld = null;
     let bestScore = -1;
 
+    tSection('STEP 8: MAINWORLD SELECTION');
+
     // 1. Clear existing isMainworld flags and Find Best Candidate
     for (let star of sys.stars) {
         if (!star.planetarySystem) continue;
         for (let body of star.planetarySystem.orbits) {
             delete body.isMainworld;
             let score = evaluateRTTMainworldCandidate(body);
+            writeLogLine('  Evaluating Candidate: Orbit ' + body.orbitNumber + ' (Pop ' + getEHexLetter(body.population) + ', Port ' + (body.starport || 'X') + ') - Score: ' + score);
             if (score > bestScore) {
                 bestScore = score;
                 bestWorld = body;
@@ -1899,6 +1676,7 @@ function extractRTTMainworld(sys) {
                 for (let sat of body.satellites) {
                     delete sat.isMainworld;
                     let satScore = evaluateRTTMainworldCandidate(sat);
+                    writeLogLine('  Evaluating Candidate: Satellite ' + sat.orbitNumber + ' (Pop ' + getEHexLetter(sat.population) + ', Port ' + (sat.starport || 'X') + ') - Score: ' + satScore);
                     if (satScore > bestScore) {
                         bestScore = satScore;
                         bestWorld = sat;
@@ -1927,6 +1705,8 @@ function extractRTTMainworld(sys) {
         };
     }
 
+    tResult('Selected Mainworld', (bestWorld.isSatellite ? 'Satellite ' : 'Orbit ') + bestWorld.orbitNumber);
+
     // Tag the body so the UI accordion knows this is the system's Mainworld
     bestWorld.isMainworld = true;
 
@@ -1944,8 +1724,9 @@ function extractRTTMainworld(sys) {
     let tl = getEHexLetter(bestWorld.population > 0 ? (sys.dominantTL || 12) : 0);
 
     let uwp = `${port}${size}${atm}${hydro}${pop}${gov}${law}-${tl}`;
+    tResult('Final Hex UWP', uwp);
     
-    return {
+    const result = {
         name: sys.name || sys.hexId,
         hex: sys.hexId,
         uwp: uwp,
@@ -1964,6 +1745,11 @@ function extractRTTMainworld(sys) {
         gasGiant: sys.stars.some(s => s.planetarySystem && s.planetarySystem.orbits.some(o => o.worldClass === 'Jovian')),
         travelZone: (bestWorld.bases || []).includes('Z') ? 'Red' : 'Green' // Simplified
     };
+
+    // Run Audit before final return
+    auditRTTSystem(sys);
+
+    return result;
 }
 
 function evaluateRTTMainworldCandidate(body) {
@@ -2020,4 +1806,93 @@ function getEHex(char) {
 
 function tRollD3(label) {
     return tRoll1D3(label);
+}
+
+/**
+ * RTT SYSTEM AUDIT
+ * Verifies that the generated system follows core RTT rules.
+ */
+function auditRTTSystem(sys) {
+    let errors = 0;
+    tSection('RTT SYSTEM AUDIT');
+
+    let mainworldCount = 0;
+    let bodyFound = false;
+
+    // Iterate through all bodies
+    for (let star of sys.stars) {
+        if (!star.planetarySystem) continue;
+        for (let body of star.planetarySystem.orbits) {
+            bodyFound = true;
+            errors += checkBodyRules(body);
+            if (body.isMainworld) mainworldCount++;
+
+            if (body.satellites) {
+                for (let sat of body.satellites) {
+                    errors += checkBodyRules(sat);
+                    if (sat.isMainworld) mainworldCount++;
+                }
+            }
+        }
+    }
+
+    // Helper for Rule Checks
+    function checkBodyRules(body) {
+        let e = 0;
+        let loc = body.orbitNumber ? `Orbit ${body.orbitNumber}` : (body.role || 'Satellite');
+        
+        // Rule 1: Homeworlds (Bio C+)
+        if (getEHex(body.biosphere) >= 12) {
+            if (body.habitationType === 'Homeworld') {
+                writeLogLine(`  [PASS] Rule 1: ${loc} matches Bio C+ to Homeworld status`);
+            } else {
+                writeLogLine(`  [FAIL] Rule 1: ${loc} has Bio C+ but is Habitation='${body.habitationType}'`);
+                e++;
+            }
+        }
+
+        // Rule 2: Uninhabited
+        if (body.habitationType === 'Uninhabited') {
+            if (body.population === 0 && body.government === 0 && body.lawLevel === 0) {
+                // Common case, skip log to avoid clutter unless error
+            } else {
+                writeLogLine(`  [FAIL] Rule 2: ${loc} is Uninhabited but has Pop=${body.population} Gov=${body.government} Law=${body.lawLevel}`);
+                e++;
+            }
+        }
+
+        // Rule 3: Extreme Hydro (F)
+        if (body.hydrosphere === 'F') {
+            if (body.canBeTerraformed === false) {
+                writeLogLine(`  [PASS] Rule 3: ${loc} with Hydro F is non-terraformable`);
+            } else {
+                writeLogLine(`  [FAIL] Rule 3: ${loc} with Hydro F is marked as Terraformable`);
+                e++;
+            }
+        }
+
+        // Rule 4: Asteroids
+        if (body.type === 'Asteroid Belt') {
+            if (body.size === 0 || body.size === 'Y') {
+                writeLogLine(`  [PASS] Rule 4: ${loc} Asteroid Belt has valid Size (${body.size})`);
+            } else {
+                writeLogLine(`  [FAIL] Rule 4: ${loc} is an Asteroid Belt but has Size ${body.size}`);
+                e++;
+            }
+        }
+
+        return e;
+    }
+
+    // Rule 5: Mainworld Check (Exactly one if planets exist)
+    if (!sys.isStellarOnly && bodyFound) {
+        if (mainworldCount === 1) {
+            writeLogLine('  [PASS] Rule 5: Exactly one Mainworld flag detected in system');
+        } else {
+            writeLogLine(`  [FAIL] Rule 5: Expected 1 Mainworld, but found ${mainworldCount}`);
+            errors++;
+        }
+    }
+
+    tResult('RTT Audit Summary', errors + ' error(s) detected');
 }

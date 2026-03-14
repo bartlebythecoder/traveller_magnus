@@ -1901,28 +1901,39 @@ function populateEditorAccordions(stateObj) {
                             ? `${(w.periodYears * 365.25).toFixed(1)} days`
                             : `${w.periodYears.toFixed(2)} years`;
                         html += `<span class="system-stats-full">Period: <strong>${periodStr}</strong></span>`;
-                        html += `<span>Composition: <strong>${w.composition || '?'}</strong></span>`;
-                        html += `<span>Density: <strong>${w.density !== undefined ? w.density.toFixed(2) : '?'}</strong></span>`;
+                        if (w.type !== 'Planetoid Belt' && w.size != 0 && w.size !== 'R') {
+                            html += `<span>Composition: <strong>${w.composition || '?'}</strong></span>`;
+                            if (w.density != null) html += `<span>Density: <strong>${w.density !== undefined ? w.density.toFixed(2) : '?'}</strong></span>`;
 
-                        let atmComp = 'None';
-                        if (w.gases && w.gases.length > 0) {
-                            atmComp = w.gases.slice(0, 3).join(', ');
-                            if (w.gases.length > 3) atmComp += ', ...';
-                        } else if (w.oxygenFraction !== undefined) {
-                            atmComp = `N2/O2 (${(w.oxygenFraction * 100).toFixed(1)}% O2)`;
+                            let atmComp = 'None';
+                            if (w.gases && w.gases.length > 0) {
+                                atmComp = w.gases.slice(0, 3).join(', ');
+                                if (w.gases.length > 3) atmComp += ', ...';
+                            } else if (w.oxygenFraction !== undefined) {
+                                atmComp = `N2/O2 (${(w.oxygenFraction * 100).toFixed(1)}% O2)`;
+                            }
+                            if (w.taints && w.taints.length > 0) {
+                                atmComp += ` [Taint: ${w.taints.join(', ')}]`;
+                            }
+                            html += `<span class="system-stats-full">Atmosphere: <strong>${atmComp}</strong></span>`;
                         }
-                        if (w.taints && w.taints.length > 0) {
-                            atmComp += ` [Taint: ${w.taints.join(', ')}]`;
-                        }
-                        html += `<span class="system-stats-full">Atmosphere: <strong>${atmComp}</strong></span>`;
                     }
 
                     // Physical Characteristics
-                    html += `<span>Gravity: <strong>${w.gravity !== undefined ? w.gravity.toFixed(2) : '?'} G</strong></span>`;
-                    html += `<span>Mass: <strong>${w.mass !== undefined ? w.mass.toFixed(4) : '?'} M⊕</strong></span>`;
-                    html += `<span>Temp: <strong>${w.meanTempK !== undefined ? (w.meanTempK - 273).toFixed(0) : '?'}°C</strong></span>`;
+                    if (w.type !== 'Planetoid Belt' && w.size != 0 && w.size !== 'R') {
+                        if (w.gravity != null) html += `<span>Gravity: <strong>${w.gravity !== undefined ? w.gravity.toFixed(2) : '?'} G</strong></span>`;
+                        if (w.mass != null) html += `<span>Mass: <strong>${w.mass !== undefined ? w.mass.toFixed(4) : '?'} M⊕</strong></span>`;
+                        if (w.escapeVel != null) html += `<span>Escape Vel: <strong>${w.escapeVel.toFixed(2)} km/s</strong></span>`;
+                        if (w.meanTempK != null) {
+                            if (w.highTempK != null && w.lowTempK != null && !isNaN(w.highTempK) && !isNaN(w.lowTempK)) {
+                                html += `<span class="system-stats-full">Temp: <strong>${(w.meanTempK - 273).toFixed(0)}°C</strong> (L:${(w.lowTempK - 273).toFixed(0)}° / H:${(w.highTempK - 273).toFixed(0)}°)</span>`;
+                            } else {
+                                html += `<span>Temp: <strong>${(w.meanTempK - 273).toFixed(0)}°C</strong></span>`;
+                            }
+                        }
+                    }
 
-                    if (w.solarDayHours !== undefined) {
+                    if (w.solarDayHours != null) {
                         let dayStr = '';
                         if (w.solarDayHours === Infinity || w.isTwilightZone) {
                             dayStr = 'Twilight Zone';
@@ -1931,7 +1942,11 @@ function populateEditorAccordions(stateObj) {
                         } else {
                             dayStr = `${w.solarDayHours.toFixed(1)}h`;
                         }
-                        html += `<span>Day: <strong>${dayStr}</strong></span>`;
+                        html += `<span>Solar Day: <strong>${dayStr}</strong></span>`;
+                    }
+                    if (w.siderealHours != null) {
+                        let sidStr = w.siderealHours >= 24 ? `${(w.siderealHours / 24).toFixed(1)}d` : `${w.siderealHours.toFixed(2)}h`;
+                        html += `<span>Sidereal Day: <strong>${sidStr}</strong></span>`;
                     }
 
 
@@ -1945,7 +1960,7 @@ function populateEditorAccordions(stateObj) {
                             const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
                             html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor};">Caution: ${mwBase.travelZone} Zone</div>`;
                         }
-                        html += `<span>Axial Tilt: <strong>${w.axialTilt ? w.axialTilt.toFixed(1) : '0'}°</strong></span>`;
+                        if (w.axialTilt != null) html += `<span>Axial Tilt: <strong>${w.axialTilt ? w.axialTilt.toFixed(1) : '0'}°</strong></span>`;
                         if (w.lifeProfile) {
                             html += `<span>Native Life: <strong>${w.lifeProfile}</strong></span>`;
                         }
@@ -2015,30 +2030,38 @@ function populateEditorAccordions(stateObj) {
                                 html += `<span>Period: <strong>${pStr}</strong></span>`;
                             }
 
-                            // Moon/SigBody Physical Stats
-                            if (m.composition) html += `<span>Comp: <strong>${m.composition}</strong></span>`;
-                            if (m.density !== undefined) html += `<span>Density: <strong>${m.density.toFixed(2)}</strong></span>`;
+                            if (m.type !== 'Planetoid Belt' && m.size != 0 && m.size !== 'R') {
+                                if (m.composition) html += `<span>Comp: <strong>${m.composition}</strong></span>`;
+                                if (m.density != null) html += `<span>Density: <strong>${m.density !== undefined ? m.density.toFixed(2) : '?'}</strong></span>`;
 
-                            let mAtmComp = 'None';
-                            if (m.gases && m.gases.length > 0) {
-                                mAtmComp = m.gases.slice(0, 3).join(', ');
-                                if (m.gases.length > 3) mAtmComp += ', ...';
-                            } else if (m.oxygenFraction !== undefined) {
-                                mAtmComp = `N2/O2 (${(m.oxygenFraction * 100).toFixed(1)}% O2)`;
-                            }
-                            if (m.taints && m.taints.length > 0) {
-                                mAtmComp += ` [Taint: ${m.taints.join(', ')}]`;
-                            }
-                            html += `<span class="system-stats-full">Atmosphere: <strong>${mAtmComp}</strong></span>`;
-
-                            html += `<span>Gravity: <strong>${m.gravity !== undefined ? m.gravity.toFixed(2) : '?'} G</strong></span>`;
-                            html += `<span>Mass: <strong>${m.mass !== undefined ? m.mass.toFixed(4) : '?'} M⊕</strong></span>`;
-
-                            if (m.meanTempK !== undefined) {
-                                html += `<span>Temp: <strong>${(m.meanTempK - 273).toFixed(0)}°C</strong></span>`;
+                                let mAtmComp = 'None';
+                                if (m.gases && m.gases.length > 0) {
+                                    mAtmComp = m.gases.slice(0, 3).join(', ');
+                                    if (m.gases.length > 3) mAtmComp += ', ...';
+                                } else if (m.oxygenFraction !== undefined) {
+                                    mAtmComp = `N2/O2 (${(m.oxygenFraction * 100).toFixed(1)}% O2)`;
+                                }
+                                if (m.taints && m.taints.length > 0) {
+                                    mAtmComp += ` [Taint: ${m.taints.join(', ')}]`;
+                                }
+                                html += `<span class="system-stats-full">Atmosphere: <strong>${mAtmComp}</strong></span>`;
                             }
 
-                            if (m.solarDayHours !== undefined) {
+                            if (m.type !== 'Planetoid Belt' && m.size != 0 && m.size !== 'R') {
+                                if (m.gravity != null) html += `<span>Gravity: <strong>${m.gravity !== undefined ? m.gravity.toFixed(2) : '?'} G</strong></span>`;
+                                if (m.mass != null) html += `<span>Mass: <strong>${m.mass !== undefined ? m.mass.toFixed(4) : '?'} M⊕</strong></span>`;
+                                if (m.escapeVel != null) html += `<span>Escape Vel: <strong>${m.escapeVel.toFixed(2)} km/s</strong></span>`;
+
+                                if (m.meanTempK != null) {
+                                    if (m.highTempK != null && m.lowTempK != null && !isNaN(m.highTempK) && !isNaN(m.lowTempK)) {
+                                        html += `<span class="system-stats-full">Temp: <strong>${(m.meanTempK - 273).toFixed(0)}°C</strong> (L:${(m.lowTempK - 273).toFixed(0)}° / H:${(m.highTempK - 273).toFixed(0)}°)</span>`;
+                                    } else {
+                                        html += `<span>Temp: <strong>${(m.meanTempK - 273).toFixed(0)}°C</strong></span>`;
+                                    }
+                                }
+                            }
+
+                            if (m.solarDayHours != null) {
                                 let mDayStr = '';
                                 if (m.solarDayHours === Infinity || m.isTwilightZone) {
                                     mDayStr = 'Twilight Zone';
@@ -2047,12 +2070,20 @@ function populateEditorAccordions(stateObj) {
                                 } else {
                                     mDayStr = `${m.solarDayHours.toFixed(1)}h`;
                                 }
-                                html += `<span>Day: <strong>${mDayStr}</strong></span>`;
+                                html += `<span>Solar Day: <strong>${mDayStr}</strong></span>`;
+                            }
+                            if (m.siderealHours != null) {
+                                let mSidStr = m.siderealHours >= 24 ? `${(m.siderealHours / 24).toFixed(1)}d` : `${m.siderealHours.toFixed(2)}h`;
+                                html += `<span>Sidereal Day: <strong>${mSidStr}</strong></span>`;
                             }
 
 
                             if (m.totalTidalAmplitude !== undefined && m.totalTidalAmplitude > 0) {
                                 html += `<span>Tidal Amp: <strong>${m.totalTidalAmplitude.toFixed(2)}</strong></span>`;
+                            }
+
+                            if (m.axialTilt != null) {
+                                html += `<span>Axial Tilt: <strong>${m.axialTilt.toFixed(1)}°</strong></span>`;
                             }
 
                             if (m.lifeProfile) {

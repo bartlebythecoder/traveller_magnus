@@ -150,7 +150,7 @@ function generateSubordinateSocial(world, mainworld) {
         // Continuation Cap: If Pop >= Mainworld Pop, set to Mainworld Pop - 1
         if (pop >= mwPop) {
             let capped = Math.max(0, mwPop - 1);
-            tOverride('Population Cap', pop, capped, 'Cannot equal/exceed Mainworld Pop');
+            tOverride('Population Cap', pop, capped, `Population rolled ${pop}, but is capped at ${capped} because a subordinate world's population cannot equal or exceed its Mainworld (Pop ${mwPop}).`);
             pop = capped;
         } else if (pop !== popRoll) {
             tClamp('Population', popRoll, pop);
@@ -438,12 +438,12 @@ function constructCTUPP(w) {
 
 function applyStarSizeOverrides(type, size, decimal) {
     if (size === 'IV' && (type === 'M' || (type === 'K' && decimal === 5))) {
-        return 'V';
+        return { size: 'V', reason: "Type M and K5 stars cannot be Size IV per Book 6; forcing to Size V." };
     }
     if (size === 'VI' && (['B', 'A'].includes(type) || (type === 'F' && decimal === 0))) {
-        return 'V';
+        return { size: 'V', reason: "Type B, A, and F0 stars cannot be Size VI per Book 6; forcing to Size V." };
     }
-    return size;
+    return { size: size, reason: "None" };
 }
 
 // =====================================================================
@@ -518,9 +518,10 @@ function generateCTSystemChunk1(mainworldBase, hexId) {
     let priDecimal = spectralDecimal(rawPriSize);
 
     // Apply Physical Overrides
-    let finalPriSize = applyStarSizeOverrides(rawPriType, rawPriSize, priDecimal);
+    let priResult = applyStarSizeOverrides(rawPriType, rawPriSize, priDecimal);
+    let finalPriSize = priResult.size;
     if (finalPriSize !== rawPriSize) {
-        tOverride('Primary Star Size', rawPriSize, finalPriSize, 'Rule Override');
+        tOverride('Primary Star Size', rawPriSize, finalPriSize, priResult.reason);
     }
 
     tResult('Primary Star Type', rawPriType);
@@ -572,9 +573,10 @@ function generateCTSystemChunk1(mainworldBase, hexId) {
         let rawCSize = CT_COMP_SIZE_TABLE[sizeIdx];
         let cDec = spectralDecimal(rawCSize);
 
-        let cSize = applyStarSizeOverrides(cType, rawCSize, cDec);
+        let compResult = applyStarSizeOverrides(cType, rawCSize, cDec);
+        let cSize = compResult.size;
         if (cSize !== rawCSize) {
-            tOverride('Companion Star Size', rawCSize, cSize, 'Rule Override');
+            tOverride('Companion Star Size', rawCSize, cSize, compResult.reason);
         }
 
         tResult('Companion Type', cType);
@@ -713,9 +715,10 @@ function generateCTSystemChunk2(sys, mainworldBase) {
                 let rawSSize = CT_COMP_SIZE_TABLE[sizeIdx];
                 let sDec = sType === 'D' ? null : (roll1D() <= 3 ? 0 : 5);
 
-                let sSize = applyStarSizeOverrides(sType, rawSSize, sDec);
+                let subResult = applyStarSizeOverrides(sType, rawSSize, sDec);
+                let sSize = subResult.size;
                 if (sSize !== rawSSize) {
-                    tOverride('Sub-Companion Size', rawSSize, sSize, 'Rule Override');
+                    tOverride('Sub-Companion Size', rawSSize, sSize, subResult.reason);
                 }
 
                 let subOrbit = tRoll2D('Sub-Companion Orbit') - 4;
@@ -897,8 +900,10 @@ function generateCTSystemChunk2(sys, mainworldBase) {
     if (!mwCanBeAnywhere) {
         const hCandidates = sys.orbits.filter(o => o.zone === 'H');
         if (hCandidates.length > 0) {
-            const target = hCandidates[Math.floor(rng() * hCandidates.length)];
-            tResult('Mainworld Orbit', `Orbit ${target.orbit} (Selected from habitable candidate orbits: ${hCandidates.map(c => c.orbit).join(', ')})`);
+            let spectralKey = pType + (pDec === null ? '' : pDec);
+            let idealOrbit = (ZONE_H_TABLE[pSize] && ZONE_H_TABLE[pSize][spectralKey] !== undefined) ? ZONE_H_TABLE[pSize][spectralKey] : (ZONE_H_TABLE[pSize] ? ZONE_H_TABLE[pSize].default : 2);
+            let target = hCandidates.find(c => c.orbit === idealOrbit) || hCandidates[0];
+            tResult('Mainworld Orbit', `Orbit ${target.orbit} selected as the optimal Habitable Zone orbit for a ${spectralKey} ${pSize} star per the Book 6 charts.`);
             let mwDist = ORBIT_AU[Math.min(Math.floor(target.orbit), ORBIT_AU.length - 1)];
             if (target.contents && target.contents.type === 'Gas Giant') {
                 if (!target.contents.satellites) target.contents.satellites = [];
@@ -1509,6 +1514,12 @@ function generateCTSystemChunk5(sys, mainworldBase) {
             }
         }
 
+        // Ensure absolute TL floor for subordinates after any bonuses (Book 6)
+        if (w.pop > 0 && w.tl < 7 && ![5, 6, 8].includes(w.atm)) {
+            tOverride('TL Environmental Floor', w.tl, 7, 'Subordinate world requires TL 7+ in hostile atmosphere');
+            w.tl = 7;
+        }
+
         // 3. Spaceport Generation
         let sp = 'Y';
         if (w.size === 0 || w.size === 'R') {
@@ -1567,6 +1578,7 @@ function generateCTSystemChunk5(sys, mainworldBase) {
         });
     }
 
+    auditCTSystem(sys, mainworldBase);
     return sys;
 }
 
@@ -1615,4 +1627,84 @@ function generateCTPhysical(base, hexId) {
         worldType: 'Planet',
         displayString: `${homestar} | Orbit ${hzOrbit} (${distAU}AU) | ${satellites} moons | G:${gravity}g | ${thermal.temperature}K | Tilt:${rot.axialTilt}° | Day:${rot.rotationPeriod}`
     };
+}
+
+/**
+ * CT SYSTEM AUDIT
+ * Verifies the generated system against core Book 6 rules.
+ */
+function auditCTSystem(sys, mainworldBase) {
+    if (!sys || !mainworldBase) return;
+    let errors = 0;
+    tSection('CT SYSTEM AUDIT');
+
+    let mainworldCount = 0;
+    const mwPop = mainworldBase.pop || 0;
+
+    const checkBody = (body) => {
+        // Guard against types that shouldn't have social stats
+        if (!body || body.type === 'Empty') return;
+
+        // Recursion must happen before potential returns for non-social parent bodies (like GGs)
+        if (body.satellites && Array.isArray(body.satellites)) {
+            body.satellites.forEach(s => checkBody(s));
+        }
+
+        if (body.type === 'Gas Giant' || body.size === 'R') {
+            return;
+        }
+
+        if (body.type === 'Mainworld') {
+            mainworldCount++;
+            if (body.tl >= 0) {
+                writeLogLine(`[PASS] Mainworld: Book 3 allows low TL in hostile atmo.`);
+            }
+            return;
+        }
+
+        // Only audit population if the property exists as a number
+        if (typeof body.pop === 'number' && mwPop > 0) {
+            if (body.pop < mwPop) {
+                writeLogLine(`[PASS] Population Cap: ${body.type} Pop ${body.pop} is less than Mainworld Pop ${mwPop}`);
+            } else {
+                writeLogLine(`[FAIL] Population Cap: ${body.type} Pop ${body.pop} is NOT less than Mainworld Pop ${mwPop}`);
+                errors++;
+            }
+        }
+
+        // Only audit TL floor if population exists and is > 0 (Book 6 Rule for Subordinates)
+        if (typeof body.pop === 'number' && body.pop > 0 && ![5, 6, 8].includes(body.atm)) {
+            if (body.tl >= 7) {
+                writeLogLine(`[PASS] Environmental TL Floor: ${body.type} Atmo ${body.atm} has TL ${body.tl} (>= 7)`);
+            } else {
+                writeLogLine(`[FAIL] Environmental TL Floor: Subordinate world requires TL 7+ for life support.`);
+                errors++;
+            }
+        }
+
+        // Rule 3: Planetoid Belts (Size must be 0)
+        if (body.type === 'Planetoid Belt') {
+            if (body.size === 0) {
+                writeLogLine(`[PASS] Planetoid Belt: Size is 0`);
+            } else {
+                writeLogLine(`[FAIL] Planetoid Belt: Size is ${body.size} (must be 0)`);
+                errors++;
+            }
+        }
+    };
+
+    sys.orbits.forEach(slot => checkBody(slot.contents));
+    if (sys.capturedPlanets) {
+        sys.capturedPlanets.forEach(p => checkBody(p));
+    }
+
+    // Rule 4: Mainworld Count (Exactly 1 Mainworld per system)
+    if (mainworldCount === 1) {
+        writeLogLine(`[PASS] Mainworld Count: Exactly 1 Mainworld detected`);
+    } else {
+        writeLogLine(`[FAIL] Mainworld Count: ${mainworldCount} detected (must be exactly 1)`);
+        errors++;
+    }
+
+    tResult('CT Audit Summary', errors + ' error(s) detected');
 }

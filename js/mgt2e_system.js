@@ -2053,6 +2053,12 @@ function generateMgT2ESystemChunk7(sys, mainworldBase) {
         // Skip Mainworld here (handled in main loop)
         if (body.type === 'Mainworld') return;
 
+        // Skip Gas Giants (no social/UWP/classification needed for the GG itself)
+        if (body.type === 'Gas Giant') {
+            body.classifications = [];
+            return;
+        }
+
         tSection(`${isMoon ? 'Moon' : body.type} Orbit ${body.orbitId.toFixed(2)} UWP & Class`);
 
         // 1. Map properties for the Social helper
@@ -2141,6 +2147,8 @@ function generateMgT2ESystemChunk7(sys, mainworldBase) {
             tResult('Viability', 'Failed: Mainworld cannot support');
             writeLogLine(`  [VIABILITY FAIL] Secondary world requires TL ${floor} to survive, but Mainworld is only TL ${Math.max(mw.tl, mwEnvTl)}.`);
             body.pop = 0;
+            body.gov = 0;
+            body.law = 0;
             body.tl = 0;
             body.classifications = ["Uninhabited/Failed Outpost"];
         }

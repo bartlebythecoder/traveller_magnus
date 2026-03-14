@@ -1878,10 +1878,9 @@ function populateEditorAccordions(stateObj) {
                         zoneLabel = ` | <span style="color: ${zColor}">${mwBase.travelZone}</span>`;
                     }
 
-                    let classLabel = (w.classifications && w.classifications.length > 0) ? ` | ${w.classifications[0]}` : '';
 
                     html += `<details open>`;
-                    html += `<summary ${summaryStyle}>Orbit ${w.orbitId.toFixed(2)} (${w.orbitType || 'S-Type'})${classLabel}${zoneLabel} <span class="sys-title-info">${w.type}</span></summary>`;
+                    html += `<summary ${summaryStyle}>Orbit ${w.orbitId.toFixed(2)} (${w.orbitType || 'S-Type'})${zoneLabel} <span class="sys-title-info">${w.type}</span></summary>`;
                     html += `<div class="system-node">`;
 
                     if (w.type !== 'Planetoid Belt' && w.type !== 'Gas Giant' && uwp !== '-') {
@@ -1986,11 +1985,10 @@ function populateEditorAccordions(stateObj) {
                             let mLabelColor = m.type === 'Mainworld' ? '#ffa500' : '#66fcf1';
                             let mSummaryStyle = m.type === 'Mainworld' ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
 
-                            let mClassLabel = (m.classifications && m.classifications.length > 0) ? ` | ${m.classifications[0]}` : '';
                             let titlePrefix = isSigBody ? 'Sig Body' : 'Moon';
 
                             html += `<details>`;
-                            html += `<summary ${mSummaryStyle}>${titlePrefix} ${midx + 1}${mClassLabel} <span class="sys-title-info">Size ${m.size}</span></summary>`;
+                            html += `<summary ${mSummaryStyle}>${titlePrefix} ${midx + 1} <span class="sys-title-info">Size ${m.size}</span></summary>`;
                             html += `<div class="system-node">`;
 
                             if (!isSigBody && mUwp !== '-') {

@@ -1,4 +1,4 @@
-# As Above, So Below (v0.2.0)
+# As Above, So Below (v0.3.0)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -36,6 +36,10 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 ---
 ## 📜 Changelog
 
+### [v0.3.0] - 2026-03-16   
+1. **UI:** Updated UI to allow full top down system generation on populated hexes.
+2. **Modular CT Engine:** Refactored CT engine into multiple files.
+
 ### [v0.2.0] - 2026-03-14
 1. **Logging:** Added automated testing for CT and RTT world generation.
 2. **Mongoose System Generation:** Removed unneccessary Planetoid Belt fields from Mongoose World Details.
@@ -43,27 +47,6 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 
 ### [v0.1.10.2] - 2026-03-13
 1. **Mongoose Classification Fixes:** Corrected formulas for mongoose classification generation.
-
-### [v0.1.10.1] - 2026-03-13
-1. **T5 System Generation:** Corrected formulas for t5 system generation.
-2. **T5 System Generation:** Added world types for non-mainworlds
-3. **T5 System Generation:** Removed AI house rules for orbital periods, orbital rotation and temperature.
-
-### [v0.1.10] - 2026-03-13
-1. **T5 Mainworld Generation:** Corrected formulas for mainworld generation.
-2. **T5 Mainworld Generation:** Added full stellar details and PBG to T5 mainworld generation.
-
-### [v0.1.9.1] - 2026-03-12
-1. **RTT Engine:** Removed asteroid symbol from empty stars in the hex map.
-2. **RTT Engine:** Now chooses random special base from list instead of providing list
-3. **RTT Engine:** World View now shows check boxes for all bases.
-
-### [v0.1.9] - 2026-03-12
-1. **Bulk Macros:** Changed CT bulk macro to **Ctrl + Alt + C**.
-2. **Dynamic Grid Scaling:** Resized the global map from 8x4 sectors to **7x5 sectors**.
-3. **Context Menu:** Added full system generation macros to the context menu.
-4. **RTT Generation:** Added RTT system generation and macro.
-
 
 
 

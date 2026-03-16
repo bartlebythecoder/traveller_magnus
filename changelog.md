@@ -1,5 +1,7 @@
 # Changelog
 
+### [v0.3.0] - 2026-03-16
+
 ### [v0.2.0] - 2026-03-14
 1. **Logging:** Added automated testing for CT and RTT world generation.
 2. **Mongoose System Generation:** Removed unneccessary Planetoid Belt fields from Mongoose World Details.

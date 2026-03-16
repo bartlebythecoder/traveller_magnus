@@ -12,9 +12,9 @@ const APP_BANNER = "v0.1.10.1 eHex Skip and T5 Trade Fixes";
 // Application State
 // -----------------------------------------------------------------------------
 
-// Camera state
-cameraX = 0;
-cameraY = 0;
+// Camera state (Centered on Sector R by default for fresh instances)
+cameraX = 8400 - (window.innerWidth / 2);
+cameraY = 8660 - (window.innerHeight / 2);
 zoom = 1.0;
 
 // Mouse tracking

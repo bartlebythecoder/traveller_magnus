@@ -16,7 +16,15 @@
     <!-- Modular JavaScript Renderer (Canvas & Drawing) -->
     <script src="js/renderer.js" defer></script>
     <!-- Modular JavaScript Generation Engines -->
-    <script src="js/ct_engine.js" defer></script>
+
+    <script src="js/ct_constants.js" defer></script>
+    <script src="js/ct_physical_library.js" defer></script>
+    <script src="js/ct_world_engine.js" defer></script>
+    <script src="js/ct_social_engine.js" defer></script>
+    <script src="js/ct_bottomup_generator.js" defer></script>
+    <script src="js/ct_topdown_generator.js" defer></script>
+    <script src="js/ct_uwp_auditor.js" defer></script>
+    <script src="js/ct_system_driver.js" defer></script>
     <script src="js/mgt2e_mainworld.js" defer></script>
     <script src="js/mgt2e_socioeconomics.js" defer></script>
     <script src="js/mgt2e_system.js" defer></script>
@@ -34,9 +42,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above So Below</span></h1>
-            <div class="splash-banner">v0.2.0 Automated Testing Logs Complete</div>
+            <div class="splash-banner">v0.3.0 Modular Classic Traveller Engine Integration</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.2.0 </div>
+            <div class="splash-version">v0.3.0 </div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -184,15 +192,13 @@
 
         <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
 
-        <!-- GENERATE Menu -->
+        <!-- GENERATE MAINWORLD Row -->
         <div class="context-menu-item has-submenu">
-            GENERATE (MAINWORLD / SYSTEM)
+            GENERATE MAINWORLD
             <div class="submenu">
                 <button class="context-menu-item" id="ctx-gen-ct">Classic Traveller (CT)</button>
                 <button class="context-menu-item" id="ctx-gen-mgt2e">Mongoose 2nd Ed (MgT2E)</button>
                 <button class="context-menu-item" id="ctx-gen-t5">Traveller 5 (T5)</button>
-                <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
-                <button class="context-menu-item" id="ctx-gen-rtt">RTT (Full System)</button>
             </div>
         </div>
 
@@ -200,7 +206,7 @@
         <div class="context-menu-item has-submenu">
             EXPAND SYSTEM
             <div class="submenu">
-                <button class="context-menu-item" id="ctx-expand-physical-ct">Book 6 (CT)</button>
+                <button class="context-menu-item" id="ctx-expand-physical-ct">Book 6 (Classic Traveller)</button>
                 <button class="context-menu-item" id="ctx-expand-physical-mgt2e">MgT2E (System &amp; Physical)</button>
                 <button class="context-menu-item" id="ctx-expand-physical-t5">Traveller 5 (T5)</button>
             </div>
@@ -215,18 +221,31 @@
             </div>
         </div>
 
+        <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
 
+        <!-- GENERATE FULL SYSTEM Row (Formerly GENERATE SYSTEM) -->
+        <div class="context-menu-item has-submenu">
+            GENERATE FULL SYSTEM
+            <div class="submenu">
+                <button class="context-menu-item" id="ctx-gen-sys-ct">Classic Traveller (CT) Top-Down</button>
+                <button class="context-menu-item" id="ctx-gen-sys-mgt2e">Mongoose 2nd Ed (MgT2E) Top-Down</button>
+                <button class="context-menu-item" id="ctx-gen-sys-t5">Traveller 5 (T5) Top-Down</button>
+                <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
+                <button class="context-menu-item" id="ctx-gen-sys-rtt">RTT Full System</button>
+            </div>
+        </div>
 
         <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
 
-        <!-- FULL SYSTEM Menu -->
+        <!-- POPULATE AND GENERATE FULL SYSTEM Row (Formerly POPULATE & GENERATE FULL SYSTEM) -->
         <div class="context-menu-item has-submenu">
-            FULL SYSTEM
+            POPULATE AND GENERATE FULL SYSTEM
             <div class="submenu">
-                <button class="context-menu-item" id="ctx-macro-ct">CT Continuation (Top Down) Ctrl+Alt+C</button>
-                <button class="context-menu-item" id="ctx-macro-mgt2e">MgT2e Continuation (Top Down) Ctrl+Alt+M</button>
-                <button class="context-menu-item" id="ctx-macro-t5">T5 Continuation (Top Down) Ctrl+Alt+5</button>
-                <button class="context-menu-item" id="ctx-macro-rtt">RTT Full Generation (Bottom Up) Ctrl+Alt+R</button>
+                <button class="context-menu-item" id="ctx-full-ct">Classic Traveller (CT) (Ctrl+Alt+C)</button>
+                <button class="context-menu-item" id="ctx-full-mgt2e">Mongoose 2nd Ed (MgT2E) (Ctrl+Alt+M)</button>
+                <button class="context-menu-item" id="ctx-full-t5">Traveller 5 (T5) (Ctrl+Alt+5)</button>
+                <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
+                <button class="context-menu-item" id="ctx-full-rtt">RTT Full System (Ctrl+Alt+R)</button>
             </div>
         </div>
 
@@ -235,14 +254,14 @@
         <button class="context-menu-item" id="ctx-gen-xboat">GENERATE XBOAT ROUTES</button>
 
         <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
-        <button class="context-menu-item" id="ctx-help">Help / Shortcuts</button>
+        <button class="context-menu-item" id="ctx-help">HELP/SHORTCUTS</button>
     </div>
 
     <!-- Help Modal -->
     <div id="help-modal">
         <div style="text-align: center; border-bottom: 2px solid #45a29e; padding-bottom: 15px; margin-bottom: 20px;">
             <h2 style="margin: 0 0 5px 0; color: #66fcf1; font-size: 24px;">As Above So Below</h2>
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.2.0</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.3.0</span>
             <p style="margin: 5px 0; color: #c5c6c7; font-size: 12px; font-style: italic;">Created by: <span
                     id="app-credits">Bartleby the Coder</span></p>
         </div>
@@ -392,7 +411,7 @@
         </div>
 
         <!-- CT Scouts System Expand Accordion -->
-        <button class="accordion-btn" id="acc-btn-ct-system" style="display: none;">CT Scouts System</button>
+        <button class="accordion-btn" id="acc-btn-ct-system" style="display: none;">CT Star System</button>
         <div class="accordion-content" id="editor-ct-system-root" style="display: none;">
             <!-- Content will be injected via JS -->
         </div>

@@ -1,6 +1,12 @@
 # Changelog
 
+### [v0.3.1] - 2026-03-16
+1. **Architecture:** Reverted to synchronous rule loading via script tags to support local file execution.
+2. **Modular CT Rules:** Refined rule export logic for global scope compatibility.
+
 ### [v0.3.0] - 2026-03-16
+1. **UI:** Updated UI to allow full top down system generation on populated hexes.
+2. **Modular CT Engine:** Refactored CT engine into multiple files.
 
 ### [v0.2.0] - 2026-03-14
 1. **Logging:** Added automated testing for CT and RTT world generation.

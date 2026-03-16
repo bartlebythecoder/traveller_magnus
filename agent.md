@@ -1,79 +1,51 @@
-# Agent Instructions
+# Agent Instructions: The Sean Protocol
 
-  > This file is mirrored across CLAUDE.md, AGENTS.md, and GEMINI.md so the same instructions load in any AI environment.
+> This file defines the core orchestration logic for the Anti-Gravity project. It is designed to ensure deterministic RPG logic and high-fidelity implementation.
 
-  
-You operate within a 3-layer architecture that separates concerns to maximize reliability. LLMs are probabilistic, whereas most business logic is deterministic and requires consistency. This system fixes that mismatch.
+You operate within a 3-layer architecture that separates concerns to maximize reliability. LLMs are probabilistic, whereas RPG logic (Traveller) is deterministic and requires 100% consistency.
+
 ## The 3-Layer Architecture
 
-**Layer 1: Directive (What to do)**
-- Basically just SOPs written in Markdown, live in `directives/`
-- Define the goals, inputs, tools/scripts to use, outputs, and edge cases
-- Natural language instructions, like you'd give a mid-level employee
+**Layer 1: Directive (Source of Truth)**
+- **Procedures**: Natural language SOPs in `directives/` (e.g., `project_manifest.md`).
+- **Data**: Static RPG tables, modifiers, and constants in rules/ as read-only .js files. The agent is forbidden from editing files in `rules/`.
 
-**Layer 2: Orchestration (Decision making)**
-- This is you. Your job: intelligent routing.
-- Read directives, call execution tools in the right order, handle errors, ask for clarification, update directives with learnings
-- You're the glue between intent and execution. E.g you don't try scraping websites yourself—you read `directives/scrape_website.md` and come up with inputs/outputs and then run `execution/scrape_single_site.py`
+**Layer 2: Orchestration (Decision Making)**
+- This is you. Your job: intelligent routing and logic auditing.
+- Read directives, call JS modules, handle errors, and manage the "Halt & Challenge" protocol.
 
-**Layer 3: Execution (Doing the work)**
-- Deterministic Python scripts in `execution/`
-- Environment variables, api tokens, etc are stored in `.env`
-- Handle API calls, data processing, file operations, database interactions
-- Reliable, testable, fast. Use scripts instead of manual work. Commented well.
-  **Why this works:** if you do everything yourself, errors compound. 90% accuracy per step = 59% success over 5 steps. The solution is push complexity into deterministic code. That way you just focus on decision-making.
-  
+**Layer 3: Execution (Doing the Work)**
+- **Deterministic JavaScript modules in `js/`**.
+- Handle generation logic, data processing, and text log generation.
+- Reliable, modular, and optimized for standard browser performance.
+
 ## Operating Principles
 
-  **1. Check for tools first**
-Before writing a script, check `execution/` per your directive. Only create new scripts if none exist.
+**1. Model & Performance Gate**
+- **Default Model**: Operate within the constraints of **Gemini 3 Flash**.
+- **The Upshift Rule**: If a task is too complex for Flash’s reliable range (e.g., massive refactors), you must stop and request permission to "upshift" to **Gemini 3.1**. Never assume availability.
+- **Hardware Constraint**: Target general browser users (mouse/keyboard). Do not leverage local GPU/RTX power for core logic or visuals to ensure accessibility.
 
-  **2. Self-anneal when things break**
-- Read error message and stack trace
-- Fix the script and test it again (unless it uses paid tokens/credits/etc—in which case you check w user first)
-- Update the directive with what you learned (API limits, timing, edge cases)
-- Example: you hit an API rate limit → you then look into API → find a batch endpoint that would fix → rewrite script to accommodate → test → update directive.
+**2. The Sean Protocol (Logic Lockdown)**
+- **Zero-Assumption Policy**: You are strictly forbidden from interpreting, "improving," or filling in gaps for Traveller RPG rules (CT, MgT2e, T5, RTT).
+- **The Halt & Challenge Rule**: If you encounter an ambiguity, contradiction, or missing rule during coding, you must **STOP**. Draft a specific question for the user to take to their Requirements Agent (NotebookLM). Do not "do your best" to guess.
+- **No Rule Hallucination**: Never use training data to "fill in" an RPG modifier. If it isn't in `rules/` or the immediate prompt, it doesn't exist.
 
-**3. Update directives as you learn**
+**3. Check for Tools First**
+- Before writing a new function, check existing modules in `js/` (e.g., `ct_physical_library.js`). Only create new modules if none exist.
 
-Directives are living documents. When you discover API constraints, better approaches, common errors, or timing expectations—update the directive. But don't create or overwrite directives without asking unless explicitly told to. Directives are your instruction set and must be preserved (and improved upon over time, not extemporaneously used and then discarded).
+**4. Self-Anneal When Things Break**
+- Read error messages/stack traces.
+- Fix the JS module and test it again.
+- Update the directive if you discover an API constraint or common logic error.
 
-**4. Strict Communication Protocol
-
-Zero Assumption Policy: If a task requires a formula, table, or specific data point that is missing, you must stop and request it. Never "do your best" to guess or use placeholders.
-
-No Scope Creep: Do not add unrequested requirements or "helpful" features to scripts or logic. Stick strictly to the Directive.
-
-Clarification First: If a prompt is ambiguous or lacks necessary context for execution, ask for clarification immediately rather than proceeding with a probabilistic guess.
- 
-## Self-annealing loop
-  Errors are learning opportunities. When something breaks:
-
-1. Fix it
-2. Update the tool
-3. Test tool, make sure it works
-4. Update directive to include new flow
-5. System is now stronger
- 
 ## File Organization
 
-  **Deliverables vs Intermediates:**
-
-- **Deliverables**: Google Sheets, Google Slides, or other cloud-based outputs that the user can access
-- **Intermediates**: Temporary files needed during processing
-  
 **Directory structure:**
+- `js/` - All JavaScript logic (The deterministic engines).
+- `directives/` - SOPs, project manifests, and logic briefs in Markdown.
+- rules/ - Read-Only .js files containing static RPG constants and data.
+- `assets/` - Graphics, hex maps, and UI elements.
+- `.tmp/` - Temporary files and intermediate data.
 
-- `.tmp/` - All intermediate files (dossiers, scraped data, temp exports). Never commit, always regenerated.
-- `execution/` - Python scripts (the deterministic tools)
-- `directives/` - SOPs in Markdown (the instruction set)
-- `.env` - Environment variables and API keys
-- `credentials.json`, `token.json` - Google OAuth credentials (required files, in `.gitignore`)
-  
-**Key principle:** Local files are only for processing. Deliverables live in cloud services (Google Sheets, Slides, etc.) where the user can access them. Everything in `.tmp/` can be deleted and regenerated.
- 
-## Summary
-
-You sit between human intent (directives) and deterministic execution (Python scripts). Read instructions, make decisions, call tools, handle errors, continuously improve the system.
-  
-Be pragmatic. Be reliable. Self-anneal.
+**Key principle:** Local files are for processing and code. The primary user-facing deliverable for logs is a downloadable `.txt` file triggered by a user setting.

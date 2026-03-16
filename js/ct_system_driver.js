@@ -17,7 +17,7 @@ if (typeof module !== 'undefined' && module.exports) {
     auditor = auditCTSystem;
     auConst = ORBIT_AU;
 } else {
-    // In browser, these come from scripts included in hex_map.html
+    // In browser, these are resolved at script load time.
     systemSkeletonGen = typeof generateSystemSkeleton !== 'undefined' ? generateSystemSkeleton : null;
     socialProcessor = typeof processBottomUpSocial !== 'undefined' ? processBottomUpSocial : null;
     topDownGen = typeof generateTopDownSystem !== 'undefined' ? generateTopDownSystem : null;
@@ -37,6 +37,7 @@ if (typeof module !== 'undefined' && module.exports) {
  * @returns {Object} The generated system object.
  */
 function generateSystem(params) {
+
     const { mode, mainworldUWP, primaryStar, hexId } = params;
 
     let sys = null;

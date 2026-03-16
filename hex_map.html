@@ -17,6 +17,7 @@
     <script src="js/renderer.js" defer></script>
     <!-- Modular JavaScript Generation Engines -->
 
+    <script src="rules/ct_data.js"></script>
     <script src="js/ct_constants.js" defer></script>
     <script src="js/ct_physical_library.js" defer></script>
     <script src="js/ct_world_engine.js" defer></script>
@@ -42,9 +43,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above So Below</span></h1>
-            <div class="splash-banner">v0.3.0 Modular Classic Traveller Engine Integration</div>
+            <div class="splash-banner">v0.3.1 Reverted to Synchronous Rule Loading</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.3.0 </div>
+            <div class="splash-version">v0.3.1 </div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -261,7 +262,7 @@
     <div id="help-modal">
         <div style="text-align: center; border-bottom: 2px solid #45a29e; padding-bottom: 15px; margin-bottom: 20px;">
             <h2 style="margin: 0 0 5px 0; color: #66fcf1; font-size: 24px;">As Above So Below</h2>
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.3.0</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.3.1</span>
             <p style="margin: 5px 0; color: #c5c6c7; font-size: 12px; font-style: italic;">Created by: <span
                     id="app-credits">Bartleby the Coder</span></p>
         </div>
@@ -651,22 +652,27 @@
     <!-- Toast Notifications -->
     <div id="toast-container"></div>
 
-    <!-- Application Initialization -->
-    <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            // Auto-load names from names.js if it was included
-            if (window.SYSTEM_NAMES && Array.isArray(window.SYSTEM_NAMES)) {
-                window.SYSTEM_NAMES.forEach(name => {
-                    const cleaned = name ? name.trim() : '';
-                    if (cleaned && !usedNames.has(cleaned)) {
-                        namePool.push(cleaned);
-                    }
-                });
+
+</body>
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        // Auto-load names from names.js if it was included
+        if (window.SYSTEM_NAMES && Array.isArray(window.SYSTEM_NAMES)) {
+            window.SYSTEM_NAMES.forEach(name => {
+                const cleaned = name ? name.trim() : '';
+                if (cleaned && typeof usedNames !== 'undefined' && !usedNames.has(cleaned)) {
+                    namePool.push(cleaned);
+                } else if (cleaned && typeof usedNames === 'undefined') {
+                    // Fallback in case usedNames isn't initialized yet
+                    if (typeof namePool !== 'undefined') namePool.push(cleaned);
+                }
+            });
+            if (typeof namePool !== 'undefined') {
                 namePool.sort(); // ENSURE SORTED POOL for strict determinism
                 console.info(`Auto-loaded ${namePool.length} system names from names.js (Alphabetically Sorted).`);
             }
-        }); 
-    </script>
-</body>
+        }
+    }); 
+</script>
 
 </html>

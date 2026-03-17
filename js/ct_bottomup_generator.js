@@ -3,7 +3,7 @@
 // =====================================================================
 
 // Browser-safe imports
-var orbitalAU, luminosityTable, starMassTable, natureTable, priTypeTable, priSizeTable, compTypeTable, compSizeTable, zoneTables, companionOrbitTable, maxOrbitsBase, maxOrbitsModifiers, zoneHTable, placementPriorities, rollSkeleton, satLogic;
+var orbitalAU, luminosityTable, starMassTable, natureTable, priTypeTable, priSizeTable, compTypeTable, compSizeTable, zoneTables, companionOrbitTable, maxOrbitsBase, maxOrbitsModifiers, zoneHTable, placementPriorities, rollSkeleton, satLogic, satOrbitsTable;
 var physicalGen, popGen, socialGen, mainworldSocialFin, subordinateSocialFin;
 var thermalStatsGetter, rotationStatsGetter, satelliteGenerator;
 
@@ -33,6 +33,7 @@ if (typeof module !== 'undefined' && module.exports) {
 
     placementPriorities = constants.CT_PLACEMENT_PRIORITIES;
     satLogic = constants.CT_SATELLITE_LOGIC;
+    satOrbitsTable = constants.SATELLITE_ORBITS;
 
     const physLib = require('./ct_physical_library');
     thermalStatsGetter = physLib.getThermalStats;
@@ -63,6 +64,7 @@ if (typeof module !== 'undefined' && module.exports) {
 
     placementPriorities = typeof CT_PLACEMENT_PRIORITIES !== 'undefined' ? CT_PLACEMENT_PRIORITIES : {};
     satLogic = typeof CT_SATELLITE_LOGIC !== 'undefined' ? CT_SATELLITE_LOGIC : {};
+    satOrbitsTable = typeof SATELLITE_ORBITS !== 'undefined' ? SATELLITE_ORBITS : {};
 
     thermalStatsGetter = typeof getThermalStats !== 'undefined' ? getThermalStats : null;
     rotationStatsGetter = typeof getRotationStats !== 'undefined' ? getRotationStats : null;
@@ -521,6 +523,9 @@ function processBottomUpSatellites(sys) {
         if (count > 0) {
             tSection(`${parent.type} at Orbit ${parent.orbit} - ${count} Satellites`);
             if (!parent.satellites) parent.satellites = [];
+            
+            const occupiedRadii = new Set();
+            let cumulativeDM = 0;
 
             for (let i = 0; i < count; i++) {
                 let sizeCode;
@@ -554,12 +559,49 @@ function processBottomUpSatellites(sys) {
                     finalType = 'Ring';
                 }
 
+                // Step 3: Orbital Location
+                let pd = null;
+                let orbitType = '';
+                let attempts = 0;
+
+                while (attempts < 5) {
+                    attempts++;
+                    if (sizeCode === 'R') {
+                        orbitType = 'Ring';
+                        const idx = tRoll1D('Ring Orbit Roll (1D)');
+                        pd = (satOrbitsTable.Ring && satOrbitsTable.Ring[idx]) || 1;
+                    } else {
+                        const orbitRoll = Math.max(2, tRoll2D('Orbit Type Roll') - cumulativeDM);
+                        if (orbitRoll >= 12 && parent.type === 'Gas Giant') {
+                            orbitType = 'Extreme';
+                        } else if (orbitRoll >= 8) {
+                            orbitType = 'Far';
+                        } else {
+                            orbitType = 'Close';
+                        }
+                        const distRoll = tRoll2D(`Orbit Distance (${orbitType})`);
+                        const distIdx = Math.min(distRoll, (satOrbitsTable[orbitType] || []).length - 1);
+                        pd = (satOrbitsTable[orbitType] && satOrbitsTable[orbitType][distIdx]) || 3;
+                    }
+
+                    if (!occupiedRadii.has(pd)) break;
+                    pd = null; 
+                }
+
+                if (pd === null) {
+                    pd = 3 + i; // Fallback
+                }
+                occupiedRadii.add(pd);
+                cumulativeDM++;
+
                 const sat = {
                     type: finalType,
                     size: finalSize,
                     parentType: parent.type,
                     orbit: parent.orbit,
-                    zone: parent.zone
+                    zone: parent.zone,
+                    pd: pd,
+                    orbitType: orbitType
                 };
 
                 // Generate Physicals & Population

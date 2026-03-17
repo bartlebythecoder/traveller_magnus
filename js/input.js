@@ -2124,9 +2124,9 @@ function populateEditorAccordions(stateObj) {
                             html += `<div class="system-stats">`;
 
                             if (isSigBody) {
-                                html += `<span>Orbit: <strong>${m.orbitId ? m.orbitId.toFixed(2) : '?'}</strong></span>`;
+                                html += `<span>Orbit: <strong>${(m.orbitId !== undefined && m.orbitId !== null) ? m.orbitId.toFixed(2) : '?'}</strong></span>`;
                             } else {
-                                html += `<span>Orbit: <strong>${m.pd ? m.pd.toFixed(1) : '?'} ⌀</strong></span>`;
+                                html += `<span>Orbit: <strong>${(m.pd !== undefined && m.pd !== null) ? m.pd.toFixed(1) : '?'} ⌀</strong></span>`;
                             }
 
                             html += `<span>Ecc: <strong>${(m.eccentricity || 0).toFixed(3)}</strong></span>`;
@@ -2364,7 +2364,7 @@ function populateEditorAccordions(stateObj) {
                                 }
 
                                 html += `<details>`;
-                                html += `<summary ${satSummaryStyle}>Satellite ${satIdx + 1} <span class="sys-title-info">${satType} | ${sat.pd || '?'}r | ${satUwp}${satZoneLabel}</span></summary>`;
+                                html += `<summary ${satSummaryStyle}>Satellite ${satIdx + 1} <span class="sys-title-info">${satType} | ${(sat.pd !== undefined && sat.pd !== null) ? sat.pd : '?'}r | ${satUwp}${satZoneLabel}</span></summary>`;
                                 html += `<div class="system-node">`;
                                 html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <strong style="color: ${satLabelColor}">${satUwp}</strong></div>`;
                                 html += `<div class="system-stats">`;

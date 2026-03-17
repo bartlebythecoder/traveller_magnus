@@ -5,17 +5,19 @@
 var orbitalDistances, gravityTable, luminosityTable, satOrbitsTable;
 
 if (typeof module !== 'undefined' && module.exports) {
-    const { ORBIT_AU, GRAV, LUM, SATELLITE_ORBITS } = require('./ct_constants');
+    const { ORBIT_AU, GRAV, LUM, SATELLITE_ORBITS, CT_SATELLITE_LOGIC } = require('./ct_constants');
     orbitalDistances = ORBIT_AU;
     gravityTable = GRAV;
     luminosityTable = LUM;
     satOrbitsTable = SATELLITE_ORBITS;
+    satLogic = CT_SATELLITE_LOGIC;
 } else {
     // In browser, these are globals from ct_constants.js
     orbitalDistances = typeof ORBIT_AU !== 'undefined' ? ORBIT_AU : [];
     gravityTable = typeof GRAV !== 'undefined' ? GRAV : {};
     luminosityTable = typeof LUM !== 'undefined' ? LUM : {};
     satOrbitsTable = typeof SATELLITE_ORBITS !== 'undefined' ? SATELLITE_ORBITS : {};
+    satLogic = typeof CT_SATELLITE_LOGIC !== 'undefined' ? CT_SATELLITE_LOGIC : {};
 }
 
 /**
@@ -130,27 +132,34 @@ function generateSatellites(parent, zone, mwPop) {
 
         for (let i = 0; i < qty; i++) {
             tSection(`${parent.name || parent.type} - Satellite ${i+1}`);
-            // Step 2: Size
-            let sizeRoll;
+            // Step 2: Size (Task 2 Mirroring)
+            let sizeCode;
             if (parent.type === 'Gas Giant') {
                 if (parent.size === 'Large') {
                     tDM('Large Gas Giant', -4);
-                    sizeRoll = tRoll2D('Moon Size (LGG)') - 4;
+                    const roll = tRoll2D('Moon Size (LGG)');
+                    const result = roll - 4; // LGG Formula: 2D-4
+                    if (result === 0) sizeCode = 'R';
+                    else if (result < 0) sizeCode = 'S';
+                    else sizeCode = result;
                 } else {
                     tDM('Small Gas Giant', -6);
-                    sizeRoll = tRoll2D('Moon Size (SGG)') - 6;
+                    const roll = tRoll2D('Moon Size (SGG)');
+                    const result = roll - 6; // SGG Formula: 2D-6
+                    if (result === 0) sizeCode = 'R';
+                    else if (result < 0) sizeCode = 'S';
+                    else sizeCode = result;
                 }
             } else {
-                const pSize = (parent.size !== undefined && !isNaN(Number(parent.size))) ? Number(parent.size) : 5;
+                const pSize = (parent.size !== undefined && !isNaN(Number(parent.size))) ? Number(parent.size) : 0;
                 tDM(`Parent Size ${pSize}`, pSize);
                 tDM('Standard Moon Size', 'Subtract 1D');
-                sizeRoll = pSize - tRoll1D('Moon Size (Terr)');
+                const roll = tRoll1D('Moon Size (Terr)');
+                const result = pSize - roll; // Terr Formula: Parent Size - 1D
+                if (result === 0) sizeCode = 'R';
+                else if (result < 0) sizeCode = 'S';
+                else sizeCode = result;
             }
-
-            let sizeCode;
-            if (sizeRoll === 0) sizeCode = 'R';
-            else if (sizeRoll < 0) sizeCode = 'S';
-            else sizeCode = Math.max(0, sizeRoll);
             tResult('Size Code', sizeCode);
 
             // Step 3: Orbital Location

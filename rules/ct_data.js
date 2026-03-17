@@ -1897,5 +1897,57 @@ const CT_CONSTANTS = {
             300,
             325
         ]
+    },
+
+
+    "CT_COMPANION_ORBIT_TABLE": {
+        "0": "Close", "1": "Close", "2": "Close", "3": "Close",
+        "4": 1, "5": 2, "6": 3,
+        "7": "4+1D", "8": "5+1D", "9": "6+1D", "10": "7+1D", "11": "8+1D",
+        "12": "Far"
+    },
+
+    "CT_MAX_ORBITS_BASE": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+
+
+
+    "CT_MAX_ORBITS_MODIFIERS": {
+        "SIZES": { "III": 4, "Ia": 8, "Ib": 8, "II": 8 },
+        "TYPES": { "M": -4, "K": -2 }
+    },
+    "CT_ANOMALY_LOGIC": {
+        "CAPTURED": { "threshold": 5, "qty": [0, 1, 1, 2, 2, 3, 3] },
+        "EMPTY": { "threshold": 5, "qty": [0, 1, 1, 2, 3, 3, 3] }
+    },
+    "CT_SKELETON_QUANTITIES": {
+        "GG_PRESENCE_MAX": 9,
+        "GG_QTY": [0, 1, 1, 1, 2, 2, 3, 3, 4, 4, 4, 5, 5], // 2D index
+        "PB_PRESENCE_MAX": 6,
+        "PB_QTY": { "0": 3, "1": 2, "2": 2, "3": 2, "4": 2, "5": 2, "6": 2 }
+    },
+    "CT_PLACEMENT_PRIORITIES": {
+        "GAS_GIANT": ["O", "H"],
+        "PLANETOID_BELT": ["I", "H", "O"],
+        "ANOMALY_DM_STARS": ["B", "A"]
+    },
+    "CT_BODY_SIZES": {
+        "GG": { "1-3": "Large", "4-6": "Small" }
+    },
+
+    "CT_SATELLITE_LOGIC": {
+        "SATELLITE_COUNT_ROLLS": {
+            "TERRESTRIAL": "1D-3",
+            "LGG": "2D",
+            "SGG": "2D-4"
+        },
+        "SIZE_DETERMINATION": {
+            "TERRESTRIAL_FORMULA": "PARENT_SIZE - 1D",
+            "LGG_FORMULA": "2D - 4",
+            "SGG_FORMULA": "2D - 6",
+            "ZERO_IS_RING": "R",
+            "NEGATIVE_IS_SMALL": "S"
+        },
+        "EXCLUSIONS": ["Planetoid Belt", "S", "Ring"]
     }
+
 }

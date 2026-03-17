@@ -3,9 +3,9 @@
 // =====================================================================
 
 // Browser-safe imports
-var orbitalAU, luminosityTable, starMassTable, zoneTables, natureTable, priTypeTable, priSizeTable, compTypeTable, compSizeTable, satOrbitsTable;
+var orbitalAU, luminosityTable, starMassTable, zoneTables, natureTable, priTypeTable, priSizeTable, compTypeTable, compSizeTable, satOrbitsTable, placementPriorities, rollSkeleton;
 var physicalGen, popGen, mainworldSocialFin, subordinateSocialFin, tradeCodesGen;
-var thermalStatsGetter, rotationStatsGetter, satelliteGenerator, systemWalker;
+var thermalStatsGetter, rotationStatsGetter, satelliteGenerator, systemWalker, processSubordinates;
 
 if (typeof module !== 'undefined' && module.exports) {
     const constants = require('./ct_constants');
@@ -26,9 +26,13 @@ if (typeof module !== 'undefined' && module.exports) {
     mainworldSocialFin = worldEngine.finalizeMainworldSocial;
     subordinateSocialFin = worldEngine.finalizeSubordinateSocial;
     tradeCodesGen = worldEngine.generateTradeCodes;
+    rollSkeleton = worldEngine.rollSystemSkeleton;
+
+    placementPriorities = constants.CT_PLACEMENT_PRIORITIES;
 
     const bottomUp = require('./ct_bottomup_generator.js');
     systemWalker = bottomUp.walkSystem;
+    processSubordinates = bottomUp.processBottomUpSubordinates;
 
     const physLib = require('./ct_physical_library.js');
     thermalStatsGetter = physLib.getThermalStats;
@@ -52,8 +56,12 @@ if (typeof module !== 'undefined' && module.exports) {
     mainworldSocialFin = (window.CT_World_Engine) ? window.CT_World_Engine.finalizeMainworldSocial : null;
     subordinateSocialFin = (window.CT_World_Engine) ? window.CT_World_Engine.finalizeSubordinateSocial : null;
     tradeCodesGen = (window.CT_World_Engine) ? window.CT_World_Engine.generateTradeCodes : null;
+    rollSkeleton = (window.CT_World_Engine) ? window.CT_World_Engine.rollSystemSkeleton : null;
+
+    placementPriorities = typeof CT_PLACEMENT_PRIORITIES !== 'undefined' ? CT_PLACEMENT_PRIORITIES : {};
 
     systemWalker = typeof walkSystem !== 'undefined' ? walkSystem : null;
+    processSubordinates = typeof processBottomUpSubordinates !== 'undefined' ? processBottomUpSubordinates : null;
 
     thermalStatsGetter = typeof getThermalStats !== 'undefined' ? getThermalStats : null;
     rotationStatsGetter = typeof getRotationStats !== 'undefined' ? getRotationStats : null;
@@ -116,31 +124,9 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
     tResult('System Nature', sys.nature);
     tResult('Baseline Orbits', sys.maxOrbits);
 
-    // 3. System-Wide Feature Counts (Initial Pass)
-    // 3a. Gas Giants
-    tSection('Gas Giant Presence');
-    let ggCount = 0;
-    if (tRoll2D('Presence Check') >= 8) {
-        let ggQtyRoll = tRoll2D('Quantity Roll');
-        ggCount = Math.max(1, Math.floor(ggQtyRoll / 2));
-    }
-    const sysGGs = [];
-    for (let i = 0; i < ggCount; i++) {
-        sysGGs.push({ type: 'Gas Giant', size: (tRoll1D(`GG ${i+1} Size Roll`) <= 3 ? 'Large' : 'Small') });
-    }
-    tResult('Gas Giants Rolled', ggCount);
-
-    // 3b. Planetoid Belts
-    tSection('Planetoid Belt Presence');
-    let beltQty = 0;
-    if (tRoll2D('Presence Check') <= 7) {
-        let pbRoll = tRoll2D('Quantity Roll');
-        if (pbRoll <= 0) beltQty = 3;
-        else if (pbRoll <= 6) beltQty = 2;
-        else beltQty = 1;
-    }
-    const totalBelts = Math.min(beltQty, sys.maxOrbits);
-    tResult('Planetoid Belts Rolled', totalBelts);
+    // 3. System-Wide Feature Skeleton
+    const skeleton = (rollSkeleton) ? rollSkeleton(primaryStar) : { ggs: [], belts: 0, emptyOrbits: [], capturedPlanets: [] };
+    const totalBelts = Math.min(skeleton.belts, sys.maxOrbits);
 
     // 4. Initialize Orbits
     for (let i = 0; i <= sys.maxOrbits; i++) {
@@ -160,8 +146,13 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
     const mainworldNeedsHZ = (!isAsteroidMW && ![0, 1, 10, 11, 12, 13, 14, 15].includes(mwAtm));
 
     // 5a. Gas Giant Placement (First)
-    sysGGs.forEach(gg => {
-        let slot = sys.orbits.find(o => (o.zone === 'H' || o.zone === 'O') && !o.contents);
+    const ggPriorities = placementPriorities.GAS_GIANT || ['O', 'H'];
+    skeleton.ggs.forEach(gg => {
+        let slot = null;
+        for (const p of ggPriorities) {
+            slot = sys.orbits.find(o => o.zone === p && !o.contents);
+            if (slot) break;
+        }
         if (slot) {
             slot.contents = {
                 type: 'Gas Giant',
@@ -174,63 +165,44 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
 
     // 5b. Planetoid Belt Placement (Second)
     let placedBelts = 0;
-    if (isAsteroidMW) {
-        // Force the Mainworld into the first available belt spot later, but count it
-        placedBelts = 1; 
-    }
+    if (isAsteroidMW) placedBelts = 1; 
+    
+    const pbPriorities = placementPriorities.PLANETOID_BELT || ['I', 'H', 'O'];
     for (let i = placedBelts; i < totalBelts; i++) {
-        let slot = sys.orbits.find(o => !o.contents && o.orbit !== targetOrbit);
+        let slot = null;
+        // Prioritize away from Target Orbit if possible
+        for (const p of pbPriorities) {
+            slot = sys.orbits.find(o => o.zone === p && !o.contents && o.orbit !== targetOrbit);
+            if (slot) break;
+        }
+        if (!slot) {
+            // Fallback to any slot
+            slot = sys.orbits.find(o => !o.contents && o.orbit !== targetOrbit);
+        }
         if (slot) {
             slot.contents = { type: 'Planetoid Belt', size: 0, gravity: 0, temperature: 100 };
         }
     }
 
     // 5c. Anomaly Placement (Third)
-    tSection('Empty Orbits');
-    let empDM = (['B', 'A'].includes(primaryStar.type)) ? 1 : 0;
-    if (empDM !== 0) tDM(`Primary Star ${primaryStar.type}`, empDM);
-    if (tRoll1D('Presence Check') + empDM >= 5) {
-        let qtyRoll = tRoll1D('Quantity Roll');
-        let qty = [0, 1, 1, 2, 3, 3, 3][qtyRoll];
-        tResult('Empty Orbits Rolled', qty);
-        for (let i = 0; i < qty; i++) {
-            let target = tRoll2D('Placement Slot Roll');
-            let slot = sys.orbits.find(o => o.orbit === target);
-            // Skip the targetOrbit if the mainworld needs it
-            if (slot && !slot.contents && (!mainworldNeedsHZ || slot.orbit !== targetOrbit)) {
-                slot.contents = { type: 'Empty' };
-                tResult(`Orbit ${target}`, 'Empty Orbit');
-            } else {
-                tSkip(`Orbit ${target} (Occupied or HZ Slot)`);
-            }
+    skeleton.emptyOrbits.forEach(target => {
+        const slot = sys.orbits.find(o => o.orbit === target);
+        // Skip the targetOrbit if the mainworld needs it
+        if (slot && !slot.contents && (!mainworldNeedsHZ || slot.orbit !== targetOrbit)) {
+            slot.contents = { type: 'Empty' };
+            tResult(`Orbit ${target}`, 'Empty Orbit');
+        } else {
+            tSkip(`Orbit ${target} (Occupied or HZ Slot)`);
         }
-    } else {
-        tResult('Empty Orbits', 'None');
-    }
+    });
 
-    tSection('Captured Planets');
-    let capDM = (['B', 'A'].includes(primaryStar.type)) ? 1 : 0;
-    if (capDM !== 0) tDM(`Primary Star ${primaryStar.type}`, capDM);
-    if (tRoll1D('Presence Check') + capDM >= 5) {
-        let qtyRoll = tRoll1D('Quantity Roll');
-        let qty = [0, 1, 1, 2, 2, 3, 3][qtyRoll];
-        tResult('Captured Planets Rolled', qty);
-        sys.capturedPlanets = [];
-        for (let i = 0; i < qty; i++) {
-            let baseline = tRoll2D('Baseline Orbit Roll');
-            let deviation = (tRoll2D('Orbit Deviation Roll') - 7) * 0.1;
-            let finalOrbit = Number((baseline + deviation).toFixed(1));
-            
-            sys.capturedPlanets.push({
-                type: 'Captured Planet',
-                orbit: finalOrbit,
-                zone: zones[Math.floor(finalOrbit)] || 'O'
-            });
-            tResult(`Captured Planet ${i+1}`, `Orbit ${finalOrbit} (Zone ${zones[Math.floor(finalOrbit)] || 'O'})`);
-        }
-    } else {
-        tResult('Captured Planets', 'None');
-    }
+    sys.capturedPlanets = skeleton.capturedPlanets.map(cap => ({
+        ...cap,
+        zone: zones[Math.floor(cap.orbit)] || 'O'
+    }));
+    sys.capturedPlanets.forEach((p, i) => {
+        tResult(`Captured Planet ${i+1}`, `Orbit ${p.orbit} (Zone ${p.zone})`);
+    });
 
     // 5d. Mainworld Placement (Last)
     const mainworld = Object.assign({}, mainworldUWP, { type: 'Mainworld' });
@@ -310,6 +282,9 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
     });
 
     // 7. Social & Physical Processing (Multi-Pass)
+    sys.mainworld = mainworld; // Anchor Task 4
+    const populationContext = { mode: 'topdown', mwPop: mainworld.pop };
+
     // Pass 1: Physical Parameters for top-level bodies (Terrestrial/Captured/GG)
     if (systemWalker) {
         systemWalker(sys, (body, orbit) => {
@@ -358,7 +333,7 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
         systemWalker(sys, (body, orbit) => {
             if (body.type === 'Mainworld') return; // Already handled
 
-            if (['Satellite'].includes(body.type)) {
+            if (body.type === 'Satellite' || body.type === 'Ring') {
                 // Determine physical scale for new moons
                 body.gravity = (body.size === 0 || body.size === 'R' || body.size === 'S') ? 0 : (body.size * 0.125);
                 body.diamKm = (body.size === 'R') ? 0 : (body.size === 'S' ? 500 : body.size * 1600);
@@ -375,27 +350,22 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
             }
         });
 
-        // Pass 3: Social
-        const mwRef = mainworld;
+        // Pass 3: Social Sweeping (Task 3 Mirroring)
         systemWalker(sys, (body) => {
             if (body.type === 'Mainworld') {
                 if (tradeCodesGen) body.tradeCodes = tradeCodesGen(body);
                 return;
             }
-            if (['Terrestrial Planet', 'Captured Planet'].includes(body.type)) {
-                // These bodies need a fresh pop roll from generatePopulation
-                if (popGen) popGen(body);
-                if (subordinateSocialFin) subordinateSocialFin(body, mwRef);
-            }
-            if (body.type === 'Satellite') {
-                // Pop/Atm/Hydro already set by generateSatellites (Book 6 Step 4)
-                // — only run Gov/Law/TL finalization
-                if (subordinateSocialFin) subordinateSocialFin(body, mwRef);
-            }
-            if (body.type === 'Planetoid Belt') {
-                if (subordinateSocialFin) subordinateSocialFin(body, mwRef);
+            // All physical bodies need population rolls
+            if (body.type !== 'Empty' && body.type !== 'Nature') {
+                if (popGen) popGen(body, populationContext);
             }
         });
+
+        // Final Subordinate Sweep ( المركزي - Centralized)
+        if (processSubordinates) {
+            processSubordinates(sys);
+        }
     }
 
     if (typeof endTrace !== 'undefined') endTrace();

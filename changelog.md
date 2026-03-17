@@ -1,8 +1,13 @@
 # Changelog
 
+### [v0.4] - 2026-03-16
+1. **Classic Traveller Engine:** Added Bottom Up Full CT system generation.
+
+### [v0.3.1.1] - 2026-03-16
+1. **UI:** Update Splash Screen
+
 ### [v0.3.1] - 2026-03-16
-1. **Architecture:** Reverted to synchronous rule loading via script tags to support local file execution.
-2. **Modular CT Rules:** Refined rule export logic for global scope compatibility.
+1. **Architecture:** Segregated CT Rules
 
 ### [v0.3.0] - 2026-03-16
 1. **UI:** Updated UI to allow full top down system generation on populated hexes.

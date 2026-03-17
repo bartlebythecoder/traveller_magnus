@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.1.10.1";
-const APP_BANNER = "v0.1.10.1 eHex Skip and T5 Trade Fixes";
+const APP_VERSION = "v0.4";
+const APP_BANNER = "v0.4 - CT Bottom-Up Release";
 
 // -----------------------------------------------------------------------------
 // Application State

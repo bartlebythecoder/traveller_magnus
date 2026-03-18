@@ -494,7 +494,7 @@ function showToast(message, duration = 3000) {
 // VALIDATION
 // ============================================================================
 
-function validateSelection(actionType) {
+function validateSelection(actionType, skipPopCheck = false) {
     if (selectedHexes.size === 0) {
         alert("Please select one or more hexes first (Shift + Left Click).");
         document.getElementById('context-menu').classList.remove('visible');
@@ -505,6 +505,23 @@ function validateSelection(actionType) {
         alert("We are currently limited to generating one sector (1280 hexes) at a time to prevent browser crashes. Please reduce your selection.");
         document.getElementById('context-menu').classList.remove('visible');
         return false;
+    }
+
+    // New logic: Check for at least one populated hex if we are updating existing systems
+    if (!skipPopCheck && (actionType === 'generate' || actionType === 'socio' || actionType === 'physical')) {
+        let hasPopulated = false;
+        for (let hexId of selectedHexes) {
+            let state = hexStates.get(hexId);
+            if (state && state.type === 'SYSTEM_PRESENT') {
+                hasPopulated = true;
+                break;
+            }
+        }
+        if (!hasPopulated) {
+            alert("No populated hexes to update. You must populate hexes first.");
+            document.getElementById('context-menu').classList.remove('visible');
+            return false;
+        }
     }
 
     if (actionType === 'populate') {
@@ -537,6 +554,7 @@ function validateSelection(actionType) {
             }
         }
     } else if (actionType === 'socio') {
+// ...
         let willOverwrite = false;
         for (let hexId of selectedHexes) {
             let state = hexStates.get(hexId);
@@ -730,7 +748,16 @@ function setupGenerationHandlers() {
             if (typeof stateObj === 'string') stateObj = { type: stateObj };
 
             if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
-                stateObj.t5Data = generateT5Mainworld(hexId);
+                if (window.T5_World_Engine) {
+                    stateObj.t5Data = window.T5_World_Engine.generateT5Mainworld(hexId);
+                } else {
+                    // Fallback to legacy if necessary, but modular should be preferred
+                    stateObj.t5Data = typeof generateT5Mainworld === 'function' ? generateT5Mainworld(hexId) : null;
+                }
+                // FIX: Assign name to the generated T5 mainworld
+                stateObj.name = getNextSystemName(hexId);
+                if (stateObj.t5Data) stateObj.t5Data.name = stateObj.name;
+                
                 stateObj.ctData = null;
                 stateObj.mgt2eData = null;
                 stateObj.ctSystem = null;
@@ -759,11 +786,7 @@ function setupGenerationHandlers() {
 
     // Socioeconomics
     document.getElementById('ctx-expand-socio-t5').addEventListener('click', () => {
-        if (selectedHexes.size === 0) {
-            alert("Please select one or more hexes first (Shift + Left Click).");
-            document.getElementById('context-menu').classList.remove('visible');
-            return;
-        }
+        if (!validateSelection('socio')) return;
 
         saveHistoryState('Expand T5 Socioeconomics');
         if (window.isLoggingEnabled) window.batchLogData = [];
@@ -776,7 +799,11 @@ function setupGenerationHandlers() {
             }
 
             if (baseData) {
-                stateObj.t5Socio = generateT5Socioeconomics(baseData, hexId);
+                if (window.T5_Socio_Engine) {
+                    stateObj.t5Socio = window.T5_Socio_Engine.generateT5Socioeconomics(baseData, hexId);
+                } else {
+                    stateObj.t5Socio = typeof generateT5Socioeconomics === 'function' ? generateT5Socioeconomics(baseData, hexId) : null;
+                }
                 hexStates.set(hexId, stateObj);
             } else if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
                 missingData = true;
@@ -966,10 +993,15 @@ function setupGenerationHandlers() {
             }
 
             if (baseData) {
-                let sys = generateT5SystemChunk1(baseData, stateObj.t5System, hexId);
-                sys = generateT5SystemChunk2(sys, baseData);
-                sys = generateT5SystemChunk3(sys, baseData);
-
+                let sys = null;
+                if (window.T5_TopDown_Generator) {
+                    sys = window.T5_TopDown_Generator.generateT5System(baseData);
+                } else {
+                    // Fallback to old chunked generation if global exists
+                    sys = generateT5SystemChunk1(baseData, stateObj.t5System, hexId);
+                    sys = generateT5SystemChunk2(sys, baseData);
+                    sys = generateT5SystemChunk3(sys, baseData);
+                }
                 stateObj.t5System = sys;
                 stateObj.t5Physical = null; // Clean up old physical object if it exists
                 stateObj.ctPhysical = null;
@@ -1062,7 +1094,7 @@ function setupGenerationHandlers() {
 // ============================================================================
 
 async function runMgT2EMacro(skipPop = false) {
-    if (!validateSelection('generate')) return;
+    if (!validateSelection('generate', !skipPop)) return;
 
     saveHistoryState('Mongoose Macro');
     if (window.isLoggingEnabled) window.batchLogData = [];
@@ -1166,7 +1198,11 @@ async function runMgT2EMacro(skipPop = false) {
                     downloadBatchLog('MgT2E_Full_Macro', targetHexes.length);
                 }
                 requestAnimationFrame(draw);
-                showToast(`Full MgT2E Generation Complete!`, 4000);
+                if (count > 0) {
+                    showToast(`Full MgT2E Generation Complete!`, 4000);
+                } else {
+                    alert("No populated hexes to update. Ensure selection contains populated hexes.");
+                }
             }, 500);
         }, 500);
     }, 500);
@@ -1174,7 +1210,7 @@ async function runMgT2EMacro(skipPop = false) {
 
 
 async function runCTNewMacro(skipPop = false) {
-    if (!validateSelection('generate')) return;
+    if (!validateSelection('generate', !skipPop)) return;
 
     saveHistoryState('CT New Macro');
 
@@ -1257,13 +1293,13 @@ async function runCTNewMacro(skipPop = false) {
         if (count > 0) {
             showToast(`Full Modular CT Generation Complete for ${count} system(s)!`, 4000);
         } else {
-            showToast("No systems generated. Ensure hexes are populated first.", 4000);
+            alert("No populated hexes to update. Ensure selection contains populated hexes.");
         }
     }, 500);
 }
 
 async function runCTBottomUpMacro(skipPop = false) {
-    if (!validateSelection('generate')) return;
+    if (!validateSelection('generate', !skipPop)) return;
 
     saveHistoryState('CT Bottom-Up Macro');
 
@@ -1342,13 +1378,13 @@ async function runCTBottomUpMacro(skipPop = false) {
         if (count > 0) {
             showToast(`Full Bottom-Up CT Generation Complete for ${count} system(s)!`, 4000);
         } else {
-            showToast("No systems generated. Check selection or population settings.", 4000);
+            alert("No populated hexes to update. Ensure selection contains populated hexes.");
         }
     }, 500);
 }
 
 async function runRTTMacro(skipPop = false) {
-    if (!validateSelection('generate')) return;
+    if (!validateSelection('generate', !skipPop)) return;
 
     saveHistoryState('RTT Macro');
     if (window.isLoggingEnabled) window.batchLogData = [];
@@ -1421,13 +1457,13 @@ async function runRTTMacro(skipPop = false) {
         if (count > 0) {
             showToast(`Full RTT Generation Complete for ${count} system(s)!`, 4000);
         } else {
-            showToast("No systems generated. Ensure hexes are populated first.", 4000);
+            alert("No populated hexes to update. Ensure selection contains populated hexes.");
         }
     }, 500);
 }
 
 async function runT5Macro(skipPop = false) {
-    if (!validateSelection('generate')) return;
+    if (!validateSelection('generate', !skipPop)) return;
 
     saveHistoryState('T5 Macro');
     if (window.isLoggingEnabled) window.batchLogData = [];
@@ -1463,7 +1499,24 @@ async function runT5Macro(skipPop = false) {
             try {
                 let stateObj = hexStates.get(hexId);
                 if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
-                    stateObj.t5Data = generateT5Mainworld(hexId);
+                    if (window.System_Driver) {
+                        const sys = window.System_Driver.generateSystem({
+                            edition: 'T5',
+                            mode: 'top-down',
+                            mainworldUWP: window.T5_World_Engine.generateT5Mainworld(hexId),
+                            hexId: hexId
+                        });
+                        stateObj.t5System = sys;
+                        stateObj.t5Data = sys.mainworld;
+                        stateObj.name = getNextSystemName(hexId);
+                        if (stateObj.t5Data) stateObj.t5Data.name = stateObj.name;
+                        stateObj.t5Socio = (window.T5_Socio_Engine) ? window.T5_Socio_Engine.generateT5Socioeconomics(sys.mainworld, hexId) : null;
+                    } else {
+                        // Legacy Fallback
+                        stateObj.t5Data = generateT5Mainworld(hexId);
+                        stateObj.name = getNextSystemName(hexId);
+                    }
+                    
                     // Clear variants to ensure fresh generation
                     stateObj.ctData = null;
                     stateObj.mgt2eData = null;
@@ -1473,58 +1526,30 @@ async function runT5Macro(skipPop = false) {
                     stateObj.mgtPhysical = null;
                     stateObj.t5Physical = null;
                     stateObj.mgtSocio = null;
-                    stateObj.t5Socio = null;
                     hexStates.set(hexId, stateObj);
                 }
             } catch (err) {
-                console.error(`T5 Macro Step 2 (Mainworld) failed for hex ${hexId}:`, err);
+                console.error(`T5 Macro Step 2 failed for hex ${hexId}:`, err);
             }
         });
         requestAnimationFrame(draw);
-        showToast(`Generated T5 Mainworlds...`, 1000);
+        showToast(`Generated T5 Systems (Top-Down)...`, 1000);
 
-        // 3. Expand Systems
-        setTimeout(() => {
-            targetHexes.forEach(hexId => {
-                try {
-                    let stateObj = hexStates.get(hexId);
-                    let baseData = stateObj ? stateObj.t5Data : null;
-                    if (baseData) {
-                        let sys = generateT5SystemChunk1(baseData, stateObj.t5System, hexId);
-                        sys = generateT5SystemChunk2(sys, baseData);
-                        sys = generateT5SystemChunk3(sys, baseData);
-                        stateObj.t5System = sys;
-                        stateObj.t5Physical = null; 
-                        hexStates.set(hexId, stateObj);
-                    }
-                } catch (err) {
-                    console.error(`T5 Macro Step 3 (Expansion) failed for hex ${hexId}:`, err);
-                }
-            });
-            requestAnimationFrame(draw);
-            showToast(`Expanded T5 Systems...`, 1000);
+        if (window.isLoggingEnabled && window.batchLogData.length > 0) {
+                downloadBatchLog('T5_Full_Macro', targetHexes.length);
+        }
+        
+        // Count how many hexes are actually populated now
+        let count = 0;
+        targetHexes.forEach(hx => {
+            if (hexStates.get(hx)?.type === 'SYSTEM_PRESENT') count++;
+        });
 
-            // 4. Socioeconomics
-            setTimeout(() => {
-                targetHexes.forEach(hexId => {
-                    try {
-                        let stateObj = hexStates.get(hexId);
-                        let baseData = stateObj ? stateObj.t5Data : null;
-                        if (baseData) {
-                            stateObj.t5Socio = generateT5Socioeconomics(baseData, hexId);
-                            hexStates.set(hexId, stateObj);
-                        }
-                    } catch (err) {
-                        console.error(`T5 Macro Step 4 (Socioeconomics) failed for hex ${hexId}:`, err);
-                    }
-                });
-                if (window.isLoggingEnabled && window.batchLogData.length > 0) {
-                     downloadBatchLog('T5_Full_Macro', targetHexes.length);
-                }
-                requestAnimationFrame(draw);
-                showToast(`Full T5 Generation Complete!`, 4000);
-            }, 500);
-        }, 500);
+        if (count > 0) {
+            showToast(`Full T5 Generation Complete!`, 4000);
+        } else {
+            alert("No populated hexes to update. Ensure selection contains populated hexes.");
+        }
     }, 500);
 }
 
@@ -2405,7 +2430,7 @@ function populateEditorAccordions(stateObj) {
 
             // 1. Stellar Header
             let html = `<div class="system-stats" style="grid-template-columns: 1fr;">
-                <div style="text-align: center; color: #66fcf1; border-bottom: 1px dotted #45a29e; padding-bottom: 4px;">T5: ${mwBase.name} Profile</div>`;
+                <div style="text-align: center; color: #66fcf1; border-bottom: 1px dotted #45a29e; padding-bottom: 4px;">T5: ${mwBase.name || stateObj.name || 'Unnamed'} Profile</div>`;
             sys.stars.forEach(star => {
                 html += `<span>${star.role}: <strong>${star.name}</strong> (Lum: ${star.luminosity ? star.luminosity.toFixed(3) : '?'})</span>`;
             });
@@ -2416,89 +2441,108 @@ function populateEditorAccordions(stateObj) {
             }
             html += `</div>`;
 
-            // 2. System Tree Structure
+            // 2. System Tree Structure (Nested Subsystems)
             html += `<div class="system-tree">`;
 
-            sys.orbits.forEach(o => {
-                let w = o.contents;
-                if (!w || w.type === 'Empty') {
-                    html += `<div style="color: #666; font-size: 0.9em; padding: 2px 0; border-bottom: 1px solid #333;">Orbit ${o.orbit}: Empty</div>`;
-                    return;
-                }
+            sys.stars.forEach(star => {
+                const starLabel = `${star.role}: ${star.name}`;
+                html += `<div style="background: rgba(102, 252, 241, 0.05); padding: 8px; border: 1px solid rgba(102, 252, 241, 0.2); margin-top: 15px; border-radius: 4px;">`;
+                html += `<div style="color: #66fcf1; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid rgba(102, 252, 241, 0.3); padding-bottom: 4px;">${starLabel}</div>`;
 
-                let uwp = w.type === 'Mainworld' ? mwBase.uwp : (w.uwpSecondary || '-');
-                let typeLabel = w.worldType || w.type;
-                if (w.type === 'Mainworld') typeLabel = `Mainworld (${typeLabel})`;
-                if (w.type === 'Gas Giant' && !w.worldType) typeLabel = `${w.size === 15 ? 'Large' : 'Small'} Gas Giant`;
-                let labelColor = w.type === 'Mainworld' ? '#ffa500' : '#66fcf1';
-                let summaryStyle = w.type === 'Mainworld' ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
+                star.orbits.forEach(o => {
+                    let w = o.contents;
+                    if (!w || w.type === 'Empty') {
+                        // html += `<div style="color: #666; font-size: 0.85em; padding: 2px 0;">Orbit ${o.orbit}: Empty</div>`;
+                        return;
+                    }
 
-                let zoneLabel = '';
-                if (w.type === 'Mainworld' && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
-                    const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
-                    zoneLabel = ` | <span style="color: ${zColor}">${mwBase.travelZone}</span>`;
-                }
+                    let uwp = w.type === 'Mainworld' ? mwBase.uwp : (w.uwpSecondary || w.uwp || '-');
+                    let typeLabel = w.worldType || w.type;
+                    if (w.type === 'Mainworld') typeLabel = `Mainworld (${typeLabel})`;
+                    if (w.type === 'Gas Giant' && !w.worldType) typeLabel = `${w.size === 15 ? 'Large' : 'Small'} Gas Giant`;
+                    let labelColor = w.type === 'Mainworld' ? '#ffa500' : '#66fcf1';
+                    let summaryStyle = w.type === 'Mainworld' ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
 
-                html += `<details open>`;
-                html += `<summary ${summaryStyle}>Orbit ${o.orbit} [${w.climateZone || 'Cold'}] <span class="sys-title-info">${typeLabel}${zoneLabel}</span></summary>`;
-                html += `<div class="system-node">`;
+                    let zoneLabel = '';
+                    if (w.type === 'Mainworld' && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                        const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
+                        zoneLabel = ` | <span style="color: ${zColor}">${mwBase.travelZone}</span>`;
+                    }
 
-                if (w.type !== 'Planetoid Belt') {
-                    html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <strong style="color: ${labelColor}">${uwp}</strong></div>`;
-                }
+                    html += `<details>`;
+                    html += `<summary ${summaryStyle}>Orbit ${o.orbit} [${w.climateZone || 'Cold'}] <span class="sys-title-info">${typeLabel}${zoneLabel}</span></summary>`;
+                    html += `<div class="system-node">`;
 
-                if (w.type === 'Mainworld' && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
-                    const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
-                    const specialCodes = mwBase.tradeCodes.filter(c => ['Fo', 'Da', 'Pz'].includes(c));
-                    const codeStr = specialCodes.length > 0 ? ` - [${specialCodes.join('/')}]` : '';
-                    html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor}; margin-bottom: 8px;">Caution: ${mwBase.travelZone} Zone${codeStr}</div>`;
-                }
+                    if (w.type !== 'Planetoid Belt') {
+                        html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <strong style="color: ${labelColor}">${uwp}</strong></div>`;
+                        
+                        const tCodes = (w.type === 'Mainworld' && mwBase && mwBase.tradeCodes) 
+                            ? mwBase.tradeCodes 
+                            : (w.tradeCodes || []);
+                        if (tCodes.length > 0) {
+                            html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Codes: <strong style="color: #66fcf1">${tCodes.join(' ')}</strong></div>`;
+                        }
+                    }
 
+                    if (w.type === 'Mainworld' && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                        const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
+                        const specialCodes = (mwBase.tradeCodes || []).filter(c => ['Fo', 'Da', 'Pz'].includes(c));
+                        const codeStr = specialCodes.length > 0 ? ` - [${specialCodes.join('/')}]` : '';
+                        html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor}; margin-bottom: 8px;">Caution: ${mwBase.travelZone} Zone${codeStr}</div>`;
+                    }
 
+                    html += `<div class="system-stats">`;
+                    html += `<span>Distance: <strong>${(o.distAU || 0).toFixed(2)} AU</strong></span>`;
 
-                html += `<div class="system-stats">`;
-                html += `<span>Distance: <strong>${o.distAU.toFixed(2)} AU</strong></span>`;
+                    if (w.type !== 'Planetoid Belt') {
+                        if (w.diamKm) html += `<span>Diameter: <strong>${w.diamKm.toLocaleString()} km</strong></span>`;
+                        if (w.density !== undefined) html += `<span>Density: <strong>${(w.density || 0).toFixed(1)}</strong></span>`;
+                        if (w.gravity !== undefined) html += `<span>Gravity: <strong>${(w.gravity || 0).toFixed(2)} G</strong></span>`;
+                    }
+                    html += `</div>`;
 
-                if (w.type !== 'Planetoid Belt') {
-                    if (w.diamKm) html += `<span>Diameter: <strong>${w.diamKm.toLocaleString()} km</strong></span>`;
-                    if (w.density) html += `<span>Density: <strong>${w.density.toFixed(1)}</strong></span>`;
-                    if (w.gravity !== undefined) html += `<span>Gravity: <strong>${w.gravity.toFixed(2)} G</strong></span>`;
-                }
+                    if (w.satellites && w.satellites.length > 0) {
+                        w.satellites.forEach((sat, satIdx) => {
+                            const isMW = sat.type === 'Mainworld';
+                            const satLabel = isMW ? 'Mainworld' : `Moon ${satIdx + 1} - ${sat.worldType || 'Satellite'}`;
+                            const satUwp = isMW ? (mwBase ? mwBase.uwp : sat.uwp || '-') : (sat.uwpSecondary || sat.uwp || '-');
+                            const satColor = isMW ? '#ffa500' : '#66fcf1';
+                            const satSummaryStyle = isMW ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
+
+                            let satZoneLabel = '';
+                            if (isMW && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                                const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
+                                satZoneLabel = ` | <span style="color: ${zColor}">${mwBase.travelZone}</span>`;
+                            }
+
+                            html += `<details style="margin-left: 20px;" ${isMW ? 'open' : ''}>`;
+                            html += `<summary ${satSummaryStyle}>${satLabel} <span class="sys-title-info">Size ${sat.size} | ${satUwp}${satZoneLabel}</span></summary>`;
+                            html += `<div class="system-node">`;
+
+                            html += `<div style="margin-bottom: 6px; font-family: monospace;"><span style="color: ${satColor};">UWP:</span> <strong style="color: ${satColor};">${satUwp}</strong></div>`;
+                            
+                            const sCodes = (isMW && mwBase && mwBase.tradeCodes) 
+                                ? mwBase.tradeCodes 
+                                : (sat.tradeCodes || []);
+                            if (sCodes.length > 0) {
+                                html += `<div style="margin-bottom: 6px; font-size: 0.85em; color: #a0a8b0;">Codes: <strong style="color: #66fcf1">${sCodes.join(' ')}</strong></div>`;
+                            }
+
+                            if (isMW && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                                const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
+                                html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor}; margin-bottom: 8px;">Caution: ${mwBase.travelZone} Zone</div>`;
+                            }
+
+                            html += `<div class="system-stats">`;
+                            if (sat.diamKm) html += `<span>Diameter: <strong>${sat.diamKm.toLocaleString()} km</strong></span>`;
+                            if (sat.gravity !== undefined) html += `<span>Gravity: <strong>${(sat.gravity || 0).toFixed(2)} G</strong></span>`;
+                            html += `</div></div></details>`;
+                        });
+                    }
+
+                    html += `</div></details>`;
+                });
                 html += `</div>`;
-
-                if (w.satellites && w.satellites.length > 0) {
-                    w.satellites.forEach((sat, satIdx) => {
-                        const isMW = sat.type === 'Mainworld';
-                        const satLabel = isMW ? 'Mainworld' : `Moon ${satIdx + 1} - ${sat.worldType || 'Satellite'}`;
-                        const satUwp = isMW ? (mwBase ? mwBase.uwp : sat.uwp || '-') : (sat.uwpSecondary || '-');
-                        const satColor = isMW ? '#ffa500' : '#66fcf1';
-                        const satSummaryStyle = isMW ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
-
-                        let satZoneLabel = '';
-                        if (isMW && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
-                            const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
-                            satZoneLabel = ` | <span style="color: ${zColor}">${mwBase.travelZone}</span>`;
-                        }
-
-                        html += `<details style="margin-left: 20px;" ${isMW ? 'open' : ''}>`;
-                        html += `<summary ${satSummaryStyle}>${satLabel} <span class="sys-title-info">Size ${sat.size} | ${satUwp}${satZoneLabel}</span></summary>`;
-                        html += `<div class="system-node">`;
-
-                        html += `<div style="margin-bottom: 6px; font-family: monospace;"><span style="color: ${satColor};">UWP:</span> <strong style="color: ${satColor};">${satUwp}</strong></div>`;
-
-                        if (isMW && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
-                            const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
-                            html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor}; margin-bottom: 8px;">Caution: ${mwBase.travelZone} Zone</div>`;
-                        }
-
-                        html += `<div class="system-stats">`;
-                        if (sat.diamKm) html += `<span>Diameter: <strong>${sat.diamKm.toLocaleString()} km</strong></span>`;
-                        if (sat.gravity !== undefined) html += `<span>Gravity: <strong>${sat.gravity.toFixed(2)} G</strong></span>`;
-                        html += `</div></div></details>`;
-                    });
-                }
-
-                html += `</div></details>`;
             });
 
             html += `</div>`;

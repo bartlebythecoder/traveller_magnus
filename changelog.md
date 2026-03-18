@@ -1,5 +1,11 @@
 # Changelog
 
+### [v0.4.2] - 2026-03-17
+1. **T5 Engine:** Refactored T5 engine into modular components.
+
+### [v0.4.1] - 2026-03-17
+1. **Classic Traveller Engine:** Fixed Satellite Radius display issue where a '?' appeared before the 'R' value.
+
 ### [v0.4] - 2026-03-16
 1. **Classic Traveller Engine:** Added Bottom Up Full CT system generation.
 

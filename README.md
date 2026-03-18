@@ -1,4 +1,4 @@
-# As Above, So Below (v0.4)
+# As Above, So Below (v0.4.2)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -36,23 +36,15 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 ---
 ## 📜 Changelog
 
+### [v0.4.2] - 2026-03-17
+1. **T5 Engine:** Refactored T5 engine into modular components.
+
+### [v0.4.1] - 2026-03-17
+1. **Classic Traveller Engine:** Fixed Satellite Radius display issue.
+
 ### [v0.4] - 2026-03-16
 1. **Classic Traveller Engine:** Added Bottom Up Full CT system generation.
 
-### [v0.3.1.1] - 2026-03-16
-1. **UI:** Update Splash Screen
-
-### [v0.3.1] - 2026-03-16   
-1. **Architecture:** Segregated CT Rules
-
-### [v0.3.0] - 2026-03-16   
-1. **UI:** Updated UI to allow full top down system generation on populated hexes.
-2. **Modular CT Engine:** Refactored CT engine into multiple files.
-
-### [v0.2.0] - 2026-03-14
-1. **Logging:** Added automated testing for CT and RTT world generation.
-2. **Mongoose System Generation:** Removed unneccessary Planetoid Belt fields from Mongoose World Details.
-3. **Mongoose System Generation:** Added Significant Bodies to Asteroid Belt mainworld systems.
 
 ---
 *For a full history of changes, see the [Changelog](changelog.md).*

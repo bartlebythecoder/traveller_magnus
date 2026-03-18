@@ -128,25 +128,35 @@
         let surfaceOrbit = -1;
 
         // 1. Determine Surface Orbit (Preclusion)
-        if (star.size && specs[star.size]) {
-            const type = star.type ? star.type.charAt(0) : 'G';
+        if (star && star.size && specs[star.size]) {
+            const type = (star.type && star.type.charAt) ? star.type.charAt(0) : 'G';
             const decimal = star.decimal || 0;
             const sizeMap = specs[star.size];
 
             // Mapping for O/B stars to A0 values
             const lookupType = (['O', 'B'].includes(type) ? 'A' : type);
+            const lookupDec = (['O', 'B'].includes(type) ? 0 : decimal);
 
             // Find the correct key in the size mapping (e.g., "A0_F5")
             for (const range in sizeMap) {
-                if (range === 'LOGIC') continue;
-                // Simple parser for ranges like "A0_F5"
-                const [start, end] = range.split('_');
+                if (range === 'LOGIC' || !range) continue;
+                
+                // Robust parser for ranges like "A0_F5" or single types like "M9"
+                const parts = range.split('_');
+                const start = parts[0];
+                const end = parts[1] || start;
+
+                // Safety check: ensure start and end are valid strings
+                if (!start || !end || typeof start !== 'string' || typeof end !== 'string') {
+                    continue;
+                }
+
                 const startType = start.charAt(0);
                 const startDec = parseInt(start.slice(1)) || 0;
                 const endType = end.charAt(0);
                 const endDec = parseInt(end.slice(1)) || 0;
 
-                const starWeight = (lookupType.charCodeAt(0) * 10) + decimal;
+                const starWeight = (lookupType.charCodeAt(0) * 10) + lookupDec;
                 const startWeight = (startType.charCodeAt(0) * 10) + startDec;
                 const endWeight = (endType.charCodeAt(0) * 10) + endDec;
 
@@ -160,7 +170,10 @@
         const preclusionLimit = surfaceOrbit; // Orbits 0 to surfaceOrbit are blocked
 
         // 2. Adjustment Loop (Closest possible >= surfaceOrbit + 1)
-        const check = (o) => (o >= 0 && o < 20 && o > preclusionLimit && !star.orbits[o].contents);
+        // Safety check: ensure star.orbits exists
+        if (!star || !star.orbits) return -1;
+        
+        const check = (o) => (o >= 0 && o < 20 && o > preclusionLimit && star.orbits[o] && !star.orbits[o].contents);
 
         if (check(target)) return target;
 

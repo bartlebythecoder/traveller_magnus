@@ -36,6 +36,9 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 ---
 ## 📜 Changelog
 
+### [v0.4.2.1] - 2026-03-18
+1. **T5 Engine:** Corrected T5 orbit error
+
 ### [v0.4.2] - 2026-03-17
 1. **T5 Engine:** Refactored T5 engine into modular components.
 

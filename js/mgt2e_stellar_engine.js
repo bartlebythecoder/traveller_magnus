@@ -65,7 +65,7 @@
      */
     function generateStarObject(sType, subType, sClass, label = 'Star') {
         let stats = MgT2EData.stellar.starStats[sType] || MgT2EData.stellar.starStats['M'];
-        
+
         let star = {
             sClass,
             sType,
@@ -82,7 +82,7 @@
         tResult(`${label} Temperature (K)`, star.temp);
         tResult(`${label} Diameter (Sol)`, star.diam);
         tResult(`${label} Luminosity (Sol)`, star.lum.toFixed(4));
-        
+
         return star;
     }
 
@@ -103,7 +103,7 @@
             }
         }
 
-        if (roll === 12) {
+        if (sType === 'Hot') {
             let hotRoll = tRoll2D(`${label} Hot Star Roll`);
             for (let entry of MgT2EData.stellar.hotType) {
                 if (hotRoll <= entry.maxRoll) {
@@ -187,7 +187,7 @@
             let idx1 = order.indexOf(tempStar.sType);
             let idx2 = order.indexOf(parentStar.sType);
             let isHotter = (idx1 < idx2) || (idx1 === idx2 && tempStar.subType < parentStar.subType);
-            
+
             if (isHotter) {
                 determination = 'Lesser';
                 tResult(`${label} Override`, 'Random -> Lesser');
@@ -278,7 +278,7 @@
 
         // Logic for Age based on Primary
         if (primary.sType === 'D') {
-            sys.age = 5.0; 
+            sys.age = 5.0;
         } else if (primary.mass < 0.9 || ['BD', 'L', 'T', 'Y'].includes(primary.sType)) {
             let r1 = tRoll1D('Age Base (1D*2)');
             let r2 = Math.ceil(tRoll1D('Age Offset (1D3)') / 2);
@@ -362,7 +362,7 @@
      */
     function generateSystemInventory(sys, mainworldBase) {
         tSection('System Inventory');
-        
+
         // Gas Giants
         let ggRoll = tRoll2D('Gas Giant Presence (<= 9)');
         let ggExists = ggRoll <= 9 || (mainworldBase && mainworldBase.gasGiant);
@@ -370,7 +370,7 @@
             let ggQ = tRoll2D('GG Quantity');
             if (sys.stars.length === 1 && sys.stars[0].sClass === 'V') { tDM('Single V', 1); ggQ += 1; }
             if (sys.stars.length >= 4) { tDM('4+ Stars', -1); ggQ -= 1; }
-            
+
             for (let entry of MgT2EData.systemInventory.gasGiants) {
                 if (ggQ <= entry.maxRoll) {
                     sys.gasGiants = entry.count;
@@ -389,7 +389,7 @@
             let pbQ = tRoll2D('PB Quantity');
             if (sys.gasGiants > 0) { tDM('GG Present', 1); pbQ += 1; }
             if (sys.stars.length > 1) { tDM('Multi-star', 1); pbQ += 1; }
-            
+
             for (let entry of MgT2EData.systemInventory.planetoidBelts) {
                 if (pbQ <= entry.maxRoll) {
                     sys.planetoidBelts = entry.count;
@@ -444,7 +444,7 @@
         let hzDeviation = MgT2EData.stellar.hzDeviation[rawHzRoll];
         let variance = (Math.floor(rng() * 10)) / 100;
         hzDeviation += (hzDeviation >= 0 ? variance : -variance);
-        
+
         let baselineOrbit;
         if (sys.hzco >= 1.0 && (sys.hzco + hzDeviation) >= 1.0) baselineOrbit = sys.hzco + hzDeviation;
         else if (sys.hzco < 1.0 && hzDeviation > 0) baselineOrbit = sys.hzco * (1 + hzDeviation);
@@ -459,7 +459,7 @@
         let rawFZ = [];
         let primaryMao = getMAO(primary.sType, primary.subType, primary.sClass);
         let directCompanions = sys.stars.filter(s => s.parentStarIdx === 0 && s.separation !== 'Companion');
-        
+
         for (let comp of directCompanions) {
             let co = comp.orbitId;
             let cm = comp.mao || 0;
@@ -469,11 +469,11 @@
             if (ce > 0.2) { fmin -= 1.0; fmax += 1.0; }
             rawFZ.push({ min: fmin, max: fmax });
         }
-        rawFZ.sort((a,b) => a.min - b.min);
+        rawFZ.sort((a, b) => a.min - b.min);
         let mergedFZ = [];
         for (let fz of rawFZ) {
-            if (mergedFZ.length === 0 || fz.min > mergedFZ[mergedFZ.length-1].max) mergedFZ.push({...fz});
-            else mergedFZ[mergedFZ.length-1].max = Math.max(mergedFZ[mergedFZ.length-1].max, fz.max);
+            if (mergedFZ.length === 0 || fz.min > mergedFZ[mergedFZ.length - 1].max) mergedFZ.push({ ...fz });
+            else mergedFZ[mergedFZ.length - 1].max = Math.max(mergedFZ[mergedFZ.length - 1].max, fz.max);
         }
         sys.forbiddenZones = mergedFZ;
 
@@ -492,11 +492,11 @@
         for (let i = 0; i < totalSlotsCount; i++) {
             let minSep = currentPos * 0.15;
             let nextOrbit = currentPos + Math.max(spread, minSep);
-            
+
             // FZ Jumping
             for (let fz of mergedFZ) {
                 if (nextOrbit >= fz.min && nextOrbit <= fz.max) {
-                    nextOrbit = fz.max + (Math.abs(tRoll2D('Resync') - 7)/10);
+                    nextOrbit = fz.max + (Math.abs(tRoll2D('Resync') - 7) / 10);
                 }
             }
             if (i === targetIdx) sys.baselineOrbit = nextOrbit;
@@ -508,14 +508,14 @@
         // 4. World Queue & Placement
         let queue = [];
         queue.push({ type: 'Mainworld', size: (mainworldBase ? mainworldBase.size : 7) });
-        for (let i=0; i<emptyCount; i++) queue.push({ type: 'Empty' });
-        for (let i=0; i<sys.gasGiants; i++) queue.push({ type: 'Gas Giant' });
-        for (let i=0; i<sys.planetoidBelts; i++) queue.push({ type: 'Planetoid Belt' });
-        for (let i=0; i<(sys.terrestrialPlanets - (mainworldBase && mainworldBase.size > 0 ? 1 : 0)); i++) queue.push({ type: 'Terrestrial Planet' });
+        for (let i = 0; i < emptyCount; i++) queue.push({ type: 'Empty' });
+        for (let i = 0; i < sys.gasGiants; i++) queue.push({ type: 'Gas Giant' });
+        for (let i = 0; i < sys.planetoidBelts; i++) queue.push({ type: 'Planetoid Belt' });
+        for (let i = 0; i < (sys.terrestrialPlanets - (mainworldBase && mainworldBase.size > 0 ? 1 : 0)); i++) queue.push({ type: 'Terrestrial Planet' });
 
         for (let wInfo of queue) {
             let startIdx = (wInfo.type === 'Mainworld') ? targetIdx : Math.floor(rng() * slots.length);
-            for (let j=0; j<slots.length; j++) {
+            for (let j = 0; j < slots.length; j++) {
                 let idx = (startIdx + j) % slots.length;
                 if (!slots[idx].occupant) {
                     let s = slots[idx];
@@ -543,8 +543,8 @@
                 }
             }
         }
-        sys.worlds.sort((a,b) => a.orbitId - b.orbitId);
-        
+        sys.worlds.sort((a, b) => a.orbitId - b.orbitId);
+
         if (window.isLoggingEnabled) endTrace();
         return sys;
     }

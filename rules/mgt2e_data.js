@@ -123,7 +123,16 @@ const MgT2EData = {
             { maxRoll: 6, type: 'M', class: 'V' },
             { maxRoll: 8, type: 'K', class: 'V' },
             { maxRoll: 10, type: 'G', class: 'V' },
-            { maxRoll: 11, type: 'F', class: 'V' }
+            { maxRoll: 11, type: 'F', class: 'V' },
+            { maxRoll: 99, type: 'Hot' }
+        ],
+        bottomUpPrimaryType: [
+            { maxRoll: 2, type: 'Special' },
+            { maxRoll: 6, type: 'M', class: 'V' },
+            { maxRoll: 8, type: 'K', class: 'V' },
+            { maxRoll: 10, type: 'G', class: 'V' },
+            { maxRoll: 11, type: 'F', class: 'V' },
+            { maxRoll: 99, type: 'Hot' }
         ],
         hotType: [
             { maxRoll: 9, type: 'A', class: 'V' },

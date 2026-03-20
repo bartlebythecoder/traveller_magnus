@@ -1,5 +1,8 @@
 # Changelog
 
+### [v0.4.3.1] - 2026-03-20
+1. **Mongoose 2E Engine:** Corrected Mongoose hot star bug.
+
 ### [v0.4.3] - 2026-03-18
 1. **Mongoose 2E Engine:** Refactored legacy generators into a modular Top-Down architecture.
 2. **Architecture:** Replaced monolithic chunk calls with a unified `generateMgT2ESystemTopDown` orchestrator.

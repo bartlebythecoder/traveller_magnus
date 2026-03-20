@@ -713,15 +713,40 @@ function setupGenerationHandlers() {
             if (typeof stateObj === 'string') stateObj = { type: stateObj };
 
             if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
-                stateObj.mgt2eData = generateMgT2EMainworld(hexId);
-                stateObj.ctData = null;
-                stateObj.t5Data = null;
-                stateObj.ctSystem = null;
-                stateObj.t5System = null;
-                stateObj.ctPhysical = null;
-                stateObj.t5Physical = null;
-                hexStates.set(hexId, stateObj);
-                count++;
+                try {
+                    if (typeof reseedForHex === 'function') reseedForHex(hexId);
+                    if (window.isLoggingEnabled && typeof startTrace === 'function') startTrace(hexId, 'MgT2E Mainworld');
+                    
+                    // Use modularized UWP generation for single world
+                    stateObj.mgt2eData = MgT2ESocioEngine.generateMainworldUWP(hexId);
+                    stateObj.name = stateObj.mgt2eData.name;
+
+                    // --- AUDIT: Mainworld Only ---
+                    if (typeof MgT2E_UWP_Auditor !== 'undefined') {
+                        const tempSys = { worlds: [stateObj.mgt2eData], hexId: hexId };
+                        MgT2E_UWP_Auditor.auditMgT2ESystem(tempSys, { mode: 'mainworld-only' });
+                    }
+                    
+                    if (window.isLoggingEnabled && typeof endTrace === 'function') endTrace();
+                    
+                    // Clear artifacts of full system generation to prevent "ghost" accordions
+                    stateObj.mgtSystem = null;
+                    stateObj.mgtSocio = null;
+
+                    // Clear other engine data
+                    stateObj.ctData = null;
+                    stateObj.t5Data = null;
+                    stateObj.ctSystem = null;
+                    stateObj.t5System = null;
+                    stateObj.ctPhysical = null;
+                    stateObj.t5Physical = null;
+                    stateObj.t5Socio = null;
+
+                    hexStates.set(hexId, stateObj);
+                    count++;
+                } catch (err) {
+                    console.error(`MgT2E generation failed for ${hexId}:`, err);
+                }
             }
         });
         if (window.isLoggingEnabled && window.batchLogData.length > 0) {
@@ -837,8 +862,20 @@ function setupGenerationHandlers() {
             }
 
             if (baseData) {
-                stateObj.mgtSocio = generateMgT2ESocioeconomics(baseData, hexId);
+                // 1. Generate the full system deterministically to guarantee all social profiles exist
+                let newSys = generateMgT2ESystemTopDown(hexId);
+
+                // 2. Find the mainworld to map the socio data
+                let mainworld = newSys.worlds.find(w => w.type === 'Mainworld') || newSys.worlds[0];
+
+                // 3. Map the data back to stateObj
+                stateObj.mgtSystem = newSys; // Keep physical data in sync
+                stateObj.mgt2eData = mainworld;
+                stateObj.mgtSocio = mainworld; // The new engine puts socio data directly on the world object
+
+                // 4. Clear UI ghosting variables
                 stateObj.t5Socio = null;
+
                 hexStates.set(hexId, stateObj);
             } else if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
                 missingData = true;
@@ -938,16 +975,24 @@ function setupGenerationHandlers() {
             let baseData = stateObj ? stateObj.mgt2eData : null;
 
             if (baseData) {
-                let chunk1System = generateMgT2ESystemChunk1(baseData, hexId);
-                let systemWithOrbits = generateMgT2ESystemChunk2(chunk1System, baseData);
-                let systemWithSizes = generateMgT2ESystemChunk3(systemWithOrbits, baseData);
-                let systemWithAtmosphere = generateMgT2ESystemChunk4(systemWithSizes, baseData);
-                let systemWithTemps = generateMgT2ESystemChunk5(systemWithAtmosphere);
-                let systemWithRatings = generateMgT2ESystemChunk6(systemWithTemps);
-                let systemWithUWP = generateMgT2ESystemChunk7(systemWithRatings, baseData);
+                // 1. Call the new Orchestrator
+                let newSys = generateMgT2ESystemTopDown(hexId);
 
-                console.log(`[MgT2E System Gen] Hex ${hexId} | Age: ${systemWithUWP.age.toFixed(2)} Gyr | HZCO: ${systemWithUWP.hzco.toFixed(2)} | Stars: ${systemWithUWP.stars.map(s => s.name).join(', ')}`);
-                console.table(systemWithUWP.worlds.map(w => ({
+                // 2. Map the data back to stateObj
+                stateObj.mgtSystem = newSys;
+
+                // Find the mainworld to map the UWP
+                let mainworld = newSys.worlds.find(w => w.type === 'Mainworld') || newSys.worlds[0];
+                stateObj.mgt2eData = mainworld;
+
+                // 3. Clear UI ghosting variables
+                stateObj.t5Physical = null;
+                stateObj.ctPhysical = null;
+
+                hexStates.set(hexId, stateObj);
+
+                console.log(`[MgT2E System Gen] Hex ${hexId} | Age: ${newSys.age.toFixed(2)} Gyr | HZCO: ${newSys.hzco.toFixed(2)} | Stars: ${newSys.stars.map(s => s.name).join(', ')}`);
+                console.table(newSys.worlds.map(w => ({
                     Type: w.type,
                     Orbit: typeof w.orbitId === 'number' ? w.orbitId.toFixed(2) : w.orbitId,
                     Size: w.size,
@@ -959,8 +1004,6 @@ function setupGenerationHandlers() {
                     Parent: w.parentStarIdx !== undefined ? w.parentStarIdx : 0,
                     OType: w.orbitType || '-'
                 })));
-
-                stateObj.mgtSystem = systemWithUWP;
             } else if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
                 missingData = true;
             }
@@ -1124,87 +1167,50 @@ async function runMgT2EMacro(skipPop = false) {
     }
 
 
-    // Generate Mainworlds
+    // Generate Full Systems (Modular Top-Down)
     setTimeout(() => {
+        let count = 0;
         targetHexes.forEach(hexId => {
             try {
                 let stateObj = hexStates.get(hexId);
                 if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
-                    stateObj.mgt2eData = generateMgT2EMainworld(hexId);
-                    // Clear all variants to ensure fresh generation
+                    // 1. Call the new Orchestrator
+                    let newSys = generateMgT2ESystemTopDown(hexId);
+                    
+                    // 2. Find the Mainworld to map to UI data states
+                    let mainworld = newSys.worlds.find(w => w.type === 'Mainworld') || newSys.worlds[0];
+
+                    // 3. Map the data back to stateObj so the Hex Editor UI doesn't break
+                    stateObj.mgtSystem = newSys;
+                    stateObj.mgt2eData = mainworld; 
+                    stateObj.mgtSocio = mainworld; // The new engine puts socio data directly on the world object
+                    stateObj.name = mainworld.name;
+
+                    // 4. Clear old variant data to prevent UI ghosting
                     stateObj.ctData = null;
                     stateObj.t5Data = null;
                     stateObj.ctSystem = null;
-                    stateObj.mgtSystem = null;
                     stateObj.t5System = null;
                     stateObj.ctPhysical = null;
-                    stateObj.mgtPhysical = null;
-                    stateObj.t5Physical = null;
-                    stateObj.mgtSocio = null;
                     stateObj.t5Socio = null;
+
                     hexStates.set(hexId, stateObj);
+                    count++;
                 }
             } catch (err) {
-                console.error(`Mongoose Macro Step 2 failed for hex ${hexId}:`, err);
+                console.error(`MgT2E Modular Macro failed for hex ${hexId}:`, err);
             }
         });
+
+        if (window.isLoggingEnabled && window.batchLogData.length > 0) {
+            downloadBatchLog('MgT2E_Full_Macro', targetHexes.length);
+        }
         requestAnimationFrame(draw);
-        showToast(`Generated MgT2E Mainworlds...`, 1000);
-
-        // Physical System
-        setTimeout(() => {
-            targetHexes.forEach(hexId => {
-                try {
-                    let stateObj = hexStates.get(hexId);
-                    let baseData = stateObj ? (stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData) : null;
-                    if (baseData) {
-                        let chunk1System = generateMgT2ESystemChunk1(baseData);
-                        let systemWithOrbits = generateMgT2ESystemChunk2(chunk1System, baseData);
-                        let systemWithSizes = generateMgT2ESystemChunk3(systemWithOrbits, baseData);
-                        let systemWithAtmosphere = generateMgT2ESystemChunk4(systemWithSizes, baseData);
-                        let systemWithTemps = generateMgT2ESystemChunk5(systemWithAtmosphere);
-                        let systemWithRatings = generateMgT2ESystemChunk6(systemWithTemps);
-                        let systemWithUWP = generateMgT2ESystemChunk7(systemWithRatings, baseData);
-
-                        stateObj.mgtSystem = systemWithUWP;
-                        stateObj.t5Physical = null;
-                        stateObj.ctPhysical = null;
-                        hexStates.set(hexId, stateObj);
-                    }
-                } catch (err) {
-                    console.error(`Mongoose Macro Step 3 failed for hex ${hexId}:`, err);
-                }
-            });
-            requestAnimationFrame(draw);
-            showToast(`Expanded MgT2E Physical System...`, 1000);
-
-            // Socioeconomics
-            setTimeout(() => {
-                showToast(`Expanding MgT2E Socioeconomics...`, 1000);
-                targetHexes.forEach(hexId => {
-                    try {
-                        let stateObj = hexStates.get(hexId);
-                        let baseData = stateObj ? (stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData) : null;
-                        if (baseData) {
-                            stateObj.mgtSocio = generateMgT2ESocioeconomics(baseData);
-                            stateObj.t5Socio = null;
-                            hexStates.set(hexId, stateObj);
-                        }
-                    } catch (err) {
-                        console.error(`Mongoose Macro Step 4 failed for hex ${hexId}:`, err);
-                    }
-                });
-                if (window.isLoggingEnabled && window.batchLogData.length > 0) {
-                    downloadBatchLog('MgT2E_Full_Macro', targetHexes.length);
-                }
-                requestAnimationFrame(draw);
-                if (count > 0) {
-                    showToast(`Full MgT2E Generation Complete!`, 4000);
-                } else {
-                    alert("No populated hexes to update. Ensure selection contains populated hexes.");
-                }
-            }, 500);
-        }, 500);
+        if (count > 0) {
+            showToast(`Full MgT2E Generation Complete! (${count} systems)`, 4000);
+        } else {
+            showToast("No populated hexes were updated.", 4000);
+        }
     }, 500);
 }
 

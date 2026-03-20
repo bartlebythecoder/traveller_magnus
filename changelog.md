@@ -1,5 +1,10 @@
 # Changelog
 
+### [v0.4.3] - 2026-03-18
+1. **Mongoose 2E Engine:** Refactored legacy generators into a modular Top-Down architecture.
+2. **Architecture:** Replaced monolithic chunk calls with a unified `generateMgT2ESystemTopDown` orchestrator.
+3. **UI Integration:** Updated individual and macro generation handlers to use the new modular engine.
+
 ### [v0.4.2.1] - 2026-03-18
 1. **T5 Engine:** Corrected T5 orbit error
 

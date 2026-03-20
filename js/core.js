@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.4.2";
-const APP_BANNER = "v0.4.2 - Maintenance Release";
+const APP_VERSION = "v0.4.3";
+const APP_BANNER = "v0.4.3 - MgT2E Modular Refactor";
 
 // -----------------------------------------------------------------------------
 // Application State

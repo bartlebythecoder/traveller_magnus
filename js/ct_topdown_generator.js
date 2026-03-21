@@ -74,8 +74,45 @@ if (typeof module !== 'undefined' && module.exports) {
  * Placement Order: GGs -> Belts -> Anomalies -> Mainworld
  */
 function generateTopDownSystem(mainworldUWP, primaryStar = null) {
-    // 1. Determine/Roll Primary Star that supports life
     tSection('Primary Star Generation');
+    let overrideStars = [];
+    if (mainworldUWP && mainworldUWP.homestar && mainworldUWP.homestar.trim() !== '') {
+        let tokens = mainworldUWP.homestar.trim().split(/\s+/);
+        for (let i = 0; i < tokens.length; i++) {
+            if (i > 0 && /^(Ia|Ib|II|III|IV|V|VI|VII|D|BD)$/i.test(tokens[i]) && !overrideStars[overrideStars.length - 1].includes(" ")) {
+                overrideStars[overrideStars.length - 1] += " " + tokens[i];
+            } else {
+                overrideStars.push(tokens[i]);
+            }
+        }
+    }
+    
+    if (overrideStars.length > 0 && !primaryStar) {
+        let primaryStr = overrideStars[0];
+        let rawType = primaryStr.split(' ')[0] || '';
+        let sType = rawType.length > 0 ? rawType[0] : 'M';
+        let subTypeMatch = rawType.match(/\d/);
+        let decimal = subTypeMatch ? parseInt(subTypeMatch[0]) : 0;
+        let sClass = primaryStr.split(' ')[1] || 'V';
+        if (sType === 'D') { sClass = 'D'; decimal = 0; }
+        if (rawType === 'BD') { sType = 'BD'; sClass = 'V'; decimal = 0; }
+        
+        let specKey = sType + decimal;
+        
+        primaryStar = {
+            role: 'Primary',
+            type: sType,
+            size: sClass,
+            decimal: decimal,
+            specKey: specKey,
+            name: `${sType}${rawType !== 'D' && rawType !== 'BD' ? decimal : ''} ${sClass}`,
+            maxOrbits: typeof tRoll2D !== 'undefined' ? tRoll2D('Primary Max Orbits') : 10,
+            mass: (typeof starMassTable !== 'undefined' && starMassTable[sClass] && starMassTable[sClass][specKey]) || 1.0,
+            luminosity: (typeof luminosityTable !== 'undefined' && luminosityTable[sClass] && luminosityTable[sClass][specKey]) || 1.0
+        };
+        tResult('Primary Override', primaryStr);
+    }
+
     if (!primaryStar) {
         let attempts = 0;
         while (!primaryStar && attempts < 50) {
@@ -110,9 +147,15 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
     if (!primaryStar) throw new Error("Could not roll a primary star with a Habitable Zone.");
 
     // 2. Identify the Habitable Zone (Target Orbit)
-    const zones = zoneTables[primaryStar.size][primaryStar.specKey];
+    let lookupSize = primaryStar.size;
+    if (typeof zoneTables !== 'undefined' && !zoneTables[lookupSize]) lookupSize = 'V';
+    
+    let zones = (typeof zoneTables !== 'undefined' && zoneTables[lookupSize] && zoneTables[lookupSize][primaryStar.specKey]) 
+                ? zoneTables[lookupSize][primaryStar.specKey] 
+                : ['I', 'I', 'H', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'];
+
     const hOrbits = zones.reduce((acc, z, idx) => (z === 'H' ? acc.concat(idx) : acc), []);
-    const targetOrbit = hOrbits[Math.floor(Math.random() * hOrbits.length)];
+    const targetOrbit = hOrbits.length > 0 ? hOrbits[Math.floor(Math.random() * hOrbits.length)] : 2; // Fallback to 2 if no H zone
     tResult('Ideal Habitable Orbit', targetOrbit);
 
     const sys = {
@@ -121,6 +164,47 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
         maxOrbits: Math.max(primaryStar.maxOrbits, targetOrbit),
         orbits: []
     };
+    
+    if (overrideStars.length > 1) {
+        for (let i = 1; i < overrideStars.length; i++) {
+            let sStr = overrideStars[i];
+            let rawType = sStr.split(' ')[0] || '';
+            let sType = rawType.length > 0 ? rawType[0] : 'M';
+            let subTypeMatch = rawType.match(/\d/);
+            let decimal = subTypeMatch ? parseInt(subTypeMatch[0]) : 0;
+            let sClass = sStr.split(' ')[1] || 'V';
+            if (sType === 'D') { sClass = 'D'; decimal = 0; }
+            if (rawType === 'BD') { sType = 'BD'; sClass = 'V'; decimal = 0; }
+            
+            let lookupType = sType;
+            if (sType === 'O') lookupType = 'B';
+            if (['D', 'BD', 'L', 'T', 'Y'].includes(sType)) lookupType = 'M';
+            let lookupDec = decimal >= 5 ? 5 : 0;
+            if (lookupType === 'M' && decimal >= 9) lookupDec = 9;
+            
+            let specKey = lookupType + lookupDec;
+            
+            // Check fallback for missing size tables
+            let lookupSize = sClass;
+            if (typeof zoneTables !== 'undefined' && !zoneTables[lookupSize]) {
+                lookupSize = 'V'; // Fallback for D, BD
+            }
+
+            let companion = {
+                role: i === 1 ? 'Close' : (i === 2 ? 'Near' : 'Far'),
+                type: sType,
+                size: sClass,
+                decimal: decimal,
+                specKey: specKey, // Keep lookup key
+                name: `${sType}${rawType !== 'D' && rawType !== 'BD' ? decimal : ''} ${sClass}`,
+                mass: (typeof starMassTable !== 'undefined' && starMassTable[lookupSize] && starMassTable[lookupSize][specKey]) || 1.0,
+                luminosity: (typeof luminosityTable !== 'undefined' && luminosityTable[lookupSize] && luminosityTable[lookupSize][specKey]) || 1.0
+            };
+            sys.stars.push(companion);
+            tResult(`${companion.role} Override`, sStr);
+        }
+    }
+    
     tResult('System Nature', sys.nature);
     tResult('Baseline Orbits', sys.maxOrbits);
 

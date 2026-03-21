@@ -253,7 +253,7 @@
      * Step 1: Primary Star & System Age
      * Step 2: Additional Stars
      */
-    function generateStellarSystem(sys, hexId) {
+    function generateStellarSystem(sys, hexId, mainworldBase = null) {
         if (window.isLoggingEnabled) {
             startTrace(hexId, 'MgT2E Stellar Generation');
         }
@@ -263,8 +263,37 @@
         sys.age = 0;
         sys.hzco = 0;
 
+        // --- OVERRIDE PARSE LOGIC ---
+        let overrideStars = [];
+        if (mainworldBase && mainworldBase.homestar && mainworldBase.homestar.trim() !== '') {
+            let tokens = mainworldBase.homestar.trim().split(/\s+/);
+            for (let i = 0; i < tokens.length; i++) {
+                if (i > 0 && /^(Ia|Ib|II|III|IV|V|VI|VII|D|BD)$/i.test(tokens[i]) && !overrideStars[overrideStars.length - 1].includes(" ")) {
+                    overrideStars[overrideStars.length - 1] += " " + tokens[i];
+                } else {
+                    overrideStars.push(tokens[i]);
+                }
+            }
+        }
+
+        let primaryStr = overrideStars.length > 0 ? overrideStars[0] : null;
+
         tSection('Primary Star');
-        let primary = rollStar('Primary');
+        let primary;
+        if (primaryStr) {
+            let typeStr = primaryStr.split(' ')[0] || '';
+            let sType = typeStr.length > 0 ? typeStr[0] : 'M';
+            let subTypeMatch = typeStr.match(/\d/);
+            let subType = subTypeMatch ? parseInt(subTypeMatch[0]) : 0;
+            let sClass = primaryStr.split(' ')[1] || 'V';
+            if (sType === 'D') { sClass = 'D'; subType = 0; }
+            if (typeStr === 'BD') { sType = 'BD'; sClass = 'V'; subType = 0; }
+            primary = generateStarObject(sType, subType, sClass, 'Primary');
+            tResult('Primary Override', primaryStr);
+        } else {
+            primary = rollStar('Primary');
+        }
+        
         primary.role = 'Primary';
         primary.separation = null;
         primary.orbitId = null;
@@ -306,50 +335,75 @@
         tResult('HZCO (Orbit)', sys.hzco.toFixed(2));
 
         tSection('Additional Stars');
-        const getMultiDM = (star) => {
-            let dm = 0;
-            if (['Ia', 'Ib', 'II', 'III', 'IV'].includes(star.sClass)) dm += 1;
-            if (['V', 'VI'].includes(star.sClass) && ['O', 'B', 'A', 'F'].includes(star.sType)) dm += 1;
-            if (['V', 'VI'].includes(star.sClass) && star.sType === 'M') dm -= 1;
-            if (star.sClass === 'D' || ['L', 'T', 'Y'].includes(star.sType)) dm -= 1;
-            return dm;
-        };
-
-        const primaryDM = getMultiDM(primary);
-        const canHaveClose = !['Ia', 'Ib', 'II', 'III'].includes(primary.sClass);
-        const definitions = [
-            { sep: 'Close', orbitFn: () => { let r = tRoll1D('Close Roll') - 1; return r === 0 ? 0.5 : r; }, allowed: canHaveClose },
-            { sep: 'Near', orbitFn: () => tRoll1D('Near Roll') + 5, allowed: true },
-            { sep: 'Far', orbitFn: () => tRoll1D('Far Roll') + 11, allowed: true }
-        ];
-
-        for (let def of definitions) {
-            if (!def.allowed) continue;
-            let presRoll = tRoll2D(`${def.sep} Presence`);
-            tDM('Primary MultiDM', primaryDM);
-            if (presRoll + primaryDM >= 10) {
-                let star = determineNonPrimaryStar(primary, def.sep, def.sep);
-                star.separation = def.sep;
-                star.role = def.sep;
+        if (overrideStars.length > 1) {
+            for (let i = 1; i < overrideStars.length; i++) {
+                let sStr = overrideStars[i];
+                let typeStr = sStr.split(' ')[0] || '';
+                let sType = typeStr.length > 0 ? typeStr[0] : 'M';
+                let subTypeMatch = typeStr.match(/\d/);
+                let subType = subTypeMatch ? parseInt(subTypeMatch[0]) : 0;
+                let sClass = sStr.split(' ')[1] || 'V';
+                if (sType === 'D') { sClass = 'D'; subType = 0; }
+                if (typeStr === 'BD') { sType = 'BD'; sClass = 'V'; subType = 0; }
+                
+                let repRole = i === 1 ? 'Close' : (i === 2 ? 'Near' : 'Far');
+                let star = generateStarObject(sType, subType, sClass, repRole);
+                star.separation = repRole;
+                star.role = repRole;
                 star.parentStarIdx = 0;
-                star.orbitId = def.orbitFn();
-                star.eccentricity = determineEccentricity(true, 0, sys.age, star.orbitId, false, 0);
+                // mock orbits for overrides based on standard ranges
+                star.orbitId = i === 1 ? 0.5 : (i === 2 ? 6.0 : 12.0); 
+                star.eccentricity = 0;
+                star.mao = getMAO(star.sType, star.subType, star.sClass);
                 sys.stars.push(star);
-                tResult(`${def.sep} Star`, star.name + " at Orbit " + star.orbitId);
+                tResult(`${repRole} Override`, sStr + " at Orbit " + star.orbitId);
+            }
+        } else {
+            const getMultiDM = (star) => {
+                let dm = 0;
+                if (['Ia', 'Ib', 'II', 'III', 'IV'].includes(star.sClass)) dm += 1;
+                if (['V', 'VI'].includes(star.sClass) && ['O', 'B', 'A', 'F'].includes(star.sType)) dm += 1;
+                if (['V', 'VI'].includes(star.sClass) && star.sType === 'M') dm -= 1;
+                if (star.sClass === 'D' || ['L', 'T', 'Y'].includes(star.sType)) dm -= 1;
+                return dm;
+            };
 
-                // Companion Check
-                let orbitDM = getMultiDM(star);
-                if (tRoll2D('Companion Presence') + orbitDM >= 10) {
-                    let companion = determineNonPrimaryStar(star, 'Companion', 'Companion');
-                    companion.separation = 'Companion';
-                    companion.role = 'Companion';
-                    companion.parentStarIdx = sys.stars.length - 1;
-                    let d1 = tRoll1D('Comp Orbit D1');
-                    let d2 = tRoll2D('Comp Orbit D2');
-                    companion.orbitId = (d1 / 10) + ((d2 - 7) / 100);
-                    companion.eccentricity = determineEccentricity(true, 0, sys.age, companion.orbitId, false, 0);
-                    sys.stars.push(companion);
-                    tResult('  Companion', companion.name);
+            const primaryDM = getMultiDM(primary);
+            const canHaveClose = !['Ia', 'Ib', 'II', 'III'].includes(primary.sClass);
+            const definitions = [
+                { sep: 'Close', orbitFn: () => { let r = tRoll1D('Close Roll') - 1; return r === 0 ? 0.5 : r; }, allowed: canHaveClose },
+                { sep: 'Near', orbitFn: () => tRoll1D('Near Roll') + 5, allowed: true },
+                { sep: 'Far', orbitFn: () => tRoll1D('Far Roll') + 11, allowed: true }
+            ];
+
+            for (let def of definitions) {
+                if (!def.allowed) continue;
+                let presRoll = tRoll2D(`${def.sep} Presence`);
+                tDM('Primary MultiDM', primaryDM);
+                if (presRoll + primaryDM >= 10) {
+                    let star = determineNonPrimaryStar(primary, def.sep, def.sep);
+                    star.separation = def.sep;
+                    star.role = def.sep;
+                    star.parentStarIdx = 0;
+                    star.orbitId = def.orbitFn();
+                    star.eccentricity = determineEccentricity(true, 0, sys.age, star.orbitId, false, 0);
+                    sys.stars.push(star);
+                    tResult(`${def.sep} Star`, star.name + " at Orbit " + star.orbitId);
+
+                    // Companion Check
+                    let orbitDM = getMultiDM(star);
+                    if (tRoll2D('Companion Presence') + orbitDM >= 10) {
+                        let companion = determineNonPrimaryStar(star, 'Companion', 'Companion');
+                        companion.separation = 'Companion';
+                        companion.role = 'Companion';
+                        companion.parentStarIdx = sys.stars.length - 1;
+                        let d1 = tRoll1D('Comp Orbit D1');
+                        let d2 = tRoll2D('Comp Orbit D2');
+                        companion.orbitId = (d1 / 10) + ((d2 - 7) / 100);
+                        companion.eccentricity = determineEccentricity(true, 0, sys.age, companion.orbitId, false, 0);
+                        sys.stars.push(companion);
+                        tResult('  Companion', companion.name);
+                    }
                 }
             }
         }
@@ -507,11 +561,22 @@
 
         // 4. World Queue & Placement
         let queue = [];
-        queue.push({ type: 'Mainworld', size: (mainworldBase ? mainworldBase.size : 7) });
+        if (mainworldBase) {
+            // Top-Down: Explicitly place the Mainworld first
+            queue.push({ type: 'Mainworld', size: mainworldBase.size || 7 });
+            // Add remaining terrestrials
+            for (let i = 0; i < (sys.terrestrialPlanets - 1); i++) {
+                queue.push({ type: 'Terrestrial Planet' });
+            }
+        } else {
+            // Bottom-Up: No Mainworld yet, all terrestrials start as Terrestrial Planet
+            for (let i = 0; i < sys.terrestrialPlanets; i++) {
+                queue.push({ type: 'Terrestrial Planet' });
+            }
+        }
         for (let i = 0; i < emptyCount; i++) queue.push({ type: 'Empty' });
         for (let i = 0; i < sys.gasGiants; i++) queue.push({ type: 'Gas Giant' });
         for (let i = 0; i < sys.planetoidBelts; i++) queue.push({ type: 'Planetoid Belt' });
-        for (let i = 0; i < (sys.terrestrialPlanets - (mainworldBase && mainworldBase.size > 0 ? 1 : 0)); i++) queue.push({ type: 'Terrestrial Planet' });
 
         for (let wInfo of queue) {
             let startIdx = (wInfo.type === 'Mainworld') ? targetIdx : Math.floor(rng() * slots.length);

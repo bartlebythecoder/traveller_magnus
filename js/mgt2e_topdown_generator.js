@@ -68,7 +68,9 @@
 
         // Create mainworld base object
         let mainworldBase = null;
-        if (SocioEngine && SocioEngine.generateMainworldUWP) {
+        if (mwOverride) {
+            mainworldBase = mwOverride;
+        } else if (SocioEngine && SocioEngine.generateMainworldUWP) {
             mainworldBase = SocioEngine.generateMainworldUWP(hexId);
         } else {
             mainworldBase = {
@@ -86,7 +88,7 @@
         // =================================================================
         
         // Generate Mainworld UWP before stars exist (legacy flow parity)
-        if (SocioEngine && SocioEngine.generateCoreSocial) {
+        if (SocioEngine && SocioEngine.generateCoreSocial && !mwOverride) {
             SocioEngine.generateCoreSocial(sys, mainworldBase);
         }
 
@@ -96,7 +98,7 @@
         
         // Generate stellar system (Primary + companions)
         if (StellarEngine && StellarEngine.generateStellarSystem) {
-            StellarEngine.generateStellarSystem(sys, hexId);
+            StellarEngine.generateStellarSystem(sys, hexId, mainworldBase);
         }
 
         // Generate system inventory (GG count, belts, terrestrials)

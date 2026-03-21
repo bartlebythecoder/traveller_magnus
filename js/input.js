@@ -972,11 +972,11 @@ function setupGenerationHandlers() {
         let missingData = false;
         selectedHexes.forEach(hexId => {
             let stateObj = hexStates.get(hexId);
-            let baseData = stateObj ? stateObj.mgt2eData : null;
+            let baseData = stateObj ? (stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData || stateObj.rttData) : null;
 
             if (baseData) {
                 // 1. Call the new Orchestrator
-                let newSys = generateMgT2ESystemTopDown(hexId);
+                let newSys = generateMgT2ESystemTopDown(hexId, baseData);
 
                 // 2. Map the data back to stateObj
                 stateObj.mgtSystem = newSys;
@@ -1010,7 +1010,7 @@ function setupGenerationHandlers() {
         });
 
         if (missingData) {
-            alert("Note: Some selected hexes skipped because they do not have MgT2E Mainworld data generated yet.");
+            alert("Note: Some selected hexes skipped because they do not have Mainworld data generated yet.");
         }
 
         if (window.isLoggingEnabled && window.batchLogData.length > 0) {
@@ -1095,6 +1095,11 @@ function setupGenerationHandlers() {
         runT5Macro(true); 
     });
 
+    document.getElementById('ctx-gen-sys-mgt2e-bu').addEventListener('click', () => {
+        document.getElementById('context-menu').classList.remove('visible');
+        runMgT2EBottomUpMacro(true); 
+    });
+
     document.getElementById('ctx-gen-sys-ct-bu').addEventListener('click', () => {
         document.getElementById('context-menu').classList.remove('visible');
         runCTBottomUpMacro(true); 
@@ -1119,6 +1124,11 @@ function setupGenerationHandlers() {
     document.getElementById('ctx-full-t5').addEventListener('click', () => {
         document.getElementById('context-menu').classList.remove('visible');
         runT5Macro(false); 
+    });
+
+    document.getElementById('ctx-full-mgt2e-bu').addEventListener('click', () => {
+        document.getElementById('context-menu').classList.remove('visible');
+        runMgT2EBottomUpMacro(false); 
     });
 
     document.getElementById('ctx-full-rtt-bu').addEventListener('click', () => {
@@ -1214,6 +1224,107 @@ async function runMgT2EMacro(skipPop = false) {
     }, 500);
 }
 
+async function runMgT2EBottomUpMacro(skipPop = false) {
+    if (!validateSelection('generate', !skipPop)) return;
+
+    saveHistoryState('MgT2E Bottom-Up Macro');
+
+    console.log("Bulk Generating MgT2E Bottom-Up Full System...");
+    await ensureNamesLoaded();
+
+    if (!confirm("This will completely overwrite ANY existing data in the selected hexes with a Bottom-Up Mongoose 2E Generation sequence. Proceed?")) {
+        return;
+    }
+
+    const targetHexes = Array.from(selectedHexes);
+
+    // 1. Auto Populate
+    if (!skipPop) {
+        targetHexes.forEach(hexId => {
+            if (typeof reseedForHex === 'function') reseedForHex(hexId);
+            const roll = typeof roll1D === 'function' ? roll1D() : Math.floor(Math.random() * 6) + 1;
+            if (roll <= 3) {
+                hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
+            } else {
+                hexStates.set(hexId, { type: 'EMPTY' });
+            }
+        });
+        if (typeof draw === 'function') requestAnimationFrame(draw);
+        if (typeof showToast === 'function') showToast(`Populated ${targetHexes.length} hex(es)...`, 1000);
+    }
+
+    // 2. Generate
+    setTimeout(() => {
+        if (window.isLoggingEnabled) window.batchLogData = [];
+        let count = 0;
+        targetHexes.forEach(hexId => {
+            try {
+                let stateObj = hexStates.get(hexId);
+                if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
+                    if (window.isLoggingEnabled && typeof startTrace === 'function') {
+                        startTrace(hexId, 'Bottom-Up MgT2E Generation', hexId);
+                    }
+
+                    if (typeof MgT2EBottomUpGenerator !== 'undefined') {
+                        const sys = MgT2EBottomUpGenerator.generateSystem(hexId);
+                        
+                        // Ensure Mainworld exists and has a name
+                        if (sys && sys.mainworld) {
+                            if (!sys.mainworld.name) {
+                                sys.mainworld.name = (typeof getNextSystemName !== 'undefined') ? getNextSystemName(hexId) : 'Unknown';
+                            }
+                            
+                            // Map resulting data
+                            stateObj.mgtSystem = sys;
+                            stateObj.mgt2eData = sys.mainworld;
+                            stateObj.mgtSocio = sys.mainworld;
+                            stateObj.name = sys.mainworld.name;
+                            
+                            // Clean up old data variants
+                            stateObj.ctData = null;
+                            stateObj.t5Data = null;
+                            stateObj.ctSystem = null;
+                            stateObj.t5System = null;
+                            stateObj.ctPhysical = null;
+                            stateObj.t5Socio = null;
+                            stateObj.rttData = null;
+                            
+                            hexStates.set(hexId, stateObj);
+                            count++;
+                        }
+                    } else {
+                        console.error(`MgT2EBottomUpGenerator object not globally available.`);
+                    }
+                    
+                    if (window.isLoggingEnabled && typeof endTrace === 'function') {
+                        endTrace();
+                    }
+                }
+            } catch (err) {
+                console.error(`Bottom-Up MgT2E Macro failed for hex ${hexId}:`, err);
+            }
+        });
+
+        if (window.isLoggingEnabled && window.batchLogData && window.batchLogData.length > 0) {
+            if (typeof downloadBatchLog === 'function') downloadBatchLog('MgT2E_BottomUp_Full_Macro', targetHexes.length);
+        }
+        
+        if (typeof draw === 'function') {
+            requestAnimationFrame(draw);
+        }
+        
+        if (count > 0) {
+            if (typeof showToast === 'function') {
+                showToast(`Full Bottom-Up MgT2E Generation Complete for ${count} system(s)!`, 4000);
+            }
+        } else {
+            console.warn("No populated hexes were updated.");
+            if (typeof showToast === 'function') {
+                showToast("No populated hexes to update. Ensure selection contains populated hexes.", 4000);
+            }
+        }
+    }, 500);
+}
 
 async function runCTNewMacro(skipPop = false) {
     if (!validateSelection('generate', !skipPop)) return;
@@ -2437,9 +2548,11 @@ function populateEditorAccordions(stateObj) {
             // 1. Stellar Header
             let html = `<div class="system-stats" style="grid-template-columns: 1fr;">
                 <div style="text-align: center; color: #66fcf1; border-bottom: 1px dotted #45a29e; padding-bottom: 4px;">T5: ${mwBase.name || stateObj.name || 'Unnamed'} Profile</div>`;
-            sys.stars.forEach(star => {
-                html += `<span>${star.role}: <strong>${star.name}</strong> (Lum: ${star.luminosity ? star.luminosity.toFixed(3) : '?'})</span>`;
-            });
+            if (sys.stars) {
+                sys.stars.forEach(star => {
+                    html += `<span>${star.role}: <strong>${star.name}</strong> (Lum: ${star.luminosity ? star.luminosity.toFixed(3) : '?'})</span>`;
+                });
+            }
 
             if (mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
                 const zoneColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
@@ -2450,13 +2563,15 @@ function populateEditorAccordions(stateObj) {
             // 2. System Tree Structure (Nested Subsystems)
             html += `<div class="system-tree">`;
 
-            sys.stars.forEach(star => {
-                const starLabel = `${star.role}: ${star.name}`;
-                html += `<div style="background: rgba(102, 252, 241, 0.05); padding: 8px; border: 1px solid rgba(102, 252, 241, 0.2); margin-top: 15px; border-radius: 4px;">`;
-                html += `<div style="color: #66fcf1; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid rgba(102, 252, 241, 0.3); padding-bottom: 4px;">${starLabel}</div>`;
+            if (sys.stars) {
+                sys.stars.forEach(star => {
+                    const starLabel = `${star.role}: ${star.name}`;
+                    html += `<div style="background: rgba(102, 252, 241, 0.05); padding: 8px; border: 1px solid rgba(102, 252, 241, 0.2); margin-top: 15px; border-radius: 4px;">`;
+                    html += `<div style="color: #66fcf1; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid rgba(102, 252, 241, 0.3); padding-bottom: 4px;">${starLabel}</div>`;
 
-                star.orbits.forEach(o => {
-                    let w = o.contents;
+                    if (star.orbits) {
+                        star.orbits.forEach(o => {
+                            let w = o.contents;
                     if (!w || w.type === 'Empty') {
                         // html += `<div style="color: #666; font-size: 0.85em; padding: 2px 0;">Orbit ${o.orbit}: Empty</div>`;
                         return;
@@ -2547,9 +2662,11 @@ function populateEditorAccordions(stateObj) {
                     }
 
                     html += `</div></details>`;
+                        });
+                    }
+                    html += `</div>`;
                 });
-                html += `</div>`;
-            });
+            }
 
             html += `</div>`;
             root.innerHTML = html;
@@ -3262,8 +3379,23 @@ function importT5Tab(fileContent, fileName) {
 
         let t5System = { totalWorlds: idxW !== -1 ? parseInt(row[idxW], 10) : 1 };
         if (idxStars !== -1 && row[idxStars] !== "-") {
-            const starNames = row[idxStars].split(/\s+/);
-            t5System.stars = starNames.map(sn => ({ name: sn, role: 'Star' }));
+            const rawStars = row[idxStars].trim();
+            t5Data.homestar = rawStars;
+            
+            const tokens = rawStars.split(/\s+/);
+            const parsedStars = [];
+            for (let i = 0; i < tokens.length; i++) {
+                if (i > 0 && /^(Ia|Ib|II|III|IV|V|VI|VII|D|BD)$/i.test(tokens[i]) && !parsedStars[parsedStars.length - 1].includes(" ")) {
+                    parsedStars[parsedStars.length - 1] += " " + tokens[i];
+                } else {
+                    parsedStars.push(tokens[i]);
+                }
+            }
+            t5System.stars = parsedStars.map((sn, idx) => ({ name: sn, role: idx === 0 ? 'Primary' : 'Companion', orbits: [] }));
+            t5System.orbits = [];
+        } else {
+            t5Data.homestar = "";
+            t5System.stars = [];
             t5System.orbits = [];
         }
 

@@ -197,7 +197,41 @@
         if (!mainworldBase) throw new Error("Sean Protocol Violation: Phase 1 requires mainworldBase.");
 
         // Break potential circularity by deep-cloning the stars for the orbital structure
-        const sysStars = mainworldBase.stars ? JSON.parse(JSON.stringify(mainworldBase.stars)) : [{ type: 'G', decimal: 2, size: 'V', name: 'Primary' }];
+        let sysStars = null;
+        if (mainworldBase && mainworldBase.homestar && mainworldBase.homestar.trim() !== '') {
+            let overrideStars = [];
+            let tokens = mainworldBase.homestar.trim().split(/\s+/);
+            for (let i = 0; i < tokens.length; i++) {
+                if (i > 0 && /^(Ia|Ib|II|III|IV|V|VI|VII|D|BD)$/i.test(tokens[i]) && !overrideStars[overrideStars.length - 1].includes(" ")) {
+                    overrideStars[overrideStars.length - 1] += " " + tokens[i];
+                } else {
+                    overrideStars.push(tokens[i]);
+                }
+            }
+            if (overrideStars.length > 0) {
+                sysStars = overrideStars.map((sStr, idx) => {
+                    let rawType = sStr.split(' ')[0] || '';
+                    let sType = rawType.length > 0 ? rawType[0] : 'M';
+                    let subTypeMatch = rawType.match(/\d/);
+                    let decimal = subTypeMatch ? parseInt(subTypeMatch[0]) : 0;
+                    let sClass = sStr.split(' ')[1] || 'V';
+                    if (sType === 'D') { sClass = 'D'; decimal = 0; }
+                    if (rawType === 'BD') { sType = 'BD'; sClass = 'V'; decimal = 0; }
+                    return {
+                        role: idx === 0 ? 'Primary' : (idx === 1 ? 'Close' : (idx === 2 ? 'Near' : 'Far')),
+                        name: `${sType}${rawType !== 'D' && rawType !== 'BD' ? decimal : ''} ${sClass}`,
+                        type: sType,
+                        decimal: decimal,
+                        size: sClass,
+                        orbitID: idx === 0 ? 0 : (idx === 1 ? 0.5 : (idx === 2 ? 6.0 : 12.0))
+                    };
+                });
+            }
+        }
+        
+        if (!sysStars) {
+            sysStars = mainworldBase.stars ? JSON.parse(JSON.stringify(mainworldBase.stars)) : [{ type: 'G', decimal: 2, size: 'V', name: 'Primary', orbitID: 0 }];
+        }
 
         const sys = {
             mainworld: { ...mainworldBase, type: 'Mainworld' },

@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.4.3";
-const APP_BANNER = "v0.4.3 - MgT2E Modular Refactor";
+const APP_VERSION = "v0.5";
+const APP_BANNER = "v0.5 - New Mongoose Bottom-Up Generation";
 
 // -----------------------------------------------------------------------------
 // Application State

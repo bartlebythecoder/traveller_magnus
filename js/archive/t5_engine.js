@@ -394,6 +394,32 @@ function getStarHZ(star) {
     return Math.max(0, Math.min(19, hz));
 }
 
+/**
+ * T5 ORBIT LABEL HELPER
+ * Returns a combined label consisting of [Positional / Climate]
+ * per Traveller 5 RAW requirements.
+ */
+function getT5OrbitLabel(orbit, hzOrbit) {
+    let positional = "";
+    if (orbit <= hzOrbit - 2) positional = "Inner";
+    else if (orbit >= hzOrbit - 1 && orbit <= hzOrbit + 1) positional = "Hospitable";
+    else if (orbit >= hzOrbit + 2) positional = "Outer";
+
+    let climate = "";
+    // Special Orbit Labels: 0 or 1 get Twilight Zone (Tz)
+    if (orbit === 0 || orbit === 1) {
+        climate = "Tz";
+    } else {
+        if (orbit <= hzOrbit - 1) climate = "Hot / Tropic";
+        else if (orbit === hzOrbit) climate = "Temperate";
+        else if (orbit >= hzOrbit + 1 && orbit <= hzOrbit + 5) climate = "Cold / Tundra";
+        else if (orbit >= hzOrbit + 6) climate = "Frozen";
+    }
+
+    if (positional && climate) return `${positional} / ${climate}`;
+    return positional || climate || "None";
+}
+
 function generateT5SizeByWorldType(worldType) {
     if (worldType === 'Belt') {
         writeLogLine(`Size Formula (Belt): Always 0.`);
@@ -1090,27 +1116,16 @@ function generateT5SystemChunk3(sys, mainworldBase) {
 
         }
 
-        // Climate
-        if (w.type === 'Mainworld' && w.climateZone) {
+        // Apply Full T5 Orbit Labeling (Positional + Climate)
+        w.climateZone = getT5OrbitLabel(o.orbit, hzOrbit);
+        writeLogLine(`Orbit ${o.orbit} Label: ${w.climateZone}`);
+
+        if (w.type === 'Mainworld') {
             // Append the T5 Table 2B Trade Code if one was generated
             if (w.t5TradeCode) {
                 if (!w.tradeCodes) w.tradeCodes = [];
                 if (!w.tradeCodes.includes(w.t5TradeCode)) w.tradeCodes.push(w.t5TradeCode);
             }
-            writeLogLine(`Mainworld Climate: ${w.climateZone}`);
-        } else {
-            // Standard T5 placement logic for non-Mainworlds
-            let diff = o.orbit - hzOrbit;
-            if (diff < 0) {
-                w.climateZone = 'Hot';
-            } else if (diff === 0) {
-                w.climateZone = 'Temperate';
-            } else if (diff === 1) {
-                w.climateZone = 'Cold';
-            } else {
-                w.climateZone = 'Frozen';
-            }
-            writeLogLine(`Climate: ${w.climateZone}`);
         }
 
 
@@ -2108,19 +2123,19 @@ function generateHZAndClimate(spectralType) {
         tradeCode = '';
     } else if (hzFlux <= -3) {
         hzVariance = -1;
-        climate = 'Hot. Tropic.';
+        climate = 'Hot / Tropic';
         tradeCode = 'Tr';
     } else if (hzFlux <= 2) {
         hzVariance = 0;
-        climate = 'Temperate.';
+        climate = 'Temperate';
         tradeCode = '';
     } else if (hzFlux <= 5) {
         hzVariance = 1;
-        climate = 'Cold. Tundra.';
+        climate = 'Cold / Tundra';
         tradeCode = 'Tu';
     } else { // +6
         hzVariance = 2;
-        climate = 'Frozen.';
+        climate = 'Frozen';
         tradeCode = 'Fr';
     }
 

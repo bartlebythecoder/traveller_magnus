@@ -177,7 +177,9 @@ const MGT2E_ATM_CODES = {
     12: { pressStr: "Varies", minP: 0.0, spanP: 0.0, gear: "Vacc Suit" },
     13: { pressStr: "2.50-10.0+", minP: 2.50, spanP: 7.50, gear: "Varies" },
     14: { pressStr: "0.10-0.42", minP: 0.10, spanP: 0.32, gear: "Varies" },
-    15: { pressStr: "Varies", minP: 0.0, spanP: 0.0, gear: "Varies" }
+    15: { pressStr: "Varies", minP: 0.0, spanP: 0.0, gear: "Varies" },
+    16: { pressStr: "Varies", minP: 0.0, spanP: 0.0, gear: "Vacc Suit" },
+    17: { pressStr: "Varies", minP: 0.0, spanP: 0.0, gear: "Vacc Suit" }
 };
 
 const MGT2E_TAINT_SUBTYPES = {

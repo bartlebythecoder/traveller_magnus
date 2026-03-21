@@ -37,7 +37,9 @@ const MgT2EData = {
             { maxRoll: 8, class: 'C' },
             { maxRoll: 10, class: 'B' },
             { maxRoll: 99, class: 'A' } // Catch-all for 11+
-        ]
+        ],
+        nativeSophontDM: -2,
+        regionalDMs: { frontier: -1, core: 1 }
     },
 
     techLevel: {
@@ -52,6 +54,10 @@ const MgT2EData = {
         environmentalMinimums: {
             "0": 8, "1": 8, "2": 5, "3": 5, "4": 3, "7": 3, "9": 3,
             "10": 8, "11": 9, "12": 10, "13": 5, "14": 5, "15": 8, "16": 14, "17": 14
+        },
+        nativeSophontExceptions: {
+            ignoreDMs: ['size', 'atm', 'hydro'],
+            ignoreEnvironmentalMinimums: true
         }
     },
 
@@ -90,6 +96,21 @@ const MgT2EData = {
         },
         redConditions: {
             starport: "X"
+        },
+        emergentRules: {
+            amberThreshold: 12,
+            redThreshold: 12,
+            amberDMs: {
+                hostileAtmo: { types: ['B', 'C', 'F'], dm: 2 }, // Example DM for hostility
+                gov0_7: 1,
+                law0: 1
+            },
+            redDMs: {
+                magnetar: 10,
+                pulsar: 8,
+                protostar: 6,
+                primitiveSophonts: 4 // TL 0-3
+            }
         }
     },
 
@@ -98,7 +119,7 @@ const MgT2EData = {
         As: { minSize: 0, maxSize: 0, minAtm: 0, maxAtm: 0, minHydro: 0, maxHydro: 0 },
         Ba: { minPop: 0, maxPop: 0, minGov: 0, maxGov: 0, minLaw: 0, maxLaw: 0 },
         De: { minAtm: 2, maxAtm: 9, minHydro: 0, maxHydro: 0 },
-        Fl: { minAtm: 10, maxAtm: 15, minHydro: 1, maxHydro: 10 },
+        Fl: { minAtm: 10, maxAtm: 17, minHydro: 1, maxHydro: 10 },
         Ga: { minSize: 6, maxSize: 8, validAtms: [5, 6, 8], minHydro: 5, maxHydro: 7 },
         Hi: { minPop: 9, maxPop: 15 },
         Ht: { minTl: 12, maxTl: 33 },
@@ -111,7 +132,7 @@ const MgT2EData = {
         Po: { minAtm: 2, maxAtm: 5, minHydro: 0, maxHydro: 3 },
         Ri: { validAtms: [6, 8], minPop: 6, maxPop: 8, minGov: 4, maxGov: 9 },
         Va: { minAtm: 0, maxAtm: 0 },
-        Wa: { complexAtmHydro: true, atmRanges: [[3, 9], [13, 15]], minHydro: 10, maxHydro: 10 }
+        Wa: { complexAtmHydro: true, atmRanges: [[3, 9], [13, 17]], minHydro: 10, maxHydro: 10 }
     },
 
     // =========================================================================
@@ -138,6 +159,44 @@ const MgT2EData = {
             { maxRoll: 9, type: 'A', class: 'V' },
             { maxRoll: 11, type: 'B', class: 'V' },
             { maxRoll: 99, type: 'O', class: 'V' }
+        ],
+        bottomUpSpecialType: [
+            { maxRoll: 5, sClass: 'VI' },
+            { maxRoll: 8, sClass: 'IV' },
+            { maxRoll: 10, sClass: 'III' },
+            { maxRoll: 99, sClass: 'Giants' } // Keeping this as a string to trigger the next table
+        ],
+        bottomUpGiantsType: [
+            { maxRoll: 8, sClass: 'III' }, // 2, 3, 4, 5, 6, 7, 8 -> Giant
+            { maxRoll: 10, sClass: 'II' }, // 9, 10 -> Bright Giant
+            { maxRoll: 11, sClass: 'Ib' }, // 11 -> Less Luminous Supergiant
+            { maxRoll: 99, sClass: 'Ia' }  // 12 -> Luminous Supergiant
+        ],
+        bottomUpUnusualType: [
+            { maxRoll: 2, result: 'Peculiar' }, // 2 -> Peculiar Sub-table
+            { maxRoll: 3, sClass: 'VI' },       // 3 -> Sub-Dwarf
+            { maxRoll: 4, sClass: 'IV' },       // 4 -> Sub-Giant
+            { maxRoll: 7, sType: 'BD' },       // 5, 6, 7 -> Brown Dwarf
+            { maxRoll: 10, sType: 'D' },        // 8, 9, 10 -> White Dwarf
+            { maxRoll: 11, sClass: 'III' },     // 11 -> Giant
+            { maxRoll: 99, result: 'Giants' }   // 12 -> Giants Sub-table
+        ],
+        bottomUpPeculiarType: [
+            { maxRoll: 2, result: 'Black Hole' },
+            { maxRoll: 3, result: 'Pulsar' },
+            { maxRoll: 4, result: 'Neutron Star' },
+            { maxRoll: 6, result: 'Nebula' },      // 5, 6
+            { maxRoll: 9, result: 'Protostar' },   // 7, 8, 9
+            { maxRoll: 10, result: 'Star Cluster' },
+            { maxRoll: 99, result: 'Anomaly' }     // 11, 12
+        ],
+        bottomUpRealisticPrimaryType: [
+            { maxRoll: 2, type: 'Special' },
+            { maxRoll: 8, type: 'M', class: 'V' },
+            { maxRoll: 9, type: 'K', class: 'V' },
+            { maxRoll: 10, type: 'G', class: 'V' },
+            { maxRoll: 11, type: 'F', class: 'V' },
+            { maxRoll: 99, type: 'Hot' }
         ],
         companionDetermination: {
             secondary: [
@@ -215,11 +274,35 @@ const MgT2EData = {
             { maxRoll: 12, count: 5 },
             { maxRoll: 99, count: 6 }
         ],
+        gasGiantDMs: {
+            singleClassV: 1,
+            primaryBrownDwarf: -2,
+            primaryPostStellar: -2,
+            perPostStellar: -1,
+            fourOrMoreStars: -1
+        },
         planetoidBelts: [
             { maxRoll: 6, count: 1 },
             { maxRoll: 11, count: 2 },
             { maxRoll: 99, count: 3 }
-        ]
+        ],
+        planetoidBeltDMs: {
+            gasGiantsPresent: 1,
+            primaryProtostar: 3,
+            primaryPrimordial: 2,
+            primaryPostStellar: 1,
+            perPostStellar: 1,
+            multiStar: 1
+        },
+        terrestrialPlanets: {
+            baseFormula: "2D-2",
+            threshold: 3,
+            belowThresholdFormula: "D3+2",
+            aboveThresholdModifier: "D3-1",
+            dms: {
+                perPostStellar: -1
+            }
+        }
     },
 
     // =========================================================================

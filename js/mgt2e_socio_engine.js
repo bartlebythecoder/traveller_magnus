@@ -278,7 +278,7 @@
     function syncUWP(body) {
         if (!body) return;
         const cSize = clampUWP(body.size || 0, 0, 15);
-        const cAtm = clampUWP(body.atmCode || 0, 0, 15);
+        const cAtm = clampUWP(body.atmCode || 0, 0, 17);
         const cHydro = clampUWP(body.hydroCode || 0, 0, 10);
         const cPop = clampUWP(body.pop || 0, 0, 15);
         const cGov = clampUWP(body.gov || 0, 0, 15);
@@ -1951,54 +1951,67 @@
     /**
      * Generate the primary UWP statistics for a new mainworld.
      * @param {string} hexId 
+     * @param {Object} existingWorld 
      * @returns {Object} mainworld object
      */
-    function generateMainworldUWP(hexId) {
-        let name = (typeof getNextSystemName === 'function') ? getNextSystemName(hexId) : 'Unnamed';
+    function generateMainworldUWP(hexId, existingWorld = null) {
+        let name = existingWorld?.name || ((typeof getNextSystemName === 'function') ? getNextSystemName(hexId) : 'Unnamed');
         // startTrace and reseedForHex are handled by Orchestrator
+        let isNativeSophont = existingWorld && existingWorld.nativeSophont === true;
 
-        // ── Size ──────────────────────────────────────────────────────
-        tSection('Planetary Size');
-        let sRoll = tRoll2D('Size');
-        tDM('Standard Size', -2);
-        let rawSize = sRoll - 2;
-        let size = Math.max(0, rawSize);
-        if (rawSize !== size) tClamp('Size', rawSize, size);
-        tResult('Size Code', size);
+        let size = 0, atm = 0, hydro = 0;
 
-        // ── Atmosphere ────────────────────────────────────────────────
-        tSection('Planetary Atmosphere');
-        let atm = 0;
-        if (size > 0) {
-            let atmRoll = tRoll2D('Atmosphere');
-            tDM('Standard Atmo', -7);
-            tDM('Size Code', size);
-            let rawAtm = atmRoll - 7 + size;
-            atm = Math.max(0, rawAtm);
-            if (rawAtm !== atm) tClamp('Atmosphere', rawAtm, atm);
+        if (existingWorld) {
+            tSection('Physical Characteristics (Inherited)');
+            size = existingWorld.size;
+            atm = existingWorld.atmCode !== undefined ? existingWorld.atmCode : existingWorld.atm;
+            hydro = existingWorld.hydroCode !== undefined ? existingWorld.hydroCode : existingWorld.hydro;
+            tSkip('Physicals (Size, Atm, Hydro) inherited from existing world');
+            tResult('Size Code', size);
+            tResult('Atmosphere Code', atm);
+            tResult('Hydrographic Code', hydro);
         } else {
-            tSkip('Size 0 forces Atm 0');
-        }
-        tResult('Atmosphere Code', atm);
+            // ── Size ──────────────────────────────────────────────────────
+            tSection('Planetary Size');
+            let sRoll = tRoll2D('Size');
+            tDM('Standard Size', -2);
+            let rawSize = sRoll - 2;
+            size = Math.max(0, rawSize);
+            if (rawSize !== size) tClamp('Size', rawSize, size);
+            tResult('Size Code', size);
 
-        // ── Hydrographics ─────────────────────────────────────────────
-        tSection('Hydrographic Percentage');
-        let hydro = 0;
-        if (size > 1) {
-            let hydroRoll = tRoll2D('Hydrographics');
-            tDM('Standard Hydro', -7);
-            tDM('Atmosphere Code', atm);
-            if (atm <= 1 || atm >= 10) {
-                tDM('Atmosphere Extreme', -4);
+            // ── Atmosphere ────────────────────────────────────────────────
+            tSection('Planetary Atmosphere');
+            if (size > 0) {
+                let atmRoll = tRoll2D('Atmosphere');
+                tDM('Standard Atmo', -7);
+                tDM('Size Code', size);
+                let rawAtm = atmRoll - 7 + size;
+                atm = Math.max(0, rawAtm);
+                if (rawAtm !== atm) tClamp('Atmosphere', rawAtm, atm);
+            } else {
+                tSkip('Size 0 forces Atm 0');
             }
-            let hydroDM = (atm <= 1 || atm >= 10) ? -4 : 0;
-            let rawHydro = hydroRoll - 7 + atm + hydroDM;
-            hydro = Math.max(0, rawHydro);
-            if (rawHydro !== hydro) tClamp('Hydrographics', rawHydro, hydro);
-        } else {
-            tSkip('Size ≤ 1 forces Hydro 0');
+            tResult('Atmosphere Code', atm);
+
+            // ── Hydrographics ─────────────────────────────────────────────
+            tSection('Hydrographic Percentage');
+            if (size > 1) {
+                let hydroRoll = tRoll2D('Hydrographics');
+                tDM('Standard Hydro', -7);
+                tDM('Atmosphere Code', atm);
+                if (atm <= 1 || atm >= 10) {
+                    tDM('Atmosphere Extreme', -4);
+                }
+                let hydroDM = (atm <= 1 || atm >= 10) ? -4 : 0;
+                let rawHydro = hydroRoll - 7 + atm + hydroDM;
+                hydro = Math.max(0, rawHydro);
+                if (rawHydro !== hydro) tClamp('Hydrographics', rawHydro, hydro);
+            } else {
+                tSkip('Size ≤ 1 forces Hydro 0');
+            }
+            tResult('Hydrographic Code', hydro);
         }
-        tResult('Hydrographic Code', hydro);
 
         // ── Population ────────────────────────────────────────────────
         tSection('Population');
@@ -2006,7 +2019,15 @@
         tDM('Standard Pop', -2);
         let rawPop = popRoll - 2;
         let pop = Math.max(0, rawPop);
-        if (rawPop !== pop) tClamp('Population', rawPop, pop);
+        
+        if (isNativeSophont) {
+            if (pop < 6) {
+                tOverride('Population Code', pop, 6, 'Native Sophont Minimum');
+                pop = 6;
+            }
+        } else {
+            if (rawPop !== pop) tClamp('Population', rawPop, pop);
+        }
         tResult('Population Code', pop);
 
         // ── Starport ──────────────────────────────────────────────────
@@ -2022,6 +2043,11 @@
         else if (pop >= 8) starportDM = 1;
         else if (pop <= 2) starportDM = -2;
         else if (pop <= 4) starportDM = -1;
+
+        if (isNativeSophont && MgT2EData.starport.nativeSophontDM !== undefined) {
+            tDM('Native Sophont', MgT2EData.starport.nativeSophontDM);
+            starportDM += MgT2EData.starport.nativeSophontDM;
+        }
 
         let spTotal = starportRoll + starportDM;
         let starport = spTotal <= 2 ? 'X' : spTotal <= 4 ? 'E' : spTotal <= 6 ? 'D'
@@ -2060,17 +2086,19 @@
             else if (starport === 'D' || starport === 'E') tDM('Starport D/E', 1);
             else if (starport === 'X') tDM('Starport X', -4);
 
-            // Size DMs
-            if (size <= 1) tDM('Size 1-', 2);
-            else if (size >= 2 && size <= 4) tDM('Size 2-4', 1);
+            if (!isNativeSophont) {
+                // Size DMs
+                if (size <= 1) tDM('Size 1-', 2);
+                else if (size >= 2 && size <= 4) tDM('Size 2-4', 1);
 
-            // Atmosphere DMs
-            if (atm <= 3 || atm >= 10) tDM('Atmosphere Extreme', 1);
+                // Atmosphere DMs
+                if (atm <= 3 || atm >= 10) tDM('Atmosphere Extreme', 1);
 
-            // Hydrographics DMs
-            if (hydro === 0) tDM('Hydrographics 0', 1);
-            else if (hydro === 9) tDM('Hydrographics 9', 1);
-            else if (hydro === 10) tDM('Hydrographics A', 2);
+                // Hydrographics DMs
+                if (hydro === 0) tDM('Hydrographics 0', 1);
+                else if (hydro === 9) tDM('Hydrographics 9', 1);
+                else if (hydro === 10) tDM('Hydrographics A', 2);
+            }
 
             // Population DMs
             if (pop >= 1 && pop <= 5) tDM('Population 1-5', 1);
@@ -2089,17 +2117,23 @@
             let baseTl = Math.max(0, rawTl);
 
             // Enforce Environmental Limits (Minimum TL)
-            let minTl = getMgT2EMinSusTL(atm);
-
-            // Final TL is the higher of the generated base or the environmental minimum
-            tl = Math.max(baseTl, minTl);
-
-            // Log the clamp if the environment forced the TL higher
-            if (rawTl !== tl) {
-                tResult('Environmental Minimum Override', `Raised to TL ${minTl}`);
-                tClamp('Tech Level', rawTl, tl);
-            } else {
+            if (isNativeSophont && MgT2EData.techLevel.nativeSophontExceptions?.ignoreEnvironmentalMinimums) {
+                tl = baseTl;
                 if (rawTl !== baseTl) tClamp('Tech Level', rawTl, baseTl); // Standard floor clamp
+                tResult('Environmental Minimum Override', 'Ignored for Native Sophonts');
+            } else {
+                let minTl = getMgT2EMinSusTL(atm);
+
+                // Final TL is the higher of the generated base or the environmental minimum
+                tl = Math.max(baseTl, minTl);
+
+                // Log the clamp if the environment forced the TL higher
+                if (rawTl !== tl) {
+                    tResult('Environmental Minimum Override', `Raised to TL ${minTl}`);
+                    tClamp('Tech Level', rawTl, tl);
+                } else {
+                    if (rawTl !== baseTl) tClamp('Tech Level', rawTl, baseTl); // Standard floor clamp
+                }
             }
 
             tResult('Tech Level Code', tl);
@@ -2187,7 +2221,41 @@
 
         const uwp = `${starport}${toUWPChar(size)}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
 
-        return { type: 'Mainworld', hexId, name, uwp, uwpSecondary: uwp, travelZone, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, navalBase, scoutBase, militaryBase, corsairBase, gasGiant };
+        if (existingWorld) {
+            existingWorld.name = name;
+            existingWorld.uwp = uwp;
+            existingWorld.uwpSecondary = uwp;
+            existingWorld.travelZone = travelZone;
+            existingWorld.tradeCodes = tradeCodes;
+            existingWorld.starport = starport;
+            existingWorld.size = size;
+            existingWorld.atm = atm;
+            existingWorld.atmCode = atm;
+            existingWorld.hydro = hydro;
+            existingWorld.hydroCode = hydro;
+            existingWorld.pop = pop;
+            existingWorld.popCode = pop;
+            existingWorld.gov = gov;
+            existingWorld.govCode = gov;
+            existingWorld.law = law;
+            existingWorld.lawCode = law;
+            existingWorld.tl = tl;
+            existingWorld.tlCode = tl;
+            existingWorld.navalBase = navalBase;
+            existingWorld.scoutBase = scoutBase;
+            existingWorld.militaryBase = militaryBase;
+            existingWorld.corsairBase = corsairBase;
+            existingWorld.gasGiant = gasGiant;
+            return existingWorld;
+        }
+
+        return { 
+            type: 'Mainworld', 
+            hexId, name, uwp, uwpSecondary: uwp, travelZone, tradeCodes, starport, 
+            size, atm, atmCode: atm, hydro, hydroCode: hydro, 
+            pop, popCode: pop, gov, govCode: gov, law, lawCode: law, tl, tlCode: tl,
+            navalBase, scoutBase, militaryBase, corsairBase, gasGiant 
+        };
     }
 
     // =====================================================================

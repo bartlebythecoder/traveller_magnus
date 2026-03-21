@@ -1,4 +1,4 @@
-# As Above, So Below (v0.4.3.1)
+# As Above, So Below (v0.5)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -35,6 +35,10 @@ This workbench allows Game Masters and world-builders to generate, import, and e
     - **Ctrl + Alt + 5:** Full Traveller 5 (T5) Generation sequence (includes system population).
 ---
 ## 📜 Changelog
+
+### [v0.5] - 2026-03-20
+1. **Mongoose 2E Engine:** Implemented New Mongoose Bottom-Up Generation.
+2. **Cross-Engine Compatibility:** Implemented cross-engine system expansion, allowing hexes imported or generated in T5 or Classic Traveller to be seamlessly expanded using the Mongoose Top-Down engine (and vice versa) while strictly preserving pre-existing stellar profiles.
 
 ### [v0.4.3.1] - 2026-03-20
 1. **Mongoose 2E Engine:** Corrected Mongoose hot star bug.

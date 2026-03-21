@@ -302,7 +302,7 @@
             let dmDiceCount = (w.size <= 2) ? 1 : (w.size <= 9 ? 2 : (w.size <= 15 ? 2 : (w.ggType === 'GS' ? 3 : 4)));
             let instability = false;
             if (w.orbitId < 1.0) instability = true;
-            
+
             // Adjacency check
             for (let s of sys.stars) {
                 if (s.orbitId !== null && s.orbitId !== undefined && Math.abs(w.orbitId - s.orbitId) <= 1.0) instability = true;
@@ -393,12 +393,12 @@
                     w.rings.push({});
                 } else {
                     tResult(`Satellite ${m + 1} Size`, moonSize);
-                    let moonObj = { 
-                        size: moonSize, 
-                        type: 'Satellite', 
-                        worldHzco: w.worldHzco, 
-                        orbitId: w.orbitId, 
-                        parentStarIdx: w.parentStarIdx, 
+                    let moonObj = {
+                        size: moonSize,
+                        type: 'Satellite',
+                        worldHzco: w.worldHzco,
+                        orbitId: w.orbitId,
+                        parentStarIdx: w.parentStarIdx,
                         orbitType: w.orbitType,
                         uwpSecondary: `S${toUWPChar(moonSize)}00000-0`
                     };
@@ -481,10 +481,23 @@
      * oxygen levels, taints, gas retention, and hydrographic percentages.
      * 
      * @param {Object} sys - System object with worlds array
-     * @param {Object} mainworldBase - Mainworld baseline data (for atm/hydro locking)
+     * @param {Object|Object} options - Options object or Mainworld baseline data
      * @returns {Object} Modified system object
      */
-    function generateAtmospherics(sys, mainworldBase) {
+    function generateAtmospherics(sys, options = {}) {
+        let mainworldBase = null;
+        let targetWorlds = sys.worlds;
+
+        // Adaptive Signature: (sys, mainworldBase) or (sys, { targetWorlds, mainworldBase })
+        if (options && options.type === 'Mainworld') {
+            mainworldBase = options;
+        } else if (options) {
+            mainworldBase = options.mainworldBase;
+            targetWorlds = options.targetWorlds || sys.worlds;
+        }
+
+        let isBottomUp = (options && options.mode === 'bottom-up');
+
         let processWorld = (w) => {
             if (w.type === 'Empty' || w.type === 'Gas Giant' || w.type === 'Planetoid Belt') return;
 
@@ -564,7 +577,8 @@
                         let hazard2 = [false, false, false, false, "Check", "Check", "Check", "Check", "Check", false, false, false, false, false, false, false, false, false];
                         w.atmCode = bracket2[bracketRoll];
                         w._atmHazardFlag = hazard2[bracketRoll];
-                        w._atmExtremeHeatFlag = (diff <= -3.0 && (w.atmCode === 8 || w.atmCode === 9 || w.atmCode === 10));
+                        w._atmExtremeHeatFlag = (diff <= -3.0 && w.atmCode === 10);
+                        w._extremeHeatMod = (bracketRoll === 7 || bracketRoll === 8) ? 1 : 0;
                     }
                 } else {
                     // Cold Atmospheres Table
@@ -585,11 +599,12 @@
                     }
                 }
 
-                if (w.atmCode > 15 && w.atmCode !== 16 && w.atmCode !== 17) w.atmCode = 15;
+                let currentMaxAtm = isBottomUp ? 17 : 15;
+                if (w.atmCode > currentMaxAtm && w.atmCode !== 16 && w.atmCode !== 17) w.atmCode = currentMaxAtm;
 
                 // Edge Case: Extreme Heat Check
                 if (w._atmExtremeHeatFlag) {
-                    let heatRoll = tRoll1D('Extreme Heat Check') + 1;
+                    let heatRoll = tRoll1D('Extreme Heat Check') + w._extremeHeatMod;
                     if (heatRoll === 1) { w.atmCode = 1; tResult('Extreme Heat', 'Code 1 (Trace)'); }
                     else if (heatRoll >= 3 && heatRoll <= 5) { w.atmCode = 11; tResult('Extreme Heat', 'Code B (Corrosive)'); }
                     else if (heatRoll >= 6) { w.atmCode = 12; tResult('Extreme Heat', 'Code C (Insidious)'); }
@@ -603,33 +618,26 @@
             }
 
             w.atmCode = Number(w.atmCode);
-            w.atmCode = Math.max(0, Math.min(15, w.atmCode));
+            let finalMaxAtm = isBottomUp ? 17 : 15;
+            w.atmCode = Math.max(0, Math.min(finalMaxAtm, w.atmCode));
             tResult('Final Atmosphere Code', toUWPChar(w.atmCode));
 
-            // 2. Runaway Greenhouse
-            let tempState = w.tempStatus || tempBand;
-            if (w.atmCode >= 2 && w.atmCode <= 15 && (tempState === "Hot" || tempState === "Boiling" || tempState === "Temperate")) {
+            // 2. Runaway Greenhouse Check
+            // GATEWAY: Atm 2-15, Habitable Zone, and Minimum Hot Temperature (313 K+)
+            if (w.atmCode >= 2 && w.atmCode <= 15 && tempBand === "Temperate" && w.meanTempK >= 313) {
+
+                // Base DM: +1 per Gyr
                 let rgDM = Math.ceil(sys.ageGyr || sys.age || 0);
-                if (w.meanTempK > 303) {
-                    let preciseDM = Math.floor((w.meanTempK - 303) / 10);
-                    tDM('Precise Temp', preciseDM);
-                    rgDM += preciseDM;
-                } else if (tempState === "Boiling") {
-                    tDM('Boiling', 4);
-                    rgDM += 4;
-                }
 
-                let currentOrbit = w.orbit !== undefined ? w.orbit : w.orbitId;
-                let hzco = w.worldHzco || sys.hzco;
-
-                if (currentOrbit < hzco && tempState === 'Temperate') {
-                    tDM('Targeted Temperate Penalty', -2);
-                    rgDM -= 2;
-                }
+                // Precise Temperature DM: +1 for every 10 full degrees above 303K
+                let preciseDM = Math.floor((w.meanTempK - 303) / 10);
+                tDM('Precise Temp', preciseDM);
+                rgDM += preciseDM;
 
                 tSection('Runaway Greenhouse Check');
                 let rgBaseRoll = tRoll2D('Runaway Greenhouse Roll (12+)');
                 let rgTotal = rgBaseRoll + rgDM;
+
                 if (rgTotal >= 12) {
                     tResult('Result', 'Runaway Greenhouse Triggered');
                     writeLogLine(`Runaway Greenhouse Check: Rolled ${rgBaseRoll} + DM ${rgDM}. Result: Success`);
@@ -741,26 +749,26 @@
 
                 if (isLowO2 || isHighO2) {
                     let needsFlip = (w.atmCode === 5 || w.atmCode === 6 || w.atmCode === 8);
-                    
+
                     if (needsFlip) {
                         if (isMainworldLocked) {
                             tResult('Top-Down Gospel', 'Forcing Physics to match UWP Atmosphere');
                             // Remove the taint
                             w.taints = w.taints.filter(t => t !== "Low Oxygen" && t !== "High Oxygen");
-                            
+
                             // Adjust oxygen fraction to force ppo into safe range
                             if (isLowO2) w.ppoBar = 0.10 + (rng() * 0.04);
                             if (isHighO2) w.ppoBar = 0.49 - (rng() * 0.04);
                             w.ppo = w.ppoBar;
                             w.oxygenFraction = w.ppoBar / w.totalPressureBar;
-                            
+
                             // If it pushes oxygen too high or pressure is too low, we adjust pressure instead
                             if (w.oxygenFraction > 0.99 || w.totalPressureBar < 0.1) {
                                 w.oxygenFraction = 0.20 + (rng() * 0.10);
                                 w.totalPressureBar = w.ppoBar / w.oxygenFraction;
                                 w.pressureBar = w.totalPressureBar;
                             }
-    
+
                             w.oxygenFrac = w.oxygenFraction;
                             writeLogLine(`[PHYSICS ANOMALY] UWP Gospel: Forced ppo to ${w.ppoBar.toFixed(3)} and Pressure to ${w.totalPressureBar.toFixed(2)} to maintain Atm ${w.atmCode.toString(16).toUpperCase()} without taints.`);
                         } else {
@@ -1070,11 +1078,18 @@
                 mainworldBase.uwp = updateUWPChar(mainworldBase.uwp, 3, finalHydroChar);
                 mainworldBase.atm = w.atmCode;
                 mainworldBase.hydro = w.hydroCode;
+                w.atm = w.atmCode;
+                w.hydro = w.hydroCode;
             } else if (w.uwpSecondary) {
                 w.uwpSecondary = updateUWPChar(w.uwpSecondary, 2, finalAtmChar);
                 w.uwpSecondary = updateUWPChar(w.uwpSecondary, 3, finalHydroChar);
+                w.atm = w.atmCode;
+                w.hydro = w.hydroCode;
                 w.uwpSecondaryAtm = w.atmCode;
                 w.uwpSecondaryHydro = w.hydroCode;
+            } else {
+                w.atm = w.atmCode;
+                w.hydro = w.hydroCode;
             }
         };
 
@@ -1127,7 +1142,7 @@
                 // Sync processed data back to moon record
                 let syncRes = Object.assign({}, fauxMoon);
                 syncRes.type = 'Satellite'; // Restore type
-                sys.worlds[i].moons[j] = syncRes;
+                w.moons[j] = syncRes;
             }
         }
 
@@ -1144,10 +1159,21 @@
      * and high/low temperature diurnals.
      * 
      * @param {Object} sys - System object with worlds array
-     * @param {Object} mainworldBase - Mainworld baseline data (for context)
+     * @param {Object|Object} options - Options object or Mainworld baseline data
      * @returns {Object} Modified system object
      */
-    function generateRotationalDynamics(sys, mainworldBase) {
+    function generateRotationalDynamics(sys, options = {}) {
+        let mainworldBase = null;
+        let targetWorlds = sys.worlds;
+
+        // Adaptive Signature: (sys, mainworldBase) or (sys, { targetWorlds, mainworldBase })
+        if (options && options.type === 'Mainworld') {
+            mainworldBase = options;
+        } else if (options) {
+            mainworldBase = options.mainworldBase;
+            targetWorlds = options.targetWorlds || sys.worlds;
+        }
+
         let primary = sys.stars[0];
         tSection('Temperature & Rotation');
 
@@ -1324,11 +1350,14 @@
             tResult('Low Temp (K)', w.lowTempK.toFixed(1) + ' K');
         };
 
-        for (let i = 0; i < sys.worlds.length; i++) {
-            for (let j = 0; j < sys.worlds[i].moons.length; j++) {
-                processBody(sys.worlds[i].moons[j], sys.worlds[i], true);
+        for (let i = 0; i < targetWorlds.length; i++) {
+            let w = targetWorlds[i];
+            if (w.moons) {
+                for (let j = 0; j < w.moons.length; j++) {
+                    processBody(w.moons[j], w, true);
+                }
             }
-            processBody(sys.worlds[i], null, false);
+            processBody(w, null, false);
         }
 
         return sys;
@@ -1727,10 +1756,21 @@
      * resource rating, and habitability score.
      * 
      * @param {Object} sys - System object with worlds array
-     * @param {Object} mainworldBase - Mainworld baseline data (for context)
+     * @param {Object|Object} options - Options object or Mainworld baseline data
      * @returns {Object} Modified system object
      */
-    function generateBiospherics(sys, mainworldBase) {
+    function generateBiospherics(sys, options = {}) {
+        let mainworldBase = null;
+        let targetWorlds = sys.worlds;
+
+        // Adaptive Signature: (sys, mainworldBase) or (sys, { targetWorlds, mainworldBase })
+        if (options && options.type === 'Mainworld') {
+            mainworldBase = options;
+        } else if (options) {
+            mainworldBase = options.mainworldBase;
+            targetWorlds = options.targetWorlds || sys.worlds;
+        }
+
         let primary = sys.stars[0];
         primary.massEarths = (primary.mass || 1.0) * 333000;
         tSection('Biomass & Resources');
@@ -2093,14 +2133,38 @@
             tResult('Habitability Score', w.habitability);
         };
 
-        for (let i = 0; i < sys.worlds.length; i++) {
-            processBody(sys.worlds[i], null, false);
-            for (let j = 0; j < sys.worlds[i].moons.length; j++) {
-                processBody(sys.worlds[i].moons[j], sys.worlds[i], true);
+        for (let i = 0; i < targetWorlds.length; i++) {
+            let w = targetWorlds[i];
+            processBody(w, null, false);
+            if (w.moons) {
+                for (let j = 0; j < w.moons.length; j++) {
+                    processBody(w.moons[j], w, true);
+                }
             }
         }
 
         return sys;
+    }
+
+    /**
+     * Evaluate candidates for Mainworld status based on World Builder's Handbook criteria.
+     * Primary Sort: Habitability (Descending)
+     * Tie-Breaker 1: Resource Rating (Descending)
+     * Fallback: Size (Descending)
+     * 
+     * @param {Array} candidates - Array of candidate world objects
+     * @returns {Object|null} The winning Mainworld candidate
+     */
+    function evaluateMainworldCandidates(candidates) {
+        if (!candidates || candidates.length === 0) return null;
+
+        candidates.sort((a, b) => {
+            if (b.habitability !== a.habitability) return (b.habitability || 0) - (a.habitability || 0);
+            if (b.resourceRating !== a.resourceRating) return (b.resourceRating || 0) - (a.resourceRating || 0);
+            return (b.size || 0) - (a.size || 0);
+        });
+
+        return candidates[0];
     }
 
     // =====================================================================
@@ -2111,4 +2175,5 @@
     exports.generateAtmospherics = generateAtmospherics;
     exports.generateRotationalDynamics = generateRotationalDynamics;
     exports.generateBiospherics = generateBiospherics;
+    exports.evaluateMainworldCandidates = evaluateMainworldCandidates;
 }));

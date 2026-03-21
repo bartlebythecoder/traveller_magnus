@@ -267,9 +267,7 @@ function draw() {
                         const isAsteroid = (data.size === 0 && !data.isStellarOnly);
                         const isWet = (
                             data.hydro !== undefined && data.hydro >= 1 &&
-                            data.atm !== undefined && (
-                                (data.atm >= 2 && data.atm <= 9) || data.atm >= 13
-                            )
+                            data.atm !== undefined && (data.atm >= 2 && data.atm <= 9)
                         );
 
                         // 2. Starport letter — above world dot

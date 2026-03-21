@@ -2,6 +2,7 @@
 .env
 credentials.json
 token.json
+.clineignore
 
 # Intermediate / temp files (always regenerated, never committed)
 .tmp/

@@ -110,7 +110,13 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
             mass: (typeof starMassTable !== 'undefined' && starMassTable[sClass] && starMassTable[sClass][specKey]) || 1.0,
             luminosity: (typeof luminosityTable !== 'undefined' && luminosityTable[sClass] && luminosityTable[sClass][specKey]) || 1.0
         };
+        primaryStar.diam = (typeof UniversalMath !== 'undefined' && UniversalMath.estimateStellarDiameter) 
+                            ? UniversalMath.estimateStellarDiameter(sType, decimal, sClass) 
+                            : 1.0;
         tResult('Primary Override', primaryStr);
+        tResult('Primary Diameter', `${primaryStar.diam} Solar`);
+        const limit100D = (primaryStar.diam * 1392700 * 100) / 1000000;
+        tResult("100D Limit", `${limit100D.toFixed(1)} M km`);
     }
 
     if (!primaryStar) {
@@ -137,9 +143,15 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
                     mass: (starMassTable[rawSize] && starMassTable[rawSize][specKey]) || 1.0,
                     luminosity: (luminosityTable[rawSize] && luminosityTable[rawSize][specKey]) || 1.0
                 };
+                primaryStar.diam = (typeof UniversalMath !== 'undefined' && UniversalMath.estimateStellarDiameter) 
+                                    ? UniversalMath.estimateStellarDiameter(rawType, decimal, rawSize) 
+                                    : 1.0;
                 tResult('Primary Selection', `${primaryStar.name} (${primaryStar.specKey})`);
                 tResult('Star Mass', `${primaryStar.mass} M☉`);
                 tResult('Star Luminosity', `${primaryStar.luminosity} L☉`);
+                tResult('Primary Diameter', `${primaryStar.diam} Solar`);
+                const limit100D = (primaryStar.diam * 1392700 * 100) / 1000000;
+                tResult("100D Limit", `${limit100D.toFixed(1)} M km`);
             }
         }
     }
@@ -200,8 +212,14 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
                 mass: (typeof starMassTable !== 'undefined' && starMassTable[lookupSize] && starMassTable[lookupSize][specKey]) || 1.0,
                 luminosity: (typeof luminosityTable !== 'undefined' && luminosityTable[lookupSize] && luminosityTable[lookupSize][specKey]) || 1.0
             };
+            companion.diam = (typeof UniversalMath !== 'undefined' && UniversalMath.estimateStellarDiameter) 
+                            ? UniversalMath.estimateStellarDiameter(sType, decimal, sClass) 
+                            : 1.0;
             sys.stars.push(companion);
             tResult(`${companion.role} Override`, sStr);
+            tResult(`${companion.role} Diameter`, `${companion.diam} Solar`);
+            const limit100D = (companion.diam * 1392700 * 100) / 1000000;
+            tResult("100D Limit", `${limit100D.toFixed(1)} M km`);
         }
     }
     
@@ -403,6 +421,20 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
             // Sync AU and orbital period for all base bodies
             if (body.distAU) {
                 body.orbitalPeriod = Math.sqrt(Math.pow(body.distAU, 3) / (primaryStar.mass || 1.0));
+
+                // Sean Protocol: Distance and 100D Logging
+                const orbitMkm = (body.distAU * 149597870) / 1000000;
+                tResult("Orbit Distance", `${body.distAU.toFixed(2)} AU (${orbitMkm.toFixed(1)} M km)`);
+                
+                const worldSize = (typeof body.size === 'string') ? UniversalMath.fromUWPChar(body.size) : (body.size || 0);
+                const world100D = (worldSize * 160000) / 1000000;
+                tResult("World 100D Limit", `${world100D.toFixed(2)} M km`);
+
+                // Stellar Masking Eligibility
+                if (typeof UniversalMath !== 'undefined' && UniversalMath.isMaskingEligible) {
+                    const isEligible = UniversalMath.isMaskingEligible(primaryStar.diam, body.distAU, worldSize);
+                    tResult("Stellar Masking", isEligible ? "ELIGIBLE" : "Ineligible");
+                }
             }
         });
 

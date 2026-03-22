@@ -269,6 +269,31 @@
                 w.periodHours = w.periodYears * 8766;
                 tResult('Calibrated Orbital Period', w.periodYears.toFixed(4) + ' yrs (' + w.periodDays.toFixed(1) + ' days)');
             }
+
+            // Sean Protocol: Distance and 100D Logging
+            const worldDistAU = w.au || w.distAU || 0;
+            if (worldDistAU && w.type !== 'Empty') {
+                const orbitMkm = (worldDistAU * 149597870) / 1000000;
+                tResult("Orbit Distance", `${worldDistAU.toFixed(2)} AU (${orbitMkm.toFixed(1)} M km)`);
+                
+                let worldSize = 0;
+                if (w.type === 'Gas Giant') {
+                    // Gas Giant 100D is based on its diameter
+                    worldSize = (w.diamKm || 0) / 1600;
+                } else {
+                    worldSize = (typeof w.size === 'string' && w.size !== 'GG') ? parseInt(w.size, 16) : (Number(w.size) || 0);
+                }
+                
+                const world100D = (worldSize * 160000) / 1000000;
+                tResult("World 100D Limit", `${world100D.toFixed(2)} M km`);
+
+                // Stellar Masking Eligibility
+                if (typeof UniversalMath !== 'undefined' && UniversalMath.isMaskingEligible) {
+                    const starDiam = primary ? primary.diam : 1.0;
+                    const isEligible = UniversalMath.isMaskingEligible(starDiam, worldDistAU, worldSize);
+                    tResult("Stellar Masking", isEligible ? "ELIGIBLE" : "Ineligible");
+                }
+            }
         }
 
         // 2. Determine Moon Quantities & Sizes

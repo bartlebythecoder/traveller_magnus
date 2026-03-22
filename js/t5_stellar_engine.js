@@ -24,8 +24,8 @@
     const _roll1D = (typeof tRoll1D === 'function') ? tRoll1D : (label) => Math.floor(_rng() * 6) + 1;
     const _roll2D = (typeof tRoll2D === 'function') ? tRoll2D : (label) => Math.floor(_rng() * 6) + 1 + Math.floor(_rng() * 6) + 1;
     const _log = (typeof writeLogLine === 'function') ? writeLogLine : console.log;
-    const _tSection = (typeof tSection === 'function') ? tSection : () => {};
-    const _tResult = (typeof tResult === 'function') ? tResult : () => {};
+    const _tSection = (typeof tSection === 'function') ? tSection : () => { };
+    const _tResult = (typeof tResult === 'function') ? tResult : () => { };
 
     /**
      * Parses a T5 stellar string (e.g., "G2 V").
@@ -138,9 +138,9 @@
         return { type, decimal, size, name, tFlux, sFlux };
     }
 
-    /**
-     * Generates a single star.
-     */
+    /** 
+    * Generates a single star.
+    */
     function generateStar(role, orbitID, importedName = null, isSecondary = false, pTypeFlux = 0, pSizeFlux = 0) {
         let type, decimal, size, tFlux, sFlux;
         _tSection(`Generating ${role} Star`);
@@ -165,13 +165,21 @@
         let luminosity = Math.pow(TYPE_MAP[type] || 1.0, 3.5);
         _tResult('Luminosity', luminosity.toFixed(3) + ' L_Sol');
 
+        // NEW: Calculate the physical diameter using the Universal Math Chassis
+        let diam = UniversalMath.estimateStellarDiameter(type, decimal, size);
+        _tResult('Diameter', diam + ' Solar');
+        const limit100D = (diam * 1392700 * 100) / 1000000;
+        _tResult("100D Limit", `${limit100D.toFixed(1)} M km`);
+
         let starName = (size === 'D') ? 'D' : (type === 'BD') ? 'BD' : `${type}${decimal} ${size}`;
         _tResult('Final Stellar', starName);
 
         return {
             type, size, decimal, orbitID,
             distAU: ORBIT_AU[orbitID] || 0,
-            role, luminosity, name: starName, tFlux, sFlux
+            role, luminosity,
+            diam, // <-- ADDED: Now available for Stellar Masking!
+            name: starName, tFlux, sFlux
         };
     }
 

@@ -81,6 +81,8 @@
         tResult(`${label} Mass (Sol)`, star.mass);
         tResult(`${label} Temperature (K)`, star.temp);
         tResult(`${label} Diameter (Sol)`, star.diam);
+        const limit100D = (star.diam * 1392700 * 100) / 1000000;
+        tResult("100D Limit", `${limit100D.toFixed(1)} M km`);
         tResult(`${label} Luminosity (Sol)`, star.lum.toFixed(4));
 
         return star;

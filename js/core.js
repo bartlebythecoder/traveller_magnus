@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.5";
-const APP_BANNER = "v0.5 - New Mongoose Bottom-Up Generation";
+const APP_VERSION = "v0.5.1";
+const APP_BANNER = "v0.5.1 - Added Times to Jump Point";
 
 // -----------------------------------------------------------------------------
 // Application State

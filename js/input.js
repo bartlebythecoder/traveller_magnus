@@ -342,7 +342,7 @@ function setupKeyboardShortcuts() {
             runRTTMacro();
         } else if (e.ctrlKey && e.altKey && key === '5') {
             e.preventDefault();
-            keysDown.clear(); 
+            keysDown.clear();
             runT5Macro();
         } else if (e.key === 'Escape') {
             e.preventDefault();
@@ -554,7 +554,7 @@ function validateSelection(actionType, skipPopCheck = false) {
             }
         }
     } else if (actionType === 'socio') {
-// ...
+        // ...
         let willOverwrite = false;
         for (let hexId of selectedHexes) {
             let state = hexStates.get(hexId);
@@ -716,7 +716,7 @@ function setupGenerationHandlers() {
                 try {
                     if (typeof reseedForHex === 'function') reseedForHex(hexId);
                     if (window.isLoggingEnabled && typeof startTrace === 'function') startTrace(hexId, 'MgT2E Mainworld');
-                    
+
                     // Use modularized UWP generation for single world
                     stateObj.mgt2eData = MgT2ESocioEngine.generateMainworldUWP(hexId);
                     stateObj.name = stateObj.mgt2eData.name;
@@ -726,9 +726,9 @@ function setupGenerationHandlers() {
                         const tempSys = { worlds: [stateObj.mgt2eData], hexId: hexId };
                         MgT2E_UWP_Auditor.auditMgT2ESystem(tempSys, { mode: 'mainworld-only' });
                     }
-                    
+
                     if (window.isLoggingEnabled && typeof endTrace === 'function') endTrace();
-                    
+
                     // Clear artifacts of full system generation to prevent "ghost" accordions
                     stateObj.mgtSystem = null;
                     stateObj.mgtSocio = null;
@@ -782,7 +782,7 @@ function setupGenerationHandlers() {
                 // FIX: Assign name to the generated T5 mainworld
                 stateObj.name = getNextSystemName(hexId);
                 if (stateObj.t5Data) stateObj.t5Data.name = stateObj.name;
-                
+
                 stateObj.ctData = null;
                 stateObj.mgt2eData = null;
                 stateObj.ctSystem = null;
@@ -804,7 +804,7 @@ function setupGenerationHandlers() {
         }
         requestAnimationFrame(draw);
     });
-    
+
     // RTT Generation (Old handler - can be removed if not needed, but we'll update it to the new ID if helpful)
     // Actually, let's just use the new ID handlers below.
 
@@ -941,9 +941,9 @@ function setupGenerationHandlers() {
                         console.table(tableData);
                     }
                 }
-                
+
                 stateObj.t5Physical = null;
-                stateObj.ctPhysical = null; 
+                stateObj.ctPhysical = null;
                 hexStates.set(hexId, stateObj);
             } else if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
                 missingData = true;
@@ -1082,63 +1082,63 @@ function setupGenerationHandlers() {
     // New GENERATE SYSTEM Row Handlers (Continuation Macros - Skip Pop)
     document.getElementById('ctx-gen-sys-ct').addEventListener('click', () => {
         document.getElementById('context-menu').classList.remove('visible');
-        runCTNewMacro(true); 
+        runCTNewMacro(true);
     });
 
     document.getElementById('ctx-gen-sys-mgt2e').addEventListener('click', () => {
         document.getElementById('context-menu').classList.remove('visible');
-        runMgT2EMacro(true); 
+        runMgT2EMacro(true);
     });
 
     document.getElementById('ctx-gen-sys-t5').addEventListener('click', () => {
         document.getElementById('context-menu').classList.remove('visible');
-        runT5Macro(true); 
+        runT5Macro(true);
     });
 
     document.getElementById('ctx-gen-sys-mgt2e-bu').addEventListener('click', () => {
         document.getElementById('context-menu').classList.remove('visible');
-        runMgT2EBottomUpMacro(true); 
+        runMgT2EBottomUpMacro(true);
     });
 
     document.getElementById('ctx-gen-sys-ct-bu').addEventListener('click', () => {
         document.getElementById('context-menu').classList.remove('visible');
-        runCTBottomUpMacro(true); 
+        runCTBottomUpMacro(true);
     });
 
     document.getElementById('ctx-gen-sys-rtt-bu').addEventListener('click', () => {
         document.getElementById('context-menu').classList.remove('visible');
-        runRTTMacro(true); 
+        runRTTMacro(true);
     });
 
     // POPULATE & GENERATE FULL SYSTEM Row Handlers (Macros - Include Pop)
     document.getElementById('ctx-full-ct').addEventListener('click', () => {
         document.getElementById('context-menu').classList.remove('visible');
-        runCTNewMacro(false); 
+        runCTNewMacro(false);
     });
 
     document.getElementById('ctx-full-mgt2e').addEventListener('click', () => {
         document.getElementById('context-menu').classList.remove('visible');
-        runMgT2EMacro(false); 
+        runMgT2EMacro(false);
     });
 
     document.getElementById('ctx-full-t5').addEventListener('click', () => {
         document.getElementById('context-menu').classList.remove('visible');
-        runT5Macro(false); 
+        runT5Macro(false);
     });
 
     document.getElementById('ctx-full-mgt2e-bu').addEventListener('click', () => {
         document.getElementById('context-menu').classList.remove('visible');
-        runMgT2EBottomUpMacro(false); 
+        runMgT2EBottomUpMacro(false);
     });
 
     document.getElementById('ctx-full-rtt-bu').addEventListener('click', () => {
         document.getElementById('context-menu').classList.remove('visible');
-        runRTTMacro(false); 
+        runRTTMacro(false);
     });
 
     document.getElementById('ctx-full-ct-bu').addEventListener('click', () => {
         document.getElementById('context-menu').classList.remove('visible');
-        runCTBottomUpMacro(false); 
+        runCTBottomUpMacro(false);
     });
 }
 
@@ -1186,13 +1186,13 @@ async function runMgT2EMacro(skipPop = false) {
                 if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
                     // 1. Call the new Orchestrator
                     let newSys = generateMgT2ESystemTopDown(hexId);
-                    
+
                     // 2. Find the Mainworld to map to UI data states
                     let mainworld = newSys.worlds.find(w => w.type === 'Mainworld') || newSys.worlds[0];
 
                     // 3. Map the data back to stateObj so the Hex Editor UI doesn't break
                     stateObj.mgtSystem = newSys;
-                    stateObj.mgt2eData = mainworld; 
+                    stateObj.mgt2eData = mainworld;
                     stateObj.mgtSocio = mainworld; // The new engine puts socio data directly on the world object
                     stateObj.name = mainworld.name;
 
@@ -1267,19 +1267,19 @@ async function runMgT2EBottomUpMacro(skipPop = false) {
 
                     if (typeof MgT2EBottomUpGenerator !== 'undefined') {
                         const sys = MgT2EBottomUpGenerator.generateSystem(hexId);
-                        
+
                         // Ensure Mainworld exists and has a name
                         if (sys && sys.mainworld) {
                             if (!sys.mainworld.name) {
                                 sys.mainworld.name = (typeof getNextSystemName !== 'undefined') ? getNextSystemName(hexId) : 'Unknown';
                             }
-                            
+
                             // Map resulting data
                             stateObj.mgtSystem = sys;
                             stateObj.mgt2eData = sys.mainworld;
                             stateObj.mgtSocio = sys.mainworld;
                             stateObj.name = sys.mainworld.name;
-                            
+
                             // Clean up old data variants
                             stateObj.ctData = null;
                             stateObj.t5Data = null;
@@ -1288,14 +1288,14 @@ async function runMgT2EBottomUpMacro(skipPop = false) {
                             stateObj.ctPhysical = null;
                             stateObj.t5Socio = null;
                             stateObj.rttData = null;
-                            
+
                             hexStates.set(hexId, stateObj);
                             count++;
                         }
                     } else {
                         console.error(`MgT2EBottomUpGenerator object not globally available.`);
                     }
-                    
+
                     if (window.isLoggingEnabled && typeof endTrace === 'function') {
                         endTrace();
                     }
@@ -1308,11 +1308,11 @@ async function runMgT2EBottomUpMacro(skipPop = false) {
         if (window.isLoggingEnabled && window.batchLogData && window.batchLogData.length > 0) {
             if (typeof downloadBatchLog === 'function') downloadBatchLog('MgT2E_BottomUp_Full_Macro', targetHexes.length);
         }
-        
+
         if (typeof draw === 'function') {
             requestAnimationFrame(draw);
         }
-        
+
         if (count > 0) {
             if (typeof showToast === 'function') {
                 showToast(`Full Bottom-Up MgT2E Generation Complete for ${count} system(s)!`, 4000);
@@ -1373,7 +1373,7 @@ async function runCTNewMacro(skipPop = false) {
                         mwData = window.CT_World_Engine.generateModularMainworld(hexId);
                     } else {
                         // Fallback to legacy if world engine is somehow not globally available, though it should be.
-                        mwData = generateCTMainworld(hexId); 
+                        mwData = generateCTMainworld(hexId);
                     }
                     stateObj.ctData = mwData;
 
@@ -1394,7 +1394,7 @@ async function runCTNewMacro(skipPop = false) {
                     stateObj.t5System = null;
                     stateObj.ctPhysical = null;
                     hexStates.set(hexId, stateObj);
-                    
+
                     count++;
                     if (window.isLoggingEnabled) endTrace();
                 }
@@ -1460,7 +1460,7 @@ async function runCTBottomUpMacro(skipPop = false) {
                             mode: 'bottom-up',
                             hexId: hexId
                         });
-                        
+
                         // Ensure Mainworld exists and has a name
                         if (sys && sys.mainworld) {
                             if (!sys.mainworld.name) {
@@ -1468,7 +1468,7 @@ async function runCTBottomUpMacro(skipPop = false) {
                             }
                             stateObj.ctSystem = sys;
                             stateObj.ctData = sys.mainworld;
-    
+
                             // Clean up variants
                             stateObj.rttData = null;
                             stateObj.mgt2eData = null;
@@ -1480,7 +1480,7 @@ async function runCTBottomUpMacro(skipPop = false) {
                             count++;
                         }
                     }
-                    
+
                     if (window.isLoggingEnabled) endTrace();
                 }
             } catch (err) {
@@ -1540,11 +1540,11 @@ async function runRTTMacro(skipPop = false) {
                 if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
                     // Start RTT Generation Pipeline
                     stateObj.rttSystem = generateRTTSectorStep1(hexId);
-                    
+
                     // Extract UW for display
                     if (stateObj.rttSystem) {
                         stateObj.rttData = extractRTTMainworld(stateObj.rttSystem);
-                        
+
                         // Clear other data
                         stateObj.ctData = null;
                         stateObj.mgt2eData = null;
@@ -1565,11 +1565,11 @@ async function runRTTMacro(skipPop = false) {
                 console.error(`RTT Macro Step 2 failed for hex ${hexId}:`, err);
             }
         });
-        
+
         if (window.isLoggingEnabled && window.batchLogData.length > 0) {
             downloadBatchLog('RTT_Full_Macro', targetHexes.length);
         }
-        
+
         requestAnimationFrame(draw);
         if (count > 0) {
             showToast(`Full RTT Generation Complete for ${count} system(s)!`, 4000);
@@ -1633,7 +1633,7 @@ async function runT5Macro(skipPop = false) {
                         stateObj.t5Data = generateT5Mainworld(hexId);
                         stateObj.name = getNextSystemName(hexId);
                     }
-                    
+
                     // Clear variants to ensure fresh generation
                     stateObj.ctData = null;
                     stateObj.mgt2eData = null;
@@ -1653,9 +1653,9 @@ async function runT5Macro(skipPop = false) {
         showToast(`Generated T5 Systems (Top-Down)...`, 1000);
 
         if (window.isLoggingEnabled && window.batchLogData.length > 0) {
-                downloadBatchLog('T5_Full_Macro', targetHexes.length);
+            downloadBatchLog('T5_Full_Macro', targetHexes.length);
         }
-        
+
         // Count how many hexes are actually populated now
         let count = 0;
         targetHexes.forEach(hx => {
@@ -1860,6 +1860,88 @@ function setupSaveLoad() {
 }
 
 // ============================================================================
+// JOURNEY TIMES UI HELPER
+// ============================================================================
+
+/**
+ * Shared helper to safely extract star diameter from varied engine storage locations.
+ * Falls back to 0 if no diameter information is found.
+ */
+function getSafeStarDiameter(starObj) {
+    if (!starObj) return 0;
+    // Account for potential variations in how it's stored across different engines
+    return starObj.diam || starObj.diameter || starObj.stellarDiameter || starObj.starDiam || 0;
+}
+
+/**
+ * Builds the HTML block for Journey Times, factoring in Stellar Masking if eligible.
+ */
+function buildJourneyTimesUI(world, star, isMaskingPreference = null) {
+    if (!world || !star) return '';
+    // Skip bodies that don't have standard jump calculations (Empty remains skipped)
+    if (world.type === 'Empty') return '';
+    if (world.size === undefined || world.size === 'R' || world.size === 'S') return '';
+
+    // Check the state of the global masking checkbox, with optional override
+    let isMaskingActive = false;
+    if (isMaskingPreference !== null) {
+        isMaskingActive = isMaskingPreference;
+    } else {
+        const maskCheckbox = document.getElementById('edit-stellar-mask');
+        isMaskingActive = maskCheckbox ? maskCheckbox.checked : false;
+    }
+
+    let eligible = false;
+    const starDiam = getSafeStarDiameter(star);
+
+    // Check for masking eligibility using whichever property is available (au or distAU)
+    const effectiveAU = (world.au !== undefined) ? world.au : (world.distAU !== undefined ? world.distAU : 0);
+    
+    // We now pass world.size to ensure the masking distance is actually strictly greater
+    if (starDiam > 0 && effectiveAU > 0 && world.size !== undefined) {
+        eligible = UniversalMath.isMaskingEligible(starDiam, effectiveAU, world.size);
+    }
+
+    let times;
+    if (eligible && isMaskingActive) {
+        times = UniversalMath.calculateMaskedJourneyTimes(world.size, starDiam, effectiveAU);
+    } else {
+        times = UniversalMath.calculateBaseJourneyTimes(world.size);
+    }
+
+    return formatJourneyTimesHTML(times, eligible, isMaskingActive);
+}
+
+/**
+ * Simplified helper for engines that don't support masking (like RTT)
+ */
+function buildBaseJourneyTimesUI(size) {
+    if (size === undefined || size === 'R' || size === 'S') return '';
+    const times = UniversalMath.calculateBaseJourneyTimes(size);
+    return formatJourneyTimesHTML(times, false, false);
+}
+
+/**
+ * Shared formatting for journey time blocks
+ */
+function formatJourneyTimesHTML(times, eligible, isMaskingActive) {
+    let html = `<div class="system-stats-full" style="background: rgba(102, 252, 241, 0.05); padding: 6px; border: 1px solid rgba(69, 162, 158, 0.4); border-radius: 4px; margin-top: 4px;">`;
+
+    let titleStr = `100D Jump Travel Times`;
+    if (eligible) {
+        titleStr += isMaskingActive ? ` <span style="color:#ffa500; font-size: 0.9em;">(Stellar Masked)</span>` : ` <span style="color:#a0a8b0; font-size: 0.9em;">(Masking Available)</span>`;
+    }
+
+    html += `<div style="color: #66fcf1; font-weight: bold; font-size: 0.85em; margin-bottom: 4px; border-bottom: 1px dotted rgba(102, 252, 241, 0.3); padding-bottom: 2px;">${titleStr}</div>`;
+    html += `<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; font-size: 0.8em;">`;
+    html += `<span>1G: <strong style="color: #fff;">${times[0]}h</strong></span><span>2G: <strong style="color: #fff;">${times[1]}h</strong></span><span>3G: <strong style="color: #fff;">${times[2]}h</strong></span>`;
+    html += `<span>4G: <strong style="color: #fff;">${times[3]}h</strong></span><span>5G: <strong style="color: #fff;">${times[4]}h</strong></span><span>6G: <strong style="color: #fff;">${times[5]}h</strong></span>`;
+    html += `</div></div>`;
+
+    return html;
+}
+
+// ============================================================================
 // HEX EDITOR
 // ============================================================================
 
@@ -1916,6 +1998,70 @@ function openHexEditor(hexId) {
     const isMgT2E = !!stateObj.mgt2eData;
     const isT5 = !!stateObj.t5Data;
     const isCT = !!stateObj.ctData;
+    // Unhide Stellar Masking Checkbox if a Full System exists (CT, MgT2E, T5)
+    // AND any world or moon in that system is eligible for masking.
+    let systemRequiresMaskingToggle = false;
+
+    if (stateObj.mgtSystem) {
+        const sys = stateObj.mgtSystem;
+        sys.worlds.forEach(w => {
+            const star = sys.stars[w.parentStarIdx || 0];
+            const starDiam = getSafeStarDiameter(star);
+            if (UniversalMath.isMaskingEligible(starDiam, w.au, w.size)) systemRequiresMaskingToggle = true;
+
+            const subBodies = (w.moons || []).concat(w.significantBodies || []);
+            subBodies.forEach(m => {
+                if (UniversalMath.isMaskingEligible(starDiam, m.au, m.size)) systemRequiresMaskingToggle = true;
+            });
+        });
+    } else if (stateObj.ctSystem) {
+        const sys = stateObj.ctSystem;
+        const star = sys.stars[0];
+        const starDiam = getSafeStarDiameter(star);
+        let scanBodies = [];
+        sys.orbits.forEach(o => { if (o.contents) scanBodies.push(o.contents); });
+        if (sys.capturedPlanets) sys.capturedPlanets.forEach(p => scanBodies.push(p));
+        scanBodies.forEach(w => {
+            if (UniversalMath.isMaskingEligible(starDiam, w.distAU, w.size)) systemRequiresMaskingToggle = true;
+            if (w.satellites) {
+                w.satellites.forEach(m => {
+                    if (UniversalMath.isMaskingEligible(starDiam, m.distAU, m.size)) systemRequiresMaskingToggle = true;
+                });
+            }
+        });
+    } else if (stateObj.t5System) {
+        const sys = stateObj.t5System;
+        if (sys.stars) {
+            sys.stars.forEach(s => {
+                const starDiam = getSafeStarDiameter(s);
+                if (s.orbits) {
+                    s.orbits.forEach(o => {
+                        let w = o.contents;
+                        if (w && UniversalMath.isMaskingEligible(starDiam, w.distAU, w.size)) systemRequiresMaskingToggle = true;
+                        if (w && w.satellites) {
+                            w.satellites.forEach(sat => {
+                                if (UniversalMath.isMaskingEligible(starDiam, sat.distAU, sat.size)) systemRequiresMaskingToggle = true;
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    const maskContainer = document.getElementById('masking-toggle-container');
+    if (maskContainer) maskContainer.style.display = 'none'; // USER REQUEST: Turn off masking on world display
+
+    // Inject Mainworld Journey Times into the panel for quick reference - USER REQUEST: Keep off main panel
+    const mainJourneyRoot = document.getElementById('main-journey-times');
+    if (mainJourneyRoot) {
+        mainJourneyRoot.innerHTML = '';
+        const starObj = { diam: getSafeStarDiameter(stateObj.stars ? stateObj.stars[0] : (stateObj.mgtSystem?.stars[0] || stateObj.ctSystem?.stars[0] || stateObj.t5System?.stars[0])) };
+        const mwJourneyHTML = buildJourneyTimesUI(data, starObj, stateObj.isStellarMaskingActive);
+        mainJourneyRoot.innerHTML = mwJourneyHTML;
+        const mainJourneyRow = document.getElementById('main-journey-row');
+        if (mainJourneyRow) mainJourneyRow.style.display = 'none'; // USER REQUEST: Turn off journey times on world display
+    }
 
     // MgT2E / T5 Shared
     document.getElementById('edit-military').parentElement.style.display = (isMgT2E || isT5) ? 'flex' : 'none';
@@ -1929,8 +2075,8 @@ function openHexEditor(hexId) {
 
     // RTT EXCLUSIVE Bases
     const rttOnlyBases = [
-        'edit-gov-estate', 'edit-embassy', 'edit-moot', 'edit-merchant', 
-        'edit-shipyard', 'edit-megacorp', 'edit-scout-hostel', 
+        'edit-gov-estate', 'edit-embassy', 'edit-moot', 'edit-merchant',
+        'edit-shipyard', 'edit-megacorp', 'edit-scout-hostel',
         'edit-psionics', 'edit-sacred', 'edit-enclave', 'edit-ancients'
     ];
     rttOnlyBases.forEach(id => {
@@ -1965,7 +2111,7 @@ function openHexEditor(hexId) {
     const t5QuickStatsDiv = document.getElementById('editor-t5-quick-stats');
     const pbgInput = document.getElementById('edit-pbg');
     const stellarInput = document.getElementById('edit-stellar');
-    
+
     t5QuickStatsDiv.style.display = 'none';
     pbgInput.value = '';
     stellarInput.value = '';
@@ -1973,12 +2119,12 @@ function openHexEditor(hexId) {
     // Check if this world has T5-specific data
     if (data && data.popDigit !== undefined) {
         const toHex = (val) => typeof toUWPChar === 'function' ? toUWPChar(val) : val.toString(16).toUpperCase();
-        
+
         let belts = data.planetoidBelts !== undefined ? data.planetoidBelts : 0;
         let gasGiants = data.gasGiantsCount !== undefined ? data.gasGiantsCount : 0;
         pbgInput.value = `${toHex(data.popDigit)}${toHex(belts)}${toHex(gasGiants)}`;
         stellarInput.value = data.homestar || (data.stars && data.stars[0] ? data.stars[0].name : '');
-        
+
         t5QuickStatsDiv.style.display = 'grid';
     }
 
@@ -1986,13 +2132,11 @@ function openHexEditor(hexId) {
 }
 
 function populateEditorAccordions(stateObj) {
+
     // MgT2E Socioeconomics
     if (stateObj.mgtSocio) { // Only run if data exists
         // 1. Make the accordion button visible
         document.getElementById('acc-btn-mgt-socio').style.display = 'flex';
-
-        // 2. Start the accordion closed
-        document.getElementById('editor-socio-mgt-container').style.display = 'none';
 
         const ms = stateObj.mgtSocio;
 
@@ -2034,7 +2178,6 @@ function populateEditorAccordions(stateObj) {
     // T5 Socioeconomics
     if (stateObj.t5Socio) {
         document.getElementById('acc-btn-t5-socio').style.display = 'flex';
-        document.getElementById('editor-socio-t5-container').style.display = 'none';
         const ts = stateObj.t5Socio;
         const fields = {
             'edit-popm': ts.popMultiplier,
@@ -2069,8 +2212,40 @@ function populateEditorAccordions(stateObj) {
             root.innerHTML = '';
             const sys = stateObj.mgtSystem;
 
+            // PRE-SCAN: Check if ANY world or moon in this MgT2E system is masking-eligible
+            let systemIsMaskingEligible = false;
+            sys.worlds.forEach(w => {
+                const star = sys.stars[w.parentStarIdx || 0];
+                const starDiam = getSafeStarDiameter(star);
+                const effectiveAU = (w.au !== undefined) ? w.au : (w.distAU !== undefined ? w.distAU : 0);
+                if (starDiam > 0 && effectiveAU > 0 && w.size !== undefined) {
+                    if (UniversalMath.isMaskingEligible(starDiam, effectiveAU, w.size)) systemIsMaskingEligible = true;
+                }
+                if (w.satellites && !systemIsMaskingEligible) {
+                    w.satellites.forEach(m => {
+                        const effectiveMoonAU = (m.au !== undefined) ? m.au : (m.distAU !== undefined ? m.distAU : 0);
+                        if (starDiam > 0 && effectiveMoonAU > 0 && m.size !== undefined) {
+                            if (UniversalMath.isMaskingEligible(starDiam, effectiveMoonAU, m.size)) systemIsMaskingEligible = true;
+                        }
+                    });
+                }
+            });
+
+            const isChecked = stateObj.isStellarMaskingActive ? 'checked' : '';
+            let html = ``;
+
+            // Inject "Mask" Toggle only if eligible
+            if (systemIsMaskingEligible) {
+                html += `<div style="margin-bottom: 15px; display: flex; align-items: center; justify-content: center; background: rgba(255, 165, 0, 0.1); border: 1px solid #ffa500; border-radius: 4px; padding: 8px;">
+                    <label for="edit-stellar-mask" style="color: #ffa500; font-size: 0.9em; font-weight: bold; margin-right: 12px; cursor: pointer;">
+                        <i class="fas fa-sun"></i> Enable Stellar Mask Distances
+                    </label>
+                    <input type="checkbox" id="edit-stellar-mask" ${isChecked} style="width: 20px; height: 20px; cursor: pointer; margin: 0;">
+                </div>`;
+            }
+
             // System Overview Header with P-Type Limits
-            let html = `<div class="system-stats" style="grid-template-columns: 1fr;">
+            html += `<div class="system-stats" style="grid-template-columns: 1fr;">
                 <div style="text-align: center; color: #66fcf1; border-bottom: 1px dotted #45a29e; padding-bottom: 4px;">System Overview</div>
                 <span>HZco (Primary): <strong>${sys.hzco.toFixed(2)}</strong></span>
                 <span>Age: <strong>${sys.age.toFixed(2)} Gyr</strong></span>`;
@@ -2238,6 +2413,9 @@ function populateEditorAccordions(stateObj) {
 
                     html += `</div>`;
 
+                    // MgT2E Journey Times Injection (Now with Masking Preference)
+                    html += buildJourneyTimesUI(w, sys.stars[starIdx], stateObj.isStellarMaskingActive);
+
                     // Moons and Significant Bodies
                     let subBodies = [];
                     if (w.moons && w.moons.length > 0) subBodies = subBodies.concat(w.moons);
@@ -2348,7 +2526,12 @@ function populateEditorAccordions(stateObj) {
                                 html += `<span>Res: <strong>${toUWPChar(m.resourceRating)}</strong></span>`;
                             }
 
-                            html += `</div></div></details>`;
+                            html += `</div>`;
+
+                            // MgT2E Moon Journey Times Injection (Now with Masking Preference)
+                            html += buildJourneyTimesUI(m, sys.stars[starIdx], stateObj.isStellarMaskingActive);
+
+                            html += `</div></details>`;
                         });
                     }
 
@@ -2361,7 +2544,6 @@ function populateEditorAccordions(stateObj) {
             html += `</div>`;
 
             root.innerHTML = html;
-            root.style.display = 'none';
         }
     }
 
@@ -2372,10 +2554,46 @@ function populateEditorAccordions(stateObj) {
         if (root) {
             root.innerHTML = '';
             const sys = stateObj.ctSystem;
-            let mwBase = stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData;
+
+            // PRE-SCAN: Check if ANY world or moon in this CT system is masking-eligible
+            let systemIsMaskingEligible = false;
+            let scanBodies = [];
+            sys.orbits.forEach(o => { if (o.contents) scanBodies.push(o.contents); });
+            if (sys.capturedPlanets) sys.capturedPlanets.forEach(p => scanBodies.push(p));
+
+            const star = sys.stars[0];
+            const starDiam = getSafeStarDiameter(star);
+            if (starDiam > 0) {
+                scanBodies.forEach(w => {
+                    if (w.distAU !== undefined && w.size !== undefined) {
+                        if (UniversalMath.isMaskingEligible(starDiam, w.distAU, w.size)) systemIsMaskingEligible = true;
+                    }
+                    if (w.satellites && !systemIsMaskingEligible) {
+                        w.satellites.forEach(m => {
+                            if (m.distAU !== undefined && m.size !== undefined) {
+                                if (UniversalMath.isMaskingEligible(starDiam, m.distAU, m.size)) systemIsMaskingEligible = true;
+                            }
+                        });
+                    }
+                });
+            }
+
+            const isChecked = stateObj.isStellarMaskingActive ? 'checked' : '';
+            let html = ``;
+
+            // Inject "Mask" Toggle only if eligible
+            if (systemIsMaskingEligible) {
+                html += `<div style="margin-bottom: 15px; display: flex; align-items: center; justify-content: center; background: rgba(255, 165, 0, 0.1); border: 1px solid #ffa500; border-radius: 4px; padding: 8px;">
+                    <label for="edit-stellar-mask" style="color: #ffa500; font-size: 0.9em; font-weight: bold; margin-right: 12px; cursor: pointer;">
+                        <i class="fas fa-sun"></i> Enable Stellar Mask Distances
+                    </label>
+                    <input type="checkbox" id="edit-stellar-mask" ${isChecked} style="width: 20px; height: 20px; cursor: pointer; margin: 0;">
+                </div>`;
+            }
 
             // System Overview Header
-            let html = `<div class="system-stats" style="grid-template-columns: 1fr;">
+            let mwBase = stateObj.ctData || stateObj.mgt2eData || stateObj.t5Data;
+            html += `<div class="system-stats" style="grid-template-columns: 1fr;">
                 <div style="text-align: center; color: #66fcf1; border-bottom: 1px dotted #45a29e; padding-bottom: 4px;">CT Scouts Overview</div>
                 <span>Nature: <strong>${sys.nature}</strong></span>
                 <span>Total Orbits: <strong>${sys.maxOrbits}</strong></span>`;
@@ -2488,6 +2706,9 @@ function populateEditorAccordions(stateObj) {
 
                         html += `</div>`;
 
+                        // CT Journey Times Injection (Now with Masking Preference)
+                        html += buildJourneyTimesUI(w, sys.stars[starIdx], stateObj.isStellarMaskingActive);
+
                         // Satellites
                         if (w.satellites && w.satellites.length > 0) {
                             // Sort satellites by distance (pd) before rendering
@@ -2518,7 +2739,12 @@ function populateEditorAccordions(stateObj) {
                                 if (sat.rotationPeriod) html += `<span>Day: <strong>${sat.rotationPeriod}</strong></span>`;
                                 if (sat.axialTilt !== undefined) html += `<span>Tilt: <strong>${sat.axialTilt}°</strong></span>`;
 
-                                html += `</div></div></details>`;
+                                html += `</div>`; // Close system-stats grid
+
+                                // CT Moon Journey Times Injection (Now with Masking Preference)
+                                html += buildJourneyTimesUI(sat, sys.stars[starIdx], stateObj.isStellarMaskingActive);
+
+                                html += `</div></details>`;
                             });
                         }
 
@@ -2532,7 +2758,6 @@ function populateEditorAccordions(stateObj) {
             html += `</div>`;
 
             root.innerHTML = html;
-            root.style.display = 'none';
         }
     }
 
@@ -2545,8 +2770,44 @@ function populateEditorAccordions(stateObj) {
             const sys = stateObj.t5System;
             let mwBase = stateObj.t5Data || stateObj.mgt2eData || stateObj.ctData;
 
+            // PRE-SCAN: Check if ANY world or moon in this T5 system is masking-eligible
+            let systemIsMaskingEligible = false;
+            if (sys.stars) {
+                sys.stars.forEach(s => {
+                    const starDiam = getSafeStarDiameter(s);
+                    if (starDiam > 0 && s.orbits) {
+                        s.orbits.forEach(o => {
+                            let w = o.contents;
+                            if (w && w.distAU !== undefined && w.size !== undefined) {
+                                if (UniversalMath.isMaskingEligible(starDiam, w.distAU, w.size)) systemIsMaskingEligible = true;
+                            }
+                            if (w && w.satellites && !systemIsMaskingEligible) {
+                                w.satellites.forEach(sat => {
+                                    if (sat.distAU !== undefined && sat.size !== undefined) {
+                                        if (UniversalMath.isMaskingEligible(starDiam, sat.distAU, sat.size)) systemIsMaskingEligible = true;
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+
+            const isChecked = stateObj.isStellarMaskingActive ? 'checked' : '';
+            let html = ``;
+
+            // Inject "Mask" Toggle only if eligible
+            if (systemIsMaskingEligible) {
+                html += `<div style="margin-bottom: 15px; display: flex; align-items: center; justify-content: center; background: rgba(255, 165, 0, 0.1); border: 1px solid #ffa500; border-radius: 4px; padding: 8px;">
+                    <label for="edit-stellar-mask" style="color: #ffa500; font-size: 0.9em; font-weight: bold; margin-right: 12px; cursor: pointer;">
+                        <i class="fas fa-sun"></i> Enable Stellar Mask Distances
+                    </label>
+                    <input type="checkbox" id="edit-stellar-mask" ${isChecked} style="width: 20px; height: 20px; cursor: pointer; margin: 0;">
+                </div>`;
+            }
+
             // 1. Stellar Header
-            let html = `<div class="system-stats" style="grid-template-columns: 1fr;">
+            html += `<div class="system-stats" style="grid-template-columns: 1fr;">
                 <div style="text-align: center; color: #66fcf1; border-bottom: 1px dotted #45a29e; padding-bottom: 4px;">T5: ${mwBase.name || stateObj.name || 'Unnamed'} Profile</div>`;
             if (sys.stars) {
                 sys.stars.forEach(star => {
@@ -2572,96 +2833,104 @@ function populateEditorAccordions(stateObj) {
                     if (star.orbits) {
                         star.orbits.forEach(o => {
                             let w = o.contents;
-                    if (!w || w.type === 'Empty') {
-                        // html += `<div style="color: #666; font-size: 0.85em; padding: 2px 0;">Orbit ${o.orbit}: Empty</div>`;
-                        return;
-                    }
-
-                    let uwp = w.type === 'Mainworld' ? mwBase.uwp : (w.uwpSecondary || w.uwp || '-');
-                    let typeLabel = w.worldType || w.type;
-                    if (w.type === 'Mainworld') typeLabel = `Mainworld (${typeLabel})`;
-                    if (w.type === 'Gas Giant' && !w.worldType) typeLabel = `${w.size === 15 ? 'Large' : 'Small'} Gas Giant`;
-                    let labelColor = w.type === 'Mainworld' ? '#ffa500' : '#66fcf1';
-                    let summaryStyle = w.type === 'Mainworld' ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
-
-                    let zoneLabel = '';
-                    if (w.type === 'Mainworld' && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
-                        const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
-                        zoneLabel = ` | <span style="color: ${zColor}">${mwBase.travelZone}</span>`;
-                    }
-
-                    html += `<details>`;
-                    html += `<summary ${summaryStyle}>Orbit ${o.orbit} [${w.climateZone || 'Cold'}] <span class="sys-title-info">${typeLabel}${zoneLabel}</span></summary>`;
-                    html += `<div class="system-node">`;
-
-                    if (w.type !== 'Planetoid Belt') {
-                        html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <strong style="color: ${labelColor}">${uwp}</strong></div>`;
-                        
-                        const tCodes = (w.type === 'Mainworld' && mwBase && mwBase.tradeCodes) 
-                            ? mwBase.tradeCodes 
-                            : (w.tradeCodes || []);
-                        if (tCodes.length > 0) {
-                            html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Codes: <strong style="color: #66fcf1">${tCodes.join(' ')}</strong></div>`;
-                        }
-                    }
-
-                    if (w.type === 'Mainworld' && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
-                        const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
-                        const specialCodes = (mwBase.tradeCodes || []).filter(c => ['Fo', 'Da', 'Pz'].includes(c));
-                        const codeStr = specialCodes.length > 0 ? ` - [${specialCodes.join('/')}]` : '';
-                        html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor}; margin-bottom: 8px;">Caution: ${mwBase.travelZone} Zone${codeStr}</div>`;
-                    }
-
-                    html += `<div class="system-stats">`;
-                    html += `<span>Distance: <strong>${(o.distAU || 0).toFixed(2)} AU</strong></span>`;
-
-                    if (w.type !== 'Planetoid Belt') {
-                        if (w.diamKm) html += `<span>Diameter: <strong>${w.diamKm.toLocaleString()} km</strong></span>`;
-                        if (w.density !== undefined) html += `<span>Density: <strong>${(w.density || 0).toFixed(1)}</strong></span>`;
-                        if (w.gravity !== undefined) html += `<span>Gravity: <strong>${(w.gravity || 0).toFixed(2)} G</strong></span>`;
-                    }
-                    html += `</div>`;
-
-                    if (w.satellites && w.satellites.length > 0) {
-                        w.satellites.forEach((sat, satIdx) => {
-                            const isMW = sat.type === 'Mainworld';
-                            const satLabel = isMW ? 'Mainworld' : `Moon ${satIdx + 1} - ${sat.worldType || 'Satellite'}`;
-                            const satUwp = isMW ? (mwBase ? mwBase.uwp : sat.uwp || '-') : (sat.uwpSecondary || sat.uwp || '-');
-                            const satColor = isMW ? '#ffa500' : '#66fcf1';
-                            const satSummaryStyle = isMW ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
-
-                            let satZoneLabel = '';
-                            if (isMW && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
-                                const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
-                                satZoneLabel = ` | <span style="color: ${zColor}">${mwBase.travelZone}</span>`;
+                            if (!w || w.type === 'Empty') {
+                                // html += `<div style="color: #666; font-size: 0.85em; padding: 2px 0;">Orbit ${o.orbit}: Empty</div>`;
+                                return;
                             }
 
-                            html += `<details style="margin-left: 20px;" ${isMW ? 'open' : ''}>`;
-                            html += `<summary ${satSummaryStyle}>${satLabel} <span class="sys-title-info">Size ${sat.size} | ${satUwp}${satZoneLabel}</span></summary>`;
+                            let uwp = w.type === 'Mainworld' ? mwBase.uwp : (w.uwpSecondary || w.uwp || '-');
+                            let typeLabel = w.worldType || w.type;
+                            if (w.type === 'Mainworld') typeLabel = `Mainworld (${typeLabel})`;
+                            if (w.type === 'Gas Giant' && !w.worldType) typeLabel = `${w.size === 15 ? 'Large' : 'Small'} Gas Giant`;
+                            let labelColor = w.type === 'Mainworld' ? '#ffa500' : '#66fcf1';
+                            let summaryStyle = w.type === 'Mainworld' ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
+
+                            let zoneLabel = '';
+                            if (w.type === 'Mainworld' && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                                const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
+                                zoneLabel = ` | <span style="color: ${zColor}">${mwBase.travelZone}</span>`;
+                            }
+
+                            html += `<details>`;
+                            html += `<summary ${summaryStyle}>Orbit ${o.orbit} [${w.climateZone || 'Cold'}] <span class="sys-title-info">${typeLabel}${zoneLabel}</span></summary>`;
                             html += `<div class="system-node">`;
 
-                            html += `<div style="margin-bottom: 6px; font-family: monospace;"><span style="color: ${satColor};">UWP:</span> <strong style="color: ${satColor};">${satUwp}</strong></div>`;
-                            
-                            const sCodes = (isMW && mwBase && mwBase.tradeCodes) 
-                                ? mwBase.tradeCodes 
-                                : (sat.tradeCodes || []);
-                            if (sCodes.length > 0) {
-                                html += `<div style="margin-bottom: 6px; font-size: 0.85em; color: #a0a8b0;">Codes: <strong style="color: #66fcf1">${sCodes.join(' ')}</strong></div>`;
+                            if (w.type !== 'Planetoid Belt') {
+                                html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <strong style="color: ${labelColor}">${uwp}</strong></div>`;
+
+                                const tCodes = (w.type === 'Mainworld' && mwBase && mwBase.tradeCodes)
+                                    ? mwBase.tradeCodes
+                                    : (w.tradeCodes || []);
+                                if (tCodes.length > 0) {
+                                    html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Codes: <strong style="color: #66fcf1">${tCodes.join(' ')}</strong></div>`;
+                                }
                             }
 
-                            if (isMW && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                            if (w.type === 'Mainworld' && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
                                 const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
-                                html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor}; margin-bottom: 8px;">Caution: ${mwBase.travelZone} Zone</div>`;
+                                const specialCodes = (mwBase.tradeCodes || []).filter(c => ['Fo', 'Da', 'Pz'].includes(c));
+                                const codeStr = specialCodes.length > 0 ? ` - [${specialCodes.join('/')}]` : '';
+                                html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor}; margin-bottom: 8px;">Caution: ${mwBase.travelZone} Zone${codeStr}</div>`;
                             }
 
                             html += `<div class="system-stats">`;
-                            if (sat.diamKm) html += `<span>Diameter: <strong>${sat.diamKm.toLocaleString()} km</strong></span>`;
-                            if (sat.gravity !== undefined) html += `<span>Gravity: <strong>${(sat.gravity || 0).toFixed(2)} G</strong></span>`;
-                            html += `</div></div></details>`;
-                        });
-                    }
+                            html += `<span>Distance: <strong>${(o.distAU || 0).toFixed(2)} AU</strong></span>`;
 
-                    html += `</div></details>`;
+                            if (w.type !== 'Planetoid Belt') {
+                                if (w.diamKm) html += `<span>Diameter: <strong>${w.diamKm.toLocaleString()} km</strong></span>`;
+                                if (w.density !== undefined) html += `<span>Density: <strong>${(w.density || 0).toFixed(1)}</strong></span>`;
+                                if (w.gravity !== undefined) html += `<span>Gravity: <strong>${(w.gravity || 0).toFixed(2)} G</strong></span>`;
+                            }
+                            html += `</div>`;
+
+                            // T5 Journey Times Injection (Now with Masking Preference)
+                            html += buildJourneyTimesUI(w, star, stateObj.isStellarMaskingActive);
+
+                            if (w.satellites && w.satellites.length > 0) {
+                                w.satellites.forEach((sat, satIdx) => {
+                                    const isMW = sat.type === 'Mainworld';
+                                    const satLabel = isMW ? 'Mainworld' : `Moon ${satIdx + 1} - ${sat.worldType || 'Satellite'}`;
+                                    const satUwp = isMW ? (mwBase ? mwBase.uwp : sat.uwp || '-') : (sat.uwpSecondary || sat.uwp || '-');
+                                    const satColor = isMW ? '#ffa500' : '#66fcf1';
+                                    const satSummaryStyle = isMW ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
+
+                                    let satZoneLabel = '';
+                                    if (isMW && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                                        const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
+                                        satZoneLabel = ` | <span style="color: ${zColor}">${mwBase.travelZone}</span>`;
+                                    }
+
+                                    html += `<details style="margin-left: 20px;" ${isMW ? 'open' : ''}>`;
+                                    html += `<summary ${satSummaryStyle}>${satLabel} <span class="sys-title-info">Size ${sat.size} | ${satUwp}${satZoneLabel}</span></summary>`;
+                                    html += `<div class="system-node">`;
+
+                                    html += `<div style="margin-bottom: 6px; font-family: monospace;"><span style="color: ${satColor};">UWP:</span> <strong style="color: ${satColor};">${satUwp}</strong></div>`;
+
+                                    const sCodes = (isMW && mwBase && mwBase.tradeCodes)
+                                        ? mwBase.tradeCodes
+                                        : (sat.tradeCodes || []);
+                                    if (sCodes.length > 0) {
+                                        html += `<div style="margin-bottom: 6px; font-size: 0.85em; color: #a0a8b0;">Codes: <strong style="color: #66fcf1">${sCodes.join(' ')}</strong></div>`;
+                                    }
+
+                                    if (isMW && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                                        const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
+                                        html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor}; margin-bottom: 8px;">Caution: ${mwBase.travelZone} Zone</div>`;
+                                    }
+
+                                    html += `<div class="system-stats">`;
+                                    if (sat.diamKm) html += `<span>Diameter: <strong>${sat.diamKm.toLocaleString()} km</strong></span>`;
+                                    if (sat.gravity !== undefined) html += `<span>Gravity: <strong>${(sat.gravity || 0).toFixed(2)} G</strong></span>`;
+                                    html += `</div>`; // Close system-stats grid
+
+                                    // T5 Moon Journey Times Injection (Now with Masking Preference)
+                                    html += buildJourneyTimesUI(sat, star, stateObj.isStellarMaskingActive);
+
+                                    html += `</div></details>`;
+                                });
+                            }
+
+                            html += `</div></details>`;
                         });
                     }
                     html += `</div>`;
@@ -2670,7 +2939,6 @@ function populateEditorAccordions(stateObj) {
 
             html += `</div>`;
             root.innerHTML = html;
-            root.style.display = 'none';
         }
     }
 
@@ -2690,7 +2958,7 @@ function populateEditorAccordions(stateObj) {
                 const isMain = body.habitationType === 'Homeworld' || body.isMainworld;
                 const summaryStyle = isMain ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
                 const uwpColor = isMain ? '#ffa500' : '#66fcf1';
-                
+
                 // Add the Mainworld prefix if applicable
                 const baseType = body.type || body.worldClass || 'Body';
                 const typeLabel = isMain ? `Mainworld (${baseType})` : baseType;
@@ -2703,7 +2971,7 @@ function populateEditorAccordions(stateObj) {
                 bHtml += `<div class="system-stats">`;
                 bHtml += `<span>Type: <strong>${body.type}</strong></span>`;
                 bHtml += `<span>Class: <strong>${body.worldClass}</strong></span>`;
-                
+
                 // Physical & Environmental Stats
                 if (body.chemistry && body.chemistry !== 'None') bHtml += `<span>Chemistry: <strong>${body.chemistry}</strong></span>`;
                 if (body.biosphere !== undefined) bHtml += `<span>Biosphere: <strong>${body.biosphere}</strong></span>`;
@@ -2722,6 +2990,9 @@ function populateEditorAccordions(stateObj) {
                 if (body.canBeTerraformed) bHtml += `<span class="system-stats-full" style="color: #66fcf1; border-color: #45a29e;">Terraforming Potential: <strong>${body.terraformPoints} pts</strong></span>`;
 
                 bHtml += `</div>`;
+
+                // RTT Journey Times Injection (Base Only)
+                bHtml += buildBaseJourneyTimesUI(body.size);
 
                 if (body.satellites && body.satellites.length > 0) {
                     body.satellites.forEach(sat => {
@@ -2762,7 +3033,6 @@ function populateEditorAccordions(stateObj) {
 
             html += `</div>`;
             root.innerHTML = html;
-            root.style.display = 'none';
         }
     }
 }
@@ -2838,7 +3108,7 @@ function closeHexEditor() {
     document.getElementById('editor-t5-system-root').innerHTML = '';
     document.getElementById('acc-btn-t5-system').style.display = 'none';
     document.getElementById('acc-btn-t5-system').classList.remove('active');
-    
+
     document.getElementById('acc-btn-rtt-system').style.display = 'none';
     document.getElementById('acc-btn-rtt-system').classList.remove('active');
 
@@ -2854,6 +3124,18 @@ function closeHexEditor() {
 function setupHexEditor() {
     document.getElementById('btn-editor-cancel').addEventListener('click', closeHexEditor);
     document.getElementById('btn-editor-save').addEventListener('click', saveHexEditorChanges);
+
+    // NEW: Listen for Stellar Masking toggles to trigger a dynamic UI refresh
+    // We use event delegation on the hex-editor container because this toggle is dynamically built
+    document.getElementById('hex-editor').addEventListener('change', (e) => {
+        if (e.target && e.target.id === 'edit-stellar-mask') {
+            if (editingHexId && hexStates.has(editingHexId)) {
+                const s = hexStates.get(editingHexId);
+                s.isStellarMaskingActive = e.target.checked; // Persist preference
+                populateEditorAccordions(s);
+            }
+        }
+    });
 }
 
 function saveHexEditorChanges() {
@@ -2926,14 +3208,14 @@ function saveHexEditorChanges() {
         if (t5QuickStatsDiv.style.display !== 'none') {
             const pbgVal = document.getElementById('edit-pbg').value.padEnd(3, '0').toUpperCase();
             const fromHex = (char) => typeof fromUWPChar === 'function' ? fromUWPChar(char) : parseInt(char, 16) || 0;
-            
+
             stateObj.t5Data.popDigit = fromHex(pbgVal[0]);
             stateObj.t5Data.planetoidBelts = fromHex(pbgVal[1]);
             stateObj.t5Data.gasGiantsCount = fromHex(pbgVal[2]);
-            
+
             // Update the boolean gasGiant flag just in case
             stateObj.t5Data.gasGiant = stateObj.t5Data.gasGiantsCount > 0;
-            
+
             stateObj.t5Data.homestar = document.getElementById('edit-stellar').value.trim();
         }
 
@@ -3381,7 +3663,7 @@ function importT5Tab(fileContent, fileName) {
         if (idxStars !== -1 && row[idxStars] !== "-") {
             const rawStars = row[idxStars].trim();
             t5Data.homestar = rawStars;
-            
+
             const tokens = rawStars.split(/\s+/);
             const parsedStars = [];
             for (let i = 0; i < tokens.length; i++) {

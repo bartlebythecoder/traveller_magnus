@@ -452,7 +452,39 @@
                         } else if (s === sys.mainworld) {
                             calculateT5PhysicalStats(s); // Recalculate mainworld physics
                         }
+
+                        // Sean Protocol: Satellites
+                        if (!s.distAU && body.distAU) { s.distAU = body.distAU; }
+                        if (s.distAU) {
+                            const orbitMkmSat = (s.distAU * 149597870) / 1000000;
+                            _tResult("Orbit Distance", `${s.distAU.toFixed(2)} AU (${orbitMkmSat.toFixed(1)} M km)`);
+                            
+                            const sSize = (typeof s.size === 'string') ? UniversalMath.fromUWPChar(s.size) : (s.size || 0);
+                            const world100DSat = (sSize * 160000) / 1000000;
+                            _tResult("World 100D Limit", `${world100DSat.toFixed(2)} M km`);
+
+                            if (typeof UniversalMath !== 'undefined' && UniversalMath.isMaskingEligible) {
+                                const isEligible = UniversalMath.isMaskingEligible(star.diam, s.distAU, sSize);
+                                _tResult("Stellar Masking", isEligible ? "ELIGIBLE" : "Ineligible");
+                            }
+                        }
                     });
+                }
+
+                // Sean Protocol: Body (Main Body)
+                if (body.distAU || o.distAU) {
+                    const distAU = body.distAU || o.distAU;
+                    const orbitMkm = (distAU * 149597870) / 1000000;
+                    _tResult("Orbit Distance", `${distAU.toFixed(3)} AU (${orbitMkm.toFixed(1)} M km)`);
+                    
+                    const bSize = (typeof body.size === 'string') ? UniversalMath.fromUWPChar(body.size) : (body.size || 0);
+                    const world100D = (bSize * 160000) / 1000000;
+                    _tResult("World 100D Limit", `${world100D.toFixed(2)} M km`);
+
+                    if (typeof UniversalMath !== 'undefined' && UniversalMath.isMaskingEligible) {
+                        const isEligible = UniversalMath.isMaskingEligible(star.diam, distAU, bSize);
+                        _tResult("Stellar Masking", isEligible ? "ELIGIBLE" : "Ineligible");
+                    }
                 }
             });
         });

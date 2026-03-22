@@ -115,8 +115,14 @@ function generateSystemSkeleton() {
     primary.mass = (starMassTable[primary.size] && starMassTable[primary.size][primary.specKey]) || 1.0;
     primary.luminosity = (luminosityTable[primary.size] && luminosityTable[primary.size][primary.specKey]) || 1.0;
     
+    primary.diam = (typeof UniversalMath !== 'undefined' && UniversalMath.estimateStellarDiameter) 
+                    ? UniversalMath.estimateStellarDiameter(priType, priDecimal, priSize) 
+                    : 1.0;
     sys.stars.push(primary);
     tResult('Primary Selection', `${primary.name} (${primary.specKey})`);
+    tResult('Primary Diameter', `${primary.diam} Solar`);
+    const limit100D = (primary.diam * 1392700 * 100) / 1000000;
+    tResult("100D Limit", `${limit100D.toFixed(1)} M km`);
 
     // 3. Generate Companion Stars (Step 2C)
     if (sys.nature === 'Binary' || sys.nature === 'Trinary') {
@@ -150,8 +156,14 @@ function generateSystemSkeleton() {
                 specKey: compType + compDecimal,
                 name: `${compType}${compDecimal} ${compSize}`
             };
+            companion.diam = (typeof UniversalMath !== 'undefined' && UniversalMath.estimateStellarDiameter) 
+                            ? UniversalMath.estimateStellarDiameter(compType, compDecimal, compSize) 
+                            : 1.0;
             companion.mass = (starMassTable[companion.size] && starMassTable[companion.size][companion.specKey]) || 1.0;
             companion.luminosity = (luminosityTable[companion.size] && luminosityTable[companion.size][companion.specKey]) || 1.0;
+            tResult(`${companion.role} Diameter`, `${companion.diam} Solar`);
+            const limit100D = (companion.diam * 1392700 * 100) / 1000000;
+            tResult("100D Limit", `${limit100D.toFixed(1)} M km`);
             
             // 4. Companion Orbit Placement (Step 2D)
             const orbitRoll = tRoll2D('Orbit Placement Roll') + (i === 1 ? 4 : 0);
@@ -461,6 +473,22 @@ function internalPhysicalPass(sys) {
         if (body.type === 'Gas Giant') {
             body.temperature = 100; // GC Baseline
         }
+
+        // Sean Protocol: Distance and 100D Logging
+        if (body.distAU) {
+            const orbitMkm = (body.distAU * 149597870) / 1000000;
+            tResult("Orbit Distance", `${body.distAU.toFixed(2)} AU (${orbitMkm.toFixed(1)} M km)`);
+            
+            const worldSize = (typeof body.size === 'string') ? UniversalMath.fromUWPChar(body.size) : (body.size || 0);
+            const world100D = (worldSize * 160000) / 1000000;
+            tResult("World 100D Limit", `${world100D.toFixed(2)} M km`);
+
+            // Stellar Masking Eligibility
+            if (typeof UniversalMath !== 'undefined' && UniversalMath.isMaskingEligible) {
+                const isEligible = UniversalMath.isMaskingEligible(sys.stars[0].diam, body.distAU, worldSize);
+                tResult("Stellar Masking", isEligible ? "ELIGIBLE" : "Ineligible");
+            }
+        }
     });
 
     // 2. Captured Planets Pass
@@ -473,6 +501,22 @@ function internalPhysicalPass(sys) {
             p.distAU = orbitalAU[Math.min(Math.floor(p.orbit), orbitalAU.length - 1)] || 1.0;
             p.orbitalPeriod = Math.sqrt(Math.pow(p.distAU, 3) / (sys.stars[0].mass || 1.0));
             p.gravity = (p.size === 0) ? 0 : (p.size * 0.125);
+
+            // Sean Protocol: Distance and 100D Logging
+            if (p.distAU) {
+                const orbitMkm = (p.distAU * 149597870) / 1000000;
+                tResult("Orbit Distance", `${p.distAU.toFixed(2)} AU (${orbitMkm.toFixed(1)} M km)`);
+                
+                const worldSize = (typeof p.size === 'string') ? UniversalMath.fromUWPChar(p.size) : (p.size || 0);
+                const world100D = (worldSize * 160000) / 1000000;
+                tResult("World 100D Limit", `${world100D.toFixed(2)} M km`);
+
+                // Stellar Masking Eligibility
+                if (typeof UniversalMath !== 'undefined' && UniversalMath.isMaskingEligible) {
+                    const isEligible = UniversalMath.isMaskingEligible(sys.stars[0].diam, p.distAU, worldSize);
+                    tResult("Stellar Masking", isEligible ? "ELIGIBLE" : "Ineligible");
+                }
+            }
         });
     }
 

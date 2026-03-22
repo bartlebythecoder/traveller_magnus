@@ -1,5 +1,8 @@
 # Changelog
 
+### [v0.5.1] - 2026-03-21
+1. **System Expansion:** Added Times to Jump Point.
+
 ### [v0.5] - 2026-03-20
 1. **Mongoose 2E Engine:** Implemented New Mongoose Bottom-Up Generation.
 2. **Cross-Engine Compatibility:** Implemented cross-engine system expansion, allowing hexes imported or generated in T5 or Classic Traveller to be seamlessly expanded using the Mongoose Top-Down engine (and vice versa) while strictly preserving pre-existing stellar profiles.

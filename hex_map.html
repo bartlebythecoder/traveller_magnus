@@ -61,9 +61,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above So Below</span></h1>
-            <div class="splash-banner">v0.5 New Mongoose Bottom-Up Generation</div>
+            <div class="splash-banner">v0.5.1 Added Times to Jump Point</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.5 </div>
+            <div class="splash-version">v0.5.1</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -296,7 +296,7 @@
     <div id="help-modal">
         <div style="text-align: center; border-bottom: 2px solid #45a29e; padding-bottom: 15px; margin-bottom: 20px;">
             <h2 style="margin: 0 0 5px 0; color: #66fcf1; font-size: 24px;">As Above So Below</h2>
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.5</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.5.1</span>
             <p style="margin: 5px 0; color: #c5c6c7; font-size: 12px; font-style: italic;">Created by: <span
                     id="app-credits">Bartleby the Coder</span></p>
         </div>
@@ -431,6 +431,25 @@
             <label>Trade Codes (Space Separated):</label>
             <input type="text" id="edit-trade-codes">
         </div>
+
+        <!-- Journey Times and Global Masking Toggle -->
+        <div class="editor-row" id="main-journey-row"
+            style="display: none; grid-column: span 2; margin-top: 10px; background: rgba(102, 252, 241, 0.05); border: 1px solid rgba(69, 162, 158, 0.4); border-radius: 4px; padding: 6px;">
+            <div id="main-journey-times"
+                style="flex: 2; border-right: 1px dotted rgba(102, 252, 241, 0.3); padding-right: 10px;">
+                <!-- Journey times content injected via JavaScript -->
+            </div>
+            <div id="masking-toggle-container"
+                style="flex: 1; display: flex; align-items: center; justify-content: center; padding-left: 10px;">
+                <label for="edit-stellar-mask"
+                    style="color: #ffa500; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: pointer;">
+                    Enable Stellar Mask Distances
+                </label>
+                <input type="checkbox" id="edit-stellar-mask" style="width: 18px; height: 18px; cursor: pointer;">
+            </div>
+        </div>
+
+
 
         <div class="editor-grid" id="editor-t5-quick-stats"
             style="display: none; margin-top: 10px; padding: 10px; background: rgba(69, 162, 158, 0.1); border-radius: 4px; border-left: 3px solid #45a29e;">

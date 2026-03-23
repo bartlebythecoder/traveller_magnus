@@ -24,6 +24,7 @@
     const _roll1D = (typeof roll1D === 'function') ? roll1D : () => Math.floor(_rng() * 6) + 1;
     const _roll2D = (typeof roll2D === 'function') ? roll2D : () => _roll1D() + _roll1D();
     const _log = (typeof writeLogLine === 'function') ? writeLogLine : console.log;
+    const _tResult = (typeof tResult === 'function') ? tResult : (label, val) => _log(`${label}: ${val}`);
 
     const HZ_DATA = {
         'O': { 'Ia': 15, 'Ib': 15, 'II': 14, 'III': 13, 'IV': 12, 'V': 11, 'D': 1 },

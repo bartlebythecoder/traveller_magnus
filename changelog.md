@@ -1,5 +1,10 @@
 # Changelog
 
+### [v0.5.2] - 2026-03-23
+1. **Architecture:** Refactored input.js
+2. **Mongoose Engine:** Socio-economic expansion now preserves existing population digits during generation (adds T5 compatibility).
+3. **T5 Engine:** Resolved `_tResult is not defined` reference error during system expansion when logging orbital data.
+
 ### [v0.5.1] - 2026-03-21
 1. **System Expansion:** Added Times to Jump Point.
 

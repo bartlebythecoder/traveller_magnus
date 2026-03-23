@@ -412,7 +412,13 @@
         tSection('World Population (P-Value)');
         let pValue = 0;
         let totalWorldPop = 0;
-        if (base.pop >= 10) {
+        if (base.popDigit !== undefined && base.popDigit !== null) {
+            pValue = base.popDigit;
+            tResult('P-Value (Existing popDigit)', pValue);
+        } else if (base.pValue !== undefined && base.pValue !== null) {
+            pValue = base.pValue;
+            tResult('P-Value (Existing pValue)', pValue);
+        } else if (base.pop >= 10) {
             pValue = 1;
             tResult('Initial P-Value', 1);
             while (pValue < 9) {
@@ -1771,6 +1777,7 @@
         // =====================================================================
     
         base.pValue = pValue;
+        base.popDigit = pValue;
         base.totalWorldPop = totalWorldPop;
         base.pcr = pcr;
         base.urbanPercent = urbanPercent;

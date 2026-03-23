@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.5.1";
-const APP_BANNER = "v0.5.1 - Added Times to Jump Point";
+const APP_VERSION = "v0.5.2";
+const APP_BANNER = "v0.5.2 - Refactored input.js";
 
 // -----------------------------------------------------------------------------
 // Application State

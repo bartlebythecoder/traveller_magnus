@@ -82,3 +82,7 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 This tool is an unofficial fan project and is not affiliated with Mongoose Publishing or Far Future Enterprises. All Traveller trademarks and copyrights are used under fair use for fan-created content.
 ---
 *Created by BIAS-CCR. Dedicated to the explorers of the Third Imperium and beyond.*
+
+## Links
+
+[![Hypercommit](https://img.shields.io/badge/Hypercommit-DB2475)](https://hypercommit.com/traveller-magnus)

@@ -208,15 +208,111 @@
         return sys;
     }
 
+    /**
+     * Developer Expansion Orchestrator:
+     * Expands an existing system object with socioeconomic data without regenerating the system structure.
+     * Following the "Audit & Repair" pattern to satisfy social engine dependencies.
+     * 
+     * @param {string} hexId - Hex identifier
+     * @param {Object} stateObj - Current world state object from hexStates
+     * @returns {Object} Modified system object
+     */
+    function expandLoadedSocioeconomics(hexId, stateObj) {
+        if (!stateObj || !stateObj.mgtSystem) {
+            console.error("[MgT2E Generator] No existing system data found for expansion.");
+            return null;
+        }
+
+        const sys = stateObj.mgtSystem;
+        // Search all potential data objects for the manual/loaded source of truth, strictly matching Hex Editor priority.
+        const mainworldBase = stateObj.rttData || stateObj.t5Data || stateObj.mgt2eData || stateObj.ctData || sys.worlds.find(w => w.type === 'Mainworld') || sys.worlds[0];
+
+        if (!mainworldBase) {
+            console.error("[MgT2E Generator] No mainworld data found for expansion.");
+            return null;
+        }
+
+        // Initialize trace logging if enabled
+        if (typeof startTrace === 'function' && typeof window !== 'undefined' && window.isLoggingEnabled) {
+            startTrace(hexId, 'MgT2E Dev Expansion (No Regen)');
+        }
+
+        // --- PHASE 0: DATA SYNC ---
+        // Ensure the system's internal mainworld reference matches our manual/loaded source of truth.
+        // This prevents the engine from skipping if the internal object was never updated.
+        let internalMW = sys.worlds.find(w => w.type === 'Mainworld') || sys.worlds[0];
+        if (internalMW && mainworldBase && internalMW !== mainworldBase) {
+            // Transfer core properties required for the SocioEngine checks
+            internalMW.pop = (mainworldBase.pop !== undefined) ? mainworldBase.pop : internalMW.pop;
+            internalMW.popDigit = (mainworldBase.popDigit !== undefined) ? mainworldBase.popDigit : internalMW.popDigit;
+            internalMW.pValue = (mainworldBase.pValue !== undefined) ? mainworldBase.pValue : (mainworldBase.popDigit !== undefined ? mainworldBase.popDigit : internalMW.pValue);
+            internalMW.pbg = mainworldBase.pbg || internalMW.pbg;
+            internalMW.uwp = mainworldBase.uwp || internalMW.uwp;
+            
+            // Sync all other UWP fields
+            internalMW.starport = mainworldBase.starport || internalMW.starport;
+            internalMW.size = mainworldBase.size !== undefined ? mainworldBase.size : internalMW.size;
+            internalMW.atm = mainworldBase.atm !== undefined ? mainworldBase.atm : (mainworldBase.atmCode !== undefined ? mainworldBase.atmCode : internalMW.atm);
+            internalMW.hydro = mainworldBase.hydro !== undefined ? mainworldBase.hydro : (mainworldBase.hydroCode !== undefined ? mainworldBase.hydroCode : internalMW.hydro);
+            internalMW.gov = mainworldBase.gov !== undefined ? mainworldBase.gov : internalMW.gov;
+            internalMW.law = mainworldBase.law !== undefined ? mainworldBase.law : internalMW.law;
+            internalMW.tl = mainworldBase.tl !== undefined ? mainworldBase.tl : internalMW.tl;
+        }
+
+
+        // --- PHASE 1: PHYSICAL AUDIT & REPAIR ---
+        // Socio-economic engines require certain physical foundations (Resource Rating, Habitability, Day Length).
+        // We surgery repair these ONLY if they are missing, preserving existing manual edits.
+        if (WorldEngine) {
+            let worldsToRepair = sys.worlds.filter(w => w.type !== 'Empty');
+
+            // 1. Rotational Dynamics (Day Length, Axial Tilt)
+            let missingRotation = worldsToRepair.filter(w => w.siderealHours === undefined || w.axialTilt === undefined);
+            if (missingRotation.length > 0 && WorldEngine.generateRotationalDynamics) {
+                WorldEngine.generateRotationalDynamics(sys, { targetWorlds: missingRotation });
+            }
+
+            // 2. Biospherics & Resources (Resource Rating, Habitability, Seismic)
+            let missingBio = worldsToRepair.filter(w => w.habitability === undefined || w.resourceRating === undefined);
+            if (missingBio.length > 0 && WorldEngine.generateBiospherics) {
+                WorldEngine.generateBiospherics(sys, { targetWorlds: missingBio, mainworldBase: mainworldBase });
+            }
+        }
+
+        // --- PHASE 2: GENERATION CALLS ---
+        if (SocioEngine && SocioEngine.generateExtendedSocioeconomics) {
+            SocioEngine.generateExtendedSocioeconomics(sys, mainworldBase);
+        }
+
+        if (SocioEngine && SocioEngine.finalizeSubordinateSocial) {
+            SocioEngine.finalizeSubordinateSocial(sys, mainworldBase);
+        }
+
+        // --- PHASE 3: FINALIZATION ---
+        // CRITICAL FIX: Ensure mainworldBase results (like pValue, govProfile) are synced back to internalMW
+        // as the SocioEngine may have updated mainworldBase but reference mismatch prevented internal update.
+        if (internalMW && mainworldBase && internalMW !== mainworldBase) {
+            Object.assign(internalMW, mainworldBase);
+        }
+
+        if (typeof endTrace === 'function' && typeof window !== 'undefined' && window.isLoggingEnabled) {
+            endTrace();
+        }
+
+        return sys;
+    }
+
     // =================================================================
     // PUBLIC API
     // =================================================================
     
     if (typeof window !== 'undefined') {
         window.generateMgT2ESystemTopDown = generateMgT2ESystemTopDown;
+        window.expandLoadedSocioeconomicsMgT2E = expandLoadedSocioeconomics;
     }
 
     return {
-        generateMgT2ESystemTopDown: generateMgT2ESystemTopDown
+        generateMgT2ESystemTopDown: generateMgT2ESystemTopDown,
+        expandLoadedSocioeconomicsMgT2E: expandLoadedSocioeconomics
     };
 }));

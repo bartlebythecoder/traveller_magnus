@@ -1,7 +1,14 @@
 # Changelog
 
+### [v0.5.3] - 2026-03-23
+1. **Socioeconomics:** Resolved P-Value / Population Multiplier mismatch when expanding existing worlds. All UWP characteristics and the Population digit are now correctly inherited from the source world.
+2. **Architecture:** Refactored `mgt2e_socio_engine.js` and `ui_menus.js` to ensure UWP immutability during world expansion.
+3. **Journey Math:** Implemented high-precision planetary diameter support for jump distance calculations. Travel times for Gas Giants and large worlds now use their physical `diamKm` instead of UWP size estimates, ensuring a strict and accurate "100-Diameter" limit.
+4. **Bug Fix:** Resolved a `ReferenceError` in `generateMainworldUWP` where certain UWP variables (`size`, `atm`, `hydro`) were not correctly declared, causing bulk macros to fail on empty hexes.
+5. **Bug Fix:** Resolved a "False Stellar Masking" bug on moons and satellites. Moons now correctly inherit their parent world's distance (AU) for stellar masking checks, preventing them from defaulting to 0 AU and falsely appearing "inside" the star's jump limit.
+
 ### [v0.5.2] - 2026-03-23
-1. **Architecture:** Refactored input.js
+1. **Architecture:** Refactored `input.js`.
 2. **Mongoose Engine:** Socio-economic expansion now preserves existing population digits during generation (adds T5 compatibility).
 3. **T5 Engine:** Resolved `_tResult is not defined` reference error during system expansion when logging orbital data.
 

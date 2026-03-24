@@ -39,6 +39,11 @@ function setupCanvasEvents() {
         }
 
         const contextMenu = document.getElementById('context-menu');
+        
+        // DEV VIEW Toggle for advanced socio expansion
+        const socioDev = document.getElementById('ctx-expand-socio-mgt2e-dev');
+        if (socioDev) socioDev.style.display = (window.devView === true) ? 'block' : 'none';
+
         contextMenu.style.left = `${e.clientX}px`;
         contextMenu.style.top = `${e.clientY}px`;
         contextMenu.classList.add('visible');

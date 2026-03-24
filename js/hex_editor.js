@@ -19,7 +19,7 @@ function getSafeStarDiameter(starObj) {
 /**
  * Builds the HTML block for Journey Times, factoring in Stellar Masking if eligible.
  */
-function buildJourneyTimesUI(world, star, isMaskingPreference = null) {
+function buildJourneyTimesUI(world, star, isMaskingPreference = null, overrideAU = null) {
     if (!world || !star) return '';
     // Skip bodies that don't have standard jump calculations (Empty remains skipped)
     if (world.type === 'Empty') return '';
@@ -37,19 +37,22 @@ function buildJourneyTimesUI(world, star, isMaskingPreference = null) {
     let eligible = false;
     const starDiam = getSafeStarDiameter(star);
 
-    // Check for masking eligibility using whichever property is available (au or distAU)
-    const effectiveAU = (world.au !== undefined) ? world.au : (world.distAU !== undefined ? world.distAU : 0);
+    // Check for masking eligibility using whichever property is available (au or distAU), with optional override for moons
+    const effectiveAU = (overrideAU !== null) ? overrideAU : ((world.au !== undefined) ? world.au : (world.distAU !== undefined ? world.distAU : 0));
+    
+    // Extract high-precision diameter if it exists
+    const worldDiam = (world.diamKm !== undefined) ? world.diamKm : null;
 
-    // We now pass world.size to ensure the masking distance is actually strictly greater
+    // We now pass world.size and optional worldDiam to ensure precision
     if (starDiam > 0 && effectiveAU > 0 && world.size !== undefined) {
-        eligible = UniversalMath.isMaskingEligible(starDiam, effectiveAU, world.size);
+        eligible = UniversalMath.isMaskingEligible(starDiam, effectiveAU, world.size, worldDiam);
     }
 
     let times;
     if (eligible && isMaskingActive) {
-        times = UniversalMath.calculateMaskedJourneyTimes(world.size, starDiam, effectiveAU);
+        times = UniversalMath.calculateMaskedJourneyTimes(world.size, starDiam, effectiveAU, worldDiam);
     } else {
-        times = UniversalMath.calculateBaseJourneyTimes(world.size);
+        times = UniversalMath.calculateBaseJourneyTimes(world.size, worldDiam);
     }
 
     return formatJourneyTimesHTML(times, eligible, isMaskingActive);
@@ -58,9 +61,9 @@ function buildJourneyTimesUI(world, star, isMaskingPreference = null) {
 /**
  * Simplified helper for engines that don't support masking (like RTT)
  */
-function buildBaseJourneyTimesUI(size) {
+function buildBaseJourneyTimesUI(size, forcedDiamKm = null) {
     if (size === undefined || size === 'R' || size === 'S') return '';
-    const times = UniversalMath.calculateBaseJourneyTimes(size);
+    const times = UniversalMath.calculateBaseJourneyTimes(size, forcedDiamKm);
     return formatJourneyTimesHTML(times, false, false);
 }
 
@@ -646,7 +649,7 @@ function populateEditorAccordions(stateObj) {
 
                             html += `</div>`;
 
-                            html += buildJourneyTimesUI(m, sys.stars[starIdx], stateObj.isStellarMaskingActive);
+                            html += buildJourneyTimesUI(m, sys.stars[starIdx], stateObj.isStellarMaskingActive, (w.au || w.distAU));
 
                             html += `</div></details>`;
                         });
@@ -842,7 +845,7 @@ function populateEditorAccordions(stateObj) {
 
                                 html += `</div>`;
 
-                                html += buildJourneyTimesUI(sat, sys.stars[starIdx], stateObj.isStellarMaskingActive);
+                                html += buildJourneyTimesUI(sat, sys.stars[starIdx], stateObj.isStellarMaskingActive, (w.au || w.distAU));
 
                                 html += `</div></details>`;
                             });
@@ -1017,7 +1020,7 @@ function populateEditorAccordions(stateObj) {
                                     if (sat.gravity !== undefined) html += `<span>Gravity: <strong>${(sat.gravity || 0).toFixed(2)} G</strong></span>`;
                                     html += `</div>`;
 
-                                    html += buildJourneyTimesUI(sat, star, stateObj.isStellarMaskingActive);
+                                    html += buildJourneyTimesUI(sat, star, stateObj.isStellarMaskingActive, o.distAU);
 
                                     html += `</div></details>`;
                                 });
@@ -1275,32 +1278,33 @@ function saveHexEditorChanges() {
 
     const sharedData = { uwp, travelZone: document.getElementById('edit-travel-zone').value, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, bases, navalBase, scoutBase, militaryBase, corsairBase, researchBase, tas, wayStation, govEstate, embassy, moot, merchantBase, shipyard, megaCorp, scoutHostel, psionics, sacredSite, enclave, ancients, gasGiant };
 
+    // Helper to sync PBG quick-stats if visible
+    const t5QuickStatsDiv = document.getElementById('editor-t5-quick-stats');
+    let pbgData = {};
+    if (t5QuickStatsDiv && t5QuickStatsDiv.style.display !== 'none') {
+        const pbgVal = document.getElementById('edit-pbg').value.padEnd(3, '0').toUpperCase();
+        const fromHex = (char) => typeof fromUWPChar === 'function' ? fromUWPChar(char) : parseInt(char, 16) || 0;
+        pbgData = {
+            popDigit: fromHex(pbgVal[0]),
+            planetoidBelts: fromHex(pbgVal[1]),
+            gasGiantsCount: fromHex(pbgVal[2]),
+            pbg: pbgVal,
+            homestar: document.getElementById('edit-stellar').value.trim()
+        };
+        pbgData.gasGiant = pbgData.gasGiantsCount > 0;
+    }
+
     if (stateObj.t5Data) {
-        stateObj.t5Data = { ...stateObj.t5Data, ...sharedData, name };
-
-        const t5QuickStatsDiv = document.getElementById('editor-t5-quick-stats');
-        if (t5QuickStatsDiv.style.display !== 'none') {
-            const pbgVal = document.getElementById('edit-pbg').value.padEnd(3, '0').toUpperCase();
-            const fromHex = (char) => typeof fromUWPChar === 'function' ? fromUWPChar(char) : parseInt(char, 16) || 0;
-
-            stateObj.t5Data.popDigit = fromHex(pbgVal[0]);
-            stateObj.t5Data.planetoidBelts = fromHex(pbgVal[1]);
-            stateObj.t5Data.gasGiantsCount = fromHex(pbgVal[2]);
-
-            stateObj.t5Data.gasGiant = stateObj.t5Data.gasGiantsCount > 0;
-
-            stateObj.t5Data.homestar = document.getElementById('edit-stellar').value.trim();
-        }
-
+        stateObj.t5Data = { ...stateObj.t5Data, ...sharedData, ...pbgData, name };
         stateObj.mgt2eData = null; stateObj.ctData = null; stateObj.rttData = null;
     } else if (stateObj.mgt2eData) {
-        stateObj.mgt2eData = { ...stateObj.mgt2eData, ...sharedData, name };
+        stateObj.mgt2eData = { ...stateObj.mgt2eData, ...sharedData, ...pbgData, name };
         stateObj.t5Data = null; stateObj.ctData = null; stateObj.rttData = null;
     } else if (stateObj.ctData) {
-        stateObj.ctData = { ...stateObj.ctData, ...sharedData, name };
+        stateObj.ctData = { ...stateObj.ctData, ...sharedData, ...pbgData, name };
         stateObj.t5Data = null; stateObj.mgt2eData = null; stateObj.rttData = null;
     } else if (stateObj.rttData) {
-        stateObj.rttData = { ...stateObj.rttData, ...sharedData, name };
+        stateObj.rttData = { ...stateObj.rttData, ...sharedData, ...pbgData, name };
         stateObj.t5Data = null; stateObj.mgt2eData = null; stateObj.ctData = null;
     }
 

@@ -391,14 +391,40 @@
             }
             if (mainworld) break;
         }
-    
-        if (!mainworld || mainworld.pop === 0) {
-            tSkip('No populated mainworld found');
-            return sys;
+        
+        // Fallback if Mainworld type identifier is missing or corrupted
+        if (!mainworld && sys.worlds.length > 0) {
+            mainworld = sys.worlds[0];
         }
     
         // Use mainworldBase if available, otherwise use found mainworld
         let base = mainworldBase || mainworld;
+
+        // EMERGENCY AUDIT & REPAIR: Ensure core UWP properties exist on `base`
+        const uwpStr = base ? (base.uwp || base.uwpSecondary) : null;
+        if (base && uwpStr && uwpStr.length >= 7) {
+            if (base.starport === undefined) base.starport = uwpStr[0] || 'X';
+            if (base.size === undefined) base.size = typeof fromUWPChar === 'function' ? fromUWPChar(uwpStr[1]) : parseInt(uwpStr[1], 16) || 0;
+            if (base.atm === undefined && base.atmCode === undefined) base.atm = typeof fromUWPChar === 'function' ? fromUWPChar(uwpStr[2]) : parseInt(uwpStr[2], 16) || 0;
+            if (base.hydro === undefined && base.hydroCode === undefined) base.hydro = typeof fromUWPChar === 'function' ? fromUWPChar(uwpStr[3]) : parseInt(uwpStr[3], 16) || 0;
+            if (base.pop === undefined) base.pop = typeof fromUWPChar === 'function' ? fromUWPChar(uwpStr[4]) : parseInt(uwpStr[4], 16) || 0;
+            if (base.gov === undefined) base.gov = typeof fromUWPChar === 'function' ? fromUWPChar(uwpStr[5]) : parseInt(uwpStr[5], 16) || 0;
+            if (base.law === undefined) base.law = typeof fromUWPChar === 'function' ? fromUWPChar(uwpStr[6]) : parseInt(uwpStr[6], 16) || 0;
+            if (uwpStr.length >= 9 && base.tl === undefined) {
+                base.tl = typeof fromUWPChar === 'function' ? fromUWPChar(uwpStr[8]) : parseInt(uwpStr[8], 16) || 0;
+            }
+        }
+
+        
+        // Also ensure mainworld specifically has `pop` so we don't accidentally skip later if base gets synced but mainworld didn't.
+        if (mainworld && mainworld.pop === undefined && base && base.pop !== undefined) {
+            mainworld.pop = base.pop;
+        }
+
+        if (!mainworld || mainworld.pop === 0) {
+            tSkip('No populated mainworld found');
+            return sys;
+        }
     
         // =====================================================================
         // EXTENDED PROFILE GENERATION
@@ -412,13 +438,24 @@
         tSection('World Population (P-Value)');
         let pValue = 0;
         let totalWorldPop = 0;
-        if (base.popDigit !== undefined && base.popDigit !== null) {
+        if (base.popDigit !== undefined && base.popDigit !== null && base.popDigit > 0) {
             pValue = base.popDigit;
             tResult('P-Value (Existing popDigit)', pValue);
-        } else if (base.pValue !== undefined && base.pValue !== null) {
+        } else if (base.pValue !== undefined && base.pValue !== null && base.pValue > 0) {
             pValue = base.pValue;
             tResult('P-Value (Existing pValue)', pValue);
+        } else if (base.popMultiplier !== undefined && base.popMultiplier !== null && base.popMultiplier > 0) {
+            pValue = base.popMultiplier;
+            tResult('P-Value (Existing popMultiplier)', pValue);
+        } else if (base.pbg && base.pbg.length > 0) {
+            pValue = parseInt(base.pbg[0], 16);
+            tResult('P-Value (Inherited from PBG String)', pValue);
+        } else if (base.PBG && base.PBG.length > 0) {
+            // Check for uppercase PBG as well
+            pValue = parseInt(base.PBG[0], 16);
+            tResult('P-Value (Inherited from PBG String)', pValue);
         } else if (base.pop >= 10) {
+
             pValue = 1;
             tResult('Initial P-Value', 1);
             while (pValue < 9) {
@@ -1777,7 +1814,6 @@
         // =====================================================================
     
         base.pValue = pValue;
-        base.popDigit = pValue;
         base.totalWorldPop = totalWorldPop;
         base.pcr = pcr;
         base.urbanPercent = urbanPercent;
@@ -1966,14 +2002,18 @@
         // startTrace and reseedForHex are handled by Orchestrator
         let isNativeSophont = existingWorld && existingWorld.nativeSophont === true;
 
-        let size = 0, atm = 0, hydro = 0;
+        let size = 0, atm = 0, hydro = 0, pop = 0, gov = 0, law = 0, tl = 0, starport = 'X', popDigit = null;
+        let pValue = 0; // Internal reference for extended socio
 
-        if (existingWorld) {
-            tSection('Physical Characteristics (Inherited)');
-            size = existingWorld.size;
-            atm = existingWorld.atmCode !== undefined ? existingWorld.atmCode : existingWorld.atm;
-            hydro = existingWorld.hydroCode !== undefined ? existingWorld.hydroCode : existingWorld.hydro;
-            tSkip('Physicals (Size, Atm, Hydro) inherited from existing world');
+        let hasPhysicals = existingWorld && (existingWorld.size !== undefined);
+        let hasSocials = existingWorld && (existingWorld.pop !== undefined || existingWorld.popCode !== undefined || existingWorld.uwp !== undefined);
+
+        if (hasPhysicals) {
+            tSection('World Characteristics (Inherited Physicals)');
+            size = (existingWorld.size !== undefined) ? existingWorld.size : 0;
+            atm = (existingWorld.atmCode !== undefined) ? existingWorld.atmCode : (existingWorld.atm !== undefined ? existingWorld.atm : 0);
+            hydro = (existingWorld.hydroCode !== undefined) ? existingWorld.hydroCode : (existingWorld.hydro !== undefined ? existingWorld.hydro : 0);
+            
             tResult('Size Code', size);
             tResult('Atmosphere Code', atm);
             tResult('Hydrographic Code', hydro);
@@ -2020,133 +2060,156 @@
             tResult('Hydrographic Code', hydro);
         }
 
-        // ── Population ────────────────────────────────────────────────
-        tSection('Population');
-        let popRoll = tRoll2D('Population');
-        tDM('Standard Pop', -2);
-        let rawPop = popRoll - 2;
-        let pop = Math.max(0, rawPop);
-        
-        if (isNativeSophont) {
-            if (pop < 6) {
-                tOverride('Population Code', pop, 6, 'Native Sophont Minimum');
-                pop = 6;
-            }
-        } else {
-            if (rawPop !== pop) tClamp('Population', rawPop, pop);
-        }
-        tResult('Population Code', pop);
-
-        // ── Starport ──────────────────────────────────────────────────
-        tSection('Starport Class');
-        if (pop >= 10) tDM('Population 10+', 2);
-        else if (pop >= 8) tDM('Population 8-9', 1);
-        else if (pop <= 2) tDM('Population 2-', -2);
-        else if (pop <= 4) tDM('Population 3-4', -1);
-
-        let starportRoll = tRoll2D('Starport');
-        let starportDM = 0;
-        if (pop >= 10) starportDM = 2;
-        else if (pop >= 8) starportDM = 1;
-        else if (pop <= 2) starportDM = -2;
-        else if (pop <= 4) starportDM = -1;
-
-        if (isNativeSophont && MgT2EData.starport.nativeSophontDM !== undefined) {
-            tDM('Native Sophont', MgT2EData.starport.nativeSophontDM);
-            starportDM += MgT2EData.starport.nativeSophontDM;
-        }
-
-        let spTotal = starportRoll + starportDM;
-        let starport = spTotal <= 2 ? 'X' : spTotal <= 4 ? 'E' : spTotal <= 6 ? 'D'
-            : spTotal <= 8 ? 'C' : spTotal <= 10 ? 'B' : 'A';
-        tResult('Starport Class', `${starport} (${spTotal})`);
-
-        // ── Government & Law ──────────────────────────────────────────
-        let gov = 0, law = 0, tl = 0;
-        if (pop > 0) {
-            tSection('Government');
-            let govRoll = tRoll2D('Government');
-            tDM('Standard Gov', -7);
-            tDM('Population Code', pop);
-            let rawGov = govRoll - 7 + pop;
-            gov = Math.max(0, rawGov);
-            if (rawGov !== gov) tClamp('Government', rawGov, gov);
+        if (hasSocials) {
+            tSection('World Characteristics (Inherited Socials)');
+            pop = (existingWorld.popCode !== undefined) ? existingWorld.popCode : (existingWorld.pop !== undefined ? existingWorld.pop : 0);
+            gov = (existingWorld.govCode !== undefined) ? existingWorld.govCode : (existingWorld.gov !== undefined ? existingWorld.gov : 0);
+            law = (existingWorld.law !== undefined) ? existingWorld.law : 0;
+            tl = (existingWorld.tl !== undefined) ? existingWorld.tl : 0;
+            starport = existingWorld.starport || 'X';
+            popDigit = (existingWorld.popDigit !== undefined) ? existingWorld.popDigit : (existingWorld.pValue !== undefined ? existingWorld.pValue : null);
+            
+            tSkip('UWP Social Characteristics inherited from existing world');
+            tResult('Population Code', pop);
             tResult('Government Code', gov);
-
-            tSection('Law Level');
-            let lawRoll = tRoll2D('Law Level');
-            tDM('Standard Law', -7);
-            tDM('Government Code', gov);
-            let rawLaw = lawRoll - 7 + gov;
-            law = Math.max(0, rawLaw);
-            if (rawLaw !== law) tClamp('Law Level', rawLaw, law);
             tResult('Law Level Code', law);
-
-            // ── Tech Level ────────────────────────────────────────────
-            tSection('Technological Level');
-            tRoll1D('Tech Level');
-
-            // Starport DMs
-            if (starport === 'A') tDM('Starport A', 6);
-            else if (starport === 'B') tDM('Starport B', 4);
-            else if (starport === 'C') tDM('Starport C', 2);
-            else if (starport === 'D' || starport === 'E') tDM('Starport D/E', 1);
-            else if (starport === 'X') tDM('Starport X', -4);
-
-            if (!isNativeSophont) {
-                // Size DMs
-                if (size <= 1) tDM('Size 1-', 2);
-                else if (size >= 2 && size <= 4) tDM('Size 2-4', 1);
-
-                // Atmosphere DMs
-                if (atm <= 3 || atm >= 10) tDM('Atmosphere Extreme', 1);
-
-                // Hydrographics DMs
-                if (hydro === 0) tDM('Hydrographics 0', 1);
-                else if (hydro === 9) tDM('Hydrographics 9', 1);
-                else if (hydro === 10) tDM('Hydrographics A', 2);
-            }
-
-            // Population DMs
-            if (pop >= 1 && pop <= 5) tDM('Population 1-5', 1);
-            else if (pop === 8) tDM('Population 8', 1);
-            else if (pop === 9) tDM('Population 9', 2);
-            else if (pop >= 10) tDM('Population 10+', 4);
-
-            // Government DMs
-            if (gov === 0 || gov === 5) tDM('Government 0 or 5', 1);
-            else if (gov === 7) tDM('Government 7', 2);
-            else if (gov >= 13) tDM('Government D+', -2);
-
-            // Calculate Base TL
-            const currentDMs = typeof pendingRoll !== 'undefined' && pendingRoll && pendingRoll.dms ? pendingRoll.dms.reduce((a, b) => a + b.val, 0) : 0;
-            let rawTl = (typeof pendingRoll !== 'undefined' && pendingRoll ? pendingRoll.val : 0) + currentDMs;
-            let baseTl = Math.max(0, rawTl);
-
-            // Enforce Environmental Limits (Minimum TL)
-            if (isNativeSophont && MgT2EData.techLevel.nativeSophontExceptions?.ignoreEnvironmentalMinimums) {
-                tl = baseTl;
-                if (rawTl !== baseTl) tClamp('Tech Level', rawTl, baseTl); // Standard floor clamp
-                tResult('Environmental Minimum Override', 'Ignored for Native Sophonts');
-            } else {
-                let minTl = getMgT2EMinSusTL(atm);
-
-                // Final TL is the higher of the generated base or the environmental minimum
-                tl = Math.max(baseTl, minTl);
-
-                // Log the clamp if the environment forced the TL higher
-                if (rawTl !== tl) {
-                    tResult('Environmental Minimum Override', `Raised to TL ${minTl}`);
-                    tClamp('Tech Level', rawTl, tl);
-                } else {
-                    if (rawTl !== baseTl) tClamp('Tech Level', rawTl, baseTl); // Standard floor clamp
-                }
-            }
-
             tResult('Tech Level Code', tl);
-        } else {
-            tSection('Government / Law / TL');
-            tSkip('Population 0 forces Gov/Law/TL 0');
+            tResult('Starport Class', starport);
+            if (popDigit !== null) tResult('P-Value (Inherited)', popDigit);
+        }
+
+        if (!hasSocials) {
+            // ── Population ────────────────────────────────────────────────
+            tSection('Population');
+            let popRoll = tRoll2D('Population');
+            tDM('Standard Pop', -2);
+            let rawPop = popRoll - 2;
+            pop = Math.max(0, rawPop);
+            
+            if (isNativeSophont) {
+                if (pop < 6) {
+                    tOverride('Population Code', pop, 6, 'Native Sophont Minimum');
+                    pop = 6;
+                }
+            } else {
+                if (rawPop !== pop) tClamp('Population', rawPop, pop);
+            }
+            tResult('Population Code', pop);
+        }
+
+        if (!hasSocials) {
+            // ── Starport ──────────────────────────────────────────────────
+            tSection('Starport Class');
+            if (pop >= 10) tDM('Population 10+', 2);
+            else if (pop >= 8) tDM('Population 8-9', 1);
+            else if (pop <= 2) tDM('Population 2-', -2);
+            else if (pop <= 4) tDM('Population 3-4', -1);
+
+            let starportRoll = tRoll2D('Starport');
+            let starportDM = 0;
+            if (pop >= 10) starportDM = 2;
+            else if (pop >= 8) starportDM = 1;
+            else if (pop <= 2) starportDM = -2;
+            else if (pop <= 4) starportDM = -1;
+
+            if (isNativeSophont && MgT2EData.starport.nativeSophontDM !== undefined) {
+                tDM('Native Sophont', MgT2EData.starport.nativeSophontDM);
+                starportDM += MgT2EData.starport.nativeSophontDM;
+            }
+
+            let spTotal = starportRoll + starportDM;
+            starport = spTotal <= 2 ? 'X' : spTotal <= 4 ? 'E' : spTotal <= 6 ? 'D'
+                : spTotal <= 8 ? 'C' : spTotal <= 10 ? 'B' : 'A';
+            tResult('Starport Class', `${starport} (${spTotal})`);
+        }
+
+        if (!hasSocials) {
+            // ── Government & Law ──────────────────────────────────────────
+            if (pop > 0) {
+                tSection('Government');
+                let govRoll = tRoll2D('Government');
+                tDM('Standard Gov', -7);
+                tDM('Population Code', pop);
+                let rawGov = govRoll - 7 + pop;
+                gov = Math.max(0, rawGov);
+                if (rawGov !== gov) tClamp('Government', rawGov, gov);
+                tResult('Government Code', gov);
+
+                tSection('Law Level');
+                let lawRoll = tRoll2D('Law Level');
+                tDM('Standard Law', -7);
+                tDM('Government Code', gov);
+                let rawLaw = lawRoll - 7 + gov;
+                law = Math.max(0, rawLaw);
+                if (rawLaw !== law) tClamp('Law Level', rawLaw, law);
+                tResult('Law Level Code', law);
+
+                // ── Tech Level ────────────────────────────────────────────
+                tSection('Technological Level');
+                tRoll1D('Tech Level');
+
+                // Starport DMs
+                if (starport === 'A') tDM('Starport A', 6);
+                else if (starport === 'B') tDM('Starport B', 4);
+                else if (starport === 'C') tDM('Starport C', 2);
+                else if (starport === 'D' || starport === 'E') tDM('Starport D/E', 1);
+                else if (starport === 'X') tDM('Starport X', -4);
+
+                if (!isNativeSophont) {
+                    // Size DMs
+                    if (size <= 1) tDM('Size 1-', 2);
+                    else if (size >= 2 && size <= 4) tDM('Size 2-4', 1);
+
+                    // Atmosphere DMs
+                    if (atm <= 3 || atm >= 10) tDM('Atmosphere Extreme', 1);
+
+                    // Hydrographics DMs
+                    if (hydro === 0) tDM('Hydrographics 0', 1);
+                    else if (hydro === 9) tDM('Hydrographics 9', 1);
+                    else if (hydro === 10) tDM('Hydrographics A', 2);
+                }
+
+                // Population DMs
+                if (pop >= 1 && pop <= 5) tDM('Population 1-5', 1);
+                else if (pop === 8) tDM('Population 8', 1);
+                else if (pop === 9) tDM('Population 9', 2);
+                else if (pop >= 10) tDM('Population 10+', 4);
+
+                // Government DMs
+                if (gov === 0 || gov === 5) tDM('Government 0 or 5', 1);
+                else if (gov === 7) tDM('Government 7', 2);
+                else if (gov >= 13) tDM('Government D+', -2);
+
+                // Calculate Base TL
+                const currentDMs = typeof pendingRoll !== 'undefined' && pendingRoll && pendingRoll.dms ? pendingRoll.dms.reduce((a, b) => a + b.val, 0) : 0;
+                let rawTl = (typeof pendingRoll !== 'undefined' && pendingRoll ? pendingRoll.val : 0) + currentDMs;
+                let baseTl = Math.max(0, rawTl);
+
+                // Enforce Environmental Limits (Minimum TL)
+                if (isNativeSophont && MgT2EData.techLevel.nativeSophontExceptions?.ignoreEnvironmentalMinimums) {
+                    tl = baseTl;
+                    if (rawTl !== baseTl) tClamp('Tech Level', rawTl, baseTl); // Standard floor clamp
+                    tResult('Environmental Minimum Override', 'Ignored for Native Sophonts');
+                } else {
+                    let minTl = getMgT2EMinSusTL(atm);
+
+                    // Final TL is the higher of the generated base or the environmental minimum
+                    tl = Math.max(baseTl, minTl);
+
+                    // Log the clamp if the environment forced the TL higher
+                    if (rawTl !== tl) {
+                        tResult('Environmental Minimum Override', `Raised to TL ${minTl}`);
+                        tClamp('Tech Level', rawTl, tl);
+                    } else {
+                        if (rawTl !== baseTl) tClamp('Tech Level', rawTl, baseTl); // Standard floor clamp
+                    }
+                }
+
+                tResult('Tech Level Code', tl);
+            } else {
+                tSection('Government / Law / TL');
+                tSkip('Population 0 forces Gov/Law/TL 0');
+            }
         }
 
         // ── Bases ─────────────────────────────────────────────────────

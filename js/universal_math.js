@@ -73,9 +73,10 @@
     /**
      * Calculates the base journey times for a world to its 100D jump limit.
      * @param {number|string} size - The UWP size digit of the world or moon.
+     * @param {number} [forcedDiamKm] - Optional: Explicit diameter in km (bypasses size estimation).
      * @returns {Array<number>} An array of 6 journey times (in hours) for 1G through 6G acceleration.
      */
-    function calculateBaseJourneyTimes(size) {
+    function calculateBaseJourneyTimes(size, forcedDiamKm = null) {
         if (typeof tSection === 'function') tSection("Calculate Base Journey Times");
 
         // Safely parse the size (handles both standard integers and UWP letters like 'A')
@@ -84,13 +85,13 @@
             numericSize = fromUWPChar(size);
         }
 
-        if (isNaN(numericSize) || numericSize <= 0) {
+        if (isNaN(numericSize) || (numericSize <= 0 && !forcedDiamKm)) {
             if (typeof tResult === 'function') tResult("Invalid or Size 0", "Returning 0 hours");
             return [0.00, 0.00, 0.00, 0.00, 0.00, 0.00];
         }
 
-        const distance = numericSize * 160000;
-        if (typeof tResult === 'function') tResult("Jump Distance", distance);
+        const distance = (forcedDiamKm) ? (forcedDiamKm * 100) : (numericSize * 160000);
+        if (typeof tResult === 'function') tResult("Jump Distance", distance.toLocaleString() + " km");
 
         const journeyTimes = [];
 
@@ -113,9 +114,10 @@
      * @param {number} starDiamSolar - The diameter of the parent star in Solar Diameters.
      * @param {number} worldDistanceAU - The distance of the world from the star in AU.
      * @param {number|string} worldSize - The UWP size digit of the world or moon.
+     * @param {number} [forcedWorldDiamKm] - Optional: Explicit world diameter in km (bypasses size estimation).
      * @returns {boolean} True if eligible AND the masking distance is greater than planetary distance.
      */
-    function isMaskingEligible(starDiamSolar, worldDistanceAU, worldSize) {
+    function isMaskingEligible(starDiamSolar, worldDistanceAU, worldSize, forcedWorldDiamKm = null) {
         if (!starDiamSolar || worldDistanceAU === undefined || worldSize === undefined) return false;
 
         const starDiamKm = starDiamSolar * SUN_DIAMETER_KM;
@@ -128,7 +130,8 @@
         // 2. Is the star's masking distance actually larger than the planet's own 100D limit?
         let numericSize = parseInt(worldSize, 10);
         if (isNaN(numericSize)) numericSize = fromUWPChar(worldSize);
-        const standardDistance = (numericSize > 0 && !isNaN(numericSize)) ? numericSize * 160000 : 0;
+        
+        const standardDistance = (forcedWorldDiamKm) ? (forcedWorldDiamKm * 100) : ((numericSize > 0 && !isNaN(numericSize)) ? numericSize * 160000 : 0);
 
         const maskedDistance = stellarMaskLimitKm - worldDistKm;
 
@@ -142,15 +145,17 @@
      * @param {number|string} worldSize - The UWP size digit of the world or moon.
      * @param {number} starDiamSolar - The diameter of the parent star in Solar Diameters.
      * @param {number} worldDistanceAU - The distance of the world from the star in AU.
+     * @param {number} [forcedWorldDiamKm] - Optional: Explicit world diameter in km.
      * @returns {Array<number>} An array of 6 masked journey times (in hours) for 1G through 6G.
      */
-    function calculateMaskedJourneyTimes(worldSize, starDiamSolar, worldDistanceAU) {
+    function calculateMaskedJourneyTimes(worldSize, starDiamSolar, worldDistanceAU, forcedWorldDiamKm = null) {
         if (typeof tSection === 'function') tSection("Calculate Stellar Masked Journey Times");
 
         // 1. Calculate Standard Planetary Distance
         let numericSize = parseInt(worldSize, 10);
         if (isNaN(numericSize)) numericSize = fromUWPChar(worldSize);
-        const standardDistance = (numericSize > 0 && !isNaN(numericSize)) ? numericSize * 100000 : 0;
+        
+        const standardDistance = (forcedWorldDiamKm) ? (forcedWorldDiamKm * 100) : ((numericSize > 0 && !isNaN(numericSize)) ? numericSize * 160000 : 0);
 
         // 2. Calculate Stellar Masking Distance
         const starDiamKm = starDiamSolar * SUN_DIAMETER_KM;

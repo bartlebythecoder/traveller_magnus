@@ -257,7 +257,7 @@ function setupGenerationHandlers() {
 
             if (baseData) {
                 // 1. Generate the full system deterministically to guarantee all social profiles exist
-                let newSys = generateMgT2ESystemTopDown(hexId);
+                let newSys = generateMgT2ESystemTopDown(hexId, baseData);
 
                 // 2. Find the mainworld to map the socio data
                 let mainworld = newSys.worlds.find(w => w.type === 'Mainworld') || newSys.worlds[0];
@@ -287,6 +287,53 @@ function setupGenerationHandlers() {
         document.getElementById('context-menu').classList.remove('visible');
         showToast(`Expanded MgT2E Socioeconomics for ${selectedHexes.size} hex(es)`);
         requestAnimationFrame(draw);
+    });
+
+    document.getElementById('ctx-expand-socio-mgt2e-dev').addEventListener('click', () => {
+        if (!validateSelection('socio')) return;
+
+        saveHistoryState('Expand MgT2E Socioeconomics (Dev)');
+        if (window.isLoggingEnabled) window.batchLogData = [];
+        let missingSystem = false;
+        selectedHexes.forEach(hexId => {
+            let stateObj = hexStates.get(hexId);
+            if (stateObj && stateObj.mgtSystem) {
+                // Call the new non-regenerative orchestrator
+                if (typeof expandLoadedSocioeconomicsMgT2E === 'function') {
+                    let newSys = expandLoadedSocioeconomicsMgT2E(hexId, stateObj);
+                    if (newSys) {
+                        let mainworld = newSys.worlds.find(w => w.type === 'Mainworld') || newSys.worlds[0];
+                        stateObj.mgtSystem = newSys;
+                        stateObj.mgt2eData = mainworld;
+                        stateObj.mgtSocio = mainworld;
+                        hexStates.set(hexId, stateObj);
+                    } else {
+                        console.error(`[UI] DEV expansion returned null for ${hexId} - no newSys!`);
+                    }
+                }
+            } else if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
+                missingSystem = true;
+            }
+        });
+
+        if (missingSystem) {
+            alert("Note: Some selected hexes skipped because they do not have an MgT2E System generated. This Dev expansion requires an existing System object.");
+        }
+
+        if (window.isLoggingEnabled && window.batchLogData.length > 0) {
+            downloadBatchLog('MgT2E_Socio_Dev', selectedHexes.size);
+        }
+
+        document.getElementById('context-menu').classList.remove('visible');
+        showToast(`[DEV] Expanded Socioeconomics for ${selectedHexes.size} hex(es) (No Regen)`);
+        requestAnimationFrame(draw);
+
+        // Auto-refresh the hex editor if it is currently open
+        if (typeof editingHexId !== 'undefined' && editingHexId && selectedHexes.has(editingHexId)) {
+            if (typeof openHexEditor === 'function') {
+                openHexEditor(editingHexId);
+            }
+        }
     });
 
     // Physical System Expansion

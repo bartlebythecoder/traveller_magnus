@@ -130,7 +130,7 @@
         // 2. Is the star's masking distance actually larger than the planet's own 100D limit?
         let numericSize = parseInt(worldSize, 10);
         if (isNaN(numericSize)) numericSize = fromUWPChar(worldSize);
-        
+
         const standardDistance = (forcedWorldDiamKm) ? (forcedWorldDiamKm * 100) : ((numericSize > 0 && !isNaN(numericSize)) ? numericSize * 160000 : 0);
 
         const maskedDistance = stellarMaskLimitKm - worldDistKm;
@@ -154,7 +154,7 @@
         // 1. Calculate Standard Planetary Distance
         let numericSize = parseInt(worldSize, 10);
         if (isNaN(numericSize)) numericSize = fromUWPChar(worldSize);
-        
+
         const standardDistance = (forcedWorldDiamKm) ? (forcedWorldDiamKm * 100) : ((numericSize > 0 && !isNaN(numericSize)) ? numericSize * 160000 : 0);
 
         // 2. Calculate Stellar Masking Distance
@@ -231,22 +231,118 @@
 
 
 
+
+     /**
+     * Universal Filter Engine for Traveller Worlds (v2.2 Hardened)
+     * Evaluates a world against criteria including routes, numeric ranges, and string inclusions.
+     */
+    function applyFilters(world, filters, routeStatus) {
+        if (!world) return false;
+
+        // 1. Granular Field Filters
+        if (filters) {
+            try {
+                for (let field in filters) {
+                    const criteria = String(filters[field]).trim();
+                    if (criteria === "") continue;
+
+                    field = field.toLowerCase();
+                    let worldValue;
+
+                    // D. EXHAUSTIVE DATA MAPPING (Property Fallback Logic)
+                    if (field === 't5ix' || field === 'ix' || field === 'importance') {
+                        worldValue = world.Ix !== undefined ? world.Ix : (world.Importance !== undefined ? world.Importance : (world.ix !== undefined ? world.ix : world.im));
+                    } else if (field === 'mgtimportance' || field === 'importance' || field === 'im') {
+                        worldValue = world.Im !== undefined ? world.Im : (world.mgtImportance !== undefined ? world.mgtImportance : (world.Importance !== undefined ? world.Importance : (world.im !== undefined ? world.im : world.ImProf)));
+                    } else if (field === 'mgtwtn' || field === 'wtn') {
+                        worldValue = world.WTN !== undefined ? world.WTN : (world.worldTradeNo !== undefined ? world.worldTradeNo : (world.wtn !== undefined ? world.wtn : world.WTN));
+                    } else if (field === 'mgtgwp' || field === 'gwp' || field === 'pcgwp') {
+                        worldValue = world.pcGWP !== undefined ? world.pcGWP : (world.GWP !== undefined ? world.GWP : (world.gwp !== undefined ? world.gwp : world.pcgwp));
+                    } else if (field === 'starport' || field === 'port' || field === 'sp') {
+                        worldValue = world.starport !== undefined ? world.starport : (world.port !== undefined ? world.port : (world.sp !== undefined ? world.sp : (world.Starport !== undefined ? world.Starport : world.uwp?.[0])));
+                    } else if (field === 'size' || field === 's') {
+                        worldValue = world.size !== undefined ? world.size : (world.s !== undefined ? world.s : (world.Size !== undefined ? world.Size : world.uwp?.[1]));
+                    } else if (field === 'atm' || field === 'atmosphere' || field === 'atmcode') {
+                        worldValue = world.atm !== undefined ? world.atm : (world.atmosphere !== undefined ? world.atmosphere : (world.atmCode !== undefined ? world.atmCode : (world.Atm !== undefined ? world.Atm : world.uwp?.[2])));
+                    } else if (field === 'hydro' || field === 'hydrosphere' || field === 'hydrocode' || field === 'hydrographics') {
+                        worldValue = world.hydro !== undefined ? world.hydro : (world.hydrographics !== undefined ? world.hydrographics : (world.hydroCode !== undefined ? world.hydroCode : (world.Hydro !== undefined ? world.Hydro : world.uwp?.[3])));
+                    } else if (field === 'pop' || field === 'population' || field === 'popcode') {
+                        worldValue = world.pop !== undefined ? world.pop : (world.population !== undefined ? world.population : (world.popCode !== undefined ? world.popCode : (world.Pop !== undefined ? world.Pop : world.uwp?.[4])));
+                    } else if (field === 'gov' || field === 'government' || field === 'govcode') {
+                        worldValue = world.gov !== undefined ? world.gov : (world.government !== undefined ? world.government : (world.govCode !== undefined ? world.govCode : (world.Gov !== undefined ? world.Gov : world.uwp?.[5])));
+                    } else if (field === 'law' || field === 'lawlevel' || field === 'lawcode') {
+                        worldValue = world.law !== undefined ? world.law : (world.lawLevel !== undefined ? world.lawLevel : (world.lawCode !== undefined ? world.lawCode : (world.Law !== undefined ? world.Law : world.uwp?.[6])));
+                    } else if (field === 'tl' || field === 'techlevel' || field === 'tech' || field === 'tlcode') {
+                        worldValue = world.tl !== undefined ? world.tl : (world.techLevel !== undefined ? world.techLevel : (world.tech !== undefined ? world.tech : (world.TL !== undefined ? world.TL : world.tlCode)));
+                    } else {
+                        worldValue = world[field];
+                    }
+                    
+                    // --- Property Guard ---
+                    if (worldValue === undefined || worldValue === null) worldValue = 0;
+
+                    // A. Numeric Operators (> , <)
+                    if (criteria.startsWith('>') || criteria.startsWith('<')) {
+                        const operator = criteria[0];
+                        const targetValue = parseFloat(criteria.substring(1).trim());
+                        let valNum = (typeof worldValue === 'number') ? worldValue : fromUWPChar(worldValue);
+                        
+                        if (operator === '>') {
+                            if (!(valNum > targetValue)) return false;
+                        } else if (operator === '<') {
+                            if (!(valNum < targetValue)) return false;
+                        }
+                    }
+                    // B. HYPHENATED RANGE & STRICT TOKEN MATCHING
+                    else {
+                        const criteriaTokens = criteria.split(',').map(s => s.trim().toUpperCase()).filter(s => s !== "");
+                        let worldValueNum = (typeof worldValue === 'number') ? worldValue : fromUWPChar(worldValue);
+
+                        if (criteriaTokens.length > 0) {
+                            const match = criteriaTokens.some(token => {
+                                // 1. Check for hyphenated range (e.g. "2-9" or "A-E")
+                                if (token.includes('-') && token.length >= 3) {
+                                    const parts = token.split('-');
+                                    if (parts.length === 2) {
+                                        const start = fromUWPChar(parts[0]);
+                                        const end = fromUWPChar(parts[1]);
+                                        return (worldValueNum >= start && worldValueNum <= end);
+                                    }
+                                }
+                                
+                                // 2. Standard Token Match
+                                let tokenNum = (token.length === 1 && isNaN(token)) ? fromUWPChar(token) : parseFloat(token);
+                                return (worldValueNum === tokenNum);
+                            });
+                            if (!match) return false;
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error(`[UniversalMath v2.2] Field ${field} evaluation failed:`, err);
+                return false;
+            }
+        }
+        return true;
+    }
+
     const exports = {
         toUWPChar,
         fromUWPChar,
         clampUWP,
         rollFlux,
+        applyFilters,
         calculateBaseJourneyTimes,
-        isMaskingEligible,           // <-- ADDED
+        isMaskingEligible,
         calculateMaskedJourneyTimes,
-        estimateStellarDiameter  // <-- ADDED
+        estimateStellarDiameter
     };
 
-    if (typeof module !== 'undefined' && module.exports) {
-        // Node.js environment
-        module.exports = exports;
-    } else {
-        // Browser environment: attach to a global namespace
+    if (typeof window !== 'undefined') {
         window.UniversalMath = exports;
+    }
+    
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = exports;
     }
 })();

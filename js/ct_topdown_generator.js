@@ -482,6 +482,11 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
         if (processSubordinates) {
             processSubordinates(sys);
         }
+
+        // --- PHASE 8: JOURNEY MATH SWEEP (Phase 2 Integration) ---
+        if (typeof MgT2EMath !== 'undefined' && MgT2EMath.performJourneyMathSweep) {
+            MgT2EMath.performJourneyMathSweep(sys);
+        }
     }
 
     if (typeof endTrace !== 'undefined') endTrace();

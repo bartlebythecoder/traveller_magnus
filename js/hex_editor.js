@@ -39,7 +39,7 @@ function buildJourneyTimesUI(world, star, isMaskingPreference = null, overrideAU
 
     // Check for masking eligibility using whichever property is available (au or distAU), with optional override for moons
     const effectiveAU = (overrideAU !== null) ? overrideAU : ((world.au !== undefined) ? world.au : (world.distAU !== undefined ? world.distAU : 0));
-    
+
     // Extract high-precision diameter if it exists
     const worldDiam = (world.diamKm !== undefined) ? world.diamKm : null;
 
@@ -1294,23 +1294,110 @@ function saveHexEditorChanges() {
         pbgData.gasGiant = pbgData.gasGiantsCount > 0;
     }
 
-    if (stateObj.t5Data) {
-        stateObj.t5Data = { ...stateObj.t5Data, ...sharedData, ...pbgData, name };
-        stateObj.mgt2eData = null; stateObj.ctData = null; stateObj.rttData = null;
-    } else if (stateObj.mgt2eData) {
-        stateObj.mgt2eData = { ...stateObj.mgt2eData, ...sharedData, ...pbgData, name };
-        stateObj.t5Data = null; stateObj.ctData = null; stateObj.rttData = null;
-    } else if (stateObj.ctData) {
-        stateObj.ctData = { ...stateObj.ctData, ...sharedData, ...pbgData, name };
-        stateObj.t5Data = null; stateObj.mgt2eData = null; stateObj.rttData = null;
-    } else if (stateObj.rttData) {
-        stateObj.rttData = { ...stateObj.rttData, ...sharedData, ...pbgData, name };
-        stateObj.t5Data = null; stateObj.mgt2eData = null; stateObj.ctData = null;
+    // GATHER SOCIOECONOMIC DATA (User-editable fields in accordions)
+    let mgtSocioInputs = {};
+    const mgtCheckEl = document.getElementById('edit-mgt-pvalue');
+    if (mgtCheckEl) {
+        mgtSocioInputs = {
+            pValue: parseInt(document.getElementById('edit-mgt-pvalue').value, 10) || 0,
+            pcr: parseInt(document.getElementById('edit-mgt-pcr').value, 10) || 0,
+            majorCities: parseInt(document.getElementById('edit-mgt-mcities').value, 10) || 0,
+            govProfile: document.getElementById('edit-mgt-gov-profile').value,
+            factions: document.getElementById('edit-mgt-fac').value,
+            judicialSystemProfile: document.getElementById('edit-mgt-judicial-profile').value,
+            lawProfile: document.getElementById('edit-mgt-law-profile').value,
+            techProfile: document.getElementById('edit-mgt-tech-profile').value,
+            culturalProfile: document.getElementById('edit-mgt-cul-profile').value,
+            Im: document.getElementById('edit-mgt-im').value,
+            economicProfile: document.getElementById('edit-mgt-eco-profile').value,
+            RU: parseInt(document.getElementById('edit-mgt-ru').value, 10) || 0,
+            pcGWP: document.getElementById('edit-mgt-gwp').value,
+            WTN: document.getElementById('edit-mgt-wtn').value,
+            IR: parseInt(document.getElementById('edit-mgt-ir').value, 10) || 0,
+            DR: document.getElementById('edit-mgt-dr').value,
+            starportProfile: document.getElementById('edit-mgt-starport-profile').value,
+            militaryProfile: document.getElementById('edit-mgt-mil-profile').value
+        };
+        // Update derived population
+        mgtSocioInputs.totalWorldPop = mgtSocioInputs.pValue * Math.pow(10, sharedData.pop);
     }
 
+    let t5SocioInputs = {};
+    const t5CheckEl = document.getElementById('edit-popm');
+    if (t5CheckEl) {
+        t5SocioInputs = {
+            popMultiplier: parseInt(document.getElementById('edit-popm').value, 10) || 0,
+            belts: parseInt(document.getElementById('edit-belts').value, 10) || 0,
+            gasGiants: parseInt(document.getElementById('edit-gas-giants').value, 10) || 0,
+            worlds: parseInt(document.getElementById('edit-worlds').value, 10) || 0,
+            Importance: parseInt(document.getElementById('edit-ix').value, 10) || 0,
+            ResourceUnits: parseInt(document.getElementById('edit-ru').value, 10) || 0,
+            ecoResources: parseInt(document.getElementById('edit-r').value, 10) || 0,
+            ecoLabor: parseInt(document.getElementById('edit-l').value, 10) || 0,
+            ecoInfrastructure: parseInt(document.getElementById('edit-i').value, 10) || 0,
+            ecoEfficiency: parseInt(document.getElementById('edit-e').value, 10) || 0,
+            H: parseInt(document.getElementById('edit-h').value, 10) || 1,
+            A: parseInt(document.getElementById('edit-a').value, 10) || 1,
+            S: parseInt(document.getElementById('edit-s').value, 10) || 1,
+            Sym: parseInt(document.getElementById('edit-sym').value, 10) || 1
+        };
+        // Aliases and Sync
+        t5SocioInputs.Ix = t5SocioInputs.Importance;
+        t5SocioInputs.RU = t5SocioInputs.ResourceUnits;
+        t5SocioInputs.R = t5SocioInputs.ecoResources;
+        t5SocioInputs.L = t5SocioInputs.ecoLabor;
+        t5SocioInputs.I = t5SocioInputs.ecoInfrastructure;
+        t5SocioInputs.E = t5SocioInputs.ecoEfficiency;
+    }
+
+    // --- PERSISTENCE & SYNC (SEAN PROTOCOL) ---
     stateObj.name = name;
 
+    // 1. Update MgT2E Socio Profile (Expansion or Native)
+    // CRITICAL: We update this independently so expansions on T5 worlds persist.
+    if (stateObj.mgtSocio) {
+        Object.assign(stateObj.mgtSocio, sharedData, pbgData, mgtSocioInputs, { name });
+    }
+
+    // 2. Update T5 Socio Overlay
+    if (stateObj.t5Socio) {
+        Object.assign(stateObj.t5Socio, t5SocioInputs);
+    }
+
+    // 3. Update Domain-Specific Primary Data Objects
+    if (stateObj.t5Data) {
+        stateObj.t5Data = { ...stateObj.t5Data, ...sharedData, ...pbgData, ...t5SocioInputs, name };
+        if (stateObj.t5System && stateObj.t5System.mainworld) {
+            Object.assign(stateObj.t5System.mainworld, sharedData, pbgData, t5SocioInputs, { name });
+        }
+    } else if (stateObj.mgt2eData) {
+        stateObj.mgt2eData = { ...stateObj.mgt2eData, ...sharedData, ...pbgData, ...mgtSocioInputs, name };
+        // Ensure mgtSocio points to the primary if it was null
+        if (!stateObj.mgtSocio) stateObj.mgtSocio = stateObj.mgt2eData;
+    } else if (stateObj.ctData) {
+        stateObj.ctData = { ...stateObj.ctData, ...sharedData, ...pbgData, name };
+    } else if (stateObj.rttData) {
+        stateObj.rttData = { ...stateObj.rttData, ...sharedData, ...pbgData, name };
+    }
+
+    // 4. Update internal Mongoose System if present (Multi-layer consistency)
+    if (stateObj.mgtSystem) {
+        let mw = stateObj.mgtSystem.worlds.find(w => w.type === 'Mainworld' || w.type === 'Main World') || stateObj.mgtSystem.worlds[0];
+        if (mw) Object.assign(mw, sharedData, pbgData, mgtSocioInputs, { name });
+    }
+
     hexStates.set(editingHexId, stateObj);
+
     requestAnimationFrame(draw);
-    closeHexEditor();
+
+    // Refresh the UI to reflect changes (and Keep Window Open as requested)
+    populateEditorAccordions(stateObj);
+
+    // Provide visual feedback that save occurred
+    if (typeof showToast === 'function') {
+        showToast("Changes saved successfully.", 2500);
+    }
+
+    // Optional: Update the "Cancel" button to "Close" if saved? 
+    // For now we just stay open.
 }

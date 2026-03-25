@@ -275,7 +275,7 @@
             if (worldDistAU && w.type !== 'Empty') {
                 const orbitMkm = (worldDistAU * 149597870) / 1000000;
                 tResult("Orbit Distance", `${worldDistAU.toFixed(2)} AU (${orbitMkm.toFixed(1)} M km)`);
-                
+
                 let worldSize = 0;
                 if (w.type === 'Gas Giant') {
                     // Gas Giant 100D is based on its diameter
@@ -283,7 +283,7 @@
                 } else {
                     worldSize = (typeof w.size === 'string' && w.size !== 'GG') ? parseInt(w.size, 16) : (Number(w.size) || 0);
                 }
-                
+
                 const world100D = (worldSize * 160000) / 1000000;
                 tResult("World 100D Limit", `${world100D.toFixed(2)} M km`);
 

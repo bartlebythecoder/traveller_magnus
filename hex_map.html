@@ -56,6 +56,7 @@
     <script src="js/macro_orchestrator.js" defer></script>
     <script src="js/hex_editor.js" defer></script>
     <script src="js/ui_menus.js" defer></script>
+    <script src="js/filter_engine.js" defer></script>
     <script src="js/io_manager.js" defer></script>
     <!-- Optional: auto-load system names. Generate names.js by running convert_names.ps1 -->
     <script src="names.js" onerror="console.info('names.js not found — names will not be auto-loaded.')"></script>
@@ -67,9 +68,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above So Below</span></h1>
-            <div class="splash-banner">v0.5.3 Fixed Journey Masking for Moons</div>
+            <div class="splash-banner">New: Added filter and custom coloring rules.</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.5.3</div>
+            <div class="splash-version">v0.5.4</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -304,7 +305,7 @@
     <div id="help-modal">
         <div style="text-align: center; border-bottom: 2px solid #45a29e; padding-bottom: 15px; margin-bottom: 20px;">
             <h2 style="margin: 0 0 5px 0; color: #66fcf1; font-size: 24px;">As Above So Below</h2>
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.5.3</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.5.4</span>
             <p style="margin: 5px 0; color: #c5c6c7; font-size: 12px; font-style: italic;">Created by: <span
                     id="app-credits">Bartleby the Coder</span></p>
         </div>
@@ -440,22 +441,31 @@
             <input type="text" id="edit-trade-codes">
         </div>
 
-        <!-- Journey Times and Global Masking Toggle -->
-        <div class="editor-row" id="main-journey-row"
-            style="display: none; grid-column: span 2; margin-top: 10px; background: rgba(102, 252, 241, 0.05); border: 1px solid rgba(69, 162, 158, 0.4); border-radius: 4px; padding: 6px;">
-            <div id="main-journey-times"
-                style="flex: 2; border-right: 1px dotted rgba(102, 252, 241, 0.3); padding-right: 10px;">
-                <!-- Journey times content injected via JavaScript -->
+        <!-- NAVIGATION CONTROLS (Phase 3 Integration) -->
+        <div id="masking-toggle-container"
+            style="display: none; margin-top: 15px; background: rgba(255, 165, 0, 0.1); border: 1px solid rgba(255, 165, 0, 0.4); border-radius: 4px; padding: 10px; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center;">
+                <i class="fas fa-rocket" style="color: #ffa500; margin-right: 10px; font-size: 1.2em;"></i>
+                <div>
+                    <div style="color: #ffa500; font-weight: bold; font-size: 0.9em;">Stellar Masking Navigation</div>
+                    <div style="color: #a0a8b0; font-size: 0.75em;">Distance shortcuts via stellar mass limit</div>
+                </div>
             </div>
-            <div id="masking-toggle-container"
-                style="flex: 1; display: flex; align-items: center; justify-content: center; padding-left: 10px;">
-                <label for="edit-stellar-mask"
-                    style="color: #ffa500; font-size: 0.8em; font-weight: bold; margin-right: 8px; cursor: pointer;">
-                    Enable Stellar Mask Distances
+            <div style="display: flex; align-items: center;">
+                <label class="switch" style="position: relative; display: inline-block; width: 40px; height: 20px;">
+                    <input type="checkbox" id="edit-stellar-mask" style="opacity: 0; width: 0; height: 0;">
+                    <span class="slider round"
+                        style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 34px; border: 1px solid #555;"></span>
                 </label>
-                <input type="checkbox" id="edit-stellar-mask" style="width: 18px; height: 18px; cursor: pointer;">
+                <span id="mask-status-label"
+                    style="color: #888; font-size: 0.8em; margin-left: 8px; width: 30px;">OFF</span>
             </div>
         </div>
+
+        <div id="main-journey-row" style="display: none; margin-top: 10px;">
+            <div id="main-journey-times"></div>
+        </div>
+
 
 
 
@@ -707,6 +717,149 @@
         <div class="editor-buttons">
             <button class="btn-cancel" id="btn-editor-cancel">Cancel</button>
             <button class="btn-save" id="btn-editor-save">Save</button>
+        </div>
+    </div>
+
+    <!-- Filter Window Modal (Phase 2) -->
+    <div id="filter-modal">
+        <div class="modal-drag-handle">
+            <h2>Sector Control</h2>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <!-- Tab Header -->
+                <div class="filter-tabs">
+                    <div class="filter-tab active" id="tab-btn-filter" onclick="switchFilterTab('filter')">Filter</div>
+                    <div class="filter-tab" id="tab-btn-design" onclick="switchFilterTab('design')">Custom</div>
+                </div>
+                <span id="btn-clear-filters" class="filter-clear-link" onclick="clearFilterInputs()">Clear All</span>
+            </div>
+        </div>
+
+        <!-- Filter Content -->
+        <div id="filter-content-pane" class="filter-content active">
+            <!-- Route Toggles (Priority 1) -->
+            <div class="filter-section">
+                <span class="filter-title">Route Visibility</span>
+                <div class="filter-route-toggles">
+                    <label class="filter-toggle-item">
+                        <input type="checkbox" id="filter-route-green" checked>
+                        <span style="color: #00FF00;">Green</span>
+                    </label>
+                    <label class="filter-toggle-item">
+                        <input type="checkbox" id="filter-route-yellow" checked>
+                        <span style="color: #FFFF00;">Yellow</span>
+                    </label>
+                    <label class="filter-toggle-item">
+                        <input type="checkbox" id="filter-route-red" checked>
+                        <span style="color: #FF0000;">Red</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- UWP Fields -->
+            <div class="filter-section">
+                <span class="filter-title">Physical & Social (UWP)</span>
+                <div class="filter-grid-uwp">
+                    <div class="filter-field">
+                        <label>Starport</label>
+                        <input type="text" id="filter-starport" placeholder="e.g. A, B">
+                    </div>
+                    <div class="filter-field">
+                        <label>Size</label>
+                        <input type="text" id="filter-size" placeholder="e.g. >5, 0, A">
+                    </div>
+                    <div class="filter-field">
+                        <label>Atmosphere</label>
+                        <input type="text" id="filter-atm" placeholder="6, 8">
+                    </div>
+                    <div class="filter-field">
+                        <label>Hydrographics</label>
+                        <input type="text" id="filter-hydro" placeholder=">0">
+                    </div>
+                    <div class="filter-field">
+                        <label>Population</label>
+                        <input type="text" id="filter-pop" placeholder=">8">
+                    </div>
+                    <div class="filter-field">
+                        <label>Government</label>
+                        <input type="text" id="filter-gov">
+                    </div>
+                    <div class="filter-field">
+                        <label>Law Level</label>
+                        <input type="text" id="filter-law">
+                    </div>
+                    <div class="filter-field">
+                        <label>Tech Level</label>
+                        <input type="text" id="filter-tl" placeholder=">10">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conditional Socio-Economic Filters -->
+            <div class="filter-section no-border" id="filter-conditional-section" style="display: none;">
+                <span class="filter-title">Advanced Data</span>
+                <div class="filter-conditional-container">
+                    <div class="filter-field" id="filter-field-t5-ix" style="display: none;">
+                        <label>T5 Ix</label>
+                        <input type="text" id="filter-t5-ix" placeholder=">2">
+                    </div>
+                    <div class="filter-field" id="filter-field-mgt-importance" style="display: none;">
+                        <label>Mongoose Importance</label>
+                        <input type="text" id="filter-mgt-importance" placeholder=">0">
+                    </div>
+                    <div class="filter-field" id="filter-field-mgt-wtn" style="display: none;">
+                        <label>Mongoose WTN</label>
+                        <input type="text" id="filter-mgt-wtn" placeholder=">3.5">
+                    </div>
+                    <div class="filter-field" id="filter-field-mgt-gwp" style="display: none;">
+                        <label>Mongoose GWP</label>
+                        <input type="text" id="filter-mgt-gwp" placeholder=">1000k">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Design Content (Phase 3) -->
+        <div id="design-content-pane" class="filter-content">
+            <span class="filter-title">Batch Customization</span>
+            <div class="design-grid">
+                <div class="design-field">
+                    <label>System Glow Color</label>
+                    <input type="color" id="design-glow-color" value="#66fcf1">
+                </div>
+                <div class="design-field">
+                    <label>Icon Style</label>
+                    <select id="design-icon-style">
+                        <option value="Classic">Classic Dot</option>
+                        <option value="Refined">Glow Sphere</option>
+                        <option value="Minimal">Crosshair</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn-batch-apply" onclick="applyBatchStyles()">Apply as New Rule</button>
+
+            <!-- Rules Ledger (New Feature) -->
+            <div id="rules-ledger-container"
+                style="margin-top: 15px; border-top: 1px solid rgba(69, 162, 158, 0.3); padding-top: 10px;">
+                <span class="filter-title"
+                    style="font-size: 0.75rem; color: #66fcf1; margin-bottom: 5px; display: block;">Active Styling
+                    Rules</span>
+                <div id="active-rules-list"
+                    style="max-height: 150px; overflow-y: auto; background: rgba(0, 0, 0, 0.2); border-radius: 4px; padding: 5px;">
+                    <!-- Rules will be injected here via JS -->
+                    <div style="color: #45a29e; font-size: 0.7rem; text-align: center; padding: 10px;">No active rules.
+                    </div>
+                </div>
+            </div>
+
+            <p style="font-size: 0.65rem; color: #a0a8b0; text-align: center; margin-top: 10px;">
+                * Rules are applied in order. Deleting a rule triggers a sector-wide repaint.
+            </p>
+        </div>
+
+        <div class="filter-modal-footer">
+            <span>Press <strong style="color: #66fcf1;">ESC</strong> to close</span>
+            <span>Matches: <span id="filter-results-count">0</span></span>
         </div>
     </div>
 

@@ -6,6 +6,8 @@ token.json
 
 # Intermediate / temp files (always regenerated, never committed)
 .tmp/
+.idea/
+tmp/
 !.tmp/.gitkeep
 
 # Python

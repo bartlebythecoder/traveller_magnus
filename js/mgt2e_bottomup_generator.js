@@ -201,7 +201,14 @@
         }
 
         // =================================================================
-        // PHASE 6: FINALIZATION & AUDIT
+        // PHASE 6: JOURNEY MATH SWEEP (Phase 2 Integration)
+        // =================================================================
+        if (MgT2EMath && MgT2EMath.performJourneyMathSweep) {
+            MgT2EMath.performJourneyMathSweep(sys);
+        }
+
+        // =================================================================
+        // PHASE 7: FINALIZATION & AUDIT
         // =================================================================
         
         // Final name check

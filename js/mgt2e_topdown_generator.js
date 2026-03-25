@@ -196,7 +196,14 @@
         }
 
         // =================================================================
-        // PHASE 9: FINALIZATION
+        // PHASE 9: JOURNEY MATH SWEEP (Phase 2 Integration)
+        // =================================================================
+        if (MgT2EMath && MgT2EMath.performJourneyMathSweep) {
+            MgT2EMath.performJourneyMathSweep(sys);
+        }
+
+        // =================================================================
+        // PHASE 10: FINALIZATION
         // =================================================================
         
         // Close trace logging
@@ -288,11 +295,13 @@
             SocioEngine.finalizeSubordinateSocial(sys, mainworldBase);
         }
 
-        // --- PHASE 3: FINALIZATION ---
-        // CRITICAL FIX: Ensure mainworldBase results (like pValue, govProfile) are synced back to internalMW
-        // as the SocioEngine may have updated mainworldBase but reference mismatch prevented internal update.
         if (internalMW && mainworldBase && internalMW !== mainworldBase) {
             Object.assign(internalMW, mainworldBase);
+        }
+
+        // --- PHASE 4: JOURNEY MATH SWEEP ---
+        if (MgT2EMath && MgT2EMath.performJourneyMathSweep) {
+            MgT2EMath.performJourneyMathSweep(sys);
         }
 
         if (typeof endTrace === 'function' && typeof window !== 'undefined' && window.isLoggingEnabled) {

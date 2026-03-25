@@ -35,7 +35,8 @@ function setupSaveLoad() {
     document.getElementById('btn-save-map').addEventListener('click', async () => {
         const stateObj = {
             hexStates: {},
-            routes: window.sectorRoutes || []
+            routes: window.sectorRoutes || [],
+            rules: window.activeFilterRules || []
         };
         hexStates.forEach((value, key) => {
             stateObj.hexStates[key] = value;
@@ -89,6 +90,11 @@ function setupSaveLoad() {
                         hexStates.set(key, parsedData.hexStates[key]);
                     }
                     window.sectorRoutes = parsedData.routes || [];
+                    window.activeFilterRules = parsedData.rules || [];
+
+                    // Re-sync UI and redraw map based on loaded rules
+                    if (typeof renderRulesLedger === 'function') renderRulesLedger();
+                    if (typeof reapplyAllRules === 'function') reapplyAllRules();
                 } else {
                     // Fallback for old format
                     for (const key in parsedData) {

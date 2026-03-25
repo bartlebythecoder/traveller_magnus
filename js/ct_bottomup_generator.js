@@ -422,6 +422,11 @@ function processBottomUpSocial(sys) {
     // 4. Subordinate Finalization (Recursive via walkSystem)
     processBottomUpSubordinates(sys);
 
+    // --- PHASE 6: JOURNEY MATH SWEEP (Phase 2 Integration) ---
+    if (typeof MgT2EMath !== 'undefined' && MgT2EMath.performJourneyMathSweep) {
+        MgT2EMath.performJourneyMathSweep(sys);
+    }
+
     return sys;
 }
 

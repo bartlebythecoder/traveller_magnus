@@ -1,39 +1,35 @@
 # PROJECT AS ABOVE, SO BELOW - Feature Manifest
-**Target:** Journey Times & Stellar Masking Integration
+**Target:** Advanced System Filtering, Route Toggles, & Batch Customization Persistence
 **Architecture Standard:** The "Sean Protocol" (Strict Modular Separation, Comprehensive Trace Logging)
 
 ## 1. Project Goal
-To integrate a "Journey Times" data readout for all generated worlds, calculated universally across all four generation engines. Additionally, introduce an optional "Stellar Masking" modifier. This modifier becomes available strictly when a full system skeleton (including the primary star) is generated, and applies exclusively to worlds that meet specific stellar size and orbital distance mathematical thresholds.
+To integrate a comprehensive, debounced "Filter Window" that allows users to parse generated systems using 10+ data points (e.g., Starport, Tech Level) alongside global Route Toggles (Green, Red, Yellow). Additionally, introduce a Phase 2 "Filter-to-Action" customization suite to apply and save batch aesthetic changes (custom colors/styles) within the core JSON data structure.
 
 ## 2. Architectural Pillars (The "Sean Protocol")
-All new code must strictly adhere to the established architecture:
-* **Data Shield (`/rules/mgt2e.js`):** Remains untouched for this specific feature update, as no static tables or string arrays are required.
-* **Math Chassis (`js/mgt2e_math.js`):** All raw formulas, journey time algorithms, and masking threshold logic must remain isolated here.
-* **Core Engines (All Four Generation Systems):** Every engine responsible for generating and packaging world objects across all four systems must be updated to call the unified math functions from the Math Chassis, ensuring universal application without duplicating the core algorithms.
-* **Trace Logging:** Every calculation, eligibility check, and modifier application MUST be wrapped in the `tSection`, `tResult`, and `writeLogLine` framework.
+* **Data Shield:** The source of truth for base system data and rules.
+* **Math Chassis:** The isolated location for all raw filtering algorithms, numeric operators, and string parsing.
+* **Core Engines:** All generation engines must be updated to handle the injection and mapping of user preference objects without duplicating logic.
+* **Trace Logging:** Every filter loop and style update MUST be wrapped in the `tSection`, `tResult`, and `writeLogLine` framework.
 
-## 3. Implementation Plan & File Targets
+## 3. Implementation Plan
 
-### Phase 0: Investigation & State Management
-* **Target:** GUI/State Modules
-* **Action:** Investigate the application's UI transition behavior when moving from a "Mainworld Only" generation state to an expanded "Full System" state. 
-    * *Objective:* Determine if expanding a system triggers a full GUI redraw (which would natively render the new checkbox) or if dynamic DOM manipulation is required to unhide the checkbox and update the existing Mainworld's Journey Time readout on the fly.
+### Phase 0: Investigation & State Decisions (Completed)
+* **Behavior:** Use dynamic DOM manipulation (not full redraws).
+* **Performance:** Implement a 300ms debounce on all filter inputs.
+* **UI:** Implement a hotkey-toggled modal mirroring the existing CSS design system.
+* **Selection Logic:** The filter window acts as a selection tool for defining the scope of batch-styling actions.
 
-### Phase 1: Math Chassis
-* **Target:** `js/mgt2e_math.js`
-* **Action:** * Build the universal base calculator function for Journey Times.
-    * Establish the mathematical thresholds for Stellar Masking eligibility (comparing primary star size vs. specific orbital distance).
-    * Build the isolated Stellar Masking modifier function.
-    * *Constraint:* Ensure all steps utilize the established trace logging framework.
+### Phase 1: Math Chassis Development
+* **Action:** Identify the file serving as the Math Chassis. Implement a universal `applyFilters` function.
+* **Logic:** Handle Route Toggles first, followed by numeric operators (`>`, `<`) and comma-separated inclusions.
+* **Requirement:** Strictly apply Trace Logging to every calculation and conditional branch.
 
-### Phase 2: Core Engines
-* **Target:** All Core Engine Object Packagers (across all four generation systems).
-* **Action:** Update all existing engines to execute the new Math Chassis functions for the Mainworld and any subordinate worlds. Ensure the computed Journey Times and the boolean maskingEligible flag are accurately packaged into the final generated world objects before they are passed to the UI orchestrators.
+### Phase 2: UI & Engine Integration
+* **Action:** Identify UI Orchestrator and CSS files. Build the Filter Modal using existing styles.
+* **Action:** Map inputs to the Math Chassis logic using the 300ms debounce.
+* **Visuals:** Position Route Toggles (Green, Red, Yellow) at the top of the modal hierarchy.
 
-### Phase 3: Auditor & UI Integration
-* **Target:** `js/input.js`, GUI Rendering Modules
-* **Action:** * **Mainworld View:** Inject the Journey Time data at the bottom of the Mainworld display panel.
-    * **Accordion View:** Inject the Journey Time data at the bottom of each non-mainworld panel within the system accordion.
-    * **Checkbox Implementation:** Add the global "Stellar Masking" checkbox to the primary UI.
-        * *Display Logic:* Hide or disable the checkbox entirely if only an isolated Mainworld exists.
-        * *Execution Logic:* When toggled on, only apply the math modifier to worlds whose data object explicitly carries a `true` value for the `maskingEligible` flag.
+### Phase 3: Batch Customization & JSON Persistence
+* **Action:** Expand UI to include a "Design/Appearance" tab for color pickers and styling.
+* **Action:** Update Save/Load logic to package persistent aesthetic data (e.g., `custom_ui`) within the project JSON.
+* **Execution:** Update initialization sequences to read saved preferences and override default paints on map load.

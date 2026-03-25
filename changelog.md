@@ -1,6 +1,10 @@
 # Changelog
 
-### [v0.5.3] - 2026-03-23
+### [v0.5.4] - 2026-03-24
+1. **System Editor:** Ability to edit and save more fields across all generation engines.
+2. **Sector Control:** Added filter and custom coloring rules.
+
+### [v0.5.3] - 2026-03-24
 1. **Socioeconomics:** Resolved P-Value / Population Multiplier mismatch when expanding existing worlds. All UWP characteristics and the Population digit are now correctly inherited from the source world.
 2. **Architecture:** Refactored `mgt2e_socio_engine.js` and `ui_menus.js` to ensure UWP immutability during world expansion.
 3. **Journey Math:** Implemented high-precision planetary diameter support for jump distance calculations. Travel times for Gas Giants and large worlds now use their physical `diamKm` instead of UWP size estimates, ensuring a strict and accurate "100-Diameter" limit.

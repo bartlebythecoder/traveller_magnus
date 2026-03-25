@@ -129,17 +129,19 @@ function draw() {
     }
 
     // =========================================================================
-    // LAYER 2: INTERSTELLAR ROUTES (Now safely on top of the grid)
+    // LAYER 2: INTERSTELLAR ROUTES (Sean Protocol: Visibility Decoupled)
     // =========================================================================
     if (window.sectorRoutes && window.sectorRoutes.length > 0) {
+        if (typeof tSection === 'function') tSection("Render Sector Routes");
+        
         ctx.save();
         ctx.lineWidth = 2 / zoom;
         const gap = 20;
 
-        // Separate routes by type for efficient batching
-        const xboatRoutes = window.sectorRoutes.filter(r => r.type === 'Xboat');
-        const tradeRoutes = window.sectorRoutes.filter(r => r.type === 'Trade');
-        const secondaryRoutes = window.sectorRoutes.filter(r => r.type === 'Secondary');
+        // Harvest visibility from checkboxes directly
+        const showGreen = document.getElementById('filter-route-green')?.checked ?? true;
+        const showRed = document.getElementById('filter-route-red')?.checked ?? true;
+        const showYellow = document.getElementById('filter-route-yellow')?.checked ?? true;
 
         const drawBatch = (routes, color) => {
             ctx.strokeStyle = color;
@@ -164,9 +166,22 @@ function draw() {
             ctx.stroke();
         };
 
-        if (xboatRoutes.length > 0) drawBatch(xboatRoutes, '#00FF00');     // Bright Green
-        if (tradeRoutes.length > 0) drawBatch(tradeRoutes, '#FF0000');     // Red
-        if (secondaryRoutes.length > 0) drawBatch(secondaryRoutes, '#FFFF00'); // Yellow
+        const xboatRoutes = window.sectorRoutes.filter(r => r.type === 'Xboat');
+        const tradeRoutes = window.sectorRoutes.filter(r => r.type === 'Trade');
+        const secondaryRoutes = window.sectorRoutes.filter(r => r.type === 'Secondary');
+
+        if (xboatRoutes.length > 0 && showGreen) {
+            drawBatch(xboatRoutes, '#00FF00'); // Bright Green
+            if (typeof writeLogLine === 'function') writeLogLine(`Rendered ${xboatRoutes.length} Green (Xboat) routes.`);
+        }
+        if (tradeRoutes.length > 0 && showRed) {
+            drawBatch(tradeRoutes, '#FF0000'); // Red
+            if (typeof writeLogLine === 'function') writeLogLine(`Rendered ${tradeRoutes.length} Red (Trade) routes.`);
+        }
+        if (secondaryRoutes.length > 0 && showYellow) {
+            drawBatch(secondaryRoutes, '#FFFF00'); // Yellow
+            if (typeof writeLogLine === 'function') writeLogLine(`Rendered ${secondaryRoutes.length} Yellow (Secondary) routes.`);
+        }
 
         ctx.restore();
     }
@@ -213,8 +228,9 @@ function draw() {
                 hexStates.set(hexId, stateObj);
             }
             const stateType = stateObj ? stateObj.type : 'BLANK';
+            const isHidden = stateObj ? stateObj.isHiddenByFilter : false;
 
-            if (stateType === 'SYSTEM_PRESENT') {
+            if (stateType === 'SYSTEM_PRESENT' && !isHidden) {
                 const data = stateObj.rttData || stateObj.t5Data || stateObj.mgt2eData || stateObj.ctData;
 
                 if (!devView) {
@@ -279,10 +295,14 @@ function draw() {
                             ctx.textBaseline = 'top';
                         }
 
-                        // 3. World dot (or asteroid cluster)
+                        // 3. World dot (or asteroid cluster) with Custom UI Support
+                        const custom = stateObj.custom_ui || {};
+                        const baseColor = isSelected ? '#ffb399' : '#ffffff';
+                        const finalColor = custom.glowColor || baseColor;
+                        const iconStyle = custom.iconStyle || 'Classic';
+
                         if (isAsteroid) {
-                            // Asteroid belt: cluster of small dots
-                            const aColor = isSelected ? '#ffb399' : '#aaaaaa';
+                            const aColor = custom.glowColor || (isSelected ? '#ffb399' : '#aaaaaa');
                             const aPositions = [
                                 { dx: -8, dy: -2 }, { dx: 0, dy: -5 }, { dx: 8, dy: -2 },
                                 { dx: -5, dy: 5 }, { dx: 5, dy: 4 }
@@ -295,14 +315,44 @@ function draw() {
                                 ctx.closePath();
                             });
                         } else {
-                            // Normal world dot
-                            ctx.beginPath();
-                            ctx.arc(cx, cy, dotRadius, 0, 2 * Math.PI);
-                            ctx.fillStyle = isWet
-                                ? (isSelected ? '#a8d8ff' : '#46b4e8')
-                                : (isSelected ? '#ffb399' : '#ffffff');
-                            ctx.fill();
-                            ctx.closePath();
+                            if (iconStyle === 'Classic') {
+                                ctx.beginPath();
+                                ctx.arc(cx, cy, dotRadius, 0, 2 * Math.PI);
+                                ctx.fillStyle = finalColor;
+                                ctx.fill();
+                                ctx.closePath();
+                            } else if (iconStyle === 'Refined') {
+                                // Glow Sphere
+                                ctx.save();
+                                const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, dotRadius + 8);
+                                grad.addColorStop(0, finalColor);
+                                grad.addColorStop(0.3, finalColor);
+                                grad.addColorStop(1, 'transparent');
+                                ctx.fillStyle = grad;
+                                ctx.beginPath();
+                                ctx.arc(cx, cy, dotRadius + 8, 0, 2 * Math.PI);
+                                ctx.fill();
+                                // White core for systems
+                                ctx.beginPath();
+                                ctx.arc(cx, cy, dotRadius * 0.4, 0, 2 * Math.PI);
+                                ctx.fillStyle = '#ffffff';
+                                ctx.fill();
+                                ctx.restore();
+                            } else if (iconStyle === 'Minimal') {
+                                // Crosshair
+                                ctx.save();
+                                ctx.strokeStyle = finalColor;
+                                ctx.lineWidth = 1.5 / zoom;
+                                ctx.beginPath();
+                                const l = dotRadius + 5;
+                                ctx.moveTo(cx - l, cy); ctx.lineTo(cx + l, cy);
+                                ctx.moveTo(cx, cy - l); ctx.lineTo(cx, cy + l);
+                                ctx.stroke();
+                                ctx.beginPath();
+                                ctx.arc(cx, cy, dotRadius * 0.5, 0, 2 * Math.PI);
+                                ctx.stroke();
+                                ctx.restore();
+                            }
                         }
 
                         // 4. UWP string — just below dot

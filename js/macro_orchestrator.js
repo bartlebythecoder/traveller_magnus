@@ -198,6 +198,9 @@ async function runMgT2EMacro(skipPop = false) {
         } else {
             showToast("No populated hexes were updated.", 4000);
         }
+        // Refresh both visibility and styling rules for the new systems
+        if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+        if (typeof applyActiveFilters === 'function') applyActiveFilters();
     }, 500);
 }
 
@@ -300,6 +303,9 @@ async function runMgT2EBottomUpMacro(skipPop = false) {
                 showToast("No populated hexes to update. Ensure selection contains populated hexes.", 4000);
             }
         }
+        // Refresh both visibility and styling rules for the new systems
+        if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+        if (typeof applyActiveFilters === 'function') applyActiveFilters();
     }, 500);
 }
 
@@ -389,6 +395,9 @@ async function runCTNewMacro(skipPop = false) {
         } else {
             alert("No populated hexes to update. Ensure selection contains populated hexes.");
         }
+        // Refresh both visibility and styling rules for the new systems
+        if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+        if (typeof applyActiveFilters === 'function') applyActiveFilters();
     }, 500);
 }
 
@@ -474,6 +483,9 @@ async function runCTBottomUpMacro(skipPop = false) {
         } else {
             alert("No populated hexes to update. Ensure selection contains populated hexes.");
         }
+        // Refresh both visibility and styling rules for the new systems
+        if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+        if (typeof applyActiveFilters === 'function') applyActiveFilters();
     }, 500);
 }
 
@@ -553,6 +565,9 @@ async function runRTTMacro(skipPop = false) {
         } else {
             alert("No populated hexes to update. Ensure selection contains populated hexes.");
         }
+        // Refresh both visibility and styling rules for the new systems
+        if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+        if (typeof applyActiveFilters === 'function') applyActiveFilters();
     }, 500);
 }
 
@@ -640,9 +655,14 @@ async function runT5Macro(skipPop = false) {
         });
 
         if (count > 0) {
-            showToast(`Full T5 Generation Complete!`, 4000);
+            if (typeof showToast === 'function') {
+                showToast(`Full T5 Generation Complete!`, 4000);
+            }
         } else {
             alert("No populated hexes to update. Ensure selection contains populated hexes.");
         }
+        // Refresh both visibility and styling rules for the new systems
+        if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+        if (typeof applyActiveFilters === 'function') applyActiveFilters();
     }, 500);
 }

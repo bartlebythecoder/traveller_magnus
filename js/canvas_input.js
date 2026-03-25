@@ -44,9 +44,36 @@ function setupCanvasEvents() {
         const socioDev = document.getElementById('ctx-expand-socio-mgt2e-dev');
         if (socioDev) socioDev.style.display = (window.devView === true) ? 'block' : 'none';
 
-        contextMenu.style.left = `${e.clientX}px`;
-        contextMenu.style.top = `${e.clientY}px`;
+        // Show first to measure dimensions
         contextMenu.classList.add('visible');
+
+        let x = e.clientX;
+        let y = e.clientY;
+        const menuWidth = contextMenu.offsetWidth;
+        const menuHeight = contextMenu.offsetHeight;
+
+        // Boundary checks
+        if (x + menuWidth > window.innerWidth) {
+            x = window.innerWidth - menuWidth - 10; // 10px buffer
+        }
+        if (y + menuHeight > window.innerHeight) {
+            y = window.innerHeight - menuHeight - 10;
+        }
+
+        // Safety floor
+        x = Math.max(10, x);
+        y = Math.max(10, y);
+
+        contextMenu.style.left = `${x}px`;
+        contextMenu.style.top = `${y}px`;
+
+        // Check if submenus will go off-screen to the right
+        const submenuWidth = 180; // Estimated from CSS
+        if (x + menuWidth + submenuWidth > window.innerWidth) {
+            contextMenu.classList.add('reverse-submenus');
+        } else {
+            contextMenu.classList.remove('reverse-submenus');
+        }
     });
 
     // 3. Mouse Down: Start Pan, Paint, or Hex Editor

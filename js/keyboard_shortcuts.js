@@ -61,9 +61,14 @@ function setupKeyboardShortcuts() {
                 closeHexEditor();
             } else if (helpModal.style.display === 'flex') {
                 closeHelpModal();
+            } else if (document.getElementById('filter-modal').style.display === 'flex') {
+                closeFilterModal();
             } else {
                 deselectAllHexes();
             }
+        } else if (key === 'f') {
+            e.preventDefault();
+            toggleFilterModal();
         } else if (e.ctrlKey && key === 'z') {
             e.preventDefault();
             if (e.shiftKey) {

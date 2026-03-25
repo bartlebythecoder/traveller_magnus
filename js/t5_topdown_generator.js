@@ -353,6 +353,11 @@
         // PHASE 6: Fleshing and Audit
         fleshOutSubordinates(sys);
 
+        // --- PHASE 7: JOURNEY MATH SWEEP (Phase 2 Integration) ---
+        if (typeof MgT2EMath !== 'undefined' && MgT2EMath.performJourneyMathSweep) {
+            MgT2EMath.performJourneyMathSweep(sys);
+        }
+
         return sys;
     }
 

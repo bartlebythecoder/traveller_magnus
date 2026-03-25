@@ -1,5 +1,8 @@
 # Changelog
 
+### [v0.5.4.1] - 2026-03-25
+1. **Shortcuts:** Added **F Key** to **Open Filter Window** (Filter Engine).
+
 ### [v0.5.4] - 2026-03-24
 1. **System Editor:** Ability to edit and save more fields across all generation engines.
 2. **Sector Control:** Added filter and custom coloring rules.

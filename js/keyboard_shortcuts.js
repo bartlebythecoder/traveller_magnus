@@ -55,17 +55,40 @@ function setupKeyboardShortcuts() {
             runT5Macro();
         } else if (e.key === 'Escape') {
             e.preventDefault();
+            const contextMenu = document.getElementById('context-menu');
+            const helpPanel = document.getElementById('help-panel');
+            const settingsPanel = document.getElementById('settings-panel');
             const hexEditor = document.getElementById('hex-editor');
-            const helpModal = document.getElementById('help-modal');
-            if (hexEditor.style.display === 'flex') {
-                closeHexEditor();
-            } else if (helpModal.style.display === 'flex') {
-                closeHelpModal();
-            } else if (document.getElementById('filter-modal').style.display === 'flex') {
-                closeFilterModal();
-            } else {
-                deselectAllHexes();
+            const filterModal = document.getElementById('filter-modal');
+            
+            // Priority 1: Context Menu
+            if (contextMenu && contextMenu.classList.contains('visible')) {
+                contextMenu.classList.remove('visible');
+                return;
             }
+            
+            // Priority 2: Side Panels
+            if (helpPanel && helpPanel.classList.contains('open')) {
+                helpPanel.classList.remove('open');
+                return;
+            }
+            if (settingsPanel && settingsPanel.classList.contains('open')) {
+                settingsPanel.classList.remove('open');
+                return;
+            }
+            
+            // Priority 3: Floating Palettes
+            if (hexEditor && hexEditor.classList.contains('visible')) {
+                closeHexEditor();
+                return;
+            }
+            if (filterModal && filterModal.classList.contains('visible')) {
+                closeFilterModal();
+                return;
+            }
+
+            // Cleanup
+            deselectAllHexes();
         } else if (key === 'f') {
             e.preventDefault();
             toggleFilterModal();

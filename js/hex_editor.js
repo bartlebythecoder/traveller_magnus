@@ -268,7 +268,7 @@ function openHexEditor(hexId) {
         t5QuickStatsDiv.style.display = 'grid';
     }
 
-    document.getElementById('hex-editor').style.display = 'flex';
+    document.getElementById('hex-editor').classList.add('visible');
 }
 
 function populateEditorAccordions(stateObj) {
@@ -1195,11 +1195,7 @@ function closeHexEditor() {
     document.getElementById('acc-btn-rtt-system').classList.remove('active');
 
     const hexEditor = document.getElementById('hex-editor');
-    hexEditor.style.left = 'calc(50% - 220px)';
-    hexEditor.style.top = '100px';
-    hexEditor.style.width = '440px';
-    hexEditor.style.height = 'auto';
-    hexEditor.style.display = 'none';
+    hexEditor.classList.remove('visible');
 }
 
 function setupHexEditor() {

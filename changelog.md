@@ -1,5 +1,7 @@
 # Changelog
 
+### [v0.5.5] - 2026-03-27
+
 ### [v0.5.4.1] - 2026-03-25
 1. **Shortcuts:** Added **F Key** to **Open Filter Window** (Filter Engine).
 

@@ -1,4 +1,4 @@
-# As Above, So Below (v0.5.4.1)
+# As Above, So Below (v0.5.5)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -37,6 +37,8 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 ---
 ## 📜 Changelog
 
+### [v0.5.5] - 2026-03-27
+
 ### [v0.5.4.1] - 2026-03-25
 1. **Shortcuts:** Added **F Key** to **Open Filter Window** (Filter Engine).
 
@@ -62,26 +64,6 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 ### [v0.5] - 2026-03-20
 1. **Mongoose 2E Engine:** Implemented New Mongoose Bottom-Up Generation.
 2. **Cross-Engine Compatibility:** Implemented cross-engine system expansion, allowing hexes imported or generated in T5 or Classic Traveller to be seamlessly expanded using the Mongoose Top-Down engine (and vice versa) while strictly preserving pre-existing stellar profiles.
-
-### [v0.4.3.1] - 2026-03-20
-1. **Mongoose 2E Engine:** Corrected Mongoose hot star bug.
-
-### [v0.4.3] - 2026-03-18
-1. **Mongoose 2E Engine:** Successfully refactored the MgT2E legacy generators into a modular Top-Down architecture.
-2. **Architecture:** Implemented a new Orchestator (`generateMgT2ESystemTopDown`) to unify stellar, world, and socioeconomic generation.
-
-### [v0.4.2.1] - 2026-03-18
-1. **T5 Engine:** Corrected T5 orbit error
-
-### [v0.4.2] - 2026-03-17
-1. **T5 Engine:** Refactored T5 engine into modular components.
-
-### [v0.4.1] - 2026-03-17
-1. **Classic Traveller Engine:** Fixed Satellite Radius display issue.
-
-### [v0.4] - 2026-03-16
-1. **Classic Traveller Engine:** Added Bottom Up Full CT system generation.
-
 
 ---
 *For a full history of changes, see the [Changelog](changelog.md).*

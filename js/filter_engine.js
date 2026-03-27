@@ -14,9 +14,32 @@
     // Initialization
     window.addEventListener('DOMContentLoaded', () => {
         setupFilterListeners();
-        initDraggable();
+        setupFilterCloseButton();
+        // initDraggable(); // Now handled globally in input_init.js
         initializeDefaultStyleRule();
     });
+
+    /**
+     * Sean Protocol: Dedicated listener for the draggable palette close button.
+     * Includes stopPropagation to avoid triggering global drag handlers.
+     */
+    function setupFilterCloseButton() {
+        const btnX = document.getElementById('btn-close-filter');
+        if (btnX) {
+            btnX.addEventListener('click', (e) => {
+                e.stopPropagation();
+                window.closeFilterModal();
+            });
+            btnX.addEventListener('mousedown', (e) => e.stopPropagation());
+        }
+
+        const btnFooter = document.getElementById('btn-footer-close-filter');
+        if (btnFooter) {
+            btnFooter.addEventListener('click', () => {
+                window.closeFilterModal();
+            });
+        }
+    }
 
     /**
      * Sean Protocol: Inject a default, visible style rule for liquid water worlds
@@ -52,66 +75,7 @@
         }, 500);
     }
 
-    /**
-     * Initializes the standard drag-and-drop logic for the modal.
-     * Strictly adheres to the Sean Protocol with segmented trace logging.
-     */
-    function initDraggable() {
-        if (typeof tSection === 'function') tSection("Init Modal Drag Logic");
-        
-        const modal = document.getElementById('filter-modal');
-        const handle = modal.querySelector('.modal-drag-handle');
-        
-        let isDragging = false;
-        let startX, startY;
-        let initialX, initialY;
 
-        handle.addEventListener('mousedown', (e) => {
-            // Prevent dragging if clicking onto inputs/buttons inside the handle (like tabs)
-            if (e.target.closest('input') || e.target.closest('button') || e.target.classList.contains('filter-tab')) {
-                // If it's the tab background it's okay, but if it's the tab text maybe not. 
-                // Let's only allow drag if it's the handle itself or the h2.
-                if (e.target.tagName !== 'H2' && e.target === handle) {
-                    // okay
-                } else if (e.target.tagName !== 'H2') {
-                    return;
-                }
-            }
-
-            isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            
-            const rect = modal.getBoundingClientRect();
-            initialX = rect.left;
-            initialY = rect.top;
-
-            if (typeof writeLogLine === 'function') writeLogLine("Filter Modal Drag Started.");
-            
-            // To ensure smooth movement even if the mouse leaves the handle
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
-        });
-
-        function onMouseMove(e) {
-            if (!isDragging) return;
-            
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-            
-            modal.style.left = `${initialX + dx}px`;
-            modal.style.top = `${initialY + dy}px`;
-        }
-
-        function onMouseUp() {
-            if (isDragging) {
-                isDragging = false;
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
-                if (typeof writeLogLine === 'function') writeLogLine("Filter Modal Drag Released.");
-            }
-        }
-    }
 
     /**
      * Toggles the filter modal visibility and performs a data scan for conditional fields.
@@ -119,14 +83,14 @@
     window.toggleFilterModal = function() {
         if (typeof tSection === 'function') tSection("Toggle Filter Modal");
         const modal = document.getElementById('filter-modal');
-        const isOpening = (modal.style.display !== 'flex');
+        const isOpening = !modal.classList.contains('visible');
 
         if (isOpening) {
-            modal.style.display = 'flex';
+            modal.classList.add('visible');
             scanForConditionalFields();
             if (typeof writeLogLine === 'function') writeLogLine("Filter Modal Opened - Performing data scan for Ix/GWP/WTN.");
         } else {
-            modal.style.display = 'none';
+            modal.classList.remove('visible');
             if (typeof writeLogLine === 'function') writeLogLine("Filter Modal Closed.");
         }
     };
@@ -135,7 +99,7 @@
      * Closes the filter modal.
      */
     window.closeFilterModal = function() {
-        document.getElementById('filter-modal').style.display = 'none';
+        document.getElementById('filter-modal').classList.remove('visible');
     };
 
     /**

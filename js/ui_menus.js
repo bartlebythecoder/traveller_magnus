@@ -553,11 +553,17 @@ function setupSettingsPanel() {
     const closeSettings = document.getElementById('btn-close-settings');
 
     settingsToggle.addEventListener('click', () => {
-        settingsPanel.classList.toggle('collapsed');
+        const isOpening = !settingsPanel.classList.contains('open');
+        if (isOpening) {
+            // Mutually exclusive: close help if open
+            const helpPanel = document.getElementById('help-panel');
+            if (helpPanel) helpPanel.classList.remove('open');
+        }
+        settingsPanel.classList.toggle('open');
     });
 
     closeSettings.addEventListener('click', () => {
-        settingsPanel.classList.add('collapsed');
+        settingsPanel.classList.remove('open');
     });
 
     const loggingToggle = document.getElementById('toggle-logging');

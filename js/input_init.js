@@ -37,22 +37,24 @@ function initializeInput() {
     const hexEditor = document.getElementById('hex-editor');
     const hexEditorHeader = hexEditor.querySelector('h3');
 
-    // Make Hex Editor Draggable
-    hexEditorHeader.addEventListener('mousedown', (e) => {
-        isDraggingEditor = true;
-        const style = window.getComputedStyle(hexEditor);
-        editorDragOffsetX = e.clientX - parseInt(style.left, 10);
-        editorDragOffsetY = e.clientY - parseInt(style.top, 10);
-    });
+    // Initialize Floating Palettes
+    const filterModal = document.getElementById('filter-modal');
+    const filterHandle = filterModal.querySelector('.modal-drag-handle');
+    makeDraggable(filterModal, filterHandle);
 
-    document.addEventListener('mousemove', (e) => {
-        if (!isDraggingEditor) return;
-        hexEditor.style.left = (e.clientX - editorDragOffsetX) + 'px';
-        hexEditor.style.top = (e.clientY - editorDragOffsetY) + 'px';
-    });
+    makeDraggable(hexEditor, hexEditorHeader);
+
+    // Default Placement
+    filterModal.style.left = '400px';
+    filterModal.style.top = '50px';
+    
+    // For Hex Editor (Right-aligned)
+    hexEditor.style.right = '400px';
+    hexEditor.style.left = 'auto'; // Ensure it doesn't conflict with left
+    hexEditor.style.top = '50px';
 
     document.addEventListener('mouseup', () => {
-        isDraggingEditor = false;
+        // Global safety net handled inside makeDraggable
     });
 
     // Setup all event listeners (These functions will live in our other new files)
@@ -127,16 +129,78 @@ function showToast(message, duration = 3000) {
 }
 
 // ============================================================================
+// DRAGGABLE PALETTE LOGIC
+// ============================================================================
+
+function makeDraggable(element, handle) {
+    let offsetX = 0;
+    let offsetY = 0;
+    let isDragging = false;
+
+    handle.addEventListener('mousedown', (e) => {
+        // Don't drag if clicking buttons/inputs inside handle
+        if (e.target.closest('button') || e.target.closest('input') || e.target.closest('select')) return;
+
+        isDragging = true;
+        
+        // Initial offset
+        const rect = element.getBoundingClientRect();
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
+        
+        // Bring to front
+        bringToFront(element);
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    });
+
+    function onMouseMove(e) {
+        if (!isDragging) return;
+        
+        // Use fixed positioning relative to viewport
+        element.style.left = (e.clientX - offsetX) + 'px';
+        element.style.top = (e.clientY - offsetY) + 'px';
+        element.style.right = 'auto'; // Reset right once moved
+        element.style.bottom = 'auto';
+    }
+
+    function onMouseUp() {
+        isDragging = false;
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+    }
+
+    // Bring to front on click anywhere inside
+    element.addEventListener('mousedown', () => {
+        bringToFront(element);
+    });
+}
+
+function bringToFront(element) {
+    // Other palettes to back
+    document.querySelectorAll('.draggable-palette').forEach(p => {
+        p.style.zIndex = '1100';
+    });
+    // This one to front
+    element.style.zIndex = '1200';
+}
+
+// ============================================================================
 // UI HELPERS (Settings & Modals)
 // ============================================================================
 
 function openHelpModal() {
     document.getElementById('context-menu').classList.remove('visible');
-    document.getElementById('help-modal').style.display = 'flex';
+    // Mutually exclusive: close settings if open
+    const settingsPanel = document.getElementById('settings-panel');
+    if (settingsPanel) settingsPanel.classList.remove('open');
+    
+    document.getElementById('help-panel').classList.add('open');
 }
 
 function closeHelpModal() {
-    document.getElementById('help-modal').style.display = 'none';
+    document.getElementById('help-panel').classList.remove('open');
 }
 
 function setupHelpModal() {

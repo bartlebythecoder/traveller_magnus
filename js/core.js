@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.5.2";
-const APP_BANNER = "v0.5.2 - Refactored input.js";
+const APP_VERSION = "v0.5.5";
+const APP_BANNER = "v0.5.5 - Added filter and custom coloring rules.";
 
 // -----------------------------------------------------------------------------
 // Application State

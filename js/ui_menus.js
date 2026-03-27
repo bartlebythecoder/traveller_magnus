@@ -607,3 +607,27 @@ function setupSettingsPanel() {
         showToast(`Seed randomized: ${randomSeed}`, 2000);
     });
 }
+
+function setupHelpToggle() {
+    const helpToggle = document.getElementById('help-toggle');
+    const helpPanel = document.getElementById('help-panel');
+    const settingsPanel = document.getElementById('settings-panel');
+
+    if (helpToggle) {
+        helpToggle.addEventListener('click', () => {
+            const isOpening = !helpPanel.classList.contains('open');
+            if (isOpening) {
+                // Mutually exclusive: close settings if open
+                if (settingsPanel) settingsPanel.classList.remove('open');
+            }
+            helpPanel.classList.toggle('open');
+        });
+    }
+
+    const closeHelp = document.getElementById('btn-close-help');
+    if (closeHelp) {
+        closeHelp.addEventListener('click', () => {
+            helpPanel.classList.remove('open');
+        });
+    }
+}

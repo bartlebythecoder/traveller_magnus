@@ -180,6 +180,34 @@ body {
     font-size: 20px;
 }
 
+#help-toggle {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 48px;
+    height: 48px;
+    background: #1f2833;
+    border: 1px solid #45a29e;
+    border-radius: 8px;
+    color: #66fcf1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1001;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+#help-toggle:hover {
+    background: #45a29e;
+    color: #0b0c10;
+}
+
+#help-toggle i {
+    font-size: 20px;
+}
+
 .settings-header {
     display: flex;
     justify-content: space-between;

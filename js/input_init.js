@@ -63,8 +63,8 @@ function initializeInput() {
     setupKeyboardShortcuts();
     setupContextMenu();
     setupSettingsPanel();
+    setupHelpToggle();
     setupHexEditor();
-    setupHelpModal();
     setupSaveLoad();
 
     setupSectorPicker();
@@ -199,13 +199,7 @@ function openHelpModal() {
     document.getElementById('help-panel').classList.add('open');
 }
 
-function closeHelpModal() {
-    document.getElementById('help-panel').classList.remove('open');
-}
 
-function setupHelpModal() {
-    document.getElementById('btn-close-help').addEventListener('click', closeHelpModal);
-}
 
 function setupSplashScreen() {
     const splash = document.getElementById('splash-screen');

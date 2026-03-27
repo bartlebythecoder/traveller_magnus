@@ -70,7 +70,7 @@
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above So Below</span></h1>
             <div class="splash-banner">New: Help shortcut window now on left panel.</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.5.5</div>
+            <div class="splash-version">v0.5.5.1</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -98,9 +98,14 @@
 
     <canvas id="map-canvas"></canvas>
 
-    <!-- Settings Panel -->
+    <!-- Settings Toggle -->
     <div id="settings-toggle" title="Toggle Settings">
         <i class="fas fa-cog"></i>
+    </div>
+
+    <!-- Help Toggle -->
+    <div id="help-toggle" title="Help & Shortcuts">
+        <i class="fas fa-question"></i>
     </div>
 
     <!-- UI Side Panels -->
@@ -108,7 +113,7 @@
         <!-- Settings Content -->
         <div class="settings-header">
             <h2>Settings</h2>
-            <button id="btn-close-settings"><i class="fas fa-times"></i></button>
+            <button id="btn-close-settings" class="btn-close-palette"><i class="fas fa-times"></i></button>
         </div>
 
         <div class="settings-row">
@@ -175,9 +180,12 @@
 
     <!-- Help Panel (formerly help-modal) -->
     <div id="help-panel" class="side-panel left">
-        <div style="text-align: center; border-bottom: 2px solid #45a29e; padding-bottom: 15px; margin-bottom: 20px;">
-            <h2 style="margin: 0 0 5px 0; color: #66fcf1; font-size: 24px;">As Above So Below</h2>
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.5.5</span></p>
+        <div class="settings-header">
+            <h2 style="margin: 0; color: #66fcf1; font-size: 20px;">Help & Shortcuts</h2>
+            <button id="btn-close-help" class="btn-close-palette"><i class="fas fa-times"></i></button>
+        </div>
+        <div style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.5.5.1</span></p>
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 15px;">
@@ -225,9 +233,7 @@
                 </div>
             </div>
         </div>
-        <div class="editor-buttons">
-            <button class="btn-cancel" id="btn-close-help">OK</button>
-        </div>
+
     </div>
 
     <!-- Status Modal / Sector Picker -->

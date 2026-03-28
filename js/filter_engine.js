@@ -110,8 +110,8 @@
         
         const inputs = [
             'filter-starport', 'filter-size', 'filter-atm', 'filter-hydro',
-            'filter-pop', 'filter-gov', 'filter-law', 'filter-tl',
-            'filter-t5-ix', 'filter-mgt-importance', 'filter-mgt-wtn', 'filter-mgt-gwp'
+            'filter-pop', 'filter-gov', 'filter-law', 'filter-tl', 'filter-trade-codes',
+            'filter-gravity', 'filter-temperature', 'filter-t5-ix', 'filter-mgt-importance', 'filter-mgt-wtn', 'filter-mgt-gwp'
         ];
 
         inputs.forEach(id => {
@@ -142,13 +142,20 @@
         let hasMgImportance = false;
         let hasMgWTN = false;
         let hasMgGWP = false;
+        let hasGravity = false;
+        let hasTemp = false;
 
         hexStates.forEach(state => {
             // Optimization: Skip if we found everything
-            if (hasT5Ix && hasMgImportance && hasMgWTN && hasMgGWP) return;
+            if (hasT5Ix && hasMgImportance && hasMgWTN && hasMgGWP && hasGravity && hasTemp) return;
 
             const t5Socio = state.t5Socio;
             const mgtSocio = state.mgtSocio;
+            const worldData = state.rttData || state.t5Data || state.mgt2eData || state.ctData || {};
+
+            // Physical Data Check (Gravity & Temp)
+            if (worldData.gravity !== undefined || worldData.Gravity !== undefined) hasGravity = true;
+            if (worldData.temperature !== undefined || worldData.temp !== undefined || worldData.Temperature !== undefined) hasTemp = true;
 
             // T5 Importance Check
             if (t5Socio && (t5Socio.Ix !== undefined || t5Socio.Importance !== undefined)) {
@@ -177,9 +184,11 @@
         document.getElementById('filter-field-mgt-importance').style.display = hasMgImportance ? 'flex' : 'none';
         document.getElementById('filter-field-mgt-wtn').style.display = hasMgWTN ? 'flex' : 'none';
         document.getElementById('filter-field-mgt-gwp').style.display = hasMgGWP ? 'flex' : 'none';
+        document.getElementById('filter-field-gravity').style.display = hasGravity ? 'flex' : 'none';
+        document.getElementById('filter-field-temperature').style.display = hasTemp ? 'flex' : 'none';
         
         const conditionalSection = document.getElementById('filter-conditional-section');
-        conditionalSection.style.display = (hasT5Ix || hasMgImportance || hasMgWTN || hasMgGWP) ? 'block' : 'none';
+        conditionalSection.style.display = (hasT5Ix || hasMgImportance || hasMgWTN || hasMgGWP || hasGravity || hasTemp) ? 'block' : 'none';
     }
 
     /**
@@ -211,6 +220,9 @@
             gov: document.getElementById('filter-gov')?.value || "",
             law: document.getElementById('filter-law')?.value || "",
             tl: document.getElementById('filter-tl')?.value || "",
+            tradeCodes: document.getElementById('filter-trade-codes')?.value || "",
+            gravity: document.getElementById('filter-gravity')?.value || "",
+            temperature: document.getElementById('filter-temperature')?.value || "",
             t5Ix: document.getElementById('filter-t5-ix')?.value || "",
             mgtImportance: document.getElementById('filter-mgt-importance')?.value || "",
             mgtWTN: document.getElementById('filter-mgt-wtn')?.value || "",
@@ -247,7 +259,7 @@
     }
 
     /**
-     * Tab Switching Logic for the Sector Control modal.
+     * Tab Switching Logic for the Filter Control modal.
      */
     window.switchFilterTab = function(tabName) {
         if (typeof tSection === 'function') tSection(`Switch Tab: ${tabName}`);
@@ -273,7 +285,8 @@
         let parts = [];
         const labels = {
             starport: "Starport", size: "Size", atm: "Atm", hydro: "Hydro", 
-            pop: "Pop", gov: "Gov", law: "Law", tl: "TL", 
+            pop: "Pop", gov: "Gov", law: "Law", tl: "TL", tradeCodes: "Codes",
+            gravity: "Grav", temperature: "Temp (°C)",
             t5Ix: "T5 Ix", mgtImportance: "Mg Imp", mgtWTN: "Mg WTN", mgtGWP: "Mg GWP"
         };
         for (const key in filters) {
@@ -301,9 +314,34 @@
             const row = document.createElement('div');
             row.style.cssText = "display: flex; align-items: center; justify-content: space-between; background: rgba(102, 252, 241, 0.05); border: 1px solid rgba(102, 252, 241, 0.2); border-radius: 3px; margin-bottom: 4px; padding: 4px 8px; font-size: 0.7rem; color: #fff;";
             
+            // Determine what little badge to show in the ledger
+            let styleIndicator = '';
+            
+            if (rule.color || rule.secondaryColor || rule.ringColor) {
+                // 1. Determine background (Solid or Split)
+                let bgCSS = 'background: transparent;';
+                if (rule.color && rule.secondaryColor) {
+                    bgCSS = `background: linear-gradient(90deg, ${rule.color} 50%, ${rule.secondaryColor} 50%);`;
+                } else if (rule.color) {
+                    bgCSS = `background: ${rule.color};`;
+                } else if (rule.secondaryColor) {
+                    bgCSS = `background: ${rule.secondaryColor};`; // Fallback
+                }
+
+                // 2. Determine border (Ring)
+                let borderCSS = rule.ringColor ? `border: 1.5px solid ${rule.ringColor}; box-sizing: border-box;` : '';
+                
+                // 3. Set slightly larger size to accommodate the ring nicely
+                let sizeCSS = 'width: 10px; height: 10px;';
+
+                styleIndicator = `<span style="${sizeCSS} border-radius: 50%; ${bgCSS} ${borderCSS} margin-right: 8px; flex-shrink: 0;" title="Custom Style"></span>`;
+            } else if (rule.iconStyle) {
+                styleIndicator = `<i class="fas fa-shapes" style="font-size: 8px; color: #a0a8b0; margin-right: 8px;" title="Shape Only"></i>`;
+            }
+
             row.innerHTML = `
                 <div style="display: flex; align-items: center; flex: 1; overflow: hidden;">
-                    <span style="width: 8px; height: 8px; border-radius: 50%; background: ${rule.color}; margin-right: 8px; flex-shrink: 0;"></span>
+                    ${styleIndicator}
                     <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${rule.description}">${rule.description}</span>
                 </div>
                 <i class="fas fa-times" style="color: #ff4500; cursor: pointer; margin-left: 10px; font-size: 0.8rem;" onclick="deleteFilterRule('${rule.id}')"></i>
@@ -337,8 +375,13 @@
 
                 if (UniversalMath.applyFilters(evalObject, rule.filters)) {
                     if (!state.custom_ui) state.custom_ui = {};
-                    state.custom_ui.glowColor = rule.color;
-                    state.custom_ui.iconStyle = rule.iconStyle;
+                    
+                    // ONLY overwrite if the rule explicitly contains a setting
+                    if (rule.color !== null) state.custom_ui.glowColor = rule.color;
+                    if (rule.secondaryColor !== null && rule.secondaryColor !== undefined) state.custom_ui.secondaryColor = rule.secondaryColor;
+                    if (rule.ringColor !== null && rule.ringColor !== undefined) state.custom_ui.ringColor = rule.ringColor;
+                    if (rule.iconStyle !== null) state.custom_ui.iconStyle = rule.iconStyle;
+                    
                     ruleMatchCount++;
                 }
             });
@@ -367,18 +410,34 @@
     window.applyBatchStyles = function() {
         if (typeof tSection === 'function') tSection("Generate New Filter Rule");
         
-        const glowColor = document.getElementById('design-glow-color').value;
-        const iconStyle = document.getElementById('design-icon-style').value;
+        // 1. Check which toggles are active
+        const applyPrimary = document.getElementById('enable-design-color').checked;
+        const applySecondary = document.getElementById('enable-design-secondary').checked;
+        const applyRing = document.getElementById('enable-design-ring').checked;
+        const applyIcon = document.getElementById('enable-design-icon').checked;
+
+        if (!applyPrimary && !applySecondary && !applyRing && !applyIcon) {
+            if (typeof showToast === 'function') showToast("Please select at least one style to apply.", 2000);
+            return; // Abort if nothing is checked
+        }
         
-        // Deep copy of active filters
-        const lockedFilters = JSON.parse(JSON.stringify(activeFilters));
+        // 2. Grab values only if their respective box is checked, otherwise store null
+        const primaryColor = applyPrimary ? document.getElementById('design-glow-color').value : null;
+        const secondaryColor = applySecondary ? document.getElementById('design-secondary-color').value : null;
+        const ringColor = applyRing ? document.getElementById('design-ring-color').value : null;
+        const iconStyle = applyIcon ? document.getElementById('design-icon-style').value : null;
+        
+        // 3. Package the Rule
+        const lockedFilters = JSON.parse(JSON.stringify(activeFilters)); // Deep copy
         const ruleId = 'rule_' + Date.now();
         const description = generateFilterDescription(lockedFilters);
 
         const newRule = {
             id: ruleId,
             filters: lockedFilters,
-            color: glowColor,
+            color: primaryColor,
+            secondaryColor: secondaryColor,
+            ringColor: ringColor,
             iconStyle: iconStyle,
             description: description
         };
@@ -386,7 +445,7 @@
         window.activeFilterRules.push(newRule);
         
         if (typeof writeLogLine === 'function') {
-            writeLogLine(`New Rule Created: ${description} (Color: ${glowColor})`);
+            writeLogLine(`New Rule Created: ${description} (Pri: ${primaryColor}, Sec: ${secondaryColor}, Ring: ${ringColor}, Icon: ${iconStyle})`);
         }
 
         renderRulesLedger();
@@ -400,8 +459,8 @@
     function setupFilterListeners() {
         const inputs = [
             'filter-starport', 'filter-size', 'filter-atm', 'filter-hydro',
-            'filter-pop', 'filter-gov', 'filter-law', 'filter-tl',
-            'filter-t5-ix', 'filter-mgt-importance', 'filter-mgt-wtn', 'filter-mgt-gwp'
+            'filter-pop', 'filter-gov', 'filter-law', 'filter-tl', 'filter-trade-codes',
+            'filter-gravity', 'filter-temperature', 'filter-t5-ix', 'filter-mgt-importance', 'filter-mgt-wtn', 'filter-mgt-gwp'
         ];
 
         inputs.forEach(id => {

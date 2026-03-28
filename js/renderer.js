@@ -133,7 +133,7 @@ function draw() {
     // =========================================================================
     if (window.sectorRoutes && window.sectorRoutes.length > 0) {
         if (typeof tSection === 'function') tSection("Render Sector Routes");
-        
+
         ctx.save();
         ctx.lineWidth = 2 / zoom;
         const gap = 20;
@@ -316,11 +316,28 @@ function draw() {
                             });
                         } else {
                             if (iconStyle === 'Classic') {
-                                ctx.beginPath();
-                                ctx.arc(cx, cy, dotRadius, 0, 2 * Math.PI);
-                                ctx.fillStyle = finalColor;
-                                ctx.fill();
-                                ctx.closePath();
+                                if (custom.secondaryColor) {
+                                    // Split Dot: Left Half (Primary Color)
+                                    ctx.beginPath();
+                                    ctx.arc(cx, cy, dotRadius, Math.PI / 2, 3 * Math.PI / 2);
+                                    ctx.fillStyle = finalColor;
+                                    ctx.fill();
+                                    ctx.closePath();
+
+                                    // Split Dot: Right Half (Secondary Color)
+                                    ctx.beginPath();
+                                    ctx.arc(cx, cy, dotRadius, -Math.PI / 2, Math.PI / 2);
+                                    ctx.fillStyle = custom.secondaryColor;
+                                    ctx.fill();
+                                    ctx.closePath();
+                                } else {
+                                    // Solid Dot
+                                    ctx.beginPath();
+                                    ctx.arc(cx, cy, dotRadius, 0, 2 * Math.PI);
+                                    ctx.fillStyle = finalColor;
+                                    ctx.fill();
+                                    ctx.closePath();
+                                }
                             } else if (iconStyle === 'Refined') {
                                 // Glow Sphere
                                 ctx.save();
@@ -335,7 +352,7 @@ function draw() {
                                 // White core for systems
                                 ctx.beginPath();
                                 ctx.arc(cx, cy, dotRadius * 0.4, 0, 2 * Math.PI);
-                                ctx.fillStyle = '#ffffff';
+                                ctx.fillStyle = custom.secondaryColor || '#ffffff'; // Use secondary as core if present
                                 ctx.fill();
                                 ctx.restore();
                             } else if (iconStyle === 'Minimal') {
@@ -350,7 +367,28 @@ function draw() {
                                 ctx.stroke();
                                 ctx.beginPath();
                                 ctx.arc(cx, cy, dotRadius * 0.5, 0, 2 * Math.PI);
+                                ctx.strokeStyle = custom.secondaryColor || finalColor;
                                 ctx.stroke();
+                                ctx.restore();
+                            }
+
+                            // --- Draw the Ring (Applies to any shape) ---
+                            if (custom.ringColor) {
+                                ctx.save();
+                                ctx.beginPath();
+
+                                // Align the ring's center path EXACTLY with the dot's edge.
+                                ctx.arc(cx, cy, dotRadius, 0, 2 * Math.PI);
+
+                                ctx.strokeStyle = custom.ringColor;
+
+                                // NEW LOGIC: Scale thickness proportionally to the dot size, 
+                                // rather than forcing a fixed screen thickness with '/ zoom'.
+                                // This ensures the ring shrinks perfectly alongside the planet.
+                                ctx.lineWidth = dotRadius * 0.3;
+
+                                ctx.stroke();
+                                ctx.closePath();
                                 ctx.restore();
                             }
                         }

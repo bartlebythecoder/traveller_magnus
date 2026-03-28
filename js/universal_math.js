@@ -249,6 +249,22 @@
                     field = field.toLowerCase();
                     let worldValue;
 
+                    // --- STRING / ARRAY EXCEPTION: Trade Codes ---
+                    if (field === 'tradecodes' || field === 'tc') {
+                        let worldTCs = world.tradeCodes || world.TradeCodes || [];
+                        if (typeof worldTCs === 'string') worldTCs = worldTCs.split(/\s+/);
+                        
+                        const searchTokens = criteria.split(',').map(s => s.trim().toUpperCase()).filter(s => s !== "");
+                        const worldTcUpper = worldTCs.map(tc => String(tc).toUpperCase());
+                        
+                        if (searchTokens.length > 0) {
+                            // Uses OR logic: If any of the typed comma-separated codes match, the world remains visible
+                            const match = searchTokens.some(token => worldTcUpper.includes(token));
+                            if (!match) return false;
+                        }
+                        continue; // Success! Skip the rest of the numeric evaluation for this specific field.
+                    }
+
                     // D. EXHAUSTIVE DATA MAPPING (Property Fallback Logic)
                     if (field === 't5ix' || field === 'ix' || field === 'importance') {
                         worldValue = world.Ix !== undefined ? world.Ix : (world.Importance !== undefined ? world.Importance : (world.ix !== undefined ? world.ix : world.im));
@@ -274,6 +290,11 @@
                         worldValue = world.law !== undefined ? world.law : (world.lawLevel !== undefined ? world.lawLevel : (world.lawCode !== undefined ? world.lawCode : (world.Law !== undefined ? world.Law : world.uwp?.[6])));
                     } else if (field === 'tl' || field === 'techlevel' || field === 'tech' || field === 'tlcode') {
                         worldValue = world.tl !== undefined ? world.tl : (world.techLevel !== undefined ? world.techLevel : (world.tech !== undefined ? world.tech : (world.TL !== undefined ? world.TL : world.tlCode)));
+                    } else if (field === 'gravity' || field === 'grav' || field === 'g') {
+                        worldValue = world.gravity !== undefined ? world.gravity : (world.Gravity !== undefined ? world.Gravity : (world.g !== undefined ? world.g : (world.Grav !== undefined ? world.Grav : 0)));
+                    } else if (field === 'temperature' || field === 'temp' || field === 't') {
+                        const raw = world.temperature !== undefined ? world.temperature : (world.meanTempK !== undefined ? world.meanTempK : (world.temp !== undefined ? world.temp : (world.Temperature !== undefined ? world.Temperature : (world.meanTemp !== undefined ? world.meanTemp : 0))));
+                        worldValue = raw - 273; // Convert Kelvin to Celsius for filter engine matching
                     } else {
                         worldValue = world[field];
                     }
@@ -304,8 +325,9 @@
                                 if (token.includes('-') && token.length >= 3) {
                                     const parts = token.split('-');
                                     if (parts.length === 2) {
-                                        const start = fromUWPChar(parts[0]);
-                                        const end = fromUWPChar(parts[1]);
+                                        const parseVal = (v) => (v.length === 1 && isNaN(v)) ? fromUWPChar(v) : parseFloat(v);
+                                        const start = parseVal(parts[0]);
+                                        const end = parseVal(parts[1]);
                                         return (worldValueNum >= start && worldValueNum <= end);
                                     }
                                 }

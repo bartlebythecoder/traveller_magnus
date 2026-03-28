@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.5.5.1";
-const APP_BANNER = "v0.5.5.1 - New: Help shortcut window now on left panel.";
+const APP_VERSION = "v0.5.6";
+const APP_BANNER = "v0.5.6 - Selective Filter Styling & Refined UI Panels";
 
 // -----------------------------------------------------------------------------
 // Application State

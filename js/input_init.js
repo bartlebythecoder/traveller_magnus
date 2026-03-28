@@ -81,23 +81,66 @@ function setupAccordions() {
     accordions.forEach(acc => {
         // Default all accordions to closed state
         acc.classList.remove('active');
-        if (acc.nextElementSibling) acc.nextElementSibling.style.display = 'none';
+        const panel = acc.nextElementSibling;
+        if (panel && panel.classList.contains('accordion-content')) {
+            panel.style.display = 'none';
+            // Teleport panel to document.body to escape backdrop-filter stacking context
+            // backdrop-filter on .draggable-palette traps position:fixed children inside it
+            if (panel.parentElement !== document.body) {
+                document.body.appendChild(panel);
+            }
+        }
 
         acc.addEventListener('click', function () {
             const isActive = this.classList.contains('active');
+            const panelId = this.dataset.accordionPanel || this.nextElementSibling?.id;
 
-            // Close all first to ensure mutual exclusivity
+            // Close all panels
             accordions.forEach(btn => {
                 btn.classList.remove('active');
-                if (btn.nextElementSibling) btn.nextElementSibling.style.display = 'none';
+            });
+            document.querySelectorAll('.accordion-content').forEach(p => {
+                p.style.display = 'none';
             });
 
             // If it wasn't active before, open it
             if (!isActive) {
                 this.classList.add('active');
-                this.nextElementSibling.style.display = 'block';
+                // Find the panel by stored reference (it may have been moved to body)
+                const targetPanel = panelId ? document.getElementById(panelId) : null;
+                if (targetPanel) {
+                    const rect = this.getBoundingClientRect();
+                    const panelW = 440;
+                    // Use 80vh (the CSS max-height) as the assumed panel height — scrollHeight is 0 on hidden elements
+                    const panelH = window.innerHeight * 0.8;
+                    const margin = 10;
+
+                    // Prefer right of the editor; flip left if it would overflow
+                    let left = rect.right + margin;
+                    if (left + panelW > window.innerWidth) {
+                        left = rect.left - panelW - margin;
+                    }
+                    // Clamp so panel never goes off left or right edge
+                    left = Math.max(margin, Math.min(left, window.innerWidth - panelW - margin));
+
+                    // Align top of panel with top of button; clamp bottom
+                    let top = rect.top;
+                    if (top + panelH > window.innerHeight - margin) {
+                        top = window.innerHeight - panelH - margin;
+                    }
+                    top = Math.max(margin, top);
+
+                    targetPanel.style.left = left + 'px';
+                    targetPanel.style.top = top + 'px';
+                    targetPanel.style.display = 'block';
+                }
             }
         });
+
+        // Store panel ID on button for lookup after DOM move
+        if (panel && panel.id) {
+            acc.dataset.accordionPanel = panel.id;
+        }
     });
 }
 

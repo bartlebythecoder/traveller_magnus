@@ -86,7 +86,7 @@ function setupCanvasEvents() {
 
         if (e.ctrlKey) {
             // Ctrl+Left-Click: Open Hex Editor
-            if (hexId) openHexEditor(hexId);
+            if (hexId) openHexEditor(hexId, e);
         } else if (e.shiftKey) {
             // Shift+Left-Click: Highlight Single Hex AND Start Painting
             isPainting = true;

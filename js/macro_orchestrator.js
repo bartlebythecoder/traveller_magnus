@@ -116,6 +116,7 @@ function autoPopulate(chanceOutOfSix) {
         }
     });
     document.getElementById('context-menu').classList.remove('visible');
+    selectedHexes.clear();
     requestAnimationFrame(draw);
 }
 
@@ -201,6 +202,9 @@ async function runMgT2EMacro(skipPop = false) {
         // Refresh both visibility and styling rules for the new systems
         if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
         if (typeof applyActiveFilters === 'function') applyActiveFilters();
+
+        selectedHexes.clear();
+        requestAnimationFrame(draw);
     }, 500);
 }
 
@@ -249,18 +253,17 @@ async function runMgT2EBottomUpMacro(skipPop = false) {
                         const sys = MgT2EBottomUpGenerator.generateSystem(hexId);
 
                         // Ensure Mainworld exists and has a name
-                        if (sys && sys.mainworld) {
-                            if (!sys.mainworld.name) {
-                                sys.mainworld.name = (typeof getNextSystemName !== 'undefined') ? getNextSystemName(hexId) : 'Unknown';
-                            }
+                        if (sys) {
+                            // Find the Mainworld to map to UI data states (ensures parity with Top-Down flow)
+                            let mainworld = sys.worlds.find(w => w.type === 'Mainworld') || sys.mainworld || sys.worlds[0];
 
-                            // Map resulting data
+                            // Map resulting data to stateObj (Sean Protocol: Orchestrator maps generated data to UI state)
                             stateObj.mgtSystem = sys;
-                            stateObj.mgt2eData = sys.mainworld;
-                            stateObj.mgtSocio = sys.mainworld;
-                            stateObj.name = sys.mainworld.name;
+                            stateObj.mgt2eData = mainworld;
+                            stateObj.mgtSocio = mainworld; // The engine puts socio data directly on the world object
+                            stateObj.name = mainworld.name;
 
-                            // Clean up old data variants
+                            // Clean up old data variants to prevent UI ghosting
                             stateObj.ctData = null;
                             stateObj.t5Data = null;
                             stateObj.ctSystem = null;
@@ -306,6 +309,9 @@ async function runMgT2EBottomUpMacro(skipPop = false) {
         // Refresh both visibility and styling rules for the new systems
         if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
         if (typeof applyActiveFilters === 'function') applyActiveFilters();
+
+        selectedHexes.clear();
+        requestAnimationFrame(draw);
     }, 500);
 }
 
@@ -398,6 +404,9 @@ async function runCTNewMacro(skipPop = false) {
         // Refresh both visibility and styling rules for the new systems
         if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
         if (typeof applyActiveFilters === 'function') applyActiveFilters();
+
+        selectedHexes.clear();
+        requestAnimationFrame(draw);
     }, 500);
 }
 
@@ -486,6 +495,9 @@ async function runCTBottomUpMacro(skipPop = false) {
         // Refresh both visibility and styling rules for the new systems
         if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
         if (typeof applyActiveFilters === 'function') applyActiveFilters();
+
+        selectedHexes.clear();
+        requestAnimationFrame(draw);
     }, 500);
 }
 
@@ -568,6 +580,9 @@ async function runRTTMacro(skipPop = false) {
         // Refresh both visibility and styling rules for the new systems
         if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
         if (typeof applyActiveFilters === 'function') applyActiveFilters();
+
+        selectedHexes.clear();
+        requestAnimationFrame(draw);
     }, 500);
 }
 
@@ -664,5 +679,8 @@ async function runT5Macro(skipPop = false) {
         // Refresh both visibility and styling rules for the new systems
         if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
         if (typeof applyActiveFilters === 'function') applyActiveFilters();
+
+        selectedHexes.clear();
+        requestAnimationFrame(draw);
     }, 500);
 }

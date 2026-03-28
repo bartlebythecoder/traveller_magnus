@@ -61,6 +61,65 @@
     <!-- Optional: auto-load system names. Generate names.js by running convert_names.ps1 -->
     <script src="names.js" onerror="console.info('names.js not found — names will not be auto-loaded.')"></script>
 
+    <style>
+        .filter-grid-uwp .filter-field,
+        .filter-conditional-container .filter-field {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            margin-bottom: 6px !important;
+        }
+
+        .filter-grid-uwp .filter-field label,
+        .filter-conditional-container .filter-field label {
+            margin-bottom: 0 !important;
+            flex: 0 0 45% !important;
+            font-size: 0.75rem !important;
+            text-align: left !important;
+        }
+
+        .filter-grid-uwp .filter-field input,
+        .filter-conditional-container .filter-field input {
+            flex: 0 0 50% !important;
+            margin-bottom: 0 !important;
+            padding: 4px 8px !important;
+            font-size: 0.8rem !important;
+        }
+
+        /* Accordion Styles */
+        .filter-accordion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px 0;
+            user-select: none;
+        }
+
+        .filter-accordion-header:hover {
+            color: #66fcf1;
+        }
+
+        .filter-accordion-content {
+            display: none;
+            /* Hidden by default */
+            padding-top: 5px;
+        }
+
+        .filter-accordion-content.open {
+            display: block;
+            /* Shown when open class is added */
+        }
+
+        .filter-accordion-header i {
+            transition: transform 0.2s ease;
+        }
+
+        .filter-accordion-header.open i {
+            transform: rotate(180deg);
+        }
+    </style>
 </head>
 
 <body>
@@ -68,9 +127,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above So Below</span></h1>
-            <div class="splash-banner">New: Help shortcut window now on left panel.</div>
+            <div class="splash-banner">v0.5.6 - Selective Filter Styling & Refined UI Panels</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.5.5.1</div>
+            <div class="splash-version">v0.5.6</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -112,8 +171,9 @@
     <div id="settings-panel" class="side-panel right">
         <!-- Settings Content -->
         <div class="settings-header">
-            <h2>Settings</h2>
-            <button id="btn-close-settings" class="btn-close-palette"><i class="fas fa-times"></i></button>
+            <h2 style="margin: 0; color: #66fcf1; font-size: 20px;">Settings</h2>
+            <button id="btn-close-settings" class="btn-close-palette" style="top: 78px; right: 20px;"><i
+                    class="fas fa-times"></i></button>
         </div>
 
         <div class="settings-row">
@@ -182,10 +242,12 @@
     <div id="help-panel" class="side-panel left">
         <div class="settings-header">
             <h2 style="margin: 0; color: #66fcf1; font-size: 20px;">Help & Shortcuts</h2>
-            <button id="btn-close-help" class="btn-close-palette"><i class="fas fa-times"></i></button>
+            <button id="btn-close-help" class="btn-close-palette" style="top: 78px; right: 20px;"><i
+                    class="fas fa-times"></i></button>
         </div>
-        <div style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.5.5.1</span></p>
+        <div
+            style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.5.6</span></p>
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 15px;">
@@ -367,357 +429,360 @@
 
 
 
-
     <!-- Hex Editor Modal -->
     <div id="hex-editor" class="draggable-palette">
         <h3 id="hex-editor-title">World Details</h3>
+        <button id="btn-close-editor" class="btn-close-palette" onclick="closeHexEditor()" title="Close"><i class="fas fa-times"></i></button>
 
-        <div class="editor-grid">
-            <div class="editor-row" style="grid-column: span 2;">
-                <label>System Name:</label>
-                <input type="text" id="edit-name" style="width: 100%; text-align: left;">
-            </div>
-            <div class="editor-row">
-                <label>Starport:</label>
-                <input type="text" id="edit-starport" maxlength="1">
-            </div>
-            <div class="editor-row">
-                <label>Size:</label>
-                <input type="number" id="edit-size" min="0" max="99">
-            </div>
-            <div class="editor-row">
-                <label>Atmosphere:</label>
-                <input type="number" id="edit-atm" min="0" max="99">
-            </div>
-            <div class="editor-row">
-                <label>Hydrographics:</label>
-                <input type="number" id="edit-hydro" min="0" max="99">
-            </div>
-            <div class="editor-row">
-                <label>Population:</label>
-                <input type="number" id="edit-pop" min="0" max="99">
-            </div>
-            <div class="editor-row">
-                <label>Government:</label>
-                <input type="number" id="edit-gov" min="0" max="99">
-            </div>
-            <div class="editor-row">
-                <label>Law Level:</label>
-                <input type="number" id="edit-law" min="0" max="99">
-            </div>
-            <div class="editor-row">
-                <label>Tech Level:</label>
-                <input type="number" id="edit-tl" min="0" max="99">
-            </div>
-            <div class="editor-row">
-                <label>Travel Zone:</label>
-                <select id="edit-travel-zone" class="travel-zone-select">
-                    <option value="Green" style="color: #66fcf1;">Green</option>
-                    <option value="Amber" style="color: #ffcc00;">Amber</option>
-                    <option value="Red" style="color: #ff0000;">Red</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="editor-grid">
-            <div class="editor-row"><label>Naval Base:</label><input type="checkbox" id="edit-naval"></div>
-            <div class="editor-row"><label>Scout Base:</label><input type="checkbox" id="edit-scout"></div>
-            <div class="editor-row"><label>Military Base:</label><input type="checkbox" id="edit-military"></div>
-            <div class="editor-row"><label>Corsair (Pirate):</label><input type="checkbox" id="edit-corsair"></div>
-            <div class="editor-row"><label>Research Base:</label><input type="checkbox" id="edit-research"></div>
-            <div class="editor-row"><label>TAS Facility:</label><input type="checkbox" id="edit-tas"></div>
-            <div class="editor-row"><label>Way Station:</label><input type="checkbox" id="edit-waystation"></div>
-            <div class="editor-row"><label>Gov Estate (G):</label><input type="checkbox" id="edit-gov-estate"></div>
-            <div class="editor-row"><label>Embassy (F):</label><input type="checkbox" id="edit-embassy"></div>
-            <div class="editor-row"><label>Moot:</label><input type="checkbox" id="edit-moot"></div>
-            <div class="editor-row"><label>Merchant (M):</label><input type="checkbox" id="edit-merchant"></div>
-            <div class="editor-row"><label>Shipyard (Y):</label><input type="checkbox" id="edit-shipyard"></div>
-            <div class="editor-row"><label>MegaCorp HQ:</label><input type="checkbox" id="edit-megacorp"></div>
-            <div class="editor-row"><label>Scout Hostel:</label><input type="checkbox" id="edit-scout-hostel"></div>
-            <div class="editor-row"><label>Psionics (Z):</label><input type="checkbox" id="edit-psionics"></div>
-            <div class="editor-row"><label>Sacred Site (K):</label><input type="checkbox" id="edit-sacred"></div>
-            <div class="editor-row"><label>Enclave (V):</label><input type="checkbox" id="edit-enclave"></div>
-            <div class="editor-row"><label>Ancients (Q):</label><input type="checkbox" id="edit-ancients"></div>
-            <div class="editor-row">
-                <label>Gas Giant:</label>
-                <input type="checkbox" id="edit-gas">
-            </div>
-        </div>
-
-        <div class="editor-full-row">
-            <label>Trade Codes (Space Separated):</label>
-            <input type="text" id="edit-trade-codes">
-        </div>
-
-        <!-- NAVIGATION CONTROLS (Phase 3 Integration) -->
-        <div id="masking-toggle-container"
-            style="display: none; margin-top: 15px; background: rgba(255, 165, 0, 0.1); border: 1px solid rgba(255, 165, 0, 0.4); border-radius: 4px; padding: 10px; align-items: center; justify-content: space-between;">
-            <div style="display: flex; align-items: center;">
-                <i class="fas fa-rocket" style="color: #ffa500; margin-right: 10px; font-size: 1.2em;"></i>
-                <div>
-                    <div style="color: #ffa500; font-weight: bold; font-size: 0.9em;">Stellar Masking Navigation</div>
-                    <div style="color: #a0a8b0; font-size: 0.75em;">Distance shortcuts via stellar mass limit</div>
-                </div>
-            </div>
-            <div style="display: flex; align-items: center;">
-                <label class="switch" style="position: relative; display: inline-block; width: 40px; height: 20px;">
-                    <input type="checkbox" id="edit-stellar-mask" style="opacity: 0; width: 0; height: 0;">
-                    <span class="slider round"
-                        style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 34px; border: 1px solid #555;"></span>
-                </label>
-                <span id="mask-status-label"
-                    style="color: #888; font-size: 0.8em; margin-left: 8px; width: 30px;">OFF</span>
-            </div>
-        </div>
-
-        <div id="main-journey-row" style="display: none; margin-top: 10px;">
-            <div id="main-journey-times"></div>
-        </div>
-
-
-
-
-        <div class="editor-grid" id="editor-t5-quick-stats"
-            style="display: none; margin-top: 10px; padding: 10px; background: rgba(69, 162, 158, 0.1); border-radius: 4px; border-left: 3px solid #45a29e;">
-            <div class="editor-row">
-                <label title="Population Multiplier, Belts, Gas Giants">PBG:</label>
-                <input type="text" id="edit-pbg" maxlength="3"
-                    style="font-family: monospace; text-transform: uppercase;">
-            </div>
-            <div class="editor-row">
-                <label>Stellar:</label>
-                <input type="text" id="edit-stellar" style="width: 100%;">
-            </div>
-        </div>
-
-        <!-- CT Scouts System Expand Accordion -->
-        <button class="accordion-btn" id="acc-btn-ct-system" style="display: none;">CT Star System</button>
-        <div class="accordion-content" id="editor-ct-system-root" style="display: none;">
-            <!-- Content will be injected via JS -->
-        </div>
-
-        <!-- MgT2E System Expand Accordion -->
-        <button class="accordion-btn" id="acc-btn-mgt-system" style="display: none;">MgT2E System</button>
-        <div class="accordion-content" id="editor-mgt-system-root" style="display: none;">
-            <!-- Content will be injected via JS -->
-        </div>
-
-        <!-- RTT System Expand Accordion -->
-        <button class="accordion-btn" id="acc-btn-rtt-system" style="display: none;">RTT System</button>
-        <div class="accordion-content" id="editor-rtt-system-root" style="display: none;">
-            <!-- Content will be injected via JS -->
-        </div>
-
-        <!-- MgT2E Socioeconomics Accordion -->
-        <button class="accordion-btn" id="acc-btn-mgt-socio" style="display: none;">MgT2E Socioeconomics</button>
-        <div class="accordion-content" id="editor-socio-mgt-container">
-            <div class="editor-grid" style="margin-top: 10px;">
-                <div class="editor-row">
-                    <label>P-Value:</label>
-                    <input type="number" id="edit-mgt-pvalue" min="0" max="9">
-                </div>
-                <div class="editor-row">
-                    <label>Total Pop:</label>
-                    <input type="text" id="edit-mgt-totalpop" readonly>
-                </div>
-                <div class="editor-row">
-                    <label>PCR:</label>
-                    <input type="number" id="edit-mgt-pcr" min="0" max="9">
-                </div>
-                <div class="editor-row">
-                    <label>Urbanization %:</label>
-                    <input type="text" id="edit-mgt-urban" readonly>
-                </div>
-            </div>
-
-            <div style="margin-top: 15px; margin-bottom: 10px;">
-                <div class="editor-flex-row">
-                    <label>Total Urban Pop:</label>
-                    <input type="text" id="edit-mgt-totalurban" readonly>
-                </div>
-                <div class="editor-flex-row">
-                    <label>Major Cities:</label>
-                    <input type="number" id="edit-mgt-mcities">
-                </div>
-                <div class="editor-flex-row">
-                    <label>Total MC Pop:</label>
-                    <input type="text" id="edit-mgt-totalmcpop" readonly>
-                </div>
-                <div class="editor-flex-row">
-                    <label>Gov Profile:</label>
-                    <input type="text" id="edit-mgt-gov-profile">
-                </div>
-                <div class="editor-flex-row">
-                    <label>Factions:</label>
-                    <input type="text" id="edit-mgt-fac">
-                </div>
-                <div class="editor-flex-row">
-                    <label>Judicial Profile:</label>
-                    <input type="text" id="edit-mgt-judicial-profile">
-                </div>
-                <div class="editor-flex-row">
-                    <label>Law Profile:</label>
-                    <input type="text" id="edit-mgt-law-profile">
-                </div>
-                <div class="editor-flex-row">
-                    <label>Tech Profile:</label>
-                    <input type="text" id="edit-mgt-tech-profile">
-                </div>
-                <div class="editor-flex-row">
-                    <label>Cultural Profile:</label>
-                    <input type="text" id="edit-mgt-cul-profile">
-                </div>
-                <div class="editor-flex-row">
-                    <label>Importance:</label>
-                    <input type="text" id="edit-mgt-im">
-                </div>
-                <div class="editor-flex-row">
-                    <label>Economic Profile:</label>
-                    <input type="text" id="edit-mgt-eco-profile">
-                </div>
-                <div class="editor-flex-row">
-                    <label>Resource Units:</label>
-                    <input type="number" id="edit-mgt-ru">
-                </div>
-                <div class="editor-flex-row">
-                    <label>GWP per Capita:</label>
-                    <input type="text" id="edit-mgt-gwp">
-                </div>
-                <div class="editor-flex-row">
-                    <label>World Trade No:</label>
-                    <input type="text" id="edit-mgt-wtn">
-                </div>
-                <div class="editor-flex-row">
-                    <label>Inequality Rating:</label>
-                    <input type="number" id="edit-mgt-ir">
-                </div>
-                <div class="editor-flex-row">
-                    <label>Devel. Rating:</label>
-                    <input type="text" id="edit-mgt-dr">
-                </div>
-                <div class="editor-flex-row">
-                    <label>Starport Profile:</label>
-                    <input type="text" id="edit-mgt-starport-profile">
-                </div>
-                <div class="editor-flex-row">
-                    <label>Military Profile:</label>
-                    <input type="text" id="edit-mgt-mil-profile">
-                </div>
-            </div>
-        </div>
-
-        <!-- T5 System Expand Accordion -->
-        <button class="accordion-btn" id="acc-btn-t5-system" style="display: none;">T5 System</button>
-        <div class="accordion-content" id="editor-t5-system-root" style="display: none;">
-            <!-- Content will be injected via JS -->
-        </div>
-
-        <!-- T5 Socioeconomics Accordion -->
-        <button class="accordion-btn" id="acc-btn-t5-socio" style="display: none;">T5 Socioeconomics</button>
-        <div class="accordion-content" id="editor-socio-t5-container">
-            <div class="editor-grid" style="margin-top: 10px;">
-                <div class="editor-row"><label>Pop M:</label><input type="number" id="edit-popm"></div>
-                <div class="editor-row"><label>Belts:</label><input type="number" id="edit-belts"></div>
-                <div class="editor-row"><label>Gas G:</label><input type="number" id="edit-gas-giants"></div>
-                <div class="editor-row"><label>Worlds:</label><input type="number" id="edit-worlds"></div>
-            </div>
-
-            <div class="editor-grid" style="margin-top: 5px;">
+        <div class="palette-content">
+            <div class="editor-grid">
                 <div class="editor-row" style="grid-column: span 2;">
-                    <label>Importance:</label>
-                    <input type="number" id="edit-ix">
+                    <label>System Name:</label>
+                    <input type="text" id="edit-name" style="width: 100%; text-align: left;">
                 </div>
-                <div class="editor-row" style="grid-column: span 2;">
-                    <label>Resource Units:</label>
-                    <input type="number" id="edit-ru">
+                <div class="editor-row">
+                    <label>Starport:</label>
+                    <input type="text" id="edit-starport" maxlength="1">
+                </div>
+                <div class="editor-row">
+                    <label>Size:</label>
+                    <input type="number" id="edit-size" min="0" max="99">
+                </div>
+                <div class="editor-row">
+                    <label>Atmosphere:</label>
+                    <input type="number" id="edit-atm" min="0" max="99">
+                </div>
+                <div class="editor-row">
+                    <label>Hydrographics:</label>
+                    <input type="number" id="edit-hydro" min="0" max="99">
+                </div>
+                <div class="editor-row">
+                    <label>Population:</label>
+                    <input type="number" id="edit-pop" min="0" max="99">
+                </div>
+                <div class="editor-row">
+                    <label>Government:</label>
+                    <input type="number" id="edit-gov" min="0" max="99">
+                </div>
+                <div class="editor-row">
+                    <label>Law Level:</label>
+                    <input type="number" id="edit-law" min="0" max="99">
+                </div>
+                <div class="editor-row">
+                    <label>Tech Level:</label>
+                    <input type="number" id="edit-tl" min="0" max="99">
+                </div>
+                <div class="editor-row">
+                    <label>Travel Zone:</label>
+                    <select id="edit-travel-zone" class="travel-zone-select">
+                        <option value="Green" style="color: #66fcf1;">Green</option>
+                        <option value="Amber" style="color: #ffcc00;">Amber</option>
+                        <option value="Red" style="color: #ff0000;">Red</option>
+                    </select>
                 </div>
             </div>
 
-            <div class="editor-grid" style="margin-top: 5px;">
-                <div class="editor-row"><label>Eco (R):</label><input type="number" id="edit-r" min="0"></div>
-                <div class="editor-row"><label>Eco (L):</label><input type="number" id="edit-l" min="0"></div>
-                <div class="editor-row"><label>Eco (I):</label><input type="number" id="edit-i" min="0"></div>
-                <div class="editor-row"><label>Eco (E):</label><input type="number" id="edit-e"></div>
+            <div class="editor-grid">
+                <div class="editor-row"><label>Naval Base:</label><input type="checkbox" id="edit-naval"></div>
+                <div class="editor-row"><label>Scout Base:</label><input type="checkbox" id="edit-scout"></div>
+                <div class="editor-row"><label>Military Base:</label><input type="checkbox" id="edit-military"></div>
+                <div class="editor-row"><label>Corsair (Pirate):</label><input type="checkbox" id="edit-corsair"></div>
+                <div class="editor-row"><label>Research Base:</label><input type="checkbox" id="edit-research"></div>
+                <div class="editor-row"><label>TAS Facility:</label><input type="checkbox" id="edit-tas"></div>
+                <div class="editor-row"><label>Way Station:</label><input type="checkbox" id="edit-waystation"></div>
+                <div class="editor-row"><label>Gov Estate (G):</label><input type="checkbox" id="edit-gov-estate"></div>
+                <div class="editor-row"><label>Embassy (F):</label><input type="checkbox" id="edit-embassy"></div>
+                <div class="editor-row"><label>Moot:</label><input type="checkbox" id="edit-moot"></div>
+                <div class="editor-row"><label>Merchant (M):</label><input type="checkbox" id="edit-merchant"></div>
+                <div class="editor-row"><label>Shipyard (Y):</label><input type="checkbox" id="edit-shipyard"></div>
+                <div class="editor-row"><label>MegaCorp HQ:</label><input type="checkbox" id="edit-megacorp"></div>
+                <div class="editor-row"><label>Scout Hostel:</label><input type="checkbox" id="edit-scout-hostel"></div>
+                <div class="editor-row"><label>Psionics (Z):</label><input type="checkbox" id="edit-psionics"></div>
+                <div class="editor-row"><label>Sacred Site (K):</label><input type="checkbox" id="edit-sacred"></div>
+                <div class="editor-row"><label>Enclave (V):</label><input type="checkbox" id="edit-enclave"></div>
+                <div class="editor-row">
+                    <label>Ancients (Q):</label><input type="checkbox" id="edit-ancients"></div>
+                <div class="editor-row">
+                    <label>Gas Giant:</label>
+                    <input type="checkbox" id="edit-gas">
+                </div>
             </div>
 
-            <div class="editor-grid" style="margin-top: 5px; margin-bottom: 10px;">
-                <div class="editor-row"><label>Cult (H):</label><input type="number" id="edit-h" min="1"></div>
-                <div class="editor-row"><label>Cult (A):</label><input type="number" id="edit-a" min="1"></div>
-                <div class="editor-row"><label>Cult (S):</label><input type="number" id="edit-s" min="1"></div>
-                <div class="editor-row"><label>Cult (Sym):</label><input type="number" id="edit-sym" min="1"></div>
+            <div class="editor-full-row">
+                <label>Trade Codes (Space Separated):</label>
+                <input type="text" id="edit-trade-codes">
             </div>
-        </div>
 
-        <!-- Physical Stats Accordion -->
-        <button class="accordion-btn" id="acc-btn-physical" style="display: none;">Physical Stats</button>
-        <div class="accordion-content" id="editor-physical-container">
-            <div class="editor-grid" style="margin-top: 10px;">
-                <div class="editor-row" style="grid-column: span 2;">
-                    <label>Homestar:</label>
-                    <input type="text" id="edit-phys-star">
+            <!-- NAVIGATION CONTROLS (Phase 3 Integration) -->
+            <div id="masking-toggle-container"
+                style="display: none; margin-top: 15px; background: rgba(255, 165, 0, 0.1); border: 1px solid rgba(255, 165, 0, 0.4); border-radius: 4px; padding: 10px; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center;">
+                    <i class="fas fa-rocket" style="color: #ffa500; margin-right: 10px; font-size: 1.2em;"></i>
+                    <div>
+                        <div style="color: #ffa500; font-weight: bold; font-size: 0.9em;">Stellar Masking Navigation</div>
+                        <div style="color: #a0a8b0; font-size: 0.75em;">Distance shortcuts via stellar mass limit</div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <label class="switch" style="position: relative; display: inline-block; width: 40px; height: 20px;">
+                        <input type="checkbox" id="edit-stellar-mask" style="opacity: 0; width: 0; height: 0;">
+                        <span class="slider round"
+                            style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 34px; border: 1px solid #555;"></span>
+                    </label>
+                    <span id="mask-status-label"
+                        style="color: #888; font-size: 0.8em; margin-left: 8px; width: 30px;">OFF</span>
                 </div>
             </div>
-            <div class="editor-grid" style="margin-top: 5px;">
+
+            <div id="main-journey-row" style="display: none; margin-top: 10px;">
+                <div id="main-journey-times"></div>
+            </div>
+
+
+
+
+            <div class="editor-grid" id="editor-t5-quick-stats"
+                style="display: none; margin-top: 10px; padding: 10px; background: rgba(69, 162, 158, 0.1); border-radius: 4px; border-left: 3px solid #45a29e;">
                 <div class="editor-row">
-                    <label>HZ Variance:</label>
-                    <input type="number" id="edit-phys-hz">
+                    <label title="Population Multiplier, Belts, Gas Giants">PBG:</label>
+                    <input type="text" id="edit-pbg" maxlength="3"
+                        style="font-family: monospace; text-transform: uppercase;">
                 </div>
                 <div class="editor-row">
-                    <label>Climate:</label>
-                    <input type="text" id="edit-phys-climate">
+                    <label>Stellar:</label>
+                    <input type="text" id="edit-stellar" style="width: 100%;">
                 </div>
             </div>
-            <div class="editor-grid" style="margin-top: 5px; margin-bottom: 10px;">
-                <div class="editor-row">
-                    <label>World Type:</label>
-                    <input type="text" id="edit-phys-worldtype">
+
+            <!-- CT Scouts System Expand Accordion -->
+            <button class="accordion-btn" id="acc-btn-ct-system" style="display: none;">CT Star System</button>
+            <div class="accordion-content" id="editor-ct-system-root" style="display: none;">
+                <!-- Content will be injected via JS -->
+            </div>
+
+            <!-- MgT2E System Expand Accordion -->
+            <button class="accordion-btn" id="acc-btn-mgt-system" style="display: none;">MgT2E System</button>
+            <div class="accordion-content" id="editor-mgt-system-root" style="display: none;">
+                <!-- Content will be injected via JS -->
+            </div>
+
+            <!-- RTT System Expand Accordion -->
+            <button class="accordion-btn" id="acc-btn-rtt-system" style="display: none;">RTT System</button>
+            <div class="accordion-content" id="editor-rtt-system-root" style="display: none;">
+                <!-- Content will be injected via JS -->
+            </div>
+
+            <!-- MgT2E Socioeconomics Accordion -->
+            <button class="accordion-btn" id="acc-btn-mgt-socio" style="display: none;">MgT2E Socioeconomics</button>
+            <div class="accordion-content" id="editor-socio-mgt-container">
+                <div class="editor-grid" style="margin-top: 10px;">
+                    <div class="editor-row">
+                        <label>P-Value:</label>
+                        <input type="number" id="edit-mgt-pvalue" min="0" max="9">
+                    </div>
+                    <div class="editor-row">
+                        <label>Total Pop:</label>
+                        <input type="text" id="edit-mgt-totalpop" readonly>
+                    </div>
+                    <div class="editor-row">
+                        <label>PCR:</label>
+                        <input type="number" id="edit-mgt-pcr" min="0" max="9">
+                    </div>
+                    <div class="editor-row">
+                        <label>Urbanization %:</label>
+                        <input type="text" id="edit-mgt-urban" readonly>
+                    </div>
                 </div>
-                <div class="editor-row">
-                    <label>Parent Body:</label>
-                    <input type="text" id="edit-phys-parent">
-                </div>
-                <div class="editor-row" style="grid-column: span 2;">
-                    <label>Sat Orbit:</label>
-                    <input type="text" id="edit-phys-satorbit">
+
+                <div style="margin-top: 15px; margin-bottom: 10px;">
+                    <div class="editor-flex-row">
+                        <label>Total Urban Pop:</label>
+                        <input type="text" id="edit-mgt-totalurban" readonly>
+                    </div>
+                    <div class="editor-flex-row">
+                        <label>Major Cities:</label>
+                        <input type="number" id="edit-mgt-mcities">
+                    </div>
+                    <div class="editor-flex-row">
+                        <label>Total MC Pop:</label>
+                        <input type="text" id="edit-mgt-totalmcpop" readonly>
+                    </div>
+                    <div class="editor-flex-row">
+                        <label>Gov Profile:</label>
+                        <input type="text" id="edit-mgt-gov-profile">
+                    </div>
+                    <div class="editor-flex-row">
+                        <label>Factions:</label>
+                        <input type="text" id="edit-mgt-fac">
+                    </div>
+                    <div class="editor-flex-row">
+                        <label>Judicial Profile:</label>
+                        <input type="text" id="edit-mgt-judicial-profile">
+                    </div>
+                    <div class="editor-flex-row">
+                        <label>Law Profile:</label>
+                        <input type="text" id="edit-mgt-law-profile">
+                    </div>
+                    <div class="editor-flex-row">
+                        <label>Tech Profile:</label>
+                        <input type="text" id="edit-mgt-tech-profile">
+                    </div>
+                    <div class="editor-flex-row">
+                        <label>Cultural Profile:</label>
+                        <input type="text" id="edit-mgt-cul-profile">
+                    </div>
+                    <div class="editor-flex-row">
+                        <label>Importance:</label>
+                        <input type="text" id="edit-mgt-im">
+                    </div>
+                    <div class="editor-flex-row">
+                        <label>Economic Profile:</label>
+                        <input type="text" id="edit-mgt-eco-profile">
+                    </div>
+                    <div class="editor-flex-row">
+                        <label>Resource Units:</label>
+                        <input type="number" id="edit-mgt-ru">
+                    </div>
+                    <div class="editor-flex-row">
+                        <label>GWP per Capita:</label>
+                        <input type="text" id="edit-mgt-gwp">
+                    </div>
+                    <div class="editor-flex-row">
+                        <label>World Trade No:</label>
+                        <input type="text" id="edit-mgt-wtn">
+                    </div>
+                    <div class="editor-flex-row">
+                        <label>Inequality Rating:</label>
+                        <input type="number" id="edit-mgt-ir">
+                    </div>
+                    <div class="editor-flex-row">
+                        <label>Devel. Rating:</label>
+                        <input type="text" id="edit-mgt-dr">
+                    </div>
+                    <div class="editor-flex-row">
+                        <label>Starport Profile:</label>
+                        <input type="text" id="edit-mgt-starport-profile">
+                    </div>
+                    <div class="editor-flex-row">
+                        <label>Military Profile:</label>
+                        <input type="text" id="edit-mgt-mil-profile">
+                    </div>
                 </div>
             </div>
-            <!-- CT Physical Stats (shown when CT physical data exists) -->
-            <div class="editor-grid" style="margin-top: 5px;" id="ct-phys-fields" style="display:none;">
-                <div class="editor-row">
-                    <label>HZ Orbit #:</label>
-                    <input type="number" id="edit-phys-orbit" min="0" max="13">
+
+            <!-- T5 System Expand Accordion -->
+            <button class="accordion-btn" id="acc-btn-t5-system" style="display: none;">T5 System</button>
+            <div class="accordion-content" id="editor-t5-system-root" style="display: none;">
+                <!-- Content will be injected via JS -->
+            </div>
+
+            <!-- T5 Socioeconomics Accordion -->
+            <button class="accordion-btn" id="acc-btn-t5-socio" style="display: none;">T5 Socioeconomics</button>
+            <div class="accordion-content" id="editor-socio-t5-container">
+                <div class="editor-grid" style="margin-top: 10px;">
+                    <div class="editor-row"><label>Pop M:</label><input type="number" id="edit-popm"></div>
+                    <div class="editor-row"><label>Belts:</label><input type="number" id="edit-belts"></div>
+                    <div class="editor-row"><label>Gas G:</label><input type="number" id="edit-gas-giants"></div>
+                    <div class="editor-row"><label>Worlds:</label><input type="number" id="edit-worlds"></div>
                 </div>
-                <div class="editor-row">
-                    <label>Distance (AU):</label>
-                    <input type="text" id="edit-phys-dist">
+
+                <div class="editor-grid" style="margin-top: 5px;">
+                    <div class="editor-row" style="grid-column: span 2;">
+                        <label>Importance:</label>
+                        <input type="number" id="edit-ix">
+                    </div>
+                    <div class="editor-row" style="grid-column: span 2;">
+                        <label>Resource Units:</label>
+                        <input type="number" id="edit-ru">
+                    </div>
                 </div>
-                <div class="editor-row">
-                    <label>Satellites:</label>
-                    <input type="number" id="edit-phys-sats" min="0">
+
+                <div class="editor-grid" style="margin-top: 5px;">
+                    <div class="editor-row"><label>Eco (R):</label><input type="number" id="edit-r" min="0"></div>
+                    <div class="editor-row"><label>Eco (L):</label><input type="number" id="edit-l" min="0"></div>
+                    <div class="editor-row"><label>Eco (I):</label><input type="number" id="edit-i" min="0"></div>
+                    <div class="editor-row"><label>Eco (E):</label><input type="number" id="edit-e"></div>
                 </div>
-                <div class="editor-row">
-                    <label>Gravity (G):</label>
-                    <input type="text" id="edit-phys-grav">
+
+                <div class="editor-grid" style="margin-top: 5px; margin-bottom: 10px;">
+                    <div class="editor-row"><label>Cult (H):</label><input type="number" id="edit-h" min="1"></div>
+                    <div class="editor-row"><label>Cult (A):</label><input type="number" id="edit-a" min="1"></div>
+                    <div class="editor-row"><label>Cult (S):</label><input type="number" id="edit-s" min="1"></div>
+                    <div class="editor-row"><label>Cult (Sym):</label><input type="number" id="edit-sym" min="1"></div>
                 </div>
-                <div class="editor-row">
-                    <label>Cloudiness (%):</label>
-                    <input type="number" id="edit-phys-cloud" min="0" max="100">
+            </div>
+
+            <!-- Physical Stats Accordion -->
+            <button class="accordion-btn" id="acc-btn-physical" style="display: none;">Physical Stats</button>
+            <div class="accordion-content" id="editor-physical-container">
+                <div class="editor-grid" style="margin-top: 10px;">
+                    <div class="editor-row" style="grid-column: span 2;">
+                        <label>Homestar:</label>
+                        <input type="text" id="edit-phys-star">
+                    </div>
                 </div>
-                <div class="editor-row">
-                    <label>Albedo:</label>
-                    <input type="text" id="edit-phys-alb">
+                <div class="editor-grid" style="margin-top: 5px;">
+                    <div class="editor-row">
+                        <label>HZ Variance:</label>
+                        <input type="number" id="edit-phys-hz">
+                    </div>
+                    <div class="editor-row">
+                        <label>Climate:</label>
+                        <input type="text" id="edit-phys-climate">
+                    </div>
                 </div>
-                <div class="editor-row">
-                    <label>Greenhouse:</label>
-                    <input type="text" id="edit-phys-gh">
+                <div class="editor-grid" style="margin-top: 5px; margin-bottom: 10px;">
+                    <div class="editor-row">
+                        <label>World Type:</label>
+                        <input type="text" id="edit-phys-worldtype">
+                    </div>
+                    <div class="editor-row">
+                        <label>Parent Body:</label>
+                        <input type="text" id="edit-phys-parent">
+                    </div>
+                    <div class="editor-row" style="grid-column: span 2;">
+                        <label>Sat Orbit:</label>
+                        <input type="text" id="edit-phys-satorbit">
+                    </div>
                 </div>
-                <div class="editor-row">
-                    <label>Axial Tilt (°):</label>
-                    <input type="number" id="edit-phys-tilt" min="0" max="90">
-                </div>
-                <div class="editor-row" style="grid-column: span 2;">
-                    <label>Temperature (K):</label>
-                    <input type="number" id="edit-phys-temp">
+                <!-- CT Physical Stats (shown when CT physical data exists) -->
+                <div class="editor-grid" style="margin-top: 5px;" id="ct-phys-fields">
+                    <div class="editor-row">
+                        <label>HZ Orbit #:</label>
+                        <input type="number" id="edit-phys-orbit" min="0" max="13">
+                    </div>
+                    <div class="editor-row">
+                        <label>Distance (AU):</label>
+                        <input type="text" id="edit-phys-dist">
+                    </div>
+                    <div class="editor-row">
+                        <label>Satellites:</label>
+                        <input type="number" id="edit-phys-sats" min="0">
+                    </div>
+                    <div class="editor-row">
+                        <label>Gravity (G):</label>
+                        <input type="text" id="edit-phys-grav">
+                    </div>
+                    <div class="editor-row">
+                        <label>Cloudiness (%):</label>
+                        <input type="number" id="edit-phys-cloud" min="0" max="100">
+                    </div>
+                    <div class="editor-row">
+                        <label>Albedo:</label>
+                        <input type="text" id="edit-phys-alb">
+                    </div>
+                    <div class="editor-row">
+                        <label>Greenhouse:</label>
+                        <input type="text" id="edit-phys-gh">
+                    </div>
+                    <div class="editor-row">
+                        <label>Axial Tilt (°):</label>
+                        <input type="number" id="edit-phys-tilt" min="0" max="90">
+                    </div>
+                    <div class="editor-row" style="grid-column: span 2;">
+                        <label>Temperature (K):</label>
+                        <input type="number" id="edit-phys-temp">
+                    </div>
                 </div>
             </div>
         </div>
@@ -731,13 +796,13 @@
     <!-- Filter Window Modal (Phase 2) -->
     <div id="filter-modal" class="draggable-palette">
         <div class="modal-drag-handle">
-            <h2>Sector Control</h2>
+            <h2>Filter Control</h2>
 
             <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
                 <!-- Tab Header -->
                 <div class="filter-tabs">
                     <div class="filter-tab active" id="tab-btn-filter" onclick="switchFilterTab('filter')">Filter</div>
-                    <div class="filter-tab" id="tab-btn-design" onclick="switchFilterTab('design')">Custom</div>
+                    <div class="filter-tab" id="tab-btn-design" onclick="switchFilterTab('design')">Rules</div>
                 </div>
                 <span id="btn-clear-filters" class="filter-clear-link" onclick="clearFilterInputs()">Clear All</span>
             </div>
@@ -767,8 +832,11 @@
 
             <!-- UWP Fields -->
             <div class="filter-section">
-                <span class="filter-title">Physical & Social (UWP)</span>
-                <div class="filter-grid-uwp">
+                <div class="filter-title filter-accordion-header open" onclick="this.classList.toggle('open'); document.getElementById('uwp-accordion-body').classList.toggle('open');">
+                    <span>Physical & Social (UWP)</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div id="uwp-accordion-body" class="filter-grid-uwp filter-accordion-content open">
                     <div class="filter-field">
                         <label>Starport</label>
                         <input type="text" id="filter-starport" placeholder="e.g. A, B">
@@ -801,13 +869,20 @@
                         <label>Tech Level</label>
                         <input type="text" id="filter-tl" placeholder=">10">
                     </div>
+                    <div class="filter-field">
+                        <label>Trade Codes</label>
+                        <input type="text" id="filter-trade-codes" placeholder="e.g. Ag, In">
+                    </div>
                 </div>
             </div>
 
             <!-- Conditional Socio-Economic Filters -->
             <div class="filter-section no-border" id="filter-conditional-section" style="display: none;">
-                <span class="filter-title">Advanced Data</span>
-                <div class="filter-conditional-container">
+                <div class="filter-title filter-accordion-header" onclick="this.classList.toggle('open'); document.getElementById('advanced-accordion-body').classList.toggle('open');">
+                    <span>Advanced Data</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div id="advanced-accordion-body" class="filter-conditional-container filter-accordion-content">
                     <div class="filter-field" id="filter-field-t5-ix" style="display: none;">
                         <label>T5 Ix</label>
                         <input type="text" id="filter-t5-ix" placeholder=">2">
@@ -824,6 +899,14 @@
                         <label>Mongoose GWP</label>
                         <input type="text" id="filter-mgt-gwp" placeholder=">1000k">
                     </div>
+                    <div class="filter-field" id="filter-field-gravity" style="display: none;">
+                        <label>Gravity</label>
+                        <input type="text" id="filter-gravity" placeholder="e.g. >1.0">
+                    </div>
+                    <div class="filter-field" id="filter-field-temperature" style="display: none;">
+                        <label>Temperature (°C)</label>
+                        <input type="text" id="filter-temperature" placeholder="e.g. 0-20, <10">
+                    </div>
                 </div>
             </div>
         </div>
@@ -832,17 +915,37 @@
         <div id="design-content-pane" class="filter-content">
             <span class="filter-title">Batch Customization</span>
             <div class="design-grid">
-                <div class="design-field">
-                    <label>System Glow Color</label>
-                    <input type="color" id="design-glow-color" value="#66fcf1">
+                <div class="design-field" style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="enable-design-color" checked title="Include Primary Color">
+                    <div style="flex-grow: 1;">
+                        <label for="design-glow-color">Primary Color</label>
+                        <input type="color" id="design-glow-color" value="#66fcf1" style="width: 100%;">
+                    </div>
                 </div>
-                <div class="design-field">
-                    <label>Icon Style</label>
-                    <select id="design-icon-style">
-                        <option value="Classic">Classic Dot</option>
-                        <option value="Refined">Glow Sphere</option>
-                        <option value="Minimal">Crosshair</option>
-                    </select>
+                <div class="design-field" style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="enable-design-secondary" title="Include Secondary Color (Split)">
+                    <div style="flex-grow: 1;">
+                        <label for="design-secondary-color">Secondary Color</label>
+                        <input type="color" id="design-secondary-color" value="#ff4500" style="width: 100%;">
+                    </div>
+                </div>
+                <div class="design-field" style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="enable-design-ring" title="Include Ring Color">
+                    <div style="flex-grow: 1;">
+                        <label for="design-ring-color">Ring Color</label>
+                        <input type="color" id="design-ring-color" value="#ffffff" style="width: 100%;">
+                    </div>
+                </div>
+                <div class="design-field" style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="enable-design-icon" checked title="Include Icon in Rule">
+                    <div style="flex-grow: 1;">
+                        <label for="design-icon-style">Icon Style</label>
+                        <select id="design-icon-style" style="width: 100%;">
+                            <option value="Classic">Classic Dot</option>
+                            <option value="Refined">Glow Sphere</option>
+                            <option value="Minimal">Crosshair</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             <button class="btn-batch-apply" onclick="applyBatchStyles()">Apply as New Rule</button>

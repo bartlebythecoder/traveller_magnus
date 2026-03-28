@@ -563,6 +563,7 @@ function importT5Tab(fileContent, fileName) {
     showToast(`Successfully imported ${importCount} worlds into Sector Slot ${fallbackSectorSlot}`);
     if (emptyCount > 0) showToast(`Initialized ${emptyCount} empty space hexes in sector bounds.`, 2000);
 
+    selectedHexes.clear();
     if (typeof draw === 'function') {
         requestAnimationFrame(draw);
     }

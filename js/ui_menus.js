@@ -14,6 +14,7 @@ function setupContextMenu() {
             hexStates.set(hexId, { type: 'EMPTY' });
         });
         document.getElementById('context-menu').classList.remove('visible');
+        selectedHexes.clear();
         requestAnimationFrame(draw);
     });
 
@@ -24,6 +25,7 @@ function setupContextMenu() {
             hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
         });
         document.getElementById('context-menu').classList.remove('visible');
+        selectedHexes.clear();
         requestAnimationFrame(draw);
     });
 
@@ -35,6 +37,7 @@ function setupContextMenu() {
             removeRoutesForHex(hexId);
         });
         document.getElementById('context-menu').classList.remove('visible');
+        selectedHexes.clear();
         showToast(`Cleared ${selectedHexes.size} hex(es) and connected routes.`, 2000);
         requestAnimationFrame(draw);
     });
@@ -96,6 +99,7 @@ function setupGenerationHandlers() {
         } else {
             showToast("No populated hexes selected");
         }
+        selectedHexes.clear();
         requestAnimationFrame(draw);
     });
 
@@ -156,6 +160,7 @@ function setupGenerationHandlers() {
         } else {
             showToast("No populated hexes selected");
         }
+        selectedHexes.clear();
         requestAnimationFrame(draw);
     });
 
@@ -200,6 +205,7 @@ function setupGenerationHandlers() {
         } else {
             showToast("No populated hexes selected");
         }
+        selectedHexes.clear();
         requestAnimationFrame(draw);
     });
 
@@ -239,6 +245,7 @@ function setupGenerationHandlers() {
 
         document.getElementById('context-menu').classList.remove('visible');
         showToast(`Expanded T5 Socioeconomics for ${selectedHexes.size} hex(es)`);
+        selectedHexes.clear();
         requestAnimationFrame(draw);
     });
 
@@ -286,6 +293,7 @@ function setupGenerationHandlers() {
 
         document.getElementById('context-menu').classList.remove('visible');
         showToast(`Expanded MgT2E Socioeconomics for ${selectedHexes.size} hex(es)`);
+        selectedHexes.clear();
         requestAnimationFrame(draw);
     });
 
@@ -326,6 +334,7 @@ function setupGenerationHandlers() {
 
         document.getElementById('context-menu').classList.remove('visible');
         showToast(`[DEV] Expanded Socioeconomics for ${selectedHexes.size} hex(es) (No Regen)`);
+        selectedHexes.clear();
         requestAnimationFrame(draw);
 
         // Auto-refresh the hex editor if it is currently open
@@ -377,6 +386,7 @@ function setupGenerationHandlers() {
 
         document.getElementById('context-menu').classList.remove('visible');
         showToast(`Expanded CT System for ${selectedHexes.size} hex(es)`);
+        selectedHexes.clear();
         requestAnimationFrame(draw);
     });
 
@@ -422,6 +432,7 @@ function setupGenerationHandlers() {
 
         document.getElementById('context-menu').classList.remove('visible');
         showToast(`Expanded MgT2E Physical system for ${selectedHexes.size} hex(es)`);
+        selectedHexes.clear();
         requestAnimationFrame(draw);
     });
 
@@ -467,6 +478,7 @@ function setupGenerationHandlers() {
 
         document.getElementById('context-menu').classList.remove('visible');
         showToast(`Expanded T5 Physical system for ${selectedHexes.size} hex(es)`);
+        selectedHexes.clear();
         requestAnimationFrame(draw);
     });
 
@@ -477,6 +489,7 @@ function setupGenerationHandlers() {
         const routeCount = window.sectorRoutes ? window.sectorRoutes.length : 0;
         showToast(`Interstellar Network Generated: ${routeCount} routes.`, 3000);
         document.getElementById('context-menu').classList.remove('visible');
+        selectedHexes.clear();
         requestAnimationFrame(draw);
     });
 

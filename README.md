@@ -1,4 +1,4 @@
-# As Above, So Below (v0.5.5.1)
+# As Above, So Below (v0.5.6)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -33,20 +33,30 @@ This workbench allows Game Masters and world-builders to generate, import, and e
     - **Ctrl + Alt + C:** Full Classic Traveller (Book 6) Generation sequence (includes system population).
     - **Ctrl + Alt + R:** Full RTT Generation sequence (includes system population).
     - **Ctrl + Alt + 5:** Full Traveller 5 (T5) Generation sequence (includes system population).
-36. **Sector Control:** Use the **F Key** to **Open Filter Window** for advanced filtering and custom styling rules.
+36. **Filter Control:** Use the **F Key** to **Open Filter Window** for advanced filtering and custom styling rules.
 ---
 ## 📜 Changelog
 
+### [v0.5.6] - 2026-03-27
+1. **UI**: Added ability to enable or disable color and icon style in the filter rules.
+2. **UI**: Refined side panel headers for Help and Settings to prevent overlap with floating toggle buttons.
+3. **UI**: Added ability to use three colors on filter rules (primary, secondary, and ring).
+4. **UI**: Resolved accordian bug where the detailed displays were not opening
+5. **UI**: Resolved jump mask travel time bug that was caused by v0.5.5
+6. **UI**: Resolved hex editor positioning bug
+
 ### [v0.5.5.1] - 2026-03-27
+1. ***UI***: Added shortcut icon on screen
 
 ### [v0.5.5] - 2026-03-27
+1. ***UI***: Added shortcut menu as a side panel.   
 
 ### [v0.5.4.1] - 2026-03-25
 1. **Shortcuts:** Added **F Key** to **Open Filter Window** (Filter Engine).
 
 ### [v0.5.4] - 2026-03-24
 1. **System Editor:** Ability to edit and save more fields across all generation engines.
-2. **Sector Control:** Added filter and custom coloring rules.
+2. **Filter Control:** Added filter and custom coloring rules.
 
 ### [v0.5.3] - 2026-03-24
 1. **Socioeconomics:** Resolved P-Value / Population Multiplier mismatch when expanding existing worlds. All UWP characteristics and the Population digit are now correctly inherited from the source world.

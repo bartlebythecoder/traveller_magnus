@@ -27,10 +27,10 @@ function buildJourneyTimesUI(world, star, isMaskingPreference = null, overrideAU
 
     // Check the state of the global masking checkbox, with optional override
     let isMaskingActive = false;
-    if (isMaskingPreference !== null) {
-        isMaskingActive = isMaskingPreference;
+    if (isMaskingPreference !== null && isMaskingPreference !== undefined) {
+        isMaskingActive = !!isMaskingPreference;
     } else {
-        const maskCheckbox = document.getElementById('edit-stellar-mask');
+        const maskCheckbox = document.body.querySelector('#edit-stellar-mask');
         isMaskingActive = maskCheckbox ? maskCheckbox.checked : false;
     }
 
@@ -91,10 +91,50 @@ function formatJourneyTimesHTML(times, eligible, isMaskingActive) {
 // HEX EDITOR MAIN FUNCTIONS
 // ============================================================================
 
-function openHexEditor(hexId) {
+function openHexEditor(hexId, e = null) {
     const stateObj = hexStates.get(hexId);
     if (!stateObj || stateObj.type !== 'SYSTEM_PRESENT' || (!stateObj.ctData && !stateObj.mgt2eData && !stateObj.t5Data && !stateObj.rttData)) {
         return;
+    }
+
+    const hexEditor = document.getElementById('hex-editor');
+
+    // Position the editor near the mouse click if an event is provided
+    if (e && e.clientX !== undefined && e.clientY !== undefined) {
+        setTimeout(() => {
+            // Ensure visible before measuring
+            hexEditor.classList.add('visible');
+
+            const rect = hexEditor.getBoundingClientRect();
+            const editorWidth = rect.width;
+            const editorHeight = rect.height;
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const padding = 15;
+
+            let x = e.clientX + 30; // 30px offset to the right
+            let y = e.clientY - (editorHeight / 2); // Center vertically on the click
+
+            // Clamping logic: ensure it stays within viewport
+            if (x + editorWidth > viewportWidth) {
+                x = viewportWidth - editorWidth - padding;
+            }
+            if (y + editorHeight > viewportHeight) {
+                y = viewportHeight - editorHeight - padding;
+            }
+
+            // Safeguards: ensure it doesn't clip off the top or left
+            x = Math.max(padding, x);
+            y = Math.max(padding, y);
+            
+            hexEditor.style.left = `${x}px`;
+            hexEditor.style.right = 'auto'; // Clear any right alignment
+            hexEditor.style.top = `${y}px`;
+            
+            // Clean up temp visibility styles
+            hexEditor.style.visibility = '';
+            hexEditor.style.display = '';
+        }, 50);
     }
 
     editingHexId = hexId;
@@ -197,15 +237,9 @@ function openHexEditor(hexId) {
     const maskContainer = document.getElementById('masking-toggle-container');
     if (maskContainer) maskContainer.style.display = 'none';
 
-    // Inject Mainworld Journey Times
-    const mainJourneyRoot = document.getElementById('main-journey-times');
-    if (mainJourneyRoot) {
-        mainJourneyRoot.innerHTML = '';
-        const starObj = { diam: getSafeStarDiameter(stateObj.stars ? stateObj.stars[0] : (stateObj.mgtSystem?.stars[0] || stateObj.ctSystem?.stars[0] || stateObj.t5System?.stars[0])) };
-        const mwJourneyHTML = buildJourneyTimesUI(data, starObj, stateObj.isStellarMaskingActive);
-        mainJourneyRoot.innerHTML = mwJourneyHTML;
-        const mainJourneyRow = document.getElementById('main-journey-row');
-        if (mainJourneyRow) mainJourneyRow.style.display = 'none';
+    // Note: Journey Times rendering moved to populateEditorAccordions to support dynamic updates via Masking toggle.
+    if (document.getElementById('main-journey-row')) {
+        document.getElementById('main-journey-row').style.display = 'none';
     }
 
     document.getElementById('edit-military').parentElement.style.display = (isMgT2E || isT5) ? 'flex' : 'none';
@@ -272,7 +306,24 @@ function openHexEditor(hexId) {
 }
 
 function populateEditorAccordions(stateObj) {
-    // MgT2E Socioeconomics
+    // 1. Update Mainworld Journey Times Row (which sits above accordions)
+    const mainJourneyTimesDiv = document.getElementById('main-journey-times');
+    const mainJourneyRow = document.getElementById('main-journey-row');
+    if (mainJourneyTimesDiv && mainJourneyRow) {
+        const data = stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData || stateObj.rttData;
+        const star = stateObj.stars ? stateObj.stars[0] : (stateObj.mgtSystem?.stars[0] || stateObj.ctSystem?.stars[0] || stateObj.t5System?.stars[0]);
+        const starObj = { diam: getSafeStarDiameter(star) };
+
+        if (data && star) {
+            const journeyHTML = buildJourneyTimesUI(data, starObj, stateObj.isStellarMaskingActive);
+            mainJourneyTimesDiv.innerHTML = journeyHTML;
+            mainJourneyRow.style.display = journeyHTML ? 'block' : 'none';
+        } else {
+            mainJourneyRow.style.display = 'none';
+        }
+    }
+
+    // 2. MgT2E Socioeconomics
     if (stateObj.mgtSocio) {
         document.getElementById('acc-btn-mgt-socio').style.display = 'flex';
         const ms = stateObj.mgtSocio;
@@ -1202,7 +1253,8 @@ function setupHexEditor() {
     document.getElementById('btn-editor-cancel').addEventListener('click', closeHexEditor);
     document.getElementById('btn-editor-save').addEventListener('click', saveHexEditorChanges);
 
-    document.getElementById('hex-editor').addEventListener('change', (e) => {
+    // Use delegation on document because panels may have been moved out of #hex-editor to body
+    document.addEventListener('change', (e) => {
         if (e.target && e.target.id === 'edit-stellar-mask') {
             if (editingHexId && hexStates.has(editingHexId)) {
                 const s = hexStates.get(editingHexId);

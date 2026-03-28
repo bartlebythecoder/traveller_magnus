@@ -317,16 +317,9 @@
             // Determine what little badge to show in the ledger
             let styleIndicator = '';
             
-            if (rule.color || rule.secondaryColor || rule.ringColor) {
-                // 1. Determine background (Solid or Split)
-                let bgCSS = 'background: transparent;';
-                if (rule.color && rule.secondaryColor) {
-                    bgCSS = `background: linear-gradient(90deg, ${rule.color} 50%, ${rule.secondaryColor} 50%);`;
-                } else if (rule.color) {
-                    bgCSS = `background: ${rule.color};`;
-                } else if (rule.secondaryColor) {
-                    bgCSS = `background: ${rule.secondaryColor};`; // Fallback
-                }
+            if (rule.color || rule.ringColor) {
+                // 1. Determine background (Solid)
+                let bgCSS = rule.color ? `background: ${rule.color};` : 'background: transparent;';
 
                 // 2. Determine border (Ring)
                 let borderCSS = rule.ringColor ? `border: 1.5px solid ${rule.ringColor}; box-sizing: border-box;` : '';
@@ -358,7 +351,9 @@
         
         // 1. Reset all worlds
         hexStates.forEach(state => {
-            if (state.type === 'SYSTEM_PRESENT') state.custom_ui = null;
+            if (state.type === 'SYSTEM_PRESENT') {
+                state.custom_ui = { appliedColors: [] };
+            }
         });
 
         // 2. Iterate through rules
@@ -374,13 +369,20 @@
                 const evalObject = { ...worldData, ...socioData };
 
                 if (UniversalMath.applyFilters(evalObject, rule.filters)) {
-                    if (!state.custom_ui) state.custom_ui = {};
+                    if (!state.custom_ui) state.custom_ui = { appliedColors: [] };
                     
-                    // ONLY overwrite if the rule explicitly contains a setting
-                    if (rule.color !== null) state.custom_ui.glowColor = rule.color;
-                    if (rule.secondaryColor !== null && rule.secondaryColor !== undefined) state.custom_ui.secondaryColor = rule.secondaryColor;
-                    if (rule.ringColor !== null && rule.ringColor !== undefined) state.custom_ui.ringColor = rule.ringColor;
-                    if (rule.iconStyle !== null) state.custom_ui.iconStyle = rule.iconStyle;
+                    // Rule Accumulation Logic: Push color into slice array
+                    if (rule.color !== null) {
+                        state.custom_ui.appliedColors.push(rule.color);
+                    }
+                    
+                    // Last-Rule-Wins logic for Ring and Icon
+                    if (rule.ringColor !== null && rule.ringColor !== undefined) {
+                        state.custom_ui.ringColor = rule.ringColor;
+                    }
+                    if (rule.iconStyle !== null) {
+                        state.custom_ui.iconStyle = rule.iconStyle;
+                    }
                     
                     ruleMatchCount++;
                 }
@@ -412,18 +414,16 @@
         
         // 1. Check which toggles are active
         const applyPrimary = document.getElementById('enable-design-color').checked;
-        const applySecondary = document.getElementById('enable-design-secondary').checked;
         const applyRing = document.getElementById('enable-design-ring').checked;
         const applyIcon = document.getElementById('enable-design-icon').checked;
 
-        if (!applyPrimary && !applySecondary && !applyRing && !applyIcon) {
+        if (!applyPrimary && !applyRing && !applyIcon) {
             if (typeof showToast === 'function') showToast("Please select at least one style to apply.", 2000);
             return; // Abort if nothing is checked
         }
         
         // 2. Grab values only if their respective box is checked, otherwise store null
         const primaryColor = applyPrimary ? document.getElementById('design-glow-color').value : null;
-        const secondaryColor = applySecondary ? document.getElementById('design-secondary-color').value : null;
         const ringColor = applyRing ? document.getElementById('design-ring-color').value : null;
         const iconStyle = applyIcon ? document.getElementById('design-icon-style').value : null;
         
@@ -436,7 +436,6 @@
             id: ruleId,
             filters: lockedFilters,
             color: primaryColor,
-            secondaryColor: secondaryColor,
             ringColor: ringColor,
             iconStyle: iconStyle,
             description: description
@@ -445,7 +444,7 @@
         window.activeFilterRules.push(newRule);
         
         if (typeof writeLogLine === 'function') {
-            writeLogLine(`New Rule Created: ${description} (Pri: ${primaryColor}, Sec: ${secondaryColor}, Ring: ${ringColor}, Icon: ${iconStyle})`);
+            writeLogLine(`New Rule Created: ${description} (Color: ${primaryColor}, Ring: ${ringColor}, Icon: ${iconStyle})`);
         }
 
         renderRulesLedger();
@@ -454,6 +453,85 @@
         if (typeof showToast === 'function') {
             showToast(`Rule added to ledger.`, 2000);
         }
+    };
+
+    /**
+     * Phase 5: Export active styling rules as a standalone JSON file.
+     * Strictly adheres to the Sean Protocol with trace logging.
+     */
+    window.exportFilterRules = function() {
+        if (typeof tSection === 'function') tSection("Export Filter Rules (Phase 5)");
+
+        if (!window.activeFilterRules || window.activeFilterRules.length === 0) {
+            if (typeof writeLogLine === 'function') writeLogLine("Export Aborted: No active rules in ledger.");
+            if (typeof showToast === 'function') showToast("Rules ledger is empty.", 2000);
+            return;
+        }
+
+        if (typeof writeLogLine === 'function') writeLogLine(`Exporting ${window.activeFilterRules.length} rules to JSON...`);
+
+        const rulesJson = JSON.stringify(window.activeFilterRules, null, 4);
+        const blob = new Blob([rulesJson], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        
+        a.href = url;
+        a.download = `traveller_filter_rules_${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        
+        // Cleanup
+        setTimeout(() => {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 100);
+
+        if (typeof showToast === 'function') showToast("Rules exported successfully.", 2000);
+    };
+
+    /**
+     * Phase 5: Import styling rules from a JSON file.
+     * Immediately applies the rules to the map upon successful parse.
+     */
+    window.importFilterRules = function(event) {
+        if (typeof tSection === 'function') tSection("Import Filter Rules (Phase 5)");
+
+        const file = event.target.files[0];
+        if (!file) {
+            if (typeof writeLogLine === 'function') writeLogLine("Import Aborted: No file selected.");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedRules = JSON.parse(e.target.result);
+                
+                if (!Array.isArray(importedRules)) {
+                    throw new Error("Invalid format: Rule file must contain a JSON array.");
+                }
+
+                if (typeof writeLogLine === 'function') writeLogLine(`Successfully parsed ${importedRules.length} rules from file.`);
+                
+                // Directly assign to the global rule manager
+                window.activeFilterRules = importedRules;
+
+                // Immediate Repaint Orchestration
+                window.renderRulesLedger();
+                window.reapplyAllRules();
+                
+                if (typeof showToast === 'function') showToast(`Successfully imported ${importedRules.length} rules.`, 2500);
+
+            } catch (err) {
+                if (typeof writeLogLine === 'function') writeLogLine(`Import Failed: ${err.message}`);
+                if (typeof showToast === 'function') showToast("Import Error: Invalid rule file.", 3000);
+            } finally {
+                // Clear the input value so the user can re-import the same file if needed
+                event.target.value = '';
+            }
+        };
+
+        reader.readAsText(file);
     };
 
     function setupFilterListeners() {
@@ -473,6 +551,12 @@
             const el = document.getElementById(id);
             if (el) el.addEventListener('change', onFilterChanged);
         });
+
+        // Phase 5: Independent Rule I/O
+        const importInput = document.getElementById('file-import-rules');
+        if (importInput) {
+            importInput.addEventListener('change', window.importFilterRules);
+        }
     }
 
 })();

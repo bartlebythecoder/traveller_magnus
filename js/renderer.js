@@ -293,16 +293,15 @@ function draw() {
                             ctx.textBaseline = 'bottom';
                             ctx.fillText(data.starport, cx, cy - dotRadius - 2);
                             ctx.textBaseline = 'top';
-                        }
-
-                        // 3. World dot (or asteroid cluster) with Custom UI Support
+                        }                        // 3. World dot (or asteroid cluster) with Custom UI Support
                         const custom = stateObj.custom_ui || {};
+                        const colors = custom.appliedColors && custom.appliedColors.length > 0 ? custom.appliedColors : null;
                         const baseColor = isSelected ? '#ffb399' : '#ffffff';
-                        const finalColor = custom.glowColor || baseColor;
+                        const primary = colors ? colors[0] : baseColor;
                         const iconStyle = custom.iconStyle || 'Classic';
 
                         if (isAsteroid) {
-                            const aColor = custom.glowColor || (isSelected ? '#ffb399' : '#aaaaaa');
+                            const aColor = primary; 
                             const aPositions = [
                                 { dx: -8, dy: -2 }, { dx: 0, dy: -5 }, { dx: 8, dy: -2 },
                                 { dx: -5, dy: 5 }, { dx: 5, dy: 4 }
@@ -316,25 +315,23 @@ function draw() {
                             });
                         } else {
                             if (iconStyle === 'Classic') {
-                                if (custom.secondaryColor) {
-                                    // Split Dot: Left Half (Primary Color)
-                                    ctx.beginPath();
-                                    ctx.arc(cx, cy, dotRadius, Math.PI / 2, 3 * Math.PI / 2);
-                                    ctx.fillStyle = finalColor;
-                                    ctx.fill();
-                                    ctx.closePath();
-
-                                    // Split Dot: Right Half (Secondary Color)
-                                    ctx.beginPath();
-                                    ctx.arc(cx, cy, dotRadius, -Math.PI / 2, Math.PI / 2);
-                                    ctx.fillStyle = custom.secondaryColor;
-                                    ctx.fill();
-                                    ctx.closePath();
+                                if (colors && colors.length > 0) {
+                                    const sliceAngle = (2 * Math.PI) / colors.length;
+                                    for (let i = 0; i < colors.length; i++) {
+                                        const startAngle = i * sliceAngle;
+                                        const endAngle = (i + 1) * sliceAngle;
+                                        ctx.beginPath();
+                                        ctx.moveTo(cx, cy);
+                                        ctx.arc(cx, cy, dotRadius, startAngle, endAngle);
+                                        ctx.closePath();
+                                        ctx.fillStyle = colors[i];
+                                        ctx.fill();
+                                    }
                                 } else {
-                                    // Solid Dot
+                                    // No rules: Solid Dot
                                     ctx.beginPath();
                                     ctx.arc(cx, cy, dotRadius, 0, 2 * Math.PI);
-                                    ctx.fillStyle = finalColor;
+                                    ctx.fillStyle = baseColor;
                                     ctx.fill();
                                     ctx.closePath();
                                 }
@@ -342,8 +339,8 @@ function draw() {
                                 // Glow Sphere
                                 ctx.save();
                                 const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, dotRadius + 8);
-                                grad.addColorStop(0, finalColor);
-                                grad.addColorStop(0.3, finalColor);
+                                grad.addColorStop(0, primary);
+                                grad.addColorStop(0.3, primary);
                                 grad.addColorStop(1, 'transparent');
                                 ctx.fillStyle = grad;
                                 ctx.beginPath();
@@ -352,13 +349,13 @@ function draw() {
                                 // White core for systems
                                 ctx.beginPath();
                                 ctx.arc(cx, cy, dotRadius * 0.4, 0, 2 * Math.PI);
-                                ctx.fillStyle = custom.secondaryColor || '#ffffff'; // Use secondary as core if present
+                                ctx.fillStyle = '#ffffff'; 
                                 ctx.fill();
                                 ctx.restore();
                             } else if (iconStyle === 'Minimal') {
                                 // Crosshair
                                 ctx.save();
-                                ctx.strokeStyle = finalColor;
+                                ctx.strokeStyle = primary;
                                 ctx.lineWidth = 1.5 / zoom;
                                 ctx.beginPath();
                                 const l = dotRadius + 5;
@@ -367,7 +364,7 @@ function draw() {
                                 ctx.stroke();
                                 ctx.beginPath();
                                 ctx.arc(cx, cy, dotRadius * 0.5, 0, 2 * Math.PI);
-                                ctx.strokeStyle = custom.secondaryColor || finalColor;
+                                ctx.strokeStyle = primary;
                                 ctx.stroke();
                                 ctx.restore();
                             }

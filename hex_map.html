@@ -127,9 +127,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above So Below</span></h1>
-            <div class="splash-banner">v0.5.6 - Selective Filter Styling & Refined UI Panels</div>
+            <div class="splash-banner">v0.5.7 - Add Multiple Colors & Export/Import Rules</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.5.6</div>
+            <div class="splash-version">v0.5.7</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -247,7 +247,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.5.6</span></p>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.5.7</span></p>
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 15px;">
@@ -432,7 +432,8 @@
     <!-- Hex Editor Modal -->
     <div id="hex-editor" class="draggable-palette">
         <h3 id="hex-editor-title">World Details</h3>
-        <button id="btn-close-editor" class="btn-close-palette" onclick="closeHexEditor()" title="Close"><i class="fas fa-times"></i></button>
+        <button id="btn-close-editor" class="btn-close-palette" onclick="closeHexEditor()" title="Close"><i
+                class="fas fa-times"></i></button>
 
         <div class="palette-content">
             <div class="editor-grid">
@@ -501,7 +502,8 @@
                 <div class="editor-row"><label>Sacred Site (K):</label><input type="checkbox" id="edit-sacred"></div>
                 <div class="editor-row"><label>Enclave (V):</label><input type="checkbox" id="edit-enclave"></div>
                 <div class="editor-row">
-                    <label>Ancients (Q):</label><input type="checkbox" id="edit-ancients"></div>
+                    <label>Ancients (Q):</label><input type="checkbox" id="edit-ancients">
+                </div>
                 <div class="editor-row">
                     <label>Gas Giant:</label>
                     <input type="checkbox" id="edit-gas">
@@ -519,7 +521,8 @@
                 <div style="display: flex; align-items: center;">
                     <i class="fas fa-rocket" style="color: #ffa500; margin-right: 10px; font-size: 1.2em;"></i>
                     <div>
-                        <div style="color: #ffa500; font-weight: bold; font-size: 0.9em;">Stellar Masking Navigation</div>
+                        <div style="color: #ffa500; font-weight: bold; font-size: 0.9em;">Stellar Masking Navigation
+                        </div>
                         <div style="color: #a0a8b0; font-size: 0.75em;">Distance shortcuts via stellar mass limit</div>
                     </div>
                 </div>
@@ -832,7 +835,8 @@
 
             <!-- UWP Fields -->
             <div class="filter-section">
-                <div class="filter-title filter-accordion-header open" onclick="this.classList.toggle('open'); document.getElementById('uwp-accordion-body').classList.toggle('open');">
+                <div class="filter-title filter-accordion-header open"
+                    onclick="this.classList.toggle('open'); document.getElementById('uwp-accordion-body').classList.toggle('open');">
                     <span>Physical & Social (UWP)</span>
                     <i class="fas fa-chevron-down"></i>
                 </div>
@@ -878,7 +882,8 @@
 
             <!-- Conditional Socio-Economic Filters -->
             <div class="filter-section no-border" id="filter-conditional-section" style="display: none;">
-                <div class="filter-title filter-accordion-header" onclick="this.classList.toggle('open'); document.getElementById('advanced-accordion-body').classList.toggle('open');">
+                <div class="filter-title filter-accordion-header"
+                    onclick="this.classList.toggle('open'); document.getElementById('advanced-accordion-body').classList.toggle('open');">
                     <span>Advanced Data</span>
                     <i class="fas fa-chevron-down"></i>
                 </div>
@@ -923,13 +928,6 @@
                     </div>
                 </div>
                 <div class="design-field" style="display: flex; align-items: center; gap: 8px;">
-                    <input type="checkbox" id="enable-design-secondary" title="Include Secondary Color (Split)">
-                    <div style="flex-grow: 1;">
-                        <label for="design-secondary-color">Secondary Color</label>
-                        <input type="color" id="design-secondary-color" value="#ff4500" style="width: 100%;">
-                    </div>
-                </div>
-                <div class="design-field" style="display: flex; align-items: center; gap: 8px;">
                     <input type="checkbox" id="enable-design-ring" title="Include Ring Color">
                     <div style="flex-grow: 1;">
                         <label for="design-ring-color">Ring Color</label>
@@ -967,6 +965,18 @@
             <p style="font-size: 0.65rem; color: #a0a8b0; text-align: center; margin-top: 10px;">
                 * Rules are applied in order. Deleting a rule triggers a sector-wide repaint.
             </p>
+
+            <!-- Independent Rule I/O (Phase 5) -->
+            <div
+                style="display: flex; gap: 10px; margin-top: 10px; justify-content: center; border-top: 1px solid rgba(69, 162, 158, 0.2); padding-top: 10px;">
+                <button onclick="exportFilterRules()"
+                    style="background: rgba(69, 162, 158, 0.2); color: #66fcf1; border: 1px solid #45a29e; border-radius: 4px; padding: 4px 10px; font-size: 0.7rem; cursor: pointer;">Export
+                    Rules</button>
+                <button onclick="document.getElementById('file-import-rules').click()"
+                    style="background: rgba(69, 162, 158, 0.2); color: #66fcf1; border: 1px solid #45a29e; border-radius: 4px; padding: 4px 10px; font-size: 0.7rem; cursor: pointer;">Import
+                    Rules</button>
+                <input type="file" id="file-import-rules" accept=".json" style="display: none;">
+            </div>
         </div>
 
         <div class="filter-modal-footer">

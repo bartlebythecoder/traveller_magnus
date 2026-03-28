@@ -1,6 +1,10 @@
 # Changelog
 
 
+### [v0.5.7] - 2026-03-28
+1. **UI**: Added multiple color support to filter rules.
+2. **UI**: Added ability to export and import filter rules.
+
 ### [v0.5.6] - 2026-03-27
 1. **UI**: Added ability to enable or disable color and icon style in the filter rules.
 2. **UI**: Refined side panel headers for Help and Settings to prevent overlap with floating toggle buttons.

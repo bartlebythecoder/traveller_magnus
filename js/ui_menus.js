@@ -591,6 +591,11 @@ function setupSettingsPanel() {
         showSubsectorBorders = e.target.checked;
         requestAnimationFrame(draw);
     });
+    
+    document.getElementById('toggle-hide-no-planets').addEventListener('change', (e) => {
+        hideNoPlanetSystems = e.target.checked;
+        requestAnimationFrame(draw);
+    });
 
     document.getElementById('toggle-dev-view').addEventListener('change', (e) => {
         devView = e.target.checked;

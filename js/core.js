@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.5.7";
-const APP_BANNER = "v0.5.7 - Internal Updates & Fixes";
+const APP_VERSION = "v0.5.7.1";
+const APP_BANNER = "v0.5.7.1 - Refined Filters & UI Enhancements";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -35,6 +35,7 @@ selectedHexes = new Set();
 // UI Display state
 showSubsectorBorders = true;
 devView = false;
+hideNoPlanetSystems = true;
 
 // Hex state (Map of hexId -> STATE)
 hexStates = new Map();

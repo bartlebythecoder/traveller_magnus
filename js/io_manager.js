@@ -33,14 +33,28 @@ function downloadBatchLog(actionName, hexCount) {
 
 function setupSaveLoad() {
     document.getElementById('btn-save-map').addEventListener('click', async () => {
+        if (typeof tSection === 'function') tSection("JSON Export: Map & Aesthetics");
+
         const stateObj = {
             hexStates: {},
             routes: window.sectorRoutes || [],
-            rules: window.activeFilterRules || []
+            rules: window.activeFilterRules || [], // Legacy Support
+            aesthetics: {
+                defaultColor: (typeof window.captureGlobalDefaults === 'function') ? window.captureGlobalDefaults() : '#ffffff',
+                activeRules: window.activeFilterRules || []
+            }
         };
+
+        if (typeof tResult === 'function') {
+            tResult("State Packaged", true);
+            tResult("Default Color", stateObj.aesthetics.defaultColor);
+            tResult("Rule Ledger Count", stateObj.aesthetics.activeRules.length);
+        }
+
         hexStates.forEach((value, key) => {
             stateObj.hexStates[key] = value;
         });
+
         const jsonStr = JSON.stringify(stateObj, null, 2);
 
         try {
@@ -86,17 +100,42 @@ function setupSaveLoad() {
                 hexStates.clear();
 
                 if (parsedData.hexStates) {
+                    if (typeof tSection === 'function') tSection("JSON Import: Analyzing Map Manifest");
+                    
                     for (const key in parsedData.hexStates) {
                         hexStates.set(key, parsedData.hexStates[key]);
                     }
                     window.sectorRoutes = parsedData.routes || [];
+                    
+                    // Priority Rule Capture: Use aesthetics.activeRules if available, else fallback to legacy field
                     window.activeFilterRules = parsedData.rules || [];
+                    if (parsedData.aesthetics && parsedData.aesthetics.activeRules) {
+                        window.activeFilterRules = parsedData.aesthetics.activeRules;
+                    }
+
+                    // Restore Global Default Appearance
+                    if (parsedData.aesthetics && parsedData.aesthetics.defaultColor) {
+                        const defaultColor = parsedData.aesthetics.defaultColor;
+                        const defaultInput = document.getElementById('default-dot-color');
+                        if (defaultInput) {
+                            defaultInput.value = defaultColor;
+                            if (typeof tResult === 'function') tResult("Restored Global Default Color", defaultColor);
+                        }
+                    }
+
+                    if (typeof tResult === 'function') {
+                        tResult("Hexes Loaded", hexStates.size);
+                        tResult("Routes Loaded", window.sectorRoutes.length);
+                        tResult("Rules Restored", window.activeFilterRules.length);
+                    }
 
                     // Re-sync UI and redraw map based on loaded rules
-                    if (typeof renderRulesLedger === 'function') renderRulesLedger();
-                    if (typeof reapplyAllRules === 'function') reapplyAllRules();
+                    if (typeof window.renderRulesLedger === 'function') window.renderRulesLedger();
+                    if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+                    if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
                 } else {
                     // Fallback for old format
+                    if (typeof writeLogLine === 'function') writeLogLine("Importing legacy map format (flat state)...");
                     for (const key in parsedData) {
                         hexStates.set(key, parsedData[key]);
                     }
@@ -106,7 +145,7 @@ function setupSaveLoad() {
                 document.getElementById('context-menu').classList.remove('visible');
                 requestAnimationFrame(draw);
 
-                alert("Map loaded successfully!");
+                if (typeof showToast === 'function') showToast("Map loaded successfully!", 2000);
             } catch (error) {
                 alert("Error loading map file. Ensure it is a valid JSON.");
                 console.error("Parse error:", error);
@@ -564,6 +603,11 @@ function importT5Tab(fileContent, fileName) {
     if (emptyCount > 0) showToast(`Initialized ${emptyCount} empty space hexes in sector bounds.`, 2000);
 
     selectedHexes.clear();
+    
+    // Sean Protocol: Refresh Styling Rules (Ledger) and Visibility Filters
+    if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+    if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
+
     if (typeof draw === 'function') {
         requestAnimationFrame(draw);
     }

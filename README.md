@@ -1,4 +1,4 @@
-# As Above, So Below (v0.5.7)
+# As Above, So Below (v0.5.7.1)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -36,6 +36,13 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 36. **Filter Control:** Use the **F Key** to **Open Filter Window** for advanced filtering and custom styling rules.
 ---
 ## 📜 Changelog
+
+### [v0.5.7.1] - 2026-03-29
+1. **System**: Added a global setting to customize the default color of planetary bodies on the hex map.
+2. **UI**: Refactored the filter interface into a persistent accordion layout, enabling simultaneous access to both filter settings and the active rules ledger.
+3. **UI**: Extended filter styling options to include advanced typography (Italics and Underlining).
+4. **UI**: Added a "Hide systems without worlds" toggle to the settings panel to declutter the map.
+5. **Bug Fix**: Resolved an issue where active filter rules were not automatically triggered upon sector load or import.
 
 ### [v0.5.7] - 2026-03-28
 1. **UI**: Added multiple color support to filter rules.

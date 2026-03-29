@@ -127,9 +127,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above So Below</span></h1>
-            <div class="splash-banner">v0.5.7 - Add Multiple Colors & Export/Import Rules</div>
+            <div class="splash-banner">v0.5.7.1 - Refined Filters & UI Enhancements</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.5.7</div>
+            <div class="splash-version">v0.5.7.1</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -185,13 +185,23 @@
             <input type="checkbox" id="toggle-logging">
             <label for="toggle-logging">Enable Batch Logging (Download .txt)</label>
         </div>
-
+        <h4>Visual Options</h4>
+        <div class="settings-row">
+            <input type="checkbox" id="toggle-hide-no-planets" checked>
+            <label for="toggle-hide-no-planets">Hide systems without planets</label>
+        </div>
         <div class="settings-row">
             <input type="checkbox" id="toggle-borders" checked>
-            <label for="toggle-borders">Show Sector/Subsector Borders</label>
+            <label for="toggle-borders">Show Subsector Borders</label>
         </div>
 
         <div style="border-top: 1px solid #45a29e; margin: 10px 0;"></div>
+
+        <div class="settings-row" style="display: flex; align-items: center; justify-content: space-between;">
+            <label style="font-size: 0.8rem; color: #66fcf1; font-weight: bold;">Default World Color</label>
+            <input type="color" id="default-dot-color" value="#ffffff"
+                style="width: 40px; height: 25px; cursor: pointer; background: transparent; border: 1px solid #45a29e;">
+        </div>
 
         <div class="settings-row" style="flex-direction: column; align-items: flex-start; gap: 6px;">
             <label for="input-seed" style="font-size: 0.8rem; color: #66fcf1; font-weight: bold;">Generation
@@ -232,7 +242,7 @@
             <button class="menu-btn" id="btn-import-sector"
                 style="width: 100%; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;"
                 onclick="document.getElementById('file-import-sector').click()">
-                <i class="fas fa-file-import"></i> Import Sector
+                <i class="fas fa-file-import"></i> Import Sector (.tsv)
             </button>
             <input type="file" id="file-import-sector" accept=".tab,.tsv,.txt" style="display: none;">
         </div>
@@ -247,7 +257,8 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.5.7</span></p>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.5.7.1</span>
+            </p>
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 15px;">
@@ -796,186 +807,202 @@
         </div>
     </div>
 
-    <!-- Filter Window Modal (Phase 2) -->
+    <!-- Filter Window Modal (Phase 2 & 3 Split-Pane) -->
     <div id="filter-modal" class="draggable-palette">
         <div class="modal-drag-handle">
             <h2>Filter Control</h2>
-
             <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                <!-- Tab Header -->
-                <div class="filter-tabs">
-                    <div class="filter-tab active" id="tab-btn-filter" onclick="switchFilterTab('filter')">Filter</div>
-                    <div class="filter-tab" id="tab-btn-design" onclick="switchFilterTab('design')">Rules</div>
-                </div>
-                <span id="btn-clear-filters" class="filter-clear-link" onclick="clearFilterInputs()">Clear All</span>
+                <span id="btn-clear-filters" class="filter-clear-link" onclick="clearFilterInputs()">Clear
+                    Filters</span>
             </div>
             <button id="btn-close-filter" class="btn-close-palette" title="Close"><i class="fas fa-times"></i></button>
         </div>
 
-        <!-- Filter Content -->
-        <div id="filter-content-pane" class="filter-content active">
-            <!-- Route Toggles (Priority 1) -->
-            <div class="filter-section">
-                <span class="filter-title">Route Visibility</span>
-                <div class="filter-route-toggles">
-                    <label class="filter-toggle-item">
-                        <input type="checkbox" id="filter-route-green" checked>
-                        <span style="color: #00FF00;">Green</span>
-                    </label>
-                    <label class="filter-toggle-item">
-                        <input type="checkbox" id="filter-route-yellow" checked>
-                        <span style="color: #FFFF00;">Yellow</span>
-                    </label>
-                    <label class="filter-toggle-item">
-                        <input type="checkbox" id="filter-route-red" checked>
-                        <span style="color: #FF0000;">Red</span>
-                    </label>
-                </div>
-            </div>
+        <div class="palette-content"
+            style="max-height: 70vh; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: row; flex-wrap: nowrap; gap: 15px; align-items: flex-start; overflow-x: hidden; transition: width 0.3s ease; width: 100%;">
 
-            <!-- UWP Fields -->
-            <div class="filter-section">
-                <div class="filter-title filter-accordion-header open"
-                    onclick="this.classList.toggle('open'); document.getElementById('uwp-accordion-body').classList.toggle('open');">
-                    <span>Physical & Social (UWP)</span>
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-                <div id="uwp-accordion-body" class="filter-grid-uwp filter-accordion-content open">
-                    <div class="filter-field">
-                        <label>Starport</label>
-                        <input type="text" id="filter-starport" placeholder="e.g. A, B">
-                    </div>
-                    <div class="filter-field">
-                        <label>Size</label>
-                        <input type="text" id="filter-size" placeholder="e.g. >5, 0, A">
-                    </div>
-                    <div class="filter-field">
-                        <label>Atmosphere</label>
-                        <input type="text" id="filter-atm" placeholder="6, 8">
-                    </div>
-                    <div class="filter-field">
-                        <label>Hydrographics</label>
-                        <input type="text" id="filter-hydro" placeholder=">0">
-                    </div>
-                    <div class="filter-field">
-                        <label>Population</label>
-                        <input type="text" id="filter-pop" placeholder=">8">
-                    </div>
-                    <div class="filter-field">
-                        <label>Government</label>
-                        <input type="text" id="filter-gov">
-                    </div>
-                    <div class="filter-field">
-                        <label>Law Level</label>
-                        <input type="text" id="filter-law">
-                    </div>
-                    <div class="filter-field">
-                        <label>Tech Level</label>
-                        <input type="text" id="filter-tl" placeholder=">10">
-                    </div>
-                    <div class="filter-field">
-                        <label>Trade Codes</label>
-                        <input type="text" id="filter-trade-codes" placeholder="e.g. Ag, In">
+            <!-- Left Pane: Primary Filters -->
+            <div id="filter-left-pane" style="flex: 1; min-width: 280px; display: flex; flex-direction: column;">
+                <!-- Route Visibility (Shared) -->
+                <div class="filter-section">
+                    <span class="filter-title">Route Visibility</span>
+                    <div class="filter-route-toggles">
+                        <label class="filter-toggle-item">
+                            <input type="checkbox" id="filter-route-green" checked>
+                            <span style="color: #00FF00;">Green</span>
+                        </label>
+                        <label class="filter-toggle-item">
+                            <input type="checkbox" id="filter-route-yellow" checked>
+                            <span style="color: #FFFF00;">Yellow</span>
+                        </label>
+                        <label class="filter-toggle-item">
+                            <input type="checkbox" id="filter-route-red" checked>
+                            <span style="color: #FF0000;">Red</span>
+                        </label>
                     </div>
                 </div>
-            </div>
 
-            <!-- Conditional Socio-Economic Filters -->
-            <div class="filter-section no-border" id="filter-conditional-section" style="display: none;">
-                <div class="filter-title filter-accordion-header"
-                    onclick="this.classList.toggle('open'); document.getElementById('advanced-accordion-body').classList.toggle('open');">
-                    <span>Advanced Data</span>
-                    <i class="fas fa-chevron-down"></i>
+                <!-- UWP Filters (Accordion) - Open by Default -->
+                <div class="filter-section">
+                    <div class="filter-accordion-header open"
+                        onclick="this.classList.toggle('open'); document.getElementById('uwp-accordion-body').classList.toggle('open');">
+                        <span class="filter-title">Physical & Social (UWP)</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div id="uwp-accordion-body" class="filter-grid-uwp filter-accordion-content open">
+                        <div class="filter-field">
+                            <label>Starport</label>
+                            <input type="text" id="filter-starport" placeholder="e.g. A, B">
+                        </div>
+                        <div class="filter-field">
+                            <label>Size</label>
+                            <input type="text" id="filter-size" placeholder="e.g. >5, 0, A">
+                        </div>
+                        <div class="filter-field">
+                            <label>Atmosphere</label>
+                            <input type="text" id="filter-atm" placeholder="6, 8">
+                        </div>
+                        <div class="filter-field">
+                            <label>Hydrographics</label>
+                            <input type="text" id="filter-hydro" placeholder=">0">
+                        </div>
+                        <div class="filter-field">
+                            <label>Population</label>
+                            <input type="text" id="filter-pop" placeholder=">8">
+                        </div>
+                        <div class="filter-field">
+                            <label>Government</label>
+                            <input type="text" id="filter-gov">
+                        </div>
+                        <div class="filter-field">
+                            <label>Law Level</label>
+                            <input type="text" id="filter-law">
+                        </div>
+                        <div class="filter-field">
+                            <label>Tech Level</label>
+                            <input type="text" id="filter-tl" placeholder=">10">
+                        </div>
+                        <div class="filter-field">
+                            <label>Trade Codes</label>
+                            <input type="text" id="filter-trade-codes" placeholder="Ag, In">
+                        </div>
+                    </div>
                 </div>
-                <div id="advanced-accordion-body" class="filter-conditional-container filter-accordion-content">
-                    <div class="filter-field" id="filter-field-t5-ix" style="display: none;">
-                        <label>T5 Ix</label>
-                        <input type="text" id="filter-t5-ix" placeholder=">2">
-                    </div>
-                    <div class="filter-field" id="filter-field-mgt-importance" style="display: none;">
-                        <label>Mongoose Importance</label>
-                        <input type="text" id="filter-mgt-importance" placeholder=">0">
-                    </div>
-                    <div class="filter-field" id="filter-field-mgt-wtn" style="display: none;">
-                        <label>Mongoose WTN</label>
-                        <input type="text" id="filter-mgt-wtn" placeholder=">3.5">
-                    </div>
-                    <div class="filter-field" id="filter-field-mgt-gwp" style="display: none;">
-                        <label>Mongoose GWP</label>
-                        <input type="text" id="filter-mgt-gwp" placeholder=">1000k">
-                    </div>
-                    <div class="filter-field" id="filter-field-gravity" style="display: none;">
-                        <label>Gravity</label>
-                        <input type="text" id="filter-gravity" placeholder="e.g. >1.0">
-                    </div>
-                    <div class="filter-field" id="filter-field-temperature" style="display: none;">
-                        <label>Temperature (°C)</label>
-                        <input type="text" id="filter-temperature" placeholder="e.g. 0-20, <10">
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Design Content (Phase 3) -->
-        <div id="design-content-pane" class="filter-content">
-            <span class="filter-title">Batch Customization</span>
-            <div class="design-grid">
-                <div class="design-field" style="display: flex; align-items: center; gap: 8px;">
-                    <input type="checkbox" id="enable-design-color" checked title="Include Primary Color">
-                    <div style="flex-grow: 1;">
-                        <label for="design-glow-color">Primary Color</label>
-                        <input type="color" id="design-glow-color" value="#66fcf1" style="width: 100%;">
+                <!-- Advanced Data (Accordion) - Closed by Default -->
+                <div class="filter-section" id="filter-conditional-section" style="display: none;">
+                    <div class="filter-accordion-header"
+                        onclick="this.classList.toggle('open'); document.getElementById('advanced-accordion-body').classList.toggle('open');">
+                        <span class="filter-title">Advanced Data</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div id="advanced-accordion-body" class="filter-conditional-container filter-accordion-content">
+                        <div class="filter-field" id="filter-field-t5-ix" style="display: none;"><label>T5
+                                Ix</label><input type="text" id="filter-t5-ix" placeholder=">2"></div>
+                        <div class="filter-field" id="filter-field-mgt-importance" style="display: none;">
+                            <label>Imp.</label><input type="text" id="filter-mgt-importance" placeholder=">0"></div>
+                        <div class="filter-field" id="filter-field-mgt-wtn" style="display: none;">
+                            <label>WTN</label><input type="text" id="filter-mgt-wtn" placeholder=">3.5"></div>
+                        <div class="filter-field" id="filter-field-mgt-gwp" style="display: none;">
+                            <label>GWP</label><input type="text" id="filter-mgt-gwp" placeholder=">1000k"></div>
+                        <div class="filter-field" id="filter-field-gravity" style="display: none;">
+                            <label>Gravity</label><input type="text" id="filter-gravity" placeholder=">1.0"></div>
+                        <div class="filter-field" id="filter-field-temperature" style="display: none;"><label>Temp
+                                (°C)</label><input type="text" id="filter-temperature" placeholder="0-20"></div>
                     </div>
                 </div>
-                <div class="design-field" style="display: flex; align-items: center; gap: 8px;">
-                    <input type="checkbox" id="enable-design-ring" title="Include Ring Color">
-                    <div style="flex-grow: 1;">
-                        <label for="design-ring-color">Ring Color</label>
-                        <input type="color" id="design-ring-color" value="#ffffff" style="width: 100%;">
-                    </div>
-                </div>
-                <div class="design-field" style="display: flex; align-items: center; gap: 8px;">
-                    <input type="checkbox" id="enable-design-icon" checked title="Include Icon in Rule">
-                    <div style="flex-grow: 1;">
-                        <label for="design-icon-style">Icon Style</label>
-                        <select id="design-icon-style" style="width: 100%;">
-                            <option value="Classic">Classic Dot</option>
-                            <option value="Refined">Glow Sphere</option>
-                            <option value="Minimal">Crosshair</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <button class="btn-batch-apply" onclick="applyBatchStyles()">Apply as New Rule</button>
 
-            <!-- Rules Ledger (New Feature) -->
-            <div id="rules-ledger-container"
-                style="margin-top: 15px; border-top: 1px solid rgba(69, 162, 158, 0.3); padding-top: 10px;">
-                <span class="filter-title"
-                    style="font-size: 0.75rem; color: #66fcf1; margin-bottom: 5px; display: block;">Active Styling
-                    Rules</span>
-                <div id="active-rules-list"
-                    style="max-height: 150px; overflow-y: auto; background: rgba(0, 0, 0, 0.2); border-radius: 4px; padding: 5px;">
-                    <!-- Rules will be injected here via JS -->
-                    <div style="color: #45a29e; font-size: 0.7rem; text-align: center; padding: 10px;">No active rules.
+                <!-- Toggle Button for Rules Pane -->
+                <div class="filter-section no-border">
+                    <div class="filter-accordion-header" id="btn-toggle-rules-pane"
+                        onclick="const pane = document.getElementById('filter-right-pane'); const modal = document.getElementById('filter-modal'); const isOpen = pane.style.display === 'block'; if(isOpen) { pane.style.display = 'none'; modal.style.width = '320px'; this.querySelector('i').className = 'fas fa-chevron-right'; } else { pane.style.display = 'block'; modal.style.width = '660px'; this.querySelector('i').className = 'fas fa-chevron-left'; }">
+                        <span class="filter-title">Advanced Styling Rules</span>
+                        <i class="fas fa-chevron-right"></i>
                     </div>
                 </div>
             </div>
 
-            <p style="font-size: 0.65rem; color: #a0a8b0; text-align: center; margin-top: 10px;">
-                * Rules are applied in order. Deleting a rule triggers a sector-wide repaint.
-            </p>
+            <!-- Right Pane: Styling Rule Engine & Ledger -->
+            <div id="filter-right-pane"
+                style="display: none; flex: 1; min-width: 320px; border-left: 1px solid #45a29e; padding-left: 15px;">
+                <div class="design-grid">
+                    <div class="design-field" style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="enable-design-color" checked title="Include Primary Color">
+                        <div style="flex-grow: 1;">
+                            <label for="design-glow-color">Primary Color</label>
+                            <input type="color" id="design-glow-color" value="#66fcf1" style="width: 100%;">
+                        </div>
+                    </div>
+                    <div class="design-field" style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="enable-design-ring" title="Include Ring Color">
+                        <div style="flex-grow: 1;">
+                            <label for="design-ring-color">Ring Color</label>
+                            <input type="color" id="design-ring-color" value="#ffffff" style="width: 100%;">
+                        </div>
+                    </div>
+                    <div class="design-field" style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="enable-design-icon" checked title="Include Icon in Rule">
+                        <div style="flex-grow: 1;">
+                            <label for="design-icon-style">Icon Style</label>
+                            <select id="design-icon-style" style="width: 100%;">
+                                <option value="Classic">Classic Dot</option>
+                                <option value="Refined">Glow Sphere</option>
+                                <option value="Minimal">Crosshair</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="design-field" style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="enable-design-text-case" title="Include Text Case">
+                        <div style="flex-grow: 1;">
+                            <label for="design-text-case">Text Case</label>
+                            <select id="design-text-case" style="width: 100%;">
+                                <option value="Default">Default</option>
+                                <option value="ALL CAPS">ALL CAPS</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="design-field" style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="enable-design-italics" title="Apply Italics">
+                        <label for="enable-design-italics"
+                            style="flex-grow: 1; cursor: pointer; color: #fff; font-size: 0.75rem;">Italicize
+                            Name</label>
+                    </div>
+                    <div class="design-field" style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="enable-design-underline" title="Apply Underline">
+                        <label for="enable-design-underline"
+                            style="flex-grow: 1; cursor: pointer; color: #fff; font-size: 0.75rem;">Underline
+                            Name</label>
+                    </div>
+                </div>
+                <button class="btn-batch-apply" onclick="applyBatchStyles()" style="margin-top: 10px;">Apply as New
+                    Rule</button>
 
-            <!-- Independent Rule I/O (Phase 5) -->
-            <div
-                style="display: flex; gap: 10px; margin-top: 10px; justify-content: center; border-top: 1px solid rgba(69, 162, 158, 0.2); padding-top: 10px;">
-                <button onclick="exportFilterRules()"
-                    style="background: rgba(69, 162, 158, 0.2); color: #66fcf1; border: 1px solid #45a29e; border-radius: 4px; padding: 4px 10px; font-size: 0.7rem; cursor: pointer;">Export
-                    Rules</button>
-                <button onclick="document.getElementById('file-import-rules').click()"
-                    style="background: rgba(69, 162, 158, 0.2); color: #66fcf1; border: 1px solid #45a29e; border-radius: 4px; padding: 4px 10px; font-size: 0.7rem; cursor: pointer;">Import
-                    Rules</button>
-                <input type="file" id="file-import-rules" accept=".json" style="display: none;">
+                <!-- Rules Ledger -->
+                <div id="rules-ledger-container"
+                    style="margin-top: 15px; border-top: 1px solid rgba(69, 162, 158, 0.3); padding-top: 10px;">
+                    <span class="filter-title"
+                        style="font-size: 0.75rem; color: #66fcf1; margin-bottom: 5px; display: block;">Active Styling
+                        Rules</span>
+                    <div id="active-rules-list"
+                        style="max-height: 150px; overflow-y: auto; background: rgba(0, 0, 0, 0.2); border-radius: 4px; padding: 5px;">
+                        <div style="color: #45a29e; font-size: 0.7rem; text-align: center; padding: 10px;">No active
+                            rules.</div>
+                    </div>
+                </div>
+
+                <p style="font-size: 0.65rem; color: #a0a8b0; text-align: center; margin-top: 10px;">
+                    * Rules apply in order.
+                </p>
+
+                <!-- Rule I/O -->
+                <div
+                    style="display: flex; gap: 10px; margin-top: 10px; justify-content: center; border-top: 1px solid rgba(69, 162, 158, 0.2); padding-top: 10px;">
+                    <button onclick="exportFilterRules()"
+                        style="background: rgba(69, 162, 158, 0.2); color: #66fcf1; border: 1px solid #45a29e; border-radius: 4px; padding: 4px 10px; font-size: 0.7rem; cursor: pointer;">Export</button>
+                    <button onclick="document.getElementById('file-import-rules').click()"
+                        style="background: rgba(69, 162, 158, 0.2); color: #66fcf1; border: 1px solid #45a29e; border-radius: 4px; padding: 4px 10px; font-size: 0.7rem; cursor: pointer;">Import</button>
+                    <input type="file" id="file-import-rules" accept=".json" style="display: none;">
+                </div>
             </div>
         </div>
 

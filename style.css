@@ -393,9 +393,10 @@ body {
    ----------------------------------------------------------------------------- */
 #filter-modal {
     /* Base style inherits from .draggable-palette */
-    width: 320px;
+    width: fit-content;
+    min-width: 320px;
     max-height: 90vh;
-    overflow-y: auto;
+    overflow-y: hidden; /* Prevent double scrollbars, let palette-content scroll */
     padding: 25px;
     color: #c5c6c7;
     font-family: 'Inter', sans-serif;
@@ -541,13 +542,15 @@ body {
 .filter-grid-uwp {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 8px; /* Slightly tighter grid */
 }
 
 .filter-field {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    flex-direction: row; /* Horizontal alignment */
+    align-items: center; /* Center vertically */
+    gap: 12px;
+    width: 100%; /* Stay within parent */
 }
 
 .filter-field label {
@@ -555,6 +558,8 @@ body {
     color: #a0a8b0;
     text-transform: uppercase;
     font-weight: 900;
+    flex: 0 0 110px; /* Precise fixed width for labels */
+    text-align: left;
 }
 
 .filter-field input {
@@ -564,7 +569,10 @@ body {
     padding: 6px 10px;
     border-radius: 4px;
     font-family: 'Courier New', monospace;
-    font-size: 14px;
+    font-size: 13px;
+    flex: 1; /* Consume remaining space */
+    min-width: 0; /* Critical for prevent flex overflow */
+    box-sizing: border-box;
 }
 
 .filter-field input:focus {

@@ -209,9 +209,19 @@ function draw() {
         }
     }
 
-    // =========================================================================
     // PASS 2: DRAW WORLD CONTENT (Icons, Labels, Symbols)
     // =========================================================================
+    
+    // Sean Protocol: Optimization: Detect and Log Typography Pass Init once per draw cycle
+    const hasTypoRules = window.activeFilterRules && window.activeFilterRules.some(r => r.isItalic || r.isUnderline);
+    if (hasTypoRules && typeof writeLogLine === 'function') {
+        writeLogLine("Typography Styling Bridge: Initializing Italics/Underline checks in render pass.");
+    }
+
+    // Sean Protocol: Capture Global Default Style once per frame to minimize spam
+    const currentGlobalDefaultColor = (typeof window.captureGlobalDefaults === 'function') ? 
+        window.captureGlobalDefaults() : '#ffffff';
+
     for (let q = Math.max(0, qMin); q <= Math.min(MAX_GLOBAL_Q, qMax); q++) {
         for (let r = Math.max(0, rMin); r <= Math.min(MAX_GLOBAL_R, rMax); r++) {
             const offset = (q & 1) ? 0.5 : 0;
@@ -232,6 +242,12 @@ function draw() {
 
             if (stateType === 'SYSTEM_PRESENT' && !isHidden) {
                 const data = stateObj.rttData || stateObj.t5Data || stateObj.mgt2eData || stateObj.ctData;
+
+                // Sean Protocol: Check if this "System Present" hex actually has no planets 
+                // and skip if the filter is active.
+                if (hideNoPlanetSystems && data && data.isStellarOnly) {
+                    continue;
+                }
 
                 if (!devView) {
                     // =============================================
@@ -296,7 +312,9 @@ function draw() {
                         }                        // 3. World dot (or asteroid cluster) with Custom UI Support
                         const custom = stateObj.custom_ui || {};
                         const colors = custom.appliedColors && custom.appliedColors.length > 0 ? custom.appliedColors : null;
-                        const baseColor = isSelected ? '#ffb399' : '#ffffff';
+                        
+                        // Sean Protocol: Dynamically use the captured Global Default as baseline dot color
+                        const baseColor = isSelected ? '#ffb399' : currentGlobalDefaultColor;
                         const primary = colors ? colors[0] : baseColor;
                         const iconStyle = custom.iconStyle || 'Classic';
 
@@ -398,14 +416,41 @@ function draw() {
                             ctx.fillText(data.uwp, cx, cy + dotRadius + 3);
                         }
 
-                        // 5. System name — bottom of hex (ALL CAPS for pop >= 9)
+                        // 5. System name — bottom of hex (Sean Protocol: Typography Suite)
                         if (data.name) {
-                            const isHighPop = (data.pop !== undefined && data.pop >= 9);
-                            const displayName = isHighPop ? data.name.toUpperCase() : data.name;
-                            ctx.font = `${pFontName}px 'Inter', sans-serif`;
+                            const custom = stateObj.custom_ui || {};
+                            let displayName = data.name;
+
+                            if (custom.textCase === 'ALL CAPS') {
+                                displayName = data.name.toUpperCase();
+                            } else if (custom.textCase === 'lowercase') {
+                                displayName = data.name.toLowerCase();
+                            }
+
+                            // Sean Protocol: Apply Italics
+                            const fontStyle = custom.isItalic ? "italic " : "";
+                            ctx.font = `${fontStyle}${pFontName}px 'Inter', sans-serif`;
                             ctx.fillStyle = pTextColor;
                             ctx.textBaseline = 'bottom';
-                            ctx.fillText(displayName, cx, cy + (size * 0.75));
+                            
+                            const textY = cy + (size * 0.75);
+                            ctx.fillText(displayName, cx, textY);
+
+                            // Sean Protocol: Manual Underline (Canvas doesn't support text-decoration native)
+                            if (custom.isUnderline) {
+                                const textWidth = ctx.measureText(displayName).width;
+                                const lineY = textY + 2; // Positioned 2px below baseline
+                                ctx.save();
+                                ctx.strokeStyle = pTextColor;
+                                ctx.lineWidth = 1 / zoom;
+                                ctx.beginPath();
+                                // X-Coordinates are relative to centered text (cx)
+                                ctx.moveTo(cx - textWidth / 2, lineY);
+                                ctx.lineTo(cx + textWidth / 2, lineY);
+                                ctx.stroke();
+                                ctx.restore();
+                            }
+                            
                             ctx.textBaseline = 'top';
                         }
 
@@ -468,11 +513,11 @@ function draw() {
                             ctx.fill();
                         }
                     } else {
-                        // No data yet — just draw a white dot and coordinate
+                        // No data yet — use global baseline dot color
                         ctx.beginPath();
                         const dotRadius2 = Math.max(1.5 / zoom, 10);
                         ctx.arc(cx, cy, dotRadius2, 0, 2 * Math.PI);
-                        ctx.fillStyle = '#ffffff';
+                        ctx.fillStyle = currentGlobalDefaultColor;
                         ctx.fill();
                         ctx.closePath();
                     }

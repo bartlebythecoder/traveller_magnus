@@ -258,8 +258,9 @@
                         const worldTcUpper = worldTCs.map(tc => String(tc).toUpperCase());
                         
                         if (searchTokens.length > 0) {
-                            // Uses OR logic: If any of the typed comma-separated codes match, the world remains visible
-                            const match = searchTokens.some(token => worldTcUpper.includes(token));
+                            // Sean Protocol: Changed from OR (some) to AND (every) logic per user requirement.
+                            // Criteria "In, Po" now requires BOTH Industrial and Poor remarks.
+                            const match = searchTokens.every(token => worldTcUpper.includes(token));
                             if (!match) return false;
                         }
                         continue; // Success! Skip the rest of the numeric evaluation for this specific field.

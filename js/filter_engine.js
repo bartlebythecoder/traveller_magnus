@@ -128,7 +128,7 @@
         if (typeof writeLogLine === 'function') writeLogLine("Filter inputs cleared. Restoring sector-wide visibility.");
         
         // Immediate trigger (bypass debounce)
-        applyActiveFilters();
+        window.applyActiveFilters();
     };
 
     /**
@@ -199,14 +199,14 @@
         
         filterDebounceTimer = setTimeout(() => {
             if (typeof tSection === 'function') tSection("Debounced Filter Triggered");
-            applyActiveFilters();
+            window.applyActiveFilters();
         }, 300);
     }
 
     /**
      * Harvests all input values and executes the cross-engine filtering logic.
      */
-    function applyActiveFilters() {
+    window.applyActiveFilters = function() {
         if (typeof writeLogLine === 'function') writeLogLine("Filter Engine: Refreshing results...");
         if (typeof tSection === 'function') tSection("Executing Filter Update Loop");
 
@@ -256,7 +256,7 @@
 
         // 4. Request Redraw
         if (typeof draw === 'function') requestAnimationFrame(draw);
-    }
+    };
 
     /**
      * Tab Switching Logic for the Filter Control modal.
@@ -383,6 +383,11 @@
                     if (rule.iconStyle !== null) {
                         state.custom_ui.iconStyle = rule.iconStyle;
                     }
+                    if (rule.textCase !== null && rule.textCase !== undefined) {
+                        state.custom_ui.textCase = rule.textCase;
+                    }
+                    if (rule.isItalic) state.custom_ui.isItalic = true;
+                    if (rule.isUnderline) state.custom_ui.isUnderline = true;
                     
                     ruleMatchCount++;
                 }
@@ -407,27 +412,74 @@
     };
 
     /**
+     * Sean Protocol: Math Chassis / UI Orchestrator Data Capture.
+     * Reads the baseline world color from the Global Defaults accordion.
+     * @returns {string} HEX color string.
+     */
+    window.captureGlobalDefaults = function() {
+        if (typeof tSection === 'function') tSection("Capture Global Defaults");
+        const defaultColor = document.getElementById('default-dot-color')?.value || "#ffffff";
+        if (typeof tResult === 'function') tResult("Default World Color", defaultColor);
+        return defaultColor;
+    };
+    /**
+     * Sean Protocol: Math Chassis / UI Orchestrator Data Capture.
+     * Harvests all checked styling overrides from the Styling Rule accordion.
+     * @returns {Object} A Rule state object with nullable properties and boolean flags.
+     */
+    window.captureNewRuleState = function() {
+        if (typeof tSection === 'function') tSection("Capture New Rule State");
+        
+        const applyPrimary = document.getElementById('enable-design-color')?.checked || false;
+        const applyRing = document.getElementById('enable-design-ring')?.checked || false;
+        const applyIcon = document.getElementById('enable-design-icon')?.checked || false;
+        const applyTextCase = document.getElementById('enable-design-text-case')?.checked || false;
+        const applyItalics = document.getElementById('enable-design-italics')?.checked || false;
+        const applyUnderline = document.getElementById('enable-design-underline')?.checked || false;
+
+        const ruleState = {
+            color: applyPrimary ? document.getElementById('design-glow-color').value : null,
+            ringColor: applyRing ? document.getElementById('design-ring-color').value : null,
+            iconStyle: applyIcon ? document.getElementById('design-icon-style').value : null,
+            textCase: applyTextCase ? document.getElementById('design-text-case').value : null,
+            isItalic: applyItalics,
+            isUnderline: applyUnderline
+        };
+
+        if (typeof writeLogLine === 'function') writeLogLine("Analyzing DOM for enabled styling toggles...");
+        if (typeof tResult === 'function') {
+            tResult("Primary Color Enabled", applyPrimary);
+            tResult("Ring Color Enabled", applyRing);
+            tResult("Icon Style Enabled", applyIcon);
+            tResult("Text Case Enabled", applyTextCase);
+            tResult("Italics Enabled", applyItalics);
+            tResult("Underline Enabled", applyUnderline);
+        }
+
+        if (ruleState.color && typeof tResult === 'function') tResult("Captured Primary Color", ruleState.color);
+        if (ruleState.ringColor && typeof tResult === 'function') tResult("Captured Ring Color", ruleState.ringColor);
+        if (ruleState.iconStyle && typeof tResult === 'function') tResult("Captured Icon Style", ruleState.iconStyle);
+        if (ruleState.textCase && typeof tResult === 'function') tResult("Captured Text Case", ruleState.textCase);
+
+        return ruleState;
+    };
+
+    /**
      * Captures current filter/style as a saved Rule.
      */
     window.applyBatchStyles = function() {
-        if (typeof tSection === 'function') tSection("Generate New Filter Rule");
-        
-        // 1. Check which toggles are active
-        const applyPrimary = document.getElementById('enable-design-color').checked;
-        const applyRing = document.getElementById('enable-design-ring').checked;
-        const applyIcon = document.getElementById('enable-design-icon').checked;
+        // Capture rule state via modular Chassis logic
+        const ruleState = captureNewRuleState();
 
-        if (!applyPrimary && !applyRing && !applyIcon) {
+        if (ruleState.color === null && ruleState.ringColor === null && 
+            ruleState.iconStyle === null && ruleState.textCase === null &&
+            !ruleState.isItalic && !ruleState.isUnderline) {
             if (typeof showToast === 'function') showToast("Please select at least one style to apply.", 2000);
-            return; // Abort if nothing is checked
+            if (typeof writeLogLine === 'function') writeLogLine("Abort: No style toggles were enabled.");
+            return;
         }
         
-        // 2. Grab values only if their respective box is checked, otherwise store null
-        const primaryColor = applyPrimary ? document.getElementById('design-glow-color').value : null;
-        const ringColor = applyRing ? document.getElementById('design-ring-color').value : null;
-        const iconStyle = applyIcon ? document.getElementById('design-icon-style').value : null;
-        
-        // 3. Package the Rule
+        // 2. Package the Rule
         const lockedFilters = JSON.parse(JSON.stringify(activeFilters)); // Deep copy
         const ruleId = 'rule_' + Date.now();
         const description = generateFilterDescription(lockedFilters);
@@ -435,16 +487,20 @@
         const newRule = {
             id: ruleId,
             filters: lockedFilters,
-            color: primaryColor,
-            ringColor: ringColor,
-            iconStyle: iconStyle,
+            color: ruleState.color,
+            ringColor: ruleState.ringColor,
+            iconStyle: ruleState.iconStyle,
+            textCase: ruleState.textCase,
+            isItalic: ruleState.isItalic,
+            isUnderline: ruleState.isUnderline,
             description: description
         };
 
         window.activeFilterRules.push(newRule);
         
         if (typeof writeLogLine === 'function') {
-            writeLogLine(`New Rule Created: ${description} (Color: ${primaryColor}, Ring: ${ringColor}, Icon: ${iconStyle})`);
+            writeLogLine(`New Rule Created: ${description}`);
+            if (typeof tResult === 'function') tResult("Rule ID", ruleId);
         }
 
         renderRulesLedger();

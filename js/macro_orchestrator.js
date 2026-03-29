@@ -201,7 +201,7 @@ async function runMgT2EMacro(skipPop = false) {
         }
         // Refresh both visibility and styling rules for the new systems
         if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
-        if (typeof applyActiveFilters === 'function') applyActiveFilters();
+        if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
 
         selectedHexes.clear();
         requestAnimationFrame(draw);
@@ -308,7 +308,7 @@ async function runMgT2EBottomUpMacro(skipPop = false) {
         }
         // Refresh both visibility and styling rules for the new systems
         if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
-        if (typeof applyActiveFilters === 'function') applyActiveFilters();
+        if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
 
         selectedHexes.clear();
         requestAnimationFrame(draw);
@@ -403,7 +403,7 @@ async function runCTNewMacro(skipPop = false) {
         }
         // Refresh both visibility and styling rules for the new systems
         if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
-        if (typeof applyActiveFilters === 'function') applyActiveFilters();
+        if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
 
         selectedHexes.clear();
         requestAnimationFrame(draw);
@@ -494,7 +494,7 @@ async function runCTBottomUpMacro(skipPop = false) {
         }
         // Refresh both visibility and styling rules for the new systems
         if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
-        if (typeof applyActiveFilters === 'function') applyActiveFilters();
+        if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
 
         selectedHexes.clear();
         requestAnimationFrame(draw);
@@ -579,7 +579,7 @@ async function runRTTMacro(skipPop = false) {
         }
         // Refresh both visibility and styling rules for the new systems
         if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
-        if (typeof applyActiveFilters === 'function') applyActiveFilters();
+        if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
 
         selectedHexes.clear();
         requestAnimationFrame(draw);
@@ -678,7 +678,7 @@ async function runT5Macro(skipPop = false) {
         }
         // Refresh both visibility and styling rules for the new systems
         if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
-        if (typeof applyActiveFilters === 'function') applyActiveFilters();
+        if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
 
         selectedHexes.clear();
         requestAnimationFrame(draw);

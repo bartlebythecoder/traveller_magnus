@@ -1,4 +1,4 @@
-# As Above, So Below (v0.5.7.1)
+# As Above, So Below (v0.5.7.2)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -33,9 +33,14 @@ This workbench allows Game Masters and world-builders to generate, import, and e
     - **Ctrl + Alt + C:** Full Classic Traveller (Book 6) Generation sequence (includes system population).
     - **Ctrl + Alt + R:** Full RTT Generation sequence (includes system population).
     - **Ctrl + Alt + 5:** Full Traveller 5 (T5) Generation sequence (includes system population).
-36. **Filter Control:** Use the **F Key** to **Open Filter Window** for advanced filtering and custom styling rules.
+6. **Filter Control:** Use the **F Key** to **Open Filter Window** for advanced filtering and custom styling rules.
 ---
 ## 📜 Changelog
+
+### [v0.5.7.2] - 2026-03-29
+1. **System**: Implemented **multi-color cycling** for Asteroid Belt clusters, allowing visual representation of multiple matching rules across individual rocks.
+2. **Filter**: Integrated "Asteroid Belt" into the choice of Icon Styles and established a new **default rule** that automatically applies the belt icon to all Size 0 worlds.
+3. **UI**: Expanded the Filter Engine suite with four new icon styles (**Square, Diamond, Rounded Rectangle, and Asteroid Grid**), each featuring stripe-based multi-color support and ring-boundary safety.
 
 ### [v0.5.7.1] - 2026-03-29
 1. **System**: Added a global setting to customize the default color of planetary bodies on the hex map.
@@ -43,6 +48,7 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 3. **UI**: Extended filter styling options to include advanced typography (Italics and Underlining).
 4. **UI**: Added a "Hide systems without worlds" toggle to the settings panel to declutter the map.
 5. **Bug Fix**: Resolved an issue where active filter rules were not automatically triggered upon sector load or import.
+
 
 ### [v0.5.7] - 2026-03-28
 1. **UI**: Added multiple color support to filter rules.

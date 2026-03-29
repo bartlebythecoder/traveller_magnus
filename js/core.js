@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.5.7.1";
-const APP_BANNER = "v0.5.7.1 - Refined Filters & UI Enhancements";
+const APP_VERSION = "v0.5.7.2";
+const APP_BANNER = "v0.5.7.2 - Refined Filters & UI Enhancements";
 
 // -----------------------------------------------------------------------------
 // Application State

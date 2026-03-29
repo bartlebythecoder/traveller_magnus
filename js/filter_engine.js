@@ -41,10 +41,6 @@
         }
     }
 
-    /**
-     * Sean Protocol: Inject a default, visible style rule for liquid water worlds
-     * on fresh session start.
-     */
     function initializeDefaultStyleRule() {
         if (typeof tSection === 'function') tSection("Initialize Default Styling Rule");
         
@@ -55,9 +51,19 @@
                 return;
             }
 
-            if (typeof writeLogLine === 'function') writeLogLine("Fresh session detected. Injecting 'Liquid Water' default rule.");
+            if (typeof writeLogLine === 'function') writeLogLine("Fresh session detected. Injecting default rules.");
 
-            const defaultRule = {
+            // 1. Default Asteroid Rule
+            const defaultAsteroidRule = {
+                id: 'rule_default_asteroid',
+                filters: { size: "0" },
+                color: null, // Set to null to inherit Global Default and prevent stacking
+                iconStyle: "Asteroid Belt",
+                description: "Size: 0 (Asteroid Belt)"
+            };
+
+            // 2. Default Liquid Water Rule
+            const defaultWetRule = {
                 id: 'rule_default_wet_world',
                 filters: {
                     atm: "2-9",
@@ -68,7 +74,8 @@
                 description: "Atm: 2-9 | Hydro: >0 (Liquid Water Presence)"
             };
 
-            window.activeFilterRules.push(defaultRule);
+            window.activeFilterRules.push(defaultAsteroidRule);
+            window.activeFilterRules.push(defaultWetRule);
             
             if (typeof window.renderRulesLedger === 'function') window.renderRulesLedger();
             if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
@@ -314,22 +321,37 @@
             const row = document.createElement('div');
             row.style.cssText = "display: flex; align-items: center; justify-content: space-between; background: rgba(102, 252, 241, 0.05); border: 1px solid rgba(102, 252, 241, 0.2); border-radius: 3px; margin-bottom: 4px; padding: 4px 8px; font-size: 0.7rem; color: #fff;";
             
-            // Determine what little badge to show in the ledger
+            // Determine what little badge to show in the ledger based on iconStyle
             let styleIndicator = '';
+            let iconType = rule.iconStyle || 'Classic';
+            let colorHex = rule.color || '#a0a8b0'; // Fallback gray for display
+            let borderCSS = rule.ringColor ? `border: 1.5px solid ${rule.ringColor}; box-sizing: border-box;` : '';
             
-            if (rule.color || rule.ringColor) {
-                // 1. Determine background (Solid)
-                let bgCSS = rule.color ? `background: ${rule.color};` : 'background: transparent;';
+            // Ensure the shape is visible in the ledger even if the user didn't apply a custom color
+            let bgCSS = '';
+            if (rule.color) {
+                bgCSS = `background: ${rule.color};`;
+            } else if (rule.ringColor) {
+                bgCSS = `background: transparent;`; // Ring only
+            } else {
+                bgCSS = `background: #a0a8b0;`; // Fallback fill so the shape isn't invisible
+            }
 
-                // 2. Determine border (Ring)
-                let borderCSS = rule.ringColor ? `border: 1.5px solid ${rule.ringColor}; box-sizing: border-box;` : '';
-                
-                // 3. Set slightly larger size to accommodate the ring nicely
-                let sizeCSS = 'width: 10px; height: 10px;';
-
-                styleIndicator = `<span style="${sizeCSS} border-radius: 50%; ${bgCSS} ${borderCSS} margin-right: 8px; flex-shrink: 0;" title="Custom Style"></span>`;
-            } else if (rule.iconStyle) {
-                styleIndicator = `<i class="fas fa-shapes" style="font-size: 8px; color: #a0a8b0; margin-right: 8px;" title="Shape Only"></i>`;
+            if (iconType === 'Asteroid Belt') {
+                styleIndicator = `<i class="fas fa-braille" style="font-size: 10px; color: ${colorHex}; margin-right: 8px; flex-shrink: 0;" title="Asteroid Belt"></i>`;
+            } else if (iconType === 'Asteroid Grid') {
+                styleIndicator = `<i class="fas fa-grip-horizontal" style="font-size: 10px; color: ${colorHex}; margin-right: 8px; flex-shrink: 0;" title="Asteroid Grid"></i>`;
+            } else if (iconType === 'Minimal') {
+                styleIndicator = `<i class="fas fa-crosshairs" style="font-size: 10px; color: ${colorHex}; margin-right: 8px; flex-shrink: 0;" title="Minimal"></i>`;
+            } else if (iconType === 'Square') {
+                styleIndicator = `<span style="display: inline-block; width: 10px; height: 10px; ${bgCSS} ${borderCSS} margin-right: 8px; flex-shrink: 0;" title="Square"></span>`;
+            } else if (iconType === 'Diamond') {
+                styleIndicator = `<span style="display: inline-block; width: 8px; height: 8px; ${bgCSS} ${borderCSS} transform: rotate(45deg); margin-right: 8px; margin-left: 2px; flex-shrink: 0;" title="Diamond"></span>`;
+            } else if (iconType === 'Rounded Rectangle') {
+                styleIndicator = `<span style="display: inline-block; width: 14px; height: 8px; border-radius: 2px; ${bgCSS} ${borderCSS} margin-right: 8px; flex-shrink: 0;" title="Rounded Rectangle"></span>`;
+            } else {
+                // Classic Dot or Refined
+                styleIndicator = `<span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; ${bgCSS} ${borderCSS} margin-right: 8px; flex-shrink: 0;" title="${iconType}"></span>`;
             }
 
             row.innerHTML = `

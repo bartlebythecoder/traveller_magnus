@@ -295,13 +295,6 @@ function draw() {
                     ctx.fillText(hexId, cx, cy - (size * 0.75));
 
                     if (data) {
-                        // Skip asteroid rendering if this is just an empty star system
-                        const isAsteroid = (data.size === 0 && !data.isStellarOnly);
-                        const isWet = (
-                            data.hydro !== undefined && data.hydro >= 1 &&
-                            data.atm !== undefined && (data.atm >= 2 && data.atm <= 9)
-                        );
-
                         // 2. Starport letter — above world dot
                         if (data.starport) {
                             ctx.font = `bold ${pFontPort}px 'Inter', sans-serif`;
@@ -309,7 +302,9 @@ function draw() {
                             ctx.textBaseline = 'bottom';
                             ctx.fillText(data.starport, cx, cy - dotRadius - 2);
                             ctx.textBaseline = 'top';
-                        }                        // 3. World dot (or asteroid cluster) with Custom UI Support
+                        }                        
+                        
+                        // 3. World dot (or asteroid cluster) with Custom UI Support
                         const custom = stateObj.custom_ui || {};
                         const colors = custom.appliedColors && custom.appliedColors.length > 0 ? custom.appliedColors : null;
                         
@@ -318,94 +313,197 @@ function draw() {
                         const primary = colors ? colors[0] : baseColor;
                         const iconStyle = custom.iconStyle || 'Classic';
 
-                        if (isAsteroid) {
-                            const aColor = primary; 
+                        if (iconStyle === 'Asteroid Belt') {
                             const aPositions = [
                                 { dx: -8, dy: -2 }, { dx: 0, dy: -5 }, { dx: 8, dy: -2 },
                                 { dx: -5, dy: 5 }, { dx: 5, dy: 4 }
                             ];
-                            aPositions.forEach(p => {
+                            aPositions.forEach((p, index) => {
                                 ctx.beginPath();
                                 ctx.arc(cx + p.dx, cy + p.dy, 2.5, 0, 2 * Math.PI);
-                                ctx.fillStyle = aColor;
+                                
+                                // Magic Multi-Color Cycling
+                                let rockColor = primary;
+                                if (colors && colors.length > 0) {
+                                    rockColor = colors[index % colors.length]; 
+                                }
+                                
+                                ctx.fillStyle = rockColor;
                                 ctx.fill();
                                 ctx.closePath();
                             });
-                        } else {
-                            if (iconStyle === 'Classic') {
-                                if (colors && colors.length > 0) {
-                                    const sliceAngle = (2 * Math.PI) / colors.length;
-                                    for (let i = 0; i < colors.length; i++) {
-                                        const startAngle = i * sliceAngle;
-                                        const endAngle = (i + 1) * sliceAngle;
-                                        ctx.beginPath();
-                                        ctx.moveTo(cx, cy);
-                                        ctx.arc(cx, cy, dotRadius, startAngle, endAngle);
-                                        ctx.closePath();
-                                        ctx.fillStyle = colors[i];
-                                        ctx.fill();
-                                    }
-                                } else {
-                                    // No rules: Solid Dot
-                                    ctx.beginPath();
-                                    ctx.arc(cx, cy, dotRadius, 0, 2 * Math.PI);
-                                    ctx.fillStyle = baseColor;
-                                    ctx.fill();
-                                    ctx.closePath();
+                        } else if (iconStyle === 'Rounded Rectangle') {
+                            // Geometry fix: Calculate dimensions so the furthest corners fit exactly
+                            // within the dotRadius circle that defines the Ring boundary.
+                            const rectWidth = dotRadius * 1.6;
+                            const rectHeight = dotRadius * 1.0;
+                            const rx = cx - rectWidth / 2;
+                            const ry = cy - rectHeight / 2;
+                            const cornerRadius = dotRadius * 0.3; // Proportionally adjusted
+
+                            ctx.save();
+                            ctx.beginPath();
+                            // Use modern roundRect if available, fallback to standard rect
+                            if (ctx.roundRect) {
+                                ctx.roundRect(rx, ry, rectWidth, rectHeight, cornerRadius);
+                            } else {
+                                ctx.rect(rx, ry, rectWidth, rectHeight);
+                            }
+                            ctx.clip(); // Mask the drawing area to the rounded shape
+
+                            if (colors && colors.length > 0) {
+                                const stripeWidth = rectWidth / colors.length;
+                                for (let i = 0; i < colors.length; i++) {
+                                    ctx.fillStyle = colors[i];
+                                    ctx.fillRect(rx + (i * stripeWidth), ry, stripeWidth + 1, rectHeight); // +1 prevents rendering gaps
                                 }
-                            } else if (iconStyle === 'Refined') {
-                                // Glow Sphere
-                                ctx.save();
-                                const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, dotRadius + 8);
-                                grad.addColorStop(0, primary);
-                                grad.addColorStop(0.3, primary);
-                                grad.addColorStop(1, 'transparent');
-                                ctx.fillStyle = grad;
-                                ctx.beginPath();
-                                ctx.arc(cx, cy, dotRadius + 8, 0, 2 * Math.PI);
-                                ctx.fill();
-                                // White core for systems
-                                ctx.beginPath();
-                                ctx.arc(cx, cy, dotRadius * 0.4, 0, 2 * Math.PI);
-                                ctx.fillStyle = '#ffffff'; 
-                                ctx.fill();
-                                ctx.restore();
-                            } else if (iconStyle === 'Minimal') {
-                                // Crosshair
-                                ctx.save();
-                                ctx.strokeStyle = primary;
-                                ctx.lineWidth = 1.5 / zoom;
-                                ctx.beginPath();
-                                const l = dotRadius + 5;
-                                ctx.moveTo(cx - l, cy); ctx.lineTo(cx + l, cy);
-                                ctx.moveTo(cx, cy - l); ctx.lineTo(cx, cy + l);
-                                ctx.stroke();
-                                ctx.beginPath();
-                                ctx.arc(cx, cy, dotRadius * 0.5, 0, 2 * Math.PI);
-                                ctx.strokeStyle = primary;
-                                ctx.stroke();
-                                ctx.restore();
+                            } else {
+                                ctx.fillStyle = baseColor;
+                                ctx.fillRect(rx, ry, rectWidth, rectHeight);
                             }
+                            ctx.restore();
+                        } else if (iconStyle === 'Square') {
+                            // Geometry: Side length = dotRadius * 1.414 (sqrt 2) to fit corners exactly inside the ring
+                            const side = dotRadius * 1.414;
+                            const rx = cx - side / 2;
+                            const ry = cy - side / 2;
 
-                            // --- Draw the Ring (Applies to any shape) ---
-                            if (custom.ringColor) {
-                                ctx.save();
+                            ctx.save();
+                            ctx.beginPath();
+                            ctx.rect(rx, ry, side, side);
+                            ctx.clip(); // Mask for stripes
+
+                            if (colors && colors.length > 0) {
+                                const stripeWidth = side / colors.length;
+                                for (let i = 0; i < colors.length; i++) {
+                                    ctx.fillStyle = colors[i];
+                                    ctx.fillRect(rx + (i * stripeWidth), ry, stripeWidth + 1, side);
+                                }
+                            } else {
+                                ctx.fillStyle = baseColor;
+                                ctx.fillRect(rx, ry, side, side);
+                            }
+                            ctx.restore();
+                        } else if (iconStyle === 'Diamond') {
+                            // Geometry: Four points touching the exact edge of the dotRadius ring
+                            ctx.save();
+                            ctx.beginPath();
+                            ctx.moveTo(cx, cy - dotRadius); // Top
+                            ctx.lineTo(cx + dotRadius, cy); // Right
+                            ctx.lineTo(cx, cy + dotRadius); // Bottom
+                            ctx.lineTo(cx - dotRadius, cy); // Left
+                            ctx.closePath();
+                            ctx.clip(); // Mask for stripes
+
+                            if (colors && colors.length > 0) {
+                                const bboxWidth = dotRadius * 2;
+                                const rx = cx - dotRadius;
+                                const ry = cy - dotRadius;
+                                const stripeWidth = bboxWidth / colors.length;
+                                for (let i = 0; i < colors.length; i++) {
+                                    ctx.fillStyle = colors[i];
+                                    ctx.fillRect(rx + (i * stripeWidth), ry, stripeWidth + 1, bboxWidth);
+                                }
+                            } else {
+                                ctx.fillStyle = baseColor;
+                                ctx.fill();
+                            }
+                            ctx.restore();
+                        } else if (iconStyle === 'Asteroid Grid') {
+                            // 3-4-3 Structured Hex Grid Pattern
+                            const gridPositions = [
+                                { dx: -5, dy: -4.5 }, { dx: 0, dy: -4.5 }, { dx: 5, dy: -4.5 },         // Top 3
+                                { dx: -7.5, dy: 0 }, { dx: -2.5, dy: 0 }, { dx: 2.5, dy: 0 }, { dx: 7.5, dy: 0 }, // Middle 4
+                                { dx: -5, dy: 4.5 }, { dx: 0, dy: 4.5 }, { dx: 5, dy: 4.5 }           // Bottom 3
+                            ];
+                            
+                            gridPositions.forEach((p, index) => {
                                 ctx.beginPath();
-
-                                // Align the ring's center path EXACTLY with the dot's edge.
-                                ctx.arc(cx, cy, dotRadius, 0, 2 * Math.PI);
-
-                                ctx.strokeStyle = custom.ringColor;
-
-                                // NEW LOGIC: Scale thickness proportionally to the dot size, 
-                                // rather than forcing a fixed screen thickness with '/ zoom'.
-                                // This ensures the ring shrinks perfectly alongside the planet.
-                                ctx.lineWidth = dotRadius * 0.3;
-
-                                ctx.stroke();
+                                ctx.arc(cx + p.dx, cy + p.dy, 1.8, 0, 2 * Math.PI);
+                                
+                                // Magic Multi-Color Cycling
+                                let dotColor = primary;
+                                if (colors && colors.length > 0) {
+                                    dotColor = colors[index % colors.length]; 
+                                }
+                                
+                                ctx.fillStyle = dotColor;
+                                ctx.fill();
                                 ctx.closePath();
-                                ctx.restore();
+                            });
+                        } else if (iconStyle === 'Classic') {
+                            if (colors && colors.length > 0) {
+                                const sliceAngle = (2 * Math.PI) / colors.length;
+                                for (let i = 0; i < colors.length; i++) {
+                                    const startAngle = i * sliceAngle;
+                                    const endAngle = (i + 1) * sliceAngle;
+                                    ctx.beginPath();
+                                    ctx.moveTo(cx, cy);
+                                    ctx.arc(cx, cy, dotRadius, startAngle, endAngle);
+                                    ctx.closePath();
+                                    ctx.fillStyle = colors[i];
+                                    ctx.fill();
+                                }
+                            } else {
+                                // No rules: Solid Dot
+                                ctx.beginPath();
+                                ctx.arc(cx, cy, dotRadius, 0, 2 * Math.PI);
+                                ctx.fillStyle = baseColor;
+                                ctx.fill();
+                                ctx.closePath();
                             }
+                        } else if (iconStyle === 'Refined') {
+                            // Glow Sphere
+                            ctx.save();
+                            const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, dotRadius + 8);
+                            grad.addColorStop(0, primary);
+                            grad.addColorStop(0.3, primary);
+                            grad.addColorStop(1, 'transparent');
+                            ctx.fillStyle = grad;
+                            ctx.beginPath();
+                            ctx.arc(cx, cy, dotRadius + 8, 0, 2 * Math.PI);
+                            ctx.fill();
+                            // White core for systems
+                            ctx.beginPath();
+                            ctx.arc(cx, cy, dotRadius * 0.4, 0, 2 * Math.PI);
+                            ctx.fillStyle = '#ffffff'; 
+                            ctx.fill();
+                            ctx.restore();
+                        } else if (iconStyle === 'Minimal') {
+                            // Crosshair
+                            ctx.save();
+                            ctx.strokeStyle = primary;
+                            ctx.lineWidth = 1.5 / zoom;
+                            ctx.beginPath();
+                            const l = dotRadius + 5;
+                            ctx.moveTo(cx - l, cy); ctx.lineTo(cx + l, cy);
+                            ctx.moveTo(cx, cy - l); ctx.lineTo(cx, cy + l);
+                            ctx.stroke();
+                            ctx.beginPath();
+                            ctx.arc(cx, cy, dotRadius * 0.5, 0, 2 * Math.PI);
+                            ctx.strokeStyle = primary;
+                            ctx.stroke();
+                            ctx.restore();
+                        }
+
+                        // --- Draw the Ring (Applies to any shape) ---
+                        if (custom.ringColor) {
+                            ctx.save();
+                            ctx.beginPath();
+
+                            // Align the ring's center path EXACTLY with the dot's edge.
+                            ctx.arc(cx, cy, dotRadius, 0, 2 * Math.PI);
+
+                            ctx.strokeStyle = custom.ringColor;
+
+                            // NEW LOGIC: Scale thickness proportionally to the dot size, 
+                            // rather than forcing a fixed screen thickness with '/ zoom'.
+                            // This ensures the ring shrinks perfectly alongside the planet.
+                            ctx.lineWidth = dotRadius * 0.3;
+
+                            ctx.stroke();
+                            ctx.closePath();
+                            ctx.restore();
                         }
 
                         // 4. UWP string — just below dot

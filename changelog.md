@@ -1,12 +1,18 @@
 # Changelog
 
 
+### [v0.5.7.2] - 2026-03-29
+1. **System**: Implemented **multi-color cycling** for Asteroid Belt clusters, allowing visual representation of multiple matching rules across individual rocks.
+2. **Filter**: Integrated "Asteroid Belt" into the choice of Icon Styles and established a new **default rule** that automatically applies the belt icon to all Size 0 worlds.
+3. **UI**: Expanded the Filter Engine suite with four new icon styles (**Square, Diamond, Rounded Rectangle, and Asteroid Grid**), each featuring stripe-based multi-color support and ring-boundary safety.
+
 ### [v0.5.7.1] - 2026-03-29
 1. **System**: Added a global setting to customize the default color of planetary bodies on the hex map.
 2. **UI**: Refactored the filter interface into a persistent accordion layout, enabling simultaneous access to both filter settings and the active rules ledger.
 3. **UI**: Extended filter styling options to include advanced typography (Italics and Underlining).
 4. **UI**: Added a "Hide systems without worlds" toggle to the settings panel to declutter the map.
 5. **Bug Fix**: Resolved an issue where active filter rules were not automatically triggered upon sector load or import.
+
 
 ### [v0.5.7] - 2026-03-28
 1. **UI**: Added multiple color support to filter rules.

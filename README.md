@@ -1,4 +1,4 @@
-# As Above, So Below (v0.5.7.2)
+# As Above, So Below (v0.5.7.3)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -36,6 +36,14 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 6. **Filter Control:** Use the **F Key** to **Open Filter Window** for advanced filtering and custom styling rules.
 ---
 ## 📜 Changelog
+
+### [v0.5.7.3] - 2026-03-30
+1. **Renderer**: Implemented logic to differentiate Gas Giant icons based on the main world's status as a planet or moon.
+2. **Renderer**: Optimized icon sizing and map placement to improve the clarity of jump routes and prevent asset overlap.
+3. **Renderer**: Implemented deterministic Gas Giant variant selection (Ringed vs. Solid) based on system hex-seed.
+4. **Classic Traveller**: Resolved a bug affecting Gas Giant presence in system generation.
+5. **Classic Traveller**: Fixed a bug in Gas Giant orbital slot allocation.
+6. **UI**: Resolved a bug where the RTT System secondary window remained open after closing the hex editor.
 
 ### [v0.5.7.2] - 2026-03-29
 1. **System**: Implemented **multi-color cycling** for Asteroid Belt clusters, allowing visual representation of multiple matching rules across individual rocks.

@@ -29,6 +29,11 @@
 }(typeof self !== 'undefined' ? self : this, function (StellarEngine, WorldEngine, SocioEngine, Auditor) {
     'use strict';
 
+    if (!StellarEngine || !WorldEngine || !SocioEngine) {
+        console.error("MgT2EBottomUpGenerator DI Failure: Critical engines missing!", { StellarEngine, WorldEngine, SocioEngine });
+    }
+
+
     /**
      * Main MgT2E Bottom-Up Generation Orchestrator.
      * Executes the complete pipeline for system generation.
@@ -67,21 +72,25 @@
         };
 
         // 1. Generate stellar system (Primary + companions)
+        if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 1: Stellar Generation...`);
         if (StellarEngine && StellarEngine.generateStellarSystem) {
             StellarEngine.generateStellarSystem(sys, hexId);
         }
 
         // 2. Generate system inventory (GG count, belts, terrestrials)
+        if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 1: Inventory... (Terrestrials: ${sys.terrestrialPlanets})`);
         if (StellarEngine && StellarEngine.generateSystemInventory) {
             StellarEngine.generateSystemInventory(sys);
         }
 
         // 3. Allocate Orbits (Places skeleton bodies into orbits)
+        if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 1: Allocation... (Total Worlds: ${sys.totalWorlds})`);
         if (StellarEngine && StellarEngine.allocateOrbits) {
             StellarEngine.allocateOrbits(sys);
         }
 
         // 4. Initial Physical Sizing (Size, Mass, Gravity)
+        if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 1: Physics... (Found ${sys.worlds.length} worlds)`);
         if (WorldEngine && WorldEngine.generatePhysicals) {
             WorldEngine.generatePhysicals(sys);
         }
@@ -91,6 +100,23 @@
         // =================================================================
         
         tSection('Phase 2: Candidate Fleshing');
+        
+        // --- SEAN PROTOCOL: Candidate Expansion ---
+        // We must flatten nested moons into the candidate pool so they can be considered for Mainworld status.
+        let candidatesToAdd = [];
+        sys.worlds.forEach(w => {
+            if (w.moons && w.moons.length > 0) {
+                w.moons.forEach(m => {
+                    if (m.type === 'Satellite') {
+                        m.isMoon = true;
+                        m.isSatellite = true;
+                        m.parentType = w.type;
+                        m.isMoonOfGG = (w.type === 'Gas Giant');
+                        candidatesToAdd.push(m);
+                    }
+                });
+            }
+        });
 
         // Step A: Identification of candidates for Mainworld eligibility
         let candidates = sys.worlds.filter(w => 
@@ -99,8 +125,11 @@
             w.type === 'Planetoid Belt'
         );
 
+        if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 2: Found ${candidates.length} top-level candidates and ${candidatesToAdd.length} moons.`);
+
         if (WorldEngine) {
             // Generate atmospherics for candidates (restricted to targetWorlds)
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 2: Generating Atmospherics...`);
             if (WorldEngine.generateAtmospherics) {
                 WorldEngine.generateAtmospherics(sys, { 
                     targetWorlds: candidates, 
@@ -109,6 +138,7 @@
             }
 
             // Generate rotational dynamics for candidates
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 2: Generating Rotational...`);
             if (WorldEngine.generateRotationalDynamics) {
                 WorldEngine.generateRotationalDynamics(sys, { 
                     targetWorlds: candidates, 
@@ -117,6 +147,7 @@
             }
 
             // Generate biospherics for candidates
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 2: Generating Biospherics...`);
             if (WorldEngine.generateBiospherics) {
                 WorldEngine.generateBiospherics(sys, { 
                     targetWorlds: candidates, 
@@ -129,14 +160,28 @@
             // =================================================================
             
             tSection('Phase 3: Mainworld Selection');
+            
+            // SEAN PROTOCOL: Inject moons into the candidate pool for Mainworld consideration
+            // This happens *after* physics generation to preserve engine iteration constraints
+            candidates = candidates.concat(candidatesToAdd);
+            
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 3: Selection from ${candidates.length} candidates...`);
             let mainworld = WorldEngine.evaluateMainworldCandidates(candidates);
 
             if (mainworld) {
                 mainworld.type = 'Mainworld';
                 sys.mainworld = mainworld;
+                
+                // SEAN PROTOCOL: Moon-Mainworld Selection Logging
+                if (mainworld.isMoon) {
+                    tResult('Mainworld Status', 'LUNAR SELECTION');
+                    writeLogLine(`[MAINWORLD LOG] Hex ${sys.hexId}: Mainworld is a MOON at Orbit ${mainworld.orbitId.toFixed(2)}`);
+                }
+
                 tResult('Winning Mainworld', `${mainworld.name || 'Body'} at Orbit ${mainworld.orbitId.toFixed(2)} [Score: ${mainworld.habitability}]`);
             } else {
                 tResult('Winning Mainworld', 'None');
+                if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 3 ERROR: No winning mainworld elected!`);
             }
         }
 
@@ -173,11 +218,13 @@
         
         if (SocioEngine) {
             // 1. Generate Mainworld social baseline (UWP) from its physicals
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 5: Socio baseline...`);
             if (sys.mainworld && SocioEngine.generateMainworldUWP) {
                 SocioEngine.generateMainworldUWP(hexId, sys.mainworld);
             }
 
             // 2. Generate/Refresh core social for all worlds (Mainworld + Subordinates)
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 5: Core Social...`);
             if (SocioEngine.generateCoreSocial) {
                 SocioEngine.generateCoreSocial(sys, sys.mainworld);
             }
@@ -185,6 +232,7 @@
             // Extended Socioeconomics
             // Only generate extended socioeconomic details if there are people
             if (sys.mainworld && sys.mainworld.pop > 0) {
+                if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 5: Extended Socio...`);
                 if (SocioEngine.generateExtendedSocioeconomics) {
                     SocioEngine.generateExtendedSocioeconomics(sys, sys.mainworld);
                 }
@@ -195,6 +243,7 @@
             }
 
             // Finalize Subordinate Social
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 5: Finalizing Subordinates...`);
             if (SocioEngine.finalizeSubordinateSocial) {
                 SocioEngine.finalizeSubordinateSocial(sys, sys.mainworld);
             }
@@ -212,6 +261,7 @@
         // =================================================================
         
         // Final name check
+        if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 7: Naming...`);
         sys.worlds.forEach(w => {
             if (!w.name) {
                 w.name = (typeof getNextSystemName === 'function') ? getNextSystemName(hexId) : 'Unnamed';

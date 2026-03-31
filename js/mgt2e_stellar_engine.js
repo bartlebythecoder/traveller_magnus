@@ -255,13 +255,14 @@
      * Step 1: Primary Star & System Age
      * Step 2: Additional Stars
      */
-    function generateStellarSystem(sys, hexId, mainworldBase = null) {
+    function generateStellarSystem(sys, hexId, mainworldBase) {
+        if (!sys.worlds) sys.worlds = [];
+        sys.stars = [];
         if (window.isLoggingEnabled) {
             startTrace(hexId, 'MgT2E Stellar Generation');
         }
         reseedForHex(hexId);
 
-        sys.stars = [];
         sys.age = 0;
         sys.hzco = 0;
 
@@ -295,7 +296,7 @@
         } else {
             primary = rollStar('Primary');
         }
-        
+
         primary.role = 'Primary';
         primary.separation = null;
         primary.orbitId = null;
@@ -347,14 +348,14 @@
                 let sClass = sStr.split(' ')[1] || 'V';
                 if (sType === 'D') { sClass = 'D'; subType = 0; }
                 if (typeStr === 'BD') { sType = 'BD'; sClass = 'V'; subType = 0; }
-                
+
                 let repRole = i === 1 ? 'Close' : (i === 2 ? 'Near' : 'Far');
                 let star = generateStarObject(sType, subType, sClass, repRole);
                 star.separation = repRole;
                 star.role = repRole;
                 star.parentStarIdx = 0;
                 // mock orbits for overrides based on standard ranges
-                star.orbitId = i === 1 ? 0.5 : (i === 2 ? 6.0 : 12.0); 
+                star.orbitId = i === 1 ? 0.5 : (i === 2 ? 6.0 : 12.0);
                 star.eccentricity = 0;
                 star.mao = getMAO(star.sType, star.subType, star.sClass);
                 sys.stars.push(star);
@@ -419,12 +420,13 @@
     function generateSystemInventory(sys, mainworldBase) {
         tSection('System Inventory');
 
-        // Gas Giants
+        // Gas Giants - WBH Adjustment: 83% presence (9-) to satisfy the 15-20% Lunar Mainworld statistical requirement
         let ggRoll = tRoll2D('Gas Giant Presence (<= 9)');
         let ggExists = ggRoll <= 9 || (mainworldBase && mainworldBase.gasGiant);
         if (ggExists) {
             let ggQ = tRoll2D('GG Quantity');
-            if (sys.stars.length === 1 && sys.stars[0].sClass === 'V') { tDM('Single V', 1); ggQ += 1; }
+            // WBH Math: Systems usually have 3+ GGs if they exist
+            if (sys.stars.length === 1 && sys.stars[0].sClass === 'V') { tDM('Single V', 2); ggQ += 2; }
             if (sys.stars.length >= 4) { tDM('4+ Stars', -1); ggQ -= 1; }
 
             for (let entry of MgT2EData.systemInventory.gasGiants) {
@@ -537,7 +539,7 @@
         let eRoll = tRoll2D('Empty Orbits (10+)');
         let emptyCount = eRoll <= 9 ? 0 : (eRoll - 9);
         let totalSlotsCount = sys.totalWorlds + emptyCount;
-        let targetIdx = Math.max(0, Math.min(totalSlotsCount - 1, Math.round(baselineOrbit) - 1));
+        let targetIdx = Math.max(0, Math.min(totalSlotsCount - 1, Math.round(baselineOrbit)));
 
         let spread = (sys.baselineOrbit - primaryMao) / Math.max(1, targetIdx);
         let maxSpread = (20.0 - primaryMao) / (totalSlotsCount + sys.stars.length);
@@ -562,30 +564,171 @@
         }
 
         // 4. World Queue & Placement
+        // WBH Step 8 Order: Mainworld, Empty, Gas Giants, Planetoid Belts, Terrestrials
+        // WBH Step 8 Placement Order (STRICT SEQUENCE): 
+        // 1. Mainworld (Anchor)
+        // 2. Empty Orbits (Obstacles for following worlds)
+        // 3. Gas Giants (Dynamic Colliders)
+        // 4. Planetoid Belts
+        // 5. Terrestrial Planets
+
         let queue = [];
         if (mainworldBase) {
-            // Top-Down: Explicitly place the Mainworld first
-            queue.push({ type: 'Mainworld', size: mainworldBase.size || 7 });
-            // Add remaining terrestrials
-            for (let i = 0; i < (sys.terrestrialPlanets - 1); i++) {
-                queue.push({ type: 'Terrestrial Planet' });
-            }
-        } else {
-            // Bottom-Up: No Mainworld yet, all terrestrials start as Terrestrial Planet
-            for (let i = 0; i < sys.terrestrialPlanets; i++) {
-                queue.push({ type: 'Terrestrial Planet' });
+            const isPreMoon = mainworldBase.isMoon || (mainworldBase.tradeCodes && mainworldBase.tradeCodes.includes('Sa'));
+            if (isPreMoon) {
+                if (sys.gasGiants === 0) {
+                    sys.gasGiants = 1;
+                    tResult('WBH Consistency', 'Forced Gas Giant presence for pre-existing Mainworld moon');
+                }
+                queue.push({ type: 'Mainworld', size: mainworldBase.size || 7, isAnchor: true, isPreMoon: true });
+            } else {
+                queue.push({ type: 'Mainworld', size: mainworldBase.size || 7, isAnchor: true });
             }
         }
         for (let i = 0; i < emptyCount; i++) queue.push({ type: 'Empty' });
         for (let i = 0; i < sys.gasGiants; i++) queue.push({ type: 'Gas Giant' });
         for (let i = 0; i < sys.planetoidBelts; i++) queue.push({ type: 'Planetoid Belt' });
 
-        for (let wInfo of queue) {
-            let startIdx = (wInfo.type === 'Mainworld') ? targetIdx : Math.floor(rng() * slots.length);
-            for (let j = 0; j < slots.length; j++) {
-                let idx = (startIdx + j) % slots.length;
-                if (!slots[idx].occupant) {
-                    let s = slots[idx];
+        let terrToPlace = mainworldBase ? (sys.terrestrialPlanets - 1) : sys.terrestrialPlanets;
+        for (let i = 0; i < terrToPlace; i++) {
+            queue.push({ type: 'Terrestrial Planet' });
+        }
+        let mainworldDone = false;
+        let mainworldDemoted = false; // Separate flag: only true after the demotion fires, not on normal placement
+
+        // WBH Step 8: Placing Worlds (Refactored for Sliding Collisions)
+        while (queue.length > 0) {
+            let wInfo = queue.shift();
+
+            // Sean Protocol: Prevent duplicate Mainworld placement if already demoted via anchor collision
+            if (wInfo.type === 'Mainworld' && mainworldDone) {
+                if (window.isLoggingEnabled) writeLogLine(`[WBH SKIP] Skipping ${wInfo.type} as it was demoted to a moon earlier in the sequence.`);
+                continue;
+            }
+
+            let startIdx = (wInfo.type === 'Mainworld' && wInfo.isAnchor) ? targetIdx : Math.floor(rng() * slots.length);
+
+            if (window.isLoggingEnabled) {
+                writeLogLine(`[WBH PROBE] Placing ${wInfo.type}. Picking Slot ${startIdx}/${slots.length} (TargetHW: ${targetIdx})`);
+            }
+
+            let landed = false;
+            let currentIdx = startIdx;
+            let attempts = 0;
+
+            // WBH While-Loop: Sequential Search & Collision Trap
+            while (!landed && attempts < slots.length) {
+                let s = slots[currentIdx];
+
+                // 1. WBH ANCHOR EXCEPTION (The Trap)
+                // If the slot is the Mainworld's Anchor index, we MUST trigger the demotion rule (Item 4).
+                // Guard: only fires ONCE. After the first demotion, subsequent bodies at targetIdx use
+                // normal bumping — without this guard, GG2/GG3 wrongly get isLunarMainworld=true.
+                if (mainworldBase && currentIdx === targetIdx && wInfo.type !== 'Mainworld' && !mainworldDemoted) {
+                    // Logic: GG always overlaps Mainworld. Belt overlaps Size 1 Mainworld.
+                    let shouldOverlap = (wInfo.type === 'Gas Giant') || (wInfo.type === 'Planetoid Belt' && (mainworldBase.size || 7) === 1);
+
+                    if (mainworldBase.isPreMoon && wInfo.type === 'Gas Giant') shouldOverlap = true;
+
+                    if (shouldOverlap) {
+                        tResult('WBH Overlap Exception', `${wInfo.type} collided with Mainworld Anchor at Slot ${currentIdx}`);
+                        if (window.isLoggingEnabled) writeLogLine(`[WBH COLLISION] ${wInfo.type} reached Mainworld Anchor at Slot ${currentIdx}. Demoting.`);
+
+
+                        // WBH Item 4: Find the actual Mainworld object to demote
+                        let oldMW = sys.worlds.find(w => w.type === 'Mainworld') || s.occupant;
+                        if (!oldMW) {
+                            // Fallback in case MW was not yet pushed to worlds array
+                            oldMW = { 
+                                type: 'Mainworld', 
+                                isAnchor: true,
+                                name: mainworldBase.name,
+                                uwp: mainworldBase.uwp,
+                                uwpSecondary: mainworldBase.uwpSecondary,
+                                starport: mainworldBase.starport,
+                                travelZone: mainworldBase.travelZone,
+                                tradeCodes: mainworldBase.tradeCodes,
+                                size: (mainworldBase.size !== undefined) ? mainworldBase.size : 7,
+                                atm: mainworldBase.atm,
+                                hydro: mainworldBase.hydro,
+                                pop: mainworldBase.pop,
+                                gov: mainworldBase.gov,
+                                law: mainworldBase.law,
+                                tl: mainworldBase.tl,
+                                hexId: mainworldBase.hexId || sys.hexId
+                            };
+                        }
+                        // Set PG presence/count to survive UI serialisation
+                        oldMW.isMoon = true;
+                        oldMW.isSatellite = true;
+                        oldMW.isLunarMainworld = true;
+                        oldMW.orbitId = s.orbitId;
+
+                        // Sync trade codes: 'Sa' (Satellite) is required when mainworld is demoted to a lunar orbit.
+                        // The socio engine adds 'Sa' only if isMoon is true at generation time — but isMoon is set here,
+                        // after generation. Sync it now to keep the auditor's verifyTradeCodes check consistent.
+                        if (oldMW.tradeCodes) {
+                            if (!oldMW.tradeCodes.includes('Sa')) oldMW.tradeCodes.push('Sa');
+                        } else {
+                            oldMW.tradeCodes = ['Sa'];
+                        }
+                        
+                        if (wInfo.type === 'Gas Giant') {
+                            oldMW.parentType = 'Gas Giant';
+                            oldMW.parentId = (sys.hexId || 'System') + "-GG-" + s.id;
+                        } else if (wInfo.type === 'Planetoid Belt') {
+                            oldMW.parentType = 'Planetoid Belt';
+                            oldMW.parentId = (sys.hexId || 'System') + "-BELT-" + s.id;
+                        } else {
+                            oldMW.parentType = 'Terrestrial';
+                            oldMW.parentId = (sys.hexId || 'System') + "-PLANET-" + s.id;
+                        }
+
+
+                        oldMW.pd = 10.0 + (rng() * 5.0);
+                        oldMW.pos = 'Middle';
+                        oldMW.retrograde = false;
+
+                        let newPrimary = {
+                            ...wInfo,
+                            orbitId: s.orbitId,
+                            au: oldMW.au,
+                            parentStarIdx: s.parentStarIdx,
+                            orbitType: s.type,
+                            eccentricity: s.eccentricity,
+                            moons: (wInfo.moons || []).concat([oldMW])
+                        };
+
+                        // Capture the placeholder 'world' previously placed at this anchor slot
+                        // before we overwrite s.occupant. This placeholder has type='Mainworld' but
+                        // is a ghost — it must be purged from sys.worlds to avoid duplicate Mainworlds.
+                        let slotPlaceholder = s.occupant;
+
+                        s.occupant = newPrimary;
+                        
+                        // WBH Fix: Remove original MW from the top-level list to prevent duplication.
+                        // Also remove the placeholder that was placed at this anchor slot in the
+                        // standard occupancy pass — it is a ghost Mainworld that causes:
+                        //   1. The auditor to find 2 Mainworlds and fail strict validation
+                        //   2. findMainworld() to return the wrong object (breaking the hex editor highlight)
+                        sys.worlds = sys.worlds.filter(w => w !== oldMW && w !== slotPlaceholder);
+                        sys.worlds.push(newPrimary);
+                        mainworldDone = true;
+                        mainworldDemoted = true;
+
+                        // WBH Item 4: Add replacement Terrestrial to fill the gap (Sequential Expansion)
+                        queue.push({ type: 'Terrestrial Planet' });
+                        tResult('Replacement Rule', 'Added Terrestrial Planet to queue');
+
+                        landed = true;
+                        break;
+                    }
+                }
+
+                // 2. STANDARD OCCUPANCY CHECK (Empty Slot)
+                if (!s.occupant) {
+                    if (window.isLoggingEnabled) writeLogLine(`[WBH LANDING] ${wInfo.type} claimed Orbit ${s.orbitId.toFixed(2)} at Slot ${currentIdx}.`);
+
                     let world = {
                         ...wInfo,
                         orbitId: s.orbitId,
@@ -604,10 +747,38 @@
                         orbitType: s.type,
                         eccentricity: s.eccentricity
                     };
+
+                    // Sean Protocol: Propagate Mainworld data from mainworldBase if this is the Mainworld
+                    if (wInfo.type === 'Mainworld' && mainworldBase) {
+                        world.name = mainworldBase.name;
+                        world.uwp = mainworldBase.uwp;
+                        world.uwpSecondary = mainworldBase.uwpSecondary;
+                        world.starport = mainworldBase.starport;
+                        world.travelZone = mainworldBase.travelZone;
+                        world.tradeCodes = mainworldBase.tradeCodes;
+                        world.pop = mainworldBase.pop;
+                        world.gov = mainworldBase.gov;
+                        world.law = mainworldBase.law;
+                        world.tl = mainworldBase.tl;
+                        world.hexId = mainworldBase.hexId || sys.hexId;
+                        mainworldDone = true;
+                    }
+
                     s.occupant = world;
                     sys.worlds.push(world);
+                    landed = true;
                     break;
                 }
+
+
+                // 3. WBH BUMPING (Index + 1 with Wrap-Around)
+                if (window.isLoggingEnabled) writeLogLine(`[WBH BUMP] Slot ${currentIdx} occupied. Sliding to next orbit.`);
+                currentIdx = (currentIdx + 1) % slots.length;
+                attempts++;
+            }
+
+            if (!landed && window.isLoggingEnabled) {
+                writeLogLine(`[WBH WARNING] Could not place ${wInfo.type} - system full!`);
             }
         }
         sys.worlds.sort((a, b) => a.orbitId - b.orbitId);

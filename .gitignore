@@ -19,6 +19,10 @@ venv/
 dist/
 build/
 
+# Node / npm (installed by tooling, not needed for browser app)
+node_modules/
+package-lock.json
+
 # OS
 .DS_Store
 Thumbs.db

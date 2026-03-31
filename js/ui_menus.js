@@ -14,6 +14,11 @@ function setupContextMenu() {
             hexStates.set(hexId, { type: 'EMPTY' });
         });
         document.getElementById('context-menu').classList.remove('visible');
+        
+        // Sean Protocol: Sync Rule Engine and Filters
+        if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+        if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
+
         selectedHexes.clear();
         requestAnimationFrame(draw);
     });
@@ -25,6 +30,11 @@ function setupContextMenu() {
             hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
         });
         document.getElementById('context-menu').classList.remove('visible');
+        
+        // Sean Protocol: Sync Rule Engine and Filters
+        if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+        if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
+
         selectedHexes.clear();
         requestAnimationFrame(draw);
     });
@@ -37,8 +47,13 @@ function setupContextMenu() {
             removeRoutesForHex(hexId);
         });
         document.getElementById('context-menu').classList.remove('visible');
-        selectedHexes.clear();
+        
+        // Sean Protocol: Sync Rule Engine and Filters
+        if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+        if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
+
         showToast(`Cleared ${selectedHexes.size} hex(es) and connected routes.`, 2000);
+        selectedHexes.clear();
         requestAnimationFrame(draw);
     });
 
@@ -96,6 +111,11 @@ function setupGenerationHandlers() {
         document.getElementById('context-menu').classList.remove('visible');
         if (count > 0) {
             showToast(`Generated Classic Traveller Mainworlds for ${count} hex(es)`);
+            
+            // Sean Protocol: Sync Rule Engine and Filters with new data
+            if (typeof writeLogLine === 'function') writeLogLine(`Refreshing rules for ${count} newly generated systems.`);
+            if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+            if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
         } else {
             showToast("No populated hexes selected");
         }
@@ -157,6 +177,11 @@ function setupGenerationHandlers() {
         document.getElementById('context-menu').classList.remove('visible');
         if (count > 0) {
             showToast(`Generated MgT2E Mainworlds for ${count} hex(es)`);
+            
+            // Sean Protocol: Sync Rule Engine and Filters with new data
+            if (typeof writeLogLine === 'function') writeLogLine(`Refreshing rules for ${count} newly generated systems.`);
+            if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+            if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
         } else {
             showToast("No populated hexes selected");
         }
@@ -202,6 +227,11 @@ function setupGenerationHandlers() {
         document.getElementById('context-menu').classList.remove('visible');
         if (count > 0) {
             showToast(`Generated T5 Mainworlds for ${count} hex(es)`);
+            
+            // Sean Protocol: Sync Rule Engine and Filters with new data
+            if (typeof writeLogLine === 'function') writeLogLine(`Refreshing rules for ${count} newly generated systems.`);
+            if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+            if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
         } else {
             showToast("No populated hexes selected");
         }
@@ -245,6 +275,12 @@ function setupGenerationHandlers() {
 
         document.getElementById('context-menu').classList.remove('visible');
         showToast(`Expanded T5 Socioeconomics for ${selectedHexes.size} hex(es)`);
+
+        // Sean Protocol: Sync Rule Engine and Filters with updated socio data
+        if (typeof writeLogLine === 'function') writeLogLine(`Refreshing rules for ${selectedHexes.size} updated systems (Socio Expansion).`);
+        if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+        if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
+
         selectedHexes.clear();
         requestAnimationFrame(draw);
     });
@@ -266,8 +302,25 @@ function setupGenerationHandlers() {
                 // 1. Generate the full system deterministically to guarantee all social profiles exist
                 let newSys = generateMgT2ESystemTopDown(hexId, baseData);
 
-                // 2. Find the mainworld to map the socio data
-                let mainworld = newSys.worlds.find(w => w.type === 'Mainworld') || newSys.worlds[0];
+                // 2. Find the mainworld to map the socio data (Recursive to handle Lunar Mainworlds)
+                let mainworld = null;
+                const findMW = (wList) => {
+                    for (let w of wList) {
+                        if (w.type === 'Mainworld' || w.isLunarMainworld) { mainworld = w; return true; }
+                        if (w.moons && findMW(w.moons)) return true;
+                    }
+                    return false;
+                };
+                findMW(newSys.worlds);
+                if (!mainworld) mainworld = newSys.worlds[0];
+
+                // Sean Protocol: Propagate gasGiant flag to Lunar Mainworlds so the renderer
+                // can display the ringed GG icon correctly from stateObj.mgt2eData.
+                if (mainworld && mainworld.isLunarMainworld) {
+                    mainworld.gasGiant = newSys.gasGiants > 0;
+                } else if (mainworld) {
+                    mainworld.gasGiant = mainworld.gasGiant || (newSys.gasGiants > 0);
+                }
 
                 // 3. Map the data back to stateObj
                 stateObj.mgtSystem = newSys; // Keep physical data in sync
@@ -293,6 +346,12 @@ function setupGenerationHandlers() {
 
         document.getElementById('context-menu').classList.remove('visible');
         showToast(`Expanded MgT2E Socioeconomics for ${selectedHexes.size} hex(es)`);
+        
+        // Sean Protocol: Sync Rule Engine and Filters with updated socio data
+        if (typeof writeLogLine === 'function') writeLogLine(`Refreshing rules for ${selectedHexes.size} updated systems (Socio Expansion).`);
+        if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+        if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
+
         selectedHexes.clear();
         requestAnimationFrame(draw);
     });
@@ -310,7 +369,25 @@ function setupGenerationHandlers() {
                 if (typeof expandLoadedSocioeconomicsMgT2E === 'function') {
                     let newSys = expandLoadedSocioeconomicsMgT2E(hexId, stateObj);
                     if (newSys) {
-                        let mainworld = newSys.worlds.find(w => w.type === 'Mainworld') || newSys.worlds[0];
+                        let mainworld = null;
+                        const findMW = (wList) => {
+                            for (let w of wList) {
+                                if (w.type === 'Mainworld' || w.isLunarMainworld) { mainworld = w; return true; }
+                                if (w.moons && findMW(w.moons)) return true;
+                            }
+                            return false;
+                        };
+                        findMW(newSys.worlds);
+                        if (!mainworld) mainworld = newSys.worlds[0];
+
+                        // Sean Protocol: Propagate gasGiant flag to Lunar Mainworlds.
+                        // The renderer reads stateObj.mgt2eData for the ringed GG icon.
+                        if (mainworld && mainworld.isLunarMainworld) {
+                            mainworld.gasGiant = newSys.gasGiants > 0;
+                        } else if (mainworld) {
+                            mainworld.gasGiant = mainworld.gasGiant || (newSys.gasGiants > 0);
+                        }
+
                         stateObj.mgtSystem = newSys;
                         stateObj.mgt2eData = mainworld;
                         stateObj.mgtSocio = mainworld;
@@ -334,6 +411,12 @@ function setupGenerationHandlers() {
 
         document.getElementById('context-menu').classList.remove('visible');
         showToast(`[DEV] Expanded Socioeconomics for ${selectedHexes.size} hex(es) (No Regen)`);
+        
+        // Sean Protocol: Sync Rule Engine and Filters with updated socio data
+        if (typeof writeLogLine === 'function') writeLogLine(`Refreshing rules for ${selectedHexes.size} updated systems (Socio Expansion).`);
+        if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+        if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
+
         selectedHexes.clear();
         requestAnimationFrame(draw);
 
@@ -386,6 +469,12 @@ function setupGenerationHandlers() {
 
         document.getElementById('context-menu').classList.remove('visible');
         showToast(`Expanded CT System for ${selectedHexes.size} hex(es)`);
+        
+        // Sean Protocol: Sync Rule Engine and Filters with updated physical data
+        if (typeof writeLogLine === 'function') writeLogLine(`Refreshing rules for ${selectedHexes.size} updated systems (Physical Expansion).`);
+        if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+        if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
+
         selectedHexes.clear();
         requestAnimationFrame(draw);
     });
@@ -408,8 +497,32 @@ function setupGenerationHandlers() {
                 // 2. Map the data back to stateObj
                 stateObj.mgtSystem = newSys;
 
-                // Find the mainworld to map the UWP
-                let mainworld = newSys.worlds.find(w => w.type === 'Mainworld') || newSys.worlds[0];
+                // Find the mainworld to map the UWP (Recursive to handle Lunar Mainworlds)
+                let mainworld = null;
+                const findMW = (wList) => {
+                    for (let w of wList) {
+                        if (w.type === 'Mainworld' || w.isLunarMainworld) { mainworld = w; return true; }
+                        if (w.moons && findMW(w.moons)) return true;
+                    }
+                    return false;
+                };
+                findMW(newSys.worlds);
+                if (!mainworld) mainworld = newSys.worlds[0];
+
+                // Sean Protocol: Propagate gasGiant flag to Lunar Mainworlds.
+                // The renderer reads stateObj.mgt2eData for the ringed GG icon check.
+                // If the mainworld is a moon, it lives inside a parent Gas Giant but
+                // the gasGiant flag is only on that parent object. We surface it here.
+                if (mainworld && mainworld.isLunarMainworld) {
+                    mainworld.gasGiant = newSys.gasGiants > 0;
+                    if (window.isLoggingEnabled && typeof writeLogLine === 'function') {
+                        writeLogLine(`[EXPAND MW] Hex ${hexId}: Lunar Mainworld detected. Propagating gasGiant=${mainworld.gasGiant} flag to UI state.`);
+                    }
+                } else if (mainworld) {
+                    // Standard mainworld: gasGiant flag from sys-level count
+                    mainworld.gasGiant = mainworld.gasGiant || (newSys.gasGiants > 0);
+                }
+                
                 stateObj.mgt2eData = mainworld;
 
                 // 3. Clear UI ghosting variables
@@ -432,6 +545,12 @@ function setupGenerationHandlers() {
 
         document.getElementById('context-menu').classList.remove('visible');
         showToast(`Expanded MgT2E Physical system for ${selectedHexes.size} hex(es)`);
+        
+        // Sean Protocol: Sync Rule Engine and Filters with updated physical data
+        if (typeof writeLogLine === 'function') writeLogLine(`Refreshing rules for ${selectedHexes.size} updated systems (Physical Expansion).`);
+        if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+        if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
+
         selectedHexes.clear();
         requestAnimationFrame(draw);
     });
@@ -478,6 +597,12 @@ function setupGenerationHandlers() {
 
         document.getElementById('context-menu').classList.remove('visible');
         showToast(`Expanded T5 Physical system for ${selectedHexes.size} hex(es)`);
+        
+        // Sean Protocol: Sync Rule Engine and Filters with updated physical data
+        if (typeof writeLogLine === 'function') writeLogLine(`Refreshing rules for ${selectedHexes.size} updated systems (Physical Expansion).`);
+        if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+        if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
+
         selectedHexes.clear();
         requestAnimationFrame(draw);
     });

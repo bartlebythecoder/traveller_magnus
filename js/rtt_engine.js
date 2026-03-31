@@ -1502,6 +1502,7 @@ function assignRTTTradeCodes(body, dominantTL) {
     if (a >= 2 && h >= 10 && h <= 11) codes.push('Wa');
     if (a === 0) codes.push('Va');
     if (b >= 7) codes.push('Zo');
+    if (body.isMoon || body.isSatellite || body.type === 'Satellite' || (body.parentType === 'Gas Giant' || body.parentBody === 'Gas Giant')) codes.push('Sa');
 
     body.tradeCodes = codes;
 }
@@ -1709,6 +1710,12 @@ function extractRTTMainworld(sys) {
 
     // Tag the body so the UI accordion knows this is the system's Mainworld
     bestWorld.isMainworld = true;
+
+    // SEAN PROTOCOL: Moon-Mainworld Selection Logging
+    if (bestWorld.isSatellite) {
+        tResult('Mainworld Status', 'LUNAR SELECTION');
+        writeLogLine(`[MAINWORLD LOG] Hex ${sys.hexId}: Mainworld is a MOON at Orbit ${bestWorld.orbitNumber}`);
+    }
 
     let port = bestWorld.starport || 'X';
     let size = getEHexLetter(bestWorld.size);

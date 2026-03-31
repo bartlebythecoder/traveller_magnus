@@ -45,6 +45,12 @@
      * @returns {Array} Array of trade code strings
      */
     function calculateMgT2ETradeCodes(w) {
+        if (w.isRuin) {
+            tSection('Trade Classifications (Ruin Override)');
+            tTrade('Ba', 'World is a Ruin (Floor > MW TL)');
+            tResult('Final Trade Codes', 'Ba');
+            return ['Ba'];
+        }
         const codes = [];
         const data = MgT2EData.tradeCodes;
         const atm = w.atmCode !== undefined ? w.atmCode : (w.atm !== undefined ? w.atm : 0);
@@ -137,6 +143,9 @@
         const inAtmRange = cWa.atmRanges.some(r => atm >= r[0] && atm <= r[1]);
         check('Wa', inAtmRange && hydro >= cWa.minHydro, `Atm ${cWa.atmRanges.map(r => r.join('-')).join('/')}, Hyd ${cWa.minHydro}+`);
 
+        // Sa: Satellite (Sean Protocol: Moon-Mainworld Sync)
+        check('Sa', w.isMoon || w.isSatellite || w.type === 'Satellite' || (w.parentType === 'Gas Giant' || w.parentBody === 'Gas Giant'), "World is a moon/satellite");
+
         if (codes.length === 0) tResult('Trade Codes', 'None');
         else tResult('Final Trade Codes', codes.join(' '));
 
@@ -151,7 +160,34 @@
     function generateSubordinateSocial(body, mainworld) {
         if (!body || !mainworld) return;
         
-        tSection(`Subordinate Social: ${body.name || body.type}`);
+        tSection(`Subordinate Physical/Social: ${body.name || body.type}`);
+
+        // 0. Environmental Pass (MgT2E Rule Zero: Fill if missing)
+        if (body.size === undefined) {
+            body.size = Math.max(0, tRoll1D('Size (1D-3)') - 3);
+            tResult('Size', body.size);
+        }
+        if (body.atmCode === undefined) {
+            if (body.size === 0) {
+                body.atmCode = 0;
+            } else {
+                let aRoll = tRoll2D('Atmosphere (2D-7+Size)');
+                body.atmCode = Math.max(0, aRoll - 7 + body.size);
+            }
+            body.atm = body.atmCode;
+            tResult('Atmosphere', body.atmCode);
+        }
+        if (body.hydroCode === undefined) {
+            if (body.size <= 1 || body.atmCode <= 1 || body.atmCode >= 10) {
+                body.hydroCode = 0;
+            } else {
+                let hRoll = tRoll2D('Hydrographics (2D-7+Size)');
+                body.hydroCode = Math.max(0, hRoll - 7 + (body.atmCode <= 1 ? -10 : 0) + body.size);
+                // Note: simplified hydro roll for subordinates
+            }
+            body.hydro = body.hydroCode;
+            tResult('Hydrographics', body.hydroCode);
+        }
 
         // 1. Population
         tSection('Population');
@@ -233,27 +269,31 @@
         }
         body.law = Math.max(0, Math.min(18, body.law));
 
-        // 4. Spaceport
-        tSection('Spaceport');
-        let spDM = 0;
-        if (body.pop >= 6) { tDM('Pop 6+', 2); spDM += 2; }
-        if (body.pop === 1) { tDM('Pop 1', -1); spDM -= 1; }
-        if (body.pop === 0) { tDM('Pop 0', -3); spDM -= 3; }
-
-        let spRoll = tRoll1D('Spaceport Class');
-        let spTotal = spRoll + spDM;
-
-        if (spTotal <= 2) body.starport = 'Y';
-        else if (spTotal === 3) body.starport = 'H';
-        else if (spTotal <= 5) body.starport = 'G';
-        else body.starport = 'F';
-        tResult('Spaceport Class', body.starport);
+        // 4. Starport (MgT2E Subordinate Standard: E or X)
+        tSection('Starport');
+        let spRoll = tRoll1D('Starport Presence (5+)');
+        if (spRoll >= 5 || body.pop >= 6) {
+            body.starport = 'E';
+            tResult('Starport Class', 'E (Minor Frontier Port)');
+        } else {
+            body.starport = 'X';
+            tResult('Starport Class', 'X (No Starport)');
+        }
 
         // 5. Tech Level
         tSection('Tech Level');
-        if (body.pop > 0) {
+        const floor = getMgT2EMinSusTL(body.atmCode);
+
+        if (floor > mainworld.tl) {
+            tSection('Ruin Reclassification');
+            tResult('Tech Level Status', 'Uninhabited/Ruin (Floor > Mainworld TL)');
+            body.pop = 0;
+            body.gov = 0;
+            body.law = 0;
+            body.tl = 0;
+            body.isRuin = true;
+        } else if (body.pop > 0) {
             // WBH Guidelines: Baseline is direct derivation (max(MW-1, Floor))
-            const floor = getMgT2EMinSusTL(body.atmCode || 0);
             const baseline = Math.max(0, mainworld.tl - 1);
             body.tl = Math.max(baseline, floor);
             
@@ -277,17 +317,73 @@
      */
     function syncUWP(body) {
         if (!body) return;
+        
+        // Ensure starport is valid MgT2E code (A-X)
+        const sp = body.starport || 'X';
         const cSize = clampUWP(body.size || 0, 0, 15);
-        const cAtm = clampUWP(body.atmCode || 0, 0, 17);
-        const cHydro = clampUWP(body.hydroCode || 0, 0, 10);
+        const cAtm = clampUWP(body.atmCode !== undefined ? body.atmCode : (body.atm || 0), 0, 17);
+        const cHydro = clampUWP(body.hydroCode !== undefined ? body.hydroCode : (body.hydro || 0), 0, 10);
         const cPop = clampUWP(body.pop || 0, 0, 15);
         const cGov = clampUWP(body.gov || 0, 0, 15);
         const cLaw = clampUWP(body.law || 0, 0, 15);
         const cTl = clampUWP(body.tl || 0, 0, 33);
 
-        const uwp = `${body.starport || 'X'}${toUWPChar(cSize)}${toUWPChar(cAtm)}${toUWPChar(cHydro)}${toUWPChar(cPop)}${toUWPChar(cGov)}${toUWPChar(cLaw)}-${toUWPChar(cTl)}`;
+        // Core component persistence (Critical for Hex Editor)
+        body.starport = sp;
+        body.size = cSize;
+        body.atmCode = cAtm;
+        body.atm = cAtm;
+        body.hydroCode = cHydro;
+        body.hydro = cHydro;
+        body.popCode = cPop;
+        body.pop = cPop;
+        body.govCode = cGov;
+        body.gov = cGov;
+        body.lawCode = cLaw;
+        body.law = cLaw;
+        body.tlCode = cTl;
+        body.tl = cTl;
+
+        const uwp = `${sp}${toUWPChar(cSize)}${toUWPChar(cAtm)}${toUWPChar(cHydro)}${toUWPChar(cPop)}${toUWPChar(cGov)}${toUWPChar(cLaw)}-${toUWPChar(cTl)}`;
         body.uwp = uwp;
         body.uwpSecondary = uwp;
+    }
+
+    /**
+     * Refreshes a body's social stats (UWP, trade codes, bases) using the provided mainworld baseline.
+     * This is critical for ensuring demoted Mainworlds (moons) maintain their correct identity.
+     */
+    function refreshMainworldSocialInPlace(w, mainworldBase) {
+        if (!w || !mainworldBase) return;
+        
+        tSection(`Mainworld Social Refresher (Orbit ${w.orbitId !== undefined ? w.orbitId.toFixed(2) : 'Unassigned'})`);
+        w.name = mainworldBase.name || (typeof getNextSystemName === 'function' ? getNextSystemName(w.hexId) : 'Unnamed');
+        
+        // Refresh core stats
+        w.size = mainworldBase.size;
+        w.atmCode = w.atmCode !== undefined ? w.atmCode : mainworldBase.atm;
+        w.hydroCode = w.hydroCode !== undefined ? w.hydroCode : mainworldBase.hydro;
+        w.pop = mainworldBase.pop !== undefined ? mainworldBase.pop : 0;
+        w.gov = mainworldBase.gov !== undefined ? mainworldBase.gov : 0;
+        w.law = mainworldBase.law !== undefined ? mainworldBase.law : 0;
+        w.tl = mainworldBase.tl !== undefined ? mainworldBase.tl : 0;
+        w.starport = mainworldBase.starport || (w.starport || 'X');
+
+        syncUWP(w); 
+
+        // Apply trade codes (recognizing its status)
+        w.tradeCodes = calculateMgT2ETradeCodes(w);
+
+        w.navalBase = mainworldBase.navalBase;
+        w.scoutBase = mainworldBase.scoutBase;
+        w.militaryBase = mainworldBase.militaryBase;
+        w.corsairBase = mainworldBase.corsairBase;
+        
+        w.gasGiant = w.gasGiant || mainworldBase.gasGiant; 
+        w.travelZone = mainworldBase.travelZone || "Green";
+        
+        tResult('Mainworld UWP Refreshed', w.uwp);
+        tResult('Trade Codes Refreshed', w.tradeCodes.join(' '));
     }
 
     // =====================================================================
@@ -308,53 +404,43 @@
         for (let i = 0; i < sys.worlds.length; i++) {
             let w = sys.worlds[i];
             
-            if (w.type === 'Empty' || w.type === 'Planetoid Belt' || w.type === 'Gas Giant') {
-                continue;
-            }
-
-            let isMainworld = (w.type === 'Mainworld');
-            
-            if (isMainworld && mainworldBase) {
-                // Transfer mainworld context
-                tSection(`Mainworld Social (Orbit ${w.orbitId !== undefined ? w.orbitId.toFixed(2) : 'Unassigned'})`);
-                w.name = mainworldBase.name || (typeof getNextSystemName === 'function' ? getNextSystemName(w.hexId || sys.hexId) : 'Unnamed');
-                
-                // Refresh core stats in case Phase 5 (Environmental) modified them
-                w.size = mainworldBase.size;
-                w.atmCode = w.atmCode !== undefined ? w.atmCode : mainworldBase.atm;
-                w.hydroCode = w.hydroCode !== undefined ? w.hydroCode : mainworldBase.hydro;
-                w.pop = mainworldBase.pop;
-                w.gov = mainworldBase.gov;
-                w.law = mainworldBase.law;
-                w.tl = mainworldBase.tl;
-                w.starport = mainworldBase.starport;
-
-                // Sync UWP string to reflect any Phase 5 atmospheric flips
-                syncUWP(w); 
-
-                // Recalculate trade codes to reflect current physical state (e.g. Garden compatibility)
-                w.tradeCodes = calculateMgT2ETradeCodes(w);
-
-                w.navalBase = mainworldBase.navalBase;
-                w.scoutBase = mainworldBase.scoutBase;
-                w.militaryBase = mainworldBase.militaryBase;
-                w.corsairBase = mainworldBase.corsairBase;
-                w.gasGiant = mainworldBase.gasGiant;
-                w.travelZone = mainworldBase.travelZone || "Green";
-                
-                tResult('Mainworld UWP Refreshed', w.uwp);
-                tResult('Mainworld Trade Codes Refreshed', w.tradeCodes.join(' '));
-            } else {
-                // Generate subordinate world social
-                generateSubordinateSocial(w, mainworldBase);
-            }
-
-            // Process moons
+            // WBH SEAN PROTOCOL: Process moons FIRST before any continue checks on the parent.
+            // This ensures demoted Mainworlds orbiting Gas Giants receive full social generation.
             let moons = w.moons || [];
             for (let j = 0; j < moons.length; j++) {
                 let m = moons[j];
-                if (m.type === 'Empty' || m.type === 'Gas Giant') continue;
-                generateSubordinateSocial(m, mainworldBase);
+                // WBH Logic: If a moon is the Mainworld, we MUST refresh it as the Mainworld
+                if (m.type === 'Mainworld' || m.targetWorld === 'Mainworld' || m.isLunarMainworld) {
+                    refreshMainworldSocialInPlace(m, mainworldBase);
+                } else {
+                    // Generate subordinate world social
+                    generateSubordinateSocial(m, mainworldBase);
+                }
+            }
+
+            // Skip logic: Only skip empty/giants if they are NOT the Mainworld or a demoted Mainworld.
+            const isAnyMainworld = (w.type === 'Mainworld' || w.targetWorld === 'Mainworld' || w.isLunarMainworld);
+            if (!isAnyMainworld && (w.type === 'Empty' || w.type === 'Planetoid Belt' || w.type === 'Gas Giant')) {
+                continue;
+            }
+
+            if (w.type === 'Mainworld') {
+                refreshMainworldSocialInPlace(w, mainworldBase);
+                // Action 4.4: Gas Giant Trace Logging (Selection Process)
+                if (w.gasGiant && window.isLoggingEnabled) {
+                    let ggVariant = 'SOLID';
+                    let reason = 'Default (Solid)';
+                    if (w.tradeCodes && w.tradeCodes.includes('Sa')) {
+                        ggVariant = 'RINGED';
+                        reason = "Condition 1: 'Sa' trade code present";
+                    } else if (w.isMoon || w.isSatellite) {
+                        ggVariant = 'RINGED';
+                        reason = "Condition 2: Main world is a moon/satellite";
+                    }
+                    writeLogLine(`[GAS GIANT LOG] Hex ${w.hexId || sys.hexId}: Icon Variant = ${ggVariant} (${reason})`);
+                }
+            } else {
+                generateSubordinateSocial(w, mainworldBase);
             }
         }
 
@@ -378,19 +464,18 @@
     
         // Find the mainworld in the system
         let mainworld = null;
-        for (let w of sys.worlds) {
-            if (w.type === 'Mainworld') {
-                mainworld = w;
-                break;
-            }
-            for (let m of w.moons || []) {
-                if (m.type === 'Mainworld') {
-                    mainworld = m;
-                    break;
+        const findMW = (wList) => {
+            for (let w of wList) {
+                if (w.type === 'Mainworld' || w.isLunarMainworld || w.targetWorld === 'Mainworld') { 
+                    mainworld = w; 
+                    return true; 
                 }
+                if (w.moons && findMW(w.moons)) return true;
+                if (w.significantBodies && findMW(w.significantBodies)) return true;
             }
-            if (mainworld) break;
-        }
+            return false;
+        };
+        findMW(sys.worlds);
         
         // Fallback if Mainworld type identifier is missing or corrupted
         if (!mainworld && sys.worlds.length > 0) {
@@ -1362,11 +1447,8 @@
             case 'C': portMod = 1.0; break;
             case 'D': portMod = 0.8; break;
             case 'E': portMod = 0.5; break;
-            case 'F': portMod = 0.9; break;
-            case 'G': portMod = 0.7; break;
-            case 'H': portMod = 0.4; break;
-            case 'Y': portMod = 0.2; break;
-            case 'X': portMod = 0.2; break;
+            case 'X': 
+            default: portMod = 0.2; break;
         }
         tResult('Starport multiplier', portMod.toFixed(2));
     
@@ -1880,7 +1962,7 @@
 
             // Process moons
             for (let m of w.moons || []) {
-                if (m.type === 'Empty' || m.type === 'Gas Giant') continue;
+                if (m.type === 'Empty' || m.type === 'Gas Giant' || m.isLunarMainworld || m.type === 'Mainworld') continue;
                 processSecondaryClassifications(m, mw, isPoor, isInd, sys);
             }
         }
@@ -1899,7 +1981,7 @@
     function processSecondaryClassifications(body, mw, isPoor, isInd, sys) {
         if (!body.pop || body.pop === 0) return;
 
-        tSection(`Classifications: ${body.name || body.type} Orbit ${body.orbitId.toFixed(2)}`);
+        tSection(`Classifications: ${body.name || body.type} Orbit ${body.orbitId !== undefined ? body.orbitId.toFixed(2) : (body.pd !== undefined ? body.pd.toFixed(1) + 'r' : 'Unknown')}`);
         body.classifications = body.classifications || [];
 
         const diff = body.orbitId !== undefined ? getEffectiveHzcoDeviation(body.orbitId, body.worldHzco || sys.hzco) : 99;

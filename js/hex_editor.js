@@ -306,22 +306,8 @@ function openHexEditor(hexId, e = null) {
 }
 
 function populateEditorAccordions(stateObj) {
-    // 1. Update Mainworld Journey Times Row (which sits above accordions)
-    const mainJourneyTimesDiv = document.getElementById('main-journey-times');
-    const mainJourneyRow = document.getElementById('main-journey-row');
-    if (mainJourneyTimesDiv && mainJourneyRow) {
-        const data = stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData || stateObj.rttData;
-        const star = stateObj.stars ? stateObj.stars[0] : (stateObj.mgtSystem?.stars[0] || stateObj.ctSystem?.stars[0] || stateObj.t5System?.stars[0]);
-        const starObj = { diam: getSafeStarDiameter(star) };
-
-        if (data && star) {
-            const journeyHTML = buildJourneyTimesUI(data, starObj, stateObj.isStellarMaskingActive);
-            mainJourneyTimesDiv.innerHTML = journeyHTML;
-            mainJourneyRow.style.display = journeyHTML ? 'block' : 'none';
-        } else {
-            mainJourneyRow.style.display = 'none';
-        }
-    }
+    // Note: Mainworld Journey Times row removed from top display as per user request to reduce clutter.
+    // Jump times are now only displayed within the expanded system tree accordions.
 
     // 2. MgT2E Socioeconomics
     if (stateObj.mgtSocio) {
@@ -472,12 +458,13 @@ function populateEditorAccordions(stateObj) {
                     if (worldParent !== starIdx || w.type === 'Empty') return;
 
                     let mwBase = stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData;
-                    let uwp = w.type === 'Mainworld' ? (mwBase ? mwBase.uwp : '-') : (w.uwpSecondary || '-');
-                    let labelColor = w.type === 'Mainworld' ? '#ffa500' : '#66fcf1';
-                    let summaryStyle = w.type === 'Mainworld' ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
+                    let isMainworldEntry = w.type === 'Mainworld' || w.isLunarMainworld;
+                    let uwp = isMainworldEntry ? (mwBase ? mwBase.uwp : '-') : (w.uwpSecondary || '-');
+                    let labelColor = isMainworldEntry ? '#ffa500' : '#66fcf1';
+                    let summaryStyle = isMainworldEntry ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
 
                     let zoneLabel = '';
-                    if (w.type === 'Mainworld' && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                    if (isMainworldEntry && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
                         const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
                         zoneLabel = ` | <span style="color: ${zColor}">${mwBase.travelZone}</span>`;
                     }
@@ -555,8 +542,8 @@ function populateEditorAccordions(stateObj) {
                         html += `<span>Tidal Amp: <strong>${(w.totalTidalAmplitude || 0).toFixed(2)}</strong></span>`;
                     }
 
-                    if (w.type === 'Terrestrial Planet' || w.type === 'Mainworld') {
-                        if (w.type === 'Mainworld' && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                    if (w.type === 'Terrestrial Planet' || isMainworldEntry) {
+                        if (isMainworldEntry && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
                             const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
                             html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor};">Caution: ${mwBase.travelZone} Zone</div>`;
                         }
@@ -597,9 +584,10 @@ function populateEditorAccordions(stateObj) {
                     if (subBodies.length > 0) {
                         subBodies.forEach((m, midx) => {
                             let isSigBody = m.type === 'Planetoid Belt Body';
-                            let mUwp = m.uwpSecondary || '-';
-                            let mLabelColor = m.type === 'Mainworld' ? '#ffa500' : '#66fcf1';
-                            let mSummaryStyle = m.type === 'Mainworld' ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
+                            let isMoonMainworld = m.type === 'Mainworld' || m.isLunarMainworld;
+                            let mUwp = isMoonMainworld ? (m.uwp || m.uwpSecondary || mwBase?.uwp || '-') : (m.uwpSecondary || '-');
+                            let mLabelColor = isMoonMainworld ? '#ffa500' : '#66fcf1';
+                            let mSummaryStyle = isMoonMainworld ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
 
                             let titlePrefix = isSigBody ? 'Sig Body' : 'Moon';
 
@@ -1242,6 +1230,8 @@ function closeHexEditor() {
     document.getElementById('acc-btn-t5-system').style.display = 'none';
     document.getElementById('acc-btn-t5-system').classList.remove('active');
 
+    document.getElementById('editor-rtt-system-root').style.display = 'none';
+    document.getElementById('editor-rtt-system-root').innerHTML = '';
     document.getElementById('acc-btn-rtt-system').style.display = 'none';
     document.getElementById('acc-btn-rtt-system').classList.remove('active');
 
@@ -1437,6 +1427,10 @@ function saveHexEditorChanges() {
     hexStates.set(editingHexId, stateObj);
 
     requestAnimationFrame(draw);
+    
+    // Sean Protocol: Sync Rule Engine and Filters with modified world data
+    if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+    if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
 
     // Refresh the UI to reflect changes (and Keep Window Open as requested)
     populateEditorAccordions(stateObj);

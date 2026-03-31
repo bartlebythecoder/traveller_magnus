@@ -304,9 +304,8 @@
             if (match) codes.push(tc.code);
         });
 
-        // 2. Situational / Relative Codes 
         // (These remain hardcoded as they depend on the world's physical relationship to the system)
-        if (world.worldType === 'Far Satellite') codes.push("Sa");
+        if (world.worldType === 'Far Satellite' || world.isMoon || world.isSatellite || world.type === 'Satellite') codes.push("Sa");
         if (world.worldType === 'Close Satellite' || world.isTidallyLocked) codes.push("Lk");
 
         // Travel Zone Specials

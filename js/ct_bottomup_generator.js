@@ -243,6 +243,7 @@ function generateSystemSkeleton() {
     if (rollSkeleton) {
         const skeleton = rollSkeleton(sys.stars[0]);
         if (skeleton) {
+            sys.gasGiant = skeleton.ggs.length > 0;
             // A. Captured Planets
             sys.capturedPlanets = skeleton.capturedPlanets.map(cap => ({
                 ...cap,
@@ -258,15 +259,12 @@ function generateSystemSkeleton() {
                 }
             });
 
-            // C. Gas Giants (Priority O, then H)
-            const ggPriorities = placementPriorities.GAS_GIANT || ['O', 'H'];
+            // C. Gas Giants (Normalized H/O Priority)
+            const eligibleSlots = sys.orbits.filter(o => ['H', 'O'].includes(o.zone) && !o.contents);
             skeleton.ggs.forEach(gg => {
-                let slot = null;
-                for (const p of ggPriorities) {
-                    slot = sys.orbits.find(o => o.zone === p && !o.contents);
-                    if (slot) break;
-                }
-                if (slot) {
+                if (eligibleSlots.length > 0) {
+                    const index = Math.floor(Math.random() * eligibleSlots.length);
+                    const slot = eligibleSlots.splice(index, 1)[0];
                     slot.contents = { 
                         type: 'Gas Giant', 
                         size: gg.size,
@@ -277,14 +275,31 @@ function generateSystemSkeleton() {
                 }
             });
 
-            // D. Planetoid Belts (Priority I, then H, then O)
-            const pbPriorities = placementPriorities.PLANETOID_BELT || ['I', 'H', 'O'];
+            // D. Planetoid Belts (Tiered Proximity Rule)
+            const ggInOrbits = sys.orbits.filter(o => o.contents && o.contents.type === 'Gas Giant').map(o => o.orbit);
+            
+            // Tier 1: Proximity Slots - Exactly one orbit inside a Gas Giant
+            let proximitySlots = sys.orbits.filter(o => {
+                const isEligible = ['I', 'H', 'O'].includes(o.zone) && !o.contents;
+                return isEligible && ggInOrbits.includes(o.orbit + 1);
+            });
+
+            // Tier 2: General Slots - All other eligible slots (I, H, O are equal)
+            let generalSlots = sys.orbits.filter(o => {
+                const isEligible = ['I', 'H', 'O'].includes(o.zone) && !o.contents;
+                return isEligible && !proximitySlots.some(p => p.orbit === o.orbit);
+            });
+
             for (let i = 0; i < skeleton.belts; i++) {
                 let slot = null;
-                for (const p of pbPriorities) {
-                    slot = sys.orbits.find(o => o.zone === p && !o.contents);
-                    if (slot) break;
+                if (proximitySlots.length > 0) {
+                    const idx = Math.floor(Math.random() * proximitySlots.length);
+                    slot = proximitySlots.splice(idx, 1)[0];
+                } else if (generalSlots.length > 0) {
+                    const idx = Math.floor(Math.random() * generalSlots.length);
+                    slot = generalSlots.splice(idx, 1)[0];
                 }
+
                 if (slot) {
                     slot.contents = { type: 'Planetoid Belt', size: 0, gravity: 0, temperature: 100 };
                     tResult(`Orbit ${slot.orbit}`, 'Planetoid Belt');
@@ -762,8 +777,17 @@ function processBottomUpDesignation(sys) {
         // Role Designation
         winner.type = 'Mainworld';
         
+        // SEAN PROTOCOL: Moon-Mainworld Selection Logging
+        if (winner.isMoon || winner.isSatellite) {
+            tResult('Mainworld Status', 'LUNAR SELECTION');
+            writeLogLine(`[MAINWORLD LOG] Hex ${sys.hexId}: Mainworld is a MOON at Orbit ${winner.orbit}`);
+        }
+
         // Generate Social (Starport, Gov, Law, TL, Trade)
         if (socialGen) socialGen(winner);
+
+        // Map Gas Giant presence from system to mainworld for UI renderer
+        winner.gasGiant = sys.gasGiant;
         
         tResult('Final Mainworld UWP', winner.uwp);
     } else {

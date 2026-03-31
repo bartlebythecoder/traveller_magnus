@@ -550,38 +550,48 @@ function draw() {
                             }
                             
                             ctx.textBaseline = 'top';
-                        }
+                                             // ---- Symbols (relative to dot center) (Sean Protocol: GUI Optimization) ----
+                        // ---- Symbols (relative to dot center) (Sean Protocol: GUI Optimization) ----
+                        const symOffset = dotRadius + GUI_CONFIG.OFFSETS.SYM_GAP;
 
-                        // ---- Symbols (relative to dot center) ----
-
-                        const symOffset = dotRadius + 6;
-
-                        // 6. Gas Giant — Saturn ring to the RIGHT of dot
+                        // 6. Gas Giant — Optimized Positioning & Variant Selection
                         if (data.gasGiant) {
-                            const gx = cx + symOffset + 8;
-                            const gy = cy;
-                            const gr = 5;
+                            const gx = cx + symOffset + GUI_CONFIG.GAS_GIANT.X_OFFSET;
+                            const gy = cy + GUI_CONFIG.GAS_GIANT.Y_OFFSET;
+                            const gr = GUI_CONFIG.GAS_GIANT.RADIUS;
+                            
+                            // Variant Selection Logic (Sean Protocol: Data-Driven)
+                            let ggVariant = 'SOLID';
+                            
+                            // Condition 1: 'Sa' (Satellite/Ring) trade code is present
+                            if (data.tradeCodes && data.tradeCodes.includes('Sa')) {
+                                ggVariant = 'RINGED';
+                            }
+
                             ctx.beginPath();
                             ctx.arc(gx, gy, gr, 0, 2 * Math.PI);
                             ctx.fillStyle = pTextColor;
                             ctx.fill();
-                            // Ring (ellipse drawn as scaled arc)
-                            ctx.save();
-                            ctx.translate(gx, gy);
-                            ctx.scale(1.8, 0.55);
-                            ctx.beginPath();
-                            ctx.arc(0, 0, gr + 2, 0, 2 * Math.PI);
-                            ctx.strokeStyle = pTextColor;
-                            ctx.lineWidth = 1.2 / zoom;
-                            ctx.stroke();
-                            ctx.restore();
+                            
+                            if (ggVariant === 'RINGED') {
+                                // Ring (ellipse drawn as scaled arc)
+                                ctx.save();
+                                ctx.translate(gx, gy);
+                                ctx.scale(GUI_CONFIG.GAS_GIANT.RING_SCALE_X, GUI_CONFIG.GAS_GIANT.RING_SCALE_Y);
+                                ctx.beginPath();
+                                ctx.arc(0, 0, gr + 2, 0, 2 * Math.PI);
+                                ctx.strokeStyle = pTextColor;
+                                ctx.lineWidth = GUI_CONFIG.GAS_GIANT.RING_WIDTH / zoom;
+                                ctx.stroke();
+                                ctx.restore();
+                            }
                         }
 
                         // 7. Scout Base — filled triangle BOTTOM-LEFT of dot
                         if (data.scoutBase) {
-                            const tx = cx - symOffset - 2;
-                            const ty = cy + symOffset * 0.3;
-                            const ts = 7;
+                            const tx = cx - symOffset + GUI_CONFIG.OFFSETS.BASE_X_ADJ;
+                            const ty = cy + symOffset * GUI_CONFIG.OFFSETS.SCOUT_Y_FACTOR;
+                            const ts = GUI_CONFIG.BASE_ICONS.RADIUS;
                             ctx.beginPath();
                             ctx.moveTo(tx, ty - ts);
                             ctx.lineTo(tx + ts, ty + ts * 0.6);
@@ -593,9 +603,9 @@ function draw() {
 
                         // 8. Naval Base — 6-point star TOP-LEFT of dot
                         if (data.navalBase) {
-                            const sx = cx - symOffset - 2;
-                            const sy = cy - symOffset * 0.5;
-                            const sr = 7;
+                            const sx = cx - symOffset + GUI_CONFIG.OFFSETS.BASE_X_ADJ;
+                            const sy = cy - symOffset * GUI_CONFIG.OFFSETS.NAVAL_Y_FACTOR;
+                            const sr = GUI_CONFIG.BASE_ICONS.RADIUS;
                             const sir = sr * 0.45;
                             const pts = 6;
                             ctx.beginPath();
@@ -610,6 +620,7 @@ function draw() {
                             ctx.fillStyle = pTextColor;
                             ctx.fill();
                         }
+           }
                     } else {
                         // No data yet — use global baseline dot color
                         ctx.beginPath();

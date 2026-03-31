@@ -22,12 +22,16 @@ function validateSelection(actionType, skipPopCheck = false) {
     // New logic: Check for at least one populated hex if we are updating existing systems
     if (!skipPopCheck && (actionType === 'generate' || actionType === 'socio' || actionType === 'physical')) {
         let hasPopulated = false;
+        let popCount = 0;
         for (let hexId of selectedHexes) {
             let state = hexStates.get(hexId);
             if (state && state.type === 'SYSTEM_PRESENT') {
                 hasPopulated = true;
-                break;
+                popCount++;
             }
+        }
+        if (window.isLoggingEnabled) {
+            writeLogLine(`[AUDIT] validateSelection: Checked ${selectedHexes.size} selected hexes. Found ${popCount} populated hexes. hasPopulated=${hasPopulated}`);
         }
         if (!hasPopulated) {
             alert("No populated hexes to update. You must populate hexes first.");
@@ -116,6 +120,12 @@ function autoPopulate(chanceOutOfSix) {
         }
     });
     document.getElementById('context-menu').classList.remove('visible');
+    
+    // Sean Protocol: Sync Rule Engine and Filters with new data
+    if (typeof writeLogLine === 'function') writeLogLine(`Auto-Populate: Refreshing rules for sector.`);
+    if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+    if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
+
     selectedHexes.clear();
     requestAnimationFrame(draw);
 }
@@ -158,6 +168,9 @@ async function runMgT2EMacro(skipPop = false) {
     // Generate Full Systems (Modular Top-Down)
     setTimeout(() => {
         let count = 0;
+        let lunarCount = 0;
+        let populatedTotal = 0;
+
         targetHexes.forEach(hexId => {
             try {
                 let stateObj = hexStates.get(hexId);
@@ -165,13 +178,40 @@ async function runMgT2EMacro(skipPop = false) {
                     // 1. Call the new Orchestrator
                     let newSys = generateMgT2ESystemTopDown(hexId);
 
-                    // 2. Find the Mainworld to map to UI data states
-                    let mainworld = newSys.worlds.find(w => w.type === 'Mainworld') || newSys.worlds[0];
+                    // 2. Find the Mainworld recursively to account for Lunar demotions
+                    let mainworld = null;
+                    const findMW = (wList) => {
+                        for (let w of wList) {
+                            if (w.type === 'Mainworld' || w.isLunarMainworld || w.targetWorld === 'Mainworld') {
+                                mainworld = w;
+                                return true;
+                            }
+                            if (w.moons && w.moons.length > 0) {
+                                if (findMW(w.moons)) return true;
+                            }
+                        }
+                        return false;
+                    };
+                    findMW(newSys.worlds);
+                    
+                    // Critical fallback: if no Mainworld found in tree, use system-level mainworld if defined, else first world
+                    if (!mainworld) mainworld = newSys.mainworld || newSys.worlds[0]; 
 
                     // 3. Map the data back to stateObj so the Hex Editor UI doesn't break
                     stateObj.mgtSystem = newSys;
+                    
+                    // Sean Protocol: Propagate gasGiant flag to Lunar Mainworlds.
+                    // The renderer reads stateObj.mgt2eData for the ringed GG icon.
+                    // Lunar Mainworlds are moons of Gas Giants — the gasGiant flag lives
+                    // on the sys object but must be surfaced to the UI state object.
+                    if (mainworld && mainworld.isLunarMainworld) {
+                        mainworld.gasGiant = newSys.gasGiants > 0;
+                    } else if (mainworld) {
+                        mainworld.gasGiant = mainworld.gasGiant || (newSys.gasGiants > 0);
+                    }
+
                     stateObj.mgt2eData = mainworld;
-                    stateObj.mgtSocio = mainworld; // The new engine puts socio data directly on the world object
+                    stateObj.mgtSocio = mainworld; 
                     stateObj.name = mainworld.name;
 
                     // 4. Clear old variant data to prevent UI ghosting
@@ -181,6 +221,18 @@ async function runMgT2EMacro(skipPop = false) {
                     stateObj.t5System = null;
                     stateObj.ctPhysical = null;
                     stateObj.t5Socio = null;
+
+                    // Action: AUDIT Trace (Verify Presence & Tags)
+                    if (window.isLoggingEnabled) {
+                        let mwInfo = mainworld ? `MW: ${mainworld.name || 'Unnamed'} (Sa: ${mainworld.tradeCodes?.includes('Sa') ? 'YES' : 'NO'})` : "MW NOT FOUND";
+                        let parentInfo = mainworld?.parentType ? `Parent: ${mainworld.parentType}` : "Parent: Parent Star";
+                        writeLogLine(`[WBH AUDIT DETAIL] Hex ${hexId}: ${mwInfo}, ${parentInfo}, Codes: [${mainworld?.tradeCodes?.join(' ')}]`);
+                    }
+
+                    // Check if Lunar Mainworld was found
+                    if (mainworld && (mainworld.isMoon || mainworld.isSatellite || mainworld.tradeCodes?.includes('Sa'))) {
+                        lunarCount++;
+                    }
 
                     hexStates.set(hexId, stateObj);
                     count++;
@@ -195,7 +247,19 @@ async function runMgT2EMacro(skipPop = false) {
         }
         requestAnimationFrame(draw);
         if (count > 0) {
-            showToast(`Full MgT2E Generation Complete! (${count} systems)`, 4000);
+            const lunarPercent = ((lunarCount / count) * 100).toFixed(1);
+            let msg = `Full MgT2E Generation Complete! (${count} systems)`;
+
+            // Sean Protocol: Reporting Detail Decoupled from core success message.
+            // Detailed lunar statistics are only shown when Development View is enabled.
+            if (typeof devView !== 'undefined' && devView) {
+                msg = `Full MgT2E Generation Complete! (${count} systems, ${lunarCount} Lunar Mainworlds: ${lunarPercent}%)`;
+            }
+
+            showToast(msg, 6000);
+            if (window.isLoggingEnabled) {
+                writeLogLine(`[WBH AUDIT] Sector Frequency: ${lunarCount}/${count} (${lunarPercent}%) Lunar Mainworlds generated.`);
+            }
         } else {
             showToast("No populated hexes were updated.", 4000);
         }
@@ -244,18 +308,39 @@ async function runMgT2EBottomUpMacro(skipPop = false) {
         targetHexes.forEach(hexId => {
             try {
                 let stateObj = hexStates.get(hexId);
+                if (window.isLoggingEnabled) {
+                    writeLogLine(`[PROBE] Target Hex ${hexId}: stateObj exists? ${!!stateObj}, type: ${stateObj?.type}`);
+                }
                 if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
                     if (window.isLoggingEnabled && typeof startTrace === 'function') {
                         startTrace(hexId, 'Bottom-Up MgT2E Generation', hexId);
                     }
 
                     if (typeof MgT2EBottomUpGenerator !== 'undefined') {
+                        if (window.isLoggingEnabled) writeLogLine(`[PROBE] Calling MgT2EBottomUpGenerator.generateSystem for ${hexId}...`);
                         const sys = MgT2EBottomUpGenerator.generateSystem(hexId);
+                        if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${hexId} generator returned: ${sys ? 'SYSTEM_OBJECT' : 'NULL'}`);
 
                         // Ensure Mainworld exists and has a name
                         if (sys) {
-                            // Find the Mainworld to map to UI data states (ensures parity with Top-Down flow)
-                            let mainworld = sys.worlds.find(w => w.type === 'Mainworld') || sys.mainworld || sys.worlds[0];
+                            // Find the Mainworld - explicitly check for lunar mainworlds if not at top level
+                            let mainworld = sys.worlds.find(w => w.type === 'Mainworld' || w.isLunarMainworld);
+                            
+                            if (!mainworld) {
+                                // Search moons
+                                for (let w of sys.worlds) {
+                                    if (w.moons) {
+                                        let foundMoon = w.moons.find(m => m.type === 'Mainworld' || m.isLunarMainworld);
+                                        if (foundMoon) {
+                                            mainworld = foundMoon;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            mainworld = mainworld || sys.mainworld || sys.worlds[0];
+                            if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${hexId} mapped mainworld: ${mainworld?.name || 'Unnamed'}`);
 
                             // Map resulting data to stateObj (Sean Protocol: Orchestrator maps generated data to UI state)
                             stateObj.mgtSystem = sys;
@@ -364,15 +449,15 @@ async function runCTNewMacro(skipPop = false) {
                         // Fallback to legacy if world engine is somehow not globally available, though it should be.
                         mwData = generateCTMainworld(hexId);
                     }
-                    stateObj.ctData = mwData;
-
                     // Step B: Modular Expansion (Top-Down)
                     if (window.CT_Generator) {
-                        stateObj.ctSystem = window.CT_Generator.generateSystem({
+                        const sys = window.CT_Generator.generateSystem({
                             mode: 'top-down',
                             mainworldUWP: mwData,
                             hexId: hexId
                         });
+                        stateObj.ctSystem = sys;
+                        stateObj.ctData = sys.mainworld; // Sean Protocol: Map finalized world to UI state
                     }
 
                     // Clean up variants
@@ -389,6 +474,7 @@ async function runCTNewMacro(skipPop = false) {
                 }
             } catch (err) {
                 console.error(`Modular CT Macro failed for hex ${hexId}:`, err);
+                alert(`CT Macro Error for hex ${hexId}:\n${err.message}\nCheck console for full trace.`);
             }
         });
 

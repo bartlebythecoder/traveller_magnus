@@ -1948,6 +1948,29 @@ const CT_CONSTANTS = {
             "NEGATIVE_IS_SMALL": "S"
         },
         "EXCLUSIONS": ["Planetoid Belt", "S", "Ring"]
+    },
+
+    "CT_POPULATION_MODIFIERS": {
+        "BASE_DM": -2,
+        "TERRESTRIAL": {
+            "I": -5,
+            "H": 0,
+            "O": -3
+        },
+        "SATELLITE": {
+            "I": -6,
+            "H": 0,
+            "O": -5,
+            "SIZE_4_OR_LESS": -2
+        },
+        "ATMOSPHERE_PENALTY": {
+            "PENALTY": -2,
+            "VALID_CODES": [0, 5, 6, 8]
+        },
+        "FORCED_ZERO_POP": {
+            "SIZES": ["R"],
+            "TYPES": ["Empty", "Gas Giant", "Nature"]
+        }
     }
 
 }

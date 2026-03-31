@@ -5,10 +5,10 @@
 // It supports both "Continuation" and "Expanded" generation timings.
 
 // Browser-safe imports
-var orbitalAU, luminosityTable, starMassTable, zoneTables, satelliteOrbits, skeletonQuantities, anomalyLogic, bodySizes;
+var orbitalAU, luminosityTable, starMassTable, zoneTables, satelliteOrbits, skeletonQuantities, anomalyLogic, bodySizes, popMods;
 
 if (typeof module !== 'undefined' && module.exports) {
-    const { ORBIT_AU, LUM, STAR_MASS, ZONE_TABLES, SATELLITE_ORBITS, CT_SKELETON_QUANTITIES, CT_ANOMALY_LOGIC, CT_BODY_SIZES } = require('./ct_constants');
+    const { ORBIT_AU, LUM, STAR_MASS, ZONE_TABLES, SATELLITE_ORBITS, CT_SKELETON_QUANTITIES, CT_ANOMALY_LOGIC, CT_BODY_SIZES, CT_POPULATION_MODIFIERS } = require('./ct_constants');
     orbitalAU = ORBIT_AU;
     luminosityTable = LUM;
     starMassTable = STAR_MASS;
@@ -17,6 +17,7 @@ if (typeof module !== 'undefined' && module.exports) {
     skeletonQuantities = CT_SKELETON_QUANTITIES;
     anomalyLogic = CT_ANOMALY_LOGIC;
     bodySizes = CT_BODY_SIZES;
+    popMods = CT_POPULATION_MODIFIERS;
 } else {
     // In browser, these are globals from ct_constants.js
     orbitalAU = typeof ORBIT_AU !== 'undefined' ? ORBIT_AU : [];
@@ -27,6 +28,7 @@ if (typeof module !== 'undefined' && module.exports) {
     skeletonQuantities = typeof CT_SKELETON_QUANTITIES !== 'undefined' ? CT_SKELETON_QUANTITIES : {};
     anomalyLogic = typeof CT_ANOMALY_LOGIC !== 'undefined' ? CT_ANOMALY_LOGIC : {};
     bodySizes = typeof CT_BODY_SIZES !== 'undefined' ? CT_BODY_SIZES : {};
+    popMods = typeof CT_POPULATION_MODIFIERS !== 'undefined' ? CT_POPULATION_MODIFIERS : {};
 }
 
 // Helper: Convert number to UWP Char (0-15 -> 0-F)
@@ -34,6 +36,15 @@ function toUWPChar(val) {
     if (val === undefined || val === null || (typeof val === 'number' && isNaN(val))) return '0';
     if (typeof val === 'string') return val.toUpperCase().substring(0, 1);
     return Math.floor(val).toString(16).toUpperCase();
+}
+
+/**
+ * REUSABLE: GAS GIANT PRESENCE CHECK 
+ * Returns true on 2D <= 9 (Standard Book 3/6)
+ */
+function rollGasGiantPresence() {
+    const roll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Gas Giant Presence Roll') : 7);
+    return roll <= 9;
 }
 
 /**
@@ -106,29 +117,55 @@ function generatePhysicals(body, zone) {
  */
 function generatePopulation(world, ctx = { mode: 'bottomup' }) {
     tSection('Population');
-    if (world.size === 'R' || world.size === 0 || world.type === 'Empty' || world.type === 'Gas Giant') {
+
+    const forcedZeroSizes = (popMods && popMods.FORCED_ZERO_POP) ? popMods.FORCED_ZERO_POP.SIZES : ['R'];
+    const forcedZeroTypes = (popMods && popMods.FORCED_ZERO_POP) ? popMods.FORCED_ZERO_POP.TYPES : ['Gas Giant', 'Empty'];
+
+    if (forcedZeroSizes.includes(world.size) || forcedZeroTypes.includes(world.type)) {
         world.pop = 0;
-        tSkip('Population (Asteroid/Rings/GG/Empty cannot have baseline population)');
+        tSkip(`Population (Body type ${world.type} / Size ${world.size} forces 0 pop)`);
         tResult('Population Code', 0);
         return world;
     }
 
-    tDM('Standard Pop', -2);
-    let popRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Population Roll') : 7) - 2;
+    const baseDM = (popMods) ? popMods.BASE_DM : -2;
+    tDM('Standard Pop', baseDM);
+    let popRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Population Roll') : 7) + baseDM;
 
-    // Location DMs (Book 6 Tables)
-    if (world.type === 'Satellite') {
-        if (world.zone === 'I') { tDM('Zone I (Satellite)', -6); popRoll -= 6; }
-        else if (world.zone === 'O') { tDM('Zone O (Satellite)', -1); popRoll -= 1; }
-    } else { // Terrestrial/Captured
-        if (world.zone === 'I') { tDM('Zone I', -5); popRoll -= 5; }
-        else if (world.zone === 'O') { tDM('Zone O', -3); popRoll -= 3; }
+    // Location DMs (Book 6 Tables from popMods)
+    if (popMods) {
+        const isSat = (world.type === 'Satellite');
+        const mods = isSat ? popMods.SATELLITE : popMods.TERRESTRIAL;
+        const zone = world.zone || 'H';
+        const zoneDM = mods[zone] || 0;
+        
+        if (zoneDM !== 0) {
+            tDM(`Zone ${zone} (${world.type})`, zoneDM);
+            popRoll += zoneDM;
+        }
+
+        // Mistake #2: Satellite/Moon size 4 or less is -2
+        if (isSat) {
+            const numericSize = (typeof world.size === 'number') ? world.size : 0;
+            if (numericSize <= 4) {
+                tDM('Satellite Size <= 4', popMods.SATELLITE.SIZE_4_OR_LESS);
+                popRoll += popMods.SATELLITE.SIZE_4_OR_LESS;
+            }
+        }
     }
 
-    // Atmosphere Penalty: If Atmo is NOT 0, 5, 6, 8, subtract 2.
-    if (![0, 5, 6, 8].includes(world.atm)) {
-        tDM(`Atmosphere ${toUWPChar(world.atm)} Penalty`, -2);
-        popRoll -= 2;
+    // Atmosphere Penalty
+    if (popMods && popMods.ATMOSPHERE_PENALTY) {
+        if (!popMods.ATMOSPHERE_PENALTY.VALID_CODES.includes(world.atm)) {
+            tDM(`Atmosphere ${toUWPChar(world.atm)} Penalty`, popMods.ATMOSPHERE_PENALTY.PENALTY);
+            popRoll -= Math.abs(popMods.ATMOSPHERE_PENALTY.PENALTY);
+        }
+    } else {
+        // Fallback
+        if (![0, 5, 6, 8].includes(world.atm)) {
+            tDM(`Atmosphere ${toUWPChar(world.atm)} Penalty`, -2);
+            popRoll -= 2;
+        }
     }
 
     world.pop = Math.max(0, popRoll);
@@ -154,11 +191,11 @@ function generatePopulation(world, ctx = { mode: 'bottomup' }) {
  */
 function generateModularMainworld(hexId) {
     if (typeof reseedForHex !== 'undefined') reseedForHex(hexId);
-    
+
     let mwName = (typeof getNextSystemName !== 'undefined') ? getNextSystemName(hexId) : 'Unknown';
     if (typeof startTrace !== 'undefined') startTrace(hexId, 'Modular CT Generation', mwName);
 
-    let mw = { 
+    let mw = {
         type: 'Mainworld',
         name: mwName
     };
@@ -189,7 +226,7 @@ function generateModularMainworld(hexId) {
     if (mw.starport === 'A') sbDM = -3;
     else if (mw.starport === 'B') sbDM = -2;
     else if (mw.starport === 'C') sbDM = -1;
-    
+
     if (['A', 'B', 'C', 'D'].includes(mw.starport)) {
         tDM(`Starport ${mw.starport}`, sbDM);
         if ((typeof tRoll2D !== 'undefined' ? tRoll2D('Scout Base Check') : 7) + sbDM >= 7) mw.scoutBase = true;
@@ -199,8 +236,8 @@ function generateModularMainworld(hexId) {
     }
 
     // C. Gas Giant Presence
-    mw.gasGiant = (typeof tRoll2D !== 'undefined' ? tRoll2D('Gas Giant Presence') : 7) >= 10;
-    tResult('Gas Giant Present', mw.gasGiant);
+    mw.gasGiant = rollGasGiantPresence();
+    tResult('Gas Giant Presence', mw.gasGiant);
 
     // D. Physicals -> Physical pass will handle sections
     generatePhysicals(mw, 'H');
@@ -249,7 +286,7 @@ function finalizeMainworldSocial(world) {
     tSection('Technological Level');
     world.tl = calculateTLModular(world, true);
     tResult('Tech Level Code', world.tl);
-    
+
     // Trade Codes
     tSection('Trade Classifications & Zones');
     world.tradeCodes = generateTradeCodes(world);
@@ -267,7 +304,7 @@ function finalizeMainworldSocial(world) {
  */
 function generateSocial(world) {
     tSection('Mainworld Social Generation');
-    
+
     // A. Starport
     tSection('Starport Generation');
     let spRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Mainworld Starport') : 7);
@@ -281,7 +318,7 @@ function generateSocial(world) {
 
     // B. Finalize Social (Gov, Law, TL, Trade)
     finalizeMainworldSocial(world);
-    
+
     return world;
 }
 
@@ -303,6 +340,7 @@ function generateTradeCodes(w) {
     if (atm === 0) codes.push("Va");
     if (size === 0) codes.push("As");
     if ([0, 1].includes(atm) && hydro >= 1) codes.push("Ic");
+    if (w.isMoon || w.isSatellite || w.type === 'Satellite' || (w.parentType === 'Gas Giant' || w.parentBody === 'Gas Giant')) codes.push("Sa");
 
     return codes;
 }
@@ -325,10 +363,10 @@ function finalizeSubordinateSocial(world, mwRef) {
     if (world.pop === 0) {
         world.starport = 'Y';
         world.spaceport = 'Y';
-        world.gov = 0; 
-        world.law = 0; 
+        world.gov = 0;
+        world.law = 0;
         world.tl = 0;
-        
+
         const uwp = `${world.starport || world.spaceport}${toUWPChar(world.size)}${toUWPChar(world.atm)}${toUWPChar(world.hydro)}${toUWPChar(world.pop)}00-0`;
         world.uwp = uwp;
         world.uwpSecondary = uwp;
@@ -365,10 +403,10 @@ function finalizeSubordinateSocial(world, mwRef) {
     else { world.spaceport = 'F'; world.starport = 'F'; }
 
     // TL Baseline (Rule: MW TL - 1, or equal if special facility present)
-    const hasSpecialFacility = (world.militaryBase || world.researchBase || 
-                               (world.facilities && (world.facilities.includes('Research Laboratory') || 
-                                                     world.facilities.includes('Military Base'))));
-    
+    const hasSpecialFacility = (world.militaryBase || world.researchBase ||
+        (world.facilities && (world.facilities.includes('Research Laboratory') ||
+            world.facilities.includes('Military Base'))));
+
     if (hasSpecialFacility) {
         world.tl = mwRef.tl;
         if (typeof tResult !== 'undefined') tResult('TL (Facility Bonus)', world.tl);
@@ -402,9 +440,9 @@ function finalizeSubordinateSocial(world, mwRef) {
 function calculateTLModular(w, isMainworld) {
     let tlBaseRoll = (typeof tRoll1D !== 'undefined' ? tRoll1D('TL Base Roll') : 3);
     let tl = tlBaseRoll;
-    
+
     // Starport
-    const sp = isMainworld ? w.starport : (w.spaceport || 'F'); 
+    const sp = isMainworld ? w.starport : (w.spaceport || 'F');
     if (sp === 'A') { tDM('Starport A', 6); tl += 6; }
     else if (sp === 'B') { tDM('Starport B', 4); tl += 4; }
     else if (sp === 'C') { tDM('Starport C', 2); tl += 2; }
@@ -438,9 +476,7 @@ function calculateTLModular(w, isMainworld) {
  * 5. SYSTEM SKELETON ROLLING
  * Centralized rolling for Gas Giants, Planetoid Belts, and Anomalies.
  */
-function rollSystemSkeleton(primaryStar) {
-    if (!skeletonQuantities || !anomalyLogic) return null;
-
+function rollSystemSkeleton(primaryStar, forcedGGPresence = null) {
     const skeleton = {
         ggs: [],
         belts: 0,
@@ -450,10 +486,21 @@ function rollSystemSkeleton(primaryStar) {
 
     // A. Gas Giants
     tSection('Gas Giant Presence');
-    const ggPresenceRoll = tRoll2D('GG Presence Roll');
-    if (ggPresenceRoll >= skeletonQuantities.GG_PRESENCE_MAX) {
+    let hasGG = false;
+    
+    // Strict boolean check prevents undefined mainworld states from disabling Bottom-Up rolls
+    if (forcedGGPresence === true || forcedGGPresence === false) {
+        hasGG = forcedGGPresence; // Obey Top-Down Mainworld
+        tResult('Gas Giant Presence', hasGG ? 'Forced Present' : 'Forced Absent');
+    } else {
+        hasGG = rollGasGiantPresence();
+        tResult('Gas Giant Presence Check', hasGG ? 'Present (9 or less)' : 'Absent');
+    }
+
+    if (hasGG) {
         const ggQtyRoll = tRoll2D('GG Quantity Roll');
-        const count = skeletonQuantities.GG_QTY[ggQtyRoll] || 0;
+        const ggQtyTable = (skeletonQuantities && skeletonQuantities.GG_QTY) ? skeletonQuantities.GG_QTY : [0, 1, 1, 1, 2, 2, 3, 3, 4, 4, 4, 5, 5];
+        const count = ggQtyTable[ggQtyRoll] || 0;
         tResult('Gas Giants Rolled', count);
         for (let i = 0; i < count; i++) {
             const sizeRoll = tRoll1D(`GG ${i + 1} Size Roll`);
@@ -466,13 +513,18 @@ function rollSystemSkeleton(primaryStar) {
 
     // B. Planetoid Belts
     tSection('Planetoid Belt Presence');
+    const pbThreshold = (skeletonQuantities && typeof skeletonQuantities.PB_PRESENCE_MAX !== 'undefined')
+                        ? skeletonQuantities.PB_PRESENCE_MAX
+                        : 6;
+
     const pbPresenceRoll = tRoll2D('PB Presence Roll');
-    if (pbPresenceRoll >= skeletonQuantities.PB_PRESENCE_MAX) {
+    if (pbPresenceRoll >= pbThreshold) {
         const pbQtyRoll = tRoll2D('PB Quantity Roll');
-        skeleton.belts = skeletonQuantities.PB_QTY[pbQtyRoll] || 0;
-        tResult('Planetoid Belts Rolled', skeleton.belts);
+        const pbQtyTable = (skeletonQuantities && skeletonQuantities.PB_QTY) ? skeletonQuantities.PB_QTY : { "0": 3, "1": 2, "2": 2, "3": 2, "4": 2, "5": 2, "6": 2 };
+        skeleton.belts = (typeof pbQtyTable[pbQtyRoll] !== 'undefined') ? pbQtyTable[pbQtyRoll] : 0;
+        tResult('Planetoid Belts Rolled', `${skeleton.belts} (${pbPresenceRoll} >= ${pbThreshold})`);
     } else {
-        tResult('Planetoid Belts', 'None');
+        tResult('Planetoid Belts', `None (${pbPresenceRoll} < ${pbThreshold})`);
     }
 
     // C. Empty Orbits (Anomaly 1)
@@ -480,10 +532,13 @@ function rollSystemSkeleton(primaryStar) {
     let anomalyDM = (starTypeGroup) ? 1 : 0;
     if (anomalyDM) tDM(`Star Type ${primaryStar.type}`, anomalyDM);
 
+    const emptyThreshold = (anomalyLogic && anomalyLogic.EMPTY) ? anomalyLogic.EMPTY.threshold : 5;
     tSection('Empty Orbits');
-    if (tRoll1D('Empty Orbit Presence Roll') + anomalyDM >= anomalyLogic.EMPTY.threshold) {
+    if (typeof tRoll1D !== 'undefined' && tRoll1D('Empty Orbit Presence Roll') + anomalyDM >= emptyThreshold) {
         const qtyRoll = tRoll1D('Quantity Roll');
-        const qty = anomalyLogic.EMPTY.qty[qtyRoll] || 0;
+        const defaultEmptyQty = [0, 1, 1, 2, 3, 3, 3];
+        const qtyTable = (anomalyLogic && anomalyLogic.EMPTY && anomalyLogic.EMPTY.qty) ? anomalyLogic.EMPTY.qty : defaultEmptyQty;
+        const qty = qtyTable[qtyRoll] || 0;
         tResult('Empty Orbits Rolled', qty);
         for (let i = 0; i < qty; i++) {
             skeleton.emptyOrbits.push(tRoll2D('Empty Orbit Slot Roll'));
@@ -494,9 +549,12 @@ function rollSystemSkeleton(primaryStar) {
 
     // D. Captured Planets (Anomaly 2)
     tSection('Captured Planets');
-    if (tRoll1D('Captured Planet Presence Roll') + anomalyDM >= anomalyLogic.CAPTURED.threshold) {
+    const capThreshold = (anomalyLogic && anomalyLogic.CAPTURED) ? anomalyLogic.CAPTURED.threshold : 5;
+    if (typeof tRoll1D !== 'undefined' && tRoll1D('Captured Planet Presence Roll') + anomalyDM >= capThreshold) {
         const qtyRoll = tRoll1D('Quantity Roll');
-        const qty = anomalyLogic.CAPTURED.qty[qtyRoll] || 0;
+        const defaultCapQty = [0, 1, 1, 2, 2, 3, 3];
+        const qtyTable = (anomalyLogic && anomalyLogic.CAPTURED && anomalyLogic.CAPTURED.qty) ? anomalyLogic.CAPTURED.qty : defaultCapQty;
+        const qty = qtyTable[qtyRoll] || 0;
         tResult('Captured Planets Rolled', qty);
         for (let i = 0; i < qty; i++) {
             const baseline = tRoll2D('Baseline Orbit Roll');
@@ -520,7 +578,8 @@ if (typeof module !== 'undefined' && module.exports) {
         finalizeSubordinateSocial,
         generateTradeCodes,
         rollSystemSkeleton,
-        generateSocial
+        generateSocial,
+        rollGasGiantPresence
     };
 } else {
     window.CT_World_Engine = {
@@ -531,6 +590,7 @@ if (typeof module !== 'undefined' && module.exports) {
         finalizeSubordinateSocial,
         generateTradeCodes,
         rollSystemSkeleton,
-        generateSocial
+        generateSocial,
+        rollGasGiantPresence
     };
 }

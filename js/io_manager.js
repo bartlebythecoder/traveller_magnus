@@ -530,6 +530,22 @@ function importT5Tab(fileContent, fileName) {
             scoutBase: idxBases !== -1 && row[idxBases].includes('S'),
         };
 
+        // Action 4.4: Gas Giant Trace Logging (Selection Process)
+        if (t5Data.gasGiant && window.isLoggingEnabled) {
+            let ggVariant = 'SOLID';
+            let reason = 'Default (Solid)';
+            
+            if (t5Data.tradeCodes && t5Data.tradeCodes.includes('Sa')) {
+                ggVariant = 'RINGED';
+                reason = "Condition 1: 'Sa' trade code present";
+            } else if (t5Data.isMoon || t5Data.isSatellite) {
+                ggVariant = 'RINGED';
+                reason = "Condition 2: Main world is a moon/satellite";
+            }
+            
+            writeLogLine(`[GAS GIANT LOG] Hex ${hexId}: Icon Variant = ${ggVariant} (${reason})`);
+        }
+
         const t5Socio = {
             Ix, R, L, I: I_val, E: E_val, RU, H, A, S, Sym,
             importance: Ix,

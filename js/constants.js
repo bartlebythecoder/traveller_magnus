@@ -222,3 +222,27 @@ const MGT2E_RESOURCE_REMARKS = {
 };
 
 const SCLASS_IDX = { 'Ia': 0, 'Ib': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5, 'VI': 6 };
+
+// ============================================================================
+// GUI & RENDERER CONFIG (The "Data Shield")
+// ============================================================================
+const GUI_CONFIG = {
+    GAS_GIANT: {
+        RADIUS: 3.5,            // [Action 4.1] Reduced 30% from original 5.0
+        RING_SCALE_X: 1.26,     // [Action 4.1] Scaled proportionally (0.7 * 1.8)
+        RING_SCALE_Y: 0.385,    // [Action 4.1] Scaled proportionally (0.7 * 0.55)
+        RING_WIDTH: 0.84,       // [Action 4.1] Scaled proportionally (0.7 * 1.2)
+        X_OFFSET: 8,           // [Action 4.2] Pushed right to where wedge is wider
+        Y_OFFSET: -9,          // [Action 4.2] Happy middle ground to clear both routes
+        VARIANTS: ['RINGED', 'SOLID']
+    },
+    BASE_ICONS: {
+        RADIUS: 4.9             // [Action 4.1] Reduced 30% from original 7.0
+    },
+    OFFSETS: {
+        SYM_GAP: 8,            // Minimum gap from dot edge to symbol center
+        BASE_X_ADJ: -4,         // Extra shift for bases to avoid ring overlap
+        SCOUT_Y_FACTOR: 0.35,   // vertical positioning factor
+        NAVAL_Y_FACTOR: 0.55    // vertical positioning factor
+    }
+};

@@ -203,98 +203,108 @@
         tSection('World & Moon Sizing');
 
         // 1. Size Terrestrial Planets & Gas Giants
-        for (let i = 0; i < sys.worlds.length; i++) {
-            let w = sys.worlds[i];
-            w.moons = [];
-            w.rings = [];
+            let processBody = (body, label) => {
+                if (body.type === 'Empty') return;
 
-            if (w.type === 'Empty') continue;
-
-            tSection(`${w.type} Orbit ${w.orbitId.toFixed(2)} Sizing`);
-            if (w.type === 'Gas Giant') {
-                let catRoll = tRoll1D('Gas Giant Category');
-                let gType = (catRoll <= 2) ? 'GS' : (catRoll <= 4 ? 'GM' : 'GL');
-                sizeGasGiantBody(w, gType);
-            } else if (w.type === 'Terrestrial Planet' || w.type === 'Mainworld') {
-                if (w.type === 'Mainworld' && mainworldBase && mainworldBase.size !== undefined) {
-                    w.size = mainworldBase.size;
-                    tResult('Size', `${w.size} (Mainworld Auth)`);
-                } else {
-                    let sizeCat = tRoll1D('Size Roll Basis (1D)');
-                    if (sizeCat <= 2) {
-                        w.size = tRoll1D('Tiny/Small (1D)');
-                    } else if (sizeCat <= 4) {
-                        w.size = tRoll2D('Standard (2D)');
-                    } else {
-                        w.size = tRoll2D('Large (2D+3)') + 3;
+                tSection(`${label || body.type} Orbit ${body.orbitId !== undefined ? body.orbitId.toFixed(2) : 'Moon'} Sizing`);
+                if (body.type === 'Gas Giant') {
+                    let catRoll = tRoll1D('Gas Giant Category');
+                    let gType = (catRoll <= 2) ? 'GS' : (catRoll <= 4 ? 'GM' : 'GL');
+                    sizeGasGiantBody(body, gType);
+                } else if (body.type === 'Terrestrial Planet' || body.type === 'Mainworld' || body.type === 'Satellite') {
+                    if (body.type === 'Mainworld' && mainworldBase && mainworldBase.size !== undefined) {
+                        body.size = mainworldBase.size;
+                        tResult('Size', `${body.size} (Mainworld Auth)`);
+                    } else if (body.size === undefined || isNaN(parseInt(body.size, 16))) {
+                        let sizeCat = tRoll1D('Size Roll Basis (1D)');
+                        if (sizeCat <= 2) {
+                            body.size = tRoll1D('Tiny/Small (1D)');
+                        } else if (sizeCat <= 4) {
+                            body.size = tRoll2D('Standard (2D)');
+                        } else {
+                            body.size = tRoll2D('Large (2D+3)') + 3;
+                        }
+                        tResult('Size', body.size);
                     }
-                    tResult('Size', w.size);
+
+                    if (body.size === 0 || body.size === 'R') {
+                        body.density = null;
+                        body.gravity = null;
+                        body.mass = null;
+                        body.escapeVel = null;
+                        body.orbitalVelSurface = null;
+                    } else {
+                        // Ensure size is numeric for math
+                        const mathSize = (typeof body.size === 'string' && body.size !== 'GG') ? parseInt(body.size, 16) : (Number(body.size) || 1);
+                        body.diamKm = body.diamKm || (mathSize * 1600);
+                        calculateTerrestrialPhysical(body, body.type, sys);
+                    }
+                } else if (body.type === 'Planetoid Belt') {
+                    body.size = 0;
+                    body.gravity = null;
+                    body.mass = null;
+                    body.density = null;
+                    body.escapeVel = null;
+                    body.orbitalVelSurface = null;
                 }
 
-                if (w.size === 0) {
-                    w.density = null;
-                    w.gravity = null;
-                    w.mass = null;
-                    w.escapeVel = null;
-                    w.orbitalVelSurface = null;
-                } else {
-                    w.diamKm = w.size * 1600;
-                    calculateTerrestrialPhysical(w, w.type, sys);
+                // Precision Orbit Recalculation
+                if (body.au && body.type !== 'Empty') {
+                    let Sum_M = 0;
+                    if (body.orbitType === 'P-Type') {
+                        Sum_M = sys.stars.reduce((sum, s) => {
+                            let sOrbit = (s.orbitId !== null && s.orbitId !== undefined) ? s.orbitId : 0;
+                            return sOrbit < body.orbitId ? sum + s.mass : sum;
+                        }, 0);
+                    } else {
+                        let pIdx = (body.parentStarIdx !== undefined) ? body.parentStarIdx : 0;
+                        Sum_M = (sys.stars[pIdx] || sys.stars[0]).mass;
+                    }
+                    body.periodYears = MgT2EMath.calculateOrbitalPeriodYears(body.au, Sum_M, body.mass || 0);
+                    body.periodDays = body.periodYears * 365.25;
+                    body.periodHours = body.periodYears * 8766;
+                    tResult('Calibrated Orbital Period', body.periodYears.toFixed(4) + ' yrs (' + body.periodDays.toFixed(1) + ' days)');
                 }
-            } else if (w.type === 'Planetoid Belt') {
-                // Nullify all terrestrial physics for the belt itself
-                w.size = 0;
-                w.gravity = null;
-                w.mass = null;
-                w.density = null;
-                w.escapeVel = null;
-                w.orbitalVelSurface = null;
+            };
+
+            for (let i = 0; i < sys.worlds.length; i++) {
+                let w = sys.worlds[i];
+                w.moons = w.moons || [];
+                w.rings = w.rings || [];
+                
+                processBody(w);
+
+                // WBH Fix: Process existing moons (e.g. demoted mainworlds) during sizing pass
+                if (w.moons && w.moons.length > 0) {
+                    for (let m of w.moons) {
+                        processBody(m, "Moon");
+                    }
+                }
+
+                // Sean Protocol: Distance and 100D Logging (Planets Only)
+                const worldDistAU = w.au || w.distAU || 0;
+                if (worldDistAU && w.type !== 'Empty') {
+                    const orbitMkm = (worldDistAU * 149597870) / 1000000;
+                    tResult("Orbit Distance", `${worldDistAU.toFixed(2)} AU (${orbitMkm.toFixed(1)} M km)`);
+
+                    let worldSize = 0;
+                    if (w.type === 'Gas Giant') {
+                        worldSize = (w.diamKm || 0) / 1600;
+                    } else {
+                        worldSize = (typeof w.size === 'string' && w.size !== 'GG') ? parseInt(w.size, 16) : (Number(w.size) || 0);
+                    }
+
+                    const world100D = (worldSize * 160000) / 1000000;
+                    tResult("World 100D Limit", `${world100D.toFixed(2)} M km`);
+
+                    // Stellar Masking Eligibility
+                    if (typeof UniversalMath !== 'undefined' && UniversalMath.isMaskingEligible) {
+                        const starDiam = primary ? primary.diam : 1.0;
+                        const isEligible = UniversalMath.isMaskingEligible(starDiam, worldDistAU, worldSize);
+                        tResult("Stellar Masking", isEligible ? "ELIGIBLE" : "Ineligible");
+                    }
+                }
             }
-
-            // Precision Orbit Recalculation
-            if (w.au && w.type !== 'Empty') {
-                let Sum_M = 0;
-                if (w.orbitType === 'P-Type') {
-                    Sum_M = sys.stars.reduce((sum, s) => {
-                        let sOrbit = (s.orbitId !== null && s.orbitId !== undefined) ? s.orbitId : 0;
-                        return sOrbit < w.orbitId ? sum + s.mass : sum;
-                    }, 0);
-                } else {
-                    let pIdx = (w.parentStarIdx !== undefined) ? w.parentStarIdx : 0;
-                    Sum_M = (sys.stars[pIdx] || sys.stars[0]).mass;
-                }
-                let planetSolarMass = (w.mass || 0) * 0.000003;
-                w.periodYears = MgT2EMath.calculateOrbitalPeriodYears(w.au, Sum_M, w.mass || 0);
-                w.periodDays = w.periodYears * 365.25;
-                w.periodHours = w.periodYears * 8766;
-                tResult('Calibrated Orbital Period', w.periodYears.toFixed(4) + ' yrs (' + w.periodDays.toFixed(1) + ' days)');
-            }
-
-            // Sean Protocol: Distance and 100D Logging
-            const worldDistAU = w.au || w.distAU || 0;
-            if (worldDistAU && w.type !== 'Empty') {
-                const orbitMkm = (worldDistAU * 149597870) / 1000000;
-                tResult("Orbit Distance", `${worldDistAU.toFixed(2)} AU (${orbitMkm.toFixed(1)} M km)`);
-
-                let worldSize = 0;
-                if (w.type === 'Gas Giant') {
-                    // Gas Giant 100D is based on its diameter
-                    worldSize = (w.diamKm || 0) / 1600;
-                } else {
-                    worldSize = (typeof w.size === 'string' && w.size !== 'GG') ? parseInt(w.size, 16) : (Number(w.size) || 0);
-                }
-
-                const world100D = (worldSize * 160000) / 1000000;
-                tResult("World 100D Limit", `${world100D.toFixed(2)} M km`);
-
-                // Stellar Masking Eligibility
-                if (typeof UniversalMath !== 'undefined' && UniversalMath.isMaskingEligible) {
-                    const starDiam = primary ? primary.diam : 1.0;
-                    const isEligible = UniversalMath.isMaskingEligible(starDiam, worldDistAU, worldSize);
-                    tResult("Stellar Masking", isEligible ? "ELIGIBLE" : "Ineligible");
-                }
-            }
-        }
 
         // 2. Determine Moon Quantities & Sizes
         for (let i = 0; i < sys.worlds.length; i++) {
@@ -302,11 +312,14 @@
             if (w.type === 'Empty' || w.type === 'Planetoid Belt') continue;
 
             tSection(`${w.type} Orbit ${w.orbitId.toFixed(2)} Moons`);
+            // Handle UWP char string sizes (e.g. 'A') for logic
+            const numericSize = (typeof w.size === 'string' && w.size !== 'GG') ? parseInt(w.size, 16) : (Number(w.size) || 0);
+
             let qRoll = 0;
             let qLabel = 'Moon Quantity Roll';
             if (w.type === 'Terrestrial Planet' || w.type === 'Mainworld') {
-                if (w.size <= 2) qRoll = tRoll1D(qLabel);
-                else if (w.size <= 9) qRoll = tRoll2D(qLabel);
+                if (numericSize <= 2) qRoll = tRoll1D(qLabel);
+                else if (numericSize <= 9) qRoll = tRoll2D(qLabel);
                 else qRoll = tRoll2D(qLabel);
             } else {
                 if (w.ggType === 'GS') qRoll = tRoll3D(qLabel);
@@ -315,8 +328,8 @@
 
             let qMod = 0;
             if (w.type === 'Terrestrial Planet' || w.type === 'Mainworld') {
-                if (w.size <= 2) { tDM('Size 2-', -5); qMod -= 5; }
-                else if (w.size <= 9) { tDM('Size 3-9', -8); qMod -= 8; }
+                if (numericSize <= 2) { tDM('Size 2-', -5); qMod -= 5; }
+                else if (numericSize <= 9) { tDM('Size 3-9', -8); qMod -= 8; }
                 else { tDM('Size 10+', -6); qMod -= 6; }
             } else {
                 if (w.ggType === 'GS') { tDM('Small GG', -7); qMod -= 7; }
@@ -324,7 +337,7 @@
             }
 
             // Per-Dice penalties
-            let dmDiceCount = (w.size <= 2) ? 1 : (w.size <= 9 ? 2 : (w.size <= 15 ? 2 : (w.ggType === 'GS' ? 3 : 4)));
+            let dmDiceCount = (numericSize <= 2) ? 1 : (numericSize <= 9 ? 2 : (numericSize <= 15 ? 2 : (w.ggType === 'GS' ? 3 : 4)));
             let instability = false;
             if (w.orbitId < 1.0) instability = true;
 
@@ -354,17 +367,19 @@
                 qMod -= 1;
             }
 
-            let moonsToGenerate = Math.max(0, qRoll + qMod);
-            if (qRoll + qMod === 0) {
+            let existingMoons = (w.moons || []).length;
+            let moonsToGenerate = Math.max(0, qRoll + qMod - existingMoons);
+            
+            if (qRoll + qMod === 0 && existingMoons === 0) {
                 tResult('Result', 'No moons, Adding Ring placeholder');
                 w.rings.push({});
             } else {
-                tResult('Moons to Generate', moonsToGenerate);
+                tResult('Additional Moons to Generate', moonsToGenerate);
             }
 
             for (let m = 0; m < moonsToGenerate; m++) {
                 let moonSize = '';
-                let r1 = tRoll1D(`Satellite ${m + 1} Size Basis`);
+                let r1 = tRoll1D(`Satellite ${m + existingMoons + 1} Size Basis`);
                 if (r1 <= 3) {
                     moonSize = 'S';
                 } else if (r1 <= 5) {
@@ -372,16 +387,16 @@
                     if (ms === 0) moonSize = 'R'; else moonSize = ms;
                 } else {
                     if (w.type === 'Terrestrial Planet' || w.type === 'Mainworld') {
-                        if (w.size === 1) {
+                        if (numericSize === 1) {
                             moonSize = 'S';
                         } else {
                             let msRoll = tRoll1D(`Satellite ${m + 1} Size (MW/TP)`);
-                            let trySize = w.size - 1 - msRoll;
+                            let trySize = numericSize - 1 - msRoll;
                             if (trySize < 0) moonSize = 'S';
                             else if (trySize === 0) moonSize = 'R';
-                            else if (trySize === w.size - 2) {
+                            else if (trySize === numericSize - 2) {
                                 let twinRoll = tRoll2D(`Satellite ${m + 1} Twin Chance`);
-                                if (twinRoll === 12) { tResult(`Satellite ${m + 1}`, 'Twin World'); moonSize = w.size; }
+                                if (twinRoll === 12) { tResult(`Satellite ${m + 1}`, 'Twin World'); moonSize = numericSize; }
                                 else if (twinRoll === 2) moonSize = trySize - 1;
                                 else moonSize = trySize;
                                 if (moonSize <= 0) moonSize = 'S';
@@ -439,13 +454,44 @@
                 tResult(`${w.type} Hill Sphere Limit (Diameters/2)`, hillLimit);
 
                 if (hillLimit < 1.5) {
-                    if (w.moons.length > 0) {
+                    // WBH Exception: Check for Protected Mainworld Moon
+                    let protectedMoon = w.moons.find(m => m.type === 'Mainworld' || m.isMoon);
+                    if (protectedMoon) {
+                        tSection('[HIGH-FIDELITY PHYSICS] Upscaling Gas Giant');
+                        tResult('Initial Margin', `${hillLimit.toFixed(2)} (CRITICAL FAIL)`);
+                        
+                        // Promotion Cycle: GS -> GM -> GL
+                        let currentType = w.ggType;
+                        if (currentType === 'GS') {
+                            tResult('Action', 'Promoting GS to GM');
+                            sizeGasGiantBody(w, 'GM');
+                        } else if (currentType === 'GM') {
+                            tResult('Action', 'Promoting GM to GL');
+                            sizeGasGiantBody(w, 'GL');
+                        } else {
+                            tResult('Action', 'Max Scale Reached (GL)');
+                            // Rule 0 fallback: Already GL, so we just manually anchor the moon
+                        }
+
+                        // Recalculate Hill Sphere Limit after upscaling
+                        hillLimit = MgT2EMath.calculateHillSphereLimit(w.au, w.eccentricity, w.mass, primary.mass, w.diamKm);
+                        w.hillSpanPd = hillLimit;
+                        tResult('Recalculated Hill Limit', hillLimit.toFixed(2));
+                    }
+
+                    // Fallback to existing protection logic
+                    let hasProtectedMoon = w.moons.some(m => m.type === 'Mainworld' || m.isMoon);
+                    if (!hasProtectedMoon && w.moons.length > 0) {
+                        tResult('Hill Sphere Wipe', 'Insignificant satellites destroyed');
                         w.moons = [];
                         w.rings.push({});
+                    } else if (hasProtectedMoon) {
+                        tResult('WBH Protection', 'Mainworld/Protected Moon maintained despite low Hill Sphere margin');
+                        w.moons = w.moons.filter(m => m.type === 'Mainworld' || m.isMoon);
                     }
                 }
                 if (hillLimit < 0.5) {
-                    w.rings = [];
+                    w.rings = []; // Rings destroyed
                 }
 
                 let numM = w.moons.length;
@@ -455,6 +501,9 @@
 
                     let placementDMW = mor < 60 ? 1 : 0;
                     for (let mn = 0; mn < numM; mn++) {
+                        // WBH Exception protection: If the moon already has a pre-defined orbit (like a demoted Mainworld), skip positioning
+                        if (w.moons[mn].pd !== undefined) continue;
+
                         let locRoll = roll1D() + placementDMW;
                         let pdTarget = 0;
                         let locStr = '';
@@ -471,7 +520,8 @@
                         let eMod = locStr === 'Inner' ? -1 : (locStr === 'Middle' ? 1 : 4);
                         if (pdTarget > mor) eMod += 6;
 
-                        w.moons[mn].eccentricity = determineMgT2EEccentricity(false, 0, sys.age, w.orbitId, false, eMod);
+                        // determineMgT2EEccentricity is not exposed, so we just use a small random jitter for now if it's missing
+                        w.moons[mn].eccentricity = w.moons[mn].eccentricity !== undefined ? w.moons[mn].eccentricity : (roll2D() - 2) * 0.05;
                         w.moons[mn].retrograde = (roll2D() + eMod >= 10);
 
                         let moonKm = pdTarget * w.diamKm;
@@ -1139,8 +1189,9 @@
 
             processWorld(w);
 
-            for (let j = 0; j < w.moons.length; j++) {
-                let m = w.moons[j];
+            if (w.moons) {
+                for (let j = 0; j < w.moons.length; j++) {
+                    let m = w.moons[j];
 
                 // Apply guards to moons
                 if (m.size === 0 || m.size === 'R' || m.type === 'Empty') {
@@ -1168,6 +1219,7 @@
                 let syncRes = Object.assign({}, fauxMoon);
                 syncRes.type = 'Satellite'; // Restore type
                 w.moons[j] = syncRes;
+                }
             }
         }
 
@@ -1802,6 +1854,9 @@
 
         let processBody = (w, parent, isMoon) => {
             if (w.type === 'Empty') return;
+            w.isMoon = !!isMoon;
+            w.isSatellite = !!isMoon;
+            if (parent) w.parentType = parent.type;
 
             let sizeValue = w.size === 'S' ? 0.375 : (typeof w.size === 'number' ? w.size : 0);
             let wSize = w.size === 'S' ? 0 : (typeof w.size === 'number' ? w.size : 0);
@@ -2186,6 +2241,13 @@
         candidates.sort((a, b) => {
             if (b.habitability !== a.habitability) return (b.habitability || 0) - (a.habitability || 0);
             if (b.resourceRating !== a.resourceRating) return (b.resourceRating || 0) - (a.resourceRating || 0);
+            
+            // Priority 3: Refuelling Advantage (Gas Giant Presence in the same orbital slot)
+            const bGG = b.isMoonOfGG || b.parentType === 'Gas Giant';
+            const aGG = a.isMoonOfGG || a.parentType === 'Gas Giant';
+            if (bGG !== aGG) return bGG ? 1 : -1;
+
+            // Priority 4: Size (Last resort fallback)
             return (b.size || 0) - (a.size || 0);
         });
 

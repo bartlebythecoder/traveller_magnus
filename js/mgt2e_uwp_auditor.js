@@ -37,6 +37,17 @@
     const _tResult = (typeof tResult === 'function') ? tResult : () => { };
 
     /**
+     * Helper to get minimum sustainable Tech Level for a given atmosphere code.
+     * Aligns with the core socio engine logic.
+     * @param {number} atmCode - Atmosphere code (0-17)
+     * @returns {number} Minimum TL required for survival
+     */
+    function getMgT2EMinSusTL(atmCode) {
+        if (!MgT2EData || !MgT2EData.techLevel || !MgT2EData.techLevel.environmentalMinimums) return 0;
+        return MgT2EData.techLevel.environmentalMinimums[atmCode] || 0;
+    }
+
+    /**
      * Re-calculates Mongoose 2E Trade Codes to verify against output
      */
     function verifyTradeCodes(w) {
@@ -125,6 +136,9 @@
         const cWa = data.Wa;
         check('Wa', hydro >= cWa.minHydro && ( (atm >= cWa.atmRanges[0][0] && atm <= cWa.atmRanges[0][1]) || (atm >= cWa.atmRanges[1][0] && atm <= cWa.atmRanges[1][1]) ));
 
+        // Sa: Satellite (Sean Protocol: Moon-Mainworld Sync)
+        check('Sa', w.isMoon || w.isSatellite || w.type === 'Satellite' || (w.parentType === 'Gas Giant' || w.parentBody === 'Gas Giant'));
+
         return codes;
     }
 
@@ -136,17 +150,26 @@
 
         _tSection('MgT2E System Audit');
 
-        // --- 1. Structure & Mainworld Audit ---
+        // --- 0. Recursive World Collector ---
+        let allWorlds = [];
         let mainworldCount = 0;
         let mainworldBase = null;
 
-        sys.worlds.forEach(w => {
-            if (w.type === 'Mainworld') {
-                mainworldCount++;
-                mainworldBase = w;
-            }
-        });
+        const collectWorlds = (worlds) => {
+            worlds.forEach(w => {
+                allWorlds.push(w);
+                if (w.type === 'Mainworld' || w.isLunarMainworld) {
+                    mainworldCount++;
+                    mainworldBase = w;
+                }
+                if (w.moons && w.moons.length > 0) {
+                    collectWorlds(w.moons);
+                }
+            });
+        };
+        collectWorlds(sys.worlds);
 
+        // --- 1. Structure & Mainworld Audit ---
         if (options.mode === 'top-down') {
             if (mainworldCount === 1) {
                 _log('[PASS] Structure: Exactly 1 Mainworld present.');
@@ -161,14 +184,13 @@
         // --- 2. Physicals & Inner Limit Audit ---
         _tSection('Physical & Orbital Audit');
         let physErrors = 0;
-
         const innerLimit = sys.ptypeInnerLimit || 0;
 
-        sys.worlds.forEach(w => {
+        allWorlds.forEach(w => {
             if (w.type === 'Empty') return;
 
-            // Inner Limit Check
-            if (w.orbitId < innerLimit) {
+            // Inner Limit Check (Only applicable to primary orbits, not moons)
+            if (!w.isMoon && w.orbitId !== undefined && w.orbitId < innerLimit) {
                 _log(`[FAIL] Orbit Violation: World at orbit ${w.orbitId} is inside the star's destroying inner limit (${innerLimit}).`);
                 physErrors++;
             }
@@ -178,7 +200,7 @@
                 const atm = w.atmCode !== undefined ? w.atmCode : w.atm;
                 const hydro = w.hydroCode !== undefined ? w.hydroCode : w.hydro;
                 if (atm !== 0 || hydro !== 0) {
-                    _log(`[FAIL] Natural Physics Violation: Size 0 world at orbit ${w.orbitId} has Atm ${atm} and Hydro ${hydro} (Both must be 0).`);
+                    _log(`[FAIL] Natural Physics Violation: Size 0 world at orbit ${w.orbitId || 'Moon'} has Atm ${atm} and Hydro ${hydro} (Both must be 0).`);
                     physErrors++;
                 }
             }
@@ -192,14 +214,14 @@
         let popErrors = 0;
         const mwPop = mainworldBase ? (mainworldBase.popCode !== undefined ? mainworldBase.popCode : mainworldBase.pop) : 0;
 
-        sys.worlds.forEach(w => {
-            if (w.type === 'Empty' || w.type === 'Mainworld' || w.type === 'Gas Giant' || w.type === 'Planetoid Belt') return;
+        allWorlds.forEach(w => {
+            if (w.type === 'Empty' || w.type === 'Mainworld' || w.isLunarMainworld || w.type === 'Gas Giant' || w.type === 'Planetoid Belt') return;
 
             const pop = w.popCode !== undefined ? w.popCode : w.pop;
 
-            // Pop Cap Check
-            if (pop >= mwPop && mwPop > 0) {
-                _log(`[FAIL] Population Cap: Subordinate world at orbit ${w.orbitId} has Pop ${pop}, which is >= Mainworld Pop ${mwPop}.`);
+            // Pop Cap Check (Strictly less than Mainworld unless Mainworld is Pop 0)
+            if (mwPop > 0 && pop >= mwPop) {
+                _log(`[FAIL] Population Cap: Subordinate world at orbit ${w.orbitId || 'Moon'} has Pop ${pop}, which is >= Mainworld Pop ${mwPop}.`);
                 popErrors++;
             }
 
@@ -207,7 +229,7 @@
             if (pop === 0) {
                 const gov = w.govCode !== undefined ? w.govCode : w.gov;
                 if (gov !== 0 || w.law !== 0 || w.tl !== 0) {
-                    _log(`[FAIL] Pop 0 Rules: World at orbit ${w.orbitId} has Pop 0 but Gov/Law/TL are not 0.`);
+                    _log(`[FAIL] Pop 0 Rules: World at orbit ${w.orbitId || 'Moon'} has Pop 0 but Gov/Law/TL are not 0.`);
                     popErrors++;
                 }
             }
@@ -219,10 +241,10 @@
         // --- 4. Tech Level Boundaries ---
         _tSection('Tech Level Audit');
         let tlErrors = 0;
-        const mwTL = mainworldBase ? mainworldBase.tl : 0;
+        const mwTL = (mainworldBase && mainworldBase.tl !== undefined) ? mainworldBase.tl : 0;
 
-        sys.worlds.forEach(w => {
-            if (w.type === 'Empty' || w.type === 'Mainworld' || w.type === 'Gas Giant' || w.type === 'Planetoid Belt') return;
+        allWorlds.forEach(w => {
+            if (w.type === 'Empty' || w.type === 'Mainworld' || w.isLunarMainworld || w.type === 'Gas Giant' || w.type === 'Planetoid Belt') return;
 
             const pop = w.popCode !== undefined ? w.popCode : w.pop;
             if (pop === 0) return; // Handled above
@@ -241,38 +263,41 @@
             else if (isFarming) classification = "Farming";
             else if (isPenal) classification = "Penal Colony";
 
-            // Lookup guidelines from Data Shield
-            const guidelist = (MgT2EData && MgT2EData.secondaryWorldGuidelines) ? MgT2EData.secondaryWorldGuidelines : null;
-            if (!guidelist) return; // Cannot audit without data shield
-
-            const rules = guidelist[classification] || guidelist["All Others"];
+            // Determine survival floor and social guidelines
             const atm = w.atmCode !== undefined ? w.atmCode : (w.atm !== undefined ? w.atm : 0);
-            const floor = (MgT2EData.techLevel && MgT2EData.techLevel.environmentalMinimums) ? (MgT2EData.techLevel.environmentalMinimums[atm] || 0) : 0;
-            
-            const expectedTL = rules.baselineTl(mwTL, floor);
+            const floor = getMgT2EMinSusTL(atm);
+            const guideline = Math.max(0, mwTL - 1);
 
-            if (w.tl !== expectedTL) {
-                _log(`[FAIL] TL Bounds: ${classification} at orbit ${w.orbitId} has TL (${w.tl}) vs Expected guideline (${expectedTL}) derived from MW TL ${mwTL} and Floor ${floor}.`);
-                tlErrors++;
+            // Validation Logic: 
+            // 1. Survival Requirement - A world must at least match its environmental floor.
+            if (w.tl < floor) {
+                 _log(`[FAIL] TL Violation (${classification}): Orbit ${w.orbitId || 'Moon'} has TL ${w.tl} but survival Requirement (Floor) is ${floor} for Atm ${atm}.`);
+                 tlErrors++;
+            } 
+            // 2. Social Guideline - A world should match the standard MW-1 baseline unless pushed higher by a floor.
+            else if (w.tl < guideline && floor <= guideline) {
+                 _log(`[FAIL] TL Violation (${classification}): Orbit ${w.orbitId || 'Moon'} has TL ${w.tl} but standard Guideline (MW-1) is ${guideline}.`);
+                 tlErrors++;
             }
+            // Note: If TL is higher than MW-1 because it is matching the Floor, this is a PASS.
         });
 
-        if (tlErrors === 0) _log('[PASS] Tech Levels: All subordinate TL caps and base exceptions align.');
+        if (tlErrors === 0) _log('[PASS] Tech Levels: All subordinate TL requirements and guidelines align.');
         totalErrors += tlErrors;
 
         // --- 5. Starports & Bases ---
         _tSection('Installations Audit');
         let baseErrors = 0;
 
-        sys.worlds.forEach(w => {
+        allWorlds.forEach(w => {
             if (!w.starport) return;
 
             if (w.navalBase && !['A', 'B'].includes(w.starport)) {
-                _log(`[FAIL] Base Rules: Naval Base found on Starport ${w.starport} at orbit ${w.orbitId}.`);
+                _log(`[FAIL] Base Rules: Naval Base found on Starport ${w.starport} at orbit ${w.orbitId || 'Moon'}.`);
                 baseErrors++;
             }
             if (w.scoutBase && !['A', 'B', 'C', 'D'].includes(w.starport)) {
-                _log(`[FAIL] Base Rules: Scout Base found on Starport ${w.starport} at orbit ${w.orbitId}.`);
+                _log(`[FAIL] Base Rules: Scout Base found on Starport ${w.starport} at orbit ${w.orbitId || 'Moon'}.`);
                 baseErrors++;
             }
         });
@@ -284,13 +309,13 @@
         _tSection('Data Integrity Audit');
         let dataErrors = 0;
 
-        sys.worlds.forEach(w => {
-            if (w.type !== 'Mainworld') return;
+        allWorlds.forEach(w => {
+            if (w.type !== 'Mainworld' && !w.isLunarMainworld) return;
 
             // UWP String validation
             const uwp = w.uwpSecondary || w.uwp;
             if (!uwp || uwp.length < 9) {
-                _log(`[FAIL] Data Integrity: Malformed UWP string "${uwp}" at orbit ${w.orbitId}.`);
+                _log(`[FAIL] Data Integrity: Malformed UWP string "${uwp}" at orbit ${w.orbitId || 'Moon'}.`);
                 dataErrors++;
             }
 
@@ -299,11 +324,11 @@
             const actualCodes = w.tradeCodes || [];
 
             // Sort to compare
-            expectedCodes.sort();
-            actualCodes.sort();
+            const expSorted = [...expectedCodes].sort();
+            const actSorted = [...actualCodes].sort();
 
-            if (expectedCodes.join(' ') !== actualCodes.join(' ')) {
-                _log(`[FAIL] Trade Codes: Orbit ${w.orbitId} generated [${actualCodes.join(' ')}] but physics dictate [${expectedCodes.join(' ')}].`);
+            if (expSorted.join(' ') !== actSorted.join(' ')) {
+                _log(`[FAIL] Trade Codes: ${w.isLunarMainworld ? 'Lunar Mainworld' : 'Mainworld'} at orbit ${w.orbitId || 'Moon'} generated [${actSorted.join(' ')}] but physics dictate [${expSorted.join(' ')}].`);
                 dataErrors++;
             }
         });

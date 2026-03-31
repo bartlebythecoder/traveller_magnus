@@ -177,14 +177,31 @@
         // =================================================================
         
         // Ensure all worlds have names and the system itself has a primary name
-        let mw = sys.worlds.find(w => w.type === 'Mainworld') || sys.worlds[0];
+        // RECURSIVE SEARCH: Find the Mainworld even if it is a moon (Lunar Mainworld)
+        const findMainworld = (worlds) => {
+            for (const w of worlds) {
+                if (w.type === 'Mainworld' || w.isLunarMainworld) return w;
+                if (w.moons && w.moons.length > 0) {
+                    const mw = findMainworld(w.moons);
+                    if (mw) return mw;
+                }
+            }
+            return null;
+        };
+
+        let mw = findMainworld(sys.worlds) || sys.worlds[0];
         
         // Fix potential missing names for all worlds (Physical Engine doesn't set names)
-        sys.worlds.forEach(w => {
-            if (!w.name) {
-                w.name = (typeof getNextSystemName === 'function') ? getNextSystemName(hexId) : 'Unnamed';
-            }
-        });
+        // RECURSIVE POLISH: Ensure moons also get names
+        const polishNames = (worlds) => {
+            worlds.forEach(w => {
+                if (!w.name) {
+                    w.name = (typeof getNextSystemName === 'function') ? getNextSystemName(hexId) : 'Unnamed';
+                }
+                if (w.moons && w.moons.length > 0) polishNames(w.moons);
+            });
+        };
+        polishNames(sys.worlds);
 
         // Set the system-level name for the Map Renderer
         if (mw && mw.name) {
@@ -246,8 +263,18 @@
 
         // --- PHASE 0: DATA SYNC ---
         // Ensure the system's internal mainworld reference matches our manual/loaded source of truth.
-        // This prevents the engine from skipping if the internal object was never updated.
-        let internalMW = sys.worlds.find(w => w.type === 'Mainworld') || sys.worlds[0];
+        const findMW = (wList) => {
+            for (let w of wList) {
+                if (w.type === 'Mainworld' || w.isLunarMainworld || w.targetWorld === 'Mainworld') return w;
+                if (w.moons) {
+                    let res = findMW(w.moons);
+                    if (res) return res;
+                }
+            }
+            return null;
+        };
+
+        let internalMW = findMW(sys.worlds) || sys.worlds[0];
         if (internalMW && mainworldBase && internalMW !== mainworldBase) {
             // Transfer core properties required for the SocioEngine checks
             internalMW.pop = (mainworldBase.pop !== undefined) ? mainworldBase.pop : internalMW.pop;
@@ -259,11 +286,15 @@
             // Sync all other UWP fields
             internalMW.starport = mainworldBase.starport || internalMW.starport;
             internalMW.size = mainworldBase.size !== undefined ? mainworldBase.size : internalMW.size;
-            internalMW.atm = mainworldBase.atm !== undefined ? mainworldBase.atm : (mainworldBase.atmCode !== undefined ? mainworldBase.atmCode : internalMW.atm);
-            internalMW.hydro = mainworldBase.hydro !== undefined ? mainworldBase.hydro : (mainworldBase.hydroCode !== undefined ? mainworldBase.hydroCode : internalMW.hydro);
-            internalMW.gov = mainworldBase.gov !== undefined ? mainworldBase.gov : internalMW.gov;
-            internalMW.law = mainworldBase.law !== undefined ? mainworldBase.law : internalMW.law;
-            internalMW.tl = mainworldBase.tl !== undefined ? mainworldBase.tl : internalMW.tl;
+            internalMW.atm = (mainworldBase.atm !== undefined) ? mainworldBase.atm : (mainworldBase.atmCode !== undefined ? mainworldBase.atmCode : internalMW.atm);
+            internalMW.hydro = (mainworldBase.hydro !== undefined) ? mainworldBase.hydro : (mainworldBase.hydroCode !== undefined ? mainworldBase.hydroCode : internalMW.hydro);
+            internalMW.gov = (mainworldBase.gov !== undefined) ? mainworldBase.gov : internalMW.gov;
+            internalMW.law = (mainworldBase.law !== undefined) ? mainworldBase.law : internalMW.law;
+            internalMW.tl = (mainworldBase.tl !== undefined) ? mainworldBase.tl : internalMW.tl;
+            
+            // Critical: Ensure flags match
+            if (mainworldBase.isLunarMainworld) internalMW.isLunarMainworld = true;
+            if (mainworldBase.isMoon) internalMW.isMoon = true;
         }
 
 
@@ -271,7 +302,15 @@
         // Socio-economic engines require certain physical foundations (Resource Rating, Habitability, Day Length).
         // We surgery repair these ONLY if they are missing, preserving existing manual edits.
         if (WorldEngine) {
-            let worldsToRepair = sys.worlds.filter(w => w.type !== 'Empty');
+            let worldsToRepair = [];
+            const collect = (list) => {
+                list.forEach(w => {
+                    if (w.type !== 'Empty') worldsToRepair.push(w);
+                    if (w.moons) collect(w.moons);
+                    if (w.significantBodies) collect(w.significantBodies);
+                });
+            };
+            collect(sys.worlds);
 
             // 1. Rotational Dynamics (Day Length, Axial Tilt)
             let missingRotation = worldsToRepair.filter(w => w.siderealHours === undefined || w.axialTilt === undefined);

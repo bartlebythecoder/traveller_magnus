@@ -275,6 +275,11 @@
                     satellites: [sys.mainworld] 
                 };
             }
+
+            // SEAN PROTOCOL: Moon-Mainworld Selection Logging
+            tResult('Mainworld Status', 'LUNAR SELECTION');
+            _log(`[MAINWORLD LOG] Hex ${mainworldBase.hex}: Mainworld is a MOON attached to a ${parent.type}`);
+
             mwTarget = findAvailableOrbit(primary, mwTarget);
             if (mwTarget >= 0) primary.orbits[mwTarget].contents = parent;
         } else {

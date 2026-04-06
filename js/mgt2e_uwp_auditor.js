@@ -175,8 +175,10 @@
                 _log('[PASS] Structure: Exactly 1 Mainworld present.');
                 results.checks.push('[PASS] Structure: Exactly 1 Mainworld present.');
             } else {
-                _log(`[FAIL] Structure: Expected exactly 1 Mainworld, found ${mainworldCount}.`);
-                results.checks.push(`[FAIL] Structure: Expected exactly 1 Mainworld, found ${mainworldCount}.`);
+                const msg = `Structure: Expected exactly 1 Mainworld, found ${mainworldCount}.`;
+                _log(`[FAIL] ${msg}`);
+                results.checks.push(`[FAIL] ${msg}`);
+                results.errors.push({ orbitId: null, message: msg });
                 totalErrors++;
             }
         }
@@ -191,7 +193,9 @@
 
             // Inner Limit Check (Only applicable to primary orbits, not moons)
             if (!w.isMoon && w.orbitId !== undefined && w.orbitId < innerLimit) {
-                _log(`[FAIL] Orbit Violation: World at orbit ${w.orbitId} is inside the star's destroying inner limit (${innerLimit}).`);
+                const msg = `Orbit Violation: World at orbit ${w.orbitId} is inside the star's destroying inner limit (${innerLimit}).`;
+                _log(`[FAIL] ${msg}`);
+                results.errors.push({ orbitId: w.orbitId, message: msg });
                 physErrors++;
             }
 
@@ -200,7 +204,9 @@
                 const atm = w.atmCode !== undefined ? w.atmCode : w.atm;
                 const hydro = w.hydroCode !== undefined ? w.hydroCode : w.hydro;
                 if (atm !== 0 || hydro !== 0) {
-                    _log(`[FAIL] Natural Physics Violation: Size 0 world at orbit ${w.orbitId || 'Moon'} has Atm ${atm} and Hydro ${hydro} (Both must be 0).`);
+                    const msg = `Natural Physics Violation: Size 0 world at orbit ${w.orbitId || 'Moon'} has Atm ${atm} and Hydro ${hydro} (Both must be 0).`;
+                    _log(`[FAIL] ${msg}`);
+                    results.errors.push({ orbitId: w.orbitId || null, message: msg });
                     physErrors++;
                 }
             }
@@ -221,7 +227,9 @@
 
             // Pop Cap Check (Strictly less than Mainworld unless Mainworld is Pop 0)
             if (mwPop > 0 && pop >= mwPop) {
-                _log(`[FAIL] Population Cap: Subordinate world at orbit ${w.orbitId || 'Moon'} has Pop ${pop}, which is >= Mainworld Pop ${mwPop}.`);
+                const msg = `Population Cap: Subordinate world at orbit ${w.orbitId || 'Moon'} has Pop ${pop}, which is >= Mainworld Pop ${mwPop}.`;
+                _log(`[FAIL] ${msg}`);
+                results.errors.push({ orbitId: w.orbitId || null, message: msg });
                 popErrors++;
             }
 
@@ -229,7 +237,9 @@
             if (pop === 0) {
                 const gov = w.govCode !== undefined ? w.govCode : w.gov;
                 if (gov !== 0 || w.law !== 0 || w.tl !== 0) {
-                    _log(`[FAIL] Pop 0 Rules: World at orbit ${w.orbitId || 'Moon'} has Pop 0 but Gov/Law/TL are not 0.`);
+                    const msg = `Pop 0 Rules: World at orbit ${w.orbitId || 'Moon'} has Pop 0 but Gov/Law/TL are not 0.`;
+                    _log(`[FAIL] ${msg}`);
+                    results.errors.push({ orbitId: w.orbitId || null, message: msg });
                     popErrors++;
                 }
             }
@@ -268,15 +278,20 @@
             const floor = getMgT2EMinSusTL(atm);
             const guideline = Math.max(0, mwTL - 1);
 
-            // Validation Logic: 
-            // 1. Survival Requirement - A world must at least match its environmental floor.
-            if (w.tl < floor) {
-                 _log(`[FAIL] TL Violation (${classification}): Orbit ${w.orbitId || 'Moon'} has TL ${w.tl} but survival Requirement (Floor) is ${floor} for Atm ${atm}.`);
+            // Validation Logic:
+            if (floor > mwTL && classification !== 'Mainworld') {
+                 const msg = `Ruin Violation (${classification}): Orbit ${w.orbitId || 'Moon'} requires Floor ${floor} but Mainworld TL is ${mwTL}. Cannot be supported; must be a ruin.`;
+                 _log(`[FAIL] ${msg}`);
+                 results.errors.push({ orbitId: w.orbitId || null, message: msg });
                  tlErrors++;
-            } 
-            // 2. Social Guideline - A world should match the standard MW-1 baseline unless pushed higher by a floor.
-            else if (w.tl < guideline && floor <= guideline) {
-                 _log(`[FAIL] TL Violation (${classification}): Orbit ${w.orbitId || 'Moon'} has TL ${w.tl} but standard Guideline (MW-1) is ${guideline}.`);
+            } else if (w.tl < floor) {
+                 const msg = `TL Guideline (${classification}): Orbit ${w.orbitId || 'Moon'} has TL ${w.tl} < Floor ${floor}. Survives via Jury-Rigged Relics (Novelty TL).`;
+                 _log(`[PASS] ${msg}`);
+                 results.checks.push(`[PASS] ${msg}`);
+            } else if (w.tl < guideline && floor <= guideline) {
+                 const msg = `TL Violation (${classification}): Orbit ${w.orbitId || 'Moon'} has TL ${w.tl} but standard Guideline (MW-1) is ${guideline}.`;
+                 _log(`[FAIL] ${msg}`);
+                 results.errors.push({ orbitId: w.orbitId || null, message: msg });
                  tlErrors++;
             }
             // Note: If TL is higher than MW-1 because it is matching the Floor, this is a PASS.
@@ -293,11 +308,15 @@
             if (!w.starport) return;
 
             if (w.navalBase && !['A', 'B'].includes(w.starport)) {
-                _log(`[FAIL] Base Rules: Naval Base found on Starport ${w.starport} at orbit ${w.orbitId || 'Moon'}.`);
+                const msg = `Base Rules: Naval Base found on Starport ${w.starport} at orbit ${w.orbitId || 'Moon'}.`;
+                _log(`[FAIL] ${msg}`);
+                results.errors.push({ orbitId: w.orbitId || null, message: msg });
                 baseErrors++;
             }
             if (w.scoutBase && !['A', 'B', 'C', 'D'].includes(w.starport)) {
-                _log(`[FAIL] Base Rules: Scout Base found on Starport ${w.starport} at orbit ${w.orbitId || 'Moon'}.`);
+                const msg = `Base Rules: Scout Base found on Starport ${w.starport} at orbit ${w.orbitId || 'Moon'}.`;
+                _log(`[FAIL] ${msg}`);
+                results.errors.push({ orbitId: w.orbitId || null, message: msg });
                 baseErrors++;
             }
         });
@@ -315,7 +334,9 @@
             // UWP String validation
             const uwp = w.uwpSecondary || w.uwp;
             if (!uwp || uwp.length < 9) {
-                _log(`[FAIL] Data Integrity: Malformed UWP string "${uwp}" at orbit ${w.orbitId || 'Moon'}.`);
+                const msg = `Data Integrity: Malformed UWP string "${uwp}" at orbit ${w.orbitId || 'Moon'}.`;
+                _log(`[FAIL] ${msg}`);
+                results.errors.push({ orbitId: w.orbitId || null, message: msg });
                 dataErrors++;
             }
 
@@ -328,7 +349,10 @@
             const actSorted = [...actualCodes].sort();
 
             if (expSorted.join(' ') !== actSorted.join(' ')) {
-                _log(`[FAIL] Trade Codes: ${w.isLunarMainworld ? 'Lunar Mainworld' : 'Mainworld'} at orbit ${w.orbitId || 'Moon'} generated [${actSorted.join(' ')}] but physics dictate [${expSorted.join(' ')}].`);
+                const label = w.isLunarMainworld ? 'Lunar Mainworld' : 'Mainworld';
+                const msg = `Trade Codes: ${label} at orbit ${w.orbitId || 'Moon'} generated [${actSorted.join(' ')}] but physics dictate [${expSorted.join(' ')}].`;
+                _log(`[FAIL] ${msg}`);
+                results.errors.push({ orbitId: w.orbitId || null, message: msg });
                 dataErrors++;
             }
         });

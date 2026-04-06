@@ -174,13 +174,13 @@
                 
                 // SEAN PROTOCOL: Moon-Mainworld Selection Logging
                 if (mainworld.isMoon) {
-                    tResult('Mainworld Status', 'LUNAR SELECTION');
+                    tResult('Mainworld Status', 'LUNAR SELECTION', 'MgT2E 1.3: Top-Down Lunar Rule');
                     writeLogLine(`[MAINWORLD LOG] Hex ${sys.hexId}: Mainworld is a MOON at Orbit ${mainworld.orbitId.toFixed(2)}`);
                 }
 
-                tResult('Winning Mainworld', `${mainworld.name || 'Body'} at Orbit ${mainworld.orbitId.toFixed(2)} [Score: ${mainworld.habitability}]`);
+                tResult('Winning Mainworld', `${mainworld.name || 'Body'} at Orbit ${mainworld.orbitId.toFixed(2)} [Score: ${mainworld.habitability}]`, 'MgT2E 1.3: Orbital Allocation');
             } else {
-                tResult('Winning Mainworld', 'None');
+                tResult('Winning Mainworld', 'None', 'MgT2E 1.3: Orbital Allocation');
                 if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 3 ERROR: No winning mainworld elected!`);
             }
         }
@@ -275,7 +275,32 @@
         // System Audit
         const activeAuditor = Auditor || (typeof MgT2E_UWP_Auditor !== 'undefined' ? MgT2E_UWP_Auditor : null);
         if (activeAuditor) {
-            activeAuditor.auditMgT2ESystem(sys, { mode: 'bottom-up' });
+            const auditResults = activeAuditor.auditMgT2ESystem(sys, { mode: 'bottom-up' });
+            if (!auditResults.pass) {
+                console.warn(`[MgT2E Auditor] System ${hexId} failed strict validation. Logging to backlog.`);
+                
+                // Action 6.3: Audit Persistence — push all strict [FAIL] to global backlog
+                if (typeof window !== 'undefined') {
+                    window.auditBacklog = window.auditBacklog || [];
+                    auditResults.errors.forEach(err => {
+                        window.auditBacklog.push({
+                            hexId: hexId,
+                            orbitId: err.orbitId !== undefined ? err.orbitId : null,
+                            engine: "MgT2E",
+                            message: err.message || err 
+                        });
+                    });
+                }
+            }
+        }
+
+        // Action 6.4: Planet-Centric Biographies (v0.6.0.0)
+        // Groups all disparate generation data into a human-readable biography per world.
+        if (StellarEngine && StellarEngine.walkMgT2ESystem && StellarEngine.logMgT2EBodyBiography) {
+            tSection('System Biographies');
+            StellarEngine.walkMgT2ESystem(sys, (body) => {
+                StellarEngine.logMgT2EBodyBiography(body);
+            });
         }
 
         // Close trace logging

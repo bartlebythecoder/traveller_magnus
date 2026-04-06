@@ -5,10 +5,10 @@
 // It supports both "Continuation" and "Expanded" generation timings.
 
 // Browser-safe imports
-var orbitalAU, luminosityTable, starMassTable, zoneTables, satelliteOrbits, skeletonQuantities, anomalyLogic, bodySizes, popMods;
+var orbitalAU, luminosityTable, starMassTable, zoneTables, satelliteOrbits, skeletonQuantities, anomalyLogic, bodySizes, popMods, planetaryDMs;
 
 if (typeof module !== 'undefined' && module.exports) {
-    const { ORBIT_AU, LUM, STAR_MASS, ZONE_TABLES, SATELLITE_ORBITS, CT_SKELETON_QUANTITIES, CT_ANOMALY_LOGIC, CT_BODY_SIZES, CT_POPULATION_MODIFIERS } = require('./ct_constants');
+    const { ORBIT_AU, LUM, STAR_MASS, ZONE_TABLES, SATELLITE_ORBITS, CT_SKELETON_QUANTITIES, CT_ANOMALY_LOGIC, CT_BODY_SIZES, CT_POPULATION_MODIFIERS, CT_PLANETARY_DMS } = require('./ct_constants');
     orbitalAU = ORBIT_AU;
     luminosityTable = LUM;
     starMassTable = STAR_MASS;
@@ -18,6 +18,7 @@ if (typeof module !== 'undefined' && module.exports) {
     anomalyLogic = CT_ANOMALY_LOGIC;
     bodySizes = CT_BODY_SIZES;
     popMods = CT_POPULATION_MODIFIERS;
+    planetaryDMs = CT_PLANETARY_DMS;
 } else {
     // In browser, these are globals from ct_constants.js
     orbitalAU = typeof ORBIT_AU !== 'undefined' ? ORBIT_AU : [];
@@ -29,6 +30,7 @@ if (typeof module !== 'undefined' && module.exports) {
     anomalyLogic = typeof CT_ANOMALY_LOGIC !== 'undefined' ? CT_ANOMALY_LOGIC : {};
     bodySizes = typeof CT_BODY_SIZES !== 'undefined' ? CT_BODY_SIZES : {};
     popMods = typeof CT_POPULATION_MODIFIERS !== 'undefined' ? CT_POPULATION_MODIFIERS : {};
+    planetaryDMs = typeof CT_PLANETARY_DMS !== 'undefined' ? CT_PLANETARY_DMS : {};
 }
 
 // Helper: Convert number to UWP Char (0-15 -> 0-F)
@@ -71,39 +73,79 @@ function generatePhysicals(body, zone) {
     if (szVal === 0) {
         body.atm = 0;
         tSkip('Atmosphere (Asteroid/Size 0 forces Atm 0)');
-        tResult('Atmosphere Code', 0);
+        tResult('Atmosphere Code', 0, 'CT 2.2: Atmospheric Chemistry');
     } else {
         tDM('Size Code', szVal);
         tDM('Standard Atm', -7);
         let atmRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Atmosphere Roll') : 7) - 7 + szVal;
-        if (zone === 'I' || zone === 'O') {
-            tDM('Zone I/O', -4);
+        
+        // Fix 1: Correct Zone Modifiers
+        if (zone === 'I') {
+            tDM('Zone I', -2);
+            atmRoll -= 2;
+        } else if (zone === 'O') {
+            tDM('Zone O', -4);
             atmRoll -= 4;
         }
+        
         body.atm = Math.max(0, Math.min(15, atmRoll));
-        tResult('Atmosphere Code', body.atm);
+
+        // Fix 2: Deep Outer Exotic Override
+        if (zone === 'O') {
+            let exoticRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Outer Exotic Override Check') : 7);
+            if (exoticRoll === 12) {
+                body.atm = 10; // Atmosphere A
+                if (typeof tResult !== 'undefined') tResult('Exotic Override', 'Atmosphere A (Natural 12)', 'CT 2.2: RAW Edge-Case');
+            }
+        }
+
+        tResult('Atmosphere Code', body.atm, 'CT 2.2: Atmospheric Chemistry');
     }
 
     // C. HYDROGRAPHICS
     tSection('Hydrographic Percentage');
+    const hRules = (planetaryDMs && planetaryDMs.HYDROGRAPHICS) ? planetaryDMs.HYDROGRAPHICS : null;
+
     if (szVal === 0 || zone === 'I') {
         body.hydro = 0;
         tSkip(szVal === 0 ? 'Hydrographics (Asteroid/Size 0 forces Hydro 0)' : 'Hydrographics (Zone I is dry)');
-        tResult('Hydrographic Code', 0);
+        tResult('Hydrographic Code', 0, 'CT 2.3: Hydrographics');
     } else {
         tDM('Size Code', szVal);
         tDM('Standard Hyd', -7);
         let hydRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Hydrographics Roll') : 7) - 7 + szVal;
-        if (body.atm <= 1 || body.atm >= 10) {
-            tDM('Extreme Atmosphere', -4);
-            hydRoll -= 4;
+        
+        if (hRules) {
+            // Data Shield DMs
+            if (hRules.ATMOSPHERE_PENALTY && hRules.ATMOSPHERE_PENALTY.VALID_CODES.includes(body.atm)) {
+                tDM('Extreme Atmosphere', hRules.ATMOSPHERE_PENALTY.PENALTY);
+                hydRoll += hRules.ATMOSPHERE_PENALTY.PENALTY;
+            }
+            if (zone === 'O' && hRules.ZONE_MODIFIERS && hRules.ZONE_MODIFIERS.O) {
+                tDM('Zone O', hRules.ZONE_MODIFIERS.O);
+                hydRoll += hRules.ZONE_MODIFIERS.O;
+            }
+        } else {
+            // Fallback
+            if (body.atm <= 1 || body.atm >= 10) {
+                tDM('Extreme Atmosphere', -4);
+                hydRoll -= 4;
+            }
+            if (zone === 'O') {
+                tDM('Zone O', -2);
+                hydRoll -= 2;
+            }
         }
-        if (zone === 'O') {
-            tDM('Zone O', -2);
-            hydRoll -= 2;
-        }
+
         body.hydro = Math.max(0, Math.min(10, hydRoll));
-        tResult('Hydrographic Code', body.hydro);
+
+        // Vacuum World Exception
+        if (body.atm === 0 && body.hydro > 0) {
+            body.liquidType = 'Ice-Caps';
+            tResult('Vacuum Exception', 'Ice-Caps Only', 'CT 2.3: Hydrographics');
+        }
+
+        tResult('Hydrographic Code', body.hydro, 'CT 2.3: Hydrographics');
     }
 
     return body;
@@ -124,7 +166,7 @@ function generatePopulation(world, ctx = { mode: 'bottomup' }) {
     if (forcedZeroSizes.includes(world.size) || forcedZeroTypes.includes(world.type)) {
         world.pop = 0;
         tSkip(`Population (Body type ${world.type} / Size ${world.size} forces 0 pop)`);
-        tResult('Population Code', 0);
+        tResult('Population Code', 0, 'CT 3.1: Social Stats');
         return world;
     }
 
@@ -181,7 +223,7 @@ function generatePopulation(world, ctx = { mode: 'bottomup' }) {
         }
     }
 
-    tResult('Population Code', world.pop);
+    tResult('Population Code', world.pop, 'CT 3.1: Social Stats');
     return world;
 }
 
@@ -200,47 +242,58 @@ function generateModularMainworld(hexId) {
         name: mwName
     };
 
-    // A. Starport
-    tSection('Starport Generation');
-    let spRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Mainworld Starport') : 7);
-    if (spRoll <= 4) mw.starport = 'A';
-    else if (spRoll <= 6) mw.starport = 'B';
-    else if (spRoll <= 8) mw.starport = 'C';
-    else if (spRoll === 9) mw.starport = 'D';
-    else if (spRoll <= 11) mw.starport = 'E';
-    else mw.starport = 'X';
-    tResult('Starport Class', mw.starport);
+    // Ensure Data Shield is available
+    const sysData = (typeof CT_CONSTANTS !== 'undefined') ? CT_CONSTANTS.CT_SYSTEM_CONTENTS : null;
 
-    // B. Bases
-    tSection('Bases & Gas Giants');
-    mw.navalBase = false;
-    mw.scoutBase = false;
-    if (['A', 'B'].includes(mw.starport)) {
-        if ((typeof tRoll2D !== 'undefined' ? tRoll2D('Naval Base Check') : 7) >= 8) mw.navalBase = true;
-        tResult('Naval Base Present', mw.navalBase);
-    } else {
-        tSkip('Naval Base (Requires Starport A or B)');
-    }
-
-    let sbDM = 0;
-    if (mw.starport === 'A') sbDM = -3;
-    else if (mw.starport === 'B') sbDM = -2;
-    else if (mw.starport === 'C') sbDM = -1;
-
-    if (['A', 'B', 'C', 'D'].includes(mw.starport)) {
-        tDM(`Starport ${mw.starport}`, sbDM);
-        if ((typeof tRoll2D !== 'undefined' ? tRoll2D('Scout Base Check') : 7) + sbDM >= 7) mw.scoutBase = true;
-        tResult('Scout Base Present', mw.scoutBase);
-    } else {
-        tSkip('Scout Base (Requires Starport A-D)');
-    }
-
-    // C. Gas Giant Presence
+    // A. Gas Giant Presence (rolled first to warm up the PRNG before the starport roll)
     mw.gasGiant = rollGasGiantPresence();
     tResult('Gas Giant Presence', mw.gasGiant);
 
-    // D. Physicals -> Physical pass will handle sections
+    // B. Physicals -> Physical pass will handle sections
     generatePhysicals(mw, 'H');
+
+    // C. Starport (rolled after physicals so the PRNG is in a warmed-up state,
+    //    matching the bottom-up path and ensuring X starports can occur)
+    tSection('Starport Generation');
+    let spRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Mainworld Starport') : 7);
+    mw.starport = 'X';
+    if (sysData && sysData.STARPORT) {
+        for (let entry of sysData.STARPORT) {
+            if (spRoll <= entry.maxRoll) {
+                mw.starport = entry.class;
+                break;
+            }
+        }
+    } else {
+        // Fallback if data shield is missing
+        if (spRoll <= 4) mw.starport = 'A'; else if (spRoll <= 6) mw.starport = 'B'; else if (spRoll <= 8) mw.starport = 'C'; else if (spRoll === 9) mw.starport = 'D'; else if (spRoll <= 11) mw.starport = 'E';
+    }
+    tResult('Starport Class', mw.starport);
+
+    // D. Bases
+    tSection('Bases & Gas Giants');
+    mw.navalBase = false;
+    mw.scoutBase = false;
+
+    if (sysData && sysData.BASES) {
+        // Naval Base
+        if (sysData.BASES.NAVAL.ALLOWED_PORTS.includes(mw.starport)) {
+            if ((typeof tRoll2D !== 'undefined' ? tRoll2D('Naval Base Check') : 7) >= sysData.BASES.NAVAL.TARGET) mw.navalBase = true;
+            tResult('Naval Base Present', mw.navalBase);
+        } else {
+            tSkip('Naval Base (Port Requirement Not Met)');
+        }
+
+        // Scout Base
+        if (sysData.BASES.SCOUT.ALLOWED_PORTS.includes(mw.starport)) {
+            let sbDM = sysData.BASES.SCOUT.DMS[mw.starport] || 0;
+            if (sbDM !== 0) tDM(`Starport ${mw.starport}`, sbDM);
+            if ((typeof tRoll2D !== 'undefined' ? tRoll2D('Scout Base Check') : 7) + sbDM >= sysData.BASES.SCOUT.TARGET) mw.scoutBase = true;
+            tResult('Scout Base Present', mw.scoutBase);
+        } else {
+            tSkip('Scout Base (Port Requirement Not Met)');
+        }
+    }
 
     // E. Population -> Population pass will handle sections
     generatePopulation(mw);
@@ -272,7 +325,7 @@ function finalizeMainworldSocial(world) {
     tDM('Population Code', world.pop);
     let govRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Government Roll') : 7);
     world.gov = Math.max(0, Math.min(15, govRoll - 7 + world.pop));
-    tResult('Government Code', world.gov);
+    tResult('Government Code', world.gov, 'CT 3.1: Social Stats');
 
     // Law: 2D-7 + Govt
     tSection('Law Level');
@@ -280,7 +333,7 @@ function finalizeMainworldSocial(world) {
     tDM('Government Code', world.gov);
     let lawRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Law Level Roll') : 7);
     world.law = Math.max(0, Math.min(15, lawRoll - 7 + world.gov));
-    tResult('Law Level Code', world.law);
+    tResult('Law Level Code', world.law, 'CT 3.1: Social Stats');
 
     // TL: Starport + Size + Atmo + Hydro + Pop + Gov bonuses
     tSection('Technological Level');
@@ -307,13 +360,20 @@ function generateSocial(world) {
 
     // A. Starport
     tSection('Starport Generation');
+    const sysData = (typeof CT_CONSTANTS !== 'undefined') ? CT_CONSTANTS.CT_SYSTEM_CONTENTS : null;
     let spRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Mainworld Starport') : 7);
-    if (spRoll <= 4) world.starport = 'A';
-    else if (spRoll <= 6) world.starport = 'B';
-    else if (spRoll <= 8) world.starport = 'C';
-    else if (spRoll === 9) world.starport = 'D';
-    else if (spRoll <= 11) world.starport = 'E';
-    else world.starport = 'X';
+    world.starport = 'X';
+    
+    if (sysData && sysData.STARPORT) {
+        for (let entry of sysData.STARPORT) {
+            if (spRoll <= entry.maxRoll) {
+                world.starport = entry.class;
+                break;
+            }
+        }
+    } else {
+        if (spRoll <= 4) world.starport = 'A'; else if (spRoll <= 6) world.starport = 'B'; else if (spRoll <= 8) world.starport = 'C'; else if (spRoll === 9) world.starport = 'D'; else if (spRoll <= 11) world.starport = 'E';
+    }
     tResult('Starport Class', world.starport);
 
     // B. Finalize Social (Gov, Law, TL, Trade)
@@ -327,20 +387,21 @@ function generateSocial(world) {
  */
 function generateTradeCodes(w) {
     let codes = [];
-    const { atm, hydro, pop, gov, size } = w;
+    const tcData = (typeof CT_CONSTANTS !== 'undefined') ? CT_CONSTANTS.TRADE_CODES : [];
 
-    if (atm >= 4 && atm <= 9 && hydro >= 4 && hydro <= 8 && pop >= 5 && pop <= 7) codes.push("Ag");
-    if (atm <= 3 && hydro <= 3 && pop >= 6) codes.push("Na");
-    if ([0, 1, 2, 4, 7, 9].includes(atm) && pop >= 9) codes.push("In");
-    if (pop <= 6) codes.push("Ni");
-    if (gov >= 4 && gov <= 9 && [6, 8].includes(atm) && pop >= 6 && pop <= 8) codes.push("Ri");
-    if (atm >= 2 && atm <= 5 && hydro <= 3) codes.push("Po");
-    if (hydro === 10) codes.push("Wa");
-    if (hydro === 0) codes.push("De");
-    if (atm === 0) codes.push("Va");
-    if (size === 0) codes.push("As");
-    if ([0, 1].includes(atm) && hydro >= 1) codes.push("Ic");
-    if (w.isMoon || w.isSatellite || w.type === 'Satellite' || (w.parentType === 'Gas Giant' || w.parentBody === 'Gas Giant')) codes.push("Sa");
+    tcData.forEach(tc => {
+        let match = true;
+        if (tc.reqs.size && !tc.reqs.size.includes(w.size)) match = false;
+        if (tc.reqs.atm && !tc.reqs.atm.includes(w.atm)) match = false;
+        if (tc.reqs.hydro && !tc.reqs.hydro.includes(w.hydro)) match = false;
+        if (tc.reqs.pop && !tc.reqs.pop.includes(w.pop)) match = false;
+        if (tc.reqs.gov && !tc.reqs.gov.includes(w.gov)) match = false;
+
+        if (match) codes.push(tc.code);
+    });
+
+    // Special Case: Satellite
+    if (w.isMoon || w.isSatellite || w.type === 'Satellite') codes.push("Sa");
 
     return codes;
 }
@@ -384,11 +445,19 @@ function finalizeSubordinateSocial(world, mwRef) {
         world.gov = (govRoll + govDM >= 5) ? 6 : (govRoll + govDM);
     }
 
+    if (typeof tResult !== 'undefined') {
+        tResult('Government Code', world.gov, 'CT 3.1: Social Stats');
+    }
+
     // Subordinate Law: 1D-3 + MW Law
     tDM('Mainworld Law', mwRef.law);
     tDM('Standard Law', -3);
     let lawRoll = (typeof tRoll1D !== 'undefined' ? tRoll1D('Subordinate Law') : 3);
     world.law = Math.max(0, Math.min(15, lawRoll - 3 + mwRef.law));
+
+    if (typeof tResult !== 'undefined') {
+        tResult('Law Level Code', world.law, 'CT 3.1: Social Stats');
+    }
 
     // Spaceport
     let spDM = 0;
@@ -476,7 +545,7 @@ function calculateTLModular(w, isMainworld) {
  * 5. SYSTEM SKELETON ROLLING
  * Centralized rolling for Gas Giants, Planetoid Belts, and Anomalies.
  */
-function rollSystemSkeleton(primaryStar, forcedGGPresence = null) {
+function rollSystemSkeleton(primaryStar, forcedGGPresence = null, hzOuterOrbits = null, totalOrbits = null) {
     const skeleton = {
         ggs: [],
         belts: 0,
@@ -488,19 +557,31 @@ function rollSystemSkeleton(primaryStar, forcedGGPresence = null) {
     tSection('Gas Giant Presence');
     let hasGG = false;
     
-    // Strict boolean check prevents undefined mainworld states from disabling Bottom-Up rolls
     if (forcedGGPresence === true || forcedGGPresence === false) {
-        hasGG = forcedGGPresence; // Obey Top-Down Mainworld
+        hasGG = forcedGGPresence; 
         tResult('Gas Giant Presence', hasGG ? 'Forced Present' : 'Forced Absent');
     } else {
         hasGG = rollGasGiantPresence();
         tResult('Gas Giant Presence Check', hasGG ? 'Present (9 or less)' : 'Absent');
     }
 
+    let ggCount = 0;
     if (hasGG) {
         const ggQtyRoll = tRoll2D('GG Quantity Roll');
         const ggQtyTable = (skeletonQuantities && skeletonQuantities.GG_QTY) ? skeletonQuantities.GG_QTY : [0, 1, 1, 1, 2, 2, 3, 3, 4, 4, 4, 5, 5];
-        const count = ggQtyTable[ggQtyRoll] || 0;
+        let count = ggQtyTable[ggQtyRoll] || 0;
+
+        // RAW Quantity Cap & Zero Orbit Exception
+        if (hzOuterOrbits !== null) {
+            if (hzOuterOrbits === 0 && totalOrbits === 0 && count > 0) {
+                count = 1; // Exception: Create exactly 1 outer orbit
+                tResult('Zero Orbit Exception', 'Forced 1 Gas Giant into generated Outer Orbit');
+            } else {
+                count = Math.min(count, hzOuterOrbits);
+            }
+        }
+        
+        ggCount = count;
         tResult('Gas Giants Rolled', count);
         for (let i = 0; i < count; i++) {
             const sizeRoll = tRoll1D(`GG ${i + 1} Size Roll`);
@@ -513,15 +594,33 @@ function rollSystemSkeleton(primaryStar, forcedGGPresence = null) {
 
     // B. Planetoid Belts
     tSection('Planetoid Belt Presence');
-    const pbThreshold = (skeletonQuantities && typeof skeletonQuantities.PB_PRESENCE_MAX !== 'undefined')
-                        ? skeletonQuantities.PB_PRESENCE_MAX
-                        : 6;
+    const pbThreshold = (skeletonQuantities && typeof skeletonQuantities.PB_PRESENCE_MAX !== 'undefined') ? skeletonQuantities.PB_PRESENCE_MAX : 6;
 
-    const pbPresenceRoll = tRoll2D('PB Presence Roll');
+    if (ggCount > 0) tDM(`${ggCount} Gas Giants`, -ggCount);
+    let pbPresenceRoll = tRoll2D('PB Presence Roll') - ggCount;
+
     if (pbPresenceRoll >= pbThreshold) {
-        const pbQtyRoll = tRoll2D('PB Quantity Roll');
+        if (ggCount > 0) tDM(`${ggCount} Gas Giants`, -ggCount);
+        let pbQtyRoll = tRoll2D('PB Quantity Roll') - ggCount;
+        pbQtyRoll = Math.max(0, pbQtyRoll); // Prevent negative table lookups
+        
         const pbQtyTable = (skeletonQuantities && skeletonQuantities.PB_QTY) ? skeletonQuantities.PB_QTY : { "0": 3, "1": 2, "2": 2, "3": 2, "4": 2, "5": 2, "6": 2 };
-        skeleton.belts = (typeof pbQtyTable[pbQtyRoll] !== 'undefined') ? pbQtyTable[pbQtyRoll] : 0;
+        
+        // Safe table mapping
+        let tableKeys = Object.keys(pbQtyTable).map(Number).sort((a,b) => a-b);
+        let lookupKey = pbQtyRoll;
+        if (lookupKey < tableKeys[0]) lookupKey = tableKeys[0];
+        if (lookupKey > tableKeys[tableKeys.length - 1]) lookupKey = tableKeys[tableKeys.length - 1];
+
+        let belts = pbQtyTable[String(lookupKey)] || 0;
+
+        // RAW Quantity Cap (Remaining Orbits)
+        if (totalOrbits !== null) {
+            let remaining = Math.max(0, totalOrbits - ggCount);
+            belts = Math.min(belts, remaining);
+        }
+
+        skeleton.belts = belts;
         tResult('Planetoid Belts Rolled', `${skeleton.belts} (${pbPresenceRoll} >= ${pbThreshold})`);
     } else {
         tResult('Planetoid Belts', `None (${pbPresenceRoll} < ${pbThreshold})`);

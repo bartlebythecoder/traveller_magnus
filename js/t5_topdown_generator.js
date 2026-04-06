@@ -24,7 +24,7 @@
     const _roll1D = (typeof roll1D === 'function') ? roll1D : () => Math.floor(_rng() * 6) + 1;
     const _roll2D = (typeof roll2D === 'function') ? roll2D : () => _roll1D() + _roll1D();
     const _log = (typeof writeLogLine === 'function') ? writeLogLine : console.log;
-    const _tResult = (typeof tResult === 'function') ? tResult : (label, val) => _log(`${label}: ${val}`);
+    const _tResult = (typeof tResult === 'function') ? tResult : (label, val, source) => _log(`${label}: ${val}`);
 
     const HZ_DATA = {
         'O': { 'Ia': 15, 'Ib': 15, 'II': 14, 'III': 13, 'IV': 12, 'V': 11, 'D': 1 },
@@ -84,20 +84,20 @@
         const type = (spectralType || 'G').charAt(0).toUpperCase();
         if (type === 'M') dm = 2;
         if (type === 'O' || type === 'B') dm = -2;
-        
+
         hzFlux = clampUWP(hzFlux + dm, -6, 6);
 
         let hzVariance = 0, climate = '', tradeCode = '';
-        if (hzFlux === -6) { 
-            hzVariance = -2; 
-        } else if (hzFlux <= -3) { 
-            hzVariance = -1; climate = 'Hot / Tropic'; tradeCode = 'Tr'; 
-        } else if (hzFlux <= 2) { 
-            hzVariance = 0; climate = 'Temperate'; 
-        } else if (hzFlux <= 5) { 
-            hzVariance = 1; climate = 'Cold / Tundra'; tradeCode = 'Tu'; 
-        } else { 
-            hzVariance = 2; climate = 'Frozen'; tradeCode = 'Fr'; 
+        if (hzFlux === -6) {
+            hzVariance = -2;
+        } else if (hzFlux <= -3) {
+            hzVariance = -1; climate = 'Hot / Tropic'; tradeCode = 'Tr';
+        } else if (hzFlux <= 2) {
+            hzVariance = 0; climate = 'Temperate';
+        } else if (hzFlux <= 5) {
+            hzVariance = 1; climate = 'Cold / Tundra'; tradeCode = 'Tu';
+        } else {
+            hzVariance = 2; climate = 'Frozen'; tradeCode = 'Fr';
         }
 
         return { hzVariance, climate, tradeCode };
@@ -109,9 +109,9 @@
     function generateGasGiantStats() {
         let roll = _roll2D();
         let size, type;
-        if (roll === 2 || roll === 3) { 
-            size = (roll === 2 ? 'M' : 'N'); 
-            type = 'Small Gas Giant'; 
+        if (roll === 2 || roll === 3) {
+            size = (roll === 2 ? 'M' : 'N');
+            type = 'Small Gas Giant';
         } else {
             type = 'Large Gas Giant';
             const chars = "PQRS TUVWX"; // Mapping for 2D rolls 4-12
@@ -141,7 +141,7 @@
             // Find the correct key in the size mapping (e.g., "A0_F5")
             for (const range in sizeMap) {
                 if (range === 'LOGIC' || !range) continue;
-                
+
                 // Robust parser for ranges like "A0_F5" or single types like "M9"
                 const parts = range.split('_');
                 const start = parts[0];
@@ -173,7 +173,7 @@
         // 2. Adjustment Loop (Closest possible >= surfaceOrbit + 1)
         // Safety check: ensure star.orbits exists
         if (!star || !star.orbits) return -1;
-        
+
         const check = (o) => (o >= 0 && o < 20 && o > preclusionLimit && star.orbits[o] && !star.orbits[o].contents);
 
         if (check(target)) return target;
@@ -229,7 +229,7 @@
                 });
             }
         }
-        
+
         if (!sysStars) {
             sysStars = mainworldBase.stars ? JSON.parse(JSON.stringify(mainworldBase.stars)) : [{ type: 'G', decimal: 2, size: 'V', name: 'Primary', orbitID: 0 }];
         }
@@ -249,10 +249,16 @@
         });
 
         const primary = sys.stars[0];
+        // PHASE 2 (PRE-REQUISITE): System Inventory (Moved up for Continuation Method)
+        let ggCountTotal = Math.max(0, Math.floor(_roll2D() / 2) - 2);
+        let beltCountTotal = Math.max(0, _roll1D() - 3);
+        const otherTerrTotal = _roll2D(); // Inventory = MW + GG + Belt + 2D. 
+
         const hzOrbit = getStarHZ(primary);
         const hzResult = generateHZAndClimate(primary.type);
 
-        // PHASE 1: The Anchor (Mainworld)
+        // PHASE 1: THE ANCHOR (Mainworld)
+        // =================================================================
         let mwTarget = clampUWP(hzOrbit + hzResult.hzVariance, 0, 19);
         sys.mainworld.climateZone = hzResult.climate;
         if (hzResult.tradeCode) {
@@ -260,25 +266,57 @@
             if (!sys.mainworld.tradeCodes.includes(hzResult.tradeCode)) sys.mainworld.tradeCodes.push(hzResult.tradeCode);
         }
 
-        // Injection Constraint: If MW is Satellite, inject parent
-        const isSatellite = sys.mainworld.worldType && sys.mainworld.worldType.includes('Satellite');
+        // Action 6.3: T5 Continuation Method - Handle Predefined Satellite Injection
+        let isSatellite = mainworldBase.isPreMoon === true ||
+            (mainworldBase.tradeCodes && (mainworldBase.tradeCodes.includes('Sa') || mainworldBase.tradeCodes.includes('Lk')));
+
+        // Objective 1: Step B2 Intercept (Random Lunar Attachment for standard worlds)
+        if (!isSatellite && mainworldBase.isPreMoon !== false) {
+            const lunarFlux = rollFlux();
+            if (lunarFlux === -3) {
+                isSatellite = true;
+                if (!sys.mainworld.tradeCodes) sys.mainworld.tradeCodes = [];
+                if (!sys.mainworld.tradeCodes.includes('Lk')) sys.mainworld.tradeCodes.push('Lk');
+                tResult('Lunar Trigger', 'LOCKED SATELLITE (Lk)', 'T5 1.3: Orbit Allocation');
+            } else if (lunarFlux <= -4) {
+                isSatellite = true;
+                if (!sys.mainworld.tradeCodes) sys.mainworld.tradeCodes = [];
+                if (!sys.mainworld.tradeCodes.includes('Sa')) sys.mainworld.tradeCodes.push('Sa');
+                tResult('Lunar Trigger', 'FAR SATELLITE (Sa)', 'T5 1.3: Orbit Allocation');
+            }
+        }
+
         if (isSatellite) {
-            const ggStats = generateGasGiantStats();
             let parent;
-            if (sys.mainworld.parentBody === 'Gas Giant') {
+            if (ggCountTotal > 0) {
+                // T5 RAW: Pre-defined moon consumes one GG from inventory
+                ggCountTotal--;
+                const ggStats = generateGasGiantStats();
                 parent = { ...ggStats, type: ggStats.type, satellites: [sys.mainworld] };
             } else {
-                parent = { 
-                    type: 'BigWorld', 
-                    worldType: 'BigWorld', 
-                    size: _roll2D() + 7, 
-                    satellites: [sys.mainworld] 
+                // No GGs rolled? Spawn a free BigWorld parent (T5 RAW Backup)
+                parent = {
+                    type: 'BigWorld',
+                    worldType: 'BigWorld',
+                    size: _roll2D() + 7,
+                    satellites: [sys.mainworld]
                 };
             }
 
+            // Objective 2: Sub-Orbit Flux Roll (Ay through Zee naming convention)
+            let satFlux = rollFlux();
+            sys.mainworld.orbitLetter = String.fromCharCode(97 + (satFlux + 6)); // Flux -6..6 maps to a..m
+
+            // CRITICAL UI FIX: Apply the Universal Project Flags so the map renderer sees the moon
+            sys.mainworld.isMoon = true;
+            sys.mainworld.isSatellite = true;
+            sys.mainworld.isLunarMainworld = true;
+            sys.mainworld.parentType = parent.type;
+            sys.mainworld.parentBody = parent.type; // Needed for the T5 Biography Logger
+
             // SEAN PROTOCOL: Moon-Mainworld Selection Logging
-            tResult('Mainworld Status', 'LUNAR SELECTION');
-            _log(`[MAINWORLD LOG] Hex ${mainworldBase.hex}: Mainworld is a MOON attached to a ${parent.type}`);
+            tResult('Mainworld Status', 'LUNAR SELECTION', 'T5 1.3: Orbit Allocation');
+            _log(`[MAINWORLD LOG] Hex ${mainworldBase.hexId || 'null'}: T5 Mainworld is a MOON attached to a ${parent.type} (Sub-Orbit ${sys.mainworld.orbitLetter})`);
 
             mwTarget = findAvailableOrbit(primary, mwTarget);
             if (mwTarget >= 0) primary.orbits[mwTarget].contents = parent;
@@ -289,18 +327,12 @@
             if (mwTarget >= 0) primary.orbits[mwTarget].contents = sys.mainworld;
         }
 
-        // PHASE 2: System Inventory
-        const ggCountTotal = Math.max(0, Math.floor(_roll2D() / 2) - 2);
-        const beltCountTotal = Math.max(0, _roll1D() - 3);
-
-        // --- NEW: Bases and GG flag for Mainworld ---
+        // Social and Inventory Flags for Mainworld
         if (T5_World_Engine && T5_World_Engine.generateT5Bases) {
             T5_World_Engine.generateT5Bases(sys.mainworld);
         }
         sys.mainworld.gasGiantsCount = ggCountTotal;
-        sys.mainworld.gasGiant = ggCountTotal > 0;
-        const roll2D = _roll2D();
-        const otherTerrTotal = roll2D; // Inventory = MW + GG + Belt + 2D. "Other" is the 2D roll.
+        sys.mainworld.gasGiant = (ggCountTotal > 0 || isSatellite); // If moon of GG, flag is true
 
         // Shared helper for Rotating Placement
         function placeCategory(category, count, targetStars, placementLogic) {
@@ -308,7 +340,7 @@
             for (let i = 0; i < count; i++) {
                 const hostStar = targetStars[starIdx];
                 const hostHZ = getStarHZ(hostStar);
-                
+
                 // Maximum orbit for secondary stars: Primary Orbit - 3
                 const maxOrbitLimit = (hostStar === primary) ? 19 : Math.max(0, hostStar.orbitID - 3);
 
@@ -319,7 +351,7 @@
                     const body = createBodyPlaceholder(category);
                     hostStar.orbits[resolved].contents = body;
                 }
-                
+
                 starIdx = (starIdx + 1) % targetStars.length;
             }
         }
@@ -363,6 +395,31 @@
             MgT2EMath.performJourneyMathSweep(sys);
         }
 
+        // --- ACTION 6.4: PLANET-CENTRIC BIOGRAPHIES (v0.6.0.0) ---
+        if (T5_Stellar_Engine && T5_Stellar_Engine.walkT5System && T5_Stellar_Engine.logT5BodyBiography) {
+            tSection('System Biographies');
+            T5_Stellar_Engine.walkT5System(sys, (body) => {
+                T5_Stellar_Engine.logT5BodyBiography(body);
+            });
+        }
+
+        // --- ACTION 6.3: AUDIT PERSISTENCE (v0.6.0.0) ---
+        const activeAuditor = (typeof T5_Auditor !== 'undefined') ? T5_Auditor : null;
+        if (activeAuditor && activeAuditor.auditT5System) {
+            const auditResults = activeAuditor.auditT5System(sys);
+            if (!auditResults.pass && typeof window !== 'undefined') {
+                window.auditBacklog = window.auditBacklog || [];
+                auditResults.errors.forEach(err => {
+                    window.auditBacklog.push({
+                        hexId: sys.mainworld.hexId || 'unknown',
+                        orbitId: err.orbitId || null,
+                        engine: "T5",
+                        message: err.message || err
+                    });
+                });
+            }
+        }
+
         return sys;
     }
 
@@ -393,7 +450,7 @@
             if (isGG) {
                 pSize = (typeof parent.size === 'string') ? fromUWPChar(parent.size) : parent.size;
             }
-            
+
             if (pSize !== undefined && moon.size >= pSize) {
                 _log(`Physics Constraint: Moon size ${moon.size} >= Parent size ${pSize}. Clamping Moon to ${Math.max(0, pSize - 1)}.`);
                 moon.size = Math.max(0, pSize - 1);
@@ -439,64 +496,35 @@
                 // Apply Full T5 Orbit Labeling (Positional + Climate)
                 body.climateZone = getT5OrbitLabel(o.orbit, hostHZ);
 
-                // 1. Flesh out the parent body (MUST HAPPEN BEFORE SATELLITES for size context)
+                // 1. Flesh out the parent body
                 if (body !== sys.mainworld) {
                     generateT5SubordinateUWP(body, o.orbit, hostHZ, maxSubPop, false);
-                } else {
-                    // Final physical stats for Mainworld
-                    calculateT5PhysicalStats(sys.mainworld);
                 }
 
-                // 2. Generate new satellites (except for belts)
-                // Note: generateT5Satellites internally calls generateT5SubordinateUWP for NEW moons
+                // 2. Generate new satellites
                 if (body.worldType !== 'Belt' && body.type !== 'Planetoid Belt') {
                     generateT5Satellites(body, o.orbit, hostHZ, maxSubPop);
                 }
 
-                // 3. Flesh out only existing satellites that weren't just created (e.g. injected Mainworld)
+                // 3. Flesh out existing satellites (e.g. injected Mainworld)
                 if (body.satellites) {
                     body.satellites.forEach(s => {
-                        // Satellites share the climate zone/label of their parent orbit
                         s.climateZone = body.climateZone;
                         if (s !== sys.mainworld && s.uwp === undefined) {
                             generateT5SubordinateUWP(s, o.orbit, hostHZ, maxSubPop, true);
-                        } else if (s === sys.mainworld) {
-                            calculateT5PhysicalStats(s); // Recalculate mainworld physics
                         }
-
-                        // Sean Protocol: Satellites
+                        
                         if (!s.distAU && body.distAU) { s.distAU = body.distAU; }
-                        if (s.distAU) {
-                            const orbitMkmSat = (s.distAU * 149597870) / 1000000;
-                            _tResult("Orbit Distance", `${s.distAU.toFixed(2)} AU (${orbitMkmSat.toFixed(1)} M km)`);
-                            
-                            const sSize = (typeof s.size === 'string') ? UniversalMath.fromUWPChar(s.size) : (s.size || 0);
-                            const world100DSat = (sSize * 160000) / 1000000;
-                            _tResult("World 100D Limit", `${world100DSat.toFixed(2)} M km`);
 
-                            if (typeof UniversalMath !== 'undefined' && UniversalMath.isMaskingEligible) {
-                                const isEligible = UniversalMath.isMaskingEligible(star.diam, s.distAU, sSize);
-                                _tResult("Stellar Masking", isEligible ? "ELIGIBLE" : "Ineligible");
-                            }
-                        }
+                        // PHASE 2.1 FINAL FIX: Ensure physics are recalculated for EVERY satellite
+                        T5_World_Engine.calculateT5PhysicalStats(s);
+                        if (T5_World_Engine.calculateT5Climate) T5_World_Engine.calculateT5Climate(s, 1.0);
                     });
                 }
 
-                // Sean Protocol: Body (Main Body)
-                if (body.distAU || o.distAU) {
-                    const distAU = body.distAU || o.distAU;
-                    const orbitMkm = (distAU * 149597870) / 1000000;
-                    _tResult("Orbit Distance", `${distAU.toFixed(3)} AU (${orbitMkm.toFixed(1)} M km)`);
-                    
-                    const bSize = (typeof body.size === 'string') ? UniversalMath.fromUWPChar(body.size) : (body.size || 0);
-                    const world100D = (bSize * 160000) / 1000000;
-                    _tResult("World 100D Limit", `${world100D.toFixed(2)} M km`);
-
-                    if (typeof UniversalMath !== 'undefined' && UniversalMath.isMaskingEligible) {
-                        const isEligible = UniversalMath.isMaskingEligible(star.diam, distAU, bSize);
-                        _tResult("Stellar Masking", isEligible ? "ELIGIBLE" : "Ineligible");
-                    }
-                }
+                // PHASE 2.1 FINAL FIX: Absolute last step for the main body
+                T5_World_Engine.calculateT5PhysicalStats(body);
+                if (T5_World_Engine.calculateT5Climate) T5_World_Engine.calculateT5Climate(body, 1.0);
             });
         });
     }
@@ -507,7 +535,7 @@
     function getT5Classification(orbit, hzOrbit, isSatellite) {
         const isZoneA = (orbit <= hzOrbit + 1);
         const limit = hzOrbit + 1;
-        
+
         if (isZoneA) {
             _log(`Zone Detection: Orbit ${orbit} is <= HZ+1 (Orbit ${limit}). Zone A applied.`);
         } else {
@@ -538,12 +566,12 @@
     function generateT5SubordinateUWP(world, orbit, hzOrbit, maxPop, isSatellite) {
         if (world.type && (world.type.includes('Gas Giant') || world.type === 'Ice Giant')) {
             world.worldType = world.type;
-            calculateT5PhysicalStats(world);
+            T5_World_Engine.calculateT5PhysicalStats(world);
             world.uwp = world.size;
             world.uwpSecondary = world.size;
             return;
         }
-        
+
         // Preserve existing classification if already set (e.g. by creation or previous call)
         if (!world.worldType) {
             if (world.type === 'Planetoid Belt') {
@@ -567,7 +595,7 @@
 
         // 2. Physical: Atmosphere
         const sizeVal = (typeof world.size === 'string' ? fromUWPChar(world.size) : (world.size || 0));
-        
+
         if (type === 'Inferno') {
             world.atm = fromUWPChar('B');
         } else if (type === 'Belt') {
@@ -601,14 +629,15 @@
         // 6. Social: Gov/Law
         world.gov = clampUWP(world.pop + rollFlux(), 0, 15);
         world.law = clampUWP(world.gov + rollFlux(), 0, 18);
-        
+
         // 7. Social: Tech Level
         let tlDM = (world.starport === 'F') ? 1 : 0;
         if (world.size <= 1) tlDM += 2;
         if (world.atm <= 3 || world.atm >= 10) tlDM += 1;
         world.tl = clampUWP(_roll1D() + tlDM, 0, 33);
 
-        calculateT5PhysicalStats(world);
+        T5_World_Engine.calculateT5PhysicalStats(world);
+        if (T5_World_Engine.calculateT5Climate) T5_World_Engine.calculateT5Climate(world, 1.0);
 
         // --- 8. Social: Trade Codes ---
         if (T5_World_Engine && T5_World_Engine.calculateT5TradeCodes) {
@@ -629,32 +658,6 @@
 
         world.uwp = `${world.starport}${toUWPChar(world.size)}${toUWPChar(world.atm)}${toUWPChar(world.hydro)}${toUWPChar(world.pop)}${toUWPChar(world.gov)}${toUWPChar(world.law)}-${toUWPChar(world.tl)}`;
         world.uwpSecondary = world.uwp;
-    }
-
-    /**
-     * Calculates secondary physical characteristics.
-     */
-    function calculateT5PhysicalStats(world) {
-        if (!world || world.size === undefined) return;
-
-        const isGG = (world.type && (world.type.includes('Gas Giant') || world.type === 'Ice Giant'));
-        const sizeVal = (world.size === '0' || world.size === 0) ? 0.35 : (typeof world.size === 'string' ? fromUWPChar(world.size) : world.size);
-        
-        if (isGG) {
-            world.diamKm = sizeVal * 10000;
-        } else if (sizeVal <= 0.35) {
-            world.diamKm = 500;
-        } else {
-            world.diamKm = sizeVal * 1600;
-        }
-
-        if (!isGG) {
-            world.density = 1.0; // Default
-            world.gravity = parseFloat((world.density * (sizeVal / 8)).toFixed(2));
-        } else {
-            world.density = 0.1;
-            world.gravity = parseFloat((sizeVal / 10).toFixed(2));
-        }
     }
 
     return { generateT5System };

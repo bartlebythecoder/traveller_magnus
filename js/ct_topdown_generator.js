@@ -3,20 +3,17 @@
 // =====================================================================
 
 // Browser-safe imports
-var orbitalAU, luminosityTable, starMassTable, zoneTables, natureTable, priTypeTable, priSizeTable, compTypeTable, compSizeTable, satOrbitsTable, placementPriorities, rollSkeleton;
+// Stellar table variables (natureTable, priTypeTable, priSizeTable, compTypeTable,
+// compSizeTable) are now owned exclusively by CT_StellarEngine.
+var orbitalAU, luminosityTable, starMassTable, zoneTables, satOrbitsTable, placementPriorities, rollSkeleton;
 var physicalGen, popGen, mainworldSocialFin, subordinateSocialFin, tradeCodesGen;
-var thermalStatsGetter, rotationStatsGetter, satelliteGenerator, systemWalker, processSubordinates;
+var thermalStatsGetter, rotationStatsGetter, satelliteGenerator, systemWalker, processSubordinates, derivedPhysicsProcessor;
 
 if (typeof module !== 'undefined' && module.exports) {
     const constants = require('./ct_constants');
     orbitalAU = constants.ORBIT_AU;
     luminosityTable = constants.LUM;
     starMassTable = constants.STAR_MASS;
-    natureTable = constants.CT_BASIC_NATURE_TABLE;
-    priTypeTable = constants.CT_PRI_TYPE_TABLE;
-    priSizeTable = constants.CT_PRI_SIZE_TABLE;
-    compTypeTable = constants.CT_COMP_TYPE_TABLE;
-    compSizeTable = constants.CT_COMP_SIZE_TABLE;
     zoneTables = constants.ZONE_TABLES;
     satOrbitsTable = constants.SATELLITE_ORBITS;
 
@@ -38,16 +35,14 @@ if (typeof module !== 'undefined' && module.exports) {
     thermalStatsGetter = physLib.getThermalStats;
     rotationStatsGetter = physLib.getRotationStats;
     satelliteGenerator = physLib.generateSatellites;
+    derivedPhysicsProcessor = physLib.processCTDerivedPhysics;
 } else {
     // In browser, these are globals or on window namespaces
+    // Note: stellar tables (priTypeTable, compTypeTable, etc.) are resolved
+    // internally by CT_StellarEngine and are not needed here.
     orbitalAU = typeof ORBIT_AU !== 'undefined' ? ORBIT_AU : [];
     luminosityTable = typeof LUM !== 'undefined' ? LUM : {};
     starMassTable = typeof STAR_MASS !== 'undefined' ? STAR_MASS : {};
-    natureTable = typeof CT_BASIC_NATURE_TABLE !== 'undefined' ? CT_BASIC_NATURE_TABLE : [];
-    priTypeTable = typeof CT_PRI_TYPE_TABLE !== 'undefined' ? CT_PRI_TYPE_TABLE : [];
-    priSizeTable = typeof CT_PRI_SIZE_TABLE !== 'undefined' ? CT_PRI_SIZE_TABLE : [];
-    compTypeTable = typeof CT_COMP_TYPE_TABLE !== 'undefined' ? CT_COMP_TYPE_TABLE : [];
-    compSizeTable = typeof CT_COMP_SIZE_TABLE !== 'undefined' ? CT_COMP_SIZE_TABLE : [];
     zoneTables = typeof ZONE_TABLES !== 'undefined' ? ZONE_TABLES : {};
     satOrbitsTable = typeof SATELLITE_ORBITS !== 'undefined' ? SATELLITE_ORBITS : {};
 
@@ -66,6 +61,7 @@ if (typeof module !== 'undefined' && module.exports) {
     thermalStatsGetter = typeof getThermalStats !== 'undefined' ? getThermalStats : null;
     rotationStatsGetter = typeof getRotationStats !== 'undefined' ? getRotationStats : null;
     satelliteGenerator = typeof generateSatellites !== 'undefined' ? generateSatellites : null;
+    derivedPhysicsProcessor = typeof processCTDerivedPhysics !== 'undefined' ? processCTDerivedPhysics : null;
 }
 
 /**
@@ -75,88 +71,37 @@ if (typeof module !== 'undefined' && module.exports) {
  */
 function generateTopDownSystem(mainworldUWP, primaryStar = null) {
     tSection('Primary Star Generation');
-    let overrideStars = [];
-    if (mainworldUWP && mainworldUWP.homestar && mainworldUWP.homestar.trim() !== '') {
-        let tokens = mainworldUWP.homestar.trim().split(/\s+/);
-        for (let i = 0; i < tokens.length; i++) {
-            if (i > 0 && /^(Ia|Ib|II|III|IV|V|VI|VII|D|BD)$/i.test(tokens[i]) && !overrideStars[overrideStars.length - 1].includes(" ")) {
-                overrideStars[overrideStars.length - 1] += " " + tokens[i];
-            } else {
-                overrideStars.push(tokens[i]);
-            }
-        }
+
+    // --- Steps 2A–2D: Stellar Generation (delegated to CT_StellarEngine) ---
+    // Handles manual override parsing, the forceSizeV HZ-guarantee loop,
+    // astrophysical corrections, companion DM inheritance, orbit placement,
+    // and Far sub-companion recursion. See js/ct_stellar_engine.js.
+    if (typeof CT_StellarEngine === 'undefined') {
+        throw new Error('CT_StellarEngine not loaded. Ensure ct_stellar_engine.js is included before ct_topdown_generator.js.');
     }
 
-    if (overrideStars.length > 0 && !primaryStar) {
-        let primaryStr = overrideStars[0];
-        let rawType = primaryStr.split(' ')[0] || '';
-        let sType = rawType.length > 0 ? rawType[0] : 'M';
-        let subTypeMatch = rawType.match(/\d/);
-        let decimal = subTypeMatch ? parseInt(subTypeMatch[0]) : 0;
-        let sClass = primaryStr.split(' ')[1] || 'V';
-        if (sType === 'D') { sClass = 'D'; decimal = 0; }
-        if (rawType === 'BD') { sType = 'BD'; sClass = 'V'; decimal = 0; }
-
-        let specKey = sType + decimal;
-
-        primaryStar = {
-            role: 'Primary',
-            type: sType,
-            size: sClass,
-            decimal: decimal,
-            specKey: specKey,
-            name: `${sType}${rawType !== 'D' && rawType !== 'BD' ? decimal : ''} ${sClass}`,
-            maxOrbits: typeof tRoll2D !== 'undefined' ? tRoll2D('Primary Max Orbits') : 10,
-            mass: (typeof starMassTable !== 'undefined' && starMassTable[sClass] && starMassTable[sClass][specKey]) || 1.0,
-            luminosity: (typeof luminosityTable !== 'undefined' && luminosityTable[sClass] && luminosityTable[sClass][specKey]) || 1.0
-        };
-        primaryStar.diam = (typeof UniversalMath !== 'undefined' && UniversalMath.estimateStellarDiameter)
-            ? UniversalMath.estimateStellarDiameter(sType, decimal, sClass)
-            : 1.0;
-        tResult('Primary Override', primaryStr);
-        tResult('Primary Diameter', `${primaryStar.diam} Solar`);
-        const limit100D = (primaryStar.diam * 1392700 * 100) / 1000000;
-        tResult("100D Limit", `${limit100D.toFixed(1)} M km`);
+    // If a primaryStar was passed in (e.g. from a test harness), skip stellar gen.
+    let stellarStars;
+    let sysNature;
+    if (primaryStar) {
+        // Caller supplied a pre-built primary — wrap it as-is, treat as Solo.
+        stellarStars = [primaryStar];
+        sysNature = 'Solo';
+        tResult('Primary Override', `${primaryStar.name} (pre-supplied)`, 'CT 1.1: Stellar Generation');
+    } else {
+        const stellarResult = CT_StellarEngine.generateStars({
+            forceSizeV:      true,
+            manualOverrides: (mainworldUWP && mainworldUWP.homestar) ? mainworldUWP.homestar : null
+        });
+        stellarStars = stellarResult.stars;
+        sysNature    = stellarResult.nature;
+        primaryStar  = stellarStars[0];
     }
 
-    if (!primaryStar) {
-        let attempts = 0;
-        while (!primaryStar && attempts < 50) {
-            attempts++;
-            let typeIdx = tRoll2D('Primary Type Roll');
-            let sizeIdx = tRoll2D('Primary Size Roll');
-            let rawType = priTypeTable[typeIdx];
-            let rawSize = priSizeTable[sizeIdx];
-            const decimal = (tRoll1D('Primary Decimal Roll') <= 3 ? 0 : 5);
-            const specKey = rawType + decimal;
-
-            const zones = (zoneTables[rawSize] && zoneTables[rawSize][specKey]);
-            if (zones && zones.includes('H')) {
-                primaryStar = {
-                    role: 'Primary',
-                    type: rawType,
-                    size: rawSize,
-                    decimal: decimal,
-                    specKey: specKey,
-                    name: `${rawType}${decimal} ${rawSize}`,
-                    maxOrbits: tRoll2D('Primary Max Orbits'),
-                    mass: (starMassTable[rawSize] && starMassTable[rawSize][specKey]) || 1.0,
-                    luminosity: (luminosityTable[rawSize] && luminosityTable[rawSize][specKey]) || 1.0
-                };
-                primaryStar.diam = (typeof UniversalMath !== 'undefined' && UniversalMath.estimateStellarDiameter)
-                    ? UniversalMath.estimateStellarDiameter(rawType, decimal, rawSize)
-                    : 1.0;
-                tResult('Primary Selection', `${primaryStar.name} (${primaryStar.specKey})`);
-                tResult('Star Mass', `${primaryStar.mass} M☉`);
-                tResult('Star Luminosity', `${primaryStar.luminosity} L☉`);
-                tResult('Primary Diameter', `${primaryStar.diam} Solar`);
-                const limit100D = (primaryStar.diam * 1392700 * 100) / 1000000;
-                tResult("100D Limit", `${limit100D.toFixed(1)} M km`);
-            }
-        }
+    // Top-Down also needs a maxOrbits count for the primary (not part of stellar gen).
+    if (!primaryStar.maxOrbits) {
+        primaryStar.maxOrbits = tRoll2D('Primary Max Orbits');
     }
-
-    if (!primaryStar) throw new Error("Could not roll a primary star with a Habitable Zone.");
 
     // 2. Identify the Habitable Zone (Target Orbit)
     let lookupSize = primaryStar.size;
@@ -167,64 +112,18 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
         : ['I', 'I', 'H', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'];
 
     const hOrbits = zones.reduce((acc, z, idx) => (z === 'H' ? acc.concat(idx) : acc), []);
-    const targetOrbit = hOrbits.length > 0 ? hOrbits[Math.floor(Math.random() * hOrbits.length)] : 2; // Fallback to 2 if no H zone
-    tResult('Ideal Habitable Orbit', targetOrbit);
+    let targetOrbit = hOrbits.length > 0 ? hOrbits[Math.floor(Math.random() * hOrbits.length)] : 2;
+    tResult('Ideal Habitable Orbit', targetOrbit, 'CT 1.3: Zone Classification');
 
     const sys = {
-        nature: natureTable[tRoll2D('System Nature Roll')],
-        stars: [primaryStar],
+        nature:    sysNature,
+        stars:     stellarStars,
         maxOrbits: Math.max(primaryStar.maxOrbits, targetOrbit),
-        orbits: []
+        orbits:    []
     };
 
-    if (overrideStars.length > 1) {
-        for (let i = 1; i < overrideStars.length; i++) {
-            let sStr = overrideStars[i];
-            let rawType = sStr.split(' ')[0] || '';
-            let sType = rawType.length > 0 ? rawType[0] : 'M';
-            let subTypeMatch = rawType.match(/\d/);
-            let decimal = subTypeMatch ? parseInt(subTypeMatch[0]) : 0;
-            let sClass = sStr.split(' ')[1] || 'V';
-            if (sType === 'D') { sClass = 'D'; decimal = 0; }
-            if (rawType === 'BD') { sType = 'BD'; sClass = 'V'; decimal = 0; }
-
-            let lookupType = sType;
-            if (sType === 'O') lookupType = 'B';
-            if (['D', 'BD', 'L', 'T', 'Y'].includes(sType)) lookupType = 'M';
-            let lookupDec = decimal >= 5 ? 5 : 0;
-            if (lookupType === 'M' && decimal >= 9) lookupDec = 9;
-
-            let specKey = lookupType + lookupDec;
-
-            // Check fallback for missing size tables
-            let lookupSize = sClass;
-            if (typeof zoneTables !== 'undefined' && !zoneTables[lookupSize]) {
-                lookupSize = 'V'; // Fallback for D, BD
-            }
-
-            let companion = {
-                role: i === 1 ? 'Close' : (i === 2 ? 'Near' : 'Far'),
-                type: sType,
-                size: sClass,
-                decimal: decimal,
-                specKey: specKey, // Keep lookup key
-                name: `${sType}${rawType !== 'D' && rawType !== 'BD' ? decimal : ''} ${sClass}`,
-                mass: (typeof starMassTable !== 'undefined' && starMassTable[lookupSize] && starMassTable[lookupSize][specKey]) || 1.0,
-                luminosity: (typeof luminosityTable !== 'undefined' && luminosityTable[lookupSize] && luminosityTable[lookupSize][specKey]) || 1.0
-            };
-            companion.diam = (typeof UniversalMath !== 'undefined' && UniversalMath.estimateStellarDiameter)
-                ? UniversalMath.estimateStellarDiameter(sType, decimal, sClass)
-                : 1.0;
-            sys.stars.push(companion);
-            tResult(`${companion.role} Override`, sStr);
-            tResult(`${companion.role} Diameter`, `${companion.diam} Solar`);
-            const limit100D = (companion.diam * 1392700 * 100) / 1000000;
-            tResult("100D Limit", `${limit100D.toFixed(1)} M km`);
-        }
-    }
-
-    tResult('System Nature', sys.nature);
-    tResult('Baseline Orbits', sys.maxOrbits);
+    tResult('System Nature', sys.nature, 'CT 1.1: System Nature');
+    tResult('Baseline Orbits', sys.maxOrbits, 'CT 1.3: Orbital Allocation');
 
     // 3. System-Wide Feature Skeleton
     const skeleton = (rollSkeleton) ? rollSkeleton(primaryStar, mainworldUWP.gasGiant) : { ggs: [], belts: 0, emptyOrbits: [], capturedPlanets: [] };
@@ -239,6 +138,14 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
         });
     }
 
+    // 4b. Companion Orbit Destruction (Book 6 inner/outer rules)
+    if (typeof CT_StellarEngine !== 'undefined') {
+        const beforeDestruction = sys.orbits.length;
+        sys.orbits = sys.orbits.filter(o => CT_StellarEngine.isOrbitValid(o.orbit, sys.stars));
+        const destroyed = beforeDestruction - sys.orbits.length;
+        if (destroyed > 0 && typeof tResult !== 'undefined') tResult('Orbits Destroyed', destroyed, 'CT 1.3: Orbital Allocation');
+    }
+
     // 5. PLACEMENT ORCHESTRATION (Rule Compliant Order)
 
     // Determine if Mainworld needs the HZ spot
@@ -250,9 +157,15 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
     // 5a. Gas Giant Placement (First) - Normalized H/O Priority
     const eligibleSlots = sys.orbits.filter(o => ['H', 'O'].includes(o.zone) && !o.contents);
     skeleton.ggs.forEach(gg => {
+        let slot;
         if (eligibleSlots.length > 0) {
             const index = Math.floor(Math.random() * eligibleSlots.length);
-            const slot = eligibleSlots.splice(index, 1)[0];
+            slot = eligibleSlots.splice(index, 1)[0];
+        } else if (typeof CT_StellarEngine !== 'undefined') {
+            // Book 6 Failsafe: no eligible slot — create one in the outer zone
+            slot = CT_StellarEngine.spawnFailsafeOrbit(sys.orbits);
+        }
+        if (slot) {
             slot.contents = {
                 type: 'Gas Giant',
                 size: gg.size,
@@ -298,24 +211,27 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
         }
     }
 
-    // 5c. Anomaly Placement (Third)
-    skeleton.emptyOrbits.forEach(target => {
-        const slot = sys.orbits.find(o => o.orbit === target);
-        // Skip the targetOrbit if the mainworld needs it
+    // 5c. Anomaly Placement (Third) — resolved via engine
+    const anomalies = (typeof CT_StellarEngine !== 'undefined')
+        ? CT_StellarEngine.resolveAnomalies(skeleton, sys.stars)
+        : { emptyOrbits: skeleton.emptyOrbits.map(o => ({ orbit: o, type: 'Empty' })), capturedPlanets: skeleton.capturedPlanets.map(c => ({ ...c, type: 'Captured' })) };
+
+    anomalies.emptyOrbits.forEach(({ orbit, type }) => {
+        if (type === 'Ghost Empty') return;
+        const slot = sys.orbits.find(o => o.orbit === orbit);
         if (slot && !slot.contents && (!mainworldNeedsHZ || slot.orbit !== targetOrbit)) {
             slot.contents = { type: 'Empty' };
-            tResult(`Orbit ${target}`, 'Empty Orbit');
-        } else {
-            tSkip(`Orbit ${target} (Occupied or HZ Slot)`);
+        } else if (slot) {
+            tSkip(`Orbit ${orbit} (Occupied or HZ Slot)`);
         }
     });
 
-    sys.capturedPlanets = skeleton.capturedPlanets.map(cap => ({
+    sys.capturedPlanets = anomalies.capturedPlanets.map(cap => ({
         ...cap,
         zone: zones[Math.floor(cap.orbit)] || 'O'
     }));
     sys.capturedPlanets.forEach((p, i) => {
-        tResult(`Captured Planet ${i + 1}`, `Orbit ${p.orbit} (Zone ${p.zone})`);
+        tResult(`Captured Planet ${i + 1}`, `Orbit ${p.orbit} (Zone ${p.zone})`, 'CT 1.3: Orbital Allocation');
     });
 
     // 5d. Mainworld Placement (Last)
@@ -360,18 +276,45 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
         }
     } else {
         // MUST be in HZ. Check priority.
-        let slot = sys.orbits[targetOrbit];
-        if (slot.contents && slot.contents.type === 'Gas Giant') {
+        let slot = sys.orbits.find(o => o.orbit === targetOrbit);
+
+        // HZ Displacement: if companion destruction removed the target orbit, find the closest survivor
+        if (!slot) {
+            let closest = null;
+            let closestDist = Infinity;
+            for (const o of sys.orbits) {
+                const canDisplace = !o.contents || o.contents.type === 'Gas Giant';
+                if (!canDisplace) continue;
+                const dist = Math.abs(o.orbit - targetOrbit);
+                if (dist < closestDist) { closestDist = dist; closest = o; }
+            }
+            slot = closest;
+            if (slot) {
+                targetOrbit = slot.orbit;
+                tResult('HZ Destroyed', 'Mainworld displaced to Orbit ' + targetOrbit + ' (Referee Discretion)', 'CT 1.3: Zone Classification');
+                // Climate Deviation Exception: temperate-classified world in a non-HZ orbit is
+                // an intentional Book 6 edge-case, not a math bug. Flag for the universal Auditor.
+                tResult('Climate Deviation Exception', 'Extreme Greenhouse/Albedo', 'CT 1.3: RAW Edge-Case');
+                if (typeof window !== 'undefined') {
+                    window.auditBacklog = window.auditBacklog || [];
+                    window.auditBacklog.push({ hexId: sys.hexId || 'unknown', orbitId: targetOrbit, engine: 'CT', message: 'HZ destroyed by companion; mainworld displaced to Orbit ' + targetOrbit + ' — Climate Deviation Exception active' });
+                }
+            }
+        }
+
+        if (slot && slot.contents && slot.contents.type === 'Gas Giant') {
             // Satellite logic
             if (!slot.contents.satellites) slot.contents.satellites = [];
             slot.contents.satellites.push(mainworld);
 
             mainworld.isSatellite = true;
             mainworld.isMoon = true; // Extra flag for robustness
+            mainworld.isLunarMainworld = true;
+            mainworld.parentBody = 'Gas Giant';
             mainworld.parentType = 'Gas Giant';
 
             // --- NEW LOGGING CODE ---
-            if (typeof tResult !== 'undefined') tResult('Mainworld Status', 'LUNAR SELECTION');
+            if (typeof tResult !== 'undefined') tResult('Mainworld Status', 'LUNAR SELECTION', 'CT 1.3: Satellite Hierarchy');
             if (typeof writeLogLine !== 'undefined') writeLogLine(`[MAINWORLD LOG]: Mainworld placed as a MOON of Gas Giant at Orbit ${targetOrbit}`);
             // ------------------------
 
@@ -384,10 +327,10 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
                 const roll = tRoll2D('Mainworld Satellite Orbit Roll');
                 const distIdx = Math.min(roll, satOrbitsTable.Close.length - 1);
                 mainworld.pd = satOrbitsTable.Close[distIdx] || 10;
-                tResult('Mainworld Distance', `${mainworld.pd}r`);
+                tResult('Mainworld Distance', `${mainworld.pd}r`, 'CT 1.3: Satellite Hierarchy');
             } else {
                 mainworld.pd = 10;
-                tResult('Mainworld Distance', '10r (default)');
+                tResult('Mainworld Distance', '10r (default)', 'CT 1.3: Satellite Hierarchy');
             }
         } else {
             // Terrestrial HZ Slot
@@ -415,20 +358,7 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
             body.distAU = orbitalAU[Math.min(Math.floor(orbit), orbitalAU.length - 1)] || 1.0;
 
             if (body.type === 'Mainworld') {
-                if (thermalStatsGetter) {
-                    const thermal = thermalStatsGetter(body, primaryStar.luminosity);
-                    body.temperature = thermal.temperature;
-                }
-                if (rotationStatsGetter) {
-                    const rot = rotationStatsGetter(body);
-                    body.axialTilt = rot.axialTilt;
-                    body.rotationPeriod = rot.rotationPeriod;
-                }
-                body.gravity = body.size === 0 ? 0 : (body.size * 0.125);
-                // Orbital Period: sqrt(AU^3 / Mass_star)
-                if (body.distAU) {
-                    body.orbitalPeriod = Math.sqrt(Math.pow(body.distAU, 3) / (primaryStar.mass || 1.0));
-                }
+                if (derivedPhysicsProcessor) derivedPhysicsProcessor(body, primaryStar);
                 return;
             }
 
@@ -436,26 +366,22 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
                 if (physicalGen) physicalGen(body, body.zone);
             }
 
-            if (body.type === 'Gas Giant') {
-                body.temperature = 100; // GC baseline
-            }
+            if (derivedPhysicsProcessor) derivedPhysicsProcessor(body, primaryStar);
 
             // Sync AU and orbital period for all base bodies
             if (body.distAU) {
-                body.orbitalPeriod = Math.sqrt(Math.pow(body.distAU, 3) / (primaryStar.mass || 1.0));
-
                 // Sean Protocol: Distance and 100D Logging
                 const orbitMkm = (body.distAU * 149597870) / 1000000;
-                tResult("Orbit Distance", `${body.distAU.toFixed(2)} AU (${orbitMkm.toFixed(1)} M km)`);
+                tResult("Orbit Distance", `${body.distAU.toFixed(2)} AU (${orbitMkm.toFixed(1)} M km)`, 'CT 1.3: Zone Classification');
 
                 const worldSize = (typeof body.size === 'string') ? UniversalMath.fromUWPChar(body.size) : (body.size || 0);
                 const world100D = (worldSize * 160000) / 1000000;
-                tResult("World 100D Limit", `${world100D.toFixed(2)} M km`);
+                tResult("World 100D Limit", `${world100D.toFixed(2)} M km`, 'CT 1.3: Zone Classification');
 
                 // Stellar Masking Eligibility
                 if (typeof UniversalMath !== 'undefined' && UniversalMath.isMaskingEligible) {
                     const isEligible = UniversalMath.isMaskingEligible(primaryStar.diam, body.distAU, worldSize);
-                    tResult("Stellar Masking", isEligible ? "ELIGIBLE" : "Ineligible");
+                    tResult("Stellar Masking", isEligible ? "ELIGIBLE" : "Ineligible", 'CT 1.3: Zone Classification');
                 }
             }
         });
@@ -471,21 +397,7 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
         systemWalker(sys, (body, orbit) => {
             if (body.type === 'Mainworld') return; // Already handled
 
-            if (body.type === 'Satellite' || body.type === 'Ring') {
-                // Determine physical scale for new moons
-                body.gravity = (body.size === 0 || body.size === 'R' || body.size === 'S') ? 0 : (body.size * 0.125);
-                body.diamKm = (body.size === 'R') ? 0 : (body.size === 'S' ? 500 : body.size * 1600);
-            }
-
-            if (thermalStatsGetter && !body.temperature) {
-                const th = thermalStatsGetter(body, primaryStar.luminosity);
-                body.temperature = th.temperature;
-            }
-            if (rotationStatsGetter && !body.rotationPeriod) {
-                const ro = rotationStatsGetter(body);
-                body.axialTilt = ro.axialTilt;
-                body.rotationPeriod = ro.rotationPeriod;
-            }
+            if (derivedPhysicsProcessor) derivedPhysicsProcessor(body, primaryStar);
         });
 
         // Pass 3: Social Sweeping (Task 3 Mirroring)
@@ -495,7 +407,7 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
                     body.tradeCodes = tradeCodesGen(body);
                     // Sean Protocol: Explicitly log the final codes to verify Sa flag
                     if (typeof tResult !== 'undefined' && (body.isMoon || body.isSatellite)) {
-                        tResult('Final Lunar Trade Codes', body.tradeCodes.join(' '));
+                        tResult('Final Lunar Trade Codes', body.tradeCodes.join(' '), 'CT 4.1: Starports & Bases');
                     }
                 }
                 return;
@@ -514,6 +426,12 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
         // --- PHASE 8: JOURNEY MATH SWEEP (Phase 2 Integration) ---
         if (typeof MgT2EMath !== 'undefined' && MgT2EMath.performJourneyMathSweep) {
             MgT2EMath.performJourneyMathSweep(sys);
+        }
+
+        // Action 6.4: Planet-Centric Biographies — one contiguous block per body
+        if (typeof logCTBodyBiography !== 'undefined' && typeof tSection !== 'undefined') {
+            tSection('System Biographies');
+            systemWalker(sys, (body) => { logCTBodyBiography(body, sys.hexId); });
         }
     }
 

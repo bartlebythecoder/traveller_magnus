@@ -15,7 +15,8 @@ const MgT2EData = {
         hydrographics: -7, // Adds Atmo automatically in engine
         population: -2,
         government: -7, // Adds Pop automatically in engine
-        lawLevel: -7 // Adds Gov automatically in engine
+        lawLevel: -7, // Adds Gov automatically in engine
+        thermalHydro: { Hot: -2, Boiling: -6 }
     },
 
     extremeAtmosphereHydroDM: {
@@ -250,6 +251,17 @@ const MgT2EData = {
             7: 0.0, 8: -0.1, 9: -0.2, 10: -0.5, 11: -1.0, 12: -1.1
         },
         sClassIdx: { 'Ia': 0, 'Ib': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5, 'VI': 6 },
+        whiteDwarfAging: [
+            { gyr: 0.0,  temp: 100000, lum: 2500      },
+            { gyr: 0.1,  temp: 25000,  lum: 0.20       },
+            { gyr: 0.5,  temp: 10000,  lum: 0.0025     },
+            { gyr: 1.0,  temp: 8000,   lum: 0.0010     },
+            { gyr: 1.5,  temp: 7000,   lum: 0.00059    },
+            { gyr: 2.5,  temp: 5500,   lum: 0.00023    },
+            { gyr: 5.0,  temp: 5000,   lum: 0.00015    },
+            { gyr: 10.0, temp: 4000,   lum: 0.000063   },
+            { gyr: 13.0, temp: 3800,   lum: 0.000051   }
+        ],
         densityLookup: {
             "2": { "Exotic Ice": 0.03, "Mostly Ice": 0.18, "Mostly Rock": 0.50, "Rock and Metal": 0.82, "Mostly Metal": 1.15, "Compressed Metal": 1.50 },
             "3": { "Exotic Ice": 0.06, "Mostly Ice": 0.21, "Mostly Rock": 0.53, "Rock and Metal": 0.85, "Mostly Metal": 1.18, "Compressed Metal": 1.55 },
@@ -262,7 +274,17 @@ const MgT2EData = {
             "10": { "Exotic Ice": 0.27, "Mostly Ice": 0.41, "Mostly Rock": 0.74, "Rock and Metal": 1.06, "Mostly Metal": 1.39, "Compressed Metal": 1.90 },
             "11": { "Exotic Ice": 0.30, "Mostly Ice": 0.44, "Mostly Rock": 0.77, "Rock and Metal": 1.09, "Mostly Metal": 1.42, "Compressed Metal": 1.95 },
             "12": { "Exotic Ice": 0.33, "Mostly Ice": 0.47, "Mostly Rock": 0.80, "Rock and Metal": 1.12, "Mostly Metal": 1.45, "Compressed Metal": 2.00 }
-        }
+        },
+
+        // WBH Core Composition Thresholds (Roll 2D + DMs)
+        coreComposition: [
+            { threshold: -4, type: 'Exotic Ice' },
+            { threshold: 2,  type: 'Mostly Ice' },
+            { threshold: 6,  type: 'Mostly Rock' },
+            { threshold: 11, type: 'Rock and Metal' },
+            { threshold: 14, type: 'Mostly Metal' },
+            { threshold: 99, type: 'Compressed Metal' }
+        ]
     },
 
     systemInventory: {
@@ -281,6 +303,11 @@ const MgT2EData = {
             perPostStellar: -1,
             fourOrMoreStars: -1
         },
+        gasGiantSizing: [
+            { maxRoll: 2, class: "Small Gas Giant (Neptune)", diamFormula: "D3+D3", massFormula: "5 * (1D+1)" },
+            { maxRoll: 4, class: "Medium Gas Giant (Jupiter)", diamFormula: "1D+6", massFormula: "20 * (3D-1)" },
+            { maxRoll: 99, class: "Large Gas Giant (Superjovian)", diamFormula: "2D+6", massFormula: "D3 * 50 * (3D+4)" } // Threshold 5+
+        ],
         planetoidBelts: [
             { maxRoll: 6, count: 1 },
             { maxRoll: 11, count: 2 },
@@ -302,6 +329,66 @@ const MgT2EData = {
             dms: {
                 perPostStellar: -1
             }
+        }
+    },
+
+    // =========================================================================
+    // SATELLITES & MOONS
+    // =========================================================================
+    satellites: {
+        significantMoonQuantity: [
+            { minSize: 1, maxSize: 2, formula: "1D-5", type: "Terrestrial" },
+            { minSize: 3, maxSize: 9, formula: "2D-8", type: "Terrestrial" },
+            { minSize: 10, maxSize: 15, formula: "2D-6", type: "Terrestrial" }, // A-F
+            { type: "SGG", formula: "3D-7" },
+            { type: "MGG", formula: "4D-6" },
+            { type: "LGG", formula: "4D-6" }
+        ]
+    },
+
+    // =========================================================================
+    // THERMAL PHYSICS (Phase 2.4)
+    // =========================================================================
+    thermalPhysics: {
+        albedo: {
+            baseRanges: [
+                { type: 'Gas Giant', base: 0.05, rollMult: 0.05, offset: 0, label: 'Gas Giant' },
+                { type: 'Rocky', base: 0.04, rollMult: 0.02, offset: 2, label: 'Rocky', maxHzOffset: 2 },
+                { type: 'Icy Near', base: 0.20, rollMult: 0.05, offset: 3, label: 'Icy Near', maxHzOffset: 4 },
+                { type: 'Icy Far', base: 0.25, rollMult: 0.07, offset: 2, label: 'Icy Far' }
+            ],
+            modifiers: {
+                atmosphere: [
+                    { codes: [1, 2, 3, 14], rollMult: 0.01, offset: 3, label: 'Atm 1-3/14' },
+                    { codes: [4, 5, 6, 7, 8, 9], rollMult: 0.01, offset: 0, label: 'Atm 4-9' },
+                    { codes: [10, 11, 12, 15], rollMult: 0.05, offset: 2, label: 'Atm 10-12/15' },
+                    { codes: [13], rollMult: 0.03, offset: 0, label: 'Atm 13' }
+                ],
+                hydrographic: [
+                    { min: 2, max: 5, rollMult: 0.02, offset: 2, label: 'Hydro 2-5' },
+                    { min: 6, max: 10, rollMult: 0.03, offset: 4, label: 'Hydro 6+' }
+                ]
+            },
+            constraint: { threshold: 0.40, rollTerm: 'Albedo Constraint Subtract', offset: 1, mult: 0.05 }
+        },
+        greenhouse: {
+            additiveGroup: [1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 14],
+            multiplierGroupA: [10, 15],
+            multiplierGroupB: [11, 12, 16, 17]
+        }
+    },
+
+    rotationalDynamics: {
+        tidalLockDMs: {
+            global: { tiltModerate: -2, tiltHigh: -4, pressureHigh: -2, ageYoung: -2, ageMid: 2, ageOld: 4 },
+            caseB_Moon: { base: 6, retrograde: -2, parentMassThresholds: [{m:1000, dm:8}, {m:100, dm:6}, {m:10, dm:4}, {m:1, dm:2}] },
+            caseA_Planet: { base: -4, distMid: 4, distFar: 1, starMassThresholds: [{m:5, dm:2}, {m:2, dm:1}, {m:1, dm:-1}, {m:0.5, dm:-2}] },
+            caseC_LockedMoons: { base: -10, pdNear: 4, pdMid: 2, pdFar: 1, pdExtreme: -6 }
+        },
+        tidalLockResults: {
+            multipliers: { 3: 1.5, 4: 2, 5: 3, 6: 5 },
+            progradeDays: { 7: 5, 8: 20 },
+            retrogradeDays: { 9: 10, 10: 50 }
         }
     },
 
@@ -354,7 +441,62 @@ const MgT2EData = {
             "24": { name: "Variable Composition", code: "A" },
             "25": { name: "Combination", code: "-" },
             "26": { name: "Unusual", code: "F" }
-        }
+        },
+
+        // WBH Atmosphere Pressure Bands & Required Gear (migrated from constants.js)
+        atmCodes: {
+            0:  { pressStr: "0.00-0.0009",  minP: 0.00,  spanP: 0.00,  gear: "Vacc Suit" },
+            1:  { pressStr: "0.001-0.09",   minP: 0.001, spanP: 0.089, gear: "Vacc Suit" },
+            2:  { pressStr: "0.1-0.42",     minP: 0.1,   spanP: 0.32,  gear: "Respirator and Filter" },
+            3:  { pressStr: "0.1-0.42",     minP: 0.1,   spanP: 0.32,  gear: "Respirator" },
+            4:  { pressStr: "0.43-0.70",    minP: 0.43,  spanP: 0.27,  gear: "Filter" },
+            5:  { pressStr: "0.43-0.70",    minP: 0.43,  spanP: 0.27,  gear: "None" },
+            6:  { pressStr: "0.70-1.49",    minP: 0.70,  spanP: 0.79,  gear: "None" },
+            7:  { pressStr: "0.70-1.49",    minP: 0.70,  spanP: 0.79,  gear: "Filter" },
+            8:  { pressStr: "1.50-2.49",    minP: 1.50,  spanP: 0.99,  gear: "None" },
+            9:  { pressStr: "1.50-2.49",    minP: 1.50,  spanP: 0.99,  gear: "Filter" },
+            10: { pressStr: "Varies",       minP: 0.0,   spanP: 0.0,   gear: "Air Supply" },
+            11: { pressStr: "Varies",       minP: 0.0,   spanP: 0.0,   gear: "Vacc Suit" },
+            12: { pressStr: "Varies",       minP: 0.0,   spanP: 0.0,   gear: "Vacc Suit" },
+            13: { pressStr: "2.50-10.0+",   minP: 2.50,  spanP: 7.50,  gear: "Varies" },
+            14: { pressStr: "0.10-0.42",    minP: 0.10,  spanP: 0.32,  gear: "Varies" },
+            15: { pressStr: "Varies",       minP: 0.0,   spanP: 0.0,   gear: "Varies" },
+            16: { pressStr: "Varies",       minP: 0.0,   spanP: 0.0,   gear: "Vacc Suit" },
+            17: { pressStr: "Varies",       minP: 0.0,   spanP: 0.0,   gear: "Vacc Suit" }
+        },
+
+        // WBH Taint Subtype Roll Results (2D, clamped 2-12)
+        taintSubtypes: {
+            2: "Low Oxygen", 3: "Radioactivity", 4: "Biologic", 5: "Gas Mix",
+            6: "Particulates", 7: "Gas Mix", 8: "Sulphur Compounds", 9: "Biologic",
+            10: "Particulates", 11: "Radioactivity", 12: "High Oxygen"
+        },
+
+        // WBH Taint Severity Scale (1-9)
+        taintSeverity: {
+            1: "Trivial irritant", 2: "Surmountable irritant", 3: "Minor irritant",
+            4: "Major irritant", 5: "Serious irritant", 6: "Hazardous irritant",
+            7: "Long term lethal", 8: "Inevitably lethal", 9: "Rapidly lethal"
+        },
+
+        // WBH Exotic Liquid Candidates (bp/mp in Kelvin, abundance = relative weight)
+        exoticLiquids: [
+            { name: "Fluorine",         code: "F2",    bp: 85,  mp: 53,  abundance: 2   },
+            { name: "Oxygen",           code: "O2",    bp: 90,  mp: 54,  abundance: 50  },
+            { name: "Methane",          code: "CH4",   bp: 113, mp: 91,  abundance: 70  },
+            { name: "Ethane",           code: "C2H6",  bp: 184, mp: 90,  abundance: 70  },
+            { name: "Chlorine",         code: "Cl2",   bp: 239, mp: 171, abundance: 1   },
+            { name: "Ammonia",          code: "NH3",   bp: 240, mp: 195, abundance: 30  },
+            { name: "Sulphur Dioxide",  code: "SO2",   bp: 263, mp: 201, abundance: 20  },
+            { name: "Hydrofluoric Acid",code: "HF",    bp: 293, mp: 190, abundance: 2   },
+            { name: "Hydrogen Cyanide", code: "HCN",   bp: 299, mp: 260, abundance: 30  },
+            { name: "Hydrochloric Acid",code: "HCl",   bp: 321, mp: 247, abundance: 1   },
+            { name: "Water",            code: "H2O",   bp: 373, mp: 273, abundance: 100 },
+            { name: "Formic Acid",      code: "CH2O2", bp: 374, mp: 281, abundance: 15  },
+            { name: "Formamide",        code: "CH3NO", bp: 483, mp: 275, abundance: 15  },
+            { name: "Carbonic Acid",    code: "H2CO3", bp: 607, mp: 193, abundance: 20  },
+            { name: "Sulphuric Acid",   code: "H2SO4", bp: 718, mp: 388, abundance: 20  }
+        ]
     },
 
     // =========================================================================
@@ -393,6 +535,55 @@ const MgT2EData = {
     // SOCIOECONOMICS & PROFILES
     // =========================================================================
     socioeconomics: {
+        factions: {
+            strength: [
+                { maxRoll: 3, code: "O", description: "Obscure group – few have heard of them" },
+                { maxRoll: 5, code: "F", description: "Fringe group" },
+                { maxRoll: 7, code: "M", description: "Minor group" },
+                { maxRoll: 9, code: "N", description: "Notable group" },
+                { maxRoll: 11, code: "S", description: "Significant – nearly as powerful as government" },
+                { maxRoll: 99, code: "P", description: "Overwhelming popular support – more powerful than government" },
+                { code: "G", description: "Official government" }
+            ],
+            relationships: {
+                min: 0,
+                max: 9,
+                notes: "1D+DM roll. 0 = Alliance, 9+ = Total War."
+            }
+        },
+        culture: {
+            differences: {
+                "12": "Religious",
+                "14": "Ritualised",
+                "15": "Conservative",
+                "16": "Xenophobic – Distrusts outsiders and alien influences.",
+                "21": "Taboo – A particular topic is forbidden.",
+                "22": "Deceptive – Trickery is acceptable; honesty is weakness.",
+                "23": "Liberal – Welcomes change and offworld influence.",
+                "24": "Honourable – One's word is one's bond; lying is despised.",
+                "25": "Influenced – Heavily influenced by a neighbouring world.",
+                "26": "Fusion – A merger of two distinct cultures.",
+                "31": "Barbaric – Physical strength and combat prowess are highly valued.",
+                "32": "Remnant",
+                "33": "Degenerate",
+                "34": "Progressive",
+                "35": "Recovering",
+                "36": "Nexus – Members of many different cultures and species visit here.",
+                "41": "Tourist Attraction – Draws visitors from all over civilised space.",
+                "42": "Violent – Physical conflict is common (duels, brawls).",
+                "43": "Peaceful – Physical conflict is almost unheard of.",
+                "44": "Obsessed – Monomania regarding a substance, personality, act, or item.",
+                "45": "Fashion – Fine clothing and decoration are vitally important.",
+                "46": "At war – At war with another planet/polity, or troubled by terrorists/rebels.",
+                "51": "Unusual Custom: Offworlders – Travellers hold a unique position in local mythology.",
+                "52": "Unusual Custom: Starport – The starport has a unique status (e.g., a temple or surrounded by protestors).",
+                "54": "Unusual Custom: Technology",
+                "56": "Unusual Customs: Social Standings – A distinct caste system with punishments for inappropriate behaviour.",
+                "61": "Unusual Customs: Trade – Odd attitudes towards commerce (e.g., requiring gifts or restricting handling of certain goods).",
+                "62": "Unusual Customs: Nobility – Nobles have strange customs (e.g., blinded, gilded cages, 1-year terms).",
+                "65": "Unusual Custom: Travel"
+            }
+        },
         governmentProfile: {
             centralisation: [
                 { maxRoll: 5, code: "C" },

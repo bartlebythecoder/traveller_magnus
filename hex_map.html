@@ -22,6 +22,7 @@
 
     <script src="rules/ct_data.js"></script>
     <script src="js/ct_constants.js" defer></script>
+    <script src="js/ct_stellar_engine.js" defer></script>
     <script src="js/ct_physical_library.js" defer></script>
     <script src="js/ct_world_engine.js" defer></script>
     <script src="js/ct_social_engine.js" defer></script>
@@ -127,9 +128,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above So Below</span></h1>
-            <div class="splash-banner">New: Optimized Icon Scaling & Asset Positioning</div>
+            <div class="splash-banner">New: Culture Quirks in Mongoose Traveller</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.5.7.3</div>
+            <div class="splash-version">v0.6</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -681,6 +682,10 @@
                         <label>Military Profile:</label>
                         <input type="text" id="edit-mgt-mil-profile">
                     </div>
+                    <div class="editor-flex-row" style="display: none;">
+                        <label>Cultural Quirks:</label>
+                        <span id="edit-mgt-quirks" style="color: #66fcf1; font-style: italic; font-size: 0.9em;"></span>
+                    </div>
                 </div>
             </div>
 
@@ -850,6 +855,10 @@
                         <i class="fas fa-chevron-down"></i>
                     </div>
                     <div id="uwp-accordion-body" class="filter-grid-uwp filter-accordion-content open">
+                        <div class="filter-field" style="grid-column: 1 / -1;">
+                            <label>System Name</label>
+                            <input type="text" id="filter-name" placeholder="e.g. Sol, Ara" autocomplete="off">
+                        </div>
                         <div class="filter-field">
                             <label>Starport</label>
                             <input type="text" id="filter-starport" placeholder="e.g. A, B">

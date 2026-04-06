@@ -45,7 +45,7 @@ function initializeInput() {
     makeDraggable(hexEditor, hexEditorHeader);
 
     // Default Placement
-    filterModal.style.left = '400px';
+    filterModal.style.left = '10px';
     filterModal.style.top = '50px';
     
     // For Hex Editor (Right-aligned)

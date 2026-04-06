@@ -77,15 +77,73 @@
             name: `${sType}${toUWPChar(subType)} ${sClass}`
         };
 
-        tResult(`${label} Classification`, star.name);
-        tResult(`${label} Mass (Sol)`, star.mass);
-        tResult(`${label} Temperature (K)`, star.temp);
-        tResult(`${label} Diameter (Sol)`, star.diam);
+        // Subtype interpolation: drift physical stats towards the next cooler class
+        const coolingSequence = ['O', 'B', 'A', 'F', 'G', 'K', 'M', 'BD'];
+        const currentIndex = coolingSequence.indexOf(sType);
+        if (currentIndex !== -1 && subType > 0) {
+            const nextType = coolingSequence[currentIndex + 1];
+            if (nextType && MgT2EData.stellar.starStats[nextType]) {
+                const nextStats = MgT2EData.stellar.starStats[nextType];
+                const fraction  = subType / 10.0;
+                star.mass = stats.mass + (nextStats.mass - stats.mass) * fraction;
+                star.temp = stats.temp + (nextStats.temp - stats.temp) * fraction;
+                star.diam = stats.diam + (nextStats.diam - stats.diam) * fraction;
+                tResult('Subtype Interpolation', `Shifted ${(fraction * 100).toFixed(0)}% towards ${nextType}`, 'MgT2E 1.1: Stellar Generation');
+            }
+        }
+
+        // Recalculate luminosity from smoothed diam/temp
+        star.lum = MgT2EMath.calculateStellarLuminosity(star.diam, star.temp);
+
+        tResult(`${label} Classification`, star.name, 'MgT2E 1.1: Stellar Generation');
+        tResult(`${label} Mass (Sol)`, star.mass, 'MgT2E 1.1: Stellar Generation');
+        tResult(`${label} Temperature (K)`, star.temp, 'MgT2E 1.1: Stellar Generation');
+        tResult(`${label} Diameter (Sol)`, star.diam, 'MgT2E 1.1: Stellar Generation');
         const limit100D = (star.diam * 1392700 * 100) / 1000000;
-        tResult("100D Limit", `${limit100D.toFixed(1)} M km`);
-        tResult(`${label} Luminosity (Sol)`, star.lum.toFixed(4));
+        tResult("100D Limit", `${limit100D.toFixed(1)} M km`, 'MgT2E 1.1: Stellar Generation');
+        tResult(`${label} Luminosity (Sol)`, star.lum.toFixed(4), 'MgT2E 1.1: Stellar Generation');
 
         return star;
+    }
+
+    /**
+     * Applies WBH White Dwarf mass, diameter, and cooling-table physics to a star.
+     * Called after sys.age is finalised so deadAge can be derived from it.
+     */
+    function applyWhiteDwarfPhysics(star, sysAge) {
+        tSection('White Dwarf Physics');
+
+        // Mass: 2D roll + D10 fractional
+        let d2Roll  = tRoll2D('WD Mass Roll (2D)');
+        let d10Roll = Math.floor(rng() * 10) + 1;
+        star.mass = ((d2Roll - 1) / 10) + (d10Roll / 100);
+        tResult('WD Mass (Sol)', star.mass.toFixed(3), 'MgT2E 1.1: Stellar Life Cycles');
+
+        // Diameter from mass (inverse relationship)
+        star.diam = (1 / star.mass) * 0.01;
+
+        // Dead age: random fraction of system age
+        let deadFrac = (Math.floor(rng() * 100) + 1) / 100;
+        let deadAge  = sysAge * deadFrac;
+        tResult('WD Dead Age (Gyr)', deadAge.toFixed(2), 'MgT2E 1.1: Stellar Life Cycles');
+
+        // Interpolate temperature from cooling table
+        const table = MgT2EData.stellar.whiteDwarfAging;
+        let baseTemp = table[table.length - 1].temp; // clamp to coldest
+        for (let i = 0; i < table.length - 1; i++) {
+            if (deadAge >= table[i].gyr && deadAge < table[i + 1].gyr) {
+                let span     = table[i + 1].gyr  - table[i].gyr;
+                let fraction = (deadAge - table[i].gyr) / span;
+                baseTemp     = table[i].temp + fraction * (table[i + 1].temp - table[i].temp);
+                break;
+            }
+        }
+
+        // Mass-adjusted temperature and updated luminosity
+        star.temp = baseTemp * (star.mass / 0.6);
+        tResult('WD Temperature (K)', star.temp.toFixed(0), 'MgT2E 1.1: Stellar Life Cycles');
+        star.lum  = MgT2EMath.calculateStellarLuminosity(star.diam, star.temp);
+        tResult('WD Luminosity (Sol)', star.lum.toFixed(6), 'MgT2E 1.1: Stellar Life Cycles');
     }
 
     /**
@@ -117,7 +175,7 @@
         }
 
         let subType = Math.floor(rng() * 10);
-        tResult(`${label} Subtype (0-9)`, subType);
+        tResult(`${label} Subtype (0-9)`, subType, 'MgT2E 1.1: Stellar Generation');
 
         return generateStarObject(sType, subType, sClass, label);
     }
@@ -143,7 +201,7 @@
                 break;
             }
         }
-        tResult(`${label} Determination Result`, determination);
+        tResult(`${label} Determination Result`, determination, 'MgT2E 1.2: Binary/Multiple Stars');
 
         let star;
         if (determination === 'Twin') {
@@ -155,7 +213,7 @@
                 star.mass *= factor;
                 star.diam *= factor;
                 star.lum = MgT2EMath.calculateStellarLuminosity(star.diam, star.temp);
-                tResult(`${label} Twin Variation`, `-${varPct}% mass/diameter`);
+                tResult(`${label} Twin Variation`, `-${varPct}% mass/diameter`, 'MgT2E 1.2: Binary/Multiple Stars');
             }
             star = generateStarObject(star.sType, star.subType, star.sClass, label);
             // Re-apply variation since generateStarObject uses table defaults
@@ -192,7 +250,7 @@
 
             if (isHotter) {
                 determination = 'Lesser';
-                tResult(`${label} Override`, 'Random -> Lesser');
+                tResult(`${label} Override`, 'Random -> Lesser', 'MgT2E 1.2: Binary/Multiple Stars');
             } else {
                 star = tempStar;
             }
@@ -292,7 +350,7 @@
             if (sType === 'D') { sClass = 'D'; subType = 0; }
             if (typeStr === 'BD') { sType = 'BD'; sClass = 'V'; subType = 0; }
             primary = generateStarObject(sType, subType, sClass, 'Primary');
-            tResult('Primary Override', primaryStr);
+            tResult('Primary Override', primaryStr, 'MgT2E 1.1: Stellar Generation');
         } else {
             primary = rollStar('Primary');
         }
@@ -305,22 +363,47 @@
         sys.stars.push(primary);
 
         tSection('System Age');
-        let msLifespan = 10 / Math.pow(primary.mass, 2.5);
-        tResult('Main Sequence Lifespan', msLifespan.toFixed(2) + " Gyr");
+        let msLifespan      = 10 / Math.pow(primary.mass, 2.5);
+        let subgiantLifespan = msLifespan / (4 + primary.mass);
+        let giantLifespan    = msLifespan / (10 * Math.pow(primary.mass, 3));
+        tResult('Main Sequence Lifespan', msLifespan.toFixed(2) + " Gyr", 'MgT2E 1.1: Stellar Life Cycles');
 
-        // Logic for Age based on Primary
+        // Phase Variance — how far along the star is in its current phase
+        let phaseVariance;
+        if (primary.mass >= 0.9 && !['BD', 'L', 'T', 'Y'].includes(primary.sType)) {
+            let d6Roll  = tRoll1D('Age Variance (1D6)');
+            let d10Roll = Math.floor(rng() * 10) + 1;
+            phaseVariance = ((d6Roll - 1) + (d10Roll / 10)) / 6;
+            tResult('Phase Variance (High-Mass)', phaseVariance.toFixed(3), 'MgT2E 1.1: Stellar Life Cycles');
+        } else {
+            phaseVariance = (Math.floor(rng() * 100) + 1) / 100;
+            tResult('Phase Variance (Standard)', phaseVariance.toFixed(3), 'MgT2E 1.1: Stellar Life Cycles');
+        }
+
+        // Age by Luminosity Class
         if (primary.sType === 'D') {
-            sys.age = 5.0;
+            let r1 = tRoll1D('Age Base (1D*2)');
+            let r2 = Math.ceil(tRoll1D('Age Offset (1D3)') / 2);
+            sys.age = (r1 * 2) + r2 - 1 + (Math.floor(rng() * 10) / 10);
+        } else if (primary.sClass === 'IV') {
+            tResult('Subgiant Lifespan', subgiantLifespan.toFixed(3) + " Gyr", 'MgT2E 1.1: Stellar Life Cycles');
+            sys.age = msLifespan + (subgiantLifespan * phaseVariance);
+        } else if (['III', 'II', 'Ib', 'Ia'].includes(primary.sClass)) {
+            tResult('Subgiant Lifespan', subgiantLifespan.toFixed(3) + " Gyr", 'MgT2E 1.1: Stellar Life Cycles');
+            tResult('Giant Lifespan', giantLifespan.toFixed(3) + " Gyr", 'MgT2E 1.1: Stellar Life Cycles');
+            sys.age = msLifespan + subgiantLifespan + (giantLifespan * phaseVariance);
         } else if (primary.mass < 0.9 || ['BD', 'L', 'T', 'Y'].includes(primary.sType)) {
             let r1 = tRoll1D('Age Base (1D*2)');
             let r2 = Math.ceil(tRoll1D('Age Offset (1D3)') / 2);
             sys.age = (r1 * 2) + r2 - 1 + (Math.floor(rng() * 10) / 10);
         } else {
-            let r1 = (Math.floor(rng() * 100) + 1) / 100;
-            sys.age = msLifespan * r1;
+            // Class V/VI high-mass main sequence
+            sys.age = msLifespan * phaseVariance;
         }
         sys.age = Math.max(0.1, sys.age);
-        tResult('System Age', sys.age.toFixed(2) + " Gyr");
+        tResult('System Age', sys.age.toFixed(2) + " Gyr", 'MgT2E 1.1: Stellar Life Cycles');
+
+        if (primary.sType === 'D') { applyWhiteDwarfPhysics(primary, sys.age); }
 
         // HZCO calculation
         let hzcoAu = Math.sqrt(primary.lum);
@@ -335,7 +418,7 @@
             return 20.0;
         };
         sys.hzco = convertAuToOrbit(hzcoAu);
-        tResult('HZCO (Orbit)', sys.hzco.toFixed(2));
+        tResult('HZCO (Orbit)', sys.hzco.toFixed(2), 'MgT2E 1.3: HZCO Formula');
 
         tSection('Additional Stars');
         if (overrideStars.length > 1) {
@@ -359,7 +442,8 @@
                 star.eccentricity = 0;
                 star.mao = getMAO(star.sType, star.subType, star.sClass);
                 sys.stars.push(star);
-                tResult(`${repRole} Override`, sStr + " at Orbit " + star.orbitId);
+                if (star.sType === 'D') { applyWhiteDwarfPhysics(star, sys.age); }
+                tResult(`${repRole} Override`, sStr + " at Orbit " + star.orbitId, 'MgT2E 1.2: Binary/Multiple Stars');
             }
         } else {
             const getMultiDM = (star) => {
@@ -391,7 +475,8 @@
                     star.orbitId = def.orbitFn();
                     star.eccentricity = determineEccentricity(true, 0, sys.age, star.orbitId, false, 0);
                     sys.stars.push(star);
-                    tResult(`${def.sep} Star`, star.name + " at Orbit " + star.orbitId);
+                    if (star.sType === 'D') { applyWhiteDwarfPhysics(star, sys.age); }
+                    tResult(`${def.sep} Star`, star.name + " at Orbit " + star.orbitId, 'MgT2E 1.2: Binary/Multiple Stars');
 
                     // Companion Check
                     let orbitDM = getMultiDM(star);
@@ -405,7 +490,8 @@
                         companion.orbitId = (d1 / 10) + ((d2 - 7) / 100);
                         companion.eccentricity = determineEccentricity(true, 0, sys.age, companion.orbitId, false, 0);
                         sys.stars.push(companion);
-                        tResult('  Companion', companion.name);
+                        if (companion.sType === 'D') { applyWhiteDwarfPhysics(companion, sys.age); }
+                        tResult('  Companion', companion.name, 'MgT2E 1.2: Binary/Multiple Stars');
                     }
                 }
             }
@@ -438,7 +524,7 @@
         } else {
             sys.gasGiants = 0;
         }
-        tResult('Gas Giants', sys.gasGiants);
+        tResult('Gas Giants', sys.gasGiants, 'MgT2E 1.3: System Inventory');
 
         // Planetoid Belts
         let pbRoll = tRoll2D('Planetoid Belt Presence (>= 8)');
@@ -457,7 +543,7 @@
         } else {
             sys.planetoidBelts = 0;
         }
-        tResult('Planetoid Belts', sys.planetoidBelts);
+        tResult('Planetoid Belts', sys.planetoidBelts, 'MgT2E 1.3: System Inventory');
 
         // Terrestrial Planets
         let tpRoll = tRoll2D('Terrestrial Quantity');
@@ -468,7 +554,7 @@
             tpCount += Math.ceil(tRoll1D('Add D3') / 2) - 1;
         }
         sys.terrestrialPlanets = tpCount;
-        tResult('Terrestrial Planets', sys.terrestrialPlanets);
+        tResult('Terrestrial Planets', sys.terrestrialPlanets, 'MgT2E 1.3: System Inventory');
 
         sys.totalWorlds = sys.gasGiants + sys.planetoidBelts + sys.terrestrialPlanets;
 
@@ -476,7 +562,7 @@
         let anomRoll = tRoll2D('Anomalous Roll');
         let anomCount = anomRoll <= 9 ? 0 : (anomRoll - 9);
         sys.totalWorlds += anomCount;
-        tResult('Total Worlds', sys.totalWorlds);
+        tResult('Total Worlds', sys.totalWorlds, 'MgT2E 1.3: System Inventory');
 
         return sys;
     }
@@ -510,7 +596,7 @@
         else baselineOrbit = sys.hzco + hzDeviation;
 
         sys.baselineOrbit = baselineOrbit;
-        tResult('Baseline Orbit', sys.baselineOrbit.toFixed(2));
+        tResult('Baseline Orbit', sys.baselineOrbit.toFixed(2), 'MgT2E 1.3: HZCO Formula');
 
         // 2. Forbidden Zones
         tSection('Forbidden Zones');
@@ -522,9 +608,33 @@
             let co = comp.orbitId;
             let cm = comp.mao || 0;
             let ce = comp.eccentricity || 0;
-            let fmin = co - 1.0, fmax = co + 1.0;
-            if (cm > 0.2) { fmin -= cm; fmax += cm; }
-            if (ce > 0.2) { fmin -= 1.0; fmax += 1.0; }
+            
+            // WBH Base Exclusion: +/- 1.0 Orbit#
+            let fmin = co - 1.0; 
+            let fmax = co + 1.0;
+            tResult('Base Exclusion Zone', `Orbit ${fmin.toFixed(2)} to ${fmax.toFixed(2)} (Star at ${co.toFixed(2)})`, 'MgT2E 1.3: Forbidden Zones');
+
+            // WBH MAO Expansion
+            if (cm > 0.2) { 
+                fmin -= cm; 
+                fmax += cm; 
+                tResult('FZ Expansion (MAO > 0.2)', `Added ±${cm.toFixed(2)} (New: ${fmin.toFixed(2)} to ${fmax.toFixed(2)})`, 'MgT2E 1.3: Forbidden Zones');
+            }
+
+            // WBH Rule 6: Tier 1 Eccentricity Expansion
+            if (ce > 0.2) { 
+                fmin -= 1.0; 
+                fmax += 1.0; 
+                tResult('FZ Expansion (Ecc > 0.2)', `Added ±1.0 (New: ${fmin.toFixed(2)} to ${fmax.toFixed(2)})`, 'MgT2E 1.3: Forbidden Zones');
+            }
+
+            // WBH Rule 7: Tier 2 Eccentricity Expansion
+            if (ce > 0.5 && (comp.separation === 'Close' || comp.separation === 'Near')) {
+                fmin -= 1.0;
+                fmax += 1.0;
+                tResult('FZ Expansion (Ecc > 0.5 & Close/Near)', `Added ±1.0 (New: ${fmin.toFixed(2)} to ${fmax.toFixed(2)})`, 'MgT2E 1.3: Forbidden Zones');
+            }
+
             rawFZ.push({ min: fmin, max: fmax });
         }
         rawFZ.sort((a, b) => a.min - b.min);
@@ -535,32 +645,83 @@
         }
         sys.forbiddenZones = mergedFZ;
 
-        // 3. Slot Generation
+        // 3. Slot Generation (Multi-Star Support & Rule #11)
         let eRoll = tRoll2D('Empty Orbits (10+)');
         let emptyCount = eRoll <= 9 ? 0 : (eRoll - 9);
         let totalSlotsCount = sys.totalWorlds + emptyCount;
-        let targetIdx = Math.max(0, Math.min(totalSlotsCount - 1, Math.round(baselineOrbit)));
-
-        let spread = (sys.baselineOrbit - primaryMao) / Math.max(1, targetIdx);
-        let maxSpread = (20.0 - primaryMao) / (totalSlotsCount + sys.stars.length);
-        spread = Math.min(Math.max(0.1, spread), maxSpread);
-
+        
         let slots = [];
-        let currentPos = primaryMao;
-        for (let i = 0; i < totalSlotsCount; i++) {
-            let minSep = currentPos * 0.15;
-            let nextOrbit = currentPos + Math.max(spread, minSep);
+        let eligibleStars = sys.stars.filter(s => s.separation !== 'Companion'); // Exclude tight companions
+        
+        // Apportion slots: heavily weight towards the Primary star (70% chance per slot)
+        let starSlotCounts = new Array(eligibleStars.length).fill(0);
+        for(let i = 0; i < totalSlotsCount; i++) {
+            let rand = rng();
+            if (rand < 0.70 || eligibleStars.length === 1) {
+                starSlotCounts[0]++;
+            } else {
+                let compIdx = 1 + Math.floor(rng() * (eligibleStars.length - 1));
+                starSlotCounts[compIdx]++;
+            }
+        }
 
-            // FZ Jumping
-            for (let fz of mergedFZ) {
-                if (nextOrbit >= fz.min && nextOrbit <= fz.max) {
-                    nextOrbit = fz.max + (Math.abs(tRoll2D('Resync') - 7) / 10);
+        for (let sIdx = 0; sIdx < eligibleStars.length; sIdx++) {
+            let hostStar = eligibleStars[sIdx];
+            let actualStarIdx = sys.stars.indexOf(hostStar);
+            let sCount = starSlotCounts[sIdx];
+            if (sCount === 0) continue;
+
+            let currentPos = hostStar.mao || 0.01;
+            
+            // WBH Rule #11: Eccentricity > 0.5 reduces available inner orbits by 1.0 Orbit#
+            if (hostStar.role !== 'Primary' && hostStar.eccentricity > 0.5) {
+                currentPos += 1.0;
+                tResult(`${hostStar.role} Subsystem Constraint (Rule #11)`, `MAO shifted to ${currentPos.toFixed(2)} (Ecc > 0.5)`, 'MgT2E 1.3: Orbital Allocation');
+            }
+
+            let spread = (sys.baselineOrbit - currentPos) / Math.max(1, sCount);
+            let maxSpread = (20.0 - currentPos) / (sCount + 1);
+            spread = Math.min(Math.max(0.1, spread), maxSpread);
+
+            for (let i = 0; i < sCount; i++) {
+                let minSep = currentPos * 0.15;
+                let nextOrbit = currentPos + Math.max(spread, minSep);
+
+                // Forbidden Zone Jumping (Primary Star Only)
+                if (actualStarIdx === 0 && mergedFZ) {
+                    for (let fz of mergedFZ) {
+                        if (nextOrbit >= fz.min && nextOrbit <= fz.max) {
+                            nextOrbit = fz.max + (Math.abs(tRoll2D('Resync') - 7) / 10);
+                        }
+                    }
+                }
+                
+                let sEcc = (tRoll2D('Orbit Eccentricity') - 2) * 0.05;
+                slots.push({ 
+                    orbitId: nextOrbit, 
+                    occupant: null, 
+                    eccentricity: Math.max(0, sEcc), 
+                    type: 'S-Type', 
+                    parentStarIdx: actualStarIdx 
+                });
+                currentPos = nextOrbit;
+            }
+        }
+        
+        // Sort all slots globally by orbitId to maintain sequence for the World Queue
+        slots.sort((a, b) => a.orbitId - b.orbitId);
+        
+        // Re-establish targetIdx to point to the Primary's closest slot to the baseline orbit
+        let targetIdx = 0;
+        let bestDist = Infinity;
+        for(let i = 0; i < slots.length; i++) {
+            if (slots[i].parentStarIdx === 0) {
+                let dist = Math.abs(slots[i].orbitId - baselineOrbit);
+                if (dist < bestDist) {
+                    bestDist = dist;
+                    targetIdx = i;
                 }
             }
-            if (i === targetIdx) sys.baselineOrbit = nextOrbit;
-            let sEcc = (tRoll2D('Orbit Eccentricity') - 2) * 0.05;
-            slots.push({ orbitId: nextOrbit, occupant: null, eccentricity: Math.max(0, sEcc), type: 'S-Type', parentStarIdx: 0 });
-            currentPos = nextOrbit;
         }
 
         // 4. World Queue & Placement
@@ -578,7 +739,7 @@
             if (isPreMoon) {
                 if (sys.gasGiants === 0) {
                     sys.gasGiants = 1;
-                    tResult('WBH Consistency', 'Forced Gas Giant presence for pre-existing Mainworld moon');
+                    tResult('WBH Consistency', 'Forced Gas Giant presence for pre-existing Mainworld moon', 'MgT2E 1.3: Top-Down Lunar Rule');
                 }
                 queue.push({ type: 'Mainworld', size: mainworldBase.size || 7, isAnchor: true, isPreMoon: true });
             } else {
@@ -595,6 +756,106 @@
         }
         let mainworldDone = false;
         let mainworldDemoted = false; // Separate flag: only true after the demotion fires, not on normal placement
+
+        // ─── MgT2E 1.3: PRE-ALLOCATION INTERCEPT ─────────────────────────────
+        // For pre-defined lunar mainworlds (isPreMoon flag or 'Sa' trade code),
+        // guarantee the parent body occupies the baseline orbit BEFORE random
+        // placement begins. This removes reliance on probabilistic GG collision.
+        const interceptNeeded = mainworldBase && (
+            mainworldBase.isPreMoon === true ||
+            (mainworldBase.tradeCodes && mainworldBase.tradeCodes.includes('Sa'))
+        );
+
+        if (interceptNeeded && slots.length > 0) {
+            // Locate a parent first — only dequeue the Mainworld if a valid parent exists
+            let parentQueueIdx = queue.findIndex(w => w.type === 'Gas Giant');
+            if (parentQueueIdx === -1) {
+                parentQueueIdx = queue.findIndex(w => w.type === 'Terrestrial Planet' && (w.size || 0) >= 6);
+            }
+
+            if (parentQueueIdx !== -1) {
+                // Remove the Mainworld entry from the queue — placed as a moon below.
+                // Adjust parentQueueIdx if the Mainworld sits ahead of the parent in the queue.
+                let mwQueueIdx = queue.findIndex(w => w.type === 'Mainworld');
+                if (mwQueueIdx !== -1) {
+                    queue.splice(mwQueueIdx, 1);
+                    if (mwQueueIdx < parentQueueIdx) parentQueueIdx--;
+                }
+                let parentInfo = queue.splice(parentQueueIdx, 1)[0];
+                let targetSlot = slots[targetIdx];
+
+                // Build the demoted Mainworld object from mainworldBase
+                let interceptMW = {
+                    type: 'Mainworld',
+                    isAnchor: true,
+                    isMoon: true,
+                    isSatellite: true,
+                    isLunarMainworld: true,
+                    name: mainworldBase.name,
+                    uwp: mainworldBase.uwp,
+                    uwpSecondary: mainworldBase.uwpSecondary,
+                    starport: mainworldBase.starport,
+                    travelZone: mainworldBase.travelZone,
+                    tradeCodes: mainworldBase.tradeCodes ? [...mainworldBase.tradeCodes] : ['Sa'],
+                    size: mainworldBase.size !== undefined ? mainworldBase.size : 7,
+                    atm: mainworldBase.atm,
+                    hydro: mainworldBase.hydro,
+                    pop: mainworldBase.pop,
+                    gov: mainworldBase.gov,
+                    law: mainworldBase.law,
+                    tl: mainworldBase.tl,
+                    hexId: mainworldBase.hexId || sys.hexId,
+                    orbitId: targetSlot.orbitId,
+                    pd: 10.0 + (rng() * 5.0),
+                    pos: 'Middle',
+                    retrograde: false
+                };
+
+                // Ensure 'Sa' is present in trade codes
+                if (!interceptMW.tradeCodes.includes('Sa')) interceptMW.tradeCodes.push('Sa');
+
+                // Parent linkage
+                if (parentInfo.type === 'Gas Giant') {
+                    interceptMW.parentType = 'Gas Giant';
+                    interceptMW.parentId = (sys.hexId || 'System') + '-GG-pre';
+                } else {
+                    interceptMW.parentType = 'Terrestrial';
+                    interceptMW.parentId = (sys.hexId || 'System') + '-PLANET-pre';
+                }
+
+                // AU computation for the target slot (mirrors standard occupancy logic)
+                let _auInt   = Math.floor(targetSlot.orbitId);
+                let _auFrac  = targetSlot.orbitId - _auInt;
+                let _auTable = MgT2EData.stellar.orbitAu;
+                let _maxIdx  = _auTable.length - 1;
+                let _limIdx  = Math.min(_auInt, _maxIdx);
+                let _auBase  = _auTable[_limIdx];
+                let _auDiff  = _limIdx < _maxIdx ? (_auTable[_limIdx + 1] - _auTable[_limIdx]) : _auBase;
+                let _computedAU = _auBase + (_auFrac * _auDiff);
+
+                let interceptParent = {
+                    ...parentInfo,
+                    orbitId: targetSlot.orbitId,
+                    au: _computedAU,
+                    parentStarIdx: targetSlot.parentStarIdx,
+                    orbitType: targetSlot.type,
+                    eccentricity: targetSlot.eccentricity,
+                    moons: [interceptMW]
+                };
+
+                targetSlot.occupant = interceptParent;
+                sys.worlds.push(interceptParent);
+                sys.mainworld = interceptMW;
+                mainworldDone = true;
+                mainworldDemoted = true;
+
+                tResult('Pre-Allocation Intercept', 'Mainworld anchored to parent at Baseline Orbit', 'MgT2E 1.3: Top-Down Lunar Rule');
+                // Replacement rule — keep total world count consistent
+                queue.push({ type: 'Terrestrial Planet' });
+                tResult('Replacement Rule', 'Added Terrestrial Planet to queue', 'MgT2E 1.3: Orbital Allocation');
+            }
+        }
+        // ─────────────────────────────────────────────────────────────────────
 
         // WBH Step 8: Placing Worlds (Refactored for Sliding Collisions)
         while (queue.length > 0) {
@@ -631,7 +892,7 @@
                     if (mainworldBase.isPreMoon && wInfo.type === 'Gas Giant') shouldOverlap = true;
 
                     if (shouldOverlap) {
-                        tResult('WBH Overlap Exception', `${wInfo.type} collided with Mainworld Anchor at Slot ${currentIdx}`);
+                        tResult('WBH Overlap Exception', `${wInfo.type} collided with Mainworld Anchor at Slot ${currentIdx}`, 'MgT2E 1.3: Orbital Allocation');
                         if (window.isLoggingEnabled) writeLogLine(`[WBH COLLISION] ${wInfo.type} reached Mainworld Anchor at Slot ${currentIdx}. Demoting.`);
 
 
@@ -675,13 +936,13 @@
                         
                         if (wInfo.type === 'Gas Giant') {
                             oldMW.parentType = 'Gas Giant';
-                            oldMW.parentId = (sys.hexId || 'System') + "-GG-" + s.id;
+                            oldMW.parentId = (sys.hexId || 'System') + "-GG-" + s.orbitId;
                         } else if (wInfo.type === 'Planetoid Belt') {
                             oldMW.parentType = 'Planetoid Belt';
-                            oldMW.parentId = (sys.hexId || 'System') + "-BELT-" + s.id;
+                            oldMW.parentId = (sys.hexId || 'System') + "-BELT-" + s.orbitId;
                         } else {
                             oldMW.parentType = 'Terrestrial';
-                            oldMW.parentId = (sys.hexId || 'System') + "-PLANET-" + s.id;
+                            oldMW.parentId = (sys.hexId || 'System') + "-PLANET-" + s.orbitId;
                         }
 
 
@@ -713,12 +974,13 @@
                         //   2. findMainworld() to return the wrong object (breaking the hex editor highlight)
                         sys.worlds = sys.worlds.filter(w => w !== oldMW && w !== slotPlaceholder);
                         sys.worlds.push(newPrimary);
+                        sys.mainworld = oldMW;
                         mainworldDone = true;
                         mainworldDemoted = true;
 
                         // WBH Item 4: Add replacement Terrestrial to fill the gap (Sequential Expansion)
                         queue.push({ type: 'Terrestrial Planet' });
-                        tResult('Replacement Rule', 'Added Terrestrial Planet to queue');
+                        tResult('Replacement Rule', 'Added Terrestrial Planet to queue', 'MgT2E 1.3: Orbital Allocation');
 
                         landed = true;
                         break;
@@ -761,6 +1023,7 @@
                         world.law = mainworldBase.law;
                         world.tl = mainworldBase.tl;
                         world.hexId = mainworldBase.hexId || sys.hexId;
+                        sys.mainworld = world;
                         mainworldDone = true;
                     }
 
@@ -787,9 +1050,96 @@
         return sys;
     }
 
+    /**
+     * UTILITY: MgT2E SYSTEM WALKER (Helper for sweeping all bodies)
+     * Following the "Sean Protocol": Recursive state discovery.
+     */
+    function walkMgT2ESystem(sys, callback) {
+        if (!sys) return;
+        
+        const processBody = (body) => {
+            if (!body) return;
+            callback(body);
+            if (body.moons && body.moons.length > 0) {
+                body.moons.forEach(moon => processBody(moon));
+            }
+        };
+
+        // 1. Process Stars (Physical Bodies)
+        if (sys.stars) {
+            sys.stars.forEach(star => callback(star));
+        }
+
+        // 2. Process Worlds & Nested Moons
+        if (sys.worlds) {
+            sys.worlds.forEach(world => processBody(world));
+        }
+    }
+
+    /**
+     * ACTION 6.4: Log a single MgT2E body's complete physical + social biography
+     * in one contiguous trace block.
+     *
+     * @param {Object} body - Any system body (star, planet, moon, etc.)
+     */
+    function logMgT2EBodyBiography(body) {
+        if (!body || body.type === 'Empty' || body.role === 'Empty') return;
+        if (typeof tSection === 'undefined' || typeof tResult === 'undefined') return;
+
+        const name = body.name || body.role || 'Unnamed Body';
+        const typeStr = body.sClass ? "Stellar Orbit" : (body.type || 'World');
+        
+        tSection(`Biography: ${name} [${typeStr}]`);
+
+        // --- PHYSICAL PROFILE ---
+        if (body.sClass) {
+            // Star Results
+            tResult('Star Classification', body.name || 'Unknown', 'MgT2E 1.1: Stellar Generation');
+            if (body.mass != null) tResult('Mass (Sol)', body.mass.toFixed(3), 'MgT2E 1.1: Stellar Generation');
+            if (body.lum  != null) tResult('Luminosity (Sol)', body.lum.toFixed(4), 'MgT2E 1.1: Stellar Generation');
+            if (body.temp != null) tResult('Temperature (K)', body.temp.toFixed(0), 'MgT2E 1.1: Stellar Generation');
+            if (body.orbitId !== null && body.orbitId !== undefined) {
+                tResult('Stellar Orbit', body.orbitId.toFixed(2), 'MgT2E 1.2: Binary/Multiple Stars');
+            }
+        } else {
+            // World Results
+            if (body.orbitId != null) tResult('Orbit', body.orbitId.toFixed(2), 'MgT2E 1.3: Orbital Allocation');
+            if (body.au != null) tResult('Distance (AU)', body.au.toFixed(3), 'MgT2E 2.1: Physical Foundations');
+
+            tResult('Physical Class', body.type, 'MgT2E 2.1: Physical Foundations');
+            if (body.size !== undefined) tResult('Size', body.size, 'MgT2E 2.1: Physical Foundations');
+            if (body.gravity != null) tResult('Gravity', body.gravity.toFixed(2) + "g", 'MgT2E 2.1: Physical Foundations');
+            if (body.atm !== undefined) tResult('Atmosphere', body.atm, 'MgT2E 2.2: Atmospherics');
+            if (body.hydro !== undefined) tResult('Hydrographics', body.hydro, 'MgT2E 2.3: Hydrographics');
+
+            if (body.tempK != null) tResult('Surface Temp (K)', body.tempK.toFixed(0), 'MgT2E 3.2: Tech Level & Environment');
+            if (body.siderealHours != null) tResult('Rotation (Hours)', body.siderealHours.toFixed(1), 'MgT2E 2.4: Rotational Dynamics');
+        }
+
+        // --- SOCIAL PROFILE ---
+        if (body.uwp) {
+            tResult('UWP String', body.uwp, 'MgT2E 3.1: Social Finalization');
+        }
+        if (body.starport) tResult('Starport', body.starport, 'MgT2E 4.1: Starports & Bases');
+        if (body.pop !== undefined) tResult('Population', body.pop, 'MgT2E 3.1: Core Social');
+        if (body.gov !== undefined) tResult('Government', body.gov, 'MgT2E 3.1: Core Social');
+        if (body.law !== undefined) tResult('Law Level', body.law, 'MgT2E 3.1: Core Social');
+        if (body.tl !== undefined) tResult('Tech Level', body.tl, 'MgT2E 3.2: Tech Level & Environment');
+        
+        if (body.tradeCodes && body.tradeCodes.length > 0) {
+            tResult('Trade Codes', body.tradeCodes.join(' '), 'MgT2E 4.1: Starports & Bases');
+        }
+
+        // --- STATUS FLAGS ---
+        if (body.isLunarMainworld) tResult('Status', 'LUNAR MAINWORLD', 'MgT2E 6.4: Planet-Centric Biographies');
+        if (body.isMoon) tResult('Parentage', `${body.parentType || 'World'} Moon`, 'MgT2E 6.4: Planet-Centric Biographies');
+    }
+
     return {
         generateStellarSystem,
         generateSystemInventory,
-        allocateOrbits
+        allocateOrbits,
+        walkMgT2ESystem,
+        logMgT2EBodyBiography
     };
 }));

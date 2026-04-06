@@ -2,15 +2,17 @@
 // CLASSIC TRAVELLER: SHARED PHYSICAL LIBRARY
 // =====================================================================
 // Browser-safe imports
-var orbitalDistances, gravityTable, luminosityTable, satOrbitsTable;
+var orbitalDistances, gravityTable, luminosityTable, satOrbitsTable, planetaryDMs, thermalData;
 
 if (typeof module !== 'undefined' && module.exports) {
-    const { ORBIT_AU, GRAV, LUM, SATELLITE_ORBITS, CT_SATELLITE_LOGIC } = require('./ct_constants');
+    const { ORBIT_AU, GRAV, LUM, SATELLITE_ORBITS, CT_SATELLITE_LOGIC, CT_PLANETARY_DMS, CT_THERMAL_DATA } = require('./ct_constants');
     orbitalDistances = ORBIT_AU;
     gravityTable = GRAV;
     luminosityTable = LUM;
     satOrbitsTable = SATELLITE_ORBITS;
     satLogic = CT_SATELLITE_LOGIC;
+    planetaryDMs = CT_PLANETARY_DMS;
+    thermalData = CT_THERMAL_DATA;
 } else {
     // In browser, these are globals from ct_constants.js
     orbitalDistances = typeof ORBIT_AU !== 'undefined' ? ORBIT_AU : [];
@@ -18,6 +20,8 @@ if (typeof module !== 'undefined' && module.exports) {
     luminosityTable = typeof LUM !== 'undefined' ? LUM : {};
     satOrbitsTable = typeof SATELLITE_ORBITS !== 'undefined' ? SATELLITE_ORBITS : {};
     satLogic = typeof CT_SATELLITE_LOGIC !== 'undefined' ? CT_SATELLITE_LOGIC : {};
+    planetaryDMs = typeof CT_PLANETARY_DMS !== 'undefined' ? CT_PLANETARY_DMS : {};
+    thermalData = typeof CT_THERMAL_DATA !== 'undefined' ? CT_THERMAL_DATA : {};
 }
 
 /**
@@ -27,16 +31,8 @@ if (typeof module !== 'undefined' && module.exports) {
 function getThermalStats(w, luminosity) {
     if (w.type === 'Planetoid Belt') return { temperature: 100 };
 
-    let cloudBase = 0;
     const h = w.hydro || 0;
-    if (h <= 1) cloudBase = 0;
-    else if (h <= 3) cloudBase = 10;
-    else if (h === 4) cloudBase = 20;
-    else if (h === 5) cloudBase = 30;
-    else if (h === 6) cloudBase = 40;
-    else if (h === 7) cloudBase = 50;
-    else if (h === 8) cloudBase = 60;
-    else cloudBase = 70;
+    const cloudBase = thermalData.CLOUDINESS[String(h)] ?? 70;
 
     let cloudiness = cloudBase;
     if ([10, 11, 12, 13].includes(w.atm)) cloudiness = Math.min(100, cloudiness + 40);
@@ -49,29 +45,30 @@ function getThermalStats(w, luminosity) {
     const tc = w.tradeCodes || [];
     if (tc.includes('Ic')) { icePortion = waterPortion + 0.05; waterPortion = 0; }
 
+    const { WATER, LAND, ICE, CLOUDS } = thermalData.ALBEDO;
     let cloudDec = cloudiness / 100.0;
     let unobs = 1.0 - cloudDec;
-    let albedo = (waterPortion * unobs * 0.02) + (landPortion * unobs * 0.10) +
-                 (icePortion * unobs * 0.85) + (cloudDec * 0.50);
+    let albedo = (waterPortion * unobs * WATER) + (landPortion * unobs * LAND) +
+                 (icePortion * unobs * ICE) + (cloudDec * CLOUDS);
 
-    let ghMult = 1.0;
     const atm = w.atm || 0;
-    if ([0, 1, 2, 3, 15].includes(atm)) ghMult = 1.00;
-    else if ([4, 5].includes(atm)) ghMult = 1.05;
-    else if ([6, 7, 14].includes(atm)) ghMult = 1.10;
-    else if ([8, 9, 13].includes(atm)) ghMult = 1.15;
-    else if (atm === 10) {
+    let ghMult = thermalData.GREENHOUSE[String(atm)] ?? 1.0;
+    if (atm === 10) {
         // Range: +20% to +70% (1.2 to 1.7)
         let roll = tRoll2D('Greenhouse Roll (A)');
-        ghMult = 1.20 + (roll - 2) * 0.05; 
-    }
-    else if ([11, 12].includes(atm)) {
+        ghMult = 1.20 + (roll - 2) * 0.05;
+    } else if ([11, 12].includes(atm)) {
         // Range: +20% to +120% (1.2 to 2.2)
         let roll = tRoll2D('Greenhouse Roll (B/C)');
         ghMult = 1.20 + (roll - 2) * 0.10;
     }
 
     let temperature = Math.round(374.025 * ghMult * (1 - albedo) * Math.pow(luminosity, 0.25) / Math.pow(w.distAU, 0.5));
+
+    tResult('Albedo', albedo.toFixed(3), 'CT 2.4: Thermal Logic');
+    tResult('Greenhouse Factor', ghMult.toFixed(2), 'CT 2.4: Thermal Logic');
+    tResult('Surface Temperature', temperature + ' K', 'CT 2.4: Thermal Logic');
+
     return { temperature };
 }
 
@@ -213,18 +210,35 @@ function generateSatellites(parent, zone, mwPop) {
                 tDM('Standard Atm', -7);
                 tDM('Size Code', Math.floor(numericSize));
                 let atmRoll = tRoll2D('Atmosphere Roll') - 7 + Math.floor(numericSize);
-                if (zone === 'I' || zone === 'O') {
-                    tDM(`Zone ${zone}`, -4);
+                
+                // Fix 1: Correct Zone Modifiers
+                if (zone === 'I') {
+                    tDM('Zone I', -2);
+                    atmRoll -= 2;
+                } else if (zone === 'O') {
+                    tDM('Zone O', -4);
                     atmRoll -= 4;
                 }
+                
                 atm = Math.max(0, Math.min(15, atmRoll));
+
+                // Fix 2: Deep Outer Exotic Override
+                if (zone === 'O') {
+                    let exoticRoll = tRoll2D('Outer Exotic Override Check');
+                    if (exoticRoll === 12) {
+                        atm = 10; // Atmosphere A
+                        tResult('Exotic Override', 'Atmosphere A (Natural 12)', 'CT 2.2: RAW Edge-Case');
+                    }
+                }
             } else {
                 tSkip('Atmosphere (Trivial Size)');
             }
-            tResult('Atmosphere Code', atm);
+            tResult('Atmosphere Code', atm, 'CT 2.2: Atmospheric Chemistry');
 
             // Hydrographics
             let hydro = 0;
+            const hRules = (planetaryDMs && planetaryDMs.HYDROGRAPHICS) ? planetaryDMs.HYDROGRAPHICS : null;
+
             if (!isRing && numericSize > 0) {
                 if (zone === 'I') {
                     tSkip('Hydrographics (Zone I is dry)');
@@ -232,14 +246,35 @@ function generateSatellites(parent, zone, mwPop) {
                     tDM('Standard Hyd', -7);
                     tDM('Size Code', Math.floor(numericSize));
                     let hydroRoll = tRoll2D('Hydrographics Roll') - 7 + Math.floor(numericSize);
-                    if (zone === 'O') { tDM('Zone O', -4); hydroRoll -= 4; }
-                    if (atm <= 1 || atm >= 10) { tDM('Extreme Atmosphere', -4); hydroRoll -= 4; }
+                    
+                    if (hRules) {
+                        // Data Shield DMs
+                        if (zone === 'O' && hRules.ZONE_MODIFIERS && hRules.ZONE_MODIFIERS.O) {
+                            tDM('Zone O', hRules.ZONE_MODIFIERS.O);
+                            hydroRoll += hRules.ZONE_MODIFIERS.O;
+                        }
+                        if (hRules.ATMOSPHERE_PENALTY && hRules.ATMOSPHERE_PENALTY.VALID_CODES.includes(atm)) {
+                            tDM('Extreme Atmosphere', hRules.ATMOSPHERE_PENALTY.PENALTY);
+                            hydroRoll += hRules.ATMOSPHERE_PENALTY.PENALTY;
+                        }
+                    } else {
+                        // Fallback
+                        if (zone === 'O') { tDM('Zone O', -4); hydroRoll -= 4; }
+                        if (atm <= 1 || atm >= 10) { tDM('Extreme Atmosphere', -4); hydroRoll -= 4; }
+                    }
+                    
                     hydro = Math.max(0, Math.min(10, hydroRoll));
                 }
             } else {
                 tSkip('Hydrographics (Rings/Trivial Size)');
             }
-            tResult('Hydrographic Code', hydro);
+            
+            // Vacuum World Exception
+            if (atm === 0 && hydro > 0) {
+                tResult('Vacuum Exception', 'Ice-Caps Only', 'CT 2.3: Hydrographics');
+            }
+
+            tResult('Hydrographic Code', hydro, 'CT 2.3: Hydrographics');
 
             // Population
             let pop = 0;
@@ -268,6 +303,7 @@ function generateSatellites(parent, zone, mwPop) {
                 atm,
                 hydro,
                 pop,
+                liquidType: (atm === 0 && hydro > 0) ? 'Ice-Caps' : undefined,
                 zone: zone || 'H',
                 pd,
                 orbitType,
@@ -277,6 +313,56 @@ function generateSatellites(parent, zone, mwPop) {
     }
 
 
+/**
+ * PHASE 2.1: CT DERIVED PHYSICAL METRICS
+ * Centralized physics processor for Mass, Gravity, Orbit Period, and Environment.
+ * Enforces K=1.0 standard Terra density per RAW.
+ */
+function processCTDerivedPhysics(body, primaryStar) {
+    if (!body || body.type === 'Empty' || body.type === 'Nature' || body.type === 'Ring') return;
+
+    // 1. Orbital Period
+    if (body.distAU && primaryStar && !body.orbitalPeriod) {
+        body.orbitalPeriod = Math.sqrt(Math.pow(body.distAU, 3) / (primaryStar.mass || 1.0));
+    }
+
+    // 2. Mass and Gravity (Skip Gas Giants, they are hardcoded in skeleton placement)
+    if (body.type !== 'Gas Giant') {
+        const numSize = (body.size === 'R' || body.size === 'S') ? 0 : Number(body.size);
+
+        if (numSize === 0) {
+            body.mass = 0;
+            body.gravity = 0;
+            if (body.type === 'Satellite') body.diamKm = (body.size === 'S') ? 500 : 0;
+        } else {
+            // Phase 2.1 RAW Math (K=1.0)
+            body.mass = Math.pow(numSize / 8, 3);
+            body.gravity = numSize * 0.125;
+            if (body.type === 'Satellite') body.diamKm = numSize * 1600;
+        }
+
+        if (typeof tResult !== 'undefined') {
+            tResult(`Size ${body.size} Mass`, `${body.mass === 0 ? 0 : body.mass.toFixed(3)} Earths`, 'CT 2.1: Composition & Gravity');
+            tResult(`Size ${body.size} Gravity`, `${body.gravity} G`, 'CT 2.1: Composition & Gravity');
+        }
+    }
+
+    // 3. Thermal and Rotation Processing
+    if (['Terrestrial Planet', 'Captured Planet', 'Mainworld', 'Satellite', 'Planetoid Belt'].includes(body.type)) {
+        if (typeof getThermalStats !== 'undefined' && !body.temperature) {
+            const thermal = getThermalStats(body, primaryStar ? primaryStar.luminosity : 1.0);
+            body.temperature = thermal.temperature;
+        }
+        if (typeof getRotationStats !== 'undefined' && !body.rotationPeriod && body.type !== 'Planetoid Belt') {
+            const rot = getRotationStats(body);
+            body.axialTilt = rot.axialTilt;
+            body.rotationPeriod = rot.rotationPeriod;
+        }
+    } else if (body.type === 'Gas Giant') {
+        body.temperature = 100; // GC Baseline
+    }
+}
+
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { getThermalStats, getRotationStats, generateSatellites };
+    module.exports = { getThermalStats, getRotationStats, generateSatellites, processCTDerivedPhysics };
 }

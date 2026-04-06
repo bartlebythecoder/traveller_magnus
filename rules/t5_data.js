@@ -74,6 +74,33 @@
             }
         },
 
+        // T5 World Map Dimension Details (Baseline 1.0 Density)
+        // Maps Size -> { gravity: G, mass: Earth-relative }
+        // Gravity = Size * 0.125 | Mass = (Size / 8)^3
+        WORLD_DIMENSIONS: {
+            1:  { gravity: 0.125, mass: 0.0020 },
+            2:  { gravity: 0.250, mass: 0.0156 },
+            3:  { gravity: 0.375, mass: 0.0527 },
+            4:  { gravity: 0.500, mass: 0.1250 },
+            5:  { gravity: 0.625, mass: 0.2441 },
+            6:  { gravity: 0.750, mass: 0.4219 },
+            7:  { gravity: 0.875, mass: 0.6699 },
+            8:  { gravity: 1.000, mass: 1.0000 },
+            9:  { gravity: 1.125, mass: 1.4238 },
+            10: { gravity: 1.250, mass: 1.9531 },
+            11: { gravity: 1.375, mass: 2.5967 },
+            12: { gravity: 1.500, mass: 3.3750 },
+            13: { gravity: 1.625, mass: 4.2988 },
+            14: { gravity: 1.750, mass: 5.3789 },
+            15: { gravity: 1.875, mass: 6.6270 },
+            16: { gravity: 2.000, mass: 8.0566 },
+            17: { gravity: 2.125, mass: 9.6802 },
+            18: { gravity: 2.250, mass: 11.510 },
+            19: { gravity: 2.375, mass: 13.561 },
+            20: { gravity: 2.500, mass: 15.842 }
+        },
+
+
         // P2 Basic Placement Chart (Relative to HZ)
         P2_PLACEMENT_CHART: {
             GG_LG: (roll) => roll - 5,
@@ -87,6 +114,22 @@
         // =====================================================================
         // EXTRACTED RPG LOGIC (NEW v2.0 DATA SHIELD)
         // =====================================================================
+
+        // T5 Starport Base Generation Targets (Roll <= Target)
+        BASES: {
+            NAVAL: {
+                ALLOWED_PORTS: ['A', 'B'],
+                TARGETS: { 'A': 6, 'B': 5 }
+            },
+            SCOUT: {
+                ALLOWED_PORTS: ['A', 'B', 'C', 'D'],
+                TARGETS: { 'A': 4, 'B': 5, 'C': 6, 'D': 7 }
+            },
+            DEPOT: {
+                ALLOWED_PORTS: ['A'],
+                PROBABILITY: 0.001 // 1 in 1,000 worlds
+            }
+        },
 
         // T5 Tech Level Dice Modifiers (DMs)
         TECH_LEVEL_MODIFIERS: {
@@ -164,6 +207,14 @@
             { code: "Po", reqs: { atm: [2, 3, 4, 5], hydro: [0, 1, 2, 3] } },
             { code: "Pr", reqs: { atm: [6, 8], pop: [5, 9] } },
             { code: "Ri", reqs: { atm: [6, 8], pop: [6, 7, 8] } }
-        ]
+        ],
+
+        CLIMATE_MAPPING: {
+            "-2": "Inferno",
+            "-1": "Hot / Tropic",
+             "0": "Temperate",
+             "1": "Cold / Tundra",
+             "2": "Frozen"
+        }
     };
 }));

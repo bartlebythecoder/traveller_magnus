@@ -51,7 +51,7 @@ function auditCTSystem(sys) {
     const mwTL = mainworldRef.tl || 0;
 
     // Second Pass: Audit all bodies
-    walkSystem(sys, (body) => {
+    walkSystem(sys, (body, slotName) => {
         if (!body || body.type === 'Empty') return;
 
         // 1. Social Integrity (Pop 0 means no civilization)
@@ -75,15 +75,13 @@ function auditCTSystem(sys) {
             }
         }
 
-        // 3. Environmental TL Floor (Book 6 Rule: Subordinates in hostile atmo need TL 7+)
-        if (body.type !== 'Mainworld' && body.pop > 0 && ![5, 6, 8].includes(body.atm)) {
-            if (body.tl < 7) {
-                results.pass = false;
-                results.errors.push(`TL Floor Error: Subordinate ${body.type} in hostile atmo ${body.atm} has TL ${body.tl} (Minimum 7 required).`);
-                results.checks.push(`[FAIL] TL Floor: ${body.type} lacks required life-support tech.`);
-            } else {
-                results.checks.push(`[PASS] TL Floor: ${body.type} meets environmental requirements.`);
-            }
+        // 3. Environmental TL Floor (Subordinate Worlds Only)
+        if (body.type !== 'Mainworld' && body.pop > 0 && body.tl < 7 && ![5, 6, 8].includes(body.atm)) {
+            results.pass = false;
+            results.errors.push(`Subordinate TL Error: ${body.type} at ${slotName} has Atm ${body.atm} and TL ${body.tl} (TL 7 minimum required).`);
+            results.checks.push(`[FAIL] TL Floor: ${body.type} lacks required life-support tech.`);
+        } else if (body.type !== 'Mainworld' && body.pop > 0) {
+            results.checks.push(`[PASS] TL Floor: ${body.type} meets environmental requirements.`);
         }
 
         // 4. Planetoid Belt Integrity

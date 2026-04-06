@@ -621,6 +621,7 @@ async function runRTTMacro(skipPop = false) {
     // 2. Generate Systems
     setTimeout(() => {
         let count = 0;
+        let noWorldCount = 0;
         targetHexes.forEach(hexId => {
             try {
                 let stateObj = hexStates.get(hexId);
@@ -631,6 +632,12 @@ async function runRTTMacro(skipPop = false) {
                     // Extract UW for display
                     if (stateObj.rttSystem) {
                         stateObj.rttData = extractRTTMainworld(stateObj.rttSystem);
+
+                        // Track systems with no planetary bodies
+                        const hasAnyOrbits = stateObj.rttSystem.stars.some(
+                            s => s.planetarySystem && s.planetarySystem.orbits.length > 0
+                        );
+                        if (!hasAnyOrbits) noWorldCount++;
 
                         // Clear other data
                         stateObj.ctData = null;
@@ -653,8 +660,22 @@ async function runRTTMacro(skipPop = false) {
             }
         });
 
+        if (window.isLoggingEnabled && count > 0) {
+            const noWorldPct = ((noWorldCount / count) * 100).toFixed(1);
+            window.batchLogData.push(`========================================================`);
+            window.batchLogData.push(`RTT GENERATION SUMMARY`);
+            window.batchLogData.push(`  Systems generated : ${count}`);
+            window.batchLogData.push(`  No-world systems  : ${noWorldCount} (${noWorldPct}%)`);
+            window.batchLogData.push(`========================================================`);
+        }
+
         if (window.isLoggingEnabled && window.batchLogData.length > 0) {
             downloadBatchLog('RTT_Full_Macro', targetHexes.length);
+        }
+
+        if (window.isLoggingEnabled && count > 0) {
+            const noWorldPct = ((noWorldCount / count) * 100).toFixed(1);
+            alert(`RTT Generation Summary\n\nSystems generated: ${count}\nNo-world systems: ${noWorldCount} (${noWorldPct}%)`);
         }
 
         requestAnimationFrame(draw);

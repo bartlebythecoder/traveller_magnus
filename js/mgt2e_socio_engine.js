@@ -269,16 +269,22 @@
         }
         body.law = Math.max(0, Math.min(18, body.law));
 
-        // 4. Starport (MgT2E Subordinate Standard: E or X)
-        tSection('Starport');
-        let spRoll = tRoll1D('Starport Presence (5+)');
-        if (spRoll >= 5 || body.pop >= 6) {
-            body.starport = 'E';
-            tResult('Starport Class', 'E (Minor Frontier Port)');
-        } else {
-            body.starport = 'X';
-            tResult('Starport Class', 'X (No Starport)');
-        }
+        // 4. Spaceport (MgT2E WBH RAW: 1D + Pop DMs)
+        tSection('Spaceport');
+        let spDM = 0;
+        if (body.pop >= 6) { tDM('Population 6+', 2); spDM += 2; }
+        else if (body.pop === 1) { tDM('Population 1', -1); spDM -= 1; }
+        else if (body.pop === 0) { tDM('Population 0', -3); spDM -= 3; }
+
+        let spRoll = tRoll1D('Spaceport Generation');
+        let spTotal = spRoll + spDM;
+
+        if (spTotal >= 6) body.starport = 'F'; // Good
+        else if (spTotal >= 4) body.starport = 'G'; // Basic
+        else if (spTotal === 3) body.starport = 'H'; // Primitive
+        else body.starport = 'Y'; // None
+
+        tResult('Spaceport Class', `${body.starport} (${spTotal})`);
 
         // 5. Tech Level
         tSection('Tech Level');
@@ -293,13 +299,12 @@
             body.tl = 0;
             body.isRuin = true;
         } else if (body.pop > 0) {
-            // WBH Guidelines: Baseline is direct derivation (max(MW-1, Floor))
             const baseline = Math.max(0, mainworld.tl - 1);
-            body.tl = Math.max(baseline, floor);
-            
+            body.tl = baseline; // WBH RAW: Do not bump subordinate UWP TL to meet floor.
             tResult('Baseline Tech Level (Direct Derivation)', body.tl);
-            if (body.tl === floor && floor > baseline) {
-                tOverride('Environmental Floor', baseline, floor, `Atm ${body.atmCode} requires TL ${floor}`);
+
+            if (body.tl < floor) {
+                tResult('Survival State', `Jury-Rigged / Relic Tech (Base TL ${body.tl} < Floor TL ${floor})`);
             }
         } else {
             tSkip('Population 0 forces Tech Level 0');
@@ -840,19 +845,28 @@
             numExternalFactions = totalFactions - 1;
         }
     
-        let factionsList = [];
+        let factionsData = [];
         for (let i = 0; i < numExternalFactions; i++) {
-            let fRoll = tRoll2D(`Faction ${i + 1} Roll`);
-            let fType = 'P';
-            if (fRoll <= 3) fType = 'O';
-            else if (fRoll <= 5) fType = 'F';
-            else if (fRoll <= 7) fType = 'M';
-            else if (fRoll <= 9) fType = 'N';
-            else if (fRoll <= 11) fType = 'S';
-            factionsList.push(fType);
-            tResult(`Faction ${i + 1} Type`, fType);
+            let fRoll = tRoll2D(`Faction ${i + 1} Strength Roll`);
+            let fStrength = 'P';
+            if (fRoll <= 3) fStrength = 'O';
+            else if (fRoll <= 5) fStrength = 'F';
+            else if (fRoll <= 7) fStrength = 'M';
+            else if (fRoll <= 9) fStrength = 'N';
+            else if (fRoll <= 11) fStrength = 'S';
+            
+            // WBH RAW: Generate Faction Government
+            let fGovRoll = tRoll2D(`Faction ${i + 1} Gov Roll`);
+            let fGov = Math.max(0, fGovRoll - 7 + base.pop);
+            
+            // Identify: Splinter vs Dissident
+            let fIdentity = (fGov === base.gov) ? "Splinter/Rival" : "Dissident/Rebel";
+            
+            factionsData.push({ strength: fStrength, gov: fGov, identity: fIdentity });
+            tResult(`Faction ${i + 1}`, `${fIdentity} (Strength ${fStrength}, Gov ${toUWPChar(fGov)})`);
         }
-        let factionsString = factionsList.join('');
+        base.factionsData = factionsData;
+        let factionsString = factionsData.map(f => f.strength).join('');
     
         // 10. Law Profile (O-WECPR)
         tSection('Law Profile');
@@ -1169,10 +1183,15 @@
         M2 = fM2;
         tResult('M2: Heavy', M2);
     
-        // Novelty TL
+        // Novelty TL (Acts as Relic/Prototype safety net if base TL is below floor)
         tSection('Tech: Novelty (N)');
         let maxOfAll = Math.max(Q1, Q2, Q3, Q4, Q5, T1, T2, T3, T4, M1, M2);
-        let N = Math.max(maxOfAll, minSusTL, Math.max(H + 2, 12));
+
+        // WBH: Prototype gear can be 0 to 2 levels below the minimum sustainable TL
+        let juryRigOffset = (base.tl < minSusTL) ? Math.floor(rng() * 3) : 0;
+        let relicTL = Math.max(0, minSusTL - juryRigOffset);
+
+        let N = Math.max(maxOfAll, relicTL, Math.max(H + 2, 12));
         tResult('Novelty (N)', N);
     
         let techProfile = `${toEHex(H)}-${toEHex(L)}-${toEHex(Q1)}${toEHex(Q2)}${toEHex(Q3)}${toEHex(Q4)}${toEHex(Q5)}-${toEHex(T1)}${toEHex(T2)}${toEHex(T3)}${toEHex(T4)}-${toEHex(M1)}${toEHex(M2)}-${toEHex(N)}`;
@@ -1306,6 +1325,22 @@
     
             culturalProfile = `${toEHex(culD)}${toEHex(culX)}${toEHex(culU)}${toEHex(culS)}-${toEHex(culC)}${toEHex(culP)}${toEHex(culE)}${toEHex(culM)}`;
             tResult('Final Cultural Profile', culturalProfile);
+
+            // Narrative Cultural Quirks (D66)
+            tSection('Cultural Quirks (D66)');
+            let numQuirks = Math.round(culD / 4);
+            let quirks = [];
+            const quirkTable = MgT2EData.socioeconomics.culture.differences;
+
+            for (let i = 0; i < numQuirks; i++) {
+                let d1 = tRoll1D('Quirk D66 Tens');
+                let d2 = tRoll1D('Quirk D66 Ones');
+                let lookup = `${d1}${d2}`;
+                let trait = quirkTable[lookup] || "Unusual Custom";
+                quirks.push(trait);
+                tResult(`Cultural Quirk ${i + 1}`, trait);
+            }
+            base.culturalQuirks = quirks;
         }
     
         // 13. Economic Profile
@@ -1925,6 +1960,11 @@
         // Copy profiles back to mainworld object
         if (mainworld && base !== mainworld) {
             Object.assign(mainworld, base);
+            // Recalculate MgT2E trade codes after merge — base may carry CT-format trade
+            // codes (e.g. no Hi/Ht/Lo/Sa) that differ from MgT2E expectations, which
+            // would cause the post-generation audit to flag a trade-code mismatch for
+            // every system expanded from a CT mainworld baseline.
+            mainworld.tradeCodes = calculateMgT2ETradeCodes(mainworld);
         }
     
         return sys;
@@ -2182,26 +2222,39 @@
         if (!hasSocials) {
             // ── Starport ──────────────────────────────────────────────────
             tSection('Starport Class');
-            if (pop >= 10) tDM('Population 10+', 2);
-            else if (pop >= 8) tDM('Population 8-9', 1);
-            else if (pop <= 2) tDM('Population 2-', -2);
-            else if (pop <= 4) tDM('Population 3-4', -1);
-
-            let starportRoll = tRoll2D('Starport');
             let starportDM = 0;
-            if (pop >= 10) starportDM = 2;
-            else if (pop >= 8) starportDM = 1;
-            else if (pop <= 2) starportDM = -2;
-            else if (pop <= 4) starportDM = -1;
+            const spData = MgT2EData.starport;
 
-            if (isNativeSophont && MgT2EData.starport.nativeSophontDM !== undefined) {
-                tDM('Native Sophont', MgT2EData.starport.nativeSophontDM);
-                starportDM += MgT2EData.starport.nativeSophontDM;
+            if (spData && spData.populationDMs) {
+                for (let rule of spData.populationDMs) {
+                    if (pop >= rule.minPop && pop <= rule.maxPop) {
+                        tDM(`Population ${rule.minPop}-${rule.maxPop}`, rule.dm);
+                        starportDM += rule.dm;
+                        break;
+                    }
+                }
             }
 
+            if (isNativeSophont && spData && spData.nativeSophontDM !== undefined) {
+                tDM('Native Sophont', spData.nativeSophontDM);
+                starportDM += spData.nativeSophontDM;
+            }
+
+            let starportRoll = tRoll2D('Starport');
             let spTotal = starportRoll + starportDM;
-            starport = spTotal <= 2 ? 'X' : spTotal <= 4 ? 'E' : spTotal <= 6 ? 'D'
-                : spTotal <= 8 ? 'C' : spTotal <= 10 ? 'B' : 'A';
+            starport = 'X';
+
+            if (spData && spData.classMap) {
+                for (let entry of spData.classMap) {
+                    if (spTotal <= entry.maxRoll) {
+                        starport = entry.class;
+                        break;
+                    }
+                }
+            } else {
+                // Fallback if Data Shield is missing
+                starport = spTotal <= 2 ? 'X' : spTotal <= 4 ? 'E' : spTotal <= 6 ? 'D' : spTotal <= 8 ? 'C' : spTotal <= 10 ? 'B' : 'A';
+            }
             tResult('Starport Class', `${starport} (${spTotal})`);
         }
 
@@ -2274,16 +2327,11 @@
                     tResult('Environmental Minimum Override', 'Ignored for Native Sophonts');
                 } else {
                     let minTl = getMgT2EMinSusTL(atm);
+                    tl = baseTl; // WBH RAW: Do not bump UWP TL to meet floor.
+                    if (rawTl !== baseTl) tClamp('Tech Level', rawTl, baseTl);
 
-                    // Final TL is the higher of the generated base or the environmental minimum
-                    tl = Math.max(baseTl, minTl);
-
-                    // Log the clamp if the environment forced the TL higher
-                    if (rawTl !== tl) {
-                        tResult('Environmental Minimum Override', `Raised to TL ${minTl}`);
-                        tClamp('Tech Level', rawTl, tl);
-                    } else {
-                        if (rawTl !== baseTl) tClamp('Tech Level', rawTl, baseTl); // Standard floor clamp
+                    if (tl < minTl) {
+                        tResult('Survival State', `Jury-Rigged / Relic Tech (Base TL ${tl} < Floor TL ${minTl})`);
                     }
                 }
 
@@ -2297,41 +2345,64 @@
         // ── Bases ─────────────────────────────────────────────────────
         tSection('Bases');
         let navalBase = false, scoutBase = false, militaryBase = false, corsairBase = false;
+        const baseData = MgT2EData.bases;
 
-        if (starport === 'A' || starport === 'B') {
-            let mr = tRoll2D('Military Base (8+)');
-            militaryBase = mr >= 8;
-            tResult('Military Base Present', militaryBase);
-            let nr = tRoll2D('Naval Base (8+)');
-            navalBase = nr >= 8;
-            tResult('Naval Base Present', navalBase);
-        } else if (starport === 'C') {
-            let mr = tRoll2D('Military Base (10+)');
-            militaryBase = mr >= 10;
-            tResult('Military Base Present', militaryBase);
-        } else {
-            tSkip('Military/Naval Bases (Required Starport A-C)');
-        }
+        if (baseData) {
+            // Dynamic Base Pull from Data Shield (arrays of { starports, target })
+            const findRule = (rules) => Array.isArray(rules) ? rules.find(r => r.starports && r.starports.includes(starport)) : null;
 
-        if (['A', 'B', 'C', 'D'].includes(starport)) {
-            let threshold = starport === 'A' ? 10 : starport === 'B' || starport === 'C' ? 9 : 8;
-            let sr = tRoll2D(`Scout Base (${threshold}+)`);
-            scoutBase = sr >= threshold;
-            tResult('Scout Base Present', scoutBase);
+            const milRule = findRule(baseData.military);
+            if (milRule) {
+                militaryBase = tRoll2D('Military Base Check') >= milRule.target;
+                tResult('Military Base Present', militaryBase);
+            }
+            const navRule = findRule(baseData.naval);
+            if (navRule) {
+                navalBase = tRoll2D('Naval Base Check') >= navRule.target;
+                tResult('Naval Base Present', navalBase);
+            }
+            const sctRule = findRule(baseData.scout);
+            if (sctRule) {
+                scoutBase = tRoll2D('Scout Base Check') >= sctRule.target;
+                tResult('Scout Base Present', scoutBase);
+            }
+            const corRule = findRule(baseData.corsair);
+            if (corRule) {
+                let corsairRoll = tRoll2D('Corsair Base Check');
+                let lawDM = 0;
+                if (baseData.corsairLawDMs) {
+                    for (let dm of baseData.corsairLawDMs) {
+                        if (dm.law !== undefined && law === dm.law) { lawDM = dm.dm; break; }
+                        if (dm.minLaw !== undefined && law >= dm.minLaw && law <= dm.maxLaw) { lawDM = dm.dm; break; }
+                    }
+                } else {
+                    if (law === 0) lawDM = 2;
+                    else if (law >= 2) lawDM = -2;
+                }
+                corsairBase = (corsairRoll + lawDM) >= corRule.target;
+                tResult('Corsair Base Present', corsairBase);
+            }
         } else {
-            tSkip('Scout Base (Required Starport A-D)');
-        }
-
-        if (['D', 'E', 'X'].includes(starport)) {
-            if (law === 0) tDM('Law 0', 2);
-            else if (law >= 2) tDM('Law 2+', -2);
-            let cr = tRoll2D('Corsair Base');
-            let threshold = starport === 'D' ? 12 : 10;
-            let finalCR = cr + (law === 0 ? 2 : law >= 2 ? -2 : 0);
-            corsairBase = finalCR >= threshold;
-            tResult('Corsair Base Present', corsairBase);
-        } else {
-            tSkip('Corsair Base (Required Starport D-X)');
+            // Legacy Hardcoded Fallback
+            if (starport === 'A' || starport === 'B') {
+                militaryBase = tRoll2D('Military Base (8+)') >= 8;
+                navalBase = tRoll2D('Naval Base (8+)') >= 8;
+                tResult('Mil/Nav Bases', `${militaryBase}/${navalBase}`);
+            } else if (starport === 'C') {
+                militaryBase = tRoll2D('Military Base (10+)') >= 10;
+                tResult('Mil Base', militaryBase);
+            }
+            if (['A', 'B', 'C', 'D'].includes(starport)) {
+                let threshold = starport === 'A' ? 10 : starport === 'B' || starport === 'C' ? 9 : 8;
+                scoutBase = tRoll2D(`Scout Base (${threshold}+)`) >= threshold;
+                tResult('Scout Base', scoutBase);
+            }
+            if (['D', 'E', 'X'].includes(starport)) {
+                let cr = tRoll2D('Corsair Base');
+                let threshold = starport === 'D' ? 12 : 10;
+                corsairBase = (cr + (law === 0 ? 2 : law >= 2 ? -2 : 0)) >= threshold;
+                tResult('Corsair Base', corsairBase);
+            }
         }
 
         // ── Gas Giant ─────────────────────────────────────────────────

@@ -138,9 +138,10 @@ function refineSocialInfrastructure(world, mainworldRef) {
         world.spaceport = mainworldRef.port || 'C'; // Mainworlds keep their starport
     }
 
-    // Environmental TL Floor (Book 6)
-    if (world.pop > 0 && world.tl < 7 && ![5, 6, 8].includes(world.atm)) {
+    // Environmental TL Floor (Book 6) - Applies ONLY to Subordinate Worlds
+    if (!isMainworld && world.pop > 0 && world.tl < 7 && ![5, 6, 8].includes(world.atm)) {
         world.tl = 7;
+        if (typeof tResult !== 'undefined') tResult('TL Floor', 'Bumped to 7 (Subordinate Habitat)', 'CT 3.2: Tech Level');
     }
 
     return world;
@@ -149,37 +150,27 @@ function refineSocialInfrastructure(world, mainworldRef) {
 /**
  * HELPER: Mainworld TL Calculation
  */
-function calculateMainworldTL(world) {
+function calculateMainworldTL(world, tlModifiers) {
     let tl = (typeof tRoll1D !== 'undefined' ? tRoll1D('TL Base') : 3);
     
-    // Starport
+    // Fallback to global if not passed explicitly
+    const mods = tlModifiers || (typeof CT_CONSTANTS !== 'undefined' ? CT_CONSTANTS.TECH_LEVEL_MODIFIERS : null);
+    
+    if (!mods) {
+        if (typeof writeLogLine !== 'undefined') writeLogLine("WARNING: Tech Level Modifiers not found in Data Shield. Base TL used.");
+        return tl;
+    }
+
+    // Dynamically apply DMs from the Data Shield
     const sp = world.starport || 'C';
-    if (sp === 'A') tl += 6;
-    else if (sp === 'B') tl += 4;
-    else if (sp === 'C') tl += 2;
-    else if (sp === 'X') tl -= 4;
+    if (mods.STARPORT[sp]) tl += mods.STARPORT[sp];
+    if (mods.SIZE[world.size]) tl += mods.SIZE[world.size];
+    if (mods.ATMOSPHERE[world.atm]) tl += mods.ATMOSPHERE[world.atm];
+    if (mods.HYDROGRAPHICS[world.hydro]) tl += mods.HYDROGRAPHICS[world.hydro];
+    if (mods.POPULATION[world.pop]) tl += mods.POPULATION[world.pop];
+    if (mods.GOVERNMENT[world.gov]) tl += mods.GOVERNMENT[world.gov];
 
-    // Size
-    if (world.size <= 1) tl += 2;
-    else if (world.size <= 4) tl += 1;
-
-    // Atmo
-    if (world.atm <= 3 || world.atm >= 10) tl += 1;
-
-    // Hydro
-    if (world.hydro === 9) tl += 1;
-    else if (world.hydro === 10) tl += 2;
-
-    // Pop
-    if (world.pop >= 1 && world.pop <= 5) tl += 1;
-    else if (world.pop === 9) tl += 2;
-    else if (world.pop === 10) tl += 4;
-
-    // Gov
-    if (world.gov === 0 || world.gov === 5) tl += 1;
-    else if (world.gov === 13) tl -= 2;
-
-    return Math.max(0, tl);
+    return Math.max(0, tl); // Tech Levels do not go below 0
 }
 
 if (typeof module !== 'undefined' && module.exports) {

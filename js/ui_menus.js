@@ -449,6 +449,7 @@ function setupGenerationHandlers() {
                         hexId: hexId
                     });
                     stateObj.ctSystem = sys;
+                    if (sys && sys.mainworld) stateObj.ctData = sys.mainworld; // Sync post-expansion mainworld (lunar flags, gasGiant, etc.)
                 }
 
                 stateObj.t5Physical = null;

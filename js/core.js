@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.5.7.3";
-const APP_BANNER = "v0.5.7.3 - Optimized Icon Scaling & Asset Positioning";
+const APP_VERSION = "v0.6";
+const APP_BANNER = "v0.6";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -93,7 +93,10 @@ function reseedForHex(hexId) {
 }
 
 function clampUWP(val, min, max) {
-    return Math.max(min, Math.min(max, val));
+    if (typeof val === 'string' && (val === 'S' || val === 'R' || val === 'GG')) return val;
+    const v = Number(val);
+    if (isNaN(v)) return min;
+    return Math.max(min, Math.min(max, v));
 }
 
 // History state
@@ -210,7 +213,10 @@ function toEHex(val) {
 const EHEX_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // Skips I and O
 
 function toUWPChar(val) {
-    if (val === undefined || val === null || isNaN(val)) return '0';
+    if (val === undefined || val === null || isNaN(val)) {
+        if (typeof val === 'string' && (val === 'S' || val === 'R' || val === 'GG')) return val;
+        return '0';
+    }
     val = Math.floor(val);
     if (val < 0) return '0';
     if (val < 10) return val.toString();

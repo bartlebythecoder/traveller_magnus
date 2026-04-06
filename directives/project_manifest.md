@@ -1,22 +1,30 @@
 # PROJECT AS ABOVE, SO BELOW - Feature Manifest
-**Version:** 0.5.7.3
-**Target:** GUI Visual Refinement, Icon Scaling, & Dynamic Asset Selection
-**Architecture Standard:** The "Sean Protocol" (Strict Modular Separation, Comprehensive Trace Logging)
+
+**Evergreen Context:** This is an ongoing, long-term project for a **Multi-Engine Traveller RPG Generator and Mapping Tool**. The system is designed to support and audit procedural generation across various Traveller rulesets (e.g., MgT2E, CT, T5, CE) using a unified architectural framework.
+
+**Version:** 0.6.0.0  
+**Target:** Auditor Logic Alignment, Failure Persistence, & Multi-Engine Diagnostic Logging  
+**Architecture Standard:** The "Sean Protocol" (Directives -> Orchestration -> Execution)
+
+---
 
 ## 1. Project Goal
-To refine the visual hierarchy of the system map by normalizing icon scales and optimizing spatial positioning. Specifically, this version focuses on reducing the visual footprint of Gas Giant assets, repositioning core GUI elements (Gas Giants and Base icons) for better clarity, and introducing a logical "Selection Process" to toggle between multiple Gas Giant visual variants.
+To eliminate logical drift across multiple RPG engines and ensure human-readable transparency in generation output. This version centralizes cross-engine "laws" into Markdown guidelines, upgrades the Auditor to handle multi-engine environmental checks, and refactors Trace Logging into a standardized, planet-by-planet hierarchy to resolve "suspicious results".
 
 ## 2. Architectural Pillars (The "Sean Protocol")
-* **Data Shield:** The source of truth for asset paths (Primary vs. Alternative icons) and coordinate constants.
-* **Math Chassis:** The isolated location for scaling calculations, coordinate offsets, and the selection logic algorithm.
-* **Core Engines:** Updated to handle the conditional rendering of alternative assets and the application of new transform scales.
-* **Trace Logging:** Every asset selection and coordinate shift MUST be wrapped in the `tSection`, `tResult`, and `writeLogLine` framework.
+* **Directives Layer:** Rule-specific Markdown files (e.g., `rules/mgt2e_logic.md`, `rules/ct_logic.md`) act as the "Source of Truth" for AI agents.
+* **Data Shield:** Centralized tables for environmental Tech Level minimums and asset paths, partitioned by engine type.
+* **Math Chassis:** Universal logic for survival floors and "Dead World" reclassification that applies across engine boundaries.
+* **Trace Logging:** A standardized, object-oriented reporting framework that prioritizes human-readability.
 
-## 3. Implementation Plan (v0.5.7.3)
+## 3. Implementation Plan (v0.6.0.0)
 
-### Phase 4: Visual Refinement & Asset Diversification
-* **Action 4.1 (Scaling):** Identify the Gas Giant scaling constant within the UI Orchestrator or CSS. Reduce dimensions to prevent GUI overcrowding.
-* **Action 4.2 (Positioning):** Update the X/Y coordinate logic for Gas Giant icons and all Base icons to improve spatial distribution on the map.
-* **Action 4.3 (Selection Logic):** * Introduce a second Gas Giant asset to the **Data Shield**.
-    * Develop a selection function within the **Math Chassis** to determine which icon is rendered (e.g., based on system seed or a random weight).
-* **Action 4.4 (Logging):** Implement Trace Logging for the selection process to output which icon was chosen and why during the generation sequence.
+### Phase 6: Multi-Engine Audit & Diagnostic Sweep
+* **Action 6.1 (Directive Documentation):** Populate the `rules/` directory with Markdown guidelines for all active engines. These files enable agents to compare code execution against specific RPG rulesets (e.g., WBH vs. Classic).
+* **Action 6.2 (Multi-Engine Auditor Refactor):** Align the Auditor to detect which engine is active and pull the correct environmental TL lookups from the Data Shield. It must [PASS] results that meet engine-specific survival requirements even if they violate generic guidelines.
+* **Action 6.3 (Reporting & Backlog Persistence):** Implement a global `window.auditBacklog`. Every audit failure must be pushed here with its **HexID**, **OrbitID**, and **Engine Source** to track "suspicious results" across different rulesets.
+* **Action 6.4 (Hierarchical Planet-by-Planet Logging):**
+    * **Object-Centricity:** Refactor all logging (Stellar, World, Socio) to group all data by **Planet/Body**. Users should see the full physical and social "biography" of a world in one section rather than seeing stats grouped by generation phase.
+    * **Standardization:** Harmonize the `tSection` and `tResult` usage across all engines to ensure identical detail levels and human-readability.
+    * **Source Labeling:** Every `tResult` must explicitly label the logic source (e.g., "WBH Requirement," "CT Baseline," or "Physics Floor").
+* **Action 6.5 (Diagnostic Sweep):** Use the new Planet-Centric Logs and Auditor Backlog to identify, isolate, and resolve the two specific groups of "suspicious results" currently appearing in multi-engine output.

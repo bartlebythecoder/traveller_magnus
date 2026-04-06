@@ -22,6 +22,7 @@
 
         let v;
         if (typeof val === 'string') {
+            if (val === 'S' || val === 'R' || val === 'GG') return val;
             v = parseInt(val, 10);
             if (isNaN(v)) return val.trim().toUpperCase().charAt(0) || '0';
         } else {
@@ -53,6 +54,7 @@
      * @returns {number} - The clamped value.
      */
     function clampUWP(val, min, max) {
+        if (typeof val === 'string' && (val === 'S' || val === 'R' || val === 'GG')) return val;
         const v = Number(val);
         if (isNaN(v)) return min;
         return Math.max(min, Math.min(max, v));

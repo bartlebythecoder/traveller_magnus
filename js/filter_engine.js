@@ -116,6 +116,7 @@
         if (typeof tSection === 'function') tSection("Clear Filter Inputs");
         
         const inputs = [
+            'filter-name',
             'filter-starport', 'filter-size', 'filter-atm', 'filter-hydro',
             'filter-pop', 'filter-gov', 'filter-law', 'filter-tl', 'filter-trade-codes',
             'filter-gravity', 'filter-temperature', 'filter-t5-ix', 'filter-mgt-importance', 'filter-mgt-wtn', 'filter-mgt-gwp'
@@ -219,6 +220,7 @@
 
         // 1. Harvest Field Filters
         activeFilters = {
+            name: document.getElementById('filter-name')?.value || "",
             starport: document.getElementById('filter-starport')?.value || "",
             size: document.getElementById('filter-size')?.value || "",
             atm: document.getElementById('filter-atm')?.value || "",
@@ -250,7 +252,17 @@
             // Merge for evaluation
             const evalObject = { ...worldData, ...socioData };
 
-            const isVisible = UniversalMath.applyFilters(evalObject, activeFilters, activeRouteStatus);
+            // Name prefix filter (case-insensitive, applied before UWP filters)
+            let isVisible = true;
+            const nameQuery = activeFilters.name.trim().toLowerCase();
+            if (nameQuery) {
+                const worldName = (evalObject.name || evalObject.systemName || state.name || '').toLowerCase();
+                if (!worldName.startsWith(nameQuery)) isVisible = false;
+            }
+            // Strip 'name' before passing to UniversalMath — it handles UWP tokens only
+            const uwpFilters = Object.assign({}, activeFilters);
+            delete uwpFilters.name;
+            if (isVisible) isVisible = UniversalMath.applyFilters(evalObject, uwpFilters, activeRouteStatus);
             state.isHiddenByFilter = !isVisible;
 
             if (isVisible) matchCount++;
@@ -291,7 +303,8 @@
     window.generateFilterDescription = function(filters) {
         let parts = [];
         const labels = {
-            starport: "Starport", size: "Size", atm: "Atm", hydro: "Hydro", 
+            name: "Name",
+            starport: "Starport", size: "Size", atm: "Atm", hydro: "Hydro",
             pop: "Pop", gov: "Gov", law: "Law", tl: "TL", tradeCodes: "Codes",
             gravity: "Grav", temperature: "Temp (°C)",
             t5Ix: "T5 Ix", mgtImportance: "Mg Imp", mgtWTN: "Mg WTN", mgtGWP: "Mg GWP"
@@ -614,6 +627,7 @@
 
     function setupFilterListeners() {
         const inputs = [
+            'filter-name',
             'filter-starport', 'filter-size', 'filter-atm', 'filter-hydro',
             'filter-pop', 'filter-gov', 'filter-law', 'filter-tl', 'filter-trade-codes',
             'filter-gravity', 'filter-temperature', 'filter-t5-ix', 'filter-mgt-importance', 'filter-mgt-wtn', 'filter-mgt-gwp'

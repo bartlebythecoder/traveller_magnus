@@ -345,6 +345,19 @@ function populateEditorAccordions(stateObj) {
                 else el.innerText = val;
             }
         }
+
+        // Mapping Cultural Quirks (Narrative)
+        const quirksContainer = document.getElementById('edit-mgt-quirks');
+        if (quirksContainer) {
+            const dataQuirks = stateObj.mgt2eData?.culturalQuirks || [];
+            if (dataQuirks.length > 0) {
+                quirksContainer.innerHTML = dataQuirks.join(', ');
+                quirksContainer.parentElement.style.display = 'flex'; // Use flex to match CSS
+            } else {
+                quirksContainer.innerHTML = 'None';
+                quirksContainer.parentElement.style.display = 'none'; // Hide row if empty
+            }
+        }
     }
 
     // T5 Socioeconomics
@@ -1354,7 +1367,8 @@ function saveHexEditorChanges() {
             IR: parseInt(document.getElementById('edit-mgt-ir').value, 10) || 0,
             DR: document.getElementById('edit-mgt-dr').value,
             starportProfile: document.getElementById('edit-mgt-starport-profile').value,
-            militaryProfile: document.getElementById('edit-mgt-mil-profile').value
+            militaryProfile: document.getElementById('edit-mgt-mil-profile').value,
+            culturalQuirks: stateObj.mgt2eData ? stateObj.mgt2eData.culturalQuirks : []
         };
         // Update derived population
         mgtSocioInputs.totalWorldPop = mgtSocioInputs.pValue * Math.pow(10, sharedData.pop);

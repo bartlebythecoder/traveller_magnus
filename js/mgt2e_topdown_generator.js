@@ -168,7 +168,20 @@
         if (activeAuditor) {
             const auditResults = activeAuditor.auditMgT2ESystem(sys, { mode: 'top-down' });
             if (!auditResults.pass) {
-                console.warn(`[MgT2E Auditor] System ${hexId} failed strict validation. See batch logs for details.`);
+                console.warn(`[MgT2E Auditor] System ${hexId} failed strict validation. Logging to backlog.`);
+                
+                // Action 6.3: Audit Persistence — push all strict [FAIL] to global backlog
+                if (typeof window !== 'undefined') {
+                    window.auditBacklog = window.auditBacklog || [];
+                    auditResults.errors.forEach(err => {
+                        window.auditBacklog.push({
+                            hexId: hexId,
+                            orbitId: err.orbitId !== undefined ? err.orbitId : null,
+                            engine: "MgT2E",
+                            message: err.message || err 
+                        });
+                    });
+                }
             }
         }
 
@@ -223,6 +236,15 @@
         // PHASE 10: FINALIZATION
         // =================================================================
         
+        // Action 6.4: Planet-Centric Biographies (v0.6.0.0)
+        // Groups all disparate generation data into a human-readable biography per world.
+        if (StellarEngine && StellarEngine.walkMgT2ESystem && StellarEngine.logMgT2EBodyBiography) {
+            tSection('System Biographies');
+            StellarEngine.walkMgT2ESystem(sys, (body) => {
+                StellarEngine.logMgT2EBodyBiography(body);
+            });
+        }
+
         // Close trace logging
         if (typeof endTrace === 'function' && typeof window !== 'undefined' && window.isLoggingEnabled) {
             endTrace();
@@ -302,26 +324,33 @@
         // Socio-economic engines require certain physical foundations (Resource Rating, Habitability, Day Length).
         // We surgery repair these ONLY if they are missing, preserving existing manual edits.
         if (WorldEngine) {
-            let worldsToRepair = [];
-            const collect = (list) => {
-                list.forEach(w => {
-                    if (w.type !== 'Empty') worldsToRepair.push(w);
-                    if (w.moons) collect(w.moons);
-                    if (w.significantBodies) collect(w.significantBodies);
-                });
-            };
-            collect(sys.worlds);
+            let rootsToRepairRot = [];
+            let rootsToRepairBio = [];
+
+            sys.worlds.forEach(w => {
+                 let needsRot = false;
+                 let needsBio = false;
+                 const check = (node) => {
+                     if (node.type !== 'Empty') {
+                         if (node.siderealHours === undefined || node.axialTilt === undefined) needsRot = true;
+                         if (node.habitability === undefined || node.resourceRating === undefined) needsBio = true;
+                     }
+                     if (node.moons) node.moons.forEach(check);
+                     if (node.significantBodies) node.significantBodies.forEach(check);
+                 };
+                 check(w);
+                 if (needsRot) rootsToRepairRot.push(w);
+                 if (needsBio) rootsToRepairBio.push(w);
+            });
 
             // 1. Rotational Dynamics (Day Length, Axial Tilt)
-            let missingRotation = worldsToRepair.filter(w => w.siderealHours === undefined || w.axialTilt === undefined);
-            if (missingRotation.length > 0 && WorldEngine.generateRotationalDynamics) {
-                WorldEngine.generateRotationalDynamics(sys, { targetWorlds: missingRotation });
+            if (rootsToRepairRot.length > 0 && WorldEngine.generateRotationalDynamics) {
+                WorldEngine.generateRotationalDynamics(sys, { targetWorlds: rootsToRepairRot });
             }
 
             // 2. Biospherics & Resources (Resource Rating, Habitability, Seismic)
-            let missingBio = worldsToRepair.filter(w => w.habitability === undefined || w.resourceRating === undefined);
-            if (missingBio.length > 0 && WorldEngine.generateBiospherics) {
-                WorldEngine.generateBiospherics(sys, { targetWorlds: missingBio, mainworldBase: mainworldBase });
+            if (rootsToRepairBio.length > 0 && WorldEngine.generateBiospherics) {
+                WorldEngine.generateBiospherics(sys, { targetWorlds: rootsToRepairBio, mainworldBase: mainworldBase });
             }
         }
 

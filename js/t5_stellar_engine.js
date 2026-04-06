@@ -25,7 +25,7 @@
     const _roll2D = (typeof tRoll2D === 'function') ? tRoll2D : (label) => Math.floor(_rng() * 6) + 1 + Math.floor(_rng() * 6) + 1;
     const _log = (typeof writeLogLine === 'function') ? writeLogLine : console.log;
     const _tSection = (typeof tSection === 'function') ? tSection : () => { };
-    const _tResult = (typeof tResult === 'function') ? tResult : () => { };
+    const _tResult = (typeof tResult === 'function') ? tResult : (label, value, source) => { };
 
     /**
      * Parses a T5 stellar string (e.g., "G2 V").
@@ -146,7 +146,7 @@
         _tSection(`Generating ${role} Star`);
 
         if (importedName) {
-            _tResult('Imported Stellar', importedName);
+            _tResult('Imported Stellar', importedName, 'T5 1.1: Stellar Generation');
             const parsed = parseT5Stellar(importedName);
             type = parsed.type;
             decimal = parsed.decimal;
@@ -163,16 +163,16 @@
 
         const TYPE_MAP = { 'O': 50, 'B': 10, 'A': 2, 'F': 1.5, 'G': 1.0, 'K': 0.7, 'M': 0.2, 'BD': 0.05, 'D': 1.0 };
         let luminosity = Math.pow(TYPE_MAP[type] || 1.0, 3.5);
-        _tResult('Luminosity', luminosity.toFixed(3) + ' L_Sol');
+        _tResult('Luminosity', luminosity.toFixed(3) + ' L_Sol', 'T5 1.1: Stellar Generation');
 
         // NEW: Calculate the physical diameter using the Universal Math Chassis
         let diam = UniversalMath.estimateStellarDiameter(type, decimal, size);
-        _tResult('Diameter', diam + ' Solar');
+        _tResult('Diameter', diam + ' Solar', 'T5 1.1: Stellar Generation');
         const limit100D = (diam * 1392700 * 100) / 1000000;
-        _tResult("100D Limit", `${limit100D.toFixed(1)} M km`);
+        _tResult("100D Limit", `${limit100D.toFixed(1)} M km`, 'T5 1.1: Stellar Generation');
 
         let starName = (size === 'D') ? 'D' : (type === 'BD') ? 'BD' : `${type}${decimal} ${size}`;
-        _tResult('Final Stellar', starName);
+        _tResult('Final Stellar', starName, 'T5 1.1: Stellar Generation');
 
         return {
             type, size, decimal, orbitID,
@@ -279,11 +279,153 @@
         return Math.max(0, Math.min(19, hz));
     }
 
+    /**
+     * Calculates maximum subsystem capacity and orbit masking (engulfment)
+     * per Traveller 5 RAW (Topic 1.2).
+     */
+    function calculateOrbitalConstraints(sys) {
+        _tSection('Stellar Orbital Constraints (Topic 1.2)');
+        
+        sys.stars.forEach(star => {
+            star.maskedOrbits = [];
+            star.maxOrbit = 20; // Default max T5 orbit
+            
+            // 1. Stellar Engulfment (Masking via Chart 5a / T5_PRECLUDED_ORBITS)
+            let surfaceOrbit = -1; 
+            
+            if (['Ia', 'Ib', 'II', 'III'].includes(star.size)) {
+                const sizeData = T5_Data.T5_PRECLUDED_ORBITS[star.size];
+                if (sizeData) {
+                    // Find matching spectral range
+                    for (const [rangeKey, orbitVal] of Object.entries(sizeData)) {
+                        const [startStr, endStr] = rangeKey.split('_');
+                        const startType = startStr[0];
+                        const startDec = parseInt(startStr.slice(1)) || 0;
+                        const endType = endStr ? endStr[0] : startType;
+                        const endDec = endStr ? (parseInt(endStr.slice(1)) || 0) : startDec;
+
+                        const types = ['O', 'B', 'A', 'F', 'G', 'K', 'M'];
+                        const starIdx = types.indexOf(star.type);
+                        const startIdx = types.indexOf(startType);
+                        const endIdx = types.indexOf(endType);
+
+                        // Normalize to a 0-69 scale for easy range checking (e.g., G2 -> 4*10 + 2 = 42)
+                        const starScore = starIdx * 10 + star.decimal;
+                        const startScore = startIdx * 10 + startDec;
+                        const endScore = endIdx * 10 + endDec;
+
+                        if (starScore >= startScore && starScore <= endScore) {
+                            surfaceOrbit = orbitVal;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (surfaceOrbit >= 0) {
+                for (let i = 0; i <= surfaceOrbit; i++) {
+                    star.maskedOrbits.push(i);
+                }
+                _tResult(`${star.name} Engulfment`, `Masked Orbits 0 to ${surfaceOrbit} (Chart 5a)`, 'T5 1.2: Orbital Constraints');
+            } else if (['IV', 'V', 'VI', 'D', 'BD'].includes(star.size) || star.type === 'BD') {
+                _tResult(`${star.name} Engulfment`, `No standard orbits blocked (Size ${star.size})`, 'T5 1.2: Orbital Constraints');
+            }
+
+            // 2. Subsystem Limit (Secondary Stars)
+            if (star.role !== 'Primary' && star.orbitID > 0) {
+                star.maxOrbit = Math.max(0, Math.floor(star.orbitID) - 3);
+                _tResult(`${star.name} Subsystem Limit`, `Max Orbit: ${star.maxOrbit} (Orbit ${Math.floor(star.orbitID)} - 3)`, 'T5 1.2: Orbital Constraints');
+                
+                if (star.maxOrbit <= 0) {
+                    _tResult(`${star.name} Capacity`, `Too close to primary to host planetary subsystem.`, 'T5 1.2: Orbital Constraints');
+                }
+            }
+        });
+        
+        return sys;
+    }
+
+    /**
+     * UTILITY: T5 SYSTEM WALKER (Recursive state discovery)
+     */
+    function walkT5System(sys, callback) {
+        if (!sys || !sys.stars) return;
+        
+        const processBody = (body) => {
+            if (!body) return;
+            callback(body);
+            if (body.satellites && body.satellites.length > 0) {
+                body.satellites.forEach(sat => processBody(sat));
+            }
+        };
+
+        sys.stars.forEach(star => {
+            callback(star);
+            if (star.orbits) {
+                star.orbits.forEach(o => {
+                    if (o.contents) processBody(o.contents);
+                });
+            }
+        });
+    }
+
+    /**
+     * ACTION 6.4: Log a single T5 body's complete physical + social biography
+     * in one contiguous trace block.
+     */
+    function logT5BodyBiography(body) {
+        if (!body || body.type === 'Empty' || body.role === 'Empty') return;
+        
+        const name = body.name || body.role || 'Unnamed Body';
+        // Distinguish between stars and worlds
+        const isStar = body.decimal !== undefined && body.size && !body.uwp;
+        const typeStr = isStar ? "Stellar Orbit" : (body.type || 'World');
+
+        _tSection(`Biography: ${name} [${typeStr}]`);
+        
+        // --- PHYSICAL PROFILE ---
+        if (isStar) {
+            if (body.luminosity !== undefined) _tResult('Luminosity', body.luminosity.toFixed(3) + ' L_Sol', 'T5 1.1: Stellar Generation');
+            if (body.diam !== undefined) _tResult('Diameter', body.diam.toFixed(2) + ' Solar', 'T5 1.1: Stellar Generation');
+        } else {
+            if (body.orbitID !== undefined) _tResult('Orbit', body.orbitID.toFixed(2), 'T5 1.3: Orbit Allocation');
+            if (body.distAU !== undefined) _tResult('Distance (AU)', body.distAU.toFixed(3), 'T5 2.1: Physical Foundations');
+            
+            if (body.size !== undefined) _tResult('Size', body.size, 'T5 2.1: Physical Foundations');
+            if (body.gravity !== undefined) _tResult('Gravity', body.gravity.toFixed(2) + "g", 'T5 2.1: Physical Foundations');
+            if (body.atm !== undefined) _tResult('Atmosphere', body.atm, 'T5 2.2: Atmospherics');
+            if (body.hydro !== undefined) _tResult('Hydrographics', body.hydro, 'T5 2.3: Hydrographics');
+            
+            if (body.climateZone) _tResult('Climate Zone', body.climateZone, 'T5 2.1: Physical Foundations');
+        }
+
+        // --- SOCIAL PROFILE ---
+        if (body.uwp) {
+            _tResult('UWP String', body.uwp, 'T5 3.1: Social Finalization');
+        }
+        if (body.starport) _tResult('Starport', body.starport, 'T5 4.1: Starports & Bases');
+        if (body.pop !== undefined) _tResult('Population', body.pop, 'T5 3.1: Core Social');
+        if (body.gov !== undefined) _tResult('Government', body.gov, 'T5 3.1: Core Social');
+        if (body.law !== undefined) _tResult('Law Level', body.law, 'T5 3.1: Core Social');
+        if (body.tl !== undefined) _tResult('Tech Level', body.tl, 'T5 3.2: Tech Level & Environment');
+        
+        if (body.tradeCodes && body.tradeCodes.length > 0) {
+            _tResult('Trade Codes', body.tradeCodes.join(' '), 'T5 3.1: Social Finalization');
+        }
+
+        // --- STATUS FLAGS ---
+        if (body.orbitLetter) _tResult('Satellite Orbit', body.orbitLetter, 'T5 1.3: Orbit Allocation');
+        if (body.parentBody) _tResult('Parentage', `${body.parentBody} Satellite`, 'T5 1.3: Orbit Allocation');
+    }
+
     return {
         parseT5Stellar,
         generateT5StellarProfile,
         generateStar,
         determineStellarConstellation,
-        getStarHZ
+        getStarHZ,
+        calculateOrbitalConstraints,
+        walkT5System,
+        logT5BodyBiography
     };
 }));

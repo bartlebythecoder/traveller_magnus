@@ -87,11 +87,17 @@
         if (worldType === 'Inferno') {
             world.atm = fromUWPChar('B'); // 11
             _log(`Atmosphere Calc (Inferno): Fixed to B.`);
+            if (typeof tResult !== 'undefined' && world.atm !== undefined) {
+                tResult('Atmosphere Code', world.atm, 'T5 2.2: Atmospheric Chemistry');
+            }
             return;
         }
         if (worldType === 'Belt' || worldType === 'Planetoid Belt') {
             world.atm = 0;
             _log(`Atmosphere Calc (Belt): Automatically 0.`);
+            if (typeof tResult !== 'undefined' && world.atm !== undefined) {
+                tResult('Atmosphere Code', world.atm, 'T5 2.2: Atmospheric Chemistry');
+            }
             return;
         }
 
@@ -106,6 +112,10 @@
         if (dm !== 0) logMsg += ` + DM ${dm}`;
         logMsg += ` = ${rawAtm} -> Final: ${toUWPChar(world.atm)}.`;
         _log(logMsg);
+
+        if (typeof tResult !== 'undefined' && world.atm !== undefined) {
+            tResult('Atmosphere Code', world.atm, 'T5 2.2: Atmospheric Chemistry');
+        }
     }
 
     /**
@@ -115,6 +125,7 @@
         if (worldType === 'Inferno' || worldType === 'Belt' || worldType === 'Planetoid Belt') {
             world.hydro = 0;
             _log(`Hydro Calc (${worldType}): Fixed to 0.`);
+            if (typeof tResult !== 'undefined' && world.hydro !== undefined) { tResult('Hydrographic Code', world.hydro, 'T5 2.3: Hydrographics'); }
             return;
         }
 
@@ -122,13 +133,14 @@
         if (sizeVal < 2) {
             world.hydro = 0;
             _log(`Hydro Calc (${worldType}): Size < 2. Fixed to 0.`);
+            if (typeof tResult !== 'undefined' && world.hydro !== undefined) { tResult('Hydrographic Code', world.hydro, 'T5 2.3: Hydrographics'); }
             return;
         }
 
         let flux = rollFlux();
         let base = flux + (world.atm || 0);
         let atmDM = (world.atm < 2 || world.atm > 9) ? -4 : 0;
-        let typeDM = (['InnerWorld', 'StormWorld'].includes(worldType)) ? -4 : 0;
+        let typeDM = (worldType !== 'Mainworld' && ['InnerWorld', 'StormWorld'].includes(worldType)) ? -4 : 0;
 
         let rawHydro = base + atmDM + typeDM;
         world.hydro = Math.min(10, Math.max(0, rawHydro));
@@ -138,6 +150,8 @@
         if (typeDM !== 0) logMsg += ` - DM 4 (${worldType})`;
         logMsg += ` = ${rawHydro}. Clamped to ${toUWPChar(world.hydro)}.`;
         _log(logMsg);
+
+        if (typeof tResult !== 'undefined' && world.hydro !== undefined) { tResult('Hydrographic Code', world.hydro, 'T5 2.3: Hydrographics'); }
     }
 
     /**
@@ -156,6 +170,11 @@
         else if (['IceWorld', 'StormWorld'].includes(worldType)) dm = -6;
 
         let rollValue = _roll2D('Pop Roll') - 2;
+        if (rollValue === 10) {
+            let explodeRoll = _roll2D('Population Explosion (2D+3)');
+            rollValue = explodeRoll + 3;
+            _log(`Population Explosion triggered! Rerolled as 2D+3 = ${rollValue}`);
+        }
         let rawPop = rollValue + dm;
         let generatedPop = Math.max(0, rawPop);
         let finalPop = Math.min(generatedPop, maxSubordinatePop);
@@ -165,6 +184,10 @@
         world.pop = finalPop;
         if (typeof world.popDigit !== 'undefined') {
             world.popDigit = world.pop > 0 ? Math.floor(_rng() * 10) : 0;
+        }
+
+        if (typeof tResult !== 'undefined' && world.pop !== undefined) {
+            tResult('Population Code', world.pop, 'T5 3.1: Social Stats');
         }
     }
 
@@ -209,6 +232,10 @@
         world.gov = Math.max(0, Math.min(15, rawGov));
 
         _log(`Gov Calc (${worldType}): Flux (${flux >= 0 ? '+' : ''}${flux}) + Pop (${world.pop || 0}) = ${rawGov} -> Final: ${toUWPChar(world.gov)}`);
+
+        if (typeof tResult !== 'undefined' && world.gov !== undefined) {
+            tResult('Government Code', world.gov, 'T5 3.1: Social Stats');
+        }
     }
 
     /**
@@ -226,6 +253,10 @@
         world.law = Math.max(0, Math.min(18, rawLaw));
 
         _log(`Law Level Calc (${worldType}): Flux (${flux >= 0 ? '+' : ''}${flux}) + Gov (${world.gov || 0}) = ${rawLaw} -> Final: ${toUWPChar(world.law)}`);
+
+        if (typeof tResult !== 'undefined' && world.law !== undefined) {
+            tResult('Law Level Code', world.law, 'T5 3.1: Social Stats');
+        }
     }
 
     /**
@@ -235,35 +266,56 @@
         if (['RadWorld', 'Inferno'].includes(worldType)) {
             world.tl = 0;
             _log(`TL Calc (${worldType}): Fixed to 0 per profile rules.`);
+            if (typeof tResult !== 'undefined') tResult('Tech Level Code', world.tl, 'T5 3.2: Tech Level');
             return;
         }
 
         let roll = _roll1D('TL Roll');
-        let mods = [];
         let tlDM = 0;
+        let mods = [];
 
-        if (world.starport === 'F') { tlDM += 1; mods.push("Port F (+1)"); }
+        const data = (typeof T5_Data !== 'undefined') ? T5_Data.TECH_LEVEL_MODIFIERS : null;
+        if (!data) {
+            _log("WARNING: T5_Data.TECH_LEVEL_MODIFIERS not found. Base roll used.");
+            world.tl = Math.max(0, roll);
+            return;
+        }
+
+        const sp = world.starport || 'C';
+        if (data.starport[sp] !== undefined) {
+            tlDM += data.starport[sp];
+            mods.push(`Port ${sp} (${data.starport[sp] > 0 ? '+' : ''}${data.starport[sp]})`);
+        }
 
         const size = typeof world.size === 'number' ? world.size : fromUWPChar(world.size);
-        if (size <= 1) { tlDM += 2; mods.push("Size 0-1 (+2)"); }
-        else if (size <= 4) { tlDM += 1; mods.push("Size 2-4 (+1)"); }
+        if (data.size[size] !== undefined) {
+            tlDM += data.size[size];
+            mods.push(`Size ${toUWPChar(size)} (${data.size[size] > 0 ? '+' : ''}${data.size[size]})`);
+        }
 
         const atm = world.atm || 0;
-        if (atm <= 3) { tlDM += 1; mods.push("Atm 0-3 (+1)"); }
-        else if (atm >= 10 && atm <= 15) { tlDM += 1; mods.push("Atm A-F (+1)"); }
+        if (data.atm[atm] !== undefined) {
+            tlDM += data.atm[atm];
+            mods.push(`Atm ${toUWPChar(atm)} (${data.atm[atm] > 0 ? '+' : ''}${data.atm[atm]})`);
+        }
 
         const hydro = world.hydro || 0;
-        if (hydro === 9) { tlDM += 1; mods.push("Hydro 9 (+1)"); }
-        else if (hydro === 10) { tlDM += 2; mods.push("Hydro A (+2)"); }
+        if (data.hydro[hydro] !== undefined) {
+            tlDM += data.hydro[hydro];
+            mods.push(`Hydro ${toUWPChar(hydro)} (${data.hydro[hydro] > 0 ? '+' : ''}${data.hydro[hydro]})`);
+        }
 
         const pop = world.pop || 0;
-        if (pop >= 1 && pop <= 5) { tlDM += 1; mods.push("Pop 1-5 (+1)"); }
-        else if (pop === 9) { tlDM += 2; mods.push("Pop 9 (+2)"); }
-        else if (pop >= 10) { tlDM += 4; mods.push("Pop A+ (+4)"); }
+        if (data.pop[pop] !== undefined) {
+            tlDM += data.pop[pop];
+            mods.push(`Pop ${toUWPChar(pop)} (${data.pop[pop] > 0 ? '+' : ''}${data.pop[pop]})`);
+        }
 
         const gov = world.gov || 0;
-        if (gov === 0 || gov === 5) { tlDM += 1; mods.push("Gov 0/5 (+1)"); }
-        else if (gov === 13) { tlDM -= 2; mods.push("Gov D (-2)"); }
+        if (data.gov[gov] !== undefined) {
+            tlDM += data.gov[gov];
+            mods.push(`Gov ${toUWPChar(gov)} (${data.gov[gov] > 0 ? '+' : ''}${data.gov[gov]})`);
+        }
 
         let finalTL = Math.max(0, roll + tlDM);
         world.tl = finalTL;
@@ -272,6 +324,84 @@
         if (mods.length > 0) logMsg += " + " + mods.join(" + ");
         logMsg += ` = ${finalTL}.`;
         _log(logMsg);
+        
+        if (typeof tResult !== 'undefined' && world.tl !== undefined) {
+            tResult('Tech Level Code', world.tl, 'T5 3.2: Tech Level');
+        }
+    }
+
+    function calculateT5PhysicalStats(world) {
+        if (!world || world.size === undefined) return;
+
+        const isGG = (world.type && (world.type.includes('Gas Giant') || world.type === 'Ice Giant'));
+        const sizeVal = (world.size === '0' || world.size === 0) ? 0.35 : (typeof world.size === 'string' ? fromUWPChar(world.size) : world.size);
+
+        // 1. Diameter Calculation (Unchanged)
+        if (isGG) {
+            world.diamKm = sizeVal * 10000;
+        } else if (sizeVal <= 0.35) {
+            world.diamKm = 500;
+        } else {
+            world.diamKm = sizeVal * 1600;
+        }
+
+        // 2. Physics Lookup (Unified Mass Assignment)
+        if (!isGG) {
+            const stats = T5_Data.WORLD_DIMENSIONS[sizeVal] || { gravity: 0, mass: 0 };
+            
+            world.density = 1.0; 
+            world.gravity = stats.gravity;
+            
+            // UI COMPATIBILITY FIX: Assign to both properties
+            world.mass = stats.mass;
+            world.massEarths = stats.mass; 
+            
+            world.composition = null;
+        } else {
+            world.density = 0.1;
+            world.gravity = parseFloat((sizeVal / 10).toFixed(2));
+            world.mass = 'Variable (Giant)';
+            world.massEarths = 317.8; // Example fallback if UI needs a number for GG
+        }
+
+        // 3. Trace Logging
+        if (typeof tResult !== 'undefined' && !isGG) {
+            tResult(`Size ${world.size} Gravity`, `${world.gravity.toFixed(3)} G`, 'T5 2.1: Composition & Gravity');
+            tResult(`Size ${world.size} Mass`, `${world.mass.toFixed(4)} Earths`, 'T5 2.1: Composition & Gravity');
+        }
+    }
+
+    /**
+     * T5 2.5: ROTATIONAL DYNAMICS
+     * Evaluates tidal locking for planets in inner orbits and close satellites.
+     * Standard day length is undefined in T5 and left to Referee Discretion.
+     */
+    function calculateT5RotationalDynamics(world) {
+        const isSatellite = world.isMoon || world.isSatellite || world.type === 'Satellite';
+
+        let isLocked = false;
+        let lockType = "Free";
+        let rotationState = "Undefined (Referee Discretion)";
+
+        if (!isSatellite && (world.orbitId === 0 || world.orbitId === 1)) {
+            isLocked = true;
+            lockType = "Locked (Star)";
+            rotationState = "Tidally Locked (1:1 to Star)";
+        }
+
+        if (isSatellite && world.worldType === 'Close Satellite') {
+            isLocked = true;
+            lockType = "Locked (Parent)";
+            rotationState = "Tidally Locked (1:1 to Parent)";
+        }
+
+        world.isTidallyLocked = isLocked;
+        world.rotationState = rotationState;
+
+        if (typeof tResult !== 'undefined') {
+            tResult('Tidal Lock Status', lockType, 'T5 2.5: Rotational Dynamics');
+            tResult('Rotation State', rotationState, 'T5 2.5: Rotational Dynamics');
+        }
     }
 
     /**
@@ -378,6 +508,9 @@
         // Tech Level: Standard modifiers
         generateT5TechLevelByWorldType(world, 'Mainworld');
 
+        // --- 2.5. Rotational Dynamics ---
+        calculateT5RotationalDynamics(world);
+
         // --- 2.5. Travel Zone ---
         world.travelZone = (world.law >= 15) ? 'Amber' : 'Green';
 
@@ -405,22 +538,36 @@
     function generateT5Bases(world) {
         let navalBase = false;
         let scoutBase = false;
-        let navalDepot = false;
         let wayStation = false;
 
         const starport = world.starport;
+        const baseData = (typeof T5_Data !== 'undefined') ? T5_Data.BASES : null;
 
-        if (starport === 'A') {
-            if (_roll2D('Naval Base Check') <= 6) navalBase = true;
-            if (_roll2D('Scout Base Check') <= 4) scoutBase = true;
-            if (_rng() < 0.001) navalBase = true; // Naval Depot proxy or roll
-        } else if (starport === 'B') {
-            if (_roll2D('Naval Base Check') <= 5) navalBase = true;
-            if (_roll2D('Scout Base Check') <= 5) scoutBase = true;
-        } else if (starport === 'C') {
-            if (_roll2D('Scout Base Check') <= 6) scoutBase = true;
-        } else if (starport === 'D') {
-            if (_roll2D('Scout Base Check') <= 7) scoutBase = true;
+        if (baseData) {
+            // Dynamic Base Pull from Data Shield
+            if (baseData.NAVAL && baseData.NAVAL.ALLOWED_PORTS.includes(starport)) {
+                navalBase = _roll2D('Naval Base Check') <= baseData.NAVAL.TARGETS[starport];
+            }
+            if (baseData.SCOUT && baseData.SCOUT.ALLOWED_PORTS.includes(starport)) {
+                scoutBase = _roll2D('Scout Base Check') <= baseData.SCOUT.TARGETS[starport];
+            }
+            if (baseData.DEPOT && baseData.DEPOT.ALLOWED_PORTS.includes(starport)) {
+                if (_rng() < baseData.DEPOT.PROBABILITY) navalBase = true; // Depot proxy
+            }
+        } else {
+            // Legacy Fallback if Data Shield missing
+            if (starport === 'A') {
+                if (_roll2D('Naval Base Check') <= 6) navalBase = true;
+                if (_roll2D('Scout Base Check') <= 4) scoutBase = true;
+                if (_rng() < 0.001) navalBase = true;
+            } else if (starport === 'B') {
+                if (_roll2D('Naval Base Check') <= 5) navalBase = true;
+                if (_roll2D('Scout Base Check') <= 5) scoutBase = true;
+            } else if (starport === 'C') {
+                if (_roll2D('Scout Base Check') <= 6) scoutBase = true;
+            } else if (starport === 'D') {
+                if (_roll2D('Scout Base Check') <= 7) scoutBase = true;
+            }
         }
 
         world.navalBase = navalBase;
@@ -434,6 +581,26 @@
         if (wayStation) world.bases.push('W');
     }
 
+    /**
+     * T5 2.4: THERMAL LOGIC — Zone-locked climate assignment.
+     * T5 uses HZ variance rather than thermodynamic math.
+     */
+    function calculateT5Climate(world, sysHzco) {
+        const isSatellite = world.isMoon || world.isSatellite || world.type === 'Satellite';
+        const hzVariance = Math.round((world.orbitId || 0) - (sysHzco || 0));
+        const clampedVariance = Math.max(-2, Math.min(2, hzVariance));
+
+        // Twilight Zone override: orbit 0 or 1 — but NOT for satellites (they orbit a parent, not the star)
+        if (!isSatellite && (world.orbitId === 0 || world.orbitId === 1)) {
+            world.climateZone = "Twilight Zone (Tz)";
+        } else {
+            const mapping = (T5_Data && T5_Data.CLIMATE_MAPPING) ? T5_Data.CLIMATE_MAPPING : {};
+            world.climateZone = mapping[String(clampedVariance)] || "Temperate";
+        }
+
+        tResult('Climate Zone', world.climateZone, 'T5 2.4: Thermal Logic');
+    }
+
     return {
         generateT5SizeByWorldType,
         generateT5AtmosphereByWorldType,
@@ -444,6 +611,9 @@
         generateT5LawLevelByWorldType,
         generateT5TechLevelByWorldType,
         calculateT5TradeCodes,
+        calculateT5RotationalDynamics,
+        calculateT5PhysicalStats,
+        calculateT5Climate,
         generateT5Bases,
         generateT5Mainworld
     };

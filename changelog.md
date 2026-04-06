@@ -1,6 +1,21 @@
 # Changelog
 
 
+### [v0.6] - 2026-04-06
+1. **ALL**: Refactored code to eliminate duplicates and move common functions to data files
+2. **ALL**:  Added name to filter window
+3. **RTT**: Removed superfluous outerDM = -1; Reduced the number of worldless systems to about 8%
+4. **RTT**: Fixed incorrect Flare Star check formula
+5. **MGT2E**: Fixed size string parsing showing NaN instead of Size S.  
+6. **MGT2E**: Added Culture Quirks to world generation
+7. **CT**: Built universal ct_stellar_engine.js to remove duplication between ct_topdown_engine.js and ct_bottomup_engine.js
+8. **CT**: Unifying stellar generation fixed bugs in top_down and bottom_up companion generation
+9. **CT**: Fixed orbital slot allocation
+10. **CT**: Fixed Gas Giant presence in system generation
+11. **CT**: Fixed mainworld as satellite frequency
+12. **T5**: Refactored social engine (including TL) resolving infrequent systems with high tech levels
+
+
 ### [v0.5.7.3] - 2026-03-30
 1. **Renderer**: Implemented logic to differentiate Gas Giant icons based on the main world's status as a planet or moon.
 2. **Renderer**: Optimized icon sizing and map placement to improve the clarity of jump routes and prevent asset overlap.

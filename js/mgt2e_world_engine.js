@@ -48,8 +48,19 @@
 
         // 1. Size 'S' math override
         let mathSize = body.size;
-        if (body.size === 'S') mathSize = 0.375;
-        else if (typeof body.size === 'string') mathSize = parseInt(body.size, 16);
+        if (body.size === 'S' || body.size === 's') mathSize = 0.375;
+        else if (body.size === 'R' || body.size === 'r' || body.size === 'GG') mathSize = 0;
+        else if (typeof body.size === 'string') {
+            mathSize = parseInt(body.size, 16);
+            if (isNaN(mathSize)) {
+                mathSize = (typeof UniversalMath !== 'undefined' && UniversalMath.fromUWPChar) ? UniversalMath.fromUWPChar(body.size) : 0;
+            }
+        }
+        
+        if (isNaN(mathSize)) {
+            if (typeof writeLogLine === 'function') writeLogLine(`[Engine Error] [MgT2E World] calculateTerrestrialPhysical: body.size "${body.size}" resolved to NaN. Defaulting mathSize to 0 to prevent downstream physical corruption.`);
+            mathSize = 0;
+        }
 
         // 2. Terrestrial Composition
         let compRoll = tRoll2D('Composition Roll');
@@ -79,41 +90,38 @@
         }
 
         let compModRoll = compRoll + compDM;
-        let coreType = 'Mostly Rock';
-        if (compModRoll <= -4) coreType = 'Exotic Ice';
-        else if (compModRoll <= 2) coreType = 'Mostly Ice';
-        else if (compModRoll <= 6) coreType = 'Mostly Rock';
-        else if (compModRoll <= 11) coreType = 'Rock and Metal';
-        else if (compModRoll <= 14) coreType = 'Mostly Metal';
-        else coreType = 'Compressed Metal';
+
+        // 2. Terrestrial Composition (Data-Driven Lookup)
+        const compTable = MgT2EData.stellar.coreComposition;
+        let coreType = compTable.find(entry => compModRoll <= entry.threshold).type;
 
         body.composition = coreType;
-        tResult('Composition Result', coreType);
+        tResult('Composition Result', coreType, 'MgT2E 2.1: Composition & Gravity');
 
         // 3. Density Lookup from MgT2EData
         let densityRoll = tRoll2D('Density Roll (No DMs)');
         const densityTable = MgT2EData.stellar.densityLookup;
         let baseDensity = densityTable[densityRoll][coreType];
         body.density = parseFloat(baseDensity.toFixed(2));
-        tResult('Density', body.density.toFixed(2));
+        tResult('Density', body.density.toFixed(2), 'MgT2E 2.1: Composition & Gravity');
 
         // 4. Calculate Physics using MgT2EMath
         body.gravity = parseFloat(MgT2EMath.calculateGravity(body.density, mathSize).toFixed(3));
         writeLogLine(`  Gravity Formula: Density(${body.density.toFixed(2)}) * (Size(${mathSize})/8) = ${body.gravity.toFixed(3)} G`);
-        tResult('Gravity (G)', body.gravity.toFixed(3));
+        tResult('Gravity (G)', body.gravity.toFixed(3), 'MgT2E 2.1: Composition & Gravity');
 
         body.mass = parseFloat(MgT2EMath.calculateMass(body.density, mathSize).toFixed(4));
         writeLogLine(`  Mass Formula: Density(${body.density.toFixed(2)}) * (Size(${mathSize})/8)^3 = ${body.mass.toFixed(4)} Earths`);
-        tResult('Mass (Earths)', body.mass.toFixed(4));
+        tResult('Mass (Earths)', body.mass.toFixed(4), 'MgT2E 2.1: Composition & Gravity');
 
         // 5. Orbital Velocity & Escape Velocity
         body.escapeVel = MgT2EMath.calculateEscapeVelocity(body.mass, mathSize);
         writeLogLine(`  Escape Velocity Formula: sqrt(Mass(${body.mass.toFixed(4)}) / (Size(${mathSize})/8)) * 11186 = ${body.escapeVel.toFixed(2)} km/s`);
-        tResult('Escape Velocity (km/s)', body.escapeVel.toFixed(2));
+        tResult('Escape Velocity (km/s)', body.escapeVel.toFixed(2), 'MgT2E 2.1: Composition & Gravity');
 
         body.orbitalVelSurface = MgT2EMath.calculateOrbitalVelocity(body.escapeVel);
         writeLogLine(`  Orbital Velocity Formula: EscapeVel(${body.escapeVel.toFixed(2)}) / sqrt(2) = ${body.orbitalVelSurface.toFixed(2)} km/s`);
-        tResult('Orbital Velocity (km/s)', body.orbitalVelSurface.toFixed(2));
+        tResult('Orbital Velocity (km/s)', body.orbitalVelSurface.toFixed(2), 'MgT2E 2.1: Composition & Gravity');
     }
 
     /**
@@ -124,38 +132,43 @@
     function sizeGasGiantBody(w, type) {
         w.ggType = type;
         if (type === 'GS') {
-            let d1 = tRoll1D('Small GG Diameter (2D)');
-            let d2 = tRoll1D('Small GG Diameter (2D)');
+            // WBH RAW: D3+D3
+            let d1 = Math.ceil(tRoll1D('Small GG Diam (D3)') / 2);
+            let d2 = Math.ceil(tRoll1D('Small GG Diam (D3)') / 2);
             w.diameterStr = `${d1 + d2} (GS)`;
             w.mass = 5 * (tRoll1D('Small GG Mass (1D+1)') + 1);
             w.diamKm = parseInt(w.diameterStr.split(' ')[0]) * 12800;
         } else if (type === 'GM') {
+            // WBH RAW: 1D+6
             w.diameterStr = `${tRoll1D('Medium GG Diameter (1D+6)') + 6} (GM)`;
             w.mass = 20 * (tRoll3D('Medium GG Mass (3D-1)') - 1);
             w.diamKm = parseInt(w.diameterStr.split(' ')[0]) * 12800;
         } else {
             w.ggType = 'GL';
+            // WBH RAW: 2D+6
             w.diameterStr = `${tRoll2D('Large GG Diameter (2D+6)') + 6} (GL)`;
-            let initMass = tRoll3D('Large GG Mass (3D)');
-            let d3Multiplier = Math.floor(rng() * 3) + 1;
+            let initMass = tRoll3D('Large GG Mass Base (3D)');
+            let d3Multiplier = Math.ceil(tRoll1D('Large GG Multiplier (D3)') / 2);
             w.mass = d3Multiplier * 50 * (initMass + 4);
+
+            // WBH RAW: Mass Cap Rule
             if (w.mass >= 3000 || initMass >= 15) {
                 w.mass = 4000 - ((tRoll2D('Mass Cap Adjust') - 2) * 200);
+                tResult('Mass Cap Applied', w.mass, 'MgT2E 4.2: Gas Giant Morphology');
             }
             w.diamKm = parseInt(w.diameterStr.split(' ')[0]) * 12800;
         }
         w.size = 'GG';
         w.composition = `Gas Giant (${w.ggType})`;
-        tResult('Type', w.ggType);
-        tResult('Diameter', w.diameterStr);
-        tResult('Mass (Earths)', w.mass);
+        tResult('Type', w.ggType, 'MgT2E 2.1: Composition & Gravity');
+        tResult('Diameter', w.diameterStr, 'MgT2E 2.1: Composition & Gravity');
+        tResult('Mass (Earths)', w.mass, 'MgT2E 2.1: Composition & Gravity');
 
-        // Physical Stats for UI
         let radiusE = w.diamKm / 12742;
         w.gravity = radiusE > 0 ? (w.mass / (radiusE * radiusE)) : 0;
         w.density = radiusE > 0 ? (w.mass / (radiusE * radiusE * radiusE)) : 0.1;
-        tResult('Composition', w.composition);
-        tResult('Gravity (G)', w.gravity.toFixed(3));
+        tResult('Composition', w.composition, 'MgT2E 2.1: Composition & Gravity');
+        tResult('Gravity (G)', w.gravity.toFixed(3), 'MgT2E 2.1: Composition & Gravity');
     }
 
     /**
@@ -215,7 +228,7 @@
                     if (body.type === 'Mainworld' && mainworldBase && mainworldBase.size !== undefined) {
                         body.size = mainworldBase.size;
                         tResult('Size', `${body.size} (Mainworld Auth)`);
-                    } else if (body.size === undefined || isNaN(parseInt(body.size, 16))) {
+                    } else if (body.size === undefined || (typeof body.size !== 'string' && isNaN(parseInt(body.size, 16))) || (typeof body.size === 'string' && body.size !== 'S' && body.size !== 'R' && body.size !== 'GG' && isNaN(parseInt(body.size, 16)))) {
                         let sizeCat = tRoll1D('Size Roll Basis (1D)');
                         if (sizeCat <= 2) {
                             body.size = tRoll1D('Tiny/Small (1D)');
@@ -235,17 +248,51 @@
                         body.orbitalVelSurface = null;
                     } else {
                         // Ensure size is numeric for math
-                        const mathSize = (typeof body.size === 'string' && body.size !== 'GG') ? parseInt(body.size, 16) : (Number(body.size) || 1);
+                        let parsedSize = parseInt(body.size, 16);
+                        if (isNaN(parsedSize) && typeof body.size === 'string' && body.size !== 'GG' && body.size !== 'S' && body.size !== 'R') {
+                            if (typeof writeLogLine === 'function') writeLogLine(`[Engine Error] [MgT2E World] processBody: string body.size "${body.size}" evaluated to NaN. Reverting to size 1 to prevent cascade.`);
+                            parsedSize = 1;
+                        }
+                        const mathSize = (typeof body.size === 'string' && body.size !== 'GG' && body.size !== 'S' && body.size !== 'R') ? parsedSize : (Number(body.size) || 1);
                         body.diamKm = body.diamKm || (mathSize * 1600);
                         calculateTerrestrialPhysical(body, body.type, sys);
                     }
                 } else if (body.type === 'Planetoid Belt') {
+                    tSection(`Planetoid Belt Orbit ${body.orbitId !== undefined ? body.orbitId.toFixed(2) : ''}`);
                     body.size = 0;
                     body.gravity = null;
                     body.mass = null;
                     body.density = null;
                     body.escapeVel = null;
                     body.orbitalVelSurface = null;
+
+                    // WBH RAW: The Belt Rule (Thermal Composition)
+                    let beltRoll = tRoll2D('Belt Composition Roll');
+                    let beltDM = 0;
+                    let hzco = body.worldHzco || (sys ? (sys.ptypeHzco || sys.hzco) : 0);
+
+                    if (hzco > 0 && body.orbitId !== undefined) {
+                        if (body.orbitId < hzco) {
+                            tDM('Inner Zone (Orbit < HZCO)', -4);
+                            beltDM = -4;
+                        } else if (body.orbitId > hzco + 2) {
+                            tDM('Outer Zone (Orbit > HZCO+2)', 4);
+                            beltDM = 4;
+                        } else {
+                            tDM('Middle Zone (HZCO to HZCO+2)', 0);
+                        }
+                    }
+
+                    let totalRoll = Math.max(0, Math.min(12, beltRoll + beltDM));
+                    const compTable = MgT2EData.belts.compositionTable;
+                    let compData = compTable[totalRoll] || compTable[0];
+
+                    body.beltM = compData.m;
+                    body.beltS = compData.s;
+                    body.beltC = compData.c;
+                    body.composition = `M:${compData.m}%, S:${compData.s}%, C:${compData.c}%`;
+
+                    tResult('Belt Composition', body.composition, 'MgT2E 4.2: Belt Morphology');
                 }
 
                 // Precision Orbit Recalculation
@@ -313,31 +360,42 @@
 
             tSection(`${w.type} Orbit ${w.orbitId.toFixed(2)} Moons`);
             // Handle UWP char string sizes (e.g. 'A') for logic
-            const numericSize = (typeof w.size === 'string' && w.size !== 'GG') ? parseInt(w.size, 16) : (Number(w.size) || 0);
+            let parsedWSize = parseInt(w.size, 16);
+            if (typeof w.size === 'string' && w.size !== 'GG' && w.size !== 'S' && w.size !== 'R' && isNaN(parsedWSize)) {
+                if (typeof writeLogLine === 'function') writeLogLine(`[Engine Error] [MgT2E World] generatePhysicals: string w.size "${w.size}" evaluated to NaN determining moon rules. Reverting to size 0.`);
+                parsedWSize = 0;
+            }
+            const numericSize = (typeof w.size === 'string' && w.size !== 'GG' && w.size !== 'S' && w.size !== 'R') ? parsedWSize : (Number(w.size) || 0);
 
             let qRoll = 0;
-            let qLabel = 'Moon Quantity Roll';
-            if (w.type === 'Terrestrial Planet' || w.type === 'Mainworld') {
-                if (numericSize <= 2) qRoll = tRoll1D(qLabel);
-                else if (numericSize <= 9) qRoll = tRoll2D(qLabel);
-                else qRoll = tRoll2D(qLabel);
-            } else {
-                if (w.ggType === 'GS') qRoll = tRoll3D(qLabel);
-                else qRoll = tRoll4D(qLabel);
-            }
-
             let qMod = 0;
+            let dmDiceCount = 1;
+            let qLabel = 'Moon Quantity Roll';
+
+            const satData = MgT2EData.satellites.significantMoonQuantity;
+            let satRule = null;
+
             if (w.type === 'Terrestrial Planet' || w.type === 'Mainworld') {
-                if (numericSize <= 2) { tDM('Size 2-', -5); qMod -= 5; }
-                else if (numericSize <= 9) { tDM('Size 3-9', -8); qMod -= 8; }
-                else { tDM('Size 10+', -6); qMod -= 6; }
+                satRule = satData.find(r => r.type === 'Terrestrial' && numericSize >= r.minSize && numericSize <= r.maxSize);
             } else {
-                if (w.ggType === 'GS') { tDM('Small GG', -7); qMod -= 7; }
-                else { tDM('Med/Large GG', -6); qMod -= 6; }
+                // Map GS/GM/GL to SGG/MGG/LGG
+                let ggMap = { 'GS': 'SGG', 'GM': 'MGG', 'GL': 'LGG' };
+                satRule = satData.find(r => r.type === ggMap[w.ggType]);
             }
 
-            // Per-Dice penalties
-            let dmDiceCount = (numericSize <= 2) ? 1 : (numericSize <= 9 ? 2 : (numericSize <= 15 ? 2 : (w.ggType === 'GS' ? 3 : 4)));
+            if (satRule && satRule.formula) {
+                let parts = satRule.formula.split('D');
+                dmDiceCount = parseInt(parts[0]);
+                let rawMod = parseInt(parts[1] || 0);
+
+                if (dmDiceCount === 1) qRoll = tRoll1D(qLabel);
+                else if (dmDiceCount === 2) qRoll = tRoll2D(qLabel);
+                else if (dmDiceCount === 3) qRoll = tRoll3D(qLabel);
+                else qRoll = tRoll4D(qLabel);
+
+                qMod += rawMod;
+                tDM(`Formula (${satRule.formula})`, rawMod);
+            }
             let instability = false;
             if (w.orbitId < 1.0) instability = true;
 
@@ -382,9 +440,12 @@
                 let r1 = tRoll1D(`Satellite ${m + existingMoons + 1} Size Basis`);
                 if (r1 <= 3) {
                     moonSize = 'S';
+                    tResult(`Bracket 1-3`, 'Tiny (Size S)');
                 } else if (r1 <= 5) {
-                    let ms = Math.floor(rng() * 3);
+                    let d3 = Math.ceil(tRoll1D('Bracket 4-5 (D3-1)') / 2);
+                    let ms = d3 - 1;
                     if (ms === 0) moonSize = 'R'; else moonSize = ms;
+                    tResult(`Bracket 4-5`, ms === 0 ? 'Ring (Size R)' : `Moderate (Size ${moonSize})`);
                 } else {
                     if (w.type === 'Terrestrial Planet' || w.type === 'Mainworld') {
                         if (numericSize === 1) {
@@ -405,14 +466,14 @@
                             }
                         }
                     } else {
-                        let specialR = tRoll1D(`Satellite ${m + 1} GG Size Type`);
+                        let specialR = tRoll1D(`Satellite ${m + 1} GG Special Size (1D)`);
                         if (specialR <= 3) {
-                            moonSize = tRoll1D(`Bracket 1-3 (Tiny)`);
+                            moonSize = tRoll1D(`Special Bracket 1-3 (1D)`);
                         } else if (specialR <= 5) {
-                            let z = Math.max(0, tRoll2D(`Bracket 4-5 (Standard)`) - 2);
+                            let z = Math.max(0, tRoll2D(`Special Bracket 4-5 (2D-2)`) - 2);
                             moonSize = z === 0 ? 'R' : z;
                         } else {
-                            let giantMoon = tRoll2D(`Bracket 6 (Special)`) + 4;
+                            let giantMoon = tRoll2D(`Special Bracket 6 (2D+4)`) + 4;
                             if (giantMoon >= 16) {
                                 let moonBody = { type: 'Gas Giant', orbitId: w.orbitId, parentStarIdx: w.parentStarIdx, orbitType: w.orbitType };
                                 let isGL = w.ggType === 'GL';
@@ -591,9 +652,18 @@
             }
 
             // Gas Retention Physics
-            w.diameterTerra = (w.diamKm || (w.size * 1600)) / 12742;
-            let bodyMass = w.mass !== undefined ? w.mass : Math.pow(w.size / 8, 3);
-            w.maxEscapeValue = MgT2EMath.calculateMaxEscapeValue(bodyMass, w.diamKm || (w.size * 1600), w.meanTempK);
+            let mathSize = w.size;
+            if (w.size === 'S' || w.size === 's') mathSize = 0.375;
+            else if (w.size === 'R' || w.size === 'r' || w.size === 'GG') mathSize = 0;
+            else if (typeof w.size === 'string') mathSize = (typeof UniversalMath !== 'undefined' && UniversalMath.fromUWPChar) ? UniversalMath.fromUWPChar(w.size) : parseInt(w.size, 16) || 0;
+            
+            w.diameterTerra = (w.diamKm || (mathSize * 1600)) / 12742;
+            let bodyMass = w.mass !== undefined ? w.mass : Math.pow(mathSize / 8, 3);
+            w.maxEscapeValue = MgT2EMath.calculateMaxEscapeValue(bodyMass, w.diamKm || (mathSize * 1600), w.meanTempK);
+            if (isNaN(w.maxEscapeValue)) {
+                if (window.isLoggingEnabled) writeLogLine(`[Engine Error] [MgT2E World] generateAtmospherics: maxEscapeValue is NaN. Defaults applied. bodyMass: ${bodyMass}, diamKm: ${w.diamKm || (mathSize * 1600)}, temp: ${w.meanTempK}. mathSize: ${mathSize}, w.size: ${w.size}`);
+                w.maxEscapeValue = 0;
+            }
             tResult('Max Escape Value', w.maxEscapeValue.toFixed(3));
 
             // 1. Base Atmosphere Code
@@ -698,8 +768,8 @@
             tResult('Final Atmosphere Code', toUWPChar(w.atmCode));
 
             // 2. Runaway Greenhouse Check
-            // GATEWAY: Atm 2-15, Habitable Zone, and Minimum Hot Temperature (313 K+)
-            if (w.atmCode >= 2 && w.atmCode <= 15 && tempBand === "Temperate" && w.meanTempK >= 313) {
+            // GATEWAY: MgT2E 2.4: Thermal Logic - RAW Gate (isBottomUp and meanTempK > 303)
+            if (isBottomUp && w.atmCode >= 2 && w.atmCode <= 15 && w.meanTempK > 303) {
 
                 // Base DM: +1 per Gyr
                 let rgDM = Math.ceil(sys.ageGyr || sys.age || 0);
@@ -714,7 +784,7 @@
                 let rgTotal = rgBaseRoll + rgDM;
 
                 if (rgTotal >= 12) {
-                    tResult('Result', 'Runaway Greenhouse Triggered');
+                    tResult('Result', 'Runaway Greenhouse Triggered', 'MgT2E 2.4: Thermal Logic');
                     writeLogLine(`Runaway Greenhouse Check: Rolled ${rgBaseRoll} + DM ${rgDM}. Result: Success`);
                     w.runawayGreenhouse = true;
                     tempBand = "Boiling";
@@ -733,16 +803,16 @@
                         else newAtmCode = 12;
 
                         if (isMainworldLocked) {
-                            tResult('Runaway Shift', `Locked.`);
+                            tResult('Runaway Shift', `Locked.`, 'MgT2E 2.4: Thermal Logic');
                             writeLogLine(`Expanded Method Simulation: Runaway Greenhouse WOULD have shifted Atmosphere from ${toUWPChar(oldCode)} to ${toUWPChar(newAtmCode)}`);
                         } else {
                             w.atmCode = newAtmCode;
-                            tResult('New Atmosphere', toUWPChar(w.atmCode));
+                            tResult('New Atmosphere', toUWPChar(w.atmCode), 'MgT2E 2.4: Thermal Logic');
                             writeLogLine(`Runaway Shift: Atm ${toUWPChar(oldCode)} -> ${toUWPChar(w.atmCode)}`);
                         }
                     }
                 } else {
-                    tResult('Result', 'Normal');
+                    tResult('Result', 'Normal', 'MgT2E 2.4: Thermal Logic');
                     writeLogLine(`Runaway Greenhouse Check: Rolled ${rgBaseRoll} + DM ${rgDM}. Result: Failure`);
                 }
             }
@@ -754,19 +824,19 @@
 
             // 3. Seeded Atmospheric Pressure
             if (w.atmCode >= 1 && w.atmCode <= 15) {
-                let cdata = MGT2E_ATM_CODES[w.atmCode];
+                let cdata = MgT2EData.atmosphereExtended.atmCodes[w.atmCode];
                 let seededFraction = rng();
                 if (sys.hexId) {
                     seededFraction = rng();
                 }
                 w.totalPressureBar = cdata.minP + (cdata.spanP * seededFraction);
                 w.pressureBar = w.totalPressureBar;
-                tResult('Total Pressure (Bar)', w.totalPressureBar.toFixed(2));
+                tResult('Total Pressure (Bar)', w.totalPressureBar.toFixed(2), 'MgT2E 2.2: Atmospheric Chemistry');
                 writeLogLine(`Surface Pressure: ${w.totalPressureBar.toFixed(2)} bar (Min ${cdata.minP} + Span ${cdata.spanP} * ${seededFraction.toFixed(3)})`);
             } else if (w.atmCode === 0) {
                 w.totalPressureBar = 0;
                 w.pressureBar = 0;
-                tResult('Total Pressure (Bar)', 'Trace/None');
+                tResult('Total Pressure (Bar)', 'Trace/None', 'MgT2E 2.2: Atmospheric Chemistry');
             }
 
             // 4. Oxygen Fraction & ppo (Standard Atmospheres)
@@ -808,9 +878,9 @@
                     writeLogLine(`Auto-Taint Triggered: Carbon Dioxide trace pressure ${tracePressure.toFixed(3)} bar > 0.015 limit.`);
                 }
 
-                tResult('Oxygen Fraction', (w.oxygenFraction * 100).toFixed(1) + '%');
-                tResult('Trace Gas', `${traceGasName} ${(traceFrac * 100).toFixed(1)}%`);
-                tResult('ppo (Bar)', w.ppoBar.toFixed(3));
+                tResult('Oxygen Fraction', (w.oxygenFraction * 100).toFixed(1) + '%', 'MgT2E 2.2: Atmospheric Chemistry');
+                tResult('Trace Gas', `${traceGasName} ${(traceFrac * 100).toFixed(1)}%`, 'MgT2E 2.2: Atmospheric Chemistry');
+                tResult('ppo (Bar)', w.ppoBar.toFixed(3), 'MgT2E 2.2: Atmospheric Chemistry');
                 writeLogLine(`Composition: N2 ${(n2Frac * 100).toFixed(1)}% | O2 ${(w.oxygenFraction * 100).toFixed(1)}% | ${traceGasName} ${(traceFrac * 100).toFixed(1)}%`);
                 writeLogLine(`Oxygen Partial Pressure: ${w.ppoBar.toFixed(3)} bar`);
 
@@ -870,7 +940,7 @@
                     let tRoll = tRollRaw;
                     if (w.atmCode === 4) { tDM('Atm 4', -2); tRoll -= 2; }
                     if (w.atmCode === 9) { tDM('Atm 9', 2); tRoll += 2; }
-                    let t = MGT2E_TAINT_SUBTYPES[Math.max(2, Math.min(12, tRoll))];
+                    let t = MgT2EData.atmosphereExtended.taintSubtypes[Math.max(2, Math.min(12, tRoll))];
 
                     let typeRollStr = `Subtype Roll ${tRollRaw}`;
                     if (w.atmCode === 4) typeRollStr += ` - Atm 4 DM (2) = ${tRoll}`;
@@ -885,7 +955,7 @@
                     }
 
                     if (t && !w.taints.includes(t)) {
-                        tResult('Atm Taint', t);
+                        tResult('Atm Taint', t, 'MgT2E 2.2: Atmospheric Chemistry');
                         w.taints.push(t);
 
                         // ppo Retroactive Recalculation
@@ -902,8 +972,8 @@
 
                     let sevRoll = tRoll2D('Taint Severity');
                     let sevIdx = Math.max(1, Math.min(9, sevRoll));
-                    w.taintSeverity = MGT2E_TAINT_SEVERITY[sevIdx];
-                    tResult('Taint Severity', w.taintSeverity);
+                    w.taintSeverity = MgT2EData.atmosphereExtended.taintSeverity[sevIdx];
+                    tResult('Taint Severity', w.taintSeverity, 'MgT2E 2.2: Atmospheric Chemistry');
 
                     let sevRollStr = `Severity Roll ${sevRoll} -> ${w.taintSeverity}`;
 
@@ -924,7 +994,7 @@
                         }
                     }
                     w.taintPersistence = Math.max(2, pRoll + pDM);
-                    tResult('Taint Persistence', w.taintPersistence);
+                    tResult('Taint Persistence', w.taintPersistence, 'MgT2E 2.2: Atmospheric Chemistry');
 
                     let perRollStr = `Persistence Roll ${pRoll}${pDMStr} -> ${w.taintPersistence}`;
                     let taintNum = w.taints.length;
@@ -949,7 +1019,7 @@
 
                 // Advanced Scale Height
                 w.scaleHeight = MgT2EMath.calculateScaleHeight(w.gravity, w.meanTempK);
-                tResult('Scale Height (km)', w.scaleHeight.toFixed(2));
+                tResult('Scale Height (km)', w.scaleHeight.toFixed(2), 'MgT2E 2.2: Atmospheric Chemistry');
                 writeLogLine(`Scale Height: ${w.scaleHeight.toFixed(2)} km`);
 
                 // Code D/E Edge Cases
@@ -959,7 +1029,7 @@
                     let badRatio = Math.max(badRatioO2, badRatioN2);
                     if (badRatio > 1 && w.scaleHeight > 0) {
                         w.safeAlt = Math.log(badRatio) * w.scaleHeight;
-                        tResult('Safe Altitude (km)', w.safeAlt.toFixed(2));
+                        tResult('Safe Altitude (km)', w.safeAlt.toFixed(2), 'MgT2E 2.2: Atmospheric Chemistry');
                         writeLogLine(`Code D Minimum Safe Altitude: ${w.safeAlt.toFixed(2)} km (O2 Ratio: ${badRatioO2.toFixed(2)}, N2 Ratio: ${badRatioN2.toFixed(2)})`);
 
                         let newPressure = w.totalPressureBar / Math.exp(w.safeAlt / w.scaleHeight);
@@ -977,7 +1047,7 @@
                     let badRatio = 0.1 / w.ppoBar;
                     if (badRatio > 1 && w.scaleHeight > 0) {
                         w.safeAltBelowMean = Math.log(badRatio) * w.scaleHeight;
-                        tResult('Safe Depth (km)', w.safeAltBelowMean.toFixed(2));
+                        tResult('Safe Depth (km)', w.safeAltBelowMean.toFixed(2), 'MgT2E 2.2: Atmospheric Chemistry');
                         writeLogLine(`Code E Safe Depth: ${w.safeAltBelowMean.toFixed(2)} km below mean`);
 
                         let newPressure = w.totalPressureBar * Math.exp(w.safeAltBelowMean / w.scaleHeight);
@@ -994,7 +1064,7 @@
 
                 // Integration & Profile String
                 w.atmProfile = `${toUWPChar(w.atmCode)}-${w.totalPressureBar.toFixed(2)}-${w.ppoBar.toFixed(3)}`;
-                tResult('Atm Profile', w.atmProfile);
+                tResult('Atm Profile', w.atmProfile, 'MgT2E 2.2: Atmospheric Chemistry');
 
             } else if (w.atmCode >= 10 && w.atmCode <= 12) {
                 // Exotic Gas Retention (DPM)
@@ -1043,7 +1113,7 @@
                     totalWeight += aggregatedGases[key].weight;
                     if (aggregatedGases[key].taint && !w.taints.includes(key)) {
                         w.taints.push(key);
-                        tResult('Atm Taint', key);
+                        tResult('Atm Taint', key, 'MgT2E 2.2: Atmospheric Chemistry');
                     }
                 }
 
@@ -1056,11 +1126,11 @@
                 mixStrings.sort((a, b) => parseFloat(b.split(' ')[b.split(' ').length - 1]) - parseFloat(a.split(' ')[a.split(' ').length - 1]));
 
                 w.gases = mixStrings;
-                tResult('Gas Mix', w.gases.join(', '));
+                tResult('Gas Mix', w.gases.join(', '), 'MgT2E 2.2: Atmospheric Chemistry');
                 writeLogLine(`Retained Gases: ${w.gases.join(', ')}`);
 
                 w.atmProfile = `${toUWPChar(w.atmCode)}-${w.totalPressureBar.toFixed(2)}-0.000`;
-                tResult('Atm Profile', w.atmProfile);
+                tResult('Atm Profile', w.atmProfile, 'MgT2E 2.2: Atmospheric Chemistry');
             } else if (w.atmCode === 15) {
                 // Unusual Atmosphere (Code F)
                 tSection('Unusual Atmosphere (Code F)');
@@ -1098,10 +1168,10 @@
                 w.pressureBar = w.totalPressureBar;
                 w.gases = [subtypeName];
                 w.atmProfile = `F-St${subtypeCode}`;
-                tResult('Atm Profile', w.atmProfile);
+                tResult('Atm Profile', w.atmProfile, 'MgT2E 2.2: Atmospheric Chemistry');
             } else if (w.atmCode <= 1) {
                 w.atmProfile = `${toUWPChar(w.atmCode)}-None-0.000`;
-                tResult('Atm Profile', w.atmProfile);
+                tResult('Atm Profile', w.atmProfile, 'MgT2E 2.2: Atmospheric Chemistry');
             }
 
             // 6. Hydrographics
@@ -1112,9 +1182,11 @@
                 w.hydroCode = mainworldBase.hydro;
             } else if (!['S', 0, 1].includes(w.size)) {
                 let hMod = 0;
-                if ([0, 1, 10, 11, 12, 15].includes(w.atmCode)) { tDM('Desert Atm', -4); hMod -= 4; }
-                if (tempBand === "Hot" && w.atmCode !== 13) { tDM('Hot', -2); hMod -= 2; }
-                if (tempBand === "Boiling" && w.atmCode !== 13) { tDM('Boiling', -6); hMod -= 6; }
+                const extremeAtmDM = MgT2EData.extremeAtmosphereHydroDM;
+                if (extremeAtmDM.triggerAtmospheres.includes(w.atmCode)) { tDM('Desert Atm', extremeAtmDM.modifier); hMod += extremeAtmDM.modifier; }
+                const thermalDMs = MgT2EData.rollModifiers.thermalHydro;
+                if (tempBand === "Hot" && w.atmCode !== 13) { tDM('Hot', thermalDMs.Hot); hMod += thermalDMs.Hot; }
+                if (tempBand === "Boiling" && w.atmCode !== 13) { tDM('Boiling', thermalDMs.Boiling); hMod += thermalDMs.Boiling; }
 
                 w.hydroCode = Math.max(0, Math.min(10, tRoll2D('Hydro Roll') - 7 + w.atmCode + hMod));
                 tDM('Atm Mod', w.atmCode);
@@ -1122,20 +1194,39 @@
 
             w.hydroPercent = MGT2E_HYDRO_RANGES[w.hydroCode] + Math.floor(rng() * 10);
             if (w.hydroCode === 0) w.hydroPercent = Math.floor(rng() * 6);
-            tResult('Final Hydro Code', toEHex(w.hydroCode));
-            tResult('Hydro Percentage', w.hydroPercent + '%');
+            tResult('Final Hydro Code', toEHex(w.hydroCode), 'MgT2E 2.3: Hydrographics');
+            tResult('Hydro Percentage', w.hydroPercent + '%', 'MgT2E 2.3: Hydrographics');
 
             let distRoll = Math.max(0, Math.min(10, tRoll2D('Surface Liquid Distribution (2D-2)') - 2));
             w.surfaceDist = MGT2E_SURFACE_DISTS[distRoll];
             w.liquidType = "Water";
 
-            if (w.atmCode >= 10 && w.atmCode <= 12 && w.hydroPercent > 0) {
-                if (tempBand === "Boiling" || tempBand === "Hot") w.liquidType = "Sulphuric Acid";
-                if (tempBand === "Cold" || tempBand === "Frozen") w.liquidType = "Methane";
+            // Ice Distinction (WBH RAW)
+            if (w.highTempK < 273 || w.atmCode === 0 || w.atmCode === 1) {
+                w.liquidType = "Ice";
             }
+
+            // Exotic Liquids Selection (WBH RAW — Data-Driven Weighted Random)
+            if (w.atmCode >= 10 && w.atmCode <= 12 && w.hydroPercent > 0) {
+                const exoticTable = MgT2EData.atmosphereExtended.exoticLiquids;
+                const candidates = exoticTable.filter(liq => w.meanTempK >= liq.mp && w.meanTempK <= liq.bp);
+                if (candidates.length > 0) {
+                    const totalWeight = candidates.reduce((sum, liq) => sum + liq.abundance, 0);
+                    let roll = rng() * totalWeight;
+                    let winner = candidates[candidates.length - 1];
+                    for (const liq of candidates) {
+                        roll -= liq.abundance;
+                        if (roll <= 0) { winner = liq; break; }
+                    }
+                    w.liquidType = winner.name;
+                } else {
+                    w.liquidType = "Unknown Exotic Liquid";
+                }
+            }
+
             w.tempBand = tempBand;
             tResult('Surface Distribution', w.surfaceDist);
-            tResult('Liquid Type', w.liquidType);
+            tResult('Liquid Type', w.liquidType, 'MgT2E 2.3: Hydrographics');
 
             // Sync final physical codes back to UWP strings
             let finalAtmChar = toUWPChar(w.atmCode);
@@ -1361,19 +1452,20 @@
             // 5. Mean Temperature
             tSection('Mean Temperature');
             w.albedo = getMgT2EAlbedo(w, w.worldHzco || sys.hzco);
-            tResult('Bond Albedo', w.albedo.toFixed(3));
+            tResult('Bond Albedo', w.albedo.toFixed(3), 'MgT2E 2.4: Thermal Logic');
             let initialGF = 0.5 * Math.sqrt(w.totalPressureBar || w.pressureBar || 0);
             let finalGF = 0;
+            const greenhouse = MgT2EData.thermalPhysics.greenhouse;
 
             if (w.atmCode === 0) {
                 finalGF = 0;
-            } else if ([1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 14].includes(w.atmCode)) {
+            } else if (greenhouse.additiveGroup.includes(w.atmCode)) {
                 finalGF = initialGF + (tRoll3D('Greenhouse Factor Roll (3D*0.01)') * 0.01);
-            } else if (w.atmCode === 10 || w.atmCode === 15) {
+            } else if (greenhouse.multiplierGroupA.includes(w.atmCode)) {
                 let mult = tRoll1D('GF Multiplier (1D-1)') - 1;
                 if (mult < 0.5) mult = 0.5;
                 finalGF = initialGF * mult;
-            } else if ([11, 12, 16, 17].includes(w.atmCode)) {
+            } else if (greenhouse.multiplierGroupB.includes(w.atmCode)) {
                 let d1 = tRoll1D('GF Basis (1D)');
                 if (d1 <= 5) {
                     finalGF = initialGF * tRoll1D('GF Multiplier (1D)');
@@ -1385,7 +1477,7 @@
             }
 
             w.greenhouseFactor = finalGF;
-            tResult('GFactor', w.greenhouseFactor.toFixed(3));
+            tResult('GFactor', w.greenhouseFactor.toFixed(3), 'MgT2E 2.4: Thermal Logic');
 
             let srcLum = primary.lum || 1.0;
             let currentAu = w.au || (parent ? parent.au : 0);
@@ -1394,7 +1486,7 @@
             } else {
                 w.meanTempK = 3;
             }
-            tResult('Mean Temp (K)', w.meanTempK.toFixed(1) + ' K');
+            tResult('Mean Temp (K)', w.meanTempK.toFixed(1) + ' K', 'MgT2E 2.4: Thermal Logic');
 
             // 6. High/Low Temperatures
             tSection('Temp Diurnals');
@@ -1405,8 +1497,15 @@
             if (w.yearHours > (2 * 8760)) { tSkip('Slow Year Adjust'); tfactor *= 1.5; }
 
             let rfactor = w.solarDayHours <= 0 || w.solarDayHours === Infinity ? 1.0 : Math.sqrt(w.solarDayHours / 50);
-            if (w.tidallyLocked) { tSkip('Tidal Lock Temp Equalization'); rfactor = 1.0; }
-            if (rfactor > 1.0) rfactor = 1.0;
+            // WBH RAW: Cap only applies if Solar Day > 2500 hours OR 1:1 Tidal Lock
+            if (w.solarDayHours > 2500) {
+                rfactor = 1.0;
+                if (typeof tSkip !== 'undefined') tSkip('Rotation Factor capped to 1.0 (Day > 2500 hrs)');
+            }
+            if (w.tidallyLocked) { 
+                rfactor = 1.0;
+                if (typeof tSkip !== 'undefined') tSkip('Rotation Factor capped to 1.0 (1:1 Tidal Lock)');
+            }
 
             let gfactor = (10 - (w.hydroCode || 0)) / 20;
             if (w.surfaceDist && w.surfaceDist.includes('Concentrated')) gfactor -= 0.1;
@@ -1423,8 +1522,8 @@
 
             if (nearAu > 0) w.highTempK = MgT2EMath.calculateMeanTemperature(highLum, nearAu, w.albedo, w.greenhouseFactor);
             if (farAu > 0) w.lowTempK = MgT2EMath.calculateMeanTemperature(lowLum, farAu, w.albedo, w.greenhouseFactor);
-            tResult('High Temp (K)', w.highTempK.toFixed(1) + ' K');
-            tResult('Low Temp (K)', w.lowTempK.toFixed(1) + ' K');
+            tResult('High Temp (K)', w.highTempK != null ? w.highTempK.toFixed(1) + ' K' : 'N/A', 'MgT2E 2.4: Thermal Logic');
+            tResult('Low Temp (K)', w.lowTempK != null ? w.lowTempK.toFixed(1) + ' K' : 'N/A', 'MgT2E 2.4: Thermal Logic');
         };
 
         for (let i = 0; i < targetWorlds.length; i++) {
@@ -1468,41 +1567,33 @@
     function getMgT2EAlbedo(w, hzco) {
         let albedo = 0;
         const orbit = w.orbitId;
+        const thermalData = MgT2EData.thermalPhysics.albedo;
 
         if (w.type === 'Gas Giant') {
-            albedo = 0.05 + (tRoll2D('Base Albedo (Gas Giant)') * 0.05);
+            const ggRange = thermalData.baseRanges.find(r => r.type === 'Gas Giant');
+            albedo = ggRange.base + (tRoll2D(`Base Albedo (${ggRange.label})`) * ggRange.rollMult);
         } else {
-            if (orbit <= hzco + 2) {
-                albedo = 0.04 + ((tRoll2D('Base Albedo (Rocky)') - 2) * 0.02);
-            } else if (orbit > hzco + 2 && orbit <= hzco + 4) {
-                albedo = 0.20 + ((tRoll2D('Base Albedo (Icy Near)') - 3) * 0.05);
-            } else {
-                albedo = 0.25 + ((tRoll2D('Base Albedo (Icy Far)') - 2) * 0.07);
-            }
+            // Find base range
+            let range = thermalData.baseRanges.find(r => r.maxHzOffset !== undefined && orbit <= hzco + r.maxHzOffset);
+            if (!range) range = thermalData.baseRanges.find(r => r.type === 'Icy Far'); // Fallback
 
-            if (albedo <= 0.40) {
-                albedo -= ((tRoll1D('Albedo Constraint Subtract') - 1) * 0.05);
+            albedo = range.base + ((tRoll2D(`Base Albedo (${range.label})`) - range.offset) * range.rollMult);
+
+            if (albedo <= thermalData.constraint.threshold) {
+                albedo -= ((tRoll1D(thermalData.constraint.rollTerm) - thermalData.constraint.offset) * thermalData.constraint.mult);
             }
         }
 
-        if ((w.atmCode >= 1 && w.atmCode <= 3) || w.atmCode === 14) {
-            albedo += ((tRoll2D('Albedo Mod (Atm 1-3/E)') - 3) * 0.01);
-        }
-        else if (w.atmCode >= 4 && w.atmCode <= 9) {
-            albedo += (tRoll2D('Albedo Mod (Atm 4-9)') * 0.01);
-        }
-        else if ((w.atmCode >= 10 && w.atmCode <= 12) || w.atmCode === 15) {
-            albedo += ((tRoll2D('Albedo Mod (Atm A-C/F)') - 2) * 0.05);
-        }
-        else if (w.atmCode === 13) {
-            albedo += (tRoll2D('Albedo Mod (Atm D)') * 0.03);
+        // Atmosphere Modifiers
+        const atmMod = thermalData.modifiers.atmosphere.find(m => m.codes.includes(w.atmCode));
+        if (atmMod) {
+            albedo += ((tRoll2D(`Albedo Mod (${atmMod.label})`) - atmMod.offset) * atmMod.rollMult);
         }
 
-        if (w.hydroCode >= 2 && w.hydroCode <= 5) {
-            albedo += ((tRoll2D('Albedo Mod (Hydro 2-5)') - 2) * 0.02);
-        }
-        else if (w.hydroCode >= 6) {
-            albedo += ((tRoll2D('Albedo Mod (Hydro 6+)') - 4) * 0.03);
+        // Hydrographic Modifiers
+        const hydroMod = thermalData.modifiers.hydrographic.find(m => w.hydroCode >= m.min && w.hydroCode <= m.max);
+        if (hydroMod) {
+            albedo += ((tRoll2D(`Albedo Mod (${hydroMod.label})`) - hydroMod.offset) * hydroMod.rollMult);
         }
 
         return Math.max(0.02, Math.min(0.98, albedo));
@@ -1512,6 +1603,7 @@
      * Helper: Calculate tidal lock DMs
      */
     function calculateTidalLockDMs(body, sys, parent, isMoon) {
+        const lockData = MgT2EData.rotationalDynamics.tidalLockDMs;
         let globalDM = 0;
 
         let bSize = body.size === 'GG' ? 10 : (typeof body.size === 'number' ? body.size : 0);
@@ -1521,34 +1613,33 @@
         if (ecc > 0.1) globalDM -= Math.floor(ecc * 10);
 
         let tilt = body.axialTilt || 0;
-        if (tilt > 30) globalDM -= 2;
-        if (tilt >= 60 && tilt <= 120) globalDM -= 4;
-        if (tilt >= 80 && tilt <= 100) globalDM -= 4;
+        if (tilt > 30) globalDM += lockData.global.tiltModerate;
+        if (tilt >= 60 && tilt <= 120) globalDM += lockData.global.tiltHigh;
+        if (tilt >= 80 && tilt <= 100) globalDM += lockData.global.tiltHigh;
 
         let pressure = body.pressureBar || 0;
-        if (pressure > 2.5) globalDM -= 2;
+        if (pressure > 2.5) globalDM += lockData.global.pressureHigh;
 
         let age = sys.age || 0;
-        if (age < 1.0) globalDM -= 2;
-        else if (age >= 5.0 && age <= 10.0) globalDM += 2;
-        else if (age > 10.0) globalDM += 4;
+        if (age < 1.0) globalDM += lockData.global.ageYoung;
+        else if (age >= 5.0 && age <= 10.0) globalDM += lockData.global.ageMid;
+        else if (age > 10.0) globalDM += lockData.global.ageOld;
 
         let highestTotalDM = -9999;
         let selectedCase = 'None';
 
         if (isMoon && parent) {
-            let caseBDM = globalDM + 6;
+            const caseB = lockData.caseB_Moon;
+            let caseBDM = globalDM + caseB.base;
             let pMass = parent.mass || 0;
 
             let orbitPD = body.pd || 0;
             if (orbitPD > 20) caseBDM -= Math.floor(orbitPD / 20);
 
-            if (body.retrograde) caseBDM -= 2;
+            if (body.retrograde) caseBDM += caseB.retrograde;
 
-            if (pMass > 1000) caseBDM += 8;
-            else if (pMass >= 100) caseBDM += 6;
-            else if (pMass >= 10) caseBDM += 4;
-            else if (pMass >= 1) caseBDM += 2;
+            const threshold = caseB.parentMassThresholds.find(t => pMass >= t.m);
+            if (threshold) caseBDM += threshold.dm;
 
             if (caseBDM > highestTotalDM) {
                 highestTotalDM = caseBDM;
@@ -1557,12 +1648,13 @@
         }
 
         if (!isMoon) {
-            let caseADM = globalDM - 4;
+            const caseA = lockData.caseA_Planet;
+            let caseADM = globalDM + caseA.base;
 
             let oDist = body.orbitId || 0;
-            if (oDist < 1.0) caseADM += 4 + Math.floor(10 * (1 - oDist));
-            else if (oDist >= 1.0 && oDist <= 2.0) caseADM += 4;
-            else if (oDist > 2.0 && oDist <= 3.0) caseADM += 1;
+            if (oDist < 1.0) caseADM += caseA.distMid + Math.floor(10 * (1 - oDist));
+            else if (oDist >= 1.0 && oDist <= 2.0) caseADM += caseA.distMid;
+            else if (oDist > 2.0 && oDist <= 3.0) caseADM += caseA.distFar;
             else if (oDist > 3.0) caseADM -= (Math.floor(oDist) * 2);
 
             let starMassSum = 0;
@@ -1585,10 +1677,8 @@
                 totalStarsOrbited = 1;
             }
 
-            if (starMassSum < 0.5) caseADM -= 2;
-            else if (starMassSum >= 0.5 && starMassSum <= 1.0) caseADM -= 1;
-            else if (starMassSum >= 2.0 && starMassSum <= 5.0) caseADM += 1;
-            else if (starMassSum > 5.0) caseADM += 2;
+            const starThreshold = caseA.starMassThresholds.find(t => starMassSum >= t.m);
+            if (starThreshold) caseADM += starThreshold.dm;
 
             if (totalStarsOrbited > 1) caseADM -= totalStarsOrbited;
 
@@ -1617,16 +1707,17 @@
                     }).length;
 
                     for (let lm of lockedMoons) {
-                        let caseCDM = globalDM - 10;
+                        const caseC = lockData.caseC_LockedMoons;
+                        let caseCDM = globalDM + caseC.base;
                         let mSize = lm.size === 'GG' ? 10 : (typeof lm.size === 'number' ? lm.size : 0);
                         caseCDM += mSize;
 
                         let lmpd = lm.pd || 0;
                         if (lmpd < 5) caseCDM += 5 + Math.ceil((5 - lmpd) * 5);
-                        else if (lmpd >= 5 && lmpd <= 10) caseCDM += 4;
-                        else if (lmpd > 10 && lmpd <= 20) caseCDM += 2;
-                        else if (lmpd > 20 && lmpd <= 40) caseCDM += 1;
-                        else if (lmpd > 60) caseCDM -= 6;
+                        else if (lmpd >= 5 && lmpd <= 10) caseCDM += caseC.pdNear;
+                        else if (lmpd > 10 && lmpd <= 20) caseCDM += caseC.pdMid;
+                        else if (lmpd > 20 && lmpd <= 40) caseCDM += caseC.pdFar;
+                        else if (lmpd > 60) caseCDM += caseC.pdExtreme;
 
                         if (totalSig > 1) caseCDM -= (totalSig - 1) * 2;
 
@@ -1665,6 +1756,7 @@
         body.tidallyLocked = false;
 
         if (totalDM > -10) {
+            const resultsData = MgT2EData.rotationalDynamics.tidalLockResults;
             if (resultValue >= 12) {
                 let breakRoll = tRoll2D('Lock Break Check (12 breaks entirely)');
                 if (breakRoll === 12) {
@@ -1676,12 +1768,12 @@
                     if (rerollResult <= 2) {
                         tempHrs = body.siderealHours;
                     } else if (rerollResult >= 3 && rerollResult <= 6) {
-                        tempHrs = body.siderealHours * [1.5, 2, 3, 5][rerollResult - 3];
+                        tempHrs = body.siderealHours * resultsData.multipliers[rerollResult];
                     } else if (rerollResult >= 7 && rerollResult <= 8) {
-                        let d = rerollResult === 7 ? 5 : 20;
+                        let d = resultsData.progradeDays[rerollResult];
                         tempHrs = 3.5 * d * 24;
                     } else if (rerollResult >= 9 && rerollResult <= 10) {
-                        let d = rerollResult === 9 ? 10 : 50;
+                        let d = resultsData.retrogradeDays[rerollResult];
                         tempHrs = 3.5 * d * 24;
                     } else if (rerollResult === 11) {
                         tempHrs = body.yearHours * 0.66;
@@ -1706,17 +1798,17 @@
             if (finalResult <= 2) {
                 tResult('Status', 'No effect');
             } else if (finalResult >= 3 && finalResult <= 6) {
-                let mult = [1.5, 2, 3, 5][finalResult - 3];
+                let mult = resultsData.multipliers[finalResult];
                 appliedHrs = body.siderealHours * mult;
                 tResult('Status', `siderealHours * ${mult}`);
             } else if (finalResult >= 7 && finalResult <= 8) {
                 let mRoll = tRoll1D('Prograde Days Roll');
-                let d = finalResult === 7 ? 5 : 20;
+                let d = resultsData.progradeDays[finalResult];
                 appliedHrs = mRoll * d * 24;
                 tResult('Status', `Prograde: ${appliedHrs} hours`);
             } else if (finalResult >= 9 && finalResult <= 10) {
                 let mRoll = tRoll1D('Retrograde Days Roll');
-                let d = finalResult === 9 ? 10 : 50;
+                let d = resultsData.retrogradeDays[finalResult];
                 appliedHrs = mRoll * d * 24;
                 if (body.axialTilt < 90) {
                     body.axialTilt = 180 - body.axialTilt;
@@ -1866,7 +1958,11 @@
             w.periodDays = (w.yearHours || 8760) / 24;
 
             let calculateTidalAmplitudes = (body, sys, parent, isMoon) => {
-                let sVal = body.size === 'S' ? 0.375 : (typeof body.size === 'string' ? parseInt(body.size, 16) : body.size);
+                let sVal = body.size;
+                if (body.size === 'S' || body.size === 's') sVal = 0.375;
+                else if (body.size === 'R' || body.size === 'r' || body.size === 'GG') sVal = 0;
+                else if (typeof body.size === 'string') sVal = (typeof UniversalMath !== 'undefined' && UniversalMath.fromUWPChar) ? UniversalMath.fromUWPChar(body.size) : parseInt(body.size, 16) || 0;
+                
                 let total = 0;
                 const star = sys.stars[0];
                 const dist = isMoon ? (body.pd * parent.diamKm / 1000000) : (body.au * 149.6);
@@ -1980,8 +2076,8 @@
             if (nearAu > 0) w.highTempK = Math.pow(Math.pow(MgT2EMath.calculateMeanTemperature(highLum, nearAu, w.albedo, w.greenhouseFactor), 4) + Math.pow(inherentK, 4), 0.25);
             if (farAu > 0) w.lowTempK = Math.pow(Math.pow(MgT2EMath.calculateMeanTemperature(lowLum, farAu, w.albedo, w.greenhouseFactor), 4) + Math.pow(inherentK, 4), 0.25);
 
-            tResult('Recalc High Temp', w.highTempK.toFixed(1) + ' K');
-            tResult('Recalc Low Temp', w.lowTempK.toFixed(1) + ' K');
+            tResult('Recalc High Temp', w.highTempK != null ? w.highTempK.toFixed(1) + ' K' : 'N/A');
+            tResult('Recalc Low Temp', w.lowTempK != null ? w.lowTempK.toFixed(1) + ' K' : 'N/A');
 
             if (w.type === 'Gas Giant' || w.type === 'Planetoid Belt' || w.size === 0 || w.size === 'R') {
                 w.habitability = 0;
@@ -1993,7 +2089,7 @@
                 return;
             }
 
-            tSection(`${isMoon ? 'Moon' : w.type} Orbit ${w.orbitId.toFixed(2)} Biology/Sophonts`);
+            tSection(`${isMoon ? 'Moon' : w.type} Orbit ${w.orbitId != null ? w.orbitId.toFixed(2) : 'N/A'} Biology/Sophonts`);
 
             w.tectonicPlates = 0;
             w.plateInteraction = "None";

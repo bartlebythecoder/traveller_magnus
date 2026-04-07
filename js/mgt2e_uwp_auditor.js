@@ -280,7 +280,9 @@
 
             // Validation Logic:
             if (floor > mwTL && classification !== 'Mainworld') {
-                 const msg = `Ruin Violation (${classification}): Orbit ${w.orbitId || 'Moon'} requires Floor ${floor} but Mainworld TL is ${mwTL}. Cannot be supported; must be a ruin.`;
+                 // Generator should have zeroed this world to uninhabited. Pop > 0 here is a
+                 // generation failure — the safety-net in finalizeSubordinateSocial didn't catch it.
+                 const msg = `Uninhabited Environment Violation (${classification}): Orbit ${w.orbitId || 'Moon'} requires Floor ${floor} but Mainworld TL is ${mwTL}. World has Pop > 0 but should be uninhabited.`;
                  _log(`[FAIL] ${msg}`);
                  results.errors.push({ orbitId: w.orbitId || null, message: msg });
                  tlErrors++;

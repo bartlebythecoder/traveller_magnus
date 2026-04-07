@@ -1,4 +1,4 @@
-# As Above, So Below (v0.6)
+# As Above, So Below (v0.6.1)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -37,6 +37,14 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 ---
 ## 📜 Changelog
 
+### [v0.6.1] - 2026-04-07
+1. **Statistical Auditor Integration:** The StatisticalAuditor is now fully integrated into all bulk generation macros (CT, MgT2E, T5, and RTT) within macro_orchestrator.js.
+2. **Statistical Auditor Integration:** It now also triggers for single-system regeneration via the Context Menu. When you regenerate a single hex, the console will now output a specific "Subsector-scale" audit for that system, allowing you to see exactly how that system's properties align with expected Traveller distributions.
+3. **Refined Thermal Physics (MgT2E):** Patched a significant scaling issue in mgt2e_world_engine.js. Previously, the tidal heat calculation for moons incorrectly used the star's mass instead of the parent planet's mass, leading to nonsensical temperature overflows. Internal heat (inherentK) is now physically capped at 200K to ensure consistent climate modeling.
+4. **UI/Console Parity:** The StatisticalAuditor now outputs color-coded [PASS] and [STATISTICAL WARNING] flags directly to the browser console, providing immediate feedback on whether your current sector generation is matching the target RAW (Rules-As-Written) frequency tables.
+5. **T5**: Fixed starport distribution; size 0 mainworlds now possible;
+6. **CT**: Fixed atmosphere penalty for mainworlds in top down generation
+
 ### [v0.6] - 2026-04-06
 1. **ALL**: Refactored code to eliminate duplicates and move common functions to data files
 2. **ALL**:  Added name to filter window
@@ -51,70 +59,6 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 11. **CT**: Fixed mainworld as satellite frequency
 12. **T5**: Refactored social engine (including TL) resolving infrequent systems with high tech levels
 
-### [v0.5.7.3] - 2026-03-30
-1. **Renderer**: Implemented logic to differentiate Gas Giant icons based on the main world's status as a planet or moon.
-2. **Renderer**: Optimized icon sizing and map placement to improve the clarity of jump routes and prevent asset overlap.
-3. **Renderer**: Implemented deterministic Gas Giant variant selection (Ringed vs. Solid) based on system hex-seed.
-4. **Classic Traveller**: Resolved a bug affecting Gas Giant presence in system generation.
-5. **Classic Traveller**: Fixed a bug in Gas Giant orbital slot allocation.
-6. **UI**: Resolved a bug where the RTT System secondary window remained open after closing the hex editor.
-
-### [v0.5.7.2] - 2026-03-29
-1. **System**: Implemented **multi-color cycling** for Asteroid Belt clusters, allowing visual representation of multiple matching rules across individual rocks.
-2. **Filter**: Integrated "Asteroid Belt" into the choice of Icon Styles and established a new **default rule** that automatically applies the belt icon to all Size 0 worlds.
-3. **UI**: Expanded the Filter Engine suite with four new icon styles (**Square, Diamond, Rounded Rectangle, and Asteroid Grid**), each featuring stripe-based multi-color support and ring-boundary safety.
-
-### [v0.5.7.1] - 2026-03-29
-1. **System**: Added a global setting to customize the default color of planetary bodies on the hex map.
-2. **UI**: Refactored the filter interface into a persistent accordion layout, enabling simultaneous access to both filter settings and the active rules ledger.
-3. **UI**: Extended filter styling options to include advanced typography (Italics and Underlining).
-4. **UI**: Added a "Hide systems without worlds" toggle to the settings panel to declutter the map.
-5. **Bug Fix**: Resolved an issue where active filter rules were not automatically triggered upon sector load or import.
-
-
-### [v0.5.7] - 2026-03-28
-1. **UI**: Added multiple color support to filter rules.
-2. **UI**: Added ability to export and import filter rules.
-
-### [v0.5.6] - 2026-03-27
-1. **UI**: Added ability to enable or disable color and icon style in the filter rules.
-2. **UI**: Refined side panel headers for Help and Settings to prevent overlap with floating toggle buttons.
-3. **UI**: Added ability to use three colors on filter rules (primary, secondary, and ring).
-4. **UI**: Resolved accordian bug where the detailed displays were not opening
-5. **UI**: Resolved jump mask travel time bug that was caused by v0.5.5
-6. **UI**: Resolved hex editor positioning bug
-
-### [v0.5.5.1] - 2026-03-27
-1. ***UI***: Added shortcut icon on screen
-
-### [v0.5.5] - 2026-03-27
-1. ***UI***: Added shortcut menu as a side panel.   
-
-### [v0.5.4.1] - 2026-03-25
-1. **Shortcuts:** Added **F Key** to **Open Filter Window** (Filter Engine).
-
-### [v0.5.4] - 2026-03-24
-1. **System Editor:** Ability to edit and save more fields across all generation engines.
-2. **Filter Control:** Added filter and custom coloring rules.
-
-### [v0.5.3] - 2026-03-24
-1. **Socioeconomics:** Resolved P-Value / Population Multiplier mismatch when expanding existing worlds. All UWP characteristics and the Population digit are now correctly inherited from the source world.
-2. **Architecture:** Refactored `mgt2e_socio_engine.js` and `ui_menus.js` to ensure UWP immutability during world expansion.
-3. **Journey Math:** Implemented high-precision planetary diameter support for jump distance calculations. Travel times for Gas Giants and large worlds now use their physical `diamKm` instead of UWP size estimates, ensuring a strict and accurate "100-Diameter" limit.
-4. **Bug Fix:** Resolved a `ReferenceError` in `generateMainworldUWP` where certain UWP variables (`size`, `atm`, `hydro`) were not correctly declared, causing bulk macros to fail on empty hexes.
-5. **Bug Fix:** Resolved a "False Stellar Masking" bug on moons and satellites. Moons now correctly inherit their parent world's distance (AU) for stellar masking checks, preventing them from defaulting to 0 AU and falsely appearing "inside" the star's jump limit.
-
-### [v0.5.2] - 2026-03-23
-1. **Architecture:** Refactored `input.js`.
-2. **Mongoose Engine:** Socio-economic expansion now preserves existing population digits during generation (adds T5 compatibility).
-3. **T5 Engine:** Resolved `_tResult is not defined` reference error during system expansion when logging orbital data.
-
-### [v0.5.1] - 2026-03-21
-1. **System Expansion:** Added Times to Jump Point.
-
-### [v0.5] - 2026-03-20
-1. **Mongoose 2E Engine:** Implemented New Mongoose Bottom-Up Generation.
-2. **Cross-Engine Compatibility:** Implemented cross-engine system expansion, allowing hexes imported or generated in T5 or Classic Traveller to be seamlessly expanded using the Mongoose Top-Down engine (and vice versa) while strictly preserving pre-existing stellar profiles.
 
 ---
 *For a full history of changes, see the [Changelog](changelog.md).*

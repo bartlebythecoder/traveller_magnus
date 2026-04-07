@@ -196,17 +196,20 @@ function generatePopulation(world, ctx = { mode: 'bottomup' }) {
         }
     }
 
-    // Atmosphere Penalty
-    if (popMods && popMods.ATMOSPHERE_PENALTY) {
-        if (!popMods.ATMOSPHERE_PENALTY.VALID_CODES.includes(world.atm)) {
-            tDM(`Atmosphere ${toUWPChar(world.atm)} Penalty`, popMods.ATMOSPHERE_PENALTY.PENALTY);
-            popRoll -= Math.abs(popMods.ATMOSPHERE_PENALTY.PENALTY);
-        }
-    } else {
-        // Fallback
-        if (![0, 5, 6, 8].includes(world.atm)) {
-            tDM(`Atmosphere ${toUWPChar(world.atm)} Penalty`, -2);
-            popRoll -= 2;
+    // Atmosphere Penalty — subordinate worlds only.
+    // CT RAW: Mainworld population is a pure 2D-2 roll with no atmosphere modifier.
+    if (world.type !== 'Mainworld') {
+        if (popMods && popMods.ATMOSPHERE_PENALTY) {
+            if (!popMods.ATMOSPHERE_PENALTY.VALID_CODES.includes(world.atm)) {
+                tDM(`Atmosphere ${toUWPChar(world.atm)} Penalty`, popMods.ATMOSPHERE_PENALTY.PENALTY);
+                popRoll -= Math.abs(popMods.ATMOSPHERE_PENALTY.PENALTY);
+            }
+        } else {
+            // Fallback
+            if (![0, 5, 6, 8].includes(world.atm)) {
+                tDM(`Atmosphere ${toUWPChar(world.atm)} Penalty`, -2);
+                popRoll -= 2;
+            }
         }
     }
 

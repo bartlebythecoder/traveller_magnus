@@ -168,8 +168,9 @@
         if (activeAuditor) {
             const auditResults = activeAuditor.auditMgT2ESystem(sys, { mode: 'top-down' });
             if (!auditResults.pass) {
-                console.warn(`[MgT2E Auditor] System ${hexId} failed strict validation. Logging to backlog.`);
-                
+                const errSummary = auditResults.errors.map(e => e.message || e).join(' | ');
+                console.warn(`[MgT2E Auditor] System ${hexId} failed strict validation (${auditResults.errors.length} error(s)): ${errSummary}`);
+
                 // Action 6.3: Audit Persistence — push all strict [FAIL] to global backlog
                 if (typeof window !== 'undefined') {
                     window.auditBacklog = window.auditBacklog || [];
@@ -178,7 +179,7 @@
                             hexId: hexId,
                             orbitId: err.orbitId !== undefined ? err.orbitId : null,
                             engine: "MgT2E",
-                            message: err.message || err 
+                            message: err.message || err
                         });
                     });
                 }

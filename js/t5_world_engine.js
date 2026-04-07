@@ -67,9 +67,12 @@
                 _log(`Size Formula (${worldType}): 2D - 2. Rolled 12 (Result 10). Applying 10 variant (9 + 1D). Rolled ${variantRoll}. Final Size: ${final}.`);
                 return Math.max(1, final);
             }
-            size = Math.max(1, tempSize);
+            // Mainworld 2D-2 can legitimately produce 0 (asteroid belt mainworld).
+            // Subordinate world types (InnerWorld, IceWorld, Hospitable, etc.) keep minimum 1.
+            const minSize = (worldType === 'Mainworld') ? 0 : 1;
+            size = Math.max(minSize, tempSize);
             let logMsg = `Size Formula (${worldType}): 2D - 2. Rolled ${roll}. Final Size: ${size}`;
-            if (tempSize < 1) logMsg += " Clamped to minimum 1.";
+            if (tempSize < minSize) logMsg += ` Clamped to minimum ${minSize}.`;
             _log(logMsg);
             return size;
         }
@@ -477,7 +480,7 @@
         _log(`System Constellation: [${stars.map(s => s.name).join(' ')}]`);
 
         // --- 1. Basic Stats ---
-        const starport = ['A', 'A', 'A', 'B', 'B', 'B', 'C', 'C', 'D', 'E', 'X'][_roll2D('Starport Roll') - 2] || 'X';
+        const starport = ['A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'E', 'E', 'X'][_roll2D('Starport Roll') - 2] || 'X';
 
         const world = {
             hexId,

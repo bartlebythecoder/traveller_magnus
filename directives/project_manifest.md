@@ -1,30 +1,32 @@
 # PROJECT AS ABOVE, SO BELOW - Feature Manifest
-
-**Evergreen Context:** This is an ongoing, long-term project for a **Multi-Engine Traveller RPG Generator and Mapping Tool**. The system is designed to support and audit procedural generation across various Traveller rulesets (e.g., MgT2E, CT, T5, CE) using a unified architectural framework.
-
-**Version:** 0.6.0.0  
-**Target:** Auditor Logic Alignment, Failure Persistence, & Multi-Engine Diagnostic Logging  
+**Version:** 0.6.1.0
+**Target:** Statistical Validation & Audit Finalization
 **Architecture Standard:** The "Sean Protocol" (Directives -> Orchestration -> Execution)
 
 ---
 
 ## 1. Project Goal
-To eliminate logical drift across multiple RPG engines and ensure human-readable transparency in generation output. This version centralizes cross-engine "laws" into Markdown guidelines, upgrades the Auditor to handle multi-engine environmental checks, and refactors Trace Logging into a standardized, planet-by-planet hierarchy to resolve "suspicious results".
+To complete the Multi-Engine Auditor suite by introducing **Sector-Wide Statistical Validation**. This version ensures the "Math Chassis" produces accurate distributions (e.g., Garden Worlds, Binary Systems) by comparing live results against RPG-specific Expectation Tables.
 
 ## 2. Architectural Pillars (The "Sean Protocol")
-* **Directives Layer:** Rule-specific Markdown files (e.g., `rules/mgt2e_logic.md`, `rules/ct_logic.md`) act as the "Source of Truth" for AI agents.
-* **Data Shield:** Centralized tables for environmental Tech Level minimums and asset paths, partitioned by engine type.
-* **Math Chassis:** Universal logic for survival floors and "Dead World" reclassification that applies across engine boundaries.
-* **Trace Logging:** A standardized, object-oriented reporting framework that prioritizes human-readability.
+* **Directives Layer:** 18 SOPs total. *New:* `directives/statistical_validation_sop.md`.
+* **Data Shield:** Centralized tables for engine rules and the new **Expectation Table**.
+* **Math Chassis:** Universal logic for survival floors, now strictly table-driven to eliminate logic drift.
+* **Trace Logging:** Planet-Centric biographies with a final **Statistical Deviation Report** footer.
 
-## 3. Implementation Plan (v0.6.0.0)
+## 3. Implementation Plan (v0.6.1.x - v0.7.x)
 
-### Phase 6: Multi-Engine Audit & Diagnostic Sweep
-* **Action 6.1 (Directive Documentation):** Populate the `rules/` directory with Markdown guidelines for all active engines. These files enable agents to compare code execution against specific RPG rulesets (e.g., WBH vs. Classic).
-* **Action 6.2 (Multi-Engine Auditor Refactor):** Align the Auditor to detect which engine is active and pull the correct environmental TL lookups from the Data Shield. It must [PASS] results that meet engine-specific survival requirements even if they violate generic guidelines.
-* **Action 6.3 (Reporting & Backlog Persistence):** Implement a global `window.auditBacklog`. Every audit failure must be pushed here with its **HexID**, **OrbitID**, and **Engine Source** to track "suspicious results" across different rulesets.
-* **Action 6.4 (Hierarchical Planet-by-Planet Logging):**
-    * **Object-Centricity:** Refactor all logging (Stellar, World, Socio) to group all data by **Planet/Body**. Users should see the full physical and social "biography" of a world in one section rather than seeing stats grouped by generation phase.
-    * **Standardization:** Harmonize the `tSection` and `tResult` usage across all engines to ensure identical detail levels and human-readability.
-    * **Source Labeling:** Every `tResult` must explicitly label the logic source (e.g., "WBH Requirement," "CT Baseline," or "Physics Floor").
-* **Action 6.5 (Diagnostic Sweep):** Use the new Planet-Centric Logs and Auditor Backlog to identify, isolate, and resolve the two specific groups of "suspicious results" currently appearing in multi-engine output.
+### Phase 6.1: The Statistical Integrity Update (Current)
+* **Action 6.1.1:** Create `directives/statistical_validation_sop.md` to define the Running Tally workflow.
+* **Action 6.1.2:** Populate the Data Shield with the **Expectation Table** (Statistical targets for all engines).
+* **Action 6.1.3:** Implement **Running Tally Logic** in the Orchestration layer to increment counts during generation.
+* **Action 6.1.4:** Append the **Statistical Footer** to all logs, comparing Actual vs. Expected results with [PASS/FAIL] statuses.
+
+### Phase 7.0: Political Mapping & Referee Utility
+* **Action 7.0.1 (Manual Entry):** Add `Allegiance` and `Notes` fields to the Main World UI for all engines.
+* **Action 7.0.2 (Hex Fill Filter):** Implement the "Hex Background Fill" filter using transparent RGBA colors to highlight Allegiance territories.
+* **Action 7.0.3 (Persistence):** Update TSV import and storage logic to ensure manual data persists across engine swaps by HexID.
+
+### Phase 7.1: Demo Assets & Final Sweep
+* **Action 7.1.1 (Demo Universe):** Add a "Load Official Sector" button in Settings for one-click curated data import.
+* **Action 7.1.2 (Diagnostic Sweep):** Use the v0.6.1 Auditor to verify the Official Sector matches expectations 100%.

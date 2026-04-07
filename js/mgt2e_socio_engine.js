@@ -291,13 +291,12 @@
         const floor = getMgT2EMinSusTL(body.atmCode);
 
         if (floor > mainworld.tl) {
-            tSection('Ruin Reclassification');
-            tResult('Tech Level Status', 'Uninhabited/Ruin (Floor > Mainworld TL)');
+            tSection('Uninhabited Reclassification');
+            tResult('Tech Level Status', 'Uninhabited (Floor > Mainworld TL — environment unsupportable)');
             body.pop = 0;
             body.gov = 0;
             body.law = 0;
             body.tl = 0;
-            body.isRuin = true;
         } else if (body.pop > 0) {
             const baseline = Math.max(0, mainworld.tl - 1);
             body.tl = baseline; // WBH RAW: Do not bump subordinate UWP TL to meet floor.
@@ -1994,17 +1993,40 @@
         const isPoor = (mw.tradeCodes && mw.tradeCodes.includes("Po"));
         const isInd = (mw.tradeCodes && mw.tradeCodes.includes("In"));
 
-        // Process all subordinate worlds
-        for (let w of sys.worlds) {
-            if (w.type === 'Mainworld' || w.type === 'Empty' || w.type === 'Gas Giant') continue;
-
-            processSecondaryClassifications(w, mw, isPoor, isInd, sys);
-
-            // Process moons
-            for (let m of w.moons || []) {
-                if (m.type === 'Empty' || m.type === 'Gas Giant' || m.isLunarMainworld || m.type === 'Mainworld') continue;
-                processSecondaryClassifications(m, mw, isPoor, isInd, sys);
+        // Safety-net: zero out any world whose atmosphere floor exceeds the mainworld's
+        // finalised TL. This catches edge cases where the Phase 6 ruin check used a
+        // slightly different TL (e.g. before extended-socio wrote back a revised value).
+        const uninhabitIfUnsupported = (body) => {
+            if (!body || body.pop === 0) return;
+            const bAtm = body.atmCode !== undefined ? body.atmCode : (body.atm || 0);
+            const bFloor = getMgT2EMinSusTL(bAtm);
+            if (bFloor > mw.tl) {
+                tResult(`Uninhabited Safety-Net (Orbit ${body.orbitId !== undefined ? body.orbitId.toFixed(2) : 'Moon'})`,
+                    `Floor ${bFloor} > Mainworld TL ${mw.tl} — zeroing out`);
+                body.pop = 0; body.popCode = 0;
+                body.gov = 0; body.govCode = 0;
+                body.law = 0; body.lawCode = 0;
+                body.tl = 0;  body.tlCode = 0;
+                syncUWP(body);
             }
+        };
+
+        // Process all subordinate worlds.
+        // Moon loop runs FIRST (before the Gas Giant continue check) — mirrors generateCoreSocial
+        // ordering and ensures Gas Giant moons (e.g. sub-gas-giant satellites) receive the
+        // uninhabited floor check even though their parent is skipped.
+        for (let w of sys.worlds) {
+            for (let m of w.moons || []) {
+                if (m.type === 'Empty' || m.isLunarMainworld || m.type === 'Mainworld') continue;
+                uninhabitIfUnsupported(m);
+                if (m.type !== 'Gas Giant') {
+                    processSecondaryClassifications(m, mw, isPoor, isInd, sys);
+                }
+            }
+
+            if (w.type === 'Mainworld' || w.type === 'Empty' || w.type === 'Gas Giant') continue;
+            uninhabitIfUnsupported(w);
+            processSecondaryClassifications(w, mw, isPoor, isInd, sys);
         }
 
         return sys;

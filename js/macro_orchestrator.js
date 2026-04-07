@@ -150,6 +150,11 @@ async function runMgT2EMacro(skipPop = false) {
     // Capture the target hexes NOW so they don't change if the user deselects during the wait
     const targetHexes = Array.from(selectedHexes);
 
+    // v0.6.1.0: Statistical auditor for this generation run
+    const _auditor_mgt2e = (typeof StatisticalAuditor !== 'undefined')
+        ? new StatisticalAuditor('mgt2e', targetHexes.length <= 80)
+        : null;
+
     // Auto Populate
     if (!skipPop) {
         targetHexes.forEach(hexId => {
@@ -211,8 +216,22 @@ async function runMgT2EMacro(skipPop = false) {
                     }
 
                     stateObj.mgt2eData = mainworld;
-                    stateObj.mgtSocio = mainworld; 
+                    stateObj.mgtSocio = mainworld;
                     stateObj.name = mainworld.name;
+
+                    // v0.6.1.0: Record system in statistical auditor
+                    if (_auditor_mgt2e && mainworld) {
+                        _auditor_mgt2e.recordSystem({
+                            stars:          newSys.stars ? newSys.stars.length : 1,
+                            isMoonMainworld: !!(mainworld.isLunarMainworld || mainworld.isMoon),
+                            size:           mainworld.size || 0,
+                            atmosphere:     mainworld.atmCode !== undefined ? mainworld.atmCode : (mainworld.atm || 0),
+                            hydrosphere:    mainworld.hydroCode !== undefined ? mainworld.hydroCode : (mainworld.hydro || 0),
+                            population:     mainworld.popCode !== undefined ? mainworld.popCode : (mainworld.pop || 0),
+                            starport:       mainworld.starport || 'X',
+                            techLevel:      mainworld.tl || 0
+                        });
+                    }
 
                     // 4. Clear old variant data to prevent UI ghosting
                     stateObj.ctData = null;
@@ -267,6 +286,9 @@ async function runMgT2EMacro(skipPop = false) {
         if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
         if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
 
+        // v0.6.1.0: Emit deviation report
+        if (_auditor_mgt2e && count > 0) _auditor_mgt2e.generateDeviationReport();
+
         selectedHexes.clear();
         requestAnimationFrame(draw);
     }, 500);
@@ -285,6 +307,11 @@ async function runMgT2EBottomUpMacro(skipPop = false) {
     }
 
     const targetHexes = Array.from(selectedHexes);
+
+    // v0.6.1.0: Statistical auditor
+    const _auditor_mgt2e_bu = (typeof StatisticalAuditor !== 'undefined')
+        ? new StatisticalAuditor('mgt2e', targetHexes.length <= 80)
+        : null;
 
     // 1. Auto Populate
     if (!skipPop) {
@@ -345,8 +372,22 @@ async function runMgT2EBottomUpMacro(skipPop = false) {
                             // Map resulting data to stateObj (Sean Protocol: Orchestrator maps generated data to UI state)
                             stateObj.mgtSystem = sys;
                             stateObj.mgt2eData = mainworld;
-                            stateObj.mgtSocio = mainworld; // The engine puts socio data directly on the world object
+                            stateObj.mgtSocio = mainworld;
                             stateObj.name = mainworld.name;
+
+                            // v0.6.1.0: Statistical auditor
+                            if (_auditor_mgt2e_bu && mainworld) {
+                                _auditor_mgt2e_bu.recordSystem({
+                                    stars:          sys.stars ? sys.stars.length : 1,
+                                    isMoonMainworld: !!(mainworld.isLunarMainworld || mainworld.isMoon),
+                                    size:           mainworld.size || 0,
+                                    atmosphere:     mainworld.atmCode !== undefined ? mainworld.atmCode : (mainworld.atm || 0),
+                                    hydrosphere:    mainworld.hydroCode !== undefined ? mainworld.hydroCode : (mainworld.hydro || 0),
+                                    population:     mainworld.popCode !== undefined ? mainworld.popCode : (mainworld.pop || 0),
+                                    starport:       mainworld.starport || 'X',
+                                    techLevel:      mainworld.tl || 0
+                                });
+                            }
 
                             // Clean up old data variants to prevent UI ghosting
                             stateObj.ctData = null;
@@ -395,6 +436,9 @@ async function runMgT2EBottomUpMacro(skipPop = false) {
         if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
         if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
 
+        // v0.6.1.0: Emit deviation report
+        if (_auditor_mgt2e_bu && count > 0) _auditor_mgt2e_bu.generateDeviationReport();
+
         selectedHexes.clear();
         requestAnimationFrame(draw);
     }, 500);
@@ -413,6 +457,11 @@ async function runCTNewMacro(skipPop = false) {
     }
 
     const targetHexes = Array.from(selectedHexes);
+
+    // v0.6.1.0: Statistical auditor
+    const _auditor_ct = (typeof StatisticalAuditor !== 'undefined')
+        ? new StatisticalAuditor('ct', targetHexes.length <= 80)
+        : null;
 
     // 1. Auto Populate
     if (!skipPop) {
@@ -458,6 +507,21 @@ async function runCTNewMacro(skipPop = false) {
                         });
                         stateObj.ctSystem = sys;
                         stateObj.ctData = sys.mainworld; // Sean Protocol: Map finalized world to UI state
+
+                        // v0.6.1.0: Statistical auditor
+                        if (_auditor_ct && sys.mainworld) {
+                            const mw = sys.mainworld;
+                            _auditor_ct.recordSystem({
+                                stars:          sys.stars ? sys.stars.length : 1,
+                                isMoonMainworld: !!(mw.isLunarMainworld || mw.isMoon),
+                                size:           mw.size || 0,
+                                atmosphere:     mw.atm || 0,
+                                hydrosphere:    mw.hydro || 0,
+                                population:     mw.pop || 0,
+                                starport:       mw.starport || 'X',
+                                techLevel:      mw.tl || 0
+                            });
+                        }
                     }
 
                     // Clean up variants
@@ -491,6 +555,9 @@ async function runCTNewMacro(skipPop = false) {
         if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
         if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
 
+        // v0.6.1.0: Emit deviation report
+        if (_auditor_ct && count > 0) _auditor_ct.generateDeviationReport();
+
         selectedHexes.clear();
         requestAnimationFrame(draw);
     }, 500);
@@ -509,6 +576,11 @@ async function runCTBottomUpMacro(skipPop = false) {
     }
 
     const targetHexes = Array.from(selectedHexes);
+
+    // v0.6.1.0: Statistical auditor
+    const _auditor_ct_bu = (typeof StatisticalAuditor !== 'undefined')
+        ? new StatisticalAuditor('ct', targetHexes.length <= 80)
+        : null;
 
     // 1. Auto Populate
     if (!skipPop) {
@@ -550,6 +622,21 @@ async function runCTBottomUpMacro(skipPop = false) {
                             stateObj.ctSystem = sys;
                             stateObj.ctData = sys.mainworld;
 
+                            // v0.6.1.0: Statistical auditor
+                            if (_auditor_ct_bu) {
+                                const mw = sys.mainworld;
+                                _auditor_ct_bu.recordSystem({
+                                    stars:          sys.stars ? sys.stars.length : 1,
+                                    isMoonMainworld: !!(mw.isLunarMainworld || mw.isMoon),
+                                    size:           mw.size || 0,
+                                    atmosphere:     mw.atm || 0,
+                                    hydrosphere:    mw.hydro || 0,
+                                    population:     mw.pop || 0,
+                                    starport:       mw.starport || 'X',
+                                    techLevel:      mw.tl || 0
+                                });
+                            }
+
                             // Clean up variants
                             stateObj.rttData = null;
                             stateObj.mgt2eData = null;
@@ -582,6 +669,9 @@ async function runCTBottomUpMacro(skipPop = false) {
         if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
         if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
 
+        // v0.6.1.0: Emit deviation report
+        if (_auditor_ct_bu && count > 0) _auditor_ct_bu.generateDeviationReport();
+
         selectedHexes.clear();
         requestAnimationFrame(draw);
     }, 500);
@@ -601,6 +691,11 @@ async function runRTTMacro(skipPop = false) {
     }
 
     const targetHexes = Array.from(selectedHexes);
+
+    // v0.6.1.0: Statistical auditor
+    const _auditor_rtt = (typeof StatisticalAuditor !== 'undefined')
+        ? new StatisticalAuditor('rtt', targetHexes.length <= 80)
+        : null;
 
     // 1. Auto Populate (Standard 3 in 6)
     if (!skipPop) {
@@ -632,6 +727,21 @@ async function runRTTMacro(skipPop = false) {
                     // Extract UW for display
                     if (stateObj.rttSystem) {
                         stateObj.rttData = extractRTTMainworld(stateObj.rttSystem);
+
+                        // v0.6.1.0: Statistical auditor
+                        if (_auditor_rtt && stateObj.rttData) {
+                            const mw = stateObj.rttData;
+                            _auditor_rtt.recordSystem({
+                                stars:          stateObj.rttSystem.stars ? stateObj.rttSystem.stars.length : 1,
+                                isMoonMainworld: !!(mw.isLunarMainworld || mw.isMoon),
+                                size:           mw.size || 0,
+                                atmosphere:     mw.atm || 0,
+                                hydrosphere:    mw.hydro || 0,
+                                population:     mw.pop || 0,
+                                starport:       mw.starport || 'X',
+                                techLevel:      mw.tl || 0
+                            });
+                        }
 
                         // Track systems with no planetary bodies
                         const hasAnyOrbits = stateObj.rttSystem.stars.some(
@@ -688,6 +798,9 @@ async function runRTTMacro(skipPop = false) {
         if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
         if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
 
+        // v0.6.1.0: Emit deviation report
+        if (_auditor_rtt && count > 0) _auditor_rtt.generateDeviationReport();
+
         selectedHexes.clear();
         requestAnimationFrame(draw);
     }, 500);
@@ -707,6 +820,11 @@ async function runT5Macro(skipPop = false) {
     }
 
     const targetHexes = Array.from(selectedHexes);
+
+    // v0.6.1.0: Statistical auditor
+    const _auditor_t5 = (typeof StatisticalAuditor !== 'undefined')
+        ? new StatisticalAuditor('t5', targetHexes.length <= 80)
+        : null;
 
     // 1. Auto Populate (Standard 3 in 6)
     if (!skipPop) {
@@ -742,6 +860,21 @@ async function runT5Macro(skipPop = false) {
                         stateObj.name = getNextSystemName(hexId);
                         if (stateObj.t5Data) stateObj.t5Data.name = stateObj.name;
                         stateObj.t5Socio = (window.T5_Socio_Engine) ? window.T5_Socio_Engine.generateT5Socioeconomics(sys.mainworld, hexId) : null;
+
+                        // v0.6.1.0: Statistical auditor
+                        if (_auditor_t5 && sys.mainworld) {
+                            const mw = sys.mainworld;
+                            _auditor_t5.recordSystem({
+                                stars:          sys.stars ? sys.stars.length : 1,
+                                isMoonMainworld: !!(mw.isLunarMainworld || mw.isMoon),
+                                size:           mw.size || 0,
+                                atmosphere:     mw.atmCode !== undefined ? mw.atmCode : (mw.atm || 0),
+                                hydrosphere:    mw.hydroCode !== undefined ? mw.hydroCode : (mw.hydro || 0),
+                                population:     mw.popCode !== undefined ? mw.popCode : (mw.pop || 0),
+                                starport:       mw.starport || 'X',
+                                techLevel:      mw.tl || 0
+                            });
+                        }
                     } else {
                         // Legacy Fallback
                         stateObj.t5Data = generateT5Mainworld(hexId);
@@ -786,6 +919,9 @@ async function runT5Macro(skipPop = false) {
         // Refresh both visibility and styling rules for the new systems
         if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
         if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
+
+        // v0.6.1.0: Emit deviation report
+        if (_auditor_t5 && count > 0) _auditor_t5.generateDeviationReport();
 
         selectedHexes.clear();
         requestAnimationFrame(draw);

@@ -1,5 +1,12 @@
 # Changelog
 
+### [v0.6.1] - 2026-04-07
+1. **Statistical Auditor Integration:** The StatisticalAuditor is now fully integrated into all bulk generation macros (CT, MgT2E, T5, and RTT) within macro_orchestrator.js.
+2. **Statistical Auditor Integration:** It now also triggers for single-system regeneration via the Context Menu. When you regenerate a single hex, the console will now output a specific "Subsector-scale" audit for that system, allowing you to see exactly how that system's properties align with expected Traveller distributions.
+3. **Refined Thermal Physics (MgT2E):** Patched a significant scaling issue in mgt2e_world_engine.js. Previously, the tidal heat calculation for moons incorrectly used the star's mass instead of the parent planet's mass, leading to nonsensical temperature overflows. Internal heat (inherentK) is now physically capped at 200K to ensure consistent climate modeling.
+4. **UI/Console Parity:** The StatisticalAuditor now outputs color-coded [PASS] and [STATISTICAL WARNING] flags directly to the browser console, providing immediate feedback on whether your current sector generation is matching the target RAW (Rules-As-Written) frequency tables.
+5. **T5**: Fixed starport distribution; size 0 mainworlds now possible;
+6. **CT**: Fixed atmosphere penalty for mainworlds in top down generation
 
 ### [v0.6] - 2026-04-06
 1. **ALL**: Refactored code to eliminate duplicates and move common functions to data files

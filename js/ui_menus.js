@@ -108,6 +108,27 @@ function setupGenerationHandlers() {
         if (window.isLoggingEnabled && window.batchLogData.length > 0) {
             downloadBatchLog('CT_Mainworlds', count);
         }
+
+        // v0.6.1.0: Individual System Audit to console
+        if (count > 0 && typeof StatisticalAuditor !== 'undefined') {
+            const auditor = new StatisticalAuditor('ct', true);
+            selectedHexes.forEach(hexId => {
+                const s = hexStates.get(hexId);
+                if (s && s.ctData) {
+                    auditor.recordSystem({
+                        stars: 1, // Mainworld only context
+                        isMoonMainworld: !!(s.ctData.isLunarMainworld || s.ctData.isMoon),
+                        size: s.ctData.size || 0,
+                        atmosphere: s.ctData.atm || 0,
+                        hydrosphere: s.ctData.hydro || 0,
+                        population: s.ctData.pop || 0,
+                        starport: s.ctData.starport || 'X',
+                        techLevel: s.ctData.tl || 0
+                    });
+                }
+            });
+            auditor.generateDeviationReport();
+        }
         document.getElementById('context-menu').classList.remove('visible');
         if (count > 0) {
             showToast(`Generated Classic Traveller Mainworlds for ${count} hex(es)`);
@@ -174,6 +195,28 @@ function setupGenerationHandlers() {
         if (window.isLoggingEnabled && window.batchLogData.length > 0) {
             downloadBatchLog('MgT2E_Mainworlds', count);
         }
+
+        // v0.6.1.0: Individual System Audit to console
+        if (count > 0 && typeof StatisticalAuditor !== 'undefined') {
+            const auditor = new StatisticalAuditor('mgt2e', true);
+            selectedHexes.forEach(hexId => {
+                const s = hexStates.get(hexId);
+                if (s && s.mgt2eData) {
+                    const mw = s.mgt2eData;
+                    auditor.recordSystem({
+                        stars: 1, 
+                        isMoonMainworld: !!(mw.isLunarMainworld || mw.isMoon),
+                        size: mw.size || 0,
+                        atmosphere: mw.atmCode !== undefined ? mw.atmCode : (mw.atm || 0),
+                        hydrosphere: mw.hydroCode !== undefined ? mw.hydroCode : (mw.hydro || 0),
+                        population: mw.popCode !== undefined ? mw.popCode : (mw.pop || 0),
+                        starport: mw.starport || 'X',
+                        techLevel: mw.tl || 0
+                    });
+                }
+            });
+            auditor.generateDeviationReport();
+        }
         document.getElementById('context-menu').classList.remove('visible');
         if (count > 0) {
             showToast(`Generated MgT2E Mainworlds for ${count} hex(es)`);
@@ -223,6 +266,28 @@ function setupGenerationHandlers() {
         });
         if (window.isLoggingEnabled && window.batchLogData.length > 0) {
             downloadBatchLog('T5_Mainworlds', count);
+        }
+
+        // v0.6.1.0: Individual System Audit to console
+        if (count > 0 && typeof StatisticalAuditor !== 'undefined') {
+            const auditor = new StatisticalAuditor('t5', true);
+            selectedHexes.forEach(hexId => {
+                const s = hexStates.get(hexId);
+                if (s && s.t5Data) {
+                    const mw = s.t5Data;
+                    auditor.recordSystem({
+                        stars: 1,
+                        isMoonMainworld: !!(mw.isLunarMainworld || mw.isMoon),
+                        size: mw.size || 0,
+                        atmosphere: mw.atmCode !== undefined ? mw.atmCode : (mw.atm || 0),
+                        hydrosphere: mw.hydroCode !== undefined ? mw.hydroCode : (mw.hydro || 0),
+                        population: mw.popCode !== undefined ? mw.popCode : (mw.pop || 0),
+                        starport: mw.starport || 'X',
+                        techLevel: mw.tl || 0
+                    });
+                }
+            });
+            auditor.generateDeviationReport();
         }
         document.getElementById('context-menu').classList.remove('visible');
         if (count > 0) {

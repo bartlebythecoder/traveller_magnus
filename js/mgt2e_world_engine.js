@@ -2032,10 +2032,14 @@
                 let compB = Math.floor(w.totalTidalAmplitude / 10);
 
                 // Component C: Tidal Heat (Scenario 3)
-                // Safety: Ensure division by zero doesn't occur for very close planets or zero period
+                // For moons, the tidal driver is the parent planet (e.g. the Gas Giant), not the star.
+                // Using primary.massEarths (star mass ~66,000 Earths) for a moon causes ~90,000x overflow.
+                let tidalDriverMass = isMoon ? (parent.mass || 220) : primary.massEarths;
                 let denom = (3000 * Math.pow(Math.max(0.001, w.distMkm), 5) * Math.max(0.001, w.periodDays) * (w.massEarths || 0.0001));
-                let compC_val = (Math.pow(primary.massEarths, 2) * Math.pow(sizeValue, 5) * Math.pow(w.eccentricity || 0, 2)) / denom;
-                let compC = (compC_val < 1 || isNaN(compC_val)) ? 0 : compC_val;
+                let compC_val = (Math.pow(tidalDriverMass, 2) * Math.pow(sizeValue, 5) * Math.pow(w.eccentricity || 0, 2)) / denom;
+                // Safety cap: seismicStress feeds directly into temperature as inherentK.
+                // Values > 200 are physically unreasonable (Io-like max is ~100 K of internal heat).
+                let compC = (compC_val < 1 || isNaN(compC_val)) ? 0 : Math.min(compC_val, 200);
 
                 w.seismicStress = Math.floor(compA + compB + compC);
                 inherentK = w.seismicStress;

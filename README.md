@@ -43,6 +43,8 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 3. **Allegiance Selection:** Implemented a way to mass change Allegiance through selection and right click.
 3. **Hex Background:** Added to filter styles
 4. **White Background Mode:** Added in settings
+5. **Fixed Mongoose World and Moon Temperature:** Orbital WBH errata applied.  Bug tidal locking some worlds to stars corrected.
+6. **Fixed Gas Giant Temperature:**  Wrong age exponent fixed.  Age divide by zero corrected (min. Gyr).
 
 ### [v0.6.1] - 2026-04-07
 1. **Statistical Auditor Integration:** The StatisticalAuditor is now fully integrated into all bulk generation macros (CT, MgT2E, T5, and RTT) within macro_orchestrator.js.

@@ -11,10 +11,21 @@
     let activeFilters = {};
     let activeRouteStatus = { green: true, yellow: true, red: true };
 
+    const DESIGN_CHECKBOX_IDS = [
+        'enable-design-color', 'enable-design-ring', 'enable-design-icon',
+        'enable-design-text-case', 'enable-design-italics', 'enable-design-underline',
+        'enable-design-bg-fill'
+    ];
+    const DESIGN_CHECKBOX_STORAGE_KEY = 'traveller_design_checkboxes';
+
+    // Hex Background Fill global visibility flag (default on)
+    window.hexBgFillVisible = true;
+
     // Initialization
     window.addEventListener('DOMContentLoaded', () => {
         setupFilterListeners();
         setupFilterCloseButton();
+        restoreDesignCheckboxes();
         // initDraggable(); // Now handled globally in input_init.js
         initializeDefaultStyleRule();
     });
@@ -119,6 +130,7 @@
             'filter-name',
             'filter-starport', 'filter-size', 'filter-atm', 'filter-hydro',
             'filter-pop', 'filter-gov', 'filter-law', 'filter-tl', 'filter-trade-codes',
+            'filter-allegiance',
             'filter-gravity', 'filter-temperature', 'filter-t5-ix', 'filter-mgt-importance', 'filter-mgt-wtn', 'filter-mgt-gwp'
         ];
 
@@ -230,6 +242,7 @@
             law: document.getElementById('filter-law')?.value || "",
             tl: document.getElementById('filter-tl')?.value || "",
             tradeCodes: document.getElementById('filter-trade-codes')?.value || "",
+            allegiance: document.getElementById('filter-allegiance')?.value || "",
             gravity: document.getElementById('filter-gravity')?.value || "",
             temperature: document.getElementById('filter-temperature')?.value || "",
             t5Ix: document.getElementById('filter-t5-ix')?.value || "",
@@ -243,14 +256,17 @@
 
         // 3. Evaluation Loop
         hexStates.forEach((state, hexId) => {
-            if (state.type !== 'SYSTEM_PRESENT') return;
-            totalCount++;
+            const isSystemPresent = state.type === 'SYSTEM_PRESENT';
+            const isBlank = state.type === 'BLANK';
+            const isEmpty = state.type === 'EMPTY';
+            if (!isSystemPresent && !isBlank && !isEmpty) return;
+            if (isSystemPresent) totalCount++;
 
             const worldData = state.rttData || state.t5Data || state.mgt2eData || state.ctData;
             const socioData = state.t5Socio || state.mgtSocio || {};
 
             // Merge for evaluation
-            const evalObject = { ...worldData, ...socioData };
+            const evalObject = { ...worldData, ...socioData, allegiance: state.allegiance, notes: state.notes };
 
             // Name prefix filter (case-insensitive, applied before UWP filters)
             let isVisible = true;
@@ -265,7 +281,7 @@
             if (isVisible) isVisible = UniversalMath.applyFilters(evalObject, uwpFilters, activeRouteStatus);
             state.isHiddenByFilter = !isVisible;
 
-            if (isVisible) matchCount++;
+            if (isSystemPresent && isVisible) matchCount++;
         });
 
         const resultsLabel = document.getElementById('filter-results-count');
@@ -306,6 +322,7 @@
             name: "Name",
             starport: "Starport", size: "Size", atm: "Atm", hydro: "Hydro",
             pop: "Pop", gov: "Gov", law: "Law", tl: "TL", tradeCodes: "Codes",
+            allegiance: "Alleg",
             gravity: "Grav", temperature: "Temp (°C)",
             t5Ix: "T5 Ix", mgtImportance: "Mg Imp", mgtWTN: "Mg WTN", mgtGWP: "Mg GWP"
         };
@@ -346,6 +363,8 @@
                 bgCSS = `background: ${rule.color};`;
             } else if (rule.ringColor) {
                 bgCSS = `background: transparent;`; // Ring only
+            } else if (rule.bgFillColor) {
+                bgCSS = `background: ${rule.bgFillColor};`;
             } else {
                 bgCSS = `background: #a0a8b0;`; // Fallback fill so the shape isn't invisible
             }
@@ -362,6 +381,9 @@
                 styleIndicator = `<span style="display: inline-block; width: 8px; height: 8px; ${bgCSS} ${borderCSS} transform: rotate(45deg); margin-right: 8px; margin-left: 2px; flex-shrink: 0;" title="Diamond"></span>`;
             } else if (iconType === 'Rounded Rectangle') {
                 styleIndicator = `<span style="display: inline-block; width: 14px; height: 8px; border-radius: 2px; ${bgCSS} ${borderCSS} margin-right: 8px; flex-shrink: 0;" title="Rounded Rectangle"></span>`;
+            } else if (rule.bgFillColor && !rule.color && !rule.ringColor) {
+                // Hex background fill only — show a flat-top hex shape in the fill color
+                styleIndicator = `<span style="display: inline-block; width: 12px; height: 10px; background: ${rule.bgFillColor}; clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); margin-right: 8px; flex-shrink: 0;" title="Hex Background Fill"></span>`;
             } else {
                 // Classic Dot or Refined
                 styleIndicator = `<span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; ${bgCSS} ${borderCSS} margin-right: 8px; flex-shrink: 0;" title="${iconType}"></span>`;
@@ -386,7 +408,7 @@
         
         // 1. Reset all worlds
         hexStates.forEach(state => {
-            if (state.type === 'SYSTEM_PRESENT') {
+            if (state.type === 'SYSTEM_PRESENT' || state.type === 'BLANK' || state.type === 'EMPTY') {
                 state.custom_ui = { appliedColors: [] };
             }
         });
@@ -397,33 +419,30 @@
             let ruleMatchCount = 0;
             
             hexStates.forEach((state, hexId) => {
-                if (state.type !== 'SYSTEM_PRESENT') return;
-                
+                const isSystemPresent = state.type === 'SYSTEM_PRESENT';
+                const isBgOnly = state.type === 'BLANK' || state.type === 'EMPTY';
+                if (!isSystemPresent && !isBgOnly) return;
+
                 const worldData = state.rttData || state.t5Data || state.mgt2eData || state.ctData;
                 const socioData = state.t5Socio || state.mgtSocio || {};
-                const evalObject = { ...worldData, ...socioData };
+                const evalObject = { ...worldData, ...socioData, allegiance: state.allegiance };
 
                 if (UniversalMath.applyFilters(evalObject, rule.filters)) {
                     if (!state.custom_ui) state.custom_ui = { appliedColors: [] };
-                    
-                    // Rule Accumulation Logic: Push color into slice array
-                    if (rule.color !== null) {
-                        state.custom_ui.appliedColors.push(rule.color);
+
+                    if (isSystemPresent) {
+                        // Full rule application — dots, rings, icons, text styling
+                        if (rule.color !== null) state.custom_ui.appliedColors.push(rule.color);
+                        if (rule.ringColor !== null && rule.ringColor !== undefined) state.custom_ui.ringColor = rule.ringColor;
+                        if (rule.iconStyle !== null) state.custom_ui.iconStyle = rule.iconStyle;
+                        if (rule.textCase !== null && rule.textCase !== undefined) state.custom_ui.textCase = rule.textCase;
+                        if (rule.isItalic) state.custom_ui.isItalic = true;
+                        if (rule.isUnderline) state.custom_ui.isUnderline = true;
                     }
-                    
-                    // Last-Rule-Wins logic for Ring and Icon
-                    if (rule.ringColor !== null && rule.ringColor !== undefined) {
-                        state.custom_ui.ringColor = rule.ringColor;
-                    }
-                    if (rule.iconStyle !== null) {
-                        state.custom_ui.iconStyle = rule.iconStyle;
-                    }
-                    if (rule.textCase !== null && rule.textCase !== undefined) {
-                        state.custom_ui.textCase = rule.textCase;
-                    }
-                    if (rule.isItalic) state.custom_ui.isItalic = true;
-                    if (rule.isUnderline) state.custom_ui.isUnderline = true;
-                    
+
+                    // Background fill applies to all hex types (SYSTEM_PRESENT, BLANK, EMPTY)
+                    if (rule.bgFillColor) state.custom_ui.bgFillColor = rule.bgFillColor;
+
                     ruleMatchCount++;
                 }
             });
@@ -469,6 +488,7 @@
         const applyRing = document.getElementById('enable-design-ring')?.checked || false;
         const applyIcon = document.getElementById('enable-design-icon')?.checked || false;
         const applyTextCase = document.getElementById('enable-design-text-case')?.checked || false;
+        const applyBgFill = document.getElementById('enable-design-bg-fill')?.checked || false;
         const applyItalics = document.getElementById('enable-design-italics')?.checked || false;
         const applyUnderline = document.getElementById('enable-design-underline')?.checked || false;
 
@@ -477,6 +497,7 @@
             ringColor: applyRing ? document.getElementById('design-ring-color').value : null,
             iconStyle: applyIcon ? document.getElementById('design-icon-style').value : null,
             textCase: applyTextCase ? document.getElementById('design-text-case').value : null,
+            bgFillColor: applyBgFill ? document.getElementById('design-bg-fill-color').value : null,
             isItalic: applyItalics,
             isUnderline: applyUnderline
         };
@@ -506,8 +527,9 @@
         // Capture rule state via modular Chassis logic
         const ruleState = captureNewRuleState();
 
-        if (ruleState.color === null && ruleState.ringColor === null && 
+        if (ruleState.color === null && ruleState.ringColor === null &&
             ruleState.iconStyle === null && ruleState.textCase === null &&
+            ruleState.bgFillColor === null &&
             !ruleState.isItalic && !ruleState.isUnderline) {
             if (typeof showToast === 'function') showToast("Please select at least one style to apply.", 2000);
             if (typeof writeLogLine === 'function') writeLogLine("Abort: No style toggles were enabled.");
@@ -526,6 +548,7 @@
             ringColor: ruleState.ringColor,
             iconStyle: ruleState.iconStyle,
             textCase: ruleState.textCase,
+            bgFillColor: ruleState.bgFillColor,
             isItalic: ruleState.isItalic,
             isUnderline: ruleState.isUnderline,
             description: description
@@ -625,11 +648,33 @@
         reader.readAsText(file);
     };
 
+    function saveDesignCheckboxes() {
+        const state = {};
+        DESIGN_CHECKBOX_IDS.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) state[id] = el.checked;
+        });
+        try { localStorage.setItem(DESIGN_CHECKBOX_STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+    }
+
+    function restoreDesignCheckboxes() {
+        try {
+            const raw = localStorage.getItem(DESIGN_CHECKBOX_STORAGE_KEY);
+            if (!raw) return; // First open — leave all unchecked (HTML defaults)
+            const state = JSON.parse(raw);
+            DESIGN_CHECKBOX_IDS.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && state[id] !== undefined) el.checked = state[id];
+            });
+        } catch(e) {}
+    }
+
     function setupFilterListeners() {
         const inputs = [
             'filter-name',
             'filter-starport', 'filter-size', 'filter-atm', 'filter-hydro',
             'filter-pop', 'filter-gov', 'filter-law', 'filter-tl', 'filter-trade-codes',
+            'filter-allegiance',
             'filter-gravity', 'filter-temperature', 'filter-t5-ix', 'filter-mgt-importance', 'filter-mgt-wtn', 'filter-mgt-gwp'
         ];
 
@@ -643,6 +688,21 @@
             const el = document.getElementById(id);
             if (el) el.addEventListener('change', onFilterChanged);
         });
+
+        // Persist design checkbox state on any change
+        DESIGN_CHECKBOX_IDS.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('change', saveDesignCheckboxes);
+        });
+
+        // Hex Background Fill visibility toggle
+        const hexBgToggle = document.getElementById('filter-hex-bg-visible');
+        if (hexBgToggle) {
+            hexBgToggle.addEventListener('change', () => {
+                window.hexBgFillVisible = hexBgToggle.checked;
+                if (typeof draw === 'function') requestAnimationFrame(draw);
+            });
+        }
 
         // Phase 5: Independent Rule I/O
         const importInput = document.getElementById('file-import-rules');

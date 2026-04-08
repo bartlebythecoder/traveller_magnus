@@ -1267,3 +1267,61 @@ body {
     border-radius: 4px;
     font-family: monospace;
 }
+
+/* -----------------------------------------------------------------------------
+   White Background (Print) Mode
+   ----------------------------------------------------------------------------- */
+body.print-mode {
+    background-color: #ffffff;
+}
+
+body.print-mode .side-panel {
+    background: rgba(255, 255, 255, 0.97);
+    color: #1a1a1a;
+}
+
+body.print-mode .side-panel.left {
+    border-right-color: #888;
+}
+
+body.print-mode .side-panel.right {
+    border-left-color: #888;
+}
+
+body.print-mode .settings-header {
+    background: #e8e8e8;
+    border-bottom-color: #888;
+}
+
+body.print-mode .settings-header h2,
+body.print-mode .settings-row label {
+    color: #1a1a1a !important;
+}
+
+body.print-mode .side-panel h4 {
+    color: #1a1a1a;
+}
+
+body.print-mode #settings-toggle,
+body.print-mode #help-toggle {
+    background: #e8e8e8;
+    color: #1a1a1a;
+    border-color: #888;
+}
+
+body.print-mode #settings-toggle:hover,
+body.print-mode #help-toggle:hover {
+    background: #cccccc;
+    color: #000000;
+}
+
+body.print-mode #btn-close-settings,
+body.print-mode .btn-close-palette {
+    color: #444444;
+}
+
+body.print-mode .menu-btn {
+    background: #cccccc;
+    color: #1a1a1a;
+    border-color: #888;
+}

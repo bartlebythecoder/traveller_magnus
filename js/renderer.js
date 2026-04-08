@@ -63,7 +63,7 @@ function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // 3. Fill the background color
-    ctx.fillStyle = '#0b0c10';
+    ctx.fillStyle = window.printMode ? '#ffffff' : '#0b0c10';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.save();
@@ -74,7 +74,7 @@ function draw() {
     ctx.translate(-cameraX, -cameraY);
 
     // 5. Grid Styling
-    ctx.strokeStyle = '#1f2833';
+    ctx.strokeStyle = window.printMode ? '#cccccc' : '#1f2833';
     ctx.lineWidth = 1 / zoom;
 
     const size = baseHexSize;
@@ -110,7 +110,17 @@ function draw() {
             const hexId = getHexId(q, r);
             if (!hexId) continue;
 
+            const stateObj = hexStates.get(hexId);
             const path = getHexPath(cx, cy, size);
+
+            // 0. Background Fill (Political Mapping)
+            if (window.hexBgFillVisible !== false && stateObj && stateObj.custom_ui && stateObj.custom_ui.bgFillColor) {
+                ctx.save();
+                ctx.globalAlpha = 0.3; // Standard transparency for territories
+                ctx.fillStyle = stateObj.custom_ui.bgFillColor;
+                ctx.fill(path);
+                ctx.restore();
+            }
 
             // 1. Selection Fill
             if (selectedHexes.has(hexId)) {
@@ -219,7 +229,7 @@ function draw() {
     }
 
     // Sean Protocol: Capture Global Default Style once per frame to minimize spam
-    const currentGlobalDefaultColor = (typeof window.captureGlobalDefaults === 'function') ? 
+    const currentGlobalDefaultColor = (typeof window.captureGlobalDefaults === 'function') ?
         window.captureGlobalDefaults() : '#ffffff';
 
     for (let q = Math.max(0, qMin); q <= Math.min(MAX_GLOBAL_Q, qMax); q++) {
@@ -281,7 +291,7 @@ function draw() {
                         ctx.restore();
                     }
 
-                    const pTextColor = isSelected ? '#ffb399' : '#ffffff';
+                    const pTextColor = isSelected ? '#ffb399' : (window.printMode ? '#000000' : '#ffffff');
                     const pFontSmall = 10;  // world-space px (coordinate, UWP)
                     const pFontName = 12;  // world-space px (system name)
                     const pFontPort = 18;  // world-space px (starport letter)
@@ -658,7 +668,7 @@ function draw() {
                         ctx.restore();
                     }
                     ctx.arc(cx, cy, dotRadius, 0, 2 * Math.PI);
-                    ctx.fillStyle = '#ffffff';
+                    ctx.fillStyle = window.printMode ? '#000000' : '#ffffff';
                     ctx.fill();
                     ctx.closePath();
 
@@ -666,7 +676,7 @@ function draw() {
                         ctx.textAlign = 'center';
                         const fontSize = 10 / zoom;
                         ctx.font = `${fontSize}px 'Inter', sans-serif`;
-                        ctx.fillStyle = isSelected ? '#ffb399' : '#ffffff';
+                        ctx.fillStyle = isSelected ? '#ffb399' : (window.printMode ? '#000000' : '#ffffff');
                         ctx.textBaseline = 'top';
 
                         let label = hexId;
@@ -697,7 +707,7 @@ function draw() {
                         }
                     }
                 }
-            } else if (stateType === 'BLANK') {
+            } else if (stateType === 'BLANK' && !isHidden) {
                 // Text in center
                 if (zoom > 0.4) {
                     ctx.textAlign = 'center';
@@ -730,7 +740,7 @@ function draw() {
             ctx.moveTo(-size, y);
             ctx.lineTo(totalWidth, y);
         }
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.strokeStyle = window.printMode ? 'rgba(0, 0, 0, 0.25)' : 'rgba(255, 255, 255, 0.15)';
         ctx.lineWidth = 1 / zoom;
         ctx.stroke();
 
@@ -746,7 +756,7 @@ function draw() {
             ctx.moveTo(-size, y);
             ctx.lineTo(totalWidth, y);
         }
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.strokeStyle = window.printMode ? 'rgba(0, 0, 0, 0.55)' : 'rgba(255, 255, 255, 0.4)';
         ctx.lineWidth = 3 / zoom;
         ctx.stroke();
     }

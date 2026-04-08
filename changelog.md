@@ -1,5 +1,12 @@
 # Changelog
 
+### [v0.7] - 2026-04-07
+1. **Political Mapping & Referee Utility:** Initiated Phase 7.0 development.
+2. **Allegiance & Notes:** Implemented manual entry fields for Allegiance codes and Referee Notes in the Main World UI.
+3. **Allegiance Selection:** Implemented a way to mass change Allegiance through selection and right click.
+3. **Hex Background:** Added to filter styles
+4. **White Background Mode:** Added in settings
+
 ### [v0.6.1] - 2026-04-07
 1. **Statistical Auditor Integration:** The StatisticalAuditor is now fully integrated into all bulk generation macros (CT, MgT2E, T5, and RTT) within macro_orchestrator.js.
 2. **Statistical Auditor Integration:** It now also triggers for single-system regeneration via the Context Menu. When you regenerate a single hex, the console will now output a specific "Subsector-scale" audit for that system, allowing you to see exactly how that system's properties align with expected Traveller distributions.

@@ -308,7 +308,7 @@ function exportRoutesToXML(sectorID) {
 }
 
 function generateT5TabData(sectorID) {
-    const header = "Hex\tName\tUWP\tBases\tRemarks\tZone\tPBG\tAllegiance\tStars\t{Ix}\t(Ex)\t[Cx]\tNobility\tW.";
+    const header = "Hex\tName\tUWP\tBases\tRemarks\tZone\tPBG\tAllegiance\tStars\t{Ix}\t(Ex)\t[Cx]\tNobility\tW.\tNotes";
     let lines = [header];
 
     hexStates.forEach((state, hexId) => {
@@ -374,13 +374,14 @@ function generateT5TabData(sectorID) {
                 (data.tradeCodes || []).join(' ') || "-",
                 (data.travelZone === "Amber" ? "A" : (data.travelZone === "Red" ? "R" : "-")),
                 pbg,
-                data.allegiance || "Im",
+                state.allegiance || data.allegiance || "Im",
                 stars,
                 ixVal,
                 exVal,
                 cxVal,
                 "-", // Nobility
-                w
+                w,
+                state.notes || ""
             ];
             lines.push(row.join('\t'));
         }
@@ -433,10 +434,12 @@ function importT5Tab(fileContent, fileName) {
     const idxZone = getIndex('Zone');
     const idxPBG = getIndex('PBG');
     const idxStars = getIndex('Stars');
+    const idxAlleg = getIndex('Allegiance');
     const idxIx = getIndex('{Ix}');
     const idxEx = getIndex('(Ex)');
     const idxCx = getIndex('[Cx]');
-    const idxW = getIndex('W');
+    const idxW = getIndex('W.');
+    const idxNotes = getIndex('Notes');
 
     if (idxHex === -1 || idxUWP === -1) {
         alert("Invalid file format. 'Hex' and 'UWP' columns (tab-separated) are required.");
@@ -587,6 +590,8 @@ function importT5Tab(fileContent, fileName) {
 
         const stateObj = {
             type: 'SYSTEM_PRESENT',
+            allegiance: idxAlleg !== -1 ? row[idxAlleg].trim() : "Im",
+            notes: idxNotes !== -1 ? row[idxNotes].trim() : "",
             t5Data,
             t5Socio,
             t5System

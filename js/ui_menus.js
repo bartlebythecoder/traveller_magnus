@@ -72,6 +72,53 @@ function setupContextMenu() {
     document.getElementById('ctx-deselect-all').addEventListener('click', deselectAllHexes);
     document.getElementById('ctx-help').addEventListener('click', openHelpModal);
 
+    // --- Assign Allegiance ---
+    function getEligibleForAllegiance() {
+        return [...selectedHexes]; // All selected hexes are eligible (BLANK, EMPTY, SYSTEM_PRESENT)
+    }
+
+    function confirmAllegiance() {
+        const val = document.getElementById('allegiance-input').value.trim() || '----';
+        const eligible = getEligibleForAllegiance();
+        saveHistoryState('Assign Allegiance');
+        eligible.forEach(hexId => {
+            let s = hexStates.get(hexId);
+            if (!s) {
+                s = { type: 'BLANK' };
+                hexStates.set(hexId, s);
+            }
+            s.allegiance = val;
+        });
+        document.getElementById('allegiance-modal').style.display = 'none';
+        showToast(`Allegiance "${val}" assigned to ${eligible.length} system(s).`, 2500);
+        if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+        if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
+    }
+
+    document.getElementById('ctx-assign-allegiance').addEventListener('click', () => {
+        document.getElementById('context-menu').classList.remove('visible');
+        const eligible = getEligibleForAllegiance();
+        if (eligible.length === 0) {
+            showToast('No systems in selection to assign allegiance to.', 2500);
+            return;
+        }
+        document.getElementById('allegiance-modal-count').textContent = eligible.length;
+        document.getElementById('allegiance-input').value = '';
+        document.getElementById('allegiance-modal').style.display = 'flex';
+        setTimeout(() => document.getElementById('allegiance-input').focus(), 50);
+    });
+
+    document.getElementById('btn-allegiance-confirm').addEventListener('click', confirmAllegiance);
+
+    document.getElementById('btn-allegiance-cancel').addEventListener('click', () => {
+        document.getElementById('allegiance-modal').style.display = 'none';
+    });
+
+    document.getElementById('allegiance-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') confirmAllegiance();
+        if (e.key === 'Escape') document.getElementById('allegiance-modal').style.display = 'none';
+    });
+
     // Generation handlers are defined in the engine files but triggered here
     setupGenerationHandlers();
 }
@@ -792,6 +839,25 @@ function setupSettingsPanel() {
         devView = e.target.checked;
         requestAnimationFrame(draw);
     });
+
+    const printModeToggle = document.getElementById('toggle-print-mode');
+    if (printModeToggle) {
+        let savedDotColor = '#ffffff';
+        printModeToggle.addEventListener('change', (e) => {
+            window.printMode = e.target.checked;
+            document.body.classList.toggle('print-mode', e.target.checked);
+            const dotColorInput = document.getElementById('default-dot-color');
+            if (dotColorInput) {
+                if (e.target.checked) {
+                    savedDotColor = dotColorInput.value;
+                    dotColorInput.value = '#444444';
+                } else {
+                    dotColorInput.value = savedDotColor;
+                }
+            }
+            requestAnimationFrame(draw);
+        });
+    }
 
     // --- Generation Seed ---
     const seedInput = document.getElementById('input-seed');

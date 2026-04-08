@@ -268,6 +268,22 @@
                         continue; // Success! Skip the rest of the numeric evaluation for this specific field.
                     }
 
+                    // --- STRING EXCEPTION: Allegiance ---
+                    // Allegiance codes (e.g. "Im", "Na", "Cs") are not UWP hex digits.
+                    // Match case-insensitively; comma-separated tokens use OR logic;
+                    // partial prefix match ("I" matches "Im", "Ir", etc.).
+                    if (field === 'allegiance' || field === 'alleg' || field === 'al') {
+                        const worldAlleg = (world.allegiance || world.Allegiance || world.al || '').trim();
+                        const filterTokens = criteria.split(',').map(s => s.trim().toUpperCase()).filter(s => s !== '' && s !== '----');
+                        if (filterTokens.length > 0) {
+                            const wUp = worldAlleg.toUpperCase();
+                            const match = (wUp !== '' && wUp !== '----') &&
+                                          filterTokens.some(token => wUp.startsWith(token));
+                            if (!match) return false;
+                        }
+                        continue;
+                    }
+
                     // D. EXHAUSTIVE DATA MAPPING (Property Fallback Logic)
                     if (field === 't5ix' || field === 'ix' || field === 'importance') {
                         worldValue = world.Ix !== undefined ? world.Ix : (world.Importance !== undefined ? world.Importance : (world.ix !== undefined ? world.ix : world.im));

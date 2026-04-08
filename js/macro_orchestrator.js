@@ -231,6 +231,15 @@ async function runMgT2EMacro(skipPop = false) {
                             starport:       mainworld.starport || 'X',
                             techLevel:      mainworld.tl || 0
                         });
+                        // Record temperatures for every body (mainworld + non-mainworld)
+                        const _walkTemps = (bodies) => {
+                            bodies.forEach(w => {
+                                if (w.meanTempK !== undefined)
+                                    _auditor_mgt2e.recordWorldTemp(w.meanTempK, hexId, w.orbitId, w.name || w.type || 'World', w.type);
+                                if (w.moons) _walkTemps(w.moons);
+                            });
+                        };
+                        if (newSys && newSys.worlds) _walkTemps(newSys.worlds);
                     }
 
                     // 4. Clear old variant data to prevent UI ghosting
@@ -387,6 +396,15 @@ async function runMgT2EBottomUpMacro(skipPop = false) {
                                     starport:       mainworld.starport || 'X',
                                     techLevel:      mainworld.tl || 0
                                 });
+                                // Record temperatures for every body (mainworld + non-mainworld)
+                                const _walkTemps = (bodies) => {
+                                    bodies.forEach(w => {
+                                        if (w.meanTempK !== undefined)
+                                            _auditor_mgt2e_bu.recordWorldTemp(w.meanTempK, hexId, w.orbitId, w.name || w.type || 'World', w.type);
+                                        if (w.moons) _walkTemps(w.moons);
+                                    });
+                                };
+                                if (sys && sys.worlds) _walkTemps(sys.worlds);
                             }
 
                             // Clean up old data variants to prevent UI ghosting

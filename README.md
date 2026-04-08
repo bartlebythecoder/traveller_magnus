@@ -1,4 +1,4 @@
-# As Above, So Below (v0.6.1)
+# As Above, So Below (v0.7)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -36,6 +36,13 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 6. **Filter Control:** Use the **F Key** to **Open Filter Window** for advanced filtering and custom styling rules.
 ---
 ## 📜 Changelog
+
+### [v0.7] - 2026-04-07
+1. **Political Mapping & Referee Utility:** Initiated Phase 7.0 development.
+2. **Allegiance & Notes:** Implemented manual entry fields for Allegiance codes and Referee Notes in the Main World UI.
+3. **Allegiance Selection:** Implemented a way to mass change Allegiance through selection and right click.
+3. **Hex Background:** Added to filter styles
+4. **White Background Mode:** Added in settings
 
 ### [v0.6.1] - 2026-04-07
 1. **Statistical Auditor Integration:** The StatisticalAuditor is now fully integrated into all bulk generation macros (CT, MgT2E, T5, and RTT) within macro_orchestrator.js.

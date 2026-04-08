@@ -178,6 +178,9 @@ function openHexEditor(hexId, e = null) {
 
     document.getElementById('edit-trade-codes').value = data.tradeCodes ? data.tradeCodes.join(' ') : '';
     document.getElementById('edit-travel-zone').value = data.travelZone || 'Green';
+    const allegVal = data.allegiance || stateObj.allegiance || '';
+    document.getElementById('edit-allegiance').value = (allegVal === '----') ? '' : allegVal;
+    document.getElementById('edit-notes').value = data.notes || stateObj.notes || '';
 
     // Dynamic UI Toggles based on active generation engine
     const isRTT = !!stateObj.rttData;
@@ -489,6 +492,9 @@ function populateEditorAccordions(stateObj) {
                     if (w.type !== 'Planetoid Belt' && w.type !== 'Gas Giant' && uwp !== '-') {
                         html += `<div style="margin-bottom: 6px; font-family: monospace; font-size: 1.1em;">UWP: <strong style="color: ${labelColor}">${uwp}</strong></div>`;
                     }
+                    if (w.type === 'Gas Giant' && w.uwpGG) {
+                        html += `<div style="margin-bottom: 6px; font-family: monospace; font-size: 1.1em;">SAH: <strong style="color: ${labelColor}">${w.uwpGG}</strong></div>`;
+                    }
                     if (w.classifications && w.classifications.length > 0) {
                         html += `<div style="margin-bottom: 6px; font-size: 0.85em; color: #a0a8b0;">Classification: <strong style="color: #66fcf1;">${w.classifications.join(', ')}</strong></div>`;
                     }
@@ -525,7 +531,7 @@ function populateEditorAccordions(stateObj) {
                     if (w.type !== 'Planetoid Belt' && w.size != 0 && w.size !== 'R') {
                         if (w.gravity != null) html += `<span>Gravity: <strong>${(w.gravity || 0).toFixed(2)} G</strong></span>`;
                         if (w.mass != null) html += `<span>Mass: <strong>${(w.mass || 0).toFixed(4)} M⊕</strong></span>`;
-                        if (w.escapeVel != null) html += `<span>Escape Vel: <strong>${(w.escapeVel || 0).toFixed(2)} km/s</strong></span>`;
+                        if (w.type === 'Gas Giant' && w.diamTerra != null) html += `<span>Diameter: <strong>${w.diamTerra} T⊕</strong></span>`;
                         if (w.meanTempK != null) {
                             if (w.highTempK != null && w.lowTempK != null && !isNaN(w.highTempK) && !isNaN(w.lowTempK)) {
                                 html += `<span class="system-stats-full">Temp: <strong>${((w.meanTempK || 273) - 273).toFixed(0)}°C</strong> (L:${(w.lowTempK - 273).toFixed(0)}° / H:${(w.highTempK - 273).toFixed(0)}°)</span>`;
@@ -545,14 +551,6 @@ function populateEditorAccordions(stateObj) {
                             dayStr = `${w.solarDayHours.toFixed(1)}h`;
                         }
                         html += `<span>Solar Day: <strong>${dayStr}</strong></span>`;
-                    }
-                    if (w.siderealHours != null) {
-                        let sidStr = w.siderealHours >= 24 ? `${(w.siderealHours / 24).toFixed(1)}d` : `${w.siderealHours.toFixed(2)}h`;
-                        html += `<span>Sidereal Day: <strong>${sidStr}</strong></span>`;
-                    }
-
-                    if (w.totalTidalAmplitude !== undefined && w.totalTidalAmplitude > 0) {
-                        html += `<span>Tidal Amp: <strong>${(w.totalTidalAmplitude || 0).toFixed(2)}</strong></span>`;
                     }
 
                     if (w.type === 'Terrestrial Planet' || isMainworldEntry) {
@@ -587,6 +585,11 @@ function populateEditorAccordions(stateObj) {
                     }
 
                     html += `</div>`;
+
+                    if (isMainworldEntry) {
+                        const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
+                        html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${alleg}</strong></div>`;
+                    }
 
                     html += buildJourneyTimesUI(w, sys.stars[starIdx], stateObj.isStellarMaskingActive);
 
@@ -652,7 +655,6 @@ function populateEditorAccordions(stateObj) {
                             if (m.type !== 'Planetoid Belt' && m.size != 0 && m.size !== 'R') {
                                 if (m.gravity != null) html += `<span>Gravity: <strong>${m.gravity !== undefined ? m.gravity.toFixed(2) : '?'} G</strong></span>`;
                                 if (m.mass != null) html += `<span>Mass: <strong>${m.mass !== undefined ? m.mass.toFixed(4) : '?'} M⊕</strong></span>`;
-                                if (m.escapeVel != null) html += `<span>Escape Vel: <strong>${m.escapeVel.toFixed(2)} km/s</strong></span>`;
 
                                 if (m.meanTempK != null) {
                                     if (m.highTempK != null && m.lowTempK != null && !isNaN(m.highTempK) && !isNaN(m.lowTempK)) {
@@ -674,14 +676,6 @@ function populateEditorAccordions(stateObj) {
                                 }
                                 html += `<span>Solar Day: <strong>${mDayStr}</strong></span>`;
                             }
-                            if (m.siderealHours != null) {
-                                let mSidStr = m.siderealHours >= 24 ? `${(m.siderealHours / 24).toFixed(1)}d` : `${m.siderealHours.toFixed(2)}h`;
-                                html += `<span>Sidereal Day: <strong>${mSidStr}</strong></span>`;
-                            }
-
-                            if (m.totalTidalAmplitude !== undefined && m.totalTidalAmplitude > 0) {
-                                html += `<span>Tidal Amp: <strong>${m.totalTidalAmplitude.toFixed(2)}</strong></span>`;
-                            }
 
                             if (m.axialTilt != null) {
                                 html += `<span>Axial Tilt: <strong>${m.axialTilt.toFixed(1)}°</strong></span>`;
@@ -700,6 +694,11 @@ function populateEditorAccordions(stateObj) {
                             }
 
                             html += `</div>`;
+
+                            if (isMoonMainworld) {
+                                const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
+                                html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${alleg}</strong></div>`;
+                            }
 
                             html += buildJourneyTimesUI(m, sys.stars[starIdx], stateObj.isStellarMaskingActive, (w.au || w.distAU));
 
@@ -865,6 +864,11 @@ function populateEditorAccordions(stateObj) {
 
                         html += `</div>`;
 
+                        if (w.type === 'Mainworld') {
+                            const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
+                            html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${alleg}</strong></div>`;
+                        }
+
                         html += buildJourneyTimesUI(w, sys.stars[starIdx], stateObj.isStellarMaskingActive);
 
                         if (w.satellites && w.satellites.length > 0) {
@@ -896,6 +900,11 @@ function populateEditorAccordions(stateObj) {
                                 if (sat.axialTilt !== undefined) html += `<span>Tilt: <strong>${sat.axialTilt}°</strong></span>`;
 
                                 html += `</div>`;
+
+                                if (sat.type === 'Mainworld') {
+                                    const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
+                                    html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${alleg}</strong></div>`;
+                                }
 
                                 html += buildJourneyTimesUI(sat, sys.stars[starIdx], stateObj.isStellarMaskingActive, (w.au || w.distAU));
 
@@ -1014,6 +1023,10 @@ function populateEditorAccordions(stateObj) {
                                 if (tCodes.length > 0) {
                                     html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Codes: <strong style="color: #66fcf1">${tCodes.join(' ')}</strong></div>`;
                                 }
+                                if (w.type === 'Mainworld') {
+                                    const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
+                                    html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${alleg}</strong></div>`;
+                                }
                             }
 
                             if (w.type === 'Mainworld' && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
@@ -1060,6 +1073,10 @@ function populateEditorAccordions(stateObj) {
                                         : (sat.tradeCodes || []);
                                     if (sCodes.length > 0) {
                                         html += `<div style="margin-bottom: 6px; font-size: 0.85em; color: #a0a8b0;">Codes: <strong style="color: #66fcf1">${sCodes.join(' ')}</strong></div>`;
+                                    }
+                                    if (isMW) {
+                                        const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
+                                        html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${alleg}</strong></div>`;
                                     }
 
                                     if (isMW && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
@@ -1130,6 +1147,10 @@ function populateEditorAccordions(stateObj) {
                 if (body.starport && body.habitationType !== 'Uninhabited') bHtml += `<span>Starport: <strong>${body.starport}</strong></span>`;
                 if (body.tradeCodes && body.tradeCodes.length > 0) bHtml += `<span>Trade: <strong>${body.tradeCodes.join(' ')}</strong></span>`;
                 if (body.bases && body.bases.length > 0) bHtml += `<span>Bases: <strong>${body.bases.join('')}</strong></span>`;
+                if (isMain) {
+                    const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
+                    bHtml += `<span>Allegiance: <strong>${alleg}</strong></span>`;
+                }
 
                 if (body.canBeTerraformed) bHtml += `<span class="system-stats-full" style="color: #66fcf1; border-color: #45a29e;">Terraforming Potential: <strong>${body.terraformPoints} pts</strong></span>`;
 
@@ -1323,11 +1344,14 @@ function saveHexEditorChanges() {
     if (enclave) bases.push('V');
     if (ancients) bases.push('Q');
 
-    const tcString = document.getElementById('edit-trade-codes').value;
-    const tradeCodes = tcString.split(/\s+/).filter(tc => tc.length > 0);
+    const tradeCodes = document.getElementById('edit-trade-codes').value
+        .split(/[\s,]+/).map(s => s.trim()).filter(Boolean);
     const uwp = `${starport}${toUWPChar(size)}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
 
-    const sharedData = { uwp, travelZone: document.getElementById('edit-travel-zone').value, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, bases, navalBase, scoutBase, militaryBase, corsairBase, researchBase, tas, wayStation, govEstate, embassy, moot, merchantBase, shipyard, megaCorp, scoutHostel, psionics, sacredSite, enclave, ancients, gasGiant };
+    const allegiance = document.getElementById('edit-allegiance').value.trim() || '----';
+    const notes = document.getElementById('edit-notes').value.trim();
+
+    const sharedData = { uwp, travelZone: document.getElementById('edit-travel-zone').value, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, bases, navalBase, scoutBase, militaryBase, corsairBase, researchBase, tas, wayStation, govEstate, embassy, moot, merchantBase, shipyard, megaCorp, scoutHostel, psionics, sacredSite, enclave, ancients, gasGiant, allegiance, notes };
 
     // Helper to sync PBG quick-stats if visible
     const t5QuickStatsDiv = document.getElementById('editor-t5-quick-stats');
@@ -1404,6 +1428,8 @@ function saveHexEditorChanges() {
 
     // --- PERSISTENCE & SYNC (SEAN PROTOCOL) ---
     stateObj.name = name;
+    stateObj.allegiance = allegiance;
+    stateObj.notes = notes;
 
     // 1. Update MgT2E Socio Profile (Expansion or Native)
     // CRITICAL: We update this independently so expansions on T5 worlds persist.

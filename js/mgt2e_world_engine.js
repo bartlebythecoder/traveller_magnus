@@ -132,35 +132,52 @@
     function sizeGasGiantBody(w, type) {
         w.ggType = type;
         if (type === 'GS') {
-            // WBH RAW: D3+D3
             let d1 = Math.ceil(tRoll1D('Small GG Diam (D3)') / 2);
             let d2 = Math.ceil(tRoll1D('Small GG Diam (D3)') / 2);
-            w.diameterStr = `${d1 + d2} (GS)`;
-            w.mass = 5 * (tRoll1D('Small GG Mass (1D+1)') + 1);
-            w.diamKm = parseInt(w.diameterStr.split(' ')[0]) * 12800;
+            let diam = d1 + d2;
+            w.diamTerra = diam;
+            w.diameterStr = `${diam} (GS)`;
+            w.diamKm = diam * 12800;
+            // Mass: scaledK = round(5 × diam / 4); mass = scaledK × (1D6+1), clamped 10–35
+            const scaledK = Math.round(5 * diam / 4);
+            tResult('GS Scaled K (round(5×diam/4))', scaledK, 'MgT2E: diameter-linked multiplier');
+            w.mass = Math.max(10, Math.min(35, scaledK * (tRoll1D('Small GG Mass (1D+1)') + 1)));
         } else if (type === 'GM') {
-            // WBH RAW: 1D+6
-            w.diameterStr = `${tRoll1D('Medium GG Diameter (1D+6)') + 6} (GM)`;
-            w.mass = 20 * (tRoll3D('Medium GG Mass (3D-1)') - 1);
-            w.diamKm = parseInt(w.diameterStr.split(' ')[0]) * 12800;
+            let diam = tRoll1D('Medium GG Diameter (1D+6)') + 6;
+            w.diamTerra = diam;
+            w.diameterStr = `${diam} (GM)`;
+            w.diamKm = diam * 12800;
+            // Mass: scaledK = round(20 × diam / 10); mass = scaledK × (3D6−1), clamped 40–340
+            const scaledK = Math.round(20 * diam / 10);
+            tResult('GM Scaled K (round(20×diam/10))', scaledK, 'MgT2E: diameter-linked multiplier');
+            w.mass = Math.max(40, Math.min(340, scaledK * (tRoll3D('Medium GG Mass (3D-1)') - 1)));
         } else {
             w.ggType = 'GL';
-            // WBH RAW: 2D+6
-            w.diameterStr = `${tRoll2D('Large GG Diameter (2D+6)') + 6} (GL)`;
+            let diam = tRoll2D('Large GG Diameter (2D+6)') + 6;
+            w.diamTerra = diam;
+            w.diameterStr = `${diam} (GL)`;
+            w.diamKm = diam * 12800;
+            // Mass: scaledK = round(50 × diam / 13); mass = 1D3 × scaledK × (3D6+4)
+            const scaledK = Math.round(50 * diam / 13);
+            tResult('GL Scaled K (round(50×diam/13))', scaledK, 'MgT2E: diameter-linked multiplier');
             let initMass = tRoll3D('Large GG Mass Base (3D)');
             let d3Multiplier = Math.ceil(tRoll1D('Large GG Multiplier (D3)') / 2);
-            w.mass = d3Multiplier * 50 * (initMass + 4);
-
-            // WBH RAW: Mass Cap Rule
-            if (w.mass >= 3000 || initMass >= 15) {
+            w.mass = d3Multiplier * scaledK * (initMass + 4);
+            tResult('GL Initial Mass', w.mass, 'MgT2E: 1D3 × scaledK × (3D6+4)');
+            // Cap rule: initial mass ≥ 3000 → 4000 − (2D6−2) × 200
+            if (w.mass >= 3000) {
                 w.mass = 4000 - ((tRoll2D('Mass Cap Adjust') - 2) * 200);
-                tResult('Mass Cap Applied', w.mass, 'MgT2E 4.2: Gas Giant Morphology');
+                tResult('GL Mass Cap Applied (≥3000)', w.mass, 'MgT2E: 4000-(2D6-2)×200');
             }
-            w.diamKm = parseInt(w.diameterStr.split(' ')[0]) * 12800;
+            w.mass = Math.max(350, Math.min(4000, w.mass));
         }
         w.size = 'GG';
+        // SAH UWP code: G + category (S/M/L) + eHex diameter (2–J)
+        w.uwpGG = 'G' + w.ggType[1] + toUWPChar(w.diamTerra);
         w.composition = `Gas Giant (${w.ggType})`;
         tResult('Type', w.ggType, 'MgT2E 2.1: Composition & Gravity');
+        tResult('SAH UWP (uwpGG)', w.uwpGG, 'MgT2E: G + category + eHex diameter');
+        tResult('Diameter (Terran)', w.diamTerra, 'MgT2E 2.1: Composition & Gravity');
         tResult('Diameter', w.diameterStr, 'MgT2E 2.1: Composition & Gravity');
         tResult('Mass (Earths)', w.mass, 'MgT2E 2.1: Composition & Gravity');
 
@@ -221,7 +238,10 @@
 
                 tSection(`${label || body.type} Orbit ${body.orbitId !== undefined ? body.orbitId.toFixed(2) : 'Moon'} Sizing`);
                 if (body.type === 'Gas Giant') {
-                    let catRoll = tRoll1D('Gas Giant Category');
+                    const ggCatDM = (primary.sClass === 'VI' || (primary.sType === 'M' && primary.sClass === 'V') || primary.sType === 'BD') ? -1 : 0;
+                    tResult('Gas Giant Category DM', ggCatDM, 'MgT2E: Class VI / M-V / BD → -1');
+                    let catRoll = tRoll1D('Gas Giant Category') + ggCatDM;
+                    tResult('Gas Giant Category (after DM)', catRoll, 'MgT2E: ≤2=GS, 3-4=GM, ≥5=GL');
                     let gType = (catRoll <= 2) ? 'GS' : (catRoll <= 4 ? 'GM' : 'GL');
                     sizeGasGiantBody(body, gType);
                 } else if (body.type === 'Terrestrial Planet' || body.type === 'Mainworld' || body.type === 'Satellite') {
@@ -557,13 +577,20 @@
 
                 let numM = w.moons.length;
                 if (numM > 0) {
-                    let mor = hillLimit - 2;
+                    let mor = Math.max(0, hillLimit - 2);
                     if (mor > 200) mor = 200 + numM;
 
                     let placementDMW = mor < 60 ? 1 : 0;
+                    
+                    // Temporary array to hold surviving moons
+                    let survivingMoons = [];
+
                     for (let mn = 0; mn < numM; mn++) {
                         // WBH Exception protection: If the moon already has a pre-defined orbit (like a demoted Mainworld), skip positioning
-                        if (w.moons[mn].pd !== undefined) continue;
+                        if (w.moons[mn].pd !== undefined) {
+                            survivingMoons.push(w.moons[mn]);
+                            continue;
+                        }
 
                         let locRoll = roll1D() + placementDMW;
                         let pdTarget = 0;
@@ -575,6 +602,13 @@
                         } else {
                             pdTarget = ((roll2D() - 2) * mor / 20) + (mor / 2) + 4; locStr = 'Outer';
                         }
+                        
+                        // WBH Errata: If a moon is created above the HSML, then it is discarded.
+                        if (pdTarget > hillLimit) {
+                            tResult('Moon Discarded', `Target orbit ${pdTarget.toFixed(2)} pd exceeds Hill Sphere Limit (${hillLimit})`);
+                            continue;
+                        }
+
                         w.moons[mn].pd = pdTarget;
                         w.moons[mn].pos = locStr;
 
@@ -585,16 +619,45 @@
                         w.moons[mn].eccentricity = w.moons[mn].eccentricity !== undefined ? w.moons[mn].eccentricity : (roll2D() - 2) * 0.05;
                         w.moons[mn].retrograde = (roll2D() + eMod >= 10);
 
-                        let moonKm = pdTarget * w.diamKm;
+                        // Fallback handling if diamKm hasn't been instantiated yet (prevents NaN bugs)
+                        let safeDiam = w.diamKm || ((w.size === 'S' || w.size === 'R' ? 0 : w.size) * 1600) || 1600;
+                        let moonKm = pdTarget * safeDiam;
                         w.moons[mn].periodHrs = Math.sqrt(Math.pow(moonKm, 3) / w.mass) / 361730;
+                        
+                        survivingMoons.push(w.moons[mn]);
                     }
+                    
+                    w.moons = survivingMoons;
 
                     w.moons.sort((a, b) => a.pd - b.pd);
                     for (let m = 1; m < w.moons.length; m++) {
-                        if (w.moons[m].pd <= w.moons[m - 1].pd) {
-                            w.moons[m].pd = w.moons[m - 1].pd + 1.5;
+                        // WBH Roche Limit enforcement: The mathematical Roche Limit for identical density 
+                        // bodies is ~1.22 planetary diameters. Earlier we allowed 0.1 which allowed moons 
+                        // to sit almost touching, creating massive tidal friction loops.
+                        if ((w.moons[m].pd - w.moons[m - 1].pd) < 1.25) {
+                            w.moons[m].pd = w.moons[m - 1].pd + 1.25;
+                            // Recalculate period if pushed
+                            let safeDiam = w.diamKm || ((w.size === 'S' || w.size === 'R' ? 0 : w.size) * 1600) || 1600;
+                            let moonKm = w.moons[m].pd * safeDiam;
+                            w.moons[m].periodHrs = Math.sqrt(Math.pow(moonKm, 3) / w.mass) / 361730;
                         }
                     }
+                    
+                    // Secondary Errata Pass: If pushing them apart violated the HSML, tear them apart
+                    // WBH Protection: Mainworld/protected moons (isMoon) are never shredded.
+                    let finalMoons = [];
+                    for (let m = 0; m < w.moons.length; m++) {
+                        const isProtectedMoon = (w.moons[m].type === 'Mainworld' || w.moons[m].isMoon);
+                        if (!isProtectedMoon && w.moons[m].pd > hillLimit) {
+                            tResult('Roche Shred', `Moon pushed to ${w.moons[m].pd.toFixed(2)} pd which exceeded HSML (${hillLimit}). Moon destroyed.`);
+                        } else {
+                            if (isProtectedMoon && w.moons[m].pd > hillLimit) {
+                                tResult('WBH Protection', `Mainworld/Protected Moon at pd ${w.moons[m].pd.toFixed(2)} exceeds HSML (${hillLimit}) but is shielded from destruction.`);
+                            }
+                            finalMoons.push(w.moons[m]);
+                        }
+                    }
+                    w.moons = finalMoons;
                 }
 
                 for (let r = 0; r < w.rings.length; r++) {
@@ -1407,33 +1470,34 @@
                 w.axialTilt = generateMgT2EAxialTilt();
                 tResult('Final Axial Tilt', w.axialTilt + '°');
 
-                // 3. Solar Day
-                let pYears = w.periodYears;
-                if (isMoon) {
-                    if (!w.periodYears) {
-                        w.periodYears = (w.periodHrs || 24) / 8760;
-                    }
-                    pYears = w.periodYears;
-                }
-                w.yearHours = pYears * 8760;
+                // 3. Solar Day & Periods
+                // RAW: We must track two distinct periods:
+                // - Orbital Period (Month for moons, Year for planets) for Tidal Lock 
+                // - Star Year (Always period around star) for Solar Day
+                let orbitalPeriodHours = isMoon ? (w.periodHrs || 24) : (w.periodYears * 8760);
+                let starYearHours = isMoon ? (parent.periodYears * 8760 || 8760) : (w.periodYears * 8760);
+                
+                // Store yearHours for thermal logic but ensure it's the period around the star
+                w.yearHours = starYearHours;
 
                 let effectiveSidereal = w.siderealHours;
                 if (w.axialTilt > 90) {
                     effectiveSidereal = -w.siderealHours;
                 }
 
-                if (Math.abs(w.siderealHours - w.yearHours) < 0.001) {
+                if (Math.abs(w.siderealHours - starYearHours) < 0.001 && !isMoon) {
                     w.solarDaysInYear = 0;
                     w.solarDayHours = Infinity;
                     w.isTwilightZone = true;
-                    writeLogLine(`  Twilight Zone World (Tidally Locked): Sidereal equals Year exactly.`);
+                    writeLogLine(`  Twilight Zone World (Tidally Locked to Sun): Sidereal equals Year exactly.`);
                 } else {
-                    w.solarDaysInYear = (w.yearHours / effectiveSidereal) - 1;
+                    w.solarDaysInYear = (starYearHours / effectiveSidereal) - 1;
                     if (Math.abs(w.solarDaysInYear) > 0.0001) {
-                        w.solarDayHours = Math.abs(w.yearHours / w.solarDaysInYear);
+                        w.solarDayHours = Math.abs(starYearHours / w.solarDaysInYear);
                     } else {
                         w.solarDayHours = Infinity;
                     }
+                    w.isTwilightZone = false;
                 }
                 tResult('Solar Day (Hours)', (w.solarDayHours === Infinity || w.solarDayHours > 999999) ? 'Infinity' : w.solarDayHours.toFixed(2));
 
@@ -1446,7 +1510,8 @@
                 tResult('Total Lock DM', lockDM);
                 tResult('Dominant Force', dmResult.Selected_Case);
 
-                executeTidalLockRoll(w, sys, lockDM, dmResult.Selected_Case);
+                // Pass the correct Driver Period (orbital period) to the lock logic
+                executeTidalLockRoll(w, sys, lockDM, dmResult.Selected_Case, orbitalPeriodHours);
             }
 
             // 5. Mean Temperature
@@ -1645,6 +1710,8 @@
                 highestTotalDM = caseBDM;
                 selectedCase = 'Case B';
             }
+            // RAW: Moons ONLY evaluate Case B. Exit now.
+            return { Global_DM: globalDM, Total_DM: highestTotalDM, Selected_Case: selectedCase };
         }
 
         if (!isMoon) {
@@ -1736,10 +1803,13 @@
     /**
      * Helper: Execute tidal lock roll
      */
-    function executeTidalLockRoll(body, sys, totalDM, selectedCase) {
+    function executeTidalLockRoll(body, sys, totalDM, selectedCase, driverPeriodHours) {
         let resultValue = 0;
         let isMoon = selectedCase === 'Case B';
         let isPlanetToStar = selectedCase === 'Case A';
+        
+        // Safety: fallback to yearHours if driverPeriod not passed
+        const lockPeriod = driverPeriodHours || body.yearHours || 8760;
 
         if (totalDM <= -10) {
             tResult('Tidal Lock Gate', 'No Effect (DM <= -10)');
@@ -1776,9 +1846,9 @@
                         let d = resultsData.retrogradeDays[rerollResult];
                         tempHrs = 3.5 * d * 24;
                     } else if (rerollResult === 11) {
-                        tempHrs = body.yearHours * 0.66;
+                        tempHrs = lockPeriod * 0.66;
                     } else if (rerollResult >= 12) {
-                        tempHrs = body.yearHours;
+                        tempHrs = lockPeriod;
                     }
 
                     if (isMoon && tempHrs > body.yearHours) {
@@ -1816,14 +1886,14 @@
                 }
                 tResult('Status', `Retrograde: ${appliedHrs} hours`);
             } else if (finalResult === 11) {
-                appliedHrs = body.yearHours * 0.66;
+                appliedHrs = lockPeriod * 0.66;
                 tResult('Status', '3:2 Resonance');
                 if (body.axialTilt > 3.0) {
                     body.axialTilt = (tRoll2D('Resonance Tilt Jitter') - 2) / 10;
                     tResult('Resonance Tilt Override', body.axialTilt.toFixed(1) + '°');
                 }
             } else if (finalResult >= 12) {
-                appliedHrs = body.yearHours;
+                appliedHrs = lockPeriod;
                 tResult('Status', '1:1 Lock');
                 body.tidallyLocked = true;
                 if (body.axialTilt > 3.0) {
@@ -1844,10 +1914,13 @@
         }
 
         if (body.tidallyLocked && finalResult >= 12) {
-            if (isPlanetToStar) {
+            if (isPlanetToStar && !body.isMoon) {
                 body.isTwilightZone = true;
                 body.solarDayHours = Infinity;
                 writeLogLine(`  Twilight Zone World (1:1 Tidal Lock to Star)`);
+            } else if (isMoon) {
+                writeLogLine(`  Satellite Lock (1:1 Tidal Lock to Parent Planet)`);
+                body.isTwilightZone = false; // RAW: Moons cannot be Twilight Zone worlds
             }
         }
 
@@ -1859,7 +1932,7 @@
         if (Math.abs(body.siderealHours - body.yearHours) < 0.001) {
             body.solarDaysInYear = 0;
             body.solarDayHours = Infinity;
-            if (body.tidallyLocked && isPlanetToStar) {
+            if (body.tidallyLocked && isPlanetToStar && !body.isMoon) {
                 body.isTwilightZone = true;
             }
         } else {
@@ -1971,8 +2044,13 @@
                     let StarOnMoonEffect = MgT2EMath.calculateTidalEffect(star.mass, sVal, body.au * 149.6);
                     total += StarOnMoonEffect;
 
-                    if (!body.tidallyLocked || body.Selected_Case !== 'Case B') {
-                        let PlanetEffect = MgT2EMath.calculateTidalEffect(parent.mass, sVal, dist);
+                    if (!body.tidallyLocked) {
+                        // RAW WBH: Parent causes tides on moon ONLY if NOT tidally locked.
+                        // We use a safety floor of 10,000km parent diameter and 0.001 Mkm distance to prevent 
+                        // floating point "Inverse-Cube" bombs.
+                        let safetyParentDiam = Math.max(10000, parent.diamKm || 0);
+                        let safetyDist = Math.max(0.001, (body.pd * safetyParentDiam / 1000000));
+                        let PlanetEffect = MgT2EMath.calculateTidalEffect(parent.mass, sVal, safetyDist);
                         total += PlanetEffect;
                     }
 
@@ -2015,8 +2093,13 @@
             tSection('Inherent Heat & Seismology');
             let inherentK = 0;
 
+            // RAW: WBH requires a minimum age floor of 0.01 Gyr to prevent divide-by-zero.
+            // Any system younger than 0.01 Gyr is classified as a forming protostar.
+            let sysAgeSafe = Math.max(0.01, sys.age || 0.01);
+
             if (w.type === 'Gas Giant') {
-                inherentK = 80 * Math.sqrt(w.massEarths / sys.age);
+                // RAW: WBH Gas Giant Residual Heat = 80 × √(mass_earths) ÷ ⁴√(age_gyr)
+                inherentK = (80 * Math.sqrt(w.massEarths)) / Math.pow(sysAgeSafe, 0.25);
                 tResult('GG Inherent Heat', inherentK.toFixed(1) + ' K');
             } else if (w.type !== 'Planetoid Belt' && w.size != 0 && w.size !== 'R') {
                 let dmResidual = 0;
@@ -2026,10 +2109,14 @@
                 if (density > 1.0) dmResidual += 2;
                 if (density < 0.5) dmResidual -= 1;
 
-                let aBasis = sizeValue - sys.age + dmResidual;
+                let aBasis = sizeValue - sysAgeSafe + dmResidual;
                 let compA = aBasis < 1 ? 0 : Math.pow(aBasis, 2);
 
-                let compB = Math.floor(w.totalTidalAmplitude / 10);
+                let compB_raw = Math.floor(w.totalTidalAmplitude / 10);
+                // Safety Cap: Tidal Stress (Comp B) for satellites/planets that are massive.
+                // In binary terrestrials, amplitudes can reach millions.
+                // We cap Comp B at 1,000 for physical sanity in the display.
+                let compB = Math.min(1000, compB_raw);
 
                 // Component C: Tidal Heat (Scenario 3)
                 // For moons, the tidal driver is the parent planet (e.g. the Gas Giant), not the star.
@@ -2037,9 +2124,10 @@
                 let tidalDriverMass = isMoon ? (parent.mass || 220) : primary.massEarths;
                 let denom = (3000 * Math.pow(Math.max(0.001, w.distMkm), 5) * Math.max(0.001, w.periodDays) * (w.massEarths || 0.0001));
                 let compC_val = (Math.pow(tidalDriverMass, 2) * Math.pow(sizeValue, 5) * Math.pow(w.eccentricity || 0, 2)) / denom;
-                // Safety cap: seismicStress feeds directly into temperature as inherentK.
-                // Values > 200 are physically unreasonable (Io-like max is ~100 K of internal heat).
-                let compC = (compC_val < 1 || isNaN(compC_val)) ? 0 : Math.min(compC_val, 200);
+                // House rule cap: RAW defines no maximum, but extreme configurations (superjovian GGs,
+                // hot-Jupiter orbits) produce compC in the hundreds of millions. Capped at 150 pending
+                // Requirements Agent guidance on WBH extreme tidal cases.
+                let compC = (compC_val < 1 || isNaN(compC_val)) ? 0 : Math.min(compC_val, 150);
 
                 w.seismicStress = Math.floor(compA + compB + compC);
                 inherentK = w.seismicStress;

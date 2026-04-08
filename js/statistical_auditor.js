@@ -37,6 +37,10 @@ class StatisticalAuditor {
             major_starport: 0,
             max_tech_level: 0
         };
+
+        // Temperature peaks — tracked separately for Gas Giants and all other bodies
+        this.hottestGasGiant = null; // { tempK, tempC, hexId, orbitId, label }
+        this.hottestNonGG    = null; // { tempK, tempC, hexId, orbitId, label }
     }
 
     /**
@@ -81,6 +85,35 @@ class StatisticalAuditor {
         if (pop >= 9)                        this.tally.high_pop++;
         if (sp === 'A' || sp === 'B')        this.tally.major_starport++;
         if (tl > this.tally.max_tech_level)  this.tally.max_tech_level = tl;
+    }
+
+    /**
+     * Record the temperature of any body (mainworld or otherwise).
+     * Keeps track of the single hottest body seen across the entire run.
+     * Called for every world and moon that has a meanTempK value.
+     *
+     * @param {number} tempK    - Mean temperature in Kelvin
+     * @param {string} hexId    - Hex coordinate string (e.g. '0101')
+     * @param {number} orbitId  - Orbital position (may be undefined for moons)
+     * @param {string} label    - Body name or type label
+     * @param {string} bodyType - Body type string (e.g. 'Gas Giant', 'Mainworld', 'Satellite')
+     */
+    recordWorldTemp(tempK, hexId, orbitId, label, bodyType) {
+        if (tempK === undefined || tempK === null || isNaN(tempK)) return;
+        const entry = {
+            tempK:   Math.round(tempK),
+            tempC:   Math.round(tempK - 273),
+            hexId:   hexId || '?',
+            orbitId: (orbitId !== undefined && orbitId !== null)
+                         ? (typeof orbitId === 'number' ? orbitId.toFixed(2) : orbitId)
+                         : '?',
+            label:   label || 'Unknown'
+        };
+        if (bodyType === 'Gas Giant') {
+            if (!this.hottestGasGiant || tempK > this.hottestGasGiant.tempK) this.hottestGasGiant = entry;
+        } else {
+            if (!this.hottestNonGG    || tempK > this.hottestNonGG.tempK)    this.hottestNonGG    = entry;
+        }
     }
 
     /**
@@ -163,6 +196,24 @@ class StatisticalAuditor {
         processRatePct('High Population',  this.tally.high_pop,       soc.high_pop_pct);
         processRatePct('Major Starports',  this.tally.major_starport, soc.major_starport_pct);
         processCeiling('Max Tech Level',                               soc.max_tech_level);
+
+        // ── Temperature Peaks (Gas Giants and non-GG bodies tracked separately) ──
+        const hasTempData = this.hottestGasGiant || this.hottestNonGG;
+        if (hasTempData) {
+            md += `\n### Temperature Peaks\n`;
+            md += `| Category | Body | Hex | Orbit | Temp (K) | Temp (°C) |\n`;
+            md += `| :--- | :--- | :--- | ---: | ---: | ---: |\n`;
+            if (this.hottestGasGiant) {
+                const gg = this.hottestGasGiant;
+                md += `| Gas Giant | ${gg.label} | ${gg.hexId} | ${gg.orbitId} | ${gg.tempK} | ${gg.tempC} |\n`;
+                console.log(`  [TEMP PEAK — GG]     ${gg.label} @ Hex ${gg.hexId}, Orbit ${gg.orbitId} — ${gg.tempK} K (${gg.tempC}°C)`);
+            }
+            if (this.hottestNonGG) {
+                const ngg = this.hottestNonGG;
+                md += `| Planet/Moon | ${ngg.label} | ${ngg.hexId} | ${ngg.orbitId} | ${ngg.tempK} | ${ngg.tempC} |\n`;
+                console.log(`  [TEMP PEAK — Non-GG] ${ngg.label} @ Hex ${ngg.hexId}, Orbit ${ngg.orbitId} — ${ngg.tempK} K (${ngg.tempC}°C)`);
+            }
+        }
 
         console.log(`=== END AUDIT ===\n`);
 

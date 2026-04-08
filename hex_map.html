@@ -50,6 +50,7 @@
     <script src="js/system_driver.js" defer></script>
 
     <script src="js/rtt_engine.js" defer></script>
+    <!-- v0.7.0.0: Political Mapping & Referee Utility -->
     <!-- v0.6.1.0: Sector-Wide Statistical Validation -->
     <script src="rules/expectations_data.js" defer></script>
     <script src="js/statistical_auditor.js" defer></script>
@@ -133,7 +134,7 @@
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above So Below</span></h1>
             <div class="splash-banner">New: Statistical Auditor in Console</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.6.1</div>
+            <div class="splash-version">v0.7</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -197,6 +198,10 @@
         <div class="settings-row">
             <input type="checkbox" id="toggle-borders" checked>
             <label for="toggle-borders">Show Subsector Borders</label>
+        </div>
+        <div class="settings-row">
+            <input type="checkbox" id="toggle-print-mode">
+            <label for="toggle-print-mode">White Background Mode</label>
         </div>
 
         <div style="border-top: 1px solid #45a29e; margin: 10px 0;"></div>
@@ -311,6 +316,25 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- Allegiance Assignment Modal -->
+    <div id="allegiance-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="width: 340px; text-align: left;">
+            <h3 style="text-align: center;">Assign Allegiance</h3>
+            <p style="color: #c5c6c7; font-size: 0.85rem; margin: 0 0 16px;">
+                Applying to <strong id="allegiance-modal-count" style="color: #66fcf1;"></strong> selected system(s).
+            </p>
+            <input type="text" id="allegiance-input" maxlength="12"
+                placeholder="e.g. Im, Na, ----"
+                style="width: 100%; padding: 8px; background: #0b0c10; border: 1px solid #45a29e; color: #66fcf1; font-family: 'Courier New', monospace; font-size: 1rem; box-sizing: border-box; border-radius: 4px; text-align: center; outline: none;">
+            <div style="display: flex; gap: 12px; margin-top: 20px;">
+                <button id="btn-allegiance-confirm" class="btn-save"
+                    style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Assign</button>
+                <button id="btn-allegiance-cancel" class="btn-cancel"
+                    style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Cancel</button>
+            </div>
+        </div>
     </div>
 
     <!-- Status Modal / Sector Picker -->
@@ -437,6 +461,7 @@
         <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
 
         <button class="context-menu-item" id="ctx-gen-xboat">GENERATE XBOAT ROUTES</button>
+        <button class="context-menu-item" id="ctx-assign-allegiance">ASSIGN ALLEGIANCE</button>
 
         <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
         <button class="context-menu-item" id="ctx-help">HELP/SHORTCUTS</button>
@@ -496,6 +521,18 @@
                         <option value="Red" style="color: #ff0000;">Red</option>
                     </select>
                 </div>
+                <div class="editor-row">
+                    <label>Allegiance:</label>
+                    <input type="text" id="edit-allegiance" maxlength="4" placeholder="----">
+                </div>
+                <div class="editor-row" style="grid-column: span 1;">
+                    <!-- Placeholder to keep grid balanced if needed, but we'll use a full row for notes below -->
+                </div>
+            </div>
+
+            <div class="editor-full-row" style="margin-top: 10px;">
+                <label>Referee Notes:</label>
+                <textarea id="edit-notes" style="width: 100%; height: 60px; background: #0b0c10; border: 1px solid #45a29e; color: #fff; font-family: inherit; font-size: 0.9em; padding: 5px; resize: none; border-radius: 4px; box-sizing: border-box;"></textarea>
             </div>
 
             <div class="editor-grid">
@@ -850,6 +887,17 @@
                     </div>
                 </div>
 
+                <!-- Layer Visibility (Shared) -->
+                <div class="filter-section">
+                    <span class="filter-title">Layer Visibility</span>
+                    <div class="filter-route-toggles">
+                        <label class="filter-toggle-item">
+                            <input type="checkbox" id="filter-hex-bg-visible" checked>
+                            <span style="color: #a0a8b0;">Hex Background Fill</span>
+                        </label>
+                    </div>
+                </div>
+
                 <!-- UWP Filters (Accordion) - Open by Default -->
                 <div class="filter-section">
                     <div class="filter-accordion-header open"
@@ -898,6 +946,10 @@
                             <label>Trade Codes</label>
                             <input type="text" id="filter-trade-codes" placeholder="Ag, In">
                         </div>
+                        <div class="filter-field">
+                            <label>Allegiance</label>
+                            <input type="text" id="filter-allegiance" placeholder="Im, Aa, Na">
+                        </div>
                     </div>
                 </div>
 
@@ -943,7 +995,7 @@
                 style="display: none; flex: 1; min-width: 320px; border-left: 1px solid #45a29e; padding-left: 15px;">
                 <div class="design-grid">
                     <div class="design-field" style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="enable-design-color" checked title="Include Primary Color">
+                        <input type="checkbox" id="enable-design-color" title="Include Primary Color">
                         <div style="flex-grow: 1;">
                             <label for="design-glow-color">Primary Color</label>
                             <input type="color" id="design-glow-color" value="#66fcf1" style="width: 100%;">
@@ -957,7 +1009,7 @@
                         </div>
                     </div>
                     <div class="design-field" style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="enable-design-icon" checked title="Include Icon in Rule">
+                        <input type="checkbox" id="enable-design-icon" title="Include Icon in Rule">
                         <div style="flex-grow: 1;">
                             <label for="design-icon-style">Icon Style</label>
                             <select id="design-icon-style" style="width: 100%;">
@@ -993,6 +1045,16 @@
                         <label for="enable-design-underline"
                             style="flex-grow: 1; cursor: pointer; color: #fff; font-size: 0.75rem;">Underline
                             Name</label>
+                    </div>
+                    <div class="design-field" style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="enable-design-bg-fill" title="Apply Political Background Color">
+                        <div style="flex-grow: 1;">
+                            <label for="design-bg-fill-color">Hex Background Fill</label>
+                            <div style="display: flex; align-items: center; gap: 4px;">
+                                <input type="color" id="design-bg-fill-color" value="#005500" style="width: 100%;">
+                                <span style="font-size: 0.6rem; color: #45a29e; white-space: nowrap;">(30% Opacity)</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <button class="btn-batch-apply" onclick="applyBatchStyles()" style="margin-top: 10px;">Apply as New

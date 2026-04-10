@@ -186,7 +186,7 @@
 
         world.pop = finalPop;
         if (typeof world.popDigit !== 'undefined') {
-            world.popDigit = world.pop > 0 ? Math.floor(_rng() * 10) : 0;
+            world.popDigit = world.pop > 0 ? Math.floor(_rng() * 9) + 1 : 0;
         }
 
         if (typeof tResult !== 'undefined' && world.pop !== undefined) {
@@ -524,7 +524,7 @@
         world.uwp = `${world.starport}${toUWPChar(world.size)}${toUWPChar(world.atm)}${toUWPChar(world.hydro)}${toUWPChar(world.pop)}${toUWPChar(world.gov)}${toUWPChar(world.law)}-${toUWPChar(world.tl)}`;
 
         // Socioeconomic placeholders for display
-        world.popDigit = world.pop > 0 ? Math.floor(_rng() * 10) : 0;
+        world.popDigit = world.pop > 0 ? Math.floor(_rng() * 9) + 1 : 0;
         world.planetoidBelts = Math.max(0, _roll1D('Belts Roll') - 3);
         world.gasGiantsCount = Math.max(0, Math.floor(_roll2D('Gas Giants Roll') / 2) - 2);
         world.gasGiant = world.gasGiantsCount > 0;

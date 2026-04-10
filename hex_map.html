@@ -132,9 +132,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above So Below</span></h1>
-            <div class="splash-banner">New: Allegiances and Hex shading</div>
+            <div class="splash-banner">New: Gas giants and population filters; Hex backgrounds without filters</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.7</div>
+            <div class="splash-version">v0.7.1</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -266,7 +266,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.5.7.3</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.7.1</span>
             </p>
         </div>
 
@@ -311,7 +311,7 @@
                 </div>
                 <div
                     style="margin-top: 10px; font-size: 12px; color: #c5c6c7; background: rgba(102, 252, 241, 0.05); padding: 8px; border-radius: 4px; border-left: 3px solid #66fcf1;">
-                    <strong>Tip:</strong> Drawing over an existing route will toggle/delete it.
+                    <p><strong>v0.7.1</strong> - Added gas giants and population to filter engine.</p>Tip: Drawing over an existing route will toggle/delete it.
                 </div>
             </div>
         </div>
@@ -332,6 +332,29 @@
                 <button id="btn-allegiance-confirm" class="btn-save"
                     style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Assign</button>
                 <button id="btn-allegiance-cancel" class="btn-cancel"
+                    style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Background Color Assignment Modal -->
+    <div id="bg-color-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="width: 340px; text-align: left;">
+            <h3 style="text-align: center;">Assign Background Color</h3>
+            <p style="color: #c5c6c7; font-size: 0.85rem; margin: 0 0 16px;">
+                Applying to <strong id="bg-color-modal-count" style="color: #66fcf1;"></strong> selected hex(es).
+            </p>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                <input type="color" id="bg-color-picker" value="#4466aa"
+                    style="width: 60px; height: 40px; border: 1px solid #45a29e; background: none; cursor: pointer; border-radius: 4px; padding: 2px;">
+                <span style="color: #c5c6c7; font-size: 0.8rem;">Hex backgrounds respect the<br><em>Hex Background Fill</em> visibility toggle.</span>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 20px;">
+                <button id="btn-bg-color-apply" class="btn-save"
+                    style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Apply</button>
+                <button id="btn-bg-color-clear" class="btn-cancel"
+                    style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem; background: #3a1a1a; color: #ff6b6b; border: 1px solid #ff4500;">Clear Background</button>
+                <button id="btn-bg-color-cancel" class="btn-cancel"
                     style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Cancel</button>
             </div>
         </div>
@@ -462,6 +485,7 @@
 
         <button class="context-menu-item" id="ctx-gen-xboat">GENERATE XBOAT ROUTES</button>
         <button class="context-menu-item" id="ctx-assign-allegiance">ASSIGN ALLEGIANCE</button>
+        <button class="context-menu-item" id="ctx-assign-bg-color">ASSIGN BACKGROUND COLOR</button>
 
         <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
         <button class="context-menu-item" id="ctx-help">HELP/SHORTCUTS</button>
@@ -931,6 +955,10 @@
                             <input type="text" id="filter-pop" placeholder=">8">
                         </div>
                         <div class="filter-field">
+                            <label>Total Pop</label>
+                            <input type="text" id="filter-total-pop" placeholder=">10m">
+                        </div>
+                        <div class="filter-field">
                             <label>Government</label>
                             <input type="text" id="filter-gov">
                         </div>
@@ -949,6 +977,10 @@
                         <div class="filter-field">
                             <label>Allegiance</label>
                             <input type="text" id="filter-allegiance" placeholder="Im, Aa, Na">
+                        </div>
+                        <div class="filter-field">
+                            <label>Gas Giants</label>
+                            <input type="text" id="filter-gas-giant" placeholder=">0">
                         </div>
                     </div>
                 </div>

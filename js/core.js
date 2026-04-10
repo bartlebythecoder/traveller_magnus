@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.7.0.0";
-const APP_BANNER = "v0.7: Political Mapping & Referee Utility";
+const APP_VERSION = "v0.7.1.0";
+const APP_BANNER = "v0.7.1: Added gas giants and population to filter";
 
 // -----------------------------------------------------------------------------
 // Application State

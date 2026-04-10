@@ -113,10 +113,19 @@ function draw() {
             const stateObj = hexStates.get(hexId);
             const path = getHexPath(cx, cy, size);
 
-            // 0. Background Fill (Political Mapping)
+            // 0a. Manual Background Fill (assigned via context menu — persists independently of filter rules)
+            if (window.hexBgFillVisible !== false && stateObj && stateObj.manualBgColor) {
+                ctx.save();
+                ctx.globalAlpha = 0.3;
+                ctx.fillStyle = stateObj.manualBgColor;
+                ctx.fill(path);
+                ctx.restore();
+            }
+
+            // 0b. Filter Rule Background Fill (Political Mapping)
             if (window.hexBgFillVisible !== false && stateObj && stateObj.custom_ui && stateObj.custom_ui.bgFillColor) {
                 ctx.save();
-                ctx.globalAlpha = 0.3; // Standard transparency for territories
+                ctx.globalAlpha = 0.3;
                 ctx.fillStyle = stateObj.custom_ui.bgFillColor;
                 ctx.fill(path);
                 ctx.restore();

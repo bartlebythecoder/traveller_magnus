@@ -119,6 +119,60 @@ function setupContextMenu() {
         if (e.key === 'Escape') document.getElementById('allegiance-modal').style.display = 'none';
     });
 
+    // --- Assign Background Color ---
+    function openBgColorModal() {
+        document.getElementById('context-menu').classList.remove('visible');
+        const hexList = [...selectedHexes];
+        if (hexList.length === 0) {
+            showToast('No hexes selected.', 2000);
+            return;
+        }
+        document.getElementById('bg-color-modal-count').textContent = hexList.length;
+
+        // Pre-populate picker with the first selected hex's existing color, or a default
+        const firstState = hexStates.get(hexList[0]);
+        const existingColor = (firstState && firstState.manualBgColor) ? firstState.manualBgColor : '#4466aa';
+        document.getElementById('bg-color-picker').value = existingColor;
+
+        document.getElementById('bg-color-modal').style.display = 'flex';
+    }
+
+    function applyBgColor() {
+        const color = document.getElementById('bg-color-picker').value;
+        const hexList = [...selectedHexes];
+        saveHistoryState('Assign Background Color');
+        hexList.forEach(hexId => {
+            let s = hexStates.get(hexId);
+            if (!s) {
+                s = { type: 'BLANK' };
+                hexStates.set(hexId, s);
+            }
+            s.manualBgColor = color;
+        });
+        document.getElementById('bg-color-modal').style.display = 'none';
+        showToast(`Background color applied to ${hexList.length} hex(es).`, 2000);
+        requestAnimationFrame(draw);
+    }
+
+    function clearBgColor() {
+        const hexList = [...selectedHexes];
+        saveHistoryState('Clear Background Color');
+        hexList.forEach(hexId => {
+            const s = hexStates.get(hexId);
+            if (s) delete s.manualBgColor;
+        });
+        document.getElementById('bg-color-modal').style.display = 'none';
+        showToast(`Background color cleared from ${hexList.length} hex(es).`, 2000);
+        requestAnimationFrame(draw);
+    }
+
+    document.getElementById('ctx-assign-bg-color').addEventListener('click', openBgColorModal);
+    document.getElementById('btn-bg-color-apply').addEventListener('click', applyBgColor);
+    document.getElementById('btn-bg-color-clear').addEventListener('click', clearBgColor);
+    document.getElementById('btn-bg-color-cancel').addEventListener('click', () => {
+        document.getElementById('bg-color-modal').style.display = 'none';
+    });
+
     // Generation handlers are defined in the engine files but triggered here
     setupGenerationHandlers();
 }

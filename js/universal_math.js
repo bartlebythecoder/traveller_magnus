@@ -314,6 +314,44 @@
                     } else if (field === 'temperature' || field === 'temp' || field === 't') {
                         const raw = world.temperature !== undefined ? world.temperature : (world.meanTempK !== undefined ? world.meanTempK : (world.temp !== undefined ? world.temp : (world.Temperature !== undefined ? world.Temperature : (world.meanTemp !== undefined ? world.meanTemp : 0))));
                         worldValue = raw - 273; // Convert Kelvin to Celsius for filter engine matching
+                    } else if (field === 'gasgiant' || field === 'gas') {
+                        // Support both boolean (MgT2E) and count (T5)
+                        worldValue = world.gasGiants !== undefined ? world.gasGiants : (world.gasGiant ? 1 : (world.gasGiantsCount || 0));
+                    } else if (field === 'totalpop' || field === 'pop_total') {
+                        // Prefer a pre-computed totalWorldPop (MgT2E socio engine sets this).
+                        // For engines that don't compute it (T5, CT), derive it from pop code + multiplier.
+                        const rawPop = (world.totalWorldPop !== undefined && world.totalWorldPop > 0)
+                            ? world.totalWorldPop
+                            : ((world.totalPop !== undefined && world.totalPop > 0) ? world.totalPop : null);
+
+                        if (rawPop !== null) {
+                            if (typeof rawPop === 'string') {
+                                const clean = rawPop.replace(/,/g, '').toUpperCase();
+                                if (clean.endsWith('M')) worldValue = parseFloat(clean) * 1000000;
+                                else if (clean.endsWith('K')) worldValue = parseFloat(clean) * 1000;
+                                else if (clean.endsWith('B')) worldValue = parseFloat(clean) * 1000000000;
+                                else worldValue = parseFloat(clean) || 0;
+                            } else {
+                                worldValue = rawPop;
+                            }
+                        } else {
+                            // Derive: popMod * 10^popCode  (popMod defaults to 1 if none available)
+                            const popCode = world.pop !== undefined ? world.pop
+                                : (world.popCode !== undefined ? world.popCode : 0);
+                            // T5 stores popMultiplier; MgT2E stores pValue; CT has neither
+                            const popMod = world.popMultiplier !== undefined ? world.popMultiplier
+                                : (world.pValue !== undefined ? world.pValue
+                                : (world.popDigit !== undefined ? world.popDigit : 0));
+                            const numPop = typeof popCode === 'number' ? popCode : fromUWPChar(popCode);
+                            if (numPop === 0) {
+                                worldValue = 0;
+                            } else if (popMod > 0) {
+                                worldValue = popMod * Math.pow(10, numPop);
+                            } else {
+                                // CT: no multiplier — use 10^popCode as the rough population
+                                worldValue = Math.pow(10, numPop);
+                            }
+                        }
                     } else {
                         worldValue = world[field];
                     }
@@ -321,12 +359,24 @@
                     // --- Property Guard ---
                     if (worldValue === undefined || worldValue === null) worldValue = 0;
 
+                    // Shared numeric parser: handles single-char UWP letters (A-Z) and K/M/B shorthand.
+                    // Used in both Section A and Section B so `3b`, `1m-10m`, `>500k` all resolve correctly.
+                    const parseNumericToken = (v) => {
+                        if (v.length === 1 && isNaN(v)) return fromUWPChar(v); // e.g. "A" → 10
+                        if (v.endsWith('B')) return parseFloat(v) * 1000000000;
+                        if (v.endsWith('M')) return parseFloat(v) * 1000000;
+                        if (v.endsWith('K')) return parseFloat(v) * 1000;
+                        return parseFloat(v);
+                    };
+
                     // A. Numeric Operators (> , <)
                     if (criteria.startsWith('>') || criteria.startsWith('<')) {
                         const operator = criteria[0];
-                        const targetValue = parseFloat(criteria.substring(1).trim());
+                        const targetStr = criteria.substring(1).trim().toUpperCase();
+                        const targetValue = parseNumericToken(targetStr);
+
                         let valNum = (typeof worldValue === 'number') ? worldValue : fromUWPChar(worldValue);
-                        
+
                         if (operator === '>') {
                             if (!(valNum > targetValue)) return false;
                         } else if (operator === '<') {
@@ -340,19 +390,18 @@
 
                         if (criteriaTokens.length > 0) {
                             const match = criteriaTokens.some(token => {
-                                // 1. Check for hyphenated range (e.g. "2-9" or "A-E")
+                                // 1. Check for hyphenated range (e.g. "2-9", "A-E", "1m-10m")
                                 if (token.includes('-') && token.length >= 3) {
                                     const parts = token.split('-');
                                     if (parts.length === 2) {
-                                        const parseVal = (v) => (v.length === 1 && isNaN(v)) ? fromUWPChar(v) : parseFloat(v);
-                                        const start = parseVal(parts[0]);
-                                        const end = parseVal(parts[1]);
+                                        const start = parseNumericToken(parts[0]);
+                                        const end = parseNumericToken(parts[1]);
                                         return (worldValueNum >= start && worldValueNum <= end);
                                     }
                                 }
-                                
+
                                 // 2. Standard Token Match
-                                let tokenNum = (token.length === 1 && isNaN(token)) ? fromUWPChar(token) : parseFloat(token);
+                                let tokenNum = parseNumericToken(token);
                                 return (worldValueNum === tokenNum);
                             });
                             if (!match) return false;

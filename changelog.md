@@ -1,5 +1,11 @@
 # Changelog
 
+### [v0.7.1] - 2026-04-10
+1. **Filter Engine Expansion:** Added "Gas Giant" and "Total Population" filters.
+2. **Filter Engine Expansion:** Added the ability to use k, m, b as shorthand for thousands, millions, and billions in the total population filter
+3. **T5 Pop mod:** Fixed a bug in the T5 engine producing Population mods of 0 when population > 0
+4. **Hex Background:** Added as an option outside of filtering.  Hex backgrounds can be placed on selected hexes via the context menu.
+
 ### [v0.7] - 2026-04-07
 1. **Political Mapping & Referee Utility:** Initiated Phase 7.0 development.
 2. **Allegiance & Notes:** Implemented manual entry fields for Allegiance codes and Referee Notes in the Main World UI.

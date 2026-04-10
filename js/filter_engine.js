@@ -129,14 +129,17 @@
         const inputs = [
             'filter-name',
             'filter-starport', 'filter-size', 'filter-atm', 'filter-hydro',
-            'filter-pop', 'filter-gov', 'filter-law', 'filter-tl', 'filter-trade-codes',
-            'filter-allegiance',
+            'filter-pop', 'filter-total-pop', 'filter-gov', 'filter-law', 'filter-tl', 'filter-trade-codes',
+            'filter-allegiance', 'filter-gas-giant',
             'filter-gravity', 'filter-temperature', 'filter-t5-ix', 'filter-mgt-importance', 'filter-mgt-wtn', 'filter-mgt-gwp'
         ];
 
         inputs.forEach(id => {
             const el = document.getElementById(id);
-            if (el) el.value = '';
+            if (el) {
+                if (el.type === 'checkbox') el.checked = false;
+                else el.value = '';
+            }
         });
 
         const toggles = ['filter-route-green', 'filter-route-yellow', 'filter-route-red'];
@@ -238,6 +241,8 @@
             atm: document.getElementById('filter-atm')?.value || "",
             hydro: document.getElementById('filter-hydro')?.value || "",
             pop: document.getElementById('filter-pop')?.value || "",
+            totalPop: document.getElementById('filter-total-pop')?.value || "",
+            gasGiant: document.getElementById('filter-gas-giant')?.value || "",
             gov: document.getElementById('filter-gov')?.value || "",
             law: document.getElementById('filter-law')?.value || "",
             tl: document.getElementById('filter-tl')?.value || "",
@@ -321,8 +326,8 @@
         const labels = {
             name: "Name",
             starport: "Starport", size: "Size", atm: "Atm", hydro: "Hydro",
-            pop: "Pop", gov: "Gov", law: "Law", tl: "TL", tradeCodes: "Codes",
-            allegiance: "Alleg",
+            pop: "Pop", totalPop: "Total Pop", gov: "Gov", law: "Law", tl: "TL", tradeCodes: "Codes",
+            allegiance: "Alleg", gasGiant: "Gas Giant",
             gravity: "Grav", temperature: "Temp (°C)",
             t5Ix: "T5 Ix", mgtImportance: "Mg Imp", mgtWTN: "Mg WTN", mgtGWP: "Mg GWP"
         };
@@ -673,14 +678,17 @@
         const inputs = [
             'filter-name',
             'filter-starport', 'filter-size', 'filter-atm', 'filter-hydro',
-            'filter-pop', 'filter-gov', 'filter-law', 'filter-tl', 'filter-trade-codes',
-            'filter-allegiance',
+            'filter-pop', 'filter-total-pop', 'filter-gov', 'filter-law', 'filter-tl', 'filter-trade-codes',
+            'filter-allegiance', 'filter-gas-giant',
             'filter-gravity', 'filter-temperature', 'filter-t5-ix', 'filter-mgt-importance', 'filter-mgt-wtn', 'filter-mgt-gwp'
         ];
 
         inputs.forEach(id => {
             const el = document.getElementById(id);
-            if (el) el.addEventListener('input', onFilterChanged);
+            if (el) {
+                const eventType = el.type === 'checkbox' ? 'change' : 'input';
+                el.addEventListener(eventType, onFilterChanged);
+            }
         });
 
         const checks = ['filter-route-green', 'filter-route-yellow', 'filter-route-red'];

@@ -284,6 +284,24 @@
                         continue;
                     }
 
+                    // --- STRING EXCEPTION: Travel Zone ---
+                    // Stored as full word ('Green', 'Amber', 'Red'). User inputs G, A, or R.
+                    // Comma-separated tokens use OR logic.
+                    if (field === 'travelzone' || field === 'zone' || field === 'tz') {
+                        const worldZone = (world.travelZone || world.TravelZone || 'Green').trim();
+                        const zoneMap = { G: 'GREEN', A: 'AMBER', R: 'RED' };
+                        const filterTokens = criteria.split(',').map(s => s.trim().toUpperCase()).filter(s => s !== '');
+                        if (filterTokens.length > 0) {
+                            const worldZoneUp = worldZone.toUpperCase();
+                            const match = filterTokens.some(token => {
+                                const mapped = zoneMap[token] || token;
+                                return worldZoneUp === mapped;
+                            });
+                            if (!match) return false;
+                        }
+                        continue;
+                    }
+
                     // D. EXHAUSTIVE DATA MAPPING (Property Fallback Logic)
                     if (field === 't5ix' || field === 'ix' || field === 'importance') {
                         worldValue = world.Ix !== undefined ? world.Ix : (world.Importance !== undefined ? world.Importance : (world.ix !== undefined ? world.ix : world.im));
@@ -314,9 +332,16 @@
                     } else if (field === 'temperature' || field === 'temp' || field === 't') {
                         const raw = world.temperature !== undefined ? world.temperature : (world.meanTempK !== undefined ? world.meanTempK : (world.temp !== undefined ? world.temp : (world.Temperature !== undefined ? world.Temperature : (world.meanTemp !== undefined ? world.meanTemp : 0))));
                         worldValue = raw - 273; // Convert Kelvin to Celsius for filter engine matching
+                    } else if (field === 'belts') {
+                        // Pre-computed at generation/import time; fall back to raw properties for compatibility.
+                        worldValue = world.beltCount !== undefined ? world.beltCount
+                                   : (world.planetoidBelts !== undefined ? world.planetoidBelts
+                                   : (world.belts !== undefined ? world.belts : 0));
                     } else if (field === 'gasgiant' || field === 'gas') {
-                        // Support both boolean (MgT2E) and count (T5)
-                        worldValue = world.gasGiants !== undefined ? world.gasGiants : (world.gasGiant ? 1 : (world.gasGiantsCount || 0));
+                        // Pre-computed at generation/import time; fall back to raw properties for compatibility.
+                        worldValue = world.gasGiantCount !== undefined ? world.gasGiantCount
+                                   : (world.gasGiants !== undefined ? world.gasGiants
+                                   : (world.gasGiant ? 1 : (world.gasGiantsCount || 0)));
                     } else if (field === 'totalpop' || field === 'pop_total') {
                         // Prefer a pre-computed totalWorldPop (MgT2E socio engine sets this).
                         // For engines that don't compute it (T5, CT), derive it from pop code + multiplier.

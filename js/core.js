@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.7.1.0";
-const APP_BANNER = "v0.7.1: Added gas giants and population to filter";
+const APP_VERSION = "v0.7.2.0";
+const APP_BANNER = "v0.7.2: Minor UI refinements and stability improvements";
 
 // -----------------------------------------------------------------------------
 // Application State

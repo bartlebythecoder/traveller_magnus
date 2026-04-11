@@ -132,9 +132,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above So Below</span></h1>
-            <div class="splash-banner">New: Gas giants and population filters; Hex backgrounds without filters</div>
+            <div class="splash-banner">New: Belt and Travel Zone filters</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.7.1</div>
+            <div class="splash-version">v0.7.2</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -266,7 +266,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.7.1</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.7.2</span>
             </p>
         </div>
 
@@ -311,6 +311,7 @@
                 </div>
                 <div
                     style="margin-top: 10px; font-size: 12px; color: #c5c6c7; background: rgba(102, 252, 241, 0.05); padding: 8px; border-radius: 4px; border-left: 3px solid #66fcf1;">
+                    <p><strong>v0.7.2</strong> - Minor UI refinements and stability improvements.</p>
                     <p><strong>v0.7.1</strong> - Added gas giants and population to filter engine.</p>Tip: Drawing over an existing route will toggle/delete it.
                 </div>
             </div>
@@ -888,37 +889,38 @@
         </div>
 
         <div class="palette-content"
-            style="max-height: 70vh; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: row; flex-wrap: nowrap; gap: 15px; align-items: flex-start; overflow-x: hidden; transition: width 0.3s ease; width: 100%;">
+            style="max-height: 70vh; overflow-y: auto; padding-left: 12px; padding-right: 12px; display: flex; flex-direction: row; flex-wrap: nowrap; gap: 15px; align-items: flex-start; overflow-x: hidden; transition: width 0.3s ease; width: 100%;">
 
             <!-- Left Pane: Primary Filters -->
             <div id="filter-left-pane" style="flex: 1; min-width: 280px; display: flex; flex-direction: column;">
-                <!-- Route Visibility (Shared) -->
+                <!-- Visibility Options (Routes + Layers combined) -->
                 <div class="filter-section">
-                    <span class="filter-title">Route Visibility</span>
-                    <div class="filter-route-toggles">
-                        <label class="filter-toggle-item">
-                            <input type="checkbox" id="filter-route-green" checked>
-                            <span style="color: #00FF00;">Green</span>
-                        </label>
-                        <label class="filter-toggle-item">
-                            <input type="checkbox" id="filter-route-yellow" checked>
-                            <span style="color: #FFFF00;">Yellow</span>
-                        </label>
-                        <label class="filter-toggle-item">
-                            <input type="checkbox" id="filter-route-red" checked>
-                            <span style="color: #FF0000;">Red</span>
-                        </label>
+                    <div class="filter-accordion-header open"
+                        onclick="this.classList.toggle('open'); document.getElementById('visibility-accordion-body').classList.toggle('open');">
+                        <span class="filter-title">Visibility Options</span>
+                        <i class="fas fa-chevron-down"></i>
                     </div>
-                </div>
-
-                <!-- Layer Visibility (Shared) -->
-                <div class="filter-section">
-                    <span class="filter-title">Layer Visibility</span>
-                    <div class="filter-route-toggles">
-                        <label class="filter-toggle-item">
-                            <input type="checkbox" id="filter-hex-bg-visible" checked>
-                            <span style="color: #a0a8b0;">Hex Background Fill</span>
-                        </label>
+                    <div id="visibility-accordion-body" class="filter-accordion-content open">
+                        <div class="filter-route-toggles">
+                            <label class="filter-toggle-item">
+                                <input type="checkbox" id="filter-route-green" checked>
+                                <span style="color: #00FF00;">Green Routes</span>
+                            </label>
+                            <label class="filter-toggle-item">
+                                <input type="checkbox" id="filter-route-yellow" checked>
+                                <span style="color: #FFFF00;">Yellow Routes</span>
+                            </label>
+                            <label class="filter-toggle-item">
+                                <input type="checkbox" id="filter-route-red" checked>
+                                <span style="color: #FF0000;">Red Routes</span>
+                            </label>
+                        </div>
+                        <div class="filter-route-toggles" style="margin-top: 4px;">
+                            <label class="filter-toggle-item">
+                                <input type="checkbox" id="filter-hex-bg-visible" checked>
+                                <span style="color: #a0a8b0;">Hex Background</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
 
@@ -978,9 +980,28 @@
                             <label>Allegiance</label>
                             <input type="text" id="filter-allegiance" placeholder="Im, Aa, Na">
                         </div>
+                    </div>
+                </div>
+
+                <!-- Zones Belts GG (Accordion) - Closed by Default -->
+                <div class="filter-section">
+                    <div class="filter-accordion-header"
+                        onclick="this.classList.toggle('open'); document.getElementById('zones-accordion-body').classList.toggle('open');">
+                        <span class="filter-title">Zones Belts GG</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div id="zones-accordion-body" class="filter-conditional-container filter-accordion-content">
+                        <div class="filter-field">
+                            <label>Belts</label>
+                            <input type="text" id="filter-belts" placeholder=">0">
+                        </div>
                         <div class="filter-field">
                             <label>Gas Giants</label>
                             <input type="text" id="filter-gas-giant" placeholder=">0">
+                        </div>
+                        <div class="filter-field">
+                            <label>Travel Zone</label>
+                            <input type="text" id="filter-travel-zone" placeholder="G, A, R">
                         </div>
                     </div>
                 </div>

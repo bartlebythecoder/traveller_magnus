@@ -1,5 +1,12 @@
 # Changelog
 
+### [v0.7.2] - 2026-04-11
+1. **Filter Engine Expansion:** Added Belt and Travel Zone filters
+2. **Filter UI:** Created new Filter section for Belts, GG, Zones
+3. **All Engines:** Created Belt and GG counts to be used for filters in creation methods of all engines
+4. **JSON Load/Save:** Ensured Belt and GG count included in all JSON saves, and added to any legacy JSON being loaded
+5. **Sector Import:** Fixed bug that prevented Travel Zones from being imported
+
 ### [v0.7.1] - 2026-04-10
 1. **Filter Engine Expansion:** Added "Gas Giant" and "Total Population" filters.
 2. **Filter Engine Expansion:** Added the ability to use k, m, b as shorthand for thousands, millions, and billions in the total population filter

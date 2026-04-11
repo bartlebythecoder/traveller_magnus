@@ -130,7 +130,7 @@
             'filter-name',
             'filter-starport', 'filter-size', 'filter-atm', 'filter-hydro',
             'filter-pop', 'filter-total-pop', 'filter-gov', 'filter-law', 'filter-tl', 'filter-trade-codes',
-            'filter-allegiance', 'filter-gas-giant',
+            'filter-allegiance', 'filter-belts', 'filter-gas-giant', 'filter-travel-zone',
             'filter-gravity', 'filter-temperature', 'filter-t5-ix', 'filter-mgt-importance', 'filter-mgt-wtn', 'filter-mgt-gwp'
         ];
 
@@ -242,7 +242,9 @@
             hydro: document.getElementById('filter-hydro')?.value || "",
             pop: document.getElementById('filter-pop')?.value || "",
             totalPop: document.getElementById('filter-total-pop')?.value || "",
+            belts: document.getElementById('filter-belts')?.value || "",
             gasGiant: document.getElementById('filter-gas-giant')?.value || "",
+            travelZone: document.getElementById('filter-travel-zone')?.value || "",
             gov: document.getElementById('filter-gov')?.value || "",
             law: document.getElementById('filter-law')?.value || "",
             tl: document.getElementById('filter-tl')?.value || "",
@@ -270,8 +272,13 @@
             const worldData = state.rttData || state.t5Data || state.mgt2eData || state.ctData;
             const socioData = state.t5Socio || state.mgtSocio || {};
 
-            // Merge for evaluation
-            const evalObject = { ...worldData, ...socioData, allegiance: state.allegiance, notes: state.notes };
+            // Merge for evaluation — beltCount and gasGiantCount are pre-computed at generation/import time
+            const evalObject = {
+                ...worldData, ...socioData,
+                allegiance: state.allegiance, notes: state.notes,
+                beltCount: state.beltCount ?? 0,
+                gasGiantCount: state.gasGiantCount ?? 0
+            };
 
             // Name prefix filter (case-insensitive, applied before UWP filters)
             let isVisible = true;
@@ -327,7 +334,7 @@
             name: "Name",
             starport: "Starport", size: "Size", atm: "Atm", hydro: "Hydro",
             pop: "Pop", totalPop: "Total Pop", gov: "Gov", law: "Law", tl: "TL", tradeCodes: "Codes",
-            allegiance: "Alleg", gasGiant: "Gas Giant",
+            allegiance: "Alleg", belts: "Belts", gasGiant: "Gas Giant", travelZone: "Zone",
             gravity: "Grav", temperature: "Temp (°C)",
             t5Ix: "T5 Ix", mgtImportance: "Mg Imp", mgtWTN: "Mg WTN", mgtGWP: "Mg GWP"
         };
@@ -679,7 +686,7 @@
             'filter-name',
             'filter-starport', 'filter-size', 'filter-atm', 'filter-hydro',
             'filter-pop', 'filter-total-pop', 'filter-gov', 'filter-law', 'filter-tl', 'filter-trade-codes',
-            'filter-allegiance', 'filter-gas-giant',
+            'filter-allegiance', 'filter-belts', 'filter-gas-giant', 'filter-travel-zone',
             'filter-gravity', 'filter-temperature', 'filter-t5-ix', 'filter-mgt-importance', 'filter-mgt-wtn', 'filter-mgt-gwp'
         ];
 

@@ -1464,10 +1464,14 @@ function saveHexEditorChanges() {
         if (mw) Object.assign(mw, sharedData, pbgData, mgtSocioInputs, { name });
     }
 
+    // Re-derive system counts if PBG was edited explicitly
+    if (pbgData.planetoidBelts !== undefined) stateObj.beltCount     = pbgData.planetoidBelts;
+    if (pbgData.gasGiantsCount !== undefined) stateObj.gasGiantCount = pbgData.gasGiantsCount;
+
     hexStates.set(editingHexId, stateObj);
 
     requestAnimationFrame(draw);
-    
+
     // Sean Protocol: Sync Rule Engine and Filters with modified world data
     if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
     if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();

@@ -101,10 +101,25 @@ function setupSaveLoad() {
 
                 if (parsedData.hexStates) {
                     if (typeof tSection === 'function') tSection("JSON Import: Analyzing Map Manifest");
-                    
+
                     for (const key in parsedData.hexStates) {
                         hexStates.set(key, parsedData.hexStates[key]);
                     }
+
+                    // Backfill beltCount/gasGiantCount for states saved before this feature existed
+                    if (typeof window.computeSystemCounts === 'function') {
+                        let backfillCount = 0;
+                        hexStates.forEach(state => {
+                            if (state.type === 'SYSTEM_PRESENT' && state.beltCount === undefined) {
+                                window.computeSystemCounts(state);
+                                backfillCount++;
+                            }
+                        });
+                        if (typeof writeLogLine === 'function' && backfillCount > 0) {
+                            writeLogLine(`JSON Load: Backfilled belt/GG counts for ${backfillCount} pre-update system(s).`);
+                        }
+                    }
+
                     window.sectorRoutes = parsedData.routes || [];
                     
                     // Priority Rule Capture: Use aesthetics.activeRules if available, else fallback to legacy field
@@ -138,6 +153,20 @@ function setupSaveLoad() {
                     if (typeof writeLogLine === 'function') writeLogLine("Importing legacy map format (flat state)...");
                     for (const key in parsedData) {
                         hexStates.set(key, parsedData[key]);
+                    }
+
+                    // Backfill beltCount/gasGiantCount for states saved before this feature existed
+                    if (typeof window.computeSystemCounts === 'function') {
+                        let backfillCount = 0;
+                        hexStates.forEach(state => {
+                            if (state.type === 'SYSTEM_PRESENT' && state.beltCount === undefined) {
+                                window.computeSystemCounts(state);
+                                backfillCount++;
+                            }
+                        });
+                        if (typeof writeLogLine === 'function' && backfillCount > 0) {
+                            writeLogLine(`JSON Load (legacy): Backfilled belt/GG counts for ${backfillCount} pre-update system(s).`);
+                        }
                     }
                 }
 
@@ -521,10 +550,13 @@ function importT5Tab(fileContent, fileName) {
         const calcE = E_val === 0 ? 1 : E_val;
         const RU = Math.abs(calcR * calcL * calcI * calcE);
 
+        const zoneRaw = (idxZone !== -1 ? row[idxZone] : "").trim().toUpperCase();
+        const travelZone = zoneRaw === 'A' ? 'Amber' : (zoneRaw === 'R' ? 'Red' : 'Green');
+
         const t5Data = {
             name, uwp, starport, size, atm, hydro, pop, gov, law, tl,
             tradeCodes: idxRemarks !== -1 ? row[idxRemarks].split(/\s+/) : [],
-            zone: idxZone !== -1 ? row[idxZone] : "-",
+            travelZone,
             popDigit: popMultiplier,
             planetoidBelts: belts,
             gasGiantsCount: gG,
@@ -592,6 +624,8 @@ function importT5Tab(fileContent, fileName) {
             type: 'SYSTEM_PRESENT',
             allegiance: idxAlleg !== -1 ? row[idxAlleg].trim() : "Im",
             notes: idxNotes !== -1 ? row[idxNotes].trim() : "",
+            beltCount: belts,
+            gasGiantCount: gG,
             t5Data,
             t5Socio,
             t5System

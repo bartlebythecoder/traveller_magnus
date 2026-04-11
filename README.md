@@ -1,4 +1,4 @@
-# As Above, So Below (v0.7.1)
+# As Above, So Below (v0.7.2)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -36,6 +36,13 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 6. **Filter Control:** Use the **F Key** to **Open Filter Window** for advanced filtering and custom styling rules.
 ---
 ## 📜 Changelog
+
+### [v0.7.2] - 2026-04-11
+1. **Filter Engine Expansion:** Added Belt and Travel Zone filters
+2. **Filter UI:** Created new Filter section for Belts, GG, Zones
+3. **All Engines:** Created Belt and GG counts to be used for filters in creation methods of all engines
+4. **JSON Load/Save:** Ensured Belt and GG count included in all JSON saves, and added to any legacy JSON being loaded
+5. **Sector Import:** Fixed bug that prevented Travel Zones from being imported
 
 ### [v0.7.1] - 2026-04-10
 1. **Filter Engine Expansion:** Added "Gas Giant" and "Total Population" filters.

@@ -3,6 +3,41 @@
 // ============================================================================
 
 // ============================================================================
+// SYSTEM COUNT HELPER
+// Computes beltCount and gasGiantCount once at generation/import time and
+// stores them on the stateObj so the filter engine can read them cheaply.
+// ============================================================================
+function computeSystemCounts(stateObj) {
+    if (stateObj.t5Data) {
+        stateObj.beltCount     = stateObj.t5Data.planetoidBelts || 0;
+        stateObj.gasGiantCount = stateObj.t5Data.gasGiantsCount !== undefined
+            ? stateObj.t5Data.gasGiantsCount
+            : (stateObj.t5Data.gasGiant ? 1 : 0);
+    } else if (stateObj.mgtSystem) {
+        stateObj.beltCount     = stateObj.mgtSystem.planetoidBelts || 0;
+        stateObj.gasGiantCount = stateObj.mgtSystem.gasGiants || 0;
+    } else if (stateObj.ctSystem) {
+        const orbits = stateObj.ctSystem.orbits || [];
+        stateObj.beltCount     = orbits.filter(o => o.contents?.type === 'Planetoid Belt').length;
+        stateObj.gasGiantCount = orbits.filter(o => o.contents?.type === 'Gas Giant').length;
+    } else if (stateObj.rttSystem) {
+        let belts = 0, ggs = 0;
+        (stateObj.rttSystem.stars || []).forEach(s => {
+            (s.planetarySystem?.orbits || []).forEach(b => {
+                if (b.type === 'Asteroid Belt') belts++;
+                if (b.type === 'Jovian Planet' || b.type === 'Helian Planet') ggs++;
+            });
+        });
+        stateObj.beltCount     = belts;
+        stateObj.gasGiantCount = ggs;
+    } else {
+        stateObj.beltCount     = 0;
+        stateObj.gasGiantCount = 0;
+    }
+}
+window.computeSystemCounts = computeSystemCounts;
+
+// ============================================================================
 // VALIDATION
 // ============================================================================
 
@@ -262,6 +297,7 @@ async function runMgT2EMacro(skipPop = false) {
                         lunarCount++;
                     }
 
+                    computeSystemCounts(stateObj);
                     hexStates.set(hexId, stateObj);
                     count++;
                 }
@@ -416,6 +452,7 @@ async function runMgT2EBottomUpMacro(skipPop = false) {
                             stateObj.t5Socio = null;
                             stateObj.rttData = null;
 
+                            computeSystemCounts(stateObj);
                             hexStates.set(hexId, stateObj);
                             count++;
                         }
@@ -549,6 +586,7 @@ async function runCTNewMacro(skipPop = false) {
                     stateObj.mgtSystem = null;
                     stateObj.t5System = null;
                     stateObj.ctPhysical = null;
+                    computeSystemCounts(stateObj);
                     hexStates.set(hexId, stateObj);
 
                     count++;
@@ -662,6 +700,7 @@ async function runCTBottomUpMacro(skipPop = false) {
                             stateObj.mgtSystem = null;
                             stateObj.t5System = null;
                             stateObj.ctPhysical = null;
+                            computeSystemCounts(stateObj);
                             hexStates.set(hexId, stateObj);
                             count++;
                         }
@@ -779,6 +818,7 @@ async function runRTTMacro(skipPop = false) {
                         stateObj.t5Physical = null;
                         stateObj.mgtSocio = null;
                         stateObj.t5Socio = null;
+                        computeSystemCounts(stateObj);
                         hexStates.set(hexId, stateObj);
                         count++;
                     }
@@ -908,6 +948,7 @@ async function runT5Macro(skipPop = false) {
                     stateObj.mgtPhysical = null;
                     stateObj.t5Physical = null;
                     stateObj.mgtSocio = null;
+                    computeSystemCounts(stateObj);
                     hexStates.set(hexId, stateObj);
                 }
             } catch (err) {

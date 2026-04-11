@@ -1,5 +1,5 @@
 # PROJECT AS ABOVE, SO BELOW - Feature Manifest
-**Version:** 0.7.1.0
+**Version:** 0.7.2.0
 **Target:** Advanced Fitering Options
 **Architecture Standard:** The "Sean Protocol" (Directives -> Orchestration -> Execution)
 
@@ -23,7 +23,7 @@ For this version: an updated filtering technique incorporated gas giants, planet
 * **Action 7.0 (Hex Fill Filter):** Implement the "Hex Background Fill" filter using transparent RGBA colors to highlight Allegiance territories.
 * **Action 7.0 (Persistence):** Update TSV import and storage logic to ensure manual data persists across engine swaps by HexID.
 
-### Phase 7.1: Filter Upgrade (Current)
+### Phase 7.1: Filter Upgrade (Complete)
 * Replace incorrect Gas Giant checkbox with a field to allow for a number filter.  Should be placed after Allegiance
 * Replace broken Total Pop logic with working Total Pop field
 * Notes on population.  
@@ -33,6 +33,12 @@ For this version: an updated filtering technique incorporated gas giants, planet
     * Some engines (like Classic Traveller) do not create a pop mod or p-value and leave the total population as 10^the population code
 * We have created a total population filter that does not currently produce expected results
     * The total population filter field should filter out all systems with mainworlds that do not meet its critera.  The field should use real numbers, not codes.  So if a user wants to filter for planets with populations greater than a million people, it should say > 1,000,000 (or >1m)
-    * This means all population codes needs to be converted to rough population before being filtered, and any pop-mods or p-values need to be applied.
+    * This means all population codes need to be converted to rough population before being filtered, and any pop-mods or p-values need to be applied.
 
+### Phase 7.2: Filter Upgrade (Current)
+* Filter window change to save space: group the Route Visibility and Layer Visibility sections into one section with one heading called "Visibility Options"
+* Add a new expandable section to the filter window called "Zones Belts GG" 
+* Move the Gas Giant filter into the "Zones Belts GG" section
+* Add a filter for Belts (second digit in PBG) into the "Zones Belts GG" section
+* Add a filter for Travel Zones (G, A, R) for Green, Amber, Red into the "Zones Belts GG" section
 

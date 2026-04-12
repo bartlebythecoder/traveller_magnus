@@ -774,15 +774,36 @@ function setupGenerationHandlers() {
         requestAnimationFrame(draw);
     });
 
-    // X-Boat Routes
+    // X-Boat Routes — open options modal
     document.getElementById('ctx-gen-xboat').addEventListener('click', () => {
-        saveHistoryState('Generate Xboat Routes');
-        generateXboatRoutes();
-        const routeCount = window.sectorRoutes ? window.sectorRoutes.length : 0;
-        showToast(`Interstellar Network Generated: ${routeCount} routes.`, 3000);
         document.getElementById('context-menu').classList.remove('visible');
+        document.getElementById('xboat-max-jump').value = 4;
+        document.getElementById('xboat-max-range').value = 12;
+        document.getElementById('xboat-modal').style.display = 'flex';
+    });
+
+    document.getElementById('btn-xboat-confirm').addEventListener('click', () => {
+        const maxJump  = Math.min(8,  Math.max(1,  parseInt(document.getElementById('xboat-max-jump').value,  10) || 4));
+        const maxRange = Math.min(32, Math.max(1,  parseInt(document.getElementById('xboat-max-range').value, 10) || 4));
+        document.getElementById('xboat-modal').style.display = 'none';
+        saveHistoryState('Generate Xboat Routes');
+        generateXboatRoutes(maxJump, maxRange);
+        const routeCount = window.sectorRoutes ? window.sectorRoutes.length : 0;
+        showToast(`Interstellar Network Generated (Jump-${maxJump}, Range-${maxRange}): ${routeCount} routes.`, 3000);
         selectedHexes.clear();
         requestAnimationFrame(draw);
+    });
+
+    document.getElementById('btn-xboat-clear').addEventListener('click', () => {
+        saveHistoryState('Clear Xboat Routes');
+        window.sectorRoutes = [];
+        document.getElementById('xboat-modal').style.display = 'none';
+        showToast('All routes cleared.', 2000);
+        requestAnimationFrame(draw);
+    });
+
+    document.getElementById('btn-xboat-cancel').addEventListener('click', () => {
+        document.getElementById('xboat-modal').style.display = 'none';
     });
 
     // New GENERATE SYSTEM Row Handlers (Continuation Macros - Skip Pop)

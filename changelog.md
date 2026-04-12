@@ -1,5 +1,15 @@
 # Changelog
 
+### [v0.7.3] - 2026-04-12
+1. **Mongoose Socioeconomic:** Fixed bug that did not check if Ix, Cx, or Ex could be inherited
+2. **Mongoose System Expand:** Fixed bug that did not make use of T5 Stellar information and PBG
+3. **Import Sector .tsv:** Fixed bug that did not capture Worlds value
+4. **Generate Xboat:** Added user options on range and jump distances
+5. **Import Imperium:** Added the option to bulk import Imperial Sectors
+
+### [v0.7.2.1] - 2026-04-11
+1. **Settings Menu:** Added Solo-6 button
+
 ### [v0.7.2] - 2026-04-11
 1. **Filter Engine Expansion:** Added Belt and Travel Zone filters
 2. **Filter UI:** Created new Filter section for Belts, GG, Zones

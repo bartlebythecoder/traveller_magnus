@@ -41,6 +41,7 @@
     <script src="js/mgt2e_bottomup_generator.js" defer></script>
 
     <script src="js/universal_math.js" defer></script>
+    <script src="js/routes.js" defer></script>
     <script src="rules/t5_data.js" defer></script>
     <script src="js/t5_stellar_engine.js" defer></script>
     <script src="js/t5_world_engine.js" defer></script>
@@ -63,8 +64,12 @@
     <script src="js/ui_menus.js" defer></script>
     <script src="js/filter_engine.js" defer></script>
     <script src="js/io_manager.js" defer></script>
+    <script src="js/imperium_data.js" defer></script>
+    <script src="js/otu_importer.js" defer></script>
     <!-- Optional: auto-load system names. Generate names.js by running convert_names.ps1 -->
     <script src="names.js" onerror="console.info('names.js not found — names will not be auto-loaded.')"></script>
+    <!-- Optional: Solo 6 sector data. Generate js/solo_6_data.js by running convert_solo6.ps1 -->
+    <script src="js/solo_6_data.js" onerror="console.info('solo_6_data.js not found — Solo 6 sector will not be available.')"></script>
 
     <style>
         .filter-grid-uwp .filter-field,
@@ -132,9 +137,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above So Below</span></h1>
-            <div class="splash-banner">New: Belt and Travel Zone filters</div>
+            <div class="splash-banner">New: Import the Imperium</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.7.2</div>
+            <div class="splash-version">v0.7.3</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -255,6 +260,63 @@
             </button>
             <input type="file" id="file-import-sector" accept=".tab,.tsv,.txt" style="display: none;">
         </div>
+
+        <div style="border-top: 1px solid #45a29e; margin: 10px 0;"></div>
+
+        <div class="settings-row" style="flex-direction: column; gap: 8px;">
+            <button class="menu-btn" id="btn-import-imperium"
+                style="width: 100%; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i class="fas fa-globe"></i> Import the Imperium
+            </button>
+        </div>
+
+        <div style="border-top: 1px solid #45a29e; margin: 10px 0;"></div>
+
+        <div class="settings-row" style="flex-direction: column; gap: 8px;">
+            <button class="menu-btn" id="btn-load-solo6"
+                style="width: 100%; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i class="fas fa-globe"></i> Load Sector Solo 6
+            </button>
+        </div>
+    </div>
+
+    <!-- OTU Import Modal -->
+    <div id="otu-import-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+               background:rgba(0,0,0,0.75); z-index:2000;
+               align-items:center; justify-content:center;">
+        <div style="background:#1f2833; border:1px solid #45a29e; border-radius:8px;
+                    padding:24px; width:540px; max-height:80vh;
+                    display:flex; flex-direction:column; gap:12px; box-shadow:0 8px 32px rgba(0,0,0,0.6);">
+
+            <h3 style="margin:0; color:#66fcf1; font-size:1.1rem;">Import the Imperium</h3>
+
+            <!-- Select All row -->
+            <div style="display:flex; align-items:center; gap:8px;
+                        border-bottom:1px solid #45a29e; padding-bottom:10px;">
+                <input type="checkbox" id="otu-select-all" checked style="cursor:pointer;">
+                <label for="otu-select-all" style="color:#c5c6c7; cursor:pointer; font-size:0.85rem;">
+                    Select / Deselect All
+                </label>
+                <span style="margin-left:auto; color:#45a29e; font-size:0.78rem;">Slot</span>
+            </div>
+
+            <!-- Sector list (populated dynamically) -->
+            <div id="otu-sector-list" style="overflow-y:auto; flex:1;
+                                             display:flex; flex-direction:column; gap:2px;
+                                             max-height:400px; padding-right:4px;"></div>
+
+            <!-- Action buttons -->
+            <div style="display:flex; gap:8px; justify-content:flex-end;
+                        border-top:1px solid #45a29e; padding-top:12px;">
+                <button id="otu-cancel" class="menu-btn"
+                    style="padding:6px 18px;">Cancel</button>
+                <button id="otu-submit" class="menu-btn"
+                    style="padding:6px 18px; background:#45a29e; color:#0b0c10; font-weight:bold;">
+                    Submit
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Help Panel (formerly help-modal) -->
@@ -266,7 +328,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.7.2</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.7.3</span>
             </p>
         </div>
 
@@ -311,8 +373,7 @@
                 </div>
                 <div
                     style="margin-top: 10px; font-size: 12px; color: #c5c6c7; background: rgba(102, 252, 241, 0.05); padding: 8px; border-radius: 4px; border-left: 3px solid #66fcf1;">
-                    <p><strong>v0.7.2</strong> - Minor UI refinements and stability improvements.</p>
-                    <p><strong>v0.7.1</strong> - Added gas giants and population to filter engine.</p>Tip: Drawing over an existing route will toggle/delete it.
+                    Tip: Drawing over an existing route will toggle/delete it.
                 </div>
             </div>
         </div>
@@ -333,6 +394,37 @@
                 <button id="btn-allegiance-confirm" class="btn-save"
                     style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Assign</button>
                 <button id="btn-allegiance-cancel" class="btn-cancel"
+                    style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Xboat Route Generation Modal -->
+    <div id="xboat-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="width: 360px; text-align: left;">
+            <h3 style="text-align: center;">Generate Xboat Routes</h3>
+            <p style="color: #c5c6c7; font-size: 0.85rem; margin: 0 0 16px;">
+                <strong style="color: #66fcf1;">Max Jump</strong> — the longest single hop between any two worlds.<br>
+                <strong style="color: #66fcf1;">Max Range</strong> — straight-line distance within which two Ix&nbsp;4+ worlds will be connected. If they are farther apart than Max Jump, a BFS path of shorter hops is used.
+            </p>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <label style="color: #c5c6c7; font-size: 0.9rem; white-space: nowrap; width: 90px;">Max Jump</label>
+                <input type="number" id="xboat-max-jump" min="1" max="8" value="4"
+                    style="width: 70px; padding: 8px; background: #0b0c10; border: 1px solid #45a29e; color: #66fcf1; font-family: 'Courier New', monospace; font-size: 1rem; border-radius: 4px; text-align: center; outline: none;">
+                <span style="color: #888; font-size: 0.8rem;">(1 – 8)</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                <label style="color: #c5c6c7; font-size: 0.9rem; white-space: nowrap; width: 90px;">Max Range</label>
+                <input type="number" id="xboat-max-range" min="1" max="32" value="12"
+                    style="width: 70px; padding: 8px; background: #0b0c10; border: 1px solid #45a29e; color: #66fcf1; font-family: 'Courier New', monospace; font-size: 1rem; border-radius: 4px; text-align: center; outline: none;">
+                <span style="color: #888; font-size: 0.8rem;">(1 – 32)</span>
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 20px;">
+                <button id="btn-xboat-confirm" class="btn-save"
+                    style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Generate</button>
+                <button id="btn-xboat-clear" class="btn-cancel"
+                    style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem; background: #3a1a1a; color: #ff6b6b; border: 1px solid #ff4500;">Clear Routes</button>
+                <button id="btn-xboat-cancel" class="btn-cancel"
                     style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Cancel</button>
             </div>
         </div>

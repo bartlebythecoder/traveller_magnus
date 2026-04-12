@@ -489,6 +489,11 @@
         // Use mainworldBase if available, otherwise use found mainworld
         let base = mainworldBase || mainworld;
 
+        // Check for existing T5 socioeconomic data on this hex.
+        // If present, Ix/RLIE/HASS values will be carried over instead of re-rolled.
+        const _hexState = (typeof hexStates !== 'undefined' && sys.hexId) ? hexStates.get(sys.hexId) : null;
+        const _t5Socio  = _hexState ? _hexState.t5Socio : null;
+
         // EMERGENCY AUDIT & REPAIR: Ensure core UWP properties exist on `base`
         const uwpStr = base ? (base.uwp || base.uwpSecondary) : null;
         if (base && uwpStr && uwpStr.length >= 7) {
@@ -1203,64 +1208,78 @@
         let culturalProfile = "0000-0000";
     
         if (base.pop > 0) {
-            // Diversity
-            tSection('Culture: Diversity (D)');
-            let cD_DM = 0;
-            if (base.pop >= 1 && base.pop <= 5) { tDM('Pop 1-5', -2); cD_DM -= 2; }
-            if (base.pop >= 9) { tDM('Pop 9+', 2); cD_DM += 2; }
-            if ([0, 1, 2].includes(base.gov)) { tDM('Gov 0,1,2', 1); cD_DM += 1; }
-            if (base.gov === 7) { tDM('Gov 7', 4); cD_DM += 4; }
-            if ([13, 14, 15].includes(base.gov)) { tDM('Gov 13-15', -4); cD_DM -= 4; }
-            if (overallLaw >= 0 && overallLaw <= 4) { tDM('Law 0-4', 1); cD_DM += 1; }
-            if (overallLaw >= 10) { tDM('Law 10+', -1); cD_DM -= 1; }
-            if (pcr >= 0 && pcr <= 3) { tDM('PCR 0-3', 1); cD_DM += 1; }
-            if (pcr >= 7 && pcr <= 9) { tDM('PCR 7-9', -2); cD_DM -= 2; }
-            culD = Math.max(1, tRoll2D('Diversity Roll') + cD_DM);
-            tResult('Diversity Score', culD);
-    
-            // Xenophilia
-            tSection('Culture: Xenophilia (X)');
-            let cX_DM = 0;
-            if (base.pop >= 1 && base.pop <= 5) { tDM('Pop 1-5', -1); cX_DM -= 1; }
-            if (base.pop >= 9) { tDM('Pop 9+', 2); cX_DM += 2; }
-            if (base.gov === 13 || base.gov === 14) { tDM('Gov 13,14', -2); cX_DM -= 2; }
-            if (overallLaw >= 10) { tDM('Law 10+', -2); cX_DM -= 2; }
-            if (base.starport === 'A') { tDM('Starport A', 2); cX_DM += 2; }
-            if (base.starport === 'B') { tDM('Starport B', 1); cX_DM += 1; }
-            if (base.starport === 'D') { tDM('Starport D', -1); cX_DM -= 1; }
-            if (base.starport === 'E') { tDM('Starport E', -2); cX_DM -= 2; }
-            if (base.starport === 'X') { tDM('Starport X', -4); cX_DM -= 4; }
-            if (culD >= 1 && culD <= 3) { tDM('Low Diversity', -2); cX_DM -= 2; }
-            if (culD >= 12) { tDM('Extreme Diversity', 1); cX_DM += 1; }
-            culX = Math.max(1, tRoll2D('Xenophilia Roll') + cX_DM);
-            tResult('Xenophilia Score', culX);
-    
-            // Uniqueness
-            tSection('Culture: Uniqueness (U)');
-            let cU_DM = 0;
-            if (base.starport === 'A') { tDM('Starport A', -2); cU_DM -= 2; }
-            if (base.starport === 'B') { tDM('Starport B', -1); cU_DM -= 1; }
-            if (base.starport === 'D') { tDM('Starport D', 1); cU_DM += 1; }
-            if (base.starport === 'E') { tDM('Starport E', 2); cU_DM += 2; }
-            if (base.starport === 'X') { tDM('Starport X', 4); cU_DM += 4; }
-            if (culD >= 1 && culD <= 3) { tDM('Low Diversity', 2); cU_DM += 2; }
-            if ([9, 10, 11].includes(culX)) { tDM('High Xenophilia', -1); cU_DM -= 1; }
-            if (culX >= 12) { tDM('Extreme Xenophilia', -2); cU_DM -= 2; }
-            culU = Math.max(1, tRoll2D('Uniqueness Roll') + cU_DM);
-            tResult('Uniqueness Score', culU);
-    
-            // Symbology
-            tSection('Culture: Symbology (S)');
-            let cS_DM = 0;
-            if (base.gov === 13 || base.gov === 14) { tDM('Gov 13,14', 2); cS_DM += 2; }
-            if (H === 0 || H === 1) { tDM('Low TL (0-1)', -3); cS_DM -= 3; }
-            if (H === 2 || H === 3) { tDM('Low TL (2-3)', -1); cS_DM -= 1; }
-            if ([9, 10, 11].includes(H)) { tDM('High TL (9-11)', 2); cS_DM += 2; }
-            if (H >= 12) { tDM('High TL (12+)', 4); cS_DM += 4; }
-            if ([9, 10, 11].includes(culU)) { tDM('High Uniqueness', 1); cS_DM += 1; }
-            if (culU >= 12) { tDM('Extreme Uniqueness', 3); cS_DM += 3; }
-            culS = Math.max(1, tRoll2D('Symbology Roll') + cS_DM);
-            tResult('Symbology Score', culS);
+            if (_t5Socio && _t5Socio.H !== undefined && _t5Socio.A !== undefined &&
+                _t5Socio.S !== undefined && _t5Socio.Sym !== undefined) {
+                // Carry over T5 Cx values: H→D, A→X, S→U, Sym→S
+                culD = _t5Socio.H;
+                culX = _t5Socio.A;
+                culU = _t5Socio.S;
+                culS = _t5Socio.Sym;
+                tSection('Culture: DXUS [carried from T5 Cx]');
+                tResult('Diversity (D) = T5 Homogeneity (H)', culD);
+                tResult('Xenophilia (X) = T5 Acceptance (A)', culX);
+                tResult('Uniqueness (U) = T5 Strangeness (S)', culU);
+                tResult('Symbology (S) = T5 Symbols (Sym)', culS);
+            } else {
+                // Diversity
+                tSection('Culture: Diversity (D)');
+                let cD_DM = 0;
+                if (base.pop >= 1 && base.pop <= 5) { tDM('Pop 1-5', -2); cD_DM -= 2; }
+                if (base.pop >= 9) { tDM('Pop 9+', 2); cD_DM += 2; }
+                if ([0, 1, 2].includes(base.gov)) { tDM('Gov 0,1,2', 1); cD_DM += 1; }
+                if (base.gov === 7) { tDM('Gov 7', 4); cD_DM += 4; }
+                if ([13, 14, 15].includes(base.gov)) { tDM('Gov 13-15', -4); cD_DM -= 4; }
+                if (overallLaw >= 0 && overallLaw <= 4) { tDM('Law 0-4', 1); cD_DM += 1; }
+                if (overallLaw >= 10) { tDM('Law 10+', -1); cD_DM -= 1; }
+                if (pcr >= 0 && pcr <= 3) { tDM('PCR 0-3', 1); cD_DM += 1; }
+                if (pcr >= 7 && pcr <= 9) { tDM('PCR 7-9', -2); cD_DM -= 2; }
+                culD = Math.max(1, tRoll2D('Diversity Roll') + cD_DM);
+                tResult('Diversity Score', culD);
+
+                // Xenophilia
+                tSection('Culture: Xenophilia (X)');
+                let cX_DM = 0;
+                if (base.pop >= 1 && base.pop <= 5) { tDM('Pop 1-5', -1); cX_DM -= 1; }
+                if (base.pop >= 9) { tDM('Pop 9+', 2); cX_DM += 2; }
+                if (base.gov === 13 || base.gov === 14) { tDM('Gov 13,14', -2); cX_DM -= 2; }
+                if (overallLaw >= 10) { tDM('Law 10+', -2); cX_DM -= 2; }
+                if (base.starport === 'A') { tDM('Starport A', 2); cX_DM += 2; }
+                if (base.starport === 'B') { tDM('Starport B', 1); cX_DM += 1; }
+                if (base.starport === 'D') { tDM('Starport D', -1); cX_DM -= 1; }
+                if (base.starport === 'E') { tDM('Starport E', -2); cX_DM -= 2; }
+                if (base.starport === 'X') { tDM('Starport X', -4); cX_DM -= 4; }
+                if (culD >= 1 && culD <= 3) { tDM('Low Diversity', -2); cX_DM -= 2; }
+                if (culD >= 12) { tDM('Extreme Diversity', 1); cX_DM += 1; }
+                culX = Math.max(1, tRoll2D('Xenophilia Roll') + cX_DM);
+                tResult('Xenophilia Score', culX);
+
+                // Uniqueness
+                tSection('Culture: Uniqueness (U)');
+                let cU_DM = 0;
+                if (base.starport === 'A') { tDM('Starport A', -2); cU_DM -= 2; }
+                if (base.starport === 'B') { tDM('Starport B', -1); cU_DM -= 1; }
+                if (base.starport === 'D') { tDM('Starport D', 1); cU_DM += 1; }
+                if (base.starport === 'E') { tDM('Starport E', 2); cU_DM += 2; }
+                if (base.starport === 'X') { tDM('Starport X', 4); cU_DM += 4; }
+                if (culD >= 1 && culD <= 3) { tDM('Low Diversity', 2); cU_DM += 2; }
+                if ([9, 10, 11].includes(culX)) { tDM('High Xenophilia', -1); cU_DM -= 1; }
+                if (culX >= 12) { tDM('Extreme Xenophilia', -2); cU_DM -= 2; }
+                culU = Math.max(1, tRoll2D('Uniqueness Roll') + cU_DM);
+                tResult('Uniqueness Score', culU);
+
+                // Symbology
+                tSection('Culture: Symbology (S)');
+                let cS_DM = 0;
+                if (base.gov === 13 || base.gov === 14) { tDM('Gov 13,14', 2); cS_DM += 2; }
+                if (H === 0 || H === 1) { tDM('Low TL (0-1)', -3); cS_DM -= 3; }
+                if (H === 2 || H === 3) { tDM('Low TL (2-3)', -1); cS_DM -= 1; }
+                if ([9, 10, 11].includes(H)) { tDM('High TL (9-11)', 2); cS_DM += 2; }
+                if (H >= 12) { tDM('High TL (12+)', 4); cS_DM += 4; }
+                if ([9, 10, 11].includes(culU)) { tDM('High Uniqueness', 1); cS_DM += 1; }
+                if (culU >= 12) { tDM('Extreme Uniqueness', 3); cS_DM += 3; }
+                culS = Math.max(1, tRoll2D('Symbology Roll') + cS_DM);
+                tResult('Symbology Score', culS);
+            }
     
             // Cohesion
             tSection('Culture: Cohesion (C)');
@@ -1368,87 +1387,108 @@
         let tcArr = tcs;
         tSection('Eco: Importance (Ix)');
         let Im = 0;
-        if (['A', 'B'].includes(base.starport)) { tDM('Starport A-B', 1); Im += 1; }
-        if (['D', 'E', 'X'].includes(base.starport)) { tDM('Starport D-X', -1); Im -= 1; }
-        if (base.tl <= 8) { tDM('TL <= 8', -1); Im -= 1; }
-        if (base.tl >= 10 && base.tl <= 15) { tDM('TL 10-15', 1); Im += 1; }
-        if (base.tl >= 16) { tDM('TL 16+', 2); Im += 2; }
-        if (base.pop <= 6) { tDM('Pop <= 6', -1); Im -= 1; }
-        if (base.pop >= 9) { tDM('Pop >= 9', 1); Im += 1; }
-        if (tcArr.includes('Ag')) { tDM('Agricultural', 1); Im += 1; }
-        if (tcArr.includes('In')) { tDM('Industrial', 1); Im += 1; }
-        if (tcArr.includes('Ri')) { tDM('Rich', 1); Im += 1; }
-        if (basesCount >= 2) { tDM('Bases >= 2', 1); Im += 1; }
-        tResult('Importance Index (Ix)', Im);
+        if (_t5Socio && _t5Socio.importance !== undefined) {
+            Im = _t5Socio.importance;
+            tResult('Importance Index (Ix) [carried from T5]', Im);
+        } else {
+            if (['A', 'B'].includes(base.starport)) { tDM('Starport A-B', 1); Im += 1; }
+            if (['D', 'E', 'X'].includes(base.starport)) { tDM('Starport D-X', -1); Im -= 1; }
+            if (base.tl <= 8) { tDM('TL <= 8', -1); Im -= 1; }
+            if (base.tl >= 10 && base.tl <= 15) { tDM('TL 10-15', 1); Im += 1; }
+            if (base.tl >= 16) { tDM('TL 16+', 2); Im += 2; }
+            if (base.pop <= 6) { tDM('Pop <= 6', -1); Im -= 1; }
+            if (base.pop >= 9) { tDM('Pop >= 9', 1); Im += 1; }
+            if (tcArr.includes('Ag')) { tDM('Agricultural', 1); Im += 1; }
+            if (tcArr.includes('In')) { tDM('Industrial', 1); Im += 1; }
+            if (tcArr.includes('Ri')) { tDM('Rich', 1); Im += 1; }
+            if (basesCount >= 2) { tDM('Bases >= 2', 1); Im += 1; }
+            tResult('Importance Index (Ix)', Im);
+        }
     
         tSection('Eco: Resources Final (R)');
-        let ecoR = resourceRating;
-        if (tcArr.includes('In') || tcArr.includes('Ag')) {
-            let consumeRoll = Math.floor(rng() * 6);
-            tDM('Industrial/Ag Consumption', -consumeRoll);
-            ecoR -= consumeRoll;
-            ecoR = Math.max(2, ecoR);
+        let ecoR, ecoL, ecoI, ecoE;
+        if (_t5Socio && _t5Socio.ecoResources !== undefined && _t5Socio.ecoLabor !== undefined &&
+            _t5Socio.ecoInfrastructure !== undefined && _t5Socio.ecoEfficiency !== undefined) {
+            ecoR = _t5Socio.ecoResources;
+            ecoL = _t5Socio.ecoLabor;
+            ecoI = _t5Socio.ecoInfrastructure;
+            ecoE = _t5Socio.ecoEfficiency;
+            tResult('Resources (R) [carried from T5]', ecoR);
+            tResult('Labor (L) [carried from T5]', ecoL);
+            tResult('Infrastructure (I) [carried from T5]', ecoI);
+            tResult('Efficiency (E) [carried from T5]', ecoE);
+        } else {
+            ecoR = resourceRating;
+            if (tcArr.includes('In') || tcArr.includes('Ag')) {
+                let consumeRoll = Math.floor(rng() * 6);
+                tDM('Industrial/Ag Consumption', -consumeRoll);
+                ecoR -= consumeRoll;
+                ecoR = Math.max(2, ecoR);
+            }
+            if (base.tl >= 8) {
+                tDM('TL 8+ GG/Belt bonus', ggCount + beltCount);
+                ecoR += ggCount + beltCount;
+            }
+            if (ecoR < 2) {
+                ecoR = 2 + ggCount + beltCount;
+                tResult('Minimum Resource Floor', ecoR);
+            }
+            tResult('Final Resources (R)', ecoR);
+
+            tSection('Eco: Labor (L)');
+            ecoL = base.pop <= 1 ? 0 : base.pop - 1;
+            tResult('Labor (L)', ecoL);
+
+            tSection('Eco: Infrastructure (I)');
+            ecoI = Im;
+            if (base.pop >= 4 && base.pop <= 6) {
+                let infraBonus = Math.floor(rng() * 6) + 1;
+                tDM('Pop 4-6 Bonus', infraBonus);
+                ecoI += infraBonus;
+            }
+            if (base.pop >= 7) {
+                let infraRoll = tRoll2D('Infrastructure Bonus Roll');
+                ecoI += infraRoll;
+            }
+            if (base.pop === 0 || ecoI < 0) ecoI = 0;
+            tResult('Infrastructure (I)', ecoI);
+
+            tSection('Eco: Efficiency (E)');
+            ecoE = 0;
+            if (base.pop === 0) ecoE = -5;
+            else if (base.pop >= 1 && base.pop <= 6) {
+                let eRoll = tRoll2D('Efficiency Roll');
+                ecoE = eRoll - 7;
+            }
+            else if (base.pop >= 7) {
+                let eRoll = tRoll2D3('Efficiency Roll Base');
+                ecoE = eRoll - 4;
+            }
         }
-        if (base.tl >= 8) {
-            tDM('TL 8+ GG/Belt bonus', ggCount + beltCount);
-            ecoR += ggCount + beltCount;
-        }
-        if (ecoR < 2) {
-            ecoR = 2 + ggCount + beltCount;
-            tResult('Minimum Resource Floor', ecoR);
-        }
-        tResult('Final Resources (R)', ecoR);
     
-        tSection('Eco: Labor (L)');
-        let ecoL = base.pop <= 1 ? 0 : base.pop - 1;
-        tResult('Labor (L)', ecoL);
-    
-        tSection('Eco: Infrastructure (I)');
-        let ecoI = Im;
-        if (base.pop >= 4 && base.pop <= 6) {
-            let infraBonus = Math.floor(rng() * 6) + 1;
-            tDM('Pop 4-6 Bonus', infraBonus);
-            ecoI += infraBonus;
+        const _ecoCarriedFromT5 = _t5Socio && _t5Socio.ecoEfficiency !== undefined;
+        if (!_ecoCarriedFromT5) {
+            let ecoE_DM = 0;
+            if ([0, 3, 6, 9, 11, 12, 15].includes(base.gov)) { tDM('Gov 0,3,6,9,11,12,15', -1); ecoE_DM -= 1; }
+            if ([1, 2, 4, 5, 8].includes(base.gov)) { tDM('Gov 1,2,4,5,8', 1); ecoE_DM += 1; }
+            if (overallLaw >= 0 && overallLaw <= 4) { tDM('Law 0-4', 1); ecoE_DM += 1; }
+            if (overallLaw >= 10) { tDM('Law 10+', -1); ecoE_DM -= 1; }
+            if (pcr >= 0 && pcr <= 3) { tDM('PCR 0-3', -1); ecoE_DM -= 1; }
+            if (pcr >= 8) { tDM('PCR 8+', 1); ecoE_DM += 1; }
+            if (culP >= 1 && culP <= 3) { tDM('Culture P 1-3', -1); ecoE_DM -= 1; }
+            if (culP >= 9) { tDM('Culture P 9+', 1); ecoE_DM += 1; }
+            if (culE >= 1 && culE <= 3) { tDM('Culture E 1-3', -1); ecoE_DM -= 1; }
+            if (culE >= 9) { tDM('Culture E 9+', 1); ecoE_DM += 1; }
+
+            if (base.pop > 0) {
+                ecoE += ecoE_DM;
+                let fEE = Math.max(-5, Math.min(5, ecoE));
+                if (ecoE !== fEE) tClamp('Efficiency', ecoE, fEE);
+                ecoE = fEE;
+                if (ecoE === 0) { tResult('Efficiency 0 Neutralized', 1); ecoE = 1; }
+            }
+            tResult('Efficiency (E)', ecoE);
         }
-        if (base.pop >= 7) {
-            let infraRoll = tRoll2D('Infrastructure Bonus Roll');
-            ecoI += infraRoll;
-        }
-        if (base.pop === 0 || ecoI < 0) ecoI = 0;
-        tResult('Infrastructure (I)', ecoI);
-    
-        tSection('Eco: Efficiency (E)');
-        let ecoE = 0;
-        if (base.pop === 0) ecoE = -5;
-        else if (base.pop >= 1 && base.pop <= 6) {
-            let eRoll = tRoll2D('Efficiency Roll');
-            ecoE = eRoll - 7;
-        }
-        else if (base.pop >= 7) {
-            let eRoll = tRoll2D3('Efficiency Roll Base');
-            ecoE = eRoll - 4;
-        }
-    
-        let ecoE_DM = 0;
-        if ([0, 3, 6, 9, 11, 12, 15].includes(base.gov)) { tDM('Gov 0,3,6,9,11,12,15', -1); ecoE_DM -= 1; }
-        if ([1, 2, 4, 5, 8].includes(base.gov)) { tDM('Gov 1,2,4,5,8', 1); ecoE_DM += 1; }
-        if (overallLaw >= 0 && overallLaw <= 4) { tDM('Law 0-4', 1); ecoE_DM += 1; }
-        if (overallLaw >= 10) { tDM('Law 10+', -1); ecoE_DM -= 1; }
-        if (pcr >= 0 && pcr <= 3) { tDM('PCR 0-3', -1); ecoE_DM -= 1; }
-        if (pcr >= 8) { tDM('PCR 8+', 1); ecoE_DM += 1; }
-        if (culP >= 1 && culP <= 3) { tDM('Culture P 1-3', -1); ecoE_DM -= 1; }
-        if (culP >= 9) { tDM('Culture P 9+', 1); ecoE_DM += 1; }
-        if (culE >= 1 && culE <= 3) { tDM('Culture E 1-3', -1); ecoE_DM -= 1; }
-        if (culE >= 9) { tDM('Culture E 9+', 1); ecoE_DM += 1; }
-    
-        if (base.pop > 0) {
-            ecoE += ecoE_DM;
-            let fEE = Math.max(-5, Math.min(5, ecoE));
-            if (ecoE !== fEE) tClamp('Efficiency', ecoE, fEE);
-            ecoE = fEE;
-            if (ecoE === 0) { tResult('Efficiency 0 Neutralized', 1); ecoE = 1; }
-        }
-        tResult('Efficiency (E)', ecoE);
     
         tSection('Resource Units (RU)');
         let calcR = ecoR === 0 ? 1 : ecoR;

@@ -506,6 +506,28 @@
     function generateSystemInventory(sys, mainworldBase) {
         tSection('System Inventory');
 
+        const hasT5Override = mainworldBase &&
+            mainworldBase.gasGiantsCount !== undefined &&
+            mainworldBase.planetoidBelts !== undefined &&
+            mainworldBase.worldCount !== undefined;
+
+        if (hasT5Override) {
+            // T5/OTU Import Override: use PBG and W. field directly instead of rolling.
+            sys.gasGiants = mainworldBase.gasGiantsCount;
+            tResult('Gas Giants (T5 Override)', sys.gasGiants, 'MgT2E 1.3: System Inventory');
+
+            sys.planetoidBelts = mainworldBase.planetoidBelts;
+            tResult('Planetoid Belts (T5 Override)', sys.planetoidBelts, 'MgT2E 1.3: System Inventory');
+
+            sys.terrestrialPlanets = Math.max(0, mainworldBase.worldCount - sys.gasGiants - sys.planetoidBelts);
+            tResult('Terrestrial Planets (T5 Derived)', sys.terrestrialPlanets, 'MgT2E 1.3: System Inventory');
+
+            sys.totalWorlds = mainworldBase.worldCount;
+            tResult('Total Worlds (T5 Override)', sys.totalWorlds, 'MgT2E 1.3: System Inventory');
+
+            return sys;
+        }
+
         // Gas Giants - WBH Adjustment: 83% presence (9-) to satisfy the 15-20% Lunar Mainworld statistical requirement
         let ggRoll = tRoll2D('Gas Giant Presence (<= 9)');
         let ggExists = ggRoll <= 9 || (mainworldBase && mainworldBase.gasGiant);

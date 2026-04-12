@@ -1,4 +1,4 @@
-# As Above, So Below (v0.7.2)
+# As Above, So Below (v0.7.3)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -37,6 +37,17 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 ---
 ## 📜 Changelog
 
+### [v0.7.3] - 2026-04-12
+1. **Mongoose Socioeconomic:** Fixed bug that did not check if Ix, Cx, or Ex could be inherited
+2. **Mongoose System Expand:** Fixed bug that did not make use of T5 Stellar information and PBG
+3. **Import Sector .tsv:** Fixed bug that did not capture Worlds value
+4. **Generate Xboat:** Added user options on range and jump distances
+5. **Import Imperium:** Added the option to bulk import Imperial Sectors
+
+
+### [v0.7.2.1] - 2026-04-11
+1. **Settings Menu:** Added Solo-6 button to download Solo Sector 6 data
+
 ### [v0.7.2] - 2026-04-11
 1. **Filter Engine Expansion:** Added Belt and Travel Zone filters
 2. **Filter UI:** Created new Filter section for Belts, GG, Zones
@@ -59,27 +70,6 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 5. **Fixed Mongoose World and Moon Temperature:** Orbital WBH errata applied.  Bug tidal locking some worlds to stars corrected.
 6. **Fixed Gas Giant Temperature:**  Wrong age exponent fixed.  Age divide by zero corrected (min. Gyr).
 
-### [v0.6.1] - 2026-04-07
-1. **Statistical Auditor Integration:** The StatisticalAuditor is now fully integrated into all bulk generation macros (CT, MgT2E, T5, and RTT) within macro_orchestrator.js.
-2. **Statistical Auditor Integration:** It now also triggers for single-system regeneration via the Context Menu. When you regenerate a single hex, the console will now output a specific "Subsector-scale" audit for that system, allowing you to see exactly how that system's properties align with expected Traveller distributions.
-3. **Refined Thermal Physics (MgT2E):** Patched a significant scaling issue in mgt2e_world_engine.js. Previously, the tidal heat calculation for moons incorrectly used the star's mass instead of the parent planet's mass, leading to nonsensical temperature overflows. Internal heat (inherentK) is now physically capped at 200K to ensure consistent climate modeling.
-4. **UI/Console Parity:** The StatisticalAuditor now outputs color-coded [PASS] and [STATISTICAL WARNING] flags directly to the browser console, providing immediate feedback on whether your current sector generation is matching the target RAW (Rules-As-Written) frequency tables.
-5. **T5**: Fixed starport distribution; size 0 mainworlds now possible;
-6. **CT**: Fixed atmosphere penalty for mainworlds in top down generation
-
-### [v0.6] - 2026-04-06
-1. **ALL**: Refactored code to eliminate duplicates and move common functions to data files
-2. **ALL**:  Added name to filter window
-3. **RTT**: Removed superfluous outerDM = -1; Reduced the number of worldless systems to about 8%
-4. **RTT**: Fixed incorrect Flare Star check formula
-5. **MGT2E**: Fixed size string parsing showing NaN instead of Size S.  
-6. **MGT2E**: Added Culture Quirks to world generation
-7. **CT**: Built universal ct_stellar_engine.js to remove duplication between ct_topdown_engine.js and ct_bottomup_engine.js
-8. **CT**: Unifying stellar generation fixed bugs in top_down and bottom_up companion generation
-9. **CT**: Fixed orbital slot allocation
-10. **CT**: Fixed Gas Giant presence in system generation
-11. **CT**: Fixed mainworld as satellite frequency
-12. **T5**: Refactored social engine (including TL) resolving infrequent systems with high tech levels
 
 
 ---

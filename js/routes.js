@@ -1,0 +1,211 @@
+// =====================================================================
+// ROUTES.JS — Interstellar Route Generation (X-Boat & Trade)
+// Depends on: core.js (hexStates, getHexDistance, getHexCoords,
+//             window.sectorRoutes)
+// =====================================================================
+
+/**
+ * Calculate the T5 Importance Extension (Ix) for a world.
+ * Used by route generators to identify high-value nodes.
+ */
+function calculateT5Ix(base) {
+    if (!base) return -1;
+    let Ix = 0;
+    const starport = base.starport || 'X';
+    const tl = base.tl || 0;
+    const pop = base.pop || 0;
+    const tradeCodes = base.tradeCodes || [];
+    const hasNaval = base.navalBase || false;
+    const hasScout = base.scoutBase || false;
+
+    if (['A', 'B'].includes(starport)) Ix += 1;
+    if (['D', 'E', 'X'].includes(starport)) Ix -= 1;
+    if (tl >= 10) Ix += 1;
+    if (tl >= 16) Ix += 1;
+    if (tl <= 8) Ix -= 1;
+    if (tradeCodes.includes("Ag")) Ix += 1;
+    if (tradeCodes.includes("Hi")) Ix += 1;
+    if (tradeCodes.includes("In")) Ix += 1;
+    if (tradeCodes.includes("Ri")) Ix += 1;
+    if (pop <= 6) Ix -= 1;
+    if (hasNaval && hasScout) Ix += 1;
+    return Ix;
+}
+
+/**
+ * Global helper to add a route with duplicate prevention.
+ * @param {string} id1
+ * @param {string} id2
+ * @param {string} type - 'Xboat', 'Trade', or 'Secondary'
+ * @param {Map|null} adjMap - optional adjacency map to update in-place
+ */
+function addRoute(id1, id2, type = "Trade", adjMap = null) {
+    if (!window.sectorRoutes) window.sectorRoutes = [];
+    const sorted = [id1, id2].sort();
+
+    const exists = window.sectorRoutes.some(r => r.startId === sorted[0] && r.endId === sorted[1]);
+    if (!exists) {
+        window.sectorRoutes.push({ startId: sorted[0], endId: sorted[1], type: type });
+        if (adjMap) {
+            if (!adjMap.has(id1)) adjMap.set(id1, []);
+            if (!adjMap.has(id2)) adjMap.set(id2, []);
+            adjMap.get(id1).push(id2);
+            adjMap.get(id2).push(id1);
+        }
+    }
+}
+
+// ── Union-Find ────────────────────────────────────────────────────────
+// Used to track which worlds are already in the same connected component
+// so BFS bridging skips pairs that are already reachable.
+
+function _ufBuild(routes) {
+    const parent = new Map();
+
+    function find(x) {
+        if (!parent.has(x)) parent.set(x, x);
+        if (parent.get(x) !== x) parent.set(x, find(parent.get(x)));
+        return parent.get(x);
+    }
+
+    function union(x, y) {
+        parent.set(find(x), find(y));
+    }
+
+    function connected(x, y) {
+        return find(x) === find(y);
+    }
+
+    for (const r of routes) {
+        union(r.startId, r.endId);
+    }
+
+    return { find, union, connected };
+}
+
+// ── BFS path finder ───────────────────────────────────────────────────
+// Finds the shortest hop path (each hop <= maxJump) between startId and
+// endId through any populated world. Returns an array of hex IDs forming
+// the path (inclusive of start and end), or null if unreachable.
+
+function _bfsPath(startId, endId, worlds, maxJump, worldById) {
+    const queue = [[startId]];
+    const visited = new Set([startId]);
+
+    while (queue.length > 0) {
+        const path = queue.shift();
+        const current = worldById.get(path[path.length - 1]);
+        if (!current) continue;
+
+        for (const w of worlds) {
+            if (visited.has(w.id)) continue;
+            if (getHexDistance(current.q, current.r, w.q, w.r) <= maxJump) {
+                const newPath = [...path, w.id];
+                if (w.id === endId) return newPath;
+                visited.add(w.id);
+                queue.push(newPath);
+            }
+        }
+    }
+    return null;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+/**
+ * Generate X-Boat routes across all populated hexes.
+ * Clears existing sectorRoutes and rebuilds from scratch.
+ *
+ * @param {number} maxJump  - Maximum hex distance for a single hop (default 4).
+ * @param {number} maxRange - Straight-line distance within which two Ix 4+ worlds
+ *                            will be connected. If > maxJump, BFS paths of shorter
+ *                            hops bridge the gap through any populated worlds.
+ *
+ * Algorithm:
+ *  1. Collect all populated worlds; identify Ix 4+ ("important") worlds.
+ *  2. Direct links: for each Ix 4+ pair within maxJump, add a link unless
+ *     another important world lies exactly on the straight-line path (redundancy).
+ *  3. BFS bridging: for each Ix 4+ pair within maxRange (but beyond maxJump),
+ *     skip if already connected; otherwise BFS through any world with hops <=
+ *     maxJump. Pairs are processed nearest-first so shorter bridges are laid
+ *     before longer ones, reducing redundant hops. Each found path's hops are
+ *     added; addRoute() prevents duplicate edges.
+ */
+function generateXboatRoutes(maxJump = 4, maxRange = 12) {
+    window.sectorRoutes = [];
+    const worlds = [];
+    const importantWorlds = [];
+
+    // Step 1: Collect worlds and compute Ix
+    hexStates.forEach((state, id) => {
+        if (state.type !== 'SYSTEM_PRESENT') return;
+        const data = state.t5Data || state.mgt2eData || state.ctData;
+        if (!data) return;
+        const ix = calculateT5Ix(data);
+        const coords = getHexCoords(id);
+        const worldInfo = { id, q: coords.q, r: coords.r, ix };
+        worlds.push(worldInfo);
+        if (ix >= 4) importantWorlds.push(worldInfo);
+    });
+
+    if (worlds.length === 0) return;
+
+    const worldById = new Map(worlds.map(w => [w.id, w]));
+    const adj = new Map();
+
+    // Step 2: Direct links between Ix 4+ worlds within maxJump
+    for (let i = 0; i < importantWorlds.length; i++) {
+        for (let j = i + 1; j < importantWorlds.length; j++) {
+            const w1 = importantWorlds[i];
+            const w2 = importantWorlds[j];
+            const dist = getHexDistance(w1.q, w1.r, w2.q, w2.r);
+
+            if (dist <= maxJump && dist > 0) {
+                // Skip if another important world lies exactly on the line w1-w2
+                let isRedundant = false;
+                for (const mid of importantWorlds) {
+                    if (mid.id === w1.id || mid.id === w2.id) continue;
+                    const d1 = getHexDistance(w1.q, w1.r, mid.q, mid.r);
+                    const d2 = getHexDistance(w2.q, w2.r, mid.q, mid.r);
+                    if (d1 + d2 === dist) { isRedundant = true; break; }
+                }
+                if (!isRedundant) addRoute(w1.id, w2.id, "Xboat", adj);
+            }
+        }
+    }
+
+    // Step 3: BFS bridging for Ix 4+ pairs beyond maxJump but within maxRange
+    if (maxRange > maxJump) {
+        const uf = _ufBuild(window.sectorRoutes);
+
+        // Collect candidate pairs sorted nearest-first
+        const pairs = [];
+        for (let i = 0; i < importantWorlds.length; i++) {
+            for (let j = i + 1; j < importantWorlds.length; j++) {
+                const w1 = importantWorlds[i];
+                const w2 = importantWorlds[j];
+                const dist = getHexDistance(w1.q, w1.r, w2.q, w2.r);
+                if (dist > maxJump && dist <= maxRange) {
+                    pairs.push({ w1, w2, dist });
+                }
+            }
+        }
+        pairs.sort((a, b) => a.dist - b.dist);
+
+        for (const { w1, w2 } of pairs) {
+            // Skip if already reachable via existing routes
+            if (uf.connected(w1.id, w2.id)) continue;
+
+            const path = _bfsPath(w1.id, w2.id, worlds, maxJump, worldById);
+            if (!path) continue;
+
+            for (let k = 0; k < path.length - 1; k++) {
+                addRoute(path[k], path[k + 1], "Xboat", adj);
+                uf.union(path[k], path[k + 1]);
+            }
+        }
+    }
+
+    const uniqueNodes = new Set();
+    window.sectorRoutes.forEach(r => { uniqueNodes.add(r.startId); uniqueNodes.add(r.endId); });
+    console.log(`Xboat Routes Generated (Jump-${maxJump}, Range-${maxRange}): ${window.sectorRoutes.length} routes. Unique Nodes: ${uniqueNodes.size}.`);
+}

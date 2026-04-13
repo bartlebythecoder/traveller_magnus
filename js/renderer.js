@@ -94,8 +94,8 @@ function draw() {
 
     // (Moved to layered pass below)
 
-    const MAX_GLOBAL_Q = 223;
-    const MAX_GLOBAL_R = 199;
+    const MAX_GLOBAL_Q = gridWidth  * 32 - 1;
+    const MAX_GLOBAL_R = gridHeight * 40 - 1;
 
     // =========================================================================
     // PASS 1: DRAW THE GRID & HEX BACKGROUNDS
@@ -734,17 +734,17 @@ function draw() {
 
     // Draw Sector & Subsector Borders
     if (showSubsectorBorders) {
-        const totalWidth = 223 * widthStep + size; // Extend lines to right edge of last hex
-        const totalHeight = 199 * heightStep + (heightStep / 2) + size; // Roughly bottom edge
+        const totalWidth  = (gridWidth  * 32 - 1) * widthStep  + size;
+        const totalHeight = (gridHeight * 40 - 1) * heightStep + (heightStep / 2) + size;
 
         // Subsector borders (thinner, darker)
         ctx.beginPath();
-        for (let i = 1; i <= 27; i++) {
+        for (let i = 1; i <= gridWidth * 4 - 1; i++) {
             const x = (i * 8 - 0.5) * widthStep;
             ctx.moveTo(x, -heightStep);
             ctx.lineTo(x, totalHeight);
         }
-        for (let j = 1; j <= 19; j++) {
+        for (let j = 1; j <= gridHeight * 4 - 1; j++) {
             const y = (j * 10 - 0.5) * heightStep;
             ctx.moveTo(-size, y);
             ctx.lineTo(totalWidth, y);
@@ -755,12 +755,12 @@ function draw() {
 
         // Sector borders (thicker, brighter)
         ctx.beginPath();
-        for (let i = 4; i <= 24; i += 4) {
+        for (let i = 4; i <= (gridWidth - 1) * 4; i += 4) {
             const x = (i * 8 - 0.5) * widthStep;
             ctx.moveTo(x, -heightStep);
             ctx.lineTo(x, totalHeight);
         }
-        for (let j = 4; j <= 16; j += 4) {
+        for (let j = 4; j <= (gridHeight - 1) * 4; j += 4) {
             const y = (j * 10 - 0.5) * heightStep;
             ctx.moveTo(-size, y);
             ctx.lineTo(totalWidth, y);

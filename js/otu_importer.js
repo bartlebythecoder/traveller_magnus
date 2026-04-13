@@ -24,12 +24,57 @@
         return window.IMPERIUM_SECTORS;
     }
 
+    const CACHE_PREFIX = 'otu_cache_';
+    const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+    /**
+     * Returns cached TSV text for a sector if it exists and is less than 24 hours old.
+     * Returns null on a miss, an expired entry, or any storage error.
+     */
+    function getCachedSector(name) {
+        try {
+            const raw = localStorage.getItem(CACHE_PREFIX + name);
+            if (!raw) return null;
+            const entry = JSON.parse(raw);
+            if (!entry || !entry.timestamp || !entry.data) return null;
+            if (Date.now() - entry.timestamp > CACHE_TTL_MS) return null;
+            return entry.data;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    /**
+     * Fetches a sector from the travellermap API, writes it to localStorage,
+     * and returns the raw TSV text. Silently skips the cache write if storage
+     * is full (QuotaExceededError) so the import still completes.
+     */
+    async function fetchAndCacheSector(name) {
+        const url = `https://travellermap.com/data/${encodeURIComponent(name)}/tab`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const text = await response.text();
+        try {
+            localStorage.setItem(CACHE_PREFIX + name, JSON.stringify({
+                timestamp: Date.now(),
+                data: text
+            }));
+        } catch (e) {
+            // QuotaExceededError or similar — cache write skipped, import continues.
+            console.warn(`[OTU Importer] Could not cache "${name}": ${e.message}`);
+        }
+        return text;
+    }
+
     /**
      * Returns true if a sector slot already contains non-empty hex data.
      * Used for the pre-flight collision check.
      */
     function sectorSlotHasData(slot) {
-        const prefix = slot.toUpperCase() + '-';
+        // Convert slot label to numeric sector ID so the prefix matches
+        // the numeric hexId format used since the v0.7.3 refactor.
+        const num = sectorSlotToNumber(slot);
+        const prefix = num + '-';
         for (const [hexId, state] of hexStates) {
             if (hexId.startsWith(prefix) && state && state.type !== 'EMPTY') {
                 return true;
@@ -140,18 +185,22 @@
         closeModal();
 
         // Fetch and import one sector at a time with a 1-second pause between
-        // each call to avoid hammering the travellermap API.
+        // each live API call to avoid hammering the travellermap API.
         const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
         for (let i = 0; i < selected.length; i++) {
             const { name, slot } = selected[i];
+            let fromCache = false;
             try {
-                if (typeof showToast === 'function') showToast(`Importing ${name} into Slot ${slot}… (${i + 1} of ${selected.length})`);
+                const cached = getCachedSector(name);
+                fromCache = cached !== null;
 
-                const url = `https://travellermap.com/data/${encodeURIComponent(name)}/tab`;
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const text = await response.text();
+                if (typeof showToast === 'function') {
+                    const source = fromCache ? 'cache' : `API (${i + 1} of ${selected.length})`;
+                    showToast(`Importing ${name} into Slot ${slot}… [${source}]`);
+                }
+
+                const text = fromCache ? cached : await fetchAndCacheSector(name);
 
                 // Delegate to the existing T5 TSV parser with the user-specified slot.
                 if (typeof importT5Tab === 'function') {
@@ -163,9 +212,96 @@
                 alert(`Failed to import "${name}": ${err.message}`);
             }
 
-            // Pause before the next request (skip delay after the last sector).
-            if (i < selected.length - 1) await delay(1000);
+            // Always pause 1 second after a live API call to respect travellermap rate limits.
+            if (!fromCache && i < selected.length - 1) {
+                await delay(1000);
+            }
         }
+    }
+
+    // =========================================================================
+    // IMPORT THE UNIVERSE
+    // =========================================================================
+
+    function getUniverseSectors() {
+        if (!window.UNIVERSE_SECTORS || window.UNIVERSE_SECTORS.length === 0) {
+            throw new Error('Universe sector list not loaded. Run convert_universe.ps1 to generate js/universe_data.js.');
+        }
+        return window.UNIVERSE_SECTORS;
+    }
+
+    /**
+     * Bulk-imports every sector in UNIVERSE_SECTORS into a freshly resized 16×8 canvas.
+     * Shows a warning confirmation first. Clears all existing data on proceed.
+     */
+    async function runUniverseImport() {
+        let sectors;
+        try {
+            sectors = getUniverseSectors();
+        } catch (err) {
+            alert(`Cannot import: ${err.message}`);
+            return;
+        }
+
+        const confirmed = confirm(
+            '⚠ EXPERIMENTAL FEATURE — USE AT YOUR OWN RISK ⚠\n\n' +
+            'Import the Universe will:\n' +
+            '  • Resize the canvas to 16×8 sectors (128 positions)\n' +
+            '  • Erase ALL existing hex data and routes\n' +
+            `  • Fetch up to ${sectors.length} sectors from travellermap.com\n` +
+            '    (cached sectors load instantly; live fetches are 1 second apart)\n\n' +
+            'This cannot be undone.\n\n' +
+            'Continue?'
+        );
+        if (!confirmed) return;
+
+        // Resize canvas to 16×8 and clear all state.
+        gridWidth  = 16;
+        gridHeight = 8;
+        hexStates.clear();
+        window.sectorRoutes = [];
+        window.undoStack    = [];
+        window.redoStack    = [];
+
+        centerCameraOnGrid();
+        requestAnimationFrame(draw);
+
+        const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+        let errorCount = 0;
+
+        for (let i = 0; i < sectors.length; i++) {
+            const { name, defaultSlot } = sectors[i];
+            let fromCache = false;
+            try {
+                const cached = getCachedSector(name);
+                fromCache = cached !== null;
+
+                if (typeof showToast === 'function') {
+                    const source = fromCache ? 'cache' : `API (${i + 1} of ${sectors.length})`;
+                    showToast(`Importing ${name} into Slot ${defaultSlot}… [${source}]`);
+                }
+
+                const text = fromCache ? cached : await fetchAndCacheSector(name);
+
+                if (typeof importT5Tab === 'function') {
+                    importT5Tab(text, name, defaultSlot);
+                } else {
+                    throw new Error('importT5Tab not available');
+                }
+            } catch (err) {
+                console.warn(`[Universe Import] Failed to import "${name}": ${err.message}`);
+                errorCount++;
+            }
+
+            if (!fromCache && i < sectors.length - 1) {
+                await delay(1000);
+            }
+        }
+
+        const summary = errorCount > 0
+            ? `Universe import complete. ${errorCount} sector(s) failed — see console for details.`
+            : `Universe import complete! ${sectors.length} sector(s) loaded.`;
+        if (typeof showToast === 'function') showToast(summary, 4000);
     }
 
     /** Wire up all event listeners once the DOM is ready. */
@@ -174,6 +310,12 @@
         const btnImperium = document.getElementById('btn-import-imperium');
         if (btnImperium) {
             btnImperium.addEventListener('click', openImperiumModal);
+        }
+
+        // "Import the Universe" settings button
+        const btnUniverse = document.getElementById('btn-import-universe');
+        if (btnUniverse) {
+            btnUniverse.addEventListener('click', runUniverseImport);
         }
 
         // Modal: Submit

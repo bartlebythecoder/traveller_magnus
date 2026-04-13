@@ -1,5 +1,14 @@
 # Changelog
 
+### [v0.7.4] - 2026-04-13
+1. **Import the Universe:** Added experimental bulk import of the full 16×8 OTU sector canvas
+2. **Numeric Sector IDs:** Refactored hex IDs from letter-based to numeric (legacy JSON auto-migrated on load)
+3. **Imperium Data:** Sector list now fetched live from travellermap API with correct OTU coordinates
+4. **Canvas Scaling:** Sector and subsector grid lines now span the full canvas at any grid size
+5. **Undo Stack:** Capped at 5 snapshots for canvases larger than 35 sectors to protect memory
+6. **Zoom:** Extended zoom-out limit from 0.1 to 0.03
+7. **API Courtesy:** Enforced 1-second delay after every live travellermap API call; sectors cached for 24 hours
+
 ### [v0.7.3] - 2026-04-12
 1. **Mongoose Socioeconomic:** Fixed bug that did not check if Ix, Cx, or Ex could be inherited
 2. **Mongoose System Expand:** Fixed bug that did not make use of T5 Stellar information and PBG

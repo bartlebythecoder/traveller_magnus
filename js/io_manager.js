@@ -36,6 +36,8 @@ function setupSaveLoad() {
         if (typeof tSection === 'function') tSection("JSON Export: Map & Aesthetics");
 
         const stateObj = {
+            gridWidth:  gridWidth,
+            gridHeight: gridHeight,
             hexStates: {},
             routes: window.sectorRoutes || [],
             rules: window.activeFilterRules || [], // Legacy Support
@@ -119,12 +121,62 @@ function setupSaveLoad() {
     }
 }
 
+/**
+ * Migrates a hexStates object and routes array from the legacy letter-based
+ * sector ID scheme to the current numeric scheme.
+ * Legacy scheme: A=1, B=2 ... Z=26, AA=27, BB=28 ... on a fixed 7×5 grid.
+ * Returns { hexStates, routes } with numeric IDs.
+ */
+function migrateLegacyIds(legacyHexStates, legacyRoutes) {
+    const migrateHexId = (hexId) => {
+        if (!hexId) return hexId;
+        const parts = hexId.split('-');
+        if (parts.length < 3) return hexId;
+        if (isNaN(parseInt(parts[0], 10))) {
+            const sectorNum = legacySectorLetterToIndex(parts[0]) + 1;
+            return `${sectorNum}-${parts[1]}-${parts[2]}`;
+        }
+        return hexId;
+    };
+
+    const migratedHexStates = {};
+    for (const key in legacyHexStates) {
+        migratedHexStates[migrateHexId(key)] = legacyHexStates[key];
+    }
+
+    const migratedRoutes = (legacyRoutes || []).map(route => ({
+        ...route,
+        startId: migrateHexId(route.startId),
+        endId:   migrateHexId(route.endId)
+    }));
+
+    return { hexStates: migratedHexStates, routes: migratedRoutes };
+}
+
 function applyLoadedMapData(parsedData) {
     saveHistoryState('Load Map JSON');
     hexStates.clear();
 
     if (parsedData.hexStates) {
         if (typeof tSection === 'function') tSection("JSON Import: Analyzing Map Manifest");
+
+        // Restore grid dimensions, or detect legacy and migrate.
+        if (parsedData.gridWidth && parsedData.gridHeight) {
+            gridWidth  = parsedData.gridWidth;
+            gridHeight = parsedData.gridHeight;
+        } else {
+            // Legacy file — no grid block means fixed 7×5 with letter-based IDs.
+            gridWidth  = 7;
+            gridHeight = 5;
+            const firstKey = Object.keys(parsedData.hexStates)[0] || '';
+            const firstPart = firstKey.split('-')[0] || '';
+            if (isNaN(parseInt(firstPart, 10))) {
+                if (typeof writeLogLine === 'function') writeLogLine('JSON Load: Legacy letter-based IDs detected — migrating to numeric scheme.');
+                const migrated = migrateLegacyIds(parsedData.hexStates, parsedData.routes);
+                parsedData = { ...parsedData, hexStates: migrated.hexStates, routes: migrated.routes };
+                if (typeof writeLogLine === 'function') writeLogLine(`JSON Load: Migration complete — ${Object.keys(migrated.hexStates).length} hex(es) converted.`);
+            }
+        }
 
         for (const key in parsedData.hexStates) {
             hexStates.set(key, parsedData.hexStates[key]);
@@ -271,10 +323,10 @@ function setupSectorPicker() {
 function exportRoutesToXML(sectorID) {
     if (!window.sectorRoutes || window.sectorRoutes.length === 0) return;
 
-    // Calculate X, Y coordinates for the sector based on its ID
-    const sIdx = sectorID.length === 1 ? sectorID.charCodeAt(0) - 65 : (sectorID.charCodeAt(0) - 65) + 26;
-    const sX = Math.floor(sIdx / 4);
-    const sY = sIdx % 4;
+    // Calculate X, Y grid coordinates for the sector from its numeric ID.
+    const sNum = parseInt(sectorID, 10);
+    const sX = (sNum - 1) % gridWidth;
+    const sY = Math.floor((sNum - 1) / gridWidth);
 
     let xmlLines = [
         '<?xml version="1.0"?>',
@@ -491,19 +543,22 @@ function importT5Tab(fileContent, fileName, forcedSectorSlot = null) {
     }
 
     let importCount = 0;
-    let fallbackSectorSlot = "A";
+    let fallbackSectorSlot = "18";
 
     if (forcedSectorSlot) {
         fallbackSectorSlot = forcedSectorSlot.toUpperCase();
     } else {
-        const nameMatch = fileName.match(/Sector_([A-Z]{1,2})/i);
+        const nameMatch = fileName.match(/Sector_([A-Z]{1,2}|\d+)/i);
         if (nameMatch) {
             fallbackSectorSlot = nameMatch[1].toUpperCase();
         } else {
-            const userSlot = prompt(`Which Sector Slot (A to AF) should we import "${fileName}" into?`, "A");
+            const userSlot = prompt(`Which Sector number (1 to ${gridWidth * gridHeight}; ${Math.ceil(gridWidth * gridHeight / 2)} is centre) should we import "${fileName}" into?`, String(Math.ceil(gridWidth * gridHeight / 2)));
             if (userSlot) fallbackSectorSlot = userSlot.toUpperCase();
         }
     }
+
+    // Convert the slot label (letter or number string) to a numeric sector ID.
+    const sectorNum = sectorSlotToNumber(fallbackSectorSlot);
 
     const importedHexes = new Set();
     for (let i = 1; i < lines.length; i++) {
@@ -518,7 +573,7 @@ function importT5Tab(fileContent, fileName, forcedSectorSlot = null) {
         }
 
         const name = idxName !== -1 ? row[idxName].trim() : "Unnamed";
-        const sectorID = fallbackSectorSlot;
+        const sectorID = sectorNum;
         let subChar = idxSS !== -1 ? row[idxSS].trim() : "";
 
         if (!subChar || subChar.length > 1) {
@@ -665,7 +720,7 @@ function importT5Tab(fileContent, fileName, forcedSectorSlot = null) {
             const subX = Math.floor((q - 1) / 8);
             const subY = Math.floor((r - 1) / 10);
             const subChar = String.fromCharCode(65 + (subY * 4 + subX));
-            const hexId = `${fallbackSectorSlot}-${subChar}-${hexNum}`;
+            const hexId = `${sectorNum}-${subChar}-${hexNum}`;
 
             if (!hexStates.has(hexId)) {
                 hexStates.set(hexId, { type: 'EMPTY' });
@@ -674,7 +729,7 @@ function importT5Tab(fileContent, fileName, forcedSectorSlot = null) {
         }
     }
 
-    showToast(`Successfully imported ${importCount} worlds into Sector Slot ${fallbackSectorSlot}`);
+    showToast(`Successfully imported ${importCount} worlds into Sector ${sectorNum} (${fallbackSectorSlot})`);
     if (emptyCount > 0) showToast(`Initialized ${emptyCount} empty space hexes in sector bounds.`, 2000);
 
     selectedHexes.clear();

@@ -206,7 +206,7 @@ function setupCanvasEvents() {
         if (direction > 0) zoom *= zoomFactor;
         else zoom /= zoomFactor;
 
-        zoom = Math.max(0.1, Math.min(zoom, 10));
+        zoom = Math.max(0.03, Math.min(zoom, 10));
         cameraX = mouseWorldX - e.clientX / zoom;
         cameraY = mouseWorldY - e.clientY / zoom;
         requestAnimationFrame(draw);

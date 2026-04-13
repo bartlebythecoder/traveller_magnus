@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.7.3";
-const APP_BANNER = "v0.7.3: Improved OTU Integration & Import the Imperium";
+const APP_VERSION = "v0.7.4";
+const APP_BANNER = "v0.7.4: Import the Universe & Numeric Sector IDs";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -16,6 +16,24 @@ const APP_BANNER = "v0.7.3: Improved OTU Integration & Import the Imperium";
 cameraX = 8400 - (window.innerWidth / 2);
 cameraY = 8660 - (window.innerHeight / 2);
 zoom = 1.0;
+
+/**
+ * Re-centers the camera on the middle of the current grid at 1:1 zoom.
+ * Call this whenever gridWidth or gridHeight changes (e.g. Universe importer).
+ */
+function centerCameraOnGrid() {
+    const centerQ = Math.floor(gridWidth * 32 / 2);
+    const centerR = Math.floor(gridHeight * 40 / 2);
+    const size = baseHexSize;
+    const widthStep = (3 / 2) * size;
+    const heightStep = Math.sqrt(3) * size;
+    const offset = (centerQ & 1) ? 0.5 : 0;
+    const px = widthStep * centerQ;
+    const py = heightStep * (centerR + offset);
+    cameraX = px - window.innerWidth / 2;
+    cameraY = py - window.innerHeight / 2;
+    zoom = 1.0;
+}
 
 // Mouse tracking
 currentMouseX = 0;
@@ -49,6 +67,11 @@ usedNames = new Set(); // Reset every load for machine-agnostic determinism
 
 // Hex properties - Renderer needs this immediately
 baseHexSize = 50;
+
+// Grid dimensions — default 7×5 (35 sectors).
+// These are runtime variables; the Universe importer will change them.
+gridWidth  = 7;
+gridHeight = 5;
 
 // Generation Trace State
 const MAX_GEN_TRACES = 5;
@@ -109,8 +132,11 @@ function saveHistoryState(actionName) {
         routes: JSON.parse(JSON.stringify(window.sectorRoutes || [])),
         hexStates: JSON.parse(JSON.stringify(Array.from(hexStates.entries())))
     };
+    // Cap undo history by grid size: 50 snapshots for the default 7×5 canvas,
+    // 5 for larger canvases where each snapshot can be hundreds of MB.
+    const undoLimit = (gridWidth * gridHeight) > 35 ? 5 : 50;
     window.undoStack.push(stateSnapshot);
-    if (window.undoStack.length > 50) window.undoStack.shift();
+    if (window.undoStack.length > undoLimit) window.undoStack.shift();
     window.redoStack = []; // Clear redo stack on new action
 }
 
@@ -118,19 +144,41 @@ function saveHistoryState(actionName) {
 // Coordinate Math Functions
 // -----------------------------------------------------------------------------
 
+/**
+ * Converts a legacy letter-based sector identifier to a zero-based index.
+ * Supports the old doubled scheme (AA=26, BB=27 ... ZZ=51).
+ * Used only during migration of pre-numeric JSON save files.
+ */
+function legacySectorLetterToIndex(letter) {
+    if (!letter || letter.length === 0) return 0;
+    if (letter.length === 1) return letter.toUpperCase().charCodeAt(0) - 65;
+    // Old scheme: same letter doubled (AA, BB, CC...)
+    return (letter.toUpperCase().charCodeAt(0) - 65) + 26;
+}
+
+/**
+ * Converts a sector slot label (letter OR numeric string) to a sector number (1-based).
+ * Letters use the legacy index mapping; numeric strings are parsed directly.
+ */
+function sectorSlotToNumber(slot) {
+    if (!slot) return 1;
+    const n = parseInt(slot, 10);
+    if (!isNaN(n)) return n;
+    return legacySectorLetterToIndex(slot) + 1;
+}
+
 function getHexId(q, r) {
-    if (q < 0 || q > 223 || r < 0 || r > 199) return null;
-    const sectorX = Math.floor(q / 32);
-    const sectorY = Math.floor(r / 40);
-    const sectorIndex = sectorY * 7 + sectorX;
-    let sectorChar = sectorIndex < 26 ? String.fromCharCode(65 + sectorIndex) :
-        String.fromCharCode(65 + (sectorIndex - 26)) + String.fromCharCode(65 + (sectorIndex - 26));
+    if (q < 0 || r < 0) return null;
+    if (q >= gridWidth * 32 || r >= gridHeight * 40) return null;
+    const sectorX  = Math.floor(q / 32);
+    const sectorY  = Math.floor(r / 40);
+    const sectorNum = sectorY * gridWidth + sectorX + 1;
     const subsectorX = Math.floor((q % 32) / 8);
     const subsectorY = Math.floor((r % 40) / 10);
     const subsectorChar = String.fromCharCode(65 + (subsectorY * 4 + subsectorX));
     const localQ = (q % 32) + 1;
     const localR = (r % 40) + 1;
-    return `${sectorChar}-${subsectorChar}-${localQ.toString().padStart(2, '0')}${localR.toString().padStart(2, '0')}`;
+    return `${sectorNum}-${subsectorChar}-${localQ.toString().padStart(2, '0')}${localR.toString().padStart(2, '0')}`;
 }
 
 function pixelToHex(x, y, size) {
@@ -146,10 +194,10 @@ function getHexCoords(hexId) {
     if (!hexId) return null;
     const parts = hexId.split('-');
     if (parts.length < 3) return null;
-    const sChar = parts[0];
-    const sIdx = sChar.length === 1 ? sChar.charCodeAt(0) - 65 : (sChar.charCodeAt(0) - 65) + 26;
-    const sectorX = sIdx % 7;
-    const sectorY = Math.floor(sIdx / 7);
+    const sectorNum = parseInt(parts[0], 10);
+    if (isNaN(sectorNum) || sectorNum < 1) return null;
+    const sectorX = (sectorNum - 1) % gridWidth;
+    const sectorY = Math.floor((sectorNum - 1) / gridWidth);
     const localQ = parseInt(parts[2].substring(0, 2)) - 1;
     const localR = parseInt(parts[2].substring(2, 4)) - 1;
     return { q: sectorX * 32 + localQ, r: sectorY * 40 + localR };

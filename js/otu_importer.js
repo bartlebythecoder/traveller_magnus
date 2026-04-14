@@ -255,7 +255,10 @@
         );
         if (!confirmed) return;
 
-        // Resize canvas to 16×8 and clear all state.
+        // Wipe IndexedDB before clearing memory so no stale data remains.
+        if (window.dbManager) await window.dbManager.clearDB();
+
+        // Resize canvas to 16×8 and clear all in-memory state.
         gridWidth  = 16;
         gridHeight = 8;
         hexStates.clear();
@@ -265,6 +268,9 @@
 
         centerCameraOnGrid();
         requestAnimationFrame(draw);
+
+        // Persist the new grid dimensions immediately.
+        if (window.dbManager) window.dbManager.saveGridDimensions();
 
         const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
         let errorCount = 0;

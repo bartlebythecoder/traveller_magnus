@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.7.4";
-const APP_BANNER = "v0.7.4: Import the Universe & Numeric Sector IDs";
+const APP_VERSION = "v0.8";
+const APP_BANNER = "v0.8: Auto Filter Routes & Zoom LOD Rendering";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -60,6 +60,7 @@ hexStates = new Map();
 
 // Route state (Global array of route objects)
 window.sectorRoutes = [];
+window.autoRouteCounter = 0; // Persistent sequential counter for Auto Route group names
 
 // System Naming State
 namePool = [];
@@ -138,6 +139,10 @@ function saveHistoryState(actionName) {
     window.undoStack.push(stateSnapshot);
     if (window.undoStack.length > undoLimit) window.undoStack.shift();
     window.redoStack = []; // Clear redo stack on new action
+
+    // Schedule a debounced DB sync. Fires 2 seconds after the last action,
+    // so bulk generation runs produce one write rather than thousands.
+    if (window.dbManager) window.dbManager.scheduleSyncAll();
 }
 
 // -----------------------------------------------------------------------------

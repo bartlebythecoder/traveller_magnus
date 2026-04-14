@@ -1,5 +1,14 @@
 # Changelog
 
+### [v0.8] - 2026-04-14
+1. **Auto Filter Routes:** Added Auto Route generation from the Filter window — connect filtered worlds via shortest-path bridging, with custom color, jump range, and named route groups; rendered as a distinct "Filter" route layer beneath manual routes
+2. **Point-to-Point Auto Routes:** Added point-to-point pathfinding between any two hexes, with optional restriction to filtered worlds only
+3. **Zoom LOD Rendering:** At zoom levels below 0.3, hex grid lines, text, and icons are suppressed; only background fills and selections are drawn, significantly improving performance when zoomed out to sector or universe scale
+4. **IndexedDB Persistence:** Added `db_manager.js` — automatically mirrors `hexStates` and `sectorRoutes` to IndexedDB so work survives browser refresh without a manual JSON save
+5. **Route Layering:** Filter routes always render beneath manual (Xboat/Trade/Secondary) routes; all four types have independent visibility toggles in the Filter window
+6. **Side-by-Side Route Offset:** Multiple routes sharing a segment are spread apart at zoom ≥ 0.3 so they remain individually visible
+7. **Chunked JSON Save:** Workspaces exceeding 250 MB are automatically split into multiple numbered JSON parts on save; loading prompts the user to select all parts together so no data is lost on very large maps
+
 ### [v0.7.4] - 2026-04-13
 1. **Import the Universe:** Added experimental bulk import of the full 16×8 OTU sector canvas
 2. **Numeric Sector IDs:** Refactored hex IDs from letter-based to numeric (legacy JSON auto-migrated on load)

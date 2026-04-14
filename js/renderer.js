@@ -97,6 +97,9 @@ function draw() {
     const MAX_GLOBAL_Q = gridWidth  * 32 - 1;
     const MAX_GLOBAL_R = gridHeight * 40 - 1;
 
+    // LOD: Computed once per frame — gates grid lines, text, and icons below zoom threshold.
+    const showText = zoom >= 0.3;
+
     // =========================================================================
     // PASS 1: DRAW THE GRID & HEX BACKGROUNDS
     // =========================================================================
@@ -111,6 +114,14 @@ function draw() {
             if (!hexId) continue;
 
             const stateObj = hexStates.get(hexId);
+
+            // LOD: At low zoom, skip hexes that need neither a background fill nor a selection
+            // highlight — avoids getHexPath() and all stroke calls for the vast majority of hexes.
+            const isSelected = selectedHexes.has(hexId);
+            const hasBgFill = window.hexBgFillVisible !== false && stateObj &&
+                (stateObj.manualBgColor || (stateObj.custom_ui && stateObj.custom_ui.bgFillColor));
+            if (!showText && !isSelected && !hasBgFill) continue;
+
             const path = getHexPath(cx, cy, size);
 
             // 0a. Manual Background Fill (assigned via context menu — persists independently of filter rules)
@@ -132,14 +143,14 @@ function draw() {
             }
 
             // 1. Selection Fill
-            if (selectedHexes.has(hexId)) {
+            if (isSelected) {
                 ctx.fillStyle = 'rgba(255, 69, 0, 0.3)';
                 ctx.fill(path);
                 ctx.strokeStyle = '#ff4500';
                 ctx.lineWidth = 2 / zoom;
                 ctx.stroke(path);
-            } else {
-                // 2. Standard Grid Line
+            } else if (showText) {
+                // 2. Standard Grid Line — hidden below zoom threshold
                 ctx.strokeStyle = '#1f2833';
                 ctx.lineWidth = 1 / zoom;
                 ctx.stroke(path);
@@ -149,6 +160,8 @@ function draw() {
 
     // =========================================================================
     // LAYER 2: INTERSTELLAR ROUTES (Sean Protocol: Visibility Decoupled)
+    // Filter routes drawn first (underneath); manual routes drawn on top.
+    // Side-by-side offset applied at zoom >= 0.3 when routes share a segment.
     // =========================================================================
     if (window.sectorRoutes && window.sectorRoutes.length > 0) {
         if (typeof tSection === 'function') tSection("Render Sector Routes");
@@ -157,48 +170,104 @@ function draw() {
         ctx.lineWidth = 2 / zoom;
         const gap = 20;
 
-        // Harvest visibility from checkboxes directly
-        const showGreen = document.getElementById('filter-route-green')?.checked ?? true;
-        const showRed = document.getElementById('filter-route-red')?.checked ?? true;
+        // Harvest visibility toggles
+        const showGreen  = document.getElementById('filter-route-green')?.checked  ?? true;
+        const showRed    = document.getElementById('filter-route-red')?.checked    ?? true;
         const showYellow = document.getElementById('filter-route-yellow')?.checked ?? true;
+        const showFilter = document.getElementById('filter-route-filter')?.checked ?? true;
 
-        const drawBatch = (routes, color) => {
-            ctx.strokeStyle = color;
-            ctx.beginPath();
-            routes.forEach(route => {
-                const startCoords = getHexCoords(route.startId);
-                const endCoords = getHexCoords(route.endId);
-                if (startCoords && endCoords) {
-                    const sPx = getHexPixel(startCoords.q, startCoords.r);
-                    const ePx = getHexPixel(endCoords.q, endCoords.r);
-                    const dx = ePx.x - sPx.x;
-                    const dy = ePx.y - sPx.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist > gap * 2) {
-                        const ux = dx / dist;
-                        const uy = dy / dist;
-                        ctx.moveTo(sPx.x + ux * gap, sPx.y + uy * gap);
-                        ctx.lineTo(ePx.x - ux * gap, ePx.y - uy * gap);
-                    }
+        // Pre-build segment usage map for side-by-side offset computation.
+        // Only visible routes are included so offsets reflect what the user sees.
+        const segmentUsage = new Map();
+        window.sectorRoutes.forEach(r => {
+            const visible = r.type === 'Filter'    ? showFilter
+                          : r.type === 'Xboat'     ? showGreen
+                          : r.type === 'Trade'     ? showRed
+                          : r.type === 'Secondary' ? showYellow : true;
+            if (!visible) return;
+            const key = `${r.startId}|${r.endId}`;
+            if (!segmentUsage.has(key)) segmentUsage.set(key, []);
+            segmentUsage.get(key).push(r);
+        });
+
+        // Draw one route segment with perpendicular offset for side-by-side.
+        function drawRouteSegment(route) {
+            const startCoords = getHexCoords(route.startId);
+            const endCoords   = getHexCoords(route.endId);
+            if (!startCoords || !endCoords) return;
+
+            const sPx  = getHexPixel(startCoords.q, startCoords.r);
+            const ePx  = getHexPixel(endCoords.q,   endCoords.r);
+            const dx   = ePx.x - sPx.x;
+            const dy   = ePx.y - sPx.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist <= gap * 2) return;
+
+            const ux = dx / dist;
+            const uy = dy / dist;
+            let ox = 0;
+            let oy = 0;
+
+            if (zoom >= 0.3) {
+                const siblings = segmentUsage.get(`${route.startId}|${route.endId}`) || [];
+                const count    = siblings.length;
+                if (count > 1) {
+                    const idx    = siblings.indexOf(route);
+                    const offset = (idx - (count - 1) / 2) * 5; // 5 world-unit gap
+                    ox = -uy * offset;
+                    oy =  ux * offset;
                 }
-            });
-            ctx.stroke();
-        };
+            }
 
-        const xboatRoutes = window.sectorRoutes.filter(r => r.type === 'Xboat');
-        const tradeRoutes = window.sectorRoutes.filter(r => r.type === 'Trade');
+            ctx.moveTo(sPx.x + ux * gap + ox, sPx.y + uy * gap + oy);
+            ctx.lineTo(ePx.x - ux * gap + ox, ePx.y - uy * gap + oy);
+        }
+
+        // --- Filter routes first (below manual routes) ---
+        if (showFilter) {
+            const filterRoutes = window.sectorRoutes.filter(r => r.type === 'Filter');
+            if (filterRoutes.length > 0) {
+                // Group by color to minimise strokeStyle state changes
+                const byColor = new Map();
+                filterRoutes.forEach(r => {
+                    const c = r.color || '#ffffff';
+                    if (!byColor.has(c)) byColor.set(c, []);
+                    byColor.get(c).push(r);
+                });
+                byColor.forEach((routes, color) => {
+                    ctx.strokeStyle = color;
+                    ctx.beginPath();
+                    routes.forEach(r => drawRouteSegment(r));
+                    ctx.stroke();
+                });
+                if (typeof writeLogLine === 'function') writeLogLine(`Rendered ${filterRoutes.length} Auto Route segment(s).`);
+            }
+        }
+
+        // --- Manual routes on top ---
+        const xboatRoutes     = window.sectorRoutes.filter(r => r.type === 'Xboat');
+        const tradeRoutes     = window.sectorRoutes.filter(r => r.type === 'Trade');
         const secondaryRoutes = window.sectorRoutes.filter(r => r.type === 'Secondary');
 
         if (xboatRoutes.length > 0 && showGreen) {
-            drawBatch(xboatRoutes, '#00FF00'); // Bright Green
+            ctx.strokeStyle = '#00FF00';
+            ctx.beginPath();
+            xboatRoutes.forEach(r => drawRouteSegment(r));
+            ctx.stroke();
             if (typeof writeLogLine === 'function') writeLogLine(`Rendered ${xboatRoutes.length} Green (Xboat) routes.`);
         }
         if (tradeRoutes.length > 0 && showRed) {
-            drawBatch(tradeRoutes, '#FF0000'); // Red
+            ctx.strokeStyle = '#FF0000';
+            ctx.beginPath();
+            tradeRoutes.forEach(r => drawRouteSegment(r));
+            ctx.stroke();
             if (typeof writeLogLine === 'function') writeLogLine(`Rendered ${tradeRoutes.length} Red (Trade) routes.`);
         }
         if (secondaryRoutes.length > 0 && showYellow) {
-            drawBatch(secondaryRoutes, '#FFFF00'); // Yellow
+            ctx.strokeStyle = '#FFFF00';
+            ctx.beginPath();
+            secondaryRoutes.forEach(r => drawRouteSegment(r));
+            ctx.stroke();
             if (typeof writeLogLine === 'function') writeLogLine(`Rendered ${secondaryRoutes.length} Yellow (Secondary) routes.`);
         }
 
@@ -277,7 +346,7 @@ function draw() {
                     const dotRadius = Math.max(minWorldRadius, baseWorldRadius);
 
                     // --- Travel Zone Halo (Amber/Red) ---
-                    if (data && data.travelZone && data.travelZone !== 'Green') {
+                    if (showText && data && data.travelZone && data.travelZone !== 'Green') {
                         const zoneColor = data.travelZone === 'Red' ? '#FF0000' : '#FFBF00';
                         ctx.save();
                         ctx.beginPath();
@@ -310,12 +379,14 @@ function draw() {
                     ctx.fillStyle = pTextColor;
 
                     // 1. Hex coordinate — top of hex
-                    ctx.font = `${pFontSmall}px 'Inter', sans-serif`;
-                    ctx.fillText(hexId, cx, cy - (size * 0.75));
+                    if (showText) {
+                        ctx.font = `${pFontSmall}px 'Inter', sans-serif`;
+                        ctx.fillText(hexId, cx, cy - (size * 0.75));
+                    }
 
                     if (data) {
                         // 2. Starport letter — above world dot
-                        if (data.starport) {
+                        if (showText && data.starport) {
                             ctx.font = `bold ${pFontPort}px 'Inter', sans-serif`;
                             ctx.fillStyle = pTextColor;
                             ctx.textBaseline = 'bottom';
@@ -332,7 +403,14 @@ function draw() {
                         const primary = colors ? colors[0] : baseColor;
                         const iconStyle = custom.iconStyle || 'Classic';
 
-                        if (iconStyle === 'Asteroid Belt') {
+                        if (!showText) {
+                            // LOD: Simple dot using filter color — skip complex icon rendering.
+                            ctx.beginPath();
+                            ctx.arc(cx, cy, dotRadius, 0, 2 * Math.PI);
+                            ctx.fillStyle = primary;
+                            ctx.fill();
+                            ctx.closePath();
+                        } else if (iconStyle === 'Asteroid Belt') {
                             const aPositions = [
                                 { dx: -8, dy: -2 }, { dx: 0, dy: -5 }, { dx: 8, dy: -2 },
                                 { dx: -5, dy: 5 }, { dx: 5, dy: 4 }
@@ -506,7 +584,7 @@ function draw() {
                         }
 
                         // --- Draw the Ring (Applies to any shape) ---
-                        if (custom.ringColor) {
+                        if (showText && custom.ringColor) {
                             ctx.save();
                             ctx.beginPath();
 
@@ -526,7 +604,7 @@ function draw() {
                         }
 
                         // 4. UWP string — just below dot
-                        if (data.uwp) {
+                        if (showText && data.uwp) {
                             ctx.font = `${pFontSmall}px 'Inter', sans-serif`;
                             ctx.fillStyle = pTextColor;
                             ctx.textBaseline = 'top';
@@ -551,21 +629,23 @@ function draw() {
                             ctx.textBaseline = 'bottom';
                             
                             const textY = cy + (size * 0.75);
-                            ctx.fillText(displayName, cx, textY);
+                            if (showText) {
+                                ctx.fillText(displayName, cx, textY);
 
-                            // Sean Protocol: Manual Underline (Canvas doesn't support text-decoration native)
-                            if (custom.isUnderline) {
-                                const textWidth = ctx.measureText(displayName).width;
-                                const lineY = textY + 2; // Positioned 2px below baseline
-                                ctx.save();
-                                ctx.strokeStyle = pTextColor;
-                                ctx.lineWidth = 1 / zoom;
-                                ctx.beginPath();
-                                // X-Coordinates are relative to centered text (cx)
-                                ctx.moveTo(cx - textWidth / 2, lineY);
-                                ctx.lineTo(cx + textWidth / 2, lineY);
-                                ctx.stroke();
-                                ctx.restore();
+                                // Sean Protocol: Manual Underline (Canvas doesn't support text-decoration native)
+                                if (custom.isUnderline) {
+                                    const textWidth = ctx.measureText(displayName).width;
+                                    const lineY = textY + 2; // Positioned 2px below baseline
+                                    ctx.save();
+                                    ctx.strokeStyle = pTextColor;
+                                    ctx.lineWidth = 1 / zoom;
+                                    ctx.beginPath();
+                                    // X-Coordinates are relative to centered text (cx)
+                                    ctx.moveTo(cx - textWidth / 2, lineY);
+                                    ctx.lineTo(cx + textWidth / 2, lineY);
+                                    ctx.stroke();
+                                    ctx.restore();
+                                }
                             }
                             
                             ctx.textBaseline = 'top';
@@ -574,7 +654,7 @@ function draw() {
                         const symOffset = dotRadius + GUI_CONFIG.OFFSETS.SYM_GAP;
 
                         // 6. Gas Giant — Optimized Positioning & Variant Selection
-                        if (data.gasGiant) {
+                        if (showText && data.gasGiant) {
                             const gx = cx + symOffset + GUI_CONFIG.GAS_GIANT.X_OFFSET;
                             const gy = cy + GUI_CONFIG.GAS_GIANT.Y_OFFSET;
                             const gr = GUI_CONFIG.GAS_GIANT.RADIUS;
@@ -607,7 +687,7 @@ function draw() {
                         }
 
                         // 7. Scout Base — filled triangle BOTTOM-LEFT of dot
-                        if (data.scoutBase) {
+                        if (showText && data.scoutBase) {
                             const tx = cx - symOffset + GUI_CONFIG.OFFSETS.BASE_X_ADJ;
                             const ty = cy + symOffset * GUI_CONFIG.OFFSETS.SCOUT_Y_FACTOR;
                             const ts = GUI_CONFIG.BASE_ICONS.RADIUS;
@@ -621,7 +701,7 @@ function draw() {
                         }
 
                         // 8. Naval Base — 6-point star TOP-LEFT of dot
-                        if (data.navalBase) {
+                        if (showText && data.navalBase) {
                             const sx = cx - symOffset + GUI_CONFIG.OFFSETS.BASE_X_ADJ;
                             const sy = cy - symOffset * GUI_CONFIG.OFFSETS.NAVAL_Y_FACTOR;
                             const sr = GUI_CONFIG.BASE_ICONS.RADIUS;

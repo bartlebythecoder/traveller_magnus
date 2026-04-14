@@ -183,6 +183,7 @@ function setupCanvasEvents() {
                     const colorName = altDragType === 'Xboat' ? 'Green' : (altDragType === 'Trade' ? 'Red' : 'Yellow');
                     showToast(`${colorName} Route added: ${sorted[0]} -> ${sorted[1]}`, 2000);
                 }
+                if (window.dbManager) window.dbManager.saveRoutes();
             }
         }
 

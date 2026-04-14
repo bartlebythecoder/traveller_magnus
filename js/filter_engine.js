@@ -142,7 +142,7 @@
             }
         });
 
-        const toggles = ['filter-route-green', 'filter-route-yellow', 'filter-route-red'];
+        const toggles = ['filter-route-green', 'filter-route-yellow', 'filter-route-red', 'filter-route-filter'];
         toggles.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.checked = true; // Restore Visibility
@@ -698,7 +698,7 @@
             }
         });
 
-        const checks = ['filter-route-green', 'filter-route-yellow', 'filter-route-red'];
+        const checks = ['filter-route-green', 'filter-route-yellow', 'filter-route-red', 'filter-route-filter'];
         checks.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('change', onFilterChanged);

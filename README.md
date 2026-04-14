@@ -1,4 +1,4 @@
-# As Above, So Below (v0.7.4)
+# As Above, So Below (v0.8)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -35,8 +35,38 @@ This workbench allows Game Masters and world-builders to generate, import, and e
     - **Ctrl + Alt + 5:** Full Traveller 5 (T5) Generation sequence (includes system population).
 6. **Filter Control:** Use the **F Key** to **Open Filter Window** for advanced filtering and custom styling rules.
 
+**Some quick notes on Importing the Universe**:
+1) I have a one second wait time for each sector - so it takes a bit to load everything
+2) Make sure to Save the JSON once you load it, so you never have to import it again - just load from your hard drive
+3) It will be its most sluggish when zoomed out, and most responsive when zoomed in.
+4) As of v0.8 this should be useable, though maybe sluggish, with older systems
+5) Having all of these sectors loaded at once was not the intention of this program. I do, however, appreciate a challenge. So if you think you would enjoy working like this and have the right system for it, be my guest.
+
+**Replacing Foreven**:
+Want to replace any of these sectors with your own file?
+1)  Mouse over the sector you want to replace (zoom in for smoother and better response results)
+2)  Press Control + S to select the Sector (you should see it highlighted)
+3)  Right Click->Populate->Manual Reset Clear (Note the sector # in the Clear Hex; 36 for Foreven)
+4)  Click the settings gear in the top right and choose Import Sector .tsv
+5)  Select your file - choose the sector number you noted (#36 for Foreven)
+
+**Notes on Size Limits as of v0.8**:
+1) 4GB RAM: Import the Universe freely. Expand systems via WBH for 8-10 sectors before risk. Ideal use case: full OTU political/astrographic view (T5 only) with a handful of deep-dived WBH sectors.
+2) 8GB RAM: The Imperium (35 sectors) fully expanded is viable. The full Universe expanded is not.
+3) 16GB RAM: Half the Universe expanded is realistic for a patient user.
+4) 32-64GB RAM: The full Universe expanded is theoretically possible.
+
 ---
 ## 📜 Changelog
+### [v0.8] - 2026-04-14
+1. **Auto Filter Routes:** Added Auto Route generation from the Filter window — connect filtered worlds via shortest-path bridging, with custom color, jump range, and named route groups; rendered as a distinct "Filter" route layer beneath manual routes
+2. **Point-to-Point Auto Routes:** Added point-to-point pathfinding between any two hexes, with optional restriction to filtered worlds only
+3. **Zoom LOD Rendering:** At zoom levels below 0.3, hex grid lines, text, and icons are suppressed; only background fills and selections are drawn, significantly improving performance when zoomed out to sector or universe scale
+4. **IndexedDB Persistence:** Added `db_manager.js` — automatically mirrors `hexStates` and `sectorRoutes` to IndexedDB so work survives browser refresh without a manual JSON save
+5. **Route Layering:** Filter routes always render beneath manual (Xboat/Trade/Secondary) routes; all four types have independent visibility toggles in the Filter window
+6. **Side-by-Side Route Offset:** Multiple routes sharing a segment are spread apart at zoom ≥ 0.3 so they remain individually visible
+7. **Chunked JSON Save:** Workspaces exceeding 250 MB are automatically split into multiple numbered JSON parts on save; loading prompts the user to select all parts together so no data is lost on very large maps
+
 ### [v0.7.4] - 2026-04-13
 1. **Import the Universe:** Added experimental bulk import of the full 16×8 OTU sector canvas
 2. **Numeric Sector IDs:** Refactored hex IDs from letter-based to numeric (legacy JSON auto-migrated on load)

@@ -70,6 +70,7 @@ function initializeInput() {
     setupSectorPicker();
     setupSectorImporter();
     setupSplashScreen();
+    setupAutoRoutes();
 }
 
 // ============================================================================
@@ -263,7 +264,15 @@ function setupSplashScreen() {
 // APP STARTUP
 // ============================================================================
 
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
+    // Load persisted data from IndexedDB before initialising the UI.
+    // The splash screen is visible during this period so the user never sees
+    // a blank map flash. loadFromDB() resolves quickly even for large datasets.
+    if (window.dbManager) {
+        const hadData = await window.dbManager.loadFromDB();
+        if (hadData && typeof draw === 'function') requestAnimationFrame(draw);
+    }
+
     initializeInput();
     if (typeof resize === 'function') {
         resize();

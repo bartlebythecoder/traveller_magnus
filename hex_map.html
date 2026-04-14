@@ -64,6 +64,7 @@
     <script src="js/ui_menus.js" defer></script>
     <script src="js/filter_engine.js" defer></script>
     <script src="js/io_manager.js" defer></script>
+    <script src="js/db_manager.js" defer></script>
     <script src="js/imperium_data.js" defer></script>
     <script src="js/universe_data.js" defer></script>
     <script src="js/otu_importer.js" defer></script>
@@ -138,9 +139,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above So Below</span></h1>
-            <div class="splash-banner">New: Import the Universe</div>
+            <div class="splash-banner">New: Automatic Filter Routes</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.7.4</div>
+            <div class="splash-version">v0.8</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -159,6 +160,7 @@
                     <div class="shortcut-item"><strong>Ctrl + Alt + 5</strong><span>Full T5 Macro</span></div>
                     <div class="shortcut-item"><strong>F Key</strong><span>Open Filter Window</span></div>
                     <div class="shortcut-item"><strong>Escape</strong><span>Cancel / Close All</span></div>
+                    <div class="shortcut-item"><strong>Ctrl + Delete</strong><span>Clear Canvas</span></div>
                 </div>
             </div>
 
@@ -243,7 +245,12 @@
                 onclick="document.getElementById('file-load-map').click()">
                 <i class="fas fa-file-upload"></i> Load Map JSON
             </button>
-            <input type="file" id="file-load-map" accept=".json" style="display: none;">
+            <input type="file" id="file-load-map" accept=".json" multiple style="display: none;">
+            <button class="menu-btn" id="btn-clear-canvas"
+                style="width: 100%; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;
+                       border-color: #c0392b; color: #e74c3c;">
+                <i class="fas fa-trash-alt"></i> Clear Canvas
+            </button>
         </div>
 
         <div style="border-top: 1px solid #45a29e; margin: 10px 0;"></div>
@@ -333,7 +340,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.7.4</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.8</span>
             </p>
         </div>
 
@@ -362,6 +369,7 @@
                     <strong>Ctrl + Alt + 5</strong><span style="color: #66fcf1;">Bulk T5 Macro</span>
                     <strong>Ctrl + Z</strong><span>Undo Last Action</span>
                     <strong>Ctrl + Shift + Z</strong><span>Redo Action</span>
+                    <strong>Ctrl + Delete</strong><span style="color: #e74c3c;">Clear Canvas</span>
                     <strong>F Key</strong><span>Open Filter Window</span>
                 </div>
             </div>
@@ -1014,6 +1022,10 @@
                         </div>
                         <div class="filter-route-toggles" style="margin-top: 4px;">
                             <label class="filter-toggle-item">
+                                <input type="checkbox" id="filter-route-filter" checked>
+                                <span style="color: #ff9900;">Auto Routes</span>
+                            </label>
+                            <label class="filter-toggle-item">
                                 <input type="checkbox" id="filter-hex-bg-visible" checked>
                                 <span style="color: #a0a8b0;">Hex Background</span>
                             </label>
@@ -1242,7 +1254,127 @@
         <div class="filter-modal-footer">
             <button class="btn-cancel" id="btn-footer-close-filter"
                 style="padding: 4px 12px; font-size: 0.8rem;">Close</button>
+            <button class="btn-save" id="btn-auto-routes"
+                style="padding: 4px 10px; font-size: 0.8rem;">Auto Routes</button>
+            <button class="btn-cancel" id="btn-clear-auto-routes"
+                style="padding: 4px 10px; font-size: 0.8rem; background: #3a1a1a; color: #ff6b6b; border: 1px solid #ff4500;">Clear Auto</button>
             <span>Matches: <span id="filter-results-count">0</span></span>
+        </div>
+    </div>
+
+    <!-- Auto Routes Generation Modal -->
+    <div id="autoroute-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="width: 400px; text-align: left;">
+            <h3 style="text-align: center;">Generate Auto Routes</h3>
+            <p style="color: #c5c6c7; font-size: 0.85rem; margin: 0 0 16px;">
+                Connects the currently filtered worlds using the same algorithm as Xboat routes.
+            </p>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <label style="color: #c5c6c7; font-size: 0.9rem; white-space: nowrap; width: 90px;">Name</label>
+                <input type="text" id="autoroute-name" placeholder="Auto Route #1"
+                    style="flex: 1; padding: 8px; background: #0b0c10; border: 1px solid #45a29e;
+                           color: #66fcf1; font-family: 'Courier New', monospace; font-size: 0.9rem;
+                           border-radius: 4px; outline: none;">
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <label style="color: #c5c6c7; font-size: 0.9rem; white-space: nowrap; width: 90px;">Max Jump</label>
+                <input type="number" id="autoroute-max-jump" min="1" max="8" value="4"
+                    style="width: 70px; padding: 8px; background: #0b0c10; border: 1px solid #45a29e;
+                           color: #66fcf1; font-family: 'Courier New', monospace; font-size: 1rem;
+                           border-radius: 4px; text-align: center; outline: none;">
+                <span style="color: #888; font-size: 0.8rem;">(1 – 8)</span>
+            </div>
+            <div id="autoroute-range-row" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <label style="color: #c5c6c7; font-size: 0.9rem; white-space: nowrap; width: 90px;">Max Range</label>
+                <input type="number" id="autoroute-max-range" min="1" max="32" value="12"
+                    style="width: 70px; padding: 8px; background: #0b0c10; border: 1px solid #45a29e;
+                           color: #66fcf1; font-family: 'Courier New', monospace; font-size: 1rem;
+                           border-radius: 4px; text-align: center; outline: none;">
+                <span style="color: #888; font-size: 0.8rem;">(1 – 32)</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                <label style="color: #c5c6c7; font-size: 0.9rem; white-space: nowrap; width: 90px;">Route Color</label>
+                <input type="color" id="autoroute-color" value="#ff9900"
+                    style="width: 60px; height: 36px; border: 1px solid #45a29e; background: none;
+                           cursor: pointer; border-radius: 4px; padding: 2px;">
+            </div>
+
+            <!-- Point-to-Point Section -->
+            <hr style="border: none; border-top: 1px solid #1f2833; margin: 16px 0 12px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                <input type="checkbox" id="autoroute-p2p"
+                    style="cursor: pointer; accent-color: #66fcf1; width: 16px; height: 16px; flex-shrink: 0;">
+                <label for="autoroute-p2p" style="color: #c5c6c7; font-size: 0.9rem; cursor: pointer;">
+                    Point-to-Point Mode
+                </label>
+            </div>
+            <div id="autoroute-p2p-options" style="display: none; padding-left: 26px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <label style="color: #c5c6c7; font-size: 0.85rem; white-space: nowrap; width: 42px;">Start</label>
+                    <input type="text" id="autoroute-p2p-start" placeholder="Hex ID"
+                        style="flex: 1; padding: 6px 8px; background: #0b0c10; border: 1px solid #45a29e;
+                               color: #66fcf1; font-family: 'Courier New', monospace; font-size: 0.85rem;
+                               border-radius: 4px; outline: none;">
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <label style="color: #c5c6c7; font-size: 0.85rem; white-space: nowrap; width: 42px;">End</label>
+                    <input type="text" id="autoroute-p2p-end" placeholder="Hex ID"
+                        style="flex: 1; padding: 6px 8px; background: #0b0c10; border: 1px solid #45a29e;
+                               color: #66fcf1; font-family: 'Courier New', monospace; font-size: 0.85rem;
+                               border-radius: 4px; outline: none;">
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 20px;">
+                <button id="btn-autoroute-confirm" class="btn-save"
+                    style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer;
+                           font-weight: bold; font-size: 0.9rem;">Generate</button>
+                <button id="btn-autoroute-cancel" class="btn-cancel"
+                    style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer;
+                           font-weight: bold; font-size: 0.9rem;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clear Routes Modal (all route types) -->
+    <div id="clear-routes-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="width: 440px; text-align: left;">
+            <h3 style="text-align: center;">Clear Routes</h3>
+            <p style="color: #c5c6c7; font-size: 0.85rem; margin: 0 0 12px;">
+                Select which route set(s) to remove:
+            </p>
+            <div id="clear-routes-list"
+                style="max-height: 340px; overflow-y: auto; margin-bottom: 16px;"></div>
+            <div style="display: flex; gap: 12px; margin-top: 8px;">
+                <button id="btn-clear-routes-confirm" class="btn-cancel"
+                    style="flex: 1; padding: 10px; border-radius: 4px; border: 1px solid #ff4500;
+                           background: #3a1a1a; color: #ff6b6b; cursor: pointer;
+                           font-weight: bold; font-size: 0.9rem;">Delete Selected</button>
+                <button id="btn-clear-routes-cancel" class="btn-cancel"
+                    style="flex: 1; padding: 10px; border-radius: 4px; border: none;
+                           cursor: pointer; font-weight: bold; font-size: 0.9rem;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clear Auto Routes Modal -->
+    <div id="clear-autoroute-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="width: 420px; text-align: left;">
+            <h3 style="text-align: center;">Clear Auto Routes</h3>
+            <p style="color: #c5c6c7; font-size: 0.85rem; margin: 0 0 12px;">
+                Select which Auto Route set(s) to remove:
+            </p>
+            <div id="clear-autoroute-list"
+                style="max-height: 300px; overflow-y: auto; margin-bottom: 16px;"></div>
+            <div style="display: flex; gap: 12px; margin-top: 8px;">
+                <button id="btn-clear-autoroute-confirm" class="btn-cancel"
+                    style="flex: 1; padding: 10px; border-radius: 4px; border: 1px solid #ff4500;
+                           background: #3a1a1a; color: #ff6b6b; cursor: pointer;
+                           font-weight: bold; font-size: 0.9rem;">Delete Selected</button>
+                <button id="btn-clear-autoroute-cancel" class="btn-cancel"
+                    style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer;
+                           font-weight: bold; font-size: 0.9rem;">Cancel</button>
+            </div>
         </div>
     </div>
 

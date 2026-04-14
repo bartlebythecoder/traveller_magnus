@@ -17,7 +17,11 @@ function setupKeyboardShortcuts() {
             e.preventDefault();
         }
 
-        if (e.ctrlKey && !e.altKey && key === 's') {
+        if (e.ctrlKey && e.key === 'Delete') {
+            e.preventDefault();
+            if (typeof clearCanvas === 'function') clearCanvas();
+
+        } else if (e.ctrlKey && !e.altKey && key === 's') {
             e.preventDefault();
             const world = getMouseWorldCoords({ clientX: currentMouseX, clientY: currentMouseY });
             const coords = pixelToHex(world.x, world.y, baseHexSize);
@@ -109,6 +113,7 @@ function setupKeyboardShortcuts() {
                     snap.hexStates.forEach(([id, st]) => hexStates.set(id, st));
                     showToast(`Redid: ${snap.action}`, 2000);
                     requestAnimationFrame(draw);
+                    if (window.dbManager) { window.dbManager.syncAllHexes(); window.dbManager.saveRoutes(); }
                 }
             } else {
                 // UNDO
@@ -125,6 +130,7 @@ function setupKeyboardShortcuts() {
                     snap.hexStates.forEach(([id, st]) => hexStates.set(id, st));
                     showToast(`Undid: ${snap.action}`, 2000);
                     requestAnimationFrame(draw);
+                    if (window.dbManager) { window.dbManager.syncAllHexes(); window.dbManager.saveRoutes(); }
                 }
             }
         }

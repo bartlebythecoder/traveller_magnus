@@ -31,56 +31,129 @@ function downloadBatchLog(actionName, hexCount) {
     window.batchLogData = [];
 }
 
+// Save thresholds (in JSON string character count, which approximates UTF-8 bytes for ASCII JSON)
+const SAVE_CHUNK_THRESHOLD = 250 * 1024 * 1024; // 250 MB — single file below this
+const SAVE_CHUNK_SIZE      = 250 * 1024 * 1024; // 250 MB per chunk above threshold
+
+/** Promise-based FileReader helper. */
+function readFileAsText(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload  = (e) => resolve(e.target.result);
+        reader.onerror = reject;
+        reader.readAsText(file);
+    });
+}
+
+/** Trigger a single blob download. */
+function triggerDownload(content, filename) {
+    const blob = new Blob([content], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
 function setupSaveLoad() {
+    // -----------------------------------------------------------------------
+    // SAVE
+    // -----------------------------------------------------------------------
     document.getElementById('btn-save-map').addEventListener('click', async () => {
         if (typeof tSection === 'function') tSection("JSON Export: Map & Aesthetics");
 
-        const stateObj = {
-            gridWidth:  gridWidth,
-            gridHeight: gridHeight,
-            hexStates: {},
-            routes: window.sectorRoutes || [],
-            rules: window.activeFilterRules || [], // Legacy Support
-            aesthetics: {
-                defaultColor: (typeof window.captureGlobalDefaults === 'function') ? window.captureGlobalDefaults() : '#ffffff',
-                activeRules: window.activeFilterRules || []
-            }
+        const aesthetics = {
+            defaultColor: (typeof window.captureGlobalDefaults === 'function') ? window.captureGlobalDefaults() : '#ffffff',
+            activeRules:  window.activeFilterRules || []
         };
 
-        if (typeof tResult === 'function') {
-            tResult("State Packaged", true);
-            tResult("Default Color", stateObj.aesthetics.defaultColor);
-            tResult("Rule Ledger Count", stateObj.aesthetics.activeRules.length);
-        }
+        // Build hexStates as a plain object (current format, backward compatible)
+        const hexObj = {};
+        hexStates.forEach((value, key) => { hexObj[key] = value; });
 
-        hexStates.forEach((value, key) => {
-            stateObj.hexStates[key] = value;
-        });
+        const stateObj = {
+            version:    APP_VERSION,
+            gridWidth,
+            gridHeight,
+            routes:     window.sectorRoutes || [],
+            rules:      window.activeFilterRules || [], // legacy support
+            aesthetics,
+            hexStates:  hexObj
+        };
 
-        const jsonStr = JSON.stringify(stateObj, null, 2);
+        // Toast before the blocking stringify so the UI doesn't appear frozen
+        if (typeof showToast === 'function') showToast('Preparing save file…', 8000);
+
+        // Yield to the browser to render the toast, then do the heavy work
+        await new Promise(r => setTimeout(r, 100));
 
         try {
-            if (window.showSaveFilePicker) {
-                const handle = await window.showSaveFilePicker({
-                    suggestedName: 'traveller_map.json',
-                    types: [{
-                        description: 'JSON Files',
-                        accept: { 'application/json': ['.json'] },
-                    }],
-                });
-                const writable = await handle.createWritable();
-                await writable.write(jsonStr);
-                await writable.close();
+            const jsonStr = JSON.stringify(stateObj);
+
+            if (jsonStr.length <= SAVE_CHUNK_THRESHOLD) {
+                // ---- Single file (the common case) ----
+                if (window.showSaveFilePicker) {
+                    const handle = await window.showSaveFilePicker({
+                        suggestedName: 'traveller_map.json',
+                        types: [{ description: 'JSON Files', accept: { 'application/json': ['.json'] } }],
+                    });
+                    const writable = await handle.createWritable();
+                    await writable.write(jsonStr);
+                    await writable.close();
+                } else {
+                    triggerDownload(jsonStr, 'traveller_map.json');
+                }
+                if (typeof showToast === 'function') showToast('Map saved successfully.', 3000);
+
             } else {
-                const blob = new Blob([jsonStr], { type: "application/json" });
-                const url = URL.createObjectURL(blob);
-                const dlAnchorElem = document.createElement('a');
-                dlAnchorElem.setAttribute("href", url);
-                dlAnchorElem.setAttribute("download", "traveller_map.json");
-                document.body.appendChild(dlAnchorElem);
-                dlAnchorElem.click();
-                document.body.removeChild(dlAnchorElem);
-                URL.revokeObjectURL(url);
+                // ---- Chunked save ----
+                const sizeMB     = Math.round(jsonStr.length / (1024 * 1024));
+                const numChunks  = Math.ceil(jsonStr.length / SAVE_CHUNK_SIZE);
+                const entries    = Array.from(hexStates.entries());
+                const perChunk   = Math.ceil(entries.length / numChunks);
+
+                const confirmed = confirm(
+                    `Your map is approximately ${sizeMB} MB — too large for a single file.\n\n` +
+                    `It will be saved in ${numChunks} parts. Keep all ${numChunks} files together;\n` +
+                    `you must select all of them at once when loading.\n\n` +
+                    `Your work is also auto-saved locally and won't be lost if you skip this.\n\n` +
+                    `Continue?`
+                );
+                if (!confirmed) return;
+
+                for (let i = 0; i < numChunks; i++) {
+                    const chunkEntries = entries.slice(i * perChunk, (i + 1) * perChunk);
+                    const chunkObj = {
+                        version:    APP_VERSION,
+                        saveType:   'chunked',
+                        part:       i + 1,
+                        totalParts: numChunks,
+                        gridWidth,
+                        gridHeight,
+                        hexStates:  chunkEntries   // array of [hexId, state] pairs
+                    };
+                    // Routes and aesthetics travel with Part 1 only
+                    if (i === 0) {
+                        chunkObj.routes     = window.sectorRoutes || [];
+                        chunkObj.rules      = window.activeFilterRules || [];
+                        chunkObj.aesthetics = aesthetics;
+                    }
+
+                    triggerDownload(
+                        JSON.stringify(chunkObj),
+                        `traveller_map_Part${i + 1}of${numChunks}.json`
+                    );
+
+                    // Brief pause so the browser doesn't suppress sequential downloads
+                    if (i < numChunks - 1) await new Promise(r => setTimeout(r, 400));
+                }
+
+                if (typeof showToast === 'function') {
+                    showToast(`Saved in ${numChunks} parts. Select all files together when loading.`, 6000);
+                }
             }
         } catch (err) {
             if (err.name !== 'AbortError') {
@@ -90,23 +163,92 @@ function setupSaveLoad() {
         }
     });
 
-    document.getElementById('file-load-map').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+    // -----------------------------------------------------------------------
+    // LOAD
+    // -----------------------------------------------------------------------
+    document.getElementById('file-load-map').addEventListener('change', async (e) => {
+        const files = Array.from(e.target.files);
+        e.target.value = ''; // reset so the same file can be reloaded
+        if (files.length === 0) return;
 
-        const reader = new FileReader();
-        reader.onload = function (event) {
-            try {
-                const parsedData = JSON.parse(event.target.result);
-                applyLoadedMapData(parsedData);
-            } catch (error) {
-                alert("Error loading map file. Ensure it is a valid JSON.");
-                console.error("Parse error:", error);
+        try {
+            if (files.length === 1) {
+                // --- Single file selected ---
+                const text = await readFileAsText(files[0]);
+                const data = JSON.parse(text);
+
+                if (data.saveType === 'chunked' && data.totalParts > 1) {
+                    alert(
+                        `This is Part ${data.part} of ${data.totalParts} of a chunked save.\n\n` +
+                        `Please select all ${data.totalParts} parts at once to load your map.`
+                    );
+                    return;
+                }
+
+                applyLoadedMapData(data);
+
+            } else {
+                // --- Multiple files selected — must be a chunked save ---
+                const parts = [];
+                for (const file of files) {
+                    const text = await readFileAsText(file);
+                    const data = JSON.parse(text);
+                    if (!data.saveType || data.saveType !== 'chunked') {
+                        alert('One or more selected files is not a chunked save part. Please select only the parts of a single chunked save.');
+                        return;
+                    }
+                    parts.push(data);
+                }
+
+                // Sort by part number
+                parts.sort((a, b) => a.part - b.part);
+
+                const totalParts = parts[0].totalParts;
+
+                // Validate correct number of parts
+                if (parts.length !== totalParts) {
+                    alert(`This save has ${totalParts} parts but ${parts.length} were selected. Please select all ${totalParts} parts together.`);
+                    return;
+                }
+
+                // Validate no gaps (e.g. parts 1, 2, 4 with 3 missing)
+                for (let i = 0; i < parts.length; i++) {
+                    if (parts[i].part !== i + 1) {
+                        alert(`Part ${i + 1} of ${totalParts} is missing. Please select all parts together.`);
+                        return;
+                    }
+                }
+
+                // Merge all hexStates chunks into a single object
+                const mergedHexStates = {};
+                for (const part of parts) {
+                    if (Array.isArray(part.hexStates)) {
+                        for (const [hexId, state] of part.hexStates) {
+                            mergedHexStates[hexId] = state;
+                        }
+                    }
+                }
+
+                // Build a unified data object using metadata from Part 1
+                const merged = {
+                    version:    parts[0].version,
+                    gridWidth:  parts[0].gridWidth,
+                    gridHeight: parts[0].gridHeight,
+                    routes:     parts[0].routes     || [],
+                    rules:      parts[0].rules       || [],
+                    aesthetics: parts[0].aesthetics  || {},
+                    hexStates:  mergedHexStates
+                };
+
+                applyLoadedMapData(merged);
+                if (typeof showToast === 'function') {
+                    showToast(`Loaded ${parts.length}-part save successfully.`, 3000);
+                }
             }
-
-            e.target.value = '';
-        };
-        reader.readAsText(file);
+        } catch (err) {
+            alert(`Error loading map file: ${err.message}`);
+            console.error("Load error:", err);
+        }
     });
 
     const btnSolo6 = document.getElementById('btn-load-solo6');
@@ -119,6 +261,43 @@ function setupSaveLoad() {
             applyLoadedMapData(window.SOLO_6_DATA);
         });
     }
+
+    const btnClear = document.getElementById('btn-clear-canvas');
+    if (btnClear) btnClear.addEventListener('click', clearCanvas);
+}
+
+/**
+ * Wipes all map data and resets the canvas to the default 7×5 grid.
+ * Clears IndexedDB so the next startup starts fresh.
+ * Triggered by the Settings button or Ctrl+Delete.
+ */
+async function clearCanvas() {
+    const confirmed = confirm(
+        'Clear Canvas will erase all hex data, routes, and auto-saved progress.\n\n' +
+        'The canvas will reset to the default 7×5 grid.\n\n' +
+        'This cannot be undone. Continue?'
+    );
+    if (!confirmed) return;
+
+    // Wipe IndexedDB so the next startup doesn't reload old data
+    if (window.dbManager) await window.dbManager.clearDB();
+
+    // Reset grid dimensions to default
+    gridWidth  = 7;
+    gridHeight = 5;
+
+    // Clear all in-memory state
+    hexStates.clear();
+    window.sectorRoutes = [];
+    window.undoStack    = [];
+    window.redoStack    = [];
+    selectedHexes.clear();
+
+    // Re-centre camera on the fresh 7×5 canvas
+    centerCameraOnGrid();
+
+    if (typeof draw === 'function') requestAnimationFrame(draw);
+    if (typeof showToast === 'function') showToast('Canvas cleared. Ready for a new map.', 3000);
 }
 
 /**
@@ -251,6 +430,13 @@ function applyLoadedMapData(parsedData) {
     requestAnimationFrame(draw);
 
     if (typeof showToast === 'function') showToast("Map loaded successfully!", 2000);
+
+    // Sync the freshly loaded state to IndexedDB, replacing whatever was there.
+    if (window.dbManager) {
+        window.dbManager.syncAllHexes();
+        window.dbManager.saveRoutes();
+        window.dbManager.saveGridDimensions();
+    }
 }
 
 // ============================================================================
@@ -741,4 +927,7 @@ function importT5Tab(fileContent, fileName, forcedSectorSlot = null) {
     if (typeof draw === 'function') {
         requestAnimationFrame(draw);
     }
+
+    // Persist the imported sector to IndexedDB in the background.
+    if (window.dbManager) window.dbManager.saveHexesBySectorNum(sectorNum);
 }

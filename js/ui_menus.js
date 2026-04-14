@@ -795,11 +795,78 @@ function setupGenerationHandlers() {
     });
 
     document.getElementById('btn-xboat-clear').addEventListener('click', () => {
-        saveHistoryState('Clear Xboat Routes');
-        window.sectorRoutes = [];
+        const routes = window.sectorRoutes || [];
+        const list = document.getElementById('clear-routes-list');
+        list.innerHTML = '';
+
+        // Static route types
+        const staticTypes = [
+            { type: 'Xboat',     label: 'Xboat Routes',     color: '#00FF00' },
+            { type: 'Trade',     label: 'Trade Routes',     color: '#FF0000' },
+            { type: 'Secondary', label: 'Secondary Routes', color: '#FFFF00' },
+        ];
+        staticTypes.forEach(({ type, label, color }) => {
+            const count = routes.filter(r => r.type === type).length;
+            if (count === 0) return;
+            const row = document.createElement('label');
+            row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 4px;cursor:pointer;border-bottom:1px solid #1f2833;';
+            row.innerHTML = `
+                <input type="checkbox" data-cleartype="static" data-routetype="${type}"
+                    style="cursor:pointer;accent-color:#66fcf1;flex-shrink:0;">
+                <span style="display:inline-block;width:16px;height:16px;border-radius:3px;
+                    background:${color};flex-shrink:0;border:1px solid rgba(255,255,255,0.25);"></span>
+                <span style="color:#c5c6c7;font-size:0.9rem;flex:1;">${label}</span>
+                <span style="color:#666;font-size:0.8rem;white-space:nowrap;">${count} segment(s)</span>
+            `;
+            list.appendChild(row);
+        });
+
+        // Auto Route / Point-to-Point groups
+        getAutoRouteGroups().forEach(g => {
+            const row = document.createElement('label');
+            row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 4px;cursor:pointer;border-bottom:1px solid #1f2833;';
+            row.innerHTML = `
+                <input type="checkbox" data-cleartype="group" data-groupid="${g.groupId}"
+                    style="cursor:pointer;accent-color:#66fcf1;flex-shrink:0;">
+                <span style="display:inline-block;width:16px;height:16px;border-radius:3px;
+                    background:${g.color};flex-shrink:0;border:1px solid rgba(255,255,255,0.25);"></span>
+                <span style="color:#c5c6c7;font-size:0.9rem;flex:1;">${g.name}</span>
+                <span style="color:#666;font-size:0.8rem;white-space:nowrap;">${g.count} segment(s)</span>
+            `;
+            list.appendChild(row);
+        });
+
+        if (list.children.length === 0) {
+            showToast('No routes to clear.', 2000);
+            return;
+        }
+
         document.getElementById('xboat-modal').style.display = 'none';
-        showToast('All routes cleared.', 2000);
+        document.getElementById('clear-routes-modal').style.display = 'flex';
+    });
+
+    document.getElementById('btn-clear-routes-confirm').addEventListener('click', () => {
+        const checked = [...document.querySelectorAll('#clear-routes-list input[type="checkbox"]:checked')];
+        if (checked.length === 0) { showToast('No sets selected.', 2000); return; }
+
+        saveHistoryState('Clear Routes');
+        checked.forEach(cb => {
+            if (cb.dataset.cleartype === 'static') {
+                const type = cb.dataset.routetype;
+                window.sectorRoutes = window.sectorRoutes.filter(r => r.type !== type);
+            } else if (cb.dataset.cleartype === 'group') {
+                clearAutoRouteGroup(cb.dataset.groupid);
+            }
+        });
+
+        document.getElementById('clear-routes-modal').style.display = 'none';
+        showToast(`Removed ${checked.length} route set(s).`, 2500);
+        if (window.dbManager) window.dbManager.saveRoutes();
         requestAnimationFrame(draw);
+    });
+
+    document.getElementById('btn-clear-routes-cancel').addEventListener('click', () => {
+        document.getElementById('clear-routes-modal').style.display = 'none';
     });
 
     document.getElementById('btn-xboat-cancel').addEventListener('click', () => {
@@ -867,6 +934,221 @@ function setupGenerationHandlers() {
         document.getElementById('context-menu').classList.remove('visible');
         runCTBottomUpMacro(false);
     });
+}
+
+// ============================================================================
+// AUTO ROUTES
+// ============================================================================
+
+/**
+ * Returns hex IDs of all populated, non-hidden worlds (the current filter result).
+ * This is what "filtered worlds" means for Auto Route generation.
+ */
+function getFilteredHexIds() {
+    const ids = [];
+    hexStates.forEach((state, id) => {
+        if (state.type === 'SYSTEM_PRESENT' && !state.isHiddenByFilter) ids.push(id);
+    });
+    return ids;
+}
+
+/**
+ * Returns true if any filter input field currently has a non-empty value.
+ * Used to block Auto Routes when no filter is active.
+ */
+function hasAnyActiveFilter() {
+    const textInputIds = [
+        'filter-name', 'filter-starport', 'filter-size', 'filter-atm', 'filter-hydro',
+        'filter-pop', 'filter-total-pop', 'filter-gov', 'filter-law', 'filter-tl',
+        'filter-trade-codes', 'filter-allegiance', 'filter-gravity', 'filter-temperature',
+        'filter-t5-ix', 'filter-mgt-importance', 'filter-mgt-wtn', 'filter-mgt-gwp'
+    ];
+    const checkboxIds = ['filter-belts', 'filter-gas-giant', 'filter-travel-zone'];
+
+    const hasText = textInputIds.some(id => {
+        const el = document.getElementById(id);
+        return el && el.value.trim() !== '';
+    });
+    const hasCheck = checkboxIds.some(id => {
+        const el = document.getElementById(id);
+        return el && el.checked;
+    });
+    return hasText || hasCheck;
+}
+
+function setupAutoRoutes() {
+    // "Auto Routes" button in filter modal footer → open generation modal
+    const btnOpen = document.getElementById('btn-auto-routes');
+    if (btnOpen) {
+        btnOpen.addEventListener('click', () => {
+            const nextNum = (window.autoRouteCounter || 0) + 1;
+            document.getElementById('autoroute-name').value = '';
+            document.getElementById('autoroute-name').placeholder = `Auto Route #${nextNum}`;
+            document.getElementById('autoroute-max-jump').value  = 4;
+            document.getElementById('autoroute-max-range').value = 12;
+
+            // Reset P2P state
+            const p2pCheck = document.getElementById('autoroute-p2p');
+            if (p2pCheck) p2pCheck.checked = false;
+            const p2pOptions = document.getElementById('autoroute-p2p-options');
+            if (p2pOptions) p2pOptions.style.display = 'none';
+
+            // Pre-populate start/end from selection if two hexes selected
+            const selArray = [...(window.selectedHexes || [])];
+            if (selArray.length >= 1) document.getElementById('autoroute-p2p-start').value = selArray[0];
+            if (selArray.length >= 2) document.getElementById('autoroute-p2p-end').value   = selArray[1];
+
+            document.getElementById('autoroute-modal').style.display = 'flex';
+        });
+    }
+
+    // P2P checkbox → show/hide options div; hide Range row (unused in P2P)
+    const p2pCheckbox = document.getElementById('autoroute-p2p');
+    if (p2pCheckbox) {
+        p2pCheckbox.addEventListener('change', () => {
+            const opts     = document.getElementById('autoroute-p2p-options');
+            const rangeRow = document.getElementById('autoroute-range-row');
+            if (opts)     opts.style.display     = p2pCheckbox.checked ? 'block' : 'none';
+            if (rangeRow) rangeRow.style.display  = p2pCheckbox.checked ? 'none'  : 'flex';
+        });
+    }
+
+    // "From Sel[0]" / "From Sel[1]" buttons
+    // Confirm → branch on P2P mode vs. standard Auto Routes
+    const btnConfirm = document.getElementById('btn-autoroute-confirm');
+    if (btnConfirm) {
+        btnConfirm.addEventListener('click', () => {
+            const isP2P    = document.getElementById('autoroute-p2p')?.checked || false;
+            const maxJump  = Math.min(8,  Math.max(1, parseInt(document.getElementById('autoroute-max-jump').value,  10) || 4));
+            const color    = document.getElementById('autoroute-color').value || '#ff9900';
+            const nameRaw  = document.getElementById('autoroute-name').value.trim();
+
+            const nextCounter = (window.autoRouteCounter || 0) + 1;
+            const name    = nameRaw || `Auto Route #${nextCounter}`;
+            const groupId = `ar_${Date.now()}`;
+
+            if (isP2P) {
+                // ── Point-to-Point path ──────────────────────────────────
+                const startId = document.getElementById('autoroute-p2p-start').value.trim();
+                const endId   = document.getElementById('autoroute-p2p-end').value.trim();
+
+                if (!startId || !endId) {
+                    alert('Point-to-Point requires both a Start and End hex ID.');
+                    return;
+                }
+                if (startId === endId) {
+                    alert('Start and End hex must be different.');
+                    return;
+                }
+
+                const filteredIds = getFilteredHexIds();
+
+                saveHistoryState('Generate Point-to-Point Route');
+                const count = generatePointToPointRoute(startId, endId, maxJump, color, groupId, name, true, filteredIds);
+
+                if (count === null) {
+                    alert(`No route found from ${startId} to ${endId} within Jump-${maxJump}.`);
+                    return; // keep modal open
+                }
+
+                window.autoRouteCounter = nextCounter;
+                document.getElementById('autoroute-modal').style.display = 'none';
+                showToast(`"${name}" generated: ${count} segment(s).`, 3000);
+
+            } else {
+                // ── Standard Auto Routes path ────────────────────────────
+                if (!hasAnyActiveFilter()) {
+                    alert('No filter is active. Apply a filter before generating Auto Routes.');
+                    return;
+                }
+
+                const filteredIds = getFilteredHexIds();
+                if (filteredIds.length === 0) {
+                    alert('The current filter matches no worlds.');
+                    return;
+                }
+
+                const maxRange = Math.min(32, Math.max(1, parseInt(document.getElementById('autoroute-max-range').value, 10) || 12));
+
+                saveHistoryState('Generate Auto Routes');
+                const count = generateAutoRoutes(filteredIds, maxJump, maxRange, color, groupId, name);
+
+                if (count === 0) {
+                    alert('No route segments could be generated for the current filter.');
+                    return; // keep modal open
+                }
+
+                window.autoRouteCounter = nextCounter;
+                document.getElementById('autoroute-modal').style.display = 'none';
+                showToast(`"${name}" generated: ${count} route segment(s).`, 3000);
+            }
+
+            if (window.dbManager) {
+                window.dbManager.saveRoutes();
+                window.dbManager.saveAutoRouteCounter();
+            }
+            requestAnimationFrame(draw);
+        });
+    }
+
+    // Cancel
+    const btnCancel = document.getElementById('btn-autoroute-cancel');
+    if (btnCancel) {
+        btnCancel.addEventListener('click', () => {
+            document.getElementById('autoroute-modal').style.display = 'none';
+        });
+    }
+
+    // "Clear Auto Routes" button → open clear modal
+    const btnClearOpen = document.getElementById('btn-clear-auto-routes');
+    if (btnClearOpen) {
+        btnClearOpen.addEventListener('click', () => {
+            const groups = getAutoRouteGroups();
+            if (groups.length === 0) {
+                showToast('No Auto Routes to clear.', 2000);
+                return;
+            }
+            const list = document.getElementById('clear-autoroute-list');
+            list.innerHTML = '';
+            groups.forEach(g => {
+                const row = document.createElement('label');
+                row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 4px;cursor:pointer;border-bottom:1px solid #1f2833;';
+                row.innerHTML = `
+                    <input type="checkbox" data-groupid="${g.groupId}"
+                        style="cursor:pointer;accent-color:#66fcf1;flex-shrink:0;">
+                    <span style="display:inline-block;width:16px;height:16px;border-radius:3px;
+                        background:${g.color};flex-shrink:0;border:1px solid rgba(255,255,255,0.25);"></span>
+                    <span style="color:#c5c6c7;font-size:0.9rem;flex:1;">${g.name}</span>
+                    <span style="color:#666;font-size:0.8rem;white-space:nowrap;">${g.count} segment(s)</span>
+                `;
+                list.appendChild(row);
+            });
+            document.getElementById('clear-autoroute-modal').style.display = 'flex';
+        });
+    }
+
+    // Confirm clear → remove selected groups
+    const btnClearConfirm = document.getElementById('btn-clear-autoroute-confirm');
+    if (btnClearConfirm) {
+        btnClearConfirm.addEventListener('click', () => {
+            const checked = [...document.querySelectorAll('#clear-autoroute-list input[type="checkbox"]:checked')];
+            if (checked.length === 0) { showToast('No sets selected.', 2000); return; }
+            saveHistoryState('Clear Auto Routes');
+            checked.forEach(cb => clearAutoRouteGroup(cb.dataset.groupid));
+            document.getElementById('clear-autoroute-modal').style.display = 'none';
+            showToast(`Removed ${checked.length} Auto Route set(s).`, 2500);
+            if (window.dbManager) window.dbManager.saveRoutes();
+            requestAnimationFrame(draw);
+        });
+    }
+
+    // Cancel clear
+    const btnClearCancel = document.getElementById('btn-clear-autoroute-cancel');
+    if (btnClearCancel) {
+        btnClearCancel.addEventListener('click', () => {
+            document.getElementById('clear-autoroute-modal').style.display = 'none';
+        });
+    }
 }
 
 // ============================================================================

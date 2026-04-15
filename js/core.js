@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.9";
-const APP_BANNER = "v0.9: RTT World Naming & System Details Sync";
+const APP_VERSION = "v0.9.0.1";
+const APP_BANNER = "v0.9.0.1: New: Adding Sector Name Display Option";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -54,6 +54,10 @@ selectedHexes = new Set();
 showSubsectorBorders = true;
 devView = false;
 hideNoPlanetSystems = true;
+showSectorNames = false;
+
+// Sector name store — keyed by integer sector number
+window.sectorNames = {};
 
 // Hex state (Map of hexId -> STATE)
 hexStates = new Map();

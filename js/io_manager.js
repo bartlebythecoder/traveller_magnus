@@ -75,13 +75,14 @@ function setupSaveLoad() {
         hexStates.forEach((value, key) => { hexObj[key] = value; });
 
         const stateObj = {
-            version:    APP_VERSION,
+            version:     APP_VERSION,
             gridWidth,
             gridHeight,
-            routes:     window.sectorRoutes || [],
-            rules:      window.activeFilterRules || [], // legacy support
+            routes:      window.sectorRoutes || [],
+            rules:       window.activeFilterRules || [], // legacy support
             aesthetics,
-            hexStates:  hexObj
+            sectorNames: window.sectorNames || {},
+            hexStates:   hexObj
         };
 
         // Toast before the blocking stringify so the UI doesn't appear frozen
@@ -376,6 +377,7 @@ function applyLoadedMapData(parsedData) {
         }
 
         window.sectorRoutes = parsedData.routes || [];
+        window.sectorNames  = parsedData.sectorNames || {};
 
         // Priority Rule Capture: Use aesthetics.activeRules if available, else fallback to legacy field
         window.activeFilterRules = parsedData.rules || [];

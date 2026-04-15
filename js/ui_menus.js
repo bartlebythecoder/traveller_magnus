@@ -1243,6 +1243,62 @@ function setupSettingsPanel() {
         requestAnimationFrame(draw);
     });
 
+    document.getElementById('toggle-sector-names').addEventListener('change', (e) => {
+        showSectorNames = e.target.checked;
+        requestAnimationFrame(draw);
+    });
+
+    // --- Sector Name Editor ---
+    document.getElementById('btn-edit-sector-names').addEventListener('click', () => {
+        const modal = document.getElementById('sector-name-editor-modal');
+        const grid  = document.getElementById('sector-name-grid');
+        grid.innerHTML = '';
+
+        // Build a row of inputs per grid row, mirroring the map layout
+        for (let sY = 0; sY < gridHeight; sY++) {
+            const row = document.createElement('div');
+            row.style.cssText = 'display:flex; gap:4px;';
+            for (let sX = 0; sX < gridWidth; sX++) {
+                const sectorNum = sY * gridWidth + sX + 1;
+                const current = (window.sectorNames && window.sectorNames[sectorNum]) || '';
+                const cell = document.createElement('div');
+                cell.style.cssText = 'flex:1; display:flex; flex-direction:column; gap:2px;';
+                cell.innerHTML = `
+                    <span style="color:#45a29e; font-size:0.65rem; text-align:center;">${sectorNum}</span>
+                    <input type="text" data-sector="${sectorNum}"
+                        value="${current.replace(/"/g, '&quot;')}"
+                        placeholder="Sector ${sectorNum}"
+                        style="width:100%; padding:3px 4px; background:#0d0f13; border:1px solid #2a3a3a;
+                               color:#c5c6c7; font-size:0.7rem; font-family:'Courier New',monospace;
+                               border-radius:3px; box-sizing:border-box;">
+                `;
+                row.appendChild(cell);
+            }
+            grid.appendChild(row);
+        }
+
+        modal.style.display = 'flex';
+    });
+
+    document.getElementById('btn-sector-names-save').addEventListener('click', () => {
+        const inputs = document.querySelectorAll('#sector-name-grid input[data-sector]');
+        inputs.forEach(input => {
+            const num = parseInt(input.dataset.sector, 10);
+            const val = input.value.trim();
+            if (val) {
+                window.sectorNames[num] = val;
+            } else {
+                delete window.sectorNames[num];
+            }
+        });
+        document.getElementById('sector-name-editor-modal').style.display = 'none';
+        requestAnimationFrame(draw);
+    });
+
+    document.getElementById('btn-sector-names-cancel').addEventListener('click', () => {
+        document.getElementById('sector-name-editor-modal').style.display = 'none';
+    });
+
     const printModeToggle = document.getElementById('toggle-print-mode');
     if (printModeToggle) {
         let savedDotColor = '#ffffff';

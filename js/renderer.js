@@ -848,6 +848,31 @@ function draw() {
         ctx.strokeStyle = window.printMode ? 'rgba(0, 0, 0, 0.55)' : 'rgba(255, 255, 255, 0.4)';
         ctx.lineWidth = 3 / zoom;
         ctx.stroke();
+
+        // Sector names — only when zoomed out past the hex-text threshold
+        if (showSectorNames && !showText) {
+            const fontSize = 32 * widthStep * 0.13;
+            ctx.font = `bold italic ${fontSize}px 'Courier New', Courier, monospace`;
+            ctx.fillStyle = window.printMode ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.60)';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            for (let sY = 0; sY < gridHeight; sY++) {
+                for (let sX = 0; sX < gridWidth; sX++) {
+                    const sectorNum = sY * gridWidth + sX + 1;
+                    const label = (window.sectorNames && window.sectorNames[sectorNum])
+                        ? window.sectorNames[sectorNum]
+                        : `Sector ${sectorNum}`;
+                    const cx = (sX * 32 + 16) * widthStep;
+                    const cy = (sY * 40 + 20) * heightStep;
+                    ctx.save();
+                    ctx.translate(cx, cy);
+                    ctx.rotate(-Math.PI / 6); // 30° — bottom-left to top-right
+                    ctx.fillText(label, 0, 0);
+                    ctx.restore();
+                }
+            }
+        }
     }
 
     ctx.restore();

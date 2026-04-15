@@ -139,9 +139,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above So Below</span></h1>
-            <div class="splash-banner">New: Edit RTT System Data</div>
+            <div class="splash-banner">New: Display Sector Names</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.9</div>
+            <div class="splash-version">v0.9.0.1</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -210,6 +210,10 @@
         <div class="settings-row">
             <input type="checkbox" id="toggle-print-mode">
             <label for="toggle-print-mode">White Background Mode</label>
+        </div>
+        <div class="settings-row">
+            <input type="checkbox" id="toggle-sector-names">
+            <label for="toggle-sector-names">Show Sector Names</label>
         </div>
 
         <div style="border-top: 1px solid #45a29e; margin: 10px 0;"></div>
@@ -280,6 +284,10 @@
                 style="width: 100%; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
                 <i class="fas fa-meteor"></i> Import the Universe
             </button>
+            <button class="menu-btn" id="btn-edit-sector-names"
+                style="width: 100%; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i class="fas fa-tag"></i> Edit Sector Names
+            </button>
         </div>
 
         <div style="border-top: 1px solid #45a29e; margin: 10px 0;"></div>
@@ -289,6 +297,31 @@
                 style="width: 100%; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
                 <i class="fas fa-globe"></i> Load Sector Solo 6
             </button>
+        </div>
+    </div>
+
+    <!-- Sector Name Editor Modal -->
+    <div id="sector-name-editor-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+               background:rgba(0,0,0,0.75); z-index:2000;
+               align-items:center; justify-content:center;">
+        <div style="background:#1f2833; border:1px solid #45a29e; border-radius:8px;
+                    padding:24px; width:620px; max-height:80vh;
+                    display:flex; flex-direction:column; gap:12px; box-shadow:0 8px 32px rgba(0,0,0,0.6);">
+            <h3 style="margin:0; color:#66fcf1; font-size:1.1rem;">Edit Sector Names</h3>
+            <p style="margin:0; color:#c5c6c7; font-size:0.8rem;">
+                Names are arranged to match the map layout. Leave blank to use the default <em>Sector N</em> label.
+            </p>
+            <div id="sector-name-grid"
+                style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:4px;">
+                <!-- Built dynamically by ui_menus.js -->
+            </div>
+            <div style="display:flex; gap:8px; justify-content:flex-end; border-top:1px solid #45a29e; padding-top:12px;">
+                <button id="btn-sector-names-cancel" class="menu-btn"
+                    style="padding:8px 20px;">Cancel</button>
+                <button id="btn-sector-names-save" class="menu-btn"
+                    style="padding:8px 20px; background:#45a29e; color:#0b0c10; border-color:#45a29e;">Save</button>
+            </div>
         </div>
     </div>
 

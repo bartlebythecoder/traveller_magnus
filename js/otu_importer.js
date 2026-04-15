@@ -208,6 +208,12 @@
                 } else {
                     throw new Error('importT5Tab not available');
                 }
+
+                // Store sector name — preserve any existing manual name (conflict rule)
+                const slotNum = parseInt(slot, 10);
+                if (!isNaN(slotNum) && !window.sectorNames[slotNum]) {
+                    window.sectorNames[slotNum] = name;
+                }
             } catch (err) {
                 alert(`Failed to import "${name}": ${err.message}`);
             }
@@ -293,6 +299,12 @@
                     importT5Tab(text, name, defaultSlot);
                 } else {
                     throw new Error('importT5Tab not available');
+                }
+
+                // Store sector name — preserve any existing manual name (conflict rule)
+                const slotNum = parseInt(defaultSlot, 10);
+                if (!isNaN(slotNum) && !window.sectorNames[slotNum]) {
+                    window.sectorNames[slotNum] = name;
                 }
             } catch (err) {
                 console.warn(`[Universe Import] Failed to import "${name}": ${err.message}`);

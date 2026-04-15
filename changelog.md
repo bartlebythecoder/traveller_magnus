@@ -1,5 +1,8 @@
 # Changelog
 
+### [v0.9.0.1] - 2026-04-15
+1. **Sector Name Display:** Added configurable sector name labels to the map. Names appear at zoom levels below 0.3 (when hex detail is suppressed), rendered at a 30° angle across each sector in the TravellerMap style. Names are auto-populated from Imperium and Universe imports, editable manually via a new "Edit Sector Names" grid dialog in the Settings panel, and persisted in the workspace JSON.
+
 ### [v0.9] - 2026-04-15
 1. **RTT World Details Sync:** Edits made to a mainworld's UWP in the World Details panel now correctly propagate into the RTT System Details accordion — the two views stay in sync after every save.
 2. **RTT World Naming:** Every body in an RTT system (planets, moons, gas giants, satellites) now has an editable name field directly in the System Details accordion header. Bodies default to auto-generated names derived from the system name and orbital position (e.g. *Regina III*, *Regina III-a* for its first moon). Custom names are saved per-body, persist with the system JSON, and are shown in italic to distinguish them from defaults. The mainworld name is also independently editable without changing the system name.

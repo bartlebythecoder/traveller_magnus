@@ -1,5 +1,10 @@
 # Changelog
 
+### [v0.9] - 2026-04-15
+1. **RTT World Details Sync:** Edits made to a mainworld's UWP in the World Details panel now correctly propagate into the RTT System Details accordion — the two views stay in sync after every save.
+2. **RTT World Naming:** Every body in an RTT system (planets, moons, gas giants, satellites) now has an editable name field directly in the System Details accordion header. Bodies default to auto-generated names derived from the system name and orbital position (e.g. *Regina III*, *Regina III-a* for its first moon). Custom names are saved per-body, persist with the system JSON, and are shown in italic to distinguish them from defaults. The mainworld name is also independently editable without changing the system name.
+3. **RTT System Details:** Fields in the RTT System Details can be edited.
+
 ### [v0.8] - 2026-04-14
 1. **Auto Filter Routes:** Added Auto Route generation from the Filter window — connect filtered worlds via shortest-path bridging, with custom color, jump range, and named route groups; rendered as a distinct "Filter" route layer beneath manual routes
 2. **Point-to-Point Auto Routes:** Added point-to-point pathfinding between any two hexes, with optional restriction to filtered worlds only

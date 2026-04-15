@@ -1,4 +1,4 @@
-# As Above, So Below (v0.8)
+# As Above, So Below (v0.9)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -58,6 +58,11 @@ Want to replace any of these sectors with your own file?
 
 ---
 ## 📜 Changelog
+### [v0.9] - 2026-04-15
+1. **RTT World Details Sync:** Edits made to a mainworld's UWP in the World Details panel now correctly propagate into the RTT System Details accordion — the two views stay in sync after every save.
+2. **RTT World Naming:** Every body in an RTT system (planets, moons, gas giants, satellites) now has an editable name field directly in the System Details accordion header. Bodies default to auto-generated names derived from the system name and orbital position (e.g. *Regina III*, *Regina III-a* for its first moon). Custom names are saved per-body, persist with the system JSON, and are shown in italic to distinguish them from defaults. The mainworld name is also independently editable without changing the system name.
+3. **RTT System Details:** Fields in the RTT System Details can be edited.
+
 ### [v0.8] - 2026-04-14
 1. **Auto Filter Routes:** Added Auto Route generation from the Filter window — connect filtered worlds via shortest-path bridging, with custom color, jump range, and named route groups; rendered as a distinct "Filter" route layer beneath manual routes
 2. **Point-to-Point Auto Routes:** Added point-to-point pathfinding between any two hexes, with optional restriction to filtered worlds only
@@ -66,51 +71,6 @@ Want to replace any of these sectors with your own file?
 5. **Route Layering:** Filter routes always render beneath manual (Xboat/Trade/Secondary) routes; all four types have independent visibility toggles in the Filter window
 6. **Side-by-Side Route Offset:** Multiple routes sharing a segment are spread apart at zoom ≥ 0.3 so they remain individually visible
 7. **Chunked JSON Save:** Workspaces exceeding 250 MB are automatically split into multiple numbered JSON parts on save; loading prompts the user to select all parts together so no data is lost on very large maps
-
-### [v0.7.4] - 2026-04-13
-1. **Import the Universe:** Added experimental bulk import of the full 16×8 OTU sector canvas
-2. **Numeric Sector IDs:** Refactored hex IDs from letter-based to numeric (legacy JSON auto-migrated on load)
-3. **Imperium Data:** Sector list now fetched live from travellermap API with correct OTU coordinates
-4. **Canvas Scaling:** Sector and subsector grid lines now span the full canvas at any grid size
-5. **Undo Stack:** Capped at 5 snapshots for canvases larger than 35 sectors to protect memory
-6. **Zoom:** Extended zoom-out limit from 0.1 to 0.03
-7. **API Courtesy:** Enforced 1-second delay after every live travellermap API call; sectors cached for 24 hours
-
-
-### [v0.7.3] - 2026-04-12
-1. **Mongoose Socioeconomic:** Fixed bug that did not check if Ix, Cx, or Ex could be inherited
-2. **Mongoose System Expand:** Fixed bug that did not make use of T5 Stellar information and PBG
-3. **Import Sector .tsv:** Fixed bug that did not capture Worlds value
-4. **Generate Xboat:** Added user options on range and jump distances
-5. **Import Imperium:** Added the option to bulk import Imperial Sectors
-
-
-### [v0.7.2.1] - 2026-04-11
-1. **Settings Menu:** Added Solo-6 button to download Solo Sector 6 data
-
-### [v0.7.2] - 2026-04-11
-1. **Filter Engine Expansion:** Added Belt and Travel Zone filters
-2. **Filter UI:** Created new Filter section for Belts, GG, Zones
-3. **All Engines:** Created Belt and GG counts to be used for filters in creation methods of all engines
-4. **JSON Load/Save:** Ensured Belt and GG count included in all JSON saves, and added to any legacy JSON being loaded
-5. **Sector Import:** Fixed bug that prevented Travel Zones from being imported
-
-### [v0.7.1] - 2026-04-10
-1. **Filter Engine Expansion:** Added "Gas Giant" and "Total Population" filters.
-2. **Filter Engine Expansion:** Added the ability to use k, m, b as shorthand for thousands, millions, and billions in the total population filter
-3. **T5 Pop mod:** Fixed a bug in the T5 engine producing Population mods of 0 when population > 0
-4. **Hex Background:** Added as an option outside of filtering.  Hex backgrounds can be placed on selected hexes via the context menu.
-
-### [v0.7] - 2026-04-07
-1. **Political Mapping & Referee Utility:** Initiated Phase 7.0 development.
-2. **Allegiance & Notes:** Implemented manual entry fields for Allegiance codes and Referee Notes in the Main World UI.
-3. **Allegiance Selection:** Implemented a way to mass change Allegiance through selection and right click.
-3. **Hex Background:** Added to filter styles
-4. **White Background Mode:** Added in settings
-5. **Fixed Mongoose World and Moon Temperature:** Orbital WBH errata applied.  Bug tidal locking some worlds to stars corrected.
-6. **Fixed Gas Giant Temperature:**  Wrong age exponent fixed.  Age divide by zero corrected (min. Gyr).
-
-
 
 ---
 *For a full history of changes, see the [Changelog](changelog.md).*

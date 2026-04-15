@@ -1115,52 +1115,115 @@ function populateEditorAccordions(stateObj) {
             root.innerHTML = '';
             const sys = stateObj.rttSystem;
 
-            function renderRTTBody(body, isSatellite = false) {
-                const uwp = (body.habitationType !== 'Uninhabited') ?
-                    `${body.starport || 'X'}${toUWPChar(body.size)}${toUWPChar(body.atmosphere)}${toUWPChar(body.hydrosphere)}${toUWPChar(body.population)}${toUWPChar(body.government)}${toUWPChar(body.lawLevel)}-${body.tl || 0}` :
-                    'Uninhabited';
+            // --- Click-to-edit field builder helpers ---
+            const _da = (field, sIdx, oIdx, satIdx) =>
+                `data-rtt-field="${field}" data-rtt-sidx="${sIdx}" data-rtt-oidx="${oIdx}" data-rtt-satidx="${satIdx}"`;
+            const _mc = (obj, field) =>
+                (typeof isManual === 'function' && isManual(obj, field)) ? ' is-manual' : '';
 
+            function _rttNum(obj, field, sIdx, oIdx, satIdx, min, max) {
+                const val = (obj[field] !== undefined && obj[field] !== null) ? obj[field] : 0;
+                return `<input type="number" class="rtt-field-input${_mc(obj, field)}" ${_da(field, sIdx, oIdx, satIdx)} value="${val}" min="${min}" max="${max}">`;
+            }
+            function _rttText(obj, field, sIdx, oIdx, satIdx) {
+                const val = (obj[field] !== undefined && obj[field] !== null) ? String(obj[field]).replace(/"/g, '&quot;') : '';
+                return `<input type="text" class="rtt-field-input${_mc(obj, field)}" ${_da(field, sIdx, oIdx, satIdx)} value="${val}">`;
+            }
+            function _rttArray(obj, field, sIdx, oIdx, satIdx) {
+                const val = Array.isArray(obj[field]) ? obj[field].join(' ') : (obj[field] || '');
+                return `<input type="text" class="rtt-field-input${_mc(obj, field)}" ${_da(field, sIdx, oIdx, satIdx)} value="${String(val).replace(/"/g, '&quot;')}">`;
+            }
+            function _rttSelect(obj, field, sIdx, oIdx, satIdx, opts) {
+                const cur = (obj[field] !== undefined && obj[field] !== null) ? String(obj[field]) : '';
+                let s = `<select class="rtt-field-select${_mc(obj, field)}" ${_da(field, sIdx, oIdx, satIdx)}>`;
+                opts.forEach(o => { s += `<option value="${o}"${String(o) === cur ? ' selected' : ''}>${o}</option>`; });
+                return s + `</select>`;
+            }
+
+            const _WC  = ['Acheronian','Arean','Arid','Asphodelian','Asteroid Belt','Chthonian',
+                          'Hebean','Helian','JaniLithic','Jovian','Meltball','Oceanic',
+                          'Panthalassic','Promethean','Rockball','Small Body','Snowball',
+                          'Stygian','Tectonic','Telluric','Vesperian'];
+            const _HAB = ['Uninhabited','Outpost','Colony','Homeworld'];
+            const _CHM = ['None','Water','Ammonia','Methane','Sulfur','Chlorine'];
+            const _RNG = ['None','Minor ring system','Complex ring system'];
+
+            // Roman numeral helper for default world names (e.g. "Regina III")
+            function toRoman(n) {
+                const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
+                const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+                let r = '';
+                for (let i = 0; i < vals.length; i++) {
+                    while (n >= vals[i]) { r += syms[i]; n -= vals[i]; }
+                }
+                return r || String(n);
+            }
+
+            function renderRTTBody(body, isSatellite, sIdx, oIdx, satIdx) {
+                const uwp = `${body.starport || 'X'}${toUWPChar(body.size)}${toUWPChar(body.atmosphere)}${toUWPChar(body.hydrosphere)}${toUWPChar(body.population)}${toUWPChar(body.government)}${toUWPChar(body.lawLevel)}-${body.tl || 0}`;
                 const isMain = body.habitationType === 'Homeworld' || body.isMainworld;
                 const summaryStyle = isMain ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
                 const uwpColor = isMain ? '#ffa500' : '#66fcf1';
-
                 const baseType = body.type || body.worldClass || 'Body';
                 const typeLabel = isMain ? `Mainworld (${baseType})` : baseType;
                 const orbitLabel = isSatellite ? 'Satellite' : `Orbit ${body.orbitNumber || '?'}`;
+                // Default name: "SystemName III" for planets, "SystemName III-a" for moons
+                const defaultBodyName = isSatellite
+                    ? `${sysName} ${toRoman(oIdx + 1)}-${String.fromCharCode(97 + Math.max(0, satIdx))}`
+                    : `${sysName} ${toRoman(oIdx + 1)}`;
 
                 let bHtml = `<details ${!isSatellite ? 'open' : ''}>`;
-                bHtml += `<summary ${summaryStyle}>${orbitLabel} (${body.zone || '?'}) <span class="sys-title-info">${typeLabel} | <strong style="color: ${uwpColor}">${uwp}</strong></span></summary>`;
-                bHtml += `<div class="system-node">`;
 
-                bHtml += `<div class="system-stats">`;
-                bHtml += `<span>Type: <strong>${body.type}</strong></span>`;
-                bHtml += `<span>Class: <strong>${body.worldClass}</strong></span>`;
+                // All bodies have an editable name input in the header.
+                // Mainworld stays orange; non-mainworld uses the teal palette.
+                // Blank = show the fallback (system name for mainworld, auto-generated default for others).
+                if (isMain) {
+                    const _mwNameCls = `rtt-field-input rtt-name-input rtt-name-mainworld${_mc(body, 'name')}`;
+                    const _mwNameVal = (body.name || '').replace(/"/g, '&quot;');
+                    const _mwNamePh  = (stateObj.name || defaultBodyName).replace(/"/g, '&quot;');
+                    bHtml += `<summary ${summaryStyle}><input type="text" class="${_mwNameCls}" ${_da('name', sIdx, oIdx, satIdx)} value="${_mwNameVal}" placeholder="${_mwNamePh}" onclick="event.stopPropagation()" style="max-width: 160px;"> (${orbitLabel} · ${body.zone || '?'}) <span class="sys-title-info">${typeLabel} | <strong style="color: ${uwpColor}">${uwp}</strong></span></summary>`;
+                } else {
+                    const _uwpManual = typeof isManual === 'function' &&
+                        ['starport','size','atmosphere','hydrosphere','population','government','lawLevel','tl'].some(f => isManual(body, f));
+                    const _uwpCls = `rtt-field-input${_uwpManual ? ' is-manual' : ''}`;
+                    const _nameCls = `rtt-field-input rtt-name-input${_mc(body, 'name')}`;
+                    const _nameVal = (body.name || '').replace(/"/g, '&quot;');
+                    const _namePh  = defaultBodyName.replace(/"/g, '&quot;');
+                    bHtml += `<summary ${summaryStyle}><input type="text" class="${_nameCls}" ${_da('name', sIdx, oIdx, satIdx)} value="${_nameVal}" placeholder="${_namePh}" onclick="event.stopPropagation()" style="max-width: 160px;"> (${orbitLabel} · ${body.zone || '?'}) <span class="sys-title-info">${typeLabel} | <input type="text" class="${_uwpCls}" ${_da('uwp', sIdx, oIdx, satIdx)} value="${uwp.replace(/"/g, '&quot;')}" onclick="event.stopPropagation()" style="color: ${uwpColor}; max-width: 120px; font-weight: bold;"></span></summary>`;
+                }
 
-                if (body.chemistry && body.chemistry !== 'None') bHtml += `<span>Chemistry: <strong>${body.chemistry}</strong></span>`;
-                if (body.biosphere !== undefined) bHtml += `<span>Biosphere: <strong>${body.biosphere}</strong></span>`;
-                if (body.rings && body.rings !== 'None') bHtml += `<span>Rings: <strong>${body.rings}</strong></span>`;
+                bHtml += `<div class="system-node"><div class="system-stats">`;
 
-                bHtml += `<span>Habitation: <strong>${body.habitationType}</strong></span>`;
-                bHtml += `<span>Desirability: <strong>${body.desirability}</strong></span>`;
-                if (body.industry !== undefined && body.habitationType !== 'Uninhabited') bHtml += `<span>Industry: <strong>${body.industry}</strong></span>`;
+                bHtml += `<span>Type: <strong>${body.type || '—'}</strong></span>`;
+                bHtml += `<span>Class: ${_rttSelect(body, 'worldClass',     sIdx, oIdx, satIdx, _WC)}</span>`;
+                bHtml += `<span>Chemistry: ${_rttSelect(body, 'chemistry',  sIdx, oIdx, satIdx, _CHM)}</span>`;
+                bHtml += `<span>Biosphere: ${_rttNum(body, 'biosphere',     sIdx, oIdx, satIdx, 0, 15)}</span>`;
+                bHtml += `<span>Rings: ${_rttSelect(body, 'rings',          sIdx, oIdx, satIdx, _RNG)}</span>`;
+                bHtml += `<span>Habitation: ${_rttSelect(body, 'habitationType', sIdx, oIdx, satIdx, _HAB)}</span>`;
+                bHtml += `<span>Desirability: ${_rttNum(body, 'desirability', sIdx, oIdx, satIdx, -10, 20)}</span>`;
+                bHtml += `<span>Industry: ${_rttNum(body, 'industry',       sIdx, oIdx, satIdx, 0, 15)}</span>`;
 
-                if (body.starport && body.habitationType !== 'Uninhabited') bHtml += `<span>Starport: <strong>${body.starport}</strong></span>`;
-                if (body.tradeCodes && body.tradeCodes.length > 0) bHtml += `<span>Trade: <strong>${body.tradeCodes.join(' ')}</strong></span>`;
-                if (body.bases && body.bases.length > 0) bHtml += `<span>Bases: <strong>${body.bases.join('')}</strong></span>`;
+                if (body.starport && body.habitationType !== 'Uninhabited') {
+                    bHtml += `<span>Starport: <strong>${body.starport}</strong></span>`;
+                }
+
+                bHtml += `<span class="system-stats-full">Trade Codes: ${_rttArray(body, 'tradeCodes', sIdx, oIdx, satIdx)}</span>`;
+                bHtml += `<span class="system-stats-full">Bases: ${_rttArray(body, 'bases', sIdx, oIdx, satIdx)}</span>`;
+
                 if (isMain) {
                     const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
                     bHtml += `<span>Allegiance: <strong>${alleg}</strong></span>`;
                 }
-
-                if (body.canBeTerraformed) bHtml += `<span class="system-stats-full" style="color: #66fcf1; border-color: #45a29e;">Terraforming Potential: <strong>${body.terraformPoints} pts</strong></span>`;
+                if (body.canBeTerraformed) {
+                    bHtml += `<span class="system-stats-full" style="color: #66fcf1; border-color: #45a29e;">Terraforming Potential: ${_rttNum(body, 'terraformPoints', sIdx, oIdx, satIdx, 0, 99)} pts</span>`;
+                }
 
                 bHtml += `</div>`;
-
                 bHtml += buildBaseJourneyTimesUI(body.size);
 
                 if (body.satellites && body.satellites.length > 0) {
-                    body.satellites.forEach(sat => {
-                        bHtml += renderRTTBody(sat, true);
+                    body.satellites.forEach((sat, satI) => {
+                        bHtml += renderRTTBody(sat, true, sIdx, oIdx, satI);
                     });
                 }
 
@@ -1168,32 +1231,32 @@ function populateEditorAccordions(stateObj) {
                 return bHtml;
             }
 
-            const mwBase = stateObj.rttData;
+            const mwBase  = stateObj.rttData;
             const sysName = (mwBase && mwBase.name) ? mwBase.name : 'Unknown';
+            const _sysAgeClass = `rtt-field-input${_mc(sys, 'age')}`;
 
             let html = `<div class="system-stats" style="grid-template-columns: 1fr;">
                 <div style="text-align: center; color: #66fcf1; border-bottom: 1px dotted #45a29e; padding-bottom: 4px;">RTT: ${sysName} Profile</div>
-                <span>Age: <strong>${sys.age.toFixed(1)} Gyr</strong></span>
+                <span>Age: <input type="number" class="${_sysAgeClass}" data-rtt-field="age" data-rtt-level="system" value="${sys.age !== undefined ? parseFloat(sys.age).toFixed(1) : '1.0'}" min="0.1" max="14" step="0.1"> Gyr</span>
                 <span>Total Stars: <strong>${sys.stars.length}</strong></span>
             </div>`;
 
             html += `<div class="system-tree">`;
-
             sys.stars.forEach((star, sIdx) => {
-                let starOrbitLabel = star.orbitType && star.role !== 'Primary' ? ` (${star.orbitType} Orbit)` : '';
+                const starOrbitLabel = (star.orbitType && star.role !== 'Primary') ? ` (${star.orbitType} Orbit)` : '';
+                const _starClassCss  = `rtt-field-input${_mc(star, 'classification')}`;
                 html += `<details open>`;
-                html += `<summary>${star.role}${starOrbitLabel} - ${star.classification} <span class="sys-title-info">Star</span></summary>`;
+                html += `<summary>${star.role}${starOrbitLabel} — <input type="text" class="${_starClassCss}" data-rtt-field="classification" data-rtt-level="star" data-rtt-sidx="${sIdx}" value="${(star.classification || '').replace(/"/g, '&quot;')}" onclick="event.stopPropagation()"> <span class="sys-title-info">Star</span></summary>`;
                 html += `<div class="system-node">`;
 
                 if (star.planetarySystem && star.planetarySystem.orbits) {
-                    star.planetarySystem.orbits.forEach(body => {
-                        html += renderRTTBody(body);
+                    star.planetarySystem.orbits.forEach((body, oIdx) => {
+                        html += renderRTTBody(body, false, sIdx, oIdx, -1);
                     });
                 }
 
                 html += `</div></details>`;
             });
-
             html += `</div>`;
             root.innerHTML = html;
         }
@@ -1456,6 +1519,34 @@ function saveHexEditorChanges() {
         stateObj.ctData = { ...stateObj.ctData, ...sharedData, ...pbgData, name };
     } else if (stateObj.rttData) {
         stateObj.rttData = { ...stateObj.rttData, ...sharedData, ...pbgData, name };
+        // Sync the RTT System mainworld body so the RTT System Details panel reflects edits.
+        // RTT body field names differ from sharedData: atmosphere/hydrosphere/population/government/lawLevel.
+        if (stateObj.rttSystem) {
+            let rttMW = null;
+            outer: for (const star of stateObj.rttSystem.stars) {
+                if (!star.planetarySystem) continue;
+                for (const body of star.planetarySystem.orbits) {
+                    if (body.isMainworld || body.habitationType === 'Homeworld') { rttMW = body; break outer; }
+                    if (body.satellites) {
+                        const sat = body.satellites.find(s => s.isMainworld || s.habitationType === 'Homeworld');
+                        if (sat) { rttMW = sat; break outer; }
+                    }
+                }
+            }
+            if (rttMW) {
+                rttMW.starport    = sharedData.starport;
+                rttMW.size        = sharedData.size;
+                rttMW.atmosphere  = sharedData.atm;
+                rttMW.hydrosphere = sharedData.hydro;
+                rttMW.population  = sharedData.pop;
+                rttMW.government  = sharedData.gov;
+                rttMW.lawLevel    = sharedData.law;
+                rttMW.tl          = sharedData.tl;
+                rttMW.tradeCodes  = sharedData.tradeCodes;
+                rttMW.bases       = sharedData.bases;
+                ['starport','size','atmosphere','hydrosphere','population','government','lawLevel','tl'].forEach(f => markManual(rttMW, f));
+            }
+        }
     }
 
     // 4. Update internal Mongoose System if present (Multi-layer consistency)
@@ -1484,6 +1575,121 @@ function saveHexEditorChanges() {
         showToast("Changes saved successfully.", 2500);
     }
 
-    // Optional: Update the "Cancel" button to "Close" if saved? 
+    // Optional: Update the "Cancel" button to "Close" if saved?
     // For now we just stay open.
 }
+
+// =============================================================================
+// RTT SYSTEM TREE — INLINE EDIT EVENT DELEGATION
+// Listens on the persistent root container; survives innerHTML re-renders.
+// =============================================================================
+(function () {
+    const root = document.getElementById('editor-rtt-system-root');
+    if (!root) return;
+
+    root.addEventListener('change', function (e) {
+        const el = e.target;
+        const field = el.dataset.rttField;
+        if (!field) return;
+
+        if (typeof editingHexId === 'undefined' || !editingHexId) return;
+        const stateObj = hexStates.get(editingHexId);
+        if (!stateObj || !stateObj.rttSystem) return;
+        const sys = stateObj.rttSystem;
+
+        const level = el.dataset.rttLevel;
+
+        if (level === 'system') {
+            // System-level field (e.g. age)
+            const val = parseFloat(el.value);
+            if (isNaN(val)) return;
+            sys[field] = val;
+            markManual(sys, field);
+
+        } else if (level === 'star') {
+            // Star-level field (e.g. classification)
+            const sIdx = parseInt(el.dataset.rttSidx, 10);
+            const star = sys.stars[sIdx];
+            if (!star) return;
+            star[field] = el.value.trim();
+            markManual(star, field);
+
+        } else {
+            // Body-level field (orbit or satellite)
+            const sIdx   = parseInt(el.dataset.rttSidx,   10);
+            const oIdx   = parseInt(el.dataset.rttOidx,   10);
+            const satIdx = parseInt(el.dataset.rttSatidx, 10);
+
+            const star = sys.stars[sIdx];
+            if (!star || !star.planetarySystem) return;
+            const orbit = star.planetarySystem.orbits[oIdx];
+            if (!orbit) return;
+
+            const body = (satIdx >= 0) ? orbit.satellites[satIdx] : orbit;
+            if (!body) return;
+
+            // Name — empty value resets to auto-generated default (don't store)
+            if (field === 'name') {
+                const trimmed = el.value.trim();
+                if (trimmed) {
+                    body.name = trimmed;
+                    markManual(body, 'name');
+                    el.classList.add('is-manual');
+                } else {
+                    delete body.name;
+                    if (Array.isArray(body._manualFields)) {
+                        body._manualFields = body._manualFields.filter(f => f !== 'name');
+                    }
+                    el.classList.remove('is-manual');
+                }
+                hexStates.set(editingHexId, stateObj);
+                return;
+            }
+
+            // UWP compact string — parse all eight UWP fields at once
+            if (field === 'uwp') {
+                const raw = el.value.trim().toUpperCase().replace(/\s/g, '');
+                if (raw.length >= 9 && raw[7] === '-') {
+                    const pc = c => { const n = parseInt(c, 10); return isNaN(n) ? c : n; };
+                    body.starport    = raw[0];
+                    body.size        = pc(raw[1]);
+                    body.atmosphere  = pc(raw[2]);
+                    body.hydrosphere = pc(raw[3]);
+                    body.population  = pc(raw[4]);
+                    body.government  = pc(raw[5]);
+                    body.lawLevel    = pc(raw[6]);
+                    body.tl          = parseInt(raw.slice(8), 10) || 0;
+                    ['starport','size','atmosphere','hydrosphere','population','government','lawLevel','tl'].forEach(f => markManual(body, f));
+                }
+                hexStates.set(editingHexId, stateObj);
+                el.classList.add('is-manual');
+                return;
+            }
+
+            // Parse value by field type
+            let val;
+            if (field === 'tradeCodes' || field === 'bases') {
+                val = el.value.trim() ? el.value.trim().split(/\s+/) : [];
+            } else if (['biosphere', 'desirability', 'industry', 'terraformPoints',
+                        'population', 'government', 'lawLevel', 'tl'].includes(field)) {
+                val = parseInt(el.value, 10);
+                if (isNaN(val)) return;
+            } else if (['size', 'atmosphere', 'hydrosphere'].includes(field)) {
+                // Smart-parse: store as number if the user typed a digit, else uppercase string (e.g. 'A', 'G', 'F')
+                const s = el.value.trim().toUpperCase();
+                const n = parseInt(s, 10);
+                val = isNaN(n) ? s : n;
+            } else {
+                val = el.value;
+            }
+
+            body[field] = val;
+            markManual(body, field);
+        }
+
+        hexStates.set(editingHexId, stateObj);
+
+        // Highlight the changed element as manual immediately (no full re-render needed)
+        el.classList.add('is-manual');
+    });
+}());

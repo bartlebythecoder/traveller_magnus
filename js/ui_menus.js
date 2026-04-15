@@ -774,6 +774,52 @@ function setupGenerationHandlers() {
         requestAnimationFrame(draw);
     });
 
+    // RTT Biographer Only
+    document.getElementById('ctx-expand-rtt-bio').addEventListener('click', () => {
+        if (!validateSelection('physical')) return;
+
+        const targetHexes = Array.from(selectedHexes).filter(hexId => {
+            const s = hexStates.get(hexId);
+            return s && s.rttSystem;
+        });
+
+        if (targetHexes.length === 0) {
+            alert('No selected hexes have an RTT system to re-expand.');
+            return;
+        }
+
+        let totalManualBodies = 0;
+        targetHexes.forEach(hexId => {
+            const s = hexStates.get(hexId);
+            if (s && s.rttSystem) totalManualBodies += countManualBodies(s.rttSystem);
+        });
+
+        const manualNote = totalManualBodies > 0
+            ? `\n\n${totalManualBodies} body/bodies have manual field overrides. These will be preserved.`
+            : '';
+
+        if (!confirm(`Re-run the RTT Biographer (physical biography + social stats) on ${targetHexes.length} hex(es). Stars and orbits will NOT be changed.${manualNote}\n\nProceed?`)) {
+            return;
+        }
+
+        saveHistoryState('RTT Re-expand Biographer');
+        targetHexes.forEach(hexId => {
+            reseedForHex(hexId);
+            if (typeof window.expandRTTBiographerOnly === 'function') {
+                window.expandRTTBiographerOnly(hexId);
+            }
+        });
+
+        document.getElementById('context-menu').classList.remove('visible');
+        showToast(`Re-ran RTT Biographer for ${targetHexes.length} hex(es)`);
+
+        if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+        if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
+
+        selectedHexes.clear();
+        requestAnimationFrame(draw);
+    });
+
     // X-Boat Routes — open options modal
     document.getElementById('ctx-gen-xboat').addEventListener('click', () => {
         document.getElementById('context-menu').classList.remove('visible');

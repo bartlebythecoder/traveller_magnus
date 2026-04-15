@@ -743,11 +743,21 @@ async function runRTTMacro(skipPop = false) {
     console.log("Bulk Generating RTT Full System...");
     await ensureNamesLoaded();
 
-    if (!confirm("This will completely overwrite ANY existing data in the selected hexes with a Full RTT Generation sequence. Proceed?")) {
+    const targetHexes = Array.from(selectedHexes);
+
+    // Warn if any selected hex has manually-overridden fields that will be lost
+    let totalManualBodies = 0;
+    targetHexes.forEach(hexId => {
+        const s = hexStates.get(hexId);
+        if (s && s.rttSystem) totalManualBodies += countManualBodies(s.rttSystem);
+    });
+    const manualWarning = totalManualBodies > 0
+        ? `\n\nWARNING: ${totalManualBodies} body/bodies in this selection have manual field overrides. These will be permanently lost.`
+        : '';
+
+    if (!confirm(`This will completely overwrite ANY existing data in the selected hexes with a Full RTT Generation sequence.${manualWarning}\n\nProceed?`)) {
         return;
     }
-
-    const targetHexes = Array.from(selectedHexes);
 
     // v0.6.1.0: Statistical auditor
     const _auditor_rtt = (typeof StatisticalAuditor !== 'undefined')

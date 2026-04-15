@@ -4,6 +4,22 @@
 // This engine implements the RTT ruleset for system generation.
 // =============================================================================
 
+// -----------------------------------------------------------------------------
+// v0.9: MANUAL OVERRIDE HELPERS
+// Used by Biographer functions to preserve fields the user has manually set.
+// Saves field values before generation runs, restores them after.
+// Depends on isManual() from core.js (loaded first in script order).
+// -----------------------------------------------------------------------------
+function _rttSaveManual(body, fields) {
+    const saved = {};
+    if (typeof isManual !== 'function') return saved;
+    fields.forEach(f => { if (isManual(body, f)) saved[f] = body[f]; });
+    return saved;
+}
+function _rttRestoreManual(body, saved) {
+    Object.assign(body, saved);
+}
+
 /**
  * DETERMINES SPECTRAL TYPE BASED ON A 2D6 ROLL
  * @param {number} roll 
@@ -404,6 +420,7 @@ function processRTTDerivedPhysics(body) {
 function processRTTPhysicalStatsPartA(body, star, sys, parent = null) {
     const wc = body.worldClass;
     let processed = false;
+    const _savedPartA = _rttSaveManual(body, ['size', 'atmosphere', 'hydrosphere']);
 
     // Initialize common fields if they don't exist
     if (body.biosphere === undefined) body.biosphere = 0;
@@ -515,6 +532,7 @@ function processRTTPhysicalStatsPartA(body, star, sys, parent = null) {
         tResult(`${body.worldClass} Atmosphere`, body.atmosphere, 'RTT 2.2: Atmospheric Chemistry');
     }
 
+    _rttRestoreManual(body, _savedPartA);
     return processed;
 }
 
@@ -531,6 +549,7 @@ function processRTTPhysicalStatsPartB(body, star, sys, parent = null) {
     if (body.biosphere === undefined) body.biosphere = 0;
     if (body.chemistry === undefined) body.chemistry = 'None';
     let chemMod = 0;
+    const _savedPartB = _rttSaveManual(body, ['size', 'atmosphere', 'hydrosphere', 'chemistry', 'biosphere']);
 
     // --- PART B: ACTIVE & LIFE-BEARING WORLDS ---
 
@@ -809,6 +828,7 @@ function processRTTPhysicalStatsPartB(body, star, sys, parent = null) {
         tResult(`${body.worldClass} Atmosphere`, body.atmosphere, 'RTT 2.2: Atmospheric Chemistry');
     }
 
+    _rttRestoreManual(body, _savedPartB);
     return processed;
 }
 
@@ -1013,6 +1033,7 @@ function classifyRTTBody(body, star, zone, parent = null) {
  */
 function calculateRTTDesirability(body, star, parent = null) {
     writeLogLine('  --- Desirability Calc: ' + (body.worldClass || body.type) + ' ---');
+    const _savedDesirability = _rttSaveManual(body, ['desirability']);
     let desirability = 0;
     const starClass = star.luminosityClass;
 
@@ -1103,6 +1124,7 @@ function calculateRTTDesirability(body, star, parent = null) {
     }
 
     body.desirability = desirability;
+    _rttRestoreManual(body, _savedDesirability);
     tResult('Final Desirability', body.desirability, 'RTT 6.1: Desirability Matrix');
 }
 
@@ -1110,6 +1132,7 @@ function calculateRTTDesirability(body, star, parent = null) {
  * HELPER: TERRAFORMING CHECK
  */
 function checkRTTTerraforming(body, star, dominantTL, settlementCenturies) {
+    const _savedTerraform = _rttSaveManual(body, ['canBeTerraformed', 'terraformPoints']);
     body.canBeTerraformed = false;
     let sHex = getEHex(body.size);
     let aHex = getEHex(body.atmosphere);
@@ -1124,12 +1147,14 @@ function checkRTTTerraforming(body, star, dominantTL, settlementCenturies) {
             }
         }
     }
+    _rttRestoreManual(body, _savedTerraform);
 }
 
 /**
  * HELPER: HABITATION TYPE
  */
 function determineRTTHabitation(body, systemHasHomeworld, dominantTL) {
+    const _savedHabitation = _rttSaveManual(body, ['habitationType']);
     body.habitationType = 'Uninhabited';
     let bHex = getEHex(body.biosphere);
 
@@ -1154,6 +1179,7 @@ function determineRTTHabitation(body, systemHasHomeworld, dominantTL) {
         }
     }
 
+    _rttRestoreManual(body, _savedHabitation);
     let loc = body.orbitNumber ? `Orbit ${body.orbitNumber}` : 'Satellite';
     writeLogLine(`  ${loc}: Desirability=${body.desirability}, Habitation=${body.habitationType}${body.canBeTerraformed ? ' (Can Terraform: ' + body.terraformPoints + ' pts)' : ''}`);
 
@@ -1392,15 +1418,16 @@ function processRTTSatellites(body) {
  * HELPER: PROCESS SOCIAL AND ECONOMIC STATS
  */
 function processRTTSocialStats(body, star, dominantTL, settlementCenturies, options = {}) {
+    const _savedSocial = _rttSaveManual(body, ['industry', 'tradeCodes', 'bases']);
     if (body.habitationType === 'Uninhabited') {
         body.population = 0;
         body.government = 0;
         body.lawLevel = 0;
-        body.industry = 0;
+        if (!isManual(body, 'industry')) body.industry = 0;
         body.tl = 0;
-        body.tradeCodes = [];
+        body.tradeCodes = isManual(body, 'tradeCodes') ? body.tradeCodes : [];
         body.starport = 'X';
-        body.bases = [];
+        body.bases = isManual(body, 'bases') ? body.bases : [];
         return;
     }
 
@@ -1506,6 +1533,8 @@ function processRTTSocialStats(body, star, dominantTL, settlementCenturies, opti
     if (typeof tResult !== 'undefined') {
         tResult('Tech Level Code', body.tl, 'RTT 3.2: Tech Level');
     }
+
+    _rttRestoreManual(body, _savedSocial);
 }
 
 /**
@@ -1969,3 +1998,15 @@ function auditRTTSystem(sys) {
 
     tResult('RTT Audit Summary', errors + ' error(s) detected', 'RTT Audit');
 }
+
+// -----------------------------------------------------------------------------
+// v0.9: EXPAND BIOGRAPHER ONLY
+// Re-runs only the Biographer (Steps 4-7) on an existing RTT system, preserving
+// any manually-set fields. Stars and orbital layout are NOT regenerated.
+// -----------------------------------------------------------------------------
+window.expandRTTBiographerOnly = function(hexId) {
+    const stateObj = hexStates.get(hexId);
+    if (!stateObj || !stateObj.rttSystem) return;
+    const sys = stateObj.rttSystem;
+    generateRTTSectorBiographer(sys);
+};

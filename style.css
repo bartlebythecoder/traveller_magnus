@@ -908,6 +908,95 @@ body {
     color: #c5c6c7;
 }
 
+/* RTT Click-to-Edit Inline Fields */
+.rtt-field-input,
+.rtt-field-select {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid transparent;
+    color: #c5c6c7;
+    font-size: 12px;
+    font-family: inherit;
+    padding: 0 2px;
+    cursor: text;
+    min-width: 30px;
+    max-width: 110px;
+}
+
+.rtt-field-select {
+    background: #0d0f13;
+    cursor: pointer;
+    max-width: 130px;
+}
+
+.rtt-field-input:hover,
+.rtt-field-select:hover {
+    border-bottom-color: #45a29e;
+}
+
+.rtt-field-input:focus,
+.rtt-field-select:focus {
+    outline: none;
+    border-bottom-color: #66fcf1;
+    background: rgba(102, 252, 241, 0.05);
+}
+
+/* Hide number spinner arrows */
+.rtt-field-input[type="number"]::-webkit-inner-spin-button,
+.rtt-field-input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.rtt-field-input[type="number"] {
+    -moz-appearance: textfield;
+    max-width: 50px;
+}
+
+/* Dropdown option text — force readable colour on native OS white dropdown */
+.rtt-field-select option {
+    background: #1a1d24;
+    color: #c5c6c7;
+}
+
+/* Manually overridden field highlight */
+.rtt-field-input.is-manual,
+.rtt-field-select.is-manual {
+    color: #ffd700;
+    font-style: italic;
+}
+
+/* World name input in RTT summary header */
+.rtt-name-input {
+    font-size: inherit;
+    font-weight: bold;
+    color: #66fcf1;
+    max-width: 160px;
+}
+.rtt-name-input::placeholder {
+    color: #66fcf1;
+    font-style: normal;
+    font-weight: bold;
+}
+
+/* Non-mainworld name manually overridden — italic only, no colour change */
+.rtt-name-input.is-manual {
+    color: #66fcf1;
+    font-style: italic;
+}
+
+/* Mainworld name — always orange and bold, even when manually overridden */
+.rtt-name-mainworld,
+.rtt-name-mainworld.is-manual {
+    color: #ffa500;
+    font-size: inherit;
+    font-weight: bold;
+    font-style: normal;
+}
+.rtt-name-mainworld::placeholder {
+    color: #ffa500;
+    font-style: normal;
+}
+
 /* Editor Accordions */
 .accordion-btn {
     background-color: #1f2833;

@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.8";
-const APP_BANNER = "v0.8: Auto Filter Routes & Zoom LOD Rendering";
+const APP_VERSION = "v0.9";
+const APP_BANNER = "v0.9: RTT World Naming & System Details Sync";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -424,6 +424,68 @@ function endTrace() {
         flushPendingRoll();
         writeLogLine(`\n`);
     }
+}
+
+// =====================================================================
+// MANUAL OVERRIDE HELPERS
+// =====================================================================
+
+/**
+ * Marks a field on a body/star object as manually set by the user.
+ * Engines check this before writing to a field during re-expansion.
+ * @param {Object} obj - The body or star object.
+ * @param {string} field - The field name to mark as manual.
+ */
+function markManual(obj, field) {
+    if (!obj) return;
+    if (!Array.isArray(obj._manualFields)) obj._manualFields = [];
+    if (!obj._manualFields.includes(field)) obj._manualFields.push(field);
+}
+
+/**
+ * Returns true if a field on a body/star object has been manually set.
+ * @param {Object} obj - The body or star object.
+ * @param {string} field - The field name to check.
+ * @returns {boolean}
+ */
+function isManual(obj, field) {
+    if (!obj || !Array.isArray(obj._manualFields)) return false;
+    return obj._manualFields.includes(field);
+}
+
+/**
+ * Clears the manual flag for a specific field, or all fields if none specified.
+ * @param {Object} obj - The body or star object.
+ * @param {string} [field] - The field to clear. Omit to clear all manual flags.
+ */
+function clearManual(obj, field) {
+    if (!obj || !Array.isArray(obj._manualFields)) return;
+    if (field === undefined) {
+        obj._manualFields = [];
+    } else {
+        obj._manualFields = obj._manualFields.filter(f => f !== field);
+    }
+}
+
+/**
+ * Counts all manually-overridden bodies across an RTT system.
+ * Used by the re-expansion warning dialog.
+ * @param {Object} rttSystem - The sys object from stateObj.rttSystem.
+ * @returns {number} Total count of bodies with at least one manual field.
+ */
+function countManualBodies(rttSystem) {
+    let count = 0;
+    if (!rttSystem || !rttSystem.stars) return 0;
+    rttSystem.stars.forEach(star => {
+        if (!star.planetarySystem) return;
+        star.planetarySystem.orbits.forEach(body => {
+            if (Array.isArray(body._manualFields) && body._manualFields.length > 0) count++;
+            (body.satellites || []).forEach(sat => {
+                if (Array.isArray(sat._manualFields) && sat._manualFields.length > 0) count++;
+            });
+        });
+    });
+    return count;
 }
 
 // =====================================================================

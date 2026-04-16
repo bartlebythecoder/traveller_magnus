@@ -1065,7 +1065,7 @@ function setupAutoRoutes() {
     if (btnConfirm) {
         btnConfirm.addEventListener('click', () => {
             const isP2P    = document.getElementById('autoroute-p2p')?.checked || false;
-            const maxJump  = Math.min(8,  Math.max(1, parseInt(document.getElementById('autoroute-max-jump').value,  10) || 4));
+            const maxJump  = Math.min(20, Math.max(1, parseInt(document.getElementById('autoroute-max-jump').value,  10) || 4));
             const color    = document.getElementById('autoroute-color').value || '#ff9900';
             const nameRaw  = document.getElementById('autoroute-name').value.trim();
 

@@ -35,7 +35,12 @@
     
     <step number="3">
       <task>Update Scripts & Banner</task>
-      <action>Update the version string to the `new_version` AND insert the `banner_text` into the script's splash screen and the help/shortcut info panel.</action>
+      <action>Make all of the following updates:
+        1. In `js/core.js`: update `APP_VERSION` and `APP_BANNER` to `new_version` and `banner_text`.
+        2. In `hex_map.html`: update the splash banner text inside `&lt;div class="splash-banner"&gt;` to `banner_text`.
+        3. In `hex_map.html`: update the splash version number inside `&lt;div class="splash-version"&gt;` to `new_version`.
+        4. In `hex_map.html`: update the version span `&lt;span id="app-version"&gt;` to `new_version`.
+      </action>
     </step>
     
     <step number="4">

@@ -761,6 +761,40 @@ function populateEditorAccordions(stateObj) {
             }
 
             let mwBase = stateObj.ctData || stateObj.mgt2eData || stateObj.t5Data;
+            const ctSysName = (mwBase && mwBase.name) || stateObj.name || 'System';
+            const _ctMc = (obj, field) =>
+                (typeof isManual === 'function' && isManual(obj, field)) ? ' is-manual' : '';
+            function ctToRoman(n) {
+                const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
+                const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+                let r = '';
+                for (let i = 0; i < vals.length; i++) {
+                    while (n >= vals[i]) { r += syms[i]; n -= vals[i]; }
+                }
+                return r || String(n);
+            }
+            // ── Field builder helpers (body/satellite) ────────────────────────
+            function _ctNum(obj, field, orbit, captured, sIdx, min, max) {
+                const val = (obj[field] !== undefined && obj[field] !== null) ? obj[field] : '';
+                return `<input type="number" class="rtt-field-input${_ctMc(obj, field)}" data-ct-field="${field}" data-ct-orbit="${orbit}" data-ct-captured="${captured}" data-ct-satidx="${sIdx}" value="${val}" min="${min}" max="${max}" step="any">`;
+            }
+            function _ctText(obj, field, orbit, captured, sIdx) {
+                const val = (obj[field] !== undefined && obj[field] !== null) ? String(obj[field]).replace(/"/g, '&quot;') : '';
+                return `<input type="text" class="rtt-field-input${_ctMc(obj, field)}" data-ct-field="${field}" data-ct-orbit="${orbit}" data-ct-captured="${captured}" data-ct-satidx="${sIdx}" value="${val}">`;
+            }
+            function _ctArray(obj, field, orbit, captured, sIdx) {
+                const val = Array.isArray(obj[field]) ? obj[field].join(' ') : (obj[field] || '');
+                return `<input type="text" class="rtt-field-input${_ctMc(obj, field)}" data-ct-field="${field}" data-ct-orbit="${orbit}" data-ct-captured="${captured}" data-ct-satidx="${sIdx}" value="${String(val).replace(/"/g, '&quot;')}">`;
+            }
+            // ── Field builder helpers (star) ──────────────────────────────────
+            function _ctStarText(star, field, sidx) {
+                const val = (star[field] !== undefined && star[field] !== null) ? String(star[field]).replace(/"/g, '&quot;') : '';
+                return `<input type="text" class="rtt-field-input${_ctMc(star, field)}" data-ct-field="${field}" data-ct-sidx="${sidx}" value="${val}">`;
+            }
+            function _ctStarNum(star, field, sidx, min, max) {
+                const val = (star[field] !== undefined && star[field] !== null) ? star[field] : '';
+                return `<input type="number" class="rtt-field-input${_ctMc(star, field)}" data-ct-field="${field}" data-ct-sidx="${sidx}" value="${val}" min="${min}" max="${max}" step="any">`;
+            }
             html += `<div class="system-stats" style="grid-template-columns: 1fr;">
                 <div style="text-align: center; color: #66fcf1; border-bottom: 1px dotted #45a29e; padding-bottom: 4px;">CT Scouts Overview</div>
                 <span>Nature: <strong>${sys.nature}</strong></span>
@@ -779,10 +813,10 @@ function populateEditorAccordions(stateObj) {
                 html += `<summary>${starIdx === 0 ? 'Primary' : (star.role || 'Companion')} - ${star.name} <span class="sys-title-info">Star</span></summary>`;
                 html += `<div class="system-node">`;
                 html += `<div class="system-stats">`;
-                html += `<span>Type: <strong>${star.type}</strong></span>`;
-                html += `<span>Size: <strong>${star.size}</strong></span>`;
-                if (star.mass) html += `<span>Mass: <strong>${star.mass.toFixed(2)} M☉</strong></span>`;
-                if (star.luminosity) html += `<span>Lum: <strong>${star.luminosity.toFixed(3)} L☉</strong></span>`;
+                html += `<span>Type: ${_ctStarText(star, 'type', starIdx)}</span>`;
+                html += `<span>Size: ${_ctStarText(star, 'size', starIdx)}</span>`;
+                html += `<span>Mass: ${_ctStarNum(star, 'mass', starIdx, 0, 200)} M☉</span>`;
+                html += `<span>Lum: ${_ctStarNum(star, 'luminosity', starIdx, 0, 1000000)} L☉</span>`;
                 if (starIdx > 0 && star.orbitLabel) html += `<span>Orbit: <strong>${star.orbitLabel}</strong></span>`;
                 html += `</div>`;
 
@@ -810,7 +844,7 @@ function populateEditorAccordions(stateObj) {
                     }
                     allBodies.sort((a, b) => a.orbit - b.orbit);
 
-                    allBodies.forEach(body => {
+                    allBodies.forEach((body, bodyIdx) => {
                         let w = body.contents;
                         let o = body;
 
@@ -831,40 +865,44 @@ function populateEditorAccordions(stateObj) {
                             ? `Captured [${o.orbit.toFixed(1)}]`
                             : `Orbit ${o.orbit}`;
 
+                        const _ctBodyDflt  = `${ctSysName} ${ctToRoman(bodyIdx + 1)}`;
+                        const _ctBodyNVal  = (w.name || '').replace(/"/g, '&quot;');
+                        const _ctBodyNPh   = _ctBodyDflt.replace(/"/g, '&quot;');
+                        const _ctBodyNCls  = `rtt-field-input rtt-name-input${w.type === 'Mainworld' ? ' rtt-name-mainworld' : ''}${_ctMc(w, 'name')}`;
+                        const _ctBodyNAttr = `data-ct-field="name" data-ct-orbit="${o.orbit}" data-ct-captured="${body.isCaptured}" data-ct-satidx="-1"`;
                         html += `<details open>`;
-                        html += `<summary ${summaryStyle}>${orbitLabel} [${o.zone}] <span class="sys-title-info">${typeLabel} | ${uwp}${zoneLabel}</span></summary>`;
+                        html += `<summary ${summaryStyle}><input type="text" class="${_ctBodyNCls}" ${_ctBodyNAttr} value="${_ctBodyNVal}" placeholder="${_ctBodyNPh}" onclick="event.stopPropagation()" style="max-width:160px;"> ${orbitLabel} [${o.zone}] <span class="sys-title-info">${typeLabel} | ${uwp}${zoneLabel}</span></summary>`;
+                        const _isMain = w.type === 'Mainworld';
                         html += `<div class="system-node">`;
 
-                        html += `<div style="margin-bottom: 6px; font-family: monospace; font-size: 1.1em;">UWP: <strong style="color: ${labelColor}">${uwp}</strong></div>`;
+                        // UWP — read-only for mainworld (top editor owns it), editable for all others
+                        if (_isMain) {
+                            html += `<div style="margin-bottom: 6px; font-family: monospace; font-size: 1.1em;">UWP: <strong style="color: ${labelColor}">${uwp}</strong></div>`;
+                        } else {
+                            const _uwpManual = typeof isManual === 'function' &&
+                                ['starport','size','atm','hydro','pop','gov','law','tl'].some(f => isManual(w, f));
+                            html += `<div style="margin-bottom: 6px; font-family: monospace; font-size: 1.1em;">UWP: <input type="text" class="rtt-field-input${_uwpManual ? ' is-manual' : ''}" data-ct-field="uwp" data-ct-orbit="${o.orbit}" data-ct-captured="${body.isCaptured}" data-ct-satidx="-1" value="${uwp.replace(/"/g, '&quot;')}" style="color: ${labelColor}; max-width:140px; font-weight:bold;"></div>`;
+                        }
 
-                        if (w.type === 'Mainworld' && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                        if (_isMain && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
                             const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
                             html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor}; margin-bottom: 8px;">Caution: ${mwBase.travelZone} Zone</div>`;
                         }
                         html += `<div class="system-stats">`;
 
                         html += `<span>Orbit: <strong>${body.isCaptured ? o.orbit.toFixed(1) : o.orbit}</strong></span>`;
-                        if (w.distAU) html += `<span>Distance: <strong>${w.distAU.toFixed(2)} AU</strong></span>`;
-                        if (w.orbitalPeriod) {
-                            let pStr = w.orbitalPeriod < 1.0
-                                ? `${(w.orbitalPeriod * 365.25).toFixed(1)}d`
-                                : `${w.orbitalPeriod.toFixed(2)}y`;
-                            html += `<span>Year: <strong>${pStr}</strong></span>`;
-                        }
-
-                        if (w.diamKm) html += `<span>Diameter: <strong>${w.diamKm.toLocaleString()} km</strong></span>`;
-                        if (w.gravity !== undefined) html += `<span>Gravity: <strong>${w.gravity.toFixed(2)} G</strong></span>`;
-                        if (w.mass !== undefined) html += `<span>Mass: <strong>${w.mass.toFixed(4)} M⊕</strong></span>`;
-
-                        if (w.temperature) {
-                            html += `<span>Temp: <strong>${w.temperature}K / ${(w.temperature - 273).toFixed(0)}°C</strong></span>`;
-                        }
-                        if (w.rotationPeriod) html += `<span>Day: <strong>${w.rotationPeriod}</strong></span>`;
-                        if (w.axialTilt !== undefined) html += `<span>Tilt: <strong>${w.axialTilt}°</strong></span>`;
+                        html += `<span>Distance (AU): ${_ctNum(w, 'distAU', o.orbit, body.isCaptured, -1, 0, 1000)}</span>`;
+                        html += `<span>Year (yr): ${_ctNum(w, 'orbitalPeriod', o.orbit, body.isCaptured, -1, 0, 100000)}</span>`;
+                        html += `<span>Diameter (km): ${_ctNum(w, 'diamKm', o.orbit, body.isCaptured, -1, 0, 200000)}</span>`;
+                        html += `<span>Gravity (G): ${_ctNum(w, 'gravity', o.orbit, body.isCaptured, -1, 0, 100)}</span>`;
+                        html += `<span>Mass (M⊕): ${_ctNum(w, 'mass', o.orbit, body.isCaptured, -1, 0, 10000)}</span>`;
+                        html += `<span>Temp (K): ${_ctNum(w, 'temperature', o.orbit, body.isCaptured, -1, 0, 10000)}</span>`;
+                        html += `<span>Day: ${_ctText(w, 'rotationPeriod', o.orbit, body.isCaptured, -1)}</span>`;
+                        html += `<span>Tilt (°): ${_ctNum(w, 'axialTilt', o.orbit, body.isCaptured, -1, 0, 180)}</span>`;
 
                         html += `</div>`;
 
-                        if (w.type === 'Mainworld') {
+                        if (_isMain) {
                             const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
                             html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${alleg}</strong></div>`;
                         }
@@ -886,22 +924,36 @@ function populateEditorAccordions(stateObj) {
                                     satZoneLabel = ` | <span style="color: ${zColor}">${mwBase.travelZone}</span>`;
                                 }
 
+                                const _ctSatDflt  = `${ctSysName} ${ctToRoman(bodyIdx + 1)}-${String.fromCharCode(97 + satIdx)}`;
+                                const _ctSatNVal  = (sat.name || '').replace(/"/g, '&quot;');
+                                const _ctSatNPh   = _ctSatDflt.replace(/"/g, '&quot;');
+                                const _ctSatNCls  = `rtt-field-input rtt-name-input${sat.type === 'Mainworld' ? ' rtt-name-mainworld' : ''}${_ctMc(sat, 'name')}`;
+                                const _ctSatNAttr = `data-ct-field="name" data-ct-orbit="${o.orbit}" data-ct-captured="${body.isCaptured}" data-ct-satidx="${satIdx}"`;
                                 html += `<details>`;
-                                html += `<summary ${satSummaryStyle}>Satellite ${satIdx + 1} <span class="sys-title-info">${satType} | ${(sat.pd !== undefined && sat.pd !== null) ? sat.pd : '?'}r | ${satUwp}${satZoneLabel}</span></summary>`;
+                                html += `<summary ${satSummaryStyle}><input type="text" class="${_ctSatNCls}" ${_ctSatNAttr} value="${_ctSatNVal}" placeholder="${_ctSatNPh}" onclick="event.stopPropagation()" style="max-width:160px;"> Satellite ${satIdx + 1} <span class="sys-title-info">${satType} | ${(sat.pd !== undefined && sat.pd !== null) ? sat.pd : '?'}r | ${satUwp}${satZoneLabel}</span></summary>`;
+                                const _isSatMain = sat.type === 'Mainworld';
                                 html += `<div class="system-node">`;
-                                html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <strong style="color: ${satLabelColor}">${satUwp}</strong></div>`;
+
+                                // UWP — read-only for mainworld sat, editable for all others
+                                if (_isSatMain) {
+                                    html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <strong style="color: ${satLabelColor}">${satUwp}</strong></div>`;
+                                } else {
+                                    const _satUwpManual = typeof isManual === 'function' &&
+                                        ['starport','size','atm','hydro','pop','gov','law','tl'].some(f => isManual(sat, f));
+                                    html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <input type="text" class="rtt-field-input${_satUwpManual ? ' is-manual' : ''}" data-ct-field="uwp" data-ct-orbit="${o.orbit}" data-ct-captured="${body.isCaptured}" data-ct-satidx="${satIdx}" value="${satUwp.replace(/"/g, '&quot;')}" style="color: ${satLabelColor}; max-width:140px; font-weight:bold;"></div>`;
+                                }
                                 html += `<div class="system-stats">`;
 
-                                if (sat.distAU) html += `<span>Distance: <strong>${sat.distAU.toFixed(2)} AU</strong></span>`;
-                                if (sat.gravity !== undefined) html += `<span>Gravity: <strong>${sat.gravity.toFixed(2)} G</strong></span>`;
-                                if (sat.mass !== undefined) html += `<span>Mass: <strong>${sat.mass.toFixed(6)} M⊕</strong></span>`;
-                                if (sat.temperature) html += `<span>Temp: <strong>${sat.temperature}K / ${(sat.temperature - 273).toFixed(0)}°C</strong></span>`;
-                                if (sat.rotationPeriod) html += `<span>Day: <strong>${sat.rotationPeriod}</strong></span>`;
-                                if (sat.axialTilt !== undefined) html += `<span>Tilt: <strong>${sat.axialTilt}°</strong></span>`;
+                                html += `<span>Distance (AU): ${_ctNum(sat, 'distAU', o.orbit, body.isCaptured, satIdx, 0, 1000)}</span>`;
+                                html += `<span>Gravity (G): ${_ctNum(sat, 'gravity', o.orbit, body.isCaptured, satIdx, 0, 100)}</span>`;
+                                html += `<span>Mass (M⊕): ${_ctNum(sat, 'mass', o.orbit, body.isCaptured, satIdx, 0, 10000)}</span>`;
+                                html += `<span>Temp (K): ${_ctNum(sat, 'temperature', o.orbit, body.isCaptured, satIdx, 0, 10000)}</span>`;
+                                html += `<span>Day: ${_ctText(sat, 'rotationPeriod', o.orbit, body.isCaptured, satIdx)}</span>`;
+                                html += `<span>Tilt (°): ${_ctNum(sat, 'axialTilt', o.orbit, body.isCaptured, satIdx, 0, 180)}</span>`;
 
                                 html += `</div>`;
 
-                                if (sat.type === 'Mainworld') {
+                                if (_isSatMain) {
                                     const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
                                     html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${alleg}</strong></div>`;
                                 }
@@ -1691,5 +1743,130 @@ function saveHexEditorChanges() {
 
         // Highlight the changed element as manual immediately (no full re-render needed)
         el.classList.add('is-manual');
+    });
+}());
+
+// =============================================================================
+// CT SYSTEM TREE — INLINE EDIT EVENT DELEGATION
+// Listens on the persistent root container; survives innerHTML re-renders.
+// =============================================================================
+(function () {
+    const root = document.getElementById('editor-ct-system-root');
+    if (!root) return;
+
+    root.addEventListener('change', function (e) {
+        const el = e.target;
+        const field = el.dataset.ctField;
+        if (!field) return;
+
+        if (typeof editingHexId === 'undefined' || !editingHexId) return;
+        const stateObj = hexStates.get(editingHexId);
+        if (!stateObj || !stateObj.ctSystem) return;
+        const sys = stateObj.ctSystem;
+
+        // ── Star fields (data-ct-sidx present, no data-ct-orbit) ─────────────
+        if (el.dataset.ctSidx !== undefined) {
+            const star = sys.stars[parseInt(el.dataset.ctSidx, 10)];
+            if (!star) return;
+            if (field === 'mass' || field === 'luminosity') {
+                const val = parseFloat(el.value);
+                if (isNaN(val)) return;
+                star[field] = val;
+            } else {
+                star[field] = el.value.trim();
+            }
+            markManual(star, field);
+            hexStates.set(editingHexId, stateObj);
+            el.classList.add('is-manual');
+            return;
+        }
+
+        // ── Resolve body/satellite ────────────────────────────────────────────
+        const orbitVal   = parseFloat(el.dataset.ctOrbit);
+        const isCaptured = el.dataset.ctCaptured === 'true';
+        const satIdx     = parseInt(el.dataset.ctSatidx, 10);
+
+        let body = null;
+        if (!isNaN(orbitVal)) {
+            if (isCaptured) {
+                body = (sys.capturedPlanets || []).find(p => p.orbit === orbitVal);
+            } else {
+                const orbitEntry = sys.orbits.find(o => o.orbit === orbitVal);
+                body = orbitEntry ? orbitEntry.contents : null;
+            }
+            if (satIdx >= 0 && body) body = body.satellites[satIdx];
+        }
+        if (!body) return;
+
+        // ── Name ─────────────────────────────────────────────────────────────
+        if (field === 'name') {
+            const trimmed = el.value.trim();
+            if (trimmed) {
+                body.name = trimmed;
+                markManual(body, 'name');
+                el.classList.add('is-manual');
+            } else {
+                delete body.name;
+                if (Array.isArray(body._manualFields)) {
+                    body._manualFields = body._manualFields.filter(f => f !== 'name');
+                }
+                el.classList.remove('is-manual');
+            }
+            hexStates.set(editingHexId, stateObj);
+            return;
+        }
+
+        // ── UWP compact string — parse all eight digits at once ───────────────
+        if (field === 'uwp') {
+            const raw = el.value.trim().toUpperCase().replace(/\s/g, '');
+            if (raw.length >= 9 && raw[7] === '-') {
+                // Traveller UWP digits are hex (0-9, A-F); TL can also be hex
+                const ph = c => { const n = parseInt(c, 16); return isNaN(n) ? c : n; };
+                body.starport = raw[0];
+                body.size     = ph(raw[1]);
+                body.atm      = ph(raw[2]);
+                body.hydro    = ph(raw[3]);
+                body.pop      = ph(raw[4]);
+                body.gov      = ph(raw[5]);
+                body.law      = ph(raw[6]);
+                body.tl       = ph(raw[8]) !== raw[8] ? ph(raw[8]) : (parseInt(raw.slice(8), 16) || 0);
+                ['starport','size','atm','hydro','pop','gov','law','tl'].forEach(f => markManual(body, f));
+                // Rebuild the uwpSecondary string so the summary stays current on next render
+                body.uwpSecondary = raw;
+            }
+            hexStates.set(editingHexId, stateObj);
+            el.classList.add('is-manual');
+            return;
+        }
+
+        // ── Array fields ──────────────────────────────────────────────────────
+        if (field === 'tradeCodes' || field === 'bases') {
+            body[field] = el.value.trim() ? el.value.trim().split(/\s+/) : [];
+            markManual(body, field);
+            hexStates.set(editingHexId, stateObj);
+            el.classList.add('is-manual');
+            return;
+        }
+
+        // ── Text fields ───────────────────────────────────────────────────────
+        if (field === 'rotationPeriod') {
+            body[field] = el.value.trim();
+            markManual(body, field);
+            hexStates.set(editingHexId, stateObj);
+            el.classList.add('is-manual');
+            return;
+        }
+
+        // ── Numeric fields ────────────────────────────────────────────────────
+        const _numericFields = ['distAU','orbitalPeriod','diamKm','gravity','mass','temperature','axialTilt'];
+        if (_numericFields.includes(field)) {
+            const val = parseFloat(el.value);
+            if (isNaN(val)) return;
+            body[field] = val;
+            markManual(body, field);
+            hexStates.set(editingHexId, stateObj);
+            el.classList.add('is-manual');
+            return;
+        }
     });
 }());

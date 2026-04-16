@@ -1,4 +1,4 @@
-# As Above, So Below (v0.9.0.2)
+# As Above, So Below (v0.9.1)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -58,6 +58,11 @@ Want to replace any of these sectors with your own file?
 
 ---
 ## 📜 Changelog
+### [v0.9.1] - 2026-04-16
+1. **CT Editable System Details:** All fields in the Classic Traveller System Details accordion are now inline-editable — star classifications, physical properties (diameter, gravity, mass, temperature, rotation, axial tilt, distance, orbital period), and UWP for non-mainworld bodies. Edited fields are highlighted and persist in the workspace JSON. Manual edits survive regeneration where orbit positions match; only an explicit hex clear removes them.
+2. **CT Body & Satellite Names:** Every planet, captured planet, and satellite in a CT system now has an editable name field in the accordion header, defaulting to Roman-numeral position names (e.g. *Regina III*, *Regina III-a*).
+3. **Auto Route Jump Limit:** Maximum jump size for Auto Filter Routes increased from 8 to 20.
+
 ### [v0.9.0.2] - 2026-04-15
 1. **MgT2E Life Roll Fix:** Corrected a bug where the biospherics engine rolled individually for life on every solid world in the system. Per WBH rules, only the mainworld (top-down) and habitable-zone worlds receive a full biomass evaluation; all remaining inhospitable worlds are resolved with a single collective 2D roll — a natural 12 means trace life exists on one randomly chosen body.
 2. **MgT2E Audit Update:** Includes % of worlds and % of systems with life

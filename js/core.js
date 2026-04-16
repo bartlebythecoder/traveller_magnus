@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.9.0.2";
-const APP_BANNER = "v0.9.0.2: MgT2E: fixed bug rolling for life on all worlds";
+const APP_VERSION = "v0.9.1";
+const APP_BANNER = "v0.9.1: New: Editable CT System fields";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -469,6 +469,32 @@ function clearManual(obj, field) {
     } else {
         obj._manualFields = obj._manualFields.filter(f => f !== field);
     }
+}
+
+/**
+ * Counts all manually-overridden bodies/stars across a CT system.
+ * Used by the re-expansion warning dialog.
+ * @param {Object} ctSystem - The sys object from stateObj.ctSystem.
+ * @returns {number} Total count of stars/bodies with at least one manual field.
+ */
+function countManualCTBodies(ctSystem) {
+    let count = 0;
+    if (!ctSystem) return 0;
+    (ctSystem.stars || []).forEach(star => {
+        if (Array.isArray(star._manualFields) && star._manualFields.length > 0) count++;
+    });
+    (ctSystem.orbits || []).forEach(slot => {
+        const body = slot.contents;
+        if (!body) return;
+        if (Array.isArray(body._manualFields) && body._manualFields.length > 0) count++;
+        (body.satellites || []).forEach(sat => {
+            if (Array.isArray(sat._manualFields) && sat._manualFields.length > 0) count++;
+        });
+    });
+    (ctSystem.capturedPlanets || []).forEach(cp => {
+        if (Array.isArray(cp._manualFields) && cp._manualFields.length > 0) count++;
+    });
+    return count;
 }
 
 /**

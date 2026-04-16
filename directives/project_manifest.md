@@ -42,10 +42,13 @@ For this version: editing system stats
   - Wire expandRTTBiographerOnly into the UI so re-expansion uses it instead of generateRTTSectorStep1
 
 
-### Phase 0.9.0.1: Sector Name Patch (Current) 
+### Phase 0.9.0.1: Sector Name Patch (Complete) 
   Step 3.1
   * Add Sector names as a configurable display option
   
+### Phase 0.9.0.2: Mongoose Life Patch (Complete) 
+  * Correct Mongoose Life rolls applicability
+
 ### Phase 0.9.1: CT Editable System Details   
   * Step 4 — CT Engine Wiring (like Phase 0.90 same pattern, smaller field set)
 

@@ -531,6 +531,51 @@ async function runMgT2EBottomUpMacro(skipPop = false) {
     }, 500);
 }
 
+// ============================================================================
+// CT MANUAL FIELD MERGE
+// After CT_Generator produces a fresh sys object, this function walks the old
+// ctSystem (if any) and copies manually-edited fields onto matching bodies in
+// the new system.  Matching keys: stars by sidx, orbits by orbit number,
+// captured planets by orbit float, satellites by satIdx.
+// Manual edits survive regeneration; only an explicit hex clear wipes them.
+// ============================================================================
+function _mergeCTManualFields(oldSys, newSys) {
+    if (!oldSys || !newSys || typeof isManual !== 'function') return;
+
+    function _copyManual(src, dst) {
+        if (!src || !dst || !Array.isArray(src._manualFields) || src._manualFields.length === 0) return;
+        if (!Array.isArray(dst._manualFields)) dst._manualFields = [];
+        src._manualFields.forEach(function (field) {
+            dst[field] = src[field];
+            if (!dst._manualFields.includes(field)) dst._manualFields.push(field);
+        });
+    }
+
+    // Stars — matched by index
+    (oldSys.stars || []).forEach(function (oldStar, sidx) {
+        var newStar = (newSys.stars || [])[sidx];
+        if (newStar) _copyManual(oldStar, newStar);
+    });
+
+    // Orbit bodies — matched by orbit number; satellites by satIdx
+    (newSys.orbits || []).forEach(function (newSlot) {
+        if (!newSlot || !newSlot.contents) return;
+        var oldSlot = (oldSys.orbits || []).find(function (o) { return o.orbit === newSlot.orbit; });
+        if (!oldSlot || !oldSlot.contents) return;
+        _copyManual(oldSlot.contents, newSlot.contents);
+        (newSlot.contents.satellites || []).forEach(function (newSat, satIdx) {
+            var oldSat = (oldSlot.contents.satellites || [])[satIdx];
+            if (oldSat) _copyManual(oldSat, newSat);
+        });
+    });
+
+    // Captured Planets — matched by orbit float
+    (newSys.capturedPlanets || []).forEach(function (newCP) {
+        var oldCP = (oldSys.capturedPlanets || []).find(function (p) { return p.orbit === newCP.orbit; });
+        if (oldCP) _copyManual(oldCP, newCP);
+    });
+}
+
 async function runCTNewMacro(skipPop = false) {
     if (!validateSelection('generate', !skipPop)) return;
 
@@ -539,11 +584,21 @@ async function runCTNewMacro(skipPop = false) {
     console.log("Bulk Generating CT (New Modular) Full System...");
     await ensureNamesLoaded();
 
-    if (!confirm("This will completely overwrite ANY existing data in the selected hexes with the NEW Modular Classic Traveller Generation sequence. Proceed?")) {
+    const targetHexes = Array.from(selectedHexes);
+
+    // Warn if any selected hex has manually-overridden CT fields
+    let _ctManualCount = 0;
+    targetHexes.forEach(hexId => {
+        const s = hexStates.get(hexId);
+        if (s && s.ctSystem) _ctManualCount += countManualCTBodies(s.ctSystem);
+    });
+    const _ctManualWarning = _ctManualCount > 0
+        ? `\n\nNOTE: ${_ctManualCount} body/bodies in this selection have manual field overrides. These will be preserved where orbit positions match the regenerated structure.`
+        : '';
+
+    if (!confirm(`This will completely overwrite ANY existing data in the selected hexes with the NEW Modular Classic Traveller Generation sequence.${_ctManualWarning}\n\nProceed?`)) {
         return;
     }
-
-    const targetHexes = Array.from(selectedHexes);
 
     // v0.6.1.0: Statistical auditor
     const _auditor_ct = (typeof StatisticalAuditor !== 'undefined')
@@ -587,11 +642,13 @@ async function runCTNewMacro(skipPop = false) {
                     }
                     // Step B: Modular Expansion (Top-Down)
                     if (window.CT_Generator) {
+                        const _oldCtSys = stateObj.ctSystem;
                         const sys = window.CT_Generator.generateSystem({
                             mode: 'top-down',
                             mainworldUWP: mwData,
                             hexId: hexId
                         });
+                        if (sys && _oldCtSys) _mergeCTManualFields(_oldCtSys, sys);
                         stateObj.ctSystem = sys;
                         stateObj.ctData = sys.mainworld; // Sean Protocol: Map finalized world to UI state
 
@@ -659,11 +716,21 @@ async function runCTBottomUpMacro(skipPop = false) {
     console.log("Bulk Generating CT Bottom-Up Full System...");
     await ensureNamesLoaded();
 
-    if (!confirm("This will completely overwrite ANY existing data in the selected hexes with a Bottom-Up Classic Traveller Generation sequence. Proceed?")) {
+    const targetHexes = Array.from(selectedHexes);
+
+    // Warn if any selected hex has manually-overridden CT fields
+    let _ctManualCount = 0;
+    targetHexes.forEach(hexId => {
+        const s = hexStates.get(hexId);
+        if (s && s.ctSystem) _ctManualCount += countManualCTBodies(s.ctSystem);
+    });
+    const _ctManualWarning = _ctManualCount > 0
+        ? `\n\nNOTE: ${_ctManualCount} body/bodies in this selection have manual field overrides. These will be preserved where orbit positions match the regenerated structure.`
+        : '';
+
+    if (!confirm(`This will completely overwrite ANY existing data in the selected hexes with a Bottom-Up Classic Traveller Generation sequence.${_ctManualWarning}\n\nProceed?`)) {
         return;
     }
-
-    const targetHexes = Array.from(selectedHexes);
 
     // v0.6.1.0: Statistical auditor
     const _auditor_ct_bu = (typeof StatisticalAuditor !== 'undefined')
@@ -697,6 +764,7 @@ async function runCTBottomUpMacro(skipPop = false) {
                     if (window.isLoggingEnabled) startTrace(hexId, 'Bottom-Up CT Generation', hexId);
 
                     if (window.CT_Generator) {
+                        const _oldCtSys = stateObj.ctSystem;
                         const sys = window.CT_Generator.generateSystem({
                             mode: 'bottom-up',
                             hexId: hexId
@@ -707,6 +775,7 @@ async function runCTBottomUpMacro(skipPop = false) {
                             if (!sys.mainworld.name) {
                                 sys.mainworld.name = (typeof getNextSystemName !== 'undefined') ? getNextSystemName(hexId) : 'Unknown';
                             }
+                            if (_oldCtSys) _mergeCTManualFields(_oldCtSys, sys);
                             stateObj.ctSystem = sys;
                             stateObj.ctData = sys.mainworld;
 

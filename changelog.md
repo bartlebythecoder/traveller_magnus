@@ -1,5 +1,11 @@
 # Changelog
 
+### [v0.9.2] - 2026-04-16
+1. **T5 Editable System Fields:** All fields in the Traveller 5 System Details accordion are now inline-editable — star type, decimal, and size class; physical properties (diameter, gravity, mass) for all worlds and moons; rotation state; climate zone; worldType (with a warning that changing it affects atmospheric generation on next re-expansion); and UWP for all non-mainworld bodies. Edited fields are highlighted and persist in the workspace JSON.
+2. **T5 Body & Satellite Names:** Every planet and moon in a T5 system now has an editable name field in the accordion header, defaulting to the system name and orbit position (e.g. *Regina 3*, *Regina 3-a*).
+3. **T5 Manual Field Preservation:** Manual edits survive system re-expansion — when a T5 system is regenerated, user-set values are restored onto the new system by matching star and orbit index. Only an explicit hex clear removes them.
+4. **T5 Belt UWP Fix:** Planetoid Belts now correctly display and expose their full UWP for editing. Per T5 rules, belts receive social stats (population, starport, government, law, tech level); the previous renderer was incorrectly suppressing this.
+
 ### [v0.9.1] - 2026-04-16
 1. **CT Editable System Details:** All fields in the Classic Traveller System Details accordion are now inline-editable — star classifications, physical properties (diameter, gravity, mass, temperature, rotation, axial tilt, distance, orbital period), and UWP for non-mainworld bodies. Edited fields are highlighted and persist in the workspace JSON. Manual edits survive regeneration where orbit positions match; only an explicit hex clear removes them.
 2. **CT Body & Satellite Names:** Every planet, captured planet, and satellite in a CT system now has an editable name field in the accordion header, defaulting to Roman-numeral position names (e.g. *Regina III*, *Regina III-a*).

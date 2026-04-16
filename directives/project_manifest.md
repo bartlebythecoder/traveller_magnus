@@ -1,6 +1,6 @@
 # PROJECT AS ABOVE, SO BELOW - Feature Manifest
-**Version:** 0.9
-**Target:** Advanced Fitering Options
+**Version:** 0.9.2
+**Target:** T5 Editable System Details
 **Architecture Standard:** The "Sean Protocol" (Directives -> Orchestration -> Execution)
 
 ---
@@ -49,10 +49,10 @@ For this version: editing system stats
 ### Phase 0.9.0.2: Mongoose Life Patch (Complete) 
   * Correct Mongoose Life rolls applicability
 
-### Phase 0.9.1: CT Editable System Details   
+### Phase 0.9.1: CT Editable System Details (Complete)
   * Step 4 — CT Engine Wiring (like Phase 0.90 same pattern, smaller field set)
 
-### Phase 0.9.2: T5 Editable System Details     
+### Phase 0.9.2: T5 Editable System Details (Complete)
 
   * Step 5 — T5 Engine Wiring (like Phase 0.90 same pattern, larger field set; T5 socio carry-over already handled)
 

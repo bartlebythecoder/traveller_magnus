@@ -24,6 +24,7 @@
     const _roll2D = (typeof tRoll2D === 'function') ? tRoll2D : (label) => Math.floor(_rng() * 6) + 1 + Math.floor(_rng() * 6) + 1;
     const _log = (typeof writeLogLine === 'function') ? writeLogLine : console.log;
     const _reseedForHex = (typeof reseedForHex === 'function') ? reseedForHex : (id) => { _log(`Warning: reseedForHex not found. Generation for ${id} may not be deterministic.`); };
+    const _isManual = (typeof isManual === 'function') ? isManual : () => false;
 
     /**
      * T5 SIZE BY WORLD TYPE
@@ -339,32 +340,34 @@
         const isGG = (world.type && (world.type.includes('Gas Giant') || world.type === 'Ice Giant'));
         const sizeVal = (world.size === '0' || world.size === 0) ? 0.35 : (typeof world.size === 'string' ? fromUWPChar(world.size) : world.size);
 
-        // 1. Diameter Calculation (Unchanged)
-        if (isGG) {
-            world.diamKm = sizeVal * 10000;
-        } else if (sizeVal <= 0.35) {
-            world.diamKm = 500;
-        } else {
-            world.diamKm = sizeVal * 1600;
+        // 1. Diameter Calculation
+        if (!_isManual(world, 'diamKm')) {
+            if (isGG) {
+                world.diamKm = sizeVal * 10000;
+            } else if (sizeVal <= 0.35) {
+                world.diamKm = 500;
+            } else {
+                world.diamKm = sizeVal * 1600;
+            }
         }
 
         // 2. Physics Lookup (Unified Mass Assignment)
         if (!isGG) {
             const stats = T5_Data.WORLD_DIMENSIONS[sizeVal] || { gravity: 0, mass: 0 };
-            
-            world.density = 1.0; 
-            world.gravity = stats.gravity;
-            
-            // UI COMPATIBILITY FIX: Assign to both properties
-            world.mass = stats.mass;
-            world.massEarths = stats.mass; 
-            
+            world.density = 1.0;
+            if (!_isManual(world, 'gravity')) world.gravity = stats.gravity;
+            if (!_isManual(world, 'mass')) {
+                world.mass = stats.mass;
+                world.massEarths = stats.mass;
+            }
             world.composition = null;
         } else {
             world.density = 0.1;
-            world.gravity = parseFloat((sizeVal / 10).toFixed(2));
-            world.mass = 'Variable (Giant)';
-            world.massEarths = 317.8; // Example fallback if UI needs a number for GG
+            if (!_isManual(world, 'gravity')) world.gravity = parseFloat((sizeVal / 10).toFixed(2));
+            if (!_isManual(world, 'mass')) {
+                world.mass = 'Variable (Giant)';
+                world.massEarths = 317.8;
+            }
         }
 
         // 3. Trace Logging
@@ -398,12 +401,12 @@
             rotationState = "Tidally Locked (1:1 to Parent)";
         }
 
-        world.isTidallyLocked = isLocked;
-        world.rotationState = rotationState;
+        if (!_isManual(world, 'isTidallyLocked')) world.isTidallyLocked = isLocked;
+        if (!_isManual(world, 'rotationState')) world.rotationState = rotationState;
 
         if (typeof tResult !== 'undefined') {
             tResult('Tidal Lock Status', lockType, 'T5 2.5: Rotational Dynamics');
-            tResult('Rotation State', rotationState, 'T5 2.5: Rotational Dynamics');
+            tResult('Rotation State', world.rotationState, 'T5 2.5: Rotational Dynamics');
         }
     }
 
@@ -594,11 +597,13 @@
         const clampedVariance = Math.max(-2, Math.min(2, hzVariance));
 
         // Twilight Zone override: orbit 0 or 1 — but NOT for satellites (they orbit a parent, not the star)
-        if (!isSatellite && (world.orbitId === 0 || world.orbitId === 1)) {
-            world.climateZone = "Twilight Zone (Tz)";
-        } else {
-            const mapping = (T5_Data && T5_Data.CLIMATE_MAPPING) ? T5_Data.CLIMATE_MAPPING : {};
-            world.climateZone = mapping[String(clampedVariance)] || "Temperate";
+        if (!_isManual(world, 'climateZone')) {
+            if (!isSatellite && (world.orbitId === 0 || world.orbitId === 1)) {
+                world.climateZone = "Twilight Zone (Tz)";
+            } else {
+                const mapping = (T5_Data && T5_Data.CLIMATE_MAPPING) ? T5_Data.CLIMATE_MAPPING : {};
+                world.climateZone = mapping[String(clampedVariance)] || "Temperate";
+            }
         }
 
         tResult('Climate Zone', world.climateZone, 'T5 2.4: Thermal Logic');

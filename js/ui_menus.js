@@ -725,6 +725,19 @@ function setupGenerationHandlers() {
     document.getElementById('ctx-expand-physical-t5').addEventListener('click', () => {
         if (!validateSelection('physical')) return;
 
+        // Warn if any selected hex has manual field overrides that will be preserved
+        let totalManualBodies = 0;
+        selectedHexes.forEach(hexId => {
+            const s = hexStates.get(hexId);
+            if (s && s.t5System) totalManualBodies += countT5ManualBodies(s.t5System);
+        });
+        const manualNote = totalManualBodies > 0
+            ? `\n\n${totalManualBodies} body/bodies have manual field overrides. These will be preserved.`
+            : '';
+        if (!confirm(`Re-expand the T5 system for ${selectedHexes.size} hex(es). Stars and orbits will be regenerated.${manualNote}\n\nProceed?`)) {
+            return;
+        }
+
         saveHistoryState('Expand T5 System');
         if (window.isLoggingEnabled) window.batchLogData = [];
         let missingData = false;
@@ -737,16 +750,18 @@ function setupGenerationHandlers() {
 
             if (baseData) {
                 let sys = null;
-                if (window.T5_TopDown_Generator) {
+                const oldSys = stateObj.t5System || null;
+                if (window.System_Driver && window.System_Driver.generateT5SystemPreservingManuals) {
+                    sys = window.System_Driver.generateT5SystemPreservingManuals(baseData, oldSys);
+                } else if (window.T5_TopDown_Generator) {
                     sys = window.T5_TopDown_Generator.generateT5System(baseData);
                 } else {
-                    // Fallback to old chunked generation if global exists
                     sys = generateT5SystemChunk1(baseData, stateObj.t5System, hexId);
                     sys = generateT5SystemChunk2(sys, baseData);
                     sys = generateT5SystemChunk3(sys, baseData);
                 }
                 stateObj.t5System = sys;
-                stateObj.t5Physical = null; // Clean up old physical object if it exists
+                stateObj.t5Physical = null;
                 stateObj.ctPhysical = null;
                 hexStates.set(hexId, stateObj);
             } else if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {

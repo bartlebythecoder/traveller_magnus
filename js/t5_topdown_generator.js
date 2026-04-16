@@ -25,6 +25,7 @@
     const _roll2D = (typeof roll2D === 'function') ? roll2D : () => _roll1D() + _roll1D();
     const _log = (typeof writeLogLine === 'function') ? writeLogLine : console.log;
     const _tResult = (typeof tResult === 'function') ? tResult : (label, val, source) => _log(`${label}: ${val}`);
+    const _isManual = (typeof isManual === 'function') ? isManual : () => false;
 
     const HZ_DATA = {
         'O': { 'Ia': 15, 'Ib': 15, 'II': 14, 'III': 13, 'IV': 12, 'V': 11, 'D': 1 },
@@ -359,11 +360,11 @@
         function createBodyPlaceholder(category) {
             if (category === 'GG') {
                 const stats = generateGasGiantStats();
-                return { type: stats.type, size: stats.size };
+                return { type: stats.type, size: stats.size, _manualFields: [] };
             } else if (category === 'BELT') {
-                return { type: 'Planetoid Belt', size: 0, worldType: 'Belt' };
+                return { type: 'Planetoid Belt', size: 0, worldType: 'Belt', _manualFields: [] };
             } else {
-                return { type: 'Terrestrial World' };
+                return { type: 'Terrestrial World', _manualFields: [] };
             }
         }
 
@@ -441,7 +442,7 @@
         }
 
         for (let i = startIdx; i < moonCount; i++) {
-            const moon = { type: 'Moon', parentBody: (isGG ? 'Gas Giant' : 'Planet') };
+            const moon = { type: 'Moon', parentBody: (isGG ? 'Gas Giant' : 'Planet'), _manualFields: [] };
             generateT5SubordinateUWP(moon, orbit, hostHZ, maxSubPop, true);
 
             // T5 RAW physics constraint: Moon must be smaller than Parent.
@@ -494,7 +495,7 @@
                 if (!body || body.type === 'Empty') return;
 
                 // Apply Full T5 Orbit Labeling (Positional + Climate)
-                body.climateZone = getT5OrbitLabel(o.orbit, hostHZ);
+                if (!_isManual(body, 'climateZone')) body.climateZone = getT5OrbitLabel(o.orbit, hostHZ);
 
                 // 1. Flesh out the parent body
                 if (body !== sys.mainworld) {
@@ -509,7 +510,7 @@
                 // 3. Flesh out existing satellites (e.g. injected Mainworld)
                 if (body.satellites) {
                     body.satellites.forEach(s => {
-                        s.climateZone = body.climateZone;
+                        if (!_isManual(s, 'climateZone')) s.climateZone = body.climateZone;
                         if (s !== sys.mainworld && s.uwp === undefined) {
                             generateT5SubordinateUWP(s, o.orbit, hostHZ, maxSubPop, true);
                         }
@@ -572,8 +573,8 @@
             return;
         }
 
-        // Preserve existing classification if already set (e.g. by creation or previous call)
-        if (!world.worldType) {
+        // Preserve existing classification — respect manual override, then soft-guard for already-set type
+        if (!_isManual(world, 'worldType') && !world.worldType) {
             if (world.type === 'Planetoid Belt') {
                 world.worldType = 'Belt';
             } else {
@@ -584,7 +585,7 @@
         const type = world.worldType;
 
         // 1. Physical: Size
-        if (world.size === undefined) {
+        if (!_isManual(world, 'size') && world.size === undefined) {
             if (type === 'Belt') world.size = 0;
             else if (type === 'Inferno') world.size = _roll1D() + 6;
             else if (type === 'BigWorld') world.size = _roll2D() + 7;
@@ -596,51 +597,61 @@
         // 2. Physical: Atmosphere
         const sizeVal = (typeof world.size === 'string' ? fromUWPChar(world.size) : (world.size || 0));
 
-        if (type === 'Inferno') {
-            world.atm = fromUWPChar('B');
-        } else if (type === 'Belt') {
-            world.atm = 0;
-        } else if (world.atm === undefined) {
-            let dm = (type === 'StormWorld') ? 4 : 0;
-            world.atm = clampUWP(sizeVal + rollFlux() + dm, (type === 'StormWorld' ? 4 : 0), 15);
+        if (!_isManual(world, 'atm')) {
+            if (type === 'Inferno') {
+                world.atm = fromUWPChar('B');
+            } else if (type === 'Belt') {
+                world.atm = 0;
+            } else if (world.atm === undefined) {
+                let dm = (type === 'StormWorld') ? 4 : 0;
+                world.atm = clampUWP(sizeVal + rollFlux() + dm, (type === 'StormWorld' ? 4 : 0), 15);
+            }
         }
 
         // 3. Physical: Hydrographics
-        if (['Inferno', 'Belt'].includes(type) || sizeVal < 2) {
-            world.hydro = 0;
-        } else if (world.hydro === undefined) {
-            let atmDM = (world.atm < 2 || world.atm > 9) ? -4 : 0;
-            let typeDM = (['InnerWorld', 'StormWorld'].includes(type)) ? -4 : 0;
-            world.hydro = clampUWP((world.atm || 0) + rollFlux() + atmDM + typeDM, 0, 10);
+        if (!_isManual(world, 'hydro')) {
+            if (['Inferno', 'Belt'].includes(type) || sizeVal < 2) {
+                world.hydro = 0;
+            } else if (world.hydro === undefined) {
+                let atmDM = (world.atm < 2 || world.atm > 9) ? -4 : 0;
+                let typeDM = (['InnerWorld', 'StormWorld'].includes(type)) ? -4 : 0;
+                world.hydro = clampUWP((world.atm || 0) + rollFlux() + atmDM + typeDM, 0, 10);
+            }
         }
 
         // 4. Social: Population (Enforce Constraint)
-        let basePop = Math.max(0, _roll2D() - 2);
-        let envDM = (type === 'InnerWorld') ? -4 : (['IceWorld', 'StormWorld'].includes(type) ? -6 : 0);
-        world.pop = clampUWP(basePop + envDM, 0, maxPop);
+        if (!_isManual(world, 'pop')) {
+            let basePop = Math.max(0, _roll2D() - 2);
+            let envDM = (type === 'InnerWorld') ? -4 : (['IceWorld', 'StormWorld'].includes(type) ? -6 : 0);
+            world.pop = clampUWP(basePop + envDM, 0, maxPop);
+        }
 
         // 5. Social: Spaceport (Enforce Downgrade Constraint)
-        const spScore = world.pop - _roll1D();
-        if (spScore >= 4) world.starport = 'F';
-        else if (spScore === 3) world.starport = 'G';
-        else if (spScore === 2) world.starport = 'H';
-        else world.starport = 'Y';
+        if (!_isManual(world, 'starport')) {
+            const spScore = world.pop - _roll1D();
+            if (spScore >= 4) world.starport = 'F';
+            else if (spScore === 3) world.starport = 'G';
+            else if (spScore === 2) world.starport = 'H';
+            else world.starport = 'Y';
+        }
 
         // 6. Social: Gov/Law
-        world.gov = clampUWP(world.pop + rollFlux(), 0, 15);
-        world.law = clampUWP(world.gov + rollFlux(), 0, 18);
+        if (!_isManual(world, 'gov')) world.gov = clampUWP(world.pop + rollFlux(), 0, 15);
+        if (!_isManual(world, 'law')) world.law = clampUWP(world.gov + rollFlux(), 0, 18);
 
         // 7. Social: Tech Level
-        let tlDM = (world.starport === 'F') ? 1 : 0;
-        if (world.size <= 1) tlDM += 2;
-        if (world.atm <= 3 || world.atm >= 10) tlDM += 1;
-        world.tl = clampUWP(_roll1D() + tlDM, 0, 33);
+        if (!_isManual(world, 'tl')) {
+            let tlDM = (world.starport === 'F') ? 1 : 0;
+            if (world.size <= 1) tlDM += 2;
+            if (world.atm <= 3 || world.atm >= 10) tlDM += 1;
+            world.tl = clampUWP(_roll1D() + tlDM, 0, 33);
+        }
 
         T5_World_Engine.calculateT5PhysicalStats(world);
         if (T5_World_Engine.calculateT5Climate) T5_World_Engine.calculateT5Climate(world, 1.0);
 
         // --- 8. Social: Trade Codes ---
-        if (T5_World_Engine && T5_World_Engine.calculateT5TradeCodes) {
+        if (!_isManual(world, 'tradeCodes') && T5_World_Engine && T5_World_Engine.calculateT5TradeCodes) {
             const calculated = T5_World_Engine.calculateT5TradeCodes(world);
             if (!world.tradeCodes) world.tradeCodes = [];
             calculated.forEach(code => {

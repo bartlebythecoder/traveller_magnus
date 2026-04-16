@@ -1009,6 +1009,32 @@ function populateEditorAccordions(stateObj) {
             }
 
             const isChecked = stateObj.isStellarMaskingActive ? 'checked' : '';
+            const t5SysName = (mwBase && mwBase.name) || stateObj.name || 'System';
+
+            const _t5Mc = (obj, field) =>
+                (typeof isManual === 'function' && isManual(obj, field)) ? ' is-manual' : '';
+
+            function _t5Num(obj, field, sIdx, oIdx, satIdx, min, max) {
+                const val = (obj[field] !== undefined && obj[field] !== null) ? obj[field] : '';
+                return `<input type="number" class="rtt-field-input${_t5Mc(obj, field)}" data-t5-field="${field}" data-t5-staridx="${sIdx}" data-t5-orbitidx="${oIdx}" data-t5-satidx="${satIdx}" value="${val}" min="${min}" max="${max}" step="any">`;
+            }
+            function _t5Text(obj, field, sIdx, oIdx, satIdx) {
+                const val = (obj[field] !== undefined && obj[field] !== null) ? String(obj[field]).replace(/"/g, '&quot;') : '';
+                return `<input type="text" class="rtt-field-input${_t5Mc(obj, field)}" data-t5-field="${field}" data-t5-staridx="${sIdx}" data-t5-orbitidx="${oIdx}" data-t5-satidx="${satIdx}" value="${val}">`;
+            }
+            function _t5Array(obj, field, sIdx, oIdx, satIdx) {
+                const val = Array.isArray(obj[field]) ? obj[field].join(' ') : (obj[field] || '');
+                return `<input type="text" class="rtt-field-input${_t5Mc(obj, field)}" data-t5-field="${field}" data-t5-staridx="${sIdx}" data-t5-orbitidx="${oIdx}" data-t5-satidx="${satIdx}" value="${String(val).replace(/"/g, '&quot;')}">`;
+            }
+            function _t5WorldType(obj, sIdx, oIdx, satIdx) {
+                const val = (obj.worldType !== undefined && obj.worldType !== null) ? String(obj.worldType).replace(/"/g, '&quot;') : '';
+                return `<input type="text" class="rtt-field-input${_t5Mc(obj, 'worldType')}" data-t5-field="worldType" data-t5-staridx="${sIdx}" data-t5-orbitidx="${oIdx}" data-t5-satidx="${satIdx}" data-t5-worldtype="1" value="${val}" title="Warning: changing worldType affects atmospheric generation on next expansion">`;
+            }
+            function _t5StarText(star, field, sIdx) {
+                const val = (star[field] !== undefined && star[field] !== null) ? String(star[field]).replace(/"/g, '&quot;') : '';
+                return `<input type="text" class="rtt-field-input${_t5Mc(star, field)}" data-t5-field="${field}" data-t5-isstar="1" data-t5-staridx="${sIdx}" value="${val}">`;
+            }
+
             let html = ``;
 
             if (systemIsMaskingEligible) {
@@ -1021,13 +1047,12 @@ function populateEditorAccordions(stateObj) {
             }
 
             html += `<div class="system-stats" style="grid-template-columns: 1fr;">
-                <div style="text-align: center; color: #66fcf1; border-bottom: 1px dotted #45a29e; padding-bottom: 4px;">T5: ${mwBase.name || stateObj.name || 'Unnamed'} Profile</div>`;
+                <div style="text-align: center; color: #66fcf1; border-bottom: 1px dotted #45a29e; padding-bottom: 4px;">T5: ${t5SysName} Profile</div>`;
             if (sys.stars) {
-                sys.stars.forEach(star => {
-                    html += `<span>${star.role}: <strong>${star.name}</strong> (Lum: ${star.luminosity ? star.luminosity.toFixed(3) : '?'})</span>`;
+                sys.stars.forEach(s => {
+                    html += `<span>${s.role}: <strong>${s.name}</strong> (Lum: ${s.luminosity ? s.luminosity.toFixed(3) : '?'})</span>`;
                 });
             }
-
             if (mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
                 const zoneColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
                 html += `<span style="color: ${zoneColor}; text-align: center;">Travel Zone: <strong>${mwBase.travelZone}</strong></span>`;
@@ -1037,108 +1062,140 @@ function populateEditorAccordions(stateObj) {
             html += `<div class="system-tree">`;
 
             if (sys.stars) {
-                sys.stars.forEach(star => {
-                    const starLabel = `${star.role}: ${star.name}`;
-                    html += `<div style="background: rgba(102, 252, 241, 0.05); padding: 8px; border: 1px solid rgba(102, 252, 241, 0.2); margin-top: 15px; border-radius: 4px;">`;
-                    html += `<div style="color: #66fcf1; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid rgba(102, 252, 241, 0.3); padding-bottom: 4px;">${starLabel}</div>`;
+                sys.stars.forEach((star, starIdx) => {
+                    html += `<details open>`;
+                    html += `<summary>${star.role}: ${star.name} <span class="sys-title-info">Star</span></summary>`;
+                    html += `<div class="system-node">`;
+                    html += `<div class="system-stats">`;
+                    html += `<span>Type: ${_t5StarText(star, 'type', starIdx)}</span>`;
+                    html += `<span>Decimal: ${_t5StarText(star, 'decimal', starIdx)}</span>`;
+                    html += `<span>Class: ${_t5StarText(star, 'size', starIdx)}</span>`;
+                    html += `<span>Luminosity: <strong>${star.luminosity ? star.luminosity.toFixed(3) : '?'}</strong> <em style="font-size:0.8em;color:#a0a8b0;">(calculated)</em></span>`;
+                    if (starIdx > 0 && star.orbitLabel) html += `<span>Orbit: <strong>${star.orbitLabel}</strong></span>`;
+                    html += `</div>`;
 
                     if (star.orbits) {
-                        star.orbits.forEach(o => {
+                        star.orbits.forEach((o, oIdx) => {
                             let w = o.contents;
-                            if (!w || w.type === 'Empty') {
-                                return;
-                            }
+                            if (!w || w.type === 'Empty') return;
 
-                            let uwp = w.type === 'Mainworld' ? mwBase.uwp : (w.uwpSecondary || w.uwp || '-');
+                            const isGG = ['Gas Giant', 'Large Gas Giant', 'Small Gas Giant', 'Ice Giant'].includes(w.type) ||
+                                         ['Gas Giant', 'Large Gas Giant', 'Small Gas Giant', 'Ice Giant'].includes(w.worldType);
+                            const isBelt = w.type === 'Planetoid Belt';
+                            const isMainworld = w.type === 'Mainworld';
+
+                            let uwp = isMainworld ? (mwBase ? mwBase.uwp : (w.uwp || '-')) : (w.uwpSecondary || w.uwp || '-');
                             let typeLabel = w.worldType || w.type;
-                            if (w.type === 'Mainworld') typeLabel = `Mainworld (${typeLabel})`;
-                            if (w.type === 'Gas Giant' && !w.worldType) typeLabel = `${w.size === 15 ? 'Large' : 'Small'} Gas Giant`;
-                            let labelColor = w.type === 'Mainworld' ? '#ffa500' : '#66fcf1';
-                            let summaryStyle = w.type === 'Mainworld' ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
+                            if (isMainworld) typeLabel = `Mainworld (${typeLabel})`;
+                            if (isGG && !w.worldType) typeLabel = `${w.size === 15 ? 'Large' : 'Small'} Gas Giant`;
+                            let labelColor = isMainworld ? '#ffa500' : '#66fcf1';
+                            let summaryStyle = isMainworld ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
 
                             let zoneLabel = '';
-                            if (w.type === 'Mainworld' && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                            if (isMainworld && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
                                 const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
                                 zoneLabel = ` | <span style="color: ${zColor}">${mwBase.travelZone}</span>`;
                             }
 
-                            html += `<details>`;
-                            html += `<summary ${summaryStyle}>Orbit ${o.orbit} [${w.climateZone || 'Cold'}] <span class="sys-title-info">${typeLabel}${zoneLabel}</span></summary>`;
+                            const _t5BodyNVal  = (w.name || '').replace(/"/g, '&quot;');
+                            const _t5BodyNPh   = `${t5SysName} ${o.orbit}`.replace(/"/g, '&quot;');
+                            const _t5BodyNCls  = `rtt-field-input rtt-name-input${isMainworld ? ' rtt-name-mainworld' : ''}${_t5Mc(w, 'name')}`;
+                            const _t5BodyNAttr = `data-t5-field="name" data-t5-staridx="${starIdx}" data-t5-orbitidx="${oIdx}" data-t5-satidx="-1"`;
+
+                            html += `<details ${isMainworld ? 'open' : ''}>`;
+                            html += `<summary ${summaryStyle}><input type="text" class="${_t5BodyNCls}" ${_t5BodyNAttr} value="${_t5BodyNVal}" placeholder="${_t5BodyNPh}" onclick="event.stopPropagation()" style="max-width:160px;"> Orbit ${o.orbit} [${w.climateZone || 'Cold'}] <span class="sys-title-info">${typeLabel}${zoneLabel}</span></summary>`;
                             html += `<div class="system-node">`;
 
-                            if (w.type !== 'Planetoid Belt') {
-                                html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <strong style="color: ${labelColor}">${uwp}</strong></div>`;
-
-                                const tCodes = (w.type === 'Mainworld' && mwBase && mwBase.tradeCodes)
-                                    ? mwBase.tradeCodes
-                                    : (w.tradeCodes || []);
-                                if (tCodes.length > 0) {
-                                    html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Codes: <strong style="color: #66fcf1">${tCodes.join(' ')}</strong></div>`;
-                                }
-                                if (w.type === 'Mainworld') {
+                            if (!isGG) {
+                                if (isMainworld) {
+                                    html += `<div style="margin-bottom: 6px; font-family: monospace; font-size: 1.1em;">UWP: <strong style="color: ${labelColor}">${uwp}</strong></div>`;
+                                    const tCodes = mwBase && mwBase.tradeCodes ? mwBase.tradeCodes : (w.tradeCodes || []);
+                                    if (tCodes.length > 0) html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Codes: <strong style="color: #66fcf1">${tCodes.join(' ')}</strong></div>`;
                                     const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
                                     html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${alleg}</strong></div>`;
+                                    if (mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                                        const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
+                                        const specialCodes = (mwBase.tradeCodes || []).filter(c => ['Fo', 'Da', 'Pz'].includes(c));
+                                        const codeStr = specialCodes.length > 0 ? ` - [${specialCodes.join('/')}]` : '';
+                                        html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor}; margin-bottom: 8px;">Caution: ${mwBase.travelZone} Zone${codeStr}</div>`;
+                                    }
+                                } else {
+                                    const _uwpManual = typeof isManual === 'function' &&
+                                        ['starport','size','atm','hydro','pop','gov','law','tl'].some(f => isManual(w, f));
+                                    html += `<div style="margin-bottom: 6px; font-family: monospace; font-size: 1.1em;">UWP: <input type="text" class="rtt-field-input${_uwpManual ? ' is-manual' : ''}" data-t5-field="uwp" data-t5-staridx="${starIdx}" data-t5-orbitidx="${oIdx}" data-t5-satidx="-1" value="${uwp.replace(/"/g, '&quot;')}" style="color: ${labelColor}; max-width:140px; font-weight:bold;"></div>`;
+                                    html += `<div style="margin-bottom: 6px;"><span style="color: #a0a8b0;">Trade Codes: </span>${_t5Array(w, 'tradeCodes', starIdx, oIdx, -1)}</div>`;
                                 }
-                            }
-
-                            if (w.type === 'Mainworld' && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
-                                const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
-                                const specialCodes = (mwBase.tradeCodes || []).filter(c => ['Fo', 'Da', 'Pz'].includes(c));
-                                const codeStr = specialCodes.length > 0 ? ` - [${specialCodes.join('/')}]` : '';
-                                html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor}; margin-bottom: 8px;">Caution: ${mwBase.travelZone} Zone${codeStr}</div>`;
                             }
 
                             html += `<div class="system-stats">`;
                             html += `<span>Distance: <strong>${(o.distAU || 0).toFixed(2)} AU</strong></span>`;
-
-                            if (w.type !== 'Planetoid Belt') {
-                                if (w.diamKm) html += `<span>Diameter: <strong>${w.diamKm.toLocaleString()} km</strong></span>`;
-                                if (w.density !== undefined) html += `<span>Density: <strong>${(w.density || 0).toFixed(1)}</strong></span>`;
-                                if (w.gravity !== undefined) html += `<span>Gravity: <strong>${(w.gravity || 0).toFixed(2)} G</strong></span>`;
+                            if (!isGG && !isBelt) {
+                                html += `<span>World Type: ${_t5WorldType(w, starIdx, oIdx, -1)}</span>`;
+                                html += `<span>Climate Zone: ${_t5Text(w, 'climateZone', starIdx, oIdx, -1)}</span>`;
                             }
+                            if (w.diamKm) html += `<span>Diameter (km): ${_t5Num(w, 'diamKm', starIdx, oIdx, -1, 0, 200000)}</span>`;
+                            if (w.gravity !== undefined) html += `<span>Gravity (G): ${_t5Num(w, 'gravity', starIdx, oIdx, -1, 0, 100)}</span>`;
+                            const massField = w.massEarths !== undefined ? 'massEarths' : (w.mass !== undefined ? 'mass' : null);
+                            if (massField) html += `<span>Mass (M⊕): ${_t5Num(w, massField, starIdx, oIdx, -1, 0, 100000)}</span>`;
+                            if (!isGG && !isBelt && w.rotationState !== undefined) html += `<span>Rotation: ${_t5Text(w, 'rotationState', starIdx, oIdx, -1)}</span>`;
                             html += `</div>`;
 
                             html += buildJourneyTimesUI(w, star, stateObj.isStellarMaskingActive);
 
                             if (w.satellites && w.satellites.length > 0) {
                                 w.satellites.forEach((sat, satIdx) => {
-                                    const isMW = sat.type === 'Mainworld';
-                                    const satLabel = isMW ? 'Mainworld' : `Moon ${satIdx + 1} - ${sat.worldType || 'Satellite'}`;
-                                    const satUwp = isMW ? (mwBase ? mwBase.uwp : sat.uwp || '-') : (sat.uwpSecondary || sat.uwp || '-');
-                                    const satColor = isMW ? '#ffa500' : '#66fcf1';
-                                    const satSummaryStyle = isMW ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
+                                    const isSatMW = sat.type === 'Mainworld';
+                                    const isSatGG = ['Gas Giant', 'Large Gas Giant', 'Small Gas Giant', 'Ice Giant'].includes(sat.type) ||
+                                                    ['Gas Giant', 'Large Gas Giant', 'Small Gas Giant', 'Ice Giant'].includes(sat.worldType);
+                                    const isSatBelt = sat.type === 'Planetoid Belt';
+                                    const satUwp = isSatMW ? (mwBase ? mwBase.uwp : (sat.uwp || '-')) : (sat.uwpSecondary || sat.uwp || '-');
+                                    const satColor = isSatMW ? '#ffa500' : '#66fcf1';
+                                    const satSummaryStyle = isSatMW ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
 
                                     let satZoneLabel = '';
-                                    if (isMW && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                                    if (isSatMW && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
                                         const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
                                         satZoneLabel = ` | <span style="color: ${zColor}">${mwBase.travelZone}</span>`;
                                     }
 
-                                    html += `<details style="margin-left: 20px;" ${isMW ? 'open' : ''}>`;
-                                    html += `<summary ${satSummaryStyle}>${satLabel} <span class="sys-title-info">Size ${sat.size} | ${satUwp}${satZoneLabel}</span></summary>`;
+                                    const _t5SatNVal  = (sat.name || '').replace(/"/g, '&quot;');
+                                    const _t5SatNPh   = `${t5SysName} ${o.orbit}-${String.fromCharCode(97 + satIdx)}`.replace(/"/g, '&quot;');
+                                    const _t5SatNCls  = `rtt-field-input rtt-name-input${isSatMW ? ' rtt-name-mainworld' : ''}${_t5Mc(sat, 'name')}`;
+                                    const _t5SatNAttr = `data-t5-field="name" data-t5-staridx="${starIdx}" data-t5-orbitidx="${oIdx}" data-t5-satidx="${satIdx}"`;
+
+                                    html += `<details style="margin-left: 20px;" ${isSatMW ? 'open' : ''}>`;
+                                    html += `<summary ${satSummaryStyle}><input type="text" class="${_t5SatNCls}" ${_t5SatNAttr} value="${_t5SatNVal}" placeholder="${_t5SatNPh}" onclick="event.stopPropagation()" style="max-width:160px;"> Satellite ${satIdx + 1} <span class="sys-title-info">${sat.worldType || (isSatGG ? 'Gas Giant' : 'Moon')} | Size ${sat.size}${satZoneLabel}</span></summary>`;
                                     html += `<div class="system-node">`;
 
-                                    html += `<div style="margin-bottom: 6px; font-family: monospace;"><span style="color: ${satColor};">UWP:</span> <strong style="color: ${satColor};">${satUwp}</strong></div>`;
-
-                                    const sCodes = (isMW && mwBase && mwBase.tradeCodes)
-                                        ? mwBase.tradeCodes
-                                        : (sat.tradeCodes || []);
-                                    if (sCodes.length > 0) {
-                                        html += `<div style="margin-bottom: 6px; font-size: 0.85em; color: #a0a8b0;">Codes: <strong style="color: #66fcf1">${sCodes.join(' ')}</strong></div>`;
-                                    }
-                                    if (isMW) {
-                                        const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
-                                        html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${alleg}</strong></div>`;
-                                    }
-
-                                    if (isMW && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
-                                        const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
-                                        html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor}; margin-bottom: 8px;">Caution: ${mwBase.travelZone} Zone</div>`;
+                                    if (!isSatGG) {
+                                        if (isSatMW) {
+                                            html += `<div style="margin-bottom: 6px; font-family: monospace;"><span style="color: ${satColor};">UWP:</span> <strong style="color: ${satColor};">${satUwp}</strong></div>`;
+                                            const sCodes = mwBase && mwBase.tradeCodes ? mwBase.tradeCodes : (sat.tradeCodes || []);
+                                            if (sCodes.length > 0) html += `<div style="margin-bottom: 6px; font-size: 0.85em; color: #a0a8b0;">Codes: <strong style="color: #66fcf1">${sCodes.join(' ')}</strong></div>`;
+                                            const salleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
+                                            html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${salleg}</strong></div>`;
+                                            if (mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
+                                                const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
+                                                html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor}; margin-bottom: 8px;">Caution: ${mwBase.travelZone} Zone</div>`;
+                                            }
+                                        } else {
+                                            const _satUwpManual = typeof isManual === 'function' &&
+                                                ['starport','size','atm','hydro','pop','gov','law','tl'].some(f => isManual(sat, f));
+                                            html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <input type="text" class="rtt-field-input${_satUwpManual ? ' is-manual' : ''}" data-t5-field="uwp" data-t5-staridx="${starIdx}" data-t5-orbitidx="${oIdx}" data-t5-satidx="${satIdx}" value="${satUwp.replace(/"/g, '&quot;')}" style="color: ${satColor}; max-width:140px; font-weight:bold;"></div>`;
+                                            html += `<div style="margin-bottom: 6px;"><span style="color: #a0a8b0;">Trade Codes: </span>${_t5Array(sat, 'tradeCodes', starIdx, oIdx, satIdx)}</div>`;
+                                        }
                                     }
 
                                     html += `<div class="system-stats">`;
-                                    if (sat.diamKm) html += `<span>Diameter: <strong>${sat.diamKm.toLocaleString()} km</strong></span>`;
-                                    if (sat.gravity !== undefined) html += `<span>Gravity: <strong>${(sat.gravity || 0).toFixed(2)} G</strong></span>`;
+                                    if (!isSatGG && !isSatBelt) {
+                                        html += `<span>World Type: ${_t5WorldType(sat, starIdx, oIdx, satIdx)}</span>`;
+                                        html += `<span>Climate Zone: ${_t5Text(sat, 'climateZone', starIdx, oIdx, satIdx)}</span>`;
+                                    }
+                                    if (sat.diamKm) html += `<span>Diameter (km): ${_t5Num(sat, 'diamKm', starIdx, oIdx, satIdx, 0, 200000)}</span>`;
+                                    if (sat.gravity !== undefined) html += `<span>Gravity (G): ${_t5Num(sat, 'gravity', starIdx, oIdx, satIdx, 0, 100)}</span>`;
+                                    const satMassField = sat.massEarths !== undefined ? 'massEarths' : (sat.mass !== undefined ? 'mass' : null);
+                                    if (satMassField) html += `<span>Mass (M⊕): ${_t5Num(sat, satMassField, starIdx, oIdx, satIdx, 0, 100000)}</span>`;
+                                    if (!isSatGG && !isSatBelt && sat.rotationState !== undefined) html += `<span>Rotation: ${_t5Text(sat, 'rotationState', starIdx, oIdx, satIdx)}</span>`;
                                     html += `</div>`;
 
                                     html += buildJourneyTimesUI(sat, star, stateObj.isStellarMaskingActive, o.distAU);
@@ -1150,7 +1207,7 @@ function populateEditorAccordions(stateObj) {
                             html += `</div></details>`;
                         });
                     }
-                    html += `</div>`;
+                    html += `</div></details>`;
                 });
             }
 
@@ -1860,6 +1917,132 @@ function saveHexEditorChanges() {
         // ── Numeric fields ────────────────────────────────────────────────────
         const _numericFields = ['distAU','orbitalPeriod','diamKm','gravity','mass','temperature','axialTilt'];
         if (_numericFields.includes(field)) {
+            const val = parseFloat(el.value);
+            if (isNaN(val)) return;
+            body[field] = val;
+            markManual(body, field);
+            hexStates.set(editingHexId, stateObj);
+            el.classList.add('is-manual');
+            return;
+        }
+    });
+}());
+
+// =============================================================================
+// T5 SYSTEM TREE — INLINE EDIT EVENT DELEGATION
+// Listens on the persistent root container; survives innerHTML re-renders.
+// =============================================================================
+(function () {
+    const root = document.getElementById('editor-t5-system-root');
+    if (!root) return;
+
+    root.addEventListener('change', function (e) {
+        const el = e.target;
+        const field = el.dataset.t5Field;
+        if (!field) return;
+
+        if (typeof editingHexId === 'undefined' || !editingHexId) return;
+        const stateObj = hexStates.get(editingHexId);
+        if (!stateObj || !stateObj.t5System) return;
+        const sys = stateObj.t5System;
+
+        // ── Star fields (data-t5-isstar="1") ─────────────────────────────────
+        if (el.dataset.t5Isstar === '1') {
+            const star = sys.stars && sys.stars[parseInt(el.dataset.t5Staridx, 10)];
+            if (!star) return;
+            star[field] = el.value.trim();
+            markManual(star, field);
+            // Rebuild display name: e.g. "G2 V"
+            star.name = `${star.type || ''}${star.decimal !== undefined ? star.decimal : ''}${star.size ? ' ' + star.size : ''}`.trim();
+            hexStates.set(editingHexId, stateObj);
+            el.classList.add('is-manual');
+            return;
+        }
+
+        // ── Resolve body/satellite via star+orbit+sat indices ─────────────────
+        const starIdx = parseInt(el.dataset.t5Staridx, 10);
+        const oIdx    = parseInt(el.dataset.t5Orbitidx, 10);
+        const satIdx  = parseInt(el.dataset.t5Satidx, 10);
+
+        const star = sys.stars && sys.stars[starIdx];
+        if (!star || !star.orbits) return;
+        const orbit = star.orbits[oIdx];
+        if (!orbit) return;
+        let body = orbit.contents;
+        if (!body) return;
+        if (satIdx >= 0) body = body.satellites && body.satellites[satIdx];
+        if (!body) return;
+
+        // ── Name ──────────────────────────────────────────────────────────────
+        if (field === 'name') {
+            const trimmed = el.value.trim();
+            if (trimmed) {
+                body.name = trimmed;
+                markManual(body, 'name');
+                el.classList.add('is-manual');
+            } else {
+                delete body.name;
+                if (Array.isArray(body._manualFields)) {
+                    body._manualFields = body._manualFields.filter(f => f !== 'name');
+                }
+                el.classList.remove('is-manual');
+            }
+            hexStates.set(editingHexId, stateObj);
+            return;
+        }
+
+        // ── UWP compact string ────────────────────────────────────────────────
+        if (field === 'uwp') {
+            const raw = el.value.trim().toUpperCase().replace(/\s/g, '');
+            if (raw.length >= 9 && raw[7] === '-') {
+                const ph = c => { const n = parseInt(c, 16); return isNaN(n) ? c : n; };
+                body.starport = raw[0];
+                body.size     = ph(raw[1]);
+                body.atm      = ph(raw[2]);
+                body.hydro    = ph(raw[3]);
+                body.pop      = ph(raw[4]);
+                body.gov      = ph(raw[5]);
+                body.law      = ph(raw[6]);
+                body.tl       = ph(raw[8]) !== raw[8] ? ph(raw[8]) : (parseInt(raw.slice(8), 16) || 0);
+                ['starport','size','atm','hydro','pop','gov','law','tl'].forEach(f => markManual(body, f));
+                body.uwpSecondary = raw;
+            }
+            hexStates.set(editingHexId, stateObj);
+            el.classList.add('is-manual');
+            return;
+        }
+
+        // ── tradeCodes (space-separated) ─────────────────────────────────────
+        if (field === 'tradeCodes') {
+            body.tradeCodes = el.value.trim() ? el.value.trim().split(/\s+/) : [];
+            markManual(body, 'tradeCodes');
+            hexStates.set(editingHexId, stateObj);
+            el.classList.add('is-manual');
+            return;
+        }
+
+        // ── worldType — text; toast warning if changed ────────────────────────
+        if (field === 'worldType') {
+            body.worldType = el.value.trim();
+            markManual(body, 'worldType');
+            hexStates.set(editingHexId, stateObj);
+            el.classList.add('is-manual');
+            if (typeof showToast === 'function') showToast('worldType changed — re-expand to regenerate dependent fields.');
+            return;
+        }
+
+        // ── Text fields ───────────────────────────────────────────────────────
+        if (field === 'climateZone' || field === 'rotationState') {
+            body[field] = el.value.trim();
+            markManual(body, field);
+            hexStates.set(editingHexId, stateObj);
+            el.classList.add('is-manual');
+            return;
+        }
+
+        // ── Numeric fields ────────────────────────────────────────────────────
+        const _t5NumericFields = ['diamKm','gravity','mass','massEarths'];
+        if (_t5NumericFields.includes(field)) {
             const val = parseFloat(el.value);
             if (isNaN(val)) return;
             body[field] = val;

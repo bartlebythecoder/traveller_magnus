@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.9.1";
-const APP_BANNER = "v0.9.1: New: Editable CT System fields";
+const APP_VERSION = "v0.9.2";
+const APP_BANNER = "v0.9.2: New: Editable T5 System fields";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -493,6 +493,30 @@ function countManualCTBodies(ctSystem) {
     });
     (ctSystem.capturedPlanets || []).forEach(cp => {
         if (Array.isArray(cp._manualFields) && cp._manualFields.length > 0) count++;
+    });
+    return count;
+}
+
+/**
+ * Counts all manually-overridden bodies across a T5 system.
+ * Used by the re-expansion warning dialog.
+ * @param {Object} t5System - The sys object from stateObj.t5System.
+ * @returns {number} Total count of bodies with at least one manual field.
+ */
+function countT5ManualBodies(t5System) {
+    let count = 0;
+    if (!t5System || !t5System.stars) return 0;
+    t5System.stars.forEach(star => {
+        if (Array.isArray(star._manualFields) && star._manualFields.length > 0) count++;
+        if (!star.orbits) return;
+        star.orbits.forEach(o => {
+            const body = o.contents;
+            if (!body || body.type === 'Empty') return;
+            if (Array.isArray(body._manualFields) && body._manualFields.length > 0) count++;
+            (body.satellites || []).forEach(sat => {
+                if (Array.isArray(sat._manualFields) && sat._manualFields.length > 0) count++;
+            });
+        });
     });
     return count;
 }

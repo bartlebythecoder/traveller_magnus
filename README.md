@@ -1,4 +1,4 @@
-# As Above, So Below (v0.9.0.1)
+# As Above, So Below (v0.9.0.2)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -58,6 +58,11 @@ Want to replace any of these sectors with your own file?
 
 ---
 ## 📜 Changelog
+### [v0.9.0.2] - 2026-04-15
+1. **MgT2E Life Roll Fix:** Corrected a bug where the biospherics engine rolled individually for life on every solid world in the system. Per WBH rules, only the mainworld (top-down) and habitable-zone worlds receive a full biomass evaluation; all remaining inhospitable worlds are resolved with a single collective 2D roll — a natural 12 means trace life exists on one randomly chosen body.
+2. **MgT2E Audit Update:** Includes % of worlds and % of systems with life
+3. **MgT2E Mainworld Selection:** Fixed bug that removed belts from Mainworld consideration
+
 ### [v0.9.0.1] - 2026-04-15
 1. **Sector Name Display:** Added configurable sector name labels to the map. Names appear at zoom levels below 0.3 (when hex detail is suppressed), rendered at a 30° angle across each sector in the TravellerMap style. Names are auto-populated from Imperium and Universe imports, editable manually via a new "Edit Sector Names" grid dialog in the Settings panel, and persisted in the workspace JSON.
 

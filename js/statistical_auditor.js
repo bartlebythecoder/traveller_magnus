@@ -27,15 +27,19 @@ class StatisticalAuditor {
         this.expectations = tables[this.engine] || tables['baseline'] || {};
 
         this.tally = {
-            total_systems:  0,
-            multi_star:     0,
-            moon_mainworld: 0,
-            garden_world:   0,
-            asteroid_belt:  0,
-            vacuum_world:   0,
-            high_pop:       0,
-            major_starport: 0,
-            max_tech_level: 0
+            total_systems:    0,
+            multi_star:       0,
+            moon_mainworld:   0,
+            garden_world:     0,
+            asteroid_belt:    0,
+            vacuum_world:     0,
+            high_pop:         0,
+            major_starport:   0,
+            max_tech_level:   0,
+            // Biological (MgT2E only)
+            systems_with_life: 0,
+            total_worlds:      0,  // non-GG, non-belt bodies across all systems
+            worlds_with_life:  0
         };
 
         // Temperature peaks — tracked separately for Gas Giants and all other bodies
@@ -117,6 +121,20 @@ class StatisticalAuditor {
     }
 
     /**
+     * Record biological (life) data for one system.
+     * Call once per system after walking all non-GG, non-belt bodies.
+     *
+     * @param {boolean} systemHasLife  - true if any body in this system has biomass > 0
+     * @param {number}  totalWorlds    - count of non-GG, non-belt bodies in this system
+     * @param {number}  livingWorlds   - count of those bodies with biomass > 0
+     */
+    recordLifeData(systemHasLife, totalWorlds, livingWorlds) {
+        if (systemHasLife)        this.tally.systems_with_life++;
+        this.tally.total_worlds  += totalWorlds;
+        this.tally.worlds_with_life += livingWorlds;
+    }
+
+    /**
      * Compare tallies against expectation tables and output a report.
      * Logs ANSI-coloured status lines to console.
      * Writes a Markdown table to window.batchLogData (if logging is enabled)
@@ -136,17 +154,17 @@ class StatisticalAuditor {
 
         // ── Helpers ───────────────────────────────────────────────────────────
 
-        const processRatePct = (label, count, block) => {
+        const processRatePct = (label, count, block, denom = n) => {
             if (!block) return;
 
             if (block.type === 'emergent') {
-                const pct = n > 0 ? ((count / n) * 100).toFixed(1) : '0.0';
+                const pct = denom > 0 ? ((count / denom) * 100).toFixed(1) : '0.0';
                 md += `| ${label} | ${pct}% | Emergent | N/A | [EMERGENT] |\n`;
                 console.log(`  [EMERGENT] ${label}: ${pct}% (no fixed target)`);
                 return;
             }
 
-            const actual    = n > 0 ? (count / n) * 100 : 0;
+            const actual    = denom > 0 ? (count / denom) * 100 : 0;
             const actualStr = actual.toFixed(1);
             const target    = block.target;
             const tol       = this.isSubsector ? block.subsector_tolerance : block.sector_tolerance;
@@ -190,6 +208,13 @@ class StatisticalAuditor {
         processRatePct('Garden Worlds',   this.tally.garden_world,   eco.garden_world_pct);
         processRatePct('Asteroid Belts',  this.tally.asteroid_belt,  eco.asteroid_belt_pct);
         processRatePct('Vacuum Worlds',   this.tally.vacuum_world,   eco.vacuum_world_pct);
+
+        // ── Biological ────────────────────────────────────────────────────────
+        const bioCat = this.expectations.biological || {};
+        if (bioCat.systems_life_pct || bioCat.worlds_life_pct) {
+            processRatePct('Systems With Life', this.tally.systems_with_life, bioCat.systems_life_pct);
+            processRatePct('Worlds With Life',  this.tally.worlds_with_life,  bioCat.worlds_life_pct, this.tally.total_worlds);
+        }
 
         // ── Societal ──────────────────────────────────────────────────────────
         const soc = this.expectations.societal || {};

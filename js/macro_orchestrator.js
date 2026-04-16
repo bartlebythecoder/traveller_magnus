@@ -275,6 +275,22 @@ async function runMgT2EMacro(skipPop = false) {
                             });
                         };
                         if (newSys && newSys.worlds) _walkTemps(newSys.worlds);
+
+                        // Record biological (life) data — planets and moons only, no Gas Giants or belts
+                        let _lifeSystemHasLife = false;
+                        let _lifeTotalWorlds   = 0;
+                        let _lifeWorldsWithLife = 0;
+                        const _walkLife = (bodies) => {
+                            bodies.forEach(w => {
+                                if (w.type !== 'Gas Giant' && w.type !== 'Planetoid Belt') {
+                                    _lifeTotalWorlds++;
+                                    if ((w.biomass || 0) > 0) { _lifeWorldsWithLife++; _lifeSystemHasLife = true; }
+                                }
+                                if (w.moons) _walkLife(w.moons);
+                            });
+                        };
+                        if (newSys && newSys.worlds) _walkLife(newSys.worlds);
+                        _auditor_mgt2e.recordLifeData(_lifeSystemHasLife, _lifeTotalWorlds, _lifeWorldsWithLife);
                     }
 
                     // 4. Clear old variant data to prevent UI ghosting
@@ -441,6 +457,22 @@ async function runMgT2EBottomUpMacro(skipPop = false) {
                                     });
                                 };
                                 if (sys && sys.worlds) _walkTemps(sys.worlds);
+
+                                // Record biological (life) data — planets and moons only, no Gas Giants or belts
+                                let _lifeSystemHasLife = false;
+                                let _lifeTotalWorlds   = 0;
+                                let _lifeWorldsWithLife = 0;
+                                const _walkLife = (bodies) => {
+                                    bodies.forEach(w => {
+                                        if (w.type !== 'Gas Giant' && w.type !== 'Planetoid Belt') {
+                                            _lifeTotalWorlds++;
+                                            if ((w.biomass || 0) > 0) { _lifeWorldsWithLife++; _lifeSystemHasLife = true; }
+                                        }
+                                        if (w.moons) _walkLife(w.moons);
+                                    });
+                                };
+                                if (sys && sys.worlds) _walkLife(sys.worlds);
+                                _auditor_mgt2e_bu.recordLifeData(_lifeSystemHasLife, _lifeTotalWorlds, _lifeWorldsWithLife);
                             }
 
                             // Clean up old data variants to prevent UI ghosting

@@ -43,7 +43,11 @@ const ExpectationTables = {
     // Mongoose 2nd Edition Ruleset
     mgt2e: {
         astrophysical: {
-            moon_mainworld_pct: { type: "emergent" } 
+            moon_mainworld_pct: { type: "emergent" }
+        },
+        biological: {
+            systems_life_pct: { type: "emergent" },
+            worlds_life_pct: { type: "emergent" }
         },
         ecological: {
             garden_world_pct: { target: 25, sector_tolerance: 5, subsector_tolerance: 15 },

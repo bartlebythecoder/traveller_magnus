@@ -2013,9 +2013,40 @@
             targetWorlds = options.targetWorlds || sys.worlds;
         }
 
+        let isBottomUp = (options && options.mode === 'bottom-up');
+
         let primary = sys.stars[0];
         primary.massEarths = (primary.mass || 1.0) * 333000;
         tSection('Biomass & Resources');
+
+        // WBH: Collect all solid bodies outside the habitable zone for the single collective life roll.
+        // Top-down: non-mainworld bodies outside HZ. Bottom-up: all bodies outside HZ.
+        let inhospitableWorlds = [];
+        let collectInhospitable = (list) => {
+            for (const w of list) {
+                if (w.type === 'Empty' || w.type === 'Gas Giant' || w.type === 'Planetoid Belt') continue;
+                if (w.size === 0 || w.size === 'R') continue;
+                const inHZ = w.tempBand === 'Temperate';
+                const isMainworld = w.type === 'Mainworld';
+                if (!inHZ && (isBottomUp || !isMainworld)) inhospitableWorlds.push(w);
+                if (w.moons) collectInhospitable(w.moons);
+            }
+        };
+        collectInhospitable(targetWorlds);
+
+        let collectiveLifeWorld = null;
+        if (inhospitableWorlds.length > 0) {
+            tSection('Collective Inhospitable Life Roll');
+            tResult('Inhospitable World Count', inhospitableWorlds.length);
+            let collectiveRoll = tRoll2D('2D Collective Roll');
+            if (collectiveRoll === 12) {
+                let idx = Math.floor(rng() * inhospitableWorlds.length);
+                collectiveLifeWorld = inhospitableWorlds[idx];
+                tResult('Collective Life', `Trace life on orbit ${collectiveLifeWorld.orbitId != null ? collectiveLifeWorld.orbitId.toFixed(2) : 'N/A'}`);
+            } else {
+                tResult('Collective Life', 'None');
+            }
+        }
 
         let processBody = (w, parent, isMoon) => {
             if (w.type === 'Empty') return;
@@ -2171,13 +2202,46 @@
             tResult('Recalc High Temp', w.highTempK != null ? w.highTempK.toFixed(1) + ' K' : 'N/A');
             tResult('Recalc Low Temp', w.lowTempK != null ? w.lowTempK.toFixed(1) + ' K' : 'N/A');
 
-            if (w.type === 'Gas Giant' || w.type === 'Planetoid Belt' || w.size === 0 || w.size === 'R') {
+            if (w.type === 'Gas Giant' || w.size === 'R') {
                 w.habitability = 0;
                 w.lifeProfile = "0000";
                 w.biomass = 0;
                 w.biocomplexity = 0;
                 w.biodiversity = 0;
                 w.compatibility = 0;
+                return;
+            }
+
+            if (w.type === 'Planetoid Belt' || w.size === 0) {
+                w.habitability = 0;
+                w.lifeProfile = "0000";
+                w.biomass = 0;
+                w.biocomplexity = 0;
+                w.biodiversity = 0;
+                w.compatibility = 0;
+                tSection('Resources (Belt)');
+                let bRDm = 0;
+                if (density > 1.12) { tDM('High Density', 2); bRDm += 2; }
+                if (density < 0.5)  { tDM('Low Density', -2); bRDm -= 2; }
+                w.resourceRating = Math.max(2, Math.min(12, tRoll2D('Resource Roll') - 7 + wSize + bRDm));
+                tResult('Resource Rating (Belt)', w.resourceRating);
+                return;
+            }
+
+            // WBH: Inhospitable worlds outside the HZ skip individual rolls. Only the single world
+            // chosen by the collective natural-12 roll receives a full biospherics evaluation.
+            const inHZ = w.tempBand === 'Temperate';
+            const isMainworld = w.type === 'Mainworld';
+            const isInhospitable = !inHZ && (isBottomUp || !isMainworld);
+            if (isInhospitable && w !== collectiveLifeWorld) {
+                w.habitability = 0;
+                w.lifeProfile = "0000";
+                w.biomass = 0;
+                w.biocomplexity = 0;
+                w.biodiversity = 0;
+                w.compatibility = 0;
+                w.tectonicPlates = 0;
+                w.plateInteraction = "None";
                 return;
             }
 
@@ -2416,10 +2480,13 @@
 
     /**
      * Evaluate candidates for Mainworld status based on World Builder's Handbook criteria.
+     * Eligible types: Terrestrial Planet, Planetoid Belt, Satellite. Gas Giants excluded.
      * Primary Sort: Habitability (Descending)
      * Tie-Breaker 1: Resource Rating (Descending)
+     * Tie-Breaker 2: Refuelling Advantage (Gas Giant moon preferred)
      * Fallback: Size (Descending)
-     * 
+     * Note: Planetoid Belts always have Habitability 0 and compete on Resource Rating alone.
+     *
      * @param {Array} candidates - Array of candidate world objects
      * @returns {Object|null} The winning Mainworld candidate
      */

@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.9.0.1";
-const APP_BANNER = "v0.9.0.1: New: Adding Sector Name Display Option";
+const APP_VERSION = "v0.9.0.2";
+const APP_BANNER = "v0.9.0.2: MgT2E: fixed bug rolling for life on all worlds";
 
 // -----------------------------------------------------------------------------
 // Application State

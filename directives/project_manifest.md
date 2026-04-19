@@ -1,6 +1,6 @@
 # PROJECT AS ABOVE, SO BELOW - Feature Manifest
-**Version:** 0.9.2
-**Target:** T5 Editable System Details
+**Version:** 0.9.3
+**Target:** MgT2E Editable System Details
 **Architecture Standard:** The "Sean Protocol" (Directives -> Orchestration -> Execution)
 
 ---
@@ -56,7 +56,7 @@ For this version: editing system stats
 
   * Step 5 — T5 Engine Wiring (like Phase 0.90 same pattern, larger field set; T5 socio carry-over already handled)
 
-### Phase 0.9.3: MgT2E Editable System Details
+### Phase 0.9.3: MgT2E Editable System Details (Current)
 
   * Step 6 - MgT2E Engine Wiring (like Phase 0.90 same pattern, larger field set; T5 socio carry-over already handled)
 

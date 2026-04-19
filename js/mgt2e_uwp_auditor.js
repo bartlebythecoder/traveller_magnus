@@ -362,6 +362,33 @@
         if (dataErrors === 0) _log('[PASS] Data Integrity: UWP formatting and Trade Codes perfectly match physics.');
         totalErrors += dataErrors;
 
+        // --- 7. Exotic/C/I Atmosphere Temperature Audit ---
+        _tSection('Atmosphere Temperature Audit');
+        let atmTempErrors = 0;
+
+        allWorlds.forEach(w => {
+            if (!w.exoticSubtype || w.meanTempK === undefined) return;
+
+            const subtype = w.exoticSubtype;
+            const tempK = w.meanTempK;
+
+            if (subtype.includes('Temperature 50K or less') && tempK > 50) {
+                const msg = `Atm Temp Violation: World at orbit ${w.orbitId || 'Moon'} has subtype "${subtype}" but meanTempK is ${tempK.toFixed(1)}K (expected <= 50K).`;
+                _log(`[WARNING] ${msg}`);
+                results.checks.push(`[WARNING] ${msg}`);
+                atmTempErrors++;
+            }
+
+            if (subtype.includes('Temperature 500K+') && tempK < 500) {
+                const msg = `Atm Temp Violation: World at orbit ${w.orbitId || 'Moon'} has subtype "${subtype}" but meanTempK is ${tempK.toFixed(1)}K (expected >= 500K).`;
+                _log(`[WARNING] ${msg}`);
+                results.checks.push(`[WARNING] ${msg}`);
+                atmTempErrors++;
+            }
+        });
+
+        if (atmTempErrors === 0) _log('[PASS] Atm Temperature: All exotic/C/I subtype temperature constraints satisfied.');
+
         // Final Summary
         if (totalErrors === 0) {
             results.pass = true;

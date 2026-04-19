@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.9.2";
-const APP_BANNER = "v0.9.2: New: Editable T5 System fields";
+const APP_VERSION = "v0.9.3";
+const APP_BANNER = "v0.9.3: Stellar tables corrected, companion rolls, per-world HZCO";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -542,6 +542,30 @@ function countManualBodies(rttSystem) {
     return count;
 }
 
+/**
+ * Counts all manually-overridden bodies across a MgT2E system.
+ * Used by the re-expansion warning dialog.
+ * @param {Object} mgtSystem - The sys object from stateObj.mgtSystem.
+ * @returns {number} Total count of bodies with at least one manual field.
+ */
+function countManualMgt2eBodies(mgtSystem) {
+    let count = 0;
+    if (!mgtSystem) return 0;
+    (mgtSystem.stars || []).forEach(star => {
+        if (Array.isArray(star._manualFields) && star._manualFields.length > 0) count++;
+    });
+    (mgtSystem.worlds || []).forEach(world => {
+        if (Array.isArray(world._manualFields) && world._manualFields.length > 0) count++;
+        (world.moons || []).forEach(m => {
+            if (Array.isArray(m._manualFields) && m._manualFields.length > 0) count++;
+        });
+        (world.significantBodies || []).forEach(sb => {
+            if (Array.isArray(sb._manualFields) && sb._manualFields.length > 0) count++;
+        });
+    });
+    return count;
+}
+
 // =====================================================================
 // NAME GENERATION UTILITIES
 // =====================================================================
@@ -576,6 +600,234 @@ function getNextSystemName(hexId) {
         }
         return name;
     }
+}
+
+/**
+ * Assigns systematic orbital names to all bodies in a fully-generated MgT2E system.
+ * Must be called after all generation phases are complete (world tree fully assembled).
+ * - Mainworld keeps the plain system name.
+ * - Other primary bodies (sorted by orbitId): "SystemName I", "SystemName II", …
+ * - Moons of primaries: "SystemName I-a", "SystemName I-b", …
+ * - Moons of the mainworld (rare): "SystemName-a", "SystemName-b", …
+ */
+function applyMgT2EOrbitalNames(sys) {
+    const _mw = (sys.mainworld) ||
+                sys.worlds.find(w => w.type === 'Mainworld' || w.isLunarMainworld) ||
+                sys.worlds[0];
+
+    if (_mw && !_mw.name) {
+        _mw.name = (typeof getNextSystemName === 'function') ? getNextSystemName(sys.hexId) : 'Unnamed';
+    }
+    const _sysName = (_mw && _mw.name) ||
+                     ((typeof getNextSystemName === 'function') ? getNextSystemName(sys.hexId) : 'Unknown');
+
+    const _toRoman = (n) => {
+        const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
+        const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+        let r = '';
+        for (let i = 0; i < vals.length; i++) {
+            while (n >= vals[i]) { r += syms[i]; n -= vals[i]; }
+        }
+        return r;
+    };
+
+    const isMultiStar = sys.stars && sys.stars.length > 1;
+
+    // Group non-mainworld bodies by parentStarIdx for multi-star prefix support
+    const starGroups = {};
+    sys.worlds
+        .filter(w => w.type !== 'Empty' && w.type !== 'Mainworld' && !w.isLunarMainworld)
+        .forEach(w => {
+            const idx = (w.parentStarIdx !== undefined) ? w.parentStarIdx : 0;
+            if (!starGroups[idx]) starGroups[idx] = [];
+            starGroups[idx].push(w);
+        });
+
+    Object.keys(starGroups).sort((a, b) => Number(a) - Number(b)).forEach(idxStr => {
+        const idx = Number(idxStr);
+        const namePrefix = isMultiStar
+            ? `${_sysName} ${String.fromCharCode(65 + idx)}-`
+            : `${_sysName} `;
+
+        const group = starGroups[idx].sort((a, b) => (a.orbitId || 0) - (b.orbitId || 0));
+        let _ordinal = 1;
+        group.forEach(w => {
+            const _roman = _toRoman(_ordinal++);
+            w.name = `${namePrefix}${_roman}`;
+            if (w.moons && w.moons.length > 0) {
+                w.moons.forEach((m, mi) => {
+                    if (m.type !== 'Mainworld' && !m.isLunarMainworld) {
+                        m.name = `${namePrefix}${_roman}-${String.fromCharCode(97 + mi)}`;
+                    }
+                });
+            }
+        });
+    });
+
+    if (_mw && _mw.moons && _mw.moons.length > 0) {
+        _mw.moons.forEach((m, mi) => {
+            if (m.type !== 'Mainworld' && !m.isLunarMainworld) {
+                m.name = `${_sysName}-${String.fromCharCode(97 + mi)}`;
+            }
+        });
+    }
+
+    sys.name = _sysName;
+}
+
+function applyCTOrbitalNames(sys) {
+    if (!sys || !sys.orbits) return;
+
+    let _mw = null;
+    for (const slot of sys.orbits) {
+        if (slot.contents && slot.contents.type === 'Mainworld') { _mw = slot.contents; break; }
+    }
+    if (!_mw && sys.capturedPlanets) {
+        _mw = sys.capturedPlanets.find(p => p.type === 'Mainworld') || null;
+    }
+
+    const _sysName = (_mw && _mw.name) ||
+                     sys.name ||
+                     ((typeof getNextSystemName === 'function') ? getNextSystemName(sys.hexId || '') : 'Unknown');
+    if (_mw && !_mw.name) _mw.name = _sysName;
+
+    const _toRoman = (n) => {
+        const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
+        const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+        let r = '';
+        for (let i = 0; i < vals.length; i++) {
+            while (n >= vals[i]) { r += syms[i]; n -= vals[i]; }
+        }
+        return r;
+    };
+
+    // CT has a flat orbit pool with no per-star attribution — use single ordinal sequence
+    const bodies = sys.orbits
+        .filter(slot => slot.contents && slot.contents.type !== 'Empty' && slot.contents.type !== 'Mainworld')
+        .sort((a, b) => (a.orbit || 0) - (b.orbit || 0))
+        .map(slot => slot.contents);
+
+    let _ordinal = 1;
+    bodies.forEach(w => {
+        const _roman = _toRoman(_ordinal++);
+        w.name = `${_sysName} ${_roman}`;
+        if (w.satellites && w.satellites.length > 0) {
+            // Sort by pd (periapsis distance) to match hex_editor display order
+            const sortedSats = [...w.satellites].sort((a, b) => (a.pd || 0) - (b.pd || 0));
+            sortedSats.forEach((m, mi) => {
+                if (m.type !== 'Mainworld') {
+                    m.name = `${_sysName} ${_roman}-${String.fromCharCode(97 + mi)}`;
+                }
+            });
+        }
+    });
+
+    sys.name = _sysName;
+}
+
+function applyT5OrbitalNames(sys) {
+    if (!sys || !sys.stars) return;
+
+    const _mw = sys.mainworld;
+    const _hexId = (_mw && _mw.hexId) || sys.hexId || '';
+    if (_mw && !_mw.name) {
+        _mw.name = (typeof getNextSystemName === 'function') ? getNextSystemName(_hexId) : 'Unnamed';
+    }
+    const _sysName = (_mw && _mw.name) ||
+                     ((typeof getNextSystemName === 'function') ? getNextSystemName(_hexId) : 'Unknown');
+
+    const _toRoman = (n) => {
+        const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
+        const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+        let r = '';
+        for (let i = 0; i < vals.length; i++) {
+            while (n >= vals[i]) { r += syms[i]; n -= vals[i]; }
+        }
+        return r;
+    };
+
+    const isMultiStar = sys.stars.length > 1;
+
+    sys.stars.forEach((star, starIdx) => {
+        if (!star.orbits) return;
+        const namePrefix = isMultiStar
+            ? `${_sysName} ${String.fromCharCode(65 + starIdx)}-`
+            : `${_sysName} `;
+
+        const bodies = star.orbits
+            .filter(slot => slot.contents && slot.contents !== _mw)
+            .sort((a, b) => (a.orbit || 0) - (b.orbit || 0))
+            .map(slot => slot.contents);
+
+        let _ordinal = 1;
+        bodies.forEach(w => {
+            const _roman = _toRoman(_ordinal++);
+            w.name = `${namePrefix}${_roman}`;
+            if (w.satellites) {
+                let satLetterIdx = 0;
+                w.satellites.forEach(s => {
+                    if (s !== _mw) {
+                        s.name = `${namePrefix}${_roman}-${String.fromCharCode(97 + satLetterIdx++)}`;
+                    }
+                });
+            }
+        });
+    });
+
+    if (_mw && _mw.satellites) {
+        _mw.satellites.forEach((s, si) => {
+            if (s !== _mw) {
+                s.name = `${_sysName}-${String.fromCharCode(97 + si)}`;
+            }
+        });
+    }
+
+    sys.name = _sysName;
+}
+
+function applyRTTOrbitalNames(sys) {
+    if (!sys || !sys.stars) return;
+
+    const _sysName = sys.name ||
+                     ((typeof getNextSystemName === 'function') ? getNextSystemName(sys.hexId || '') : 'Unknown');
+    sys.name = _sysName;
+
+    const _toRoman = (n) => {
+        const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
+        const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+        let r = '';
+        for (let i = 0; i < vals.length; i++) {
+            while (n >= vals[i]) { r += syms[i]; n -= vals[i]; }
+        }
+        return r;
+    };
+
+    const isMultiStar = sys.stars.length > 1;
+
+    sys.stars.forEach((star, starIdx) => {
+        if (!star.planetarySystem || !star.planetarySystem.orbits) return;
+        const namePrefix = isMultiStar
+            ? `${_sysName} ${String.fromCharCode(65 + starIdx)}-`
+            : `${_sysName} `;
+
+        const bodies = [...star.planetarySystem.orbits]
+            .filter(b => !b.isMainworld)
+            .sort((a, b) => (a.orbitNumber || 0) - (b.orbitNumber || 0));
+
+        let _ordinal = 1;
+        bodies.forEach(b => {
+            const _roman = _toRoman(_ordinal++);
+            b.name = `${namePrefix}${_roman}`;
+            if (b.satellites) {
+                let satLetterIdx = 0;
+                b.satellites.forEach(s => {
+                    if (!s.isMainworld) {
+                        s.name = `${namePrefix}${_roman}-${String.fromCharCode(97 + satLetterIdx++)}`;
+                    }
+                });
+            }
+        });
+    });
 }
 
 // calculateT5Ix(), generateXboatRoutes(), and addRoute() live in js/routes.js

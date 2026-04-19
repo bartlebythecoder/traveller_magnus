@@ -62,43 +62,86 @@
 
     /**
      * Helper to generate a star object with mass, diam, temp, lum.
+     * Uses per-luminosity-class tables (starStats_V, starStats_Ia, etc.) with
+     * subtype-key interpolation between x0/x5/x9 anchors.
      */
-    function generateStarObject(sType, subType, sClass, label = 'Star') {
-        let stats = MgT2EData.stellar.starStats[sType] || MgT2EData.stellar.starStats['M'];
+    const _SPECTRAL_TYPE_OFFSET = { O: 0, B: 10, A: 20, F: 30, G: 40, K: 50, M: 60 };
 
-        let star = {
-            sClass,
-            sType,
-            subType,
-            mass: stats.mass,
-            diam: stats.diam,
-            temp: stats.temp,
-            lum: MgT2EMath.calculateStellarLuminosity(stats.diam, stats.temp),
+    function _spectralPos(key) {
+        const type = key.slice(0, -1);
+        const sub  = parseInt(key.slice(-1));
+        return (_SPECTRAL_TYPE_OFFSET[type] || 0) + sub;
+    }
+
+    function generateStarObject(sType, subType, sClass, label = 'Star') {
+        const stellar = MgT2EData.stellar;
+
+        // BD and D bypass the spectral interpolation entirely
+        if (sType === 'BD' || sType === 'D') {
+            const bdStats = stellar.starStats_BD[sType] || stellar.starStats_BD['BD'];
+            const lum = MgT2EMath.calculateStellarLuminosity(bdStats.diam, bdStats.temp);
+            const star = { sClass, sType, subType, mass: bdStats.mass, diam: bdStats.diam, temp: bdStats.temp, lum,
+                           name: `${sType} ${sClass}` };
+            tResult(`${label} Classification`, star.name, 'MgT2E 1.1: Stellar Generation');
+            tResult(`${label} Mass (Sol)`, star.mass, 'MgT2E 1.1: Stellar Generation');
+            tResult(`${label} Temperature (K)`, star.temp, 'MgT2E 1.1: Stellar Generation');
+            tResult(`${label} Diameter (Sol)`, star.diam, 'MgT2E 1.1: Stellar Generation');
+            tResult(`${label} Luminosity (Sol)`, star.lum.toFixed(4), 'MgT2E 1.1: Stellar Generation');
+            return star;
+        }
+
+        // Select per-class table; fall back to V if class is unrecognised
+        const table = stellar['starStats_' + sClass] || stellar.starStats_V;
+
+        // Class VI: B-type has no A/F anchor beyond B5 — clamp to prevent cross-type bleed
+        let effectiveSubType = subType;
+        if (sClass === 'VI' && sType === 'B' && subType > 5) effectiveSubType = 5;
+
+        // Build sorted key list by spectral position
+        const sortedKeys = Object.keys(table).sort((a, b) => _spectralPos(a) - _spectralPos(b));
+
+        const targetPos = (_SPECTRAL_TYPE_OFFSET[sType] || 0) + effectiveSubType;
+
+        // Find bracketing anchors
+        let loKey = sortedKeys[0];
+        let hiKey = null;
+        for (const k of sortedKeys) {
+            if (_spectralPos(k) <= targetPos) { loKey = k; }
+            else { hiKey = k; break; }
+        }
+
+        const loStats = table[loKey];
+        let mass, diam, temp;
+
+        if (!hiKey) {
+            // At or beyond last anchor — clamp
+            mass = loStats.mass;
+            diam = loStats.diam;
+            temp = loStats.temp;
+            tResult('Subtype Interpolation', `Clamped to ${loKey} (terminal anchor)`, 'MgT2E 1.1: Stellar Generation');
+        } else {
+            const hiStats = table[hiKey];
+            const loPos   = _spectralPos(loKey);
+            const hiPos   = _spectralPos(hiKey);
+            const fraction = (targetPos - loPos) / (hiPos - loPos);
+            mass = loStats.mass + (hiStats.mass - loStats.mass) * fraction;
+            diam = loStats.diam + (hiStats.diam - loStats.diam) * fraction;
+            temp = loStats.temp + (hiStats.temp - loStats.temp) * fraction;
+            tResult('Subtype Interpolation', `${loKey}→${hiKey} at ${(fraction * 100).toFixed(0)}%`, 'MgT2E 1.1: Stellar Generation');
+        }
+
+        const lum = MgT2EMath.calculateStellarLuminosity(diam, temp);
+
+        const star = {
+            sClass, sType, subType,
+            mass, diam, temp, lum,
             name: `${sType}${toUWPChar(subType)} ${sClass}`
         };
 
-        // Subtype interpolation: drift physical stats towards the next cooler class
-        const coolingSequence = ['O', 'B', 'A', 'F', 'G', 'K', 'M', 'BD'];
-        const currentIndex = coolingSequence.indexOf(sType);
-        if (currentIndex !== -1 && subType > 0) {
-            const nextType = coolingSequence[currentIndex + 1];
-            if (nextType && MgT2EData.stellar.starStats[nextType]) {
-                const nextStats = MgT2EData.stellar.starStats[nextType];
-                const fraction  = subType / 10.0;
-                star.mass = stats.mass + (nextStats.mass - stats.mass) * fraction;
-                star.temp = stats.temp + (nextStats.temp - stats.temp) * fraction;
-                star.diam = stats.diam + (nextStats.diam - stats.diam) * fraction;
-                tResult('Subtype Interpolation', `Shifted ${(fraction * 100).toFixed(0)}% towards ${nextType}`, 'MgT2E 1.1: Stellar Generation');
-            }
-        }
-
-        // Recalculate luminosity from smoothed diam/temp
-        star.lum = MgT2EMath.calculateStellarLuminosity(star.diam, star.temp);
-
         tResult(`${label} Classification`, star.name, 'MgT2E 1.1: Stellar Generation');
-        tResult(`${label} Mass (Sol)`, star.mass, 'MgT2E 1.1: Stellar Generation');
-        tResult(`${label} Temperature (K)`, star.temp, 'MgT2E 1.1: Stellar Generation');
-        tResult(`${label} Diameter (Sol)`, star.diam, 'MgT2E 1.1: Stellar Generation');
+        tResult(`${label} Mass (Sol)`, star.mass.toFixed(3), 'MgT2E 1.1: Stellar Generation');
+        tResult(`${label} Temperature (K)`, star.temp.toFixed(0), 'MgT2E 1.1: Stellar Generation');
+        tResult(`${label} Diameter (Sol)`, star.diam.toFixed(3), 'MgT2E 1.1: Stellar Generation');
         const limit100D = (star.diam * 1392700 * 100) / 1000000;
         tResult("100D Limit", `${limit100D.toFixed(1)} M km`, 'MgT2E 1.1: Stellar Generation');
         tResult(`${label} Luminosity (Sol)`, star.lum.toFixed(4), 'MgT2E 1.1: Stellar Generation');
@@ -144,6 +187,45 @@
         tResult('WD Temperature (K)', star.temp.toFixed(0), 'MgT2E 1.1: Stellar Life Cycles');
         star.lum  = MgT2EMath.calculateStellarLuminosity(star.diam, star.temp);
         tResult('WD Luminosity (Sol)', star.lum.toFixed(6), 'MgT2E 1.1: Stellar Life Cycles');
+    }
+
+    /**
+     * Converts an AU distance to a Traveller orbit number using the standard orbit table.
+     * Module-scope so both generateStellarSystem and allocateOrbits can call it.
+     */
+    function convertAuToOrbit(au) {
+        const orbitAuTable = MgT2EData.stellar.orbitAu;
+        for (let i = 0; i < orbitAuTable.length - 1; i++) {
+            if (au >= orbitAuTable[i] && au < orbitAuTable[i + 1]) {
+                let fraction = (au - orbitAuTable[i]) / (orbitAuTable[i + 1] - orbitAuTable[i]);
+                return i + fraction;
+            }
+        }
+        return 20.0;
+    }
+
+    /**
+     * Computes the effective HZCO for a specific world based on all stars interior to its orbit.
+     * Secondary-subsystem worlds use only their host star's luminosity.
+     * Primary-subsystem worlds accumulate: primary + primary companion + any Close/Near/Far
+     * secondary whose orbitId is less than the world's orbit.
+     */
+    function computeWorldHzco(orbitId, parentStarIdx, sys) {
+        if (parentStarIdx !== 0) {
+            const hostStar = sys.stars[parentStarIdx];
+            return convertAuToOrbit(Math.sqrt(hostStar.lum));
+        }
+        let effectiveLum = 0;
+        for (const star of sys.stars) {
+            if (star.role === 'Primary') {
+                effectiveLum += star.lum;
+            } else if (star.separation === 'Companion' && star.parentStarIdx === 0) {
+                effectiveLum += star.lum;
+            } else if (star.parentStarIdx === 0 && star.separation !== 'Companion') {
+                if (star.orbitId < orbitId) effectiveLum += star.lum;
+            }
+        }
+        return convertAuToOrbit(Math.sqrt(effectiveLum));
     }
 
     /**
@@ -405,18 +487,8 @@
 
         if (primary.sType === 'D') { applyWhiteDwarfPhysics(primary, sys.age); }
 
-        // HZCO calculation
+        // HZCO calculation (module-scope convertAuToOrbit used here and in allocateOrbits)
         let hzcoAu = Math.sqrt(primary.lum);
-        const convertAuToOrbit = (au) => {
-            const orbitAuTable = MgT2EData.stellar.orbitAu;
-            for (let i = 0; i < orbitAuTable.length - 1; i++) {
-                if (au >= orbitAuTable[i] && au < orbitAuTable[i + 1]) {
-                    let fraction = (au - orbitAuTable[i]) / (orbitAuTable[i + 1] - orbitAuTable[i]);
-                    return i + fraction;
-                }
-            }
-            return 20.0;
-        };
         sys.hzco = convertAuToOrbit(hzcoAu);
         tResult('HZCO (Orbit)', sys.hzco.toFixed(2), 'MgT2E 1.3: HZCO Formula');
 
@@ -478,22 +550,47 @@
                     if (star.sType === 'D') { applyWhiteDwarfPhysics(star, sys.age); }
                     tResult(`${def.sep} Star`, star.name + " at Orbit " + star.orbitId, 'MgT2E 1.2: Binary/Multiple Stars');
 
-                    // Companion Check
-                    let orbitDM = getMultiDM(star);
-                    if (tRoll2D('Companion Presence') + orbitDM >= 10) {
-                        let companion = determineNonPrimaryStar(star, 'Companion', 'Companion');
+                    // Companion Check for this secondary star
+                    let secCompDM = getMultiDM(star);
+                    tDM(`${def.sep} Companion DM`, secCompDM);
+                    if (tRoll2D(`${def.sep} Star: Companion Presence`) + secCompDM >= 10) {
+                        let companion = determineNonPrimaryStar(star, 'Companion', `${def.sep} Star Companion`);
                         companion.separation = 'Companion';
                         companion.role = 'Companion';
                         companion.parentStarIdx = sys.stars.length - 1;
-                        let d1 = tRoll1D('Comp Orbit D1');
-                        let d2 = tRoll2D('Comp Orbit D2');
+                        let d1 = tRoll1D(`${def.sep} Comp Orbit D1`);
+                        let d2 = tRoll2D(`${def.sep} Comp Orbit D2`);
                         companion.orbitId = (d1 / 10) + ((d2 - 7) / 100);
                         companion.eccentricity = determineEccentricity(true, 0, sys.age, companion.orbitId, false, 0);
                         sys.stars.push(companion);
                         if (companion.sType === 'D') { applyWhiteDwarfPhysics(companion, sys.age); }
-                        tResult('  Companion', companion.name, 'MgT2E 1.2: Binary/Multiple Stars');
+                        tResult(`${def.sep} Star Companion`, companion.name + ' at Orbit ' + companion.orbitId.toFixed(3), 'MgT2E 1.2: Binary/Multiple Stars');
                     }
                 }
+            }
+
+            // Primary Companion Check — every system rolls for this
+            tSection('Primary Companion Check');
+            let primaryCompDM = getMultiDM(primary);
+            tDM('Primary Companion DM', primaryCompDM);
+            if (tRoll2D('Primary: Companion Presence') + primaryCompDM >= 10) {
+                let primaryCompanion = determineNonPrimaryStar(primary, 'Companion', 'Primary Companion');
+                primaryCompanion.separation = 'Companion';
+                primaryCompanion.role = 'Companion';
+                primaryCompanion.parentStarIdx = 0;
+                let d1 = tRoll1D('Primary Comp Orbit D1');
+                let d2 = tRoll2D('Primary Comp Orbit D2');
+                primaryCompanion.orbitId = (d1 / 10) + ((d2 - 7) / 100);
+                primaryCompanion.eccentricity = determineEccentricity(true, 0, sys.age, primaryCompanion.orbitId, false, 0);
+                sys.stars.push(primaryCompanion);
+                if (primaryCompanion.sType === 'D') { applyWhiteDwarfPhysics(primaryCompanion, sys.age); }
+                tResult('Primary Companion', primaryCompanion.name + ' at Orbit ' + primaryCompanion.orbitId.toFixed(3), 'MgT2E 1.2: Binary/Multiple Stars');
+
+                // Recalculate HZCO: all primary-subsystem worlds orbit both stars, so use combined luminosity
+                const combinedLum = primary.lum + primaryCompanion.lum;
+                const newHzcoAu = Math.sqrt(combinedLum);
+                sys.hzco = convertAuToOrbit(newHzcoAu);
+                tResult('HZCO Recalculated (Circumbinary)', `${primary.lum.toFixed(4)} + ${primaryCompanion.lum.toFixed(4)} = ${combinedLum.toFixed(4)} L☉ → Orbit ${sys.hzco.toFixed(2)}`, 'MgT2E 1.3: HZCO Formula');
             }
         }
 
@@ -862,6 +959,7 @@
                     parentStarIdx: targetSlot.parentStarIdx,
                     orbitType: targetSlot.type,
                     eccentricity: targetSlot.eccentricity,
+                    worldHzco: computeWorldHzco(targetSlot.orbitId, targetSlot.parentStarIdx, sys),
                     moons: [interceptMW]
                 };
 
@@ -979,6 +1077,7 @@
                             parentStarIdx: s.parentStarIdx,
                             orbitType: s.type,
                             eccentricity: s.eccentricity,
+                            worldHzco: computeWorldHzco(s.orbitId, s.parentStarIdx, sys),
                             moons: (wInfo.moons || []).concat([oldMW])
                         };
 
@@ -1029,7 +1128,8 @@
                         })(),
                         parentStarIdx: s.parentStarIdx,
                         orbitType: s.type,
-                        eccentricity: s.eccentricity
+                        eccentricity: s.eccentricity,
+                        worldHzco: computeWorldHzco(s.orbitId, s.parentStarIdx, sys)
                     };
 
                     // Sean Protocol: Propagate Mainworld data from mainworldBase if this is the Mainworld

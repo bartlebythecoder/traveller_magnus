@@ -421,6 +421,8 @@
             }
         }
 
+        if (typeof applyT5OrbitalNames === 'function') applyT5OrbitalNames(sys);
+
         return sys;
     }
 

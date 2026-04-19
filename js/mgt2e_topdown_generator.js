@@ -187,44 +187,14 @@
         }
 
         // =================================================================
-        // PHASE 8: FINAL POLISH
+        // PHASE 8: FINAL POLISH — ORBITAL NAMING
         // =================================================================
-        
-        // Ensure all worlds have names and the system itself has a primary name
-        // RECURSIVE SEARCH: Find the Mainworld even if it is a moon (Lunar Mainworld)
-        const findMainworld = (worlds) => {
-            for (const w of worlds) {
-                if (w.type === 'Mainworld' || w.isLunarMainworld) return w;
-                if (w.moons && w.moons.length > 0) {
-                    const mw = findMainworld(w.moons);
-                    if (mw) return mw;
-                }
-            }
-            return null;
-        };
+        // All generation phases are complete here. The world tree is fully
+        // assembled. Assign systematic orbital names to every body now so
+        // we never fight intermediate generation state.
 
-        let mw = findMainworld(sys.worlds) || sys.worlds[0];
-        
-        // Fix potential missing names for all worlds (Physical Engine doesn't set names)
-        // RECURSIVE POLISH: Ensure moons also get names
-        const polishNames = (worlds) => {
-            worlds.forEach(w => {
-                if (!w.name) {
-                    w.name = (typeof getNextSystemName === 'function') ? getNextSystemName(hexId) : 'Unnamed';
-                }
-                if (w.moons && w.moons.length > 0) polishNames(w.moons);
-            });
-        };
-        polishNames(sys.worlds);
-
-        // Set the system-level name for the Map Renderer
-        if (mw && mw.name) {
-            sys.name = mw.name;
-        } else if (mainworldBase && mainworldBase.name) {
-            sys.name = mainworldBase.name;
-        } else {
-            sys.name = (typeof getNextSystemName === 'function') ? getNextSystemName(hexId) : 'Unknown';
-        }
+        // Assign systematic orbital names now that the world tree is fully assembled
+        applyMgT2EOrbitalNames(sys);
 
         // =================================================================
         // PHASE 9: JOURNEY MATH SWEEP (Phase 2 Integration)

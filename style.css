@@ -891,15 +891,55 @@ body {
 
 .system-stats span {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 4px;
 }
 
 .system-stats-full {
     grid-column: span 2;
-    text-align: center;
     border-top: 1px dashed #45a29e;
     padding-top: 4px;
     margin-top: 2px;
+}
+
+.system-stats-taints {
+    grid-column: span 2;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-top: 1px dashed #45a29e;
+    padding-top: 4px;
+    margin-top: 2px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.system-stats-taints .rtt-field-input {
+    flex: 1;
+    min-width: 0;
+    max-width: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Full-width label: value rows — left-aligned, no justify-content space-between */
+.system-stats-inline {
+    grid-column: span 2;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: flex-start;
+    border-top: 1px dashed #45a29e;
+    padding-top: 4px;
+    margin-top: 2px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.system-stats-inline strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
 }
 
 .sys-title-info {

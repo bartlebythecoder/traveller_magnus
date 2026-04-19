@@ -313,7 +313,7 @@ function populateEditorAccordions(stateObj) {
     // Jump times are now only displayed within the expanded system tree accordions.
 
     // 2. MgT2E Socioeconomics
-    if (stateObj.mgtSocio) {
+    if (stateObj.mgtSocio && stateObj.mgtSocio.pValue !== undefined) {
         document.getElementById('acc-btn-mgt-socio').style.display = 'flex';
         const ms = stateObj.mgtSocio;
         const fields = {
@@ -400,6 +400,56 @@ function populateEditorAccordions(stateObj) {
             root.innerHTML = '';
             const sys = stateObj.mgtSystem;
 
+            // ---- Input helpers (MgT2E) ----
+            const _mgtMc = (obj, field) =>
+                (typeof isManual === 'function' && isManual(obj, field)) ? ' is-manual' : '';
+            function _mgtStarNum(star, field, sidx, min, max) {
+                const raw = (star[field] !== undefined && star[field] !== null) ? star[field] : '';
+                const val = (raw !== '' && isFinite(raw)) ? Number(parseFloat(raw).toFixed(2)) : raw;
+                return `<input type="number" class="rtt-field-input${_mgtMc(star, field)}" data-mgt-field="${field}" data-mgt-sidx="${sidx}" value="${val}" min="${min}" max="${max}" step="any">`;
+            }
+            function _mgtStarText(star, field, sidx) {
+                const val = (star[field] !== undefined && star[field] !== null) ? String(star[field]).replace(/"/g, '&quot;') : '';
+                return `<input type="text" class="rtt-field-input${_mgtMc(star, field)}" data-mgt-field="${field}" data-mgt-sidx="${sidx}" value="${val}">`;
+            }
+            function _mgtNum(obj, field, widx, min, max) {
+                const raw = (obj[field] !== undefined && obj[field] !== null) ? obj[field] : '';
+                const val = (raw !== '' && isFinite(raw)) ? Number(parseFloat(raw).toFixed(2)) : raw;
+                return `<input type="number" class="rtt-field-input${_mgtMc(obj, field)}" data-mgt-field="${field}" data-mgt-widx="${widx}" value="${val}" min="${min}" max="${max}" step="any">`;
+            }
+            function _mgtText(obj, field, widx) {
+                const val = (obj[field] !== undefined && obj[field] !== null) ? String(obj[field]).replace(/"/g, '&quot;') : '';
+                return `<input type="text" class="rtt-field-input${_mgtMc(obj, field)}" data-mgt-field="${field}" data-mgt-widx="${widx}" value="${val}">`;
+            }
+            function _mgtTempC(obj, field, widx) {
+                const rawK = (obj[field] !== undefined && obj[field] !== null) ? obj[field] : 273;
+                return `<input type="number" class="rtt-field-input${_mgtMc(obj, field)}" data-mgt-field="${field}" data-mgt-widx="${widx}" data-mgt-iskelvin="1" value="${(rawK - 273).toFixed(0)}" step="1">`;
+            }
+            function _mgtMoonNum(m, field, widx, subarray, midx, min, max) {
+                const raw = (m[field] !== undefined && m[field] !== null) ? m[field] : '';
+                const val = (raw !== '' && isFinite(raw)) ? Number(parseFloat(raw).toFixed(2)) : raw;
+                return `<input type="number" class="rtt-field-input${_mgtMc(m, field)}" data-mgt-field="${field}" data-mgt-widx="${widx}" data-mgt-subarray="${subarray}" data-mgt-midx="${midx}" value="${val}" min="${min}" max="${max}" step="any">`;
+            }
+            function _mgtMoonText(m, field, widx, subarray, midx) {
+                const val = (m[field] !== undefined && m[field] !== null) ? String(m[field]).replace(/"/g, '&quot;') : '';
+                return `<input type="text" class="rtt-field-input${_mgtMc(m, field)}" data-mgt-field="${field}" data-mgt-widx="${widx}" data-mgt-subarray="${subarray}" data-mgt-midx="${midx}" value="${val}">`;
+            }
+            function _mgtMoonTempC(m, field, widx, subarray, midx) {
+                const rawK = (m[field] !== undefined && m[field] !== null) ? m[field] : 273;
+                return `<input type="number" class="rtt-field-input${_mgtMc(m, field)}" data-mgt-field="${field}" data-mgt-widx="${widx}" data-mgt-subarray="${subarray}" data-mgt-midx="${midx}" data-mgt-iskelvin="1" value="${(rawK - 273).toFixed(0)}" step="1">`;
+            }
+            function _mgtTaints(obj, widx) {
+                const arr = Array.isArray(obj.taints) ? obj.taints : (obj.taints ? [obj.taints] : []);
+                const display = arr.slice(0, 2).join(', ') + (arr.length > 2 ? ', ...' : '');
+                return `<strong>${display || '—'}</strong>`;
+            }
+            function _mgtMoonTaints(m, widx, subarray, midx) {
+                const arr = Array.isArray(m.taints) ? m.taints : (m.taints ? [m.taints] : []);
+                const display = arr.slice(0, 2).join(', ') + (arr.length > 2 ? ', ...' : '');
+                return `<strong>${display || '—'}</strong>`;
+            }
+
+            // ---- Masking eligibility check ----
             let systemIsMaskingEligible = false;
             sys.worlds.forEach(w => {
                 const star = sys.stars[w.parentStarIdx || 0];
@@ -452,24 +502,26 @@ function populateEditorAccordions(stateObj) {
             html += `<div class="system-tree">`;
 
             sys.stars.forEach((star, starIdx) => {
+                const starNameInput = `<input type="text" class="rtt-field-input rtt-name-input${_mgtMc(star, 'name')}" data-mgt-field="name" data-mgt-sidx="${starIdx}" value="${(star.name || '').replace(/"/g, '&quot;')}">`;
                 html += `<details open>`;
-                html += `<summary>${star.role || 'Star'} - ${star.name} <span class="sys-title-info">Star</span></summary>`;
+                html += `<summary>${star.role || 'Star'} — ${starNameInput} <span class="sys-title-info">Star</span></summary>`;
                 html += `<div class="system-node">`;
                 html += `<div class="system-stats">`;
-                html += `<span>Mass: <strong>${(star.mass || 0).toFixed(2)} M☉</strong></span>`;
-                html += `<span>Lum: <strong>${(star.lum || 0).toFixed(3)} L☉</strong></span>`;
+                html += `<span>Mass (M☉): ${_mgtStarNum(star, 'mass', starIdx, 0, 100)}</span>`;
+                html += `<span>Lum (L☉): ${_mgtStarNum(star, 'lum', starIdx, 0, 100000)}</span>`;
 
                 if (star.orbitId !== null && starIdx > 0) {
-                    html += `<span>Orbit ID: <strong>${(star.orbitId || 0).toFixed(2)}</strong></span>`;
-                    html += `<span>Ecc: <strong>${(star.eccentricity || 0).toFixed(3)}</strong></span>`;
-                    if (star.mao) {
-                        html += `<span>MAO: <strong>${(star.mao || 0).toFixed(2)}</strong></span>`;
+                    html += `<span>Orbit ID: ${_mgtStarNum(star, 'orbitId', starIdx, 0, 20)}</span>`;
+                    html += `<span>Ecc: ${_mgtStarNum(star, 'eccentricity', starIdx, 0, 1)}</span>`;
+                    if (star.mao !== undefined) {
+                        html += `<span>MAO: ${_mgtStarNum(star, 'mao', starIdx, 0, 100)}</span>`;
                     }
                 }
                 html += `</div>`;
 
                 const sortedWorlds = [...sys.worlds].sort((a, b) => (a.orbitId || 0) - (b.orbitId || 0));
-                sortedWorlds.forEach((w, widx) => {
+                sortedWorlds.forEach((w) => {
+                    const realWidx = sys.worlds.indexOf(w);
                     let worldParent = w.parentStarIdx !== undefined ? w.parentStarIdx : 0;
                     if (worldParent !== starIdx || w.type === 'Empty') return;
 
@@ -485,12 +537,20 @@ function populateEditorAccordions(stateObj) {
                         zoneLabel = ` | <span style="color: ${zColor}">${mwBase.travelZone}</span>`;
                     }
 
+                    const wNameCls = `rtt-field-input rtt-name-input${isMainworldEntry ? ' rtt-name-mainworld' : ''}${_mgtMc(w, 'name')}`;
+                    const wNameInput = `<input type="text" class="${wNameCls}" data-mgt-field="name" data-mgt-widx="${realWidx}" value="${(w.name || '').replace(/"/g, '&quot;')}">`;
+
                     html += `<details open>`;
-                    html += `<summary ${summaryStyle}>Orbit ${(w.orbitId || 0).toFixed(2)} (${w.orbitType || 'S-Type'})${zoneLabel} <span class="sys-title-info">${w.type}</span></summary>`;
+                    html += `<summary ${summaryStyle}>Orbit ${(w.orbitId || 0).toFixed(2)} (${w.orbitType || 'S-Type'}) ${wNameInput}${zoneLabel} <span class="sys-title-info">${w.type}</span></summary>`;
                     html += `<div class="system-node">`;
 
-                    if (w.type !== 'Planetoid Belt' && w.type !== 'Gas Giant' && uwp !== '-') {
-                        html += `<div style="margin-bottom: 6px; font-family: monospace; font-size: 1.1em;">UWP: <strong style="color: ${labelColor}">${uwp}</strong></div>`;
+                    // UWP: mainworld = read-only; secondary bodies = editable
+                    if (w.type !== 'Planetoid Belt' && w.type !== 'Gas Giant') {
+                        if (isMainworldEntry) {
+                            html += `<div style="margin-bottom: 6px; font-family: monospace; font-size: 1.1em;">UWP: <strong style="color: ${labelColor}">${uwp}</strong> <em style="color: #a0a8b0; font-size: 0.75em;">(edit via UWP panel)</em></div>`;
+                        } else if (uwp !== '-') {
+                            html += `<div style="margin-bottom: 6px; font-family: monospace; font-size: 1.1em;">UWP: ${_mgtText(w, 'uwpSecondary', realWidx)}</div>`;
+                        }
                     }
                     if (w.type === 'Gas Giant' && w.uwpGG) {
                         html += `<div style="margin-bottom: 6px; font-family: monospace; font-size: 1.1em;">SAH: <strong style="color: ${labelColor}">${w.uwpGG}</strong></div>`;
@@ -502,55 +562,54 @@ function populateEditorAccordions(stateObj) {
                     html += `<div class="system-stats">`;
                     html += `<span>Orbit ID: <strong>${(w.orbitId || 0).toFixed(2)}</strong></span>`;
                     html += `<span>Type: <strong>${w.orbitType || 'S-Type'}</strong></span>`;
-                    html += `<span>Distance: <strong>${w.au ? (w.au || 0).toFixed(2) : '?'} AU</strong></span>`;
-                    html += `<span>Ecc: <strong>${(w.eccentricity || 0).toFixed(3)}</strong></span>`;
+                    html += `<span>Distance (AU): ${_mgtNum(w, 'au', realWidx, 0, 1000)}</span>`;
+                    html += `<span>Ecc: ${_mgtNum(w, 'eccentricity', realWidx, 0, 1)}</span>`;
 
-                    if (w.periodYears) {
+                    if (w.periodYears !== undefined) {
                         let periodStr = w.periodYears < 1.0
                             ? `${(w.periodYears * 365.25).toFixed(1)} days`
                             : `${(w.periodYears || 0).toFixed(2)} years`;
                         html += `<span class="system-stats-full">Period: <strong>${periodStr}</strong></span>`;
-                        if (w.type !== 'Planetoid Belt' && w.size != 0 && w.size !== 'R') {
-                            html += `<span>Composition: <strong>${w.composition || '?'}</strong></span>`;
-                            if (w.density != null) html += `<span>Density: <strong>${(w.density || 0).toFixed(2)}</strong></span>`;
 
-                            let atmComp = 'None';
+                        if (w.type !== 'Planetoid Belt' && w.size != 0 && w.size !== 'R') {
+                            html += `<span>Composition: ${_mgtText(w, 'composition', realWidx)}</span>`;
+                            if (w.density != null) html += `<span>Density (g/cm³): ${_mgtNum(w, 'density', realWidx, 0, 30)}</span>`;
+
                             if (w.gases && w.gases.length > 0) {
-                                atmComp = w.gases.slice(0, 3).join(', ');
-                                if (w.gases.length > 3) atmComp += ', ...';
+                                let atmComp = w.gases.slice(0, 2).join(', ');
+                                if (w.gases.length > 2) atmComp += ', ...';
+                                html += `<span class="system-stats-inline">Atmosphere: <strong>${atmComp}</strong></span>`;
                             } else if (w.oxygenFraction !== undefined) {
-                                atmComp = `N2/O2 (${(w.oxygenFraction * 100).toFixed(1)}% O2)`;
+                                html += `<span class="system-stats-inline">Atm — O₂ Fraction: ${_mgtNum(w, 'oxygenFraction', realWidx, 0, 1)}</span>`;
+                            } else {
+                                html += `<span class="system-stats-inline">Atmosphere: <strong>None</strong></span>`;
                             }
-                            if (w.taints && w.taints.length > 0) {
-                                atmComp += ` [Taint: ${w.taints.join(', ')}]`;
-                            }
-                            html += `<span class="system-stats-full">Atmosphere: <strong>${atmComp}</strong></span>`;
+                            if (w.totalPressureBar !== undefined) html += `<span>Pressure (bar): ${_mgtNum(w, 'totalPressureBar', realWidx, 0, 1000)}</span>`;
+                            if (w.taints !== undefined || w.oxygenFraction !== undefined) html += `<span class="system-stats-taints">Taints: ${_mgtTaints(w, realWidx)}</span>`;
                         }
                     }
 
                     if (w.type !== 'Planetoid Belt' && w.size != 0 && w.size !== 'R') {
-                        if (w.gravity != null) html += `<span>Gravity: <strong>${(w.gravity || 0).toFixed(2)} G</strong></span>`;
-                        if (w.mass != null) html += `<span>Mass: <strong>${(w.mass || 0).toFixed(4)} M⊕</strong></span>`;
-                        if (w.type === 'Gas Giant' && w.diamTerra != null) html += `<span>Diameter: <strong>${w.diamTerra} T⊕</strong></span>`;
+                        if (w.gravity != null) html += `<span>Gravity (G): ${_mgtNum(w, 'gravity', realWidx, 0, 100)}</span>`;
+                        if (w.mass != null) html += `<span>Mass (M⊕): ${_mgtNum(w, 'mass', realWidx, 0, 100000)}</span>`;
+                        if (w.type === 'Gas Giant' && w.diamTerra != null) html += `<span>Diameter (T⊕): ${_mgtNum(w, 'diamTerra', realWidx, 0, 100)}</span>`;
                         if (w.meanTempK != null) {
                             if (w.highTempK != null && w.lowTempK != null && !isNaN(w.highTempK) && !isNaN(w.lowTempK)) {
-                                html += `<span class="system-stats-full">Temp: <strong>${((w.meanTempK || 273) - 273).toFixed(0)}°C</strong> (L:${(w.lowTempK - 273).toFixed(0)}° / H:${(w.highTempK - 273).toFixed(0)}°)</span>`;
+                                html += `<span>Temp °C (mean): ${_mgtTempC(w, 'meanTempK', realWidx)}</span>`;
+                                html += `<span>Temp °C (low): ${_mgtTempC(w, 'lowTempK', realWidx)}</span>`;
+                                html += `<span>Temp °C (high): ${_mgtTempC(w, 'highTempK', realWidx)}</span>`;
                             } else {
-                                html += `<span>Temp: <strong>${((w.meanTempK || 273) - 273).toFixed(0)}°C</strong></span>`;
+                                html += `<span>Temp °C: ${_mgtTempC(w, 'meanTempK', realWidx)}</span>`;
                             }
                         }
                     }
 
                     if (w.solarDayHours != null) {
-                        let dayStr = '';
                         if (w.solarDayHours === Infinity || w.isTwilightZone) {
-                            dayStr = 'Twilight Zone';
-                        } else if (w.solarDayHours >= 24) {
-                            dayStr = `${(w.solarDayHours / 24).toFixed(1)}d`;
+                            html += `<span>Solar Day: <strong>Twilight Zone</strong></span>`;
                         } else {
-                            dayStr = `${w.solarDayHours.toFixed(1)}h`;
+                            html += `<span>Solar Day (hrs): ${_mgtNum(w, 'solarDayHours', realWidx, 0, 1000000)}</span>`;
                         }
-                        html += `<span>Solar Day: <strong>${dayStr}</strong></span>`;
                     }
 
                     if (w.type === 'Terrestrial Planet' || isMainworldEntry) {
@@ -558,27 +617,24 @@ function populateEditorAccordions(stateObj) {
                             const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
                             html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor};">Caution: ${mwBase.travelZone} Zone</div>`;
                         }
-                        if (w.axialTilt != null) html += `<span>Axial Tilt: <strong>${w.axialTilt ? w.axialTilt.toFixed(1) : '0'}°</strong></span>`;
-                        if (w.lifeProfile) {
-                            html += `<span>Native Life: <strong>${w.lifeProfile}</strong></span>`;
-                        }
-                        html += `<span>Habitability: <strong>${w.habitability !== undefined ? w.habitability : '?'}/15</strong></span>`;
+                        if (w.axialTilt != null) html += `<span>Axial Tilt (°): ${_mgtNum(w, 'axialTilt', realWidx, 0, 180)}</span>`;
+                        if (w.lifeProfile !== undefined) html += `<span>Native Life: ${_mgtText(w, 'lifeProfile', realWidx)}</span>`;
+                        html += `<span>Habitability (/15): ${_mgtNum(w, 'habitability', realWidx, 0, 15)}</span>`;
+                        if (w.resourceRating !== undefined) html += `<span>Resource: ${_mgtNum(w, 'resourceRating', realWidx, 0, 15)}</span>`;
+                        if (w.secRU !== undefined && w.secPop > 0) html += `<span>RU: ${_mgtNum(w, 'secRU', realWidx, -99999, 99999)}</span>`;
 
-                        if (w.resourceRating !== undefined) {
-                            html += `<span>Res: <strong>${toUWPChar(w.resourceRating)}</strong></span>`;
-                        }
-                        if (w.secRU !== undefined && w.secPop > 0) {
-                            html += `<span>RU: <strong>${w.secRU}</strong></span>`;
-                        }
                     } else if (w.type === 'Planetoid Belt') {
                         if (w.beltProfileString) {
                             html += `<div class="system-stats-full" style="color: #66fcf1; font-family: monospace;">Profile: ${w.beltProfileString}</div>`;
-                            html += `<span>Span: <strong>${w.span ? w.span.toFixed(2) : '?'}</strong></span>`;
-                            html += `<span>Bulk: <strong>${w.bulk !== undefined ? w.bulk : '?'}</strong></span>`;
-                            html += `<span>Resource: <strong>${w.resourceRating !== undefined ? toUWPChar(w.resourceRating) : '?'}</strong></span>`;
-                            html += `<span>Sig Size 1: <strong>${w.size1Count || 0}</strong></span>`;
-                            html += `<span>Sig Size S: <strong>${w.sizeSCount || 0}</strong></span>`;
-                            html += `<div class="system-stats-full">Comp: M:${w.mType}% S:${w.sType}% C:${w.cType}% O:${w.oType}%</div>`;
+                            html += `<span>Span: ${_mgtNum(w, 'span', realWidx, 0, 20)}</span>`;
+                            html += `<span>Bulk: ${_mgtNum(w, 'bulk', realWidx, 0, 9)}</span>`;
+                            html += `<span>Resource: ${_mgtNum(w, 'resourceRating', realWidx, 0, 15)}</span>`;
+                            html += `<span>Sig Size 1: ${_mgtNum(w, 'size1Count', realWidx, 0, 99)}</span>`;
+                            html += `<span>Sig Size S: ${_mgtNum(w, 'sizeSCount', realWidx, 0, 99)}</span>`;
+                            html += `<span>M%: ${_mgtNum(w, 'mType', realWidx, 0, 100)}</span>`;
+                            html += `<span>S%: ${_mgtNum(w, 'sType', realWidx, 0, 100)}</span>`;
+                            html += `<span>C%: ${_mgtNum(w, 'cType', realWidx, 0, 100)}</span>`;
+                            html += `<span>O%: ${_mgtNum(w, 'oType', realWidx, 0, 100)}</span>`;
                         } else {
                             html += `<div class="system-stats-full" style="color: #a0a8b0;">No profile data generated.</div>`;
                         }
@@ -593,105 +649,73 @@ function populateEditorAccordions(stateObj) {
 
                     html += buildJourneyTimesUI(w, sys.stars[starIdx], stateObj.isStellarMaskingActive);
 
-                    let subBodies = [];
-                    if (w.moons && w.moons.length > 0) subBodies = subBodies.concat(w.moons);
-                    if (w.significantBodies && w.significantBodies.length > 0) subBodies = subBodies.concat(w.significantBodies);
-
-                    if (subBodies.length > 0) {
-                        subBodies.forEach((m, midx) => {
-                            let isSigBody = m.type === 'Planetoid Belt Body';
+                    // Moons — iterated separately for clean index-based addressing
+                    if (w.moons && w.moons.length > 0) {
+                        w.moons.forEach((m, moonIdx) => {
                             let isMoonMainworld = m.type === 'Mainworld' || m.isLunarMainworld;
                             let mUwp = isMoonMainworld ? (m.uwp || m.uwpSecondary || mwBase?.uwp || '-') : (m.uwpSecondary || '-');
                             let mLabelColor = isMoonMainworld ? '#ffa500' : '#66fcf1';
                             let mSummaryStyle = isMoonMainworld ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
 
-                            let titlePrefix = isSigBody ? 'Sig Body' : 'Moon';
+                            const mNameCls = `rtt-field-input rtt-name-input${isMoonMainworld ? ' rtt-name-mainworld' : ''}${_mgtMc(m, 'name')}`;
+                            const mNameInput = `<input type="text" class="${mNameCls}" data-mgt-field="name" data-mgt-widx="${realWidx}" data-mgt-subarray="moons" data-mgt-midx="${moonIdx}" value="${(m.name || '').replace(/"/g, '&quot;')}">`;
 
                             html += `<details>`;
-                            html += `<summary ${mSummaryStyle}>${titlePrefix} ${midx + 1} <span class="sys-title-info">Size ${m.size}</span></summary>`;
+                            html += `<summary ${mSummaryStyle}>Moon ${moonIdx + 1} ${mNameInput} <span class="sys-title-info">Size ${m.size}</span></summary>`;
                             html += `<div class="system-node">`;
 
-                            if (!isSigBody && mUwp !== '-') {
-                                html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <strong style="color: ${mLabelColor}">${mUwp}</strong></div>`;
+                            if (isMoonMainworld) {
+                                html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <strong style="color: ${mLabelColor}">${mUwp}</strong> <em style="color: #a0a8b0; font-size: 0.75em;">(edit via UWP panel)</em></div>`;
+                            } else if (mUwp !== '-') {
+                                html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <input type="text" class="rtt-field-input${_mgtMc(m, 'uwpSecondary')}" data-mgt-field="uwpSecondary" data-mgt-widx="${realWidx}" data-mgt-subarray="moons" data-mgt-midx="${moonIdx}" value="${mUwp.replace(/"/g, '&quot;')}"></div>`;
                             }
                             if (m.classifications && m.classifications.length > 0) {
                                 html += `<div style="margin-bottom: 6px; font-size: 0.85em; color: #a0a8b0;">Classification: <strong style="color: #66fcf1;">${m.classifications.join(', ')}</strong></div>`;
                             }
 
                             html += `<div class="system-stats">`;
-
-                            if (isSigBody) {
-                                html += `<span>Orbit: <strong>${(m.orbitId !== undefined && m.orbitId !== null) ? m.orbitId.toFixed(2) : '?'}</strong></span>`;
-                            } else {
-                                html += `<span>Orbit: <strong>${(m.pd !== undefined && m.pd !== null) ? m.pd.toFixed(1) : '?'} ⌀</strong></span>`;
-                            }
-
-                            html += `<span>Ecc: <strong>${(m.eccentricity || 0).toFixed(3)}</strong></span>`;
-
-                            if (m.periodHrs) {
-                                let pStr = m.periodHrs < 24
-                                    ? `${m.periodHrs.toFixed(1)}h`
-                                    : `${(m.periodHrs / 24).toFixed(1)}d`;
-                                html += `<span>Period: <strong>${pStr}</strong></span>`;
-                            }
+                            html += `<span>Orbit (⌀): ${_mgtMoonNum(m, 'pd', realWidx, 'moons', moonIdx, 0, 1000)}</span>`;
+                            html += `<span>Ecc: ${_mgtMoonNum(m, 'eccentricity', realWidx, 'moons', moonIdx, 0, 1)}</span>`;
+                            if (m.periodHrs !== undefined) html += `<span>Period (hrs): ${_mgtMoonNum(m, 'periodHrs', realWidx, 'moons', moonIdx, 0, 1000000)}</span>`;
 
                             if (m.type !== 'Planetoid Belt' && m.size != 0 && m.size !== 'R') {
-                                if (m.composition) html += `<span>Comp: <strong>${m.composition}</strong></span>`;
-                                if (m.density != null) html += `<span>Density: <strong>${m.density !== undefined ? m.density.toFixed(2) : '?'}</strong></span>`;
+                                if (m.composition !== undefined) html += `<span>Comp: ${_mgtMoonText(m, 'composition', realWidx, 'moons', moonIdx)}</span>`;
+                                if (m.density != null) html += `<span>Density (g/cm³): ${_mgtMoonNum(m, 'density', realWidx, 'moons', moonIdx, 0, 30)}</span>`;
 
-                                let mAtmComp = 'None';
                                 if (m.gases && m.gases.length > 0) {
-                                    mAtmComp = m.gases.slice(0, 3).join(', ');
-                                    if (m.gases.length > 3) mAtmComp += ', ...';
+                                    let mAtmComp = m.gases.slice(0, 2).join(', ');
+                                    if (m.gases.length > 2) mAtmComp += ', ...';
+                                    html += `<span class="system-stats-inline">Atmosphere: <strong>${mAtmComp}</strong></span>`;
                                 } else if (m.oxygenFraction !== undefined) {
-                                    mAtmComp = `N2/O2 (${(m.oxygenFraction * 100).toFixed(1)}% O2)`;
+                                    html += `<span class="system-stats-inline">Atm — O₂ Fraction: ${_mgtMoonNum(m, 'oxygenFraction', realWidx, 'moons', moonIdx, 0, 1)}</span>`;
                                 }
-                                if (m.taints && m.taints.length > 0) {
-                                    mAtmComp += ` [Taint: ${m.taints.join(', ')}]`;
-                                }
-                                html += `<span class="system-stats-full">Atmosphere: <strong>${mAtmComp}</strong></span>`;
-                            }
+                                if (m.totalPressureBar !== undefined) html += `<span>Pressure (bar): ${_mgtMoonNum(m, 'totalPressureBar', realWidx, 'moons', moonIdx, 0, 1000)}</span>`;
+                                if (m.taints !== undefined || m.oxygenFraction !== undefined) html += `<span class="system-stats-taints">Taints: ${_mgtMoonTaints(m, realWidx, 'moons', moonIdx)}</span>`;
 
-                            if (m.type !== 'Planetoid Belt' && m.size != 0 && m.size !== 'R') {
-                                if (m.gravity != null) html += `<span>Gravity: <strong>${m.gravity !== undefined ? m.gravity.toFixed(2) : '?'} G</strong></span>`;
-                                if (m.mass != null) html += `<span>Mass: <strong>${m.mass !== undefined ? m.mass.toFixed(4) : '?'} M⊕</strong></span>`;
-
+                                if (m.gravity != null) html += `<span>Gravity (G): ${_mgtMoonNum(m, 'gravity', realWidx, 'moons', moonIdx, 0, 100)}</span>`;
+                                if (m.mass != null) html += `<span>Mass (M⊕): ${_mgtMoonNum(m, 'mass', realWidx, 'moons', moonIdx, 0, 100000)}</span>`;
                                 if (m.meanTempK != null) {
                                     if (m.highTempK != null && m.lowTempK != null && !isNaN(m.highTempK) && !isNaN(m.lowTempK)) {
-                                        html += `<span class="system-stats-full">Temp: <strong>${(m.meanTempK - 273).toFixed(0)}°C</strong> (L:${(m.lowTempK - 273).toFixed(0)}° / H:${(m.highTempK - 273).toFixed(0)}°)</span>`;
+                                        html += `<span>Temp °C (mean): ${_mgtMoonTempC(m, 'meanTempK', realWidx, 'moons', moonIdx)}</span>`;
+                                        html += `<span>Temp °C (low): ${_mgtMoonTempC(m, 'lowTempK', realWidx, 'moons', moonIdx)}</span>`;
+                                        html += `<span>Temp °C (high): ${_mgtMoonTempC(m, 'highTempK', realWidx, 'moons', moonIdx)}</span>`;
                                     } else {
-                                        html += `<span>Temp: <strong>${(m.meanTempK - 273).toFixed(0)}°C</strong></span>`;
+                                        html += `<span>Temp °C: ${_mgtMoonTempC(m, 'meanTempK', realWidx, 'moons', moonIdx)}</span>`;
                                     }
                                 }
                             }
 
                             if (m.solarDayHours != null) {
-                                let mDayStr = '';
                                 if (m.solarDayHours === Infinity || m.isTwilightZone) {
-                                    mDayStr = 'Twilight Zone';
-                                } else if (m.solarDayHours >= 24) {
-                                    mDayStr = `${(m.solarDayHours / 24).toFixed(1)}d`;
+                                    html += `<span>Solar Day: <strong>Twilight Zone</strong></span>`;
                                 } else {
-                                    mDayStr = `${m.solarDayHours.toFixed(1)}h`;
+                                    html += `<span>Solar Day (hrs): ${_mgtMoonNum(m, 'solarDayHours', realWidx, 'moons', moonIdx, 0, 1000000)}</span>`;
                                 }
-                                html += `<span>Solar Day: <strong>${mDayStr}</strong></span>`;
                             }
-
-                            if (m.axialTilt != null) {
-                                html += `<span>Axial Tilt: <strong>${m.axialTilt.toFixed(1)}°</strong></span>`;
-                            }
-
-                            if (m.lifeProfile) {
-                                html += `<span>Native Life: <strong>${m.lifeProfile}</strong></span>`;
-                            }
-
-                            if (m.habitability !== undefined) {
-                                html += `<span>Hab: <strong>${m.habitability}/15</strong></span>`;
-                            }
-
-                            if (m.resourceRating !== undefined) {
-                                html += `<span>Res: <strong>${toUWPChar(m.resourceRating)}</strong></span>`;
-                            }
+                            if (m.axialTilt != null) html += `<span>Axial Tilt (°): ${_mgtMoonNum(m, 'axialTilt', realWidx, 'moons', moonIdx, 0, 180)}</span>`;
+                            if (m.lifeProfile !== undefined) html += `<span>Native Life: ${_mgtMoonText(m, 'lifeProfile', realWidx, 'moons', moonIdx)}</span>`;
+                            if (m.habitability !== undefined) html += `<span>Hab (/15): ${_mgtMoonNum(m, 'habitability', realWidx, 'moons', moonIdx, 0, 15)}</span>`;
+                            if (m.resourceRating !== undefined) html += `<span>Resource: ${_mgtMoonNum(m, 'resourceRating', realWidx, 'moons', moonIdx, 0, 15)}</span>`;
 
                             html += `</div>`;
 
@@ -701,8 +725,24 @@ function populateEditorAccordions(stateObj) {
                             }
 
                             html += buildJourneyTimesUI(m, sys.stars[starIdx], stateObj.isStellarMaskingActive, (w.au || w.distAU));
-
                             html += `</div></details>`;
+                        });
+                    }
+
+                    // Significant bodies (Planetoid Belt Bodies) — separate loop for clean indexing
+                    if (w.significantBodies && w.significantBodies.length > 0) {
+                        w.significantBodies.forEach((m, sigIdx) => {
+                            html += `<details>`;
+                            html += `<summary>Sig Body ${sigIdx + 1} <span class="sys-title-info">Size ${m.size}</span></summary>`;
+                            html += `<div class="system-node"><div class="system-stats">`;
+                            html += `<span>Orbit: <strong>${(m.orbitId !== undefined && m.orbitId !== null) ? m.orbitId.toFixed(2) : '?'}</strong></span>`;
+                            html += `<span>Ecc: ${_mgtMoonNum(m, 'eccentricity', realWidx, 'significantBodies', sigIdx, 0, 1)}</span>`;
+                            if (m.periodHrs !== undefined) html += `<span>Period (hrs): ${_mgtMoonNum(m, 'periodHrs', realWidx, 'significantBodies', sigIdx, 0, 1000000)}</span>`;
+                            if (m.composition !== undefined) html += `<span>Comp: ${_mgtMoonText(m, 'composition', realWidx, 'significantBodies', sigIdx)}</span>`;
+                            if (m.density != null) html += `<span>Density: ${_mgtMoonNum(m, 'density', realWidx, 'significantBodies', sigIdx, 0, 30)}</span>`;
+                            if (m.gravity != null) html += `<span>Gravity (G): ${_mgtMoonNum(m, 'gravity', realWidx, 'significantBodies', sigIdx, 0, 100)}</span>`;
+                            if (m.mass != null) html += `<span>Mass (M⊕): ${_mgtMoonNum(m, 'mass', realWidx, 'significantBodies', sigIdx, 0, 100000)}</span>`;
+                            html += `</div></div></details>`;
                         });
                     }
 
@@ -713,7 +753,6 @@ function populateEditorAccordions(stateObj) {
             });
 
             html += `</div>`;
-
             root.innerHTML = html;
         }
     }
@@ -1621,9 +1660,7 @@ function saveHexEditorChanges() {
             Object.assign(stateObj.t5System.mainworld, sharedData, pbgData, t5SocioInputs, { name });
         }
     } else if (stateObj.mgt2eData) {
-        stateObj.mgt2eData = { ...stateObj.mgt2eData, ...sharedData, ...pbgData, ...mgtSocioInputs, name };
-        // Ensure mgtSocio points to the primary if it was null
-        if (!stateObj.mgtSocio) stateObj.mgtSocio = stateObj.mgt2eData;
+        stateObj.mgt2eData = { ...stateObj.mgt2eData, ...sharedData, ...pbgData, name };
     } else if (stateObj.ctData) {
         stateObj.ctData = { ...stateObj.ctData, ...sharedData, ...pbgData, name };
     } else if (stateObj.rttData) {
@@ -2045,6 +2082,144 @@ function saveHexEditorChanges() {
         if (_t5NumericFields.includes(field)) {
             const val = parseFloat(el.value);
             if (isNaN(val)) return;
+            body[field] = val;
+            markManual(body, field);
+            hexStates.set(editingHexId, stateObj);
+            el.classList.add('is-manual');
+            return;
+        }
+    });
+}());
+
+// =============================================================================
+// MGT2E SYSTEM TREE — INLINE EDIT EVENT DELEGATION
+// Listens on the persistent root container; survives innerHTML re-renders.
+// data-mgt-sidx          → star index (star fields only)
+// data-mgt-widx          → index in sys.worlds (world + moon fields)
+// data-mgt-subarray      → "moons" or "significantBodies"
+// data-mgt-midx          → index within the subarray
+// data-mgt-iskelvin="1"  → input value is °C; convert +273 before storing
+// =============================================================================
+(function () {
+    const root = document.getElementById('editor-mgt-system-root');
+    if (!root) return;
+
+    root.addEventListener('change', function (e) {
+        const el = e.target;
+        const field = el.dataset.mgtField;
+        if (!field) return;
+
+        if (typeof editingHexId === 'undefined' || !editingHexId) return;
+        const stateObj = hexStates.get(editingHexId);
+        if (!stateObj || !stateObj.mgtSystem) return;
+        const sys = stateObj.mgtSystem;
+
+        // ── Star fields (data-mgt-sidx present, no data-mgt-widx) ────────────
+        if (el.dataset.mgtSidx !== undefined && el.dataset.mgtWidx === undefined) {
+            const star = sys.stars[parseInt(el.dataset.mgtSidx, 10)];
+            if (!star) return;
+            const _starNumFields = ['mass','lum','orbitId','eccentricity','mao'];
+            if (field === 'name') {
+                star.name = el.value.trim() || star.name;
+            } else if (_starNumFields.includes(field)) {
+                const val = parseFloat(el.value);
+                if (isNaN(val)) return;
+                star[field] = val;
+            } else {
+                star[field] = el.value.trim();
+            }
+            markManual(star, field);
+            hexStates.set(editingHexId, stateObj);
+            el.classList.add('is-manual');
+            return;
+        }
+
+        // ── Resolve world object ──────────────────────────────────────────────
+        const widx = parseInt(el.dataset.mgtWidx, 10);
+        if (isNaN(widx)) return;
+        const world = sys.worlds[widx];
+        if (!world) return;
+
+        // ── Resolve body (world itself, or moon/sig body) ─────────────────────
+        let body = world;
+        const subarray = el.dataset.mgtSubarray;
+        const midx     = el.dataset.mgtMidx !== undefined ? parseInt(el.dataset.mgtMidx, 10) : undefined;
+        if (subarray !== undefined && midx !== undefined && !isNaN(midx)) {
+            body = world[subarray] && world[subarray][midx];
+            if (!body) return;
+        }
+
+        // ── Name ──────────────────────────────────────────────────────────────
+        if (field === 'name') {
+            const trimmed = el.value.trim();
+            if (trimmed) {
+                body.name = trimmed;
+                markManual(body, 'name');
+                el.classList.add('is-manual');
+            } else {
+                delete body.name;
+                if (Array.isArray(body._manualFields)) {
+                    body._manualFields = body._manualFields.filter(f => f !== 'name');
+                }
+                el.classList.remove('is-manual');
+            }
+            hexStates.set(editingHexId, stateObj);
+            return;
+        }
+
+        // ── uwpSecondary — parse all eight digits and mark sub-fields manual ──
+        if (field === 'uwpSecondary') {
+            const raw = el.value.trim().toUpperCase().replace(/\s/g, '');
+            if (raw.length >= 9 && raw[7] === '-') {
+                const ph = c => { const n = parseInt(c, 16); return isNaN(n) ? c : n; };
+                body.starport = raw[0];
+                body.size     = ph(raw[1]);
+                body.atm      = ph(raw[2]);
+                body.hydro    = ph(raw[3]);
+                body.pop      = ph(raw[4]);
+                body.gov      = ph(raw[5]);
+                body.law      = ph(raw[6]);
+                body.tl       = ph(raw[8]) !== raw[8] ? ph(raw[8]) : (parseInt(raw.slice(8), 16) || 0);
+                ['starport','size','atm','hydro','pop','gov','law','tl'].forEach(f => markManual(body, f));
+                body.uwpSecondary = raw;
+            }
+            hexStates.set(editingHexId, stateObj);
+            el.classList.add('is-manual');
+            return;
+        }
+
+        // ── Taints — comma-delimited string → array ───────────────────────────
+        if (field === 'taints') {
+            const raw = el.value.trim();
+            body.taints = raw === '' ? [] : raw.split(',').map(t => t.trim()).filter(t => t.length > 0);
+            markManual(body, field);
+            hexStates.set(editingHexId, stateObj);
+            el.classList.add('is-manual');
+            return;
+        }
+
+        // ── Text fields ───────────────────────────────────────────────────────
+        const _mgtTextFields = ['composition','lifeProfile'];
+        if (_mgtTextFields.includes(field)) {
+            body[field] = el.value.trim();
+            markManual(body, field);
+            hexStates.set(editingHexId, stateObj);
+            el.classList.add('is-manual');
+            return;
+        }
+
+        // ── Numeric fields (°C inputs stored as Kelvin) ───────────────────────
+        const _mgtNumericFields = [
+            'au','eccentricity','density','gravity','mass','diamTerra',
+            'meanTempK','lowTempK','highTempK','solarDayHours','axialTilt',
+            'habitability','resourceRating','secRU','oxygenFraction',
+            'totalPressureBar','pd','periodHrs',
+            'span','bulk','size1Count','sizeSCount','mType','sType','cType','oType'
+        ];
+        if (_mgtNumericFields.includes(field)) {
+            let val = parseFloat(el.value);
+            if (isNaN(val)) return;
+            if (el.dataset.mgtIskelvin === '1') val = val + 273;
             body[field] = val;
             markManual(body, field);
             hexStates.set(editingHexId, stateObj);

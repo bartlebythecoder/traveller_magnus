@@ -506,6 +506,33 @@ function draw() {
                                 ctx.fill();
                             }
                             ctx.restore();
+                        } else if (iconStyle === 'Octagon') {
+                            // 8-point regular polygon inscribed in dotRadius
+                            ctx.save();
+                            ctx.beginPath();
+                            for (let i = 0; i < 8; i++) {
+                                const angle = (Math.PI / 4) * i - Math.PI / 8;
+                                const px = cx + dotRadius * Math.cos(angle);
+                                const py = cy + dotRadius * Math.sin(angle);
+                                i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+                            }
+                            ctx.closePath();
+                            ctx.clip();
+
+                            if (colors && colors.length > 0) {
+                                const bboxWidth = dotRadius * 2;
+                                const rx = cx - dotRadius;
+                                const ry = cy - dotRadius;
+                                const stripeWidth = bboxWidth / colors.length;
+                                for (let i = 0; i < colors.length; i++) {
+                                    ctx.fillStyle = colors[i];
+                                    ctx.fillRect(rx + (i * stripeWidth), ry, stripeWidth + 1, bboxWidth);
+                                }
+                            } else {
+                                ctx.fillStyle = baseColor;
+                                ctx.fill();
+                            }
+                            ctx.restore();
                         } else if (iconStyle === 'Asteroid Grid') {
                             // 3-4-3 Structured Hex Grid Pattern
                             const gridPositions = [

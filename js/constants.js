@@ -231,7 +231,7 @@ const GUI_CONFIG = {
         RADIUS: 3.5,            // [Action 4.1] Reduced 30% from original 5.0
         RING_SCALE_X: 1.26,     // [Action 4.1] Scaled proportionally (0.7 * 1.8)
         RING_SCALE_Y: 0.385,    // [Action 4.1] Scaled proportionally (0.7 * 0.55)
-        RING_WIDTH: 0.84,       // [Action 4.1] Scaled proportionally (0.7 * 1.2)
+        RING_WIDTH: 2.5,        // thickened for visibility at small zoom levels
         X_OFFSET: 8,           // [Action 4.2] Pushed right to where wedge is wider
         Y_OFFSET: -9,          // [Action 4.2] Happy middle ground to clear both routes
         VARIANTS: ['RINGED', 'SOLID']

@@ -199,5 +199,64 @@
         return newSys;
     }
 
-    return { generateSystem, generateT5SystemPreservingManuals };
+    /**
+     * Restores manually-set field values from an old MgT2E sys onto a freshly generated sys.
+     * Bodies are matched by star index + worlds array index.
+     * Only fields listed in the old body's _manualFields array are copied.
+     */
+    function restoreMgt2eManualFields(newSys, oldSys) {
+        if (!oldSys || !newSys) return;
+
+        function applyManuals(oldBody, newBody) {
+            if (!oldBody || !newBody) return;
+            if (!Array.isArray(oldBody._manualFields) || oldBody._manualFields.length === 0) return;
+            oldBody._manualFields.forEach(field => { newBody[field] = oldBody[field]; });
+            newBody._manualFields = [...oldBody._manualFields];
+        }
+
+        // Stars: match by index
+        if (Array.isArray(oldSys.stars) && Array.isArray(newSys.stars)) {
+            oldSys.stars.forEach((oldStar, sIdx) => {
+                const newStar = newSys.stars[sIdx];
+                if (!newStar) return;
+                if (Array.isArray(oldStar._manualFields) && oldStar._manualFields.length > 0) {
+                    oldStar._manualFields.forEach(field => { newStar[field] = oldStar[field]; });
+                    newStar._manualFields = [...oldStar._manualFields];
+                }
+            });
+        }
+
+        // Worlds: match by index in sys.worlds array
+        if (Array.isArray(oldSys.worlds) && Array.isArray(newSys.worlds)) {
+            oldSys.worlds.forEach((oldWorld, wIdx) => {
+                const newWorld = newSys.worlds[wIdx];
+                if (!newWorld) return;
+                applyManuals(oldWorld, newWorld);
+                // Moons
+                if (Array.isArray(oldWorld.moons) && Array.isArray(newWorld.moons)) {
+                    oldWorld.moons.forEach((oldMoon, mIdx) => {
+                        applyManuals(oldMoon, newWorld.moons[mIdx]);
+                    });
+                }
+                // Significant bodies
+                if (Array.isArray(oldWorld.significantBodies) && Array.isArray(newWorld.significantBodies)) {
+                    oldWorld.significantBodies.forEach((oldSb, sbIdx) => {
+                        applyManuals(oldSb, newWorld.significantBodies[sbIdx]);
+                    });
+                }
+            });
+        }
+    }
+
+    /**
+     * Generates a fresh MgT2E top-down system and restores any manual field overrides from the existing sys.
+     * Use this instead of generateMgT2ESystemTopDown when the hex already has a mgtSystem with user edits.
+     */
+    function generateMgt2eSystemPreservingManuals(hexId, oldSys) {
+        const newSys = generateMgT2ESystemTopDown(hexId);
+        if (oldSys) restoreMgt2eManualFields(newSys, oldSys);
+        return newSys;
+    }
+
+    return { generateSystem, generateT5SystemPreservingManuals, generateMgt2eSystemPreservingManuals };
 }));

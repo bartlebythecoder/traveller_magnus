@@ -226,6 +226,128 @@ const MgT2EData = {
             'BD': { mass: 0.05, diam: 0.1, lum: 0.0001, temp: 1500 },
             'D': { mass: 0.6, diam: 0.01, lum: 0.001, temp: 10000 }
         },
+        starStats_V: {
+            'O0': { mass: 90, diam: 20, temp: 50000 },
+            'O5': { mass: 60, diam: 12, temp: 40000 },
+            'B0': { mass: 18, diam: 7, temp: 30000 },
+            'B5': { mass: 5, diam: 3.5, temp: 15000 },
+            'A0': { mass: 2.2, diam: 2.2, temp: 10000 },
+            'A5': { mass: 1.8, diam: 2, temp: 8000 },
+            'F0': { mass: 1.5, diam: 1.7, temp: 7500 },
+            'F5': { mass: 1.3, diam: 1.5, temp: 6500 },
+            'G0': { mass: 1.1, diam: 1.1, temp: 6000 },
+            'G5': { mass: 0.9, diam: 0.95, temp: 5600 },
+            'K0': { mass: 0.8, diam: 0.9, temp: 5200 },
+            'K5': { mass: 0.7, diam: 0.8, temp: 4400 },
+            'M0': { mass: 0.5, diam: 0.7, temp: 3700 },
+            'M5': { mass: 0.16, diam: 0.2, temp: 3000 },
+            'M9': { mass: 0.08, diam: 0.1, temp: 2400 }
+        },
+
+        starStats_Ia: {
+            'O0': { mass: 200, diam: 25, temp: 50000 },
+            'O5': { mass: 80, diam: 22, temp: 40000 },
+            'B0': { mass: 60, diam: 20, temp: 30000 },
+            'B5': { mass: 30, diam: 60, temp: 15000 },
+            'A0': { mass: 20, diam: 120, temp: 10000 },
+            'A5': { mass: 15, diam: 180, temp: 8000 },
+            'F0': { mass: 13, diam: 210, temp: 7500 },
+            'F5': { mass: 12, diam: 280, temp: 6500 },
+            'G0': { mass: 12, diam: 330, temp: 6000 },
+            'G5': { mass: 13, diam: 360, temp: 5600 },
+            'K0': { mass: 14, diam: 420, temp: 5200 },
+            'K5': { mass: 18, diam: 600, temp: 4400 },
+            'M0': { mass: 20, diam: 900, temp: 3700 },
+            'M5': { mass: 25, diam: 1200, temp: 3000 },
+            'M9': { mass: 30, diam: 1800, temp: 2400 }
+        },
+
+
+        starStats_Ib: {
+            'O0': { mass: 150, diam: 24, temp: 50000 },
+            'O5': { mass: 60, diam: 20, temp: 40000 },
+            'B0': { mass: 40, diam: 14, temp: 30000 },
+            'B5': { mass: 25, diam: 25, temp: 15000 },
+            'A0': { mass: 15, diam: 50, temp: 10000 },
+            'A5': { mass: 13, diam: 75, temp: 8000 },
+            'F0': { mass: 12, diam: 85, temp: 7500 },
+            'F5': { mass: 10, diam: 115, temp: 6500 },
+            'G0': { mass: 10, diam: 135, temp: 6000 },
+            'G5': { mass: 11, diam: 150, temp: 5600 },
+            'K0': { mass: 12, diam: 180, temp: 5200 },
+            'K5': { mass: 13, diam: 260, temp: 4400 },
+            'M0': { mass: 15, diam: 380, temp: 3700 },
+            'M5': { mass: 20, diam: 600, temp: 3000 },
+            'M9': { mass: 25, diam: 800, temp: 2400 }
+        },
+           
+        starStats_II: {
+            'O0': { mass: 130, diam: 22, temp: 50000 },
+            'O5': { mass: 40, diam: 18, temp: 40000 },
+            'B0': { mass: 30, diam: 12, temp: 30000 },
+            'B5': { mass: 20, diam: 14, temp: 15000 },
+            'A0': { mass: 14, diam: 30, temp: 10000 },
+            'A5': { mass: 11, diam: 45, temp: 8000 },
+            'F0': { mass: 10, diam: 50, temp: 7500 },
+            'F5': { mass: 8, diam: 66, temp: 6500 },
+            'G0': { mass: 8, diam: 77, temp: 6000 },
+            'G5': { mass: 10, diam: 90, temp: 5600 },
+            'K0': { mass: 10, diam: 110, temp: 5200 },
+            'K5': { mass: 12, diam: 160, temp: 4400 },
+            'M0': { mass: 14, diam: 230, temp: 3700 },
+            'M5': { mass: 16, diam: 350, temp: 3000 },
+            'M9': { mass: 18, diam: 500, temp: 2400 }
+        },
+
+        starStats_III: {
+            'O0': { mass: 110, diam: 21, temp: 50000 },
+            'O5': { mass: 30, diam: 15, temp: 40000 },
+            'B0': { mass: 20, diam: 10, temp: 30000 },
+            'B5': { mass: 10, diam: 6, temp: 15000 },
+            'A0': { mass: 8, diam: 5, temp: 10000 },
+            'A5': { mass: 6, diam: 5, temp: 8000 },
+            'F0': { mass: 4, diam: 5, temp: 7500 },
+            'F5': { mass: 3, diam: 5, temp: 6500 },
+            'G0': { mass: 2.5, diam: 10, temp: 6000 },
+            'G5': { mass: 2.4, diam: 15, temp: 5600 },
+            'K0': { mass: 1.1, diam: 20, temp: 5200 },
+            'K5': { mass: 1.5, diam: 40, temp: 4400 },
+            'M0': { mass: 1.8, diam: 60, temp: 3700 },
+            'M5': { mass: 2.4, diam: 100, temp: 3000 },
+            'M9': { mass: 8, diam: 200, temp: 2400 }
+        },
+
+        starStats_IV: {
+            'B0': { mass: 20, diam: 8, temp: 30000 },
+            'B5': { mass: 10, diam: 5, temp: 15000 },
+            'A0': { mass: 4, diam: 4, temp: 10000 },
+            'A5': { mass: 2.3, diam: 3, temp: 8000 },
+            'F0': { mass: 2, diam: 3, temp: 7500 },
+            'F5': { mass: 1.5, diam: 2, temp: 6500 },
+            'G0': { mass: 1.7, diam: 3, temp: 6000 },
+            'G5': { mass: 1.2, diam: 4, temp: 5600 },
+            'K0': { mass: 1.5, diam: 6, temp: 5200 }
+        },
+
+        starStats_VI: {
+            'O0': { mass: 2, diam: 0.18, temp: 50000 },
+            'O5': { mass: 1.5, diam: 0.18, temp: 40000 },
+            'B0': { mass: 0.5, diam: 0.2, temp: 30000 },
+            'B5': { mass: 0.4, diam: 0.5, temp: 15000 },
+            'G0': { mass: 0.8, diam: 0.8, temp: 6000 },
+            'G5': { mass: 0.7, diam: 0.7, temp: 5600 },
+            'K0': { mass: 0.6, diam: 0.6, temp: 5200 },
+            'K5': { mass: 0.5, diam: 0.5, temp: 4400 },
+            'M0': { mass: 0.4, diam: 0.4, temp: 3700 },
+            'M5': { mass: 0.12, diam: 0.1, temp: 3000 },
+            'M9': { mass: 0.075, diam: 0.08, temp: 2400 }
+        },
+
+        starStats_BD: {
+            'BD': { mass: 0.05, diam: 0.1, temp: 1500 },
+            'D': { mass: 0.6, diam: 0.01, temp: 10000 }
+        },
+
         mao: {
             'O0': [0.63, 0.60, 0.55, 0.53, Infinity, 0.5, 0.01],
             'O5': [0.55, 0.50, 0.45, 0.38, Infinity, 0.3, 0.01],
@@ -463,6 +585,72 @@ const MgT2EData = {
             15: { pressStr: "Varies",       minP: 0.0,   spanP: 0.0,   gear: "Varies" },
             16: { pressStr: "Varies",       minP: 0.0,   spanP: 0.0,   gear: "Vacc Suit" },
             17: { pressStr: "Varies",       minP: 0.0,   spanP: 0.0,   gear: "Vacc Suit" }
+        },
+
+        // WBH Exotic Atmosphere Subtype Table (2D + DMs, clamped 2-14)
+        // Used for atmCode 10 (A). Engine: roll = Math.max(2, Math.min(14, 2D + DMs))
+        exoticAtmosphereSubtypes: {
+            2:  { type: "Very Thin, Irritant",                 minP: 0.10, spanP: 0.32 },
+            3:  { type: "Very Thin",                           minP: 0.10, spanP: 0.32 },
+            4:  { type: "Thin, Irritant",                      minP: 0.43, spanP: 0.27 },
+            5:  { type: "Thin",                                minP: 0.43, spanP: 0.27 },
+            6:  { type: "Standard",                            minP: 0.70, spanP: 0.79 },
+            7:  { type: "Standard, Irritant",                  minP: 0.70, spanP: 0.79 },
+            8:  { type: "Dense",                               minP: 1.50, spanP: 0.99 },
+            9:  { type: "Dense, Irritant",                     minP: 1.50, spanP: 0.99 },
+            10: { type: "Very Dense",                          minP: 2.50, spanP: 7.50 },
+            11: { type: "Very Dense, Irritant",                minP: 2.50, spanP: 7.50 },
+            12: { type: "Very Dense, Occasionally Corrosive",  minP: 2.50, spanP: 7.50 },
+            13: { type: "Very Dense",                          minP: 2.50, spanP: 7.50 },
+            14: { type: "Very Dense, Irritant",                minP: 2.50, spanP: 7.50 }
+        },
+        // DMs for the exotic atmosphere subtype roll
+        // size2to4: w.size >= 2 && w.size <= 4
+        // innerOrbit: w.orbitId < (hzco - 1)
+        // outerOrbit: w.orbitId > (hzco + 2)
+        // runawayGreenhouse: w.runawayGreenhouse === true
+        exoticAtmosphereSubtypeDMs: {
+            size2to4:          -2,
+            innerOrbit:        -2,
+            outerOrbit:         2,
+            runawayGreenhouse:  4
+        },
+
+        // WBH Corrosive/Insidious Atmosphere Subtype Table (2D + DMs, clamped 1-14)
+        // Engine: roll = Math.max(1, Math.min(14, 2D + DMs))
+        // Rolls 12-14: "unbound" — spanP: 0 means pressure = exactly minP (10.0 bar)
+        // type strings containing "Temperature 50K or less" → auditor checks meanTempK <= 50
+        // type strings containing "Temperature 500K+" → auditor checks meanTempK >= 500
+        corrosiveInsidiousSubtypes: {
+            1:  { type: "Very Thin, Temperature 50K or less",               minP: 0.10, spanP: 0.32 },
+            2:  { type: "Very Thin, Irritant",                              minP: 0.10, spanP: 0.32 },
+            3:  { type: "Very Thin",                                        minP: 0.10, spanP: 0.32 },
+            4:  { type: "Thin, Irritant",                                   minP: 0.43, spanP: 0.27 },
+            5:  { type: "Thin",                                             minP: 0.43, spanP: 0.27 },
+            6:  { type: "Standard",                                         minP: 0.70, spanP: 0.79 },
+            7:  { type: "Standard, Irritant",                               minP: 0.70, spanP: 0.79 },
+            8:  { type: "Dense",                                            minP: 1.50, spanP: 0.99 },
+            9:  { type: "Dense, Irritant",                                  minP: 1.50, spanP: 0.99 },
+            10: { type: "Very Dense",                                       minP: 2.50, spanP: 7.50 },
+            11: { type: "Very Dense, Irritant",                             minP: 2.50, spanP: 7.50 },
+            12: { type: "Extremely Dense",                                  minP: 10.0, spanP: 0    },
+            13: { type: "Extremely Dense, Temperature 500K+",               minP: 10.0, spanP: 0    },
+            14: { type: "Extremely Dense, Temperature 500K+, Irritant",     minP: 10.0, spanP: 0    }
+        },
+        // DMs for the corrosive/insidious atmosphere subtype roll
+        // size2to4:         w.size >= 2 && w.size <= 4
+        // size8Plus:        w.size >= 8
+        // innerOrbit:       w.orbitId < (hzco - 1)
+        // outerOrbit:       w.orbitId > (hzco + 2)
+        // insidiousC:       w.atmCode === 12
+        // runawayGreenhouse: w.runawayGreenhouse === true
+        corrosiveInsidiousDMs: {
+            size2to4:          -3,
+            size8Plus:          2,
+            innerOrbit:         4,
+            outerOrbit:        -2,
+            insidiousC:         2,
+            runawayGreenhouse:  4
         },
 
         // WBH Taint Subtype Roll Results (2D, clamped 2-12)

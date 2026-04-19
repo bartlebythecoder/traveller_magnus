@@ -201,8 +201,11 @@ function generateRTTSectorStep1(hexId, options = {}) {
         endTrace();
     }
 
-    // Proactively run Step 2
+    // Proactively run Step 2 (which chains Step 3 → Biographer)
     generateRTTSectorStep2(sys, options);
+
+    // Apply systematic orbital names after full pipeline completes
+    applyRTTOrbitalNames(sys);
 
     return sys;
 }

@@ -178,12 +178,22 @@ async function runMgT2EMacro(skipPop = false) {
     console.log("Bulk Generating MgT2E Full System...");
     await ensureNamesLoaded();
 
-    if (!confirm("This will completely overwrite ANY existing data in the selected hexes with a Full Mongoose 2E Generation sequence. Proceed?")) {
-        return;
-    }
-
     // Capture the target hexes NOW so they don't change if the user deselects during the wait
     const targetHexes = Array.from(selectedHexes);
+
+    // Warn if any selected hex has manually-overridden MgT2E fields
+    let _mgtManualCount = 0;
+    targetHexes.forEach(hexId => {
+        const s = hexStates.get(hexId);
+        if (s && s.mgtSystem) _mgtManualCount += countManualMgt2eBodies(s.mgtSystem);
+    });
+    const _mgtManualWarning = _mgtManualCount > 0
+        ? `\n\nNOTE: ${_mgtManualCount} body/bodies in this selection have manual field overrides. These will be preserved where world positions match the regenerated structure.`
+        : '';
+
+    if (!confirm(`This will completely overwrite ANY existing data in the selected hexes with a Full Mongoose 2E Generation sequence.${_mgtManualWarning}\n\nProceed?`)) {
+        return;
+    }
 
     // v0.6.1.0: Statistical auditor for this generation run
     const _auditor_mgt2e = (typeof StatisticalAuditor !== 'undefined')
@@ -215,8 +225,11 @@ async function runMgT2EMacro(skipPop = false) {
             try {
                 let stateObj = hexStates.get(hexId);
                 if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
-                    // 1. Call the new Orchestrator
-                    let newSys = generateMgT2ESystemTopDown(hexId);
+                    // 1. Call the new Orchestrator, preserving any manual field overrides
+                    const _oldMgtSys = stateObj.mgtSystem || null;
+                    let newSys = (window.System_Driver && window.System_Driver.generateMgt2eSystemPreservingManuals && _oldMgtSys)
+                        ? window.System_Driver.generateMgt2eSystemPreservingManuals(hexId, _oldMgtSys)
+                        : generateMgT2ESystemTopDown(hexId);
 
                     // 2. Find the Mainworld recursively to account for Lunar demotions
                     let mainworld = null;

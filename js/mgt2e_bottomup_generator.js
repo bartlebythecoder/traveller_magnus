@@ -260,17 +260,9 @@
         // PHASE 7: FINALIZATION & AUDIT
         // =================================================================
         
-        // Final name check
-        if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 7: Naming...`);
-        sys.worlds.forEach(w => {
-            if (!w.name) {
-                w.name = (typeof getNextSystemName === 'function') ? getNextSystemName(hexId) : 'Unnamed';
-            }
-        });
-
-        if (sys.mainworld && sys.mainworld.name) {
-            sys.name = sys.mainworld.name;
-        }
+        // Assign systematic orbital names now that the world tree is fully assembled
+        if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 7: Orbital Naming...`);
+        applyMgT2EOrbitalNames(sys);
 
         // System Audit
         const activeAuditor = Auditor || (typeof MgT2E_UWP_Auditor !== 'undefined' ? MgT2E_UWP_Auditor : null);

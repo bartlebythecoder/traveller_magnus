@@ -53,6 +53,7 @@ function generateSystem(params) {
     }
 
     if (sys) {
+        if (hexId) sys.hexId = sys.hexId || hexId;
         sys.audit = auditor(sys);
         if (typeof writeLogLine !== 'undefined') {
             writeLogLine("=====================================================================");
@@ -63,6 +64,7 @@ function generateSystem(params) {
             }
             writeLogLine("=====================================================================");
         }
+        if (typeof applyCTOrbitalNames === 'function') applyCTOrbitalNames(sys);
         return sys;
     }
 

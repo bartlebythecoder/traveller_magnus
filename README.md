@@ -1,4 +1,4 @@
-# As Above, So Below (v0.9.2)
+# As Above, So Below (v0.9.3)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -58,6 +58,17 @@ Want to replace any of these sectors with your own file?
 
 ---
 ## 📜 Changelog
+
+### [v0.9.3] - 2026-04-19
+1. **Mongoose Editable System Fields:** All fields in the Mongoose Traveller 2nd Edition System Details accordion are now inline-editable — star names and classifications, physical properties (diameter, gravity, mass, temperature, luminosity, orbital period), and UWP for all non-mainworld bodies. Edited fields are highlighted and persist in the workspace JSON.
+2. **Corrected Stellar Generation Tables:** Star physical properties (mass, diameter, surface temperature) are now derived from accurate per-luminosity-class tables with subtype anchors, rather than a single averaged value per spectral type. Giant, dwarf, and subdwarf stars now have physically distinct and correct statistics.
+3. **Fixed Missing Companion Rolls for Primary Star:** Previously, only secondary stars (Close, Near, Far) received a companion roll. The primary star now also rolls for a companion, matching the full rules requirement that every star in the system gets a companion check.
+4. **Improved Companion Log Labels:** Generation logs now clearly identify which star each companion roll belongs to (e.g. "Close Star: Companion Presence"), making it easier to trace multi-star system generation step by step.
+5. **HZCO Updated for Primary Companions:** When the primary star gains a companion, the system's Habitable Zone Central Orbit (HZCO) is recalculated using the combined luminosity of both stars, ensuring mainworld placement reflects the true binary heat output.
+6. **Per-World HZCO (Habitable Zone Accuracy):** Each world now receives its own HZCO calculated from only the stars interior to its orbit — secondary stars and their companion stars contribute to HZCO only for worlds in the appropriate subsystem. This prevents distant companion stars from artificially shifting the habitable zone for worlds they don't actually illuminate.
+7. **Accordion Display Polish:** Fixed excessive spacing between labels and values in the Mongoose system accordion. Atmosphere gas components and taint entries are now capped at the top two results in the display, keeping the panel readable for complex atmospheres. Added atmospheric pressure to UI.
+8. **Octagon Filter Symbol:** Added an octagon as a new shape option in the Advanced Filter styling panel.
+9. **Gas Giant Ring Visibility:** The ring symbol on gas giants is now 2–3× thicker, making it clearly visible when zoomed out to subsector or sector scale.
 
 ### [v0.9.2] - 2026-04-16
 1. **T5 Editable System Fields:** All fields in the Traveller 5 System Details accordion are now inline-editable — star type, decimal, and size class; physical properties (diameter, gravity, mass) for all worlds and moons; rotation state; climate zone; worldType (with a warning that changing it affects atmospheric generation on next re-expansion); and UWP for all non-mainworld bodies. Edited fields are highlighted and persist in the workspace JSON.

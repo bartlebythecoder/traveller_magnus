@@ -630,9 +630,14 @@
         let ggExists = ggRoll <= 9 || (mainworldBase && mainworldBase.gasGiant);
         if (ggExists) {
             let ggQ = tRoll2D('GG Quantity');
-            // WBH Math: Systems usually have 3+ GGs if they exist
-            if (sys.stars.length === 1 && sys.stars[0].sClass === 'V') { tDM('Single V', 2); ggQ += 2; }
-            if (sys.stars.length >= 4) { tDM('4+ Stars', -1); ggQ -= 1; }
+            const ggDMs = MgT2EData.systemInventory.gasGiantDMs;
+            const primary = sys.stars[0];
+            if (sys.stars.length === 1 && primary.sClass === 'V') { tDM('Single V', ggDMs.singleClassV); ggQ += ggDMs.singleClassV; }
+            if (['BD', 'L', 'T', 'Y'].includes(primary.sType)) { tDM('Primary Brown Dwarf', ggDMs.primaryBrownDwarf); ggQ += ggDMs.primaryBrownDwarf; }
+            if (primary.sType === 'D') { tDM('Primary Post-Stellar', ggDMs.primaryPostStellar); ggQ += ggDMs.primaryPostStellar; }
+            const postStellarCount = sys.stars.filter(s => s.sType === 'D').length;
+            if (postStellarCount > 0) { tDM('Post-Stellar Stars', ggDMs.perPostStellar * postStellarCount); ggQ += ggDMs.perPostStellar * postStellarCount; }
+            if (sys.stars.length >= 4) { tDM('4+ Stars', ggDMs.fourOrMoreStars); ggQ += ggDMs.fourOrMoreStars; }
 
             for (let entry of MgT2EData.systemInventory.gasGiants) {
                 if (ggQ <= entry.maxRoll) {
@@ -666,11 +671,18 @@
 
         // Terrestrial Planets
         let tpRoll = tRoll2D('Terrestrial Quantity');
+        tDM('Fixed', -2);
         let tpCount = tpRoll - 2;
         if (tpCount < 3) {
-            tpCount = Math.ceil(tRoll1D('Reroll D3') / 2) + 2;
+            writeLogLine(`  Base count: ${tpCount} (< 3, result is too low — applying D3+2 floor)`);
+            const d3Raw = rollD3();
+            writeLogLine(`Low Result Floor (D3+2): Rolled 1D3 for ${d3Raw} + 2 = ${d3Raw + 2}`);
+            tpCount = d3Raw + 2;
         } else {
-            tpCount += Math.ceil(tRoll1D('Add D3') / 2) - 1;
+            writeLogLine(`  Base count: ${tpCount} (>= 3, adding D3-1 bonus worlds)`);
+            const d3Raw = rollD3();
+            writeLogLine(`Bonus Worlds (D3-1): Rolled 1D3 for ${d3Raw} - 1 = ${d3Raw - 1}`);
+            tpCount += d3Raw - 1;
         }
         sys.terrestrialPlanets = tpCount;
         tResult('Terrestrial Planets', sys.terrestrialPlanets, 'MgT2E 1.3: System Inventory');

@@ -1,4 +1,4 @@
-# As Above, So Below (v0.9.3)
+# As Above, So Below (v0.9.3.1)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -58,6 +58,9 @@ Want to replace any of these sectors with your own file?
 
 ---
 ## 📜 Changelog
+
+### [v0.9.3.1] - In Progress
+*(work in progress)*
 
 ### [v0.9.3] - 2026-04-19
 1. **Mongoose Editable System Fields:** All fields in the Mongoose Traveller 2nd Edition System Details accordion are now inline-editable — star names and classifications, physical properties (diameter, gravity, mass, temperature, luminosity, orbital period), and UWP for all non-mainworld bodies. Edited fields are highlighted and persist in the workspace JSON.

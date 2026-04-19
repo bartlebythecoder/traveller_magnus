@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.9.3";
-const APP_BANNER = "v0.9.3: Stellar tables corrected, companion rolls, per-world HZCO";
+const APP_VERSION = "v0.9.3.1";
+const APP_BANNER = "v0.9.3.1: Gas Giant Quantity DM fix";
 
 // -----------------------------------------------------------------------------
 // Application State

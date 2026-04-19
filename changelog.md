@@ -1,5 +1,8 @@
 # Changelog
 
+### [v0.9.3.1] - In Progress
+*(work in progress)*
+
 ### [v0.9.3] - 2026-04-19
 1. **Mongoose Editable System Fields:** All fields in the Mongoose Traveller 2nd Edition System Details accordion are now inline-editable — star names and classifications, physical properties (diameter, gravity, mass, temperature, luminosity, orbital period), and UWP for all non-mainworld bodies. Edited fields are highlighted and persist in the workspace JSON.
 2. **Corrected Stellar Generation Tables:** Star physical properties (mass, diameter, surface temperature) are now derived from accurate per-luminosity-class tables with subtype anchors, rather than a single averaged value per spectral type. Giant, dwarf, and subdwarf stars now have physically distinct and correct statistics.

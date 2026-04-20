@@ -248,10 +248,9 @@
         const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
         // Build coord lookup for cross-sector route resolution.
-        // Start from each sector's default slot, then override with the user's
-        // actual slot assignments so offsets resolve to the right hexIds.
+        // Only include sectors the user actually imported — pre-loading all sectors
+        // caused routes to unimported neighbours to resolve to wrong hexIds on canvas.
         const coordLookup = new Map();
-        sectors.forEach(s => coordLookup.set(`${s.x},${s.y}`, parseInt(s.defaultSlot, 10)));
         selected.forEach(sel => {
             const match = sectors.find(s => s.name === sel.name);
             if (match) coordLookup.set(`${match.x},${match.y}`, sectorSlotToNumber(sel.slot));

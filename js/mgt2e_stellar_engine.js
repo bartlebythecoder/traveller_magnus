@@ -688,12 +688,9 @@
         tResult('Terrestrial Planets', sys.terrestrialPlanets, 'MgT2E 1.3: System Inventory');
 
         sys.totalWorlds = sys.gasGiants + sys.planetoidBelts + sys.terrestrialPlanets;
-
-        // Anomalous Orbits
-        let anomRoll = tRoll2D('Anomalous Roll');
-        let anomCount = anomRoll <= 9 ? 0 : (anomRoll - 9);
-        sys.totalWorlds += anomCount;
         tResult('Total Worlds', sys.totalWorlds, 'MgT2E 1.3: System Inventory');
+        // Anomalous worlds are rolled and placed in Step 7 (allocateOrbits),
+        // after regular slot allocation, per MgT2E rules sequence.
 
         return sys;
     }
@@ -705,29 +702,173 @@
         tSection('Orbit Allocation');
         sys.worlds = [];
         let primary = sys.stars[0];
+        const eligibleStars = sys.stars.filter(s => s.separation !== 'Companion');
 
-        // 1. Baseline Orbit
-        let mwAtm = mainworldBase ? mainworldBase.atm : 0;
-        let atmDM = 0;
-        if ([2, 3].includes(mwAtm)) atmDM = -2;
-        else if ([4, 5, 14].includes(mwAtm)) atmDM = -1;
-        else if ([8, 9].includes(mwAtm)) atmDM = 1;
-        else if ([10, 13, 15].includes(mwAtm)) atmDM = 2;
-        else if ([11, 12].includes(mwAtm)) atmDM = 6;
+        // Step 1: Roll Baseline Number (2D + DMs)
+        // Must be determined before Baseline Orbit so the correct method (1/2/3/4) can be selected.
+        {
+            const bnDMs = MgT2EData.systemInventory.baselineNumberDMs;
+            let bnRoll = tRoll2D('Baseline Number');
 
-        let rawHzRoll = Math.max(2, Math.min(12, 7 - atmDM));
-        let hzDeviation = MgT2EData.stellar.hzDeviation[rawHzRoll];
-        let variance = (Math.floor(rng() * 10)) / 100;
-        hzDeviation += (hzDeviation >= 0 ? variance : -variance);
+            const hasPrimaryCompanion = sys.stars.some(s => s.separation === 'Companion' && s.parentStarIdx === 0);
+            if (hasPrimaryCompanion)                           { tDM('Primary has Companion', bnDMs.primaryHasCompanion); bnRoll += bnDMs.primaryHasCompanion; }
+            if (['Ia', 'Ib', 'II'].includes(primary.sClass))  { tDM(`Primary ${primary.sClass}`, bnDMs.primaryClassIaIbII); bnRoll += bnDMs.primaryClassIaIbII; }
+            else if (primary.sClass === 'III')                 { tDM('Primary III', bnDMs.primaryClassIII); bnRoll += bnDMs.primaryClassIII; }
+            else if (primary.sClass === 'IV')                  { tDM('Primary IV', bnDMs.primaryClassIV); bnRoll += bnDMs.primaryClassIV; }
+            else if (primary.sClass === 'VI')                  { tDM('Primary VI', bnDMs.primaryClassVI); bnRoll += bnDMs.primaryClassVI; }
+            if (primary.sType === 'D')                         { tDM('Primary Post-Stellar', bnDMs.primaryPostStellar); bnRoll += bnDMs.primaryPostStellar; }
+
+            const tw = sys.totalWorlds;
+            let worldsDM = 0;
+            if (tw < 6)                    worldsDM = bnDMs.totalWorldsLt6;
+            else if (tw <= 9)              worldsDM = bnDMs.totalWorlds6to9;
+            else if (tw <= 12)             worldsDM = bnDMs.totalWorlds10to12;
+            else if (tw <= 15)             worldsDM = bnDMs.totalWorlds13to15;
+            else if (tw >= 18 && tw <= 20) worldsDM = bnDMs.totalWorlds18to20;
+            else if (tw > 20)              worldsDM = bnDMs.totalWorldsGt20;
+            if (worldsDM !== 0) { tDM(`Total Worlds (${tw})`, worldsDM); bnRoll += worldsDM; }
+
+            const secondaryEligible = eligibleStars.filter(s => s.role !== 'Primary');
+            if (secondaryEligible.length > 0) {
+                const secDM = bnDMs.perSecondaryStar * secondaryEligible.length;
+                tDM(`Secondary Stars (×${secondaryEligible.length})`, secDM);
+                bnRoll += secDM;
+            }
+
+            // Allow BN < 1: Cold Systems (Method 2) require BN < 1 to be preserved.
+            // The clamp to min 1 is applied only in the System Spread denominator below.
+            sys.baselineNumber = bnRoll;
+            tResult('Baseline Number', sys.baselineNumber, 'MgT2E 1.3: Orbital Allocation (unclamped)');
+        }
+        const baselineNumber = sys.baselineNumber;
+
+        // 1. Baseline Orbit — method dispatch
+        // Helper: compute atmosphere DM for temperature reverse-engineering
+        function getAtmDM(atm) {
+            if ([2, 3].includes(atm)) return -2;
+            if ([4, 5, 14].includes(atm)) return -1;
+            if ([8, 9].includes(atm)) return 1;
+            if ([10, 13, 15].includes(atm)) return 2;
+            if ([11, 12].includes(atm)) return 6;
+            return 0;
+        }
+
+        // Helper: apply HZCO deviation using the 3-branch formula
+        function applyHzcoDeviation(hzco, deviation) {
+            if (hzco >= 1.0) {
+                return { orbit: hzco + deviation, formula: `HZCO (${hzco.toFixed(2)}) + dev (${deviation.toFixed(3)}) [HZCO≥1]` };
+            } else if (deviation > 0) {
+                return { orbit: hzco * (1 + deviation), formula: `HZCO (${hzco.toFixed(2)}) × (1 + dev (${deviation.toFixed(3)})) [HZCO<1, dev+]` };
+            } else if (deviation < 0) {
+                return { orbit: hzco / (1 - deviation), formula: `HZCO (${hzco.toFixed(2)}) / (1 - dev (${deviation.toFixed(3)})) [HZCO<1, dev-]` };
+            } else {
+                return { orbit: hzco, formula: `HZCO (${hzco.toFixed(2)}) [zero deviation]` };
+            }
+        }
+
+        // Helper: determine if a top-down mainworld resides in the habitable zone
+        function isMainworldInHZ(mw) {
+            const tempModMap = { 'Frozen': 2, 'Cold': 4, 'Temperate': 7, 'Hot': 10, 'Boiling': 12 };
+            const modifiedRoll = tempModMap[mw.tempBand] ?? 7;
+            const rawRoll = modifiedRoll - getAtmDM(mw.atm || 0);
+            tResult('HZ Check', `tempBand=${mw.tempBand ?? 'unknown (defaulting Temperate)'}, modRoll=${modifiedRoll}, atmDM=${getAtmDM(mw.atm || 0)}, rawRoll=${rawRoll} → ${rawRoll >= 3 && rawRoll <= 11 ? 'IN HZ (Method 4)' : 'OUTSIDE HZ (Methods 1/2/3)'}`, 'MgT2E Step 1');
+            return rawRoll >= 3 && rawRoll <= 11;
+        }
+
+        const tw = sys.totalWorlds;
+        const primaryMAOEarly = primary.mao || 0.01;
+        const useMethod4 = mainworldBase != null && isMainworldInHZ(mainworldBase);
+        tSection('Baseline Orbit Calculation');
 
         let baselineOrbit;
-        if (sys.hzco >= 1.0 && (sys.hzco + hzDeviation) >= 1.0) baselineOrbit = sys.hzco + hzDeviation;
-        else if (sys.hzco < 1.0 && hzDeviation > 0) baselineOrbit = sys.hzco * (1 + hzDeviation);
-        else if (sys.hzco < 1.0 && hzDeviation < 0) baselineOrbit = sys.hzco / (1 - hzDeviation);
-        else baselineOrbit = sys.hzco + hzDeviation;
+
+        if (useMethod4) {
+            // Method 4: Continuation — top-down mainworld in HZ.
+            // Reverse-engineer the world's temperature to get its orbit deviation from HZCO.
+            tResult('Method Selected', '4 — Continuation (top-down mainworld in habitable zone)', 'MgT2E Step 1');
+            const tempModMap = { 'Frozen': 2, 'Cold': 4, 'Temperate': 7, 'Hot': 10, 'Boiling': 12 };
+            const modifiedRoll = tempModMap[mainworldBase.tempBand] ?? 7;
+            const atmDM = getAtmDM(mainworldBase.atm || 0);
+            const rawHzRoll = Math.max(2, Math.min(12, modifiedRoll - atmDM));
+            let hzDeviation = MgT2EData.stellar.hzDeviation[rawHzRoll];
+            const hzDeviationBase = hzDeviation;
+            const variance = (Math.floor(rng() * 10)) / 100;
+            hzDeviation += (hzDeviation >= 0 ? variance : -variance);
+            writeLogLine(`Method 4: modRoll=${modifiedRoll}, atmDM=${atmDM}, rawHzRoll=${rawHzRoll} → base dev ${hzDeviationBase.toFixed(2)}, variance +${variance.toFixed(2)} → final dev ${hzDeviation.toFixed(2)}`);
+            const result = applyHzcoDeviation(sys.hzco, hzDeviation);
+            baselineOrbit = result.orbit;
+            writeLogLine(`Baseline Orbit Formula: ${result.formula} = ${baselineOrbit.toFixed(3)}`);
+
+        } else if (baselineNumber >= 1 && baselineNumber <= tw) {
+            // Method 1: Standard — BN is between 1 and Total Worlds.
+            tResult('Method Selected', `1 — Standard (BN ${baselineNumber} between 1 and TW ${tw})`, 'MgT2E Step 1');
+            const devRoll = tRoll2D('Method 1 Variance (2D-7)');
+            if (sys.hzco >= 1.0) {
+                const deviation = (devRoll - 7) / 10;
+                baselineOrbit = sys.hzco + deviation;
+                writeLogLine(`Method 1 (HZCO≥1): HZCO (${sys.hzco.toFixed(2)}) + (${devRoll}-7)/10 (${deviation.toFixed(3)}) = ${baselineOrbit.toFixed(3)}`);
+            } else {
+                const deviation = (devRoll - 7) / 100;
+                baselineOrbit = sys.hzco + deviation;
+                writeLogLine(`Method 1 (HZCO<1): HZCO (${sys.hzco.toFixed(2)}) + (${devRoll}-7)/100 (${deviation.toFixed(3)}) = ${baselineOrbit.toFixed(3)}`);
+            }
+
+        } else if (baselineNumber < 1) {
+            // Method 2: Cold System — all worlds are beyond HZCO.
+            tResult('Method Selected', `2 — Cold System (BN ${baselineNumber} < 1)`, 'MgT2E Step 1');
+            const devRoll = tRoll2D('Method 2 Variance (2D-7)');
+            const deviation = (devRoll - 7) / 5;
+            if (primaryMAOEarly >= 1.0) {
+                baselineOrbit = sys.hzco - baselineNumber + tw + deviation;
+                writeLogLine(`Method 2 (MAO≥1): HZCO (${sys.hzco.toFixed(2)}) - BN (${baselineNumber}) + TW (${tw}) + dev (${deviation.toFixed(3)}) = ${baselineOrbit.toFixed(3)}`);
+            } else {
+                baselineOrbit = primaryMAOEarly - (baselineNumber / 10) + (tw / 10) + deviation;
+                writeLogLine(`Method 2 (MAO<1): MAO (${primaryMAOEarly.toFixed(3)}) - BN/10 (${(baselineNumber/10).toFixed(3)}) + TW/10 (${(tw/10).toFixed(3)}) + dev (${deviation.toFixed(3)}) = ${baselineOrbit.toFixed(3)}`);
+            }
+
+        } else {
+            // Method 3: Hot System — BN > Total Worlds; all worlds orbit inside HZCO.
+            tResult('Method Selected', `3 — Hot System (BN ${baselineNumber} > TW ${tw})`, 'MgT2E Step 1');
+            const baseCalc = sys.hzco - baselineNumber + tw;
+            tResult('Base Calc (HZCO - BN + TW)', baseCalc.toFixed(3), 'MgT2E Step 1');
+            if (baseCalc >= 1.0) {
+                const devRoll = tRoll2D('Method 3 Variance (2D-7)/5');
+                const deviation = (devRoll - 7) / 5;
+                baselineOrbit = baseCalc + deviation;
+                writeLogLine(`Method 3a (base≥1): (${baseCalc.toFixed(3)}) + dev (${deviation.toFixed(3)}) = ${baselineOrbit.toFixed(3)}`);
+            } else {
+                const devRoll = tRoll2D('Method 3 Variance (2D-2)/100');
+                const deviation = (devRoll - 2) / 100;
+                baselineOrbit = sys.hzco - (baselineNumber / 10) + (tw / 10) + deviation;
+                writeLogLine(`Method 3b (base<1): HZCO (${sys.hzco.toFixed(2)}) - BN/10 (${(baselineNumber/10).toFixed(3)}) + TW/10 (${(tw/10).toFixed(3)}) + dev (${deviation.toFixed(3)}) = ${baselineOrbit.toFixed(3)}`);
+                if (baselineOrbit < 0) {
+                    baselineOrbit = Math.max(sys.hzco - 0.1, primaryMAOEarly + tw * 0.01);
+                    writeLogLine(`Method 3b edge case: result negative, clamped to max(HZCO-0.1, MAO+TW×0.01) = ${baselineOrbit.toFixed(3)}`);
+                }
+            }
+        }
 
         sys.baselineOrbit = baselineOrbit;
-        tResult('Baseline Orbit', sys.baselineOrbit.toFixed(2), 'MgT2E 1.3: HZCO Formula');
+        tResult('Baseline Orbit', sys.baselineOrbit.toFixed(3), 'MgT2E Step 1');
+
+        // 1b. Mainworld Target Orbit override (top-down mainworld outside HZ)
+        // When Methods 1/2/3 drive the baseline orbit (for system spread), the mainworld itself
+        // must still anchor at its temperature-appropriate orbit — not at the baseline orbit.
+        let mainworldTargetOrbit = null;
+        if (mainworldBase != null && !useMethod4) {
+            tSection('Mainworld Target Orbit (out-of-HZ override)');
+            const tempModMap = { 'Frozen': 2, 'Cold': 4, 'Temperate': 7, 'Hot': 10, 'Boiling': 12 };
+            const modifiedRoll = tempModMap[mainworldBase.tempBand] ?? 7;
+            const atmDM = getAtmDM(mainworldBase.atm || 0);
+            const rawHzRoll = Math.max(2, Math.min(12, modifiedRoll - atmDM));
+            let mwDeviation = MgT2EData.stellar.hzDeviation[rawHzRoll];
+            const mwVariance = (Math.floor(rng() * 10)) / 100;
+            mwDeviation += (mwDeviation >= 0 ? mwVariance : -mwVariance);
+            writeLogLine(`MW Target: modRoll=${modifiedRoll}, atmDM=${atmDM}, rawHzRoll=${rawHzRoll} → dev ${mwDeviation.toFixed(3)}`);
+            const mwResult = applyHzcoDeviation(sys.hzco, mwDeviation);
+            mainworldTargetOrbit = mwResult.orbit;
+            tResult('Mainworld Target Orbit', mainworldTargetOrbit.toFixed(3), `${mwResult.formula} — WBH anchor overrides baseline`);
+        }
 
         // 2. Forbidden Zones
         tSection('Forbidden Zones');
@@ -776,69 +917,241 @@
         }
         sys.forbiddenZones = mergedFZ;
 
-        // 3. Slot Generation (Multi-Star Support & Rule #11)
-        let eRoll = tRoll2D('Empty Orbits (10+)');
-        let emptyCount = eRoll <= 9 ? 0 : (eRoll - 9);
-        let totalSlotsCount = sys.totalWorlds + emptyCount;
-        
-        let slots = [];
-        let eligibleStars = sys.stars.filter(s => s.separation !== 'Companion'); // Exclude tight companions
-        
-        // Apportion slots: heavily weight towards the Primary star (70% chance per slot)
-        let starSlotCounts = new Array(eligibleStars.length).fill(0);
-        for(let i = 0; i < totalSlotsCount; i++) {
-            let rand = rng();
-            if (rand < 0.70 || eligibleStars.length === 1) {
-                starSlotCounts[0]++;
-            } else {
-                let compIdx = 1 + Math.floor(rng() * (eligibleStars.length - 1));
-                starSlotCounts[compIdx]++;
+        // 2b. Forbidden Zone baseline check
+        // If the computed baseline orbit falls inside a FZ, move it to the nearest clear boundary
+        // and apply a (2D-7)/10 variance directed INTO the available zone.
+        if (mergedFZ.length > 0) {
+            const inFZ = mergedFZ.find(fz => sys.baselineOrbit >= fz.min && sys.baselineOrbit <= fz.max);
+            if (inFZ) {
+                tSection('Baseline Orbit FZ Adjustment');
+                tResult('Baseline Orbit in FZ', `${sys.baselineOrbit.toFixed(3)} is inside [${inFZ.min.toFixed(2)}, ${inFZ.max.toFixed(2)}]`, 'MgT2E Step 1');
+                // Find the nearest clear boundary across all merged FZs
+                const distToInner = Math.abs(sys.baselineOrbit - inFZ.min);
+                const distToOuter = Math.abs(sys.baselineOrbit - inFZ.max);
+                let clearBoundary, direction;
+                if (distToInner <= distToOuter) {
+                    clearBoundary = inFZ.min;
+                    direction = -1; // variance pushes further inward (away from FZ)
+                } else {
+                    clearBoundary = inFZ.max;
+                    direction = 1;  // variance pushes further outward
+                }
+                const adjRoll = tRoll2D('FZ Baseline Adjustment (2D-7)/10');
+                const adjVariance = Math.abs((adjRoll - 7) / 10); // always positive; direction applied below
+                sys.baselineOrbit = clearBoundary + (direction * adjVariance);
+                tResult('Baseline Orbit Adjusted', sys.baselineOrbit.toFixed(3), `nearest boundary ${clearBoundary.toFixed(3)}, direction ${direction > 0 ? 'outward' : 'inward'}, variance ${adjVariance.toFixed(3)}`);
             }
         }
 
+        // 3. Slot Generation (RAW System Spread - WBH)
+        let eRoll = tRoll2D('Empty Orbits (10+)');
+        let emptyCount = eRoll <= 9 ? 0 : (eRoll - 9);
+        let totalSlotsCount = sys.totalWorlds + emptyCount;
+
+        let slots = [];
+
+        // RAW World Apportionment (WBH Proportional Formula)
+        const ADJACENCY = { 'Close': ['Near'], 'Near': ['Close', 'Far'], 'Far': ['Near'] };
+        const primaryMAO = primary.mao || 0.01;
+
+        // Phase A: Compute each eligible star's allowable orbit width
+        const starAllowable = eligibleStars.map(star => {
+            if (star.role === 'Primary') {
+                // Primary: [primaryMAO, 20] minus any FZ overlap within that range
+                let allowable = 20 - primaryMAO;
+                if (mergedFZ) {
+                    for (const fz of mergedFZ) {
+                        const overlapMin = Math.max(fz.min, primaryMAO);
+                        const overlapMax = Math.min(fz.max, 20);
+                        if (overlapMax > overlapMin) allowable -= (overlapMax - overlapMin);
+                    }
+                }
+                return Math.max(0, allowable);
+            } else {
+                // Secondary: orbitId - 3 minus reductions, clipped to max(0, outermost - secMao)
+                const adjSeps = ADJACENCY[star.separation] || [];
+                const adjStars = sys.stars.filter(s => adjSeps.includes(s.separation));
+                let outermost = star.orbitId - 3;
+                if (adjStars.length > 0) outermost -= 1;
+                if (star.eccentricity > 0.2 || adjStars.some(s => s.eccentricity > 0.2)) outermost -= 1;
+                if (star.eccentricity > 0.5) outermost -= 1;
+                return Math.max(0, outermost - (star.mao || 0.01));
+            }
+        });
+
+        // Phase B: +1 if star has > 0 allowable orbits AND no companion
+        const starTotals = starAllowable.map((allowable, sIdx) => {
+            const actualIdx = sys.stars.indexOf(eligibleStars[sIdx]);
+            const hasCompanion = sys.stars.some(s => s.separation === 'Companion' && s.parentStarIdx === actualIdx);
+            return allowable + (allowable > 0 && !hasCompanion ? 1 : 0);
+        });
+
+        // Phase C: Floor each star's total → Total Star Orbits
+        const starTotalOrbits = starTotals.map(t => Math.floor(t));
+
+        // Phase D: Sum → Total System Orbits
+        const totalSystemOrbits = starTotalOrbits.reduce((a, b) => a + b, 0);
+
+        eligibleStars.forEach((star, i) => {
+            writeLogLine(`  ${star.role || 'Primary'}: Allowable=${starAllowable[i].toFixed(2)}, Total Star Orbits=${starTotalOrbits[i]}`);
+        });
+        writeLogLine(`  Total System Orbits: ${totalSystemOrbits}`);
+
+        // Phase E: Allocate — ceil(Primary), floor(Intermediates), remainder(Outermost)
+        // outermostIdx = last eligible star that has > 0 total orbits
+        let starSlotCounts = new Array(eligibleStars.length).fill(0);
+        let outermostIdx = 0;
+        for (let i = eligibleStars.length - 1; i >= 0; i--) {
+            if (starTotalOrbits[i] > 0) { outermostIdx = i; break; }
+        }
+
+        if (totalSystemOrbits === 0) {
+            starSlotCounts[0] = totalSlotsCount;
+            writeLogLine(`  Apportionment: No valid orbital space anywhere — all ${totalSlotsCount} slots assigned to Primary`);
+        } else {
+            let allocated = 0;
+            for (let i = 0; i < eligibleStars.length; i++) {
+                if (starTotalOrbits[i] === 0) {
+                    starSlotCounts[i] = 0;
+                } else if (i === outermostIdx) {
+                    starSlotCounts[i] = totalSlotsCount - allocated;
+                    allocated += starSlotCounts[i];
+                } else if (i === 0) {
+                    starSlotCounts[i] = Math.ceil(totalSlotsCount * starTotalOrbits[i] / totalSystemOrbits);
+                    allocated += starSlotCounts[i];
+                } else {
+                    starSlotCounts[i] = Math.floor(totalSlotsCount * starTotalOrbits[i] / totalSystemOrbits);
+                    allocated += starSlotCounts[i];
+                }
+                writeLogLine(`  ${eligibleStars[i].role || 'Primary'}: ${starSlotCounts[i]} slots allocated`);
+            }
+        }
+
+        // Step 2: Compute System Spread
+        const bnForSpread = Math.max(1, baselineNumber);
+        let systemSpread = (sys.baselineOrbit - primaryMAO) / bnForSpread;
+        if (systemSpread <= 0) systemSpread = 0.1;
+        tResult('System Spread', systemSpread.toFixed(4), `(${sys.baselineOrbit.toFixed(2)} - ${primaryMAO.toFixed(2)}) / ${bnForSpread}${baselineNumber < 1 ? ` (BN ${baselineNumber} clamped to 1 for spread)` : ''}`);
+
+        // Step 3: Cap Check — project outermost primary orbit; replace spread with 2D/8 if > Orbit# 20
+        const primarySlotCount = starSlotCounts[0];
+        const projectedOuter = primaryMAO + systemSpread * primarySlotCount;
+        tResult('Projected Outermost Primary Orbit', projectedOuter.toFixed(2), `${primaryMAO.toFixed(2)} + ${systemSpread.toFixed(4)} × ${primarySlotCount} slots`);
+        if (projectedOuter > 20) {
+            const capRoll = roll2D();
+            systemSpread = capRoll / 8;
+            writeLogLine(`Max Spread Cap Triggered: 2D6=${capRoll} / 8 = ${systemSpread.toFixed(4)}`);
+        }
+
+        // Steps 4 & 5: Per-star spread assignment and slot placement
+
         for (let sIdx = 0; sIdx < eligibleStars.length; sIdx++) {
-            let hostStar = eligibleStars[sIdx];
-            let actualStarIdx = sys.stars.indexOf(hostStar);
-            let sCount = starSlotCounts[sIdx];
+            const hostStar = eligibleStars[sIdx];
+            const actualStarIdx = sys.stars.indexOf(hostStar);
+            const sCount = starSlotCounts[sIdx];
             if (sCount === 0) continue;
 
-            let currentPos = hostStar.mao || 0.01;
-            
-            // WBH Rule #11: Eccentricity > 0.5 reduces available inner orbits by 1.0 Orbit#
-            if (hostStar.role !== 'Primary' && hostStar.eccentricity > 0.5) {
-                currentPos += 1.0;
-                tResult(`${hostStar.role} Subsystem Constraint (Rule #11)`, `MAO shifted to ${currentPos.toFixed(2)} (Ecc > 0.5)`, 'MgT2E 1.3: Orbital Allocation');
+            tSection(`Orbital Slots: ${hostStar.role || 'Primary'}`);
+
+            let spread;
+            let outermost;
+
+            if (hostStar.role === 'Primary') {
+                spread = systemSpread;
+                outermost = 20;
+                tResult('Spread', spread.toFixed(4), 'System spread (primary)');
+            } else {
+                // Compute secondary outermost allowable orbit (WBH: OrbitId - 3, then reductions)
+                outermost = hostStar.orbitId - 3;
+                tResult('Outermost Base (OrbitId - 3)', outermost.toFixed(2));
+
+                const adjSeps = ADJACENCY[hostStar.separation] || [];
+                const adjStars = sys.stars.filter(s => adjSeps.includes(s.separation));
+
+                // Reduction 1: flat -1 if any adjacent-zone star exists (applied once)
+                if (adjStars.length > 0) {
+                    outermost -= 1;
+                    tResult('Neighbour Reduction (-1)', outermost.toFixed(2), `Adjacent: ${adjStars.map(s => s.separation).join(', ')}`);
+                }
+
+                // Reduction 2: -1 if secondary or any adjacent star has ecc > 0.2
+                const hasHighEcc = hostStar.eccentricity > 0.2 || adjStars.some(s => s.eccentricity > 0.2);
+                if (hasHighEcc) {
+                    outermost -= 1;
+                    tResult('High Eccentricity Reduction (-1, ecc > 0.2)', outermost.toFixed(2));
+                }
+
+                // Reduction 3: -1 if secondary itself has ecc > 0.5 (stacks)
+                if (hostStar.eccentricity > 0.5) {
+                    outermost -= 1;
+                    tResult('Extreme Eccentricity Reduction (-1, ecc > 0.5)', outermost.toFixed(2));
+                }
+
+                const secMao = hostStar.mao || 0.01;
+
+                // Guard: Close stars with small orbitId produce outermost ≤ 0 — no centred orbits possible
+                if (outermost <= secMao) {
+                    tResult(`${hostStar.role} Orbital Space`, `None — outermost (${outermost.toFixed(2)}) ≤ MAO (${secMao.toFixed(2)}). Secondary too close to primary for centred orbits.`, 'WBH: Centred Orbits');
+                    continue;
+                }
+
+                const secSpread = (outermost - secMao) / (sCount + 1);
+                tResult('Secondary Spread Formula', secSpread.toFixed(4), `(${outermost.toFixed(2)} - ${secMao.toFixed(2)}) / (${sCount} + 1)`);
+
+                if (secSpread > systemSpread) {
+                    spread = secSpread;
+                    tResult('Spread', spread.toFixed(4), 'Secondary override (> system spread)');
+                } else {
+                    spread = systemSpread;
+                    tResult('Spread', spread.toFixed(4), 'System spread used');
+                }
             }
 
-            let spread = (sys.baselineOrbit - currentPos) / Math.max(1, sCount);
-            let maxSpread = (20.0 - currentPos) / (sCount + 1);
-            spread = Math.min(Math.max(0.1, spread), maxSpread);
+            // WBH Rule #11: ecc > 0.5 on secondary shifts inner boundary out by 1.0 Orbit#
+            let currentPos = hostStar.mao || 0.01;
+            if (hostStar.role !== 'Primary' && hostStar.eccentricity > 0.5) {
+                currentPos += 1.0;
+                tResult('Rule #11 Inner Boundary Shift', currentPos.toFixed(2), 'Ecc > 0.5 on secondary');
+            }
 
             for (let i = 0; i < sCount; i++) {
-                let minSep = currentPos * 0.15;
-                let nextOrbit = currentPos + Math.max(spread, minSep);
+                const varRoll = roll2D();
+                const variance = (varRoll - 7) * spread / 10;
+                let nextOrbit = currentPos + spread + variance;
+                writeLogLine(`  Slot ${i + 1}: ${currentPos.toFixed(3)} + ${spread.toFixed(4)} (spread) + (${varRoll}-7)×${spread.toFixed(4)}/10 (variance) = ${nextOrbit.toFixed(3)}`);
 
-                // Forbidden Zone Jumping (Primary Star Only)
-                if (actualStarIdx === 0 && mergedFZ) {
-                    for (let fz of mergedFZ) {
+                // Forbidden zone: one-time zone-width offset per zone hit
+                if (mergedFZ && mergedFZ.length > 0) {
+                    for (const fz of mergedFZ) {
                         if (nextOrbit >= fz.min && nextOrbit <= fz.max) {
-                            nextOrbit = fz.max + (Math.abs(tRoll2D('Resync') - 7) / 10);
+                            const zoneWidth = fz.max - fz.min;
+                            nextOrbit += zoneWidth;
+                            writeLogLine(`    FZ Jump (+${zoneWidth.toFixed(2)}): zone ${fz.min.toFixed(2)}–${fz.max.toFixed(2)} → ${nextOrbit.toFixed(3)}`);
                         }
                     }
                 }
-                
-                let sEcc = (tRoll2D('Orbit Eccentricity') - 2) * 0.05;
-                slots.push({ 
-                    orbitId: nextOrbit, 
-                    occupant: null, 
-                    eccentricity: Math.max(0, sEcc), 
-                    type: 'S-Type', 
-                    parentStarIdx: actualStarIdx 
+
+                // Clamp to boundary
+                if (nextOrbit > outermost) {
+                    writeLogLine(`    Clamped to boundary: ${nextOrbit.toFixed(3)} → ${outermost.toFixed(2)}`);
+                    nextOrbit = outermost;
+                }
+
+                const eccRoll = roll2D();
+                const sEcc = Math.max(0, (eccRoll - 2) * 0.05);
+                writeLogLine(`  Slot ${i + 1} Eccentricity: 2D6=${eccRoll} → (${eccRoll}-2)×0.05 = ${sEcc.toFixed(3)}`);
+
+                slots.push({
+                    orbitId: nextOrbit,
+                    occupant: null,
+                    eccentricity: sEcc,
+                    type: 'S-Type',
+                    parentStarIdx: actualStarIdx
                 });
                 currentPos = nextOrbit;
             }
         }
-        
+
         // Sort all slots globally by orbitId to maintain sequence for the World Queue
         slots.sort((a, b) => a.orbitId - b.orbitId);
         
@@ -851,6 +1164,101 @@
                 if (dist < bestDist) {
                     bestDist = dist;
                     targetIdx = i;
+                }
+            }
+        }
+
+        // Override targetIdx for out-of-HZ top-down mainworlds: anchor the mainworld at its
+        // temperature-appropriate orbit rather than the baseline orbit used for system spread.
+        if (mainworldTargetOrbit !== null && slots.length > 0) {
+            let mwBestDist = Infinity;
+            for (let i = 0; i < slots.length; i++) {
+                if (slots[i].parentStarIdx === 0) {
+                    const dist = Math.abs(slots[i].orbitId - mainworldTargetOrbit);
+                    if (dist < mwBestDist) { mwBestDist = dist; targetIdx = i; }
+                }
+            }
+            tResult('targetIdx Override', `Slot ${targetIdx} at Orbit ${slots[targetIdx]?.orbitId.toFixed(3)}`, `mainworld anchored at temperature orbit ${mainworldTargetOrbit.toFixed(3)}, not baseline ${baselineOrbit.toFixed(3)}`);
+        }
+
+        // 7. Anomalous Worlds (MgT2E Step 7 — after slot allocation, before world placement)
+        tSection('Step 7: Anomalous Worlds');
+        const anomalousPending = [];
+        {
+            const anomQtyTable = MgT2EData.systemInventory.anomalousOrbitQuantity;
+            const anomTypeTable = MgT2EData.systemInventory.anomalousOrbitType;
+            const anomRoll = tRoll2D('Anomalous Quantity Roll');
+            const anomEntry = anomQtyTable.find(e => anomRoll <= e.maxRoll);
+            const anomCount = anomEntry ? anomEntry.count : 0;
+            tResult('Anomalous Worlds', anomCount, 'MgT2E Step 7');
+
+            for (let ai = 0; ai < anomCount; ai++) {
+                tSection(`Anomalous World ${ai + 1}`);
+
+                // Roll type
+                const typeRoll = tRoll2D(`Anomalous Type Roll (world ${ai + 1})`);
+                const typeEntry = anomTypeTable.find(e => typeRoll <= e.maxRoll);
+                const anomType = typeEntry ? typeEntry.type : 'Random';
+                const eccentricityDM = typeEntry ? typeEntry.eccentricityDM : 2;
+                tResult('Anomalous Type', anomType, 'MgT2E Step 7 Type Table');
+                tResult('Eccentricity DM', eccentricityDM != null ? eccentricityDM : 'N/A', 'MgT2E Step 7');
+
+                if (anomType === 'Trojan') {
+                    // Trojan: reserves a primary orbit slot to share with whatever world WBH places there.
+                    // At Step 7, no worlds are placed yet — pick from all primary slots.
+                    const primarySlotsForTrojan = slots.filter(s => s.parentStarIdx === 0);
+                    if (primarySlotsForTrojan.length === 0) {
+                        tResult('Trojan Placement', 'SKIPPED — no primary slots available', 'MgT2E Step 7');
+                    } else {
+                        const pickedIdx = Math.floor(rng() * primarySlotsForTrojan.length);
+                        const trojanOrbit = primarySlotsForTrojan[pickedIdx].orbitId;
+                        primarySlotsForTrojan[pickedIdx].hasTrojan = true;
+                        tResult('Trojan Orbit', trojanOrbit, 'MgT2E Step 7 — shares orbit with existing world');
+                        anomalousPending.push({
+                            type: anomType,
+                            orbitId: trojanOrbit,
+                            eccentricityDM: null,
+                            inclination: null,
+                            retrograde: false,
+                            isTrojan: true,
+                            trojanPartnerOrbit: trojanOrbit
+                        });
+                    }
+                } else {
+                    // Random orbit procedure: pick a random orbit from the primary's slots
+                    const primarySlots = slots.filter(s => s.parentStarIdx === 0);
+                    let anomOrbit;
+                    if (primarySlots.length === 0) {
+                        // Fallback: place at MAO if no primary slots
+                        anomOrbit = primaryMAO;
+                        tResult('Anomalous Orbit', anomOrbit, 'MgT2E Step 7 — fallback to MAO (no primary slots)');
+                    } else {
+                        const pickedSlot = primarySlots[Math.floor(rng() * primarySlots.length)];
+                        anomOrbit = pickedSlot.orbitId;
+                        tResult('Anomalous Orbit', anomOrbit, 'MgT2E Step 7 — randomly selected primary slot');
+                    }
+
+                    // Inclination (only for Inclined type)
+                    let inclination = null;
+                    if (anomType === 'Inclined') {
+                        const inclineDie = Math.floor(rng() * 6) + 1;
+                        inclination = (inclineDie + 2) * 10;
+                        tResult('Inclination', inclination + '°', 'MgT2E Step 7 — (1D+2)x10');
+                    }
+
+                    // Retrograde flag
+                    const retrograde = (anomType === 'Retrograde');
+                    tResult('Retrograde', retrograde, 'MgT2E Step 7');
+
+                    anomalousPending.push({
+                        type: anomType,
+                        orbitId: anomOrbit,
+                        eccentricityDM: eccentricityDM,
+                        inclination: inclination,
+                        retrograde: retrograde,
+                        isTrojan: false,
+                        trojanPartnerOrbit: null
+                    });
                 }
             }
         }
@@ -1122,6 +1530,14 @@
 
                 // 2. STANDARD OCCUPANCY CHECK (Empty Slot)
                 if (!s.occupant) {
+                    // Trojan guard: don't fill trojan-reserved slots with Empty orbit markers —
+                    // the slot must be claimed by a real world so the trojan has a companion.
+                    if (wInfo.type === 'Empty' && s.hasTrojan) {
+                        if (window.isLoggingEnabled) writeLogLine(`[WBH TROJAN GUARD] Skipping Empty at Orbit ${s.orbitId.toFixed(2)} — reserved for Trojan companion.`);
+                        currentIdx = (currentIdx + 1) % slots.length;
+                        attempts++;
+                        continue;
+                    }
                     if (window.isLoggingEnabled) writeLogLine(`[WBH LANDING] ${wInfo.type} claimed Orbit ${s.orbitId.toFixed(2)} at Slot ${currentIdx}.`);
 
                     let world = {
@@ -1178,6 +1594,64 @@
                 writeLogLine(`[WBH WARNING] Could not place ${wInfo.type} - system full!`);
             }
         }
+        // 7b. Anomalous World Finalisation — build world objects from anomalousPending
+        if (anomalousPending.length > 0) {
+            tSection('Step 7b: Anomalous World Finalisation');
+            const orbitAuTable = MgT2EData.stellar.orbitAu;
+
+            function computeAnomalousAu(orbitId) {
+                const auInt = Math.floor(orbitId);
+                const auFrac = orbitId - auInt;
+                const maxIdx = orbitAuTable.length - 1;
+                const limitIdx = Math.min(auInt, maxIdx);
+                const auTarget = orbitAuTable[limitIdx];
+                const auDiff = limitIdx < maxIdx ? (orbitAuTable[limitIdx + 1] - orbitAuTable[limitIdx]) : auTarget;
+                return auTarget + (auFrac * auDiff);
+            }
+
+            for (const ap of anomalousPending) {
+                tSection(`Finalise Anomalous: ${ap.type} at Orbit ${ap.orbitId}`);
+
+                let eccentricity = 0;
+                if (ap.eccentricityDM != null) {
+                    const eccRoll = tRoll2D('Anomalous Eccentricity Roll');
+                    eccentricity = Math.max(0, (eccRoll + ap.eccentricityDM - 2) * 0.05);
+                    tResult('Eccentricity', eccentricity.toFixed(3), `roll ${eccRoll} + DM ${ap.eccentricityDM}`);
+                } else {
+                    tResult('Eccentricity', 'N/A (Trojan)', 'MgT2E Step 7');
+                }
+
+                // For Trojan: find the companion world already placed at the shared orbit
+                let trojanPartner = null;
+                if (ap.isTrojan) {
+                    trojanPartner = sys.worlds.find(w => Math.abs(w.orbitId - ap.trojanPartnerOrbit) < 0.01) || null;
+                    tResult('Trojan Partner', trojanPartner ? (trojanPartner.type + ' at ' + ap.trojanPartnerOrbit) : 'NOT FOUND — no world placed at reserved orbit', 'MgT2E Step 7');
+                    if (!trojanPartner) {
+                        tResult('Trojan Skipped', 'Cannot finalise trojan with no companion', 'MgT2E Step 7');
+                        continue;
+                    }
+                }
+
+                const anomWorld = {
+                    type: 'Terrestrial Planet',
+                    anomalousType: ap.type,
+                    orbitId: ap.orbitId,
+                    au: computeAnomalousAu(ap.orbitId),
+                    parentStarIdx: 0,
+                    orbitType: 'P-Type',
+                    eccentricity: eccentricity,
+                    inclination: ap.inclination,
+                    retrograde: ap.retrograde,
+                    isTrojan: ap.isTrojan,
+                    trojanPartner: trojanPartner ? trojanPartner.type : null,
+                    worldHzco: computeWorldHzco(ap.orbitId, 0, sys)
+                };
+
+                sys.worlds.push(anomWorld);
+                tResult('Anomalous World Added', `${ap.type} at Orbit ${ap.orbitId.toFixed(2)}, AU ${anomWorld.au.toFixed(3)}, Ecc ${eccentricity.toFixed(3)}`, 'MgT2E Step 7');
+            }
+        }
+
         sys.worlds.sort((a, b) => a.orbitId - b.orbitId);
 
         if (window.isLoggingEnabled) endTrace();

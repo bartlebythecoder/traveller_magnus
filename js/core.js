@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.9.3.1";
-const APP_BANNER = "v0.9.3.1: Gas Giant Quantity DM fix";
+const APP_VERSION = "v0.9.3.2";
+const APP_BANNER = "v0.9.3.2: New: Fixed Mongoose Orbital Spread";
 
 // -----------------------------------------------------------------------------
 // Application State

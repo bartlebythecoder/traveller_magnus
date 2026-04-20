@@ -269,7 +269,8 @@
         if (activeAuditor) {
             const auditResults = activeAuditor.auditMgT2ESystem(sys, { mode: 'bottom-up' });
             if (!auditResults.pass) {
-                console.warn(`[MgT2E Auditor] System ${hexId} failed strict validation. Logging to backlog.`);
+                const errorSummary = auditResults.errors.map(e => `  • ${e.message}`).join('\n');
+                console.warn(`[MgT2E Auditor] System ${hexId} — ${auditResults.errors.length} violation(s):\n${errorSummary}`);
                 
                 // Action 6.3: Audit Persistence — push all strict [FAIL] to global backlog
                 if (typeof window !== 'undefined') {

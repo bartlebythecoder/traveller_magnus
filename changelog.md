@@ -1,7 +1,12 @@
 # Changelog
 
-### [v0.9.3.1] - In Progress
-*(work in progress)*
+### [v0.9.3.2] - In Progress
+1. **Mongoose Orbit Placement Corrected:** The Mongoose 2E engine now selects the correct orbit-placement method based on the system's configuration. Standard systems place the reference orbit near the habitable zone.  
+2. **OTU X-Boat Routes on Import:** When importing sectors from TravellerMap, the tool now also downloads each sector's official route data and displays the X-boat routes on the map as green lines. Routes that cross sector boundaries are correctly resolved. Route visibility can be toggled on and off using the existing Filter window controls.
+
+### [v0.9.3.1] - 2026-04-19
+1. **Gas Giant Quantity DMs Fixed:** Gas giant quantity roll now correctly applies all DMs from the data table — Single Class V (+1), Brown Dwarf primary (-2), Post-Stellar primary (-2), per post-stellar star (-1), and 4+ stars (-1). Previously only Single V (+2, incorrect) and 4+ stars were applied.
+2. **Terrestrial Planet Logging Improved:** The terrestrial planet quantity log now explicitly shows the fixed -2 DM on the 2D6 roll, the base count and branch decision, and the D3-1 or D3+2 formula steps with correct dice types (1D3, not 1D6).
 
 ### [v0.9.3] - 2026-04-19
 1. **Mongoose Editable System Fields:** All fields in the Mongoose Traveller 2nd Edition System Details accordion are now inline-editable — star names and classifications, physical properties (diameter, gravity, mass, temperature, luminosity, orbital period), and UWP for all non-mainworld bodies. Edited fields are highlighted and persist in the workspace JSON.

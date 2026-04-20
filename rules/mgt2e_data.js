@@ -384,6 +384,11 @@ const MgT2EData = {
             { gyr: 10.0, temp: 4000,   lum: 0.000063   },
             { gyr: 13.0, temp: 3800,   lum: 0.000051   }
         ],
+
+        
+
+
+
         densityLookup: {
             "2": { "Exotic Ice": 0.03, "Mostly Ice": 0.18, "Mostly Rock": 0.50, "Rock and Metal": 0.82, "Mostly Metal": 1.15, "Compressed Metal": 1.50 },
             "3": { "Exotic Ice": 0.06, "Mostly Ice": 0.21, "Mostly Rock": 0.53, "Rock and Metal": 0.85, "Mostly Metal": 1.18, "Compressed Metal": 1.55 },
@@ -406,7 +411,9 @@ const MgT2EData = {
             { threshold: 11, type: 'Rock and Metal' },
             { threshold: 14, type: 'Mostly Metal' },
             { threshold: 99, type: 'Compressed Metal' }
-        ]
+        ],
+
+
     },
 
     systemInventory: {
@@ -451,6 +458,21 @@ const MgT2EData = {
             dms: {
                 perPostStellar: -1
             }
+        },
+        baselineNumberDMs: {
+            primaryHasCompanion:  -2,
+            primaryClassIaIbII:   3,
+            primaryClassIII:      2,
+            primaryClassIV:       1,
+            primaryClassVI:       -1,
+            primaryPostStellar:   -2,
+            totalWorldsLt6:       -4,
+            totalWorlds6to9:      -3,
+            totalWorlds10to12:    -2,
+            totalWorlds13to15:    -1,
+            totalWorlds18to20:    1,
+            totalWorldsGt20:      2,
+            perSecondaryStar:     -1
         }
     },
 

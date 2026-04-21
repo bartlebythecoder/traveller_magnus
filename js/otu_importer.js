@@ -58,24 +58,53 @@
     }
 
     /**
-     * Fetches a sector from the travellermap API, writes it to localStorage,
-     * and returns the raw TSV text. Silently skips the cache write if storage
-     * is full (QuotaExceededError) so the import still completes.
+     * Fetches raw TSV text for a sector from the travellermap API.
+     * Throws on HTTP error. Shared by both cache paths.
      */
-    async function fetchAndCacheSector(name) {
+    async function fetchSectorText(name) {
         const url = `https://travellermap.com/data/${encodeURIComponent(name)}/tab`;
         const response = await fetch(url);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const text = await response.text();
+        return await response.text();
+    }
+
+    /**
+     * Fetches a sector, writes it to localStorage, and returns the TSV text.
+     * Used by the Imperium import (small number of sectors, fits in localStorage).
+     * Silently skips the cache write on QuotaExceededError so import still completes.
+     */
+    async function fetchAndCacheSector(name) {
+        const text = await fetchSectorText(name);
         try {
             localStorage.setItem(CACHE_PREFIX + name, JSON.stringify({
                 timestamp: Date.now(),
                 data: text
             }));
         } catch (e) {
-            // QuotaExceededError or similar — cache write skipped, import continues.
             console.warn(`[OTU Importer] Could not cache "${name}": ${e.message}`);
         }
+        return text;
+    }
+
+    /**
+     * Reads a universe sector TSV from IndexedDB. Returns the text string or null
+     * on a miss, expiry, or if dbManager is unavailable.
+     */
+    async function getCachedUniverseSector(name) {
+        if (!window.dbManager) return null;
+        const entry = await window.dbManager.getTsvCache(name);
+        if (!entry || !entry.data || !entry.timestamp) return null;
+        if (Date.now() - entry.timestamp > CACHE_TTL_MS) return null;
+        return entry.data;
+    }
+
+    /**
+     * Fetches a sector, writes it to the IndexedDB TSV cache, and returns the text.
+     * Used by the Universe import (128 sectors, exceeds localStorage quota).
+     */
+    async function fetchAndCacheUniverseSector(name) {
+        const text = await fetchSectorText(name);
+        if (window.dbManager) await window.dbManager.putTsvCache(name, text);
         return text;
     }
 
@@ -122,6 +151,41 @@
         } catch (e) {
             console.warn(`[OTU Importer] Could not cache metadata for "${name}": ${e.message}`);
         }
+        return text;
+    }
+
+    /**
+     * Reads universe metadata XML from IndexedDB. Returns text or null.
+     * Keyed as 'meta:<name>' inside the shared tsvCache store.
+     */
+    async function getCachedUniverseMetadata(name) {
+        if (!window.dbManager) return null;
+        const entry = await window.dbManager.getTsvCache('meta:' + name);
+        if (!entry || !entry.data || !entry.timestamp) return null;
+        if (Date.now() - entry.timestamp > CACHE_TTL_MS) return null;
+        return entry.data;
+    }
+
+    /**
+     * Fetches sector metadata XML and writes it to IndexedDB.
+     * Non-fatal: logs a warning and returns null on HTTP error.
+     */
+    async function fetchAndCacheUniverseMetadata(name) {
+        const slug = sectorMetadataSlug(name);
+        const url  = `https://travellermap.com/data/${encodeURIComponent(slug)}/metadata`;
+        let text;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                console.warn(`[OTU Importer] Metadata fetch failed for "${name}" (slug: ${slug}): HTTP ${response.status}`);
+                return null;
+            }
+            text = await response.text();
+        } catch (e) {
+            console.warn(`[OTU Importer] Metadata fetch error for "${name}": ${e.message}`);
+            return null;
+        }
+        if (window.dbManager) await window.dbManager.putTsvCache('meta:' + name, text);
         return text;
     }
 
@@ -256,6 +320,7 @@
             if (match) coordLookup.set(`${match.x},${match.y}`, sectorSlotToNumber(sel.slot));
         });
 
+        const sectorMetas = [];
         for (let i = 0; i < selected.length; i++) {
             const { name, slot } = selected[i];
             let tsvFromCache = false;
@@ -289,7 +354,7 @@
             // Pause before metadata fetch if TSV came from a live API call.
             if (!tsvFromCache) await delay(1000);
 
-            // Fetch metadata, parse routes immediately (non-fatal).
+            // Fetch and cache metadata now, but defer route parsing until all sectors are loaded.
             let metaXml = getCachedMetadata(name);
             if (!metaXml) {
                 if (typeof showToast === 'function') showToast(`Fetching metadata for ${name}…`);
@@ -297,8 +362,16 @@
                 if (i < selected.length - 1) await delay(1000);
             }
             const sectorInfo = sectors.find(s => s.name === name);
-            if (metaXml && sectorInfo && typeof parseAndAddOtuRoutes === 'function') {
-                parseAndAddOtuRoutes(name, metaXml, sectorSlotToNumber(slot), sectorInfo.x, sectorInfo.y, coordLookup);
+            if (metaXml && sectorInfo) {
+                sectorMetas.push({ name, metaXml, slotNum: sectorSlotToNumber(slot), x: sectorInfo.x, y: sectorInfo.y });
+            }
+        }
+
+        // Parse all routes in a single pass after every sector is loaded,
+        // so cross-sector routes can resolve both endpoints correctly.
+        if (typeof parseAndAddOtuRoutes === 'function') {
+            for (const m of sectorMetas) {
+                parseAndAddOtuRoutes(m.name, m.metaXml, m.slotNum, m.x, m.y, coordLookup);
             }
         }
 
@@ -365,11 +438,12 @@
         const coordLookup = new Map();
         sectors.forEach(s => coordLookup.set(`${s.x},${s.y}`, parseInt(s.defaultSlot, 10)));
 
+        const universeMetas = [];
         for (let i = 0; i < sectors.length; i++) {
             const { name, defaultSlot, x, y } = sectors[i];
             let tsvFromCache = false;
             try {
-                const cached = getCachedSector(name);
+                const cached = await getCachedUniverseSector(name);
                 tsvFromCache = cached !== null;
 
                 if (typeof showToast === 'function') {
@@ -377,7 +451,7 @@
                     showToast(`Importing ${name} into Slot ${defaultSlot}… [${source}]`);
                 }
 
-                const text = tsvFromCache ? cached : await fetchAndCacheSector(name);
+                const text = tsvFromCache ? cached : await fetchAndCacheUniverseSector(name);
 
                 if (typeof importT5Tab === 'function') {
                     importT5Tab(text, name, defaultSlot);
@@ -398,15 +472,23 @@
             // Pause before metadata fetch if TSV came from a live API call.
             if (!tsvFromCache) await delay(1000);
 
-            // Fetch metadata, parse routes immediately (non-fatal).
-            let metaXml = getCachedMetadata(name);
+            // Fetch and cache metadata, but defer route parsing until all sectors are loaded.
+            let metaXml = await getCachedUniverseMetadata(name);
             if (!metaXml) {
                 if (typeof showToast === 'function') showToast(`Fetching metadata for ${name}…`);
-                metaXml = await fetchAndCacheMetadata(name);
+                metaXml = await fetchAndCacheUniverseMetadata(name);
                 if (i < sectors.length - 1) await delay(1000);
             }
-            if (metaXml && typeof parseAndAddOtuRoutes === 'function') {
-                parseAndAddOtuRoutes(name, metaXml, parseInt(defaultSlot, 10), x, y, coordLookup);
+            if (metaXml) {
+                universeMetas.push({ name, metaXml, slotNum: parseInt(defaultSlot, 10), x, y });
+            }
+        }
+
+        // Parse all routes in a single pass after every sector is loaded,
+        // so cross-sector routes can resolve both endpoints correctly.
+        if (typeof parseAndAddOtuRoutes === 'function') {
+            for (const m of universeMetas) {
+                parseAndAddOtuRoutes(m.name, m.metaXml, m.slotNum, m.x, m.y, coordLookup);
             }
         }
 

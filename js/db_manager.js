@@ -15,10 +15,11 @@
 (function () {
     'use strict';
 
-    const DB_NAME    = 'traveller_magnus';
-    const DB_VERSION = 1;
-    const STORE_HEX  = 'hexStates';
-    const STORE_APP  = 'appState';
+    const DB_NAME       = 'traveller_magnus';
+    const DB_VERSION    = 2;
+    const STORE_HEX     = 'hexStates';
+    const STORE_APP     = 'appState';
+    const STORE_TSV     = 'tsvCache';
 
     let _db        = null;
     let _syncTimer = null;
@@ -39,6 +40,9 @@
                 }
                 if (!database.objectStoreNames.contains(STORE_APP)) {
                     database.createObjectStore(STORE_APP); // key = named string
+                }
+                if (!database.objectStoreNames.contains(STORE_TSV)) {
+                    database.createObjectStore(STORE_TSV); // key = sector name string
                 }
             };
 
@@ -223,15 +227,46 @@
     }
 
     // -------------------------------------------------------------------------
+    // Read one TSV cache entry by sector name. Returns { data, timestamp } or null.
+    // -------------------------------------------------------------------------
+    async function getTsvCache(name) {
+        try {
+            const db = await _openDB();
+            const tx = db.transaction(STORE_TSV, 'readonly');
+            return await new Promise((resolve) => {
+                const req = tx.objectStore(STORE_TSV).get(name);
+                req.onsuccess = () => resolve(req.result || null);
+                req.onerror   = () => resolve(null);
+            });
+        } catch {
+            return null;
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Write one TSV cache entry. Fire-and-forget; logs on failure.
+    // -------------------------------------------------------------------------
+    async function putTsvCache(name, data) {
+        try {
+            const db = await _openDB();
+            const tx = db.transaction(STORE_TSV, 'readwrite');
+            tx.objectStore(STORE_TSV).put({ data, timestamp: Date.now() }, name);
+        } catch (err) {
+            console.warn('[DB] putTsvCache failed:', err);
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // Wipe the entire database.
     // Called before Universe import or when the user starts a new map.
     // -------------------------------------------------------------------------
     async function clearDB() {
         try {
             const db = await _openDB();
-            const tx = db.transaction([STORE_HEX, STORE_APP], 'readwrite');
+            const tx = db.transaction([STORE_HEX, STORE_APP, STORE_TSV], 'readwrite');
             tx.objectStore(STORE_HEX).clear();
             tx.objectStore(STORE_APP).clear();
+            tx.objectStore(STORE_TSV).clear();
         } catch (err) {
             console.warn('[DB] clearDB failed:', err);
         }
@@ -249,7 +284,9 @@
         saveRoutes,
         saveGridDimensions,
         saveAutoRouteCounter,
-        clearDB
+        clearDB,
+        getTsvCache,
+        putTsvCache
     };
 
 }());

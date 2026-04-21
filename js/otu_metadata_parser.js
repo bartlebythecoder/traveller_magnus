@@ -70,11 +70,26 @@
             const endCode   = el.getAttribute('End');
             if (!startCode || !endCode) return;
 
-            const startId = hexCodeToHexId(slotNum, startCode);
+            // Resolve start sector — StartOffsetX/Y shift the start hex into an adjacent sector.
+            const startOffsetX = parseInt(el.getAttribute('StartOffsetX') || '0', 10);
+            const startOffsetY = parseInt(el.getAttribute('StartOffsetY') || '0', 10);
+            let startSlotNum = slotNum;
+            if (startOffsetX !== 0 || startOffsetY !== 0) {
+                const startKey  = `${sectorX + startOffsetX},${sectorY + startOffsetY}`;
+                const startSlot = coordLookup.get(startKey);
+                if (startSlot === undefined) {
+                    console.warn(`[OTU Metadata] "${sectorName}": cross-sector route from (${startKey}) skipped — sector not in lookup.`);
+                    skipped++;
+                    return;
+                }
+                startSlotNum = startSlot;
+            }
 
+            const startId = hexCodeToHexId(startSlotNum, startCode);
+
+            // Resolve end sector — EndOffsetX/Y shift the end hex into an adjacent sector.
             const offsetX = parseInt(el.getAttribute('EndOffsetX') || '0', 10);
             const offsetY = parseInt(el.getAttribute('EndOffsetY') || '0', 10);
-
             let endSlotNum = slotNum;
             if (offsetX !== 0 || offsetY !== 0) {
                 const targetKey  = `${sectorX + offsetX},${sectorY + offsetY}`;

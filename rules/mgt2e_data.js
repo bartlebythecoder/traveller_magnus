@@ -473,7 +473,20 @@ const MgT2EData = {
             totalWorlds18to20:    1,
             totalWorldsGt20:      2,
             perSecondaryStar:     -1
-        }
+        },
+        anomalousOrbitQuantity: [
+            { maxRoll: 9,  count: 0 },
+            { maxRoll: 10, count: 1 },
+            { maxRoll: 11, count: 2 },
+            { maxRoll: 99, count: 3 }
+        ],
+        anomalousOrbitType: [
+            { maxRoll: 7,  type: 'Random',    eccentricityDM: 2 },
+            { maxRoll: 8,  type: 'Eccentric', eccentricityDM: 5 },
+            { maxRoll: 9,  type: 'Inclined',  eccentricityDM: 2, inclinationFormula: '(1D+2)x10' },
+            { maxRoll: 11, type: 'Retrograde', eccentricityDM: 2 },
+            { maxRoll: 99, type: 'Trojan',    eccentricityDM: null }
+        ]
     },
 
     // =========================================================================

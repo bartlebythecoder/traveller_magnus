@@ -490,7 +490,7 @@
         // HZCO calculation (module-scope convertAuToOrbit used here and in allocateOrbits)
         let hzcoAu = Math.sqrt(primary.lum);
         sys.hzco = convertAuToOrbit(hzcoAu);
-        tResult('HZCO (Orbit)', sys.hzco.toFixed(2), 'MgT2E 1.3: HZCO Formula');
+        tResult('HZCO (Orbit)', sys.hzco.toFixed(3), 'MgT2E 1.3: HZCO Formula');
 
         tSection('Additional Stars');
         if (overrideStars.length > 1) {
@@ -590,7 +590,7 @@
                 const combinedLum = primary.lum + primaryCompanion.lum;
                 const newHzcoAu = Math.sqrt(combinedLum);
                 sys.hzco = convertAuToOrbit(newHzcoAu);
-                tResult('HZCO Recalculated (Circumbinary)', `${primary.lum.toFixed(4)} + ${primaryCompanion.lum.toFixed(4)} = ${combinedLum.toFixed(4)} L☉ → Orbit ${sys.hzco.toFixed(2)}`, 'MgT2E 1.3: HZCO Formula');
+                tResult('HZCO Recalculated (Circumbinary)', `${primary.lum.toFixed(4)} + ${primaryCompanion.lum.toFixed(4)} = ${combinedLum.toFixed(4)} L☉ → Orbit ${sys.hzco.toFixed(3)}`, 'MgT2E 1.3: HZCO Formula');
             }
         }
 
@@ -756,13 +756,13 @@
         // Helper: apply HZCO deviation using the 3-branch formula
         function applyHzcoDeviation(hzco, deviation) {
             if (hzco >= 1.0) {
-                return { orbit: hzco + deviation, formula: `HZCO (${hzco.toFixed(2)}) + dev (${deviation.toFixed(3)}) [HZCO≥1]` };
+                return { orbit: hzco + deviation, formula: `HZCO (${hzco.toFixed(3)}) + dev (${deviation.toFixed(3)}) [HZCO≥1]` };
             } else if (deviation > 0) {
-                return { orbit: hzco * (1 + deviation), formula: `HZCO (${hzco.toFixed(2)}) × (1 + dev (${deviation.toFixed(3)})) [HZCO<1, dev+]` };
+                return { orbit: hzco * (1 + deviation), formula: `HZCO (${hzco.toFixed(3)}) × (1 + dev (${deviation.toFixed(3)})) [HZCO<1, dev+]` };
             } else if (deviation < 0) {
-                return { orbit: hzco / (1 - deviation), formula: `HZCO (${hzco.toFixed(2)}) / (1 - dev (${deviation.toFixed(3)})) [HZCO<1, dev-]` };
+                return { orbit: hzco / (1 - deviation), formula: `HZCO (${hzco.toFixed(3)}) / (1 - dev (${deviation.toFixed(3)})) [HZCO<1, dev-]` };
             } else {
-                return { orbit: hzco, formula: `HZCO (${hzco.toFixed(2)}) [zero deviation]` };
+                return { orbit: hzco, formula: `HZCO (${hzco.toFixed(3)}) [zero deviation]` };
             }
         }
 
@@ -806,11 +806,11 @@
             if (sys.hzco >= 1.0) {
                 const deviation = (devRoll - 7) / 10;
                 baselineOrbit = sys.hzco + deviation;
-                writeLogLine(`Method 1 (HZCO≥1): HZCO (${sys.hzco.toFixed(2)}) + (${devRoll}-7)/10 (${deviation.toFixed(3)}) = ${baselineOrbit.toFixed(3)}`);
+                writeLogLine(`Method 1 (HZCO≥1): HZCO (${sys.hzco.toFixed(3)}) + (${devRoll}-7)/10 (${deviation.toFixed(3)}) = ${baselineOrbit.toFixed(3)}`);
             } else {
                 const deviation = (devRoll - 7) / 100;
                 baselineOrbit = sys.hzco + deviation;
-                writeLogLine(`Method 1 (HZCO<1): HZCO (${sys.hzco.toFixed(2)}) + (${devRoll}-7)/100 (${deviation.toFixed(3)}) = ${baselineOrbit.toFixed(3)}`);
+                writeLogLine(`Method 1 (HZCO<1): HZCO (${sys.hzco.toFixed(3)}) + (${devRoll}-7)/100 (${deviation.toFixed(3)}) = ${baselineOrbit.toFixed(3)}`);
             }
 
         } else if (baselineNumber < 1) {
@@ -820,7 +820,7 @@
             const deviation = (devRoll - 7) / 5;
             if (primaryMAOEarly >= 1.0) {
                 baselineOrbit = sys.hzco - baselineNumber + tw + deviation;
-                writeLogLine(`Method 2 (MAO≥1): HZCO (${sys.hzco.toFixed(2)}) - BN (${baselineNumber}) + TW (${tw}) + dev (${deviation.toFixed(3)}) = ${baselineOrbit.toFixed(3)}`);
+                writeLogLine(`Method 2 (MAO≥1): HZCO (${sys.hzco.toFixed(3)}) - BN (${baselineNumber}) + TW (${tw}) + dev (${deviation.toFixed(3)}) = ${baselineOrbit.toFixed(3)}`);
             } else {
                 baselineOrbit = primaryMAOEarly - (baselineNumber / 10) + (tw / 10) + deviation;
                 writeLogLine(`Method 2 (MAO<1): MAO (${primaryMAOEarly.toFixed(3)}) - BN/10 (${(baselineNumber/10).toFixed(3)}) + TW/10 (${(tw/10).toFixed(3)}) + dev (${deviation.toFixed(3)}) = ${baselineOrbit.toFixed(3)}`);
@@ -840,7 +840,7 @@
                 const devRoll = tRoll2D('Method 3 Variance (2D-2)/100');
                 const deviation = (devRoll - 2) / 100;
                 baselineOrbit = sys.hzco - (baselineNumber / 10) + (tw / 10) + deviation;
-                writeLogLine(`Method 3b (base<1): HZCO (${sys.hzco.toFixed(2)}) - BN/10 (${(baselineNumber/10).toFixed(3)}) + TW/10 (${(tw/10).toFixed(3)}) + dev (${deviation.toFixed(3)}) = ${baselineOrbit.toFixed(3)}`);
+                writeLogLine(`Method 3b (base<1): HZCO (${sys.hzco.toFixed(3)}) - BN/10 (${(baselineNumber/10).toFixed(3)}) + TW/10 (${(tw/10).toFixed(3)}) + dev (${deviation.toFixed(3)}) = ${baselineOrbit.toFixed(3)}`);
                 if (baselineOrbit < 0) {
                     baselineOrbit = Math.max(sys.hzco - 0.1, primaryMAOEarly + tw * 0.01);
                     writeLogLine(`Method 3b edge case: result negative, clamped to max(HZCO-0.1, MAO+TW×0.01) = ${baselineOrbit.toFixed(3)}`);

@@ -42,12 +42,19 @@ function initializeInput() {
     const filterHandle = filterModal.querySelector('.modal-drag-handle');
     makeDraggable(filterModal, filterHandle);
 
+    const routeWindow = document.getElementById('route-window');
+    const routeHandle = routeWindow.querySelector('.modal-drag-handle');
+    makeDraggable(routeWindow, routeHandle);
+
     makeDraggable(hexEditor, hexEditorHeader);
 
     // Default Placement
     filterModal.style.left = '10px';
     filterModal.style.top = '50px';
-    
+
+    routeWindow.style.left = '10px';
+    routeWindow.style.top = '110px';
+
     // For Hex Editor (Right-aligned)
     hexEditor.style.right = '400px';
     hexEditor.style.left = 'auto'; // Ensure it doesn't conflict with left
@@ -71,6 +78,7 @@ function initializeInput() {
     setupSectorImporter();
     setupSplashScreen();
     setupAutoRoutes();
+    setupRouteWindow();
 }
 
 // ============================================================================

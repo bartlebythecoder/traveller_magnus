@@ -132,6 +132,386 @@
         .filter-accordion-header.open i {
             transform: rotate(180deg);
         }
+
+        /* Route Manager Window */
+        #route-window {
+            width: 430px;
+            padding: 25px;
+            color: #c5c6c7;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            gap: 10px;
+            border: 2px solid #66fcf1;
+            /* Viewport height cap: header and footer stay pinned; body scrolls */
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #route-window .modal-drag-handle { flex-shrink: 0; }
+        #route-window .palette-content   { flex: 1; min-height: 0; overflow-y: auto; }
+        #route-window .route-window-footer { flex-shrink: 0; }
+        .route-window-footer {
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 8px;
+            border-top: 1px solid rgba(69, 162, 158, 0.4);
+            margin-top: 2px;
+        }
+        .route-row {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 2px;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .route-num {
+            color: #66fcf1;
+            font-size: 0.85rem;
+            font-weight: bold;
+            min-width: 22px;
+        }
+        .route-name-input {
+            width: 110px;
+            flex: none;
+            background: #1a1a2e;
+            border: 1px solid #45a29e;
+            color: #c5c6c7;
+            padding: 2px 5px;
+            font-size: 0.82rem;
+            border-radius: 3px;
+        }
+        .route-color-swatch {
+            width: 50px;
+            height: 24px;
+            padding: 1px;
+            border: 1px solid #45a29e;
+            border-radius: 3px;
+            cursor: pointer;
+            background: none;
+        }
+        .route-shortcut-input {
+            width: 28px;
+            text-align: center;
+            background: #1a1a2e;
+            border: 1px solid #45a29e;
+            color: #c5c6c7;
+            padding: 2px 3px;
+            font-size: 0.82rem;
+            border-radius: 3px;
+        }
+        .route-clear-btn {
+            background: #1a1a2e;
+            border: 1px solid #8b3a3a;
+            color: #e06c6c;
+            padding: 2px 6px;
+            font-size: 0.8rem;
+            border-radius: 3px;
+            cursor: pointer;
+            min-width: 22px;
+            text-align: center;
+        }
+        .route-clear-btn:hover {
+            background: #3a1a1a;
+            border-color: #e06c6c;
+        }
+        .route-auto-btn {
+            background: #1a1a2e;
+            border: 1px solid #45a29e;
+            color: #66fcf1;
+            padding: 2px 6px;
+            font-size: 0.8rem;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .route-auto-btn:hover {
+            background: #0d2a2a;
+            border-color: #66fcf1;
+        }
+        .route-seg-count {
+            font-size: 0.7rem;
+            min-width: 28px;
+            text-align: center;
+            border-radius: 10px;
+            padding: 1px 5px;
+            font-family: 'Courier New', monospace;
+        }
+        .route-seg-count.used {
+            background: rgba(102, 252, 241, 0.15);
+            color: #66fcf1;
+            border: 1px solid rgba(102, 252, 241, 0.4);
+        }
+        .route-seg-count.free {
+            background: rgba(255,255,255,0.04);
+            color: #555;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        /* ── Route Systems Panel ─────────────────────────────────────────── */
+        #route-systems-panel {
+            border-top: 1px solid rgba(69, 162, 158, 0.5);
+            background: rgba(69, 162, 158, 0.04);
+            padding: 8px 10px;
+            margin-top: 4px;
+        }
+        #route-systems-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            color: #66fcf1;
+            font-size: 0.85rem;
+        }
+        #route-systems-panel-header strong { color: #fff; }
+        #btn-route-systems-close {
+            background: none;
+            border: none;
+            color: #45a29e;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0 2px;
+            line-height: 1;
+        }
+        #btn-route-systems-close:hover { color: #e06c6c; }
+        #route-systems-list {
+            max-height: 220px;
+            overflow-y: auto;
+            font-size: 0.8rem;
+            font-family: 'Courier New', monospace;
+        }
+        .route-systems-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 2px 4px;
+            border-radius: 2px;
+            color: #c5c6c7;
+        }
+        .route-systems-item:hover { background: rgba(69,162,158,0.1); color: #66fcf1; }
+        .route-systems-item-num  { color: #45a29e; min-width: 22px; text-align: right; font-size: 0.75rem; flex-shrink: 0; }
+        .route-systems-item-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .route-systems-item-id   { color: #45a29e; font-size: 0.72rem; flex-shrink: 0; }
+        #route-systems-footer {
+            font-size: 0.72rem;
+            color: #45a29e;
+            padding-top: 5px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            margin-top: 4px;
+        }
+
+        /* ── Route Automation Panel ───────────────────────────────────────── */
+        #route-auto-panel {
+            border-top: 1px solid rgba(69, 162, 158, 0.5);
+            background: rgba(69, 162, 158, 0.04);
+            padding: 10px 10px 8px;
+            margin-top: 4px;
+        }
+        #route-auto-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            color: #66fcf1;
+            font-size: 0.9rem;
+        }
+        #route-auto-panel-header strong {
+            color: #fff;
+        }
+        #btn-route-auto-close {
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0 2px;
+            line-height: 1;
+        }
+        #btn-route-auto-close:hover {
+            color: #e06c6c;
+        }
+        .route-auto-option {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .route-auto-option:last-of-type {
+            border-bottom: none;
+        }
+        .route-auto-option-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: #c5c6c7;
+            font-size: 0.85rem;
+            padding: 6px 4px;
+            user-select: none;
+            border-radius: 3px;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+        .route-auto-option-label:hover {
+            color: #66fcf1;
+            background: rgba(69, 162, 158, 0.08);
+        }
+        .route-auto-option.open .route-auto-option-label {
+            color: #66fcf1;
+        }
+        .route-auto-option-label::after {
+            content: '›';
+            margin-left: auto;
+            font-size: 1.1rem;
+            color: #45a29e;
+            transition: transform 0.2s ease;
+            line-height: 1;
+        }
+        .route-auto-option.open .route-auto-option-label::after {
+            transform: rotate(90deg);
+        }
+        .route-auto-option-label input[type="radio"] {
+            accent-color: #66fcf1;
+            cursor: pointer;
+        }
+        .route-auto-config {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.25s ease;
+            padding-left: 22px;
+        }
+        .route-auto-option.open .route-auto-config {
+            max-height: 600px;
+            padding-bottom: 6px;
+        }
+        .route-auto-param {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.82rem;
+            color: #a0a8b0;
+            margin-bottom: 5px;
+        }
+        .route-auto-param input[type="number"] {
+            width: 60px;
+            background: #1a1a2e;
+            border: 1px solid #45a29e;
+            color: #66fcf1;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 0.82rem;
+            text-align: center;
+        }
+        .route-auto-filter-summary {
+            background: rgba(69, 162, 158, 0.08);
+            border: 1px solid rgba(69, 162, 158, 0.35);
+            border-radius: 3px;
+            padding: 6px 8px;
+            font-size: 0.8rem;
+            color: #c5c6c7;
+            margin-bottom: 7px;
+            line-height: 1.4;
+        }
+        .route-auto-filter-summary .filter-active {
+            color: #66fcf1;
+        }
+        .route-auto-filter-summary .filter-none {
+            color: #a0a8b0;
+            font-style: italic;
+        }
+        .route-auto-filter-summary a,
+        .route-auto-filter-summary button.inline-link {
+            background: none;
+            border: none;
+            color: #45a29e;
+            cursor: pointer;
+            padding: 0;
+            font-size: inherit;
+            text-decoration: underline;
+        }
+        .route-auto-filter-summary button.inline-link:hover {
+            color: #66fcf1;
+        }
+        /* ── World Autocomplete ─────────────────────────────────────────── */
+        .wac-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 0;
+        }
+        .wac-input {
+            width: 100%;
+            box-sizing: border-box;
+            background: #1a1a2e;
+            border: 1px solid #45a29e;
+            color: #66fcf1;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 0.82rem;
+            font-family: 'Courier New', monospace;
+        }
+        .wac-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 100%;
+            background: #0d1117;
+            border: 1px solid #45a29e;
+            border-top: none;
+            border-radius: 0 0 3px 3px;
+            max-height: 160px;
+            overflow-y: auto;
+            z-index: 9999;
+        }
+        .wac-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 8px;
+            cursor: pointer;
+            color: #c5c6c7;
+            font-size: 0.8rem;
+            font-family: 'Courier New', monospace;
+            gap: 8px;
+        }
+        .wac-item:hover, .wac-item.wac-active {
+            background: rgba(102, 252, 241, 0.12);
+            color: #66fcf1;
+        }
+        .wac-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .wac-hexid { color: #45a29e; font-size: 0.75rem; white-space: nowrap; flex-shrink: 0; }
+        .p2p-waypoint-row { display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
+        .p2p-waypoint-remove {
+            background: none; border: none; color: #c5585e; font-size: 1.1rem;
+            cursor: pointer; padding: 0 4px; line-height: 1; flex-shrink: 0;
+        }
+        .p2p-waypoint-remove:hover { color: #ff6b6b; }
+        #route-auto-p2p-waypoints-section { margin: 2px 0 4px; }
+        #route-auto-p2p-waypoints-label {
+            font-size: 0.72rem; color: #45a29e; margin-bottom: 4px; letter-spacing: 0.03em;
+        }
+        .route-auto-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            padding-top: 10px;
+            margin-top: 6px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .route-auto-actions button {
+            padding: 4px 14px;
+            border-radius: 3px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: bold;
+        }
+        .btn-confirm {
+            background-color: #45a29e;
+            color: #0b0c10;
+        }
+        .btn-confirm:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+        .btn-confirm:not(:disabled):hover {
+            background-color: #66fcf1;
+        }
     </style>
 </head>
 
@@ -140,9 +520,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above So Below</span></h1>
-            <div class="splash-banner">New: Fixed Mongoose Orbital Spread</div>
+            <div class="splash-banner">New: Route Enhancements</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.9.3.2</div>
+            <div class="splash-version">v0.10.0</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -160,6 +540,7 @@
                     <div class="shortcut-item"><strong>Ctrl + Alt + R</strong><span>Full RTT Macro</span></div>
                     <div class="shortcut-item"><strong>Ctrl + Alt + 5</strong><span>Full T5 Macro</span></div>
                     <div class="shortcut-item"><strong>F Key</strong><span>Open Filter Window</span></div>
+                    <div class="shortcut-item"><strong>R Key</strong><span>Open Route Manager</span></div>
                     <div class="shortcut-item"><strong>Escape</strong><span>Cancel / Close All</span></div>
                     <div class="shortcut-item"><strong>Ctrl + Delete</strong><span>Clear Canvas</span></div>
                 </div>
@@ -374,7 +755,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.9.3.2</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.10.0</span>
             </p>
         </div>
 
@@ -465,6 +846,12 @@
                 <input type="number" id="xboat-max-range" min="1" max="32" value="12"
                     style="width: 70px; padding: 8px; background: #0b0c10; border: 1px solid #45a29e; color: #66fcf1; font-family: 'Courier New', monospace; font-size: 1rem; border-radius: 4px; text-align: center; outline: none;">
                 <span style="color: #888; font-size: 0.8rem;">(1 – 32)</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                <label style="color: #c5c6c7; font-size: 0.9rem; white-space: nowrap; width: 90px;">Min Ix</label>
+                <input type="number" id="xboat-min-ix" min="0" max="8" value="4"
+                    style="width: 70px; padding: 8px; background: #0b0c10; border: 1px solid #45a29e; color: #66fcf1; font-family: 'Courier New', monospace; font-size: 1rem; border-radius: 4px; text-align: center; outline: none;">
+                <span style="color: #888; font-size: 0.8rem;">(0 – 8, CT: try 2)</span>
             </div>
             <div style="display: flex; gap: 12px; margin-top: 20px;">
                 <button id="btn-xboat-confirm" class="btn-save"
@@ -624,7 +1011,8 @@
 
         <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
 
-        <button class="context-menu-item" id="ctx-gen-xboat">GENERATE XBOAT ROUTES</button>
+        <button class="context-menu-item" id="ctx-open-filter" onclick="toggleFilterModal()">FILTER CONTROL (F)</button>
+        <button class="context-menu-item" id="ctx-open-route-window">ROUTE MANAGER (R)</button>
         <button class="context-menu-item" id="ctx-assign-allegiance">ASSIGN ALLEGIANCE</button>
         <button class="context-menu-item" id="ctx-assign-bg-color">ASSIGN BACKGROUND COLOR</button>
 
@@ -778,6 +1166,12 @@
             <button class="accordion-btn" id="acc-btn-ct-system" style="display: none;">CT Star System</button>
             <div class="accordion-content" id="editor-ct-system-root" style="display: none;">
                 <!-- Content will be injected via JS -->
+            </div>
+
+            <!-- MgT2E Stellar Configuration (populated by JS when mgtSystem is present) -->
+            <div id="mgt-stellar-config" class="editor-full-row" style="display: none; margin-top: 10px;">
+                <label>Stellar Config:</label>
+                <div id="mgt-stellar-config-lines" style="font-family: monospace; font-size: 0.9em; color: #66fcf1; line-height: 1.6; padding: 2px 4px;"></div>
             </div>
 
             <!-- MgT2E System Expand Accordion -->
@@ -1043,24 +1437,6 @@
                     <div id="visibility-accordion-body" class="filter-accordion-content open">
                         <div class="filter-route-toggles">
                             <label class="filter-toggle-item">
-                                <input type="checkbox" id="filter-route-green" checked>
-                                <span style="color: #00FF00;">Green Routes</span>
-                            </label>
-                            <label class="filter-toggle-item">
-                                <input type="checkbox" id="filter-route-yellow" checked>
-                                <span style="color: #FFFF00;">Yellow Routes</span>
-                            </label>
-                            <label class="filter-toggle-item">
-                                <input type="checkbox" id="filter-route-red" checked>
-                                <span style="color: #FF0000;">Red Routes</span>
-                            </label>
-                        </div>
-                        <div class="filter-route-toggles" style="margin-top: 4px;">
-                            <label class="filter-toggle-item">
-                                <input type="checkbox" id="filter-route-filter" checked>
-                                <span style="color: #ff9900;">Auto Routes</span>
-                            </label>
-                            <label class="filter-toggle-item">
                                 <input type="checkbox" id="filter-hex-bg-visible" checked>
                                 <span style="color: #a0a8b0;">Hex Background</span>
                             </label>
@@ -1290,11 +1666,141 @@
         <div class="filter-modal-footer">
             <button class="btn-cancel" id="btn-footer-close-filter"
                 style="padding: 4px 12px; font-size: 0.8rem;">Close</button>
-            <button class="btn-save" id="btn-auto-routes"
-                style="padding: 4px 10px; font-size: 0.8rem;">Auto Routes</button>
-            <button class="btn-cancel" id="btn-clear-auto-routes"
-                style="padding: 4px 10px; font-size: 0.8rem; background: #3a1a1a; color: #ff6b6b; border: 1px solid #ff4500;">Clear Auto</button>
             <span>Matches: <span id="filter-results-count">0</span></span>
+        </div>
+    </div>
+
+    <!-- Route Manager Window -->
+    <div id="route-window" class="draggable-palette">
+        <div class="modal-drag-handle">
+            <h2>Route Manager</h2>
+            <button id="btn-close-route-window" class="btn-close-palette" title="Close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="palette-content" style="padding: 0;">
+            <div id="route-window-list"></div>
+
+            <!-- Route Systems Panel (shown when segment-count pill is clicked) -->
+            <div id="route-systems-panel" style="display: none;">
+                <div id="route-systems-panel-header">
+                    <span>Systems: <strong id="route-systems-panel-name"></strong></span>
+                    <button id="btn-route-systems-close" title="Close">&#x2715;</button>
+                </div>
+                <div id="route-systems-list"></div>
+                <div id="route-systems-footer"></div>
+            </div>
+
+            <!-- Route Automation Panel (shown when a route's auto button is clicked) -->
+            <div id="route-auto-panel" style="display: none;">
+
+                <!-- Panel header -->
+                <div id="route-auto-panel-header">
+                    <span>Automate: <strong id="route-auto-panel-route-name"></strong></span>
+                    <button id="btn-route-auto-close" title="Close">&#x2715;</button>
+                </div>
+
+                <!-- Option 1: XBoat -->
+                <div class="route-auto-option">
+                    <label class="route-auto-option-label">
+                        <input type="radio" name="route-auto-type" id="route-auto-type-xboat" value="xboat">
+                        Generate XBoat Routes
+                    </label>
+                    <div class="route-auto-config" id="route-auto-config-xboat">
+                        <div class="route-auto-param">
+                            <label>Max Jump (1–8):</label>
+                            <input type="number" id="route-auto-xboat-jump" min="1" max="8" value="4">
+                        </div>
+                        <div class="route-auto-param">
+                            <label>Max Range (1–32):</label>
+                            <input type="number" id="route-auto-xboat-range" min="1" max="32" value="12">
+                        </div>
+                        <div class="route-auto-param">
+                            <label>Min Ix (0–8):</label>
+                            <input type="number" id="route-auto-xboat-min-ix" min="0" max="8" value="4">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Option 2: BTN Trade Routes -->
+                <div class="route-auto-option">
+                    <label class="route-auto-option-label">
+                        <input type="radio" name="route-auto-type" id="route-auto-type-btn" value="btn">
+                        Generate BTN Trade Routes
+                    </label>
+                    <div class="route-auto-config" id="route-auto-config-btn">
+                        <div class="route-auto-param">
+                            <label>Min BTN:</label>
+                            <input type="number" id="route-auto-btn-min" min="1" max="15" value="9">
+                        </div>
+                        <div class="route-auto-param">
+                            <label>Max Jump (1–6):</label>
+                            <input type="number" id="route-auto-btn-jump" min="1" max="6" value="4">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Option 3: Custom Point-to-Point -->
+                <div class="route-auto-option">
+                    <label class="route-auto-option-label">
+                        <input type="radio" name="route-auto-type" id="route-auto-type-p2p" value="p2p">
+                        Custom Point-to-Point
+                    </label>
+                    <div class="route-auto-config" id="route-auto-config-p2p">
+                        <div class="route-auto-param">
+                            <label>Start:</label>
+                            <div class="wac-wrap">
+                                <input type="text" id="route-auto-p2p-start" class="wac-input" placeholder="Name or hex ID">
+                                <div id="route-auto-p2p-start-drop" class="wac-dropdown"></div>
+                            </div>
+                        </div>
+                        <div class="route-auto-param">
+                            <label>End:</label>
+                            <div class="wac-wrap">
+                                <input type="text" id="route-auto-p2p-end" class="wac-input" placeholder="Name or hex ID">
+                                <div id="route-auto-p2p-end-drop" class="wac-dropdown"></div>
+                            </div>
+                        </div>
+                        <div id="route-auto-p2p-waypoints-section">
+                            <div id="route-auto-p2p-waypoints-label">Waypoints (optional — mandatory stops along the way):</div>
+                            <div id="route-auto-p2p-waypoints-list"></div>
+                            <button type="button" id="btn-p2p-add-waypoint" class="inline-link" style="font-size:0.8rem;">+ Add Waypoint</button>
+                        </div>
+                        <div class="route-auto-param">
+                            <label>Max Jump (1–6):</label>
+                            <input type="number" id="route-auto-p2p-jump" min="1" max="6" value="4">
+                        </div>
+                        <div id="route-auto-filter-summary-p2p" class="route-auto-filter-summary"></div>
+                    </div>
+                </div>
+
+                <!-- Option 4: Custom Network -->
+                <div class="route-auto-option">
+                    <label class="route-auto-option-label">
+                        <input type="radio" name="route-auto-type" id="route-auto-type-network" value="network">
+                        Custom Network
+                    </label>
+                    <div class="route-auto-config" id="route-auto-config-network">
+                        <div id="route-auto-filter-summary-network" class="route-auto-filter-summary"></div>
+                        <div class="route-auto-param">
+                            <label>Max Jump (1–6):</label>
+                            <input type="number" id="route-auto-network-jump" min="1" max="6" value="4">
+                        </div>
+                        <div class="route-auto-param">
+                            <label>Max Range (1–32):</label>
+                            <input type="number" id="route-auto-network-range" min="1" max="32" value="12">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="route-auto-actions">
+                    <button id="btn-route-auto-cancel" class="btn-cancel">Cancel</button>
+                    <button id="btn-route-auto-generate" class="btn-confirm" disabled>Generate</button>
+                </div>
+
+            </div><!-- end #route-auto-panel -->
+        </div>
+        <div class="route-window-footer">
+            <button id="btn-close-route-window-footer" class="btn-cancel" style="padding: 4px 12px; font-size: 0.8rem;">Close</button>
         </div>
     </div>
 

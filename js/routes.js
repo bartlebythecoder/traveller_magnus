@@ -32,6 +32,39 @@ function calculateT5Ix(base) {
     return Ix;
 }
 
+// Maps legacy type strings to their default route definition IDs.
+const ROUTE_TYPE_TO_ID = { 'Xboat': 1, 'Trade': 2, 'Secondary': 3 };
+
+/**
+ * Resolves the routeId for a segment being added.
+ * Standard types map to fixed IDs 1-3. Filter routes look up their
+ * groupId in routeDefinitions; if not found, a new definition is created.
+ */
+function resolveRouteId(type, extras) {
+    if (type !== 'Filter') return ROUTE_TYPE_TO_ID[type] || 1;
+
+    const defs = window.routeDefinitions || [];
+    const groupId = extras.groupId;
+    if (!groupId) return 4;
+
+    const existing = defs.find(d => d.groupId === groupId);
+    if (existing) return existing.id;
+
+    // Create a new route definition for this Filter group
+    const newId = defs.length > 0 ? Math.max(...defs.map(d => d.id)) + 1 : 4;
+    defs.push({
+        id: newId,
+        name: extras.name || groupId,
+        color: extras.color || '#ffffff',
+        shortcut: null,
+        visible: true,
+        automationRef: null,
+        groupId
+    });
+    window.routeDefinitions = defs;
+    return newId;
+}
+
 /**
  * Global helper to add a route with duplicate prevention.
  * @param {string}   id1    - First hex ID (will be sorted with id2)
@@ -54,7 +87,8 @@ function addRoute(id1, id2, type = "Trade", adjMap = null, extras = {}) {
     });
 
     if (!exists) {
-        window.sectorRoutes.push({ startId: sorted[0], endId: sorted[1], type, ...extras });
+        const routeId = resolveRouteId(type, extras);
+        window.sectorRoutes.push({ startId: sorted[0], endId: sorted[1], type, routeId, ...extras });
         if (adjMap) {
             if (!adjMap.has(id1)) adjMap.set(id1, []);
             if (!adjMap.has(id2)) adjMap.set(id2, []);
@@ -139,7 +173,7 @@ function _bfsPath(startId, endId, worlds, maxJump, worldById) {
  *     before longer ones, reducing redundant hops. Each found path's hops are
  *     added; addRoute() prevents duplicate edges.
  */
-function generateXboatRoutes(maxJump = 4, maxRange = 12) {
+function generateXboatRoutes(maxJump = 4, maxRange = 12, minIx = 4) {
     // Preserve Filter routes (Auto Routes, Point-to-Point) — only clear Xboat routes.
     window.sectorRoutes = (window.sectorRoutes || []).filter(r => r.type !== 'Xboat');
     const worlds = [];
@@ -148,13 +182,13 @@ function generateXboatRoutes(maxJump = 4, maxRange = 12) {
     // Step 1: Collect worlds and compute Ix
     hexStates.forEach((state, id) => {
         if (state.type !== 'SYSTEM_PRESENT') return;
-        const data = state.t5Data || state.mgt2eData || state.ctData;
+        const data = state.rttData || state.t5Data || state.mgt2eData || state.ctData;
         if (!data) return;
         const ix = calculateT5Ix(data);
         const coords = getHexCoords(id);
         const worldInfo = { id, q: coords.q, r: coords.r, ix };
         worlds.push(worldInfo);
-        if (ix >= 4) importantWorlds.push(worldInfo);
+        if (ix >= minIx) importantWorlds.push(worldInfo);
     });
 
     if (worlds.length === 0) return;
@@ -234,7 +268,7 @@ function generateXboatRoutes(maxJump = 4, maxRange = 12) {
  * @param {string}   name           - Display name shown in the Clear modal.
  * @returns {number} Number of route segments added.
  */
-function generateAutoRoutes(filteredHexIds, maxJump, maxRange, color, groupId, name) {
+function generateAutoRoutes(filteredHexIds, maxJump, maxRange, color, groupId, name, routeIdOverride = null) {
     if (!window.sectorRoutes) window.sectorRoutes = [];
 
     const filteredSet = new Set(filteredHexIds);
@@ -257,6 +291,7 @@ function generateAutoRoutes(filteredHexIds, maxJump, maxRange, color, groupId, n
     const worldById = new Map(worlds.map(w => [w.id, w]));
     const adj = new Map();
     const extras = { subtype: 'AutoRoute', color, groupId, name };
+    if (routeIdOverride != null) extras.routeId = routeIdOverride;
 
     // Step 1: Direct links between filtered worlds within maxJump
     for (let i = 0; i < endpointWorlds.length; i++) {
@@ -337,49 +372,61 @@ function clearAutoRouteGroup(groupId) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 /**
- * Generate a single Point-to-Point route from startId to endId via BFS.
+ * Generate a Point-to-Point route from startId to endId via BFS, with optional waypoints.
+ * Waypoints are mandatory intermediate stops; BFS runs independently on each leg.
  * Does NOT clear existing routes — appends to window.sectorRoutes.
  *
- * @param {string}   startId      - Starting hex ID.
- * @param {string}   endId        - Ending hex ID.
- * @param {number}   maxJump      - Max single-hop distance (hex units).
- * @param {string}   color        - CSS color string for this route.
- * @param {string}   groupId      - Unique ID (used for clearing).
- * @param {string}   name         - Display name shown in the Clear modal.
- * @param {boolean}  filteredOnly - If true, BFS traverses only filtered worlds
- *                                  (start and end are always included regardless).
- * @param {string[]} filteredHexIds - Hex IDs allowed as BFS waypoints (used when filteredOnly=true).
- * @returns {number|null} Number of segments added, or null if no path found.
+ * @param {string}   startId        - Starting hex ID.
+ * @param {string}   endId          - Ending hex ID.
+ * @param {number}   maxJump        - Max single-hop distance (hex units).
+ * @param {string}   color          - CSS color string for this route.
+ * @param {string}   groupId        - Unique ID (used for clearing).
+ * @param {string}   name           - Display name shown in the Clear modal.
+ * @param {boolean}  filteredOnly   - If true, BFS traverses only filtered worlds.
+ * @param {string[]} filteredHexIds - Hex IDs allowed as BFS traversal nodes (filteredOnly mode).
+ * @param {number|null} routeIdOverride - If set, overrides computed routeId on all segments.
+ * @param {string[]} waypointIds    - Ordered mandatory intermediate stops (default empty).
+ * @returns {number|null} Total segments added across all legs, or null if any leg has no path.
  */
-function generatePointToPointRoute(startId, endId, maxJump, color, groupId, name, filteredOnly = false, filteredHexIds = []) {
+function generatePointToPointRoute(startId, endId, maxJump, color, groupId, name, filteredOnly = false, filteredHexIds = [], routeIdOverride = null, waypointIds = []) {
     if (!window.sectorRoutes) window.sectorRoutes = [];
 
     const filteredSet = new Set(filteredHexIds);
+    // All mandatory stops are exempt from the filter requirement.
+    const allStops = new Set([startId, endId, ...waypointIds]);
     const worlds = [];
 
     hexStates.forEach((state, id) => {
         if (state.type !== 'SYSTEM_PRESENT') return;
         const data = state.rttData || state.t5Data || state.mgt2eData || state.ctData;
         if (!data) return;
-        // In filteredOnly mode, skip worlds that aren't filtered AND aren't start/end.
-        if (filteredOnly && !filteredSet.has(id) && id !== startId && id !== endId) return;
+        if (filteredOnly && !filteredSet.has(id) && !allStops.has(id)) return;
         const coords = getHexCoords(id);
         worlds.push({ id, q: coords.q, r: coords.r });
     });
 
     const worldById = new Map(worlds.map(w => [w.id, w]));
 
-    // Verify both endpoints exist as populated worlds.
-    if (!worldById.has(startId) || !worldById.has(endId)) return null;
-
-    const path = _bfsPath(startId, endId, worlds, maxJump, worldById);
-    if (!path) return null;
-
-    const extras = { subtype: 'PointToPoint', color, groupId, name };
-    for (let k = 0; k < path.length - 1; k++) {
-        addRoute(path[k], path[k + 1], 'Filter', null, extras);
+    // Verify all stops exist as populated worlds.
+    for (const stopId of allStops) {
+        if (!worldById.has(stopId)) return null;
     }
 
-    console.log(`Point-to-Point "${name}" (Jump-${maxJump}): ${path.length - 1} segment(s) from ${startId} to ${endId}.`);
-    return path.length - 1;
+    const stops = [startId, ...waypointIds, endId];
+    const extras = { subtype: 'PointToPoint', color, groupId, name };
+    if (routeIdOverride != null) extras.routeId = routeIdOverride;
+
+    let totalSegments = 0;
+    for (let i = 0; i < stops.length - 1; i++) {
+        const path = _bfsPath(stops[i], stops[i + 1], worlds, maxJump, worldById);
+        if (!path) return null;
+        for (let k = 0; k < path.length - 1; k++) {
+            addRoute(path[k], path[k + 1], 'Filter', null, extras);
+        }
+        totalSegments += path.length - 1;
+    }
+
+    const legDesc = waypointIds.length > 0 ? `, ${stops.length - 1} leg(s)` : '';
+    console.log(`Point-to-Point "${name}" (Jump-${maxJump}): ${totalSegments} segment(s) from ${startId} to ${endId}${legDesc}.`);
+    return totalSegments;
 }

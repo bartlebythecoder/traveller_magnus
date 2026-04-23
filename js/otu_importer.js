@@ -367,6 +367,11 @@
             }
         }
 
+        // Wipe existing Route 1 (Xboat) segments before populating from OTU metadata
+        if (window.sectorRoutes) {
+            window.sectorRoutes = window.sectorRoutes.filter(r => r.routeId !== 1 && r.type !== 'Xboat');
+        }
+
         // Parse all routes in a single pass after every sector is loaded,
         // so cross-sector routes can resolve both endpoints correctly.
         if (typeof parseAndAddOtuRoutes === 'function') {

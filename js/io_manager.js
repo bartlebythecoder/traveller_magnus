@@ -75,14 +75,15 @@ function setupSaveLoad() {
         hexStates.forEach((value, key) => { hexObj[key] = value; });
 
         const stateObj = {
-            version:     APP_VERSION,
+            version:          APP_VERSION,
             gridWidth,
             gridHeight,
-            routes:      window.sectorRoutes || [],
-            rules:       window.activeFilterRules || [], // legacy support
+            routes:           window.sectorRoutes || [],
+            routeDefinitions: window.routeDefinitions || [],
+            rules:            window.activeFilterRules || [], // legacy support
             aesthetics,
-            sectorNames: window.sectorNames || {},
-            hexStates:   hexObj
+            sectorNames:      window.sectorNames || {},
+            hexStates:        hexObj
         };
 
         // Toast before the blocking stringify so the UI doesn't appear frozen
@@ -289,9 +290,10 @@ async function clearCanvas() {
 
     // Clear all in-memory state
     hexStates.clear();
-    window.sectorRoutes = [];
-    window.undoStack    = [];
-    window.redoStack    = [];
+    window.sectorRoutes      = [];
+    window.routeDefinitions  = (typeof getDefaultRouteDefinitions === 'function') ? getDefaultRouteDefinitions() : [];
+    window.undoStack         = [];
+    window.redoStack         = [];
     selectedHexes.clear();
 
     // Re-centre camera on the fresh 7×5 canvas
@@ -331,6 +333,54 @@ function migrateLegacyIds(legacyHexStates, legacyRoutes) {
     }));
 
     return { hexStates: migratedHexStates, routes: migratedRoutes };
+}
+
+/**
+ * Migrates a segments array that predates routeDefinitions (v0.9.x and earlier).
+ * - Xboat → routeId 1, Trade → routeId 2, Secondary → routeId 3
+ * - Each unique Filter groupId → routeId 4, 5, ... with a definition built from the segment data
+ * Returns { routeDefinitions, routes } with routeId stamped on every segment.
+ */
+function migrateToRouteDefinitions(segments) {
+    const defs = (typeof getDefaultRouteDefinitions === 'function')
+        ? getDefaultRouteDefinitions()
+        : [
+            { id: 1, name: "XBoat Route",     color: "#00ff00", shortcut: "g", visible: true, automationRef: null },
+            { id: 2, name: "Trading Route",   color: "#ff0000", shortcut: "r", visible: true, automationRef: null },
+            { id: 3, name: "Secondary Route", color: "#ffff00", shortcut: "y", visible: true, automationRef: null }
+          ];
+
+    const groupIdToRouteId = {};
+    let nextId = 4;
+
+    const migratedSegments = (segments || []).map(seg => {
+        let routeId;
+        if (seg.type === 'Xboat')     routeId = 1;
+        else if (seg.type === 'Trade')     routeId = 2;
+        else if (seg.type === 'Secondary') routeId = 3;
+        else if (seg.type === 'Filter') {
+            const gid = seg.groupId || '_ungrouped';
+            if (groupIdToRouteId[gid] === undefined) {
+                groupIdToRouteId[gid] = nextId;
+                defs.push({
+                    id: nextId,
+                    name: seg.name || gid,
+                    color: seg.color || '#ffffff',
+                    shortcut: null,
+                    visible: true,
+                    automationRef: null,
+                    groupId: gid
+                });
+                nextId++;
+            }
+            routeId = groupIdToRouteId[gid];
+        } else {
+            routeId = 1;
+        }
+        return { ...seg, routeId };
+    });
+
+    return { routeDefinitions: defs, routes: migratedSegments };
 }
 
 function applyLoadedMapData(parsedData) {
@@ -376,7 +426,18 @@ function applyLoadedMapData(parsedData) {
             }
         }
 
-        window.sectorRoutes = parsedData.routes || [];
+        // Restore routes — migrate to routeDefinitions model if save predates v0.10.0
+        if (parsedData.routeDefinitions && parsedData.routeDefinitions.length > 0) {
+            window.routeDefinitions = parsedData.routeDefinitions;
+            window.sectorRoutes     = parsedData.routes || [];
+            if (typeof writeLogLine === 'function') writeLogLine(`JSON Load: Route definitions restored (${window.routeDefinitions.length} routes).`);
+        } else {
+            const migrated = migrateToRouteDefinitions(parsedData.routes || []);
+            window.routeDefinitions = migrated.routeDefinitions;
+            window.sectorRoutes     = migrated.routes;
+            if (typeof writeLogLine === 'function') writeLogLine(`JSON Load: Legacy routes migrated — ${window.routeDefinitions.length} route definition(s) created.`);
+        }
+
         window.sectorNames  = parsedData.sectorNames || {};
 
         // Priority Rule Capture: Use aesthetics.activeRules if available, else fallback to legacy field

@@ -2,8 +2,6 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-@agent.md
-
 ## Project Overview
 
 **"As Above, So Below"** is a browser-based hex map tool for generating star systems across four Traveller RPG editions: Classic Traveller (CT), Mongoose Traveller 2nd Edition (MgT2E), Traveller 5 (T5), and Revised Traveller (RTT). It runs as a single HTML file (`hex_map.html`) with vanilla JavaScript — no build step, no framework, no bundler.
@@ -73,3 +71,4 @@ When bumping the version, update these locations (see `directives/update_version
 1. `js/core.js` — `APP_VERSION` and `APP_BANNER` constants
 2. `README.md` — version header
 3. `changelog.md` — add entry at top with date and description
+4. `hex_map.html` — update entries on splash screen and shortcut help screen

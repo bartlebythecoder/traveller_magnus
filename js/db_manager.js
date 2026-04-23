@@ -77,6 +77,17 @@
             if (Array.isArray(appState.routes))               window.sectorRoutes   = appState.routes;
             if (typeof appState.autoRouteCounter === 'number') window.autoRouteCounter = appState.autoRouteCounter;
 
+            // Restore routeDefinitions, or migrate from legacy segments if missing
+            if (Array.isArray(appState.routeDefinitions) && appState.routeDefinitions.length > 0) {
+                window.routeDefinitions = appState.routeDefinitions;
+            } else if (Array.isArray(appState.routes) && appState.routes.length > 0 && typeof migrateToRouteDefinitions === 'function') {
+                const migrated = migrateToRouteDefinitions(appState.routes);
+                window.routeDefinitions = migrated.routeDefinitions;
+                window.sectorRoutes     = migrated.routes;
+            } else {
+                window.routeDefinitions = (typeof getDefaultRouteDefinitions === 'function') ? getDefaultRouteDefinitions() : [];
+            }
+
             // Load hex states
             const hexCount = await new Promise((resolve) => {
                 const tx    = db.transaction(STORE_HEX, 'readonly');
@@ -182,6 +193,7 @@
             _syncTimer = null;
             syncAllHexes();
             saveRoutes();
+            saveRouteDefinitions();
         }, 2000);
     }
 
@@ -195,6 +207,19 @@
             tx.objectStore(STORE_APP).put(window.sectorRoutes || [], 'routes');
         } catch (err) {
             console.warn('[DB] saveRoutes failed:', err);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Persist route definitions
+    // -------------------------------------------------------------------------
+    async function saveRouteDefinitions() {
+        try {
+            const db = await _openDB();
+            const tx = db.transaction(STORE_APP, 'readwrite');
+            tx.objectStore(STORE_APP).put(window.routeDefinitions || [], 'routeDefinitions');
+        } catch (err) {
+            console.warn('[DB] saveRouteDefinitions failed:', err);
         }
     }
 
@@ -282,6 +307,7 @@
         syncAllHexes,
         scheduleSyncAll,
         saveRoutes,
+        saveRouteDefinitions,
         saveGridDimensions,
         saveAutoRouteCounter,
         clearDB,

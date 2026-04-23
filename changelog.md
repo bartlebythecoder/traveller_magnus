@@ -1,6 +1,8 @@
 # Changelog
 
-### [v0.9.3.2] - In Progress
+### [v0.10.0] - In Progress
+
+### [v0.9.3.2] - 2026-04-21
 1. **Mongoose Orbit Placement Corrected:** The Mongoose 2E engine now selects the correct orbit-placement method based on the system's configuration. Standard systems place the reference orbit near the habitable zone.  
 2. **OTU X-Boat Routes on Import:** When importing sectors from TravellerMap, the tool now also downloads each sector's official route data and displays the X-boat routes on the map as green lines. Routes that cross sector boundaries are correctly resolved. Route visibility can be toggled on and off using the existing Filter window controls.
 

@@ -12,8 +12,9 @@ function setupKeyboardShortcuts() {
         const key = e.key.toLowerCase();
         keysDown.add(key);
 
-        // Prevent default for routing keys
-        if (['g', 'r', 'y'].includes(key)) {
+        // Prevent default for route shortcut keys (dynamic from definitions) and R
+        const routeShortcuts = (window.routeDefinitions || []).map(d => d.shortcut).filter(s => s && s.length === 1);
+        if (key === 'r' || routeShortcuts.includes(key)) {
             e.preventDefault();
         }
 
@@ -90,12 +91,20 @@ function setupKeyboardShortcuts() {
                 closeFilterModal();
                 return;
             }
+            const routeWindow = document.getElementById('route-window');
+            if (routeWindow && routeWindow.classList.contains('visible')) {
+                window.closeRouteWindow();
+                return;
+            }
 
             // Cleanup
             deselectAllHexes();
         } else if (key === 'f') {
             e.preventDefault();
             toggleFilterModal();
+        } else if (key === 'r') {
+            e.preventDefault();
+            if (typeof window.toggleRouteWindow === 'function') window.toggleRouteWindow();
         } else if (e.ctrlKey && key === 'z') {
             e.preventDefault();
             if (e.shiftKey) {

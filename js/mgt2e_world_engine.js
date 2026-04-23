@@ -105,18 +105,37 @@
         if (!isManual(body, 'density')) body.density = parseFloat(baseDensity.toFixed(2));
         tResult('Density', body.density.toFixed(2), 'MgT2E 2.1: Composition & Gravity');
 
-        // 4. Calculate Physics using MgT2EMath
-        if (!isManual(body, 'gravity')) body.gravity = parseFloat(MgT2EMath.calculateGravity(body.density, mathSize).toFixed(3));
-        writeLogLine(`  Gravity Formula: Density(${body.density.toFixed(2)}) * (Size(${mathSize})/8) = ${body.gravity.toFixed(3)} G`);
+        // 4. Roll Diameter from worldSizeTable
+        if (!isManual(body, 'diamKm')) {
+            const sizeKey = String(body.size).toUpperCase();
+            const sizeEntry = MgT2EData.stellar.worldSizeTable.find(e => e.size === sizeKey);
+            if (sizeEntry && sizeEntry.minDiameterKm !== null) {
+                const minD = sizeEntry.minDiameterKm;
+                const maxD = sizeEntry.maxDiameterKm;
+                body.diamKm = Math.floor(rng() * (maxD - minD + 1)) + minD;
+                writeLogLine(`  Diameter Roll: Size(${body.size}) range [${minD} - ${maxD}] km → rolled ${body.diamKm} km`);
+            } else {
+                body.diamKm = 0;
+                writeLogLine(`  Diameter Roll: Size(${body.size}) has no diameter range — set to 0`);
+            }
+        } else {
+            writeLogLine(`  Diameter: ${body.diamKm} km (manual override)`);
+        }
+        tResult('Diameter (km)', body.diamKm, 'MgT2E 2.1: Physical Foundations');
+
+        // 5. Calculate Physics using MgT2EMath (diameter-based)
+        const diamRatio = (body.diamKm / 12742).toFixed(4);
+        if (!isManual(body, 'gravity')) body.gravity = parseFloat(MgT2EMath.calculateGravity(body.density, body.diamKm).toFixed(3));
+        writeLogLine(`  Gravity Formula: Density(${body.density.toFixed(2)}) × (DiamKm(${body.diamKm}) / 12742) [ratio=${diamRatio}] = ${body.gravity.toFixed(3)} G`);
         tResult('Gravity (G)', body.gravity.toFixed(3), 'MgT2E 2.1: Composition & Gravity');
 
-        if (!isManual(body, 'mass')) body.mass = parseFloat(MgT2EMath.calculateMass(body.density, mathSize).toFixed(4));
-        writeLogLine(`  Mass Formula: Density(${body.density.toFixed(2)}) * (Size(${mathSize})/8)^3 = ${body.mass.toFixed(4)} Earths`);
+        if (!isManual(body, 'mass')) body.mass = parseFloat(MgT2EMath.calculateMass(body.density, body.diamKm).toFixed(4));
+        writeLogLine(`  Mass Formula: Density(${body.density.toFixed(2)}) × (DiamKm(${body.diamKm}) / 12742)³ [ratio=${diamRatio}] = ${body.mass.toFixed(4)} M⊕`);
         tResult('Mass (Earths)', body.mass.toFixed(4), 'MgT2E 2.1: Composition & Gravity');
 
-        // 5. Orbital Velocity & Escape Velocity
-        body.escapeVel = MgT2EMath.calculateEscapeVelocity(body.mass, mathSize);
-        writeLogLine(`  Escape Velocity Formula: sqrt(Mass(${body.mass.toFixed(4)}) / (Size(${mathSize})/8)) * 11186 = ${body.escapeVel.toFixed(2)} km/s`);
+        // 6. Orbital Velocity & Escape Velocity
+        body.escapeVel = MgT2EMath.calculateEscapeVelocity(body.mass, body.diamKm);
+        writeLogLine(`  Escape Velocity Formula: sqrt(Mass(${body.mass.toFixed(4)}) / (DiamKm(${body.diamKm}) / 12742)) [ratio=${diamRatio}] × 11186 = ${body.escapeVel.toFixed(2)} km/s`);
         tResult('Escape Velocity (km/s)', body.escapeVel.toFixed(2), 'MgT2E 2.1: Composition & Gravity');
 
         body.orbitalVelSurface = MgT2EMath.calculateOrbitalVelocity(body.escapeVel);
@@ -268,7 +287,6 @@
                             parsedSize = 1;
                         }
                         const mathSize = (typeof body.size === 'string' && body.size !== 'GG' && body.size !== 'S' && body.size !== 'R') ? parsedSize : (Number(body.size) || 1);
-                        body.diamKm = body.diamKm || (mathSize * 1600);
                         calculateTerrestrialPhysical(body, body.type, sys);
                     }
                 } else if (body.type === 'Planetoid Belt') {
@@ -348,20 +366,13 @@
                     const orbitMkm = (worldDistAU * 149597870) / 1000000;
                     tResult("Orbit Distance", `${worldDistAU.toFixed(2)} AU (${orbitMkm.toFixed(1)} M km)`);
 
-                    let worldSize = 0;
-                    if (w.type === 'Gas Giant') {
-                        worldSize = (w.diamKm || 0) / 1600;
-                    } else {
-                        worldSize = (typeof w.size === 'string' && w.size !== 'GG') ? parseInt(w.size, 16) : (Number(w.size) || 0);
-                    }
-
-                    const world100D = (worldSize * 160000) / 1000000;
+                    const world100D = (w.diamKm || 0) * 100 / 1000000;
                     tResult("World 100D Limit", `${world100D.toFixed(2)} M km`);
 
                     // Stellar Masking Eligibility
                     if (typeof UniversalMath !== 'undefined' && UniversalMath.isMaskingEligible) {
                         const starDiam = primary ? primary.diam : 1.0;
-                        const isEligible = UniversalMath.isMaskingEligible(starDiam, worldDistAU, worldSize);
+                        const isEligible = UniversalMath.isMaskingEligible(starDiam, worldDistAU, w.size, w.diamKm);
                         tResult("Stellar Masking", isEligible ? "ELIGIBLE" : "Ineligible");
                     }
                 }
@@ -614,7 +625,7 @@
                         w.moons[mn].retrograde = (roll2D() + eMod >= 10);
 
                         // Fallback handling if diamKm hasn't been instantiated yet (prevents NaN bugs)
-                        let safeDiam = w.diamKm || ((w.size === 'S' || w.size === 'R' ? 0 : w.size) * 1600) || 1600;
+                        let safeDiam = w.diamKm || 1600;
                         let moonKm = pdTarget * safeDiam;
                         w.moons[mn].periodHrs = Math.sqrt(Math.pow(moonKm, 3) / w.mass) / 361730;
                         
@@ -631,7 +642,7 @@
                         if ((w.moons[m].pd - w.moons[m - 1].pd) < 1.25) {
                             w.moons[m].pd = w.moons[m - 1].pd + 1.25;
                             // Recalculate period if pushed
-                            let safeDiam = w.diamKm || ((w.size === 'S' || w.size === 'R' ? 0 : w.size) * 1600) || 1600;
+                            let safeDiam = w.diamKm || 1600;
                             let moonKm = w.moons[m].pd * safeDiam;
                             w.moons[m].periodHrs = Math.sqrt(Math.pow(moonKm, 3) / w.mass) / 361730;
                         }
@@ -714,11 +725,11 @@
             else if (w.size === 'R' || w.size === 'r' || w.size === 'GG') mathSize = 0;
             else if (typeof w.size === 'string') mathSize = (typeof UniversalMath !== 'undefined' && UniversalMath.fromUWPChar) ? UniversalMath.fromUWPChar(w.size) : parseInt(w.size, 16) || 0;
             
-            w.diameterTerra = (w.diamKm || (mathSize * 1600)) / 12742;
-            let bodyMass = w.mass !== undefined ? w.mass : Math.pow(mathSize / 8, 3);
-            w.maxEscapeValue = MgT2EMath.calculateMaxEscapeValue(bodyMass, w.diamKm || (mathSize * 1600), w.meanTempK);
+            w.diameterTerra = (w.diamKm || 0) / 12742;
+            let bodyMass = w.mass !== undefined ? w.mass : Math.pow((w.diamKm || 0) / 12742, 3);
+            w.maxEscapeValue = MgT2EMath.calculateMaxEscapeValue(bodyMass, w.diamKm || 0, w.meanTempK);
             if (isNaN(w.maxEscapeValue)) {
-                if (window.isLoggingEnabled) writeLogLine(`[Engine Error] [MgT2E World] generateAtmospherics: maxEscapeValue is NaN. Defaults applied. bodyMass: ${bodyMass}, diamKm: ${w.diamKm || (mathSize * 1600)}, temp: ${w.meanTempK}. mathSize: ${mathSize}, w.size: ${w.size}`);
+                if (window.isLoggingEnabled) writeLogLine(`[Engine Error] [MgT2E World] generateAtmospherics: maxEscapeValue is NaN. Defaults applied. bodyMass: ${bodyMass}, diamKm: ${w.diamKm}, temp: ${w.meanTempK}, w.size: ${w.size}`);
                 w.maxEscapeValue = 0;
             }
             tResult('Max Escape Value', w.maxEscapeValue.toFixed(3));
@@ -1177,8 +1188,8 @@
                 // Exotic Gas Retention (DPM)
                 tSection('Exotic Gas Retention (DPM)');
                 let massTerra = w.mass || 0.001;
-                let diamTerra = w.diamKm ? (w.diamKm / 12742) : (w.size * 1600 / 12742) || 0.001;
-                w.maxEscapeValue = MgT2EMath.calculateMaxEscapeValue(massTerra, w.diamKm || (w.size * 1600), w.meanTempK);
+                let diamTerra = (w.diamKm || 0) / 12742 || 0.001;
+                w.maxEscapeValue = MgT2EMath.calculateMaxEscapeValue(massTerra, w.diamKm || 0, w.meanTempK);
 
                 const dpmGasData = MgT2EData.atmosphereExtended.gasRetentionData;
 
@@ -1299,8 +1310,14 @@
                 tDM('Atm Mod', w.atmCode);
             }
 
-            w.hydroPercent = MGT2E_HYDRO_RANGES[w.hydroCode] + Math.floor(rng() * 10);
-            if (w.hydroCode === 0) w.hydroPercent = Math.floor(rng() * 6);
+            const _hd10 = Math.floor(rng() * 10) + 1;
+            if (w.hydroCode === 0) {
+                w.hydroPercent = Math.max(0, -5 + _hd10);
+            } else if (w.hydroCode === 10) {
+                w.hydroPercent = (typeof w.size === 'number' && w.size > 9) ? 100 : Math.min(100, 95 + _hd10);
+            } else {
+                w.hydroPercent = (w.hydroCode * 10 - 5) + _hd10;
+            }
             tResult('Final Hydro Code', toEHex(w.hydroCode), 'MgT2E 2.3: Hydrographics');
             tResult('Hydro Percentage', w.hydroPercent + '%', 'MgT2E 2.3: Hydrographics');
 

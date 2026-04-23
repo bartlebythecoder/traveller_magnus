@@ -303,6 +303,9 @@
 
         // 4. Request Redraw
         if (typeof draw === 'function') requestAnimationFrame(draw);
+
+        // 5. Refresh Route Manager filter summary if it's open
+        if (typeof window.updateRouteFilterSummary === 'function') window.updateRouteFilterSummary();
     };
 
     /**

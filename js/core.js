@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.9.3.2";
-const APP_BANNER = "v0.9.3.2: New: Fixed Mongoose Orbital Spread";
+const APP_VERSION = "v0.10.0";
+const APP_BANNER = "v0.10.0: New: Route Enhancements";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -43,6 +43,7 @@ currentMouseY = 0;
 isAltDragging = false;
 altDragStartId = null;
 altDragType = 'Trade';
+altDragRouteId = null;
 
 // Key state tracking
 keysDown = new Set();
@@ -62,9 +63,30 @@ window.sectorNames = {};
 // Hex state (Map of hexId -> STATE)
 hexStates = new Map();
 
-// Route state (Global array of route objects)
+// Route state (Global array of route segment objects)
 window.sectorRoutes = [];
 window.autoRouteCounter = 0; // Persistent sequential counter for Auto Route group names
+
+// Route definitions (ordered list of named/coloured route lanes)
+window.routeDefinitions = [];
+
+/**
+ * Returns the 9 default route definitions used on a fresh map.
+ * Route IDs are fixed and never change; name/color/shortcut are user-editable.
+ */
+function getDefaultRouteDefinitions() {
+    return [
+        { id: 1, name: "XBoat Route",     color: "#00ff00", shortcut: "1", visible: true, automationRef: null },
+        { id: 2, name: "Trading Route",   color: "#ff0000", shortcut: "2", visible: true, automationRef: null },
+        { id: 3, name: "Secondary Route", color: "#ffff00", shortcut: "3", visible: true, automationRef: null },
+        { id: 4, name: "Route 4",         color: "#ff8800", shortcut: "4", visible: true, automationRef: null },
+        { id: 5, name: "Route 5",         color: "#00ddff", shortcut: "5", visible: true, automationRef: null },
+        { id: 6, name: "Route 6",         color: "#ff44aa", shortcut: "6", visible: true, automationRef: null },
+        { id: 7, name: "Route 7",         color: "#aa66ff", shortcut: "7", visible: true, automationRef: null },
+        { id: 8, name: "Route 8",         color: "#66aaff", shortcut: "8", visible: true, automationRef: null },
+        { id: 9, name: "Route 9",         color: "#aaff44", shortcut: "9", visible: true, automationRef: null }
+    ];
+}
 
 // System Naming State
 namePool = [];

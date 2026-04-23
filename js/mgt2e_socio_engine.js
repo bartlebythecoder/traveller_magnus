@@ -297,6 +297,7 @@
             body.gov = 0;
             body.law = 0;
             body.tl = 0;
+            body.starport = 'Y';
         } else if (body.pop > 0) {
             const baseline = Math.max(0, mainworld.tl - 1);
             body.tl = baseline; // WBH RAW: Do not bump subordinate UWP TL to meet floor.
@@ -2047,6 +2048,7 @@
                 body.gov = 0; body.govCode = 0;
                 body.law = 0; body.lawCode = 0;
                 body.tl = 0;  body.tlCode = 0;
+                body.starport = 'Y';
                 syncUWP(body);
             }
         };

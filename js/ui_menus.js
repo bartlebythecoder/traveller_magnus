@@ -835,20 +835,13 @@ function setupGenerationHandlers() {
         requestAnimationFrame(draw);
     });
 
-    // X-Boat Routes — open options modal
-    document.getElementById('ctx-gen-xboat').addEventListener('click', () => {
-        document.getElementById('context-menu').classList.remove('visible');
-        document.getElementById('xboat-max-jump').value = 4;
-        document.getElementById('xboat-max-range').value = 12;
-        document.getElementById('xboat-modal').style.display = 'flex';
-    });
-
     document.getElementById('btn-xboat-confirm').addEventListener('click', () => {
         const maxJump  = Math.min(8,  Math.max(1,  parseInt(document.getElementById('xboat-max-jump').value,  10) || 4));
         const maxRange = Math.min(32, Math.max(1,  parseInt(document.getElementById('xboat-max-range').value, 10) || 4));
+        const minIx    = Math.min(8,  Math.max(0,  parseInt(document.getElementById('xboat-min-ix').value,    10) || 4));
         document.getElementById('xboat-modal').style.display = 'none';
         saveHistoryState('Generate Xboat Routes');
-        generateXboatRoutes(maxJump, maxRange);
+        generateXboatRoutes(maxJump, maxRange, minIx);
         const routeCount = window.sectorRoutes ? window.sectorRoutes.length : 0;
         showToast(`Interstellar Network Generated (Jump-${maxJump}, Range-${maxRange}): ${routeCount} routes.`, 3000);
         selectedHexes.clear();
@@ -1211,6 +1204,677 @@ function setupAutoRoutes() {
         });
     }
 }
+
+// ============================================================================
+// WORLD AUTOCOMPLETE
+// ============================================================================
+
+/**
+ * Attaches a name-based autocomplete dropdown to a text input.
+ * Matching worlds appear as "Name  HXXX" rows; selecting one writes the
+ * hex ID into the input. Typing a raw hex ID directly still works.
+ */
+function setupWorldAutocomplete(inputEl, dropdownEl) {
+    let activeIndex = -1;
+
+    function getMatches(query) {
+        if (!query) return [];
+        const q = query.toLowerCase();
+        const results = [];
+        hexStates.forEach((state, hexId) => {
+            if (state.type !== 'SYSTEM_PRESENT') return;
+            const name = state.name || '';
+            if (name.toLowerCase().startsWith(q)) results.push({ hexId, name });
+        });
+        return results.sort((a, b) => a.name.localeCompare(b.name)).slice(0, 10);
+    }
+
+    function renderDropdown(matches) {
+        dropdownEl.innerHTML = '';
+        if (matches.length === 0) { dropdownEl.style.display = 'none'; return; }
+        matches.forEach((m) => {
+            const item = document.createElement('div');
+            item.className = 'wac-item';
+            item.dataset.hexId = m.hexId;
+            item.innerHTML = `<span class="wac-name">${m.name}</span><span class="wac-hexid">${m.hexId}</span>`;
+            item.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                inputEl.value = m.hexId;
+                dropdownEl.style.display = 'none';
+                activeIndex = -1;
+            });
+            dropdownEl.appendChild(item);
+        });
+        activeIndex = -1;
+        dropdownEl.style.display = 'block';
+    }
+
+    function updateActive() {
+        [...dropdownEl.querySelectorAll('.wac-item')].forEach((el, i) =>
+            el.classList.toggle('wac-active', i === activeIndex));
+    }
+
+    inputEl.addEventListener('input', () => {
+        renderDropdown(getMatches(inputEl.value.trim()));
+    });
+
+    inputEl.addEventListener('keydown', (e) => {
+        const items = [...dropdownEl.querySelectorAll('.wac-item')];
+        if (dropdownEl.style.display === 'none' || items.length === 0) return;
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            activeIndex = Math.min(activeIndex + 1, items.length - 1);
+            updateActive();
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            activeIndex = Math.max(activeIndex - 1, 0);
+            updateActive();
+        } else if (e.key === 'Enter' && activeIndex >= 0) {
+            e.preventDefault();
+            const hexId = items[activeIndex]?.dataset.hexId;
+            if (hexId) { inputEl.value = hexId; dropdownEl.style.display = 'none'; activeIndex = -1; }
+        } else if (e.key === 'Escape') {
+            dropdownEl.style.display = 'none'; activeIndex = -1;
+        }
+    });
+
+    inputEl.addEventListener('focus', () => {
+        const matches = getMatches(inputEl.value.trim());
+        if (matches.length > 0) renderDropdown(matches);
+    });
+
+    inputEl.addEventListener('blur', () => {
+        setTimeout(() => { dropdownEl.style.display = 'none'; activeIndex = -1; }, 150);
+    });
+}
+
+/**
+ * Resolves a P2P input value to a hex ID.
+ * Accepts a raw hex ID or a system name (case-insensitive, first match wins).
+ * Returns null if nothing matches.
+ */
+function resolveWorldInput(value) {
+    const v = value.trim();
+    if (!v) return null;
+    if (hexStates.has(v) && hexStates.get(v).type === 'SYSTEM_PRESENT') return v;
+    const q = v.toLowerCase();
+    let found = null;
+    hexStates.forEach((state, hexId) => {
+        if (found) return;
+        if (state.type === 'SYSTEM_PRESENT' && (state.name || '').toLowerCase() === q) found = hexId;
+    });
+    return found;
+}
+
+// ============================================================================
+// ROUTE SYSTEMS PANEL
+// ============================================================================
+
+function getRouteSystemList(routeId) {
+    const segments = (window.sectorRoutes || []).filter(r => r.routeId === routeId);
+    if (segments.length === 0) return { ordered: false, worlds: [] };
+
+    const isP2P = segments[0].subtype === 'PointToPoint';
+
+    if (isP2P) {
+        // Build adjacency map from segments
+        const adj = new Map();
+        segments.forEach(seg => {
+            if (!adj.has(seg.startId)) adj.set(seg.startId, []);
+            if (!adj.has(seg.endId))   adj.set(seg.endId,   []);
+            adj.get(seg.startId).push(seg.endId);
+            adj.get(seg.endId).push(seg.startId);
+        });
+
+        // Endpoints are nodes with exactly one neighbour (degree 1)
+        const endpoints = [...adj.keys()].filter(id => adj.get(id).length === 1);
+
+        // Guard: if not a clean chain, fall back to unordered
+        if (endpoints.length !== 2) {
+            const allIds = [...new Set(segments.flatMap(s => [s.startId, s.endId]))];
+            return { ordered: false, worlds: allIds };
+        }
+
+        // Walk the chain from one endpoint to the other
+        const path = [endpoints[0]];
+        const visited = new Set([endpoints[0]]);
+        let current = endpoints[0];
+        while (true) {
+            const next = (adj.get(current) || []).find(n => !visited.has(n));
+            if (!next) break;
+            path.push(next);
+            visited.add(next);
+            current = next;
+        }
+        return { ordered: true, worlds: path };
+    }
+
+    // Network / XBoat / AutoRoute — collect unique IDs, sort by world name
+    const allIds = [...new Set(segments.flatMap(s => [s.startId, s.endId]))];
+    allIds.sort((a, b) => {
+        const na = (hexStates.get(a) || {}).name || a;
+        const nb = (hexStates.get(b) || {}).name || b;
+        return na.localeCompare(nb);
+    });
+    return { ordered: false, worlds: allIds };
+}
+
+window.openRouteSystemsPanel = function (routeId, routeName) {
+    window.closeRouteAutoPanel();
+
+    const panel   = document.getElementById('route-systems-panel');
+    const nameEl  = document.getElementById('route-systems-panel-name');
+    const listEl  = document.getElementById('route-systems-list');
+    const footerEl = document.getElementById('route-systems-footer');
+    if (!panel || !nameEl || !listEl) return;
+
+    // Toggle off if already showing this route
+    if (panel.dataset.routeId === String(routeId) && panel.style.display !== 'none') {
+        window.closeRouteSystemsPanel();
+        return;
+    }
+
+    panel.dataset.routeId = String(routeId);
+    nameEl.textContent = routeName;
+
+    const { ordered, worlds } = getRouteSystemList(routeId);
+    listEl.innerHTML = '';
+
+    if (worlds.length === 0) {
+        listEl.innerHTML = '<div style="color:#555;font-style:italic;padding:4px 0;">No systems found.</div>';
+    } else {
+        worlds.forEach((hexId, i) => {
+            const state = hexStates.get(hexId);
+            const name  = (state && state.name) ? state.name : '(unnamed)';
+            const item  = document.createElement('div');
+            item.className = 'route-systems-item';
+            const marker = ordered ? `${i + 1}.` : '•';
+            item.innerHTML = `<span class="route-systems-item-num">${marker}</span>`
+                           + `<span class="route-systems-item-name">${name}</span>`
+                           + `<span class="route-systems-item-id">${hexId}</span>`;
+            listEl.appendChild(item);
+        });
+    }
+
+    const segCount = (window.sectorRoutes || []).filter(r => r.routeId === routeId).length;
+    footerEl.textContent = `${segCount} segment${segCount !== 1 ? 's' : ''} · ${worlds.length} world${worlds.length !== 1 ? 's' : ''}`;
+
+    panel.style.display = 'block';
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+};
+
+window.closeRouteSystemsPanel = function () {
+    const panel = document.getElementById('route-systems-panel');
+    if (!panel) return;
+    panel.style.display = 'none';
+    panel.dataset.routeId = '';
+};
+
+// ============================================================================
+// WAYPOINT HELPERS (P2P Route Builder)
+// ============================================================================
+
+function addWaypointRow() {
+    const list = document.getElementById('route-auto-p2p-waypoints-list');
+    if (!list) return;
+    const index = list.children.length + 1;
+
+    const row = document.createElement('div');
+    row.className = 'p2p-waypoint-row';
+
+    const wrap = document.createElement('div');
+    wrap.className = 'wac-wrap';
+    wrap.style.flex = '1';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'wac-input p2p-waypoint-input';
+    input.placeholder = `Waypoint ${index}`;
+
+    const drop = document.createElement('div');
+    drop.className = 'wac-dropdown';
+
+    wrap.appendChild(input);
+    wrap.appendChild(drop);
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'p2p-waypoint-remove';
+    removeBtn.title = 'Remove waypoint';
+    removeBtn.textContent = '×';
+    removeBtn.addEventListener('click', () => {
+        row.remove();
+        renumberWaypoints();
+    });
+
+    row.appendChild(wrap);
+    row.appendChild(removeBtn);
+    list.appendChild(row);
+
+    setupWorldAutocomplete(input, drop);
+    input.focus();
+}
+
+function renumberWaypoints() {
+    document.querySelectorAll('#route-auto-p2p-waypoints-list .p2p-waypoint-input').forEach((inp, i) => {
+        if (!inp.value) inp.placeholder = `Waypoint ${i + 1}`;
+    });
+}
+
+function collectWaypointRaws() {
+    return Array.from(document.querySelectorAll('#route-auto-p2p-waypoints-list .p2p-waypoint-input'))
+        .map(inp => inp.value.trim())
+        .filter(v => v !== '');
+}
+
+// ============================================================================
+// ROUTE WINDOW
+// ============================================================================
+
+function setupRouteWindow() {
+    const closeBtn = document.getElementById('btn-close-route-window');
+    if (closeBtn) closeBtn.addEventListener('click', window.closeRouteWindow);
+
+    const closeBtnFooter = document.getElementById('btn-close-route-window-footer');
+    if (closeBtnFooter) closeBtnFooter.addEventListener('click', window.closeRouteWindow);
+
+    const ctxBtn = document.getElementById('ctx-open-route-window');
+    if (ctxBtn) {
+        ctxBtn.addEventListener('click', () => {
+            document.getElementById('context-menu').classList.remove('visible');
+            window.toggleRouteWindow();
+        });
+    }
+
+    const autoPanelClose = document.getElementById('btn-route-auto-close');
+    if (autoPanelClose) autoPanelClose.addEventListener('click', window.closeRouteAutoPanel);
+
+    const sysPanelClose = document.getElementById('btn-route-systems-close');
+    if (sysPanelClose) sysPanelClose.addEventListener('click', window.closeRouteSystemsPanel);
+
+    const autoPanelCancel = document.getElementById('btn-route-auto-cancel');
+    if (autoPanelCancel) autoPanelCancel.addEventListener('click', window.closeRouteAutoPanel);
+
+    // Radio toggle: accordion open/close + enable Generate
+    document.querySelectorAll('input[name="route-auto-type"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            document.querySelectorAll('.route-auto-option').forEach(opt => opt.classList.remove('open'));
+            const parentOption = radio.closest('.route-auto-option');
+            if (parentOption) parentOption.classList.add('open');
+            if (radio.value === 'p2p' || radio.value === 'network') {
+                window.updateRouteFilterSummary();
+            }
+            const genBtn = document.getElementById('btn-route-auto-generate');
+            if (genBtn) genBtn.disabled = false;
+        });
+    });
+
+    // Generate button stub — logs config payload; replaced per-type in later phases
+    const genBtn = document.getElementById('btn-route-auto-generate');
+    if (genBtn) {
+        genBtn.addEventListener('click', () => {
+            const panel = document.getElementById('route-auto-panel');
+            const routeId = parseInt(panel.dataset.targetRouteId, 10);
+            const routeDef = (window.routeDefinitions || []).find(d => d.id === routeId);
+            const routeName = routeDef ? routeDef.name : `Route #${routeId}`;
+            const type = (document.querySelector('input[name="route-auto-type"]:checked') || {}).value;
+
+            if (!type) {
+                showToast('Select an automation type first.', 2000);
+                return;
+            }
+
+            const configs = {
+                xboat:   { maxJump:  parseInt(document.getElementById('route-auto-xboat-jump').value, 10),
+                           maxRange: parseInt(document.getElementById('route-auto-xboat-range').value, 10),
+                           minIx:    parseInt(document.getElementById('route-auto-xboat-min-ix').value, 10) },
+                btn:     { minBTN:   parseInt(document.getElementById('route-auto-btn-min').value, 10),
+                           maxJump:  parseInt(document.getElementById('route-auto-btn-jump').value, 10) },
+                p2p:     { startRaw: document.getElementById('route-auto-p2p-start').value,
+                           endRaw:   document.getElementById('route-auto-p2p-end').value,
+                           maxJump:  parseInt(document.getElementById('route-auto-p2p-jump').value, 10) },
+                network: { maxJump:  parseInt(document.getElementById('route-auto-network-jump').value, 10),
+                           maxRange: parseInt(document.getElementById('route-auto-network-range').value, 10),
+                           filterRules: window.activeFilterRules || [] }
+            };
+
+            if (type === 'xboat') {
+                const { maxJump, maxRange, minIx } = configs.xboat;
+                saveHistoryState('Generate Xboat Routes');
+                generateXboatRoutes(maxJump, maxRange, minIx);
+                if (window.dbManager) window.dbManager.saveRoutes();
+                requestAnimationFrame(draw);
+                window.closeRouteAutoPanel();
+                window.refreshRouteWindowCounts();
+                const count = (window.sectorRoutes || []).filter(r => r.type === 'Xboat').length;
+                showToast(`XBoat routes generated: ${count} segment(s) added to Route #1.`, 3000);
+                return;
+            }
+
+            if (type === 'network') {
+                if (!hasAnyActiveFilter()) {
+                    showToast('No filter is active. Apply a filter before generating a Custom Network.', 3000);
+                    return;
+                }
+                const filteredIds = getFilteredHexIds();
+                if (filteredIds.length === 0) {
+                    showToast('The current filter matches no worlds.', 2500);
+                    return;
+                }
+                const { maxJump, maxRange } = configs.network;
+                const groupId = `net_${routeId}`;
+                saveHistoryState(`Generate Custom Network: ${routeName}`);
+                window.sectorRoutes = (window.sectorRoutes || []).filter(r => r.routeId !== routeId);
+                const count = generateAutoRoutes(filteredIds, maxJump, maxRange, routeDef.color, groupId, routeName, routeId);
+                if (count === 0) {
+                    showToast('No route segments could be generated for the current filter.', 2500);
+                    return;
+                }
+                if (window.dbManager) window.dbManager.saveRoutes();
+                requestAnimationFrame(draw);
+                window.closeRouteAutoPanel();
+                window.refreshRouteWindowCounts();
+                showToast(`"${routeName}" generated: ${count} segment(s).`, 3000);
+                return;
+            }
+
+            if (type === 'p2p') {
+                const { startRaw, endRaw, maxJump } = configs.p2p;
+                const startId = resolveWorldInput(startRaw);
+                const endId   = resolveWorldInput(endRaw);
+                if (!startRaw.trim() || !endRaw.trim()) {
+                    showToast('Point-to-Point requires both a Start and End world.', 2500);
+                    return;
+                }
+                if (!startId) {
+                    showToast(`Cannot find world: "${startRaw.trim()}"`, 2500);
+                    return;
+                }
+                if (!endId) {
+                    showToast(`Cannot find world: "${endRaw.trim()}"`, 2500);
+                    return;
+                }
+                if (startId === endId) {
+                    showToast('Start and End must be different worlds.', 2500);
+                    return;
+                }
+
+                // Resolve waypoints
+                const waypointRaws = collectWaypointRaws();
+                const waypointIds = [];
+                for (let wi = 0; wi < waypointRaws.length; wi++) {
+                    const wpId = resolveWorldInput(waypointRaws[wi]);
+                    if (!wpId) {
+                        showToast(`Cannot find waypoint ${wi + 1}: "${waypointRaws[wi]}"`, 2500);
+                        return;
+                    }
+                    waypointIds.push(wpId);
+                }
+
+                const filteredIds = getFilteredHexIds();
+                const groupId = `p2p_${routeId}`;
+                saveHistoryState(`Generate Point-to-Point: ${routeName}`);
+                window.sectorRoutes = (window.sectorRoutes || []).filter(r => r.routeId !== routeId);
+                const count = generatePointToPointRoute(startId, endId, maxJump, routeDef.color, groupId, routeName, true, filteredIds, routeId, waypointIds);
+                if (count === null) {
+                    const wpNote = waypointIds.length > 0 ? ` via ${waypointIds.length} waypoint(s)` : '';
+                    showToast(`No path found from ${startId} to ${endId}${wpNote} within Jump-${maxJump}.`, 3000);
+                    return;
+                }
+                if (window.dbManager) window.dbManager.saveRoutes();
+                requestAnimationFrame(draw);
+                window.closeRouteAutoPanel();
+                window.refreshRouteWindowCounts();
+                const wpNote = waypointIds.length > 0 ? ` via ${waypointIds.length} waypoint(s)` : '';
+                showToast(`"${routeName}" generated: ${count} segment(s) from ${startId} to ${endId}${wpNote}.`, 3000);
+                return;
+            }
+
+            showToast(`[Stub] ${type.toUpperCase()} → "${routeName}" — not yet implemented.`, 3000);
+        });
+    }
+
+    // Wire world autocomplete to the P2P start/end inputs (runs once at init)
+    const p2pStartIn   = document.getElementById('route-auto-p2p-start');
+    const p2pStartDrop = document.getElementById('route-auto-p2p-start-drop');
+    const p2pEndIn     = document.getElementById('route-auto-p2p-end');
+    const p2pEndDrop   = document.getElementById('route-auto-p2p-end-drop');
+    if (p2pStartIn && p2pStartDrop) setupWorldAutocomplete(p2pStartIn, p2pStartDrop);
+    if (p2pEndIn   && p2pEndDrop)   setupWorldAutocomplete(p2pEndIn,   p2pEndDrop);
+
+    // Wire "Add Waypoint" button
+    const addWpBtn = document.getElementById('btn-p2p-add-waypoint');
+    if (addWpBtn) addWpBtn.addEventListener('click', addWaypointRow);
+}
+
+window.renderRouteWindow = function () {
+    const list = document.getElementById('route-window-list');
+    if (!list) return;
+    list.innerHTML = '';
+    window.closeRouteAutoPanel();
+    window.closeRouteSystemsPanel();
+
+    // Ensure exactly 9 definitions; pad with defaults for any missing slots
+    const allDefaults = typeof getDefaultRouteDefinitions === 'function' ? getDefaultRouteDefinitions() : [];
+    let padded = false;
+    while (window.routeDefinitions.length < 9) {
+        const nextId = window.routeDefinitions.length + 1;
+        const def = allDefaults.find(d => d.id === nextId);
+        window.routeDefinitions.push(def || { id: nextId, name: `Route ${nextId}`, color: '#ffffff', shortcut: String(nextId), visible: true, automationRef: null });
+        padded = true;
+    }
+    if (padded && window.dbManager) window.dbManager.saveRouteDefinitions();
+
+    const segCounts = new Map();
+    (window.sectorRoutes || []).forEach(r => {
+        if (r.routeId != null) segCounts.set(r.routeId, (segCounts.get(r.routeId) || 0) + 1);
+    });
+
+    const defs = window.routeDefinitions.slice(0, 9);
+    defs.forEach((def) => {
+        const segCount = segCounts.get(def.id) || 0;
+        const segClass = segCount > 0 ? 'used' : 'free';
+        const segLabel = segCount > 0 ? segCount : '&mdash;';
+        const row = document.createElement('div');
+        row.className = 'route-row';
+        row.dataset.routeId = def.id;
+        row.innerHTML = `
+            <span class="route-num">#${def.id}</span>
+            <span class="route-seg-count ${segClass}" title="${segCount} segment(s)">${segLabel}</span>
+            <input type="text" class="route-name-input" value="${def.name.replace(/"/g, '&quot;')}" title="Route name" />
+            <input type="color" class="route-color-swatch" value="${def.color}" title="Route color" />
+            <input type="text" class="route-shortcut-input" maxlength="1" placeholder="key" value="${def.shortcut || ''}" title="Shortcut key" />
+            <label style="display:flex;align-items:center;gap:3px;color:#c5c6c7;font-size:0.8rem;cursor:pointer;">
+                <input type="checkbox" class="route-visible-check" ${def.visible ? 'checked' : ''}> Vis
+            </label>
+            <button class="route-clear-btn" title="Remove all map segments for this route">C</button>
+            <button class="route-auto-btn" title="Set up automation for ${def.name}">&#9881; Auto</button>
+        `;
+        const nameIn  = row.querySelector('.route-name-input');
+        const colorIn = row.querySelector('.route-color-swatch');
+        const shortIn = row.querySelector('.route-shortcut-input');
+        const visIn   = row.querySelector('.route-visible-check');
+
+        nameIn.addEventListener('change', () => {
+            def.name = nameIn.value;
+            if (window.dbManager) window.dbManager.saveRouteDefinitions();
+            requestAnimationFrame(draw);
+        });
+        colorIn.addEventListener('input', () => {
+            def.color = colorIn.value;
+            if (window.dbManager) window.dbManager.saveRouteDefinitions();
+            requestAnimationFrame(draw);
+        });
+        shortIn.addEventListener('change', () => {
+            const RESERVED = ['f', 'r'];
+            const typed = shortIn.value.toLowerCase();
+            if (RESERVED.includes(typed)) {
+                showToast(`'${typed}' is reserved for a window shortcut.`, 2500);
+                shortIn.value = def.shortcut || '';
+                return;
+            }
+            def.shortcut = typed;
+            if (window.dbManager) window.dbManager.saveRouteDefinitions();
+        });
+        visIn.addEventListener('change', () => {
+            def.visible = visIn.checked;
+            if (window.dbManager) window.dbManager.saveRouteDefinitions();
+            requestAnimationFrame(draw);
+        });
+
+        // Segment-count pill: click to view route systems
+        const pill = row.querySelector('.route-seg-count');
+        if (pill && segCount > 0) {
+            pill.style.cursor = 'pointer';
+            pill.title = `${segCount} segment(s) — click to view systems`;
+            pill.addEventListener('click', () => window.openRouteSystemsPanel(def.id, def.name));
+        }
+
+        const autoBtn = row.querySelector('.route-auto-btn');
+        autoBtn.addEventListener('click', () => {
+            window.closeRouteSystemsPanel();
+            window.openRouteAutoPanel(def.id, def.name);
+        });
+
+        const clearBtn = row.querySelector('.route-clear-btn');
+        clearBtn.addEventListener('click', () => {
+            const segments = (window.sectorRoutes || []).filter(r => r.routeId === def.id);
+            if (segments.length === 0) {
+                showToast(`No segments to clear for "${def.name}".`, 2000);
+                return;
+            }
+            const confirmed = window.confirm(
+                `Clear all ${segments.length} segment(s) from "${def.name}"?\n\nThis can be undone with Ctrl+Z.`
+            );
+            if (!confirmed) return;
+            saveHistoryState(`Clear ${def.name}`);
+            window.sectorRoutes = window.sectorRoutes.filter(r => r.routeId !== def.id);
+            if (window.dbManager) window.dbManager.saveRoutes();
+            requestAnimationFrame(draw);
+            window.closeRouteSystemsPanel();
+            window.refreshRouteWindowCounts();
+            showToast(`Cleared ${segments.length} segment(s) from "${def.name}".`, 2000);
+        });
+
+        list.appendChild(row);
+    });
+};
+
+window.toggleRouteWindow = function () {
+    const win = document.getElementById('route-window');
+    if (!win) return;
+    if (win.classList.contains('visible')) {
+        window.closeRouteWindow();
+    } else {
+        window.renderRouteWindow();
+        win.classList.add('visible');
+    }
+};
+
+window.closeRouteWindow = function () {
+    const win = document.getElementById('route-window');
+    if (win) win.classList.remove('visible');
+};
+
+window.refreshRouteWindowCounts = function () {
+    const win = document.getElementById('route-window');
+    if (!win || !win.classList.contains('visible')) return;
+    const segCounts = new Map();
+    (window.sectorRoutes || []).forEach(r => {
+        if (r.routeId != null) segCounts.set(r.routeId, (segCounts.get(r.routeId) || 0) + 1);
+    });
+
+    // If the systems panel is open for a route that now has 0 segments, close it
+    const sysPanel = document.getElementById('route-systems-panel');
+    const sysPanelRouteId = sysPanel ? parseInt(sysPanel.dataset.routeId, 10) : null;
+
+    document.querySelectorAll('#route-window-list .route-row').forEach(row => {
+        const routeId = parseInt(row.dataset.routeId, 10);
+        const pill = row.querySelector('.route-seg-count');
+        if (!pill) return;
+        const count = segCounts.get(routeId) || 0;
+        pill.innerHTML = count > 0 ? count : '&mdash;';
+        pill.className = `route-seg-count ${count > 0 ? 'used' : 'free'}`;
+        if (count > 0) {
+            pill.style.cursor = 'pointer';
+            pill.title = `${count} segment(s) — click to view systems`;
+            if (!pill.dataset.listenerAttached) {
+                const def = (window.routeDefinitions || []).find(d => d.id === routeId);
+                const routeName = def ? def.name : `Route #${routeId}`;
+                pill.addEventListener('click', () => window.openRouteSystemsPanel(routeId, routeName));
+                pill.dataset.listenerAttached = 'true';
+            }
+        } else {
+            pill.style.cursor = '';
+            pill.title = '0 segment(s)';
+            if (routeId === sysPanelRouteId) window.closeRouteSystemsPanel();
+        }
+    });
+};
+
+window.openRouteAutoPanel = function (routeId, routeName) {
+    const panel = document.getElementById('route-auto-panel');
+    const nameEl = document.getElementById('route-auto-panel-route-name');
+    if (!panel || !nameEl) return;
+    panel.dataset.targetRouteId = routeId;
+    nameEl.textContent = routeName;
+    document.querySelectorAll('input[name="route-auto-type"]').forEach(r => r.checked = false);
+    document.querySelectorAll('.route-auto-option').forEach(opt => opt.classList.remove('open'));
+    document.getElementById('btn-route-auto-generate').disabled = true;
+
+    // Pre-populate P2P start/end from the current hex selection (1 or 2 hexes).
+    const selArray = typeof selectedHexes !== 'undefined' ? [...selectedHexes] : [];
+    const startIn = document.getElementById('route-auto-p2p-start');
+    const endIn   = document.getElementById('route-auto-p2p-end');
+    if (startIn) startIn.value = selArray[0] || '';
+    if (endIn)   endIn.value   = selArray[1] || '';
+
+    // Clear any waypoints from a previous session
+    const wpList = document.getElementById('route-auto-p2p-waypoints-list');
+    if (wpList) wpList.innerHTML = '';
+
+    panel.style.display = 'block';
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+};
+
+window.closeRouteAutoPanel = function () {
+    const panel = document.getElementById('route-auto-panel');
+    if (!panel) return;
+    panel.style.display = 'none';
+    panel.dataset.targetRouteId = '';
+    document.querySelectorAll('input[name="route-auto-type"]').forEach(r => r.checked = false);
+    document.querySelectorAll('.route-auto-option').forEach(opt => opt.classList.remove('open'));
+    const genBtn = document.getElementById('btn-route-auto-generate');
+    if (genBtn) genBtn.disabled = true;
+};
+
+window.updateRouteFilterSummary = function () {
+    const filterActive = hasAnyActiveFilter();
+    let html;
+
+    if (!filterActive) {
+        html = `<span class="filter-none">No active filter.</span> ` +
+               `<button class="inline-link" onclick="window.toggleFilterModal()">Open Filter</button>`;
+    } else {
+        // Count using the same source as getFilteredHexIds() — the isHiddenByFilter flag
+        // stamped by the filter bar. Styling rules (activeFilterRules) are intentionally
+        // excluded: they control display only and do not drive route generation.
+        let matchCount = 0;
+        if (typeof hexStates !== 'undefined') {
+            hexStates.forEach(state => {
+                if (state.type === 'SYSTEM_PRESENT' && !state.isHiddenByFilter) matchCount++;
+            });
+        }
+
+        html = `<span class="filter-active">${matchCount} world${matchCount !== 1 ? 's' : ''} match active filter</span>` +
+               `<div style="margin-top:5px;"><button class="inline-link" onclick="window.toggleFilterModal()">Edit Filter</button></div>`;
+    }
+
+    ['route-auto-filter-summary-p2p', 'route-auto-filter-summary-network'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = html;
+    });
+};
 
 // ============================================================================
 // SETTINGS PANEL

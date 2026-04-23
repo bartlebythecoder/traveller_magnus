@@ -97,32 +97,32 @@ function setupCanvasEvents() {
                 lastPaintedHexId = hexId;
                 requestAnimationFrame(draw);
             }
-        } else if (keysDown.has('g') || keysDown.has('r') || keysDown.has('y')) {
-            // G, R, or Y Key + Left-Click: Start Manual Route Creation
-            if (hexId) {
+        } else {
+            // Check if any held key is a route shortcut
+            const defs = window.routeDefinitions || [];
+            let activeDef = null;
+            for (const key of keysDown) {
+                const match = defs.find(d => d.shortcut && d.shortcut === key);
+                if (match) { activeDef = match; break; }
+            }
+
+            if (activeDef && hexId) {
+                // Route shortcut + Left-Click: Start Manual Route Creation
                 saveHistoryState('Manual Route');
                 isAltDragging = true;
                 altDragStartId = hexId;
-
-                if (keysDown.has('g')) {
-                    altDragType = 'Xboat';
-                    console.log("Routing Mode Active: Green (Xboat)");
-                } else if (keysDown.has('r')) {
-                    altDragType = 'Trade';
-                    console.log("Routing Mode Active: Red (Trade)");
-                } else if (keysDown.has('y')) {
-                    altDragType = 'Secondary';
-                    console.log("Routing Mode Active: Yellow (Secondary)");
-                }
-
+                altDragRouteId = activeDef.id;
+                const typeMap = { 1: 'Xboat', 2: 'Trade', 3: 'Secondary' };
+                altDragType = typeMap[activeDef.id] || 'Filter';
+                console.log(`Routing Mode Active: Route #${activeDef.id} (${activeDef.name})`);
                 requestAnimationFrame(draw);
+            } else {
+                // Plain Left-Click: ONLY Panning (No selection logic whatsoever)
+                isDragging = true;
+                lastMouseX = e.clientX;
+                lastMouseY = e.clientY;
+                mapCanvas.classList.add('dragging');
             }
-        } else {
-            // Plain Left-Click: ONLY Panning (No selection logic whatsoever)
-            isDragging = true;
-            lastMouseX = e.clientX;
-            lastMouseY = e.clientY;
-            mapCanvas.classList.add('dragging');
         }
     });
 
@@ -159,31 +159,37 @@ function setupCanvasEvents() {
 
     // 5. Mouse Up: Stop Actions entirely
     window.addEventListener('mouseup', (e) => {
-        if (isAltDragging && altDragStartId) {
+        if (isAltDragging && altDragStartId && altDragRouteId != null) {
             const world = getMouseWorldCoords(e);
             const coords = pixelToHex(world.x, world.y, baseHexSize);
             const endHexId = getHexId(coords.q, coords.r);
 
             if (endHexId && endHexId !== altDragStartId) {
-                // Toggle route
                 const sorted = [altDragStartId, endHexId].sort();
                 if (!window.sectorRoutes) window.sectorRoutes = [];
 
+                // Toggle: remove if the same routeId already exists on this segment
                 const existingIndex = window.sectorRoutes.findIndex(r =>
-                    (r.startId === sorted[0] && r.endId === sorted[1])
+                    r.startId === sorted[0] && r.endId === sorted[1] && r.routeId === altDragRouteId
                 );
 
                 if (existingIndex !== -1) {
                     window.sectorRoutes.splice(existingIndex, 1);
-                    console.log(`Route Removed: ${sorted[0]} to ${sorted[1]}`);
-                    showToast(`Route removed: ${sorted[0]} -> ${sorted[1]}`, 2000);
+                    console.log(`Route #${altDragRouteId} Removed: ${sorted[0]} to ${sorted[1]}`);
+                    showToast(`Route removed: ${sorted[0]} → ${sorted[1]}`, 2000);
                 } else {
-                    window.sectorRoutes.push({ startId: sorted[0], endId: sorted[1], type: altDragType });
-                    console.log(`${altDragType} Route Added: ${sorted[0]} to ${sorted[1]}`);
-                    const colorName = altDragType === 'Xboat' ? 'Green' : (altDragType === 'Trade' ? 'Red' : 'Yellow');
-                    showToast(`${colorName} Route added: ${sorted[0]} -> ${sorted[1]}`, 2000);
+                    const def = (window.routeDefinitions || []).find(d => d.id === altDragRouteId);
+                    const label = def ? def.name : `Route #${altDragRouteId}`;
+                    const typeMap = { 1: 'Xboat', 2: 'Trade', 3: 'Secondary' };
+                    const type = typeMap[altDragRouteId] || 'Filter';
+                    const routeObj = { startId: sorted[0], endId: sorted[1], type, routeId: altDragRouteId };
+                    if (type === 'Filter' && def) routeObj.color = def.color;
+                    window.sectorRoutes.push(routeObj);
+                    console.log(`${label} Added: ${sorted[0]} to ${sorted[1]}`);
+                    showToast(`${label}: ${sorted[0]} → ${sorted[1]}`, 2000);
                 }
                 if (window.dbManager) window.dbManager.saveRoutes();
+                if (window.refreshRouteWindowCounts) window.refreshRouteWindowCounts();
             }
         }
 
@@ -191,6 +197,7 @@ function setupCanvasEvents() {
         isPainting = false;
         isAltDragging = false;
         altDragStartId = null;
+        altDragRouteId = null;
         lastPaintedHexId = null;
         mapCanvas.classList.remove('dragging');
         requestAnimationFrame(draw);

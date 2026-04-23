@@ -389,6 +389,30 @@ const MgT2EData = {
 
 
 
+        // Diameter range (km) by size code. Roll a random integer between min and max (inclusive).
+        // Size 0 (no significant world) and R (ring) have no diameter calculation.
+        // Valid for sizes S through F only.
+        worldSizeTable: [
+            { size: "0", minDiameterKm: null, maxDiameterKm: null },
+            { size: "R", minDiameterKm: null, maxDiameterKm: null },
+            { size: "S", minDiameterKm: 400,   maxDiameterKm: 799   },
+            { size: "1", minDiameterKm: 800,   maxDiameterKm: 2399  },
+            { size: "2", minDiameterKm: 2400,  maxDiameterKm: 3999  },
+            { size: "3", minDiameterKm: 4000,  maxDiameterKm: 5599  },
+            { size: "4", minDiameterKm: 5600,  maxDiameterKm: 7199  },
+            { size: "5", minDiameterKm: 7200,  maxDiameterKm: 8799  },
+            { size: "6", minDiameterKm: 8800,  maxDiameterKm: 10399 },
+            { size: "7", minDiameterKm: 10400, maxDiameterKm: 11999 },
+            { size: "8", minDiameterKm: 12000, maxDiameterKm: 13599 },
+            { size: "9", minDiameterKm: 13600, maxDiameterKm: 15199 },
+            { size: "A", minDiameterKm: 15200, maxDiameterKm: 16799 },
+            { size: "B", minDiameterKm: 16800, maxDiameterKm: 18399 },
+            { size: "C", minDiameterKm: 18400, maxDiameterKm: 19999 },
+            { size: "D", minDiameterKm: 20000, maxDiameterKm: 21599 },
+            { size: "E", minDiameterKm: 21600, maxDiameterKm: 23199 },
+            { size: "F", minDiameterKm: 23200, maxDiameterKm: 24799 }
+        ],
+
         densityLookup: {
             "2": { "Exotic Ice": 0.03, "Mostly Ice": 0.18, "Mostly Rock": 0.50, "Rock and Metal": 0.82, "Mostly Metal": 1.15, "Compressed Metal": 1.50 },
             "3": { "Exotic Ice": 0.06, "Mostly Ice": 0.21, "Mostly Rock": 0.53, "Rock and Metal": 0.85, "Mostly Metal": 1.18, "Compressed Metal": 1.55 },

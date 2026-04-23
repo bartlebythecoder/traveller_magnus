@@ -283,6 +283,9 @@ function openHexEditor(hexId, e = null) {
         if (cont) cont.style.display = 'none';
     });
 
+    const mgtStellarCfgDiv = document.getElementById('mgt-stellar-config');
+    if (mgtStellarCfgDiv) mgtStellarCfgDiv.style.display = 'none';
+
     populateEditorAccordions(stateObj);
 
     // T5 Quick Stats
@@ -395,6 +398,25 @@ function populateEditorAccordions(stateObj) {
     // MgT2E Star System Tree
     if (stateObj.mgtSystem) {
         document.getElementById('acc-btn-mgt-system').style.display = 'flex';
+
+        // Stellar Configuration display
+        const _stellarCfgDiv = document.getElementById('mgt-stellar-config');
+        const _stellarCfgLines = document.getElementById('mgt-stellar-config-lines');
+        if (_stellarCfgDiv && _stellarCfgLines && stateObj.mgtSystem.stars && stateObj.mgtSystem.stars.length > 0) {
+            const _stars = stateObj.mgtSystem.stars;
+            const _lines = _stars
+                .filter(s => s.separation !== 'Companion')
+                .map(star => {
+                    const idx = _stars.indexOf(star);
+                    const companions = _stars.filter(c => c.separation === 'Companion' && c.parentStarIdx === idx);
+                    const compPart = companions.length > 0 ? ` (+${companions.map(c => c.name).join(', +')})` : '';
+                    const rolePart = star.role === 'Primary' ? '' : ` — ${star.role}`;
+                    return `<div>${star.name}${compPart}${rolePart}</div>`;
+                });
+            _stellarCfgLines.innerHTML = _lines.join('');
+            _stellarCfgDiv.style.display = 'block';
+        }
+
         const root = document.getElementById('editor-mgt-system-root');
         if (root) {
             root.innerHTML = '';
@@ -429,6 +451,16 @@ function populateEditorAccordions(stateObj) {
                 const raw = (m[field] !== undefined && m[field] !== null) ? m[field] : '';
                 const val = (raw !== '' && isFinite(raw)) ? Number(parseFloat(raw).toFixed(2)) : raw;
                 return `<input type="number" class="rtt-field-input${_mgtMc(m, field)}" data-mgt-field="${field}" data-mgt-widx="${widx}" data-mgt-subarray="${subarray}" data-mgt-midx="${midx}" value="${val}" min="${min}" max="${max}" step="any">`;
+            }
+            function _mgtKm(obj, field, widx) {
+                const raw = (obj[field] !== undefined && obj[field] !== null) ? obj[field] : '';
+                const val = (raw !== '' && isFinite(raw)) ? Math.round(raw).toLocaleString('en-US') : raw;
+                return `<input type="text" class="rtt-field-input${_mgtMc(obj, field)}" data-mgt-field="${field}" data-mgt-widx="${widx}" data-mgt-fmt="comma-int" value="${val}">`;
+            }
+            function _mgtMoonKm(m, field, widx, subarray, midx) {
+                const raw = (m[field] !== undefined && m[field] !== null) ? m[field] : '';
+                const val = (raw !== '' && isFinite(raw)) ? Math.round(raw).toLocaleString('en-US') : raw;
+                return `<input type="text" class="rtt-field-input${_mgtMc(m, field)}" data-mgt-field="${field}" data-mgt-widx="${widx}" data-mgt-subarray="${subarray}" data-mgt-midx="${midx}" data-mgt-fmt="comma-int" value="${val}">`;
             }
             function _mgtMoonText(m, field, widx, subarray, midx) {
                 const val = (m[field] !== undefined && m[field] !== null) ? String(m[field]).replace(/"/g, '&quot;') : '';
@@ -593,6 +625,7 @@ function populateEditorAccordions(stateObj) {
                         if (w.gravity != null) html += `<span>Gravity (G): ${_mgtNum(w, 'gravity', realWidx, 0, 100)}</span>`;
                         if (w.mass != null) html += `<span>Mass (M⊕): ${_mgtNum(w, 'mass', realWidx, 0, 100000)}</span>`;
                         if (w.type === 'Gas Giant' && w.diamTerra != null) html += `<span>Diameter (T⊕): ${_mgtNum(w, 'diamTerra', realWidx, 0, 100)}</span>`;
+                        if (w.type !== 'Gas Giant' && w.diamKm != null) html += `<span>Diameter (km): ${_mgtKm(w, 'diamKm', realWidx)}</span>`;
                         if (w.meanTempK != null) {
                             if (w.highTempK != null && w.lowTempK != null && !isNaN(w.highTempK) && !isNaN(w.lowTempK)) {
                                 html += `<span>Temp °C (mean): ${_mgtTempC(w, 'meanTempK', realWidx)}</span>`;
@@ -602,6 +635,7 @@ function populateEditorAccordions(stateObj) {
                                 html += `<span>Temp °C: ${_mgtTempC(w, 'meanTempK', realWidx)}</span>`;
                             }
                         }
+                        if (w.hydroPercent !== undefined) html += `<span>Hydro (%): ${_mgtNum(w, 'hydroPercent', realWidx, 0, 100)}</span>`;
                     }
 
                     if (w.solarDayHours != null) {
@@ -694,6 +728,7 @@ function populateEditorAccordions(stateObj) {
 
                                 if (m.gravity != null) html += `<span>Gravity (G): ${_mgtMoonNum(m, 'gravity', realWidx, 'moons', moonIdx, 0, 100)}</span>`;
                                 if (m.mass != null) html += `<span>Mass (M⊕): ${_mgtMoonNum(m, 'mass', realWidx, 'moons', moonIdx, 0, 100000)}</span>`;
+                                if (m.diamKm != null) html += `<span>Diameter (km): ${_mgtMoonKm(m, 'diamKm', realWidx, 'moons', moonIdx)}</span>`;
                                 if (m.meanTempK != null) {
                                     if (m.highTempK != null && m.lowTempK != null && !isNaN(m.highTempK) && !isNaN(m.lowTempK)) {
                                         html += `<span>Temp °C (mean): ${_mgtMoonTempC(m, 'meanTempK', realWidx, 'moons', moonIdx)}</span>`;
@@ -703,6 +738,7 @@ function populateEditorAccordions(stateObj) {
                                         html += `<span>Temp °C: ${_mgtMoonTempC(m, 'meanTempK', realWidx, 'moons', moonIdx)}</span>`;
                                     }
                                 }
+                                if (m.hydroPercent !== undefined) html += `<span>Hydro (%): ${_mgtMoonNum(m, 'hydroPercent', realWidx, 'moons', moonIdx, 0, 100)}</span>`;
                             }
 
                             if (m.solarDayHours != null) {
@@ -742,6 +778,7 @@ function populateEditorAccordions(stateObj) {
                             if (m.density != null) html += `<span>Density: ${_mgtMoonNum(m, 'density', realWidx, 'significantBodies', sigIdx, 0, 30)}</span>`;
                             if (m.gravity != null) html += `<span>Gravity (G): ${_mgtMoonNum(m, 'gravity', realWidx, 'significantBodies', sigIdx, 0, 100)}</span>`;
                             if (m.mass != null) html += `<span>Mass (M⊕): ${_mgtMoonNum(m, 'mass', realWidx, 'significantBodies', sigIdx, 0, 100000)}</span>`;
+                            if (m.diamKm != null) html += `<span>Diameter (km): ${_mgtMoonKm(m, 'diamKm', realWidx, 'significantBodies', sigIdx)}</span>`;
                             html += `</div></div></details>`;
                         });
                     }
@@ -2205,6 +2242,18 @@ function saveHexEditorChanges() {
             markManual(body, field);
             hexStates.set(editingHexId, stateObj);
             el.classList.add('is-manual');
+            return;
+        }
+
+        // ── Comma-formatted integer fields (type="text", data-mgt-fmt="comma-int") ──
+        if (el.dataset.mgtFmt === 'comma-int') {
+            const val = parseFloat(String(el.value).replace(/,/g, ''));
+            if (isNaN(val)) return;
+            body[field] = val;
+            markManual(body, field);
+            hexStates.set(editingHexId, stateObj);
+            el.classList.add('is-manual');
+            el.value = Math.round(val).toLocaleString('en-US');
             return;
         }
 

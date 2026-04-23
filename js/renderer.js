@@ -170,24 +170,50 @@ function draw() {
         ctx.lineWidth = 2 / zoom;
         const gap = 20;
 
-        // Harvest visibility toggles
-        const showGreen  = document.getElementById('filter-route-green')?.checked  ?? true;
-        const showRed    = document.getElementById('filter-route-red')?.checked    ?? true;
-        const showYellow = document.getElementById('filter-route-yellow')?.checked ?? true;
+        // Build definition map and per-route visibility helper
+        const defs       = window.routeDefinitions || [];
+        const defMap     = new Map(defs.map(d => [d.id, d]));
         const showFilter = document.getElementById('filter-route-filter')?.checked ?? true;
+
+        function isRouteVisible(r) {
+            if (r.routeId != null) {
+                const def = defMap.get(r.routeId);
+                if (def) return def.visible !== false;
+            }
+            if (r.type === 'Filter') return showFilter;
+            return true; // Legacy routes without routeId always shown
+        }
 
         // Pre-build segment usage map for side-by-side offset computation.
         // Only visible routes are included so offsets reflect what the user sees.
         const segmentUsage = new Map();
         window.sectorRoutes.forEach(r => {
-            const visible = r.type === 'Filter'    ? showFilter
-                          : r.type === 'Xboat'     ? showGreen
-                          : r.type === 'Trade'     ? showRed
-                          : r.type === 'Secondary' ? showYellow : true;
-            if (!visible) return;
+            if (!isRouteVisible(r)) return;
             const key = `${r.startId}|${r.endId}`;
             if (!segmentUsage.has(key)) segmentUsage.set(key, []);
             segmentUsage.get(key).push(r);
+        });
+
+        // Corridor usage: groups routes by departure hex + angle bucket (12 buckets = 15° each).
+        // Catches partial-overlap cases where two routes share a hex and direction but differ in endpoint.
+        const CORRIDOR_BUCKETS = 12;
+        const corridorUsage = new Map();
+        window.sectorRoutes.forEach(r => {
+            if (!isRouteVisible(r)) return;
+            const sc = getHexCoords(r.startId);
+            const ec = getHexCoords(r.endId);
+            if (!sc || !ec) return;
+            const sp = getHexPixel(sc.q, sc.r);
+            const ep = getHexPixel(ec.q, ec.r);
+            let angle = Math.atan2(ep.y - sp.y, ep.x - sp.x);
+            if (angle < 0) angle += Math.PI;
+            const bucket = Math.floor(angle / Math.PI * CORRIDOR_BUCKETS) % CORRIDOR_BUCKETS;
+            for (const hexId of [r.startId, r.endId]) {
+                const key = `${hexId}|${bucket}`;
+                if (!corridorUsage.has(key)) corridorUsage.set(key, []);
+                const arr = corridorUsage.get(key);
+                if (!arr.includes(r)) arr.push(r);
+            }
         });
 
         // Draw one route segment with perpendicular offset for side-by-side.
@@ -209,11 +235,21 @@ function draw() {
             let oy = 0;
 
             if (zoom >= 0.3) {
-                const siblings = segmentUsage.get(`${route.startId}|${route.endId}`) || [];
-                const count    = siblings.length;
+                let group = segmentUsage.get(`${route.startId}|${route.endId}`) || [];
+                if (group.length <= 1) {
+                    // Fall back to corridor group for partial-overlap detection
+                    let angle = Math.atan2(dy, dx);
+                    if (angle < 0) angle += Math.PI;
+                    const bucket = Math.floor(angle / Math.PI * CORRIDOR_BUCKETS) % CORRIDOR_BUCKETS;
+                    for (const hexId of [route.startId, route.endId]) {
+                        const cGroup = corridorUsage.get(`${hexId}|${bucket}`) || [];
+                        if (cGroup.length > group.length) group = cGroup;
+                    }
+                }
+                const count = group.length;
                 if (count > 1) {
-                    const idx    = siblings.indexOf(route);
-                    const offset = (idx - (count - 1) / 2) * 5; // 5 world-unit gap
+                    const idx    = group.indexOf(route);
+                    const offset = (idx - (count - 1) / 2) * 5;
                     ox = -uy * offset;
                     oy =  ux * offset;
                 }
@@ -223,14 +259,15 @@ function draw() {
             ctx.lineTo(ePx.x - ux * gap + ox, ePx.y - uy * gap + oy);
         }
 
-        // --- Filter routes first (below manual routes) ---
+        // --- Filter/Auto routes first (underneath definition-based routes) ---
         if (showFilter) {
-            const filterRoutes = window.sectorRoutes.filter(r => r.type === 'Filter');
+            const filterRoutes = window.sectorRoutes.filter(r => r.type === 'Filter' && isRouteVisible(r));
             if (filterRoutes.length > 0) {
-                // Group by color to minimise strokeStyle state changes
+                // Use definition color when available; fall back to per-route color
                 const byColor = new Map();
                 filterRoutes.forEach(r => {
-                    const c = r.color || '#ffffff';
+                    const def = r.routeId != null ? defMap.get(r.routeId) : null;
+                    const c = def ? def.color : (r.color || '#ffffff');
                     if (!byColor.has(c)) byColor.set(c, []);
                     byColor.get(c).push(r);
                 });
@@ -244,31 +281,34 @@ function draw() {
             }
         }
 
-        // --- Manual routes on top ---
-        const xboatRoutes     = window.sectorRoutes.filter(r => r.type === 'Xboat');
-        const tradeRoutes     = window.sectorRoutes.filter(r => r.type === 'Trade');
-        const secondaryRoutes = window.sectorRoutes.filter(r => r.type === 'Secondary');
+        // --- Definition-based routes on top (in definition order, color from definition) ---
+        defs.forEach(def => {
+            if (def.visible === false) return;
+            const defRoutes = window.sectorRoutes.filter(r => r.routeId === def.id && r.type !== 'Filter');
+            if (defRoutes.length === 0) return;
+            ctx.strokeStyle = def.color;
+            ctx.beginPath();
+            defRoutes.forEach(r => drawRouteSegment(r));
+            ctx.stroke();
+            if (typeof writeLogLine === 'function') writeLogLine(`Rendered ${defRoutes.length} "${def.name}" route(s).`);
+        });
 
-        if (xboatRoutes.length > 0 && showGreen) {
-            ctx.strokeStyle = '#00FF00';
-            ctx.beginPath();
-            xboatRoutes.forEach(r => drawRouteSegment(r));
-            ctx.stroke();
-            if (typeof writeLogLine === 'function') writeLogLine(`Rendered ${xboatRoutes.length} Green (Xboat) routes.`);
-        }
-        if (tradeRoutes.length > 0 && showRed) {
-            ctx.strokeStyle = '#FF0000';
-            ctx.beginPath();
-            tradeRoutes.forEach(r => drawRouteSegment(r));
-            ctx.stroke();
-            if (typeof writeLogLine === 'function') writeLogLine(`Rendered ${tradeRoutes.length} Red (Trade) routes.`);
-        }
-        if (secondaryRoutes.length > 0 && showYellow) {
-            ctx.strokeStyle = '#FFFF00';
-            ctx.beginPath();
-            secondaryRoutes.forEach(r => drawRouteSegment(r));
-            ctx.stroke();
-            if (typeof writeLogLine === 'function') writeLogLine(`Rendered ${secondaryRoutes.length} Yellow (Secondary) routes.`);
+        // --- Legacy fallback: routes with no routeId and non-Filter type ---
+        const legacyRoutes = window.sectorRoutes.filter(r => r.routeId == null && r.type !== 'Filter');
+        if (legacyRoutes.length > 0) {
+            const typeColors = { Xboat: '#00ff00', Trade: '#ff0000', Secondary: '#ffff00' };
+            const byType = new Map();
+            legacyRoutes.forEach(r => {
+                const t = r.type || 'unknown';
+                if (!byType.has(t)) byType.set(t, []);
+                byType.get(t).push(r);
+            });
+            byType.forEach((routes, type) => {
+                ctx.strokeStyle = typeColors[type] || '#ffffff';
+                ctx.beginPath();
+                routes.forEach(r => drawRouteSegment(r));
+                ctx.stroke();
+            });
         }
 
         ctx.restore();
@@ -281,9 +321,15 @@ function draw() {
             const sPx = getHexPixel(startCoords.q, startCoords.r);
             const worldMouse = { x: cameraX + currentMouseX / zoom, y: cameraY + currentMouseY / zoom };
 
-            let previewColor = 'rgba(0, 255, 0, 0.5)'; // Default green
-            if (altDragType === 'Trade') previewColor = 'rgba(255, 0, 0, 0.5)';
-            else if (altDragType === 'Secondary') previewColor = 'rgba(255, 255, 0, 0.5)';
+            let previewColor = 'rgba(128, 128, 128, 0.5)';
+            const previewDef = (window.routeDefinitions || []).find(d => d.id === altDragRouteId);
+            if (previewDef && previewDef.color) {
+                const hex = previewDef.color.replace('#', '');
+                const rCh = parseInt(hex.substring(0, 2), 16);
+                const gCh = parseInt(hex.substring(2, 4), 16);
+                const bCh = parseInt(hex.substring(4, 6), 16);
+                previewColor = `rgba(${rCh}, ${gCh}, ${bCh}, 0.5)`;
+            }
 
             ctx.save();
             ctx.strokeStyle = previewColor;

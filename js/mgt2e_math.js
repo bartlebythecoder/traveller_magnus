@@ -13,32 +13,32 @@ const MgT2EMath = {
     /**
      * Calculates planetary gravity in Gs.
      * @param {number} density - Density relative to Earth (1.0).
-     * @param {number} mathSize - The mathematical size value (UWP Size, or 0.375 for 'S').
+     * @param {number} diamKm - Diameter in km (Earth = 12,742 km).
      * @returns {number} Gravity in Gs.
      */
-    calculateGravity: function (density, mathSize) {
-        return density * (mathSize / 8);
+    calculateGravity: function (density, diamKm) {
+        return density * (diamKm / 12742);
     },
 
     /**
      * Calculates planetary mass in Earth masses.
      * @param {number} density - Density relative to Earth.
-     * @param {number} mathSize - The mathematical size value.
+     * @param {number} diamKm - Diameter in km (Earth = 12,742 km).
      * @returns {number} Mass in Earths.
      */
-    calculateMass: function (density, mathSize) {
-        return density * Math.pow(mathSize / 8, 3);
+    calculateMass: function (density, diamKm) {
+        return density * Math.pow(diamKm / 12742, 3);
     },
 
     /**
      * Calculates planetary escape velocity.
      * @param {number} massEarths - Mass in Earths.
-     * @param {number} mathSize - The mathematical size value.
+     * @param {number} diamKm - Diameter in km (Earth = 12,742 km).
      * @returns {number} Escape velocity in km/s.
      */
-    calculateEscapeVelocity: function (massEarths, mathSize) {
-        if (mathSize === 0) return 0;
-        return Math.sqrt(massEarths / (mathSize / 8)) * 11186;
+    calculateEscapeVelocity: function (massEarths, diamKm) {
+        if (diamKm <= 0) return 0;
+        return Math.sqrt(massEarths / (diamKm / 12742)) * 11186;
     },
 
     /**

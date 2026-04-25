@@ -434,9 +434,9 @@ function populateEditorAccordions(stateObj) {
                 const val = (star[field] !== undefined && star[field] !== null) ? String(star[field]).replace(/"/g, '&quot;') : '';
                 return `<input type="text" class="rtt-field-input${_mgtMc(star, field)}" data-mgt-field="${field}" data-mgt-sidx="${sidx}" value="${val}">`;
             }
-            function _mgtNum(obj, field, widx, min, max) {
+            function _mgtNum(obj, field, widx, min, max, decimals = 2) {
                 const raw = (obj[field] !== undefined && obj[field] !== null) ? obj[field] : '';
-                const val = (raw !== '' && isFinite(raw)) ? Number(parseFloat(raw).toFixed(2)) : raw;
+                const val = (raw !== '' && isFinite(raw)) ? Number(parseFloat(raw).toFixed(decimals)) : raw;
                 return `<input type="number" class="rtt-field-input${_mgtMc(obj, field)}" data-mgt-field="${field}" data-mgt-widx="${widx}" value="${val}" min="${min}" max="${max}" step="any">`;
             }
             function _mgtText(obj, field, widx) {
@@ -447,9 +447,9 @@ function populateEditorAccordions(stateObj) {
                 const rawK = (obj[field] !== undefined && obj[field] !== null) ? obj[field] : 273;
                 return `<input type="number" class="rtt-field-input${_mgtMc(obj, field)}" data-mgt-field="${field}" data-mgt-widx="${widx}" data-mgt-iskelvin="1" value="${(rawK - 273).toFixed(0)}" step="1">`;
             }
-            function _mgtMoonNum(m, field, widx, subarray, midx, min, max) {
+            function _mgtMoonNum(m, field, widx, subarray, midx, min, max, decimals = 2) {
                 const raw = (m[field] !== undefined && m[field] !== null) ? m[field] : '';
-                const val = (raw !== '' && isFinite(raw)) ? Number(parseFloat(raw).toFixed(2)) : raw;
+                const val = (raw !== '' && isFinite(raw)) ? Number(parseFloat(raw).toFixed(decimals)) : raw;
                 return `<input type="number" class="rtt-field-input${_mgtMc(m, field)}" data-mgt-field="${field}" data-mgt-widx="${widx}" data-mgt-subarray="${subarray}" data-mgt-midx="${midx}" value="${val}" min="${min}" max="${max}" step="any">`;
             }
             function _mgtKm(obj, field, widx) {
@@ -605,7 +605,7 @@ function populateEditorAccordions(stateObj) {
 
                         if (w.type !== 'Planetoid Belt' && w.size != 0 && w.size !== 'R') {
                             html += `<span>Composition: ${_mgtText(w, 'composition', realWidx)}</span>`;
-                            if (w.density != null) html += `<span>Density (g/cm³): ${_mgtNum(w, 'density', realWidx, 0, 30)}</span>`;
+                            if (w.density != null) html += `<span>Density (ρ⊕): ${_mgtNum(w, 'density', realWidx, 0, 30, 3)}</span>`;
 
                             if (w.gases && w.gases.length > 0) {
                                 let atmComp = w.gases.slice(0, 2).join(', ');
@@ -714,7 +714,7 @@ function populateEditorAccordions(stateObj) {
 
                             if (m.type !== 'Planetoid Belt' && m.size != 0 && m.size !== 'R') {
                                 if (m.composition !== undefined) html += `<span>Comp: ${_mgtMoonText(m, 'composition', realWidx, 'moons', moonIdx)}</span>`;
-                                if (m.density != null) html += `<span>Density (g/cm³): ${_mgtMoonNum(m, 'density', realWidx, 'moons', moonIdx, 0, 30)}</span>`;
+                                if (m.density != null) html += `<span>Density (ρ⊕): ${_mgtMoonNum(m, 'density', realWidx, 'moons', moonIdx, 0, 30, 3)}</span>`;
 
                                 if (m.gases && m.gases.length > 0) {
                                     let mAtmComp = m.gases.slice(0, 2).join(', ');
@@ -775,7 +775,7 @@ function populateEditorAccordions(stateObj) {
                             html += `<span>Ecc: ${_mgtMoonNum(m, 'eccentricity', realWidx, 'significantBodies', sigIdx, 0, 1)}</span>`;
                             if (m.periodHrs !== undefined) html += `<span>Period (hrs): ${_mgtMoonNum(m, 'periodHrs', realWidx, 'significantBodies', sigIdx, 0, 1000000)}</span>`;
                             if (m.composition !== undefined) html += `<span>Comp: ${_mgtMoonText(m, 'composition', realWidx, 'significantBodies', sigIdx)}</span>`;
-                            if (m.density != null) html += `<span>Density: ${_mgtMoonNum(m, 'density', realWidx, 'significantBodies', sigIdx, 0, 30)}</span>`;
+                            if (m.density != null) html += `<span>Density (ρ⊕): ${_mgtMoonNum(m, 'density', realWidx, 'significantBodies', sigIdx, 0, 30, 3)}</span>`;
                             if (m.gravity != null) html += `<span>Gravity (G): ${_mgtMoonNum(m, 'gravity', realWidx, 'significantBodies', sigIdx, 0, 100)}</span>`;
                             if (m.mass != null) html += `<span>Mass (M⊕): ${_mgtMoonNum(m, 'mass', realWidx, 'significantBodies', sigIdx, 0, 100000)}</span>`;
                             if (m.diamKm != null) html += `<span>Diameter (km): ${_mgtMoonKm(m, 'diamKm', realWidx, 'significantBodies', sigIdx)}</span>`;

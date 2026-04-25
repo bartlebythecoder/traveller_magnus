@@ -1,9 +1,15 @@
 # Changelog
 
-### [v0.10.0.1]
+### [v0.10.0.2] - In Progress
+1. **Route Manager:** Fixed bugs preventing system names being used properly in filters and reports for OTU imports and JSONs
+2. **Mongoose Engine:** Density: Added randomized linear results between table results to three decimals to increase variability
+3. **Mongoose Engine:** Density: Corrected UI units to Earth-relative
+4. **Mongoose Engine:** Escape Velocity:  Corrected units in logs to m/s
+
+### [v0.10.0.1] - 2026-04-24
 1. **Shortcut Menu:** Removed legacy shortcuts from help menu
 
-### [v0.10.0]
+### [v0.10.0] - 2026-04-24
 1. **Mongoose Engine:** Calculate precide diameter and hydrographic measurements and added to UI
 2. **Mongoose Engine:** Updated mass, gravity, escape velocity calculations with new diameter meaasurements
 3. **Routes:** Completely revamped routs including:

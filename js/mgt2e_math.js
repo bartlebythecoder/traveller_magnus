@@ -34,7 +34,7 @@ const MgT2EMath = {
      * Calculates planetary escape velocity.
      * @param {number} massEarths - Mass in Earths.
      * @param {number} diamKm - Diameter in km (Earth = 12,742 km).
-     * @returns {number} Escape velocity in km/s.
+     * @returns {number} Escape velocity in m/s.
      */
     calculateEscapeVelocity: function (massEarths, diamKm) {
         if (diamKm <= 0) return 0;
@@ -43,8 +43,8 @@ const MgT2EMath = {
 
     /**
      * Calculates surface orbital velocity.
-     * @param {number} escapeVelocity - Escape velocity in km/s.
-     * @returns {number} Orbital velocity in km/s.
+     * @param {number} escapeVelocity - Escape velocity in m/s.
+     * @returns {number} Orbital velocity in m/s.
      */
     calculateOrbitalVelocity: function (escapeVelocity) {
         return escapeVelocity / Math.sqrt(2);

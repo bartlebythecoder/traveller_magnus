@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.10.0";
-const APP_BANNER = "v0.10.0: New: Route Enhancements";
+const APP_VERSION = "v0.10.0.2";
+const APP_BANNER = "v0.10.0.2: Patch OTU imports for routes; Mongoose Engine Fixes";
 
 // -----------------------------------------------------------------------------
 // Application State

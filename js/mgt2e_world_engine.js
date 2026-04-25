@@ -102,8 +102,20 @@
         let densityRoll = tRoll2D('Density Roll (No DMs)');
         const densityTable = MgT2EData.stellar.densityLookup;
         let baseDensity = densityTable[densityRoll][coreType];
-        if (!isManual(body, 'density')) body.density = parseFloat(baseDensity.toFixed(2));
-        tResult('Density', body.density.toFixed(2), 'MgT2E 2.1: Composition & Gravity');
+
+        // Linear interpolation: pick a random value between the neighbouring rows.
+        // Lower bound = row(N-1) + 0.001 so we never equal that row's exact value.
+        // Upper bound = row(N+1) - 0.001 so we never equal that row's exact value.
+        // At the floor (roll=2) use the table value itself as the lower bound.
+        // At the ceiling (roll=12) use the table value itself as the upper bound.
+        const lowerRow = densityTable[String(densityRoll - 1)];
+        const upperRow = densityTable[String(densityRoll + 1)];
+        const lowerBound = lowerRow ? lowerRow[coreType] + 0.001 : baseDensity;
+        const upperBound = upperRow ? upperRow[coreType] - 0.001 : baseDensity;
+        const finalDensity = parseFloat((lowerBound + rng() * (upperBound - lowerBound)).toFixed(3));
+
+        if (!isManual(body, 'density')) body.density = finalDensity;
+        tResult('Density', `${baseDensity.toFixed(2)} (table) → ${body.density.toFixed(3)} (interpolated, range ${lowerBound.toFixed(3)}–${upperBound.toFixed(3)})`, 'MgT2E 2.1: Composition & Gravity');
 
         // 4. Roll Diameter from worldSizeTable
         if (!isManual(body, 'diamKm')) {
@@ -135,12 +147,12 @@
 
         // 6. Orbital Velocity & Escape Velocity
         body.escapeVel = MgT2EMath.calculateEscapeVelocity(body.mass, body.diamKm);
-        writeLogLine(`  Escape Velocity Formula: sqrt(Mass(${body.mass.toFixed(4)}) / (DiamKm(${body.diamKm}) / 12742)) [ratio=${diamRatio}] × 11186 = ${body.escapeVel.toFixed(2)} km/s`);
-        tResult('Escape Velocity (km/s)', body.escapeVel.toFixed(2), 'MgT2E 2.1: Composition & Gravity');
+        writeLogLine(`  Escape Velocity Formula: sqrt(Mass(${body.mass.toFixed(4)}) / (DiamKm(${body.diamKm}) / 12742)) [ratio=${diamRatio}] × 11186 = ${body.escapeVel.toFixed(2)} m/s`);
+        tResult('Escape Velocity (m/s)', body.escapeVel.toFixed(2), 'MgT2E 2.1: Composition & Gravity');
 
         body.orbitalVelSurface = MgT2EMath.calculateOrbitalVelocity(body.escapeVel);
-        writeLogLine(`  Orbital Velocity Formula: EscapeVel(${body.escapeVel.toFixed(2)}) / sqrt(2) = ${body.orbitalVelSurface.toFixed(2)} km/s`);
-        tResult('Orbital Velocity (km/s)', body.orbitalVelSurface.toFixed(2), 'MgT2E 2.1: Composition & Gravity');
+        writeLogLine(`  Orbital Velocity Formula: EscapeVel(${body.escapeVel.toFixed(2)}) / sqrt(2) = ${body.orbitalVelSurface.toFixed(2)} m/s`);
+        tResult('Orbital Velocity (m/s)', body.orbitalVelSurface.toFixed(2), 'MgT2E 2.1: Composition & Gravity');
     }
 
     /**

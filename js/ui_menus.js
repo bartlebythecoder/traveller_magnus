@@ -1206,6 +1206,23 @@ function setupAutoRoutes() {
 }
 
 // ============================================================================
+// WORLD NAME RESOLUTION
+// ============================================================================
+
+// Returns the display name for a hex state, falling back through all
+// edition-specific sub-objects. Required for OTU/JSON-imported worlds
+// whose name lives in t5Data.name rather than the top-level state.name.
+function getWorldName(state) {
+    if (!state) return '';
+    return state.name
+        || (state.t5Data    && state.t5Data.name)
+        || (state.mgt2eData && state.mgt2eData.name)
+        || (state.rttData   && state.rttData.name)
+        || (state.ctData    && state.ctData.name)
+        || '';
+}
+
+// ============================================================================
 // WORLD AUTOCOMPLETE
 // ============================================================================
 
@@ -1223,7 +1240,7 @@ function setupWorldAutocomplete(inputEl, dropdownEl) {
         const results = [];
         hexStates.forEach((state, hexId) => {
             if (state.type !== 'SYSTEM_PRESENT') return;
-            const name = state.name || '';
+            const name = getWorldName(state);
             if (name.toLowerCase().startsWith(q)) results.push({ hexId, name });
         });
         return results.sort((a, b) => a.name.localeCompare(b.name)).slice(0, 10);
@@ -1301,7 +1318,7 @@ function resolveWorldInput(value) {
     let found = null;
     hexStates.forEach((state, hexId) => {
         if (found) return;
-        if (state.type === 'SYSTEM_PRESENT' && (state.name || '').toLowerCase() === q) found = hexId;
+        if (state.type === 'SYSTEM_PRESENT' && getWorldName(state).toLowerCase() === q) found = hexId;
     });
     return found;
 }
@@ -1352,8 +1369,8 @@ function getRouteSystemList(routeId) {
     // Network / XBoat / AutoRoute — collect unique IDs, sort by world name
     const allIds = [...new Set(segments.flatMap(s => [s.startId, s.endId]))];
     allIds.sort((a, b) => {
-        const na = (hexStates.get(a) || {}).name || a;
-        const nb = (hexStates.get(b) || {}).name || b;
+        const na = getWorldName(hexStates.get(a)) || a;
+        const nb = getWorldName(hexStates.get(b)) || b;
         return na.localeCompare(nb);
     });
     return { ordered: false, worlds: allIds };
@@ -1385,7 +1402,7 @@ window.openRouteSystemsPanel = function (routeId, routeName) {
     } else {
         worlds.forEach((hexId, i) => {
             const state = hexStates.get(hexId);
-            const name  = (state && state.name) ? state.name : '(unnamed)';
+            const name  = getWorldName(state) || '(unnamed)';
             const item  = document.createElement('div');
             item.className = 'route-systems-item';
             const marker = ordered ? `${i + 1}.` : '•';

@@ -946,6 +946,7 @@ function importT5Tab(fileContent, fileName, forcedSectorSlot = null) {
 
         const stateObj = {
             type: 'SYSTEM_PRESENT',
+            name: name,
             allegiance: idxAlleg !== -1 ? row[idxAlleg].trim() : "Im",
             notes: idxNotes !== -1 ? row[idxNotes].trim() : "",
             beltCount: belts,

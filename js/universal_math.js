@@ -284,6 +284,19 @@
                         continue;
                     }
 
+                    // --- STRING EXCEPTION: Cluster ---
+                    if (field === 'cluster' || field === 'cl') {
+                        const worldCluster = (world.cluster || world.Cluster || '').trim();
+                        const filterTokens = criteria.split(',').map(s => s.trim().toUpperCase()).filter(s => s !== '' && s !== '----');
+                        if (filterTokens.length > 0) {
+                            const wUp = worldCluster.toUpperCase();
+                            const match = (wUp !== '' && wUp !== '----') &&
+                                          filterTokens.some(token => wUp.startsWith(token));
+                            if (!match) return false;
+                        }
+                        continue;
+                    }
+
                     // --- STRING EXCEPTION: Travel Zone ---
                     // Stored as full word ('Green', 'Amber', 'Red'). User inputs G, A, or R.
                     // Comma-separated tokens use OR logic.

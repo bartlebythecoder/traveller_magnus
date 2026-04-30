@@ -76,8 +76,8 @@ function initializeInput() {
 
     setupSectorPicker();
     setupSectorImporter();
+    setupXmlMetadataImporter();
     setupSplashScreen();
-    setupAutoRoutes();
     setupRouteWindow();
 }
 

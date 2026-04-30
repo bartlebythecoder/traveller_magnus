@@ -526,44 +526,46 @@ function getAvailableSectors() {
 }
 
 function setupSectorPicker() {
-    const openBtn = document.getElementById('btn-open-sector-export');
-    const closeBtn = document.getElementById('btn-close-sector-picker');
-    const modal = document.getElementById('sector-picker-modal');
+    const openBtn     = document.getElementById('btn-open-sector-export');
+    const xmlBtn      = document.getElementById('btn-export-xml-metadata');
+    const closeBtn    = document.getElementById('btn-close-sector-picker');
+    const modal       = document.getElementById('sector-picker-modal');
     const listContainer = document.getElementById('sector-list');
 
-    if (openBtn) {
-        openBtn.addEventListener('click', () => {
-            const sectors = getAvailableSectors();
-            listContainer.innerHTML = '';
+    function openPicker(mode) {
+        modal.dataset.exportMode = mode;
+        const sectors = getAvailableSectors();
+        listContainer.innerHTML = '';
 
-            if (sectors.length === 0) {
-                listContainer.innerHTML = '<p style="color: #666; grid-column: 1/-1;">No sectors discovered in memory. Populate some hexes first!</p>';
-            } else {
-                sectors.forEach(s => {
-                    const tile = document.createElement('div');
-                    tile.className = 'sector-tile';
-                    tile.innerHTML = `
-                        <strong>${s.name}</strong>
-                        <span>${s.count} Data Points</span>
-                    `;
-                    tile.onclick = () => {
+        if (sectors.length === 0) {
+            listContainer.innerHTML = '<p style="color: #666; grid-column: 1/-1;">No sectors discovered in memory. Populate some hexes first!</p>';
+        } else {
+            sectors.forEach(s => {
+                const tile = document.createElement('div');
+                tile.className = 'sector-tile';
+                tile.innerHTML = `
+                    <strong>${s.name}</strong>
+                    <span>${s.count} Data Points</span>
+                `;
+                tile.onclick = () => {
+                    if (modal.dataset.exportMode === 'xml') {
+                        exportMetadataXml(s.id);
+                    } else {
                         generateT5TabData(s.id);
-                        exportRoutesToXML(s.id);
+                        exportMetadataXml(s.id);
                         showToast(`Exported ${s.name} Data and Routes`, 2000);
-                        modal.style.display = 'none';
-                    };
-                    listContainer.appendChild(tile);
-                });
-            }
-            modal.style.display = 'flex';
-        });
+                    }
+                    modal.style.display = 'none';
+                };
+                listContainer.appendChild(tile);
+            });
+        }
+        modal.style.display = 'flex';
     }
 
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
-    }
+    if (openBtn)  openBtn.addEventListener('click',  () => openPicker('full'));
+    if (xmlBtn)   xmlBtn.addEventListener('click',   () => openPicker('xml'));
+    if (closeBtn) closeBtn.addEventListener('click', () => { modal.style.display = 'none'; });
 }
 
 /**
@@ -652,6 +654,88 @@ function exportRoutesToXML(sectorID) {
     URL.revokeObjectURL(url);
 }
 
+/**
+ * Export all routes touching a sector as a TravellerMap metadata XML file.
+ * Routes with one end in an adjacent sector carry EndOffsetX/Y attributes.
+ * Color is read from window.routeDefinitions so the file round-trips cleanly
+ * with Import Metadata (.xml).
+ */
+function exportMetadataXml(sectorID) {
+    if (!window.sectorRoutes || window.sectorRoutes.length === 0) {
+        showToast(`No routes to export for Sector ${sectorID}.`, 2000);
+        return;
+    }
+
+    const sectorNum = parseInt(sectorID, 10);
+    const sectorX   = (sectorNum - 1) % gridWidth;
+    const sectorY   = Math.floor((sectorNum - 1) / gridWidth);
+
+    const defs   = window.routeDefinitions || [];
+    const defMap = new Map(defs.map(d => [d.id, d]));
+
+    const xmlLines = [
+        '<?xml version="1.0" encoding="utf-8"?>',
+        '<Sector>',
+        `  <Name>Sector ${sectorID}</Name>`,
+        '  <Routes>'
+    ];
+    let count = 0;
+
+    (window.sectorRoutes || []).forEach(route => {
+        const sParts    = route.startId.split('-');
+        const eParts    = route.endId.split('-');
+        const startSlot = parseInt(sParts[0], 10);
+        const endSlot   = parseInt(eParts[0], 10);
+
+        // At least one end must belong to this sector
+        if (startSlot !== sectorNum && endSlot !== sectorNum) return;
+
+        const startHex      = sParts[sParts.length - 1];
+        const endHex        = eParts[eParts.length - 1];
+        const def           = defMap.get(route.routeId);
+        const color         = def ? def.color : '#ffffff';
+
+        let startOffsetAttr = '';
+        let endOffsetAttr   = '';
+
+        if (startSlot !== sectorNum) {
+            const offX = ((startSlot - 1) % gridWidth) - sectorX;
+            const offY = Math.floor((startSlot - 1) / gridWidth) - sectorY;
+            if (offX !== 0) startOffsetAttr += ` StartOffsetX="${offX}"`;
+            if (offY !== 0) startOffsetAttr += ` StartOffsetY="${offY}"`;
+        }
+        if (endSlot !== sectorNum) {
+            const offX = ((endSlot - 1) % gridWidth) - sectorX;
+            const offY = Math.floor((endSlot - 1) / gridWidth) - sectorY;
+            if (offX !== 0) endOffsetAttr += ` EndOffsetX="${offX}"`;
+            if (offY !== 0) endOffsetAttr += ` EndOffsetY="${offY}"`;
+        }
+
+        xmlLines.push(`    <Route Start="${startHex}"${startOffsetAttr} End="${endHex}"${endOffsetAttr} Color="${color}" />`);
+        count++;
+    });
+
+    if (count === 0) {
+        showToast(`No routes found for Sector ${sectorID}.`, 2000);
+        return;
+    }
+
+    xmlLines.push('  </Routes>');
+    xmlLines.push('</Sector>');
+
+    const content = xmlLines.join('\n');
+    const blob    = new Blob([content], { type: 'text/xml;charset=utf-8' });
+    const url     = URL.createObjectURL(blob);
+    const link    = document.createElement('a');
+    link.href     = url;
+    link.download = `Sector_${sectorID}_Metadata.xml`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    showToast(`Exported ${count} route(s) for Sector ${sectorID}.`, 2000);
+}
+
 function generateT5TabData(sectorID) {
     const header = "Hex\tName\tUWP\tBases\tRemarks\tZone\tPBG\tAllegiance\tStars\t{Ix}\t(Ex)\t[Cx]\tNobility\tW.\tNotes";
     let lines = [header];
@@ -679,10 +763,36 @@ function generateT5TabData(sectorID) {
             const pbg = `${toUWPChar(p)}${toUWPChar(b)}${toUWPChar(g)}`;
 
             // Extensions (Importance, Economic, Cultural)
+            // Tier 1: T5 worlds store a pre-computed t5Socio object.
+            // Tier 2: Mongoose worlds store Im/ecoR/L/I/E on mgtSocio (= mgt2eData);
+            //         Cx uses D/X/U/S from the Mongoose culturalProfile string.
+            // Tier 3: CT/RTT worlds fall back to T5_Socio_Engine for a fresh calculation.
             let socio = state.t5Socio;
-            if (!socio && typeof generateT5Socioeconomics === 'function') {
-                socio = generateT5Socioeconomics(data);
+
+            if (!socio) {
+                const mgt = state.mgtSocio;
+                if (mgt && mgt.Im !== undefined) {
+                    const Im   = mgt.Im;
+                    const ecoR = mgt.ecoR ?? 0;
+                    const ecoL = mgt.ecoL ?? 0;
+                    const ecoI = mgt.ecoI ?? 0;
+                    const ecoE = mgt.ecoE ?? 0;
+                    const cp   = (mgt.culturalProfile || '').split('-')[0] || '0000';
+                    socio = {
+                        ixString: `{${Im >= 0 ? '+' : ''}${Im}}`,
+                        exString: `(${toUWPChar(ecoR)}${toUWPChar(ecoL)}${toUWPChar(ecoI)}${ecoE >= 0 ? '+' : ''}${ecoE})`,
+                        cxString: `[${cp.padEnd(4, '0').slice(0, 4)}]`
+                    };
+                }
             }
+
+            if (!socio) {
+                const t5Eng = window.T5_Socio_Engine;
+                if (t5Eng && typeof t5Eng.generateT5Socioeconomics === 'function') {
+                    socio = t5Eng.generateT5Socioeconomics(data);
+                }
+            }
+
             socio = socio || {};
 
             const ixVal = socio.ixString || (socio.Ix !== undefined ? `{ ${socio.Ix} }` : '{ 0 }');
@@ -994,4 +1104,334 @@ function importT5Tab(fileContent, fileName, forcedSectorSlot = null) {
 
     // Persist the imported sector to IndexedDB in the background.
     if (window.dbManager) window.dbManager.saveHexesBySectorNum(sectorNum);
+}
+
+// ============================================================================
+// XML METADATA IMPORTER
+// ============================================================================
+
+// ── Hex coordinate helpers ────────────────────────────────────────────────────
+
+function _hexCodeToSubChar(hexCode) {
+    const hexVal = parseInt(hexCode, 10);
+    const lQ     = Math.floor(hexVal / 100);
+    const lR     = hexVal % 100;
+    const subX   = Math.floor((lQ - 1) / 8);
+    const subY   = Math.floor((lR - 1) / 10);
+    return String.fromCharCode(65 + (subY * 4 + subX));
+}
+
+function _hexCodeToHexId(slotNum, hexCode) {
+    return `${slotNum}-${_hexCodeToSubChar(hexCode)}-${hexCode}`;
+}
+
+/**
+ * Extract the sector slot number and 4-digit hex code from a hexId.
+ * Exposed on window for use by the forthcoming XML export feature.
+ */
+function hexIdToSectorAndCode(hexId) {
+    const parts = hexId.split('-');
+    return { slotNum: parseInt(parts[0], 10), hexCode: parts[parts.length - 1] };
+}
+window.hexIdToSectorAndCode = hexIdToSectorAndCode;
+
+// ── Sector coord lookup ───────────────────────────────────────────────────────
+
+function _buildSectorCoordLookup() {
+    const lookup = new Map();
+    const seen = new Set();
+    hexStates.forEach((state, hexId) => {
+        const slotNum = parseInt(hexId.split('-')[0], 10);
+        if (seen.has(slotNum)) return;
+        seen.add(slotNum);
+        const sx = (slotNum - 1) % gridWidth;
+        const sy = Math.floor((slotNum - 1) / gridWidth);
+        lookup.set(`${sx},${sy}`, slotNum);
+    });
+    return lookup;
+}
+
+// ── XML parser ────────────────────────────────────────────────────────────────
+
+/**
+ * Parse a TravellerMap metadata XML string and return a Map of color groups.
+ * Keys are normalised lowercase color strings, or '__default__' for routes
+ * with no Color attribute.  Values are arrays of segment descriptor objects.
+ */
+function parseXmlRouteGroups(xmlText) {
+    if (!xmlText) return null;
+    let doc;
+    try {
+        doc = new DOMParser().parseFromString(xmlText, 'application/xml');
+    } catch (e) {
+        console.warn('[XML Import] XML parse failed:', e.message);
+        return null;
+    }
+    if (doc.querySelector('parsererror')) {
+        console.warn('[XML Import] Malformed XML — routes skipped.');
+        return null;
+    }
+
+    const routeEls = doc.querySelectorAll('Route');
+    const groups = new Map();
+
+    routeEls.forEach(el => {
+        const startCode = el.getAttribute('Start');
+        const endCode   = el.getAttribute('End');
+        if (!startCode || !endCode) return;
+
+        const color    = (el.getAttribute('Color') || '').trim().toLowerCase();
+        const colorKey = color || '__default__';
+
+        const segment = {
+            startCode,
+            endCode,
+            startOffsetX: parseInt(el.getAttribute('StartOffsetX') || '0', 10),
+            startOffsetY: parseInt(el.getAttribute('StartOffsetY') || '0', 10),
+            endOffsetX:   parseInt(el.getAttribute('EndOffsetX')   || '0', 10),
+            endOffsetY:   parseInt(el.getAttribute('EndOffsetY')   || '0', 10)
+        };
+
+        if (!groups.has(colorKey)) groups.set(colorKey, []);
+        groups.get(colorKey).push(segment);
+    });
+
+    return groups.size > 0 ? groups : null;
+}
+
+// ── Route applier ─────────────────────────────────────────────────────────────
+
+function _applyXmlRoutesForGroup(segments, slotNum, sectorX, sectorY, targetRouteId, coordLookup, groupKey) {
+    const typeMap = { 1: 'Xboat', 2: 'Trade', 3: 'Secondary' };
+    const routeType = typeMap[targetRouteId] || 'Filter';
+    const isFilter  = routeType === 'Filter';
+    let added = 0, skipped = 0;
+
+    segments.forEach(seg => {
+        const { startCode, endCode, startOffsetX, startOffsetY, endOffsetX, endOffsetY } = seg;
+
+        let startSlotNum = slotNum;
+        if (startOffsetX !== 0 || startOffsetY !== 0) {
+            const key      = `${sectorX + startOffsetX},${sectorY + startOffsetY}`;
+            const resolved = coordLookup.get(key);
+            if (resolved === undefined) {
+                console.warn(`[XML Import] Cross-sector start (${key}) skipped — sector not loaded.`);
+                skipped++;
+                return;
+            }
+            startSlotNum = resolved;
+        }
+
+        let endSlotNum = slotNum;
+        if (endOffsetX !== 0 || endOffsetY !== 0) {
+            const key      = `${sectorX + endOffsetX},${sectorY + endOffsetY}`;
+            const resolved = coordLookup.get(key);
+            if (resolved === undefined) {
+                console.warn(`[XML Import] Cross-sector end (${key}) skipped — sector not loaded.`);
+                skipped++;
+                return;
+            }
+            endSlotNum = resolved;
+        }
+
+        const startId = _hexCodeToHexId(startSlotNum, startCode);
+        const endId   = _hexCodeToHexId(endSlotNum, endCode);
+
+        const before = (window.sectorRoutes || []).length;
+        if (isFilter) {
+            addRoute(startId, endId, 'Filter', null, { routeId: targetRouteId, groupId: groupKey });
+        } else {
+            addRoute(startId, endId, routeType);
+        }
+        if ((window.sectorRoutes || []).length > before) added++;
+    });
+
+    if (added > 0 || skipped > 0) {
+        console.log(`[XML Import] ${added} segment(s) added to Route #${targetRouteId}, ${skipped} skipped.`);
+    }
+    return added;
+}
+
+// ── Modal helpers ─────────────────────────────────────────────────────────────
+
+function _openXmlRouteModal(fileName, slotNum, groups) {
+    const modal      = document.getElementById('xml-route-modal');
+    const desc       = document.getElementById('xml-route-modal-desc');
+    const table      = document.getElementById('xml-route-modal-table');
+    const confirmBtn = document.getElementById('btn-xml-route-confirm');
+    if (!modal) return;
+
+    desc.textContent = `Assign each color group from "${fileName}" to a route slot.`;
+    table.innerHTML  = '';
+
+    const defs = window.routeDefinitions || [];
+
+    const optionsHtml = defs.slice(0, 9).map(d => {
+        const count = (window.sectorRoutes || []).filter(r => r.routeId === d.id).length;
+        const hint  = count > 0 ? ` (${count} segs)` : '';
+        return `<option value="${d.id}">#${d.id} ${d.name}${hint}</option>`;
+    }).join('');
+
+    const header = document.createElement('div');
+    header.style.cssText = 'display:grid;grid-template-columns:28px 1fr 200px;gap:8px;padding:4px 0;color:#a0a8b0;font-size:0.82em;border-bottom:1px solid #45a29e;';
+    header.innerHTML = '<span></span><span>Color Group</span><span>Route Slot</span>';
+    table.appendChild(header);
+
+    let nextSlot = 1;
+    for (const [colorKey, segments] of groups) {
+        const isDefault   = colorKey === '__default__';
+        const displayName = isDefault ? 'No color (default)' : colorKey;
+        const swatch      = isDefault ? '#888888' : colorKey;
+        const count       = segments.length;
+
+        const row = document.createElement('div');
+        row.style.cssText = 'display:grid;grid-template-columns:28px 1fr 200px;gap:8px;align-items:center;';
+        row.dataset.colorKey = colorKey;
+        row.innerHTML = `
+            <div style="width:22px;height:22px;border-radius:3px;background:${swatch};border:1px solid #555;flex-shrink:0;"></div>
+            <span style="color:#c5c6c7;font-size:0.88em;">${displayName} &mdash; ${count} segment${count !== 1 ? 's' : ''}</span>
+            <select class="xml-route-select" style="background:#1f2833;color:#c5c6c7;border:1px solid #45a29e;padding:3px 6px;border-radius:4px;width:100%;font-size:0.88em;">
+                ${optionsHtml}
+            </select>`;
+
+        const sel  = row.querySelector('.xml-route-select');
+        sel.value  = String(Math.min(nextSlot, 9));
+        nextSlot++;
+        table.appendChild(row);
+    }
+
+    // Replace confirmBtn to drop any previous listener
+    const fresh = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(fresh, confirmBtn);
+    fresh.addEventListener('click', () => {
+        modal.style.display = 'none';
+        _confirmXmlRouteImport(slotNum, groups, table);
+    });
+
+    modal.style.display = 'flex';
+}
+
+function _confirmXmlRouteImport(slotNum, groups, table) {
+    const rows = table.querySelectorAll('[data-color-key]');
+    const mapping = new Map();
+    rows.forEach(row => {
+        mapping.set(row.dataset.colorKey, parseInt(row.querySelector('.xml-route-select').value, 10));
+    });
+
+    // Warn if any chosen slot already has segments
+    const defs = window.routeDefinitions || [];
+    const seenIds = new Set();
+    const occupiedLabels = [];
+    mapping.forEach(routeId => {
+        if (seenIds.has(routeId)) return;
+        seenIds.add(routeId);
+        const count = (window.sectorRoutes || []).filter(r => r.routeId === routeId).length;
+        if (count > 0) {
+            const def = defs.find(d => d.id === routeId);
+            occupiedLabels.push(`Route #${routeId} "${def ? def.name : routeId}" (${count} segment${count !== 1 ? 's' : ''})`);
+        }
+    });
+
+    if (occupiedLabels.length > 0) {
+        const ok = confirm(
+            `The following route slot(s) already have data:\n\n${occupiedLabels.join('\n')}\n\nAdd XML routes anyway?`
+        );
+        if (!ok) return;
+    }
+
+    saveHistoryState('Import XML Metadata');
+    const coordLookup = _buildSectorCoordLookup();
+    const sectorX     = (slotNum - 1) % gridWidth;
+    const sectorY     = Math.floor((slotNum - 1) / gridWidth);
+    const ts          = Date.now();
+    let totalAdded    = 0;
+
+    mapping.forEach((targetRouteId, colorKey) => {
+        const segments = groups.get(colorKey);
+        if (!segments || segments.length === 0) return;
+        const groupKey = `xml_import_${ts}_${colorKey}`;
+        totalAdded += _applyXmlRoutesForGroup(segments, slotNum, sectorX, sectorY, targetRouteId, coordLookup, groupKey);
+    });
+
+    if (window.dbManager) window.dbManager.saveRoutes();
+    requestAnimationFrame(draw);
+    showToast(`Imported ${totalAdded} route segment(s) from XML.`, 3000);
+}
+
+// ── Setup ─────────────────────────────────────────────────────────────────────
+
+function setupXmlMetadataImporter() {
+    const btn       = document.getElementById('btn-import-xml-metadata');
+    const fileInput = document.getElementById('file-import-xml-metadata');
+    const modal     = document.getElementById('xml-route-modal');
+    const cancelBtn = document.getElementById('btn-xml-route-cancel');
+
+    if (!btn || !fileInput) return;
+
+    btn.addEventListener('click', () => fileInput.click());
+
+    cancelBtn?.addEventListener('click', () => { modal.style.display = 'none'; });
+
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        e.target.value = '';
+        if (!file) return;
+
+        const userSlot = prompt(
+            `Which Sector number (1 to ${gridWidth * gridHeight}; ${Math.ceil(gridWidth * gridHeight / 2)} is centre) does "${file.name}" apply to?`,
+            String(Math.ceil(gridWidth * gridHeight / 2))
+        );
+        if (!userSlot) return;
+        const slotNum = sectorSlotToNumber(userSlot.toUpperCase());
+
+        readFileAsText(file).then(xmlText => {
+            const groups = parseXmlRouteGroups(xmlText);
+            if (!groups) {
+                showToast('No routes found in XML file.', 3000);
+                return;
+            }
+
+            const colorKeys    = Array.from(groups.keys());
+            const isDefaultOnly = colorKeys.length === 1 && colorKeys[0] === '__default__';
+
+            if (isDefaultOnly) {
+                // Auto-assign to first empty route slot
+                const segCounts = new Map();
+                (window.sectorRoutes || []).forEach(r => {
+                    if (r.routeId != null) segCounts.set(r.routeId, (segCounts.get(r.routeId) || 0) + 1);
+                });
+
+                const defs = window.routeDefinitions || [];
+                let targetId = null;
+                for (const def of defs.slice(0, 9)) {
+                    if ((segCounts.get(def.id) || 0) === 0) { targetId = def.id; break; }
+                }
+
+                if (targetId === null) {
+                    const ok = confirm('All route slots have existing data.\n\nImport XML routes to Route #1 anyway?');
+                    if (!ok) return;
+                    targetId = 1;
+                }
+
+                saveHistoryState('Import XML Metadata');
+                const coordLookup = _buildSectorCoordLookup();
+                const sectorX     = (slotNum - 1) % gridWidth;
+                const sectorY     = Math.floor((slotNum - 1) / gridWidth);
+                const added = _applyXmlRoutesForGroup(
+                    groups.get('__default__'), slotNum, sectorX, sectorY,
+                    targetId, coordLookup, `xml_default_${Date.now()}`
+                );
+
+                if (window.dbManager) window.dbManager.saveRoutes();
+                requestAnimationFrame(draw);
+                showToast(`Imported ${added} route segment(s) to Route #${targetId}.`, 3000);
+
+            } else {
+                _openXmlRouteModal(file.name, slotNum, groups);
+            }
+        }).catch(err => {
+            showToast('Error reading XML file.', 3000);
+            console.error('[XML Import]', err);
+        });
+    });
 }

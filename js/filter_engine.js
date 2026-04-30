@@ -130,7 +130,7 @@
             'filter-name',
             'filter-starport', 'filter-size', 'filter-atm', 'filter-hydro',
             'filter-pop', 'filter-total-pop', 'filter-gov', 'filter-law', 'filter-tl', 'filter-trade-codes',
-            'filter-allegiance', 'filter-belts', 'filter-gas-giant', 'filter-travel-zone',
+            'filter-allegiance', 'filter-cluster', 'filter-belts', 'filter-gas-giant', 'filter-travel-zone',
             'filter-gravity', 'filter-temperature', 'filter-t5-ix', 'filter-mgt-importance', 'filter-mgt-wtn', 'filter-mgt-gwp'
         ];
 
@@ -250,6 +250,7 @@
             tl: document.getElementById('filter-tl')?.value || "",
             tradeCodes: document.getElementById('filter-trade-codes')?.value || "",
             allegiance: document.getElementById('filter-allegiance')?.value || "",
+            cluster: document.getElementById('filter-cluster')?.value || "",
             gravity: document.getElementById('filter-gravity')?.value || "",
             temperature: document.getElementById('filter-temperature')?.value || "",
             t5Ix: document.getElementById('filter-t5-ix')?.value || "",
@@ -275,7 +276,7 @@
             // Merge for evaluation — beltCount and gasGiantCount are pre-computed at generation/import time
             const evalObject = {
                 ...worldData, ...socioData,
-                allegiance: state.allegiance, notes: state.notes,
+                allegiance: state.allegiance, cluster: state.cluster, notes: state.notes,
                 beltCount: state.beltCount ?? 0,
                 gasGiantCount: state.gasGiantCount ?? 0
             };
@@ -337,7 +338,7 @@
             name: "Name",
             starport: "Starport", size: "Size", atm: "Atm", hydro: "Hydro",
             pop: "Pop", totalPop: "Total Pop", gov: "Gov", law: "Law", tl: "TL", tradeCodes: "Codes",
-            allegiance: "Alleg", belts: "Belts", gasGiant: "Gas Giant", travelZone: "Zone",
+            allegiance: "Alleg", cluster: "Cluster", belts: "Belts", gasGiant: "Gas Giant", travelZone: "Zone",
             gravity: "Grav", temperature: "Temp (°C)",
             t5Ix: "T5 Ix", mgtImportance: "Mg Imp", mgtWTN: "Mg WTN", mgtGWP: "Mg GWP"
         };
@@ -440,7 +441,7 @@
 
                 const worldData = state.rttData || state.t5Data || state.mgt2eData || state.ctData;
                 const socioData = state.t5Socio || state.mgtSocio || {};
-                const evalObject = { ...worldData, ...socioData, allegiance: state.allegiance };
+                const evalObject = { ...worldData, ...socioData, allegiance: state.allegiance, cluster: state.cluster };
 
                 if (UniversalMath.applyFilters(evalObject, rule.filters)) {
                     if (!state.custom_ui) state.custom_ui = { appliedColors: [] };
@@ -689,7 +690,7 @@
             'filter-name',
             'filter-starport', 'filter-size', 'filter-atm', 'filter-hydro',
             'filter-pop', 'filter-total-pop', 'filter-gov', 'filter-law', 'filter-tl', 'filter-trade-codes',
-            'filter-allegiance', 'filter-belts', 'filter-gas-giant', 'filter-travel-zone',
+            'filter-allegiance', 'filter-cluster', 'filter-belts', 'filter-gas-giant', 'filter-travel-zone',
             'filter-gravity', 'filter-temperature', 'filter-t5-ix', 'filter-mgt-importance', 'filter-mgt-wtn', 'filter-mgt-gwp'
         ];
 

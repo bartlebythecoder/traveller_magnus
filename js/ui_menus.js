@@ -119,6 +119,53 @@ function setupContextMenu() {
         if (e.key === 'Escape') document.getElementById('allegiance-modal').style.display = 'none';
     });
 
+    // --- Assign Cluster ---
+    function getEligibleForCluster() {
+        return [...selectedHexes];
+    }
+
+    function confirmCluster() {
+        const val = document.getElementById('cluster-input').value.trim() || '----';
+        const eligible = getEligibleForCluster();
+        saveHistoryState('Assign Cluster');
+        eligible.forEach(hexId => {
+            let s = hexStates.get(hexId);
+            if (!s) {
+                s = { type: 'BLANK' };
+                hexStates.set(hexId, s);
+            }
+            s.cluster = val;
+        });
+        document.getElementById('cluster-modal').style.display = 'none';
+        showToast(`Cluster "${val}" assigned to ${eligible.length} system(s).`, 2500);
+        if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+        if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
+    }
+
+    document.getElementById('ctx-assign-cluster').addEventListener('click', () => {
+        document.getElementById('context-menu').classList.remove('visible');
+        const eligible = getEligibleForCluster();
+        if (eligible.length === 0) {
+            showToast('No systems in selection to assign cluster to.', 2500);
+            return;
+        }
+        document.getElementById('cluster-modal-count').textContent = eligible.length;
+        document.getElementById('cluster-input').value = '';
+        document.getElementById('cluster-modal').style.display = 'flex';
+        setTimeout(() => document.getElementById('cluster-input').focus(), 50);
+    });
+
+    document.getElementById('btn-cluster-confirm').addEventListener('click', confirmCluster);
+
+    document.getElementById('btn-cluster-cancel').addEventListener('click', () => {
+        document.getElementById('cluster-modal').style.display = 'none';
+    });
+
+    document.getElementById('cluster-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') confirmCluster();
+        if (e.key === 'Escape') document.getElementById('cluster-modal').style.display = 'none';
+    });
+
     // --- Assign Background Color ---
     function openBgColorModal() {
         document.getElementById('context-menu').classList.remove('visible');
@@ -835,98 +882,6 @@ function setupGenerationHandlers() {
         requestAnimationFrame(draw);
     });
 
-    document.getElementById('btn-xboat-confirm').addEventListener('click', () => {
-        const maxJump  = Math.min(8,  Math.max(1,  parseInt(document.getElementById('xboat-max-jump').value,  10) || 4));
-        const maxRange = Math.min(32, Math.max(1,  parseInt(document.getElementById('xboat-max-range').value, 10) || 4));
-        const minIx    = Math.min(8,  Math.max(0,  parseInt(document.getElementById('xboat-min-ix').value,    10) || 4));
-        document.getElementById('xboat-modal').style.display = 'none';
-        saveHistoryState('Generate Xboat Routes');
-        generateXboatRoutes(maxJump, maxRange, minIx);
-        const routeCount = window.sectorRoutes ? window.sectorRoutes.length : 0;
-        showToast(`Interstellar Network Generated (Jump-${maxJump}, Range-${maxRange}): ${routeCount} routes.`, 3000);
-        selectedHexes.clear();
-        requestAnimationFrame(draw);
-    });
-
-    document.getElementById('btn-xboat-clear').addEventListener('click', () => {
-        const routes = window.sectorRoutes || [];
-        const list = document.getElementById('clear-routes-list');
-        list.innerHTML = '';
-
-        // Static route types
-        const staticTypes = [
-            { type: 'Xboat',     label: 'Xboat Routes',     color: '#00FF00' },
-            { type: 'Trade',     label: 'Trade Routes',     color: '#FF0000' },
-            { type: 'Secondary', label: 'Secondary Routes', color: '#FFFF00' },
-        ];
-        staticTypes.forEach(({ type, label, color }) => {
-            const count = routes.filter(r => r.type === type).length;
-            if (count === 0) return;
-            const row = document.createElement('label');
-            row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 4px;cursor:pointer;border-bottom:1px solid #1f2833;';
-            row.innerHTML = `
-                <input type="checkbox" data-cleartype="static" data-routetype="${type}"
-                    style="cursor:pointer;accent-color:#66fcf1;flex-shrink:0;">
-                <span style="display:inline-block;width:16px;height:16px;border-radius:3px;
-                    background:${color};flex-shrink:0;border:1px solid rgba(255,255,255,0.25);"></span>
-                <span style="color:#c5c6c7;font-size:0.9rem;flex:1;">${label}</span>
-                <span style="color:#666;font-size:0.8rem;white-space:nowrap;">${count} segment(s)</span>
-            `;
-            list.appendChild(row);
-        });
-
-        // Auto Route / Point-to-Point groups
-        getAutoRouteGroups().forEach(g => {
-            const row = document.createElement('label');
-            row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 4px;cursor:pointer;border-bottom:1px solid #1f2833;';
-            row.innerHTML = `
-                <input type="checkbox" data-cleartype="group" data-groupid="${g.groupId}"
-                    style="cursor:pointer;accent-color:#66fcf1;flex-shrink:0;">
-                <span style="display:inline-block;width:16px;height:16px;border-radius:3px;
-                    background:${g.color};flex-shrink:0;border:1px solid rgba(255,255,255,0.25);"></span>
-                <span style="color:#c5c6c7;font-size:0.9rem;flex:1;">${g.name}</span>
-                <span style="color:#666;font-size:0.8rem;white-space:nowrap;">${g.count} segment(s)</span>
-            `;
-            list.appendChild(row);
-        });
-
-        if (list.children.length === 0) {
-            showToast('No routes to clear.', 2000);
-            return;
-        }
-
-        document.getElementById('xboat-modal').style.display = 'none';
-        document.getElementById('clear-routes-modal').style.display = 'flex';
-    });
-
-    document.getElementById('btn-clear-routes-confirm').addEventListener('click', () => {
-        const checked = [...document.querySelectorAll('#clear-routes-list input[type="checkbox"]:checked')];
-        if (checked.length === 0) { showToast('No sets selected.', 2000); return; }
-
-        saveHistoryState('Clear Routes');
-        checked.forEach(cb => {
-            if (cb.dataset.cleartype === 'static') {
-                const type = cb.dataset.routetype;
-                window.sectorRoutes = window.sectorRoutes.filter(r => r.type !== type);
-            } else if (cb.dataset.cleartype === 'group') {
-                clearAutoRouteGroup(cb.dataset.groupid);
-            }
-        });
-
-        document.getElementById('clear-routes-modal').style.display = 'none';
-        showToast(`Removed ${checked.length} route set(s).`, 2500);
-        if (window.dbManager) window.dbManager.saveRoutes();
-        requestAnimationFrame(draw);
-    });
-
-    document.getElementById('btn-clear-routes-cancel').addEventListener('click', () => {
-        document.getElementById('clear-routes-modal').style.display = 'none';
-    });
-
-    document.getElementById('btn-xboat-cancel').addEventListener('click', () => {
-        document.getElementById('xboat-modal').style.display = 'none';
-    });
-
     // New GENERATE SYSTEM Row Handlers (Continuation Macros - Skip Pop)
     document.getElementById('ctx-gen-sys-ct').addEventListener('click', () => {
         document.getElementById('context-menu').classList.remove('visible');
@@ -1014,7 +969,7 @@ function hasAnyActiveFilter() {
     const textInputIds = [
         'filter-name', 'filter-starport', 'filter-size', 'filter-atm', 'filter-hydro',
         'filter-pop', 'filter-total-pop', 'filter-gov', 'filter-law', 'filter-tl',
-        'filter-trade-codes', 'filter-allegiance', 'filter-gravity', 'filter-temperature',
+        'filter-trade-codes', 'filter-allegiance', 'filter-cluster', 'filter-gravity', 'filter-temperature',
         'filter-t5-ix', 'filter-mgt-importance', 'filter-mgt-wtn', 'filter-mgt-gwp'
     ];
     const checkboxIds = ['filter-belts', 'filter-gas-giant', 'filter-travel-zone'];
@@ -1028,181 +983,6 @@ function hasAnyActiveFilter() {
         return el && el.checked;
     });
     return hasText || hasCheck;
-}
-
-function setupAutoRoutes() {
-    // "Auto Routes" button in filter modal footer → open generation modal
-    const btnOpen = document.getElementById('btn-auto-routes');
-    if (btnOpen) {
-        btnOpen.addEventListener('click', () => {
-            const nextNum = (window.autoRouteCounter || 0) + 1;
-            document.getElementById('autoroute-name').value = '';
-            document.getElementById('autoroute-name').placeholder = `Auto Route #${nextNum}`;
-            document.getElementById('autoroute-max-jump').value  = 4;
-            document.getElementById('autoroute-max-range').value = 12;
-
-            // Reset P2P state
-            const p2pCheck = document.getElementById('autoroute-p2p');
-            if (p2pCheck) p2pCheck.checked = false;
-            const p2pOptions = document.getElementById('autoroute-p2p-options');
-            if (p2pOptions) p2pOptions.style.display = 'none';
-
-            // Pre-populate start/end from selection if two hexes selected
-            const selArray = [...(window.selectedHexes || [])];
-            if (selArray.length >= 1) document.getElementById('autoroute-p2p-start').value = selArray[0];
-            if (selArray.length >= 2) document.getElementById('autoroute-p2p-end').value   = selArray[1];
-
-            document.getElementById('autoroute-modal').style.display = 'flex';
-        });
-    }
-
-    // P2P checkbox → show/hide options div; hide Range row (unused in P2P)
-    const p2pCheckbox = document.getElementById('autoroute-p2p');
-    if (p2pCheckbox) {
-        p2pCheckbox.addEventListener('change', () => {
-            const opts     = document.getElementById('autoroute-p2p-options');
-            const rangeRow = document.getElementById('autoroute-range-row');
-            if (opts)     opts.style.display     = p2pCheckbox.checked ? 'block' : 'none';
-            if (rangeRow) rangeRow.style.display  = p2pCheckbox.checked ? 'none'  : 'flex';
-        });
-    }
-
-    // "From Sel[0]" / "From Sel[1]" buttons
-    // Confirm → branch on P2P mode vs. standard Auto Routes
-    const btnConfirm = document.getElementById('btn-autoroute-confirm');
-    if (btnConfirm) {
-        btnConfirm.addEventListener('click', () => {
-            const isP2P    = document.getElementById('autoroute-p2p')?.checked || false;
-            const maxJump  = Math.min(20, Math.max(1, parseInt(document.getElementById('autoroute-max-jump').value,  10) || 4));
-            const color    = document.getElementById('autoroute-color').value || '#ff9900';
-            const nameRaw  = document.getElementById('autoroute-name').value.trim();
-
-            const nextCounter = (window.autoRouteCounter || 0) + 1;
-            const name    = nameRaw || `Auto Route #${nextCounter}`;
-            const groupId = `ar_${Date.now()}`;
-
-            if (isP2P) {
-                // ── Point-to-Point path ──────────────────────────────────
-                const startId = document.getElementById('autoroute-p2p-start').value.trim();
-                const endId   = document.getElementById('autoroute-p2p-end').value.trim();
-
-                if (!startId || !endId) {
-                    alert('Point-to-Point requires both a Start and End hex ID.');
-                    return;
-                }
-                if (startId === endId) {
-                    alert('Start and End hex must be different.');
-                    return;
-                }
-
-                const filteredIds = getFilteredHexIds();
-
-                saveHistoryState('Generate Point-to-Point Route');
-                const count = generatePointToPointRoute(startId, endId, maxJump, color, groupId, name, true, filteredIds);
-
-                if (count === null) {
-                    alert(`No route found from ${startId} to ${endId} within Jump-${maxJump}.`);
-                    return; // keep modal open
-                }
-
-                window.autoRouteCounter = nextCounter;
-                document.getElementById('autoroute-modal').style.display = 'none';
-                showToast(`"${name}" generated: ${count} segment(s).`, 3000);
-
-            } else {
-                // ── Standard Auto Routes path ────────────────────────────
-                if (!hasAnyActiveFilter()) {
-                    alert('No filter is active. Apply a filter before generating Auto Routes.');
-                    return;
-                }
-
-                const filteredIds = getFilteredHexIds();
-                if (filteredIds.length === 0) {
-                    alert('The current filter matches no worlds.');
-                    return;
-                }
-
-                const maxRange = Math.min(32, Math.max(1, parseInt(document.getElementById('autoroute-max-range').value, 10) || 12));
-
-                saveHistoryState('Generate Auto Routes');
-                const count = generateAutoRoutes(filteredIds, maxJump, maxRange, color, groupId, name);
-
-                if (count === 0) {
-                    alert('No route segments could be generated for the current filter.');
-                    return; // keep modal open
-                }
-
-                window.autoRouteCounter = nextCounter;
-                document.getElementById('autoroute-modal').style.display = 'none';
-                showToast(`"${name}" generated: ${count} route segment(s).`, 3000);
-            }
-
-            if (window.dbManager) {
-                window.dbManager.saveRoutes();
-                window.dbManager.saveAutoRouteCounter();
-            }
-            requestAnimationFrame(draw);
-        });
-    }
-
-    // Cancel
-    const btnCancel = document.getElementById('btn-autoroute-cancel');
-    if (btnCancel) {
-        btnCancel.addEventListener('click', () => {
-            document.getElementById('autoroute-modal').style.display = 'none';
-        });
-    }
-
-    // "Clear Auto Routes" button → open clear modal
-    const btnClearOpen = document.getElementById('btn-clear-auto-routes');
-    if (btnClearOpen) {
-        btnClearOpen.addEventListener('click', () => {
-            const groups = getAutoRouteGroups();
-            if (groups.length === 0) {
-                showToast('No Auto Routes to clear.', 2000);
-                return;
-            }
-            const list = document.getElementById('clear-autoroute-list');
-            list.innerHTML = '';
-            groups.forEach(g => {
-                const row = document.createElement('label');
-                row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 4px;cursor:pointer;border-bottom:1px solid #1f2833;';
-                row.innerHTML = `
-                    <input type="checkbox" data-groupid="${g.groupId}"
-                        style="cursor:pointer;accent-color:#66fcf1;flex-shrink:0;">
-                    <span style="display:inline-block;width:16px;height:16px;border-radius:3px;
-                        background:${g.color};flex-shrink:0;border:1px solid rgba(255,255,255,0.25);"></span>
-                    <span style="color:#c5c6c7;font-size:0.9rem;flex:1;">${g.name}</span>
-                    <span style="color:#666;font-size:0.8rem;white-space:nowrap;">${g.count} segment(s)</span>
-                `;
-                list.appendChild(row);
-            });
-            document.getElementById('clear-autoroute-modal').style.display = 'flex';
-        });
-    }
-
-    // Confirm clear → remove selected groups
-    const btnClearConfirm = document.getElementById('btn-clear-autoroute-confirm');
-    if (btnClearConfirm) {
-        btnClearConfirm.addEventListener('click', () => {
-            const checked = [...document.querySelectorAll('#clear-autoroute-list input[type="checkbox"]:checked')];
-            if (checked.length === 0) { showToast('No sets selected.', 2000); return; }
-            saveHistoryState('Clear Auto Routes');
-            checked.forEach(cb => clearAutoRouteGroup(cb.dataset.groupid));
-            document.getElementById('clear-autoroute-modal').style.display = 'none';
-            showToast(`Removed ${checked.length} Auto Route set(s).`, 2500);
-            if (window.dbManager) window.dbManager.saveRoutes();
-            requestAnimationFrame(draw);
-        });
-    }
-
-    // Cancel clear
-    const btnClearCancel = document.getElementById('btn-clear-autoroute-cancel');
-    if (btnClearCancel) {
-        btnClearCancel.addEventListener('click', () => {
-            document.getElementById('clear-autoroute-modal').style.display = 'none';
-        });
-    }
 }
 
 // ============================================================================
@@ -1545,14 +1325,23 @@ function setupRouteWindow() {
                 xboat:   { maxJump:  parseInt(document.getElementById('route-auto-xboat-jump').value, 10),
                            maxRange: parseInt(document.getElementById('route-auto-xboat-range').value, 10),
                            minIx:    parseInt(document.getElementById('route-auto-xboat-min-ix').value, 10) },
-                btn:     { minBTN:   parseInt(document.getElementById('route-auto-btn-min').value, 10),
-                           maxJump:  parseInt(document.getElementById('route-auto-btn-jump').value, 10) },
-                p2p:     { startRaw: document.getElementById('route-auto-p2p-start').value,
-                           endRaw:   document.getElementById('route-auto-p2p-end').value,
-                           maxJump:  parseInt(document.getElementById('route-auto-p2p-jump').value, 10) },
-                network: { maxJump:  parseInt(document.getElementById('route-auto-network-jump').value, 10),
-                           maxRange: parseInt(document.getElementById('route-auto-network-range').value, 10),
-                           filterRules: window.activeFilterRules || [] }
+                btn:     { lowerBTN: parseInt(document.getElementById('route-auto-btn-lower').value, 10),
+                           minBTN:   parseInt(document.getElementById('route-auto-btn-min').value,   10),
+                           maxBTN:   document.getElementById('route-auto-btn-max').value.trim() === ''
+                                       ? null
+                                       : parseInt(document.getElementById('route-auto-btn-max').value, 10),
+                           maxJump:  parseInt(document.getElementById('route-auto-btn-jump').value,  10),
+                           range:    parseInt(document.getElementById('route-auto-btn-range').value, 10) },
+                p2p:     { startRaw:        document.getElementById('route-auto-p2p-start').value,
+                           endRaw:          document.getElementById('route-auto-p2p-end').value,
+                           maxJump:         parseInt(document.getElementById('route-auto-p2p-jump').value, 10),
+                           allowEmptyHexes: document.getElementById('route-auto-p2p-allow-empty')?.checked || false,
+                           maxEmptyJumps:   parseInt(document.getElementById('route-auto-p2p-max-empty')?.value || '1', 10) },
+                network: { maxJump:         parseInt(document.getElementById('route-auto-network-jump').value, 10),
+                           maxRange:        parseInt(document.getElementById('route-auto-network-range').value, 10),
+                           filterRules:     window.activeFilterRules || [],
+                           allowEmptyHexes: document.getElementById('route-auto-network-allow-empty')?.checked || false,
+                           maxEmptyJumps:   parseInt(document.getElementById('route-auto-network-max-empty')?.value || '1', 10) }
             };
 
             if (type === 'xboat') {
@@ -1578,11 +1367,11 @@ function setupRouteWindow() {
                     showToast('The current filter matches no worlds.', 2500);
                     return;
                 }
-                const { maxJump, maxRange } = configs.network;
+                const { maxJump, maxRange, allowEmptyHexes: netAllowEmpty, maxEmptyJumps: netMaxEmpty } = configs.network;
                 const groupId = `net_${routeId}`;
                 saveHistoryState(`Generate Custom Network: ${routeName}`);
                 window.sectorRoutes = (window.sectorRoutes || []).filter(r => r.routeId !== routeId);
-                const count = generateAutoRoutes(filteredIds, maxJump, maxRange, routeDef.color, groupId, routeName, routeId);
+                const count = generateAutoRoutes(filteredIds, maxJump, maxRange, routeDef.color, groupId, routeName, routeId, netAllowEmpty, netMaxEmpty);
                 if (count === 0) {
                     showToast('No route segments could be generated for the current filter.', 2500);
                     return;
@@ -1596,7 +1385,7 @@ function setupRouteWindow() {
             }
 
             if (type === 'p2p') {
-                const { startRaw, endRaw, maxJump } = configs.p2p;
+                const { startRaw, endRaw, maxJump, allowEmptyHexes: p2pAllowEmpty, maxEmptyJumps: p2pMaxEmpty } = configs.p2p;
                 const startId = resolveWorldInput(startRaw);
                 const endId   = resolveWorldInput(endRaw);
                 if (!startRaw.trim() || !endRaw.trim()) {
@@ -1632,7 +1421,7 @@ function setupRouteWindow() {
                 const groupId = `p2p_${routeId}`;
                 saveHistoryState(`Generate Point-to-Point: ${routeName}`);
                 window.sectorRoutes = (window.sectorRoutes || []).filter(r => r.routeId !== routeId);
-                const count = generatePointToPointRoute(startId, endId, maxJump, routeDef.color, groupId, routeName, true, filteredIds, routeId, waypointIds);
+                const count = generatePointToPointRoute(startId, endId, maxJump, routeDef.color, groupId, routeName, true, filteredIds, routeId, waypointIds, p2pAllowEmpty, p2pMaxEmpty);
                 if (count === null) {
                     const wpNote = waypointIds.length > 0 ? ` via ${waypointIds.length} waypoint(s)` : '';
                     showToast(`No path found from ${startId} to ${endId}${wpNote} within Jump-${maxJump}.`, 3000);
@@ -1647,7 +1436,60 @@ function setupRouteWindow() {
                 return;
             }
 
+            if (type === 'btn') {
+                const { lowerBTN, minBTN, maxBTN, maxJump, range } = configs.btn;
+                if (!Number.isFinite(lowerBTN) || !Number.isFinite(minBTN)) {
+                    showToast('Lower BTN and Min BTN must be valid numbers.', 2500);
+                    return;
+                }
+                if (lowerBTN > minBTN) {
+                    showToast('Lower BTN must be ≤ Min BTN.', 2500);
+                    return;
+                }
+                if (!Number.isFinite(maxJump) || !Number.isFinite(range)) {
+                    showToast('Max Jump and Range must be valid numbers.', 2500);
+                    return;
+                }
+                const groupId = `btn_${routeId}`;
+                saveHistoryState(`Generate BTN Routes: ${routeName}`);
+                window.sectorRoutes = (window.sectorRoutes || []).filter(r => r.routeId !== routeId);
+                const result = generateBTNRoutes({
+                    lowerBTN, minBTN, maxBTN, maxJump, range,
+                    color: routeDef.color, groupId, name: routeName, routeId
+                });
+                if (window.isLoggingEnabled && window.batchLogData && window.batchLogData.length > 0) {
+                    downloadBatchLog('BTN_Routes', result.included);
+                }
+                if (window.dbManager) window.dbManager.saveRoutes();
+                requestAnimationFrame(draw);
+                window.closeRouteAutoPanel();
+                window.refreshRouteWindowCounts();
+                const maxLabel = maxBTN !== null ? `–${maxBTN}` : '+';
+                showToast(
+                    `"${routeName}" BTN[${lowerBTN}/${minBTN}${maxLabel}]: ${result.segments} seg — ${result.fullRoutes} full + ${result.promoted} promoted seg. (${result.included} worlds, ${result.skipped} skipped)`,
+                    5000
+                );
+                return;
+            }
+
             showToast(`[Stub] ${type.toUpperCase()} → "${routeName}" — not yet implemented.`, 3000);
+        });
+    }
+
+    // Wire Allow Empty Hexes checkboxes show/hide
+    const networkAllowEmpty = document.getElementById('route-auto-network-allow-empty');
+    const networkEmptyOpts  = document.getElementById('route-auto-network-empty-opts');
+    if (networkAllowEmpty && networkEmptyOpts) {
+        networkAllowEmpty.addEventListener('change', () => {
+            networkEmptyOpts.style.display = networkAllowEmpty.checked ? 'block' : 'none';
+        });
+    }
+
+    const p2pAllowEmpty = document.getElementById('route-auto-p2p-allow-empty');
+    const p2pEmptyOpts  = document.getElementById('route-auto-p2p-empty-opts');
+    if (p2pAllowEmpty && p2pEmptyOpts) {
+        p2pAllowEmpty.addEventListener('change', () => {
+            p2pEmptyOpts.style.display = p2pAllowEmpty.checked ? 'block' : 'none';
         });
     }
 
@@ -1849,6 +1691,17 @@ window.openRouteAutoPanel = function (routeId, routeName) {
     // Clear any waypoints from a previous session
     const wpList = document.getElementById('route-auto-p2p-waypoints-list');
     if (wpList) wpList.innerHTML = '';
+
+    // Reset Allow Empty Hexes checkboxes and hide their option sections
+    const netEmptyCb = document.getElementById('route-auto-network-allow-empty');
+    const netEmptyOpts = document.getElementById('route-auto-network-empty-opts');
+    if (netEmptyCb) netEmptyCb.checked = false;
+    if (netEmptyOpts) netEmptyOpts.style.display = 'none';
+
+    const p2pEmptyCb = document.getElementById('route-auto-p2p-allow-empty');
+    const p2pEmptyOptsEl = document.getElementById('route-auto-p2p-empty-opts');
+    if (p2pEmptyCb) p2pEmptyCb.checked = false;
+    if (p2pEmptyOptsEl) p2pEmptyOptsEl.style.display = 'none';
 
     panel.style.display = 'block';
     panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

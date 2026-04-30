@@ -2167,10 +2167,8 @@
      * Helper: Get effective HZCO deviation
      */
     function getEffectiveHzcoDeviation(orbitId, hzco) {
-        if (orbitId < 1.0 || hzco < 1.0) {
-            return (orbitId - hzco) / Math.max(0.01, Math.min(orbitId, hzco));
-        }
-        return orbitId - hzco;
+        function toScale(v) { return v < 1.0 ? 10 * v : v + 9; }
+        return toScale(orbitId) - toScale(hzco);
     }
 
     // =====================================================================

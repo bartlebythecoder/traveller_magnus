@@ -153,6 +153,72 @@ function _bfsPath(startId, endId, worlds, maxJump, worldById) {
     return null;
 }
 
+// ── BFS path finder with empty hex traversal ─────────────────────────────────
+// Returns a Map<hexId, {id, q, r}> of empty hexes within maxJump of any world
+// in traversalWorlds. Used to pre-filter the empty hex candidate set.
+
+function _buildEmptyHexCandidates(traversalWorlds, maxJump) {
+    const result = new Map();
+    for (const world of traversalWorlds) {
+        for (let dq = -maxJump; dq <= maxJump; dq++) {
+            for (let dr = -maxJump; dr <= maxJump; dr++) {
+                const nq = world.q + dq;
+                const nr = world.r + dr;
+                if (getHexDistance(world.q, world.r, nq, nr) > maxJump) continue;
+                const hexId = getHexId(nq, nr);
+                if (!hexId || result.has(hexId)) continue;
+                const state = hexStates.get(hexId);
+                if (state && state.type === 'EMPTY') {
+                    result.set(hexId, { id: hexId, q: nq, r: nr });
+                }
+            }
+        }
+    }
+    return result;
+}
+
+// Like _bfsPath but allows intermediate hops through EMPTY hexes.
+// emptyById: Map<hexId, {id,q,r}> of candidate empty hexes.
+// maxEmptyJumps: max consecutive empty hops before a system is required.
+
+function _bfsPathWithEmpty(startId, endId, worlds, maxJump, worldById, emptyById, maxEmptyJumps) {
+    const queue = [{ path: [startId], streak: 0 }];
+    const visited = new Set([`${startId}:0`]);
+
+    while (queue.length > 0) {
+        const { path, streak } = queue.shift();
+        const currentId = path[path.length - 1];
+        const current = worldById.get(currentId) || emptyById.get(currentId);
+        if (!current) continue;
+
+        // System neighbors — landing on a system resets the consecutive empty streak
+        for (const w of worlds) {
+            const dist = getHexDistance(current.q, current.r, w.q, w.r);
+            if (dist === 0 || dist > maxJump) continue;
+            const vKey = `${w.id}:0`;
+            if (visited.has(vKey)) continue;
+            const newPath = [...path, w.id];
+            if (w.id === endId) return newPath;
+            visited.add(vKey);
+            queue.push({ path: newPath, streak: 0 });
+        }
+
+        // Empty hex neighbors — only if the streak budget allows another empty hop
+        if (streak < maxEmptyJumps) {
+            for (const [eId, eCoords] of emptyById) {
+                const dist = getHexDistance(current.q, current.r, eCoords.q, eCoords.r);
+                if (dist === 0 || dist > maxJump) continue;
+                const newStreak = streak + 1;
+                const vKey = `${eId}:${newStreak}`;
+                if (visited.has(vKey)) continue;
+                visited.add(vKey);
+                queue.push({ path: [...path, eId], streak: newStreak });
+            }
+        }
+    }
+    return null;
+}
+
 // ─────────────────────────────────────────────────────────────────────
 /**
  * Generate X-Boat routes across all populated hexes.
@@ -186,7 +252,7 @@ function generateXboatRoutes(maxJump = 4, maxRange = 12, minIx = 4) {
         if (!data) return;
         const ix = calculateT5Ix(data);
         const coords = getHexCoords(id);
-        const worldInfo = { id, q: coords.q, r: coords.r, ix };
+        const worldInfo = { id, q: coords.q, r: coords.r, ix, travelZone: data.travelZone || 'Green' };
         worlds.push(worldInfo);
         if (ix >= minIx) importantWorlds.push(worldInfo);
     });
@@ -194,6 +260,8 @@ function generateXboatRoutes(maxJump = 4, maxRange = 12, minIx = 4) {
     if (worlds.length === 0) return;
 
     const worldById = new Map(worlds.map(w => [w.id, w]));
+    const nonRedWorlds = worlds.filter(w => w.travelZone !== 'Red');
+    const nonRedById   = new Map(nonRedWorlds.map(w => [w.id, w]));
     const adj = new Map();
 
     // Step 2: Direct links between Ix 4+ worlds within maxJump
@@ -239,7 +307,20 @@ function generateXboatRoutes(maxJump = 4, maxRange = 12, minIx = 4) {
             // Skip if already reachable via existing routes
             if (uf.connected(w1.id, w2.id)) continue;
 
-            const path = _bfsPath(w1.id, w2.id, worlds, maxJump, worldById);
+            // Avoid Red-zone intermediaries; allow Red endpoints
+            const needW1 = w1.travelZone === 'Red';
+            const needW2 = w2.travelZone === 'Red';
+            let bfsW, bfsMap;
+            if (needW1 || needW2) {
+                bfsW = [...nonRedWorlds];
+                if (needW1) bfsW.push(w1);
+                if (needW2) bfsW.push(w2);
+                bfsMap = new Map(bfsW.map(w => [w.id, w]));
+            } else {
+                bfsW = nonRedWorlds; bfsMap = nonRedById;
+            }
+
+            const path = _bfsPath(w1.id, w2.id, bfsW, maxJump, bfsMap);
             if (!path) continue;
 
             for (let k = 0; k < path.length - 1; k++) {
@@ -268,7 +349,7 @@ function generateXboatRoutes(maxJump = 4, maxRange = 12, minIx = 4) {
  * @param {string}   name           - Display name shown in the Clear modal.
  * @returns {number} Number of route segments added.
  */
-function generateAutoRoutes(filteredHexIds, maxJump, maxRange, color, groupId, name, routeIdOverride = null) {
+function generateAutoRoutes(filteredHexIds, maxJump, maxRange, color, groupId, name, routeIdOverride = null, allowEmptyHexes = false, maxEmptyJumps = 1) {
     if (!window.sectorRoutes) window.sectorRoutes = [];
 
     const filteredSet = new Set(filteredHexIds);
@@ -281,17 +362,22 @@ function generateAutoRoutes(filteredHexIds, maxJump, maxRange, color, groupId, n
         const data = state.rttData || state.t5Data || state.mgt2eData || state.ctData;
         if (!data) return;
         const coords = getHexCoords(id);
-        const worldInfo = { id, q: coords.q, r: coords.r };
+        const worldInfo = { id, q: coords.q, r: coords.r, travelZone: data.travelZone || 'Green' };
         worlds.push(worldInfo);
         if (filteredSet.has(id)) endpointWorlds.push(worldInfo);
     });
 
     if (endpointWorlds.length === 0) return 0;
 
-    const worldById = new Map(worlds.map(w => [w.id, w]));
+    const worldById   = new Map(worlds.map(w => [w.id, w]));
+    const nonRedWorlds = worlds.filter(w => w.travelZone !== 'Red');
+    const nonRedById   = new Map(nonRedWorlds.map(w => [w.id, w]));
     const adj = new Map();
     const extras = { subtype: 'AutoRoute', color, groupId, name };
     if (routeIdOverride != null) extras.routeId = routeIdOverride;
+
+    // Pre-build empty hex candidates if the option is enabled
+    const emptyById = allowEmptyHexes ? _buildEmptyHexCandidates(worlds, maxJump) : new Map();
 
     // Step 1: Direct links between filtered worlds within maxJump
     for (let i = 0; i < endpointWorlds.length; i++) {
@@ -331,7 +417,23 @@ function generateAutoRoutes(filteredHexIds, maxJump, maxRange, color, groupId, n
 
         for (const { w1, w2 } of pairs) {
             if (uf.connected(w1.id, w2.id)) continue;
-            const path = _bfsPath(w1.id, w2.id, worlds, maxJump, worldById);
+
+            // Avoid Red-zone intermediaries; allow Red endpoints
+            const needW1 = w1.travelZone === 'Red';
+            const needW2 = w2.travelZone === 'Red';
+            let bfsW, bfsMap;
+            if (needW1 || needW2) {
+                bfsW = [...nonRedWorlds];
+                if (needW1) bfsW.push(w1);
+                if (needW2) bfsW.push(w2);
+                bfsMap = new Map(bfsW.map(w => [w.id, w]));
+            } else {
+                bfsW = nonRedWorlds; bfsMap = nonRedById;
+            }
+
+            const path = allowEmptyHexes
+                ? _bfsPathWithEmpty(w1.id, w2.id, bfsW, maxJump, bfsMap, emptyById, maxEmptyJumps)
+                : _bfsPath(w1.id, w2.id, bfsW, maxJump, bfsMap);
             if (!path) continue;
             for (let k = 0; k < path.length - 1; k++) {
                 addRoute(path[k], path[k + 1], 'Filter', adj, { ...extras });
@@ -388,7 +490,7 @@ function clearAutoRouteGroup(groupId) {
  * @param {string[]} waypointIds    - Ordered mandatory intermediate stops (default empty).
  * @returns {number|null} Total segments added across all legs, or null if any leg has no path.
  */
-function generatePointToPointRoute(startId, endId, maxJump, color, groupId, name, filteredOnly = false, filteredHexIds = [], routeIdOverride = null, waypointIds = []) {
+function generatePointToPointRoute(startId, endId, maxJump, color, groupId, name, filteredOnly = false, filteredHexIds = [], routeIdOverride = null, waypointIds = [], allowEmptyHexes = false, maxEmptyJumps = 1) {
     if (!window.sectorRoutes) window.sectorRoutes = [];
 
     const filteredSet = new Set(filteredHexIds);
@@ -412,13 +514,18 @@ function generatePointToPointRoute(startId, endId, maxJump, color, groupId, name
         if (!worldById.has(stopId)) return null;
     }
 
+    // Pre-build empty hex candidates if the option is enabled
+    const emptyById = allowEmptyHexes ? _buildEmptyHexCandidates(worlds, maxJump) : new Map();
+
     const stops = [startId, ...waypointIds, endId];
     const extras = { subtype: 'PointToPoint', color, groupId, name };
     if (routeIdOverride != null) extras.routeId = routeIdOverride;
 
     let totalSegments = 0;
     for (let i = 0; i < stops.length - 1; i++) {
-        const path = _bfsPath(stops[i], stops[i + 1], worlds, maxJump, worldById);
+        const path = allowEmptyHexes
+            ? _bfsPathWithEmpty(stops[i], stops[i + 1], worlds, maxJump, worldById, emptyById, maxEmptyJumps)
+            : _bfsPath(stops[i], stops[i + 1], worlds, maxJump, worldById);
         if (!path) return null;
         for (let k = 0; k < path.length - 1; k++) {
             addRoute(path[k], path[k + 1], 'Filter', null, extras);
@@ -429,4 +536,223 @@ function generatePointToPointRoute(startId, endId, maxJump, color, groupId, name
     const legDesc = waypointIds.length > 0 ? `, ${stops.length - 1} leg(s)` : '';
     console.log(`Point-to-Point "${name}" (Jump-${maxJump}): ${totalSegments} segment(s) from ${startId} to ${endId}${legDesc}.`);
     return totalSegments;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BTN (Basic Trade Number) Route Generation
+// Inspired by GURPS Traveller Far Trader.
+// ─────────────────────────────────────────────────────────────────────────────
+
+function _btnDistancePenalty(d) {
+    if (d <= 1)   return 0;
+    if (d <= 2)   return 1;
+    if (d <= 5)   return 2;
+    if (d <= 9)   return 3;
+    if (d <= 19)  return 4;
+    if (d <= 29)  return 5;
+    if (d <= 59)  return 6;
+    if (d <= 99)  return 7;
+    if (d <= 199) return 8;
+    if (d <= 299) return 9;
+    if (d <= 599) return 10;
+    if (d <= 999) return 11;
+    return 12;
+}
+
+function _btnTradeBonus(tcA, tcB) {
+    let bonus = 0;
+    if ((tcA.includes('Ag') && tcB.includes('Na')) || (tcB.includes('Ag') && tcA.includes('Na'))) bonus += 1;
+    if ((tcA.includes('In') && tcB.includes('Ni')) || (tcB.includes('In') && tcA.includes('Ni'))) bonus += 1;
+    return bonus;
+}
+
+/**
+ * Attempt to add a BTN route segment, enforcing the no-share rule across
+ * different BTN route groups. Null btnMax is treated as +Infinity.
+ */
+function _btnAddSegment(id1, id2, extras) {
+    const sorted = [id1, id2].sort();
+    const [s, e] = sorted;
+    const myMax = extras.btnMax === null ? Infinity : extras.btnMax;
+
+    const conflictIdx = (window.sectorRoutes || []).findIndex(r =>
+        r.startId === s && r.endId === e &&
+        r.subtype === 'BTN' &&
+        r.groupId !== extras.groupId
+    );
+
+    if (conflictIdx !== -1) {
+        const rival = window.sectorRoutes[conflictIdx];
+        const rivalMax = rival.btnMax === null ? Infinity : rival.btnMax;
+        if (rivalMax >= myMax) return; // rival wins or tie — first placed stands
+        window.sectorRoutes.splice(conflictIdx, 1); // we win — evict rival
+    }
+
+    addRoute(id1, id2, 'Filter', null, extras);
+}
+
+/**
+ * Generate BTN Trade Routes for a given route slot.
+ *
+ * @param {Object} cfg
+ * @param {number}      cfg.lowerBTN  - Partial-success floor (inclusive).
+ * @param {number}      cfg.minBTN    - Full-route floor (inclusive).
+ * @param {number|null} cfg.maxBTN    - Full-route ceiling (null = no cap).
+ * @param {number}      cfg.maxJump   - Max single-hop distance for BFS.
+ * @param {number}      cfg.range     - Straight-line pair-filter distance.
+ * @param {string}      cfg.color     - CSS colour for segments.
+ * @param {string}      cfg.groupId   - Unique group ID (e.g. "btn_2").
+ * @param {string}      cfg.name      - Display name.
+ * @param {number}      cfg.routeId   - Route definition ID for rendering.
+ * @returns {{ segments, fullRoutes, promoted, included, skipped }}
+ */
+function generateBTNRoutes({ lowerBTN, minBTN, maxBTN, maxJump, range, color, groupId, name, routeId }) {
+    if (!window.sectorRoutes) window.sectorRoutes = [];
+
+    // ── 1. Collect worlds with a valid WTN ──────────────────────────────────
+    const worlds = [];
+    let included = 0, skipped = 0;
+
+    hexStates.forEach((state, id) => {
+        if (state.type !== 'SYSTEM_PRESENT') return;
+        const data = state.rttData || state.t5Data || state.mgt2eData || state.ctData;
+        if (!data) { skipped++; return; }
+        const wtn = data.WTN;
+        if (wtn === undefined || wtn === null || !Number.isFinite(wtn)) { skipped++; return; }
+        const coords = getHexCoords(id);
+        worlds.push({
+            id, q: coords.q, r: coords.r,
+            name: data.name || id,
+            WTN: wtn,
+            tradeCodes: data.tradeCodes || [],
+            travelZone: data.travelZone || 'Green'
+        });
+        included++;
+    });
+
+    // ── 2. Sort descending by WTN ────────────────────────────────────────────
+    worlds.sort((a, b) => b.WTN - a.WTN);
+
+    const worldById = new Map(worlds.map(w => [w.id, w]));
+
+    // BFS candidate list that allows Red-zone endpoints but bars Red intermediaries.
+    const nonRedWorlds = worlds.filter(w => w.travelZone !== 'Red');
+
+    const extras = { subtype: 'BTN', color, groupId, name, btnMax: maxBTN, routeId };
+
+    const partials = [];
+    let fullRoutes = 0;
+    let segments = 0;
+
+    const logging = !!window.isLoggingEnabled;
+    const wLabel = w => `${w.name} [${w.id}] WTN:${w.WTN}`;
+
+    if (logging) {
+        const maxLabel = maxBTN !== null ? maxBTN : 'none';
+        tSection(`BTN Route Generation: ${name}`);
+        writeLogLine(`Thresholds: Lower ${lowerBTN} / Min ${minBTN} / Max ${maxLabel} | Jump ${maxJump} | Range ${range}`);
+        writeLogLine(`Worlds eligible: ${included} | Skipped (no WTN): ${skipped}`);
+        tSection('Full Routes');
+    }
+
+    // ── 3 & 4. Pair iteration ────────────────────────────────────────────────
+    for (let i = 0; i < worlds.length; i++) {
+        const wa = worlds[i];
+        for (let j = i + 1; j < worlds.length; j++) {
+            const wb = worlds[j];
+            const d = getHexDistance(wa.q, wa.r, wb.q, wb.r);
+            if (d === 0 || d > range) continue;
+
+            const pen     = _btnDistancePenalty(d);
+            const bon     = _btnTradeBonus(wa.tradeCodes, wb.tradeCodes);
+            const rawBTN  = wa.WTN + wb.WTN - pen + bon;
+            const btnCap  = Math.min(wa.WTN, wb.WTN) + 10;
+            const btn     = Math.min(rawBTN, btnCap);
+
+            const isFull    = btn >= minBTN && (maxBTN === null || btn <= maxBTN);
+            const isPartial = !isFull && btn >= lowerBTN;
+
+            if (!isFull && !isPartial) continue;
+
+            // ── 5. BFS — bar Red intermediaries, but allow Red endpoints ────
+            const needA = wa.travelZone === 'Red';
+            const needB = wb.travelZone === 'Red';
+            let bfsWorlds, bfsById;
+            if (needA || needB) {
+                bfsWorlds = [...nonRedWorlds];
+                if (needA) bfsWorlds.push(wa);
+                if (needB) bfsWorlds.push(wb);
+                bfsById = new Map(bfsWorlds.map(w => [w.id, w]));
+            } else {
+                bfsWorlds = nonRedWorlds;
+                bfsById = worldById;
+            }
+
+            const path = _bfsPath(wa.id, wb.id, bfsWorlds, maxJump, bfsById);
+            if (!path) continue;
+
+            if (isFull) {
+                if (logging) {
+                    const capNote = rawBTN > btnCap ? ` (capped from ${rawBTN})` : '';
+                    writeLogLine(`  ${wLabel(wa)} + ${wLabel(wb)} | dist:${d} pen:${pen} bon:${bon} | raw:${rawBTN} cap:${btnCap} BTN:${btn}${capNote} → ROUTE`);
+                }
+                for (let k = 0; k < path.length - 1; k++) {
+                    const before = window.sectorRoutes.length;
+                    _btnAddSegment(path[k], path[k + 1], extras);
+                    if (window.sectorRoutes.length > before) segments++;
+                }
+                fullRoutes++;
+            } else {
+                partials.push({ path, wa, wb, pen, bon, rawBTN, btnCap, btn });
+            }
+        }
+    }
+
+    // ── 7. Partial-success promotion ─────────────────────────────────────────
+    // Map each segment key → indices into partials[]
+    const segToPartials = new Map();
+    for (let pi = 0; pi < partials.length; pi++) {
+        const { path } = partials[pi];
+        for (let k = 0; k < path.length - 1; k++) {
+            const key = [path[k], path[k + 1]].sort().join('|');
+            if (!segToPartials.has(key)) segToPartials.set(key, []);
+            segToPartials.get(key).push(pi);
+        }
+    }
+
+    // Draw only segments that appear in 2+ partial paths (segment-level promotion)
+    if (logging) tSection('Promoted Segments');
+
+    let promoted = 0;
+    for (const [key, indices] of segToPartials) {
+        if (indices.length < 2) continue;
+        const [id1, id2] = key.split('|');
+
+        if (logging) {
+            const hopA = worldById.get(id1);
+            const hopB = worldById.get(id2);
+            const hopLabel = `${hopA ? hopA.name : id1} [${id1}] ↔ ${hopB ? hopB.name : id2} [${id2}]`;
+            const sharers = indices
+                .map(pi => `${partials[pi].wa.name} [${partials[pi].wa.id}] ↔ ${partials[pi].wb.name} [${partials[pi].wb.id}]`)
+                .join(', ');
+            writeLogLine(`  ${hopLabel}  (shared by: ${sharers})`);
+        }
+
+        const before = window.sectorRoutes.length;
+        _btnAddSegment(id1, id2, extras);
+        if (window.sectorRoutes.length > before) {
+            segments++;
+            promoted++;
+        }
+    }
+
+
+    if (logging) {
+        tSection('BTN Generation Summary');
+        writeLogLine(`Full routes: ${fullRoutes} | Promoted: ${promoted} | Total segments: ${segments}`);
+        writeLogLine(`Worlds included: ${included} | Skipped (no WTN): ${skipped}`);
+    }
+
+    console.log(`BTN Routes "${name}": ${segments} segments, ${fullRoutes} full + ${promoted} promoted, ${included} worlds included, ${skipped} skipped.`);
+    return { segments, fullRoutes, promoted, included, skipped };
 }

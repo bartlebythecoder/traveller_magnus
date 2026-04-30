@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.10.0.2";
-const APP_BANNER = "v0.10.0.2: Patch OTU imports for routes; Mongoose Engine Fixes";
+const APP_VERSION = "v0.10.0.3";
+const APP_BANNER = "v0.10.0.3: New: BTN Routes inspired by GURPS Far Trader";
 
 // -----------------------------------------------------------------------------
 // Application State

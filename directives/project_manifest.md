@@ -36,7 +36,7 @@ For this version: (1) Routes (2) Borders (3) Small bug fixes
 9. Integrate Generate XBoat automation into Route Management (complete)
 10. Build special BTN Routes from GURPS Traveller into Route Management (outstanding)
 11. Integrate filter automatic routes into Route Management (complete)
-10. Look to include waypoints in point to point routes (outstanding)
+12. Look to include waypoints in point to point routes (complete)
 
 ### Phase 0.10.1.x: Build Out Border Functionality 
 Borders:

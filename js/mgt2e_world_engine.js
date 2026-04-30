@@ -73,7 +73,7 @@
 
         let hzco = body.worldHzco || (sys ? (sys.ptypeHzco || sys.hzco) : 0);
         if (hzco > 0 && body.orbitId !== undefined) {
-            let diff = body.orbitId - hzco;
+            let diff = getEffectiveHzcoDeviation(body.orbitId, hzco);
             if (diff <= 0) {
                 compDM += 1;
                 tDM('At/Closer than HZCO', 1);
@@ -138,11 +138,11 @@
         // 5. Calculate Physics using MgT2EMath (diameter-based)
         const diamRatio = (body.diamKm / 12742).toFixed(4);
         if (!isManual(body, 'gravity')) body.gravity = parseFloat(MgT2EMath.calculateGravity(body.density, body.diamKm).toFixed(3));
-        writeLogLine(`  Gravity Formula: Density(${body.density.toFixed(2)}) × (DiamKm(${body.diamKm}) / 12742) [ratio=${diamRatio}] = ${body.gravity.toFixed(3)} G`);
+        writeLogLine(`  Gravity Formula: Density(${body.density.toFixed(3)}) × (DiamKm(${body.diamKm}) / 12742) [ratio=${diamRatio}] = ${body.gravity.toFixed(3)} G`);
         tResult('Gravity (G)', body.gravity.toFixed(3), 'MgT2E 2.1: Composition & Gravity');
 
         if (!isManual(body, 'mass')) body.mass = parseFloat(MgT2EMath.calculateMass(body.density, body.diamKm).toFixed(4));
-        writeLogLine(`  Mass Formula: Density(${body.density.toFixed(2)}) × (DiamKm(${body.diamKm}) / 12742)³ [ratio=${diamRatio}] = ${body.mass.toFixed(4)} M⊕`);
+        writeLogLine(`  Mass Formula: Density(${body.density.toFixed(3)}) × (DiamKm(${body.diamKm}) / 12742)³ [ratio=${diamRatio}] = ${body.mass.toFixed(4)} M⊕`);
         tResult('Mass (Earths)', body.mass.toFixed(4), 'MgT2E 2.1: Composition & Gravity');
 
         // 6. Orbital Velocity & Escape Velocity
@@ -220,10 +220,8 @@
      * @returns {number} Deviation value
      */
     function getEffectiveHzcoDeviation(orbitId, hzco) {
-        if (orbitId < 1.0 || hzco < 1.0) {
-            return (orbitId - hzco) / Math.max(0.01, Math.min(orbitId, hzco));
-        }
-        return orbitId - hzco;
+        function toScale(v) { return v < 1.0 ? 10 * v : v + 9; }
+        return toScale(orbitId) - toScale(hzco);
     }
 
     /**
@@ -776,9 +774,6 @@
                 // Refined Deviation Logic (Phase 1)
                 let diff = getEffectiveHzcoDeviation(w.orbitId, w.worldHzco || sys.hzco);
                 let hzco = w.worldHzco || sys.hzco;
-                if (hzco < 1.0 && diff < 0) {
-                    diff = diff * 10;
-                }
 
                 // Flags for Phase 4 Checks
                 w._atmHazardFlag = false;

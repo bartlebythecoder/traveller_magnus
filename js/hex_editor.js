@@ -180,6 +180,8 @@ function openHexEditor(hexId, e = null) {
     document.getElementById('edit-travel-zone').value = data.travelZone || 'Green';
     const allegVal = data.allegiance || stateObj.allegiance || '';
     document.getElementById('edit-allegiance').value = (allegVal === '----') ? '' : allegVal;
+    const clusterVal = stateObj.cluster || '';
+    document.getElementById('edit-cluster').value = (clusterVal === '----') ? '' : clusterVal;
     document.getElementById('edit-notes').value = data.notes || stateObj.notes || '';
 
     // Dynamic UI Toggles based on active generation engine
@@ -679,6 +681,8 @@ function populateEditorAccordions(stateObj) {
                     if (isMainworldEntry) {
                         const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
                         html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${alleg}</strong></div>`;
+                        const clust = (stateObj.cluster && stateObj.cluster.trim()) || '----';
+                        html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Cluster: <strong style="color: #66fcf1">${clust}</strong></div>`;
                     }
 
                     html += buildJourneyTimesUI(w, sys.stars[starIdx], stateObj.isStellarMaskingActive);
@@ -758,6 +762,8 @@ function populateEditorAccordions(stateObj) {
                             if (isMoonMainworld) {
                                 const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
                                 html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${alleg}</strong></div>`;
+                                const clust = (stateObj.cluster && stateObj.cluster.trim()) || '----';
+                                html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Cluster: <strong style="color: #66fcf1">${clust}</strong></div>`;
                             }
 
                             html += buildJourneyTimesUI(m, sys.stars[starIdx], stateObj.isStellarMaskingActive, (w.au || w.distAU));
@@ -981,6 +987,8 @@ function populateEditorAccordions(stateObj) {
                         if (_isMain) {
                             const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
                             html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${alleg}</strong></div>`;
+                            const clust = (stateObj.cluster && stateObj.cluster.trim()) || '----';
+                            html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Cluster: <strong style="color: #66fcf1">${clust}</strong></div>`;
                         }
 
                         html += buildJourneyTimesUI(w, sys.stars[starIdx], stateObj.isStellarMaskingActive);
@@ -1032,6 +1040,8 @@ function populateEditorAccordions(stateObj) {
                                 if (_isSatMain) {
                                     const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
                                     html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${alleg}</strong></div>`;
+                                    const clust = (stateObj.cluster && stateObj.cluster.trim()) || '----';
+                                    html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Cluster: <strong style="color: #66fcf1">${clust}</strong></div>`;
                                 }
 
                                 html += buildJourneyTimesUI(sat, sys.stars[starIdx], stateObj.isStellarMaskingActive, (w.au || w.distAU));
@@ -1189,6 +1199,8 @@ function populateEditorAccordions(stateObj) {
                                     if (tCodes.length > 0) html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Codes: <strong style="color: #66fcf1">${tCodes.join(' ')}</strong></div>`;
                                     const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
                                     html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${alleg}</strong></div>`;
+                                    const clust = (stateObj.cluster && stateObj.cluster.trim()) || '----';
+                                    html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Cluster: <strong style="color: #66fcf1">${clust}</strong></div>`;
                                     if (mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
                                         const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
                                         const specialCodes = (mwBase.tradeCodes || []).filter(c => ['Fo', 'Da', 'Pz'].includes(c));
@@ -1250,6 +1262,8 @@ function populateEditorAccordions(stateObj) {
                                             if (sCodes.length > 0) html += `<div style="margin-bottom: 6px; font-size: 0.85em; color: #a0a8b0;">Codes: <strong style="color: #66fcf1">${sCodes.join(' ')}</strong></div>`;
                                             const salleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
                                             html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${salleg}</strong></div>`;
+                                            const sclust = (stateObj.cluster && stateObj.cluster.trim()) || '----';
+                                            html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Cluster: <strong style="color: #66fcf1">${sclust}</strong></div>`;
                                             if (mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
                                                 const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
                                                 html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor}; margin-bottom: 8px;">Caution: ${mwBase.travelZone} Zone</div>`;
@@ -1398,6 +1412,8 @@ function populateEditorAccordions(stateObj) {
                 if (isMain) {
                     const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
                     bHtml += `<span>Allegiance: <strong>${alleg}</strong></span>`;
+                    const clust = (stateObj.cluster && stateObj.cluster.trim()) || '----';
+                    bHtml += `<span>Cluster: <strong>${clust}</strong></span>`;
                 }
                 if (body.canBeTerraformed) {
                     bHtml += `<span class="system-stats-full" style="color: #66fcf1; border-color: #45a29e;">Terraforming Potential: ${_rttNum(body, 'terraformPoints', sIdx, oIdx, satIdx, 0, 99)} pts</span>`;
@@ -1597,9 +1613,10 @@ function saveHexEditorChanges() {
     const uwp = `${starport}${toUWPChar(size)}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
 
     const allegiance = document.getElementById('edit-allegiance').value.trim() || '----';
+    const cluster = document.getElementById('edit-cluster').value.trim() || '----';
     const notes = document.getElementById('edit-notes').value.trim();
 
-    const sharedData = { uwp, travelZone: document.getElementById('edit-travel-zone').value, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, bases, navalBase, scoutBase, militaryBase, corsairBase, researchBase, tas, wayStation, govEstate, embassy, moot, merchantBase, shipyard, megaCorp, scoutHostel, psionics, sacredSite, enclave, ancients, gasGiant, allegiance, notes };
+    const sharedData = { uwp, travelZone: document.getElementById('edit-travel-zone').value, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, bases, navalBase, scoutBase, militaryBase, corsairBase, researchBase, tas, wayStation, govEstate, embassy, moot, merchantBase, shipyard, megaCorp, scoutHostel, psionics, sacredSite, enclave, ancients, gasGiant, allegiance, cluster, notes };
 
     // Helper to sync PBG quick-stats if visible
     const t5QuickStatsDiv = document.getElementById('editor-t5-quick-stats');
@@ -1677,6 +1694,7 @@ function saveHexEditorChanges() {
     // --- PERSISTENCE & SYNC (SEAN PROTOCOL) ---
     stateObj.name = name;
     stateObj.allegiance = allegiance;
+    stateObj.cluster = cluster;
     stateObj.notes = notes;
 
     // 1. Update MgT2E Socio Profile (Expansion or Native)

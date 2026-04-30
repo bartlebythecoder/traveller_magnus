@@ -1,6 +1,17 @@
 # Changelog
 
-### [v0.10.0.2] - In Progress
+### [v0.10.0.3] - In Progress
+1. **Routes:** Removed legacy Xboat and Auto Routes modals and their event handlers; all route operations now go through the Route Manager
+2. **Routes:** Increased jump range limit from 6 to 20 across all Route Manager panels (BTN, P2P, Network, Xboat)
+3. **Mongoose Engine:** Rewrote HZCO deviation formula to use a continuous linear scale (sub-1 orbits scaled ×10) giving physically correct temperature classifications for inner-system worlds
+4. **Routes:** Implemented BTN Trade Route generation (GURPS Far Trader inspired) — computes Basic Trade Number for all world pairs within range, draws routes for pairs meeting Min/Max BTN thresholds, promotes partial-success pairs whose BFS paths share a segment, and enforces no-shared-segment priority between competing BTN route slots
+5. **Routes:** Xboat, Network, and BTN route generators now avoid Red travel zones and X starport worlds as intermediate routing hops (endpoints may still be Red)
+6. **Routes:** Added Import Metadata (.xml) and Export Metadata (.xml) buttons for TravellerMap-format sector XML files — import routes grouped by color into chosen route slots; export all routes for a sector with route definition colors and cross-sector offset attributes for round-trip compatibility
+7. **Export:** Fixed Ix, Ex, and Cx not being populated when exporting a Mongoose-generated sector — the exporter now reads Im/ecoR/L/I/E directly from the Mongoose engine output and uses the cultural profile D/X/U/S dimensions for Cx; also fixed a broken global reference that prevented the T5 socio fallback from firing for CT/RTT worlds
+8. **Routes:** Added "Allow Empty Hexes" option to Custom Network and Point-to-Point route generators — when enabled, BFS can traverse hexes marked as EMPTY, subject to a configurable Max Empty Jumps (1–3) consecutive-hop limit before a populated system must be reached
+9. **All Engines:** Added freeform **Cluster** field to all systems — displayed in the world info panel below Allegiance, editable inline (up to 10 characters), bulk-assignable via right-click context menu, and filterable in the Filter Control window using the same prefix-match OR logic as Allegiance; persists in JSON saves
+
+### [v0.10.0.2] - 2026-04-25
 1. **Route Manager:** Fixed bugs preventing system names being used properly in filters and reports for OTU imports and JSONs
 2. **Mongoose Engine:** Density: Added randomized linear results between table results to three decimals to increase variability
 3. **Mongoose Engine:** Density: Corrected UI units to Earth-relative

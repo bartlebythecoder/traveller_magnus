@@ -76,6 +76,7 @@ Want to replace any of these sectors with your own file?
 11. **Advanced Filter Rules:** Now have visibility checkboxes
 12. **Mongoose Engine:** Updated temperature band calculation to match chart on Page 47
 13. **Mongoose Engine:** Updated atmosphere gas mix for exotic atmospheres to limit gases to reasonable amount
+14. **Routes:** Removed limit of routs to match the new metadata Borders and Regions
 
 ### [v0.10.0.3] - 2026-05-02
 1. **Routes:** Removed legacy Xboat and Auto Routes modals and their event handlers; all route operations now go through the Route Manager

@@ -22,7 +22,7 @@ const MgT2EData = {
     // Scaled HZCO deviation thresholds (uses getEffectiveHzcoDeviation output).
     // Entries are checked in order; first match wins. Last entry (no maxDeviation) is the fallback.
     temperatureBands: [
-        { maxDeviation: -1.10, band: 'Boiling'   },
+        { maxDeviation: -1.01, band: 'Boiling'   },
         { maxDeviation: -0.50, band: 'Hot'        },
         { maxDeviation:  0.49, band: 'Temperate'  },
         { maxDeviation:  1.00, band: 'Cold'       },

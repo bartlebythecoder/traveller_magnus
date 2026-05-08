@@ -27,8 +27,7 @@
     }
 
     /**
-     * Parse metadata XML for one sector and add its <Route> elements to
-     * window.sectorRoutes as Xboat-type routes.
+     * Parse metadata XML for one sector and add its <Route> and <Borders> elements.
      *
      * Cross-sector routes carry EndOffsetX / EndOffsetY attributes that shift
      * the end hex into an adjacent sector grid position.  coordLookup resolves
@@ -45,9 +44,14 @@
      * @param {number} sectorX     - Grid X position of this sector.
      * @param {number} sectorY     - Grid Y position of this sector.
      * @param {Map}    coordLookup - Map<"x,y" → slotNum> for all known sectors.
+     * @param {object} [options]   - { importRoutes: bool, importBorders: bool } — defaults to both true.
      */
-    function parseAndAddOtuRoutes(sectorName, xmlText, slotNum, sectorX, sectorY, coordLookup) {
+    function parseAndAddOtuRoutes(sectorName, xmlText, slotNum, sectorX, sectorY, coordLookup, options) {
         if (!xmlText) return;
+
+        const importRoutes  = !options || options.importRoutes  !== false;
+        const importBorders = !options || options.importBorders !== false;
+        const importRegions = !options || options.importRegions !== false;
 
         let doc;
         try {
@@ -62,55 +66,80 @@
             return;
         }
 
-        const routeEls = doc.querySelectorAll('Route');
-        let added = 0, skipped = 0;
+        if (importRoutes) {
+            const routeEls = doc.querySelectorAll('Route');
+            let added = 0, skipped = 0;
 
-        routeEls.forEach(el => {
-            const startCode = el.getAttribute('Start');
-            const endCode   = el.getAttribute('End');
-            if (!startCode || !endCode) return;
+            routeEls.forEach(el => {
+                const startCode = el.getAttribute('Start');
+                const endCode   = el.getAttribute('End');
+                if (!startCode || !endCode) return;
 
-            // Resolve start sector — StartOffsetX/Y shift the start hex into an adjacent sector.
-            const startOffsetX = parseInt(el.getAttribute('StartOffsetX') || '0', 10);
-            const startOffsetY = parseInt(el.getAttribute('StartOffsetY') || '0', 10);
-            let startSlotNum = slotNum;
-            if (startOffsetX !== 0 || startOffsetY !== 0) {
-                const startKey  = `${sectorX + startOffsetX},${sectorY + startOffsetY}`;
-                const startSlot = coordLookup.get(startKey);
-                if (startSlot === undefined) {
-                    console.warn(`[OTU Metadata] "${sectorName}": cross-sector route from (${startKey}) skipped — sector not in lookup.`);
-                    skipped++;
-                    return;
+                // Resolve start sector — StartOffsetX/Y shift the start hex into an adjacent sector.
+                const startOffsetX = parseInt(el.getAttribute('StartOffsetX') || '0', 10);
+                const startOffsetY = parseInt(el.getAttribute('StartOffsetY') || '0', 10);
+                let startSlotNum = slotNum;
+                if (startOffsetX !== 0 || startOffsetY !== 0) {
+                    const startKey  = `${sectorX + startOffsetX},${sectorY + startOffsetY}`;
+                    const startSlot = coordLookup.get(startKey);
+                    if (startSlot === undefined) {
+                        console.warn(`[OTU Metadata] "${sectorName}": cross-sector route from (${startKey}) skipped — sector not in lookup.`);
+                        skipped++;
+                        return;
+                    }
+                    startSlotNum = startSlot;
                 }
-                startSlotNum = startSlot;
-            }
 
-            const startId = hexCodeToHexId(startSlotNum, startCode);
+                const startId = hexCodeToHexId(startSlotNum, startCode);
 
-            // Resolve end sector — EndOffsetX/Y shift the end hex into an adjacent sector.
-            const offsetX = parseInt(el.getAttribute('EndOffsetX') || '0', 10);
-            const offsetY = parseInt(el.getAttribute('EndOffsetY') || '0', 10);
-            let endSlotNum = slotNum;
-            if (offsetX !== 0 || offsetY !== 0) {
-                const targetKey  = `${sectorX + offsetX},${sectorY + offsetY}`;
-                const targetSlot = coordLookup.get(targetKey);
-                if (targetSlot === undefined) {
-                    console.warn(`[OTU Metadata] "${sectorName}": cross-sector route to (${targetKey}) skipped — sector not in lookup.`);
-                    skipped++;
-                    return;
+                // Resolve end sector — EndOffsetX/Y shift the end hex into an adjacent sector.
+                const offsetX = parseInt(el.getAttribute('EndOffsetX') || '0', 10);
+                const offsetY = parseInt(el.getAttribute('EndOffsetY') || '0', 10);
+                let endSlotNum = slotNum;
+                if (offsetX !== 0 || offsetY !== 0) {
+                    const targetKey  = `${sectorX + offsetX},${sectorY + offsetY}`;
+                    const targetSlot = coordLookup.get(targetKey);
+                    if (targetSlot === undefined) {
+                        console.warn(`[OTU Metadata] "${sectorName}": cross-sector route to (${targetKey}) skipped — sector not in lookup.`);
+                        skipped++;
+                        return;
+                    }
+                    endSlotNum = targetSlot;
                 }
-                endSlotNum = targetSlot;
-            }
 
-            const endId = hexCodeToHexId(endSlotNum, endCode);
-            if (typeof addRoute === 'function') {
-                addRoute(startId, endId, 'Xboat');
-                added++;
-            }
-        });
+                const endId = hexCodeToHexId(endSlotNum, endCode);
+                if (typeof addRoute === 'function') {
+                    addRoute(startId, endId, 'Xboat');
+                    added++;
+                }
+            });
 
-        if (added > 0 || skipped > 0) {
-            console.log(`[OTU Metadata] "${sectorName}": ${added} route(s) added, ${skipped} cross-sector skipped.`);
+            if (added > 0 || skipped > 0) {
+                console.log(`[OTU Metadata] "${sectorName}": ${added} route(s) added, ${skipped} cross-sector skipped.`);
+            }
+        }
+
+        if (importBorders) {
+            const bordersEl = doc.querySelector('Borders');
+            if (bordersEl && typeof window.importBordersFromXml === 'function') {
+                const result = window.importBordersFromXml(bordersEl, slotNum);
+                if (result.skipped.length > 0) {
+                    console.warn(`[OTU Metadata] "${sectorName}": ${result.skipped.length} border(s) skipped — no free slots: ${result.skipped.map(s => s.label).join(', ')}`);
+                }
+            }
+        }
+
+        if (importRegions) {
+            const regionsEl = doc.querySelector('Regions');
+            if (regionsEl && typeof window.importRegionsFromXml === 'function') {
+                const result = window.importRegionsFromXml(regionsEl, slotNum);
+                if (result.assigned.length > 0) {
+                    console.log(`[OTU Metadata] "${sectorName}": ${result.assigned.length} region(s) imported — ${result.assigned.map(r => r.label).join(', ')}`);
+                }
+                if (result.skipped.length > 0) {
+                    console.warn(`[OTU Metadata] "${sectorName}": ${result.skipped.length} region(s) skipped — ${result.skipped.map(r => r.label).join(', ')}`);
+                }
+            }
         }
     }
 

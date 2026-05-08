@@ -42,6 +42,8 @@
 
     <script src="js/universal_math.js" defer></script>
     <script src="js/routes.js" defer></script>
+    <script src="js/borders.js" defer></script>
+    <script src="js/regions.js" defer></script>
     <script src="rules/t5_data.js" defer></script>
     <script src="js/t5_stellar_engine.js" defer></script>
     <script src="js/t5_world_engine.js" defer></script>
@@ -512,6 +514,163 @@
         .btn-confirm:not(:disabled):hover {
             background-color: #66fcf1;
         }
+
+        /* ── Region Manager Window ───────────────────────────────────────── */
+        #region-window {
+            width: 390px;
+            padding: 25px;
+            color: #c5c6c7;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            gap: 10px;
+            border: 2px solid #66fcf1;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #region-window .modal-drag-handle { flex-shrink: 0; }
+        #region-window .palette-content   { flex: 1; min-height: 0; overflow-y: auto; }
+        #region-window .region-window-footer { flex-shrink: 0; }
+        .region-window-footer {
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 8px;
+            border-top: 1px solid rgba(69, 162, 158, 0.4);
+            margin-top: 2px;
+        }
+
+        /* ── Border Manager Window ───────────────────────────────────────── */
+        #border-window {
+            width: 390px;
+            padding: 25px;
+            color: #c5c6c7;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            gap: 10px;
+            border: 2px solid #66fcf1;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #border-window .modal-drag-handle { flex-shrink: 0; }
+        #border-window .palette-content   { flex: 1; min-height: 0; overflow-y: auto; }
+        #border-window .border-window-footer { flex-shrink: 0; }
+        .border-window-footer {
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 8px;
+            border-top: 1px solid rgba(69, 162, 158, 0.4);
+            margin-top: 2px;
+        }
+        .border-row {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 2px;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .border-num {
+            color: #66fcf1;
+            font-size: 0.85rem;
+            font-weight: bold;
+            min-width: 22px;
+        }
+        .border-name-input {
+            width: 110px;
+            flex: none;
+            background: #1a1a2e;
+            border: 1px solid #45a29e;
+            color: #c5c6c7;
+            padding: 2px 5px;
+            font-size: 0.82rem;
+            border-radius: 3px;
+        }
+        .border-color-swatch {
+            width: 50px;
+            height: 24px;
+            padding: 1px;
+            border: 1px solid #45a29e;
+            border-radius: 3px;
+            cursor: pointer;
+            background: none;
+        }
+        .border-vis-label {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 0.78rem;
+            color: #a0a8b0;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .border-clear-btn {
+            background: #1a1a2e;
+            border: 1px solid #8b3a3a;
+            color: #e06c6c;
+            padding: 2px 6px;
+            font-size: 0.8rem;
+            border-radius: 3px;
+            cursor: pointer;
+            min-width: 22px;
+            text-align: center;
+        }
+        .border-clear-btn:hover {
+            background: #3a1a1a;
+            border-color: #e06c6c;
+        }
+        .border-hex-count {
+            font-size: 0.7rem;
+            min-width: 28px;
+            text-align: center;
+            border-radius: 10px;
+            padding: 1px 5px;
+            font-family: 'Courier New', monospace;
+        }
+        .border-hex-count.used {
+            background: rgba(102, 252, 241, 0.15);
+            color: #66fcf1;
+            border: 1px solid rgba(102, 252, 241, 0.4);
+        }
+        .border-hex-count.free {
+            background: rgba(255,255,255,0.04);
+            color: #555;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        /* ── Border Assignment Modal ─────────────────────────────────────── */
+        #border-assign-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .border-assign-btn {
+            background: #1a1a2e;
+            border: 2px solid currentColor;
+            border-radius: 4px;
+            padding: 8px 4px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            font-family: 'Inter', sans-serif;
+            transition: background 0.15s;
+        }
+        .border-assign-btn:hover { background: rgba(255,255,255,0.1); }
+        .border-assign-num {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        .border-assign-name {
+            font-size: 0.68rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 90px;
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -520,9 +679,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above So Below</span></h1>
-            <div class="splash-banner">New: BTN Routes inspired by GURPS Far Trader</div>
+            <div class="splash-banner">New: Borders</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.10.0.3</div>
+            <div class="splash-version">v0.10.1</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -541,6 +700,7 @@
                     <div class="shortcut-item"><strong>Ctrl + Alt + 5</strong><span>Full T5 Macro</span></div>
                     <div class="shortcut-item"><strong>F Key</strong><span>Open Filter Window</span></div>
                     <div class="shortcut-item"><strong>R Key</strong><span>Open Route Manager</span></div>
+                    <div class="shortcut-item"><strong>B Key</strong><span>Open Border Manager</span></div>
                     <div class="shortcut-item"><strong>Escape</strong><span>Cancel / Close All</span></div>
                     <div class="shortcut-item"><strong>Ctrl + Delete</strong><span>Clear Canvas</span></div>
                 </div>
@@ -727,6 +887,34 @@
 
             <h3 style="margin:0; color:#66fcf1; font-size:1.1rem;">Import the Imperium</h3>
 
+            <!-- Import options -->
+            <div style="border-bottom:1px solid #45a29e; padding-bottom:10px;">
+                <div style="color:#66fcf1; font-size:0.8rem; margin-bottom:8px;
+                            text-transform:uppercase; letter-spacing:0.05em;">Import Options</div>
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="otu-opt-sector" checked
+                            style="cursor:pointer; accent-color:#66fcf1;">
+                        <span style="color:#c5c6c7; font-size:0.85rem;">Sector Data</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="otu-opt-routes" checked
+                            style="cursor:pointer; accent-color:#66fcf1;">
+                        <span style="color:#c5c6c7; font-size:0.85rem;">Route Data</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="otu-opt-borders" checked
+                            style="cursor:pointer; accent-color:#66fcf1;">
+                        <span style="color:#c5c6c7; font-size:0.85rem;">Border Data</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="otu-opt-regions" checked
+                            style="cursor:pointer; accent-color:#66fcf1;">
+                        <span style="color:#c5c6c7; font-size:0.85rem;">Region Data</span>
+                    </label>
+                </div>
+            </div>
+
             <!-- Select All row -->
             <div style="display:flex; align-items:center; gap:8px;
                         border-bottom:1px solid #45a29e; padding-bottom:10px;">
@@ -755,6 +943,71 @@
         </div>
     </div>
 
+    <!-- Universe Import Modal -->
+    <div id="universe-import-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+               background:rgba(0,0,0,0.75); z-index:2000;
+               align-items:center; justify-content:center;">
+        <div style="background:#1f2833; border:1px solid #45a29e; border-radius:8px;
+                    padding:24px; width:480px;
+                    display:flex; flex-direction:column; gap:12px; box-shadow:0 8px 32px rgba(0,0,0,0.6);">
+
+            <h3 style="margin:0; color:#66fcf1; font-size:1.1rem;">Import the Universe</h3>
+
+            <!-- Warning -->
+            <div style="background:#2a1500; border:1px solid #c0392b; border-radius:4px; padding:12px;
+                        color:#e74c3c; font-size:0.82rem; line-height:1.6;">
+                &#9888; EXPERIMENTAL FEATURE &mdash; USE AT YOUR OWN RISK &#9888;<br>
+                Import the Universe will:<br>
+                &bull;&nbsp;Resize the canvas to 16&times;8 sectors (128 positions)<br>
+                &bull;&nbsp;Erase ALL existing hex data and routes<br>
+                &bull;&nbsp;Fetch up to <span id="universe-modal-sector-count">128</span> sectors
+                    from travellermap.com<br>
+                &nbsp;&nbsp;&nbsp;(cached sectors load instantly; live fetches are 1 second apart)<br><br>
+                This cannot be undone.
+            </div>
+
+            <!-- Import options -->
+            <div style="border-top:1px solid #45a29e; border-bottom:1px solid #45a29e; padding:10px 0;">
+                <div style="color:#66fcf1; font-size:0.8rem; margin-bottom:8px;
+                            text-transform:uppercase; letter-spacing:0.05em;">Import Options</div>
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="univ-opt-sector" checked
+                            style="cursor:pointer; accent-color:#66fcf1;">
+                        <span style="color:#c5c6c7; font-size:0.85rem;">Sector Data</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="univ-opt-routes" checked
+                            style="cursor:pointer; accent-color:#66fcf1;">
+                        <span style="color:#c5c6c7; font-size:0.85rem;">Route Data</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="univ-opt-borders" checked
+                            style="cursor:pointer; accent-color:#66fcf1;">
+                        <span style="color:#c5c6c7; font-size:0.85rem;">Border Data</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="univ-opt-regions" checked
+                            style="cursor:pointer; accent-color:#66fcf1;">
+                        <span style="color:#c5c6c7; font-size:0.85rem;">Region Data</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div style="display:flex; gap:8px; justify-content:flex-end;">
+                <button id="universe-cancel" class="menu-btn"
+                    style="padding:6px 18px;">Cancel</button>
+                <button id="universe-submit" class="menu-btn"
+                    style="padding:6px 18px; background:#c0392b; color:#fff;
+                           font-weight:bold; border-color:#c0392b;">
+                    Import
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Help Panel (formerly help-modal) -->
     <div id="help-panel" class="side-panel left">
         <div class="settings-header">
@@ -764,7 +1017,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.10.0.3</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.10.1</span>
             </p>
         </div>
 
@@ -821,22 +1074,16 @@
         </div>
     </div>
 
-    <!-- Cluster Assignment Modal -->
-    <div id="cluster-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content" style="width: 340px; text-align: left;">
-            <h3 style="text-align: center;">Assign Cluster</h3>
-            <p style="color: #c5c6c7; font-size: 0.85rem; margin: 0 0 16px;">
-                Applying to <strong id="cluster-modal-count" style="color: #66fcf1;"></strong> selected system(s).
+    <!-- Region Assignment Modal -->
+    <div id="region-assign-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="width: 360px; text-align: left;">
+            <h3 style="text-align: center; margin-bottom: 8px;">Assign Region</h3>
+            <p style="color: #c5c6c7; font-size: 0.85rem; margin: 0 0 14px;">
+                Assigning <strong id="region-assign-modal-count" style="color: #66fcf1;"></strong> hex(es) to region:
             </p>
-            <input type="text" id="cluster-input" maxlength="10"
-                placeholder="e.g. Core, Rim, ----"
-                style="width: 100%; padding: 8px; background: #0b0c10; border: 1px solid #45a29e; color: #66fcf1; font-family: 'Courier New', monospace; font-size: 1rem; box-sizing: border-box; border-radius: 4px; text-align: center; outline: none;">
-            <div style="display: flex; gap: 12px; margin-top: 20px;">
-                <button id="btn-cluster-confirm" class="btn-save"
-                    style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Assign</button>
-                <button id="btn-cluster-cancel" class="btn-cancel"
-                    style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Cancel</button>
-            </div>
+            <div id="region-assign-grid"></div>
+            <button id="btn-region-assign-cancel" class="btn-cancel"
+                style="width: 100%; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Cancel</button>
         </div>
     </div>
 
@@ -860,6 +1107,19 @@
                 <button id="btn-bg-color-cancel" class="btn-cancel"
                     style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Cancel</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Border Assignment Modal -->
+    <div id="border-assign-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="width: 360px; text-align: left;">
+            <h3 style="text-align: center; margin-bottom: 8px;">Assign Border</h3>
+            <p style="color: #c5c6c7; font-size: 0.85rem; margin: 0 0 14px;">
+                Assigning <strong id="border-assign-modal-count" style="color: #66fcf1;"></strong> hex(es) to border:
+            </p>
+            <div id="border-assign-grid"></div>
+            <button id="btn-border-assign-cancel" class="btn-cancel"
+                style="width: 100%; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Cancel</button>
         </div>
     </div>
 
@@ -1002,8 +1262,11 @@
 
         <button class="context-menu-item" id="ctx-open-filter" onclick="toggleFilterModal()">FILTER CONTROL (F)</button>
         <button class="context-menu-item" id="ctx-open-route-window">ROUTE MANAGER (R)</button>
+        <button class="context-menu-item" id="ctx-open-border-window">BORDER MANAGER (B)</button>
+        <button class="context-menu-item" id="ctx-open-region-window">REGION MANAGER (G)</button>
         <button class="context-menu-item" id="ctx-assign-allegiance">ASSIGN ALLEGIANCE</button>
-        <button class="context-menu-item" id="ctx-assign-cluster">ASSIGN CLUSTER</button>
+        <button class="context-menu-item" id="ctx-assign-region">ASSIGN REGION</button>
+        <button class="context-menu-item" id="ctx-assign-border">ASSIGN BORDER</button>
         <button class="context-menu-item" id="ctx-assign-bg-color">ASSIGN BACKGROUND COLOR</button>
 
         <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
@@ -1069,8 +1332,10 @@
                     <input type="text" id="edit-allegiance" maxlength="4" placeholder="----">
                 </div>
                 <div class="editor-row">
-                    <label>Cluster:</label>
-                    <input type="text" id="edit-cluster" maxlength="10" placeholder="----">
+                    <label>Region:</label>
+                    <select id="edit-region" style="width: 100%; background: #0b0c10; border: 1px solid #45a29e; color: #66fcf1; font-family: 'Courier New', monospace; font-size: 0.9rem; padding: 3px; border-radius: 3px;">
+                        <option value="----">— None —</option>
+                    </select>
                 </div>
                 <div class="editor-row" style="grid-column: span 1;">
                     <!-- Placeholder to keep grid balanced if needed, but we'll use a full row for notes below -->
@@ -1490,13 +1755,27 @@
                             <label>Trade Codes</label>
                             <input type="text" id="filter-trade-codes" placeholder="Ag, In">
                         </div>
+                    </div>
+                </div>
+
+                <!-- Polities (Accordion) - Closed by Default -->
+                <div class="filter-section">
+                    <div class="filter-accordion-header"
+                        onclick="this.classList.toggle('open'); document.getElementById('polities-accordion-body').classList.toggle('open');">
+                        <span class="filter-title">Polities</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div id="polities-accordion-body" class="filter-conditional-container filter-accordion-content">
                         <div class="filter-field">
                             <label>Allegiance</label>
                             <input type="text" id="filter-allegiance" placeholder="Im, Aa, Na">
                         </div>
-                        <div class="filter-field">
-                            <label>Cluster</label>
-                            <input type="text" id="filter-cluster" placeholder="Core, Rim">
+                        <div class="filter-field" style="flex-direction: column; align-items: stretch; grid-column: span 2;">
+                            <label>Region</label>
+                            <select id="filter-region" multiple size="4" style="width: 100%; background: #0b0c10; border: 1px solid #45a29e; color: #66fcf1; font-family: 'Courier New', monospace; font-size: 0.85rem; padding: 2px; border-radius: 3px;">
+                                <option value="">— Any —</option>
+                            </select>
+                            <span style="font-size: 0.7rem; color: #888; margin-top: 2px;">Ctrl+click to select multiple</span>
                         </div>
                     </div>
                 </div>
@@ -1783,8 +2062,8 @@
                         </div>
                         <div id="route-auto-p2p-empty-opts" style="display:none;">
                             <div class="route-auto-param">
-                                <label>Max Empty Jumps (1–3):</label>
-                                <input type="number" id="route-auto-p2p-max-empty" min="1" max="3" value="1">
+                                <label>Max Empty Jumps (1–10):</label>
+                                <input type="number" id="route-auto-p2p-max-empty" min="1" max="10" value="1">
                             </div>
                         </div>
                         <div id="route-auto-filter-summary-p2p" class="route-auto-filter-summary"></div>
@@ -1829,6 +2108,34 @@
         </div>
         <div class="route-window-footer">
             <button id="btn-close-route-window-footer" class="btn-cancel" style="padding: 4px 12px; font-size: 0.8rem;">Close</button>
+        </div>
+    </div>
+
+    <!-- Border Manager Window -->
+    <div id="border-window" class="draggable-palette">
+        <div class="modal-drag-handle">
+            <h2>Border Manager</h2>
+            <button id="btn-close-border-window" class="btn-close-palette" title="Close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="palette-content" style="padding: 0;">
+            <div id="border-window-list"></div>
+        </div>
+        <div class="border-window-footer">
+            <button id="btn-close-border-window-footer" class="btn-cancel" style="padding: 4px 12px; font-size: 0.8rem;">Close</button>
+        </div>
+    </div>
+
+    <!-- Region Manager Window -->
+    <div id="region-window" class="draggable-palette">
+        <div class="modal-drag-handle">
+            <h2>Region Manager</h2>
+            <button id="btn-close-region-window" class="btn-close-palette" title="Close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="palette-content" style="padding: 0;">
+            <div id="region-window-list"></div>
+        </div>
+        <div class="region-window-footer">
+            <button id="btn-close-region-window-footer" class="btn-cancel" style="padding: 4px 12px; font-size: 0.8rem;">Close</button>
         </div>
     </div>
 

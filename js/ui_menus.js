@@ -119,53 +119,6 @@ function setupContextMenu() {
         if (e.key === 'Escape') document.getElementById('allegiance-modal').style.display = 'none';
     });
 
-    // --- Assign Cluster ---
-    function getEligibleForCluster() {
-        return [...selectedHexes];
-    }
-
-    function confirmCluster() {
-        const val = document.getElementById('cluster-input').value.trim() || '----';
-        const eligible = getEligibleForCluster();
-        saveHistoryState('Assign Cluster');
-        eligible.forEach(hexId => {
-            let s = hexStates.get(hexId);
-            if (!s) {
-                s = { type: 'BLANK' };
-                hexStates.set(hexId, s);
-            }
-            s.cluster = val;
-        });
-        document.getElementById('cluster-modal').style.display = 'none';
-        showToast(`Cluster "${val}" assigned to ${eligible.length} system(s).`, 2500);
-        if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
-        if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
-    }
-
-    document.getElementById('ctx-assign-cluster').addEventListener('click', () => {
-        document.getElementById('context-menu').classList.remove('visible');
-        const eligible = getEligibleForCluster();
-        if (eligible.length === 0) {
-            showToast('No systems in selection to assign cluster to.', 2500);
-            return;
-        }
-        document.getElementById('cluster-modal-count').textContent = eligible.length;
-        document.getElementById('cluster-input').value = '';
-        document.getElementById('cluster-modal').style.display = 'flex';
-        setTimeout(() => document.getElementById('cluster-input').focus(), 50);
-    });
-
-    document.getElementById('btn-cluster-confirm').addEventListener('click', confirmCluster);
-
-    document.getElementById('btn-cluster-cancel').addEventListener('click', () => {
-        document.getElementById('cluster-modal').style.display = 'none';
-    });
-
-    document.getElementById('cluster-input').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') confirmCluster();
-        if (e.key === 'Escape') document.getElementById('cluster-modal').style.display = 'none';
-    });
-
     // --- Assign Background Color ---
     function openBgColorModal() {
         document.getElementById('context-menu').classList.remove('visible');
@@ -212,6 +165,10 @@ function setupContextMenu() {
         showToast(`Background color cleared from ${hexList.length} hex(es).`, 2000);
         requestAnimationFrame(draw);
     }
+
+    document.getElementById('ctx-assign-border').addEventListener('click', () => {
+        if (typeof window.openAssignBorderModal === 'function') window.openAssignBorderModal();
+    });
 
     document.getElementById('ctx-assign-bg-color').addEventListener('click', openBgColorModal);
     document.getElementById('btn-bg-color-apply').addEventListener('click', applyBgColor);
@@ -969,14 +926,16 @@ function hasAnyActiveFilter() {
     const textInputIds = [
         'filter-name', 'filter-starport', 'filter-size', 'filter-atm', 'filter-hydro',
         'filter-pop', 'filter-total-pop', 'filter-gov', 'filter-law', 'filter-tl',
-        'filter-trade-codes', 'filter-allegiance', 'filter-cluster', 'filter-gravity', 'filter-temperature',
+        'filter-trade-codes', 'filter-allegiance', 'filter-region', 'filter-gravity', 'filter-temperature',
         'filter-t5-ix', 'filter-mgt-importance', 'filter-mgt-wtn', 'filter-mgt-gwp'
     ];
     const checkboxIds = ['filter-belts', 'filter-gas-giant', 'filter-travel-zone'];
 
     const hasText = textInputIds.some(id => {
         const el = document.getElementById(id);
-        return el && el.value.trim() !== '';
+        if (!el) return false;
+        if (el.multiple) return Array.from(el.selectedOptions).some(o => o.value !== '');
+        return el.value.trim() !== '';
     });
     const hasCheck = checkboxIds.some(id => {
         const el = document.getElementById(id);
@@ -1347,13 +1306,13 @@ function setupRouteWindow() {
             if (type === 'xboat') {
                 const { maxJump, maxRange, minIx } = configs.xboat;
                 saveHistoryState('Generate Xboat Routes');
-                generateXboatRoutes(maxJump, maxRange, minIx);
+                generateXboatRoutes(maxJump, maxRange, minIx, routeId, `xboat_${routeId}`);
                 if (window.dbManager) window.dbManager.saveRoutes();
                 requestAnimationFrame(draw);
                 window.closeRouteAutoPanel();
                 window.refreshRouteWindowCounts();
-                const count = (window.sectorRoutes || []).filter(r => r.type === 'Xboat').length;
-                showToast(`XBoat routes generated: ${count} segment(s) added to Route #1.`, 3000);
+                const count = (window.sectorRoutes || []).filter(r => r.type === 'Xboat' && r.routeId === routeId).length;
+                showToast(`XBoat routes generated: ${count} segment(s) added to Route #${routeId}.`, 3000);
                 return;
             }
 
@@ -1524,12 +1483,16 @@ window.renderRouteWindow = function () {
     }
     if (padded && window.dbManager) window.dbManager.saveRouteDefinitions();
 
+    if (typeof window.ensureFreeRouteSlot === 'function') {
+        if (window.ensureFreeRouteSlot() && window.dbManager) window.dbManager.saveRouteDefinitions();
+    }
+
     const segCounts = new Map();
     (window.sectorRoutes || []).forEach(r => {
         if (r.routeId != null) segCounts.set(r.routeId, (segCounts.get(r.routeId) || 0) + 1);
     });
 
-    const defs = window.routeDefinitions.slice(0, 9);
+    const defs = window.routeDefinitions;
     defs.forEach((def) => {
         const segCount = segCounts.get(def.id) || 0;
         const segClass = segCount > 0 ? 'used' : 'free';

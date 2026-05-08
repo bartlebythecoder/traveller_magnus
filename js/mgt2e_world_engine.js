@@ -219,8 +219,9 @@
      * @param {number} hzco - Habitable zone center orbit
      * @returns {number} Deviation value
      */
+    function toScale(v) { return v < 1.0 ? 10 * v : v + 9; }
+
     function getEffectiveHzcoDeviation(orbitId, hzco) {
-        function toScale(v) { return v < 1.0 ? 10 * v : v + 9; }
         return toScale(orbitId) - toScale(hzco);
     }
 
@@ -231,12 +232,21 @@
      * @returns {string} Temperature band
      */
     function getTempBand(orbitId, hzco) {
-        let diff = getEffectiveHzcoDeviation(orbitId, hzco);
-        if (diff <= -2.01) return "Boiling";
-        if (diff <= -1.01) return "Hot";
-        if (diff <= 1.00) return "Temperate";
-        if (diff <= 3.00) return "Cold";
-        return "Frozen";
+        const scaledOrbit = toScale(orbitId);
+        const scaledHzco  = toScale(hzco);
+        const diff        = scaledOrbit - scaledHzco;
+        const table = MgT2EData.temperatureBands;
+        let band = table[table.length - 1].band;
+        for (const entry of table) {
+            if (entry.maxDeviation === undefined || diff <= entry.maxDeviation) {
+                band = entry.band;
+                break;
+            }
+        }
+        const threshold = (table.find(e => e.band === band && e.maxDeviation !== undefined) || {}).maxDeviation ?? '∞';
+        tResult('Temp Band', band);
+        writeLogLine(`  HZCO calc: orbit ${orbitId} → scaled ${scaledOrbit.toFixed(2)} | HZCO ${hzco} → scaled ${scaledHzco.toFixed(2)} | diff ${diff.toFixed(3)} | threshold ≤ ${threshold}`);
+        return band;
     }
 
     // =====================================================================
@@ -717,7 +727,6 @@
 
             tSection(`Atmosphere & Hydro: ${w.type} Orbit ${w.orbitId.toFixed(2)}`);
             let tempBand = getTempBand(w.orbitId, w.worldHzco || sys.hzco);
-            tResult('Temperature Band', tempBand);
 
             // Preliminary Temperature Estimation
             if (w.meanTempK === undefined) {
@@ -780,6 +789,7 @@
                 w._atmExtremeHeatFlag = false;
 
                 if (diff >= -1.00 && diff <= 1.00) {
+                    writeLogLine(`HZ Atmosphere: Deviation ${diff.toFixed(2)}, Table: Standard`);
                     w.atmCode = Math.max(0, baseRoll);
                 } else if (diff < -1.00) {
                     // Hot Atmospheres Table
@@ -1223,36 +1233,73 @@
                     retainedGases.push({ name: w.maxEscapeValue > 0.2 ? "Heavy Gases" : "Trace Gases", weight: 100, taint: false });
                 }
 
-                // Aggregate weights by name
-                let aggregatedGases = {};
-                let totalWeight = 0;
+                // Aggregate duplicates by name before selection
+                let aggregatedMap = {};
                 for (let g of retainedGases) {
-                    if (!aggregatedGases[g.name]) {
-                        aggregatedGases[g.name] = { weight: 0, taint: g.taint };
-                    }
-                    aggregatedGases[g.name].weight += g.weight;
-                    aggregatedGases[g.name].taint = aggregatedGases[g.name].taint || g.taint;
+                    if (!aggregatedMap[g.name]) aggregatedMap[g.name] = { weight: 0, taint: g.taint };
+                    aggregatedMap[g.name].weight += g.weight;
+                    aggregatedMap[g.name].taint = aggregatedMap[g.name].taint || g.taint;
+                }
+                let gasPool = Object.entries(aggregatedMap).map(([name, data]) => ({ name, weight: data.weight, taint: data.taint }));
+
+                tSection('Gas Selection');
+                tResult('Candidate Gases', gasPool.map(g => `${g.name} (wt ${g.weight})`).join(', '));
+
+                // Roll for target gas count
+                let countRoll = tRoll2D('Gas Count Roll (2d6)');
+                let targetCount;
+                if (countRoll <= 10) {
+                    targetCount = 2;
+                    tResult('Target Gas Count', targetCount, `Roll ${countRoll} (2–10) → 2 gases`);
+                } else if (countRoll === 11) {
+                    targetCount = 3;
+                    tResult('Target Gas Count', targetCount, `Roll 11 → 3 gases`);
+                } else {
+                    let bonusRoll = tRoll1D('Gas Count Bonus (1d6)');
+                    targetCount = bonusRoll <= 4 ? 4 : bonusRoll === 5 ? 5 : 6;
+                    tResult('Target Gas Count', targetCount, `Roll 12, bonus d6 ${bonusRoll} → ${targetCount} gases`);
                 }
 
-                for (let key in aggregatedGases) {
-                    totalWeight += aggregatedGases[key].weight;
-                    if (!isManual(w, 'taints') && aggregatedGases[key].taint && !w.taints.includes(key)) {
-                        w.taints.push(key);
-                        tResult('Atm Taint', key, 'MgT2E 2.2: Atmospheric Chemistry');
-                    }
+                // Cap at available pool size
+                let actualCount = Math.min(targetCount, gasPool.length);
+                if (actualCount < targetCount) {
+                    tResult('Gas Count Capped', actualCount, `Only ${gasPool.length} candidate(s) — using all`);
                 }
 
+                // Weighted selection without replacement
+                let pool = [...gasPool];
+                let selectedGases = [];
+                for (let i = 0; i < actualCount; i++) {
+                    let totalW = pool.reduce((s, g) => s + g.weight, 0);
+                    let rand = rng() * totalW;
+                    let cumulative = 0;
+                    let chosen = null;
+                    for (let j = 0; j < pool.length; j++) {
+                        cumulative += pool[j].weight;
+                        if (rand <= cumulative) { chosen = pool[j]; pool.splice(j, 1); break; }
+                    }
+                    if (!chosen) chosen = pool.pop(); // floating-point safety fallback
+                    selectedGases.push(chosen);
+                    tResult(`Draw ${i + 1}`, chosen.name, `rand ${rand.toFixed(2)} / pool total ${totalW.toFixed(0)} → weight ${chosen.weight}`);
+                }
+
+                // Prorate selected gases to 100% and assign taints for selected gases only
+                let totalSelected = selectedGases.reduce((s, g) => s + g.weight, 0);
                 let mixStrings = [];
-                for (let name in aggregatedGases) {
-                    let pct = (aggregatedGases[name].weight / totalWeight) * 100;
-                    mixStrings.push(`${name} ${pct.toFixed(1)}%`);
+                for (let g of selectedGases) {
+                    let pct = (g.weight / totalSelected) * 100;
+                    mixStrings.push(`${g.name} ${pct.toFixed(1)}%`);
+                    if (!isManual(w, 'taints') && g.taint && !w.taints.includes(g.name)) {
+                        w.taints.push(g.name);
+                        tResult('Atm Taint', g.name, 'MgT2E 2.2: Atmospheric Chemistry');
+                    }
                 }
 
                 mixStrings.sort((a, b) => parseFloat(b.split(' ')[b.split(' ').length - 1]) - parseFloat(a.split(' ')[a.split(' ').length - 1]));
 
                 w.gases = mixStrings;
                 tResult('Gas Mix', w.gases.join(', '), 'MgT2E 2.2: Atmospheric Chemistry');
-                writeLogLine(`Retained Gases: ${w.gases.join(', ')}`);
+                writeLogLine(`Final Composition: ${w.gases.join(' | ')}`);
 
                 w.atmProfile = `${toUWPChar(w.atmCode)}-${w.totalPressureBar.toFixed(2)}-0.000`;
                 tResult('Atm Profile', w.atmProfile, 'MgT2E 2.2: Atmospheric Chemistry');

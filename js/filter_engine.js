@@ -96,6 +96,25 @@
 
 
     /**
+     * Populates (or repopulates) the #filter-region multi-select from window.regionDefinitions.
+     * Preserves any currently selected values by name so live-sync doesn't clear the user's pick.
+     */
+    window.populateFilterRegionDropdown = function() {
+        const sel = document.getElementById('filter-region');
+        if (!sel) return;
+        // Preserve current selection
+        const selected = new Set(Array.from(sel.selectedOptions).map(o => o.value));
+        sel.innerHTML = '<option value="">— Any —</option>';
+        (window.regionDefinitions || []).forEach(def => {
+            const opt = document.createElement('option');
+            opt.value       = def.name;
+            opt.textContent = `#${def.id} ${def.name}`;
+            if (selected.has(def.name)) opt.selected = true;
+            sel.appendChild(opt);
+        });
+    };
+
+    /**
      * Toggles the filter modal visibility and performs a data scan for conditional fields.
      */
     window.toggleFilterModal = function() {
@@ -105,6 +124,7 @@
 
         if (isOpening) {
             modal.classList.add('visible');
+            window.populateFilterRegionDropdown();
             scanForConditionalFields();
             if (typeof writeLogLine === 'function') writeLogLine("Filter Modal Opened - Performing data scan for Ix/GWP/WTN.");
         } else {
@@ -130,16 +150,16 @@
             'filter-name',
             'filter-starport', 'filter-size', 'filter-atm', 'filter-hydro',
             'filter-pop', 'filter-total-pop', 'filter-gov', 'filter-law', 'filter-tl', 'filter-trade-codes',
-            'filter-allegiance', 'filter-cluster', 'filter-belts', 'filter-gas-giant', 'filter-travel-zone',
+            'filter-allegiance', 'filter-region', 'filter-belts', 'filter-gas-giant', 'filter-travel-zone',
             'filter-gravity', 'filter-temperature', 'filter-t5-ix', 'filter-mgt-importance', 'filter-mgt-wtn', 'filter-mgt-gwp'
         ];
 
         inputs.forEach(id => {
             const el = document.getElementById(id);
-            if (el) {
-                if (el.type === 'checkbox') el.checked = false;
-                else el.value = '';
-            }
+            if (!el) return;
+            if (el.type === 'checkbox') el.checked = false;
+            else if (el.tagName === 'SELECT' && el.multiple) Array.from(el.options).forEach(o => o.selected = false);
+            else el.value = '';
         });
 
         const toggles = ['filter-route-green', 'filter-route-yellow', 'filter-route-red', 'filter-route-filter'];
@@ -250,7 +270,7 @@
             tl: document.getElementById('filter-tl')?.value || "",
             tradeCodes: document.getElementById('filter-trade-codes')?.value || "",
             allegiance: document.getElementById('filter-allegiance')?.value || "",
-            cluster: document.getElementById('filter-cluster')?.value || "",
+            cluster: Array.from(document.getElementById('filter-region')?.selectedOptions || []).map(o => o.value).filter(v => v).join(','),
             gravity: document.getElementById('filter-gravity')?.value || "",
             temperature: document.getElementById('filter-temperature')?.value || "",
             t5Ix: document.getElementById('filter-t5-ix')?.value || "",
@@ -338,7 +358,7 @@
             name: "Name",
             starport: "Starport", size: "Size", atm: "Atm", hydro: "Hydro",
             pop: "Pop", totalPop: "Total Pop", gov: "Gov", law: "Law", tl: "TL", tradeCodes: "Codes",
-            allegiance: "Alleg", cluster: "Cluster", belts: "Belts", gasGiant: "Gas Giant", travelZone: "Zone",
+            allegiance: "Alleg", cluster: "Region", belts: "Belts", gasGiant: "Gas Giant", travelZone: "Zone",
             gravity: "Grav", temperature: "Temp (°C)",
             t5Ix: "T5 Ix", mgtImportance: "Mg Imp", mgtWTN: "Mg WTN", mgtGWP: "Mg GWP"
         };
@@ -405,12 +425,15 @@
                 styleIndicator = `<span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; ${bgCSS} ${borderCSS} margin-right: 8px; flex-shrink: 0;" title="${iconType}"></span>`;
             }
 
+            const isHidden = rule.visible === false;
+            row.style.opacity = isHidden ? '0.45' : '1';
             row.innerHTML = `
                 <div style="display: flex; align-items: center; flex: 1; overflow: hidden;">
                     ${styleIndicator}
                     <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${rule.description}">${rule.description}</span>
                 </div>
-                <i class="fas fa-times" style="color: #ff4500; cursor: pointer; margin-left: 10px; font-size: 0.8rem;" onclick="deleteFilterRule('${rule.id}')"></i>
+                <i class="fas fa-eye${isHidden ? '-slash' : ''}" style="color: ${isHidden ? '#666' : '#45a29e'}; cursor: pointer; margin-left: 8px; font-size: 0.8rem;" title="${isHidden ? 'Enable rule' : 'Disable rule'}" onclick="toggleFilterRuleVisibility('${rule.id}')"></i>
+                <i class="fas fa-times" style="color: #ff4500; cursor: pointer; margin-left: 8px; font-size: 0.8rem;" onclick="deleteFilterRule('${rule.id}')"></i>
             `;
             listContainer.appendChild(row);
         });
@@ -429,8 +452,9 @@
             }
         });
 
-        // 2. Iterate through rules
+        // 2. Iterate through rules (skip hidden ones)
         window.activeFilterRules.forEach(rule => {
+            if (rule.visible === false) return;
             if (typeof writeLogLine === 'function') writeLogLine(`Applying Rule: ${rule.description}`);
             let ruleMatchCount = 0;
             
@@ -466,6 +490,17 @@
         });
 
         if (typeof draw === 'function') requestAnimationFrame(draw);
+    };
+
+    /**
+     * Toggles a rule's visibility without removing it from the ledger.
+     */
+    window.toggleFilterRuleVisibility = function(ruleId) {
+        const rule = window.activeFilterRules.find(r => r.id === ruleId);
+        if (!rule) return;
+        rule.visible = rule.visible === false;
+        renderRulesLedger();
+        window.reapplyAllRules();
     };
 
     /**
@@ -690,14 +725,14 @@
             'filter-name',
             'filter-starport', 'filter-size', 'filter-atm', 'filter-hydro',
             'filter-pop', 'filter-total-pop', 'filter-gov', 'filter-law', 'filter-tl', 'filter-trade-codes',
-            'filter-allegiance', 'filter-cluster', 'filter-belts', 'filter-gas-giant', 'filter-travel-zone',
+            'filter-allegiance', 'filter-region', 'filter-belts', 'filter-gas-giant', 'filter-travel-zone',
             'filter-gravity', 'filter-temperature', 'filter-t5-ix', 'filter-mgt-importance', 'filter-mgt-wtn', 'filter-mgt-gwp'
         ];
 
         inputs.forEach(id => {
             const el = document.getElementById(id);
             if (el) {
-                const eventType = el.type === 'checkbox' ? 'change' : 'input';
+                const eventType = (el.type === 'checkbox' || el.tagName === 'SELECT') ? 'change' : 'input';
                 el.addEventListener(eventType, onFilterChanged);
             }
         });

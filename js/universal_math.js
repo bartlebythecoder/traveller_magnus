@@ -284,14 +284,16 @@
                         continue;
                     }
 
-                    // --- STRING EXCEPTION: Cluster ---
+                    // --- STRING EXCEPTION: Cluster / Region ---
+                    // Values come from the multi-select dropdown (exact slot names), comma-joined.
+                    // Match is exact equality (case-insensitive) against any selected token.
                     if (field === 'cluster' || field === 'cl') {
                         const worldCluster = (world.cluster || world.Cluster || '').trim();
-                        const filterTokens = criteria.split(',').map(s => s.trim().toUpperCase()).filter(s => s !== '' && s !== '----');
+                        const filterTokens = criteria.split(',').map(s => s.trim()).filter(s => s !== '' && s !== '----');
                         if (filterTokens.length > 0) {
-                            const wUp = worldCluster.toUpperCase();
-                            const match = (wUp !== '' && wUp !== '----') &&
-                                          filterTokens.some(token => wUp.startsWith(token));
+                            const wLow = worldCluster.toLowerCase();
+                            const match = (wLow !== '' && wLow !== '----') &&
+                                          filterTokens.some(token => token.toLowerCase() === wLow);
                             if (!match) return false;
                         }
                         continue;

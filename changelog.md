@@ -1,6 +1,21 @@
 # Changelog
 
-### [v0.10.0.3] - In Progress
+### [v0.10.1] - In Progress
+1. **Routes:** X-Boat generation now writes to the selected route slot instead of always forcing to Slot #1 — each generation only clears and replaces segments in its own slot, leaving all other slots untouched
+2. **Mongoose Engine:** Fixed missing HZCO deviation log entry for temperate (habitable-zone) planets — deviation and table selection are now recorded in the generation log for every planet regardless of temperature band
+3. **Canvas:** Clear Canvas now also resets all sector names
+4. **Routes:** Raised Max Empty Jumps cap for Point-to-Point routes from 3 to 10; Custom Network remains capped at 3
+5. **Borders:** New Border functionality including Border Window, import borders from metadatafiles or add them manually via right-click context menu.
+6. **Import:** Added selective import options to Import Imperium and Import Universe — a checkbox panel lets you choose which data to import independently: Sector Data, Route Data, Border Data, and Region Data (all enabled by default)
+7. **Import:** Region Data import from TravellerMap metadata XML — parses `<Regions>` polygon boundaries using the same flood-fill algorithm as borders, assigns region names to each hex's Region (cluster) field, and automatically creates a background-highlight filter rule using the region's defined color
+8. **Import:** Region name field expanded from 10 to 20 characters to accommodate longer TravellerMap region names
+9. **Import:** TSV sector import now accepts 3-digit hex codes by automatically padding a leading zero, preventing rows from being silently dropped when the leading zero is missing
+10. **Regions:** New Region functionality including Region Window, import regions from metadatafiles or add them manually via right-click context menu.
+11. **Advanced Filter Rules:** Now have visibility checkboxes
+12. **Mongoose Engine:** Updated temperature band calculation to match chart on Page 47
+13. **Mongoose Engine:** Updated atmosphere gas mix for exotic atmospheres to limit gases to reasonable amount
+
+### [v0.10.0.3] - 2026-05-02
 1. **Routes:** Removed legacy Xboat and Auto Routes modals and their event handlers; all route operations now go through the Route Manager
 2. **Routes:** Increased jump range limit from 6 to 20 across all Route Manager panels (BTN, P2P, Network, Xboat)
 3. **Mongoose Engine:** Rewrote HZCO deviation formula to use a continuous linear scale (sub-1 orbits scaled ×10) giving physically correct temperature classifications for inner-system worlds

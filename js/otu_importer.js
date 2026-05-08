@@ -207,6 +207,20 @@
     }
 
     /**
+     * Read the four import-option checkboxes from a modal by element ID.
+     * Falls back to true for any missing element so old call sites stay safe.
+     */
+    function readImportOptions(sectorElId, routesElId, bordersElId, regionsElId) {
+        const checked = id => { const el = document.getElementById(id); return el ? el.checked : true; };
+        return {
+            importSector:  checked(sectorElId),
+            importRoutes:  checked(routesElId),
+            importBorders: checked(bordersElId),
+            importRegions: checked(regionsElId),
+        };
+    }
+
+    /**
      * Open the Import the Imperium modal.
      */
     function openImperiumModal() {
@@ -276,6 +290,9 @@
      * Pre-flight check, then fetch and import each selected sector in sequence.
      */
     async function runImport() {
+        const opts = readImportOptions('otu-opt-sector', 'otu-opt-routes', 'otu-opt-borders', 'otu-opt-regions');
+        const needsMeta = opts.importRoutes || opts.importBorders || opts.importRegions;
+
         const rows = document.querySelectorAll('.otu-sector-row');
         const selected = [];
 
@@ -294,15 +311,18 @@
             return;
         }
 
-        // Pre-flight: check all selected slots for existing data before fetching anything.
-        const collisions = selected.filter(s => sectorSlotHasData(s.slot));
-        if (collisions.length > 0) {
-            const detail = collisions.map(c => `  • "${c.name}" → Slot ${c.slot}`).join('\n');
-            alert(
-                `The following sector slots already contain data.\n` +
-                `Please clear each slot manually before importing:\n\n${detail}`
-            );
-            return;
+        // Pre-flight: only check for slot collisions when importing sector data.
+        // Routes and borders are additive and can be layered onto populated slots.
+        if (opts.importSector) {
+            const collisions = selected.filter(s => sectorSlotHasData(s.slot));
+            if (collisions.length > 0) {
+                const detail = collisions.map(c => `  • "${c.name}" → Slot ${c.slot}`).join('\n');
+                alert(
+                    `The following sector slots already contain data.\n` +
+                    `Please clear each slot manually before importing:\n\n${detail}`
+                );
+                return;
+            }
         }
 
         closeModal();
@@ -324,59 +344,69 @@
         for (let i = 0; i < selected.length; i++) {
             const { name, slot } = selected[i];
             let tsvFromCache = false;
-            try {
-                const cached = getCachedSector(name);
-                tsvFromCache = cached !== null;
 
-                if (typeof showToast === 'function') {
-                    const source = tsvFromCache ? 'cache' : `API (${i + 1} of ${selected.length})`;
-                    showToast(`Importing ${name} into Slot ${slot}… [${source}]`);
+            if (opts.importSector) {
+                try {
+                    const cached = getCachedSector(name);
+                    tsvFromCache = cached !== null;
+
+                    if (typeof showToast === 'function') {
+                        const source = tsvFromCache ? 'cache' : `API (${i + 1} of ${selected.length})`;
+                        showToast(`Importing ${name} into Slot ${slot}… [${source}]`);
+                    }
+
+                    const text = tsvFromCache ? cached : await fetchAndCacheSector(name);
+
+                    // Delegate to the existing T5 TSV parser with the user-specified slot.
+                    if (typeof importT5Tab === 'function') {
+                        importT5Tab(text, name, slot);
+                    } else {
+                        throw new Error('importT5Tab not available');
+                    }
+
+                    // Store sector name — preserve any existing manual name (conflict rule)
+                    const slotNum = parseInt(slot, 10);
+                    if (!isNaN(slotNum) && !window.sectorNames[slotNum]) {
+                        window.sectorNames[slotNum] = name;
+                    }
+                } catch (err) {
+                    alert(`Failed to import "${name}": ${err.message}`);
                 }
 
-                const text = tsvFromCache ? cached : await fetchAndCacheSector(name);
-
-                // Delegate to the existing T5 TSV parser with the user-specified slot.
-                if (typeof importT5Tab === 'function') {
-                    importT5Tab(text, name, slot);
-                } else {
-                    throw new Error('importT5Tab not available');
-                }
-
-                // Store sector name — preserve any existing manual name (conflict rule)
-                const slotNum = parseInt(slot, 10);
-                if (!isNaN(slotNum) && !window.sectorNames[slotNum]) {
-                    window.sectorNames[slotNum] = name;
-                }
-            } catch (err) {
-                alert(`Failed to import "${name}": ${err.message}`);
+                // Pause before metadata fetch if TSV came from a live API call.
+                if (!tsvFromCache) await delay(1000);
             }
 
-            // Pause before metadata fetch if TSV came from a live API call.
-            if (!tsvFromCache) await delay(1000);
-
-            // Fetch and cache metadata now, but defer route parsing until all sectors are loaded.
-            let metaXml = getCachedMetadata(name);
-            if (!metaXml) {
-                if (typeof showToast === 'function') showToast(`Fetching metadata for ${name}…`);
-                metaXml = await fetchAndCacheMetadata(name);
-                if (i < selected.length - 1) await delay(1000);
-            }
-            const sectorInfo = sectors.find(s => s.name === name);
-            if (metaXml && sectorInfo) {
-                sectorMetas.push({ name, metaXml, slotNum: sectorSlotToNumber(slot), x: sectorInfo.x, y: sectorInfo.y });
+            if (needsMeta) {
+                // Fetch and cache metadata now, but defer parsing until all sectors are loaded.
+                let metaXml = getCachedMetadata(name);
+                if (!metaXml) {
+                    if (typeof showToast === 'function') showToast(`Fetching metadata for ${name}…`);
+                    metaXml = await fetchAndCacheMetadata(name);
+                    if (i < selected.length - 1) await delay(1000);
+                }
+                const sectorInfo = sectors.find(s => s.name === name);
+                if (metaXml && sectorInfo) {
+                    sectorMetas.push({ name, metaXml, slotNum: sectorSlotToNumber(slot), x: sectorInfo.x, y: sectorInfo.y });
+                }
             }
         }
 
-        // Wipe existing Route 1 (Xboat) segments before populating from OTU metadata
-        if (window.sectorRoutes) {
-            window.sectorRoutes = window.sectorRoutes.filter(r => r.routeId !== 1 && r.type !== 'Xboat');
-        }
+        if (needsMeta) {
+            // Wipe existing Route 1 segments before populating from OTU metadata
+            if (opts.importRoutes && window.sectorRoutes) {
+                window.sectorRoutes = window.sectorRoutes.filter(r => r.routeId !== 1);
+            }
 
-        // Parse all routes in a single pass after every sector is loaded,
-        // so cross-sector routes can resolve both endpoints correctly.
-        if (typeof parseAndAddOtuRoutes === 'function') {
-            for (const m of sectorMetas) {
-                parseAndAddOtuRoutes(m.name, m.metaXml, m.slotNum, m.x, m.y, coordLookup);
+            // Parse all routes/borders in a single pass after every sector is loaded,
+            // so cross-sector routes can resolve both endpoints correctly.
+            if (typeof parseAndAddOtuRoutes === 'function') {
+                for (const m of sectorMetas) {
+                    parseAndAddOtuRoutes(m.name, m.metaXml, m.slotNum, m.x, m.y, coordLookup, opts);
+                }
+            }
+            if (opts.importRoutes && typeof window.ensureFreeRouteSlot === 'function') {
+                if (window.ensureFreeRouteSlot() && window.dbManager) window.dbManager.saveRouteDefinitions();
             }
         }
 
@@ -394,11 +424,8 @@
         return window.UNIVERSE_SECTORS;
     }
 
-    /**
-     * Bulk-imports every sector in UNIVERSE_SECTORS into a freshly resized 16×8 canvas.
-     * Shows a warning confirmation first. Clears all existing data on proceed.
-     */
-    async function runUniverseImport() {
+    /** Open the Universe import modal, pre-filling the sector count. */
+    function openUniverseModal() {
         let sectors;
         try {
             sectors = getUniverseSectors();
@@ -406,18 +433,30 @@
             alert(`Cannot import: ${err.message}`);
             return;
         }
+        const countEl = document.getElementById('universe-modal-sector-count');
+        if (countEl) countEl.textContent = sectors.length;
+        document.getElementById('universe-import-modal').style.display = 'flex';
+    }
 
-        const confirmed = confirm(
-            '⚠ EXPERIMENTAL FEATURE — USE AT YOUR OWN RISK ⚠\n\n' +
-            'Import the Universe will:\n' +
-            '  • Resize the canvas to 16×8 sectors (128 positions)\n' +
-            '  • Erase ALL existing hex data and routes\n' +
-            `  • Fetch up to ${sectors.length} sectors from travellermap.com\n` +
-            '    (cached sectors load instantly; live fetches are 1 second apart)\n\n' +
-            'This cannot be undone.\n\n' +
-            'Continue?'
-        );
-        if (!confirmed) return;
+    /** Close the Universe import modal. */
+    function closeUniverseModal() {
+        document.getElementById('universe-import-modal').style.display = 'none';
+    }
+
+    /**
+     * Bulk-imports every sector in UNIVERSE_SECTORS into a freshly resized 16×8 canvas.
+     * Called after the user confirms in the modal. Clears all existing data.
+     */
+    async function executeUniverseImport(opts) {
+        const needsMeta = opts.importRoutes || opts.importBorders || opts.importRegions;
+
+        let sectors;
+        try {
+            sectors = getUniverseSectors();
+        } catch (err) {
+            alert(`Cannot import: ${err.message}`);
+            return;
+        }
 
         // Wipe IndexedDB before clearing memory so no stale data remains.
         if (window.dbManager) await window.dbManager.clearDB();
@@ -447,53 +486,58 @@
         for (let i = 0; i < sectors.length; i++) {
             const { name, defaultSlot, x, y } = sectors[i];
             let tsvFromCache = false;
-            try {
-                const cached = await getCachedUniverseSector(name);
-                tsvFromCache = cached !== null;
 
-                if (typeof showToast === 'function') {
-                    const source = tsvFromCache ? 'cache' : `API (${i + 1} of ${sectors.length})`;
-                    showToast(`Importing ${name} into Slot ${defaultSlot}… [${source}]`);
+            if (opts.importSector) {
+                try {
+                    const cached = await getCachedUniverseSector(name);
+                    tsvFromCache = cached !== null;
+
+                    if (typeof showToast === 'function') {
+                        const source = tsvFromCache ? 'cache' : `API (${i + 1} of ${sectors.length})`;
+                        showToast(`Importing ${name} into Slot ${defaultSlot}… [${source}]`);
+                    }
+
+                    const text = tsvFromCache ? cached : await fetchAndCacheUniverseSector(name);
+
+                    if (typeof importT5Tab === 'function') {
+                        importT5Tab(text, name, defaultSlot);
+                    } else {
+                        throw new Error('importT5Tab not available');
+                    }
+
+                    // Store sector name — preserve any existing manual name (conflict rule)
+                    const slotNum = parseInt(defaultSlot, 10);
+                    if (!isNaN(slotNum) && !window.sectorNames[slotNum]) {
+                        window.sectorNames[slotNum] = name;
+                    }
+                } catch (err) {
+                    console.warn(`[Universe Import] Failed to import "${name}": ${err.message}`);
+                    errorCount++;
                 }
 
-                const text = tsvFromCache ? cached : await fetchAndCacheUniverseSector(name);
-
-                if (typeof importT5Tab === 'function') {
-                    importT5Tab(text, name, defaultSlot);
-                } else {
-                    throw new Error('importT5Tab not available');
-                }
-
-                // Store sector name — preserve any existing manual name (conflict rule)
-                const slotNum = parseInt(defaultSlot, 10);
-                if (!isNaN(slotNum) && !window.sectorNames[slotNum]) {
-                    window.sectorNames[slotNum] = name;
-                }
-            } catch (err) {
-                console.warn(`[Universe Import] Failed to import "${name}": ${err.message}`);
-                errorCount++;
+                // Pause before metadata fetch if TSV came from a live API call.
+                if (!tsvFromCache) await delay(1000);
             }
 
-            // Pause before metadata fetch if TSV came from a live API call.
-            if (!tsvFromCache) await delay(1000);
-
-            // Fetch and cache metadata, but defer route parsing until all sectors are loaded.
-            let metaXml = await getCachedUniverseMetadata(name);
-            if (!metaXml) {
-                if (typeof showToast === 'function') showToast(`Fetching metadata for ${name}…`);
-                metaXml = await fetchAndCacheUniverseMetadata(name);
-                if (i < sectors.length - 1) await delay(1000);
-            }
-            if (metaXml) {
-                universeMetas.push({ name, metaXml, slotNum: parseInt(defaultSlot, 10), x, y });
+            if (needsMeta) {
+                // Fetch and cache metadata, but defer parsing until all sectors are loaded.
+                let metaXml = await getCachedUniverseMetadata(name);
+                if (!metaXml) {
+                    if (typeof showToast === 'function') showToast(`Fetching metadata for ${name}…`);
+                    metaXml = await fetchAndCacheUniverseMetadata(name);
+                    if (i < sectors.length - 1) await delay(1000);
+                }
+                if (metaXml) {
+                    universeMetas.push({ name, metaXml, slotNum: parseInt(defaultSlot, 10), x, y });
+                }
             }
         }
 
-        // Parse all routes in a single pass after every sector is loaded,
-        // so cross-sector routes can resolve both endpoints correctly.
-        if (typeof parseAndAddOtuRoutes === 'function') {
+        if (needsMeta && typeof parseAndAddOtuRoutes === 'function') {
+            // Parse all routes/borders in a single pass after every sector is loaded,
+            // so cross-sector routes can resolve both endpoints correctly.
             for (const m of universeMetas) {
-                parseAndAddOtuRoutes(m.name, m.metaXml, m.slotNum, m.x, m.y, coordLookup);
+                parseAndAddOtuRoutes(m.name, m.metaXml, m.slotNum, m.x, m.y, coordLookup, opts);
             }
         }
 
@@ -513,10 +557,34 @@
             btnImperium.addEventListener('click', openImperiumModal);
         }
 
-        // "Import the Universe" settings button
+        // "Import the Universe" settings button — opens modal
         const btnUniverse = document.getElementById('btn-import-universe');
         if (btnUniverse) {
-            btnUniverse.addEventListener('click', runUniverseImport);
+            btnUniverse.addEventListener('click', openUniverseModal);
+        }
+
+        // Universe modal: Submit
+        const btnUniverseSubmit = document.getElementById('universe-submit');
+        if (btnUniverseSubmit) {
+            btnUniverseSubmit.addEventListener('click', () => {
+                const opts = readImportOptions('univ-opt-sector', 'univ-opt-routes', 'univ-opt-borders', 'univ-opt-regions');
+                closeUniverseModal();
+                executeUniverseImport(opts);
+            });
+        }
+
+        // Universe modal: Cancel
+        const btnUniverseCancel = document.getElementById('universe-cancel');
+        if (btnUniverseCancel) {
+            btnUniverseCancel.addEventListener('click', closeUniverseModal);
+        }
+
+        // Universe modal: backdrop click closes it
+        const universeModal = document.getElementById('universe-import-modal');
+        if (universeModal) {
+            universeModal.addEventListener('click', (e) => {
+                if (e.target === universeModal) closeUniverseModal();
+            });
         }
 
         // Modal: Submit

@@ -905,13 +905,12 @@ body {
 .system-stats-taints {
     grid-column: span 2;
     display: flex;
-    align-items: center;
-    gap: 6px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 4px 6px;
     border-top: 1px dashed #45a29e;
     padding-top: 4px;
     margin-top: 2px;
-    overflow: hidden;
-    white-space: nowrap;
 }
 
 .system-stats-taints .rtt-field-input {
@@ -922,24 +921,28 @@ body {
     text-overflow: ellipsis;
 }
 
-/* Full-width label: value rows — left-aligned, no justify-content space-between */
+/* Full-width label: value rows — left-aligned, wraps for chip lists */
 .system-stats-inline {
     grid-column: span 2;
     display: flex;
-    align-items: center;
-    gap: 6px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 4px 6px;
     justify-content: flex-start;
     border-top: 1px dashed #45a29e;
     padding-top: 4px;
     margin-top: 2px;
-    overflow: hidden;
-    white-space: nowrap;
 }
 
-.system-stats-inline strong {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-width: 0;
+.gas-chip {
+    display: inline-block;
+    background: rgba(69, 162, 158, 0.12);
+    border: 1px solid rgba(69, 162, 158, 0.4);
+    border-radius: 10px;
+    padding: 1px 8px;
+    font-size: 11px;
+    white-space: nowrap;
+    color: #c5c6c7;
 }
 
 .sys-title-info {

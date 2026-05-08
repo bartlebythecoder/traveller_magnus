@@ -65,6 +65,28 @@ function resolveRouteId(type, extras) {
     return newId;
 }
 
+window.ensureFreeRouteSlot = function () {
+    if (!window.routeDefinitions) window.routeDefinitions = [];
+    const segCounts = new Map();
+    (window.sectorRoutes || []).forEach(r => {
+        if (r.routeId != null) segCounts.set(r.routeId, (segCounts.get(r.routeId) || 0) + 1);
+    });
+    const free = window.routeDefinitions.find(d => !segCounts.has(d.id));
+    if (free) return false;
+    const nextId = window.routeDefinitions.length > 0
+        ? Math.max(...window.routeDefinitions.map(d => d.id)) + 1 : 1;
+    window.routeDefinitions.push({
+        id:           nextId,
+        name:         `Route ${nextId}`,
+        color:        '#ffffff',
+        shortcut:     null,
+        visible:      true,
+        automationRef: null,
+    });
+    if (window.dbManager) window.dbManager.saveRouteDefinitions?.();
+    return true;
+};
+
 /**
  * Global helper to add a route with duplicate prevention.
  * @param {string}   id1    - First hex ID (will be sorted with id2)
@@ -239,9 +261,9 @@ function _bfsPathWithEmpty(startId, endId, worlds, maxJump, worldById, emptyById
  *     before longer ones, reducing redundant hops. Each found path's hops are
  *     added; addRoute() prevents duplicate edges.
  */
-function generateXboatRoutes(maxJump = 4, maxRange = 12, minIx = 4) {
-    // Preserve Filter routes (Auto Routes, Point-to-Point) — only clear Xboat routes.
-    window.sectorRoutes = (window.sectorRoutes || []).filter(r => r.type !== 'Xboat');
+function generateXboatRoutes(maxJump = 4, maxRange = 12, minIx = 4, routeId = 1, groupId = null) {
+    // Clear only Xboat segments belonging to this slot; leave all other slots untouched.
+    window.sectorRoutes = (window.sectorRoutes || []).filter(r => !(r.type === 'Xboat' && r.routeId === routeId));
     const worlds = [];
     const importantWorlds = [];
 
@@ -280,7 +302,7 @@ function generateXboatRoutes(maxJump = 4, maxRange = 12, minIx = 4) {
                     const d2 = getHexDistance(w2.q, w2.r, mid.q, mid.r);
                     if (d1 + d2 === dist) { isRedundant = true; break; }
                 }
-                if (!isRedundant) addRoute(w1.id, w2.id, "Xboat", adj);
+                if (!isRedundant) addRoute(w1.id, w2.id, "Xboat", adj, { routeId, groupId });
             }
         }
     }
@@ -324,15 +346,16 @@ function generateXboatRoutes(maxJump = 4, maxRange = 12, minIx = 4) {
             if (!path) continue;
 
             for (let k = 0; k < path.length - 1; k++) {
-                addRoute(path[k], path[k + 1], "Xboat", adj);
+                addRoute(path[k], path[k + 1], "Xboat", adj, { routeId, groupId });
                 uf.union(path[k], path[k + 1]);
             }
         }
     }
 
+    const myRoutes = window.sectorRoutes.filter(r => r.type === 'Xboat' && r.routeId === routeId);
     const uniqueNodes = new Set();
-    window.sectorRoutes.forEach(r => { uniqueNodes.add(r.startId); uniqueNodes.add(r.endId); });
-    console.log(`Xboat Routes Generated (Jump-${maxJump}, Range-${maxRange}): ${window.sectorRoutes.length} routes. Unique Nodes: ${uniqueNodes.size}.`);
+    myRoutes.forEach(r => { uniqueNodes.add(r.startId); uniqueNodes.add(r.endId); });
+    console.log(`Xboat Routes Generated (Jump-${maxJump}, Range-${maxRange}, Route #${routeId}): ${myRoutes.length} routes. Unique Nodes: ${uniqueNodes.size}.`);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

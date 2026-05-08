@@ -180,8 +180,9 @@ function openHexEditor(hexId, e = null) {
     document.getElementById('edit-travel-zone').value = data.travelZone || 'Green';
     const allegVal = data.allegiance || stateObj.allegiance || '';
     document.getElementById('edit-allegiance').value = (allegVal === '----') ? '' : allegVal;
-    const clusterVal = stateObj.cluster || '';
-    document.getElementById('edit-cluster').value = (clusterVal === '----') ? '' : clusterVal;
+    if (typeof window.populateRegionDropdown === 'function') {
+        window.populateRegionDropdown(stateObj.cluster || '----');
+    }
     document.getElementById('edit-notes').value = data.notes || stateObj.notes || '';
 
     // Dynamic UI Toggles based on active generation engine
@@ -474,13 +475,13 @@ function populateEditorAccordions(stateObj) {
             }
             function _mgtTaints(obj, widx) {
                 const arr = Array.isArray(obj.taints) ? obj.taints : (obj.taints ? [obj.taints] : []);
-                const display = arr.slice(0, 2).join(', ') + (arr.length > 2 ? ', ...' : '');
-                return `<strong>${display || '—'}</strong>`;
+                if (arr.length === 0) return `<strong>—</strong>`;
+                return arr.map(t => `<span class="gas-chip">${t}</span>`).join('');
             }
             function _mgtMoonTaints(m, widx, subarray, midx) {
                 const arr = Array.isArray(m.taints) ? m.taints : (m.taints ? [m.taints] : []);
-                const display = arr.slice(0, 2).join(', ') + (arr.length > 2 ? ', ...' : '');
-                return `<strong>${display || '—'}</strong>`;
+                if (arr.length === 0) return `<strong>—</strong>`;
+                return arr.map(t => `<span class="gas-chip">${t}</span>`).join('');
             }
 
             // ---- Masking eligibility check ----
@@ -610,9 +611,7 @@ function populateEditorAccordions(stateObj) {
                             if (w.density != null) html += `<span>Density (ρ⊕): ${_mgtNum(w, 'density', realWidx, 0, 30, 3)}</span>`;
 
                             if (w.gases && w.gases.length > 0) {
-                                let atmComp = w.gases.slice(0, 2).join(', ');
-                                if (w.gases.length > 2) atmComp += ', ...';
-                                html += `<span class="system-stats-inline">Atmosphere: <strong>${atmComp}</strong></span>`;
+                                html += `<span class="system-stats-inline">Atmosphere: ${w.gases.map(g => `<span class="gas-chip">${g}</span>`).join('')}</span>`;
                             } else if (w.oxygenFraction !== undefined) {
                                 html += `<span class="system-stats-inline">Atm — O₂ Fraction: ${_mgtNum(w, 'oxygenFraction', realWidx, 0, 1)}</span>`;
                             } else {
@@ -682,7 +681,7 @@ function populateEditorAccordions(stateObj) {
                         const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
                         html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${alleg}</strong></div>`;
                         const clust = (stateObj.cluster && stateObj.cluster.trim()) || '----';
-                        html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Cluster: <strong style="color: #66fcf1">${clust}</strong></div>`;
+                        html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Region: <strong style="color: #66fcf1">${clust}</strong></div>`;
                     }
 
                     html += buildJourneyTimesUI(w, sys.stars[starIdx], stateObj.isStellarMaskingActive);
@@ -721,9 +720,7 @@ function populateEditorAccordions(stateObj) {
                                 if (m.density != null) html += `<span>Density (ρ⊕): ${_mgtMoonNum(m, 'density', realWidx, 'moons', moonIdx, 0, 30, 3)}</span>`;
 
                                 if (m.gases && m.gases.length > 0) {
-                                    let mAtmComp = m.gases.slice(0, 2).join(', ');
-                                    if (m.gases.length > 2) mAtmComp += ', ...';
-                                    html += `<span class="system-stats-inline">Atmosphere: <strong>${mAtmComp}</strong></span>`;
+                                    html += `<span class="system-stats-inline">Atmosphere: ${m.gases.map(g => `<span class="gas-chip">${g}</span>`).join('')}</span>`;
                                 } else if (m.oxygenFraction !== undefined) {
                                     html += `<span class="system-stats-inline">Atm — O₂ Fraction: ${_mgtMoonNum(m, 'oxygenFraction', realWidx, 'moons', moonIdx, 0, 1)}</span>`;
                                 }
@@ -763,7 +760,7 @@ function populateEditorAccordions(stateObj) {
                                 const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
                                 html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${alleg}</strong></div>`;
                                 const clust = (stateObj.cluster && stateObj.cluster.trim()) || '----';
-                                html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Cluster: <strong style="color: #66fcf1">${clust}</strong></div>`;
+                                html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Region: <strong style="color: #66fcf1">${clust}</strong></div>`;
                             }
 
                             html += buildJourneyTimesUI(m, sys.stars[starIdx], stateObj.isStellarMaskingActive, (w.au || w.distAU));
@@ -988,7 +985,7 @@ function populateEditorAccordions(stateObj) {
                             const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
                             html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${alleg}</strong></div>`;
                             const clust = (stateObj.cluster && stateObj.cluster.trim()) || '----';
-                            html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Cluster: <strong style="color: #66fcf1">${clust}</strong></div>`;
+                            html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Region: <strong style="color: #66fcf1">${clust}</strong></div>`;
                         }
 
                         html += buildJourneyTimesUI(w, sys.stars[starIdx], stateObj.isStellarMaskingActive);
@@ -1041,7 +1038,7 @@ function populateEditorAccordions(stateObj) {
                                     const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
                                     html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${alleg}</strong></div>`;
                                     const clust = (stateObj.cluster && stateObj.cluster.trim()) || '----';
-                                    html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Cluster: <strong style="color: #66fcf1">${clust}</strong></div>`;
+                                    html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Region: <strong style="color: #66fcf1">${clust}</strong></div>`;
                                 }
 
                                 html += buildJourneyTimesUI(sat, sys.stars[starIdx], stateObj.isStellarMaskingActive, (w.au || w.distAU));
@@ -1200,7 +1197,7 @@ function populateEditorAccordions(stateObj) {
                                     const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
                                     html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${alleg}</strong></div>`;
                                     const clust = (stateObj.cluster && stateObj.cluster.trim()) || '----';
-                                    html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Cluster: <strong style="color: #66fcf1">${clust}</strong></div>`;
+                                    html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Region: <strong style="color: #66fcf1">${clust}</strong></div>`;
                                     if (mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
                                         const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
                                         const specialCodes = (mwBase.tradeCodes || []).filter(c => ['Fo', 'Da', 'Pz'].includes(c));
@@ -1263,7 +1260,7 @@ function populateEditorAccordions(stateObj) {
                                             const salleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
                                             html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${salleg}</strong></div>`;
                                             const sclust = (stateObj.cluster && stateObj.cluster.trim()) || '----';
-                                            html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Cluster: <strong style="color: #66fcf1">${sclust}</strong></div>`;
+                                            html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Region: <strong style="color: #66fcf1">${sclust}</strong></div>`;
                                             if (mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
                                                 const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
                                                 html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor}; margin-bottom: 8px;">Caution: ${mwBase.travelZone} Zone</div>`;
@@ -1413,7 +1410,7 @@ function populateEditorAccordions(stateObj) {
                     const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
                     bHtml += `<span>Allegiance: <strong>${alleg}</strong></span>`;
                     const clust = (stateObj.cluster && stateObj.cluster.trim()) || '----';
-                    bHtml += `<span>Cluster: <strong>${clust}</strong></span>`;
+                    bHtml += `<span>Region: <strong>${clust}</strong></span>`;
                 }
                 if (body.canBeTerraformed) {
                     bHtml += `<span class="system-stats-full" style="color: #66fcf1; border-color: #45a29e;">Terraforming Potential: ${_rttNum(body, 'terraformPoints', sIdx, oIdx, satIdx, 0, 99)} pts</span>`;
@@ -1613,7 +1610,7 @@ function saveHexEditorChanges() {
     const uwp = `${starport}${toUWPChar(size)}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
 
     const allegiance = document.getElementById('edit-allegiance').value.trim() || '----';
-    const cluster = document.getElementById('edit-cluster').value.trim() || '----';
+    const cluster = document.getElementById('edit-region').value.trim() || '----';
     const notes = document.getElementById('edit-notes').value.trim();
 
     const sharedData = { uwp, travelZone: document.getElementById('edit-travel-zone').value, tradeCodes, starport, size, atm, hydro, pop, gov, law, tl, bases, navalBase, scoutBase, militaryBase, corsairBase, researchBase, tas, wayStation, govEstate, embassy, moot, merchantBase, shipyard, megaCorp, scoutHostel, psionics, sacredSite, enclave, ancients, gasGiant, allegiance, cluster, notes };
@@ -1694,6 +1691,11 @@ function saveHexEditorChanges() {
     // --- PERSISTENCE & SYNC (SEAN PROTOCOL) ---
     stateObj.name = name;
     stateObj.allegiance = allegiance;
+    if (window.regionPaths && cluster !== stateObj.cluster) {
+        const sn = parseInt(editingHexId.split('-')[0], 10);
+        if (stateObj.cluster) window.regionPaths.delete(`${sn}:${stateObj.cluster}`);
+        if (cluster && cluster !== '----') window.regionPaths.delete(`${sn}:${cluster}`);
+    }
     stateObj.cluster = cluster;
     stateObj.notes = notes;
 

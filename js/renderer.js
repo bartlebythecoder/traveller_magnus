@@ -100,6 +100,20 @@ function draw() {
     // LOD: Computed once per frame — gates grid lines, text, and icons below zoom threshold.
     const showText = zoom >= 0.3;
 
+    // Build region color lookup once per frame (hexId -> color for visible regions)
+    const visibleRegionMap = new Map();
+    if (window.regionDefinitions && window.regionDefinitions.length > 0) {
+        const regionByName = new Map(
+            window.regionDefinitions.filter(d => d.visible !== false).map(d => [d.name, d.color])
+        );
+        hexStates.forEach((state, hexId) => {
+            if (state.cluster && state.cluster !== '----') {
+                const color = regionByName.get(state.cluster);
+                if (color) visibleRegionMap.set(hexId, color);
+            }
+        });
+    }
+
     // =========================================================================
     // PASS 1: DRAW THE GRID & HEX BACKGROUNDS
     // =========================================================================
@@ -119,7 +133,7 @@ function draw() {
             // highlight — avoids getHexPath() and all stroke calls for the vast majority of hexes.
             const isSelected = selectedHexes.has(hexId);
             const hasBgFill = window.hexBgFillVisible !== false && stateObj &&
-                (stateObj.manualBgColor || (stateObj.custom_ui && stateObj.custom_ui.bgFillColor));
+                (stateObj.manualBgColor || (stateObj.custom_ui && stateObj.custom_ui.bgFillColor) || visibleRegionMap.has(hexId));
             if (!showText && !isSelected && !hasBgFill) continue;
 
             const path = getHexPath(cx, cy, size);
@@ -133,7 +147,19 @@ function draw() {
                 ctx.restore();
             }
 
-            // 0b. Filter Rule Background Fill (Political Mapping)
+            // 0b. Region Fill (from Region Manager slot assignments)
+            if (window.hexBgFillVisible !== false) {
+                const regionColor = visibleRegionMap.get(hexId);
+                if (regionColor) {
+                    ctx.save();
+                    ctx.globalAlpha = 0.3;
+                    ctx.fillStyle = regionColor;
+                    ctx.fill(path);
+                    ctx.restore();
+                }
+            }
+
+            // 0c. Filter Rule Background Fill (Political Mapping)
             if (window.hexBgFillVisible !== false && stateObj && stateObj.custom_ui && stateObj.custom_ui.bgFillColor) {
                 ctx.save();
                 ctx.globalAlpha = 0.3;
@@ -342,6 +368,11 @@ function draw() {
             ctx.restore();
         }
     }
+
+    // =========================================================================
+    // PASS 1.5: BORDER GROUPS
+    // =========================================================================
+    drawBorderGroups();
 
     // PASS 2: DRAW WORLD CONTENT (Icons, Labels, Symbols)
     // =========================================================================
@@ -949,6 +980,146 @@ function draw() {
     }
 
     ctx.restore();
+}
+
+// ============================================================================
+// BORDER GROUP RENDERING
+// Draws inset perimeter lines around groups of hexes sharing a border ID.
+// Called from draw() as Pass 1.5 — after routes, before world content.
+// ============================================================================
+
+function drawBorderGroups() {
+    if (!window.borderDefinitions || window.borderDefinitions.length === 0) return;
+    const hasAssignments = window.hexBorderAssignments && window.hexBorderAssignments.size > 0;
+    if (!hasAssignments) return;
+
+    const size        = baseHexSize;
+    const INSET       = size * 0.1;
+    const widthStep   = (3 / 2) * size;
+    const heightStep  = Math.sqrt(3) * size;
+
+    // Neighbor offset for each of the 6 sides, indexed by [sideIndex][qParity].
+    // Derived from flat-top odd-q offset coordinate math (qParity 0=even, 1=odd).
+    const NEIGHBOR = [
+        [[1,  0], [1,  1]],  // side 0
+        [[0,  1], [0,  1]],  // side 1
+        [[-1, 0], [-1, 1]],  // side 2
+        [[-1,-1], [-1, 0]],  // side 3
+        [[0, -1], [0, -1]],  // side 4
+        [[1, -1], [1,  0]],  // side 5
+    ];
+
+    function hexVertices(q, r) {
+        const parity = q & 1;
+        const cx = widthStep * q;
+        const cy = heightStep * (r + (parity ? 0.5 : 0));
+        const v = [];
+        for (let i = 0; i < 6; i++) {
+            const a = (Math.PI / 180) * (60 * i);
+            v.push({ x: cx + size * Math.cos(a), y: cy + size * Math.sin(a) });
+        }
+        return v;
+    }
+
+    // ── Hex-assignment borders ─────────────────────────────────────────────
+    if (hasAssignments) {
+        const groups = new Map();
+        window.hexBorderAssignments.forEach((borderId, hexId) => {
+            if (!groups.has(borderId)) groups.set(borderId, new Set());
+            groups.get(borderId).add(hexId);
+        });
+
+        window.borderDefinitions.forEach(def => {
+            if (def.visible === false) return;
+            const hexSet = groups.get(def.id);
+            if (!hexSet || hexSet.size === 0) return;
+
+            // Step 1: collect perimeter edges { v1, v2, normal }
+            const edges = [];
+
+            hexSet.forEach(hexId => {
+                const coords = getHexCoords(hexId);
+                if (!coords) return;
+                const { q, r } = coords;
+                const parity = q & 1;
+                const cx = widthStep * q;
+                const cy = heightStep * (r + (parity ? 0.5 : 0));
+                const verts = hexVertices(q, r);
+
+                for (let side = 0; side < 6; side++) {
+                    const [dq, dr] = NEIGHBOR[side][parity];
+                    const nId = getHexId(q + dq, r + dr);
+                    if (nId && hexSet.has(nId)) continue;
+
+                    const v1 = verts[side];
+                    const v2 = verts[(side + 1) % 6];
+                    const mx = (v1.x + v2.x) / 2;
+                    const my = (v1.y + v2.y) / 2;
+                    const dx = cx - mx, dy = cy - my;
+                    const len = Math.sqrt(dx * dx + dy * dy);
+                    edges.push({ v1, v2, normal: { x: dx / len, y: dy / len } });
+                }
+            });
+
+            if (edges.length === 0) return;
+
+            // Step 2: build adjacency map — v1 of each edge → edge index
+            function vKey(v) { return `${Math.round(v.x)},${Math.round(v.y)}`; }
+            const byStart = new Map();
+            edges.forEach((e, i) => byStart.set(vKey(e.v1), i));
+
+            // Step 3: trace connected loops
+            const visited = new Set();
+            const loops   = [];
+
+            edges.forEach((_, startIdx) => {
+                if (visited.has(startIdx)) return;
+                const loop = [];
+                let idx = startIdx;
+                while (idx !== undefined && !visited.has(idx)) {
+                    visited.add(idx);
+                    const e = edges[idx];
+                    loop.push({ vertex: e.v1, normal: e.normal });
+                    idx = byStart.get(vKey(e.v2));
+                }
+                if (loop.length > 0) loops.push(loop);
+            });
+
+            // Step 4: draw with miter-corrected inset corners
+            ctx.save();
+            ctx.strokeStyle = def.color;
+            ctx.lineWidth   = 2.5 / zoom;
+            ctx.lineJoin    = 'round';
+            ctx.lineCap     = 'round';
+
+            loops.forEach(loop => {
+                if (loop.length < 2) return;
+                ctx.beginPath();
+                const n = loop.length;
+                for (let i = 0; i < n; i++) {
+                    const { vertex: V, normal: nOut } = loop[i];
+                    const nIn  = loop[(i + n - 1) % n].normal;
+                    const dot   = nIn.x * nOut.x + nIn.y * nOut.y;
+                    const denom = 1 + dot;
+                    let ix, iy;
+                    if (Math.abs(denom) < 1e-6) {
+                        ix = V.x + INSET * nOut.x;
+                        iy = V.y + INSET * nOut.y;
+                    } else {
+                        ix = V.x + INSET * (nIn.x + nOut.x) / denom;
+                        iy = V.y + INSET * (nIn.y + nOut.y) / denom;
+                    }
+                    if (i === 0) ctx.moveTo(ix, iy);
+                    else         ctx.lineTo(ix, iy);
+                }
+                ctx.closePath();
+                ctx.stroke();
+            });
+
+            ctx.restore();
+        });
+    }
+
 }
 
 // Listen for window resizing automatically

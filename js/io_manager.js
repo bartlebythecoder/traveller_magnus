@@ -75,15 +75,20 @@ function setupSaveLoad() {
         hexStates.forEach((value, key) => { hexObj[key] = value; });
 
         const stateObj = {
-            version:          APP_VERSION,
+            version:              APP_VERSION,
             gridWidth,
             gridHeight,
-            routes:           window.sectorRoutes || [],
-            routeDefinitions: window.routeDefinitions || [],
-            rules:            window.activeFilterRules || [], // legacy support
+            routes:               window.sectorRoutes || [],
+            routeDefinitions:     window.routeDefinitions || [],
+            rules:                window.activeFilterRules || [], // legacy support
             aesthetics,
-            sectorNames:      window.sectorNames || {},
-            hexStates:        hexObj
+            sectorNames:          window.sectorNames || {},
+            hexStates:            hexObj,
+            borderDefinitions:    window.borderDefinitions || [],
+            hexBorderAssignments: Array.from((window.hexBorderAssignments || new Map()).entries()),
+            borderPaths:          Array.from((window.borderPaths || new Map()).entries()),
+            regionDefinitions:    window.regionDefinitions || [],
+            regionPaths:          Array.from((window.regionPaths || new Map()).entries()),
         };
 
         // Toast before the blocking stringify so the UI doesn't appear frozen
@@ -137,11 +142,16 @@ function setupSaveLoad() {
                         gridHeight,
                         hexStates:  chunkEntries   // array of [hexId, state] pairs
                     };
-                    // Routes and aesthetics travel with Part 1 only
+                    // Routes, aesthetics, and border/region state travel with Part 1 only
                     if (i === 0) {
-                        chunkObj.routes     = window.sectorRoutes || [];
-                        chunkObj.rules      = window.activeFilterRules || [];
-                        chunkObj.aesthetics = aesthetics;
+                        chunkObj.routes               = window.sectorRoutes || [];
+                        chunkObj.rules                = window.activeFilterRules || [];
+                        chunkObj.aesthetics           = aesthetics;
+                        chunkObj.borderDefinitions    = window.borderDefinitions || [];
+                        chunkObj.hexBorderAssignments = Array.from((window.hexBorderAssignments || new Map()).entries());
+                        chunkObj.borderPaths          = Array.from((window.borderPaths || new Map()).entries());
+                        chunkObj.regionDefinitions    = window.regionDefinitions || [];
+                        chunkObj.regionPaths          = Array.from((window.regionPaths || new Map()).entries());
                     }
 
                     triggerDownload(
@@ -275,7 +285,7 @@ function setupSaveLoad() {
  */
 async function clearCanvas() {
     const confirmed = confirm(
-        'Clear Canvas will erase all hex data, routes, and auto-saved progress.\n\n' +
+        'Clear Canvas will erase all hex data, routes, borders, and auto-saved progress.\n\n' +
         'The canvas will reset to the default 7×5 grid.\n\n' +
         'This cannot be undone. Continue?'
     );
@@ -290,11 +300,21 @@ async function clearCanvas() {
 
     // Clear all in-memory state
     hexStates.clear();
+    window.sectorNames        = {};
     window.sectorRoutes      = [];
     window.routeDefinitions  = (typeof getDefaultRouteDefinitions === 'function') ? getDefaultRouteDefinitions() : [];
     window.undoStack         = [];
     window.redoStack         = [];
     selectedHexes.clear();
+
+    // Reset all border/region state to defaults
+    window.hexBorderAssignments = new Map();
+    window.borderPaths          = new Map();
+    window.regionPaths          = new Map();
+    window.borderDefinitions    = (typeof getDefaultBorderDefinitions === 'function') ? getDefaultBorderDefinitions() : [];
+    window.regionDefinitions    = (typeof getDefaultRegionDefinitions === 'function') ? getDefaultRegionDefinitions() : [];
+    if (typeof window.renderBorderWindow === 'function') window.renderBorderWindow();
+    if (typeof window.renderRegionWindow === 'function') window.renderRegionWindow();
 
     // Re-centre camera on the fresh 7×5 canvas
     centerCameraOnGrid();
@@ -439,6 +459,59 @@ function applyLoadedMapData(parsedData) {
         }
 
         window.sectorNames  = parsedData.sectorNames || {};
+
+        // Restore border and region state
+        window.borderDefinitions    = Array.isArray(parsedData.borderDefinitions) && parsedData.borderDefinitions.length > 0
+            ? parsedData.borderDefinitions
+            : (typeof getDefaultBorderDefinitions === 'function' ? getDefaultBorderDefinitions() : []);
+        // Migrate old single-string allegiance to allegianceCodes array
+        window.borderDefinitions.forEach(def => {
+            if (def.allegiance && !def.allegianceCodes) def.allegianceCodes = [def.allegiance];
+        });
+        window.hexBorderAssignments = Array.isArray(parsedData.hexBorderAssignments)
+            ? new Map(parsedData.hexBorderAssignments)
+            : new Map();
+        window.borderPaths          = Array.isArray(parsedData.borderPaths)
+            ? new Map(parsedData.borderPaths)
+            : new Map();
+
+        // Restore region definitions, auto-creating slots for any cluster labels not yet in the list
+        window.regionDefinitions = Array.isArray(parsedData.regionDefinitions) && parsedData.regionDefinitions.length > 0
+            ? parsedData.regionDefinitions
+            : (typeof getDefaultRegionDefinitions === 'function' ? getDefaultRegionDefinitions() : []);
+        // Ensure minimum 10 slots
+        while (window.regionDefinitions.length < 10) {
+            const nextId = window.regionDefinitions.length + 1;
+            const CYCLE = typeof REGION_COLOR_CYCLE !== 'undefined' ? REGION_COLOR_CYCLE : [];
+            window.regionDefinitions.push({
+                id: nextId, name: `Region ${nextId}`,
+                color: CYCLE[(nextId - 1) % CYCLE.length] || '#888888', visible: true,
+            });
+        }
+        // Auto-create slots for cluster labels not yet covered (legacy/imported data)
+        const knownRegionNames = new Set(window.regionDefinitions.map(d => d.name));
+        const usedClusterNames = new Set();
+        hexStates.forEach(state => { if (state.cluster && state.cluster !== '----') usedClusterNames.add(state.cluster); });
+        usedClusterNames.forEach(label => {
+            if (knownRegionNames.has(label)) return;
+            knownRegionNames.add(label);
+            const CYCLE = typeof REGION_COLOR_CYCLE !== 'undefined' ? REGION_COLOR_CYCLE : [];
+            // Claim a free default-named slot (no hex assignments)
+            const free = window.regionDefinitions.find(d => /^Region \d+$/.test(d.name) && !usedClusterNames.has(d.name));
+            if (free) {
+                free.name = label;
+            } else {
+                const nextId = Math.max(...window.regionDefinitions.map(d => d.id)) + 1;
+                window.regionDefinitions.push({ id: nextId, name: label, color: CYCLE[(nextId - 1) % CYCLE.length] || '#888888', visible: true });
+            }
+        });
+
+        window.regionPaths          = Array.isArray(parsedData.regionPaths)
+            ? new Map(parsedData.regionPaths)
+            : new Map();
+        if (typeof window.renderBorderWindow === 'function') window.renderBorderWindow();
+        if (typeof window.renderRegionWindow === 'function') window.renderRegionWindow();
+        if (typeof writeLogLine === 'function') writeLogLine(`JSON Load: Border definitions (${window.borderDefinitions.length}), border assignments (${window.hexBorderAssignments.size}), region definitions (${window.regionDefinitions.length}), region paths (${window.regionPaths.size}) restored.`);
 
         // Priority Rule Capture: Use aesthetics.activeRules if available, else fallback to legacy field
         window.activeFilterRules = parsedData.rules || [];
@@ -655,49 +728,150 @@ function exportRoutesToXML(sectorID) {
 }
 
 /**
- * Export all routes touching a sector as a TravellerMap metadata XML file.
- * Routes with one end in an adjacent sector carry EndOffsetX/Y attributes.
- * Color is read from window.routeDefinitions so the file round-trips cleanly
- * with Import Metadata (.xml).
+ * Converts a list of local XXYY hex codes (interior of a border/region) into one or more
+ * MSEC-format perimeter waypoint strings suitable for TravellerMap <Border>/<Region> elements.
+ * Returns an array — one string per connected component — so callers emit one element each.
+ *
+ * Algorithm: flood-fill to find connected components, then for each component trace the
+ * clockwise boundary starting from the topmost (min-r) hex in the leftmost (min-q) column
+ * using a right-hand-rule walk on the flat-top odd-column-offset hex grid.
  */
-function exportMetadataXml(sectorID) {
-    if (!window.sectorRoutes || window.sectorRoutes.length === 0) {
-        showToast(`No routes to export for Sector ${sectorID}.`, 2000);
-        return;
+function computeMsecPath(localXxyyCodes, sectorNum) {
+    if (!localXxyyCodes || localXxyyCodes.length === 0) return [];
+
+    const sX = (sectorNum - 1) % gridWidth;
+    const sY = Math.floor((sectorNum - 1) / gridWidth);
+
+    function toGlobal(code) {
+        const v = parseInt(code, 10);
+        return { q: sX * 32 + Math.floor(v / 100) - 1, r: sY * 40 + (v % 100) - 1 };
+    }
+    function toXxyy(q, r) {
+        const col = q - sX * 32 + 1;
+        const row = r - sY * 40 + 1;
+        return String(col).padStart(2, '0') + String(row).padStart(2, '0');
+    }
+    // 6 neighbours in directions 0-5 (flat-top, odd-column-shifted-down offset grid)
+    // Clockwise visual order: N(4) → NE(5) → SE(0) → S(1) → SW(2) → NW(3)
+    function nbrs(q, r) {
+        const p = q & 1;
+        return [
+            [q + 1, r + (p ? 1 : 0)],   // 0 SE/E
+            [q,     r + 1],              // 1 S
+            [q - 1, r + (p ? 1 : 0)],   // 2 SW/W
+            [q - 1, r + (p ? 0 : -1)],  // 3 NW
+            [q,     r - 1],              // 4 N
+            [q + 1, r + (p ? 0 : -1)],  // 5 NE
+        ];
     }
 
+    // Build global coord set (deduplicated)
+    const coordSet = new Set();
+    const allCoords = [];
+    localXxyyCodes.forEach(code => {
+        if (!code || code.length !== 4) return;
+        const { q, r } = toGlobal(code);
+        const key = `${q},${r}`;
+        if (!coordSet.has(key)) { coordSet.add(key); allCoords.push({ q, r }); }
+    });
+    if (allCoords.length === 0) return [];
+
+    // Flood-fill to find connected components
+    const visited = new Set();
+    const components = [];
+    allCoords.forEach(({ q, r }) => {
+        const key = `${q},${r}`;
+        if (visited.has(key)) return;
+        const comp = [];
+        const queue = [{ q, r }];
+        visited.add(key);
+        while (queue.length > 0) {
+            const cur = queue.shift();
+            comp.push(cur);
+            nbrs(cur.q, cur.r).forEach(([nq, nr]) => {
+                const nk = `${nq},${nr}`;
+                if (coordSet.has(nk) && !visited.has(nk)) { visited.add(nk); queue.push({ q: nq, r: nr }); }
+            });
+        }
+        components.push(comp);
+    });
+
+    const results = [];
+    components.forEach(comp => {
+        if (comp.length === 1) {
+            results.push(toXxyy(comp[0].q, comp[0].r));
+            return;
+        }
+
+        const compSet = new Set(comp.map(h => `${h.q},${h.r}`));
+
+        // Start: topmost hex in leftmost column (min q, then min r for that q)
+        let startQ = Infinity, startR = Infinity;
+        comp.forEach(({ q, r }) => {
+            if (q < startQ || (q === startQ && r < startR)) { startQ = q; startR = r; }
+        });
+
+        // Clockwise boundary walk (right-hand rule)
+        // fromDir = direction index pointing back toward where we "came from"
+        const path = [];
+        let curQ = startQ, curR = startR;
+        let fromDir = 4; // initially came from N (empty space above the topmost hex)
+        const maxSteps = comp.length * 6 + 6;
+
+        for (let step = 0; step < maxSteps; step++) {
+            path.push(toXxyy(curQ, curR));
+            let moved = false;
+            const neighbours = nbrs(curQ, curR);
+            for (let i = 0; i < 6; i++) {
+                const tryDir = (fromDir + 1 + i) % 6;
+                const [nq, nr] = neighbours[tryDir];
+                if (compSet.has(`${nq},${nr}`)) {
+                    fromDir = (tryDir + 3) % 6; // reverse: direction from new hex back to current
+                    curQ = nq; curR = nr;
+                    moved = true;
+                    break;
+                }
+            }
+            if (!moved || (curQ === startQ && curR === startR)) break;
+        }
+
+        results.push(path.join(' '));
+    });
+
+    return results;
+}
+
+/**
+ * Export routes, borders, and regions for a sector as a TravellerMap metadata XML file.
+ * Routes with one end in an adjacent sector carry EndOffsetX/Y attributes.
+ * Borders and regions re-use the original polygon paths stored during import when
+ * available; falls back to computing MSEC perimeter paths from interior hex assignments.
+ */
+function exportMetadataXml(sectorID) {
     const sectorNum = parseInt(sectorID, 10);
     const sectorX   = (sectorNum - 1) % gridWidth;
     const sectorY   = Math.floor((sectorNum - 1) / gridWidth);
+    const secPrefix = sectorNum + '-';
 
+    // ── Routes ────────────────────────────────────────────────────────────────
+    const routeLines = [];
     const defs   = window.routeDefinitions || [];
     const defMap = new Map(defs.map(d => [d.id, d]));
-
-    const xmlLines = [
-        '<?xml version="1.0" encoding="utf-8"?>',
-        '<Sector>',
-        `  <Name>Sector ${sectorID}</Name>`,
-        '  <Routes>'
-    ];
-    let count = 0;
 
     (window.sectorRoutes || []).forEach(route => {
         const sParts    = route.startId.split('-');
         const eParts    = route.endId.split('-');
         const startSlot = parseInt(sParts[0], 10);
         const endSlot   = parseInt(eParts[0], 10);
-
-        // At least one end must belong to this sector
         if (startSlot !== sectorNum && endSlot !== sectorNum) return;
 
-        const startHex      = sParts[sParts.length - 1];
-        const endHex        = eParts[eParts.length - 1];
-        const def           = defMap.get(route.routeId);
-        const color         = def ? def.color : '#ffffff';
+        const startHex = sParts[sParts.length - 1];
+        const endHex   = eParts[eParts.length - 1];
+        const def      = defMap.get(route.routeId);
+        const color    = def ? def.color : '#ffffff';
 
         let startOffsetAttr = '';
         let endOffsetAttr   = '';
-
         if (startSlot !== sectorNum) {
             const offX = ((startSlot - 1) % gridWidth) - sectorX;
             const offY = Math.floor((startSlot - 1) / gridWidth) - sectorY;
@@ -710,17 +884,113 @@ function exportMetadataXml(sectorID) {
             if (offX !== 0) endOffsetAttr += ` EndOffsetX="${offX}"`;
             if (offY !== 0) endOffsetAttr += ` EndOffsetY="${offY}"`;
         }
-
-        xmlLines.push(`    <Route Start="${startHex}"${startOffsetAttr} End="${endHex}"${endOffsetAttr} Color="${color}" />`);
-        count++;
+        routeLines.push(`    <Route Start="${startHex}"${startOffsetAttr} End="${endHex}"${endOffsetAttr} Color="${color}" />`);
     });
 
-    if (count === 0) {
-        showToast(`No routes found for Sector ${sectorID}.`, 2000);
+    // ── Borders ───────────────────────────────────────────────────────────────
+    const borderLines      = [];
+    const storedBorderPaths = window.borderPaths || new Map();
+    const borderDefs       = window.borderDefinitions || [];
+    const hexBorders       = window.hexBorderAssignments || new Map();
+
+    borderDefs.forEach(def => {
+        const pathEntries = storedBorderPaths.get(def.id);
+        if (pathEntries && pathEntries.length > 0) {
+            pathEntries.forEach(({ rawPath, labelPos, allegianceCode: pathAllegCode }) => {
+                const allegCode = pathAllegCode || (def.allegianceCodes && def.allegianceCodes[0]) || def.allegiance || '';
+                const allegAttr = allegCode ? ` Allegiance="${allegCode}"` : '';
+                const colorAttr = def.color ? ` Color="${def.color}"` : '';
+                const labelAttr = def.name ? ` Label="${def.name}"` : '';
+                const lpAttr    = labelPos ? ` LabelPosition="${labelPos}"` : '';
+                borderLines.push(`    <Border${allegAttr}${colorAttr}${labelAttr}${lpAttr}>${rawPath}</Border>`);
+            });
+        } else {
+            // Fallback: compute MSEC perimeter path from assigned interior hexes
+            const hexCodes = [];
+            hexBorders.forEach((borderId, hexId) => {
+                if (borderId !== def.id) return;
+                if (!hexId.startsWith(secPrefix)) return;
+                hexCodes.push(hexId.split('-').pop());
+            });
+            if (hexCodes.length === 0) return;
+            const allegCode = (def.allegianceCodes && def.allegianceCodes[0]) || def.allegiance || '';
+            const allegAttr = allegCode ? ` Allegiance="${allegCode}"` : '';
+            const colorAttr = def.color ? ` Color="${def.color}"` : '';
+            const labelAttr = def.name ? ` Label="${def.name}"` : '';
+            const msecPaths = computeMsecPath(hexCodes, sectorNum);
+            msecPaths.forEach(path => {
+                borderLines.push(`    <Border${allegAttr}${colorAttr}${labelAttr}>${path}</Border>`);
+            });
+        }
+    });
+
+    // ── Regions ───────────────────────────────────────────────────────────────
+    const regionLines       = [];
+    const storedRegionPaths = window.regionPaths || new Map();
+
+    // Build label → slot colour map from regionDefinitions (authoritative source)
+    const regionSlotColorMap = new Map();
+    (window.regionDefinitions || []).forEach(def => {
+        if (def.name && def.color) regionSlotColorMap.set(def.name, def.color);
+    });
+
+    // Group hex IDs by cluster label for this sector
+    const labelToHexes = new Map();
+    hexStates.forEach((state, hexId) => {
+        if (!hexId.startsWith(secPrefix)) return;
+        const label = state.cluster;
+        if (!label || typeof label !== 'string' || !label.trim() || label === '----') return;
+        if (!labelToHexes.has(label)) labelToHexes.set(label, []);
+        labelToHexes.get(label).push(hexId);
+    });
+
+    labelToHexes.forEach((hexIds, label) => {
+        const stored = storedRegionPaths.get(`${sectorNum}:${label}`);
+        const color  = regionSlotColorMap.get(label) || '#888888';
+        if (stored && stored.rawPath) {
+            const labelAttr = ` Label="${label}"`;
+            const colorAttr = ` Color="${stored.color || color}"`;
+            const lpAttr    = stored.labelPos ? ` LabelPosition="${stored.labelPos}"` : '';
+            regionLines.push(`    <Region${labelAttr}${colorAttr}${lpAttr}>${stored.rawPath}</Region>`);
+        } else {
+            // Fallback: compute MSEC perimeter path from interior hex assignments
+            const hexCodes  = hexIds.map(hexId => hexId.split('-').pop());
+            const msecPaths = computeMsecPath(hexCodes, sectorNum);
+            msecPaths.forEach(path => {
+                regionLines.push(`    <Region Label="${label}" Color="${color}">${path}</Region>`);
+            });
+        }
+    });
+
+    // ── Guard ─────────────────────────────────────────────────────────────────
+    if (routeLines.length === 0 && borderLines.length === 0 && regionLines.length === 0) {
+        showToast(`No routes, borders, or regions to export for Sector ${sectorID}.`, 2500);
         return;
     }
 
-    xmlLines.push('  </Routes>');
+    // ── Build XML ─────────────────────────────────────────────────────────────
+    const xmlLines = [
+        '<?xml version="1.0" encoding="utf-8"?>',
+        '<Sector>',
+        `  <Name>Sector ${sectorID}</Name>`,
+    ];
+
+    if (routeLines.length > 0) {
+        xmlLines.push('  <Routes>');
+        routeLines.forEach(l => xmlLines.push(l));
+        xmlLines.push('  </Routes>');
+    }
+    if (borderLines.length > 0) {
+        xmlLines.push('  <Borders>');
+        borderLines.forEach(l => xmlLines.push(l));
+        xmlLines.push('  </Borders>');
+    }
+    if (regionLines.length > 0) {
+        xmlLines.push('  <Regions>');
+        regionLines.forEach(l => xmlLines.push(l));
+        xmlLines.push('  </Regions>');
+    }
+
     xmlLines.push('</Sector>');
 
     const content = xmlLines.join('\n');
@@ -733,7 +1003,12 @@ function exportMetadataXml(sectorID) {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    showToast(`Exported ${count} route(s) for Sector ${sectorID}.`, 2000);
+
+    const parts = [];
+    if (routeLines.length > 0) parts.push(`${routeLines.length} route(s)`);
+    if (borderLines.length > 0) parts.push(`${borderLines.length} border(s)`);
+    if (regionLines.length > 0) parts.push(`${regionLines.length} region(s)`);
+    showToast(`Exported ${parts.join(', ')} for Sector ${sectorID}.`, 2500);
 }
 
 function generateT5TabData(sectorID) {
@@ -924,7 +1199,8 @@ function importT5Tab(fileContent, fileName, forcedSectorSlot = null) {
         const row = lines[i].split('\t');
         if (row.length < header.length) continue;
 
-        const hexNum = row[idxHex]?.trim();
+        let hexNum = row[idxHex]?.trim();
+        if (hexNum?.length === 3) hexNum = '0' + hexNum;
         const uwp = row[idxUWP]?.trim();
 
         if (!hexNum || !uwp || hexNum.length !== 4 || uwp.length < 7) {
@@ -1385,6 +1661,42 @@ function setupXmlMetadataImporter() {
         const slotNum = sectorSlotToNumber(userSlot.toUpperCase());
 
         readFileAsText(file).then(xmlText => {
+            let parsedDoc;
+            try { parsedDoc = new DOMParser().parseFromString(xmlText, 'application/xml'); } catch (e) { /* ignore */ }
+
+            // Border import — runs regardless of whether routes are present
+            if (typeof window.importBordersFromXml === 'function') {
+                const bordersEl = parsedDoc && parsedDoc.querySelector('Borders');
+                if (bordersEl) {
+                    const borderResult = window.importBordersFromXml(bordersEl, slotNum);
+                    if (borderResult.assigned.length > 0 || borderResult.skipped.length > 0) {
+                        const assignedMsg = borderResult.assigned.length > 0
+                            ? `${borderResult.assigned.length} border allegiance(s) imported.`
+                            : '';
+                        const skippedMsg = borderResult.skipped.length > 0
+                            ? ` ${borderResult.skipped.length} skipped (no free slots): ${borderResult.skipped.map(s => s.allegianceCode).join(', ')}`
+                            : '';
+                        showToast((assignedMsg + skippedMsg).trim(), 4000);
+                        if (window.dbManager) {
+                            window.dbManager.saveBorderDefinitions?.();
+                        }
+                        requestAnimationFrame(draw);
+                    }
+                }
+            }
+
+            // Region import — runs whenever <Regions> is present in the XML
+            if (typeof window.importRegionsFromXml === 'function') {
+                const regionsEl = parsedDoc && parsedDoc.querySelector('Regions');
+                if (regionsEl) {
+                    const regionResult = window.importRegionsFromXml(regionsEl, slotNum);
+                    if (regionResult.assigned.length > 0) {
+                        showToast(`${regionResult.assigned.length} region(s) imported: ${regionResult.assigned.map(r => r.label).join(', ')}`, 4000);
+                        requestAnimationFrame(draw);
+                    }
+                }
+            }
+
             const groups = parseXmlRouteGroups(xmlText);
             if (!groups) {
                 showToast('No routes found in XML file.', 3000);

@@ -46,6 +46,14 @@ function initializeInput() {
     const routeHandle = routeWindow.querySelector('.modal-drag-handle');
     makeDraggable(routeWindow, routeHandle);
 
+    const borderWindow = document.getElementById('border-window');
+    const borderHandle = borderWindow.querySelector('.modal-drag-handle');
+    makeDraggable(borderWindow, borderHandle);
+
+    const regionWindow = document.getElementById('region-window');
+    const regionHandle = regionWindow.querySelector('.modal-drag-handle');
+    makeDraggable(regionWindow, regionHandle);
+
     makeDraggable(hexEditor, hexEditorHeader);
 
     // Default Placement
@@ -54,6 +62,12 @@ function initializeInput() {
 
     routeWindow.style.left = '10px';
     routeWindow.style.top = '110px';
+
+    borderWindow.style.left = '10px';
+    borderWindow.style.top = '110px';
+
+    regionWindow.style.left = '10px';
+    regionWindow.style.top = '110px';
 
     // For Hex Editor (Right-aligned)
     hexEditor.style.right = '400px';
@@ -79,6 +93,8 @@ function initializeInput() {
     setupXmlMetadataImporter();
     setupSplashScreen();
     setupRouteWindow();
+    setupBorderWindow();
+    setupRegionWindow();
 }
 
 // ============================================================================

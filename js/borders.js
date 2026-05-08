@@ -319,8 +319,13 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
 
     // ── Process each label/allegiance group ───────────────────────────────
     byGroup.forEach((items, groupKey) => {
-        // 1. Find an existing slot already claimed by this group key (name match)
-        let def = window.borderDefinitions.find(d => d.name === groupKey);
+        // 1. Find an existing slot already claimed by this group key.
+        // Check name (handles label-keyed groups) AND allegianceCodes array (handles
+        // code-keyed groups whose name was later changed to an English description).
+        let def = window.borderDefinitions.find(d =>
+            d.name === groupKey ||
+            (d.allegianceCodes && d.allegianceCodes.includes(groupKey))
+        );
         let isNewSlot = false;
 
         // 2. If none, find the next free slot
@@ -365,9 +370,11 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
                 }
             }
 
-            // Color: first recognisable color found, applied only when slot is new
-            const colorItem = items.find(it => it.color && BORDER_COLOR_MAP[it.color]);
-            if (colorItem) def.color = BORDER_COLOR_MAP[colorItem.color];
+            // Color: first recognisable color found, applied only when slot is new.
+            // Accepts both CSS name strings (mapped via BORDER_COLOR_MAP) and raw
+            // hex codes (#rrggbb) so round-tripped exports survive re-import.
+            const colorItem = items.find(it => it.color && (it.color.startsWith('#') || BORDER_COLOR_MAP[it.color]));
+            if (colorItem) def.color = colorItem.color.startsWith('#') ? colorItem.color : BORDER_COLOR_MAP[colorItem.color];
         }
 
         // 5. Accumulate raw allegiance codes seen for this group (enables BFS expansion)
@@ -675,7 +682,17 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
                             });
                         }
                         if (!pLeaked) {
-                            pInterior.forEach(([q2, r2]) => window.hexBorderAssignments.set(_qrToHexId(q2, r2), def.id));
+                            // A true isolated interior pocket is fully enclosed by boundary
+                            // hexes and cannot touch a sector edge.  If this component touches
+                            // any sector edge it is the exterior of a sector-edge-closing
+                            // polygon (e.g. Aslan Hierate NE area above a diagonal boundary),
+                            // not a pocket — skip it.
+                            const touchesSectorEdge = pInterior.some(
+                                ([q2, r2]) => q2 === secMinQ || q2 === secMaxQ || r2 === secMinR || r2 === secMaxR
+                            );
+                            if (!touchesSectorEdge) {
+                                pInterior.forEach(([q2, r2]) => window.hexBorderAssignments.set(_qrToHexId(q2, r2), def.id));
+                            }
                         }
                         pWall.forEach(k => { if (!boundaryQR.has(k)) patchedSoFar.add(k); });
                     }
@@ -880,7 +897,7 @@ window.importRegionsFromXml = function (regionsElement, slotNum) {
             return;
         }
 
-        const hexColor = BORDER_COLOR_MAP[colorStr] || '#888888';
+        const hexColor = colorStr.startsWith('#') ? colorStr : (BORDER_COLOR_MAP[colorStr] || '#888888');
 
         // ── Parse waypoint path (identical format to <Border>) ────────────────
         const seen               = new Set();

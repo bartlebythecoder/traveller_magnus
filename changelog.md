@@ -1,6 +1,12 @@
 # Changelog
 
-### [v0.10.1] - In Progress
+### [v0.10.1.2] - In progress
+
+### [v0.10.1.1] - 2026-05-08
+1. **Changelogs:** Updated (had been incomplete)
+2. **Mongoose Engine:**  Adjusted boiling and frozen temperature bands to align with atmosphere tables (which disagree with page 47 table)
+
+### [v0.10.1] - 2026-05-08
 1. **Routes:** X-Boat generation now writes to the selected route slot instead of always forcing to Slot #1 — each generation only clears and replaces segments in its own slot, leaving all other slots untouched
 2. **Mongoose Engine:** Fixed missing HZCO deviation log entry for temperate (habitable-zone) planets — deviation and table selection are now recorded in the generation log for every planet regardless of temperature band
 3. **Canvas:** Clear Canvas now also resets all sector names

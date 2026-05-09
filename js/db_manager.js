@@ -88,6 +88,25 @@
                 window.routeDefinitions = (typeof getDefaultRouteDefinitions === 'function') ? getDefaultRouteDefinitions() : [];
             }
 
+            // Restore border state
+            if (Array.isArray(appState.borderDefinitions) && appState.borderDefinitions.length > 0) {
+                window.borderDefinitions = appState.borderDefinitions;
+            }
+            if (Array.isArray(appState.hexBorderAssignments)) {
+                window.hexBorderAssignments = new Map(appState.hexBorderAssignments);
+            }
+            if (Array.isArray(appState.borderPaths)) {
+                window.borderPaths = new Map(appState.borderPaths);
+            }
+
+            // Restore region state
+            if (Array.isArray(appState.regionDefinitions) && appState.regionDefinitions.length > 0) {
+                window.regionDefinitions = appState.regionDefinitions;
+            }
+            if (Array.isArray(appState.regionPaths)) {
+                window.regionPaths = new Map(appState.regionPaths);
+            }
+
             // Load hex states
             const hexCount = await new Promise((resolve) => {
                 const tx    = db.transaction(STORE_HEX, 'readonly');
@@ -194,6 +213,11 @@
             syncAllHexes();
             saveRoutes();
             saveRouteDefinitions();
+            saveBorderDefinitions();
+            saveBorderAssignments();
+            saveBorderPaths();
+            saveRegionDefinitions();
+            saveRegionPaths();
         }, 2000);
     }
 
@@ -282,6 +306,74 @@
     }
 
     // -------------------------------------------------------------------------
+    // Persist border definitions
+    // -------------------------------------------------------------------------
+    async function saveBorderDefinitions() {
+        try {
+            const db = await _openDB();
+            const tx = db.transaction(STORE_APP, 'readwrite');
+            tx.objectStore(STORE_APP).put(window.borderDefinitions || [], 'borderDefinitions');
+        } catch (err) {
+            console.warn('[DB] saveBorderDefinitions failed:', err);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Persist hex→border assignments (Map serialised as entries array)
+    // -------------------------------------------------------------------------
+    async function saveBorderAssignments() {
+        try {
+            const db      = await _openDB();
+            const tx      = db.transaction(STORE_APP, 'readwrite');
+            const entries = window.hexBorderAssignments ? [...window.hexBorderAssignments.entries()] : [];
+            tx.objectStore(STORE_APP).put(entries, 'hexBorderAssignments');
+        } catch (err) {
+            console.warn('[DB] saveBorderAssignments failed:', err);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Persist border polygon paths (Map serialised as entries array)
+    // -------------------------------------------------------------------------
+    async function saveBorderPaths() {
+        try {
+            const db      = await _openDB();
+            const tx      = db.transaction(STORE_APP, 'readwrite');
+            const entries = window.borderPaths ? [...window.borderPaths.entries()] : [];
+            tx.objectStore(STORE_APP).put(entries, 'borderPaths');
+        } catch (err) {
+            console.warn('[DB] saveBorderPaths failed:', err);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Persist region definitions
+    // -------------------------------------------------------------------------
+    async function saveRegionDefinitions() {
+        try {
+            const db = await _openDB();
+            const tx = db.transaction(STORE_APP, 'readwrite');
+            tx.objectStore(STORE_APP).put(window.regionDefinitions || [], 'regionDefinitions');
+        } catch (err) {
+            console.warn('[DB] saveRegionDefinitions failed:', err);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Persist region polygon paths (Map serialised as entries array)
+    // -------------------------------------------------------------------------
+    async function saveRegionPaths() {
+        try {
+            const db      = await _openDB();
+            const tx      = db.transaction(STORE_APP, 'readwrite');
+            const entries = window.regionPaths ? [...window.regionPaths.entries()] : [];
+            tx.objectStore(STORE_APP).put(entries, 'regionPaths');
+        } catch (err) {
+            console.warn('[DB] saveRegionPaths failed:', err);
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // Wipe the entire database.
     // Called before Universe import or when the user starts a new map.
     // -------------------------------------------------------------------------
@@ -310,6 +402,11 @@
         saveRouteDefinitions,
         saveGridDimensions,
         saveAutoRouteCounter,
+        saveBorderDefinitions,
+        saveBorderAssignments,
+        saveBorderPaths,
+        saveRegionDefinitions,
+        saveRegionPaths,
         clearDB,
         getTsvCache,
         putTsvCache

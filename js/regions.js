@@ -111,16 +111,27 @@ window.renderRegionWindow = function () {
                 });
             }
             def.name = newName;
+            if (window.dbManager) { window.dbManager.saveRegionDefinitions?.(); window.dbManager.saveRegionPaths?.(); }
             requestAnimationFrame(draw);
         });
 
         colorIn.addEventListener('input', () => {
             def.color = colorIn.value;
+            if (window.dbManager) window.dbManager.saveRegionDefinitions?.();
             requestAnimationFrame(draw);
         });
 
         visIn.addEventListener('change', () => {
             def.visible = visIn.checked;
+            if (window.dbManager) window.dbManager.saveRegionDefinitions?.();
+            // Keep "Show All" header checkbox in sync
+            const allCb = document.getElementById('region-vis-all-check');
+            if (allCb) {
+                const defs2 = window.regionDefinitions || [];
+                const vis2 = defs2.filter(d => d.visible).length;
+                allCb.indeterminate = vis2 > 0 && vis2 < defs2.length;
+                allCb.checked       = vis2 === defs2.length;
+            }
             requestAnimationFrame(draw);
         });
 
@@ -136,6 +147,7 @@ window.renderRegionWindow = function () {
                     if (key.endsWith(':' + def.name)) window.regionPaths.delete(key);
                 });
             }
+            if (window.dbManager) window.dbManager.saveRegionPaths?.();
             requestAnimationFrame(draw);
             window.renderRegionWindow();
             showToast(`Cleared all hexes for "${def.name}".`, 2000);
@@ -145,6 +157,15 @@ window.renderRegionWindow = function () {
     });
 
     if (typeof window.populateFilterRegionDropdown === 'function') window.populateFilterRegionDropdown();
+
+    // Sync the "Show All" header checkbox to the current visibility state.
+    const visAllCb = document.getElementById('region-vis-all-check');
+    if (visAllCb) {
+        const defs = window.regionDefinitions || [];
+        const visCount = defs.filter(d => d.visible).length;
+        visAllCb.indeterminate = visCount > 0 && visCount < defs.length;
+        visAllCb.checked       = visCount === defs.length;
+    }
 };
 
 // ── Toggle / close ────────────────────────────────────────────────────────────
@@ -199,6 +220,29 @@ window.openAssignRegionModal = function () {
 
     const grid = document.getElementById('region-assign-grid');
     grid.innerHTML = '';
+
+    // "Clear Region" option at the top of the list
+    const clearBtn = document.createElement('button');
+    clearBtn.className = 'border-assign-btn';
+    clearBtn.style.color       = '#888888';
+    clearBtn.style.borderColor = '#888888';
+    clearBtn.innerHTML = `<span class="border-assign-num">✕</span>`
+                       + `<span class="border-assign-name">Clear Region</span>`;
+    clearBtn.addEventListener('click', () => {
+        const hexList = [...selectedHexes];
+        saveHistoryState('Clear Region');
+        hexList.forEach(hexId => {
+            const s = hexStates.get(hexId);
+            if (!s) return;
+            s.cluster = '----';
+        });
+        document.getElementById('region-assign-modal').style.display = 'none';
+        window.renderRegionWindow();
+        requestAnimationFrame(draw);
+        showToast(`Region cleared for ${hexList.length} hex(es).`, 2500);
+    });
+    grid.appendChild(clearBtn);
+
     (window.regionDefinitions || getDefaultRegionDefinitions()).forEach(def => {
         const btn = document.createElement('button');
         btn.className = 'border-assign-btn';
@@ -234,6 +278,7 @@ window.confirmAssignRegion = function (regionId) {
     document.getElementById('region-assign-modal').style.display = 'none';
     window.ensureFreeRegionSlot();
     window.renderRegionWindow();
+    if (window.dbManager) window.dbManager.saveRegionDefinitions?.();
     requestAnimationFrame(draw);
     showToast(`${hexList.length} hex(es) assigned to "${def.name}".`, 2500);
 };
@@ -290,6 +335,18 @@ function setupRegionWindow() {
     if (cancelBtn) cancelBtn.addEventListener('click', () => {
         document.getElementById('region-assign-modal').style.display = 'none';
     });
+
+    const visAllCb = document.getElementById('region-vis-all-check');
+    if (visAllCb) {
+        visAllCb.addEventListener('change', () => {
+            const show = visAllCb.checked;
+            (window.regionDefinitions || []).forEach(def => { def.visible = show; });
+            if (window.dbManager) window.dbManager.saveRegionDefinitions?.();
+            document.querySelectorAll('#region-window-list .border-visible-check').forEach(cb => { cb.checked = show; });
+            visAllCb.indeterminate = false;
+            requestAnimationFrame(draw);
+        });
+    }
 
     if (!window.regionDefinitions) window.regionDefinitions = getDefaultRegionDefinitions();
     if (!window.regionPaths)       window.regionPaths       = new Map();

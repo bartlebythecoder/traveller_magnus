@@ -644,6 +644,8 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 8px;
             margin-bottom: 16px;
+            max-height: 530px;
+            overflow-y: auto;
         }
         .border-assign-btn {
             background: #1a1a2e;
@@ -668,7 +670,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            max-width: 90px;
+            max-width: 100%;
             text-align: center;
         }
     </style>
@@ -679,9 +681,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above So Below</span></h1>
-            <div class="splash-banner">New: Borders and Regions</div>
+            <div class="splash-banner">New: Border and Region Menus</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.10.1.2</div>
+            <div class="splash-version">v0.10.1.3</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -701,6 +703,7 @@
                     <div class="shortcut-item"><strong>F Key</strong><span>Open Filter Window</span></div>
                     <div class="shortcut-item"><strong>R Key</strong><span>Open Route Manager</span></div>
                     <div class="shortcut-item"><strong>B Key</strong><span>Open Border Manager</span></div>
+                    <div class="shortcut-item"><strong>G Key</strong><span>Open Region Manager</span></div>
                     <div class="shortcut-item"><strong>Escape</strong><span>Cancel / Close All</span></div>
                     <div class="shortcut-item"><strong>Ctrl + Delete</strong><span>Clear Canvas</span></div>
                 </div>
@@ -1017,7 +1020,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.10.1.2</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.10.1.3</span>
             </p>
         </div>
 
@@ -1048,6 +1051,9 @@
                     <strong>Ctrl + Shift + Z</strong><span>Redo Action</span>
                     <strong>Ctrl + Delete</strong><span style="color: #e74c3c;">Clear Canvas</span>
                     <strong>F Key</strong><span>Open Filter Window</span>
+                    <strong>R Key</strong><span>Open Route Manager</span>
+                    <strong>B Key</strong><span>Open Border Manager</span>
+                    <strong>G Key</strong><span>Open Region Manager</span>
                 </div>
             </div>
 
@@ -1139,18 +1145,6 @@
 
 
 
-    <!-- XML Route Importer Modal -->
-    <div id="xml-route-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content" style="width: 500px;">
-            <h3><i class="fas fa-code"></i> Import XML Routes</h3>
-            <p id="xml-route-modal-desc" style="color: #a0a8b0; font-size: 0.9em; margin-bottom: 15px;"></p>
-            <div id="xml-route-modal-table" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;"></div>
-            <div class="editor-buttons" style="margin-top: 20px;">
-                <button class="btn-confirm" id="btn-xml-route-confirm">Import</button>
-                <button class="btn-cancel" id="btn-xml-route-cancel">Cancel</button>
-            </div>
-        </div>
-    </div>
 
     <!-- Context Menu -->
     <div id="context-menu">
@@ -1954,6 +1948,11 @@
             <button id="btn-close-route-window" class="btn-close-palette" title="Close"><i class="fas fa-times"></i></button>
         </div>
         <div class="palette-content" style="padding: 0;">
+            <div style="display:flex;align-items:center;gap:6px;padding:4px 8px 6px;border-bottom:1px solid #45a29e;">
+                <label style="display:flex;align-items:center;gap:5px;cursor:pointer;color:#c5c6c7;font-size:0.82em;">
+                    <input type="checkbox" id="route-vis-all-check"> Show All Routes
+                </label>
+            </div>
             <div id="route-window-list"></div>
 
             <!-- Route Systems Panel (shown when segment-count pill is clicked) -->
@@ -2118,6 +2117,11 @@
             <button id="btn-close-border-window" class="btn-close-palette" title="Close"><i class="fas fa-times"></i></button>
         </div>
         <div class="palette-content" style="padding: 0;">
+            <div style="display:flex;align-items:center;gap:6px;padding:4px 8px 6px;border-bottom:1px solid #45a29e;">
+                <label style="display:flex;align-items:center;gap:5px;cursor:pointer;color:#c5c6c7;font-size:0.82em;">
+                    <input type="checkbox" id="border-vis-all-check"> Show All Borders
+                </label>
+            </div>
             <div id="border-window-list"></div>
         </div>
         <div class="border-window-footer">
@@ -2132,6 +2136,11 @@
             <button id="btn-close-region-window" class="btn-close-palette" title="Close"><i class="fas fa-times"></i></button>
         </div>
         <div class="palette-content" style="padding: 0;">
+            <div style="display:flex;align-items:center;gap:6px;padding:4px 8px 6px;border-bottom:1px solid #45a29e;">
+                <label style="display:flex;align-items:center;gap:5px;cursor:pointer;color:#c5c6c7;font-size:0.82em;">
+                    <input type="checkbox" id="region-vis-all-check"> Show All Regions
+                </label>
+            </div>
             <div id="region-window-list"></div>
         </div>
         <div class="region-window-footer">

@@ -131,6 +131,14 @@ window.renderBorderWindow = function () {
         visIn.addEventListener('change', () => {
             def.visible = visIn.checked;
             if (window.dbManager) window.dbManager.saveBorderDefinitions?.();
+            // Keep "Show All" header checkbox in sync
+            const allCb = document.getElementById('border-vis-all-check');
+            if (allCb) {
+                const defs2 = window.borderDefinitions || [];
+                const vis2 = defs2.filter(d => d.visible).length;
+                allCb.indeterminate = vis2 > 0 && vis2 < defs2.length;
+                allCb.checked       = vis2 === defs2.length;
+            }
             requestAnimationFrame(draw);
         });
 
@@ -152,6 +160,15 @@ window.renderBorderWindow = function () {
 
         list.appendChild(row);
     });
+
+    // Sync the "Show All" header checkbox to the current visibility state.
+    const visAllCb = document.getElementById('border-vis-all-check');
+    if (visAllCb) {
+        const defs = window.borderDefinitions || [];
+        const visCount = defs.filter(d => d.visible).length;
+        visAllCb.indeterminate = visCount > 0 && visCount < defs.length;
+        visAllCb.checked       = visCount === defs.length;
+    }
 };
 
 window.toggleBorderWindow = function () {
@@ -199,6 +216,28 @@ window.openAssignBorderModal = function () {
 
     const grid = document.getElementById('border-assign-grid');
     grid.innerHTML = '';
+
+    // "Clear Border" option at the top of the list
+    const clearBtn = document.createElement('button');
+    clearBtn.className = 'border-assign-btn';
+    clearBtn.style.color       = '#888888';
+    clearBtn.style.borderColor = '#888888';
+    clearBtn.innerHTML = `<span class="border-assign-num">✕</span>`
+                       + `<span class="border-assign-name">Clear Border</span>`;
+    clearBtn.addEventListener('click', () => {
+        const hexList = [...selectedHexes];
+        saveHistoryState('Clear Border');
+        hexList.forEach(hexId => {
+            if (window.hexBorderAssignments) window.hexBorderAssignments.delete(hexId);
+        });
+        if (window.dbManager) window.dbManager.saveBorderAssignments?.();
+        document.getElementById('border-assign-modal').style.display = 'none';
+        window.renderBorderWindow();
+        requestAnimationFrame(draw);
+        showToast(`Border cleared for ${hexList.length} hex(es).`, 2500);
+    });
+    grid.appendChild(clearBtn);
+
     const defs = window.borderDefinitions || getDefaultBorderDefinitions();
     defs.forEach(def => {
         const btn = document.createElement('button');
@@ -211,6 +250,24 @@ window.openAssignBorderModal = function () {
         grid.appendChild(btn);
     });
 
+    // Expand columns so all items fit within max-height without scrolling.
+    // Each button row is ~51px tall; with 8px gap: row pitch ≈ 59px.
+    // max-height is 530px → up to 9 rows fit cleanly.
+    const BTN_COL_W = 90;  // px per column
+    const MAX_ROWS  = 9;
+    const total     = defs.length + 1; // +1 for Clear button
+    const cols      = Math.max(4, Math.ceil(total / MAX_ROWS));
+    grid.style.gridTemplateColumns = `repeat(${cols}, ${BTN_COL_W}px)`;
+
+    const modalContent = document.getElementById('border-assign-modal').querySelector('.modal-content');
+    if (cols > 4) {
+        modalContent.style.width    = 'max-content';
+        modalContent.style.maxWidth = 'calc(100vw - 40px)';
+    } else {
+        modalContent.style.width    = '360px';
+        modalContent.style.maxWidth = '';
+    }
+
     document.getElementById('border-assign-modal').style.display = 'flex';
 };
 
@@ -221,6 +278,7 @@ window.confirmAssignBorder = function (borderId) {
     hexList.forEach(hexId => {
         window.hexBorderAssignments.set(hexId, borderId);
     });
+    if (window.dbManager) window.dbManager.saveBorderAssignments?.();
     document.getElementById('border-assign-modal').style.display = 'none';
     window.ensureFreeBorderSlot();
     window.renderBorderWindow();
@@ -779,6 +837,11 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
     if (typeof window.renderBorderWindow === 'function') {
         window.renderBorderWindow();
     }
+    if (window.dbManager) {
+        window.dbManager.saveBorderDefinitions?.();
+        window.dbManager.saveBorderAssignments?.();
+        window.dbManager.saveBorderPaths?.();
+    }
 
     return { assigned, skipped };
 };
@@ -1146,6 +1209,10 @@ window.importRegionsFromXml = function (regionsElement, slotNum) {
     if (affectedHexIds.length > 0 && window.dbManager) {
         window.dbManager.saveHexes(affectedHexIds);
     }
+    if (window.dbManager) {
+        window.dbManager.saveRegionDefinitions?.();
+        window.dbManager.saveRegionPaths?.();
+    }
     if (typeof window.renderRulesLedger === 'function') window.renderRulesLedger();
     if (typeof window.reapplyAllRules    === 'function') window.reapplyAllRules();
     if (typeof window.ensureFreeRegionSlot === 'function') window.ensureFreeRegionSlot();
@@ -1166,6 +1233,18 @@ function setupBorderWindow() {
             const menu = document.getElementById('context-menu');
             if (menu) menu.classList.remove('visible');
             window.toggleBorderWindow();
+        });
+    }
+
+    const visAllCb = document.getElementById('border-vis-all-check');
+    if (visAllCb) {
+        visAllCb.addEventListener('change', () => {
+            const show = visAllCb.checked;
+            (window.borderDefinitions || []).forEach(def => { def.visible = show; });
+            if (window.dbManager) window.dbManager.saveBorderDefinitions?.();
+            document.querySelectorAll('#border-window-list .border-visible-check').forEach(cb => { cb.checked = show; });
+            visAllCb.indeterminate = false;
+            requestAnimationFrame(draw);
         });
     }
 

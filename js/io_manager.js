@@ -572,6 +572,11 @@ function applyLoadedMapData(parsedData) {
         window.dbManager.syncAllHexes();
         window.dbManager.saveRoutes();
         window.dbManager.saveGridDimensions();
+        window.dbManager.saveBorderDefinitions?.();
+        window.dbManager.saveBorderAssignments?.();
+        window.dbManager.saveBorderPaths?.();
+        window.dbManager.saveRegionDefinitions?.();
+        window.dbManager.saveRegionPaths?.();
     }
 }
 
@@ -1183,12 +1188,9 @@ function importT5Tab(fileContent, fileName, forcedSectorSlot = null) {
         fallbackSectorSlot = forcedSectorSlot.toUpperCase();
     } else {
         const nameMatch = fileName.match(/Sector_([A-Z]{1,2}|\d+)/i);
-        if (nameMatch) {
-            fallbackSectorSlot = nameMatch[1].toUpperCase();
-        } else {
-            const userSlot = prompt(`Which Sector number (1 to ${gridWidth * gridHeight}; ${Math.ceil(gridWidth * gridHeight / 2)} is centre) should we import "${fileName}" into?`, String(Math.ceil(gridWidth * gridHeight / 2)));
-            if (userSlot) fallbackSectorSlot = userSlot.toUpperCase();
-        }
+        const detectedSlot = nameMatch ? nameMatch[1] : String(Math.ceil(gridWidth * gridHeight / 2));
+        const userSlot = prompt(`Which Sector number (1 to ${gridWidth * gridHeight}; ${Math.ceil(gridWidth * gridHeight / 2)} is centre) should we import "${fileName}" into?`, detectedSlot);
+        if (userSlot) fallbackSectorSlot = userSlot.toUpperCase();
     }
 
     // Convert the slot label (letter or number string) to a numeric sector ID.
@@ -1528,110 +1530,64 @@ function _applyXmlRoutesForGroup(segments, slotNum, sectorX, sectorY, targetRout
     return added;
 }
 
-// ── Modal helpers ─────────────────────────────────────────────────────────────
+// ── Auto route assigner ───────────────────────────────────────────────────────
 
-function _openXmlRouteModal(fileName, slotNum, groups) {
-    const modal      = document.getElementById('xml-route-modal');
-    const desc       = document.getElementById('xml-route-modal-desc');
-    const table      = document.getElementById('xml-route-modal-table');
-    const confirmBtn = document.getElementById('btn-xml-route-confirm');
-    if (!modal) return;
-
-    desc.textContent = `Assign each color group from "${fileName}" to a route slot.`;
-    table.innerHTML  = '';
-
-    const defs = window.routeDefinitions || [];
-
-    const optionsHtml = defs.slice(0, 9).map(d => {
-        const count = (window.sectorRoutes || []).filter(r => r.routeId === d.id).length;
-        const hint  = count > 0 ? ` (${count} segs)` : '';
-        return `<option value="${d.id}">#${d.id} ${d.name}${hint}</option>`;
-    }).join('');
-
-    const header = document.createElement('div');
-    header.style.cssText = 'display:grid;grid-template-columns:28px 1fr 200px;gap:8px;padding:4px 0;color:#a0a8b0;font-size:0.82em;border-bottom:1px solid #45a29e;';
-    header.innerHTML = '<span></span><span>Color Group</span><span>Route Slot</span>';
-    table.appendChild(header);
-
-    let nextSlot = 1;
-    for (const [colorKey, segments] of groups) {
-        const isDefault   = colorKey === '__default__';
-        const displayName = isDefault ? 'No color (default)' : colorKey;
-        const swatch      = isDefault ? '#888888' : colorKey;
-        const count       = segments.length;
-
-        const row = document.createElement('div');
-        row.style.cssText = 'display:grid;grid-template-columns:28px 1fr 200px;gap:8px;align-items:center;';
-        row.dataset.colorKey = colorKey;
-        row.innerHTML = `
-            <div style="width:22px;height:22px;border-radius:3px;background:${swatch};border:1px solid #555;flex-shrink:0;"></div>
-            <span style="color:#c5c6c7;font-size:0.88em;">${displayName} &mdash; ${count} segment${count !== 1 ? 's' : ''}</span>
-            <select class="xml-route-select" style="background:#1f2833;color:#c5c6c7;border:1px solid #45a29e;padding:3px 6px;border-radius:4px;width:100%;font-size:0.88em;">
-                ${optionsHtml}
-            </select>`;
-
-        const sel  = row.querySelector('.xml-route-select');
-        sel.value  = String(Math.min(nextSlot, 9));
-        nextSlot++;
-        table.appendChild(row);
-    }
-
-    // Replace confirmBtn to drop any previous listener
-    const fresh = confirmBtn.cloneNode(true);
-    confirmBtn.parentNode.replaceChild(fresh, confirmBtn);
-    fresh.addEventListener('click', () => {
-        modal.style.display = 'none';
-        _confirmXmlRouteImport(slotNum, groups, table);
-    });
-
-    modal.style.display = 'flex';
-}
-
-function _confirmXmlRouteImport(slotNum, groups, table) {
-    const rows = table.querySelectorAll('[data-color-key]');
-    const mapping = new Map();
-    rows.forEach(row => {
-        mapping.set(row.dataset.colorKey, parseInt(row.querySelector('.xml-route-select').value, 10));
-    });
-
-    // Warn if any chosen slot already has segments
-    const defs = window.routeDefinitions || [];
-    const seenIds = new Set();
-    const occupiedLabels = [];
-    mapping.forEach(routeId => {
-        if (seenIds.has(routeId)) return;
-        seenIds.add(routeId);
-        const count = (window.sectorRoutes || []).filter(r => r.routeId === routeId).length;
-        if (count > 0) {
-            const def = defs.find(d => d.id === routeId);
-            occupiedLabels.push(`Route #${routeId} "${def ? def.name : routeId}" (${count} segment${count !== 1 ? 's' : ''})`);
-        }
-    });
-
-    if (occupiedLabels.length > 0) {
-        const ok = confirm(
-            `The following route slot(s) already have data:\n\n${occupiedLabels.join('\n')}\n\nAdd XML routes anyway?`
-        );
-        if (!ok) return;
-    }
-
+function _autoAssignXmlRoutes(groups, slotNum) {
     saveHistoryState('Import XML Metadata');
     const coordLookup = _buildSectorCoordLookup();
     const sectorX     = (slotNum - 1) % gridWidth;
     const sectorY     = Math.floor((slotNum - 1) / gridWidth);
     const ts          = Date.now();
     let totalAdded    = 0;
+    let slotsUsed     = 0;
 
-    mapping.forEach((targetRouteId, colorKey) => {
-        const segments = groups.get(colorKey);
-        if (!segments || segments.length === 0) return;
+    for (const [colorKey, segments] of groups) {
+        // Guarantee an empty slot exists before targeting one
+        if (typeof window.ensureFreeRouteSlot === 'function') window.ensureFreeRouteSlot();
+
+        // Recompute after potential slot creation
+        const segCounts = new Map();
+        (window.sectorRoutes || []).forEach(r => {
+            if (r.routeId != null) segCounts.set(r.routeId, (segCounts.get(r.routeId) || 0) + 1);
+        });
+        const targetDef = (window.routeDefinitions || []).find(d => (segCounts.get(d.id) || 0) === 0);
+        if (!targetDef) {
+            console.warn(`[XML Import] No free route slot for "${colorKey}" — skipped.`);
+            continue;
+        }
+
+        // Resolve hex color
+        const isDefault = colorKey === '__default__';
+        const isHex     = colorKey.startsWith('#');
+        let hexColor    = '#00ff00';
+        if (!isDefault) {
+            hexColor = isHex
+                ? colorKey
+                : ((typeof BORDER_COLOR_MAP !== 'undefined' && BORDER_COLOR_MAP[colorKey]) || '#00ff00');
+        }
+
+        // Apply color; apply name only for human-readable named colors
+        targetDef.color = hexColor;
+        if (!isDefault && !isHex) {
+            targetDef.name = colorKey.charAt(0).toUpperCase() + colorKey.slice(1);
+        }
+
         const groupKey = `xml_import_${ts}_${colorKey}`;
-        totalAdded += _applyXmlRoutesForGroup(segments, slotNum, sectorX, sectorY, targetRouteId, coordLookup, groupKey);
-    });
+        totalAdded += _applyXmlRoutesForGroup(segments, slotNum, sectorX, sectorY, targetDef.id, coordLookup, groupKey);
+        slotsUsed++;
+    }
 
-    if (window.dbManager) window.dbManager.saveRoutes();
+    // Ensure one free slot remains after import
+    if (typeof window.ensureFreeRouteSlot === 'function') {
+        if (window.ensureFreeRouteSlot() && window.dbManager) window.dbManager.saveRouteDefinitions();
+    }
+    if (window.dbManager) {
+        window.dbManager.saveRouteDefinitions();
+        window.dbManager.saveRoutes();
+    }
     requestAnimationFrame(draw);
-    showToast(`Imported ${totalAdded} route segment(s) from XML.`, 3000);
+    if (typeof window.renderRouteWindow === 'function') window.renderRouteWindow();
+    showToast(`Imported ${totalAdded} route segment(s) across ${slotsUsed} slot(s) from XML.`, 3000);
 }
 
 // ── Setup ─────────────────────────────────────────────────────────────────────
@@ -1639,14 +1595,10 @@ function _confirmXmlRouteImport(slotNum, groups, table) {
 function setupXmlMetadataImporter() {
     const btn       = document.getElementById('btn-import-xml-metadata');
     const fileInput = document.getElementById('file-import-xml-metadata');
-    const modal     = document.getElementById('xml-route-modal');
-    const cancelBtn = document.getElementById('btn-xml-route-cancel');
 
     if (!btn || !fileInput) return;
 
     btn.addEventListener('click', () => fileInput.click());
-
-    cancelBtn?.addEventListener('click', () => { modal.style.display = 'none'; });
 
     fileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -1698,49 +1650,7 @@ function setupXmlMetadataImporter() {
             }
 
             const groups = parseXmlRouteGroups(xmlText);
-            if (!groups) {
-                showToast('No routes found in XML file.', 3000);
-                return;
-            }
-
-            const colorKeys    = Array.from(groups.keys());
-            const isDefaultOnly = colorKeys.length === 1 && colorKeys[0] === '__default__';
-
-            if (isDefaultOnly) {
-                // Auto-assign to first empty route slot
-                const segCounts = new Map();
-                (window.sectorRoutes || []).forEach(r => {
-                    if (r.routeId != null) segCounts.set(r.routeId, (segCounts.get(r.routeId) || 0) + 1);
-                });
-
-                const defs = window.routeDefinitions || [];
-                let targetId = null;
-                for (const def of defs.slice(0, 9)) {
-                    if ((segCounts.get(def.id) || 0) === 0) { targetId = def.id; break; }
-                }
-
-                if (targetId === null) {
-                    const ok = confirm('All route slots have existing data.\n\nImport XML routes to Route #1 anyway?');
-                    if (!ok) return;
-                    targetId = 1;
-                }
-
-                saveHistoryState('Import XML Metadata');
-                const coordLookup = _buildSectorCoordLookup();
-                const sectorX     = (slotNum - 1) % gridWidth;
-                const sectorY     = Math.floor((slotNum - 1) / gridWidth);
-                const added = _applyXmlRoutesForGroup(
-                    groups.get('__default__'), slotNum, sectorX, sectorY,
-                    targetId, coordLookup, `xml_default_${Date.now()}`
-                );
-
-                if (window.dbManager) window.dbManager.saveRoutes();
-                requestAnimationFrame(draw);
-                showToast(`Imported ${added} route segment(s) to Route #${targetId}.`, 3000);
-
-            } else {
-                _openXmlRouteModal(file.name, slotNum, groups);
-            }
+            if (groups) _autoAssignXmlRoutes(groups, slotNum);
         }).catch(err => {
             showToast('Error reading XML file.', 3000);
             console.error('[XML Import]', err);

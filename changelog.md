@@ -1,6 +1,13 @@
 # Changelog
 
-### [v0.10.1.2] - In progress
+### [v0.10.1.3] - In Progress
+1. **Routes, Borders, Regions:** Added options in menu to clear values for selected hexes
+2. **Import Sector (tsv):** Fixed bug retaining previous sector selection in cache
+
+### [v0.10.1.2] - 2026-05-09
+1. **Borders:** Corrected border fills expanding to sector borders
+2. **Borders:** Corrected duplicate border slots when importing multi-sector allegiance codes
+3. **Regions:** Corrected errors that were not properly import/exporting region colors
 
 ### [v0.10.1.1] - 2026-05-08
 1. **Changelogs:** Updated (had been incomplete)

@@ -1242,6 +1242,18 @@ function setupRouteWindow() {
         });
     }
 
+    const visAllCb = document.getElementById('route-vis-all-check');
+    if (visAllCb) {
+        visAllCb.addEventListener('change', () => {
+            const show = visAllCb.checked;
+            (window.routeDefinitions || []).forEach(def => { def.visible = show; });
+            if (window.dbManager) window.dbManager.saveRouteDefinitions();
+            document.querySelectorAll('#route-window-list .route-visible-check').forEach(cb => { cb.checked = show; });
+            visAllCb.indeterminate = false;
+            requestAnimationFrame(draw);
+        });
+    }
+
     const autoPanelClose = document.getElementById('btn-route-auto-close');
     if (autoPanelClose) autoPanelClose.addEventListener('click', window.closeRouteAutoPanel);
 
@@ -1465,6 +1477,22 @@ function setupRouteWindow() {
     if (addWpBtn) addWpBtn.addEventListener('click', addWaypointRow);
 }
 
+window.ensureFreeRouteSlot = function () {
+    if (!window.routeDefinitions) window.routeDefinitions = getDefaultRouteDefinitions();
+    const segCounts = new Map();
+    (window.sectorRoutes || []).forEach(r => {
+        if (r.routeId != null) segCounts.set(r.routeId, (segCounts.get(r.routeId) || 0) + 1);
+    });
+    const hasFree = window.routeDefinitions.some(d => (segCounts.get(d.id) || 0) === 0);
+    if (hasFree) return false;
+    const nextId = Math.max(...window.routeDefinitions.map(d => d.id)) + 1;
+    window.routeDefinitions.push({
+        id: nextId, name: `Route ${nextId}`, color: '#00ff00',
+        shortcut: null, visible: true, automationRef: null,
+    });
+    return true;
+};
+
 window.renderRouteWindow = function () {
     const list = document.getElementById('route-window-list');
     if (!list) return;
@@ -1541,6 +1569,14 @@ window.renderRouteWindow = function () {
         visIn.addEventListener('change', () => {
             def.visible = visIn.checked;
             if (window.dbManager) window.dbManager.saveRouteDefinitions();
+            // Keep "Show All" header checkbox in sync
+            const allCb = document.getElementById('route-vis-all-check');
+            if (allCb) {
+                const defs2 = window.routeDefinitions || [];
+                const vis2 = defs2.filter(d => d.visible).length;
+                allCb.indeterminate = vis2 > 0 && vis2 < defs2.length;
+                allCb.checked       = vis2 === defs2.length;
+            }
             requestAnimationFrame(draw);
         });
 
@@ -1580,6 +1616,14 @@ window.renderRouteWindow = function () {
 
         list.appendChild(row);
     });
+
+    // Sync the "Show All" header checkbox to the current visibility state.
+    const visAllCb = document.getElementById('route-vis-all-check');
+    if (visAllCb) {
+        const visCount = defs.filter(d => d.visible).length;
+        visAllCb.indeterminate = visCount > 0 && visCount < defs.length;
+        visAllCb.checked       = visCount === defs.length;
+    }
 };
 
 window.toggleRouteWindow = function () {

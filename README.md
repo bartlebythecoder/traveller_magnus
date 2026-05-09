@@ -1,4 +1,4 @@
-# As Above, So Below (v0.10.1)
+# As Above, So Below (v0.10.1.3)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -62,7 +62,11 @@ Want to replace any of these sectors with your own file?
 ---
 ## 📜 Changelog
 
-### [v0.10.1.2] - In progress
+### [v0.10.1.3] - In Progress
+1. **Routes, Borders, Regions:** Added options in menu to clear values for selected hexes
+2. **Import Sector (tsv):** Fixed bug retaining previous sector selection in cache
+
+### [v0.10.1.2] - 2026-05-09
 1. **Borders:** Corrected border fills expanding to sector borders
 2. **Regions:** Corrected errors that were not properly import/exporting region colors
 

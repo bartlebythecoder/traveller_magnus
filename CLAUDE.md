@@ -14,6 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 2. **Zero-Assumption Policy.** Do not interpret, guess, or "fill in" Traveller RPG rules from training data. If a rule is ambiguous or missing from `rules/`, stop and ask — do not implement a best guess.
 3. **Halt & Challenge.** When encountering an ambiguity in RPG logic, draft a specific question for the user rather than guessing. Log the issue and stop.
 4. **Check `js/` before creating new files.** Prefer extending an existing module over creating a new one.
+5. **Do Not Interact with Git.**  All git adding, staging and committing will be handled manually by the user.  You will only work on the code.
 
 ## Architecture
 

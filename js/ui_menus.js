@@ -72,52 +72,7 @@ function setupContextMenu() {
     document.getElementById('ctx-deselect-all').addEventListener('click', deselectAllHexes);
     document.getElementById('ctx-help').addEventListener('click', openHelpModal);
 
-    // --- Assign Allegiance ---
-    function getEligibleForAllegiance() {
-        return [...selectedHexes]; // All selected hexes are eligible (BLANK, EMPTY, SYSTEM_PRESENT)
-    }
-
-    function confirmAllegiance() {
-        const val = document.getElementById('allegiance-input').value.trim() || '----';
-        const eligible = getEligibleForAllegiance();
-        saveHistoryState('Assign Allegiance');
-        eligible.forEach(hexId => {
-            let s = hexStates.get(hexId);
-            if (!s) {
-                s = { type: 'BLANK' };
-                hexStates.set(hexId, s);
-            }
-            s.allegiance = val;
-        });
-        document.getElementById('allegiance-modal').style.display = 'none';
-        showToast(`Allegiance "${val}" assigned to ${eligible.length} system(s).`, 2500);
-        if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
-        if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
-    }
-
-    document.getElementById('ctx-assign-allegiance').addEventListener('click', () => {
-        document.getElementById('context-menu').classList.remove('visible');
-        const eligible = getEligibleForAllegiance();
-        if (eligible.length === 0) {
-            showToast('No systems in selection to assign allegiance to.', 2500);
-            return;
-        }
-        document.getElementById('allegiance-modal-count').textContent = eligible.length;
-        document.getElementById('allegiance-input').value = '';
-        document.getElementById('allegiance-modal').style.display = 'flex';
-        setTimeout(() => document.getElementById('allegiance-input').focus(), 50);
-    });
-
-    document.getElementById('btn-allegiance-confirm').addEventListener('click', confirmAllegiance);
-
-    document.getElementById('btn-allegiance-cancel').addEventListener('click', () => {
-        document.getElementById('allegiance-modal').style.display = 'none';
-    });
-
-    document.getElementById('allegiance-input').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') confirmAllegiance();
-        if (e.key === 'Escape') document.getElementById('allegiance-modal').style.display = 'none';
-    });
+    // Allegiance assignment is handled by allegiances.js (setupAllegianceWindow)
 
     // --- Assign Background Color ---
     function openBgColorModal() {

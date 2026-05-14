@@ -84,11 +84,13 @@ function setupSaveLoad() {
             aesthetics,
             sectorNames:          window.sectorNames || {},
             hexStates:            hexObj,
-            borderDefinitions:    window.borderDefinitions || [],
-            hexBorderAssignments: Array.from((window.hexBorderAssignments || new Map()).entries()),
-            borderPaths:          Array.from((window.borderPaths || new Map()).entries()),
-            regionDefinitions:    window.regionDefinitions || [],
-            regionPaths:          Array.from((window.regionPaths || new Map()).entries()),
+            borderDefinitions:       window.borderDefinitions || [],
+            hexBorderAssignments:    Array.from((window.hexBorderAssignments || new Map()).entries()),
+            borderPaths:             Array.from((window.borderPaths || new Map()).entries()),
+            regionDefinitions:       window.regionDefinitions || [],
+            regionPaths:             Array.from((window.regionPaths || new Map()).entries()),
+            allegianceDefinitions:   window.allegianceDefinitions || [],
+            hexAllegianceAssignments: Array.from((window.hexAllegianceAssignments || new Map()).entries()),
         };
 
         // Toast before the blocking stringify so the UI doesn't appear frozen
@@ -147,11 +149,13 @@ function setupSaveLoad() {
                         chunkObj.routes               = window.sectorRoutes || [];
                         chunkObj.rules                = window.activeFilterRules || [];
                         chunkObj.aesthetics           = aesthetics;
-                        chunkObj.borderDefinitions    = window.borderDefinitions || [];
-                        chunkObj.hexBorderAssignments = Array.from((window.hexBorderAssignments || new Map()).entries());
-                        chunkObj.borderPaths          = Array.from((window.borderPaths || new Map()).entries());
-                        chunkObj.regionDefinitions    = window.regionDefinitions || [];
-                        chunkObj.regionPaths          = Array.from((window.regionPaths || new Map()).entries());
+                        chunkObj.borderDefinitions       = window.borderDefinitions || [];
+                        chunkObj.hexBorderAssignments    = Array.from((window.hexBorderAssignments || new Map()).entries());
+                        chunkObj.borderPaths             = Array.from((window.borderPaths || new Map()).entries());
+                        chunkObj.regionDefinitions       = window.regionDefinitions || [];
+                        chunkObj.regionPaths             = Array.from((window.regionPaths || new Map()).entries());
+                        chunkObj.allegianceDefinitions   = window.allegianceDefinitions || [];
+                        chunkObj.hexAllegianceAssignments = Array.from((window.hexAllegianceAssignments || new Map()).entries());
                     }
 
                     triggerDownload(
@@ -307,14 +311,17 @@ async function clearCanvas() {
     window.redoStack         = [];
     selectedHexes.clear();
 
-    // Reset all border/region state to defaults
-    window.hexBorderAssignments = new Map();
-    window.borderPaths          = new Map();
-    window.regionPaths          = new Map();
-    window.borderDefinitions    = (typeof getDefaultBorderDefinitions === 'function') ? getDefaultBorderDefinitions() : [];
-    window.regionDefinitions    = (typeof getDefaultRegionDefinitions === 'function') ? getDefaultRegionDefinitions() : [];
+    // Reset all border/region/allegiance state to defaults
+    window.hexBorderAssignments    = new Map();
+    window.borderPaths             = new Map();
+    window.regionPaths             = new Map();
+    window.hexAllegianceAssignments = new Map();
+    window.borderDefinitions       = (typeof getDefaultBorderDefinitions === 'function') ? getDefaultBorderDefinitions() : [];
+    window.regionDefinitions       = (typeof getDefaultRegionDefinitions === 'function') ? getDefaultRegionDefinitions() : [];
+    window.allegianceDefinitions   = (typeof getDefaultAllegianceDefinitions === 'function') ? getDefaultAllegianceDefinitions() : [];
     if (typeof window.renderBorderWindow === 'function') window.renderBorderWindow();
     if (typeof window.renderRegionWindow === 'function') window.renderRegionWindow();
+    if (typeof window.renderAllegianceWindow === 'function') window.renderAllegianceWindow();
 
     // Re-centre camera on the fresh 7×5 canvas
     centerCameraOnGrid();
@@ -509,9 +516,28 @@ function applyLoadedMapData(parsedData) {
         window.regionPaths          = Array.isArray(parsedData.regionPaths)
             ? new Map(parsedData.regionPaths)
             : new Map();
+        // Restore allegiance state
+        window.allegianceDefinitions = Array.isArray(parsedData.allegianceDefinitions) && parsedData.allegianceDefinitions.length > 0
+            ? parsedData.allegianceDefinitions
+            : (typeof getDefaultAllegianceDefinitions === 'function' ? getDefaultAllegianceDefinitions() : []);
+        while (window.allegianceDefinitions.length < 20) {
+            const nextId = window.allegianceDefinitions.length + 1;
+            const CYCLE = typeof ALLEGIANCE_COLOR_CYCLE !== 'undefined' ? ALLEGIANCE_COLOR_CYCLE : [];
+            window.allegianceDefinitions.push({
+                id: nextId, code: null, name: `Allegiance ${nextId}`,
+                color: CYCLE[(nextId - 1) % CYCLE.length] || '#888888', visible: true,
+            });
+        }
+        window.hexAllegianceAssignments = Array.isArray(parsedData.hexAllegianceAssignments)
+            ? new Map(parsedData.hexAllegianceAssignments)
+            : new Map();
+        // Auto-discover any codes in state.allegiance not yet covered (legacy saves)
+        if (typeof window.autoDiscoverAllegianceCodes === 'function') window.autoDiscoverAllegianceCodes();
+
         if (typeof window.renderBorderWindow === 'function') window.renderBorderWindow();
         if (typeof window.renderRegionWindow === 'function') window.renderRegionWindow();
-        if (typeof writeLogLine === 'function') writeLogLine(`JSON Load: Border definitions (${window.borderDefinitions.length}), border assignments (${window.hexBorderAssignments.size}), region definitions (${window.regionDefinitions.length}), region paths (${window.regionPaths.size}) restored.`);
+        if (typeof window.renderAllegianceWindow === 'function') window.renderAllegianceWindow();
+        if (typeof writeLogLine === 'function') writeLogLine(`JSON Load: Border definitions (${window.borderDefinitions.length}), border assignments (${window.hexBorderAssignments.size}), region definitions (${window.regionDefinitions.length}), allegiance definitions (${window.allegianceDefinitions.length}), allegiance assignments (${window.hexAllegianceAssignments.size}) restored.`);
 
         // Priority Rule Capture: Use aesthetics.activeRules if available, else fallback to legacy field
         window.activeFilterRules = parsedData.rules || [];
@@ -1151,8 +1177,8 @@ function setupSectorImporter() {
     }
 }
 
-function importT5Tab(fileContent, fileName, forcedSectorSlot = null) {
-    saveHistoryState('Import Sector');
+function importT5Tab(fileContent, fileName, forcedSectorSlot = null, bulkMode = false) {
+    if (!bulkMode) saveHistoryState('Import Sector');
     const lines = fileContent.split(/\r?\n/);
     if (lines.length < 2) return;
 
@@ -1367,21 +1393,24 @@ function importT5Tab(fileContent, fileName, forcedSectorSlot = null) {
         }
     }
 
-    showToast(`Successfully imported ${importCount} worlds into Sector ${sectorNum} (${fallbackSectorSlot})`);
-    if (emptyCount > 0) showToast(`Initialized ${emptyCount} empty space hexes in sector bounds.`, 2000);
-
     selectedHexes.clear();
-    
-    // Sean Protocol: Refresh Styling Rules (Ledger) and Visibility Filters
-    if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
-    if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
 
-    if (typeof draw === 'function') {
-        requestAnimationFrame(draw);
+    if (!bulkMode) {
+        // Sync allegiance codes, refresh UI, redraw, and persist.
+        // Skipped in bulk mode — the caller does these once after all sectors are loaded.
+        if (typeof window.autoDiscoverAllegianceCodes === 'function') window.autoDiscoverAllegianceCodes();
+        if (typeof window.renderAllegianceWindow === 'function') window.renderAllegianceWindow();
+
+        showToast(`Successfully imported ${importCount} worlds into Sector ${sectorNum} (${fallbackSectorSlot})`);
+        if (emptyCount > 0) showToast(`Initialized ${emptyCount} empty space hexes in sector bounds.`, 2000);
+
+        if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+        if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
+
+        if (typeof draw === 'function') requestAnimationFrame(draw);
+
+        if (window.dbManager) window.dbManager.saveHexesBySectorNum(sectorNum);
     }
-
-    // Persist the imported sector to IndexedDB in the background.
-    if (window.dbManager) window.dbManager.saveHexesBySectorNum(sectorNum);
 }
 
 // ============================================================================
@@ -1648,6 +1677,18 @@ function setupXmlMetadataImporter() {
                     }
                 }
             }
+
+            // Allegiance import — seed names from <Allegiances> then populate hex assignments from borders
+            if (typeof window.importAllegianceCodesFromXml === 'function') {
+                const allegiancesEl = parsedDoc && parsedDoc.querySelector('Allegiances');
+                if (allegiancesEl) window.importAllegianceCodesFromXml(allegiancesEl, bordersEl);
+            }
+            if (typeof window.autoPopulateAllegianceFromBorders === 'function') {
+                window.autoPopulateAllegianceFromBorders();
+            }
+            if (typeof window.sortAndTrimBorderDefinitions === 'function') window.sortAndTrimBorderDefinitions();
+            if (typeof window.renderBorderWindow === 'function') window.renderBorderWindow();
+            requestAnimationFrame(draw);
 
             const groups = parseXmlRouteGroups(xmlText);
             if (groups) _autoAssignXmlRoutes(groups, slotNum);

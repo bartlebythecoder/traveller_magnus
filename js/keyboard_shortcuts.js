@@ -14,7 +14,7 @@ function setupKeyboardShortcuts() {
 
         // Prevent default for route shortcut keys (dynamic from definitions), R, B, and G
         const routeShortcuts = (window.routeDefinitions || []).map(d => d.shortcut).filter(s => s && s.length === 1);
-        if (key === 'r' || key === 'b' || key === 'g' || routeShortcuts.includes(key)) {
+        if (key === 'r' || key === 'b' || key === 'g' || key === 'a' || routeShortcuts.includes(key)) {
             e.preventDefault();
         }
 
@@ -101,6 +101,11 @@ function setupKeyboardShortcuts() {
                 window.closeBorderWindow();
                 return;
             }
+            const allegianceWindow = document.getElementById('allegiance-window');
+            if (allegianceWindow && allegianceWindow.classList.contains('visible')) {
+                window.closeAllegianceWindow();
+                return;
+            }
 
             // Cleanup
             deselectAllHexes();
@@ -116,6 +121,9 @@ function setupKeyboardShortcuts() {
         } else if (key === 'g' && !e.ctrlKey) {
             e.preventDefault();
             if (typeof window.toggleRegionWindow === 'function') window.toggleRegionWindow();
+        } else if (key === 'a' && !e.ctrlKey) {
+            e.preventDefault();
+            if (typeof window.toggleAllegianceWindow === 'function') window.toggleAllegianceWindow();
         } else if (e.ctrlKey && key === 'z') {
             e.preventDefault();
             if (e.shiftKey) {

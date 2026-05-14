@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.10.1.3";
-const APP_BANNER = "v0.10.1.3: New: Border and Region Menus";
+const APP_VERSION = "v0.10.2";
+const APP_BANNER = "v0.10.2: New: Allegiance Management";
 
 // -----------------------------------------------------------------------------
 // Application State

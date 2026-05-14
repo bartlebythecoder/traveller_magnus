@@ -178,8 +178,12 @@ function openHexEditor(hexId, e = null) {
 
     document.getElementById('edit-trade-codes').value = data.tradeCodes ? data.tradeCodes.join(' ') : '';
     document.getElementById('edit-travel-zone').value = data.travelZone || 'Green';
-    const allegVal = data.allegiance || stateObj.allegiance || '';
-    document.getElementById('edit-allegiance').value = (allegVal === '----') ? '' : allegVal;
+    const allegVal = data.allegiance || stateObj.allegiance || '----';
+    if (typeof window.populateAllegianceDropdown === 'function') {
+        window.populateAllegianceDropdown(allegVal);
+    } else {
+        document.getElementById('edit-allegiance').value = (allegVal === '----') ? '----' : allegVal;
+    }
     if (typeof window.populateRegionDropdown === 'function') {
         window.populateRegionDropdown(stateObj.cluster || '----');
     }
@@ -1609,7 +1613,8 @@ function saveHexEditorChanges() {
         .split(/[\s,]+/).map(s => s.trim()).filter(Boolean);
     const uwp = `${starport}${toUWPChar(size)}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
 
-    const allegiance = document.getElementById('edit-allegiance').value.trim() || '----';
+    const allegianceEl = document.getElementById('edit-allegiance');
+    const allegiance = (allegianceEl ? allegianceEl.value.trim() : '') || '----';
     const cluster = document.getElementById('edit-region').value.trim() || '----';
     const notes = document.getElementById('edit-notes').value.trim();
 
@@ -1763,6 +1768,15 @@ function saveHexEditorChanges() {
     if (pbgData.gasGiantsCount !== undefined) stateObj.gasGiantCount = pbgData.gasGiantsCount;
 
     hexStates.set(editingHexId, stateObj);
+
+    // Sync allegiance assignment map with the edited value
+    if (window.hexAllegianceAssignments) {
+        if (allegiance && allegiance !== '----') {
+            window.hexAllegianceAssignments.set(editingHexId, allegiance);
+        } else {
+            window.hexAllegianceAssignments.delete(editingHexId);
+        }
+    }
 
     requestAnimationFrame(draw);
 

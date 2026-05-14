@@ -100,6 +100,27 @@ function draw() {
     // LOD: Computed once per frame — gates grid lines, text, and icons below zoom threshold.
     const showText = zoom >= 0.3;
 
+    // Build allegiance color lookup once per frame (hexId -> color for visible allegiances)
+    const visibleAllegianceMap = new Map();
+    if (window.allegianceDefinitions && window.allegianceDefinitions.length > 0 &&
+        window.hexAllegianceAssignments && window.hexAllegianceAssignments.size > 0) {
+        const allegByCode = new Map();
+        window.allegianceDefinitions
+            .filter(d => d.visible !== false)
+            .forEach(d => {
+                if (d.codes && d.codes.length > 0) {
+                    d.codes.forEach(c => allegByCode.set(c, d.color));
+                } else if (d.code) {
+                    allegByCode.set(d.code, d.color); // migration safety
+                }
+            });
+        window.hexAllegianceAssignments.forEach((code, hexId) => {
+            if (!code || code === '----') return;
+            const color = allegByCode.get(code);
+            if (color) visibleAllegianceMap.set(hexId, color);
+        });
+    }
+
     // Build region color lookup once per frame (hexId -> color for visible regions)
     const visibleRegionMap = new Map();
     if (window.regionDefinitions && window.regionDefinitions.length > 0) {
@@ -132,13 +153,25 @@ function draw() {
             // LOD: At low zoom, skip hexes that need neither a background fill nor a selection
             // highlight — avoids getHexPath() and all stroke calls for the vast majority of hexes.
             const isSelected = selectedHexes.has(hexId);
-            const hasBgFill = window.hexBgFillVisible !== false && stateObj &&
-                (stateObj.manualBgColor || (stateObj.custom_ui && stateObj.custom_ui.bgFillColor) || visibleRegionMap.has(hexId));
+            const hasBgFill = window.hexBgFillVisible !== false &&
+                (visibleAllegianceMap.has(hexId) || (stateObj && (stateObj.manualBgColor || (stateObj.custom_ui && stateObj.custom_ui.bgFillColor) || visibleRegionMap.has(hexId))));
             if (!showText && !isSelected && !hasBgFill) continue;
 
             const path = getHexPath(cx, cy, size);
 
-            // 0a. Manual Background Fill (assigned via context menu — persists independently of filter rules)
+            // 0a. Allegiance Fill (from Allegiance Manager — covers system and blank hexes)
+            if (window.hexBgFillVisible !== false) {
+                const allegColor = visibleAllegianceMap.get(hexId);
+                if (allegColor) {
+                    ctx.save();
+                    ctx.globalAlpha = 0.2;
+                    ctx.fillStyle = allegColor;
+                    ctx.fill(path);
+                    ctx.restore();
+                }
+            }
+
+            // 0b. Manual Background Fill (assigned via context menu)
             if (window.hexBgFillVisible !== false && stateObj && stateObj.manualBgColor) {
                 ctx.save();
                 ctx.globalAlpha = 0.3;
@@ -147,7 +180,7 @@ function draw() {
                 ctx.restore();
             }
 
-            // 0b. Region Fill (from Region Manager slot assignments)
+            // 0c. Region Fill (from Region Manager slot assignments)
             if (window.hexBgFillVisible !== false) {
                 const regionColor = visibleRegionMap.get(hexId);
                 if (regionColor) {
@@ -159,7 +192,7 @@ function draw() {
                 }
             }
 
-            // 0c. Filter Rule Background Fill (Political Mapping)
+            // 0d. Filter Rule Background Fill (Political Mapping)
             if (window.hexBgFillVisible !== false && stateObj && stateObj.custom_ui && stateObj.custom_ui.bgFillColor) {
                 ctx.save();
                 ctx.globalAlpha = 0.3;

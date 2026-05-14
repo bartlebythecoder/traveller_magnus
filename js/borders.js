@@ -74,20 +74,76 @@ window.ensureFreeBorderSlot = function () {
     return true;
 };
 
+// Sort used border slots alphabetically, trim excess free slots to one sentinel,
+// then renumber IDs and remap hexBorderAssignments + borderPaths to match.
+// Called once at the end of a full import (not per-sector) so the sort is global.
+window.sortAndTrimBorderDefinitions = function () {
+    if (!window.borderDefinitions || window.borderDefinitions.length === 0) return;
+
+    const assignedIds = new Set(
+        window.hexBorderAssignments ? [...window.hexBorderAssignments.values()] : []
+    );
+    const pathIds = new Set(
+        window.borderPaths ? [...window.borderPaths.keys()] : []
+    );
+    const isUsed = d =>
+        assignedIds.has(d.id) ||
+        pathIds.has(d.id) ||
+        (d.allegianceCodes && d.allegianceCodes.length > 0) ||
+        !!d.allegiance;
+
+    window.borderDefinitions.sort((a, b) => {
+        const aUsed = isUsed(a);
+        const bUsed = isUsed(b);
+        if (aUsed !== bUsed) return aUsed ? -1 : 1;
+        return a.name.localeCompare(b.name);
+    });
+
+    // Trim to one free sentinel slot at the end.
+    const firstFreeIdx = window.borderDefinitions.findIndex(d => !isUsed(d));
+    if (firstFreeIdx !== -1) {
+        window.borderDefinitions.splice(firstFreeIdx + 1);
+    }
+
+    // Build old→new ID map and renumber definitions.
+    const idMap = new Map();
+    window.borderDefinitions.forEach((d, i) => {
+        idMap.set(d.id, i + 1);
+        d.id = i + 1;
+    });
+
+    // Remap hexBorderAssignments (hexId → borderId).
+    if (window.hexBorderAssignments) {
+        window.hexBorderAssignments.forEach((oldId, hexId) => {
+            const newId = idMap.get(oldId);
+            if (newId !== undefined) window.hexBorderAssignments.set(hexId, newId);
+        });
+    }
+
+    // Remap borderPaths (borderId → path array).
+    if (window.borderPaths && window.borderPaths.size > 0) {
+        const newPaths = new Map();
+        window.borderPaths.forEach((paths, oldId) => {
+            const newId = idMap.get(oldId);
+            if (newId !== undefined) newPaths.set(newId, paths);
+        });
+        window.borderPaths = newPaths;
+    }
+
+    window.ensureFreeBorderSlot();
+    if (window.dbManager) {
+        window.dbManager.saveBorderDefinitions?.();
+        window.dbManager.saveBorderAssignments?.();
+        window.dbManager.saveBorderPaths?.();
+    }
+};
+
 window.renderBorderWindow = function () {
     const list = document.getElementById('border-window-list');
     if (!list) return;
     list.innerHTML = '';
 
-    const allDefaults = getDefaultBorderDefinitions();
-    let padded = false;
-    while (window.borderDefinitions.length < 10) {
-        const nextId = window.borderDefinitions.length + 1;
-        const def = allDefaults.find(d => d.id === nextId);
-        window.borderDefinitions.push(def || { id: nextId, name: `Border ${nextId}`, color: '#ffffff', visible: true });
-        padded = true;
-    }
-    if (padded && window.dbManager) window.dbManager.saveBorderDefinitions?.();
+    window.ensureFreeBorderSlot();
 
     const hexCounts = new Map();
     (window.hexBorderAssignments || new Map()).forEach((borderId) => {
@@ -259,14 +315,12 @@ window.openAssignBorderModal = function () {
     const cols      = Math.max(4, Math.ceil(total / MAX_ROWS));
     grid.style.gridTemplateColumns = `repeat(${cols}, ${BTN_COL_W}px)`;
 
+    // Set modal width to exactly fit the grid columns (col widths + 8px gaps).
+    // Avoids both horizontal overflow and the max-content clipping bug.
+    const gridPixelW   = cols * BTN_COL_W + (cols - 1) * 8;
     const modalContent = document.getElementById('border-assign-modal').querySelector('.modal-content');
-    if (cols > 4) {
-        modalContent.style.width    = 'max-content';
-        modalContent.style.maxWidth = 'calc(100vw - 40px)';
-    } else {
-        modalContent.style.width    = '360px';
-        modalContent.style.maxWidth = '';
-    }
+    modalContent.style.width    = gridPixelW + 'px';
+    modalContent.style.maxWidth = '';
 
     document.getElementById('border-assign-modal').style.display = 'flex';
 };
@@ -345,7 +399,7 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
         if (code.startsWith('Im')) return 'Im';
         if (code.startsWith('As')) return 'As';
         if (code.startsWith('Zh')) return 'Zh';
-        if (code.startsWith('Va')) return 'Va';
+        if (code.startsWith('V'))  return 'V';   // all Vargr polities
         if (code.startsWith('Kk')) return 'Kk';
         if (code.startsWith('Hv')) return 'Hv';
         if (code.startsWith('So')) return 'So';
@@ -361,7 +415,10 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
     borderEls.forEach(el => {
         const allegianceCode = (el.getAttribute('Allegiance') || '').trim();
         const label          = (el.getAttribute('Label')      || '').trim();
-        const groupKey       = label || allegianceCode;
+        // Vargr polities: any V* allegiance code collapses into one "Vargr Extents" slot.
+        const groupKey       = allegianceCode.startsWith('Kk') ? 'Two Thousand Worlds'
+            : allegianceCode.startsWith('V') ? 'Vargr Extents'
+            : (label || allegianceCode);
         if (!groupKey) return;
         const color    = (el.getAttribute('Color')         || '').trim().toLowerCase();
         const labelPos = (el.getAttribute('LabelPosition') || '').trim();
@@ -375,8 +432,8 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
     if (!window.borderDefinitions) window.borderDefinitions = getDefaultBorderDefinitions();
     if (!window.borderPaths)       window.borderPaths       = new Map();
 
-    // ── Process each label/allegiance group ───────────────────────────────
-    byGroup.forEach((items, groupKey) => {
+    // ── Process each label/allegiance group (sorted alphabetically) ──────
+    [...byGroup.entries()].sort(([a], [b]) => a.localeCompare(b)).forEach(([groupKey, items]) => {
         // 1. Find an existing slot already claimed by this group key.
         // Check name (handles label-keyed groups) AND allegianceCodes array (handles
         // code-keyed groups whose name was later changed to an English description).
@@ -530,6 +587,52 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
                     window.hexBorderAssignments.set(_qrToHexId(q, r), def.id);
                 });
                 totalBoundaryCount += wsInter.length;
+
+                // Adjacent-sector fill: this sector has only off-sector codes, meaning
+                // it is completely enclosed territory with no in-sector waypoints.
+                // Fill adjacent sectors (only in directions where off-sector codes were
+                // seen) that have no existing border assignment and contain at least one
+                // matching-allegiance star system — confirming they are the same polity.
+                {
+                    const adjDirs = [];
+                    if (hadColLo && secX > 0)             adjDirs.push({ minQ: (secX-1)*32, maxQ: (secX-1)*32+31, minR: secMinR,         maxR: secMaxR         });
+                    if (hadColHi && secX < gridWidth-1)   adjDirs.push({ minQ: (secX+1)*32, maxQ: (secX+1)*32+31, minR: secMinR,         maxR: secMaxR         });
+                    if (hadRowLo && secY > 0)             adjDirs.push({ minQ: secMinQ,      maxQ: secMaxQ,         minR: (secY-1)*40,     maxR: (secY-1)*40+39  });
+                    if (hadRowHi && secY < gridHeight-1)  adjDirs.push({ minQ: secMinQ,      maxQ: secMaxQ,         minR: (secY+1)*40,     maxR: (secY+1)*40+39  });
+                    adjDirs.forEach(({ minQ, maxQ, minR, maxR }) => {
+                        // Skip if adjacent sector already has any border assignment at all.
+                        for (let aq = minQ; aq <= maxQ; aq++) {
+                            for (let ar = minR; ar <= maxR; ar++) {
+                                if (window.hexBorderAssignments.has(_qrToHexId(aq, ar))) return;
+                            }
+                        }
+                        // Skip unless adjacent sector has matching-allegiance systems AND
+                        // no systems belonging to a different major polity.  Edge sectors
+                        // (e.g. K'trekreer with both Kk and HvFd) must not be whole-filled.
+                        if (window.hexStates && def.allegianceCodes && def.allegianceCodes.length > 0) {
+                            const MAJOR = ['Im','As','Hv','Kk','Va','Zh','So','Dr'];
+                            let hasMatch = false, hasRival = false;
+                            for (const [hId, st] of window.hexStates) {
+                                if (!st || st.type !== 'SYSTEM_PRESENT') continue;
+                                const sc = getHexCoords(hId);
+                                if (!sc || sc.q < minQ || sc.q > maxQ || sc.r < minR || sc.r > maxR) continue;
+                                const norm = _normalizeAlleg((st.allegiance || '').trim());
+                                if (def.allegianceCodes.some(c => _normalizeAlleg(c) === norm)) {
+                                    hasMatch = true;
+                                } else if (MAJOR.includes(norm)) {
+                                    hasRival = true;
+                                    break;
+                                }
+                            }
+                            if (!hasMatch || hasRival) return;
+                        }
+                        for (let aq = minQ; aq <= maxQ; aq++) {
+                            for (let ar = minR; ar <= maxR; ar++) {
+                                window.hexBorderAssignments.set(_qrToHexId(aq, ar), def.id);
+                            }
+                        }
+                    });
+                }
                 return;
             }
             totalBoundaryCount += boundaryHexIds.length;
@@ -679,6 +782,10 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
                         const k = `${nq},${nr}`;
                         if (!visited.has(k)) {
                             visited.add(k);
+                            // Treat hexes already claimed by a different border as walls so
+                            // this fill cannot bleed across a previously established boundary.
+                            const existingId = window.hexBorderAssignments.get(_qrToHexId(nq, nr));
+                            if (existingId !== undefined && existingId !== def.id) return;
                             // Sector boundary is the natural wall for this border's flood-fill.
                             if (nq >= secMinQ && nq <= secMaxQ && nr >= secMinR && nr <= secMaxR) {
                                 queue.push([nq, nr]);
@@ -769,17 +876,18 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
     // seeded from the polygon fill frontier so the expansion is bounded — it can
     // only reach worlds connected to the fill through a chain of same-allegiance
     // neighbors.  This correctly pulls in AsSc / AsWc / AsT3 / ImDd / etc. that
-    // the flood-fill missed, while leaving genuinely isolated worlds (no path
-    // back to the polygon fill) unassigned.
+    // the flood-fill missed, and also reaches into ADJACENT SECTORS so that
+    // cross-sector polities like the Two Thousand Worlds (Kk) correctly absorb
+    // their star systems in neighboring sectors without needing a separate import.
     //
     // _normalizeAlleg handles the major/minor split automatically:
     //   • major polities  → 2-letter code  (AsWc→As, ImDd→Im, VaDr→Va, …)
     //   • minor polities  → full 4-letter  (CaPr stays CaPr, NaHu stays NaHu, …)
     if (window.hexStates) {
-        // Build candidate map: unassigned worlds in this sector with a matching slot.
+        // Build candidate map: ALL unassigned system hexes with a matching slot
+        // (not restricted to slotNum — cross-sector expansion is intentional).
         const candidates = new Map(); // hexId → borderId
         window.hexStates.forEach((state, hexId) => {
-            if (parseInt(hexId.split('-')[0], 10) !== slotNum) return;
             if (!state || state.type !== 'SYSTEM_PRESENT') return;
             const rawAlleg = (state.allegiance || '').trim();
             if (!rawAlleg || rawAlleg === '----') return;
@@ -1215,7 +1323,8 @@ window.importRegionsFromXml = function (regionsElement, slotNum) {
     }
     if (typeof window.renderRulesLedger === 'function') window.renderRulesLedger();
     if (typeof window.reapplyAllRules    === 'function') window.reapplyAllRules();
-    if (typeof window.ensureFreeRegionSlot === 'function') window.ensureFreeRegionSlot();
+    if (typeof window.sortAndTrimRegionDefinitions === 'function') window.sortAndTrimRegionDefinitions();
+    if (typeof window.renderRegionWindow === 'function') window.renderRegionWindow();
 
     return { assigned, skipped };
 };

@@ -1215,6 +1215,8 @@ body {
     justify-content: center;
     align-items: center;
     z-index: 2000;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .modal-content {
@@ -1226,6 +1228,7 @@ body {
     max-width: 90vw;
     box-shadow: 0 0 30px rgba(102, 252, 241, 0.2);
     text-align: center;
+    overflow-x: hidden;
 }
 
 .modal-content h3 {

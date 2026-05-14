@@ -366,6 +366,30 @@
     }
 
     /**
+     * Eccentricity for regular planets (size > 0). Belts always get 0 and must not call this.
+     */
+    function determinePlanetEccentricity(orbitId, sysAge, orbitType, extraDM = 0) {
+        let roll = tRoll2D('Planet Eccentricity Roll');
+        let dm = 0;
+        if (extraDM !== 0) { tDM('Anomaly Type', extraDM); dm += extraDM; }
+        if (orbitType === 'P-Type') { tDM('P-Type Orbit', 1); dm += 1; }
+        if (sysAge > 1.0 && orbitId < 1.0) { tDM('Old Inner System', 1); dm += 1; }
+
+        let sumRoll = roll + dm;
+        let base = 0, fraction = 0;
+        if (sumRoll <= 5) { base = -0.001; fraction = tRoll1D('Ecc Jitter') / 1000; }
+        else if (sumRoll <= 7) { base = 0.000; fraction = tRoll1D('Ecc Jitter') / 200; }
+        else if (sumRoll <= 9) { base = 0.030; fraction = tRoll1D('Ecc Jitter') / 100; }
+        else if (sumRoll === 10) { base = 0.050; fraction = tRoll1D('Ecc Jitter') / 20; }
+        else if (sumRoll === 11) { base = 0.050; fraction = tRoll2D('Ecc Jitter') / 20; }
+        else { base = 0.300; fraction = tRoll2D('Ecc Jitter') / 20; }
+
+        const ecc = Math.max(0, base + fraction);
+        tResult('Planet Eccentricity', ecc.toFixed(3));
+        return ecc;
+    }
+
+    /**
      * Helper for eccentricity.
      */
     function determineEccentricity(isStar, orbitsBeyondFirst, sysAgeGyr, orbitNum, isAsteroid, isPType) {
@@ -1137,9 +1161,7 @@
                     nextOrbit = outermost;
                 }
 
-                const eccRoll = roll2D();
-                const sEcc = Math.max(0, (eccRoll - 2) * 0.05);
-                writeLogLine(`  Slot ${i + 1} Eccentricity: 2D6=${eccRoll} → (${eccRoll}-2)×0.05 = ${sEcc.toFixed(3)}`);
+                const sEcc = determinePlanetEccentricity(nextOrbit, sys.age, 'S-Type');
 
                 slots.push({
                     orbitId: nextOrbit,
@@ -1614,9 +1636,7 @@
 
                 let eccentricity = 0;
                 if (ap.eccentricityDM != null) {
-                    const eccRoll = tRoll2D('Anomalous Eccentricity Roll');
-                    eccentricity = Math.max(0, (eccRoll + ap.eccentricityDM - 2) * 0.05);
-                    tResult('Eccentricity', eccentricity.toFixed(3), `roll ${eccRoll} + DM ${ap.eccentricityDM}`);
+                    eccentricity = determinePlanetEccentricity(ap.orbitId, sys.age, 'P-Type', ap.eccentricityDM);
                 } else {
                     tResult('Eccentricity', 'N/A (Trojan)', 'MgT2E Step 7');
                 }

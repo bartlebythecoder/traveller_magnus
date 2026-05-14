@@ -54,6 +54,10 @@ function initializeInput() {
     const regionHandle = regionWindow.querySelector('.modal-drag-handle');
     makeDraggable(regionWindow, regionHandle);
 
+    const allegianceWindow = document.getElementById('allegiance-window');
+    const allegianceHandle = allegianceWindow.querySelector('.modal-drag-handle');
+    makeDraggable(allegianceWindow, allegianceHandle);
+
     makeDraggable(hexEditor, hexEditorHeader);
 
     // Default Placement
@@ -68,6 +72,9 @@ function initializeInput() {
 
     regionWindow.style.left = '10px';
     regionWindow.style.top = '110px';
+
+    allegianceWindow.style.left = '10px';
+    allegianceWindow.style.top = '110px';
 
     // For Hex Editor (Right-aligned)
     hexEditor.style.right = '400px';
@@ -95,6 +102,7 @@ function initializeInput() {
     setupRouteWindow();
     setupBorderWindow();
     setupRegionWindow();
+    if (typeof setupAllegianceWindow === 'function') setupAllegianceWindow();
 }
 
 // ============================================================================

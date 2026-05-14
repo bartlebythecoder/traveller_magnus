@@ -44,14 +44,15 @@
      * @param {number} sectorX     - Grid X position of this sector.
      * @param {number} sectorY     - Grid Y position of this sector.
      * @param {Map}    coordLookup - Map<"x,y" → slotNum> for all known sectors.
-     * @param {object} [options]   - { importRoutes: bool, importBorders: bool } — defaults to both true.
+     * @param {object} [options]   - { importRoutes: bool, importBorders: bool, importRegions: bool, importAllegiances: bool } — defaults to all true.
      */
     function parseAndAddOtuRoutes(sectorName, xmlText, slotNum, sectorX, sectorY, coordLookup, options) {
         if (!xmlText) return;
 
-        const importRoutes  = !options || options.importRoutes  !== false;
-        const importBorders = !options || options.importBorders !== false;
-        const importRegions = !options || options.importRegions !== false;
+        const importRoutes      = !options || options.importRoutes      !== false;
+        const importBorders     = !options || options.importBorders     !== false;
+        const importRegions     = !options || options.importRegions     !== false;
+        const importAllegiances = !options || options.importAllegiances !== false;
 
         let doc;
         try {
@@ -139,6 +140,18 @@
                 if (result.skipped.length > 0) {
                     console.warn(`[OTU Metadata] "${sectorName}": ${result.skipped.length} region(s) skipped — ${result.skipped.map(r => r.label).join(', ')}`);
                 }
+            }
+        }
+
+        if (importAllegiances) {
+            const allegiancesEl = doc.querySelector('Allegiances');
+            if (allegiancesEl && typeof window.importAllegianceCodesFromXml === 'function') {
+                const bordersElForAlleg = doc.querySelector('Borders');
+                window.importAllegianceCodesFromXml(allegiancesEl, bordersElForAlleg);
+            }
+            // Populate blank-hex allegiance from the borders just imported above
+            if (importBorders && typeof window.autoPopulateAllegianceFromBorders === 'function') {
+                window.autoPopulateAllegianceFromBorders();
             }
         }
     }

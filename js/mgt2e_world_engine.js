@@ -312,6 +312,8 @@
                 } else if (body.type === 'Planetoid Belt') {
                     tSection(`Planetoid Belt Orbit ${body.orbitId !== undefined ? body.orbitId.toFixed(2) : ''}`);
                     body.size = 0;
+                    body.eccentricity = 0;
+                    tResult('Belt Eccentricity', 0, 'Belts have no orbital eccentricity');
                     body.gravity = null;
                     body.mass = null;
                     body.density = null;
@@ -428,10 +430,48 @@
                 satRule = satData.find(r => r.type === ggMap[w.ggType]);
             }
 
+            let hillSphereDM = 0;
+            let hsPDLogged = null;
+            if (w.mass > 0 && w.diamKm > 0) {
+                let starMassSum = 0;
+                if (w.orbitType === 'P-Type') {
+                    for (let s of sys.stars) {
+                        let sOrb = (s.orbitId !== null && s.orbitId !== undefined) ? s.orbitId : 0;
+                        if (sOrb < w.orbitId) starMassSum += (s.mass || 0);
+                    }
+                    if (starMassSum === 0) starMassSum = sys.stars[0].mass || 1;
+                } else {
+                    let pIdx = (w.parentStarIdx !== undefined) ? w.parentStarIdx : 0;
+                    starMassSum = (sys.stars[pIdx] || sys.stars[0]).mass || 1;
+                }
+
+                let planetMassSolar = w.mass * 0.000003;
+                let hsAU = w.au * (1 - (w.eccentricity || 0)) * Math.pow(planetMassSolar / (3 * starMassSum), 1 / 3);
+                hsPDLogged = hsAU * 149597870.9 / w.diamKm;
+                tResult('Hill Sphere Formula', 'HS_AU = AU × (1 − ecc) × (M_planet / (3 × M_star))^(1/3)   →   PD = HS_AU × 149,597,870.9 / diam_km');
+                tResult('Hill Sphere Inputs', `AU=${w.au.toFixed(3)}, ecc=${(w.eccentricity || 0).toFixed(3)}, M_planet=${planetMassSolar.toFixed(6)} M☉, M_star=${starMassSum.toFixed(3)} M☉, diam=${w.diamKm} km`);
+                tResult('Hill Sphere (AU)', hsAU.toFixed(6));
+                tResult('Hill Sphere (Planetary Diameters)', hsPDLogged.toFixed(1));
+
+                if (hsPDLogged < 60) {
+                    hillSphereDM = -1;
+                    tResult('Hill Sphere DM', `${hillSphereDM} per die (Hill Sphere ${hsPDLogged.toFixed(1)} PD < 60 threshold)`);
+                } else {
+                    tResult('Hill Sphere DM', `0 (Hill Sphere ${hsPDLogged.toFixed(1)} PD ≥ 60 threshold)`);
+                }
+            } else {
+                tResult('Hill Sphere DM', 'Skipped (no mass/diameter)');
+            }
+
             if (satRule && satRule.formula) {
                 let parts = satRule.formula.split('D');
                 dmDiceCount = parseInt(parts[0]);
                 let rawMod = parseInt(parts[1] || 0);
+
+                const hillDMTotal = hillSphereDM * dmDiceCount;
+                const hillDMLabel = hsPDLogged !== null
+                    ? `Hill Sphere DM (${hillSphereDM}/die × ${dmDiceCount} dice = ${hillDMTotal}, HS=${hsPDLogged.toFixed(1)} PD)`
+                    : 'Hill Sphere DM (skipped)';
 
                 if (dmDiceCount === 1) qRoll = tRoll1D(qLabel);
                 else if (dmDiceCount === 2) qRoll = tRoll2D(qLabel);
@@ -439,40 +479,19 @@
                 else qRoll = tRoll4D(qLabel);
 
                 qMod += rawMod;
-                tDM(`Formula (${satRule.formula})`, rawMod);
-            }
-            let instability = false;
-            if (w.orbitId < 1.0) instability = true;
+                tDM(`Formula modifier (${satRule.formula})`, rawMod);
 
-            // Adjacency check
-            for (let s of sys.stars) {
-                if (s.orbitId !== null && s.orbitId !== undefined && Math.abs(w.orbitId - s.orbitId) <= 1.0) instability = true;
-            }
-            if (sys.forbiddenZones) {
-                for (let fz of sys.forbiddenZones) {
-                    if (w.orbitId >= fz.min - 1.0 && w.orbitId <= fz.max + 1.0) instability = true;
+                if (hillDMTotal !== 0) {
+                    qMod += hillDMTotal;
+                    tDM(hillDMLabel, hillDMTotal);
                 }
-            }
-
-            if (instability) {
-                tDM('System Instability (Per-Dice Penalty)', -dmDiceCount);
-                qMod -= dmDiceCount;
-            }
-
-            if (sys.primarySpread < 0.1) {
-                tDM('Low System Spread', -1);
-                qMod -= 1;
-            }
-
-            let isDim = ['M', 'L', 'T', 'Y'].includes(primary.sType) && (['V', 'VI'].includes(primary.sClass) || !primary.sClass);
-            if (isDim) {
-                tDM('Dim/Dwarf Primary', -1);
-                qMod -= 1;
             }
 
             let existingMoons = (w.moons || []).length;
             let moonsToGenerate = Math.max(0, qRoll + qMod - existingMoons);
-            
+
+            tResult('Moon Quantity Total', `Roll ${qRoll} + Mods ${qMod} = ${qRoll + qMod}${hsPDLogged !== null && hillSphereDM < 0 ? ` [Hill Sphere DM applied: HS=${hsPDLogged.toFixed(1)} PD]` : ''}`);
+
             if (qRoll + qMod === 0 && existingMoons === 0) {
                 tResult('Result', 'No moons, Adding Ring placeholder');
                 w.rings.push({});
@@ -555,6 +574,13 @@
 
             // 3. Hill Sphere & Roche Limit
             if (w.mass > 0 && w.diamKm > 0) {
+                const _hsPlanetSolar = w.mass * 0.000003;
+                const _hsAU = w.au * (1 - (w.eccentricity || 0)) * Math.pow(_hsPlanetSolar / (3 * primary.mass), 1 / 3);
+                const _hsPDRaw = _hsAU * 149597870.9 / w.diamKm;
+                tResult('Hill Sphere Formula', 'HS_AU = AU × (1 − ecc) × (M_planet / (3 × M_star))^(1/3)   →   PD = HS_AU × 149,597,870.9 / diam_km');
+                tResult('Hill Sphere Inputs', `AU=${w.au.toFixed(3)}, ecc=${(w.eccentricity || 0).toFixed(3)}, M_planet=${_hsPlanetSolar.toFixed(6)} M☉, M_star=${primary.mass.toFixed(3)} M☉, diam=${w.diamKm} km`);
+                tResult('Hill Sphere (AU)', _hsAU.toFixed(6));
+                tResult('Hill Sphere (PD, pre-halving)', _hsPDRaw.toFixed(1));
                 let hillLimit = MgT2EMath.calculateHillSphereLimit(w.au, w.eccentricity, w.mass, primary.mass, w.diamKm);
                 w.hillSpanPd = hillLimit;
                 tResult(`${w.type} Hill Sphere Limit (Diameters/2)`, hillLimit);
@@ -771,12 +797,24 @@
                     let baseRollRaw = tRoll2D('Atmosphere Roll');
                     baseRoll = baseRollRaw - 7 + w.size;
                     tDM('Size Mod', w.size - 7);
-                    if (w.size >= 2 && w.size <= 4) {
-                        tDM('Size Variant (2-4)', -2);
-                        baseRoll -= 2;
-                        writeLogLine(`Base Generation: 2D (${baseRollRaw}) - 7 + Size (${w.size}) - Size Variant (2) = Atm ${baseRoll}`);
+
+                    let gravDM = 0;
+                    if (w.gravity != null) {
+                        if (w.gravity < 0.4) {
+                            gravDM = -2;
+                        } else if (w.gravity <= 0.5) {
+                            gravDM = -1;
+                        }
+                        if (gravDM !== 0) {
+                            tDM(`Gravity DM (${w.gravity.toFixed(3)}G < ${w.gravity < 0.4 ? '0.4' : '0.5'}G threshold)`, gravDM);
+                            baseRoll += gravDM;
+                            writeLogLine(`Base Generation: 2D (${baseRollRaw}) - 7 + Size (${w.size}) + Gravity DM (${gravDM}, gravity=${w.gravity.toFixed(3)}G) = Atm ${baseRoll}`);
+                        } else {
+                            tDM(`Gravity DM (${w.gravity.toFixed(3)}G > 0.5G threshold)`, 0);
+                            writeLogLine(`Base Generation: 2D (${baseRollRaw}) - 7 + Size (${w.size}) + Gravity DM (0, gravity=${w.gravity.toFixed(3)}G) = Atm ${baseRoll}`);
+                        }
                     } else {
-                        writeLogLine(`Base Generation: 2D (${baseRollRaw}) - 7 + Size (${w.size}) = Atm ${baseRoll}`);
+                        writeLogLine(`Base Generation: 2D (${baseRollRaw}) - 7 + Size (${w.size}) [Gravity DM skipped: gravity null] = Atm ${baseRoll}`);
                     }
                 }
 

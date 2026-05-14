@@ -207,16 +207,17 @@
     }
 
     /**
-     * Read the four import-option checkboxes from a modal by element ID.
+     * Read the five import-option checkboxes from a modal by element ID.
      * Falls back to true for any missing element so old call sites stay safe.
      */
-    function readImportOptions(sectorElId, routesElId, bordersElId, regionsElId) {
+    function readImportOptions(sectorElId, routesElId, bordersElId, regionsElId, allegiancesElId) {
         const checked = id => { const el = document.getElementById(id); return el ? el.checked : true; };
         return {
-            importSector:  checked(sectorElId),
-            importRoutes:  checked(routesElId),
-            importBorders: checked(bordersElId),
-            importRegions: checked(regionsElId),
+            importSector:      checked(sectorElId),
+            importRoutes:      checked(routesElId),
+            importBorders:     checked(bordersElId),
+            importRegions:     checked(regionsElId),
+            importAllegiances: checked(allegiancesElId),
         };
     }
 
@@ -290,8 +291,8 @@
      * Pre-flight check, then fetch and import each selected sector in sequence.
      */
     async function runImport() {
-        const opts = readImportOptions('otu-opt-sector', 'otu-opt-routes', 'otu-opt-borders', 'otu-opt-regions');
-        const needsMeta = opts.importRoutes || opts.importBorders || opts.importRegions;
+        const opts = readImportOptions('otu-opt-sector', 'otu-opt-routes', 'otu-opt-borders', 'otu-opt-regions', 'otu-opt-allegiances');
+        const needsMeta = opts.importRoutes || opts.importBorders || opts.importRegions || opts.importAllegiances;
 
         const rows = document.querySelectorAll('.otu-sector-row');
         const selected = [];
@@ -357,9 +358,10 @@
 
                     const text = tsvFromCache ? cached : await fetchAndCacheSector(name);
 
-                    // Delegate to the existing T5 TSV parser with the user-specified slot.
+                    // bulkMode=true: skip per-sector saveHistoryState, rule re-application,
+                    // allegiance scan, draw, and DB write — all done once after the loop.
                     if (typeof importT5Tab === 'function') {
-                        importT5Tab(text, name, slot);
+                        importT5Tab(text, name, slot, true);
                     } else {
                         throw new Error('importT5Tab not available');
                     }
@@ -392,6 +394,15 @@
             }
         }
 
+        // Post-processing deferred from bulkMode importT5Tab calls — run once here.
+        if (opts.importSector) {
+            if (typeof window.autoDiscoverAllegianceCodes === 'function') window.autoDiscoverAllegianceCodes();
+            if (typeof window.renderAllegianceWindow === 'function') window.renderAllegianceWindow();
+            if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+            if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
+            if (window.dbManager) window.dbManager.syncAllHexes();
+        }
+
         if (needsMeta) {
             // Wipe existing Route 1 segments before populating from OTU metadata
             if (opts.importRoutes && window.sectorRoutes) {
@@ -408,6 +419,8 @@
             if (opts.importRoutes && typeof window.ensureFreeRouteSlot === 'function') {
                 if (window.ensureFreeRouteSlot() && window.dbManager) window.dbManager.saveRouteDefinitions();
             }
+            if (typeof window.sortAndTrimBorderDefinitions === 'function') window.sortAndTrimBorderDefinitions();
+            if (typeof window.renderBorderWindow === 'function') window.renderBorderWindow();
         }
 
         requestAnimationFrame(draw);
@@ -448,7 +461,7 @@
      * Called after the user confirms in the modal. Clears all existing data.
      */
     async function executeUniverseImport(opts) {
-        const needsMeta = opts.importRoutes || opts.importBorders || opts.importRegions;
+        const needsMeta = opts.importRoutes || opts.importBorders || opts.importRegions || opts.importAllegiances;
 
         let sectors;
         try {
@@ -499,8 +512,10 @@
 
                     const text = tsvFromCache ? cached : await fetchAndCacheUniverseSector(name);
 
+                    // bulkMode=true: skip per-sector saveHistoryState, rule re-application,
+                    // allegiance scan, draw, and DB write — all done once after the loop.
                     if (typeof importT5Tab === 'function') {
-                        importT5Tab(text, name, defaultSlot);
+                        importT5Tab(text, name, defaultSlot, true);
                     } else {
                         throw new Error('importT5Tab not available');
                     }
@@ -533,12 +548,23 @@
             }
         }
 
+        // Post-processing deferred from bulkMode importT5Tab calls — run once here.
+        if (opts.importSector) {
+            if (typeof window.autoDiscoverAllegianceCodes === 'function') window.autoDiscoverAllegianceCodes();
+            if (typeof window.renderAllegianceWindow === 'function') window.renderAllegianceWindow();
+            if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+            if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
+            if (window.dbManager) window.dbManager.syncAllHexes();
+        }
+
         if (needsMeta && typeof parseAndAddOtuRoutes === 'function') {
             // Parse all routes/borders in a single pass after every sector is loaded,
             // so cross-sector routes can resolve both endpoints correctly.
             for (const m of universeMetas) {
                 parseAndAddOtuRoutes(m.name, m.metaXml, m.slotNum, m.x, m.y, coordLookup, opts);
             }
+            if (typeof window.sortAndTrimBorderDefinitions === 'function') window.sortAndTrimBorderDefinitions();
+            if (typeof window.renderBorderWindow === 'function') window.renderBorderWindow();
         }
 
         requestAnimationFrame(draw);
@@ -567,7 +593,7 @@
         const btnUniverseSubmit = document.getElementById('universe-submit');
         if (btnUniverseSubmit) {
             btnUniverseSubmit.addEventListener('click', () => {
-                const opts = readImportOptions('univ-opt-sector', 'univ-opt-routes', 'univ-opt-borders', 'univ-opt-regions');
+                const opts = readImportOptions('univ-opt-sector', 'univ-opt-routes', 'univ-opt-borders', 'univ-opt-regions', 'univ-opt-allegiances');
                 closeUniverseModal();
                 executeUniverseImport(opts);
             });

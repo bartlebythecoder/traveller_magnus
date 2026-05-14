@@ -44,6 +44,37 @@ window.ensureFreeRegionSlot = function () {
     return true;
 };
 
+// Sort used region slots alphabetically, trim excess free slots to one sentinel,
+// then renumber IDs.  Safe because hex assignments use def.name (state.cluster),
+// not def.id, and regionPaths is also keyed by name.
+window.sortAndTrimRegionDefinitions = function () {
+    if (!window.regionDefinitions || window.regionDefinitions.length === 0) return;
+
+    const usedNames = new Set();
+    hexStates.forEach(state => {
+        if (state.cluster && state.cluster !== '----') usedNames.add(state.cluster);
+    });
+    const isUsed = d => usedNames.has(d.name);
+
+    window.regionDefinitions.sort((a, b) => {
+        const aUsed = isUsed(a);
+        const bUsed = isUsed(b);
+        if (aUsed !== bUsed) return aUsed ? -1 : 1;
+        return a.name.localeCompare(b.name);
+    });
+
+    // Trim to one free sentinel slot.
+    const firstFreeIdx = window.regionDefinitions.findIndex(d => !isUsed(d));
+    if (firstFreeIdx !== -1) {
+        window.regionDefinitions.splice(firstFreeIdx + 1);
+    }
+
+    window.regionDefinitions.forEach((d, i) => { d.id = i + 1; });
+
+    window.ensureFreeRegionSlot();
+    if (window.dbManager) window.dbManager.saveRegionDefinitions?.();
+};
+
 // ── Render the Region Manager window list ─────────────────────────────────────
 window.renderRegionWindow = function () {
     const list = document.getElementById('region-window-list');
@@ -51,17 +82,6 @@ window.renderRegionWindow = function () {
     list.innerHTML = '';
 
     if (!window.regionDefinitions) window.regionDefinitions = getDefaultRegionDefinitions();
-
-    // Ensure minimum 10 slots
-    while (window.regionDefinitions.length < 10) {
-        const nextId = window.regionDefinitions.length + 1;
-        window.regionDefinitions.push({
-            id:      nextId,
-            name:    `Region ${nextId}`,
-            color:   REGION_COLOR_CYCLE[(nextId - 1) % REGION_COLOR_CYCLE.length],
-            visible: true,
-        });
-    }
 
     window.ensureFreeRegionSlot();
 

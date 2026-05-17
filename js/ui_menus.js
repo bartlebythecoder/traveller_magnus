@@ -72,8 +72,6 @@ function setupContextMenu() {
     document.getElementById('ctx-deselect-all').addEventListener('click', deselectAllHexes);
     document.getElementById('ctx-help').addEventListener('click', openHelpModal);
 
-    // Allegiance assignment is handled by allegiances.js (setupAllegianceWindow)
-
     // --- Assign Background Color ---
     function openBgColorModal() {
         document.getElementById('context-menu').classList.remove('visible');
@@ -123,6 +121,42 @@ function setupContextMenu() {
 
     document.getElementById('ctx-assign-border').addEventListener('click', () => {
         if (typeof window.openAssignBorderModal === 'function') window.openAssignBorderModal();
+    });
+
+    // --- Assign Allegiance ---
+    function openAssignAllegianceModal() {
+        document.getElementById('context-menu').classList.remove('visible');
+        const count = selectedHexes.size;
+        if (count === 0) { showToast('No hexes selected.', 2000); return; }
+        document.getElementById('allegiance-assign-count').textContent = count;
+        document.getElementById('allegiance-assign-input').value = '';
+        document.getElementById('allegiance-assign-modal').style.display = 'flex';
+        document.getElementById('allegiance-assign-input').focus();
+    }
+
+    function applyAllegiance() {
+        const code = document.getElementById('allegiance-assign-input').value.trim();
+        if (!code) { showToast('Please enter an allegiance code.', 2000); return; }
+        const hexList = [...selectedHexes];
+        saveHistoryState('Assign Allegiance');
+        hexList.forEach(hexId => {
+            const s = hexStates.get(hexId);
+            if (s) s.allegiance = code;
+        });
+        if (window.dbManager) window.dbManager.saveHexes(hexList);
+        document.getElementById('allegiance-assign-modal').style.display = 'none';
+        showToast(`Allegiance "${code}" assigned to ${hexList.length} system(s).`, 2500);
+        requestAnimationFrame(draw);
+    }
+
+    document.getElementById('ctx-assign-allegiance').addEventListener('click', openAssignAllegianceModal);
+    document.getElementById('btn-allegiance-assign-apply').addEventListener('click', applyAllegiance);
+    document.getElementById('btn-allegiance-assign-cancel').addEventListener('click', () => {
+        document.getElementById('allegiance-assign-modal').style.display = 'none';
+    });
+    document.getElementById('allegiance-assign-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') applyAllegiance();
+        if (e.key === 'Escape') document.getElementById('allegiance-assign-modal').style.display = 'none';
     });
 
     document.getElementById('ctx-assign-bg-color').addEventListener('click', openBgColorModal);
@@ -1070,6 +1104,36 @@ function getRouteSystemList(routeId) {
     return { ordered: false, worlds: allIds };
 }
 
+function exportRouteSystemsCSV(routeId, routeName) {
+    const { ordered, worlds } = getRouteSystemList(routeId);
+    const rows = [['Hex', 'Name']];
+
+    worlds.forEach(hexId => {
+        const state = hexStates.get(hexId);
+        const name  = getWorldName(state) || '(unnamed)';
+        rows.push([hexId, name]);
+    });
+
+    const csv = rows.map(row =>
+        row.map(cell => {
+            const s = String(cell);
+            return (s.includes(',') || s.includes('"') || s.includes('\n'))
+                ? `"${s.replace(/"/g, '""')}"` : s;
+        }).join(',')
+    ).join('\r\n');
+
+    const safe = routeName.replace(/[^a-z0-9_\-]/gi, '_');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `route_${safe}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
 window.openRouteSystemsPanel = function (routeId, routeName) {
     window.closeRouteAutoPanel();
 
@@ -1203,7 +1267,16 @@ function setupRouteWindow() {
             const show = visAllCb.checked;
             (window.routeDefinitions || []).forEach(def => { def.visible = show; });
             if (window.dbManager) window.dbManager.saveRouteDefinitions();
-            document.querySelectorAll('#route-window-list .route-visible-check').forEach(cb => { cb.checked = show; });
+            document.querySelectorAll('#route-window-list .route-row').forEach(row => {
+                const eye = row.querySelector('.route-eye-btn');
+                if (eye) {
+                    eye.classList.toggle('fa-eye', show);
+                    eye.classList.toggle('fa-eye-slash', !show);
+                    eye.style.color = show ? '#45a29e' : '#666';
+                    eye.title = show ? 'Disable route' : 'Enable route';
+                }
+                row.style.opacity = show ? '1' : '0.45';
+            });
             visAllCb.indeterminate = false;
             requestAnimationFrame(draw);
         });
@@ -1440,7 +1513,7 @@ window.ensureFreeRouteSlot = function () {
     });
     const hasFree = window.routeDefinitions.some(d => (segCounts.get(d.id) || 0) === 0);
     if (hasFree) return false;
-    const nextId = Math.max(...window.routeDefinitions.map(d => d.id)) + 1;
+    const nextId = window.routeDefinitions.length > 0 ? Math.max(...window.routeDefinitions.map(d => d.id)) + 1 : 1;
     window.routeDefinitions.push({
         id: nextId, name: `Route ${nextId}`, color: '#00ff00',
         shortcut: null, visible: true, automationRef: null,
@@ -1454,17 +1527,6 @@ window.renderRouteWindow = function () {
     list.innerHTML = '';
     window.closeRouteAutoPanel();
     window.closeRouteSystemsPanel();
-
-    // Ensure exactly 9 definitions; pad with defaults for any missing slots
-    const allDefaults = typeof getDefaultRouteDefinitions === 'function' ? getDefaultRouteDefinitions() : [];
-    let padded = false;
-    while (window.routeDefinitions.length < 9) {
-        const nextId = window.routeDefinitions.length + 1;
-        const def = allDefaults.find(d => d.id === nextId);
-        window.routeDefinitions.push(def || { id: nextId, name: `Route ${nextId}`, color: '#ffffff', shortcut: String(nextId), visible: true, automationRef: null });
-        padded = true;
-    }
-    if (padded && window.dbManager) window.dbManager.saveRouteDefinitions();
 
     if (typeof window.ensureFreeRouteSlot === 'function') {
         if (window.ensureFreeRouteSlot() && window.dbManager) window.dbManager.saveRouteDefinitions();
@@ -1483,22 +1545,23 @@ window.renderRouteWindow = function () {
         const row = document.createElement('div');
         row.className = 'route-row';
         row.dataset.routeId = def.id;
+        row.style.opacity = def.visible ? '1' : '0.45';
         row.innerHTML = `
-            <span class="route-num">#${def.id}</span>
             <span class="route-seg-count ${segClass}" title="${segCount} segment(s)">${segLabel}</span>
             <input type="text" class="route-name-input" value="${def.name.replace(/"/g, '&quot;')}" title="Route name" />
             <input type="color" class="route-color-swatch" value="${def.color}" title="Route color" />
             <input type="text" class="route-shortcut-input" maxlength="1" placeholder="key" value="${def.shortcut || ''}" title="Shortcut key" />
-            <label style="display:flex;align-items:center;gap:3px;color:#c5c6c7;font-size:0.8rem;cursor:pointer;">
-                <input type="checkbox" class="route-visible-check" ${def.visible ? 'checked' : ''}> Vis
-            </label>
+            <i class="fas fa-eye${def.visible ? '' : '-slash'} route-eye-btn" style="color:${def.visible ? '#45a29e' : '#666'};cursor:pointer;font-size:0.8rem;" title="${def.visible ? 'Disable route' : 'Enable route'}"></i>
             <button class="route-clear-btn" title="Remove all map segments for this route">C</button>
+            <i class="fas fa-download route-export-btn" style="color:${segCount > 0 ? '#45a29e' : '#333'};cursor:${segCount > 0 ? 'pointer' : 'default'};font-size:0.8rem;opacity:${segCount > 0 ? '1' : '0.3'};" title="${segCount > 0 ? 'Export systems to CSV' : 'No segments to export'}"></i>
             <button class="route-auto-btn" title="Set up automation for ${def.name}">&#9881; Auto</button>
+            <i class="fas fa-times route-delete-btn" style="color:#ff4500;cursor:pointer;font-size:0.8rem;" title="Delete route '${def.name.replace(/'/g, "&#39;")}'"></i>
         `;
         const nameIn  = row.querySelector('.route-name-input');
         const colorIn = row.querySelector('.route-color-swatch');
         const shortIn = row.querySelector('.route-shortcut-input');
-        const visIn   = row.querySelector('.route-visible-check');
+        const eyeBtn  = row.querySelector('.route-eye-btn');
+        const delBtn  = row.querySelector('.route-delete-btn');
 
         nameIn.addEventListener('change', () => {
             def.name = nameIn.value;
@@ -1521,10 +1584,14 @@ window.renderRouteWindow = function () {
             def.shortcut = typed;
             if (window.dbManager) window.dbManager.saveRouteDefinitions();
         });
-        visIn.addEventListener('change', () => {
-            def.visible = visIn.checked;
+        eyeBtn.addEventListener('click', () => {
+            def.visible = !def.visible;
+            eyeBtn.classList.toggle('fa-eye', def.visible);
+            eyeBtn.classList.toggle('fa-eye-slash', !def.visible);
+            eyeBtn.style.color = def.visible ? '#45a29e' : '#666';
+            eyeBtn.title = def.visible ? 'Disable route' : 'Enable route';
+            row.style.opacity = def.visible ? '1' : '0.45';
             if (window.dbManager) window.dbManager.saveRouteDefinitions();
-            // Keep "Show All" header checkbox in sync
             const allCb = document.getElementById('route-vis-all-check');
             if (allCb) {
                 const defs2 = window.routeDefinitions || [];
@@ -1535,12 +1602,30 @@ window.renderRouteWindow = function () {
             requestAnimationFrame(draw);
         });
 
+        delBtn.addEventListener('click', () => {
+            const segments = (window.sectorRoutes || []).filter(r => r.routeId === def.id);
+            const segMsg = segments.length > 0 ? `\nThis will also clear its ${segments.length} segment(s).` : '';
+            if (!window.confirm(`Delete route "${def.name}"?${segMsg}\n\nThis can be undone with Ctrl+Z.`)) return;
+            saveHistoryState(`Delete ${def.name}`);
+            window.sectorRoutes = (window.sectorRoutes || []).filter(r => r.routeId !== def.id);
+            window.routeDefinitions = (window.routeDefinitions || []).filter(d => d.id !== def.id);
+            if (window.dbManager) { window.dbManager.saveRoutes(); window.dbManager.saveRouteDefinitions(); }
+            requestAnimationFrame(draw);
+            window.renderRouteWindow();
+            showToast(`Deleted route "${def.name}".`, 2000);
+        });
+
         // Segment-count pill: click to view route systems
         const pill = row.querySelector('.route-seg-count');
         if (pill && segCount > 0) {
             pill.style.cursor = 'pointer';
             pill.title = `${segCount} segment(s) — click to view systems`;
             pill.addEventListener('click', () => window.openRouteSystemsPanel(def.id, def.name));
+        }
+
+        const exportBtn = row.querySelector('.route-export-btn');
+        if (exportBtn && segCount > 0) {
+            exportBtn.addEventListener('click', () => exportRouteSystemsCSV(def.id, def.name));
         }
 
         const autoBtn = row.querySelector('.route-auto-btn');
@@ -1712,6 +1797,40 @@ window.updateRouteFilterSummary = function () {
 // SETTINGS PANEL
 // ============================================================================
 
+// Hides borders below window.borderMinSystems and restores them when the
+// threshold drops back below their count.  Uses a hiddenByMinSystems flag to
+// distinguish auto-hidden borders from ones the user manually turned off.
+window.applyBorderMinSystems = function () {
+    if (!window.borderDefinitions || !window.hexBorderAssignments) return;
+    const threshold = window.borderMinSystems || 0;
+    const hexCounts = new Map();
+    window.hexBorderAssignments.forEach(borderId => {
+        hexCounts.set(borderId, (hexCounts.get(borderId) || 0) + 1);
+    });
+    let changed = false;
+    window.borderDefinitions.forEach(def => {
+        const count = hexCounts.get(def.id) || 0;
+        if (threshold > 0 && count < threshold) {
+            if (def.visible) {
+                def.visible = false;
+                def.hiddenByMinSystems = true;
+                changed = true;
+            }
+        } else {
+            if (def.hiddenByMinSystems) {
+                def.visible = true;
+                def.hiddenByMinSystems = false;
+                changed = true;
+            }
+        }
+    });
+    if (changed) {
+        if (window.dbManager) window.dbManager.saveBorderDefinitions?.();
+        if (typeof window.renderBorderWindow === 'function') window.renderBorderWindow();
+        requestAnimationFrame(draw);
+    }
+};
+
 function setupSettingsPanel() {
     const settingsPanel = document.getElementById('settings-panel');
     const settingsToggle = document.getElementById('settings-toggle');
@@ -1851,6 +1970,36 @@ function setupSettingsPanel() {
         localStorage.setItem('traveller_gen_seed', randomSeed);
         showToast(`Seed randomized: ${randomSeed}`, 2000);
     });
+
+    // --- Border minimum systems ---
+    const borderMinInput = document.getElementById('input-border-min-systems');
+    if (borderMinInput) {
+        const saved = localStorage.getItem('traveller_border_min_systems');
+        const initial = saved !== null ? parseInt(saved, 10) : 20;
+        borderMinInput.value = initial;
+        window.borderMinSystems = initial;
+
+        borderMinInput.addEventListener('change', () => {
+            const threshold = Math.max(0, parseInt(borderMinInput.value, 10) || 0);
+            borderMinInput.value = threshold;
+            window.borderMinSystems = threshold;
+            localStorage.setItem('traveller_border_min_systems', String(threshold));
+            window.applyBorderMinSystems();
+        });
+    }
+
+    // --- Border territory fill ---
+    const borderFillToggle = document.getElementById('toggle-border-fill');
+    if (borderFillToggle) {
+        const saved = localStorage.getItem('traveller_border_fill');
+        window.borderFillEnabled = saved === 'true';
+        borderFillToggle.checked = window.borderFillEnabled;
+        borderFillToggle.addEventListener('change', () => {
+            window.borderFillEnabled = borderFillToggle.checked;
+            localStorage.setItem('traveller_border_fill', String(window.borderFillEnabled));
+            requestAnimationFrame(draw);
+        });
+    }
 }
 
 function setupHelpToggle() {

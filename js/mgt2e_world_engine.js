@@ -119,7 +119,7 @@
 
         // 4. Roll Diameter from worldSizeTable
         if (!isManual(body, 'diamKm')) {
-            const sizeKey = String(body.size).toUpperCase();
+            const sizeKey = (typeof body.size === 'number') ? toUWPChar(body.size) : String(body.size).toUpperCase();
             const sizeEntry = MgT2EData.stellar.worldSizeTable.find(e => e.size === sizeKey);
             if (sizeEntry && sizeEntry.minDiameterKm !== null) {
                 const minD = sizeEntry.minDiameterKm;
@@ -2106,7 +2106,7 @@
         let roll = tRoll2D('Eccentricity Roll');
         let dm = typeof isPTypeOrDM === 'number' ? isPTypeOrDM : (isPTypeOrDM ? 2 : 0);
 
-        if (sysAgeGyr > 1.0 && orbitNum < 1.0) { tDM('Old Inner System', 1); dm += 1; }
+        if (sysAgeGyr > 1.0 && orbitNum < 1.0) { tDM('Old Inner System', -1); dm -= 1; }
         if (isAsteroid) { tDM('Belt Body', -1); dm -= 1; }
 
         let sumRoll = roll + dm;

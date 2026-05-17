@@ -44,7 +44,6 @@
     <script src="js/routes.js" defer></script>
     <script src="js/borders.js" defer></script>
     <script src="js/regions.js" defer></script>
-    <script src="js/allegiances.js" defer></script>
     <script src="rules/t5_data.js" defer></script>
     <script src="js/t5_stellar_engine.js" defer></script>
     <script src="js/t5_world_engine.js" defer></script>
@@ -60,6 +59,7 @@
     <script src="js/statistical_auditor.js" defer></script>
     <!-- Modular JavaScript Input Handling -->
     <script src="js/input_init.js" defer></script>
+    <script src="js/system_viewer.js" defer></script>
     <script src="js/canvas_input.js" defer></script>
     <script src="js/keyboard_shortcuts.js" defer></script>
     <script src="js/macro_orchestrator.js" defer></script>
@@ -540,42 +540,6 @@
             margin-top: 2px;
         }
 
-        /* ── Allegiance Manager Window ──────────────────────────────────── */
-        #allegiance-window {
-            width: 430px;
-            padding: 25px;
-            color: #c5c6c7;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            gap: 10px;
-            border: 2px solid #66fcf1;
-            max-height: 85vh;
-            display: flex;
-            flex-direction: column;
-        }
-        #allegiance-window .modal-drag-handle { flex-shrink: 0; }
-        #allegiance-window .palette-content   { flex: 1; min-height: 0; overflow-y: auto; }
-        #allegiance-window .allegiance-window-footer { flex-shrink: 0; }
-        .allegiance-window-footer {
-            display: flex;
-            justify-content: flex-end;
-            padding-top: 8px;
-            border-top: 1px solid rgba(69, 162, 158, 0.4);
-            margin-top: 2px;
-        }
-        .alleg-code-input {
-            width: 40px;
-            flex: none;
-            background: #1a1a2e;
-            border: 1px solid #45a29e;
-            color: #66fcf1;
-            padding: 2px 4px;
-            font-size: 0.82rem;
-            border-radius: 3px;
-            font-family: 'Courier New', monospace;
-            text-align: center;
-        }
-
         /* ── Border Manager Window ───────────────────────────────────────── */
         #border-window {
             width: 390px;
@@ -675,10 +639,9 @@
             border: 1px solid rgba(255,255,255,0.08);
         }
 
-        /* ── Assignment Modal Grids (border, region, allegiance) ────────── */
+        /* ── Assignment Modal Grids (border, region) ────────────────────── */
         #border-assign-grid,
-        #region-assign-grid,
-        #allegiance-assign-grid {
+        #region-assign-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 8px;
@@ -720,9 +683,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above So Below</span></h1>
-            <div class="splash-banner">New: Allegiance Management</div>
+            <div class="splash-banner">New this version: Border Fills; Better OTU Borders</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.10.2</div>
+            <div class="splash-version">v0.10.2.1</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -770,7 +733,7 @@
         <!-- Settings Content -->
         <div class="settings-header">
             <h2 style="margin: 0; color: #66fcf1; font-size: 20px;">Settings</h2>
-            <button id="btn-close-settings" class="btn-close-palette" style="top: 78px; right: 20px;"><i
+            <button id="btn-close-settings" class="btn-close-palette"><i
                     class="fas fa-times"></i></button>
         </div>
 
@@ -791,6 +754,16 @@
         <div class="settings-row">
             <input type="checkbox" id="toggle-borders" checked>
             <label for="toggle-borders">Show Subsector Borders</label>
+        </div>
+        <div class="settings-row" style="display: flex; align-items: center; justify-content: space-between;">
+            <label for="input-border-min-systems" style="font-size: 0.8rem;">Min systems for border visibility</label>
+            <input type="number" id="input-border-min-systems" min="0" value="20"
+                style="width: 55px; padding: 4px 6px; background: #1f2833; border: 1px solid #45a29e; color: #fff;
+                       font-family: 'Courier New', Courier, monospace; font-size: 0.85rem; border-radius: 3px; text-align: right;">
+        </div>
+        <div class="settings-row">
+            <input type="checkbox" id="toggle-border-fill">
+            <label for="toggle-border-fill">Fill border territories</label>
         </div>
         <div class="settings-row">
             <input type="checkbox" id="toggle-print-mode">
@@ -819,6 +792,23 @@
                     style="padding: 0 10px; background: #45a29e; border: none; color: #0b0c10; cursor: pointer; display: flex; align-items: center; justify-content: center;">
                     <i class="fas fa-sync-alt"></i>
                 </button>
+            </div>
+        </div>
+
+        <!-- Generation Options: hidden until next release -->
+        <div id="generation-options-section" style="display: none;">
+            <h4>Generation Options</h4>
+            <div class="settings-row" style="display: flex; align-items: center; justify-content: space-between;">
+                <label for="input-tl-max" style="font-size: 0.8rem;">TL Max</label>
+                <input type="number" id="input-tl-max" min="0" max="33" value="20"
+                    style="width: 55px; padding: 4px 6px; background: #1f2833; border: 1px solid #45a29e; color: #fff;
+                           font-family: 'Courier New', Courier, monospace; font-size: 0.85rem; border-radius: 3px; text-align: right;">
+            </div>
+            <div class="settings-row" style="display: flex; align-items: center; justify-content: space-between;">
+                <label for="input-tl-mod" style="font-size: 0.8rem;">TL Mod</label>
+                <input type="number" id="input-tl-mod" min="-20" max="20" value="0"
+                    style="width: 55px; padding: 4px 6px; background: #1f2833; border: 1px solid #45a29e; color: #fff;
+                           font-family: 'Courier New', Courier, monospace; font-size: 0.85rem; border-radius: 3px; text-align: right;">
             </div>
         </div>
 
@@ -955,11 +945,6 @@
                             style="cursor:pointer; accent-color:#66fcf1;">
                         <span style="color:#c5c6c7; font-size:0.85rem;">Region Data</span>
                     </label>
-                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                        <input type="checkbox" id="otu-opt-allegiances" checked
-                            style="cursor:pointer; accent-color:#66fcf1;">
-                        <span style="color:#c5c6c7; font-size:0.85rem;">Allegiance Data</span>
-                    </label>
                 </div>
             </div>
 
@@ -1015,39 +1000,6 @@
                 This cannot be undone.
             </div>
 
-            <!-- Import options -->
-            <div style="border-top:1px solid #45a29e; border-bottom:1px solid #45a29e; padding:10px 0;">
-                <div style="color:#66fcf1; font-size:0.8rem; margin-bottom:8px;
-                            text-transform:uppercase; letter-spacing:0.05em;">Import Options</div>
-                <div style="display:flex; flex-direction:column; gap:6px;">
-                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                        <input type="checkbox" id="univ-opt-sector" checked
-                            style="cursor:pointer; accent-color:#66fcf1;">
-                        <span style="color:#c5c6c7; font-size:0.85rem;">Sector Data</span>
-                    </label>
-                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                        <input type="checkbox" id="univ-opt-routes" checked
-                            style="cursor:pointer; accent-color:#66fcf1;">
-                        <span style="color:#c5c6c7; font-size:0.85rem;">Route Data</span>
-                    </label>
-                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                        <input type="checkbox" id="univ-opt-borders" checked
-                            style="cursor:pointer; accent-color:#66fcf1;">
-                        <span style="color:#c5c6c7; font-size:0.85rem;">Border Data</span>
-                    </label>
-                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                        <input type="checkbox" id="univ-opt-regions" checked
-                            style="cursor:pointer; accent-color:#66fcf1;">
-                        <span style="color:#c5c6c7; font-size:0.85rem;">Region Data</span>
-                    </label>
-                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                        <input type="checkbox" id="univ-opt-allegiances" checked
-                            style="cursor:pointer; accent-color:#66fcf1;">
-                        <span style="color:#c5c6c7; font-size:0.85rem;">Allegiance Data</span>
-                    </label>
-                </div>
-            </div>
-
             <!-- Action buttons -->
             <div style="display:flex; gap:8px; justify-content:flex-end;">
                 <button id="universe-cancel" class="menu-btn"
@@ -1070,7 +1022,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.10.2</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.10.2.1</span>
             </p>
         </div>
 
@@ -1112,19 +1064,6 @@
 
     </div>
 
-    <!-- Allegiance Assignment Modal -->
-    <div id="allegiance-assign-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content" style="width: 400px; text-align: left;">
-            <h3 style="text-align: center; margin-bottom: 8px;">Assign Allegiance</h3>
-            <p style="color: #c5c6c7; font-size: 0.85rem; margin: 0 0 14px;">
-                Assigning <strong id="allegiance-assign-modal-count" style="color: #66fcf1;"></strong> hex(es) to allegiance:
-            </p>
-            <div id="allegiance-assign-grid"></div>
-            <button id="btn-allegiance-assign-cancel" class="btn-cancel"
-                style="width: 100%; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Cancel</button>
-        </div>
-    </div>
-
     <!-- Region Assignment Modal -->
     <div id="region-assign-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content" style="width: 360px; text-align: left;">
@@ -1156,6 +1095,26 @@
                 <button id="btn-bg-color-clear" class="btn-cancel"
                     style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem; background: #3a1a1a; color: #ff6b6b; border: 1px solid #ff4500;">Clear Background</button>
                 <button id="btn-bg-color-cancel" class="btn-cancel"
+                    style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assign Allegiance Modal -->
+    <div id="allegiance-assign-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="width: 380px; text-align: left;">
+            <h3 style="text-align: center; color: #66fcf1; margin-bottom: 16px;">Assign Allegiance</h3>
+            <p style="color: #c5c6c7; font-size: 0.85rem; margin: 0 0 16px;">
+                Applying to <strong id="allegiance-assign-count" style="color: #66fcf1;"></strong> selected system(s).
+            </p>
+            <input type="text" id="allegiance-assign-input"
+                placeholder="e.g. Im, Na, ----"
+                maxlength="8"
+                style="width: 100%; box-sizing: border-box; padding: 10px 14px; background: #0d1117; border: 1px solid #45a29e; border-radius: 4px; color: #c5c6c7; font-size: 0.95rem; font-family: 'Courier New', monospace; text-align: center; margin-bottom: 20px;" />
+            <div style="display: flex; gap: 10px;">
+                <button id="btn-allegiance-assign-apply" class="btn-save"
+                    style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Assign</button>
+                <button id="btn-allegiance-assign-cancel" class="btn-cancel"
                     style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Cancel</button>
             </div>
         </div>
@@ -1301,12 +1260,11 @@
 
         <button class="context-menu-item" id="ctx-open-filter" onclick="toggleFilterModal()">FILTER CONTROL (F)</button>
         <button class="context-menu-item" id="ctx-open-route-window">ROUTE MANAGER (R)</button>
-        <button class="context-menu-item" id="ctx-open-allegiance-window">ALLEGIANCE MANAGER</button>
         <button class="context-menu-item" id="ctx-open-border-window">BORDER MANAGER (B)</button>
         <button class="context-menu-item" id="ctx-open-region-window">REGION MANAGER (G)</button>
-        <button class="context-menu-item" id="ctx-assign-allegiance">ASSIGN ALLEGIANCE</button>
         <button class="context-menu-item" id="ctx-assign-region">ASSIGN REGION</button>
         <button class="context-menu-item" id="ctx-assign-border">ASSIGN BORDER</button>
+        <button class="context-menu-item" id="ctx-assign-allegiance">ASSIGN ALLEGIANCE</button>
         <button class="context-menu-item" id="ctx-assign-bg-color">ASSIGN BACKGROUND COLOR</button>
 
         <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
@@ -1369,9 +1327,8 @@
                 </div>
                 <div class="editor-row">
                     <label>Allegiance:</label>
-                    <select id="edit-allegiance" style="width: 100%; background: #0b0c10; border: 1px solid #45a29e; color: #66fcf1; font-family: 'Courier New', monospace; font-size: 0.9rem; padding: 3px; border-radius: 3px;">
-                        <option value="----">— None —</option>
-                    </select>
+                    <input type="text" id="edit-allegiance" maxlength="10" placeholder="----"
+                        style="width: 100%; background: #0b0c10; border: 1px solid #45a29e; color: #66fcf1; font-family: 'Courier New', monospace; font-size: 0.9rem; padding: 3px; border-radius: 3px;">
                 </div>
                 <div class="editor-row">
                     <label>Region:</label>
@@ -2155,25 +2112,6 @@
         </div>
         <div class="route-window-footer">
             <button id="btn-close-route-window-footer" class="btn-cancel" style="padding: 4px 12px; font-size: 0.8rem;">Close</button>
-        </div>
-    </div>
-
-    <!-- Allegiance Manager Window -->
-    <div id="allegiance-window" class="draggable-palette">
-        <div class="modal-drag-handle">
-            <h2>Allegiance Manager</h2>
-            <button id="btn-close-allegiance-window" class="btn-close-palette" title="Close"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="palette-content" style="padding: 0;">
-            <div style="display:flex;align-items:center;gap:6px;padding:4px 8px 6px;border-bottom:1px solid #45a29e;">
-                <label style="display:flex;align-items:center;gap:5px;cursor:pointer;color:#c5c6c7;font-size:0.82em;">
-                    <input type="checkbox" id="allegiance-vis-all-check"> Show All Allegiances
-                </label>
-            </div>
-            <div id="allegiance-window-list"></div>
-        </div>
-        <div class="allegiance-window-footer">
-            <button id="btn-close-allegiance-window-footer" class="btn-cancel" style="padding: 4px 12px; font-size: 0.8rem;">Close</button>
         </div>
     </div>
 

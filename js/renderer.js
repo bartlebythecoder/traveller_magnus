@@ -100,24 +100,18 @@ function draw() {
     // LOD: Computed once per frame — gates grid lines, text, and icons below zoom threshold.
     const showText = zoom >= 0.3;
 
-    // Build allegiance color lookup once per frame (hexId -> color for visible allegiances)
-    const visibleAllegianceMap = new Map();
-    if (window.allegianceDefinitions && window.allegianceDefinitions.length > 0 &&
-        window.hexAllegianceAssignments && window.hexAllegianceAssignments.size > 0) {
-        const allegByCode = new Map();
-        window.allegianceDefinitions
-            .filter(d => d.visible !== false)
-            .forEach(d => {
-                if (d.codes && d.codes.length > 0) {
-                    d.codes.forEach(c => allegByCode.set(c, d.color));
-                } else if (d.code) {
-                    allegByCode.set(d.code, d.color); // migration safety
-                }
-            });
-        window.hexAllegianceAssignments.forEach((code, hexId) => {
-            if (!code || code === '----') return;
-            const color = allegByCode.get(code);
-            if (color) visibleAllegianceMap.set(hexId, color);
+    // Build border territory fill lookup once per frame (hexId -> color, when fill is enabled)
+    const visibleBorderFillMap = new Map();
+    if (window.borderFillEnabled &&
+        window.borderDefinitions && window.borderDefinitions.length > 0 &&
+        window.hexBorderAssignments && window.hexBorderAssignments.size > 0) {
+        const borderColorById = new Map();
+        window.borderDefinitions
+            .filter(d => d.visible !== false && d.color)
+            .forEach(d => borderColorById.set(d.id, d.color));
+        window.hexBorderAssignments.forEach((borderId, hexId) => {
+            const color = borderColorById.get(borderId);
+            if (color) visibleBorderFillMap.set(hexId, color);
         });
     }
 
@@ -154,18 +148,18 @@ function draw() {
             // highlight — avoids getHexPath() and all stroke calls for the vast majority of hexes.
             const isSelected = selectedHexes.has(hexId);
             const hasBgFill = window.hexBgFillVisible !== false &&
-                (visibleAllegianceMap.has(hexId) || (stateObj && (stateObj.manualBgColor || (stateObj.custom_ui && stateObj.custom_ui.bgFillColor) || visibleRegionMap.has(hexId))));
+                (visibleBorderFillMap.has(hexId) || (stateObj && (stateObj.manualBgColor || (stateObj.custom_ui && stateObj.custom_ui.bgFillColor) || visibleRegionMap.has(hexId))));
             if (!showText && !isSelected && !hasBgFill) continue;
 
             const path = getHexPath(cx, cy, size);
 
-            // 0a. Allegiance Fill (from Allegiance Manager — covers system and blank hexes)
+            // 0a. Border Territory Fill (when enabled in Settings)
             if (window.hexBgFillVisible !== false) {
-                const allegColor = visibleAllegianceMap.get(hexId);
-                if (allegColor) {
+                const fillColor = visibleBorderFillMap.get(hexId);
+                if (fillColor) {
                     ctx.save();
                     ctx.globalAlpha = 0.2;
-                    ctx.fillStyle = allegColor;
+                    ctx.fillStyle = fillColor;
                     ctx.fill(path);
                     ctx.restore();
                 }

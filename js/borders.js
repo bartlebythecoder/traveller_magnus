@@ -27,26 +27,11 @@ const BORDER_COLOR_CYCLE = [
 
 function getDefaultBorderDefinitions() {
     return [
-        { id:  1, name: 'Border 1',  color: '#e63946', visible: true },
-        { id:  2, name: 'Border 2',  color: '#f4a261', visible: true },
-        { id:  3, name: 'Border 3',  color: '#e9c46a', visible: true },
-        { id:  4, name: 'Border 4',  color: '#2a9d8f', visible: true },
-        { id:  5, name: 'Border 5',  color: '#4cc9f0', visible: true },
-        { id:  6, name: 'Border 6',  color: '#7209b7', visible: true },
-        { id:  7, name: 'Border 7',  color: '#f72585', visible: true },
-        { id:  8, name: 'Border 8',  color: '#06d6a0', visible: true },
-        { id:  9, name: 'Border 9',  color: '#ffffff', visible: true },
-        { id: 10, name: 'Border 10', color: '#ff6b35', visible: true },
-        { id: 11, name: 'Border 11', color: '#b5e48c', visible: true },
-        { id: 12, name: 'Border 12', color: '#0077b6', visible: true },
-        { id: 13, name: 'Border 13', color: '#9d4edd', visible: true },
-        { id: 14, name: 'Border 14', color: '#ffbe0b', visible: true },
-        { id: 15, name: 'Border 15', color: '#d62828', visible: true },
-        { id: 16, name: 'Border 16', color: '#52b788', visible: true },
-        { id: 17, name: 'Border 17', color: '#c77dff', visible: true },
-        { id: 18, name: 'Border 18', color: '#3a86ff', visible: true },
-        { id: 19, name: 'Border 19', color: '#fb8500', visible: true },
-        { id: 20, name: 'Border 20', color: '#a8dadc', visible: true },
+        { id: 1, name: 'Border 1', color: '#e63946', visible: true },
+        { id: 2, name: 'Border 2', color: '#f4a261', visible: true },
+        { id: 3, name: 'Border 3', color: '#e9c46a', visible: true },
+        { id: 4, name: 'Border 4', color: '#2a9d8f', visible: true },
+        { id: 5, name: 'Border 5', color: '#4cc9f0', visible: true },
     ];
 }
 
@@ -159,19 +144,21 @@ window.renderBorderWindow = function () {
         const row = document.createElement('div');
         row.className = 'border-row';
         row.dataset.borderId = def.id;
+        row.style.opacity = def.visible ? '1' : '0.45';
         row.innerHTML = `
-            <span class="border-num">#${def.id}</span>
             <span class="border-hex-count ${hexClass}" title="${hexCount} hex(es)">${hexLabel}</span>
             <input type="text" class="border-name-input" value="${def.name.replace(/"/g, '&quot;')}" title="Border name" />
             <input type="color" class="border-color-swatch" value="${def.color}" title="Border color" />
-            <label class="border-vis-label"><input type="checkbox" class="border-visible-check" ${def.visible ? 'checked' : ''}> Vis</label>
+            <i class="fas fa-eye${def.visible ? '' : '-slash'} border-eye-btn" style="color:${def.visible ? '#45a29e' : '#666'};cursor:pointer;font-size:0.8rem;" title="${def.visible ? 'Disable border' : 'Enable border'}"></i>
             <button class="border-clear-btn" title="Remove all hex assignments for this border">C</button>
+            <i class="fas fa-times border-delete-btn" style="color:#ff4500;cursor:pointer;font-size:0.8rem;" title="Delete border '${def.name.replace(/'/g, "&#39;")}'"></i>
         `;
 
         const nameIn   = row.querySelector('.border-name-input');
         const colorIn  = row.querySelector('.border-color-swatch');
-        const visIn    = row.querySelector('.border-visible-check');
+        const eyeBtn   = row.querySelector('.border-eye-btn');
         const clearBtn = row.querySelector('.border-clear-btn');
+        const delBtn   = row.querySelector('.border-delete-btn');
 
         nameIn.addEventListener('change', () => {
             def.name = nameIn.value;
@@ -184,10 +171,14 @@ window.renderBorderWindow = function () {
             requestAnimationFrame(draw);
         });
 
-        visIn.addEventListener('change', () => {
-            def.visible = visIn.checked;
+        eyeBtn.addEventListener('click', () => {
+            def.visible = !def.visible;
+            eyeBtn.classList.toggle('fa-eye', def.visible);
+            eyeBtn.classList.toggle('fa-eye-slash', !def.visible);
+            eyeBtn.style.color = def.visible ? '#45a29e' : '#666';
+            eyeBtn.title = def.visible ? 'Disable border' : 'Enable border';
+            row.style.opacity = def.visible ? '1' : '0.45';
             if (window.dbManager) window.dbManager.saveBorderDefinitions?.();
-            // Keep "Show All" header checkbox in sync
             const allCb = document.getElementById('border-vis-all-check');
             if (allCb) {
                 const defs2 = window.borderDefinitions || [];
@@ -196,6 +187,27 @@ window.renderBorderWindow = function () {
                 allCb.checked       = vis2 === defs2.length;
             }
             requestAnimationFrame(draw);
+        });
+
+        delBtn.addEventListener('click', () => {
+            const count = hexCounts.get(def.id) || 0;
+            const hexMsg = count > 0 ? `\nThis will also clear its ${count} hex assignment(s).` : '';
+            if (!confirm(`Delete border "${def.name}"?${hexMsg}\n\nThis can be undone with Ctrl+Z.`)) return;
+            saveHistoryState(`Delete ${def.name}`);
+            if (window.hexBorderAssignments) {
+                window.hexBorderAssignments.forEach((bId, hexId) => {
+                    if (bId === def.id) window.hexBorderAssignments.delete(hexId);
+                });
+            }
+            if (window.borderPaths) window.borderPaths.delete(def.id);
+            window.borderDefinitions = (window.borderDefinitions || []).filter(d => d.id !== def.id);
+            if (window.dbManager) {
+                window.dbManager.saveBorderAssignments?.();
+                window.dbManager.saveBorderDefinitions?.();
+            }
+            requestAnimationFrame(draw);
+            window.renderBorderWindow();
+            showToast(`Deleted border "${def.name}".`, 2000);
         });
 
         clearBtn.addEventListener('click', () => {
@@ -393,24 +405,28 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
         return `${sY * gridWidth + sX + 1}-${sub}-${String(lQ + 1).padStart(2, '0')}${String(lR + 1).padStart(2, '0')}`;
     }
 
-    // ── Normalize allegiance for BFS expansion only (major polity family codes) ─
-    // NOT used for grouping <Border> elements — label-first grouping handles that.
-    function _normalizeAlleg(code) {
-        if (code.startsWith('Im')) return 'Im';
-        if (code.startsWith('As')) return 'As';
-        if (code.startsWith('Zh')) return 'Zh';
-        if (code.startsWith('V'))  return 'V';   // all Vargr polities
-        if (code.startsWith('Kk')) return 'Kk';
-        if (code.startsWith('Hv')) return 'Hv';
-        if (code.startsWith('So')) return 'So';
-        return code;
-    }
-
     // ── Group <Border> elements by Label (when present) or raw allegiance ──
     // Label-first: <Border Label="Third Imperium"> and <Border Label="Vegan Autonomous District">
     // each get their own slot even though both carry Im* allegiance codes.
     const borderEls = Array.from(bordersElement.querySelectorAll('Border'));
     const byGroup   = new Map(); // groupKey (label || allegianceCode) → [ {el, allegianceCode, color, labelPos} ]
+
+    // Parse <Stylesheet> for allegiance-keyed colors (e.g. "border.CyUn { color: orange; }").
+    // Used as a fallback when individual <Border> elements have no Color attribute.
+    const stylesheetColors = new Map(); // allegianceCode → resolved hex color
+    {
+        const ssEl = bordersElement.ownerDocument && bordersElement.ownerDocument.querySelector('Stylesheet');
+        if (ssEl) {
+            const cssRe = /border\.(\w+)\s*\{[^}]*color:\s*([^;}\s]+)/g;
+            let m;
+            while ((m = cssRe.exec(ssEl.textContent || '')) !== null) {
+                const code     = m[1];
+                const colorStr = m[2].toLowerCase().trim();
+                const hex      = colorStr.startsWith('#') ? colorStr : BORDER_COLOR_MAP[colorStr];
+                if (hex) stylesheetColors.set(code, hex);
+            }
+        }
+    }
 
     borderEls.forEach(el => {
         const allegianceCode = (el.getAttribute('Allegiance') || '').trim();
@@ -420,7 +436,8 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
             : allegianceCode.startsWith('V') ? 'Vargr Extents'
             : (label || allegianceCode);
         if (!groupKey) return;
-        const color    = (el.getAttribute('Color')         || '').trim().toLowerCase();
+        const rawColor = (el.getAttribute('Color') || '').trim().toLowerCase();
+        const color    = rawColor || stylesheetColors.get(allegianceCode) || '';
         const labelPos = (el.getAttribute('LabelPosition') || '').trim();
         if (!byGroup.has(groupKey)) byGroup.set(groupKey, []);
         byGroup.get(groupKey).push({ el, allegianceCode, color, labelPos });
@@ -432,14 +449,57 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
     if (!window.borderDefinitions) window.borderDefinitions = getDefaultBorderDefinitions();
     if (!window.borderPaths)       window.borderPaths       = new Map();
 
-    // ── Process each label/allegiance group (sorted alphabetically) ──────
-    [...byGroup.entries()].sort(([a], [b]) => a.localeCompare(b)).forEach(([groupKey, items]) => {
+    // ── Classify groups as weak or strong ────────────────────────────────
+    // A group is "weak" when every one of its <Border> elements carries
+    // ShowLabel="false".  These are umbrella/background borders (e.g. JuPr
+    // covering the same territory as JuRu + JuHl in Empty Quarter).  Weak
+    // groups fill first; strong groups overwrite weak hex assignments so the
+    // sub-faction borders always win over the umbrella outline.
+    const weakGroupKeys = new Set();
+    byGroup.forEach((groupItems, key) => {
+        if (groupItems.every(({ el }) => (el.getAttribute('ShowLabel') || '').toLowerCase() === 'false')) {
+            weakGroupKeys.add(key);
+        }
+    });
+    // Track the border slot IDs assigned to weak groups in this import so the
+    // strong-group BFS wall check can treat them as transparent (not walls).
+    const weakBorderIds = new Set();
+
+    const _sortedEntries  = [...byGroup.entries()].sort(([a], [b]) => a.localeCompare(b));
+    const _orderedEntries = [
+        ..._sortedEntries.filter(([k]) =>  weakGroupKeys.has(k)),
+        ..._sortedEntries.filter(([k]) => !weakGroupKeys.has(k)),
+    ];
+
+    // ── Process each label/allegiance group (weak first, then strong) ────
+    _orderedEntries.forEach(([groupKey, items]) => {
+        const isWeak = weakGroupKeys.has(groupKey);
         // 1. Find an existing slot already claimed by this group key.
-        // Check name (handles label-keyed groups) AND allegianceCodes array (handles
-        // code-keyed groups whose name was later changed to an English description).
+        // Four ways to match:
+        //   a) d.name === groupKey  (label-keyed group matches stored name)
+        //   b) d.allegianceCodes.includes(groupKey)  (code-keyed group matches stored codes)
+        //   c) any raw allegiance code from this group's items appears in d.allegianceCodes
+        //      — handles cross-sector borders where one sector's XML uses a Label attribute
+        //      and the other doesn't, causing groupKey to differ while the underlying
+        //      allegiance code is the same.
+        //   d) color-based fallback: same resolved hex color AND slot already has allegiance
+        //      codes — handles cross-sector pairs that use different code schemes (e.g.
+        //      Hinterworlds "CyUn" via Stylesheet vs Leonidae "Cu" via Color attr) but
+        //      consistently use the same color for the same polity.
+        const resolvedColor = (() => {
+            for (const it of items) {
+                if (!it.color) continue;
+                if (it.color.startsWith('#')) return it.color;
+                const mapped = BORDER_COLOR_MAP[it.color];
+                if (mapped) return mapped;
+            }
+            return null;
+        })();
         let def = window.borderDefinitions.find(d =>
             d.name === groupKey ||
-            (d.allegianceCodes && d.allegianceCodes.includes(groupKey))
+            (d.allegianceCodes && d.allegianceCodes.includes(groupKey)) ||
+            (d.allegianceCodes && items.some(it => it.allegianceCode && d.allegianceCodes.includes(it.allegianceCode))) ||
+            (resolvedColor && d.allegianceCodes && d.allegianceCodes.length > 0 && d.color === resolvedColor)
         );
         let isNewSlot = false;
 
@@ -469,7 +529,16 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
             isNewSlot = true;
         }
 
-        // 4. Claim slot if new
+        // 4. Claim slot if new; or upgrade a raw-code name to a richer label when
+        //    the same border is re-encountered via the allegianceCode fallback match.
+        if (!isNewSlot && !isWeak) {
+            // If this slot was previously named after the raw allegiance code and the
+            // current import supplies a human-readable label, upgrade the stored name.
+            const primaryCode = items.length > 0 ? items[0].allegianceCode : null;
+            if (primaryCode && def.name === primaryCode && groupKey !== primaryCode) {
+                def.name = groupKey;
+            }
+        }
         if (isNewSlot) {
             // groupKey is either the Label attribute (human-readable) or the raw
             // allegiance code (when no Label was present).  When it's a raw code,
@@ -492,7 +561,7 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
             if (colorItem) def.color = colorItem.color.startsWith('#') ? colorItem.color : BORDER_COLOR_MAP[colorItem.color];
         }
 
-        // 5. Accumulate raw allegiance codes seen for this group (enables BFS expansion)
+        // 5. Accumulate raw allegiance codes seen for this group (enables slot re-matching on re-import)
         if (!def.allegianceCodes) def.allegianceCodes = [];
         items.forEach(it => {
             if (it.allegianceCode && !def.allegianceCodes.includes(it.allegianceCode)) {
@@ -511,7 +580,6 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
         let totalBoundaryCount = 0;
 
         items.forEach(({ el, allegianceCode: itemAllegCode, labelPos }) => {
-            const seen               = new Set();
             const boundaryHexIds     = [];
             const boundaryCoords     = [];
             const boundaryIsAfterGap = []; // true when off-sector codes preceded this waypoint
@@ -529,7 +597,7 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
             if (!window.borderPaths.has(def.id)) window.borderPaths.set(def.id, []);
             window.borderPaths.get(def.id).push({ rawPath: raw, labelPos, allegianceCode: itemAllegCode });
             raw.split(/\s+/).forEach(code => {
-                if (code.length !== 4 || seen.has(code)) return;
+                if (code.length !== 4) return;
                 // Skip adjacent-sector codes (col 00, col 33+, row 00, row 41+).
                 // TravellerMap XML closes polygons across sector edges using these codes;
                 // the sector boundary itself acts as the natural wall instead.
@@ -544,7 +612,6 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
                     hadGapBefore = true;
                     return;
                 }
-                seen.add(code);
                 const hexId = _hexIdOf(code);
                 const c     = getHexCoords(hexId);
                 if (!c) return;
@@ -587,52 +654,6 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
                     window.hexBorderAssignments.set(_qrToHexId(q, r), def.id);
                 });
                 totalBoundaryCount += wsInter.length;
-
-                // Adjacent-sector fill: this sector has only off-sector codes, meaning
-                // it is completely enclosed territory with no in-sector waypoints.
-                // Fill adjacent sectors (only in directions where off-sector codes were
-                // seen) that have no existing border assignment and contain at least one
-                // matching-allegiance star system — confirming they are the same polity.
-                {
-                    const adjDirs = [];
-                    if (hadColLo && secX > 0)             adjDirs.push({ minQ: (secX-1)*32, maxQ: (secX-1)*32+31, minR: secMinR,         maxR: secMaxR         });
-                    if (hadColHi && secX < gridWidth-1)   adjDirs.push({ minQ: (secX+1)*32, maxQ: (secX+1)*32+31, minR: secMinR,         maxR: secMaxR         });
-                    if (hadRowLo && secY > 0)             adjDirs.push({ minQ: secMinQ,      maxQ: secMaxQ,         minR: (secY-1)*40,     maxR: (secY-1)*40+39  });
-                    if (hadRowHi && secY < gridHeight-1)  adjDirs.push({ minQ: secMinQ,      maxQ: secMaxQ,         minR: (secY+1)*40,     maxR: (secY+1)*40+39  });
-                    adjDirs.forEach(({ minQ, maxQ, minR, maxR }) => {
-                        // Skip if adjacent sector already has any border assignment at all.
-                        for (let aq = minQ; aq <= maxQ; aq++) {
-                            for (let ar = minR; ar <= maxR; ar++) {
-                                if (window.hexBorderAssignments.has(_qrToHexId(aq, ar))) return;
-                            }
-                        }
-                        // Skip unless adjacent sector has matching-allegiance systems AND
-                        // no systems belonging to a different major polity.  Edge sectors
-                        // (e.g. K'trekreer with both Kk and HvFd) must not be whole-filled.
-                        if (window.hexStates && def.allegianceCodes && def.allegianceCodes.length > 0) {
-                            const MAJOR = ['Im','As','Hv','Kk','Va','Zh','So','Dr'];
-                            let hasMatch = false, hasRival = false;
-                            for (const [hId, st] of window.hexStates) {
-                                if (!st || st.type !== 'SYSTEM_PRESENT') continue;
-                                const sc = getHexCoords(hId);
-                                if (!sc || sc.q < minQ || sc.q > maxQ || sc.r < minR || sc.r > maxR) continue;
-                                const norm = _normalizeAlleg((st.allegiance || '').trim());
-                                if (def.allegianceCodes.some(c => _normalizeAlleg(c) === norm)) {
-                                    hasMatch = true;
-                                } else if (MAJOR.includes(norm)) {
-                                    hasRival = true;
-                                    break;
-                                }
-                            }
-                            if (!hasMatch || hasRival) return;
-                        }
-                        for (let aq = minQ; aq <= maxQ; aq++) {
-                            for (let ar = minR; ar <= maxR; ar++) {
-                                window.hexBorderAssignments.set(_qrToHexId(aq, ar), def.id);
-                            }
-                        }
-                    });
-                }
                 return;
             }
             totalBoundaryCount += boundaryHexIds.length;
@@ -667,18 +688,23 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
                     if (boundaryIsAfterGap[nextIdx]) continue;
                     const { q: q1, r: r1 } = boundaryCoords[i];
                     const { q: q2, r: r2 } = boundaryCoords[nextIdx];
-                    const s1   = -q1 - r1;
-                    const s2   = -q2 - r2;
-                    const dist = Math.max(Math.abs(q2 - q1), Math.abs(r2 - r1), Math.abs(s2 - s1));
+                    // Convert even-q offset → cube (matches getHexDistance in core.js)
+                    const cx1 = q1, cz1 = r1 - (q1 - (q1 & 1)) / 2, cy1 = -cx1 - cz1;
+                    const cx2 = q2, cz2 = r2 - (q2 - (q2 & 1)) / 2, cy2 = -cx2 - cz2;
+                    const dist = Math.max(Math.abs(cx2 - cx1), Math.abs(cy2 - cy1), Math.abs(cz2 - cz1));
                     for (let step = 1; step < dist; step++) {
                         const t  = step / dist;
-                        const lq = q1 + (q2 - q1) * t;
-                        const lr = r1 + (r2 - r1) * t;
-                        const ls = s1 + (s2 - s1) * t;
-                        let rq = Math.round(lq), rr = Math.round(lr), rs = Math.round(ls);
-                        const dq = Math.abs(rq - lq), dr = Math.abs(rr - lr), ds = Math.abs(rs - ls);
-                        if (dq > dr && dq > ds) rq = -rr - rs;
-                        else if (dr > ds)       rr = -rq - rs;
+                        const lx = cx1 + (cx2 - cx1) * t;
+                        const ly = cy1 + (cy2 - cy1) * t;
+                        const lz = cz1 + (cz2 - cz1) * t;
+                        let rx = Math.round(lx), ry = Math.round(ly), rz = Math.round(lz);
+                        const dx = Math.abs(rx - lx), dy = Math.abs(ry - ly), dz = Math.abs(rz - lz);
+                        if (dx > dy && dx > dz) rx = -ry - rz;
+                        else if (dy > dz)       ry = -rx - rz;
+                        else                    rz = -rx - ry;
+                        // Convert cube back to even-q offset
+                        const rq = rx;
+                        const rr = rz + (rx - (rx & 1)) / 2;
                         if (rq < secMinQ || rq > secMaxQ || rr < secMinR || rr > secMaxR) continue;
                         const k = `${rq},${rr}`;
                         if (boundaryQR.has(k)) continue;
@@ -733,15 +759,20 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
                 if (csQ !== null) candidateSeeds.push([csQ, csR]);
             }
 
+            // Centroid probe — explores outward from the average waypoint position and
+            // collects ALL non-boundary hexes found (up to the BFS expansion limit).
+            // Trying multiple candidates handles cases where the first non-boundary hex
+            // found is exterior (e.g. CoLp: 3036 leaks, but 3135 found next does not).
             {
                 const avgQ   = Math.round(boundaryCoords.reduce((s, c) => s + c.q, 0) / boundaryCoords.length);
                 const avgR   = Math.round(boundaryCoords.reduce((s, c) => s + c.r, 0) / boundaryCoords.length);
                 const probe  = [[avgQ, avgR]];
                 const probed = new Set([`${avgQ},${avgR}`]);
-                let csQ = null, csR = null;
                 for (let i = 0; i < probe.length; i++) {
                     const [pq, pr] = probe[i];
-                    if (!boundaryQR.has(`${pq},${pr}`)) { csQ = pq; csR = pr; break; }
+                    if (!boundaryQR.has(`${pq},${pr}`)) {
+                        candidateSeeds.push([pq, pr]);
+                    }
                     if (i < 50) {
                         _hexNeighbors(pq, pr).forEach(([nq, nr]) => {
                             const k = `${nq},${nr}`;
@@ -749,7 +780,6 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
                         });
                     }
                 }
-                if (csQ !== null) candidateSeeds.push([csQ, csR]);
             }
 
             // BFS flood-fill with leak detection.
@@ -784,8 +814,11 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
                             visited.add(k);
                             // Treat hexes already claimed by a different border as walls so
                             // this fill cannot bleed across a previously established boundary.
+                            // Exception: strong borders ignore weak assignments from this import
+                            // so they can reclaim territory the umbrella border filled first.
                             const existingId = window.hexBorderAssignments.get(_qrToHexId(nq, nr));
-                            if (existingId !== undefined && existingId !== def.id) return;
+                            if (existingId !== undefined && existingId !== def.id &&
+                                (isWeak || !weakBorderIds.has(existingId))) return;
                             // Sector boundary is the natural wall for this border's flood-fill.
                             if (nq >= secMinQ && nq <= secMaxQ && nr >= secMinR && nr <= secMaxR) {
                                 queue.push([nq, nr]);
@@ -819,7 +852,12 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
             // unvisited hex that produces a non-leaking fill is an isolated pocket that
             // belongs to this border.  Each connected component is processed exactly
             // once — patchedSoFar accumulates all explored hexes so no hex is retried.
-            if (filled) {
+            //
+            // Runs unconditionally: when the main BFS leaked (filled=false) the seed
+            // was placed outside the polygon, but isolated interior pockets still exist
+            // and must be found here.  The touchesSectorEdge guard below prevents the
+            // exterior from being mis-assigned in the open-boundary case.
+            {
                 const patchedSoFar = new Set(boundaryQR);
                 for (let pq = eMinQ + 1; pq <= eMaxQ - 1; pq++) {
                     for (let pr = eMinR + 1; pr <= eMaxR - 1; pr++) {
@@ -862,84 +900,16 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
                         pWall.forEach(k => { if (!boundaryQR.has(k)) patchedSoFar.add(k); });
                     }
                 }
-            }
+            } // end second pass
         });
+
+        // Record this slot as weak so subsequent strong-group BFS can see through it.
+        if (isWeak) weakBorderIds.add(def.id);
 
         if (totalBoundaryCount > 0) {
             assigned.push({ label: groupKey, slotId: def.id, hexCount: totalBoundaryCount });
         }
     });
-
-    // ── Post-import allegiance scan (BFS expansion) ───────────────────────────
-    // After the polygon fills, expand each border outward through unassigned
-    // worlds whose allegiance normalises to the same border slot.  Uses a BFS
-    // seeded from the polygon fill frontier so the expansion is bounded — it can
-    // only reach worlds connected to the fill through a chain of same-allegiance
-    // neighbors.  This correctly pulls in AsSc / AsWc / AsT3 / ImDd / etc. that
-    // the flood-fill missed, and also reaches into ADJACENT SECTORS so that
-    // cross-sector polities like the Two Thousand Worlds (Kk) correctly absorb
-    // their star systems in neighboring sectors without needing a separate import.
-    //
-    // _normalizeAlleg handles the major/minor split automatically:
-    //   • major polities  → 2-letter code  (AsWc→As, ImDd→Im, VaDr→Va, …)
-    //   • minor polities  → full 4-letter  (CaPr stays CaPr, NaHu stays NaHu, …)
-    if (window.hexStates) {
-        // Build candidate map: ALL unassigned system hexes with a matching slot
-        // (not restricted to slotNum — cross-sector expansion is intentional).
-        const candidates = new Map(); // hexId → borderId
-        window.hexStates.forEach((state, hexId) => {
-            if (!state || state.type !== 'SYSTEM_PRESENT') return;
-            const rawAlleg = (state.allegiance || '').trim();
-            if (!rawAlleg || rawAlleg === '----') return;
-            const norm = _normalizeAlleg(rawAlleg);
-            const matchDef = window.borderDefinitions.find(d => {
-                if (!d.allegianceCodes && !d.allegiance) return false;
-                // Priority 1: exact raw allegiance code in slot's known codes
-                if (d.allegianceCodes && d.allegianceCodes.includes(rawAlleg)) return true;
-                // Priority 2: normalized match (e.g. ImSy → Im matches ImDd → Im)
-                if (d.allegianceCodes && d.allegianceCodes.some(c => _normalizeAlleg(c) === norm)) return true;
-                // Priority 3: backwards compat with old single-string allegiance field
-                if (d.allegiance && _normalizeAlleg(d.allegiance) === norm) return true;
-                return false;
-            });
-            if (matchDef && !window.hexBorderAssignments.has(hexId)) {
-                candidates.set(hexId, matchDef.id);
-            }
-        });
-
-        if (candidates.size > 0) {
-            // Seed the BFS with candidates already adjacent to the polygon fill.
-            const queue = [];
-            candidates.forEach((borderId, hexId) => {
-                const c = getHexCoords(hexId);
-                if (!c) return;
-                const seeded = _hexNeighbors(c.q, c.r).some(
-                    ([nq, nr]) => window.hexBorderAssignments.get(_qrToHexId(nq, nr)) === borderId
-                );
-                if (seeded) queue.push(hexId);
-            });
-
-            // BFS: each assigned world unlocks its same-allegiance candidate neighbors.
-            let qi = 0;
-            while (qi < queue.length) {
-                const hexId = queue[qi++];
-                if (window.hexBorderAssignments.has(hexId)) continue; // already handled
-                const borderId = candidates.get(hexId);
-                if (borderId === undefined) continue;
-                window.hexBorderAssignments.set(hexId, borderId);
-                const c = getHexCoords(hexId);
-                if (!c) continue;
-                _hexNeighbors(c.q, c.r).forEach(([nq, nr]) => {
-                    const nId = _qrToHexId(nq, nr);
-                    if (candidates.has(nId) &&
-                        candidates.get(nId) === borderId &&
-                        !window.hexBorderAssignments.has(nId)) {
-                        queue.push(nId);
-                    }
-                });
-            }
-        }
-    }
 
     window.ensureFreeBorderSlot();
     if (typeof window.renderBorderWindow === 'function') {
@@ -1351,7 +1321,16 @@ function setupBorderWindow() {
             const show = visAllCb.checked;
             (window.borderDefinitions || []).forEach(def => { def.visible = show; });
             if (window.dbManager) window.dbManager.saveBorderDefinitions?.();
-            document.querySelectorAll('#border-window-list .border-visible-check').forEach(cb => { cb.checked = show; });
+            document.querySelectorAll('#border-window-list .border-row').forEach(row => {
+                const eye = row.querySelector('.border-eye-btn');
+                if (eye) {
+                    eye.classList.toggle('fa-eye', show);
+                    eye.classList.toggle('fa-eye-slash', !show);
+                    eye.style.color = show ? '#45a29e' : '#666';
+                    eye.title = show ? 'Disable border' : 'Enable border';
+                }
+                row.style.opacity = show ? '1' : '0.45';
+            });
             visAllCb.indeterminate = false;
             requestAnimationFrame(draw);
         });

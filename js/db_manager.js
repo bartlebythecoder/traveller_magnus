@@ -107,14 +107,6 @@
                 window.regionPaths = new Map(appState.regionPaths);
             }
 
-            // Restore allegiance state
-            if (Array.isArray(appState.allegianceDefinitions) && appState.allegianceDefinitions.length > 0) {
-                window.allegianceDefinitions = appState.allegianceDefinitions;
-            }
-            if (Array.isArray(appState.hexAllegianceAssignments)) {
-                window.hexAllegianceAssignments = new Map(appState.hexAllegianceAssignments);
-            }
-
             // Load hex states
             const hexCount = await new Promise((resolve) => {
                 const tx    = db.transaction(STORE_HEX, 'readonly');
@@ -226,8 +218,6 @@
             saveBorderPaths();
             saveRegionDefinitions();
             saveRegionPaths();
-            saveAllegianceDefinitions();
-            saveAllegianceAssignments();
         }, 2000);
     }
 
@@ -384,33 +374,6 @@
     }
 
     // -------------------------------------------------------------------------
-    // Persist allegiance definitions
-    // -------------------------------------------------------------------------
-    async function saveAllegianceDefinitions() {
-        try {
-            const db = await _openDB();
-            const tx = db.transaction(STORE_APP, 'readwrite');
-            tx.objectStore(STORE_APP).put(window.allegianceDefinitions || [], 'allegianceDefinitions');
-        } catch (err) {
-            console.warn('[DB] saveAllegianceDefinitions failed:', err);
-        }
-    }
-
-    // -------------------------------------------------------------------------
-    // Persist hex→allegiance assignments (Map serialised as entries array)
-    // -------------------------------------------------------------------------
-    async function saveAllegianceAssignments() {
-        try {
-            const db      = await _openDB();
-            const tx      = db.transaction(STORE_APP, 'readwrite');
-            const entries = window.hexAllegianceAssignments ? [...window.hexAllegianceAssignments.entries()] : [];
-            tx.objectStore(STORE_APP).put(entries, 'hexAllegianceAssignments');
-        } catch (err) {
-            console.warn('[DB] saveAllegianceAssignments failed:', err);
-        }
-    }
-
-    // -------------------------------------------------------------------------
     // Wipe the entire database.
     // Called before Universe import or when the user starts a new map.
     // -------------------------------------------------------------------------
@@ -444,8 +407,6 @@
         saveBorderPaths,
         saveRegionDefinitions,
         saveRegionPaths,
-        saveAllegianceDefinitions,
-        saveAllegianceAssignments,
         clearDB,
         getTsvCache,
         putTsvCache

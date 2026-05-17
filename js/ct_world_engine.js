@@ -33,12 +33,6 @@ if (typeof module !== 'undefined' && module.exports) {
     planetaryDMs = typeof CT_PLANETARY_DMS !== 'undefined' ? CT_PLANETARY_DMS : {};
 }
 
-// Helper: Convert number to UWP Char (0-15 -> 0-F)
-function toUWPChar(val) {
-    if (val === undefined || val === null || (typeof val === 'number' && isNaN(val))) return '0';
-    if (typeof val === 'string') return val.toUpperCase().substring(0, 1);
-    return Math.floor(val).toString(16).toUpperCase();
-}
 
 /**
  * REUSABLE: GAS GIANT PRESENCE CHECK 

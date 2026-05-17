@@ -179,11 +179,7 @@ function openHexEditor(hexId, e = null) {
     document.getElementById('edit-trade-codes').value = data.tradeCodes ? data.tradeCodes.join(' ') : '';
     document.getElementById('edit-travel-zone').value = data.travelZone || 'Green';
     const allegVal = data.allegiance || stateObj.allegiance || '----';
-    if (typeof window.populateAllegianceDropdown === 'function') {
-        window.populateAllegianceDropdown(allegVal);
-    } else {
-        document.getElementById('edit-allegiance').value = (allegVal === '----') ? '----' : allegVal;
-    }
+    document.getElementById('edit-allegiance').value = (allegVal === '----') ? '' : allegVal;
     if (typeof window.populateRegionDropdown === 'function') {
         window.populateRegionDropdown(stateObj.cluster || '----');
     }
@@ -1768,15 +1764,6 @@ function saveHexEditorChanges() {
     if (pbgData.gasGiantsCount !== undefined) stateObj.gasGiantCount = pbgData.gasGiantsCount;
 
     hexStates.set(editingHexId, stateObj);
-
-    // Sync allegiance assignment map with the edited value
-    if (window.hexAllegianceAssignments) {
-        if (allegiance && allegiance !== '----') {
-            window.hexAllegianceAssignments.set(editingHexId, allegiance);
-        } else {
-            window.hexAllegianceAssignments.delete(editingHexId);
-        }
-    }
 
     requestAnimationFrame(draw);
 

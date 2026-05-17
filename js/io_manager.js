@@ -89,8 +89,6 @@ function setupSaveLoad() {
             borderPaths:             Array.from((window.borderPaths || new Map()).entries()),
             regionDefinitions:       window.regionDefinitions || [],
             regionPaths:             Array.from((window.regionPaths || new Map()).entries()),
-            allegianceDefinitions:   window.allegianceDefinitions || [],
-            hexAllegianceAssignments: Array.from((window.hexAllegianceAssignments || new Map()).entries()),
         };
 
         // Toast before the blocking stringify so the UI doesn't appear frozen
@@ -154,8 +152,6 @@ function setupSaveLoad() {
                         chunkObj.borderPaths             = Array.from((window.borderPaths || new Map()).entries());
                         chunkObj.regionDefinitions       = window.regionDefinitions || [];
                         chunkObj.regionPaths             = Array.from((window.regionPaths || new Map()).entries());
-                        chunkObj.allegianceDefinitions   = window.allegianceDefinitions || [];
-                        chunkObj.hexAllegianceAssignments = Array.from((window.hexAllegianceAssignments || new Map()).entries());
                     }
 
                     triggerDownload(
@@ -311,17 +307,14 @@ async function clearCanvas() {
     window.redoStack         = [];
     selectedHexes.clear();
 
-    // Reset all border/region/allegiance state to defaults
-    window.hexBorderAssignments    = new Map();
-    window.borderPaths             = new Map();
-    window.regionPaths             = new Map();
-    window.hexAllegianceAssignments = new Map();
-    window.borderDefinitions       = (typeof getDefaultBorderDefinitions === 'function') ? getDefaultBorderDefinitions() : [];
-    window.regionDefinitions       = (typeof getDefaultRegionDefinitions === 'function') ? getDefaultRegionDefinitions() : [];
-    window.allegianceDefinitions   = (typeof getDefaultAllegianceDefinitions === 'function') ? getDefaultAllegianceDefinitions() : [];
+    // Reset all border/region state to defaults
+    window.hexBorderAssignments = new Map();
+    window.borderPaths          = new Map();
+    window.regionPaths          = new Map();
+    window.borderDefinitions    = (typeof getDefaultBorderDefinitions === 'function') ? getDefaultBorderDefinitions() : [];
+    window.regionDefinitions    = (typeof getDefaultRegionDefinitions === 'function') ? getDefaultRegionDefinitions() : [];
     if (typeof window.renderBorderWindow === 'function') window.renderBorderWindow();
     if (typeof window.renderRegionWindow === 'function') window.renderRegionWindow();
-    if (typeof window.renderAllegianceWindow === 'function') window.renderAllegianceWindow();
 
     // Re-centre camera on the fresh 7×5 canvas
     centerCameraOnGrid();
@@ -516,28 +509,10 @@ function applyLoadedMapData(parsedData) {
         window.regionPaths          = Array.isArray(parsedData.regionPaths)
             ? new Map(parsedData.regionPaths)
             : new Map();
-        // Restore allegiance state
-        window.allegianceDefinitions = Array.isArray(parsedData.allegianceDefinitions) && parsedData.allegianceDefinitions.length > 0
-            ? parsedData.allegianceDefinitions
-            : (typeof getDefaultAllegianceDefinitions === 'function' ? getDefaultAllegianceDefinitions() : []);
-        while (window.allegianceDefinitions.length < 20) {
-            const nextId = window.allegianceDefinitions.length + 1;
-            const CYCLE = typeof ALLEGIANCE_COLOR_CYCLE !== 'undefined' ? ALLEGIANCE_COLOR_CYCLE : [];
-            window.allegianceDefinitions.push({
-                id: nextId, code: null, name: `Allegiance ${nextId}`,
-                color: CYCLE[(nextId - 1) % CYCLE.length] || '#888888', visible: true,
-            });
-        }
-        window.hexAllegianceAssignments = Array.isArray(parsedData.hexAllegianceAssignments)
-            ? new Map(parsedData.hexAllegianceAssignments)
-            : new Map();
-        // Auto-discover any codes in state.allegiance not yet covered (legacy saves)
-        if (typeof window.autoDiscoverAllegianceCodes === 'function') window.autoDiscoverAllegianceCodes();
 
         if (typeof window.renderBorderWindow === 'function') window.renderBorderWindow();
         if (typeof window.renderRegionWindow === 'function') window.renderRegionWindow();
-        if (typeof window.renderAllegianceWindow === 'function') window.renderAllegianceWindow();
-        if (typeof writeLogLine === 'function') writeLogLine(`JSON Load: Border definitions (${window.borderDefinitions.length}), border assignments (${window.hexBorderAssignments.size}), region definitions (${window.regionDefinitions.length}), allegiance definitions (${window.allegianceDefinitions.length}), allegiance assignments (${window.hexAllegianceAssignments.size}) restored.`);
+        if (typeof writeLogLine === 'function') writeLogLine(`JSON Load: Border definitions (${window.borderDefinitions.length}), border assignments (${window.hexBorderAssignments.size}), region definitions (${window.regionDefinitions.length}) restored.`);
 
         // Priority Rule Capture: Use aesthetics.activeRules if available, else fallback to legacy field
         window.activeFilterRules = parsedData.rules || [];
@@ -1165,6 +1140,7 @@ function setupSectorImporter() {
     if (fileInput) {
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
+            e.target.value = '';
             if (!file) return;
 
             const reader = new FileReader();
@@ -1396,11 +1372,6 @@ function importT5Tab(fileContent, fileName, forcedSectorSlot = null, bulkMode = 
     selectedHexes.clear();
 
     if (!bulkMode) {
-        // Sync allegiance codes, refresh UI, redraw, and persist.
-        // Skipped in bulk mode — the caller does these once after all sectors are loaded.
-        if (typeof window.autoDiscoverAllegianceCodes === 'function') window.autoDiscoverAllegianceCodes();
-        if (typeof window.renderAllegianceWindow === 'function') window.renderAllegianceWindow();
-
         showToast(`Successfully imported ${importCount} worlds into Sector ${sectorNum} (${fallbackSectorSlot})`);
         if (emptyCount > 0) showToast(`Initialized ${emptyCount} empty space hexes in sector bounds.`, 2000);
 
@@ -1465,19 +1436,8 @@ function _buildSectorCoordLookup() {
  * Keys are normalised lowercase color strings, or '__default__' for routes
  * with no Color attribute.  Values are arrays of segment descriptor objects.
  */
-function parseXmlRouteGroups(xmlText) {
-    if (!xmlText) return null;
-    let doc;
-    try {
-        doc = new DOMParser().parseFromString(xmlText, 'application/xml');
-    } catch (e) {
-        console.warn('[XML Import] XML parse failed:', e.message);
-        return null;
-    }
-    if (doc.querySelector('parsererror')) {
-        console.warn('[XML Import] Malformed XML — routes skipped.');
-        return null;
-    }
+function parseXmlRouteGroups(doc) {
+    if (!doc) return null;
 
     const routeEls = doc.querySelectorAll('Route');
     const groups = new Map();
@@ -1643,7 +1603,11 @@ function setupXmlMetadataImporter() {
 
         readFileAsText(file).then(xmlText => {
             let parsedDoc;
-            try { parsedDoc = new DOMParser().parseFromString(xmlText, 'application/xml'); } catch (e) { /* ignore */ }
+            // Strip <DataFile .../> before parsing — its Author attribute sometimes
+            // contains unescaped double quotes (e.g. Jason "Flynn" Kemp) which
+            // cause a hard parse error before the parser reaches <Borders>/<Routes>.
+            const cleanXml = xmlText.replace(/\s*<DataFile\b[^>]*\/>/g, '');
+            try { parsedDoc = new DOMParser().parseFromString(cleanXml, 'application/xml'); } catch (e) { /* ignore */ }
 
             // Border import — runs regardless of whether routes are present
             if (typeof window.importBordersFromXml === 'function') {
@@ -1652,10 +1616,10 @@ function setupXmlMetadataImporter() {
                     const borderResult = window.importBordersFromXml(bordersEl, slotNum);
                     if (borderResult.assigned.length > 0 || borderResult.skipped.length > 0) {
                         const assignedMsg = borderResult.assigned.length > 0
-                            ? `${borderResult.assigned.length} border allegiance(s) imported.`
+                            ? `${borderResult.assigned.length} border(s) imported.`
                             : '';
                         const skippedMsg = borderResult.skipped.length > 0
-                            ? ` ${borderResult.skipped.length} skipped (no free slots): ${borderResult.skipped.map(s => s.allegianceCode).join(', ')}`
+                            ? ` ${borderResult.skipped.length} skipped (no free slots): ${borderResult.skipped.map(s => s.label).join(', ')}`
                             : '';
                         showToast((assignedMsg + skippedMsg).trim(), 4000);
                         if (window.dbManager) {
@@ -1678,19 +1642,11 @@ function setupXmlMetadataImporter() {
                 }
             }
 
-            // Allegiance import — seed names from <Allegiances> then populate hex assignments from borders
-            if (typeof window.importAllegianceCodesFromXml === 'function') {
-                const allegiancesEl = parsedDoc && parsedDoc.querySelector('Allegiances');
-                if (allegiancesEl) window.importAllegianceCodesFromXml(allegiancesEl, bordersEl);
-            }
-            if (typeof window.autoPopulateAllegianceFromBorders === 'function') {
-                window.autoPopulateAllegianceFromBorders();
-            }
             if (typeof window.sortAndTrimBorderDefinitions === 'function') window.sortAndTrimBorderDefinitions();
             if (typeof window.renderBorderWindow === 'function') window.renderBorderWindow();
             requestAnimationFrame(draw);
 
-            const groups = parseXmlRouteGroups(xmlText);
+            const groups = parseXmlRouteGroups(parsedDoc);
             if (groups) _autoAssignXmlRoutes(groups, slotNum);
         }).catch(err => {
             showToast('Error reading XML file.', 3000);

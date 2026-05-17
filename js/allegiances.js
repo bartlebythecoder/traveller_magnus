@@ -20,7 +20,7 @@ const ALLEGIANCE_COLOR_CYCLE = [
 ];
 
 function getDefaultAllegianceDefinitions() {
-    return Array.from({ length: 20 }, (_, i) => ({
+    return Array.from({ length: 5 }, (_, i) => ({
         id:      i + 1,
         codes:   [],
         name:    `Allegiance ${i + 1}`,
@@ -44,7 +44,8 @@ window.ensureFreeAllegianceSlot = function () {
     window.allegianceDefinitions.forEach(_migrateAllegianceDef);
     const free = window.allegianceDefinitions.find(d => d.codes.length === 0);
     if (free) return false;
-    const nextId = Math.max(...window.allegianceDefinitions.map(d => d.id)) + 1;
+    const nextId = window.allegianceDefinitions.length > 0
+        ? Math.max(...window.allegianceDefinitions.map(d => d.id)) + 1 : 1;
     window.allegianceDefinitions.push({
         id:      nextId,
         codes:   [],
@@ -293,21 +294,23 @@ window.renderAllegianceWindow = function () {
         const row = document.createElement('div');
         row.className = 'border-row';
         row.dataset.allegianceId = def.id;
+        row.style.opacity = def.visible ? '1' : '0.45';
         row.innerHTML = `
-            <span class="border-num">#${def.id}</span>
             <span class="border-hex-count ${hexClass}" title="${count} hex(es)">${hexLabel}</span>
             <input type="text" class="alleg-code-input" value="${codesStr.replace(/"/g, '&quot;')}" placeholder="----" title="Allegiance codes (comma-separated, e.g. ImDd, ImSy)" />
             <input type="text" class="border-name-input" value="${def.name.replace(/"/g, '&quot;')}" title="Allegiance name" />
             <input type="color" class="border-color-swatch" value="${def.color}" title="Allegiance color" />
-            <label class="border-vis-label"><input type="checkbox" class="border-visible-check" ${def.visible ? 'checked' : ''}> Vis</label>
+            <i class="fas fa-eye${def.visible ? '' : '-slash'} alleg-eye-btn" style="color:${def.visible ? '#45a29e' : '#666'};cursor:pointer;font-size:0.8rem;" title="${def.visible ? 'Disable allegiance' : 'Enable allegiance'}"></i>
             <button class="border-clear-btn" title="Remove all hex assignments for this allegiance">C</button>
+            <i class="fas fa-times alleg-delete-btn" style="color:#ff4500;cursor:pointer;font-size:0.8rem;" title="Delete allegiance '${def.name.replace(/'/g, "&#39;")}'"></i>
         `;
 
         const codeIn   = row.querySelector('.alleg-code-input');
         const nameIn   = row.querySelector('.border-name-input');
         const colorIn  = row.querySelector('.border-color-swatch');
-        const visIn    = row.querySelector('.border-visible-check');
+        const eyeBtn   = row.querySelector('.alleg-eye-btn');
         const clearBtn = row.querySelector('.border-clear-btn');
+        const delBtn   = row.querySelector('.alleg-delete-btn');
 
         codeIn.addEventListener('change', () => {
             const raw      = codeIn.value.trim();
@@ -361,8 +364,13 @@ window.renderAllegianceWindow = function () {
             requestAnimationFrame(draw);
         });
 
-        visIn.addEventListener('change', () => {
-            def.visible = visIn.checked;
+        eyeBtn.addEventListener('click', () => {
+            def.visible = !def.visible;
+            eyeBtn.classList.toggle('fa-eye', def.visible);
+            eyeBtn.classList.toggle('fa-eye-slash', !def.visible);
+            eyeBtn.style.color = def.visible ? '#45a29e' : '#666';
+            eyeBtn.title = def.visible ? 'Disable allegiance' : 'Enable allegiance';
+            row.style.opacity = def.visible ? '1' : '0.45';
             if (window.dbManager) window.dbManager.saveAllegianceDefinitions?.();
             const allCb = document.getElementById('allegiance-vis-all-check');
             if (allCb) {
@@ -372,6 +380,29 @@ window.renderAllegianceWindow = function () {
                 allCb.checked       = vis2 === defs2.length;
             }
             requestAnimationFrame(draw);
+        });
+
+        delBtn.addEventListener('click', () => {
+            const codeStr = def.codes.length > 0 ? ` (${def.codes.join(', ')})` : '';
+            const hexMsg  = count > 0 ? `\nThis will also clear its ${count} hex assignment(s).` : '';
+            if (!confirm(`Delete allegiance "${def.name}"${codeStr}?${hexMsg}\n\nThis can be undone with Ctrl+Z.`)) return;
+            saveHistoryState(`Delete ${def.name}`);
+            if (window.hexAllegianceAssignments) {
+                window.hexAllegianceAssignments.forEach((c, hexId) => {
+                    if (def.codes.includes(c)) window.hexAllegianceAssignments.delete(hexId);
+                });
+            }
+            hexStates.forEach(state => {
+                if (def.codes.includes(state.allegiance)) state.allegiance = '----';
+            });
+            window.allegianceDefinitions = (window.allegianceDefinitions || []).filter(d => d.id !== def.id);
+            if (window.dbManager) {
+                window.dbManager.saveAllegianceAssignments?.();
+                window.dbManager.saveAllegianceDefinitions?.();
+            }
+            requestAnimationFrame(draw);
+            window.renderAllegianceWindow();
+            showToast(`Deleted allegiance "${def.name}".`, 2000);
         });
 
         clearBtn.addEventListener('click', () => {
@@ -460,6 +491,10 @@ window.openAssignAllegianceModal = function () {
 
     document.getElementById('allegiance-assign-modal-count').textContent = count;
 
+    // Always start at step 1
+    document.getElementById('allegiance-assign-step1').style.display = '';
+    document.getElementById('allegiance-code-step').style.display    = 'none';
+
     const grid = document.getElementById('allegiance-assign-grid');
     grid.innerHTML = '';
 
@@ -489,14 +524,19 @@ window.openAssignAllegianceModal = function () {
     // Only show definitions that have at least one code assigned
     const defs = (window.allegianceDefinitions || getDefaultAllegianceDefinitions()).filter(d => d.codes.length > 0);
     defs.forEach(def => {
+        const multiCode = def.codes.length > 1;
         const btn = document.createElement('button');
         btn.className = 'border-assign-btn';
         btn.title     = `${def.name} (${def.codes.join(', ')})`;
         btn.style.color       = def.color;
         btn.style.borderColor = def.color;
+        // Show "+" badge on the code label for multi-code slots so users know a second step follows
+        const codeLabel = multiCode
+            ? `${def.codes[0]} <span style="opacity:0.6;font-size:0.6rem;">+${def.codes.length - 1}</span>`
+            : def.codes[0];
         btn.innerHTML = `<span class="border-assign-num">#${def.id}</span>`
                       + `<span class="border-assign-name">${def.name}</span>`
-                      + `<span style="font-size:0.65rem;font-family:'Courier New',monospace;opacity:0.75;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;">${def.codes[0]}</span>`;
+                      + `<span style="font-size:0.65rem;font-family:'Courier New',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;">${codeLabel}</span>`;
         btn.addEventListener('click', () => window.confirmAssignAllegiance(def.id));
         grid.appendChild(btn);
     });
@@ -524,10 +564,49 @@ window.openAssignAllegianceModal = function () {
 };
 
 // ── Assign-modal: confirm selection ──────────────────────────────────────────
+// If the chosen slot has multiple codes, show step 2 (code picker) before writing.
+// Otherwise write immediately.
 window.confirmAssignAllegiance = function (allegianceId) {
     const def = (window.allegianceDefinitions || []).find(d => d.id === allegianceId);
     if (!def || def.codes.length === 0) return;
-    const code    = def.codes[0]; // canonical/primary code for this slot
+
+    if (def.codes.length > 1) {
+        _showAllegianceCodeStep(def);
+        return;
+    }
+
+    _writeAllegianceAssignment(def, def.codes[0]);
+};
+
+// Show step 2: a chip for each code in the slot.
+function _showAllegianceCodeStep(def) {
+    document.getElementById('allegiance-assign-step1').style.display = 'none';
+
+    const stepEl = document.getElementById('allegiance-code-step');
+    stepEl.style.display = '';
+    document.getElementById('allegiance-code-step-slotname').textContent = def.name;
+
+    // Resize modal to a comfortable fixed width for the chip row
+    const modalContent = document.getElementById('allegiance-assign-modal').querySelector('.modal-content');
+    modalContent.style.width    = '420px';
+    modalContent.style.maxWidth = '';
+
+    const chips = document.getElementById('allegiance-code-chips');
+    chips.innerHTML = '';
+    def.codes.forEach(code => {
+        const chip = document.createElement('button');
+        chip.className        = 'alleg-code-chip';
+        chip.style.color      = def.color;
+        chip.style.borderColor= def.color;
+        chip.textContent      = code;
+        chip.title            = `Assign code ${code}`;
+        chip.addEventListener('click', () => _writeAllegianceAssignment(def, code));
+        chips.appendChild(chip);
+    });
+}
+
+// Write the assignment for all selected hexes and close the modal.
+function _writeAllegianceAssignment(def, code) {
     const hexList = [...selectedHexes];
     saveHistoryState('Assign Allegiance');
 
@@ -547,7 +626,7 @@ window.confirmAssignAllegiance = function (allegianceId) {
     if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
     requestAnimationFrame(draw);
     showToast(`${hexList.length} hex(es) assigned to "${def.name}" (${code}).`, 2500);
-};
+}
 
 // ── Hex-editor allegiance dropdown ───────────────────────────────────────────
 window.populateAllegianceDropdown = function (currentCode) {
@@ -559,27 +638,32 @@ window.populateAllegianceDropdown = function (currentCode) {
         .slice()
         .sort((a, b) => a.name.localeCompare(b.name))
         .forEach(def => {
-            const opt = document.createElement('option');
-            opt.value       = def.codes[0]; // canonical code stored on save
-            opt.textContent = def.codes.length > 1
-                ? `${def.name} (${def.codes[0]}…)`
-                : `${def.name} (${def.codes[0]})`;
-            sel.appendChild(opt);
+            if (def.codes.length === 1) {
+                const opt = document.createElement('option');
+                opt.value       = def.codes[0];
+                opt.textContent = `${def.name} (${def.codes[0]})`;
+                sel.appendChild(opt);
+            } else {
+                // One option per code so the user can select and preserve the exact 4-digit value
+                def.codes.forEach(code => {
+                    const opt = document.createElement('option');
+                    opt.value       = code;
+                    opt.textContent = `${def.name} — ${code}`;
+                    sel.appendChild(opt);
+                });
+            }
         });
 
     const val = (!currentCode || currentCode === '----') ? '----' : currentCode;
     if (val !== '----') {
-        // Resolve any sub-code (e.g. ImSy) to its slot's canonical code (e.g. ImDd)
-        const matchDef = (window.allegianceDefinitions || []).find(d => d.codes.includes(val));
-        const selectVal = matchDef ? matchDef.codes[0] : val;
-        sel.value = selectVal;
-        // If not found in any option, add a temporary unassigned entry
-        if (sel.value !== selectVal) {
+        sel.value = val;
+        // If the exact code isn't in any slot, add a temporary unassigned entry
+        if (sel.value !== val) {
             const opt = document.createElement('option');
-            opt.value       = selectVal;
-            opt.textContent = `${selectVal} (unassigned)`;
+            opt.value       = val;
+            opt.textContent = `${val} (unassigned)`;
             sel.insertBefore(opt, sel.children[1]);
-            sel.value = selectVal;
+            sel.value = val;
         }
     } else {
         sel.value = '----';
@@ -614,13 +698,37 @@ function setupAllegianceWindow() {
         document.getElementById('allegiance-assign-modal').style.display = 'none';
     });
 
+    const backBtn = document.getElementById('btn-allegiance-code-back');
+    if (backBtn) backBtn.addEventListener('click', () => {
+        document.getElementById('allegiance-code-step').style.display    = 'none';
+        document.getElementById('allegiance-assign-step1').style.display = '';
+        // Restore modal width to match the step-1 grid
+        const grid    = document.getElementById('allegiance-assign-grid');
+        const colDef  = grid.style.gridTemplateColumns || '';
+        const colMatch = colDef.match(/repeat\((\d+)/);
+        if (colMatch) {
+            const cols = parseInt(colMatch[1], 10);
+            const w    = cols * 100 + (cols - 1) * 8;
+            document.getElementById('allegiance-assign-modal').querySelector('.modal-content').style.width = w + 'px';
+        }
+    });
+
     const visAllCb = document.getElementById('allegiance-vis-all-check');
     if (visAllCb) {
         visAllCb.addEventListener('change', () => {
             const show = visAllCb.checked;
             (window.allegianceDefinitions || []).forEach(def => { def.visible = show; });
             if (window.dbManager) window.dbManager.saveAllegianceDefinitions?.();
-            document.querySelectorAll('#allegiance-window-list .border-visible-check').forEach(cb => { cb.checked = show; });
+            document.querySelectorAll('#allegiance-window-list .border-row').forEach(row => {
+                const eye = row.querySelector('.alleg-eye-btn');
+                if (eye) {
+                    eye.classList.toggle('fa-eye', show);
+                    eye.classList.toggle('fa-eye-slash', !show);
+                    eye.style.color = show ? '#45a29e' : '#666';
+                    eye.title = show ? 'Disable allegiance' : 'Enable allegiance';
+                }
+                row.style.opacity = show ? '1' : '0.45';
+            });
             visAllCb.indeterminate = false;
             requestAnimationFrame(draw);
         });

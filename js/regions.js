@@ -13,7 +13,7 @@ const REGION_COLOR_CYCLE = [
 ];
 
 function getDefaultRegionDefinitions() {
-    return Array.from({ length: 10 }, (_, i) => ({
+    return Array.from({ length: 5 }, (_, i) => ({
         id:      i + 1,
         name:    `Region ${i + 1}`,
         color:   REGION_COLOR_CYCLE[i],
@@ -100,19 +100,25 @@ window.renderRegionWindow = function () {
 
         const row = document.createElement('div');
         row.className = 'border-row';
+        row.style.opacity = def.visible ? '1' : '0.45';
         row.dataset.regionId = def.id;
         row.innerHTML = `
-            <span class="border-num">#${def.id}</span>
             <span class="border-hex-count ${hexClass}" title="${hexCount} hex(es)">${hexLabel}</span>
             <input type="text" class="border-name-input" value="${def.name.replace(/"/g, '&quot;')}" title="Region name" />
             <input type="color" class="border-color-swatch" value="${def.color}" title="Region color" />
-            <label class="border-vis-label"><input type="checkbox" class="border-visible-check" ${def.visible ? 'checked' : ''}> Vis</label>
+            <i class="fas fa-eye${def.visible ? '' : '-slash'} region-eye-btn"
+               style="color:${def.visible ? '#45a29e' : '#666'};cursor:pointer;font-size:0.8rem;"
+               title="${def.visible ? 'Disable region' : 'Enable region'}"></i>
             <button class="border-clear-btn" title="Remove all hex assignments for this region">C</button>
+            <i class="fas fa-times region-delete-btn"
+               style="color:#ff4500;cursor:pointer;font-size:0.8rem;"
+               title="Delete region '${def.name.replace(/'/g, "&#39;")}'"></i>
         `;
 
         const nameIn   = row.querySelector('.border-name-input');
         const colorIn  = row.querySelector('.border-color-swatch');
-        const visIn    = row.querySelector('.border-visible-check');
+        const eyeBtn   = row.querySelector('.region-eye-btn');
+        const delBtn   = row.querySelector('.region-delete-btn');
         const clearBtn = row.querySelector('.border-clear-btn');
 
         nameIn.addEventListener('change', () => {
@@ -141,10 +147,14 @@ window.renderRegionWindow = function () {
             requestAnimationFrame(draw);
         });
 
-        visIn.addEventListener('change', () => {
-            def.visible = visIn.checked;
+        eyeBtn.addEventListener('click', () => {
+            def.visible = !def.visible;
+            const vis = def.visible;
+            eyeBtn.className = `fas fa-eye${vis ? '' : '-slash'} region-eye-btn`;
+            eyeBtn.style.color = vis ? '#45a29e' : '#666';
+            eyeBtn.title = vis ? 'Disable region' : 'Enable region';
+            row.style.opacity = vis ? '1' : '0.45';
             if (window.dbManager) window.dbManager.saveRegionDefinitions?.();
-            // Keep "Show All" header checkbox in sync
             const allCb = document.getElementById('region-vis-all-check');
             if (allCb) {
                 const defs2 = window.regionDefinitions || [];
@@ -153,6 +163,29 @@ window.renderRegionWindow = function () {
                 allCb.checked       = vis2 === defs2.length;
             }
             requestAnimationFrame(draw);
+        });
+
+        delBtn.addEventListener('click', () => {
+            const hexMsg = hexCount > 0
+                ? `\nThis will also clear its ${hexCount} hex assignment(s).` : '';
+            if (!confirm(`Delete region "${def.name}"?${hexMsg}\n\nThis can be undone with Ctrl+Z.`)) return;
+            saveHistoryState(`Delete ${def.name}`);
+            hexStates.forEach(state => {
+                if (state.cluster === def.name) state.cluster = '----';
+            });
+            if (window.regionPaths) {
+                window.regionPaths.forEach((val, key) => {
+                    if (key.endsWith(':' + def.name)) window.regionPaths.delete(key);
+                });
+            }
+            window.regionDefinitions = (window.regionDefinitions || []).filter(d => d.id !== def.id);
+            if (window.dbManager) {
+                window.dbManager.saveRegionDefinitions?.();
+                window.dbManager.saveRegionPaths?.();
+            }
+            requestAnimationFrame(draw);
+            window.renderRegionWindow();
+            showToast(`Deleted region "${def.name}".`, 2000);
         });
 
         clearBtn.addEventListener('click', () => {
@@ -362,7 +395,18 @@ function setupRegionWindow() {
             const show = visAllCb.checked;
             (window.regionDefinitions || []).forEach(def => { def.visible = show; });
             if (window.dbManager) window.dbManager.saveRegionDefinitions?.();
-            document.querySelectorAll('#region-window-list .border-visible-check').forEach(cb => { cb.checked = show; });
+            document.querySelectorAll('#region-window-list .border-row').forEach(row => {
+                const regionId = parseInt(row.dataset.regionId, 10);
+                const d = (window.regionDefinitions || []).find(x => x.id === regionId);
+                if (!d) return;
+                const eye = row.querySelector('.region-eye-btn');
+                if (eye) {
+                    eye.className = `fas fa-eye${show ? '' : '-slash'} region-eye-btn`;
+                    eye.style.color = show ? '#45a29e' : '#666';
+                    eye.title = show ? 'Disable region' : 'Enable region';
+                }
+                row.style.opacity = show ? '1' : '0.45';
+            });
             visAllCb.indeterminate = false;
             requestAnimationFrame(draw);
         });

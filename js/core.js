@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.10.2";
-const APP_BANNER = "v0.10.2: New: Allegiance Management";
+const APP_VERSION = "v0.10.2.1";
+const APP_BANNER = "v0.10.2.1: Splashscreen: Alignment and Border Improvements";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -76,7 +76,7 @@ window.routeDefinitions = [];
  */
 function getDefaultRouteDefinitions() {
     return [
-        { id: 1, name: "XBoat Route",     color: "#00ff00", shortcut: "1", visible: true, automationRef: null },
+        { id: 1, name: "XBoat Route",     color: "#016a01", shortcut: "1", visible: true, automationRef: null },
         { id: 2, name: "Trading Route",   color: "#ff0000", shortcut: "2", visible: true, automationRef: null },
         { id: 3, name: "Secondary Route", color: "#ffff00", shortcut: "3", visible: true, automationRef: null },
         { id: 4, name: "Route 4",         color: "#ff8800", shortcut: "4", visible: true, automationRef: null },

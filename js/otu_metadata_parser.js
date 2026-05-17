@@ -44,26 +44,29 @@
      * @param {number} sectorX     - Grid X position of this sector.
      * @param {number} sectorY     - Grid Y position of this sector.
      * @param {Map}    coordLookup - Map<"x,y" → slotNum> for all known sectors.
-     * @param {object} [options]   - { importRoutes: bool, importBorders: bool, importRegions: bool, importAllegiances: bool } — defaults to all true.
+     * @param {object} [options]   - { importRoutes: bool, importBorders: bool, importRegions: bool } — defaults to all true.
      */
     function parseAndAddOtuRoutes(sectorName, xmlText, slotNum, sectorX, sectorY, coordLookup, options) {
         if (!xmlText) return;
 
-        const importRoutes      = !options || options.importRoutes      !== false;
-        const importBorders     = !options || options.importBorders     !== false;
-        const importRegions     = !options || options.importRegions     !== false;
-        const importAllegiances = !options || options.importAllegiances !== false;
+        const importRoutes  = !options || options.importRoutes  !== false;
+        const importBorders = !options || options.importBorders !== false;
+        const importRegions = !options || options.importRegions !== false;
 
+        // Strip <DataFile .../> before parsing — its Author attribute sometimes
+        // contains unescaped double quotes (e.g. Jason "Flynn" Kemp) which
+        // cause a hard parse error before the parser reaches <Borders>/<Routes>.
+        const cleanXml = xmlText.replace(/\s*<DataFile\b[^>]*\/>/g, '');
         let doc;
         try {
-            doc = new DOMParser().parseFromString(xmlText, 'application/xml');
+            doc = new DOMParser().parseFromString(cleanXml, 'application/xml');
         } catch (e) {
             console.warn(`[OTU Metadata] XML parse failed for "${sectorName}": ${e.message}`);
             return;
         }
 
         if (doc.querySelector('parsererror')) {
-            console.warn(`[OTU Metadata] Malformed XML for "${sectorName}" — routes skipped.`);
+            console.warn(`[OTU Metadata] Malformed XML for "${sectorName}" — skipped.`);
             return;
         }
 
@@ -143,17 +146,6 @@
             }
         }
 
-        if (importAllegiances) {
-            const allegiancesEl = doc.querySelector('Allegiances');
-            if (allegiancesEl && typeof window.importAllegianceCodesFromXml === 'function') {
-                const bordersElForAlleg = doc.querySelector('Borders');
-                window.importAllegianceCodesFromXml(allegiancesEl, bordersElForAlleg);
-            }
-            // Populate blank-hex allegiance from the borders just imported above
-            if (importBorders && typeof window.autoPopulateAllegianceFromBorders === 'function') {
-                window.autoPopulateAllegianceFromBorders();
-            }
-        }
     }
 
     window.parseAndAddOtuRoutes = parseAndAddOtuRoutes;

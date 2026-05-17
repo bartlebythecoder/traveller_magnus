@@ -28,18 +28,6 @@
     const META_PREFIX  = 'otu_meta_';
     const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
-    // Derive the travellermap slug for metadata URLs:
-    //   1. Strip leading "The " (case-insensitive)
-    //   2. Remove all non-alphanumeric characters
-    //   3. Take first 4 chars, lowercase
-    function sectorMetadataSlug(name) {
-        return name
-            .replace(/^the\s+/i, '')
-            .replace(/[^a-z0-9]/gi, '')
-            .slice(0, 4)
-            .toLowerCase();
-    }
-
     /**
      * Returns cached TSV text for a sector if it exists and is less than 24 hours old.
      * Returns null on a miss, an expired entry, or any storage error.
@@ -128,14 +116,15 @@
      * Fetches sector metadata XML from travellermap, caches it, and returns the raw text.
      * Non-fatal: logs a warning and returns null on HTTP error so the import continues.
      */
-    async function fetchAndCacheMetadata(name) {
-        const slug = sectorMetadataSlug(name);
-        const url  = `https://travellermap.com/data/${encodeURIComponent(slug)}/metadata`;
+    async function fetchAndCacheMetadata(name, x, y) {
+        const url = (x !== undefined && y !== undefined)
+            ? `https://travellermap.com/api/metadata?sx=${x}&sy=${y}&accept=text/xml`
+            : `https://travellermap.com/api/metadata?sector=${encodeURIComponent(name)}&accept=text/xml`;
         let text;
         try {
             const response = await fetch(url);
             if (!response.ok) {
-                console.warn(`[OTU Importer] Metadata fetch failed for "${name}" (slug: ${slug}): HTTP ${response.status}`);
+                console.warn(`[OTU Importer] Metadata fetch failed for "${name}": HTTP ${response.status}`);
                 return null;
             }
             text = await response.text();
@@ -170,14 +159,15 @@
      * Fetches sector metadata XML and writes it to IndexedDB.
      * Non-fatal: logs a warning and returns null on HTTP error.
      */
-    async function fetchAndCacheUniverseMetadata(name) {
-        const slug = sectorMetadataSlug(name);
-        const url  = `https://travellermap.com/data/${encodeURIComponent(slug)}/metadata`;
+    async function fetchAndCacheUniverseMetadata(name, x, y) {
+        const url = (x !== undefined && y !== undefined)
+            ? `https://travellermap.com/api/metadata?sx=${x}&sy=${y}&accept=text/xml`
+            : `https://travellermap.com/api/metadata?sector=${encodeURIComponent(name)}&accept=text/xml`;
         let text;
         try {
             const response = await fetch(url);
             if (!response.ok) {
-                console.warn(`[OTU Importer] Metadata fetch failed for "${name}" (slug: ${slug}): HTTP ${response.status}`);
+                console.warn(`[OTU Importer] Metadata fetch failed for "${name}": HTTP ${response.status}`);
                 return null;
             }
             text = await response.text();
@@ -207,17 +197,16 @@
     }
 
     /**
-     * Read the five import-option checkboxes from a modal by element ID.
+     * Read the four import-option checkboxes from a modal by element ID.
      * Falls back to true for any missing element so old call sites stay safe.
      */
-    function readImportOptions(sectorElId, routesElId, bordersElId, regionsElId, allegiancesElId) {
+    function readImportOptions(sectorElId, routesElId, bordersElId, regionsElId) {
         const checked = id => { const el = document.getElementById(id); return el ? el.checked : true; };
         return {
-            importSector:      checked(sectorElId),
-            importRoutes:      checked(routesElId),
-            importBorders:     checked(bordersElId),
-            importRegions:     checked(regionsElId),
-            importAllegiances: checked(allegiancesElId),
+            importSector:  checked(sectorElId),
+            importRoutes:  checked(routesElId),
+            importBorders: checked(bordersElId),
+            importRegions: checked(regionsElId),
         };
     }
 
@@ -291,8 +280,8 @@
      * Pre-flight check, then fetch and import each selected sector in sequence.
      */
     async function runImport() {
-        const opts = readImportOptions('otu-opt-sector', 'otu-opt-routes', 'otu-opt-borders', 'otu-opt-regions', 'otu-opt-allegiances');
-        const needsMeta = opts.importRoutes || opts.importBorders || opts.importRegions || opts.importAllegiances;
+        const opts = readImportOptions('otu-opt-sector', 'otu-opt-routes', 'otu-opt-borders', 'otu-opt-regions');
+        const needsMeta = opts.importRoutes || opts.importBorders || opts.importRegions;
 
         const rows = document.querySelectorAll('.otu-sector-row');
         const selected = [];
@@ -341,7 +330,8 @@
             if (match) coordLookup.set(`${match.x},${match.y}`, sectorSlotToNumber(sel.slot));
         });
 
-        const sectorMetas = [];
+        const sectorMetas  = [];
+        const metaFailures = [];
         for (let i = 0; i < selected.length; i++) {
             const { name, slot } = selected[i];
             let tsvFromCache = false;
@@ -381,23 +371,23 @@
 
             if (needsMeta) {
                 // Fetch and cache metadata now, but defer parsing until all sectors are loaded.
+                const sectorInfo = sectors.find(s => s.name === name);
                 let metaXml = getCachedMetadata(name);
                 if (!metaXml) {
                     if (typeof showToast === 'function') showToast(`Fetching metadata for ${name}…`);
-                    metaXml = await fetchAndCacheMetadata(name);
+                    metaXml = await fetchAndCacheMetadata(name, sectorInfo?.x, sectorInfo?.y);
                     if (i < selected.length - 1) await delay(1000);
                 }
-                const sectorInfo = sectors.find(s => s.name === name);
                 if (metaXml && sectorInfo) {
                     sectorMetas.push({ name, metaXml, slotNum: sectorSlotToNumber(slot), x: sectorInfo.x, y: sectorInfo.y });
+                } else if (!metaXml) {
+                    metaFailures.push(name);
                 }
             }
         }
 
         // Post-processing deferred from bulkMode importT5Tab calls — run once here.
         if (opts.importSector) {
-            if (typeof window.autoDiscoverAllegianceCodes === 'function') window.autoDiscoverAllegianceCodes();
-            if (typeof window.renderAllegianceWindow === 'function') window.renderAllegianceWindow();
             if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
             if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
             if (window.dbManager) window.dbManager.syncAllHexes();
@@ -411,9 +401,11 @@
 
             // Parse all routes/borders in a single pass after every sector is loaded,
             // so cross-sector routes can resolve both endpoints correctly.
+            // Yield between sectors to keep the tab responsive.
             if (typeof parseAndAddOtuRoutes === 'function') {
                 for (const m of sectorMetas) {
                     parseAndAddOtuRoutes(m.name, m.metaXml, m.slotNum, m.x, m.y, coordLookup, opts);
+                    await delay(0);
                 }
             }
             if (opts.importRoutes && typeof window.ensureFreeRouteSlot === 'function') {
@@ -424,6 +416,12 @@
         }
 
         requestAnimationFrame(draw);
+
+        if (metaFailures.length > 0 && typeof showToast === 'function') {
+            const preview = metaFailures.slice(0, 3).join(', ') + (metaFailures.length > 3 ? `… (+${metaFailures.length - 3} more)` : '');
+            showToast(`${metaFailures.length} metadata fetch(es) failed (no borders/routes): ${preview}`, 6000);
+            console.warn(`[Imperium Import] Metadata fetch failed for: ${metaFailures.join(', ')}`);
+        }
     }
 
     // =========================================================================
@@ -461,7 +459,7 @@
      * Called after the user confirms in the modal. Clears all existing data.
      */
     async function executeUniverseImport(opts) {
-        const needsMeta = opts.importRoutes || opts.importBorders || opts.importRegions || opts.importAllegiances;
+        const needsMeta = opts.importRoutes || opts.importBorders || opts.importRegions;
 
         let sectors;
         try {
@@ -474,13 +472,21 @@
         // Wipe IndexedDB before clearing memory so no stale data remains.
         if (window.dbManager) await window.dbManager.clearDB();
 
-        // Resize canvas to 16×8 and clear all in-memory state.
+        // Resize canvas to 16×8 and clear all in-memory state (mirrors clearCanvas).
         gridWidth  = 16;
         gridHeight = 8;
         hexStates.clear();
-        window.sectorRoutes = [];
-        window.undoStack    = [];
-        window.redoStack    = [];
+        window.sectorNames        = {};
+        window.sectorRoutes       = [];
+        window.routeDefinitions   = (typeof getDefaultRouteDefinitions === 'function') ? getDefaultRouteDefinitions() : [];
+        window.undoStack          = [];
+        window.redoStack          = [];
+        selectedHexes.clear();
+        window.hexBorderAssignments = new Map();
+        window.borderPaths          = new Map();
+        window.regionPaths          = new Map();
+        window.borderDefinitions    = (typeof getDefaultBorderDefinitions === 'function') ? getDefaultBorderDefinitions() : [];
+        window.regionDefinitions    = (typeof getDefaultRegionDefinitions === 'function') ? getDefaultRegionDefinitions() : [];
 
         centerCameraOnGrid();
         requestAnimationFrame(draw);
@@ -496,6 +502,7 @@
         sectors.forEach(s => coordLookup.set(`${s.x},${s.y}`, parseInt(s.defaultSlot, 10)));
 
         const universeMetas = [];
+        const metaFailures = [];
         for (let i = 0; i < sectors.length; i++) {
             const { name, defaultSlot, x, y } = sectors[i];
             let tsvFromCache = false;
@@ -539,19 +546,19 @@
                 let metaXml = await getCachedUniverseMetadata(name);
                 if (!metaXml) {
                     if (typeof showToast === 'function') showToast(`Fetching metadata for ${name}…`);
-                    metaXml = await fetchAndCacheUniverseMetadata(name);
+                    metaXml = await fetchAndCacheUniverseMetadata(name, x, y);
                     if (i < sectors.length - 1) await delay(1000);
                 }
                 if (metaXml) {
                     universeMetas.push({ name, metaXml, slotNum: parseInt(defaultSlot, 10), x, y });
+                } else if (needsMeta) {
+                    metaFailures.push(name);
                 }
             }
         }
 
         // Post-processing deferred from bulkMode importT5Tab calls — run once here.
         if (opts.importSector) {
-            if (typeof window.autoDiscoverAllegianceCodes === 'function') window.autoDiscoverAllegianceCodes();
-            if (typeof window.renderAllegianceWindow === 'function') window.renderAllegianceWindow();
             if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
             if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
             if (window.dbManager) window.dbManager.syncAllHexes();
@@ -560,19 +567,29 @@
         if (needsMeta && typeof parseAndAddOtuRoutes === 'function') {
             // Parse all routes/borders in a single pass after every sector is loaded,
             // so cross-sector routes can resolve both endpoints correctly.
+            // Yield to the browser between sectors to keep the tab responsive.
+            if (typeof showToast === 'function') showToast(`Processing metadata for ${universeMetas.length} sectors…`);
             for (const m of universeMetas) {
                 parseAndAddOtuRoutes(m.name, m.metaXml, m.slotNum, m.x, m.y, coordLookup, opts);
+                await delay(0);
             }
             if (typeof window.sortAndTrimBorderDefinitions === 'function') window.sortAndTrimBorderDefinitions();
             if (typeof window.renderBorderWindow === 'function') window.renderBorderWindow();
         }
 
+        if (typeof window.renderBorderWindow === 'function') window.renderBorderWindow();
+        if (typeof window.renderRegionWindow === 'function') window.renderRegionWindow();
         requestAnimationFrame(draw);
 
-        const summary = errorCount > 0
+        let summary = errorCount > 0
             ? `Universe import complete. ${errorCount} sector(s) failed — see console for details.`
             : `Universe import complete! ${sectors.length} sector(s) loaded.`;
-        if (typeof showToast === 'function') showToast(summary, 4000);
+        if (metaFailures.length > 0) {
+            const preview = metaFailures.slice(0, 3).join(', ') + (metaFailures.length > 3 ? `… (+${metaFailures.length - 3} more)` : '');
+            summary += ` ${metaFailures.length} metadata fetch(es) failed (no borders/routes): ${preview}`;
+            console.warn(`[Universe Import] Metadata fetch failed for: ${metaFailures.join(', ')}`);
+        }
+        if (typeof showToast === 'function') showToast(summary, 6000);
     }
 
     /** Wire up all event listeners once the DOM is ready. */
@@ -593,9 +610,13 @@
         const btnUniverseSubmit = document.getElementById('universe-submit');
         if (btnUniverseSubmit) {
             btnUniverseSubmit.addEventListener('click', () => {
-                const opts = readImportOptions('univ-opt-sector', 'univ-opt-routes', 'univ-opt-borders', 'univ-opt-regions', 'univ-opt-allegiances');
                 closeUniverseModal();
-                executeUniverseImport(opts);
+                executeUniverseImport({
+                    importSector:  true,
+                    importRoutes:  true,
+                    importBorders: true,
+                    importRegions: true,
+                });
             });
         }
 

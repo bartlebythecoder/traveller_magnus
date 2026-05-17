@@ -1,4 +1,4 @@
-# As Above, So Below (v0.10.2)
+# As Above, So Below (v0.10.2.1)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -62,7 +62,18 @@ Want to replace any of these sectors with your own file?
 ---
 ## 📜 Changelog
 
-### [v0.10.2] - In Progress
+### [v0.10.2.1] - In Progress
+1. **Allegiances:**  Removed Allegiance Manager (added in v0.10.2.1 because Travellermap borders do not syncronize with Travellermap allegiances the way I assumed they did)
+2. **Borders:** Redesigned border logic to better match travellermap requirements
+3. **Borders:** Added border-fill option (replicates what Allegiance Manager was trying to do)
+4. **Borders:** Added setting for minimum systems required to show borders (0 = show all borders)
+5. **Import Universe:** Refactored Import process to improve upon v0.10.2
+6. **Import Universe:** Removed options allowing partial imports, forced system to clean canvas for all Import Universe functions
+7. **Mongoose Engine:** Fixed bug missing diameter and mass for planets > size 9
+8. **Mongoose Engine:** Fixed bug displaying TL > F as 10
+9. **Routes:** Added feature to download route details
+
+### [v0.10.2] - 2026-05-14
 1. **Allegiances:**  Added Allegiance Manager
 2. **Import Universe:** Improved Import time by refactoring processing and eliminating redundant rendering
 3. **Mongoose Engine:**  Corrected planetary eccentricity calculation to match text

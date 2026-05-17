@@ -28,7 +28,7 @@ Each row in the Route Window represents one route slot:
 
 | Column | What it does |
 |---|---|
-| **#** | Fixed slot number (1–9). Slot #1 is the dedicated X-Boat slot. |
+| **#** | Fixed slot number (1–9). Default shortcuts 1–9 are pre-assigned but can be changed. |
 | **Segment count pill** | Shows how many map segments this route currently has. A dash (—) means empty. Click the pill to open the **Systems Panel** listing all worlds on this route. |
 | **Name field** | Editable label. Changes are saved automatically. |
 | **Colour swatch** | Click to pick the colour routes in this slot are drawn in. |
@@ -36,6 +36,7 @@ Each row in the Route Window represents one route slot:
 | **Vis checkbox** | Toggles route visibility on the map without deleting segments. |
 | **C (Clear)** | Removes all map segments for this slot. Can be undone with **Ctrl+Z**. |
 | **⚙ Auto** | Opens the Automation Panel where you choose a generation method and run it. |
+| **× (Delete)** | Deletes the slot and all its segments entirely. Can be undone with **Ctrl+Z**. |
 
 ### The Automation Panel
 
@@ -86,8 +87,6 @@ The **Filter** (opened with `f` or via the right-click menu) controls which worl
 ### 3.1 X-Boat Routes
 
 **What it does:** Automatically generates an interstellar communication network across all populated worlds in the sector, following the Traveller 5 Importance Extension (Ix) rules. High-importance worlds become the backbone nodes; BFS fills in the connecting hops.
-
-**Note:  In current version this always writes to Slot #1, regardless of which slot's ⚙ Auto button you used.** The X-Boat type has a hardcoded route ID — even if you open the Automation Panel from Slot #6 and choose X-Boat, the segments are assigned to Slot #1. The toast after generation will confirm this ("added to Route #1"). Generating X-Boat routes clears all existing Xboat segments but leaves all other slots untouched.  This will be changed in an upcoming release.
 
 **When to use it:** When you want a canonical, rules-based communication spine for your sector without manually placing any routes.
 

@@ -1,11 +1,21 @@
 # Changelog
+### [v0.10.2.1] - In Progress
+1. **Allegiances:**  Removed Allegiance Manager (added in v0.10.2.1 because Travellermap borders do not syncronize with Travellermap allegiances the way I assumed they did)
+2. **Borders:** Redesigned border logic to better match travellermap requirements
+3. **Borders:** Added border-fill option (replicates what Allegiance Manager was trying to do)
+4. **Borders:** Added setting for minimum systems required to show borders (0 = show all borders)
+5. **Import Universe:** Refactored Import process to improve upon v0.10.2
+6. **Import Universe:** Removed options allowing partial imports, forced system to clean canvas for all Import Universe functions
+7. **Mongoose Engine:** Fixed bug missing diameter and mass for planets > size 9
+8. **Mongoose Engine:** Fixed bug displaying TL > F as 10
+9. **Routes:** Added feature to download route details
 
-### [v0.10.2] - In Progress
+### [v0.10.2] - 2026-05-14
 1. **Allegiances:**  Added Allegiance Manager
 2. **Import Universe:** Improved Import time by refactoring processing and eliminating redundant rendering
 3. **Mongoose Engine:**  Corrected planetary eccentricity calculation to match text
 4. **Mongoose Engine:**  Used optional rules to incorporate Hill Sphere calculation in Moon generation calculation
-5. **Mongoose Engine:**  Updated atmosphere generation rules to incorporate optional gravity DMs
+5. **Mongoose Engine:**  Updated atmosphere generation rules to incorporate optional gravity DMs/new
 
 ### [v0.10.1.3] - 2026-05-12
 1. **Routes, Borders, Regions:** Added options in menu to clear values for selected hexes

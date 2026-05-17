@@ -207,7 +207,20 @@ function setupCanvasEvents() {
     mapCanvas.addEventListener('wheel', (e) => {
         e.preventDefault();
         const zoomFactor = 1.1;
-        const direction = e.deltaY > 0 ? -1 : 1;
+        const direction  = e.deltaY > 0 ? -1 : 1;
+
+        // Route to system viewer when open
+        if (window.SystemViewer && window.SystemViewer.isOpen()) {
+            window.SystemViewer.handleWheel(direction);
+            return;
+        }
+
+        // Trigger system viewer on scroll-in at max zoom (dev mode only)
+        if (direction > 0 && zoom >= 10 && window.devView && window.SystemViewer) {
+            window.SystemViewer.open();
+            return;
+        }
+
         const mouseWorldX = cameraX + e.clientX / zoom;
         const mouseWorldY = cameraY + e.clientY / zoom;
 

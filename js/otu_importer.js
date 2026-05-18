@@ -391,6 +391,7 @@
             if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
             if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
             if (window.dbManager) window.dbManager.syncAllHexes();
+            if (window.dbManager) window.dbManager.saveSectorNames();
         }
 
         if (needsMeta) {
@@ -562,6 +563,7 @@
             if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
             if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
             if (window.dbManager) window.dbManager.syncAllHexes();
+            if (window.dbManager) window.dbManager.saveSectorNames();
         }
 
         if (needsMeta && typeof parseAndAddOtuRoutes === 'function') {

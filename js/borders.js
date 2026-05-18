@@ -431,9 +431,10 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
     borderEls.forEach(el => {
         const allegianceCode = (el.getAttribute('Allegiance') || '').trim();
         const label          = (el.getAttribute('Label')      || '').trim();
-        // Vargr polities: any V* allegiance code collapses into one "Vargr Extents" slot.
+        // Vargr/K'kree/Zhodani polities: any V*, Kk*, or Zh* code collapses into one slot.
         const groupKey       = allegianceCode.startsWith('Kk') ? 'Two Thousand Worlds'
-            : allegianceCode.startsWith('V') ? 'Vargr Extents'
+            : allegianceCode.startsWith('V')  ? 'Vargr Extents'
+            : allegianceCode.startsWith('Zh') ? 'Zhodani Consulate'
             : (label || allegianceCode);
         if (!groupKey) return;
         const rawColor = (el.getAttribute('Color') || '').trim().toLowerCase();

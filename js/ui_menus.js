@@ -1922,6 +1922,7 @@ function setupSettingsPanel() {
             }
         });
         document.getElementById('sector-name-editor-modal').style.display = 'none';
+        if (window.dbManager) window.dbManager.saveSectorNames();
         requestAnimationFrame(draw);
     });
 

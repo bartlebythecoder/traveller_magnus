@@ -1135,6 +1135,108 @@ function generateT5TabData(sectorID) {
     URL.revokeObjectURL(url);
 }
 
+/**
+ * Show a visual sector-slot picker modal.
+ * @param {string} fileName - Shown in the modal description.
+ * @param {number} suggestedSlot - Pre-highlighted slot (1-based).
+ * @param {function} onSelect - Called with the chosen slot number (integer).
+ */
+function openSectorSlotPicker(fileName, suggestedSlot, onSelect) {
+    const modal   = document.getElementById('sector-slot-modal');
+    const grid    = document.getElementById('sector-slot-grid');
+    const descEl  = document.getElementById('sector-slot-modal-desc');
+    if (!modal || !grid) return;
+
+    if (descEl) descEl.textContent = fileName
+        ? `Place "${fileName}" into a sector slot:`
+        : 'Select a sector slot:';
+
+    // Re-wire cancel/backdrop each open to avoid stale handlers
+    const cancelBtn = document.getElementById('btn-sector-slot-cancel');
+    if (cancelBtn) {
+        const fresh = cancelBtn.cloneNode(true);
+        cancelBtn.parentNode.replaceChild(fresh, cancelBtn);
+        fresh.addEventListener('click', () => { modal.style.display = 'none'; });
+    }
+    modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+
+    // Build occupancy set
+    const occupied = new Set();
+    hexStates.forEach((state, hexId) => {
+        if (state && state.type !== 'EMPTY') occupied.add(parseInt(hexId.split('-')[0], 10));
+    });
+
+    // Size cells so the entire grid fits the viewport with no scrollbar.
+    // MODAL_PAD = 30px padding × 2 + 2px border × 2 = 64px
+    const MODAL_PAD = 64;
+    const GAP       = 5;
+    const availW    = Math.floor(window.innerWidth * 0.94) - MODAL_PAD;
+    const cellW     = Math.max(54, Math.min(90, Math.floor((availW - (gridWidth - 1) * GAP) / gridWidth)));
+    const cellH     = Math.max(38, Math.floor(cellW * 0.62));
+    const gridPxW   = gridWidth * cellW + (gridWidth - 1) * GAP;
+
+    // Override both the CSS max-width and the default width so the content
+    // is exactly wide enough for the grid — no horizontal scrollbar.
+    const modalContent = modal.querySelector('.modal-content');
+    if (modalContent) {
+        modalContent.style.width    = (gridPxW + MODAL_PAD) + 'px';
+        modalContent.style.maxWidth = 'none';
+    }
+
+    grid.innerHTML = '';
+    grid.style.gridTemplateColumns = `repeat(${gridWidth}, ${cellW}px)`;
+    grid.style.gap = `${GAP}px`;
+
+    const total = gridWidth * gridHeight;
+    for (let i = 1; i <= total; i++) {
+        const isOccupied  = occupied.has(i);
+        const isSuggested = i === suggestedSlot;
+        const name        = window.sectorNames && window.sectorNames[i];
+        const hasName     = !!name;
+
+        const borderColor = isSuggested ? '#66fcf1' : isOccupied ? '#45a29e' : '#2a3a3a';
+        const bgColor     = isSuggested ? '#0f2e2e' : isOccupied ? '#0e1e2e' : '#0a0f16';
+
+        const btn = document.createElement('button');
+        btn.title = name ? `Slot ${i}: ${name}` : `Slot ${i}${isOccupied ? ' (has data)' : ' (empty)'}`;
+        btn.style.cssText = [
+            `width:${cellW}px`, `min-height:${cellH}px`,
+            'display:flex', 'flex-direction:column',
+            'align-items:center', 'justify-content:center',
+            'padding:3px 2px', 'border-radius:3px', 'cursor:pointer',
+            'font-family:"Courier New",monospace',
+            `border:2px solid ${borderColor}`,
+            `background:${bgColor}`,
+        ].join(';');
+
+        const numSpan  = document.createElement('span');
+        const nameSpan = document.createElement('span');
+
+        if (hasName) {
+            // Name is primary — slot number is small and secondary
+            numSpan.style.cssText  = `color:${isSuggested ? '#45bdb5' : '#444'};font-size:0.55rem;line-height:1.2;`;
+            numSpan.textContent    = i;
+            nameSpan.style.cssText = `color:${isSuggested ? '#66fcf1' : isOccupied ? '#45a29e' : '#8a9a9a'};font-size:${cellW > 68 ? '0.62rem' : '0.53rem'};text-align:center;line-height:1.2;max-width:${cellW - 8}px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:bold;`;
+            nameSpan.textContent   = name;
+            btn.appendChild(numSpan);
+            btn.appendChild(nameSpan);
+        } else {
+            // No name — slot number centred and prominent
+            numSpan.style.cssText = `color:${isSuggested ? '#66fcf1' : isOccupied ? '#45a29e' : '#555'};font-size:${cellW > 68 ? '0.72rem' : '0.62rem'};font-weight:bold;line-height:1.3;`;
+            numSpan.textContent   = i;
+            btn.appendChild(numSpan);
+        }
+
+        btn.addEventListener('mouseenter', () => { btn.style.background = '#1a3535'; btn.style.borderColor = '#66fcf1'; });
+        btn.addEventListener('mouseleave', () => { btn.style.background = bgColor; btn.style.borderColor = borderColor; });
+        btn.addEventListener('click', () => { modal.style.display = 'none'; onSelect(i); });
+
+        grid.appendChild(btn);
+    }
+
+    modal.style.display = 'flex';
+}
+
 function setupSectorImporter() {
     const fileInput = document.getElementById('file-import-sector');
     if (fileInput) {
@@ -1145,8 +1247,14 @@ function setupSectorImporter() {
 
             const reader = new FileReader();
             reader.onload = (event) => {
-                const content = event.target.result;
-                importT5Tab(content, file.name);
+                const content   = event.target.result;
+                const nameMatch = file.name.match(/Sector_([A-Z]{1,2}|\d+)/i);
+                const suggested = nameMatch
+                    ? sectorSlotToNumber(nameMatch[1])
+                    : Math.ceil(gridWidth * gridHeight / 2);
+                openSectorSlotPicker(file.name, suggested, (slotNum) => {
+                    importT5Tab(content, file.name, String(slotNum));
+                });
             };
             reader.readAsText(file);
         });
@@ -1188,15 +1296,29 @@ function importT5Tab(fileContent, fileName, forcedSectorSlot = null, bulkMode = 
 
     if (forcedSectorSlot) {
         fallbackSectorSlot = forcedSectorSlot.toUpperCase();
-    } else {
-        const nameMatch = fileName.match(/Sector_([A-Z]{1,2}|\d+)/i);
-        const detectedSlot = nameMatch ? nameMatch[1] : String(Math.ceil(gridWidth * gridHeight / 2));
-        const userSlot = prompt(`Which Sector number (1 to ${gridWidth * gridHeight}; ${Math.ceil(gridWidth * gridHeight / 2)} is centre) should we import "${fileName}" into?`, detectedSlot);
-        if (userSlot) fallbackSectorSlot = userSlot.toUpperCase();
     }
 
     // Convert the slot label (letter or number string) to a numeric sector ID.
     const sectorNum = sectorSlotToNumber(fallbackSectorSlot);
+
+    // Populate sector name if not already set.
+    // Priority: (1) Sector column in TSV, (2) fileName stripped of extension.
+    if (!window.sectorNames[sectorNum]) {
+        let derivedName = '';
+        if (idxSector !== -1) {
+            for (let i = 1; i < lines.length; i++) {
+                const v = (lines[i].split('\t')[idxSector] || '').trim();
+                if (v) { derivedName = v; break; }
+            }
+        }
+        if (!derivedName && fileName) {
+            derivedName = fileName.replace(/\.[^.]+$/, '').trim();
+        }
+        if (derivedName) {
+            window.sectorNames[sectorNum] = derivedName;
+            if (window.dbManager) window.dbManager.saveSectorNames();
+        }
+    }
 
     const importedHexes = new Set();
     for (let i = 1; i < lines.length; i++) {
@@ -1594,12 +1716,8 @@ function setupXmlMetadataImporter() {
         e.target.value = '';
         if (!file) return;
 
-        const userSlot = prompt(
-            `Which Sector number (1 to ${gridWidth * gridHeight}; ${Math.ceil(gridWidth * gridHeight / 2)} is centre) does "${file.name}" apply to?`,
-            String(Math.ceil(gridWidth * gridHeight / 2))
-        );
-        if (!userSlot) return;
-        const slotNum = sectorSlotToNumber(userSlot.toUpperCase());
+        const suggested = Math.ceil(gridWidth * gridHeight / 2);
+        openSectorSlotPicker(file.name, suggested, (slotNum) => {
 
         readFileAsText(file).then(xmlText => {
             let parsedDoc;
@@ -1652,5 +1770,7 @@ function setupXmlMetadataImporter() {
             showToast('Error reading XML file.', 3000);
             console.error('[XML Import]', err);
         });
+
+        }); // openSectorSlotPicker callback
     });
 }

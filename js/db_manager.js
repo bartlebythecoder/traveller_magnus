@@ -76,6 +76,9 @@
             if (typeof appState.gridHeight      === 'number') gridHeight            = appState.gridHeight;
             if (Array.isArray(appState.routes))               window.sectorRoutes   = appState.routes;
             if (typeof appState.autoRouteCounter === 'number') window.autoRouteCounter = appState.autoRouteCounter;
+            if (appState.sectorNames && typeof appState.sectorNames === 'object') {
+                window.sectorNames = appState.sectorNames;
+            }
 
             // Restore routeDefinitions, or migrate from legacy segments if missing
             if (Array.isArray(appState.routeDefinitions) && appState.routeDefinitions.length > 0) {
@@ -374,6 +377,19 @@
     }
 
     // -------------------------------------------------------------------------
+    // Persist sector names (window.sectorNames keyed by integer slot number).
+    // -------------------------------------------------------------------------
+    async function saveSectorNames() {
+        try {
+            const db = await _openDB();
+            const tx = db.transaction(STORE_APP, 'readwrite');
+            tx.objectStore(STORE_APP).put(window.sectorNames || {}, 'sectorNames');
+        } catch (err) {
+            console.warn('[DB] saveSectorNames failed:', err);
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // Wipe the entire database.
     // Called before Universe import or when the user starts a new map.
     // -------------------------------------------------------------------------
@@ -407,6 +423,7 @@
         saveBorderPaths,
         saveRegionDefinitions,
         saveRegionPaths,
+        saveSectorNames,
         clearDB,
         getTsvCache,
         putTsvCache

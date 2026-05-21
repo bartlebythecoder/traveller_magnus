@@ -215,8 +215,8 @@ function setupCanvasEvents() {
             return;
         }
 
-        // Trigger system viewer on scroll-in at max zoom (dev mode only)
-        if (direction > 0 && zoom >= 10 && window.devView && window.SystemViewer) {
+        // Trigger system viewer on scroll-in at max zoom
+        if (direction > 0 && zoom >= 10 && window.SystemViewer) {
             window.SystemViewer.open();
             return;
         }

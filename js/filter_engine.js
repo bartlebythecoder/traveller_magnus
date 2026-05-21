@@ -547,7 +547,7 @@
             color: applyPrimary ? document.getElementById('design-glow-color').value : null,
             ringColor: applyRing ? document.getElementById('design-ring-color').value : null,
             iconStyle: applyIcon ? document.getElementById('design-icon-style').value : null,
-            textCase: applyTextCase ? document.getElementById('design-text-case').value : null,
+            textCase: applyTextCase ? 'ALL CAPS' : null,
             bgFillColor: applyBgFill ? document.getElementById('design-bg-fill-color').value : null,
             isItalic: applyItalics,
             isUnderline: applyUnderline

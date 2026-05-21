@@ -739,7 +739,10 @@ function draw() {
                             ctx.font = `${pFontSmall}px 'Inter', sans-serif`;
                             ctx.fillStyle = pTextColor;
                             ctx.textBaseline = 'top';
-                            ctx.fillText(data.uwp, cx, cy + dotRadius + 3);
+                            const displayUwp4 = (window.rttShowIndustry && stateObj.rttData && data.industry != null)
+                                ? data.uwp.slice(0, -1) + data.industry
+                                : data.uwp;
+                            ctx.fillText(displayUwp4, cx, cy + dotRadius + 3);
                         }
 
                         // 5. System name — bottom of hex (Sean Protocol: Typography Suite)
@@ -906,8 +909,11 @@ function draw() {
                             if (tcs.length > 0) tcs = " " + tcs;
 
                             const topLabel = data.name ? `${data.name} (${hexId})` : hexId;
+                            const displayUwp910 = (window.rttShowIndustry && stateObj.rttData && data.industry != null)
+                                ? data.uwp.slice(0, -1) + data.industry
+                                : data.uwp;
                             ctx.fillText(topLabel, cx, cy - (size * 0.75));
-                            ctx.fillText(data.uwp + tcs, cx, cy - (size * 0.75) + fontSize * 1.2);
+                            ctx.fillText(displayUwp910 + tcs, cx, cy - (size * 0.75) + fontSize * 1.2);
 
                             if (stateObj.t5Socio) {
                                 let sStrings = stateObj.t5Socio.displayStrings || [stateObj.t5Socio.displayString];

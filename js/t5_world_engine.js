@@ -180,10 +180,37 @@
             _log(`Population Explosion triggered! Rerolled as 2D+3 = ${rollValue}`);
         }
         let rawPop = rollValue + dm;
-        let generatedPop = Math.max(0, rawPop);
-        let finalPop = Math.min(generatedPop, maxSubordinatePop);
 
-        _log(`Pop Calc (${worldType}): Roll (${rollValue + 2}) - 2 DM ${dm} = ${rawPop}. Cap ${maxSubordinatePop}. Final ${finalPop}`);
+        // Settings: Pop Mod (mainworld only)
+        if (worldType === 'Mainworld') {
+            const settingsPopMod = (typeof window !== 'undefined' && window.generationPopMod !== undefined) ? window.generationPopMod : 0;
+            if (settingsPopMod !== 0) {
+                rawPop += settingsPopMod;
+                _log(`Settings Pop Modifier: ${settingsPopMod > 0 ? '+' : ''}${settingsPopMod}`);
+                if (typeof tResult !== 'undefined') tResult('Settings Pop Modifier', `${settingsPopMod > 0 ? '+' : ''}${settingsPopMod}`, 'T5 3.1: Social Stats');
+            } else {
+                if (typeof tResult !== 'undefined') tResult('Settings Pop Modifier', 'None (0)', 'T5 3.1: Social Stats');
+            }
+        }
+
+        let generatedPop = Math.max(0, rawPop);
+
+        // Settings: Pop Max cap (mainworld only — subordinates use mainworld-derived maxSubordinatePop)
+        const effectiveCap = (worldType === 'Mainworld')
+            ? Math.min(maxSubordinatePop, (typeof window !== 'undefined' && window.generationPopMax !== undefined) ? window.generationPopMax : maxSubordinatePop)
+            : maxSubordinatePop;
+        if (worldType === 'Mainworld' && typeof tResult !== 'undefined') {
+            const settingsPopMax = (typeof window !== 'undefined' && window.generationPopMax !== undefined) ? window.generationPopMax : maxSubordinatePop;
+            if (generatedPop > settingsPopMax) {
+                tResult('Settings Pop Max', `Cap applied: ${generatedPop} → ${settingsPopMax}`);
+            } else {
+                tResult('Settings Pop Max', `No cap (${generatedPop} ≤ ${settingsPopMax})`);
+            }
+        }
+
+        let finalPop = Math.min(generatedPop, effectiveCap);
+
+        _log(`Pop Calc (${worldType}): Roll (${rollValue + 2}) - 2 DM ${dm} = ${rawPop}. Cap ${effectiveCap}. Final ${finalPop}`);
 
         world.pop = finalPop;
         if (typeof world.popDigit !== 'undefined') {
@@ -321,15 +348,30 @@
             mods.push(`Gov ${toUWPChar(gov)} (${data.gov[gov] > 0 ? '+' : ''}${data.gov[gov]})`);
         }
 
+        // Settings: TL Modifier
+        const settingsTlMod = (typeof window !== 'undefined' && window.generationTlMod !== undefined) ? window.generationTlMod : 0;
+        const settingsTlMax = (typeof window !== 'undefined' && window.generationTlMax !== undefined) ? window.generationTlMax : 20;
+        if (settingsTlMod !== 0) {
+            tlDM += settingsTlMod;
+            mods.push(`Settings Mod (${settingsTlMod > 0 ? '+' : ''}${settingsTlMod})`);
+        }
+
         let finalTL = Math.max(0, roll + tlDM);
-        world.tl = finalTL;
+
+        // Settings: TL Max cap
+        world.tl = Math.min(finalTL, settingsTlMax);
 
         let logMsg = `TL Calc (${worldType}): Roll (${roll})`;
         if (mods.length > 0) logMsg += " + " + mods.join(" + ");
-        logMsg += ` = ${finalTL}.`;
+        logMsg += ` = ${finalTL}`;
+        if (world.tl < finalTL) logMsg += ` → capped to ${world.tl} (TL Max ${settingsTlMax})`;
+        else logMsg += ` (TL Max ${settingsTlMax}: no cap)`;
+        logMsg += '.';
         _log(logMsg);
-        
+
         if (typeof tResult !== 'undefined' && world.tl !== undefined) {
+            tResult('Settings TL Modifier', settingsTlMod !== 0 ? `${settingsTlMod > 0 ? '+' : ''}${settingsTlMod}` : 'None (0)', 'T5 3.2: Tech Level');
+            tResult('Settings TL Max', world.tl < finalTL ? `Cap applied: ${finalTL} → ${world.tl}` : `No cap (${finalTL} ≤ ${settingsTlMax})`, 'T5 3.2: Tech Level');
             tResult('Tech Level Code', world.tl, 'T5 3.2: Tech Level');
         }
     }
@@ -483,7 +525,25 @@
         _log(`System Constellation: [${stars.map(s => s.name).join(' ')}]`);
 
         // --- 1. Basic Stats ---
-        const starport = ['A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'E', 'E', 'X'][_roll2D('Starport Roll') - 2] || 'X';
+        const _starportTable = ['A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'E', 'E', 'X'];
+        const _starportRoll = _roll2D('Starport Roll');
+        const _starportMod = (typeof window !== 'undefined' && window.generationStarportMod !== undefined) ? window.generationStarportMod : 0;
+        if (_starportMod !== 0) _log(`Settings Starport Modifier: ${_starportMod > 0 ? '+' : ''}${_starportMod}`);
+        const _starportIdx = Math.max(0, Math.min(10, (_starportRoll + _starportMod) - 2));
+        let starport = _starportTable[_starportIdx] || 'X';
+        _log(`Starport Roll: ${_starportRoll}${_starportMod !== 0 ? ` (mod ${_starportMod > 0 ? '+' : ''}${_starportMod})` : ''} → ${starport}`);
+
+        // Settings: Starport Max cap
+        const _starportOrder = ['A', 'B', 'C', 'D', 'E', 'X'];
+        const _starportMax = (typeof window !== 'undefined' && window.generationStarportMax !== undefined) ? window.generationStarportMax : 'A';
+        const _spMaxIdx = _starportOrder.indexOf(_starportMax);
+        const _spCurIdx = _starportOrder.indexOf(starport);
+        if (_spMaxIdx !== -1 && _spCurIdx !== -1 && _spCurIdx < _spMaxIdx) {
+            _log(`Settings Starport Max: Cap applied ${starport} → ${_starportMax}`);
+            starport = _starportMax;
+        } else {
+            _log(`Settings Starport Max: No cap (${starport} ≤ ${_starportMax})`);
+        }
 
         const world = {
             hexId,

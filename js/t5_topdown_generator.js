@@ -646,7 +646,21 @@
             let tlDM = (world.starport === 'F') ? 1 : 0;
             if (world.size <= 1) tlDM += 2;
             if (world.atm <= 3 || world.atm >= 10) tlDM += 1;
-            world.tl = clampUWP(_roll1D() + tlDM, 0, 33);
+
+            const settingsTlMod = (typeof window !== 'undefined' && window.generationTlMod !== undefined) ? window.generationTlMod : 0;
+            const settingsTlMax = (typeof window !== 'undefined' && window.generationTlMax !== undefined) ? window.generationTlMax : 20;
+            if (settingsTlMod !== 0) tlDM += settingsTlMod;
+
+            const tlRoll = _roll1D();
+            const flooredTl = Math.max(0, tlRoll + tlDM);
+            world.tl = Math.min(flooredTl, settingsTlMax);
+
+            _log(`TL Calc (Subordinate): Roll (${tlRoll}) + DMs (${tlDM - settingsTlMod}) = ${flooredTl}`);
+            if (typeof tResult !== 'undefined') {
+                tResult('Settings TL Modifier', settingsTlMod !== 0 ? `${settingsTlMod > 0 ? '+' : ''}${settingsTlMod}` : 'None (0)');
+                tResult('Settings TL Max', world.tl < flooredTl ? `Cap applied: ${flooredTl} → ${world.tl}` : `No cap (${flooredTl} ≤ ${settingsTlMax})`);
+                tResult('Tech Level Code', world.tl);
+            }
         }
 
         T5_World_Engine.calculateT5PhysicalStats(world);

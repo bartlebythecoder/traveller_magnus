@@ -1017,13 +1017,35 @@ function exportMetadataXml(sectorID) {
     showToast(`Exported ${parts.join(', ')} for Sector ${sectorID}.`, 2500);
 }
 
+function _countRTTBelts(rttSystem) {
+    if (!rttSystem || !rttSystem.stars) return 0;
+    let count = 0;
+    rttSystem.stars.forEach(s => {
+        (s.planetarySystem && s.planetarySystem.orbits || []).forEach(o => {
+            if (o.type === 'Asteroid Belt' || o.worldClass === 'Planetoid Belt') count++;
+        });
+    });
+    return count;
+}
+
+function _countRTTGasGiants(rttSystem) {
+    if (!rttSystem || !rttSystem.stars) return 0;
+    let count = 0;
+    rttSystem.stars.forEach(s => {
+        (s.planetarySystem && s.planetarySystem.orbits || []).forEach(o => {
+            if (o.worldClass === 'Jovian' || o.worldClass === 'Chthonian' || o.type === 'Jovian Planet' || o.type === 'Helian Planet') count++;
+        });
+    });
+    return count;
+}
+
 function generateT5TabData(sectorID) {
     const header = "Hex\tName\tUWP\tBases\tRemarks\tZone\tPBG\tAllegiance\tStars\t{Ix}\t(Ex)\t[Cx]\tNobility\tW.\tNotes";
     let lines = [header];
 
     hexStates.forEach((state, hexId) => {
         if (hexId.startsWith(sectorID + "-")) {
-            const data = state.t5Data || state.mgt2eData || state.ctData;
+            const data = state.t5Data || state.mgt2eData || state.ctData || state.rttData;
             if (!data) return;
 
             // Hex: Extract 0101 from A-B-0101
@@ -1039,8 +1061,10 @@ function generateT5TabData(sectorID) {
 
             // PBG (Pop-Multiplier, Belts, Gas Giants)
             const p = data.popDigit !== undefined ? data.popDigit : (data.pop > 0 ? 5 : 0);
-            const b = data.planetoidBelts !== undefined ? data.planetoidBelts : (data.size === 0 ? 1 : 0);
-            const g = data.gasGiantsCount !== undefined ? data.gasGiantsCount : (data.gasGiant ? 1 : 0);
+            const b = data.planetoidBelts !== undefined ? data.planetoidBelts
+                    : (state.beltCount    !== undefined ? state.beltCount    : _countRTTBelts(state.rttSystem));
+            const g = data.gasGiantsCount !== undefined ? data.gasGiantsCount
+                    : (state.gasGiantCount !== undefined ? state.gasGiantCount : _countRTTGasGiants(state.rttSystem));
             const pbg = `${toUWPChar(p)}${toUWPChar(b)}${toUWPChar(g)}`;
 
             // Extensions (Importance, Economic, Cultural)
@@ -1087,9 +1111,9 @@ function generateT5TabData(sectorID) {
             } else if (state.t5Data && state.t5Data.homestar && state.t5Data.homestar !== 'Unknown') {
                 stars = state.t5Data.homestar;
             } else {
-                const sys = state.t5System || state.mgtSystem || state.ctSystem;
+                const sys = state.t5System || state.mgtSystem || state.ctSystem || state.rttSystem;
                 if (sys && sys.stars) {
-                    stars = sys.stars.map(s => s.name).join(' ');
+                    stars = sys.stars.map(s => s.classification || s.name).join(' ');
                 }
             }
 
@@ -1100,6 +1124,11 @@ function generateT5TabData(sectorID) {
             else if (state.ctSystem && state.ctSystem.orbits) {
                 w = state.ctSystem.orbits.filter(o => o.contents).length;
                 if (state.ctSystem.capturedPlanets) w += state.ctSystem.capturedPlanets.length;
+            } else if (state.rttSystem && state.rttSystem.stars) {
+                w = 0;
+                state.rttSystem.stars.forEach(s => {
+                    if (s.planetarySystem) w += s.planetarySystem.orbits.length;
+                });
             }
 
             const row = [
@@ -1484,10 +1513,8 @@ function importT5Tab(fileContent, fileName, forcedSectorSlot = null, bulkMode = 
             const subChar = String.fromCharCode(65 + (subY * 4 + subX));
             const hexId = `${sectorNum}-${subChar}-${hexNum}`;
 
-            if (!hexStates.has(hexId)) {
-                hexStates.set(hexId, { type: 'EMPTY' });
-                emptyCount++;
-            }
+            hexStates.set(hexId, { type: 'EMPTY' });
+            emptyCount++;
         }
     }
 

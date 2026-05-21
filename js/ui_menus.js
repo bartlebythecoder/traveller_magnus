@@ -1701,12 +1701,13 @@ window.refreshRouteWindowCounts = function () {
         const count = segCounts.get(routeId) || 0;
         pill.innerHTML = count > 0 ? count : '&mdash;';
         pill.className = `route-seg-count ${count > 0 ? 'used' : 'free'}`;
+        const def = (window.routeDefinitions || []).find(d => d.id === routeId);
+        const routeName = def ? def.name : `Route #${routeId}`;
+
         if (count > 0) {
             pill.style.cursor = 'pointer';
             pill.title = `${count} segment(s) — click to view systems`;
             if (!pill.dataset.listenerAttached) {
-                const def = (window.routeDefinitions || []).find(d => d.id === routeId);
-                const routeName = def ? def.name : `Route #${routeId}`;
                 pill.addEventListener('click', () => window.openRouteSystemsPanel(routeId, routeName));
                 pill.dataset.listenerAttached = 'true';
             }
@@ -1714,6 +1715,15 @@ window.refreshRouteWindowCounts = function () {
             pill.style.cursor = '';
             pill.title = '0 segment(s)';
             if (routeId === sysPanelRouteId) window.closeRouteSystemsPanel();
+        }
+
+        const exportBtn = row.querySelector('.route-export-btn');
+        if (exportBtn) {
+            exportBtn.style.color  = count > 0 ? '#45a29e' : '#333';
+            exportBtn.style.cursor = count > 0 ? 'pointer'  : 'default';
+            exportBtn.style.opacity = count > 0 ? '1' : '0.3';
+            exportBtn.title = count > 0 ? 'Export systems to CSV' : 'No segments to export';
+            exportBtn.onclick = count > 0 ? () => exportRouteSystemsCSV(routeId, routeName) : null;
         }
     });
 };
@@ -2000,6 +2010,171 @@ function setupSettingsPanel() {
             localStorage.setItem('traveller_border_fill', String(window.borderFillEnabled));
             requestAnimationFrame(draw);
         });
+    }
+
+    // --- Generation Options: TL Max ---
+    const tlMaxInput = document.getElementById('input-tl-max');
+    if (tlMaxInput) {
+        const savedTlMax = localStorage.getItem('traveller_gen_tl_max');
+        const initialTlMax = savedTlMax !== null ? parseInt(savedTlMax, 10) : 20;
+        tlMaxInput.value = initialTlMax;
+        window.generationTlMax = initialTlMax;
+
+        tlMaxInput.addEventListener('change', () => {
+            const val = Math.max(0, Math.min(33, parseInt(tlMaxInput.value, 10) || 20));
+            tlMaxInput.value = val;
+            window.generationTlMax = val;
+            localStorage.setItem('traveller_gen_tl_max', String(val));
+        });
+    }
+
+    // --- Generation Options: TL Mod ---
+    const tlModInput = document.getElementById('input-tl-mod');
+    if (tlModInput) {
+        const savedTlMod = localStorage.getItem('traveller_gen_tl_mod');
+        const initialTlMod = savedTlMod !== null ? parseInt(savedTlMod, 10) : 0;
+        tlModInput.value = initialTlMod;
+        window.generationTlMod = initialTlMod;
+
+        tlModInput.addEventListener('change', () => {
+            const val = Math.max(-20, Math.min(20, parseInt(tlModInput.value, 10) || 0));
+            tlModInput.value = val;
+            window.generationTlMod = val;
+            localStorage.setItem('traveller_gen_tl_mod', String(val));
+        });
+    }
+
+    // --- Generation Options: Use Min TL Floor (MgT2e only) ---
+    const tlFloorInput = document.getElementById('input-use-tl-floor');
+    if (tlFloorInput) {
+        const savedTlFloor = localStorage.getItem('traveller_gen_use_tl_floor');
+        const initialTlFloor = savedTlFloor === 'true';
+        tlFloorInput.checked = initialTlFloor;
+        window.generationUseTlFloor = initialTlFloor;
+
+        tlFloorInput.addEventListener('change', () => {
+            window.generationUseTlFloor = tlFloorInput.checked;
+            localStorage.setItem('traveller_gen_use_tl_floor', String(tlFloorInput.checked));
+        });
+    }
+
+    // --- Generation Options: Settlement Centuries (RTT only) ---
+    const rttSettlementInput = document.getElementById('input-rtt-settlement');
+    if (rttSettlementInput) {
+        const saved = localStorage.getItem('traveller_gen_rtt_settlement');
+        const initial = saved !== null ? parseInt(saved, 10) : 2;
+        rttSettlementInput.value = initial;
+        window.generationRttSettlement = initial;
+
+        rttSettlementInput.addEventListener('change', () => {
+            const parsed = parseInt(rttSettlementInput.value, 10);
+            const val = Math.max(0, Math.min(100, isNaN(parsed) ? 2 : parsed));
+            rttSettlementInput.value = val;
+            window.generationRttSettlement = val;
+            localStorage.setItem('traveller_gen_rtt_settlement', String(val));
+        });
+    }
+
+    // --- Display Options: Show Industry instead of TL (RTT only) ---
+    const rttIndustryToggle = document.getElementById('toggle-rtt-industry');
+    if (rttIndustryToggle) {
+        const saved = localStorage.getItem('traveller_rtt_show_industry');
+        window.rttShowIndustry = saved === 'true';
+        rttIndustryToggle.checked = window.rttShowIndustry;
+
+        rttIndustryToggle.addEventListener('change', () => {
+            window.rttShowIndustry = rttIndustryToggle.checked;
+            localStorage.setItem('traveller_rtt_show_industry', String(rttIndustryToggle.checked));
+            requestAnimationFrame(draw);
+        });
+    }
+
+    // --- Generation Options: Tech Level (RTT only) ---
+    const rttTlInput = document.getElementById('input-rtt-tl');
+    if (rttTlInput) {
+        const saved = localStorage.getItem('traveller_gen_rtt_tl');
+        const initial = saved !== null ? parseInt(saved, 10) : 15;
+        rttTlInput.value = initial;
+        window.generationRttTL = initial;
+
+        rttTlInput.addEventListener('change', () => {
+            const parsed = parseInt(rttTlInput.value, 10);
+            const val = Math.max(0, Math.min(33, isNaN(parsed) ? 15 : parsed));
+            rttTlInput.value = val;
+            window.generationRttTL = val;
+            localStorage.setItem('traveller_gen_rtt_tl', String(val));
+        });
+    }
+
+    // --- Generation Options: Pop Max ---
+    const popMaxInput = document.getElementById('input-pop-max');
+    if (popMaxInput) {
+        window.generationPopMax = 20;
+        popMaxInput.value = 20;
+
+        popMaxInput.addEventListener('change', () => {
+            const val = Math.max(0, Math.min(33, parseInt(popMaxInput.value, 10) || 20));
+            popMaxInput.value = val;
+            window.generationPopMax = val;
+        });
+    }
+
+    // --- Generation Options: Pop Mod ---
+    const popModInput = document.getElementById('input-pop-mod');
+    if (popModInput) {
+        window.generationPopMod = 0;
+        popModInput.value = 0;
+
+        popModInput.addEventListener('change', () => {
+            const val = Math.max(-20, Math.min(20, parseInt(popModInput.value, 10) || 0));
+            popModInput.value = val;
+            window.generationPopMod = val;
+        });
+    }
+
+    // --- Generation Options: Starport Max ---
+    const starportMaxInput = document.getElementById('input-starport-max');
+    if (starportMaxInput) {
+        const validStarportClasses = ['A', 'B', 'C', 'D', 'E', 'X'];
+        const savedStarportMax = localStorage.getItem('traveller_gen_starport_max');
+        const initialStarportMax = (savedStarportMax && validStarportClasses.includes(savedStarportMax)) ? savedStarportMax : 'A';
+        starportMaxInput.value = initialStarportMax;
+        window.generationStarportMax = initialStarportMax;
+
+        starportMaxInput.addEventListener('change', () => {
+            const val = starportMaxInput.value.toUpperCase().trim();
+            const clamped = validStarportClasses.includes(val) ? val : 'A';
+            starportMaxInput.value = clamped;
+            window.generationStarportMax = clamped;
+            localStorage.setItem('traveller_gen_starport_max', clamped);
+        });
+    }
+
+    // --- Generation Options: Starport Mod ---
+    const starportModInput = document.getElementById('input-starport-mod');
+    if (starportModInput) {
+        const savedStarportMod = localStorage.getItem('traveller_gen_starport_mod');
+        const initialStarportMod = savedStarportMod !== null ? parseInt(savedStarportMod, 10) : 0;
+        starportModInput.value = initialStarportMod;
+        window.generationStarportMod = initialStarportMod;
+
+        starportModInput.addEventListener('change', () => {
+            const val = Math.max(-20, Math.min(20, parseInt(starportModInput.value, 10) || 0));
+            starportModInput.value = val;
+            window.generationStarportMod = val;
+            localStorage.setItem('traveller_gen_starport_mod', String(val));
+        });
+    }
+}
+
+function toggleSettingsSection(header) {
+    header.classList.toggle('open');
+    const body = header.nextElementSibling;
+    body.classList.toggle('open');
+    if (body.classList.contains('open')) {
+        body.style.display = 'flex';
+    } else {
+        body.style.display = 'none';
     }
 }
 

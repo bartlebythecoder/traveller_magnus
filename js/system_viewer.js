@@ -1,6 +1,6 @@
 // =============================================================================
-// SYSTEM_VIEWER.JS  —  Dev-only Orrery Overlay
-// Triggered when devView=true and user scrolls past max map zoom.
+// SYSTEM_VIEWER.JS  —  Orrery Overlay
+// Triggered when user scrolls past max map zoom.
 // Supports MgT2E, CT, and T5 systems via normalisation.
 // Exposes window.SystemViewer  { open, close, isOpen, handleWheel }
 //
@@ -29,6 +29,17 @@ const SystemViewer = (() => {
 
     let _dragging = false;
     let _dragLast = null;
+
+    let _linearScale = false;
+
+    let _startTime   = 0;
+    let _animFrameId = null;
+
+    let _planetSpeed = 1.0;   // multiplier: 1 = default, 0 = paused
+    let _moonSpeed   = 1.0;
+
+    const GOLDEN = 2.39996;   // golden angle (rad) for spiral angular spacing
+    const PLANET_SPEED_BASE = 0.08;
 
     // ── Fallback orbit→AU table ───────────────────────────────────────────────
     const _FALLBACK_ORBIT_AU = [
@@ -105,6 +116,12 @@ const SystemViewer = (() => {
     function _logR(au, maxAU, maxPx) {
         if (au <= 0 || maxAU <= 0 || maxPx <= 0) return 0;
         return maxPx * Math.log(1 + au) / Math.log(1 + maxAU);
+    }
+
+    function _scaleR(au, maxAU, maxPx) {
+        return _linearScale
+            ? (maxAU > 0 ? maxPx * (au / maxAU) : 0)
+            : _logR(au, maxAU, maxPx);
     }
 
     // ── System normalisation ──────────────────────────────────────────────────
@@ -487,27 +504,31 @@ const SystemViewer = (() => {
         _viewOffX = 0;
         _viewOffY = 0;
         _buildOverlay(hexId);
-        requestAnimationFrame(_drawOrrery);
+        _startTime = performance.now();
+        _startLoop();
     }
 
     function close() {
         if (!_overlay) return;
         window.removeEventListener('mousemove', _onWindowMouseMove);
         window.removeEventListener('mouseup',   _onWindowMouseUp);
+        cancelAnimationFrame(_animFrameId);
         _overlay.remove();
-        _overlay   = null;
-        _orrCanvas = null;
-        _orrCtx    = null;
-        _sys       = null;
-        _tooltip   = null;
-        _hitBodies = [];
-        _canvasW   = 0;
-        _canvasH   = 0;
-        _viewZoom  = 1.0;
-        _viewOffX  = 0;
-        _viewOffY  = 0;
-        _dragging  = false;
-        _dragLast  = null;
+        _overlay     = null;
+        _orrCanvas   = null;
+        _orrCtx      = null;
+        _sys         = null;
+        _tooltip     = null;
+        _hitBodies   = [];
+        _canvasW     = 0;
+        _canvasH     = 0;
+        _viewZoom    = 1.0;
+        _viewOffX    = 0;
+        _viewOffY    = 0;
+        _dragging    = false;
+        _dragLast    = null;
+        _startTime   = 0;
+        _animFrameId = null;
     }
 
     function handleWheel(direction) {
@@ -526,7 +547,7 @@ const SystemViewer = (() => {
         _overlay.id = 'system-viewer-overlay';
         Object.assign(_overlay.style, {
             position: 'fixed', inset: '0', zIndex: '9000',
-            background: 'rgba(10,14,20,0.97)',
+            background: '#000000',
             display: 'flex', flexDirection: 'column',
             fontFamily: '"Share Tech Mono", "Courier New", monospace',
             color: '#c5c6c7', userSelect: 'none'
@@ -561,6 +582,65 @@ const SystemViewer = (() => {
         });
         hint.textContent = 'Scroll to zoom orbits  ·  Drag to pan  ·  Scroll out at full view or ESC to return';
 
+        // Planet speed slider
+        const planetWrap = document.createElement('span');
+        Object.assign(planetWrap.style, { display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px' });
+        const planetLbl = document.createElement('span');
+        planetLbl.textContent = 'Planet Speed:';
+        Object.assign(planetLbl.style, { color: '#8a8f94', whiteSpace: 'nowrap' });
+        const planetSlider = document.createElement('input');
+        planetSlider.type = 'range'; planetSlider.min = '0'; planetSlider.max = '4';
+        planetSlider.step = '0.1'; planetSlider.value = String(_planetSpeed);
+        Object.assign(planetSlider.style, { width: '80px', cursor: 'pointer' });
+        const planetVal = document.createElement('span');
+        planetVal.textContent = _planetSpeed.toFixed(1) + 'x';
+        Object.assign(planetVal.style, { color: '#66fcf1', minWidth: '30px' });
+        planetSlider.addEventListener('input', () => {
+            _planetSpeed = parseFloat(planetSlider.value);
+            planetVal.textContent = _planetSpeed.toFixed(1) + 'x';
+        });
+        planetWrap.append(planetLbl, planetSlider, planetVal);
+
+        // Moon speed slider
+        const moonWrap = document.createElement('span');
+        Object.assign(moonWrap.style, { display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px' });
+        const moonLbl = document.createElement('span');
+        moonLbl.textContent = 'Moon Speed:';
+        Object.assign(moonLbl.style, { color: '#8a8f94', whiteSpace: 'nowrap' });
+        const moonSlider = document.createElement('input');
+        moonSlider.type = 'range'; moonSlider.min = '0'; moonSlider.max = '4';
+        moonSlider.step = '0.1'; moonSlider.value = String(_moonSpeed);
+        Object.assign(moonSlider.style, { width: '80px', cursor: 'pointer' });
+        const moonVal = document.createElement('span');
+        moonVal.textContent = _moonSpeed.toFixed(1) + 'x';
+        Object.assign(moonVal.style, { color: '#66fcf1', minWidth: '30px' });
+        moonSlider.addEventListener('input', () => {
+            _moonSpeed = parseFloat(moonSlider.value);
+            moonVal.textContent = _moonSpeed.toFixed(1) + 'x';
+        });
+        moonWrap.append(moonLbl, moonSlider, moonVal);
+
+        // Linear scale toggle
+        const linearWrap = document.createElement('label');
+        Object.assign(linearWrap.style, {
+            display: 'flex', alignItems: 'center', gap: '5px',
+            fontSize: '11px', cursor: 'pointer', whiteSpace: 'nowrap'
+        });
+        const linearCheck = document.createElement('input');
+        linearCheck.type    = 'checkbox';
+        linearCheck.checked = _linearScale;
+        Object.assign(linearCheck.style, { cursor: 'pointer' });
+        const linearLbl = document.createElement('span');
+        linearLbl.textContent = 'Linear (true scale)';
+        Object.assign(linearLbl.style, { color: '#8a8f94' });
+        linearCheck.addEventListener('change', () => {
+            _linearScale = linearCheck.checked;
+            _viewZoom = 1.0;
+            _viewOffX = 0;
+            _viewOffY = 0;
+        });
+        linearWrap.append(linearCheck, linearLbl);
+
         const closeBtn = document.createElement('button');
         closeBtn.textContent = '✕';
         Object.assign(closeBtn.style, {
@@ -570,7 +650,7 @@ const SystemViewer = (() => {
         });
         closeBtn.addEventListener('click', close);
 
-        header.append(title, editionBadge, sub, hint, closeBtn);
+        header.append(title, editionBadge, sub, hint, planetWrap, moonWrap, linearWrap, closeBtn);
         _overlay.appendChild(header);
 
         _orrCanvas = document.createElement('canvas');
@@ -610,7 +690,15 @@ const SystemViewer = (() => {
 
     // ── Orrery Draw ───────────────────────────────────────────────────────────
 
-    function _redraw() { requestAnimationFrame(_drawOrrery); }
+    function _redraw() { /* animation loop redraws every frame */ }
+
+    function _startLoop() {
+        function tick() {
+            _drawOrrery();
+            _animFrameId = requestAnimationFrame(tick);
+        }
+        _animFrameId = requestAnimationFrame(tick);
+    }
 
     function _drawOrrery() {
         if (!_orrCtx || !_canvasW || !_canvasH) return;
@@ -646,11 +734,20 @@ const SystemViewer = (() => {
         const starPos    = new Map();
         starPos.set(0, { cx: originX, cy: originY });
 
-        const FAN = [0, -Math.PI / 7, Math.PI / 7, -Math.PI / 3.5, Math.PI / 3.5];
+        const elapsed = _startTime > 0 ? (performance.now() - _startTime) / 1000 : 0;
+
+        // Companion star positions — animated along their orbit rings
+        const STAR_SPEED_BASE  = 0.08;
+        const effectiveSSspeed = STAR_SPEED_BASE * _planetSpeed;
+        const VISUAL_YEAR_SECS_S = effectiveSSspeed > 0 ? 2 * Math.PI / effectiveSSspeed : Infinity;
         companions.forEach((s, i) => {
             const compAU = _starCompanionAU(s);
-            const dist   = Math.max(90, _logR(compAU, maxAU, scaledMaxR));
-            const angle  = FAN[i % FAN.length];
+            const dist   = Math.max(_linearScale ? 30 : 90, _scaleR(compAU, maxAU, scaledMaxR));
+            const au     = Math.max(compAU, 0.05);
+            const angVel = s.periodYears
+                ? (2 * Math.PI / s.periodYears) / VISUAL_YEAR_SECS_S
+                : effectiveSSspeed / Math.pow(au, 1.5);
+            const angle  = i * GOLDEN - Math.PI / 2 + angVel * elapsed;
             starPos.set(i + 1, {
                 cx: originX + dist * Math.cos(angle),
                 cy: originY + dist * Math.sin(angle)
@@ -661,8 +758,8 @@ const SystemViewer = (() => {
 
         // HZ band — hzAU is set by the normaliser for all editions
         const hzAU      = sys.hzAU !== undefined ? sys.hzAU : _orbitToAU(sys.hzco || 3);
-        const hzInnerPx = _logR(hzAU * 0.70, maxAU, scaledMaxR);
-        const hzOuterPx = _logR(hzAU * 1.55, maxAU, scaledMaxR);
+        const hzInnerPx = _scaleR(hzAU * 0.70, maxAU, scaledMaxR);
+        const hzOuterPx = _scaleR(hzAU * 1.55, maxAU, scaledMaxR);
         _drawHZBand(ctx, originX, originY, hzInnerPx, hzOuterPx);
 
         // Companion orbit rings + sub-orreries
@@ -670,7 +767,7 @@ const SystemViewer = (() => {
             const sIdx   = i + 1;
             const pos    = starPos.get(sIdx);
             const compAU = _starCompanionAU(s);
-            const orbitR = Math.max(90, _logR(compAU, maxAU, scaledMaxR));
+            const orbitR = Math.max(_linearScale ? 30 : 90, _scaleR(compAU, maxAU, scaledMaxR));
 
             ctx.beginPath();
             ctx.arc(originX, originY, orbitR, 0, Math.PI * 2);
@@ -686,7 +783,7 @@ const SystemViewer = (() => {
             if (sWorlds.length > 0) {
                 const subMaxAU = sWorlds.reduce((m, w) => Math.max(m, w.au || 0), 0.01) * 1.2;
                 const subMaxR  = orbitR * 0.28;
-                _drawWorldSet(ctx, sWorlds, pos.cx, pos.cy, subMaxAU, subMaxR);
+                _drawWorldSet(ctx, sWorlds, pos.cx, pos.cy, subMaxAU, subMaxR, elapsed);
             }
         });
 
@@ -696,7 +793,7 @@ const SystemViewer = (() => {
             (w.orbitType === 'S-Type' && (w.parentStarIdx === 0 || w.parentStarIdx === undefined))
         );
         if (primaryWorlds.length > 0) {
-            _drawWorldSet(ctx, primaryWorlds, originX, originY, maxAU, scaledMaxR);
+            _drawWorldSet(ctx, primaryWorlds, originX, originY, maxAU, scaledMaxR, elapsed);
         }
 
         // Stars — topmost layer
@@ -721,15 +818,23 @@ const SystemViewer = (() => {
         return false;
     }
 
-    function _drawWorldSet(ctx, worldList, cx, cy, maxAU, maxPx) {
+    function _drawWorldSet(ctx, worldList, cx, cy, maxAU, maxPx, elapsed = 0) {
         const isBelt = w => w.type === 'Planetoid Belt' || _isMainworldBelt(w);
         const belts  = worldList.filter(isBelt);
         const bodies = worldList.filter(w => !isBelt(w));
 
+        const effectivePSpeed   = PLANET_SPEED_BASE * _planetSpeed;
+        const VISUAL_YEAR_SECS  = effectivePSpeed > 0 ? 2 * Math.PI / effectivePSpeed : Infinity;
+
         belts.forEach(w => {
-            const r    = _logR(w.au || 0, maxAU, maxPx);
-            const isMW = _isMainworldBelt(w);
-            _drawBeltRing(ctx, cx, cy, r, isMW);
+            const r      = _scaleR(w.au || 0, maxAU, maxPx);
+            const isMW   = _isMainworldBelt(w);
+            const au     = Math.max(w.au || 0.1, 0.05);
+            const angVel = w.periodYears
+                ? (2 * Math.PI / w.periodYears) / VISUAL_YEAR_SECS
+                : effectivePSpeed / Math.pow(au, 1.5);
+            const dashOffset = -(angVel * elapsed * r);
+            _drawBeltRing(ctx, cx, cy, r, isMW, dashOffset);
             if (isMW && w.name) {
                 ctx.save();
                 ctx.fillStyle = '#66fcf1';
@@ -745,7 +850,7 @@ const SystemViewer = (() => {
         });
 
         bodies.forEach(w => {
-            const r = _logR(w.au || 0, maxAU, maxPx);
+            const r = _scaleR(w.au || 0, maxAU, maxPx);
             if (r < 2) return;
             ctx.beginPath();
             ctx.arc(cx, cy, r, 0, Math.PI * 2);
@@ -754,13 +859,16 @@ const SystemViewer = (() => {
             ctx.stroke();
         });
 
-        const GOLDEN = 2.39996;
         bodies.forEach((w, idx) => {
-            const r     = _logR(w.au || 0, maxAU, maxPx);
-            const angle = idx * GOLDEN - Math.PI / 2;
-            const px    = cx + r * Math.cos(angle);
-            const py    = cy + r * Math.sin(angle);
-            _drawWorld(ctx, w, px, py);
+            const r      = _scaleR(w.au || 0, maxAU, maxPx);
+            const au     = Math.max(w.au || 0.1, 0.05);
+            const angVel = w.periodYears
+                ? (2 * Math.PI / w.periodYears) / VISUAL_YEAR_SECS
+                : effectivePSpeed / Math.pow(au, 1.5);
+            const angle  = idx * GOLDEN - Math.PI / 2 + angVel * elapsed;
+            const px     = cx + r * Math.cos(angle);
+            const py     = cy + r * Math.sin(angle);
+            _drawWorld(ctx, w, px, py, elapsed);
         });
     }
 
@@ -768,12 +876,14 @@ const SystemViewer = (() => {
 
     function _drawStarField(ctx, W, H) {
         ctx.save();
-        for (let i = 0; i < 220; i++) {
-            const x = (i * 7919 + 131) % W;
-            const y = (i * 6271 + 179) % H;
-            const r = i % 5 === 0 ? 0.9 : 0.45;
-            ctx.globalAlpha = 0.10 + (i % 6) * 0.04;
-            ctx.fillStyle   = '#ffffff';
+        ctx.fillStyle = '#ffffff';
+        let s = 0xdeadbeef;
+        const _r = () => { s = (Math.imul(s ^ (s >>> 16), 0x45d9f3b) + 1) | 0; return (s >>> 0) / 0x100000000; };
+        for (let i = 0; i < 280; i++) {
+            const x = _r() * W;
+            const y = _r() * H;
+            const r = _r() < 0.18 ? 0.9 : 0.45;
+            ctx.globalAlpha = 0.08 + _r() * 0.22;
             ctx.beginPath();
             ctx.arc(x, y, r, 0, Math.PI * 2);
             ctx.fill();
@@ -833,7 +943,7 @@ const SystemViewer = (() => {
         ctx.restore();
     }
 
-    function _drawWorld(ctx, w, px, py) {
+    function _drawWorld(ctx, w, px, py, elapsed = 0) {
         const r     = _worldBodyRadius(w);
         const color = _worldColor(w);
 
@@ -850,9 +960,17 @@ const SystemViewer = (() => {
         ctx.arc(px, py, r, 0, Math.PI * 2);
         ctx.fill();
 
+        const effectiveMSpeed  = 25 * _planetSpeed * _moonSpeed;
+        const VISUAL_YEAR_SECS = _planetSpeed > 0 ? (2 * Math.PI) / (PLANET_SPEED_BASE * _planetSpeed) : Infinity;
+        const VISUAL_HOUR_SECS = (_moonSpeed > 0 && _planetSpeed > 0)
+            ? VISUAL_YEAR_SECS / (8760 * _moonSpeed) : Infinity;
         const moons = (w.moons || []).filter(m => m.type !== 'Empty');
         moons.forEach((m, mi) => {
-            const mAngle      = Math.PI / 6 + (mi / Math.max(moons.length, 1)) * Math.PI * 2;
+            const pd          = Math.max(m.pd || (mi + 1) * 8, 1);
+            const moonAngVel  = m.periodHrs
+                ? (2 * Math.PI / m.periodHrs) / VISUAL_HOUR_SECS
+                : effectiveMSpeed / Math.pow(pd, 1.5);
+            const mAngle      = Math.PI / 6 + (mi / Math.max(moons.length, 1)) * Math.PI * 2 + moonAngVel * elapsed;
             const mDist       = r + 10 + mi * 6;
             const mx          = px + mDist * Math.cos(mAngle);
             const my          = py + mDist * Math.sin(mAngle);
@@ -896,13 +1014,14 @@ const SystemViewer = (() => {
         _hitBodies.push({ kind: 'world', body: w, cx: px, cy: py, r: Math.max(r + 9, 14) });
     }
 
-    function _drawBeltRing(ctx, cx, cy, r, isMainworld = false) {
+    function _drawBeltRing(ctx, cx, cy, r, isMainworld = false, dashOffset = 0) {
         if (r < 2) return;
         ctx.save();
         ctx.beginPath();
         ctx.arc(cx, cy, r, 0, Math.PI * 2);
-        ctx.strokeStyle = isMainworld ? '#4fc3a188' : '#88888855';
-        ctx.lineWidth   = isMainworld ? 7 : 5;
+        ctx.strokeStyle    = isMainworld ? '#4fc3a188' : '#88888855';
+        ctx.lineWidth      = isMainworld ? 7 : 5;
+        ctx.lineDashOffset = dashOffset;
         ctx.setLineDash([3, 7]);
         ctx.stroke();
         ctx.setLineDash([]);
@@ -1061,9 +1180,19 @@ const SystemViewer = (() => {
             if (m.size != null)    html += `<div>Size: ${m.size}</div>`;
 
         } else if (hit.kind === 'belt') {
-            html += `<div style="color:#66fcf1;margin-bottom:5px">Planetoid Belt</div>`;
+            const beltName = body.name ? `${body.name} ` : '';
+            html += `<div style="color:#66fcf1;margin-bottom:5px;border-bottom:1px solid #45a29e44;padding-bottom:4px">`;
+            html += `${beltName}<span style="color:#8a8f94">(Planetoid Belt)</span></div>`;
+            if (body.orbitId != null) html += `<div>Orbit #: ${body.orbitId.toFixed ? body.orbitId.toFixed(2) : body.orbitId}</div>`;
             if (body.au)              html += `<div>Distance: ${body.au.toFixed(3)} AU</div>`;
-            if (body.orbitId != null) html += `<div>Orbit #: ${body.orbitId}</div>`;
+            if (body.uwp)             html += `<div style="margin-top:4px">UWP: <strong>${body.uwp}</strong></div>`;
+            if (body.starport)        html += `<div>Spaceport: ${body.starport}</div>`;
+            if (body.tl != null)      html += `<div>TL: ${body.tl}</div>`;
+            if (body.tradeCodes && body.tradeCodes.length)
+                                      html += `<div>Codes: ${body.tradeCodes.join(' ')}</div>`;
+            if (body.travelZone && body.travelZone !== 'G')
+                                      html += `<div>Zone: ${body.travelZone}</div>`;
+            if (body.resourceRating != null) html += `<div style="margin-top:4px">Resource: ${body.resourceRating}</div>`;
         }
 
         _tooltip.innerHTML = html;

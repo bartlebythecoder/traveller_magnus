@@ -221,7 +221,7 @@
         const mwPop = mainworldBase ? (mainworldBase.popCode !== undefined ? mainworldBase.popCode : mainworldBase.pop) : 0;
 
         allWorlds.forEach(w => {
-            if (w.type === 'Empty' || w.type === 'Mainworld' || w.isLunarMainworld || w.type === 'Gas Giant' || w.type === 'Planetoid Belt') return;
+            if (w.type === 'Empty' || w.type === 'Mainworld' || w.isLunarMainworld || w.type === 'Gas Giant') return;
 
             const pop = w.popCode !== undefined ? w.popCode : w.pop;
 
@@ -254,7 +254,7 @@
         const mwTL = (mainworldBase && mainworldBase.tl !== undefined) ? mainworldBase.tl : 0;
 
         allWorlds.forEach(w => {
-            if (w.type === 'Empty' || w.type === 'Mainworld' || w.isLunarMainworld || w.type === 'Gas Giant' || w.type === 'Planetoid Belt') return;
+            if (w.type === 'Empty' || w.type === 'Mainworld' || w.isLunarMainworld || w.type === 'Gas Giant') return;
 
             const pop = w.popCode !== undefined ? w.popCode : w.pop;
             if (pop === 0) return; // Handled above

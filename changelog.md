@@ -1,5 +1,13 @@
-# Changelog
-### [v0.10.2.1] - In Progress
+### [v0.11.0] - 2026-05-21
+1. **System Viewer:** Zoom into system with details and see orbiting worlds and moons
+2. **RTT World Gen:**  Enable RTT World Gen exports; can now be imported into travellermap
+3. **RTT World Gen:**  Add settings to change default Settlement, TL value and use Industry instead of TL in UWP
+4. **Mongoose Engine:** Added setting to force Minimal Sustainable Tech levels
+5. **All Engines:** Added Mod and Max settings for Starport, Pop, and TL for customizing builds for colonies, frontiers etc
+6. **Import TSV:** Fixed bug that did not clear sector chosen for import before importing
+7. **Import Universe:** Added option to include Terry Mixon Foreven sector in Universe Import
+
+### [v0.10.2.1] - 2026-05-18
 1. **Allegiances:**  Removed Allegiance Manager (added in v0.10.2.1 because Travellermap borders do not syncronize with Travellermap allegiances the way I assumed they did)
 2. **Borders:** Redesigned border logic to better match travellermap requirements
 3. **Borders:** Added border-fill option (replicates what Allegiance Manager was trying to do)

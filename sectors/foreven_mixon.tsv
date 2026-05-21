@@ -1,0 +1,357 @@
+Sector	SS	Hex	Name	UWP	Bases	Remarks	Zone	PBG	Allegiance	Stars	{Ix}	(Ex)	[Cx]	Nobility	W	RU
+		0103	Ezjavrcha           	E5589BD-3	  		 	014	ZhIN	G3 V        						
+		0104	Fadishivr           	B35A315-E	  		 	033	ZhIN	A3 II       						
+		0202	Tlensheplie         	D100201-9	  		 	020	ZhIN	M4 V D M5 VI						
+		0203	Frinzhqlekl         	C8A4597-9	  		 	201	ZhIN	K8 V        						
+		0302	Odlaj               	E400432-8	  		 	102	ZhIN	F9 V        						
+		0304	Iatsvlabl           	A56A846-B	  		 	004	ZhIN	K3 V        						
+		0305	Anzplefral          	D300420-A	  		 	005	ZhIN	G3 V D      						
+		0306	Tefechij            	D787558-3	  		 	014	ZhIN	M2 II       						
+		0308	Brajshtaz           	B100699-E	  		 	005	ZhIN	K0 V M4 V   						
+		0309	Chanzqlibr          	C400896-B	  		 	000	ZhIN	G4 III      						
+		0401	Tledlziad           	C300879-A	  		 	004	ZhIN	M3 V        						
+		0402	Stietlid            	D68A554-6	  		 	003	ZhIN	A7 V        						
+		0403	Shivva              	C535552-7	  		 	524	ZhIN	G2 V        						
+		0404	Diachiniem          	C554676-9	  		 	304	ZhIN	F8 V        						
+		0408	Zhodrkradl          	D997648-1	  		 	004	ZhIN	K1 V M3 V   						
+		0502	Niaql               	A556566-B	  		 	011	ZhIN	G0 V        						
+		0503	Izdeprjdia          	E420699-7	  		 	000	ZhIN	M5 V D      						
+		0504	Ezh Zafr            	B863541-7	  		 	004	ZhIN	G4 III      						
+		0507	Ishitlidl           	E400210-9	  		 	002	ZhIN	K6 V        						
+		0508	Planchiefl          	C9B2522-9	  		 	005	ZhIN	M5 V D      						
+		0604	Padrebr             	X355333-3	  		 	003	ZhIN	G9 V D      						
+		0607	Antneflkra          	B89A245-8	  		 	015	ZhIN	G3 III M3 V 						
+		0610	Dliatsia            	X757435-3	  		 	004	ZhIN	F9 V D      						
+		0708	Pa Flavr            	B66A767-C	  		 	002	ZhIN	G1 V        						
+		0801	Ezh Etsia           	D965633-4	  		 	003	ZhIN	G4 V        						
+		0807	Seqi                	B9A7769-A	  		 	201	ZhIN	G2 V        						
+		0810	Sutiano             	C400340-9	  		 	712	ZhIN	F9 V						
+		0902	Ojovshala           	D100650-9	  		 	020	ZhIN	G2 V        						
+		0908	Friazhdial          	X77A455-3	  		 	024	ZhIN	G1 V        						
+		0909	Jdatshiedl          	E300000-0	  		 	613	ZhIN	F1 V        						
+		0910	Shtiem              	C110301-A	  		 	104	ZhIN	G5 V        						
+		1007	Viplshanch          	B1008CC-E	  		 	003	ZhIN	K2 V        						
+		1102	Ezh Bova            	A723788-D	  		 	003	ZhIN	G9 V        						
+		1103	Vrarnjiavl          	E997335-5	  		 	002	ZhIN	M3 V D      						
+		1109	Yejaple             	B205542-C	  		 	412	ZhIN	F5 V D      						
+		1205	Rabrplibli          	B4007BC-D	  		 	023	ZhIN	F6 V D      						
+		1209	Jiatsar             	E330223-6	  		 	211	ZhIN	F3 V        						
+		1303	Apltla              	X76737B-0	  		 	302	ZhIN	F9 V        						
+		1304	Fliaza              	C322144-8	  		 	013	ZhIN	G5 V        						
+		1307	Shiplielot          	C7A3113-A	  		 	004	ZhIN	G2 V        						
+		1403	Flieflienz          	D00065A-B	  		 	010	ZhIN	M1 V D      						
+		1404	Lieber              	D876647-6	  		 	010	ZhIN	G3 V D      						
+		1405	Inzens              	E567211-7	  		 	003	ZhIN	G9 V        						
+		1410	Stablolins          	C400555-9	  		 	002	ZhIN	G4 V        						
+		1501	Prozashiz           	D300333-9	  		 	010	ZhIN	G5 V        						
+		1504	Shetsodrev          	B7957A9-9	  		 	011	ZhIN	G0 V        						
+		1507	Lianzhjinj          	E67A68A-4	  		 	014	ZhIN	K4 IV M6 V  						
+		1602	Chiazeaz            	A6B1869-C	  		 	002	ZhIN	K4 V        						
+		1701	Ezh Ieets           	B9C77AA-A	  		 	002	ZhIN	G3 V D      						
+		1703	Jdieshaqra          	CAC4441-A	  		 	004	ZhIN	K8 V        						
+		1704	Frapi               	C100968-E	  		 	020	ZhIN	M1 V D      						
+		1804	Blibrafli           	D426100-6	  		 	003	ZhIN	K6 V        						
+		1806	Tladree             	BBC0455-E	  		 	001	ZhIN	G3 V        						
+		1807	Ibiedl              	D432320-9	  		 	015	ZhIN	M3 V        						
+		1808	Tseplezvie          	BFFA466-E	  		 	003	ZhIN	F1 V        						
+		1901	Qrikliev            	C9E969A-A	  		 	002	ZhIN	F9 V        						
+		1905	Entians             	E469000-0	  		 	123	ZhIN	G4 V        						
+		2002	Eqrebr              	D66A215-6	  		 	005	ZhIN	M8 II M3 V  						
+		2003	Ezh Kadep           	B477ADE-A	  		 	305	ZhIN	G3 V        						
+		2005	Ratanshont          	B300756-C	  		 	004	ZhIN	M3 V D      						
+		2102	Oplzenzh            	D510111-9	  		 	004	ZhIN	F7 V D D    						
+		2103	Ziatip              	E679100-6	  		 	002	ZhIN	G8 IV       						
+		2202	Pepraet             	B7C1786-B	  		 	000	ZhIN	M7 V D      						
+		2209	Caglop              	X540000-0	  		 	001	ZhIN	G2 V        						
+		2304	Praienz             	A6699DG-9	  		 	003	ZhIN	M6 V        						
+		2306	Zhdejtlia           	E10068A-A	  		 	004	ZhIN	M1 V D      						
+		2309	Dybun               	X410000-0	  		 	004	ZhIN	F6 V        						
+		2310	Sayploc             	X5A6000-0	  		 	005	ZhIN	G1 V        						
+		2501	Stablstiaiql        	C540560-6	  		 	004	ZhIN	K4 V        						
+		2502	Aba                 	C7585A9-8	  		 	023	ZhIN	M6 V D D    						
+		2602	Kloiabr             	B544434-A	  		 	020	ZhIN	K8 V D D    						
+		2603	Bivreble            	E526211-7	  		 	901	ZhIN	M4 V        						
+		2607	Azesiatl            	B422575-D	  		 	015	ZhIN	M9 V D      						
+		2608	Stiviaz             	C4475AA-5	  		 	002	ZhIN	K9 V        						
+		2610	Idlzhatl            	B8A0466-C	  		 	004	ZhIN	G0 V        						
+		2710	Inshzdans           	E832847-6	  		 	014	ZhIN	M7 V        						
+		2805	Siablibriats        	B568555-B	  		 	020	ZhIN	M7 V        						
+		2807	Prafniedr           	C5969CD-A	  		 	030	ZhIN	M4 V D      						
+		2808	Siapriao            	B63559A-C	  		 	000	ZhIN	M9 V        						
+		2905	Pliakrdla           	D689575-8	  		 	013	ZhIN	G9 V        						
+		2907	Yim                 	A5436A9-C	  		 	030	ZhIN	M2 V D D    						
+		2910	Zdiiel              	C438141-B	  		 	010	ZhIN	G4 V        						
+		3003	Rayarkfost          	B535987-C	  		 	323	ZhIN	M3 V D      						
+		3006	Brimatij            	B100667-B	  		 	025	ZhIN	M9 V D      						
+		3107	Tiens Parde         	C200125-A	  		 	302	ZhIN	G3 III M3 V 						
+		3108	Nianshse            	B000845-E	  		 	010	ZhIN	M5 V D      						
+		3201	Zde'dier            	B757333-9	  		 	002	ZhIN	G3 V        						
+		3204	Iasha               	C5107BD-8	  		 	014	ZhIN	M2 V D      						
+		3205	Jdiaiekl            	E100200-B	  		 	010	ZhIN	M6 V D      						
+		3206	Bri'zdapienz        	ABC48CF-B	  		 	010	ZhIN	F0 V D      						
+		0112	Zdata               	B457650-9	  		 	901	ZhIN	G9 V D      						
+		0113	Zabl                	D850200-9	  		 	002	ZhIN	F5 V        						
+		0116	Azhdots             	C9A8446-A	  		 	022	ZhIN	K3 V        						
+		0211	Azh                 	D247110-8	  		 	101	ZhIN	G5 V        						
+		0212	Ientsyopr           	C300213-B	  		 	020	ZhIN	A3 II       						
+		0213	Dled                	E200000-0	  		 	000	ZhIN	K6 V        						
+		0214	Vratsie             	E5209EF-6	  		 	004	ZhIN	K1 V        						
+		0218	Ponchviaq           	C300236-B	  		 	303	ZhIN	G0 V        						
+		0312	Pieplov             	C420657-9	  		 	025	ZhIN	F5 V D      						
+		0411	Brieria             	B531755-C	  		 	005	ZhIN	K3 V D      						
+		0412	Epriatlech          	A7B0887-C	  		 	405	ZhIN	G4 V        						
+		0418	Piesh               	C9B0478-C	  		 	323	ZhIN	G5 V        						
+		0513	Dumosif             	C438100-B	  		 	212	ZhIN	F8 V        						
+		0516	Aflebshaql          	B9D7366-C	  		 	202	ZhIN	G9 V D      						
+		0517	Dliadizh            	C732123-8	  		 	310	ZhIN	G9 V D      						
+		0520	Maple               	C688745-7	  		 	002	XXXX	K2 IV       						
+		0612	Bianz               	E641000-0	  		 	400	ZhIN	G3 V        						
+		0712	Drensblebl          	C987547-9	  		 	003	ZhIN	K4 V        						
+		0716	Plibradr            	D542434-7	  		 	013	ZhIN	G4 V        						
+		0717	Iantzpliq           	C000215-D	  		 	620	ZhIN	G1 V        						
+		0720	Tlesho              	A998844-A	NM		 	435	TlUn	G3 V        						
+		0814	Afriedevr           	X7B3000-0	  		 	010	ZhIN	F1 V        						
+		0815	Brietlmofl          	D845322-5	  		 	014	ZhIN	G3 V        						
+		0818	Eriedlier           	A585563-D	  		 	014	ZhIN	G2 V        						
+		0819	Zhdikevli           	B226586-A	M 		 	023	TlUn	F7 V        						
+		0820	Chtenchee           	C25A694-A	M 		 	002	TlUn	G4 V        						
+		0911	Stradl              	A354623-A	  		 	010	ZhIN	K6 V        						
+		0914	Ora'shtivl          	B888557-B	  		 	000	ZhIN	G9 V        						
+		0915	Chabriaezh          	B56246A-B	  		 	021	ZhIN	F8 V D      						
+		0919	Zdefr               	D000340-A	M 		 	200	TlUn	F9 V        						
+		1012	Il Ser              	B9A656A-C	  		 	011	ZhIN	M2 III      						
+		1111	Rafra               	D510465-9	  		 	024	ZhIN	F6 V D      						
+		1112	Ebriapl             	E100000-0	  		 	022	ZhIN	F9 V        						
+		1115	Azhshinti           	B857544-8	  		 	004	ZhIN	F0 V        						
+		1212	Zdovesil            	A65588A-9	NM		 	203	ZhIN	M9 V D      						
+		1214	Vla Mev             	C7A2458-9	  		 	013	ZhIN	F2 V        						
+		1216	Dla'zevl            	B767837-9	  		 	521	ZhIN	M1 V        						
+		1218	Belt Maginum        	E553000-0	  		 	023	XXXX	F5 V        						
+		1312	Oriaj A'            	D962230-4	  		 	013	ZhIN	G9 V        						
+		1314	Dashiietl           	D9B6100-9	  		 	010	ZhIN	K2 V        						
+		1316	Iazbreliep          	C431400-B	  		 	020	ZhIN	F5 V D      						
+		1317	Clamp               	D56A221-8	  		 	002	XXXX	G3 V M1 V   						
+		1319	Hamagast            	X300000-0	  		 	000	XXXX	G1 V        						
+		1411	Edaj                	XAB5000-0	  		 	024	ZhIN	F9 V        						
+		1412	Enjiaim             	B8D679C-7	  		 	004	ZhIN	F3 V        						
+		1416	Ile Danse           	D878454-6	  		 	120	XXXX	F1 V        						
+		1419	Kormorant           	X100000-0	  		 	001	XXXX	M9 V        						
+		1519	Jaliaia             	C473211-8	  		 	012	XXXX	F9 V D      						
+		1612	Tlivsiqlal          	B598788-8	  		 	002	ZhIN	G1 V        						
+		1617	Battle              	E954320-6	  		 	024	XXXX	M5 V D      						
+		1618	Tlebria             	A798652-D	  		 	225	XXXX	G9 V D      						
+		1619	Gohrost             	E410252-A	  		 	020	XXXX	M3 V D      						
+		1620	Yanagh              	B445452-D	  		 	011	XXXX	K2 V        						
+		1712	Retlkasrnz          	D400533-A	  		 	001	ZhIN	M3 III      						
+		1813	New Keento          	C555256-8	  		 	000	ZhIN	M3 III      						
+		1815	Fonda               	E436000-0	  		 	014	ZhIN	F3 V D      						
+		1816	Cotalu              	D542388-6	  		 	003	ZhIN	M3 V        						
+		1817	Eronirabo           	C300636-9	  		 	003	ZhIN	G1 V D      						
+		1915	Gatina              	B9649B9-B	  		 	211	ZhIN	F7 V        						
+		1920	Lalumostu           	C469777-A	  		 	004	ZhIN	M5 V        						
+		2017	Sturray             	B300543-D	  		 	002	ZhIN	K1 II       						
+		2113	Tasijopze           	B565753-A	  		 	020	ZhIN	F4 V D      						
+		2211	Purfyr              	C100348-A	  		 	312	ZhIN	K1 V        						
+		2214	Ranther             	E333321-8	  		 	003	ZhIN	F5 V        						
+		2311	Lajachi             	D667645-6	  		 	003	ZhIN	M8 V        						
+		2320	Robebi              	B544474-A	  		 	004	ZhIN	F8 V M1 V   						
+		2412	Ibrolelis           	D100324-9	  		 	011	ZhIN	M3 V        						
+		2517	Lanei               	C400578-D	  		 	005	XXXX	M2 III      						
+		2518	Lorelei             	C102342-A	  		 	310	XXXX	F2 V D      						
+		2520	Rematen             	B9C47A8-B	  		 	001	XXXX	G2 IV       						
+		2611	Okopivo             	E9D2100-6	  		 	020	XXXX	M0 V        						
+		2613	Orval               	C8A6556-B	  		 	902	XXXX	K1 V M3 V   						
+		2614	Nilestart           	BCE777B-9	  		 	411	XXXX	F7 V        						
+		2615	Cigura              	C30079A-9	  		 	001	XXXX	G6 V        						
+		2616	Blukjere            	A210887-D	  		 	113	XXXX	F2 V D      						
+		2712	Roopolaty           	A444998-E	  		 	320	XXXX	F8 V        						
+		2715	Cadabibado          	B430887-C	  		 	304	XXXX	F5 V D M2 V 						
+		2811	Esia'dria           	B57A663-A	  		 	702	ZhIN	G5 V        						
+		2812	Agnasti             	X200000-0	  		 	000	XXXX	K2 V        						
+		2814	Fessor              	B4007AB-B	  		 	001	XXXX	M3 V D      						
+		2820	Ynotpu              	B532647-B	  		 	002	XXXX	G6 IV       						
+		2920	Ecahesa             	D67A246-5	  		 	025	XXXX	M3 V        						
+		3013	Askadero            	B524575-C	  		 	013	XXXX	K4 V        						
+		3014	Apinanto            	C210433-8	  		 	003	XXXX	M6 V        						
+		3015	Pynchan             	D643420-7	  		 	212	XXXX	G0 V        						
+		3018	Parthinia           	C694655-C	  		 	012	XXXX	F9 V        						
+		3020	Gwydion             	C899366-8	  		 	010	XXXX	G5 V D      						
+		3111	Ugenie              	C5A5567-9	  		 	014	XXXX	F8 V        						
+		3115	Lanilre             	C568984-9	  		 	014	XXXX	A7 V        						
+		3116	Malefolge           	C520445-A	  		 	512	XXXX	G3 V        						
+		3119	Wadanga             	B301597-A	  		 	003	XXXX	K0 V M4 V   						
+		3212	Koskepoc            	A7869AC-C	  		 	504	XXXX	F1 V        						
+		3214	Saphi               	A0008BE-C	  		 	412	XXXX	M2 II       						
+		3215	Calo                	B510658-A	  		 	105	XXXX	G3 V        						
+		3217	Elindu              	CAEA543-9	  		 	024	XXXX	F4 V        						
+		0129	Canwell             	E897478-8	  		 	001	XXXX	G2 V        						
+		0130	Ablets              	D543553-7	  		 	014	XXXX	F2 V D      						
+		0223	Penud               	C447474-B	  		 	023	XXXX	M4 V        						
+		0224	Syngok              	B56A363-B	  		 	002	XXXX	M3 V D      						
+		0226	Coolie              	C410200-C	  		 	010	XXXX	G2 V D      						
+		0227	Mospat              	A5628BA-D	  		 	004	XXXX	M2 II       						
+		0422	Ceysteni            	C9E8338-9	  		 	004	XXXX	K8 V        						
+		0424	Hallap              	C7A5232-9	  		 	000	XXXX	G4 V        						
+		0426	Wanb                	C7A65AB-9	  		A	025	XXXX	F5 V        						
+		0526	Meltrand            	X321000-0	  		 	903	XXXX	F5 V D      						
+		0527	Alista              	C689775-7	  		 	424	XXXX	G1 V        						
+		0623	Ebsa                	C854858-8	  		 	012	XXXX	G9 V M3 V   						
+		0723	San Soisva          	E752143-5	  		 	011	XXXX	F6 V        						
+		0730	Ghost               	C300344-B	  		 	010	XXXX	G2 IV       						
+		0822	Logan               	X200000-0	  		 	003	XXXX	F0 V        						
+		0825	White Hart          	X677776-4	  		 	100	XXXX	G5 V D      						
+		0926	Highbury            	A458844-C	  		 	313	XXXX	F7 V        						
+		0930	Garbo               	B66A524-A	  		 	030	XXXX	M2 V        						
+		1026	Anfield             	B567689-A	  		 	004	XXXX	M8 V        						
+		1124	Solochov            	X962000-0	  		 	014	XXXX	F0 V        						
+		1126	Trafford            	E578300-8	  		 	023	XXXX	F6 V D      						
+		1224	Pasternak           	E666000-0	  		 	003	XXXX	G0 V D      						
+		1325	Bunin               	E755000-0	  		 	010	XXXX	M0 V        						
+		1329	Unaski              	C200778-A	  		 	000	XXXX	M4 V        						
+		1330	Ninox               	C768245-6	  		 	004	XXXX	F7 II       						
+		1422	Telypo              	X688000-0	  		 	004	XXXX	F7 V D      						
+		1423	Totashev            	X676000-0	  		 	300	XXXX	G8 V D      						
+		1426	Bamse               	C536315-A	  		 	003	XXXX	F2 V        						
+		1427	Evaberi             	C561444-8	  		 	004	XXXX	M2 V        						
+		1428	Spokes              	C8A0200-B	  		 	015	XXXX	M0 V        						
+		1429	Titan               	X532000-0	  		 	013	XXXX	F7 V        						
+		1523	Nordstrom           	X587000-0	  		 	001	XXXX	M5 V        						
+		1528	Pudimon             	E569473-6	  		 	013	XXXX	G8 V        						
+		1622	Naphopi             	X311000-0	  		 	411	XXXX	F1 V M7 V   						
+		1628	Hepring             	B6A698A-9	  		 	203	XXXX	G8 V        						
+		1630	Lun Escarpa         	B400310-C	  		 	104	AvCo	F9 V D      						
+		1724	Sypot               	C673423-9	  		 	005	XXXX	M2 V        						
+		1725	Lubote              	E223686-3	  		 	004	XXXX	M1 V D      						
+		1726	Koshadi             	D300450-9	  		 	012	XXXX	G3 V        						
+		1728	Torinsk             	D100253-C	  		 	000	XXXX	M8 V        						
+		1729	Mahir               	C337400-8	  		 	002	XXXX	M8 V D      						
+		1822	Onohemu             	E431147-7	  		 	010	XXXX	F3 IV       						
+		1828	Xenough             	C233200-8	  		 	013	XXXX	G3 V        						
+		1926	Tepenke             	X986346-2	  		 	001	XXXX	G8 V        						
+		1927	Dibelon             	E666988-7	  		 	714	XXXX	M0 V        						
+		2021	Debagu              	D000576-A	  		 	032	XXXX	A9 IV       						
+		2022	Notaneja            	D552632-4	  		 	003	XXXX	F6 V        						
+		2023	Tubadeja            	E642777-8	  		 	002	XXXX	G3 V M6 V D 						
+		2121	Sizapooma           	D632789-6	  		 	001	XXXX	M1 V D      						
+		2123	Bava World          	C520336-8	  		 	005	XXXX	G8 V D      						
+		2128	Nesturgi            	D659241-8	  		 	004	XXXX	F9 V        						
+		2225	Daba                	A887694-A	  		 	003	XXXX	G4 V        						
+		2230	Lador               	C8B2301-9	  		 	800	XXXX	F9 V D D    						
+		2325	Dengvin             	C400211-B	  		 	313	XXXX	K2 V        						
+		2326	Asyrog              	C775574-9	  		 	414	XXXX	F5 V        						
+		2328	Manifesto           	E755733-3	  		 	001	XXXX	K8 V D      						
+		2422	Anipaso             	C100121-A	  		 	002	XXXX	M0 V        						
+		2427	Kahitse             	B10078D-A	  		 	200	XXXX	F0 V D      						
+		2428	Lenin               	B647789-9	  		 	303	XXXX	G3 V M3 V   						
+		2429	Tunmoposu           	B337579-B	  		 	004	XXXX	F6 V D      						
+		2430	Rantatte            	E30058C-9	  		 	001	XXXX	M5 V        						
+		2523	Hollis              	A370642-C	NS		 	003	CsIm	M3 V        						
+		2527	Ryanbiwul           	D426566-8	  		 	003	XXXX	F9 V        						
+		2528	Ontsi               	C7A4537-9	  		 	002	XXXX	F7 V        						
+		2623	Gitts               	C100576-C	  		 	004	XXXX	K0 V        						
+		2724	Syl                 	C68A530-7	  		 	014	XXXX	G0 III M7 V 						
+		2822	Genape              	E320434-8	  		 	002	XXXX	M8 V        						
+		2823	Taypikacho          	C753875-A	  		 	400	XXXX	F5 V M9 V   						
+		2829	Orynphant           	C421753-B	  		 	000	XXXX	G9 V        						
+		2923	Attbegasu           	C753875-A	  		 	000	XXXX	F3 V D      						
+		2924	Jadrin              	A411652-D	  		 	404	XXXX	K0 V M2 V   						
+		2925	Reidain             	C4048DD-9	  		 	002	XXXX	G5 V D      						
+		2926	Lenskansi           	B572899-9	  		 	033	XXXX	A0 V        						
+		2927	Danalipa            	B7A9534-C	  		 	000	XXXX	M6 V        						
+		3021	Isheydkoka          	C20157A-C	  		 	002	XXXX	G2 V        						
+		3027	Gijisapo            	C000220-B	  		 	012	XXXX	F1 IV       						
+		3028	Inpota              	C100220-A	  		 	000	XXXX	K4 V M6 V   						
+		3126	Sowponanho          	E69A476-9	  		 	703	XXXX	G4 V        						
+		3129	Tadasvena           	B9A0521-C	  		 	002	XXXX	F4 V M4 V   						
+		3227	Lopiengeta          	C313300-C	  		 	003	XXXX	F3 V        						
+		3229	Alenzar             	C000414-9	  		 	013	CsIm	G0 V        						
+		3230	Raschev             	C8697C4-6	  		 	823	CsIm	F9 V        						
+		0131	Bender              	A654956-E	  		 	904	XXXX	G6 V        						
+		0135	Konnel              	D400426-9	  		 	023	XXXX	M7 V D      						
+		0136	Pinkel              	D215223-9	  		 	302	XXXX	F1 V M3 V   						
+		0232	Junnice             	E76A646-7	  		 	022	XXXX	G2 IV       						
+		0235	Kelly               	X779000-0	  		 	003	XXXX	M0 V        						
+		0236	Cauchon             	C400773-A	  		 	024	XXXX	F3 III      						
+		0239	Esker               	C410433-9	  		 	020	XXXX	K2 V        						
+		0332	Thorhault           	A979657-D	  		 	112	XXXX	G3 V D      						
+		0335	Baldur              	D500100-8	  		 	015	XXXX	G4 V        						
+		0336	Cale                	E475475-5	  		 	004	XXXX	M6 V        						
+		0431	Guam Go             	X200000-0	  		 	000	XXXX	G1 V D      						
+		0436	Spirit              	C400420-A	  		 	014	XXXX	M2 V        						
+		0437	Mossip              	E58A69C-8	  		 	004	XXXX	G4 V        						
+		0439	Aren-Karu           	B58687B-9	  		 	300	XXXX	F7 V D      						
+		0538	Rull                	B668879-B	  		 	004	XXXX	K8 V        						
+		0633	Bail                	A437585-D	  		 	005	XXXX	F9 V        						
+		0634	Mape                	X536000-0	  		 	020	XXXX	K1 V        						
+		0639	Maru                	B232341-D	  		 	010	XXXX	M2 V        						
+		0732	Forget              	D510241-8	  		 	000	XXXX	K4 V        						
+		0734	Foop                	X8B4000-0	  		 	012	XXXX	G8 V        						
+		0735	Connaught           	D300111-A	  		 	902	XXXX	F5 V        						
+		0837	Ripost              	C89967A-9	  		 	040	XXXX	F4 V D      						
+		0839	Ventnor             	A677887-B	  		 	012	XXXX	M3 V        						
+		0840	Ovant               	C7C0323-B	  		 	021	XXXX	F6 V        						
+		0935	Wright              	C57488D-9	  		R	205	XXXX	F8 V D      						
+		1032	Ninang              	X000000-0	  		 	003	XXXX	M1 V D      						
+		1039	Denanus             	C777554-8	  		 	014	XXXX	F1 V D      						
+		1139	Vanja               	B8A0722-A	  		 	032	XXXX	M4 V        						
+		1140	Soonrod             	D578753-6	  		 	042	XXXX	F9 V        						
+		1234	Amanecer            	C212347-9	  		 	001	AvCo	M3 V D      						
+		1239	Wakato              	E5627AD-3	  		 	023	XXXX	K6 V        						
+		1240	Bophani             	B73257A-9	  		 	012	XXXX	F2 V        						
+		1335	Ardiente            	B461885-B	  		 	001	AvCo	F3 V D      						
+		1432	Rocaroja            	B100798-A	N 		 	224	AvCo	G1 V        						
+		1534	Acerbo              	E877100-7	  		 	010	AvCo	K2 V        						
+		1536	Lun Varga           	C336412-9	  		 	212	AvCo	G8 V        						
+		1539	Horizonte           	D87A653-6	  		 	221	AvCo	F7 V        						
+		1631	Buergeria           	C542635-6	  		 	101	AvCo	F5 V D      						
+		1632	Escandi             	E746321-3	  		 	001	AvCo	M8 II M3 V  						
+		1634	Hortali             	A9B8787-C	  		 	000	AvCo	G8 IV       						
+		1636	AVALAR              	A75599C-C	N 		 	204	AvCo	G9 V        						
+		1637	Tranquilidad        	C669638-8	  		 	120	AvCo	F6 V D M1 V 						
+		1639	Lun Estrad          	B4346A8-A	  		 	514	AvCo	G9 V        						
+		1640	Orilla              	B400233-C	N 		 	020	AvCo	F1 V        						
+		1734	Pres Tinto          	B452464-C	NM		 	100	AvCo	F5 V        						
+		1738	Pres Alfa           	B443454-C	NM		 	015	AvCo	F5 V        						
+		1739	Lun Rico            	D442221-7	  		 	013	AvCo	M3 V M3 V   						
+		1833	Salacia             	C98A154-C	  		 	225	AvCo	G7 V        						
+		1834	CloaciXXXX          	C510647-8	  		 	023	AvCo	K1 V D      						
+		1840	Atun                	C66A336-A	  		 	524	AvCo	F5 V D      						
+		1936	Tresca              	D76A340-6	  		 	925	AvCo	G4 V        						
+		1938	Zuekgoz             	C657864-6	  		A	014	AvCo	M4 V        						
+		2040	Tapsa-64            	C989401-8	  		 	022	XXXX	M0 V D      						
+		2135	Fragos              	A000641-C	N 		 	005	AvCo	A4 II       						
+		2136	Ninfa               	B567757-B	  		 	005	AvCo	F7 V        						
+		2137	Drevas              	D410444-9	  		 	001	AvCo	F1 V        						
+		2231	Merghy              	C8B1536-9	  		 	011	XXXX	G1 V D      						
+		2236	Larissa             	C659841-7	  		 	002	AvCo	F3 V D      						
+		2237	Lun Orcus           	B100341-C	  		 	001	AvCo	K6 V D      						
+		2334	Iptete              	B231642-C	  		 	114	XXXX	F8 V D D    						
+		2335	Shortcut            	D310545-A	  		 	013	XXXX	F8 V        						
+		2431	Kulse               	D56A537-7	  		 	010	XXXX	M9 V D      						
+		2433	Ronsk               	C410231-A	  		 	012	XXXX	M6 III      						
+		2532	Dinpholasy          	C311533-9	  		 	005	XXXX	F1 V        						
+		2537	Lune                	C674346-8	  		 	403	XXXX	G5 V        						
+		2632	Ronu                	C6A2356-B	  		 	002	XXXX	F0 V D      						
+		2634	Lela                	C20069A-8	  		 	012	XXXX	G6 V        						
+		2731	Suspe               	C545756-9	  		 	004	XXXX	G3 V D      						
+		2736	Capshobem           	C767302-7	  		 	013	XXXX	F8 V D      						
+		2739	Nosafo              	A695554-C	  		 	003	XXXX	G7 IV       						
+		2740	Nanno               	C000522-D	  		 	020	XXXX	M5 V        						
+		2833	Urnian              	C400842-9	  		 	413	XXXX	K3 V        						
+		2834	Pylkah              	B100753-C	  		 	205	XXXX	G4 V        						
+		2835	Nato                	C577757-7	  		 	002	XXXX	F0 V        						
+		2836	Okunpamsk           	C6666AB-7	  		 	012	XXXX	M1 V D      						
+		2838	Ipmokyng            	C231315-B	  		 	004	XXXX	K0 V        						
+		2934	Udika               	CAD46AB-8	  		 	005	XXXX	F5 V        						
+		2935	Ovdyo               	D100457-B	  		 	015	XXXX	M1 V        						
+		2937	Kutadis             	B54698B-C	  		 	024	XXXX	G1 V D      						
+		2938	Cinboshabo          	C210699-9	  		 	014	XXXX	M1 V        						
+		2940	Tenynti             	C4558CB-6	  		 	014	XXXX	F3 V        						
+		3034	Vapchy              	D641530-6	  		 	004	XXXX	F7 V        						
+		3035	Gotylu              	E574346-6	  		 	324	XXXX	G3 V        						
+		3037	Novoterre           	C2038B9-9	  		 	404	XXXX	F5 V        						
+		3131	Benoncra            	C301575-A	  		 	003	XXXX	M5 V D      						
+		3134	Lorapa              	C400598-A	  		 	004	XXXX	M3 V        						
+		3135	Mainap              	B310535-B	  		 	013	XXXX	F4 V        						
+		3232	Shofrete            	A400658-B	  		 	030	XXXX	G4 III      						
+		3238	Ake                 	B68A325-C	  		 	021	XXXX	K6 V        						

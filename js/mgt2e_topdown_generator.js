@@ -293,7 +293,27 @@
 
         // --- PHASE 1: PHYSICAL AUDIT & REPAIR ---
         // Socio-economic engines require certain physical foundations (Resource Rating, Habitability, Day Length).
-        // We surgery repair these ONLY if they are missing, preserving existing manual edits.
+        // Snapshot all existing body fields before repairs run so we can restore them afterward.
+        // This guarantees repairs only ADD missing fields and never overwrite values already in the loaded JSON.
+        const _snapBody = (body) => {
+            const snap = {};
+            for (const [key, val] of Object.entries(body)) {
+                if (val !== null && typeof val === 'object' && !Array.isArray(val)) continue;
+                snap[key] = Array.isArray(val) ? val.slice() : val;
+            }
+            return snap;
+        };
+        const _collectSnapshots = (bodies, map) => {
+            if (!bodies) return;
+            for (const w of bodies) {
+                map.set(w, _snapBody(w));
+                _collectSnapshots(w.moons, map);
+                _collectSnapshots(w.significantBodies, map);
+            }
+        };
+        const bodySnapshots = new Map();
+        _collectSnapshots(sys.worlds, bodySnapshots);
+
         if (WorldEngine) {
             let rootsToRepairRot = [];
             let rootsToRepairBio = [];
@@ -322,6 +342,15 @@
             // 2. Biospherics & Resources (Resource Rating, Habitability, Seismic)
             if (rootsToRepairBio.length > 0 && WorldEngine.generateBiospherics) {
                 WorldEngine.generateBiospherics(sys, { targetWorlds: rootsToRepairBio, mainworldBase: mainworldBase });
+            }
+        }
+
+        // Restore: overwrite any field the repair passes changed back to its pre-repair value.
+        // Fields that were missing before (e.g. habitability) were absent from the snapshot,
+        // so they remain as newly-generated values.
+        for (const [body, snap] of bodySnapshots) {
+            for (const [key, val] of Object.entries(snap)) {
+                body[key] = val;
             }
         }
 

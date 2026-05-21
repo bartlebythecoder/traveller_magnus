@@ -260,8 +260,18 @@ function generateRTTSectorBiographer(sys, options = {}) {
     }
 
     // 3. SOCIAL GENERATION & BIOGRAPHY DUMP
-    const dominantTL = options.dominantTL || 12;
-    const settlementCenturies = options.settlementCenturies || 2;
+    const settingsTlMod = (typeof window !== 'undefined' && window.generationTlMod !== undefined) ? window.generationTlMod : 0;
+    const settingsTlMax = (typeof window !== 'undefined' && window.generationTlMax !== undefined) ? window.generationTlMax : 20;
+    const baseDominantTL = options.dominantTL !== undefined
+        ? options.dominantTL
+        : (window.generationRttTL !== undefined ? window.generationRttTL : 15);
+    const dominantTL = Math.min(baseDominantTL + settingsTlMod, settingsTlMax);
+    tResult('Settings TL Modifier', settingsTlMod !== 0 ? `${settingsTlMod > 0 ? '+' : ''}${settingsTlMod} (${baseDominantTL} → ${baseDominantTL + settingsTlMod})` : 'None (0)');
+    tResult('Settings TL Max', dominantTL < baseDominantTL + settingsTlMod ? `Cap applied: ${baseDominantTL + settingsTlMod} → ${dominantTL}` : `No cap (${baseDominantTL + settingsTlMod} ≤ ${settingsTlMax})`);
+    tResult('Dominant TL', dominantTL);
+    const settlementCenturies = options.settlementCenturies !== undefined
+        ? options.settlementCenturies
+        : (window.generationRttSettlement !== undefined ? window.generationRttSettlement : 2);
 
     for (let star of sys.stars) {
         if (!star.planetarySystem) continue;
@@ -1455,9 +1465,8 @@ function processRTTSocialStats(body, star, dominantTL, settlementCenturies, opti
     } else if (body.habitationType === 'Colony') {
         let maxPop = Math.max(0, (body.desirability || 0) + (tRollD3('Pop Var') - tRollD3('Pop Var')));
         let pop = dominantTL + settlementCenturies - 9;
-        body.population = Math.max(0, Math.min(pop, maxPop));
-        body.population = Math.max(4, body.population); // CLAMP(pop, 4, Max_Pop)
-        if (body.population > maxPop) body.population = Math.max(0, maxPop);
+        body.population = Math.min(pop, maxPop);
+        body.population = Math.max(4, body.population);
 
         body.government = Math.max(0, body.population + tRoll2D('Gov Roll') - 7);
 
@@ -1475,6 +1484,18 @@ function processRTTSocialStats(body, star, dominantTL, settlementCenturies, opti
             body.government = 0;
         } else {
             body.government = Math.max(0, Math.min(6, body.population + tRoll2D('Gov Roll') - 7));
+        }
+    }
+
+    // Settings: Pop Mod (Homeworld only)
+    if (body.habitationType === 'Homeworld') {
+        const settingsPopMod = (typeof window !== 'undefined' && window.generationPopMod !== undefined) ? window.generationPopMod : 0;
+        const prePop = body.population;
+        if (settingsPopMod !== 0) {
+            body.population = Math.max(0, body.population + settingsPopMod);
+            if (typeof tResult !== 'undefined') tResult('Settings Pop Modifier', `${settingsPopMod > 0 ? '+' : ''}${settingsPopMod} (${prePop} → ${body.population})`);
+        } else {
+            if (typeof tResult !== 'undefined') tResult('Settings Pop Modifier', 'None (0)');
         }
     }
 
@@ -1515,6 +1536,17 @@ function processRTTSocialStats(body, star, dominantTL, settlementCenturies, opti
                 tResult('Adjusted Population Code', body.population, 'RTT 3.3: Industry Bonus');
             }
         }
+    // Settings: Pop Max cap (Homeworld only — applied after High Industry bonus)
+    if (body.habitationType === 'Homeworld') {
+        const settingsPopMax = (typeof window !== 'undefined' && window.generationPopMax !== undefined) ? window.generationPopMax : 20;
+        if (body.population > settingsPopMax) {
+            if (typeof tResult !== 'undefined') tResult('Settings Pop Max', `Cap applied: ${body.population} → ${settingsPopMax}`);
+            body.population = settingsPopMax;
+        } else {
+            if (typeof tResult !== 'undefined') tResult('Settings Pop Max', `No cap (${body.population} ≤ ${settingsPopMax})`);
+        }
+    }
+
     body.population = Math.max(0, body.population);
 
     if (typeof tResult !== 'undefined' && body.habitationType !== 'Uninhabited') {
@@ -1597,6 +1629,12 @@ function determineRTTStarport(body, dominantTL) {
     if (codes.includes('Po')) portDM -= 1;
     if (dominantTL <= 9) portDM -= 1;
 
+    // Settings: Starport Modifier
+    const settingsStarportMod = (typeof window !== 'undefined' && window.generationStarportMod !== undefined) ? window.generationStarportMod : 0;
+    if (settingsStarportMod !== 0) tDM('Settings Starport Modifier', settingsStarportMod);
+    else tResult('Settings Starport Modifier', 'None (0)');
+    portDM += settingsStarportMod;
+
     let roll = tRoll2D('Starport Roll') + body.industry - 7 + portDM;
     let port = 'X';
     if (roll <= 2) port = 'X';
@@ -1612,6 +1650,18 @@ function determineRTTStarport(body, dominantTL) {
     let a = getEHex(body.atmosphere);
     let h = getEHex(body.hydrosphere);
     if ((a <= 3 || a >= 10 || h >= 12) && body.population >= 1 && port === 'X') port = 'E';
+
+    // Settings: Starport Max cap
+    const rttStarportOrder = ['A', 'B', 'C', 'D', 'E', 'X'];
+    const settingsStarportMax = (typeof window !== 'undefined' && window.generationStarportMax !== undefined) ? window.generationStarportMax : 'A';
+    const rttSpMaxIdx = rttStarportOrder.indexOf(settingsStarportMax);
+    const rttSpCurIdx = rttStarportOrder.indexOf(port);
+    if (rttSpMaxIdx !== -1 && rttSpCurIdx !== -1 && rttSpCurIdx < rttSpMaxIdx) {
+        tResult('Settings Starport Max', `Cap applied: ${port} → ${settingsStarportMax}`);
+        port = settingsStarportMax;
+    } else {
+        tResult('Settings Starport Max', `No cap (${port} ≤ ${settingsStarportMax})`);
+    }
 
     return port;
 }
@@ -1826,6 +1876,7 @@ function extractRTTMainworld(sys) {
         gov: typeof bestWorld.government === 'number' ? bestWorld.government : getEHex(bestWorld.government),
         law: typeof bestWorld.lawLevel === 'number' ? bestWorld.lawLevel : getEHex(bestWorld.lawLevel),
         tl: getEHex(tl),
+        industry: getEHexLetter(bestWorld.industry || 0),
         tradeCodes: bestWorld.tradeCodes || [],
         bases: bestWorld.bases || [],
         navalBase: (bestWorld.bases || []).includes('N'),

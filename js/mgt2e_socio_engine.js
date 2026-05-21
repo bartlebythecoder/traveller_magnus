@@ -300,11 +300,17 @@
             body.starport = 'Y';
         } else if (body.pop > 0) {
             const baseline = Math.max(0, mainworld.tl - 1);
-            body.tl = baseline; // WBH RAW: Do not bump subordinate UWP TL to meet floor.
+            body.tl = baseline;
             tResult('Baseline Tech Level (Direct Derivation)', body.tl);
 
             if (body.tl < floor) {
-                tResult('Survival State', `Jury-Rigged / Relic Tech (Base TL ${body.tl} < Floor TL ${floor})`);
+                const useTlFloor = (typeof window !== 'undefined' && window.generationUseTlFloor);
+                if (useTlFloor) {
+                    body.tl = floor;
+                    tResult('TL Floor Applied', `Bumped to Atm. Minimum TL ${floor}`);
+                } else {
+                    tResult('Survival State', `Jury-Rigged / Relic Tech (Base TL ${body.tl} < Floor TL ${floor})`);
+                }
             }
         } else {
             tSkip('Population 0 forces Tech Level 0');
@@ -425,7 +431,7 @@
 
             // Skip logic: Only skip empty/giants if they are NOT the Mainworld or a demoted Mainworld.
             const isAnyMainworld = (w.type === 'Mainworld' || w.targetWorld === 'Mainworld' || w.isLunarMainworld);
-            if (!isAnyMainworld && (w.type === 'Empty' || w.type === 'Planetoid Belt' || w.type === 'Gas Giant')) {
+            if (!isAnyMainworld && (w.type === 'Empty' || w.type === 'Gas Giant')) {
                 continue;
             }
 
@@ -2269,7 +2275,7 @@
             tDM('Standard Pop', -2);
             let rawPop = popRoll - 2;
             pop = Math.max(0, rawPop);
-            
+
             if (isNativeSophont) {
                 if (pop < 6) {
                     tOverride('Population Code', pop, 6, 'Native Sophont Minimum');
@@ -2278,6 +2284,30 @@
             } else {
                 if (rawPop !== pop) tClamp('Population', rawPop, pop);
             }
+
+            // Settings: Pop Mod (applied after native sophont floor; cannot circumvent it)
+            const settingsPopMod = (typeof window !== 'undefined' && window.generationPopMod !== undefined) ? window.generationPopMod : 0;
+            if (settingsPopMod !== 0) {
+                const prePop = pop;
+                const modPop = pop + settingsPopMod;
+                const popFloor = isNativeSophont ? 6 : 0;
+                pop = Math.max(popFloor, modPop);
+                tResult('Settings Pop Modifier', `${settingsPopMod > 0 ? '+' : ''}${settingsPopMod} (${prePop} → ${pop})`);
+                if (modPop < popFloor) tClamp('Population (Native Sophont Floor)', modPop, pop);
+            } else {
+                tResult('Settings Pop Modifier', 'None (0)');
+            }
+
+            // Settings: Pop Max cap (always the final decision — overrides native sophont floor)
+            const settingsPopMax = (typeof window !== 'undefined' && window.generationPopMax !== undefined) ? window.generationPopMax : 20;
+            const effectivePopMax = settingsPopMax;
+            if (pop > effectivePopMax) {
+                tResult('Settings Pop Max', `Cap applied: ${pop} → ${effectivePopMax}`);
+                pop = effectivePopMax;
+            } else {
+                tResult('Settings Pop Max', `No cap (${pop} ≤ ${effectivePopMax})`);
+            }
+
             tResult('Population Code', pop);
         }
 
@@ -2302,6 +2332,15 @@
                 starportDM += spData.nativeSophontDM;
             }
 
+            // Settings: Starport Modifier
+            const settingsStarportMod = (typeof window !== 'undefined' && window.generationStarportMod !== undefined) ? window.generationStarportMod : 0;
+            if (settingsStarportMod !== 0) {
+                tDM('Settings Starport Modifier', settingsStarportMod);
+                starportDM += settingsStarportMod;
+            } else {
+                tResult('Settings Starport Modifier', 'None (0)');
+            }
+
             let starportRoll = tRoll2D('Starport');
             let spTotal = starportRoll + starportDM;
             starport = 'X';
@@ -2318,6 +2357,18 @@
                 starport = spTotal <= 2 ? 'X' : spTotal <= 4 ? 'E' : spTotal <= 6 ? 'D' : spTotal <= 8 ? 'C' : spTotal <= 10 ? 'B' : 'A';
             }
             tResult('Starport Class', `${starport} (${spTotal})`);
+
+            // Settings: Starport Max cap
+            const starportOrder = ['A', 'B', 'C', 'D', 'E', 'X'];
+            const settingsStarportMax = (typeof window !== 'undefined' && window.generationStarportMax !== undefined) ? window.generationStarportMax : 'A';
+            const spMaxIdx = starportOrder.indexOf(settingsStarportMax);
+            const spCurIdx = starportOrder.indexOf(starport);
+            if (spMaxIdx !== -1 && spCurIdx !== -1 && spCurIdx < spMaxIdx) {
+                tResult('Settings Starport Max', `Cap applied: ${starport} → ${settingsStarportMax}`);
+                starport = settingsStarportMax;
+            } else {
+                tResult('Settings Starport Max', `No cap (${starport} ≤ ${settingsStarportMax})`);
+            }
         }
 
         if (!hasSocials) {
@@ -2377,10 +2428,26 @@
                 else if (gov === 7) tDM('Government 7', 2);
                 else if (gov >= 13) tDM('Government D+', -2);
 
-                // Calculate Base TL
+                // Settings: TL Modifier (applied as a DM so it appears in the roll total)
+                const settingsTlMod = (typeof window !== 'undefined' && window.generationTlMod !== undefined) ? window.generationTlMod : 0;
+                if (settingsTlMod !== 0) tDM('Settings TL Modifier', settingsTlMod);
+
+                // Calculate Base TL — read pendingRoll BEFORE any tResult/tSection call,
+                // because tResult → writeLogLine → flushPendingRoll sets pendingRoll = null.
                 const currentDMs = typeof pendingRoll !== 'undefined' && pendingRoll && pendingRoll.dms ? pendingRoll.dms.reduce((a, b) => a + b.val, 0) : 0;
                 let rawTl = (typeof pendingRoll !== 'undefined' && pendingRoll ? pendingRoll.val : 0) + currentDMs;
                 let baseTl = Math.max(0, rawTl);
+
+                if (settingsTlMod === 0) tResult('Settings TL Modifier', 'None (0)');
+
+                // Settings: TL Max cap (applied after floor clamp, before environmental check)
+                const settingsTlMax = (typeof window !== 'undefined' && window.generationTlMax !== undefined) ? window.generationTlMax : 20;
+                if (baseTl > settingsTlMax) {
+                    tResult('Settings TL Max', `Cap applied: ${baseTl} → ${settingsTlMax}`);
+                    baseTl = settingsTlMax;
+                } else {
+                    tResult('Settings TL Max', `No cap (${baseTl} ≤ ${settingsTlMax})`);
+                }
 
                 // Enforce Environmental Limits (Minimum TL)
                 if (isNativeSophont && MgT2EData.techLevel.nativeSophontExceptions?.ignoreEnvironmentalMinimums) {
@@ -2389,11 +2456,17 @@
                     tResult('Environmental Minimum Override', 'Ignored for Native Sophonts');
                 } else {
                     let minTl = getMgT2EMinSusTL(atm);
-                    tl = baseTl; // WBH RAW: Do not bump UWP TL to meet floor.
+                    tl = baseTl;
                     if (rawTl !== baseTl) tClamp('Tech Level', rawTl, baseTl);
 
                     if (tl < minTl) {
-                        tResult('Survival State', `Jury-Rigged / Relic Tech (Base TL ${tl} < Floor TL ${minTl})`);
+                        const useTlFloor = (typeof window !== 'undefined' && window.generationUseTlFloor);
+                        if (useTlFloor && baseTl < settingsTlMax) {
+                            tl = Math.min(minTl, settingsTlMax);
+                            tResult('TL Floor Applied', `Bumped to Atm. Minimum TL ${tl} (floor: ${minTl})`);
+                        } else {
+                            tResult('Survival State', `Jury-Rigged / Relic Tech (Base TL ${tl} < Floor TL ${minTl})`);
+                        }
                     }
                 }
 

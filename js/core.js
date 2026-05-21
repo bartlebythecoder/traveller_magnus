@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.10.2.1";
-const APP_BANNER = "v0.10.2.1: Splashscreen: Alignment and Border Improvements";
+const APP_VERSION = "v0.11.0";
+const APP_BANNER = "v0.11.0: New: System Maps";
 
 // -----------------------------------------------------------------------------
 // Application State

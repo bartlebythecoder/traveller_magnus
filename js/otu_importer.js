@@ -180,20 +180,22 @@
     }
 
     /**
-     * Returns true if a sector slot already contains non-empty hex data.
-     * Used for the pre-flight collision check.
+     * Clears all in-memory data for one sector slot before a re-import.
+     * Removes hex states, the sector name, and border hex assignments.
+     * Routes are handled separately (the metadata pass wipes Route 1 globally).
+     * DB consistency is guaranteed by the syncAllHexes() call after the import loop.
      */
-    function sectorSlotHasData(slot) {
-        // Convert slot label to numeric sector ID so the prefix matches
-        // the numeric hexId format used since the v0.7.3 refactor.
-        const num = sectorSlotToNumber(slot);
-        const prefix = num + '-';
-        for (const [hexId, state] of hexStates) {
-            if (hexId.startsWith(prefix) && state && state.type !== 'EMPTY') {
-                return true;
+    function clearSectorSlotData(slotNum) {
+        const prefix = slotNum + '-';
+        for (const hexId of hexStates.keys()) {
+            if (hexId.startsWith(prefix)) hexStates.delete(hexId);
+        }
+        delete window.sectorNames[slotNum];
+        if (window.hexBorderAssignments) {
+            for (const hexId of window.hexBorderAssignments.keys()) {
+                if (hexId.startsWith(prefix)) window.hexBorderAssignments.delete(hexId);
             }
         }
-        return false;
     }
 
     /**
@@ -301,20 +303,6 @@
             return;
         }
 
-        // Pre-flight: only check for slot collisions when importing sector data.
-        // Routes and borders are additive and can be layered onto populated slots.
-        if (opts.importSector) {
-            const collisions = selected.filter(s => sectorSlotHasData(s.slot));
-            if (collisions.length > 0) {
-                const detail = collisions.map(c => `  • "${c.name}" → Slot ${c.slot}`).join('\n');
-                alert(
-                    `The following sector slots already contain data.\n` +
-                    `Please clear each slot manually before importing:\n\n${detail}`
-                );
-                return;
-            }
-        }
-
         closeModal();
 
         // Fetch and import one sector at a time. Each sector makes two API calls
@@ -338,6 +326,8 @@
 
             if (opts.importSector) {
                 try {
+                    clearSectorSlotData(sectorSlotToNumber(slot));
+
                     const cached = getCachedSector(name);
                     tsvFromCache = cached !== null;
 
@@ -356,7 +346,7 @@
                         throw new Error('importT5Tab not available');
                     }
 
-                    // Store sector name — preserve any existing manual name (conflict rule)
+                    // Store sector name (importT5Tab in bulkMode may set it first; don't overwrite)
                     const slotNum = parseInt(slot, 10);
                     if (!isNaN(slotNum) && !window.sectorNames[slotNum]) {
                         window.sectorNames[slotNum] = name;
@@ -508,41 +498,72 @@
             const { name, defaultSlot, x, y } = sectors[i];
             let tsvFromCache = false;
 
+            const isMixonForeven = opts.mixonForeven && name === 'Foreven';
+
             if (opts.importSector) {
                 try {
-                    const cached = await getCachedUniverseSector(name);
-                    tsvFromCache = cached !== null;
+                    if (isMixonForeven) {
+                        // Use the embedded JS constant — no fetch needed (avoids CORS on file://).
+                        if (!window.FOREVEN_MIXON_TSV) throw new Error('FOREVEN_MIXON_TSV not loaded. Run convert_foreven_mixon.ps1.');
+                        tsvFromCache = true; // treat as always-available, no API delay needed
 
-                    if (typeof showToast === 'function') {
-                        const source = tsvFromCache ? 'cache' : `API (${i + 1} of ${sectors.length})`;
-                        showToast(`Importing ${name} into Slot ${defaultSlot}… [${source}]`);
-                    }
+                        if (typeof showToast === 'function') {
+                            showToast(`Importing Foreven (Mixon) into Slot ${defaultSlot}… [embedded]`);
+                        }
 
-                    const text = tsvFromCache ? cached : await fetchAndCacheUniverseSector(name);
+                        const text = window.FOREVEN_MIXON_TSV;
 
-                    // bulkMode=true: skip per-sector saveHistoryState, rule re-application,
-                    // allegiance scan, draw, and DB write — all done once after the loop.
-                    if (typeof importT5Tab === 'function') {
-                        importT5Tab(text, name, defaultSlot, true);
+                        if (typeof importT5Tab === 'function') {
+                            importT5Tab(text, 'Foreven', defaultSlot, true);
+                        } else {
+                            throw new Error('importT5Tab not available');
+                        }
+
+                        const slotNum = parseInt(defaultSlot, 10);
+                        if (!isNaN(slotNum) && !window.sectorNames[slotNum]) {
+                            window.sectorNames[slotNum] = 'Foreven';
+                        }
                     } else {
-                        throw new Error('importT5Tab not available');
-                    }
+                        const cached = await getCachedUniverseSector(name);
+                        tsvFromCache = cached !== null;
 
-                    // Store sector name — preserve any existing manual name (conflict rule)
-                    const slotNum = parseInt(defaultSlot, 10);
-                    if (!isNaN(slotNum) && !window.sectorNames[slotNum]) {
-                        window.sectorNames[slotNum] = name;
+                        if (typeof showToast === 'function') {
+                            const source = tsvFromCache ? 'cache' : `API (${i + 1} of ${sectors.length})`;
+                            showToast(`Importing ${name} into Slot ${defaultSlot}… [${source}]`);
+                        }
+
+                        const text = tsvFromCache ? cached : await fetchAndCacheUniverseSector(name);
+
+                        // bulkMode=true: skip per-sector saveHistoryState, rule re-application,
+                        // allegiance scan, draw, and DB write — all done once after the loop.
+                        if (typeof importT5Tab === 'function') {
+                            importT5Tab(text, name, defaultSlot, true);
+                        } else {
+                            throw new Error('importT5Tab not available');
+                        }
+
+                        // Store sector name — preserve any existing manual name (conflict rule)
+                        const slotNum = parseInt(defaultSlot, 10);
+                        if (!isNaN(slotNum) && !window.sectorNames[slotNum]) {
+                            window.sectorNames[slotNum] = name;
+                        }
                     }
                 } catch (err) {
                     console.warn(`[Universe Import] Failed to import "${name}": ${err.message}`);
                     errorCount++;
                 }
 
-                // Pause before metadata fetch if TSV came from a live API call.
-                if (!tsvFromCache) await delay(1000);
+                // Pause before metadata fetch only for live API calls (not local or cached).
+                if (!tsvFromCache && !isMixonForeven) await delay(1000);
             }
 
             if (needsMeta) {
+                if (isMixonForeven) {
+                    // Use the locally embedded XML instead of travellermap metadata.
+                    if (window.FOREVEN_MIXON_XML) {
+                        universeMetas.push({ name: 'Foreven', metaXml: window.FOREVEN_MIXON_XML, slotNum: parseInt(defaultSlot, 10), x, y });
+                    }
+                } else {
                 // Fetch and cache metadata, but defer parsing until all sectors are loaded.
                 let metaXml = await getCachedUniverseMetadata(name);
                 if (!metaXml) {
@@ -555,6 +576,7 @@
                 } else if (needsMeta) {
                     metaFailures.push(name);
                 }
+                } // end else (not isMixonForeven)
             }
         }
 
@@ -612,12 +634,14 @@
         const btnUniverseSubmit = document.getElementById('universe-submit');
         if (btnUniverseSubmit) {
             btnUniverseSubmit.addEventListener('click', () => {
+                const mixonEl = document.getElementById('universe-opt-mixon-foreven');
                 closeUniverseModal();
                 executeUniverseImport({
                     importSector:  true,
                     importRoutes:  true,
                     importBorders: true,
                     importRegions: true,
+                    mixonForeven:  mixonEl ? mixonEl.checked : false,
                 });
             });
         }

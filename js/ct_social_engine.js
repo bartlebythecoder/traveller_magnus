@@ -170,7 +170,21 @@ function calculateMainworldTL(world, tlModifiers) {
     if (mods.POPULATION[world.pop]) tl += mods.POPULATION[world.pop];
     if (mods.GOVERNMENT[world.gov]) tl += mods.GOVERNMENT[world.gov];
 
-    return Math.max(0, tl); // Tech Levels do not go below 0
+    const settingsTlMod = (typeof window !== 'undefined' && window.generationTlMod !== undefined) ? window.generationTlMod : 0;
+    const settingsTlMax = (typeof window !== 'undefined' && window.generationTlMax !== undefined) ? window.generationTlMax : 20;
+
+    if (settingsTlMod !== 0) tl += settingsTlMod;
+    if (typeof tResult !== 'undefined') {
+        tResult('Settings TL Modifier', settingsTlMod !== 0 ? `${settingsTlMod > 0 ? '+' : ''}${settingsTlMod}` : 'None (0)', 'CT 3.2: Tech Level');
+    }
+
+    const flooredTl = Math.max(0, tl);
+    const finalTl = Math.min(flooredTl, settingsTlMax);
+    if (typeof tResult !== 'undefined') {
+        tResult('Settings TL Max', finalTl < flooredTl ? `Cap applied: ${flooredTl} → ${finalTl}` : `No cap (${flooredTl} ≤ ${settingsTlMax})`, 'CT 3.2: Tech Level');
+    }
+
+    return finalTl;
 }
 
 if (typeof module !== 'undefined' && module.exports) {

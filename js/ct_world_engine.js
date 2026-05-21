@@ -209,6 +209,26 @@ function generatePopulation(world, ctx = { mode: 'bottomup' }) {
 
     world.pop = Math.max(0, popRoll);
 
+    // Settings: Pop Mod and Pop Max (mainworld only)
+    if (world.type === 'Mainworld') {
+        const settingsPopMod = (typeof window !== 'undefined' && window.generationPopMod !== undefined) ? window.generationPopMod : 0;
+        if (settingsPopMod !== 0) {
+            const prePop = world.pop;
+            world.pop = Math.max(0, world.pop + settingsPopMod);
+            if (typeof tResult !== 'undefined') tResult('Settings Pop Modifier', `${settingsPopMod > 0 ? '+' : ''}${settingsPopMod} (${prePop} → ${world.pop})`);
+        } else {
+            if (typeof tResult !== 'undefined') tResult('Settings Pop Modifier', 'None (0)');
+        }
+
+        const settingsPopMax = (typeof window !== 'undefined' && window.generationPopMax !== undefined) ? window.generationPopMax : 20;
+        if (world.pop > settingsPopMax) {
+            if (typeof tResult !== 'undefined') tResult('Settings Pop Max', `Cap applied: ${world.pop} → ${settingsPopMax}`);
+            world.pop = settingsPopMax;
+        } else {
+            if (typeof tResult !== 'undefined') tResult('Settings Pop Max', `No cap (${world.pop} ≤ ${settingsPopMax})`);
+        }
+    }
+
     // Mode-Aware Population Clamp (Top-Down only)
     if (ctx.mode === 'topdown' && ctx.mwPop !== undefined && ctx.mwPop !== null) {
         if (world.pop >= ctx.mwPop) {
@@ -253,6 +273,13 @@ function generateModularMainworld(hexId) {
     //    matching the bottom-up path and ensuring X starports can occur)
     tSection('Starport Generation');
     let spRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Mainworld Starport') : 7);
+
+    // Settings: Starport Modifier (note: in CT lower roll = better port, so positive mod = worse)
+    const ctSpMod = (typeof window !== 'undefined' && window.generationStarportMod !== undefined) ? window.generationStarportMod : 0;
+    if (ctSpMod !== 0) tResult('Settings Starport Modifier', `${ctSpMod > 0 ? '+' : ''}${ctSpMod}`);
+    else tResult('Settings Starport Modifier', 'None (0)');
+    spRoll += ctSpMod;
+
     mw.starport = 'X';
     if (sysData && sysData.STARPORT) {
         for (let entry of sysData.STARPORT) {
@@ -266,6 +293,18 @@ function generateModularMainworld(hexId) {
         if (spRoll <= 4) mw.starport = 'A'; else if (spRoll <= 6) mw.starport = 'B'; else if (spRoll <= 8) mw.starport = 'C'; else if (spRoll === 9) mw.starport = 'D'; else if (spRoll <= 11) mw.starport = 'E';
     }
     tResult('Starport Class', mw.starport);
+
+    // Settings: Starport Max cap
+    const ctStarportOrder = ['A', 'B', 'C', 'D', 'E', 'X'];
+    const ctSpMax = (typeof window !== 'undefined' && window.generationStarportMax !== undefined) ? window.generationStarportMax : 'A';
+    const ctSpMaxIdx = ctStarportOrder.indexOf(ctSpMax);
+    const ctSpCurIdx = ctStarportOrder.indexOf(mw.starport);
+    if (ctSpMaxIdx !== -1 && ctSpCurIdx !== -1 && ctSpCurIdx < ctSpMaxIdx) {
+        tResult('Settings Starport Max', `Cap applied: ${mw.starport} → ${ctSpMax}`);
+        mw.starport = ctSpMax;
+    } else {
+        tResult('Settings Starport Max', `No cap (${mw.starport} ≤ ${ctSpMax})`);
+    }
 
     // D. Bases
     tSection('Bases & Gas Giants');
@@ -359,8 +398,15 @@ function generateSocial(world) {
     tSection('Starport Generation');
     const sysData = (typeof CT_CONSTANTS !== 'undefined') ? CT_CONSTANTS.CT_SYSTEM_CONTENTS : null;
     let spRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Mainworld Starport') : 7);
+
+    // Settings: Starport Modifier (note: in CT lower roll = better port, so positive mod = worse)
+    const ctSpMod2 = (typeof window !== 'undefined' && window.generationStarportMod !== undefined) ? window.generationStarportMod : 0;
+    if (ctSpMod2 !== 0) tResult('Settings Starport Modifier', `${ctSpMod2 > 0 ? '+' : ''}${ctSpMod2}`);
+    else tResult('Settings Starport Modifier', 'None (0)');
+    spRoll += ctSpMod2;
+
     world.starport = 'X';
-    
+
     if (sysData && sysData.STARPORT) {
         for (let entry of sysData.STARPORT) {
             if (spRoll <= entry.maxRoll) {
@@ -372,6 +418,18 @@ function generateSocial(world) {
         if (spRoll <= 4) world.starport = 'A'; else if (spRoll <= 6) world.starport = 'B'; else if (spRoll <= 8) world.starport = 'C'; else if (spRoll === 9) world.starport = 'D'; else if (spRoll <= 11) world.starport = 'E';
     }
     tResult('Starport Class', world.starport);
+
+    // Settings: Starport Max cap
+    const ctStarportOrder2 = ['A', 'B', 'C', 'D', 'E', 'X'];
+    const ctSpMax2 = (typeof window !== 'undefined' && window.generationStarportMax !== undefined) ? window.generationStarportMax : 'A';
+    const ctSpMaxIdx2 = ctStarportOrder2.indexOf(ctSpMax2);
+    const ctSpCurIdx2 = ctStarportOrder2.indexOf(world.starport);
+    if (ctSpMaxIdx2 !== -1 && ctSpCurIdx2 !== -1 && ctSpCurIdx2 < ctSpMaxIdx2) {
+        tResult('Settings Starport Max', `Cap applied: ${world.starport} → ${ctSpMax2}`);
+        world.starport = ctSpMax2;
+    } else {
+        tResult('Settings Starport Max', `No cap (${world.starport} ≤ ${ctSpMax2})`);
+    }
 
     // B. Finalize Social (Gov, Law, TL, Trade)
     finalizeMainworldSocial(world);

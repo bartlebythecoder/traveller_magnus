@@ -659,6 +659,10 @@ function populateEditorAccordions(stateObj) {
                         if (w.secRU !== undefined && w.secPop > 0) html += `<span>RU: ${_mgtNum(w, 'secRU', realWidx, -99999, 99999)}</span>`;
 
                     } else if (w.type === 'Planetoid Belt') {
+                        const beltUwp = w.uwpSecondary || w.uwp;
+                        if (beltUwp && beltUwp !== '-') {
+                            html += `<div style="margin-bottom: 6px; font-family: monospace; font-size: 1.1em;">UWP: ${_mgtText(w, 'uwpSecondary', realWidx)}</div>`;
+                        }
                         if (w.beltProfileString) {
                             html += `<div class="system-stats-full" style="color: #66fcf1; font-family: monospace;">Profile: ${w.beltProfileString}</div>`;
                             html += `<span>Span: ${_mgtNum(w, 'span', realWidx, 0, 20)}</span>`;

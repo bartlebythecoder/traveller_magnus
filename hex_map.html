@@ -76,6 +76,8 @@
     <script src="names.js" onerror="console.info('names.js not found — names will not be auto-loaded.')"></script>
     <!-- Optional: Solo 6 sector data. Generate js/solo_6_data.js by running convert_solo6.ps1 -->
     <script src="js/solo_6_data.js" onerror="console.info('solo_6_data.js not found — Solo 6 sector will not be available.')"></script>
+    <!-- Optional: Foreven (Mixon) sector data. Generate js/foreven_mixon_data.js by running convert_foreven_mixon.ps1 -->
+    <script src="js/foreven_mixon_data.js" onerror="console.info('foreven_mixon_data.js not found — Foreven (Mixon) option will be unavailable.')"></script>
 
     <style>
         .filter-grid-uwp .filter-field,
@@ -248,6 +250,36 @@
             background: rgba(255,255,255,0.04);
             color: #555;
             border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        /* Settings Panel Accordion Sections */
+        .settings-section {
+            border-top: 1px solid rgba(69, 162, 158, 0.3);
+            margin-top: 6px;
+            padding-top: 2px;
+        }
+        .settings-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 7px 0;
+            color: #66fcf1;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            user-select: none;
+        }
+        .settings-section-header:hover { color: #fff; }
+        .settings-section-header i {
+            transition: transform 0.2s ease;
+            font-size: 0.7rem;
+            color: #45a29e;
+        }
+        .settings-section-header.open i { transform: rotate(180deg); }
+        .settings-section-body {
+            padding-bottom: 6px;
         }
 
         /* ── Route Systems Panel ─────────────────────────────────────────── */
@@ -683,9 +715,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above<br> So Below</span></h1>
-            <div class="splash-banner">New this version: Border Fills; Better OTU Borders</div>
+            <div class="splash-banner">New: System Maps</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.10.2.1</div>
+            <div class="splash-version">v0.11.0</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -736,150 +768,214 @@
                     class="fas fa-times"></i></button>
         </div>
 
-        <div class="settings-row">
+        <!-- Global toggles -->
+        <div class="settings-row" style="display:flex;align-items:center;gap:10px;padding:6px 0;">
             <input type="checkbox" id="toggle-dev-view">
-            <label for="toggle-dev-view">Development View</label>
+            <label for="toggle-dev-view" style="cursor:pointer;">Development View</label>
         </div>
-
-        <div class="settings-row">
+        <div class="settings-row" style="display:flex;align-items:center;gap:10px;padding:4px 0;">
             <input type="checkbox" id="toggle-logging">
-            <label for="toggle-logging">Enable Batch Logging (Download .txt)</label>
-        </div>
-        <h4>Visual Options</h4>
-        <div class="settings-row">
-            <input type="checkbox" id="toggle-hide-no-planets" checked>
-            <label for="toggle-hide-no-planets">Hide systems without planets</label>
-        </div>
-        <div class="settings-row">
-            <input type="checkbox" id="toggle-borders" checked>
-            <label for="toggle-borders">Show Subsector Borders</label>
-        </div>
-        <div class="settings-row" style="display: flex; align-items: center; justify-content: space-between;">
-            <label for="input-border-min-systems" style="font-size: 0.8rem;">Min systems for border visibility</label>
-            <input type="number" id="input-border-min-systems" min="0" value="20"
-                style="width: 55px; padding: 4px 6px; background: #1f2833; border: 1px solid #45a29e; color: #fff;
-                       font-family: 'Courier New', Courier, monospace; font-size: 0.85rem; border-radius: 3px; text-align: right;">
-        </div>
-        <div class="settings-row">
-            <input type="checkbox" id="toggle-border-fill">
-            <label for="toggle-border-fill">Fill border territories</label>
-        </div>
-        <div class="settings-row">
-            <input type="checkbox" id="toggle-print-mode">
-            <label for="toggle-print-mode">White Background Mode</label>
-        </div>
-        <div class="settings-row">
-            <input type="checkbox" id="toggle-sector-names">
-            <label for="toggle-sector-names">Show Sector Names</label>
+            <label for="toggle-logging" style="cursor:pointer;">Enable Batch Logging (Download .txt)</label>
         </div>
 
-        <div style="border-top: 1px solid #45a29e; margin: 10px 0;"></div>
-
-        <div class="settings-row" style="display: flex; align-items: center; justify-content: space-between;">
-            <label style="font-size: 0.8rem; color: #66fcf1; font-weight: bold;">Default World Color</label>
-            <input type="color" id="default-dot-color" value="#ffffff"
-                style="width: 40px; height: 25px; cursor: pointer; background: transparent; border: 1px solid #45a29e;">
+        <!-- Visual Options -->
+        <div class="settings-section">
+            <div class="settings-section-header" onclick="toggleSettingsSection(this)">
+                <span>Visual Options</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="settings-section-body" style="display:flex;flex-direction:column;gap:6px;display:none;">
+                <div class="settings-row" style="display:flex;align-items:center;gap:10px;">
+                    <input type="checkbox" id="toggle-hide-no-planets" checked>
+                    <label for="toggle-hide-no-planets" style="cursor:pointer;">Hide systems without planets</label>
+                </div>
+                <div class="settings-row" style="display:flex;align-items:center;gap:10px;">
+                    <input type="checkbox" id="toggle-borders" checked>
+                    <label for="toggle-borders" style="cursor:pointer;">Show Subsector Borders</label>
+                </div>
+                <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
+                    <label for="input-border-min-systems" style="font-size:0.8rem;">Min systems for border visibility</label>
+                    <input type="number" id="input-border-min-systems" min="0" value="20"
+                        style="width:55px;padding:4px 6px;background:#1f2833;border:1px solid #45a29e;color:#fff;
+                               font-family:'Courier New',Courier,monospace;font-size:0.85rem;border-radius:3px;text-align:right;">
+                </div>
+                <div class="settings-row" style="display:flex;align-items:center;gap:10px;">
+                    <input type="checkbox" id="toggle-border-fill">
+                    <label for="toggle-border-fill" style="cursor:pointer;">Fill border territories</label>
+                </div>
+                <div class="settings-row" style="display:flex;align-items:center;gap:10px;">
+                    <input type="checkbox" id="toggle-print-mode">
+                    <label for="toggle-print-mode" style="cursor:pointer;">White Background Mode</label>
+                </div>
+                <div class="settings-row" style="display:flex;align-items:center;gap:10px;">
+                    <input type="checkbox" id="toggle-sector-names">
+                    <label for="toggle-sector-names" style="cursor:pointer;">Show Sector Names</label>
+                </div>
+                <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
+                    <label style="font-size:0.8rem;color:#c5c6c7;">Default World Color</label>
+                    <input type="color" id="default-dot-color" value="#ffffff"
+                        style="width:40px;height:25px;cursor:pointer;background:transparent;border:1px solid #45a29e;">
+                </div>
+                <div style="padding-top:4px;">
+                    <button class="menu-btn" id="btn-edit-sector-names"
+                        style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                        <i class="fas fa-tag"></i> Edit Sector Names
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <div class="settings-row" style="flex-direction: column; align-items: flex-start; gap: 6px;">
-            <label for="input-seed" style="font-size: 0.8rem; color: #66fcf1; font-weight: bold;">Generation
-                Seed:</label>
-            <div style="display: flex; gap: 4px; width: 100%;">
-                <input type="text" id="input-seed" placeholder="Enter seed..."
-                    style="flex-grow: 1; padding: 6px; background: #1f2833; border: 1px solid #45a29e; color: #fff; font-family: 'Courier New', Courier, monospace; font-size: 0.9rem;">
-                <button id="btn-randomize-seed" title="Randomize Seed"
-                    style="padding: 0 10px; background: #45a29e; border: none; color: #0b0c10; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-sync-alt"></i>
+        <!-- Generation -->
+        <div class="settings-section">
+            <div class="settings-section-header" onclick="toggleSettingsSection(this)">
+                <span>Generation</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="settings-section-body" style="display:flex;flex-direction:column;gap:6px;display:none;">
+                <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:6px;display:flex;">
+                    <label for="input-seed" style="font-size:0.8rem;color:#c5c6c7;">Generation Seed:</label>
+                    <div style="display:flex;gap:4px;width:100%;">
+                        <input type="text" id="input-seed" placeholder="Enter seed..."
+                            style="flex-grow:1;padding:6px;background:#1f2833;border:1px solid #45a29e;color:#fff;font-family:'Courier New',Courier,monospace;font-size:0.9rem;">
+                        <button id="btn-randomize-seed" title="Randomize Seed"
+                            style="padding:0 10px;background:#45a29e;border:none;color:#0b0c10;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
+                    <label for="input-starport-max" style="font-size:0.8rem;">Starport Max</label>
+                    <input type="text" id="input-starport-max" maxlength="1" value="A"
+                        style="width:55px;padding:4px 6px;background:#1f2833;border:1px solid #45a29e;color:#fff;
+                               font-family:'Courier New',Courier,monospace;font-size:0.85rem;border-radius:3px;text-align:right;">
+                </div>
+                <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
+                    <label for="input-starport-mod" style="font-size:0.8rem;">Starport Mod</label>
+                    <input type="number" id="input-starport-mod" min="-20" max="20" value="0"
+                        style="width:55px;padding:4px 6px;background:#1f2833;border:1px solid #45a29e;color:#fff;
+                               font-family:'Courier New',Courier,monospace;font-size:0.85rem;border-radius:3px;text-align:right;">
+                </div>
+                <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
+                    <label for="input-pop-max" style="font-size:0.8rem;">Pop Max</label>
+                    <input type="number" id="input-pop-max" min="0" max="33" value="20"
+                        style="width:55px;padding:4px 6px;background:#1f2833;border:1px solid #45a29e;color:#fff;
+                               font-family:'Courier New',Courier,monospace;font-size:0.85rem;border-radius:3px;text-align:right;">
+                </div>
+                <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
+                    <label for="input-pop-mod" style="font-size:0.8rem;">Pop Mod</label>
+                    <input type="number" id="input-pop-mod" min="-20" max="20" value="0"
+                        style="width:55px;padding:4px 6px;background:#1f2833;border:1px solid #45a29e;color:#fff;
+                               font-family:'Courier New',Courier,monospace;font-size:0.85rem;border-radius:3px;text-align:right;">
+                </div>
+                <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
+                    <label for="input-tl-max" style="font-size:0.8rem;">TL Max</label>
+                    <input type="number" id="input-tl-max" min="0" max="33" value="20"
+                        style="width:55px;padding:4px 6px;background:#1f2833;border:1px solid #45a29e;color:#fff;
+                               font-family:'Courier New',Courier,monospace;font-size:0.85rem;border-radius:3px;text-align:right;">
+                </div>
+                <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
+                    <label for="input-tl-mod" style="font-size:0.8rem;">TL Mod</label>
+                    <input type="number" id="input-tl-mod" min="-20" max="20" value="0"
+                        style="width:55px;padding:4px 6px;background:#1f2833;border:1px solid #45a29e;color:#fff;
+                               font-family:'Courier New',Courier,monospace;font-size:0.85rem;border-radius:3px;text-align:right;">
+                </div>
+                <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
+                    <label for="input-use-tl-floor" style="font-size:0.8rem;">Use Min TL <span style="font-size:0.7rem;color:#66fcf1;">(MgT2e)</span></label>
+                    <input type="checkbox" id="input-use-tl-floor" style="cursor:pointer;accent-color:#66fcf1;">
+                </div>
+                <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
+                    <label for="input-rtt-settlement" style="font-size:0.8rem;">Settlement Centuries <span style="font-size:0.7rem;color:#66fcf1;">(RTT)</span></label>
+                    <input type="number" id="input-rtt-settlement" min="0" max="100" value="2"
+                        style="width:55px;padding:4px 6px;background:#1f2833;border:1px solid #45a29e;color:#fff;
+                               font-family:'Courier New',Courier,monospace;font-size:0.85rem;border-radius:3px;text-align:right;">
+                </div>
+                <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
+                    <label for="input-rtt-tl" style="font-size:0.8rem;">Tech Level <span style="font-size:0.7rem;color:#66fcf1;">(RTT)</span></label>
+                    <input type="number" id="input-rtt-tl" min="0" max="33" value="15"
+                        style="width:55px;padding:4px 6px;background:#1f2833;border:1px solid #45a29e;color:#fff;
+                               font-family:'Courier New',Courier,monospace;font-size:0.85rem;border-radius:3px;text-align:right;">
+                </div>
+                <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
+                    <label for="toggle-rtt-industry" style="font-size:0.8rem;">Show Industry in UWP <span style="font-size:0.7rem;color:#66fcf1;">(RTT)</span></label>
+                    <input type="checkbox" id="toggle-rtt-industry" style="cursor:pointer;accent-color:#66fcf1;">
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Files -->
+        <div class="settings-section">
+            <div class="settings-section-header" onclick="toggleSettingsSection(this)">
+                <span>Map Files</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="settings-section-body" style="display:flex;flex-direction:column;gap:6px;padding-top:4px;display:none;">
+                <button class="menu-btn" id="btn-save-map"
+                    style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <i class="fas fa-save"></i> Save Map JSON
+                </button>
+                <button class="menu-btn" id="btn-load-map"
+                    style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;"
+                    onclick="document.getElementById('file-load-map').click()">
+                    <i class="fas fa-file-upload"></i> Load Map JSON
+                </button>
+                <input type="file" id="file-load-map" accept=".json" multiple style="display:none;">
+                <button class="menu-btn" id="btn-clear-canvas"
+                    style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;
+                           border-color:#c0392b;color:#e74c3c;">
+                    <i class="fas fa-trash-alt"></i> Clear Canvas
                 </button>
             </div>
         </div>
 
-        <!-- Generation Options: hidden until next release -->
-        <div id="generation-options-section" style="display: none;">
-            <h4>Generation Options</h4>
-            <div class="settings-row" style="display: flex; align-items: center; justify-content: space-between;">
-                <label for="input-tl-max" style="font-size: 0.8rem;">TL Max</label>
-                <input type="number" id="input-tl-max" min="0" max="33" value="20"
-                    style="width: 55px; padding: 4px 6px; background: #1f2833; border: 1px solid #45a29e; color: #fff;
-                           font-family: 'Courier New', Courier, monospace; font-size: 0.85rem; border-radius: 3px; text-align: right;">
+        <!-- Import / Export (collapsed by default) -->
+        <div class="settings-section">
+            <div class="settings-section-header" onclick="toggleSettingsSection(this)">
+                <span>Import / Export</span>
+                <i class="fas fa-chevron-down"></i>
             </div>
-            <div class="settings-row" style="display: flex; align-items: center; justify-content: space-between;">
-                <label for="input-tl-mod" style="font-size: 0.8rem;">TL Mod</label>
-                <input type="number" id="input-tl-mod" min="-20" max="20" value="0"
-                    style="width: 55px; padding: 4px 6px; background: #1f2833; border: 1px solid #45a29e; color: #fff;
-                           font-family: 'Courier New', Courier, monospace; font-size: 0.85rem; border-radius: 3px; text-align: right;">
+            <div class="settings-section-body" style="display:none;flex-direction:column;gap:6px;padding-top:4px;">
+                <button class="menu-btn" id="btn-open-sector-export"
+                    style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <i class="fas fa-file-export"></i> Export Sector
+                </button>
+                <button class="menu-btn" id="btn-export-xml-metadata"
+                    style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <i class="fas fa-code"></i> Export Metadata (.xml)
+                </button>
+                <button class="menu-btn" id="btn-import-sector"
+                    style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;"
+                    onclick="document.getElementById('file-import-sector').click()">
+                    <i class="fas fa-file-import"></i> Import Sector (.tsv)
+                </button>
+                <input type="file" id="file-import-sector" accept=".tab,.tsv,.txt" style="display:none;">
+                <button class="menu-btn" id="btn-import-xml-metadata"
+                    style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <i class="fas fa-code"></i> Import Metadata (.xml)
+                </button>
+                <input type="file" id="file-import-xml-metadata" accept=".xml" style="display:none;">
+                <button class="menu-btn" id="btn-import-imperium"
+                    style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <i class="fas fa-globe"></i> Import the Imperium
+                </button>
+                <button class="menu-btn" id="btn-import-universe"
+                    style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <i class="fas fa-meteor"></i> Import the Universe
+                </button>
             </div>
         </div>
 
-        <div style="border-top: 1px solid #45a29e; margin: 10px 0;"></div>
-
-        <div class="settings-row" style="flex-direction: column; gap: 8px;">
-            <button class="menu-btn" id="btn-save-map"
-                style="width: 100%; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <i class="fas fa-save"></i> Save Map JSON
-            </button>
-            <button class="menu-btn" id="btn-load-map"
-                style="width: 100%; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;"
-                onclick="document.getElementById('file-load-map').click()">
-                <i class="fas fa-file-upload"></i> Load Map JSON
-            </button>
-            <input type="file" id="file-load-map" accept=".json" multiple style="display: none;">
-            <button class="menu-btn" id="btn-clear-canvas"
-                style="width: 100%; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;
-                       border-color: #c0392b; color: #e74c3c;">
-                <i class="fas fa-trash-alt"></i> Clear Canvas
-            </button>
-        </div>
-
-        <div style="border-top: 1px solid #45a29e; margin: 10px 0;"></div>
-
-        <div class="settings-row" style="flex-direction: column; gap: 8px;">
-
-            <button class="menu-btn" id="btn-open-sector-export"
-                style="width: 100%; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <i class="fas fa-file-export"></i> Export Sector
-            </button>
-            <button class="menu-btn" id="btn-export-xml-metadata"
-                style="width: 100%; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <i class="fas fa-code"></i> Export Metadata (.xml)
-            </button>
-            <button class="menu-btn" id="btn-import-sector"
-                style="width: 100%; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;"
-                onclick="document.getElementById('file-import-sector').click()">
-                <i class="fas fa-file-import"></i> Import Sector (.tsv)
-            </button>
-            <input type="file" id="file-import-sector" accept=".tab,.tsv,.txt" style="display: none;">
-            <button class="menu-btn" id="btn-import-xml-metadata"
-                style="width: 100%; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <i class="fas fa-code"></i> Import Metadata (.xml)
-            </button>
-            <input type="file" id="file-import-xml-metadata" accept=".xml" style="display: none;">
-        </div>
-
-        <div style="border-top: 1px solid #45a29e; margin: 10px 0;"></div>
-
-        <div class="settings-row" style="flex-direction: column; gap: 8px;">
-            <button class="menu-btn" id="btn-import-imperium"
-                style="width: 100%; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <i class="fas fa-globe"></i> Import the Imperium
-            </button>
-            <button class="menu-btn" id="btn-import-universe"
-                style="width: 100%; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <i class="fas fa-meteor"></i> Import the Universe
-            </button>
-            <button class="menu-btn" id="btn-edit-sector-names"
-                style="width: 100%; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <i class="fas fa-tag"></i> Edit Sector Names
-            </button>
-        </div>
-
-        <div style="border-top: 1px solid #45a29e; margin: 10px 0;"></div>
-
-        <div class="settings-row" style="flex-direction: column; gap: 8px;">
-            <button class="menu-btn" id="btn-load-solo6"
-                style="width: 100%; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <i class="fas fa-globe"></i> Load Sector Solo 6
-            </button>
+        <!-- Presets -->
+        <div class="settings-section">
+            <div class="settings-section-header" onclick="toggleSettingsSection(this)">
+                <span>Presets</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="settings-section-body" style="display:flex;flex-direction:column;gap:6px;padding-top:4px;display:none;">
+                <button class="menu-btn" id="btn-load-solo6"
+                    style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <i class="fas fa-globe"></i> Load Sector Solo 6
+                </button>
+            </div>
         </div>
     </div>
 
@@ -999,6 +1095,16 @@
                 This cannot be undone.
             </div>
 
+            <!-- Options -->
+            <div style="border-top:1px solid #2a3a3a; padding-top:10px;">
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;
+                               color:#c5c6c7; font-size:0.85rem;">
+                    <input type="checkbox" id="universe-opt-mixon-foreven"
+                        style="cursor:pointer; accent-color:#66fcf1;">
+                    Replace Foreven with Terry Mixon version
+                </label>
+            </div>
+
             <!-- Action buttons -->
             <div style="display:flex; gap:8px; justify-content:flex-end;">
                 <button id="universe-cancel" class="menu-btn"
@@ -1021,7 +1127,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.10.2.1</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.11.0</span>
             </p>
         </div>
 
@@ -1886,14 +1992,10 @@
                         </div>
                     </div>
                     <div class="design-field" style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="enable-design-text-case" title="Include Text Case">
-                        <div style="flex-grow: 1;">
-                            <label for="design-text-case">Text Case</label>
-                            <select id="design-text-case" style="width: 100%;">
-                                <option value="Default">Default</option>
-                                <option value="ALL CAPS">ALL CAPS</option>
-                            </select>
-                        </div>
+                        <input type="checkbox" id="enable-design-text-case" title="ALL CAPS Name">
+                        <label for="enable-design-text-case"
+                            style="flex-grow: 1; cursor: pointer; color: #fff; font-size: 0.75rem;">ALL CAPS
+                            Name</label>
                     </div>
                     <div class="design-field" style="display: flex; align-items: center; gap: 8px;">
                         <input type="checkbox" id="enable-design-italics" title="Apply Italics">

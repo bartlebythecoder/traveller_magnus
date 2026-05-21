@@ -635,6 +635,24 @@ function processBottomUpDesignation(sys) {
             writeLogLine(`[MAINWORLD LOG] Hex ${sys.hexId}: Mainworld is a MOON at Orbit ${winner.orbit}`);
         }
 
+        // Settings: Pop Mod and Pop Max (applied after designation, before social so Gov/Law derive from adjusted pop)
+        const settingsPopMod = (typeof window !== 'undefined' && window.generationPopMod !== undefined) ? window.generationPopMod : 0;
+        if (settingsPopMod !== 0) {
+            const prePop = winner.pop;
+            winner.pop = Math.max(0, winner.pop + settingsPopMod);
+            if (typeof tResult !== 'undefined') tResult('Settings Pop Modifier', `${settingsPopMod > 0 ? '+' : ''}${settingsPopMod} (${prePop} → ${winner.pop})`);
+        } else {
+            if (typeof tResult !== 'undefined') tResult('Settings Pop Modifier', 'None (0)');
+        }
+
+        const settingsPopMax = (typeof window !== 'undefined' && window.generationPopMax !== undefined) ? window.generationPopMax : 20;
+        if (winner.pop > settingsPopMax) {
+            if (typeof tResult !== 'undefined') tResult('Settings Pop Max', `Cap applied: ${winner.pop} → ${settingsPopMax}`);
+            winner.pop = settingsPopMax;
+        } else {
+            if (typeof tResult !== 'undefined') tResult('Settings Pop Max', `No cap (${winner.pop} ≤ ${settingsPopMax})`);
+        }
+
         // Generate Social (Starport, Gov, Law, TL, Trade)
         if (socialGen) socialGen(winner);
 

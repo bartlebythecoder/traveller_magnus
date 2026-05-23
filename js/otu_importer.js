@@ -520,7 +520,7 @@
                         }
 
                         const slotNum = parseInt(defaultSlot, 10);
-                        if (!isNaN(slotNum) && !window.sectorNames[slotNum]) {
+                        if (!isNaN(slotNum)) {
                             window.sectorNames[slotNum] = 'Foreven';
                         }
                     } else {
@@ -542,9 +542,8 @@
                             throw new Error('importT5Tab not available');
                         }
 
-                        // Store sector name — preserve any existing manual name (conflict rule)
                         const slotNum = parseInt(defaultSlot, 10);
-                        if (!isNaN(slotNum) && !window.sectorNames[slotNum]) {
+                        if (!isNaN(slotNum)) {
                             window.sectorNames[slotNum] = name;
                         }
                     }

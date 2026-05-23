@@ -1,4 +1,4 @@
-# As Above, So Below (v0.11.0)
+# As Above, So Below (v0.11.1)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -61,6 +61,16 @@ Want to replace any of these sectors with your own file?
 
 ---
 ## 📜 Changelog
+
+### [v0.11.1] - 2026-05-22
+1. **Borders and Regions:** Setting option available to see Border and Region names on map
+2. **Borders and Import OTU:** Fixed a bug incorrectly importing the Solomani Rim
+2. **Import Universe:** Added Terry Mixon xml file for Foreven Sector
+3. **Import Imperium/Universe:** Fixed bug that would not expand System in non-aligned worlds
+4. **Download Routes:** Added options for more fields to include in Route csv download
+5. **Settings:** Improved look and feel of headings on white background
+6. **System Viewer:** Added option to scale size of orbit lines in system viewer
+7. **System Viewer:** When white background setting enabled, system viewer shows white background
 
 ### [v0.11.0] - 2026-05-21
 1. **System Viewer:** Zoom into system with details and see orbiting worlds and moons

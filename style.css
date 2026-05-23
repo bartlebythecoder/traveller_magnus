@@ -1460,3 +1460,19 @@ body.print-mode .menu-btn {
     color: #1a1a1a;
     border-color: #888;
 }
+
+body.print-mode .settings-section-header {
+    color: #0d6b64;
+}
+
+body.print-mode .settings-section-header:hover {
+    color: #064b45;
+}
+
+body.print-mode .settings-section-header i {
+    color: #2c8a84;
+}
+
+body.print-mode .settings-section {
+    border-top-color: rgba(13, 107, 100, 0.3);
+}

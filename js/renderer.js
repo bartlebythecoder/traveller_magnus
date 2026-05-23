@@ -99,6 +99,7 @@ function draw() {
 
     // LOD: Computed once per frame — gates grid lines, text, and icons below zoom threshold.
     const showText = zoom >= 0.3;
+    const showDots = zoom >= 0.07;
 
     // Build border territory fill lookup once per frame (hexId -> color, when fill is enabled)
     const visibleBorderFillMap = new Map();
@@ -422,6 +423,7 @@ function draw() {
 
             const hexId = getHexId(q, r);
             if (!hexId) continue;
+            if (!showDots) continue;
 
             const isSelected = selectedHexes.has(hexId);
             let stateObj = hexStates.get(hexId);
@@ -1012,6 +1014,12 @@ function draw() {
         }
     }
 
+    // =========================================================================
+    // FINAL PASS: BORDER NAMES + REGION NAMES (drawn last so they sit above all other content)
+    // =========================================================================
+    drawBorderNames();
+    drawRegionNames();
+
     ctx.restore();
 }
 
@@ -1153,6 +1161,254 @@ function drawBorderGroups() {
         });
     }
 
+}
+
+// ============================================================================
+// BORDER NAME RENDERING
+// Draws each border's name at the centroid of its hex group, scaled by size.
+// Called from draw() after drawBorderGroups().
+// ============================================================================
+
+let _bnCacheSize = -1;
+const _bnCacheMap = new Map(); // borderId → { cx, cy, hexCount, minX, maxX, minY, maxY }
+
+// Called after sortAndTrimBorderDefinitions remaps IDs so the stale cache is discarded.
+window.invalidateBorderNamesCache = function () { _bnCacheSize = -1; };
+
+function _rebuildBorderNamesCache() {
+    _bnCacheMap.clear();
+    if (!window.hexBorderAssignments || !window.borderDefinitions) return;
+
+    const size       = baseHexSize;
+    const widthStep  = (3 / 2) * size;
+    const heightStep = Math.sqrt(3) * size;
+
+    const groups = new Map(); // borderId → { sumX, sumY, count, minX, maxX, minY, maxY }
+    window.hexBorderAssignments.forEach((borderId, hexId) => {
+        const coords = getHexCoords(hexId);
+        if (!coords) return;
+        const { q, r } = coords;
+        const parity = q & 1;
+        const cx = widthStep * q;
+        const cy = heightStep * (r + (parity ? 0.5 : 0));
+        if (!groups.has(borderId)) groups.set(borderId, { sumX: 0, sumY: 0, count: 0, minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity });
+        const g = groups.get(borderId);
+        g.sumX += cx;
+        g.sumY += cy;
+        g.count++;
+        if (cx < g.minX) g.minX = cx;
+        if (cx > g.maxX) g.maxX = cx;
+        if (cy < g.minY) g.minY = cy;
+        if (cy > g.maxY) g.maxY = cy;
+    });
+
+    groups.forEach(({ sumX, sumY, count, minX, maxX, minY, maxY }, borderId) => {
+        _bnCacheMap.set(borderId, { cx: sumX / count, cy: sumY / count, hexCount: count, minX, maxX, minY, maxY });
+    });
+    _bnCacheSize = window.hexBorderAssignments.size;
+}
+
+function drawBorderNames() {
+    if (!window.borderNamesEnabled) return;
+    if (!window.borderDefinitions || window.borderDefinitions.length === 0) return;
+    if (!window.hexBorderAssignments || window.hexBorderAssignments.size === 0) return;
+
+    if (window.hexBorderAssignments.size !== _bnCacheSize) _rebuildBorderNamesCache();
+
+    const size         = baseHexSize;
+    const MIN_LABEL_PX = 10;
+    const MAX_LABEL_PX = 22;
+
+    // Viewport in world coordinates
+    const viewLeft   = cameraX;
+    const viewRight  = cameraX + window.innerWidth  / zoom;
+    const viewTop    = cameraY;
+    const viewBottom = cameraY + window.innerHeight / zoom;
+
+    ctx.save();
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.lineJoin     = 'round';
+    ctx.miterLimit   = 2;
+
+    window.borderDefinitions.forEach(def => {
+        if (def.visible === false) return;
+        const info = _bnCacheMap.get(def.id);
+        if (!info || info.hexCount === 0) return;
+
+        // Skip if border's bounding box doesn't intersect the viewport at all
+        if (info.maxX < viewLeft  || info.minX > viewRight ||
+            info.maxY < viewTop   || info.minY > viewBottom) return;
+
+        const worldFontSize  = 0.4 * size * Math.sqrt(info.hexCount);
+        const screenFontSize = worldFontSize * zoom;
+        if (screenFontSize < MIN_LABEL_PX) return;
+
+        const displayWorldFont = Math.min(worldFontSize, MAX_LABEL_PX / zoom);
+
+        // Clamp centroid to the raw intersection of border AABB and viewport.
+        // No padding — padding in world-space blows up at low zoom.
+        const clampL = Math.max(info.minX, viewLeft);
+        const clampR = Math.min(info.maxX, viewRight);
+        const clampT = Math.max(info.minY, viewTop);
+        const clampB = Math.min(info.maxY, viewBottom);
+        if (clampL >= clampR || clampT >= clampB) return; // degenerate intersection
+
+        const labelX = Math.max(clampL, Math.min(clampR, info.cx));
+        const labelY = Math.max(clampT, Math.min(clampB, info.cy));
+
+        ctx.font = `bold ${displayWorldFont}px 'Courier New', Courier, monospace`;
+
+        const label      = def.name.toUpperCase();
+        const textWidth  = ctx.measureText(label).width;
+        const hPad       = displayWorldFont * 0.35;
+        const vPad       = displayWorldFont * 0.20;
+        const bgX        = labelX - textWidth / 2 - hPad;
+        const bgY        = labelY - displayWorldFont / 2 - vPad;
+        const bgW        = textWidth + hPad * 2;
+        const bgH        = displayWorldFont + vPad * 2;
+        const radius     = displayWorldFont * 0.25;
+
+        // Subtle dark pill behind the text
+        ctx.globalAlpha = 0.50;
+        ctx.fillStyle   = '#000000';
+        ctx.beginPath();
+        ctx.roundRect(bgX, bgY, bgW, bgH, radius);
+        ctx.fill();
+
+        // Dark outline then colored fill
+        ctx.globalAlpha = 0.75;
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth   = 3 / zoom;
+        ctx.strokeText(label, labelX, labelY);
+
+        ctx.globalAlpha = 0.95;
+        ctx.fillStyle   = def.color;
+        ctx.fillText(label, labelX, labelY);
+
+        ctx.globalAlpha = 1.0;
+    });
+
+    ctx.restore();
+}
+
+// ============================================================================
+// REGION NAME RENDERING
+// Draws each region's name at the centroid of its hex group, scaled by size.
+// Called from draw() after drawBorderNames().
+// ============================================================================
+
+let _rnCacheSize = -1;
+const _rnCacheMap = new Map(); // regionName → { cx, cy, hexCount, minX, maxX, minY, maxY }
+
+function _rebuildRegionNamesCache() {
+    _rnCacheMap.clear();
+    const size       = baseHexSize;
+    const widthStep  = (3 / 2) * size;
+    const heightStep = Math.sqrt(3) * size;
+
+    const groups = new Map(); // regionName → { sumX, sumY, count, minX, maxX, minY, maxY }
+    hexStates.forEach((state, hexId) => {
+        if (!state.cluster || state.cluster === '----') return;
+        const coords = getHexCoords(hexId);
+        if (!coords) return;
+        const { q, r } = coords;
+        const parity = q & 1;
+        const cx = widthStep * q;
+        const cy = heightStep * (r + (parity ? 0.5 : 0));
+        if (!groups.has(state.cluster)) groups.set(state.cluster, { sumX: 0, sumY: 0, count: 0, minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity });
+        const g = groups.get(state.cluster);
+        g.sumX += cx;
+        g.sumY += cy;
+        g.count++;
+        if (cx < g.minX) g.minX = cx;
+        if (cx > g.maxX) g.maxX = cx;
+        if (cy < g.minY) g.minY = cy;
+        if (cy > g.maxY) g.maxY = cy;
+    });
+
+    groups.forEach(({ sumX, sumY, count, minX, maxX, minY, maxY }, name) => {
+        _rnCacheMap.set(name, { cx: sumX / count, cy: sumY / count, hexCount: count, minX, maxX, minY, maxY });
+    });
+    _rnCacheSize = hexStates.size;
+}
+
+function drawRegionNames() {
+    if (!window.regionNamesEnabled) return;
+    if (!window.regionDefinitions || window.regionDefinitions.length === 0) return;
+    if (!hexStates || hexStates.size === 0) return;
+
+    if (hexStates.size !== _rnCacheSize) _rebuildRegionNamesCache();
+
+    const size         = baseHexSize;
+    const MIN_LABEL_PX = 10;
+    const MAX_LABEL_PX = 22;
+
+    const viewLeft   = cameraX;
+    const viewRight  = cameraX + window.innerWidth  / zoom;
+    const viewTop    = cameraY;
+    const viewBottom = cameraY + window.innerHeight / zoom;
+
+    ctx.save();
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.lineJoin     = 'round';
+    ctx.miterLimit   = 2;
+
+    window.regionDefinitions.forEach(def => {
+        if (def.visible === false) return;
+        const info = _rnCacheMap.get(def.name);
+        if (!info || info.hexCount === 0) return;
+
+        if (info.maxX < viewLeft  || info.minX > viewRight ||
+            info.maxY < viewTop   || info.minY > viewBottom) return;
+
+        const worldFontSize  = 0.4 * size * Math.sqrt(info.hexCount);
+        const screenFontSize = worldFontSize * zoom;
+        if (screenFontSize < MIN_LABEL_PX) return;
+
+        const displayWorldFont = Math.min(worldFontSize, MAX_LABEL_PX / zoom);
+
+        const clampL = Math.max(info.minX, viewLeft);
+        const clampR = Math.min(info.maxX, viewRight);
+        const clampT = Math.max(info.minY, viewTop);
+        const clampB = Math.min(info.maxY, viewBottom);
+        if (clampL >= clampR || clampT >= clampB) return;
+
+        const labelX = Math.max(clampL, Math.min(clampR, info.cx));
+        const labelY = Math.max(clampT, Math.min(clampB, info.cy));
+
+        ctx.font = `bold ${displayWorldFont}px 'Courier New', Courier, monospace`;
+
+        const label      = def.name.toUpperCase();
+        const textWidth  = ctx.measureText(label).width;
+        const hPad       = displayWorldFont * 0.35;
+        const vPad       = displayWorldFont * 0.20;
+        const bgX        = labelX - textWidth / 2 - hPad;
+        const bgY        = labelY - displayWorldFont / 2 - vPad;
+        const bgW        = textWidth + hPad * 2;
+        const bgH        = displayWorldFont + vPad * 2;
+        const radius     = displayWorldFont * 0.25;
+
+        ctx.globalAlpha = 0.50;
+        ctx.fillStyle   = '#000000';
+        ctx.beginPath();
+        ctx.roundRect(bgX, bgY, bgW, bgH, radius);
+        ctx.fill();
+
+        ctx.globalAlpha = 0.75;
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth   = 3 / zoom;
+        ctx.strokeText(label, labelX, labelY);
+
+        ctx.globalAlpha = 0.95;
+        ctx.fillStyle   = def.color;
+        ctx.fillText(label, labelX, labelY);
+
+        ctx.globalAlpha = 1.0;
+    });
+
+    ctx.restore();
 }
 
 // Listen for window resizing automatically

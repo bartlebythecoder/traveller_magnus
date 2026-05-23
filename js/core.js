@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.11.0";
-const APP_BANNER = "v0.11.0: New: System Maps";
+const APP_VERSION = "v0.11.1";
+const APP_BANNER = "v0.11.1: Splash: Region and Border Names Display Options";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -56,6 +56,8 @@ showSubsectorBorders = true;
 devView = false;
 hideNoPlanetSystems = true;
 showSectorNames = false;
+window.borderNamesEnabled = false;
+window.regionNamesEnabled = false;
 
 // Sector name store — keyed by integer sector number
 window.sectorNames = {};

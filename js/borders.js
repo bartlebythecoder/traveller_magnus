@@ -115,6 +115,7 @@ window.sortAndTrimBorderDefinitions = function () {
         window.borderPaths = newPaths;
     }
 
+    if (typeof window.invalidateBorderNamesCache === 'function') window.invalidateBorderNamesCache();
     window.ensureFreeBorderSlot();
     if (window.dbManager) {
         window.dbManager.saveBorderDefinitions?.();
@@ -467,26 +468,43 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
     const weakBorderIds = new Set();
 
     const _sortedEntries  = [...byGroup.entries()].sort(([a], [b]) => a.localeCompare(b));
+
+    // Enclosed polygons (no off-sector codes) must fill before sector-spanning ones.
+    // This ensures inner polities like the Vegan Autonomous District claim their hexes
+    // before the encompassing border (Third Imperium) sweeps through the whole sector.
+    function _hasOffSectorCodes(items) {
+        return items.some(({ el }) => {
+            const raw = (el.textContent || '').trim();
+            return raw.split(/\s+/).some(code => {
+                if (code.length !== 4) return false;
+                const v = parseInt(code, 10);
+                const lQ = Math.floor(v / 100), lR = v % 100;
+                return lQ < 1 || lQ > 32 || lR < 1 || lR > 40;
+            });
+        });
+    }
+
     const _orderedEntries = [
-        ..._sortedEntries.filter(([k]) =>  weakGroupKeys.has(k)),
-        ..._sortedEntries.filter(([k]) => !weakGroupKeys.has(k)),
+        ..._sortedEntries.filter(([k])        =>  weakGroupKeys.has(k)),
+        ..._sortedEntries.filter(([k, items]) => !weakGroupKeys.has(k) && !_hasOffSectorCodes(items)),
+        ..._sortedEntries.filter(([k, items]) => !weakGroupKeys.has(k) &&  _hasOffSectorCodes(items)),
     ];
 
     // ── Process each label/allegiance group (weak first, then strong) ────
     _orderedEntries.forEach(([groupKey, items]) => {
         const isWeak = weakGroupKeys.has(groupKey);
         // 1. Find an existing slot already claimed by this group key.
-        // Four ways to match:
+        // Three ways to match:
         //   a) d.name === groupKey  (label-keyed group matches stored name)
         //   b) d.allegianceCodes.includes(groupKey)  (code-keyed group matches stored codes)
         //   c) any raw allegiance code from this group's items appears in d.allegianceCodes
         //      — handles cross-sector borders where one sector's XML uses a Label attribute
         //      and the other doesn't, causing groupKey to differ while the underlying
         //      allegiance code is the same.
-        //   d) color-based fallback: same resolved hex color AND slot already has allegiance
-        //      codes — handles cross-sector pairs that use different code schemes (e.g.
-        //      Hinterworlds "CyUn" via Stylesheet vs Leonidae "Cu" via Color attr) but
-        //      consistently use the same color for the same polity.
+        // Color-based fallback was removed: it caused polities sharing the same color (e.g.
+        // multiple yellow client states across the Imperium) to be incorrectly merged into
+        // the first slot that claimed that color, pulling the label centroid far from the
+        // actual territory.
         const resolvedColor = (() => {
             for (const it of items) {
                 if (!it.color) continue;
@@ -499,8 +517,7 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
         let def = window.borderDefinitions.find(d =>
             d.name === groupKey ||
             (d.allegianceCodes && d.allegianceCodes.includes(groupKey)) ||
-            (d.allegianceCodes && items.some(it => it.allegianceCode && d.allegianceCodes.includes(it.allegianceCode))) ||
-            (resolvedColor && d.allegianceCodes && d.allegianceCodes.length > 0 && d.color === resolvedColor)
+            (d.allegianceCodes && items.some(it => it.allegianceCode && d.allegianceCodes.includes(it.allegianceCode)))
         );
         let isNewSlot = false;
 
@@ -794,6 +811,7 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
             const eMaxR = hadRowHi ? secMaxR + 1 : maxR + 1;
 
             let filled = false;
+            let successSeed = null;
             for (const [seedQ, seedR] of candidateSeeds) {
                 const visited  = new Set(boundaryQR);
                 const interior = [];
@@ -836,6 +854,7 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
                     // don't appear as unassigned rings inside the filled region.
                     boundaryHexIds.forEach(hId => window.hexBorderAssignments.set(hId, def.id));
                     filled = true;
+                    successSeed = [seedQ, seedR];
                     break;
                 }
             }
@@ -844,6 +863,36 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
                 // All seeds leaked (open boundary or single-hex marker): fall back to
                 // assigning the boundary hexes themselves so something is visible.
                 boundaryHexIds.forEach(hId => window.hexBorderAssignments.set(hId, def.id));
+            }
+
+            // Reference fill: re-run from the successful seed using ONLY boundary hexes
+            // as walls (no other-polity walls).  The resulting set is the polygon's true
+            // interior — used by the second pass to distinguish valid isolated pockets
+            // (cut off by an inner polity) from the polygon's exterior.
+            let refInteriorSet = null;
+            if (successSeed) {
+                const [rsQ, rsR] = successSeed;
+                const refVisited = new Set(boundaryQR);
+                const refQueue   = [];
+                if (!refVisited.has(`${rsQ},${rsR}`)) {
+                    refVisited.add(`${rsQ},${rsR}`);
+                    refQueue.push([rsQ, rsR]);
+                }
+                let refLeaked = false;
+                while (refQueue.length > 0 && !refLeaked) {
+                    const [q, r] = refQueue.shift();
+                    if (q <= eMinQ || q >= eMaxQ || r <= eMinR || r >= eMaxR) { refLeaked = true; break; }
+                    _hexNeighbors(q, r).forEach(([nq, nr]) => {
+                        const nk = `${nq},${nr}`;
+                        if (!refVisited.has(nk)) {
+                            refVisited.add(nk);
+                            if (nq >= secMinQ && nq <= secMaxQ && nr >= secMinR && nr <= secMaxR) {
+                                refQueue.push([nq, nr]);
+                            }
+                        }
+                    });
+                }
+                if (!refLeaked) refInteriorSet = refVisited;
             }
 
             // Second pass: fill isolated interior pockets the LabelPosition-seed fill
@@ -863,6 +912,14 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
                 for (let pq = eMinQ + 1; pq <= eMaxQ - 1; pq++) {
                     for (let pr = eMinR + 1; pr <= eMaxR - 1; pr++) {
                         if (patchedSoFar.has(`${pq},${pr}`)) continue;
+                        // Skip hexes already claimed by a different strong border — they are
+                        // walls for this fill and must not become pocket starting points.
+                        const _startId = window.hexBorderAssignments.get(_qrToHexId(pq, pr));
+                        if (_startId !== undefined && _startId !== def.id &&
+                            (isWeak || !weakBorderIds.has(_startId))) {
+                            patchedSoFar.add(`${pq},${pr}`);
+                            continue;
+                        }
                         const pWall     = new Set(boundaryQR);
                         const pQueue    = [[pq, pr]];
                         const pInterior = [];
@@ -879,6 +936,11 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
                                 const nk = `${nq},${nr}`;
                                 if (!pWall.has(nk)) {
                                     pWall.add(nk);
+                                    // Treat hexes claimed by a different strong border as walls,
+                                    // mirroring the main fill — prevents overwriting inner polities.
+                                    const _nId = window.hexBorderAssignments.get(_qrToHexId(nq, nr));
+                                    if (_nId !== undefined && _nId !== def.id &&
+                                        (isWeak || !weakBorderIds.has(_nId))) return;
                                     if (nq >= secMinQ && nq <= secMaxQ && nr >= secMinR && nr <= secMaxR) {
                                         pQueue.push([nq, nr]);
                                     }
@@ -886,15 +948,16 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
                             });
                         }
                         if (!pLeaked) {
-                            // A true isolated interior pocket is fully enclosed by boundary
-                            // hexes and cannot touch a sector edge.  If this component touches
-                            // any sector edge it is the exterior of a sector-edge-closing
-                            // polygon (e.g. Aslan Hierate NE area above a diagonal boundary),
-                            // not a pocket — skip it.
-                            const touchesSectorEdge = pInterior.some(
-                                ([q2, r2]) => q2 === secMinQ || q2 === secMaxQ || r2 === secMinR || r2 === secMaxR
-                            );
-                            if (!touchesSectorEdge) {
+                            // Accept a pocket only if all its hexes lie within the reference
+                            // interior (true interior ignoring other-polity walls).  This
+                            // distinguishes a valid isolated pocket — cut off by an inner polity
+                            // barrier — from the polygon's exterior, which the reference fill
+                            // never reaches.  Falls back to the sector-edge guard when no
+                            // reference fill is available (main fill leaked).
+                            const inRefInterior = refInteriorSet
+                                ? pInterior.every(([q2, r2]) => refInteriorSet.has(`${q2},${r2}`))
+                                : !pInterior.some(([q2, r2]) => q2 === secMinQ || q2 === secMaxQ || r2 === secMinR || r2 === secMaxR);
+                            if (inRefInterior) {
                                 pInterior.forEach(([q2, r2]) => window.hexBorderAssignments.set(_qrToHexId(q2, r2), def.id));
                             }
                         }

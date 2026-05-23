@@ -1104,14 +1104,208 @@ function getRouteSystemList(routeId) {
     return { ordered: false, worlds: allIds };
 }
 
-function exportRouteSystemsCSV(routeId, routeName) {
-    const { ordered, worlds } = getRouteSystemList(routeId);
-    const rows = [['Hex', 'Name']];
+// ── Route Export Field Registry ───────────────────────────────────────────────
+const ROUTE_EXPORT_FIELDS = [
+    { group: 'Location',       id: 'name',       label: 'Name',            defaultOn: true  },
+    { group: 'Location',       id: 'hex',         label: 'Hex',             defaultOn: true  },
+    { group: 'Location',       id: 'sector',      label: 'Sector',          defaultOn: false },
+    { group: 'Location',       id: 'subsector',   label: 'Subsector',       defaultOn: false },
+    { group: 'Identity',       id: 'uwp',         label: 'UWP',             defaultOn: true  },
+    { group: 'Identity',       id: 'zone',        label: 'Zone',            defaultOn: true  },
+    { group: 'Identity',       id: 'allegiance',  label: 'Allegiance',      defaultOn: true  },
+    { group: 'UWP Components', id: 'starport',    label: 'Star Port',       defaultOn: false },
+    { group: 'UWP Components', id: 'size',        label: 'World Size',      defaultOn: false },
+    { group: 'UWP Components', id: 'atm',         label: 'Atmosphere',      defaultOn: false },
+    { group: 'UWP Components', id: 'hydro',       label: 'Hydrographics',   defaultOn: false },
+    { group: 'UWP Components', id: 'pop',         label: 'Population Code', defaultOn: false },
+    { group: 'UWP Components', id: 'gov',         label: 'Government',      defaultOn: false },
+    { group: 'UWP Components', id: 'law',         label: 'Law Level',       defaultOn: false },
+    { group: 'UWP Components', id: 'tl',          label: 'Tech Level',      defaultOn: false },
+    { group: 'Demographics',   id: 'totalpop',    label: 'Total Population', defaultOn: false },
+    { group: 'Demographics',   id: 'nobility',    label: 'Nobilities',      defaultOn: false },
+    { group: 'Classification', id: 'tradecodes',  label: 'Trade Codes',     defaultOn: true  },
+    { group: 'System',         id: 'belts',       label: 'Planetoid Belts', defaultOn: false },
+    { group: 'System',         id: 'gasgiant',    label: 'Gas Giants',      defaultOn: false },
+    { group: 'System',         id: 'stars',       label: 'Stars',           defaultOn: false },
+    { group: 'System',         id: 'worlds',      label: 'System Worlds',   defaultOn: false },
+    { group: 'Bases',          id: 'bases',       label: 'Bases',           defaultOn: false },
+    { group: 'Bases',          id: 'navalbase',   label: 'Naval Base',      defaultOn: false },
+    { group: 'Bases',          id: 'scoutbase',   label: 'Scout Base',      defaultOn: false },
+    { group: 'Bases',          id: 'milbase',     label: 'Military Base',   defaultOn: false },
+];
+
+const _ROUTE_EXPORT_LS_KEY = 'traveller_routeExportFields';
+
+function _getRouteExportValue(fieldId, hexId, state, data) {
+    switch (fieldId) {
+        case 'name':      return getWorldName(state) || '(unnamed)';
+        case 'hex': {
+            const parts = hexId.split('-');
+            return parts[parts.length - 1];
+        }
+        case 'sector': {
+            const sNum = parseInt(hexId.split('-')[0], 10);
+            return (window.sectorNames && window.sectorNames[sNum]) || `Sector ${sNum}`;
+        }
+        case 'subsector':  return hexId.split('-')[1] || '-';
+        case 'uwp':        return data.uwp || '???????-?';
+        case 'starport':   return String(data.starport || '-');
+        case 'size':       return data.size  != null ? toUWPChar(data.size)  : '-';
+        case 'atm':        return data.atm   != null ? toUWPChar(data.atm)   : '-';
+        case 'hydro':      return data.hydro != null ? toUWPChar(data.hydro) : '-';
+        case 'pop':        return data.pop   != null ? toUWPChar(data.pop)   : '-';
+        case 'gov':        return data.gov   != null ? toUWPChar(data.gov)   : '-';
+        case 'law':        return data.law   != null ? toUWPChar(data.law)   : '-';
+        case 'tl':         return data.tl    != null ? String(data.tl)       : '-';
+        case 'zone':       return data.travelZone || 'Green';
+        case 'allegiance': return state.allegiance || data.allegiance || '-';
+        case 'totalpop': {
+            // MgT2E stores fine-grained total population on mgtSocio
+            const mgtTotal = state.mgtSocio && state.mgtSocio.totalWorldPop;
+            if (mgtTotal != null && mgtTotal > 0) return mgtTotal.toLocaleString();
+            const pop = data.pop != null ? data.pop : 0;
+            if (!pop) return '0';
+            const mult = data.popDigit != null ? data.popDigit : 5;
+            return Math.round(Math.pow(10, pop) * mult).toLocaleString();
+        }
+        case 'tradecodes': return (data.tradeCodes || []).join(' ') || '-';
+        case 'nobility':   return '-';
+        case 'belts':      return String(data.planetoidBelts != null ? data.planetoidBelts : (state.beltCount != null ? state.beltCount : 0));
+        case 'gasgiant':   return String(data.gasGiantsCount != null ? data.gasGiantsCount : (state.gasGiantCount != null ? state.gasGiantCount : (data.gasGiant ? 1 : 0)));
+        case 'stars': {
+            if (state.t5Data && state.t5Data.stars && state.t5Data.stars.length > 0)
+                return state.t5Data.stars.map(s => s.name).join(' ');
+            if (state.t5Data && state.t5Data.homestar && state.t5Data.homestar !== 'Unknown')
+                return state.t5Data.homestar;
+            const sys = state.t5System || state.mgtSystem || state.ctSystem || state.rttSystem;
+            if (sys && sys.stars) return sys.stars.map(s => s.classification || s.name || '?').join(' ');
+            return '-';
+        }
+        case 'worlds': {
+            if (state.t5System && state.t5System.totalWorlds) return String(state.t5System.totalWorlds);
+            if (state.mgtSystem && state.mgtSystem.worlds)    return String(state.mgtSystem.worlds.length);
+            if (state.ctSystem && state.ctSystem.orbits) {
+                let w = state.ctSystem.orbits.filter(o => o.contents).length;
+                if (state.ctSystem.capturedPlanets) w += state.ctSystem.capturedPlanets.length;
+                return String(w);
+            }
+            if (state.rttSystem && state.rttSystem.stars) {
+                let w = 0;
+                state.rttSystem.stars.forEach(s => { if (s.planetarySystem) w += s.planetarySystem.orbits.length; });
+                return String(w);
+            }
+            return '1';
+        }
+        case 'bases': {
+            let b = '';
+            if (data.navalBase)    b += 'N';
+            if (data.scoutBase)    b += 'S';
+            if (data.researchBase) b += 'R';
+            if (data.militaryBase) b += 'M';
+            if (data.tas)          b += 'T';
+            if (data.wayStation)   b += 'W';
+            if (data.govEstate)    b += 'G';
+            return b || '-';
+        }
+        case 'navalbase': return data.navalBase    ? 'Y' : '-';
+        case 'scoutbase': return data.scoutBase    ? 'Y' : '-';
+        case 'milbase':   return data.militaryBase ? 'Y' : '-';
+        default:          return '-';
+    }
+}
+
+function _buildRouteExportModal() {
+    if (document.getElementById('route-export-modal')) return;
+
+    const groups = {};
+    const groupOrder = ['Location', 'Identity', 'UWP Components', 'Demographics', 'Classification', 'System', 'Bases'];
+    ROUTE_EXPORT_FIELDS.forEach(f => {
+        if (!groups[f.group]) groups[f.group] = [];
+        groups[f.group].push(f);
+    });
+
+    let gridHtml = '<div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px 20px;">';
+    groupOrder.forEach(gName => {
+        if (!groups[gName]) return;
+        gridHtml += `<div><span style="color:#66fcf1; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px; display:block;">${gName}</span>`;
+        groups[gName].forEach(f => {
+            gridHtml += `<label style="display:flex; align-items:center; gap:6px; cursor:pointer; margin-bottom:3px;"><input type="checkbox" data-field="${f.id}" style="cursor:pointer; accent-color:#66fcf1;"><span style="color:#c5c6c7; font-size:0.82rem;">${f.label}</span></label>`;
+        });
+        gridHtml += '</div>';
+    });
+    gridHtml += '</div>';
+
+    const modal = document.createElement('div');
+    modal.id = 'route-export-modal';
+    modal.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); z-index:2000; align-items:center; justify-content:center;';
+    modal.innerHTML = `
+        <div style="background:#1f2833; border:1px solid #45a29e; border-radius:8px; padding:24px; width:600px; max-height:85vh; display:flex; flex-direction:column; gap:14px; box-shadow:0 8px 32px rgba(0,0,0,0.6);">
+            <h3 style="margin:0; color:#66fcf1; font-size:1.1rem;">Export Route Systems</h3>
+            <div style="display:flex; gap:8px;">
+                <button id="route-export-all" class="menu-btn" style="padding:4px 12px; font-size:0.75rem;">Select All</button>
+                <button id="route-export-none" class="menu-btn" style="padding:4px 12px; font-size:0.75rem;">Select None</button>
+            </div>
+            <div style="overflow-y:auto; flex:1; padding-right:4px;">${gridHtml}</div>
+            <div style="display:flex; gap:8px; justify-content:flex-end; border-top:1px solid #2a3a3a; padding-top:12px;">
+                <button id="route-export-cancel" class="menu-btn" style="padding:8px 20px;">Cancel</button>
+                <button id="route-export-download" class="menu-btn" style="padding:8px 20px; background:#45a29e; color:#0b0c10; border-color:#45a29e;">Download CSV</button>
+            </div>
+        </div>`;
+    document.body.appendChild(modal);
+
+    modal.querySelector('#route-export-all').addEventListener('click', () => {
+        modal.querySelectorAll('input[data-field]').forEach(cb => { cb.checked = true; });
+    });
+    modal.querySelector('#route-export-none').addEventListener('click', () => {
+        modal.querySelectorAll('input[data-field]').forEach(cb => { cb.checked = false; });
+    });
+    modal.querySelector('#route-export-cancel').addEventListener('click', () => { modal.style.display = 'none'; });
+    modal.addEventListener('click', e => { if (e.target === modal) modal.style.display = 'none'; });
+}
+
+function openRouteExportModal(routeId, routeName) {
+    _buildRouteExportModal();
+    const modal = document.getElementById('route-export-modal');
+
+    // Restore checkbox state from localStorage or fall back to defaults
+    let savedFields;
+    try { savedFields = JSON.parse(localStorage.getItem(_ROUTE_EXPORT_LS_KEY)); } catch (_) {}
+    const enabled = new Set(savedFields || ROUTE_EXPORT_FIELDS.filter(f => f.defaultOn).map(f => f.id));
+    modal.querySelectorAll('input[data-field]').forEach(cb => { cb.checked = enabled.has(cb.dataset.field); });
+
+    // Re-wire Download for this routeId/routeName (cloneNode removes old listeners)
+    const oldBtn = modal.querySelector('#route-export-download');
+    const newBtn = oldBtn.cloneNode(true);
+    oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+    newBtn.addEventListener('click', () => {
+        const checked = [...modal.querySelectorAll('input[data-field]:checked')].map(cb => cb.dataset.field);
+        try { localStorage.setItem(_ROUTE_EXPORT_LS_KEY, JSON.stringify(checked)); } catch (_) {}
+        modal.style.display = 'none';
+        exportRouteSystemsCSV(routeId, routeName, checked);
+    });
+
+    modal.style.display = 'flex';
+}
+
+function exportRouteSystemsCSV(routeId, routeName, fieldIds) {
+    if (!fieldIds || !fieldIds.length) {
+        try {
+            const saved = JSON.parse(localStorage.getItem(_ROUTE_EXPORT_LS_KEY));
+            fieldIds = (saved && saved.length) ? saved : ROUTE_EXPORT_FIELDS.filter(f => f.defaultOn).map(f => f.id);
+        } catch (_) {
+            fieldIds = ROUTE_EXPORT_FIELDS.filter(f => f.defaultOn).map(f => f.id);
+        }
+    }
+
+    const { worlds } = getRouteSystemList(routeId);
+    const labels = fieldIds.map(id => (ROUTE_EXPORT_FIELDS.find(f => f.id === id) || {}).label || id);
+    const rows = [labels];
 
     worlds.forEach(hexId => {
         const state = hexStates.get(hexId);
-        const name  = getWorldName(state) || '(unnamed)';
-        rows.push([hexId, name]);
+        if (!state) return;
+        const data = state.rttData || state.t5Data || state.mgt2eData || state.ctData || {};
+        rows.push(fieldIds.map(id => _getRouteExportValue(id, hexId, state, data)));
     });
 
     const csv = rows.map(row =>
@@ -1625,7 +1819,7 @@ window.renderRouteWindow = function () {
 
         const exportBtn = row.querySelector('.route-export-btn');
         if (exportBtn && segCount > 0) {
-            exportBtn.addEventListener('click', () => exportRouteSystemsCSV(def.id, def.name));
+            exportBtn.addEventListener('click', () => openRouteExportModal(def.id, def.name));
         }
 
         const autoBtn = row.querySelector('.route-auto-btn');
@@ -1723,7 +1917,7 @@ window.refreshRouteWindowCounts = function () {
             exportBtn.style.cursor = count > 0 ? 'pointer'  : 'default';
             exportBtn.style.opacity = count > 0 ? '1' : '0.3';
             exportBtn.title = count > 0 ? 'Export systems to CSV' : 'No segments to export';
-            exportBtn.onclick = count > 0 ? () => exportRouteSystemsCSV(routeId, routeName) : null;
+            exportBtn.onclick = count > 0 ? () => openRouteExportModal(routeId, routeName) : null;
         }
     });
 };
@@ -2008,6 +2202,32 @@ function setupSettingsPanel() {
         borderFillToggle.addEventListener('change', () => {
             window.borderFillEnabled = borderFillToggle.checked;
             localStorage.setItem('traveller_border_fill', String(window.borderFillEnabled));
+            requestAnimationFrame(draw);
+        });
+    }
+
+    // --- Border names ---
+    const borderNamesToggle = document.getElementById('toggle-border-names');
+    if (borderNamesToggle) {
+        const saved = localStorage.getItem('traveller_border_names');
+        window.borderNamesEnabled = saved === 'true';
+        borderNamesToggle.checked = window.borderNamesEnabled;
+        borderNamesToggle.addEventListener('change', () => {
+            window.borderNamesEnabled = borderNamesToggle.checked;
+            localStorage.setItem('traveller_border_names', String(window.borderNamesEnabled));
+            requestAnimationFrame(draw);
+        });
+    }
+
+    // --- Region names ---
+    const regionNamesToggle = document.getElementById('toggle-region-names');
+    if (regionNamesToggle) {
+        const saved = localStorage.getItem('traveller_region_names');
+        window.regionNamesEnabled = saved === 'true';
+        regionNamesToggle.checked = window.regionNamesEnabled;
+        regionNamesToggle.addEventListener('change', () => {
+            window.regionNamesEnabled = regionNamesToggle.checked;
+            localStorage.setItem('traveller_region_names', String(window.regionNamesEnabled));
             requestAnimationFrame(draw);
         });
     }

@@ -13,6 +13,8 @@
 const SystemViewer = (() => {
 
     // ── State ─────────────────────────────────────────────────────────────────
+    let _lightMode = false;   // mirrors window.printMode at open() time
+
     let _overlay   = null;
     let _orrCanvas = null;
     let _orrCtx    = null;
@@ -31,6 +33,7 @@ const SystemViewer = (() => {
     let _dragLast = null;
 
     let _linearScale = false;
+    let _orbitOpacity = 0;
 
     let _startTime   = 0;
     let _animFrameId = null;
@@ -51,6 +54,12 @@ const SystemViewer = (() => {
         O: '#9bb0ff', B: '#aabfff', A: '#cad7ff',
         F: '#f8f7ff', G: '#fff4ea', K: '#ffd2a1',
         M: '#ffcc6f', D: '#dce0ff', BD: '#a56432'
+    };
+    // Darker, saturated equivalents for white-background mode (originals wash out).
+    const _STAR_COLORS_LIGHT = {
+        O: '#3a5cc2', B: '#5070cc', A: '#6080b8',
+        F: '#b88a00', G: '#c86800', K: '#c04800',
+        M: '#b82800', D: '#6070a0', BD: '#7a4010'
     };
 
     // ── Fixed body sizes (never scale with zoom) ──────────────────────────────
@@ -79,7 +88,10 @@ const SystemViewer = (() => {
 
     // ── Colour helpers ────────────────────────────────────────────────────────
 
-    function _starColor(s) { return _STAR_COLORS[s.sType] || '#ffffff'; }
+    function _starColor(s) {
+        const map = _lightMode ? _STAR_COLORS_LIGHT : _STAR_COLORS;
+        return map[s.sType] || (_lightMode ? '#606060' : '#ffffff');
+    }
 
     function _worldColor(w) {
         if (w.type === 'Gas Giant') {
@@ -499,10 +511,11 @@ const SystemViewer = (() => {
         else if (found.edition === 'T5')    normalised = _normalizeT5(found.raw);
         else                                normalised = _normalizeRTT(found.raw);
 
-        _sys      = normalised;
-        _viewZoom = 1.0;
-        _viewOffX = 0;
-        _viewOffY = 0;
+        _sys       = normalised;
+        _lightMode = !!window.printMode;
+        _viewZoom  = 1.0;
+        _viewOffX  = 0;
+        _viewOffY  = 0;
         _buildOverlay(hexId);
         _startTime = performance.now();
         _startLoop();
@@ -543,41 +556,48 @@ const SystemViewer = (() => {
         const age      = (sys.age || 0).toFixed(2);
         const edition  = sys.edition || '';
 
+        // Palette: dark (default) or light (print mode)
+        const P = _lightMode
+            ? { bg: '#ffffff', border: '#45a29e88', text: '#1a1a2e', accent: '#0d6b64',
+                sub: '#4a5568', hint: '#6b7280', badge: '#45a29e', badgeBorder: '#45a29eaa' }
+            : { bg: '#000000', border: '#45a29e55', text: '#c5c6c7', accent: '#66fcf1',
+                sub: '#8a8f94', hint: '#55686b', badge: '#45a29e', badgeBorder: '#45a29e55' };
+
         _overlay = document.createElement('div');
         _overlay.id = 'system-viewer-overlay';
         Object.assign(_overlay.style, {
             position: 'fixed', inset: '0', zIndex: '9000',
-            background: '#000000',
+            background: P.bg,
             display: 'flex', flexDirection: 'column',
             fontFamily: '"Share Tech Mono", "Courier New", monospace',
-            color: '#c5c6c7', userSelect: 'none'
+            color: P.text, userSelect: 'none'
         });
 
         const header = document.createElement('div');
         Object.assign(header.style, {
             display: 'flex', alignItems: 'center', gap: '14px',
             padding: '8px 18px', flexShrink: '0',
-            borderBottom: '1px solid #45a29e55'
+            borderBottom: `1px solid ${P.border}`
         });
 
         const title = document.createElement('span');
-        Object.assign(title.style, { color: '#66fcf1', fontSize: '15px', fontWeight: 'bold' });
+        Object.assign(title.style, { color: P.accent, fontSize: '15px', fontWeight: 'bold' });
         title.textContent = `SYSTEM  ${hexId}`;
 
         const editionBadge = document.createElement('span');
         Object.assign(editionBadge.style, {
-            fontSize: '10px', color: '#45a29e',
-            border: '1px solid #45a29e55', padding: '1px 6px'
+            fontSize: '10px', color: P.badge,
+            border: `1px solid ${P.badgeBorder}`, padding: '1px 6px'
         });
         editionBadge.textContent = edition;
 
         const sub = document.createElement('span');
-        Object.assign(sub.style, { fontSize: '12px', color: '#8a8f94' });
+        Object.assign(sub.style, { fontSize: '12px', color: P.sub });
         sub.textContent = `${starLine}   ·   Age ${age} Gyr`;
 
         const hint = document.createElement('span');
         Object.assign(hint.style, {
-            fontSize: '11px', color: '#55686b',
+            fontSize: '11px', color: P.hint,
             marginLeft: 'auto', marginRight: '12px'
         });
         hint.textContent = 'Scroll to zoom orbits  ·  Drag to pan  ·  Scroll out at full view or ESC to return';
@@ -587,14 +607,14 @@ const SystemViewer = (() => {
         Object.assign(planetWrap.style, { display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px' });
         const planetLbl = document.createElement('span');
         planetLbl.textContent = 'Planet Speed:';
-        Object.assign(planetLbl.style, { color: '#8a8f94', whiteSpace: 'nowrap' });
+        Object.assign(planetLbl.style, { color: P.sub, whiteSpace: 'nowrap' });
         const planetSlider = document.createElement('input');
         planetSlider.type = 'range'; planetSlider.min = '0'; planetSlider.max = '4';
         planetSlider.step = '0.1'; planetSlider.value = String(_planetSpeed);
         Object.assign(planetSlider.style, { width: '80px', cursor: 'pointer' });
         const planetVal = document.createElement('span');
         planetVal.textContent = _planetSpeed.toFixed(1) + 'x';
-        Object.assign(planetVal.style, { color: '#66fcf1', minWidth: '30px' });
+        Object.assign(planetVal.style, { color: P.accent, minWidth: '30px' });
         planetSlider.addEventListener('input', () => {
             _planetSpeed = parseFloat(planetSlider.value);
             planetVal.textContent = _planetSpeed.toFixed(1) + 'x';
@@ -606,14 +626,14 @@ const SystemViewer = (() => {
         Object.assign(moonWrap.style, { display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px' });
         const moonLbl = document.createElement('span');
         moonLbl.textContent = 'Moon Speed:';
-        Object.assign(moonLbl.style, { color: '#8a8f94', whiteSpace: 'nowrap' });
+        Object.assign(moonLbl.style, { color: P.sub, whiteSpace: 'nowrap' });
         const moonSlider = document.createElement('input');
         moonSlider.type = 'range'; moonSlider.min = '0'; moonSlider.max = '4';
         moonSlider.step = '0.1'; moonSlider.value = String(_moonSpeed);
         Object.assign(moonSlider.style, { width: '80px', cursor: 'pointer' });
         const moonVal = document.createElement('span');
         moonVal.textContent = _moonSpeed.toFixed(1) + 'x';
-        Object.assign(moonVal.style, { color: '#66fcf1', minWidth: '30px' });
+        Object.assign(moonVal.style, { color: P.accent, minWidth: '30px' });
         moonSlider.addEventListener('input', () => {
             _moonSpeed = parseFloat(moonSlider.value);
             moonVal.textContent = _moonSpeed.toFixed(1) + 'x';
@@ -632,7 +652,7 @@ const SystemViewer = (() => {
         Object.assign(linearCheck.style, { cursor: 'pointer' });
         const linearLbl = document.createElement('span');
         linearLbl.textContent = 'Linear (true scale)';
-        Object.assign(linearLbl.style, { color: '#8a8f94' });
+        Object.assign(linearLbl.style, { color: P.sub });
         linearCheck.addEventListener('change', () => {
             _linearScale = linearCheck.checked;
             _viewZoom = 1.0;
@@ -641,16 +661,31 @@ const SystemViewer = (() => {
         });
         linearWrap.append(linearCheck, linearLbl);
 
+        // Orbit lines slider
+        const orbitWrap = document.createElement('span');
+        Object.assign(orbitWrap.style, { display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px' });
+        const orbitLbl = document.createElement('span');
+        orbitLbl.textContent = 'Orbit Lines:';
+        Object.assign(orbitLbl.style, { color: P.sub, whiteSpace: 'nowrap' });
+        const orbitSlider = document.createElement('input');
+        orbitSlider.type = 'range'; orbitSlider.min = '0'; orbitSlider.max = '1';
+        orbitSlider.step = '0.05'; orbitSlider.value = String(_orbitOpacity);
+        Object.assign(orbitSlider.style, { width: '70px', cursor: 'pointer' });
+        orbitSlider.addEventListener('input', () => {
+            _orbitOpacity = parseFloat(orbitSlider.value);
+        });
+        orbitWrap.append(orbitLbl, orbitSlider);
+
         const closeBtn = document.createElement('button');
         closeBtn.textContent = '✕';
         Object.assign(closeBtn.style, {
-            background: 'transparent', border: '1px solid #45a29e',
-            color: '#66fcf1', padding: '3px 10px', cursor: 'pointer',
+            background: 'transparent', border: `1px solid ${P.badge}`,
+            color: P.accent, padding: '3px 10px', cursor: 'pointer',
             fontFamily: 'inherit', fontSize: '13px'
         });
         closeBtn.addEventListener('click', close);
 
-        header.append(title, editionBadge, sub, hint, planetWrap, moonWrap, linearWrap, closeBtn);
+        header.append(title, editionBadge, sub, hint, planetWrap, moonWrap, linearWrap, orbitWrap, closeBtn);
         _overlay.appendChild(header);
 
         _orrCanvas = document.createElement('canvas');
@@ -660,7 +695,9 @@ const SystemViewer = (() => {
         _tooltip = document.createElement('div');
         Object.assign(_tooltip.style, {
             position: 'fixed', display: 'none', pointerEvents: 'none',
-            background: 'rgba(10,14,20,0.95)', border: '1px solid #45a29e',
+            background: _lightMode ? 'rgba(255,255,255,0.97)' : 'rgba(10,14,20,0.95)',
+            border: `1px solid ${P.badge}`,
+            color: P.text,
             padding: '8px 12px', fontSize: '12px', lineHeight: '1.65',
             maxWidth: '280px', zIndex: '9100', fontFamily: 'inherit'
         });
@@ -754,7 +791,7 @@ const SystemViewer = (() => {
             });
         });
 
-        _drawStarField(ctx, W, H);
+        if (!_lightMode) _drawStarField(ctx, W, H);
 
         // HZ band — hzAU is set by the normaliser for all editions
         const hzAU      = sys.hzAU !== undefined ? sys.hzAU : _orbitToAU(sys.hzco || 3);
@@ -769,13 +806,16 @@ const SystemViewer = (() => {
             const compAU = _starCompanionAU(s);
             const orbitR = Math.max(_linearScale ? 30 : 90, _scaleR(compAU, maxAU, scaledMaxR));
 
-            ctx.beginPath();
-            ctx.arc(originX, originY, orbitR, 0, Math.PI * 2);
-            ctx.strokeStyle = '#45a29e28';
-            ctx.lineWidth   = 1;
-            ctx.setLineDash([4, 6]);
-            ctx.stroke();
-            ctx.setLineDash([]);
+            if (_orbitOpacity > 0) {
+                const orbitAlpha = _lightMode ? _orbitOpacity * 0.80 : _orbitOpacity * 0.55;
+                ctx.beginPath();
+                ctx.arc(originX, originY, orbitR, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(69, 162, 158, ${orbitAlpha.toFixed(3)})`;
+                ctx.lineWidth   = 1 + _orbitOpacity * 1.5;
+                ctx.setLineDash([4, 6]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
 
             const sWorlds = worlds.filter(
                 w => w.orbitType === 'S-Type' && w.parentStarIdx === sIdx
@@ -837,7 +877,7 @@ const SystemViewer = (() => {
             _drawBeltRing(ctx, cx, cy, r, isMW, dashOffset);
             if (isMW && w.name) {
                 ctx.save();
-                ctx.fillStyle = '#66fcf1';
+                ctx.fillStyle = _lightMode ? '#0d6b64' : '#66fcf1';
                 ctx.font      = '11px "Share Tech Mono", monospace';
                 ctx.textAlign = 'center';
                 ctx.fillText(w.name, cx, cy - r - 8);
@@ -849,13 +889,14 @@ const SystemViewer = (() => {
             });
         });
 
-        bodies.forEach(w => {
+        if (_orbitOpacity > 0) bodies.forEach(w => {
             const r = _scaleR(w.au || 0, maxAU, maxPx);
             if (r < 2) return;
+            const worldAlpha = _lightMode ? _orbitOpacity * 0.65 : _orbitOpacity * 0.40;
             ctx.beginPath();
             ctx.arc(cx, cy, r, 0, Math.PI * 2);
-            ctx.strokeStyle = '#45a29e1a';
-            ctx.lineWidth   = 1;
+            ctx.strokeStyle = `rgba(69, 162, 158, ${worldAlpha.toFixed(3)})`;
+            ctx.lineWidth   = 1 + _orbitOpacity * 1.5;
             ctx.stroke();
         });
 
@@ -913,7 +954,7 @@ const SystemViewer = (() => {
 
         ctx.save();
         const glow = ctx.createRadialGradient(cx, cy, r * 0.2, cx, cy, r * 3);
-        glow.addColorStop(0, color + 'aa');
+        glow.addColorStop(0, color + (_lightMode ? '66' : 'aa'));
         glow.addColorStop(1, color + '00');
         ctx.fillStyle = glow;
         ctx.beginPath();
@@ -931,12 +972,12 @@ const SystemViewer = (() => {
         ctx.fill();
 
         ctx.save();
-        ctx.fillStyle = '#c5c6c7';
+        ctx.fillStyle = _lightMode ? '#1a1a2e' : '#c5c6c7';
         ctx.font      = '11px "Share Tech Mono", monospace';
         ctx.textAlign = 'center';
         ctx.fillText(s.name, cx, cy + r + 15);
         if (idx > 0 && s.separation) {
-            ctx.fillStyle = '#65706e';
+            ctx.fillStyle = _lightMode ? '#4a5568' : '#65706e';
             ctx.font      = '10px "Share Tech Mono", monospace';
             ctx.fillText(s.separation, cx, cy + r + 27);
         }
@@ -950,7 +991,7 @@ const SystemViewer = (() => {
         if (w.type === 'Mainworld') {
             ctx.beginPath();
             ctx.arc(px, py, r + 5, 0, Math.PI * 2);
-            ctx.strokeStyle = '#66fcf1';
+            ctx.strokeStyle = _lightMode ? '#0d6b64' : '#66fcf1';
             ctx.lineWidth   = 1.5;
             ctx.stroke();
         }
@@ -980,7 +1021,7 @@ const SystemViewer = (() => {
             if (isMainworld) {
                 ctx.beginPath();
                 ctx.arc(mx, my, moonR + 3, 0, Math.PI * 2);
-                ctx.strokeStyle = '#66fcf1';
+                ctx.strokeStyle = _lightMode ? '#0d6b64' : '#66fcf1';
                 ctx.lineWidth   = 1.2;
                 ctx.stroke();
             }
@@ -992,7 +1033,7 @@ const SystemViewer = (() => {
 
             if (isMainworld && m.name) {
                 ctx.save();
-                ctx.fillStyle = '#66fcf1';
+                ctx.fillStyle = _lightMode ? '#0d6b64' : '#66fcf1';
                 ctx.font      = '10px "Share Tech Mono", monospace';
                 ctx.textAlign = 'center';
                 ctx.fillText(m.name, mx, my - moonR - 5);
@@ -1004,7 +1045,7 @@ const SystemViewer = (() => {
 
         if (w.type === 'Mainworld' && w.name) {
             ctx.save();
-            ctx.fillStyle = '#66fcf1';
+            ctx.fillStyle = _lightMode ? '#0d6b64' : '#66fcf1';
             ctx.font      = '11px "Share Tech Mono", monospace';
             ctx.textAlign = 'center';
             ctx.fillText(w.name, px, py - r - 8);
@@ -1118,13 +1159,16 @@ const SystemViewer = (() => {
 
     function _showTooltip(hit, mx, my) {
         if (!_tooltip) return;
-        const body = hit.body;
-        let html   = '';
+        const body    = hit.body;
+        const TH      = _lightMode ? '#0d6b64' : '#66fcf1';   // tooltip heading colour
+        const TSUB    = _lightMode ? '#4a5568' : '#8a8f94';   // tooltip secondary colour
+        const TBORDER = _lightMode ? '#45a29eaa' : '#45a29e44';
+        let html      = '';
 
         if (hit.kind === 'star') {
             const s = body;
-            html += `<div style="color:#66fcf1;margin-bottom:5px;border-bottom:1px solid #45a29e44;padding-bottom:4px">`;
-            html += `${s.name} <span style="color:#8a8f94">(${s.role || 'Primary'})</span></div>`;
+            html += `<div style="color:${TH};margin-bottom:5px;border-bottom:1px solid ${TBORDER};padding-bottom:4px">`;
+            html += `${s.name} <span style="color:${TSUB}">(${s.role || 'Primary'})</span></div>`;
             html += `<div>Type: ${s.sType}${s.subType ?? ''} ${s.sClass}</div>`;
             if (s.temp)       html += `<div>Temperature: ${Math.round(s.temp).toLocaleString()} K</div>`;
             if (s.mass)       html += `<div>Mass: ${s.mass.toFixed(3)} M☉</div>`;
@@ -1137,9 +1181,9 @@ const SystemViewer = (() => {
         } else if (hit.kind === 'world') {
             const w = body;
             const typeTag = w.ggType
-                ? ` <span style="color:#8a8f94">(${w.type} ${w.ggType})</span>`
-                : (w.name ? ` <span style="color:#8a8f94">(${w.type})</span>` : '');
-            html += `<div style="color:#66fcf1;margin-bottom:5px;border-bottom:1px solid #45a29e44;padding-bottom:4px">`;
+                ? ` <span style="color:${TSUB}">(${w.type} ${w.ggType})</span>`
+                : (w.name ? ` <span style="color:${TSUB}">(${w.type})</span>` : '');
+            html += `<div style="color:${TH};margin-bottom:5px;border-bottom:1px solid ${TBORDER};padding-bottom:4px">`;
             html += `${w.name || w.type}${typeTag}</div>`;
             if (w.orbitId != null) html += `<div>Orbit #: ${w.orbitId.toFixed ? w.orbitId.toFixed(2) : w.orbitId}</div>`;
             if (w.au)              html += `<div>Distance: ${w.au.toFixed(3)} AU</div>`;
@@ -1163,8 +1207,8 @@ const SystemViewer = (() => {
             const isMainworld = m.type === 'Mainworld';
             const label       = m.name || (isMainworld ? 'Mainworld (Moon)' : 'Moon');
             const typeLabel   = isMainworld ? 'Mainworld Satellite' : 'Satellite';
-            html += `<div style="color:#66fcf1;margin-bottom:5px;border-bottom:1px solid #45a29e44;padding-bottom:4px">`;
-            html += `${label} <span style="color:#8a8f94">(${typeLabel})</span></div>`;
+            html += `<div style="color:${TH};margin-bottom:5px;border-bottom:1px solid ${TBORDER};padding-bottom:4px">`;
+            html += `${label} <span style="color:${TSUB}">(${typeLabel})</span></div>`;
             if (m.pd != null)      html += `<div>Orbit: ${m.pd.toFixed(1)} PD from parent</div>`;
             if (m.uwp)             html += `<div style="margin-top:4px">UWP: <strong>${m.uwp}</strong></div>`;
             if (m.starport)        html += `<div>Starport: ${m.starport}</div>`;
@@ -1181,8 +1225,8 @@ const SystemViewer = (() => {
 
         } else if (hit.kind === 'belt') {
             const beltName = body.name ? `${body.name} ` : '';
-            html += `<div style="color:#66fcf1;margin-bottom:5px;border-bottom:1px solid #45a29e44;padding-bottom:4px">`;
-            html += `${beltName}<span style="color:#8a8f94">(Planetoid Belt)</span></div>`;
+            html += `<div style="color:${TH};margin-bottom:5px;border-bottom:1px solid ${TBORDER};padding-bottom:4px">`;
+            html += `${beltName}<span style="color:${TSUB}">(Planetoid Belt)</span></div>`;
             if (body.orbitId != null) html += `<div>Orbit #: ${body.orbitId.toFixed ? body.orbitId.toFixed(2) : body.orbitId}</div>`;
             if (body.au)              html += `<div>Distance: ${body.au.toFixed(3)} AU</div>`;
             if (body.uwp)             html += `<div style="margin-top:4px">UWP: <strong>${body.uwp}</strong></div>`;

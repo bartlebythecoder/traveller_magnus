@@ -627,10 +627,13 @@
     function generateSystemInventory(sys, mainworldBase) {
         tSection('System Inventory');
 
+        // worldCount must be a finite positive number — NaN (from '?' UWP fields on XXXX/unknown
+        // systems) and 0 both fall back to random generation so the mainworld can always be placed.
         const hasT5Override = mainworldBase &&
             mainworldBase.gasGiantsCount !== undefined &&
             mainworldBase.planetoidBelts !== undefined &&
-            mainworldBase.worldCount !== undefined;
+            Number.isFinite(mainworldBase.worldCount) &&
+            mainworldBase.worldCount > 0;
 
         if (hasT5Override) {
             // T5/OTU Import Override: use PBG and W. field directly instead of rolling.

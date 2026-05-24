@@ -57,6 +57,8 @@
     <!-- v0.6.1.0: Sector-Wide Statistical Validation -->
     <script src="rules/expectations_data.js" defer></script>
     <script src="js/statistical_auditor.js" defer></script>
+    <!-- Planet hemisphere renderer -->
+    <script src="js/planet_renderer.js" defer></script>
     <!-- Modular JavaScript Input Handling -->
     <script src="js/input_init.js" defer></script>
     <script src="js/system_viewer.js" defer></script>
@@ -715,9 +717,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above<br> So Below</span></h1>
-            <div class="splash-banner">Splash: Region and Border Names Display Options</div>
+            <div class="splash-banner">New this version: World Images</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.11.1</div>
+            <div class="splash-version">v0.12.0</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -1135,7 +1137,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.11.1</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.12.0</span>
             </p>
         </div>
 
@@ -1403,6 +1405,16 @@
         <h3 id="hex-editor-title">World Details</h3>
         <button id="btn-close-editor" class="btn-close-palette" onclick="closeHexEditor()" title="Close"><i
                 class="fas fa-times"></i></button>
+
+        <div id="hex-editor-globe-bar" style="display:none; padding: 0 0 8px 0;">
+            <button id="btn-view-world-image" onclick="openWorldImagePanel()"
+                style="width:100%; padding: 5px 10px; background: transparent;
+                       border: 1px solid #45a29e88; color: #66fcf1; cursor: pointer;
+                       font-family: 'Share Tech Mono','Courier New',monospace; font-size: 11px;
+                       letter-spacing: 0.06em; border-radius: 3px;">
+                ◎ &nbsp;VIEW WORLD IMAGE
+            </button>
+        </div>
 
         <div class="palette-content">
             <div class="editor-grid">

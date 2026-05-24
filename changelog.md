@@ -1,13 +1,16 @@
+### [v0.12.0] - In Progress
+1. **World Images:** World hemisphere images and maps generated for all terrestrial bodies
+2. **Borders:** Fixed bug impacting manual border fills
+
 ### [v0.11.1] - 2026-05-22
 1. **Borders and Regions:** Setting option available to see Border and Region names on map
-2. **Borders and Import OTU:** Fixed a bug incorrectly importing the Solomani Rim
+2. **Borders and Import OTU:** Fixed a bug incorrectly importing the Solomani Rim borders
 2. **Import Universe:** Added Terry Mixon xml file for Foreven Sector
 3. **Import Imperium/Universe:** Fixed bug that would not expand System in non-aligned worlds
 4. **Download Routes:** Added options for more fields to include in Route csv download
 5. **Settings:** Improved look and feel of headings on white background
 6. **System Viewer:** Added option to scale size of orbit lines in system viewer
 7. **System Viewer:** When white background setting enabled, system viewer shows white background
-
 
 ### [v0.11.0] - 2026-05-21
 1. **System Viewer:** Zoom into system with details and see orbiting worlds and moons

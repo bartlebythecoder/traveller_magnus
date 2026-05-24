@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.11.1";
-const APP_BANNER = "v0.11.1: Splash: Region and Border Names Display Options";
+const APP_VERSION = "v0.12.0";
+const APP_BANNER = "v0.12.0: World Images";
 
 // -----------------------------------------------------------------------------
 // Application State

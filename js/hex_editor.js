@@ -185,6 +185,10 @@ function openHexEditor(hexId, e = null) {
     }
     document.getElementById('edit-notes').value = data.notes || stateObj.notes || '';
 
+    // Show the world-image button only for worlds with a physical surface (size > 0).
+    const globeBar = document.getElementById('hex-editor-globe-bar');
+    if (globeBar) globeBar.style.display = (data.size && data.size != 0) ? 'block' : 'none';
+
     // Dynamic UI Toggles based on active generation engine
     const isRTT = !!stateObj.rttData;
     const isMgT2E = !!stateObj.mgt2eData;
@@ -681,6 +685,25 @@ function populateEditorAccordions(stateObj) {
 
                     html += `</div>`;
 
+                    if (w.type !== 'Gas Giant' && w.type !== 'Planetoid Belt' && w.size != 0 && w.size !== 'R') {
+                        if (isMainworldEntry) {
+                            html += `<button data-action="open-mainworld-ph" style="margin-top:6px;width:100%;padding:4px 8px;background:transparent;border:1px solid #45a29e88;color:#66fcf1;cursor:pointer;font-family:'Share Tech Mono','Courier New',monospace;font-size:10px;letter-spacing:0.06em;border-radius:3px;">◎ &nbsp;VIEW WORLD IMAGE</button>`;
+                        } else {
+                            const _phUwpRaw = w.uwpSecondary || w.uwp || '';
+                            const _phAtmRaw = w.atmCode ?? w.atm;
+                            const _phAtm    = (_phAtmRaw != null) ? Number(_phAtmRaw).toString(16) : (_phUwpRaw[2] || '0').toLowerCase();
+                            const _phHydroCodeRaw = w.hydroCode ?? w.hydro;
+                            const _phHydroCode = (_phHydroCodeRaw != null) ? Number(_phHydroCodeRaw) : parseInt(_phUwpRaw[3] || '0', 16);
+                            const _phHydro = w.hydroPercent ?? (_phHydroCode * 10);
+                            const _phTemp  = w.tempBand || '';
+                            const _phTempK = w.meanTempK ?? '';
+                            const _phName  = (w.name || '').replace(/"/g, '&quot;');
+                            const _phSize  = Number(w.size ?? 0).toString(16);
+                            const _phUwp   = (w.uwpSecondary || w.uwp || '').replace(/"/g, '&quot;');
+                            html += `<button data-action="open-ph" data-ph-atm="${_phAtm}" data-ph-hydro="${_phHydro}" data-ph-temp="${_phTemp}" data-ph-temp-k="${_phTempK}" data-ph-name="${_phName}" data-ph-size="${_phSize}" data-ph-uwp="${_phUwp}" style="margin-top:6px;width:100%;padding:4px 8px;background:transparent;border:1px solid #45a29e88;color:#66fcf1;cursor:pointer;font-family:'Share Tech Mono','Courier New',monospace;font-size:10px;letter-spacing:0.06em;border-radius:3px;">◎ &nbsp;VIEW WORLD IMAGE</button>`;
+                        }
+                    }
+
                     if (isMainworldEntry) {
                         const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
                         html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${alleg}</strong></div>`;
@@ -759,6 +782,21 @@ function populateEditorAccordions(stateObj) {
                             if (m.resourceRating !== undefined) html += `<span>Resource: ${_mgtMoonNum(m, 'resourceRating', realWidx, 'moons', moonIdx, 0, 15)}</span>`;
 
                             html += `</div>`;
+
+                            if (m.size != 0 && m.size !== 'R' && !isMoonMainworld) {
+                                const _mphUwpRaw = m.uwpSecondary || m.uwp || '';
+                                const _mphAtmRaw = m.atmCode ?? m.atm;
+                                const _mphAtm    = (_mphAtmRaw != null) ? Number(_mphAtmRaw).toString(16) : (_mphUwpRaw[2] || '0').toLowerCase();
+                                const _mphHydroCodeRaw = m.hydroCode ?? m.hydro;
+                                const _mphHydroCode = (_mphHydroCodeRaw != null) ? Number(_mphHydroCodeRaw) : parseInt(_mphUwpRaw[3] || '0', 16);
+                                const _mphHydro = m.hydroPercent ?? (_mphHydroCode * 10);
+                                const _mphTemp  = m.tempBand || '';
+                                const _mphTempK = m.meanTempK ?? '';
+                                const _mphName  = (m.name || '').replace(/"/g, '&quot;');
+                                const _mphSize  = Number(m.size ?? 0).toString(16);
+                                const _mphUwp   = (m.uwpSecondary || m.uwp || '').replace(/"/g, '&quot;');
+                                html += `<button data-action="open-ph" data-ph-atm="${_mphAtm}" data-ph-hydro="${_mphHydro}" data-ph-temp="${_mphTemp}" data-ph-temp-k="${_mphTempK}" data-ph-name="${_mphName}" data-ph-size="${_mphSize}" data-ph-uwp="${_mphUwp}" style="margin-top:6px;width:100%;padding:4px 8px;background:transparent;border:1px solid #45a29e88;color:#66fcf1;cursor:pointer;font-family:'Share Tech Mono','Courier New',monospace;font-size:10px;letter-spacing:0.06em;border-radius:3px;">◎ &nbsp;VIEW WORLD IMAGE</button>`;
+                            }
 
                             if (isMoonMainworld) {
                                 const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
@@ -1423,6 +1461,17 @@ function populateEditorAccordions(stateObj) {
                 bHtml += `</div>`;
                 bHtml += buildBaseJourneyTimesUI(body.size);
 
+                if (!isMain && body.size && body.size !== 0 && body.size !== 'Y' && body.type !== 'Gas Giant' && body.worldClass !== 'Jovian') {
+                    const _rttAtm   = getEHex(body.atmosphere).toString(16);
+                    const _rttHydro = getEHex(body.hydrosphere) * 10;
+                    const _rttSize  = getEHex(body.size).toString(16);
+                    const _rttTemp  = body.tempBand || '';
+                    const _rttTempK = body.meanTempK ?? '';
+                    const _rttName  = (body.name || defaultBodyName).replace(/"/g, '&quot;');
+                    const _rttUwp   = uwp.replace(/"/g, '&quot;');
+                    bHtml += `<button data-action="open-ph" data-ph-atm="${_rttAtm}" data-ph-hydro="${_rttHydro}" data-ph-temp="${_rttTemp}" data-ph-temp-k="${_rttTempK}" data-ph-name="${_rttName}" data-ph-size="${_rttSize}" data-ph-uwp="${_rttUwp}" style="margin-top:6px;width:100%;padding:4px 8px;background:transparent;border:1px solid #45a29e88;color:#66fcf1;cursor:pointer;font-family:'Share Tech Mono','Courier New',monospace;font-size:10px;letter-spacing:0.06em;border-radius:3px;">◎ &nbsp;VIEW WORLD IMAGE</button>`;
+                }
+
                 if (body.satellites && body.satellites.length > 0) {
                     body.satellites.forEach((sat, satI) => {
                         bHtml += renderRTTBody(sat, true, sIdx, oIdx, satI);
@@ -1499,8 +1548,296 @@ window.handleT5ZoneChange = function (el) {
     requestAnimationFrame(draw);
 };
 
+// =============================================================================
+// WORLD IMAGE PANEL
+// =============================================================================
+
+function openBodyImagePanel(worldData, label) {
+    const existing = document.getElementById('world-image-panel');
+    if (existing) existing.remove();
+
+    const panel = document.createElement('div');
+    panel.id = 'world-image-panel';
+    Object.assign(panel.style, {
+        position: 'fixed', inset: '0', zIndex: '9500',
+        background: 'rgba(0,0,0,0.88)',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        fontFamily: '"Share Tech Mono","Courier New",monospace',
+    });
+
+    const title = document.createElement('div');
+    title.textContent = label;
+    Object.assign(title.style, {
+        color: '#66fcf1', fontSize: '13px',
+        marginBottom: '12px', letterSpacing: '0.05em',
+    });
+
+    const canvas = document.createElement('canvas');
+    canvas.height = 280;
+    canvas.width  = 580;
+    Object.assign(canvas.style, {
+        border: '1px solid #45a29e55',
+        background: window.printMode ? '#ffffff' : '#000011',
+        display: 'block',
+    });
+
+    const openMapBtn = document.createElement('button');
+    openMapBtn.textContent = 'Open Map';
+    Object.assign(openMapBtn.style, {
+        marginTop: '14px', padding: '6px 24px',
+        background: 'transparent', border: '1px solid #45a29e',
+        color: '#66fcf1', cursor: 'pointer',
+        fontFamily: 'inherit', fontSize: '12px',
+    });
+    openMapBtn.addEventListener('click', () => {
+        panel.remove();
+        openFlatMapPanel(worldData, editingHexId, label);
+    });
+
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = 'Close';
+    Object.assign(closeBtn.style, {
+        marginTop: '14px', padding: '6px 24px',
+        background: 'transparent', border: '1px solid #45a29e',
+        color: '#66fcf1', cursor: 'pointer',
+        fontFamily: 'inherit', fontSize: '12px',
+    });
+    closeBtn.addEventListener('click', () => panel.remove());
+    panel.addEventListener('click', e => { if (e.target === panel) panel.remove(); });
+
+    const btnRow = document.createElement('div');
+    Object.assign(btnRow.style, { display: 'flex', gap: '10px' });
+    btnRow.append(openMapBtn, closeBtn);
+
+    panel.append(title, canvas, btnRow);
+    document.body.appendChild(panel);
+
+    PlanetRenderer.renderPlanetHemispheres(canvas, worldData, editingHexId);
+}
+
+function openWorldImagePanel() {
+    if (!editingHexId) return;
+    const stateObj = hexStates.get(editingHexId);
+    if (!stateObj) return;
+
+    // Prefer the richest available data source for temperature and trade codes.
+    const src = stateObj.mgt2eData || stateObj.t5Data || stateObj.rttData || stateObj.ctData;
+    if (!src) return;
+
+    const worldData = {
+        name:          src.name      || '',
+        atmosphere:    src.atm       ?? 0,
+        hydrographics: src.hydro     ?? 0,
+        temperature:   src.tempBand  || '',
+        temperatureK:  src.meanTempK || 0,
+        size:          src.size      ?? 0,
+        uwp:           src.uwp       || '',
+    };
+
+    const worldName = worldData.name || editingHexId;
+
+    const existing = document.getElementById('world-image-panel');
+    if (existing) existing.remove();
+
+    const panel = document.createElement('div');
+    panel.id = 'world-image-panel';
+    Object.assign(panel.style, {
+        position: 'fixed', inset: '0', zIndex: '9500',
+        background: 'rgba(0,0,0,0.88)',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        fontFamily: '"Share Tech Mono","Courier New",monospace',
+    });
+
+    const title = document.createElement('div');
+    title.textContent = worldName + '  ·  ' + editingHexId;
+    Object.assign(title.style, {
+        color: '#66fcf1', fontSize: '13px',
+        marginBottom: '12px', letterSpacing: '0.05em',
+    });
+
+    const canvas = document.createElement('canvas');
+    canvas.height = 280;
+    canvas.width  = 580;
+    Object.assign(canvas.style, {
+        border: '1px solid #45a29e55',
+        background: window.printMode ? '#ffffff' : '#000011',
+        display: 'block',
+    });
+
+    const openMapBtn = document.createElement('button');
+    openMapBtn.textContent = 'Open Map';
+    Object.assign(openMapBtn.style, {
+        marginTop: '14px', padding: '6px 24px',
+        background: 'transparent', border: '1px solid #45a29e',
+        color: '#66fcf1', cursor: 'pointer',
+        fontFamily: 'inherit', fontSize: '12px',
+    });
+    openMapBtn.addEventListener('click', () => {
+        panel.remove();
+        openFlatMapPanel(worldData, editingHexId, worldName + '  ·  ' + editingHexId);
+    });
+
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = 'Close';
+    Object.assign(closeBtn.style, {
+        marginTop: '14px', padding: '6px 24px',
+        background: 'transparent', border: '1px solid #45a29e',
+        color: '#66fcf1', cursor: 'pointer',
+        fontFamily: 'inherit', fontSize: '12px',
+    });
+    closeBtn.addEventListener('click', () => panel.remove());
+    panel.addEventListener('click', e => { if (e.target === panel) panel.remove(); });
+
+    const btnRow = document.createElement('div');
+    Object.assign(btnRow.style, { display: 'flex', gap: '10px' });
+    btnRow.append(openMapBtn, closeBtn);
+
+    panel.append(title, canvas, btnRow);
+    document.body.appendChild(panel);
+
+    PlanetRenderer.renderPlanetHemispheres(canvas, worldData, editingHexId);
+}
+
+function openFlatMapPanel(worldData, hexId, titleText) {
+    const existing = document.getElementById('world-image-panel');
+    if (existing) existing.remove();
+
+    const panel = document.createElement('div');
+    panel.id = 'world-image-panel';
+    Object.assign(panel.style, {
+        position: 'fixed', inset: '0', zIndex: '9500',
+        background: 'rgba(0,0,0,0.88)',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        fontFamily: '"Share Tech Mono","Courier New",monospace',
+    });
+
+    const title = document.createElement('div');
+    title.textContent = titleText + '  —  World Map';
+    Object.assign(title.style, {
+        color: '#66fcf1', fontSize: '13px',
+        marginBottom: '12px', letterSpacing: '0.05em',
+    });
+
+    const canvas = document.createElement('canvas');
+    canvas.width  = 800;
+    canvas.height = 400;
+    Object.assign(canvas.style, {
+        border: '1px solid #45a29e55',
+        background: window.printMode ? '#ffffff' : '#000011',
+        display: 'block', maxWidth: '90vw',
+    });
+
+    // ── Projection selector ───────────────────────────────────────────────────
+    let currentProjection = 'sinusoidal';
+    const projections = [
+        { key: 'sinusoidal', label: 'Sinusoidal' },
+        { key: 'mercator',   label: 'Mercator'   },
+        { key: 'mollweide',  label: 'Mollweide'  },
+        { key: 'diamond',    label: 'Diamond'    },
+    ];
+    const projBtnStyle = {
+        padding: '4px 12px',
+        background: 'transparent', border: '1px solid #45a29e55',
+        color: '#8ab8b5', cursor: 'pointer',
+        fontFamily: 'inherit', fontSize: '11px',
+        transition: 'border-color 0.15s, color 0.15s',
+    };
+    const projBtnActiveStyle = {
+        border: '1px solid #66fcf1', color: '#66fcf1',
+    };
+
+    const projRow = document.createElement('div');
+    Object.assign(projRow.style, { display: 'flex', gap: '6px', marginBottom: '8px' });
+
+    const projBtns = {};
+    projections.forEach(({ key, label }) => {
+        const btn = document.createElement('button');
+        btn.textContent = label;
+        Object.assign(btn.style, projBtnStyle);
+        if (key === currentProjection) Object.assign(btn.style, projBtnActiveStyle);
+        btn.addEventListener('click', () => {
+            if (key === currentProjection) return;
+            currentProjection = key;
+            projections.forEach(p => Object.assign(projBtns[p.key].style, projBtnStyle));
+            Object.assign(btn.style, projBtnActiveStyle);
+            _doRender();
+        });
+        projBtns[key] = btn;
+        projRow.appendChild(btn);
+    });
+
+    // ── Render + header helper ────────────────────────────────────────────────
+    // Renders the terrain for the current projection then repaints the header
+    // strip. Called on open and on every projection switch.
+    function _doRender() {
+        PlanetRenderer.renderFlatMap(canvas, worldData, hexId, { projection: currentProjection });
+
+        const hCtx    = canvas.getContext('2d');
+        const mapData = hCtx.getImageData(0, 0, 800, 400);
+
+        const hName  = (worldData.name || '').toUpperCase();
+        const hLine1 = [hName, hexId].filter(Boolean).join('   ');
+        const hLine2 = worldData.uwp || '';
+        const hLines = [hLine1, hLine2].filter(Boolean);
+        const headerH = 46;
+
+        canvas.height = 400 + headerH;   // resizing clears the canvas
+
+        hCtx.fillStyle = window.printMode ? '#ffffff' : '#000011';
+        hCtx.fillRect(0, 0, 800, headerH);
+
+        if (hLines.length > 0) {
+            const lineH = 17;
+            const padX  = 13;
+            const padY  = Math.round((headerH - hLines.length * lineH) / 2) + lineH - 3;
+            hCtx.font      = 'bold 13px "Share Tech Mono","Courier New",monospace';
+            hCtx.fillStyle = window.printMode ? '#222222' : '#c8d8e0';
+            hLines.forEach((line, i) => hCtx.fillText(line, padX, padY + i * lineH));
+        }
+
+        hCtx.putImageData(mapData, 0, headerH);
+    }
+
+    const btnStyle = {
+        marginTop: '14px', padding: '6px 24px',
+        background: 'transparent', border: '1px solid #45a29e',
+        color: '#66fcf1', cursor: 'pointer',
+        fontFamily: 'inherit', fontSize: '12px',
+    };
+
+    const downloadBtn = document.createElement('button');
+    downloadBtn.textContent = 'Download Map';
+    Object.assign(downloadBtn.style, btnStyle);
+    downloadBtn.addEventListener('click', () => {
+        const link = document.createElement('a');
+        const safeName = (worldData.name || hexId || 'world').replace(/[^a-z0-9_\-]/gi, '_');
+        link.download = safeName + '_map.jpg';
+        link.href = canvas.toDataURL('image/jpeg', 0.95);
+        link.click();
+    });
+
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = 'Close';
+    Object.assign(closeBtn.style, btnStyle);
+    closeBtn.addEventListener('click', () => panel.remove());
+    panel.addEventListener('click', e => { if (e.target === panel) panel.remove(); });
+
+    const btnRow = document.createElement('div');
+    Object.assign(btnRow.style, { display: 'flex', gap: '10px' });
+    btnRow.append(downloadBtn, closeBtn);
+
+    panel.append(title, projRow, canvas, btnRow);
+    document.body.appendChild(panel);
+    _doRender();
+}
+
 function closeHexEditor() {
     editingHexId = null;
+    const globeBar = document.getElementById('hex-editor-globe-bar');
+    if (globeBar) globeBar.style.display = 'none';
 
     document.getElementById('editor-socio-t5-container').style.display = 'none';
     document.getElementById('acc-btn-t5-socio').style.display = 'none';
@@ -1541,6 +1878,43 @@ function closeHexEditor() {
 function setupHexEditor() {
     document.getElementById('btn-editor-cancel').addEventListener('click', closeHexEditor);
     document.getElementById('btn-editor-save').addEventListener('click', saveHexEditorChanges);
+
+    // Image button delegation — buttons are injected into accordion HTML at render time
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('[data-action="open-mainworld-ph"]')) {
+            if (editingHexId) openWorldImagePanel();
+            return;
+        }
+
+        const btn = e.target.closest('[data-action="open-ph"]');
+        if (!btn || !editingHexId) return;
+
+        const phAtmRaw = btn.dataset.phAtm || '0';
+        const phAtm    = parseInt(String(phAtmRaw), 16) || 0;
+        const phHydro  = parseFloat(btn.dataset.phHydro || '0') / 10;
+        let   phTemp   = btn.dataset.phTemp || '';
+        const phTempK  = parseFloat(btn.dataset.phTempK || '0');
+        const phName   = btn.dataset.phName || '';
+        const phSize   = parseInt(btn.dataset.phSize || '0', 16) || 0;
+        const phUwp    = btn.dataset.phUwp || '';
+
+        if (!phTemp && phTempK > 0 && window.PlanetRenderer) {
+            phTemp = PlanetRenderer.tempBandFromKelvin(phTempK);
+        }
+
+        const worldData = {
+            name:          phName,
+            atmosphere:    phAtm,
+            hydrographics: phHydro,
+            temperature:   phTemp,
+            temperatureK:  phTempK,
+            size:          phSize,
+            uwp:           phUwp,
+        };
+
+        const label = phName || editingHexId;
+        openBodyImagePanel(worldData, label);
+    });
 
     // Use delegation on document because panels may have been moved out of #hex-editor to body
     document.addEventListener('change', (e) => {

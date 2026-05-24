@@ -330,7 +330,7 @@ body {
 
 #hex-editor {
     /* Base style inherits from .draggable-palette */
-    width: 440px;
+    width: 520px;
     min-width: 320px;
     /* padding: 20px; -- Moved to .palette-content */
     padding: 0;

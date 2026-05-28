@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // RTT ENGINE - Star System Generation
 // =============================================================================
 // This engine implements the RTT ruleset for system generation.
@@ -1857,7 +1857,7 @@ function extractRTTMainworld(sys) {
     // RTT doesn't strictly generate TL for all worlds exactly the same way (or at all if pop 0),
     // but we can infer or pass a default. We'll set it to 0 and let socioeconomics/etc handle it or 
     // assign a default based on population.
-    let tl = getEHexLetter(bestWorld.population > 0 ? (sys.dominantTL || 12) : 0);
+    let tl = getEHexLetter(bestWorld.population > 0 ? (bestWorld.tl || 0) : 0);
 
     let uwp = `${port}${size}${atm}${hydro}${pop}${gov}${law}-${tl}`;
     tResult('Final Hex UWP', uwp, 'RTT 8.2: UWP Finalization');
@@ -1940,7 +1940,7 @@ function getEHex(char) {
     // we just need the raw value. Using the standard A=10, B=11 sequence.
     if (code >= 74 && code <= 78) return code - 56; // J-N (J=18)
     if (code >= 80) return code - 57; // P...
-    return fromUWPChar(str); // Fallback to core helper
+    return fromEHex(str); // Fallback to core helper
 }
 
 function tRollD3(label) {

@@ -89,6 +89,7 @@ function initializeInput() {
     setupSaveLoad();
 
     setupSectorPicker();
+    setupObsidianExport();
     setupSectorImporter();
     setupXmlMetadataImporter();
     setupSplashScreen();

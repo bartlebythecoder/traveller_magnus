@@ -140,12 +140,6 @@
     function restoreT5ManualFields(newSys, oldSys) {
         if (!oldSys || !oldSys.stars || !newSys || !newSys.stars) return;
 
-        const _toUWPChar = (typeof toUWPChar === 'function') ? toUWPChar : (v) => {
-            if (v === undefined || v === null) return '0';
-            if (typeof v === 'string') return v.toUpperCase().substring(0, 1);
-            return Math.floor(v).toString(16).toUpperCase();
-        };
-
         function applyManuals(oldBody, newBody) {
             if (!oldBody || !newBody) return;
             if (!Array.isArray(oldBody._manualFields) || oldBody._manualFields.length === 0) return;
@@ -158,7 +152,7 @@
                               newBody.pop !== undefined && !['Gas Giant', 'Large Gas Giant',
                               'Small Gas Giant', 'Ice Giant', 'Planetoid Belt'].includes(newBody.type);
             if (hasSocial) {
-                newBody.uwp = `${newBody.starport}${_toUWPChar(newBody.size)}${_toUWPChar(newBody.atm)}${_toUWPChar(newBody.hydro)}${_toUWPChar(newBody.pop)}${_toUWPChar(newBody.gov)}${_toUWPChar(newBody.law)}-${_toUWPChar(newBody.tl)}`;
+                newBody.uwp = `${newBody.starport}${toEHex(newBody.size)}${toEHex(newBody.atm)}${toEHex(newBody.hydro)}${toEHex(newBody.pop)}${toEHex(newBody.gov)}${toEHex(newBody.law)}-${toEHex(newBody.tl)}`;
                 newBody.uwpSecondary = newBody.uwp;
             }
         }

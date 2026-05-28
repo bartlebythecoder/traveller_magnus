@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.12.0";
-const APP_BANNER = "v0.12.0: World Images";
+const APP_VERSION = "v0.13.0";
+const APP_BANNER = "v0.13.0: New this version: Export to Obsidian";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -282,36 +282,27 @@ function roll4D() {
     return rollND(4);
 }
 
-// Convert to Traveller eHex (skipping I and O)
+// --- Traveller Extended Hexadecimal (eHex: skips I and O) ---
+const EHEX_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+
 function toEHex(val) {
     if (val === undefined || val === null) return '0';
-    if (val <= 9) return val.toString();
-    const hexChars = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // Skip I and O
-    return hexChars[val - 10] || '0';
+    if (typeof val === 'string' && (val === 'S' || val === 'R' || val === 'GG')) return val;
+    const v = Math.floor(Number(val));
+    if (isNaN(v) || v < 0) return '0';
+    if (v < 10) return v.toString();
+    return EHEX_CHARS[v - 10] || 'Z';
 }
 
-// --- Traveller Translators (eHex: skips I and O) ---
-const EHEX_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // Skips I and O
-
-function toUWPChar(val) {
-    if (val === undefined || val === null || isNaN(val)) {
-        if (typeof val === 'string' && (val === 'S' || val === 'R' || val === 'GG')) return val;
-        return '0';
-    }
-    val = Math.floor(val);
-    if (val < 0) return '0';
-    if (val < 10) return val.toString();
-    return EHEX_CHARS[val - 10] || 'Z';
-}
-
-function fromUWPChar(char) {
-    if (!char) return 0;
-    const c = char.toUpperCase();
-    const code = c.charCodeAt(0);
-    if (code >= 48 && code <= 57) return code - 48; // 0-9
-    const idx = EHEX_CHARS.indexOf(c);
-    if (idx >= 0) return idx + 10;
-    return 0;
+function fromEHex(char) {
+    if (char === undefined || char === null || char === '') return 0;
+    const c = String(char).trim().toUpperCase();
+    if (c === 'R') return 0.1;  // CT Ring — sub-integer, distinct from 0 for filter purposes
+    if (c === 'S') return 0.5;  // CT Small moon — sub-integer, distinct from 0 for filter purposes
+    const ch = c.charAt(0);
+    if (ch >= '0' && ch <= '9') return parseInt(ch, 10);
+    const idx = EHEX_CHARS.indexOf(ch);
+    return idx >= 0 ? idx + 10 : 0;
 }
 
 // =====================================================================
@@ -634,6 +625,16 @@ function getNextSystemName(hexId) {
  * - Moons of primaries: "SystemName I-a", "SystemName I-b", …
  * - Moons of the mainworld (rare): "SystemName-a", "SystemName-b", …
  */
+function _toRoman(n) {
+    const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
+    const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+    let r = '';
+    for (let i = 0; i < vals.length; i++) {
+        while (n >= vals[i]) { r += syms[i]; n -= vals[i]; }
+    }
+    return r;
+}
+
 function applyMgT2EOrbitalNames(sys) {
     const _mw = (sys.mainworld) ||
                 sys.worlds.find(w => w.type === 'Mainworld' || w.isLunarMainworld) ||
@@ -644,16 +645,6 @@ function applyMgT2EOrbitalNames(sys) {
     }
     const _sysName = (_mw && _mw.name) ||
                      ((typeof getNextSystemName === 'function') ? getNextSystemName(sys.hexId) : 'Unknown');
-
-    const _toRoman = (n) => {
-        const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
-        const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
-        let r = '';
-        for (let i = 0; i < vals.length; i++) {
-            while (n >= vals[i]) { r += syms[i]; n -= vals[i]; }
-        }
-        return r;
-    };
 
     const isMultiStar = sys.stars && sys.stars.length > 1;
 
@@ -715,16 +706,6 @@ function applyCTOrbitalNames(sys) {
                      ((typeof getNextSystemName === 'function') ? getNextSystemName(sys.hexId || '') : 'Unknown');
     if (_mw && !_mw.name) _mw.name = _sysName;
 
-    const _toRoman = (n) => {
-        const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
-        const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
-        let r = '';
-        for (let i = 0; i < vals.length; i++) {
-            while (n >= vals[i]) { r += syms[i]; n -= vals[i]; }
-        }
-        return r;
-    };
-
     // CT has a flat orbit pool with no per-star attribution — use single ordinal sequence
     const bodies = sys.orbits
         .filter(slot => slot.contents && slot.contents.type !== 'Empty' && slot.contents.type !== 'Mainworld')
@@ -759,16 +740,6 @@ function applyT5OrbitalNames(sys) {
     }
     const _sysName = (_mw && _mw.name) ||
                      ((typeof getNextSystemName === 'function') ? getNextSystemName(_hexId) : 'Unknown');
-
-    const _toRoman = (n) => {
-        const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
-        const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
-        let r = '';
-        for (let i = 0; i < vals.length; i++) {
-            while (n >= vals[i]) { r += syms[i]; n -= vals[i]; }
-        }
-        return r;
-    };
 
     const isMultiStar = sys.stars.length > 1;
 
@@ -815,16 +786,6 @@ function applyRTTOrbitalNames(sys) {
     const _sysName = sys.name ||
                      ((typeof getNextSystemName === 'function') ? getNextSystemName(sys.hexId || '') : 'Unknown');
     sys.name = _sysName;
-
-    const _toRoman = (n) => {
-        const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
-        const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
-        let r = '';
-        for (let i = 0; i < vals.length; i++) {
-            while (n >= vals[i]) { r += syms[i]; n -= vals[i]; }
-        }
-        return r;
-    };
 
     const isMultiStar = sys.stars.length > 1;
 

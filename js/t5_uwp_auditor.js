@@ -1,4 +1,4 @@
-/**
+﻿/**
  * js/t5_uwp_auditor.js
  * 
  * T5 UWP AUDITOR (v2.0 Modular Architecture)
@@ -16,7 +16,7 @@
         root.T5_UWP_Auditor = factory(root.UniversalMath, root.T5_Stellar_Engine);
     }
 }(this, function (UniversalMath, T5_Stellar_Engine) {
-    const { toUWPChar, fromUWPChar } = UniversalMath;
+    const { toEHex, fromEHex } = UniversalMath;
     const { getStarHZ } = T5_Stellar_Engine;
 
     const _log = (typeof writeLogLine === 'function') ? writeLogLine : () => {};
@@ -32,7 +32,7 @@
         if (size === 'S' && !isGG) return 0.4;
         if (size === 'R' && !isGG) return 0;
         if (typeof size === 'number') return size;
-        if (typeof size === 'string') return fromUWPChar(size);
+        if (typeof size === 'string') return fromEHex(size);
         return 0;
     }
 
@@ -47,25 +47,25 @@
             logFail(`Missing Data: Body in Orbit ${orbit} is missing worldType.`);
         }
         if (['Hospitable', 'InnerWorld', 'IceWorld', 'StormWorld', 'RadWorld', 'BigWorld'].includes(body.worldType) && normSize(body.size, body.type) < 1) {
-            logFail(`Size Clamping Check: ${body.worldType} in Orbit ${orbit} has Size ${toUWPChar(body.size)}. Must be >= 1.`);
+            logFail(`Size Clamping Check: ${body.worldType} in Orbit ${orbit} has Size ${toEHex(body.size)}. Must be >= 1.`);
         }
         if (body.worldType === 'Belt' && normSize(body.size, body.type) !== 0) {
-            logFail(`Belt Check: Belt in Orbit ${orbit} has Size ${toUWPChar(body.size)}. Must be 0.`);
+            logFail(`Belt Check: Belt in Orbit ${orbit} has Size ${toEHex(body.size)}. Must be 0.`);
         }
-        if (body.worldType === 'Inferno' && body.atm !== 11 && body.atm !== fromUWPChar('B')) {
-            logFail(`Atmosphere Check: Inferno in Orbit ${orbit} has Atm ${toUWPChar(body.atm)}. Must be B (11).`);
+        if (body.worldType === 'Inferno' && body.atm !== 11 && body.atm !== fromEHex('B')) {
+            logFail(`Atmosphere Check: Inferno in Orbit ${orbit} has Atm ${toEHex(body.atm)}. Must be B (11).`);
         }
         if (body.worldType === 'Belt' && body.atm !== 0) {
-            logFail(`Atmosphere Check: Belt in Orbit ${orbit} has Atm ${toUWPChar(body.atm)}. Must be 0.`);
+            logFail(`Atmosphere Check: Belt in Orbit ${orbit} has Atm ${toEHex(body.atm)}. Must be 0.`);
         }
         if (body.worldType === 'StormWorld' && (body.atm || 0) < 4) {
-            logFail(`Atmosphere Check: StormWorld in Orbit ${orbit} has Atm ${toUWPChar(body.atm)}. Must be >= 4.`);
+            logFail(`Atmosphere Check: StormWorld in Orbit ${orbit} has Atm ${toEHex(body.atm)}. Must be >= 4.`);
         }
         if (['Inferno', 'Belt'].includes(body.worldType) && (body.hydro || 0) !== 0) {
-            logFail(`Hydro Check: ${body.worldType} in Orbit ${orbit} has Hydro ${toUWPChar(body.hydro)}. Must be 0.`);
+            logFail(`Hydro Check: ${body.worldType} in Orbit ${orbit} has Hydro ${toEHex(body.hydro)}. Must be 0.`);
         }
         if (normSize(body.size, body.type) < 2 && (body.hydro || 0) !== 0) {
-            logFail(`Hydro Check: World with Size ${toUWPChar(body.size)} in Orbit ${orbit} has Hydro ${toUWPChar(body.hydro)}. Must be 0.`);
+            logFail(`Hydro Check: World with Size ${toEHex(body.size)} in Orbit ${orbit} has Hydro ${toEHex(body.hydro)}. Must be 0.`);
         }
 
         // Zone A Integrity
@@ -184,13 +184,13 @@
                 let w = o.contents;
                 if (!w || w.type === 'Empty' || w.type === 'Mainworld') return;
                 if (w.pop > 0 && w.pop >= mwPop && mwPop < 15) {
-                    _log(`[FAIL] Pop Cap: Star ${star.name} Orbit ${o.orbit} has Pop ${toUWPChar(w.pop)}, which is >= Mainworld Pop ${toUWPChar(mwPop)}.`);
+                    _log(`[FAIL] Pop Cap: Star ${star.name} Orbit ${o.orbit} has Pop ${toEHex(w.pop)}, which is >= Mainworld Pop ${toEHex(mwPop)}.`);
                     popErrors++;
                 }
                 if (w.satellites) {
                     w.satellites.forEach(s => {
                         if (s.pop > 0 && s.type !== 'Mainworld' && s.pop >= mwPop && mwPop < 15) {
-                            _log(`[FAIL] Pop Cap: Moon of Star ${star.name} Orbit ${o.orbit} has Pop ${toUWPChar(s.pop)}, which is >= Mainworld Pop ${toUWPChar(mwPop)}.`);
+                            _log(`[FAIL] Pop Cap: Moon of Star ${star.name} Orbit ${o.orbit} has Pop ${toEHex(s.pop)}, which is >= Mainworld Pop ${toEHex(mwPop)}.`);
                             popErrors++;
                         }
                     });

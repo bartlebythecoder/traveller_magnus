@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PROJECT AS ABOVE, SO BELOW
  * MGT2E WORLD ENGINE - Planetary Physics & Atmospherics Module
  * 
@@ -53,7 +53,7 @@
         else if (typeof body.size === 'string') {
             mathSize = parseInt(body.size, 16);
             if (isNaN(mathSize)) {
-                mathSize = (typeof UniversalMath !== 'undefined' && UniversalMath.fromUWPChar) ? UniversalMath.fromUWPChar(body.size) : 0;
+                mathSize = fromEHex(body.size);
             }
         }
         
@@ -119,7 +119,7 @@
 
         // 4. Roll Diameter from worldSizeTable
         if (!isManual(body, 'diamKm')) {
-            const sizeKey = (typeof body.size === 'number') ? toUWPChar(body.size) : String(body.size).toUpperCase();
+            const sizeKey = (typeof body.size === 'number') ? toEHex(body.size) : String(body.size).toUpperCase();
             const sizeEntry = MgT2EData.stellar.worldSizeTable.find(e => e.size === sizeKey);
             if (sizeEntry && sizeEntry.minDiameterKm !== null) {
                 const minD = sizeEntry.minDiameterKm;
@@ -198,7 +198,7 @@
         }
         w.size = 'GG';
         // SAH UWP code: G + category (S/M/L) + eHex diameter (2–J)
-        w.uwpGG = 'G' + w.ggType[1] + toUWPChar(w.diamTerra);
+        w.uwpGG = 'G' + w.ggType[1] + toEHex(w.diamTerra);
         if (!isManual(w, 'composition')) w.composition = `Gas Giant (${w.ggType})`;
         tResult('Type', w.ggType, 'MgT2E 2.1: Composition & Gravity');
         tResult('SAH UWP (uwpGG)', w.uwpGG, 'MgT2E: G + category + eHex diameter');
@@ -565,7 +565,7 @@
                         orbitId: w.orbitId,
                         parentStarIdx: w.parentStarIdx,
                         orbitType: w.orbitType,
-                        uwpSecondary: `S${toUWPChar(moonSize)}00000-0`
+                        uwpSecondary: `S${toEHex(moonSize)}00000-0`
                     };
                     calculateTerrestrialPhysical(moonObj, `Satellite ${m + 1}`, sys);
                     w.moons.push(moonObj);
@@ -768,7 +768,7 @@
             let mathSize = w.size;
             if (w.size === 'S' || w.size === 's') mathSize = 0.375;
             else if (w.size === 'R' || w.size === 'r' || w.size === 'GG') mathSize = 0;
-            else if (typeof w.size === 'string') mathSize = (typeof UniversalMath !== 'undefined' && UniversalMath.fromUWPChar) ? UniversalMath.fromUWPChar(w.size) : parseInt(w.size, 16) || 0;
+            else if (typeof w.size === 'string') mathSize = fromEHex(w.size);
             
             w.diameterTerra = (w.diamKm || 0) / 12742;
             let bodyMass = w.mass !== undefined ? w.mass : Math.pow((w.diamKm || 0) / 12742, 3);
@@ -880,7 +880,7 @@
                 }
 
                 if (isMainworldLocked && w.atmCode !== mainworldBase.atm) {
-                    writeLogLine(`Expanded Method Simulation: Non-HZ conditions WOULD have forced Atmosphere to ${toUWPChar(w.atmCode)}`);
+                    writeLogLine(`Expanded Method Simulation: Non-HZ conditions WOULD have forced Atmosphere to ${toEHex(w.atmCode)}`);
                     w.atmCode = mainworldBase.atm;
                 }
             }
@@ -888,7 +888,7 @@
             w.atmCode = Number(w.atmCode);
             let finalMaxAtm = isBottomUp ? 17 : 15;
             w.atmCode = Math.max(0, Math.min(finalMaxAtm, w.atmCode));
-            tResult('Final Atmosphere Code', toUWPChar(w.atmCode));
+            tResult('Final Atmosphere Code', toEHex(w.atmCode));
 
             // 2. Runaway Greenhouse Check
             // GATEWAY: MgT2E 2.4: Thermal Logic - RAW Gate (isBottomUp and meanTempK > 303)
@@ -927,11 +927,11 @@
 
                         if (isMainworldLocked) {
                             tResult('Runaway Shift', `Locked.`, 'MgT2E 2.4: Thermal Logic');
-                            writeLogLine(`Expanded Method Simulation: Runaway Greenhouse WOULD have shifted Atmosphere from ${toUWPChar(oldCode)} to ${toUWPChar(newAtmCode)}`);
+                            writeLogLine(`Expanded Method Simulation: Runaway Greenhouse WOULD have shifted Atmosphere from ${toEHex(oldCode)} to ${toEHex(newAtmCode)}`);
                         } else {
                             w.atmCode = newAtmCode;
-                            tResult('New Atmosphere', toUWPChar(w.atmCode), 'MgT2E 2.4: Thermal Logic');
-                            writeLogLine(`Runaway Shift: Atm ${toUWPChar(oldCode)} -> ${toUWPChar(w.atmCode)}`);
+                            tResult('New Atmosphere', toEHex(w.atmCode), 'MgT2E 2.4: Thermal Logic');
+                            writeLogLine(`Runaway Shift: Atm ${toEHex(oldCode)} -> ${toEHex(w.atmCode)}`);
                         }
                     }
                 } else {
@@ -1236,7 +1236,7 @@
                 }
 
                 // Integration & Profile String
-                w.atmProfile = `${toUWPChar(w.atmCode)}-${w.totalPressureBar.toFixed(2)}-${w.ppoBar.toFixed(3)}`;
+                w.atmProfile = `${toEHex(w.atmCode)}-${w.totalPressureBar.toFixed(2)}-${w.ppoBar.toFixed(3)}`;
                 tResult('Atm Profile', w.atmProfile, 'MgT2E 2.2: Atmospheric Chemistry');
 
             } else if (w.atmCode >= 10 && w.atmCode <= 12) {
@@ -1339,7 +1339,7 @@
                 tResult('Gas Mix', w.gases.join(', '), 'MgT2E 2.2: Atmospheric Chemistry');
                 writeLogLine(`Final Composition: ${w.gases.join(' | ')}`);
 
-                w.atmProfile = `${toUWPChar(w.atmCode)}-${w.totalPressureBar.toFixed(2)}-0.000`;
+                w.atmProfile = `${toEHex(w.atmCode)}-${w.totalPressureBar.toFixed(2)}-0.000`;
                 tResult('Atm Profile', w.atmProfile, 'MgT2E 2.2: Atmospheric Chemistry');
             } else if (w.atmCode === 15) {
                 // Unusual Atmosphere (Code F)
@@ -1380,7 +1380,7 @@
                 w.atmProfile = `F-St${subtypeCode}`;
                 tResult('Atm Profile', w.atmProfile, 'MgT2E 2.2: Atmospheric Chemistry');
             } else if (w.atmCode <= 1) {
-                w.atmProfile = `${toUWPChar(w.atmCode)}-None-0.000`;
+                w.atmProfile = `${toEHex(w.atmCode)}-None-0.000`;
                 tResult('Atm Profile', w.atmProfile, 'MgT2E 2.2: Atmospheric Chemistry');
             }
 
@@ -1445,8 +1445,8 @@
             tResult('Liquid Type', w.liquidType, 'MgT2E 2.3: Hydrographics');
 
             // Sync final physical codes back to UWP strings
-            let finalAtmChar = toUWPChar(w.atmCode);
-            let finalHydroChar = toUWPChar(w.hydroCode);
+            let finalAtmChar = toEHex(w.atmCode);
+            let finalHydroChar = toEHex(w.hydroCode);
 
             let updateUWPChar = (uwpStr, idx, char) => {
                 if (!uwpStr || uwpStr.length <= idx || uwpStr === '-') return uwpStr;
@@ -2218,7 +2218,7 @@
                 let sVal = body.size;
                 if (body.size === 'S' || body.size === 's') sVal = 0.375;
                 else if (body.size === 'R' || body.size === 'r' || body.size === 'GG') sVal = 0;
-                else if (typeof body.size === 'string') sVal = (typeof UniversalMath !== 'undefined' && UniversalMath.fromUWPChar) ? UniversalMath.fromUWPChar(body.size) : parseInt(body.size, 16) || 0;
+                else if (typeof body.size === 'string') sVal = fromEHex(body.size);
                 
                 let total = 0;
                 const star = sys.stars[0];

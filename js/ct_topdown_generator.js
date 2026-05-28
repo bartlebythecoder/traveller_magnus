@@ -1,4 +1,4 @@
-// =====================================================================
+﻿// =====================================================================
 // CLASSIC TRAVELLER: MODULAR TOP-DOWN GENERATOR
 // =====================================================================
 
@@ -374,7 +374,7 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
                 const orbitMkm = (body.distAU * 149597870) / 1000000;
                 tResult("Orbit Distance", `${body.distAU.toFixed(2)} AU (${orbitMkm.toFixed(1)} M km)`, 'CT 1.3: Zone Classification');
 
-                const worldSize = (typeof body.size === 'string') ? UniversalMath.fromUWPChar(body.size) : (body.size || 0);
+                const worldSize = (typeof body.size === 'string') ? UniversalMath.fromEHex(body.size) : (body.size || 0);
                 const world100D = (worldSize * 160000) / 1000000;
                 tResult("World 100D Limit", `${world100D.toFixed(2)} M km`, 'CT 1.3: Zone Classification');
 

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * js/t5_socio_engine.js
  * 
  * T5 SOCIOECONOMIC ENGINE (v2.0 Modular Architecture)
@@ -16,7 +16,7 @@
         root.T5_Socio_Engine = factory(root.UniversalMath);
     }
 }(this, function (UniversalMath) {
-    const { toUWPChar, rollFlux } = UniversalMath;
+    const { toEHex, rollFlux } = UniversalMath;
 
     // Safe Fallback Utilities
     const _rng = (typeof rng === 'function') ? rng : Math.random;
@@ -71,10 +71,10 @@
             _tDM('Gas Giants + Belts (TL 8+)', rMod);
         }
         R = Math.max(0, R);
-        _tResult('Resources (R)', toUWPChar(R));
+        _tResult('Resources (R)', toEHex(R));
 
         let L = Math.max(0, (base.pop || 0) - 1);
-        _tResult('Labor (L)', toUWPChar(L));
+        _tResult('Labor (L)', toEHex(L));
 
         let I = 0;
         if ((base.pop || 0) > 0) {
@@ -92,7 +92,7 @@
             }
         }
         I = Math.max(0, I);
-        _tResult('Infrastructure (I)', toUWPChar(I));
+        _tResult('Infrastructure (I)', toEHex(I));
 
         let E = rollFlux();
         if (E === 0) {
@@ -134,8 +134,8 @@
         }
 
         let ixStr = `{${Ix >= 0 ? '+' : ''}${Ix}}`;
-        let exStr = `(${toUWPChar(R)}${toUWPChar(L)}${toUWPChar(I)}${E >= 0 ? '+' : ''}${E})`;
-        let cxStr = `[${toUWPChar(H)}${toUWPChar(A)}${toUWPChar(S)}${toUWPChar(Sym)}]`;
+        let exStr = `(${toEHex(R)}${toEHex(L)}${toEHex(I)}${E >= 0 ? '+' : ''}${E})`;
+        let cxStr = `[${toEHex(H)}${toEHex(A)}${toEHex(S)}${toEHex(Sym)}]`;
 
         _tResult('T5 Extension Line', `${ixStr} ${exStr} ${cxStr}`);
 
@@ -153,7 +153,7 @@
             ecoLabor: L,
             ecoInfrastructure: I,
             ecoEfficiency: E,
-            culturalProfile: `${toUWPChar(H)}${toUWPChar(A)}${toUWPChar(S)}${toUWPChar(Sym)}`
+            culturalProfile: `${toEHex(H)}${toEHex(A)}${toEHex(S)}${toEHex(Sym)}`
         };
     }
 

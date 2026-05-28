@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PROJECT AS ABOVE, SO BELOW
  * Layer 2: The Math Chassis (Mongoose 2nd Edition)
  * Description: Pure mathematical formulas and physics approximations specific to MgT2E.
@@ -171,8 +171,7 @@ const MgT2EMath = {
     calculateBaseJourneyTimes: function(size, forcedDiamKm = null) {
         if (typeof tSection === 'function') tSection("Math: Base Journey Times");
         
-        // Use UniversalMath for UWP parsing if available
-        let numericSize = (typeof UniversalMath !== 'undefined') ? UniversalMath.fromUWPChar(size) : parseInt(size, 16);
+        let numericSize = fromEHex(size);
         if (isNaN(numericSize)) numericSize = 0;
 
         const distance = forcedDiamKm ? (forcedDiamKm * 100) : (numericSize * 160000);
@@ -208,7 +207,7 @@ const MgT2EMath = {
         if (worldDistKm >= maskLimitKm) return false;
 
         // And if the masked distance is greater than the world's own 100D limit
-        let numericSize = (typeof UniversalMath !== 'undefined') ? UniversalMath.fromUWPChar(worldSize) : parseInt(worldSize, 16);
+        let numericSize = fromEHex(worldSize);
         const standardDist = forcedWorldDiamKm ? (forcedWorldDiamKm * 100) : (numericSize * 160000);
         const maskedDist = maskLimitKm - worldDistKm;
 
@@ -228,9 +227,9 @@ const MgT2EMath = {
         const maskLimitKm = 100 * starDiamKm;
         const worldDistKm = worldDistAU * KM_PER_AU;
         
-        let numericSize = (typeof UniversalMath !== 'undefined') ? UniversalMath.fromUWPChar(worldSize) : parseInt(worldSize, 16);
+        let numericSize = fromEHex(worldSize);
         const standardDist = forcedWorldDiamKm ? (forcedWorldDiamKm * 100) : (numericSize * 160000);
-        
+
         const maskedDist = maskLimitKm - worldDistKm;
         const finalDist = Math.max(standardDist, maskedDist);
 

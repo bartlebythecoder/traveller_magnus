@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>World Name Fixer — As Above So Below</title>
+<style>
+* { box-sizing: border-box; }
+body {
+    font-family: 'Courier New', monospace;
+    background: #0f0f1a;
+    color: #c8c8d8;
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+header {
+    background: #141428;
+    border-bottom: 1px solid #252540;
+    padding: 9px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+h1 { margin: 0; font-size: 0.95rem; color: #7eb8f7; letter-spacing: 0.03em; }
+.btn {
+    padding: 5px 12px;
+    border: 1px solid #303050;
+    background: #1a1a30;
+    color: #b8b8d0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.78rem;
+    border-radius: 2px;
+}
+.btn:hover:not(:disabled) { background: #22223a; border-color: #4a4a70; }
+.btn:disabled { opacity: 0.35; cursor: default; }
+.btn-primary { background: #142040; border-color: #2a5080; color: #80b8e8; }
+.btn-primary:hover:not(:disabled) { background: #1a2a50; }
+.btn-success { background: #0a200f; border-color: #1a5030; color: #60b870; }
+.btn-success:hover:not(:disabled) { background: #102818; }
+#status-bar { color: #505070; font-size: 0.75rem; flex: 1; }
+
+#layout { display: flex; flex: 1; overflow: hidden; }
+
+/* Sidebar */
+#sidebar {
+    width: 260px; min-width: 260px;
+    background: #0c0c18;
+    border-right: 1px solid #202035;
+    display: flex; flex-direction: column; overflow: hidden;
+}
+#sidebar-hdr {
+    padding: 7px 11px;
+    font-size: 0.68rem; color: #383858;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    border-bottom: 1px solid #181828; flex-shrink: 0;
+}
+#system-list { overflow-y: auto; flex: 1; }
+.sys-item {
+    padding: 5px 10px 5px 12px;
+    border-left: 3px solid transparent;
+    cursor: pointer;
+}
+.sys-item:hover { background: #111122; }
+.sys-item.active { background: #121a2e; border-left-color: #4a80c0; }
+.sys-item .sn { font-size: 0.76rem; color: #c0c0d8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sys-item .sh { font-size: 0.68rem; color: #303050; }
+
+/* Editor */
+#editor-panel {
+    flex: 1; overflow-y: auto; padding: 16px 20px;
+    display: flex; flex-direction: column; gap: 10px;
+}
+#welcome {
+    color: #303050; margin: auto; text-align: center;
+    font-size: 0.85rem; line-height: 2.2;
+}
+.stats-box {
+    background: #0c0c1a; border: 1px solid #202035;
+    border-radius: 3px; padding: 10px 14px;
+    font-size: 0.82rem; line-height: 2; flex-shrink: 0;
+}
+.c-good { color: #50a050; }
+.c-info { color: #7eb8f7; }
+
+.sys-view { display: flex; flex-direction: column; gap: 2px; }
+.sys-hdr {
+    display: flex; align-items: baseline; gap: 8px;
+    border-bottom: 1px solid #181828; padding-bottom: 6px; margin-bottom: 4px;
+}
+.sys-hdr h2 { margin: 0; font-size: 0.88rem; color: #90b8e0; }
+.sys-hdr .hexid { font-size: 0.72rem; color: #303055; }
+.world-entry {
+    display: grid;
+    grid-template-columns: 60px 100px 1fr;
+    gap: 5px; align-items: baseline; padding: 1px 0;
+    font-size: 0.76rem;
+}
+.world-entry.is-moon { padding-left: 18px; grid-template-columns: 42px 100px 1fr; }
+.orb { color: #2a2a50; text-align: right; }
+.typ { color: #404060; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nm  { color: #a8b8c8; }
+.nm.is-mw { color: #7eb8f7; font-style: italic; }
+.nav-bar {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.78rem; color: #404060;
+}
+.sep { border: none; border-top: 1px solid #181828; margin: 4px 0; }
+</style>
+</head>
+<body>
+<header>
+    <h1>World Name Fixer</h1>
+    <label class="btn btn-primary">
+        Load JSON
+        <input type="file" id="file-inp" accept=".json" style="display:none">
+    </label>
+    <span id="status-bar">No file loaded.</span>
+    <button class="btn btn-success" id="dl-btn" disabled>Download Fixed JSON</button>
+</header>
+
+<div id="layout">
+    <div id="sidebar">
+        <div id="sidebar-hdr">Systems renamed</div>
+        <div id="system-list">
+            <div style="padding:11px;font-size:0.75rem;color:#282840">Load a file to begin.</div>
+        </div>
+    </div>
+    <div id="editor-panel">
+        <div id="welcome">
+            Load a sector JSON file to begin.<br>
+            All world and moon names will be re-applied<br>
+            using the MgT2E orbital naming convention:<br>
+            <span style="color:#6a8aaa">System I, System II, System II-a …</span><br>
+            <span style="color:#6a8aaa">System A-I, System A-II … (multi-star)</span>
+        </div>
+    </div>
+</div>
+
+<script>
+'use strict';
+
+let g_data    = null;
+let g_log     = [];   // [{hexId, sysName, worlds: [{orb, type, name, isMoon, isMw}]}]
+let g_curIdx  = -1;
+let g_outFile = 'fixed.json';
+
+// ── File loading ──────────────────────────────────────────────────────────────
+
+document.getElementById('file-inp').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    g_outFile = file.name.replace(/\.json$/i, '_fixed.json');
+    setStatus('Parsing ' + file.name + ' …');
+    const r = new FileReader();
+    r.onload = ev => {
+        try {
+            g_data = JSON.parse(ev.target.result);
+            onLoaded();
+        } catch(err) { setStatus('Parse error: ' + err.message); }
+    };
+    r.readAsText(file);
+});
+
+function onLoaded() {
+    const stats = renameAllSystems(g_data);
+    document.getElementById('dl-btn').disabled = false;
+    setStatus('Done. ' + stats.sysCount + ' systems renamed (' + stats.worldCount + ' worlds, ' + stats.moonCount + ' moons).');
+    renderSidebar();
+    renderStats(stats);
+    if (g_log.length > 0) showSystem(0);
+}
+
+// ── Roman numeral helper (mirrors core.js _toRoman) ──────────────────────────
+
+function toRoman(n) {
+    const vals = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
+    const syms = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+    let r = '';
+    for (let i = 0; i < vals.length; i++)
+        while (n >= vals[i]) { r += syms[i]; n -= vals[i]; }
+    return r;
+}
+
+// ── Core rename logic — mirrors applyMgT2EOrbitalNames in core.js ─────────────
+
+function renameMgT2ESystem(sys) {
+    if (!sys.worlds || sys.worlds.length === 0) return null;
+
+    // Find mainworld object
+    const mw = sys.mainworld ||
+               sys.worlds.find(w => w.type === 'Mainworld' || w.isLunarMainworld) ||
+               null;
+
+    const sysName = (mw && mw.name) || sys.name;
+    if (!sysName) return null;
+
+    const isMultiStar = sys.stars && sys.stars.length > 1;
+
+    // Group non-mainworld bodies by parentStarIdx (missing/null/empty → 0)
+    const starGroups = {};
+    for (const w of sys.worlds) {
+        if (w.type === 'Empty' || w.type === 'Mainworld' || w.isLunarMainworld) continue;
+        const raw = w.parentStarIdx;
+        const idx = (raw !== undefined && raw !== null && raw !== '') ? Number(raw) : 0;
+        if (!starGroups[idx]) starGroups[idx] = [];
+        starGroups[idx].push(w);
+    }
+
+    let worldCount = 0, moonCount = 0;
+    const preview = [];
+
+    // Build mainworld preview entry
+    if (mw) {
+        preview.push({ orb: mw.orbitId, type: mw.type || 'Mainworld', name: mw.name, isMw: true, isMoon: mw.isMoon || mw.isSatellite || false });
+    }
+
+    // Sort group keys numerically (0, 1, 2 → A, B, C)
+    const sortedKeys = Object.keys(starGroups).map(Number).sort((a, b) => a - b);
+
+    for (const groupIdx of sortedKeys) {
+        const namePrefix = isMultiStar
+            ? sysName + ' ' + String.fromCharCode(65 + groupIdx) + '-'
+            : sysName + ' ';
+
+        const group = starGroups[groupIdx].sort((a, b) => (a.orbitId || 0) - (b.orbitId || 0));
+        let ordinal = 1;
+
+        for (const w of group) {
+            const roman = toRoman(ordinal++);
+            w.name = namePrefix + roman;
+            worldCount++;
+            preview.push({ orb: w.orbitId, type: w.type, name: w.name, isMw: false, isMoon: false });
+
+            // Moon naming mirrors core.js exactly: use forEach index (mi),
+            // skip Mainworld moons but preserve their index position.
+            if (w.moons && w.moons.length > 0) {
+                w.moons.forEach((m, mi) => {
+                    if (m.type === 'Mainworld' || m.isLunarMainworld) {
+                        preview.push({ orb: m.orbitId, type: 'Mainworld (moon)', name: m.name, isMw: true, isMoon: true });
+                        return;
+                    }
+                    m.name = namePrefix + roman + '-' + String.fromCharCode(97 + mi);
+                    moonCount++;
+                    preview.push({ orb: m.orbitId, type: m.type || 'Moon', name: m.name, isMw: false, isMoon: true });
+                });
+            }
+        }
+    }
+
+    // Moons of the mainworld planet itself (mainworld is a terrestrial planet, not a satellite)
+    if (mw && !mw.isMoon && !mw.isSatellite && mw.moons && mw.moons.length > 0) {
+        mw.moons.forEach((m, mi) => {
+            if (m.type === 'Mainworld' || m.isLunarMainworld) return;
+            m.name = sysName + '-' + String.fromCharCode(97 + mi);
+            moonCount++;
+            preview.push({ orb: m.orbitId, type: m.type || 'Moon', name: m.name, isMw: false, isMoon: true });
+        });
+    }
+
+    sys.name = sysName;
+
+    // Keep sys.mainworld in sync if it's a separate copy
+    if (sys.mainworld && sys.mainworld !== mw && mw) {
+        sys.mainworld.name = sysName;
+    }
+
+    return { worldCount, moonCount, preview };
+}
+
+function renameAllSystems(data) {
+    g_log = [];
+    let sysCount = 0, worldCount = 0, moonCount = 0;
+
+    for (const hexId of Object.keys(data.hexStates)) {
+        const hex = data.hexStates[hexId];
+        if (!hex.mgtSystem || !hex.mgtSystem.worlds || hex.mgtSystem.worlds.length === 0) continue;
+
+        const result = renameMgT2ESystem(hex.mgtSystem);
+        if (!result) continue;
+
+        sysCount++;
+        worldCount += result.worldCount;
+        moonCount  += result.moonCount;
+        g_log.push({ hexId, sysName: hex.mgtSystem.name, worlds: result.preview });
+    }
+
+    return { sysCount, worldCount, moonCount };
+}
+
+// ── Sidebar ───────────────────────────────────────────────────────────────────
+
+function renderSidebar() {
+    const list = document.getElementById('system-list');
+    list.innerHTML = g_log.map((e, i) =>
+        `<div class="sys-item" id="si-${i}" onclick="showSystem(${i})">
+            <div class="sn" title="${eh(e.sysName)}">${eh(e.sysName)}</div>
+            <div class="sh">${eh(e.hexId)}</div>
+        </div>`
+    ).join('');
+}
+
+// ── Editor ────────────────────────────────────────────────────────────────────
+
+function renderStats(stats) {
+    document.getElementById('editor-panel').innerHTML =
+        `<div class="stats-box" id="stats-box">
+            <span class="c-good">✓ Systems renamed:</span> ${stats.sysCount}<br>
+            <span class="c-good">✓ Worlds renamed:</span>  ${stats.worldCount}<br>
+            <span class="c-good">✓ Moons renamed:</span>   ${stats.moonCount}
+         </div>
+         <hr class="sep">
+         <div id="sys-content"></div>`;
+}
+
+function showSystem(idx) {
+    g_curIdx = idx;
+    document.querySelectorAll('.sys-item').forEach((el, i) => el.classList.toggle('active', i === idx));
+    document.getElementById('si-' + idx)?.scrollIntoView({ block: 'nearest' });
+
+    const e    = g_log[idx];
+    const last = g_log.length - 1;
+
+    const nav = `<div class="nav-bar">
+        <button class="btn" onclick="navSys(-1)" ${idx===0?'disabled':''}>← Prev</button>
+        <button class="btn" onclick="navSys(1)"  ${idx===last?'disabled':''}>Next →</button>
+        <span>${idx+1} / ${g_log.length}</span>
+    </div>`;
+
+    const hdr = `<div class="sys-hdr">
+        <h2>${eh(e.sysName)}</h2>
+        <span class="hexid">${eh(e.hexId)}</span>
+    </div>`;
+
+    const colHdr = `<div class="world-entry">
+        <span class="orb" style="color:#252540">Orbit AU</span>
+        <span class="typ" style="color:#252540">Type</span>
+        <span class="nm"  style="color:#252540">Name</span>
+    </div>`;
+
+    const rows = e.worlds.map(w => {
+        const orb = w.orb != null ? Number(w.orb).toFixed(3) : '';
+        return `<div class="world-entry${w.isMoon?' is-moon':''}">
+            <span class="orb">${eh(orb)}</span>
+            <span class="typ" title="${eh(w.type)}">${eh((w.type||'').slice(0,16))}</span>
+            <span class="nm${w.isMw?' is-mw':''}">${eh(w.name)}</span>
+        </div>`;
+    }).join('');
+
+    const content = document.getElementById('sys-content');
+    if (content) content.innerHTML = nav + hdr + colHdr + rows;
+}
+
+function navSys(dir) {
+    const next = g_curIdx + dir;
+    if (next >= 0 && next < g_log.length) showSystem(next);
+}
+
+// ── Download ──────────────────────────────────────────────────────────────────
+
+document.getElementById('dl-btn').addEventListener('click', () => {
+    if (!g_data) return;
+    const blob = new Blob([JSON.stringify(g_data)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = g_outFile;
+    a.click();
+    URL.revokeObjectURL(a.href);
+});
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+
+function setStatus(msg) { document.getElementById('status-bar').textContent = msg; }
+function eh(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+</body>
+</html>

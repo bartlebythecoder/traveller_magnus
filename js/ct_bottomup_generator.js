@@ -1,4 +1,4 @@
-// =====================================================================
+﻿// =====================================================================
 // CLASSIC TRAVELLER: MODULAR BOTTOM-UP GENERATOR (Rule Compliant)
 // =====================================================================
 
@@ -349,7 +349,7 @@ function internalPhysicalPass(sys) {
             const orbitMkm = (body.distAU * 149597870) / 1000000;
             tResult("Orbit Distance", `${body.distAU.toFixed(2)} AU (${orbitMkm.toFixed(1)} M km)`, 'CT 1.3: Zone Classification');
 
-            const worldSize = (typeof body.size === 'string') ? UniversalMath.fromUWPChar(body.size) : (body.size || 0);
+            const worldSize = (typeof body.size === 'string') ? UniversalMath.fromEHex(body.size) : (body.size || 0);
             const world100D = (worldSize * 160000) / 1000000;
             tResult("World 100D Limit", `${world100D.toFixed(2)} M km`, 'CT 1.3: Zone Classification');
 
@@ -376,7 +376,7 @@ function internalPhysicalPass(sys) {
                 const orbitMkm = (p.distAU * 149597870) / 1000000;
                 tResult("Orbit Distance", `${p.distAU.toFixed(2)} AU (${orbitMkm.toFixed(1)} M km)`, 'CT 1.3: Zone Classification');
 
-                const worldSize = (typeof p.size === 'string') ? UniversalMath.fromUWPChar(p.size) : (p.size || 0);
+                const worldSize = (typeof p.size === 'string') ? UniversalMath.fromEHex(p.size) : (p.size || 0);
                 const world100D = (worldSize * 160000) / 1000000;
                 tResult("World 100D Limit", `${world100D.toFixed(2)} M km`, 'CT 1.3: Zone Classification');
 
@@ -578,13 +578,13 @@ function processBottomUpSubordinates(sys) {
 
         // Final UWP Refresh (Syncing Starport/Spaceport and Char representation)
         const spChar = body.starport || body.spaceport || 'Y';
-        const szChar = toUWPChar(body.size);
-        const atChar = toUWPChar(body.atm);
-        const hyChar = toUWPChar(body.hydro);
-        const poChar = toUWPChar(body.pop);
-        const gvChar = toUWPChar(body.gov);
-        const lwChar = toUWPChar(body.law);
-        const tlChar = toUWPChar(body.tl);
+        const szChar = toEHex(body.size);
+        const atChar = toEHex(body.atm);
+        const hyChar = toEHex(body.hydro);
+        const poChar = toEHex(body.pop);
+        const gvChar = toEHex(body.gov);
+        const lwChar = toEHex(body.law);
+        const tlChar = toEHex(body.tl);
         
         body.uwp = `${spChar}${szChar}${atChar}${hyChar}${poChar}${gvChar}${lwChar}-${tlChar}`;
         body.uwpSecondary = body.uwp;

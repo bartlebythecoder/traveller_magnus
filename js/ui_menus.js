@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // UI_MENUS.JS - Context Menu & Settings Panel Handlers
 // ============================================================================
 
@@ -1150,12 +1150,12 @@ function _getRouteExportValue(fieldId, hexId, state, data) {
         case 'subsector':  return hexId.split('-')[1] || '-';
         case 'uwp':        return data.uwp || '???????-?';
         case 'starport':   return String(data.starport || '-');
-        case 'size':       return data.size  != null ? toUWPChar(data.size)  : '-';
-        case 'atm':        return data.atm   != null ? toUWPChar(data.atm)   : '-';
-        case 'hydro':      return data.hydro != null ? toUWPChar(data.hydro) : '-';
-        case 'pop':        return data.pop   != null ? toUWPChar(data.pop)   : '-';
-        case 'gov':        return data.gov   != null ? toUWPChar(data.gov)   : '-';
-        case 'law':        return data.law   != null ? toUWPChar(data.law)   : '-';
+        case 'size':       return data.size  != null ? toEHex(data.size)  : '-';
+        case 'atm':        return data.atm   != null ? toEHex(data.atm)   : '-';
+        case 'hydro':      return data.hydro != null ? toEHex(data.hydro) : '-';
+        case 'pop':        return data.pop   != null ? toEHex(data.pop)   : '-';
+        case 'gov':        return data.gov   != null ? toEHex(data.gov)   : '-';
+        case 'law':        return data.law   != null ? toEHex(data.law)   : '-';
         case 'tl':         return data.tl    != null ? String(data.tl)       : '-';
         case 'zone':       return data.travelZone || 'Green';
         case 'allegiance': return state.allegiance || data.allegiance || '-';

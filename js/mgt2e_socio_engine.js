@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PROJECT AS ABOVE, SO BELOW
  * MGT2E SOCIO ENGINE - Social & Economic Generation Module
  * 
@@ -355,7 +355,7 @@
         body.tlCode = cTl;
         body.tl = cTl;
 
-        const uwp = `${sp}${toUWPChar(cSize)}${toUWPChar(cAtm)}${toUWPChar(cHydro)}${toUWPChar(cPop)}${toUWPChar(cGov)}${toUWPChar(cLaw)}-${toUWPChar(cTl)}`;
+        const uwp = `${sp}${toEHex(cSize)}${toEHex(cAtm)}${toEHex(cHydro)}${toEHex(cPop)}${toEHex(cGov)}${toEHex(cLaw)}-${toEHex(cTl)}`;
         body.uwp = uwp;
         body.uwpSecondary = uwp;
     }
@@ -505,14 +505,14 @@
         const uwpStr = base ? (base.uwp || base.uwpSecondary) : null;
         if (base && uwpStr && uwpStr.length >= 7) {
             if (base.starport === undefined) base.starport = uwpStr[0] || 'X';
-            if (base.size === undefined) base.size = typeof fromUWPChar === 'function' ? fromUWPChar(uwpStr[1]) : parseInt(uwpStr[1], 16) || 0;
-            if (base.atm === undefined && base.atmCode === undefined) base.atm = typeof fromUWPChar === 'function' ? fromUWPChar(uwpStr[2]) : parseInt(uwpStr[2], 16) || 0;
-            if (base.hydro === undefined && base.hydroCode === undefined) base.hydro = typeof fromUWPChar === 'function' ? fromUWPChar(uwpStr[3]) : parseInt(uwpStr[3], 16) || 0;
-            if (base.pop === undefined) base.pop = typeof fromUWPChar === 'function' ? fromUWPChar(uwpStr[4]) : parseInt(uwpStr[4], 16) || 0;
-            if (base.gov === undefined) base.gov = typeof fromUWPChar === 'function' ? fromUWPChar(uwpStr[5]) : parseInt(uwpStr[5], 16) || 0;
-            if (base.law === undefined) base.law = typeof fromUWPChar === 'function' ? fromUWPChar(uwpStr[6]) : parseInt(uwpStr[6], 16) || 0;
+            if (base.size === undefined) base.size = fromEHex(uwpStr[1]);
+            if (base.atm === undefined && base.atmCode === undefined) base.atm = fromEHex(uwpStr[2]);
+            if (base.hydro === undefined && base.hydroCode === undefined) base.hydro = fromEHex(uwpStr[3]);
+            if (base.pop === undefined) base.pop = fromEHex(uwpStr[4]);
+            if (base.gov === undefined) base.gov = fromEHex(uwpStr[5]);
+            if (base.law === undefined) base.law = fromEHex(uwpStr[6]);
             if (uwpStr.length >= 9 && base.tl === undefined) {
-                base.tl = typeof fromUWPChar === 'function' ? fromUWPChar(uwpStr[8]) : parseInt(uwpStr[8], 16) || 0;
+                base.tl = fromEHex(uwpStr[8]);
             }
         }
 
@@ -874,7 +874,7 @@
             let fIdentity = (fGov === base.gov) ? "Splinter/Rival" : "Dissident/Rebel";
             
             factionsData.push({ strength: fStrength, gov: fGov, identity: fIdentity });
-            tResult(`Faction ${i + 1}`, `${fIdentity} (Strength ${fStrength}, Gov ${toUWPChar(fGov)})`);
+            tResult(`Faction ${i + 1}`, `${fIdentity} (Strength ${fStrength}, Gov ${toEHex(fGov)})`);
         }
         base.factionsData = factionsData;
         let factionsString = factionsData.map(f => f.strength).join('');
@@ -2577,7 +2577,7 @@
         law = clampUWP(law, 0, 15);
         tl = clampUWP(tl, 0, 33);
 
-        const uwp = `${starport}${toUWPChar(size)}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
+        const uwp = `${starport}${toEHex(size)}${toEHex(atm)}${toEHex(hydro)}${toEHex(pop)}${toEHex(gov)}${toEHex(law)}-${toEHex(tl)}`;
 
         if (existingWorld) {
             existingWorld.name = name;

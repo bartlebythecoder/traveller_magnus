@@ -6,45 +6,8 @@
  */
 
 (function () {
-    // Traveller Extended Alphabet (Skips 'I' and 'O' per standard T5/Universal rules)
-    // 0-9 = 0-9, A-H = 10-17, J-N = 18-22, P-Z = 23-33
-    const UWP_ALPHA = "0123456789ABCDEFGHJKLMNPQRSTUVWXYZ";
     const KM_PER_AU = 149597870;
     const SUN_DIAMETER_KM = 1392700;
-
-    /**
-     * Converts an integer value to its pseudo-hexadecimal UWP character.
-     * @param {number|string} val - The numeric value to convert.
-     * @returns {string} - The corresponding UWP character (0-9, A-Z).
-     */
-    function toUWPChar(val) {
-        if (val === undefined || val === null) return '0';
-
-        let v;
-        if (typeof val === 'string') {
-            if (val === 'S' || val === 'R' || val === 'GG') return val;
-            v = parseInt(val, 10);
-            if (isNaN(v)) return val.trim().toUpperCase().charAt(0) || '0';
-        } else {
-            v = Math.floor(Number(val));
-        }
-
-        if (isNaN(v) || v < 0) return '0';
-        if (v >= UWP_ALPHA.length) return UWP_ALPHA[UWP_ALPHA.length - 1]; // Cap at Z (33)
-        return UWP_ALPHA[v];
-    }
-
-    /**
-     * Converts a UWP character back to an integer.
-     * @param {string} char - The UWP character (0-9, A-Z).
-     * @returns {number} - The integer value (0-33).
-     */
-    function fromUWPChar(char) {
-        if (char === undefined || char === null || char === '') return 0;
-        const c = String(char).trim().toUpperCase().charAt(0);
-        const idx = UWP_ALPHA.indexOf(c);
-        return (idx >= 0) ? idx : 0;
-    }
 
     /**
      * Restricts a value within given numerical bounds.
@@ -84,7 +47,7 @@
         // Safely parse the size (handles both standard integers and UWP letters like 'A')
         let numericSize = parseInt(size, 10);
         if (isNaN(numericSize)) {
-            numericSize = fromUWPChar(size);
+            numericSize = fromEHex(size);
         }
 
         if (isNaN(numericSize) || (numericSize <= 0 && !forcedDiamKm)) {
@@ -131,7 +94,7 @@
 
         // 2. Is the star's masking distance actually larger than the planet's own 100D limit?
         let numericSize = parseInt(worldSize, 10);
-        if (isNaN(numericSize)) numericSize = fromUWPChar(worldSize);
+        if (isNaN(numericSize)) numericSize = fromEHex(worldSize);
 
         const standardDistance = (forcedWorldDiamKm) ? (forcedWorldDiamKm * 100) : ((numericSize > 0 && !isNaN(numericSize)) ? numericSize * 160000 : 0);
 
@@ -155,7 +118,7 @@
 
         // 1. Calculate Standard Planetary Distance
         let numericSize = parseInt(worldSize, 10);
-        if (isNaN(numericSize)) numericSize = fromUWPChar(worldSize);
+        if (isNaN(numericSize)) numericSize = fromEHex(worldSize);
 
         const standardDistance = (forcedWorldDiamKm) ? (forcedWorldDiamKm * 100) : ((numericSize > 0 && !isNaN(numericSize)) ? numericSize * 160000 : 0);
 
@@ -260,8 +223,7 @@
                         const worldTcUpper = worldTCs.map(tc => String(tc).toUpperCase());
                         
                         if (searchTokens.length > 0) {
-                            // Sean Protocol: Changed from OR (some) to AND (every) logic per user requirement.
-                            // Criteria "In, Po" now requires BOTH Industrial and Poor remarks.
+                            // "In, Po" requires ALL listed codes present (AND, not OR).
                             const match = searchTokens.every(token => worldTcUpper.includes(token));
                             if (!match) return false;
                         }
@@ -382,7 +344,7 @@
                             const popMod = world.popMultiplier !== undefined ? world.popMultiplier
                                 : (world.pValue !== undefined ? world.pValue
                                 : (world.popDigit !== undefined ? world.popDigit : 0));
-                            const numPop = typeof popCode === 'number' ? popCode : fromUWPChar(popCode);
+                            const numPop = typeof popCode === 'number' ? popCode : fromEHex(popCode);
                             if (numPop === 0) {
                                 worldValue = 0;
                             } else if (popMod > 0) {
@@ -402,7 +364,7 @@
                     // Shared numeric parser: handles single-char UWP letters (A-Z) and K/M/B shorthand.
                     // Used in both Section A and Section B so `3b`, `1m-10m`, `>500k` all resolve correctly.
                     const parseNumericToken = (v) => {
-                        if (v.length === 1 && isNaN(v)) return fromUWPChar(v); // e.g. "A" → 10
+                        if (v.length === 1 && isNaN(v)) return fromEHex(v); // e.g. "A" → 10
                         if (v.endsWith('B')) return parseFloat(v) * 1000000000;
                         if (v.endsWith('M')) return parseFloat(v) * 1000000;
                         if (v.endsWith('K')) return parseFloat(v) * 1000;
@@ -415,7 +377,7 @@
                         const targetStr = criteria.substring(1).trim().toUpperCase();
                         const targetValue = parseNumericToken(targetStr);
 
-                        let valNum = (typeof worldValue === 'number') ? worldValue : fromUWPChar(worldValue);
+                        let valNum = (typeof worldValue === 'number') ? worldValue : fromEHex(worldValue);
 
                         if (operator === '>') {
                             if (!(valNum > targetValue)) return false;
@@ -426,7 +388,7 @@
                     // B. HYPHENATED RANGE & STRICT TOKEN MATCHING
                     else {
                         const criteriaTokens = criteria.split(',').map(s => s.trim().toUpperCase()).filter(s => s !== "");
-                        let worldValueNum = (typeof worldValue === 'number') ? worldValue : fromUWPChar(worldValue);
+                        let worldValueNum = (typeof worldValue === 'number') ? worldValue : fromEHex(worldValue);
 
                         if (criteriaTokens.length > 0) {
                             const match = criteriaTokens.some(token => {
@@ -457,8 +419,8 @@
     }
 
     const exports = {
-        toUWPChar,
-        fromUWPChar,
+        toEHex,
+        fromEHex,
         clampUWP,
         rollFlux,
         applyFilters,

@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // IO_MANAGER.JS - File Saving, Loading, and Sector Exports
 // ============================================================================
 
@@ -620,10 +620,11 @@ function setupSectorPicker() {
             listContainer.innerHTML = '<p style="color: #666; grid-column: 1/-1;">No sectors discovered in memory. Populate some hexes first!</p>';
         } else {
             sectors.forEach(s => {
+                const displayName = (window.sectorNames && window.sectorNames[parseInt(s.id)]) || s.name;
                 const tile = document.createElement('div');
                 tile.className = 'sector-tile';
                 tile.innerHTML = `
-                    <strong>${s.name}</strong>
+                    <strong>${displayName}</strong>
                     <span>${s.count} Data Points</span>
                 `;
                 tile.onclick = () => {
@@ -632,7 +633,7 @@ function setupSectorPicker() {
                     } else {
                         generateT5TabData(s.id);
                         exportMetadataXml(s.id);
-                        showToast(`Exported ${s.name} Data and Routes`, 2000);
+                        showToast(`Exported ${displayName} Data and Routes`, 2000);
                     }
                     modal.style.display = 'none';
                 };
@@ -645,6 +646,132 @@ function setupSectorPicker() {
     if (openBtn)  openBtn.addEventListener('click',  () => openPicker('full'));
     if (xmlBtn)   xmlBtn.addEventListener('click',   () => openPicker('xml'));
     if (closeBtn) closeBtn.addEventListener('click', () => { modal.style.display = 'none'; });
+}
+
+// ============================================================================
+// OBSIDIAN WIKI EXPORT
+// ============================================================================
+
+function setupObsidianExport() {
+    const openBtn      = document.getElementById('btn-export-obsidian');
+    const modal        = document.getElementById('obsidian-export-modal');
+    const cancelBtn    = document.getElementById('obs-cancel-btn');
+    const exportBtn    = document.getElementById('obs-export-btn');
+    const sectorSel    = document.getElementById('obs-sector-select');
+    const subsectorSel = document.getElementById('obs-subsector-select');
+    const incImages          = document.getElementById('obs-include-images');
+    const skipAirlessRow     = document.getElementById('obs-skip-airless-row');
+    const skipAirlessChk     = document.getElementById('obs-skip-airless');
+    const incSystemImages    = document.getElementById('obs-include-system-images');
+    const progressRow     = document.getElementById('obs-progress-row');
+    const progressBar  = document.getElementById('obs-progress-bar');
+    const progressTxt  = document.getElementById('obs-progress-text');
+
+    if (!openBtn) return;
+
+    function _updateExportBtn() {
+        const ready = !!(sectorSel.value && subsectorSel.value);
+        if (exportBtn) exportBtn.disabled = !ready;
+    }
+
+    sectorSel.addEventListener('change', () => {
+        const sectorNum = parseInt(sectorSel.value);
+        subsectorSel.innerHTML = '<option value="">— choose subsector —</option>';
+        subsectorSel.disabled  = true;
+
+        if (!sectorNum) { _updateExportBtn(); return; }
+
+        const subs = new Set();
+        hexStates.forEach((state, hexId) => {
+            const parts = hexId.split('-');
+            if (parseInt(parts[0]) === sectorNum && state && state.type !== 'EMPTY') {
+                subs.add(parts[1]);
+            }
+        });
+
+        [...subs].sort().forEach(sub => {
+            const opt = document.createElement('option');
+            opt.value       = sub;
+            opt.textContent = `Subsector ${sub}`;
+            subsectorSel.appendChild(opt);
+        });
+
+        subsectorSel.disabled = subs.size === 0;
+        _updateExportBtn();
+    });
+
+    subsectorSel.addEventListener('change', _updateExportBtn);
+
+    incImages.addEventListener('change', () => {
+        if (skipAirlessRow) skipAirlessRow.style.display = incImages.checked ? 'flex' : 'none';
+    });
+
+    openBtn.addEventListener('click', () => {
+        const sectors = getAvailableSectors();
+        sectorSel.innerHTML = '<option value="">— choose sector —</option>';
+        sectors.forEach(s => {
+            const opt       = document.createElement('option');
+            opt.value       = s.id;
+            const name      = (window.sectorNames && window.sectorNames[parseInt(s.id)]) || s.name;
+            opt.textContent = `${name} (${s.count} data points)`;
+            sectorSel.appendChild(opt);
+        });
+
+        subsectorSel.innerHTML    = '<option value="">— choose sector first —</option>';
+        subsectorSel.disabled     = true;
+        progressRow.style.display = 'none';
+        progressBar.style.width   = '0%';
+        progressTxt.textContent   = '';
+        if (exportBtn) exportBtn.disabled    = true;
+        if (cancelBtn) cancelBtn.textContent = 'Cancel';
+        if (cancelBtn) cancelBtn.disabled    = false;
+
+        modal.style.display = 'flex';
+    });
+
+    cancelBtn.addEventListener('click', () => { modal.style.display = 'none'; });
+
+    exportBtn.addEventListener('click', async () => {
+        const sectorNum     = parseInt(sectorSel.value);
+        const subsectorChar = subsectorSel.value;
+        const includeImages       = !!(incImages       && incImages.checked);
+        const skipAirless         = includeImages && !!(skipAirlessChk  && skipAirlessChk.checked);
+        const includeSystemImages = !!(incSystemImages && incSystemImages.checked);
+
+        exportBtn.disabled        = true;
+        cancelBtn.disabled        = true;
+        progressRow.style.display = 'block';
+        progressBar.style.width   = '0%';
+        progressTxt.textContent   = 'Starting export…';
+
+        try {
+            await ObsidianExporter.startExport(sectorNum, subsectorChar, {
+                includeImages,
+                skipAirless,
+                includeSystemImages,
+                onProgress: (done, total, msg) => {
+                    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+                    progressBar.style.width = `${pct}%`;
+                    progressTxt.textContent = msg || `${done} / ${total}`;
+                },
+                onDone: (fileCount) => {
+                    progressBar.style.width = '100%';
+                    progressTxt.textContent = `Done — ${fileCount} files exported.`;
+                    cancelBtn.disabled      = false;
+                    cancelBtn.textContent   = 'Close';
+                },
+                onError: (msg) => {
+                    progressTxt.textContent = `Error: ${msg}`;
+                    cancelBtn.disabled      = false;
+                    exportBtn.disabled      = false;
+                },
+            });
+        } catch (e) {
+            progressTxt.textContent = `Error: ${e.message}`;
+            cancelBtn.disabled      = false;
+            exportBtn.disabled      = false;
+        }
+    });
 }
 
 /**
@@ -1065,7 +1192,7 @@ function generateT5TabData(sectorID) {
                     : (state.beltCount    !== undefined ? state.beltCount    : _countRTTBelts(state.rttSystem));
             const g = data.gasGiantsCount !== undefined ? data.gasGiantsCount
                     : (state.gasGiantCount !== undefined ? state.gasGiantCount : _countRTTGasGiants(state.rttSystem));
-            const pbg = `${toUWPChar(p)}${toUWPChar(b)}${toUWPChar(g)}`;
+            const pbg = `${toEHex(p)}${toEHex(b)}${toEHex(g)}`;
 
             // Extensions (Importance, Economic, Cultural)
             // Tier 1: T5 worlds store a pre-computed t5Socio object.
@@ -1085,7 +1212,7 @@ function generateT5TabData(sectorID) {
                     const cp   = (mgt.culturalProfile || '').split('-')[0] || '0000';
                     socio = {
                         ixString: `{${Im >= 0 ? '+' : ''}${Im}}`,
-                        exString: `(${toUWPChar(ecoR)}${toUWPChar(ecoL)}${toUWPChar(ecoI)}${ecoE >= 0 ? '+' : ''}${ecoE})`,
+                        exString: `(${toEHex(ecoR)}${toEHex(ecoL)}${toEHex(ecoI)}${ecoE >= 0 ? '+' : ''}${ecoE})`,
                         cxString: `[${cp.padEnd(4, '0').slice(0, 4)}]`
                     };
                 }
@@ -1378,35 +1505,35 @@ function importT5Tab(fileContent, fileName, forcedSectorSlot = null, bulkMode = 
         const hexId = `${sectorID}-${subChar}-${hexNum}`;
 
         const starport = uwp[0] || 'C';
-        const size = fromUWPChar(uwp[1]);
-        const atm = fromUWPChar(uwp[2]);
-        const hydro = fromUWPChar(uwp[3]);
-        const pop = fromUWPChar(uwp[4]);
-        const gov = fromUWPChar(uwp[5]);
-        const law = fromUWPChar(uwp[6]);
-        const tl = fromUWPChar(uwp.split('-')[1]?.[0] || '7');
+        const size = fromEHex(uwp[1]);
+        const atm = fromEHex(uwp[2]);
+        const hydro = fromEHex(uwp[3]);
+        const pop = fromEHex(uwp[4]);
+        const gov = fromEHex(uwp[5]);
+        const law = fromEHex(uwp[6]);
+        const tl = fromEHex(uwp.split('-')[1]?.[0] || '7');
 
         const pbgStr = idxPBG !== -1 ? row[idxPBG].trim() : "000";
-        const popMultiplier = fromUWPChar(pbgStr[0]);
-        const belts = fromUWPChar(pbgStr[1]);
+        const popMultiplier = fromEHex(pbgStr[0]);
+        const belts = fromEHex(pbgStr[1]);
 
         function pbgChar(c) { return c !== undefined && c !== null; }
-        const gG = pbgChar(pbgStr[2]) ? fromUWPChar(pbgStr[2]) : 0;
+        const gG = pbgChar(pbgStr[2]) ? fromEHex(pbgStr[2]) : 0;
 
         const ixRaw = idxIx !== -1 ? row[idxIx].replace(/[{}]/g, '') : "0";
         const exRaw = idxEx !== -1 ? row[idxEx].replace(/[()]/g, '') : "000+0";
         const cxRaw = idxCx !== -1 ? row[idxCx].replace(/[\[\]]/g, '') : "0000";
 
         const Ix = parseInt(ixRaw, 10) || 0;
-        const R = fromUWPChar(exRaw[0]);
-        const L = fromUWPChar(exRaw[1]);
-        const I_val = fromUWPChar(exRaw[2]);
+        const R = fromEHex(exRaw[0]);
+        const L = fromEHex(exRaw[1]);
+        const I_val = fromEHex(exRaw[2]);
         const E_val = parseInt(exRaw.substring(3), 10) || 0;
 
-        const H = fromUWPChar(cxRaw[0]);
-        const A = fromUWPChar(cxRaw[1]);
-        const S = fromUWPChar(cxRaw[2]);
-        const Sym = fromUWPChar(cxRaw[3]);
+        const H = fromEHex(cxRaw[0]);
+        const A = fromEHex(cxRaw[1]);
+        const S = fromEHex(cxRaw[2]);
+        const Sym = fromEHex(cxRaw[3]);
 
         const calcR = R === 0 ? 1 : R;
         const calcL = L === 0 ? 1 : L;
@@ -1459,8 +1586,8 @@ function importT5Tab(fileContent, fileName, forcedSectorSlot = null, bulkMode = 
             gasGiants: gG,
             worlds: idxW !== -1 ? parseInt(row[idxW], 10) : 1,
             ixString: (idxIx !== -1) ? row[idxIx] : `{${Ix >= 0 ? '+' : ''}${Ix}}`,
-            exString: (idxEx !== -1) ? row[idxEx] : `(${toUWPChar(R)}${toUWPChar(L)}${toUWPChar(I_val)}${E_val >= 0 ? '+' : ''}${E_val})`,
-            cxString: (idxCx !== -1) ? row[idxCx] : `[${toUWPChar(H)}${toUWPChar(A)}${toUWPChar(S)}${toUWPChar(Sym)}]`
+            exString: (idxEx !== -1) ? row[idxEx] : `(${toEHex(R)}${toEHex(L)}${toEHex(I_val)}${E_val >= 0 ? '+' : ''}${E_val})`,
+            cxString: (idxCx !== -1) ? row[idxCx] : `[${toEHex(H)}${toEHex(A)}${toEHex(S)}${toEHex(Sym)}]`
         };
 
         let t5System = { totalWorlds: idxW !== -1 ? parseInt(row[idxW], 10) : 1 };

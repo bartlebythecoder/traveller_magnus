@@ -1,4 +1,4 @@
-// =====================================================================
+﻿// =====================================================================
 // CLASSIC TRAVELLER: WORLD ENGINE (Atomic Rules)
 // =====================================================================
 // This module contains the literal rule logic from Book 3 and Book 6.
@@ -195,13 +195,13 @@ function generatePopulation(world, ctx = { mode: 'bottomup' }) {
     if (world.type !== 'Mainworld') {
         if (popMods && popMods.ATMOSPHERE_PENALTY) {
             if (!popMods.ATMOSPHERE_PENALTY.VALID_CODES.includes(world.atm)) {
-                tDM(`Atmosphere ${toUWPChar(world.atm)} Penalty`, popMods.ATMOSPHERE_PENALTY.PENALTY);
+                tDM(`Atmosphere ${toEHex(world.atm)} Penalty`, popMods.ATMOSPHERE_PENALTY.PENALTY);
                 popRoll -= Math.abs(popMods.ATMOSPHERE_PENALTY.PENALTY);
             }
         } else {
             // Fallback
             if (![0, 5, 6, 8].includes(world.atm)) {
-                tDM(`Atmosphere ${toUWPChar(world.atm)} Penalty`, -2);
+                tDM(`Atmosphere ${toEHex(world.atm)} Penalty`, -2);
                 popRoll -= 2;
             }
         }
@@ -350,7 +350,7 @@ function finalizeMainworldSocial(world) {
     if (world.pop === 0) {
         world.gov = 0; world.law = 0; world.tl = 0;
         tSkip('Social stats (Population 0 forces Gov 0, Law 0, TL 0)');
-        const uwp = `${world.starport || '?'}${toUWPChar(world.size)}${toUWPChar(world.atm)}${toUWPChar(world.hydro)}${toUWPChar(world.pop)}${toUWPChar(world.gov)}${toUWPChar(world.law)}-${toUWPChar(world.tl)}`;
+        const uwp = `${world.starport || '?'}${toEHex(world.size)}${toEHex(world.atm)}${toEHex(world.hydro)}${toEHex(world.pop)}${toEHex(world.gov)}${toEHex(world.law)}-${toEHex(world.tl)}`;
         world.uwp = uwp;
         world.uwpSecondary = uwp;
         return world;
@@ -382,7 +382,7 @@ function finalizeMainworldSocial(world) {
     tResult('Final Trade Codes', world.tradeCodes.join(' '));
 
     // Final UWP String
-    world.uwp = `${world.starport}${toUWPChar(world.size)}${toUWPChar(world.atm)}${toUWPChar(world.hydro)}${toUWPChar(world.pop)}${toUWPChar(world.gov)}${toUWPChar(world.law)}-${toUWPChar(world.tl)}`;
+    world.uwp = `${world.starport}${toEHex(world.size)}${toEHex(world.atm)}${toEHex(world.hydro)}${toEHex(world.pop)}${toEHex(world.gov)}${toEHex(world.law)}-${toEHex(world.tl)}`;
 
     return world;
 }
@@ -483,7 +483,7 @@ function finalizeSubordinateSocial(world, mwRef) {
         world.law = 0;
         world.tl = 0;
 
-        const uwp = `${world.starport || world.spaceport}${toUWPChar(world.size)}${toUWPChar(world.atm)}${toUWPChar(world.hydro)}${toUWPChar(world.pop)}00-0`;
+        const uwp = `${world.starport || world.spaceport}${toEHex(world.size)}${toEHex(world.atm)}${toEHex(world.hydro)}${toEHex(world.pop)}00-0`;
         world.uwp = uwp;
         world.uwpSecondary = uwp;
         return world;
@@ -551,7 +551,7 @@ function finalizeSubordinateSocial(world, mwRef) {
     world.tradeCodes = generateTradeCodes(world);
 
     // Final UWP String
-    const uwp = `${world.starport || world.spaceport}${toUWPChar(world.size)}${toUWPChar(world.atm)}${toUWPChar(world.hydro)}${toUWPChar(world.pop)}${toUWPChar(world.gov)}${toUWPChar(world.law)}-${toUWPChar(world.tl)}`;
+    const uwp = `${world.starport || world.spaceport}${toEHex(world.size)}${toEHex(world.atm)}${toEHex(world.hydro)}${toEHex(world.pop)}${toEHex(world.gov)}${toEHex(world.law)}-${toEHex(world.tl)}`;
     world.uwp = uwp;
     world.uwpSecondary = uwp;
 
@@ -578,7 +578,7 @@ function calculateTLModular(w, isMainworld) {
     else if (w.size <= 4) { tDM('Size 2-4', 1); tl += 1; }
 
     // Atmo
-    if (w.atm <= 3 || w.atm >= 10) { tDM(`Atmosphere ${toUWPChar(w.atm)}`, 1); tl += 1; }
+    if (w.atm <= 3 || w.atm >= 10) { tDM(`Atmosphere ${toEHex(w.atm)}`, 1); tl += 1; }
 
     // Hydro
     if (w.hydro === 9) { tDM('Hydro 9', 1); tl += 1; }

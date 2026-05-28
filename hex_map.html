@@ -62,6 +62,7 @@
     <!-- Modular JavaScript Input Handling -->
     <script src="js/input_init.js" defer></script>
     <script src="js/system_viewer.js" defer></script>
+    <script src="js/obsidian_exporter.js" defer></script>
     <script src="js/canvas_input.js" defer></script>
     <script src="js/keyboard_shortcuts.js" defer></script>
     <script src="js/macro_orchestrator.js" defer></script>
@@ -717,9 +718,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above<br> So Below</span></h1>
-            <div class="splash-banner">New this version: World Images</div>
+            <div class="splash-banner">New this version: Export to Obsidian</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.12.0</div>
+            <div class="splash-version">v0.13.0</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -946,11 +947,15 @@
             <div class="settings-section-body" style="display:none;flex-direction:column;gap:6px;padding-top:4px;">
                 <button class="menu-btn" id="btn-open-sector-export"
                     style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <i class="fas fa-file-export"></i> Export Sector
+                    <i class="fas fa-file-export"></i> Export Sector (.tsv)
                 </button>
                 <button class="menu-btn" id="btn-export-xml-metadata"
                     style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
                     <i class="fas fa-code"></i> Export Metadata (.xml)
+                </button>
+                <button class="menu-btn" id="btn-export-obsidian"
+                    style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <i class="fas fa-book"></i> Export Obsidian Wiki
                 </button>
                 <button class="menu-btn" id="btn-import-sector"
                     style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;"
@@ -1137,7 +1142,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.12.0</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.13.0</span>
             </p>
         </div>
 
@@ -1276,6 +1281,64 @@
 
 
 
+
+    <!-- Obsidian Export Modal -->
+    <div id="obsidian-export-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content" style="max-width:420px;width:90%;">
+            <h3><i class="fas fa-book"></i> Export Obsidian Wiki</h3>
+
+            <div style="display:flex;flex-direction:column;gap:12px;margin:16px 0;">
+
+                <!-- Sector -->
+                <div>
+                    <label style="display:block;margin-bottom:4px;color:#a0a8b0;font-size:0.85em;">SECTOR</label>
+                    <select id="obs-sector-select" style="width:100%;padding:6px;background:#1a2332;color:#cdd6e3;border:1px solid #45a29e;border-radius:4px;">
+                        <option value="">— choose sector —</option>
+                    </select>
+                </div>
+
+                <!-- Subsector -->
+                <div>
+                    <label style="display:block;margin-bottom:4px;color:#a0a8b0;font-size:0.85em;">SUBSECTOR</label>
+                    <select id="obs-subsector-select" style="width:100%;padding:6px;background:#1a2332;color:#cdd6e3;border:1px solid #45a29e;border-radius:4px;" disabled>
+                        <option value="">— choose sector first —</option>
+                    </select>
+                </div>
+
+                <!-- Include images -->
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                    <input type="checkbox" id="obs-include-images" checked>
+                    Include world images
+                </label>
+
+                <!-- Skip airless (sub-option, shown when include images is checked) -->
+                <label id="obs-skip-airless-row" style="display:flex;align-items:center;gap:8px;cursor:pointer;padding-left:24px;">
+                    <input type="checkbox" id="obs-skip-airless" checked>
+                    Skip airless worlds (atm 0, hydro 0)
+                </label>
+
+                <!-- Include system orrery images -->
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                    <input type="checkbox" id="obs-include-system-images" checked>
+                    Include system orrery images
+                </label>
+
+                <!-- Progress -->
+                <div id="obs-progress-row" style="display:none;">
+                    <div style="background:#0d1b2a;border-radius:4px;height:8px;overflow:hidden;margin-bottom:6px;">
+                        <div id="obs-progress-bar" style="height:100%;width:0%;background:#66fcf1;transition:width 0.2s;"></div>
+                    </div>
+                    <p id="obs-progress-text" style="color:#a0a8b0;font-size:0.82em;margin:0;"></p>
+                </div>
+
+            </div>
+
+            <div class="editor-buttons" style="margin-top:8px;">
+                <button class="btn-cancel" id="obs-cancel-btn">Cancel</button>
+                <button class="btn-confirm" id="obs-export-btn" disabled>Export ZIP</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Context Menu -->
     <div id="context-menu">

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PROJECT AS ABOVE, SO BELOW
  * Module: MgT2E Stellar Engine
  * Description: Modular star system generator for Traveller MgT2E.
@@ -135,7 +135,7 @@
         const star = {
             sClass, sType, subType,
             mass, diam, temp, lum,
-            name: `${sType}${toUWPChar(subType)} ${sClass}`
+            name: `${sType}${toEHex(subType)} ${sClass}`
         };
 
         tResult(`${label} Classification`, star.name, 'MgT2E 1.1: Stellar Generation');

@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // HEX_EDITOR.JS - World Details & Accordion UI Logic
 // ============================================================================
 
@@ -305,11 +305,9 @@ function openHexEditor(hexId, e = null) {
     stellarInput.value = '';
 
     if (data && data.popDigit !== undefined) {
-        const toHex = (val) => typeof toUWPChar === 'function' ? toUWPChar(val) : val.toString(16).toUpperCase();
-
         let belts = data.planetoidBelts !== undefined ? data.planetoidBelts : 0;
         let gasGiants = data.gasGiantsCount !== undefined ? data.gasGiantsCount : 0;
-        pbgInput.value = `${toHex(data.popDigit)}${toHex(belts)}${toHex(gasGiants)}`;
+        pbgInput.value = `${toEHex(data.popDigit)}${toEHex(belts)}${toEHex(gasGiants)}`;
         stellarInput.value = data.homestar || (data.stars && data.stars[0] ? data.stars[0].name : '');
 
         t5QuickStatsDiv.style.display = 'grid';
@@ -1398,7 +1396,7 @@ function populateEditorAccordions(stateObj) {
             }
 
             function renderRTTBody(body, isSatellite, sIdx, oIdx, satIdx) {
-                const uwp = `${body.starport || 'X'}${toUWPChar(body.size)}${toUWPChar(body.atmosphere)}${toUWPChar(body.hydrosphere)}${toUWPChar(body.population)}${toUWPChar(body.government)}${toUWPChar(body.lawLevel)}-${body.tl || 0}`;
+                const uwp = `${body.starport || 'X'}${toEHex(body.size)}${toEHex(body.atmosphere)}${toEHex(body.hydrosphere)}${toEHex(body.population)}${toEHex(body.government)}${toEHex(body.lawLevel)}-${body.tl || 0}`;
                 const isMain = body.habitationType === 'Homeworld' || body.isMainworld;
                 const summaryStyle = isMain ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
                 const uwpColor = isMain ? '#ffa500' : '#66fcf1';
@@ -1985,7 +1983,7 @@ function saveHexEditorChanges() {
 
     const tradeCodes = document.getElementById('edit-trade-codes').value
         .split(/[\s,]+/).map(s => s.trim()).filter(Boolean);
-    const uwp = `${starport}${toUWPChar(size)}${toUWPChar(atm)}${toUWPChar(hydro)}${toUWPChar(pop)}${toUWPChar(gov)}${toUWPChar(law)}-${toUWPChar(tl)}`;
+    const uwp = `${starport}${toEHex(size)}${toEHex(atm)}${toEHex(hydro)}${toEHex(pop)}${toEHex(gov)}${toEHex(law)}-${toEHex(tl)}`;
 
     const allegianceEl = document.getElementById('edit-allegiance');
     const allegiance = (allegianceEl ? allegianceEl.value.trim() : '') || '----';
@@ -1999,11 +1997,10 @@ function saveHexEditorChanges() {
     let pbgData = {};
     if (t5QuickStatsDiv && t5QuickStatsDiv.style.display !== 'none') {
         const pbgVal = document.getElementById('edit-pbg').value.padEnd(3, '0').toUpperCase();
-        const fromHex = (char) => typeof fromUWPChar === 'function' ? fromUWPChar(char) : parseInt(char, 16) || 0;
         pbgData = {
-            popDigit: fromHex(pbgVal[0]),
-            planetoidBelts: fromHex(pbgVal[1]),
-            gasGiantsCount: fromHex(pbgVal[2]),
+            popDigit: fromEHex(pbgVal[0]),
+            planetoidBelts: fromEHex(pbgVal[1]),
+            gasGiantsCount: fromEHex(pbgVal[2]),
             pbg: pbgVal,
             homestar: document.getElementById('edit-stellar').value.trim()
         };

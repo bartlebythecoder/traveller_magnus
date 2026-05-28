@@ -1411,5 +1411,85 @@ function drawRegionNames() {
     ctx.restore();
 }
 
+// ============================================================================
+// SUBSECTOR CAPTURE
+// Renders the given subsector to an off-screen canvas and returns PNG bytes.
+// Called by ObsidianExporter to embed a map image in the subsector index page.
+// ============================================================================
+
+async function captureSubsector(sectorNum, subsectorChar, outputWidth, outputHeight) {
+    outputWidth  = outputWidth  || 900;
+    outputHeight = outputHeight || 1000;
+
+    if (!initCanvas()) return null;   // ensure live globals are initialised
+
+    // ── Compute subsector hex-grid bounds ─────────────────────────────────────
+    const subIdx  = subsectorChar.charCodeAt(0) - 65;   // 0-15 (A-P)
+    const subX    = subIdx % 4;
+    const subY    = Math.floor(subIdx / 4);
+    const sectorX = (sectorNum - 1) % gridWidth;
+    const sectorY = Math.floor((sectorNum - 1) / gridWidth);
+
+    const q0 = sectorX * 32 + subX * 8;
+    const q1 = q0 + 7;
+    const r0 = sectorY * 40 + subY * 10;
+    const r1 = r0 + 9;
+
+    // ── Compute world-pixel bounding box with a hex-radius margin ─────────────
+    const size       = baseHexSize;
+    const widthStep  = 1.5 * size;
+    const heightStep = Math.sqrt(3) * size;
+    const margin     = size * 1.5;
+
+    const leftX   = widthStep * q0  - margin;
+    const rightX  = widthStep * q1  + margin;
+    const topY    = heightStep * r0 - margin;
+    const bottomY = heightStep * (r1 + 0.5) + margin;
+    const worldW  = rightX - leftX;
+    const worldH  = bottomY - topY;
+
+    // ── Zoom to fit the subsector, centred in the output canvas ───────────────
+    const FILL_FRAC = 0.92;
+    const capZoom   = Math.min(outputWidth / worldW, outputHeight / worldH) * FILL_FRAC;
+    const capCamX   = leftX - (outputWidth  / capZoom - worldW) / 2;
+    const capCamY   = topY  - (outputHeight / capZoom - worldH) / 2;
+
+    // ── Save live renderer state ───────────────────────────────────────────────
+    const savedCanvas = canvas;
+    const savedCtx    = ctx;
+    const savedZoom   = zoom;
+    const savedCamX   = cameraX;
+    const savedCamY   = cameraY;
+
+    // ── Swap in off-screen canvas ──────────────────────────────────────────────
+    const offscreen    = document.createElement('canvas');
+    offscreen.width    = outputWidth;
+    offscreen.height   = outputHeight;
+
+    canvas  = offscreen;
+    ctx     = offscreen.getContext('2d');
+    zoom    = capZoom;
+    cameraX = capCamX;
+    cameraY = capCamY;
+
+    // ── Render one frame ───────────────────────────────────────────────────────
+    draw();
+
+    // ── Restore live renderer state ────────────────────────────────────────────
+    canvas  = savedCanvas;
+    ctx     = savedCtx;
+    zoom    = savedZoom;
+    cameraX = savedCamX;
+    cameraY = savedCamY;
+
+    // ── Return PNG bytes ───────────────────────────────────────────────────────
+    return new Promise(resolve => {
+        offscreen.toBlob(blob => {
+            if (!blob) { resolve(null); return; }
+            blob.arrayBuffer().then(buf => resolve(new Uint8Array(buf)));
+        }, 'image/png');
+    });
+}
+
 // Listen for window resizing automatically
 window.addEventListener('resize', resize);

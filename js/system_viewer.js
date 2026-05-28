@@ -40,9 +40,10 @@ const SystemViewer = (() => {
 
     let _planetSpeed = 1.0;   // multiplier: 1 = default, 0 = paused
     let _moonSpeed   = 1.0;
+    let _starSpeed   = 1.0;
 
     const GOLDEN = 2.39996;   // golden angle (rad) for spiral angular spacing
-    const PLANET_SPEED_BASE = 0.08;
+    const PLANET_SPEED_BASE = 0.04;
 
     // ── Fallback orbit→AU table ───────────────────────────────────────────────
     const _FALLBACK_ORBIT_AU = [
@@ -602,6 +603,25 @@ const SystemViewer = (() => {
         });
         hint.textContent = 'Scroll to zoom orbits  ·  Drag to pan  ·  Scroll out at full view or ESC to return';
 
+        // Star speed slider
+        const starWrap = document.createElement('span');
+        Object.assign(starWrap.style, { display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px' });
+        const starLbl = document.createElement('span');
+        starLbl.textContent = 'Star Speed:';
+        Object.assign(starLbl.style, { color: P.sub, whiteSpace: 'nowrap' });
+        const starSlider = document.createElement('input');
+        starSlider.type = 'range'; starSlider.min = '0'; starSlider.max = '4';
+        starSlider.step = '0.1'; starSlider.value = String(_starSpeed);
+        Object.assign(starSlider.style, { width: '80px', cursor: 'pointer' });
+        const starVal = document.createElement('span');
+        starVal.textContent = _starSpeed.toFixed(1) + 'x';
+        Object.assign(starVal.style, { color: P.accent, minWidth: '30px' });
+        starSlider.addEventListener('input', () => {
+            _starSpeed = parseFloat(starSlider.value);
+            starVal.textContent = _starSpeed.toFixed(1) + 'x';
+        });
+        starWrap.append(starLbl, starSlider, starVal);
+
         // Planet speed slider
         const planetWrap = document.createElement('span');
         Object.assign(planetWrap.style, { display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px' });
@@ -685,7 +705,7 @@ const SystemViewer = (() => {
         });
         closeBtn.addEventListener('click', close);
 
-        header.append(title, editionBadge, sub, hint, planetWrap, moonWrap, linearWrap, orbitWrap, closeBtn);
+        header.append(title, editionBadge, sub, hint, starWrap, planetWrap, moonWrap, linearWrap, orbitWrap, closeBtn);
         _overlay.appendChild(header);
 
         _orrCanvas = document.createElement('canvas');
@@ -774,8 +794,8 @@ const SystemViewer = (() => {
         const elapsed = _startTime > 0 ? (performance.now() - _startTime) / 1000 : 0;
 
         // Companion star positions — animated along their orbit rings
-        const STAR_SPEED_BASE  = 0.08;
-        const effectiveSSspeed = STAR_SPEED_BASE * _planetSpeed;
+        const STAR_SPEED_BASE  = 0.04;
+        const effectiveSSspeed = STAR_SPEED_BASE * _starSpeed;
         const VISUAL_YEAR_SECS_S = effectiveSSspeed > 0 ? 2 * Math.PI / effectiveSSspeed : Infinity;
         companions.forEach((s, i) => {
             const compAU = _starCompanionAU(s);
@@ -1001,10 +1021,9 @@ const SystemViewer = (() => {
         ctx.arc(px, py, r, 0, Math.PI * 2);
         ctx.fill();
 
-        const effectiveMSpeed  = 25 * _planetSpeed * _moonSpeed;
-        const VISUAL_YEAR_SECS = _planetSpeed > 0 ? (2 * Math.PI) / (PLANET_SPEED_BASE * _planetSpeed) : Infinity;
-        const VISUAL_HOUR_SECS = (_moonSpeed > 0 && _planetSpeed > 0)
-            ? VISUAL_YEAR_SECS / (8760 * _moonSpeed) : Infinity;
+        const effectiveMSpeed  = 12.5 * _moonSpeed;
+        const VISUAL_HOUR_SECS = _moonSpeed > 0
+            ? (2 * Math.PI) / (PLANET_SPEED_BASE * 8760 * _moonSpeed) : Infinity;
         const moons = (w.moons || []).filter(m => m.type !== 'Empty');
         moons.forEach((m, mi) => {
             const pd          = Math.max(m.pd || (mi + 1) * 8, 1);
@@ -1259,7 +1278,123 @@ const SystemViewer = (() => {
         if (e.key === 'Escape' && isOpen()) close();
     });
 
-    return { open, close, isOpen, handleWheel };
+    function normalizeSystem(state) {
+        const found = _detectSystem(state);
+        if (!found) return null;
+        if      (found.edition === 'MgT2E') return _normalizeMgT2E(found.raw);
+        else if (found.edition === 'CT')    return _normalizeCT(found.raw);
+        else if (found.edition === 'T5')    return _normalizeT5(found.raw);
+        else                                return _normalizeRTT(found.raw);
+    }
+
+    // ── Snapshot auto-fit ────────────────────────────────────────────────────
+    // Computes the viewZoom that makes the outermost body fill FILL_FRAC of the
+    // available canvas radius, using the same log-scale formula as _drawOrrery.
+    // Mirrors the maxAU logic in _drawOrrery exactly so the two stay in sync.
+    function _autoFitZoom(normalised, width, height) {
+        const FILL_FRAC = 0.85;
+        const MARGIN    = 70;   // must match _drawOrrery's margin constant
+
+        // Find the true outermost orbital distance across all worlds + companions
+        let actualMaxAU = 0;
+        (normalised.worlds || []).forEach(w => {
+            if ((w.au || 0) > actualMaxAU) actualMaxAU = w.au;
+        });
+        (normalised.stars || []).slice(1).forEach(s => {
+            const au = _starCompanionAU(s);
+            if (au > actualMaxAU) actualMaxAU = au;
+        });
+
+        // Mirror _drawOrrery's floor: rawMaxAU is what _drawOrrery passes to _scaleR
+        const rawMaxAU = Math.max(actualMaxAU * 1.18, 2);
+
+        // log-scale: r = baseMaxR * zoom * log(1+au) / log(1+rawMaxAU)
+        // Solve for zoom so the outermost body lands at FILL_FRAC * baseMaxR:
+        //   zoom = FILL_FRAC * log(1+rawMaxAU) / log(1+actualMaxAU)
+        const logActual = Math.log(1 + actualMaxAU);
+        const logRaw    = Math.log(1 + rawMaxAU);
+        const zoom      = logActual > 0 ? FILL_FRAC * logRaw / logActual : 1.0;
+
+        return Math.max(0.5, Math.min(zoom, 20.0));
+    }
+
+    // ── Snapshot export ───────────────────────────────────────────────────────
+    // Renders one static orrery frame to an off-screen canvas and returns the
+    // PNG bytes as a Uint8Array.  Safe to call while the live viewer is closed;
+    // all module-level render state is saved and fully restored afterwards.
+    // Returns null if the state has no detectable system.
+    async function renderSnapshot(state, width, height) {
+        width  = width  || 900;
+        height = height || 500;
+
+        const found = _detectSystem(state);
+        if (!found) return null;
+
+        let normalised;
+        if      (found.edition === 'MgT2E') normalised = _normalizeMgT2E(found.raw);
+        else if (found.edition === 'CT')    normalised = _normalizeCT(found.raw);
+        else if (found.edition === 'T5')    normalised = _normalizeT5(found.raw);
+        else                                normalised = _normalizeRTT(found.raw);
+
+        // Save every module-level variable that _drawOrrery() reads or writes
+        const saved = {
+            orrCtx:       _orrCtx,
+            canvasW:      _canvasW,
+            canvasH:      _canvasH,
+            sys:          _sys,
+            startTime:    _startTime,
+            viewZoom:     _viewZoom,
+            viewOffX:     _viewOffX,
+            viewOffY:     _viewOffY,
+            lightMode:    _lightMode,
+            linearScale:  _linearScale,
+            orbitOpacity: _orbitOpacity,
+            hitBodies:    _hitBodies,
+        };
+
+        // Create an off-screen canvas and install snapshot render state
+        const canvas  = document.createElement('canvas');
+        canvas.width  = width;
+        canvas.height = height;
+
+        _orrCtx       = canvas.getContext('2d');
+        _canvasW      = width;
+        _canvasH      = height;
+        _sys          = normalised;
+        _startTime    = 0;      // elapsed = 0 → planets at deterministic T=0 positions
+        _viewZoom     = _autoFitZoom(normalised, width, height);
+        _viewOffX     = 0;
+        _viewOffY     = 0;
+        _lightMode    = false;  // always dark-mode for export
+        _linearScale  = false;
+        _orbitOpacity = 0.3;    // light orbit rings add context without clutter
+        _hitBodies    = [];
+
+        _drawOrrery();
+
+        // Restore every saved variable before yielding
+        _orrCtx       = saved.orrCtx;
+        _canvasW      = saved.canvasW;
+        _canvasH      = saved.canvasH;
+        _sys          = saved.sys;
+        _startTime    = saved.startTime;
+        _viewZoom     = saved.viewZoom;
+        _viewOffX     = saved.viewOffX;
+        _viewOffY     = saved.viewOffY;
+        _lightMode    = saved.lightMode;
+        _linearScale  = saved.linearScale;
+        _orbitOpacity = saved.orbitOpacity;
+        _hitBodies    = saved.hitBodies;
+
+        return new Promise(resolve => {
+            canvas.toBlob(blob => {
+                if (!blob) { resolve(null); return; }
+                blob.arrayBuffer().then(buf => resolve(new Uint8Array(buf)));
+            }, 'image/png');
+        });
+    }
+
+    return { open, close, isOpen, handleWheel, normalizeSystem, renderSnapshot };
 
 })();
 

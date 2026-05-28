@@ -14,24 +14,6 @@
     }
 }(this, function () {
 
-    // Fallback UWP Helpers if not globally available
-    const EHEX_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // Skips I and O
-    const toUWPChar = (val) => {
-        if (val === undefined || val === null || (typeof val === 'number' && isNaN(val))) return '0';
-        val = Math.floor(val);
-        if (val < 0) return '0';
-        if (val < 10) return val.toString();
-        return EHEX_CHARS[val - 10] || 'Z';
-    };
-    const fromUWPChar = (char) => {
-        if (!char) return 0;
-        const c = char.toUpperCase();
-        if (c >= '0' && c <= '9') return parseInt(c);
-        const idx = EHEX_CHARS.indexOf(c);
-        if (idx >= 0) return idx + 10;
-        return 0;
-    };
-
     const _log = (typeof writeLogLine === 'function') ? writeLogLine : console.log;
     const _tSection = (typeof tSection === 'function') ? tSection : () => { };
     const _tResult = (typeof tResult === 'function') ? tResult : () => { };

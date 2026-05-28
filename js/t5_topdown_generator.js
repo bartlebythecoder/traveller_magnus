@@ -1,4 +1,4 @@
-/**
+﻿/**
  * js/t5_topdown_generator.js
  * 
  * T5 SYSTEM GENERATOR (v2.0 Modular Architecture)
@@ -16,7 +16,7 @@
         root.T5_TopDown_Generator = factory(root.UniversalMath, root.T5_Data, root.T5_World_Engine);
     }
 }(this, function (UniversalMath, T5_Data, T5_World_Engine) {
-    const { toUWPChar, fromUWPChar, clampUWP, rollFlux } = UniversalMath;
+    const { toEHex, fromEHex, clampUWP, rollFlux } = UniversalMath;
 
     // --- Internal Helpers & Tables (Drawn from T5 Logic) ---
     // Note: Uses global rng/roll functions if available (e.g., from core.js), otherwise fallbacks.
@@ -451,7 +451,7 @@
             // Normalize alpha sizes for comparison (e.g., GG Size M = 22).
             let pSize = parent.size;
             if (isGG) {
-                pSize = (typeof parent.size === 'string') ? fromUWPChar(parent.size) : parent.size;
+                pSize = (typeof parent.size === 'string') ? fromEHex(parent.size) : parent.size;
             }
 
             if (pSize !== undefined && moon.size >= pSize) {
@@ -465,17 +465,17 @@
                         moon.worldType = 'Worldlet';
                     }
                     if (moon.hydro > 0) {
-                        _log(`Hydro Adjustment: Size ${moon.size} world cannot have Hydro ${toUWPChar(moon.hydro)}. Resetting to 0.`);
+                        _log(`Hydro Adjustment: Size ${moon.size} world cannot have Hydro ${toEHex(moon.hydro)}. Resetting to 0.`);
                         moon.hydro = 0;
                     }
                     if (moon.size === 0 && moon.atm > 0 && moon.worldType !== 'Inferno') {
-                        _log(`Atmosphere Adjustment: Size 0 non-inferno cannot have Atm ${toUWPChar(moon.atm)}. Resetting to 0.`);
+                        _log(`Atmosphere Adjustment: Size 0 non-inferno cannot have Atm ${toEHex(moon.atm)}. Resetting to 0.`);
                         moon.atm = 0;
                     }
                 }
 
                 // Re-build UWP string with new size and adjusted stats
-                moon.uwp = `${moon.starport}${toUWPChar(moon.size)}${toUWPChar(moon.atm)}${toUWPChar(moon.hydro)}${toUWPChar(moon.pop)}${toUWPChar(moon.gov)}${toUWPChar(moon.law)}-${toUWPChar(moon.tl)}`;
+                moon.uwp = `${moon.starport}${toEHex(moon.size)}${toEHex(moon.atm)}${toEHex(moon.hydro)}${toEHex(moon.pop)}${toEHex(moon.gov)}${toEHex(moon.law)}-${toEHex(moon.tl)}`;
                 moon.uwpSecondary = moon.uwp;
             }
 
@@ -597,11 +597,11 @@
         }
 
         // 2. Physical: Atmosphere
-        const sizeVal = (typeof world.size === 'string' ? fromUWPChar(world.size) : (world.size || 0));
+        const sizeVal = (typeof world.size === 'string' ? fromEHex(world.size) : (world.size || 0));
 
         if (!_isManual(world, 'atm')) {
             if (type === 'Inferno') {
-                world.atm = fromUWPChar('B');
+                world.atm = fromEHex('B');
             } else if (type === 'Belt') {
                 world.atm = 0;
             } else if (world.atm === undefined) {
@@ -683,7 +683,7 @@
             world.gasGiant = true;
         }
 
-        world.uwp = `${world.starport}${toUWPChar(world.size)}${toUWPChar(world.atm)}${toUWPChar(world.hydro)}${toUWPChar(world.pop)}${toUWPChar(world.gov)}${toUWPChar(world.law)}-${toUWPChar(world.tl)}`;
+        world.uwp = `${world.starport}${toEHex(world.size)}${toEHex(world.atm)}${toEHex(world.hydro)}${toEHex(world.pop)}${toEHex(world.gov)}${toEHex(world.law)}-${toEHex(world.tl)}`;
         world.uwpSecondary = world.uwp;
     }
 

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * js/t5_world_engine.js
  * 
  * T5 WORLD ENGINE (v2.0 Modular Architecture)
@@ -16,7 +16,7 @@
         root.T5_World_Engine = factory(root.UniversalMath, root.T5_Data);
     }
 }(this, function (UniversalMath, T5_Data) {
-    const { toUWPChar, fromUWPChar, clampUWP, rollFlux } = UniversalMath;
+    const { toEHex, fromEHex, clampUWP, rollFlux } = UniversalMath;
 
     // Safe Fallback Utilities
     const _rng = (typeof rng === 'function') ? rng : Math.random;
@@ -86,10 +86,10 @@
      * T5 ATMOSPHERE BY WORLD TYPE
      */
     function generateT5AtmosphereByWorldType(world, worldType) {
-        const sizeVal = (typeof world.size === 'string' ? fromUWPChar(world.size) : (world.size || 0));
+        const sizeVal = (typeof world.size === 'string' ? fromEHex(world.size) : (world.size || 0));
         
         if (worldType === 'Inferno') {
-            world.atm = fromUWPChar('B'); // 11
+            world.atm = fromEHex('B'); // 11
             _log(`Atmosphere Calc (Inferno): Fixed to B.`);
             if (typeof tResult !== 'undefined' && world.atm !== undefined) {
                 tResult('Atmosphere Code', world.atm, 'T5 2.2: Atmospheric Chemistry');
@@ -114,7 +114,7 @@
 
         let logMsg = `Atmosphere Calc (${worldType}): Size ${world.size} + Flux (${flux >= 0 ? '+' : ''}${flux})`;
         if (dm !== 0) logMsg += ` + DM ${dm}`;
-        logMsg += ` = ${rawAtm} -> Final: ${toUWPChar(world.atm)}.`;
+        logMsg += ` = ${rawAtm} -> Final: ${toEHex(world.atm)}.`;
         _log(logMsg);
 
         if (typeof tResult !== 'undefined' && world.atm !== undefined) {
@@ -133,7 +133,7 @@
             return;
         }
 
-        const sizeVal = (typeof world.size === 'string' ? fromUWPChar(world.size) : (world.size || 0));
+        const sizeVal = (typeof world.size === 'string' ? fromEHex(world.size) : (world.size || 0));
         if (sizeVal < 2) {
             world.hydro = 0;
             _log(`Hydro Calc (${worldType}): Size < 2. Fixed to 0.`);
@@ -152,7 +152,7 @@
         let logMsg = `Hydro Calc (${worldType}): Base (Flux+Atm) ${base}`;
         if (atmDM !== 0) logMsg += ` - DM 4 (Atm)`;
         if (typeDM !== 0) logMsg += ` - DM 4 (${worldType})`;
-        logMsg += ` = ${rawHydro}. Clamped to ${toUWPChar(world.hydro)}.`;
+        logMsg += ` = ${rawHydro}. Clamped to ${toEHex(world.hydro)}.`;
         _log(logMsg);
 
         if (typeof tResult !== 'undefined' && world.hydro !== undefined) { tResult('Hydrographic Code', world.hydro, 'T5 2.3: Hydrographics'); }
@@ -262,7 +262,7 @@
         let rawGov = flux + (world.pop || 0);
         world.gov = Math.max(0, Math.min(15, rawGov));
 
-        _log(`Gov Calc (${worldType}): Flux (${flux >= 0 ? '+' : ''}${flux}) + Pop (${world.pop || 0}) = ${rawGov} -> Final: ${toUWPChar(world.gov)}`);
+        _log(`Gov Calc (${worldType}): Flux (${flux >= 0 ? '+' : ''}${flux}) + Pop (${world.pop || 0}) = ${rawGov} -> Final: ${toEHex(world.gov)}`);
 
         if (typeof tResult !== 'undefined' && world.gov !== undefined) {
             tResult('Government Code', world.gov, 'T5 3.1: Social Stats');
@@ -283,7 +283,7 @@
         let rawLaw = flux + (world.gov || 0);
         world.law = Math.max(0, Math.min(18, rawLaw));
 
-        _log(`Law Level Calc (${worldType}): Flux (${flux >= 0 ? '+' : ''}${flux}) + Gov (${world.gov || 0}) = ${rawLaw} -> Final: ${toUWPChar(world.law)}`);
+        _log(`Law Level Calc (${worldType}): Flux (${flux >= 0 ? '+' : ''}${flux}) + Gov (${world.gov || 0}) = ${rawLaw} -> Final: ${toEHex(world.law)}`);
 
         if (typeof tResult !== 'undefined' && world.law !== undefined) {
             tResult('Law Level Code', world.law, 'T5 3.1: Social Stats');
@@ -318,34 +318,34 @@
             mods.push(`Port ${sp} (${data.starport[sp] > 0 ? '+' : ''}${data.starport[sp]})`);
         }
 
-        const size = typeof world.size === 'number' ? world.size : fromUWPChar(world.size);
+        const size = typeof world.size === 'number' ? world.size : fromEHex(world.size);
         if (data.size[size] !== undefined) {
             tlDM += data.size[size];
-            mods.push(`Size ${toUWPChar(size)} (${data.size[size] > 0 ? '+' : ''}${data.size[size]})`);
+            mods.push(`Size ${toEHex(size)} (${data.size[size] > 0 ? '+' : ''}${data.size[size]})`);
         }
 
         const atm = world.atm || 0;
         if (data.atm[atm] !== undefined) {
             tlDM += data.atm[atm];
-            mods.push(`Atm ${toUWPChar(atm)} (${data.atm[atm] > 0 ? '+' : ''}${data.atm[atm]})`);
+            mods.push(`Atm ${toEHex(atm)} (${data.atm[atm] > 0 ? '+' : ''}${data.atm[atm]})`);
         }
 
         const hydro = world.hydro || 0;
         if (data.hydro[hydro] !== undefined) {
             tlDM += data.hydro[hydro];
-            mods.push(`Hydro ${toUWPChar(hydro)} (${data.hydro[hydro] > 0 ? '+' : ''}${data.hydro[hydro]})`);
+            mods.push(`Hydro ${toEHex(hydro)} (${data.hydro[hydro] > 0 ? '+' : ''}${data.hydro[hydro]})`);
         }
 
         const pop = world.pop || 0;
         if (data.pop[pop] !== undefined) {
             tlDM += data.pop[pop];
-            mods.push(`Pop ${toUWPChar(pop)} (${data.pop[pop] > 0 ? '+' : ''}${data.pop[pop]})`);
+            mods.push(`Pop ${toEHex(pop)} (${data.pop[pop] > 0 ? '+' : ''}${data.pop[pop]})`);
         }
 
         const gov = world.gov || 0;
         if (data.gov[gov] !== undefined) {
             tlDM += data.gov[gov];
-            mods.push(`Gov ${toUWPChar(gov)} (${data.gov[gov] > 0 ? '+' : ''}${data.gov[gov]})`);
+            mods.push(`Gov ${toEHex(gov)} (${data.gov[gov] > 0 ? '+' : ''}${data.gov[gov]})`);
         }
 
         // Settings: TL Modifier
@@ -380,7 +380,7 @@
         if (!world || world.size === undefined) return;
 
         const isGG = (world.type && (world.type.includes('Gas Giant') || world.type === 'Ice Giant'));
-        const sizeVal = (world.size === '0' || world.size === 0) ? 0.35 : (typeof world.size === 'string' ? fromUWPChar(world.size) : world.size);
+        const sizeVal = (world.size === '0' || world.size === 0) ? 0.35 : (typeof world.size === 'string' ? fromEHex(world.size) : world.size);
 
         // 1. Diameter Calculation
         if (!_isManual(world, 'diamKm')) {
@@ -460,7 +460,7 @@
         const tcData = T5_Data.TRADE_CODES;
 
         // Normalize values for comparison
-        const wSize = typeof world.size === 'number' ? world.size : fromUWPChar(world.size);
+        const wSize = typeof world.size === 'number' ? world.size : fromEHex(world.size);
         const wAtm = world.atm || 0;
         const wHydro = world.hydro || 0;
         const wPop = world.pop || 0;
@@ -584,7 +584,7 @@
         world.tradeCodes = calculateT5TradeCodes(world);
 
         // --- 4. Finalize ---
-        world.uwp = `${world.starport}${toUWPChar(world.size)}${toUWPChar(world.atm)}${toUWPChar(world.hydro)}${toUWPChar(world.pop)}${toUWPChar(world.gov)}${toUWPChar(world.law)}-${toUWPChar(world.tl)}`;
+        world.uwp = `${world.starport}${toEHex(world.size)}${toEHex(world.atm)}${toEHex(world.hydro)}${toEHex(world.pop)}${toEHex(world.gov)}${toEHex(world.law)}-${toEHex(world.tl)}`;
 
         // Socioeconomic placeholders for display
         world.popDigit = world.pop > 0 ? Math.floor(_rng() * 9) + 1 : 0;

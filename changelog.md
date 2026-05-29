@@ -1,3 +1,5 @@
+### [v0.13.1] - In Progress
+
 ### [v0.13.0] - 2026-05-28
 1. **Exports:** Added markdown file exports (Obsidian Export)
 2. **CT Engine/Filter Menu:** Adjusted filter menus to treat size of S and R as between 0 and 1

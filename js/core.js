@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.13.0";
-const APP_BANNER = "v0.13.0: New this version: Export to Obsidian";
+const APP_VERSION = "v0.13.1";
+const APP_BANNER = "v0.13.1: New: Obsidian Export Updates";
 
 // -----------------------------------------------------------------------------
 // Application State

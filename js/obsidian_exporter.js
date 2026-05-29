@@ -683,7 +683,7 @@ const ObsidianExporter = (() => {
         return parts.join('\n');
     }
 
-    function _buildSystemHub(hexId, hexCode, sectorName, subsectorChar, state, normalized, imageFilename) {
+    function _buildSystemHub(hexId, hexCode, sectorName, subsectorChar, state, normalized, imageFilename, subsectorLink) {
         const systemName = _resolveSystemName(state);
         const edition    = normalized.edition || 'Unknown';
         const allegiance = state.allegiance || '—';
@@ -720,7 +720,7 @@ const ObsidianExporter = (() => {
             `# ${systemName}`,
             '',
             `**Sector:** ${sectorName}  `,
-            `**Subsector:** ${subsectorChar}  `,
+            `**Subsector:** ${subsectorLink}  `,
             `**Hex:** ${hexCode}  `,
             `**Edition:** ${edition}  `,
             `**Allegiance:** ${allegiance}`,
@@ -777,7 +777,7 @@ const ObsidianExporter = (() => {
         return lines.join('\n');
     }
 
-    function _buildStarFile(star, starIdx, hexId, hexCode, sectorName, systemName, worlds, isMultiStar, state) {
+    function _buildStarFile(star, starIdx, hexId, hexCode, sectorName, systemName, worlds, isMultiStar, state, subsectorLink) {
         const starName   = _starDisplayName(star, starIdx, isMultiStar);
         const systemLink = `[[${_sanitize(systemName)} (${hexCode})]]`;
         const isPrimary  = starIdx === 0;
@@ -805,6 +805,7 @@ const ObsidianExporter = (() => {
             '',
             `# ${starName}`,
             '',
+            `**Subsector:** ${subsectorLink}  `,
             `**System:** ${systemLink}  `,
             `**Role:** ${star.role}  `,
             `**Type:** ${star.sType}${star.subType ?? ''} ${star.sClass}`,
@@ -841,7 +842,7 @@ const ObsidianExporter = (() => {
         return lines.join('\n');
     }
 
-    function _buildWorldFile(world, worldIdx, hexId, hexCode, sectorName, systemName, stars, starIdx, imageFilename, state, rawWorld) {
+    function _buildWorldFile(world, worldIdx, hexId, hexCode, sectorName, systemName, stars, starIdx, imageFilename, state, rawWorld, subsectorLink) {
         const worldName  = _worldDisplayName(world, worldIdx);
         const systemLink  = `[[${_sanitize(systemName)} (${hexCode})]]`;
         const isMultiStar = stars.length > 1;
@@ -873,6 +874,7 @@ const ObsidianExporter = (() => {
         lines.push('---', '');
 
         lines.push(`# ${worldName}`, '');
+        lines.push(`**Subsector:** ${subsectorLink}  `);
         lines.push(`**System:** ${systemLink}  `);
         lines.push(`**Star:** ${starLink}  `);
         if (world.uwp) lines.push(`**UWP:** \`${world.uwp}\``);
@@ -933,7 +935,7 @@ const ObsidianExporter = (() => {
         return lines.join('\n');
     }
 
-    function _buildMoonFile(moon, moonIdx, parentWorldName, hexId, hexCode, sectorName, systemName, imageFilename, state, rawMoon) {
+    function _buildMoonFile(moon, moonIdx, parentWorldName, hexId, hexCode, sectorName, systemName, imageFilename, state, rawMoon, subsectorLink) {
         const moonName    = _moonDisplayName(moon, moonIdx);
         const systemLink  = `[[${_sanitize(systemName)} (${hexCode})]]`;
         const worldLink   = `[[${_sanitize(systemName)} - ${_sanitize(parentWorldName)} (${hexCode})]]`;
@@ -957,6 +959,7 @@ const ObsidianExporter = (() => {
         lines.push('---', '');
 
         lines.push(`# ${moonName}`, '');
+        lines.push(`**Subsector:** ${subsectorLink}  `);
         lines.push(`**System:** ${systemLink}  `);
         lines.push(`**Parent World:** ${worldLink}  `);
         if (moon.uwp) lines.push(`**UWP:** \`${moon.uwp}\``);
@@ -1058,7 +1061,7 @@ const ObsidianExporter = (() => {
     // ── Export orchestrator ───────────────────────────────────────────────────
 
     async function startExport(sectorNum, subsectorChar, options) {
-        const { includeImages, skipAirless, includeSystemImages, onProgress, onDone, onError } = options || {};
+        const { includeImages, skipAirless, includeSystemImages, useSubfolders, onProgress, onDone, onError } = options || {};
 
         const report = (done, total, msg) => onProgress && onProgress(done, total, msg);
 
@@ -1078,8 +1081,10 @@ const ObsidianExporter = (() => {
 
         const sectorName = (window.sectorNames && window.sectorNames[sectorNum])
             || `Sector ${sectorNum}`;
-        const enc   = new TextEncoder();
-        const files = [];
+        const enc           = new TextEncoder();
+        const files         = [];
+        const prefix        = useSubfolders ? `Subsector ${subsectorChar}/` : '';
+        const subsectorLink = `[[${_sanitize(sectorName)} - Subsector ${subsectorChar}]]`;
 
         // Optional subsector map image embedded in the index page
         let mapImageFilename = null;
@@ -1088,7 +1093,7 @@ const ObsidianExporter = (() => {
             const mapPng = await captureSubsector(sectorNum, subsectorChar, 900, 1000);
             if (mapPng) {
                 mapImageFilename = `${_sanitize(sectorName)} - Subsector ${subsectorChar} - Map.png`;
-                files.push({ name: 'images/' + mapImageFilename, data: mapPng });
+                files.push({ name: prefix + 'images/' + mapImageFilename, data: mapPng });
             }
         }
 
@@ -1122,7 +1127,7 @@ const ObsidianExporter = (() => {
                     '',
                     '_No system data generated for this hex._',
                 ].join('\n');
-                files.push({ name: _systemFilename(systemName, hexCode, 'md'), data: enc.encode(stub) });
+                files.push({ name: prefix + _systemFilename(systemName, hexCode, 'md'), data: enc.encode(stub) });
                 continue;
             }
 
@@ -1135,20 +1140,20 @@ const ObsidianExporter = (() => {
                 const imgData = await SystemViewer.renderSnapshot(state, 900, 500);
                 if (imgData) {
                     sysImageFilename = _systemFilename(systemName, hexCode, 'png');
-                    files.push({ name: 'images/' + sysImageFilename, data: imgData });
+                    files.push({ name: prefix + 'images/' + sysImageFilename, data: imgData });
                 }
             }
 
-            const hubMd = _buildSystemHub(hexId, hexCode, sectorName, subsectorChar, state, normalized, sysImageFilename);
-            files.push({ name: _systemFilename(systemName, hexCode, 'md'), data: enc.encode(hubMd) });
+            const hubMd = _buildSystemHub(hexId, hexCode, sectorName, subsectorChar, state, normalized, sysImageFilename, subsectorLink);
+            files.push({ name: prefix + _systemFilename(systemName, hexCode, 'md'), data: enc.encode(hubMd) });
 
             // Stars
             const isMultiStar = stars.length > 1;
             for (let starI = 0; starI < stars.length; starI++) {
                 const star     = stars[starI];
                 const starName = _starDisplayName(star, starI, isMultiStar);
-                const starMd   = _buildStarFile(star, starI, hexId, hexCode, sectorName, systemName, worlds, isMultiStar, state);
-                files.push({ name: _bodyFilename(systemName, starName, hexCode, 'md'), data: enc.encode(starMd) });
+                const starMd   = _buildStarFile(star, starI, hexId, hexCode, sectorName, systemName, worlds, isMultiStar, state, subsectorLink);
+                files.push({ name: prefix + _bodyFilename(systemName, starName, hexCode, 'md'), data: enc.encode(starMd) });
             }
 
             // Worlds and moons
@@ -1167,12 +1172,12 @@ const ObsidianExporter = (() => {
                     const imgData = await _renderWorldImage(world, `${hexId}-w${wi}`);
                     if (imgData) {
                         imageFilename = _bodyFilename(systemName, worldName, hexCode, 'png');
-                        files.push({ name: 'images/' + imageFilename, data: imgData });
+                        files.push({ name: prefix + 'images/' + imageFilename, data: imgData });
                     }
                 }
 
-                const worldMd = _buildWorldFile(world, wi, hexId, hexCode, sectorName, systemName, stars, starIdx, imageFilename, state, rawWorld);
-                files.push({ name: _bodyFilename(systemName, worldName, hexCode, 'md'), data: enc.encode(worldMd) });
+                const worldMd = _buildWorldFile(world, wi, hexId, hexCode, sectorName, systemName, stars, starIdx, imageFilename, state, rawWorld, subsectorLink);
+                files.push({ name: prefix + _bodyFilename(systemName, worldName, hexCode, 'md'), data: enc.encode(worldMd) });
 
                 // Moons
                 for (let mi = 0; mi < (world.moons || []).length; mi++) {
@@ -1189,13 +1194,13 @@ const ObsidianExporter = (() => {
                         const imgData = await _renderWorldImage(moon, `${hexId}-w${wi}-m${mi}`);
                         if (imgData) {
                             moonImageFilename = `${_sanitize(systemName)} - ${_sanitize(worldName)} - ${_sanitize(moonName)} (${hexCode}).png`;
-                            files.push({ name: 'images/' + moonImageFilename, data: imgData });
+                            files.push({ name: prefix + 'images/' + moonImageFilename, data: imgData });
                         }
                     }
 
-                    const moonMd   = _buildMoonFile(moon, mi, worldName, hexId, hexCode, sectorName, systemName, moonImageFilename, state, rawMoon);
+                    const moonMd   = _buildMoonFile(moon, mi, worldName, hexId, hexCode, sectorName, systemName, moonImageFilename, state, rawMoon, subsectorLink);
                     const moonFile = `${_sanitize(systemName)} - ${_sanitize(worldName)} - ${_sanitize(moonName)} (${hexCode}).md`;
-                    files.push({ name: moonFile, data: enc.encode(moonMd) });
+                    files.push({ name: prefix + moonFile, data: enc.encode(moonMd) });
                 }
             }
 

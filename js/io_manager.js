@@ -663,6 +663,7 @@ function setupObsidianExport() {
     const skipAirlessRow     = document.getElementById('obs-skip-airless-row');
     const skipAirlessChk     = document.getElementById('obs-skip-airless');
     const incSystemImages    = document.getElementById('obs-include-system-images');
+    const useSubfoldersChk   = document.getElementById('obs-use-subfolders');
     const progressRow     = document.getElementById('obs-progress-row');
     const progressBar  = document.getElementById('obs-progress-bar');
     const progressTxt  = document.getElementById('obs-progress-text');
@@ -737,6 +738,7 @@ function setupObsidianExport() {
         const includeImages       = !!(incImages       && incImages.checked);
         const skipAirless         = includeImages && !!(skipAirlessChk  && skipAirlessChk.checked);
         const includeSystemImages = !!(incSystemImages && incSystemImages.checked);
+        const useSubfolders       = !!(useSubfoldersChk && useSubfoldersChk.checked);
 
         exportBtn.disabled        = true;
         cancelBtn.disabled        = true;
@@ -749,6 +751,7 @@ function setupObsidianExport() {
                 includeImages,
                 skipAirless,
                 includeSystemImages,
+                useSubfolders,
                 onProgress: (done, total, msg) => {
                     const pct = total > 0 ? Math.round((done / total) * 100) : 0;
                     progressBar.style.width = `${pct}%`;

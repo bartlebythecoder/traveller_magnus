@@ -2385,6 +2385,38 @@ function setupSettingsPanel() {
             localStorage.setItem('traveller_gen_starport_mod', String(val));
         });
     }
+
+    const continentDefInput = document.getElementById('input-continent-def');
+    const continentDefVal   = document.getElementById('continent-def-val');
+    if (continentDefInput) {
+        const saved   = localStorage.getItem('traveller_planet_continent_def');
+        const initial = saved !== null ? parseFloat(saved) : 0.55;
+        continentDefInput.value = initial;
+        window.planetContinentalDefinition = initial;
+        if (continentDefVal) continentDefVal.textContent = initial.toFixed(2);
+        continentDefInput.addEventListener('input', () => {
+            const val = parseFloat(continentDefInput.value);
+            window.planetContinentalDefinition = val;
+            if (continentDefVal) continentDefVal.textContent = val.toFixed(2);
+            localStorage.setItem('traveller_planet_continent_def', String(val));
+        });
+    }
+
+    const coastlineCompInput = document.getElementById('input-coastline-comp');
+    const coastlineCompVal   = document.getElementById('coastline-comp-val');
+    if (coastlineCompInput) {
+        const saved   = localStorage.getItem('traveller_planet_coastline_comp');
+        const initial = saved !== null ? parseFloat(saved) : 0.45;
+        coastlineCompInput.value = initial;
+        window.planetCoastlineComplexity = initial;
+        if (coastlineCompVal) coastlineCompVal.textContent = initial.toFixed(2);
+        coastlineCompInput.addEventListener('input', () => {
+            const val = parseFloat(coastlineCompInput.value);
+            window.planetCoastlineComplexity = val;
+            if (coastlineCompVal) coastlineCompVal.textContent = val.toFixed(2);
+            localStorage.setItem('traveller_planet_coastline_comp', String(val));
+        });
+    }
 }
 
 function toggleSettingsSection(header) {

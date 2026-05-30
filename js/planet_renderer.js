@@ -26,6 +26,14 @@ const PlanetRenderer = (() => {
     // The equatorial band fills the remaining (1 − 2·POLE_FRAC) of the height.
     const POLE_FRAC = 1 / 3;
 
+    // Domain-warp + continent-mask parameters (used by _continentHeight).
+    const WARP_FREQ = 1.8;  // input frequency for domain warp sampling
+
+    // These two are set at render time from window globals so the settings sliders
+    // take effect without rebuilding the noise grids.
+    let _maskWeight   = 0.55;  // Continental Definition (0 = pure noise, 1 = pure seeds)
+    let _warpStrength = 0.45;  // Coastline Complexity (0 = smooth, 1 = highly irregular)
+
     // ── 3-D value noise ───────────────────────────────────────────────────────
 
     function _buildGrid3D(rng) {
@@ -124,22 +132,79 @@ const PlanetRenderer = (() => {
         return craters;
     }
 
+    // ── Continental seeds ─────────────────────────────────────────────────────
+
+    // Generates a seeded list of continent-centre descriptors on the unit sphere.
+    // Each seed carries a world-space centre, angular cosR threshold, and strength.
+    // Count is seeded-random 3–7 so each world has a distinct number of continents.
+    function _buildContinentSeeds(rng) {
+        const count = 3 + Math.floor(rng() * 5);
+        const seeds = new Array(count);
+        for (let i = 0; i < count; i++) {
+            const cosTheta = rng() * 2 - 1;
+            const sinTheta = Math.sqrt(1 - cosTheta * cosTheta);
+            const phi      = rng() * 2 * Math.PI;
+            const angRad   = (35 + rng() * 35) * Math.PI / 180;  // 35–70° angular radius
+            seeds[i] = {
+                sx: sinTheta * Math.cos(phi),
+                sy: cosTheta,
+                sz: sinTheta * Math.sin(phi),
+                cosR:     Math.cos(angRad),
+                strength: 0.7 + rng() * 0.3,
+            };
+        }
+        return seeds;
+    }
+
+    // Returns a composite height for world-space point (wx, wy, wz) blending:
+    //   - a continent mask: max smoothstepped falloff from the nearest seed centre
+    //   - a domain-warped detail fBm: reuses heightGrid, so no extra memory
+    // Result is not percentile-remapped; that is done downstream by the CDF pipeline.
+    function _continentHeight(heightGrid, seeds, wx, wy, wz) {
+        // Continent mask — strongest seed contribution at this point.
+        let mask = 0;
+        for (let i = 0; i < seeds.length; i++) {
+            const s   = seeds[i];
+            const dot = wx * s.sx + wy * s.sy + wz * s.sz;
+            if (dot > s.cosR) {
+                const t  = (dot - s.cosR) / (1 - s.cosR);
+                const sm = t * t * (3 - 2 * t);  // smoothstep
+                const v  = sm * s.strength;
+                if (v > mask) mask = v;
+            }
+        }
+
+        // Domain warp — three independent low-frequency fBm samples used as
+        // coordinate offsets.  Large constant biases decorrelate the three
+        // channels from each other and from the detail fBm below.
+        const f  = WARP_FREQ;
+        const dx = _fbm3D(heightGrid, wx * f + 1.7, wy * f + 9.2, wz * f + 3.4, 3, 0.50) - 0.5;
+        const dy = _fbm3D(heightGrid, wx * f + 8.3, wy * f + 2.8, wz * f + 5.1, 3, 0.50) - 0.5;
+        const dz = _fbm3D(heightGrid, wx * f + 4.6, wy * f + 7.1, wz * f + 0.9, 3, 0.50) - 0.5;
+        const detail = _fbm3D(heightGrid,
+            wx + dx * _warpStrength,
+            wy + dy * _warpStrength,
+            wz + dz * _warpStrength,
+            6, 0.43);
+
+        return mask * _maskWeight + detail * (1 - _maskWeight);
+    }
+
     // ── Empirical CDF helpers ─────────────────────────────────────────────────
 
     // Samples the height grid at nSamples uniformly distributed sphere points
     // (Fibonacci lattice) and returns the sorted height values as a Float32Array.
     // Used to remap raw fBm output to true percentile rank so that seaLevel
     // corresponds to the actual fraction of the surface covered by ocean.
-    function _buildCDF(heightGrid, nSamples) {
+    function _buildCDF(heightGrid, seeds, nSamples) {
         const samples     = new Float32Array(nSamples);
         const goldenAngle = Math.PI * (Math.sqrt(5) - 1);
         for (let i = 0; i < nSamples; i++) {
             const cosTheta = 1 - (2 * (i + 0.5)) / nSamples;
             const sinTheta = Math.sqrt(1 - cosTheta * cosTheta);
             const phi = goldenAngle * i;
-            samples[i] = _fbm3D(heightGrid,
-                sinTheta * Math.cos(phi), cosTheta, sinTheta * Math.sin(phi),
-                6, 0.43);
+            samples[i] = _continentHeight(heightGrid, seeds,
+                sinTheta * Math.cos(phi), cosTheta, sinTheta * Math.sin(phi));
         }
         samples.sort();
         return samples;
@@ -397,7 +462,7 @@ const PlanetRenderer = (() => {
     // 3-D field — no lat/lon seams, no polar artefacts, guaranteed continuity at
     // the shared 180° anti-meridian limb.
 
-    function _renderHemisphere(imageData, cx, cy, diskR, heightGrid, cloudGrid,
+    function _renderHemisphere(imageData, cx, cy, diskR, heightGrid, seeds, cloudGrid,
                                 heightCDF, lonOffset, palette, lightDir, cityCenters, craters) {
         const data = imageData.data;
         const W    = imageData.width;
@@ -439,7 +504,7 @@ const PlanetRenderer = (() => {
                 // Geographic latitude — used only for polar ice overlay.
                 const lat = Math.asin(wy);
 
-                const h  = _fbm3D(heightGrid, wx, wy, wz, 6, 0.43);
+                const h  = _continentHeight(heightGrid, seeds, wx, wy, wz);
                 const hN = _remapHeight(h, heightCDF);
 
                 let [r, g, b] = _heightToRGB(hN, lat, palette);
@@ -588,7 +653,7 @@ const PlanetRenderer = (() => {
     // numLobes equal columns; each column maps to a 360°/numLobes longitude
     // band using the sinusoidal formula, filling every pixel with terrain.
 
-    function _renderInterruptedSinusoidal(imageData, heightGrid, heightCDF, palette, numLobes) {
+    function _renderInterruptedSinusoidal(imageData, heightGrid, seeds, heightCDF, palette, numLobes) {
         const data    = imageData.data;
         const W       = imageData.width;
         const H       = imageData.height;
@@ -622,7 +687,7 @@ const PlanetRenderer = (() => {
                     const wy = sinLat;
                     const wz = cosLat * Math.sin(lon);
 
-                    const h         = _fbm3D(heightGrid, wx, wy, wz, 6, 0.43);
+                    const h         = _continentHeight(heightGrid, seeds, wx, wy, wz);
                     const hN        = _remapHeight(h, heightCDF);
                     const [r, g, b] = _heightToRGB(hN, lat, palette);
                     const idx       = (py * W + px) * 4;
@@ -640,7 +705,7 @@ const PlanetRenderer = (() => {
     // inverse Mercator formula. Clipped to ±85.051° (yMax ≈ π) so the canvas
     // exactly matches the standard Web Mercator tile extent.
 
-    function _renderMercator(imageData, heightGrid, heightCDF, palette) {
+    function _renderMercator(imageData, heightGrid, seeds, heightCDF, palette) {
         const data = imageData.data;
         const W    = imageData.width;
         const H    = imageData.height;
@@ -653,7 +718,7 @@ const PlanetRenderer = (() => {
                 const wx  = cosLat * Math.cos(lon);
                 const wy  = sinLat;
                 const wz  = cosLat * Math.sin(lon);
-                const h   = _fbm3D(heightGrid, wx, wy, wz, 6, 0.43);
+                const h   = _continentHeight(heightGrid, seeds, wx, wy, wz);
                 const hN  = _remapHeight(h, heightCDF);
                 const [r, g, b] = _heightToRGB(hN, lat, palette);
                 const idx = (py * W + px) * 4;
@@ -667,7 +732,7 @@ const PlanetRenderer = (() => {
     // makes the oval exactly fill the canvas. Pixels outside the ellipse keep
     // alpha 0 (transparent, showing the panel background through).
 
-    function _renderMollweide(imageData, heightGrid, heightCDF, palette) {
+    function _renderMollweide(imageData, heightGrid, seeds, heightCDF, palette) {
         const data  = imageData.data;
         const W     = imageData.width;
         const H     = imageData.height;
@@ -701,7 +766,7 @@ const PlanetRenderer = (() => {
                 const wx  = cosLat * Math.cos(lon);
                 const wy  = Math.sin(lat);
                 const wz  = cosLat * Math.sin(lon);
-                const h   = _fbm3D(heightGrid, wx, wy, wz, 6, 0.43);
+                const h   = _continentHeight(heightGrid, seeds, wx, wy, wz);
                 const hN  = _remapHeight(h, heightCDF);
                 const [r, g, b] = _heightToRGB(hN, lat, palette);
                 const idx = (py * W + px) * 4;
@@ -715,11 +780,11 @@ const PlanetRenderer = (() => {
     // equirectangular mapping: x → longitude, y → latitude, diamond clips the
     // corners. Matches the Traveller Cosmographer reference aesthetic.
 
-    function _renderDiamond(imageData, heightGrid, heightCDF, palette) {
+    function _renderDiamond(imageData, heightGrid, seeds, heightCDF, palette) {
         const data    = imageData.data;
         const W       = imageData.width;
         const H       = imageData.height;
-        const N       = 6;
+        const N       = 5;
         const hw      = W / (2 * N);
         const lobeLon = 2 * Math.PI / N;
 
@@ -727,17 +792,18 @@ const PlanetRenderer = (() => {
         const bandBot = H - bandTop;
         const cutLat  = Math.PI / 2 - POLE_FRAC * Math.PI;   // 30° at POLE_FRAC=1/3
 
-        // ── Northern lobes: N upward triangles ───────────────────────────
+        // ── Northern lobes: N+1 upward triangles, offset half lobe ───────
         // Tips at y=0 (north pole), bases at y=bandTop.
+        // Half-lobes at canvas left and right edges match T5 standard layout.
         for (let py = 0; py < bandTop; py++) {
             const lat    = Math.PI / 2 - (py / bandTop) * (Math.PI / 2 - cutLat);
             const sinLat = Math.sin(lat);
             const cosLat = Math.cos(lat);
             const maxOff = hw * py / bandTop;
 
-            for (let li = 0; li < N; li++) {
-                const cx         = (li + 0.5) * W / N;
-                const lobeCenLon = -Math.PI + (li + 0.5) * lobeLon;
+            for (let li = 0; li <= N; li++) {
+                const cx         = li * W / N;
+                const lobeCenLon = -Math.PI + li * lobeLon;
                 const pxStart    = Math.max(0,     Math.ceil(cx - maxOff));
                 const pxEnd      = Math.min(W - 1, Math.floor(cx + maxOff));
                 for (let px = pxStart; px <= pxEnd; px++) {
@@ -745,7 +811,7 @@ const PlanetRenderer = (() => {
                     const lon     = lobeCenLon + lonFrac * (lobeLon / 2);
                     const wx      = cosLat * Math.cos(lon);
                     const wz      = cosLat * Math.sin(lon);
-                    const h       = _fbm3D(heightGrid, wx, sinLat, wz, 6, 0.43);
+                    const h       = _continentHeight(heightGrid, seeds, wx, sinLat, wz);
                     const hN      = _remapHeight(h, heightCDF);
                     const [r, g, b] = _heightToRGB(hN, lat, palette);
                     const idx     = (py * W + px) * 4;
@@ -765,7 +831,7 @@ const PlanetRenderer = (() => {
                 const lon = -Math.PI + (px / W) * 2 * Math.PI;
                 const wx  = cosLat * Math.cos(lon);
                 const wz  = cosLat * Math.sin(lon);
-                const h   = _fbm3D(heightGrid, wx, sinLat, wz, 6, 0.43);
+                const h   = _continentHeight(heightGrid, seeds, wx, sinLat, wz);
                 const hN  = _remapHeight(h, heightCDF);
                 const [r, g, b] = _heightToRGB(hN, lat, palette);
                 const idx = (py * W + px) * 4;
@@ -773,9 +839,9 @@ const PlanetRenderer = (() => {
             }
         }
 
-        // ── Southern lobes: N+1 downward triangles, offset half lobe ─────
+        // ── Southern lobes: N downward triangles ─────────────────────────
         // Tips at y=H (south pole), bases at y=bandBot.
-        // N+1 so the two half-triangles at canvas edges are both rendered.
+        // N complete lobes (no edge halves) matches T5 standard layout.
         const southH = H - bandBot;
         for (let py = bandBot; py < H; py++) {
             const lat    = -cutLat - ((py - bandBot) / southH) * (Math.PI / 2 - cutLat);
@@ -783,9 +849,9 @@ const PlanetRenderer = (() => {
             const cosLat = Math.cos(lat);
             const maxOff = hw * (H - py) / southH;
 
-            for (let li = 0; li <= N; li++) {
-                const cx         = li * W / N;
-                const lobeCenLon = -Math.PI + li * lobeLon;
+            for (let li = 0; li < N; li++) {
+                const cx         = (li + 0.5) * W / N;
+                const lobeCenLon = -Math.PI + (li + 0.5) * lobeLon;
                 const pxStart    = Math.max(0,     Math.ceil(cx - maxOff));
                 const pxEnd      = Math.min(W - 1, Math.floor(cx + maxOff));
                 for (let px = pxStart; px <= pxEnd; px++) {
@@ -793,7 +859,7 @@ const PlanetRenderer = (() => {
                     const lon     = lobeCenLon + lonFrac * (lobeLon / 2);
                     const wx      = cosLat * Math.cos(lon);
                     const wz      = cosLat * Math.sin(lon);
-                    const h       = _fbm3D(heightGrid, wx, sinLat, wz, 6, 0.43);
+                    const h       = _continentHeight(heightGrid, seeds, wx, sinLat, wz);
                     const hN      = _remapHeight(h, heightCDF);
                     const [r, g, b] = _heightToRGB(hN, lat, palette);
                     const idx     = (py * W + px) * 4;
@@ -901,9 +967,9 @@ const PlanetRenderer = (() => {
         const bandTop = Math.round(POLE_FRAC * H);
         const bandBot = H - bandTop;
         ctx.beginPath();
-        // Northern upward triangles
-        for (let li = 0; li < N; li++) {
-            const cx = (li + 0.5) * W / N;
+        // Northern upward triangles (N+1, half-lobes at edges)
+        for (let li = 0; li <= N; li++) {
+            const cx = li * W / N;
             ctx.moveTo(cx,      0);
             ctx.lineTo(cx + hw, bandTop);
             ctx.lineTo(cx - hw, bandTop);
@@ -915,9 +981,9 @@ const PlanetRenderer = (() => {
         ctx.lineTo(W,      bandBot);
         ctx.lineTo(0,      bandBot);
         ctx.closePath();
-        // Southern downward triangles (offset half lobe, including edge half-lobes)
-        for (let li = 0; li <= N; li++) {
-            const cx = li * W / N;
+        // Southern downward triangles (N complete lobes)
+        for (let li = 0; li < N; li++) {
+            const cx = (li + 0.5) * W / N;
             ctx.moveTo(cx,      H);
             ctx.lineTo(cx + hw, bandBot);
             ctx.lineTo(cx - hw, bandBot);
@@ -932,9 +998,9 @@ const PlanetRenderer = (() => {
         const bandBot = H - bandTop;
         ctx.strokeStyle = 'rgba(0,0,0,0.65)';
         ctx.lineWidth   = 1.0;
-        // Northern upward triangles
-        for (let li = 0; li < N; li++) {
-            const cx = (li + 0.5) * W / N;
+        // Northern upward triangles (N+1, half-lobes at edges)
+        for (let li = 0; li <= N; li++) {
+            const cx = li * W / N;
             ctx.beginPath();
             ctx.moveTo(cx,      0);
             ctx.lineTo(cx + hw, bandTop);
@@ -942,9 +1008,9 @@ const PlanetRenderer = (() => {
             ctx.closePath();
             ctx.stroke();
         }
-        // Southern downward triangles (offset half lobe, including edge half-lobes)
-        for (let li = 0; li <= N; li++) {
-            const cx = li * W / N;
+        // Southern downward triangles (N complete lobes)
+        for (let li = 0; li < N; li++) {
+            const cx = (li + 0.5) * W / N;
             ctx.beginPath();
             ctx.moveTo(cx,      H);
             ctx.lineTo(cx + hw, bandBot);
@@ -977,6 +1043,9 @@ const PlanetRenderer = (() => {
     // ── Entry point ───────────────────────────────────────────────────────────
 
     function renderPlanetHemispheres(canvas, worldData, hexId) {
+        _maskWeight   = typeof window.planetContinentalDefinition === 'number' ? window.planetContinentalDefinition : 0.55;
+        _warpStrength = typeof window.planetCoastlineComplexity   === 'number' ? window.planetCoastlineComplexity   : 0.45;
+
         // Derive radius from incoming canvas height; resize canvas to fit.
         const diskR = Math.max(60, Math.floor(canvas.height / 2) - 8);
         const gap   = 18;
@@ -991,8 +1060,10 @@ const PlanetRenderer = (() => {
         const ms        = (typeof masterSeed !== 'undefined') ? masterSeed : 'default';
         const baseSeed  = hashString(ms + '-' + (hexId || '0000') + '-ph');
         const cloudSeed = hashString(ms + '-' + (hexId || '0000') + '-pc');
-        const heightGrid = _buildGrid3D(mulberry32(baseSeed));
-        const heightCDF  = _buildCDF(heightGrid, 2048);
+        const heightGrid    = _buildGrid3D(mulberry32(baseSeed));
+        const continentSeed = hashString(ms + '-' + (hexId || '0000') + '-cn');
+        const seeds         = _buildContinentSeeds(mulberry32(continentSeed));
+        const heightCDF     = _buildCDF(heightGrid, seeds, 2048);
 
         const hasAtmo   = _parseStat(worldData.atmosphere) > 0;
         const cloudGrid = hasAtmo ? _buildGrid3D(mulberry32(cloudSeed)) : null;
@@ -1029,10 +1100,10 @@ const PlanetRenderer = (() => {
         const imageData = ctx.createImageData(W, H);
 
         // Western hemisphere centred on 90°W (lonOffset = −π/2)
-        _renderHemisphere(imageData, lcx, cy, diskR, heightGrid, cloudGrid,
+        _renderHemisphere(imageData, lcx, cy, diskR, heightGrid, seeds, cloudGrid,
                           heightCDF, -Math.PI / 2, palette, lightDir, cityCenters, craters);
         // Eastern hemisphere centred on 90°E (lonOffset = +π/2)
-        _renderHemisphere(imageData, rcx, cy, diskR, heightGrid, cloudGrid,
+        _renderHemisphere(imageData, rcx, cy, diskR, heightGrid, seeds, cloudGrid,
                           heightCDF,  Math.PI / 2, palette, lightDir, cityCenters, craters);
 
         ctx.putImageData(imageData, 0, 0);
@@ -1048,6 +1119,9 @@ const PlanetRenderer = (() => {
     // ── Flat map entry point ──────────────────────────────────────────────────
 
     function renderFlatMap(canvas, worldData, hexId, options) {
+        _maskWeight   = typeof window.planetContinentalDefinition === 'number' ? window.planetContinentalDefinition : 0.55;
+        _warpStrength = typeof window.planetCoastlineComplexity   === 'number' ? window.planetCoastlineComplexity   : 0.45;
+
         const numLobes = (options && options.numLobes)   || 5;
         const proj     = (options && options.projection) || 'sinusoidal';
         const W = 800, H = 400;
@@ -1060,10 +1134,12 @@ const PlanetRenderer = (() => {
 
         // Same seed chain as renderPlanetHemispheres — guarantees terrain match.
         const ms         = (typeof masterSeed !== 'undefined') ? masterSeed : 'default';
-        const baseSeed   = hashString(ms + '-' + (hexId || '0000') + '-ph');
-        const heightGrid = _buildGrid3D(mulberry32(baseSeed));
-        const heightCDF  = _buildCDF(heightGrid, 2048);
-        const oceanSeed  = hashString(ms + '-' + (hexId || '0000') + '-oc');
+        const baseSeed      = hashString(ms + '-' + (hexId || '0000') + '-ph');
+        const heightGrid    = _buildGrid3D(mulberry32(baseSeed));
+        const continentSeed = hashString(ms + '-' + (hexId || '0000') + '-cn');
+        const seeds         = _buildContinentSeeds(mulberry32(continentSeed));
+        const heightCDF     = _buildCDF(heightGrid, seeds, 2048);
+        const oceanSeed     = hashString(ms + '-' + (hexId || '0000') + '-oc');
         const oceanRng   = mulberry32(oceanSeed)();
         const palette    = _buildPalette(worldData, oceanRng);
 
@@ -1071,27 +1147,27 @@ const PlanetRenderer = (() => {
         const sizeCode  = _parseStat(worldData.size);
 
         if (proj === 'mercator') {
-            _renderMercator(imageData, heightGrid, heightCDF, palette);
+            _renderMercator(imageData, heightGrid, seeds, heightCDF, palette);
             ctx.putImageData(imageData, 0, 0);
             // No hex grid for Mercator — geographic hex cells are non-rectangular.
         } else if (proj === 'mollweide') {
-            _renderMollweide(imageData, heightGrid, heightCDF, palette);
+            _renderMollweide(imageData, heightGrid, seeds, heightCDF, palette);
             ctx.putImageData(imageData, 0, 0);
             // No hex grid for Mollweide — oval boundary makes screen-space grid misleading.
         } else if (proj === 'diamond') {
-            _renderDiamond(imageData, heightGrid, heightCDF, palette);
+            _renderDiamond(imageData, heightGrid, seeds, heightCDF, palette);
             ctx.putImageData(imageData, 0, 0);
             if (sizeCode > 0) {
                 ctx.save();
-                _applyDiamondClip(ctx, W, H, 6);
+                _applyDiamondClip(ctx, W, H, 5);
                 _drawHexGrid(ctx, W, H, sizeCode);
                 _drawLatitudeLines(ctx, W, H, sizeCode);
                 ctx.restore();
             }
-            _drawDiamondSeparators(ctx, W, H, 6);
+            _drawDiamondSeparators(ctx, W, H, 5);
         } else {
             // Default: interrupted sinusoidal
-            _renderInterruptedSinusoidal(imageData, heightGrid, heightCDF, palette, numLobes);
+            _renderInterruptedSinusoidal(imageData, heightGrid, seeds, heightCDF, palette, numLobes);
             ctx.putImageData(imageData, 0, 0);
             if (sizeCode > 0) {
                 ctx.save();

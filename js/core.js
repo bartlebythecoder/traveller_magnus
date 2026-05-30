@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.13.1";
-const APP_BANNER = "v0.13.1: New: Obsidian Export Updates";
+const APP_VERSION = "v0.13.2";
+const APP_BANNER = "v0.13.2: New: Diamond Map now matches T5 standards";
 
 // -----------------------------------------------------------------------------
 // Application State

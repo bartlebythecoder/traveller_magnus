@@ -1,4 +1,4 @@
-# As Above, So Below (v0.13.1)
+# As Above, So Below (v0.13.2)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -62,7 +62,13 @@ Want to replace any of these sectors with your own file?
 ---
 ## 📜 Changelog
 
-### [v0.13.1] - In Progress
+### [v0.13.2] - 2026-05-30
+1. **World Image:** Added continent generator to make worlds look more realistic, including Continental Definition and Coastline Complexity sliders in settings.
+2. **Diamond Projection Map:**  Updated diamond projection map to match T5 standard
+
+### [v0.13.1] - 2026-05-29
+1. **Wiki Export:** Wiki entries now all link back to the system and subsector entries
+2. **Wiki Export:** Optional folder structure so the subsector overview entry sits one directory above the detailed entries
 
 ### [v0.13.0] - 2026-05-28
 1. **Exports:** Added markdown file exports (Obsidian Export)
@@ -72,29 +78,6 @@ Want to replace any of these sectors with your own file?
 5. **System Viewer:** Reduced overall speeds on orbits
 5. **System Viewer:** Added stellar body orbit speed slider
 5. **System Viewer:** Removed dependencies between sliders
-
-### [v0.12.0] - 2026-05-24
-1. **World Images:** World hemisphere images and maps generated for all terrestrial bodies
-2. **Borders:** Fixed bug impacting manual border fills
-
-### [v0.11.1] - 2026-05-22
-1. **Borders and Regions:** Setting option available to see Border and Region names on map
-2. **Borders and Import OTU:** Fixed a bug incorrectly importing the Solomani Rim
-2. **Import Universe:** Added Terry Mixon xml file for Foreven Sector
-3. **Import Imperium/Universe:** Fixed bug that would not expand System in non-aligned worlds
-4. **Download Routes:** Added options for more fields to include in Route csv download
-5. **Settings:** Improved look and feel of headings on white background
-6. **System Viewer:** Added option to scale size of orbit lines in system viewer
-7. **System Viewer:** When white background setting enabled, system viewer shows white background
-
-### [v0.11.0] - 2026-05-21
-1. **System Viewer:** Zoom into system with details and see orbiting worlds and moons
-2. **RTT World Gen:**  Enable RTT World Gen exports; can now be imported into travellermap
-3. **RTT World Gen:**  Add settings to change default Settlement, TL value and use Industry instead of TL in UWP
-4. **Mongoose Engine:** Added setting to force Minimal Sustainable Tech levels
-5. **All Engines:** Added Mod and Max settings for Starport, Pop, and TL for customizing builds for colonies, frontiers etc
-6. **Import TSV:** Fixed bug that did not clear sector chosen for import before importing
-7. **Import Universe:** Added option to include Terry Mixon Foreven sector in Universe Import
 
 
 ---

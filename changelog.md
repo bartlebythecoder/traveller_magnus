@@ -1,4 +1,10 @@
-### [v0.13.1] - In Progress
+### [v0.13.2] - 2026-05-30
+1. **World Image:** Added continent generator to make worlds look more realistic, including Continental Definition and Coastline Complexity sliders in settings.
+2. **Diamond Projection Map:**  Updated diamond projection map to match T5 standard
+
+### [v0.13.1] - 2026-05-29
+1. **Wiki Export:** Wiki entries now all link back to the system and subsector entries
+2. **Wiki Export:** Optional folder structure so the subsector overview entry sits one directory above the detailed entries
 
 ### [v0.13.0] - 2026-05-28
 1. **Exports:** Added markdown file exports (Obsidian Export)

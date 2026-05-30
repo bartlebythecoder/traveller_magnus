@@ -998,33 +998,24 @@ const PlanetRenderer = (() => {
         const bandBot = H - bandTop;
         ctx.strokeStyle = 'rgba(0,0,0,0.65)';
         ctx.lineWidth   = 1.0;
-        // Northern upward triangles (N+1, half-lobes at edges)
+        // Northern upward triangles — two slanted sides only, no base
         for (let li = 0; li <= N; li++) {
             const cx = li * W / N;
             ctx.beginPath();
-            ctx.moveTo(cx,      0);
+            ctx.moveTo(cx - hw, bandTop);
+            ctx.lineTo(cx,      0);
             ctx.lineTo(cx + hw, bandTop);
-            ctx.lineTo(cx - hw, bandTop);
-            ctx.closePath();
             ctx.stroke();
         }
-        // Southern downward triangles (N complete lobes)
+        // Southern downward triangles — two slanted sides only, no base
         for (let li = 0; li < N; li++) {
             const cx = (li + 0.5) * W / N;
             ctx.beginPath();
-            ctx.moveTo(cx,      H);
+            ctx.moveTo(cx - hw, bandBot);
+            ctx.lineTo(cx,      H);
             ctx.lineTo(cx + hw, bandBot);
-            ctx.lineTo(cx - hw, bandBot);
-            ctx.closePath();
             ctx.stroke();
         }
-        // Band boundary lines
-        ctx.beginPath();
-        ctx.moveTo(0, bandTop);
-        ctx.lineTo(W, bandTop);
-        ctx.moveTo(0, bandBot);
-        ctx.lineTo(W, bandBot);
-        ctx.stroke();
     }
 
     // ── Utility ───────────────────────────────────────────────────────────────
@@ -1161,7 +1152,6 @@ const PlanetRenderer = (() => {
                 ctx.save();
                 _applyDiamondClip(ctx, W, H, 5);
                 _drawHexGrid(ctx, W, H, sizeCode);
-                _drawLatitudeLines(ctx, W, H, sizeCode);
                 ctx.restore();
             }
             _drawDiamondSeparators(ctx, W, H, 5);

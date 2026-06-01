@@ -24,7 +24,7 @@ const PlanetRenderer = (() => {
 
     // Fraction of canvas height for each polar lobe zone.
     // The equatorial band fills the remaining (1 − 2·POLE_FRAC) of the height.
-    const POLE_FRAC = 1 / 3;
+    const POLE_FRAC = 1 / 3;  // H/bandTop = 3 (integer) → top/bottom lobe edges are collinear
 
     // Domain-warp + continent-mask parameters (used by _continentHeight).
     const WARP_FREQ = 1.8;  // input frequency for domain warp sampling
@@ -914,26 +914,46 @@ const PlanetRenderer = (() => {
         }
     }
 
-    function _drawHexGrid(ctx, W, H, size) {
+    function _drawHexGrid(ctx, W, H, size, numLobes) {
         if (size <= 0) return;
         const hexesAcross = Math.max(1, Math.round(Math.PI * size * 1600 / 1005));
-        // Flat-top hex: N columns fill width W, column-to-column spacing = 3R/2.
-        const R  = (2 * W) / (3 * hexesAcross);
-        const rh = R * Math.sqrt(3);   // row height (flat-to-flat)
+        // Pointy-top hex: N hexes fill width W, centre-to-centre column spacing = R√3.
+        // Scale: colStep = W/N = 1005 km/hex projected onto the canvas — same as flat-top.
+        const colStep = W / hexesAcross;          // = R√3
+        const R       = colStep / Math.sqrt(3);   // circumradius
+        const rowStep = 1.5 * R;                  // row centre-to-centre = 3R/2
+
+        // Anchor the grid on the band boundaries (bandTop / bandBot) rather than
+        // on the canvas edges (y=0 / y=H).  The minimax-optimal offset is the
+        // average of the two modular remainders: this makes bandTop and bandBot
+        // equally close to a row centre, minimising the visible misalignment at
+        // the points where the diamond separator lines start.
+        const bandTop = H * POLE_FRAC;
+        const bandBot = H - bandTop;
+        const modTop  = bandTop - Math.floor(bandTop / rowStep) * rowStep;
+        const modBot  = bandBot - Math.floor(bandBot / rowStep) * rowStep;
+        const yOffset = (modTop + modBot) / 2;
+
+        // For the diamond projection (numLobes=5), the critical corners at y=bandTop are
+        // the triangle base corners at x=(li+0.5)*W/N (half-integer multiples of W/N),
+        // not the tips.  A colStep/2 phase shift aligns whichever row parity falls at
+        // bandTop onto those positions, for all world sizes.
+        const xPhase = numLobes ? colStep / 2 : 0;
 
         ctx.strokeStyle = 'rgba(0,0,0,0.45)';
         ctx.lineWidth   = 0.6;
 
-        const rowCount = Math.ceil(H / rh) + 2;
+        const rowCount = Math.ceil(H / rowStep) + 2;
+        const colCount = hexesAcross + 2;
 
-        for (let c = -1; c <= hexesAcross + 1; c++) {
-            const cx     = c * 1.5 * R;
-            const offset = (c & 1) ? rh / 2 : 0;   // odd columns shift down by half a row
-            for (let r = -1; r <= rowCount; r++) {
-                const cy = r * rh + offset;
+        for (let r = -1; r <= rowCount; r++) {
+            const cy      = yOffset + r * rowStep;
+            const xOffset = (r & 1) ? colStep / 2 : 0;  // odd rows shift right by half a column
+            for (let c = -1; c <= colCount; c++) {
+                const cx = c * colStep + xPhase + xOffset;
                 ctx.beginPath();
                 for (let v = 0; v < 6; v++) {
-                    const angle = (v * Math.PI) / 3;   // 0°, 60°, … 300° → flat-top
+                    const angle = Math.PI / 6 + v * Math.PI / 3;  // 30°, 90°, … 330° → pointy-top
                     const vx = cx + R * Math.cos(angle);
                     const vy = cy + R * Math.sin(angle);
                     if (v === 0) ctx.moveTo(vx, vy); else ctx.lineTo(vx, vy);
@@ -1151,7 +1171,7 @@ const PlanetRenderer = (() => {
             if (sizeCode > 0) {
                 ctx.save();
                 _applyDiamondClip(ctx, W, H, 5);
-                _drawHexGrid(ctx, W, H, sizeCode);
+                _drawHexGrid(ctx, W, H, sizeCode, 5);
                 ctx.restore();
             }
             _drawDiamondSeparators(ctx, W, H, 5);
@@ -1163,7 +1183,6 @@ const PlanetRenderer = (() => {
                 ctx.save();
                 _applyLobeClip(ctx, W, H, numLobes);
                 _drawHexGrid(ctx, W, H, sizeCode);
-                _drawLatitudeLines(ctx, W, H, sizeCode);
                 ctx.restore();
             }
             _drawLobeSeparators(ctx, W, H, numLobes);

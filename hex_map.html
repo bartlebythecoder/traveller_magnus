@@ -718,9 +718,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above<br> So Below</span></h1>
-            <div class="splash-banner">New: World Map Continents</div>
+            <div class="splash-banner">New: JSON saves all settings</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.13.2</div>
+            <div class="splash-version">v0.13.3</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -833,6 +833,23 @@
                         <i class="fas fa-tag"></i> Edit Sector Names
                     </button>
                 </div>
+                <div style="font-size:0.7rem;color:#45a29e;letter-spacing:0.06em;text-transform:uppercase;padding-top:4px;border-top:1px solid #1f2833;">World Image Generation</div>
+                <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:3px;display:flex;">
+                    <div style="display:flex;width:100%;justify-content:space-between;align-items:center;">
+                        <label for="input-continent-def" style="font-size:0.8rem;color:#c5c6c7;">Continental Definition</label>
+                        <span id="continent-def-val" style="font-size:0.8rem;color:#66fcf1;min-width:30px;text-align:right;">0.55</span>
+                    </div>
+                    <input type="range" id="input-continent-def" min="0" max="1" step="0.05" value="0.55"
+                        style="width:100%;accent-color:#66fcf1;cursor:pointer;">
+                </div>
+                <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:3px;display:flex;">
+                    <div style="display:flex;width:100%;justify-content:space-between;align-items:center;">
+                        <label for="input-coastline-comp" style="font-size:0.8rem;color:#c5c6c7;">Coastline Complexity</label>
+                        <span id="coastline-comp-val" style="font-size:0.8rem;color:#66fcf1;min-width:30px;text-align:right;">0.45</span>
+                    </div>
+                    <input type="range" id="input-coastline-comp" min="0" max="1" step="0.05" value="0.45"
+                        style="width:100%;accent-color:#66fcf1;cursor:pointer;">
+                </div>
             </div>
         </div>
 
@@ -909,23 +926,6 @@
                 <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
                     <label for="toggle-rtt-industry" style="font-size:0.8rem;">Show Industry in UWP <span style="font-size:0.7rem;color:#66fcf1;">(RTT)</span></label>
                     <input type="checkbox" id="toggle-rtt-industry" style="cursor:pointer;accent-color:#66fcf1;">
-                </div>
-                <div style="font-size:0.7rem;color:#45a29e;letter-spacing:0.06em;text-transform:uppercase;padding-top:4px;border-top:1px solid #1f2833;">World Image Generation</div>
-                <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:3px;display:flex;">
-                    <div style="display:flex;width:100%;justify-content:space-between;align-items:center;">
-                        <label for="input-continent-def" style="font-size:0.8rem;color:#c5c6c7;">Continental Definition</label>
-                        <span id="continent-def-val" style="font-size:0.8rem;color:#66fcf1;min-width:30px;text-align:right;">0.55</span>
-                    </div>
-                    <input type="range" id="input-continent-def" min="0" max="1" step="0.05" value="0.55"
-                        style="width:100%;accent-color:#66fcf1;cursor:pointer;">
-                </div>
-                <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:3px;display:flex;">
-                    <div style="display:flex;width:100%;justify-content:space-between;align-items:center;">
-                        <label for="input-coastline-comp" style="font-size:0.8rem;color:#c5c6c7;">Coastline Complexity</label>
-                        <span id="coastline-comp-val" style="font-size:0.8rem;color:#66fcf1;min-width:30px;text-align:right;">0.45</span>
-                    </div>
-                    <input type="range" id="input-coastline-comp" min="0" max="1" step="0.05" value="0.45"
-                        style="width:100%;accent-color:#66fcf1;cursor:pointer;">
                 </div>
             </div>
         </div>
@@ -1159,7 +1159,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.13.2</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.13.3</span>
             </p>
         </div>
 

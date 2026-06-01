@@ -1,3 +1,10 @@
+### [v0.13.3] - In Progress
+1. **JSON Save:** JSON saves now include all settings (display toggles, planet rendering, generation options)
+2. **Imperium Import:** Imperium imports now use full sector names (matching Universe Import behaviour)
+3. **Settings:** The "World Image Generation" sub-header and both sliders (Continental Definition, Coastline Complexity) are now at the bottom of the Visual Options section and removed from Generation. 
+4. **BTS Routes:** Fixed bug that sometimes hid/unhid parts of other routes
+5. **Maps:** Diamond Projection hex overlay updated to better match T5 standards
+
 ### [v0.13.2] - 2026-05-30
 1. **World Image:** Added continent generator to make worlds look more realistic, including Continental Definition and Coastline Complexity sliders in settings.
 2. **Diamond Projection Map:**  Updated diamond projection map to match T5 standard
@@ -11,9 +18,9 @@
 2. **CT Engine/Filter Menu:** Adjusted filter menus to treat size of S and R as between 0 and 1
 3. **Refactor:** Code refactor, harmonizing to_eHex and from_eHex functions
 4. **RTT Engine:** Fixed bug that was not pulling TL from Settings
-5. **System Viewer:** Reduced overall speeds on orbits
-5. **System Viewer:** Added stellar body orbit speed slider
-5. **System Viewer:** Removed dependencies between sliders
+6. **System Viewer:** Reduced overall speeds on orbits
+7. **System Viewer:** Added stellar body orbit speed slider
+8. **System Viewer:** Removed dependencies between sliders
 
 ### [v0.12.0] - 2026-05-24
 1. **World Images:** World hemisphere images and maps generated for all terrestrial bodies

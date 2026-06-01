@@ -607,7 +607,15 @@ function _btnAddSegment(id1, id2, extras) {
     if (conflictIdx !== -1) {
         const rival = window.sectorRoutes[conflictIdx];
         const rivalMax = rival.btnMax === null ? Infinity : rival.btnMax;
-        if (rivalMax >= myMax) return; // rival wins or tie — first placed stands
+        if (rivalMax > myMax) return; // rival wins outright
+        if (rivalMax === myMax) {
+            // Tiebreak: route with higher minBTN (more selective) owns the segment.
+            // Prevents a lower-minBTN route from claiming high-WTN hops just because
+            // it was generated first, which would hide the higher route's coverage.
+            const myMin = extras.minBTN ?? 0;
+            const rivalMin = rival.minBTN ?? 0;
+            if (rivalMin >= myMin) return; // rival wins or true tie — first placed stands
+        }
         window.sectorRoutes.splice(conflictIdx, 1); // we win — evict rival
     }
 
@@ -661,7 +669,7 @@ function generateBTNRoutes({ lowerBTN, minBTN, maxBTN, maxJump, range, color, gr
     // BFS candidate list that allows Red-zone endpoints but bars Red intermediaries.
     const nonRedWorlds = worlds.filter(w => w.travelZone !== 'Red');
 
-    const extras = { subtype: 'BTN', color, groupId, name, btnMax: maxBTN, routeId };
+    const extras = { subtype: 'BTN', color, groupId, name, btnMax: maxBTN, minBTN, routeId };
 
     const partials = [];
     let fullRoutes = 0;

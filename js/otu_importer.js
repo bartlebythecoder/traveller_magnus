@@ -346,9 +346,9 @@
                         throw new Error('importT5Tab not available');
                     }
 
-                    // Store sector name (importT5Tab in bulkMode may set it first; don't overwrite)
+                    // Always use the full name from IMPERIUM_SECTORS (importT5Tab sets an abbreviation)
                     const slotNum = parseInt(slot, 10);
-                    if (!isNaN(slotNum) && !window.sectorNames[slotNum]) {
+                    if (!isNaN(slotNum)) {
                         window.sectorNames[slotNum] = name;
                     }
                 } catch (err) {

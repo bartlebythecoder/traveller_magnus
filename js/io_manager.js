@@ -70,6 +70,23 @@ function setupSaveLoad() {
             activeRules:  window.activeFilterRules || []
         };
 
+        const settings = {
+            borderFillEnabled:           window.borderFillEnabled           ?? false,
+            borderNamesEnabled:          window.borderNamesEnabled          ?? false,
+            regionNamesEnabled:          window.regionNamesEnabled          ?? false,
+            rttShowIndustry:             window.rttShowIndustry             ?? false,
+            borderMinSystems:            window.borderMinSystems            ?? 20,
+            planetContinentalDefinition: window.planetContinentalDefinition ?? 0.55,
+            planetCoastlineComplexity:   window.planetCoastlineComplexity   ?? 0.45,
+            generationTlMax:             window.generationTlMax             ?? 20,
+            generationTlMod:             window.generationTlMod             ?? 0,
+            generationUseTlFloor:        window.generationUseTlFloor        ?? false,
+            generationRttSettlement:     window.generationRttSettlement      ?? 2,
+            generationRttTL:             window.generationRttTL             ?? 15,
+            generationStarportMax:       window.generationStarportMax       || 'A',
+            generationStarportMod:       window.generationStarportMod       ?? 0,
+        };
+
         // Build hexStates as a plain object (current format, backward compatible)
         const hexObj = {};
         hexStates.forEach((value, key) => { hexObj[key] = value; });
@@ -82,6 +99,7 @@ function setupSaveLoad() {
             routeDefinitions:     window.routeDefinitions || [],
             rules:                window.activeFilterRules || [], // legacy support
             aesthetics,
+            settings,
             sectorNames:          window.sectorNames || {},
             hexStates:            hexObj,
             borderDefinitions:       window.borderDefinitions || [],
@@ -142,11 +160,12 @@ function setupSaveLoad() {
                         gridHeight,
                         hexStates:  chunkEntries   // array of [hexId, state] pairs
                     };
-                    // Routes, aesthetics, and border/region state travel with Part 1 only
+                    // Routes, aesthetics, settings, and border/region state travel with Part 1 only
                     if (i === 0) {
                         chunkObj.routes               = window.sectorRoutes || [];
                         chunkObj.rules                = window.activeFilterRules || [];
                         chunkObj.aesthetics           = aesthetics;
+                        chunkObj.settings             = settings;
                         chunkObj.borderDefinitions       = window.borderDefinitions || [];
                         chunkObj.hexBorderAssignments    = Array.from((window.hexBorderAssignments || new Map()).entries());
                         chunkObj.borderPaths             = Array.from((window.borderPaths || new Map()).entries());
@@ -249,6 +268,7 @@ function setupSaveLoad() {
                     routes:     parts[0].routes     || [],
                     rules:      parts[0].rules       || [],
                     aesthetics: parts[0].aesthetics  || {},
+                    settings:   parts[0].settings   || {},
                     hexStates:  mergedHexStates
                 };
 
@@ -401,6 +421,101 @@ function migrateToRouteDefinitions(segments) {
     });
 
     return { routeDefinitions: defs, routes: migratedSegments };
+}
+
+function applyLoadedSettings(settings) {
+    const s = settings || {};
+
+    // --- Display toggles ---
+    const borderFillEnabled = s.borderFillEnabled ?? false;
+    window.borderFillEnabled = borderFillEnabled;
+    const borderFillEl = document.getElementById('toggle-border-fill');
+    if (borderFillEl) borderFillEl.checked = borderFillEnabled;
+    localStorage.setItem('traveller_border_fill', String(borderFillEnabled));
+
+    const borderNamesEnabled = s.borderNamesEnabled ?? false;
+    window.borderNamesEnabled = borderNamesEnabled;
+    const borderNamesEl = document.getElementById('toggle-border-names');
+    if (borderNamesEl) borderNamesEl.checked = borderNamesEnabled;
+    localStorage.setItem('traveller_border_names', String(borderNamesEnabled));
+
+    const regionNamesEnabled = s.regionNamesEnabled ?? false;
+    window.regionNamesEnabled = regionNamesEnabled;
+    const regionNamesEl = document.getElementById('toggle-region-names');
+    if (regionNamesEl) regionNamesEl.checked = regionNamesEnabled;
+    localStorage.setItem('traveller_region_names', String(regionNamesEnabled));
+
+    const rttShowIndustry = s.rttShowIndustry ?? false;
+    window.rttShowIndustry = rttShowIndustry;
+    const rttIndustryEl = document.getElementById('toggle-rtt-industry');
+    if (rttIndustryEl) rttIndustryEl.checked = rttShowIndustry;
+    localStorage.setItem('traveller_rtt_show_industry', String(rttShowIndustry));
+
+    const borderMinSystems = s.borderMinSystems ?? 20;
+    window.borderMinSystems = borderMinSystems;
+    const borderMinEl = document.getElementById('input-border-min-systems');
+    if (borderMinEl) borderMinEl.value = borderMinSystems;
+    localStorage.setItem('traveller_border_min_systems', String(borderMinSystems));
+
+    // --- Planet rendering ---
+    const continentDef = s.planetContinentalDefinition ?? 0.55;
+    window.planetContinentalDefinition = continentDef;
+    const continentDefEl = document.getElementById('input-continent-def');
+    if (continentDefEl) continentDefEl.value = continentDef;
+    const continentDefVal = document.getElementById('continent-def-val');
+    if (continentDefVal) continentDefVal.textContent = continentDef.toFixed(2);
+    localStorage.setItem('traveller_planet_continent_def', String(continentDef));
+
+    const coastlineComp = s.planetCoastlineComplexity ?? 0.45;
+    window.planetCoastlineComplexity = coastlineComp;
+    const coastlineCompEl = document.getElementById('input-coastline-comp');
+    if (coastlineCompEl) coastlineCompEl.value = coastlineComp;
+    const coastlineCompVal = document.getElementById('coastline-comp-val');
+    if (coastlineCompVal) coastlineCompVal.textContent = coastlineComp.toFixed(2);
+    localStorage.setItem('traveller_planet_coastline_comp', String(coastlineComp));
+
+    // --- Generation settings ---
+    const tlMax = s.generationTlMax ?? 20;
+    window.generationTlMax = tlMax;
+    const tlMaxEl = document.getElementById('input-tl-max');
+    if (tlMaxEl) tlMaxEl.value = tlMax;
+    localStorage.setItem('traveller_gen_tl_max', String(tlMax));
+
+    const tlMod = s.generationTlMod ?? 0;
+    window.generationTlMod = tlMod;
+    const tlModEl = document.getElementById('input-tl-mod');
+    if (tlModEl) tlModEl.value = tlMod;
+    localStorage.setItem('traveller_gen_tl_mod', String(tlMod));
+
+    const useTlFloor = s.generationUseTlFloor ?? false;
+    window.generationUseTlFloor = useTlFloor;
+    const tlFloorEl = document.getElementById('input-use-tl-floor');
+    if (tlFloorEl) tlFloorEl.checked = useTlFloor;
+    localStorage.setItem('traveller_gen_use_tl_floor', String(useTlFloor));
+
+    const rttSettlement = s.generationRttSettlement ?? 2;
+    window.generationRttSettlement = rttSettlement;
+    const rttSettlementEl = document.getElementById('input-rtt-settlement');
+    if (rttSettlementEl) rttSettlementEl.value = rttSettlement;
+    localStorage.setItem('traveller_gen_rtt_settlement', String(rttSettlement));
+
+    const rttTL = s.generationRttTL ?? 15;
+    window.generationRttTL = rttTL;
+    const rttTlEl = document.getElementById('input-rtt-tl');
+    if (rttTlEl) rttTlEl.value = rttTL;
+    localStorage.setItem('traveller_gen_rtt_tl', String(rttTL));
+
+    const starportMax = s.generationStarportMax || 'A';
+    window.generationStarportMax = starportMax;
+    const starportMaxEl = document.getElementById('input-starport-max');
+    if (starportMaxEl) starportMaxEl.value = starportMax;
+    localStorage.setItem('traveller_gen_starport_max', starportMax);
+
+    const starportMod = s.generationStarportMod ?? 0;
+    window.generationStarportMod = starportMod;
+    const starportModEl = document.getElementById('input-starport-mod');
+    if (starportModEl) starportModEl.value = starportMod;
+    localStorage.setItem('traveller_gen_starport_mod', String(starportMod));
 }
 
 function applyLoadedMapData(parsedData) {
@@ -561,6 +676,8 @@ function applyLoadedMapData(parsedData) {
             }
         }
     }
+
+    applyLoadedSettings(parsedData.settings);
 
     selectedHexes.clear();
     document.getElementById('context-menu').classList.remove('visible');

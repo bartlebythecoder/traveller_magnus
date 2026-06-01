@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.13.2";
-const APP_BANNER = "v0.13.2: New: Diamond Map now matches T5 standards";
+const APP_VERSION = "v0.13.3";
+const APP_BANNER = "v0.13.3: New: Json saves all settings";
 
 // -----------------------------------------------------------------------------
 // Application State

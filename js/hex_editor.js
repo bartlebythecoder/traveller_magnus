@@ -538,7 +538,25 @@ function populateEditorAccordions(stateObj) {
 
             html += `<div class="system-tree">`;
 
-            sys.stars.forEach((star, starIdx) => {
+            // Build star render order: primary first, then all other stars sorted by
+            // orbitId within each parent's sub-system. Companions of a secondary appear
+            // immediately after that secondary, not at the end of the array.
+            function buildMgtStarOrder(stars) {
+                const result = [0];
+                function addChildren(parentIdx) {
+                    stars
+                        .map((s, i) => ({ s, i }))
+                        .filter(({ i }) => i > 0 && stars[i].parentStarIdx === parentIdx)
+                        .sort((a, b) => (a.s.orbitId || 0) - (b.s.orbitId || 0))
+                        .forEach(({ i }) => { result.push(i); addChildren(i); });
+                }
+                addChildren(0);
+                return result;
+            }
+
+            const orderedStarIndices = buildMgtStarOrder(sys.stars);
+            orderedStarIndices.forEach(starIdx => {
+                const star = sys.stars[starIdx];
                 const starNameInput = `<input type="text" class="rtt-field-input rtt-name-input${_mgtMc(star, 'name')}" data-mgt-field="name" data-mgt-sidx="${starIdx}" value="${(star.name || '').replace(/"/g, '&quot;')}">`;
                 html += `<details open>`;
                 html += `<summary>${star.role || 'Star'} — ${starNameInput} <span class="sys-title-info">Star</span></summary>`;

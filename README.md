@@ -1,4 +1,4 @@
-# As Above, So Below (v0.13.3)
+# As Above, So Below (v0.14.0)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -62,7 +62,12 @@ Want to replace any of these sectors with your own file?
 ---
 ## 📜 Changelog
 
-### [v0.13.3] - In Progress
+### [v0.14.0] - 2026-06-05
+1. **Filter:** Added ability to filter stellar information
+2. **Mongoose:** Added Class III, Class IV, Class VI and Giants to bottom up generation (Special table)
+3. **Mongoose:** Added Setting to use Optional Variant adding the realism of more colder M-type (red dwarf) systems
+
+### [v0.13.3] - 2026-06-01
 1. **JSON Save:** JSON saves now include all settings (display toggles, planet rendering, generation options)
 2. **Imperium Import:** Imperium imports now use full sector names (matching Universe Import behaviour)
 3. **Settings:** The "World Image Generation" sub-header and both sliders (Continental Definition, Coastline Complexity) are now at the bottom of the Visual Options section and removed from Generation. 

@@ -2264,6 +2264,20 @@ function setupSettingsPanel() {
         });
     }
 
+    // --- Generation Options: Use Realistic Stellar Variant (MgT2e only) ---
+    const realisticStellarInput = document.getElementById('input-use-realistic-stellar');
+    if (realisticStellarInput) {
+        const savedRealisticStellar = localStorage.getItem('traveller_gen_use_realistic_stellar');
+        const initialRealisticStellar = savedRealisticStellar === 'true';
+        realisticStellarInput.checked = initialRealisticStellar;
+        window.generationUseRealisticStellar = initialRealisticStellar;
+
+        realisticStellarInput.addEventListener('change', () => {
+            window.generationUseRealisticStellar = realisticStellarInput.checked;
+            localStorage.setItem('traveller_gen_use_realistic_stellar', String(realisticStellarInput.checked));
+        });
+    }
+
     // --- Generation Options: Use Min TL Floor (MgT2e only) ---
     const tlFloorInput = document.getElementById('input-use-tl-floor');
     if (tlFloorInput) {

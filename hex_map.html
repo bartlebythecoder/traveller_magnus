@@ -718,9 +718,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above<br> So Below</span></h1>
-            <div class="splash-banner">New: JSON saves all settings</div>
+            <div class="splash-banner">New: Mongoose Optional Realistic Star Generation</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.13.3</div>
+            <div class="splash-version">v0.14.0</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -795,12 +795,6 @@
                 <div class="settings-row" style="display:flex;align-items:center;gap:10px;">
                     <input type="checkbox" id="toggle-borders" checked>
                     <label for="toggle-borders" style="cursor:pointer;">Show Subsector Borders</label>
-                </div>
-                <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
-                    <label for="input-border-min-systems" style="font-size:0.8rem;">Min systems for border visibility</label>
-                    <input type="number" id="input-border-min-systems" min="0" value="20"
-                        style="width:55px;padding:4px 6px;background:#1f2833;border:1px solid #45a29e;color:#fff;
-                               font-family:'Courier New',Courier,monospace;font-size:0.85rem;border-radius:3px;text-align:right;">
                 </div>
                 <div class="settings-row" style="display:flex;align-items:center;gap:10px;">
                     <input type="checkbox" id="toggle-border-fill">
@@ -907,25 +901,33 @@
                         style="width:55px;padding:4px 6px;background:#1f2833;border:1px solid #45a29e;color:#fff;
                                font-family:'Courier New',Courier,monospace;font-size:0.85rem;border-radius:3px;text-align:right;">
                 </div>
-                <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
-                    <label for="input-use-tl-floor" style="font-size:0.8rem;">Use Min TL <span style="font-size:0.7rem;color:#66fcf1;">(MgT2e)</span></label>
-                    <input type="checkbox" id="input-use-tl-floor" style="cursor:pointer;accent-color:#66fcf1;">
+                <div style="border-top:1px solid rgba(102,252,241,0.15);border-bottom:1px solid rgba(102,252,241,0.15);padding:3px 0;margin:4px 0;">
+                    <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
+                        <label for="input-use-realistic-stellar" style="font-size:0.8rem;">Use Realistic Stellar Variant <span style="font-size:0.7rem;color:#66fcf1;">(MgT2e)</span></label>
+                        <input type="checkbox" id="input-use-realistic-stellar" style="cursor:pointer;accent-color:#66fcf1;">
+                    </div>
+                    <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
+                        <label for="input-use-tl-floor" style="font-size:0.8rem;">Use Min TL <span style="font-size:0.7rem;color:#66fcf1;">(MgT2e)</span></label>
+                        <input type="checkbox" id="input-use-tl-floor" style="cursor:pointer;accent-color:#66fcf1;">
+                    </div>
                 </div>
-                <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
-                    <label for="input-rtt-settlement" style="font-size:0.8rem;">Settlement Centuries <span style="font-size:0.7rem;color:#66fcf1;">(RTT)</span></label>
-                    <input type="number" id="input-rtt-settlement" min="0" max="100" value="2"
-                        style="width:55px;padding:4px 6px;background:#1f2833;border:1px solid #45a29e;color:#fff;
-                               font-family:'Courier New',Courier,monospace;font-size:0.85rem;border-radius:3px;text-align:right;">
-                </div>
-                <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
-                    <label for="input-rtt-tl" style="font-size:0.8rem;">Tech Level <span style="font-size:0.7rem;color:#66fcf1;">(RTT)</span></label>
-                    <input type="number" id="input-rtt-tl" min="0" max="33" value="15"
-                        style="width:55px;padding:4px 6px;background:#1f2833;border:1px solid #45a29e;color:#fff;
-                               font-family:'Courier New',Courier,monospace;font-size:0.85rem;border-radius:3px;text-align:right;">
-                </div>
-                <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
-                    <label for="toggle-rtt-industry" style="font-size:0.8rem;">Show Industry in UWP <span style="font-size:0.7rem;color:#66fcf1;">(RTT)</span></label>
-                    <input type="checkbox" id="toggle-rtt-industry" style="cursor:pointer;accent-color:#66fcf1;">
+                <div style="border-top:1px solid rgba(102,252,241,0.15);border-bottom:1px solid rgba(102,252,241,0.15);padding:3px 0;margin:4px 0;">
+                    <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
+                        <label for="input-rtt-settlement" style="font-size:0.8rem;">Settlement Centuries <span style="font-size:0.7rem;color:#66fcf1;">(RTT)</span></label>
+                        <input type="number" id="input-rtt-settlement" min="0" max="100" value="2"
+                            style="width:55px;padding:4px 6px;background:#1f2833;border:1px solid #45a29e;color:#fff;
+                                   font-family:'Courier New',Courier,monospace;font-size:0.85rem;border-radius:3px;text-align:right;">
+                    </div>
+                    <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
+                        <label for="input-rtt-tl" style="font-size:0.8rem;">Tech Level <span style="font-size:0.7rem;color:#66fcf1;">(RTT)</span></label>
+                        <input type="number" id="input-rtt-tl" min="0" max="33" value="15"
+                            style="width:55px;padding:4px 6px;background:#1f2833;border:1px solid #45a29e;color:#fff;
+                                   font-family:'Courier New',Courier,monospace;font-size:0.85rem;border-radius:3px;text-align:right;">
+                    </div>
+                    <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
+                        <label for="toggle-rtt-industry" style="font-size:0.8rem;">Show Industry in UWP <span style="font-size:0.7rem;color:#66fcf1;">(RTT)</span></label>
+                        <input type="checkbox" id="toggle-rtt-industry" style="cursor:pointer;accent-color:#66fcf1;">
+                    </div>
                 </div>
             </div>
         </div>
@@ -1159,7 +1161,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.13.3</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.14.0</span>
             </p>
         </div>
 
@@ -1976,6 +1978,55 @@
                         <div class="filter-field">
                             <label>Trade Codes</label>
                             <input type="text" id="filter-trade-codes" placeholder="Ag, In">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stellar Info (Accordion) - Closed by Default, Conditional -->
+                <div class="filter-section" id="filter-stellar-section" style="display: none;">
+                    <div class="filter-accordion-header"
+                        onclick="this.classList.toggle('open'); document.getElementById('stellar-accordion-body').classList.toggle('open');">
+                        <span class="filter-title">Stellar Info</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div id="stellar-accordion-body" class="filter-conditional-container filter-accordion-content">
+                        <div class="filter-field" style="grid-column: 1 / -1;">
+                            <label>Primary Only</label>
+                            <input type="checkbox" id="filter-stellar-primary-only" style="width: auto; margin-top: 2px;">
+                        </div>
+                        <div class="filter-field" style="flex-direction: column; align-items: stretch; grid-column: span 2;">
+                            <label>Class</label>
+                            <select id="filter-stellar-class" multiple size="5" style="width: 100%; background: #0b0c10; border: 1px solid #45a29e; color: #66fcf1; font-family: 'Courier New', monospace; font-size: 0.85rem; padding: 2px; border-radius: 3px;">
+                                <option value="V">V — Main Sequence</option>
+                                <option value="IV">IV — Sub-giant</option>
+                                <option value="III">III — Giant</option>
+                                <option value="II">II — Bright Giant</option>
+                                <option value="Ib">Ib — Supergiant</option>
+                                <option value="Ia">Ia — Luminous Supergiant</option>
+                                <option value="VI">VI — Sub-dwarf</option>
+                                <option value="D">D — White Dwarf</option>
+                                <option value="BD">BD — Brown Dwarf</option>
+                            </select>
+                            <span style="font-size: 0.7rem; color: #888; margin-top: 2px;">Ctrl+click to select multiple</span>
+                        </div>
+                        <div class="filter-field" style="flex-direction: column; align-items: stretch; grid-column: span 2;">
+                            <label>Type</label>
+                            <select id="filter-stellar-type" multiple size="5" style="width: 100%; background: #0b0c10; border: 1px solid #45a29e; color: #66fcf1; font-family: 'Courier New', monospace; font-size: 0.85rem; padding: 2px; border-radius: 3px;">
+                                <option value="O">O</option>
+                                <option value="B">B</option>
+                                <option value="A">A</option>
+                                <option value="F">F</option>
+                                <option value="G">G</option>
+                                <option value="K">K</option>
+                                <option value="M">M</option>
+                                <option value="D">D — White Dwarf</option>
+                                <option value="BD">BD — Brown Dwarf</option>
+                            </select>
+                            <span style="font-size: 0.7rem; color: #888; margin-top: 2px;">Ctrl+click to select multiple</span>
+                        </div>
+                        <div class="filter-field">
+                            <label>Subtype</label>
+                            <input type="text" id="filter-stellar-subtype" placeholder="e.g. 0-4, >5">
                         </div>
                     </div>
                 </div>

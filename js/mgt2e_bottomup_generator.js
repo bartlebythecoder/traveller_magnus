@@ -74,7 +74,7 @@
         // 1. Generate stellar system (Primary + companions)
         if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 1: Stellar Generation...`);
         if (StellarEngine && StellarEngine.generateStellarSystem) {
-            StellarEngine.generateStellarSystem(sys, hexId);
+            StellarEngine.generateStellarSystem(sys, hexId, null, 'bottom-up');
         }
 
         // 2. Generate system inventory (GG count, belts, terrestrials)

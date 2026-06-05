@@ -229,20 +229,224 @@
     }
 
     /**
-     * Helper to roll a MgT2E Star type and class.
+     * Resolves a 'Special' primary star result from bottomUpPrimaryType.
+     * Rolls luminosity class (bottomUpSpecialType → bottomUpGiantsType),
+     * then spectral type (2d6+1 on primaryType) with class-specific adjustments.
      */
-    function rollStar(label = 'Star') {
+    function resolveBottomUpSpecial(label) {
+        tSection(`${label} Special Star Resolution`);
+        if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Entering Special resolution — bottom-up primary roll was 2 (Special trigger)`);
+
+        // -----------------------------------------------------------------
+        // STEP 1: Luminosity Class (bottomUpSpecialType table)
+        // -----------------------------------------------------------------
+        tSection(`${label} Step 1 — Luminosity Class`);
+        let specialRoll = tRoll2D(`${label} Special Class Roll (2D6)`);
+        if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Special Class roll = ${specialRoll} → looking up bottomUpSpecialType`);
+
+        let sClass = '';
+        for (let entry of MgT2EData.stellar.bottomUpSpecialType) {
+            if (specialRoll <= entry.maxRoll) {
+                sClass = entry.sClass;
+                break;
+            }
+        }
+        tResult(`${label} Initial Class Result`, sClass, 'MgT2E 1.1: bottomUpSpecialType table');
+
+        if (sClass === 'Giants') {
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Class result is 'Giants' — rolling on bottomUpGiantsType sub-table`);
+            tSection(`${label} Step 1a — Giants Sub-class`);
+            let giantsRoll = tRoll2D(`${label} Giants Sub-class Roll (2D6)`);
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Giants sub-class roll = ${giantsRoll} → looking up bottomUpGiantsType`);
+            for (let entry of MgT2EData.stellar.bottomUpGiantsType) {
+                if (giantsRoll <= entry.maxRoll) {
+                    sClass = entry.sClass;
+                    break;
+                }
+            }
+            tResult(`${label} Giants Sub-class Result`, sClass, 'MgT2E 1.1: bottomUpGiantsType table');
+        }
+
+        tResult(`${label} Final Luminosity Class`, sClass, 'MgT2E 1.1: Stellar Generation');
+        if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Luminosity class resolved → ${sClass}`);
+
+        // -----------------------------------------------------------------
+        // STEP 2: Spectral Type (2d6+1 on primaryType table)
+        // -----------------------------------------------------------------
+        tSection(`${label} Step 2 — Spectral Type`);
+        if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Rolling 2D6+1 on primaryType table for spectral type`);
+        let typeRollBase = tRoll2D(`${label} Spectral Type Roll (2D6)`);
+        tDM('+1 Special Type DM', 1);
+        let typeRoll = typeRollBase + 1;
+        tResult(`${label} Adjusted Type Roll`, typeRoll, 'MgT2E 1.1: Special Type = 2D6+1');
+
+        let sType = '';
+        for (let entry of MgT2EData.stellar.primaryType) {
+            if (typeRoll <= entry.maxRoll) {
+                sType = entry.type;
+                break;
+            }
+        }
+        tResult(`${label} Initial Spectral Type`, sType, 'MgT2E 1.1: primaryType table lookup');
+        if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Initial spectral type = ${sType} (roll ${typeRoll}, class ${sClass}) — checking for class-specific adjustments`);
+
+        // -----------------------------------------------------------------
+        // STEP 3a: Class IV Adjustments
+        // Sub-giants cannot be M-type; O-type is capped at B
+        // -----------------------------------------------------------------
+        if (sClass === 'IV') {
+            tSection(`${label} Step 3 — Class IV Adjustments`);
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Class IV (Sub-giant) — checking M-type suppression rule`);
+
+            if (typeRoll <= 6) {
+                if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Roll ${typeRoll} ≤ 6 → M-type result suppressed for Class IV; applying +5 DM`);
+                tDM('+5 Class IV M-type suppression', 5);
+                typeRoll += 5;
+                tResult(`${label} Adjusted Type Roll (post M-suppression)`, typeRoll, 'MgT2E 1.1: Class IV cannot be M-type');
+                sType = '';
+                for (let entry of MgT2EData.stellar.primaryType) {
+                    if (typeRoll <= entry.maxRoll) {
+                        sType = entry.type;
+                        break;
+                    }
+                }
+                tResult(`${label} Re-looked Spectral Type`, sType, 'MgT2E 1.1: primaryType table re-lookup after M-suppression');
+                if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Post M-suppression type = ${sType} (adjusted roll ${typeRoll})`);
+            } else {
+                if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Roll ${typeRoll} > 6 — no M-suppression needed`);
+            }
+
+            if (sType === 'Hot') {
+                if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Type is Hot — rolling hotType sub-table (O will be capped to B for Class IV)`);
+                tSection(`${label} Step 3 — Class IV Hot Resolution`);
+                let hotRoll = tRoll2D(`${label} Hot Type Roll (2D6)`);
+                if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Hot type roll = ${hotRoll}`);
+                let hotType = '';
+                for (let entry of MgT2EData.stellar.hotType) {
+                    if (hotRoll <= entry.maxRoll) {
+                        hotType = entry.type;
+                        break;
+                    }
+                }
+                tResult(`${label} Hot Table Result`, hotType, 'MgT2E 1.1: hotType table lookup');
+                if (hotType === 'O') {
+                    sType = 'B';
+                    tResult(`${label} O→B Cap Applied`, `O changed to B (Class IV sub-giants cannot be O-type)`, 'MgT2E 1.1: Class IV O cap');
+                    if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: O-type capped to B for Class IV sub-giant`);
+                } else {
+                    sType = hotType;
+                    if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Hot type resolved to ${sType} — no cap needed`);
+                }
+            }
+
+            tResult(`${label} Class IV Final Spectral Type`, sType, 'MgT2E 1.1: Stellar Generation');
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Class IV adjustments complete → final type = ${sType}`);
+        }
+
+        // -----------------------------------------------------------------
+        // STEP 3b: Class VI Adjustments
+        // Sub-dwarfs cannot be F-type (→G) or A-type (→B)
+        // -----------------------------------------------------------------
+        if (sClass === 'VI') {
+            tSection(`${label} Step 3 — Class VI Adjustments`);
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Class VI (Sub-dwarf) — checking F→G and A→B restriction rules`);
+
+            if (sType === 'Hot') {
+                if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Type is Hot — resolving hotType first, then applying Class VI restrictions`);
+                tSection(`${label} Step 3 — Class VI Hot Resolution`);
+                let hotRoll = tRoll2D(`${label} Hot Type Roll (2D6)`);
+                if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Hot type roll = ${hotRoll}`);
+                let hotType = '';
+                for (let entry of MgT2EData.stellar.hotType) {
+                    if (hotRoll <= entry.maxRoll) {
+                        hotType = entry.type;
+                        break;
+                    }
+                }
+                sType = hotType;
+                tResult(`${label} Hot Table Result`, sType, 'MgT2E 1.1: hotType table lookup');
+                if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Hot resolved to ${sType} — now applying Class VI restrictions`);
+            }
+
+            if (sType === 'F') {
+                tResult(`${label} F→G Restriction`, `F changed to G (Class VI sub-dwarfs cannot be F-type)`, 'MgT2E 1.1: Class VI F restriction');
+                if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: F-type restricted to G for Class VI sub-dwarf`);
+                sType = 'G';
+            }
+            if (sType === 'A') {
+                tResult(`${label} A→B Restriction`, `A changed to B (Class VI sub-dwarfs cannot be A-type)`, 'MgT2E 1.1: Class VI A restriction');
+                if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: A-type restricted to B for Class VI sub-dwarf`);
+                sType = 'B';
+            }
+
+            tResult(`${label} Class VI Final Spectral Type`, sType, 'MgT2E 1.1: Stellar Generation');
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Class VI adjustments complete → final type = ${sType}`);
+        }
+
+        // -----------------------------------------------------------------
+        // STEP 3c: Hot Resolution for Giant/Supergiant classes (III, II, Ib, Ia)
+        // No spectral type restrictions apply
+        // -----------------------------------------------------------------
+        if (sType === 'Hot') {
+            tSection(`${label} Step 3 — Hot Resolution (${sClass})`);
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Type is Hot for class ${sClass} — rolling hotType sub-table (no restrictions)`);
+            let hotRoll = tRoll2D(`${label} Hot Type Roll (2D6)`);
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Hot type roll = ${hotRoll}`);
+            for (let entry of MgT2EData.stellar.hotType) {
+                if (hotRoll <= entry.maxRoll) {
+                    sType = entry.type;
+                    break;
+                }
+            }
+            tResult(`${label} Hot Table Result`, sType, 'MgT2E 1.1: hotType table lookup');
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Hot type resolved to ${sType} for ${sClass} class`);
+        }
+
+        // -----------------------------------------------------------------
+        // STEP 4: Subtype
+        // Class IV K-type restricted to 0-4 (cooler end of K band only)
+        // All others: 0-9
+        // -----------------------------------------------------------------
+        tSection(`${label} Step 4 — Subtype`);
+        let subType;
+        if (sClass === 'IV' && sType === 'K') {
+            subType = Math.floor(rng() * 5);
+            tResult(`${label} Subtype`, subType, 'MgT2E 1.1: Class IV K restricted to subtype 0-4');
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Class IV K-type — subtype restricted to 0-4, rolled ${subType}`);
+        } else {
+            subType = Math.floor(rng() * 10);
+            tResult(`${label} Subtype`, subType, 'MgT2E 1.1: Subtype 0-9');
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Subtype roll 0-9 = ${subType}`);
+        }
+
+        // -----------------------------------------------------------------
+        // FINAL RESULT
+        // -----------------------------------------------------------------
+        tResult(`${label} Special Star Final`, `${sType}${subType} ${sClass}`, 'MgT2E 1.1: Bottom-Up Special Star');
+        if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${label}: Special resolution complete → ${sType}${subType} ${sClass}`);
+
+        return generateStarObject(sType, subType, sClass, label);
+    }
+
+    /**
+     * Helper to roll a MgT2E Star type and class.
+     * tableKey selects which primary type table to use (primaryType or bottomUpPrimaryType).
+     */
+    function rollStar(label = 'Star', tableKey = 'primaryType') {
         let roll = tRoll2D(`${label} Type Roll`);
         let sType = '';
         let sClass = 'V';
 
-        // Use MgT2EData lookup
-        for (let entry of MgT2EData.stellar.primaryType) {
+        for (let entry of MgT2EData.stellar[tableKey]) {
             if (roll <= entry.maxRoll) {
                 sType = entry.type;
-                sClass = entry.class;
+                sClass = entry.class || sClass;
                 break;
             }
+        }
+
+        if (sType === 'Special') {
+            return resolveBottomUpSpecial(label);
         }
 
         if (sType === 'Hot') {
@@ -419,7 +623,7 @@
      * Step 1: Primary Star & System Age
      * Step 2: Additional Stars
      */
-    function generateStellarSystem(sys, hexId, mainworldBase) {
+    function generateStellarSystem(sys, hexId, mainworldBase, mode = 'topdown') {
         if (!sys.worlds) sys.worlds = [];
         sys.stars = [];
         if (window.isLoggingEnabled) {
@@ -458,7 +662,10 @@
             primary = generateStarObject(sType, subType, sClass, 'Primary');
             tResult('Primary Override', primaryStr, 'MgT2E 1.1: Stellar Generation');
         } else {
-            primary = rollStar('Primary');
+            const bottomUpTable = window.generationUseRealisticStellar
+                ? 'bottomUpRealisticPrimaryType'
+                : 'bottomUpPrimaryType';
+            primary = rollStar('Primary', mode === 'bottom-up' ? bottomUpTable : 'primaryType');
         }
 
         primary.role = 'Primary';

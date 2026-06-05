@@ -229,18 +229,19 @@ const SystemViewer = (() => {
                 else                              orbitAU = 10;
             }
             return {
-                name:       s.name || `${s.type}${s.decimal ?? ''} ${s.size}`,
-                sType:      s.type  || 'G',
-                sClass:     s.size  || 'V',
-                subType:    s.decimal ?? 5,
-                mass:       s.mass        || 1,
-                diam:       s.diam        || 1,
-                temp:       null,
-                lum:        s.luminosity  || 1,
-                role:       s.role || (i === 0 ? 'Primary' : 'Companion'),
-                separation: i > 0 ? (typeof s.orbit === 'string' ? s.orbit : null) : null,
-                orbitId:    typeof s.orbit === 'number' ? s.orbit : null,
+                name:           s.name || `${s.type}${s.decimal ?? ''} ${s.size}`,
+                sType:          s.type  || 'G',
+                sClass:         s.size  || 'V',
+                subType:        s.decimal ?? 5,
+                mass:           s.mass        || 1,
+                diam:           s.diam        || 1,
+                temp:           null,
+                lum:            s.luminosity  || 1,
+                role:           s.role || (i === 0 ? 'Primary' : 'Companion'),
+                separation:     i > 0 ? (typeof s.orbit === 'string' ? s.orbit : null) : null,
+                orbitId:        typeof s.orbit === 'number' ? s.orbit : null,
                 orbitAU,
+                parentStarIdx:  s.parentStarIdx ?? 0,
             };
         });
 
@@ -302,18 +303,19 @@ const SystemViewer = (() => {
 
         // Stars
         const stars = (sys.stars || []).map((s, i) => ({
-            name:       s.name || `${s.type}${s.decimal ?? ''} ${s.size}`,
-            sType:      s.type  || 'G',
-            sClass:     s.size  || 'V',
-            subType:    s.decimal ?? 5,
-            mass:       s.mass        || 1,
-            diam:       s.diam        || 1,
-            temp:       null,
-            lum:        s.luminosity  || 1,
-            role:       s.role || (i === 0 ? 'Primary' : 'Companion'),
-            separation: i > 0 ? (s.role || null) : null,
-            orbitId:    s.orbitID     || null,
-            orbitAU:    i > 0 ? (s.distAU || null) : null,
+            name:          s.name || `${s.type}${s.decimal ?? ''} ${s.size}`,
+            sType:         s.type  || 'G',
+            sClass:        s.size  || 'V',
+            subType:       s.decimal ?? 5,
+            mass:          s.mass        || 1,
+            diam:          s.diam        || 1,
+            temp:          null,
+            lum:           s.luminosity  || 1,
+            role:          s.role || (i === 0 ? 'Primary' : 'Companion'),
+            separation:    i > 0 ? (s.role || null) : null,
+            orbitId:       s.orbitID     || null,
+            orbitAU:       i > 0 ? (s.distAU || null) : null,
+            parentStarIdx: s.parentStarIdx ?? 0,
         }));
 
         // Worlds — per-star orbital arrays
@@ -391,17 +393,18 @@ const SystemViewer = (() => {
             const orbitAU = i > 0 ? (_RTT_COMPANION_AU[s.orbitType] ?? 5) : null;
 
             return {
-                name:       s.classification || `${s.type}-${s.luminosityClass}`,
+                name:          s.classification || `${s.type}-${s.luminosityClass}`,
                 sType, sClass,
-                subType:    5,
-                mass:       s.mass || 1,
-                diam:       s.diam || 1,
-                temp:       null,
-                lum:        s.lum  || 1,
-                role:       s.role || (i === 0 ? 'Primary' : 'Companion'),
-                separation: i > 0 ? (s.orbitType || null) : null,
-                orbitId:    null,
+                subType:       5,
+                mass:          s.mass || 1,
+                diam:          s.diam || 1,
+                temp:          null,
+                lum:           s.lum  || 1,
+                role:          s.role || (i === 0 ? 'Primary' : 'Companion'),
+                separation:    i > 0 ? (s.orbitType || null) : null,
+                orbitId:       null,
                 orbitAU,
+                parentStarIdx: s.parentStarIdx ?? 0,
             };
         });
 
@@ -798,16 +801,17 @@ const SystemViewer = (() => {
         const effectiveSSspeed = STAR_SPEED_BASE * _starSpeed;
         const VISUAL_YEAR_SECS_S = effectiveSSspeed > 0 ? 2 * Math.PI / effectiveSSspeed : Infinity;
         companions.forEach((s, i) => {
-            const compAU = _starCompanionAU(s);
-            const dist   = Math.max(_linearScale ? 30 : 90, _scaleR(compAU, maxAU, scaledMaxR));
-            const au     = Math.max(compAU, 0.05);
-            const angVel = s.periodYears
+            const compAU   = _starCompanionAU(s);
+            const dist     = Math.max(_linearScale ? 30 : 90, _scaleR(compAU, maxAU, scaledMaxR));
+            const au       = Math.max(compAU, 0.05);
+            const angVel   = s.periodYears
                 ? (2 * Math.PI / s.periodYears) / VISUAL_YEAR_SECS_S
                 : effectiveSSspeed / Math.pow(au, 1.5);
-            const angle  = i * GOLDEN - Math.PI / 2 + angVel * elapsed;
+            const angle    = i * GOLDEN - Math.PI / 2 + angVel * elapsed;
+            const parentPos = starPos.get(s.parentStarIdx ?? 0) || { cx: originX, cy: originY };
             starPos.set(i + 1, {
-                cx: originX + dist * Math.cos(angle),
-                cy: originY + dist * Math.sin(angle)
+                cx: parentPos.cx + dist * Math.cos(angle),
+                cy: parentPos.cy + dist * Math.sin(angle)
             });
         });
 
@@ -821,15 +825,16 @@ const SystemViewer = (() => {
 
         // Companion orbit rings + sub-orreries
         companions.forEach((s, i) => {
-            const sIdx   = i + 1;
-            const pos    = starPos.get(sIdx);
-            const compAU = _starCompanionAU(s);
-            const orbitR = Math.max(_linearScale ? 30 : 90, _scaleR(compAU, maxAU, scaledMaxR));
+            const sIdx      = i + 1;
+            const pos       = starPos.get(sIdx);
+            const compAU    = _starCompanionAU(s);
+            const orbitR    = Math.max(_linearScale ? 30 : 90, _scaleR(compAU, maxAU, scaledMaxR));
+            const parentPos = starPos.get(s.parentStarIdx ?? 0) || { cx: originX, cy: originY };
 
             if (_orbitOpacity > 0) {
                 const orbitAlpha = _lightMode ? _orbitOpacity * 0.80 : _orbitOpacity * 0.55;
                 ctx.beginPath();
-                ctx.arc(originX, originY, orbitR, 0, Math.PI * 2);
+                ctx.arc(parentPos.cx, parentPos.cy, orbitR, 0, Math.PI * 2);
                 ctx.strokeStyle = `rgba(69, 162, 158, ${orbitAlpha.toFixed(3)})`;
                 ctx.lineWidth   = 1 + _orbitOpacity * 1.5;
                 ctx.setLineDash([4, 6]);

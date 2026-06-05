@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.13.3";
-const APP_BANNER = "v0.13.3: New: Json saves all settings";
+const APP_VERSION = "v0.14.0";
+const APP_BANNER = "v0.14.0: New: Mongoose Optional Realistic Star Generation";
 
 // -----------------------------------------------------------------------------
 // Application State

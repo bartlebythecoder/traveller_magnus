@@ -80,6 +80,7 @@ function setupSaveLoad() {
             planetCoastlineComplexity:   window.planetCoastlineComplexity   ?? 0.45,
             generationTlMax:             window.generationTlMax             ?? 20,
             generationTlMod:             window.generationTlMod             ?? 0,
+            generationUseRealisticStellar: window.generationUseRealisticStellar ?? false,
             generationUseTlFloor:        window.generationUseTlFloor        ?? false,
             generationRttSettlement:     window.generationRttSettlement      ?? 2,
             generationRttTL:             window.generationRttTL             ?? 15,
@@ -486,6 +487,12 @@ function applyLoadedSettings(settings) {
     const tlModEl = document.getElementById('input-tl-mod');
     if (tlModEl) tlModEl.value = tlMod;
     localStorage.setItem('traveller_gen_tl_mod', String(tlMod));
+
+    const useRealisticStellar = s.generationUseRealisticStellar ?? false;
+    window.generationUseRealisticStellar = useRealisticStellar;
+    const realisticStellarEl = document.getElementById('input-use-realistic-stellar');
+    if (realisticStellarEl) realisticStellarEl.checked = useRealisticStellar;
+    localStorage.setItem('traveller_gen_use_realistic_stellar', String(useRealisticStellar));
 
     const useTlFloor = s.generationUseTlFloor ?? false;
     window.generationUseTlFloor = useTlFloor;

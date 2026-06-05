@@ -168,6 +168,16 @@
             if (el) el.checked = true; // Restore Visibility
         });
 
+        // Stellar Info fields
+        const stellarPrimaryOnly = document.getElementById('filter-stellar-primary-only');
+        if (stellarPrimaryOnly) stellarPrimaryOnly.checked = false;
+        ['filter-stellar-class', 'filter-stellar-type'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) Array.from(el.options).forEach(o => o.selected = false);
+        });
+        const stellarSubtype = document.getElementById('filter-stellar-subtype');
+        if (stellarSubtype) stellarSubtype.value = '';
+
         if (typeof writeLogLine === 'function') writeLogLine("Filter inputs cleared. Restoring sector-wide visibility.");
         
         // Immediate trigger (bypass debounce)
@@ -180,17 +190,18 @@
     */
     function scanForConditionalFields() {
         if (typeof tSection === 'function') tSection("Scan Sector for Conditional Fields");
-        
+
         let hasT5Ix = false;
         let hasMgImportance = false;
         let hasMgWTN = false;
         let hasMgGWP = false;
         let hasGravity = false;
         let hasTemp = false;
+        let hasStellarData = false;
 
         hexStates.forEach(state => {
             // Optimization: Skip if we found everything
-            if (hasT5Ix && hasMgImportance && hasMgWTN && hasMgGWP && hasGravity && hasTemp) return;
+            if (hasT5Ix && hasMgImportance && hasMgWTN && hasMgGWP && hasGravity && hasTemp && hasStellarData) return;
 
             const t5Socio = state.t5Socio;
             const mgtSocio = state.mgtSocio;
@@ -217,10 +228,14 @@
                     hasMgGWP = true;
                 }
             }
+
+            // Stellar Data Check
+            const sys = state.mgtSystem || state.ctSystem || state.t5System || state.rttSystem;
+            if (sys && sys.stars && sys.stars.length > 0) hasStellarData = true;
         });
 
         if (typeof writeLogLine === 'function') {
-            writeLogLine(`Scan Complete: T5Ix=${hasT5Ix}, MgImp=${hasMgImportance}, MgWTN=${hasMgWTN}, MgGWP=${hasMgGWP}`);
+            writeLogLine(`Scan Complete: T5Ix=${hasT5Ix}, MgImp=${hasMgImportance}, MgWTN=${hasMgWTN}, MgGWP=${hasMgGWP}, Stellar=${hasStellarData}`);
         }
 
         document.getElementById('filter-field-t5-ix').style.display = hasT5Ix ? 'flex' : 'none';
@@ -229,9 +244,54 @@
         document.getElementById('filter-field-mgt-gwp').style.display = hasMgGWP ? 'flex' : 'none';
         document.getElementById('filter-field-gravity').style.display = hasGravity ? 'flex' : 'none';
         document.getElementById('filter-field-temperature').style.display = hasTemp ? 'flex' : 'none';
-        
+
         const conditionalSection = document.getElementById('filter-conditional-section');
         conditionalSection.style.display = (hasT5Ix || hasMgImportance || hasMgWTN || hasMgGWP || hasGravity || hasTemp) ? 'block' : 'none';
+
+        document.getElementById('filter-stellar-section').style.display = hasStellarData ? 'block' : 'none';
+    }
+
+    /**
+     * Returns true if the state's star data satisfies all stellar filter criteria.
+     * Checks across all engines. If primaryOnly, only the first star (role=Primary) is evaluated.
+     * A system with no star data never matches when a stellar filter is active.
+     */
+    function matchesStellarFilter(state, criteria) {
+        const sys = state.mgtSystem || state.ctSystem || state.t5System || state.rttSystem;
+        if (!sys || !sys.stars || sys.stars.length === 0) return false;
+
+        const starsToCheck = criteria.primaryOnly
+            ? sys.stars.filter((s, i) => s.role === 'Primary' || i === 0).slice(0, 1)
+            : sys.stars;
+
+        return starsToCheck.some(star => {
+            if (criteria.classes.length > 0 && !criteria.classes.includes(star.sClass)) return false;
+            if (criteria.types.length > 0 && !criteria.types.includes(star.sType)) return false;
+            if (criteria.subtype && !matchesStellarNumericRange(star.subType, criteria.subtype)) return false;
+            return true;
+        });
+    }
+
+    /**
+     * Minimal numeric range parser for stellar subtype matching.
+     * Supports: >N, <N, N-M (range), or comma-separated exact values.
+     */
+    function matchesStellarNumericRange(value, criteria) {
+        const str = String(criteria).trim();
+        if (!str) return true;
+        const num = parseFloat(value);
+        if (isNaN(num)) return false;
+
+        if (str.startsWith('>')) return num > parseFloat(str.substring(1));
+        if (str.startsWith('<')) return num < parseFloat(str.substring(1));
+
+        return str.split(',').map(s => s.trim()).filter(s => s !== '').some(token => {
+            if (token.includes('-') && token.length >= 3) {
+                const parts = token.split('-');
+                if (parts.length === 2) return num >= parseFloat(parts[0]) && num <= parseFloat(parts[1]);
+            }
+            return num === parseFloat(token);
+        });
     }
 
     /**
@@ -276,8 +336,15 @@
             t5Ix: document.getElementById('filter-t5-ix')?.value || "",
             mgtImportance: document.getElementById('filter-mgt-importance')?.value || "",
             mgtWTN: document.getElementById('filter-mgt-wtn')?.value || "",
-            mgtGWP: document.getElementById('filter-mgt-gwp')?.value || ""
+            mgtGWP: document.getElementById('filter-mgt-gwp')?.value || "",
+            stellarClasses: Array.from(document.getElementById('filter-stellar-class')?.selectedOptions || []).map(o => o.value),
+            stellarTypes: Array.from(document.getElementById('filter-stellar-type')?.selectedOptions || []).map(o => o.value),
+            stellarSubtype: document.getElementById('filter-stellar-subtype')?.value.trim() || '',
+            stellarPrimaryOnly: document.getElementById('filter-stellar-primary-only')?.checked || false
         };
+
+        // 2. Derive stellar filter presence from the now-merged activeFilters
+        const hasStellarFilter = activeFilters.stellarClasses.length > 0 || activeFilters.stellarTypes.length > 0 || activeFilters.stellarSubtype !== '';
 
         let matchCount = 0;
         let totalCount = 0;
@@ -308,10 +375,25 @@
                 const worldName = (evalObject.name || evalObject.systemName || state.name || '').toLowerCase();
                 if (!worldName.startsWith(nameQuery)) isVisible = false;
             }
-            // Strip 'name' before passing to UniversalMath — it handles UWP tokens only
+            // Strip non-UWP keys before passing to UniversalMath
             const uwpFilters = Object.assign({}, activeFilters);
             delete uwpFilters.name;
+            delete uwpFilters.stellarClasses;
+            delete uwpFilters.stellarTypes;
+            delete uwpFilters.stellarSubtype;
+            delete uwpFilters.stellarPrimaryOnly;
             if (isVisible) isVisible = UniversalMath.applyFilters(evalObject, uwpFilters, activeRouteStatus);
+
+            // Stellar filter pass (operates on star objects, not UWP data)
+            if (isVisible && hasStellarFilter) {
+                isVisible = matchesStellarFilter(state, {
+                    classes: activeFilters.stellarClasses,
+                    types: activeFilters.stellarTypes,
+                    subtype: activeFilters.stellarSubtype,
+                    primaryOnly: activeFilters.stellarPrimaryOnly
+                });
+            }
+
             state.isHiddenByFilter = !isVisible;
 
             if (isSystemPresent && isVisible) matchCount++;
@@ -360,11 +442,18 @@
             pop: "Pop", totalPop: "Total Pop", gov: "Gov", law: "Law", tl: "TL", tradeCodes: "Codes",
             allegiance: "Alleg", cluster: "Region", belts: "Belts", gasGiant: "Gas Giant", travelZone: "Zone",
             gravity: "Grav", temperature: "Temp (°C)",
-            t5Ix: "T5 Ix", mgtImportance: "Mg Imp", mgtWTN: "Mg WTN", mgtGWP: "Mg GWP"
+            t5Ix: "T5 Ix", mgtImportance: "Mg Imp", mgtWTN: "Mg WTN", mgtGWP: "Mg GWP",
+            stellarClasses: "Star Class", stellarTypes: "Star Type", stellarSubtype: "Star Subtype", stellarPrimaryOnly: "Primary Star Only"
         };
         for (const key in filters) {
-            if (filters[key] && filters[key].trim() !== "") {
-                parts.push(`${labels[key] || key}: ${filters[key]}`);
+            const val = filters[key];
+            if (!val) continue;
+            if (Array.isArray(val)) {
+                if (val.length > 0) parts.push(`${labels[key] || key}: ${val.join('/')}`);
+            } else if (typeof val === 'boolean') {
+                if (val && labels[key]) parts.push(labels[key]);
+            } else if (String(val).trim() !== '') {
+                parts.push(`${labels[key] || key}: ${val}`);
             }
         }
         return parts.length > 0 ? parts.join(" | ") : "All Worlds";
@@ -467,7 +556,27 @@
                 const socioData = state.t5Socio || state.mgtSocio || {};
                 const evalObject = { ...worldData, ...socioData, allegiance: state.allegiance, cluster: state.cluster };
 
-                if (UniversalMath.applyFilters(evalObject, rule.filters)) {
+                const uwpRuleFilters = Object.assign({}, rule.filters);
+                delete uwpRuleFilters.stellarClasses;
+                delete uwpRuleFilters.stellarTypes;
+                delete uwpRuleFilters.stellarSubtype;
+                delete uwpRuleFilters.stellarPrimaryOnly;
+
+                const hasStellarCriteria = (rule.filters.stellarClasses && rule.filters.stellarClasses.length > 0) ||
+                    (rule.filters.stellarTypes && rule.filters.stellarTypes.length > 0) ||
+                    (rule.filters.stellarSubtype && rule.filters.stellarSubtype !== '');
+
+                let matchesRule = UniversalMath.applyFilters(evalObject, uwpRuleFilters);
+                if (matchesRule && hasStellarCriteria) {
+                    matchesRule = matchesStellarFilter(state, {
+                        classes: rule.filters.stellarClasses || [],
+                        types: rule.filters.stellarTypes || [],
+                        subtype: rule.filters.stellarSubtype || '',
+                        primaryOnly: rule.filters.stellarPrimaryOnly || false
+                    });
+                }
+
+                if (matchesRule) {
                     if (!state.custom_ui) state.custom_ui = { appliedColors: [] };
 
                     if (isSystemPresent) {
@@ -748,6 +857,16 @@
             const el = document.getElementById(id);
             if (el) el.addEventListener('change', saveDesignCheckboxes);
         });
+
+        // Stellar Info filters
+        ['filter-stellar-class', 'filter-stellar-type'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('change', onFilterChanged);
+        });
+        const stellarPrimaryOnlyEl = document.getElementById('filter-stellar-primary-only');
+        if (stellarPrimaryOnlyEl) stellarPrimaryOnlyEl.addEventListener('change', onFilterChanged);
+        const stellarSubtypeEl = document.getElementById('filter-stellar-subtype');
+        if (stellarSubtypeEl) stellarSubtypeEl.addEventListener('input', onFilterChanged);
 
         // Hex Background Fill visibility toggle
         const hexBgToggle = document.getElementById('filter-hex-bg-visible');

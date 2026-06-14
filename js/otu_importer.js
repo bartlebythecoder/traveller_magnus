@@ -283,6 +283,7 @@
      */
     async function runImport() {
         const opts = readImportOptions('otu-opt-sector', 'otu-opt-routes', 'otu-opt-borders', 'otu-opt-regions');
+        opts.importSystemData = document.getElementById('otu-opt-system-data')?.checked ?? false;
         const needsMeta = opts.importRoutes || opts.importBorders || opts.importRegions;
 
         const rows = document.querySelectorAll('.otu-sector-row');
@@ -404,6 +405,10 @@
             }
             if (typeof window.sortAndTrimBorderDefinitions === 'function') window.sortAndTrimBorderDefinitions();
             if (typeof window.renderBorderWindow === 'function') window.renderBorderWindow();
+        }
+
+        if (opts.importSystemData && typeof applyOtuSystemData === 'function') {
+            applyOtuSystemData();
         }
 
         requestAnimationFrame(draw);
@@ -602,6 +607,11 @@
 
         if (typeof window.renderBorderWindow === 'function') window.renderBorderWindow();
         if (typeof window.renderRegionWindow === 'function') window.renderRegionWindow();
+
+        if (opts.importSystemData && typeof applyOtuSystemData === 'function') {
+            applyOtuSystemData();
+        }
+
         requestAnimationFrame(draw);
 
         let summary = errorCount > 0
@@ -634,13 +644,15 @@
         if (btnUniverseSubmit) {
             btnUniverseSubmit.addEventListener('click', () => {
                 const mixonEl = document.getElementById('universe-opt-mixon-foreven');
+                const systemDataEl = document.getElementById('universe-opt-system-data');
                 closeUniverseModal();
                 executeUniverseImport({
-                    importSector:  true,
-                    importRoutes:  true,
-                    importBorders: true,
-                    importRegions: true,
-                    mixonForeven:  mixonEl ? mixonEl.checked : false,
+                    importSector:     true,
+                    importRoutes:     true,
+                    importBorders:    true,
+                    importRegions:    true,
+                    mixonForeven:     mixonEl ? mixonEl.checked : false,
+                    importSystemData: systemDataEl ? systemDataEl.checked : false,
                 });
             });
         }

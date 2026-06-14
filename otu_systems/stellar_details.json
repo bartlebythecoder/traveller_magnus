@@ -1,0 +1,1172 @@
+[
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 1,
+        "location_id": 1,
+        "name": "Endinho",
+        "system_name": "Acton",
+        "type": "M1 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 2,
+        "location_id": 2,
+        "name": "Aerfor Primary",
+        "system_name": "Aerfor",
+        "type": "F7 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 3,
+        "location_id": 3,
+        "name": "Persei A",
+        "system_name": "Algol ABC",
+        "type": "B8 V"
+    },
+    {
+        "distance": 0.06,
+        "distance_unit": "AU",
+        "id": 4,
+        "location_id": 3,
+        "name": "Persei B",
+        "system_name": "Algol ABC",
+        "type": "K2 IV"
+    },
+    {
+        "distance": 2.69,
+        "distance_unit": "AU",
+        "id": 5,
+        "location_id": 3,
+        "name": "Persei C",
+        "system_name": "Algol ABC",
+        "type": "A5 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 6,
+        "location_id": 3,
+        "name": "Persei C",
+        "system_name": "Algol C Sub",
+        "type": "A5 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 7,
+        "location_id": 4,
+        "name": "Primary",
+        "system_name": "Alzirr",
+        "type": "F5 IV"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 8,
+        "location_id": 5,
+        "name": "Antares A",
+        "system_name": "Antares",
+        "type": "M1.5 Ib"
+    },
+    {
+        "distance": 540.0,
+        "distance_unit": "AU",
+        "id": 9,
+        "location_id": 5,
+        "name": "Antares B",
+        "system_name": "Antares",
+        "type": "B3 V"
+    },
+    {
+        "distance": 2000.0,
+        "distance_unit": "AU",
+        "id": 10,
+        "location_id": 5,
+        "name": "The Dwarf",
+        "system_name": "Antares",
+        "type": "L7 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 11,
+        "location_id": 6,
+        "name": "Launcelot",
+        "system_name": "Arkadia",
+        "type": "G8 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 12,
+        "location_id": 7,
+        "name": "Primary",
+        "system_name": "Asterope Primary",
+        "type": "M5 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 13,
+        "location_id": 7,
+        "name": "Secondary",
+        "system_name": "Asterope Secondary",
+        "type": "M6 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 14,
+        "location_id": 8,
+        "name": "Lumara",
+        "system_name": "Atina",
+        "type": "M3 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 15,
+        "location_id": 9,
+        "name": "Burtson",
+        "system_name": "Burtson",
+        "type": "G4 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 16,
+        "location_id": 10,
+        "name": "Escalibor",
+        "system_name": "Caladbolg",
+        "type": "F7 V"
+    },
+    {
+        "distance": 83.3,
+        "distance_unit": "AU",
+        "id": 17,
+        "location_id": 10,
+        "name": "Companion 1",
+        "system_name": "Caladbolg",
+        "type": "M0 V"
+    },
+    {
+        "distance": 339.0,
+        "distance_unit": "AU",
+        "id": 18,
+        "location_id": 10,
+        "name": "Companion 2",
+        "system_name": "Caladbolg",
+        "type": "M4 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 19,
+        "location_id": 11,
+        "name": "Primary",
+        "system_name": "Celepina",
+        "type": "M2 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 20,
+        "location_id": 12,
+        "name": "Cipango-Taiyoo",
+        "system_name": "Cipango",
+        "type": "G2 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 21,
+        "location_id": 13,
+        "name": "Gorie",
+        "system_name": "Collace",
+        "type": "F1 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 22,
+        "location_id": 13,
+        "name": "Sonor",
+        "system_name": "Collace",
+        "type": "M3 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 23,
+        "location_id": 14,
+        "name": "Primary",
+        "system_name": "Collette",
+        "type": "M3 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 24,
+        "location_id": 15,
+        "name": "Prime",
+        "system_name": "Columbier Primary",
+        "type": "F7 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 25,
+        "location_id": 15,
+        "name": "Minor",
+        "system_name": "Columbier Secondary",
+        "type": "M0 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 26,
+        "location_id": 16,
+        "name": "Bizitza",
+        "system_name": "Cordillon",
+        "type": "K1 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 27,
+        "location_id": 17,
+        "name": "Corella A",
+        "system_name": "Corella",
+        "type": "G2 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 28,
+        "location_id": 17,
+        "name": "Corella B",
+        "system_name": "Corella",
+        "type": "G8 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 29,
+        "location_id": 18,
+        "name": "Primary",
+        "system_name": "Corinna",
+        "type": "G1 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 30,
+        "location_id": 19,
+        "name": "Primary",
+        "system_name": "Daedalus",
+        "type": "G6 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 31,
+        "location_id": 20,
+        "name": "Tarnis",
+        "system_name": "Darrian",
+        "type": "G1 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 32,
+        "location_id": 21,
+        "name": "Hemen",
+        "system_name": "Dashi",
+        "type": "M2 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 33,
+        "location_id": 22,
+        "name": "Deneb Primary",
+        "system_name": "Deneb",
+        "type": "A2 Ia"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 34,
+        "location_id": 23,
+        "name": "Minowara",
+        "system_name": "Depot",
+        "type": "M1 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 35,
+        "location_id": 24,
+        "name": "Rudha",
+        "system_name": "Dhillourr",
+        "type": "F9 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 36,
+        "location_id": 25,
+        "name": "Kateri",
+        "system_name": "Divad",
+        "type": "M5 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 37,
+        "location_id": 26,
+        "name": "Dril",
+        "system_name": "Home",
+        "type": "G2 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 38,
+        "location_id": 27,
+        "name": "Erg",
+        "system_name": "Dynam",
+        "type": "F7 V"
+    },
+    {
+        "distance": 2.8,
+        "distance_unit": "AU",
+        "id": 39,
+        "location_id": 27,
+        "name": "Shushan",
+        "system_name": "Dynam",
+        "type": "M0 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 40,
+        "location_id": 28,
+        "name": "Hannichuzik",
+        "system_name": "Dywosik",
+        "type": "G5 IV"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 41,
+        "location_id": 28,
+        "name": "Unnamed",
+        "system_name": "Companion: Dywosik Companion",
+        "type": "M8 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 42,
+        "location_id": 29,
+        "name": "Prime",
+        "system_name": "Elysee Primary",
+        "type": "G5 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 43,
+        "location_id": 29,
+        "name": "Deuxime",
+        "system_name": "Elysee Secondary",
+        "type": "K2 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 44,
+        "location_id": 30,
+        "name": "Lustre",
+        "system_name": "Emerald",
+        "type": "M1 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 45,
+        "location_id": 31,
+        "name": "Netali",
+        "system_name": "Ficant",
+        "type": "M0 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 46,
+        "location_id": 31,
+        "name": "Netali Bis",
+        "system_name": "Ficant",
+        "type": "M1 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 47,
+        "location_id": 32,
+        "name": "Girehredh",
+        "system_name": "Flexos",
+        "type": "M1 V"
+    },
+    {
+        "distance": 0.04,
+        "distance_unit": "AU",
+        "id": 48,
+        "location_id": 32,
+        "name": "Onu",
+        "system_name": "Flexos",
+        "type": "M2 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 49,
+        "location_id": 33,
+        "name": "Fomalhaut A",
+        "system_name": "Fomalhaut (SR 1024)",
+        "type": "A3 V"
+    },
+    {
+        "distance": 60000.0,
+        "distance_unit": "AU",
+        "id": 50,
+        "location_id": 33,
+        "name": "Fomalhaut B",
+        "system_name": "Fomalhaut (SR 1024)",
+        "type": "K5 V"
+    },
+    {
+        "distance": 166667.0,
+        "distance_unit": "AU",
+        "id": 51,
+        "location_id": 33,
+        "name": "Fomalhaut C",
+        "system_name": "Fomalhaut (SR 1024)",
+        "type": "M4 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 52,
+        "location_id": 34,
+        "name": "Oin",
+        "system_name": "Froin",
+        "type": "M2 V"
+    },
+    {
+        "distance": 102.0,
+        "distance_unit": "AU",
+        "id": 53,
+        "location_id": 34,
+        "name": "Aoin",
+        "system_name": "Froin",
+        "type": "M7 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 54,
+        "location_id": 35,
+        "name": "Uumgadi",
+        "system_name": "Kaggushus",
+        "type": "F1 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 55,
+        "location_id": 36,
+        "name": "Harzah",
+        "system_name": "Garoo",
+        "type": "M1 V"
+    },
+    {
+        "distance": 100.0,
+        "distance_unit": "AU",
+        "id": 56,
+        "location_id": 36,
+        "name": "Leocen",
+        "system_name": "Garoo",
+        "type": "M5 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 57,
+        "location_id": 22,
+        "name": "Deneb Primary",
+        "system_name": "Deneb",
+        "type": "A2 Ia"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 58,
+        "location_id": 37,
+        "name": "Ukaa",
+        "system_name": "Gateway",
+        "type": "M1 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 59,
+        "location_id": 38,
+        "name": "Gliss",
+        "system_name": "Glisten",
+        "type": "K9 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 60,
+        "location_id": 39,
+        "name": "Prime",
+        "system_name": "Grande-Terre Primary",
+        "type": "K8 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 61,
+        "location_id": 39,
+        "name": "Second",
+        "system_name": "Grande-Terre Secondary",
+        "type": "M5 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 62,
+        "location_id": 40,
+        "name": null,
+        "system_name": "Grille",
+        "type": "M2 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 63,
+        "location_id": 40,
+        "name": null,
+        "system_name": "Grille Companion",
+        "type": "M2 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 64,
+        "location_id": 41,
+        "name": "Regis",
+        "system_name": "Grote",
+        "type": "F8 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 65,
+        "location_id": 42,
+        "name": "Sage",
+        "system_name": "Guru",
+        "type": "M1 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 66,
+        "location_id": 43,
+        "name": "Alseran",
+        "system_name": "Hiemalis",
+        "type": "K5 III"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 67,
+        "location_id": 43,
+        "name": "Tork",
+        "system_name": "Hiemalis",
+        "type": "M1 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 68,
+        "location_id": 26,
+        "name": "Dril",
+        "system_name": "Home",
+        "type": "G2 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 69,
+        "location_id": 44,
+        "name": "Harbane",
+        "system_name": "Icon",
+        "type": "K1 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 70,
+        "location_id": 45,
+        "name": "Vogut",
+        "system_name": "Ilelish",
+        "type": "M0 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 71,
+        "location_id": 46,
+        "name": "Erwon",
+        "system_name": "Inchin",
+        "type": "F0 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 72,
+        "location_id": 35,
+        "name": "Uumgadi",
+        "system_name": "Kaggushus",
+        "type": "F1 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 73,
+        "location_id": 47,
+        "name": "Primary",
+        "system_name": "Ivraie",
+        "type": "G8 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 74,
+        "location_id": 48,
+        "name": "Dikaai",
+        "system_name": "Jae Tellona",
+        "type": "F9 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 75,
+        "location_id": 49,
+        "name": "Sol",
+        "system_name": "Jupiter / Terra",
+        "type": "G2 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 76,
+        "location_id": 50,
+        "name": "Uumgadi",
+        "system_name": "Kaggushus (ca 1200)",
+        "type": "F1 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 77,
+        "location_id": 51,
+        "name": "Kyan A",
+        "system_name": "Kemshigesh",
+        "type": "K2 V"
+    },
+    {
+        "distance": 5.2,
+        "distance_unit": "AU",
+        "id": 78,
+        "location_id": 51,
+        "name": "Kyan B",
+        "system_name": "Kemshigesh",
+        "type": "M8 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 79,
+        "location_id": 52,
+        "name": "Heko",
+        "system_name": "Kerak",
+        "type": "M2 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 80,
+        "location_id": 53,
+        "name": "Gzang",
+        "system_name": "Kirur",
+        "type": "F5 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 81,
+        "location_id": 54,
+        "name": "Sol",
+        "system_name": "The Kuiper Belt, forming theouter fringe of the Terra",
+        "type": "G2 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 82,
+        "location_id": 55,
+        "name": "Tyeyo",
+        "system_name": "Kusyu",
+        "type": "G4 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 83,
+        "location_id": 55,
+        "name": "Saietaie",
+        "system_name": "Kusyu",
+        "type": "D"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 84,
+        "location_id": 56,
+        "name": "Tyeyo",
+        "system_name": "Kusyu",
+        "type": "G5 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 85,
+        "location_id": 57,
+        "name": "Primary",
+        "system_name": "Kwan Primary",
+        "type": "K5 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 86,
+        "location_id": 57,
+        "name": "Primary",
+        "system_name": "Kwan Secondary",
+        "type": "M4 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 87,
+        "location_id": 58,
+        "name": "Kneng",
+        "system_name": "Lloelldegh (\"Lair\")",
+        "type": "G5 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 88,
+        "location_id": 35,
+        "name": "Uumgadi",
+        "system_name": "Kaggushus",
+        "type": "F1 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 89,
+        "location_id": 59,
+        "name": "Primary",
+        "system_name": "Likhukam",
+        "type": "M5 III"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 90,
+        "location_id": 60,
+        "name": "Urudu",
+        "system_name": "Masiruu",
+        "type": "K4 V"
+    },
+    {
+        "distance": 5000.0,
+        "distance_unit": "AU",
+        "id": 91,
+        "location_id": 60,
+        "name": "UN",
+        "system_name": "Masiruu",
+        "type": "M9 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 92,
+        "location_id": 61,
+        "name": "Hymax",
+        "system_name": "Mercator",
+        "type": "G1 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 93,
+        "location_id": 62,
+        "name": "Sisyphus",
+        "system_name": "Merope",
+        "type": "G3 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 94,
+        "location_id": 63,
+        "name": "Primary",
+        "system_name": "Mire",
+        "type": "K6 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 95,
+        "location_id": 64,
+        "name": "Dimoph",
+        "system_name": "Mora",
+        "type": "F0 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 96,
+        "location_id": 65,
+        "name": "Primary",
+        "system_name": "Mu'izzi",
+        "type": "M0 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 97,
+        "location_id": 66,
+        "name": "Primary",
+        "system_name": "Myrthe",
+        "type": "K8 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 98,
+        "location_id": 67,
+        "name": "Sol",
+        "system_name": "Neptune / Terra",
+        "type": "G2 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 99,
+        "location_id": 68,
+        "name": "Primary",
+        "system_name": "Nova Prometheus",
+        "type": "G0 V"
+    },
+    {
+        "distance": 0.03,
+        "distance_unit": "AU",
+        "id": 100,
+        "location_id": 68,
+        "name": "Secondary",
+        "system_name": "Nova Prometheus",
+        "type": "M0 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 101,
+        "location_id": 69,
+        "name": "Yradon",
+        "system_name": "Nukyls",
+        "type": "K2 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 102,
+        "location_id": 70,
+        "name": "Primary",
+        "system_name": "Pallique",
+        "type": "M0 V"
+    },
+    {
+        "distance": 0.03,
+        "distance_unit": "AU",
+        "id": 103,
+        "location_id": 70,
+        "name": "Companion",
+        "system_name": "Pallique",
+        "type": "M1 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 104,
+        "location_id": 71,
+        "name": "Prime",
+        "system_name": "Pax Rulin",
+        "type": "M8 III"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 105,
+        "location_id": 72,
+        "name": "Corusca",
+        "system_name": "Porozlo",
+        "type": "M1 V"
+    },
+    {
+        "distance": 1.0,
+        "distance_unit": "AU",
+        "id": 106,
+        "location_id": 72,
+        "name": "Glint",
+        "system_name": "Porozlo",
+        "type": "M9 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 107,
+        "location_id": 73,
+        "name": "Lusor",
+        "system_name": "Regina",
+        "type": "F7 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 108,
+        "location_id": 73,
+        "name": "Speck",
+        "system_name": "Regina",
+        "type": "BD"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 109,
+        "location_id": 73,
+        "name": "Darida",
+        "system_name": "Far Companion: Darida",
+        "type": "M3 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 110,
+        "location_id": 74,
+        "name": "Icarus",
+        "system_name": "Rhylanor",
+        "type": "M2 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 111,
+        "location_id": 75,
+        "name": "Orb",
+        "system_name": "Risek",
+        "type": "M2 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 112,
+        "location_id": 76,
+        "name": "Uwalraw",
+        "system_name": "Roikhoi",
+        "type": "F5 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 113,
+        "location_id": 77,
+        "name": "Ustrelli",
+        "system_name": "Rode",
+        "type": "M2 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 114,
+        "location_id": 78,
+        "name": "Noera",
+        "system_name": "Rovick / Noera-Solox",
+        "type": "M1 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 115,
+        "location_id": 78,
+        "name": "Solox",
+        "system_name": "Rovick / Noera-Solox",
+        "type": "M3 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 116,
+        "location_id": 78,
+        "name": "Cuvis",
+        "system_name": "Rovick / Cuvis",
+        "type": "M5 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 117,
+        "location_id": 79,
+        "name": "Ohrreit",
+        "system_name": "Ruie",
+        "type": "G5 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 118,
+        "location_id": 80,
+        "name": "Primary",
+        "system_name": "Rydem",
+        "type": "K6 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 119,
+        "location_id": 81,
+        "name": "Prime",
+        "system_name": "Soror",
+        "type": "K1 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 120,
+        "location_id": 82,
+        "name": "Nijet",
+        "system_name": "Talak",
+        "type": "G7 III"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 121,
+        "location_id": 83,
+        "name": "Sol",
+        "system_name": "Terra (\"Sol\")",
+        "type": "G2 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 122,
+        "location_id": 84,
+        "name": "Tuus",
+        "system_name": "The Maralee",
+        "type": "K7 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 123,
+        "location_id": 85,
+        "name": "Zaiden",
+        "system_name": "Trin",
+        "type": "G0 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 124,
+        "location_id": 86,
+        "name": "Losteye",
+        "system_name": "Valhalla",
+        "type": "G4 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 125,
+        "location_id": 87,
+        "name": "Urakkalan",
+        "system_name": "Vland",
+        "type": "F8 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 126,
+        "location_id": 88,
+        "name": "Albins Star",
+        "system_name": "Walston",
+        "type": "M2 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 127,
+        "location_id": 71,
+        "name": "Prime",
+        "system_name": "Pax Rulin",
+        "type": "M8 III"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 128,
+        "location_id": 89,
+        "name": "Pliebr",
+        "system_name": "Pliebr",
+        "type": "K0 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 129,
+        "location_id": 90,
+        "name": "Hawayeil",
+        "system_name": "Ziruushda",
+        "type": "M5 V"
+    },
+    {
+        "distance": null,
+        "distance_unit": null,
+        "id": 130,
+        "location_id": 91,
+        "name": "Zvyozdochka",
+        "system_name": "Zivije",
+        "type": "G6 V"
+    }
+]

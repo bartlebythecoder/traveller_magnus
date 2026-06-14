@@ -859,6 +859,11 @@ function setupGenerationHandlers() {
         runRTTMacro(true);
     });
 
+    document.getElementById('ctx-gen-sys-aow-bu').addEventListener('click', () => {
+        document.getElementById('context-menu').classList.remove('visible');
+        runAoWMacro(true);
+    });
+
     // POPULATE & GENERATE FULL SYSTEM Row Handlers (Macros - Include Pop)
     document.getElementById('ctx-full-ct').addEventListener('click', () => {
         document.getElementById('context-menu').classList.remove('visible');
@@ -883,6 +888,11 @@ function setupGenerationHandlers() {
     document.getElementById('ctx-full-rtt-bu').addEventListener('click', () => {
         document.getElementById('context-menu').classList.remove('visible');
         runRTTMacro(false);
+    });
+
+    document.getElementById('ctx-full-aow-bu').addEventListener('click', () => {
+        document.getElementById('context-menu').classList.remove('visible');
+        runAoWMacro(false);
     });
 
     document.getElementById('ctx-full-ct-bu').addEventListener('click', () => {
@@ -2343,26 +2353,32 @@ function setupSettingsPanel() {
     // --- Generation Options: Pop Max ---
     const popMaxInput = document.getElementById('input-pop-max');
     if (popMaxInput) {
-        window.generationPopMax = 20;
-        popMaxInput.value = 20;
+        const savedPopMax = localStorage.getItem('traveller_gen_pop_max');
+        const initialPopMax = savedPopMax !== null ? parseInt(savedPopMax, 10) : 20;
+        popMaxInput.value = initialPopMax;
+        window.generationPopMax = initialPopMax;
 
         popMaxInput.addEventListener('change', () => {
             const val = Math.max(0, Math.min(33, parseInt(popMaxInput.value, 10) || 20));
             popMaxInput.value = val;
             window.generationPopMax = val;
+            localStorage.setItem('traveller_gen_pop_max', String(val));
         });
     }
 
     // --- Generation Options: Pop Mod ---
     const popModInput = document.getElementById('input-pop-mod');
     if (popModInput) {
-        window.generationPopMod = 0;
-        popModInput.value = 0;
+        const savedPopMod = localStorage.getItem('traveller_gen_pop_mod');
+        const initialPopMod = savedPopMod !== null ? parseInt(savedPopMod, 10) : 0;
+        popModInput.value = initialPopMod;
+        window.generationPopMod = initialPopMod;
 
         popModInput.addEventListener('change', () => {
             const val = Math.max(-20, Math.min(20, parseInt(popModInput.value, 10) || 0));
             popModInput.value = val;
             window.generationPopMod = val;
+            localStorage.setItem('traveller_gen_pop_mod', String(val));
         });
     }
 
@@ -2429,6 +2445,30 @@ function setupSettingsPanel() {
             window.planetCoastlineComplexity = val;
             if (coastlineCompVal) coastlineCompVal.textContent = val.toFixed(2);
             localStorage.setItem('traveller_planet_coastline_comp', String(val));
+        });
+    }
+
+    // Default orrery start date
+    const orreryYearInput = document.getElementById('input-orrery-default-year');
+    const orreryDayInput  = document.getElementById('input-orrery-default-day');
+    if (orreryYearInput && orreryDayInput) {
+        const savedYear = localStorage.getItem('traveller_orrery_default_year');
+        const savedDay  = localStorage.getItem('traveller_orrery_default_day');
+        window.orreryDefaultYear = savedYear !== null ? parseInt(savedYear) : 0;
+        window.orreryDefaultDay  = savedDay  !== null ? parseInt(savedDay)  : 1;
+        orreryYearInput.value = window.orreryDefaultYear;
+        orreryDayInput.value  = window.orreryDefaultDay;
+        orreryYearInput.addEventListener('change', () => {
+            const val = parseInt(orreryYearInput.value) || 0;
+            orreryYearInput.value    = val;
+            window.orreryDefaultYear = val;
+            localStorage.setItem('traveller_orrery_default_year', String(val));
+        });
+        orreryDayInput.addEventListener('change', () => {
+            const val = Math.min(365, Math.max(1, parseInt(orreryDayInput.value) || 1));
+            orreryDayInput.value    = val;
+            window.orreryDefaultDay = val;
+            localStorage.setItem('traveller_orrery_default_day', String(val));
         });
     }
 }

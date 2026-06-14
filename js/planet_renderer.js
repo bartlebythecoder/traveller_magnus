@@ -1290,7 +1290,51 @@ const PlanetRenderer = (() => {
                       { projection: projection || 'sinusoidal' });
     }
 
-    return { renderPlanetHemispheres, renderFlatMap, tempBandFromKelvin, test, testMolten, testFlatMap };
+    // ── Approach frame renderer ───────────────────────────────────────────────
+    // Renders a single hemisphere to an off-screen canvas at the given lonOffset.
+    // Called 24 times by ApproachViewer to build the rotating-sphere sprite strip.
+
+    function renderApproachFrame(canvas, worldData, hexId, lonOffset) {
+        _maskWeight   = typeof window.planetContinentalDefinition === 'number' ? window.planetContinentalDefinition : 0.55;
+        _warpStrength = typeof window.planetCoastlineComplexity   === 'number' ? window.planetCoastlineComplexity   : 0.45;
+
+        const diskR = Math.floor(Math.min(canvas.width, canvas.height) / 2) - 4;
+        const cx    = Math.floor(canvas.width  / 2);
+        const cy    = Math.floor(canvas.height / 2);
+
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const ms            = (typeof masterSeed !== 'undefined') ? masterSeed : 'default';
+        const baseSeed      = hashString(ms + '-' + (hexId || '0000') + '-ph');
+        const heightGrid    = _buildGrid3D(mulberry32(baseSeed));
+        const continentSeed = hashString(ms + '-' + (hexId || '0000') + '-cn');
+        const seeds         = _buildContinentSeeds(mulberry32(continentSeed));
+        const heightCDF     = _buildCDF(heightGrid, seeds, 2048);
+
+        const hasAtmo   = _parseStat(worldData.atmosphere) > 0;
+        const cloudGrid = hasAtmo
+            ? _buildGrid3D(mulberry32(hashString(ms + '-' + (hexId || '0000') + '-pc')))
+            : null;
+
+        const oceanSeed  = hashString(ms + '-' + (hexId || '0000') + '-oc');
+        const oceanRng   = mulberry32(oceanSeed)();
+        const palette    = _buildPalette(worldData, oceanRng);
+
+        const craterSeed = hashString(ms + '-' + (hexId || '0000') + '-cr');
+        const craters    = palette.isAirless ? _buildCraters(mulberry32(craterSeed)) : null;
+
+        const lRaw     = [-0.665, 0.342, -0.665];
+        const lLen     = Math.sqrt(lRaw[0] ** 2 + lRaw[1] ** 2 + lRaw[2] ** 2);
+        const lightDir = lRaw.map(v => v / lLen);
+
+        const imageData = ctx.createImageData(canvas.width, canvas.height);
+        _renderHemisphere(imageData, cx, cy, diskR, heightGrid, seeds, cloudGrid,
+                          heightCDF, lonOffset, palette, lightDir, null, craters);
+        ctx.putImageData(imageData, 0, 0);
+    }
+
+    return { renderPlanetHemispheres, renderFlatMap, renderApproachFrame, tempBandFromKelvin, test, testMolten, testFlatMap };
 
 })();
 

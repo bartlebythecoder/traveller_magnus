@@ -78,6 +78,8 @@ function setupSaveLoad() {
             borderMinSystems:            window.borderMinSystems            ?? 20,
             planetContinentalDefinition: window.planetContinentalDefinition ?? 0.55,
             planetCoastlineComplexity:   window.planetCoastlineComplexity   ?? 0.45,
+            generationPopMax:            window.generationPopMax            ?? 20,
+            generationPopMod:            window.generationPopMod            ?? 0,
             generationTlMax:             window.generationTlMax             ?? 20,
             generationTlMod:             window.generationTlMod             ?? 0,
             generationUseRealisticStellar: window.generationUseRealisticStellar ?? false,
@@ -476,6 +478,18 @@ function applyLoadedSettings(settings) {
     localStorage.setItem('traveller_planet_coastline_comp', String(coastlineComp));
 
     // --- Generation settings ---
+    const popMax = s.generationPopMax ?? 20;
+    window.generationPopMax = popMax;
+    const popMaxEl = document.getElementById('input-pop-max');
+    if (popMaxEl) popMaxEl.value = popMax;
+    localStorage.setItem('traveller_gen_pop_max', String(popMax));
+
+    const popMod = s.generationPopMod ?? 0;
+    window.generationPopMod = popMod;
+    const popModEl = document.getElementById('input-pop-mod');
+    if (popModEl) popModEl.value = popMod;
+    localStorage.setItem('traveller_gen_pop_mod', String(popMod));
+
     const tlMax = s.generationTlMax ?? 20;
     window.generationTlMax = tlMax;
     const tlMaxEl = document.getElementById('input-tl-max');

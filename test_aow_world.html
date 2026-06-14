@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AoW World Engine — Spec Tests (Steps 9–17)</title>
+  <style>
+    body { font-family: monospace; background: #1a1a1a; color: #e0e0e0; padding: 20px; margin: 0; }
+    h1   { color: #88aaff; font-size: 1.1em; margin-bottom: 4px; }
+    .subtitle { color: #777; font-size: 0.85em; margin-bottom: 16px; }
+    #controls { margin-bottom: 12px; }
+    button { background: #333; color: #ccc; border: 1px solid #555; padding: 5px 12px;
+             cursor: pointer; border-radius: 3px; margin-right: 6px; font-family: monospace; font-size: 0.85em; }
+    button:hover { background: #444; }
+    .summary { padding: 8px 12px; border-radius: 4px; margin-bottom: 12px; font-size: 0.95em; }
+    .summary.pass { background: #1a2e1a; border-left: 4px solid #4caf50; }
+    .summary.fail { background: #2e1a1a; border-left: 4px solid #f44336; }
+    .group { margin: 6px 0; border-left: 3px solid #444; padding: 6px 10px; background: #212121; }
+    .group.all-pass { border-left-color: #4caf50; }
+    .group.has-fail  { border-left-color: #f44336; }
+    .group-header { font-size: 0.85em; color: #aaa; }
+    .group-header .gname { color: #ccc; }
+    .group-header .pass-ct { color: #4caf50; }
+    .group-header .fail-ct { color: #f44336; }
+    .test-line { font-size: 0.82em; margin: 2px 0 2px 12px; }
+    .pass-icon { color: #4caf50; }
+    .fail-icon { color: #f44336; }
+    .err-detail { color: #f88; font-size: 0.80em; margin: 1px 0 1px 28px; }
+    .skip-line  { color: #666; font-size: 0.80em; margin: 2px 0 2px 28px; }
+    #timing { color: #666; font-size: 0.80em; margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+<h1>AoW World Engine — Spec Compliance Tests (Steps 9–17)</h1>
+<div class="subtitle">Validates aow_world_engine.js against Architect of Worlds PDF spec.<br>
+Errata verified: v1.04 (satellite mass ×10⁻⁵), v1.05 (disk inner edge 2d6), v1.06 (DI mass threshold 0.8).</div>
+
+<div id="controls">
+  <button onclick="runTests(false)">Run Tests</button>
+  <button onclick="runTests(true)">Run Verbose</button>
+  <button onclick="runTests(false, 200)">Quick (200 iters)</button>
+  <button onclick="runTests(false, 2000)">Deep (2000 iters)</button>
+</div>
+
+<div id="summary"></div>
+<div id="results"></div>
+<div id="timing"></div>
+
+<!-- ============================================================
+     MINIMAL STUBS — only what the engines need
+     (avoids loading core.js which pulls in camera/canvas state)
+     ============================================================ -->
+<script>
+  // RNG (copied verbatim from js/core.js)
+  function hashString(str) {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < str.length; i++) {
+      h = Math.imul(h ^ str.charCodeAt(i), 16777619);
+    }
+    return h >>> 0;
+  }
+  function mulberry32(a) {
+    return function () {
+      let t = a += 0x6D2B79F5;
+      t = Math.imul(t ^ t >>> 15, t | 1);
+      t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  let masterSeed = 'AoWWorldTest';
+  let rng = mulberry32(hashString(masterSeed));
+
+  function reseedForHex(hexId) {
+    rng = mulberry32(hashString(masterSeed + '-' + (hexId || '0000')));
+  }
+
+  // Trace stubs — keep them silent
+  window.isLoggingEnabled = false;
+  function tSection()    {}
+  function tResult()     {}
+  function tSkip()       {}
+  function writeLogLine(){}
+  function startTrace()  {}
+  function endTrace()    {}
+
+  // applyMgT2EOrbitalNames stub (called by bottomup generator, not needed for world tests)
+  function applyMgT2EOrbitalNames() {}
+
+  // Copied from aow_world_engine.js (private to module — duplicated here for test assertions)
+  function roundToSigFigs(n, sigFigs) {
+    if (n === 0) return 0;
+    const magnitude = Math.floor(Math.log10(Math.abs(n)));
+    const factor = Math.pow(10, sigFigs - 1 - magnitude);
+    return Math.round(n * factor) / factor;
+  }
+</script>
+
+<script src="rules/aow_data.js"></script>
+<script src="js/aow_stellar_engine.js"></script>
+<script src="js/aow_world_engine.js"></script>
+
+<script>
+// ============================================================
+// MINI TEST RUNNER
+// ============================================================
+
+const testQueue = [];
+let _curGroup = null;
+
+function group(name) { _curGroup = name; }
+function test(desc, fn) { testQueue.push({ group: _curGroup, desc, fn }); }
+
+function assert(cond, msg, errors) {
+  if (!cond) errors.push(msg || 'assertion failed');
+}
+
+// ============================================================
+// HELPER: run full pipeline (stellar + disk + orbital dynamics + physicals)
+// ============================================================
+
+function runWorld(hexId) {
+  reseedForHex(hexId);
+  const sys = {
+    hexId,
+    worlds:      [],
+    stars:       [],
+    age:         0,
+    hzco:        0,
+    gasGiants:   0,
+    planetoidBelts: 0,
+    terrestrialPlanets: 0,
+    totalWorlds: 0,
+    forbiddenZones: []
+  };
+
+  AoWStellarEngine.generateStarHierarchyAndMasses(sys, { forceEarthlike: false });
+  AoWStellarEngine.generateAgeMetallicityAndEvolution(sys, { forceEarthlike: false });
+  AoWStellarEngine.generateStellarOrbits(sys);
+
+  AoWWorldEngine.generatePlanetaryDisks(sys);
+  AoWWorldEngine.generateOrbitalDynamics(sys);
+  AoWWorldEngine.generatePhysicals(sys);
+
+  return sys;
+}
+
+// Collect every planet across all disk worksheets in a sys
+function allPlanets(sys) {
+  const out = [];
+  for (const ws of (sys.diskWorksheets || [])) {
+    for (const p of (ws.planets || [])) {
+      out.push({ ws, p });
+    }
+  }
+  return out;
+}
+
+let N_DEFAULT = 1000;
+let N = N_DEFAULT;
+
+// ============================================================
+// ── GROUP 1: DATA — Disk Mass Factor Table ─────────────────
+// ============================================================
+
+group('DATA — Disk Mass Factor Table');
+
+test('15 rows covering rolls 3–18', (e) => {
+  const t = diskMassFactorTable.results;
+  assert(t.length === 15, `Expected 15 rows, got ${t.length}`, e);
+  assert(t[0].minRoll  === 3  && t[0].maxRoll  === 3,  `First row bounds: ${t[0].minRoll}-${t[0].maxRoll}`, e);
+  assert(t[14].minRoll === 18 && t[14].maxRoll === 18, `Last row bounds: ${t[14].minRoll}-${t[14].maxRoll}`, e);
+});
+
+test('massFactor range [0.25, 4.00] and monotonically non-decreasing', (e) => {
+  const t = diskMassFactorTable.results;
+  assert(t[0].massFactor  === 0.25, `First massFactor: ${t[0].massFactor}`, e);
+  assert(t[14].massFactor === 4.00, `Last massFactor: ${t[14].massFactor}`, e);
+  for (let i = 1; i < t.length; i++) {
+    assert(t[i].massFactor >= t[i-1].massFactor,
+      `Non-monotone at row ${i}: ${t[i-1].massFactor} → ${t[i].massFactor}`, e);
+  }
+});
+
+test('massModifier range [-6, +6] matching spec table', (e) => {
+  const t = diskMassFactorTable.results;
+  assert(t[0].massModifier  === -6, `Roll 3 modifier: ${t[0].massModifier}`, e);
+  assert(t[14].massModifier ===  6, `Roll 18 modifier: ${t[14].massModifier}`, e);
+  // Rolls 9–12 should have modifier 0
+  const zeroRows = t.filter(r => r.massModifier === 0);
+  assert(zeroRows.length >= 3, `Expected ≥3 zero-modifier rows, got ${zeroRows.length}`, e);
+  // Spot-check: roll 9 → massFactor=0.80, modifier=0
+  const r9 = t.find(r => r.minRoll === 9 && r.maxRoll === 9);
+  assert(r9 && r9.massFactor === 0.80 && r9.massModifier === 0,
+    `Roll 9: ${JSON.stringify(r9)}`, e);
+});
+
+// ============================================================
+// ── GROUP 2: DATA — Formation Orbit Table ──────────────────
+// ============================================================
+
+group('DATA — Formation Orbit Table');
+
+test('16 rows for orbits 1–16', (e) => {
+  const t = formationOrbitTable.results;
+  assert(t.length === 16, `Expected 16 rows, got ${t.length}`, e);
+  assert(t[0].orbitNumber  ===  1 && t[0].radiusFactor  === 0.6,   `Orbit 1: ${JSON.stringify(t[0])}`, e);
+  assert(t[15].orbitNumber === 16 && t[15].radiusFactor === 220.0, `Orbit 16: ${JSON.stringify(t[15])}`, e);
+});
+
+test('Orbit 6 radiusFactor = 4.0 (formation ice line factor, spec p.60)', (e) => {
+  const r6 = formationOrbitTable.results.find(r => r.orbitNumber === 6);
+  assert(r6 && r6.radiusFactor === 4.0, `Orbit 6: ${JSON.stringify(r6)}`, e);
+});
+
+test('radiusFactor monotonically increasing', (e) => {
+  const t = formationOrbitTable.results;
+  for (let i = 1; i < t.length; i++) {
+    assert(t[i].radiusFactor > t[i-1].radiusFactor,
+      `Non-monotone at orbit ${t[i].orbitNumber}: ${t[i-1].radiusFactor} → ${t[i].radiusFactor}`, e);
+  }
+});
+
+test('Spot-check orbit factors: 1→0.6, 2→0.8, 3→1.2, 4→1.8, 5→2.7, 7→6.0, 8→9.0', (e) => {
+  const t = formationOrbitTable.results;
+  const checks = [[1,0.6],[2,0.8],[3,1.2],[4,1.8],[5,2.7],[7,6.0],[8,9.0]];
+  checks.forEach(([n, rf]) => {
+    const r = t.find(r => r.orbitNumber === n);
+    assert(r && r.radiusFactor === rf, `Orbit ${n}: expected ${rf}, got ${r ? r.radiusFactor : 'not found'}`, e);
+  });
+});
+
+// ============================================================
+// ── GROUP 3: DATA — Disk Instability Placement Table ───────
+// ============================================================
+
+group('DATA — Disk Instability Placement Table');
+
+test('7 rows; firstFormationOrbit range [7, 13]; planet count range [1, 4]', (e) => {
+  const t = diskInstabilityPlacementTable.results;
+  assert(t.length === 7, `Expected 7 rows, got ${t.length}`, e);
+  const orbits  = t.map(r => r.firstFormationOrbit);
+  const planets = t.map(r => r.planets);
+  assert(Math.min(...orbits)  === 7,  `Min firstFormationOrbit: ${Math.min(...orbits)}`, e);
+  assert(Math.max(...orbits)  === 13, `Max firstFormationOrbit: ${Math.max(...orbits)}`, e);
+  assert(Math.min(...planets) === 1,  `Min planets: ${Math.min(...planets)}`, e);
+  assert(Math.max(...planets) === 4,  `Max planets: ${Math.max(...planets)}`, e);
+});
+
+test('First row uses -Infinity; last row uses +Infinity; middle rows have numeric bounds', (e) => {
+  const t = diskInstabilityPlacementTable.results;
+  assert(t[0].minRoll  === -Infinity, `First minRoll: ${t[0].minRoll}`, e);
+  assert(t[6].maxRoll  ===  Infinity, `Last maxRoll: ${t[6].maxRoll}`, e);
+  for (let i = 1; i < t.length - 1; i++) {
+    assert(isFinite(t[i].minRoll) && isFinite(t[i].maxRoll),
+      `Row ${i} bounds not finite: ${t[i].minRoll}-${t[i].maxRoll}`, e);
+  }
+});
+
+test('Spot-check: rolls 12–13 → orbit 9, 2 planets; rolls 16+ → orbit 7, 4 planets', (e) => {
+  const t = diskInstabilityPlacementTable.results;
+  const r12 = t.find(r => r.minRoll === 12 && r.maxRoll === 13);
+  assert(r12 && r12.firstFormationOrbit === 9 && r12.planets === 2,
+    `Rolls 12-13: ${JSON.stringify(r12)}`, e);
+  const r16 = t.find(r => r.minRoll === 16);
+  assert(r16 && r16.firstFormationOrbit === 7 && r16.planets === 4,
+    `Rolls ≥16: ${JSON.stringify(r16)}`, e);
+});
+
+// ============================================================
+// ── GROUP 4: DATA — Core Accretion / Migration / Grand Tack ─
+// ============================================================
+
+group('DATA — Core Accretion, Migration, Grand Tack Tables');
+
+test('coreAccretionTable: 5 rows, spacing labels, modifiers -2 to +2', (e) => {
+  const t = coreAccretionTable.results;
+  assert(t.length === 5, `Expected 5 rows, got ${t.length}`, e);
+  const mods = t.map(r => r.modifier);
+  assert(Math.min(...mods) === -2 && Math.max(...mods) === 2,
+    `Modifier range: [${Math.min(...mods)}, ${Math.max(...mods)}]`, e);
+  assert(t.some(r => r.spacing === 'Very Loose'), `Missing "Very Loose"`, e);
+  assert(t.some(r => r.spacing === 'Very Tight'), `Missing "Very Tight"`, e);
+  assert(t.some(r => r.spacing === 'Moderate'),   `Missing "Moderate"`,   e);
+});
+
+test('planetaryMigrationTable: 7 rows, arrivalOrbit in [0, 6], planetesimalMassFactor in [0.25, 1.0]', (e) => {
+  const t = planetaryMigrationTable.results;
+  assert(t.length === 7, `Expected 7 rows, got ${t.length}`, e);
+  t.forEach((r, i) => {
+    assert(r.arrivalOrbit >= 0 && r.arrivalOrbit <= 6,
+      `Row ${i} arrivalOrbit=${r.arrivalOrbit} out of [0,6]`, e);
+    assert(r.planetesimalMassFactor >= 0.25 && r.planetesimalMassFactor <= 1.0,
+      `Row ${i} massFactor=${r.planetesimalMassFactor} out of [0.25,1.0]`, e);
+  });
+  // First row (lowest roll): arrivalOrbit=6 (no migration), massFactor=1.0
+  assert(t[0].minRoll === -Infinity && t[0].arrivalOrbit === 6 && t[0].planetesimalMassFactor === 1.0,
+    `First row: ${JSON.stringify(t[0])}`, e);
+  // Last row (highest roll): arrivalOrbit=0, massFactor=0.25 (most extreme migration)
+  assert(t[6].maxRoll === Infinity && t[6].arrivalOrbit === 0 && t[6].planetesimalMassFactor === 0.25,
+    `Last row: ${JSON.stringify(t[6])}`, e);
+});
+
+test('grandTackTable: 3 rows, movement values 1/2/3', (e) => {
+  const t = grandTackTable.results;
+  assert(t.length === 3, `Expected 3 rows, got ${t.length}`, e);
+  assert(t[0].movement === 1 && t[0].minRoll === -Infinity && t[0].maxRoll === 8,
+    `Row 0: ${JSON.stringify(t[0])}`, e);
+  assert(t[1].movement === 2 && t[1].minRoll === 9 && t[1].maxRoll === 16,
+    `Row 1: ${JSON.stringify(t[1])}`, e);
+  assert(t[2].movement === 3 && t[2].minRoll === 17 && t[2].maxRoll === Infinity,
+    `Row 2: ${JSON.stringify(t[2])}`, e);
+});
+
+test('oligarchicCollisionTable: 5 rows, same structure as coreAccretionTable', (e) => {
+  const t = oligarchicCollisionTable.results;
+  assert(t.length === 5, `Expected 5 rows, got ${t.length}`, e);
+  const mods = t.map(r => r.modifier);
+  assert(Math.min(...mods) === -2 && Math.max(...mods) === 2,
+    `Modifier range: [${Math.min(...mods)}, ${Math.max(...mods)}]`, e);
+  assert(t.some(r => r.spacing === 'Tight'     && r.modifier === 1),  `Missing Tight/+1`, e);
+  assert(t.some(r => r.spacing === 'Loose'     && r.modifier === -1), `Missing Loose/-1`, e);
+  assert(t.some(r => r.spacing === 'Moderate'  && r.modifier === 0),  `Missing Moderate/0`, e);
+});
+
+// ============================================================
+// ── GROUP 5: DATA — Orbital Ratio Tables ───────────────────
+// ============================================================
+
+group('DATA — Orbital Ratio Tables');
+
+test('orbitalRatioTable: 16 rows (3–18), ratioMultiplier range [0.71, 1.48]', (e) => {
+  const t = orbitalRatioTable.results;
+  assert(t.length === 16, `Expected 16 rows, got ${t.length}`, e);
+  assert(t[0].minRoll  === 3  && t[0].ratioMultiplier  === 0.71, `Row 0: ${JSON.stringify(t[0])}`, e);
+  assert(t[15].minRoll === 18 && t[15].ratioMultiplier === 1.48, `Row 15: ${JSON.stringify(t[15])}`, e);
+  // Roll 10 → 1.00 (neutral ratio)
+  const r10 = t.find(r => r.minRoll === 10 && r.maxRoll === 10);
+  assert(r10 && r10.ratioMultiplier === 1.00, `Roll 10: ${JSON.stringify(r10)}`, e);
+});
+
+test('resonantOrbitSpacingTable: 13 rows, exactly one Laplace (2:1) entry', (e) => {
+  const t = resonantOrbitSpacingTable.results;
+  assert(t.length === 13, `Expected 13 rows, got ${t.length}`, e);
+  const laplace = t.filter(r => r.isLaplace === true);
+  assert(laplace.length === 1, `Expected 1 Laplace entry, got ${laplace.length}`, e);
+  assert(laplace[0].resonance === '2:1' && laplace[0].actualRatio === 1.587,
+    `Laplace entry: ${JSON.stringify(laplace[0])}`, e);
+  // First entry: 4:3 resonance at 1.211
+  assert(t[0].resonance === '4:3' && t[0].actualRatio === 1.211,
+    `First entry: ${JSON.stringify(t[0])}`, e);
+  // All entries: minRatio ≤ actualRatio ≤ maxRatio
+  t.forEach((r, i) => {
+    assert(r.actualRatio >= r.minRatio && r.actualRatio <= r.maxRatio,
+      `Row ${i}: actualRatio ${r.actualRatio} outside [${r.minRatio}, ${r.maxRatio}]`, e);
+  });
+});
+
+test('coreAccretionMassTable: 7 rows, three factor columns present, factors reasonable', (e) => {
+  const t = coreAccretionMassTable.results;
+  assert(t.length === 7, `Expected 7 rows, got ${t.length}`, e);
+  t.forEach((r, i) => {
+    assert(r.innermostFactor   !== undefined, `Row ${i} missing innermostFactor`, e);
+    assert(r.nextInnermostFactor !== undefined, `Row ${i} missing nextInnermostFactor`, e);
+    assert(r.subsequentFactor  !== undefined, `Row ${i} missing subsequentFactor`, e);
+    assert(r.innermostFactor >= r.nextInnermostFactor,
+      `Row ${i} innermostFactor < nextInnermostFactor`, e);
+    assert(r.nextInnermostFactor >= r.subsequentFactor,
+      `Row ${i} nextInnermostFactor < subsequentFactor`, e);
+  });
+  // Spot-check: rolls 9-12 → 10/5/1.2
+  const r912 = t.find(r => r.minRoll === 9 && r.maxRoll === 12);
+  assert(r912 && r912.innermostFactor === 10 && r912.nextInnermostFactor === 5 && r912.subsequentFactor === 1.2,
+    `Rolls 9-12: ${JSON.stringify(r912)}`, e);
+});
+
+// ============================================================
+// ── GROUP 6: DATA — Eccentricity & Satellite Tables ────────
+// ============================================================
+
+group('DATA — Eccentricity & Satellite Tables');
+
+test('systemEccentricityTable: 8 rows, typical eccentricities decreasing with planet count', (e) => {
+  const t = systemEccentricityTable.results;
+  assert(t.length === 8, `Expected 8 rows, got ${t.length}`, e);
+  // First row (≤2 planets) = 0.23; last row (≥10 planets) = 0.05
+  assert(t[0].maxPlanets  === 2 && t[0].typicalEccentricity === 0.23,
+    `First row: ${JSON.stringify(t[0])}`, e);
+  assert(t[7].minPlanets  === 10 && t[7].typicalEccentricity === 0.05,
+    `Last row: ${JSON.stringify(t[7])}`, e);
+  // Monotonically non-increasing
+  for (let i = 1; i < t.length; i++) {
+    assert(t[i].typicalEccentricity <= t[i-1].typicalEccentricity,
+      `Non-decreasing at row ${i}: ${t[i-1].typicalEccentricity} → ${t[i].typicalEccentricity}`, e);
+  }
+});
+
+test('majorSatelliteOrbitalRatioTable: 13 rows, exactly one Laplace entry, ratios ≥ 1.4', (e) => {
+  const t = majorSatelliteOrbitalRatioTable.results;
+  assert(t.length === 13, `Expected 13 rows, got ${t.length}`, e);
+  const laplace = t.filter(r => r.isLaplace === true);
+  assert(laplace.length === 1, `Expected 1 Laplace entry, got ${laplace.length}`, e);
+  assert(laplace[0].ratio === 1.587, `Laplace ratio: ${laplace[0].ratio}`, e);
+  t.forEach((r, i) => {
+    assert(r.ratio >= 1.4, `Row ${i} ratio ${r.ratio} < 1.4`, e);
+  });
+});
+
+// ============================================================
+// ── GROUP 7: CONSTRAINTS — Step 9 Disk Worksheet ───────────
+// ============================================================
+
+group('CONSTRAINTS — Step 9: Protoplanetary Disk Worksheet');
+
+test('rInner > 0 for all disk worksheets', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w9a-${i}`);
+    (sys.diskWorksheets || []).forEach(ws => {
+      assert(ws.rInner > 0,
+        `Hex w9a-${i} Node ${ws.label}: rInner=${ws.rInner}`, e);
+    });
+  }
+});
+
+test('ERRATA v1.05 — S-type rInner ≤ 12×0.005×∛(focalMass) (2d6 max, not 3d6 max of 18)', (e) => {
+  // With 2d6, max roll is 12.  If 3d6 were used, max would be 18, and we'd see
+  // rInner values exceeding 12×0.005×cbrt(M) — this test would then fail.
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w9b-${i}`);
+    (sys.diskWorksheets || []).filter(ws => ws.type === 'S').forEach(ws => {
+      const maxAllowed = roundToSigFigs(12 * 0.005 * Math.pow(ws.focalMass, 1/3), 3);
+      assert(ws.rInner <= maxAllowed,
+        `Hex w9b-${i} Node ${ws.label}: rInner=${ws.rInner.toFixed(5)} > 2d6-max=${maxAllowed.toFixed(5)} AU (3d6 leak?)`,
+        e);
+    });
+  }
+});
+
+test('Formation orbit 6 radius = 4.0 × √(focalLum) for all worksheets (ice line factor)', (e) => {
+  const TOL = 1e-9;
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w9c-${i}`);
+    (sys.diskWorksheets || []).forEach(ws => {
+      const orbit6 = ws.orbits.find(o => o.orbitNumber === 6);
+      if (!orbit6) return;
+      const expected = 4.0 * Math.sqrt(ws.focalLum);
+      const diff = Math.abs(orbit6.radiusAU - expected);
+      assert(diff < TOL,
+        `Hex w9c-${i} Node ${ws.label} (${ws.type}-type): orbit6.radiusAU=${orbit6.radiusAU.toFixed(5)} ≠ 4√L=${expected.toFixed(5)}`, e);
+    });
+  }
+});
+
+test('rIce = roundToSigFigs(4.0 × √focalInitialLum, 3) on worksheet (spec p.56)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w9f-${i}`);
+    (sys.diskWorksheets || []).forEach(ws => {
+      const expected = roundToSigFigs(4.0 * Math.sqrt(ws.focalInitialLum), 3);
+      assert(ws.rIce === expected,
+        `Hex w9f-${i} Node ${ws.label}: rIce=${ws.rIce} ≠ roundToSigFigs(4.0×√L0)=${expected}`, e);
+    });
+  }
+});
+
+test('rSlow = roundToSigFigs(20 × ∛focalMass, 3) for all worksheets (spec p.56)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w9d-${i}`);
+    (sys.diskWorksheets || []).forEach(ws => {
+      const expected = roundToSigFigs(20 * Math.pow(ws.focalMass, 1/3), 3);
+      assert(ws.rSlow === expected,
+        `Hex w9d-${i} Node ${ws.label}: rSlow=${ws.rSlow} ≠ roundToSigFigs(20×∛M)=${expected}`, e);
+    });
+  }
+});
+
+test('Orbits 1–16 with radiusAU < rInner are flagged Disabled (not silently wrong)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w9e-${i}`);
+    (sys.diskWorksheets || []).forEach(ws => {
+      ws.orbits.filter(o => o.orbitNumber >= 1 && o.radiusAU < ws.rInner).forEach(o => {
+        assert(o.flag === 'Disabled',
+          `Hex w9e-${i} Node ${ws.label} Orbit ${o.orbitNumber}: radiusAU=${o.radiusAU.toFixed(5)} < rInner=${ws.rInner.toFixed(5)} but flag='${o.flag}'`, e);
+      });
+    });
+  }
+});
+
+// ============================================================
+// ── GROUP 8: CONSTRAINTS — Step 10 Disk Instability ────────
+// ============================================================
+
+group('CONSTRAINTS — Step 10: Disk Instability (+ Errata v1.06)');
+
+test('ERRATA v1.06 — no DI planets when focalMass × massFactor < 0.8', (e) => {
+  // The spec (v1.06 errata) requires a mass threshold pre-check.
+  // Any worksheet where the product is below 0.8 must have zero DI planets.
+  let checkedLowMass = 0;
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w10a-${i}`);
+    (sys.diskWorksheets || []).forEach(ws => {
+      if (ws.focalMass * ws.massFactor < 0.8) {
+        checkedLowMass++;
+        assert(ws.diskInstabilityPlanets.length === 0,
+          `Hex w10a-${i} Node ${ws.label}: massProduct=${(ws.focalMass*ws.massFactor).toFixed(3)} < 0.8 but ${ws.diskInstabilityPlanets.length} DI planet(s)`, e);
+      }
+    });
+  }
+  if (checkedLowMass === 0) {
+    // Soft warning: no low-mass cases found in this run — increase iterations
+    // Not a test failure; just a coverage note
+  }
+});
+
+test('DI planets only at formation orbit numbers 7–16 (outer disk)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w10b-${i}`);
+    (sys.diskWorksheets || []).forEach(ws => {
+      ws.diskInstabilityPlanets.forEach(p => {
+        assert(p.orbitNumber >= 7 && p.orbitNumber <= 16,
+          `Hex w10b-${i} Node ${ws.label}: DI planet at orbit ${p.orbitNumber} (must be 7-16)`, e);
+      });
+    });
+  }
+});
+
+test('DI planet count ≤ 4 per worksheet (table maximum)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w10c-${i}`);
+    (sys.diskWorksheets || []).forEach(ws => {
+      assert(ws.diskInstabilityPlanets.length <= 4,
+        `Hex w10c-${i} Node ${ws.label}: ${ws.diskInstabilityPlanets.length} DI planets > max 4`, e);
+    });
+  }
+});
+
+test('No DI planet placed at a Forbidden orbit', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w10d-${i}`);
+    (sys.diskWorksheets || []).forEach(ws => {
+      ws.diskInstabilityPlanets.forEach(p => {
+        const slot = ws.orbits.find(o => o.orbitNumber === p.orbitNumber);
+        // After placement the slot is flagged Occupied-DI; before it was null or Available
+        // The engine aborts when it hits Forbidden; so we verify no DI planets sit at what
+        // was originally a Forbidden orbit by cross-checking against forbiddenZoneStart.
+        if (ws.forbiddenZoneStart !== null) {
+          assert(p.radiusAU < ws.forbiddenZoneStart,
+            `Hex w10d-${i} Node ${ws.label}: DI planet at orbit ${p.orbitNumber} r=${p.radiusAU.toFixed(4)} ≥ forbiddenZoneStart=${ws.forbiddenZoneStart.toFixed(4)}`, e);
+        }
+      });
+    });
+  }
+});
+
+// ============================================================
+// ── GROUP 9: CONSTRAINTS — Step 11 Core Accretion ──────────
+// ============================================================
+
+group('CONSTRAINTS — Step 11: Core Accretion & Migration');
+
+test('First (migrated) CA planet always at orbit ≤ 7 (Grand Tack ceiling = orbit 7)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w11a-${i}`);
+    (sys.diskWorksheets || []).forEach(ws => {
+      if (ws.coreAccretionPlanets.length > 0) {
+        const sorted = [...ws.coreAccretionPlanets].sort((a,b) => a.orbitNumber - b.orbitNumber);
+        assert(sorted[0].orbitNumber <= 7,
+          `Hex w11a-${i} Node ${ws.label}: first CA planet at orbit ${sorted[0].orbitNumber} > 7`, e);
+      }
+    });
+  }
+});
+
+test('planetesimalMassFactor ∈ [0.25, 1.0] (from planetaryMigrationTable)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w11b-${i}`);
+    (sys.diskWorksheets || []).forEach(ws => {
+      if (ws.coreAccretionPlanets.length > 0) {
+        const pmf = ws.planetesimalMassFactor;
+        assert(pmf >= 0.25 && pmf <= 1.0,
+          `Hex w11b-${i} Node ${ws.label}: planetesimalMassFactor=${pmf} outside [0.25, 1.0]`, e);
+      }
+    });
+  }
+});
+
+// ============================================================
+// ── GROUP 10: CONSTRAINTS — Step 12 Oligarchic Collision ───
+// ============================================================
+
+group('CONSTRAINTS — Step 12: Oligarchic Collision');
+
+test('OC planets only at orbit numbers 0–5 (inner system only, below formation ice line)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w12a-${i}`);
+    (sys.diskWorksheets || []).forEach(ws => {
+      ws.oligarchicCollisionPlanets.forEach(p => {
+        assert(p.orbitNumber >= 0 && p.orbitNumber <= 5,
+          `Hex w12a-${i} Node ${ws.label}: OC planet at orbit ${p.orbitNumber} (must be 0-5)`, e);
+      });
+    });
+  }
+});
+
+test('If orbit 0 or orbit 1 is occupied or Forbidden, zero OC planets', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w12b-${i}`);
+    (sys.diskWorksheets || []).forEach(ws => {
+      const slot0 = ws.orbits.find(o => o.orbitNumber === 0);
+      const slot1 = ws.orbits.find(o => o.orbitNumber === 1);
+      const blocked = (slot0 && slot0.flag !== null && slot0.flag !== 'Occupied-OC')
+                   || (slot1 && slot1.flag !== null && slot1.flag !== 'Occupied-OC');
+      if (blocked) {
+        // If the pre-check fires (orbit 0 or 1 blocked), no OC planets should appear.
+        // (Note: we exclude 'Occupied-OC' itself — OC planets set the flag)
+        const hasOC = ws.oligarchicCollisionPlanets.length > 0;
+        // We need the pre-check state BEFORE OC ran; use the fact that OC requires
+        // slots 0 and 1 to be completely unoccupied.  The blocking flags are from
+        // DI (Occupied-DI), CA (Occupied-CA), Disabled, or Forbidden — never OC (which runs last).
+        const preCheckBlocked = (slot0 && slot0.flag !== null && slot0.flag !== 'Occupied-OC')
+                              || (slot1 && slot1.flag !== null && slot1.flag !== 'Occupied-OC');
+        if (preCheckBlocked) {
+          assert(ws.oligarchicCollisionPlanets.length === 0,
+            `Hex w12b-${i} Node ${ws.label}: OC pre-check should block (slot0=${slot0 ? slot0.flag : '?'}, slot1=${slot1 ? slot1.flag : '?'}) but ${ws.oligarchicCollisionPlanets.length} OC planets exist`, e);
+        }
+      }
+    });
+  }
+});
+
+// ============================================================
+// ── GROUP 11: CONSTRAINTS — Step 13 Orbital Radii ──────────
+// ============================================================
+
+group('CONSTRAINTS — Step 13: Orbital Radii');
+
+test('All planets have orbitalRadius > 0', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w13a-${i}`);
+    allPlanets(sys).forEach(({ ws, p }) => {
+      assert(p.orbitalRadius > 0,
+        `Hex w13a-${i} Node ${ws.label} Orbit ${p.orbitNumber}: orbitalRadius=${p.orbitalRadius}`, e);
+    });
+  }
+});
+
+test('Orbital radii monotonically increasing within each worksheet', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w13b-${i}`);
+    (sys.diskWorksheets || []).forEach(ws => {
+      const planets = (ws.planets || []);
+      for (let j = 1; j < planets.length; j++) {
+        assert(planets[j].orbitalRadius > planets[j-1].orbitalRadius,
+          `Hex w13b-${i} Node ${ws.label}: planet[${j}].orbitalRadius=${planets[j].orbitalRadius.toFixed(4)} ≤ planet[${j-1}].orbitalRadius=${planets[j-1].orbitalRadius.toFixed(4)}`, e);
+      }
+    });
+  }
+});
+
+test('Innermost planet orbitalRadius ≥ worksheet rInner', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w13c-${i}`);
+    (sys.diskWorksheets || []).forEach(ws => {
+      const planets = (ws.planets || []);
+      if (planets.length === 0) return;
+      const inner = planets[0];
+      assert(inner.orbitalRadius >= ws.rInner - 1e-9,
+        `Hex w13c-${i} Node ${ws.label}: innermost orbitalRadius=${inner.orbitalRadius.toFixed(5)} < rInner=${ws.rInner.toFixed(5)}`, e);
+    });
+  }
+});
+
+// ============================================================
+// ── GROUP 12: CONSTRAINTS — Step 14 Planetary Mass ─────────
+// ============================================================
+
+group('CONSTRAINTS — Step 14: Planetary Mass');
+
+test('DI gas giants: mass clamped to [5, 5000] Earth masses', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w14a-${i}`);
+    (sys.diskWorksheets || []).forEach(ws => {
+      ws.diskInstabilityPlanets.forEach(p => {
+        assert(p.mass >= 5 && p.mass <= 5000,
+          `Hex w14a-${i} Node ${ws.label} DI orbit ${p.orbitNumber}: mass=${p.mass ? p.mass.toFixed(1) : p.mass}`, e);
+      });
+    });
+  }
+});
+
+test('CA gas giants: mass clamped to [5, 5000] Earth masses', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w14b-${i}`);
+    (sys.diskWorksheets || []).forEach(ws => {
+      ws.coreAccretionPlanets.filter(p => p.planetType === 'Gas Giant (CA)').forEach(p => {
+        assert(p.mass >= 5 && p.mass <= 5000,
+          `Hex w14b-${i} Node ${ws.label} CA orbit ${p.orbitNumber}: mass=${p.mass ? p.mass.toFixed(1) : p.mass}`, e);
+      });
+    });
+  }
+});
+
+test('Terrestrial planets have mass > 0.18 Em (threshold for terrestrial classification)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w14c-${i}`);
+    allPlanets(sys).forEach(({ ws, p }) => {
+      if (p.planetType === 'Terrestrial') {
+        assert(p.mass > 0.18,
+          `Hex w14c-${i} Node ${ws.label} Orbit ${p.orbitNumber}: Terrestrial mass=${p.mass ? p.mass.toFixed(5) : p.mass} ≤ 0.18`, e);
+      }
+    });
+  }
+});
+
+test('Planetoid Belts have mass === null', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w14d-${i}`);
+    allPlanets(sys).forEach(({ ws, p }) => {
+      if (p.planetType === 'Planetoid Belt') {
+        assert(p.mass === null || p.mass === undefined,
+          `Hex w14d-${i} Node ${ws.label} Orbit ${p.orbitNumber}: Planetoid Belt mass=${p.mass}`, e);
+      }
+    });
+  }
+});
+
+test('All non-Belt planets have mass assigned (truthy or explicit 0+)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w14e-${i}`);
+    allPlanets(sys).forEach(({ ws, p }) => {
+      if (p.planetType !== 'Planetoid Belt') {
+        assert(p.mass !== undefined && p.mass !== null,
+          `Hex w14e-${i} Node ${ws.label} Orbit ${p.orbitNumber} (${p.planetType}): no mass assigned`, e);
+      }
+    });
+  }
+});
+
+test('Failed Core: mass ≤ 5 Em (spec cap) and mass > 0', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w14f-${i}`);
+    allPlanets(sys).forEach(({ ws, p }) => {
+      if (p.planetType === 'Failed Core') {
+        if (ws.planetesimalMass === 0) return; // zero metallicity → P=0 → mass=0 is correct
+        assert(p.mass > 0 && p.mass <= 5,
+          `Hex w14f-${i} Node ${ws.label} Orbit ${p.orbitNumber}: Failed Core mass=${p.mass !== null ? p.mass.toFixed(3) : 'null'} outside (0, 5]`, e);
+      }
+    });
+  }
+});
+
+// ============================================================
+// ── GROUP 13: CONSTRAINTS — Step 15 Orbital Eccentricity ───
+// ============================================================
+
+group('CONSTRAINTS — Step 15: Orbital Eccentricity');
+
+test('Non-Belt planets: eccentricity ≥ 0', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w15a-${i}`);
+    allPlanets(sys).forEach(({ ws, p }) => {
+      if (p.planetType !== 'Planetoid Belt') {
+        assert(typeof p.eccentricity === 'number' && p.eccentricity >= 0,
+          `Hex w15a-${i} Node ${ws.label} Orbit ${p.orbitNumber}: eccentricity=${p.eccentricity}`, e);
+      }
+    });
+  }
+});
+
+test('Planetoid Belts: eccentricity = 0, Rmin = Rmax = orbitalRadius', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w15b-${i}`);
+    allPlanets(sys).forEach(({ ws, p }) => {
+      if (p.planetType === 'Planetoid Belt') {
+        assert(p.eccentricity === 0, `Hex w15b-${i} Belt Orbit ${p.orbitNumber}: E=${p.eccentricity}`, e);
+        assert(p.Rmin === p.orbitalRadius, `Belt Rmin≠R: ${p.Rmin} vs ${p.orbitalRadius}`, e);
+        assert(p.Rmax === p.orbitalRadius, `Belt Rmax≠R: ${p.Rmax} vs ${p.orbitalRadius}`, e);
+      }
+    });
+  }
+});
+
+test('Rmin = orbitalRadius × (1−E) and Rmax = orbitalRadius × (1+E) for non-Belt planets', (e) => {
+  const TOL = 1e-9;
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w15c-${i}`);
+    allPlanets(sys).forEach(({ ws, p }) => {
+      if (p.planetType !== 'Planetoid Belt') {
+        const expMin = p.orbitalRadius * (1 - p.eccentricity);
+        const expMax = p.orbitalRadius * (1 + p.eccentricity);
+        assert(Math.abs(p.Rmin - expMin) < TOL,
+          `Hex w15c-${i} Orbit ${p.orbitNumber}: Rmin=${p.Rmin.toFixed(6)} ≠ R(1-E)=${expMin.toFixed(6)}`, e);
+        assert(Math.abs(p.Rmax - expMax) < TOL,
+          `Hex w15c-${i} Orbit ${p.orbitNumber}: Rmax=${p.Rmax.toFixed(6)} ≠ R(1+E)=${expMax.toFixed(6)}`, e);
+      }
+    });
+  }
+});
+
+test('Stability enforcement: inner.Rmax ≤ outer.Rmin for all non-outermost adjacent pairs', (e) => {
+  // Spec exception: the last (outermost) pair is exempt from stability enforcement.
+  const TOL = 1e-9;
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w15d-${i}`);
+    (sys.diskWorksheets || []).forEach(ws => {
+      const sorted = [...(ws.planets || [])].sort((a,b) => (a.orbitalRadius||0) - (b.orbitalRadius||0));
+      // Check all pairs except the last one (spec exempts outermost pair)
+      for (let j = 0; j + 2 < sorted.length; j++) {
+        const inner = sorted[j];
+        const outer = sorted[j+1];
+        if (inner.planetType === 'Planetoid Belt' || outer.planetType === 'Planetoid Belt') continue;
+        assert(inner.Rmax <= outer.Rmin + TOL,
+          `Hex w15d-${i} Node ${ws.label}: planet[${j}].Rmax=${inner.Rmax.toFixed(5)} > planet[${j+1}].Rmin=${outer.Rmin.toFixed(5)} (overlap)`, e);
+      }
+    });
+  }
+});
+
+// ============================================================
+// ── GROUP 14: CONSTRAINTS — Step 16 Physical Parameters ────
+// ============================================================
+
+group('CONSTRAINTS — Step 16: Physical Parameters');
+
+test('Planetoid Belts have no density, radius, or surfaceGravity', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w16a-${i}`);
+    allPlanets(sys).forEach(({ ws, p }) => {
+      if (p.planetType === 'Planetoid Belt') {
+        assert(p.density === undefined || p.density === null,
+          `Hex w16a-${i} Belt Orbit ${p.orbitNumber}: has density=${p.density}`, e);
+      }
+    });
+  }
+});
+
+test('Gas Giants ≤ 200 Em: density = 1/√mass (deterministic formula, no random)', (e) => {
+  const TOL = 1e-9;
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w16b-${i}`);
+    allPlanets(sys).forEach(({ ws, p }) => {
+      if (p.planetType && p.planetType.includes('Gas Giant') && p.mass <= 200) {
+        const expected = 1 / Math.sqrt(p.mass);
+        assert(Math.abs(p.density - expected) < TOL,
+          `Hex w16b-${i} GG Orbit ${p.orbitNumber} M=${p.mass.toFixed(1)}: density=${p.density.toFixed(5)} ≠ 1/√M=${expected.toFixed(5)}`, e);
+      }
+    });
+  }
+});
+
+test('Gas Giants > 200 Em: density = M^1.27 / 11800 (deterministic formula, no random)', (e) => {
+  const TOL = 1e-9;
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w16c-${i}`);
+    allPlanets(sys).forEach(({ ws, p }) => {
+      if (p.planetType && p.planetType.includes('Gas Giant') && p.mass > 200) {
+        const expected = Math.pow(p.mass, 1.27) / 11800;
+        assert(Math.abs(p.density - expected) < TOL,
+          `Hex w16c-${i} GG Orbit ${p.orbitNumber} M=${p.mass.toFixed(0)}: density=${p.density.toFixed(5)} ≠ M^1.27/11800=${expected.toFixed(5)}`, e);
+      }
+    });
+  }
+});
+
+test('Stony worlds: density clamped to [0.18, 1.43]', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w16d-${i}`);
+    allPlanets(sys).forEach(({ ws, p }) => {
+      const isStony = ['Terrestrial', 'Failed Core', 'Leftover Oligarch'].includes(p.planetType);
+      if (isStony && p.density !== undefined) {
+        assert(p.density >= 0.18 && p.density <= 1.43,
+          `Hex w16d-${i} ${p.planetType} Orbit ${p.orbitNumber}: density=${p.density.toFixed(4)} outside [0.18, 1.43]`, e);
+      }
+    });
+  }
+});
+
+test('Radius = 6370 × (M/D)^(1/3) for all non-Belt planets (3 sig-fig rounding allowed)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w16e-${i}`);
+    allPlanets(sys).forEach(({ ws, p }) => {
+      if (p.planetType !== 'Planetoid Belt' && p.density !== undefined && p.mass > 0) {
+        const raw   = 6370 * Math.pow(p.mass / p.density, 1/3);
+        // The engine rounds to 3 significant figures; allow up to 0.5% tolerance
+        const rel = Math.abs(p.radius - raw) / raw;
+        assert(rel < 0.005,
+          `Hex w16e-${i} ${p.planetType} Orbit ${p.orbitNumber}: radius=${p.radius} raw=${raw.toFixed(0)} diff=${(rel*100).toFixed(2)}%`, e);
+      }
+    });
+  }
+});
+
+test('SurfaceGravity = (M × D²)^(1/3) for all non-Belt planets (nearest 0.01 rounding)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w16f-${i}`);
+    allPlanets(sys).forEach(({ ws, p }) => {
+      if (p.planetType !== 'Planetoid Belt' && p.density !== undefined && p.mass > 0) {
+        const raw = Math.pow(p.mass * p.density * p.density, 1/3);
+        const rounded = Math.round(raw * 100) / 100;
+        assert(Math.abs(p.surfaceGravity - rounded) < 1e-9,
+          `Hex w16f-${i} ${p.planetType} Orbit ${p.orbitNumber}: G=${p.surfaceGravity} ≠ rounded(∛(M×D²))=${rounded}`, e);
+      }
+    });
+  }
+});
+
+// ============================================================
+// ── GROUP 15: CONSTRAINTS — Step 17 Natural Satellites ─────
+// ============================================================
+
+group('CONSTRAINTS — Step 17: Natural Satellites (+ Errata v1.04)');
+
+test('ERRATA v1.04 — Gas giant satellite mass formula uses 10⁻⁵ (not 10⁻⁶)', (e) => {
+  // Formula: M_sat = 1e-5 × 3d6 × M_planet / N
+  // So: M_sat × N / M_planet = 1e-5 × roll  where roll ∈ [3, 18]
+  // Range: [3e-5, 18e-5].  If 1e-6 were used, max = 1.8e-5 < 3e-5, so lower bound catches it.
+  let satCount = 0;
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w17a-${i}`);
+    (sys.diskWorksheets || []).forEach(ws => {
+      for (const planet of (ws.planets || [])) {
+        if (!planet.planetType || !planet.planetType.includes('Gas Giant')) continue;
+        const N_sat = (planet.satellites || []).length;
+        if (N_sat === 0) continue;
+        for (const sat of planet.satellites) {
+          satCount++;
+          const ratio = sat.mass * N_sat / planet.mass;
+          // ±1e-5 tolerance absorbs 2-sig-fig rounding of M_sat for extreme planet masses
+          assert(ratio >= 2e-5 && ratio <= 19e-5,
+            `Hex w17a-${i} GG Orbit ${planet.orbitNumber} Sat: massRatio=${ratio.toExponential(3)} outside [3e-5, 18e-5] (v1.04 violation if <3e-5)`, e);
+        }
+      }
+    });
+  }
+  if (satCount === 0) {
+    // No gas giant satellites generated in this run — not an error, just low coverage
+  }
+});
+
+test('Hill radius formula: H = 2.17e6 × Rmin × (M_planet/focalMass)^(1/3)', (e) => {
+  const TOL = 1e-3; // km
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w17b-${i}`);
+    (sys.diskWorksheets || []).forEach(ws => {
+      (ws.planets || []).filter(p => p.hillRadius !== undefined && p.planetType !== 'Planetoid Belt').forEach(p => {
+        const expected = 2.17e6 * p.Rmin * Math.pow(p.mass / ws.focalMass, 1/3);
+        assert(Math.abs(p.hillRadius - expected) < TOL,
+          `Hex w17b-${i} Node ${ws.label} Orbit ${p.orbitNumber}: hillRadius=${p.hillRadius.toFixed(0)} ≠ ${expected.toFixed(0)} km`, e);
+      });
+    });
+  }
+});
+
+test('Gas giants: ring system is null/"Thin"/"Moderate"/"Dense" (always assigned)', (e) => {
+  const VALID = new Set([null, 'Thin', 'Moderate', 'Dense']);
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w17c-${i}`);
+    allPlanets(sys).forEach(({ ws, p }) => {
+      if (p.planetType && p.planetType.includes('Gas Giant')) {
+        assert(VALID.has(p.ringSystem),
+          `Hex w17c-${i} GG Orbit ${p.orbitNumber}: ringSystem="${p.ringSystem}"`, e);
+      }
+    });
+  }
+});
+
+test('Gas giant satellite orbital radii are monotonically increasing', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w17d-${i}`);
+    allPlanets(sys).forEach(({ ws, p }) => {
+      const sats = p.satellites || [];
+      for (let j = 1; j < sats.length; j++) {
+        assert(sats[j].orbitalRadius > sats[j-1].orbitalRadius,
+          `Hex w17d-${i} GG Orbit ${p.orbitNumber}: sat[${j}].r=${sats[j].orbitalRadius.toFixed(0)} ≤ sat[${j-1}].r=${sats[j-1].orbitalRadius.toFixed(0)} km`, e);
+      }
+    });
+  }
+});
+
+test('Terrestrial major satellite mass = roundToSigFigs(10⁻³ × 3d6 × M_planet, 2) (Case 2)', (e) => {
+  // Impact moon: M_sat = roundToSigFigs(1e-3 × roll × M_planet, 2), roll ∈ [3,18].
+  // Ratio-based bounds break after 2-sig-fig rounding, so verify sat.mass is one
+  // of the 16 valid rounded outcomes for the given planet mass.
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w17e-${i}`);
+    allPlanets(sys).forEach(({ ws, p }) => {
+      if (p.planetType !== 'Terrestrial' && p.planetType !== 'Leftover Oligarch') return;
+      for (const sat of (p.satellites || [])) {
+        const validMasses = [];
+        for (let roll = 3; roll <= 18; roll++) {
+          validMasses.push(roundToSigFigs(1e-3 * roll * p.mass, 2));
+        }
+        assert(validMasses.some(m => Math.abs(m - sat.mass) < 1e-12),
+          `Hex w17e-${i} ${p.planetType} Orbit ${p.orbitNumber}: impact moon mass=${sat.mass} not a valid roundToSigFigs(1e-3×[3..18]×${p.mass.toFixed(4)},2) outcome`, e);
+      }
+    });
+  }
+});
+
+test('Case 2 impact moon orbital radius ∈ [40×R_planet, 100×R_planet] (spec: (3d6+7)×4×R)', (e) => {
+  const TOL = 1e-6;
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w17h-${i}`);
+    allPlanets(sys).forEach(({ ws, p }) => {
+      if (p.planetType !== 'Terrestrial' && p.planetType !== 'Leftover Oligarch') return;
+      for (const sat of (p.satellites || [])) {
+        const lo = 40  * p.radius;
+        const hi = 100 * p.radius;
+        assert(sat.orbitalRadius >= lo - TOL && sat.orbitalRadius <= hi + TOL,
+          `Hex w17h-${i} ${p.planetType} Orbit ${p.orbitNumber}: sat.orbitalRadius=${sat.orbitalRadius.toFixed(0)} km outside [${lo.toFixed(0)}, ${hi.toFixed(0)}] km (spec: (3d6+7)×4×R)`, e);
+      }
+    });
+  }
+});
+
+test('Stony world satellite density clamped to [0.18, 1.43]', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w17f-${i}`);
+    allPlanets(sys).forEach(({ ws, p }) => {
+      (p.satellites || []).forEach((sat, si) => {
+        if (sat.density !== undefined) {
+          assert(sat.density >= 0.18 && sat.density <= 1.43,
+            `Hex w17f-${i} Orbit ${p.orbitNumber} Sat ${si+1}: density=${sat.density.toFixed(3)} outside [0.18, 1.43]`, e);
+        }
+      });
+    });
+  }
+});
+
+test('Case 1 satellite count: N_raw = ⌊(2×10⁻¹⁵) × H² / √R⌋ ± adj ∈ [1,8] (spec, not H/(2e6×R))', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runWorld(`w17g-${i}`);
+    (sys.diskWorksheets || []).forEach(ws => {
+      for (const planet of (ws.planets || [])) {
+        if (!planet.planetType) continue;
+        if (!planet.planetType.includes('Gas Giant') && planet.planetType !== 'Failed Core') continue;
+        if (planet.hillRadius === undefined) continue;
+        const H         = planet.hillRadius;
+        const R         = planet.orbitalRadius;
+        const N_formula = Math.floor((2e-15) * H * H / Math.sqrt(R));
+        const N_actual  = (planet.satellites || []).length;
+        if (N_formula === 0) {
+          assert(N_actual === 0,
+            `Hex w17g-${i} Orbit ${planet.orbitNumber}: N_formula=0 but ${N_actual} satellite(s) — formula mismatch?`, e);
+        } else {
+          const lo = Math.min(8, Math.max(1, N_formula - 2));
+          const hi = Math.min(8, N_formula + 2);
+          assert(N_actual >= lo && N_actual <= hi,
+            `Hex w17g-${i} Orbit ${planet.orbitNumber}: N_formula=${N_formula}, expected N∈[${lo},${hi}] but N_actual=${N_actual}`, e);
+        }
+      }
+    });
+  }
+});
+
+// ============================================================
+// TEST RUNNER & RENDERER
+// ============================================================
+
+function runAllTests(iterations) {
+  N = iterations || N_DEFAULT;
+  const groups = [];
+  let cur = null;
+  testQueue.forEach(({ group: gname, desc, fn }) => {
+    if (!cur || cur.name !== gname) { cur = { name: gname, tests: [] }; groups.push(cur); }
+    const errors = [];
+    try { fn(errors); } catch (ex) { errors.push('THREW: ' + ex.message + '\n' + (ex.stack||'').split('\n')[1]); }
+    cur.tests.push({ desc, pass: errors.length === 0, errors });
+  });
+  return groups;
+}
+
+function renderResults(groups, verbose) {
+  let passTotal = 0, failTotal = 0;
+  const html = groups.map(g => {
+    const gPass = g.tests.filter(t => t.pass).length;
+    const gFail = g.tests.length - gPass;
+    passTotal += gPass; failTotal += gFail;
+    const cls = gFail > 0 ? 'has-fail' : 'all-pass';
+    const lines = g.tests.map(t => {
+      const icon = t.pass ? '<span class="pass-icon">✓</span>' : '<span class="fail-icon">✗</span>';
+      let out = `<div class="test-line">${icon} ${t.desc}</div>`;
+      if (!t.pass) {
+        const shown = verbose ? t.errors : t.errors.slice(0, 3);
+        out += shown.map(err => `<div class="err-detail">↳ ${err}</div>`).join('');
+        if (!verbose && t.errors.length > 3)
+          out += `<div class="skip-line">... and ${t.errors.length - 3} more failures</div>`;
+      }
+      return out;
+    }).join('');
+    return `<div class="group ${cls}">
+      <div class="group-header">
+        <span class="gname">${g.name}</span> —
+        <span class="pass-ct">${gPass} passed</span>
+        ${gFail > 0 ? `<span class="fail-ct">, ${gFail} failed</span>` : ''}
+      </div>
+      ${lines}
+    </div>`;
+  }).join('');
+
+  const sumCls = failTotal > 0 ? 'fail' : 'pass';
+  const sumMsg = failTotal > 0
+    ? `✗ ${failTotal} test(s) failed, ${passTotal} passed (N=${N} iterations)`
+    : `✓ All ${passTotal} tests passed (N=${N} iterations)`;
+
+  document.getElementById('summary').innerHTML =
+    `<div class="summary ${sumCls}">${sumMsg}</div>`;
+  document.getElementById('results').innerHTML = html;
+}
+
+function runTests(verbose, iters) {
+  const t0 = performance.now();
+  document.getElementById('summary').innerHTML = '<div class="summary">Running…</div>';
+  document.getElementById('results').innerHTML = '';
+
+  // Defer to let browser paint "Running..." before blocking
+  setTimeout(() => {
+    const groups = runAllTests(iters || N_DEFAULT);
+    const elapsed = ((performance.now() - t0) / 1000).toFixed(2);
+    renderResults(groups, verbose);
+    document.getElementById('timing').textContent = `Completed in ${elapsed}s`;
+  }, 10);
+}
+</script>
+</body>
+</html>

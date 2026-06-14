@@ -77,12 +77,12 @@
             const defaultWetRule = {
                 id: 'rule_default_wet_world',
                 filters: {
-                    atm: "2-9",
+                    atm: "2-9,D,E",
                     hydro: ">0"
                 },
                 color: "#46b4e8", // Cyan-Blue
                 iconStyle: "Classic",
-                description: "Atm: 2-9 | Hydro: >0 (Liquid Water Presence)"
+                description: "Atm: 2-9, D, E | Hydro: >0 (Liquid Water Presence)"
             };
 
             window.activeFilterRules.push(defaultAsteroidRule);
@@ -230,7 +230,7 @@
             }
 
             // Stellar Data Check
-            const sys = state.mgtSystem || state.ctSystem || state.t5System || state.rttSystem;
+            const sys = state.mgtSystem || state.ctSystem || state.t5System || state.rttSystem || state.aowSystem;
             if (sys && sys.stars && sys.stars.length > 0) hasStellarData = true;
         });
 
@@ -257,7 +257,7 @@
      * A system with no star data never matches when a stellar filter is active.
      */
     function matchesStellarFilter(state, criteria) {
-        const sys = state.mgtSystem || state.ctSystem || state.t5System || state.rttSystem;
+        const sys = state.mgtSystem || state.ctSystem || state.t5System || state.rttSystem || state.aowSystem;
         if (!sys || !sys.stars || sys.stars.length === 0) return false;
 
         const starsToCheck = criteria.primaryOnly

@@ -13,13 +13,18 @@ function setupCanvasEvents() {
         }
     });
 
-    // 2. Right-Click: Open Context Menu
+    // 2. Right-Click: Open Context Menu  (Ctrl+Right-Click: open Hex Editor directly)
     mapCanvas.addEventListener('contextmenu', (e) => {
         e.preventDefault(); // Stop default browser menu
 
         const world = getMouseWorldCoords(e);
         const coords = pixelToHex(world.x, world.y, baseHexSize);
         const hexId = getHexId(coords.q, coords.r);
+
+        if (e.ctrlKey) {
+            if (hexId && hexStates.get(hexId)) openHexEditor(hexId, e);
+            return;
+        }
 
         if (hexId) {
             const parts = hexId.split('-');

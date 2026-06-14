@@ -190,10 +190,11 @@ function openHexEditor(hexId, e = null) {
     if (globeBar) globeBar.style.display = (data.size && data.size != 0) ? 'block' : 'none';
 
     // Dynamic UI Toggles based on active generation engine
-    const isRTT = !!stateObj.rttData;
-    const isMgT2E = !!stateObj.mgt2eData;
-    const isT5 = !!stateObj.t5Data;
-    const isCT = !!stateObj.ctData;
+    const isAoW   = !!stateObj.aowSystem;
+    const isRTT   = !!stateObj.rttData;
+    const isMgT2E = !!stateObj.mgt2eData && !isAoW;   // AoW bridges through mgt2eData but is not MgT2E
+    const isT5    = !!stateObj.t5Data;
+    const isCT    = !!stateObj.ctData;
 
     let systemRequiresMaskingToggle = false;
 
@@ -277,7 +278,8 @@ function openHexEditor(hexId, e = null) {
         { btn: 'acc-btn-mgt-system', container: 'editor-mgt-system-root' },
         { btn: 'acc-btn-ct-system', container: 'editor-ct-system-root' },
         { btn: 'acc-btn-t5-system', container: 'editor-t5-system-root' },
-        { btn: 'acc-btn-rtt-system', container: 'editor-rtt-system-root' }
+        { btn: 'acc-btn-rtt-system', container: 'editor-rtt-system-root' },
+        { btn: 'acc-btn-aow-system', container: 'editor-aow-system-root' }
     ];
 
     accordionControls.forEach(ctrl => {
@@ -1528,6 +1530,199 @@ function populateEditorAccordions(stateObj) {
             root.innerHTML = html;
         }
     }
+
+    // AoW Bottom-Up System Tree
+    if (stateObj.aowSystem) {
+        document.getElementById('acc-btn-aow-system').style.display = 'flex';
+        const root = document.getElementById('editor-aow-system-root');
+        if (root) {
+            root.innerHTML = '';
+            const sys = stateObj.aowSystem;
+
+            function _aowC(k) {
+                return (k && !isNaN(k)) ? `${(k - 273).toFixed(0)}°C` : '—';
+            }
+            const _aowMc = (obj, field) =>
+                (typeof isManual === 'function' && isManual(obj, field)) ? ' is-manual' : '';
+            function _aowText(obj, field, widx) {
+                const val = (obj[field] !== undefined && obj[field] !== null) ? String(obj[field]).replace(/"/g, '&quot;') : '';
+                return `<input type="text" class="rtt-field-input rtt-name-input${_aowMc(obj, field)}" data-aow-field="${field}" data-aow-widx="${widx}" value="${val}">`;
+            }
+            function _aowMoonText(m, field, widx, midx) {
+                const val = (m[field] !== undefined && m[field] !== null) ? String(m[field]).replace(/"/g, '&quot;') : '';
+                return `<input type="text" class="rtt-field-input rtt-name-input${_aowMc(m, field)}" data-aow-field="${field}" data-aow-widx="${widx}" data-aow-midx="${midx}" value="${val}">`;
+            }
+            function _aowUwp(obj, field, widx, midx) {
+                const val = (obj[field] !== undefined && obj[field] !== null) ? String(obj[field]).replace(/"/g, '&quot;') : '';
+                const midxAttr = midx >= 0 ? ` data-aow-midx="${midx}"` : '';
+                return `<input type="text" class="rtt-field-input${_aowMc(obj, field)}" data-aow-field="${field}" data-aow-widx="${widx}"${midxAttr} value="${val}" style="max-width:160px;font-family:monospace;">`;
+            }
+            function _aowNum(obj, field, widx, min, max, decimals = 2) {
+                const raw = (obj[field] !== undefined && obj[field] !== null) ? obj[field] : '';
+                const val = (raw !== '' && isFinite(raw)) ? Number(parseFloat(raw).toFixed(decimals)) : raw;
+                return `<input type="number" class="rtt-field-input${_aowMc(obj, field)}" data-aow-field="${field}" data-aow-widx="${widx}" value="${val}" min="${min}" max="${max}" step="any">`;
+            }
+            function _aowTempC(obj, field, widx) {
+                const rawK = (obj[field] !== undefined && obj[field] !== null) ? obj[field] : 273;
+                return `<input type="number" class="rtt-field-input${_aowMc(obj, field)}" data-aow-field="${field}" data-aow-widx="${widx}" data-aow-iskelvin="1" value="${(rawK - 273).toFixed(0)}" step="1">`;
+            }
+            function _aowMoonNum(m, field, widx, midx, min, max, decimals = 2) {
+                const raw = (m[field] !== undefined && m[field] !== null) ? m[field] : '';
+                const val = (raw !== '' && isFinite(raw)) ? Number(parseFloat(raw).toFixed(decimals)) : raw;
+                return `<input type="number" class="rtt-field-input${_aowMc(m, field)}" data-aow-field="${field}" data-aow-widx="${widx}" data-aow-midx="${midx}" value="${val}" min="${min}" max="${max}" step="any">`;
+            }
+            function _aowMoonTempC(m, field, widx, midx) {
+                const rawK = (m[field] !== undefined && m[field] !== null) ? m[field] : 273;
+                return `<input type="number" class="rtt-field-input${_aowMc(m, field)}" data-aow-field="${field}" data-aow-widx="${widx}" data-aow-midx="${midx}" data-aow-iskelvin="1" value="${(rawK - 273).toFixed(0)}" step="1">`;
+            }
+
+            let html = `<div class="system-stats" style="grid-template-columns: 1fr;">`;
+            html += `<div style="text-align: center; color: #66fcf1; border-bottom: 1px dotted #45a29e; padding-bottom: 4px;">AoW System Overview</div>`;
+            if (sys.hierarchy)                     html += `<span>Hierarchy: <strong>${sys.hierarchy}</strong></span>`;
+            if (sys.systemAge !== undefined)        html += `<span>Age: <strong>${(sys.systemAge).toFixed(2)} Gyr</strong></span>`;
+            if (sys.systemMetallicity !== undefined) html += `<span>Metallicity: <strong>${sys.systemMetallicity.toFixed(2)} [Fe/H]</strong></span>`;
+            html += `</div>`;
+
+            html += `<div class="system-tree">`;
+
+            (sys.stars || []).forEach((star, sIdx) => {
+                const starLabel = star.spectralClassification || star.name || `Star ${sIdx + 1}`;
+                html += `<details open>`;
+                html += `<summary>${star.role || 'Star'} — ${starLabel} <span class="sys-title-info">Star</span></summary>`;
+                html += `<div class="system-node"><div class="system-stats">`;
+                if (star.mass       !== undefined) html += `<span>Mass (M☉): <strong>${star.mass.toFixed(3)}</strong></span>`;
+                if (star.lum        !== undefined) html += `<span>Lum (L☉): <strong>${star.lum.toFixed(4)}</strong></span>`;
+                if (star.initialLum !== undefined) html += `<span>Init Lum (L☉): <strong>${star.initialLum.toFixed(4)}</strong></span>`;
+                html += `</div>`;
+
+                const sortedWorlds = [...(sys.worlds || [])].sort((a, b) => (a.orbitId || 0) - (b.orbitId || 0));
+                sortedWorlds.forEach(w => {
+                    if (w.parentStarIdx !== sIdx) return;
+
+                    const isMain      = w.type === 'Mainworld' || !!w.isMainworld;
+                    const labelColor  = isMain ? '#ffa500' : '#66fcf1';
+                    const sumStyle    = isMain ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
+                    const wName  = w.name || w.label || `Body at ${(w.orbitId || 0).toFixed(2)} AU`;
+                    const widx   = sys.worlds.indexOf(w);
+                    const wAtm   = (w.atmosphereCode || (w.atmCode  !== undefined ? w.atmCode.toString(16)  : '?')).toUpperCase();
+                    const wSize  = (w.sizeCode       || (w.size     !== undefined ? w.size.toString(16)     : '?')).toUpperCase();
+                    const wHydro = w.hydroCode !== undefined ? w.hydroCode : '?';
+                    const wUwp   = w.uwp || w.uwpSecondary || '';
+                    const wNameDisplay = isMain
+                        ? `<span style="color: ${labelColor};">${wName}</span>`
+                        : _aowText(w, 'name', widx);
+
+                    html += `<details open>`;
+                    html += `<summary ${sumStyle}>${(w.orbitId || 0).toFixed(2)} AU — ${wNameDisplay} <span class="sys-title-info">${w.type}</span></summary>`;
+                    html += `<div class="system-node"><div class="system-stats">`;
+
+                    if (w.worldClass && w.type !== 'Gas Giant' && w.type !== 'Planetoid Belt') {
+                        html += `<span style="grid-column:1/-1;color:#a0c8d0;font-style:italic;">${w.worldClass}</span>`;
+                    }
+                    if (w.type !== 'Planetoid Belt') {
+                        html += `<span>Size: <strong>${wSize}</strong></span>`;
+                        html += `<span>Atm: <strong>${wAtm}</strong></span>`;
+                        html += `<span>Hydro: <strong>${wHydro}</strong></span>`;
+                    }
+                    if (w.avgSurfaceTemp !== undefined) html += `<span>Temp (°C): ${_aowTempC(w, 'avgSurfaceTemp', widx)}</span>`;
+                    if (w.atmPressure !== undefined && w.type !== 'Gas Giant') html += `<span>Pressure (bar): ${_aowNum(w, 'atmPressure', widx, 0, 1000, 3)}</span>`;
+                    if (w.waterCoverage !== undefined) html += `<span>Water Cover (%): ${_aowNum(w, 'waterCoverage', widx, 0, 100, 1)}</span>`;
+                    if (w.habitability  !== undefined) html += `<span>Habitability: ${_aowNum(w, 'habitability', widx, -20, 20, 0)}</span>`;
+                    if (w.type !== 'Gas Giant' && w.type !== 'Planetoid Belt' && w.radius !== undefined) {
+                        html += `<span>Radius (km): ${_aowNum(w, 'radius', widx, 0, 100000, 0)}</span>`;
+                    }
+                    if (w.gravity != null && w.type !== 'Gas Giant' && w.type !== 'Planetoid Belt') {
+                        html += `<span>Gravity (G): ${_aowNum(w, 'gravity', widx, 0, 100, 2)}</span>`;
+                    }
+                    html += `</div>`;
+                    if (isMain) {
+                        if (wUwp && wUwp !== '-') {
+                            html += `<div style="margin-bottom: 6px; font-family: monospace; font-size: 1.1em;">UWP: <strong style="color: ${labelColor};">${wUwp}</strong> <em style="color: #a0a8b0; font-size: 0.75em;">(edit via UWP panel)</em></div>`;
+                        }
+                    } else if (w.type !== 'Gas Giant' && w.type !== 'Planetoid Belt') {
+                        html += `<div style="margin-bottom: 6px; font-family: monospace; font-size: 1.1em;">UWP: ${_aowUwp(w, 'uwpSecondary', widx, -1)}</div>`;
+                    }
+                    if (isMain) {
+                        const mwD   = stateObj.mgt2eData;
+                        if (mwD && mwD.travelZone && mwD.travelZone !== 'Green') {
+                            const zc = mwD.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
+                            html += `<div class="system-stats-full" style="color: ${zc}; border-color: ${zc};">Caution: ${mwD.travelZone} Zone</div>`;
+                        }
+                        const alleg = (stateObj.allegiance && stateObj.allegiance.trim()) || '----';
+                        html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Allegiance: <strong style="color: #66fcf1">${alleg}</strong></div>`;
+                        const clust = (stateObj.cluster && stateObj.cluster.trim()) || '----';
+                        html += `<div style="margin-bottom: 6px; font-size: 0.9em; color: #a0a8b0;">Region: <strong style="color: #66fcf1">${clust}</strong></div>`;
+                    }
+
+                    if (w.type !== 'Gas Giant' && w.type !== 'Planetoid Belt' && w.size && w.size !== 0) {
+                        if (isMain) {
+                            html += `<button data-action="open-mainworld-ph" style="margin-top:6px;width:100%;padding:4px 8px;background:transparent;border:1px solid #45a29e88;color:#66fcf1;cursor:pointer;font-family:'Share Tech Mono','Courier New',monospace;font-size:10px;letter-spacing:0.06em;border-radius:3px;">◎ &nbsp;VIEW WORLD IMAGE</button>`;
+                        } else {
+                            const _pa  = wAtm.toLowerCase();
+                            const _ph  = w.waterCoverage ?? (w.hydroCode !== undefined ? w.hydroCode * 10 : 0);
+                            const _pk  = w.avgSurfaceTemp ?? 0;
+                            const _pn  = (w.name || w.label || '').replace(/"/g, '&quot;');
+                            const _ps  = wSize.toLowerCase();
+                            const _pu  = (w.uwpSecondary || '').replace(/"/g, '&quot;');
+                            html += `<button data-action="open-ph" data-ph-atm="${_pa}" data-ph-hydro="${_ph}" data-ph-temp="" data-ph-temp-k="${_pk}" data-ph-name="${_pn}" data-ph-size="${_ps}" data-ph-uwp="${_pu}" style="margin-top:6px;width:100%;padding:4px 8px;background:transparent;border:1px solid #45a29e88;color:#66fcf1;cursor:pointer;font-family:'Share Tech Mono','Courier New',monospace;font-size:10px;letter-spacing:0.06em;border-radius:3px;">◎ &nbsp;VIEW WORLD IMAGE</button>`;
+                        }
+                    }
+
+                    // Moons
+                    (w.moons || []).forEach((m, mIdx) => {
+                        const mIsMain  = m.type === 'Mainworld' || !!m.isMainworld;
+                        const mColor   = mIsMain ? '#ffa500' : '#66fcf1';
+                        const mStyle   = mIsMain ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
+                        const mName    = m.name || m.label || `Moon ${mIdx + 1}`;
+                        const mAtm    = (m.atmosphereCode || (m.atmCode !== undefined ? m.atmCode.toString(16) : '?')).toUpperCase();
+                        const mSize   = (m.sizeCode       || (m.size    !== undefined ? m.size.toString(16)   : '?')).toUpperCase();
+                        const mHydro  = m.hydroCode !== undefined ? m.hydroCode : '?';
+                        const mNameDisplay = mIsMain
+                            ? `<span style="color: ${mColor};">${mName}</span>`
+                            : _aowMoonText(m, 'name', widx, mIdx);
+                        html += `<details>`;
+                        html += `<summary ${mStyle}>Moon ${mIdx + 1} — ${mNameDisplay} <span class="sys-title-info">Size ${mSize}</span></summary>`;
+                        html += `<div class="system-node"><div class="system-stats">`;
+                        if (m.worldClass) {
+                            html += `<span style="grid-column:1/-1;color:#a0c8d0;font-style:italic;">${m.worldClass}</span>`;
+                        }
+                        html += `<span>Size: <strong>${mSize}</strong></span>`;
+                        html += `<span>Atm: <strong>${mAtm}</strong></span>`;
+                        html += `<span>Hydro: <strong>${mHydro}</strong></span>`;
+                        if (m.avgSurfaceTemp !== undefined) html += `<span>Temp (°C): ${_aowMoonTempC(m, 'avgSurfaceTemp', widx, mIdx)}</span>`;
+                        if (m.habitability   !== undefined) html += `<span>Habitability: ${_aowMoonNum(m, 'habitability', widx, mIdx, -20, 20, 0)}</span>`;
+                        if (m.gravity != null) html += `<span>Gravity (G): ${_aowMoonNum(m, 'gravity', widx, mIdx, 0, 100, 2)}</span>`;
+                        html += `</div>`;
+                        if (mIsMain) {
+                            const mUwp = m.uwp || m.uwpSecondary || '';
+                            if (mUwp && mUwp !== '-') {
+                                html += `<div style="margin-bottom: 6px; font-family: monospace; font-size: 1.1em;">UWP: <strong style="color: ${mColor};">${mUwp}</strong> <em style="color: #a0a8b0; font-size: 0.75em;">(edit via UWP panel)</em></div>`;
+                            }
+                        } else {
+                            html += `<div style="margin-bottom: 6px; font-family: monospace; font-size: 1.1em;">UWP: ${_aowUwp(m, 'uwpSecondary', widx, mIdx)}</div>`;
+                        }
+                        if (!mIsMain && m.size && m.size !== 0) {
+                            const _mpa = mAtm.toLowerCase();
+                            const _mph = m.waterCoverage ?? (m.hydroCode !== undefined ? m.hydroCode * 10 : 0);
+                            const _mpk = m.avgSurfaceTemp ?? 0;
+                            const _mpn = mName.replace(/"/g, '&quot;');
+                            const _mps = mSize.toLowerCase();
+                            const _mpu = (m.uwpSecondary || '').replace(/"/g, '&quot;');
+                            html += `<button data-action="open-ph" data-ph-atm="${_mpa}" data-ph-hydro="${_mph}" data-ph-temp="" data-ph-temp-k="${_mpk}" data-ph-name="${_mpn}" data-ph-size="${_mps}" data-ph-uwp="${_mpu}" style="margin-top:6px;width:100%;padding:4px 8px;background:transparent;border:1px solid #45a29e88;color:#66fcf1;cursor:pointer;font-family:'Share Tech Mono','Courier New',monospace;font-size:10px;letter-spacing:0.06em;border-radius:3px;">◎ &nbsp;VIEW WORLD IMAGE</button>`;
+                        }
+                        html += `</div></details>`;
+                    });
+
+                    html += `</div></details>`;
+                });
+
+                html += `</div></details>`;
+            });
+
+            html += `</div>`;
+            root.innerHTML = html;
+        }
+    }
 }
 
 // Global handler for T5 Travel Zone manual overrides
@@ -1641,12 +1836,13 @@ function openWorldImagePanel() {
     const src = stateObj.mgt2eData || stateObj.t5Data || stateObj.rttData || stateObj.ctData;
     if (!src) return;
 
+    const _tempK = src.meanTempK || src.avgSurfaceTemp || 0;
     const worldData = {
         name:          src.name      || '',
-        atmosphere:    src.atm       ?? 0,
-        hydrographics: src.hydro     ?? 0,
-        temperature:   src.tempBand  || '',
-        temperatureK:  src.meanTempK || 0,
+        atmosphere:    src.atmCode   ?? src.atm   ?? 0,
+        hydrographics: src.hydroCode ?? src.hydro ?? 0,
+        temperature:   src.tempBand  || (_tempK ? PlanetRenderer.tempBandFromKelvin(_tempK) : ''),
+        temperatureK:  _tempK,
         size:          src.size      ?? 0,
         uwp:           src.uwp       || '',
     };
@@ -1887,6 +2083,11 @@ function closeHexEditor() {
     document.getElementById('acc-btn-rtt-system').style.display = 'none';
     document.getElementById('acc-btn-rtt-system').classList.remove('active');
 
+    document.getElementById('editor-aow-system-root').style.display = 'none';
+    document.getElementById('editor-aow-system-root').innerHTML = '';
+    document.getElementById('acc-btn-aow-system').style.display = 'none';
+    document.getElementById('acc-btn-aow-system').classList.remove('active');
+
     const hexEditor = document.getElementById('hex-editor');
     hexEditor.classList.remove('visible');
 }
@@ -1944,11 +2145,147 @@ function setupHexEditor() {
     });
 }
 
+function _propagateSystemName(stateObj, oldName, newName) {
+    function renameFn(n) {
+        if (!n) return n;
+        if (n === oldName) return newName;
+        if (n.startsWith(oldName + ' ')) return newName + n.slice(oldName.length);
+        return n;
+    }
+
+    // CT
+    if (stateObj.ctSystem) {
+        const sys = stateObj.ctSystem;
+        sys.orbits.forEach(o => {
+            if (!o.contents) return;
+            o.contents.name = renameFn(o.contents.name);
+            (o.contents.satellites || []).forEach(s => { s.name = renameFn(s.name); });
+        });
+        (sys.capturedPlanets || []).forEach(p => {
+            p.name = renameFn(p.name);
+            (p.satellites || []).forEach(s => { s.name = renameFn(s.name); });
+        });
+    }
+
+    // MgT2E
+    if (stateObj.mgtSystem) {
+        stateObj.mgtSystem.worlds.forEach(w => {
+            w.name = renameFn(w.name);
+            (w.moons || []).forEach(m => { m.name = renameFn(m.name); });
+        });
+    }
+
+    // T5
+    if (stateObj.t5System) {
+        const sys = stateObj.t5System;
+        (sys.stars || []).forEach(s => {
+            (s.orbits || []).forEach(o => {
+                if (!o.contents) return;
+                o.contents.name = renameFn(o.contents.name);
+                (o.contents.satellites || []).forEach(sat => { sat.name = renameFn(sat.name); });
+            });
+        });
+    }
+
+    // RTT
+    if (stateObj.rttSystem) {
+        stateObj.rttSystem.stars.forEach(star => {
+            if (!star.planetarySystem) return;
+            star.planetarySystem.orbits.forEach(body => {
+                body.name = renameFn(body.name);
+                (body.satellites || []).forEach(s => { s.name = renameFn(s.name); });
+            });
+        });
+    }
+
+    // AoW
+    if (stateObj.aowSystem) {
+        (stateObj.aowSystem.worlds || []).forEach(w => {
+            w.name = renameFn(w.name);
+            (w.satellites || []).forEach(s => { s.name = renameFn(s.name); });
+        });
+    }
+
+    hexStates.set(editingHexId, stateObj);
+    populateEditorAccordions(stateObj);
+}
+
+function _showNamePropagationDialog(stateObj, oldName, newName) {
+    const overlay = document.createElement('div');
+    Object.assign(overlay.style, {
+        position: 'fixed', inset: '0', zIndex: '10000',
+        background: 'rgba(0,0,0,0.75)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontFamily: '"Share Tech Mono","Courier New",monospace'
+    });
+
+    const box = document.createElement('div');
+    Object.assign(box.style, {
+        background: '#0d1117',
+        border: '1px solid #45a29e',
+        padding: '28px 32px',
+        maxWidth: '420px',
+        width: '90%',
+        color: '#c5c6c7',
+        lineHeight: '1.6'
+    });
+
+    const heading = document.createElement('div');
+    Object.assign(heading.style, {
+        color: '#66fcf1', fontSize: '13px', fontWeight: 'bold',
+        marginBottom: '14px', borderBottom: '1px solid #45a29e55', paddingBottom: '8px'
+    });
+    heading.textContent = 'PROPAGATE SYSTEM NAME';
+
+    const body = document.createElement('div');
+    body.style.fontSize = '12px';
+    body.style.marginBottom = '20px';
+    body.innerHTML =
+        `Rename all worlds and moons whose name begins with ` +
+        `<span style="color:#ffa500;">"${oldName}"</span> ` +
+        `to use <span style="color:#66fcf1;">"${newName}"</span> instead?<br><br>` +
+        `<span style="color:#8a8f94;">Bodies with custom names (not starting with "${oldName}") are left unchanged. Blank names are unaffected.</span>`;
+
+    const btnRow = document.createElement('div');
+    Object.assign(btnRow.style, { display: 'flex', gap: '12px', justifyContent: 'flex-end' });
+
+    function dismiss() { overlay.remove(); }
+
+    const btnKeep = document.createElement('button');
+    btnKeep.textContent = 'Keep Existing Names';
+    Object.assign(btnKeep.style, {
+        background: 'transparent', border: '1px solid #45a29e88',
+        color: '#8a8f94', padding: '6px 14px', cursor: 'pointer',
+        fontFamily: 'inherit', fontSize: '11px'
+    });
+    btnKeep.addEventListener('click', dismiss);
+
+    const btnPropagate = document.createElement('button');
+    btnPropagate.textContent = 'Propagate Names';
+    Object.assign(btnPropagate.style, {
+        background: 'rgba(102,252,241,0.08)', border: '1px solid #66fcf1',
+        color: '#66fcf1', padding: '6px 14px', cursor: 'pointer',
+        fontFamily: 'inherit', fontSize: '11px', fontWeight: 'bold'
+    });
+    btnPropagate.addEventListener('click', () => {
+        _propagateSystemName(stateObj, oldName, newName);
+        dismiss();
+    });
+
+    btnRow.append(btnKeep, btnPropagate);
+    box.append(heading, body, btnRow);
+    overlay.appendChild(box);
+    overlay.addEventListener('click', e => { if (e.target === overlay) dismiss(); });
+    document.body.appendChild(overlay);
+}
+
 function saveHexEditorChanges() {
     if (!editingHexId) return;
 
     const stateObj = hexStates.get(editingHexId);
     if (!stateObj || stateObj.type !== 'SYSTEM_PRESENT') return;
+
+    const oldSystemName = stateObj.name || '';
 
     const name = document.getElementById('edit-name').value.trim();
     const starport = document.getElementById('edit-starport').value.toUpperCase();
@@ -2170,6 +2507,10 @@ function saveHexEditorChanges() {
     // Provide visual feedback that save occurred
     if (typeof showToast === 'function') {
         showToast("Changes saved successfully.", 2500);
+    }
+
+    if (name && oldSystemName && name !== oldSystemName) {
+        _showNamePropagationDialog(stateObj, oldSystemName, name);
     }
 
     // Optional: Update the "Cancel" button to "Close" if saved?
@@ -2683,6 +3024,115 @@ function saveHexEditorChanges() {
             let val = parseFloat(el.value);
             if (isNaN(val)) return;
             if (el.dataset.mgtIskelvin === '1') val = val + 273;
+            body[field] = val;
+            markManual(body, field);
+            hexStates.set(editingHexId, stateObj);
+            el.classList.add('is-manual');
+            return;
+        }
+    });
+}());
+
+// =============================================================================
+// AoW SYSTEM TREE — INLINE EDIT EVENT DELEGATION
+// Listens on the persistent root container; survives innerHTML re-renders.
+// Scope: name (worlds & moons) and uwpSecondary (non-mainworld terrestrials & moons).
+// =============================================================================
+(function () {
+    const root = document.getElementById('editor-aow-system-root');
+    if (!root) return;
+
+    root.addEventListener('change', function (e) {
+        const el = e.target;
+        const field = el.dataset.aowField;
+        if (!field) return;
+
+        if (typeof editingHexId === 'undefined' || !editingHexId) return;
+        const stateObj = hexStates.get(editingHexId);
+        if (!stateObj || !stateObj.aowSystem) return;
+        const sys = stateObj.aowSystem;
+
+        const widx = parseInt(el.dataset.aowWidx, 10);
+        const midx = el.dataset.aowMidx !== undefined ? parseInt(el.dataset.aowMidx, 10) : -1;
+
+        let body = sys.worlds[widx];
+        if (!body) return;
+        if (midx >= 0) {
+            body = body.moons[midx];
+            if (!body) return;
+        }
+
+        // ── Name ──────────────────────────────────────────────────────────────
+        if (field === 'name') {
+            const trimmed = el.value.trim();
+            if (trimmed) {
+                body.name = trimmed;
+                markManual(body, 'name');
+                el.classList.add('is-manual');
+            } else {
+                delete body.name;
+                if (Array.isArray(body._manualFields)) {
+                    body._manualFields = body._manualFields.filter(f => f !== 'name');
+                }
+                el.classList.remove('is-manual');
+            }
+            hexStates.set(editingHexId, stateObj);
+            return;
+        }
+
+        // ── UWP compact string — fan out into AoW field names ─────────────────
+        if (field === 'uwpSecondary') {
+            const raw = el.value.trim().toUpperCase().replace(/\s/g, '');
+            if (raw.length >= 9 && raw[7] === '-') {
+                const ph = c => { const n = parseInt(c, 16); return isNaN(n) ? c : n; };
+                body.starport         = raw[0];
+                body.size             = ph(raw[1]);
+                body.sizeCode         = raw[1];
+                body.atmCode          = ph(raw[2]);
+                body.atmosphereCode   = raw[2];
+                body.hydroCode        = ph(raw[3]);
+                body.pop              = ph(raw[4]);
+                body.gov              = ph(raw[5]);
+                body.law              = ph(raw[6]);
+                body.tl               = ph(raw[8]) !== raw[8] ? ph(raw[8]) : (parseInt(raw.slice(8), 16) || 0);
+                ['starport','size','sizeCode','atmCode','atmosphereCode','hydroCode','pop','gov','law','tl']
+                    .forEach(f => markManual(body, f));
+                body.uwpSecondary = raw;
+            }
+            hexStates.set(editingHexId, stateObj);
+            el.classList.add('is-manual');
+            return;
+        }
+
+        // ── Temperature fields (°C input stored as Kelvin) ────────────────────
+        if (el.dataset.aowIskelvin === '1') {
+            const val = parseFloat(el.value);
+            if (isNaN(val)) return;
+            body[field] = val + 273;
+            markManual(body, field);
+            hexStates.set(editingHexId, stateObj);
+            el.classList.add('is-manual');
+            return;
+        }
+
+        // ── Gravity — dual-write to bridged display field and canonical AoW field ──
+        if (field === 'gravity') {
+            const val = parseFloat(el.value);
+            if (isNaN(val)) return;
+            body.gravity = val;
+            body.surfaceGravity = val;
+            markManual(body, 'gravity');
+            markManual(body, 'surfaceGravity');
+            hexStates.set(editingHexId, stateObj);
+            el.classList.add('is-manual');
+            return;
+        }
+
+        // ── General numeric fields ─────────────────────────────────────────────
+        const _aowNumericFields = ['atmPressure', 'waterCoverage', 'habitability', 'radius'];
+        if (_aowNumericFields.includes(field)) {
+            const val = parseFloat(el.value);
+            if (isNaN(val)) return;
             body[field] = val;
             markManual(body, field);
             hexStates.set(editingHexId, stateObj);

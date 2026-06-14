@@ -1,0 +1,366 @@
+[
+    {
+        "id": 1,
+        "location": "Acton / Kursa / Aldebaran  3220"
+    },
+    {
+        "id": 2,
+        "location": "Aerfor / Million / Deneb  3104"
+    },
+    {
+        "id": 3,
+        "location": "Algol C Sub / Star Bridge / Aldebaran  0112"
+    },
+    {
+        "id": 4,
+        "location": "Alzirr / Firdausi / Aldebaran  2504"
+    },
+    {
+        "id": 5,
+        "location": "Antares / Antares / Antares  2421"
+    },
+    {
+        "id": 6,
+        "location": "Arkadia / Vilis / Spinward Marches  1217"
+    },
+    {
+        "id": 7,
+        "location": "Asterope Secondary / Euxene / Aldebaran  0706"
+    },
+    {
+        "id": 8,
+        "location": "Atina / Palasha / Massilia  2513"
+    },
+    {
+        "id": 9,
+        "location": "Burtson / Trin's Veil / Spinward Marches  2534"
+    },
+    {
+        "id": 10,
+        "location": "Caladbolg / Sword Worlds / Spinward Marches  1329"
+    },
+    {
+        "id": 11,
+        "location": "Celepina / Rhylanor / Spinward Marches  2913"
+    },
+    {
+        "id": 12,
+        "location": "Cipango / Cronor / Spinward Marches  0705"
+    },
+    {
+        "id": 13,
+        "location": "Collace / District 268 / Spinward Marches  1237"
+    },
+    {
+        "id": 14,
+        "location": "Collette / Gadde / Dagudashaag  2725"
+    },
+    {
+        "id": 15,
+        "location": "Columbier Secondary / Euxene / Aldebaran  0807"
+    },
+    {
+        "id": 16,
+        "location": "Cordillon / Sindal / Trojan Reach  2411"
+    },
+    {
+        "id": 17,
+        "location": "Corella / Corella / The Beyond  0314"
+    },
+    {
+        "id": 18,
+        "location": "Corinna / Euxene / Aldebaran  0209"
+    },
+    {
+        "id": 19,
+        "location": "Daedalus / Euxene / Aldebaran  0606"
+    },
+    {
+        "id": 20,
+        "location": "Darrian / Darrian / Spinward Marches  0627"
+    },
+    {
+        "id": 21,
+        "location": "Dashi / Pact / Dagudashaag  1723"
+    },
+    {
+        "id": 22,
+        "location": "Deneb / Usani / Deneb  1925"
+    },
+    {
+        "id": 23,
+        "location": "Depot / Gadde / Dagudashaag  3121"
+    },
+    {
+        "id": 24,
+        "location": "Dhillourr / Teksuelats / Gzaekfueg  1413"
+    },
+    {
+        "id": 25,
+        "location": "Divad / Sinta / Corridor  2238"
+    },
+    {
+        "id": 26,
+        "location": "Home / Aldebaran / Aldebaran  1009"
+    },
+    {
+        "id": 27,
+        "location": "Dynam / Masionia / Lishun  1219"
+    },
+    {
+        "id": 28,
+        "location": "Companion: Dywosik Companion / Ian / Corridor  0614"
+    },
+    {
+        "id": 29,
+        "location": "Elysee Secondary / Star Bridge / Aldebaran  0111"
+    },
+    {
+        "id": 30,
+        "location": "Emerald / Jewell / Spinward Marches  1006"
+    },
+    {
+        "id": 31,
+        "location": "Ficant / Vilis / Spinward Marches  1417"
+    },
+    {
+        "id": 32,
+        "location": "Flexos / District 268 / Spinward Marches  1233"
+    },
+    {
+        "id": 33,
+        "location": "Fomalhaut (SR 1024) / Dingir / Solomani Rim  1024"
+    },
+    {
+        "id": 34,
+        "location": "Froin / Five Sisters / Spinward Marches  0539"
+    },
+    {
+        "id": 35,
+        "location": "Kaggushus / Kerr / Massilia  0402"
+    },
+    {
+        "id": 36,
+        "location": "Garoo / Darrian / Spinward Marches  0130"
+    },
+    {
+        "id": 37,
+        "location": "Gateway / Argi / Dagudashaag  1331"
+    },
+    {
+        "id": 38,
+        "location": "Glisten / Glisten / Spinward Marches  2036"
+    },
+    {
+        "id": 39,
+        "location": "Grande-Terre Secondary / Star Bridge / Aldebaran  0312"
+    },
+    {
+        "id": 40,
+        "location": "Grille Companion / Mora / Spinward Marches  3026"
+    },
+    {
+        "id": 41,
+        "location": "Grote / Glisten / Spinward Marches  1731"
+    },
+    {
+        "id": 42,
+        "location": "Guru / Arnakhish / Dagudashaag  2005"
+    },
+    {
+        "id": 43,
+        "location": "Hiemalis / The Barrens / Massilia  0425"
+    },
+    {
+        "id": 44,
+        "location": "Icon / Laeth / Gushemege  1235"
+    },
+    {
+        "id": 45,
+        "location": "Ilelish / Ilelish / Ilelish  2907"
+    },
+    {
+        "id": 46,
+        "location": "Inchin / District 268 / Spinward Marches  0938"
+    },
+    {
+        "id": 47,
+        "location": "Ivraie / Star Bridge / Aldebaran  0309"
+    },
+    {
+        "id": 48,
+        "location": "Jae Tellona / Rhylanor / Spinward Marches  2814"
+    },
+    {
+        "id": 49,
+        "location": "Jupiter / Terra / Sol / Solomani Rim  1827"
+    },
+    {
+        "id": 50,
+        "location": "Kaggushus (ca 1200) / Kerr / Massilia  0402"
+    },
+    {
+        "id": 51,
+        "location": "Kemshigesh / Laeth / Gushemege  1133"
+    },
+    {
+        "id": 52,
+        "location": "Kerak / Forquee / Massilia  2411"
+    },
+    {
+        "id": 53,
+        "location": "Kirur / Kirarurr!Ka / Ruupiin  1315"
+    },
+    {
+        "id": 54,
+        "location": "The Kuiper Belt, forming theouter fringe of the Terra / Sol / Solomani Rim  1827"
+    },
+    {
+        "id": 55,
+        "location": "Kusyu / Kilrai' / Dark Nebula  1226"
+    },
+    {
+        "id": 56,
+        "location": "Kusyu / Yataw / Dark Nebula  1226"
+    },
+    {
+        "id": 57,
+        "location": "Kwan Secondary / Theta Aurigae / Aldebaran  1431"
+    },
+    {
+        "id": 58,
+        "location": "Lloelldegh (\"Lair\") / Grnouf / Provence  2402"
+    },
+    {
+        "id": 59,
+        "location": "Likhukam / Arnakhish / Dagudashaag  2204"
+    },
+    {
+        "id": 60,
+        "location": "Masiruu / Arnakhish / Dagudashaag  2106"
+    },
+    {
+        "id": 61,
+        "location": "Mercator / Laeth / Gushemege  1233"
+    },
+    {
+        "id": 62,
+        "location": "Merope / Firdausi / Aldebaran  2604"
+    },
+    {
+        "id": 63,
+        "location": "Mire / Darrian / Spinward Marches  0527"
+    },
+    {
+        "id": 64,
+        "location": "Mora / Mora / Spinward Marches  3124"
+    },
+    {
+        "id": 65,
+        "location": "Mu'izzi / Firdausi / Aldebaran  2805"
+    },
+    {
+        "id": 66,
+        "location": "Myrthe / Star Bridge / Aldebaran  0512"
+    },
+    {
+        "id": 67,
+        "location": "Neptune / Terra / Sol / Solomani Rim  1827"
+    },
+    {
+        "id": 68,
+        "location": "Nova Prometheus / Firdausi / Aldebaran  2705"
+    },
+    {
+        "id": 69,
+        "location": "Nukyls / Laeth / Gushemege  1033"
+    },
+    {
+        "id": 70,
+        "location": "Pallique / Mora / Spinward Marches  3029"
+    },
+    {
+        "id": 71,
+        "location": "Pax Rulin / Pax Rulin / Trojan Reaches  2204"
+    },
+    {
+        "id": 72,
+        "location": "Porozlo / Rhylanor / Spinward Marches  2715"
+    },
+    {
+        "id": 73,
+        "location": "Far Companion: Darida / Regina / Spinward Marches  1910"
+    },
+    {
+        "id": 74,
+        "location": "Rhylanor / Rhylanor / Spinward Marches  2716"
+    },
+    {
+        "id": 75,
+        "location": "Risek / Rhylanor / Spinward Marches  2712"
+    },
+    {
+        "id": 76,
+        "location": "Roikhoi / Ea / Reaver's Deep  1224"
+    },
+    {
+        "id": 77,
+        "location": "Rode / Forquee / Massilia  2414"
+    },
+    {
+        "id": 78,
+        "location": "Rovick / Cuvis / Palasha / Massilia  2514"
+    },
+    {
+        "id": 79,
+        "location": "Ruie / Regina / Spinward Marches  1809"
+    },
+    {
+        "id": 80,
+        "location": "Rydem / Darrian / Spinward Marches  0527"
+    },
+    {
+        "id": 81,
+        "location": "Soror / Star Bridge / Aldebaran  0411"
+    },
+    {
+        "id": 82,
+        "location": "Talak / Cabala / Far Frontiers  1537"
+    },
+    {
+        "id": 83,
+        "location": "Terra (\"Sol\") / Sol / Solomani Rim  1827"
+    },
+    {
+        "id": 84,
+        "location": "The Maralee / Palasha / Massilia  2512"
+    },
+    {
+        "id": 85,
+        "location": "Trin / Trin's Veil / Spinward Marches  3235"
+    },
+    {
+        "id": 86,
+        "location": "Valhalla / Rhylanor / Spinward Marches  2811"
+    },
+    {
+        "id": 87,
+        "location": "Vland / Vland / Vland  1717"
+    },
+    {
+        "id": 88,
+        "location": "Walston / District 268 / Spinward Marches  1232"
+    },
+    {
+        "id": 89,
+        "location": "Pliebr / Gaval / Zhodane  2719"
+    },
+    {
+        "id": 90,
+        "location": "Ziruushda / Old Suns / Dagudashaag  1204"
+    },
+    {
+        "id": 91,
+        "location": "Zivije / Rhylanor / Spinward Marches  2812"
+    }
+]

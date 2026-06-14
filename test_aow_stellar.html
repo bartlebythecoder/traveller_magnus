@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AoW Stellar Engine — Spec Tests (Steps 1–8)</title>
+  <style>
+    body { font-family: monospace; background: #1a1a1a; color: #e0e0e0; padding: 20px; margin: 0; }
+    h1   { color: #88aaff; font-size: 1.1em; margin-bottom: 4px; }
+    .subtitle { color: #777; font-size: 0.85em; margin-bottom: 16px; }
+    #controls { margin-bottom: 12px; }
+    button { background: #333; color: #ccc; border: 1px solid #555; padding: 5px 12px;
+             cursor: pointer; border-radius: 3px; margin-right: 6px; font-family: monospace; font-size: 0.85em; }
+    button:hover { background: #444; }
+    .summary { padding: 8px 12px; border-radius: 4px; margin-bottom: 12px; font-size: 0.95em; }
+    .summary.pass { background: #1a2e1a; border-left: 4px solid #4caf50; }
+    .summary.fail { background: #2e1a1a; border-left: 4px solid #f44336; }
+    .group { margin: 6px 0; border-left: 3px solid #444; padding: 6px 10px; background: #212121; }
+    .group.all-pass { border-left-color: #4caf50; }
+    .group.has-fail  { border-left-color: #f44336; }
+    .group-header { font-size: 0.85em; color: #aaa; }
+    .group-header .gname { color: #ccc; }
+    .group-header .pass-ct { color: #4caf50; }
+    .group-header .fail-ct { color: #f44336; }
+    .test-line { font-size: 0.82em; margin: 2px 0 2px 12px; }
+    .pass-icon { color: #4caf50; }
+    .fail-icon { color: #f44336; }
+    .err-detail  { color: #f88; font-size: 0.80em; margin: 1px 0 1px 28px; }
+    .info-detail { color: #88aaff; font-size: 0.80em; margin: 1px 0 1px 28px; }
+    .skip-line   { color: #666; font-size: 0.80em; margin: 2px 0 2px 28px; }
+    #timing { color: #666; font-size: 0.80em; margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+<h1>AoW Stellar Engine — Spec Compliance Tests (Steps 1–8)</h1>
+<div class="subtitle">Validates aow_stellar_engine.js against Architect of Worlds PDF spec.</div>
+
+<div id="controls">
+  <button onclick="runTests(false)">Run Tests</button>
+  <button onclick="runTests(true)">Run Verbose</button>
+  <button onclick="runTests(false, 200)">Quick (200 iters)</button>
+  <button onclick="runTests(false, 2000)">Deep (2000 iters)</button>
+</div>
+
+<div id="summary"></div>
+<div id="results"></div>
+<div id="timing"></div>
+
+<!-- ============================================================
+     MINIMAL STUBS — only what aow_stellar_engine.js needs
+     (avoids loading core.js which pulls in camera/canvas state)
+     ============================================================ -->
+<script>
+  // RNG (copied verbatim from js/core.js)
+  function hashString(str) {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < str.length; i++) {
+      h = Math.imul(h ^ str.charCodeAt(i), 16777619);
+    }
+    return h >>> 0;
+  }
+  function mulberry32(a) {
+    return function () {
+      let t = a += 0x6D2B79F5;
+      t = Math.imul(t ^ t >>> 15, t | 1);
+      t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  let masterSeed = 'AoWTest';
+  let rng = mulberry32(hashString(masterSeed));
+
+  function reseedForHex(hexId) {
+    rng = mulberry32(hashString(masterSeed + '-' + (hexId || '0000')));
+  }
+
+  // Trace stubs — keep them silent
+  window.isLoggingEnabled = false;
+  function tSection()    {}
+  function tResult()     {}
+  function tSkip()       {}
+  function writeLogLine(){}
+  function startTrace()  {}
+  function endTrace()    {}
+</script>
+
+<script src="rules/aow_data.js"></script>
+<script src="js/aow_stellar_engine.js"></script>
+
+<script>
+// ============================================================
+// MINI TEST RUNNER
+// ============================================================
+
+const testQueue  = [];  // {groupName, desc, fn}
+let _curGroup = null;
+
+function group(name) { _curGroup = name; }
+function test(desc, fn) { testQueue.push({ group: _curGroup, desc, fn }); }
+
+function assert(cond, msg, errors) {
+  if (!cond) errors.push(msg || 'assertion failed');
+}
+
+// ============================================================
+// HELPER: run the three stellar-engine phases for one hex
+// ============================================================
+
+function runStellar(hexId, options) {
+  reseedForHex(hexId);
+  const sys = { hexId, stars: [], hierarchy: null };
+  AoWStellarEngine.generateStarHierarchyAndMasses(sys, options || { forceEarthlike: false });
+  AoWStellarEngine.generateAgeMetallicityAndEvolution(sys, options || { forceEarthlike: false });
+  AoWStellarEngine.generateStellarOrbits(sys);
+  return sys;
+}
+
+// ============================================================
+// ── GROUP 1: DATA TABLE FIDELITY ────────────────────────────
+// These tests run directly against aow_data.js; no engine
+// execution needed.  They catch copy-paste errors in the tables.
+// ============================================================
+
+group('DATA — Primary Star Category Table');
+
+test('4 categories with spec roll ranges (1-3 BD, 4-77 LMS, 78-90 IMS, 91-100 HMS)', (e) => {
+  const c = primaryStarCategoryTable.categories;
+  assert(c.length === 4, `Row count: expected 4 got ${c.length}`, e);
+  assert(c[0].minRoll===1   && c[0].maxRoll===3,   `BD: ${c[0].minRoll}-${c[0].maxRoll}`, e);
+  assert(c[1].minRoll===4   && c[1].maxRoll===77,  `LMS: ${c[1].minRoll}-${c[1].maxRoll}`, e);
+  assert(c[2].minRoll===78  && c[2].maxRoll===90,  `IMS: ${c[2].minRoll}-${c[2].maxRoll}`, e);
+  assert(c[3].minRoll===91  && c[3].maxRoll===100, `HMS: ${c[3].minRoll}-${c[3].maxRoll}`, e);
+});
+
+test('Category name strings match spec', (e) => {
+  const c = primaryStarCategoryTable.categories;
+  assert(c[0].category === 'Brown Dwarf',            `c[0]: "${c[0].category}"`, e);
+  assert(c[1].category === 'Low Mass Star',           `c[1]: "${c[1].category}"`, e);
+  assert(c[2].category === 'Intermediate Mass Star',  `c[2]: "${c[2].category}"`, e);
+  assert(c[3].category === 'High Mass Star',          `c[3]: "${c[3].category}"`, e);
+});
+
+group('DATA — Stellar Mass Tables');
+
+test('Brown Dwarf: 7 rows, first 01-10→0.015, last 88-100→0.07', (e) => {
+  const t = brownDwarfMassTable.results;
+  assert(t.length === 7, `Expected 7 rows, got ${t.length}`, e);
+  assert(t[0].minRoll===1   && t[0].maxRoll===10  && t[0].mass===0.015, `Row0: ${JSON.stringify(t[0])}`, e);
+  assert(t[1].minRoll===11  && t[1].maxRoll===29  && t[1].mass===0.02,  `Row1: ${JSON.stringify(t[1])}`, e);
+  assert(t[6].minRoll===88  && t[6].maxRoll===100 && t[6].mass===0.07,  `Row6: ${JSON.stringify(t[6])}`, e);
+  t.forEach((r,i) => assert(r.mass >= 0.015 && r.mass <= 0.07, `Row${i} mass ${r.mass} outside BD range`, e));
+});
+
+test('Low Mass Star: 19 rows, first 01-13→0.08, last 100→0.68', (e) => {
+  const t = lowMassStarTable.results;
+  assert(t.length === 19, `Expected 19 rows, got ${t.length}`, e);
+  assert(t[0].minRoll===1   && t[0].maxRoll===13  && t[0].mass===0.08, `Row0: ${JSON.stringify(t[0])}`, e);
+  assert(t[18].minRoll===100 && t[18].maxRoll===100 && t[18].mass===0.68, `Row18: ${JSON.stringify(t[18])}`, e);
+  // Spot-check Alice's example (spec p.31): roll 48 → 0.18 M☉
+  const r18 = t.find(r => r.mass === 0.18);
+  assert(r18 && r18.minRoll===44 && r18.maxRoll===52, `0.18 M☉ (spec 44-52): ${JSON.stringify(r18)}`, e);
+});
+
+test('Intermediate Mass Star: 25 rows, first 01-07→0.70, last 98-100→1.25', (e) => {
+  const t = intermediateMassStarTable.results;
+  assert(t.length === 25, `Expected 25 rows, got ${t.length}`, e);
+  assert(t[0].minRoll===1   && t[0].maxRoll===7   && t[0].mass===0.70, `Row0: ${JSON.stringify(t[0])}`, e);
+  assert(t[24].minRoll===98 && t[24].maxRoll===100 && t[24].mass===1.25, `Row24: ${JSON.stringify(t[24])}`, e);
+  // Alice's example: roll 61 → 0.94 M☉ (spec: 60-62)
+  const r94 = t.find(r => r.mass === 0.94);
+  assert(r94 && r94.minRoll===60 && r94.maxRoll===62, `0.94 M☉ (spec 60-62): ${JSON.stringify(r94)}`, e);
+  // Spec: 69-71 → 1.00
+  const r100 = t.find(r => r.mass === 1.00);
+  assert(r100 && r100.minRoll===69 && r100.maxRoll===71, `1.00 M☉ (spec 69-71): ${JSON.stringify(r100)}`, e);
+});
+
+test('High Mass Star: 29 rows, first 01-03→1.28, last 99-100→6.00', (e) => {
+  const t = highMassStarTable.results;
+  assert(t.length === 29, `Expected 29 rows, got ${t.length}`, e);
+  assert(t[0].minRoll===1   && t[0].maxRoll===3   && t[0].mass===1.28, `Row0: ${JSON.stringify(t[0])}`, e);
+  assert(t[28].minRoll===99 && t[28].maxRoll===100 && t[28].mass===6.00, `Row28: ${JSON.stringify(t[28])}`, e);
+});
+
+group('DATA — Multiplicity & Companion Tables');
+
+test('Multiplicity Threshold: 5 rows, correct mass breaks and thresholds', (e) => {
+  const t = multiplicityThresholdTable.results;
+  assert(t.length === 5, `Expected 5 rows, got ${t.length}`, e);
+  // Spec: <0.08→14, 0.08-0.70→13, 0.70-1.00→12, 1.00-1.30→11, ≥1.30→10
+  assert(t[0].minMass===0.00 && t[0].maxMass===0.08  && t[0].threshold===14, `t[0]: ${JSON.stringify(t[0])}`, e);
+  assert(t[1].minMass===0.08 && t[1].maxMass===0.70  && t[1].threshold===13, `t[1]: ${JSON.stringify(t[1])}`, e);
+  assert(t[2].minMass===0.70 && t[2].maxMass===1.00  && t[2].threshold===12, `t[2]: ${JSON.stringify(t[2])}`, e);
+  assert(t[3].minMass===1.00 && t[3].maxMass===1.30  && t[3].threshold===11, `t[3]: ${JSON.stringify(t[3])}`, e);
+  assert(t[4].minMass===1.30 && t[4].threshold===10,                          `t[4]: ${JSON.stringify(t[4])}`, e);
+});
+
+test('Stellar Multiplicity: 01-75→2, 76-95→3, 96-100→4', (e) => {
+  const t = stellarMultiplicityTable.results;
+  assert(t.length === 3, `Expected 3 rows, got ${t.length}`, e);
+  assert(t[0].minRoll===1  && t[0].maxRoll===75  && t[0].numberOfStars===2, `Row0: ${JSON.stringify(t[0])}`, e);
+  assert(t[1].minRoll===76 && t[1].maxRoll===95  && t[1].numberOfStars===3, `Row1: ${JSON.stringify(t[1])}`, e);
+  assert(t[2].minRoll===96 && t[2].maxRoll===100 && t[2].numberOfStars===4, `Row2: ${JSON.stringify(t[2])}`, e);
+});
+
+test('Companion Star Mass: 19 rows, 01-04→0.05, 87-100→0.95, key middle entries', (e) => {
+  const t = companionStarMassTable.results;
+  assert(t.length === 19, `Expected 19 rows, got ${t.length}`, e);
+  assert(t[0].minRoll===1  && t[0].maxRoll===4   && t[0].massRatio===0.05, `Row0 (spec ≤04→0.05): ${JSON.stringify(t[0])}`, e);
+  assert(t[1].minRoll===5  && t[1].maxRoll===8   && t[1].massRatio===0.10, `Row1 (spec 05-08→0.10): ${JSON.stringify(t[1])}`, e);
+  assert(t[18].minRoll===87 && t[18].maxRoll===100 && t[18].massRatio===0.95, `Row18 (spec ≥87→0.95): ${JSON.stringify(t[18])}`, e);
+  // Spec: 29-31 → 0.40
+  const r40 = t.find(r => r.massRatio === 0.40);
+  assert(r40 && r40.minRoll===29 && r40.maxRoll===31, `0.40 ratio (spec 29-31): ${JSON.stringify(r40)}`, e);
+  // Spec: 77-86 → 0.90
+  const r90 = t.find(r => r.massRatio === 0.90);
+  assert(r90 && r90.minRoll===77 && r90.maxRoll===86, `0.90 ratio (spec 77-86): ${JSON.stringify(r90)}`, e);
+});
+
+group('DATA — Stellar Age Table');
+
+test('5 population rows with correct base ages and ranges (spec p.38)', (e) => {
+  const t = stellarAgeTable.results;
+  assert(t.length === 5, `Expected 5 rows, got ${t.length}`, e);
+  // Spec: 01-42 Young Pop I, base 0.0, range 2.0
+  assert(t[0].minRoll===1   && t[0].maxRoll===42  && t[0].baseAge===0.0 && t[0].ageRange===2.0, `Young Pop I: ${JSON.stringify(t[0])}`, e);
+  // Spec: 43-76 Intermediate Pop I, base 2.0, range 3.0
+  assert(t[1].minRoll===43  && t[1].maxRoll===76  && t[1].baseAge===2.0 && t[1].ageRange===3.0, `Int Pop I: ${JSON.stringify(t[1])}`, e);
+  // Spec: 77-95 Old Pop I, base 5.0, range 3.0
+  assert(t[2].minRoll===77  && t[2].maxRoll===95  && t[2].baseAge===5.0 && t[2].ageRange===3.0, `Old Pop I: ${JSON.stringify(t[2])}`, e);
+  // Spec: 96-99 Disk Pop II, base 8.0, range 1.5
+  assert(t[3].minRoll===96  && t[3].maxRoll===99  && t[3].baseAge===8.0 && t[3].ageRange===1.5, `Disk Pop II: ${JSON.stringify(t[3])}`, e);
+  // Spec: 00 (roll=100) Halo Pop II, base 9.5, range 3.0
+  assert(t[4].minRoll===100 && t[4].maxRoll===100 && t[4].baseAge===9.5 && t[4].ageRange===3.0, `Halo Pop II: ${JSON.stringify(t[4])}`, e);
+});
+
+test('Age ranges are consistent: base + range ≤ 13.5 Gyr', (e) => {
+  stellarAgeTable.results.forEach((r, i) => {
+    assert(r.baseAge + r.ageRange <= 13.5, `Row${i} (${r.population}): base ${r.baseAge} + range ${r.ageRange} = ${r.baseAge+r.ageRange} > 13.5`, e);
+  });
+});
+
+group('DATA — Red Dwarf & Main Sequence Tables');
+
+test('Red Dwarf: 13 entries, spot-checked against spec', (e) => {
+  const t = redDwarfStellarCharacteristicsTable.results;
+  assert(t.length === 13, `Expected 13 rows, got ${t.length}`, e);
+  const checks = [
+    { mass: 0.08, temp: 2500,  lum: 0.00047 },
+    { mass: 0.18, temp: 3210,  lum: 0.0044  },
+    { mass: 0.50, temp: 3780,  lum: 0.039   },
+  ];
+  checks.forEach(c => {
+    const row = t.find(r => r.mass === c.mass);
+    assert(row, `No entry for mass ${c.mass}`, e);
+    if (!row) return;
+    assert(row.expectedEffectiveTemperature === c.temp,
+      `Mass ${c.mass}: temp spec=${c.temp} got=${row.expectedEffectiveTemperature}`, e);
+    assert(Math.abs(row.expectedLuminosity - c.lum) <= c.lum * 0.001,
+      `Mass ${c.mass}: lum spec=${c.lum} got=${row.expectedLuminosity}`, e);
+  });
+});
+
+test('Main Sequence: 55 entries, key rows match spec', (e) => {
+  const t = mainSequenceStellarCharacteristicsTable.results;
+  assert(t.length === 61, `Expected 61 rows, got ${t.length}`, e);
+
+  function chk(mass, T0, Tf, L0, GR, S) {
+    const r = t.find(x => x.mass === mass);
+    assert(r, `No entry for ${mass} M☉`, e);
+    if (!r) return;
+    assert(r.initialEffectiveTemperature  === T0, `${mass}M☉ T0: spec=${T0} got=${r.initialEffectiveTemperature}`, e);
+    assert(r.finalEffectiveTemperature    === Tf, `${mass}M☉ Tf: spec=${Tf} got=${r.finalEffectiveTemperature}`, e);
+    assert(r.initialLuminosity            === L0, `${mass}M☉ L0: spec=${L0} got=${r.initialLuminosity}`, e);
+    assert(r.luminosityGrowthRate         === GR, `${mass}M☉ GR: spec=${GR} got=${r.luminosityGrowthRate}`, e);
+    assert(r.mainSequenceLifespanGyr      === S,  `${mass}M☉ S: spec=${S} got=${r.mainSequenceLifespanGyr}`, e);
+  }
+
+  // Mass 0.50 M☉ — first table row
+  chk(0.50, 3780, 4330, 0.039, 1.010, 131);
+  // Mass 1.00 M☉ — Sun analog
+  chk(1.00, 5600, 5670, 0.71, 1.076, 10.5);
+  // Mass 0.94 M☉ — Alice's Arcadia example from spec
+  chk(0.94, 5390, 5590, 0.53, 1.064, 13.5);
+  // Mass 6.00 M☉ — last row
+  chk(6.00, 18800, 15300, 1000.0, 185800.0, 0.0647);
+});
+
+group('DATA — Spectral Type Table');
+
+test('Key temperature→type mappings match spec (p.50)', (e) => {
+  const t = spectralTypeTable.results;
+  const checks = [
+    { temp: 5770, type: 'G2' },   // Our Sun
+    { temp: 5450, type: 'G7' },   // Alice's Arcadia (spec example)
+    { temp: 3220, type: 'M4' },   // Beta Nine A (spec example)
+    { temp: 1660, type: 'L6' },   // Beta Nine B (spec example)
+    { temp: 9200, type: 'A2' },
+    { temp: 500,  type: 'Y0' },   // Coolest entry
+    { temp: 17000, type: 'B3' },  // Hottest listed
+  ];
+  checks.forEach(c => {
+    const row = t.find(r => r.temperature === c.temp);
+    assert(row, `No entry for temp ${c.temp} K`, e);
+    if (row) assert(row.type === c.type, `Temp ${c.temp}: spec="${c.type}" got="${row.type}"`, e);
+  });
+});
+
+group('DATA — Stellar Orbit Tables');
+
+test('Separation: 6 categories, base distances and roll ranges match spec (p.51)', (e) => {
+  const t = stellarSeparationTable.results;
+  assert(t.length === 6, `Expected 6 rows, got ${t.length}`, e);
+  assert(t[0].separation==='Extremely Close' && t[0].baseDistanceAU===0.015,   `Row0: ${JSON.stringify(t[0])}`, e);
+  assert(t[1].minRoll===4  && t[1].maxRoll===5  && t[1].separation==='Very Close' && t[1].baseDistanceAU===0.15,   `Row1: ${JSON.stringify(t[1])}`, e);
+  assert(t[2].minRoll===6  && t[2].maxRoll===8  && t[2].separation==='Close'      && t[2].baseDistanceAU===1.5,    `Row2: ${JSON.stringify(t[2])}`, e);
+  assert(t[3].minRoll===9  && t[3].maxRoll===12 && t[3].separation==='Moderate'   && t[3].baseDistanceAU===15.0,   `Row3: ${JSON.stringify(t[3])}`, e);
+  assert(t[4].minRoll===13 && t[4].maxRoll===15 && t[4].separation==='Wide'       && t[4].baseDistanceAU===150.0,  `Row4: ${JSON.stringify(t[4])}`, e);
+  assert(t[5].separation==='Very Wide' && t[5].baseDistanceAU===1500.0,            `Row5: ${JSON.stringify(t[5])}`, e);
+});
+
+test('Eccentricity: 10 rows, all values 0.0–0.9, roll ranges match spec (p.51)', (e) => {
+  const t = stellarOrbitalEccentricityTable.results;
+  assert(t.length === 10, `Expected 10 rows, got ${t.length}`, e);
+  // Spec: ≤3→0.0, 4→0.1, 5-6→0.2, 7-8→0.3, 9-11→0.4
+  //       12-13→0.5, 14-15→0.6, 16→0.7, 17→0.8, ≥18→0.9
+  const expected = [
+    [0.0, null, 3], [0.1, 4, 4], [0.2, 5, 6], [0.3, 7, 8],
+    [0.4, 9, 11], [0.5, 12, 13], [0.6, 14, 15], [0.7, 16, 16],
+    [0.8, 17, 17], [0.9, 18, null]
+  ];
+  expected.forEach(([ecc, minR, maxR], i) => {
+    assert(t[i].eccentricity === ecc, `Row${i}: ecc spec=${ecc} got=${t[i].eccentricity}`, e);
+    if (minR !== null) assert(t[i].minRoll === minR, `Row${i}: minRoll spec=${minR} got=${t[i].minRoll}`, e);
+    if (maxR !== null) assert(t[i].maxRoll === maxR, `Row${i}: maxRoll spec=${maxR} got=${t[i].maxRoll}`, e);
+  });
+});
+
+// ============================================================
+// ── GROUP 2: ENGINE CONSTRAINT TESTS ────────────────────────
+// Run N iterations; every generated system must satisfy the
+// hard constraints from the spec.
+// ============================================================
+
+const N_DEFAULT = 1000;
+let N = N_DEFAULT;
+
+group('CONSTRAINTS — Steps 1–3: Hierarchy & Masses');
+
+test('Primary star mass always ≥ 0.015 M☉', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`c1-${i}`);
+    sys.stars.forEach(s => assert(s.initialMass >= 0.015,
+      `Hex c1-${i} Star ${s.label}: mass=${s.initialMass} < 0.015`, e));
+  }
+});
+
+test('sys.hierarchy is one of 5 valid strings', (e) => {
+  const VALID = new Set(['Singleton','Binary','Trinary (A-B, C)','Trinary (A, B-C)','Quaternary (A-B, C-D)']);
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`c2-${i}`);
+    assert(VALID.has(sys.hierarchy), `Hex c2-${i}: hierarchy="${sys.hierarchy}"`, e);
+  }
+});
+
+test('Star count matches hierarchy type', (e) => {
+  const map = { 'Singleton':1, 'Binary':2, 'Trinary (A-B, C)':3, 'Trinary (A, B-C)':3, 'Quaternary (A-B, C-D)':4 };
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`c3-${i}`);
+    assert(sys.stars.length === map[sys.hierarchy],
+      `Hex c3-${i}: ${sys.hierarchy} expects ${map[sys.hierarchy]} stars, got ${sys.stars.length}`, e);
+  }
+});
+
+test('Star labels are A, B, C, D in sequence', (e) => {
+  const seq = ['A','B','C','D'];
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`c4-${i}`);
+    sys.stars.forEach((s, idx) => assert(s.label === seq[idx],
+      `Hex c4-${i}: stars[${idx}].label="${s.label}", expected "${seq[idx]}"`, e));
+  }
+});
+
+test('Companion masses ≤ primary mass (spec: companions rated relative to primary)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`c5-${i}`);
+    if (sys.stars.length > 1) {
+      assert(sys.stars[1].initialMass <= sys.stars[0].initialMass,
+        `Hex c5-${i}: B (${sys.stars[1].initialMass}) > A (${sys.stars[0].initialMass})`, e);
+    }
+  }
+});
+
+test('forceEarthlike: primary mass always in IMS range (0.70–1.25 M☉)', (e) => {
+  for (let i = 0; i < 200; i++) {
+    const sys = runStellar(`fe-${i}`, { forceEarthlike: true });
+    const m = sys.stars[0].initialMass;
+    assert(m >= 0.70 && m <= 1.25,
+      `Hex fe-${i}: primary mass ${m} outside IMS range`, e);
+  }
+});
+
+group('CONSTRAINTS — Step 4: System Age');
+
+test('System age in [0.0, 13.5] Gyr', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`a1-${i}`);
+    assert(sys.systemAge >= 0 && sys.systemAge <= 13.5,
+      `Hex a1-${i}: age=${sys.systemAge}`, e);
+  }
+});
+
+test('Population II systems have age ≥ 8.0 Gyr', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`a2-${i}`);
+    if ((sys.population || '').includes('Population II'))
+      assert(sys.systemAge >= 8.0, `Hex a2-${i}: ${sys.population} but age=${sys.systemAge}`, e);
+  }
+});
+
+test('forceEarthlike: age in Intermediate or Old Pop I range [2.0, 8.0] Gyr', (e) => {
+  for (let i = 0; i < 200; i++) {
+    const sys = runStellar(`afe-${i}`, { forceEarthlike: true });
+    assert(sys.systemAge >= 2.0 && sys.systemAge <= 8.0,
+      `Hex afe-${i}: forceEarthlike age=${sys.systemAge} outside [2.0, 8.0]`, e);
+  }
+});
+
+group('CONSTRAINTS — Step 5: Metallicity');
+
+// Spec formula: K = (3d6/10) × (1.2 − Age/13.5)
+// Modifiers: Pop II age≥8 → K−0.2 (floor 0); rare enrichment (d6=1) → K + 3d6×0.1 (cap 3.0)
+// forceEarthlike floor: K raised to 0.3 if lower.
+// Base K range: min (roll=3, age=13.5) → 0.06; max (roll=18, age=0) → 2.16.
+// Full range including enrichment: [0.0, 3.0].
+
+test('Metallicity in [0.0, 3.0] (enrichment cap is 3.0; base max is 2.16)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`m1-${i}`);
+    assert(sys.systemMetallicity >= 0 && sys.systemMetallicity <= 3.0,
+      `Hex m1-${i}: K=${sys.systemMetallicity}`, e);
+  }
+});
+
+test('sys.systemMetallicity is defined (not undefined/null)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`m2-${i}`);
+    assert(sys.systemMetallicity !== undefined && sys.systemMetallicity !== null,
+      `Hex m2-${i}: systemMetallicity missing`, e);
+  }
+});
+
+test('forceEarthlike: metallicity ≥ 0.3 (spec floor)', (e) => {
+  for (let i = 0; i < 200; i++) {
+    const sys = runStellar(`mfe-${i}`, { forceEarthlike: true });
+    assert(sys.systemMetallicity >= 0.3,
+      `Hex mfe-${i}: forceEarthlike K=${sys.systemMetallicity.toFixed(4)} < 0.3`, e);
+  }
+});
+
+test('Metallicity formula stats [INFO]: K=(3d6/10)×(1.2-Age/13.5)', (e) => {
+  let minK = Infinity, maxK = -Infinity, sum = 0;
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`mst-${i}`);
+    const K = sys.systemMetallicity;
+    if (K < minK) minK = K;
+    if (K > maxK) maxK = K;
+    sum += K;
+  }
+  e.push(`[INFO] K over ${N} systems: min=${minK.toFixed(3)}, max=${maxK.toFixed(3)}, mean=${(sum/N).toFixed(3)}`);
+  e.push(`[INFO] Spec: base max 2.16 (roll=18/age=0), enrichment cap 3.0, Pop II floor 0`);
+});
+
+group('CONSTRAINTS — Step 6: Stellar Evolution');
+
+test('All stars have: state, effectiveTemperature, luminosity, radius', (e) => {
+  const req = ['state','effectiveTemperature','luminosity','radius'];
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`e1-${i}`);
+    sys.stars.forEach(s => req.forEach(f => assert(s[f] !== undefined,
+      `Hex e1-${i} Star ${s.label}: missing "${f}"`, e)));
+  }
+});
+
+test('Valid state values only', (e) => {
+  const VALID = new Set(['Brown Dwarf','Main Sequence','Subgiant','Red Giant Branch','Horizontal Branch','White Dwarf']);
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`ev-${i}`);
+    sys.stars.forEach(s => assert(VALID.has(s.state),
+      `Hex ev-${i} Star ${s.label}: state="${s.state}"`, e));
+  }
+});
+
+test('Brown dwarfs: radius fixed at 0.00047 AU (spec p.41)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`e2-${i}`);
+    sys.stars.filter(s => s.state === 'Brown Dwarf').forEach(s =>
+      assert(Math.abs(s.radius - 0.00047) < 1e-9,
+        `Hex e2-${i} Star ${s.label}: radius=${s.radius}`, e));
+  }
+});
+
+test('Brown dwarfs: effective temperature ≤ 3000 K (spec p.41)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`e3-${i}`);
+    sys.stars.filter(s => s.state === 'Brown Dwarf').forEach(s =>
+      assert(s.effectiveTemperature <= 3000,
+        `Hex e3-${i} Star ${s.label}: T=${s.effectiveTemperature} > 3000`, e));
+  }
+});
+
+test('Brown dwarfs: temperature within ±10% of T=18600×M^0.8/Age^0.3', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`e4-${i}`);
+    sys.stars.filter(s => s.state === 'Brown Dwarf').forEach(s => {
+      const A     = Math.max(0.01, sys.systemAge);
+      const rawT  = (18600 * Math.pow(s.initialMass, 0.8)) / Math.pow(A, 0.3);
+      // Engine applies min(3000, variedT), so both bounds must respect the cap
+      const minT  = Math.min(3000, rawT * 0.90);
+      const maxT  = Math.min(3000, rawT * 1.10);
+      assert(s.effectiveTemperature >= minT - 1 && s.effectiveTemperature <= maxT + 1,
+        `Hex e4-${i} Star ${s.label}: T=${s.effectiveTemperature} outside [${minT.toFixed(0)},${maxT.toFixed(0)}]`, e);
+    });
+  }
+});
+
+test('Brown dwarfs: luminosity = T⁴ / (1.1×10¹⁷) using actual T (spec p.41)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`e5-${i}`);
+    sys.stars.filter(s => s.state === 'Brown Dwarf').forEach(s => {
+      const expL = Math.pow(s.effectiveTemperature, 4) / 1.1e17;
+      const rel  = Math.abs(s.luminosity - expL) / (expL + 1e-30);
+      assert(rel < 0.001, `Hex e5-${i} Star ${s.label}: L=${s.luminosity.toExponential(3)} expected=${expL.toExponential(3)}`, e);
+    });
+  }
+});
+
+test('Non-WD non-BD stars: radius = 155000×√L / T² (spec p.41)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`e6-${i}`);
+    sys.stars.filter(s => s.state !== 'Brown Dwarf' && s.state !== 'White Dwarf').forEach(s => {
+      const expR = 155000 * Math.sqrt(s.luminosity) / (s.effectiveTemperature * s.effectiveTemperature);
+      const rel  = Math.abs(s.radius - expR) / expR;
+      assert(rel < 0.001,
+        `Hex e6-${i} Star ${s.label} (${s.state}): R=${s.radius.toExponential(4)} expected=${expR.toExponential(4)}`, e);
+    });
+  }
+});
+
+test('Main sequence (≥0.50 M☉): temperature within ±5% of T=T0+(Tf-T0)×(A/S)', (e) => {
+  const tbl = mainSequenceStellarCharacteristicsTable.results;
+  function interpolate(mass) {
+    if (mass <= tbl[0].mass) return Object.assign({}, tbl[0]);
+    if (mass >= tbl[tbl.length-1].mass) return Object.assign({}, tbl[tbl.length-1]);
+    for (let j = 0; j < tbl.length-1; j++) {
+      if (mass >= tbl[j].mass && mass <= tbl[j+1].mass) {
+        const t2 = (mass - tbl[j].mass) / (tbl[j+1].mass - tbl[j].mass);
+        return {
+          initialEffectiveTemperature: tbl[j].initialEffectiveTemperature + t2*(tbl[j+1].initialEffectiveTemperature - tbl[j].initialEffectiveTemperature),
+          finalEffectiveTemperature:   tbl[j].finalEffectiveTemperature   + t2*(tbl[j+1].finalEffectiveTemperature   - tbl[j].finalEffectiveTemperature),
+          mainSequenceLifespanGyr:     tbl[j].mainSequenceLifespanGyr     + t2*(tbl[j+1].mainSequenceLifespanGyr     - tbl[j].mainSequenceLifespanGyr),
+        };
+      }
+    }
+    return Object.assign({}, tbl[tbl.length-1]);
+  }
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`e7-${i}`);
+    sys.stars.filter(s => s.state === 'Main Sequence' && s.initialMass >= 0.50).forEach(s => {
+      const row  = interpolate(s.initialMass);
+      const rawT = row.initialEffectiveTemperature + (row.finalEffectiveTemperature - row.initialEffectiveTemperature) * (sys.systemAge / row.mainSequenceLifespanGyr);
+      assert(s.effectiveTemperature >= rawT * 0.95 - 1 && s.effectiveTemperature <= rawT * 1.05 + 1,
+        `Hex e7-${i} Star ${s.label} M=${s.initialMass}: T=${s.effectiveTemperature} outside ±5% of ${rawT.toFixed(0)}`, e);
+    });
+  }
+});
+
+test('White dwarfs: wdMass ≈ 0.43×initialMass + 0.10 (±5%, spec p.46)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`e8-${i}`);
+    sys.stars.filter(s => s.state === 'White Dwarf').forEach(s => {
+      const exp = 0.43 * s.initialMass + 0.10;
+      assert(s.wdMass >= exp*0.95 - 1e-6 && s.wdMass <= exp*1.05 + 1e-6,
+        `Hex e8-${i} Star ${s.label}: wdMass=${s.wdMass.toFixed(4)} expected ≈${exp.toFixed(4)}`, e);
+    });
+  }
+});
+
+test('White dwarfs: temperature within ±10% of T=13500×M^0.25/A^0.35 (spec p.46)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`ewdt-${i}`);
+    sys.stars.filter(s => s.state === 'White Dwarf').forEach(s => {
+      const A_WD = s.wdCoolingAge;
+      if (!A_WD || A_WD <= 0) return; // degenerate case — skip
+      const rawT  = (13500 * Math.pow(s.wdMass, 0.25)) / Math.pow(A_WD, 0.35);
+      const minT  = rawT * 0.90 - 100;
+      const maxT  = rawT * 1.10 + 100;
+      assert(s.effectiveTemperature >= minT && s.effectiveTemperature <= maxT,
+        `Hex ewdt-${i} Star ${s.label}: T=${s.effectiveTemperature} outside ±10% of ${rawT.toFixed(0)} (M=${s.wdMass.toFixed(3)}, A_WD=${A_WD.toFixed(3)})`, e);
+    });
+  }
+});
+
+test('White dwarfs: radiusKm = 5500 / wdMass^(1/3) (spec p.47)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`e9-${i}`);
+    sys.stars.filter(s => s.state === 'White Dwarf').forEach(s => {
+      const expR = 5500 / Math.pow(s.wdMass, 1/3);
+      const rel  = Math.abs(s.radiusKm - expR) / expR;
+      assert(rel < 0.001,
+        `Hex e9-${i} Star ${s.label}: radiusKm=${s.radiusKm.toFixed(1)} expected=${expR.toFixed(1)}`, e);
+    });
+  }
+});
+
+test('White dwarfs: luminosity = R²×T⁴ / (5.4×10²⁶) using radiusKm (spec p.47)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`ea-${i}`);
+    sys.stars.filter(s => s.state === 'White Dwarf').forEach(s => {
+      const expL = (s.radiusKm * s.radiusKm * Math.pow(s.effectiveTemperature, 4)) / 5.4e26;
+      const rel  = Math.abs(s.luminosity - expL) / (expL + 1e-40);
+      assert(rel < 0.001,
+        `Hex ea-${i} Star ${s.label}: L=${s.luminosity.toExponential(3)} expected=${expL.toExponential(3)}`, e);
+    });
+  }
+});
+
+group('CONSTRAINTS — Step 7: Spectral Classification');
+
+test('White dwarfs: spectralClassification = "D" (spec p.49)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`s1-${i}`);
+    sys.stars.filter(s => s.state === 'White Dwarf').forEach(s =>
+      assert(s.spectralClassification === 'D',
+        `Hex s1-${i} Star ${s.label}: "${s.spectralClassification}"`, e));
+  }
+});
+
+test('Subgiant stars: luminosity class IV', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`s2-${i}`);
+    sys.stars.filter(s => s.state === 'Subgiant').forEach(s =>
+      assert(s.spectralClassification.endsWith('IV'),
+        `Hex s2-${i} Star ${s.label}: "${s.spectralClassification}"`, e));
+  }
+});
+
+test('Red Giant Branch and Horizontal Branch: luminosity class III', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`s3-${i}`);
+    sys.stars.filter(s => s.state==='Red Giant Branch' || s.state==='Horizontal Branch').forEach(s =>
+      assert(s.spectralClassification.endsWith('III'),
+        `Hex s3-${i} Star ${s.label} (${s.state}): "${s.spectralClassification}"`, e));
+  }
+});
+
+test('Main Sequence and Brown Dwarf: luminosity class V', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`s4-${i}`);
+    sys.stars.filter(s => s.state==='Main Sequence' || s.state==='Brown Dwarf').forEach(s =>
+      assert(s.spectralClassification.endsWith('V'),
+        `Hex s4-${i} Star ${s.label} (${s.state}): "${s.spectralClassification}"`, e));
+  }
+});
+
+test('sType / sClass / subType populated on all stars', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`s5-${i}`);
+    sys.stars.forEach(s => {
+      assert(s.sType  !== undefined, `Hex s5-${i} Star ${s.label}: missing sType`,  e);
+      assert(s.sClass !== undefined, `Hex s5-${i} Star ${s.label}: missing sClass`, e);
+      assert(s.subType !== undefined,`Hex s5-${i} Star ${s.label}: missing subType`,e);
+    });
+  }
+});
+
+group('CONSTRAINTS — Step 8: Stellar Orbits');
+
+test('Singleton: no orbits', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`o1-${i}`);
+    if (sys.hierarchy === 'Singleton')
+      assert((sys.orbits||[]).length === 0,
+        `Hex o1-${i}: singleton has ${(sys.orbits||[]).length} orbits`, e);
+  }
+});
+
+test('Binary: exactly 1 orbit', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`o2-${i}`);
+    if (sys.hierarchy === 'Binary')
+      assert((sys.orbits||[]).length === 1,
+        `Hex o2-${i}: binary has ${(sys.orbits||[]).length} orbits`, e);
+  }
+});
+
+test('Trinary: exactly 2 orbits', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`o3-${i}`);
+    if (sys.hierarchy.startsWith('Trinary'))
+      assert((sys.orbits||[]).length === 2,
+        `Hex o3-${i}: trinary has ${(sys.orbits||[]).length} orbits`, e);
+  }
+});
+
+test('Quaternary: exactly 3 orbits', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`o4-${i}`);
+    if (sys.hierarchy === 'Quaternary (A-B, C-D)')
+      assert((sys.orbits||[]).length === 3,
+        `Hex o4-${i}: quaternary has ${(sys.orbits||[]).length} orbits`, e);
+  }
+});
+
+test('Stability: outer Rmin ≥ 3 × max inner Rmax (spec p.51-52)', (e) => {
+  const TOL = 1e-6;
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`o5-${i}`);
+    if (!sys.orbits || sys.orbits.length < 2) continue;
+    const inners     = sys.orbits.slice(0, sys.orbits.length - 1);
+    const outerOrbit = sys.orbits[sys.orbits.length - 1];
+    const maxRmax    = Math.max(...inners.map(o => o.Rmax));
+    assert(outerOrbit.Rmin >= 3 * maxRmax - TOL,
+      `Hex o5-${i} (${sys.hierarchy}): outer.Rmin=${outerOrbit.Rmin.toFixed(4)} < 3×${maxRmax.toFixed(4)}`, e);
+  }
+});
+
+test('Eccentricity in [0.0, 0.9] for all orbits', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`o6-${i}`);
+    (sys.orbits||[]).forEach(orb =>
+      assert(orb.E >= 0 && orb.E <= 0.9,
+        `Hex o6-${i} ${orb.label}: E=${orb.E}`, e));
+  }
+});
+
+test('Rmin = R×(1-E) and Rmax = R×(1+E) (spec p.51)', (e) => {
+  const TOL = 1e-9;
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`o7-${i}`);
+    (sys.orbits||[]).forEach(orb => {
+      assert(Math.abs(orb.Rmin - orb.R*(1-orb.E)) < TOL,
+        `Hex o7-${i} ${orb.label}: Rmin=${orb.Rmin} ≠ R(1-E)=${orb.R*(1-orb.E)}`, e);
+      assert(Math.abs(orb.Rmax - orb.R*(1+orb.E)) < TOL,
+        `Hex o7-${i} ${orb.label}: Rmax=${orb.Rmax} ≠ R(1+E)=${orb.R*(1+orb.E)}`, e);
+    });
+  }
+});
+
+test('Period P = √(R³/mTotal) (spec p.52)', (e) => {
+  const TOL = 1e-9;
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`o8-${i}`);
+    (sys.orbits||[]).forEach(orb => {
+      const expP = Math.sqrt(Math.pow(orb.R, 3) / orb.mTotal);
+      assert(Math.abs(orb.P - expP) < TOL,
+        `Hex o8-${i} ${orb.label}: P=${orb.P} ≠ √(R³/M)=${expP}`, e);
+    });
+  }
+});
+
+test('Inner pair orbits never "Very Wide" (−3 roll modifier makes it impossible)', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`o9-${i}`);
+    if (!sys.orbits || sys.orbits.length < 2) continue;
+    const inner = sys.orbits.slice(0, sys.orbits.length - 1);
+    inner.forEach(orb => assert(orb.separation !== 'Very Wide',
+      `Hex o9-${i} inner orbit ${orb.label}: separation=Very Wide`, e));
+  }
+});
+
+test('Average distance R > 0 for all orbits', (e) => {
+  for (let i = 0; i < N; i++) {
+    const sys = runStellar(`oa-${i}`);
+    (sys.orbits||[]).forEach(orb =>
+      assert(orb.R > 0, `Hex oa-${i} ${orb.label}: R=${orb.R}`, e));
+  }
+});
+
+// ============================================================
+// STATISTICS — Evolved Star Frequency
+// Catches silent zero-rate bugs; trivially-passing filter tests
+// (filter().forEach on empty array) don't catch these.
+// Uses 5000 iterations regardless of N to get reliable statistics.
+// ============================================================
+
+group('STATISTICS — Evolved Star Frequency');
+
+test('Evolved stars appear in 5000 systems at expected rate (~0.5% per system)', (e) => {
+  const counts = { Subgiant: 0, 'Red Giant Branch': 0, 'Horizontal Branch': 0 };
+  const STAT_N = 5000;
+  for (let i = 0; i < STAT_N; i++) {
+    const sys = runStellar(`stat-${i}`);
+    sys.stars.forEach(s => {
+      if (counts[s.state] !== undefined) counts[s.state]++;
+    });
+  }
+  const total = counts.Subgiant + counts['Red Giant Branch'] + counts['Horizontal Branch'];
+  const pct   = (total / STAT_N * 100).toFixed(2);
+  const ivCt  = counts.Subgiant;
+  const iiiCt = counts['Red Giant Branch'] + counts['Horizontal Branch'];
+
+  // Always-visible breakdown (blue info lines)
+  e.push(`[INFO] Class IV  (Subgiant):          ${ivCt}`);
+  e.push(`[INFO] Class III (Red Giant Branch):   ${counts['Red Giant Branch']}`);
+  e.push(`[INFO] Class III (Horizontal Branch):  ${counts['Horizontal Branch']}`);
+  e.push(`[INFO] Total evolved: ${total} / ${STAT_N} systems = ${pct}%  (expected ~0.5%)`);
+
+  // Real pass/fail assertions
+  assert(total > 0,
+    `ZERO evolved stars in ${STAT_N} systems — generation bug. Expected ~0.5% per system.`, e);
+  if (total > 0) {
+    assert(total / STAT_N >= 0.0005,
+      `Rate ${pct}% is suspiciously low (expected ~0.5%)`, e);
+    assert(total / STAT_N <= 0.05,
+      `Rate ${pct}% is suspiciously high (expected ~0.5%)`, e);
+  }
+});
+
+// ============================================================
+// TEST RUNNER & RENDERER
+// ============================================================
+
+function runAllTests(iterations) {
+  N = iterations || N_DEFAULT;
+  const groups = [];
+  let cur = null;
+  testQueue.forEach(({ group: gname, desc, fn }) => {
+    if (!cur || cur.name !== gname) { cur = { name: gname, tests: [] }; groups.push(cur); }
+    const errors = [];
+    try { fn(errors); } catch (ex) { errors.push('THREW: ' + ex.message + '\n' + (ex.stack||'').split('\n')[1]); }
+    const realErrors = errors.filter(err => !err.startsWith('[INFO]'));
+    cur.tests.push({ desc, pass: realErrors.length === 0, errors });
+  });
+  return groups;
+}
+
+function renderResults(groups, verbose) {
+  let passTotal = 0, failTotal = 0;
+  const html = groups.map(g => {
+    const gPass = g.tests.filter(t => t.pass).length;
+    const gFail = g.tests.length - gPass;
+    passTotal += gPass; failTotal += gFail;
+    const cls  = gFail > 0 ? 'has-fail' : 'all-pass';
+    const icon = gFail > 0 ? '✗' : '✓';
+    const rows = g.tests.map(t => {
+      const tick = t.pass
+        ? '<span class="pass-icon">✓</span>'
+        : '<span class="fail-icon">✗</span>';
+      let out = `<div class="test-line">${tick} ${t.desc}</div>`;
+      const realErrs = t.errors.filter(err => !err.startsWith('[INFO]'));
+      const infoLines = t.errors.filter(err => err.startsWith('[INFO]'));
+      if (!t.pass || (verbose && realErrs.length)) {
+        realErrs.slice(0, 5).forEach(err =>
+          out += `<div class="err-detail">↳ ${err}</div>`);
+        if (realErrs.length > 5)
+          out += `<div class="skip-line">  … and ${realErrs.length-5} more</div>`;
+      }
+      infoLines.forEach(info =>
+        out += `<div class="info-detail">· ${info.slice(7)}</div>`);
+      return out;
+    }).join('');
+    return `<div class="group ${cls}">
+      <div class="group-header">
+        <span class="gname">${icon} ${g.name}</span>
+        &nbsp;
+        <span class="pass-ct">${gPass} pass</span>
+        ${gFail ? `<span class="fail-ct"> / ${gFail} fail</span>` : ''}
+      </div>
+      ${rows}
+    </div>`;
+  }).join('');
+
+  const allOk = failTotal === 0;
+  document.getElementById('summary').innerHTML = `
+    <div class="summary ${allOk ? 'pass' : 'fail'}">
+      <strong>${allOk ? '✓ ALL PASS' : '✗ FAILURES FOUND'}</strong>
+      &nbsp;&mdash;&nbsp;
+      ${passTotal} passed &nbsp;/&nbsp; ${failTotal} failed &nbsp;/&nbsp; ${passTotal+failTotal} total tests
+      &nbsp;&nbsp;(${N} iterations per constraint suite)
+    </div>`;
+  document.getElementById('results').innerHTML = html;
+}
+
+function runTests(verbose, iterations) {
+  const t0     = performance.now();
+  const groups = runAllTests(iterations);
+  const ms     = (performance.now() - t0).toFixed(0);
+  renderResults(groups, verbose || false);
+  document.getElementById('timing').textContent = `Completed in ${ms} ms`;
+}
+
+window.addEventListener('load', () => runTests(false));
+</script>
+</body>
+</html>

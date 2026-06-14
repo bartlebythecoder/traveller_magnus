@@ -30,12 +30,58 @@ function computeSystemCounts(stateObj) {
         });
         stateObj.beltCount     = belts;
         stateObj.gasGiantCount = ggs;
+    } else if (stateObj.aowSystem) {
+        const aowWorlds = stateObj.aowSystem.worlds || [];
+        stateObj.beltCount     = aowWorlds.filter(w => w.type === 'Planetoid Belt').length;
+        stateObj.gasGiantCount = aowWorlds.filter(w => w.type === 'Gas Giant').length;
     } else {
         stateObj.beltCount     = 0;
         stateObj.gasGiantCount = 0;
     }
 }
 window.computeSystemCounts = computeSystemCounts;
+
+// ============================================================================
+// LUMINOSITY CLASS TALLY — shared across all macro engines
+// Reads star.sClass (CT/MgT2E/T5/AoW) or star.luminosityClass (RTT) and
+// prints a sorted summary to the console at the end of each bulk macro.
+// ============================================================================
+function _printLumTally(label, targetHexes, sysKey) {
+    const tally = {};
+    targetHexes.forEach(hexId => {
+        const sys = (hexStates.get(hexId) || {})[sysKey];
+        if (!sys || !sys.stars) return;
+        sys.stars.forEach(star => {
+            const key = star.sClass || star.luminosityClass || star.size || 'unknown';
+            tally[key] = (tally[key] || 0) + 1;
+        });
+    });
+    const tallyStr = Object.keys(tally).sort().map(k => `${k}: ${tally[k]}`).join(' | ');
+    if (tallyStr) console.log(`[${label} Lum Tally] ${tallyStr}`);
+}
+
+function _printWetWorldPct(label, targetHexes) {
+    const toNum = (v) => {
+        if (v === undefined || v === null) return 0;
+        if (typeof v === 'number') return v;
+        return (typeof UniversalMath !== 'undefined') ? UniversalMath.fromEHex(v) : (parseInt(v, 16) || 0);
+    };
+    let wetCount = 0;
+    let totalCount = 0;
+    targetHexes.forEach(hexId => {
+        const state = hexStates.get(hexId) || {};
+        if (state.type !== 'SYSTEM_PRESENT') return;
+        const w = state.rttData || state.t5Data || state.mgt2eData || state.ctData;
+        if (!w) return;
+        totalCount++;
+        const atm = toNum(w.atm ?? w.atmosphere ?? w.atmCode ?? w.Atm);
+        const hydro = toNum(w.hydro ?? w.hydrographics ?? w.hydroCode ?? w.Hydro);
+        if ((atm === 5 || atm === 6 || atm === 8) && hydro > 0) wetCount++;
+    });
+    if (totalCount === 0) return;
+    const pct = ((wetCount / totalCount) * 100).toFixed(1);
+    console.log(`[${label} Wet World] ${wetCount} / ${totalCount} (${pct}%)`);
+}
 
 // ============================================================================
 // VALIDATION
@@ -93,7 +139,7 @@ function validateSelection(actionType, skipPopCheck = false) {
         let willOverwrite = false;
         for (let hexId of selectedHexes) {
             let state = hexStates.get(hexId);
-            if (state && (state.ctData || state.mgt2eData || state.t5Data)) {
+            if (state && (state.ctData || state.mgt2eData || state.t5Data || state.aowSystem)) {
                 willOverwrite = true;
                 break;
             }
@@ -335,6 +381,9 @@ async function runMgT2EMacro(skipPop = false) {
             }
         });
 
+        _printLumTally('MgT2E', targetHexes, 'mgtSystem');
+        _printWetWorldPct('MgT2E', targetHexes);
+
         if (window.isLoggingEnabled && window.batchLogData.length > 0) {
             downloadBatchLog('MgT2E_Full_Macro', targetHexes.length);
         }
@@ -388,9 +437,12 @@ async function runMgT2EBottomUpMacro(skipPop = false) {
         : null;
 
     // 1. Auto Populate
+    // Use "-pop" salt so the populate check doesn't share a seed with the first
+    // generation roll — without it, SYSTEM_PRESENT hexes are exactly those where
+    // rng() < 0.5, biasing the first roll in every generated system.
     if (!skipPop) {
         targetHexes.forEach(hexId => {
-            if (typeof reseedForHex === 'function') reseedForHex(hexId);
+            if (typeof reseedForHex === 'function') reseedForHex(hexId + "-pop");
             const roll = typeof roll1D === 'function' ? roll1D() : Math.floor(Math.random() * 6) + 1;
             if (roll <= 3) {
                 hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
@@ -514,6 +566,9 @@ async function runMgT2EBottomUpMacro(skipPop = false) {
             }
         });
 
+        _printLumTally('MgT2E BU', targetHexes, 'mgtSystem');
+        _printWetWorldPct('MgT2E BU', targetHexes);
+
         if (window.isLoggingEnabled && window.batchLogData && window.batchLogData.length > 0) {
             if (typeof downloadBatchLog === 'function') downloadBatchLog('MgT2E_BottomUp_Full_Macro', targetHexes.length);
         }
@@ -619,9 +674,12 @@ async function runCTNewMacro(skipPop = false) {
         : null;
 
     // 1. Auto Populate
+    // Use "-pop" salt so the populate check doesn't share a seed with the first
+    // generation roll — without it, SYSTEM_PRESENT hexes are exactly those where
+    // rng() < 0.5, biasing the first roll in every generated system.
     if (!skipPop) {
         targetHexes.forEach(hexId => {
-            reseedForHex(hexId);
+            reseedForHex(hexId + "-pop");
             const roll = roll1D();
             if (roll <= 3) {
                 hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
@@ -700,6 +758,9 @@ async function runCTNewMacro(skipPop = false) {
             }
         });
 
+        _printLumTally('CT', targetHexes, 'ctSystem');
+        _printWetWorldPct('CT', targetHexes);
+
         if (window.isLoggingEnabled && window.batchLogData.length > 0) {
             downloadBatchLog('CT_Modular_Full_Macro', targetHexes.length);
         }
@@ -751,9 +812,12 @@ async function runCTBottomUpMacro(skipPop = false) {
         : null;
 
     // 1. Auto Populate
+    // Use "-pop" salt so the populate check doesn't share a seed with the first
+    // generation roll — without it, SYSTEM_PRESENT hexes are exactly those where
+    // rng() < 0.5, biasing the first roll in every generated system.
     if (!skipPop) {
         targetHexes.forEach(hexId => {
-            reseedForHex(hexId);
+            reseedForHex(hexId + "-pop");
             const roll = roll1D();
             if (roll <= 3) {
                 hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
@@ -827,6 +891,9 @@ async function runCTBottomUpMacro(skipPop = false) {
             }
         });
 
+        _printLumTally('CT BU', targetHexes, 'ctSystem');
+        _printWetWorldPct('CT BU', targetHexes);
+
         if (window.isLoggingEnabled && window.batchLogData.length > 0) {
             downloadBatchLog('CT_BottomUp_Full_Macro', targetHexes.length);
         }
@@ -879,9 +946,12 @@ async function runRTTMacro(skipPop = false) {
         : null;
 
     // 1. Auto Populate (Standard 3 in 6)
+    // Use "-pop" salt so the populate check doesn't share a seed with the first
+    // generation roll — without it, SYSTEM_PRESENT hexes are exactly those where
+    // rng() < 0.5, biasing the first roll in every generated system.
     if (!skipPop) {
         targetHexes.forEach(hexId => {
-            reseedForHex(hexId);
+            reseedForHex(hexId + "-pop");
             const roll = roll1D();
             if (roll <= 3) {
                 hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
@@ -961,6 +1031,9 @@ async function runRTTMacro(skipPop = false) {
             window.batchLogData.push(`========================================================`);
         }
 
+        _printLumTally('RTT', targetHexes, 'rttSystem');
+        _printWetWorldPct('RTT', targetHexes);
+
         if (window.isLoggingEnabled && window.batchLogData.length > 0) {
             downloadBatchLog('RTT_Full_Macro', targetHexes.length);
         }
@@ -988,6 +1061,108 @@ async function runRTTMacro(skipPop = false) {
     }, 500);
 }
 
+// ============================================================================
+// AoW BOTTOM-UP MACRO
+// ============================================================================
+
+async function runAoWMacro(skipPop = false) {
+    if (!validateSelection('generate', !skipPop)) return;
+
+    saveHistoryState('AoW Macro');
+    if (window.isLoggingEnabled) window.batchLogData = [];
+
+    console.log("Bulk Generating AoW Bottom-Up Full System...");
+    await ensureNamesLoaded();
+
+    const targetHexes = Array.from(selectedHexes);
+
+    if (!confirm(`This will completely overwrite ANY existing data in the selected hexes with a Full Architect of Worlds (Bottom-Up) generation sequence.\n\nProceed?`)) {
+        return;
+    }
+
+    // 1. Auto Populate (Standard 3 in 6)
+    // Use "-pop" salt so the populate check doesn't share a seed with the stellar
+    // engine's first roll — without it, SYSTEM_PRESENT hexes are exactly those
+    // where rng() < 0.5, causing rollD100() in generation to always be ≤ 50.
+    if (!skipPop) {
+        targetHexes.forEach(hexId => {
+            reseedForHex(hexId + "-pop");
+            const roll = roll1D();
+            if (roll <= 3) {
+                hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
+            } else {
+                hexStates.set(hexId, { type: 'EMPTY' });
+            }
+        });
+        requestAnimationFrame(draw);
+        showToast(`Populated ${targetHexes.length} hex(es)...`, 1000);
+    }
+
+    // 2. Generate Systems
+    setTimeout(() => {
+        let count = 0;
+
+        targetHexes.forEach(hexId => {
+            try {
+                let stateObj = hexStates.get(hexId);
+                if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
+                    const newSys = (window.AoWBottomUpGenerator && window.AoWBottomUpGenerator.generateAoWSystemBottomUp)
+                        ? window.AoWBottomUpGenerator.generateAoWSystemBottomUp(hexId)
+                        : (typeof generateAoWSystemBottomUp === 'function' ? generateAoWSystemBottomUp(hexId) : null);
+
+                    if (newSys) {
+                        stateObj.aowSystem = newSys;
+
+                        // Bridge the mainworld to the MgT2E display fields (AoW uses MgT2E socio)
+                        const mainworld = newSys.mainworld || null;
+                        stateObj.mgt2eData = mainworld;
+                        stateObj.mgtSocio  = mainworld;
+                        stateObj.name      = mainworld ? mainworld.name : null;
+
+                        // Clear all other engine data
+                        stateObj.ctData      = null;
+                        stateObj.t5Data      = null;
+                        stateObj.rttData     = null;
+                        stateObj.ctSystem    = null;
+                        stateObj.mgtSystem   = null;
+                        stateObj.t5System    = null;
+                        stateObj.rttSystem   = null;
+                        stateObj.ctPhysical  = null;
+                        stateObj.mgtPhysical = null;
+                        stateObj.t5Physical  = null;
+                        stateObj.t5Socio     = null;
+
+                        computeSystemCounts(stateObj);
+                        hexStates.set(hexId, stateObj);
+                        count++;
+                    }
+                }
+            } catch (err) {
+                console.error(`AoW Macro failed for hex ${hexId}:`, err);
+            }
+        });
+
+        _printLumTally('AoW', targetHexes, 'aowSystem');
+        _printWetWorldPct('AoW', targetHexes);
+
+        if (window.isLoggingEnabled && window.batchLogData.length > 0) {
+            downloadBatchLog('AoW_Full_Macro', targetHexes.length);
+        }
+
+        requestAnimationFrame(draw);
+        if (count > 0) {
+            showToast(`Full AoW Generation Complete for ${count} system(s)!`, 4000);
+        } else {
+            alert("No populated hexes to update. Ensure selection contains populated hexes.");
+        }
+        if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+        if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
+
+        selectedHexes.clear();
+        requestAnimationFrame(draw);
+    }, 500);
+}
+
 async function runT5Macro(skipPop = false) {
     if (!validateSelection('generate', !skipPop)) return;
 
@@ -1009,9 +1184,12 @@ async function runT5Macro(skipPop = false) {
         : null;
 
     // 1. Auto Populate (Standard 3 in 6)
+    // Use "-pop" salt so the populate check doesn't share a seed with the first
+    // generation roll — without it, SYSTEM_PRESENT hexes are exactly those where
+    // rng() < 0.5, biasing the first roll in every generated system.
     if (!skipPop) {
         targetHexes.forEach(hexId => {
-            reseedForHex(hexId);
+            reseedForHex(hexId + "-pop");
             const roll = roll1D();
             if (roll <= 3) {
                 hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
@@ -1079,6 +1257,9 @@ async function runT5Macro(skipPop = false) {
                 console.error(`T5 Macro Step 2 failed for hex ${hexId}:`, err);
             }
         });
+        _printLumTally('T5', targetHexes, 't5System');
+        _printWetWorldPct('T5', targetHexes);
+
         requestAnimationFrame(draw);
         showToast(`Generated T5 Systems (Top-Down)...`, 1000);
 

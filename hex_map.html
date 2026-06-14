@@ -53,15 +53,22 @@
     <script src="js/system_driver.js" defer></script>
 
     <script src="js/rtt_engine.js" defer></script>
+
+    <script src="rules/aow_data.js" defer></script>
+    <script src="js/aow_stellar_engine.js" defer></script>
+    <script src="js/aow_world_engine.js" defer></script>
+    <script src="js/aow_bottomup_generator.js" defer></script>
     <!-- v0.7.0.0: Political Mapping & Referee Utility -->
     <!-- v0.6.1.0: Sector-Wide Statistical Validation -->
     <script src="rules/expectations_data.js" defer></script>
     <script src="js/statistical_auditor.js" defer></script>
     <!-- Planet hemisphere renderer -->
     <script src="js/planet_renderer.js" defer></script>
+    <script src="js/approach_viewer.js" defer></script>
     <!-- Modular JavaScript Input Handling -->
     <script src="js/input_init.js" defer></script>
     <script src="js/system_viewer.js" defer></script>
+    <script src="js/surface_viewer.js" defer></script>
     <script src="js/obsidian_exporter.js" defer></script>
     <script src="js/canvas_input.js" defer></script>
     <script src="js/keyboard_shortcuts.js" defer></script>
@@ -73,6 +80,8 @@
     <script src="js/db_manager.js" defer></script>
     <script src="js/imperium_data.js" defer></script>
     <script src="js/universe_data.js" defer></script>
+    <script src="js/otu_system_data.js" defer></script>
+    <script src="js/add_otu_system_info.js" defer></script>
     <script src="js/otu_metadata_parser.js" defer></script>
     <script src="js/otu_importer.js" defer></script>
     <!-- Optional: auto-load system names. Generate names.js by running convert_names.ps1 -->
@@ -718,9 +727,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above<br> So Below</span></h1>
-            <div class="splash-banner">New: Mongoose Optional Realistic Star Generation</div>
+            <div class="splash-banner">New This Version:  Architect of Worlds Generation Option</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.14.0</div>
+            <div class="splash-version">v0.15.0</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -843,6 +852,22 @@
                     </div>
                     <input type="range" id="input-coastline-comp" min="0" max="1" step="0.05" value="0.45"
                         style="width:100%;accent-color:#66fcf1;cursor:pointer;">
+                </div>
+                <div style="font-size:0.7rem;color:#45a29e;letter-spacing:0.06em;text-transform:uppercase;padding-top:4px;border-top:1px solid #1f2833;">System Viewer</div>
+                <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
+                    <label style="font-size:0.8rem;color:#c5c6c7;">Default Start Date</label>
+                    <div style="display:flex;align-items:center;gap:4px;">
+                        <input type="number" id="input-orrery-default-year" value="0" step="1"
+                            title="Default year when opening System Viewer"
+                            style="width:60px;padding:4px 6px;background:#1f2833;border:1px solid #45a29e;color:#fff;
+                                   font-family:'Courier New',Courier,monospace;font-size:0.85rem;text-align:right;">
+                        <span style="font-size:0.75rem;color:#8a8f94;">Y</span>
+                        <input type="number" id="input-orrery-default-day" value="1" min="1" max="365" step="1"
+                            title="Default day (1–365) when opening System Viewer"
+                            style="width:50px;padding:4px 6px;background:#1f2833;border:1px solid #45a29e;color:#fff;
+                                   font-family:'Courier New',Courier,monospace;font-size:0.85rem;text-align:right;">
+                        <span style="font-size:0.75rem;color:#8a8f94;">D</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1074,6 +1099,11 @@
                             style="cursor:pointer; accent-color:#66fcf1;">
                         <span style="color:#c5c6c7; font-size:0.85rem;">Region Data</span>
                     </label>
+                    <label style="display:none; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="otu-opt-system-data"
+                            style="cursor:pointer; accent-color:#66fcf1;">
+                        <span style="color:#c5c6c7; font-size:0.85rem;">Published System Data (planets &amp; moons)</span>
+                    </label>
                 </div>
             </div>
 
@@ -1137,6 +1167,12 @@
                         style="cursor:pointer; accent-color:#66fcf1;">
                     Replace Foreven with Terry Mixon version
                 </label>
+                <label style="display:none; align-items:center; gap:8px; cursor:pointer;
+                               color:#c5c6c7; font-size:0.85rem; margin-top:6px;">
+                    <input type="checkbox" id="universe-opt-system-data"
+                        style="cursor:pointer; accent-color:#66fcf1;">
+                    Published System Data (planets &amp; moons)
+                </label>
             </div>
 
             <!-- Action buttons -->
@@ -1161,7 +1197,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.14.0</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.15.0</span>
             </p>
         </div>
 
@@ -1446,6 +1482,7 @@
                 <button class="context-menu-item" id="ctx-gen-sys-ct-bu">Classic Traveler (Bottom Up)</button>
                 <button class="context-menu-item" id="ctx-gen-sys-mgt2e-bu">Mongoose 2nd Ed (Bottom Up)</button>
                 <button class="context-menu-item" id="ctx-gen-sys-rtt-bu">RTT WORLDGEN (Bottom Up)</button>
+                <button class="context-menu-item" id="ctx-gen-sys-aow-bu">Architect of Worlds (+ MgT2e WBH)</button>
             </div>
         </div>
 
@@ -1468,6 +1505,7 @@
                 <button class="context-menu-item" id="ctx-full-ct-bu">Classic Traveler (Bottom Up)</button>
                 <button class="context-menu-item" id="ctx-full-mgt2e-bu">Mongoose 2nd Ed (Bottom Up)</button>
                 <button class="context-menu-item" id="ctx-full-rtt-bu">RTT WORLDGEN (Bottom Up) (Ctrl+Alt+R)</button>
+                <button class="context-menu-item" id="ctx-full-aow-bu">Architect of Worlds (+ MgT2e WBH)</button>
             </div>
         </div>
 
@@ -1666,6 +1704,12 @@
             <!-- RTT System Expand Accordion -->
             <button class="accordion-btn" id="acc-btn-rtt-system" style="display: none;">RTT System</button>
             <div class="accordion-content" id="editor-rtt-system-root" style="display: none;">
+                <!-- Content will be injected via JS -->
+            </div>
+
+            <!-- AoW Bottom-Up System Accordion -->
+            <button class="accordion-btn" id="acc-btn-aow-system" style="display: none;">AoW System</button>
+            <div class="accordion-content" id="editor-aow-system-root" style="display: none;">
                 <!-- Content will be injected via JS -->
             </div>
 
@@ -1994,8 +2038,8 @@
                             <label>Primary Only</label>
                             <input type="checkbox" id="filter-stellar-primary-only" style="width: auto; margin-top: 2px;">
                         </div>
-                        <div class="filter-field" style="flex-direction: column; align-items: stretch; grid-column: span 2;">
-                            <label>Class</label>
+                        <div style="margin-bottom: 2px;">
+                            <label style="display: block; font-size: 0.7rem; color: #a0a8b0; text-transform: uppercase; font-weight: 900; margin-bottom: 4px;">Class</label>
                             <select id="filter-stellar-class" multiple size="5" style="width: 100%; background: #0b0c10; border: 1px solid #45a29e; color: #66fcf1; font-family: 'Courier New', monospace; font-size: 0.85rem; padding: 2px; border-radius: 3px;">
                                 <option value="V">V — Main Sequence</option>
                                 <option value="IV">IV — Sub-giant</option>
@@ -2004,13 +2048,11 @@
                                 <option value="Ib">Ib — Supergiant</option>
                                 <option value="Ia">Ia — Luminous Supergiant</option>
                                 <option value="VI">VI — Sub-dwarf</option>
-                                <option value="D">D — White Dwarf</option>
-                                <option value="BD">BD — Brown Dwarf</option>
                             </select>
-                            <span style="font-size: 0.7rem; color: #888; margin-top: 2px;">Ctrl+click to select multiple</span>
+                            <span style="font-size: 0.7rem; color: #888; margin-top: 2px; display: block;">Ctrl+click to select multiple</span>
                         </div>
-                        <div class="filter-field" style="flex-direction: column; align-items: stretch; grid-column: span 2;">
-                            <label>Type</label>
+                        <div style="margin-bottom: 2px;">
+                            <label style="display: block; font-size: 0.7rem; color: #a0a8b0; text-transform: uppercase; font-weight: 900; margin-bottom: 4px;">Type</label>
                             <select id="filter-stellar-type" multiple size="5" style="width: 100%; background: #0b0c10; border: 1px solid #45a29e; color: #66fcf1; font-family: 'Courier New', monospace; font-size: 0.85rem; padding: 2px; border-radius: 3px;">
                                 <option value="O">O</option>
                                 <option value="B">B</option>
@@ -2022,7 +2064,7 @@
                                 <option value="D">D — White Dwarf</option>
                                 <option value="BD">BD — Brown Dwarf</option>
                             </select>
-                            <span style="font-size: 0.7rem; color: #888; margin-top: 2px;">Ctrl+click to select multiple</span>
+                            <span style="font-size: 0.7rem; color: #888; margin-top: 2px; display: block;">Ctrl+click to select multiple</span>
                         </div>
                         <div class="filter-field">
                             <label>Subtype</label>

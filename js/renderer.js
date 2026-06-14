@@ -437,10 +437,14 @@ function draw() {
             if (stateType === 'SYSTEM_PRESENT' && !isHidden) {
                 const data = stateObj.rttData || stateObj.t5Data || stateObj.mgt2eData || stateObj.ctData;
 
-                // Sean Protocol: Check if this "System Present" hex actually has no planets 
+                // Sean Protocol: Check if this "System Present" hex actually has no planets
                 // and skip if the filter is active.
-                if (hideNoPlanetSystems && data && data.isStellarOnly) {
-                    continue;
+                // RTT: sets isStellarOnly on rttData when no bodies are generated.
+                // AoW: hide if no mainworld was elected; gas-giant-only systems render as a blank dot.
+                if (hideNoPlanetSystems) {
+                    const aowStellarOnly = stateObj.aowSystem &&
+                        !stateObj.aowSystem.mainworld;
+                    if ((data && data.isStellarOnly) || aowStellarOnly) continue;
                 }
 
                 if (!devView) {

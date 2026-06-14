@@ -1,7 +1,13 @@
+### [v0.15.0] - 2026-06-13
+1. **AoW Engine:** Added 'Architect of Worlds' stellar and planetary generation option. Generation is matched with Mongoose Socioeconomic expansion.
+2. **System Viewer:**  System Viewer now includes pause/play button, and the option of entering a date.  Default start date can be set in Settings.
+3. **World Details:** Changing a mainworld/system name in the World Details window gives the option of propogating the name change throughout the system.
+4. **All Engines:** Added sub-phase reseeding to isolate their RNG phase from main generation.   For example, population rolls during auto-populate use reseedForHex(hexId + "-pop") so they don't interfere with system generation even if called in a different order.
+
 ### [v0.14.0] - 2026-06-05
 1. **Filter:** Added ability to filter stellar information
 2. **Mongoose:** Added Class III, Class IV, Class VI and Giants to bottom up generation (Special table)
-3. **Mongoose:** Added Setting to use Optional Variant adding the realism of more colder M-type (red dwarf) systemss
+3. **Mongoose:** Added Setting to use Optional Variant adding the realism of more colder M-type (red dwarf) systems
 
 ### [v0.13.3] - 2026-06-01
 1. **JSON Save:** JSON saves now include all settings (display toggles, planet rendering, generation options)

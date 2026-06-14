@@ -19,6 +19,7 @@ const SystemViewer = (() => {
     let _orrCanvas = null;
     let _orrCtx    = null;
     let _sys       = null;   // normalised system object
+    let _hexId     = null;   // hex currently shown in the orrery
     let _tooltip   = null;
     let _hitBodies = [];
 
@@ -35,15 +36,22 @@ const SystemViewer = (() => {
     let _linearScale = false;
     let _orbitOpacity = 0;
 
-    let _startTime   = 0;
-    let _animFrameId = null;
+    let _animFrameId   = null;
+    let _lastFrameTime = 0;
 
-    let _planetSpeed = 1.0;   // multiplier: 1 = default, 0 = paused
-    let _moonSpeed   = 1.0;
-    let _starSpeed   = 1.0;
+    // In-game clock
+    let _gameYear        = 0;
+    let _gameDay         = 1;    // float, range [1, 366)
+    let _speedDaysPerSec = 2;    // in-game days advancing per real second
+
+    // DOM refs updated each frame
+    let _yearInput = null;
+    let _dayInput  = null;
+
+    let _paused   = false;
+    let _pauseBtn = null;
 
     const GOLDEN = 2.39996;   // golden angle (rad) for spiral angular spacing
-    const PLANET_SPEED_BASE = 0.04;
 
     // ── Fallback orbit→AU table ───────────────────────────────────────────────
     const _FALLBACK_ORBIT_AU = [
@@ -137,6 +145,60 @@ const SystemViewer = (() => {
             : _logR(au, maxAU, maxPx);
     }
 
+    // ── Deterministic epoch hash ──────────────────────────────────────────────
+    // FNV-1a body + MurmurHash3 finalizer for full avalanche.
+    // Without the finalizer, keys differing only in a trailing digit (e.g. ':0'
+    // vs ':1') produce raw hash values that differ by only ~16 million, causing
+    // all moons of a planet to cluster at nearly the same angle.
+    function _hashEpoch(key) {
+        let h = 2166136261;
+        for (let i = 0; i < key.length; i++) {
+            h ^= key.charCodeAt(i);
+            h  = Math.imul(h, 16777619) >>> 0;
+        }
+        h ^= h >>> 16;
+        h  = Math.imul(h, 0x85ebca6b) >>> 0;
+        h ^= h >>> 13;
+        h  = Math.imul(h, 0xc2b2ae35) >>> 0;
+        h ^= h >>> 16;
+        return (h / 0x100000000) * 2 * Math.PI;
+    }
+
+    // ── Physical period helpers ───────────────────────────────────────────────
+
+    // Kepler's 3rd law: period in years for au (AU) around starMass (M☉).
+    function _keplerYears(au, starMass) {
+        if (au <= 0 || starMass <= 0) return 1;
+        return Math.sqrt(Math.pow(au, 3) / starMass);
+    }
+
+    // Period in years for a normalised world object.
+    function _worldPeriodYears(w, starMass) {
+        if (w.periodYears && w.periodYears > 0) return w.periodYears;
+        return _keplerYears(w.au || 1, starMass || 1);
+    }
+
+    // Period in years for a moon.  Uses periodHrs if stored; otherwise derives
+    // from pd (planetary diameters from parent centre) via Kepler in SI units.
+    function _moonPeriodYears(m, parentWorld) {
+        if (m.periodHrs && m.periodHrs > 0) return m.periodHrs / (365.25 * 24);
+        const G            = 6.674e-11;
+        const M_EARTH_KG   = 5.972e24;
+        const parentMassKg = (parentWorld.mass || 1) * M_EARTH_KG;
+        const parentDiamKm = parentWorld.diamKm || 12742;
+        const pd           = m.pd || 20;
+        const r_m          = pd * parentDiamKm * 1000;   // orbital radius metres
+        const T_sec        = 2 * Math.PI * Math.sqrt(Math.pow(r_m, 3) / (G * parentMassKg));
+        return T_sec / (365.25 * 24 * 3600);
+    }
+
+    // Push current _gameYear / _gameDay into the header inputs.
+    // Skip an input while it has focus so the user can type or use the spinner without being overwritten.
+    function _updateDateDisplay() {
+        if (_yearInput && document.activeElement !== _yearInput) _yearInput.value = _gameYear;
+        if (_dayInput  && document.activeElement !== _dayInput)  _dayInput.value  = Math.max(1, Math.floor(_gameDay));
+    }
+
     // ── System normalisation ──────────────────────────────────────────────────
     // Each normaliser returns a common object:
     // {
@@ -157,6 +219,8 @@ const SystemViewer = (() => {
     // }
 
     function _detectSystem(state) {
+        if (state.aowSystem && state.aowSystem.stars && state.aowSystem.stars.length > 0)
+            return { raw: state.aowSystem, edition: 'AoW' };
         if (state.mgtSystem && state.mgtSystem.stars && state.mgtSystem.stars.length > 0)
             return { raw: state.mgtSystem, edition: 'MgT2E' };
         if (state.ctSystem  && state.ctSystem.stars  && state.ctSystem.stars.length  > 0)
@@ -335,16 +399,22 @@ const SystemViewer = (() => {
     }
 
     function _normT5World(w, au, parentStarIdx, mainworldRef) {
-        const isMainworld = _isSameWorld(w, mainworldRef);
+        const isMainworld = _isSameWorld(w, mainworldRef) || w.type === 'Mainworld';
         let type  = 'Terrestrial Planet';
         let ggType = null;
         if (isMainworld) {
             type = 'Mainworld';
+        } else if (w.type === 'Large Gas Giant') {
+            type = 'Gas Giant'; ggType = 'GL';
+        } else if (w.type === 'Small Gas Giant') {
+            type = 'Gas Giant'; ggType = 'GS';
         } else if (w.type === 'Gas Giant') {
             type = 'Gas Giant'; ggType = 'GM';
         } else if (w.type === 'Ice Giant') {
             type = 'Gas Giant'; ggType = 'GS';
         } else if (w.type === 'Planetoid Belt') {
+            type = 'Planetoid Belt';
+        } else if (w.type === 'Ring') {
             type = 'Planetoid Belt';
         }
         return {
@@ -487,6 +557,117 @@ const SystemViewer = (() => {
         };
     }
 
+    // ── AoW normaliser ────────────────────────────────────────────────────────
+
+    function _normalizeAoW(sys) {
+        const mw = sys.mainworld;
+
+        // hzco is always 0 in the generator (TODO); fall back to mainworld orbit
+        const mwAU = mw ? (mw.orbitalRadius ?? mw.orbitId ?? 1.0) : 1.0;
+        const hzAU = (sys.hzco && sys.hzco > 0) ? sys.hzco : mwAU;
+
+        // Companion orbit AU from sys.orbits[], sorted by R ascending
+        const sortedOrbits = [...(sys.orbits || [])].sort((a, b) => a.R - b.R);
+
+        const stars = (sys.stars || []).map((star, idx) => {
+            let sType = 'G', subType = 5, sClass = 'V';
+            const sc = star.spectralClassification || '';
+            if (star.state === 'White Dwarf') {
+                sType = 'D'; subType = 0; sClass = '';
+            } else if (star.state === 'Brown Dwarf') {
+                sType = 'BD'; subType = 0; sClass = '';
+            } else {
+                const m = sc.match(/^([OBAFGKM])(\d+)\s*(Ia|Ib|II|III|IV|V)$/i);
+                if (m) { sType = m[1].toUpperCase(); subType = parseInt(m[2]); sClass = m[3]; }
+            }
+            const orbitAU = (idx > 0 && sortedOrbits[idx - 1]) ? sortedOrbits[idx - 1].R : null;
+            return {
+                role:          idx === 0 ? 'Primary' : 'Companion',
+                sType, subType, sClass,
+                mass:          star.wdMass || star.initialMass || 1.0,
+                lum:           star.luminosity ?? null,
+                age:           sys.systemAge ?? null,
+                orbitAU,
+                name:          (star.label ? `${star.label}: ` : '') + (sc || '?'),
+            };
+        });
+
+        const worlds = (sys.worlds || []).map(w => {
+            const isMainworld = w === mw || w.type === 'Mainworld';
+            let type   = isMainworld ? 'Mainworld' : (w.type || 'Terrestrial Planet');
+            let ggType = null;
+            if (type === 'Gas Giant') {
+                const em = w.mass || 0;
+                ggType = em >= 200 ? 'GL' : em >= 50 ? 'GM' : 'GS';
+            }
+
+            const au      = w.orbitalRadius ?? w.orbitId ?? null;
+            const diamKm  = (w.radius != null) ? Math.round(w.radius * 2) : null;
+
+            const moons = (w.satellites || []).map(m => ({
+                type:      m.type || 'Satellite',
+                name:      m.name       ?? null,
+                pd:        null,
+                uwp:       m.uwp        ?? null,
+                starport:  m.starport   ?? null,
+                tl:        m.tl         ?? null,
+                tradeCodes: m.tradeCodes || [],
+                travelZone: m.travelZone || 'G',
+                diamKm:    (m.radius != null) ? Math.round(m.radius * 2) : null,
+                mass:      m.mass       ?? null,
+                gravity:   m.gravity    ?? null,
+                meanTempK: m.avgSurfaceTemp ?? null,
+                size:      m.size       ?? null,
+            }));
+
+            const parentStarIdx = Math.min(w.parentStarIdx ?? 0, Math.max(0, stars.length - 1));
+
+            return {
+                type, ggType,
+                au, orbitId: au,
+                parentStarIdx,
+                orbitType:    'S-Type',
+                eccentricity: w.eccentricity ?? 0,
+                diamKm,
+                mass:         w.mass       ?? null,
+                gravity:      w.gravity    ?? null,
+                meanTempK:    w.avgSurfaceTemp ?? null,
+                size:         w.size       ?? null,
+                atm:          w.atmCode    ?? w.atm ?? null,
+                hydro:        w.hydroCode  ?? w.hydro ?? null,
+                uwp:          w.uwp        || '',
+                name:         w.name       || '',
+                starport:     w.starport   || '',
+                tl:           w.tl         ?? null,
+                tradeCodes:   w.tradeCodes || [],
+                travelZone:   w.travelZone || 'G',
+                moons,
+            };
+        });
+
+        return { edition: 'AoW', age: sys.systemAge ?? null, hzAU, stars, worlds };
+    }
+
+    // ── Surface viewer helpers ────────────────────────────────────────────────
+
+    function _isTerrestrial(w) {
+        if (w.type === 'Gas Giant')      return false;
+        if (w.type === 'Planetoid Belt') return false;
+        if (w.uwp && w.uwp[1] === '0')  return false;   // size-0 belt mainworld
+        return true;
+    }
+
+    function _findTerrestrialUnderCursor(mx, my) {
+        for (let i = _hitBodies.length - 1; i >= 0; i--) {
+            const b = _hitBodies[i];
+            if (b.kind !== 'world' && b.kind !== 'moon') continue;
+            if (!_isTerrestrial(b.body)) continue;
+            const dx = mx - b.cx, dy = my - b.cy;
+            if (Math.sqrt(dx * dx + dy * dy) <= b.r) return b.body;
+        }
+        return null;
+    }
+
     // ── Centre-hex detection ──────────────────────────────────────────────────
 
     function _centerHexId() {
@@ -510,18 +691,22 @@ const SystemViewer = (() => {
         if (!found) return;  // no system expansion — silently do nothing
 
         let normalised;
-        if      (found.edition === 'MgT2E') normalised = _normalizeMgT2E(found.raw);
+        if      (found.edition === 'AoW')   normalised = _normalizeAoW(found.raw);
+        else if (found.edition === 'MgT2E') normalised = _normalizeMgT2E(found.raw);
         else if (found.edition === 'CT')    normalised = _normalizeCT(found.raw);
         else if (found.edition === 'T5')    normalised = _normalizeT5(found.raw);
         else                                normalised = _normalizeRTT(found.raw);
 
-        _sys       = normalised;
-        _lightMode = !!window.printMode;
-        _viewZoom  = 1.0;
-        _viewOffX  = 0;
-        _viewOffY  = 0;
+        _sys         = normalised;
+        _hexId       = hexId;
+        _lightMode   = !!window.printMode;
+        _viewZoom    = 1.0;
+        _viewOffX    = 0;
+        _viewOffY    = 0;
+        _gameYear    = (window.orreryDefaultYear !== undefined) ? window.orreryDefaultYear : 0;
+        _gameDay     = (window.orreryDefaultDay  !== undefined) ? window.orreryDefaultDay  : 1;
+        _paused      = false;
         _buildOverlay(hexId);
-        _startTime = performance.now();
         _startLoop();
     }
 
@@ -535,6 +720,7 @@ const SystemViewer = (() => {
         _orrCanvas   = null;
         _orrCtx      = null;
         _sys         = null;
+        _hexId       = null;
         _tooltip     = null;
         _hitBodies   = [];
         _canvasW     = 0;
@@ -542,14 +728,27 @@ const SystemViewer = (() => {
         _viewZoom    = 1.0;
         _viewOffX    = 0;
         _viewOffY    = 0;
-        _dragging    = false;
-        _dragLast    = null;
-        _startTime   = 0;
-        _animFrameId = null;
+        _dragging      = false;
+        _dragLast      = null;
+        _animFrameId   = null;
+        _lastFrameTime = 0;
+        _gameYear      = 0;
+        _gameDay       = 1;
+        _yearInput     = null;
+        _dayInput      = null;
+        _paused        = false;
+        _pauseBtn      = null;
     }
 
     function handleWheel(direction) {
         if (direction < 0 && _viewZoom <= 1.0) close();
+    }
+
+    // ── Play / Pause ──────────────────────────────────────────────────────────
+
+    function _togglePause() {
+        _paused = !_paused;
+        if (_pauseBtn) _pauseBtn.textContent = _paused ? '▶' : '⏸';
     }
 
     // ── DOM Construction ──────────────────────────────────────────────────────
@@ -606,62 +805,68 @@ const SystemViewer = (() => {
         });
         hint.textContent = 'Scroll to zoom orbits  ·  Drag to pan  ·  Scroll out at full view or ESC to return';
 
-        // Star speed slider
-        const starWrap = document.createElement('span');
-        Object.assign(starWrap.style, { display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px' });
-        const starLbl = document.createElement('span');
-        starLbl.textContent = 'Star Speed:';
-        Object.assign(starLbl.style, { color: P.sub, whiteSpace: 'nowrap' });
-        const starSlider = document.createElement('input');
-        starSlider.type = 'range'; starSlider.min = '0'; starSlider.max = '4';
-        starSlider.step = '0.1'; starSlider.value = String(_starSpeed);
-        Object.assign(starSlider.style, { width: '80px', cursor: 'pointer' });
-        const starVal = document.createElement('span');
-        starVal.textContent = _starSpeed.toFixed(1) + 'x';
-        Object.assign(starVal.style, { color: P.accent, minWidth: '30px' });
-        starSlider.addEventListener('input', () => {
-            _starSpeed = parseFloat(starSlider.value);
-            starVal.textContent = _starSpeed.toFixed(1) + 'x';
+        // Year input
+        const yearWrap = document.createElement('span');
+        Object.assign(yearWrap.style, { display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px' });
+        const yearLbl = document.createElement('span');
+        yearLbl.textContent = 'Year:';
+        Object.assign(yearLbl.style, { color: P.sub, whiteSpace: 'nowrap' });
+        _yearInput = document.createElement('input');
+        _yearInput.type = 'number'; _yearInput.value = String(_gameYear); _yearInput.step = '1';
+        Object.assign(_yearInput.style, {
+            width: '64px', background: 'transparent', textAlign: 'center',
+            border: `1px solid ${P.badge}`, color: P.accent,
+            fontFamily: 'inherit', fontSize: '11px', padding: '1px 4px'
         });
-        starWrap.append(starLbl, starSlider, starVal);
+        _yearInput.addEventListener('change', () => {
+            _gameYear = parseInt(_yearInput.value) || 0;
+            _yearInput.value = _gameYear;
+        });
+        yearWrap.append(yearLbl, _yearInput);
 
-        // Planet speed slider
-        const planetWrap = document.createElement('span');
-        Object.assign(planetWrap.style, { display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px' });
-        const planetLbl = document.createElement('span');
-        planetLbl.textContent = 'Planet Speed:';
-        Object.assign(planetLbl.style, { color: P.sub, whiteSpace: 'nowrap' });
-        const planetSlider = document.createElement('input');
-        planetSlider.type = 'range'; planetSlider.min = '0'; planetSlider.max = '4';
-        planetSlider.step = '0.1'; planetSlider.value = String(_planetSpeed);
-        Object.assign(planetSlider.style, { width: '80px', cursor: 'pointer' });
-        const planetVal = document.createElement('span');
-        planetVal.textContent = _planetSpeed.toFixed(1) + 'x';
-        Object.assign(planetVal.style, { color: P.accent, minWidth: '30px' });
-        planetSlider.addEventListener('input', () => {
-            _planetSpeed = parseFloat(planetSlider.value);
-            planetVal.textContent = _planetSpeed.toFixed(1) + 'x';
+        // Day input
+        const dayWrap = document.createElement('span');
+        Object.assign(dayWrap.style, { display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px' });
+        const dayLbl = document.createElement('span');
+        dayLbl.textContent = 'Day:';
+        Object.assign(dayLbl.style, { color: P.sub, whiteSpace: 'nowrap' });
+        _dayInput = document.createElement('input');
+        _dayInput.type = 'number'; _dayInput.value = '1'; _dayInput.min = '1'; _dayInput.max = '365'; _dayInput.step = '1';
+        Object.assign(_dayInput.style, {
+            width: '52px', background: 'transparent', textAlign: 'center',
+            border: `1px solid ${P.badge}`, color: P.accent,
+            fontFamily: 'inherit', fontSize: '11px', padding: '1px 4px'
         });
-        planetWrap.append(planetLbl, planetSlider, planetVal);
+        _dayInput.addEventListener('change', () => {
+            const d = parseInt(_dayInput.value) || 1;
+            _gameDay = Math.min(365, Math.max(1, d));
+            _dayInput.value = Math.floor(_gameDay);
+        });
+        dayWrap.append(dayLbl, _dayInput);
 
-        // Moon speed slider
-        const moonWrap = document.createElement('span');
-        Object.assign(moonWrap.style, { display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px' });
-        const moonLbl = document.createElement('span');
-        moonLbl.textContent = 'Moon Speed:';
-        Object.assign(moonLbl.style, { color: P.sub, whiteSpace: 'nowrap' });
-        const moonSlider = document.createElement('input');
-        moonSlider.type = 'range'; moonSlider.min = '0'; moonSlider.max = '4';
-        moonSlider.step = '0.1'; moonSlider.value = String(_moonSpeed);
-        Object.assign(moonSlider.style, { width: '80px', cursor: 'pointer' });
-        const moonVal = document.createElement('span');
-        moonVal.textContent = _moonSpeed.toFixed(1) + 'x';
-        Object.assign(moonVal.style, { color: P.accent, minWidth: '30px' });
-        moonSlider.addEventListener('input', () => {
-            _moonSpeed = parseFloat(moonSlider.value);
-            moonVal.textContent = _moonSpeed.toFixed(1) + 'x';
+        // Single speed slider — logarithmic scale 0.1–365 d/s
+        // Slider pos 0–100 maps via: speed = 0.1 * 3650^(pos/100)
+        const _sliderToSpeed = v => 0.1 * Math.pow(3650, v / 100);
+        const _speedToSlider = s => Math.log(s / 0.1) / Math.log(3650) * 100;
+        const _fmtSpeed = s => s < 1 ? s.toFixed(2) + 'd/s' : s < 10 ? s.toFixed(1) + 'd/s' : Math.round(s) + 'd/s';
+
+        const speedWrap = document.createElement('span');
+        Object.assign(speedWrap.style, { display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px' });
+        const speedLbl = document.createElement('span');
+        speedLbl.textContent = 'Speed:';
+        Object.assign(speedLbl.style, { color: P.sub, whiteSpace: 'nowrap' });
+        const speedSlider = document.createElement('input');
+        speedSlider.type = 'range'; speedSlider.min = '0'; speedSlider.max = '100';
+        speedSlider.step = '1'; speedSlider.value = String(Math.round(_speedToSlider(_speedDaysPerSec)));
+        Object.assign(speedSlider.style, { width: '90px', cursor: 'pointer' });
+        const speedVal = document.createElement('span');
+        speedVal.textContent = _fmtSpeed(_speedDaysPerSec);
+        Object.assign(speedVal.style, { color: P.accent, minWidth: '48px' });
+        speedSlider.addEventListener('input', () => {
+            _speedDaysPerSec = _sliderToSpeed(parseFloat(speedSlider.value));
+            speedVal.textContent = _fmtSpeed(_speedDaysPerSec);
         });
-        moonWrap.append(moonLbl, moonSlider, moonVal);
+        speedWrap.append(speedLbl, speedSlider, speedVal);
 
         // Linear scale toggle
         const linearWrap = document.createElement('label');
@@ -699,6 +904,15 @@ const SystemViewer = (() => {
         });
         orbitWrap.append(orbitLbl, orbitSlider);
 
+        _pauseBtn = document.createElement('button');
+        _pauseBtn.textContent = '⏸';
+        Object.assign(_pauseBtn.style, {
+            background: 'transparent', border: `1px solid ${P.badge}`,
+            color: P.accent, padding: '3px 10px', cursor: 'pointer',
+            fontFamily: 'inherit', fontSize: '13px'
+        });
+        _pauseBtn.addEventListener('click', _togglePause);
+
         const closeBtn = document.createElement('button');
         closeBtn.textContent = '✕';
         Object.assign(closeBtn.style, {
@@ -708,7 +922,7 @@ const SystemViewer = (() => {
         });
         closeBtn.addEventListener('click', close);
 
-        header.append(title, editionBadge, sub, hint, starWrap, planetWrap, moonWrap, linearWrap, orbitWrap, closeBtn);
+        header.append(title, editionBadge, sub, hint, yearWrap, dayWrap, speedWrap, linearWrap, orbitWrap, _pauseBtn, closeBtn);
         _overlay.appendChild(header);
 
         _orrCanvas = document.createElement('canvas');
@@ -753,7 +967,16 @@ const SystemViewer = (() => {
     function _redraw() { /* animation loop redraws every frame */ }
 
     function _startLoop() {
-        function tick() {
+        _lastFrameTime = performance.now();
+        function tick(now) {
+            if (!_paused) {
+                const deltaDay = ((now - _lastFrameTime) / 1000) * _speedDaysPerSec;
+                _gameDay += deltaDay;
+                while (_gameDay > 365) { _gameDay -= 365; _gameYear++; }
+                while (_gameDay < 1)   { _gameDay += 365; _gameYear--; }
+                _updateDateDisplay();
+            }
+            _lastFrameTime = now;
             _drawOrrery();
             _animFrameId = requestAnimationFrame(tick);
         }
@@ -794,20 +1017,20 @@ const SystemViewer = (() => {
         const starPos    = new Map();
         starPos.set(0, { cx: originX, cy: originY });
 
-        const elapsed = _startTime > 0 ? (performance.now() - _startTime) / 1000 : 0;
+        // Elapsed in-game years drives all orbital angles
+        const elapsed_years = _gameYear + (_gameDay - 1) / 365.25;
 
-        // Companion star positions — animated along their orbit rings
-        const STAR_SPEED_BASE  = 0.04;
-        const effectiveSSspeed = STAR_SPEED_BASE * _starSpeed;
-        const VISUAL_YEAR_SECS_S = effectiveSSspeed > 0 ? 2 * Math.PI / effectiveSSspeed : Infinity;
+        // Build a stable world→index map for epoch hashing
+        const worldIdxMap = new Map(worlds.map((w, i) => [w, i]));
+
+        // Companion star positions — physical Kepler periods
         companions.forEach((s, i) => {
-            const compAU   = _starCompanionAU(s);
-            const dist     = Math.max(_linearScale ? 30 : 90, _scaleR(compAU, maxAU, scaledMaxR));
-            const au       = Math.max(compAU, 0.05);
-            const angVel   = s.periodYears
-                ? (2 * Math.PI / s.periodYears) / VISUAL_YEAR_SECS_S
-                : effectiveSSspeed / Math.pow(au, 1.5);
-            const angle    = i * GOLDEN - Math.PI / 2 + angVel * elapsed;
+            const compAU    = _starCompanionAU(s);
+            const dist      = Math.max(_linearScale ? 30 : 90, _scaleR(compAU, maxAU, scaledMaxR));
+            const parentMass = (stars[s.parentStarIdx ?? 0] || {}).mass || 1;
+            const period    = s.periodYears || _keplerYears(Math.max(compAU, 0.05), parentMass);
+            const epoch     = _hashEpoch(_hexId + ':star:' + (i + 1));
+            const angle     = epoch + (2 * Math.PI / period) * elapsed_years;
             const parentPos = starPos.get(s.parentStarIdx ?? 0) || { cx: originX, cy: originY };
             starPos.set(i + 1, {
                 cx: parentPos.cx + dist * Math.cos(angle),
@@ -846,9 +1069,10 @@ const SystemViewer = (() => {
                 w => w.orbitType === 'S-Type' && w.parentStarIdx === sIdx
             );
             if (sWorlds.length > 0) {
-                const subMaxAU = sWorlds.reduce((m, w) => Math.max(m, w.au || 0), 0.01) * 1.2;
-                const subMaxR  = orbitR * 0.28;
-                _drawWorldSet(ctx, sWorlds, pos.cx, pos.cy, subMaxAU, subMaxR, elapsed);
+                const subMaxAU    = sWorlds.reduce((m, w) => Math.max(m, w.au || 0), 0.01) * 1.2;
+                const subMaxR     = orbitR * 0.28;
+                const compStarMass = ((stars[sIdx] || {}).mass) || 1;
+                _drawWorldSet(ctx, sWorlds, pos.cx, pos.cy, subMaxAU, subMaxR, elapsed_years, compStarMass, worldIdxMap);
             }
         });
 
@@ -858,7 +1082,8 @@ const SystemViewer = (() => {
             (w.orbitType === 'S-Type' && (w.parentStarIdx === 0 || w.parentStarIdx === undefined))
         );
         if (primaryWorlds.length > 0) {
-            _drawWorldSet(ctx, primaryWorlds, originX, originY, maxAU, scaledMaxR, elapsed);
+            const primaryStarMass = ((stars[0] || {}).mass) || 1;
+            _drawWorldSet(ctx, primaryWorlds, originX, originY, maxAU, scaledMaxR, elapsed_years, primaryStarMass, worldIdxMap);
         }
 
         // Stars — topmost layer
@@ -883,23 +1108,19 @@ const SystemViewer = (() => {
         return false;
     }
 
-    function _drawWorldSet(ctx, worldList, cx, cy, maxAU, maxPx, elapsed = 0) {
+    function _drawWorldSet(ctx, worldList, cx, cy, maxAU, maxPx, elapsed_years, starMass, worldIdxMap) {
         const isBelt = w => w.type === 'Planetoid Belt' || _isMainworldBelt(w);
         const belts  = worldList.filter(isBelt);
         const bodies = worldList.filter(w => !isBelt(w));
 
-        const effectivePSpeed   = PLANET_SPEED_BASE * _planetSpeed;
-        const VISUAL_YEAR_SECS  = effectivePSpeed > 0 ? 2 * Math.PI / effectivePSpeed : Infinity;
-
         belts.forEach(w => {
             const r      = _scaleR(w.au || 0, maxAU, maxPx);
             const isMW   = _isMainworldBelt(w);
-            const au     = Math.max(w.au || 0.1, 0.05);
-            const angVel = w.periodYears
-                ? (2 * Math.PI / w.periodYears) / VISUAL_YEAR_SECS
-                : effectivePSpeed / Math.pow(au, 1.5);
-            const dashOffset = -(angVel * elapsed * r);
-            _drawBeltRing(ctx, cx, cy, r, isMW, dashOffset);
+            const wIdx   = worldIdxMap.get(w) ?? 0;
+            const period = _worldPeriodYears(w, starMass);
+            const epoch  = _hashEpoch(_hexId + ':world:' + wIdx);
+            const angle  = epoch + (2 * Math.PI / period) * elapsed_years;
+            _drawBeltRing(ctx, cx, cy, r, isMW, -(angle * r));
             if (isMW && w.name) {
                 ctx.save();
                 ctx.fillStyle = _lightMode ? '#0d6b64' : '#66fcf1';
@@ -925,16 +1146,15 @@ const SystemViewer = (() => {
             ctx.stroke();
         });
 
-        bodies.forEach((w, idx) => {
+        bodies.forEach(w => {
             const r      = _scaleR(w.au || 0, maxAU, maxPx);
-            const au     = Math.max(w.au || 0.1, 0.05);
-            const angVel = w.periodYears
-                ? (2 * Math.PI / w.periodYears) / VISUAL_YEAR_SECS
-                : effectivePSpeed / Math.pow(au, 1.5);
-            const angle  = idx * GOLDEN - Math.PI / 2 + angVel * elapsed;
+            const wIdx   = worldIdxMap.get(w) ?? 0;
+            const period = _worldPeriodYears(w, starMass);
+            const epoch  = _hashEpoch(_hexId + ':world:' + wIdx);
+            const angle  = epoch + (2 * Math.PI / period) * elapsed_years;
             const px     = cx + r * Math.cos(angle);
             const py     = cy + r * Math.sin(angle);
-            _drawWorld(ctx, w, px, py, elapsed);
+            _drawWorld(ctx, w, px, py, elapsed_years, wIdx);
         });
     }
 
@@ -1009,7 +1229,7 @@ const SystemViewer = (() => {
         ctx.restore();
     }
 
-    function _drawWorld(ctx, w, px, py, elapsed = 0) {
+    function _drawWorld(ctx, w, px, py, elapsed_years, wIdx) {
         const r     = _worldBodyRadius(w);
         const color = _worldColor(w);
 
@@ -1026,17 +1246,12 @@ const SystemViewer = (() => {
         ctx.arc(px, py, r, 0, Math.PI * 2);
         ctx.fill();
 
-        const effectiveMSpeed  = 12.5 * _moonSpeed;
-        const VISUAL_HOUR_SECS = _moonSpeed > 0
-            ? (2 * Math.PI) / (PLANET_SPEED_BASE * 8760 * _moonSpeed) : Infinity;
         const moons = (w.moons || []).filter(m => m.type !== 'Empty');
         moons.forEach((m, mi) => {
-            const pd          = Math.max(m.pd || (mi + 1) * 8, 1);
-            const moonAngVel  = m.periodHrs
-                ? (2 * Math.PI / m.periodHrs) / VISUAL_HOUR_SECS
-                : effectiveMSpeed / Math.pow(pd, 1.5);
-            const mAngle      = Math.PI / 6 + (mi / Math.max(moons.length, 1)) * Math.PI * 2 + moonAngVel * elapsed;
-            const mDist       = r + 10 + mi * 6;
+            const period = _moonPeriodYears(m, w);
+            const mAngle = _hashEpoch(_hexId + ':moon:' + wIdx + ':' + mi)
+                         + (2 * Math.PI / period) * elapsed_years;
+            const mDist   = r + 10 + mi * 6;
             const mx          = px + mDist * Math.cos(mAngle);
             const my          = py + mDist * Math.sin(mAngle);
             const isMainworld = m.type === 'Mainworld';
@@ -1199,8 +1414,10 @@ const SystemViewer = (() => {
             if (s.diam)       html += `<div>Diameter: ${s.diam.toFixed(3)} D☉</div>`;
             if (s.lum)        html += `<div>Luminosity: ${s.lum.toFixed(4)} L☉</div>`;
             if (s.separation) html += `<div>Separation: ${s.separation}</div>`;
-            const compAU = _starCompanionAU(s);
-            if (compAU)       html += `<div>Distance: ${compAU.toFixed(3)} AU</div>`;
+            if (s.role !== 'Primary') {
+                const compAU = _starCompanionAU(s);
+                if (compAU)   html += `<div>Distance: ${compAU.toFixed(3)} AU</div>`;
+            }
 
         } else if (hit.kind === 'world') {
             const w = body;
@@ -1280,13 +1497,16 @@ const SystemViewer = (() => {
 
     // ── ESC ───────────────────────────────────────────────────────────────────
     document.addEventListener('keydown', e => {
-        if (e.key === 'Escape' && isOpen()) close();
+        if (e.key === 'Escape' && isOpen() &&
+            !(window.SurfaceViewer  && window.SurfaceViewer.isOpen()) &&
+            !(window.ApproachViewer && window.ApproachViewer.isOpen())) close();
     });
 
     function normalizeSystem(state) {
         const found = _detectSystem(state);
         if (!found) return null;
-        if      (found.edition === 'MgT2E') return _normalizeMgT2E(found.raw);
+        if      (found.edition === 'AoW')   return _normalizeAoW(found.raw);
+        else if (found.edition === 'MgT2E') return _normalizeMgT2E(found.raw);
         else if (found.edition === 'CT')    return _normalizeCT(found.raw);
         else if (found.edition === 'T5')    return _normalizeT5(found.raw);
         else                                return _normalizeRTT(found.raw);
@@ -1336,7 +1556,8 @@ const SystemViewer = (() => {
         if (!found) return null;
 
         let normalised;
-        if      (found.edition === 'MgT2E') normalised = _normalizeMgT2E(found.raw);
+        if      (found.edition === 'AoW')   normalised = _normalizeAoW(found.raw);
+        else if (found.edition === 'MgT2E') normalised = _normalizeMgT2E(found.raw);
         else if (found.edition === 'CT')    normalised = _normalizeCT(found.raw);
         else if (found.edition === 'T5')    normalised = _normalizeT5(found.raw);
         else                                normalised = _normalizeRTT(found.raw);
@@ -1347,7 +1568,9 @@ const SystemViewer = (() => {
             canvasW:      _canvasW,
             canvasH:      _canvasH,
             sys:          _sys,
-            startTime:    _startTime,
+            hexId:        _hexId,
+            gameYear:     _gameYear,
+            gameDay:      _gameDay,
             viewZoom:     _viewZoom,
             viewOffX:     _viewOffX,
             viewOffY:     _viewOffY,
@@ -1366,7 +1589,9 @@ const SystemViewer = (() => {
         _canvasW      = width;
         _canvasH      = height;
         _sys          = normalised;
-        _startTime    = 0;      // elapsed = 0 → planets at deterministic T=0 positions
+        _hexId        = saved.hexId || 'snapshot';
+        _gameYear     = 0;   // T=0 → deterministic epoch positions
+        _gameDay      = 1;
         _viewZoom     = _autoFitZoom(normalised, width, height);
         _viewOffX     = 0;
         _viewOffY     = 0;
@@ -1382,7 +1607,9 @@ const SystemViewer = (() => {
         _canvasW      = saved.canvasW;
         _canvasH      = saved.canvasH;
         _sys          = saved.sys;
-        _startTime    = saved.startTime;
+        _hexId        = saved.hexId;
+        _gameYear     = saved.gameYear;
+        _gameDay      = saved.gameDay;
         _viewZoom     = saved.viewZoom;
         _viewOffX     = saved.viewOffX;
         _viewOffY     = saved.viewOffY;

@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.14.0";
-const APP_BANNER = "v0.14.0: New: Mongoose Optional Realistic Star Generation";
+const APP_VERSION = "v0.15.0";
+const APP_BANNER = "v0.15.0: v0.15.0";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -141,7 +141,6 @@ function setRandomSeed(seedString) {
 function reseedForHex(hexId) {
     const hexSeed = hashString(masterSeed + "-" + (hexId || "0000"));
     rng = mulberry32(hexSeed);
-    // console.log(`RNG re-seeded for Hex ${hexId} (Hash: ${hexSeed})`);
 }
 
 function clampUWP(val, min, max) {

@@ -1,3 +1,6 @@
+### [v0.15.1] - In Progress
+1. **World Details:** Fixed bug that did not propagate names to mainworld moons in some systems
+
 ### [v0.15.0] - 2026-06-13
 1. **AoW Engine:** Added 'Architect of Worlds' stellar and planetary generation option. Generation is matched with Mongoose Socioeconomic expansion.
 2. **System Viewer:**  System Viewer now includes pause/play button, and the option of entering a date.  Default start date can be set in Settings.

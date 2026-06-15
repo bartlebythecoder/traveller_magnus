@@ -2150,6 +2150,7 @@ function _propagateSystemName(stateObj, oldName, newName) {
         if (!n) return n;
         if (n === oldName) return newName;
         if (n.startsWith(oldName + ' ')) return newName + n.slice(oldName.length);
+        if (n.startsWith(oldName + '-')) return newName + n.slice(oldName.length);
         return n;
     }
 

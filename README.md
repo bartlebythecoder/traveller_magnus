@@ -1,4 +1,4 @@
-# As Above, So Below (v0.15.1)
+# As Above, So Below (v0.15.2)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -62,7 +62,13 @@ Want to replace any of these sectors with your own file?
 ---
 ## 📜 Changelog
 
-### [v0.15.1] - In Progress
+### [v0.15.2] - 2026-06-15
+1. **System Viewer:** Fixed bug that incorrectly showed some worlds in same orbit as companion stars
+2. **All Engines:** Harmonized system naming conventions across engines
+3. **Context Menu:** Redesigned Right-click context menu
+4. **Import Traveller World Systems:** Added feature to import Traveller World System JSON
+
+### [v0.15.1] - 2026-06-15
 1. **World Details:** Fixed bug that did not propagate names to mainworld moons in some systems
 
 ### [v0.15.0] - 2026-06-13
@@ -75,30 +81,6 @@ Want to replace any of these sectors with your own file?
 1. **Filter:** Added ability to filter stellar information
 2. **Mongoose:** Added Class III, Class IV, Class VI and Giants to bottom up generation (Special table)
 3. **Mongoose:** Added Setting to use Optional Variant adding the realism of more colder M-type (red dwarf) systems
-
-### [v0.13.3] - 2026-06-01
-1. **JSON Save:** JSON saves now include all settings (display toggles, planet rendering, generation options)
-2. **Imperium Import:** Imperium imports now use full sector names (matching Universe Import behaviour)
-3. **Settings:** The "World Image Generation" sub-header and both sliders (Continental Definition, Coastline Complexity) are now at the bottom of the Visual Options section and removed from Generation. 
-4. **BTS Routes:** Fixed bug that sometimes hid/unhid parts of other routes
-5. **Maps:** Diamond Projection hex overlay updated to better match T5 standards
-
-### [v0.13.2] - 2026-05-30
-1. **World Image:** Added continent generator to make worlds look more realistic, including Continental Definition and Coastline Complexity sliders in settings.
-2. **Diamond Projection Map:**  Updated diamond projection map to match T5 standard
-
-### [v0.13.1] - 2026-05-29
-1. **Wiki Export:** Wiki entries now all link back to the system and subsector entries
-2. **Wiki Export:** Optional folder structure so the subsector overview entry sits one directory above the detailed entries
-
-### [v0.13.0] - 2026-05-28
-1. **Exports:** Added markdown file exports (Obsidian Export)
-2. **CT Engine/Filter Menu:** Adjusted filter menus to treat size of S and R as between 0 and 1
-3. **Refactor:** Code refactor, harmonizing to_eHex and from_eHex functions
-4. **RTT Engine:** Fixed bug that was not pulling TL from Settings
-5. **System Viewer:** Reduced overall speeds on orbits
-6. **System Viewer:** Added stellar body orbit speed slider
-7. **System Viewer:** Removed dependencies between sliders
 
 
 ---

@@ -87,6 +87,7 @@ function initializeInput() {
     setupHelpToggle();
     setupHexEditor();
     setupSaveLoad();
+    setupTWImport();
 
     setupSectorPicker();
     setupObsidianExport();

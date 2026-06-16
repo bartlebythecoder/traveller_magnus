@@ -102,6 +102,11 @@ body {
     right: 100%;
 }
 
+.context-menu-item.has-submenu.flip-up > .submenu {
+    top: auto;
+    bottom: 0;
+}
+
 .submenu .context-menu-item {
     width: 100%;
 }

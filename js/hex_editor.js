@@ -1050,6 +1050,21 @@ function populateEditorAccordions(stateObj) {
 
                         html += buildJourneyTimesUI(w, sys.stars[starIdx], stateObj.isStellarMaskingActive);
 
+                        if (w.type !== 'Gas Giant' && w.type !== 'Planetoid Belt' && w.size && w.size !== 0 && w.size !== 'R' && w.size !== 'S') {
+                            if (_isMain) {
+                                html += `<button data-action="open-mainworld-ph" style="margin-top:6px;width:100%;padding:4px 8px;background:transparent;border:1px solid #45a29e88;color:#66fcf1;cursor:pointer;font-family:'Share Tech Mono','Courier New',monospace;font-size:10px;letter-spacing:0.06em;border-radius:3px;">◎ &nbsp;VIEW WORLD IMAGE</button>`;
+                            } else {
+                                const _ctAtm   = Number(w.atm ?? 0).toString(16);
+                                const _ctHydro = (w.hydro ?? 0) * 10;
+                                const _ctTempK = w.temperature ?? '';
+                                const _ctTemp  = '';
+                                const _ctName  = (w.name || '').replace(/"/g, '&quot;');
+                                const _ctSize  = Number(w.size ?? 0).toString(16);
+                                const _ctUwp   = (w.uwpSecondary || '').replace(/"/g, '&quot;');
+                                html += `<button data-action="open-ph" data-ph-atm="${_ctAtm}" data-ph-hydro="${_ctHydro}" data-ph-temp="${_ctTemp}" data-ph-temp-k="${_ctTempK}" data-ph-name="${_ctName}" data-ph-size="${_ctSize}" data-ph-uwp="${_ctUwp}" style="margin-top:6px;width:100%;padding:4px 8px;background:transparent;border:1px solid #45a29e88;color:#66fcf1;cursor:pointer;font-family:'Share Tech Mono','Courier New',monospace;font-size:10px;letter-spacing:0.06em;border-radius:3px;">◎ &nbsp;VIEW WORLD IMAGE</button>`;
+                            }
+                        }
+
                         if (w.satellites && w.satellites.length > 0) {
                             const sortedSats = [...w.satellites].sort((a, b) => (a.pd || 0) - (b.pd || 0));
 
@@ -1102,6 +1117,21 @@ function populateEditorAccordions(stateObj) {
                                 }
 
                                 html += buildJourneyTimesUI(sat, sys.stars[starIdx], stateObj.isStellarMaskingActive, (w.au || w.distAU));
+
+                                if (sat.size && sat.size !== 0 && sat.size !== 'R' && sat.size !== 'S') {
+                                    if (_isSatMain) {
+                                        html += `<button data-action="open-mainworld-ph" style="margin-top:6px;width:100%;padding:4px 8px;background:transparent;border:1px solid #45a29e88;color:#66fcf1;cursor:pointer;font-family:'Share Tech Mono','Courier New',monospace;font-size:10px;letter-spacing:0.06em;border-radius:3px;">◎ &nbsp;VIEW WORLD IMAGE</button>`;
+                                    } else {
+                                        const _ctSatAtm   = Number(sat.atm ?? 0).toString(16);
+                                        const _ctSatHydro = (sat.hydro ?? 0) * 10;
+                                        const _ctSatTempK = sat.temperature ?? '';
+                                        const _ctSatTemp  = '';
+                                        const _ctSatName  = (sat.name || '').replace(/"/g, '&quot;');
+                                        const _ctSatSize  = Number(sat.size ?? 0).toString(16);
+                                        const _ctSatUwp   = (sat.uwpSecondary || '').replace(/"/g, '&quot;');
+                                        html += `<button data-action="open-ph" data-ph-atm="${_ctSatAtm}" data-ph-hydro="${_ctSatHydro}" data-ph-temp="${_ctSatTemp}" data-ph-temp-k="${_ctSatTempK}" data-ph-name="${_ctSatName}" data-ph-size="${_ctSatSize}" data-ph-uwp="${_ctSatUwp}" style="margin-top:6px;width:100%;padding:4px 8px;background:transparent;border:1px solid #45a29e88;color:#66fcf1;cursor:pointer;font-family:'Share Tech Mono','Courier New',monospace;font-size:10px;letter-spacing:0.06em;border-radius:3px;">◎ &nbsp;VIEW WORLD IMAGE</button>`;
+                                    }
+                                }
 
                                 html += `</div></details>`;
                             });
@@ -1287,6 +1317,21 @@ function populateEditorAccordions(stateObj) {
 
                             html += buildJourneyTimesUI(w, star, stateObj.isStellarMaskingActive);
 
+                            if (!isGG && !isBelt && w.size && w.size !== 0) {
+                                if (isMainworld) {
+                                    html += `<button data-action="open-mainworld-ph" style="margin-top:6px;width:100%;padding:4px 8px;background:transparent;border:1px solid #45a29e88;color:#66fcf1;cursor:pointer;font-family:'Share Tech Mono','Courier New',monospace;font-size:10px;letter-spacing:0.06em;border-radius:3px;">◎ &nbsp;VIEW WORLD IMAGE</button>`;
+                                } else {
+                                    const _t5Atm   = Number(w.atm ?? 0).toString(16);
+                                    const _t5Hydro = w.hydroPercent ?? ((w.hydro ?? 0) * 10);
+                                    const _t5TempK = w.meanTempK ?? '';
+                                    const _t5Temp  = w.tempBand || '';
+                                    const _t5Name  = (w.name || '').replace(/"/g, '&quot;');
+                                    const _t5Size  = Number(w.size ?? 0).toString(16);
+                                    const _t5Uwp   = (w.uwpSecondary || w.uwp || '').replace(/"/g, '&quot;');
+                                    html += `<button data-action="open-ph" data-ph-atm="${_t5Atm}" data-ph-hydro="${_t5Hydro}" data-ph-temp="${_t5Temp}" data-ph-temp-k="${_t5TempK}" data-ph-name="${_t5Name}" data-ph-size="${_t5Size}" data-ph-uwp="${_t5Uwp}" style="margin-top:6px;width:100%;padding:4px 8px;background:transparent;border:1px solid #45a29e88;color:#66fcf1;cursor:pointer;font-family:'Share Tech Mono','Courier New',monospace;font-size:10px;letter-spacing:0.06em;border-radius:3px;">◎ &nbsp;VIEW WORLD IMAGE</button>`;
+                                }
+                            }
+
                             if (w.satellites && w.satellites.length > 0) {
                                 w.satellites.forEach((sat, satIdx) => {
                                     const isSatMW = sat.type === 'Mainworld';
@@ -1346,6 +1391,21 @@ function populateEditorAccordions(stateObj) {
                                     html += `</div>`;
 
                                     html += buildJourneyTimesUI(sat, star, stateObj.isStellarMaskingActive, o.distAU);
+
+                                    if (!isSatGG && !isSatBelt && sat.size && sat.size !== 0) {
+                                        if (isSatMW) {
+                                            html += `<button data-action="open-mainworld-ph" style="margin-top:6px;width:100%;padding:4px 8px;background:transparent;border:1px solid #45a29e88;color:#66fcf1;cursor:pointer;font-family:'Share Tech Mono','Courier New',monospace;font-size:10px;letter-spacing:0.06em;border-radius:3px;">◎ &nbsp;VIEW WORLD IMAGE</button>`;
+                                        } else {
+                                            const _t5SatAtm   = Number(sat.atm ?? 0).toString(16);
+                                            const _t5SatHydro = sat.hydroPercent ?? ((sat.hydro ?? 0) * 10);
+                                            const _t5SatTempK = sat.meanTempK ?? '';
+                                            const _t5SatTemp  = sat.tempBand || '';
+                                            const _t5SatName  = (sat.name || '').replace(/"/g, '&quot;');
+                                            const _t5SatSize  = Number(sat.size ?? 0).toString(16);
+                                            const _t5SatUwp   = (sat.uwpSecondary || sat.uwp || '').replace(/"/g, '&quot;');
+                                            html += `<button data-action="open-ph" data-ph-atm="${_t5SatAtm}" data-ph-hydro="${_t5SatHydro}" data-ph-temp="${_t5SatTemp}" data-ph-temp-k="${_t5SatTempK}" data-ph-name="${_t5SatName}" data-ph-size="${_t5SatSize}" data-ph-uwp="${_t5SatUwp}" style="margin-top:6px;width:100%;padding:4px 8px;background:transparent;border:1px solid #45a29e88;color:#66fcf1;cursor:pointer;font-family:'Share Tech Mono','Courier New',monospace;font-size:10px;letter-spacing:0.06em;border-radius:3px;">◎ &nbsp;VIEW WORLD IMAGE</button>`;
+                                        }
+                                    }
 
                                     html += `</div></details>`;
                                 });

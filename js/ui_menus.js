@@ -1187,13 +1187,14 @@ function _getRouteExportValue(fieldId, hexId, state, data) {
                 return state.t5Data.stars.map(s => s.name).join(' ');
             if (state.t5Data && state.t5Data.homestar && state.t5Data.homestar !== 'Unknown')
                 return state.t5Data.homestar;
-            const sys = state.t5System || state.mgtSystem || state.ctSystem || state.rttSystem;
+            const sys = state.t5System || state.mgtSystem || state.ctSystem || state.rttSystem || state.aowSystem;
             if (sys && sys.stars) return sys.stars.map(s => s.classification || s.name || '?').join(' ');
             return '-';
         }
         case 'worlds': {
             if (state.t5System && state.t5System.totalWorlds) return String(state.t5System.totalWorlds);
             if (state.mgtSystem && state.mgtSystem.worlds)    return String(state.mgtSystem.worlds.length);
+            if (state.aowSystem && state.aowSystem.worlds)    return String(state.aowSystem.worlds.length);
             if (state.ctSystem && state.ctSystem.orbits) {
                 let w = state.ctSystem.orbits.filter(o => o.contents).length;
                 if (state.ctSystem.capturedPlanets) w += state.ctSystem.capturedPlanets.length;

@@ -125,7 +125,7 @@
      * Finds the closest available orbital slot in a star's private subsystem.
      * Handles Preclusion (Surface Orbit) and Duplication (Occupied Slots).
      */
-    function findAvailableOrbit(star, target) {
+    function findAvailableOrbit(star, target, reservedOrbits = new Set()) {
         const specs = T5_Data.T5_PRECLUDED_ORBITS;
         let surfaceOrbit = -1;
 
@@ -175,7 +175,7 @@
         // Safety check: ensure star.orbits exists
         if (!star || !star.orbits) return -1;
 
-        const check = (o) => (o >= 0 && o < 20 && o > preclusionLimit && star.orbits[o] && !star.orbits[o].contents);
+        const check = (o) => (o >= 0 && o < 20 && o > preclusionLimit && star.orbits[o] && !star.orbits[o].contents && !reservedOrbits.has(o));
 
         if (check(target)) return target;
 
@@ -250,6 +250,24 @@
         });
 
         const primary = sys.stars[0];
+
+        // Set distAU on companion stars so the system viewer positions them correctly,
+        // and build the reserved-orbit set so findAvailableOrbit won't place planets there.
+        sys.stars.slice(1).forEach(star => {
+            const tbl  = T5_Data.ORBIT_AU;
+            const idx  = Math.floor(star.orbitID);
+            const frac = star.orbitID - idx;
+            const lo   = tbl[Math.min(idx, tbl.length - 1)] || 0;
+            const hi   = idx < tbl.length - 1 ? tbl[idx + 1] : lo;
+            star.distAU = lo + frac * (hi - lo);
+        });
+
+        const companionOrbitIndices = new Set(
+            sys.stars.slice(1)
+                .map(s => Math.round(s.orbitID))
+                .filter(i => i >= 0 && i < 20)
+        );
+
         // PHASE 2 (PRE-REQUISITE): System Inventory (Moved up for Continuation Method)
         let ggCountTotal = Math.max(0, Math.floor(_roll2D() / 2) - 2);
         let beltCountTotal = Math.max(0, _roll1D() - 3);
@@ -319,12 +337,12 @@
             tResult('Mainworld Status', 'LUNAR SELECTION', 'T5 1.3: Orbit Allocation');
             _log(`[MAINWORLD LOG] Hex ${mainworldBase.hexId || 'null'}: T5 Mainworld is a MOON attached to a ${parent.type} (Sub-Orbit ${sys.mainworld.orbitLetter})`);
 
-            mwTarget = findAvailableOrbit(primary, mwTarget);
+            mwTarget = findAvailableOrbit(primary, mwTarget, companionOrbitIndices);
             if (mwTarget >= 0) primary.orbits[mwTarget].contents = parent;
         } else {
             // Mainworld as standalone planet (or belt)
             if (sys.mainworld.size === 0) sys.mainworld.worldType = 'Belt';
-            mwTarget = findAvailableOrbit(primary, mwTarget);
+            mwTarget = findAvailableOrbit(primary, mwTarget, companionOrbitIndices);
             if (mwTarget >= 0) primary.orbits[mwTarget].contents = sys.mainworld;
         }
 
@@ -346,7 +364,10 @@
                 const maxOrbitLimit = (hostStar === primary) ? 19 : Math.max(0, hostStar.orbitID - 3);
 
                 const targetOrbit = placementLogic(hostHZ, i === count - 1);
-                const resolved = findAvailableOrbit(hostStar, targetOrbit);
+                const resolved = findAvailableOrbit(
+                    hostStar, targetOrbit,
+                    hostStar === primary ? companionOrbitIndices : new Set()
+                );
 
                 if (resolved >= 0 && resolved <= maxOrbitLimit) {
                     const body = createBodyPlaceholder(category);

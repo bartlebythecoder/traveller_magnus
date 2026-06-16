@@ -1,4 +1,10 @@
-### [v0.15.1] - In Progress
+### [v0.15.2] - 2026-06-15
+1. **System Viewer:** Fixed bug that incorrectly showed some worlds in same orbit as companion stars
+2. **All Engines:** Harmonized system naming conventions across engines
+3. **Context Menu:** Redesigned Right-click context menu
+4. **Import Traveller World Systems:** Added feature to import Traveller World System JSON
+
+### [v0.15.1] - 2026-06-15
 1. **World Details:** Fixed bug that did not propagate names to mainworld moons in some systems
 
 ### [v0.15.0] - 2026-06-13

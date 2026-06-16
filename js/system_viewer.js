@@ -34,7 +34,7 @@ const SystemViewer = (() => {
     let _dragLast = null;
 
     let _linearScale = false;
-    let _orbitOpacity = 0;
+    let _orbitOpacity = 0.25;
 
     let _animFrameId   = null;
     let _lastFrameTime = 0;
@@ -1026,7 +1026,8 @@ const SystemViewer = (() => {
         // Companion star positions — physical Kepler periods
         companions.forEach((s, i) => {
             const compAU    = _starCompanionAU(s);
-            const dist      = Math.max(_linearScale ? 30 : 90, _scaleR(compAU, maxAU, scaledMaxR));
+            const minPx     = (s.separation === 'Companion') ? 130 : 90;
+            const dist      = Math.max(_linearScale ? 30 : minPx, _scaleR(compAU, maxAU, scaledMaxR));
             const parentMass = (stars[s.parentStarIdx ?? 0] || {}).mass || 1;
             const period    = s.periodYears || _keplerYears(Math.max(compAU, 0.05), parentMass);
             const epoch     = _hashEpoch(_hexId + ':star:' + (i + 1));
@@ -1051,7 +1052,8 @@ const SystemViewer = (() => {
             const sIdx      = i + 1;
             const pos       = starPos.get(sIdx);
             const compAU    = _starCompanionAU(s);
-            const orbitR    = Math.max(_linearScale ? 30 : 90, _scaleR(compAU, maxAU, scaledMaxR));
+            const minPx     = (s.separation === 'Companion') ? 130 : 90;
+            const orbitR    = Math.max(_linearScale ? 30 : minPx, _scaleR(compAU, maxAU, scaledMaxR));
             const parentPos = starPos.get(s.parentStarIdx ?? 0) || { cx: originX, cy: originY };
 
             if (_orbitOpacity > 0) {

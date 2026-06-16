@@ -49,6 +49,10 @@ function setupCanvasEvents() {
         const socioDev = document.getElementById('ctx-expand-socio-mgt2e-dev');
         if (socioDev) socioDev.style.display = (window.devView === true) ? 'block' : 'none';
 
+        // Import TW System — only when exactly 1 hex is selected
+        const importTwBtn = document.getElementById('ctx-import-tw-system');
+        if (importTwBtn) importTwBtn.style.display = selectedHexes.size === 1 ? 'block' : 'none';
+
         // Show first to measure dimensions
         contextMenu.classList.add('visible');
 
@@ -79,6 +83,21 @@ function setupCanvasEvents() {
         } else {
             contextMenu.classList.remove('reverse-submenus');
         }
+
+        // Check if each submenu will go off-screen downward; flip up if needed
+        contextMenu.querySelectorAll('.has-submenu').forEach(item => {
+            item.classList.remove('flip-up');
+            item.addEventListener('mouseenter', function onEnter() {
+                const submenu = this.querySelector('.submenu');
+                if (!submenu) return;
+                const rect = submenu.getBoundingClientRect();
+                if (rect.bottom > window.innerHeight) {
+                    this.classList.add('flip-up');
+                } else {
+                    this.classList.remove('flip-up');
+                }
+            }, { once: true });
+        });
     });
 
     // 3. Mouse Down: Start Pan, Paint, or Hex Editor

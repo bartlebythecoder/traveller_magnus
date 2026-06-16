@@ -1379,7 +1379,7 @@ function generateT5TabData(sectorID) {
             } else if (state.t5Data && state.t5Data.homestar && state.t5Data.homestar !== 'Unknown') {
                 stars = state.t5Data.homestar;
             } else {
-                const sys = state.t5System || state.mgtSystem || state.ctSystem || state.rttSystem;
+                const sys = state.t5System || state.mgtSystem || state.ctSystem || state.rttSystem || state.aowSystem;
                 if (sys && sys.stars) {
                     stars = sys.stars.map(s => s.classification || s.name).join(' ');
                 }
@@ -1389,6 +1389,7 @@ function generateT5TabData(sectorID) {
             let w = 1;
             if (state.t5System && state.t5System.totalWorlds) w = state.t5System.totalWorlds;
             else if (state.mgtSystem && state.mgtSystem.worlds) w = state.mgtSystem.worlds.length;
+            else if (state.aowSystem && state.aowSystem.worlds) w = state.aowSystem.worlds.length;
             else if (state.ctSystem && state.ctSystem.orbits) {
                 w = state.ctSystem.orbits.filter(o => o.contents).length;
                 if (state.ctSystem.capturedPlanets) w += state.ctSystem.capturedPlanets.length;
@@ -1412,7 +1413,7 @@ function generateT5TabData(sectorID) {
                 ixVal,
                 exVal,
                 cxVal,
-                "-", // Nobility
+                state.t5Socio?.nobleCodes || state.t5Data?.nobleCodes || "-",
                 w,
                 state.notes || ""
             ];
@@ -2067,5 +2068,86 @@ function setupXmlMetadataImporter() {
         });
 
         }); // openSectorSlotPicker callback
+    });
+}
+
+// ============================================================================
+// TRAVELLER WORLDS SYSTEM IMPORT UI
+// ============================================================================
+
+function setupTWImport() {
+    let _hexId  = null;
+    let _jsonObj = null;
+
+    function openModal() {
+        document.getElementById('context-menu').classList.remove('visible');
+        _hexId = [...selectedHexes][0];
+        if (!_hexId) { showToast('No hex selected.', 2000); return; }
+
+        document.getElementById('tw-import-hexid').textContent = _hexId;
+        document.getElementById('tw-import-file').value = '';
+        _jsonObj = null;
+
+        document.getElementById('tw-import-modal').style.display = 'flex';
+    }
+
+    function doImport() {
+        try {
+            saveHistoryState('Import TW System');
+            TravellerWorldsImporter.importSystem(_jsonObj, _hexId, 'T5');
+            document.getElementById('tw-import-modal').style.display = 'none';
+            if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
+            if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
+            if (window.dbManager) window.dbManager.saveHexes([_hexId]);
+            requestAnimationFrame(draw);
+            showToast(`System imported into hex ${_hexId}.`, 3000);
+        } catch (err) {
+            showToast(`Import failed: ${err.message}`, 5000);
+            console.error('[TW Import]', err);
+        }
+    }
+
+    function hasExistingSystem(hexId) {
+        const s = hexStates.get(hexId);
+        if (!s) return false;
+        return !!(s.t5System || s.mgtSystem || s.t5Data || s.mgt2eData || s.type === 'SYSTEM_PRESENT');
+    }
+
+    document.getElementById('ctx-import-tw-system').addEventListener('click', openModal);
+
+    document.getElementById('tw-import-file').addEventListener('change', function () {
+        const file = this.files[0];
+        if (!file) { _jsonObj = null; return; }
+        readFileAsText(file).then(text => {
+            try {
+                _jsonObj = JSON.parse(text);
+            } catch (e) {
+                showToast('Invalid JSON — could not parse file.', 3000);
+                _jsonObj = null;
+            }
+        });
+    });
+
+    document.getElementById('btn-tw-import-apply').addEventListener('click', () => {
+        if (!_jsonObj) { showToast('Please select a JSON file.', 2500); return; }
+        if (hasExistingSystem(_hexId)) {
+            document.getElementById('tw-import-confirm-hexid').textContent = _hexId;
+            document.getElementById('tw-import-confirm-modal').style.display = 'flex';
+            return;
+        }
+        doImport();
+    });
+
+    document.getElementById('btn-tw-import-cancel').addEventListener('click', () => {
+        document.getElementById('tw-import-modal').style.display = 'none';
+    });
+
+    document.getElementById('btn-tw-import-confirm-yes').addEventListener('click', () => {
+        document.getElementById('tw-import-confirm-modal').style.display = 'none';
+        doImport();
+    });
+
+    document.getElementById('btn-tw-import-confirm-no').addEventListener('click', () => {
+        document.getElementById('tw-import-confirm-modal').style.display = 'none';
     });
 }

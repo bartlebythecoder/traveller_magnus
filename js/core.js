@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.15.1";
-const APP_BANNER = "v0.15.1: Now includes moons in naming propagation";
+const APP_VERSION = "v0.15.2";
+const APP_BANNER = "v0.15.2: New: Import Traveller World data";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -634,6 +634,16 @@ function _toRoman(n) {
     return r;
 }
 
+function _assignMoonNames(moons, parentName) {
+    if (!moons || moons.length === 0) return;
+    let idx = 0;
+    moons.forEach(m => {
+        if (m.isLunarMainworld || m.type === 'Mainworld' || m.isMainworld) return;
+        if (!m.name) m.name = `${parentName}-${String.fromCharCode(97 + idx)}`;
+        idx++;
+    });
+}
+
 function applyMgT2EOrbitalNames(sys) {
     const _mw = (sys.mainworld) ||
                 sys.worlds.find(w => w.type === 'Mainworld' || w.isLunarMainworld) ||
@@ -667,25 +677,12 @@ function applyMgT2EOrbitalNames(sys) {
         let _ordinal = 1;
         group.forEach(w => {
             const _roman = _toRoman(_ordinal++);
-            w.name = `${namePrefix}${_roman}`;
-            if (w.moons && w.moons.length > 0) {
-                w.moons.forEach((m, mi) => {
-                    if (m.type !== 'Mainworld' && !m.isLunarMainworld) {
-                        m.name = `${namePrefix}${_roman}-${String.fromCharCode(97 + mi)}`;
-                    }
-                });
-            }
+            if (!w.name) w.name = `${namePrefix}${_roman}`;
+            _assignMoonNames(w.moons, `${namePrefix}${_roman}`);
         });
     });
 
-    if (_mw && _mw.moons && _mw.moons.length > 0) {
-        _mw.moons.forEach((m, mi) => {
-            if (m.type !== 'Mainworld' && !m.isLunarMainworld) {
-                m.name = `${_sysName}-${String.fromCharCode(97 + mi)}`;
-            }
-        });
-    }
-
+    _assignMoonNames(_mw && _mw.moons, _sysName);
     sys.name = _sysName;
 }
 
@@ -714,18 +711,15 @@ function applyCTOrbitalNames(sys) {
     let _ordinal = 1;
     bodies.forEach(w => {
         const _roman = _toRoman(_ordinal++);
-        w.name = `${_sysName} ${_roman}`;
+        if (!w.name) w.name = `${_sysName} ${_roman}`;
         if (w.satellites && w.satellites.length > 0) {
             // Sort by pd (periapsis distance) to match hex_editor display order
             const sortedSats = [...w.satellites].sort((a, b) => (a.pd || 0) - (b.pd || 0));
-            sortedSats.forEach((m, mi) => {
-                if (m.type !== 'Mainworld') {
-                    m.name = `${_sysName} ${_roman}-${String.fromCharCode(97 + mi)}`;
-                }
-            });
+            _assignMoonNames(sortedSats, `${_sysName} ${_roman}`);
         }
     });
 
+    _assignMoonNames(_mw && _mw.satellites, _sysName);
     sys.name = _sysName;
 }
 
@@ -756,26 +750,12 @@ function applyT5OrbitalNames(sys) {
         let _ordinal = 1;
         bodies.forEach(w => {
             const _roman = _toRoman(_ordinal++);
-            w.name = `${namePrefix}${_roman}`;
-            if (w.satellites) {
-                let satLetterIdx = 0;
-                w.satellites.forEach(s => {
-                    if (s !== _mw) {
-                        s.name = `${namePrefix}${_roman}-${String.fromCharCode(97 + satLetterIdx++)}`;
-                    }
-                });
-            }
+            if (!w.name) w.name = `${namePrefix}${_roman}`;
+            _assignMoonNames(w.satellites, `${namePrefix}${_roman}`);
         });
     });
 
-    if (_mw && _mw.satellites) {
-        _mw.satellites.forEach((s, si) => {
-            if (s !== _mw) {
-                s.name = `${_sysName}-${String.fromCharCode(97 + si)}`;
-            }
-        });
-    }
-
+    _assignMoonNames(_mw && _mw.satellites, _sysName);
     sys.name = _sysName;
 }
 
@@ -794,22 +774,18 @@ function applyRTTOrbitalNames(sys) {
             ? `${_sysName} ${String.fromCharCode(65 + starIdx)}-`
             : `${_sysName} `;
 
-        const bodies = [...star.planetarySystem.orbits]
-            .filter(b => !b.isMainworld)
+        const allOrbits = [...star.planetarySystem.orbits]
             .sort((a, b) => (a.orbitNumber || 0) - (b.orbitNumber || 0));
 
         let _ordinal = 1;
-        bodies.forEach(b => {
-            const _roman = _toRoman(_ordinal++);
-            b.name = `${namePrefix}${_roman}`;
-            if (b.satellites) {
-                let satLetterIdx = 0;
-                b.satellites.forEach(s => {
-                    if (!s.isMainworld) {
-                        s.name = `${namePrefix}${_roman}-${String.fromCharCode(97 + satLetterIdx++)}`;
-                    }
-                });
+        allOrbits.forEach(b => {
+            if (b.isMainworld) {
+                _assignMoonNames(b.satellites, _sysName);
+                return;
             }
+            const _roman = _toRoman(_ordinal++);
+            if (!b.name) b.name = `${namePrefix}${_roman}`;
+            _assignMoonNames(b.satellites, `${namePrefix}${_roman}`);
         });
     });
 }

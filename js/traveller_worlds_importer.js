@@ -126,7 +126,7 @@
 
         function walkOrbitSet(orbitSet, parentStarIdx, orbitType) {
             for (const orbit of (orbitSet.orbits || [])) {
-                const orbitId  = orbit.baseOrbit + orbit.increment;
+                const orbitId  = orbit.baseOrbit + orbit.increment / 10;
                 const contents = orbit.contents;
                 if (!contents) continue;
 

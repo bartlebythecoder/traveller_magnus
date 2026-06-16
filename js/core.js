@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.15.2.1";
-const APP_BANNER = "v0.15.2.1: New: Import Traveller World data";
+const APP_VERSION = "v0.15.2.2";
+const APP_BANNER = "v0.15.2.2: New: Import Traveller World data";
 
 // -----------------------------------------------------------------------------
 // Application State

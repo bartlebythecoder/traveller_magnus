@@ -1,4 +1,7 @@
-### [v0.15.2.1] - In Progress
+### [v0.15.2.2] - 2026-06-16
+1. **Import Traveller World Systems:** Fixed import error changing Orbit #
+
+### [v0.15.2.1] - 2026-06-16
 1. **System Viewer:** Fixed bug where over-written system appears on System Viewer
 
 ### [v0.15.2] - 2026-06-15

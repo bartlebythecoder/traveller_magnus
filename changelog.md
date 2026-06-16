@@ -1,3 +1,6 @@
+### [v0.15.2.1] - In Progress
+1. **System Viewer:** Fixed bug where over-written system appears on System Viewer
+
 ### [v0.15.2] - 2026-06-15
 1. **System Viewer:** Fixed bug that incorrectly showed some worlds in same orbit as companion stars
 2. **All Engines:** Harmonized system naming conventions across engines

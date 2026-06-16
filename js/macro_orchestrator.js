@@ -548,6 +548,7 @@ async function runMgT2EBottomUpMacro(skipPop = false) {
                             stateObj.ctPhysical = null;
                             stateObj.t5Socio = null;
                             stateObj.rttData = null;
+                            stateObj.aowSystem = null;
 
                             computeSystemCounts(stateObj);
                             hexStates.set(hexId, stateObj);
@@ -746,6 +747,7 @@ async function runCTNewMacro(skipPop = false) {
                     stateObj.mgtSystem = null;
                     stateObj.t5System = null;
                     stateObj.ctPhysical = null;
+                    stateObj.aowSystem = null;
                     computeSystemCounts(stateObj);
                     hexStates.set(hexId, stateObj);
 
@@ -878,6 +880,7 @@ async function runCTBottomUpMacro(skipPop = false) {
                             stateObj.mgtSystem = null;
                             stateObj.t5System = null;
                             stateObj.ctPhysical = null;
+                            stateObj.aowSystem = null;
                             computeSystemCounts(stateObj);
                             hexStates.set(hexId, stateObj);
                             count++;
@@ -1012,6 +1015,7 @@ async function runRTTMacro(skipPop = false) {
                         stateObj.t5Physical = null;
                         stateObj.mgtSocio = null;
                         stateObj.t5Socio = null;
+                        stateObj.aowSystem = null;
                         computeSystemCounts(stateObj);
                         hexStates.set(hexId, stateObj);
                         count++;

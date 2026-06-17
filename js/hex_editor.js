@@ -1260,7 +1260,7 @@ function populateEditorAccordions(stateObj) {
                             let uwp = isMainworld ? (mwBase ? mwBase.uwp : (w.uwp || '-')) : (w.uwpSecondary || w.uwp || '-');
                             let typeLabel = w.worldType || w.type;
                             if (isMainworld) typeLabel = `Mainworld (${typeLabel})`;
-                            if (isGG && !w.worldType) typeLabel = `${w.size === 15 ? 'Large' : 'Small'} Gas Giant`;
+                            if (isGG && !w.worldType) typeLabel = `${w.ggType === 'GL' ? 'Large' : 'Small'} Gas Giant`;
                             let labelColor = isMainworld ? '#ffa500' : '#66fcf1';
                             let summaryStyle = isMainworld ? 'style="background-color: rgba(255, 165, 0, 0.1); border-color: #ffa500;"' : '';
 

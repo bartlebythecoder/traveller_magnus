@@ -147,6 +147,7 @@
 
                 // Regular world body
                 const world = parseWorldContents(contents, orbitId, parentStarIdx, orbitType);
+                world.baseOrbit = orbit.baseOrbit;   // integer slot key — unique per body, drives profile display
                 if (contents.isMainWorld) {
                     mainworldOrbitId = orbitId;
                     mainworldStarIdx = parentStarIdx;
@@ -165,7 +166,7 @@
     // =========================================================================
 
     function parseWorldContents(c, orbitId, parentStarIdx, orbitType) {
-        const u      = c.uwp || {};
+        const u      = (c.uwp && typeof c.uwp === 'object') ? c.uwp : {};
         const port   = u.port  !== undefined ? u.port  : 'X';
         const size   = u.size  !== undefined ? u.size  : 0;
         const atm    = u.atmos !== undefined ? u.atmos : 0;
@@ -187,17 +188,27 @@
         let ggType    = null;
         if (isMainworld) {
             worldType = 'Mainworld';
-        } else if (size === 0) {
-            worldType = 'Planetoid Belt';
+        } else if (c.type === 'gasGiant') {
+            worldType = 'Gas Giant';
+            const ggt = c.gas_giant_type || '';
+            if      (ggt === 'LGG')  ggType = 'GL';
+            else if (ggt === 'SGG')  ggType = 'GS';
+            else if (c.iceGiant)     ggType = 'GS';
+            else                     ggType = 'GM';
         } else if (genObj.includes('Gas Giant') || genObj === 'Ice Giant') {
             worldType = 'Gas Giant';
             if      (genObj.includes('Large'))                           ggType = 'GL';
             else if (genObj.includes('Small') || genObj === 'Ice Giant') ggType = 'GS';
             else                                                          ggType = 'GM';
+        } else if (genObj.includes('Planetoid') || genObj.includes('Asteroid') || !!c.beltDetails) {
+            worldType = 'Planetoid Belt';
+        } else if (size === 0) {
+            // Size-0 with no belt indicator: worldlet if generationObject present, belt if unknown
+            worldType = genObj ? 'Terrestrial Planet' : 'Planetoid Belt';
         }
 
         // Planetoid Belt physical nulls
-        const isBelt      = size === 0;
+        const isBelt      = worldType === 'Planetoid Belt';
         const axialTilt   = isBelt ? null : (c.axialTilt  !== undefined ? c.axialTilt  : null);
         const solarDay    = isBelt ? null : (c.rotationalPeriod !== undefined ? c.rotationalPeriod : null);
 
@@ -401,6 +412,17 @@
         return lo + frac * (hi - lo);
     }
 
+    function _t5OrbitToAU(orbitId) {
+        const tbl = (typeof T5_Data !== 'undefined' && T5_Data.ORBIT_AU) ? T5_Data.ORBIT_AU : [];
+        if (!tbl.length) return 0;
+        const idx  = Math.floor(orbitId);
+        const frac = orbitId - idx;
+        const max  = tbl.length - 1;
+        const lo   = tbl[Math.min(idx, max)];
+        const hi   = idx < max ? tbl[idx + 1] : lo;
+        return lo + frac * (hi - lo);
+    }
+
     function buildT5System(hexId, parsedStars, allWorlds) {
         const ORBIT_AU = (typeof T5_Data !== 'undefined' && T5_Data.ORBIT_AU) ? T5_Data.ORBIT_AU : [];
         const ROLE_MAP = ['Primary', 'Close', 'Near', 'Far'];
@@ -445,10 +467,12 @@
             return star;
         });
 
-        // Place each world into the correct star's orbit slot
+        // Place each world into its star's orbit slot keyed by baseOrbit (the integer
+        // orbit number from the JSON). This is unique per body and matches the display
+        // label shown in the profile panel, avoiding rounding collisions from orbitId.
         for (const w of allWorlds) {
             const starIdx  = w.parentStarIdx !== undefined ? w.parentStarIdx : 0;
-            const orbitIdx = Math.round(w.orbitId);
+            const orbitIdx = w.baseOrbit !== undefined ? w.baseOrbit : Math.round(w.orbitId);
             if (stars[starIdx] && orbitIdx >= 0 && orbitIdx < 20) {
                 stars[starIdx].orbits[orbitIdx].contents = w;
             }
@@ -458,13 +482,13 @@
 
         const mainworld = allWorlds.find(w => w.isMainWorld) || allWorlds[0];
 
-        // Set distAU on the mainworld so _normalizeT5 can place the HZ band correctly.
-        if (mainworld && mainworld.orbitId != null) {
-            const slotIdx = Math.round(mainworld.orbitId);
-            const mwStar  = stars[mainworld.parentStarIdx || 0];
-            if (mwStar && mwStar.orbits[slotIdx]) {
-                mainworld.distAU = mwStar.orbits[slotIdx].distAU;
-            }
+        // Set distAU on every world using baseOrbit (the integer T5 orbit slot).
+        // orbitId can be negative when increment < 0 and baseOrbit = 0, which
+        // causes _t5OrbitToAU to return NaN. baseOrbit is always a non-negative
+        // integer and is the correct index into T5_Data.ORBIT_AU.
+        for (const w of allWorlds) {
+            const orbitForAU = w.baseOrbit != null ? w.baseOrbit : w.orbitId;
+            if (orbitForAU != null) w.distAU = _t5OrbitToAU(orbitForAU);
         }
 
         return {

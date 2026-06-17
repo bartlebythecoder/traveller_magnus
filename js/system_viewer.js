@@ -36,6 +36,10 @@ const SystemViewer = (() => {
     let _linearScale = false;
     let _orbitOpacity = 0.25;
 
+    let _hideMoons              = false;
+    let _hideHZ                 = false;
+    let _hideMainworldHighlight = false;
+
     let _animFrameId   = null;
     let _lastFrameTime = 0;
 
@@ -92,6 +96,7 @@ const SystemViewer = (() => {
             return 8;
         }
         if (w.type === 'Mainworld') return 8;
+        if (w.worldType === 'Worldlet') return 3;
         return 5;
     }
 
@@ -382,15 +387,20 @@ const SystemViewer = (() => {
             parentStarIdx: s.parentStarIdx ?? 0,
         }));
 
-        // Worlds — per-star orbital arrays
+        // Worlds — flat list (imported systems) or per-star orbit slots (generated).
+        // Imported systems set sys.worlds; generated systems only have orbit slots.
         const worlds = [];
-        (sys.stars || []).forEach((s, si) => {
-            (s.orbits || []).forEach(slot => {
-                const w = slot.contents;
-                if (!w || w.type === 'Empty') return;
-                worlds.push(_normT5World(w, slot.distAU || 0, si, mw));
+        if (sys.worlds && sys.worlds.length > 0) {
+            sys.worlds.forEach(w => worlds.push(_normT5World(w, w.distAU || 0, w.parentStarIdx || 0, mw)));
+        } else {
+            (sys.stars || []).forEach((s, si) => {
+                (s.orbits || []).forEach(slot => {
+                    const w = slot.contents;
+                    if (!w || w.type === 'Empty') return;
+                    worlds.push(_normT5World(w, slot.distAU || 0, si, mw));
+                });
             });
-        });
+        }
 
         // HZ centre: mainworld distAU
         const hzAU = (mw && mw.distAU) ? mw.distAU : 1.0;
@@ -409,7 +419,7 @@ const SystemViewer = (() => {
         } else if (w.type === 'Small Gas Giant') {
             type = 'Gas Giant'; ggType = 'GS';
         } else if (w.type === 'Gas Giant') {
-            type = 'Gas Giant'; ggType = 'GM';
+            type = 'Gas Giant'; ggType = w.ggType || 'GM';
         } else if (w.type === 'Ice Giant') {
             type = 'Gas Giant'; ggType = 'GS';
         } else if (w.type === 'Planetoid Belt') {
@@ -419,6 +429,7 @@ const SystemViewer = (() => {
         }
         return {
             type, ggType,
+            worldType:     w.worldType || null,
             au:            au || w.distAU || 0,
             parentStarIdx,
             orbitType:     'S-Type',
@@ -738,6 +749,9 @@ const SystemViewer = (() => {
         _dayInput      = null;
         _paused        = false;
         _pauseBtn      = null;
+        _hideMoons              = false;
+        _hideHZ                 = false;
+        _hideMainworldHighlight = false;
     }
 
     function handleWheel(direction) {
@@ -904,6 +918,51 @@ const SystemViewer = (() => {
         });
         orbitWrap.append(orbitLbl, orbitSlider);
 
+        const hideMoonsWrap = document.createElement('label');
+        Object.assign(hideMoonsWrap.style, {
+            display: 'flex', alignItems: 'center', gap: '5px',
+            fontSize: '11px', cursor: 'pointer', whiteSpace: 'nowrap'
+        });
+        const hideMoonsChk = document.createElement('input');
+        hideMoonsChk.type    = 'checkbox';
+        hideMoonsChk.checked = _hideMoons;
+        Object.assign(hideMoonsChk.style, { cursor: 'pointer' });
+        const hideMoonsLbl = document.createElement('span');
+        hideMoonsLbl.textContent = 'Hide Moons';
+        Object.assign(hideMoonsLbl.style, { color: P.sub });
+        hideMoonsChk.addEventListener('change', () => { _hideMoons = hideMoonsChk.checked; });
+        hideMoonsWrap.append(hideMoonsChk, hideMoonsLbl);
+
+        const hideHZWrap = document.createElement('label');
+        Object.assign(hideHZWrap.style, {
+            display: 'flex', alignItems: 'center', gap: '5px',
+            fontSize: '11px', cursor: 'pointer', whiteSpace: 'nowrap'
+        });
+        const hideHZChk = document.createElement('input');
+        hideHZChk.type    = 'checkbox';
+        hideHZChk.checked = _hideHZ;
+        Object.assign(hideHZChk.style, { cursor: 'pointer' });
+        const hideHZLbl = document.createElement('span');
+        hideHZLbl.textContent = 'Hide HZ';
+        Object.assign(hideHZLbl.style, { color: P.sub });
+        hideHZChk.addEventListener('change', () => { _hideHZ = hideHZChk.checked; });
+        hideHZWrap.append(hideHZChk, hideHZLbl);
+
+        const hideHighlightWrap = document.createElement('label');
+        Object.assign(hideHighlightWrap.style, {
+            display: 'flex', alignItems: 'center', gap: '5px',
+            fontSize: '11px', cursor: 'pointer', whiteSpace: 'nowrap'
+        });
+        const hideHighlightChk = document.createElement('input');
+        hideHighlightChk.type    = 'checkbox';
+        hideHighlightChk.checked = _hideMainworldHighlight;
+        Object.assign(hideHighlightChk.style, { cursor: 'pointer' });
+        const hideHighlightLbl = document.createElement('span');
+        hideHighlightLbl.textContent = 'Hide MW';
+        Object.assign(hideHighlightLbl.style, { color: P.sub });
+        hideHighlightChk.addEventListener('change', () => { _hideMainworldHighlight = hideHighlightChk.checked; });
+        hideHighlightWrap.append(hideHighlightChk, hideHighlightLbl);
+
         _pauseBtn = document.createElement('button');
         _pauseBtn.textContent = '⏸';
         Object.assign(_pauseBtn.style, {
@@ -922,7 +981,7 @@ const SystemViewer = (() => {
         });
         closeBtn.addEventListener('click', close);
 
-        header.append(title, editionBadge, sub, hint, yearWrap, dayWrap, speedWrap, linearWrap, orbitWrap, _pauseBtn, closeBtn);
+        header.append(title, editionBadge, sub, hint, yearWrap, dayWrap, speedWrap, linearWrap, orbitWrap, hideMoonsWrap, hideHZWrap, hideHighlightWrap, _pauseBtn, closeBtn);
         _overlay.appendChild(header);
 
         _orrCanvas = document.createElement('canvas');
@@ -1045,7 +1104,7 @@ const SystemViewer = (() => {
         const hzAU      = sys.hzAU !== undefined ? sys.hzAU : _orbitToAU(sys.hzco || 3);
         const hzInnerPx = _scaleR(hzAU * 0.70, maxAU, scaledMaxR);
         const hzOuterPx = _scaleR(hzAU * 1.55, maxAU, scaledMaxR);
-        _drawHZBand(ctx, originX, originY, hzInnerPx, hzOuterPx);
+        if (!_hideHZ) _drawHZBand(ctx, originX, originY, hzInnerPx, hzOuterPx);
 
         // Companion orbit rings + sub-orreries
         companions.forEach((s, i) => {
@@ -1233,9 +1292,9 @@ const SystemViewer = (() => {
 
     function _drawWorld(ctx, w, px, py, elapsed_years, wIdx) {
         const r     = _worldBodyRadius(w);
-        const color = _worldColor(w);
+        const color = (_hideMainworldHighlight && w.type === 'Mainworld') ? '#a0a0b0' : _worldColor(w);
 
-        if (w.type === 'Mainworld') {
+        if (w.type === 'Mainworld' && !_hideMainworldHighlight) {
             ctx.beginPath();
             ctx.arc(px, py, r + 5, 0, Math.PI * 2);
             ctx.strokeStyle = _lightMode ? '#0d6b64' : '#66fcf1';
@@ -1249,7 +1308,7 @@ const SystemViewer = (() => {
         ctx.fill();
 
         const moons = (w.moons || []).filter(m => m.type !== 'Empty');
-        moons.forEach((m, mi) => {
+        if (!_hideMoons) moons.forEach((m, mi) => {
             const period = _moonPeriodYears(m, w);
             const mAngle = _hashEpoch(_hexId + ':moon:' + wIdx + ':' + mi)
                          + (2 * Math.PI / period) * elapsed_years;
@@ -1259,7 +1318,7 @@ const SystemViewer = (() => {
             const isMainworld = m.type === 'Mainworld';
             const moonR       = isMainworld ? 5 : 3;
 
-            if (isMainworld) {
+            if (isMainworld && !_hideMainworldHighlight) {
                 ctx.beginPath();
                 ctx.arc(mx, my, moonR + 3, 0, Math.PI * 2);
                 ctx.strokeStyle = _lightMode ? '#0d6b64' : '#66fcf1';
@@ -1267,12 +1326,12 @@ const SystemViewer = (() => {
                 ctx.stroke();
             }
 
-            ctx.fillStyle = isMainworld ? '#4fc3a1' : '#6a7070';
+            ctx.fillStyle = (isMainworld && !_hideMainworldHighlight) ? '#4fc3a1' : '#6a7070';
             ctx.beginPath();
             ctx.arc(mx, my, moonR, 0, Math.PI * 2);
             ctx.fill();
 
-            if (isMainworld && m.name) {
+            if (isMainworld && m.name && !_hideMainworldHighlight) {
                 ctx.save();
                 ctx.fillStyle = _lightMode ? '#0d6b64' : '#66fcf1';
                 ctx.font      = '10px "Share Tech Mono", monospace';
@@ -1284,7 +1343,7 @@ const SystemViewer = (() => {
             _hitBodies.push({ kind: 'moon', body: m, cx: mx, cy: my, r: Math.max(moonR + 6, 9) });
         });
 
-        if (w.type === 'Mainworld' && w.name) {
+        if (w.type === 'Mainworld' && w.name && !_hideMainworldHighlight) {
             ctx.save();
             ctx.fillStyle = _lightMode ? '#0d6b64' : '#66fcf1';
             ctx.font      = '11px "Share Tech Mono", monospace';
@@ -1423,9 +1482,10 @@ const SystemViewer = (() => {
 
         } else if (hit.kind === 'world') {
             const w = body;
-            const typeTag = w.ggType
-                ? ` <span style="color:${TSUB}">(${w.type} ${w.ggType})</span>`
-                : (w.name ? ` <span style="color:${TSUB}">(${w.type})</span>` : '');
+            const _displayType = w.ggType ? `${w.type} ${w.ggType}` : (w.worldType || w.type);
+            const typeTag = w.name
+                ? ` <span style="color:${TSUB}">(${_displayType})</span>`
+                : '';
             html += `<div style="color:${TH};margin-bottom:5px;border-bottom:1px solid ${TBORDER};padding-bottom:4px">`;
             html += `${w.name || w.type}${typeTag}</div>`;
             if (w.orbitId != null) html += `<div>Orbit #: ${w.orbitId.toFixed ? w.orbitId.toFixed(2) : w.orbitId}</div>`;
@@ -1578,8 +1638,11 @@ const SystemViewer = (() => {
             viewOffY:     _viewOffY,
             lightMode:    _lightMode,
             linearScale:  _linearScale,
-            orbitOpacity: _orbitOpacity,
-            hitBodies:    _hitBodies,
+            orbitOpacity:          _orbitOpacity,
+            hitBodies:             _hitBodies,
+            hideMoons:              _hideMoons,
+            hideHZ:                 _hideHZ,
+            hideMainworldHighlight: _hideMainworldHighlight,
         };
 
         // Create an off-screen canvas and install snapshot render state
@@ -1599,8 +1662,11 @@ const SystemViewer = (() => {
         _viewOffY     = 0;
         _lightMode    = false;  // always dark-mode for export
         _linearScale  = false;
-        _orbitOpacity = 0.3;    // light orbit rings add context without clutter
-        _hitBodies    = [];
+        _orbitOpacity           = 0.3;    // light orbit rings add context without clutter
+        _hideMoons              = false;
+        _hideHZ                 = false;
+        _hideMainworldHighlight = false;
+        _hitBodies              = [];
 
         _drawOrrery();
 
@@ -1617,8 +1683,11 @@ const SystemViewer = (() => {
         _viewOffY     = saved.viewOffY;
         _lightMode    = saved.lightMode;
         _linearScale  = saved.linearScale;
-        _orbitOpacity = saved.orbitOpacity;
-        _hitBodies    = saved.hitBodies;
+        _orbitOpacity           = saved.orbitOpacity;
+        _hitBodies              = saved.hitBodies;
+        _hideMoons              = saved.hideMoons;
+        _hideHZ                 = saved.hideHZ;
+        _hideMainworldHighlight = saved.hideMainworldHighlight;
 
         return new Promise(resolve => {
             canvas.toBlob(blob => {

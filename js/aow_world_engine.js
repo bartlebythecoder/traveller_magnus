@@ -4137,6 +4137,19 @@
             }
         }
 
+        // Fallback: if no terrestrial bodies or GG satellites exist, admit gas giants
+        // so that gas-giant-only systems still elect a mainworld.
+        if (candidates.length === 0) {
+            for (const worksheet of sys.diskWorksheets) {
+                for (const planet of (worksheet.planets || [])) {
+                    candidates.push(planet);
+                }
+            }
+            if (candidates.length > 0) {
+                tResult('Mainworld Candidates', 'No terrestrial bodies — falling back to gas giants', 'AoW Mainworld');
+            }
+        }
+
         if (typeof window !== 'undefined' && window.isLoggingEnabled) {
             writeLogLine(`[PROBE] Mainworld: ${candidates.length} candidate(s) from ${sys.diskWorksheets.length} worksheet(s)`);
         }

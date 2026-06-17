@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sector Comparison Utility — As Above, So Below</title>
+    <style>
+        body {
+            background: #1a1a2e;
+            color: #c5c6c7;
+            font-family: 'Courier New', monospace;
+            padding: 30px;
+            font-size: 14px;
+            max-width: 800px;
+        }
+        h1 { color: #45a29e; margin: 0 0 4px 0; }
+        .subtitle { color: #66fcf1; opacity: 0.7; margin-bottom: 20px; font-size: 12px; }
+        #status {
+            color: #66fcf1;
+            font-size: 15px;
+            margin-bottom: 12px;
+            border-left: 3px solid #45a29e;
+            padding: 6px 10px;
+            background: rgba(69,162,158,0.08);
+        }
+        #log {
+            white-space: pre;
+            color: #c5c6c7;
+            opacity: 0.65;
+            font-size: 12px;
+            max-height: 320px;
+            overflow-y: auto;
+            border: 1px solid rgba(69,162,158,0.2);
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <h1>Sector Comparison Utility</h1>
+    <div class="subtitle">As Above, So Below — opens in browser, auto-generates, downloads CSV</div>
+    <div id="status">Initializing engines…</div>
+    <div id="log"></div>
+
+    <!-- ================================================================
+         PRE-LOAD SHIMS
+         Must execute before any engine script loads. Provides every global
+         the engine files expect to find in the full browser environment but
+         that are not needed for pure statistical generation.
+    ================================================================= -->
+    <script>
+        // Logging — all gated on isLoggingEnabled; set false to silence everything
+        window.isLoggingEnabled  = false;
+        window.batchLogData      = [];
+        window.logIndentLevel    = 0;
+
+        // Core map state — engines reference these as bare globals (no var/let in core.js)
+        window.hexStates         = new Map();
+        window.selectedHexes     = new Set();
+        window.sectorRoutes      = [];
+        window.routeDefinitions  = [];
+        window.sectorNames       = {};
+        window.autoRouteCounter  = 0;
+        window.activeFilterRules = [];
+
+        // Name pool — engines fall back to getNextSystemName when names.js absent
+        window.namePool          = [];
+        window.usedNames         = new Set();
+        window.getNextSystemName = function(hexId) { return 'System-' + hexId; };
+        window.ensureNamesLoaded = async function() {};
+
+        // Renderer dimensions — expected as globals by some engine load-time checks
+        window.baseHexSize = 50;
+        window.gridWidth   = 7;
+        window.gridHeight  = 5;
+
+        // UI flags engines may read
+        window.devView               = false;
+        window.showSubsectorBorders  = false;
+        window.hideNoPlanetSystems   = false;
+        window.showSectorNames       = false;
+        window.borderNamesEnabled    = false;
+        window.regionNamesEnabled    = false;
+
+        // T5 TL modifiers (read by t5_topdown_generator at generation time)
+        window.generationTlMod = 0;
+        window.generationTlMax = 20;
+
+        // Audit / backlog
+        window.auditBacklog = [];
+
+        // Hook stubs
+        window.reapplyAllRules    = function() {};
+        window.applyActiveFilters = function() {};
+        window.saveHistoryState   = function() {};
+
+        // Browser API stubs
+        window.showToast             = function() {};
+        window.draw                  = function() {};
+        window.requestAnimationFrame = function(fn) { setTimeout(fn, 0); };
+        window.confirm               = function() { return true; };
+        window.alert                 = function(msg) { console.log('[ALERT]', msg); };
+
+        // MgT2EMath is loaded via script tag below; no stub needed
+
+        // Statistical auditor — disable to avoid extra processing
+        window.StatisticalAuditor = null;
+
+        // Manual-field helpers — irrelevant for fresh generation
+        window.isManual               = function() { return false; };
+        window.countManualMgt2eBodies = function() { return 0; };
+        window.countManualCTBodies    = function() { return 0; };
+        window.countManualBodies      = function() { return 0; };
+    </script>
+
+    <!-- ================================================================
+         ENGINE SCRIPTS — in strict dependency order
+         Paths are relative to this file in utility/
+    ================================================================= -->
+
+    <!-- Core -->
+    <script src="../js/constants.js"></script>
+    <script src="../js/core.js"></script>
+    <script src="../js/universal_math.js"></script>
+
+    <!-- Classic Traveller -->
+    <script src="../rules/ct_data.js"></script>
+    <script src="../js/ct_constants.js"></script>
+    <script src="../js/ct_world_engine.js"></script>
+    <script src="../js/ct_physical_library.js"></script>
+    <script src="../js/ct_stellar_engine.js"></script>
+    <script src="../js/ct_social_engine.js"></script>
+    <script src="../js/ct_bottomup_generator.js"></script>
+    <script src="../js/ct_topdown_generator.js"></script>
+    <script src="../js/ct_uwp_auditor.js"></script>
+    <script src="../js/ct_system_driver.js"></script>
+
+    <!-- Mongoose Traveller 2E -->
+    <script src="../rules/mgt2e_data.js"></script>
+    <script src="../js/mgt2e_math.js"></script>
+    <script src="../js/mgt2e_world_engine.js"></script>
+    <script src="../js/mgt2e_stellar_engine.js"></script>
+    <script src="../js/mgt2e_socio_engine.js"></script>
+    <script src="../js/mgt2e_uwp_auditor.js"></script>
+    <script src="../js/mgt2e_topdown_generator.js"></script>
+    <script src="../js/mgt2e_bottomup_generator.js"></script>
+
+    <!-- Traveller 5 -->
+    <script src="../rules/t5_data.js"></script>
+    <script src="../js/t5_world_engine.js"></script>
+    <script src="../js/t5_stellar_engine.js"></script>
+    <script src="../js/t5_socio_engine.js"></script>
+    <script src="../js/t5_uwp_auditor.js"></script>
+    <script src="../js/t5_topdown_generator.js"></script>
+
+    <!-- Revised Traveller -->
+    <script src="../js/rtt_engine.js"></script>
+
+    <!-- Architect of Worlds -->
+    <script src="../rules/aow_data.js"></script>
+    <script src="../js/aow_stellar_engine.js"></script>
+    <script src="../js/aow_world_engine.js"></script>
+    <script src="../js/aow_bottomup_generator.js"></script>
+
+    <!-- Universal System Driver (CT + T5 routing; depends on all above) -->
+    <script src="../js/system_driver.js"></script>
+
+    <!-- ================================================================
+         COMPARISON RUNNER
+    ================================================================= -->
+    <script>
+    window.addEventListener('load', function() {
+        // Short delay so the browser paints the status div before we block
+        setTimeout(runComparison, 150);
+    });
+
+    async function runComparison() {
+        var statusEl = document.getElementById('status');
+        var logEl    = document.getElementById('log');
+
+        function log(msg) {
+            console.log(msg);
+            logEl.textContent += msg + '\n';
+            logEl.scrollTop    = logEl.scrollHeight;
+            statusEl.textContent = msg;
+        }
+
+        function logErr(msg) {
+            console.error(msg);
+            logEl.textContent += '[ERR] ' + msg + '\n';
+            logEl.scrollTop    = logEl.scrollHeight;
+        }
+
+        log('Starting sector comparison...');
+
+        // ── SEED ────────────────────────────────────────────────────────
+        // A numeric string seed. Type this value into the hex_map.html seed
+        // field to reproduce identical populated hexes for any engine.
+        var SEED_STR = String(Math.floor(Math.random() * 0xFFFFFFFF));
+        log('Seed: ' + SEED_STR);
+
+        // ── SECTOR HEX LIST ─────────────────────────────────────────────
+        // Standard Traveller sector: 32 columns × 40 rows = 1280 hexes.
+        var SECTOR_HEXES = [];
+        for (var col = 1; col <= 32; col++) {
+            for (var row = 1; row <= 40; row++) {
+                SECTOR_HEXES.push(
+                    String(col).padStart(2, '0') + String(row).padStart(2, '0')
+                );
+            }
+        }
+
+        // ── eHEX DECODER ────────────────────────────────────────────────
+        var EHEX = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+        function toInt(v) {
+            if (v === undefined || v === null) return -1;
+            if (typeof v === 'number') return Math.floor(v);
+            var s = String(v).trim().toUpperCase();
+            if (!s.length) return -1;
+            var idx = EHEX.indexOf(s[0]);
+            return idx >= 0 ? idx : -1;
+        }
+
+        function getAtm(w) {
+            if (!w) return -1;
+            return toInt(w.atmCode      !== undefined ? w.atmCode
+                       : w.atm         !== undefined ? w.atm
+                       : w.atmosphere  !== undefined ? w.atmosphere
+                       : w.Atm         !== undefined ? w.Atm
+                       : w.uwp         !== undefined ? w.uwp[2]
+                       : undefined);
+        }
+
+        function getHydro(w) {
+            if (!w) return -1;
+            return toInt(w.hydroCode     !== undefined ? w.hydroCode
+                       : w.hydro        !== undefined ? w.hydro
+                       : w.hydrographics !== undefined ? w.hydrographics
+                       : w.Hydro        !== undefined ? w.Hydro
+                       : w.uwp          !== undefined ? w.uwp[3]
+                       : undefined);
+        }
+
+        // ── MAINWORLD FINDER (MgT2E / AoW tree structure) ────────────────
+        function findMgT2EMainworld(worlds) {
+            if (!worlds) return null;
+            for (var i = 0; i < worlds.length; i++) {
+                var w = worlds[i];
+                if (w.type === 'Mainworld' || w.isLunarMainworld || w.targetWorld === 'Mainworld') return w;
+                var inMoon = findMgT2EMainworld(w.moons);
+                if (inMoon) return inMoon;
+            }
+            return null;
+        }
+
+        // ── CATEGORIES ───────────────────────────────────────────────────
+        var CAT_TOTAL      = 'Total Systems';
+        var CAT_BREATH_OCN = 'Breathable Ocean World (Atm 5/6/8 + Hydro>0)';
+        var CAT_ASSIST_OCN = 'Breathe-Assisted Ocean World (Atm 2/3/4/7/9/D/E + Hydro>0)';
+        var CAT_HOSTILE    = 'Hostile Atmosphere (Atm A/B/C)';
+        var CAT_VACUUM     = 'Vacuum or Near-Vacuum (Atm 0/1)';
+        var CAT_DESERT     = 'Desert World - Arrakis (Atm 2-9/D/E + Hydro=0)';
+        var CAT_UNUSUAL    = 'Unusual/Exceptional (Atm F+)';
+        var CAT_OTHER      = 'Uncategorized';
+
+        var CATEGORIES = [
+            CAT_TOTAL, CAT_BREATH_OCN, CAT_ASSIST_OCN,
+            CAT_HOSTILE, CAT_VACUUM, CAT_DESERT, CAT_UNUSUAL, CAT_OTHER
+        ];
+
+        // Priority-ordered classification. Categories are mutually exclusive.
+        // D=13, E=14, F+=15+; A=10, B=11, C=12.
+        function classify(w) {
+            var atm   = getAtm(w);
+            var hydro = getHydro(w);
+
+            if (atm < 0)                                       return CAT_OTHER;
+            if (atm >= 15)                                     return CAT_UNUSUAL;
+            if ([5,6,8].indexOf(atm) >= 0 && hydro > 0)       return CAT_BREATH_OCN;
+            if ([2,3,4,7,9,13,14].indexOf(atm) >= 0 && hydro > 0) return CAT_ASSIST_OCN;
+            if ([10,11,12].indexOf(atm) >= 0)                  return CAT_HOSTILE;
+            if (atm === 0 || atm === 1)                        return CAT_VACUUM;
+            if (atm >= 2 && atm <= 14 && hydro === 0)         return CAT_DESERT;
+            return CAT_OTHER;
+        }
+
+        function emptyCounts() {
+            var c = {};
+            CATEGORIES.forEach(function(k) { c[k] = 0; });
+            return c;
+        }
+
+        // ── POPULATE ─────────────────────────────────────────────────────
+        // Mirrors the -pop salt logic used by CT, T5, and MgT2E macros.
+        // Resetting masterSeed via setRandomSeed() before each engine run
+        // ensures the same hexes are populated for every engine.
+        function populateSector() {
+            window.hexStates = new Map();
+            var populated = [];
+            SECTOR_HEXES.forEach(function(hexId) {
+                reseedForHex(hexId + '-pop');
+                var roll = roll1D();
+                if (roll <= 3) {
+                    window.hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });
+                    populated.push(hexId);
+                } else {
+                    window.hexStates.set(hexId, { type: 'EMPTY' });
+                }
+            });
+            return populated;
+        }
+
+        // ── ENGINE DEFINITIONS ────────────────────────────────────────────
+        var ENGINES = [
+            {
+                label: 'CT Top-Down',
+                run: function(hexId) {
+                    var mw  = window.CT_World_Engine.generateModularMainworld(hexId);
+                    var sys = window.CT_Generator.generateSystem({ mode: 'top-down', mainworldUWP: mw, hexId: hexId });
+                    return sys ? sys.mainworld : null;
+                }
+            },
+            {
+                label: 'MgT2E Top-Down',
+                run: function(hexId) {
+                    var sys = generateMgT2ESystemTopDown(hexId);
+                    if (!sys) return null;
+                    return findMgT2EMainworld(sys.worlds) || sys.mainworld || (sys.worlds && sys.worlds[0]) || null;
+                }
+            },
+            {
+                label: 'T5 Top-Down',
+                run: function(hexId) {
+                    var mw  = window.T5_World_Engine.generateT5Mainworld(hexId);
+                    var sys = window.System_Driver.generateSystem({ edition: 'T5', mode: 'top-down', mainworldUWP: mw, hexId: hexId });
+                    return sys ? (sys.mainworld || mw) : null;
+                }
+            },
+            {
+                label: 'CT Bottom-Up',
+                run: function(hexId) {
+                    var sys = window.CT_Generator.generateSystem({ mode: 'bottom-up', hexId: hexId });
+                    return sys ? sys.mainworld : null;
+                }
+            },
+            {
+                label: 'MgT2E Bottom-Up',
+                run: function(hexId) {
+                    if (!window.MgT2EBottomUpGenerator) return null;
+                    var sys = window.MgT2EBottomUpGenerator.generateSystem(hexId);
+                    if (!sys) return null;
+                    return findMgT2EMainworld(sys.worlds) || sys.mainworld || (sys.worlds && sys.worlds[0]) || null;
+                }
+            },
+            {
+                label: 'RTT',
+                run: function(hexId) {
+                    var sys = generateRTTSectorStep1(hexId);
+                    return sys ? extractRTTMainworld(sys) : null;
+                }
+            },
+            {
+                label: 'AoW',
+                run: function(hexId) {
+                    if (!window.AoWBottomUpGenerator) return null;
+                    var sys = window.AoWBottomUpGenerator.generateAoWSystemBottomUp(hexId);
+                    return sys ? sys.mainworld : null;
+                }
+            }
+        ];
+
+        // ── RUN ALL ENGINES ───────────────────────────────────────────────
+        var allResults = {};
+
+        for (var ei = 0; ei < ENGINES.length; ei++) {
+            var engine = ENGINES[ei];
+            log('Running ' + engine.label + '...');
+
+            // Yield to browser so the status line updates between engines
+            await new Promise(function(resolve) { setTimeout(resolve, 0); });
+
+            // Reset the master seed and repopulate — same hexes every engine
+            setRandomSeed(SEED_STR);
+            var systemHexIds = populateSector();
+
+            var counts = emptyCounts();
+            var errors  = 0;
+
+            for (var hi = 0; hi < systemHexIds.length; hi++) {
+                var hexId = systemHexIds[hi];
+                counts[CAT_TOTAL]++;
+                try {
+                    var mw  = engine.run(hexId);
+                    var cat = classify(mw);
+                    counts[cat]++;
+                    if (cat === CAT_OTHER) {
+                        var atmVal   = getAtm(mw);
+                        var hydroVal = getHydro(mw);
+                        var atmField = !mw ? 'null mainworld'
+                                     : mw.atmCode    !== undefined ? 'atmCode='    + mw.atmCode
+                                     : mw.atm        !== undefined ? 'atm='        + mw.atm
+                                     : mw.atmosphere !== undefined ? 'atmosphere=' + mw.atmosphere
+                                     : 'no atm field';
+                        var hydroField = !mw ? ''
+                                       : mw.hydroCode     !== undefined ? 'hydroCode='     + mw.hydroCode
+                                       : mw.hydro         !== undefined ? 'hydro='         + mw.hydro
+                                       : mw.hydrographics !== undefined ? 'hydrographics=' + mw.hydrographics
+                                       : 'no hydro field';
+                        logErr(engine.label + ' / ' + hexId + ': CAT_OTHER — atm=' + atmVal
+                            + ' (' + atmField + ')  hydro=' + hydroVal + ' (' + hydroField + ')');
+                    }
+                } catch (err) {
+                    errors++;
+                    counts[CAT_OTHER]++;
+                    logErr(engine.label + ' / ' + hexId + ': [THROW] ' + (err.message || err));
+                }
+            }
+
+            allResults[engine.label] = counts;
+            log('  → ' + counts[CAT_TOTAL] + ' systems'
+                + (errors ? ' (' + errors + ' errors → Uncategorized)' : ''));
+        }
+
+        // ── BUILD CSV ─────────────────────────────────────────────────────
+        log('Building CSV...');
+
+        var dateStr = new Date().toISOString().slice(0, 10);
+        var labels  = ENGINES.map(function(e) { return e.label; });
+
+        function csvCell(v) {
+            var s = String(v);
+            // Quote cells that contain commas, quotes, or newlines
+            if (s.indexOf(',') >= 0 || s.indexOf('"') >= 0 || s.indexOf('\n') >= 0) {
+                return '"' + s.replace(/"/g, '""') + '"';
+            }
+            return s;
+        }
+
+        var lines = [
+            'Sector Comparison Report',
+            'Seed,' + SEED_STR,
+            'Generated,' + dateStr,
+            'Sector,"Standard (32 x 40 = 1280 hexes)"',
+            '',
+            ['Category'].concat(labels).map(csvCell).join(',')
+        ];
+
+        CATEGORIES.forEach(function(cat) {
+            var row = [cat].concat(labels.map(function(l) { return allResults[l][cat]; }));
+            lines.push(row.map(csvCell).join(','));
+        });
+
+        var csv    = lines.join('\r\n');
+        var blob   = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        var url    = URL.createObjectURL(blob);
+        var anchor = document.createElement('a');
+        anchor.href     = url;
+        anchor.download = 'sector_comparison_' + SEED_STR + '.csv';
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        URL.revokeObjectURL(url);
+
+        log('');
+        log('Complete.');
+        log('Seed: ' + SEED_STR);
+        statusEl.textContent = 'Done — seed: ' + SEED_STR + ' — check Downloads for CSV';
+    }
+    </script>
+</body>
+</html>

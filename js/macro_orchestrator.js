@@ -249,6 +249,7 @@ async function runMgT2EMacro(skipPop = false) {
     // Auto Populate
     if (!skipPop) {
         targetHexes.forEach(hexId => {
+            reseedForHex(hexId + "-pop");
             const roll = roll1D();
             if (roll <= 3) {
                 hexStates.set(hexId, { type: 'SYSTEM_PRESENT' });

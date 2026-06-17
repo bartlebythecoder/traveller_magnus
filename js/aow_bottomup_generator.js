@@ -239,8 +239,22 @@
             const scoreLabel = mainworld.habitabilityScore ?? mainworld.habitability ?? 'N/A';
             tResult('Winning Mainworld', `${mainworld.name || 'Body'} at Orbit ${orbitLabel} [Score: ${scoreLabel}]`, 'AoW: Mainworld Selection');
         } else {
-            tResult('Winning Mainworld', 'None elected', 'AoW: Mainworld Selection');
-            if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 4 ERROR: No winning mainworld elected!`);
+            // No planets formed (disk formation produced nothing — Brown Dwarf, failed disk, etc.).
+            // Synthesize a barren placeholder so sys.mainworld is never null.
+            mainworld = {
+                label:           'Barren System',
+                isBarrenSystem:  true,
+                type:            'Mainworld',
+                atmCode:         0,
+                hydroCode:       0,
+                size:            0,
+                sizeCode:        '0',
+                atmosphereCode:  '0',
+                habitability:    0
+            };
+            sys.mainworld = mainworld;
+            tResult('Winning Mainworld', 'None — barren system placeholder used (no planets formed)', 'AoW: Mainworld Selection');
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 4: barren system — no disk planets`);
         }
 
         // Build sys.worlds[] from diskWorksheets after mainworld is elected,
@@ -258,7 +272,7 @@
 
         tSection(`[${hexId}] Phase 5: Social Sweeps`);
 
-        if (SocioEngine && sys.mainworld) {
+        if (SocioEngine && sys.mainworld && !sys.mainworld.isBarrenSystem) {
             // Step 1: Generate full mainworld UWP (Pop/Gov/Law/TL/Starport/Trade Codes).
             // generateMainworldUWP detects world.size !== undefined and uses our pre-set
             // physical integers (size, atmCode, hydroCode) rather than re-rolling physicals.

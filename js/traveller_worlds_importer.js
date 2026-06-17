@@ -116,6 +116,18 @@
     // Returns: { allWorlds[], mainworldOrbitId, mainworldStarIdx }
     // Side effect: sets parsedStars[i].orbitId for S-type companions.
 
+    // Recursive search: mainworld may be a moon of a gas giant (lunar mainworld).
+    function findMainworld(worlds) {
+        for (const w of worlds) {
+            if (w.isMainWorld) return w;
+            if (w.moons && w.moons.length > 0) {
+                const found = findMainworld(w.moons);
+                if (found) return found;
+            }
+        }
+        return null;
+    }
+
     function collectWorlds(orbitSets, parsedStars) {
         const allWorlds       = [];
         let mainworldOrbitId  = 0;
@@ -480,7 +492,7 @@
             if (w.moons && w.moons.length > 0) w.satellites = w.moons;
         }
 
-        const mainworld = allWorlds.find(w => w.isMainWorld) || allWorlds[0];
+        const mainworld = findMainworld(allWorlds) || allWorlds[0];
 
         // Set distAU on every world using baseOrbit (the integer T5 orbit slot).
         // orbitId can be negative when increment < 0 and baseOrbit = 0, which
@@ -537,7 +549,7 @@
             };
         });
 
-        const mainworld = allWorlds.find(w => w.isMainWorld) || allWorlds[0];
+        const mainworld = findMainworld(allWorlds) || allWorlds[0];
 
         // Compute AU distances so the system viewer can position worlds correctly.
         for (const w of allWorlds) {
@@ -585,8 +597,13 @@
         const { allWorlds, mainworldOrbitId, mainworldStarIdx } =
             collectWorlds(jsonObj.orbitSets, parsedStars);
 
-        const mainworld = allWorlds.find(w => w.isMainWorld);
+        const mainworld = findMainworld(allWorlds);
         if (!mainworld) throw new Error(`TW Import: no mainWorld found in orbitSets for hex ${hexId}`);
+
+        // If mainworld is a moon of a gas giant, mark it as a lunar mainworld
+        if (!allWorlds.includes(mainworld)) {
+            mainworld.isLunarMainworld = true;
+        }
 
         // Attach hex identity and inventory fields to the mainworld
         mainworld.hexId          = hexId;

@@ -103,19 +103,39 @@ function logCTBodyBiography(body, hexId) {
 /**
  * PHASE 1: SKELETON GENERATION (System-Wide Logic)
  */
-function generateSystemSkeleton() {
-    const sys = { stars: [], orbits: [] };
+/**
+ * @param {string}  hexId   - Passed for logging; not used internally (CT reseeds upstream).
+ * @param {Object} [seedSys=null] - Optional seed from the System Editor. When null, full
+ *   stochastic generation runs unchanged. When provided:
+ *   - seedSys.stars:           star objects to use instead of rolling
+ *   - seedSys.orbits:          CT orbital slot array to use instead of skeleton placement
+ *   - seedSys._allowAddBodies: when false, inventory/allocation phases are skipped
+ */
+function generateSystemSkeleton(hexId, seedSys = null) {
+    const sys = { stars: [], orbits: [], hexId: hexId };
 
-    // --- Steps 2A–2D: Stellar Generation (delegated to CT_StellarEngine) ---
-    // Nature roll, primary roll + astrophysical corrections, companion rolls
-    // with DM inheritance, orbit placement, and Far sub-companion recursion
-    // are all handled centrally. See js/ct_stellar_engine.js.
-    if (typeof CT_StellarEngine === 'undefined') {
-        throw new Error('CT_StellarEngine not loaded. Ensure ct_stellar_engine.js is included before ct_bottomup_generator.js.');
+    // --- Steps 2A–2D: Stellar Generation ---
+    // Skip if seedSys provides stars; otherwise delegate to CT_StellarEngine.
+    if (seedSys && (seedSys.stars || []).length > 0) {
+        sys.stars = seedSys.stars.map(s => Object.assign({}, s));
+        if (window.isLoggingEnabled) writeLogLine(`[PROBE] CT Skeleton: Stellar skipped — seed provides ${sys.stars.length} star(s).`);
+    } else {
+        if (typeof CT_StellarEngine === 'undefined') {
+            throw new Error('CT_StellarEngine not loaded. Ensure ct_stellar_engine.js is included before ct_bottomup_generator.js.');
+        }
+        const stellarResult = CT_StellarEngine.generateStars({});
+        sys.nature = stellarResult.nature;
+        sys.stars  = stellarResult.stars;
     }
-    const stellarResult = CT_StellarEngine.generateStars({});
-    sys.nature = stellarResult.nature;
-    sys.stars  = stellarResult.stars;
+
+    // Step 2E & 2F: Max Orbits & Zones + Step 2G: Skeleton Placement
+    // Skip both if seedSys provides orbits (body count controlled by editor).
+    if (seedSys && !(seedSys._allowAddBodies !== false) && (seedSys.orbits || []).length > 0) {
+        sys.orbits = seedSys.orbits.map(slot => Object.assign({}, slot));
+        if (seedSys.capturedPlanets) sys.capturedPlanets = seedSys.capturedPlanets.slice();
+        if (window.isLoggingEnabled) writeLogLine(`[PROBE] CT Skeleton: Orbit/skeleton skipped — seed provides ${sys.orbits.length} slot(s).`);
+        return sys;
+    }
 
     // Step 2E & 2F: Max Orbits & Zones
     generateSystemOrbits(sys);

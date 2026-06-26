@@ -411,14 +411,18 @@ function populateEditorAccordions(stateObj) {
         const _stellarCfgLines = document.getElementById('mgt-stellar-config-lines');
         if (_stellarCfgDiv && _stellarCfgLines && stateObj.mgtSystem.stars && stateObj.mgtSystem.stars.length > 0) {
             const _stars = stateObj.mgtSystem.stars;
+            const _starLabel = s => {
+                const spec = `${s.sType || ''}${s.subType !== undefined ? s.subType : ''}${s.sClass ? ' ' + s.sClass : ''}`.trim();
+                return spec || s.name || '?';
+            };
             const _lines = _stars
                 .filter(s => s.separation !== 'Companion')
                 .map(star => {
                     const idx = _stars.indexOf(star);
                     const companions = _stars.filter(c => c.separation === 'Companion' && c.parentStarIdx === idx);
-                    const compPart = companions.length > 0 ? ` (+${companions.map(c => c.name).join(', +')})` : '';
+                    const compPart = companions.length > 0 ? ` (+${companions.map(c => _starLabel(c)).join(', +')})` : '';
                     const rolePart = star.role === 'Primary' ? '' : ` — ${star.role}`;
-                    return `<div>${star.name}${compPart}${rolePart}</div>`;
+                    return `<div>${_starLabel(star)}${compPart}${rolePart}</div>`;
                 });
             _stellarCfgLines.innerHTML = _lines.join('');
             _stellarCfgDiv.style.display = 'block';
@@ -540,25 +544,19 @@ function populateEditorAccordions(stateObj) {
 
             html += `<div class="system-tree">`;
 
-            // Build star render order: primary first, then all other stars sorted by
-            // orbitId within each parent's sub-system. Companions of a secondary appear
-            // immediately after that secondary, not at the end of the array.
-            function buildMgtStarOrder(stars) {
-                const result = [0];
-                function addChildren(parentIdx) {
-                    stars
-                        .map((s, i) => ({ s, i }))
-                        .filter(({ i }) => i > 0 && stars[i].parentStarIdx === parentIdx)
-                        .sort((a, b) => (a.s.orbitId || 0) - (b.s.orbitId || 0))
-                        .forEach(({ i }) => { result.push(i); addChildren(i); });
-                }
-                addChildren(0);
-                return result;
-            }
+            // Compute AU for an MgT2E companion star from its orbitId
+            const _mgtCompAU = s => {
+                const tbl = (window.MgT2EData && window.MgT2EData.stellar && window.MgT2EData.stellar.orbitAu) || null;
+                if (!tbl || s.orbitId == null) return null;
+                const idx = Math.floor(s.orbitId), frac = s.orbitId - idx;
+                const lo = tbl[Math.min(idx, tbl.length - 1)] || 0;
+                const hi = tbl[Math.min(idx + 1, tbl.length - 1)] || lo;
+                return lo + frac * (hi - lo);
+            };
 
-            const orderedStarIndices = buildMgtStarOrder(sys.stars);
-            orderedStarIndices.forEach(starIdx => {
+            function renderMgtStar(starIdx) {
                 const star = sys.stars[starIdx];
+                const isCompanion = starIdx > 0;
                 const starNameInput = `<input type="text" class="rtt-field-input rtt-name-input${_mgtMc(star, 'name')}" data-mgt-field="name" data-mgt-sidx="${starIdx}" value="${(star.name || '').replace(/"/g, '&quot;')}">`;
                 html += `<details open>`;
                 html += `<summary>${star.role || 'Star'} — ${starNameInput} <span class="sys-title-info">Star</span></summary>`;
@@ -567,20 +565,39 @@ function populateEditorAccordions(stateObj) {
                 html += `<span>Mass (M☉): ${_mgtStarNum(star, 'mass', starIdx, 0, 100)}</span>`;
                 html += `<span>Lum (L☉): ${_mgtStarNum(star, 'lum', starIdx, 0, 100000)}</span>`;
 
-                if (star.orbitId !== null && starIdx > 0) {
-                    html += `<span>Orbit ID: ${_mgtStarNum(star, 'orbitId', starIdx, 0, 20)}</span>`;
-                    html += `<span>Ecc: ${_mgtStarNum(star, 'eccentricity', starIdx, 0, 1)}</span>`;
-                    if (star.mao !== undefined) {
-                        html += `<span>MAO: ${_mgtStarNum(star, 'mao', starIdx, 0, 100)}</span>`;
+                const _specStr = `${star.sType || ''}${star.subType !== undefined ? star.subType : ''}${star.sClass ? ' ' + star.sClass : ''}`.trim();
+                if (_specStr) html += `<span>Spectral: <strong class="${_mgtMc(star, 'sType')}">${_specStr}</strong></span>`;
+                if (star.diam != null) html += `<span>Diameter (D☉): <strong class="${_mgtMc(star, 'diam')}">${star.diam.toFixed(3)}</strong></span>`;
+                if (star.temp != null) html += `<span>Temp (K): <strong class="${_mgtMc(star, 'temp')}">${Math.round(star.temp).toLocaleString('en-US')}</strong></span>`;
+
+                if (isCompanion) {
+                    const compAU = star.distAU ?? _mgtCompAU(star);
+                    if (compAU != null) html += `<span>Distance: <strong>${compAU.toFixed(3)} AU</strong></span>`;
+                    if (star.orbitId !== null) {
+                        html += `<span>Orbit ID: <strong>${star.orbitId.toFixed(2)}</strong></span>`;
+                        html += `<span>Ecc: ${_mgtStarNum(star, 'eccentricity', starIdx, 0, 1)}</span>`;
+                        if (star.mao !== undefined) {
+                            html += `<span>MAO: ${_mgtStarNum(star, 'mao', starIdx, 0, 100)}</span>`;
+                        }
                     }
                 }
                 html += `</div>`;
 
-                const sortedWorlds = [...sys.worlds].sort((a, b) => (a.orbitId || 0) - (b.orbitId || 0));
-                sortedWorlds.forEach((w) => {
-                    const realWidx = sys.worlds.indexOf(w);
-                    let worldParent = w.parentStarIdx !== undefined ? w.parentStarIdx : 0;
-                    if (worldParent !== starIdx || w.type === 'Empty') return;
+                // Interleave worlds and sub-companion stars, sorted by AU
+                const _childAU = s => s.distAU ?? _mgtCompAU(s) ?? Infinity;
+                const merged = [
+                    ...sys.worlds
+                        .map((w, wi) => ({ kind: 'world', w, wi, sortAU: w.au ?? 0 }))
+                        .filter(e => (e.w.parentStarIdx ?? 0) === starIdx && e.w.type !== 'Empty'),
+                    ...sys.stars
+                        .map((s, i) => ({ kind: 'star', i, sortAU: _childAU(s) }))
+                        .filter(e => e.i > 0 && (sys.stars[e.i].parentStarIdx ?? 0) === starIdx),
+                ].sort((a, b) => a.sortAU - b.sortAU);
+
+                merged.forEach(entry => {
+                    if (entry.kind === 'star') { renderMgtStar(entry.i); return; }
+                    const w = entry.w;
+                    const realWidx = entry.wi;
 
                     let mwBase = stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData;
                     let isMainworldEntry = w.type === 'Mainworld' || w.isLunarMainworld;
@@ -619,7 +636,7 @@ function populateEditorAccordions(stateObj) {
                     html += `<div class="system-stats">`;
                     html += `<span>Orbit ID: <strong>${(w.orbitId || 0).toFixed(2)}</strong></span>`;
                     html += `<span>Type: <strong>${w.orbitType || 'S-Type'}</strong></span>`;
-                    html += `<span>Distance (AU): ${_mgtNum(w, 'au', realWidx, 0, 1000)}</span>`;
+                    html += `<span>Distance (AU): <strong>${(w.au || 0).toFixed(3)}</strong></span>`;
                     html += `<span>Ecc: ${_mgtNum(w, 'eccentricity', realWidx, 0, 1)}</span>`;
 
                     if (w.periodYears !== undefined) {
@@ -632,15 +649,20 @@ function populateEditorAccordions(stateObj) {
                             html += `<span>Composition: ${_mgtText(w, 'composition', realWidx)}</span>`;
                             if (w.density != null) html += `<span>Density (ρ⊕): ${_mgtNum(w, 'density', realWidx, 0, 30, 3)}</span>`;
 
-                            if (w.gases && w.gases.length > 0) {
-                                html += `<span class="system-stats-inline">Atmosphere: ${w.gases.map(g => `<span class="gas-chip">${g}</span>`).join('')}</span>`;
-                            } else if (w.oxygenFraction !== undefined) {
-                                html += `<span class="system-stats-inline">Atm — O₂ Fraction: ${_mgtNum(w, 'oxygenFraction', realWidx, 0, 1)}</span>`;
-                            } else {
-                                html += `<span class="system-stats-inline">Atmosphere: <strong>None</strong></span>`;
+                            if (w.type !== 'Gas Giant') {
+                                if (w.gases && w.gases.length > 0) {
+                                    const _agpMc = (typeof isManual === 'function' && isManual(w, 'gases')) ? ' is-manual' : '';
+                                    html += `<span class="system-stats-inline">Atmosphere: ${w.gases.map(g => `<span class="gas-chip${_agpMc}">${g}</span>`).join('')}<button class="sdp-edit-btn" data-action="open-atmo-gas-popup" data-agp-widx="${realWidx}" title="Edit gas mix">✎</button></span>`;
+                                } else if (w.oxygenFraction !== undefined) {
+                                    const _agpO2Mc = (typeof isManual === 'function' && isManual(w, 'oxygenFraction')) ? ' is-manual' : '';
+                                    html += `<span class="system-stats-inline">Atm — O₂ Fraction: <span class="${_agpO2Mc}">${_mgtNum(w, 'oxygenFraction', realWidx, 0, 1)}</span><button class="sdp-edit-btn" data-action="open-atmo-gas-popup" data-agp-widx="${realWidx}" title="Edit gas mix">✎</button></span>`;
+                                } else {
+                                    const _agpNoAtmMc = (typeof isManual === 'function' && isManual(w, 'gases')) ? ' is-manual' : '';
+                                    html += `<span class="system-stats-inline">Atmosphere: <strong class="${_agpNoAtmMc}">None</strong><button class="sdp-edit-btn" data-action="open-atmo-gas-popup" data-agp-widx="${realWidx}" title="Edit gas mix">✎</button></span>`;
+                                }
+                                if (w.totalPressureBar !== undefined) html += `<span>Pressure (bar): ${_mgtNum(w, 'totalPressureBar', realWidx, 0, 1000)}</span>`;
+                                if (w.taints !== undefined || w.oxygenFraction !== undefined) html += `<span class="system-stats-taints">Taints: ${_mgtTaints(w, realWidx)}</span>`;
                             }
-                            if (w.totalPressureBar !== undefined) html += `<span>Pressure (bar): ${_mgtNum(w, 'totalPressureBar', realWidx, 0, 1000)}</span>`;
-                            if (w.taints !== undefined || w.oxygenFraction !== undefined) html += `<span class="system-stats-taints">Taints: ${_mgtTaints(w, realWidx)}</span>`;
                         }
                     }
 
@@ -662,11 +684,12 @@ function populateEditorAccordions(stateObj) {
                     }
 
                     if (w.solarDayHours != null) {
-                        if (w.solarDayHours === Infinity || w.isTwilightZone) {
-                            html += `<span>Solar Day: <strong>Twilight Zone</strong></span>`;
-                        } else {
-                            html += `<span>Solar Day (hrs): ${_mgtNum(w, 'solarDayHours', realWidx, 0, 1000000)}</span>`;
-                        }
+                        const _sdTZ  = w.solarDayHours === Infinity || !!w.isTwilightZone;
+                        const _sdVal = _sdTZ ? 'Twilight Zone'
+                            : w.solarDayHours >= 24 ? `${(w.solarDayHours / 24).toFixed(1)}d`
+                            : `${w.solarDayHours.toFixed(1)}h`;
+                        const _sdMc = (typeof isManual === 'function' && (isManual(w, 'solarDayHours') || isManual(w, 'tidallyLocked') || isManual(w, 'isTwilightZone'))) ? ' is-manual' : '';
+                        html += `<span>Solar Day: <strong class="sdp-val${_sdMc}">${_sdVal}</strong><button class="sdp-edit-btn" data-action="open-solar-day-popup" data-sdp-widx="${realWidx}" title="Edit solar day">✎</button></span>`;
                     }
 
                     if (w.type === 'Terrestrial Planet' || isMainworldEntry) {
@@ -765,9 +788,14 @@ function populateEditorAccordions(stateObj) {
                                 if (m.density != null) html += `<span>Density (ρ⊕): ${_mgtMoonNum(m, 'density', realWidx, 'moons', moonIdx, 0, 30, 3)}</span>`;
 
                                 if (m.gases && m.gases.length > 0) {
-                                    html += `<span class="system-stats-inline">Atmosphere: ${m.gases.map(g => `<span class="gas-chip">${g}</span>`).join('')}</span>`;
+                                    const _agpMoonMc = (typeof isManual === 'function' && isManual(m, 'gases')) ? ' is-manual' : '';
+                                    html += `<span class="system-stats-inline">Atmosphere: ${m.gases.map(g => `<span class="gas-chip${_agpMoonMc}">${g}</span>`).join('')}<button class="sdp-edit-btn" data-action="open-atmo-gas-popup" data-agp-widx="${realWidx}" data-agp-subarray="moons" data-agp-midx="${moonIdx}" title="Edit gas mix">✎</button></span>`;
                                 } else if (m.oxygenFraction !== undefined) {
-                                    html += `<span class="system-stats-inline">Atm — O₂ Fraction: ${_mgtMoonNum(m, 'oxygenFraction', realWidx, 'moons', moonIdx, 0, 1)}</span>`;
+                                    const _agpMoonO2Mc = (typeof isManual === 'function' && isManual(m, 'oxygenFraction')) ? ' is-manual' : '';
+                                    html += `<span class="system-stats-inline">Atm — O₂ Fraction: <span class="${_agpMoonO2Mc}">${_mgtMoonNum(m, 'oxygenFraction', realWidx, 'moons', moonIdx, 0, 1)}</span><button class="sdp-edit-btn" data-action="open-atmo-gas-popup" data-agp-widx="${realWidx}" data-agp-subarray="moons" data-agp-midx="${moonIdx}" title="Edit gas mix">✎</button></span>`;
+                                } else {
+                                    const _agpMoonNoAtmMc = (typeof isManual === 'function' && isManual(m, 'gases')) ? ' is-manual' : '';
+                                    html += `<span class="system-stats-inline">Atmosphere: <strong class="${_agpMoonNoAtmMc}">None</strong><button class="sdp-edit-btn" data-action="open-atmo-gas-popup" data-agp-widx="${realWidx}" data-agp-subarray="moons" data-agp-midx="${moonIdx}" title="Edit gas mix">✎</button></span>`;
                                 }
                                 if (m.totalPressureBar !== undefined) html += `<span>Pressure (bar): ${_mgtMoonNum(m, 'totalPressureBar', realWidx, 'moons', moonIdx, 0, 1000)}</span>`;
                                 if (m.taints !== undefined || m.oxygenFraction !== undefined) html += `<span class="system-stats-taints">Taints: ${_mgtMoonTaints(m, realWidx, 'moons', moonIdx)}</span>`;
@@ -788,11 +816,12 @@ function populateEditorAccordions(stateObj) {
                             }
 
                             if (m.solarDayHours != null) {
-                                if (m.solarDayHours === Infinity || m.isTwilightZone) {
-                                    html += `<span>Solar Day: <strong>Twilight Zone</strong></span>`;
-                                } else {
-                                    html += `<span>Solar Day (hrs): ${_mgtMoonNum(m, 'solarDayHours', realWidx, 'moons', moonIdx, 0, 1000000)}</span>`;
-                                }
+                                const _msdTZ  = m.solarDayHours === Infinity || !!m.isTwilightZone;
+                                const _msdVal = _msdTZ ? 'Twilight Zone'
+                                    : m.solarDayHours >= 24 ? `${(m.solarDayHours / 24).toFixed(1)}d`
+                                    : `${m.solarDayHours.toFixed(1)}h`;
+                                const _msdMc = (typeof isManual === 'function' && (isManual(m, 'solarDayHours') || isManual(m, 'tidallyLocked') || isManual(m, 'isTwilightZone'))) ? ' is-manual' : '';
+                                html += `<span>Solar Day: <strong class="sdp-val${_msdMc}">${_msdVal}</strong><button class="sdp-edit-btn" data-action="open-solar-day-popup" data-sdp-widx="${realWidx}" data-sdp-subarray="moons" data-sdp-midx="${moonIdx}" title="Edit solar day">✎</button></span>`;
                             }
                             if (m.axialTilt != null) html += `<span>Axial Tilt (°): ${_mgtMoonNum(m, 'axialTilt', realWidx, 'moons', moonIdx, 0, 180)}</span>`;
                             if (m.lifeProfile !== undefined) html += `<span>Native Life: ${_mgtMoonText(m, 'lifeProfile', realWidx, 'moons', moonIdx)}</span>`;
@@ -850,7 +879,9 @@ function populateEditorAccordions(stateObj) {
                 });
 
                 html += `</div></details>`;
-            });
+            }
+
+            renderMgtStar(0);
 
             html += `</div>`;
             root.innerHTML = html;
@@ -947,7 +978,21 @@ function populateEditorAccordions(stateObj) {
 
             html += `<div class="system-tree">`;
 
-            sys.stars.forEach((star, starIdx) => {
+            const _ctCompAU = star => {
+                if (star.distAU != null) return star.distAU;
+                const tbl = (window.MgT2EData && window.MgT2EData.stellar && window.MgT2EData.stellar.orbitAu) || null;
+                const orb = star.orbit;
+                if (typeof orb === 'number' && tbl) {
+                    const idx = Math.floor(orb), frac = orb - idx;
+                    return (tbl[Math.min(idx, tbl.length-1)] || 0) + frac * ((tbl[Math.min(idx+1, tbl.length-1)] || 0) - (tbl[Math.min(idx, tbl.length-1)] || 0));
+                }
+                if (orb === 'Close') return 0.05;
+                return 10;
+            };
+
+            function renderCtStar(starIdx) {
+                const star = sys.stars[starIdx];
+                const isCompanion = starIdx > 0;
                 html += `<details open>`;
                 html += `<summary>${starIdx === 0 ? 'Primary' : (star.role || 'Companion')} - ${star.name} <span class="sys-title-info">Star</span></summary>`;
                 html += `<div class="system-node">`;
@@ -956,11 +1001,15 @@ function populateEditorAccordions(stateObj) {
                 html += `<span>Size: ${_ctStarText(star, 'size', starIdx)}</span>`;
                 html += `<span>Mass: ${_ctStarNum(star, 'mass', starIdx, 0, 200)} M☉</span>`;
                 html += `<span>Lum: ${_ctStarNum(star, 'luminosity', starIdx, 0, 1000000)} L☉</span>`;
-                if (starIdx > 0 && star.orbitLabel) html += `<span>Orbit: <strong>${star.orbitLabel}</strong></span>`;
+                if (isCompanion) {
+                    const compAU = _ctCompAU(star);
+                    html += `<span>Distance: <strong>${compAU.toFixed(3)} AU</strong></span>`;
+                    if (star.orbitLabel) html += `<span>Orbit: <strong>${star.orbitLabel}</strong></span>`;
+                }
                 html += `</div>`;
 
-                if (starIdx === 0) {
-                    let allBodies = [];
+                let allBodies = [];
+                if (!isCompanion) {
                     sys.orbits.forEach(o => {
                         if (o.contents) {
                             allBodies.push({
@@ -981,9 +1030,21 @@ function populateEditorAccordions(stateObj) {
                             });
                         });
                     }
-                    allBodies.sort((a, b) => a.orbit - b.orbit);
+                }
 
-                    allBodies.forEach((body, bodyIdx) => {
+                // Interleave bodies and sub-companion stars, sorted by AU
+                let bodyCount = 0;
+                const merged = [
+                    ...allBodies.map(body => ({ kind: 'body', body, sortAU: body.contents.distAU ?? 0 })),
+                    ...sys.stars
+                        .map((s, i) => ({ kind: 'star', i, sortAU: _ctCompAU(s) }))
+                        .filter(e => e.i > 0 && (sys.stars[e.i].parentStarIdx ?? 0) === starIdx),
+                ].sort((a, b) => a.sortAU - b.sortAU);
+
+                merged.forEach(entry => {
+                    if (entry.kind === 'star') { renderCtStar(entry.i); return; }
+                    const bodyIdx = bodyCount++;
+                    const body = entry.body;
                         let w = body.contents;
                         let o = body;
 
@@ -1139,10 +1200,11 @@ function populateEditorAccordions(stateObj) {
 
                         html += `</div></details>`;
                     });
-                }
 
                 html += `</div></details>`;
-            });
+            }
+
+            renderCtStar(0);
 
             html += `</div>`;
 
@@ -1234,8 +1296,21 @@ function populateEditorAccordions(stateObj) {
 
             html += `<div class="system-tree">`;
 
+            const _t5CompAU = star => {
+                if (star.distAU != null) return star.distAU;
+                const tbl = (window.MgT2EData && window.MgT2EData.stellar && window.MgT2EData.stellar.orbitAu) || null;
+                const id = star.orbitID ?? star.orbitId;
+                if (id != null && tbl) {
+                    const idx = Math.floor(id), frac = id - idx;
+                    return (tbl[Math.min(idx, tbl.length-1)] || 0) + frac * ((tbl[Math.min(idx+1, tbl.length-1)] || 0) - (tbl[Math.min(idx, tbl.length-1)] || 0));
+                }
+                return null;
+            };
+
             if (sys.stars) {
-                sys.stars.forEach((star, starIdx) => {
+                function renderT5Star(starIdx) {
+                    const star = sys.stars[starIdx];
+                    const isCompanion = starIdx > 0;
                     html += `<details open>`;
                     html += `<summary>${star.role}: ${star.name} <span class="sys-title-info">Star</span></summary>`;
                     html += `<div class="system-node">`;
@@ -1244,13 +1319,28 @@ function populateEditorAccordions(stateObj) {
                     html += `<span>Decimal: ${_t5StarText(star, 'decimal', starIdx)}</span>`;
                     html += `<span>Class: ${_t5StarText(star, 'size', starIdx)}</span>`;
                     html += `<span>Luminosity: <strong>${star.luminosity ? star.luminosity.toFixed(3) : '?'}</strong> <em style="font-size:0.8em;color:#a0a8b0;">(calculated)</em></span>`;
-                    if (starIdx > 0 && star.orbitLabel) html += `<span>Orbit: <strong>${star.orbitLabel}</strong></span>`;
+                    if (isCompanion) {
+                        const compAU = _t5CompAU(star);
+                        if (compAU != null) html += `<span>Distance: <strong>${compAU.toFixed(3)} AU</strong></span>`;
+                        if (star.orbitLabel) html += `<span>Orbit: <strong>${star.orbitLabel}</strong></span>`;
+                    }
                     html += `</div>`;
 
-                    if (star.orbits) {
-                        star.orbits.forEach((o, oIdx) => {
-                            let w = o.contents;
-                            if (!w || w.type === 'Empty') return;
+                    // Interleave orbits and sub-companion stars, sorted by AU
+                    const _childAU = s => _t5CompAU(s) ?? Infinity;
+                    const merged = [
+                        ...(star.orbits || [])
+                            .map((o, oIdx) => ({ kind: 'body', o, oIdx, sortAU: o.distAU ?? 0 }))
+                            .filter(e => e.o.contents && e.o.contents.type !== 'Empty'),
+                        ...sys.stars
+                            .map((s, i) => ({ kind: 'star', i, sortAU: _childAU(s) }))
+                            .filter(e => e.i > 0 && (sys.stars[e.i].parentStarIdx ?? 0) === starIdx),
+                    ].sort((a, b) => a.sortAU - b.sortAU);
+
+                    merged.forEach(entry => {
+                        if (entry.kind === 'star') { renderT5Star(entry.i); return; }
+                        const { o, oIdx } = entry;
+                        let w = o.contents;
 
                             const isGG = ['Gas Giant', 'Large Gas Giant', 'Small Gas Giant', 'Ice Giant'].includes(w.type) ||
                                          ['Gas Giant', 'Large Gas Giant', 'Small Gas Giant', 'Ice Giant'].includes(w.worldType);
@@ -1413,9 +1503,11 @@ function populateEditorAccordions(stateObj) {
 
                             html += `</div></details>`;
                         });
-                    }
+
                     html += `</div></details>`;
-                });
+                }
+
+                renderT5Star(0);
             }
 
             html += `</div>`;
@@ -1571,21 +1663,49 @@ function populateEditorAccordions(stateObj) {
             </div>`;
 
             html += `<div class="system-tree">`;
-            sys.stars.forEach((star, sIdx) => {
-                const starOrbitLabel = (star.orbitType && star.role !== 'Primary') ? ` (${star.orbitType} Orbit)` : '';
+
+            const _RTT_COMP_AU = { Tight: 0.05, Close: 0.5, Moderate: 5, Distant: 60 };
+            const _RTT_ZONE_AU = { Epistellar: {base:0.10,step:0.10}, Inner: {base:0.50,step:0.70}, Outer: {base:5.00,step:8.00} };
+
+            function renderRttStar(sIdx) {
+                const star = sys.stars[sIdx];
+                const isCompanion = sIdx > 0;
+                const compAU = isCompanion ? (_RTT_COMP_AU[star.orbitType] ?? 5) : null;
+                const starOrbitLabel = isCompanion ? ` (${star.orbitType || '?'} Orbit · ~${(compAU).toFixed(2)} AU)` : '';
                 const _starClassCss  = `rtt-field-input${_mc(star, 'classification')}`;
                 html += `<details open>`;
                 html += `<summary>${star.role}${starOrbitLabel} — <input type="text" class="${_starClassCss}" data-rtt-field="classification" data-rtt-level="star" data-rtt-sidx="${sIdx}" value="${(star.classification || '').replace(/"/g, '&quot;')}" onclick="event.stopPropagation()"> <span class="sys-title-info">Star</span></summary>`;
                 html += `<div class="system-node">`;
 
-                if (star.planetarySystem && star.planetarySystem.orbits) {
-                    star.planetarySystem.orbits.forEach((body, oIdx) => {
-                        html += renderRTTBody(body, false, sIdx, oIdx, -1);
+                // Compute synthetic AU for bodies, preserving original oIdx for data attrs
+                const zoneCounts = {};
+                const bodiesWithAU = (star.planetarySystem?.orbits || [])
+                    .map((body, oIdx) => {
+                        const zone = body.zone || 'Inner';
+                        const zIdx = zoneCounts[zone] = (zoneCounts[zone] || 0);
+                        zoneCounts[zone]++;
+                        const zDef = _RTT_ZONE_AU[zone] || _RTT_ZONE_AU.Inner;
+                        return { body, oIdx, sortAU: zDef.base + zIdx * zDef.step };
                     });
-                }
+
+                // Interleave bodies and sub-companion stars, sorted by AU
+                const merged = [
+                    ...bodiesWithAU.map(e => ({ kind: 'body', ...e })),
+                    ...sys.stars
+                        .map((s, i) => ({ kind: 'star', i, sortAU: _RTT_COMP_AU[s.orbitType] ?? 5 }))
+                        .filter(e => e.i > 0 && (sys.stars[e.i].parentStarIdx ?? 0) === sIdx),
+                ].sort((a, b) => a.sortAU - b.sortAU);
+
+                merged.forEach(entry => {
+                    if (entry.kind === 'star') { renderRttStar(entry.i); return; }
+                    html += renderRTTBody(entry.body, false, sIdx, entry.oIdx, -1);
+                });
 
                 html += `</div></details>`;
-            });
+            }
+
+            renderRttStar(0);
+
             html += `</div>`;
             root.innerHTML = html;
         }
@@ -1645,7 +1765,12 @@ function populateEditorAccordions(stateObj) {
 
             html += `<div class="system-tree">`;
 
-            (sys.stars || []).forEach((star, sIdx) => {
+            const _aowSortedOrbits = [...(sys.orbits || [])].sort((a, b) => (a.R || 0) - (b.R || 0));
+            const _aowCompAU = (i) => i > 0 && _aowSortedOrbits[i - 1] ? _aowSortedOrbits[i - 1].R : null;
+
+            function renderAowStar(sIdx) {
+                const star = (sys.stars || [])[sIdx];
+                const isCompanion = sIdx > 0;
                 const starLabel = star.spectralClassification || star.name || `Star ${sIdx + 1}`;
                 html += `<details open>`;
                 html += `<summary>${star.role || 'Star'} — ${starLabel} <span class="sys-title-info">Star</span></summary>`;
@@ -1653,11 +1778,25 @@ function populateEditorAccordions(stateObj) {
                 if (star.mass       !== undefined) html += `<span>Mass (M☉): <strong>${star.mass.toFixed(3)}</strong></span>`;
                 if (star.lum        !== undefined) html += `<span>Lum (L☉): <strong>${star.lum.toFixed(4)}</strong></span>`;
                 if (star.initialLum !== undefined) html += `<span>Init Lum (L☉): <strong>${star.initialLum.toFixed(4)}</strong></span>`;
+                if (isCompanion) {
+                    const compAU = _aowCompAU(sIdx);
+                    if (compAU != null) html += `<span>Distance: <strong>${compAU.toFixed(3)} AU</strong></span>`;
+                }
                 html += `</div>`;
 
-                const sortedWorlds = [...(sys.worlds || [])].sort((a, b) => (a.orbitId || 0) - (b.orbitId || 0));
-                sortedWorlds.forEach(w => {
-                    if (w.parentStarIdx !== sIdx) return;
+                // Interleave worlds and sub-companion stars, sorted by AU
+                const merged = [
+                    ...(sys.worlds || [])
+                        .map(w => ({ kind: 'world', w, sortAU: w.orbitId ?? 0 }))
+                        .filter(e => e.w.parentStarIdx === sIdx),
+                    ...(sys.stars || [])
+                        .map((s, i) => ({ kind: 'star', i, sortAU: _aowCompAU(i) ?? Infinity }))
+                        .filter(e => e.i > 0 && ((sys.stars[e.i].parentStarIdx ?? 0) === sIdx)),
+                ].sort((a, b) => a.sortAU - b.sortAU);
+
+                merged.forEach(entry => {
+                    if (entry.kind === 'star') { renderAowStar(entry.i); return; }
+                    const w = entry.w;
 
                     const isMain      = w.type === 'Mainworld' || !!w.isMainworld;
                     const labelColor  = isMain ? '#ffa500' : '#66fcf1';
@@ -1777,7 +1916,9 @@ function populateEditorAccordions(stateObj) {
                 });
 
                 html += `</div></details>`;
-            });
+            }
+
+            renderAowStar(0);
 
             html += `</div>`;
             root.innerHTML = html;
@@ -2203,6 +2344,437 @@ function setupHexEditor() {
             }
         }
     });
+
+    // ── Solar Day Override Popup ─────────────────────────────────────────────
+    (function () {
+        const popup     = document.getElementById('solar-day-popup');
+        const bodyLabel = document.getElementById('sdp-body-label');
+        const radioTZ   = document.getElementById('sdp-radio-tz');
+        const radioCust = document.getElementById('sdp-radio-custom');
+        const hoursInp  = document.getElementById('sdp-hours-input');
+        const btnRecalc = document.getElementById('sdp-btn-recalc');
+        const btnCancel = document.getElementById('sdp-btn-cancel');
+        const btnSave   = document.getElementById('sdp-btn-save');
+        if (!popup) return;
+
+        let _ctx = null; // { widx, subarray, midx }
+
+        function _getContext() {
+            if (!editingHexId || !_ctx) return null;
+            const stateObj = hexStates.get(editingHexId);
+            if (!stateObj || !stateObj.mgtSystem) return null;
+            const sys = stateObj.mgtSystem;
+            const world = sys.worlds[_ctx.widx];
+            if (!world) return null;
+            if (_ctx.subarray && _ctx.midx !== undefined && !isNaN(_ctx.midx)) {
+                const body = world[_ctx.subarray] && world[_ctx.subarray][_ctx.midx];
+                return body ? { body, parentWorld: world, sys, stateObj } : null;
+            }
+            return { body: world, parentWorld: world, sys, stateObj };
+        }
+
+        function _syncInputState() {
+            hoursInp.disabled     = radioTZ.checked;
+            hoursInp.style.opacity = radioTZ.checked ? '0.4' : '1';
+        }
+        radioTZ.addEventListener('change', _syncInputState);
+        radioCust.addEventListener('change', _syncInputState);
+
+        function _closePopup() {
+            popup.style.display = 'none';
+            _ctx = null;
+        }
+
+        // Open on ✎ button click
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('[data-action="open-solar-day-popup"]');
+            if (!btn || !editingHexId) return;
+
+            _ctx = {
+                widx:     parseInt(btn.dataset.sdpWidx, 10),
+                subarray: btn.dataset.sdpSubarray || null,
+                midx:     btn.dataset.sdpMidx !== undefined ? parseInt(btn.dataset.sdpMidx, 10) : undefined,
+            };
+
+            const found = _getContext();
+            if (!found) return;
+            const { body } = found;
+
+            // Pre-populate radio and hours input
+            const isTZ = body.solarDayHours === Infinity || !!body.isTwilightZone;
+            radioTZ.checked   = isTZ;
+            radioCust.checked = !isTZ;
+            hoursInp.value    = (!isTZ && body.solarDayHours != null)
+                ? parseFloat(body.solarDayHours.toFixed(2)) : '';
+            _syncInputState();
+
+            bodyLabel.textContent = body.name || body.type || 'Body';
+
+            // Recalculate only available for MgT2E
+            const hasRecalc = !!(window.MgT2EWorldEngine && MgT2EWorldEngine.generateRotationalDynamics);
+            btnRecalc.disabled      = !hasRecalc;
+            btnRecalc.style.opacity = hasRecalc ? '1' : '0.4';
+            btnRecalc.title         = hasRecalc ? 'Recalculate from physics' : 'Not available for this system type';
+
+            // Position popup near the button, keeping it on screen
+            const rect = btn.getBoundingClientRect();
+            const popW = 288;
+            let left = rect.right + 8;
+            if (left + popW > window.innerWidth) left = rect.left - popW - 8;
+            let top = rect.top;
+            if (top + 230 > window.innerHeight) top = window.innerHeight - 234;
+            popup.style.left    = Math.max(4, left) + 'px';
+            popup.style.top     = Math.max(4, top) + 'px';
+            popup.style.display = 'block';
+        });
+
+        // Close on Cancel or outside click
+        btnCancel.addEventListener('click', _closePopup);
+        document.addEventListener('click', function (e) {
+            if (popup.style.display === 'none') return;
+            if (popup.contains(e.target)) return;
+            if (e.target.closest('[data-action="open-solar-day-popup"]')) return;
+            _closePopup();
+        });
+
+        // Save
+        btnSave.addEventListener('click', function () {
+            const found = _getContext();
+            if (!found) { _closePopup(); return; }
+            const { body, stateObj } = found;
+
+            if (radioTZ.checked) {
+                body.solarDayHours  = Infinity;
+                body.tidallyLocked  = true;
+                body.isTwilightZone = true;
+                markManual(body, 'solarDayHours');
+                markManual(body, 'tidallyLocked');
+                markManual(body, 'isTwilightZone');
+            } else {
+                const hrs = parseFloat(hoursInp.value);
+                if (isNaN(hrs) || hrs <= 0) {
+                    hoursInp.style.borderColor = '#ff6b6b';
+                    hoursInp.focus();
+                    return;
+                }
+                hoursInp.style.borderColor = '';
+                body.solarDayHours  = hrs;
+                body.tidallyLocked  = false;
+                body.isTwilightZone = false;
+                markManual(body, 'solarDayHours');
+                if (Array.isArray(body._manualFields)) {
+                    body._manualFields = body._manualFields.filter(f => f !== 'tidallyLocked' && f !== 'isTwilightZone');
+                }
+            }
+
+            hexStates.set(editingHexId, stateObj);
+            populateEditorAccordions(stateObj);
+            _closePopup();
+        });
+
+        // Recalculate from physics
+        btnRecalc.addEventListener('click', function () {
+            const found = _getContext();
+            if (!found) { _closePopup(); return; }
+            const { body, parentWorld, sys, stateObj } = found;
+
+            // Clear narrative overrides so the engine owns these fields again
+            if (Array.isArray(body._manualFields)) {
+                body._manualFields = body._manualFields.filter(
+                    f => f !== 'solarDayHours' && f !== 'tidallyLocked' && f !== 'isTwilightZone'
+                );
+            }
+
+            if (window.MgT2EWorldEngine && MgT2EWorldEngine.generateRotationalDynamics) {
+                try {
+                    MgT2EWorldEngine.generateRotationalDynamics(sys, { targetWorlds: [parentWorld] });
+                } catch (err) {
+                    console.error('[SolarDayPopup] Recalculate failed:', err);
+                }
+            }
+
+            hexStates.set(editingHexId, stateObj);
+            populateEditorAccordions(stateObj);
+            _closePopup();
+        });
+    }());
+
+    // ── Atmosphere Gas Mix Popup ─────────────────────────────────────────────
+    (function () {
+        const popup     = document.getElementById('atmo-gas-popup');
+        const bodyLabel = document.getElementById('agp-body-label');
+        const cbList    = document.getElementById('agp-checkbox-list');
+        const selList   = document.getElementById('agp-selected-list');
+        const totalEl   = document.getElementById('agp-total');
+        const btnRegen  = document.getElementById('agp-btn-regen');
+        const btnCancel = document.getElementById('agp-btn-cancel');
+        const btnSave   = document.getElementById('agp-btn-save');
+        if (!popup) return;
+
+        let _ctx = null; // { widx, subarray, midx }
+
+        function _getContext() {
+            if (!editingHexId || !_ctx) return null;
+            const stateObj = hexStates.get(editingHexId);
+            if (!stateObj || !stateObj.mgtSystem) return null;
+            const sys = stateObj.mgtSystem;
+            const world = sys.worlds[_ctx.widx];
+            if (!world) return null;
+            if (_ctx.subarray && _ctx.midx !== undefined && !isNaN(_ctx.midx)) {
+                const body = world[_ctx.subarray] && world[_ctx.subarray][_ctx.midx];
+                return body ? { body, parentWorld: world, sys, stateObj } : null;
+            }
+            return { body: world, parentWorld: world, sys, stateObj };
+        }
+
+        function _closePopup() {
+            popup.style.display = 'none';
+            _ctx = null;
+        }
+
+        function _parseGasEntry(str) {
+            const i = str.lastIndexOf(' ');
+            if (i === -1) return { name: str, pct: 100 };
+            const tail = str.slice(i + 1);
+            if (tail.endsWith('%')) return { name: str.slice(0, i), pct: parseFloat(tail) || 0 };
+            return { name: str, pct: 100 };
+        }
+
+        function _updateTotal() {
+            let sum = 0;
+            selList.querySelectorAll('.agp-pct-input').forEach(inp => { sum += parseFloat(inp.value) || 0; });
+            totalEl.textContent = `Total: ${sum.toFixed(1)}%`;
+            totalEl.className = (sum >= 99.5 && sum <= 100.5) ? 'agp-total-ok' : 'agp-total-warn';
+        }
+
+        function _addSelectedRow(name, pct) {
+            const row = document.createElement('div');
+            row.className = 'agp-gas-row';
+            row.dataset.gasName = name;
+            row.innerHTML = `<span class="agp-gas-name" title="${name}">${name}</span>`
+                + `<input type="number" class="agp-pct-input" min="0" max="100" step="0.1" value="${pct.toFixed(1)}">`;
+            row.querySelector('.agp-pct-input').addEventListener('input', _updateTotal);
+            selList.appendChild(row);
+            _updateTotal();
+        }
+
+        function _removeSelectedRow(name) {
+            Array.from(selList.querySelectorAll('.agp-gas-row')).forEach(row => {
+                if (row.dataset.gasName === name) row.remove();
+            });
+            _updateTotal();
+        }
+
+        function _makeGasLabel(g, currentNames) {
+            const checked = currentNames.has(g.name);
+            const label = document.createElement('label');
+            label.className = 'agp-checkbox-row';
+            label.innerHTML = `<input type="checkbox" value="${g.name}"${checked ? ' checked' : ''}>`
+                + `${g.name}`
+                + (g.taint ? `<span class="agp-taint-badge" title="Taint">T</span>` : '');
+            label.querySelector('input').addEventListener('change', function () {
+                if (this.checked) {
+                    _addSelectedRow(g.name, 0);
+                } else {
+                    _removeSelectedRow(g.name);
+                }
+            });
+            return label;
+        }
+
+        function _makeSeparator(label) {
+            const sep = document.createElement('div');
+            sep.style.cssText = 'border-top:1px solid #2a3040; margin:5px 0 4px; padding-top:4px; color:#8a8f94; font-size:9px; text-transform:uppercase; letter-spacing:0.06em;';
+            sep.textContent = label;
+            return sep;
+        }
+
+        function _buildCheckboxList(currentNames, body) {
+            cbList.innerHTML = '';
+            const allGases = (window.MgT2EData && window.MgT2EData.atmosphereExtended && window.MgT2EData.atmosphereExtended.gasRetentionData) || [];
+
+            // Filter to non-special gases only (Hydrogen Ion weight=0 is a particle, not a gas mix component)
+            const usable = allGases.filter(g => g.weight > 0);
+
+            // Split into plausible (retained by this world's physics) vs. narrative override
+            const maxEv   = (body && body.maxEscapeValue)  || 0;
+            const tempK   = (body && body.meanTempK)        || 0;
+            const hasPhysics = maxEv > 0 && tempK > 0;
+
+            const plausible  = usable.filter(g => hasPhysics && g.ev < maxEv && tempK > g.bp)
+                                     .sort((a, b) => a.name.localeCompare(b.name));
+            const narrative  = usable.filter(g => !hasPhysics || !(g.ev < maxEv && tempK > g.bp))
+                                     .sort((a, b) => a.name.localeCompare(b.name));
+
+            // Any current gases absent from the full list get synthetic entries (edge case)
+            const knownNames = new Set(usable.map(g => g.name));
+            currentNames.forEach(n => {
+                if (!knownNames.has(n)) {
+                    plausible.unshift({ name: n, taint: false, _synthetic: true });
+                }
+            });
+
+            if (plausible.length > 0) {
+                cbList.appendChild(_makeSeparator('Plausible for this world'));
+                plausible.forEach(g => cbList.appendChild(_makeGasLabel(g, currentNames)));
+            }
+            if (narrative.length > 0) {
+                cbList.appendChild(_makeSeparator('Narrative / Override'));
+                narrative.forEach(g => cbList.appendChild(_makeGasLabel(g, currentNames)));
+            }
+        }
+
+        // Open on ✎ button click
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('[data-action="open-atmo-gas-popup"]');
+            if (!btn || !editingHexId) return;
+
+            _ctx = {
+                widx:     parseInt(btn.dataset.agpWidx, 10),
+                subarray: btn.dataset.agpSubarray || null,
+                midx:     btn.dataset.agpMidx !== undefined ? parseInt(btn.dataset.agpMidx, 10) : undefined,
+            };
+
+            const found = _getContext();
+            if (!found) return;
+            const { body } = found;
+
+            let initialEntries = [];
+            if (body.gases && body.gases.length > 0) {
+                initialEntries = body.gases.map(_parseGasEntry);
+            } else if (body.oxygenFraction > 0) {
+                const o2Pct = parseFloat((body.oxygenFraction * 100).toFixed(1));
+                const n2Pct = parseFloat(((1 - body.oxygenFraction) * 100).toFixed(1));
+                initialEntries = [
+                    { name: 'Nitrogen', pct: n2Pct },
+                    { name: 'Oxygen',   pct: o2Pct },
+                ];
+            }
+            // else: no atmosphere / cleared — start with empty right panel
+
+            const currentNames = new Set(initialEntries.map(p => p.name));
+
+            selList.innerHTML = '';
+            initialEntries.forEach(p => _addSelectedRow(p.name, p.pct));
+            _buildCheckboxList(currentNames, body);
+            bodyLabel.textContent = body.name || body.type || 'Body';
+
+            const rect = btn.getBoundingClientRect();
+            const popW = 496;
+            let left = rect.right + 8;
+            if (left + popW > window.innerWidth) left = rect.left - popW - 8;
+            let top = rect.top;
+            if (top + 420 > window.innerHeight) top = Math.max(4, window.innerHeight - 424);
+            popup.style.left    = Math.max(4, left) + 'px';
+            popup.style.top     = top + 'px';
+            popup.style.display = 'block';
+        });
+
+        // Close on outside click
+        document.addEventListener('click', function (e) {
+            if (popup.style.display === 'none') return;
+            if (!popup.contains(e.target) && !e.target.closest('[data-action="open-atmo-gas-popup"]')) {
+                _closePopup();
+            }
+        });
+
+        btnCancel.addEventListener('click', _closePopup);
+
+        btnSave.addEventListener('click', function () {
+            const found = _getContext();
+            if (!found) { _closePopup(); return; }
+            const { body, stateObj } = found;
+
+            let entries = [];
+            selList.querySelectorAll('.agp-gas-row').forEach(row => {
+                const name = row.dataset.gasName;
+                const pct  = parseFloat(row.querySelector('.agp-pct-input').value) || 0;
+                if (name && pct > 0) entries.push({ name, pct });
+            });
+
+            selList.style.outline = '';
+
+            // Normalize to 100% (skip if empty — saving empty is valid: "No Atmosphere")
+            const total = entries.reduce((s, e) => s + e.pct, 0);
+            if (total > 0 && Math.abs(total - 100) > 0.05) {
+                entries.forEach(e => { e.pct = e.pct / total * 100; });
+            }
+
+            // Sync oxygenFraction from the Oxygen gas entry (if present)
+            const o2Entry = entries.find(e => e.name === 'Oxygen');
+            if (o2Entry) {
+                body.oxygenFraction = o2Entry.pct / 100;
+                if (body.totalPressureBar !== undefined) body.ppoBar = body.oxygenFraction * body.totalPressureBar;
+            } else {
+                body.oxygenFraction = 0;
+                body.ppoBar = 0;
+            }
+            markManual(body, 'oxygenFraction');
+
+            // Sync taints: add for taint-flagged gases now in the mix, remove for those no longer present
+            const _taintGasData = (window.MgT2EData && window.MgT2EData.atmosphereExtended && window.MgT2EData.atmosphereExtended.gasRetentionData) || [];
+            const _taintGasNames = new Set(_taintGasData.filter(g => g.taint).map(g => g.name));
+            const _newGasNames   = new Set(entries.map(e => e.name));
+            let _taints = Array.isArray(body.taints) ? [...body.taints] : [];
+            // Remove taints for taint-gases that are no longer in the mix
+            _taints = _taints.filter(t => !_taintGasNames.has(t) || _newGasNames.has(t));
+            // Add taints for taint-gases newly present in the mix
+            _newGasNames.forEach(name => {
+                if (_taintGasNames.has(name) && !_taints.includes(name)) _taints.push(name);
+            });
+            // Recalculate O2-based taints from the updated ppoBar
+            const _ppo = body.ppoBar || 0;
+            _taints = _taints.filter(t => t !== 'Low Oxygen' && t !== 'High Oxygen');
+            if (_ppo > 0 && _ppo < 0.1) _taints.push('Low Oxygen');
+            else if (_ppo > 0.5)         _taints.push('High Oxygen');
+            body.taints = _taints;
+            markManual(body, 'taints');
+
+            body.gases = entries.map(e => `${e.name} ${e.pct.toFixed(1)}%`);
+            markManual(body, 'gases');
+            hexStates.set(editingHexId, stateObj);
+            populateEditorAccordions(stateObj);
+            _closePopup();
+        });
+
+        btnRegen.addEventListener('click', function () {
+            const found = _getContext();
+            if (!found) { _closePopup(); return; }
+            const { body, parentWorld, sys, stateObj } = found;
+
+            // Snapshot hydro — generateAtmospherics regenerates hydro as a side effect
+            const hydroSnap = {
+                hydroCode:    body.hydroCode,
+                hydroPercent: body.hydroPercent,
+                hydrosphere:  body.hydrosphere,
+            };
+
+            // Clear manual locks on atmosphere fields so the engine regenerates freely
+            if (Array.isArray(body._manualFields)) {
+                body._manualFields = body._manualFields.filter(
+                    f => f !== 'gases' && f !== 'oxygenFraction' && f !== 'taints'
+                );
+            }
+
+            if (window.MgT2EWorldEngine && MgT2EWorldEngine.generateAtmospherics) {
+                try {
+                    // Pass parentWorld so satellite atmospheres are also regenerated correctly
+                    MgT2EWorldEngine.generateAtmospherics(sys, { targetWorlds: [parentWorld] });
+                } catch (err) {
+                    console.error('[AtmoGasPopup] Regenerate failed:', err);
+                }
+            }
+
+            // Restore hydro fields
+            if (hydroSnap.hydroCode    !== undefined) body.hydroCode    = hydroSnap.hydroCode;
+            if (hydroSnap.hydroPercent !== undefined) body.hydroPercent = hydroSnap.hydroPercent;
+            if (hydroSnap.hydrosphere  !== undefined) body.hydrosphere  = hydroSnap.hydrosphere;
+
+            hexStates.set(editingHexId, stateObj);
+            populateEditorAccordions(stateObj);
+            _closePopup();
+        });
+    }());
 }
 
 function _propagateSystemName(stateObj, oldName, newName) {

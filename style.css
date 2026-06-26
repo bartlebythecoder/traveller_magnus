@@ -898,6 +898,8 @@ body {
     display: flex;
     justify-content: flex-start;
     gap: 4px;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .system-stats-full {
@@ -948,6 +950,95 @@ body {
     font-size: 11px;
     white-space: nowrap;
     color: #c5c6c7;
+}
+.gas-chip.is-manual {
+    color: #ffd700;
+    font-style: italic;
+    border-color: rgba(255, 215, 0, 0.5);
+}
+
+/* Atmosphere Gas Mix Popup */
+.agp-popup {
+    position: fixed;
+    z-index: 9500;
+    background: #0d1117;
+    border: 1px solid #45a29e;
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-family: 'Share Tech Mono', 'Courier New', monospace;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+    width: 480px;
+}
+.agp-panels {
+    display: flex;
+    gap: 10px;
+    margin: 8px 0 4px;
+}
+.agp-panel {
+    flex: 1;
+    border: 1px solid #2a3040;
+    border-radius: 4px;
+    padding: 6px 8px;
+    max-height: 220px;
+    overflow-y: auto;
+    background: rgba(255,255,255,0.02);
+}
+.agp-checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 0;
+    font-size: 11px;
+    color: #c5c6c7;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.agp-checkbox-row input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+    accent-color: #45a29e;
+}
+.agp-gas-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 3px 0;
+    font-size: 11px;
+    color: #c5c6c7;
+    border-bottom: 1px solid rgba(69,162,158,0.1);
+}
+.agp-gas-row:last-child {
+    border-bottom: none;
+}
+.agp-gas-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11px;
+}
+.agp-pct-input {
+    width: 52px;
+    background: transparent;
+    border: 1px solid #45a29e66;
+    color: #66fcf1;
+    padding: 2px 4px;
+    font-family: inherit;
+    font-size: 11px;
+    border-radius: 3px;
+    text-align: right;
+}
+.agp-total-ok  { color: #45a29e; font-size: 11px; text-align: right; margin-bottom: 8px; }
+.agp-total-warn { color: #ff6b6b; font-size: 11px; text-align: right; margin-bottom: 8px; }
+.agp-taint-badge {
+    font-size: 9px;
+    color: #ff9944;
+    border: 1px solid #ff994466;
+    border-radius: 3px;
+    padding: 0 3px;
+    margin-left: 2px;
+    flex-shrink: 0;
 }
 
 .sys-title-info {
@@ -1011,6 +1102,38 @@ body {
 .rtt-field-select.is-manual {
     color: #ffd700;
     font-style: italic;
+}
+
+/* Solar day display value — shrinks to keep the edit button visible */
+.sdp-val {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Solar day display value — manual override indicator */
+.sdp-val.is-manual {
+    color: #ffd700;
+    font-style: italic;
+}
+
+/* Solar day edit button — never shrinks or gets clipped */
+.sdp-edit-btn {
+    background: none;
+    border: 1px solid #45a29e66;
+    color: #8a8f94;
+    cursor: pointer;
+    font-size: 10px;
+    padding: 0 4px;
+    border-radius: 2px;
+    margin-left: 3px;
+    line-height: 1.4;
+    flex-shrink: 0;
+}
+.sdp-edit-btn:hover {
+    color: #66fcf1;
+    border-color: #66fcf1;
 }
 
 /* World name input in RTT summary header */

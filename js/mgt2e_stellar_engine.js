@@ -1978,6 +1978,9 @@
         generateSystemInventory,
         allocateOrbits,
         walkMgT2ESystem,
-        logMgT2EBodyBiography
+        logMgT2EBodyBiography,
+        generateStarObject,
+        getMAO,
+        convertAuToOrbit,
     };
 }));

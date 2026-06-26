@@ -242,12 +242,20 @@ const SystemViewer = (() => {
     function _normalizeMgT2E(sys) {
         const hzAU = _orbitToAU(sys.hzco || 3);
         const mw   = sys.mainworld;
+        const mwId = mw && mw._id;
         const worlds = (sys.worlds || []).map(w => {
             const isMainworld = _isSameWorld(w, mw) || w.type === 'Mainworld';
             let type = isMainworld ? 'Mainworld' : w.type;
             if (type === 'Planet') type = 'Terrestrial Planet';
+            // generateAtmospherics replaces moon objects (w.moons[j] = syncRes with type:'Satellite'),
+            // detaching them from sys.mainworld. Re-identify lunar mainworlds by _id.
+            const moons = (w.moons || []).map(m => {
+                const moonIsMainworld = (mwId && m._id === mwId) || m.type === 'Mainworld';
+                return moonIsMainworld ? Object.assign({}, m, { type: 'Mainworld' }) : m;
+            });
             return Object.assign({}, w, {
                 type,
+                moons,
                 orbitType:     w.orbitType     || 'S-Type',
                 parentStarIdx: w.parentStarIdx ?? 0,
                 travelZone:    w.travelZone    || w.travelCode || 'G',
@@ -692,8 +700,26 @@ const SystemViewer = (() => {
 
     function isOpen() { return _overlay !== null; }
 
-    function open() {
-        const hexId = _centerHexId();
+    // Re-normalises the system data from hexStates without closing or resetting any
+    // viewer state (zoom, pan, pause, hideMoons, speed, year, etc.).
+    // Used by the System Editor's Preview so viewer settings survive each preview cycle.
+    function refresh(hexId) {
+        if (!_overlay || hexId !== _hexId) return;
+        const state = (typeof hexStates !== 'undefined') ? hexStates.get(hexId) : null;
+        if (!state) return;
+        const found = _detectSystem(state);
+        if (!found) return;
+        if      (found.edition === 'AoW')   _sys = _normalizeAoW(found.raw);
+        else if (found.edition === 'MgT2E') _sys = _normalizeMgT2E(found.raw);
+        else if (found.edition === 'CT')    _sys = _normalizeCT(found.raw);
+        else if (found.edition === 'T5')    _sys = _normalizeT5(found.raw);
+        else                                _sys = _normalizeRTT(found.raw);
+        _hitBodies = [];
+        if (_tooltip) _tooltip.style.display = 'none';
+    }
+
+    function open(explicitHexId) {
+        const hexId = explicitHexId || _centerHexId();
         if (!hexId) return;
         const state = hexStates.get(hexId);
         if (!state) return;
@@ -752,6 +778,7 @@ const SystemViewer = (() => {
         _hideMoons              = false;
         _hideHZ                 = false;
         _hideMainworldHighlight = false;
+        if (typeof SystemEditor !== 'undefined') SystemEditor.close();
     }
 
     function handleWheel(direction) {
@@ -972,6 +999,18 @@ const SystemViewer = (() => {
         });
         _pauseBtn.addEventListener('click', _togglePause);
 
+        const editBtn = document.createElement('button');
+        editBtn.id = 'sv-edit-btn';
+        editBtn.textContent = 'Edit System';
+        Object.assign(editBtn.style, {
+            background: 'transparent', border: `1px solid ${P.badge}`,
+            color: P.accent, padding: '3px 10px', cursor: 'pointer',
+            fontFamily: 'inherit', fontSize: '11px', whiteSpace: 'nowrap'
+        });
+        editBtn.addEventListener('click', () => {
+            if (typeof SystemEditor !== 'undefined') SystemEditor.openEdit(_hexId);
+        });
+
         const closeBtn = document.createElement('button');
         closeBtn.textContent = '✕';
         Object.assign(closeBtn.style, {
@@ -981,7 +1020,7 @@ const SystemViewer = (() => {
         });
         closeBtn.addEventListener('click', close);
 
-        header.append(title, editionBadge, sub, hint, yearWrap, dayWrap, speedWrap, linearWrap, orbitWrap, hideMoonsWrap, hideHZWrap, hideHighlightWrap, _pauseBtn, closeBtn);
+        header.append(title, editionBadge, sub, hint, yearWrap, dayWrap, speedWrap, linearWrap, orbitWrap, hideMoonsWrap, hideHZWrap, hideHighlightWrap, _pauseBtn, editBtn, closeBtn);
         _overlay.appendChild(header);
 
         _orrCanvas = document.createElement('canvas');
@@ -1071,6 +1110,45 @@ const SystemViewer = (() => {
         const originX = W / 2 + _viewOffX;
         const originY = H / 2 + _viewOffY;
 
+        // Primary worlds — defined early so the companion ring pre-computation can reference them
+        const primaryWorlds = worlds.filter(w =>
+            w.orbitType === 'P-Type' ||
+            (w.orbitType === 'S-Type' && (w.parentStarIdx === 0 || w.parentStarIdx === undefined))
+        );
+
+        // Pre-compute companion orbit ring radii that honour the true AU order.
+        // A close companion gets a minimum visibility bump, but that bump is capped so
+        // its ring never visually crosses outside any body at a larger AU from the same parent.
+        // Sub-companions (orbiting a secondary star, not the primary) keep a small fixed floor.
+        const _COMP_MIN_PX  = 20;  // desired minimum ring radius for visibility
+        const _COMP_ABS_MIN =  4;  // absolute floor — ring never drawn smaller than this
+        const _COMP_GAP     =  3;  // pixel gap to maintain between adjacent rings
+        const _compRingR    = new Map();
+        stars.slice(1).forEach(s => {
+            const pIdx   = s.parentStarIdx ?? 0;
+            const compAU = _starCompanionAU(s);
+            const natR   = _scaleR(compAU, maxAU, scaledMaxR);
+            if (_linearScale || pIdx !== 0) {
+                // Linear mode or sub-companion: simple floor, no ordering constraint needed
+                _compRingR.set(s, _linearScale ? Math.max(30, natR) : Math.max(8, natR));
+                return;
+            }
+            // Primary companion: find pixel radius of nearest outer body in primary orbit
+            let outerMinR = Infinity;
+            primaryWorlds.forEach(w => {
+                if ((w.au || 0) > compAU)
+                    outerMinR = Math.min(outerMinR, _scaleR(w.au || 0, maxAU, scaledMaxR));
+            });
+            stars.slice(1).forEach(t => {
+                if (t !== s && (t.parentStarIdx ?? 0) === 0 && _starCompanionAU(t) > compAU)
+                    outerMinR = Math.min(outerMinR, _scaleR(_starCompanionAU(t), maxAU, scaledMaxR));
+            });
+            let r = Math.max(natR, _COMP_MIN_PX);
+            if (outerMinR !== Infinity && r >= outerMinR - _COMP_GAP)
+                r = Math.max(natR, outerMinR - _COMP_GAP - 1);
+            _compRingR.set(s, Math.max(r, _COMP_ABS_MIN));
+        });
+
         // Companion star screen positions
         const companions = stars.slice(1);
         const starPos    = new Map();
@@ -1085,8 +1163,7 @@ const SystemViewer = (() => {
         // Companion star positions — physical Kepler periods
         companions.forEach((s, i) => {
             const compAU    = _starCompanionAU(s);
-            const minPx     = (s.separation === 'Companion') ? 130 : 90;
-            const dist      = Math.max(_linearScale ? 30 : minPx, _scaleR(compAU, maxAU, scaledMaxR));
+            const dist      = _compRingR.get(s);
             const parentMass = (stars[s.parentStarIdx ?? 0] || {}).mass || 1;
             const period    = s.periodYears || _keplerYears(Math.max(compAU, 0.05), parentMass);
             const epoch     = _hashEpoch(_hexId + ':star:' + (i + 1));
@@ -1110,9 +1187,7 @@ const SystemViewer = (() => {
         companions.forEach((s, i) => {
             const sIdx      = i + 1;
             const pos       = starPos.get(sIdx);
-            const compAU    = _starCompanionAU(s);
-            const minPx     = (s.separation === 'Companion') ? 130 : 90;
-            const orbitR    = Math.max(_linearScale ? 30 : minPx, _scaleR(compAU, maxAU, scaledMaxR));
+            const orbitR    = _compRingR.get(s);
             const parentPos = starPos.get(s.parentStarIdx ?? 0) || { cx: originX, cy: originY };
 
             if (_orbitOpacity > 0) {
@@ -1138,10 +1213,6 @@ const SystemViewer = (() => {
         });
 
         // Primary worlds
-        const primaryWorlds = worlds.filter(w =>
-            w.orbitType === 'P-Type' ||
-            (w.orbitType === 'S-Type' && (w.parentStarIdx === 0 || w.parentStarIdx === undefined))
-        );
         if (primaryWorlds.length > 0) {
             const primaryStarMass = ((stars[0] || {}).mass) || 1;
             _drawWorldSet(ctx, primaryWorlds, originX, originY, maxAU, scaledMaxR, elapsed_years, primaryStarMass, worldIdxMap);
@@ -1697,7 +1768,7 @@ const SystemViewer = (() => {
         });
     }
 
-    return { open, close, isOpen, handleWheel, normalizeSystem, renderSnapshot };
+    return { open, close, isOpen, refresh, handleWheel, normalizeSystem, renderSnapshot };
 
 })();
 

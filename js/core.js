@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.15.2.4";
-const APP_BANNER = "v0.15.2.4: New: System Editor";
+const APP_VERSION = "v0.16.0";
+const APP_BANNER = "v0.16.0: New This Version: Full System Editor";
 
 // -----------------------------------------------------------------------------
 // Application State

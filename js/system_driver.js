@@ -42,17 +42,21 @@
 
     /**
      * Main entry point for universal system generation.
-     * 
+     *
      * @param {Object} params - Configuration for generation.
      * @param {string} params.edition - 'CT' or 'T5'.
      * @param {string} params.mode - 'bottom-up' or 'top-down'.
      * @param {Object} [params.mainworldUWP] - Required for 'top-down'.
      * @param {Object} [params.primaryStar] - Optional context.
      * @param {string} [params.hexId] - Seed or identification string.
+     * @param {Object} [params.seedSys=null] - Optional seed from the System Editor. When null,
+     *   generation is fully stochastic (all existing macro calls). When provided:
+     *   - For T5: seedSys._mainworldRef body's UWP is used as mainworldUWP
+     *   - For CT: passed to generateSystemSkeleton to gate stellar/skeleton phases
      * @returns {Object} The generated system object.
      */
     function generateSystem(params) {
-        const { edition, mode, mainworldUWP, primaryStar, hexId } = params;
+        const { edition, mode, mainworldUWP, primaryStar, hexId, seedSys = null } = params;
 
         if (!edition) {
             throw new Error("Sean Protocol Violation: Generation requires a specific 'edition' flag (CT or T5).");
@@ -67,11 +71,23 @@
             }
 
             if (mode === 'top-down') {
-                if (!mainworldUWP) {
+                // When seedSys designates a mainworld, extract its UWP for the top-down anchor
+                let resolvedUWP = mainworldUWP;
+                if (seedSys && seedSys._mainworldRef) {
+                    const mwBody = (seedSys.worlds || []).find(w => w._id === seedSys._mainworldRef) ||
+                                   (seedSys.worlds || []).reduce((found, w) => {
+                                       if (found) return found;
+                                       return (w.moons || []).find(m => m._id === seedSys._mainworldRef) || null;
+                                   }, null);
+                    if (mwBody && mwBody.uwp) {
+                        resolvedUWP = Object.assign({}, mwBody, { uwp: mwBody.uwp });
+                    }
+                }
+                if (!resolvedUWP) {
                     throw new Error("T5 Top-Down generation requires a valid mainworldUWP object.");
                 }
                 // T5 Generator expects the mainworldBase as the anchor
-                sys = T5_Generator.generateT5System(mainworldUWP);
+                sys = T5_Generator.generateT5System(resolvedUWP);
             } else {
                 throw new Error(`Invalid generation mode for T5: ${mode}. Only 'top-down' is supported.`);
             }
@@ -95,7 +111,28 @@
                     throw new Error("Missing Classic Traveller Bottom-Up generator components.");
                 }
 
-                const skeleton = skeletonGen(hexId);
+                const skeleton = skeletonGen(hexId, seedSys);
+
+                // If seedSys designates a mainworld, pre-set it on the skeleton so
+                // processBottomUpDesignation uses the Fixed Anchor path.
+                if (seedSys && seedSys._mainworldRef && skeleton) {
+                    const _findById = (id) => {
+                        for (const slot of (skeleton.orbits || [])) {
+                            const w = slot.contents;
+                            if (w && w._id === id) return w;
+                            for (const m of (w && (w.satellites || w.moons)) || []) {
+                                if (m._id === id) return m;
+                            }
+                        }
+                        for (const w of (skeleton.capturedPlanets || [])) {
+                            if (w && w._id === id) return w;
+                        }
+                        return null;
+                    };
+                    const mw = _findById(seedSys._mainworldRef);
+                    if (mw) skeleton.mainworld = mw;
+                }
+
                 sys = socialProc(skeleton);
             } else {
                 throw new Error(`Invalid generation mode for CT: ${mode}. Use 'bottom-up' or 'top-down'.`);

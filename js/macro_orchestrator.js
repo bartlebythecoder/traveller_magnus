@@ -496,6 +496,10 @@ async function runMgT2EBottomUpMacro(skipPop = false) {
                             mainworld = mainworld || sys.mainworld || sys.worlds[0];
                             if (window.isLoggingEnabled) writeLogLine(`[PROBE] ${hexId} mapped mainworld: ${mainworld?.name || 'Unnamed'}`);
 
+                            // Sean Protocol: sys.gasGiants is authoritative in bottom-up;
+                            // override the socio engine's independent gasGiant roll.
+                            mainworld.gasGiant = sys.gasGiants > 0;
+
                             // Map resulting data to stateObj (Sean Protocol: Orchestrator maps generated data to UI state)
                             stateObj.mgtSystem = sys;
                             stateObj.mgt2eData = mainworld;

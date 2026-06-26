@@ -97,7 +97,15 @@ function determineRTTLuminosity(starType, systemAge, hasCompanion = false) {
  * STEP 1: STELLAR GENERATION
  * Generates the stars, spectral types, age, and orbits.
  */
+/**
+ * options.seedSys (optional): seed from the System Editor. When provided:
+ *   - options.seedSys.stars:          star objects to use instead of rolling
+ *   - options.seedSys._allowAddBodies: when false, body generation in Step2 is skipped
+ *   - options.seedSys._mainworldRef:   _id of the body designated as mainworld
+ */
 function generateRTTSectorStep1(hexId, options = {}) {
+    const seedSys = options.seedSys || null;
+
     let name = options.name || getNextSystemName(hexId);
     if (window.isLoggingEnabled) {
         startTrace(hexId, 'RTT Engine', name);
@@ -114,87 +122,95 @@ function generateRTTSectorStep1(hexId, options = {}) {
 
     tSection('STEP 1: STELLAR GENERATION');
 
-    // 1. DETERMINE NUMBER OF STARS
-    let rollStars = tRoll3D('Star Count Roll');
-    if (options.isOpenCluster) {
-        tDM('Open Cluster', 3);
-        rollStars += 3;
-    }
+    // If seedSys provides stars, use them directly and skip stellar dice rolls
+    if (seedSys && (seedSys.stars || []).length > 0) {
+        sys.stars = seedSys.stars.map(s => Object.assign({}, s));
+        sys.totalStars = sys.stars.length;
+        sys.age = seedSys.age || 0;
+        tResult('Stellar Source', `seed — ${sys.totalStars} star(s)`, 'RTT 1: Seeded');
+    } else {
+        // 1. DETERMINE NUMBER OF STARS
+        let rollStars = tRoll3D('Star Count Roll');
+        if (options.isOpenCluster) {
+            tDM('Open Cluster', 3);
+            rollStars += 3;
+        }
 
-    if (rollStars <= 10) sys.totalStars = 1;
-    else if (rollStars <= 15) sys.totalStars = 2;
-    else sys.totalStars = 3;
+        if (rollStars <= 10) sys.totalStars = 1;
+        else if (rollStars <= 15) sys.totalStars = 2;
+        else sys.totalStars = 3;
 
-    tResult('Initial Star Count', sys.totalStars, 'RTT 1.1: Star Count');
+        tResult('Initial Star Count', sys.totalStars, 'RTT 1.1: Star Count');
 
-    // 2. DETERMINE SPECTRAL TYPES
-    let primaryRoll = tRoll2D('Primary Spectral Roll');
-    let primaryType = getRTTSpectralType(primaryRoll);
+        // 2. DETERMINE SPECTRAL TYPES
+        let primaryRoll = tRoll2D('Primary Spectral Roll');
+        let primaryType = getRTTSpectralType(primaryRoll);
 
-    // Constraint: Brown dwarfs (L) are always solitary
-    if (primaryType === 'L' && sys.totalStars > 1) {
-        writeLogLine('  Notice: Primary is an L-type dwarf. Forcing Solitary.');
-        sys.totalStars = 1;
-        tResult('Total Stars (Override)', 1, 'RTT 1.1: Star Count Override');
-    }
-
-    sys.stars.push({
-        type: primaryType,
-        role: 'Primary',
-        spectralRoll: primaryRoll,
-        orbitType: 'Primary'
-    });
-    tResult('Primary Spectral Type', primaryType, 'RTT 1.2: Spectral Type');
-
-    // Companion stars
-    for (let i = 1; i < sys.totalStars; i++) {
-        let d6_1 = tRoll1D(`Companion ${i} Offset (1D6-1)`) - 1;
-        let companionRoll = primaryRoll + d6_1;
-        let companionType = getRTTSpectralType(companionRoll);
+        // Constraint: Brown dwarfs (L) are always solitary
+        if (primaryType === 'L' && sys.totalStars > 1) {
+            writeLogLine('  Notice: Primary is an L-type dwarf. Forcing Solitary.');
+            sys.totalStars = 1;
+            tResult('Total Stars (Override)', 1, 'RTT 1.1: Star Count Override');
+        }
 
         sys.stars.push({
-            type: companionType,
-            role: `Companion ${i}`,
-            spectralRoll: companionRoll
+            type: primaryType,
+            role: 'Primary',
+            spectralRoll: primaryRoll,
+            orbitType: 'Primary'
         });
-        tResult(`Companion ${i} Spectral Type`, companionType, 'RTT 1.2: Spectral Type');
-    }
+        tResult('Primary Spectral Type', primaryType, 'RTT 1.2: Spectral Type');
 
-    // 3. DETERMINE SYSTEM AGE & LUMINOSITY
-    sys.age = tRoll3D('System Age Roll (3D6-3)') - 3;
-    if (sys.age < 0.1) sys.age = 0.1;
-    tResult('System Age (Gyrs)', sys.age.toFixed(1), 'RTT 1.3: System Age');
+        // Companion stars
+        for (let i = 1; i < sys.totalStars; i++) {
+            let d6_1 = tRoll1D(`Companion ${i} Offset (1D6-1)`) - 1;
+            let companionRoll = primaryRoll + d6_1;
+            let companionType = getRTTSpectralType(companionRoll);
 
-    let hasCompanion = sys.totalStars > 1;
-
-    for (let star of sys.stars) {
-        let lumData = determineRTTLuminosity(star.type, sys.age, hasCompanion);
-        star.type = lumData.type; // Apply any spectral shifts
-        star.luminosityClass = lumData.lum;
-
-        // Format classification cleanly for White Dwarfs and Brown Dwarfs
-        if (star.luminosityClass === 'D' || star.luminosityClass === 'L') {
-            star.classification = star.luminosityClass;
-        } else {
-            star.classification = `${star.type}-${star.luminosityClass}`;
+            sys.stars.push({
+                type: companionType,
+                role: `Companion ${i}`,
+                spectralRoll: companionRoll
+            });
+            tResult(`Companion ${i} Spectral Type`, companionType, 'RTT 1.2: Spectral Type');
         }
-        tResult(`${star.role} Classification`, star.classification, 'RTT 1.4: Stellar Classification');
-    }
 
-    // 4. DETERMINE COMPANION ORBITS
-    for (let i = 1; i < sys.stars.length; i++) {
-        let star = sys.stars[i];
-        let orbitRoll = tRoll1D(`${star.role} Orbit Roll`);
-        let orbit = 'Moderate';
+        // 3. DETERMINE SYSTEM AGE & LUMINOSITY
+        sys.age = tRoll3D('System Age Roll (3D6-3)') - 3;
+        if (sys.age < 0.1) sys.age = 0.1;
+        tResult('System Age (Gyrs)', sys.age.toFixed(1), 'RTT 1.3: System Age');
 
-        // Mapping 1D6: 1-2: Tight, 3-4: Close (corrected gap), 5: Moderate, 6: Distant
-        if (orbitRoll <= 2) orbit = 'Tight';
-        else if (orbitRoll <= 4) orbit = 'Close';
-        else if (orbitRoll === 5) orbit = 'Moderate';
-        else orbit = 'Distant';
+        let hasCompanion = sys.totalStars > 1;
 
-        star.orbitType = orbit;
-        tResult(`${star.role} Orbit`, orbit, 'RTT 1.5: Stellar Orbits');
+        for (let star of sys.stars) {
+            let lumData = determineRTTLuminosity(star.type, sys.age, hasCompanion);
+            star.type = lumData.type; // Apply any spectral shifts
+            star.luminosityClass = lumData.lum;
+
+            // Format classification cleanly for White Dwarfs and Brown Dwarfs
+            if (star.luminosityClass === 'D' || star.luminosityClass === 'L') {
+                star.classification = star.luminosityClass;
+            } else {
+                star.classification = `${star.type}-${star.luminosityClass}`;
+            }
+            tResult(`${star.role} Classification`, star.classification, 'RTT 1.4: Stellar Classification');
+        }
+
+        // 4. DETERMINE COMPANION ORBITS
+        for (let i = 1; i < sys.stars.length; i++) {
+            let star = sys.stars[i];
+            let orbitRoll = tRoll1D(`${star.role} Orbit Roll`);
+            let orbit = 'Moderate';
+
+            // Mapping 1D6: 1-2: Tight, 3-4: Close (corrected gap), 5: Moderate, 6: Distant
+            if (orbitRoll <= 2) orbit = 'Tight';
+            else if (orbitRoll <= 4) orbit = 'Close';
+            else if (orbitRoll === 5) orbit = 'Moderate';
+            else orbit = 'Distant';
+
+            star.orbitType = orbit;
+            tResult(`${star.role} Orbit`, orbit, 'RTT 1.5: Stellar Orbits');
+        }
     }
 
     if (window.isLoggingEnabled) {
@@ -1221,11 +1237,27 @@ function getEHex(val) {
  * STEP 2: ORBITAL ZONES & PLANETARY SYSTEM LAYOUT
  */
 function generateRTTSectorStep2(sys, options = {}) {
+    const seedSys = options.seedSys || null;
+
     if (window.isLoggingEnabled) {
         startTrace(sys.hexId, 'RTT Engine - Step 2', sys.name || sys.hexId);
     }
 
     tSection('STEP 2: ORBITAL ZONES & PLANETARY SYSTEM LAYOUT');
+
+    // If seedSys controls body count, load seeded bodies per-star instead of rolling.
+    // seedSys.rttBodies[starIdx] = RTT-format orbit array for that star (set by _buildSeedSys).
+    if (seedSys && !seedSys._allowAddBodies) {
+        const rttBodies = seedSys.rttBodies || [];
+        sys.stars.forEach((star, si) => {
+            if (star.role === 'Primary' || star.orbitType === 'Distant') {
+                star.planetarySystem = { orbits: (rttBodies[si] || []).map(b => Object.assign({}, b)) };
+            }
+        });
+        if (window.isLoggingEnabled) writeLogLine(`[PROBE] RTT Step 2: Skipped — seed provides bodies (${(rttBodies[0] || []).length} in primary star).`);
+        generateRTTSectorStep3(sys, options);
+        return;
+    }
 
     for (let star of sys.stars) {
         // Each Primary and Distant Companion star has its own planetary system
@@ -1775,14 +1807,38 @@ function assignRTTBases(body, star) {
  * Finds the most populated world (or highest starport) in the RTT system
  * to populate the main hex editor window.
  */
-function extractRTTMainworld(sys) {
+/**
+ * @param {Object} sys - The fully generated RTT system
+ * @param {string} [preferredId=null] - Optional _id of a seeded body to designate as mainworld
+ *   instead of running the scoring election (used by Fill & Save when editor has a mainworld ref).
+ */
+function extractRTTMainworld(sys, preferredId = null) {
     let bestWorld = null;
     let bestScore = -1;
     let bestWorldParent = null; // Track parent for Lunar Mainworlds
 
     tSection('STEP 8: MAINWORLD SELECTION');
 
-    // 1. Clear existing isMainworld flags and Find Best Candidate
+    // If a preferred body _id was provided (seeded mainworld), find it directly
+    if (preferredId) {
+        for (const star of sys.stars) {
+            if (!star.planetarySystem) continue;
+            for (const body of star.planetarySystem.orbits) {
+                if (body._id === preferredId) { bestWorld = body; break; }
+                for (const sat of (body.satellites || [])) {
+                    if (sat._id === preferredId) { bestWorld = sat; bestWorldParent = body; break; }
+                }
+                if (bestWorld) break;
+            }
+            if (bestWorld) break;
+        }
+        if (bestWorld) {
+            tResult('Preferred Mainworld', `Orbit ${bestWorld.orbitNumber} (seed-pinned)`, 'RTT 8.1: Mainworld Selection');
+        }
+    }
+
+    // 1. Clear existing isMainworld flags and Find Best Candidate (skipped if seed-pinned)
+    if (!bestWorld) {
     for (let star of sys.stars) {
         if (!star.planetarySystem) continue;
         for (let body of star.planetarySystem.orbits) {
@@ -1808,6 +1864,7 @@ function extractRTTMainworld(sys) {
             }
         }
     }
+    } // end if (!bestWorld) scoring block
 
     if (!bestWorld) {
         // FALLBACK: The system generated 0 planetary bodies (Stellar-Only system)

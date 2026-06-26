@@ -1,4 +1,8 @@
-### [v0.15.2.4] - In Progress
+### [v0.16.0] - In Progress
+
+### [v0.15.2.4] - 2026-06-19
+1. **System Viewer**: Fixed bug that showed Companion stars in incorrect orbits in some systems
+2. **System Details**:  System details window now has consistent format for all systems regardless of engine.  Companions, secondaries and worlds are all shown in the same list in order of distance from primary.
 
 ### [v0.15.2.3] - 2026-06-17
 1. **Import Traveller World Systems:** Fixed import slot error resulting in system viewer mis-aligning orbits

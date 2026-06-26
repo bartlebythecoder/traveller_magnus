@@ -42,9 +42,15 @@
      * Executes the complete pipeline for system generation per Architect of Worlds rules.
      *
      * @param {string} hexId - The hex identifier for this system
+     * @param {Object} [seedSys=null] - Optional seed from the System Editor. When null,
+     *   generation is fully stochastic (all existing macro calls). When provided:
+     *   - seedSys.stars: star objects to use instead of rolling
+     *   - seedSys.worlds: body objects to use instead of disk/orbital generation
+     *   - seedSys._allowAddBodies: when false, disk/orbital phases are skipped
+     *   - seedSys._mainworldRef: _id of the body to designate as mainworld
      * @returns {Object} sys - The fully populated system object
      */
-    function generateAoWSystemBottomUp(hexId) {
+    function generateAoWSystemBottomUp(hexId, seedSys = null) {
 
         // =================================================================
         // INITIALIZATION
@@ -64,18 +70,29 @@
             writeLogLine(`${'═'.repeat(72)}`);
         }
 
-        // Base system object — AoW carries more physical detail than MgT2E
-        const sys = {
-            hexId: hexId,
-            worlds: [],
-            stars: [],
-            age: 0,           // system age in Gyr
-            hzco: 0,          // habitable zone center orbit (AU)
-            gasGiants: 0,
-            planetoidBelts: 0,
+        // Base system object — seed from seedSys if provided, otherwise start fresh
+        const sys = seedSys ? {
+            hexId:              hexId,
+            worlds:             (seedSys.worlds || []).map(b => Object.assign({}, b)),
+            stars:              (seedSys.stars  || []).map(s => Object.assign({}, s)),
+            age:                seedSys.age  || 0,
+            hzco:               seedSys.hzco || 0,
+            gasGiants:          0,
+            planetoidBelts:     0,
             terrestrialPlanets: 0,
-            totalWorlds: 0,
-            forbiddenZones: []
+            totalWorlds:        0,
+            forbiddenZones:     []
+        } : {
+            hexId:              hexId,
+            worlds:             [],
+            stars:              [],
+            age:                0,
+            hzco:               0,
+            gasGiants:          0,
+            planetoidBelts:     0,
+            terrestrialPlanets: 0,
+            totalWorlds:        0,
+            forbiddenZones:     []
         };
 
         // =================================================================
@@ -86,27 +103,31 @@
         // Chunk 3 (Step 8)    — Stellar orbital parameters (skipped for Singletons).
 
         tSection(`[${hexId}] Phase 1: Stellar Generation`);
-        if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 1: Chunk 1 — Star Hierarchy & Masses...`);
 
-        // Chunk 1: System Hierarchy and Masses (Steps 1–3)
-        // forceEarthlike defaults to false; wire options.forceEarthlike when UI input is ready
-        if (StellarEngine && StellarEngine.generateStarHierarchyAndMasses) {
-            StellarEngine.generateStarHierarchyAndMasses(sys, { forceEarthlike: false });
+        if (seedSys && sys.stars.length > 0) {
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 1: Stellar skipped — seed provides ${sys.stars.length} star(s).`);
+        } else {
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 1: Chunk 1 — Star Hierarchy & Masses...`);
+
+            // Chunk 1: System Hierarchy and Masses (Steps 1–3)
+            if (StellarEngine && StellarEngine.generateStarHierarchyAndMasses) {
+                StellarEngine.generateStarHierarchyAndMasses(sys, { forceEarthlike: false });
+            }
+
+            // Chunk 2: Age, Metallicity, and Stellar Evolution (Steps 4–7)
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 1: Chunk 2 — Age, Metallicity, Evolution... (Hierarchy: ${sys.hierarchy}, Stars: ${sys.stars.length})`);
+            if (StellarEngine && StellarEngine.generateAgeMetallicityAndEvolution) {
+                StellarEngine.generateAgeMetallicityAndEvolution(sys, { forceEarthlike: false });
+            }
+
+            // Chunk 3: Stellar Orbital Parameters (Step 8) — skipped for Singletons
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 1: Chunk 3 — Stellar Orbits... (Age: ${sys.systemAge} Gyr, Metallicity: ${sys.systemMetallicity})`);
+            if (StellarEngine && StellarEngine.generateStellarOrbits) {
+                StellarEngine.generateStellarOrbits(sys);
+            }
+
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 1 complete. Hierarchy: ${sys.hierarchy} | Stars: ${sys.stars.length} | Orbits: ${(sys.orbits || []).length} | Classifications: ${sys.stars.map(s => s.spectralClassification).join(', ')}`);
         }
-
-        // Chunk 2: Age, Metallicity, and Stellar Evolution (Steps 4–7)
-        if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 1: Chunk 2 — Age, Metallicity, Evolution... (Hierarchy: ${sys.hierarchy}, Stars: ${sys.stars.length})`);
-        if (StellarEngine && StellarEngine.generateAgeMetallicityAndEvolution) {
-            StellarEngine.generateAgeMetallicityAndEvolution(sys, { forceEarthlike: false });
-        }
-
-        // Chunk 3: Stellar Orbital Parameters (Step 8) — skipped for Singletons
-        if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 1: Chunk 3 — Stellar Orbits... (Age: ${sys.systemAge} Gyr, Metallicity: ${sys.systemMetallicity})`);
-        if (StellarEngine && StellarEngine.generateStellarOrbits) {
-            StellarEngine.generateStellarOrbits(sys);
-        }
-
-        if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 1 complete. Hierarchy: ${sys.hierarchy} | Stars: ${sys.stars.length} | Orbits: ${(sys.orbits || []).length} | Classifications: ${sys.stars.map(s => s.spectralClassification).join(', ')}`);
 
         // =================================================================
         // PHASE 2: SYSTEM STRUCTURE
@@ -119,24 +140,31 @@
         if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 2: System Structure...`);
 
         // Chunk 4 (Steps 9–12): Protoplanetary disk worksheets + planet placement
-        if (WorldEngine && WorldEngine.generatePlanetaryDisks) {
-            WorldEngine.generatePlanetaryDisks(sys);
+        // Skip if seedSys controls body count (worlds already in sys.worlds)
+        if (!seedSys || seedSys._allowAddBodies) {
+            if (WorldEngine && WorldEngine.generatePlanetaryDisks) {
+                WorldEngine.generatePlanetaryDisks(sys);
+            }
+        } else {
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 2: Disk/orbital skipped — seed provides ${sys.worlds.length} world(s).`);
         }
 
-        if (window.isLoggingEnabled) {
-            const totalPlanets = (sys.diskWorksheets || []).reduce((sum, ws) =>
-                sum + ws.diskInstabilityPlanets.length + ws.coreAccretionPlanets.length + ws.oligarchicCollisionPlanets.length, 0);
-            writeLogLine(`[PROBE] AoW Chunk 4 complete. Worksheets: ${(sys.diskWorksheets || []).length} | Total planets placed: ${totalPlanets}`);
-        }
+        if (!seedSys || seedSys._allowAddBodies) {
+            if (window.isLoggingEnabled) {
+                const totalPlanets = (sys.diskWorksheets || []).reduce((sum, ws) =>
+                    sum + ws.diskInstabilityPlanets.length + ws.coreAccretionPlanets.length + ws.oligarchicCollisionPlanets.length, 0);
+                writeLogLine(`[PROBE] AoW Chunk 4 complete. Worksheets: ${(sys.diskWorksheets || []).length} | Total planets placed: ${totalPlanets}`);
+            }
 
-        // Chunk 5 (Steps 13–15): Orbital radii, planetary mass, orbital eccentricity
-        if (WorldEngine && WorldEngine.generateOrbitalDynamics) {
-            WorldEngine.generateOrbitalDynamics(sys);
-        }
+            // Chunk 5 (Steps 13–15): Orbital radii, planetary mass, orbital eccentricity
+            if (WorldEngine && WorldEngine.generateOrbitalDynamics) {
+                WorldEngine.generateOrbitalDynamics(sys);
+            }
 
-        if (window.isLoggingEnabled) {
-            const totalWithDynamics = (sys.diskWorksheets || []).reduce((sum, ws) => sum + (ws.planets ? ws.planets.length : 0), 0);
-            writeLogLine(`[PROBE] AoW Phase 2 complete. Planets with orbital dynamics: ${totalWithDynamics}`);
+            if (window.isLoggingEnabled) {
+                const totalWithDynamics = (sys.diskWorksheets || []).reduce((sum, ws) => sum + (ws.planets ? ws.planets.length : 0), 0);
+                writeLogLine(`[PROBE] AoW Phase 2 complete. Planets with orbital dynamics: ${totalWithDynamics}`);
+            }
         }
 
         // TODO: StellarEngine.generateHabitableZone(sys)
@@ -153,8 +181,19 @@
         tSection(`[${hexId}] Phase 3: World Formation`);
 
         if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 3: Physicals...`);
+        const _seededMoonCaps = (seedSys && !seedSys._allowAddBodies)
+            ? sys.worlds.map(w => (w.moons || []).length)
+            : null;
+
         if (WorldEngine && WorldEngine.generatePhysicals) {
             WorldEngine.generatePhysicals(sys);
+        }
+
+        if (_seededMoonCaps) {
+            sys.worlds.forEach((w, i) => {
+                const cap = _seededMoonCaps[i] ?? 0;
+                if (w.moons && w.moons.length > cap) w.moons = w.moons.slice(0, cap);
+            });
         }
 
         if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 3: Orbital Conditions...`);
@@ -230,7 +269,18 @@
 
         let mainworld = null;
 
-        if (WorldEngine && WorldEngine.generateMainworldSelection) {
+        // If seedSys designates a mainworld, find it by _id; otherwise run normal election
+        if (seedSys && seedSys._mainworldRef) {
+            mainworld = sys.worlds.find(w => w._id === seedSys._mainworldRef);
+            if (!mainworld) {
+                for (const w of sys.worlds) {
+                    const moon = (w.moons || w.satellites || []).find(m => m._id === seedSys._mainworldRef);
+                    if (moon) { mainworld = moon; break; }
+                }
+            }
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 4: Mainworld from seed ref: ${mainworld ? mainworld._id : 'NOT FOUND'}`);
+        }
+        if (!mainworld && WorldEngine && WorldEngine.generateMainworldSelection) {
             mainworld = WorldEngine.generateMainworldSelection(sys);
         }
 
@@ -257,10 +307,12 @@
             if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 4: barren system — no disk planets`);
         }
 
-        // Build sys.worlds[] from diskWorksheets after mainworld is elected,
-        // so type='Mainworld' is already set before social generators iterate it.
-        if (WorldEngine && WorldEngine.populateAoWWorldsList) {
-            WorldEngine.populateAoWWorldsList(sys);
+        // Build sys.worlds[] from diskWorksheets after mainworld is elected.
+        // Skip if seedSys already provides worlds (they're already in sys.worlds).
+        if (!seedSys || seedSys._allowAddBodies) {
+            if (WorldEngine && WorldEngine.populateAoWWorldsList) {
+                WorldEngine.populateAoWWorldsList(sys);
+            }
         }
 
         // =================================================================

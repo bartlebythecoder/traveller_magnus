@@ -53,6 +53,26 @@ function setupCanvasEvents() {
         const importTwBtn = document.getElementById('ctx-import-tw-system');
         if (importTwBtn) importTwBtn.style.display = selectedHexes.size === 1 ? 'block' : 'none';
 
+        // System Editor — create for empty hex, edit for populated hex
+        {
+            const createBtn = document.getElementById('ctx-create-system');
+            const editBtn   = document.getElementById('ctx-edit-system');
+            if (selectedHexes.size === 1) {
+                const _seHexId = [...selectedHexes][0];
+                const _seState = hexStates.get(_seHexId);
+                const _seHasSystem    = !!(_seState && (_seState.ctData || _seState.ctSystem ||
+                    _seState.mgt2eData || _seState.mgtSystem ||
+                    _seState.t5Data || _seState.t5System ||
+                    _seState.aowSystem || _seState.rttData));
+                const _seCanEdit = !!(_seState && (_seState.mgt2eData || _seState.mgtSystem || _seState.aowSystem));
+                if (createBtn) createBtn.style.display = _seHasSystem ? 'none' : 'block';
+                if (editBtn)   editBtn.style.display   = _seCanEdit ? 'block' : 'none';
+            } else {
+                if (createBtn) createBtn.style.display = 'none';
+                if (editBtn)   editBtn.style.display   = 'none';
+            }
+        }
+
         // Show first to measure dimensions
         contextMenu.classList.add('visible');
 

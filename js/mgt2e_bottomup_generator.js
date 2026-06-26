@@ -37,15 +37,20 @@
     /**
      * Main MgT2E Bottom-Up Generation Orchestrator.
      * Executes the complete pipeline for system generation.
-     * 
-     * @param {string} hexId - The hex identifier for this system
+     *
+     * @param {string} hexId   - The hex identifier for this system
+     * @param {Object} [seedSys=null] - Optional seed from the System Editor. When null,
+     *   generation is fully stochastic (all existing macro calls). When provided:
+     *   - Stars/worlds are taken from seedSys instead of being rolled
+     *   - seedSys._allowAddBodies: if false, inventory/allocation phases are skipped
+     *   - seedSys._mainworldRef: _id of the body to designate as mainworld (skips election)
      * @returns {Object} sys - The fully populated system object
      */
-    function generateMgT2ESystemBottomUp(hexId) {
+    function generateMgT2ESystemBottomUp(hexId, seedSys = null) {
         // =================================================================
         // PHASE 1: INITIALIZATION & SKELETON
         // =================================================================
-        
+
         // Initialize trace logging
         if (typeof startTrace === 'function' && typeof window !== 'undefined' && window.isLoggingEnabled) {
             startTrace(hexId, 'MgT2E Bottom-Up System');
@@ -56,8 +61,20 @@
             reseedForHex(hexId);
         }
 
-        // Create base system object
-        const sys = {
+        // Create base system object — seed from seedSys if provided, otherwise start fresh
+        const sys = seedSys ? {
+            hexId: hexId,
+            worlds: (seedSys.worlds || []).map(b => Object.assign({}, b)),
+            stars:  (seedSys.stars  || []).map(s => Object.assign({}, s)),
+            age:              seedSys.age  || 0,
+            hzco:             seedSys.hzco || 0,
+            gasGiants:        0,
+            planetoidBelts:   0,
+            terrestrialPlanets: 0,
+            totalWorlds:      0,
+            baselineOrbit:    0,
+            forbiddenZones:   []
+        } : {
             hexId: hexId,
             worlds: [],
             stars: [],
@@ -71,28 +88,61 @@
             forbiddenZones: []
         };
 
-        // 1. Generate stellar system (Primary + companions)
-        if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 1: Stellar Generation...`);
-        if (StellarEngine && StellarEngine.generateStellarSystem) {
-            StellarEngine.generateStellarSystem(sys, hexId, null, 'bottom-up');
+        // 1. Generate stellar system (Primary + companions) — skip if seedSys provides stars
+        if (!seedSys || !sys.stars.length) {
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 1: Stellar Generation...`);
+            if (StellarEngine && StellarEngine.generateStellarSystem) {
+                StellarEngine.generateStellarSystem(sys, hexId, null, 'bottom-up');
+            }
+        } else {
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 1: Stellar skipped — seed provides ${sys.stars.length} star(s).`);
         }
 
-        // 2. Generate system inventory (GG count, belts, terrestrials)
-        if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 1: Inventory... (Terrestrials: ${sys.terrestrialPlanets})`);
-        if (StellarEngine && StellarEngine.generateSystemInventory) {
-            StellarEngine.generateSystemInventory(sys);
-        }
-
-        // 3. Allocate Orbits (Places skeleton bodies into orbits)
-        if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 1: Allocation... (Total Worlds: ${sys.totalWorlds})`);
-        if (StellarEngine && StellarEngine.allocateOrbits) {
-            StellarEngine.allocateOrbits(sys);
+        // 2 & 3. Generate inventory + allocate orbits — skip if seedSys controls body count
+        if (!seedSys || seedSys._allowAddBodies) {
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 1: Inventory... (Terrestrials: ${sys.terrestrialPlanets})`);
+            if (StellarEngine && StellarEngine.generateSystemInventory) {
+                StellarEngine.generateSystemInventory(sys);
+            }
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 1: Allocation... (Total Worlds: ${sys.totalWorlds})`);
+            if (StellarEngine && StellarEngine.allocateOrbits) {
+                StellarEngine.allocateOrbits(sys);
+            }
+        } else {
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 1: Inventory/Allocation skipped — seed provides ${sys.worlds.length} world(s), _allowAddBodies=false.`);
         }
 
         // 4. Initial Physical Sizing (Size, Mass, Gravity)
+        // When seeded and not allowing new bodies, capture moon counts before generatePhysicals
+        // runs so we can trim any dice-rolled additions back out. The seed's moons array is a
+        // shared reference (Object.assign shallow copy), so generatePhysicals can extend it.
+        const _seededMoonCaps = (seedSys && !seedSys._allowAddBodies)
+            ? sys.worlds.map(w => (w.moons || []).length)
+            : null;
+
         if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 1: Physics... (Found ${sys.worlds.length} worlds)`);
         if (WorldEngine && WorldEngine.generatePhysicals) {
             WorldEngine.generatePhysicals(sys);
+        }
+
+        // Trim back any moons generatePhysicals added beyond the seeded count.
+        // Before slicing, move the mainworld moon to index 0 so the sort-by-pd reordering
+        // cannot push it beyond the cap and lose it.
+        if (_seededMoonCaps) {
+            const mwId = seedSys && seedSys._mainworldRef ? seedSys._mainworldRef : null;
+            sys.worlds.forEach((w, i) => {
+                const cap = _seededMoonCaps[i] ?? 0;
+                if (w.moons && w.moons.length > cap) {
+                    if (mwId) {
+                        const mwIdx = w.moons.findIndex(m => m._id === mwId);
+                        if (mwIdx >= cap) {
+                            const mwMoon = w.moons.splice(mwIdx, 1)[0];
+                            w.moons.unshift(mwMoon);
+                        }
+                    }
+                    w.moons = w.moons.slice(0, cap);
+                }
+            });
         }
 
         // =================================================================
@@ -166,7 +216,22 @@
             candidates = candidates.concat(candidatesToAdd);
             
             if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 3: Selection from ${candidates.length} candidates...`);
-            let mainworld = WorldEngine.evaluateMainworldCandidates(candidates);
+
+            // If seedSys designates a mainworld, find it by _id; otherwise run normal election
+            let mainworld = null;
+            if (seedSys && seedSys._mainworldRef) {
+                mainworld = sys.worlds.find(w => w._id === seedSys._mainworldRef);
+                if (!mainworld) {
+                    for (const w of sys.worlds) {
+                        const moon = (w.moons || []).find(m => m._id === seedSys._mainworldRef);
+                        if (moon) { mainworld = moon; break; }
+                    }
+                }
+                if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 3: Mainworld from seed ref: ${mainworld ? mainworld._id : 'NOT FOUND'}`);
+            }
+            if (!mainworld) {
+                mainworld = WorldEngine.evaluateMainworldCandidates(candidates);
+            }
 
             if (mainworld) {
                 mainworld.type = 'Mainworld';
@@ -221,6 +286,9 @@
             if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 5: Socio baseline...`);
             if (sys.mainworld && SocioEngine.generateMainworldUWP) {
                 SocioEngine.generateMainworldUWP(hexId, sys.mainworld);
+                // The socio engine rolls gasGiant independently; in bottom-up the stellar
+                // engine's sys.gasGiants is authoritative, so override the roll result.
+                sys.mainworld.gasGiant = sys.gasGiants > 0;
             }
 
             // 2. Generate/Refresh core social for all worlds (Mainworld + Subordinates)

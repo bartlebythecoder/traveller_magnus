@@ -655,9 +655,15 @@
                         }
                         
                         // WBH Errata: If a moon is created above the HSML, then it is discarded.
+                        // Exception: mainworld/protected moons are anchored inside the Hill Sphere instead.
+                        const isProtectedMoon = (w.moons[mn].type === 'Mainworld' || w.moons[mn].isMoon);
                         if (pdTarget > hillLimit) {
-                            tResult('Moon Discarded', `Target orbit ${pdTarget.toFixed(2)} pd exceeds Hill Sphere Limit (${hillLimit})`);
-                            continue;
+                            if (!isProtectedMoon) {
+                                tResult('Moon Discarded', `Target orbit ${pdTarget.toFixed(2)} pd exceeds Hill Sphere Limit (${hillLimit})`);
+                                continue;
+                            }
+                            pdTarget = hillLimit * 0.9;
+                            tResult('WBH Protection', `Protected moon anchored at pd=${pdTarget.toFixed(2)} pd (Hill Sphere limit=${hillLimit.toFixed(2)})`);
                         }
 
                         w.moons[mn].pd = pdTarget;
@@ -1524,7 +1530,7 @@
 
                 // Sync processed data back to moon record
                 let syncRes = Object.assign({}, fauxMoon);
-                syncRes.type = 'Satellite'; // Restore type
+                syncRes.type = m.type; // Restore original type (preserves 'Mainworld' for lunar mainworlds)
                 w.moons[j] = syncRes;
                 }
             }

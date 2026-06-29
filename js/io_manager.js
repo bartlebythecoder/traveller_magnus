@@ -2151,3 +2151,185 @@ function setupTWImport() {
         document.getElementById('tw-import-confirm-modal').style.display = 'none';
     });
 }
+
+// ============================================================================
+// SYSTEM EXPORT / IMPORT
+// ============================================================================
+
+/**
+ * Recursively rewrite hexId and parentId references inside a cloned state
+ * object after a system is transplanted to a new hex.
+ *
+ * - Properties named `hexId` whose value is exactly `oldId` are replaced.
+ * - Properties named `parentId` whose value starts with `oldId + '-'` have
+ *   the prefix replaced (preserving the orbit-type suffix, e.g. '-GG-2.5').
+ */
+function _rewriteHexIdRefs(obj, oldId, newId) {
+    if (!obj || typeof obj !== 'object') return;
+    if (Array.isArray(obj)) {
+        for (const item of obj) _rewriteHexIdRefs(item, oldId, newId);
+        return;
+    }
+    for (const key of Object.keys(obj)) {
+        const val = obj[key];
+        if (typeof val === 'string') {
+            if (key === 'hexId' && val === oldId) {
+                obj[key] = newId;
+            } else if (key === 'parentId' && val.startsWith(oldId + '-')) {
+                obj[key] = newId + val.slice(oldId.length);
+            }
+        } else if (val && typeof val === 'object') {
+            _rewriteHexIdRefs(val, oldId, newId);
+        }
+    }
+}
+
+/**
+ * Export the system in the given hex as a downloadable JSON file.
+ * Only SYSTEM_PRESENT hexes can be exported.
+ */
+function exportSystemJson(hexId) {
+    const state = hexStates.get(hexId);
+    if (!state || state.type !== 'SYSTEM_PRESENT') {
+        if (typeof showToast === 'function') showToast('No system in this hex to export.', 2500);
+        return;
+    }
+    const systemName = state.name || hexId;
+    const envelope = {
+        exportType: 'asab-system',
+        version:    APP_VERSION,
+        sourceHexId: hexId,
+        state:      state
+    };
+    const safeName = systemName.replace(/[^a-z0-9_\-]/gi, '_');
+    triggerDownload(JSON.stringify(envelope, null, 2), `${safeName}_system.json`);
+    if (typeof showToast === 'function') showToast(`System "${systemName}" exported.`, 2500);
+}
+window.exportSystemJson = exportSystemJson;
+
+/**
+ * Import a previously exported system JSON object into the target hex.
+ * Throws on validation failure so callers can surface the error.
+ *
+ * Post-import side-effects (redraw, DB save, filter reapply) are handled
+ * here so all UI entry points get them for free.
+ */
+function importSystemJson(jsonObj, targetHexId) {
+    if (!jsonObj || jsonObj.exportType !== 'asab-system' || !jsonObj.state) {
+        throw new Error('Not a valid system export file (missing exportType or state).');
+    }
+    if (!targetHexId) {
+        throw new Error('No target hex specified.');
+    }
+
+    const sourceHexId = jsonObj.sourceHexId || null;
+
+    // Deep-clone so the original jsonObj is never mutated
+    const newState = JSON.parse(JSON.stringify(jsonObj.state));
+
+    // Rewrite all hexId / parentId references embedded in the state tree
+    if (sourceHexId && sourceHexId !== targetHexId) {
+        _rewriteHexIdRefs(newState, sourceHexId, targetHexId);
+    }
+
+    // Backfill belt/GG counts if the state predates that feature
+    if (typeof computeSystemCounts === 'function' && newState.beltCount === undefined) {
+        computeSystemCounts(newState);
+    }
+
+    hexStates.set(targetHexId, newState);
+
+    if (typeof reapplyAllRules === 'function')   reapplyAllRules();
+    if (typeof applyActiveFilters === 'function') applyActiveFilters();
+    if (window.dbManager) window.dbManager.saveHexes([targetHexId]);
+    requestAnimationFrame(draw);
+}
+window.importSystemJson = importSystemJson;
+
+// ============================================================================
+// ASAB IMPORT / EXPORT SETUP
+// ============================================================================
+
+function setupAsabImportExport() {
+    let _hexId  = null;
+    let _jsonObj = null;
+
+    function openImportModal() {
+        document.getElementById('context-menu').classList.remove('visible');
+        _hexId = [...selectedHexes][0];
+        if (!_hexId) { showToast('No hex selected.', 2000); return; }
+        document.getElementById('asab-import-hexid').textContent = _hexId;
+        document.getElementById('asab-import-file').value = '';
+        _jsonObj = null;
+        document.getElementById('asab-import-modal').style.display = 'flex';
+    }
+
+    function doImport() {
+        try {
+            saveHistoryState('Import ASAB System');
+            importSystemJson(_jsonObj, _hexId);
+            document.getElementById('asab-import-modal').style.display = 'none';
+            showToast(`System imported into hex ${_hexId}.`, 3000);
+        } catch (err) {
+            showToast(`Import failed: ${err.message}`, 5000);
+            console.error('[ASAB Import]', err);
+        }
+    }
+
+    function hasExistingSystem(hexId) {
+        const s = hexStates.get(hexId);
+        return !!(s && (s.t5System || s.mgtSystem || s.t5Data || s.mgt2eData || s.ctData || s.rttData || s.aowSystem));
+    }
+
+    // Export
+    document.getElementById('ctx-export-asab-system').addEventListener('click', () => {
+        document.getElementById('context-menu').classList.remove('visible');
+        const hexId = [...selectedHexes][0];
+        if (!hexId) { showToast('No hex selected.', 2000); return; }
+        exportSystemJson(hexId);
+    });
+
+    // Import — open modal
+    document.getElementById('ctx-import-asab-system').addEventListener('click', openImportModal);
+
+    // File selected
+    document.getElementById('asab-import-file').addEventListener('change', function () {
+        const file = this.files[0];
+        if (!file) { _jsonObj = null; return; }
+        readFileAsText(file).then(text => {
+            try {
+                _jsonObj = JSON.parse(text);
+            } catch (e) {
+                showToast('Invalid JSON — could not parse file.', 3000);
+                _jsonObj = null;
+            }
+        });
+    });
+
+    // Apply button
+    document.getElementById('btn-asab-import-apply').addEventListener('click', () => {
+        if (!_jsonObj) { showToast('Please select a JSON file.', 2500); return; }
+        if (hasExistingSystem(_hexId)) {
+            document.getElementById('asab-import-confirm-hexid').textContent = _hexId;
+            document.getElementById('asab-import-confirm-modal').style.display = 'flex';
+            return;
+        }
+        doImport();
+    });
+
+    // Cancel
+    document.getElementById('btn-asab-import-cancel').addEventListener('click', () => {
+        document.getElementById('asab-import-modal').style.display = 'none';
+    });
+
+    // Overwrite confirmed
+    document.getElementById('btn-asab-import-confirm-yes').addEventListener('click', () => {
+        document.getElementById('asab-import-confirm-modal').style.display = 'none';
+        doImport();
+    });
+
+    // Overwrite cancelled
+    document.getElementById('btn-asab-import-confirm-no').addEventListener('click', () => {
+        document.getElementById('asab-import-confirm-modal').style.display = 'none';
+    });
+}

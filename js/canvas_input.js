@@ -49,9 +49,23 @@ function setupCanvasEvents() {
         const socioDev = document.getElementById('ctx-expand-socio-mgt2e-dev');
         if (socioDev) socioDev.style.display = (window.devView === true) ? 'block' : 'none';
 
-        // Import TW System — only when exactly 1 hex is selected
-        const importTwBtn = document.getElementById('ctx-import-tw-system');
-        if (importTwBtn) importTwBtn.style.display = selectedHexes.size === 1 ? 'block' : 'none';
+        // Import / Export System submenu — only when exactly 1 hex is selected;
+        // Export child additionally requires a system to be present in the hex.
+        {
+            const importExportMenu = document.getElementById('ctx-import-export-system');
+            if (importExportMenu) {
+                if (selectedHexes.size === 1) {
+                    importExportMenu.style.display = 'block';
+                    const _ieHexId = [...selectedHexes][0];
+                    const _ieState = hexStates.get(_ieHexId);
+                    const _hasSystem = !!(_ieState && _ieState.type === 'SYSTEM_PRESENT');
+                    const exportBtn = document.getElementById('ctx-export-asab-system');
+                    if (exportBtn) exportBtn.style.display = _hasSystem ? 'block' : 'none';
+                } else {
+                    importExportMenu.style.display = 'none';
+                }
+            }
+        }
 
         // System Editor — create for empty hex, edit for populated hex
         {

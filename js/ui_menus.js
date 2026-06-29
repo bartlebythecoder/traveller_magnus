@@ -458,38 +458,47 @@ function setupGenerationHandlers() {
             }
 
             if (baseData) {
-                // 1. Generate the full system deterministically to guarantee all social profiles exist
-                let newSys = generateMgT2ESystemTopDown(hexId, baseData);
+                let newSys = null;
 
-                // 2. Find the mainworld to map the socio data (Recursive to handle Lunar Mainworlds)
-                let mainworld = null;
-                const findMW = (wList) => {
-                    for (let w of wList) {
-                        if (w.type === 'Mainworld' || w.isLunarMainworld) { mainworld = w; return true; }
-                        if (w.moons && findMW(w.moons)) return true;
-                    }
-                    return false;
-                };
-                findMW(newSys.worlds);
-                if (!mainworld) mainworld = newSys.worlds[0];
-
-                // Sean Protocol: Propagate gasGiant flag to Lunar Mainworlds so the renderer
-                // can display the ringed GG icon correctly from stateObj.mgt2eData.
-                if (mainworld && mainworld.isLunarMainworld) {
-                    mainworld.gasGiant = newSys.gasGiants > 0;
-                } else if (mainworld) {
-                    mainworld.gasGiant = mainworld.gasGiant || (newSys.gasGiants > 0);
+                if (stateObj.mgtSystem && typeof expandLoadedSocioeconomicsMgT2E === 'function') {
+                    // A physical system already exists (from the system editor, a prior physical
+                    // expansion, or a full generation). Run socio without regenerating the
+                    // physical structure — this is what preserves manually created systems.
+                    newSys = expandLoadedSocioeconomicsMgT2E(hexId, stateObj);
+                } else {
+                    // No system yet (mainworld UWP only). Generate top-down first, which
+                    // includes the socio pass, then surface the result.
+                    newSys = generateMgT2ESystemTopDown(hexId, baseData);
                 }
 
-                // 3. Map the data back to stateObj
-                stateObj.mgtSystem = newSys; // Keep physical data in sync
-                stateObj.mgt2eData = mainworld;
-                stateObj.mgtSocio = mainworld; // The new engine puts socio data directly on the world object
+                if (newSys) {
+                    // Find the mainworld to map the socio data (recursive to handle Lunar Mainworlds)
+                    let mainworld = null;
+                    const findMW = (wList) => {
+                        for (let w of wList) {
+                            if (w.type === 'Mainworld' || w.isLunarMainworld) { mainworld = w; return true; }
+                            if (w.moons && findMW(w.moons)) return true;
+                        }
+                        return false;
+                    };
+                    findMW(newSys.worlds);
+                    if (!mainworld) mainworld = newSys.worlds[0];
 
-                // 4. Clear UI ghosting variables
-                stateObj.t5Socio = null;
+                    // Sean Protocol: Propagate gasGiant flag to Lunar Mainworlds so the renderer
+                    // can display the ringed GG icon correctly from stateObj.mgt2eData.
+                    if (mainworld && mainworld.isLunarMainworld) {
+                        mainworld.gasGiant = newSys.gasGiants > 0;
+                    } else if (mainworld) {
+                        mainworld.gasGiant = mainworld.gasGiant || (newSys.gasGiants > 0);
+                    }
 
-                hexStates.set(hexId, stateObj);
+                    stateObj.mgtSystem = newSys;
+                    stateObj.mgt2eData = mainworld;
+                    stateObj.mgtSocio  = mainworld;
+                    stateObj.t5Socio   = null;
+
+                    hexStates.set(hexId, stateObj);
+                }
             } else if (stateObj && stateObj.type === 'SYSTEM_PRESENT') {
                 missingData = true;
             }
@@ -2303,6 +2312,20 @@ function setupSettingsPanel() {
         });
     }
 
+    // --- Generation Options: No Red or Amber Zones (all editions) ---
+    const noTravelZonesInput = document.getElementById('input-no-travel-zones');
+    if (noTravelZonesInput) {
+        const savedNoTravelZones = localStorage.getItem('traveller_gen_no_travel_zones');
+        const initialNoTravelZones = savedNoTravelZones === 'true';
+        noTravelZonesInput.checked = initialNoTravelZones;
+        window.generationNoTravelZones = initialNoTravelZones;
+
+        noTravelZonesInput.addEventListener('change', () => {
+            window.generationNoTravelZones = noTravelZonesInput.checked;
+            localStorage.setItem('traveller_gen_no_travel_zones', String(noTravelZonesInput.checked));
+        });
+    }
+
     // --- Generation Options: Settlement Centuries (RTT only) ---
     const rttSettlementInput = document.getElementById('input-rtt-settlement');
     if (rttSettlementInput) {
@@ -2380,6 +2403,22 @@ function setupSettingsPanel() {
             popModInput.value = val;
             window.generationPopMod = val;
             localStorage.setItem('traveller_gen_pop_mod', String(val));
+        });
+    }
+
+    // --- Generation Options: Pop Check Frequency ---
+    const popCheckFreqInput = document.getElementById('input-pop-check-frequency');
+    if (popCheckFreqInput) {
+        const savedPopCheckFreq = localStorage.getItem('traveller_gen_pop_check_frequency');
+        const initialPopCheckFreq = savedPopCheckFreq !== null ? parseInt(savedPopCheckFreq, 10) : 100;
+        popCheckFreqInput.value = initialPopCheckFreq;
+        window.generationPopCheckFrequency = initialPopCheckFreq;
+
+        popCheckFreqInput.addEventListener('change', () => {
+            const val = Math.max(0, Math.min(100, parseInt(popCheckFreqInput.value, 10) || 100));
+            popCheckFreqInput.value = val;
+            window.generationPopCheckFrequency = val;
+            localStorage.setItem('traveller_gen_pop_check_frequency', String(val));
         });
     }
 

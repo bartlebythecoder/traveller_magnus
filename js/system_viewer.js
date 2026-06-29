@@ -782,7 +782,7 @@ const SystemViewer = (() => {
     }
 
     function handleWheel(direction) {
-        if (direction < 0 && _viewZoom <= 1.0) close();
+        if (direction < 0 && _viewZoom <= 0.5) close();
     }
 
     // ── Play / Pause ──────────────────────────────────────────────────────────
@@ -1462,7 +1462,7 @@ const SystemViewer = (() => {
             _redraw();
         } else {
             const newZoom = _viewZoom / factor;
-            if (newZoom < 1.0) {
+            if (newZoom < 0.5) {
                 close();
             } else {
                 const ratio = newZoom / _viewZoom;

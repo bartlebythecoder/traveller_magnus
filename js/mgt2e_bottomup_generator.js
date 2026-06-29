@@ -60,6 +60,7 @@
         if (typeof reseedForHex === 'function') {
             reseedForHex(hexId);
         }
+        window._currentSystemHasPop = (typeof shouldGeneratePopulation === 'function') ? shouldGeneratePopulation(hexId) : true;
 
         // Create base system object — seed from seedSys if provided, otherwise start fresh
         const sys = seedSys ? {
@@ -107,6 +108,49 @@
             if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 1: Allocation... (Total Worlds: ${sys.totalWorlds})`);
             if (StellarEngine && StellarEngine.allocateOrbits) {
                 StellarEngine.allocateOrbits(sys);
+            }
+            // After allocateOrbits wipes and rebuilds sys.worlds, restore each seed
+            // world's user data (name, UWP, _id, locked fields) to the nearest-orbit
+            // generated world of the same body category. Must run before generatePhysicals
+            // so the locked fields are honoured by the physics engines.
+            if (seedSys && (seedSys.worlds || []).length > 0) {
+                const _normCat = t => t === 'Gas Giant' ? 'GG' : t === 'Planetoid Belt' ? 'Belt' : 'Rocky';
+                const _restored = new Set();
+                const _moonHasUserData = m => !!(m.name || m.uwp || (m._manualFields && m._manualFields.length > 0));
+                for (const sw of seedSys.worlds) {
+                    const hasUserData = sw.name || sw.uwp || (sw._manualFields && sw._manualFields.length > 0)
+                        || (sw.moons && sw.moons.some(_moonHasUserData));
+                    if (!hasUserData) continue;
+                    const swCat   = _normCat(sw.type);
+                    const swOrbit = sw.orbitId != null ? sw.orbitId : 1;
+                    let best = null, bestDist = Infinity;
+                    for (const gw of sys.worlds) {
+                        if (_restored.has(gw)) continue;
+                        if (_normCat(gw.type) !== swCat) continue;
+                        const d = Math.abs((gw.orbitId || 0) - swOrbit);
+                        if (d < bestDist) { bestDist = d; best = gw; }
+                    }
+                    if (!best) continue;
+                    _restored.add(best);
+                    if (sw._id)  best._id  = sw._id;
+                    if (sw.name) best.name = sw.name;
+                    if (sw.uwp)  best.uwp  = sw.uwp;
+                    ['size', 'atmCode', 'hydroCode', 'pop', 'popCode', 'gov', 'govCode', 'law', 'tl', 'starport'].forEach(f => {
+                        if (sw[f] != null) best[f] = sw[f];
+                    });
+                    if (sw._manualFields && sw._manualFields.length) {
+                        const mfSet = new Set(best._manualFields || []);
+                        sw._manualFields.forEach(f => mfSet.add(f));
+                        best._manualFields = [...mfSet];
+                    }
+                    // Restore any user-authored moons (named/detailed) from the seed world.
+                    // generatePhysicals counts these as existingMoons and will add more if
+                    // the dice roll exceeds the count; moons with pd already set are kept as-is.
+                    if (sw.moons && sw.moons.length > 0) {
+                        best.moons = sw.moons.map(m => Object.assign({}, m));
+                    }
+                    if (window.isLoggingEnabled) writeLogLine(`[SEED RESTORE] Seed "${sw.name || sw._id}" → generated ${best.type} at orbit ${best.orbitId != null ? best.orbitId.toFixed(2) : '?'} (dist ${bestDist.toFixed(2)}, moons restored: ${(sw.moons || []).length})`);
+                }
             }
         } else {
             if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 1: Inventory/Allocation skipped — seed provides ${sys.worlds.length} world(s), _allowAddBodies=false.`);
@@ -240,10 +284,10 @@
                 // SEAN PROTOCOL: Moon-Mainworld Selection Logging
                 if (mainworld.isMoon) {
                     tResult('Mainworld Status', 'LUNAR SELECTION', 'MgT2E 1.3: Top-Down Lunar Rule');
-                    writeLogLine(`[MAINWORLD LOG] Hex ${sys.hexId}: Mainworld is a MOON at Orbit ${mainworld.orbitId.toFixed(2)}`);
+                    writeLogLine(`[MAINWORLD LOG] Hex ${sys.hexId}: Mainworld is a MOON at Orbit ${mainworld.orbitId != null ? mainworld.orbitId.toFixed(2) : '?'}`);
                 }
 
-                tResult('Winning Mainworld', `${mainworld.name || 'Body'} at Orbit ${mainworld.orbitId.toFixed(2)} [Score: ${mainworld.habitability}]`, 'MgT2E 1.3: Orbital Allocation');
+                tResult('Winning Mainworld', `${mainworld.name || 'Body'} at Orbit ${mainworld.orbitId != null ? mainworld.orbitId.toFixed(2) : '?'} [Score: ${mainworld.habitability}]`, 'MgT2E 1.3: Orbital Allocation');
             } else {
                 tResult('Winning Mainworld', 'None', 'MgT2E 1.3: Orbital Allocation');
                 if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 3 ERROR: No winning mainworld elected!`);

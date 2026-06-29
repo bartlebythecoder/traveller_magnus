@@ -405,7 +405,7 @@
             let w = sys.worlds[i];
             if (w.type === 'Empty' || w.type === 'Planetoid Belt') continue;
 
-            tSection(`${w.type} Orbit ${w.orbitId.toFixed(2)} Moons`);
+            tSection(`${w.type} Orbit ${w.orbitId != null ? w.orbitId.toFixed(2) : '?'} Moons`);
             // Handle UWP char string sizes (e.g. 'A') for logic
             let parsedWSize = parseInt(w.size, 16);
             if (typeof w.size === 'string' && w.size !== 'GG' && w.size !== 'S' && w.size !== 'R' && isNaN(parsedWSize)) {
@@ -757,7 +757,7 @@
         let processWorld = (w) => {
             if (w.type === 'Empty' || w.type === 'Gas Giant' || w.type === 'Planetoid Belt') return;
 
-            tSection(`Atmosphere & Hydro: ${w.type} Orbit ${w.orbitId.toFixed(2)}`);
+            tSection(`Atmosphere & Hydro: ${w.type} Orbit ${w.orbitId != null ? w.orbitId.toFixed(2) : '?'}`);
             let tempBand = getTempBand(w.orbitId, w.worldHzco || sys.hzco);
 
             // Preliminary Temperature Estimation
@@ -788,6 +788,7 @@
             // 1. Base Atmosphere Code
             writeLogLine("--- ATMOSPHERE PHYSICS ---");
             let isMainworldLocked = (w.type === 'Mainworld' && mainworldBase && mainworldBase.atm !== undefined);
+            let isAtmSeeded = !isMainworldLocked && Array.isArray(w._manualFields) && w._manualFields.includes('atmCode') && w.atmCode !== undefined;
 
             if (w.size === 'S' || w.size === 0 || w.size === 1) {
                 tSkip('Size 0, 1, S forces Atmosphere 0');
@@ -799,6 +800,10 @@
                     tResult('Mainworld Atmosphere Inherited', mainworldBase.atm);
                     baseRoll = mainworldBase.atm;
                     writeLogLine(`Base Generation: Inherited Atm ${baseRoll}`);
+                } else if (isAtmSeeded) {
+                    tResult('Seeded Atmosphere', w.atmCode);
+                    baseRoll = w.atmCode;
+                    writeLogLine(`Base Generation: Seeded Atm ${baseRoll}`);
                 } else {
                     let baseRollRaw = tRoll2D('Atmosphere Roll');
                     baseRoll = baseRollRaw - 7 + w.size;
@@ -888,6 +893,9 @@
                 if (isMainworldLocked && w.atmCode !== mainworldBase.atm) {
                     writeLogLine(`Expanded Method Simulation: Non-HZ conditions WOULD have forced Atmosphere to ${toEHex(w.atmCode)}`);
                     w.atmCode = mainworldBase.atm;
+                } else if (isAtmSeeded && w.atmCode !== baseRoll) {
+                    writeLogLine(`Seeded UWP: Non-HZ conditions would have shifted Atm to ${toEHex(w.atmCode)}; overriding to seeded ${toEHex(baseRoll)}`);
+                    w.atmCode = baseRoll;
                 }
             }
 
@@ -1241,6 +1249,19 @@
                     }
                 }
 
+                // Store gas composition for display (parallel to exotic path which sets w.gases at selection time)
+                if (!isManual(w, 'gases')) {
+                    const _finalN2 = Math.max(0, 1.0 - w.oxygenFraction - traceFrac);
+                    const _gasMix = [
+                        { name: 'Nitrogen', pct: _finalN2 * 100 },
+                        { name: 'Oxygen',   pct: w.oxygenFraction * 100 },
+                        { name: traceGasName, pct: traceFrac * 100 }
+                    ];
+                    _gasMix.sort((a, b) => b.pct - a.pct);
+                    w.gases = _gasMix.map(g => `${g.name} ${g.pct.toFixed(1)}%`);
+                    tResult('Gas Composition', w.gases.join(', '), 'MgT2E 2.2: Atmospheric Chemistry');
+                }
+
                 // Integration & Profile String
                 w.atmProfile = `${toEHex(w.atmCode)}-${w.totalPressureBar.toFixed(2)}-${w.ppoBar.toFixed(3)}`;
                 tResult('Atm Profile', w.atmProfile, 'MgT2E 2.2: Atmospheric Chemistry');
@@ -1392,10 +1413,14 @@
 
             // 6. Hydrographics
             tSection('Hydrographics');
+            const _seedHydro = Array.isArray(w._manualFields) && w._manualFields.includes('hydroCode') && w.hydroCode !== undefined ? w.hydroCode : undefined;
             w.hydroCode = 0;
             if (w.type === 'Mainworld' && mainworldBase && mainworldBase.hydro !== undefined) {
                 tSkip('Mainworld Hydro Inherited');
                 w.hydroCode = mainworldBase.hydro;
+            } else if (_seedHydro !== undefined) {
+                tResult('Seeded Hydrographics', _seedHydro);
+                w.hydroCode = _seedHydro;
             } else if (!['S', 0, 1].includes(w.size)) {
                 let hMod = 0;
                 const extremeAtmDM = MgT2EData.extremeAtmosphereHydroDM;
@@ -1589,7 +1614,7 @@
                 w.lowTempK = null;
                 return;
             } else {
-                tSection(`${isMoon ? 'Moon' : w.type} Orbit ${w.orbitId.toFixed(2)} Rotation`);
+                tSection(`${isMoon ? 'Moon' : w.type} Orbit ${w.orbitId != null ? w.orbitId.toFixed(2) : '?'} Rotation`);
 
                 // 1. Sidereal Day
                 let sRoll1 = tRoll2D('Base Sidereal Day Roll');

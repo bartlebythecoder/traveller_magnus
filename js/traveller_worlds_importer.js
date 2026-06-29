@@ -262,6 +262,9 @@
             // Physical — fields native to MgT2E engine
             diamKm:           c.diameter        !== undefined ? c.diameter        : 0,
             density:          c.density         !== undefined ? c.density         : 1,
+            gravity:          (!isBelt && c.diameter && c.density != null)
+                                  ? parseFloat((c.density * (c.diameter / 12742)).toFixed(3))
+                                  : null,
             composition:      c.densityType     || '',
             axialTilt,
             solarDayHours:    solarDay,

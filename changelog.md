@@ -1,4 +1,13 @@
-### [v0.16.0] - In Progress
+### [v0.16.0.1] - In Progress
+1. **System Import/Export:** Can now import and export individual systems
+2. **System Editor:** New worlds created in system editor allow for manual UWPs
+3. **Travel Zones:** Setting to disable automatice Travel Zone setting
+4. **Traveller World Import:** Gravity added to worlds imported from Traveller World JSON 
+
+### [v0.16.0] - 2026-06-26
+1. **Mongoose Engine - System Editor:** Added Mongoose edit system window.  Mongoose orbital bodies can now be added. removed or changed.
+2. **Mongoose Engine - Atmosphere Editor:** Added Atmosphere edit system window.  Mongoose world atmospheres can now be edited.
+3. **Mongoose Engine - Solar Days Editor:** Added Atmosphere edit solar days window.  Mongoose world solar days can now be edited.
 
 ### [v0.15.2.4] - 2026-06-19
 1. **System Viewer**: Fixed bug that showed Companion stars in incorrect orbits in some systems

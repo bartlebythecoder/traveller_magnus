@@ -209,6 +209,12 @@ function generatePopulation(world, ctx = { mode: 'bottomup' }) {
 
     world.pop = Math.max(0, popRoll);
 
+    // Pop Check Frequency setting
+    if (world.type === 'Mainworld' && !(window._currentSystemHasPop ?? true)) {
+        world.pop = 0;
+        if (typeof tResult !== 'undefined') tResult('Pop Check Frequency', 'Uninhabited system (forced 0)', 'CT 3.1: Social Stats');
+    }
+
     // Settings: Pop Mod and Pop Max (mainworld only)
     if (world.type === 'Mainworld') {
         const settingsPopMod = (typeof window !== 'undefined' && window.generationPopMod !== undefined) ? window.generationPopMod : 0;
@@ -250,6 +256,9 @@ function generatePopulation(world, ctx = { mode: 'bottomup' }) {
  */
 function generateModularMainworld(hexId) {
     if (typeof reseedForHex !== 'undefined') reseedForHex(hexId);
+    if (typeof shouldGeneratePopulation === 'function') {
+        window._currentSystemHasPop = shouldGeneratePopulation(hexId);
+    }
 
     let mwName = (typeof getNextSystemName !== 'undefined') ? getNextSystemName(hexId) : 'Unknown';
     if (typeof startTrace !== 'undefined') startTrace(hexId, 'Modular CT Generation', mwName);
@@ -304,6 +313,10 @@ function generateModularMainworld(hexId) {
         mw.starport = ctSpMax;
     } else {
         tResult('Settings Starport Max', `No cap (${mw.starport} ≤ ${ctSpMax})`);
+    }
+    if (!(window._currentSystemHasPop ?? true) && ctStarportOrder.indexOf(mw.starport) < ctStarportOrder.indexOf('E')) {
+        tResult('Pop Check Frequency', `Starport cap applied: ${mw.starport} → E`);
+        mw.starport = 'E';
     }
 
     // D. Bases

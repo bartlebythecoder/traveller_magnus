@@ -114,7 +114,7 @@ const MgT2EMath = {
     calculateHillSphereLimit: function (au, eccentricity, planetMassEarths, starMassSolar, diamKm) {
         if (diamKm <= 0 || starMassSolar <= 0) return 0;
         let planetSolarMass = planetMassEarths * 0.000003;
-        let hsAu = au * (1 - eccentricity) * Math.pow(planetSolarMass / (3 * starMassSolar), 0.3333);
+        let hsAu = au * (1 - (eccentricity || 0)) * Math.pow(planetSolarMass / (3 * starMassSolar), 0.3333);
         let hsPd = hsAu * 149597870.9 / diamKm;
         return Math.floor(hsPd / 2);
     },

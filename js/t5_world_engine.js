@@ -194,6 +194,10 @@
         }
 
         let generatedPop = Math.max(0, rawPop);
+        if (worldType === 'Mainworld' && !(window._currentSystemHasPop ?? true)) {
+            generatedPop = 0;
+            _log('Pop Check Frequency: system is uninhabited (forced 0)');
+        }
 
         // Settings: Pop Max cap (mainworld only — subordinates use mainworld-derived maxSubordinatePop)
         const effectiveCap = (worldType === 'Mainworld')
@@ -506,6 +510,9 @@
         if (hexId) {
             _reseedForHex(hexId);
             _log(`T5 Mainworld Generation: Hex ${hexId}`);
+            if (typeof shouldGeneratePopulation === 'function') {
+                window._currentSystemHasPop = shouldGeneratePopulation(hexId);
+            }
         }
 
         // --- 0. Stellar Situation ---
@@ -544,6 +551,10 @@
         } else {
             _log(`Settings Starport Max: No cap (${starport} ≤ ${_starportMax})`);
         }
+        if (!(window._currentSystemHasPop ?? true) && _starportOrder.indexOf(starport) < _starportOrder.indexOf('E')) {
+            _log(`Pop Check Frequency: Starport cap applied ${starport} → E`);
+            starport = 'E';
+        }
 
         const world = {
             hexId,
@@ -578,7 +589,7 @@
         calculateT5RotationalDynamics(world);
 
         // --- 2.5. Travel Zone ---
-        world.travelZone = (world.law >= 15) ? 'Amber' : 'Green';
+        world.travelZone = (!window.generationNoTravelZones && world.law >= 15) ? 'Amber' : 'Green';
 
         // --- 3. Trade Codes ---
         world.tradeCodes = calculateT5TradeCodes(world);

@@ -63,6 +63,7 @@
         if (typeof reseedForHex === 'function') {
             reseedForHex(hexId);
         }
+        window._currentSystemHasPop = (typeof shouldGeneratePopulation === 'function') ? shouldGeneratePopulation(hexId) : true;
 
         if (window.isLoggingEnabled) {
             writeLogLine(`\n${'═'.repeat(72)}`);

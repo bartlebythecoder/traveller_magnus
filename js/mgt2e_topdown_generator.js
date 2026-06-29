@@ -50,6 +50,7 @@
         if (typeof reseedForHex === 'function') {
             reseedForHex(hexId);
         }
+        window._currentSystemHasPop = (typeof shouldGeneratePopulation === 'function') ? shouldGeneratePopulation(hexId) : true;
 
         // Create base system object
         const sys = {

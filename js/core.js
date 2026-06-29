@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.16.0";
-const APP_BANNER = "v0.16.0: New This Version: Full System Editor";
+const APP_VERSION = "v0.16.0.1";
+const APP_BANNER = "v0.16.0.1: New This Version: Full System Editor";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -141,6 +141,15 @@ function setRandomSeed(seedString) {
 function reseedForHex(hexId) {
     const hexSeed = hashString(masterSeed + "-" + (hexId || "0000"));
     rng = mulberry32(hexSeed);
+}
+
+function shouldGeneratePopulation(hexId) {
+    const freq = (typeof window !== 'undefined' && window.generationPopCheckFrequency !== undefined)
+        ? Number(window.generationPopCheckFrequency) : 100;
+    if (freq >= 100) return true;
+    if (freq <= 0) return false;
+    const hash = hashString(masterSeed + '-popcheck-' + (hexId || ''));
+    return (hash % 100) < freq;
 }
 
 function clampUWP(val, min, max) {

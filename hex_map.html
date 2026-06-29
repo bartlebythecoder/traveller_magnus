@@ -731,7 +731,7 @@
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above<br> So Below</span></h1>
             <div class="splash-banner">New This Version: Full System Editor</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.16.0</div>
+            <div class="splash-version">v0.16.0.1</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -917,6 +917,12 @@
                                font-family:'Courier New',Courier,monospace;font-size:0.85rem;border-radius:3px;text-align:right;">
                 </div>
                 <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
+                    <label for="input-pop-check-frequency" style="font-size:0.8rem;">Pop Check Frequency</label>
+                    <input type="number" id="input-pop-check-frequency" min="0" max="100" value="100"
+                        style="width:55px;padding:4px 6px;background:#1f2833;border:1px solid #45a29e;color:#fff;
+                               font-family:'Courier New',Courier,monospace;font-size:0.85rem;border-radius:3px;text-align:right;">
+                </div>
+                <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
                     <label for="input-tl-max" style="font-size:0.8rem;">TL Max</label>
                     <input type="number" id="input-tl-max" min="0" max="33" value="20"
                         style="width:55px;padding:4px 6px;background:#1f2833;border:1px solid #45a29e;color:#fff;
@@ -928,6 +934,12 @@
                         style="width:55px;padding:4px 6px;background:#1f2833;border:1px solid #45a29e;color:#fff;
                                font-family:'Courier New',Courier,monospace;font-size:0.85rem;border-radius:3px;text-align:right;">
                 </div>
+
+                <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
+                    <label for="input-no-travel-zones" style="font-size:0.8rem;">Disable Red/Amber Zone Assignments</label>
+                    <input type="checkbox" id="input-no-travel-zones" style="cursor:pointer;accent-color:#66fcf1;">
+                </div>
+
                 <div style="border-top:1px solid rgba(102,252,241,0.15);border-bottom:1px solid rgba(102,252,241,0.15);padding:3px 0;margin:4px 0;">
                     <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
                         <label for="input-use-realistic-stellar" style="font-size:0.8rem;">Use Realistic Stellar Variant <span style="font-size:0.7rem;color:#66fcf1;">(MgT2e)</span></label>
@@ -956,6 +968,7 @@
                         <input type="checkbox" id="toggle-rtt-industry" style="cursor:pointer;accent-color:#66fcf1;">
                     </div>
                 </div>
+
             </div>
         </div>
 
@@ -1199,7 +1212,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.16.0</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.16.0.1</span>
             </p>
         </div>
 
@@ -1327,6 +1340,44 @@
         </div>
     </div>
 
+    <!-- Import ASAB System JSON -->
+    <div id="asab-import-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="width: 420px; text-align: left;">
+            <h3 style="text-align: center; color: #66fcf1; margin-bottom: 16px;">Import ASAB System JSON</h3>
+            <p style="color: #c5c6c7; font-size: 0.85rem; margin: 0 0 16px;">
+                Importing into hex <strong id="asab-import-hexid" style="color: #66fcf1;"></strong>
+            </p>
+            <div style="margin-bottom: 16px;">
+                <label style="color: #c5c6c7; font-size: 0.85rem; display: block; margin-bottom: 6px;">ASAB System JSON File</label>
+                <input type="file" id="asab-import-file" accept=".json"
+                    style="width: 100%; box-sizing: border-box; padding: 8px; background: #0d1117; border: 1px solid #45a29e; border-radius: 4px; color: #c5c6c7; font-size: 0.9rem; cursor: pointer;" />
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button id="btn-asab-import-apply" class="btn-save"
+                    style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Import</button>
+                <button id="btn-asab-import-cancel" class="btn-cancel"
+                    style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import ASAB System JSON — Overwrite Confirmation -->
+    <div id="asab-import-confirm-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="width: 380px; text-align: center;">
+            <h3 style="color: #ffa500; margin-bottom: 16px;">Overwrite Existing System?</h3>
+            <p style="color: #c5c6c7; font-size: 0.85rem; margin-bottom: 20px;">
+                Hex <strong id="asab-import-confirm-hexid" style="color: #66fcf1;"></strong> already has a system.<br>
+                This import will overwrite all existing data.
+            </p>
+            <div style="display: flex; gap: 10px;">
+                <button id="btn-asab-import-confirm-yes" class="btn-save"
+                    style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Overwrite</button>
+                <button id="btn-asab-import-confirm-no" class="btn-cancel"
+                    style="flex: 1; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- System Editor: Engine Selection Dialog -->
     <div id="se-engine-dialog" class="modal-overlay" style="display: none;">
         <div class="modal-content" style="width: 380px; text-align: left;">
@@ -1338,18 +1389,59 @@
                 <label style="color: #c5c6c7; cursor: pointer; display: flex; align-items: center; gap: 10px;">
                     <input type="radio" name="se-engine-choice" value="MgT2E" checked> Mongoose Traveller 2nd Ed (MgT2E)
                 </label>
-                <label style="color: #c5c6c7; cursor: pointer; display: flex; align-items: center; gap: 10px;">
-                    <input type="radio" name="se-engine-choice" value="CT"> Classic Traveller (CT)
+                <label style="color: #555; cursor: not-allowed; display: flex; align-items: center; gap: 10px;">
+                    <input type="radio" name="se-engine-choice" value="CT" disabled> Classic Traveller (CT) <span style="font-size:0.75rem;">(coming soon)</span>
                 </label>
-                <label style="color: #c5c6c7; cursor: pointer; display: flex; align-items: center; gap: 10px;">
-                    <input type="radio" name="se-engine-choice" value="T5"> Traveller 5 (T5)
+                <label style="color: #555; cursor: not-allowed; display: flex; align-items: center; gap: 10px;">
+                    <input type="radio" name="se-engine-choice" value="T5" disabled> Traveller 5 (T5) <span style="font-size:0.75rem;">(coming soon)</span>
                 </label>
-                <label style="color: #c5c6c7; cursor: pointer; display: flex; align-items: center; gap: 10px;">
-                    <input type="radio" name="se-engine-choice" value="AoW"> Architect of Worlds (AoW)
+                <label style="color: #555; cursor: not-allowed; display: flex; align-items: center; gap: 10px;">
+                    <input type="radio" name="se-engine-choice" value="AoW" disabled> Architect of Worlds (AoW) <span style="font-size:0.75rem;">(coming soon)</span>
                 </label>
-                <label style="color: #c5c6c7; cursor: pointer; display: flex; align-items: center; gap: 10px;">
-                    <input type="radio" name="se-engine-choice" value="RTT"> RTT WorldGen (RTT)
+                <label style="color: #555; cursor: not-allowed; display: flex; align-items: center; gap: 10px;">
+                    <input type="radio" name="se-engine-choice" value="RTT" disabled> RTT WorldGen (RTT) <span style="font-size:0.75rem;">(coming soon)</span>
                 </label>
+            </div>
+            <div style="border-top: 1px solid #45a29e33; margin: 16px 0; padding-top: 16px;">
+                <p style="color: #c5c6c7; font-size: 0.85rem; margin: 0 0 10px 0;">Primary Star</p>
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <label style="color: #8a8f94; font-size: 0.8rem; min-width: 36px;">Type</label>
+                    <select id="se-primary-type" style="background: #0d1117; border: 1px solid #45a29e55; color: #66fcf1; font-family: inherit; font-size: 0.85rem; padding: 4px 6px;">
+                        <option value="O">O — Blue</option>
+                        <option value="B">B — Blue-White</option>
+                        <option value="A">A — White</option>
+                        <option value="F">F — Yellow-White</option>
+                        <option value="G" selected>G — Yellow</option>
+                        <option value="K">K — Orange</option>
+                        <option value="M">M — Red</option>
+                        <option value="D">D — White Dwarf</option>
+                        <option value="BD">BD — Brown Dwarf</option>
+                    </select>
+                    <label style="color: #8a8f94; font-size: 0.8rem; min-width: 52px;">Subtype</label>
+                    <select id="se-primary-subtype" style="background: #0d1117; border: 1px solid #45a29e55; color: #66fcf1; font-family: inherit; font-size: 0.85rem; padding: 4px 6px;">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2" selected>2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                    </select>
+                    <label style="color: #8a8f94; font-size: 0.8rem; min-width: 35px;">Class</label>
+                    <select id="se-primary-class" style="background: #0d1117; border: 1px solid #45a29e55; color: #66fcf1; font-family: inherit; font-size: 0.85rem; padding: 4px 6px;">
+                        <option value="Ia">Ia — Supergiant</option>
+                        <option value="Ib">Ib — Supergiant (dim)</option>
+                        <option value="II">II — Bright Giant</option>
+                        <option value="III">III — Giant</option>
+                        <option value="IV">IV — Subgiant</option>
+                        <option value="V" selected>V — Main Sequence</option>
+                        <option value="VI">VI — Subdwarf</option>
+                        <option value="D">D — White Dwarf</option>
+                    </select>
+                </div>
             </div>
             <div style="display: flex; gap: 10px;">
                 <button id="btn-se-engine-confirm" class="btn-save"
@@ -1638,8 +1730,17 @@
 
         <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
 
-        <button class="context-menu-item" id="ctx-import-tw-system" style="display: none;">IMPORT TRAVELLER WORLD SYSTEM</button>
-        <button class="context-menu-item" id="ctx-create-system" style="display: none;">CREATE SYSTEM</button>
+        <!-- IMPORT / EXPORT SYSTEM submenu — shown only when exactly 1 hex is selected -->
+        <div class="context-menu-item has-submenu" id="ctx-import-export-system" style="display: none;">
+            IMPORT / EXPORT SYSTEM
+            <div class="submenu">
+                <button class="context-menu-item" id="ctx-import-tw-system">Import: Traveller World JSON</button>
+                <button class="context-menu-item" id="ctx-import-asab-system">Import: ASAB System JSON</button>
+                <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
+                <button class="context-menu-item" id="ctx-export-asab-system">Export: ASAB System JSON</button>
+            </div>
+        </div>
+        <button class="context-menu-item" id="ctx-create-system" style="display: none;">CREATE MANUAL SYSTEM</button>
         <button class="context-menu-item" id="ctx-edit-system" style="display: none;">EDIT SYSTEM</button>
 
         <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>

@@ -111,6 +111,9 @@ function generateRTTSectorStep1(hexId, options = {}) {
         startTrace(hexId, 'RTT Engine', name);
     }
     reseedForHex(hexId);
+    if (typeof shouldGeneratePopulation === 'function') {
+        window._currentSystemHasPop = shouldGeneratePopulation(hexId);
+    }
 
     const sys = {
         hexId: hexId,
@@ -1464,6 +1467,9 @@ function processRTTSatellites(body) {
  */
 function processRTTSocialStats(body, star, dominantTL, settlementCenturies, options = {}) {
     const _savedSocial = _rttSaveManual(body, ['industry', 'tradeCodes', 'bases']);
+    if (!(window._currentSystemHasPop ?? true) && !isManual(body, 'population') && body.habitationType !== 'Uninhabited') {
+        body.habitationType = 'Uninhabited';
+    }
     if (body.habitationType === 'Uninhabited') {
         body.population = 0;
         body.government = 0;

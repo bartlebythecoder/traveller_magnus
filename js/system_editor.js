@@ -23,6 +23,31 @@ const SystemEditor = (() => {
 
     const HISTORY_CAP = 50;
 
+    // ── Star spectral-type dropdown options ───────────────────────────────────
+
+    const _STAR_TYPE_CHOICES = [
+        { value: 'O',  label: 'O — Blue' },
+        { value: 'B',  label: 'B — Blue-White' },
+        { value: 'A',  label: 'A — White' },
+        { value: 'F',  label: 'F — Yellow-White' },
+        { value: 'G',  label: 'G — Yellow' },
+        { value: 'K',  label: 'K — Orange' },
+        { value: 'M',  label: 'M — Red' },
+        { value: 'D',  label: 'D — White Dwarf' },
+        { value: 'BD', label: 'BD — Brown Dwarf' },
+    ];
+    const _STAR_SUBTYPE_CHOICES = [0,1,2,3,4,5,6,7,8,9].map(n => ({ value: n, label: String(n) }));
+    const _STAR_CLASS_CHOICES = [
+        { value: 'Ia',  label: 'Ia — Supergiant' },
+        { value: 'Ib',  label: 'Ib — Supergiant (dim)' },
+        { value: 'II',  label: 'II — Bright Giant' },
+        { value: 'III', label: 'III — Giant' },
+        { value: 'IV',  label: 'IV — Subgiant' },
+        { value: 'V',   label: 'V — Main Sequence' },
+        { value: 'VI',  label: 'VI — Subdwarf' },
+        { value: 'D',   label: 'D — White Dwarf' },
+    ];
+
     // ── ID generator ──────────────────────────────────────────────────────────
 
     let _nextId = 0;
@@ -97,6 +122,7 @@ const SystemEditor = (() => {
             isMainworld:   !!m.isMainworld,
             travelZone:    m.travelZone || m.zone || 'G',
             _manualFields: m._manualFields ? [...m._manualFields] : [],
+            _uwpSeed:      null,
             _raw:          m,
         };
     }
@@ -274,13 +300,18 @@ const SystemEditor = (() => {
                  age: raw.age ?? null, hzco: raw.hzco ?? null };
     }
 
-    function _buildBlankWorkingCopy(hexId, engine) {
+    function _buildBlankWorkingCopy(hexId, engine, starSpec) {
+        const sp     = starSpec || {};
+        const sType  = sp.sType  || 'G';
+        const subType = sp.subType != null ? sp.subType : 2;
+        const sClass = sp.sClass || 'V';
         return {
             hexId, engine, allowAddBodies: false, mainworldRef: null,
             age: null, hzco: null,
             stars: [{
                 _id: _uid('star'), role: 'Primary',
-                sType: 'G', subType: 2, sClass: 'V', name: 'G2V',
+                sType, subType, sClass,
+                name: `${sType}${subType}${sClass}`,
                 orbitAU: null, parentStarId: null,
                 mass: null, lum: null, diam: null, temp: null, mao: null,
                 _manualFields: [], _raw: {},
@@ -389,7 +420,7 @@ const SystemEditor = (() => {
             name: '', uwp: null, au: null,
             orbitId:       _nextOrbitId(parentStarId),
             travelZone:    'G', parentStarId, isMainworld: false,
-            moons: [], _manualFields: ['type'], _raw: {},
+            moons: [], _manualFields: ['type'], _uwpSeed: null, _raw: {},
         });
         _renderAndPreview();
     }
@@ -401,7 +432,7 @@ const SystemEditor = (() => {
         parent.moons.push({
             _id: _uid('moon'), type: 'Satellite',
             name: '', uwp: null, isMainworld: false,
-            travelZone: 'G', _manualFields: [], _raw: {},
+            travelZone: 'G', _manualFields: [], _uwpSeed: null, _raw: {},
         });
         _renderAndPreview();
         // Force the parent body open so the new moon is immediately visible
@@ -753,6 +784,33 @@ const SystemEditor = (() => {
             return row;
         }
 
+        // ── Helper: labelled dropdown row for star spectral fields
+        function _starSelectRow(labelText, currentValue, choices, disabled, onChange) {
+            const row = document.createElement('div');
+            Object.assign(row.style, { display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px', fontSize: '11px' });
+            const lbl = document.createElement('label');
+            lbl.textContent = labelText;
+            Object.assign(lbl.style, { color: P.sub, minWidth: '54px' });
+            const sel = document.createElement('select');
+            Object.assign(sel.style, {
+                background: '#0d1117', border: `1px solid ${P.border}`,
+                color: disabled ? P.dim : P.accent,
+                fontFamily: 'inherit', fontSize: '11px', padding: '2px 4px',
+                opacity: disabled ? '0.55' : '1', cursor: disabled ? 'not-allowed' : 'default',
+            });
+            sel.disabled = disabled;
+            choices.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = String(c.value);
+                opt.textContent = c.label;
+                if (String(c.value) === String(currentValue)) opt.selected = true;
+                sel.appendChild(opt);
+            });
+            sel.addEventListener('change', () => onChange(sel.value));
+            row.append(lbl, sel);
+            return row;
+        }
+
         // ── Helper: numeric input row for derived stellar properties (null = auto-derive)
         function _derivedRow(labelText, value, unit, onSet) {
             const row = document.createElement('div');
@@ -1011,6 +1069,56 @@ const SystemEditor = (() => {
                 uwpRow.textContent = `UWP: ${body.uwp}`;
                 detailPad.appendChild(uwpRow);
             }
+
+            // UWP seed boxes — only for newly added terrestrial/mainworld bodies (no generated UWP yet)
+            if (!body.uwp && body.type !== 'Belt' && body.type !== 'Gas Giant') {
+                if (!body._uwpSeed) body._uwpSeed = { st:null, s:null, a:null, h:null, p:null, g:null, l:null, tl:null };
+                const seedSection = document.createElement('div');
+                Object.assign(seedSection.style, { marginTop: '4px', marginBottom: '3px' });
+                const seedLabel = document.createElement('div');
+                seedLabel.textContent = 'Seed UWP digits (optional):';
+                Object.assign(seedLabel.style, { fontSize: '10px', color: P.dim, marginBottom: '2px' });
+                seedSection.appendChild(seedLabel);
+                const boxRow = document.createElement('div');
+                Object.assign(boxRow.style, { display: 'flex', gap: '5px', alignItems: 'flex-end' });
+                [['st','St'],['s','S'],['a','A'],['h','H'],['p','P'],['g','G'],['l','L'],['tl','TL']].forEach(([key, lbl]) => {
+                    const isStarport = key === 'st';
+                    const cell = document.createElement('div');
+                    Object.assign(cell.style, { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px' });
+                    const cellLbl = document.createElement('span');
+                    cellLbl.textContent = lbl;
+                    Object.assign(cellLbl.style, { fontSize: '9px', color: P.dim });
+                    const inp = document.createElement('input');
+                    inp.type = 'text'; inp.maxLength = 1;
+                    inp.value = body._uwpSeed[key] || '';
+                    Object.assign(inp.style, {
+                        width: '20px', textAlign: 'center', background: 'transparent',
+                        border: `1px solid ${body._uwpSeed[key] ? P.accent : P.border}`,
+                        color: body._uwpSeed[key] ? P.accent : P.dim,
+                        fontFamily: 'inherit', fontSize: '11px', padding: '2px 0',
+                    });
+                    inp.addEventListener('input', () => {
+                        const v = isStarport
+                            ? inp.value.toUpperCase().replace(/[^A-Z]/g, '')
+                            : inp.value.toUpperCase().replace(/[^0-9A-F]/g, '');
+                        if (inp.value !== v) inp.value = v;
+                        inp.style.color = v ? P.accent : P.dim;
+                        inp.style.borderColor = v ? P.accent : P.border;
+                    });
+                    inp.addEventListener('change', () => {
+                        const v = isStarport
+                            ? inp.value.toUpperCase().replace(/[^A-Z]/g, '')
+                            : inp.value.toUpperCase().replace(/[^0-9A-F]/g, '');
+                        inp.value = v;
+                        _pushHistory();
+                        body._uwpSeed[key] = v || null;
+                    });
+                    cell.append(cellLbl, inp);
+                    boxRow.appendChild(cell);
+                });
+                seedSection.appendChild(boxRow);
+                detailPad.appendChild(seedSection);
+            }
             if (body.travelZone && body.travelZone !== 'G') {
                 const zoneRow = document.createElement('div');
                 Object.assign(zoneRow.style, {
@@ -1056,6 +1164,49 @@ const SystemEditor = (() => {
                     ));
                     moonRow.appendChild(_btn('✕', 'Delete moon', () => _deleteMoon(body._id, moon._id)));
                     moonContainer.appendChild(moonRow);
+
+                    // UWP seed boxes for newly added moons (no generated UWP yet)
+                    if (!moon.uwp) {
+                        if (!moon._uwpSeed) moon._uwpSeed = { st:null, s:null, a:null, h:null, p:null, g:null, l:null, tl:null };
+                        const moonSeedRow = document.createElement('div');
+                        Object.assign(moonSeedRow.style, { display: 'flex', gap: '5px', alignItems: 'flex-end', marginBottom: '4px', marginLeft: '2px' });
+                        [['st','St'],['s','S'],['a','A'],['h','H'],['p','P'],['g','G'],['l','L'],['tl','TL']].forEach(([key, lbl]) => {
+                            const isStarport = key === 'st';
+                            const cell = document.createElement('div');
+                            Object.assign(cell.style, { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px' });
+                            const cellLbl = document.createElement('span');
+                            cellLbl.textContent = lbl;
+                            Object.assign(cellLbl.style, { fontSize: '9px', color: P.dim });
+                            const inp = document.createElement('input');
+                            inp.type = 'text'; inp.maxLength = 1;
+                            inp.value = moon._uwpSeed[key] || '';
+                            Object.assign(inp.style, {
+                                width: '20px', textAlign: 'center', background: 'transparent',
+                                border: `1px solid ${moon._uwpSeed[key] ? P.accent : P.border}`,
+                                color: moon._uwpSeed[key] ? P.accent : P.dim,
+                                fontFamily: 'inherit', fontSize: '10px', padding: '1px 0',
+                            });
+                            inp.addEventListener('input', () => {
+                                const v = isStarport
+                                    ? inp.value.toUpperCase().replace(/[^A-Z]/g, '')
+                                    : inp.value.toUpperCase().replace(/[^0-9A-F]/g, '');
+                                if (inp.value !== v) inp.value = v;
+                                inp.style.color = v ? P.accent : P.dim;
+                                inp.style.borderColor = v ? P.accent : P.border;
+                            });
+                            inp.addEventListener('change', () => {
+                                const v = isStarport
+                                    ? inp.value.toUpperCase().replace(/[^A-Z]/g, '')
+                                    : inp.value.toUpperCase().replace(/[^0-9A-F]/g, '');
+                                inp.value = v;
+                                _pushHistory();
+                                moon._uwpSeed[key] = v || null;
+                            });
+                            cell.append(cellLbl, inp);
+                            moonSeedRow.appendChild(cell);
+                        });
+                        moonContainer.appendChild(moonSeedRow);
+                    }
                 });
                 detailPad.appendChild(moonContainer);
             }
@@ -1139,18 +1290,21 @@ const SystemEditor = (() => {
 
             const updateCompLabel = () => { compLabel.textContent = `⊙ ${star.role}: ${star.sType}${star.subType}${star.sClass}${compOrbitStr()}`; };
 
-            compDetailPad.appendChild(_starInputRow('Type:', star.sType, { maxLength: 2, width: '40px', placeholder: 'M' }, val => {
-                _pushHistory(); star.sType = val.toUpperCase() || 'M';
+            const _compIsExotic = (star.sType === 'D' || star.sType === 'BD');
+            compDetailPad.appendChild(_starSelectRow('Type:', star.sType, _STAR_TYPE_CHOICES, false, val => {
+                _pushHistory(); star.sType = val;
+                if (val === 'D')  { star.sClass = 'D'; star.subType = 0; }
+                if (val === 'BD') { star.sClass = 'V'; star.subType = 0; }
                 if (!star._manualFields.includes('sType')) star._manualFields.push('sType');
-                updateCompLabel(); _preview();
+                if (val === 'D' || val === 'BD') { _renderAndPreview(); } else { updateCompLabel(); _preview(); }
             }));
-            compDetailPad.appendChild(_starInputRow('Subtype:', star.subType, { type: 'number', min: '0', max: '9', width: '50px' }, val => {
-                _pushHistory(); star.subType = val !== '' ? parseInt(val) : 0;
+            compDetailPad.appendChild(_starSelectRow('Subtype:', star.subType, _STAR_SUBTYPE_CHOICES, _compIsExotic, val => {
+                _pushHistory(); star.subType = parseInt(val);
                 if (!star._manualFields.includes('subType')) star._manualFields.push('subType');
                 updateCompLabel(); _preview();
             }));
-            compDetailPad.appendChild(_starInputRow('Class:', star.sClass, { maxLength: 3, width: '50px', placeholder: 'V' }, val => {
-                _pushHistory(); star.sClass = val || 'V';
+            compDetailPad.appendChild(_starSelectRow('Class:', star.sClass, _STAR_CLASS_CHOICES, _compIsExotic, val => {
+                _pushHistory(); star.sClass = val;
                 if (!star._manualFields.includes('sClass')) star._manualFields.push('sClass');
                 updateCompLabel(); _preview();
             }));
@@ -1305,18 +1459,21 @@ const SystemEditor = (() => {
         const updatePrimaryLabel = () => {
             primaryLabel.textContent = `★ Primary: ${primaryStar.sType}${primaryStar.subType}${primaryStar.sClass}`;
         };
-        primaryDetailPad.appendChild(_starInputRow('Type:', primaryStar.sType, { maxLength: 2, width: '40px', placeholder: 'G' }, val => {
-            _pushHistory(); primaryStar.sType = val.toUpperCase() || 'G';
+        const _primaryIsExotic = (primaryStar.sType === 'D' || primaryStar.sType === 'BD');
+        primaryDetailPad.appendChild(_starSelectRow('Type:', primaryStar.sType, _STAR_TYPE_CHOICES, false, val => {
+            _pushHistory(); primaryStar.sType = val;
+            if (val === 'D')  { primaryStar.sClass = 'D'; primaryStar.subType = 0; }
+            if (val === 'BD') { primaryStar.sClass = 'V'; primaryStar.subType = 0; }
             if (!primaryStar._manualFields.includes('sType')) primaryStar._manualFields.push('sType');
-            updatePrimaryLabel(); _preview();
+            if (val === 'D' || val === 'BD') { _renderAndPreview(); } else { updatePrimaryLabel(); _preview(); }
         }));
-        primaryDetailPad.appendChild(_starInputRow('Subtype:', primaryStar.subType, { type: 'number', min: '0', max: '9', width: '50px' }, val => {
-            _pushHistory(); primaryStar.subType = val !== '' ? parseInt(val) : 0;
+        primaryDetailPad.appendChild(_starSelectRow('Subtype:', primaryStar.subType, _STAR_SUBTYPE_CHOICES, _primaryIsExotic, val => {
+            _pushHistory(); primaryStar.subType = parseInt(val);
             if (!primaryStar._manualFields.includes('subType')) primaryStar._manualFields.push('subType');
             updatePrimaryLabel(); _preview();
         }));
-        primaryDetailPad.appendChild(_starInputRow('Class:', primaryStar.sClass, { maxLength: 3, width: '50px', placeholder: 'V' }, val => {
-            _pushHistory(); primaryStar.sClass = val || 'V';
+        primaryDetailPad.appendChild(_starSelectRow('Class:', primaryStar.sClass, _STAR_CLASS_CHOICES, _primaryIsExotic, val => {
+            _pushHistory(); primaryStar.sClass = val;
             if (!primaryStar._manualFields.includes('sClass')) primaryStar._manualFields.push('sClass');
             updatePrimaryLabel(); _preview();
         }));
@@ -1478,6 +1635,54 @@ const SystemEditor = (() => {
 
     // ── Fill & Save ───────────────────────────────────────────────────────────
 
+    // For a fresh blank creation (no user-supplied bodies), force the mainworld
+    // travel zone to Green regardless of what the generator computed from its
+    // randomly-seeded UWP. Called after every generator run when working copy
+    // has no bodies.
+    function _forceGreenTravelZone(stateObj) {
+        const dataKeys   = ['mgt2eData', 't5Data', 'ctData', 'rttData'];
+        const systemKeys = ['mgtSystem', 't5System', 'ctSystem', 'rttSystem'];
+        dataKeys.forEach(k => { if (stateObj[k]) stateObj[k].travelZone = 'Green'; });
+        systemKeys.forEach(k => {
+            const sys = stateObj[k];
+            if (sys && Array.isArray(sys.worlds)) {
+                const mw = sys.worlds.find(w => w.isMainworld);
+                if (mw) mw.travelZone = 'Green';
+            }
+        });
+    }
+
+    // Applies user-entered UWP seed digits to a seed body object in-place.
+    // Sets numeric properties and records locked fields in _manualFields.
+    // Returns the mutated seedBody for chaining.
+    function _applyUwpSeed(seedBody, uwpSeed) {
+        if (!uwpSeed) return seedBody;
+        const mf = seedBody._manualFields = seedBody._manualFields || [];
+        // Starport is a letter (A–X), not a hex digit — handle separately
+        if (uwpSeed.st) {
+            const sp = uwpSeed.st.toUpperCase();
+            if (/^[A-Z]$/.test(sp)) {
+                seedBody.starport = sp;
+                if (!mf.includes('starport')) mf.push('starport');
+            }
+        }
+        const pairs = [
+            ['s', 'size'], ['a', 'atmCode'], ['h', 'hydroCode'],
+            ['p', 'pop'],  ['g', 'gov'],     ['l', 'law'], ['tl', 'tl'],
+        ];
+        pairs.forEach(([key, prop]) => {
+            const ch = uwpSeed[key];
+            if (!ch) return;
+            const val = parseInt(ch, 16);
+            if (isNaN(val)) return;
+            seedBody[prop] = val;
+            if (prop === 'atmCode')   seedBody.atm   = val;
+            if (prop === 'hydroCode') seedBody.hydro = val;
+            if (!mf.includes(prop)) mf.push(prop);
+        });
+        return seedBody;
+    }
+
     // Pre-pass: derives missing stellar physics on a seedSys (in-place) before
     // calling the generator.  Deterministic — table lookups only, no dice.
     function _resolveStarPhysics(seedSys) {
@@ -1562,33 +1767,69 @@ const SystemEditor = (() => {
         };
 
         if (engine === 'MgT2E' || engine === 'AoW') {
+            // Build UWP lock fields for a mainworld body that already has a UWP set.
+            // Stars spread _raw so their engine fields survive the generation pass; world
+            // bodies need the same treatment for UWP components.  Without this, the engine
+            // regenerates size/atm/hydro/socials from the seeded RNG and overwrites the
+            // hex-editor-saved UWP every time a preview runs (e.g. when adding a world).
+            function _uwpLockFor(body) {
+                const raw = body._raw || {};
+                if (!body.isMainworld || !body.uwp || !body._raw) return { fields: {}, mf: [] };
+                const fields = {};
+                const mf = [];
+                // Phase 1 physicals — size kept when !== undefined; no _manualFields needed
+                if (raw.size !== undefined) fields.size = raw.size;
+                // Phase 2 atm — engine checks _manualFields.includes('atmCode')
+                // Hex editor saves 'atm'; engine field is 'atmCode' — prefer edited value.
+                const atmVal = raw.atm !== undefined ? raw.atm : raw.atmCode;
+                if (atmVal !== undefined) { fields.atmCode = atmVal; mf.push('atmCode'); }
+                // Phase 2 hydro — engine checks _manualFields.includes('hydroCode')
+                const hydroVal = raw.hydro !== undefined ? raw.hydro : raw.hydroCode;
+                if (hydroVal !== undefined) { fields.hydroCode = hydroVal; mf.push('hydroCode'); }
+                // Phase 5 socio — generateMainworldUWP inherits these directly
+                if (raw.pop      !== undefined) fields.pop      = raw.pop;
+                if (raw.popCode  !== undefined) fields.popCode  = raw.popCode;
+                if (raw.gov      !== undefined) fields.gov      = raw.gov;
+                if (raw.govCode  !== undefined) fields.govCode  = raw.govCode;
+                if (raw.law      !== undefined) fields.law      = raw.law;
+                if (raw.tl       !== undefined) fields.tl       = raw.tl;
+                if (raw.starport !== undefined) fields.starport = raw.starport;
+                return { fields, mf };
+            }
+
             seed.worlds = wc.bodies.map(b => {
                 const parentStarIdx = starIdxById[b.parentStarId] ?? 0;
                 const engType = b.isMainworld   ? 'Mainworld'
                     : b.type === 'Gas Giant'    ? 'Gas Giant'
                     : b.type === 'Belt'         ? 'Planetoid Belt'
                     : 'Terrestrial Planet';
-                return {
+                const { fields: uwpLock, mf: extraMF } = _uwpLockFor(b);
+                return _applyUwpSeed({
                     _id:           b._id,
                     type:          engType,
                     ggType:        b.ggType  || null,
                     name:          b.name    || '',
                     uwp:           b.uwp     || null,
+                    ...uwpLock,
                     orbitId:       b.orbitId != null ? b.orbitId : null,
                     au:            b.orbitId != null ? (_orbitIdToAU(b.orbitId) ?? b.au ?? 1.0) : (b.au ?? 1.0),
                     orbitalRadius: b.orbitId != null ? (_orbitIdToAU(b.orbitId) ?? b.au ?? 1.0) : (b.au ?? 1.0),
                     parentStarIdx,
                     travelZone:    b.travelZone || 'G',
-                    moons: (b.moons || []).map(m => ({
-                        _id:          m._id,
-                        type:         m.isMainworld ? 'Mainworld' : 'Satellite',
-                        name:         m.name || '',
-                        uwp:          m.uwp  || null,
-                        isMainworld:  !!m.isMainworld,
-                        _manualFields: m._manualFields ? [...m._manualFields] : [],
-                    })),
-                    _manualFields: b._manualFields ? [...b._manualFields] : [],
-                };
+                    moons: (b.moons || []).map(m => {
+                        const { fields: mUwpLock, mf: mExtraMF } = _uwpLockFor(m);
+                        return _applyUwpSeed({
+                            _id:          m._id,
+                            type:         m.isMainworld ? 'Mainworld' : 'Satellite',
+                            name:         m.name || '',
+                            uwp:          m.uwp  || null,
+                            ...mUwpLock,
+                            isMainworld:  !!m.isMainworld,
+                            _manualFields: [...(m._manualFields || []), ...mExtraMF],
+                        }, m._uwpSeed);
+                    }),
+                    _manualFields: [...(b._manualFields || []), ...extraMF],
+                }, b._uwpSeed);
             });
         } else if (engine === 'CT') {
             // CT expects orbital slots: { orbit, zone, distAU, contents }
@@ -1788,6 +2029,7 @@ const SystemEditor = (() => {
             newSys = _runGenerator(hexId, engine, seedSys, stateObj);
         } catch (err) {
             console.error('[SystemEditor] Preview failed:', err);
+            console.error('[SystemEditor] Stack trace:', err.stack);
             _showWarn('Preview Error',
                 `The generator encountered an error:\n${err.message}`,
                 [{ label: 'OK', cls: 'btn-save', onClick: () => {} }]);
@@ -1800,6 +2042,9 @@ const SystemEditor = (() => {
                 [{ label: 'OK', cls: 'btn-save', onClick: () => {} }]);
             return;
         }
+
+        // Fresh blank creation: override generator's travel zone with Green
+        if (_workingCopy.bodies.length === 0) _forceGreenTravelZone(stateObj);
 
         // Preserve name from working copy mainworld
         const mwBody = _workingCopy.bodies.find(b => b._id === _workingCopy.mainworldRef)
@@ -1821,8 +2066,9 @@ const SystemEditor = (() => {
         if (typeof requestAnimationFrame === 'function' && typeof draw === 'function') {
             requestAnimationFrame(draw);
         }
-        if (typeof SystemViewer !== 'undefined' && SystemViewer.isOpen()) {
-            SystemViewer.refresh(hexId);
+        if (typeof SystemViewer !== 'undefined') {
+            if (SystemViewer.isOpen()) SystemViewer.refresh(hexId);
+            else SystemViewer.open(hexId);
         }
         if (typeof populateEditorAccordions === 'function' &&
             typeof editingHexId !== 'undefined' && editingHexId === hexId) {
@@ -1882,6 +2128,9 @@ const SystemEditor = (() => {
             return;
         }
 
+        // Fresh blank creation: override generator's travel zone with Green
+        if (_workingCopy.bodies.length === 0) _forceGreenTravelZone(stateObj);
+
         // Preserve name: use mainworld body's name from working copy, or keep existing stateObj name
         const mwBody = _workingCopy.bodies.find(b => b._id === _workingCopy.mainworldRef)
             || _workingCopy.bodies.find(b => b.isMainworld);
@@ -1932,6 +2181,11 @@ const SystemEditor = (() => {
         }
         _buildPanel();
         window.addEventListener('keydown', _onKeyDown, true);
+        // For a create flow, hexStates has no entry yet so the viewer open above was a no-op.
+        // Auto-preview now to generate a starter system and open the viewer.
+        if (typeof SystemViewer !== 'undefined' && !SystemViewer.isOpen()) {
+            _preview();
+        }
     }
 
     function _forceClose() {
@@ -1947,6 +2201,13 @@ const SystemEditor = (() => {
     function openCreate(hexId) {
         if (_workingCopy) return;
         _pendingCreateHexId = hexId;
+        // Reset primary star selects to G2V defaults each time the dialog opens
+        const pType    = document.getElementById('se-primary-type');
+        const pSubtype = document.getElementById('se-primary-subtype');
+        const pClass   = document.getElementById('se-primary-class');
+        if (pType)    { pType.value    = 'G'; pType.disabled    = false; pType.style.opacity    = '1'; }
+        if (pSubtype) { pSubtype.value = '2'; pSubtype.disabled = false; pSubtype.style.opacity = '1'; }
+        if (pClass)   { pClass.value   = 'V'; pClass.disabled   = false; pClass.style.opacity   = '1'; }
         const dlg = document.getElementById('se-engine-dialog');
         if (dlg) dlg.style.display = 'flex';
     }
@@ -1993,6 +2254,22 @@ const SystemEditor = (() => {
         const engineDlg     = document.getElementById('se-engine-dialog');
         const engineCancel  = document.getElementById('btn-se-engine-cancel');
         const engineConfirm = document.getElementById('btn-se-engine-confirm');
+        const dlgTypeSel    = document.getElementById('se-primary-type');
+        const dlgSubtypeSel = document.getElementById('se-primary-subtype');
+        const dlgClassSel   = document.getElementById('se-primary-class');
+
+        // D/BD auto-set in the creation dialog
+        if (dlgTypeSel) {
+            dlgTypeSel.addEventListener('change', () => {
+                const v = dlgTypeSel.value;
+                const exotic = (v === 'D' || v === 'BD');
+                if (v === 'D')  { dlgClassSel.value = 'D'; dlgSubtypeSel.value = '0'; }
+                if (v === 'BD') { dlgClassSel.value = 'V'; dlgSubtypeSel.value = '0'; }
+                if (dlgSubtypeSel) { dlgSubtypeSel.disabled = exotic; dlgSubtypeSel.style.opacity = exotic ? '0.55' : '1'; }
+                if (dlgClassSel)   { dlgClassSel.disabled   = exotic; dlgClassSel.style.opacity   = exotic ? '0.55' : '1'; }
+            });
+        }
+
         if (engineCancel) engineCancel.addEventListener('click', () => {
             if (engineDlg) engineDlg.style.display = 'none';
             _pendingCreateHexId = null;
@@ -2000,11 +2277,16 @@ const SystemEditor = (() => {
         if (engineConfirm) engineConfirm.addEventListener('click', () => {
             const chosen = document.querySelector('input[name="se-engine-choice"]:checked');
             const engine = chosen ? chosen.value : 'MgT2E';
+            const starSpec = {
+                sType:   dlgTypeSel    ? dlgTypeSel.value                : 'G',
+                subType: dlgSubtypeSel ? parseInt(dlgSubtypeSel.value)   : 2,
+                sClass:  dlgClassSel   ? dlgClassSel.value               : 'V',
+            };
             if (engineDlg) engineDlg.style.display = 'none';
             if (_pendingCreateHexId) {
                 const hexId = _pendingCreateHexId;
                 _pendingCreateHexId = null;
-                _openWithWorkingCopy(_buildBlankWorkingCopy(hexId, engine));
+                _openWithWorkingCopy(_buildBlankWorkingCopy(hexId, engine, starSpec));
             }
         });
     });

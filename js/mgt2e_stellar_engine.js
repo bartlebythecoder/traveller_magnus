@@ -1108,7 +1108,7 @@
         tSection('Forbidden Zones');
         let rawFZ = [];
         let primaryMao = getMAO(primary.sType, primary.subType, primary.sClass);
-        let directCompanions = sys.stars.filter(s => s.parentStarIdx === 0 && s.separation !== 'Companion');
+        let directCompanions = sys.stars.filter(s => s.parentStarIdx === 0 && s.separation !== 'Companion' && s.orbitId != null);
 
         for (let comp of directCompanions) {
             let co = comp.orbitId;
@@ -1118,7 +1118,7 @@
             // WBH Base Exclusion: +/- 1.0 Orbit#
             let fmin = co - 1.0; 
             let fmax = co + 1.0;
-            tResult('Base Exclusion Zone', `Orbit ${fmin.toFixed(2)} to ${fmax.toFixed(2)} (Star at ${co.toFixed(2)})`, 'MgT2E 1.3: Forbidden Zones');
+            tResult('Base Exclusion Zone', `Orbit ${fmin.toFixed(2)} to ${fmax.toFixed(2)} (Star at ${co != null ? co.toFixed(2) : '?'})`, 'MgT2E 1.3: Forbidden Zones');
 
             // WBH MAO Expansion
             if (cm > 0.2) { 

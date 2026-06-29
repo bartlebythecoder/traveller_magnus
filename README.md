@@ -1,4 +1,4 @@
-# As Above, So Below (v0.16.0)
+# As Above, So Below (v0.16.0.1)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -62,7 +62,16 @@ Want to replace any of these sectors with your own file?
 ---
 ## 📜 Changelog
 
-### [v0.16.0] - In Progress
+### [v0.16.0.1] - In Progress
+1. **System Import/Export:** Can now import and export individual systems
+2. **System Editor:** New worlds created in system editor allow for manual UWPs
+3. **Travel Zones:** Setting to disable automatice Travel Zone setting
+4. **Traveller World Import:** Gravity added to worlds imported from Traveller World JSON 
+
+### [v0.16.0] - 2026-06-26
+1. **Mongoose Engine - System Editor:** Added Mongoose edit system window.  Mongoose orbital bodies can now be added. removed or changed.
+2. **Mongoose Engine - Atmosphere Editor:** Added Atmosphere edit system window.  Mongoose world atmospheres can now be edited.
+3. **Mongoose Engine - Solar Days Editor:** Added Atmosphere edit solar days window.  Mongoose world solar days can now be edited.
 
 ### [v0.15.2.4] - 2026-06-19
 1. **Import Traveller World Systems:** Fixed import error not reading mainworlds as satellites

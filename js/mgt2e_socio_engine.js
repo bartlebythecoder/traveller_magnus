@@ -191,43 +191,55 @@
 
         // 1. Population
         tSection('Population');
-        const systemLimit = Math.max(0, mainworld.pop - roll1D());
-        tResult('System Pop Limit (MW Pop - 1D)', systemLimit);
-
-        let popTypeRoll = tRoll1D('Population Presence (5+)');
-        if (popTypeRoll >= 5) {
-            body.pop = 0;
-            tResult('Population', 0);
+        const _popSeeded = Array.isArray(body._manualFields) && body._manualFields.includes('pop') && body.pop !== undefined;
+        if (_popSeeded) {
+            tResult('Population (Seeded)', body.pop);
         } else {
-            let pRoll = tRoll1D('Population Value (1D)');
-            body.pop = Math.min(systemLimit, pRoll);
-            if (pRoll > systemLimit) tClamp('Population', pRoll, body.pop);
-            tResult('Population', body.pop);
+            const systemLimit = Math.max(0, mainworld.pop - roll1D());
+            tResult('System Pop Limit (MW Pop - 1D)', systemLimit);
+            let popTypeRoll = tRoll1D('Population Presence (5+)');
+            if (popTypeRoll >= 5) {
+                body.pop = 0;
+                tResult('Population', 0);
+            } else {
+                let pRoll = tRoll1D('Population Value (1D)');
+                body.pop = Math.min(systemLimit, pRoll);
+                if (pRoll > systemLimit) tClamp('Population', pRoll, body.pop);
+                tResult('Population', body.pop);
+            }
         }
 
         // 2. Government
+        const _govSeeded = Array.isArray(body._manualFields) && body._manualFields.includes('gov') && body.gov !== undefined;
+        const _lawSeeded = Array.isArray(body._manualFields) && body._manualFields.includes('law') && body.law !== undefined;
         if (body.pop > 0) {
             tSection('Government');
-            let govRoll = tRoll1D('Government');
-            if (mainworld.gov === 0) {
-                tDM('Mainworld Gov 0', -2);
-                govRoll -= 2;
-            }
-            if (mainworld.gov === 6) {
-                tDM(`Mainworld Gov 6 (+MW Pop ${mainworld.pop})`, mainworld.pop);
-                govRoll += mainworld.pop;
-            }
+            if (_govSeeded) {
+                tResult('Government (Seeded)', body.gov);
+            } else {
+                let govRoll = tRoll1D('Government');
+                if (mainworld.gov === 0) {
+                    tDM('Mainworld Gov 0', -2);
+                    govRoll -= 2;
+                }
+                if (mainworld.gov === 6) {
+                    tDM(`Mainworld Gov 6 (+MW Pop ${mainworld.pop})`, mainworld.pop);
+                    govRoll += mainworld.pop;
+                }
 
-            if (govRoll <= 1) body.gov = 0;
-            else if (govRoll === 2) body.gov = 1;
-            else if (govRoll === 3) body.gov = 2;
-            else if (govRoll === 4) body.gov = 3;
-            else body.gov = 6;
-            tResult('Government Code', body.gov);
+                if (govRoll <= 1) body.gov = 0;
+                else if (govRoll === 2) body.gov = 1;
+                else if (govRoll === 3) body.gov = 2;
+                else if (govRoll === 4) body.gov = 3;
+                else body.gov = 6;
+                tResult('Government Code', body.gov);
+            }
 
             // 3. Law Level
             tSection('Law Level');
-            if (body.gov === 6) {
+            if (_lawSeeded) {
+                tResult('Law Level (Seeded)', body.law);
+            } else if (body.gov === 6) {
                 let lRoll = tRoll1D('Law (Captive)');
                 if (lRoll <= 4) body.law = mainworld.law;
                 else if (lRoll === 5) body.law = mainworld.law + 1;
@@ -299,17 +311,22 @@
             body.tl = 0;
             body.starport = 'Y';
         } else if (body.pop > 0) {
-            const baseline = Math.max(0, mainworld.tl - 1);
-            body.tl = baseline;
-            tResult('Baseline Tech Level (Direct Derivation)', body.tl);
+            const _tlSeeded = Array.isArray(body._manualFields) && body._manualFields.includes('tl') && body.tl !== undefined;
+            if (_tlSeeded) {
+                tResult('Tech Level (Seeded)', body.tl);
+            } else {
+                const baseline = Math.max(0, mainworld.tl - 1);
+                body.tl = baseline;
+                tResult('Baseline Tech Level (Direct Derivation)', body.tl);
 
-            if (body.tl < floor) {
-                const useTlFloor = (typeof window !== 'undefined' && window.generationUseTlFloor);
-                if (useTlFloor) {
-                    body.tl = floor;
-                    tResult('TL Floor Applied', `Bumped to Atm. Minimum TL ${floor}`);
-                } else {
-                    tResult('Survival State', `Jury-Rigged / Relic Tech (Base TL ${body.tl} < Floor TL ${floor})`);
+                if (body.tl < floor) {
+                    const useTlFloor = (typeof window !== 'undefined' && window.generationUseTlFloor);
+                    if (useTlFloor) {
+                        body.tl = floor;
+                        tResult('TL Floor Applied', `Bumped to Atm. Minimum TL ${floor}`);
+                    } else {
+                        tResult('Survival State', `Jury-Rigged / Relic Tech (Base TL ${body.tl} < Floor TL ${floor})`);
+                    }
                 }
             }
         } else {
@@ -2275,6 +2292,10 @@
             tDM('Standard Pop', -2);
             let rawPop = popRoll - 2;
             pop = Math.max(0, rawPop);
+            if (!(window._currentSystemHasPop ?? true)) {
+                tOverride('Population Code', pop, 0, 'Pop Check Frequency (uninhabited system)');
+                pop = 0;
+            }
 
             if (isNativeSophont) {
                 if (pop < 6) {
@@ -2368,6 +2389,10 @@
                 starport = settingsStarportMax;
             } else {
                 tResult('Settings Starport Max', `No cap (${starport} ≤ ${settingsStarportMax})`);
+            }
+            if (!(window._currentSystemHasPop ?? true) && starportOrder.indexOf(starport) < starportOrder.indexOf('E')) {
+                tResult('Pop Check Frequency', `Starport cap applied: ${starport} → E`);
+                starport = 'E';
             }
         }
 
@@ -2554,15 +2579,25 @@
         // ── Travel Zone ───────────────────────────────────────────────
         tSection('Travel Zone');
         let travelZone = "Green";
-        const isAmber = (atm >= 10) && ([0, 7, 10].includes(gov)) && (law === 0 || law >= 9);
-        if (isAmber) {
-            travelZone = "Amber";
-            tResult('Travel Zone', 'Amber (Environmental/Social hazard)');
-        } else if (starport === 'X') {
-            travelZone = "Red";
-            tResult('Travel Zone', 'Red (Starport X)');
+        if (hasSocials && existingWorld && existingWorld.travelZone) {
+            // Inherit the existing travel zone when we're in social-inherit mode.
+            // This preserves both rules-computed and manually-overridden zones
+            // through System Editor preview passes.
+            travelZone = existingWorld.travelZone;
+            tResult('Travel Zone', `${travelZone} (Inherited)`);
         } else {
-            tResult('Travel Zone', 'Green');
+            const isAmber = (atm >= 10) && ([0, 7, 10].includes(gov)) && (law === 0 || law >= 9);
+            if (window.generationNoTravelZones) {
+                tResult('Travel Zone', 'Green (No Travel Zones setting active)');
+            } else if (isAmber) {
+                travelZone = "Amber";
+                tResult('Travel Zone', 'Amber (Environmental/Social hazard)');
+            } else if (starport === 'X') {
+                travelZone = "Red";
+                tResult('Travel Zone', 'Red (Starport X)');
+            } else {
+                tResult('Travel Zone', 'Green');
+            }
         }
 
         tSection('System Name');

@@ -566,9 +566,9 @@ const SystemEditor = (() => {
 
     function _regenerateBody(bodyId) {
         const engine = _workingCopy.engine;
-        if (engine !== 'MgT2E' && engine !== 'AoW') {
+        if (engine !== 'MgT2E') {
             _showWarn('Unsupported Engine',
-                'Regeneration is only available for MgT2E and AoW systems.',
+                'Regeneration is only available for MgT2E systems.',
                 [{ label: 'OK', cls: 'btn-save', onClick: () => {} }]);
             return;
         }

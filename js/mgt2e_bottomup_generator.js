@@ -330,9 +330,11 @@
             if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 5: Socio baseline...`);
             if (sys.mainworld && SocioEngine.generateMainworldUWP) {
                 SocioEngine.generateMainworldUWP(hexId, sys.mainworld);
-                // The socio engine rolls gasGiant independently; in bottom-up the stellar
-                // engine's sys.gasGiants is authoritative, so override the roll result.
-                sys.mainworld.gasGiant = sys.gasGiants > 0;
+                // The socio engine rolls gasGiant independently; override with the actual
+                // world list. sys.gasGiants (rolled inventory count) is NOT reliable here —
+                // it stays 0 whenever the System Editor locks body count (_allowAddBodies
+                // false), even though sys.worlds may contain a user-added Gas Giant body.
+                sys.mainworld.gasGiant = sys.worlds.some(w => w.type === 'Gas Giant');
             }
 
             // 2. Generate/Refresh core social for all worlds (Mainworld + Subordinates)

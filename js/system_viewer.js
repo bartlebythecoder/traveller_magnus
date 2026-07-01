@@ -999,17 +999,21 @@ const SystemViewer = (() => {
         });
         _pauseBtn.addEventListener('click', _togglePause);
 
-        const editBtn = document.createElement('button');
-        editBtn.id = 'sv-edit-btn';
-        editBtn.textContent = 'Edit System';
-        Object.assign(editBtn.style, {
-            background: 'transparent', border: `1px solid ${P.badge}`,
-            color: P.accent, padding: '3px 10px', cursor: 'pointer',
-            fontFamily: 'inherit', fontSize: '11px', whiteSpace: 'nowrap'
-        });
-        editBtn.addEventListener('click', () => {
-            if (typeof SystemEditor !== 'undefined') SystemEditor.openEdit(_hexId);
-        });
+        // System Editor is only tested against MgT2E systems — hide "Edit System" for all other engines.
+        let editBtn = null;
+        if (edition === 'MgT2E') {
+            editBtn = document.createElement('button');
+            editBtn.id = 'sv-edit-btn';
+            editBtn.textContent = 'Edit System';
+            Object.assign(editBtn.style, {
+                background: 'transparent', border: `1px solid ${P.badge}`,
+                color: P.accent, padding: '3px 10px', cursor: 'pointer',
+                fontFamily: 'inherit', fontSize: '11px', whiteSpace: 'nowrap'
+            });
+            editBtn.addEventListener('click', () => {
+                if (typeof SystemEditor !== 'undefined') SystemEditor.openEdit(_hexId);
+            });
+        }
 
         const closeBtn = document.createElement('button');
         closeBtn.textContent = '✕';
@@ -1020,7 +1024,7 @@ const SystemViewer = (() => {
         });
         closeBtn.addEventListener('click', close);
 
-        header.append(title, editionBadge, sub, hint, yearWrap, dayWrap, speedWrap, linearWrap, orbitWrap, hideMoonsWrap, hideHZWrap, hideHighlightWrap, _pauseBtn, editBtn, closeBtn);
+        header.append(...[title, editionBadge, sub, hint, yearWrap, dayWrap, speedWrap, linearWrap, orbitWrap, hideMoonsWrap, hideHZWrap, hideHighlightWrap, _pauseBtn, editBtn, closeBtn].filter(Boolean));
         _overlay.appendChild(header);
 
         _orrCanvas = document.createElement('canvas');

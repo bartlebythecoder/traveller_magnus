@@ -624,7 +624,12 @@ function processBottomUpSubordinates(sys) {
  */
 function processBottomUpDesignation(sys) {
     tSection('Step 7: Mainworld Designation');
-    
+
+    // Derive Gas Giant presence directly from the actual orbit contents rather than
+    // sys.gasGiant (only set when the skeleton-roll phase runs — it stays stale/undefined
+    // when the System Editor locks body count via _allowAddBodies: false).
+    const hasGasGiant = (sys.orbits || []).some(o => o.contents && o.contents.type === 'Gas Giant');
+
     // Task 4 Critical: Fixed Anchor Check
     if (sys.mainworld) {
         tResult('Fixed Anchor', 'Using pre-designated Mainworld (Top-Down mode)', 'CT 3.1: Social Finalization');
@@ -634,6 +639,9 @@ function processBottomUpDesignation(sys) {
 
         // Generate Social ONLY if missing (manual or incomplete anchor)
         if (socialGen && !winner.uwp) socialGen(winner);
+
+        // Map Gas Giant presence from system to mainworld for UI renderer
+        winner.gasGiant = hasGasGiant;
 
         tResult('Final Mainworld UWP', winner.uwp, 'CT 3.1: Social Finalization');
         return sys;
@@ -677,7 +685,7 @@ function processBottomUpDesignation(sys) {
         if (socialGen) socialGen(winner);
 
         // Map Gas Giant presence from system to mainworld for UI renderer
-        winner.gasGiant = sys.gasGiant;
+        winner.gasGiant = hasGasGiant;
 
         tResult('Final Mainworld UWP', winner.uwp, 'CT 3.1: Social Finalization');
     } else {

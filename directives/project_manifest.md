@@ -632,3 +632,25 @@ Root cause: `generateAtmospherics` in `mgt2e_world_engine.js` hardcoded `syncRes
 **Bug #6 — FIXED (2026-06-25): MgT2E bottom-up sector shows GG symbol on systems with no gas giant**
 Root cause: `generateMainworldUWP` in `mgt2e_socio_engine.js` independently rolls 2d6 for gas giant presence (≤9 = true, ~83% hit rate) and writes to `existingWorld.gasGiant`. In top-down this roll is authoritative. In bottom-up, `sys.gasGiants` from the stellar engine is authoritative, but the socio roll was overwriting it. Fix: in `mgt2e_bottomup_generator.js`, after `SocioEngine.generateMainworldUWP`, override with `sys.mainworld.gasGiant = sys.gasGiants > 0`. Defense-in-depth: same override added in `macro_orchestrator.js` `runMgT2EBottomUpMacro` before `stateObj.mgt2eData` is set.
 
+**Bug #7 — FIXED (2026-07-01): System Editor — adding/removing a Gas Giant via "+GG"/delete didn't toggle the map/orrery GG symbol (MgT2E, CT)**
+Root cause: the Bug #6 fix (`sys.mainworld.gasGiant = sys.gasGiants > 0`) assumed `sys.gasGiants` is always authoritative, but `sys.gasGiants` is only populated by `StellarEngine.generateSystemInventory()` — which the System Editor's Fill/Preview path explicitly skips whenever `_allowAddBodies` is false (the "Allow engine to add additional bodies" checkbox default). So a Gas Giant added by hand in the editor landed correctly in `sys.worlds`, but `sys.gasGiants` stayed 0 and the flag never flipped on.
+- **MgT2E fix** (`js/mgt2e_bottomup_generator.js`): `sys.mainworld.gasGiant` now derives directly from the actual world list — `sys.worlds.some(w => w.type === 'Gas Giant')` — instead of the `sys.gasGiants` counter. Self-corrects on both add and remove regardless of whether the inventory phase ran.
+- **CT fix** (`js/ct_bottomup_generator.js`, `processBottomUpDesignation`): had the same stale-counter issue (`sys.gasGiant`, singular, only set when the skeleton-roll phase runs), plus a second bug — the "Fixed Anchor" branch (hit whenever the System Editor pre-designates a mainworld via `_mainworldRef`, i.e. essentially every editor Fill/Preview on an existing system) returned early and never assigned `winner.gasGiant` at all. Fix: derive `hasGasGiant` once from `sys.orbits.some(o => o.contents && o.contents.type === 'Gas Giant')` and assign it to `winner.gasGiant` in both the Fixed Anchor branch and the normal-election branch.
+- **RTT** — audited, no fix needed. `extractRTTMainworld` in `js/rtt_engine.js` already derives the flag live from `sys.stars[].planetarySystem.orbits[].worldClass === 'Jovian'` at extraction time, and Step 3's classification pass reclassifies every body (seeded or rolled) on every run.
+- **T5** — not fixed; see Section 7, "T5 — Gas Giant / Body-List Sync Gap."
+- Neither the CT fix nor the T5 gap were reachable by users at the time of this investigation — System Editor editing is currently enabled for MgT2E (and AoW) only, per Section 5. The CT fix was applied anyway since it was low-risk and self-contained; it will already be correct whenever CT editing ships in v0.16.1.
+
+---
+
+## 7. Future Release Notes
+
+### T5 — Gas Giant / Body-List Sync Gap (found 2026-07-01, deferred to v0.16.1)
+
+Investigating Bug #7 (System Editor GG symbol not updating) confirmed T5's issue is broader than a display flag, and sharpens the "Known gap" already logged in Section 5's T5 subsection: `t5_topdown_generator.js`'s `generateT5System(mainworldBase)` takes only the mainworld's UWP as an anchor and always independently re-rolls its own gas giant / belt / terrestrial inventory from dice. `system_driver.js`'s T5 branch (`generateSystem({ edition: 'T5', mode: 'top-down', ... })`) never threads `seedSys.worlds` into that call — it's only consulted to look up the mainworld's own UWP when `_mainworldRef` is set.
+
+Practical effect once T5 editing is enabled: adding or removing **any** body (not just a Gas Giant — belts and terrestrials too) via the System Editor's "+GG"/"+World"/"+Belt" buttons on a T5 system will have no effect on the generated result. The body silently fails to appear (or disappear) after Fill & Save / Preview, because the generator never sees the edited body list.
+
+A real fix requires applying Step 5d (the generator override gate) to `js/t5_topdown_generator.js` — teaching it to accept a seeded body list, match bodies by `_id`, preserve/add/remove per the seed, and only roll fresh bodies for anything not seeded — mirroring the pattern already applied to MgT2E and CT. There's an existing but unused `restoreT5ManualFields` / `generateT5SystemPreservingManuals` pair in `system_driver.js` that only patches field-level edits onto matching existing bodies by index; it does not add or remove bodies, so it would not close this gap on its own.
+
+No code changes were made for this — T5 editing is not yet enabled for users (Section 5), so there is no way to exercise or verify a fix in the UI today. Queue alongside Step 5d and Algorithm 7 in v0.16.1.
+

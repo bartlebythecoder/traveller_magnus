@@ -2156,6 +2156,27 @@ const SystemEditor = (() => {
             });
             if (_workingCopy.age  == null && newSys.age  != null) _workingCopy.age  = newSys.age;
             if (_workingCopy.hzco == null && newSys.hzco != null) _workingCopy.hzco = newSys.hzco;
+
+            // Backfill moon orbital data (pd/pos/eccentricity/retrograde) so repeated Previews
+            // don't keep re-rolling positions, and re-sort each body's moon list to match the
+            // engine's final (orbital-distance-sorted) order — otherwise the editor's own list
+            // silently drifts out of sync with the order shown in the accordion after Save.
+            if (engine === 'MgT2E' && newSys.worlds) {
+                _workingCopy.bodies.forEach(wcBody => {
+                    const genBody = newSys.worlds.find(w => w._id === wcBody._id);
+                    if (!genBody || !genBody.moons || !wcBody.moons.length) return;
+                    wcBody.moons.forEach(wcMoon => {
+                        const genMoon = genBody.moons.find(m => m._id === wcMoon._id);
+                        if (!genMoon) return;
+                        if (genMoon.pd           !== undefined) wcMoon.pd           = genMoon.pd;
+                        if (genMoon.pos          !== undefined) wcMoon.pos          = genMoon.pos;
+                        if (genMoon.eccentricity !== undefined) wcMoon.eccentricity = genMoon.eccentricity;
+                        if (genMoon.retrograde   !== undefined) wcMoon.retrograde   = genMoon.retrograde;
+                    });
+                    wcBody.moons.sort((a, b) => (a.pd ?? Infinity) - (b.pd ?? Infinity));
+                });
+            }
+
             _renderEditorTree();
         }
 

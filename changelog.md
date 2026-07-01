@@ -1,3 +1,6 @@
+### [v0.16.0.3] - In Progress
+1. **System Editor:** Fixed bug where re-previewing a system could re-roll and re-sort moon orbital positions, making manually named/added moons appear shuffled or mismatched in the accordion view
+
 ### [v0.16.0.2] - 2026-07-01
 1. **System Editor:** Allow user to override Atmosphere rules for size 0/S/1 worlds
 

@@ -3,6 +3,7 @@
 2. **System Editor:** New worlds created in system editor allow for manual UWPs
 3. **Travel Zones:** Setting to disable automatice Travel Zone setting
 4. **Traveller World Import:** Gravity added to worlds imported from Traveller World JSON 
+5. **Hex Map:** Fixed bug that sometimes incorrectly showed Gas Giant symbol in systems without Gas Giants
 
 ### [v0.16.0] - 2026-06-26
 1. **Mongoose Engine - System Editor:** Added Mongoose edit system window.  Mongoose orbital bodies can now be added. removed or changed.

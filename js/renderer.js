@@ -456,7 +456,7 @@ function draw() {
                     const dotRadius = Math.max(minWorldRadius, baseWorldRadius);
 
                     // --- Travel Zone Halo (Amber/Red) ---
-                    if (showText && data && data.travelZone && data.travelZone !== 'Green') {
+                    if (showText && data && data.travelZone && data.travelZone !== 'Green' && data.travelZone !== 'G') {
                         const zoneColor = data.travelZone === 'Red' ? '#FF0000' : '#FFBF00';
                         ctx.save();
                         ctx.beginPath();
@@ -880,7 +880,7 @@ function draw() {
                     const dotRadius = Math.max(minWorldRadius, baseWorldRadius);
 
                     // --- Travel Zone Halo (Amber/Red) ---
-                    if (data && data.travelZone && data.travelZone !== 'Green') {
+                    if (data && data.travelZone && data.travelZone !== 'Green' && data.travelZone !== 'G') {
                         const zoneColor = data.travelZone === 'Red' ? '#FF0000' : '#FFBF00';
                         ctx.save();
                         ctx.beginPath();

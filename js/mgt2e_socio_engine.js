@@ -283,26 +283,31 @@
 
         // 4. Spaceport (MgT2E WBH RAW: 1D + Pop DMs)
         tSection('Spaceport');
-        let spDM = 0;
-        if (body.pop >= 6) { tDM('Population 6+', 2); spDM += 2; }
-        else if (body.pop === 1) { tDM('Population 1', -1); spDM -= 1; }
-        else if (body.pop === 0) { tDM('Population 0', -3); spDM -= 3; }
+        const _starportSeeded = Array.isArray(body._manualFields) && body._manualFields.includes('starport') && body.starport !== undefined;
+        if (_starportSeeded) {
+            tResult('Spaceport (Seeded)', body.starport);
+        } else {
+            let spDM = 0;
+            if (body.pop >= 6) { tDM('Population 6+', 2); spDM += 2; }
+            else if (body.pop === 1) { tDM('Population 1', -1); spDM -= 1; }
+            else if (body.pop === 0) { tDM('Population 0', -3); spDM -= 3; }
 
-        let spRoll = tRoll1D('Spaceport Generation');
-        let spTotal = spRoll + spDM;
+            let spRoll = tRoll1D('Spaceport Generation');
+            let spTotal = spRoll + spDM;
 
-        if (spTotal >= 6) body.starport = 'F'; // Good
-        else if (spTotal >= 4) body.starport = 'G'; // Basic
-        else if (spTotal === 3) body.starport = 'H'; // Primitive
-        else body.starport = 'Y'; // None
+            if (spTotal >= 6) body.starport = 'F'; // Good
+            else if (spTotal >= 4) body.starport = 'G'; // Basic
+            else if (spTotal === 3) body.starport = 'H'; // Primitive
+            else body.starport = 'Y'; // None
 
-        tResult('Spaceport Class', `${body.starport} (${spTotal})`);
+            tResult('Spaceport Class', `${body.starport} (${spTotal})`);
+        }
 
         // 5. Tech Level
         tSection('Tech Level');
         const floor = getMgT2EMinSusTL(body.atmCode);
 
-        if (floor > mainworld.tl) {
+        if (!_popSeeded && floor > mainworld.tl) {
             tSection('Uninhabited Reclassification');
             tResult('Tech Level Status', 'Uninhabited (Floor > Mainworld TL — environment unsupportable)');
             body.pop = 0;
@@ -2062,6 +2067,7 @@
         // slightly different TL (e.g. before extended-socio wrote back a revised value).
         const uninhabitIfUnsupported = (body) => {
             if (!body || body.pop === 0) return;
+            if (Array.isArray(body._manualFields) && body._manualFields.includes('pop')) return;
             const bAtm = body.atmCode !== undefined ? body.atmCode : (body.atm || 0);
             const bFloor = getMgT2EMinSusTL(bAtm);
             if (bFloor > mw.tl) {

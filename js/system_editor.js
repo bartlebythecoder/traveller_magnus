@@ -121,6 +121,10 @@ const SystemEditor = (() => {
             uwp:           m.uwp  || null,
             isMainworld:   !!m.isMainworld,
             travelZone:    m.travelZone || m.zone || 'G',
+            pd:            m.pd,
+            pos:           m.pos,
+            eccentricity:  m.eccentricity,
+            retrograde:    m.retrograde,
             _manualFields: m._manualFields ? [...m._manualFields] : [],
             _uwpSeed:      null,
             _raw:          m,
@@ -447,7 +451,9 @@ const SystemEditor = (() => {
         const doDelete = () => {
             _pushHistory();
             _workingCopy.bodies = _workingCopy.bodies.filter(b => b._id !== bodyId);
-            if (_workingCopy.mainworldRef === bodyId) _workingCopy.mainworldRef = null;
+            const mwGone = _workingCopy.mainworldRef === bodyId ||
+                (body.moons || []).some(m => m._id === _workingCopy.mainworldRef);
+            if (mwGone) _workingCopy.mainworldRef = null;
             _renderAndPreview();
         };
         if (moonCount > 0) {
@@ -507,9 +513,18 @@ const SystemEditor = (() => {
         );
     }
 
+    function _restoreBeltType(b) {
+        // At import, mainworld bodies have type forced to 'World' regardless of physical type.
+        // Size 0 uniquely identifies an asteroid belt — restore the canonical type so
+        // _buildSeedSys sends 'Planetoid Belt' to the generator instead of 'Terrestrial Planet'.
+        const rawSize = b._raw && b._raw.size;
+        if (rawSize === 0 || rawSize === '0') b.type = 'Belt';
+    }
+
     function _setMainworld(bodyId, isMoon, parentBodyId) {
         _pushHistory();
         _workingCopy.bodies.forEach(b => {
+            if (b.isMainworld) _restoreBeltType(b);
             b.isMainworld = false;
             (b.moons || []).forEach(m => { m.isMainworld = false; });
         });
@@ -543,7 +558,7 @@ const SystemEditor = (() => {
             }
         } else {
             const body = _workingCopy.bodies.find(b => b._id === bodyId);
-            if (body) body.isMainworld = false;
+            if (body) { body.isMainworld = false; _restoreBeltType(body); }
         }
         _workingCopy.mainworldRef = null;
         _renderAndPreview();
@@ -1723,6 +1738,13 @@ const SystemEditor = (() => {
         }
     }
 
+    // Normalises a working-copy travelZone value ('G' short-code) to the full-word
+    // format expected by all generators and the renderer ('Green').
+    function _normTz(tz) {
+        if (!tz || tz === 'G') return 'Green';
+        return tz;
+    }
+
     // Converts the working-copy's normalized format to the engine's native seedSys object.
     function _buildSeedSys() {
         const wc = _workingCopy;
@@ -1767,14 +1789,13 @@ const SystemEditor = (() => {
         };
 
         if (engine === 'MgT2E' || engine === 'AoW') {
-            // Build UWP lock fields for a mainworld body that already has a UWP set.
-            // Stars spread _raw so their engine fields survive the generation pass; world
-            // bodies need the same treatment for UWP components.  Without this, the engine
-            // regenerates size/atm/hydro/socials from the seeded RNG and overwrites the
-            // hex-editor-saved UWP every time a preview runs (e.g. when adding a world).
+            // Build UWP lock fields for any body that already has a UWP set.
+            // Applied to both the current mainworld AND any body that was previously the
+            // mainworld (or otherwise has a generated UWP), so changing the mainworld
+            // designation does not re-roll the former mainworld's characteristics.
             function _uwpLockFor(body) {
                 const raw = body._raw || {};
-                if (!body.isMainworld || !body.uwp || !body._raw) return { fields: {}, mf: [] };
+                if (!body.uwp || !body._raw) return { fields: {}, mf: [] };
                 const fields = {};
                 const mf = [];
                 // Phase 1 physicals — size kept when !== undefined; no _manualFields needed
@@ -1786,14 +1807,37 @@ const SystemEditor = (() => {
                 // Phase 2 hydro — engine checks _manualFields.includes('hydroCode')
                 const hydroVal = raw.hydro !== undefined ? raw.hydro : raw.hydroCode;
                 if (hydroVal !== undefined) { fields.hydroCode = hydroVal; mf.push('hydroCode'); }
-                // Phase 5 socio — generateMainworldUWP inherits these directly
-                if (raw.pop      !== undefined) fields.pop      = raw.pop;
-                if (raw.popCode  !== undefined) fields.popCode  = raw.popCode;
-                if (raw.gov      !== undefined) fields.gov      = raw.gov;
-                if (raw.govCode  !== undefined) fields.govCode  = raw.govCode;
-                if (raw.law      !== undefined) fields.law      = raw.law;
-                if (raw.tl       !== undefined) fields.tl       = raw.tl;
-                if (raw.starport !== undefined) fields.starport = raw.starport;
+                // Phase 5 socio — generateMainworldUWP inherits via hasSocials field check;
+                // generateSubordinateSocial uses _manualFields, so add to mf for both paths.
+                if (raw.pop      !== undefined) { fields.pop      = raw.pop;     mf.push('pop'); }
+                if (raw.popCode  !== undefined) { fields.popCode  = raw.popCode; }
+                if (raw.gov      !== undefined) { fields.gov      = raw.gov;     mf.push('gov'); }
+                if (raw.govCode  !== undefined) { fields.govCode  = raw.govCode; }
+                if (raw.law      !== undefined) { fields.law      = raw.law;     mf.push('law'); }
+                if (raw.tl       !== undefined) { fields.tl       = raw.tl;      mf.push('tl'); }
+                if (raw.starport !== undefined) { fields.starport = raw.starport; mf.push('starport'); }
+                return { fields, mf };
+            }
+
+            // Fields seeded from _raw for all body types so generators skip re-rolling them.
+            // Guards already exist in calculateTerrestrialPhysical for density/diamKm/mass/gravity.
+            // 'size' is included so moons without a UWP (which bypass _uwpLockFor) still have
+            // their size seeded — the generatePhysicals guard checks body.size === undefined.
+            // meanTempK/highTempK/lowTempK are intentionally excluded: the generator's geothermal
+            // pass (line ~2376 in mgt2e_world_engine.js) uses w.meanTempK as the *solar-only* base
+            // and adds inherentK on top. If we seed meanTempK with the final post-geothermal value
+            // from _raw, the geothermal heat is applied twice. Let the generator re-derive all three
+            // from the seeded albedo, greenhouseFactor, and eccentricity instead.
+            const _PHYS_FIELDS = [
+                'size',
+                'siderealHours', 'axialTilt', 'tidallyLocked', 'solarDayHours',
+                'eccentricity',
+                'albedo', 'greenhouseFactor',
+                'density', 'diamKm', 'mass', 'gravity', 'composition',
+            ];
+            function _physSeed(raw) {
+                const fields = {}; const mf = [];
+                _PHYS_FIELDS.forEach(f => { if (raw[f] !== undefined) { fields[f] = raw[f]; mf.push(f); } });
                 return { fields, mf };
             }
 
@@ -1804,6 +1848,21 @@ const SystemEditor = (() => {
                     : b.type === 'Belt'         ? 'Planetoid Belt'
                     : 'Terrestrial Planet';
                 const { fields: uwpLock, mf: extraMF } = _uwpLockFor(b);
+                // Gas Giants: seed physical properties so sizeGasGiantBody preserves
+                // diameter/mass and the Hill Sphere stays stable across Preview.
+                const ggRaw = (b.type === 'Gas Giant' && b._raw) ? b._raw : null;
+                const ggPhysFields = ggRaw ? {
+                    ...(ggRaw.diamTerra !== undefined && { diamTerra: ggRaw.diamTerra }),
+                    ...(ggRaw.diamKm    !== undefined && { diamKm:    ggRaw.diamKm    }),
+                    ...(ggRaw.mass      !== undefined && { mass:      ggRaw.mass      }),
+                    ...(ggRaw.gravity   !== undefined && { gravity:   ggRaw.gravity   }),
+                    ...(ggRaw.density   !== undefined && { density:   ggRaw.density   }),
+                } : {};
+                const ggPhysMF = ggRaw
+                    ? ['diamTerra', 'mass', 'gravity', 'density'].filter(f => ggRaw[f] != null)
+                    : [];
+                // All bodies: seed rotation/thermal so generateRotationalDynamics skips re-rolls.
+                const { fields: rotFields, mf: rotMF } = _physSeed(b._raw || {});
                 return _applyUwpSeed({
                     _id:           b._id,
                     type:          engType,
@@ -1811,24 +1870,32 @@ const SystemEditor = (() => {
                     name:          b.name    || '',
                     uwp:           b.uwp     || null,
                     ...uwpLock,
+                    ...rotFields,
+                    ...ggPhysFields,
                     orbitId:       b.orbitId != null ? b.orbitId : null,
                     au:            b.orbitId != null ? (_orbitIdToAU(b.orbitId) ?? b.au ?? 1.0) : (b.au ?? 1.0),
                     orbitalRadius: b.orbitId != null ? (_orbitIdToAU(b.orbitId) ?? b.au ?? 1.0) : (b.au ?? 1.0),
                     parentStarIdx,
-                    travelZone:    b.travelZone || 'G',
+                    travelZone:    _normTz(b.travelZone),
                     moons: (b.moons || []).map(m => {
                         const { fields: mUwpLock, mf: mExtraMF } = _uwpLockFor(m);
+                        const { fields: mRotFields, mf: mRotMF } = _physSeed(m._raw || {});
                         return _applyUwpSeed({
                             _id:          m._id,
                             type:         m.isMainworld ? 'Mainworld' : 'Satellite',
                             name:         m.name || '',
                             uwp:          m.uwp  || null,
                             ...mUwpLock,
+                            ...mRotFields,
                             isMainworld:  !!m.isMainworld,
-                            _manualFields: [...(m._manualFields || []), ...mExtraMF],
+                            pd:           m.pd,
+                            pos:          m.pos,
+                            eccentricity: m.eccentricity,
+                            retrograde:   m.retrograde,
+                            _manualFields: [...(m._manualFields || []), ...mExtraMF, ...mRotMF],
                         }, m._uwpSeed);
                     }),
-                    _manualFields: [...(b._manualFields || []), ...extraMF],
+                    _manualFields: [...(b._manualFields || []), ...extraMF, ...rotMF, ...ggPhysMF],
                 }, b._uwpSeed);
             });
         } else if (engine === 'CT') {
@@ -1849,7 +1916,7 @@ const SystemEditor = (() => {
                             : undefined,
                         name:         b.name || '',
                         uwp:          b.uwp  || null,
-                        travelZone:   b.travelZone || 'G',
+                        travelZone:   _normTz(b.travelZone),
                         satellites:   (b.moons || []).map(m => ({
                             _id:          m._id,
                             type:         'Satellite',
@@ -1872,7 +1939,7 @@ const SystemEditor = (() => {
             seed.mainworldUWP = mwBody ? {
                 uwp:        mwBody.uwp        || 'A788899-9',
                 name:       mwBody.name       || '',
-                travelZone: mwBody.travelZone || 'G',
+                travelZone: _normTz(mwBody.travelZone),
             } : null;
             seed.worlds = wc.bodies.map(b => ({
                 _id:           b._id,

@@ -273,9 +273,15 @@
                 if (body.type === 'Gas Giant') {
                     const ggCatDM = (primary.sClass === 'VI' || (primary.sType === 'M' && primary.sClass === 'V') || primary.sType === 'BD') ? -1 : 0;
                     tResult('Gas Giant Category DM', ggCatDM, 'MgT2E: Class VI / M-V / BD → -1');
-                    let catRoll = tRoll1D('Gas Giant Category') + ggCatDM;
-                    tResult('Gas Giant Category (after DM)', catRoll, 'MgT2E: ≤2=GS, 3-4=GM, ≥5=GL');
-                    let gType = (catRoll <= 2) ? 'GS' : (catRoll <= 4 ? 'GM' : 'GL');
+                    let gType;
+                    if (body.ggType) {
+                        gType = body.ggType;
+                        tResult('Gas Giant Category (Preserved)', gType, 'Seed already has ggType — skipping re-roll');
+                    } else {
+                        let catRoll = tRoll1D('Gas Giant Category') + ggCatDM;
+                        tResult('Gas Giant Category (after DM)', catRoll, 'MgT2E: ≤2=GS, 3-4=GM, ≥5=GL');
+                        gType = (catRoll <= 2) ? 'GS' : (catRoll <= 4 ? 'GM' : 'GL');
+                    }
                     sizeGasGiantBody(body, gType);
                 } else if (body.type === 'Terrestrial Planet' || body.type === 'Mainworld' || body.type === 'Satellite') {
                     if (body.type === 'Mainworld' && mainworldBase && mainworldBase.size !== undefined) {
@@ -1278,7 +1284,7 @@
                 writeLogLine(`Max Escape Value: ${w.maxEscapeValue.toFixed(3)} (1000 * (${massTerra.toFixed(3)} / (${diamTerra.toFixed(2)} * ${w.meanTempK.toFixed(1)})))`);
 
                 let retainedGases = [];
-                if (!isManual(w, 'taints')) w.taints = w.taints || [];
+                if (!isManual(w, 'taints')) w.taints = [];
 
                 for (let g of dpmGasData) {
                     if (g.weight > 0 && g.ev < w.maxEscapeValue && w.meanTempK > g.bp) {
@@ -1617,36 +1623,40 @@
                 tSection(`${isMoon ? 'Moon' : w.type} Orbit ${w.orbitId != null ? w.orbitId.toFixed(2) : '?'} Rotation`);
 
                 // 1. Sidereal Day
-                let sRoll1 = tRoll2D('Base Sidereal Day Roll');
-                let sRoll2 = tRoll1D('Sidereal Day Adjust');
-                let sMult = (w.type === 'Gas Giant' || w.size === 0 || w.size === 'S') ? 2 : 4;
-                tResult('Rotation Multiplier', sMult);
-                let ageDm = Math.floor((sys.age || 0) / 2);
-                w.siderealHours = ((sRoll1 - 2) * sMult) + 2 + sRoll2 + ageDm;
+                if (!isManual(w, 'siderealHours')) {
+                    let sRoll1 = tRoll2D('Base Sidereal Day Roll');
+                    let sRoll2 = tRoll1D('Sidereal Day Adjust');
+                    let sMult = (w.type === 'Gas Giant' || w.size === 0 || w.size === 'S') ? 2 : 4;
+                    tResult('Rotation Multiplier', sMult);
+                    let ageDm = Math.floor((sys.age || 0) / 2);
+                    w.siderealHours = ((sRoll1 - 2) * sMult) + 2 + sRoll2 + ageDm;
 
-                // Safety: Ensure siderealHours is a finite number
-                if (!Number.isFinite(w.siderealHours)) {
-                    console.error(`[MgT2E World Engine] Invalid siderealHours calculated for ${w.type}: ${w.siderealHours}. Age: ${sys.age}, sRoll1: ${sRoll1}, sRoll2: ${sRoll2}, ageDm: ${ageDm}`);
-                    w.siderealHours = 24.0; // Fallback to standard day
-                }
-
-                let extRoll = w.siderealHours;
-                let extCount = 0;
-                while (extRoll >= 40) {
-                    if (tRoll1D(`Extension ${++extCount} Roll (5+)`) >= 5) {
-                        let bonusRoll1 = tRoll2D(`Extension ${extCount} Base`);
-                        let bonusRoll2 = tRoll1D(`Extension ${extCount} Adjust`);
-                        let bonus = ((bonusRoll1 - 2) * sMult) + 2 + bonusRoll2 + ageDm;
-                        w.siderealHours += bonus;
-                        extRoll = bonus;
-                    } else {
-                        break;
+                    // Safety: Ensure siderealHours is a finite number
+                    if (!Number.isFinite(w.siderealHours)) {
+                        console.error(`[MgT2E World Engine] Invalid siderealHours calculated for ${w.type}: ${w.siderealHours}. Age: ${sys.age}, sRoll1: ${sRoll1}, sRoll2: ${sRoll2}, ageDm: ${ageDm}`);
+                        w.siderealHours = 24.0; // Fallback to standard day
                     }
+
+                    let extRoll = w.siderealHours;
+                    let extCount = 0;
+                    while (extRoll >= 40) {
+                        if (tRoll1D(`Extension ${++extCount} Roll (5+)`) >= 5) {
+                            let bonusRoll1 = tRoll2D(`Extension ${extCount} Base`);
+                            let bonusRoll2 = tRoll1D(`Extension ${extCount} Adjust`);
+                            let bonus = ((bonusRoll1 - 2) * sMult) + 2 + bonusRoll2 + ageDm;
+                            w.siderealHours += bonus;
+                            extRoll = bonus;
+                        } else {
+                            break;
+                        }
+                    }
+                    let minRoll = Math.floor(rng() * 60);
+                    let secRoll = Math.floor(rng() * 60);
+                    w.siderealHours += (minRoll / 60) + (secRoll / 3600);
+                    tResult('Fractional Adjust', `${minRoll}m ${secRoll}s`);
+                } else {
+                    tResult('Sidereal Hours (Preserved)', w.siderealHours.toFixed(4));
                 }
-                let minRoll = Math.floor(rng() * 60);
-                let secRoll = Math.floor(rng() * 60);
-                w.siderealHours += (minRoll / 60) + (secRoll / 3600);
-                tResult('Fractional Adjust', `${minRoll}m ${secRoll}s`);
                 tResult('Sidereal Hours', w.siderealHours.toFixed(4));
 
                 // 2. Axial Tilt
@@ -1688,46 +1698,55 @@
                 tResult('Solar Day (Hours)', (w.solarDayHours === Infinity || w.solarDayHours > 999999) ? 'Infinity' : w.solarDayHours.toFixed(2));
 
                 // 4. Tidal Lock
-                tSection('Tidal Lock Check');
-                let dmResult = calculateTidalLockDMs(w, sys, parent, isMoon);
-                let lockDM = dmResult.Total_DM;
-                w.Selected_Case = dmResult.Selected_Case;
-                tResult('Global DM', dmResult.Global_DM);
-                tResult('Total Lock DM', lockDM);
-                tResult('Dominant Force', dmResult.Selected_Case);
+                if (!isManual(w, 'tidallyLocked')) {
+                    tSection('Tidal Lock Check');
+                    let dmResult = calculateTidalLockDMs(w, sys, parent, isMoon);
+                    let lockDM = dmResult.Total_DM;
+                    w.Selected_Case = dmResult.Selected_Case;
+                    tResult('Global DM', dmResult.Global_DM);
+                    tResult('Total Lock DM', lockDM);
+                    tResult('Dominant Force', dmResult.Selected_Case);
 
-                // Pass the correct Driver Period (orbital period) to the lock logic
-                executeTidalLockRoll(w, sys, lockDM, dmResult.Selected_Case, orbitalPeriodHours);
+                    // Pass the correct Driver Period (orbital period) to the lock logic
+                    executeTidalLockRoll(w, sys, lockDM, dmResult.Selected_Case, orbitalPeriodHours);
+                } else {
+                    tResult('Tidal Lock (Preserved)', w.tidallyLocked);
+                }
             }
 
             // 5. Mean Temperature
             tSection('Mean Temperature');
-            w.albedo = getMgT2EAlbedo(w, w.worldHzco || sys.hzco);
+            if (!isManual(w, 'albedo')) {
+                w.albedo = getMgT2EAlbedo(w, w.worldHzco || sys.hzco);
+            }
             tResult('Bond Albedo', w.albedo.toFixed(3), 'MgT2E 2.4: Thermal Logic');
             let initialGF = 0.5 * Math.sqrt(w.totalPressureBar || w.pressureBar || 0);
-            let finalGF = 0;
             const greenhouse = MgT2EData.thermalPhysics.greenhouse;
 
-            if (w.atmCode === 0) {
-                finalGF = 0;
-            } else if (greenhouse.additiveGroup.includes(w.atmCode)) {
-                finalGF = initialGF + (tRoll3D('Greenhouse Factor Roll (3D*0.01)') * 0.01);
-            } else if (greenhouse.multiplierGroupA.includes(w.atmCode)) {
-                let mult = tRoll1D('GF Multiplier (1D-1)') - 1;
-                if (mult < 0.5) mult = 0.5;
-                finalGF = initialGF * mult;
-            } else if (greenhouse.multiplierGroupB.includes(w.atmCode)) {
-                let d1 = tRoll1D('GF Basis (1D)');
-                if (d1 <= 5) {
-                    finalGF = initialGF * tRoll1D('GF Multiplier (1D)');
+            if (!isManual(w, 'greenhouseFactor')) {
+                let finalGF = 0;
+                if (w.atmCode === 0) {
+                    finalGF = 0;
+                } else if (greenhouse.additiveGroup.includes(w.atmCode)) {
+                    finalGF = initialGF + (tRoll3D('Greenhouse Factor Roll (3D*0.01)') * 0.01);
+                } else if (greenhouse.multiplierGroupA.includes(w.atmCode)) {
+                    let mult = tRoll1D('GF Multiplier (1D-1)') - 1;
+                    if (mult < 0.5) mult = 0.5;
+                    finalGF = initialGF * mult;
+                } else if (greenhouse.multiplierGroupB.includes(w.atmCode)) {
+                    let d1 = tRoll1D('GF Basis (1D)');
+                    if (d1 <= 5) {
+                        finalGF = initialGF * tRoll1D('GF Multiplier (1D)');
+                    } else {
+                        finalGF = initialGF * tRoll3D('GF Multiplier (3D)');
+                    }
                 } else {
-                    finalGF = initialGF * tRoll3D('GF Multiplier (3D)');
+                    finalGF = initialGF;
                 }
+                w.greenhouseFactor = finalGF;
             } else {
-                finalGF = initialGF;
+                tResult('Greenhouse Factor (Preserved)', w.greenhouseFactor.toFixed(3));
             }
-
-            w.greenhouseFactor = finalGF;
             tResult('GFactor', w.greenhouseFactor.toFixed(3), 'MgT2E 2.4: Thermal Logic');
 
             let srcLum = primary.lum || 1.0;

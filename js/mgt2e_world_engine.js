@@ -796,7 +796,7 @@
             let isMainworldLocked = (w.type === 'Mainworld' && mainworldBase && mainworldBase.atm !== undefined);
             let isAtmSeeded = !isMainworldLocked && Array.isArray(w._manualFields) && w._manualFields.includes('atmCode') && w.atmCode !== undefined;
 
-            if (w.size === 'S' || w.size === 0 || w.size === 1) {
+            if ((w.size === 'S' || w.size === 0 || w.size === 1) && !isMainworldLocked && !isAtmSeeded) {
                 tSkip('Size 0, 1, S forces Atmosphere 0');
                 w.atmCode = 0;
                 writeLogLine(`Base Generation: Size ${w.size} forces Atm 0`);

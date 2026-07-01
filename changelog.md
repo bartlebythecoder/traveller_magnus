@@ -1,4 +1,7 @@
-### [v0.16.0.1] - In Progress
+### [v0.16.0.2] - 2026-07-01
+1. **System Editor:** Allow user to override Atmosphere rules for size 0/S/1 worlds
+
+### [v0.16.0.1] - 2026-07-01
 1. **System Import/Export:** Can now import and export individual systems
 2. **System Editor:** New worlds created in system editor allow for manual UWPs
 3. **Travel Zones:** Setting to disable automatice Travel Zone setting

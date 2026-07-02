@@ -433,15 +433,43 @@ const SystemEditor = (() => {
         const parent = _workingCopy.bodies.find(b => b._id === parentBodyId);
         if (!parent) return;
         _pushHistory();
+
+        // Assign the new moon a pd (orbital distance, in planetary diameters) immediately
+        // rather than leaving it undefined — an undefined pd invites the engine to free-roll
+        // a position anywhere in the Hill Sphere on the next Preview, which can land it ahead
+        // of existing moons. A locked, deliberately-larger slot keeps "add moon" behaving like
+        // "add body" (always appended at the far end) and the engine already treats any
+        // defined pd as locked (mgt2e_world_engine.js: `if (w.moons[mn].pd !== undefined)`).
+        const SLOT_SPACING = 5; // simple fixed step, in planetary diameters
+        const existingPds = (parent.moons || []).map(m => m.pd).filter(v => v != null);
+        const nextPd = existingPds.length > 0 ? Math.max(...existingPds) + SLOT_SPACING : SLOT_SPACING;
+        const hillLimit = parent._raw && parent._raw.hillSpanPd;
+        const willCrowdHill = hillLimit != null && nextPd > hillLimit;
+
         parent.moons.push({
             _id: _uid('moon'), type: 'Satellite',
             name: '', uwp: null, isMainworld: false,
-            travelZone: 'G', _manualFields: [], _uwpSeed: null, _raw: {},
+            travelZone: 'G', _uwpSeed: null, _raw: {},
+            // hillLimit unknown (parent never previewed yet) — fall back to undefined and let
+            // the engine roll a position once, same as before this fix.
+            // Not added to _manualFields: locking only requires pd !== undefined (see engine
+            // check above) — _manualFields is reserved for fields the user deliberately typed,
+            // since it also drives the accordion's "manually edited" highlight.
+            pd: hillLimit != null ? nextPd : undefined,
+            _manualFields: [],
         });
         _renderAndPreview();
         // Force the parent body open so the new moon is immediately visible
         const bodyEl = _editorPanel && _editorPanel.querySelector(`details[data-body-id="${parentBodyId}"]`);
         if (bodyEl) bodyEl.open = true;
+
+        if (willCrowdHill) {
+            _showWarn('Hill Sphere Crowded',
+                `This moon's orbit (${nextPd.toFixed(1)} pd) exceeds the gas giant's Hill Sphere limit ` +
+                `(${hillLimit.toFixed(1)} pd) — it may be destroyed when the system regenerates. ` +
+                `You can lower its orbit (⌀) value manually.`,
+                [{ label: 'OK', cls: 'btn-save', onClick: () => {} }]);
+        }
     }
 
     function _deleteBody(bodyId) {
@@ -1127,6 +1155,11 @@ const SystemEditor = (() => {
                         inp.value = v;
                         _pushHistory();
                         body._uwpSeed[key] = v || null;
+                        const fieldName = _UWP_SEED_FIELD_MAP[key];
+                        if (fieldName) {
+                            if (v) { if (!body._manualFields.includes(fieldName)) body._manualFields.push(fieldName); }
+                            else { body._manualFields = body._manualFields.filter(f => f !== fieldName); }
+                        }
                     });
                     cell.append(cellLbl, inp);
                     boxRow.appendChild(cell);
@@ -1180,6 +1213,24 @@ const SystemEditor = (() => {
                     moonRow.appendChild(_btn('✕', 'Delete moon', () => _deleteMoon(body._id, moon._id)));
                     moonContainer.appendChild(moonRow);
 
+                    // Orbit distance (pd) — directly editable, same pattern as the star
+                    // Derived Properties fields. Clearing hands the moon back to the engine
+                    // to roll a fresh position on the next Preview.
+                    moonContainer.appendChild(_derivedRow(
+                        'Orbit (⌀):',
+                        moon.pd != null ? Math.round(moon.pd * 100) / 100 : null,
+                        'pd',
+                        val => {
+                            _pushHistory();
+                            // Must assign `undefined`, not `null` — mgt2e_world_engine.js checks
+                            // `pd !== undefined` to decide whether to re-roll a position; `null`
+                            // would incorrectly be treated as "already positioned at null".
+                            moon.pd = (val == null) ? undefined : val;
+                            if (val != null) { if (!moon._manualFields.includes('pd')) moon._manualFields.push('pd'); }
+                            else { moon._manualFields = moon._manualFields.filter(f => f !== 'pd'); }
+                        }
+                    ));
+
                     // UWP seed boxes for newly added moons (no generated UWP yet)
                     if (!moon.uwp) {
                         if (!moon._uwpSeed) moon._uwpSeed = { st:null, s:null, a:null, h:null, p:null, g:null, l:null, tl:null };
@@ -1216,6 +1267,11 @@ const SystemEditor = (() => {
                                 inp.value = v;
                                 _pushHistory();
                                 moon._uwpSeed[key] = v || null;
+                                const fieldName = _UWP_SEED_FIELD_MAP[key];
+                                if (fieldName) {
+                                    if (v) { if (!moon._manualFields.includes(fieldName)) moon._manualFields.push(fieldName); }
+                                    else { moon._manualFields = moon._manualFields.filter(f => f !== fieldName); }
+                                }
                             });
                             cell.append(cellLbl, inp);
                             moonSeedRow.appendChild(cell);
@@ -1667,6 +1723,12 @@ const SystemEditor = (() => {
         });
     }
 
+    // Maps a UWP seed digit key to the field name it represents. Shared between _applyUwpSeed
+    // (applied to the transient seed body sent to the generator) and the UWP seed box UI
+    // handlers (which mark the same field manual on the persistent working-copy body/moon, so
+    // _restoreDisplayManualFields can later report it back to the accordion as user-edited).
+    const _UWP_SEED_FIELD_MAP = { st: 'starport', s: 'size', a: 'atmCode', h: 'hydroCode', p: 'pop', g: 'gov', l: 'law', tl: 'tl' };
+
     // Applies user-entered UWP seed digits to a seed body object in-place.
     // Sets numeric properties and records locked fields in _manualFields.
     // Returns the mutated seedBody for chaining.
@@ -2069,6 +2131,29 @@ const SystemEditor = (() => {
         }
     }
 
+    // Restores true (user-edited-only) _manualFields on the generated output. _uwpLockFor()/
+    // _physSeed()/ggPhysFields (used in _buildSeedSys) deliberately mark every field present
+    // in a body's/moon's _raw as "manually locked" so the generator won't re-roll values that
+    // are only being preserved from a prior save — necessary for stability. But that same
+    // _manualFields array is also what the accordion reads to highlight a field as user-edited
+    // (isManual(), core.js:478). Left uncorrected, every pre-existing world's fields would show
+    // as manually edited the moment the System Editor regenerates the system at all, even if
+    // the user only touched one unrelated body. The working copy's own _manualFields (built up
+    // only by explicit UI edits — star overrides, UWP seed digits, moon pd edits, drag-reorder,
+    // etc.) is the source of truth for display purposes, so copy it onto the generated output.
+    function _restoreDisplayManualFields(engine, newSys) {
+        if (engine !== 'MgT2E' || !newSys || !newSys.worlds) return;
+        _workingCopy.bodies.forEach(wcBody => {
+            const genBody = newSys.worlds.find(w => w._id === wcBody._id);
+            if (!genBody) return;
+            genBody._manualFields = wcBody._manualFields ? [...wcBody._manualFields] : [];
+            (wcBody.moons || []).forEach(wcMoon => {
+                const genMoon = (genBody.moons || []).find(m => m._id === wcMoon._id);
+                if (genMoon) genMoon._manualFields = wcMoon._manualFields ? [...wcMoon._manualFields] : [];
+            });
+        });
+    }
+
     function _preview() {
         if (!_workingCopy) return;
         const hexId   = _workingCopy.hexId;
@@ -2109,6 +2194,8 @@ const SystemEditor = (() => {
                 [{ label: 'OK', cls: 'btn-save', onClick: () => {} }]);
             return;
         }
+
+        _restoreDisplayManualFields(engine, newSys);
 
         // Fresh blank creation: override generator's travel zone with Green
         if (_workingCopy.bodies.length === 0) _forceGreenTravelZone(stateObj);
@@ -2156,6 +2243,23 @@ const SystemEditor = (() => {
             });
             if (_workingCopy.age  == null && newSys.age  != null) _workingCopy.age  = newSys.age;
             if (_workingCopy.hzco == null && newSys.hzco != null) _workingCopy.hzco = newSys.hzco;
+
+            // Backfill ONLY hillSpanPd (Hill Sphere limit, in planetary diameters) so _addMoon
+            // can pick a safe orbital slot for new moons. Deliberately narrow: _physSeed() and
+            // ggPhysFields (system_editor.js _buildSeedSys) treat ANY field present in a body's
+            // _raw as manually locked and stamp it into _manualFields — which is also what the
+            // accordion reads to paint a field yellow/italic (isManual(), core.js:478). Backfilling
+            // the full physical-field set here previously caused every world's fields to show as
+            // "manually edited". hillSpanPd itself isn't consumed by any of those lock helpers, so
+            // storing it is inert with respect to _manualFields/highlighting.
+            if (engine === 'MgT2E' && newSys.worlds) {
+                _workingCopy.bodies.forEach(wcBody => {
+                    const genBody = newSys.worlds.find(w => w._id === wcBody._id);
+                    if (!genBody || genBody.hillSpanPd === undefined) return;
+                    wcBody._raw = wcBody._raw || {};
+                    wcBody._raw.hillSpanPd = genBody.hillSpanPd;
+                });
+            }
 
             // Backfill moon orbital data (pd/pos/eccentricity/retrograde) so repeated Previews
             // don't keep re-rolling positions, and re-sort each body's moon list to match the
@@ -2215,6 +2319,8 @@ const SystemEditor = (() => {
                 [{ label: 'OK', cls: 'btn-save', onClick: () => {} }]);
             return;
         }
+
+        _restoreDisplayManualFields(engine, newSys);
 
         // Fresh blank creation: override generator's travel zone with Green
         if (_workingCopy.bodies.length === 0) _forceGreenTravelZone(stateObj);

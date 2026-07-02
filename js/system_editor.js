@@ -1903,6 +1903,29 @@ const SystemEditor = (() => {
                 return { fields, mf };
             }
 
+            // Extended Socioeconomics (Ix, RU, GWP, WTN, IR, DR, and all profile strings) is
+            // expensive to hand-tune and fully re-rolled by mgt2e_socio_engine.js on every
+            // generation pass. An unrelated System Editor edit (moving an orbit, adding a gas
+            // giant) would otherwise regenerate the whole system and silently reroll all of it.
+            // Snapshot the mainworld's already-generated values here so the socio engine can
+            // carry them forward unchanged; the user can still force a fresh roll at any time
+            // via the existing right-click "Generate Socioeconomic" menu action, which operates
+            // directly on stateObj.mgtSystem and never sees this snapshot.
+            const _EXT_SOCIO_FIELDS = [
+                'pValue', 'totalWorldPop', 'pcr', 'urbanPercent', 'totalUrbanPop',
+                'majorCities', 'totalMajorCityPop', 'govProfile', 'factions', 'factionsData',
+                'lawProfile', 'techProfile', 'culturalProfile', 'culturalQuirks',
+                'economicProfile', 'starportProfile', 'militaryProfile', 'judicialSystemProfile',
+                'Im', 'ecoR', 'ecoL', 'ecoI', 'ecoE', 'RU', 'pcGWP', 'WTN', 'IR', 'DR',
+                'resourceRating',
+            ];
+            function _extSocioSeedFor(raw) {
+                if (!raw || raw.RU === undefined) return null;
+                const snap = {};
+                _EXT_SOCIO_FIELDS.forEach(f => { if (raw[f] !== undefined) snap[f] = raw[f]; });
+                return snap;
+            }
+
             seed.worlds = wc.bodies.map(b => {
                 const parentStarIdx = starIdxById[b.parentStarId] ?? 0;
                 const engType = b.isMainworld   ? 'Mainworld'
@@ -1939,6 +1962,7 @@ const SystemEditor = (() => {
                     orbitalRadius: b.orbitId != null ? (_orbitIdToAU(b.orbitId) ?? b.au ?? 1.0) : (b.au ?? 1.0),
                     parentStarIdx,
                     travelZone:    _normTz(b.travelZone),
+                    _extSocioFrozen: _extSocioSeedFor(b._raw),
                     moons: (b.moons || []).map(m => {
                         const { fields: mUwpLock, mf: mExtraMF } = _uwpLockFor(m);
                         const { fields: mRotFields, mf: mRotMF } = _physSeed(m._raw || {});
@@ -1954,6 +1978,7 @@ const SystemEditor = (() => {
                             pos:          m.pos,
                             eccentricity: m.eccentricity,
                             retrograde:   m.retrograde,
+                            _extSocioFrozen: _extSocioSeedFor(m._raw),
                             _manualFields: [...(m._manualFields || []), ...mExtraMF, ...mRotMF],
                         }, m._uwpSeed);
                     }),
@@ -2064,6 +2089,7 @@ const SystemEditor = (() => {
                 _clearSystemData(stateObj);
                 stateObj.mgtSystem = newSys;
                 stateObj.mgt2eData = newSys.mainworld || null;
+                stateObj.mgtSocio  = newSys.mainworld || null;
             }
         } else if (engine === 'AoW') {
             const genFn = (typeof window !== 'undefined' && window.AoWBottomUpGenerator)
@@ -2074,6 +2100,8 @@ const SystemEditor = (() => {
                 _clearSystemData(stateObj);
                 stateObj.aowSystem = newSys;
                 stateObj.mgt2eData = newSys.mainworld || null;
+                // AoW uses MgT2E's socio display fields (macro_orchestrator.js:1128)
+                stateObj.mgtSocio  = newSys.mainworld || null;
             }
         } else if (engine === 'CT') {
             if (typeof window !== 'undefined' && window.CT_Generator) {

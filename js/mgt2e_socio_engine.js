@@ -548,7 +548,27 @@
             tSkip('No populated mainworld found');
             return sys;
         }
-    
+
+        // System Editor Freeze: if this mainworld carries a socioeconomic snapshot from a
+        // prior generation (attached by system_editor.js when an unrelated edit forces a
+        // regeneration), carry it forward verbatim instead of re-rolling. This keeps
+        // Ix/RU/GWP/WTN/IR/DR and every profile string stable across edits. The snapshot is
+        // consumed (deleted) here so it never survives into stored hex data — the right-click
+        // "Generate Socioeconomic" menu action operates on stored data directly and never
+        // attaches this snapshot, so it always produces a fresh roll.
+        if (base && base._extSocioFrozen) {
+            tSection('Extended Socioeconomics (Frozen — carried over from prior generation)');
+            Object.assign(base, base._extSocioFrozen);
+            delete base._extSocioFrozen;
+            if (mainworld && base !== mainworld) {
+                Object.assign(mainworld, base);
+                mainworld.tradeCodes = calculateMgT2ETradeCodes(mainworld);
+                delete mainworld._extSocioFrozen;
+            }
+            tResult('Extended Socioeconomics', 'Carried forward unchanged (frozen)');
+            return sys;
+        }
+
         // =====================================================================
         // EXTENDED PROFILE GENERATION
         // =====================================================================

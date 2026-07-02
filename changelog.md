@@ -1,3 +1,7 @@
+### [v0.16.0.5] - In Progress
+1. **System Editor (Mongoose):** Fixed bug where editing an already-generated system caused its socioeconomic data (Importance, RU, GWP, WTN, IR/DR, and all profile strings) to be silently rerolled instead of preserved
+2. **System Editor (Mongoose):** Fixed bug where editing a system with existing socioeconomic data could cause that data to disappear from the display entirely
+
 ### [v0.16.0.4] - 2026-07-01
 1. **System Details:** Fixed a bug where entire system details were marked as changed when one or more bodies were added
 

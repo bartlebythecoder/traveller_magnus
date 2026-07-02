@@ -1497,3 +1497,19 @@ async function captureSubsector(sectorNum, subsectorChar, outputWidth, outputHei
 
 // Listen for window resizing automatically
 window.addEventListener('resize', resize);
+
+// Chrome will not let a page block Ctrl+MouseWheel browser zoom via preventDefault
+// (it's an intentional accessibility protection), so a scroll gesture that also
+// carries a Ctrl modifier can change the page's zoom level out from under us. That
+// desyncs the canvas's backing-buffer size from window.devicePixelRatio and produces
+// corrupted, screen-position-fixed rendering until something forces a resize. There's
+// no native 'devicepixelratiochange' event, so we re-arm a matchMedia listener each
+// time it fires — the standard pattern for watching devicePixelRatio.
+function _watchDevicePixelRatio() {
+    const onChange = () => {
+        resize();
+        _watchDevicePixelRatio();
+    };
+    matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`).addEventListener('change', onChange, { once: true });
+}
+_watchDevicePixelRatio();

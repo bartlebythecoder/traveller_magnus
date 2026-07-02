@@ -65,6 +65,7 @@ Want to replace any of these sectors with your own file?
 ### [v0.16.0.5] - In Progress
 1. **System Editor (Mongoose):** Fixed bug where editing an already-generated system caused its socioeconomic data (Importance, RU, GWP, WTN, IR/DR, and all profile strings) to be silently rerolled instead of preserved
 2. **System Editor (Mongoose):** Fixed bug where editing a system with existing socioeconomic data could cause that data to disappear from the display entirely
+3. **Hex Map Rendering:** Fixed a graphical corruption bug where the map canvas could become visually garbled after a browser page-zoom change (e.g. Ctrl+Mousewheel) went unsynced from the canvas; the canvas now automatically resyncs whenever the browser's zoom/DPI changes
 
 ### [v0.16.0.4] - 2026-07-01
 1. **System Details:** Fixed a bug where entire system details were marked as changed when one or more bodies were added

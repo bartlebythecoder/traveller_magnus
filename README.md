@@ -68,6 +68,10 @@ Want to replace any of these sectors with your own file?
 3. **System Editor (Traveller 5):** User-set values are now preserved on Fill & Save instead of being silently rerolled
 4. **System Editor (Traveller 5):** Fill & Save now runs the UWP Auditor for Traveller 5 systems too, matching the same warning-and-choice behavior already available for Mongoose and Classic Traveller
 5. **System Editor (Traveller 5):** Fixed a bug where reopening a previously-saved Traveller 5 system for editing could show extra phantom "World" entries that were never actually part of the system
+6. **System Editor (RTT):** RTT WorldGen systems can now be created and edited in the System Editor, matching functionality already available for Mongoose, Classic Traveller, and Traveller 5 — add, remove, and edit stars, worlds, gas giants, belts, and moons, then Fill & Save to regenerate
+7. **System Editor (RTT):** User-set values (world classification, size, atmosphere, hydrographics, population, government, law level, starport, and tech level) are now preserved on Fill & Save instead of being silently rerolled
+8. **System Editor (RTT):** Fill & Save now runs the UWP Auditor for RTT systems too, matching the same warning-and-choice behavior already available for Mongoose, Classic Traveller, and Traveller 5
+9. **System Editor (RTT):** Fixed a bug where creating a new RTT system and adding any body would fail to generate when previewed or saved
 
 ### [v0.16.0.6] - 2026-07-04
 1. **System Editor:** Unified the Fill & Save and Preview commit logic into a single internal function, removing duplicated code that could drift out of sync between the two
@@ -107,39 +111,7 @@ Want to replace any of these sectors with your own file?
 3. **Mongoose Engine - Solar Days Editor:** Added Atmosphere edit solar days window.  Mongoose world solar days can now be edited.
 4. **System Overview:*** - Reorganized the overview to show all orbital bodies in order of their distance from primary.  All engines now use the same method.
 
-### [v0.15.2.4] - 2026-06-19
-1. **Import Traveller World Systems:** Fixed import error not reading mainworlds as satellites
 
-### [v0.15.2.3] - 2026-06-17
-1. **Import Traveller World Systems:** Fixed import slot error resulting in system viewer mis-aligning orbits
-2. **System Viewer:** Now distinguishes between Size 0 belts and Size 0 worldlets
-3. **System Viewer:** Options added to hide moons, habitable zone, mainworld highlights
-
-### [v0.15.2.2] - 2026-06-16
-1. **Import Traveller World Systems:** Fixed import error changing Orbit #
-
-### [v0.15.2.1] - 2026-06-16
-1. **System Viewer:** Fixed bug where over-written system appears on System Viewer
-
-### [v0.15.2] - 2026-06-15
-1. **System Viewer:** Fixed bug that incorrectly showed some worlds in same orbit as companion stars
-2. **All Engines:** Harmonized system naming conventions across engines
-3. **Context Menu:** Redesigned Right-click context menu
-4. **Import Traveller World Systems:** Added feature to import Traveller World System JSON
-
-### [v0.15.1] - 2026-06-15
-1. **World Details:** Fixed bug that did not propagate names to mainworld moons in some systems
-
-### [v0.15.0] - 2026-06-13
-1. **AoW Engine:** Added 'Architect of Worlds' stellar and planetary generation option. Generation is matched with Mongoose Socioeconomic expansion.
-2. **System Viewer:**  System Viewer now includes pause/play button, and the option of entering a date.  Default start date can be set in Settings.
-3. **World Details:** Changing a mainworld/system name in the World Details window gives the option of propogating the name change throughout the system.
-4. **All Engines:** Added sub-phase reseeding to isolate their RNG phase from main generation.   For example, population rolls during auto-populate use reseedForHex(hexId + "-pop") so they don't interfere with system generation even if called in a different order.
-
-### [v0.14.0] - 2026-06-05
-1. **Filter:** Added ability to filter stellar information
-2. **Mongoose:** Added Class III, Class IV, Class VI and Giants to bottom up generation (Special table)
-3. **Mongoose:** Added Setting to use Optional Variant adding the realism of more colder M-type (red dwarf) systems
 
 
 ---

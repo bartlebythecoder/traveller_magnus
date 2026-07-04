@@ -793,7 +793,7 @@ function applyRTTOrbitalNames(sys) {
                 return;
             }
             const _roman = _toRoman(_ordinal++);
-            if (!b.name) b.name = `${namePrefix}${_roman}`;
+            if (!isManual(b, 'name')) b.name = `${namePrefix}${_roman}`;
             _assignMoonNames(b.satellites, `${namePrefix}${_roman}`);
         });
     });

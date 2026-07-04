@@ -4,6 +4,10 @@
 3. **System Editor (Traveller 5):** User-set values are now preserved on Fill & Save instead of being silently rerolled
 4. **System Editor (Traveller 5):** Fill & Save now runs the UWP Auditor for Traveller 5 systems too, matching the same warning-and-choice behavior already available for Mongoose and Classic Traveller
 5. **System Editor (Traveller 5):** Fixed a bug where reopening a previously-saved Traveller 5 system for editing could show extra phantom "World" entries that were never actually part of the system
+6. **System Editor (RTT):** RTT WorldGen systems can now be created and edited in the System Editor, matching functionality already available for Mongoose, Classic Traveller, and Traveller 5 — add, remove, and edit stars, worlds, gas giants, belts, and moons, then Fill & Save to regenerate
+7. **System Editor (RTT):** User-set values (world classification, size, atmosphere, hydrographics, population, government, law level, starport, and tech level) are now preserved on Fill & Save instead of being silently rerolled
+8. **System Editor (RTT):** Fill & Save now runs the UWP Auditor for RTT systems too, matching the same warning-and-choice behavior already available for Mongoose, Classic Traveller, and Traveller 5
+9. **System Editor (RTT):** Fixed a bug where creating a new RTT system and adding any body would fail to generate when previewed or saved
 
 ### [v0.16.0.6] - 2026-07-04
 1. **System Editor:** Unified the Fill & Save and Preview commit logic into a single internal function, removing duplicated code that could drift out of sync between the two

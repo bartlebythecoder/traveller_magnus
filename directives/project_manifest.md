@@ -7,7 +7,7 @@
 
 ## 1. Project Goal
 An easy to use Traveller/Cepheus system builder and navigator
-For this version: (1) Routes (2) Borders (3) Small bug fixes
+
 
 ## 2. Next Update
 
@@ -25,11 +25,11 @@ A new full-screen system editor allowing users to create star systems from scrat
 - **New script** (`js/system_editor.js` or similar) — minimal changes to existing engines
 - The System Viewer is the UI container; Edit Mode is a state within it, not a separate tool
 - Always work on a **copy** of hexState data — never mutate live state during editing
-- On save, result must land in hexStates as a normal system with one hidden flag: `manually_edited: true`
+- On save, result must land in hexStates as a normal system. ~~with one hidden flag: `manually_edited: true`~~ **Dropped 2026-07-03, see OW-4 in Section 6** — no consumer for this flag exists or is planned; do not implement it.
 - No duplication of engine logic
 
 #### Creating vs Editing
-- **New system:** Engine selection dialog appears first. v0.16.0.x scope: **MgT2E / AoW** only. CT / T5 / RTT deferred to v0.16.1 — stubs exist in `system_editor.js` (see Section 5). Editor then opens blank.
+- **New system:** Engine selection dialog appears first. **UPDATED 2026-07-04:** MgT2E and CT are both live — in `hex_map.html`'s `#se-engine-dialog`, the MgT2E and CT radio buttons are enabled; AoW, T5, and RTT remain `disabled`, marked "(coming soon)". T5 / RTT / AoW are staged for a controlled rollout per Section 5, same pattern CT just went through — stubs exist in `system_editor.js`, and AoW's generator-level plumbing is further along than T5/RTT (see Supported Engines note below). Editor then opens blank.
 - **Existing system:** Engine is locked to whatever generated it. No engine switching in v1.
 - Minimum required to unlock Fill & Save: **a primary star must exist** (all its fields can be blank)
 
@@ -47,24 +47,25 @@ Stars (primary, companion), terrestrial worlds, gas giants, planetoid belts, moo
 #### Mainworld Rules
 - User can flag/unflag any body as mainworld
 - Re-designating mainworld on an existing system is a key use case
-- If no mainworld at Fill time: warn, offer user the choice to pick one or let engine decide
+- ~~If no mainworld at Fill time: warn, offer user the choice to pick one or let engine decide~~ — **CORRECTED 2026-07-03, see OW-2 (CLOSED):** no warning needed. A null mainworld at Fill time already falls through to the generator's normal habitability-based election automatically — this already is "let engine decide," with no dialog required.
 - T5 gets a dedicated one-off mainworld selection algorithm (T5 does not designate mainworld the same way as other engines) — **deferred to v0.16.1; see Algorithm 7 and Section 5**
 
-#### Supported Engines (v0.16.0.x — Edit System scope)
-- **MgT2E** (Mongoose Traveller 2nd Ed) — bottom-up fill; `js/mgt2e_bottomup_generator.js`
-- **AoW** (Architect of Worlds) — bottom-up fill; uses MgT2E socioeconomics by design; `js/aow_bottomup_generator.js`
+#### Supported Engines (UPDATED 2026-07-04 — Edit System scope)
+- **MgT2E** (Mongoose Traveller 2nd Ed) — bottom-up fill; `js/mgt2e_bottomup_generator.js`. Both entry points (`canvas_input.js` right-click gate, `system_viewer.js`'s "Edit System" button) recognize `mgt2eData`/`mgtSystem` or `edition === 'MgT2E'` respectively.
+- **CT** (Classic Traveller) — bottom-up fill; `js/ct_bottomup_generator.js`. **UI-exposed 2026-07-04** — the same two entry points now also recognize `ctData`/`ctSystem` or `edition === 'CT'`. Has its own `_ENGINE_ADAPTERS.CT` entry, `sys.auditResult` coverage, and `capturedPlanets` support — see the "CT is now fully online" note under v0.16.1 SEQUENCING above and the corrected CT subsection in Section 5.
 
-#### Deferred Engines (v0.16.1)
-- **CT** (Classic Traveller) — bottom-up fill; `js/ct_bottomup_generator.js`. Read/write stubs exist in `system_editor.js` — see Section 5.
-- **T5** (Traveller 5) — top-down fill only (strictly enforced in system_driver.js); `js/t5_topdown_generator.js`. Read/write stubs exist in `system_editor.js` — see Section 5.
-- **RTT** (Revised Traveller) — 3-step pipeline (Step1 → Biographer → Step2 → Step3); entirely within `js/rtt_engine.js`. Read/write stubs exist in `system_editor.js` — see Section 5. **Already has `_rttSaveManual`/`_rttRestoreManual` — manual override pattern exists and is a head start for the Fill gate.**
+**Note (2026-07-03):** AoW's bottom-up generator (`js/aow_bottomup_generator.js`) already has the `seedSys`/override-gate plumbing built and `system_editor.js`'s `_detectEngine()` will recognize an `aowSystem` if reached — but neither UI entry point currently surfaces "Edit System" for AoW hexes. This is a deliberate, not-yet-flipped switch: AoW (and T5/RTT) are being staged for a controlled rollout into the System Editor rather than exposed all at once, the same pattern CT just went through. Confirming/enabling AoW in the editor UI is future work.
+
+#### Deferred Engines (AoW / T5 / RTT)
+- **T5** (Traveller 5) — top-down fill only (strictly enforced in system_driver.js); `js/t5_topdown_generator.js`. Read/write stubs exist in `system_editor.js`. **No gating at all yet — neither structural nor field-level.** T5 is the furthest behind of the three deferred engines — see corrected Section 5.
+- **RTT** (Revised Traveller) — 3-step pipeline (Step1 → Biographer → Step2 → Step3), auto-chained internally; entirely within `js/rtt_engine.js`. Read/write stubs exist in `system_editor.js`. **Structural `seedSys` gating and full pipeline threading are already done; only broader field-level `isManual` coverage remains** (currently limited to `industry`/`tradeCodes`/`bases`/`population` in `processRTTSocialStats()`) — see corrected Section 5.
 
 #### Fill & Save — The Commit Action
 - One-time, whole-system commit — not iterative
-- **MgT2E / AoW (v0.16.0.x):** runs bottom-up engine sequence with a "check user first, generate if missing" gate at every decision point. User-set values feed downstream decisions correctly (e.g. user-set spectral type informs habitable zone).
-- **CT / T5 / RTT:** deferred to v0.16.1 — stubs exist in `system_editor.js` (see Section 5)
+- **MgT2E and CT (UI-exposed):** both run their bottom-up engine sequence with a "check user first, generate if missing" gate at every decision point. User-set values feed downstream decisions correctly (e.g. user-set spectral type informs habitable zone).
+- **AoW / T5 / RTT:** not yet UI-exposed. Their generator-level readiness varies — AoW already has structural `seedSys` gating, RTT has structural gating plus full pipeline threading, T5 has none yet. See corrected Section 5 for the accurate per-engine status; do not assume "deferred" means "no generator work has happened."
 - **Checkbox (unchecked by default):** "Allow engine to add additional bodies" — when unchecked, Fill only fills fields on bodies the user placed; when checked, engine may add bodies per its normal rules
-- Physical inconsistencies trigger a warning; user may correct or proceed
+- Physical inconsistencies trigger a warning; user may correct or proceed. **This is OW-3 (UWP Auditor) — DONE for MgT2E and CT (2026-07-04), still open for AoW/T5/RTT, see Section 6.**
 
 #### UX & Safety
 - Cancel → warn-and-confirm → discard copy (original untouched)
@@ -80,13 +81,14 @@ Stars (primary, companion), terrestrial worlds, gas giants, planetoid belts, moo
 
 ---
 
-#### hexStates Structure (per system hex)
+#### hexStates Structure (per system hex) — CORRECTED 2026-07-03 (RTT was omitted from this list; it is a fully live 5th engine, confirmed via `macro_orchestrator.js`)
 Each populated hex carries parallel objects — all must be written correctly on Fill & Save:
 - `type: 'SYSTEM_PRESENT'`
-- `mgtSystem` / `ctSystem` / `t5System` / `aowSystem` — raw body/orbit data per engine
-- `mgt2eData` / `ctData` / `t5Data` — mainworld UWP fields
+- `mgtSystem` / `ctSystem` / `t5System` / `aowSystem` / `rttSystem` — raw body/orbit data per engine
+- `mgt2eData` / `ctData` / `t5Data` / `rttData` — mainworld UWP fields
 - `mgtSocio` / `t5Socio` — socioeconomic expansion data
-- `name`, `allegiance`, `cluster`, `manually_edited` (new flag)
+- `name`, `allegiance`, `cluster`
+- `manually_edited` — **dropped as a requirement, see OW-4 in Section 6.** Not currently set anywhere; do not assume it's present on editor-produced systems.
 
 ---
 
@@ -100,39 +102,45 @@ Each populated hex carries parallel objects — all must be written correctly on
 | `js/canvas_input.js` | LOW | Show/hide `ctx-create-system` and `ctx-edit-system` per selection state; add click handlers |
 | `js/system_viewer.js` | MEDIUM | `open()` accepts optional explicit hexId; add `_editMode` flag; add Edit button to `_buildOverlay()` |
 | `js/macro_orchestrator.js` | LOW-MEDIUM | Extract commit block to shared `_commitSystemToHex()`; add `commitEditorSystem()` for Fill & Save |
-| `js/mgt2e_bottomup_generator.js` | HIGH | Add optional `userOverrides = null` parameter; thread override gate through all 5 phases |
+| `js/mgt2e_bottomup_generator.js` | HIGH | Add optional `seedSys = null` parameter; thread override gate through all 5 phases |
 | `js/aow_bottomup_generator.js` | HIGH | Same pattern as MgT2E |
-| ~~`js/ct_bottomup_generator.js`~~ | — | **Deferred (v0.16.1)** — stubs in `system_editor.js` Section 5 |
-| ~~`js/t5_topdown_generator.js`~~ | — | **Deferred (v0.16.1)** — stubs in `system_editor.js` Section 5 |
-| ~~`js/rtt_engine.js`~~ | — | **Deferred (v0.16.1)** — stubs in `system_editor.js` Section 5 |
+| `js/ct_bottomup_generator.js` / `js/ct_world_engine.js` | — | **UPDATED 2026-07-04: structural AND field-level (size/atm/hydro/pop) gating both done; CT is UI-exposed** — see Section 5. |
+| `js/t5_topdown_generator.js` | — | **Deferred (v0.16.1) — still accurate.** No structural or field-level gating exists yet — see Section 5. |
+| `js/rtt_engine.js` | — | **CORRECTED 2026-07-03: structural gate + full pipeline threading already done, not deferred.** Broader field-level `isManual` coverage still outstanding — see Section 5. |
 
 ---
 
-#### The Override Gate Pattern (applied to all 5 generators)
+#### The Override Gate Pattern (CORRECTED 2026-07-03 — this was originally a design sketch that was never built this way; see Algorithm 6 for the actual mechanism, which this now matches)
+
+The real mechanism uses a `seedSys` parameter (not `userOverrides`) plus the pre-existing `isManual()`/`_manualFields` tracking from `core.js` — there is no `_getOverride()` helper anywhere in the codebase.
 
 ```javascript
-// Existing macro callers pass no second argument → userOverrides is null → identical behavior
-function generateMgT2ESystemBottomUp(hexId, userOverrides = null) {
+// Existing macro callers pass no second argument → seedSys is null → identical behavior
+function generateMgT2ESystemBottomUp(hexId, seedSys = null) {
 
-    // At each decision point:
-    const starType = _getOverride(userOverrides, 'stars', 0, 'type') ?? generateStarType();
+    // Star fields are NOT gated field-by-field in the generator — _buildSeedSys() (system_editor.js)
+    // always resolves a concrete value before the generator ever sees it (e.g. `s.sType || 'G'`),
+    // so seeded stars are simply used as-is rather than rerolled-unless-manual.
+
+    // Body/world fields ARE gated field-by-field, e.g. in mgt2e_world_engine.js:
+    if (!isManual(body, 'density')) body.density = finalDensity;
 }
 ```
 
-**Critical safety rule:** When `userOverrides` is null (all existing macro calls), the gate is a no-op. Zero regression risk to existing generation — provided the gate check itself is correct. Each generator must be tested in isolation before the editor UI calls it.
+**Critical safety rule:** When `seedSys` is null (all existing macro calls), every `isManual` check returns false and all gates pass — generation is identical to today. This is confirmed real in `mgt2e_world_engine.js` (e.g. lines 98, 117, 121, 140, 144) and CT/RTT's structural (not field-level) equivalents — see corrected Section 5.
 
-#### The Override Object Schema (consistent across all engines)
+#### The Seed Object Schema (CORRECTED 2026-07-03 — field names below are the real ones; the version previously here — `{ stars, bodies, mainworldRef, allowAddBodies }` — does not match `_buildSeedSys()`'s actual output)
 ```javascript
 {
-  stars: [],            // user-placed star objects with partial or full fields
-  bodies: [],           // user-placed body objects (worlds, belts, etc.)
-  mainworldRef: null,   // reference to the body flagged as mainworld by the user
-  allowAddBodies: false // mirrors the "Allow engine to add additional bodies" checkbox
+  stars: [],             // seeded star objects, always fully resolved (no undefined fields)
+  worlds: [],            // MgT2E/AoW/T5: seeded body list (CT uses `orbits`; RTT uses `rttBodies`, a per-star 2D array)
+  _mainworldRef: null,   // underscore-prefixed — _id of the body flagged as mainworld by the user
+  _allowAddBodies: false // underscore-prefixed — mirrors the "Allow engine to add additional bodies" checkbox
 }
 ```
 
-#### The Commit Path
-After Fill runs, `system_editor.js` calls `commitEditorSystem(hexId, engineResult, engine)` in `macro_orchestrator.js`, which writes the completed system to hexStates — setting `manually_edited: true` — then triggers a map redraw. Identical to what macros do today.
+#### The Commit Path — 🟡 PARTIALLY BUILT, ACCEPTED FINAL STATE (see OW-5, Section 6)
+Original plan: after Fill runs, `system_editor.js` would call `commitEditorSystem(hexId, engineResult, engine)` in `macro_orchestrator.js`, writing the completed system to hexStates and triggering a map redraw. **`commitEditorSystem` in `macro_orchestrator.js` does not exist and, per Sean's explicit 2026-07-04 decision, is not planned** — see OW-5 in Section 6. What was built instead: `system_editor.js`'s own internal duplication between `_fillAndSave()`/`_preview()` was extracted into a shared `_generateAndCommit()` (2026-07-04). The separate duplication in `macro_orchestrator.js`'s macro commit blocks remains un-consolidated — a deliberate, accepted scope decision, not an oversight. Also drop the `manually_edited: true` detail from this description — that flag was retired, see OW-4.
 
 ---
 
@@ -146,61 +154,65 @@ These three functions already exist and are the native mechanism for tracking us
 
 ---
 
-#### Algorithm 1: Editor Working Copy State
+#### Algorithm 1: Editor Working Copy State — CORRECTED 2026-07-03
 
 ```
 WorkingCopy {
-  hexId, engine, isNewSystem, allowAddBodies, mainworldRef
+  hexId, engine, allowAddBodies, mainworldRef, age, hzco
 
-  stars: [StarObject]   — each has _editorId, _manualFields[], role, parentStarId, and all star fields (undefined = engine fills)
-  bodies: [BodyObject]  — flat list; each has _editorId, _manualFields[], parentStarId, type, orbitId, isMainworld, moons[]
+  stars: [StarObject]   — each has _id (NOT _editorId), _manualFields[], role, parentStarId, and all star fields, always fully resolved (never undefined — see Algorithm 6)
+  bodies: [BodyObject]  — flat list; each has _id, _manualFields[], parentStarId, type, orbitId, isMainworld, moons[]
 }
 ```
-- **Open existing system:** Deep-clone raw engine system (e.g. `stateObj.mgtSystem`) into working copy. All fields present, none manual — user edits call `markManual`.
-- **Open new system:** Single blank StarObject (Primary, all fields undefined). Engine selection must have occurred first.
-- **Original copy:** Second deep-clone taken at open, never modified. Used by Cancel to detect changes.
+- There is **no `isNewSystem` field.** New-vs-edit is tracked separately via a module-level `_pendingCreateHexId` variable, not a property on the working copy itself.
+- **Open existing system:** Deep-clone raw engine system (e.g. `stateObj.mgtSystem`) into working copy via `_buildWorkingCopyFromState()`. All fields present, none manual — user edits mark `_manualFields` inline (there is no `markManual` helper function despite `core.js` exposing one — the editor pushes directly to the array).
+- **Open new system:** Single blank StarObject (Primary, all fields undefined) via `_buildBlankWorkingCopy()`. Engine selection must have occurred first.
+- **Original copy:** `_originalCopy` — confirmed real, a second deep-clone (`JSON.parse(JSON.stringify(wc))`) taken once at open and never reassigned except to `null` on close. Used by `_isDirty()` (`JSON.stringify(_workingCopy) !== JSON.stringify(_originalCopy)`) to detect changes — see corrected Algorithm 8, which also depends on a second condition beyond this comparison.
 
 ---
 
-#### Algorithm 2: Local Undo/Redo Stack
+#### Algorithm 2: Local Undo/Redo Stack — CORRECTED 2026-07-03 (variable names only; behavior confirmed accurate)
 
 Separate from global `saveHistoryState` (which is called once at Fill & Save for map-level undo).
 
 ```
-_editorHistory []   — JSON-serialized WorkingCopy snapshots
-_editorHistIdx -1   — current position
+_history []   — JSON-serialized WorkingCopy snapshots (NOT _editorHistory)
+_histIdx -1   — current position (NOT _editorHistIdx)
 
 _pushHistory():
-  Truncate array above _editorHistIdx
+  Truncate array above _histIdx
   Push JSON.stringify(_workingCopy)
-  _editorHistIdx = length - 1
-  Cap at 50 entries
+  _histIdx = length - 1
+  Cap at HISTORY_CAP = 50 entries — confirmed real constant, enforced with .shift() when exceeded
 
-undo() [Ctrl+Z]:  _editorHistIdx--; restore; _renderEditorTree()
-redo() [Ctrl+Y]:  _editorHistIdx++; restore; _renderEditorTree()
+undo() [Ctrl+Z]:  _histIdx--; restore; _renderEditorTree()
+redo() [Ctrl+Y]:  _histIdx++; restore; _renderEditorTree()
 ```
-Push on every structural operation (before the change) and on field-edit blur (not per keystroke).
+Push on every structural operation (before the change, confirmed) and on field-edit **`change` event** (not literally a `blur` listener, though functionally similar — not per keystroke).
 Initial state pushed at editor open (position 0 = "before any edits").
 
 ---
 
-#### Algorithm 3: Structural Operations
+#### Algorithm 3: Structural Operations — CORRECTED 2026-07-03
 
-**addStar(role)**  → create StarObject (_manualFields:[]), push to stars, _pushHistory, render
+**`_addStar(separation, parentStarId)`** (not `addStar(role)`) → `_pushHistory()` fires **first**, then create StarObject (`_manualFields: []`), push to stars, `_renderAndPreview()`.
 
-**addBody(parentStarId, bodyType)**  → create BodyObject, markManual(body,'type'), assign next available orbitId, _pushHistory, push to bodies, render
+**`_addBody(parentStarId, bodyType)`** → `_pushHistory()` fires **first**, then create BodyObject with `_manualFields: ['type']` set inline (there is no `markManual` function — despite `core.js` exposing one, the editor pushes to `_manualFields` directly everywhere), `orbitId: _nextOrbitId(parentStarId)` computed inline, render.
 
-**deleteBody(bodyId)**
+**`_deleteBody(bodyId)`**
 ```
-If body has moons → warn-and-confirm "N moons will also be deleted"
+If body has moons → warn-and-confirm "This body has N moon(s) that will also be deleted."
 _pushHistory → remove body + moons → if was mainworld: clear mainworldRef → render
 ```
+Confirmed accurate in substance; only the exact dialog wording differs from the paraphrase above.
 
-**deleteStar(starId)**
+**`_deleteStar(starId)`** — broader in scope than previously documented:
 ```
-If only star → show error "Cannot delete the only star"
-Count all bodies on this star → warn-and-confirm "N bodies will be deleted"
-_pushHistory → remove star + all its bodies → clear mainworldRef if affected → render
+If only star → show error "A system must have at least one star." (NOT "Cannot delete the only star")
+Collect the target star PLUS any sub-companion stars orbiting it (not just bodies)
+Count all bodies on this star (and its sub-companions) → warn-and-confirm
+  "This star (and its companion) and N orbiting bodies will be permanently removed."
+_pushHistory → remove star + sub-companions + all their bodies → clear mainworldRef if affected → render
 ```
 
 **moveBody(bodyId, newOrbitId)** — implemented as `_insertAtOrbit(draggedObj, targetOrbitId)`
@@ -214,81 +226,106 @@ All shifted items + draggedObj: mark orbitId as manual
 _pushHistory (pushed before the change)
 render + auto-preview
 ```
-Note: typed orbit# changes that would cross a neighbor are blocked with a popup directing the user to drag-and-drop instead (`_wouldReorder` guard).
+Note: typed orbit# changes that would cross a neighbor are blocked with a popup directing the user to drag-and-drop instead (`_wouldReorder` guard) — confirmed real, invoked at both the primary-body and companion-star orbit inputs.
 
-**setMainworld(bodyId)**
+**`_setMainworld(bodyId, isMoon, parentBodyId)`** (two more parameters than previously documented)
 ```
 _pushHistory
-All bodies: isMainworld = false
-Target: isMainworld = true; markManual(body, 'isMainworld')
+All bodies AND moons: isMainworld = false (also restores true Belt type via _restoreBeltType() — an undocumented side effect: mainworld bodies display as type 'World' regardless of physical type, so un-designating one must restore its real type)
+Target: isMainworld = true; _manualFields push 'isMainworld' inline (no markManual function — see Algorithm 1)
 mainworldRef = bodyId → render
 ```
 
 ---
 
-#### Algorithm 4: Drag-and-Drop (single star orbit tree only)
+#### Algorithm 4: Drag-and-Drop — CORRECTED 2026-07-03
 
+There are actually **two separate draggable-object models**, not one — the original single "single star orbit tree only" header was incomplete rather than wrong:
+
+**Body drags** (`_dragBodyId` + `_dragStarId` — two variables set together, not one) — genuinely restricted to a single star's tree:
 ```
-dragStart(bodyId):  _dragBodyId = bodyId; add 'se-dragging' CSS class
+dragstart(bodyId):  _dragBodyId = bodyId; _dragStarId = <that body's parent star>; bodyEl.style.opacity = '0.4' (no 'se-dragging' CSS class exists anywhere in the file)
 
-dragOver(event):
-  If cursor over body in DIFFERENT star tree → show no-drop cursor; return
-  Show drop-indicator at insertion point; compute targetOrbitId
+dragover(event):
+  If body.parentStarId !== _dragStarId → dropEffect = 'none'; return   (cross-star block, confirmed real)
+  Target orbit is simply the hovered body's own orbitId — no separate drop-indicator/insertion-point calculation
 
-dragDrop():
-  If no valid target → dragCancel(); return
-  Call moveBody(_dragBodyId, targetOrbitId)  ← handles history + warnings
-  Clear drag state
+drop():
+  Calls _insertAtOrbit(dragBody, body.orbitId) directly — there is no moveBody() wrapper function
+  Invalid drops simply no-op via the guard conditions above — there is no dragCancel() function
 
-dragCancel():  clear _dragBodyId; remove CSS classes; no history push
+dragend:  _dragBodyId = null; _dragStarId = null; no history push (opacity style cleared)
+```
+
+**Companion-star drags** (`_dragCompanionId` — a third, separate variable) — CAN cross star boundaries, confirmed real:
+```
+A companion star can be dropped onto primary-level bodies or onto other companions,
+via the same _insertAtOrbit(draggedObj, targetOrbitId) used for body drags.
+This is what "Interleaved Companion Stars" (Phase 5, below) describes — it is not a
+contradiction with the body-drag restriction above, they are different draggable types.
 ```
 
 ---
 
-#### Algorithm 5: Fill Sequence
+#### Algorithm 5: Fill Sequence — CORRECTED 2026-07-03 to match Section 6 decisions (this is the master sequence; keep it in sync whenever an OW item's status changes)
 
 ```
-fillAndSave():
+_fillAndSave():
 
-  1. VALIDATE PRIMARY STAR
-     If no Primary star → error "A primary star is required" → return
+  1. ~~VALIDATE PRIMARY STAR~~ — RETRACTED, see OW-1 (CLOSED).
+     Structurally unreachable: the UI has no way to delete the primary or leave
+     the stars array empty. Not implemented, not needed.
 
-  2. VALIDATE MAINWORLD (skip for T5)
-     If mainworldRef === null AND engine !== 'T5':
-       Dialog: [A] Let me pick one  [B] Let engine decide  [C] Cancel
+  2. ~~VALIDATE MAINWORLD~~ — RETRACTED, see OW-2 (CLOSED).
+     A null mainworldRef already falls through to the generator's normal
+     habitability-based election (WorldEngine.evaluateMainworldCandidates) —
+     this already IS "Let engine decide," automatically, no dialog needed.
 
   3. BUILD SEED SYS
-     seedSys = { hexId, stars: deep-clone, worlds: deep-clone of bodies,
-                 _allowAddBodies, _mainworldRef }
+     seedSys = _buildSeedSys() — engine-specific shape, see corrected "Seed Object
+     Schema" in Phase 2 above (_mainworldRef / _allowAddBodies, underscore-prefixed)
      ← _manualFields arrays are preserved in the clone
 
-  4. CALL GENERATOR (switch on engine — v0.16.0.x scope: MgT2E and AoW only)
-     MgT2E → MgT2EBottomUpGenerator.generateMgT2ESystemBottomUp(hexId, seedSys)
-     AoW   → AoWBottomUpGenerator.generateAoWSystemBottomUp(hexId, seedSys)
-     CT    → [deferred post-v0.16.0.x]
-     T5    → [deferred post-v0.16.0.x]
-     RTT   → [deferred post-v0.16.0.x]
+  4. CALL GENERATOR (switch on engine — UPDATED 2026-07-04: MgT2E and CT are both
+     UI-exposed; AoW is generator-ready but not switched on in the UI, see Supported
+     Engines note)
+     MgT2E → MgT2EBottomUpGenerator.generateSystem(hexId, seedSys)
+     CT    → CT_Generator.generateSystem({ mode: 'bottom-up', hexId, seedSys })  [UI-exposed]
+     AoW   → AoWBottomUpGenerator.generateAoWSystemBottomUp(hexId, seedSys)  [built, not UI-exposed]
+     T5    → not UI-exposed; generator has no gating yet (see Section 5)
+     RTT   → not UI-exposed; generator has structural gating + full pipeline threading already (see Section 5)
 
-  5. RUN UWP AUDITOR
-     If errors → warn-and-proceed: [Proceed anyway] [Go back and fix]
+  5. RUN UWP AUDITOR — ✅ DONE for MgT2E and CT (2026-07-04). See OW-3 (Section 6).
+     Each generator attaches its audit result to `sys.auditResult` (`auditMgT2ESystem`/
+     `MgT2E_UWP_Auditor.runAndLog` for MgT2E; `auditCTSystem`/`CT_Auditor.runAndLog` for
+     CT, wired into `ct_system_driver.js`). `_fillAndSave()` reads `result.newSys.auditResult`
+     generically (engine-agnostic check) — if `pass === false`: warn-and-proceed
+     [Proceed anyway] [Go back and fix]. Still a no-op for AoW/T5/RTT until each gets
+     its own `sys.auditResult` attachment.
 
-  6. COMMIT
-     saveHistoryState('System Editor: Fill & Save')  ← global map undo
-     result.manually_edited = true
-     commitEditorSystem(hexId, result, engine)
-     Close editor → SystemViewer.open(hexId)
+  6. COMMIT — 🟡 PARTIALLY EXTRACTED, ACCEPTED FINAL STATE. See OW-5 (Section 6).
+     `_generateAndCommit(errorLabel)` (2026-07-04) is now the shared function called by
+     both `_preview()` and `_fillAndSave()`: build seedSys → run generator (via
+     `_ENGINE_ADAPTERS` for MgT2E/CT) → restore-display-manual-fields → preserve
+     mainworld name → `computeSystemCounts` → `hexStates.set()` → redraw → (run UWP
+     auditor gate, step 5 above) → close editor → `SystemViewer.open(hexId)`.
+     ~~result.manually_edited = true~~ — DROPPED, see OW-4 (CLOSED). Do not implement.
+     ~~commitEditorSystem(hexId, result, engine)~~ in `macro_orchestrator.js` — does not
+     exist and is not planned (Sean's call, 2026-07-04): only `system_editor.js`'s own
+     internal duplication was consolidated; the separate `macro_orchestrator.js` commit
+     blocks remain un-consolidated. See OW-5's scope note in Section 6.
 ```
 
 ---
 
-#### Algorithm 6: Generator Override Mechanism
+#### Algorithm 6: Generator Override Mechanism — CORRECTED 2026-07-03 (nuance added, mechanism itself confirmed accurate)
 
-`_buildSeedSys` passes working copy bodies (with `_manualFields`) to the generator as its starting `sys`. Inside each generator, every field assignment is gated:
+`_buildSeedSys` passes working copy bodies (with `_manualFields`) to the generator as its starting `sys`. Inside each generator, **body/world field assignments** are gated exactly like this — confirmed real and extensive in `mgt2e_world_engine.js` (e.g. lines 98, 117, 121, 140, 144):
 
 ```javascript
-// Before: star.type = rollStarType();
+// Before: body.density = finalDensity;
 // After:
-if (!isManual(star, 'type')) star.type = rollStarType();
+if (!isManual(body, 'density')) body.density = finalDensity;
 
 // allowAddBodies gate (inventory/allocation phases):
 if (!seedSys || seedSys._allowAddBodies) {
@@ -296,6 +333,8 @@ if (!seedSys || seedSys._allowAddBodies) {
     StellarEngine.allocateOrbits(sys);
 }
 ```
+
+**Star fields do NOT use this pattern.** No generator calls `isManual(star, 'type')` or rerolls star fields — `_buildSeedSys()` always resolves every star field to a concrete value before the generator sees it (e.g. `type: s.sType || 'G'`), so seeded stars are simply used as-is. The `star.type = rollStarType()` example previously shown here described a mechanism that doesn't exist for stars; it's been replaced with the real body-field example above.
 
 **Safety guarantee:** When `seedSys` is null (all existing macro calls), every `isManual` check returns false and all gates pass — generation is 100% identical to today.
 
@@ -317,29 +356,33 @@ When the user has not designated a mainworld and engine is T5:
 
 ---
 
-#### Algorithm 8: Cancel Sequence
+#### Algorithm 8: Cancel Sequence — CORRECTED 2026-07-03
+
+The actual function is `close()`, not `cancel()`. More importantly, the trigger condition is **not just `_isDirty()`** as previously documented — there's a second, undocumented condition:
 
 ```
-cancel():
-  hasChanges = JSON.stringify(_workingCopy) !== JSON.stringify(_originalCopy)
-  If hasChanges → warn-and-confirm "Discard all unsaved changes?"
-    [Discard] → close editor (map state unchanged)
-    [Keep Editing] → return
-  If no changes → close immediately
+close():
+  If _isDirty() [= JSON.stringify(_workingCopy) !== JSON.stringify(_originalCopy)] OR _previewOriginalState is set:
+    warn-and-confirm ('Discard Changes?', 'You have unsaved changes. Discard them and close the editor?')
+      [Discard]      → _restorePreview() (reverts hexStates if a Preview snapshot exists, no-op otherwise) → _forceClose()
+      [Keep Editing] → return
+  Else → _forceClose() immediately
 ```
+
+**The `_previewOriginalState` condition matters in practice:** `_preview()` doesn't touch `_workingCopy`, only `hexStates` — so a user who clicks Preview and then Close, with zero further edits, still gets the "unsaved changes" warning, because `_previewOriginalState` is set even though `_isDirty()` alone would be `false`. This is real and reachable: the "Create New" flow auto-previews once immediately on open (see `_openWithWorkingCopy`) to render a starter system, so closing a freshly-created system without touching anything still triggers this dialog.
 
 ---
 
 ### Phase 4 — Implementation Sequence
 
-**Steps 1–4 complete** — HTML structure (`hex_map.html`), context menu entry points (`js/canvas_input.js`, `js/system_viewer.js`), `system_editor.js` scaffold, and structural operations + drag-and-drop are all implemented.
+**Steps 1–4 complete** — HTML structure (`hex_map.html`), context menu entry points (`js/canvas_input.js`, `js/system_viewer.js`), `system_editor.js` scaffold, and structural operations + drag-and-drop are all implemented. **Reconfirmed 2026-07-03**: `system_editor.js` is a substantial 2500+ line implementation, not a stub; context menu wiring, HTML dialog markup, and structural-op/DnD handlers were all directly verified present and functional (see corrected Algorithms 1-4, 8 above for the accurate behavioral detail).
 
 ---
 
 #### Step 5 — Generator Override Gates (one engine at a time)
 **Files:** `js/mgt2e_bottomup_generator.js`, `js/ct_bottomup_generator.js`, `js/aow_bottomup_generator.js`, `js/t5_topdown_generator.js`, `js/rtt_engine.js`
 
-Pattern applied identically to all 5 generators:
+Pattern applied identically across generators (CORRECTED 2026-07-03 — see Algorithm 6 for the accurate body-vs-star distinction; star fields are seeded wholesale, not field-gated):
 ```javascript
 function generateMgT2ESystemBottomUp(hexId, seedSys = null) {
     const sys = seedSys || { hexId, worlds: [], stars: [], ... };
@@ -347,47 +390,49 @@ function generateMgT2ESystemBottomUp(hexId, seedSys = null) {
         StellarEngine.generateSystemInventory(sys);
         StellarEngine.allocateOrbits(sys);
     }
-    if (!isManual(star, 'type')) star.type = rollStarType();  // at every field
+    if (!isManual(body, 'density')) body.density = finalDensity;  // body/world fields, at every field
     // mainworld: use seedSys._mainworldRef if set, else run normal election
 }
 ```
 
-Sub-steps and regression tests (⚠️ do not proceed to next engine until regression passes):
-- **5a MgT2E:** Add seedSys param; gate stellar/inventory/world fields/mainworld. Regression: run MgT2E BU macro on 5 hexes, output identical to pre-change.
-- **5b AoW:** Same pattern. Regression: AoW macro on 5 hexes.
-- ~~**5c CT:**~~ **Deferred (post-v0.16.0.x)**
-- ~~**5d T5:**~~ **Deferred (post-v0.16.0.x)**
-- ~~**5e RTT:**~~ **Deferred (post-v0.16.0.x)**
+Sub-steps and regression status (UPDATED 2026-07-05 — CT and T5 have both completed the full Phase B sequence; see corrected Section 5 for full evidence):
+- **5a MgT2E:** ✅ Done — structural + field-level gating complete, UI-exposed.
+- **5b CT:** ✅ Done (2026-07-04) — structural + field-level (size/atm/hydro/pop) gating complete, own `_ENGINE_ADAPTERS` entry, own UWP-auditor coverage, **UI-exposed**. Gov/law/tl/starport gating is a known, deliberately-deferred follow-up (not a blocker).
+- **5c AoW:** ✅ Done at the generator level (structural + field-level gating present) — **not yet UI-exposed, no adapter, no auditor coverage**. Last in the RTT → AoW queue (see v0.16.1 SEQUENCING note above).
+- **5d T5:** ✅ Done (2026-07-05) — structural + field-level (worldType/size/atm/hydro/pop) gating complete, Algorithm 7 mainworld election implemented, own `_ENGINE_ADAPTERS` entry, own UWP-auditor coverage, **UI-exposed**. Gov/law/tl/starport gating deliberately deferred (not a blocker, same as CT). Verified end-to-end in-browser via Playwright.
+- **5e RTT:** ⚠️ Partial — structural gating + full pipeline threading done; field-level `isManual` gating covers only 4 fields (`industry`/`tradeCodes`/`bases`/`population`). Not UI-exposed. **Next in the queue.**
 
-**⚠️ Do not proceed to Step 6 until regressions for MgT2E and AoW pass.**
+**Before AoW/RTT is UI-exposed:** finish its remaining gating work above, give it its own `_ENGINE_ADAPTERS` entry (OW-8 pattern), AND give it its own UWP-auditor coverage (OW-3 pattern, per-engine — MgT2E's/CT's/T5's coverage does not extend to other engines). CT's and T5's Phase B work (Section 5, "CT is now fully online" / "T5 is now fully online") are the worked reference implementations for this whole sequence.
 
 ---
 
-#### Step 6 — Fill & Save Orchestration
+#### Step 6 — Fill & Save Orchestration — DONE for MgT2E and CT (UPDATED 2026-07-04)
 **Files:** `js/system_editor.js`
 
-Add Fill & Save button to editor toolbar. Implement `_fillAndSave()` (Algorithm 5): validate → mainworld dialog → `_buildSeedSys()` → call generator → run UWP auditor → warn-and-proceed → `saveHistoryState()` → commit → close editor → `SystemViewer.open(hexId)`.
+Fill & Save button exists and works for MgT2E and CT. Actual current sequence (see corrected Algorithm 5): `_buildSeedSys()` → call generator (via `_ENGINE_ADAPTERS` for MgT2E/CT) → `_generateAndCommit()`'s shared commit block (`hexStates.set`/redraw) → **OW-3 audit gate** (`result.newSys.auditResult`; warn-and-proceed dialog if `pass === false`) → close editor → `SystemViewer.open(hexId)`. The "validate → mainworld dialog" steps this used to describe are retracted (OW-1/OW-2, closed as unnecessary). The UWP auditor step is implemented and live for MgT2E and CT; still a no-op for AoW/T5/RTT until each gets its own `sys.auditResult` attachment (see OW-3 in Section 6).
 
-`_buildSeedSys()`: deep-clone working copy stars and bodies (preserving `_manualFields`) into seedSys object with `_allowAddBodies` and `_mainworldRef`.
+`_buildSeedSys()`: deep-clone working copy stars and bodies (preserving `_manualFields`) into seedSys object with `_allowAddBodies` and `_mainworldRef` — confirmed real and matches the corrected Seed Object Schema in Phase 2.
 
-- **Verify (each engine):** Create system, fill → appears on map with correct data; user-set fields survive Fill; allowAddBodies checkbox respected; audit errors → warn dialog with go-back option; edit existing system, change structure, fill → changes in result
+- **Verified working today (MgT2E, in-browser by Sean):** audit errors → warn dialog with go-back option; Create system, fill → appears on map with correct data; user-set fields survive Fill; allowAddBodies checkbox respected; edit existing system, change structure, fill → changes in result
+- **CT (2026-07-04):** same code paths, but only `node --check`-verified so far — **not yet exercised in-browser**, since CT's UI exposure (Phase B item 5) just landed this session. First real end-to-end test is up to Sean.
 - **Regression:** All existing macros still generate correctly (seedSys=null path untouched)
 
 ---
 
-#### Step 7 — Commit Path
-**Files:** `js/macro_orchestrator.js`
+#### Step 7 — Commit Path — 🟡 PARTIALLY DONE, ACCEPTED FINAL STATE (UPDATED 2026-07-04, see OW-5 in Section 6)
+**Files:** `js/system_editor.js`, `js/macro_orchestrator.js`
 
-Add `commitEditorSystem(hexId, sys, engine)` — based directly on existing macro commit blocks (lines ~499–555). Nulls all competing engine data, writes engine-specific fields, sets `manually_edited: true`, calls `computeSystemCounts()`, `hexStates.set()`, `requestAnimationFrame(draw)`.
+`commitEditorSystem(hexId, sys, engine)` in `macro_orchestrator.js` (shared by macros AND the editor) does **not** exist and is **not planned** — Sean explicitly scoped this down (2026-07-04) to "system_editor.js only." What was built instead: `system_editor.js`'s own internal duplication between `_fillAndSave()`/`_preview()` is extracted into a shared `_generateAndCommit(errorLabel)` — see OW-5 Layer 1 in Section 6 for the full method list (build seedSys → run generator → restore-display-manual-fields → mainworld-name preservation → `computeSystemCounts` → `hexStates.set` → redraw). The `macro_orchestrator.js` commit-block layer (Layer 2) remains a separate, un-consolidated path — revisit only if a future engine's macro and editor commit paths need to agree, per OW-5's note.
 
-- **Verify (full round-trip, each engine):** Committed system on hex map; System Viewer renders it; Hex Editor shows correct fields; JSON export/re-import round-trips correctly; `manually_edited: true` in raw JSON; macro re-run on same hex overwrites correctly; map-level Ctrl+Z reverts to pre-edit state
+- **Verified (MgT2E, in-browser by Sean):** Committed system on hex map; System Viewer renders it; Hex Editor shows correct fields; macro re-run on same hex overwrites correctly; map-level Ctrl+Z reverts to pre-edit state
+- **CT (2026-07-04):** same `_generateAndCommit()` code path (CT's `_ENGINE_ADAPTERS.CT.run()` writes `stateObj.ctSystem`/`ctData` the same way MgT2E's adapter does) — not yet exercised in-browser, see Step 6 above
 - **Final regression:** Every macro type generates correctly; open/cancel preserves original; open/edit/fill/save produces correct result
 
 ---
 
 ### Phase 5 — Implementation Notes & Design Decisions (2026-06-22)
 
-Steps 1–4 of the Phase 4 sequence are fully implemented. Steps 5–7 (generator override gates, Fill & Save validation, commit path) are partially implemented — see Section 6 for outstanding items. The following design decisions were made during or after implementation and are not reflected in Phases 2–4.
+Steps 1–4 of the Phase 4 sequence are fully implemented. **UPDATED 2026-07-04:** Steps 5–6 are done for MgT2E and CT (still open for AoW/T5/RTT); Step 7 is intentionally left partial as an accepted final state (see OW-5, Section 6) rather than "not yet implemented." See Section 6 for current per-item status. The following design decisions were made during or after implementation and are not reflected in Phases 2–4.
 
 #### Preview Button & Auto-Preview (updated 2026-06-24)
 
@@ -453,7 +498,7 @@ Each companion renders as a draggable header row inside the primary's `bodyConta
 #### Additional Implementation Decisions (2026-06-24)
 
 **AU display in detail pads**
-Each body's orbit row shows a read-only AU distance derived from `orbitId` via `_orbitIdToAU()`: `→ X.XX AU`. Displayed in dim text alongside the editable Orbit # field. Stars (companions) show the same. AU fields in the MgT2E/AoW hex editor accordion are **read-only** (shown as `<strong>` text, not editable inputs) since orbit is now managed in the system editor.
+Each body's orbit row shows a read-only AU distance derived from `orbitId` via `_orbitIdToAU()`: `→ X.XX AU`. Displayed in dim text alongside the editable Orbit # field. Stars (companions) show the same. AU fields in the MgT2E hex editor accordion are **read-only** (shown as `<strong>` text, not editable inputs) since orbit is now managed in the system editor. **Caveat confirmed 2026-07-03:** true for MgT2E (body and companion rows) and for AoW's companion row, but AoW's *body* row AU is plain text in the `<summary>` line, not `<strong>`-wrapped like the others — still non-editable in substance, just a minor markup inconsistency worth knowing about if AoW's accordion gets touched.
 
 **Orbit # — decimal support & reorder guard**
 Orbit number inputs use `step="0.001"` and `parseFloat` (not `parseInt`). Typing an orbit# that would cross a neighbor in the sorted list is blocked by `_wouldReorder(item, isStar, newOrbitId)`: shows a popup "Use Drag & Drop — reorder orbital bodies by dragging and dropping." and reverts the field. Orbit# changes that stay within the current slot range auto-preview normally.
@@ -498,89 +543,176 @@ Both the orrery and accordion now correctly highlight a lunar mainworld. The `_n
 
 ## 5. Deferred Engine Stub Inventory (v0.16.1 Handoff)
 
-All three deferred engines have complete read/write/dispatch stubs in `js/system_editor.js`. The stubs are live code paths — they run if those engines are ever selected — but the underlying **generators have not been modified** with `isManual` override gates (Step 5 in Phase 4). Once the generators are gated, the stubs become fully functional.
+> ## ✅ PHASE A COMPLETE (signed off 2026-07-04) — v0.16.1 SEQUENCING (decided 2026-07-03; progress updated through 2026-07-04)
+>
+> Work on the next version happens in two strict phases. Phase A is now fully signed off — **Phase B (new engines) may begin.**
+>
+> **Phase A — Clean up and architect the System Editor, MgT2E only, no new engines touched: — ✅ ALL ITEMS DONE**
+> 1. **OW-5** (Section 6, hard prerequisite): extract the commit path. **🟡 PARTIALLY DONE 2026-07-04, and that's the accepted final state** — see corrected OW-5 status in Section 6. `system_editor.js`'s own internal duplication (`_preview()` vs `_fillAndSave()`) is extracted into a shared `_generateAndCommit()`. The `macro_orchestrator.js` commit-block layer was deliberately scoped out (Sean's call, 2026-07-04) and does not block Phase A sign-off — revisit only if a future engine's macro and editor commit paths need to agree.
+> 2. **OW-3** (Section 6, open, prioritized): implement the UWP Auditor step in Fill & Save. **✅ DONE for MgT2E, 2026-07-04** — see corrected OW-3 status in Section 6. Still needs its own per-engine hookup (a `sys.auditResult` attachment in each generator) before AoW/CT/T5/RTT can rely on it — that per-engine coverage is Phase B work, not a Phase A blocker.
+> 3. **OW-8 (✅ DONE 2026-07-04, verified in-browser by Sean)** — the per-engine adapter/config pattern for `js/system_editor.js`. `_buildWorkingCopyFromState()`, `_buildSeedSys()`, and `_runGenerator()` each had a separate near-parallel `if/else if` branch per engine; this was the last item blocking Phase A sign-off. See OW-8 in Section 6 for the full implementation writeup. The same 2026-07-04 audit that raised this also turned up two smaller items, both done: **OW-6 (✅ DONE)** — seed-restoration matching logic that lived inline in `mgt2e_bottomup_generator.js` is now `js/seed_restoration.js`; **OW-7 (✅ DONE)** — the `MgT2EMath` guard-consistency fix and the duplicated auditor-logging cleanup (now `MgT2E_UWP_Auditor.runAndLog()`), see Section 6.
+>
+> **Phase B — Expand to additional engines (now unblocked):**
+> Bring engines online one at a time per the per-engine remaining-work lists in Section 5 below (CT needs field-level `isManual` gating; T5 needs both structural and field-level gating plus Algorithm 7; RTT needs broader field-level gating). Each engine's UI entry point (`canvas_input.js`/`system_viewer.js` gates, `hex_map.html` dialog radio buttons) should only be switched on once that engine's generator work *and* its own UWP-auditor coverage are both complete — OW-3's auditor work from Phase A does not automatically cover new engines, each needs its own. Per OW-8, bringing each engine online should also mean giving it its own adapter in `_ENGINE_ADAPTERS` (see Section 6) instead of adding another inline branch.
+>
+> **CT is now fully online (2026-07-04) — first engine through the full Phase B sequence:**
+> 1. Field-level `isManual` gating for size/atm/hydro/pop (`ct_world_engine.js` + `system_editor.js`'s `_ctUwpLockFor`)
+> 2. `capturedPlanets` write-stub gap closed (`system_editor.js`)
+> 3. UWP-auditor coverage (`sys.auditResult`, `ct_uwp_auditor.js`'s new `runAndLog`, wired into `ct_system_driver.js`)
+> 4. `_ENGINE_ADAPTERS.CT` entry (OW-8 pattern) — CT's old inline branches deleted from all four call sites
+> 5. UI switches flipped: `canvas_input.js`'s `_seCanEdit` gate, `system_viewer.js`'s Edit-button gate, and `hex_map.html`'s `#se-engine-dialog` CT radio button all now include/enable CT
+>
+> **Companion fix found while flipping item 5:** `_restoreDisplayManualFields()` (`system_editor.js`) was `MgT2E`-only — without a CT branch, every pre-existing CT body's `atm`/`hydro`/`pop` (marked manual purely for seed-preservation by `_ctUwpLockFor`, item 1) would have displayed as "manually edited" in the accordion after every Fill & Save, even on bodies the user never touched. Added a CT branch reading `newSys.orbits[].contents` + `newSys.capturedPlanets[]` (CT's shape, vs. MgT2E's flat `.worlds[]`) and matching moons via `.satellites` (not `.moons`). `_regenerateBody()`'s per-body regenerate feature and the Hill-sphere/moon-orbital-data backfills remain MgT2E-only by design (CT doesn't model moon pd/pos/eccentricity, and `_regenerateBody` already warn-and-refuses gracefully on non-MgT2E systems) — not gaps, not touched.
+>
+> **T5 is now fully online (2026-07-05) — second engine through the full Phase B sequence:**
+> 1. Structural `seedSys` gating in `js/t5_topdown_generator.js`: `generateT5System(mainworldBase, seedSys)` now accepts a second parameter — seeded stars skip the homestar-string-parsing/default-star fallback; seeded bodies are placed at their own orbits in a dedicated pass that runs *before* Phase 1 (the mainworld anchor placement), not after Phases 3-5 like a naive port of CT's pattern would suggest — this ordering is required so a moon-mainworld's parent body is already sitting in `orbits[].contents` by the time Phase 1 looks for it via the new `mainworldBase.parentBodyId`/`parentStarIdx` fields (avoids re-synthesizing a fresh GG/BigWorld parent on every save). `ggCountTotal`/`beltCountTotal`/`otherTerrTotal` dice rolls and moon-count rolls (`generateT5Satellites`'s new `capToExisting` param) are all gated to 0/capped when seeded and `_allowAddBodies` is false.
+> 2. Field-level manual preservation via a new `_t5UwpLockFor` helper (`system_editor.js`, mirrors `_ctUwpLockFor`'s exact scope: worldType/size seeded unmarked, atm/hydro/pop locked via `_manualFields` since T5's Inferno/Belt/small-size branches force-overwrite those regardless of presence). T5's world engine already had full `_isManual` gating for worldType/size/atm/hydro/pop/starport/gov/law/tl/tradeCodes going in — gov/law/tl/starport left deliberately unlocked this pass, matching CT's own deferred scope, but extending later is low-risk since the engine-side guards already exist.
+> 3. **Algorithm 7 implemented** (`_t5ElectMainworldIfNeeded`, `system_editor.js`) — adapted from the manifest's original spec to run over **working-copy** bodies rather than post-generation candidates, since T5 needs its mainworld anchor *before* generation starts (unlike CT/MgT2E's post-roll election). Excludes only top-level Gas Giants from candidacy (moons of anything remain eligible), uses the global seeded `rng` for tie-breaks, and deliberately does not mark the auto-elected body `_manualFields: ['isMainworld']` (contrast the explicit `_setMainworld()` toggle) so it doesn't paint as user-edited in the accordion.
+> 4. UWP-auditor coverage: `t5_uwp_auditor.js`'s `runT5SystemAudit` now returns `{ pass, errors }` (previously returned nothing — a real, if dormant, pre-existing gap) plus a new `runAndLog(sys, hexId)` mirroring CT's/MgT2E's, wired into `system_driver.js`'s T5 finalization block. The dead `T5_Auditor.auditT5System` reference inside `t5_topdown_generator.js` (referred to a method that never existed anywhere in the codebase, always a silent no-op) was removed in favor of the single real call site in `system_driver.js`.
+> 5. `_ENGINE_ADAPTERS.T5` entry (OW-8 pattern) — T5's old inline branches deleted from all four call sites (`_detectEngine`, `_buildWorkingCopyFromState`, `_buildSeedSys`, `_runGenerator`); new `_restoreDisplayManualFields` T5 branch added (T5's generated shape: `newSys.stars[].orbits[].contents`, moons keyed `.satellites` like CT, not `.moons` like MgT2E).
+> 6. UI switches flipped: `canvas_input.js`'s `_seCanEdit` gate, `system_viewer.js`'s Edit-button gate, and `hex_map.html`'s `#se-engine-dialog` T5 radio button all now include/enable T5.
+>
+> **Real bug found and fixed during in-browser verification (2026-07-05):** `T5.readBodies()`'s per-star fallback (`raw.stars[].orbits[].contents`, used whenever the generated system has no flat `raw.worlds[]`) built each working-copy body via `Object.assign({}, slot.contents, {...})` without first checking `slot.contents` was non-null. For an **empty** orbit slot (`contents: null`, ~18 of 20 orbits in a typical 2-body system), `Object.assign({}, null, {...})` still produces a plain object with no `type` field, and the old filter (`w.type !== 'Empty'`) let it through since `undefined !== 'Empty'` is true — every empty orbit silently became a phantom body on re-edit. This is a genuinely pre-existing gap (the exact same unguarded pattern was already in the original inline branch before this pass), just never reachable before because Fill & Save didn't actually work for T5 until this session. Fixed by filtering out null-content slots before the `Object.assign`. Found via an end-to-end Playwright browser test (create → add bodies → Preview → Fill & Save → re-edit → move a body → Fill & Save again), not by static reading — re-editing a freshly-saved T5 system was the reproduction case.
+>
+> **Verified in-browser (Playwright, 2026-07-05):** Create New (T5) with a Terrestrial World + Gas Giant and no mainworld flagged → Algorithm 7 correctly elected the World (never the GG) → Preview succeeded → Fill & Save committed exactly the 2 seeded bodies with no extra rolled bodies (`_allowAddBodies` unchecked) → System Viewer rendered the system correctly (habitable-zone ring, mainworld highlighted) → re-opened Edit System → moved the Gas Giant to a new orbit via a realistic click+type+Tab interaction → Fill & Save again → new orbit position persisted correctly, mainworld undisturbed. Zero console/page errors throughout.
+>
+> **Next up, in priority order (Sean's call, 2026-07-03): RTT, then AoW.** Follow CT's/T5's 5-item sequence (field-level/structural gating → write-stub gaps → UWP-auditor `sys.auditResult` coverage → `_ENGINE_ADAPTERS` entry → UI exposure). Per-engine remaining-work lists are in Section 5 below:
+> - **RTT next** — structural `seedSys` gating and full pipeline threading (Step1→2→3→Biographer) are already done; needs broader field-level `isManual` coverage (currently only 4 fields in `processRTTSocialStats()`) plus its read-stub UWP gap (`raw.mainworld.uwp` never looked up). Not started.
+> - **AoW after that** — already the furthest *along* at the generator level (structural + field-level `seedSys` gating both present in `aow_bottomup_generator.js`), but has no adapter or UI exposure yet and hasn't had a UWP-auditor pass. Despite being closer to done technically, it's queued last per Sean's stated priority — do not jump ahead to it before RTT is through the sequence, unless explicitly redirected.
+
+T5 and RTT (subsections below) have complete read/write/dispatch stubs in `js/system_editor.js`. The stubs are live code paths — they run if those engines are ever selected — but the underlying generators are not fully gated with `isManual`/`seedSys` overrides (Step 5 in Phase 4). Once each generator is gated, its stub becomes fully functional.
+
+**Gap: AoW has no dedicated subsection here yet.** Unlike CT/T5/RTT, this section has never had an AoW read/write/dispatch-stub inventory written up — Section 3's "Supported Engines" note and Phase 4's Step 5c are the only existing AoW status pointers, and they're generator-level summaries, not the same depth of stub-by-stub detail CT/T5/RTT get below. When AoW's turn comes (third in the queue), research and write an "### AoW" subsection here first, mirroring the CT/T5/RTT format, before starting its Phase B implementation — don't assume AoW's stubs match CT's shape without reading `system_editor.js`'s AoW branches directly (per the Zero-Assumption Policy).
+
+> **⚠️ Verify before trusting a "Known gap" claim in this section.** A manifest-vs-code review on 2026-07-03 found that CT and RTT had both progressed further than this section documented — CT's structural `seedSys` gate was already implemented despite this section claiming otherwise, and RTT's full Step1→Step2→Step3→Biographer pipeline was already threaded and auto-chaining despite this section claiming only Step1 ran. Line-number citations (`lines ~XXX–YYY`) also drift as the file is edited and should not be trusted at face value. Each "Known gap" bullet below that has been re-verified carries a **Confirmed** line with the exact command/grep used and a date — re-run it before relying on the claim. Bullets without a **Confirmed** line have not been re-checked since original authoring and should be treated as unverified.
 
 ---
 
 ### CT (Classic Traveller)
 
-**Read stub — `_buildWorkingCopyFromState()`, lines ~177–206**
+**Read stub — `_buildWorkingCopyFromState()`, CT branch (search for `engine === 'CT'` in `system_editor.js`; cited line numbers drift — do not trust `~177–206` at face value)**
 - Reads bodies from `raw.orbits[]` (each slot: `{ orbit, zone, distAU, contents }`) — skips `type === 'Empty'`
 - Gas Giant size: `contents.size === 'S'` → `ggType: 'GS'`, else `'GL'`
 - Also reads `raw.capturedPlanets[]` as orbitless bodies (no `orbitId`, no moons)
 - All bodies assigned `parentStarId` of the primary star (index 0) — CT does not use multi-star parentage in the bottom-up generator
 - CT companion orbit strings ("Close"/"Near"/"Far") produce `orbitId: null` and sort to end of merged list
 
-**Write stub — `_buildSeedSys()`, lines ~1369–1400**
+**Write stub — `_buildSeedSys()`, CT branch — UPDATED 2026-07-04 (Phase B, items 1 & 2, DONE)**
 - Produces `seed.orbits[]`: each entry `{ orbit, zone: 'H', distAU, contents }`
-- `contents` format: `{ _id, type, size, name, uwp, travelZone, satellites[], _manualFields[] }`
+- `contents` format: `{ _id, type, size, atm?, hydro?, pop?, name, uwp, travelZone, satellites[], _manualFields[] }`
 - Type mapping: `'Gas Giant'` → `'Gas Giant'`; `'Belt'` → `'Planetoid Belt'`; else `'Terrestrial Planet'`
-- GG size: `ggType === 'GS'` → `size: 'Small'`; else `size: 'Large'`
+- GG size: `ggType === 'GS'` → `size: 'Small'`; else `size: 'Large'` (unchanged; unrelated to the physical-digit lock below, and left as-is — see note under Bug tracker about a pre-existing `'S'`-vs-`'Small'` mismatch between this and the read stub that was noticed but not touched)
 - Zone field hardcoded to `'H'` — the generator will recalculate zones from orbit position
-- **Known gap:** `_buildSeedSys` does not populate `capturedPlanets` — only `orbits`. Captured planet support needs to be added in v0.16.1.
+- **`_ctUwpLockFor(body)`** (function-scoped inside the CT branch, mirrors `_mgt2eUwpLockFor`'s role) — reads the body's previous generated values off `b._raw` (`size`/`atm`/`hydro`/`pop`) and seeds them into `contents`. `atm`/`hydro`/`pop` are also pushed into `_manualFields` so the generator won't reroll them; `size` is seeded but **not** marked manual — `generatePhysicals`'s existing `body.size === undefined` guard already skips rerolling it, same reasoning as MgT2E's own `size` field. Brand-new bodies (no `_raw`/`uwp` yet) get `{}` back and roll fresh, same as before.
+- ✅ **Done (Phase B item 2, 2026-07-04): `capturedPlanets` now populated.** `wc.bodies` is split by `orbitId != null` (regular orbit-slot bodies → `seed.orbits`, unchanged) vs. `orbitId == null` (captured planets — the only way a CT body ends up with a null `orbitId`, since `_addBody` always assigns a real one) → new `seed.capturedPlanets` array. Each entry: `{ _id, type: 'Captured', orbit, zone, size?, atm?, hydro?, pop?, name, uwp, _manualFields[] }`, with `orbit`/`zone` carried forward unchanged from `b._raw` (no UI exists to move a captured planet — drag-and-drop and the typed orbit# field both operate on `orbitId`, which captured planets don't have). `_id` is required: `ct_system_driver.js`'s mainworld-by-`_id` lookup (~line 69-71) already searches `seedSys.capturedPlanets` when `_mainworldRef` points at one — that lookup was ready and waiting, only the write stub wasn't producing the array. Both `generateSystemSkeleton` (`ct_bottomup_generator.js` ~line 135, `if (seedSys.capturedPlanets) sys.capturedPlanets = seedSys.capturedPlanets.slice();`) and the mainworld lookup were already ready to consume this — only the write stub had the gap.
+  **Companion fix, same pass:** the read stub (`_buildWorkingCopyFromState`, CT capturedPlanets branch) was hardcoding `_manualFields: []` instead of reading `w._manualFields` like its sibling `raw.orbits` loop does — fixed to match, since without it a captured planet's manual fields wouldn't survive a close-and-reopen of the editor.
+  **Known edge case, not fixed (pre-existing, out of scope):** `generateSystemSkeleton`'s seeded-body branch only activates `if ((seedSys.orbits || []).length > 0)` — a CT system consisting *solely* of captured planets (zero regular orbit bodies) would fall through to full stochastic regeneration, discarding the seeded captured planets too. Rare in practice; not addressed here.
+  **Confirmed:** `node --check js/system_editor.js` passes.
 
-**Dispatch stub — `_runGenerator()`, lines ~1484–1492**
+**Dispatch stub — `_runGenerator()`, CT branch**
 - Calls `window.CT_Generator.generateSystem({ mode: 'bottom-up', hexId, seedSys })`
 - Writes `stateObj.ctSystem = newSys` and `stateObj.ctData = newSys.mainworld || null`
-- **Known gap:** The generator override gate (Step 5b in Phase 4) has **not** been applied to `js/ct_bottomup_generator.js`. Until that is done, `seedSys` is passed but ignored by the generator.
+
+**Generator gate status — `js/ct_bottomup_generator.js` / `js/ct_world_engine.js` — UPDATED 2026-07-04 (Phase B, item 1, DONE):**
+- ✅ **Done — structural seeding.** `generateSystemSkeleton(hexId, seedSys)` already consumes `seedSys.stars` (uses them directly, skips the stellar dice roll) and `seedSys.orbits` (uses the seeded body list directly, skips skeleton placement, when `_allowAddBodies` is false). User-placed/moved/deleted bodies already survive Fill & Save structurally.
+  **Confirmed:** read `generateSystemSkeleton()` in full — the `if (seedSys && ...)` branches are real and functional, not stubs.
+- ✅ **Done — field-level manual preservation for size/atm/hydro/pop.** `ct_world_engine.js`'s `generatePhysicals()` and `generatePopulation()` now check a new `_ctFieldIsManual(obj, field)` helper (a safe wrapper around core.js's `isManual`, following the same `typeof`-guard convention already used for `tRoll2D`/`MgT2EMath` elsewhere in this file) before rolling `atm`/`hydro`/`pop`. Style note: unlike `mgt2e_world_engine.js` (which always rolls, then conditionally assigns, because GG mass/gravity chains need the rolled diameter regardless of which field is manual), CT skips the roll entirely when a field is manual — mirroring `t5_topdown_generator.js`'s `_isManual` pattern instead, since CT's atm/hydro/pop each only feed forward as *already-resolved* values (`body.atm`, `body.size`), not as intermediate roll results other fields depend on. The pre-existing `body.size === undefined` guard was left as the sole size gate (no `isManual` needed, matching MgT2E's own reasoning for `size`). The Vacuum World Exception (`liquidType`) check was hoisted out of the hydro roll's `else` branch so it still evaluates correctly when hydro is manual.
+  **Not gated (deliberately, this pass):** government/law/tech-level/starport — those roll in a separate pass (`finalizeMainworldSocial`/`generateSocial`), not `internalPhysicalPass()`. Treated as a follow-up item, not folded into this one.
+  **Confirmed:** `node --check js/ct_world_engine.js` and `node --check js/system_editor.js` both pass.
+- **CT is fully editor-ready as of 2026-07-04.** All five Phase B items (field-level gating, `capturedPlanets`, UWP-auditor coverage, `_ENGINE_ADAPTERS` entry, UI exposure) are done — see the "CT is now fully online" note under v0.16.1 SEQUENCING above for the full rundown. Gov/law/tech-level/starport gating remains a known, deliberately-deferred follow-up (not a blocker — see the field-level note just above).
+
+**UI exposure — `js/canvas_input.js` / `js/system_viewer.js` / `hex_map.html` — DONE 2026-07-04 (Phase B, item 5):**
+- `canvas_input.js`'s `_seCanEdit` right-click gate now includes `_seState.ctData || _seState.ctSystem` alongside the existing MgT2E check.
+- `system_viewer.js`'s "Edit System" button now renders `if (edition === 'MgT2E' || edition === 'CT')`.
+- `hex_map.html`'s `#se-engine-dialog` CT radio button is no longer `disabled`, and the "(coming soon)" label is removed — matching the MgT2E option's styling. T5/AoW/RTT radios remain disabled.
+- The dialog's confirm handler (`system_editor.js` ~line 2790) and `_buildBlankWorkingCopy()` were already fully engine-agnostic (read whichever radio is checked, no hardcoded engine name) — no changes needed there for "Create New" to work with CT.
+- **Confirmed:** `node --check` passes on all three touched JS files. Cannot verify in-browser this session — first real end-to-end test (Create System, Edit System, Fill & Save, Preview, undo/redo) is now unblocked and up to Sean.
+
+**UWP-auditor coverage — `js/ct_uwp_auditor.js` / `js/ct_system_driver.js` — DONE 2026-07-04 (Phase B, item 3):**
+- ✅ **Done.** Added `runAndLog(sys, hexId)` to `ct_uwp_auditor.js`, mirroring `MgT2E_UWP_Auditor.runAndLog` (`mgt2e_uwp_auditor.js:400-423`, added under OW-7) — runs `auditCTSystem`, attaches the result to `sys.auditResult` (the field `system_editor.js`'s Fill & Save OW-3 gate reads — that gate is engine-agnostic, so it required no changes), and on failure `console.warn`s plus pushes each error to `window.auditBacklog` as `{ hexId, orbitId: null, engine: 'CT', message }`. `orbitId` is always `null` for CT since `auditCTSystem`'s `errors` array holds plain strings (not MgT2E's `{orbitId, message}` objects) — irrelevant to the Fill & Save dialog either way, since it only reads `audit.errors.length` for a count.
+- `ct_system_driver.js`'s `generateSystem()` (the function CT's System Editor dispatch always calls, both bottom-up and top-down) now does `sys.audit = auditRunAndLog ? auditRunAndLog(sys, hexId) : auditor(sys);` in place of the old bare `auditor(sys)` call — `sys.audit` keeps working for existing consumers (same result object), `sys.auditResult` is now also set as a side effect. The existing `writeLogLine`-based trace logging right below this line is untouched (a different, complementary consumer — in-app trace log vs. `runAndLog`'s console/backlog).
+- **Not done, deliberately out of scope:** `ct_bottomup_generator.js`/`ct_topdown_generator.js` still don't call the full auditor themselves (only a couple of narrow hand-written edge cases go straight to `auditBacklog`) — no duplication existed to consolidate here (unlike MgT2E's OW-7, which had two call sites), so no `runAndLog` call was added to either generator file. `system_driver.js` (the separate "Universal" driver used for T5 and some MgT2E regen paths) has its own CT-audit-attaching code but is never reached by CT's System-Editor dispatch — left untouched.
+- **Confirmed:** `node --check js/ct_uwp_auditor.js` and `node --check js/ct_system_driver.js` both pass. CT is now UI-exposed (item 5, done later the same session) — the Fill & Save dialog itself still hasn't been exercised in-browser; that's the first real end-to-end test, up to Sean.
+
+**`_ENGINE_ADAPTERS` entry — `js/system_editor.js` — DONE 2026-07-04 (Phase B, item 4, per the OW-8 pattern):**
+- ✅ **Done.** CT now has its own adapter (`_ENGINE_ADAPTERS.CT`, added right after `MgT2E` in the registry) with all four methods — `detect`, `readBodies`, `write`, `run` — moved verbatim from CT's old inline `else if (engine === 'CT')` branches in `_detectEngine`, `_buildWorkingCopyFromState`, `_buildSeedSys`, and `_runGenerator`, which were then deleted (all four call sites already had the generic `if (adapter) { ...delegate... }` check from OW-8, so no call-site changes were needed beyond adding `_ENGINE_ADAPTERS.CT.detect(stateObj)` to `_detectEngine`, mirroring its existing `_ENGINE_ADAPTERS.MgT2E.detect(stateObj)` line).
+- `_ctUwpLockFor` (added under item 1) was hoisted from `write`'s function body up to module scope, alongside `_mgt2eUwpLockFor` — matching OW-8's "define once, not per-call" optimization for MgT2E's equivalent helpers.
+- `write(wc, starIdxById)` keeps the two-parameter shape documented in the adapter interface comment even though CT's `starIdxById` argument goes unused (CT bodies are always parented to the primary star in the bottom-up generator) — kept for signature consistency with MgT2E's adapter, not because CT needs it.
+- AoW's copy of the old shared `MgT2E`/`AoW` inline branches (untouched by Phase A) is unaffected — CT and AoW were always separate branches, this pass didn't touch AoW.
+- **Confirmed:** `node --check js/system_editor.js` passes; `grep "'CT'" js/system_editor.js` shows only the new adapter's `detect()` and the pre-existing, unrelated CT-specific companion-star `orbitAU` branch in the shared star-building loop (not part of the adapter interface, correctly left alone since only MgT2E's star-building was ever centralized the same way).
 
 ---
 
 ### T5 (Traveller 5)
 
-**Read stub — `_buildWorkingCopyFromState()`, lines ~207–231**
+**T5 is fully editor-ready as of 2026-07-05.** All items below are DONE — `_ENGINE_ADAPTERS.T5` in `system_editor.js` now owns `detect`/`readBodies`/`write`/`run` (the old inline branches this subsection originally documented were deleted). Kept below as historical context on what was built and why; see "T5 is now fully online" under v0.16.1 SEQUENCING (Section 5 header) for the full rundown.
+
+**Read stub → `_ENGINE_ADAPTERS.T5.readBodies()`**
 - Reads from `raw.worlds[]` (flat list) if present; falls back to iterating `raw.stars[].orbits[]` slots
 - `parentStarIdx` preserved from world objects or inferred from the star index when iterating slots
-- `au` resolved as `w.au ?? w.distAU ?? _orbitIdToAU(w.orbitId)` in that priority order
+- `au` resolved as `w.au ?? w.distAU ?? _orbitIdToAU(w.orbitId)` in that priority order; `orbitId` falls back to the slot's own index (`slot.orbit`) when the body itself doesn't carry one
 - UWP preserved from body objects
+- **Bug fixed (2026-07-05):** the per-star fallback path built each body via `Object.assign({}, slot.contents, {...})` without first checking `slot.contents` was non-null — an empty orbit slot (`contents: null`) still produced a typeless object that the old `type !== 'Empty'` filter let through, turning every empty orbit into a phantom body on re-edit. Fixed by filtering out null-content slots before the `Object.assign`. Found via in-browser testing (create → save → re-edit), not static review.
+- Moon-level mainworld detection also fixed: a moon flagged as the system's mainworld doesn't reliably carry `isMainworld: true` from the generator (`t5_topdown_generator.js` never sets it explicitly on `sys.mainworld`) — now detected the same way top-level bodies are (`_isMW`/`type === 'Mainworld'`) before handing off to the shared `_buildMoon` helper.
 
-**Write stub — `_buildSeedSys()`, lines ~1401–1420**
-- Builds `seed.mainworldUWP`: extracts UWP, name, travelZone from the flagged mainworld body. Falls back to `'A788899-9'` if no UWP set — this placeholder needs replacing with a proper "no UWP" signal in v0.16.1
-- Produces `seed.worlds[]` as a flat list with `{ _id, type, name, uwp, orbitId, parentStarIdx, _manualFields[] }`
-- T5 is top-down: `seed.mainworldUWP` is the anchor; the generator ignores most of `seed.worlds`
+**Write stub → `_ENGINE_ADAPTERS.T5.write()`**
+- Runs Algorithm 7 (`_t5ElectMainworldIfNeeded`) first, so an unflagged mainworld gets auto-elected before the seed is built
+- Builds `seed.mainworldUWP`: extracts UWP, name, travelZone from the resolved mainworld body/moon, plus `isPreMoon`/`orbitId`/`parentBodyId`/`parentStarIdx` (so the generator can place a moon-mainworld under its actual seeded parent instead of a fresh roll) and locked physical fields via `_t5UwpLockFor`. Retains the `'A788899-9'` fallback UWP for a body with no UWP yet (brand new, not a gap — the generator rolls a fresh one)
+- Produces `seed.worlds[]` via `_t5BodySeed()`, now including moons and locked fields (previously a bare `{_id, type, name, uwp, orbitId, parentStarIdx, _manualFields}` with no moons array at all — seeded moons used to be silently dropped before ever reaching the generator)
 
-**Dispatch stub — `_runGenerator()`, lines ~1493–1504**
+**Dispatch stub → `_ENGINE_ADAPTERS.T5.run()`**
 - Calls `window.System_Driver.generateSystem({ edition: 'T5', mode: 'top-down', mainworldUWP: seedSys.mainworldUWP, hexId, seedSys })`
-- Guard: skips if `seedSys.mainworldUWP` is null (generator cannot run without a mainworld UWP)
+- Guard: skips if `seedSys.mainworldUWP` is null — now correctly reachable only when the working copy has zero eligible bodies (Algorithm 7 step 6), not effectively-always-null as before
 - Writes `stateObj.t5System = newSys` and `stateObj.t5Data = newSys.mainworld || null`
-- **Known gap:** T5 top-down generator does not accept or consult `seedSys` today. The override gate (Step 5d in Phase 4) must be applied to `js/t5_topdown_generator.js` before user-placed bodies survive Fill.
-- **Known gap:** Algorithm 7 (HZ-proximity mainworld selection when no mainworld designated) is not implemented in the stub. It must be added in v0.16.1 before the T5 mainworld validation dialog can function.
+- ✅ **Done:** `js/t5_topdown_generator.js`'s `generateT5System(mainworldBase, seedSys)` now accepts and fully consults `seedSys` — structural seeding, `_allowAddBodies` gating, and Algorithm 7 are all implemented; see Section 5 header for the full writeup.
 
 ---
 
 ### RTT (RTT Worldgen)
 
-**Read stub — `_buildWorkingCopyFromState()`, lines ~232–265**
+**Read stub — `_buildWorkingCopyFromState()`, RTT branch (search for `engine === 'RTT'` in `system_editor.js`; cited line numbers drift — do not trust `~232–265` at face value)**
 - Reads from `raw.stars[].planetarySystem.orbits[]` — iterates per star, sorted by `orbitNumber`
 - AU is approximated from zone: Epistellar (base 0.10AU, step 0.10), Inner (base 0.50AU, step 0.70), Outer (base 5.00AU, step 8.00). These are estimates for display order only — RTT does not use AU natively.
-- UWP is not read (RTT mainworld UWP is in `rttData`, not in orbit entries) — bodies load with `uwp: null`
+- ❌ **Not done:** UWP is not read (RTT mainworld UWP is in `rttData`, not in orbit entries) — bodies load with `uwp: null`.
+  **Confirmed** 2026-07-03: read the RTT read-stub branch directly — `uwp: null` is hardcoded, no lookup into `raw.mainworld`/`rttData`.
 - Travel zone: `'Red'` if body has a `'Z'` base; else `'G'`
-- **Known gap:** UWP is not transferred from `rttData.uwp` to the mainworld body. In v0.16.1, the read stub should look up `raw.mainworld.uwp` (or the equivalent rttData field) and assign it to the mainworld body.
+- **Remaining work:** the read stub should look up `raw.mainworld.uwp` (or the equivalent `rttData` field) and assign it to the mainworld body.
 
-**Write stub — `_buildSeedSys()`, lines ~1421–1444**
+**Write stub — `_buildSeedSys()`, RTT branch**
 - Produces `seed.rttBodies`: a 2D array indexed by star (`rttBodies[starIdx][]`)
 - Per-body format: `{ _id, orbitNumber, zone: 'Inner', type, satellites[], name, _manualFields[] }`
 - Type mapping: `'Gas Giant'` → `'Jovian Planet'`; `'Belt'` → `'Asteroid Belt'`; else `'Terrestrial Planet'`
 - Zone is hardcoded to `'Inner'` — the RTT generator will recalculate zone from orbit position
-- **Known gap:** The full RTT pipeline is Step1 → Biographer → Step2 → Step3. The dispatch stub only calls Step1. Biographer + Steps 2 and 3 must be threaded in v0.16.1.
 
-**Dispatch stub — `_runGenerator()`, lines ~1505–1515**
+**Dispatch stub — `_runGenerator()`, RTT branch**
 - Calls `generateRTTSectorStep1(hexId, { seedSys })`
 - Writes `stateObj.rttSystem = newSys`
 - Calls `extractRTTMainworld(newSys, _workingCopy.mainworldRef)` for `stateObj.rttData` if that function exists
-- **Known gap:** Only Step1 is called. The existing `_rttSaveManual`/`_rttRestoreManual` pattern in `js/rtt_engine.js` is the head start for threading `seedSys` through the full pipeline — see the existing RTT engine code before designing the v0.16.1 override gate.
+
+**Pipeline threading status — `js/rtt_engine.js` — CORRECTED 2026-07-03 (previously claimed "only Step1 is called, Biographer+Step2+Step3 must be threaded" — that was stale):**
+- ✅ **Done — full pipeline already auto-chains and threads `seedSys`.** `generateRTTSectorStep1(hexId, options)` proactively calls `generateRTTSectorStep2(sys, options)` at its end; `generateRTTSectorStep2` proactively calls `generateRTTSectorStep3(sys, options)`; `generateRTTSectorStep3` proactively calls `generateRTTSectorBiographer(sys, options)`. `options` (containing `seedSys`) is passed at every hop — the dispatch stub calling only `generateRTTSectorStep1` is sufficient to run the entire pipeline, it was never actually stopping at Step1.
+  **Confirmed:** read `generateRTTSectorStep1` end-to-end — the "Proactively run Step 2 (which chains Step 3 → Biographer)" comment and call are present in the code, not aspirational.
+- ✅ **Done — structural body seeding.** `generateRTTSectorStep2` already reads `seedSys.rttBodies[starIdx]` and uses it directly (skipping the dice-rolled orbit layout) whenever `seedSys._allowAddBodies` is false. User-placed/moved/deleted bodies already survive Fill & Save structurally, same as CT.
+- ⚠️ **Partial — field-level manual preservation.** `_rttSaveManual`/`_rttRestoreManual` plus scattered `isManual()` checks exist in `processRTTSocialStats()`, but only guard a handful of fields (`industry`, `tradeCodes`, `bases`, `population`). Most fields (name, UWP components, physical stats) are not gated and will be rerolled on Fill & Save regardless of user edits.
+  **Confirmed:** `grep -n "isManual" js/rtt_engine.js` → matches concentrated in `processRTTSocialStats()` only, covering the 4 fields listed above (2026-07-03). Re-run this grep to check if still true.
+- **Remaining work for RTT to be editor-ready:** extend `isManual` gating to the remaining body fields (mirroring MgT2E's broader coverage), plus the read-stub UWP gap above. The pipeline-threading work this section previously called for appears to already be done — verify with the greps above before re-scoping it as a task.
 
 ---
 
-### What v0.16.1 Must Do (per engine)
+### What v0.16.1 Must Do (per engine) — CORRECTED 2026-07-03
 
-| Engine | Generator gate needed | Additional stub gaps |
-|---|---|---|
-| CT | `js/ct_bottomup_generator.js` Step 5b | `capturedPlanets` in write stub |
-| T5 | `js/t5_topdown_generator.js` Step 5d | Algorithm 7 (HZ mainworld); UWP fallback |
-| RTT | `js/rtt_engine.js` Step 5e | Full pipeline (Step1→Bio→Step2→Step3); UWP read in load stub |
+Superseded the version of this table dated before 2026-07-03, which assumed no generator gating existed for CT or RTT. See the per-engine sections above for the full evidence trail.
 
-The engine selection dialog HTML (`#se-engine-dialog`) must also add CT / T5 / RTT radio buttons when v0.16.1 work begins.
+| Engine | Structural seeding (stars/bodies survive Fill) | Field-level manual preservation | Remaining work |
+|---|---|---|---|
+| CT | ✅ Done (`generateSystemSkeleton` consumes `seedSys.stars`/`seedSys.orbits`/`seedSys.capturedPlanets`) | ⚠️ Partial — **UPDATED 2026-07-04:** `size`/`atm`/`hydro`/`pop` gated via `_ctFieldIsManual` in `ct_world_engine.js`, seeded via `_ctUwpLockFor` in `system_editor.js`'s write stub (covers both orbit bodies and captured planets). Gov/law/tl/starport (a separate pass) still unguarded. | **✅ UI-exposed 2026-07-04 — CT is fully live in the System Editor.** Only remaining item: gate gov/law/tl/starport (optional follow-up, not a blocker) |
+| T5 | ✅ Done (2026-07-05) — `generateT5System(mainworldBase, seedSys)` places seeded stars/bodies before Phase 1, gates all inventory/moon rolls off `_allowAddBodies` | ✅ Done (worldType/size/atm/hydro/pop via `_t5UwpLockFor`; gov/law/tl/starport deliberately deferred, same as CT) | **✅ UI-exposed 2026-07-05 — T5 is fully live in the System Editor.** Algorithm 7 implemented; only remaining item: gate gov/law/tl/starport (optional follow-up, not a blocker) |
+| RTT | ✅ Done (`generateRTTSectorStep2` consumes `seedSys.rttBodies`, full pipeline already auto-chains Step1→2→3→Biographer with `seedSys` threaded throughout) | ⚠️ Partial (`isManual` only covers `industry`/`tradeCodes`/`bases`/`population` in `processRTTSocialStats()`) | Broaden `isManual` gating to remaining fields; UWP read in load stub |
+
+**Status as of 2026-07-05:** CT and T5 are both fully online. RTT is next — it needs "just" broader field-level `isManual` coverage plus its smaller stub gaps (structural seeding and pipeline threading are already done).
+
+The engine selection dialog HTML (`#se-engine-dialog`, in `hex_map.html`) has MgT2E / CT / T5 / AoW / RTT radio buttons present. **UPDATED 2026-07-04:** CT's is now enabled (no longer `disabled`, "(coming soon)" label removed), matching MgT2E's. T5 / AoW / RTT remain `disabled` with the "(coming soon)" label. Work here for each remaining engine is *enabling* its radio (once that engine's gate/audit/adapter work is actually done, per the T5 → RTT → AoW sequence above), not adding new markup.
+**Confirmed** 2026-07-04: read `hex_map.html`'s `#se-engine-dialog` directly.
 
 ---
 
@@ -588,25 +720,65 @@ The engine selection dialog HTML (`#se-engine-dialog`) must also add CT / T5 / R
 
 ### Spec Gaps — implemented in the manifest but not yet in the code
 
-**OW-1 — Primary star validation gate (Fill & Save)**
-`_fillAndSave()` should check that a Primary star exists before proceeding. If none: show error dialog "A primary star is required" and return. Currently the function calls `_buildSeedSys()` unconditionally.
-*Spec ref: Algorithm 5, Step 1*
+**OW-1 — CLOSED (2026-07-03): Primary star validation gate deemed unnecessary**
+Reviewed against the actual UI and found the scenario the gate was meant to catch is structurally unreachable: the Primary star row (`system_editor.js` ~line 1510) has no delete button — only companion rows get `Del★` — and `_deleteStar()` (line 511) independently refuses to delete the last remaining star regardless. Separately, `_workingCopy.stars[0]` is treated as "the primary" by array position throughout the editor (`_addStar` always `.push()`es to the end, `_deleteStar` only filters, `_insertAtOrbit` explicitly excludes index 0 via `.slice(1)`), so no editor operation can ever displace the primary from index 0 or leave the array empty. A Fill-time check would be dead code. No implementation needed; Algorithm 5 Step 1 is retracted.
 
-**OW-2 — Mainworld validation dialog (Fill & Save)**
-If `_workingCopy.mainworldRef === null` at Fill time (and engine is not T5), show a three-option dialog: [A] Let me pick one / [B] Let engine decide / [C] Cancel. Currently the code skips this check entirely.
-*Spec ref: Algorithm 5, Step 2*
+**OW-2 — CLOSED (2026-07-03): Mainworld validation dialog deemed unnecessary**
+Traced what actually happens when `_workingCopy.mainworldRef === null` at Fill time: both `mgt2e_bottomup_generator.js` (~line 264) and `aow_bottomup_generator.js` (~line 274) already fall through to `WorldEngine.evaluateMainworldCandidates(candidates)` whenever `seedSys._mainworldRef` is absent or not found — this **is** option [B] "Let engine decide," running automatically with no prompt needed. The election uses the same habitability → resourceRating → GG-presence → size tiebreak order as normal generation, over whatever Terrestrial/Satellite/Belt bodies exist in the working copy. [A] "Let me pick one" is redundant with existing UX (the user can just click ☆MW before Fill), and [C] "Cancel" is already available via the Cancel button. No dialog needed; Algorithm 5 Step 2 is retracted.
+Known edge case (not addressed, considered rare enough to defer): if the working copy has zero eligible candidates (e.g. a system consisting solely of a moonless Gas Giant), `evaluateMainworldCandidates([])` returns `null` and `sys.mainworld` is left unset after Fill & Save. Pre-existing generator behavior, not introduced by the System Editor.
 
-**OW-3 — UWP Auditor step (Fill & Save)**
-After the generator runs, the UWP Auditor should be called. If it returns errors, show a warn-and-proceed dialog: [Proceed anyway] / [Go back and fix]. No auditor call exists in the current code.
+**OW-3 — ✅ DONE for MgT2E (2026-07-04) and CT (2026-07-04, Phase B item 3); still open per-engine for AoW/T5/RTT: UWP Auditor step (Fill & Save)**
+After the generator runs, the UWP Auditor should be called. If it returns errors, show a warn-and-proceed dialog: [Proceed anyway] / [Go back and fix].
+**Implementation (2026-07-04):** `mgt2e_bottomup_generator.js` already computed a full `auditMgT2ESystem()` result internally on every run but discarded it after logging/backlog-pushing; it now also attaches it to the returned system as `sys.auditResult`, so callers can read it without re-running the (recursive, trace-logging) audit a second time. `system_editor.js`'s `_fillAndSave()` checks `result.newSys.auditResult` after `_generateAndCommit()` runs; on `pass === false` it shows a warn-and-proceed dialog (`Proceed Anyway` / `Go Back & Fix`) instead of silently closing the editor. The close-editor/reopen-viewer tail was split into `_finishFillAndSave(hexId)` so "Proceed Anyway" can run it without redoing generation; "Go Back & Fix" is a no-op that just leaves the editor open.
+**Known limitation, accepted as out of scope for this pass:** by the time the audit result is available, `_generateAndCommit()` has already written the (possibly failing) system into `hexStates` — `_runGenerator` mutates the live `stateObj` mid-generation rather than staging to a copy, so "Go Back & Fix" cannot literally un-commit the write. It only keeps the editor open for further edits; the map-level `Ctrl+Z` undo (already saved via `saveHistoryState()` before generation) remains the actual rollback path if the user wants one. A true "nothing touched until Fill & Save confirms" would require `_runGenerator`/the generators to stage writes rather than mutate live state — a bigger change, not attempted here.
+**Gate is engine-agnostic and opt-in:** `_fillAndSave()` checks `audit && audit.pass === false` generically, so it's silently inert for AoW/T5/RTT until each of those generators gets the same one-line `sys.auditResult = ...` attachment once their own `seedSys` gating work is done (Section 5) — CT already got this (`ct_uwp_auditor.js`'s new `runAndLog`, wired into `ct_system_driver.js`). **Sequencing still applies going forward:** each new engine needs its own auditor coverage (its own populated `sys.auditResult`) before it's trustworthy to Fill & Save against — OW-3's MgT2E/CT work does not automatically cover them.
 *Spec ref: Algorithm 5, Step 5*
 
-**OW-4 — `manually_edited: true` flag not set on commit**
-Both `_fillAndSave()` and `_preview()` write to `hexStates` without setting `stateObj.manually_edited = true`. This flag is required so the rest of the app can identify editor-produced systems.
+**OW-4 — CLOSED (2026-07-03): `manually_edited: true` flag dropped as a requirement**
+Neither `_fillAndSave()` nor `_preview()` sets `stateObj.manually_edited = true`, and nothing in `js/` currently reads that field either. Intent was to flag editor-produced systems for possible future use (e.g. excluding them from bulk re-generation, or visually marking them), but there's no active consumer today and no near-term plan for one. Deprioritized to low-priority/someday rather than an outstanding requirement — revisit if a concrete use for the flag comes up. Not implementing now.
 *Spec ref: Algorithm 5 Step 6; Architecture Constraints*
 
-**OW-5 — Commit path is inline, not in `macro_orchestrator.js`**
-The spec calls for a `commitEditorSystem(hexId, sys, engine)` function in `macro_orchestrator.js` as the shared commit gate. Currently the full commit (clear old data, write new engine data, `computeSystemCounts`, `hexStates.set`, redraw) is handled inline inside `system_editor.js`. Functionally equivalent for now, but diverges from the planned architecture. Decide before v0.16.1 whether to extract or accept inline as the permanent pattern.
+**OW-5 — 🟡 PARTIALLY DONE (decided 2026-07-03; layer 1 completed 2026-07-04): Extract commit path before any new-engine work begins**
+The spec calls for a `commitEditorSystem(hexId, sys, engine)` function in `macro_orchestrator.js` as the shared commit gate. The full commit (clear old data, write new engine data, `computeSystemCounts`, `hexStates.set`, redraw) was duplicated inline between `_fillAndSave()` and `_preview()` in `system_editor.js`, and diverges from the separate commit blocks already living in `macro_orchestrator.js`'s macro functions.
+**Decision:** Sean does not want to compound this duplication by adding CT/T5/RTT/AoW branches on top of it. This must be resolved — for MgT2E only, no new engines involved — **before** any engine-expansion work starts, not deferred to "whenever we touch the next engine."
+**Scope note:** the duplication is two-layered — (1) `_fillAndSave()` vs `_preview()` duplicated the same name-preservation/`computeSystemCounts`/`hexStates.set`/redraw block inside `system_editor.js` itself, and (2) that block also duplicates logic already present in `macro_orchestrator.js`'s existing macro commit blocks (~lines 499-555 as of Phase 2). A full fix consolidates both layers into one shared function used by all three call sites (macros, Fill & Save, Preview) — extracting only the editor's own duplication without touching the macro commit blocks leaves a second parallel path exactly like the one that caused Bug #6 (the gas-giant-sync fix needing to be applied in two places).
+**✅ Layer 1 DONE (2026-07-04):** `system_editor.js`'s internal duplication is extracted into a shared `_generateAndCommit(errorLabel)` (private to the module, ~line 2196), called by both `_preview()` and `_fillAndSave()`. It owns: build seedSys → `_resolveStarPhysics` → resolve/create `stateObj` → run generator (try/catch, parameterized error-dialog text) → `_restoreDisplayManualFields` → `_forceGreenTravelZone` → mainworld-name preservation across `mgt2eData`/`ctData`/`t5Data`/`rttData` → `stateObj.type` → `computeSystemCounts` → `hexStates.set` → `requestAnimationFrame(draw)` → `populateEditorAccordions`. Returns `{ hexId, stateObj, newSys }` or `null` (dialog already shown) on failure.
+Per the design-care note below, the two behavioral differences were deliberately kept in the callers rather than folded into the shared function: `_preview()` still takes its own `_previewOriginalState` snapshot before calling it, and still does its own post-commit viewer-refresh + derived-property backfill; `_fillAndSave()` still calls `saveHistoryState()` before calling it, and still does its own post-commit editor-close + viewer-reopen. Net change: `system_editor.js` shrank by ~31 lines (79 deleted, 48 added); `node --check js/system_editor.js` passes.
+**❌ Layer 2 NOT DONE — explicit scope decision (2026-07-04):** Sean chose "system_editor.js only" for this pass over "full consolidation" when asked directly, given the added risk of reconciling `macro_orchestrator.js`'s batch-macro commit block (which carries extra logic — `StatisticalAuditor` hooks, its own mainworld-lookup-including-lunar-search, its own old-data-clearing field list that already differs from `system_editor.js`'s `_clearSystemData()`) with the editor's per-hex preview/undo semantics. **The macro_orchestrator.js layer remains open** — a `commitEditorSystem()` shared by macros AND the editor has not been built, and the drift between the editor's `_clearSystemData()` and the macro's inline clear-block (Bug #6/#7's root cause pattern) is still live. Revisit before or during Phase B if a new engine's macro and editor commit paths need to agree.
 *Spec ref: Phase 2 Modified Files table; Phase 4 Step 7*
+
+**OW-6 — ✅ DONE (found 2026-07-04; fixed 2026-07-04): Seed-restoration matching logic lives in the MgT2E orchestrator, not an engine**
+`mgt2e_bottomup_generator.js`'s own header states "This module contains ZERO generation logic. It only manages state and calls engine functions in the correct sequence" — but two blocks violated that: the seed-world-to-generated-body nearest-orbit matching/restoration logic and the post-`generatePhysicals` moon-trim-back logic were real matching algorithms, not sequencing.
+**Implementation:** extracted both into a new standalone, engine-agnostic module `js/seed_restoration.js` (UMD-wrapped, same pattern as `mgt2e_uwp_auditor.js` etc.), exposing `SeedRestoration.restoreSeedWorldsIntoGenerated(sys, seedSys)`, `SeedRestoration.captureSeededMoonCaps(sys, seedSys)`, and `SeedRestoration.trimGeneratedMoonsToSeededCaps(sys, seedSys, caps)`. `mgt2e_bottomup_generator.js` now calls these three (each guarded `typeof SeedRestoration !== 'undefined'` — the safe pattern, not the bare-global style flagged in OW-7) instead of carrying ~75 lines of matching logic inline. `hex_map.html` loads `js/seed_restoration.js` before the per-edition engine block so it's available to any bottom-up generator.
+**Checked but not touched:** `aow_bottomup_generator.js` has no equivalent seed-restoration block at all today — not a second copy to consolidate, and adding the behavior to AoW would be new functionality, not extraction, so it was left alone.
+**Still to do when RTT reaches this point (Phase B):** wire its bottom-up generator to call the same `SeedRestoration` functions once it gains broader field-level `seedSys` gating, rather than re-inlining this logic.
+**CT update (2026-07-04):** CT's own Phase B pass (field-level gating, item 1) did **not** wire in `SeedRestoration` — worth flagging as an open question, not a confirmed gap. MgT2E needed nearest-orbit matching because its seeded bodies can still be reconciled against a fresh roll; CT's seeded path (`generateSystemSkeleton`, `ct_bottomup_generator.js` ~line 135) substitutes `seedSys.orbits`/`seedSys.capturedPlanets` directly by reference when `_allowAddBodies` is false, with no separate reconciliation pass — so it may simply not need this module the same way. Not verified either way; check before assuming CT needs the same wiring RTT will.
+*Spec ref: found during the pre-Phase-B `system_editor.js`/MgT2E cleanup audit requested 2026-07-04.*
+
+**OW-7 — ✅ DONE (found 2026-07-04; fixed 2026-07-04): `MgT2EMath` guard inconsistency + duplicated auditor-logging block**
+`mgt2e_bottomup_generator.js:369` and `mgt2e_topdown_generator.js:203,372` guarded with a bare `if (MgT2EMath && MgT2EMath.performJourneyMathSweep)`, while every other generator (`ct_bottomup_generator.js`, `ct_topdown_generator.js`, `t5_topdown_generator.js`) used the safer `typeof MgT2EMath !== 'undefined' && MgT2EMath.performJourneyMathSweep`. Harmless in practice (fixed script load order in `hex_map.html`) but inconsistent with the `typeof`-guard style used for every other optional dependency in the same files, and one load-order change away from a `ReferenceError`.
+**Fix 1:** both files (all three call sites — bottom-up's one, top-down's two, the second inside `expandLoadedSocioeconomics`) now use `typeof MgT2EMath !== 'undefined' && ...`.
+**Fix 2:** the audit-and-push-to-`window.auditBacklog` block, previously duplicated verbatim between `mgt2e_bottomup_generator.js` and `mgt2e_topdown_generator.js` (with a minor console-message format difference between the two), is now one shared `MgT2E_UWP_Auditor.runAndLog(sys, hexId, options)` in `js/mgt2e_uwp_auditor.js`. It runs `auditMgT2ESystem`, attaches `sys.auditResult` (previously only the bottom-up generator did this, for OW-3), and on failure logs + backlogs using the bottom-up generator's more readable bulleted message format for both. Both generators now call `activeAuditor.runAndLog(sys, hexId, { mode: '...' })` instead of carrying the ~20-line block inline. Net: bottom-up generator −60 lines, top-down generator −16 lines, auditor +37 lines (one reusable function instead of two divergent copies).
+**Not touched:** CT's equivalent duplication (`ct_bottomup_generator.js`/`ct_topdown_generator.js` use their own `ct_uwp_auditor.js`) — consolidating across engine boundaries wasn't part of this pass; CT can adopt the same `runAndLog` pattern in its own auditor module independently, whenever convenient.
+*Spec ref: found during the pre-Phase-B `system_editor.js`/MgT2E cleanup audit requested 2026-07-04.*
+
+**OW-8 — ✅ DONE (found 2026-07-04; fixed 2026-07-04; verified in-browser by Sean 2026-07-04): Per-engine adapter pattern for `js/system_editor.js`**
+`_buildWorkingCopyFromState()`, `_buildSeedSys()`, and `_runGenerator()` each had a separate near-parallel `if/else if engine === '...'` branch — adding CT/T5/RTT meant editing the same four places (those three plus `_detectEngine()`) again. This was the last item blocking Phase A sign-off.
+**Decision (asked directly, 2026-07-04):** adapters live inline in `system_editor.js` (not split into separate per-engine files), and this pass covers **MgT2E only** — AoW/CT/T5/RTT get their own adapters later, in Phase B, as each engine's editor support is actually built out.
+**Implementation:** added a module-level `_ENGINE_ADAPTERS` registry (`system_editor.js`, right before `_buildWorkingCopyFromState`). Each adapter implements four methods:
+```js
+{
+  detect(stateObj)              -> { raw, engine } | null
+  readBodies(raw, starIdByIdx)  -> bodies[]   // working-copy body list
+  write(wc, starIdxById)        -> partial seedSys fields to merge in (e.g. { worlds })
+  run(hexId, seedSys, stateObj) -> newSys | null
+}
+```
+Only `MgT2E` is registered. All four call sites (`_detectEngine`, the body-building section of `_buildWorkingCopyFromState`, the per-engine section of `_buildSeedSys`, and `_runGenerator`) now do `const adapter = _ENGINE_ADAPTERS[engine]; if (adapter) { ...delegate... }` — falling through to the **exact original inline branches, untouched**, for AoW/CT/T5/RTT when no adapter is registered. MgT2E's four branch-bodies were moved verbatim into the adapter (including hoisting its `_uwpLockFor`/`_physSeed`/`_extSocioSeedFor` helpers, previously redefined on every single `_buildSeedSys()` call, up to module scope as `_mgt2eUwpLockFor`/`_mgt2ePhysSeed`/`_mgt2eExtSocioSeedFor` — defined once now instead of per-call).
+**AoW wrinkle:** MgT2E and AoW previously shared one literal branch (`if (engine === 'MgT2E' || engine === 'AoW')`) in both `_buildWorkingCopyFromState` and `_buildSeedSys`. Rather than route AoW through the new MgT2E adapter (coupling AoW's behavior to MgT2E's future changes) or duplicate the adapter's logic under an `AoW` key (moving the duplication rather than removing it), AoW's copy was left exactly where it was, now reached via `else if (engine === 'AoW')` in the same two functions. AoW becomes a genuine adapter of its own, independently, whenever its Phase B work happens — this is a deliberate, documented, temporary duplication, not an oversight.
+**Also normalized:** `_buildSeedSys()` and `_runGenerator()` previously read `_workingCopy` via closure; both now take it as an explicit `workingCopy` parameter (both call sites — `_regenerateBody` and `_generateAndCommit` — updated to pass `_workingCopy`). Required for the adapter's `write()`/`run()` to be pure functions of their inputs; also fixed the one non-MgT2E branch that referenced `_workingCopy` directly (RTT's `extractRTTMainworld(newSys, workingCopy.mainworldRef)` in `_runGenerator`) to use the parameter instead — mechanical, zero behavior change.
+**Verified:** `node --check js/system_editor.js` passes; Sean manually tested Create System (MgT2E) → add world → Preview → Fill & Save, and Edit System → change a body → Fill & Save, on a real hex map — "everything works fine."
+*Spec ref: v0.16.1 SEQUENCING Phase A item 3; found during the pre-Phase-B `system_editor.js`/MgT2E cleanup audit requested 2026-07-04.*
 
 ---
 
@@ -638,19 +810,15 @@ Root cause: the Bug #6 fix (`sys.mainworld.gasGiant = sys.gasGiants > 0`) assume
 - **CT fix** (`js/ct_bottomup_generator.js`, `processBottomUpDesignation`): had the same stale-counter issue (`sys.gasGiant`, singular, only set when the skeleton-roll phase runs), plus a second bug — the "Fixed Anchor" branch (hit whenever the System Editor pre-designates a mainworld via `_mainworldRef`, i.e. essentially every editor Fill/Preview on an existing system) returned early and never assigned `winner.gasGiant` at all. Fix: derive `hasGasGiant` once from `sys.orbits.some(o => o.contents && o.contents.type === 'Gas Giant')` and assign it to `winner.gasGiant` in both the Fixed Anchor branch and the normal-election branch.
 - **RTT** — audited, no fix needed. `extractRTTMainworld` in `js/rtt_engine.js` already derives the flag live from `sys.stars[].planetarySystem.orbits[].worldClass === 'Jovian'` at extraction time, and Step 3's classification pass reclassifies every body (seeded or rolled) on every run.
 - **T5** — not fixed; see Section 7, "T5 — Gas Giant / Body-List Sync Gap."
-- Neither the CT fix nor the T5 gap were reachable by users at the time of this investigation — System Editor editing is currently enabled for MgT2E (and AoW) only, per Section 5. The CT fix was applied anyway since it was low-risk and self-contained; it will already be correct whenever CT editing ships in v0.16.1.
+- Neither the CT fix nor the T5 gap were reachable by users at the time of this investigation — System Editor editing is currently enabled for MgT2E only (not AoW — see the Supported Engines note in Section 3/Phase 5), per Section 5. The CT fix was applied anyway since it was low-risk and self-contained; it will already be correct whenever CT editing ships in v0.16.1.
 
 ---
 
 ## 7. Future Release Notes
 
-### T5 — Gas Giant / Body-List Sync Gap (found 2026-07-01, deferred to v0.16.1)
+### T5 — Gas Giant / Body-List Sync Gap (found 2026-07-01) — ✅ CLOSED 2026-07-05
 
-Investigating Bug #7 (System Editor GG symbol not updating) confirmed T5's issue is broader than a display flag, and sharpens the "Known gap" already logged in Section 5's T5 subsection: `t5_topdown_generator.js`'s `generateT5System(mainworldBase)` takes only the mainworld's UWP as an anchor and always independently re-rolls its own gas giant / belt / terrestrial inventory from dice. `system_driver.js`'s T5 branch (`generateSystem({ edition: 'T5', mode: 'top-down', ... })`) never threads `seedSys.worlds` into that call — it's only consulted to look up the mainworld's own UWP when `_mainworldRef` is set.
+`t5_topdown_generator.js`'s `generateT5System()` now takes a `seedSys` second parameter and fully consults it — seeded bodies are placed at their own orbits in a pass that runs before Phase 1, `_allowAddBodies` gates whether the dice-rolled GG/Belt/Terrestrial inventory rolls at all, and moon counts are capped to what was seeded via `generateT5Satellites`'s new `capToExisting` param. Adding or removing a body via the System Editor's "+GG"/"+World"/"+Belt" buttons on a T5 system now has full effect on Fill & Save's output — see "T5 is now fully online" under Section 5's v0.16.1 SEQUENCING header for the complete implementation writeup, and Section 4/6 for the phantom-body bug found and fixed during verification.
 
-Practical effect once T5 editing is enabled: adding or removing **any** body (not just a Gas Giant — belts and terrestrials too) via the System Editor's "+GG"/"+World"/"+Belt" buttons on a T5 system will have no effect on the generated result. The body silently fails to appear (or disappear) after Fill & Save / Preview, because the generator never sees the edited body list.
-
-A real fix requires applying Step 5d (the generator override gate) to `js/t5_topdown_generator.js` — teaching it to accept a seeded body list, match bodies by `_id`, preserve/add/remove per the seed, and only roll fresh bodies for anything not seeded — mirroring the pattern already applied to MgT2E and CT. There's an existing but unused `restoreT5ManualFields` / `generateT5SystemPreservingManuals` pair in `system_driver.js` that only patches field-level edits onto matching existing bodies by index; it does not add or remove bodies, so it would not close this gap on its own.
-
-No code changes were made for this — T5 editing is not yet enabled for users (Section 5), so there is no way to exercise or verify a fix in the UI today. Queue alongside Step 5d and Algorithm 7 in v0.16.1.
+`restoreT5ManualFields` / `generateT5SystemPreservingManuals` in `system_driver.js` were left untouched, per the original plan — they remain the working implementation behind `ui_menus.js`'s right-click "regenerate T5 system" action, a separate, still-valid use case (bulk regen across selected hexes, no System Editor working copy involved), distinct from the new structural `seedSys` gating used by the System Editor's Fill & Save path.
 

@@ -1,4 +1,4 @@
-# As Above, So Below (v0.16.0.5)
+# As Above, So Below (v0.16.1.0)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -62,7 +62,25 @@ Want to replace any of these sectors with your own file?
 ---
 ## 📜 Changelog
 
-### [v0.16.0.5] - In Progress
+### [v0.16.1.0] - In Progress
+1. **System Editor (Traveller 5):** Traveller 5 systems can now be created and edited in the System Editor, matching functionality already available for Mongoose and Classic Traveller — add, remove, and edit stars, worlds, gas giants, belts, and moons, then Fill & Save to regenerate
+2. **System Editor (Traveller 5):** When no mainworld is designated, the system now automatically selects the body closest to the habitable zone as mainworld instead of failing to generate
+3. **System Editor (Traveller 5):** User-set values are now preserved on Fill & Save instead of being silently rerolled
+4. **System Editor (Traveller 5):** Fill & Save now runs the UWP Auditor for Traveller 5 systems too, matching the same warning-and-choice behavior already available for Mongoose and Classic Traveller
+5. **System Editor (Traveller 5):** Fixed a bug where reopening a previously-saved Traveller 5 system for editing could show extra phantom "World" entries that were never actually part of the system
+
+### [v0.16.0.6] - 2026-07-04
+1. **System Editor:** Unified the Fill & Save and Preview commit logic into a single internal function, removing duplicated code that could drift out of sync between the two
+2. **System Editor (Mongoose):** Fill & Save now runs the UWP Auditor after generating the system; if it finds issues you'll get a warning with the choice to proceed anyway or go back and fix the system first
+3. **Mongoose Engine:** Moved the seed-restoration logic (used when regenerating a System-Editor-authored system) out of the bottom-up generator into a shared helper module, so other engines can reuse it without duplicating the logic
+4. **Mongoose Engine:** Consolidated duplicated audit-logging code between the two Mongoose generators (bottom-up and top-down) into one shared function, and fixed a fragile dependency check that could break if script load order ever changed — internal cleanup, no behavior change
+5. **System Editor:** Replaced the scattered per-engine branches in the System Editor's internals with a single per-engine lookup, starting with Mongoose — internal architecture groundwork for adding more engines to the System Editor, no behavior change
+6. **System Editor (Classic Traveller):** Classic Traveller systems can now be created and edited in the System Editor, matching functionality already available for Mongoose — add, remove, and edit stars, worlds, gas giants, belts, moons, and captured planets, then Fill & Save to regenerate
+7. **System Editor (Classic Traveller):** User-set values (size, atmosphere, hydrographics, population) on Classic Traveller bodies are now preserved on Fill & Save instead of being silently rerolled
+8. **System Editor (Classic Traveller):** Fill & Save now runs the UWP Auditor for Classic Traveller systems too; if it finds issues you'll get the same warning with the choice to proceed anyway or go back and fix, already available for Mongoose systems
+9. **System Editor:** Extended the shared per-engine lookup (item 5 above) to Classic Traveller — internal architecture groundwork, no behavior change beyond enabling item 6
+
+### [v0.16.0.5] - 2026-07-04
 1. **System Editor (Mongoose):** Fixed bug where editing an already-generated system caused its socioeconomic data (Importance, RU, GWP, WTN, IR/DR, and all profile strings) to be silently rerolled instead of preserved
 2. **System Editor (Mongoose):** Fixed bug where editing a system with existing socioeconomic data could cause that data to disappear from the display entirely
 3. **Hex Map Rendering:** Fixed a graphical corruption bug where the map canvas could become visually garbled after a browser page-zoom change (e.g. Ctrl+Mousewheel) went unsynced from the canvas; the canvas now automatically resyncs whenever the browser's zoom/DPI changes

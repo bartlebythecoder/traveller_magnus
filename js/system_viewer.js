@@ -999,9 +999,9 @@ const SystemViewer = (() => {
         });
         _pauseBtn.addEventListener('click', _togglePause);
 
-        // System Editor is only tested against MgT2E systems — hide "Edit System" for all other engines.
+        // System Editor is tested against MgT2E, CT, and T5 systems — hide "Edit System" for all other engines.
         let editBtn = null;
-        if (edition === 'MgT2E') {
+        if (edition === 'MgT2E' || edition === 'CT' || edition === 'T5') {
             editBtn = document.createElement('button');
             editBtn.id = 'sv-edit-btn';
             editBtn.textContent = 'Edit System';

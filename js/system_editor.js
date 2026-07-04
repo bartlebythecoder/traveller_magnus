@@ -73,12 +73,12 @@ const SystemEditor = (() => {
         if (!stateObj) return null;
         if (stateObj.aowSystem && stateObj.aowSystem.stars && stateObj.aowSystem.stars.length > 0)
             return { raw: stateObj.aowSystem, engine: 'AoW' };
-        if (stateObj.mgtSystem && stateObj.mgtSystem.stars && stateObj.mgtSystem.stars.length > 0)
-            return { raw: stateObj.mgtSystem, engine: 'MgT2E' };
-        if (stateObj.ctSystem  && stateObj.ctSystem.stars  && stateObj.ctSystem.stars.length  > 0)
-            return { raw: stateObj.ctSystem,  engine: 'CT'   };
-        if (stateObj.t5System  && stateObj.t5System.stars  && stateObj.t5System.stars.length  > 0)
-            return { raw: stateObj.t5System,  engine: 'T5'   };
+        const mgt2eDetected = _ENGINE_ADAPTERS.MgT2E.detect(stateObj);
+        if (mgt2eDetected) return mgt2eDetected;
+        const ctDetected = _ENGINE_ADAPTERS.CT.detect(stateObj);
+        if (ctDetected) return ctDetected;
+        const t5Detected = _ENGINE_ADAPTERS.T5.detect(stateObj);
+        if (t5Detected) return t5Detected;
         if (stateObj.rttSystem && stateObj.rttSystem.stars && stateObj.rttSystem.stars.length > 0)
             return { raw: stateObj.rttSystem, engine: 'RTT'  };
         if (stateObj.rttData   && stateObj.rttData.stars   && stateObj.rttData.stars.length   > 0)
@@ -131,6 +131,542 @@ const SystemEditor = (() => {
         };
     }
 
+    // ── Per-engine adapters ───────────────────────────────────────────────────
+    // First implementation of the per-engine adapter pattern (Phase A, item 3). Each adapter
+    // bundles the four things _detectEngine/_buildWorkingCopyFromState/_buildSeedSys/
+    // _runGenerator otherwise handle as one more `if/else if engine === '...'` branch apiece:
+    //   detect(stateObj)              -> { raw, engine } | null
+    //   readBodies(raw, starIdByIdx)  -> bodies[]  (working-copy body list)
+    //   write(wc, starIdxById)        -> partial seedSys fields to merge in (e.g. { worlds })
+    //   run(hexId, seedSys, stateObj) -> newSys | null  (calls the real generator, writes stateObj)
+    // Introduced scoped to MgT2E only (Phase A, 2026-07-04); CT became its own adapter in
+    // Phase B (2026-07-04) once its editor support (seedSys gating, capturedPlanets, UWP
+    // auditor coverage) was built out. AoW/T5/RTT still keep their existing inline `else if`
+    // branches untouched in all four functions below; each becomes its own adapter later, as
+    // that engine's editor support is built out.
+    //
+    // AoW currently shares MgT2E's read/write logic verbatim (see the `else if (engine ===
+    // 'AoW')` branches below) — that sharing predates this refactor. Rather than route AoW
+    // through the MgT2E adapter (which would couple AoW's behavior to MgT2E's future
+    // changes) or duplicate the adapter's logic a second time under an `AoW` key (which would
+    // just relocate the duplication instead of removing it), AoW's copy is left exactly where
+    // it was. It becomes a genuine adapter of its own, independently, in a later pass.
+
+    function _mgt2eUwpLockFor(body) {
+        const raw = body._raw || {};
+        if (!body.uwp || !body._raw) return { fields: {}, mf: [] };
+        const fields = {};
+        const mf = [];
+        // Phase 1 physicals — size kept when !== undefined; no _manualFields needed
+        if (raw.size !== undefined) fields.size = raw.size;
+        // Phase 2 atm — engine checks _manualFields.includes('atmCode')
+        // Hex editor saves 'atm'; engine field is 'atmCode' — prefer edited value.
+        const atmVal = raw.atm !== undefined ? raw.atm : raw.atmCode;
+        if (atmVal !== undefined) { fields.atmCode = atmVal; mf.push('atmCode'); }
+        // Phase 2 hydro — engine checks _manualFields.includes('hydroCode')
+        const hydroVal = raw.hydro !== undefined ? raw.hydro : raw.hydroCode;
+        if (hydroVal !== undefined) { fields.hydroCode = hydroVal; mf.push('hydroCode'); }
+        // Phase 5 socio — generateMainworldUWP inherits via hasSocials field check;
+        // generateSubordinateSocial uses _manualFields, so add to mf for both paths.
+        if (raw.pop      !== undefined) { fields.pop      = raw.pop;     mf.push('pop'); }
+        if (raw.popCode  !== undefined) { fields.popCode  = raw.popCode; }
+        if (raw.gov      !== undefined) { fields.gov      = raw.gov;     mf.push('gov'); }
+        if (raw.govCode  !== undefined) { fields.govCode  = raw.govCode; }
+        if (raw.law      !== undefined) { fields.law      = raw.law;     mf.push('law'); }
+        if (raw.tl       !== undefined) { fields.tl       = raw.tl;      mf.push('tl'); }
+        if (raw.starport !== undefined) { fields.starport = raw.starport; mf.push('starport'); }
+        return { fields, mf };
+    }
+
+    // Fields seeded from _raw for all body types so generators skip re-rolling them.
+    // Guards already exist in calculateTerrestrialPhysical for density/diamKm/mass/gravity.
+    // 'size' is included so moons without a UWP (which bypass _mgt2eUwpLockFor) still have
+    // their size seeded — the generatePhysicals guard checks body.size === undefined.
+    // meanTempK/highTempK/lowTempK are intentionally excluded: the generator's geothermal
+    // pass (line ~2376 in mgt2e_world_engine.js) uses w.meanTempK as the *solar-only* base
+    // and adds inherentK on top. If we seed meanTempK with the final post-geothermal value
+    // from _raw, the geothermal heat is applied twice. Let the generator re-derive all three
+    // from the seeded albedo, greenhouseFactor, and eccentricity instead.
+    const _MGT2E_PHYS_FIELDS = [
+        'size',
+        'siderealHours', 'axialTilt', 'tidallyLocked', 'solarDayHours',
+        'eccentricity',
+        'albedo', 'greenhouseFactor',
+        'density', 'diamKm', 'mass', 'gravity', 'composition',
+    ];
+    function _mgt2ePhysSeed(raw) {
+        const fields = {}; const mf = [];
+        _MGT2E_PHYS_FIELDS.forEach(f => { if (raw[f] !== undefined) { fields[f] = raw[f]; mf.push(f); } });
+        return { fields, mf };
+    }
+
+    // Extended Socioeconomics (Ix, RU, GWP, WTN, IR, DR, and all profile strings) is
+    // expensive to hand-tune and fully re-rolled by mgt2e_socio_engine.js on every
+    // generation pass. An unrelated System Editor edit (moving an orbit, adding a gas
+    // giant) would otherwise regenerate the whole system and silently reroll all of it.
+    // Snapshot the mainworld's already-generated values here so the socio engine can
+    // carry them forward unchanged; the user can still force a fresh roll at any time
+    // via the existing right-click "Generate Socioeconomic" menu action, which operates
+    // directly on stateObj.mgtSystem and never sees this snapshot.
+    const _MGT2E_EXT_SOCIO_FIELDS = [
+        'pValue', 'totalWorldPop', 'pcr', 'urbanPercent', 'totalUrbanPop',
+        'majorCities', 'totalMajorCityPop', 'govProfile', 'factions', 'factionsData',
+        'lawProfile', 'techProfile', 'culturalProfile', 'culturalQuirks',
+        'economicProfile', 'starportProfile', 'militaryProfile', 'judicialSystemProfile',
+        'Im', 'ecoR', 'ecoL', 'ecoI', 'ecoE', 'RU', 'pcGWP', 'WTN', 'IR', 'DR',
+        'resourceRating',
+    ];
+    function _mgt2eExtSocioSeedFor(raw) {
+        if (!raw || raw.RU === undefined) return null;
+        const snap = {};
+        _MGT2E_EXT_SOCIO_FIELDS.forEach(f => { if (raw[f] !== undefined) snap[f] = raw[f]; });
+        return snap;
+    }
+
+    // Seeds physical/population digits from the body's previous generated values (_raw)
+    // so Fill & Save doesn't silently reroll size/atm/hydro/pop on a body the user never
+    // touched. Mirrors _mgt2eUwpLockFor's role for MgT2E. 'size' is seeded but not marked
+    // manual — generatePhysicals already skips rerolling it whenever it's !== undefined,
+    // same reasoning as MgT2E's own size field.
+    function _ctUwpLockFor(body) {
+        const raw = body._raw || {};
+        if (!body.uwp || !body._raw) return { fields: {}, mf: [] };
+        const fields = {};
+        const mf = [];
+        if (raw.size  !== undefined) fields.size  = raw.size;
+        if (raw.atm   !== undefined) { fields.atm   = raw.atm;   mf.push('atm'); }
+        if (raw.hydro !== undefined) { fields.hydro = raw.hydro; mf.push('hydro'); }
+        if (raw.pop   !== undefined) { fields.pop   = raw.pop;   mf.push('pop'); }
+        return { fields, mf };
+    }
+
+    // Seeds physical/population digits from the body's previous generated values (_raw), same
+    // role as _ctUwpLockFor. worldType/size are seeded but not marked manual — the generator's
+    // own `!world.worldType`/`size === undefined` guards already skip rerolling them once
+    // present. atm/hydro/pop must be marked manual: t5_topdown_generator.js's Inferno/Belt/
+    // small-size branches force-overwrite those fields regardless of presence unless the
+    // manual flag is checked first (mirrors CT's exact reasoning).
+    function _t5UwpLockFor(body) {
+        const raw = body._raw || {};
+        if (!body.uwp || !body._raw) return { fields: {}, mf: [] };
+        const fields = {};
+        const mf = [];
+        if (raw.worldType !== undefined) fields.worldType = raw.worldType;
+        if (raw.size      !== undefined) fields.size      = raw.size;
+        if (raw.atm   !== undefined) { fields.atm   = raw.atm;   mf.push('atm'); }
+        if (raw.hydro !== undefined) { fields.hydro = raw.hydro; mf.push('hydro'); }
+        if (raw.pop   !== undefined) { fields.pop   = raw.pop;   mf.push('pop'); }
+        return { fields, mf };
+    }
+
+    // Algorithm 7 (directives/project_manifest.md): elects a mainworld when the user hasn't
+    // designated one. Runs over WORKING-COPY bodies (not generated output) because T5's
+    // generator needs its mainworld anchor *before* generation starts — unlike CT/MgT2E, which
+    // elect a candidate from an already-generated body list. `wc` is the live _workingCopy
+    // object; mutating it here is visible immediately (accordion ★, name-preservation lookup
+    // in _generateAndCommit) with no extra wiring.
+    function _t5ElectMainworldIfNeeded(wc) {
+        if (wc.mainworldRef) return;
+        const already = wc.bodies.find(b => b.isMainworld);
+        if (already) { wc.mainworldRef = already._id; return; }
+
+        const primaryWc = wc.stars[0];
+        const hzOrbit = (typeof T5_Stellar_Engine !== 'undefined' && primaryWc)
+            ? T5_Stellar_Engine.getStarHZ({ type: primaryWc.sType, size: primaryWc.sClass })
+            : 3;
+
+        // Step 1: eligible = all worlds (excluding top-level Gas Giants — CT/MgT2E's own
+        // mainworld election likewise excludes only bare GGs, admits Belts directly; mirrors
+        // the existing "★MW suppressed for type==='Gas Giant'" UI convention) + all moons
+        // (inheriting the parent body's orbitId).
+        const candidates = [];
+        wc.bodies.forEach(b => {
+            if (b.type !== 'Gas Giant' && b.orbitId != null) candidates.push({ ref: b, orbitId: b.orbitId });
+            (b.moons || []).forEach(m => candidates.push({ ref: m, orbitId: b.orbitId }));
+        });
+        if (candidates.length === 0) return; // Step 6: proceed with no mainworld, no error
+
+        // Steps 3-5: closest-to-HZ wins; ties broken with the existing global seeded rng
+        // (core.js) — never Math.random().
+        let bestDist = Infinity, winners = [];
+        candidates.forEach(c => {
+            const d = Math.abs(c.orbitId - hzOrbit);
+            if (d < bestDist) { bestDist = d; winners = [c]; }
+            else if (d === bestDist) winners.push(c);
+        });
+        const winner = winners.length === 1 ? winners[0] : winners[Math.floor(rng() * winners.length)];
+
+        // Step 7 — deliberately NOT pushed to _manualFields: this is an automatic default, not
+        // a user click (contrast the explicit _setMainworld() toggle), so
+        // _restoreDisplayManualFields won't paint the auto-elected body as "user-edited."
+        winner.ref.isMainworld = true;
+        wc.mainworldRef = winner.ref._id;
+    }
+
+    // Per-body seed construction shared by T5's `write()` for both top-level worlds and the
+    // owner-of-a-moon-mainworld case (Algorithm 7 / _t5ElectMainworldIfNeeded above).
+    function _t5BodySeed(b, starIdxById) {
+        const { fields: uwpLock, mf: extraMF } = _t5UwpLockFor(b);
+        return {
+            _id: b._id,
+            type: b.type === 'Gas Giant' ? (b.ggType === 'GS' ? 'Small Gas Giant' : 'Large Gas Giant')
+                : b.type === 'Belt' ? 'Planetoid Belt' : 'Terrestrial World',
+            name: b.name || '', uwp: b.uwp || null,
+            ...uwpLock,
+            orbitId: b.orbitId, parentStarIdx: starIdxById[b.parentStarId] ?? 0,
+            travelZone: _normTz(b.travelZone),
+            moons: (b.moons || []).map(m => {
+                const { fields: mLock, mf: mMF } = _t5UwpLockFor(m);
+                return {
+                    _id: m._id, name: m.name || '', uwp: m.uwp || null, ...mLock,
+                    _manualFields: [...(m._manualFields || []), ...mMF],
+                };
+            }),
+            _manualFields: [...(b._manualFields || []), ...extraMF],
+        };
+    }
+
+    const _ENGINE_ADAPTERS = {
+        MgT2E: {
+            detect(stateObj) {
+                if (stateObj.mgtSystem && stateObj.mgtSystem.stars && stateObj.mgtSystem.stars.length > 0) {
+                    return { raw: stateObj.mgtSystem, engine: 'MgT2E' };
+                }
+                return null;
+            },
+
+            readBodies(raw, starIdByIdx) {
+                const bodies = [];
+                const mwRef = raw.mainworld;
+                (raw.worlds || []).forEach(w => {
+                    if (!w || w.type === 'Empty') return;
+                    const isMainworld = _isMW(w, mwRef) || w.type === 'Mainworld';
+                    const rawType     = isMainworld ? 'World' : (w.type || '');
+                    const canon       = isMainworld ? 'World' : _canonType(rawType);
+                    const au          = w.au ?? w.orbitalRadius ?? w.distAU ?? (w.orbitId != null ? _orbitIdToAU(w.orbitId) : null);
+                    bodies.push({
+                        _id: _uid('body'), type: canon,
+                        ggType:        canon === 'Gas Giant' ? (w.ggType || _ggTypeFrom(rawType)) : null,
+                        name: w.name || '', uwp: w.uwp || null, au,
+                        orbitId:       w.orbitId ?? w.orbit ?? null,
+                        travelZone:    w.travelZone || w.travelCode || 'G',
+                        parentStarId:  starIdByIdx(w.parentStarIdx ?? 0),
+                        isMainworld,
+                        moons:         (w.moons || w.satellites || []).map(_buildMoon),
+                        _manualFields: w._manualFields ? [...w._manualFields] : [],
+                        _raw: w,
+                    });
+                });
+                return bodies;
+            },
+
+            // Returns the MgT2E-specific seedSys fields to merge onto the common seed skeleton
+            // (stars/_mainworldRef/_allowAddBodies/age/hzco) that _buildSeedSys already built.
+            write(wc, starIdxById) {
+                const worlds = wc.bodies.map(b => {
+                    const parentStarIdx = starIdxById[b.parentStarId] ?? 0;
+                    const engType = b.isMainworld   ? 'Mainworld'
+                        : b.type === 'Gas Giant'    ? 'Gas Giant'
+                        : b.type === 'Belt'         ? 'Planetoid Belt'
+                        : 'Terrestrial Planet';
+                    const { fields: uwpLock, mf: extraMF } = _mgt2eUwpLockFor(b);
+                    // Gas Giants: seed physical properties so sizeGasGiantBody preserves
+                    // diameter/mass and the Hill Sphere stays stable across Preview.
+                    const ggRaw = (b.type === 'Gas Giant' && b._raw) ? b._raw : null;
+                    const ggPhysFields = ggRaw ? {
+                        ...(ggRaw.diamTerra !== undefined && { diamTerra: ggRaw.diamTerra }),
+                        ...(ggRaw.diamKm    !== undefined && { diamKm:    ggRaw.diamKm    }),
+                        ...(ggRaw.mass      !== undefined && { mass:      ggRaw.mass      }),
+                        ...(ggRaw.gravity   !== undefined && { gravity:   ggRaw.gravity   }),
+                        ...(ggRaw.density   !== undefined && { density:   ggRaw.density   }),
+                    } : {};
+                    const ggPhysMF = ggRaw
+                        ? ['diamTerra', 'mass', 'gravity', 'density'].filter(f => ggRaw[f] != null)
+                        : [];
+                    // All bodies: seed rotation/thermal so generateRotationalDynamics skips re-rolls.
+                    const { fields: rotFields, mf: rotMF } = _mgt2ePhysSeed(b._raw || {});
+                    return _applyUwpSeed({
+                        _id:           b._id,
+                        type:          engType,
+                        ggType:        b.ggType  || null,
+                        name:          b.name    || '',
+                        uwp:           b.uwp     || null,
+                        ...uwpLock,
+                        ...rotFields,
+                        ...ggPhysFields,
+                        orbitId:       b.orbitId != null ? b.orbitId : null,
+                        au:            b.orbitId != null ? (_orbitIdToAU(b.orbitId) ?? b.au ?? 1.0) : (b.au ?? 1.0),
+                        orbitalRadius: b.orbitId != null ? (_orbitIdToAU(b.orbitId) ?? b.au ?? 1.0) : (b.au ?? 1.0),
+                        parentStarIdx,
+                        travelZone:    _normTz(b.travelZone),
+                        _extSocioFrozen: _mgt2eExtSocioSeedFor(b._raw),
+                        moons: (b.moons || []).map(m => {
+                            const { fields: mUwpLock, mf: mExtraMF } = _mgt2eUwpLockFor(m);
+                            const { fields: mRotFields, mf: mRotMF } = _mgt2ePhysSeed(m._raw || {});
+                            return _applyUwpSeed({
+                                _id:          m._id,
+                                type:         m.isMainworld ? 'Mainworld' : 'Satellite',
+                                name:         m.name || '',
+                                uwp:          m.uwp  || null,
+                                ...mUwpLock,
+                                ...mRotFields,
+                                isMainworld:  !!m.isMainworld,
+                                pd:           m.pd,
+                                pos:          m.pos,
+                                eccentricity: m.eccentricity,
+                                retrograde:   m.retrograde,
+                                _extSocioFrozen: _mgt2eExtSocioSeedFor(m._raw),
+                                _manualFields: [...(m._manualFields || []), ...mExtraMF, ...mRotMF],
+                            }, m._uwpSeed);
+                        }),
+                        _manualFields: [...(b._manualFields || []), ...extraMF, ...rotMF, ...ggPhysMF],
+                    }, b._uwpSeed);
+                });
+                return { worlds };
+            },
+
+            run(hexId, seedSys, stateObj) {
+                let newSys = null;
+                if (typeof MgT2EBottomUpGenerator !== 'undefined') {
+                    newSys = MgT2EBottomUpGenerator.generateSystem(hexId, seedSys);
+                }
+                if (newSys) {
+                    _clearSystemData(stateObj);
+                    stateObj.mgtSystem = newSys;
+                    stateObj.mgt2eData = newSys.mainworld || null;
+                    stateObj.mgtSocio  = newSys.mainworld || null;
+                }
+                return newSys;
+            },
+        },
+
+        CT: {
+            detect(stateObj) {
+                if (stateObj.ctSystem && stateObj.ctSystem.stars && stateObj.ctSystem.stars.length > 0) {
+                    return { raw: stateObj.ctSystem, engine: 'CT' };
+                }
+                return null;
+            },
+
+            readBodies(raw, starIdByIdx) {
+                const bodies = [];
+                const mwRef = raw.mainworld;
+                (raw.orbits || []).forEach(slot => {
+                    const w = slot.contents;
+                    if (!w || w.type === 'Empty') return;
+                    const isMainworld = _isMW(w, mwRef) || w.type === 'Mainworld';
+                    const canon       = isMainworld ? 'World' : _canonType(w.type);
+                    bodies.push({
+                        _id: _uid('body'), type: canon,
+                        ggType:        canon === 'Gas Giant' ? (w.size === 'S' ? 'GS' : 'GL') : null,
+                        name: w.name || '', uwp: w.uwp || null,
+                        au: slot.distAU ?? null, orbitId: slot.orbit ?? null,
+                        travelZone:    w.travelZone || w.zone || 'G',
+                        parentStarId:  starIdByIdx(0), isMainworld,
+                        moons:         (w.moons || w.satellites || []).map(_buildMoon),
+                        _manualFields: w._manualFields ? [...w._manualFields] : [],
+                        _raw: w,
+                    });
+                });
+                (raw.capturedPlanets || []).forEach(w => {
+                    if (!w || w.type === 'Empty') return;
+                    const isMainworld = _isMW(w, raw.mainworld) || w.type === 'Mainworld';
+                    bodies.push({
+                        _id: _uid('body'), type: isMainworld ? 'World' : _canonType(w.type),
+                        ggType: null, name: w.name || '', uwp: w.uwp || null,
+                        au: w.distAU ?? null, orbitId: null, travelZone: 'G',
+                        parentStarId: starIdByIdx(0), isMainworld, moons: [],
+                        _manualFields: w._manualFields ? [...w._manualFields] : [],
+                        _raw: w,
+                    });
+                });
+                return bodies;
+            },
+
+            // Captured planets are orbitless (orbitId === null) — the only way a CT body
+            // ends up with a null orbitId, since _addBody always assigns a real one. Split
+            // them out into their own seed.capturedPlanets array, matching what
+            // generateSystemSkeleton already consumes (js/ct_bottomup_generator.js ~line 135)
+            // and what CT_Generator's mainworld _id lookup already searches
+            // (js/ct_system_driver.js ~line 69). CT bodies are always parented to the
+            // primary (index 0) in the bottom-up generator, so starIdxById goes unused —
+            // kept as a parameter anyway to match the adapter interface's documented shape.
+            write(wc, starIdxById) {
+                const orbitBodies    = wc.bodies.filter(b => b.orbitId != null);
+                const capturedBodies = wc.bodies.filter(b => b.orbitId == null);
+
+                // CT expects orbital slots: { orbit, zone, distAU, contents }
+                const orbits = orbitBodies.map(b => {
+                    const ctType = b.type === 'Gas Giant'  ? 'Gas Giant'
+                        : b.type === 'Belt'                ? 'Planetoid Belt'
+                        : 'Terrestrial Planet';
+                    const { fields: uwpLock, mf: extraMF } = _ctUwpLockFor(b);
+                    const ggSize = b.type === 'Gas Giant' ? (b.ggType === 'GS' ? 'Small' : 'Large') : undefined;
+                    return {
+                        orbit:   b.orbitId != null ? b.orbitId : 1,
+                        zone:    'H',
+                        distAU:  b.au != null ? b.au : (_orbitIdToAU(b.orbitId) ?? null),
+                        contents: {
+                            _id:          b._id,
+                            type:         ctType,
+                            ...uwpLock,
+                            size:         ggSize !== undefined ? ggSize : uwpLock.size,
+                            name:         b.name || '',
+                            uwp:          b.uwp  || null,
+                            travelZone:   _normTz(b.travelZone),
+                            satellites:   (b.moons || []).map(m => ({
+                                _id:          m._id,
+                                type:         'Satellite',
+                                name:         m.name || '',
+                                uwp:          m.uwp  || null,
+                                isMoon:       true,
+                                isSatellite:  true,
+                                _manualFields: m._manualFields ? [...m._manualFields] : [],
+                            })),
+                            _manualFields: Array.from(new Set([...(b._manualFields || []), ...extraMF])),
+                        },
+                    };
+                });
+
+                // Captured planets carry their own fractional `orbit`/`zone` rather than an
+                // integer orbit slot — there's no UI to move one (drag-and-drop and the typed
+                // orbit# field both operate on orbitId), so both are simply carried forward
+                // from _raw unchanged. `_id` is required: CT_Generator's mainworld-by-_id
+                // lookup searches seedSys.capturedPlanets when _mainworldRef points at one.
+                const capturedPlanets = capturedBodies.map(b => {
+                    const { fields: uwpLock, mf: extraMF } = _ctUwpLockFor(b);
+                    return {
+                        _id:    b._id,
+                        type:   'Captured',
+                        orbit:  (b._raw && b._raw.orbit != null) ? b._raw.orbit : 0,
+                        zone:   (b._raw && b._raw.zone) || 'H',
+                        ...uwpLock,
+                        name:   b.name || '',
+                        uwp:    b.uwp || null,
+                        _manualFields: Array.from(new Set([...(b._manualFields || []), ...extraMF])),
+                    };
+                });
+
+                return { orbits, capturedPlanets };
+            },
+
+            run(hexId, seedSys, stateObj) {
+                let newSys = null;
+                if (typeof window !== 'undefined' && window.CT_Generator) {
+                    newSys = window.CT_Generator.generateSystem({ mode: 'bottom-up', hexId, seedSys });
+                }
+                if (newSys) {
+                    _clearSystemData(stateObj);
+                    stateObj.ctSystem = newSys;
+                    stateObj.ctData   = newSys.mainworld || null;
+                }
+                return newSys;
+            },
+        },
+
+        T5: {
+            detect(stateObj) {
+                if (stateObj.t5System && stateObj.t5System.stars && stateObj.t5System.stars.length > 0) {
+                    return { raw: stateObj.t5System, engine: 'T5' };
+                }
+                return null;
+            },
+
+            readBodies(raw, starIdByIdx) {
+                const bodies = [];
+                const mwRef = raw.mainworld;
+                const flatWorlds = (raw.worlds && raw.worlds.length > 0)
+                    ? raw.worlds
+                    : (raw.stars || []).flatMap((s, si) =>
+                        (s.orbits || [])
+                            // Empty orbit slots have contents: null — must be dropped BEFORE the
+                            // Object.assign below, since Object.assign({}, null, {...}) silently
+                            // produces a typeless object that the old `w.type !== 'Empty'` filter
+                            // let straight through (undefined !== 'Empty' is true), turning every
+                            // empty orbit into a phantom body on re-edit.
+                            .filter(slot => slot.contents)
+                            // orbitId falls back to the slot's own index (slot.orbit) — T5 bodies
+                            // don't carry their own orbitId, position is implied by array index.
+                            .map(slot => Object.assign({}, slot.contents, {
+                                parentStarIdx: si, distAU: slot.distAU,
+                                orbitId: slot.contents.orbitId != null ? slot.contents.orbitId : slot.orbit,
+                            }))
+                            .filter(w => w.type !== 'Empty')
+                      );
+                flatWorlds.forEach(w => {
+                    const isMainworld = _isMW(w, mwRef) || w.type === 'Mainworld';
+                    const rawType     = isMainworld ? 'World' : (w.type || '');
+                    const canon       = isMainworld ? 'World' : _canonType(rawType);
+                    bodies.push({
+                        _id: _uid('body'), type: canon,
+                        ggType:        canon === 'Gas Giant' ? _ggTypeFrom(rawType) : null,
+                        name: w.name || '', uwp: w.uwp || null,
+                        au: w.au ?? w.distAU ?? (w.orbitId != null ? _orbitIdToAU(w.orbitId) : null), orbitId: w.orbitId ?? null,
+                        travelZone:    w.travelZone || 'G',
+                        parentStarId:  starIdByIdx(w.parentStarIdx ?? 0), isMainworld,
+                        // A moon flagged as this system's mainworld doesn't reliably carry its own
+                        // isMainworld:true from the generator (t5_topdown_generator.js never sets
+                        // it explicitly on sys.mainworld) — detect it the same way top-level bodies
+                        // are detected (_isMW / type==='Mainworld') before handing off to _buildMoon.
+                        moons: (w.moons || w.satellites || []).map(m => _buildMoon(
+                            Object.assign({}, m, { isMainworld: !!(m.isMainworld || m.type === 'Mainworld' || _isMW(m, mwRef)) })
+                        )),
+                        _manualFields: w._manualFields ? [...w._manualFields] : [],
+                        _raw: w,
+                    });
+                });
+                return bodies;
+            },
+
+            write(wc, starIdxById) {
+                _t5ElectMainworldIfNeeded(wc);   // Algorithm 7 — no-op if already designated
+
+                const mwRefBody   = wc.mainworldRef ? wc.bodies.find(b => b._id === wc.mainworldRef) : null;
+                const ownerOfMoon = mwRefBody ? null : wc.bodies.find(b => (b.moons || []).some(m => m._id === wc.mainworldRef));
+                const mwMoon      = ownerOfMoon ? ownerOfMoon.moons.find(m => m._id === wc.mainworldRef) : null;
+                const mwBody      = mwRefBody || mwMoon || wc.bodies.find(b => b.isMainworld);
+                const isMoonMW    = !!mwMoon;
+
+                const { fields: mwLock } = _t5UwpLockFor(mwBody || {});
+                const mainworldUWP = mwBody ? {
+                    _id: mwBody._id,
+                    uwp: mwBody.uwp || 'A788899-9', name: mwBody.name || '',
+                    travelZone: _normTz(mwBody.travelZone),
+                    isPreMoon: isMoonMW,
+                    orbitId: isMoonMW ? ownerOfMoon.orbitId : mwBody.orbitId,
+                    parentBodyId:  isMoonMW ? ownerOfMoon._id : null,
+                    parentStarIdx: isMoonMW ? (starIdxById[ownerOfMoon.parentStarId] ?? 0) : null,
+                    ...mwLock,
+                } : null;
+
+                // Exclude the top-level mainworld body from seed.worlds (it's threaded separately
+                // as the anchor); its owner (if MW is a moon) stays IN seed.worlds so the generator
+                // places it normally and Phase 1's parentBodyId lookup finds it there.
+                const worlds = wc.bodies
+                    .filter(b => !(mwBody && !isMoonMW && b._id === mwBody._id))
+                    .map(b => _t5BodySeed(b, starIdxById));
+
+                return { mainworldUWP, worlds };
+            },
+
+            run(hexId, seedSys, stateObj) {
+                let newSys = null;
+                if (typeof window !== 'undefined' && window.System_Driver && seedSys.mainworldUWP) {
+                    newSys = window.System_Driver.generateSystem({
+                        edition: 'T5', mode: 'top-down',
+                        mainworldUWP: seedSys.mainworldUWP, hexId, seedSys,
+                    });
+                }
+                if (newSys) {
+                    _clearSystemData(stateObj);
+                    stateObj.t5System = newSys;
+                    stateObj.t5Data   = newSys.mainworld || null;
+                }
+                return newSys;
+            },
+        },
+    };
+
     // ── Build working copy from engine state ──────────────────────────────────
 
     function _buildWorkingCopyFromState(stateObj, hexId) {
@@ -180,9 +716,12 @@ const SystemEditor = (() => {
         });
 
         const _starIdByIdx = (idx) => (stars[idx] || stars[0] || {})._id || null;
-        const bodies = [];
+        const adapter = _ENGINE_ADAPTERS[engine];
+        let bodies = [];
 
-        if (engine === 'MgT2E' || engine === 'AoW') {
+        if (adapter) {
+            bodies = adapter.readBodies(raw, _starIdByIdx);
+        } else if (engine === 'AoW') {
             const mwRef = raw.mainworld;
             (raw.worlds || []).forEach(w => {
                 if (!w || w.type === 'Empty') return;
@@ -198,61 +737,6 @@ const SystemEditor = (() => {
                     travelZone:    w.travelZone || w.travelCode || 'G',
                     parentStarId:  _starIdByIdx(w.parentStarIdx ?? 0),
                     isMainworld,
-                    moons:         (w.moons || w.satellites || []).map(_buildMoon),
-                    _manualFields: w._manualFields ? [...w._manualFields] : [],
-                    _raw: w,
-                });
-            });
-        } else if (engine === 'CT') {
-            const mwRef = raw.mainworld;
-            (raw.orbits || []).forEach(slot => {
-                const w = slot.contents;
-                if (!w || w.type === 'Empty') return;
-                const isMainworld = _isMW(w, mwRef) || w.type === 'Mainworld';
-                const canon       = isMainworld ? 'World' : _canonType(w.type);
-                bodies.push({
-                    _id: _uid('body'), type: canon,
-                    ggType:        canon === 'Gas Giant' ? (w.size === 'S' ? 'GS' : 'GL') : null,
-                    name: w.name || '', uwp: w.uwp || null,
-                    au: slot.distAU ?? null, orbitId: slot.orbit ?? null,
-                    travelZone:    w.travelZone || w.zone || 'G',
-                    parentStarId:  _starIdByIdx(0), isMainworld,
-                    moons:         (w.moons || w.satellites || []).map(_buildMoon),
-                    _manualFields: w._manualFields ? [...w._manualFields] : [],
-                    _raw: w,
-                });
-            });
-            (raw.capturedPlanets || []).forEach(w => {
-                if (!w || w.type === 'Empty') return;
-                const isMainworld = _isMW(w, raw.mainworld) || w.type === 'Mainworld';
-                bodies.push({
-                    _id: _uid('body'), type: isMainworld ? 'World' : _canonType(w.type),
-                    ggType: null, name: w.name || '', uwp: w.uwp || null,
-                    au: w.distAU ?? null, orbitId: null, travelZone: 'G',
-                    parentStarId: _starIdByIdx(0), isMainworld, moons: [],
-                    _manualFields: [], _raw: w,
-                });
-            });
-        } else if (engine === 'T5') {
-            const mwRef = raw.mainworld;
-            const flatWorlds = (raw.worlds && raw.worlds.length > 0)
-                ? raw.worlds
-                : (raw.stars || []).flatMap((s, si) =>
-                    (s.orbits || [])
-                        .map(slot => Object.assign({}, slot.contents, { parentStarIdx: si, distAU: slot.distAU }))
-                        .filter(w => w && w.type !== 'Empty')
-                  );
-            flatWorlds.forEach(w => {
-                const isMainworld = _isMW(w, mwRef) || w.type === 'Mainworld';
-                const rawType     = isMainworld ? 'World' : (w.type || '');
-                const canon       = isMainworld ? 'World' : _canonType(rawType);
-                bodies.push({
-                    _id: _uid('body'), type: canon,
-                    ggType:        canon === 'Gas Giant' ? _ggTypeFrom(rawType) : null,
-                    name: w.name || '', uwp: w.uwp || null,
-                    au: w.au ?? w.distAU ?? (w.orbitId != null ? _orbitIdToAU(w.orbitId) : null), orbitId: w.orbitId ?? null,
-                    travelZone:    w.travelZone || 'G',
-                    parentStarId:  _starIdByIdx(w.parentStarIdx ?? 0), isMainworld,
                     moons:         (w.moons || w.satellites || []).map(_buildMoon),
                     _manualFields: w._manualFields ? [...w._manualFields] : [],
                     _raw: w,
@@ -602,7 +1086,7 @@ const SystemEditor = (() => {
         }
 
         const hexId   = _workingCopy.hexId;
-        const seedSys = _buildSeedSys();
+        const seedSys = _buildSeedSys(_workingCopy);
         _resolveStarPhysics(seedSys);
 
         const worlds    = seedSys.worlds || [];
@@ -639,7 +1123,7 @@ const SystemEditor = (() => {
 
         let newSys = null;
         try {
-            newSys = _runGenerator(hexId, engine, seedSys, stateObj);
+            newSys = _runGenerator(hexId, engine, seedSys, stateObj, _workingCopy);
         } catch (err) {
             console.error('[SystemEditor] Regenerate failed:', err);
             _showWarn('Regenerate Error',
@@ -1808,8 +2292,8 @@ const SystemEditor = (() => {
     }
 
     // Converts the working-copy's normalized format to the engine's native seedSys object.
-    function _buildSeedSys() {
-        const wc = _workingCopy;
+    function _buildSeedSys(workingCopy) {
+        const wc = workingCopy;
         const engine = wc.engine;
 
         // Map star _id → array index for parentStarIdx derivation
@@ -1850,7 +2334,10 @@ const SystemEditor = (() => {
             hzco: wc.hzco ?? null,
         };
 
-        if (engine === 'MgT2E' || engine === 'AoW') {
+        const adapter = _ENGINE_ADAPTERS[engine];
+        if (adapter) {
+            Object.assign(seed, adapter.write(wc, starIdxById));
+        } else if (engine === 'AoW') {
             // Build UWP lock fields for any body that already has a UWP set.
             // Applied to both the current mainworld AND any body that was previously the
             // mainworld (or otherwise has a generated UWP), so changing the mainworld
@@ -1985,58 +2472,6 @@ const SystemEditor = (() => {
                     _manualFields: [...(b._manualFields || []), ...extraMF, ...rotMF, ...ggPhysMF],
                 }, b._uwpSeed);
             });
-        } else if (engine === 'CT') {
-            // CT expects orbital slots: { orbit, zone, distAU, contents }
-            seed.orbits = wc.bodies.map(b => {
-                const ctType = b.type === 'Gas Giant'  ? 'Gas Giant'
-                    : b.type === 'Belt'                ? 'Planetoid Belt'
-                    : 'Terrestrial Planet';
-                return {
-                    orbit:   b.orbitId != null ? b.orbitId : 1,
-                    zone:    'H',
-                    distAU:  b.au != null ? b.au : (_orbitIdToAU(b.orbitId) ?? null),
-                    contents: {
-                        _id:          b._id,
-                        type:         ctType,
-                        size:         b.type === 'Gas Giant'
-                            ? (b.ggType === 'GS' ? 'Small' : 'Large')
-                            : undefined,
-                        name:         b.name || '',
-                        uwp:          b.uwp  || null,
-                        travelZone:   _normTz(b.travelZone),
-                        satellites:   (b.moons || []).map(m => ({
-                            _id:          m._id,
-                            type:         'Satellite',
-                            name:         m.name || '',
-                            uwp:          m.uwp  || null,
-                            isMoon:       true,
-                            isSatellite:  true,
-                            _manualFields: m._manualFields ? [...m._manualFields] : [],
-                        })),
-                        _manualFields: b._manualFields ? [...b._manualFields] : [],
-                    },
-                };
-            });
-        } else if (engine === 'T5') {
-            // T5 top-down: mainworld body provides the UWP anchor
-            const mwBody = wc.mainworldRef
-                ? wc.bodies.find(b => b._id === wc.mainworldRef)
-                  || wc.bodies.reduce((f, b) => f || (b.moons||[]).find(m => m._id === wc.mainworldRef), null)
-                : wc.bodies.find(b => b.isMainworld);
-            seed.mainworldUWP = mwBody ? {
-                uwp:        mwBody.uwp        || 'A788899-9',
-                name:       mwBody.name       || '',
-                travelZone: _normTz(mwBody.travelZone),
-            } : null;
-            seed.worlds = wc.bodies.map(b => ({
-                _id:           b._id,
-                type:          b.isMainworld ? 'Mainworld' : b.type,
-                name:          b.name  || '',
-                uwp:           b.uwp   || null,
-                orbitId:       b.orbitId,
-                parentStarIdx: starIdxById[b.parentStarId] ?? 0,
-                _manualFields: b._manualFields ? [...b._manualFields] : [],
-            }));
         } else if (engine === 'RTT') {
             // RTT uses per-star body arrays: rttBodies[starIdx][]
             const rttBodies = wc.stars.map(() => []);
@@ -2079,19 +2514,12 @@ const SystemEditor = (() => {
 
     // Runs the appropriate generator for the given engine and writes results into stateObj.
     // Returns newSys on success, null if generator not found. Throws on engine error.
-    function _runGenerator(hexId, engine, seedSys, stateObj) {
+    function _runGenerator(hexId, engine, seedSys, stateObj, workingCopy) {
+        const adapter = _ENGINE_ADAPTERS[engine];
+        if (adapter) return adapter.run(hexId, seedSys, stateObj);
+
         let newSys = null;
-        if (engine === 'MgT2E') {
-            if (typeof MgT2EBottomUpGenerator !== 'undefined') {
-                newSys = MgT2EBottomUpGenerator.generateSystem(hexId, seedSys);
-            }
-            if (newSys) {
-                _clearSystemData(stateObj);
-                stateObj.mgtSystem = newSys;
-                stateObj.mgt2eData = newSys.mainworld || null;
-                stateObj.mgtSocio  = newSys.mainworld || null;
-            }
-        } else if (engine === 'AoW') {
+        if (engine === 'AoW') {
             const genFn = (typeof window !== 'undefined' && window.AoWBottomUpGenerator)
                 ? window.AoWBottomUpGenerator.generateAoWSystemBottomUp
                 : (typeof generateAoWSystemBottomUp === 'function' ? generateAoWSystemBottomUp : null);
@@ -2103,27 +2531,6 @@ const SystemEditor = (() => {
                 // AoW uses MgT2E's socio display fields (macro_orchestrator.js:1128)
                 stateObj.mgtSocio  = newSys.mainworld || null;
             }
-        } else if (engine === 'CT') {
-            if (typeof window !== 'undefined' && window.CT_Generator) {
-                newSys = window.CT_Generator.generateSystem({ mode: 'bottom-up', hexId, seedSys });
-            }
-            if (newSys) {
-                _clearSystemData(stateObj);
-                stateObj.ctSystem = newSys;
-                stateObj.ctData   = newSys.mainworld || null;
-            }
-        } else if (engine === 'T5') {
-            if (typeof window !== 'undefined' && window.System_Driver && seedSys.mainworldUWP) {
-                newSys = window.System_Driver.generateSystem({
-                    edition: 'T5', mode: 'top-down',
-                    mainworldUWP: seedSys.mainworldUWP, hexId, seedSys,
-                });
-            }
-            if (newSys) {
-                _clearSystemData(stateObj);
-                stateObj.t5System = newSys;
-                stateObj.t5Data   = newSys.mainworld || null;
-            }
         } else if (engine === 'RTT') {
             if (typeof generateRTTSectorStep1 === 'function') {
                 newSys = generateRTTSectorStep1(hexId, { seedSys });
@@ -2132,7 +2539,7 @@ const SystemEditor = (() => {
                 _clearSystemData(stateObj);
                 stateObj.rttSystem = newSys;
                 stateObj.rttData   = (typeof extractRTTMainworld === 'function')
-                    ? extractRTTMainworld(newSys, _workingCopy.mainworldRef) : null;
+                    ? extractRTTMainworld(newSys, workingCopy.mainworldRef) : null;
             }
         }
         return newSys;
@@ -2170,57 +2577,97 @@ const SystemEditor = (() => {
     // only by explicit UI edits — star overrides, UWP seed digits, moon pd edits, drag-reorder,
     // etc.) is the source of truth for display purposes, so copy it onto the generated output.
     function _restoreDisplayManualFields(engine, newSys) {
-        if (engine !== 'MgT2E' || !newSys || !newSys.worlds) return;
-        _workingCopy.bodies.forEach(wcBody => {
-            const genBody = newSys.worlds.find(w => w._id === wcBody._id);
-            if (!genBody) return;
-            genBody._manualFields = wcBody._manualFields ? [...wcBody._manualFields] : [];
-            (wcBody.moons || []).forEach(wcMoon => {
-                const genMoon = (genBody.moons || []).find(m => m._id === wcMoon._id);
-                if (genMoon) genMoon._manualFields = wcMoon._manualFields ? [...wcMoon._manualFields] : [];
+        if (!newSys) return;
+        if (engine === 'MgT2E' && newSys.worlds) {
+            _workingCopy.bodies.forEach(wcBody => {
+                const genBody = newSys.worlds.find(w => w._id === wcBody._id);
+                if (!genBody) return;
+                genBody._manualFields = wcBody._manualFields ? [...wcBody._manualFields] : [];
+                (wcBody.moons || []).forEach(wcMoon => {
+                    const genMoon = (genBody.moons || []).find(m => m._id === wcMoon._id);
+                    if (genMoon) genMoon._manualFields = wcMoon._manualFields ? [...wcMoon._manualFields] : [];
+                });
             });
-        });
+        } else if (engine === 'CT') {
+            // CT's generated bodies live under newSys.orbits[].contents plus
+            // newSys.capturedPlanets[], and moons are keyed 'satellites' (not 'moons') —
+            // same restoration as MgT2E's above, adapted to CT's shape. Necessary for the
+            // same reason: _ctUwpLockFor (system_editor.js) marks atm/hydro/pop manual
+            // purely to stop the generator re-rolling them, which would otherwise make
+            // every pre-existing CT body's fields show as "manually edited" in the
+            // accordion after every Fill & Save, even on bodies the user never touched.
+            const genBodies = [];
+            (newSys.orbits || []).forEach(slot => { if (slot.contents) genBodies.push(slot.contents); });
+            (newSys.capturedPlanets || []).forEach(p => genBodies.push(p));
+            _workingCopy.bodies.forEach(wcBody => {
+                const genBody = genBodies.find(b => b._id === wcBody._id);
+                if (!genBody) return;
+                genBody._manualFields = wcBody._manualFields ? [...wcBody._manualFields] : [];
+                (wcBody.moons || []).forEach(wcMoon => {
+                    const genMoon = (genBody.satellites || []).find(m => m._id === wcMoon._id);
+                    if (genMoon) genMoon._manualFields = wcMoon._manualFields ? [...wcMoon._manualFields] : [];
+                });
+            });
+        } else if (engine === 'T5') {
+            // T5's generated bodies live under newSys.stars[].orbits[].contents, and moons are
+            // keyed 'satellites' (not 'moons') — same restoration as CT's, same reasoning:
+            // _t5UwpLockFor marks atm/hydro/pop manual purely to stop the generator re-rolling
+            // them, which would otherwise make every pre-existing T5 body's fields show as
+            // "manually edited" in the accordion after every Fill & Save.
+            const genBodies = [];
+            (newSys.stars || []).forEach(star => (star.orbits || []).forEach(o => { if (o.contents) genBodies.push(o.contents); }));
+            _workingCopy.bodies.forEach(wcBody => {
+                const genBody = genBodies.find(b => b._id === wcBody._id)
+                    || genBodies.reduce((f, b) => f || (b.satellites || []).find(s => s._id === wcBody._id), null);
+                if (!genBody) return;
+                genBody._manualFields = wcBody._manualFields ? [...wcBody._manualFields] : [];
+                (wcBody.moons || []).forEach(wcMoon => {
+                    const genMoon = (genBody.satellites || []).find(m => m._id === wcMoon._id);
+                    if (genMoon) genMoon._manualFields = wcMoon._manualFields ? [...wcMoon._manualFields] : [];
+                });
+            });
+        }
     }
 
-    function _preview() {
-        if (!_workingCopy) return;
+    // Shared commit path for _preview() and _fillAndSave(): builds a seedSys from the working
+    // copy, runs the engine generator, and writes the result into hexStates. This is everything
+    // the two callers had in common (OW-5) — the two remaining differences are deliberately left
+    // to the caller rather than folded in here: (1) the pre-generation snapshot side effect
+    // (_preview takes a _previewOriginalState snapshot; _fillAndSave calls the global
+    // saveHistoryState() undo instead) and (2) what happens to the editor/viewer after a
+    // successful commit (_preview refreshes in place and keeps editing; _fillAndSave closes the
+    // editor). Folding either of those in here would risk a duplicate undo snapshot on every
+    // Preview click, or a missing one on Fill & Save.
+    // Returns { hexId, stateObj, newSys } on success, or null if generation failed (a warning
+    // dialog has already been shown to the user in that case).
+    function _generateAndCommit(errorLabel) {
         const hexId   = _workingCopy.hexId;
         const engine  = _workingCopy.engine;
-        const seedSys = _buildSeedSys();
+        const seedSys = _buildSeedSys(_workingCopy);
         _resolveStarPhysics(seedSys);
 
-        // On first preview only: snapshot the original state so Cancel can restore it.
-        if (!_previewOriginalState) {
-            const orig = (typeof hexStates !== 'undefined') ? hexStates.get(hexId) : undefined;
-            _previewOriginalState = {
-                hexId,
-                existed: orig !== undefined,
-                state:   orig ? JSON.parse(JSON.stringify(orig)) : null,
-            };
-        }
-
         // Use current hexStates entry as the write target (overwritten by _runGenerator).
-        let stateObj = (typeof hexStates !== 'undefined' && hexStates.get(hexId))
+        const stateObj = (typeof hexStates !== 'undefined' && hexStates.get(hexId))
             ? hexStates.get(hexId)
             : { hexId, type: 'SYSTEM_PRESENT' };
 
         let newSys = null;
         try {
-            newSys = _runGenerator(hexId, engine, seedSys, stateObj);
+            newSys = _runGenerator(hexId, engine, seedSys, stateObj, _workingCopy);
         } catch (err) {
-            console.error('[SystemEditor] Preview failed:', err);
+            console.error(`[SystemEditor] ${errorLabel} failed:`, err);
             console.error('[SystemEditor] Stack trace:', err.stack);
-            _showWarn('Preview Error',
+            _showWarn(`${errorLabel} Error`,
                 `The generator encountered an error:\n${err.message}`,
                 [{ label: 'OK', cls: 'btn-save', onClick: () => {} }]);
-            return;
+            return null;
         }
 
         if (!newSys) {
-            _showWarn('Preview Failed',
+            _showWarn(`${errorLabel} Failed`,
                 'No system was produced. Check the browser console for details.',
                 [{ label: 'OK', cls: 'btn-save', onClick: () => {} }]);
-            return;
+            return null;
         }
 
         _restoreDisplayManualFields(engine, newSys);
@@ -2248,13 +2695,36 @@ const SystemEditor = (() => {
         if (typeof requestAnimationFrame === 'function' && typeof draw === 'function') {
             requestAnimationFrame(draw);
         }
-        if (typeof SystemViewer !== 'undefined') {
-            if (SystemViewer.isOpen()) SystemViewer.refresh(hexId);
-            else SystemViewer.open(hexId);
-        }
         if (typeof populateEditorAccordions === 'function' &&
             typeof editingHexId !== 'undefined' && editingHexId === hexId) {
             populateEditorAccordions(stateObj);
+        }
+
+        return { hexId, stateObj, newSys };
+    }
+
+    function _preview() {
+        if (!_workingCopy) return;
+        const hexId  = _workingCopy.hexId;
+        const engine = _workingCopy.engine;
+
+        // On first preview only: snapshot the original state so Cancel can restore it.
+        if (!_previewOriginalState) {
+            const orig = (typeof hexStates !== 'undefined') ? hexStates.get(hexId) : undefined;
+            _previewOriginalState = {
+                hexId,
+                existed: orig !== undefined,
+                state:   orig ? JSON.parse(JSON.stringify(orig)) : null,
+            };
+        }
+
+        const result = _generateAndCommit('Preview');
+        if (!result) return;
+        const { newSys } = result;
+
+        if (typeof SystemViewer !== 'undefined') {
+            if (SystemViewer.isOpen()) SystemViewer.refresh(hexId);
+            else SystemViewer.open(hexId);
         }
 
         // Backfill derived properties into working copy for fields that were null (auto-derived).
@@ -2314,70 +2784,11 @@ const SystemEditor = (() => {
 
     }
 
-    function _fillAndSave() {
-        if (!_workingCopy) return;
-        const hexId  = _workingCopy.hexId;
-        const engine = _workingCopy.engine;
-        const seedSys = _buildSeedSys();
-        _resolveStarPhysics(seedSys);
-
-        // Get or create stateObj
-        let stateObj = (typeof hexStates !== 'undefined') ? hexStates.get(hexId) : null;
-        if (!stateObj) {
-            stateObj = { hexId, type: 'SYSTEM_PRESENT' };
-        }
-
-        // Save global undo snapshot before mutating
-        if (typeof saveHistoryState === 'function') saveHistoryState('Fill & Save System');
-
-        let newSys = null;
-        try {
-            newSys = _runGenerator(hexId, engine, seedSys, stateObj);
-        } catch (err) {
-            console.error('[SystemEditor] Fill & Save failed:', err);
-            _showWarn('Generation Error',
-                `The generator encountered an error:\n${err.message}`,
-                [{ label: 'OK', cls: 'btn-save', onClick: () => {} }]);
-            return;
-        }
-
-        if (!newSys) {
-            _showWarn('Generation Failed',
-                'No system was produced. Check the browser console for details.',
-                [{ label: 'OK', cls: 'btn-save', onClick: () => {} }]);
-            return;
-        }
-
-        _restoreDisplayManualFields(engine, newSys);
-
-        // Fresh blank creation: override generator's travel zone with Green
-        if (_workingCopy.bodies.length === 0) _forceGreenTravelZone(stateObj);
-
-        // Preserve name: use mainworld body's name from working copy, or keep existing stateObj name
-        const mwBody = _workingCopy.bodies.find(b => b._id === _workingCopy.mainworldRef)
-            || _workingCopy.bodies.find(b => b.isMainworld);
-        const mwName = mwBody && mwBody.name ? mwBody.name : null;
-        if (mwName) {
-            stateObj.name = mwName;
-            if (stateObj.mgt2eData) stateObj.mgt2eData.name = mwName;
-            if (stateObj.ctData)    stateObj.ctData.name    = mwName;
-            if (stateObj.t5Data)    stateObj.t5Data.name    = mwName;
-            if (stateObj.rttData)   stateObj.rttData.name   = mwName;
-        } else if (!stateObj.name && typeof getNextSystemName === 'function') {
-            stateObj.name = getNextSystemName(hexId);
-        }
-
-        stateObj.type = 'SYSTEM_PRESENT';
-        if (typeof computeSystemCounts === 'function') computeSystemCounts(stateObj);
-        if (typeof hexStates !== 'undefined') hexStates.set(hexId, stateObj);
-        if (typeof requestAnimationFrame === 'function' && typeof draw === 'function') {
-            requestAnimationFrame(draw);
-        }
-        if (typeof populateEditorAccordions === 'function' &&
-            typeof editingHexId !== 'undefined' && editingHexId === hexId) {
-            populateEditorAccordions(stateObj);
-        }
-
+    // Completes Fill & Save after any audit warning has been resolved: closes the editor and
+    // reopens the System Viewer on the freshly-committed system. Split out from _fillAndSave()
+    // so the audit warn-and-proceed dialog (OW-3) can defer this tail without re-running
+    // generation if the user picks "Proceed Anyway".
+    function _finishFillAndSave(hexId) {
         // Clear preview snapshot and close editor before refreshing the viewer,
         // so the re-entrant SystemEditor.close() call from SystemViewer.close() is a no-op.
         _previewOriginalState = null;
@@ -2388,6 +2799,40 @@ const SystemEditor = (() => {
             SystemViewer.close();
             setTimeout(() => { if (typeof SystemViewer !== 'undefined') SystemViewer.open(hexId); }, 80);
         }
+    }
+
+    function _fillAndSave() {
+        if (!_workingCopy) return;
+        const hexId = _workingCopy.hexId;
+
+        // Save global undo snapshot before mutating
+        if (typeof saveHistoryState === 'function') saveHistoryState('Fill & Save System');
+
+        const result = _generateAndCommit('Fill & Save');
+        if (!result) return;
+
+        // OW-3: UWP Auditor gate. Not every engine's generator populates auditResult (only
+        // MgT2E does today — see mgt2e_bottomup_generator.js), so this is a no-op for engines
+        // that haven't been wired up yet. The system is already committed to hexStates by this
+        // point (_generateAndCommit just ran), so "Go Back & Fix" can't un-commit it — it just
+        // leaves the editor open (same as dismissing any other warning) so the user can keep
+        // adjusting bodies and re-run Fill & Save, instead of closing over a failing result.
+        const audit = result.newSys && result.newSys.auditResult;
+        if (audit && audit.pass === false) {
+            const errCount = (audit.errors || []).length;
+            _showWarn('Audit Warnings Found',
+                `The UWP Auditor found ${errCount} issue${errCount !== 1 ? 's' : ''} with this system ` +
+                `(see browser console for details). You can proceed anyway, or go back and adjust ` +
+                `the system before saving.`,
+                [
+                    { label: 'Proceed Anyway', cls: 'btn-cancel', onClick: () => _finishFillAndSave(hexId) },
+                    { label: 'Go Back & Fix',  cls: 'btn-save',   onClick: () => {} },
+                ]
+            );
+            return;
+        }
+
+        _finishFillAndSave(hexId);
     }
 
     // ── Open/close ────────────────────────────────────────────────────────────

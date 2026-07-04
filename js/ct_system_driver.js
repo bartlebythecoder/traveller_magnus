@@ -3,18 +3,19 @@
 // =====================================================================
 
 // Browser-safe imports
-var systemSkeletonGen, socialProcessor, topDownGen, auditor, auConst;
+var systemSkeletonGen, socialProcessor, topDownGen, auditor, auditRunAndLog, auConst;
 
 if (typeof module !== 'undefined' && module.exports) {
     const { generateSystemSkeleton, processBottomUpSocial } = require('./ct_bottomup_generator.js');
     const { generateTopDownSystem } = require('./ct_topdown_generator.js');
-    const { auditCTSystem } = require('./ct_uwp_auditor.js');
+    const { auditCTSystem, runAndLog } = require('./ct_uwp_auditor.js');
     const { ORBIT_AU } = require('./ct_constants.js');
-    
+
     systemSkeletonGen = generateSystemSkeleton;
     socialProcessor = processBottomUpSocial;
     topDownGen = generateTopDownSystem;
     auditor = auditCTSystem;
+    auditRunAndLog = runAndLog;
     auConst = ORBIT_AU;
 } else {
     // In browser, these are resolved at script load time.
@@ -22,6 +23,8 @@ if (typeof module !== 'undefined' && module.exports) {
     socialProcessor = typeof processBottomUpSocial !== 'undefined' ? processBottomUpSocial : null;
     topDownGen = typeof generateTopDownSystem !== 'undefined' ? generateTopDownSystem : null;
     auditor = typeof auditCTSystem !== 'undefined' ? auditCTSystem : null;
+    auditRunAndLog = (typeof window !== 'undefined' && window.CT_Auditor && window.CT_Auditor.runAndLog)
+        ? window.CT_Auditor.runAndLog : null;
     auConst = typeof ORBIT_AU !== 'undefined' ? ORBIT_AU : 149597870;
 }
 
@@ -80,7 +83,7 @@ function generateSystem(params) {
 
     if (sys) {
         if (hexId) sys.hexId = sys.hexId || hexId;
-        sys.audit = auditor(sys);
+        sys.audit = auditRunAndLog ? auditRunAndLog(sys, hexId) : auditor(sys);
         if (typeof writeLogLine !== 'undefined') {
             writeLogLine("=====================================================================");
             writeLogLine("SYSTEM AUDIT RESULTS");

@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(awk '/draggable-palette|\\\\.visible\\\\b/{found=1} found{print NR\": \"$0; if\\(/}/\\) {found=0; count++} if\\(count>3\\) exit}' C:/Users/sean/Documents/github/traveller_magnus/hex_map.html)",
-      "Bash(awk -F: '$2 <= 1450 && $2 >= 1420 {print}')"
+      "Bash(awk -F: '$2 <= 1450 && $2 >= 1420 {print}')",
+      "Skill(run)"
     ]
   }
 }

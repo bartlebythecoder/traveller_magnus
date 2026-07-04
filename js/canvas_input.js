@@ -78,7 +78,9 @@ function setupCanvasEvents() {
                     _seState.mgt2eData || _seState.mgtSystem ||
                     _seState.t5Data || _seState.t5System ||
                     _seState.aowSystem || _seState.rttData));
-                const _seCanEdit = !!(_seState && (_seState.mgt2eData || _seState.mgtSystem));
+                const _seCanEdit = !!(_seState && (_seState.mgt2eData || _seState.mgtSystem ||
+                    _seState.ctData || _seState.ctSystem ||
+                    _seState.t5Data || _seState.t5System));
                 if (createBtn) createBtn.style.display = _seHasSystem ? 'none' : 'block';
                 if (editBtn)   editBtn.style.display   = _seCanEdit ? 'block' : 'none';
             } else {

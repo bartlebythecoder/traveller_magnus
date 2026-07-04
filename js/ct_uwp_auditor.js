@@ -98,6 +98,32 @@ function auditCTSystem(sys) {
 }
 
 /**
+ * Runs the CT UWP Auditor and logs/backlogs any failures. Mirrors
+ * MgT2E_UWP_Auditor.runAndLog's role (js/mgt2e_uwp_auditor.js) — attaches the audit
+ * result to sys.auditResult (the field system_editor.js's Fill & Save OW-3 gate reads)
+ * and pushes failures to the global audit backlog with a consistent shape. CT's errors
+ * are plain strings (not MgT2E's {orbitId, message} objects), so orbitId is always null.
+ */
+function runAndLog(sys, hexId) {
+    const results = auditCTSystem(sys);
+    sys.auditResult = results;
+
+    if (!results.pass) {
+        const errorSummary = results.errors.map(e => `  • ${e}`).join('\n');
+        console.warn(`[CT Auditor] System ${hexId} — ${results.errors.length} violation(s):\n${errorSummary}`);
+
+        if (typeof window !== 'undefined') {
+            window.auditBacklog = window.auditBacklog || [];
+            results.errors.forEach(err => {
+                window.auditBacklog.push({ hexId, orbitId: null, engine: 'CT', message: err });
+            });
+        }
+    }
+
+    return results;
+}
+
+/**
  * Reusable walker to ensure we check orbits, satellites, and captured planets.
  */
 function walkSystem(sys, callback) {
@@ -117,10 +143,10 @@ function walkSystem(sys, callback) {
 
 // Export for both Node.js and Browser environments
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { auditCTSystem };
+    module.exports = { auditCTSystem, runAndLog };
 } else {
     if (typeof window !== 'undefined') {
         window.auditCTSystem = auditCTSystem;
-        window.CT_Auditor = { auditCTSystem };
+        window.CT_Auditor = { auditCTSystem, runAndLog };
     }
 }

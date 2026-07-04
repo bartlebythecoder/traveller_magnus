@@ -33,9 +33,14 @@ if (typeof module !== 'undefined' && module.exports) {
     planetaryDMs = typeof CT_PLANETARY_DMS !== 'undefined' ? CT_PLANETARY_DMS : {};
 }
 
+// Safe wrapper around core.js's isManual() — falls back to false when isManual isn't in
+// scope (e.g. the CommonJS/Node test branch, which doesn't require core.js).
+function _ctFieldIsManual(obj, field) {
+    return (typeof isManual === 'function') && isManual(obj, field);
+}
 
 /**
- * REUSABLE: GAS GIANT PRESENCE CHECK 
+ * REUSABLE: GAS GIANT PRESENCE CHECK
  * Returns true on 2D <= 9 (Standard Book 3/6)
  */
 function rollGasGiantPresence() {
@@ -64,7 +69,10 @@ function generatePhysicals(body, zone) {
 
     // B. ATMOSPHERE
     tSection('Planetary Atmosphere');
-    if (szVal === 0) {
+    if (_ctFieldIsManual(body, 'atm')) {
+        tSkip('Atmosphere (Manually Set)');
+        tResult('Atmosphere Code', body.atm, 'CT 2.2: Atmospheric Chemistry');
+    } else if (szVal === 0) {
         body.atm = 0;
         tSkip('Atmosphere (Asteroid/Size 0 forces Atm 0)');
         tResult('Atmosphere Code', 0, 'CT 2.2: Atmospheric Chemistry');
@@ -100,7 +108,10 @@ function generatePhysicals(body, zone) {
     tSection('Hydrographic Percentage');
     const hRules = (planetaryDMs && planetaryDMs.HYDROGRAPHICS) ? planetaryDMs.HYDROGRAPHICS : null;
 
-    if (szVal === 0 || zone === 'I') {
+    if (_ctFieldIsManual(body, 'hydro')) {
+        tSkip('Hydrographics (Manually Set)');
+        tResult('Hydrographic Code', body.hydro, 'CT 2.3: Hydrographics');
+    } else if (szVal === 0 || zone === 'I') {
         body.hydro = 0;
         tSkip(szVal === 0 ? 'Hydrographics (Asteroid/Size 0 forces Hydro 0)' : 'Hydrographics (Zone I is dry)');
         tResult('Hydrographic Code', 0, 'CT 2.3: Hydrographics');
@@ -108,7 +119,7 @@ function generatePhysicals(body, zone) {
         tDM('Size Code', szVal);
         tDM('Standard Hyd', -7);
         let hydRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Hydrographics Roll') : 7) - 7 + szVal;
-        
+
         if (hRules) {
             // Data Shield DMs
             if (hRules.ATMOSPHERE_PENALTY && hRules.ATMOSPHERE_PENALTY.VALID_CODES.includes(body.atm)) {
@@ -132,14 +143,13 @@ function generatePhysicals(body, zone) {
         }
 
         body.hydro = Math.max(0, Math.min(10, hydRoll));
-
-        // Vacuum World Exception
-        if (body.atm === 0 && body.hydro > 0) {
-            body.liquidType = 'Ice-Caps';
-            tResult('Vacuum Exception', 'Ice-Caps Only', 'CT 2.3: Hydrographics');
-        }
-
         tResult('Hydrographic Code', body.hydro, 'CT 2.3: Hydrographics');
+    }
+
+    // Vacuum World Exception — checked regardless of how atm/hydro were arrived at
+    if (body.atm === 0 && body.hydro > 0 && !_ctFieldIsManual(body, 'liquidType')) {
+        body.liquidType = 'Ice-Caps';
+        tResult('Vacuum Exception', 'Ice-Caps Only', 'CT 2.3: Hydrographics');
     }
 
     return body;
@@ -153,6 +163,12 @@ function generatePhysicals(body, zone) {
  */
 function generatePopulation(world, ctx = { mode: 'bottomup' }) {
     tSection('Population');
+
+    if (_ctFieldIsManual(world, 'pop')) {
+        tSkip('Population (Manually Set)');
+        tResult('Population Code', world.pop, 'CT 3.1: Social Stats');
+        return world;
+    }
 
     const forcedZeroSizes = (popMods && popMods.FORCED_ZERO_POP) ? popMods.FORCED_ZERO_POP.SIZES : ['R'];
     const forcedZeroTypes = (popMods && popMods.FORCED_ZERO_POP) ? popMods.FORCED_ZERO_POP.TYPES : ['Gas Giant', 'Empty'];

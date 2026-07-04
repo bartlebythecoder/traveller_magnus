@@ -109,48 +109,13 @@
             if (StellarEngine && StellarEngine.allocateOrbits) {
                 StellarEngine.allocateOrbits(sys);
             }
-            // After allocateOrbits wipes and rebuilds sys.worlds, restore each seed
-            // world's user data (name, UWP, _id, locked fields) to the nearest-orbit
-            // generated world of the same body category. Must run before generatePhysicals
-            // so the locked fields are honoured by the physics engines.
-            if (seedSys && (seedSys.worlds || []).length > 0) {
-                const _normCat = t => t === 'Gas Giant' ? 'GG' : t === 'Planetoid Belt' ? 'Belt' : 'Rocky';
-                const _restored = new Set();
-                const _moonHasUserData = m => !!(m.name || m.uwp || (m._manualFields && m._manualFields.length > 0));
-                for (const sw of seedSys.worlds) {
-                    const hasUserData = sw.name || sw.uwp || (sw._manualFields && sw._manualFields.length > 0)
-                        || (sw.moons && sw.moons.some(_moonHasUserData));
-                    if (!hasUserData) continue;
-                    const swCat   = _normCat(sw.type);
-                    const swOrbit = sw.orbitId != null ? sw.orbitId : 1;
-                    let best = null, bestDist = Infinity;
-                    for (const gw of sys.worlds) {
-                        if (_restored.has(gw)) continue;
-                        if (_normCat(gw.type) !== swCat) continue;
-                        const d = Math.abs((gw.orbitId || 0) - swOrbit);
-                        if (d < bestDist) { bestDist = d; best = gw; }
-                    }
-                    if (!best) continue;
-                    _restored.add(best);
-                    if (sw._id)  best._id  = sw._id;
-                    if (sw.name) best.name = sw.name;
-                    if (sw.uwp)  best.uwp  = sw.uwp;
-                    ['size', 'atmCode', 'hydroCode', 'pop', 'popCode', 'gov', 'govCode', 'law', 'tl', 'starport'].forEach(f => {
-                        if (sw[f] != null) best[f] = sw[f];
-                    });
-                    if (sw._manualFields && sw._manualFields.length) {
-                        const mfSet = new Set(best._manualFields || []);
-                        sw._manualFields.forEach(f => mfSet.add(f));
-                        best._manualFields = [...mfSet];
-                    }
-                    // Restore any user-authored moons (named/detailed) from the seed world.
-                    // generatePhysicals counts these as existingMoons and will add more if
-                    // the dice roll exceeds the count; moons with pd already set are kept as-is.
-                    if (sw.moons && sw.moons.length > 0) {
-                        best.moons = sw.moons.map(m => Object.assign({}, m));
-                    }
-                    if (window.isLoggingEnabled) writeLogLine(`[SEED RESTORE] Seed "${sw.name || sw._id}" → generated ${best.type} at orbit ${best.orbitId != null ? best.orbitId.toFixed(2) : '?'} (dist ${bestDist.toFixed(2)}, moons restored: ${(sw.moons || []).length})`);
-                }
+            // After allocateOrbits wipes and rebuilds sys.worlds, restore each seed world's
+            // user data (name, UWP, _id, locked fields) onto the nearest-orbit generated world
+            // of the same body category. Must run before generatePhysicals so the locked
+            // fields are honoured by the physics engines. Shared helper (OW-6) — see
+            // js/seed_restoration.js; CT/RTT will reuse this once they gain the same gating.
+            if (typeof SeedRestoration !== 'undefined') {
+                SeedRestoration.restoreSeedWorldsIntoGenerated(sys, seedSys);
             }
         } else {
             if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 1: Inventory/Allocation skipped — seed provides ${sys.worlds.length} world(s), _allowAddBodies=false.`);
@@ -160,8 +125,9 @@
         // When seeded and not allowing new bodies, capture moon counts before generatePhysicals
         // runs so we can trim any dice-rolled additions back out. The seed's moons array is a
         // shared reference (Object.assign shallow copy), so generatePhysicals can extend it.
-        const _seededMoonCaps = (seedSys && !seedSys._allowAddBodies)
-            ? sys.worlds.map(w => (w.moons || []).length)
+        // Shared helper (OW-6) — see js/seed_restoration.js.
+        const _seededMoonCaps = (typeof SeedRestoration !== 'undefined')
+            ? SeedRestoration.captureSeededMoonCaps(sys, seedSys)
             : null;
 
         if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 1: Physics... (Found ${sys.worlds.length} worlds)`);
@@ -170,23 +136,8 @@
         }
 
         // Trim back any moons generatePhysicals added beyond the seeded count.
-        // Before slicing, move the mainworld moon to index 0 so the sort-by-pd reordering
-        // cannot push it beyond the cap and lose it.
-        if (_seededMoonCaps) {
-            const mwId = seedSys && seedSys._mainworldRef ? seedSys._mainworldRef : null;
-            sys.worlds.forEach((w, i) => {
-                const cap = _seededMoonCaps[i] ?? 0;
-                if (w.moons && w.moons.length > cap) {
-                    if (mwId) {
-                        const mwIdx = w.moons.findIndex(m => m._id === mwId);
-                        if (mwIdx >= cap) {
-                            const mwMoon = w.moons.splice(mwIdx, 1)[0];
-                            w.moons.unshift(mwMoon);
-                        }
-                    }
-                    w.moons = w.moons.slice(0, cap);
-                }
-            });
+        if (typeof SeedRestoration !== 'undefined') {
+            SeedRestoration.trimGeneratedMoonsToSeededCaps(sys, seedSys, _seededMoonCaps);
         }
 
         // =================================================================
@@ -366,7 +317,7 @@
         // =================================================================
         // PHASE 6: JOURNEY MATH SWEEP (Phase 2 Integration)
         // =================================================================
-        if (MgT2EMath && MgT2EMath.performJourneyMathSweep) {
+        if (typeof MgT2EMath !== 'undefined' && MgT2EMath.performJourneyMathSweep) {
             MgT2EMath.performJourneyMathSweep(sys);
         }
 
@@ -378,27 +329,11 @@
         if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 7: Orbital Naming...`);
         applyMgT2EOrbitalNames(sys);
 
-        // System Audit
+        // System Audit — shared helper (OW-7): audits, attaches sys.auditResult, logs/backlogs
+        // on failure. Was previously duplicated inline here and in mgt2e_topdown_generator.js.
         const activeAuditor = Auditor || (typeof MgT2E_UWP_Auditor !== 'undefined' ? MgT2E_UWP_Auditor : null);
-        if (activeAuditor) {
-            const auditResults = activeAuditor.auditMgT2ESystem(sys, { mode: 'bottom-up' });
-            if (!auditResults.pass) {
-                const errorSummary = auditResults.errors.map(e => `  • ${e.message}`).join('\n');
-                console.warn(`[MgT2E Auditor] System ${hexId} — ${auditResults.errors.length} violation(s):\n${errorSummary}`);
-                
-                // Action 6.3: Audit Persistence — push all strict [FAIL] to global backlog
-                if (typeof window !== 'undefined') {
-                    window.auditBacklog = window.auditBacklog || [];
-                    auditResults.errors.forEach(err => {
-                        window.auditBacklog.push({
-                            hexId: hexId,
-                            orbitId: err.orbitId !== undefined ? err.orbitId : null,
-                            engine: "MgT2E",
-                            message: err.message || err 
-                        });
-                    });
-                }
-            }
+        if (activeAuditor && activeAuditor.runAndLog) {
+            activeAuditor.runAndLog(sys, hexId, { mode: 'bottom-up' });
         }
 
         // Action 6.4: Planet-Centric Biographies (v0.6.0.0)

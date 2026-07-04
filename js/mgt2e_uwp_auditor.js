@@ -385,7 +385,45 @@
         return results;
     }
 
+    /**
+     * Runs auditMgT2ESystem, attaches the result to sys.auditResult (so callers — e.g.
+     * system_editor.js's Fill & Save, OW-3 — can react to failures without re-running the
+     * audit), and on failure logs a console warning plus pushes every strict [FAIL] to
+     * window.auditBacklog. Shared by the bottom-up and top-down orchestrators (OW-7) — was
+     * previously duplicated verbatim in both.
+     *
+     * @param {Object} sys    - system object to audit; mutated with sys.auditResult
+     * @param {string} hexId  - hex identifier, used in log/backlog messages
+     * @param {Object} options - forwarded to auditMgT2ESystem, e.g. { mode: 'bottom-up' }
+     * @returns {Object} the audit results (same object as sys.auditResult)
+     */
+    function runAndLog(sys, hexId, options) {
+        const results = auditMgT2ESystem(sys, options);
+        sys.auditResult = results;
+
+        if (!results.pass) {
+            const errorSummary = results.errors.map(e => `  • ${e.message}`).join('\n');
+            console.warn(`[MgT2E Auditor] System ${hexId} — ${results.errors.length} violation(s):\n${errorSummary}`);
+
+            // Action 6.3: Audit Persistence — push all strict [FAIL] to global backlog
+            if (typeof window !== 'undefined') {
+                window.auditBacklog = window.auditBacklog || [];
+                results.errors.forEach(err => {
+                    window.auditBacklog.push({
+                        hexId: hexId,
+                        orbitId: err.orbitId !== undefined ? err.orbitId : null,
+                        engine: "MgT2E",
+                        message: err.message || err
+                    });
+                });
+            }
+        }
+
+        return results;
+    }
+
     return {
-        auditMgT2ESystem
+        auditMgT2ESystem,
+        runAndLog
     };
 }));

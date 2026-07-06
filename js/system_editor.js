@@ -71,8 +71,8 @@ const SystemEditor = (() => {
 
     function _detectEngine(stateObj) {
         if (!stateObj) return null;
-        if (stateObj.aowSystem && stateObj.aowSystem.stars && stateObj.aowSystem.stars.length > 0)
-            return { raw: stateObj.aowSystem, engine: 'AoW' };
+        const aowDetected = _ENGINE_ADAPTERS.AoW.detect(stateObj);
+        if (aowDetected) return aowDetected;
         const mgt2eDetected = _ENGINE_ADAPTERS.MgT2E.detect(stateObj);
         if (mgt2eDetected) return mgt2eDetected;
         const ctDetected = _ENGINE_ADAPTERS.CT.detect(stateObj);
@@ -791,6 +791,85 @@ const SystemEditor = (() => {
                 return newSys;
             },
         },
+
+        // Per OW-9: AoW's actual generation logic (star-physics solving, hierarchy mapping,
+        // disk-worksheet synthesis) lives entirely in js/aow_seed_bridge.js, not here — this
+        // adapter stays thin, unlike CT/T5/RTT's write() which do their own field-locking inline.
+        AoW: {
+            detect(stateObj) {
+                if (stateObj.aowSystem && stateObj.aowSystem.stars && stateObj.aowSystem.stars.length > 0) {
+                    return { raw: stateObj.aowSystem, engine: 'AoW' };
+                }
+                return null;
+            },
+
+            readBodies(raw, starIdByIdx) {
+                const bodies = [];
+                const mwRef = raw.mainworld;
+                (raw.worlds || []).forEach(w => {
+                    if (!w || w.type === 'Empty') return;
+                    const isMainworld = _isMW(w, mwRef) || w.type === 'Mainworld';
+                    const rawType     = isMainworld ? 'World' : (w.type || '');
+                    const canon       = isMainworld ? 'World' : _canonType(rawType);
+                    const au          = w.au ?? w.orbitalRadius ?? w.distAU ?? (w.orbitId != null ? _orbitIdToAU(w.orbitId) : null);
+                    bodies.push({
+                        _id: _uid('body'), type: canon,
+                        ggType:        canon === 'Gas Giant' ? (w.ggType || _ggTypeFrom(rawType)) : null,
+                        name: w.name || '', uwp: w.uwp || null, au,
+                        orbitId:       w.orbitId ?? w.orbit ?? null,
+                        travelZone:    w.travelZone || w.travelCode || 'G',
+                        parentStarId:  starIdByIdx(w.parentStarIdx ?? 0),
+                        isMainworld,
+                        moons:         (w.moons || w.satellites || []).map(_buildMoon),
+                        _manualFields: w._manualFields ? [...w._manualFields] : [],
+                        _raw: w,
+                    });
+                });
+                return bodies;
+            },
+
+            // Deliberately thin: the actual field-locking (aowUwpLockFor/aowPhysSeed) happens
+            // inside AoWSeedBridge.synthesizeDiskWorksheets, which is what consumes seed.worlds —
+            // this just carries each working-copy body through with the fields that function and
+            // aow_bottomup_generator.js's Phase 1 star-physics resolution need: parentStarId
+            // (a star _id, not an index — synthesizeDiskWorksheets maps bodies to worksheets by
+            // matching this against each star's own _id), orbitId, au, _raw, _manualFields.
+            write(wc, starIdxById) {
+                const worlds = wc.bodies.map(b => ({
+                    _id: b._id,
+                    name: b.name || '',
+                    type: b.type, // editor vocabulary ('Gas Giant'/'Belt'/'World') — mapped to AoW's own planetType inside the bridge
+                    uwp: b.uwp || null,
+                    orbitId: b.orbitId != null ? b.orbitId : null,
+                    au: b.orbitId != null ? (_orbitIdToAU(b.orbitId) ?? b.au ?? 1.0) : (b.au ?? 1.0),
+                    parentStarId: b.parentStarId,
+                    isMainworld: !!b.isMainworld,
+                    moons: (b.moons || []).map(m => ({
+                        _id: m._id, name: m.name || '', uwp: m.uwp || null,
+                        isMainworld: !!m.isMainworld,
+                        _raw: m._raw, _manualFields: m._manualFields ? [...m._manualFields] : [],
+                    })),
+                    _raw: b._raw,
+                    _manualFields: b._manualFields ? [...b._manualFields] : [],
+                }));
+                return { worlds };
+            },
+
+            run(hexId, seedSys, stateObj) {
+                let newSys = null;
+                if (typeof window !== 'undefined' && window.AoWBottomUpGenerator) {
+                    newSys = window.AoWBottomUpGenerator.generateAoWSystemBottomUp(hexId, seedSys);
+                }
+                if (newSys) {
+                    _clearSystemData(stateObj);
+                    stateObj.aowSystem = newSys;
+                    stateObj.mgt2eData = newSys.mainworld || null;
+                    // AoW uses MgT2E's socio display fields (macro_orchestrator.js:1128)
+                    stateObj.mgtSocio  = newSys.mainworld || null;
+                }
+                return newSys;
+            },
+        },
     };
 
     // ── Build working copy from engine state ──────────────────────────────────
@@ -847,27 +926,6 @@ const SystemEditor = (() => {
 
         if (adapter) {
             bodies = adapter.readBodies(raw, _starIdByIdx);
-        } else if (engine === 'AoW') {
-            const mwRef = raw.mainworld;
-            (raw.worlds || []).forEach(w => {
-                if (!w || w.type === 'Empty') return;
-                const isMainworld = _isMW(w, mwRef) || w.type === 'Mainworld';
-                const rawType     = isMainworld ? 'World' : (w.type || '');
-                const canon       = isMainworld ? 'World' : _canonType(rawType);
-                const au          = w.au ?? w.orbitalRadius ?? w.distAU ?? (w.orbitId != null ? _orbitIdToAU(w.orbitId) : null);
-                bodies.push({
-                    _id: _uid('body'), type: canon,
-                    ggType:        canon === 'Gas Giant' ? (w.ggType || _ggTypeFrom(rawType)) : null,
-                    name: w.name || '', uwp: w.uwp || null, au,
-                    orbitId:       w.orbitId ?? w.orbit ?? null,
-                    travelZone:    w.travelZone || w.travelCode || 'G',
-                    parentStarId:  _starIdByIdx(w.parentStarIdx ?? 0),
-                    isMainworld,
-                    moons:         (w.moons || w.satellites || []).map(_buildMoon),
-                    _manualFields: w._manualFields ? [...w._manualFields] : [],
-                    _raw: w,
-                });
-            });
         }
 
         // Identify mainworldRef from isMainworld flags on bodies and moons
@@ -980,6 +1038,32 @@ const SystemEditor = (() => {
     function _addStar(separation, parentStarId) {
         separation   = separation   || 'Companion';
         parentStarId = parentStarId || (_workingCopy.stars[0] || {})._id;
+
+        // AoW design decision 3 (directives/project_manifest.md OW-9): restrict the shape at
+        // build time to the 5 hierarchies aow_seed_bridge.js's mapHierarchy() actually supports
+        // (Singleton/Binary/Trinary×2/Quaternary — always paired, max 4 stars), rather than
+        // silently building something it can't represent. 1-3 stars are always representable
+        // regardless of which existing star a new companion attaches to (both Trinary shapes are
+        // covered); only the 4th star is constrained — it must pair with the most recently added
+        // companion to form the Quaternary's second binary pair.
+        if (_workingCopy.engine === 'AoW') {
+            const companions = _workingCopy.stars.filter(s => s.role !== 'Primary');
+            if (_workingCopy.stars.length >= 4) {
+                _showWarn('Maximum Stars Reached',
+                    'AoW supports at most 4 stars, always in paired arrangements (a Quaternary system) — ' +
+                    'real multi-star systems beyond this are generally unstable. Remove a companion before adding another.',
+                    [{ label: 'OK', cls: 'btn-save', onClick: () => {} }]);
+                return;
+            }
+            if (companions.length === 2 && parentStarId !== companions[1]._id) {
+                _showWarn('Unsupported Star Arrangement',
+                    'A 4th star in an AoW system must pair with the most recently added companion, forming a ' +
+                    'second binary pair — use that companion\'s own "+Comp" button to add it.',
+                    [{ label: 'OK', cls: 'btn-save', onClick: () => {} }]);
+                return;
+            }
+        }
+
         const _orbitBySep = { Companion: 0.15, Close: 0.5, Near: 6.0, Far: 12.0 };
         _pushHistory();
         _workingCopy.stars.push({
@@ -2430,141 +2514,6 @@ const SystemEditor = (() => {
         const adapter = _ENGINE_ADAPTERS[engine];
         if (adapter) {
             Object.assign(seed, adapter.write(wc, starIdxById));
-        } else if (engine === 'AoW') {
-            // Build UWP lock fields for any body that already has a UWP set.
-            // Applied to both the current mainworld AND any body that was previously the
-            // mainworld (or otherwise has a generated UWP), so changing the mainworld
-            // designation does not re-roll the former mainworld's characteristics.
-            function _uwpLockFor(body) {
-                const raw = body._raw || {};
-                if (!body.uwp || !body._raw) return { fields: {}, mf: [] };
-                const fields = {};
-                const mf = [];
-                // Phase 1 physicals — size kept when !== undefined; no _manualFields needed
-                if (raw.size !== undefined) fields.size = raw.size;
-                // Phase 2 atm — engine checks _manualFields.includes('atmCode')
-                // Hex editor saves 'atm'; engine field is 'atmCode' — prefer edited value.
-                const atmVal = raw.atm !== undefined ? raw.atm : raw.atmCode;
-                if (atmVal !== undefined) { fields.atmCode = atmVal; mf.push('atmCode'); }
-                // Phase 2 hydro — engine checks _manualFields.includes('hydroCode')
-                const hydroVal = raw.hydro !== undefined ? raw.hydro : raw.hydroCode;
-                if (hydroVal !== undefined) { fields.hydroCode = hydroVal; mf.push('hydroCode'); }
-                // Phase 5 socio — generateMainworldUWP inherits via hasSocials field check;
-                // generateSubordinateSocial uses _manualFields, so add to mf for both paths.
-                if (raw.pop      !== undefined) { fields.pop      = raw.pop;     mf.push('pop'); }
-                if (raw.popCode  !== undefined) { fields.popCode  = raw.popCode; }
-                if (raw.gov      !== undefined) { fields.gov      = raw.gov;     mf.push('gov'); }
-                if (raw.govCode  !== undefined) { fields.govCode  = raw.govCode; }
-                if (raw.law      !== undefined) { fields.law      = raw.law;     mf.push('law'); }
-                if (raw.tl       !== undefined) { fields.tl       = raw.tl;      mf.push('tl'); }
-                if (raw.starport !== undefined) { fields.starport = raw.starport; mf.push('starport'); }
-                return { fields, mf };
-            }
-
-            // Fields seeded from _raw for all body types so generators skip re-rolling them.
-            // Guards already exist in calculateTerrestrialPhysical for density/diamKm/mass/gravity.
-            // 'size' is included so moons without a UWP (which bypass _uwpLockFor) still have
-            // their size seeded — the generatePhysicals guard checks body.size === undefined.
-            // meanTempK/highTempK/lowTempK are intentionally excluded: the generator's geothermal
-            // pass (line ~2376 in mgt2e_world_engine.js) uses w.meanTempK as the *solar-only* base
-            // and adds inherentK on top. If we seed meanTempK with the final post-geothermal value
-            // from _raw, the geothermal heat is applied twice. Let the generator re-derive all three
-            // from the seeded albedo, greenhouseFactor, and eccentricity instead.
-            const _PHYS_FIELDS = [
-                'size',
-                'siderealHours', 'axialTilt', 'tidallyLocked', 'solarDayHours',
-                'eccentricity',
-                'albedo', 'greenhouseFactor',
-                'density', 'diamKm', 'mass', 'gravity', 'composition',
-            ];
-            function _physSeed(raw) {
-                const fields = {}; const mf = [];
-                _PHYS_FIELDS.forEach(f => { if (raw[f] !== undefined) { fields[f] = raw[f]; mf.push(f); } });
-                return { fields, mf };
-            }
-
-            // Extended Socioeconomics (Ix, RU, GWP, WTN, IR, DR, and all profile strings) is
-            // expensive to hand-tune and fully re-rolled by mgt2e_socio_engine.js on every
-            // generation pass. An unrelated System Editor edit (moving an orbit, adding a gas
-            // giant) would otherwise regenerate the whole system and silently reroll all of it.
-            // Snapshot the mainworld's already-generated values here so the socio engine can
-            // carry them forward unchanged; the user can still force a fresh roll at any time
-            // via the existing right-click "Generate Socioeconomic" menu action, which operates
-            // directly on stateObj.mgtSystem and never sees this snapshot.
-            const _EXT_SOCIO_FIELDS = [
-                'pValue', 'totalWorldPop', 'pcr', 'urbanPercent', 'totalUrbanPop',
-                'majorCities', 'totalMajorCityPop', 'govProfile', 'factions', 'factionsData',
-                'lawProfile', 'techProfile', 'culturalProfile', 'culturalQuirks',
-                'economicProfile', 'starportProfile', 'militaryProfile', 'judicialSystemProfile',
-                'Im', 'ecoR', 'ecoL', 'ecoI', 'ecoE', 'RU', 'pcGWP', 'WTN', 'IR', 'DR',
-                'resourceRating',
-            ];
-            function _extSocioSeedFor(raw) {
-                if (!raw || raw.RU === undefined) return null;
-                const snap = {};
-                _EXT_SOCIO_FIELDS.forEach(f => { if (raw[f] !== undefined) snap[f] = raw[f]; });
-                return snap;
-            }
-
-            seed.worlds = wc.bodies.map(b => {
-                const parentStarIdx = starIdxById[b.parentStarId] ?? 0;
-                const engType = b.isMainworld   ? 'Mainworld'
-                    : b.type === 'Gas Giant'    ? 'Gas Giant'
-                    : b.type === 'Belt'         ? 'Planetoid Belt'
-                    : 'Terrestrial Planet';
-                const { fields: uwpLock, mf: extraMF } = _uwpLockFor(b);
-                // Gas Giants: seed physical properties so sizeGasGiantBody preserves
-                // diameter/mass and the Hill Sphere stays stable across Preview.
-                const ggRaw = (b.type === 'Gas Giant' && b._raw) ? b._raw : null;
-                const ggPhysFields = ggRaw ? {
-                    ...(ggRaw.diamTerra !== undefined && { diamTerra: ggRaw.diamTerra }),
-                    ...(ggRaw.diamKm    !== undefined && { diamKm:    ggRaw.diamKm    }),
-                    ...(ggRaw.mass      !== undefined && { mass:      ggRaw.mass      }),
-                    ...(ggRaw.gravity   !== undefined && { gravity:   ggRaw.gravity   }),
-                    ...(ggRaw.density   !== undefined && { density:   ggRaw.density   }),
-                } : {};
-                const ggPhysMF = ggRaw
-                    ? ['diamTerra', 'mass', 'gravity', 'density'].filter(f => ggRaw[f] != null)
-                    : [];
-                // All bodies: seed rotation/thermal so generateRotationalDynamics skips re-rolls.
-                const { fields: rotFields, mf: rotMF } = _physSeed(b._raw || {});
-                return _applyUwpSeed({
-                    _id:           b._id,
-                    type:          engType,
-                    ggType:        b.ggType  || null,
-                    name:          b.name    || '',
-                    uwp:           b.uwp     || null,
-                    ...uwpLock,
-                    ...rotFields,
-                    ...ggPhysFields,
-                    orbitId:       b.orbitId != null ? b.orbitId : null,
-                    au:            b.orbitId != null ? (_orbitIdToAU(b.orbitId) ?? b.au ?? 1.0) : (b.au ?? 1.0),
-                    orbitalRadius: b.orbitId != null ? (_orbitIdToAU(b.orbitId) ?? b.au ?? 1.0) : (b.au ?? 1.0),
-                    parentStarIdx,
-                    travelZone:    _normTz(b.travelZone),
-                    _extSocioFrozen: _extSocioSeedFor(b._raw),
-                    moons: (b.moons || []).map(m => {
-                        const { fields: mUwpLock, mf: mExtraMF } = _uwpLockFor(m);
-                        const { fields: mRotFields, mf: mRotMF } = _physSeed(m._raw || {});
-                        return _applyUwpSeed({
-                            _id:          m._id,
-                            type:         m.isMainworld ? 'Mainworld' : 'Satellite',
-                            name:         m.name || '',
-                            uwp:          m.uwp  || null,
-                            ...mUwpLock,
-                            ...mRotFields,
-                            isMainworld:  !!m.isMainworld,
-                            pd:           m.pd,
-                            pos:          m.pos,
-                            eccentricity: m.eccentricity,
-                            retrograde:   m.retrograde,
-                            _extSocioFrozen: _extSocioSeedFor(m._raw),
-                            _manualFields: [...(m._manualFields || []), ...mExtraMF, ...mRotMF],
-                        }, m._uwpSeed);
-                    }),
-                    _manualFields: [...(b._manualFields || []), ...extraMF, ...rotMF, ...ggPhysMF],
-                }, b._uwpSeed);
-            });
         }
 
         return seed;
@@ -2586,22 +2535,7 @@ const SystemEditor = (() => {
     function _runGenerator(hexId, engine, seedSys, stateObj, workingCopy) {
         const adapter = _ENGINE_ADAPTERS[engine];
         if (adapter) return adapter.run(hexId, seedSys, stateObj);
-
-        let newSys = null;
-        if (engine === 'AoW') {
-            const genFn = (typeof window !== 'undefined' && window.AoWBottomUpGenerator)
-                ? window.AoWBottomUpGenerator.generateAoWSystemBottomUp
-                : (typeof generateAoWSystemBottomUp === 'function' ? generateAoWSystemBottomUp : null);
-            if (genFn) newSys = genFn(hexId, seedSys);
-            if (newSys) {
-                _clearSystemData(stateObj);
-                stateObj.aowSystem = newSys;
-                stateObj.mgt2eData = newSys.mainworld || null;
-                // AoW uses MgT2E's socio display fields (macro_orchestrator.js:1128)
-                stateObj.mgtSocio  = newSys.mainworld || null;
-            }
-        }
-        return newSys;
+        return null;
     }
 
     // Restores the pre-preview hexStates snapshot, redraws, and refreshes the viewer.
@@ -2891,12 +2825,40 @@ const SystemEditor = (() => {
         const result = _generateAndCommit('Fill & Save');
         if (!result) return;
 
-        // OW-3: UWP Auditor gate. Not every engine's generator populates auditResult (only
-        // MgT2E does today — see mgt2e_bottomup_generator.js), so this is a no-op for engines
-        // that haven't been wired up yet. The system is already committed to hexStates by this
-        // point (_generateAndCommit just ran), so "Go Back & Fix" can't un-commit it — it just
-        // leaves the editor open (same as dismissing any other warning) so the user can keep
-        // adjusting bodies and re-run Fill & Save, instead of closing over a failing result.
+        // AoW age-conflict gate (design decision 2, see directives/project_manifest.md OW-9):
+        // aow_seed_bridge.js's reconcileSystemAge sets sys.ageConflict when manually-chosen
+        // spectral types across stars imply system-age windows with no overlap — the system was
+        // still generated (using a best-effort compromise age), so this is a warn-and-proceed,
+        // same shape as the OW-3 audit gate below, just checked first since an age conflict is
+        // upstream of everything else the audit might also flag.
+        const ageConflict = result.newSys && result.newSys.ageConflict;
+        if (ageConflict) {
+            const starList = (ageConflict.stars || [])
+                .map(s => `${s.label}: valid age ${s.minAge.toFixed(2)}-${s.maxAge.toFixed(2)} Gyr`)
+                .join('; ');
+            _showWarn('Star Ages Conflict',
+                `These stars' chosen spectral types imply system ages that don't overlap (${starList}). ` +
+                `The system was generated using a best-effort compromise age. You can proceed anyway, ` +
+                `or go back and adjust one of the stars' spectral types.`,
+                [
+                    { label: 'Proceed Anyway', cls: 'btn-cancel', onClick: () => _checkAuditThenFinish(hexId, result) },
+                    { label: 'Go Back & Fix',  cls: 'btn-save',   onClick: () => {} },
+                ]
+            );
+            return;
+        }
+
+        _checkAuditThenFinish(hexId, result);
+    }
+
+    // OW-3: UWP Auditor gate. Not every engine's generator populates auditResult (only
+    // MgT2E/CT/T5/AoW do today), so this is a no-op for engines that haven't been wired up yet.
+    // The system is already committed to hexStates by this point (_generateAndCommit already
+    // ran), so "Go Back & Fix" can't un-commit it — it just leaves the editor open (same as
+    // dismissing any other warning) so the user can keep adjusting bodies and re-run Fill & Save,
+    // instead of closing over a failing result. Split out from _fillAndSave() so the age-conflict
+    // gate above it can defer to this same check after "Proceed Anyway".
+    function _checkAuditThenFinish(hexId, result) {
         const audit = result.newSys && result.newSys.auditResult;
         if (audit && audit.pass === false) {
             const errCount = (audit.errors || []).length;
@@ -2911,7 +2873,6 @@ const SystemEditor = (() => {
             );
             return;
         }
-
         _finishFillAndSave(hexId);
     }
 

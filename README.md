@@ -72,6 +72,10 @@ Want to replace any of these sectors with your own file?
 7. **System Editor (RTT):** User-set values (world classification, size, atmosphere, hydrographics, population, government, law level, starport, and tech level) are now preserved on Fill & Save instead of being silently rerolled
 8. **System Editor (RTT):** Fill & Save now runs the UWP Auditor for RTT systems too, matching the same warning-and-choice behavior already available for Mongoose, Classic Traveller, and Traveller 5
 9. **System Editor (RTT):** Fixed a bug where creating a new RTT system and adding any body would fail to generate when previewed or saved
+10. **System Editor (AoW):** Architect of Worlds systems can now be created and edited in the System Editor, matching Mongoose, Classic Traveller, Traveller 5, and RTT — add, remove, and edit stars, worlds, gas giants, belts, and moons, then Fill & Save to regenerate
+11. **System Editor (AoW):** User-set values are now preserved on Fill & Save instead of being silently rerolled, and Fill & Save now runs the UWP Auditor for AoW systems too
+12. **System Editor (AoW):** Multi-star systems with conflicting stellar ages (e.g. a young star with a white dwarf companion) now show a warning instead of silently generating an inconsistent result
+13. **System Editor (AoW):** Fixed a bug where adding any body to a new AoW system would fail to generate when previewed or saved
 
 ### [v0.16.0.6] - 2026-07-04
 1. **System Editor:** Unified the Fill & Save and Preview commit logic into a single internal function, removing duplicated code that could drift out of sync between the two

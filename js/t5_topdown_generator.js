@@ -310,6 +310,7 @@
         const otherTerrTotal = (hasSeedWorlds && !allowAddBodies) ? 0 : _roll2D(); // Inventory = MW + GG + Belt + 2D.
 
         const hzOrbit = getStarHZ(primary);
+        sys.hzOrbit = hzOrbit; // star-physics HZ orbit, independent of mainworld placement — read by system_viewer.js
         const hzResult = generateHZAndClimate(primary.type);
 
         // PHASE 1: THE ANCHOR (Mainworld)

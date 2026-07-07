@@ -996,15 +996,15 @@ function populateEditorAccordions(stateObj) {
                 html += `<details open>`;
                 html += `<summary>${starIdx === 0 ? 'Primary' : (star.role || 'Companion')} - ${star.name} <span class="sys-title-info">Star</span></summary>`;
                 html += `<div class="system-node">`;
-                html += `<div class="system-stats">`;
-                html += `<span>Type: ${_ctStarText(star, 'type', starIdx)}</span>`;
-                html += `<span>Size: ${_ctStarText(star, 'size', starIdx)}</span>`;
-                html += `<span>Mass: ${_ctStarNum(star, 'mass', starIdx, 0, 200)} M☉</span>`;
-                html += `<span>Lum: ${_ctStarNum(star, 'luminosity', starIdx, 0, 1000000)} L☉</span>`;
+                html += `<div class="system-stats-lv">`;
+                html += `<span class="stat-label">Type</span><span class="stat-value">${_ctStarText(star, 'type', starIdx)}</span>`;
+                html += `<span class="stat-label">Size</span><span class="stat-value">${_ctStarText(star, 'size', starIdx)}</span>`;
+                html += `<span class="stat-label">Mass</span><span class="stat-value">${_ctStarNum(star, 'mass', starIdx, 0, 200)} M☉</span>`;
+                html += `<span class="stat-label">Lum</span><span class="stat-value">${_ctStarNum(star, 'luminosity', starIdx, 0, 1000000)} L☉</span>`;
                 if (isCompanion) {
                     const compAU = _ctCompAU(star);
-                    html += `<span>Distance: <strong>${compAU.toFixed(3)} AU</strong></span>`;
-                    if (star.orbitLabel) html += `<span>Orbit: <strong>${star.orbitLabel}</strong></span>`;
+                    html += `<span class="stat-label">Distance</span><span class="stat-value"><strong>${compAU.toFixed(3)} AU</strong></span>`;
+                    if (star.orbitLabel) html += `<span class="stat-label">Orbit</span><span class="stat-value"><strong>${star.orbitLabel}</strong></span>`;
                 }
                 html += `</div>`;
 
@@ -1088,17 +1088,17 @@ function populateEditorAccordions(stateObj) {
                             const zColor = mwBase.travelZone === 'Red' ? '#ff0000' : '#ffcc00';
                             html += `<div class="system-stats-full" style="color: ${zColor}; border-color: ${zColor}; margin-bottom: 8px;">Caution: ${mwBase.travelZone} Zone</div>`;
                         }
-                        html += `<div class="system-stats">`;
+                        html += `<div class="system-stats-lv">`;
 
-                        html += `<span>Orbit: <strong>${body.isCaptured ? o.orbit.toFixed(1) : o.orbit}</strong></span>`;
-                        html += `<span>Distance (AU): ${_ctNum(w, 'distAU', o.orbit, body.isCaptured, -1, 0, 1000)}</span>`;
-                        html += `<span>Year (yr): ${_ctNum(w, 'orbitalPeriod', o.orbit, body.isCaptured, -1, 0, 100000)}</span>`;
-                        html += `<span>Diameter (km): ${_ctNum(w, 'diamKm', o.orbit, body.isCaptured, -1, 0, 200000)}</span>`;
-                        html += `<span>Gravity (G): ${_ctNum(w, 'gravity', o.orbit, body.isCaptured, -1, 0, 100)}</span>`;
-                        html += `<span>Mass (M⊕): ${_ctNum(w, 'mass', o.orbit, body.isCaptured, -1, 0, 10000)}</span>`;
-                        html += `<span>Temp (K): ${_ctNum(w, 'temperature', o.orbit, body.isCaptured, -1, 0, 10000)}</span>`;
-                        html += `<span>Day: ${_ctText(w, 'rotationPeriod', o.orbit, body.isCaptured, -1)}</span>`;
-                        html += `<span>Tilt (°): ${_ctNum(w, 'axialTilt', o.orbit, body.isCaptured, -1, 0, 180)}</span>`;
+                        html += `<span class="stat-label">Orbit</span><span class="stat-value"><strong>${body.isCaptured ? o.orbit.toFixed(1) : o.orbit}</strong></span>`;
+                        html += `<span class="stat-label">Distance (AU)</span><span class="stat-value">${_ctNum(w, 'distAU', o.orbit, body.isCaptured, -1, 0, 1000)}</span>`;
+                        html += `<span class="stat-label">Year (yr)</span><span class="stat-value">${_ctNum(w, 'orbitalPeriod', o.orbit, body.isCaptured, -1, 0, 100000)}</span>`;
+                        html += `<span class="stat-label">Diameter (km)</span><span class="stat-value">${_ctNum(w, 'diamKm', o.orbit, body.isCaptured, -1, 0, 200000)}</span>`;
+                        html += `<span class="stat-label">Gravity (G)</span><span class="stat-value">${_ctNum(w, 'gravity', o.orbit, body.isCaptured, -1, 0, 100)}</span>`;
+                        html += `<span class="stat-label">Mass (M⊕)</span><span class="stat-value">${_ctNum(w, 'mass', o.orbit, body.isCaptured, -1, 0, 10000)}</span>`;
+                        html += `<span class="stat-label">Temp (K)</span><span class="stat-value">${_ctNum(w, 'temperature', o.orbit, body.isCaptured, -1, 0, 10000)}</span>`;
+                        html += `<span class="stat-label">Day</span><span class="stat-value">${_ctText(w, 'rotationPeriod', o.orbit, body.isCaptured, -1)}</span>`;
+                        html += `<span class="stat-label">Tilt (°)</span><span class="stat-value">${_ctNum(w, 'axialTilt', o.orbit, body.isCaptured, -1, 0, 180)}</span>`;
 
                         html += `</div>`;
 
@@ -1147,7 +1147,7 @@ function populateEditorAccordions(stateObj) {
                                 const _ctSatNCls  = `rtt-field-input rtt-name-input${sat.type === 'Mainworld' ? ' rtt-name-mainworld' : ''}${_ctMc(sat, 'name')}`;
                                 const _ctSatNAttr = `data-ct-field="name" data-ct-orbit="${o.orbit}" data-ct-captured="${body.isCaptured}" data-ct-satidx="${satIdx}"`;
                                 html += `<details>`;
-                                html += `<summary ${satSummaryStyle}><input type="text" class="${_ctSatNCls}" ${_ctSatNAttr} value="${_ctSatNVal}" placeholder="${_ctSatNPh}" onclick="event.stopPropagation()" style="max-width:160px;"> Satellite ${satIdx + 1} <span class="sys-title-info">${satType} | ${(sat.pd !== undefined && sat.pd !== null) ? sat.pd : '?'}r | ${satUwp}${satZoneLabel}</span></summary>`;
+                                html += `<summary ${satSummaryStyle}><input type="text" class="${_ctSatNCls}" ${_ctSatNAttr} value="${_ctSatNVal}" placeholder="${_ctSatNPh}" onclick="event.stopPropagation()" style="max-width:160px;"> <span class="sys-title-info">${satType} | ${(sat.pd !== undefined && sat.pd !== null) ? sat.pd : '?'}r | ${satUwp}${satZoneLabel}</span></summary>`;
                                 const _isSatMain = sat.type === 'Mainworld';
                                 html += `<div class="system-node">`;
 
@@ -1159,14 +1159,14 @@ function populateEditorAccordions(stateObj) {
                                         ['starport','size','atm','hydro','pop','gov','law','tl'].some(f => isManual(sat, f));
                                     html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <input type="text" class="rtt-field-input${_satUwpManual ? ' is-manual' : ''}" data-ct-field="uwp" data-ct-orbit="${o.orbit}" data-ct-captured="${body.isCaptured}" data-ct-satidx="${satIdx}" value="${satUwp.replace(/"/g, '&quot;')}" style="color: ${satLabelColor}; max-width:140px; font-weight:bold;"></div>`;
                                 }
-                                html += `<div class="system-stats">`;
+                                html += `<div class="system-stats-lv">`;
 
-                                html += `<span>Distance (AU): ${_ctNum(sat, 'distAU', o.orbit, body.isCaptured, satIdx, 0, 1000)}</span>`;
-                                html += `<span>Gravity (G): ${_ctNum(sat, 'gravity', o.orbit, body.isCaptured, satIdx, 0, 100)}</span>`;
-                                html += `<span>Mass (M⊕): ${_ctNum(sat, 'mass', o.orbit, body.isCaptured, satIdx, 0, 10000)}</span>`;
-                                html += `<span>Temp (K): ${_ctNum(sat, 'temperature', o.orbit, body.isCaptured, satIdx, 0, 10000)}</span>`;
-                                html += `<span>Day: ${_ctText(sat, 'rotationPeriod', o.orbit, body.isCaptured, satIdx)}</span>`;
-                                html += `<span>Tilt (°): ${_ctNum(sat, 'axialTilt', o.orbit, body.isCaptured, satIdx, 0, 180)}</span>`;
+                                html += `<span class="stat-label">Distance (AU)</span><span class="stat-value">${_ctNum(sat, 'distAU', o.orbit, body.isCaptured, satIdx, 0, 1000)}</span>`;
+                                html += `<span class="stat-label">Gravity (G)</span><span class="stat-value">${_ctNum(sat, 'gravity', o.orbit, body.isCaptured, satIdx, 0, 100)}</span>`;
+                                html += `<span class="stat-label">Mass (M⊕)</span><span class="stat-value">${_ctNum(sat, 'mass', o.orbit, body.isCaptured, satIdx, 0, 10000)}</span>`;
+                                html += `<span class="stat-label">Temp (K)</span><span class="stat-value">${_ctNum(sat, 'temperature', o.orbit, body.isCaptured, satIdx, 0, 10000)}</span>`;
+                                html += `<span class="stat-label">Day</span><span class="stat-value">${_ctText(sat, 'rotationPeriod', o.orbit, body.isCaptured, satIdx)}</span>`;
+                                html += `<span class="stat-label">Tilt (°)</span><span class="stat-value">${_ctNum(sat, 'axialTilt', o.orbit, body.isCaptured, satIdx, 0, 180)}</span>`;
 
                                 html += `</div>`;
 
@@ -3313,7 +3313,18 @@ function saveHexEditorChanges() {
                 const orbitEntry = sys.orbits.find(o => o.orbit === orbitVal);
                 body = orbitEntry ? orbitEntry.contents : null;
             }
-            if (satIdx >= 0 && body) body = body.satellites[satIdx];
+            // satIdx is assigned during render by iterating a copy of body.satellites
+            // sorted by pd (closest-first — see the sortedSats build a few hundred lines up),
+            // not the raw stored array order. Resolving via body.satellites[satIdx] directly
+            // would silently edit the wrong physical moon whenever the raw array's order
+            // doesn't already match pd order (e.g. an older save from before CT's generator
+            // started sorting satellites by pd on every generation pass). Re-deriving the
+            // same sorted view here keeps this lookup consistent with what the user actually
+            // clicked on.
+            if (satIdx >= 0 && body && body.satellites) {
+                const sortedSats = [...body.satellites].sort((a, b) => (a.pd || 0) - (b.pd || 0));
+                body = sortedSats[satIdx] || null;
+            }
         }
         if (!body) return;
 

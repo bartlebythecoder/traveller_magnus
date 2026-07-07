@@ -166,11 +166,20 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
             slot = CT_StellarEngine.spawnFailsafeOrbit(sys.orbits);
         }
         if (slot) {
+            // Diameter placeholder — see the matching comment in ct_bottomup_generator.js's
+            // Step 2G Gas Giant placement: CT has no Book 6 gas giant diameter table, so this
+            // borrows MgT2E's dice-rolled-diameter × 12800 km/unit convention until a real
+            // source is found. Without it, the orrery's moon-orbit-period calc fell back to
+            // Earth's diameter for every gas giant, making its moons orbit far too fast.
+            const ggDiamKm = gg.size === 'Large'
+                ? (tRoll2D('Placeholder GG Diameter (Large, 2D+6)') + 6) * 12800
+                : (Math.ceil(tRoll1D('Placeholder GG Diameter (Small) D3') / 2) + Math.ceil(tRoll1D('Placeholder GG Diameter (Small) D3') / 2)) * 12800;
             slot.contents = {
                 type: 'Gas Giant',
                 size: gg.size,
                 gravity: (gg.size === 'Large' ? 2.5 : 0.8),
-                mass: (gg.size === 'Large' ? 300 : 50)
+                mass: (gg.size === 'Large' ? 300 : 50),
+                diamKm: ggDiamKm
             };
         }
     });
@@ -355,7 +364,9 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
     // Pass 1: Physical Parameters for top-level bodies (Terrestrial/Captured/GG)
     if (systemWalker) {
         systemWalker(sys, (body, orbit) => {
-            body.distAU = orbitalAU[Math.min(Math.floor(orbit), orbitalAU.length - 1)] || 1.0;
+            body.distAU = (typeof CT_StellarEngine !== 'undefined')
+                ? CT_StellarEngine.interpolateOrbitAU(orbitalAU, orbit)
+                : (orbitalAU[Math.min(Math.floor(orbit), orbitalAU.length - 1)] || 1.0);
 
             if (body.type === 'Mainworld') {
                 if (derivedPhysicsProcessor) derivedPhysicsProcessor(body, primaryStar);

@@ -519,61 +519,75 @@ function finalizeSubordinateSocial(world, mwRef) {
     }
 
     // Subordinate Govt
-    if (mwRef.gov === 6) {
+    if (_ctFieldIsManual(world, 'gov')) {
+        tSkip('Government (Already Generated)');
+        tResult('Government Code', world.gov, 'CT 3.1: Social Stats');
+    } else if (mwRef.gov === 6) {
         world.gov = 6;
+        tResult('Government Code', world.gov, 'CT 3.1: Social Stats');
     } else {
         let govDM = 0;
         if (mwRef.gov >= 7) govDM = 2;
         if (govDM !== 0) tDM('Mainworld Gov 7+', govDM);
         let govRoll = (typeof tRoll1D !== 'undefined' ? tRoll1D('Subordinate Gov') : 3);
         world.gov = (govRoll + govDM >= 5) ? 6 : (govRoll + govDM);
-    }
-
-    if (typeof tResult !== 'undefined') {
         tResult('Government Code', world.gov, 'CT 3.1: Social Stats');
     }
 
     // Subordinate Law: 1D-3 + MW Law
-    tDM('Mainworld Law', mwRef.law);
-    tDM('Standard Law', -3);
-    let lawRoll = (typeof tRoll1D !== 'undefined' ? tRoll1D('Subordinate Law') : 3);
-    world.law = Math.max(0, Math.min(15, lawRoll - 3 + mwRef.law));
-
-    if (typeof tResult !== 'undefined') {
+    if (_ctFieldIsManual(world, 'law')) {
+        tSkip('Law Level (Already Generated)');
+        tResult('Law Level Code', world.law, 'CT 3.1: Social Stats');
+    } else {
+        tDM('Mainworld Law', mwRef.law);
+        tDM('Standard Law', -3);
+        let lawRoll = (typeof tRoll1D !== 'undefined' ? tRoll1D('Subordinate Law') : 3);
+        world.law = Math.max(0, Math.min(15, lawRoll - 3 + mwRef.law));
         tResult('Law Level Code', world.law, 'CT 3.1: Social Stats');
     }
 
     // Spaceport
-    let spDM = 0;
-    if (world.pop >= 6) spDM = 2;
-    else if (world.pop === 1) spDM = -2;
-    if (spDM !== 0) tDM(`Population ${world.pop}`, spDM);
-    let spRoll = (typeof tRoll1D !== 'undefined' ? tRoll1D('Subordinate Spaceport') : 3);
-    let finalSP = spRoll + spDM;
-    if (finalSP <= 2) { world.spaceport = 'Y'; world.starport = 'Y'; }
-    else if (finalSP === 3) { world.spaceport = 'H'; world.starport = 'H'; }
-    else if (finalSP <= 5) { world.spaceport = 'G'; world.starport = 'G'; }
-    else { world.spaceport = 'F'; world.starport = 'F'; }
-
-    // TL Baseline (Rule: MW TL - 1, or equal if special facility present)
-    const hasSpecialFacility = (world.militaryBase || world.researchBase ||
-        (world.facilities && (world.facilities.includes('Research Laboratory') ||
-            world.facilities.includes('Military Base'))));
-
-    if (hasSpecialFacility) {
-        world.tl = mwRef.tl;
-        if (typeof tResult !== 'undefined') tResult('TL (Facility Bonus)', world.tl);
+    if (_ctFieldIsManual(world, 'starport')) {
+        tSkip('Starport (Already Generated)');
+        world.spaceport = world.starport;
+        tResult('Starport Class', world.starport, 'CT 3.1: Social Stats');
     } else {
-        world.tl = Math.max(0, mwRef.tl - 1);
-        if (typeof tResult !== 'undefined') tResult('TL (Baseline MW-1)', world.tl);
+        let spDM = 0;
+        if (world.pop >= 6) spDM = 2;
+        else if (world.pop === 1) spDM = -2;
+        if (spDM !== 0) tDM(`Population ${world.pop}`, spDM);
+        let spRoll = (typeof tRoll1D !== 'undefined' ? tRoll1D('Subordinate Spaceport') : 3);
+        let finalSP = spRoll + spDM;
+        if (finalSP <= 2) { world.spaceport = 'Y'; world.starport = 'Y'; }
+        else if (finalSP === 3) { world.spaceport = 'H'; world.starport = 'H'; }
+        else if (finalSP <= 5) { world.spaceport = 'G'; world.starport = 'G'; }
+        else { world.spaceport = 'F'; world.starport = 'F'; }
     }
 
-    // Book 6 Environmental Floor (Corrosive, Vacuum, etc. requires TL 7)
-    if (world.tl < 7 && ![5, 6, 8].includes(world.atm)) {
-        if (typeof tOverride !== 'undefined') {
-            tOverride('TL Environmental Floor', world.tl, 7, 'Hostile atmosphere requires life-support tech');
+    // TL Baseline (Rule: MW TL - 1, or equal if special facility present)
+    if (_ctFieldIsManual(world, 'tl')) {
+        tSkip('Tech Level (Already Generated)');
+        tResult('Tech Level Code', world.tl, 'CT 3.1: Social Stats');
+    } else {
+        const hasSpecialFacility = (world.militaryBase || world.researchBase ||
+            (world.facilities && (world.facilities.includes('Research Laboratory') ||
+                world.facilities.includes('Military Base'))));
+
+        if (hasSpecialFacility) {
+            world.tl = mwRef.tl;
+            if (typeof tResult !== 'undefined') tResult('TL (Facility Bonus)', world.tl);
+        } else {
+            world.tl = Math.max(0, mwRef.tl - 1);
+            if (typeof tResult !== 'undefined') tResult('TL (Baseline MW-1)', world.tl);
         }
-        world.tl = 7;
+
+        // Book 6 Environmental Floor (Corrosive, Vacuum, etc. requires TL 7)
+        if (world.tl < 7 && ![5, 6, 8].includes(world.atm)) {
+            if (typeof tOverride !== 'undefined') {
+                tOverride('TL Environmental Floor', world.tl, 7, 'Hostile atmosphere requires life-support tech');
+            }
+            world.tl = 7;
+        }
     }
 
     // Trade Codes

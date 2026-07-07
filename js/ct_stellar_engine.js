@@ -657,10 +657,24 @@
             return { orbit, type: valid ? 'Empty' : 'Ghost Empty' };
         });
 
-        const capturedPlanets = (skeleton.capturedPlanets || []).map(cap => ({
-            ...cap,
-            type: 'Captured'   // always preserved — captured planets ignore destruction rules
-        }));
+        // Captured planets ignore the inner/outer zone-destruction rules (they survive
+        // orbits that would vaporize a normal body) — but a companion star still
+        // physically occupies its own orbit slot, so an exact numeric coincidence
+        // (0% deviation roll landing on the star's integer orbit) must be nudged off it.
+        const capturedPlanets = (skeleton.capturedPlanets || []).map(cap => {
+            let orbit = cap.orbit;
+            const collidesWithStar = stars.some(star =>
+                star.role !== 'Primary' && typeof star.orbit === 'number' && star.orbit === orbit
+            );
+            if (collidesWithStar) {
+                const adjusted = Number((orbit + 0.1).toFixed(1));
+                if (typeof tResult !== 'undefined') {
+                    tResult(`Captured Planet Orbit ${orbit}`, `Collides with companion star slot — shifted to ${adjusted}`, 'CT 1.3: Orbital Allocation');
+                }
+                orbit = adjusted;
+            }
+            return { ...cap, orbit, type: 'Captured' };
+        });
 
         return { emptyOrbits, capturedPlanets };
     }
@@ -678,17 +692,39 @@
             if (star.role === 'Primary') continue;
             if (typeof star.orbit !== 'number') continue;
 
-            if (orbitNumber === star.orbit) continue; // companion's own slot — always valid
-
             if (orbitNumber < star.orbit) {
                 // Inner Rule: valid only if <= floor(orbit / 2)
                 if (orbitNumber > Math.floor(star.orbit / 2)) return false;
             } else {
-                // Outer Rule: valid only if >= orbit + 2
+                // Outer Rule: valid only if >= orbit + 2 (also destroys the companion's
+                // own orbit number itself, orbitNumber === star.orbit, since that always
+                // fails this check — a planet can't share the companion's exact slot)
                 if (orbitNumber < star.orbit + 2) return false;
             }
         }
         return true;
+    }
+
+    /**
+     * Interpolates an AU distance for a fractional orbit number (e.g. a Captured
+     * Planet's baseline+deviation orbit), mirroring the viewer's _orbitToAU so
+     * generated distances agree with how the orrery positions companion stars.
+     * A plain `table[Math.floor(orbit)]` lookup discards the fractional part,
+     * which collapses a Captured Planet onto the same radius as whatever
+     * integer-orbit body (including a companion star) sits at that floor.
+     *
+     * @param {Array}  table  - orbitalAU-style table (AU per integer orbit index).
+     * @param {number} orbit  - Possibly-fractional orbit number.
+     * @returns {number} Interpolated AU distance.
+     */
+    function interpolateOrbitAU(table, orbit) {
+        if (!table || table.length === 0) return 1.0;
+        const idx  = Math.max(0, Math.floor(orbit));
+        const frac = orbit - Math.floor(orbit);
+        const max  = table.length - 1;
+        const lo   = table[Math.min(idx, max)];
+        const hi   = idx < max ? table[idx + 1] : lo;
+        return lo + frac * (hi - lo);
     }
 
     return {
@@ -701,7 +737,8 @@
         applySizeCorrections,
         isOrbitValid,
         resolveAnomalies,
-        spawnFailsafeOrbit
+        spawnFailsafeOrbit,
+        interpolateOrbitAU
     };
 
 }));

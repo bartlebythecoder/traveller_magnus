@@ -334,12 +334,41 @@ const SystemViewer = (() => {
             if (w && w.type !== 'Empty') worlds.push(_normCTWorld(w, w.distAU || 0, mw));
         });
 
-        // HZ centre: use mainworld distAU, or first H-zone slot
-        let hzAU = mw && mw.distAU ? mw.distAU : null;
-        if (!hzAU) {
-            const hSlot = (sys.orbits || []).find(o => o.zone === 'H');
-            hzAU = hSlot ? (hSlot.distAU || 1.0) : 1.0;
+        // HZ centre: prefer sys.hzco — the orbit number CT's generator actually resolved and
+        // used for zone classification/placement (ct_bottomup_generator.js's
+        // generateSystemOrbits), which respects any System Editor override. Falling back to a
+        // live zoneHTable lookup here (as this code used to do unconditionally) meant an
+        // edited system's HZ override never moved the ring, since this recomputed straight from
+        // the primary's size/type every time regardless of what the generator/editor resolved.
+        // sys.hzco is only ever absent (undefined, not null) for systems that predate this field
+        // — chiefly Top-Down-generated ones (ct_topdown_generator.js doesn't set it) — so those
+        // still fall back to the direct table lookup below.
+        const primary = (sys.stars || [])[0];
+        let hzAU = null;
+        let hzKnownAbsent = false;
+        if (sys.hzco !== undefined) {
+            if (sys.hzco != null) hzAU = _orbitToAU(sys.hzco);
+            // sys.hzco === null means the generator resolved no HZ (RAW ZONE_H_TABLE negative,
+            // and no override forced one) — same "known absent" semantics as the table lookup
+            // below, not a missing value to fall back from.
+            else hzKnownAbsent = true;
+        } else if (primary && typeof zoneHTable !== 'undefined' && zoneHTable[primary.size]) {
+            const hzOrbitNum = zoneHTable[primary.size][`${primary.type}${primary.decimal}`];
+            if (hzOrbitNum != null) {
+                if (hzOrbitNum >= 0) hzAU = _orbitToAU(hzOrbitNum);
+                // ZONE_H_TABLE uses negative values (e.g. M5/M9 under size 'V', most of 'VI'
+                // and 'D') as a deliberate RAW signal that this star type has no classical
+                // habitable zone at all — not a lookup failure. _orbitToAU(-1) previously read
+                // past the start of the orbit-AU array (tbl[-1] === undefined), producing NaN,
+                // which crashed _drawHZBand's ctx.createRadialGradient (non-finite radius) and
+                // aborted the whole orrery render before stars/worlds were drawn. Leave hzAU
+                // null here — no ring should be drawn, and the mainworld-distance fallback
+                // below is skipped too, since falling back there would incorrectly imply a
+                // habitable zone exists when RAW says it doesn't.
+                else hzKnownAbsent = true;
+            }
         }
+        if (hzAU == null && !hzKnownAbsent) hzAU = (mw && mw.distAU) ? mw.distAU : 1.0;
 
         return { edition: 'CT', age: sys.age || 0, hzAU, stars, worlds };
     }
@@ -410,8 +439,12 @@ const SystemViewer = (() => {
             });
         }
 
-        // HZ centre: mainworld distAU
-        const hzAU = (mw && mw.distAU) ? mw.distAU : 1.0;
+        // HZ centre: prefer the star-physics-derived HZ orbit (getStarHZ in
+        // t5_topdown_generator.js, fixed by the primary's spectral type/size — independent
+        // of which body is flagged mainworld). Fall back to the mainworld's own distance
+        // only for older saves generated before sys.hzOrbit was persisted.
+        let hzAU = (sys.hzOrbit != null) ? _orbitToAU(sys.hzOrbit) : null;
+        if (hzAU == null) hzAU = (mw && mw.distAU) ? mw.distAU : 1.0;
 
         return { edition: 'T5', age: sys.age || 0, hzAU, stars, worlds };
     }
@@ -581,9 +614,17 @@ const SystemViewer = (() => {
     function _normalizeAoW(sys) {
         const mw = sys.mainworld;
 
-        // hzco is always 0 in the generator (TODO); fall back to mainworld orbit
+        // sys.hzco is never computed by the AoW generator (see OW-9 note above), so derive
+        // the HZ ring directly from the primary's real solar luminosity — same inverse-square
+        // approximation MgT2E uses for HZCO (HZ AU = sqrt(luminosity in L☉)), applied straight
+        // in AU since AoW bodies already carry real orbitalRadius rather than an abstract orbit
+        // number. Unlike RTT (which only tracks a luminosity *class* letter, not a numeric solar
+        // luminosity), AoW's star-physics solver already produces `star.luminosity` for every
+        // star, so this needs no new data — only falls back to the mainworld's own orbit if
+        // luminosity is somehow missing (e.g. an unresolved/partial star).
+        const primaryLum = (sys.stars && sys.stars[0]) ? sys.stars[0].luminosity : null;
         const mwAU = mw ? (mw.orbitalRadius ?? mw.orbitId ?? 1.0) : 1.0;
-        const hzAU = (sys.hzco && sys.hzco > 0) ? sys.hzco : mwAU;
+        const hzAU = (primaryLum != null && primaryLum > 0) ? Math.sqrt(primaryLum) : mwAU;
 
         // Companion orbit AU from sys.orbits[], sorted by R ascending
         const sortedOrbits = [...(sys.orbits || [])].sort((a, b) => a.R - b.R);

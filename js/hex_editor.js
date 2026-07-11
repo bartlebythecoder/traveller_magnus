@@ -944,17 +944,22 @@ function populateEditorAccordions(stateObj) {
                 return r || String(n);
             }
             // ── Field builder helpers (body/satellite) ────────────────────────
-            function _ctNum(obj, field, orbit, captured, sIdx, min, max) {
+            // `starIdx` (default 0 = primary) disambiguates which star's orbit sequence `orbit`
+            // refers to — a Far companion has its own independent nestedSystem.orbits, so orbit
+            // numbers are NOT globally unique across the system (a companion's own orbit 1 and
+            // the primary's orbit 1 can coexist). Without this, the write-back handler below
+            // could silently resolve an edit to the wrong star's body (OW-19).
+            function _ctNum(obj, field, orbit, captured, sIdx, min, max, starIdx) {
                 const val = (obj[field] !== undefined && obj[field] !== null) ? obj[field] : '';
-                return `<input type="number" class="rtt-field-input${_ctMc(obj, field)}" data-ct-field="${field}" data-ct-orbit="${orbit}" data-ct-captured="${captured}" data-ct-satidx="${sIdx}" value="${val}" min="${min}" max="${max}" step="any">`;
+                return `<input type="number" class="rtt-field-input${_ctMc(obj, field)}" data-ct-field="${field}" data-ct-orbit="${orbit}" data-ct-captured="${captured}" data-ct-satidx="${sIdx}" data-ct-star-idx="${starIdx || 0}" value="${val}" min="${min}" max="${max}" step="any">`;
             }
-            function _ctText(obj, field, orbit, captured, sIdx) {
+            function _ctText(obj, field, orbit, captured, sIdx, starIdx) {
                 const val = (obj[field] !== undefined && obj[field] !== null) ? String(obj[field]).replace(/"/g, '&quot;') : '';
-                return `<input type="text" class="rtt-field-input${_ctMc(obj, field)}" data-ct-field="${field}" data-ct-orbit="${orbit}" data-ct-captured="${captured}" data-ct-satidx="${sIdx}" value="${val}">`;
+                return `<input type="text" class="rtt-field-input${_ctMc(obj, field)}" data-ct-field="${field}" data-ct-orbit="${orbit}" data-ct-captured="${captured}" data-ct-satidx="${sIdx}" data-ct-star-idx="${starIdx || 0}" value="${val}">`;
             }
-            function _ctArray(obj, field, orbit, captured, sIdx) {
+            function _ctArray(obj, field, orbit, captured, sIdx, starIdx) {
                 const val = Array.isArray(obj[field]) ? obj[field].join(' ') : (obj[field] || '');
-                return `<input type="text" class="rtt-field-input${_ctMc(obj, field)}" data-ct-field="${field}" data-ct-orbit="${orbit}" data-ct-captured="${captured}" data-ct-satidx="${sIdx}" value="${String(val).replace(/"/g, '&quot;')}">`;
+                return `<input type="text" class="rtt-field-input${_ctMc(obj, field)}" data-ct-field="${field}" data-ct-orbit="${orbit}" data-ct-captured="${captured}" data-ct-satidx="${sIdx}" data-ct-star-idx="${starIdx || 0}" value="${String(val).replace(/"/g, '&quot;')}">`;
             }
             // ── Field builder helpers (star) ──────────────────────────────────
             function _ctStarText(star, field, sidx) {
@@ -987,6 +992,17 @@ function populateEditorAccordions(stateObj) {
                     return (tbl[Math.min(idx, tbl.length-1)] || 0) + frac * ((tbl[Math.min(idx+1, tbl.length-1)] || 0) - (tbl[Math.min(idx, tbl.length-1)] || 0));
                 }
                 if (orb === 'Close') return 0.05;
+                // System-Editor-authored companion (e.g. added via +Secondary): never resolved
+                // through CT_StellarEngine.resolveCompanionOrbit, so it has no native orbit/distAU
+                // — fall back to the editor's own orbitId/orbitAU position key, mirroring
+                // system_viewer.js's _starCompanionAU/_normalizeCT (OW-15), so the accordion
+                // agrees with the Edit panel and orrery instead of defaulting to a fixed 10 AU
+                // regardless of where the star was actually placed (OW-17).
+                if (star.orbitAU != null) return star.orbitAU;
+                if (star.orbitId != null && tbl) {
+                    const idx = Math.floor(star.orbitId), frac = star.orbitId - idx;
+                    return (tbl[Math.min(idx, tbl.length-1)] || 0) + frac * ((tbl[Math.min(idx+1, tbl.length-1)] || 0) - (tbl[Math.min(idx, tbl.length-1)] || 0));
+                }
                 return 10;
             };
 
@@ -1008,29 +1024,35 @@ function populateEditorAccordions(stateObj) {
                 }
                 html += `</div>`;
 
+                // A Far companion has its own independent orbit sequence (nestedSystem, set by
+                // ct_bottomup_generator.js's generateSystemOrbits or by the System Editor's CT
+                // write() adapter) — a Close companion never does (occupies a single slot inside
+                // the primary's own sequence, see OW-18). Read whichever orbit/capturedPlanets
+                // list actually belongs to this star instead of hard-defaulting a companion to
+                // an empty list, which previously hid any body a user added to a Far companion
+                // from the accordion entirely (OW-19).
+                const ownOrbits         = isCompanion ? (star.nestedSystem && star.nestedSystem.orbits) : sys.orbits;
+                const ownCapturedPlanets = isCompanion ? (star.nestedSystem && star.nestedSystem.capturedPlanets) : sys.capturedPlanets;
+
                 let allBodies = [];
-                if (!isCompanion) {
-                    sys.orbits.forEach(o => {
-                        if (o.contents) {
-                            allBodies.push({
-                                isCaptured: false,
-                                orbit: o.orbit,
-                                zone: o.zone,
-                                contents: o.contents
-                            });
-                        }
-                    });
-                    if (sys.capturedPlanets) {
-                        sys.capturedPlanets.forEach(p => {
-                            allBodies.push({
-                                isCaptured: true,
-                                orbit: p.orbit,
-                                zone: p.zone,
-                                contents: p
-                            });
+                (ownOrbits || []).forEach(o => {
+                    if (o.contents) {
+                        allBodies.push({
+                            isCaptured: false,
+                            orbit: o.orbit,
+                            zone: o.zone,
+                            contents: o.contents
                         });
                     }
-                }
+                });
+                (ownCapturedPlanets || []).forEach(p => {
+                    allBodies.push({
+                        isCaptured: true,
+                        orbit: p.orbit,
+                        zone: p.zone,
+                        contents: p
+                    });
+                });
 
                 // Interleave bodies and sub-companion stars, sorted by AU
                 let bodyCount = 0;
@@ -1069,7 +1091,7 @@ function populateEditorAccordions(stateObj) {
                         const _ctBodyNVal  = (w.name || '').replace(/"/g, '&quot;');
                         const _ctBodyNPh   = _ctBodyDflt.replace(/"/g, '&quot;');
                         const _ctBodyNCls  = `rtt-field-input rtt-name-input${w.type === 'Mainworld' ? ' rtt-name-mainworld' : ''}${_ctMc(w, 'name')}`;
-                        const _ctBodyNAttr = `data-ct-field="name" data-ct-orbit="${o.orbit}" data-ct-captured="${body.isCaptured}" data-ct-satidx="-1"`;
+                        const _ctBodyNAttr = `data-ct-field="name" data-ct-orbit="${o.orbit}" data-ct-captured="${body.isCaptured}" data-ct-satidx="-1" data-ct-star-idx="${starIdx}"`;
                         html += `<details open>`;
                         html += `<summary ${summaryStyle}><input type="text" class="${_ctBodyNCls}" ${_ctBodyNAttr} value="${_ctBodyNVal}" placeholder="${_ctBodyNPh}" onclick="event.stopPropagation()" style="max-width:160px;"> ${orbitLabel} [${o.zone}] <span class="sys-title-info">${typeLabel} | ${uwp}${zoneLabel}</span></summary>`;
                         const _isMain = w.type === 'Mainworld';
@@ -1081,7 +1103,7 @@ function populateEditorAccordions(stateObj) {
                         } else {
                             const _uwpManual = typeof isManual === 'function' &&
                                 ['starport','size','atm','hydro','pop','gov','law','tl'].some(f => isManual(w, f));
-                            html += `<div style="margin-bottom: 6px; font-family: monospace; font-size: 1.1em;">UWP: <input type="text" class="rtt-field-input${_uwpManual ? ' is-manual' : ''}" data-ct-field="uwp" data-ct-orbit="${o.orbit}" data-ct-captured="${body.isCaptured}" data-ct-satidx="-1" value="${uwp.replace(/"/g, '&quot;')}" style="color: ${labelColor}; max-width:140px; font-weight:bold;"></div>`;
+                            html += `<div style="margin-bottom: 6px; font-family: monospace; font-size: 1.1em;">UWP: <input type="text" class="rtt-field-input${_uwpManual ? ' is-manual' : ''}" data-ct-field="uwp" data-ct-orbit="${o.orbit}" data-ct-captured="${body.isCaptured}" data-ct-satidx="-1" data-ct-star-idx="${starIdx}" value="${uwp.replace(/"/g, '&quot;')}" style="color: ${labelColor}; max-width:140px; font-weight:bold;"></div>`;
                         }
 
                         if (_isMain && mwBase && mwBase.travelZone && mwBase.travelZone !== 'Green') {
@@ -1091,14 +1113,14 @@ function populateEditorAccordions(stateObj) {
                         html += `<div class="system-stats-lv">`;
 
                         html += `<span class="stat-label">Orbit</span><span class="stat-value"><strong>${body.isCaptured ? o.orbit.toFixed(1) : o.orbit}</strong></span>`;
-                        html += `<span class="stat-label">Distance (AU)</span><span class="stat-value">${_ctNum(w, 'distAU', o.orbit, body.isCaptured, -1, 0, 1000)}</span>`;
-                        html += `<span class="stat-label">Year (yr)</span><span class="stat-value">${_ctNum(w, 'orbitalPeriod', o.orbit, body.isCaptured, -1, 0, 100000)}</span>`;
-                        html += `<span class="stat-label">Diameter (km)</span><span class="stat-value">${_ctNum(w, 'diamKm', o.orbit, body.isCaptured, -1, 0, 200000)}</span>`;
-                        html += `<span class="stat-label">Gravity (G)</span><span class="stat-value">${_ctNum(w, 'gravity', o.orbit, body.isCaptured, -1, 0, 100)}</span>`;
-                        html += `<span class="stat-label">Mass (M⊕)</span><span class="stat-value">${_ctNum(w, 'mass', o.orbit, body.isCaptured, -1, 0, 10000)}</span>`;
-                        html += `<span class="stat-label">Temp (K)</span><span class="stat-value">${_ctNum(w, 'temperature', o.orbit, body.isCaptured, -1, 0, 10000)}</span>`;
-                        html += `<span class="stat-label">Day</span><span class="stat-value">${_ctText(w, 'rotationPeriod', o.orbit, body.isCaptured, -1)}</span>`;
-                        html += `<span class="stat-label">Tilt (°)</span><span class="stat-value">${_ctNum(w, 'axialTilt', o.orbit, body.isCaptured, -1, 0, 180)}</span>`;
+                        html += `<span class="stat-label">Distance (AU)</span><span class="stat-value">${_ctNum(w, 'distAU', o.orbit, body.isCaptured, -1, 0, 1000, starIdx)}</span>`;
+                        html += `<span class="stat-label">Year (yr)</span><span class="stat-value">${_ctNum(w, 'orbitalPeriod', o.orbit, body.isCaptured, -1, 0, 100000, starIdx)}</span>`;
+                        html += `<span class="stat-label">Diameter (km)</span><span class="stat-value">${_ctNum(w, 'diamKm', o.orbit, body.isCaptured, -1, 0, 200000, starIdx)}</span>`;
+                        html += `<span class="stat-label">Gravity (G)</span><span class="stat-value">${_ctNum(w, 'gravity', o.orbit, body.isCaptured, -1, 0, 100, starIdx)}</span>`;
+                        html += `<span class="stat-label">Mass (M⊕)</span><span class="stat-value">${_ctNum(w, 'mass', o.orbit, body.isCaptured, -1, 0, 10000, starIdx)}</span>`;
+                        html += `<span class="stat-label">Temp (K)</span><span class="stat-value">${_ctNum(w, 'temperature', o.orbit, body.isCaptured, -1, 0, 10000, starIdx)}</span>`;
+                        html += `<span class="stat-label">Day</span><span class="stat-value">${_ctText(w, 'rotationPeriod', o.orbit, body.isCaptured, -1, starIdx)}</span>`;
+                        html += `<span class="stat-label">Tilt (°)</span><span class="stat-value">${_ctNum(w, 'axialTilt', o.orbit, body.isCaptured, -1, 0, 180, starIdx)}</span>`;
 
                         html += `</div>`;
 
@@ -1145,7 +1167,7 @@ function populateEditorAccordions(stateObj) {
                                 const _ctSatNVal  = (sat.name || '').replace(/"/g, '&quot;');
                                 const _ctSatNPh   = _ctSatDflt.replace(/"/g, '&quot;');
                                 const _ctSatNCls  = `rtt-field-input rtt-name-input${sat.type === 'Mainworld' ? ' rtt-name-mainworld' : ''}${_ctMc(sat, 'name')}`;
-                                const _ctSatNAttr = `data-ct-field="name" data-ct-orbit="${o.orbit}" data-ct-captured="${body.isCaptured}" data-ct-satidx="${satIdx}"`;
+                                const _ctSatNAttr = `data-ct-field="name" data-ct-orbit="${o.orbit}" data-ct-captured="${body.isCaptured}" data-ct-satidx="${satIdx}" data-ct-star-idx="${starIdx}"`;
                                 html += `<details>`;
                                 html += `<summary ${satSummaryStyle}><input type="text" class="${_ctSatNCls}" ${_ctSatNAttr} value="${_ctSatNVal}" placeholder="${_ctSatNPh}" onclick="event.stopPropagation()" style="max-width:160px;"> <span class="sys-title-info">${satType} | ${(sat.pd !== undefined && sat.pd !== null) ? sat.pd : '?'}r | ${satUwp}${satZoneLabel}</span></summary>`;
                                 const _isSatMain = sat.type === 'Mainworld';
@@ -1157,16 +1179,16 @@ function populateEditorAccordions(stateObj) {
                                 } else {
                                     const _satUwpManual = typeof isManual === 'function' &&
                                         ['starport','size','atm','hydro','pop','gov','law','tl'].some(f => isManual(sat, f));
-                                    html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <input type="text" class="rtt-field-input${_satUwpManual ? ' is-manual' : ''}" data-ct-field="uwp" data-ct-orbit="${o.orbit}" data-ct-captured="${body.isCaptured}" data-ct-satidx="${satIdx}" value="${satUwp.replace(/"/g, '&quot;')}" style="color: ${satLabelColor}; max-width:140px; font-weight:bold;"></div>`;
+                                    html += `<div style="margin-bottom: 6px; font-family: monospace;">UWP: <input type="text" class="rtt-field-input${_satUwpManual ? ' is-manual' : ''}" data-ct-field="uwp" data-ct-orbit="${o.orbit}" data-ct-captured="${body.isCaptured}" data-ct-satidx="${satIdx}" data-ct-star-idx="${starIdx}" value="${satUwp.replace(/"/g, '&quot;')}" style="color: ${satLabelColor}; max-width:140px; font-weight:bold;"></div>`;
                                 }
                                 html += `<div class="system-stats-lv">`;
 
-                                html += `<span class="stat-label">Distance (AU)</span><span class="stat-value">${_ctNum(sat, 'distAU', o.orbit, body.isCaptured, satIdx, 0, 1000)}</span>`;
-                                html += `<span class="stat-label">Gravity (G)</span><span class="stat-value">${_ctNum(sat, 'gravity', o.orbit, body.isCaptured, satIdx, 0, 100)}</span>`;
-                                html += `<span class="stat-label">Mass (M⊕)</span><span class="stat-value">${_ctNum(sat, 'mass', o.orbit, body.isCaptured, satIdx, 0, 10000)}</span>`;
-                                html += `<span class="stat-label">Temp (K)</span><span class="stat-value">${_ctNum(sat, 'temperature', o.orbit, body.isCaptured, satIdx, 0, 10000)}</span>`;
-                                html += `<span class="stat-label">Day</span><span class="stat-value">${_ctText(sat, 'rotationPeriod', o.orbit, body.isCaptured, satIdx)}</span>`;
-                                html += `<span class="stat-label">Tilt (°)</span><span class="stat-value">${_ctNum(sat, 'axialTilt', o.orbit, body.isCaptured, satIdx, 0, 180)}</span>`;
+                                html += `<span class="stat-label">Distance (AU)</span><span class="stat-value">${_ctNum(sat, 'distAU', o.orbit, body.isCaptured, satIdx, 0, 1000, starIdx)}</span>`;
+                                html += `<span class="stat-label">Gravity (G)</span><span class="stat-value">${_ctNum(sat, 'gravity', o.orbit, body.isCaptured, satIdx, 0, 100, starIdx)}</span>`;
+                                html += `<span class="stat-label">Mass (M⊕)</span><span class="stat-value">${_ctNum(sat, 'mass', o.orbit, body.isCaptured, satIdx, 0, 10000, starIdx)}</span>`;
+                                html += `<span class="stat-label">Temp (K)</span><span class="stat-value">${_ctNum(sat, 'temperature', o.orbit, body.isCaptured, satIdx, 0, 10000, starIdx)}</span>`;
+                                html += `<span class="stat-label">Day</span><span class="stat-value">${_ctText(sat, 'rotationPeriod', o.orbit, body.isCaptured, satIdx, starIdx)}</span>`;
+                                html += `<span class="stat-label">Tilt (°)</span><span class="stat-value">${_ctNum(sat, 'axialTilt', o.orbit, body.isCaptured, satIdx, 0, 180, starIdx)}</span>`;
 
                                 html += `</div>`;
 
@@ -3304,13 +3326,22 @@ function saveHexEditorChanges() {
         const orbitVal   = parseFloat(el.dataset.ctOrbit);
         const isCaptured = el.dataset.ctCaptured === 'true';
         const satIdx     = parseInt(el.dataset.ctSatidx, 10);
+        // A Far companion has its own independent nestedSystem — orbit numbers reset per star,
+        // so orbit 1 on the primary and orbit 1 on a companion are different bodies. Without
+        // resolving via the star this input was rendered under, this lookup could silently
+        // mutate the wrong star's body whenever their orbit numbers collide (OW-19).
+        const starIdxAttr = parseInt(el.dataset.ctStarIdx, 10);
+        const ownerStarIdx = isNaN(starIdxAttr) ? 0 : starIdxAttr;
+        const ownerStar    = sys.stars && sys.stars[ownerStarIdx];
+        const orbitsList    = ownerStarIdx === 0 ? sys.orbits : (ownerStar && ownerStar.nestedSystem && ownerStar.nestedSystem.orbits);
+        const capturedList  = ownerStarIdx === 0 ? sys.capturedPlanets : (ownerStar && ownerStar.nestedSystem && ownerStar.nestedSystem.capturedPlanets);
 
         let body = null;
         if (!isNaN(orbitVal)) {
             if (isCaptured) {
-                body = (sys.capturedPlanets || []).find(p => p.orbit === orbitVal);
+                body = (capturedList || []).find(p => p.orbit === orbitVal);
             } else {
-                const orbitEntry = sys.orbits.find(o => o.orbit === orbitVal);
+                const orbitEntry = (orbitsList || []).find(o => o.orbit === orbitVal);
                 body = orbitEntry ? orbitEntry.contents : null;
             }
             // satIdx is assigned during render by iterating a copy of body.satellites

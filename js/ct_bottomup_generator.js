@@ -181,7 +181,7 @@ function generateSystemSkeleton(hexId, seedSys = null) {
             skeleton.ggs.forEach(gg => {
                 let slot;
                 if (eligibleSlots.length > 0) {
-                    const index = Math.floor(Math.random() * eligibleSlots.length);
+                    const index = Math.floor(rng() * eligibleSlots.length);
                     slot = eligibleSlots.splice(index, 1)[0];
                 } else {
                     // Book 6 Failsafe: no eligible slot — create one in the outer zone
@@ -229,10 +229,10 @@ function generateSystemSkeleton(hexId, seedSys = null) {
             for (let i = 0; i < skeleton.belts; i++) {
                 let slot = null;
                 if (proximitySlots.length > 0) {
-                    const idx = Math.floor(Math.random() * proximitySlots.length);
+                    const idx = Math.floor(rng() * proximitySlots.length);
                     slot = proximitySlots.splice(idx, 1)[0];
                 } else if (generalSlots.length > 0) {
-                    const idx = Math.floor(Math.random() * generalSlots.length);
+                    const idx = Math.floor(rng() * generalSlots.length);
                     slot = generalSlots.splice(idx, 1)[0];
                 }
 

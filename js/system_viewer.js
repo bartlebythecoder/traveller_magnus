@@ -26,6 +26,23 @@ const SystemViewer = (() => {
     let _canvasW = 0;
     let _canvasH = 0;
 
+    // Covers the worst realistic case: a tight companion pair (~0.05 AU) rendered
+    // alongside a Far companion star (~300 AU) needs ~1900x to visually separate.
+    const _MAX_ZOOM = 5000;
+
+    // Dashed-stroke cost scales with circumference (canvas has to walk the whole path
+    // to place each dash), so an orbit ring keeps costing more as _viewZoom grows —
+    // unlike a plain stroke, which is cheap regardless of radius. At deep zoom a wide
+    // companion's ring can reach into the hundreds of thousands of pixels, driving dash
+    // segment counts high enough to freeze the render loop (confirmed empirically: a
+    // 60-tick zoom-in froze the tab for 13+ minutes before this guard was added). Past
+    // this radius the ring is also many multiples of any plausible viewport, so skipping
+    // it costs nothing visually. ~80,000px keeps dash segments under ~50k/frame
+    // ((2*pi*r)/10) — the ring stays visible at the pre-existing 200x zoom ceiling
+    // (~57k px worst case), so this doesn't change behaviour below that; it only kicks
+    // in at the deeper zoom this cap increase now allows.
+    const _MAX_DASHED_RING_RADIUS = 80000;
+
     let _viewZoom = 1.0;
     let _viewOffX = 0;
     let _viewOffY = 0;
@@ -297,12 +314,21 @@ const SystemViewer = (() => {
 
         // Stars
         const stars = (sys.stars || []).map((s, i) => {
-            // CT companion orbit may be 'Close', 'Far', or a number
+            // CT companion orbit may be 'Close', 'Far', or a number (native stochastic
+            // generation) — but a System-Editor-authored/repositioned companion never carries
+            // those fields at all, only `orbitId` (the shared drag-and-drop position key also
+            // used for worlds). Without this fallback, a companion added or dragged in the
+            // editor always rendered at the same hardcoded distance in the orrery no matter
+            // where it was dropped, because none of the native-format checks ever matched.
+            // Mirrors the equivalent read-side fallback in system_editor.js's
+            // _buildWorkingCopyFromState (orbitAU derivation for CT/RTT stars).
             let orbitAU = null;
             if (i > 0) {
                 if (typeof s.orbit === 'number') orbitAU = _orbitToAU(s.orbit);
                 else if (s.distAU)               orbitAU = s.distAU;
                 else if (s.orbit === 'Close')     orbitAU = 0.05;
+                else if (s.orbitAU != null)       orbitAU = s.orbitAU;
+                else if (s.orbitId != null)       orbitAU = _orbitToAU(s.orbitId);
                 else                              orbitAU = 10;
             }
             return {
@@ -332,6 +358,24 @@ const SystemViewer = (() => {
         // Captured planets (anomalies)
         (sys.capturedPlanets || []).forEach(w => {
             if (w && w.type !== 'Empty') worlds.push(_normCTWorld(w, w.distAU || 0, mw));
+        });
+
+        // Far companions carry their own independent orbit sequence in nestedSystem (set by
+        // ct_bottomup_generator.js's generateSystemOrbits or the System Editor's CT write()
+        // adapter) — flatten those bodies too, tagged with the companion's own star index, so
+        // the existing sub-orrery drawing code (_drawWorldSet's `w.parentStarIdx === sIdx`
+        // filter, below) picks them up. Without this a Far companion's own bodies were
+        // invisible in the orrery even after the System Editor/accordion could show them (OW-19).
+        (sys.stars || []).forEach((s, i) => {
+            if (i === 0 || !s.nestedSystem) return;
+            (s.nestedSystem.orbits || []).forEach(slot => {
+                const w = slot.contents;
+                if (!w || w.type === 'Empty') return;
+                worlds.push(_normCTWorld(w, slot.distAU || 0, mw, i));
+            });
+            (s.nestedSystem.capturedPlanets || []).forEach(w => {
+                if (w && w.type !== 'Empty') worlds.push(_normCTWorld(w, w.distAU || 0, mw, i));
+            });
         });
 
         // HZ centre: prefer sys.hzco — the orbit number CT's generator actually resolved and
@@ -373,7 +417,7 @@ const SystemViewer = (() => {
         return { edition: 'CT', age: sys.age || 0, hzAU, stars, worlds };
     }
 
-    function _normCTWorld(w, au, mainworldRef) {
+    function _normCTWorld(w, au, mainworldRef, parentStarIdx) {
         const isMainworld = _isSameWorld(w, mainworldRef) || w.type === 'Mainworld';
         let type  = isMainworld ? 'Mainworld' : (w.type || 'Terrestrial Planet');
         let ggType = null;
@@ -384,7 +428,7 @@ const SystemViewer = (() => {
         return {
             type, ggType,
             au:            au || w.distAU || 0,
-            parentStarIdx: 0,
+            parentStarIdx: parentStarIdx || 0,
             orbitType:     'S-Type',
             eccentricity:  0,
             mass:          w.mass     || null,
@@ -1235,7 +1279,7 @@ const SystemViewer = (() => {
             const orbitR    = _compRingR.get(s);
             const parentPos = starPos.get(s.parentStarIdx ?? 0) || { cx: originX, cy: originY };
 
-            if (_orbitOpacity > 0) {
+            if (_orbitOpacity > 0 && orbitR <= _MAX_DASHED_RING_RADIUS) {
                 const orbitAlpha = _lightMode ? _orbitOpacity * 0.80 : _orbitOpacity * 0.55;
                 ctx.beginPath();
                 ctx.arc(parentPos.cx, parentPos.cy, orbitR, 0, Math.PI * 2);
@@ -1297,8 +1341,8 @@ const SystemViewer = (() => {
             const period = _worldPeriodYears(w, starMass);
             const epoch  = _hashEpoch(_hexId + ':world:' + wIdx);
             const angle  = epoch + (2 * Math.PI / period) * elapsed_years;
-            _drawBeltRing(ctx, cx, cy, r, isMW, -(angle * r));
-            if (isMW && w.name) {
+            _drawBeltRing(ctx, cx, cy, r, isMW && !_hideMainworldHighlight, -(angle * r));
+            if (isMW && w.name && !_hideMainworldHighlight) {
                 ctx.save();
                 ctx.fillStyle = _lightMode ? '#0d6b64' : '#66fcf1';
                 ctx.font      = '11px "Share Tech Mono", monospace';
@@ -1472,7 +1516,7 @@ const SystemViewer = (() => {
     }
 
     function _drawBeltRing(ctx, cx, cy, r, isMainworld = false, dashOffset = 0) {
-        if (r < 2) return;
+        if (r < 2 || r > _MAX_DASHED_RING_RADIUS) return;
         ctx.save();
         ctx.beginPath();
         ctx.arc(cx, cy, r, 0, Math.PI * 2);
@@ -1493,13 +1537,23 @@ const SystemViewer = (() => {
         const direction = e.deltaY < 0 ? 1 : -1;
         const factor    = 1.15;
         const rect      = _orrCanvas.getBoundingClientRect();
-        const mx        = e.clientX - rect.left;
-        const my        = e.clientY - rect.top;
         const cx        = _canvasW / 2;
         const cy        = _canvasH / 2;
+        let   mx        = e.clientX - rect.left;
+        let   my        = e.clientY - rect.top;
+
+        // Snap to the exact center when the cursor is within a tight tolerance. Mouse
+        // coordinates are always whole pixels, but a canvas with an odd width/height has
+        // a fractional center (e.g. 357.5) — that sub-pixel gap gets multiplied by `factor`
+        // on every tick (offset ~= gap * (1 - factor^n)), so it compounds into a pan large
+        // enough to fling the primary off-screen well before reaching deep zoom levels,
+        // even though the cursor never actually moved off center.
+        const SNAP_PX = 3;
+        if (Math.abs(mx - cx) <= SNAP_PX) mx = cx;
+        if (Math.abs(my - cy) <= SNAP_PX) my = cy;
 
         if (direction > 0) {
-            const newZoom = Math.min(_viewZoom * factor, 200);
+            const newZoom = Math.min(_viewZoom * factor, _MAX_ZOOM);
             const ratio   = newZoom / _viewZoom;
             _viewOffX = mx - cx - (mx - cx - _viewOffX) * ratio;
             _viewOffY = my - cy - (my - cy - _viewOffY) * ratio;

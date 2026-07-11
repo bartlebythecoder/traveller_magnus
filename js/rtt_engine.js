@@ -335,7 +335,7 @@ function generateRTTSectorBiographer(sys, options = {}) {
             }
         }
         if (allInhabited.length > 0) {
-            let target = allInhabited[Math.floor(Math.random() * allInhabited.length)];
+            let target = allInhabited[Math.floor(rng() * allInhabited.length)];
             target.bases = target.bases || [];
             target.bases.push('Q');
             tResult('Ancient Site Found', target.orbitNumber ? `Orbit ${target.orbitNumber}` : 'Satellite', 'RTT 7.5: Ancient Sites');

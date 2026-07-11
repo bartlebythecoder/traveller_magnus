@@ -2202,7 +2202,8 @@ function exportSystemJson(hexId) {
         state:      state
     };
     const safeName = systemName.replace(/[^a-z0-9_\-]/gi, '_');
-    triggerDownload(JSON.stringify(envelope, null, 2), `${safeName}_system.json`);
+    const safeHexId = String(hexId).replace(/[^a-z0-9_\-]/gi, '_');
+    triggerDownload(JSON.stringify(envelope, null, 2), `${safeHexId}_${safeName}_system.json`);
     if (typeof showToast === 'function') showToast(`System "${systemName}" exported.`, 2500);
 }
 window.exportSystemJson = exportSystemJson;

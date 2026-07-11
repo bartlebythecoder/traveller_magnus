@@ -589,6 +589,10 @@
 
                 // Apply Full T5 Orbit Labeling (Positional + Climate)
                 if (!_isManual(body, 'climateZone')) body.climateZone = getT5OrbitLabel(o.orbit, hostHZ);
+                // Generator placeholders don't carry their own orbitId (position is implied by
+                // array index) — stamp it here so calculateT5RotationalDynamics below can tell
+                // orbit 0/1 (tidally locked to the star) from everything else.
+                if (body.orbitId === undefined) body.orbitId = o.orbit;
 
                 // 1. Flesh out the parent body
                 if (body !== sys.mainworld) {
@@ -609,16 +613,22 @@
                         }
                         
                         if (!s.distAU && body.distAU) { s.distAU = body.distAU; }
+                        // Mark as a satellite so calculateT5RotationalDynamics evaluates it against
+                        // its parent body, not the star — without this it would inherit the parent's
+                        // orbitId and could be wrongly flagged "tidally locked to the star".
+                        if (s.isMoon === undefined && s.isSatellite === undefined) s.isMoon = true;
 
                         // PHASE 2.1 FINAL FIX: Ensure physics are recalculated for EVERY satellite
                         T5_World_Engine.calculateT5PhysicalStats(s);
                         if (T5_World_Engine.calculateT5Climate) T5_World_Engine.calculateT5Climate(s, 1.0);
+                        if (T5_World_Engine.calculateT5RotationalDynamics) T5_World_Engine.calculateT5RotationalDynamics(s);
                     });
                 }
 
                 // PHASE 2.1 FINAL FIX: Absolute last step for the main body
                 T5_World_Engine.calculateT5PhysicalStats(body);
                 if (T5_World_Engine.calculateT5Climate) T5_World_Engine.calculateT5Climate(body, 1.0);
+                if (T5_World_Engine.calculateT5RotationalDynamics) T5_World_Engine.calculateT5RotationalDynamics(body);
             });
         });
     }

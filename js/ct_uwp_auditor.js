@@ -3,7 +3,23 @@
 // =====================================================================
 // Validates a generated CT system against Book 6 Extended Rules.
 
-// Browser-safe imports
+// Browser-safe imports.
+//
+// This file previously also declared its own local `function walkSystem(sys, callback) {...}`
+// (a stale duplicate, missing the "RECURSE into nested systems (Far Companions)" block
+// ct_bottomup_generator.js's real walkSystem has). In a classic (non-module) browser script,
+// ALL top-level function/var declarations across every loaded <script> share one global
+// environment — so that local declaration's hoisting unconditionally overwrote
+// `window.walkSystem` the instant this file's script began executing, clobbering the good
+// version ct_bottomup_generator.js had already set, regardless of load order. The `else`
+// branch below then read `window.walkSystem` back — but by then it was already reading its
+// own clobbered value, not ct_bottomup_generator.js's. Every consumer of the shared
+// `walkSystem` identifier (including code *inside* ct_bottomup_generator.js itself, like
+// designateMainworld — which resolves the bare identifier dynamically at call time via the
+// global scope, not at definition time) silently lost nested-system recursion the moment this
+// script loaded. Dormant until a Far companion's own bodies were the only mainworld-eligible
+// candidates in the system (OW-19) — previously CT never populated Far-companion nested
+// systems with real bodies at all, so this always walked an empty branch unnoticed.
 var walkSystem;
 if (typeof module !== 'undefined' && module.exports) {
     const bottomUp = require('./ct_bottomup_generator.js');
@@ -121,24 +137,6 @@ function runAndLog(sys, hexId) {
     }
 
     return results;
-}
-
-/**
- * Reusable walker to ensure we check orbits, satellites, and captured planets.
- */
-function walkSystem(sys, callback) {
-    if (!sys.orbits) return;
-    sys.orbits.forEach(slot => {
-        if (slot.contents) {
-            callback(slot.contents, slot.orbit);
-            if (slot.contents.satellites) {
-                slot.contents.satellites.forEach(sat => callback(sat, slot.orbit));
-            }
-        }
-    });
-    if (sys.capturedPlanets) {
-        sys.capturedPlanets.forEach(p => callback(p, p.orbit));
-    }
 }
 
 // Export for both Node.js and Browser environments

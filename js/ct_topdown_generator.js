@@ -112,7 +112,7 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
         : ['I', 'I', 'H', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'];
 
     const hOrbits = zones.reduce((acc, z, idx) => (z === 'H' ? acc.concat(idx) : acc), []);
-    let targetOrbit = hOrbits.length > 0 ? hOrbits[Math.floor(Math.random() * hOrbits.length)] : 2;
+    let targetOrbit = hOrbits.length > 0 ? hOrbits[Math.floor(rng() * hOrbits.length)] : 2;
     tResult('Ideal Habitable Orbit', targetOrbit, 'CT 1.3: Zone Classification');
 
     const sys = {
@@ -159,7 +159,7 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
     skeleton.ggs.forEach(gg => {
         let slot;
         if (eligibleSlots.length > 0) {
-            const index = Math.floor(Math.random() * eligibleSlots.length);
+            const index = Math.floor(rng() * eligibleSlots.length);
             slot = eligibleSlots.splice(index, 1)[0];
         } else if (typeof CT_StellarEngine !== 'undefined') {
             // Book 6 Failsafe: no eligible slot — create one in the outer zone
@@ -208,10 +208,10 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
     for (let i = 0; i < beltsToPlace; i++) {
         let slot = null;
         if (proximitySlots.length > 0) {
-            const index = Math.floor(Math.random() * proximitySlots.length);
+            const index = Math.floor(rng() * proximitySlots.length);
             slot = proximitySlots.splice(index, 1)[0];
         } else if (generalSlots.length > 0) {
-            const index = Math.floor(Math.random() * generalSlots.length);
+            const index = Math.floor(rng() * generalSlots.length);
             slot = generalSlots.splice(index, 1)[0];
         }
         

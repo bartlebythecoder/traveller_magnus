@@ -194,7 +194,13 @@ const SystemEditor = (() => {
     ];
     function _mgt2ePhysSeed(raw) {
         const fields = {}; const mf = [];
-        _MGT2E_PHYS_FIELDS.forEach(f => { if (raw[f] !== undefined) { fields[f] = raw[f]; mf.push(f); } });
+        // Excludes null, not just undefined: a Planetoid Belt (or size-0/Ring body) has
+        // siderealHours/solarDayHours/axialTilt deliberately nulled by generateRotationalDynamics
+        // (mgt2e_world_engine.js — rotation doesn't apply to those types). Locking a null in as
+        // "manual" survives a later type/size change away from Belt, so the next Preview's
+        // isManual() check skips recomputing it and leaves the real value null — crashing the
+        // first .toFixed() call on it (e.g. Solar Day (Hours) logging).
+        _MGT2E_PHYS_FIELDS.forEach(f => { if (raw[f] !== undefined && raw[f] !== null) { fields[f] = raw[f]; mf.push(f); } });
         return { fields, mf };
     }
 
@@ -538,68 +544,101 @@ const SystemEditor = (() => {
             readBodies(raw, starIdByIdx) {
                 const bodies = [];
                 const mwRef = raw.mainworld;
-                (raw.orbits || []).forEach(slot => {
-                    const w = slot.contents;
-                    if (!w || w.type === 'Empty') return;
-                    const isMainworld = _isMW(w, mwRef) || w.type === 'Mainworld';
-                    const canon       = isMainworld ? 'World' : _canonType(w.type);
-                    bodies.push({
-                        _id: _uid('body'), type: canon,
-                        ggType:        canon === 'Gas Giant' ? (w.size === 'S' ? 'GS' : 'GL') : null,
-                        name: w.name || '', uwp: w.uwp || null,
-                        au: slot.distAU ?? null, orbitId: slot.orbit ?? null,
-                        travelZone:    w.travelZone || w.zone || 'G',
-                        parentStarId:  starIdByIdx(0), isMainworld,
-                        // A lunar mainworld's moon carries `type: 'Mainworld'` (stamped by
-                        // processBottomUpDesignation) but never its own `isMainworld` boolean —
-                        // that flag is only ever set here, from mwRef/type, mirroring the
-                        // top-level `isMainworld` check above (and T5's equivalent fix). Without
-                        // this, no body shows the ★ highlight, wc.mainworldRef never resolves,
-                        // and the next Preview/Save re-elects an entirely new mainworld.
-                        moons:         (w.moons || w.satellites || []).map(m => _buildMoon(
-                            Object.assign({}, m, { isMainworld: !!(m.isMainworld || m.type === 'Mainworld' || _isMW(m, mwRef)) })
-                        )),
-                        _manualFields: w._manualFields ? [...w._manualFields] : [],
-                        _raw: w,
+
+                // Shared parser for a CT-shaped { orbits[], capturedPlanets[] } body list — used
+                // for both the primary's own top-level lists and a Far companion's own
+                // nestedSystem (OW-19). `parentId` is the owning star's working-copy _id.
+                const readOrbitSlots = (orbits, parentId) => {
+                    (orbits || []).forEach(slot => {
+                        const w = slot.contents;
+                        if (!w || w.type === 'Empty') return;
+                        const isMainworld = _isMW(w, mwRef) || w.type === 'Mainworld';
+                        const canon       = isMainworld ? 'World' : _canonType(w.type);
+                        bodies.push({
+                            _id: _uid('body'), type: canon,
+                            ggType:        canon === 'Gas Giant' ? (w.size === 'S' ? 'GS' : 'GL') : null,
+                            name: w.name || '', uwp: w.uwp || null,
+                            au: slot.distAU ?? null, orbitId: slot.orbit ?? null,
+                            travelZone:    w.travelZone || w.zone || 'G',
+                            parentStarId:  parentId, isMainworld,
+                            // A lunar mainworld's moon carries `type: 'Mainworld'` (stamped by
+                            // processBottomUpDesignation) but never its own `isMainworld` boolean —
+                            // that flag is only ever set here, from mwRef/type, mirroring the
+                            // top-level `isMainworld` check above (and T5's equivalent fix). Without
+                            // this, no body shows the ★ highlight, wc.mainworldRef never resolves,
+                            // and the next Preview/Save re-elects an entirely new mainworld.
+                            moons:         (w.moons || w.satellites || []).map(m => _buildMoon(
+                                Object.assign({}, m, { isMainworld: !!(m.isMainworld || m.type === 'Mainworld' || _isMW(m, mwRef)) })
+                            )),
+                            _manualFields: w._manualFields ? [...w._manualFields] : [],
+                            _raw: w,
+                        });
                     });
-                });
-                (raw.capturedPlanets || []).forEach(w => {
-                    if (!w || w.type === 'Empty') return;
-                    const isMainworld = _isMW(w, raw.mainworld) || w.type === 'Mainworld';
-                    bodies.push({
-                        _id: _uid('body'), type: isMainworld ? 'World' : _canonType(w.type),
-                        ggType: null, name: w.name || '', uwp: w.uwp || null,
-                        au: w.distAU ?? null, orbitId: null, travelZone: 'G',
-                        parentStarId: starIdByIdx(0), isMainworld, moons: [],
-                        _manualFields: w._manualFields ? [...w._manualFields] : [],
-                        _raw: w,
+                };
+                const readCaptured = (capturedPlanets, parentId) => {
+                    (capturedPlanets || []).forEach(w => {
+                        if (!w || w.type === 'Empty') return;
+                        const isMainworld = _isMW(w, mwRef) || w.type === 'Mainworld';
+                        bodies.push({
+                            _id: _uid('body'), type: isMainworld ? 'World' : _canonType(w.type),
+                            ggType: null, name: w.name || '', uwp: w.uwp || null,
+                            au: w.distAU ?? null, orbitId: null, travelZone: 'G',
+                            parentStarId: parentId, isMainworld, moons: [],
+                            _manualFields: w._manualFields ? [...w._manualFields] : [],
+                            _raw: w,
+                        });
                     });
+                };
+
+                readOrbitSlots(raw.orbits, starIdByIdx(0));
+                readCaptured(raw.capturedPlanets, starIdByIdx(0));
+
+                // Far companions carry their own independent orbit sequence in nestedSystem (set
+                // by ct_bottomup_generator.js's generateSystemOrbits — "Handle Far Companions as
+                // nested systems" — or, for a System-Editor-authored companion, by write() below).
+                // Read those bodies too, parented to the companion star itself, so they round-trip
+                // back into the editor instead of silently vanishing on next open (OW-19).
+                (raw.stars || []).forEach((s, i) => {
+                    if (i === 0 || !s.nestedSystem) return;
+                    readOrbitSlots(s.nestedSystem.orbits, starIdByIdx(i));
+                    readCaptured(s.nestedSystem.capturedPlanets, starIdByIdx(i));
                 });
+
                 return bodies;
             },
 
             // Captured planets are orbitless (orbitId === null) — the only way a CT body
-            // ends up with a null orbitId, since _addBody always assigns a real one. Split
-            // them out into their own seed.capturedPlanets array, matching what
-            // generateSystemSkeleton already consumes (js/ct_bottomup_generator.js ~line 135)
-            // and what CT_Generator's mainworld _id lookup already searches
-            // (js/ct_system_driver.js ~line 69). CT bodies are always parented to the
-            // primary (index 0) in the bottom-up generator, so starIdxById goes unused —
-            // kept as a parameter anyway to match the adapter interface's documented shape.
-            write(wc, starIdxById) {
-                const orbitBodies    = wc.bodies.filter(b => b.orbitId != null);
-                const capturedBodies = wc.bodies.filter(b => b.orbitId == null);
+            // ends up with a null orbitId, since _addBody always assigns a real one.
+            //
+            // Bodies are split by which star they orbit: primary-parented bodies feed the
+            // existing top-level orbits/capturedPlanets seed; bodies parented to a Far companion
+            // (the only CT companion role that can have bodies of its own — see the CT/Far gate
+            // in _buildCompanionBlock) are built into that companion's own nestedSystem, mirroring
+            // ct_bottomup_generator.js's own convention for a Far companion's independent
+            // planetary system (generateSystemOrbits, "Handle Far Companions as nested systems").
+            // `engStars` — the seed star objects _buildSeedSys already built — is where that
+            // nestedSystem gets attached; write() otherwise only returns *additional* top-level
+            // seed fields, with no other channel to reach an individual star's own seed object.
+            write(wc, starIdxById, engStars) {
+                const primaryId = (wc.stars[0] || {})._id;
 
-                // CT expects orbital slots: { orbit, zone, distAU, contents }
-                const orbits = orbitBodies.map(b => {
+                // Shared body → CT orbit-slot builder, used for both the primary's own list and
+                // any Far companion's nested list. `zoneStar` is the engStars-shaped seed object
+                // whose size/specKey the Book 6 zone table classification runs against — was
+                // previously hardcoded to 'H' for every body regardless of star or orbit.
+                const buildOrbits = (bodies, zoneStar) => bodies.filter(b => b.orbitId != null).map(b => {
                     const ctType = b.type === 'Gas Giant'  ? 'Gas Giant'
                         : b.type === 'Belt'                ? 'Planetoid Belt'
                         : 'Terrestrial Planet';
                     const { fields: uwpLock, mf: extraMF } = _ctUwpLockFor(b);
                     const ggSize = b.type === 'Gas Giant' ? (b.ggType === 'GS' ? 'Small' : 'Large') : undefined;
+                    const specKey = zoneStar && (zoneStar.specKey || `${zoneStar.sType || 'G'}${zoneStar.subType != null ? zoneStar.subType : 5}`);
+                    const zone = (zoneStar && typeof getZoneForOrbit === 'function')
+                        ? getZoneForOrbit(zoneStar.sClass || 'V', specKey, Math.floor(b.orbitId))
+                        : 'H';
                     return {
                         orbit:   b.orbitId != null ? b.orbitId : 1,
-                        zone:    'H',
+                        zone,
                         distAU:  b.au != null ? b.au : (_orbitIdToAU(b.orbitId) ?? null),
                         contents: {
                             _id:          b._id,
@@ -613,7 +652,15 @@ const SystemEditor = (() => {
                                 const { fields: moonLock, mf: moonMF } = _ctMoonLockFor(m);
                                 return {
                                     _id:          m._id,
-                                    type:         m.type || 'Satellite',
+                                    // Derive from the live isMainworld flag, not the frozen `m.type`
+                                    // _buildMoon stamped at read time — demoting a mainworld moon
+                                    // (_setMainworld/_clearMainworld) only flips isMainworld, so a
+                                    // stale 'Mainworld' string here would survive into the next Save
+                                    // alongside the newly-designated mainworld, producing the CT
+                                    // auditor's "found 2, expected 1" duplicate-mainworld error.
+                                    type:         m.isMainworld ? 'Mainworld'
+                                                : m.type === 'Mainworld' ? 'Satellite'
+                                                : (m.type || 'Satellite'),
                                     ...moonLock,
                                     name:         m.name || '',
                                     uwp:          m.uwp  || null,
@@ -632,7 +679,7 @@ const SystemEditor = (() => {
                 // orbit# field both operate on orbitId), so both are simply carried forward
                 // from _raw unchanged. `_id` is required: CT_Generator's mainworld-by-_id
                 // lookup searches seedSys.capturedPlanets when _mainworldRef points at one.
-                const capturedPlanets = capturedBodies.map(b => {
+                const buildCaptured = bodies => bodies.filter(b => b.orbitId == null).map(b => {
                     const { fields: uwpLock, mf: extraMF } = _ctUwpLockFor(b);
                     return {
                         _id:    b._id,
@@ -646,7 +693,11 @@ const SystemEditor = (() => {
                             const { fields: moonLock, mf: moonMF } = _ctMoonLockFor(m);
                             return {
                                 _id:          m._id,
-                                type:         m.type || 'Satellite',
+                                // See the orbits-branch satellites mapping above: derive from the
+                                // live isMainworld flag rather than the frozen `m.type`.
+                                type:         m.isMainworld ? 'Mainworld'
+                                            : m.type === 'Mainworld' ? 'Satellite'
+                                            : (m.type || 'Satellite'),
                                 ...moonLock,
                                 name:         m.name || '',
                                 uwp:          m.uwp  || null,
@@ -656,6 +707,32 @@ const SystemEditor = (() => {
                             };
                         }),
                         _manualFields: Array.from(new Set([...(b._manualFields || []), ...extraMF])),
+                    };
+                });
+
+                const primaryBodies  = wc.bodies.filter(b => b.parentStarId === primaryId);
+                const orbits          = buildOrbits(primaryBodies, engStars && engStars[0]);
+                const capturedPlanets = buildCaptured(primaryBodies);
+
+                // Far companions: any star with bodies parented to it gets its own nestedSystem,
+                // attached directly to its seed star object in engStars (mutated in place —
+                // write() has no other channel to reach an individual star's seed entry).
+                wc.stars.forEach((compStar, idx) => {
+                    if (idx === 0 || !engStars) return;
+                    const compBodies = wc.bodies.filter(b => b.parentStarId === compStar._id);
+                    if (compBodies.length === 0) return;
+                    const seedStar = engStars[idx];
+                    if (!seedStar) return;
+                    // Self-reference broken via a shallow copy (mirrors
+                    // ct_bottomup_generator.js's own "Break circularity for JSON stringification
+                    // and recursive walking" pattern) — a live circular star<->nestedSystem<->star
+                    // reference would break hexStates' JSON round-trip.
+                    const compStarCopy = Object.assign({}, seedStar);
+                    delete compStarCopy.nestedSystem;
+                    seedStar.nestedSystem = {
+                        stars:          [compStarCopy],
+                        orbits:         buildOrbits(compBodies, seedStar),
+                        capturedPlanets: buildCaptured(compBodies),
                     };
                 });
 
@@ -2064,10 +2141,17 @@ const SystemEditor = (() => {
             Object.assign(compLabel.style, { color: P.star, fontWeight: 'bold', fontSize: '12px', flex: '1' });
             compSummary.appendChild(compLabel);
 
-            compSummary.appendChild(_btn('+World', 'Add terrestrial world', () => _addBody(star._id, 'World')));
-            compSummary.appendChild(_btn('+GG',    'Add gas giant',         () => _addBody(star._id, 'Gas Giant')));
-            compSummary.appendChild(_btn('+Belt',  'Add planetoid belt',    () => _addBody(star._id, 'Belt')));
-            if (star.role !== 'Companion') {
+            // CT: only a Far companion has its own orbit sequence (CT_COMPANION_ORBIT_TABLE) —
+            // a Close companion occupies a single slot inside the primary's own sequence and
+            // structurally can't have orbiting bodies of its own (see OW-18/OW-19). Hide the
+            // add-body buttons for a Close CT companion rather than let the user create bodies
+            // that have nowhere valid to round-trip through.
+            if (_workingCopy.engine !== 'CT' || star.role === 'Far') {
+                compSummary.appendChild(_btn('+World', 'Add terrestrial world', () => _addBody(star._id, 'World')));
+                compSummary.appendChild(_btn('+GG',    'Add gas giant',         () => _addBody(star._id, 'Gas Giant')));
+                compSummary.appendChild(_btn('+Belt',  'Add planetoid belt',    () => _addBody(star._id, 'Belt')));
+            }
+            if (star.role !== 'Companion' && _workingCopy.engine !== 'CT') {
                 compSummary.appendChild(_btn('+Comp', 'Add companion star to this secondary', () => _addStar('Companion', star._id)));
             }
             compSummary.appendChild(_btn('Del★',   'Delete this star',      () => _deleteStar(star._id)));
@@ -2125,9 +2209,17 @@ const SystemEditor = (() => {
                 updateCompLabel(); _preview();
             }));
 
-            // Role / separation selector
+            // Role / separation selector. CT has no "Companion" or "Near" separation category —
+            // CT_COMPANION_ORBIT_TABLE (rules/ct_data.js) only ever produces Close, a rolled
+            // numeric orbit slot, or Far — so those two options are hidden for CT to stop a
+            // manually-added star (via +Secondary) from being set to a role CT rules don't
+            // recognize, which was silently possible even after +Comp itself was removed (OW-17).
+            const _isCT          = _workingCopy.engine === 'CT';
+            const _roleChoices   = _isCT ? ['Close', 'Far'] : ['Companion', 'Close', 'Near', 'Far'];
             const _orbitBySep    = { Companion: 0.15, Close: 0.5, Near: 6.0, Far: 12.0 };
-            const _roleFromOrbit = id => id == null ? 'Far' : id <= 5 ? 'Close' : id <= 11 ? 'Near' : 'Far';
+            const _roleFromOrbit = _isCT
+                ? (id => id == null ? 'Far' : id <= 5 ? 'Close' : 'Far')
+                : (id => id == null ? 'Far' : id <= 5 ? 'Close' : id <= 11 ? 'Near' : 'Far');
             const sepRow = document.createElement('div');
             Object.assign(sepRow.style, { display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px', fontSize: '11px' });
             const sepLbl = document.createElement('label');
@@ -2138,10 +2230,10 @@ const SystemEditor = (() => {
                 background: '#0d1117', border: `1px solid ${P.border}`,
                 color: P.accent, fontFamily: 'inherit', fontSize: '11px', padding: '2px 4px',
             });
-            ['Companion', 'Close', 'Near', 'Far'].forEach(opt => {
+            _roleChoices.forEach(opt => {
                 const o = document.createElement('option');
                 o.value = opt; o.textContent = opt;
-                if ((star.role || 'Companion') === opt) o.selected = true;
+                if ((star.role || (_isCT ? 'Far' : 'Companion')) === opt) o.selected = true;
                 sepSel.appendChild(o);
             });
             sepSel.addEventListener('change', () => {
@@ -2271,7 +2363,14 @@ const SystemEditor = (() => {
         primarySummary.appendChild(_btn('+World', 'Add terrestrial world', () => _addBody(primaryStar._id, 'World')));
         primarySummary.appendChild(_btn('+GG',    'Add gas giant',         () => _addBody(primaryStar._id, 'Gas Giant')));
         primarySummary.appendChild(_btn('+Belt',  'Add planetoid belt',    () => _addBody(primaryStar._id, 'Belt')));
-        primarySummary.appendChild(_btn('+Comp',      'Add companion star to primary',  () => _addStar('Companion',  primaryStar._id)));
+        // CT has no discretionary "Companion" placement — real CT companions only arise from
+        // the Binary/Trinary Nature roll at generation time, placed via CT_COMPANION_ORBIT_TABLE
+        // (Close / a rolled numeric orbit slot / Far), not a freeform orbitId. Offering +Comp
+        // for CT wrote a companion the CT engine's own orbit-ordering logic couldn't interpret,
+        // producing mismatched ordering across the Edit panel, orrery, and accordion.
+        if (_workingCopy.engine !== 'CT') {
+            primarySummary.appendChild(_btn('+Comp', 'Add companion star to primary', () => _addStar('Companion', primaryStar._id)));
+        }
         primarySummary.appendChild(_btn('+Secondary', 'Add secondary star (Close/Near/Far)', () => _addStar('Far', primaryStar._id)));
         primaryDetails.appendChild(primarySummary);
 
@@ -2522,7 +2621,7 @@ const SystemEditor = (() => {
         // Null age → 5 Gyr default (reasonable for inhabited systems)
         if (seedSys.age == null) seedSys.age = 5.0;
 
-        for (const star of seedSys.stars) {
+        const resolveOne = star => {
             const sType   = star.sType   || star.type   || 'G';
             const subType = star.decimal ?? star.subType ?? 5;
             const sClass  = star.size    || star.sClass  || 'V';
@@ -2539,6 +2638,19 @@ const SystemEditor = (() => {
 
             if (star.mao == null && typeof eng.getMAO === 'function') {
                 star.mao = eng.getMAO(sType, subType, sClass);
+            }
+        };
+
+        for (const star of seedSys.stars) {
+            resolveOne(star);
+            // CT: a Far companion's nestedSystem.stars[0] is a separate shallow-copied object
+            // (CT.write(), system_editor.js — copied to break circularity, not the same
+            // reference as `star`), snapshotted before this function runs. Resolve it too,
+            // rather than leaving it permanently null — otherwise a manually-added companion's
+            // own bodies would derive physics (mass-dependent thermal/orbital calcs) against an
+            // unresolved star (OW-19).
+            if (star.nestedSystem && Array.isArray(star.nestedSystem.stars)) {
+                star.nestedSystem.stars.forEach(resolveOne);
             }
         }
 
@@ -2611,7 +2723,11 @@ const SystemEditor = (() => {
 
         const adapter = _ENGINE_ADAPTERS[engine];
         if (adapter) {
-            Object.assign(seed, adapter.write(wc, starIdxById));
+            // engStars passed through so an adapter can attach data directly onto a specific
+            // seeded star object (e.g. CT's write() attaching a Far companion's own nestedSystem
+            // orbit list) — write() previously only returned top-level seed fields, with no way
+            // to reach into an individual star's own seed object.
+            Object.assign(seed, adapter.write(wc, starIdxById, engStars));
         }
 
         return seed;

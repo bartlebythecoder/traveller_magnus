@@ -60,11 +60,38 @@
     }
 
     /**
+     * CT's RAW tables (STAR_MASS, LUM, ZONE_H_TABLE) only tabulate spectral
+     * subtypes at 0/5 (plus a 9 endpoint for M-class) — matching how CT's own
+     * dice rolls generate a decimal (tRoll1D <=3 -> 0, else 5). The System
+     * Editor's manual-creation dialog and parseManualStars both allow any
+     * subtype 0-9, so a value like "F7" has no exact table entry. Snap to the
+     * nearest tabulated subtype of the same spectral type rather than
+     * silently falling back to a flat default (was masking real mass/lum/HZ
+     * data behind 1.0/null for any non-0/5/9 manual subtype).
+     */
+    function _nearestTableKey(tableForSize, specKey) {
+        if (!tableForSize) return null;
+        if (tableForSize[specKey] !== undefined) return specKey;
+        const m = /^([A-Za-z]+)(\d+)$/.exec(specKey);
+        if (!m) return null;
+        const type = m[1], decimal = parseInt(m[2], 10);
+        let best = null, bestDiff = Infinity;
+        for (const key in tableForSize) {
+            const km = /^([A-Za-z]+)(\d+)$/.exec(key);
+            if (!km || km[1] !== type) continue;
+            const diff = Math.abs(parseInt(km[2], 10) - decimal);
+            if (diff < bestDiff) { bestDiff = diff; best = key; }
+        }
+        return best;
+    }
+
+    /**
      * Look up a star's mass from the STAR_MASS table.
      */
     function _starMass(size, specKey) {
         const t = starMassLookup();
-        return (t[size] && t[size][specKey]) || 1.0;
+        const key = t[size] ? _nearestTableKey(t[size], specKey) : null;
+        return key ? t[size][key] : 1.0;
     }
 
     /**
@@ -72,7 +99,8 @@
      */
     function _starLum(size, specKey) {
         const t = lumLookup();
-        return (t[size] && t[size][specKey]) || 1.0;
+        const key = t[size] ? _nearestTableKey(t[size], specKey) : null;
+        return key ? t[size][key] : 1.0;
     }
 
     /**
@@ -607,7 +635,10 @@
         const zt = zoneTables();
         const table = zt[size];
         if (!table) return 'O';
-        const zoneList = table[spectralKey] || table.default || [];
+        // Snap an off-table subtype to the nearest tabulated one — see
+        // _nearestTableKey for the shared rationale.
+        const key = _nearestTableKey(table, spectralKey);
+        const zoneList = (key && table[key]) || table.default || [];
         if (orbitNum < 0) return '-';
         if (orbitNum >= zoneList.length) return 'O';
         return zoneList[orbitNum] || 'O';
@@ -738,7 +769,11 @@
         isOrbitValid,
         resolveAnomalies,
         spawnFailsafeOrbit,
-        interpolateOrbitAU
+        interpolateOrbitAU,
+        nearestTableKey: _nearestTableKey,
+        starMass: _starMass,
+        starLuminosity: _starLum,
+        stellarDiam: _stellarDiam
     };
 
 }));

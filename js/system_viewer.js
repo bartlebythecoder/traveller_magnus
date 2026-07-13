@@ -348,12 +348,16 @@ const SystemViewer = (() => {
             };
         });
 
-        // Worlds — flattened from sys.orbits[]
+        // Worlds — flattened from sys.orbits[]. Read the body's own w.distAU (always freshly
+        // recomputed from the current orbit every generation pass — ct_bottomup_generator.js's
+        // internalPhysicalPass) rather than slot.distAU (a write-time-only echo of the seed
+        // that's never refreshed after a Preview — see OW-25). Matches the pattern captured
+        // planets already use correctly, two lines below.
         const worlds = [];
         (sys.orbits || []).forEach(slot => {
             const w = slot.contents;
             if (!w || w.type === 'Empty') return;
-            worlds.push(_normCTWorld(w, slot.distAU || 0, mw));
+            worlds.push(_normCTWorld(w, w.distAU || 0, mw));
         });
         // Captured planets (anomalies)
         (sys.capturedPlanets || []).forEach(w => {
@@ -371,7 +375,7 @@ const SystemViewer = (() => {
             (s.nestedSystem.orbits || []).forEach(slot => {
                 const w = slot.contents;
                 if (!w || w.type === 'Empty') return;
-                worlds.push(_normCTWorld(w, slot.distAU || 0, mw, i));
+                worlds.push(_normCTWorld(w, w.distAU || 0, mw, i));
             });
             (s.nestedSystem.capturedPlanets || []).forEach(w => {
                 if (w && w.type !== 'Empty') worlds.push(_normCTWorld(w, w.distAU || 0, mw, i));
@@ -1084,9 +1088,10 @@ const SystemViewer = (() => {
         });
         _pauseBtn.addEventListener('click', _togglePause);
 
-        // System Editor is tested against MgT2E, CT, T5, RTT, and AoW systems — hide "Edit System" for all other engines.
+        // T5/RTT/AoW System Editor support is preliminary and slated for an overhaul — only
+        // MgT2E and CT are exposed to users for editing for now.
         let editBtn = null;
-        if (edition === 'MgT2E' || edition === 'CT' || edition === 'T5' || edition === 'RTT' || edition === 'AoW') {
+        if (edition === 'MgT2E' || edition === 'CT') {
             editBtn = document.createElement('button');
             editBtn.id = 'sv-edit-btn';
             editBtn.textContent = 'Edit System';

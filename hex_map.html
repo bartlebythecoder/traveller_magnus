@@ -73,6 +73,11 @@
     <!-- Modular JavaScript Input Handling -->
     <script src="js/input_init.js" defer></script>
     <script src="js/system_viewer.js" defer></script>
+    <script src="js/mgt2e_editor_adapter.js" defer></script>
+    <script src="js/ct_editor_adapter.js" defer></script>
+    <script src="js/t5_editor_adapter.js" defer></script>
+    <script src="js/rtt_editor_adapter.js" defer></script>
+    <script src="js/aow_editor_adapter.js" defer></script>
     <script src="js/system_editor.js" defer></script>
     <script src="js/surface_viewer.js" defer></script>
     <script src="js/obsidian_exporter.js" defer></script>
@@ -1397,14 +1402,14 @@
                 <label style="color: #c5c6c7; cursor: pointer; display: flex; align-items: center; gap: 10px;">
                     <input type="radio" name="se-engine-choice" value="CT"> Classic Traveller (CT)
                 </label>
-                <label style="color: #c5c6c7; cursor: pointer; display: flex; align-items: center; gap: 10px;">
-                    <input type="radio" name="se-engine-choice" value="T5"> Traveller 5 (T5)
+                <label style="color: #6b6f73; cursor: not-allowed; display: flex; align-items: center; gap: 10px;" title="Not yet available in the System Editor">
+                    <input type="radio" name="se-engine-choice" value="T5" disabled> Traveller 5 (T5) <span style="font-size: 0.75rem; color: #45a29e;">(coming soon)</span>
                 </label>
-                <label style="color: #c5c6c7; cursor: pointer; display: flex; align-items: center; gap: 10px;">
-                    <input type="radio" name="se-engine-choice" value="AoW"> Architect of Worlds (AoW)
+                <label style="color: #6b6f73; cursor: not-allowed; display: flex; align-items: center; gap: 10px;" title="Not yet available in the System Editor">
+                    <input type="radio" name="se-engine-choice" value="AoW" disabled> Architect of Worlds (AoW) <span style="font-size: 0.75rem; color: #45a29e;">(coming soon)</span>
                 </label>
-                <label style="color: #c5c6c7; cursor: pointer; display: flex; align-items: center; gap: 10px;">
-                    <input type="radio" name="se-engine-choice" value="RTT"> RTT WorldGen (RTT)
+                <label style="color: #6b6f73; cursor: not-allowed; display: flex; align-items: center; gap: 10px;" title="Not yet available in the System Editor">
+                    <input type="radio" name="se-engine-choice" value="RTT" disabled> RTT WorldGen (RTT) <span style="font-size: 0.75rem; color: #45a29e;">(coming soon)</span>
                 </label>
             </div>
             <div style="border-top: 1px solid #45a29e33; margin: 16px 0; padding-top: 16px;">

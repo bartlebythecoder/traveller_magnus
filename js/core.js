@@ -711,11 +711,23 @@ function applyCTOrbitalNames(sys) {
                      ((typeof getNextSystemName === 'function') ? getNextSystemName(sys.hexId || '') : 'Unknown');
     if (_mw && !_mw.name) _mw.name = _sysName;
 
-    // CT has a flat orbit pool with no per-star attribution — use single ordinal sequence
-    const bodies = sys.orbits
+    // CT has a flat orbit pool with no per-star attribution — use a single ordinal sequence.
+    // Captured Planets (RAW Book 6 anomalies that sit outside the normal discrete orbit-slot
+    // sequence, sys.capturedPlanets — see ct_bottomup_generator.js) are merged in here, sorted
+    // by real distance (distAU) rather than orbit-slot number so they interleave at their true
+    // position — same order hex_editor.js's accordion already renders them in. Without this, a
+    // captured planet's `.name` was never set at all; the accordion's input `placeholder`
+    // (computed from that same ordinal position) made it merely *look* named, while the real
+    // field stayed permanently blank — visible the moment System Editor read `w.name` directly.
+    const orbitBodies = sys.orbits
         .filter(slot => slot.contents && slot.contents.type !== 'Empty' && slot.contents.type !== 'Mainworld')
-        .sort((a, b) => (a.orbit || 0) - (b.orbit || 0))
-        .map(slot => slot.contents);
+        .map(slot => ({ body: slot.contents, sortAU: slot.contents.distAU ?? slot.orbit ?? 0 }));
+    const capturedBodies = (sys.capturedPlanets || [])
+        .filter(p => p.type !== 'Mainworld')
+        .map(p => ({ body: p, sortAU: p.distAU ?? p.orbit ?? 0 }));
+    const bodies = [...orbitBodies, ...capturedBodies]
+        .sort((a, b) => a.sortAU - b.sortAU)
+        .map(e => e.body);
 
     let _ordinal = 1;
     bodies.forEach(w => {

@@ -273,7 +273,16 @@ function calculateMaxOrbits(star) {
  * seed-orbits-verbatim branch so sys.hzco is resolved consistently either way.
  */
 function _resolveHzOrbit(primary, hzOverride) {
-    const rawHz = zoneHTable[primary.size] ? zoneHTable[primary.size][primary.specKey] : -99;
+    // ZONE_H_TABLE only tabulates subtypes at 0/5 (plus a 9 endpoint for
+    // M-class) — CT_StellarEngine.nearestTableKey snaps a manually-entered
+    // subtype like "F7" to the nearest tabulated one ("F5") instead of
+    // missing the lookup entirely. See ct_stellar_engine.js's _nearestTableKey
+    // for the shared rationale (also used for mass/luminosity lookups).
+    const sizeTable = zoneHTable[primary.size];
+    const key = (sizeTable && typeof CT_StellarEngine !== 'undefined')
+        ? CT_StellarEngine.nearestTableKey(sizeTable, primary.specKey)
+        : null;
+    const rawHz = key ? sizeTable[key] : -99;
     const hz = (hzOverride != null) ? hzOverride : rawHz;
     return (hz >= 0) ? hz : null;
 }
@@ -397,7 +406,14 @@ function internalPhysicalPass(sys) {
         tSection(`Orbit ${slot.orbit} - ${body.type}`);
         
         // Basic Physics Setup
-        body.distAU = orbitalAU[Math.min(slot.orbit, orbitalAU.length - 1)] || 1.0;
+        // orbitalAU is a plain array indexed by integer orbit slot (0="Orbit 0"=0.2 AU, 1=0.4
+        // AU, ...) — a fractional slot.orbit (e.g. a System-Editor-seeded body left at 0.2
+        // instead of an integer slot number) misses the array index entirely (arr[0.2] is
+        // undefined, not an interpolated value) and silently fell through to the `|| 1.0`
+        // fallback, putting the body at the wrong AU regardless of its real orbit — including
+        // sorting it *behind* farther-out bodies in hex_editor.js's by-distAU accordion sort.
+        // Math.floor degrades to the nearest real slot instead of a fixed 1.0 AU guess.
+        body.distAU = orbitalAU[Math.min(Math.floor(slot.orbit), orbitalAU.length - 1)] || 1.0;
 
         // Generate Physicals (Size, Atmo, Hydro)
         if (physicalGen) physicalGen(body, slot.zone);
@@ -519,12 +535,93 @@ function processBottomUpSatellites(sys) {
         // legitimately rolls zero moons is still recognized as "already generated" next pass.
         if (parent.type === 'Gas Giant') parent._satellitesGenerated = true;
 
+        // Shared across both the backfill pass (below) and the fresh-roll loop, so a
+        // System-Editor-seeded moon's assigned orbit and a freshly-rolled one can't collide.
+        const occupiedRadii = new Set();
+        let cumulativeDM = 0;
+
+        // Backfill physical stats for any pre-existing (System-Editor-seeded) satellite that
+        // never went through generation — `distAU` is the tell, since every satellite below
+        // (fresh-rolled or backfilled) always gets one. Without this, a moon added via +Moon
+        // (mainworld or not — OW-24) only ever received UWP digits explicitly typed via the
+        // Seed UWP boxes and, if it happened to be the mainworld, whatever
+        // processBottomUpDesignation's socialGen() derives from mostly-undefined fields —
+        // distAU/gravity/mass/temperature/rotationPeriod/axialTilt were never computed at all,
+        // leaving those fields permanently blank in the accordion. Mirrors the fresh-roll loop
+        // immediately below field-for-field, but only fills in what's missing: a seeded size
+        // (including OW-22's 'S'/'R' codes) or pd is left untouched.
+        (parent.satellites || []).forEach(sat => {
+            if (sat.distAU !== undefined) return; // already generated
+
+            if (sat.size === undefined) {
+                let sizeCode;
+                if (parent.type === 'Gas Giant') {
+                    if (parent.size === 'Large') {
+                        const roll = tRoll2D('LGG Sat Size Roll (2D-4, seeded moon backfill)');
+                        const result = roll - 4;
+                        sizeCode = result === 0 ? 'R' : (result < 0 ? 'S' : result);
+                    } else {
+                        const roll = tRoll2D('SGG Sat Size Roll (2D-6, seeded moon backfill)');
+                        const result = roll - 6;
+                        sizeCode = result === 0 ? 'R' : (result < 0 ? 'S' : result);
+                    }
+                } else {
+                    const pSize = (typeof parent.size === 'number') ? parent.size : 0;
+                    const roll = tRoll1D('Terrestrial Sat Size Roll (1D, seeded moon backfill)');
+                    const result = pSize - roll;
+                    sizeCode = result === 0 ? 'R' : (result < 0 ? 'S' : result);
+                }
+                sat.size = sizeCode;
+            }
+            if (sat.size === 'R') sat.type = 'Ring';
+
+            if (sat.pd === undefined || sat.pd === null) {
+                let pd = null, orbitType = '', attempts = 0;
+                while (attempts < 5) {
+                    attempts++;
+                    if (sat.size === 'R') {
+                        orbitType = 'Ring';
+                        const idx = tRoll1D('Ring Orbit Roll (1D, seeded moon backfill)');
+                        pd = (satOrbitsTable.Ring && satOrbitsTable.Ring[idx]) || 1;
+                    } else {
+                        const orbitRoll = Math.max(2, tRoll2D('Orbit Type Roll (seeded moon backfill)') - cumulativeDM);
+                        if (orbitRoll >= 12 && parent.type === 'Gas Giant') orbitType = 'Extreme';
+                        else if (orbitRoll >= 8) orbitType = 'Far';
+                        else orbitType = 'Close';
+                        const distRoll = tRoll2D(`Orbit Distance (${orbitType}, seeded moon backfill)`);
+                        const distIdx = Math.min(distRoll, (satOrbitsTable[orbitType] || []).length - 1);
+                        pd = (satOrbitsTable[orbitType] && satOrbitsTable[orbitType][distIdx]) || 3;
+                    }
+                    if (!occupiedRadii.has(pd)) break;
+                    pd = null;
+                }
+                if (pd === null) pd = 3;
+                sat.pd = pd;
+                sat.orbitType = orbitType;
+            }
+            occupiedRadii.add(sat.pd);
+            cumulativeDM++;
+
+            sat.parentType = parent.type;
+            sat.orbit = parent.orbit;
+            sat.distAU = parent.distAU;
+            sat.zone = parent.zone;
+
+            if (sat.size === 'R') {
+                if (sat.atm   === undefined) sat.atm   = 0;
+                if (sat.hydro === undefined) sat.hydro = 0;
+                if (sat.pop   === undefined) sat.pop   = 0;
+            } else {
+                if (physicalGen) physicalGen(sat, sat.zone);
+                if (popGen) popGen(sat);
+                if (derivedPhysicsProcessor) derivedPhysicsProcessor(sat, sys.stars[0]);
+            }
+            tResult('Backfilled Seeded Satellite', `${sat.size} ${sat.type}`, 'CT 1.3: Satellite Hierarchy');
+        });
+
         if (count > 0) {
             tSection(`${parent.type} at Orbit ${parent.orbit} - ${count} Satellites`);
             if (!parent.satellites) parent.satellites = [];
-            
-            const occupiedRadii = new Set();
-            let cumulativeDM = 0;
 
             for (let i = 0; i < count; i++) {
                 let sizeCode;
@@ -622,11 +719,15 @@ function processBottomUpSatellites(sys) {
                 parent.satellites.push(sat);
                 tResult(`Satellite ${i+1}`, `${finalSize} ${finalType}`, 'CT 1.3: Satellite Hierarchy');
             }
+        }
 
-            // Store in orbital-distance order (matches Mongoose's equivalent fix) so every
-            // consumer (accordion, orrery, System Editor) sees a naturally-sorted list without
-            // each needing its own defensive re-sort. applyCTOrbitalNames (core.js) relies on
-            // this order to assign closest-first alphabetical names.
+        // Store in orbital-distance order (matches Mongoose's equivalent fix) so every
+        // consumer (accordion, orrery, System Editor) sees a naturally-sorted list without
+        // each needing its own defensive re-sort. applyCTOrbitalNames (core.js) relies on
+        // this order to assign closest-first alphabetical names. Runs unconditionally (not
+        // just when count > 0) since the backfill pass above can assign/change `pd` on its
+        // own with zero freshly-rolled satellites added.
+        if (parent.satellites && parent.satellites.length > 0) {
             parent.satellites.sort((a, b) => (a.pd || 0) - (b.pd || 0));
         }
     });
@@ -900,7 +1001,16 @@ function designateMainworld(sys) {
 function getZoneForOrbit(size, spectralKey, orbitNum) {
     const table = zoneTables[size];
     if (!table) return 'O';
-    const zoneList = table[spectralKey] || table.default || [];
+    // ZONE_TABLES is keyed the same way as ZONE_H_TABLE (subtypes at 0/5, plus
+    // a 9 endpoint for M-class) — snap a manually-entered off-table subtype
+    // (e.g. "F7") to the nearest tabulated one instead of silently falling
+    // through to an empty zone list, which was misclassifying every orbit as
+    // 'O' regardless of actual position (see _resolveHzOrbit for the HZCO
+    // counterpart of this same gap).
+    const key = (typeof CT_StellarEngine !== 'undefined')
+        ? CT_StellarEngine.nearestTableKey(table, spectralKey)
+        : spectralKey;
+    const zoneList = (key && table[key]) || table.default || [];
     if (orbitNum < 0) return '-';
     if (orbitNum >= zoneList.length) return 'O';
     return zoneList[orbitNum] || 'O';

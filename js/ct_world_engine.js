@@ -385,25 +385,44 @@ function finalizeMainworldSocial(world) {
         return world;
     }
 
-    // Govt: 2D-7 + Pop
-    tDM('Standard Gov', -7);
-    tDM('Population Code', world.pop);
-    let govRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Government Roll') : 7);
-    world.gov = Math.max(0, Math.min(15, govRoll - 7 + world.pop));
-    tResult('Government Code', world.gov, 'CT 3.1: Social Stats');
+    // Govt: 2D-7 + Pop. finalizeSubordinateSocial (below) already checks _ctFieldIsManual
+    // before rerolling gov/law/tl — this mainworld path never did (only starport got that
+    // guard, in generateSocial above), so a manually-typed "Seed UWP digits" gov/law/tl for the
+    // mainworld was silently rerolled on every Preview/Fill & Save, changing the UWP the user
+    // just typed.
+    if (_ctFieldIsManual(world, 'gov')) {
+        tSkip('Government (Manually Set)');
+        tResult('Government Code', world.gov, 'CT 3.1: Social Stats');
+    } else {
+        tDM('Standard Gov', -7);
+        tDM('Population Code', world.pop);
+        let govRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Government Roll') : 7);
+        world.gov = Math.max(0, Math.min(15, govRoll - 7 + world.pop));
+        tResult('Government Code', world.gov, 'CT 3.1: Social Stats');
+    }
 
     // Law: 2D-7 + Govt
     tSection('Law Level');
-    tDM('Standard Law', -7);
-    tDM('Government Code', world.gov);
-    let lawRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Law Level Roll') : 7);
-    world.law = Math.max(0, Math.min(15, lawRoll - 7 + world.gov));
-    tResult('Law Level Code', world.law, 'CT 3.1: Social Stats');
+    if (_ctFieldIsManual(world, 'law')) {
+        tSkip('Law Level (Manually Set)');
+        tResult('Law Level Code', world.law, 'CT 3.1: Social Stats');
+    } else {
+        tDM('Standard Law', -7);
+        tDM('Government Code', world.gov);
+        let lawRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Law Level Roll') : 7);
+        world.law = Math.max(0, Math.min(15, lawRoll - 7 + world.gov));
+        tResult('Law Level Code', world.law, 'CT 3.1: Social Stats');
+    }
 
     // TL: Starport + Size + Atmo + Hydro + Pop + Gov bonuses
     tSection('Technological Level');
-    world.tl = calculateTLModular(world, true);
-    tResult('Tech Level Code', world.tl);
+    if (_ctFieldIsManual(world, 'tl')) {
+        tSkip('Tech Level (Manually Set)');
+        tResult('Tech Level Code', world.tl);
+    } else {
+        world.tl = calculateTLModular(world, true);
+        tResult('Tech Level Code', world.tl);
+    }
 
     // Trade Codes
     tSection('Trade Classifications & Zones');
@@ -426,38 +445,49 @@ function generateSocial(world) {
     // A. Starport
     tSection('Starport Generation');
     const sysData = (typeof CT_CONSTANTS !== 'undefined') ? CT_CONSTANTS.CT_SYSTEM_CONTENTS : null;
-    let spRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Mainworld Starport') : 7);
 
-    // Settings: Starport Modifier (note: in CT lower roll = better port, so positive mod = worse)
-    const ctSpMod2 = (typeof window !== 'undefined' && window.generationStarportMod !== undefined) ? window.generationStarportMod : 0;
-    if (ctSpMod2 !== 0) tResult('Settings Starport Modifier', `${ctSpMod2 > 0 ? '+' : ''}${ctSpMod2}`);
-    else tResult('Settings Starport Modifier', 'None (0)');
-    spRoll += ctSpMod2;
+    // finalizeSubordinateSocial (below) and generatePhysicals/generatePopulation all check
+    // _ctFieldIsManual before rerolling a locked field — this mainworld path never did, so a
+    // manually-typed "Seed UWP digits" starport for the mainworld was silently rerolled every
+    // time (the System Editor's UWP-seed feature, once wired into CT's write() adapter, still
+    // had no effect on the mainworld's own starport specifically).
+    if (_ctFieldIsManual(world, 'starport')) {
+        tSkip('Starport (Manually Set)');
+        tResult('Starport Class', world.starport);
+    } else {
+        let spRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Mainworld Starport') : 7);
 
-    world.starport = 'X';
+        // Settings: Starport Modifier (note: in CT lower roll = better port, so positive mod = worse)
+        const ctSpMod2 = (typeof window !== 'undefined' && window.generationStarportMod !== undefined) ? window.generationStarportMod : 0;
+        if (ctSpMod2 !== 0) tResult('Settings Starport Modifier', `${ctSpMod2 > 0 ? '+' : ''}${ctSpMod2}`);
+        else tResult('Settings Starport Modifier', 'None (0)');
+        spRoll += ctSpMod2;
 
-    if (sysData && sysData.STARPORT) {
-        for (let entry of sysData.STARPORT) {
-            if (spRoll <= entry.maxRoll) {
-                world.starport = entry.class;
-                break;
+        world.starport = 'X';
+
+        if (sysData && sysData.STARPORT) {
+            for (let entry of sysData.STARPORT) {
+                if (spRoll <= entry.maxRoll) {
+                    world.starport = entry.class;
+                    break;
+                }
             }
+        } else {
+            if (spRoll <= 4) world.starport = 'A'; else if (spRoll <= 6) world.starport = 'B'; else if (spRoll <= 8) world.starport = 'C'; else if (spRoll === 9) world.starport = 'D'; else if (spRoll <= 11) world.starport = 'E';
         }
-    } else {
-        if (spRoll <= 4) world.starport = 'A'; else if (spRoll <= 6) world.starport = 'B'; else if (spRoll <= 8) world.starport = 'C'; else if (spRoll === 9) world.starport = 'D'; else if (spRoll <= 11) world.starport = 'E';
-    }
-    tResult('Starport Class', world.starport);
+        tResult('Starport Class', world.starport);
 
-    // Settings: Starport Max cap
-    const ctStarportOrder2 = ['A', 'B', 'C', 'D', 'E', 'X'];
-    const ctSpMax2 = (typeof window !== 'undefined' && window.generationStarportMax !== undefined) ? window.generationStarportMax : 'A';
-    const ctSpMaxIdx2 = ctStarportOrder2.indexOf(ctSpMax2);
-    const ctSpCurIdx2 = ctStarportOrder2.indexOf(world.starport);
-    if (ctSpMaxIdx2 !== -1 && ctSpCurIdx2 !== -1 && ctSpCurIdx2 < ctSpMaxIdx2) {
-        tResult('Settings Starport Max', `Cap applied: ${world.starport} → ${ctSpMax2}`);
-        world.starport = ctSpMax2;
-    } else {
-        tResult('Settings Starport Max', `No cap (${world.starport} ≤ ${ctSpMax2})`);
+        // Settings: Starport Max cap
+        const ctStarportOrder2 = ['A', 'B', 'C', 'D', 'E', 'X'];
+        const ctSpMax2 = (typeof window !== 'undefined' && window.generationStarportMax !== undefined) ? window.generationStarportMax : 'A';
+        const ctSpMaxIdx2 = ctStarportOrder2.indexOf(ctSpMax2);
+        const ctSpCurIdx2 = ctStarportOrder2.indexOf(world.starport);
+        if (ctSpMaxIdx2 !== -1 && ctSpCurIdx2 !== -1 && ctSpCurIdx2 < ctSpMaxIdx2) {
+            tResult('Settings Starport Max', `Cap applied: ${world.starport} → ${ctSpMax2}`);
+            world.starport = ctSpMax2;
+        } else {
+            tResult('Settings Starport Max', `No cap (${world.starport} ≤ ${ctSpMax2})`);
+        }
     }
 
     // B. Finalize Social (Gov, Law, TL, Trade)

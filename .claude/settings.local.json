@@ -13,7 +13,10 @@
       "Bash(node *)",
       "Bash(npm init *)",
       "Bash(npm install *)",
-      "Bash(npx playwright *)"
+      "Bash(npx playwright *)",
+      "Bash(npx -y -p playwright node ./_tmp_verify_adapter_split.js)",
+      "Read(//c/Users/sean/AppData/Local/npm-cache/_npx/**)",
+      "Bash(NODE_PATH=\"/c/Users/sean/AppData/Local/npm-cache/_npx/e41f203b7505f1fb/node_modules\" node ./_tmp_verify_regina.js)"
     ]
   }
 }

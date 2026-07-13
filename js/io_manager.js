@@ -314,6 +314,14 @@ async function clearCanvas() {
     );
     if (!confirmed) return;
 
+    // Leave the orrery/System Viewer (and anything stacked on top of it — Surface/Approach
+    // Viewer) if open — otherwise its now-stale system (from a hex that no longer exists
+    // post-wipe) stays on screen, making it look like Clear Canvas did nothing. Closed
+    // innermost-first since each viewer's own close() may assume the one above it is gone.
+    if (typeof ApproachViewer !== 'undefined' && ApproachViewer.isOpen()) ApproachViewer.close();
+    if (typeof SurfaceViewer  !== 'undefined' && SurfaceViewer.isOpen())  SurfaceViewer.close();
+    if (typeof SystemViewer   !== 'undefined' && SystemViewer.isOpen())   SystemViewer.close();
+
     // Wipe IndexedDB so the next startup doesn't reload old data
     if (window.dbManager) await window.dbManager.clearDB();
 

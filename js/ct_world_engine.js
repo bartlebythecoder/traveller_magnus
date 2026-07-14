@@ -53,7 +53,18 @@ function rollGasGiantPresence() {
  * Rolls Size, Atmosphere, and Hydrographics using legacy algorithms.
  */
 function generatePhysicals(body, zone) {
-    if (body.type === 'Gas Giant' || body.type === 'Planetoid Belt' || body.type === 'Empty' || body.type === 'Nature') {
+    if (body.type === 'Planetoid Belt') {
+        // RAW: a belt's size digit is always 0 — not rollable or manually settable — mirroring
+        // MgT2E's own unconditional `body.size = 0` for the same body type
+        // (mgt2e_world_engine.js). Automatic skeleton placement (ct_bottomup_generator.js)
+        // stamps this in directly, but a belt added via the System Editor's +Belt button never
+        // goes through that path, so size stayed `undefined` for its entire editing session —
+        // tripping the UWP auditor's "Planetoid Belt has size undefined (must be 0)" check and
+        // corrupting mass/gravity/diamKm with NaN (ct_physical_library.js's Number(undefined)).
+        body.size = 0;
+        return body;
+    }
+    if (body.type === 'Gas Giant' || body.type === 'Empty' || body.type === 'Nature') {
         return body;
     }
 

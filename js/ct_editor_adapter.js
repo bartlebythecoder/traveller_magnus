@@ -96,10 +96,20 @@
         const raw = m._raw || {};
         const fields = {};
         const mf = [];
-        ['pd', 'size', 'distAU', 'zone', 'orbitType', 'parentType', 'orbit',
+        ['size', 'distAU', 'zone', 'orbitType', 'parentType', 'orbit',
          'diamKm', 'mass', 'gravity', 'temperature', 'rotationPeriod', 'axialTilt'].forEach(f => {
             if (raw[f] !== undefined) fields[f] = raw[f];
         });
+        // pd (orbital distance) is deliberately sourced from the live m.pd, not raw.pd above —
+        // the "Orbit (⌀)" field (system_editor.js _derivedRow) edits m.pd directly, and
+        // backfillFromGenerated() already keeps m.pd in sync with the generator's own result
+        // after every Preview, so raw.pd is never more current than m.pd and is redundant at
+        // best. Sourcing from raw.pd instead had two bugs: (1) typing a new orbit value seeded
+        // the generator with the pre-edit raw.pd, which it then echoed straight back, silently
+        // reverting the user's edit every Preview/Fill & Save; (2) clearing the field (m.pd set
+        // to undefined, meant to hand the moon back to the engine for a fresh roll per the "×"
+        // button's own comment) still leaked the stale raw.pd through, so Clear never worked.
+        if (m.pd !== undefined) fields.pd = m.pd;
         if (m.uwp && m._raw) {
             ['atm', 'hydro', 'pop', 'gov', 'law', 'starport', 'tl'].forEach(f => {
                 if (raw[f] !== undefined) { fields[f] = raw[f]; mf.push(f); }
@@ -123,11 +133,20 @@
 
     // Shared by restoreManualFields()/backfillFromGenerated() below: CT's generated bodies live
     // under newSys.orbits[].contents plus newSys.capturedPlanets[] (not a flat list like MgT2E's
-    // newSys.worlds), so both need the same flattening pass first.
+    // newSys.worlds), so both need the same flattening pass first. Recurses into Far-companion
+    // nestedSystems the same way ct_bottomup_generator.js's own internal passes do (see e.g.
+    // processBottomUpSatellites' sys.stars.forEach(star => star.nestedSystem) recursion) —
+    // without this, a companion star's own worlds were never found here, so
+    // backfillFromGenerated() never wrote their rolled Starport/Size/Atm/Hydro/Pop/Gov/Law/TL
+    // into _raw, _ctUwpLockFor's lock never engaged for them, and every companion-star world
+    // silently re-rolled its entire UWP from scratch on every single Preview/Fill & Save.
     function _ctFlattenBodies(newSys) {
         const genBodies = [];
         (newSys.orbits || []).forEach(slot => { if (slot.contents) genBodies.push(slot.contents); });
         (newSys.capturedPlanets || []).forEach(p => genBodies.push(p));
+        (newSys.stars || []).forEach(star => {
+            if (star.nestedSystem) genBodies.push(..._ctFlattenBodies(star.nestedSystem));
+        });
         return genBodies;
     }
 

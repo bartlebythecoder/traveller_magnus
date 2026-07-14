@@ -186,6 +186,12 @@
                     parentStarIdx,
                     travelZone:    SE().normTz(b.travelZone),
                     _extSocioFrozen: _mgt2eExtSocioSeedFor(b._raw),
+                    // Carried forward verbatim from the last generation, the same way moons
+                    // are (below) — without this, mgt2e_world_engine.js's `w.rings = w.rings ||
+                    // []` (run at the start of every satellite pass) always saw an undefined
+                    // seed field and silently wiped an already-generated ring back to empty on
+                    // every single Preview/Fill & Save, even with zero user edits.
+                    rings: (b._raw && b._raw.rings) || [],
                     moons: (b.moons || []).map(m => {
                         const { fields: mUwpLock, mf: mExtraMF } = _mgt2eUwpLockFor(m);
                         const { fields: mRotFields, mf: mRotMF } = _mgt2ePhysSeed(m._raw || {});

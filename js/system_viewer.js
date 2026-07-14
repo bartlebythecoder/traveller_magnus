@@ -1455,6 +1455,20 @@ const SystemViewer = (() => {
         ctx.restore();
     }
 
+    // A planetary ring — a thin static stroked circle, not an animated orbiting dot. Shared by
+    // CT (a moon-slot whose size roll came up 'R', living inside w.moons[]/satellites[]) and
+    // MgT2E (the same RAW rule, but stored separately on the planet as w.rings[] rather than
+    // inside w.moons[] — see mgt2e_world_engine.js's moon-size-roll-of-'R' branches). Distinct
+    // styling from _drawBeltRing's dashed belt line (solid, thinner, silvery) so the two read as
+    // different things at a glance.
+    function _drawStaticRing(ctx, px, py, dist) {
+        ctx.beginPath();
+        ctx.arc(px, py, dist, 0, Math.PI * 2);
+        ctx.strokeStyle = _lightMode ? '#8a8f9488' : '#c8ccd0aa';
+        ctx.lineWidth   = 1;
+        ctx.stroke();
+    }
+
     function _drawWorld(ctx, w, px, py, elapsed_years, wIdx) {
         const r     = _worldBodyRadius(w);
         const color = (_hideMainworldHighlight && w.type === 'Mainworld') ? '#a0a0b0' : _worldColor(w);
@@ -1474,10 +1488,21 @@ const SystemViewer = (() => {
 
         const moons = (w.moons || []).filter(m => m.type !== 'Empty');
         if (!_hideMoons) moons.forEach((m, mi) => {
+            const mDist = r + 10 + mi * 6;
+
+            // A Ring (CT: size === 'R', from either generation path — Bottom-Up also sets
+            // type:'Ring' but Top-Down doesn't, so size is the one field both paths agree on)
+            // is a band around the planet, not a discrete orbiting body — skip the per-frame
+            // orbital angle entirely and draw a thin static circle instead.
+            if (m.size === 'R') {
+                _drawStaticRing(ctx, px, py, mDist);
+                _hitBodies.push({ kind: 'moon', body: m, cx: px, cy: py, r: mDist + 3, innerR: mDist - 3 });
+                return;
+            }
+
             const period = _moonPeriodYears(m, w);
             const mAngle = _hashEpoch(_hexId + ':moon:' + wIdx + ':' + mi)
                          + (2 * Math.PI / period) * elapsed_years;
-            const mDist   = r + 10 + mi * 6;
             const mx          = px + mDist * Math.cos(mAngle);
             const my          = py + mDist * Math.sin(mAngle);
             const isMainworld = m.type === 'Mainworld';
@@ -1506,6 +1531,17 @@ const SystemViewer = (() => {
             }
 
             _hitBodies.push({ kind: 'moon', body: m, cx: mx, cy: my, r: Math.max(moonR + 6, 9) });
+        });
+
+        // MgT2E rings: RAW's "moon-size roll comes up Ring" outcome is stored on the planet
+        // itself (w.rings[]), not inside w.moons[] the way CT's is — see mgt2e_world_engine.js's
+        // moon-size-roll-of-'R' branches, which push({}) onto w.rings instead of w.moons. Not
+        // interleaved with the moon index sequence above, so rings get their own close-in offset.
+        const rings = w.rings || [];
+        if (!_hideMoons) rings.forEach((rg, ri) => {
+            const rDist = r + 6 + ri * 5;
+            _drawStaticRing(ctx, px, py, rDist);
+            _hitBodies.push({ kind: 'ring', body: rg, cx: px, cy: py, r: rDist + 3, innerR: rDist - 3 });
         });
 
         if (w.type === 'Mainworld' && w.name && !_hideMainworldHighlight) {

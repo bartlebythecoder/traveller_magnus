@@ -514,30 +514,43 @@ function processBottomUpSatellites(sys) {
         // _ctUwpLockFor). Without it, a Gas Giant's moon family was silently re-rolled
         // (and swapped in/out via the later seeded-cap trim) on every Preview/Fill & Save.
         const alreadyGenerated = parent.type === 'Gas Giant' ? !!parent._satellitesGenerated : !!parent.uwp;
+
+        // Determine Quantity — only rolled the first time a parent is processed; the lock
+        // above stops the family from growing on every pass. But a moon added to an
+        // *already-generated* parent (e.g. +Moon on a Gas Giant/world reopened in the
+        // System Editor) must still reach the backfill pass below — returning early here
+        // used to skip that pass entirely, leaving such a moon's distAU/gravity/mass/
+        // temp/day/tilt permanently blank (found from a user report: a moon showing a
+        // UWP but every physical stat empty).
+        let count = 0;
         if (alreadyGenerated) {
             tSkip(`Satellite Quantity (${parent.name || parent.type} already generated)`);
-            return;
-        }
-
-        // Determine Quantity
-        let count = 0;
-        if (parent.type === 'Gas Giant') {
-            if (parent.size === 'Large') {
-                count = tRoll2D('LGG Satellite Qty (2D)');
-            } else {
-                count = Math.max(0, tRoll2D('SGG Satellite Qty (2D-4)') - 4);
-            }
         } else {
-             count = Math.max(0, tRoll1D('Terrestrial Satellite Qty (1D-3)') - 3);
-        }
+            if (parent.type === 'Gas Giant') {
+                if (parent.size === 'Large') {
+                    count = tRoll2D('LGG Satellite Qty (2D)');
+                } else {
+                    count = Math.max(0, tRoll2D('SGG Satellite Qty (2D-4)') - 4);
+                }
+            } else {
+                 count = Math.max(0, tRoll1D('Terrestrial Satellite Qty (1D-3)') - 3);
+            }
 
-        // Stamp the lock signal now (before any early-exit below) so a Gas Giant that
-        // legitimately rolls zero moons is still recognized as "already generated" next pass.
-        if (parent.type === 'Gas Giant') parent._satellitesGenerated = true;
+            // Stamp the lock signal now (before any early-exit below) so a Gas Giant that
+            // legitimately rolls zero moons is still recognized as "already generated" next pass.
+            if (parent.type === 'Gas Giant') parent._satellitesGenerated = true;
+        }
 
         // Shared across both the backfill pass (below) and the fresh-roll loop, so a
         // System-Editor-seeded moon's assigned orbit and a freshly-rolled one can't collide.
+        // When the parent is locked, seed it with every already-fully-generated satellite's
+        // orbit so a moon backfilled below can't land on one an existing moon already occupies.
         const occupiedRadii = new Set();
+        if (alreadyGenerated) {
+            (parent.satellites || []).forEach(sat => {
+                if (sat.distAU !== undefined && sat.pd != null) occupiedRadii.add(sat.pd);
+            });
+        }
         let cumulativeDM = 0;
 
         // Backfill physical stats for any pre-existing (System-Editor-seeded) satellite that
@@ -754,12 +767,18 @@ function processBottomUpSatellites(sys) {
  * Uses parallel positional arrays rather than object identity, matching CT's two separate
  * body lists (sys.orbits[].contents / sys.capturedPlanets) — safe because neither list is
  * reordered or resized between this capture and the later trim, only .satellites is mutated.
+ * Recurses into Far-companion nestedSystems (caps.nested), mirroring the same
+ * sys.stars.forEach(star => star.nestedSystem) recursion processBottomUpSatellites() itself
+ * uses to roll their moons in the first place — without this, a body added under a companion
+ * star was rolling fresh moons every pass with nothing ever capping them back down, since the
+ * original OW-11 Gap 2 fix only ever looked at the top-level sys.orbits/sys.capturedPlanets.
  */
 function captureCTSatelliteCaps(sys, seedSys) {
     if (!seedSys || seedSys._allowAddBodies) return null;
     return {
         orbits: (sys.orbits || []).map(slot => (slot.contents && slot.contents.satellites) ? slot.contents.satellites.length : 0),
         captured: (sys.capturedPlanets || []).map(p => (p.satellites || []).length),
+        nested: (sys.stars || []).map(star => star.nestedSystem ? captureCTSatelliteCaps(star.nestedSystem, seedSys) : null),
     };
 }
 
@@ -767,7 +786,8 @@ function captureCTSatelliteCaps(sys, seedSys) {
  * Trims back any satellites processBottomUpSatellites() added beyond the count captured by
  * captureCTSatelliteCaps(), mirroring SeedRestoration.trimGeneratedMoonsToSeededCaps. Before
  * slicing, moves the mainworld moon (if any) to index 0 so the cap can never accidentally
- * drop it.
+ * drop it. Recurses into Far-companion nestedSystems the same way captureCTSatelliteCaps()
+ * captured them.
  */
 function trimCTSatellitesToSeededCaps(sys, seedSys, caps) {
     if (!caps) return;
@@ -787,6 +807,11 @@ function trimCTSatellitesToSeededCaps(sys, seedSys, caps) {
         if (slot.contents && slot.contents.type !== 'Empty') trim(slot.contents, caps.orbits[i] ?? 0);
     });
     (sys.capturedPlanets || []).forEach((p, i) => trim(p, caps.captured[i] ?? 0));
+    (sys.stars || []).forEach((star, i) => {
+        if (star.nestedSystem && caps.nested && caps.nested[i]) {
+            trimCTSatellitesToSeededCaps(star.nestedSystem, seedSys, caps.nested[i]);
+        }
+    });
 }
 
 /**

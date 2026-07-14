@@ -444,13 +444,19 @@ const SystemEditor = (() => {
 
     function _addBody(parentStarId, bodyType) {
         _pushHistory();
+        // A Planetoid Belt's size/gravity/temperature are fixed constants of the type (RAW),
+        // not rolled or user-entered — seed them the same way automatic skeleton placement
+        // already does (ct_bottomup_generator.js) so the accordion reflects the right values
+        // immediately instead of waiting on a Preview round-trip through the generator.
+        const isBelt = bodyType === 'Belt';
         _workingCopy.bodies.push({
             _id: _uid('body'), type: bodyType,
             ggType:        bodyType === 'Gas Giant' ? 'GS' : null,
             name: '', uwp: null, au: null,
             orbitId:       _nextOrbitId(parentStarId),
             travelZone:    'G', parentStarId, isMainworld: false,
-            moons: [], _manualFields: ['type'], _uwpSeed: null, _raw: {},
+            moons: [], _manualFields: ['type'], _uwpSeed: null,
+            _raw: isBelt ? { size: 0, gravity: 0, temperature: 100 } : {},
         });
         _renderAndPreview();
     }
@@ -729,11 +735,16 @@ const SystemEditor = (() => {
         const oldOrbit = draggedObj.orbitId;
         if (oldOrbit == null || targetOrbitId == null || oldOrbit === targetOrbitId) return;
 
+        // Scoped to draggedObj's own parentStarId — a Far companion runs its own independent
+        // orbit-number sequence (0..N, same range as the primary's), so without this filter,
+        // dragging a primary-star body could silently shift an unrelated companion-star body's
+        // orbitId whenever the two happened to share a numeric orbit value by coincidence, even
+        // though the two are never shown in the same drop zone and the user never touched it.
         const nonPrimaryStars = _workingCopy.stars.slice(1);
         const pool = [
             ..._workingCopy.bodies,
             ...nonPrimaryStars,
-        ].filter(obj => obj !== draggedObj && obj.orbitId != null);
+        ].filter(obj => obj !== draggedObj && obj.orbitId != null && obj.parentStarId === draggedObj.parentStarId);
 
         _pushHistory();
 
@@ -1215,8 +1226,15 @@ const SystemEditor = (() => {
                 detailPad.appendChild(uwpRow);
             }
 
-            // UWP seed boxes — only for newly added terrestrial/mainworld bodies (no generated UWP yet)
-            if (!body.uwp && body.type !== 'Belt' && body.type !== 'Gas Giant') {
+            // UWP seed boxes — only for newly added terrestrial/mainworld bodies (no generated UWP yet).
+            // CT and MgT2E Planetoid Belts are also allowed in (starport/pop/gov/law/tl only — see
+            // seedKeys below): unlike a Gas Giant, a belt's population isn't forced to 0 in either
+            // engine (CT: rules/ct_data.js's FORCED_ZERO_POP.TYPES omits 'Planetoid Belt'; MgT2E:
+            // generateSubordinateSocial/mgt2e_socio_engine.js has no belt-type exclusion for pop/
+            // gov/law/starport/tl either), matching both editions' allowance for belt outposts/
+            // colonies — so its social digits are meaningful to seed in both.
+            const isEditableBelt = body.type === 'Belt' && (_workingCopy.engine === 'CT' || _workingCopy.engine === 'MgT2E');
+            if (!body.uwp && body.type !== 'Gas Giant' && (body.type !== 'Belt' || isEditableBelt)) {
                 if (!body._uwpSeed) body._uwpSeed = { st:null, s:null, a:null, h:null, p:null, g:null, l:null, tl:null };
                 const seedSection = document.createElement('div');
                 Object.assign(seedSection.style, { marginTop: '4px', marginBottom: '3px' });
@@ -1226,7 +1244,12 @@ const SystemEditor = (() => {
                 seedSection.appendChild(seedLabel);
                 const boxRow = document.createElement('div');
                 Object.assign(boxRow.style, { display: 'flex', gap: '5px', alignItems: 'flex-end' });
-                [['st','St'],['s','S'],['a','A'],['h','H'],['p','P'],['g','G'],['l','L'],['tl','TL']].forEach(([key, lbl]) => {
+                // A belt's size/atm/hydro are RAW-fixed constants (always 0), not user choices —
+                // omit those three digit boxes so they can't be typo'd into a non-zero override.
+                const seedKeys = isEditableBelt
+                    ? [['st','St'],['p','P'],['g','G'],['l','L'],['tl','TL']]
+                    : [['st','St'],['s','S'],['a','A'],['h','H'],['p','P'],['g','G'],['l','L'],['tl','TL']];
+                seedKeys.forEach(([key, lbl]) => {
                     const cell = document.createElement('div');
                     Object.assign(cell.style, { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px' });
                     const cellLbl = document.createElement('span');
@@ -1487,9 +1510,6 @@ const SystemEditor = (() => {
             const _isCT          = _workingCopy.engine === 'CT';
             const _roleChoices   = _isCT ? ['Close', 'Far'] : ['Companion', 'Close', 'Near', 'Far'];
             const _orbitBySep    = { Companion: 0.15, Close: 0.5, Near: 6.0, Far: 12.0 };
-            const _roleFromOrbit = _isCT
-                ? (id => id == null ? 'Far' : id <= 5 ? 'Close' : 'Far')
-                : (id => id == null ? 'Far' : id <= 5 ? 'Close' : id <= 11 ? 'Near' : 'Far');
             const sepRow = document.createElement('div');
             Object.assign(sepRow.style, { display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px', fontSize: '11px' });
             const sepLbl = document.createElement('label');
@@ -1529,11 +1549,6 @@ const SystemEditor = (() => {
                 _pushHistory();
                 star.orbitId = newOrbitId;
                 if (!star._manualFields.includes('orbitId')) star._manualFields.push('orbitId');
-                if (star.role !== 'Companion') {
-                    star.role = _roleFromOrbit(newOrbitId);
-                    sepSel.value = star.role;
-                    updateCompLabel();
-                }
                 _renderAndPreview();
             });
             const compOrbitAuSpan = document.createElement('span');

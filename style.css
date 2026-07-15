@@ -852,6 +852,7 @@ body {
     user-select: none;
     display: flex;
     align-items: center;
+    gap: 6px;
 }
 
 .system-tree summary:hover {
@@ -880,6 +881,44 @@ body {
     border-left: 1px dashed #45a29e;
     margin-top: 4px;
     margin-bottom: 8px;
+}
+
+/* Label/value grid — CT accordion only (see .system-stats-lv below). Labels get only the
+   width their own text needs (auto), instead of splitting each row into two even 1fr halves
+   that leave long labels no room for their value and short labels sitting in mostly-empty
+   space. */
+.system-stats-lv {
+    display: grid;
+    grid-template-columns: auto 1fr auto 1fr;
+    gap: 4px 8px;
+    background-color: rgba(11, 12, 16, 0.5);
+    padding: 6px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    color: #c5c6c7;
+    font-size: 12px;
+}
+
+.system-stats-lv .stat-label {
+    color: #8a8f94;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+}
+
+.system-stats-lv .stat-value {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    overflow: hidden;
+    gap: 4px;
+}
+
+/* Scoped override: the shared .rtt-field-input[type=number] cap (50px) is too tight for
+   values like Distance/Mass now that they have real room in the label/value grid — widen
+   only inside this CT-specific grid so other engines' number inputs are unaffected. */
+.system-stats-lv .rtt-field-input[type="number"] {
+    max-width: 72px;
 }
 
 .system-stats {

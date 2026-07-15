@@ -127,7 +127,24 @@ function generateRTTSectorStep1(hexId, options = {}) {
 
     // If seedSys provides stars, use them directly and skip stellar dice rolls
     if (seedSys && (seedSys.stars || []).length > 0) {
-        sys.stars = seedSys.stars.map(s => Object.assign({}, s));
+        sys.stars = seedSys.stars.map(s => {
+            const star = Object.assign({}, s);
+            // A brand-new star from the System Editor (no prior _raw) never carries
+            // classification/luminosityClass — those are normally only produced by the
+            // dice-driven evolution roll below, which a seeded star must NOT go through
+            // (seeded stars are used as-is, never rerolled — see Algorithm 6). Every downstream
+            // function (e.g. calculateRTTDesirability) reads star.classification unconditionally,
+            // so it must be backfilled here from the user's own type/class choice — just the
+            // same string-formatting convention already used a few lines below, with no dice
+            // rolls and no type-shifting.
+            if (!star.luminosityClass) star.luminosityClass = star.sClass || 'V';
+            if (!star.classification) {
+                star.classification = (star.luminosityClass === 'D' || star.luminosityClass === 'L')
+                    ? star.luminosityClass
+                    : `${star.type}-${star.luminosityClass}`;
+            }
+            return star;
+        });
         sys.totalStars = sys.stars.length;
         sys.age = seedSys.age || 0;
         tResult('Stellar Source', `seed — ${sys.totalStars} star(s)`, 'RTT 1: Seeded');
@@ -318,7 +335,7 @@ function generateRTTSectorBiographer(sys, options = {}) {
             }
         }
         if (allInhabited.length > 0) {
-            let target = allInhabited[Math.floor(Math.random() * allInhabited.length)];
+            let target = allInhabited[Math.floor(rng() * allInhabited.length)];
             target.bases = target.bases || [];
             target.bases.push('Q');
             tResult('Ancient Site Found', target.orbitNumber ? `Orbit ${target.orbitNumber}` : 'Satellite', 'RTT 7.5: Ancient Sites');
@@ -890,7 +907,7 @@ function generateRTTSectorStep3(sys, options = {}) {
         for (let body of star.planetarySystem.orbits) {
             // Check for bake override
             let overrideTriggered = false;
-            if (body.orbitNumber <= affectedOrbits) {
+            if (!isManual(body, 'worldClass') && body.orbitNumber <= affectedOrbits) {
                 if (body.type === 'Dwarf Planet') {
                     body.worldClass = 'Stygian';
                     overrideTriggered = true;
@@ -944,6 +961,7 @@ function generateRTTSectorStep3(sys, options = {}) {
  * HELPER: CLASSIFY INDIVIDUAL BODY
  */
 function classifyRTTBody(body, star, zone, parent = null) {
+    if (isManual(body, 'worldClass')) return; // preserve a user-set classification, same idiom as PartA/PartB
     let type = body.type;
     let roll = 0;
 
@@ -1466,18 +1484,22 @@ function processRTTSatellites(body) {
  * HELPER: PROCESS SOCIAL AND ECONOMIC STATS
  */
 function processRTTSocialStats(body, star, dominantTL, settlementCenturies, options = {}) {
-    const _savedSocial = _rttSaveManual(body, ['industry', 'tradeCodes', 'bases']);
+    // Uninhabited early-return below bypasses the _rttRestoreManual call at the end of this
+    // function entirely (it hits `return` first) — population/government/lawLevel/starport/tl
+    // need their own inline isManual guards here, not just the outer save/restore list, or a
+    // manual value set on an Uninhabited body would be silently lost on every regeneration.
+    const _savedSocial = _rttSaveManual(body, ['industry', 'tradeCodes', 'bases', 'population', 'government', 'lawLevel', 'starport', 'tl']);
     if (!(window._currentSystemHasPop ?? true) && !isManual(body, 'population') && body.habitationType !== 'Uninhabited') {
         body.habitationType = 'Uninhabited';
     }
     if (body.habitationType === 'Uninhabited') {
-        body.population = 0;
-        body.government = 0;
-        body.lawLevel = 0;
+        if (!isManual(body, 'population')) body.population = 0;
+        if (!isManual(body, 'government')) body.government = 0;
+        if (!isManual(body, 'lawLevel')) body.lawLevel = 0;
         if (!isManual(body, 'industry')) body.industry = 0;
-        body.tl = 0;
+        if (!isManual(body, 'tl')) body.tl = 0;
         body.tradeCodes = isManual(body, 'tradeCodes') ? body.tradeCodes : [];
-        body.starport = 'X';
+        if (!isManual(body, 'starport')) body.starport = 'X';
         body.bases = isManual(body, 'bases') ? body.bases : [];
         return;
     }
@@ -1818,6 +1840,24 @@ function assignRTTBases(body, star) {
  * @param {string} [preferredId=null] - Optional _id of a seeded body to designate as mainworld
  *   instead of running the scoring election (used by Fill & Save when editor has a mainworld ref).
  */
+/**
+ * Builds the concatenated UWP string for a single RTT body from its raw component
+ * fields. Extracted from extractRTTMainworld so any body can get a UWP synthesized
+ * (RTT bodies never carry a .uwp field of their own) — the System Editor's read stub
+ * uses this for every body, not just the elected mainworld.
+ */
+function computeRTTBodyUWP(body) {
+    const port = body.starport || 'X';
+    const size = getEHexLetter(body.size);
+    const atm = getEHexLetter(body.atmosphere);
+    const hydro = getEHexLetter(body.hydrosphere);
+    const pop = getEHexLetter(body.population);
+    const gov = getEHexLetter(body.government);
+    const law = getEHexLetter(body.lawLevel);
+    const tl = getEHexLetter(body.population > 0 ? (body.tl || 0) : 0);
+    return `${port}${size}${atm}${hydro}${pop}${gov}${law}-${tl}`;
+}
+
 function extractRTTMainworld(sys, preferredId = null) {
     let bestWorld = null;
     let bestScore = -1;
@@ -1910,19 +1950,12 @@ function extractRTTMainworld(sys, preferredId = null) {
     }
 
     let port = bestWorld.starport || 'X';
-    let size = getEHexLetter(bestWorld.size);
-    let atm = getEHexLetter(bestWorld.atmosphere);
-    let hydro = getEHexLetter(bestWorld.hydrosphere);
-    let pop = getEHexLetter(bestWorld.population);
-    let gov = getEHexLetter(bestWorld.government);
-    let law = getEHexLetter(bestWorld.lawLevel);
-
     // RTT doesn't strictly generate TL for all worlds exactly the same way (or at all if pop 0),
-    // but we can infer or pass a default. We'll set it to 0 and let socioeconomics/etc handle it or 
+    // but we can infer or pass a default. We'll set it to 0 and let socioeconomics/etc handle it or
     // assign a default based on population.
     let tl = getEHexLetter(bestWorld.population > 0 ? (bestWorld.tl || 0) : 0);
 
-    let uwp = `${port}${size}${atm}${hydro}${pop}${gov}${law}-${tl}`;
+    let uwp = computeRTTBodyUWP(bestWorld);
     tResult('Final Hex UWP', uwp, 'RTT 8.2: UWP Finalization');
 
     const result = {
@@ -1948,8 +1981,10 @@ function extractRTTMainworld(sys, preferredId = null) {
         travelZone: (bestWorld.bases || []).includes('Z') ? 'Red' : 'Green' // Simplified
     };
 
-    // Run Audit before final return
-    auditRTTSystem(sys);
+    // Run Audit before final return; attach the result so the System Editor's
+    // engine-agnostic Fill & Save gate (which reads newSys.auditResult) can see it,
+    // mirroring CT's/T5's runAndLog pattern.
+    sys.auditResult = auditRTTSystem(sys);
 
     return result;
 }
@@ -2016,6 +2051,7 @@ function tRollD3(label) {
  */
 function auditRTTSystem(sys) {
     let errors = 0;
+    const errorMessages = [];
     tSection('RTT SYSTEM AUDIT');
 
     let mainworldCount = 0;
@@ -2053,6 +2089,7 @@ function auditRTTSystem(sys) {
                 engine: "RTT",
                 message: msg
             });
+            errorMessages.push(msg);
             e++;
         }
 
@@ -2109,11 +2146,13 @@ function auditRTTSystem(sys) {
                 engine: "RTT",
                 message: msg
             });
+            errorMessages.push(msg);
             errors++;
         }
     }
 
     tResult('RTT Audit Summary', errors + ' error(s) detected', 'RTT Audit');
+    return { pass: errors === 0, errors: errorMessages };
 }
 
 // -----------------------------------------------------------------------------

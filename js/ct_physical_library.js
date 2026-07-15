@@ -104,6 +104,14 @@ function generateSatellites(parent, zone, mwPop) {
     if (parent.size === 0 || parent.size === 'S' || parent.size === 'R' ||
         parent.type === 'Planetoid Belt' || parent.type === 'Empty') return;
 
+    // Already generated in a prior pass — lock the satellite family instead of rolling a
+    // fresh quantity and appending it on top of whatever satellites already exist (mirrors
+    // the same guard in ct_bottomup_generator.js's processBottomUpSatellites).
+    if (parent.uwp) {
+        tSkip(`Satellite Quantity (${parent.name || parent.type} already generated)`);
+        return;
+    }
+
     let qty = 0;
     tSection(`Satellite Generation for ${parent.name || parent.type}`);
     if (parent.type === 'Gas Giant') {
@@ -307,9 +315,18 @@ function generateSatellites(parent, zone, mwPop) {
                 zone: zone || 'H',
                 pd,
                 orbitType,
-                parentType: parent.type
+                parentType: parent.type,
+                // A moon's distance to the star is dominated by its parent's orbit — without
+                // this, getThermalStats' division by distAU produces NaN (mirrors the same fix
+                // in ct_bottomup_generator.js's processBottomUpSatellites).
+                distAU: parent.distAU,
             });
         }
+
+        // Store in orbital-distance order (matches Mongoose's equivalent fix) so every consumer
+        // (accordion, orrery, System Editor) sees a naturally-sorted list without each needing
+        // its own defensive re-sort.
+        parent.satellites.sort((a, b) => (a.pd || 0) - (b.pd || 0));
     }
 
 
@@ -333,17 +350,37 @@ function processCTDerivedPhysics(body, primaryStar) {
         if (numSize === 0) {
             body.mass = 0;
             body.gravity = 0;
-            if (body.type === 'Satellite') body.diamKm = (body.size === 'S') ? 500 : 0;
+            // Previously only assigned when body.type === 'Satellite' — a top-level Terrestrial
+            // Planet/Mainworld/Captured Planet never got a diamKm at all, which made the
+            // orrery's moon-orbit-period calc (system_viewer.js _moonPeriodYears) fall back to
+            // Earth's diameter for its own moons regardless of the parent's real size. Applying
+            // the same existing formula to every type in this branch (not just satellites)
+            // closes that gap using a convention CT already trusted, not a new one.
+            body.diamKm = (body.size === 'S') ? 500 : 0;
         } else {
-            // Phase 2.1 RAW Math (K=1.0)
-            body.mass = Math.pow(numSize / 8, 3);
+            // Phase 2.1 RAW Math (K=1.0). Mass is rounded here (not just at display time) since
+            // the raw float can run to 6+ decimal places and overflow the accordion's Mass field.
+            body.mass = Number(Math.pow(numSize / 8, 3).toFixed(4));
             body.gravity = numSize * 0.125;
-            if (body.type === 'Satellite') body.diamKm = numSize * 1600;
+            body.diamKm = numSize * 1600;
         }
 
         if (typeof tResult !== 'undefined') {
             tResult(`Size ${body.size} Mass`, `${body.mass === 0 ? 0 : body.mass.toFixed(3)} Earths`, 'CT 2.1: Composition & Gravity');
             tResult(`Size ${body.size} Gravity`, `${body.gravity} G`, 'CT 2.1: Composition & Gravity');
+        }
+    } else if (!body.diamKm) {
+        // Gas giant bypassed the stochastic skeleton-placement roll entirely — e.g. added
+        // directly via the System Editor's "+GG" button, which seeds straight into the
+        // generator without ever touching ct_bottomup_generator.js's Step 2G placement code.
+        // Same placeholder convention as that roll (see the comment there): CT has no Book 6
+        // gas giant diameter table, so this borrows MgT2E's dice-rolled-diameter × 12800
+        // km/unit approach until a real source is found.
+        body.diamKm = body.size === 'Large'
+            ? (tRoll2D('Placeholder GG Diameter (Large, 2D+6)') + 6) * 12800
+            : (Math.ceil(tRoll1D('Placeholder GG Diameter (Small) D3') / 2) + Math.ceil(tRoll1D('Placeholder GG Diameter (Small) D3') / 2)) * 12800;
+        if (typeof tResult !== 'undefined') {
+            tResult('Gas Giant Diameter (Placeholder)', `${Math.round(body.diamKm).toLocaleString()} km`, 'CT 2.1: Composition & Gravity');
         }
     }
 

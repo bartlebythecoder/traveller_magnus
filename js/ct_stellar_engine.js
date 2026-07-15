@@ -60,11 +60,38 @@
     }
 
     /**
+     * CT's RAW tables (STAR_MASS, LUM, ZONE_H_TABLE) only tabulate spectral
+     * subtypes at 0/5 (plus a 9 endpoint for M-class) — matching how CT's own
+     * dice rolls generate a decimal (tRoll1D <=3 -> 0, else 5). The System
+     * Editor's manual-creation dialog and parseManualStars both allow any
+     * subtype 0-9, so a value like "F7" has no exact table entry. Snap to the
+     * nearest tabulated subtype of the same spectral type rather than
+     * silently falling back to a flat default (was masking real mass/lum/HZ
+     * data behind 1.0/null for any non-0/5/9 manual subtype).
+     */
+    function _nearestTableKey(tableForSize, specKey) {
+        if (!tableForSize) return null;
+        if (tableForSize[specKey] !== undefined) return specKey;
+        const m = /^([A-Za-z]+)(\d+)$/.exec(specKey);
+        if (!m) return null;
+        const type = m[1], decimal = parseInt(m[2], 10);
+        let best = null, bestDiff = Infinity;
+        for (const key in tableForSize) {
+            const km = /^([A-Za-z]+)(\d+)$/.exec(key);
+            if (!km || km[1] !== type) continue;
+            const diff = Math.abs(parseInt(km[2], 10) - decimal);
+            if (diff < bestDiff) { bestDiff = diff; best = key; }
+        }
+        return best;
+    }
+
+    /**
      * Look up a star's mass from the STAR_MASS table.
      */
     function _starMass(size, specKey) {
         const t = starMassLookup();
-        return (t[size] && t[size][specKey]) || 1.0;
+        const key = t[size] ? _nearestTableKey(t[size], specKey) : null;
+        return key ? t[size][key] : 1.0;
     }
 
     /**
@@ -72,7 +99,8 @@
      */
     function _starLum(size, specKey) {
         const t = lumLookup();
-        return (t[size] && t[size][specKey]) || 1.0;
+        const key = t[size] ? _nearestTableKey(t[size], specKey) : null;
+        return key ? t[size][key] : 1.0;
     }
 
     /**
@@ -607,7 +635,10 @@
         const zt = zoneTables();
         const table = zt[size];
         if (!table) return 'O';
-        const zoneList = table[spectralKey] || table.default || [];
+        // Snap an off-table subtype to the nearest tabulated one — see
+        // _nearestTableKey for the shared rationale.
+        const key = _nearestTableKey(table, spectralKey);
+        const zoneList = (key && table[key]) || table.default || [];
         if (orbitNum < 0) return '-';
         if (orbitNum >= zoneList.length) return 'O';
         return zoneList[orbitNum] || 'O';
@@ -657,10 +688,24 @@
             return { orbit, type: valid ? 'Empty' : 'Ghost Empty' };
         });
 
-        const capturedPlanets = (skeleton.capturedPlanets || []).map(cap => ({
-            ...cap,
-            type: 'Captured'   // always preserved — captured planets ignore destruction rules
-        }));
+        // Captured planets ignore the inner/outer zone-destruction rules (they survive
+        // orbits that would vaporize a normal body) — but a companion star still
+        // physically occupies its own orbit slot, so an exact numeric coincidence
+        // (0% deviation roll landing on the star's integer orbit) must be nudged off it.
+        const capturedPlanets = (skeleton.capturedPlanets || []).map(cap => {
+            let orbit = cap.orbit;
+            const collidesWithStar = stars.some(star =>
+                star.role !== 'Primary' && typeof star.orbit === 'number' && star.orbit === orbit
+            );
+            if (collidesWithStar) {
+                const adjusted = Number((orbit + 0.1).toFixed(1));
+                if (typeof tResult !== 'undefined') {
+                    tResult(`Captured Planet Orbit ${orbit}`, `Collides with companion star slot — shifted to ${adjusted}`, 'CT 1.3: Orbital Allocation');
+                }
+                orbit = adjusted;
+            }
+            return { ...cap, orbit, type: 'Captured' };
+        });
 
         return { emptyOrbits, capturedPlanets };
     }
@@ -678,17 +723,39 @@
             if (star.role === 'Primary') continue;
             if (typeof star.orbit !== 'number') continue;
 
-            if (orbitNumber === star.orbit) continue; // companion's own slot — always valid
-
             if (orbitNumber < star.orbit) {
                 // Inner Rule: valid only if <= floor(orbit / 2)
                 if (orbitNumber > Math.floor(star.orbit / 2)) return false;
             } else {
-                // Outer Rule: valid only if >= orbit + 2
+                // Outer Rule: valid only if >= orbit + 2 (also destroys the companion's
+                // own orbit number itself, orbitNumber === star.orbit, since that always
+                // fails this check — a planet can't share the companion's exact slot)
                 if (orbitNumber < star.orbit + 2) return false;
             }
         }
         return true;
+    }
+
+    /**
+     * Interpolates an AU distance for a fractional orbit number (e.g. a Captured
+     * Planet's baseline+deviation orbit), mirroring the viewer's _orbitToAU so
+     * generated distances agree with how the orrery positions companion stars.
+     * A plain `table[Math.floor(orbit)]` lookup discards the fractional part,
+     * which collapses a Captured Planet onto the same radius as whatever
+     * integer-orbit body (including a companion star) sits at that floor.
+     *
+     * @param {Array}  table  - orbitalAU-style table (AU per integer orbit index).
+     * @param {number} orbit  - Possibly-fractional orbit number.
+     * @returns {number} Interpolated AU distance.
+     */
+    function interpolateOrbitAU(table, orbit) {
+        if (!table || table.length === 0) return 1.0;
+        const idx  = Math.max(0, Math.floor(orbit));
+        const frac = orbit - Math.floor(orbit);
+        const max  = table.length - 1;
+        const lo   = table[Math.min(idx, max)];
+        const hi   = idx < max ? table[idx + 1] : lo;
+        return lo + frac * (hi - lo);
     }
 
     return {
@@ -701,7 +768,12 @@
         applySizeCorrections,
         isOrbitValid,
         resolveAnomalies,
-        spawnFailsafeOrbit
+        spawnFailsafeOrbit,
+        interpolateOrbitAU,
+        nearestTableKey: _nearestTableKey,
+        starMass: _starMass,
+        starLuminosity: _starLum,
+        stellarDiam: _stellarDiam
     };
 
 }));

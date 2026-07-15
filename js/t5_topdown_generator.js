@@ -195,12 +195,16 @@
      * Main T5 Top-Down Generation Orchestrator.
      * Executes the 4-Phase pipeline for system generation.
      */
-    function generateT5System(mainworldBase) {
+    function generateT5System(mainworldBase, seedSys = null) {
         if (!mainworldBase) throw new Error("Sean Protocol Violation: Phase 1 requires mainworldBase.");
 
         // Break potential circularity by deep-cloning the stars for the orbital structure
         let sysStars = null;
-        if (mainworldBase && mainworldBase.homestar && mainworldBase.homestar.trim() !== '') {
+        if (seedSys && (seedSys.stars || []).length > 0) {
+            // System Editor seed: use the working copy's stars directly, skipping the
+            // homestar-string-parsing/default-star fallback below entirely.
+            sysStars = seedSys.stars.map(s => Object.assign({}, s));
+        } else if (mainworldBase && mainworldBase.homestar && mainworldBase.homestar.trim() !== '') {
             let overrideStars = [];
             let tokens = mainworldBase.homestar.trim().split(/\s+/);
             for (let i = 0; i < tokens.length; i++) {
@@ -268,17 +272,54 @@
                 .filter(i => i >= 0 && i < 20)
         );
 
+        // System Editor seed-body placement: place every seeded body at its own orbit BEFORE
+        // any dice-rolled inventory/placement runs, and before Phase 1 (mainworld anchor), since
+        // a moon-mainworld's parent must already be sitting in orbits[].contents by the time
+        // Phase 1 looks for it (see mainworldBase.parentBodyId below). findAvailableOrbit's
+        // existing `!star.orbits[o].contents` check means placing a body here automatically
+        // keeps every later placement pass (Phase 1, 3-5) from landing on the same slot — no
+        // separate reserved-orbit bookkeeping is needed.
+        const hasSeedWorlds = !!(seedSys && Array.isArray(seedSys.worlds) && seedSys.worlds.length > 0);
+        const allowAddBodies = !!(seedSys && seedSys._allowAddBodies);
+        if (hasSeedWorlds) {
+            seedSys.worlds.forEach(w => {
+                const starIdx = w.parentStarIdx || 0;
+                const hostStar = sys.stars[starIdx] || primary;
+                const resolved = findAvailableOrbit(hostStar, w.orbitId, hostStar === primary ? companionOrbitIndices : new Set());
+                if (resolved < 0) return;
+                const body = createBodyPlaceholder(_seedCategory(w.type), w);
+                hostStar.orbits[resolved].contents = body;
+                if (w.moons && w.moons.length) {
+                    // Skip the mainworld itself if it's one of this body's seeded moons — Phase 1
+                    // (below) places sys.mainworld into this same parent's satellites separately;
+                    // including it here too would duplicate it.
+                    const mwId = seedSys.mainworldUWP && seedSys.mainworldUWP._id;
+                    body.satellites = w.moons
+                        .filter(m => !mwId || m._id !== mwId)
+                        .map(m => Object.assign({ type: 'Moon', _manualFields: [] }, m));
+                }
+            });
+        }
+
         // PHASE 2 (PRE-REQUISITE): System Inventory (Moved up for Continuation Method)
-        let ggCountTotal = Math.max(0, Math.floor(_roll2D() / 2) - 2);
-        let beltCountTotal = Math.max(0, _roll1D() - 3);
-        const otherTerrTotal = _roll2D(); // Inventory = MW + GG + Belt + 2D. 
+        // Locked to 0 when the System Editor supplied a seeded body list and the user hasn't
+        // checked "Allow engine to add additional bodies" — the seeded bodies above are the
+        // entire inventory in that case.
+        let ggCountTotal = (hasSeedWorlds && !allowAddBodies) ? 0 : Math.max(0, Math.floor(_roll2D() / 2) - 2);
+        let beltCountTotal = (hasSeedWorlds && !allowAddBodies) ? 0 : Math.max(0, _roll1D() - 3);
+        const otherTerrTotal = (hasSeedWorlds && !allowAddBodies) ? 0 : _roll2D(); // Inventory = MW + GG + Belt + 2D.
 
         const hzOrbit = getStarHZ(primary);
+        sys.hzOrbit = hzOrbit; // star-physics HZ orbit, independent of mainworld placement — read by system_viewer.js
         const hzResult = generateHZAndClimate(primary.type);
 
         // PHASE 1: THE ANCHOR (Mainworld)
         // =================================================================
-        let mwTarget = clampUWP(hzOrbit + hzResult.hzVariance, 0, 19);
+        // When editing/re-saving an existing system, the seed already knows this body's prior
+        // orbit — pin to it instead of re-rolling HZ + a fresh hzVariance every Fill & Save.
+        let mwTarget = (mainworldBase.orbitId != null)
+            ? mainworldBase.orbitId
+            : clampUWP(hzOrbit + hzResult.hzVariance, 0, 19);
         sys.mainworld.climateZone = hzResult.climate;
         if (hzResult.tradeCode) {
             if (!sys.mainworld.tradeCodes) sys.mainworld.tradeCodes = [];
@@ -306,13 +347,23 @@
         }
 
         if (isSatellite) {
-            let parent;
-            if (ggCountTotal > 0) {
+            let parent = null;
+
+            // System Editor seed: the mainworld's parent body was already placed above (it's a
+            // real body the user placed in the working copy, not a fresh roll) — find it by _id
+            // instead of synthesizing a new GG/BigWorld every save.
+            if (mainworldBase.parentBodyId) {
+                const hostStar = sys.stars[mainworldBase.parentStarIdx || 0];
+                const found = hostStar && hostStar.orbits.find(o => o.contents && o.contents._id === mainworldBase.parentBodyId);
+                parent = found ? found.contents : null;
+            }
+
+            if (!parent && ggCountTotal > 0) {
                 // T5 RAW: Pre-defined moon consumes one GG from inventory
                 ggCountTotal--;
                 const ggStats = generateGasGiantStats();
                 parent = { ...ggStats, type: ggStats.type, satellites: [sys.mainworld] };
-            } else {
+            } else if (!parent) {
                 // No GGs rolled? Spawn a free BigWorld parent (T5 RAW Backup)
                 parent = {
                     type: 'BigWorld',
@@ -320,6 +371,9 @@
                     size: _roll2D() + 7,
                     satellites: [sys.mainworld]
                 };
+            } else {
+                if (!parent.satellites) parent.satellites = [];
+                parent.satellites.push(sys.mainworld);
             }
 
             // Objective 2: Sub-Orbit Flux Roll (Ay through Zee naming convention)
@@ -378,15 +432,41 @@
             }
         }
 
-        function createBodyPlaceholder(category) {
+        // seedOverride (System Editor only): overlays a working-copy body's locked identity/
+        // fields onto the placeholder so Fill & Save doesn't reroll a body's type/size/atm/
+        // hydro/pop every save. Fields left undefined here (not seeded) fall through to the
+        // normal roll further down in generateT5SubordinateUWP, same as an unseeded body.
+        function createBodyPlaceholder(category, seedOverride) {
+            let base;
             if (category === 'GG') {
                 const stats = generateGasGiantStats();
-                return { type: stats.type, size: stats.size, _manualFields: [] };
+                base = { type: stats.type, size: stats.size, _manualFields: [] };
             } else if (category === 'BELT') {
-                return { type: 'Planetoid Belt', size: 0, worldType: 'Belt', _manualFields: [] };
+                base = { type: 'Planetoid Belt', size: 0, worldType: 'Belt', _manualFields: [] };
             } else {
-                return { type: 'Terrestrial World', _manualFields: [] };
+                base = { type: 'Terrestrial World', _manualFields: [] };
             }
+            if (!seedOverride) return base;
+            return Object.assign(base, {
+                _id: seedOverride._id,
+                name: seedOverride.name,
+                uwp: seedOverride.uwp,
+                type: seedOverride.type || base.type,
+                worldType: seedOverride.worldType !== undefined ? seedOverride.worldType : base.worldType,
+                size: seedOverride.size !== undefined ? seedOverride.size : base.size,
+                atm: seedOverride.atm,
+                hydro: seedOverride.hydro,
+                pop: seedOverride.pop,
+                _manualFields: seedOverride._manualFields || [],
+            });
+        }
+
+        // Maps a System Editor seed body's `type` string to the GG/BELT/WORLD category tags
+        // createBodyPlaceholder/placeCategory already use internally.
+        function _seedCategory(seedType) {
+            if (seedType === 'Large Gas Giant' || seedType === 'Small Gas Giant') return 'GG';
+            if (seedType === 'Planetoid Belt') return 'BELT';
+            return 'WORLD';
         }
 
         // PHASE 3: Place Gas Giants
@@ -410,7 +490,9 @@
         });
 
         // PHASE 6: Fleshing and Audit
-        fleshOutSubordinates(sys);
+        // capToExisting: when the System Editor locked the body count (seeded, allowAddBodies
+        // unchecked), don't let generateT5Satellites roll additional moons beyond what was seeded.
+        fleshOutSubordinates(sys, hasSeedWorlds && !allowAddBodies);
 
         // --- PHASE 7: JOURNEY MATH SWEEP (Phase 2 Integration) ---
         if (typeof MgT2EMath !== 'undefined' && MgT2EMath.performJourneyMathSweep) {
@@ -425,22 +507,8 @@
             });
         }
 
-        // --- ACTION 6.3: AUDIT PERSISTENCE (v0.6.0.0) ---
-        const activeAuditor = (typeof T5_Auditor !== 'undefined') ? T5_Auditor : null;
-        if (activeAuditor && activeAuditor.auditT5System) {
-            const auditResults = activeAuditor.auditT5System(sys);
-            if (!auditResults.pass && typeof window !== 'undefined') {
-                window.auditBacklog = window.auditBacklog || [];
-                auditResults.errors.forEach(err => {
-                    window.auditBacklog.push({
-                        hexId: sys.mainworld.hexId || 'unknown',
-                        orbitId: err.orbitId || null,
-                        engine: "T5",
-                        message: err.message || err
-                    });
-                });
-            }
-        }
+        // Auditing is run externally by system_driver.js (T5_Auditor.runAndLog), the single
+        // real call site — see js/t5_uwp_auditor.js.
 
         if (typeof applyT5OrbitalNames === 'function') applyT5OrbitalNames(sys);
 
@@ -451,14 +519,16 @@
      * Generates subordinate satellites (moons) for a body.
      * Uses 2D-2 for Gas Giants, 1D-3 for Terrestrial.
      */
-    function generateT5Satellites(parent, orbit, hostHZ, maxSubPop) {
+    function generateT5Satellites(parent, orbit, hostHZ, maxSubPop, capToExisting) {
         if (!parent || parent.type === 'Empty' || parent.worldType === 'Belt') return;
-
-        const isGG = (parent.type && (parent.type.includes('Gas Giant') || parent.type === 'Ice Giant'));
-        const moonCount = isGG ? Math.max(0, _roll2D() - 2) : Math.max(0, _roll1D() - 3);
 
         if (!parent.satellites) parent.satellites = [];
         const startIdx = parent.satellites.length;
+
+        const isGG = (parent.type && (parent.type.includes('Gas Giant') || parent.type === 'Ice Giant'));
+        // capToExisting (System Editor, seeded + allowAddBodies unchecked): never roll additional
+        // moons beyond what the user placed.
+        const moonCount = capToExisting ? startIdx : (isGG ? Math.max(0, _roll2D() - 2) : Math.max(0, _roll1D() - 3));
 
         if (moonCount > startIdx) {
             _log(`Satellite Generation: Body in Orbit ${orbit} rolling for ${moonCount} satellites (already has ${startIdx}).`);
@@ -507,7 +577,7 @@
     /**
      * Iterates through all stars and their orbits to generate UWP data.
      */
-    function fleshOutSubordinates(sys) {
+    function fleshOutSubordinates(sys, capToExisting) {
         const mwPop = sys.mainworld.pop || 0;
         const maxSubPop = Math.max(0, mwPop - 1);
 
@@ -519,6 +589,10 @@
 
                 // Apply Full T5 Orbit Labeling (Positional + Climate)
                 if (!_isManual(body, 'climateZone')) body.climateZone = getT5OrbitLabel(o.orbit, hostHZ);
+                // Generator placeholders don't carry their own orbitId (position is implied by
+                // array index) — stamp it here so calculateT5RotationalDynamics below can tell
+                // orbit 0/1 (tidally locked to the star) from everything else.
+                if (body.orbitId === undefined) body.orbitId = o.orbit;
 
                 // 1. Flesh out the parent body
                 if (body !== sys.mainworld) {
@@ -527,7 +601,7 @@
 
                 // 2. Generate new satellites
                 if (body.worldType !== 'Belt' && body.type !== 'Planetoid Belt') {
-                    generateT5Satellites(body, o.orbit, hostHZ, maxSubPop);
+                    generateT5Satellites(body, o.orbit, hostHZ, maxSubPop, capToExisting);
                 }
 
                 // 3. Flesh out existing satellites (e.g. injected Mainworld)
@@ -539,16 +613,22 @@
                         }
                         
                         if (!s.distAU && body.distAU) { s.distAU = body.distAU; }
+                        // Mark as a satellite so calculateT5RotationalDynamics evaluates it against
+                        // its parent body, not the star — without this it would inherit the parent's
+                        // orbitId and could be wrongly flagged "tidally locked to the star".
+                        if (s.isMoon === undefined && s.isSatellite === undefined) s.isMoon = true;
 
                         // PHASE 2.1 FINAL FIX: Ensure physics are recalculated for EVERY satellite
                         T5_World_Engine.calculateT5PhysicalStats(s);
                         if (T5_World_Engine.calculateT5Climate) T5_World_Engine.calculateT5Climate(s, 1.0);
+                        if (T5_World_Engine.calculateT5RotationalDynamics) T5_World_Engine.calculateT5RotationalDynamics(s);
                     });
                 }
 
                 // PHASE 2.1 FINAL FIX: Absolute last step for the main body
                 T5_World_Engine.calculateT5PhysicalStats(body);
                 if (T5_World_Engine.calculateT5Climate) T5_World_Engine.calculateT5Climate(body, 1.0);
+                if (T5_World_Engine.calculateT5RotationalDynamics) T5_World_Engine.calculateT5RotationalDynamics(body);
             });
         });
     }

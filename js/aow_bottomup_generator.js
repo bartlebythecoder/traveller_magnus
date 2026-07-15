@@ -13,23 +13,25 @@
 
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
-        define(['./aow_stellar_engine', './aow_world_engine', './aow_socio_engine', './aow_uwp_auditor'], factory);
+        define(['./aow_stellar_engine', './aow_world_engine', './aow_socio_engine', './aow_uwp_auditor', './aow_seed_bridge'], factory);
     } else if (typeof module === 'object' && module.exports) {
         module.exports = factory(
             require('./aow_stellar_engine'),
             require('./aow_world_engine'),
             require('./aow_socio_engine'),
-            require('./aow_uwp_auditor')
+            require('./aow_uwp_auditor'),
+            require('./aow_seed_bridge')
         );
     } else {
         root.AoWBottomUpGenerator = factory(
             root.AoWStellarEngine,
             root.AoWWorldEngine,
             root.MgT2ESocioEngine,   // AoW uses MgT2E socioeconomics by design
-            root.AoW_UWP_Auditor
+            root.AoW_UWP_Auditor,
+            root.AoWSeedBridge
         );
     }
-}(typeof self !== 'undefined' ? self : this, function (StellarEngine, WorldEngine, SocioEngine, Auditor) {
+}(typeof self !== 'undefined' ? self : this, function (StellarEngine, WorldEngine, SocioEngine, Auditor, Bridge) {
     'use strict';
 
     if (!StellarEngine || !WorldEngine || !SocioEngine) {
@@ -77,7 +79,7 @@
             worlds:             (seedSys.worlds || []).map(b => Object.assign({}, b)),
             stars:              (seedSys.stars  || []).map(s => Object.assign({}, s)),
             age:                seedSys.age  || 0,
-            hzco:               seedSys.hzco || 0,
+            hzco:               seedSys.hzco || 0, // display-only for AoW — see OW-9 note, generator never reads this
             gasGiants:          0,
             planetoidBelts:     0,
             terrestrialPlanets: 0,
@@ -105,8 +107,37 @@
 
         tSection(`[${hexId}] Phase 1: Stellar Generation`);
 
-        if (seedSys && sys.stars.length > 0) {
-            if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 1: Stellar skipped — seed provides ${sys.stars.length} star(s).`);
+        if (seedSys && sys.stars.length > 0 && Bridge) {
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 1: Stellar seeded — resolving physics for ${sys.stars.length} star(s) from chosen spectral types.`);
+
+            const reconciled = Bridge.reconcileSystemAge(sys.stars);
+            if (reconciled.conflict) {
+                sys.ageConflict = reconciled; // system_editor.js's Fill & Save reads this for the warn-and-proceed dialog
+                // Still need an age to generate against — fall back to the average of each star's
+                // own valid-window midpoint so generation can proceed under "Proceed Anyway".
+                const mids = reconciled.stars.map(s => (s.minAge + Math.min(s.maxAge, 13.5)) / 2);
+                sys.systemAge = mids.reduce((a, b) => a + b, 0) / mids.length;
+                if (window.isLoggingEnabled) {
+                    writeLogLine(`[PROBE] AoW Phase 1: AGE CONFLICT — stars' spectral types imply non-overlapping age windows: ${JSON.stringify(reconciled.stars)}. Falling back to averaged age ${sys.systemAge.toFixed(2)} Gyr.`);
+                }
+            } else {
+                sys.systemAge = reconciled.systemAge;
+            }
+            sys.systemMetallicity = Bridge.resolveSystemMetallicity(sys.systemAge);
+
+            sys.stars.forEach(star => {
+                const starWindow = reconciled.windows ? reconciled.windows.find(w => w.star === star) : null;
+                const resolved = Bridge.resolveStarPhysics(star, sys.systemAge, starWindow ? starWindow.window : null);
+                Object.assign(star, resolved);
+            });
+
+            const mapped = Bridge.mapHierarchy(sys.stars);
+            sys.hierarchy = mapped.hierarchy;
+            sys.orbits = mapped.orbits;
+
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 1 (seeded) complete. Hierarchy: ${sys.hierarchy} | Age: ${sys.systemAge.toFixed(2)} Gyr | Metallicity: ${sys.systemMetallicity} | Classifications: ${sys.stars.map(s => s.spectralClassification).join(', ')}`);
+        } else if (seedSys && sys.stars.length > 0) {
+            if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 1: Stellar skipped — seed provided but AoWSeedBridge unavailable.`);
         } else {
             if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 1: Chunk 1 — Star Hierarchy & Masses...`);
 
@@ -168,8 +199,21 @@
             }
         }
 
-        // TODO: StellarEngine.generateHabitableZone(sys)
-        // TODO: StellarEngine.generateSystemInventory(sys)
+        // Confirmed during OW-9 investigation: nothing in aow_world_engine.js's Phase 3 reads a
+        // habitable-zone-AU value or a separate "system inventory" — generateHabitabilityScores
+        // works entirely off avgSurfaceTemp, so these were dead stubs and are not implemented.
+
+        // Seeded path: Phase 3's 13 functions below all key off sys.diskWorksheets, which nothing
+        // else populates when seedSys controls body count (generatePlanetaryDisks is skipped
+        // above) — synthesize worksheets from the resolved stars + seeded bodies so Phase 3 can
+        // actually run instead of every function's own "no diskWorksheets" guard silently no-op'ing.
+        if (seedSys && !seedSys._allowAddBodies && Bridge) {
+            Bridge.synthesizeDiskWorksheets(sys, sys.worlds, WorldEngine);
+            if (window.isLoggingEnabled) {
+                const totalPlanets = (sys.diskWorksheets || []).reduce((sum, ws) => sum + (ws.planets ? ws.planets.length : 0), 0);
+                writeLogLine(`[PROBE] AoW Phase 2 (seeded): synthesized ${(sys.diskWorksheets || []).length} disk worksheet(s), placed ${totalPlanets} seeded body/bodies.`);
+            }
+        }
 
         // =================================================================
         // PHASE 3: WORLD FORMATION
@@ -182,18 +226,27 @@
         tSection(`[${hexId}] Phase 3: World Formation`);
 
         if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 3: Physicals...`);
-        const _seededMoonCaps = (seedSys && !seedSys._allowAddBodies)
-            ? sys.worlds.map(w => (w.moons || []).length)
+        // Was reading/trimming sys.worlds[i].moons — silently dead even before this pass, since
+        // stepNaturalSatellites (called by generatePhysicals below) writes to
+        // sys.diskWorksheets[].planets[].satellites, not sys.worlds[].moons. Now that worksheets
+        // are actually populated for the seeded path, cap on the object/field that's really used.
+        const _seededSatCaps = (seedSys && !seedSys._allowAddBodies && sys.diskWorksheets)
+            ? new Map(sys.diskWorksheets.reduce((acc, ws) => acc.concat(ws.planets || []), [])
+                .map(p => [p._id, (p.satellites || []).length]))
             : null;
 
         if (WorldEngine && WorldEngine.generatePhysicals) {
             WorldEngine.generatePhysicals(sys);
         }
 
-        if (_seededMoonCaps) {
-            sys.worlds.forEach((w, i) => {
-                const cap = _seededMoonCaps[i] ?? 0;
-                if (w.moons && w.moons.length > cap) w.moons = w.moons.slice(0, cap);
+        if (_seededSatCaps) {
+            (sys.diskWorksheets || []).forEach(ws => {
+                (ws.planets || []).forEach(p => {
+                    const cap = _seededSatCaps.get(p._id);
+                    if (cap !== undefined && p.satellites && p.satellites.length > cap) {
+                        p.satellites = p.satellites.slice(0, cap);
+                    }
+                });
             });
         }
 
@@ -270,14 +323,32 @@
 
         let mainworld = null;
 
-        // If seedSys designates a mainworld, find it by _id; otherwise run normal election
+        // If seedSys designates a mainworld, find it by _id; otherwise run normal election.
+        // Search sys.diskWorksheets (not sys.worlds) when worksheets exist — for the seeded path
+        // sys.worlds still holds the pre-Phase-3 flat copies at this point (populateAoWWorldsList,
+        // which refreshes sys.worlds from the now-computed worksheets, runs AFTER mainworld
+        // selection by design — see its own doc comment), so the up-to-date, physics-resolved
+        // body objects only live in the worksheets until then.
         if (seedSys && seedSys._mainworldRef) {
-            mainworld = sys.worlds.find(w => w._id === seedSys._mainworldRef);
+            const searchPlanets = (sys.diskWorksheets && sys.diskWorksheets.length > 0)
+                ? sys.diskWorksheets.reduce((acc, ws) => acc.concat(ws.planets || []), [])
+                : sys.worlds;
+            mainworld = searchPlanets.find(w => w._id === seedSys._mainworldRef);
             if (!mainworld) {
-                for (const w of sys.worlds) {
+                for (const w of searchPlanets) {
                     const moon = (w.moons || w.satellites || []).find(m => m._id === seedSys._mainworldRef);
                     if (moon) { mainworld = moon; break; }
                 }
+            }
+            if (mainworld) {
+                // Pre-existing gap found while wiring this path (never triggered before since AoW
+                // was never UI-exposed): generateMainworldSelection() sets these three itself when
+                // it finds the winner; this direct seedSys._mainworldRef branch bypasses that
+                // function entirely, so nothing set them — leaving sys.mainworld unset and silently
+                // skipping all of Phase 5's Social Sweeps (population/government/etc. never run).
+                mainworld.isMainworld = true;
+                mainworld.type = 'Mainworld';
+                sys.mainworld = mainworld;
             }
             if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 4: Mainworld from seed ref: ${mainworld ? mainworld._id : 'NOT FOUND'}`);
         }
@@ -308,9 +379,12 @@
             if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 4: barren system — no disk planets`);
         }
 
-        // Build sys.worlds[] from diskWorksheets after mainworld is elected.
-        // Skip if seedSys already provides worlds (they're already in sys.worlds).
-        if (!seedSys || seedSys._allowAddBodies) {
+        // Build sys.worlds[] from diskWorksheets after mainworld is elected. Runs whenever
+        // worksheets exist — for the seeded path (plan step 3) diskWorksheets are now synthesized
+        // in Phase 2 and actually populated by Phase 3, so sys.worlds must be refreshed from them
+        // the same as the non-seeded path; leaving it gated to skip here would strand all of
+        // Phase 3's computed physics inside diskWorksheets and never surface it to sys.worlds.
+        if (sys.diskWorksheets && sys.diskWorksheets.length > 0) {
             if (WorldEngine && WorldEngine.populateAoWWorldsList) {
                 WorldEngine.populateAoWWorldsList(sys);
             }
@@ -368,25 +442,12 @@
         if (window.isLoggingEnabled) writeLogLine(`[PROBE] AoW Phase 6: Orbital Naming...`);
         applyMgT2EOrbitalNames(sys);
 
+        // sys.auditResult (set by runAndLog) is what system_editor.js's Fill & Save OW-3 gate
+        // reads — previously this block ran auditAoWSystem() directly and never attached that
+        // field, so the gate was permanently inert for AoW (see OW-9).
         const activeAuditor = Auditor || (typeof AoW_UWP_Auditor !== 'undefined' ? AoW_UWP_Auditor : null);
-        if (activeAuditor) {
-            const auditResults = activeAuditor.auditAoWSystem(sys, { mode: 'bottom-up' });
-            if (!auditResults.pass) {
-                const errorSummary = auditResults.errors.map(e => `  • ${e.message}`).join('\n');
-                console.warn(`[AoW Auditor] System ${hexId} — ${auditResults.errors.length} violation(s):\n${errorSummary}`);
-
-                if (typeof window !== 'undefined') {
-                    window.auditBacklog = window.auditBacklog || [];
-                    auditResults.errors.forEach(err => {
-                        window.auditBacklog.push({
-                            hexId: hexId,
-                            orbitId: err.orbitId !== undefined ? err.orbitId : null,
-                            engine: "AoW",
-                            message: err.message || err
-                        });
-                    });
-                }
-            }
+        if (activeAuditor && activeAuditor.runAndLog) {
+            activeAuditor.runAndLog(sys, hexId);
         }
 
         if (typeof endTrace === 'function' && typeof window !== 'undefined' && window.isLoggingEnabled) {

@@ -39,9 +39,13 @@
     /**
      * Checks constraints for a specific body.
      */
-    function checkConstraints(body, orbit, isSat, hzOrbit) {
+    function checkConstraints(body, orbit, isSat, hzOrbit, errors) {
         let errs = 0;
-        const logFail = (msg) => { _log(`[FAIL] ${msg}`); errs++; };
+        const logFail = (msg) => {
+            _log(`[FAIL] ${msg}`);
+            errs++;
+            if (errors) errors.push({ orbitId: orbit, message: msg });
+        };
 
         if (!body.worldType) {
             logFail(`Missing Data: Body in Orbit ${orbit} is missing worldType.`);
@@ -93,8 +97,9 @@
      * Executes the final system audit.
      */
     function runT5SystemAudit(sys, hzOrbit) {
-        if (!sys || !sys.stars) return;
+        if (!sys || !sys.stars) return { pass: true, errors: [] };
         if (hzOrbit === undefined) hzOrbit = getStarHZ(sys.stars[0]);
+        const errors = [];
 
         let mainworldBase = null;
         let mwCount = 0;
@@ -132,9 +137,13 @@
         let totalErrors = 0;
 
         // --- 2. Structure Check ---
-        if (mwCount === 0) { _log('[FAIL] Structure: No Mainworld found in system.'); totalErrors++; }
-        else if (mwCount > 1) { _log(`[FAIL] Structure: Multiple Mainworlds found (${mwCount}).`); totalErrors++; }
-        else { _log('[PASS] Structure: Exactly 1 Mainworld present.'); }
+        if (mwCount === 0) {
+            const msg = 'Structure: No Mainworld found in system.';
+            _log(`[FAIL] ${msg}`); totalErrors++; errors.push({ orbitId: null, message: msg });
+        } else if (mwCount > 1) {
+            const msg = `Structure: Multiple Mainworlds found (${mwCount}).`;
+            _log(`[FAIL] ${msg}`); totalErrors++; errors.push({ orbitId: null, message: msg });
+        } else { _log('[PASS] Structure: Exactly 1 Mainworld present.'); }
 
         _log(`[INFO] Inventory: ${ggCount} Gas Giants, ${beltCount} Belts, ${totalWorlds} total bodies across ${sys.stars.length} stars.`);
 
@@ -149,8 +158,10 @@
                 w.satellites.forEach((sat, idx) => {
                     let satSize = normSize(sat.size, sat.type);
                     if (satSize > parentSize) {
-                        _log(`[FAIL] Physics: Star ${star.name} Orbit ${o.orbit} Satellite ${idx + 1} Size (${satSize}) exceeds Parent Size (${parentSize})`);
+                        const msg = `Physics: Star ${star.name} Orbit ${o.orbit} Satellite ${idx + 1} Size (${satSize}) exceeds Parent Size (${parentSize})`;
+                        _log(`[FAIL] ${msg}`);
                         physErrors++;
+                        errors.push({ orbitId: o.orbit, message: msg });
                     }
                 });
             });
@@ -166,9 +177,9 @@
             star.orbits.forEach(o => {
                 let w = o.contents;
                 if (!w || w.type === 'Empty') return;
-                if (w.type !== 'Mainworld') typeErrors += checkConstraints(w, o.orbit, false, hostHZ);
+                if (w.type !== 'Mainworld') typeErrors += checkConstraints(w, o.orbit, false, hostHZ, errors);
                 if (w.satellites) {
-                    w.satellites.forEach(s => { if (s.type !== 'Mainworld') typeErrors += checkConstraints(s, o.orbit, true, hostHZ); });
+                    w.satellites.forEach(s => { if (s.type !== 'Mainworld') typeErrors += checkConstraints(s, o.orbit, true, hostHZ, errors); });
                 }
             });
         });
@@ -184,14 +195,18 @@
                 let w = o.contents;
                 if (!w || w.type === 'Empty' || w.type === 'Mainworld') return;
                 if (w.pop > 0 && w.pop >= mwPop && mwPop < 15) {
-                    _log(`[FAIL] Pop Cap: Star ${star.name} Orbit ${o.orbit} has Pop ${toEHex(w.pop)}, which is >= Mainworld Pop ${toEHex(mwPop)}.`);
+                    const msg = `Pop Cap: Star ${star.name} Orbit ${o.orbit} has Pop ${toEHex(w.pop)}, which is >= Mainworld Pop ${toEHex(mwPop)}.`;
+                    _log(`[FAIL] ${msg}`);
                     popErrors++;
+                    errors.push({ orbitId: o.orbit, message: msg });
                 }
                 if (w.satellites) {
                     w.satellites.forEach(s => {
                         if (s.pop > 0 && s.type !== 'Mainworld' && s.pop >= mwPop && mwPop < 15) {
-                            _log(`[FAIL] Pop Cap: Moon of Star ${star.name} Orbit ${o.orbit} has Pop ${toEHex(s.pop)}, which is >= Mainworld Pop ${toEHex(mwPop)}.`);
+                            const msg = `Pop Cap: Moon of Star ${star.name} Orbit ${o.orbit} has Pop ${toEHex(s.pop)}, which is >= Mainworld Pop ${toEHex(mwPop)}.`;
+                            _log(`[FAIL] ${msg}`);
                             popErrors++;
+                            errors.push({ orbitId: o.orbit, message: msg });
                         }
                     });
                 }
@@ -201,9 +216,32 @@
         if (popErrors === 0) _log('[PASS] Population: No subordinate world exceeds or equals the Mainworld population.');
 
         _tResult('T5 Audit Summary', totalErrors === 0 ? 'ALL CLEAR' : `${totalErrors} error(s) detected`);
+
+        return { pass: totalErrors === 0, errors };
+    }
+
+    /**
+     * Runs the audit, attaches the result to sys.auditResult, and logs/backlogs failures.
+     * Mirrors ct_uwp_auditor.js's runAndLog for the System Editor's engine-agnostic OW-3 gate.
+     */
+    function runAndLog(sys, hexId) {
+        const results = runT5SystemAudit(sys);
+        sys.auditResult = results;
+        if (!results.pass) {
+            const errorSummary = results.errors.map(e => `  • ${e.message}`).join('\n');
+            console.warn(`[T5 Auditor] System ${hexId} — ${results.errors.length} violation(s):\n${errorSummary}`);
+            if (typeof window !== 'undefined') {
+                window.auditBacklog = window.auditBacklog || [];
+                results.errors.forEach(e => {
+                    window.auditBacklog.push({ hexId, orbitId: e.orbitId != null ? e.orbitId : null, engine: 'T5', message: e.message });
+                });
+            }
+        }
+        return results;
     }
 
     return {
-        runT5SystemAudit
+        runT5SystemAudit,
+        runAndLog
     };
 }));

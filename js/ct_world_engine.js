@@ -33,9 +33,14 @@ if (typeof module !== 'undefined' && module.exports) {
     planetaryDMs = typeof CT_PLANETARY_DMS !== 'undefined' ? CT_PLANETARY_DMS : {};
 }
 
+// Safe wrapper around core.js's isManual() — falls back to false when isManual isn't in
+// scope (e.g. the CommonJS/Node test branch, which doesn't require core.js).
+function _ctFieldIsManual(obj, field) {
+    return (typeof isManual === 'function') && isManual(obj, field);
+}
 
 /**
- * REUSABLE: GAS GIANT PRESENCE CHECK 
+ * REUSABLE: GAS GIANT PRESENCE CHECK
  * Returns true on 2D <= 9 (Standard Book 3/6)
  */
 function rollGasGiantPresence() {
@@ -48,7 +53,18 @@ function rollGasGiantPresence() {
  * Rolls Size, Atmosphere, and Hydrographics using legacy algorithms.
  */
 function generatePhysicals(body, zone) {
-    if (body.type === 'Gas Giant' || body.type === 'Planetoid Belt' || body.type === 'Empty' || body.type === 'Nature') {
+    if (body.type === 'Planetoid Belt') {
+        // RAW: a belt's size digit is always 0 — not rollable or manually settable — mirroring
+        // MgT2E's own unconditional `body.size = 0` for the same body type
+        // (mgt2e_world_engine.js). Automatic skeleton placement (ct_bottomup_generator.js)
+        // stamps this in directly, but a belt added via the System Editor's +Belt button never
+        // goes through that path, so size stayed `undefined` for its entire editing session —
+        // tripping the UWP auditor's "Planetoid Belt has size undefined (must be 0)" check and
+        // corrupting mass/gravity/diamKm with NaN (ct_physical_library.js's Number(undefined)).
+        body.size = 0;
+        return body;
+    }
+    if (body.type === 'Gas Giant' || body.type === 'Empty' || body.type === 'Nature') {
         return body;
     }
 
@@ -64,7 +80,10 @@ function generatePhysicals(body, zone) {
 
     // B. ATMOSPHERE
     tSection('Planetary Atmosphere');
-    if (szVal === 0) {
+    if (_ctFieldIsManual(body, 'atm')) {
+        tSkip('Atmosphere (Manually Set)');
+        tResult('Atmosphere Code', body.atm, 'CT 2.2: Atmospheric Chemistry');
+    } else if (szVal === 0) {
         body.atm = 0;
         tSkip('Atmosphere (Asteroid/Size 0 forces Atm 0)');
         tResult('Atmosphere Code', 0, 'CT 2.2: Atmospheric Chemistry');
@@ -100,7 +119,10 @@ function generatePhysicals(body, zone) {
     tSection('Hydrographic Percentage');
     const hRules = (planetaryDMs && planetaryDMs.HYDROGRAPHICS) ? planetaryDMs.HYDROGRAPHICS : null;
 
-    if (szVal === 0 || zone === 'I') {
+    if (_ctFieldIsManual(body, 'hydro')) {
+        tSkip('Hydrographics (Manually Set)');
+        tResult('Hydrographic Code', body.hydro, 'CT 2.3: Hydrographics');
+    } else if (szVal === 0 || zone === 'I') {
         body.hydro = 0;
         tSkip(szVal === 0 ? 'Hydrographics (Asteroid/Size 0 forces Hydro 0)' : 'Hydrographics (Zone I is dry)');
         tResult('Hydrographic Code', 0, 'CT 2.3: Hydrographics');
@@ -108,7 +130,7 @@ function generatePhysicals(body, zone) {
         tDM('Size Code', szVal);
         tDM('Standard Hyd', -7);
         let hydRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Hydrographics Roll') : 7) - 7 + szVal;
-        
+
         if (hRules) {
             // Data Shield DMs
             if (hRules.ATMOSPHERE_PENALTY && hRules.ATMOSPHERE_PENALTY.VALID_CODES.includes(body.atm)) {
@@ -132,14 +154,13 @@ function generatePhysicals(body, zone) {
         }
 
         body.hydro = Math.max(0, Math.min(10, hydRoll));
-
-        // Vacuum World Exception
-        if (body.atm === 0 && body.hydro > 0) {
-            body.liquidType = 'Ice-Caps';
-            tResult('Vacuum Exception', 'Ice-Caps Only', 'CT 2.3: Hydrographics');
-        }
-
         tResult('Hydrographic Code', body.hydro, 'CT 2.3: Hydrographics');
+    }
+
+    // Vacuum World Exception — checked regardless of how atm/hydro were arrived at
+    if (body.atm === 0 && body.hydro > 0 && !_ctFieldIsManual(body, 'liquidType')) {
+        body.liquidType = 'Ice-Caps';
+        tResult('Vacuum Exception', 'Ice-Caps Only', 'CT 2.3: Hydrographics');
     }
 
     return body;
@@ -153,6 +174,12 @@ function generatePhysicals(body, zone) {
  */
 function generatePopulation(world, ctx = { mode: 'bottomup' }) {
     tSection('Population');
+
+    if (_ctFieldIsManual(world, 'pop')) {
+        tSkip('Population (Manually Set)');
+        tResult('Population Code', world.pop, 'CT 3.1: Social Stats');
+        return world;
+    }
 
     const forcedZeroSizes = (popMods && popMods.FORCED_ZERO_POP) ? popMods.FORCED_ZERO_POP.SIZES : ['R'];
     const forcedZeroTypes = (popMods && popMods.FORCED_ZERO_POP) ? popMods.FORCED_ZERO_POP.TYPES : ['Gas Giant', 'Empty'];
@@ -369,25 +396,44 @@ function finalizeMainworldSocial(world) {
         return world;
     }
 
-    // Govt: 2D-7 + Pop
-    tDM('Standard Gov', -7);
-    tDM('Population Code', world.pop);
-    let govRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Government Roll') : 7);
-    world.gov = Math.max(0, Math.min(15, govRoll - 7 + world.pop));
-    tResult('Government Code', world.gov, 'CT 3.1: Social Stats');
+    // Govt: 2D-7 + Pop. finalizeSubordinateSocial (below) already checks _ctFieldIsManual
+    // before rerolling gov/law/tl — this mainworld path never did (only starport got that
+    // guard, in generateSocial above), so a manually-typed "Seed UWP digits" gov/law/tl for the
+    // mainworld was silently rerolled on every Preview/Fill & Save, changing the UWP the user
+    // just typed.
+    if (_ctFieldIsManual(world, 'gov')) {
+        tSkip('Government (Manually Set)');
+        tResult('Government Code', world.gov, 'CT 3.1: Social Stats');
+    } else {
+        tDM('Standard Gov', -7);
+        tDM('Population Code', world.pop);
+        let govRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Government Roll') : 7);
+        world.gov = Math.max(0, Math.min(15, govRoll - 7 + world.pop));
+        tResult('Government Code', world.gov, 'CT 3.1: Social Stats');
+    }
 
     // Law: 2D-7 + Govt
     tSection('Law Level');
-    tDM('Standard Law', -7);
-    tDM('Government Code', world.gov);
-    let lawRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Law Level Roll') : 7);
-    world.law = Math.max(0, Math.min(15, lawRoll - 7 + world.gov));
-    tResult('Law Level Code', world.law, 'CT 3.1: Social Stats');
+    if (_ctFieldIsManual(world, 'law')) {
+        tSkip('Law Level (Manually Set)');
+        tResult('Law Level Code', world.law, 'CT 3.1: Social Stats');
+    } else {
+        tDM('Standard Law', -7);
+        tDM('Government Code', world.gov);
+        let lawRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Law Level Roll') : 7);
+        world.law = Math.max(0, Math.min(15, lawRoll - 7 + world.gov));
+        tResult('Law Level Code', world.law, 'CT 3.1: Social Stats');
+    }
 
     // TL: Starport + Size + Atmo + Hydro + Pop + Gov bonuses
     tSection('Technological Level');
-    world.tl = calculateTLModular(world, true);
-    tResult('Tech Level Code', world.tl);
+    if (_ctFieldIsManual(world, 'tl')) {
+        tSkip('Tech Level (Manually Set)');
+        tResult('Tech Level Code', world.tl);
+    } else {
+        world.tl = calculateTLModular(world, true);
+        tResult('Tech Level Code', world.tl);
+    }
 
     // Trade Codes
     tSection('Trade Classifications & Zones');
@@ -410,38 +456,49 @@ function generateSocial(world) {
     // A. Starport
     tSection('Starport Generation');
     const sysData = (typeof CT_CONSTANTS !== 'undefined') ? CT_CONSTANTS.CT_SYSTEM_CONTENTS : null;
-    let spRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Mainworld Starport') : 7);
 
-    // Settings: Starport Modifier (note: in CT lower roll = better port, so positive mod = worse)
-    const ctSpMod2 = (typeof window !== 'undefined' && window.generationStarportMod !== undefined) ? window.generationStarportMod : 0;
-    if (ctSpMod2 !== 0) tResult('Settings Starport Modifier', `${ctSpMod2 > 0 ? '+' : ''}${ctSpMod2}`);
-    else tResult('Settings Starport Modifier', 'None (0)');
-    spRoll += ctSpMod2;
+    // finalizeSubordinateSocial (below) and generatePhysicals/generatePopulation all check
+    // _ctFieldIsManual before rerolling a locked field — this mainworld path never did, so a
+    // manually-typed "Seed UWP digits" starport for the mainworld was silently rerolled every
+    // time (the System Editor's UWP-seed feature, once wired into CT's write() adapter, still
+    // had no effect on the mainworld's own starport specifically).
+    if (_ctFieldIsManual(world, 'starport')) {
+        tSkip('Starport (Manually Set)');
+        tResult('Starport Class', world.starport);
+    } else {
+        let spRoll = (typeof tRoll2D !== 'undefined' ? tRoll2D('Mainworld Starport') : 7);
 
-    world.starport = 'X';
+        // Settings: Starport Modifier (note: in CT lower roll = better port, so positive mod = worse)
+        const ctSpMod2 = (typeof window !== 'undefined' && window.generationStarportMod !== undefined) ? window.generationStarportMod : 0;
+        if (ctSpMod2 !== 0) tResult('Settings Starport Modifier', `${ctSpMod2 > 0 ? '+' : ''}${ctSpMod2}`);
+        else tResult('Settings Starport Modifier', 'None (0)');
+        spRoll += ctSpMod2;
 
-    if (sysData && sysData.STARPORT) {
-        for (let entry of sysData.STARPORT) {
-            if (spRoll <= entry.maxRoll) {
-                world.starport = entry.class;
-                break;
+        world.starport = 'X';
+
+        if (sysData && sysData.STARPORT) {
+            for (let entry of sysData.STARPORT) {
+                if (spRoll <= entry.maxRoll) {
+                    world.starport = entry.class;
+                    break;
+                }
             }
+        } else {
+            if (spRoll <= 4) world.starport = 'A'; else if (spRoll <= 6) world.starport = 'B'; else if (spRoll <= 8) world.starport = 'C'; else if (spRoll === 9) world.starport = 'D'; else if (spRoll <= 11) world.starport = 'E';
         }
-    } else {
-        if (spRoll <= 4) world.starport = 'A'; else if (spRoll <= 6) world.starport = 'B'; else if (spRoll <= 8) world.starport = 'C'; else if (spRoll === 9) world.starport = 'D'; else if (spRoll <= 11) world.starport = 'E';
-    }
-    tResult('Starport Class', world.starport);
+        tResult('Starport Class', world.starport);
 
-    // Settings: Starport Max cap
-    const ctStarportOrder2 = ['A', 'B', 'C', 'D', 'E', 'X'];
-    const ctSpMax2 = (typeof window !== 'undefined' && window.generationStarportMax !== undefined) ? window.generationStarportMax : 'A';
-    const ctSpMaxIdx2 = ctStarportOrder2.indexOf(ctSpMax2);
-    const ctSpCurIdx2 = ctStarportOrder2.indexOf(world.starport);
-    if (ctSpMaxIdx2 !== -1 && ctSpCurIdx2 !== -1 && ctSpCurIdx2 < ctSpMaxIdx2) {
-        tResult('Settings Starport Max', `Cap applied: ${world.starport} → ${ctSpMax2}`);
-        world.starport = ctSpMax2;
-    } else {
-        tResult('Settings Starport Max', `No cap (${world.starport} ≤ ${ctSpMax2})`);
+        // Settings: Starport Max cap
+        const ctStarportOrder2 = ['A', 'B', 'C', 'D', 'E', 'X'];
+        const ctSpMax2 = (typeof window !== 'undefined' && window.generationStarportMax !== undefined) ? window.generationStarportMax : 'A';
+        const ctSpMaxIdx2 = ctStarportOrder2.indexOf(ctSpMax2);
+        const ctSpCurIdx2 = ctStarportOrder2.indexOf(world.starport);
+        if (ctSpMaxIdx2 !== -1 && ctSpCurIdx2 !== -1 && ctSpCurIdx2 < ctSpMaxIdx2) {
+            tResult('Settings Starport Max', `Cap applied: ${world.starport} → ${ctSpMax2}`);
+            world.starport = ctSpMax2;
+        } else {
+            tResult('Settings Starport Max', `No cap (${world.starport} ≤ ${ctSpMax2})`);
+        }
     }
 
     // B. Finalize Social (Gov, Law, TL, Trade)
@@ -503,61 +560,75 @@ function finalizeSubordinateSocial(world, mwRef) {
     }
 
     // Subordinate Govt
-    if (mwRef.gov === 6) {
+    if (_ctFieldIsManual(world, 'gov')) {
+        tSkip('Government (Already Generated)');
+        tResult('Government Code', world.gov, 'CT 3.1: Social Stats');
+    } else if (mwRef.gov === 6) {
         world.gov = 6;
+        tResult('Government Code', world.gov, 'CT 3.1: Social Stats');
     } else {
         let govDM = 0;
         if (mwRef.gov >= 7) govDM = 2;
         if (govDM !== 0) tDM('Mainworld Gov 7+', govDM);
         let govRoll = (typeof tRoll1D !== 'undefined' ? tRoll1D('Subordinate Gov') : 3);
         world.gov = (govRoll + govDM >= 5) ? 6 : (govRoll + govDM);
-    }
-
-    if (typeof tResult !== 'undefined') {
         tResult('Government Code', world.gov, 'CT 3.1: Social Stats');
     }
 
     // Subordinate Law: 1D-3 + MW Law
-    tDM('Mainworld Law', mwRef.law);
-    tDM('Standard Law', -3);
-    let lawRoll = (typeof tRoll1D !== 'undefined' ? tRoll1D('Subordinate Law') : 3);
-    world.law = Math.max(0, Math.min(15, lawRoll - 3 + mwRef.law));
-
-    if (typeof tResult !== 'undefined') {
+    if (_ctFieldIsManual(world, 'law')) {
+        tSkip('Law Level (Already Generated)');
+        tResult('Law Level Code', world.law, 'CT 3.1: Social Stats');
+    } else {
+        tDM('Mainworld Law', mwRef.law);
+        tDM('Standard Law', -3);
+        let lawRoll = (typeof tRoll1D !== 'undefined' ? tRoll1D('Subordinate Law') : 3);
+        world.law = Math.max(0, Math.min(15, lawRoll - 3 + mwRef.law));
         tResult('Law Level Code', world.law, 'CT 3.1: Social Stats');
     }
 
     // Spaceport
-    let spDM = 0;
-    if (world.pop >= 6) spDM = 2;
-    else if (world.pop === 1) spDM = -2;
-    if (spDM !== 0) tDM(`Population ${world.pop}`, spDM);
-    let spRoll = (typeof tRoll1D !== 'undefined' ? tRoll1D('Subordinate Spaceport') : 3);
-    let finalSP = spRoll + spDM;
-    if (finalSP <= 2) { world.spaceport = 'Y'; world.starport = 'Y'; }
-    else if (finalSP === 3) { world.spaceport = 'H'; world.starport = 'H'; }
-    else if (finalSP <= 5) { world.spaceport = 'G'; world.starport = 'G'; }
-    else { world.spaceport = 'F'; world.starport = 'F'; }
-
-    // TL Baseline (Rule: MW TL - 1, or equal if special facility present)
-    const hasSpecialFacility = (world.militaryBase || world.researchBase ||
-        (world.facilities && (world.facilities.includes('Research Laboratory') ||
-            world.facilities.includes('Military Base'))));
-
-    if (hasSpecialFacility) {
-        world.tl = mwRef.tl;
-        if (typeof tResult !== 'undefined') tResult('TL (Facility Bonus)', world.tl);
+    if (_ctFieldIsManual(world, 'starport')) {
+        tSkip('Starport (Already Generated)');
+        world.spaceport = world.starport;
+        tResult('Starport Class', world.starport, 'CT 3.1: Social Stats');
     } else {
-        world.tl = Math.max(0, mwRef.tl - 1);
-        if (typeof tResult !== 'undefined') tResult('TL (Baseline MW-1)', world.tl);
+        let spDM = 0;
+        if (world.pop >= 6) spDM = 2;
+        else if (world.pop === 1) spDM = -2;
+        if (spDM !== 0) tDM(`Population ${world.pop}`, spDM);
+        let spRoll = (typeof tRoll1D !== 'undefined' ? tRoll1D('Subordinate Spaceport') : 3);
+        let finalSP = spRoll + spDM;
+        if (finalSP <= 2) { world.spaceport = 'Y'; world.starport = 'Y'; }
+        else if (finalSP === 3) { world.spaceport = 'H'; world.starport = 'H'; }
+        else if (finalSP <= 5) { world.spaceport = 'G'; world.starport = 'G'; }
+        else { world.spaceport = 'F'; world.starport = 'F'; }
     }
 
-    // Book 6 Environmental Floor (Corrosive, Vacuum, etc. requires TL 7)
-    if (world.tl < 7 && ![5, 6, 8].includes(world.atm)) {
-        if (typeof tOverride !== 'undefined') {
-            tOverride('TL Environmental Floor', world.tl, 7, 'Hostile atmosphere requires life-support tech');
+    // TL Baseline (Rule: MW TL - 1, or equal if special facility present)
+    if (_ctFieldIsManual(world, 'tl')) {
+        tSkip('Tech Level (Already Generated)');
+        tResult('Tech Level Code', world.tl, 'CT 3.1: Social Stats');
+    } else {
+        const hasSpecialFacility = (world.militaryBase || world.researchBase ||
+            (world.facilities && (world.facilities.includes('Research Laboratory') ||
+                world.facilities.includes('Military Base'))));
+
+        if (hasSpecialFacility) {
+            world.tl = mwRef.tl;
+            if (typeof tResult !== 'undefined') tResult('TL (Facility Bonus)', world.tl);
+        } else {
+            world.tl = Math.max(0, mwRef.tl - 1);
+            if (typeof tResult !== 'undefined') tResult('TL (Baseline MW-1)', world.tl);
         }
-        world.tl = 7;
+
+        // Book 6 Environmental Floor (Corrosive, Vacuum, etc. requires TL 7)
+        if (world.tl < 7 && ![5, 6, 8].includes(world.atm)) {
+            if (typeof tOverride !== 'undefined') {
+                tOverride('TL Environmental Floor', world.tl, 7, 'Hostile atmosphere requires life-support tech');
+            }
+            world.tl = 7;
+        }
     }
 
     // Trade Codes

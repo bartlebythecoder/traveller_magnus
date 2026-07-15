@@ -164,27 +164,12 @@
             SocioEngine.finalizeSubordinateSocial(sys, mainworldBase);
         }
 
-        // --- PHASE 8: SYSTEM AUDIT ---
+        // --- PHASE 8: SYSTEM AUDIT --- shared helper (OW-7): audits, attaches sys.auditResult,
+        // logs/backlogs on failure. Was previously duplicated inline here and in
+        // mgt2e_bottomup_generator.js.
         const activeAuditor = Auditor || (typeof MgT2E_UWP_Auditor !== 'undefined' ? MgT2E_UWP_Auditor : null);
-        if (activeAuditor) {
-            const auditResults = activeAuditor.auditMgT2ESystem(sys, { mode: 'top-down' });
-            if (!auditResults.pass) {
-                const errSummary = auditResults.errors.map(e => e.message || e).join(' | ');
-                console.warn(`[MgT2E Auditor] System ${hexId} failed strict validation (${auditResults.errors.length} error(s)): ${errSummary}`);
-
-                // Action 6.3: Audit Persistence — push all strict [FAIL] to global backlog
-                if (typeof window !== 'undefined') {
-                    window.auditBacklog = window.auditBacklog || [];
-                    auditResults.errors.forEach(err => {
-                        window.auditBacklog.push({
-                            hexId: hexId,
-                            orbitId: err.orbitId !== undefined ? err.orbitId : null,
-                            engine: "MgT2E",
-                            message: err.message || err
-                        });
-                    });
-                }
-            }
+        if (activeAuditor && activeAuditor.runAndLog) {
+            activeAuditor.runAndLog(sys, hexId, { mode: 'top-down' });
         }
 
         // =================================================================
@@ -200,7 +185,7 @@
         // =================================================================
         // PHASE 9: JOURNEY MATH SWEEP (Phase 2 Integration)
         // =================================================================
-        if (MgT2EMath && MgT2EMath.performJourneyMathSweep) {
+        if (typeof MgT2EMath !== 'undefined' && MgT2EMath.performJourneyMathSweep) {
             MgT2EMath.performJourneyMathSweep(sys);
         }
 
@@ -369,7 +354,7 @@
         }
 
         // --- PHASE 4: JOURNEY MATH SWEEP ---
-        if (MgT2EMath && MgT2EMath.performJourneyMathSweep) {
+        if (typeof MgT2EMath !== 'undefined' && MgT2EMath.performJourneyMathSweep) {
             MgT2EMath.performJourneyMathSweep(sys);
         }
 

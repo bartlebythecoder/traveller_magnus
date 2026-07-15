@@ -20,6 +20,9 @@
     <script src="js/renderer.js" defer></script>
     <!-- Modular JavaScript Generation Engines -->
 
+    <!-- Shared System Editor <-> generator reconciliation helpers (engine-agnostic; see OW-6) -->
+    <script src="js/seed_restoration.js" defer></script>
+
     <script src="rules/ct_data.js"></script>
     <script src="js/ct_constants.js" defer></script>
     <script src="js/ct_stellar_engine.js" defer></script>
@@ -57,6 +60,8 @@
     <script src="rules/aow_data.js" defer></script>
     <script src="js/aow_stellar_engine.js" defer></script>
     <script src="js/aow_world_engine.js" defer></script>
+    <script src="js/aow_uwp_auditor.js" defer></script>
+    <script src="js/aow_seed_bridge.js" defer></script>
     <script src="js/aow_bottomup_generator.js" defer></script>
     <!-- v0.7.0.0: Political Mapping & Referee Utility -->
     <!-- v0.6.1.0: Sector-Wide Statistical Validation -->
@@ -68,6 +73,11 @@
     <!-- Modular JavaScript Input Handling -->
     <script src="js/input_init.js" defer></script>
     <script src="js/system_viewer.js" defer></script>
+    <script src="js/mgt2e_editor_adapter.js" defer></script>
+    <script src="js/ct_editor_adapter.js" defer></script>
+    <script src="js/t5_editor_adapter.js" defer></script>
+    <script src="js/rtt_editor_adapter.js" defer></script>
+    <script src="js/aow_editor_adapter.js" defer></script>
     <script src="js/system_editor.js" defer></script>
     <script src="js/surface_viewer.js" defer></script>
     <script src="js/obsidian_exporter.js" defer></script>
@@ -731,7 +741,7 @@
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above<br> So Below</span></h1>
             <div class="splash-banner">New This Version: Full System Editor</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.16.0.5</div>
+            <div class="splash-version">v0.16.1.0</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -1212,7 +1222,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.16.0.5</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.16.1.0</span>
             </p>
         </div>
 
@@ -1389,17 +1399,17 @@
                 <label style="color: #c5c6c7; cursor: pointer; display: flex; align-items: center; gap: 10px;">
                     <input type="radio" name="se-engine-choice" value="MgT2E" checked> Mongoose Traveller 2nd Ed (MgT2E)
                 </label>
-                <label style="color: #555; cursor: not-allowed; display: flex; align-items: center; gap: 10px;">
-                    <input type="radio" name="se-engine-choice" value="CT" disabled> Classic Traveller (CT) <span style="font-size:0.75rem;">(coming soon)</span>
+                <label style="color: #c5c6c7; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                    <input type="radio" name="se-engine-choice" value="CT"> Classic Traveller (CT)
                 </label>
-                <label style="color: #555; cursor: not-allowed; display: flex; align-items: center; gap: 10px;">
-                    <input type="radio" name="se-engine-choice" value="T5" disabled> Traveller 5 (T5) <span style="font-size:0.75rem;">(coming soon)</span>
+                <label style="color: #6b6f73; cursor: not-allowed; display: flex; align-items: center; gap: 10px;" title="Not yet available in the System Editor">
+                    <input type="radio" name="se-engine-choice" value="T5" disabled> Traveller 5 (T5) <span style="font-size: 0.75rem; color: #45a29e;">(coming soon)</span>
                 </label>
-                <label style="color: #555; cursor: not-allowed; display: flex; align-items: center; gap: 10px;">
-                    <input type="radio" name="se-engine-choice" value="AoW" disabled> Architect of Worlds (AoW) <span style="font-size:0.75rem;">(coming soon)</span>
+                <label style="color: #6b6f73; cursor: not-allowed; display: flex; align-items: center; gap: 10px;" title="Not yet available in the System Editor">
+                    <input type="radio" name="se-engine-choice" value="AoW" disabled> Architect of Worlds (AoW) <span style="font-size: 0.75rem; color: #45a29e;">(coming soon)</span>
                 </label>
-                <label style="color: #555; cursor: not-allowed; display: flex; align-items: center; gap: 10px;">
-                    <input type="radio" name="se-engine-choice" value="RTT" disabled> RTT WorldGen (RTT) <span style="font-size:0.75rem;">(coming soon)</span>
+                <label style="color: #6b6f73; cursor: not-allowed; display: flex; align-items: center; gap: 10px;" title="Not yet available in the System Editor">
+                    <input type="radio" name="se-engine-choice" value="RTT" disabled> RTT WorldGen (RTT) <span style="font-size: 0.75rem; color: #45a29e;">(coming soon)</span>
                 </label>
             </div>
             <div style="border-top: 1px solid #45a29e33; margin: 16px 0; padding-top: 16px;">

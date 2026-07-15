@@ -86,8 +86,9 @@
                 if (!resolvedUWP) {
                     throw new Error("T5 Top-Down generation requires a valid mainworldUWP object.");
                 }
-                // T5 Generator expects the mainworldBase as the anchor
-                sys = T5_Generator.generateT5System(resolvedUWP);
+                // T5 Generator expects the mainworldBase as the anchor; seedSys threads the
+                // System Editor's structural gating (stars/worlds/_allowAddBodies) through.
+                sys = T5_Generator.generateT5System(resolvedUWP, seedSys);
             } else {
                 throw new Error(`Invalid generation mode for T5: ${mode}. Only 'top-down' is supported.`);
             }
@@ -146,8 +147,10 @@
         // --- FINALIZATION: AUDIT & LOGGING ---
         if (sys) {
             if (edition.toUpperCase() === 'T5') {
-                // T5 Auditor handles logging internally via writeLogLine if present
-                T5_Auditor.runT5SystemAudit(sys);
+                // Attaches sys.auditResult for the System Editor's engine-agnostic OW-3 Fill &
+                // Save audit gate; falls back to the bare audit call if runAndLog isn't present.
+                if (T5_Auditor.runAndLog) T5_Auditor.runAndLog(sys, hexId);
+                else T5_Auditor.runT5SystemAudit(sys);
             } else {
                 // CT Auditor returns an audit object
                 const auditFn = (typeof CT_Auditor === 'function') ? CT_Auditor : CT_Auditor.auditCTSystem;

@@ -499,8 +499,7 @@
             tResult('Moon Quantity Total', `Roll ${qRoll} + Mods ${qMod} = ${qRoll + qMod}${hsPDLogged !== null && hillSphereDM < 0 ? ` [Hill Sphere DM applied: HS=${hsPDLogged.toFixed(1)} PD]` : ''}`);
 
             if (qRoll + qMod === 0 && existingMoons === 0) {
-                tResult('Result', 'No moons, Adding Ring placeholder');
-                w.rings.push({});
+                tResult('Result', 'No significant moons');
             } else {
                 tResult('Additional Moons to Generate', moonsToGenerate);
             }

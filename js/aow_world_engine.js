@@ -1264,8 +1264,12 @@
 
             let D;
             const isGasGiant = planet.planetType.includes('Gas Giant');
+            const densityIsManual = typeof isManual === 'function' && isManual(planet, 'density');
 
-            if (isGasGiant) {
+            if (densityIsManual) {
+                D = planet.density;
+                tResult(`Orbit ${planet.orbitNumber} Density (Preserved)`, `${D} (manually set)`, 'AoW Step 16');
+            } else if (isGasGiant) {
                 if (planet.mass <= 200) {
                     D = 1 / Math.sqrt(planet.mass);
                     tResult(`Orbit ${planet.orbitNumber} Density`,
@@ -1315,17 +1319,25 @@
 
             planet.density = D;
 
-            const R = roundToSigFigs(6370 * Math.pow(planet.mass / D, 1 / 3), 3);
-            planet.radius = R;
-            tResult(`Orbit ${planet.orbitNumber} Radius`,
-                `6370 × ∛(${planet.mass.toFixed(3)}/${D.toFixed(4)}) = ${R} km`,
-                'AoW Step 16');
+            if (typeof isManual === 'function' && isManual(planet, 'radius')) {
+                tResult(`Orbit ${planet.orbitNumber} Radius (Preserved)`, `${planet.radius} km (manually set)`, 'AoW Step 16');
+            } else {
+                const R = roundToSigFigs(6370 * Math.pow(planet.mass / D, 1 / 3), 3);
+                planet.radius = R;
+                tResult(`Orbit ${planet.orbitNumber} Radius`,
+                    `6370 × ∛(${planet.mass.toFixed(3)}/${D.toFixed(4)}) = ${R} km`,
+                    'AoW Step 16');
+            }
 
-            const G = Math.round(Math.pow(planet.mass * D * D, 1 / 3) * 100) / 100;
-            planet.surfaceGravity = G;
-            tResult(`Orbit ${planet.orbitNumber} Gravity`,
-                `∛(${planet.mass.toFixed(3)} × ${D.toFixed(4)}²) = ${G.toFixed(2)} g`,
-                'AoW Step 16');
+            if (typeof isManual === 'function' && isManual(planet, 'surfaceGravity')) {
+                tResult(`Orbit ${planet.orbitNumber} Gravity (Preserved)`, `${planet.surfaceGravity} g (manually set)`, 'AoW Step 16');
+            } else {
+                const G = Math.round(Math.pow(planet.mass * D * D, 1 / 3) * 100) / 100;
+                planet.surfaceGravity = G;
+                tResult(`Orbit ${planet.orbitNumber} Gravity`,
+                    `∛(${planet.mass.toFixed(3)} × ${D.toFixed(4)}²) = ${G.toFixed(2)} g`,
+                    'AoW Step 16');
+            }
         }
 
         const physCount = worksheet.planets.filter(p => p.density !== undefined).length;
@@ -2902,6 +2914,10 @@
         }
 
         function computeAlbedo(world, label) {
+            if (typeof isManual === 'function' && isManual(world, 'albedo')) {
+                tResult(`${label} Albedo (Preserved)`, `${world.albedo} (manually set)`, 'AoW Step 27');
+                return;
+            }
             if (!world.worldClass) {
                 tSkip(`${label}: no worldClass — skipped`);
                 return;
@@ -4038,17 +4054,32 @@
     }
 
     function applyUWPPhysicals(world) {
-        // String codes — for UWP string building and display
-        world.sizeCode       = classifySizeCode(world);
-        world.atmosphereCode = classifyAtmosphereCode(world);
+        const sizeManual  = typeof isManual === 'function' && isManual(world, 'size');
+        const atmManual   = typeof isManual === 'function' && isManual(world, 'atmCode');
+        const hydroManual = typeof isManual === 'function' && isManual(world, 'hydroCode');
 
-        // Integer codes — required by MgT2E social generators
-        world.size     = parseInt(world.sizeCode, 16);      // 0-10
-        world.atmCode  = parseInt(world.atmosphereCode, 16); // 0-13
-        world.hydroCode = classifyHydroCode(world);          // 0-10 (integer; socio reads this field)
+        // String codes — for UWP string building and display
+        if (sizeManual) {
+            world.sizeCode = (typeof world.size === 'number') ? world.size.toString(16).toUpperCase() : classifySizeCode(world);
+        } else {
+            world.sizeCode = classifySizeCode(world);
+            world.size     = parseInt(world.sizeCode, 16); // 0-10
+        }
+
+        if (atmManual) {
+            world.atmosphereCode = (typeof world.atmCode === 'number') ? world.atmCode.toString(16).toUpperCase() : classifyAtmosphereCode(world);
+        } else {
+            world.atmosphereCode = classifyAtmosphereCode(world);
+            world.atmCode        = parseInt(world.atmosphereCode, 16); // 0-13
+        }
+
+        if (!hydroManual) {
+            world.hydroCode = classifyHydroCode(world); // 0-10 (integer; socio reads this field)
+        }
 
         tResult(`UWP Physicals [${world.label || '?'}]`,
             `S=${world.sizeCode} A=${world.atmosphereCode} H=${world.hydroCode}` +
+            `${(sizeManual || atmManual || hydroManual) ? ' (some manually preserved)' : ''}` +
             ` | radius=${world.radius || 0}km P=${world.atmPressure || 0}atm cov=${world.waterCoverage || 0}%`,
             'AoW UWP Physicals');
     }
@@ -4319,8 +4350,8 @@
     // =================================================================
 
     if (typeof window !== 'undefined') {
-        window.AoWWorldEngine = { generatePlanetaryDisks, generateOrbitalDynamics, generatePhysicals, generateOrbitalConditions, generateThermalAndWater, generateGeophysics, generateMagneticField, generateEarlyAtmosphere, generateAlbedo, generateCarbonDioxide, generatePresenceOfLife, generateAverageSurfaceTemp, generateFinalizeAtmosphere, calculatePressureAtAltitude, calculateAltitudeForPressure, classifySizeCode, classifyAtmosphereCode, classifyHydroCode, generateUWPPhysicals, generateHabitabilityScores, generateMainworldSelection, populateAoWWorldsList };
+        window.AoWWorldEngine = { buildNodes, buildDiskWorksheet, generatePlanetaryDisks, generateOrbitalDynamics, generatePhysicals, generateOrbitalConditions, generateThermalAndWater, generateGeophysics, generateMagneticField, generateEarlyAtmosphere, generateAlbedo, generateCarbonDioxide, generatePresenceOfLife, generateAverageSurfaceTemp, generateFinalizeAtmosphere, calculatePressureAtAltitude, calculateAltitudeForPressure, classifySizeCode, classifyAtmosphereCode, classifyHydroCode, generateUWPPhysicals, generateHabitabilityScores, generateMainworldSelection, populateAoWWorldsList };
     }
 
-    return { generatePlanetaryDisks, generateOrbitalDynamics, generatePhysicals, generateOrbitalConditions, generateThermalAndWater, generateGeophysics, generateMagneticField, generateEarlyAtmosphere, generateAlbedo, generateCarbonDioxide, generatePresenceOfLife, generateAverageSurfaceTemp, generateFinalizeAtmosphere, calculatePressureAtAltitude, calculateAltitudeForPressure, classifySizeCode, classifyAtmosphereCode, classifyHydroCode, generateUWPPhysicals, generateHabitabilityScores, generateMainworldSelection, populateAoWWorldsList };
+    return { buildNodes, buildDiskWorksheet, generatePlanetaryDisks, generateOrbitalDynamics, generatePhysicals, generateOrbitalConditions, generateThermalAndWater, generateGeophysics, generateMagneticField, generateEarlyAtmosphere, generateAlbedo, generateCarbonDioxide, generatePresenceOfLife, generateAverageSurfaceTemp, generateFinalizeAtmosphere, calculatePressureAtAltitude, calculateAltitudeForPressure, classifySizeCode, classifyAtmosphereCode, classifyHydroCode, generateUWPPhysicals, generateHabitabilityScores, generateMainworldSelection, populateAoWWorldsList };
 }));

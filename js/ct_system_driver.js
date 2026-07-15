@@ -3,26 +3,34 @@
 // =====================================================================
 
 // Browser-safe imports
-var systemSkeletonGen, socialProcessor, topDownGen, auditor, auConst;
+var systemSkeletonGen, socialProcessor, topDownGen, auditor, auditRunAndLog, auConst;
+var captureSatCaps, trimSatCaps;
 
 if (typeof module !== 'undefined' && module.exports) {
-    const { generateSystemSkeleton, processBottomUpSocial } = require('./ct_bottomup_generator.js');
+    const { generateSystemSkeleton, processBottomUpSocial, captureCTSatelliteCaps, trimCTSatellitesToSeededCaps } = require('./ct_bottomup_generator.js');
     const { generateTopDownSystem } = require('./ct_topdown_generator.js');
-    const { auditCTSystem } = require('./ct_uwp_auditor.js');
+    const { auditCTSystem, runAndLog } = require('./ct_uwp_auditor.js');
     const { ORBIT_AU } = require('./ct_constants.js');
-    
+
     systemSkeletonGen = generateSystemSkeleton;
     socialProcessor = processBottomUpSocial;
     topDownGen = generateTopDownSystem;
     auditor = auditCTSystem;
+    auditRunAndLog = runAndLog;
     auConst = ORBIT_AU;
+    captureSatCaps = captureCTSatelliteCaps;
+    trimSatCaps = trimCTSatellitesToSeededCaps;
 } else {
     // In browser, these are resolved at script load time.
     systemSkeletonGen = typeof generateSystemSkeleton !== 'undefined' ? generateSystemSkeleton : null;
     socialProcessor = typeof processBottomUpSocial !== 'undefined' ? processBottomUpSocial : null;
     topDownGen = typeof generateTopDownSystem !== 'undefined' ? generateTopDownSystem : null;
     auditor = typeof auditCTSystem !== 'undefined' ? auditCTSystem : null;
+    auditRunAndLog = (typeof window !== 'undefined' && window.CT_Auditor && window.CT_Auditor.runAndLog)
+        ? window.CT_Auditor.runAndLog : null;
     auConst = typeof ORBIT_AU !== 'undefined' ? ORBIT_AU : 149597870;
+    captureSatCaps = typeof captureCTSatelliteCaps !== 'undefined' ? captureCTSatelliteCaps : null;
+    trimSatCaps = typeof trimCTSatellitesToSeededCaps !== 'undefined' ? trimCTSatellitesToSeededCaps : null;
 }
 
 /**
@@ -75,12 +83,21 @@ function generateSystem(params) {
             if (mw) skeleton.mainworld = mw;
         }
 
+        // Snapshot each body's satellite count before social processing rolls moons, so a
+        // freshly-added body (0 satellites before this pass) can't come out of Preview/Fill &
+        // Save with dice-rolled moons the user never asked for — matches MgT2E's equivalent
+        // SeedRestoration capture/trim pair (see OW-10 in project_manifest.md). No-op (returns
+        // null) whenever the engine is allowed to add bodies or there's no seed at all.
+        const satCaps = captureSatCaps ? captureSatCaps(skeleton, seedSys) : null;
+
         sys = socialProcessor(skeleton);
+
+        if (trimSatCaps) trimSatCaps(sys, seedSys, satCaps);
     }
 
     if (sys) {
         if (hexId) sys.hexId = sys.hexId || hexId;
-        sys.audit = auditor(sys);
+        sys.audit = auditRunAndLog ? auditRunAndLog(sys, hexId) : auditor(sys);
         if (typeof writeLogLine !== 'undefined') {
             writeLogLine("=====================================================================");
             writeLogLine("SYSTEM AUDIT RESULTS");

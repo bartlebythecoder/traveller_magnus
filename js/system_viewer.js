@@ -26,6 +26,23 @@ const SystemViewer = (() => {
     let _canvasW = 0;
     let _canvasH = 0;
 
+    // Covers the worst realistic case: a tight companion pair (~0.05 AU) rendered
+    // alongside a Far companion star (~300 AU) needs ~1900x to visually separate.
+    const _MAX_ZOOM = 5000;
+
+    // Dashed-stroke cost scales with circumference (canvas has to walk the whole path
+    // to place each dash), so an orbit ring keeps costing more as _viewZoom grows —
+    // unlike a plain stroke, which is cheap regardless of radius. At deep zoom a wide
+    // companion's ring can reach into the hundreds of thousands of pixels, driving dash
+    // segment counts high enough to freeze the render loop (confirmed empirically: a
+    // 60-tick zoom-in froze the tab for 13+ minutes before this guard was added). Past
+    // this radius the ring is also many multiples of any plausible viewport, so skipping
+    // it costs nothing visually. ~80,000px keeps dash segments under ~50k/frame
+    // ((2*pi*r)/10) — the ring stays visible at the pre-existing 200x zoom ceiling
+    // (~57k px worst case), so this doesn't change behaviour below that; it only kicks
+    // in at the deeper zoom this cap increase now allows.
+    const _MAX_DASHED_RING_RADIUS = 80000;
+
     let _viewZoom = 1.0;
     let _viewOffX = 0;
     let _viewOffY = 0;
@@ -297,12 +314,21 @@ const SystemViewer = (() => {
 
         // Stars
         const stars = (sys.stars || []).map((s, i) => {
-            // CT companion orbit may be 'Close', 'Far', or a number
+            // CT companion orbit may be 'Close', 'Far', or a number (native stochastic
+            // generation) — but a System-Editor-authored/repositioned companion never carries
+            // those fields at all, only `orbitId` (the shared drag-and-drop position key also
+            // used for worlds). Without this fallback, a companion added or dragged in the
+            // editor always rendered at the same hardcoded distance in the orrery no matter
+            // where it was dropped, because none of the native-format checks ever matched.
+            // Mirrors the equivalent read-side fallback in system_editor.js's
+            // _buildWorkingCopyFromState (orbitAU derivation for CT/RTT stars).
             let orbitAU = null;
             if (i > 0) {
                 if (typeof s.orbit === 'number') orbitAU = _orbitToAU(s.orbit);
                 else if (s.distAU)               orbitAU = s.distAU;
                 else if (s.orbit === 'Close')     orbitAU = 0.05;
+                else if (s.orbitAU != null)       orbitAU = s.orbitAU;
+                else if (s.orbitId != null)       orbitAU = _orbitToAU(s.orbitId);
                 else                              orbitAU = 10;
             }
             return {
@@ -322,29 +348,80 @@ const SystemViewer = (() => {
             };
         });
 
-        // Worlds — flattened from sys.orbits[]
+        // Worlds — flattened from sys.orbits[]. Read the body's own w.distAU (always freshly
+        // recomputed from the current orbit every generation pass — ct_bottomup_generator.js's
+        // internalPhysicalPass) rather than slot.distAU (a write-time-only echo of the seed
+        // that's never refreshed after a Preview — see OW-25). Matches the pattern captured
+        // planets already use correctly, two lines below.
         const worlds = [];
         (sys.orbits || []).forEach(slot => {
             const w = slot.contents;
             if (!w || w.type === 'Empty') return;
-            worlds.push(_normCTWorld(w, slot.distAU || 0, mw));
+            worlds.push(_normCTWorld(w, w.distAU || 0, mw));
         });
         // Captured planets (anomalies)
         (sys.capturedPlanets || []).forEach(w => {
             if (w && w.type !== 'Empty') worlds.push(_normCTWorld(w, w.distAU || 0, mw));
         });
 
-        // HZ centre: use mainworld distAU, or first H-zone slot
-        let hzAU = mw && mw.distAU ? mw.distAU : null;
-        if (!hzAU) {
-            const hSlot = (sys.orbits || []).find(o => o.zone === 'H');
-            hzAU = hSlot ? (hSlot.distAU || 1.0) : 1.0;
+        // Far companions carry their own independent orbit sequence in nestedSystem (set by
+        // ct_bottomup_generator.js's generateSystemOrbits or the System Editor's CT write()
+        // adapter) — flatten those bodies too, tagged with the companion's own star index, so
+        // the existing sub-orrery drawing code (_drawWorldSet's `w.parentStarIdx === sIdx`
+        // filter, below) picks them up. Without this a Far companion's own bodies were
+        // invisible in the orrery even after the System Editor/accordion could show them (OW-19).
+        (sys.stars || []).forEach((s, i) => {
+            if (i === 0 || !s.nestedSystem) return;
+            (s.nestedSystem.orbits || []).forEach(slot => {
+                const w = slot.contents;
+                if (!w || w.type === 'Empty') return;
+                worlds.push(_normCTWorld(w, w.distAU || 0, mw, i));
+            });
+            (s.nestedSystem.capturedPlanets || []).forEach(w => {
+                if (w && w.type !== 'Empty') worlds.push(_normCTWorld(w, w.distAU || 0, mw, i));
+            });
+        });
+
+        // HZ centre: prefer sys.hzco — the orbit number CT's generator actually resolved and
+        // used for zone classification/placement (ct_bottomup_generator.js's
+        // generateSystemOrbits), which respects any System Editor override. Falling back to a
+        // live zoneHTable lookup here (as this code used to do unconditionally) meant an
+        // edited system's HZ override never moved the ring, since this recomputed straight from
+        // the primary's size/type every time regardless of what the generator/editor resolved.
+        // sys.hzco is only ever absent (undefined, not null) for systems that predate this field
+        // — chiefly Top-Down-generated ones (ct_topdown_generator.js doesn't set it) — so those
+        // still fall back to the direct table lookup below.
+        const primary = (sys.stars || [])[0];
+        let hzAU = null;
+        let hzKnownAbsent = false;
+        if (sys.hzco !== undefined) {
+            if (sys.hzco != null) hzAU = _orbitToAU(sys.hzco);
+            // sys.hzco === null means the generator resolved no HZ (RAW ZONE_H_TABLE negative,
+            // and no override forced one) — same "known absent" semantics as the table lookup
+            // below, not a missing value to fall back from.
+            else hzKnownAbsent = true;
+        } else if (primary && typeof zoneHTable !== 'undefined' && zoneHTable[primary.size]) {
+            const hzOrbitNum = zoneHTable[primary.size][`${primary.type}${primary.decimal}`];
+            if (hzOrbitNum != null) {
+                if (hzOrbitNum >= 0) hzAU = _orbitToAU(hzOrbitNum);
+                // ZONE_H_TABLE uses negative values (e.g. M5/M9 under size 'V', most of 'VI'
+                // and 'D') as a deliberate RAW signal that this star type has no classical
+                // habitable zone at all — not a lookup failure. _orbitToAU(-1) previously read
+                // past the start of the orbit-AU array (tbl[-1] === undefined), producing NaN,
+                // which crashed _drawHZBand's ctx.createRadialGradient (non-finite radius) and
+                // aborted the whole orrery render before stars/worlds were drawn. Leave hzAU
+                // null here — no ring should be drawn, and the mainworld-distance fallback
+                // below is skipped too, since falling back there would incorrectly imply a
+                // habitable zone exists when RAW says it doesn't.
+                else hzKnownAbsent = true;
+            }
         }
+        if (hzAU == null && !hzKnownAbsent) hzAU = (mw && mw.distAU) ? mw.distAU : 1.0;
 
         return { edition: 'CT', age: sys.age || 0, hzAU, stars, worlds };
     }
 
-    function _normCTWorld(w, au, mainworldRef) {
+    function _normCTWorld(w, au, mainworldRef, parentStarIdx) {
         const isMainworld = _isSameWorld(w, mainworldRef) || w.type === 'Mainworld';
         let type  = isMainworld ? 'Mainworld' : (w.type || 'Terrestrial Planet');
         let ggType = null;
@@ -355,7 +432,7 @@ const SystemViewer = (() => {
         return {
             type, ggType,
             au:            au || w.distAU || 0,
-            parentStarIdx: 0,
+            parentStarIdx: parentStarIdx || 0,
             orbitType:     'S-Type',
             eccentricity:  0,
             mass:          w.mass     || null,
@@ -410,8 +487,12 @@ const SystemViewer = (() => {
             });
         }
 
-        // HZ centre: mainworld distAU
-        const hzAU = (mw && mw.distAU) ? mw.distAU : 1.0;
+        // HZ centre: prefer the star-physics-derived HZ orbit (getStarHZ in
+        // t5_topdown_generator.js, fixed by the primary's spectral type/size — independent
+        // of which body is flagged mainworld). Fall back to the mainworld's own distance
+        // only for older saves generated before sys.hzOrbit was persisted.
+        let hzAU = (sys.hzOrbit != null) ? _orbitToAU(sys.hzOrbit) : null;
+        if (hzAU == null) hzAU = (mw && mw.distAU) ? mw.distAU : 1.0;
 
         return { edition: 'T5', age: sys.age || 0, hzAU, stars, worlds };
     }
@@ -581,9 +662,17 @@ const SystemViewer = (() => {
     function _normalizeAoW(sys) {
         const mw = sys.mainworld;
 
-        // hzco is always 0 in the generator (TODO); fall back to mainworld orbit
+        // sys.hzco is never computed by the AoW generator (see OW-9 note above), so derive
+        // the HZ ring directly from the primary's real solar luminosity — same inverse-square
+        // approximation MgT2E uses for HZCO (HZ AU = sqrt(luminosity in L☉)), applied straight
+        // in AU since AoW bodies already carry real orbitalRadius rather than an abstract orbit
+        // number. Unlike RTT (which only tracks a luminosity *class* letter, not a numeric solar
+        // luminosity), AoW's star-physics solver already produces `star.luminosity` for every
+        // star, so this needs no new data — only falls back to the mainworld's own orbit if
+        // luminosity is somehow missing (e.g. an unresolved/partial star).
+        const primaryLum = (sys.stars && sys.stars[0]) ? sys.stars[0].luminosity : null;
         const mwAU = mw ? (mw.orbitalRadius ?? mw.orbitId ?? 1.0) : 1.0;
-        const hzAU = (sys.hzco && sys.hzco > 0) ? sys.hzco : mwAU;
+        const hzAU = (primaryLum != null && primaryLum > 0) ? Math.sqrt(primaryLum) : mwAU;
 
         // Companion orbit AU from sys.orbits[], sorted by R ascending
         const sortedOrbits = [...(sys.orbits || [])].sort((a, b) => a.R - b.R);
@@ -999,9 +1088,10 @@ const SystemViewer = (() => {
         });
         _pauseBtn.addEventListener('click', _togglePause);
 
-        // System Editor is only tested against MgT2E systems — hide "Edit System" for all other engines.
+        // T5/RTT/AoW System Editor support is preliminary and slated for an overhaul — only
+        // MgT2E and CT are exposed to users for editing for now.
         let editBtn = null;
-        if (edition === 'MgT2E') {
+        if (edition === 'MgT2E' || edition === 'CT') {
             editBtn = document.createElement('button');
             editBtn.id = 'sv-edit-btn';
             editBtn.textContent = 'Edit System';
@@ -1194,7 +1284,7 @@ const SystemViewer = (() => {
             const orbitR    = _compRingR.get(s);
             const parentPos = starPos.get(s.parentStarIdx ?? 0) || { cx: originX, cy: originY };
 
-            if (_orbitOpacity > 0) {
+            if (_orbitOpacity > 0 && orbitR <= _MAX_DASHED_RING_RADIUS) {
                 const orbitAlpha = _lightMode ? _orbitOpacity * 0.80 : _orbitOpacity * 0.55;
                 ctx.beginPath();
                 ctx.arc(parentPos.cx, parentPos.cy, orbitR, 0, Math.PI * 2);
@@ -1256,8 +1346,8 @@ const SystemViewer = (() => {
             const period = _worldPeriodYears(w, starMass);
             const epoch  = _hashEpoch(_hexId + ':world:' + wIdx);
             const angle  = epoch + (2 * Math.PI / period) * elapsed_years;
-            _drawBeltRing(ctx, cx, cy, r, isMW, -(angle * r));
-            if (isMW && w.name) {
+            _drawBeltRing(ctx, cx, cy, r, isMW && !_hideMainworldHighlight, -(angle * r));
+            if (isMW && w.name && !_hideMainworldHighlight) {
                 ctx.save();
                 ctx.fillStyle = _lightMode ? '#0d6b64' : '#66fcf1';
                 ctx.font      = '11px "Share Tech Mono", monospace';
@@ -1365,6 +1455,20 @@ const SystemViewer = (() => {
         ctx.restore();
     }
 
+    // A planetary ring — a thin static stroked circle, not an animated orbiting dot. Shared by
+    // CT (a moon-slot whose size roll came up 'R', living inside w.moons[]/satellites[]) and
+    // MgT2E (the same RAW rule, but stored separately on the planet as w.rings[] rather than
+    // inside w.moons[] — see mgt2e_world_engine.js's moon-size-roll-of-'R' branches). Distinct
+    // styling from _drawBeltRing's dashed belt line (solid, thinner, silvery) so the two read as
+    // different things at a glance.
+    function _drawStaticRing(ctx, px, py, dist) {
+        ctx.beginPath();
+        ctx.arc(px, py, dist, 0, Math.PI * 2);
+        ctx.strokeStyle = _lightMode ? '#8a8f9488' : '#c8ccd0aa';
+        ctx.lineWidth   = 1;
+        ctx.stroke();
+    }
+
     function _drawWorld(ctx, w, px, py, elapsed_years, wIdx) {
         const r     = _worldBodyRadius(w);
         const color = (_hideMainworldHighlight && w.type === 'Mainworld') ? '#a0a0b0' : _worldColor(w);
@@ -1384,10 +1488,21 @@ const SystemViewer = (() => {
 
         const moons = (w.moons || []).filter(m => m.type !== 'Empty');
         if (!_hideMoons) moons.forEach((m, mi) => {
+            const mDist = r + 10 + mi * 6;
+
+            // A Ring (CT: size === 'R', from either generation path — Bottom-Up also sets
+            // type:'Ring' but Top-Down doesn't, so size is the one field both paths agree on)
+            // is a band around the planet, not a discrete orbiting body — skip the per-frame
+            // orbital angle entirely and draw a thin static circle instead.
+            if (m.size === 'R') {
+                _drawStaticRing(ctx, px, py, mDist);
+                _hitBodies.push({ kind: 'moon', body: m, cx: px, cy: py, r: mDist + 3, innerR: mDist - 3 });
+                return;
+            }
+
             const period = _moonPeriodYears(m, w);
             const mAngle = _hashEpoch(_hexId + ':moon:' + wIdx + ':' + mi)
                          + (2 * Math.PI / period) * elapsed_years;
-            const mDist   = r + 10 + mi * 6;
             const mx          = px + mDist * Math.cos(mAngle);
             const my          = py + mDist * Math.sin(mAngle);
             const isMainworld = m.type === 'Mainworld';
@@ -1418,6 +1533,17 @@ const SystemViewer = (() => {
             _hitBodies.push({ kind: 'moon', body: m, cx: mx, cy: my, r: Math.max(moonR + 6, 9) });
         });
 
+        // MgT2E rings: RAW's "moon-size roll comes up Ring" outcome is stored on the planet
+        // itself (w.rings[]), not inside w.moons[] the way CT's is — see mgt2e_world_engine.js's
+        // moon-size-roll-of-'R' branches, which push({}) onto w.rings instead of w.moons. Not
+        // interleaved with the moon index sequence above, so rings get their own close-in offset.
+        const rings = w.rings || [];
+        if (!_hideMoons) rings.forEach((rg, ri) => {
+            const rDist = r + 6 + ri * 5;
+            _drawStaticRing(ctx, px, py, rDist);
+            _hitBodies.push({ kind: 'ring', body: rg, cx: px, cy: py, r: rDist + 3, innerR: rDist - 3 });
+        });
+
         if (w.type === 'Mainworld' && w.name && !_hideMainworldHighlight) {
             ctx.save();
             ctx.fillStyle = _lightMode ? '#0d6b64' : '#66fcf1';
@@ -1431,7 +1557,7 @@ const SystemViewer = (() => {
     }
 
     function _drawBeltRing(ctx, cx, cy, r, isMainworld = false, dashOffset = 0) {
-        if (r < 2) return;
+        if (r < 2 || r > _MAX_DASHED_RING_RADIUS) return;
         ctx.save();
         ctx.beginPath();
         ctx.arc(cx, cy, r, 0, Math.PI * 2);
@@ -1452,13 +1578,23 @@ const SystemViewer = (() => {
         const direction = e.deltaY < 0 ? 1 : -1;
         const factor    = 1.15;
         const rect      = _orrCanvas.getBoundingClientRect();
-        const mx        = e.clientX - rect.left;
-        const my        = e.clientY - rect.top;
         const cx        = _canvasW / 2;
         const cy        = _canvasH / 2;
+        let   mx        = e.clientX - rect.left;
+        let   my        = e.clientY - rect.top;
+
+        // Snap to the exact center when the cursor is within a tight tolerance. Mouse
+        // coordinates are always whole pixels, but a canvas with an odd width/height has
+        // a fractional center (e.g. 357.5) — that sub-pixel gap gets multiplied by `factor`
+        // on every tick (offset ~= gap * (1 - factor^n)), so it compounds into a pan large
+        // enough to fling the primary off-screen well before reaching deep zoom levels,
+        // even though the cursor never actually moved off center.
+        const SNAP_PX = 3;
+        if (Math.abs(mx - cx) <= SNAP_PX) mx = cx;
+        if (Math.abs(my - cy) <= SNAP_PX) my = cy;
 
         if (direction > 0) {
-            const newZoom = Math.min(_viewZoom * factor, 200);
+            const newZoom = Math.min(_viewZoom * factor, _MAX_ZOOM);
             const ratio   = newZoom / _viewZoom;
             _viewOffX = mx - cx - (mx - cx - _viewOffX) * ratio;
             _viewOffY = my - cy - (my - cy - _viewOffY) * ratio;

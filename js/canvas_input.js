@@ -78,7 +78,11 @@ function setupCanvasEvents() {
                     _seState.mgt2eData || _seState.mgtSystem ||
                     _seState.t5Data || _seState.t5System ||
                     _seState.aowSystem || _seState.rttData));
-                const _seCanEdit = !!(_seState && (_seState.mgt2eData || _seState.mgtSystem));
+                // T5/RTT/AoW System Editor support is preliminary and slated for an overhaul —
+                // only MgT2E and CT are exposed to users for editing for now (matches the
+                // orrery's "Edit System" button gating in system_viewer.js).
+                const _seCanEdit = !!(_seState && (_seState.mgt2eData || _seState.mgtSystem ||
+                    _seState.ctData || _seState.ctSystem));
                 if (createBtn) createBtn.style.display = _seHasSystem ? 'none' : 'block';
                 if (editBtn)   editBtn.style.display   = _seCanEdit ? 'block' : 'none';
             } else {

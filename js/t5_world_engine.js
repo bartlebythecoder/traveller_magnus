@@ -585,8 +585,10 @@
         // Tech Level: Standard modifiers
         generateT5TechLevelByWorldType(world, 'Mainworld');
 
-        // --- 2.5. Rotational Dynamics ---
-        calculateT5RotationalDynamics(world);
+        // Rotational Dynamics deliberately NOT run here: this entry point generates the
+        // mainworld before it has been placed into a star orbit, so world.orbitId does not
+        // exist yet and the tidal-lock-to-star check could never fire. t5_topdown_generator.js's
+        // fleshOutSubordinates() runs it once the body's real orbit is known.
 
         // --- 2.5. Travel Zone ---
         world.travelZone = (!window.generationNoTravelZones && world.law >= 15) ? 'Amber' : 'Green';

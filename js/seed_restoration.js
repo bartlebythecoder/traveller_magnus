@@ -112,6 +112,21 @@
     }
 
     /**
+     * Same idea as captureSeededMoonCaps, but for ring systems. generatePhysicals-style passes
+     * treat "0 significant moons" and "ring system" as the same die-roll outcome and re-roll it
+     * on every Preview/Save — without a cap, a body that legitimately has zero moons/rings gets
+     * a fresh chance every pass to spuriously pick up a ring, and rings are deliberately carried
+     * forward forever once rolled (so the body is stuck with it after one unlucky Preview).
+     *
+     * @returns {number[]|null} per-world ring count (same order as sys.worlds), or null if
+     *   the seed allows new bodies and no cap should be enforced.
+     */
+    function captureSeededRingCaps(sys, seedSys) {
+        if (!seedSys || seedSys._allowAddBodies) return null;
+        return sys.worlds.map(w => (w.rings || []).length);
+    }
+
+    /**
      * Trims back any moons a generatePhysicals-style pass added beyond the seeded count
      * captured by captureSeededMoonCaps. Before slicing, moves the mainworld moon (if any) to
      * index 0 so the cap can never accidentally drop it.
@@ -137,9 +152,27 @@
         });
     }
 
+    /**
+     * Trims back any rings a generatePhysicals-style pass added beyond the seeded count
+     * captured by captureSeededRingCaps.
+     *
+     * @param {Object} sys             - system object, sys.worlds[].rings already (possibly over-)populated
+     * @param {number[]|null} seededRingCaps - result of a prior captureSeededRingCaps call
+     */
+    function trimGeneratedRingsToSeededCaps(sys, seededRingCaps) {
+        if (!seededRingCaps) return;
+        sys.worlds.forEach((w, i) => {
+            const cap = seededRingCaps[i] ?? 0;
+            if (!w.rings || w.rings.length <= cap) return;
+            w.rings = w.rings.slice(0, cap);
+        });
+    }
+
     return {
         restoreSeedWorldsIntoGenerated,
         captureSeededMoonCaps,
         trimGeneratedMoonsToSeededCaps,
+        captureSeededRingCaps,
+        trimGeneratedRingsToSeededCaps,
     };
 }));

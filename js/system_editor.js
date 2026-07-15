@@ -1219,6 +1219,49 @@ const SystemEditor = (() => {
                 detailPad.appendChild(ggRow);
             }
 
+            // Gas Giant size (MgT2E — three tiers per rules/mgt2e_data.js
+            // satellites.significantMoonQuantity: SGG/MGG/LGG, unlike CT's two. Never had a UI
+            // control before — ggType was fixed at creation ('+GG' always defaults to 'GS') or
+            // read from a previously-generated body. Unlike CT (hardcoded-by-size constants),
+            // MgT2E's sizeGasGiantBody (mgt2e_world_engine.js) dice-rolls diamTerra/mass/gravity/
+            // density per size, guarded by isManual() — so instead of hardcoding new values here,
+            // clear the old size's physical fields from _raw so the next Preview rolls fresh,
+            // size-appropriate ones instead of carrying forward values scaled for the old size.
+            if (body.type === 'Gas Giant' && _workingCopy.engine === 'MgT2E') {
+                const ggRow = document.createElement('div');
+                Object.assign(ggRow.style, { display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px', fontSize: '11px' });
+                const ggLbl = document.createElement('label');
+                ggLbl.textContent = 'Size:';
+                Object.assign(ggLbl.style, { color: P.sub, minWidth: '38px' });
+                const ggSel = document.createElement('select');
+                Object.assign(ggSel.style, {
+                    background: '#0d1117', border: `1px solid ${P.border}`,
+                    color: P.accent, fontFamily: 'inherit', fontSize: '11px', padding: '2px 4px',
+                });
+                [['GS', 'Small'], ['GM', 'Medium'], ['GL', 'Large']].forEach(([val, label]) => {
+                    const opt = document.createElement('option');
+                    opt.value = val; opt.textContent = label;
+                    if ((body.ggType || 'GS') === val) opt.selected = true;
+                    ggSel.appendChild(opt);
+                });
+                ggSel.addEventListener('change', () => {
+                    _pushHistory();
+                    body.ggType = ggSel.value;
+                    body._raw = body._raw || {};
+                    delete body._raw.diamTerra;
+                    delete body._raw.diamKm;
+                    delete body._raw.diameterStr;
+                    delete body._raw.mass;
+                    delete body._raw.gravity;
+                    delete body._raw.density;
+                    delete body._raw.composition;
+                    delete body._raw.uwpGG;
+                    _renderAndPreview();
+                });
+                ggRow.append(ggLbl, ggSel);
+                detailPad.appendChild(ggRow);
+            }
+
             if (body.uwp) {
                 const uwpRow = document.createElement('div');
                 Object.assign(uwpRow.style, { fontSize: '11px', color: P.sub, marginBottom: '2px' });

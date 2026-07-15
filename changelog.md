@@ -13,6 +13,7 @@
 12. **Revised Traveller Engine:** Fixed a bug where Ancients Site placement used an unseeded random number generator instead of the seeded one used everywhere else, so it wasn't reproducible when regenerating with the same seed
 13. **System Viewer**: Added ring visuals for CT and MgT2E
 14. **System Editor (Mongoose):** Updated belt input to allow user to include UWP
+15. **System Editor:** Refactored system_editor.js to remove engine specific functions to their js scripts to allow further engine development without risking unexpected results in working engines.
 
 ### [v0.16.0.6] - 2026-07-04
 1. **System Editor:** Unified the Fill & Save and Preview commit logic into a single internal function, removing duplicated code that could drift out of sync between the two

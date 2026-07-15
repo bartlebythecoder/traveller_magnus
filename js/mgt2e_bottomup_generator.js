@@ -129,15 +129,19 @@
         const _seededMoonCaps = (typeof SeedRestoration !== 'undefined')
             ? SeedRestoration.captureSeededMoonCaps(sys, seedSys)
             : null;
+        const _seededRingCaps = (typeof SeedRestoration !== 'undefined')
+            ? SeedRestoration.captureSeededRingCaps(sys, seedSys)
+            : null;
 
         if (window.isLoggingEnabled) writeLogLine(`[PROBE] Bottom-Up Phase 1: Physics... (Found ${sys.worlds.length} worlds)`);
         if (WorldEngine && WorldEngine.generatePhysicals) {
             WorldEngine.generatePhysicals(sys);
         }
 
-        // Trim back any moons generatePhysicals added beyond the seeded count.
+        // Trim back any moons/rings generatePhysicals added beyond the seeded count.
         if (typeof SeedRestoration !== 'undefined') {
             SeedRestoration.trimGeneratedMoonsToSeededCaps(sys, seedSys, _seededMoonCaps);
+            SeedRestoration.trimGeneratedRingsToSeededCaps(sys, _seededRingCaps);
         }
 
         // =================================================================

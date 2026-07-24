@@ -1745,16 +1745,21 @@ function importT5Tab(fileContent, fileName, forcedSectorSlot = null, bulkMode = 
             const rawStars = row[idxStars].trim();
             t5Data.homestar = rawStars;
 
-            const tokens = rawStars.split(/\s+/);
-            const parsedStars = [];
-            for (let i = 0; i < tokens.length; i++) {
-                if (i > 0 && /^(Ia|Ib|II|III|IV|V|VI|VII|D|BD)$/i.test(tokens[i]) && !parsedStars[parsedStars.length - 1].includes(" ")) {
-                    parsedStars[parsedStars.length - 1] += " " + tokens[i];
-                } else {
-                    parsedStars.push(tokens[i]);
-                }
-            }
-            t5System.stars = parsedStars.map((sn, idx) => ({ name: sn, role: idx === 0 ? 'Primary' : 'Companion', orbits: [] }));
+            // Shared with generateT5System's own homestar parsing (js/t5_topdown_generator.js)
+            // — see OW-N, directives/project_manifest.md. Previously this importer had its own
+            // inferior copy that never decomposed spectral type (every star silently displayed
+            // as generic "G V" downstream) and flatly labeled every secondary 'Companion' with
+            // no orbit data. Falls back to the old naive behavior only if the generator module
+            // somehow isn't loaded yet (shouldn't happen — script order in hex_map.html loads
+            // t5_topdown_generator.js well before io_manager.js).
+            const parsedStars = (typeof T5_TopDown_Generator !== 'undefined' && T5_TopDown_Generator.parseT5HomestarString)
+                ? T5_TopDown_Generator.parseT5HomestarString(rawStars)
+                : rawStars.split(/\s+/).map((sn, idx) => ({ name: sn, role: idx === 0 ? 'Primary' : 'Companion' }));
+            // Use rawName (the untouched OTU token) as the stored name, not the reconstructed
+            // `name` — the reconstruction formula has a known pre-existing quirk for D/BD stars
+            // that js/add_otu_system_info.js's parseStarType() can't parse back correctly; the
+            // literal imported token always round-trips.
+            t5System.stars = parsedStars.map(s => Object.assign({}, s, { name: s.rawName || s.name, orbits: [] }));
             t5System.orbits = [];
         } else {
             t5Data.homestar = "";

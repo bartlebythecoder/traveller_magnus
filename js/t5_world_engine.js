@@ -505,8 +505,22 @@
      * T5 MAINWORLD GENERATION (UI Entry Point)
      * Generates a basic UWP for a mainworld in a hex.
      * Includes Stellar Situation, Starport, and all UWP stats.
+     *
+     * `editorSeed` (optional) — System Editor support (OW-44, directives/project_manifest.md):
+     * when supplied (an object carrying any pre-filled fields plus `_manualFields`, built via
+     * the shared `applyUwpSeed()` from a working-copy body's typed "Seed UWP digits"), every
+     * roll step below is gated the same way generateT5SubordinateUWP already gates subordinate
+     * bodies' fields — `!_isManual(world, field)` — instead of rolling unconditionally. The
+     * stellar-constellation roll (step 0) is skipped entirely in this mode: generateT5System()
+     * never reads a seeded mainworldBase.stars when seedSys.stars is present (always true from
+     * the System Editor), and none of this function's own fields depend on star type, so rolling
+     * one here would only waste seeded dice and log a "System Constellation" entry unrelated to
+     * the system's real, user-built stars. Existing (non-editor) callers pass no second argument,
+     * so editorSeed is undefined, every _isManual check returns false, and generation is
+     * identical to before this change — same safety guarantee this codebase relies on everywhere
+     * a seedSys/editorSeed parameter gates a generator (see Algorithm 6).
      */
-    function generateT5Mainworld(hexId) {
+    function generateT5Mainworld(hexId, editorSeed) {
         if (hexId) {
             _reseedForHex(hexId);
             _log(`T5 Mainworld Generation: Hex ${hexId}`);
@@ -516,74 +530,81 @@
         }
 
         // --- 0. Stellar Situation ---
-        // Note: In UI context, we often roll fresh unless imported.
-        // We'll use a simplified version that integrates with the existing Stellar Engine.
+        // Skipped when editor-seeded — see the editorSeed doc comment above.
         const stars = [];
-        const stellarEngine = (typeof T5_Stellar_Engine !== 'undefined') ? T5_Stellar_Engine : (typeof window !== 'undefined' ? window.T5_Stellar_Engine : null);
+        if (!editorSeed) {
+            // Note: In UI context, we often roll fresh unless imported.
+            // We'll use a simplified version that integrates with the existing Stellar Engine.
+            const stellarEngine = (typeof T5_Stellar_Engine !== 'undefined') ? T5_Stellar_Engine : (typeof window !== 'undefined' ? window.T5_Stellar_Engine : null);
 
-        if (stellarEngine) {
-            const constellation = stellarEngine.determineStellarConstellation();
-            stars.push(...constellation.stars);
-        } else {
-            stars.push({ type: 'G', size: 'V', name: 'Primary', decimal: 2 });
+            if (stellarEngine) {
+                const constellation = stellarEngine.determineStellarConstellation();
+                stars.push(...constellation.stars);
+            } else {
+                stars.push({ type: 'G', size: 'V', name: 'Primary', decimal: 2 });
+            }
+
+            _log(`System Constellation: [${stars.map(s => s.name).join(' ')}]`);
         }
 
-        const primary = stars[0];
-        _log(`System Constellation: [${stars.map(s => s.name).join(' ')}]`);
-
-        // --- 1. Basic Stats ---
-        const _starportTable = ['A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'E', 'E', 'X'];
-        const _starportRoll = _roll2D('Starport Roll');
-        const _starportMod = (typeof window !== 'undefined' && window.generationStarportMod !== undefined) ? window.generationStarportMod : 0;
-        if (_starportMod !== 0) _log(`Settings Starport Modifier: ${_starportMod > 0 ? '+' : ''}${_starportMod}`);
-        const _starportIdx = Math.max(0, Math.min(10, (_starportRoll + _starportMod) - 2));
-        let starport = _starportTable[_starportIdx] || 'X';
-        _log(`Starport Roll: ${_starportRoll}${_starportMod !== 0 ? ` (mod ${_starportMod > 0 ? '+' : ''}${_starportMod})` : ''} → ${starport}`);
-
-        // Settings: Starport Max cap
-        const _starportOrder = ['A', 'B', 'C', 'D', 'E', 'X'];
-        const _starportMax = (typeof window !== 'undefined' && window.generationStarportMax !== undefined) ? window.generationStarportMax : 'A';
-        const _spMaxIdx = _starportOrder.indexOf(_starportMax);
-        const _spCurIdx = _starportOrder.indexOf(starport);
-        if (_spMaxIdx !== -1 && _spCurIdx !== -1 && _spCurIdx < _spMaxIdx) {
-            _log(`Settings Starport Max: Cap applied ${starport} → ${_starportMax}`);
-            starport = _starportMax;
-        } else {
-            _log(`Settings Starport Max: No cap (${starport} ≤ ${_starportMax})`);
-        }
-        if (!(window._currentSystemHasPop ?? true) && _starportOrder.indexOf(starport) < _starportOrder.indexOf('E')) {
-            _log(`Pop Check Frequency: Starport cap applied ${starport} → E`);
-            starport = 'E';
-        }
-
-        const world = {
+        const world = Object.assign({
             hexId,
             stars,
-            starport,
-            worldType: 'Mainworld' // Default for this entry point
-        };
+            worldType: 'Mainworld', // Default for this entry point
+            _manualFields: [],
+        }, editorSeed || {});
+
+        // --- 1. Basic Stats ---
+        if (!_isManual(world, 'starport')) {
+            const _starportTable = ['A', 'A', 'A', 'B', 'B', 'C', 'C', 'D', 'E', 'E', 'X'];
+            const _starportRoll = _roll2D('Starport Roll');
+            const _starportMod = (typeof window !== 'undefined' && window.generationStarportMod !== undefined) ? window.generationStarportMod : 0;
+            if (_starportMod !== 0) _log(`Settings Starport Modifier: ${_starportMod > 0 ? '+' : ''}${_starportMod}`);
+            const _starportIdx = Math.max(0, Math.min(10, (_starportRoll + _starportMod) - 2));
+            let starport = _starportTable[_starportIdx] || 'X';
+            _log(`Starport Roll: ${_starportRoll}${_starportMod !== 0 ? ` (mod ${_starportMod > 0 ? '+' : ''}${_starportMod})` : ''} → ${starport}`);
+
+            // Settings: Starport Max cap
+            const _starportOrder = ['A', 'B', 'C', 'D', 'E', 'X'];
+            const _starportMax = (typeof window !== 'undefined' && window.generationStarportMax !== undefined) ? window.generationStarportMax : 'A';
+            const _spMaxIdx = _starportOrder.indexOf(_starportMax);
+            const _spCurIdx = _starportOrder.indexOf(starport);
+            if (_spMaxIdx !== -1 && _spCurIdx !== -1 && _spCurIdx < _spMaxIdx) {
+                _log(`Settings Starport Max: Cap applied ${starport} → ${_starportMax}`);
+                starport = _starportMax;
+            } else {
+                _log(`Settings Starport Max: No cap (${starport} ≤ ${_starportMax})`);
+            }
+            if (!(window._currentSystemHasPop ?? true) && _starportOrder.indexOf(starport) < _starportOrder.indexOf('E')) {
+                _log(`Pop Check Frequency: Starport cap applied ${starport} → E`);
+                starport = 'E';
+            }
+            world.starport = starport;
+        }
 
         // --- 2. UWP Parameters ---
         // Size: 2D-2 (with 10 variant)
-        world.size = generateT5SizeByWorldType('Mainworld');
+        if (!_isManual(world, 'size') && world.size === undefined) {
+            world.size = generateT5SizeByWorldType('Mainworld');
+        }
 
         // Atmosphere: Size + Flux
-        generateT5AtmosphereByWorldType(world, 'Mainworld');
+        if (!_isManual(world, 'atm')) generateT5AtmosphereByWorldType(world, 'Mainworld');
 
         // Hydrographics: Atm + Flux
-        generateT5HydrographicsByWorldType(world, 'Mainworld');
+        if (!_isManual(world, 'hydro')) generateT5HydrographicsByWorldType(world, 'Mainworld');
 
         // Population: 2D-2
-        generateT5PopulationByWorldType(world, 'Mainworld', 12); // Mainworlds usually not capped below 12
+        if (!_isManual(world, 'pop')) generateT5PopulationByWorldType(world, 'Mainworld', 12); // Mainworlds usually not capped below 12
 
         // Government: Pop + Flux
-        generateT5GovernmentByWorldType(world, 'Mainworld');
+        if (!_isManual(world, 'gov')) generateT5GovernmentByWorldType(world, 'Mainworld');
 
         // Law: Gov + Flux
-        generateT5LawLevelByWorldType(world, 'Mainworld');
+        if (!_isManual(world, 'law')) generateT5LawLevelByWorldType(world, 'Mainworld');
 
         // Tech Level: Standard modifiers
-        generateT5TechLevelByWorldType(world, 'Mainworld');
+        if (!_isManual(world, 'tl')) generateT5TechLevelByWorldType(world, 'Mainworld');
 
         // Rotational Dynamics deliberately NOT run here: this entry point generates the
         // mainworld before it has been placed into a star orbit, so world.orbitId does not

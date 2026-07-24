@@ -37,6 +37,13 @@
     // present. atm/hydro/pop must be marked manual: t5_topdown_generator.js's Inferno/Belt/
     // small-size branches force-overwrite those fields regardless of presence unless the
     // manual flag is checked first (mirrors CT's exact reasoning).
+    // gov/law/starport/tl were previously left unlocked here (T5 overhaul punch-list item 2 /
+    // OW-10 Gap 2) even though generateT5SubordinateUWP (t5_topdown_generator.js) already gates
+    // all four behind `!_isManual(world, ...)` — the engine-side guard was ready and waiting,
+    // only this lock-for function never marked them manual, so every subordinate body's
+    // government, law level, starport, and tech level re-rolled from scratch on every single
+    // Preview/Fill & Save regardless of what the user touched. Matches _ctUwpLockFor's exact
+    // treatment of these same four fields.
     function _t5UwpLockFor(body) {
         const raw = body._raw || {};
         if (!body.uwp || !body._raw) return { fields: {}, mf: [] };
@@ -47,6 +54,10 @@
         if (raw.atm   !== undefined) { fields.atm   = raw.atm;   mf.push('atm'); }
         if (raw.hydro !== undefined) { fields.hydro = raw.hydro; mf.push('hydro'); }
         if (raw.pop   !== undefined) { fields.pop   = raw.pop;   mf.push('pop'); }
+        if (raw.gov      !== undefined) { fields.gov      = raw.gov;      mf.push('gov'); }
+        if (raw.law      !== undefined) { fields.law      = raw.law;      mf.push('law'); }
+        if (raw.starport !== undefined) { fields.starport = raw.starport; mf.push('starport'); }
+        if (raw.tl       !== undefined) { fields.tl       = raw.tl;       mf.push('tl'); }
         return { fields, mf };
     }
 
@@ -155,7 +166,19 @@
                     _id: SE().uid('body'), type: canon,
                     ggType:        canon === 'Gas Giant' ? SE().ggTypeFrom(rawType) : null,
                     name: w.name || '', uwp: w.uwp || null,
-                    au: w.au ?? w.distAU ?? (w.orbitId != null ? SE().orbitIdToAU(w.orbitId) : null), orbitId: w.orbitId ?? null,
+                    // baseOrbit (OTU importer, traveller_worlds_importer.js) is the real integer
+                    // orbit slot a body occupies — orbitId there is a *different*, often
+                    // fractional value (`baseOrbit + increment/10`) used only to disambiguate
+                    // display order when multiple objects share a base slot. Every consumer of
+                    // this working-copy orbitId (_nextOrbitId's max+1 arithmetic, and
+                    // t5_topdown_generator.js's findAvailableOrbit, which requires an exact
+                    // integer array-index match) expects a real slot number. Passing the
+                    // fractional orbitId through unchanged (as this used to do) poisoned
+                    // _nextOrbitId for every body added after an imported one with a fractional
+                    // value, and findAvailableOrbit then silently dropped all of them at
+                    // generation time — no error, just missing bodies (OW-58).
+                    au: w.au ?? w.distAU ?? (w.orbitId != null ? SE().orbitIdToAU(w.orbitId) : null),
+                    orbitId: w.baseOrbit ?? w.orbitId ?? null,
                     travelZone:    w.travelZone || 'G',
                     parentStarId:  starIdByIdx(w.parentStarIdx ?? 0), isMainworld,
                     // A moon flagged as this system's mainworld doesn't reliably carry its own
@@ -182,15 +205,36 @@
             const isMoonMW    = !!mwMoon;
 
             const { fields: mwLock } = _t5UwpLockFor(mwBody || {});
+
+            // OW-44 (directives/project_manifest.md): a brand-new mainworld (no prior .uwp) was
+            // never actually generated at all — this used to fall back to a literal placeholder
+            // UWP string unconditionally. Roll a real one via the classic flow's own
+            // generateT5Mainworld (t5_world_engine.js), seeded with any typed "Seed UWP digits"
+            // via the shared applyUwpSeed (the same call CT/MgT2E's write() already make —
+            // wiring up T5's seed-digit boxes for the first time here too). Once a mainworld has
+            // been generated once (mwBody.uwp truthy), _t5UwpLockFor above already covers all
+            // nine relevant fields (OW-45) — that path is untouched.
+            let freshRoll = null;
+            if (mwBody && !mwBody.uwp && typeof T5_World_Engine !== 'undefined') {
+                const editorSeed = SE().applyUwpSeed({ _manualFields: [] }, mwBody._uwpSeed);
+                freshRoll = T5_World_Engine.generateT5Mainworld(wc.hexId, editorSeed);
+            }
+
             const mainworldUWP = mwBody ? {
                 _id: mwBody._id,
-                uwp: mwBody.uwp || 'A788899-9', name: mwBody.name || '',
+                uwp: freshRoll ? freshRoll.uwp : (mwBody.uwp || 'A788899-9'),
+                name: mwBody.name || '',
                 travelZone: SE().normTz(mwBody.travelZone),
                 isPreMoon: isMoonMW,
                 orbitId: isMoonMW ? ownerOfMoon.orbitId : mwBody.orbitId,
                 parentBodyId:  isMoonMW ? ownerOfMoon._id : null,
                 parentStarIdx: isMoonMW ? (starIdxById[ownerOfMoon.parentStarId] ?? 0) : null,
                 ...mwLock,
+                ...(freshRoll ? {
+                    worldType: freshRoll.worldType, starport: freshRoll.starport, size: freshRoll.size,
+                    atm: freshRoll.atm, hydro: freshRoll.hydro, pop: freshRoll.pop,
+                    gov: freshRoll.gov, law: freshRoll.law, tl: freshRoll.tl,
+                } : {}),
             } : null;
 
             // Exclude the top-level mainworld body from seed.worlds (it's threaded separately
@@ -210,6 +254,13 @@
                     edition: 'T5', mode: 'top-down',
                     mainworldUWP: seedSys.mainworldUWP, hexId, seedSys,
                 });
+            } else if (typeof window !== 'undefined' && window.T5_TopDown_Generator &&
+                       typeof window.T5_TopDown_Generator.buildT5StarOnlyPreview === 'function') {
+                // No mainworld yet (blank Create, before any body has been added) — show just
+                // the star(s) in the orrery immediately, matching MgT2E/CT parity, without
+                // invoking generateT5System's mainworld-anchored pipeline at all (T5's own
+                // "Continuation Method" requires a real mainworld before that runs). See OW-49.
+                newSys = window.T5_TopDown_Generator.buildT5StarOnlyPreview(seedSys);
             }
             if (newSys) {
                 SE().clearSystemData(stateObj);

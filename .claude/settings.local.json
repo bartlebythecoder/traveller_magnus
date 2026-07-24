@@ -21,7 +21,8 @@
       "Bash(git -C \"C:\\\\Users\\\\sean\\\\Documents\\\\github\\\\traveller_magnus\" diff --stat)",
       "Bash(npx --yes playwright --version)",
       "Bash(npm ls *)",
-      "Bash(npx --yes playwright install chromium)"
+      "Bash(npx --yes playwright install chromium)",
+      "Bash(NODE_PATH=\"/c/Users/sean/Documents/github/traveller_magnus/node_modules\" node *)"
     ]
   }
 }

@@ -615,6 +615,23 @@
         return Math.max(0, base + fraction);
     }
 
+    /**
+     * Orbit-roll helpers for Close/Near/Far secondary stars and any star's Companion.
+     * Extracted so both the real (dice-rolled presence) generation path below and the
+     * homestar-override path (used for cross-engine expansion of an OTU/TravellerMap import,
+     * which has no MgT2E-native role/orbit data of its own — see OW-51,
+     * directives/project_manifest.md) can share the same real MgT2E formulas instead of the
+     * override path inventing its own fixed placeholder constants.
+     */
+    function _rollCloseOrbit() { let r = tRoll1D('Close Roll') - 1; return r === 0 ? 0.5 : r; }
+    function _rollNearOrbit() { return tRoll1D('Near Roll') + 5; }
+    function _rollFarOrbit() { return tRoll1D('Far Roll') + 11; }
+    function _rollCompanionOrbit(label) {
+        let d1 = tRoll1D(`${label} Orbit D1`);
+        let d2 = tRoll2D(`${label} Orbit D2`);
+        return (d1 / 10) + ((d2 - 7) / 100);
+    }
+
     // =========================================================================
     // CORE FUNCTIONS
     // =========================================================================
@@ -725,7 +742,32 @@
 
         tSection('Additional Stars');
         if (overrideStars.length > 1) {
-            for (let i = 1; i < overrideStars.length; i++) {
+            // Canonical 8-slot role/orbit assignment for a homestar override (used for
+            // cross-engine expansion of an OTU/TravellerMap import, which carries only a flat,
+            // role-less spectral-type list — see OW-51, directives/project_manifest.md). MgT2E
+            // RAW has no defined convention for interpreting such a list beyond the Primary, so
+            // this order (Close, Near, Far, then Companion-of-Primary/-Close/-Near/-Far) is an
+            // invented-but-consistent guess, mirroring the same policy already applied to T5's
+            // sibling fix (OW-50) — a wrong guess is corrected via the System Editor's existing
+            // Role dropdown, not a blocking UI. Orbit values reuse this file's own real MgT2E
+            // dice formulas (_rollCloseOrbit/_rollNearOrbit/_rollFarOrbit/_rollCompanionOrbit),
+            // not fixed placeholder constants.
+            const OVERRIDE_ROLE_SLOTS = [
+                { role: 'Close', orbitFn: _rollCloseOrbit, parentStarIdx: null },
+                { role: 'Near', orbitFn: _rollNearOrbit, parentStarIdx: null },
+                { role: 'Far', orbitFn: _rollFarOrbit, parentStarIdx: null },
+                { role: 'Companion', orbitFn: () => _rollCompanionOrbit('Primary Comp Override'), parentStarIdx: 0 },
+                { role: 'Companion', orbitFn: () => _rollCompanionOrbit('Close Comp Override'), parentStarIdx: 1 },
+                { role: 'Companion', orbitFn: () => _rollCompanionOrbit('Near Comp Override'), parentStarIdx: 2 },
+                { role: 'Companion', orbitFn: () => _rollCompanionOrbit('Far Comp Override'), parentStarIdx: 3 },
+            ];
+
+            if (overrideStars.length - 1 > OVERRIDE_ROLE_SLOTS.length) {
+                const extra = overrideStars.slice(OVERRIDE_ROLE_SLOTS.length + 1);
+                tResult('Star Override Overflow', `${extra.length} extra star(s) ignored (8-star RAW max): ${extra.join(', ')}`, 'MgT2E 1.2: Binary/Multiple Stars');
+            }
+
+            for (let i = 1; i < overrideStars.length && i <= OVERRIDE_ROLE_SLOTS.length; i++) {
                 let sStr = overrideStars[i];
                 let typeStr = sStr.split(' ')[0] || '';
                 let sType = typeStr.length > 0 ? typeStr[0] : 'M';
@@ -735,18 +777,17 @@
                 if (sType === 'D') { sClass = 'D'; subType = 0; }
                 if (typeStr === 'BD') { sType = 'BD'; sClass = 'V'; subType = 0; }
 
-                let repRole = i === 1 ? 'Close' : (i === 2 ? 'Near' : 'Far');
-                let star = generateStarObject(sType, subType, sClass, repRole);
-                star.separation = repRole;
-                star.role = repRole;
-                star.parentStarIdx = 0;
-                // mock orbits for overrides based on standard ranges
-                star.orbitId = i === 1 ? 0.5 : (i === 2 ? 6.0 : 12.0);
+                const slot = OVERRIDE_ROLE_SLOTS[i - 1];
+                let star = generateStarObject(sType, subType, sClass, slot.role);
+                star.separation = slot.role;
+                star.role = slot.role;
+                star.parentStarIdx = slot.parentStarIdx != null ? slot.parentStarIdx : 0;
+                star.orbitId = slot.orbitFn();
                 star.eccentricity = 0;
                 star.mao = getMAO(star.sType, star.subType, star.sClass);
                 sys.stars.push(star);
                 if (star.sType === 'D') { applyWhiteDwarfPhysics(star, sys.age); }
-                tResult(`${repRole} Override`, sStr + " at Orbit " + star.orbitId, 'MgT2E 1.2: Binary/Multiple Stars');
+                tResult(`${slot.role} Override`, sStr + " at Orbit " + star.orbitId, 'MgT2E 1.2: Binary/Multiple Stars');
             }
         } else {
             const getMultiDM = (star) => {
@@ -761,9 +802,9 @@
             const primaryDM = getMultiDM(primary);
             const canHaveClose = !['Ia', 'Ib', 'II', 'III'].includes(primary.sClass);
             const definitions = [
-                { sep: 'Close', orbitFn: () => { let r = tRoll1D('Close Roll') - 1; return r === 0 ? 0.5 : r; }, allowed: canHaveClose },
-                { sep: 'Near', orbitFn: () => tRoll1D('Near Roll') + 5, allowed: true },
-                { sep: 'Far', orbitFn: () => tRoll1D('Far Roll') + 11, allowed: true }
+                { sep: 'Close', orbitFn: _rollCloseOrbit, allowed: canHaveClose },
+                { sep: 'Near', orbitFn: _rollNearOrbit, allowed: true },
+                { sep: 'Far', orbitFn: _rollFarOrbit, allowed: true }
             ];
 
             for (let def of definitions) {
@@ -789,9 +830,7 @@
                         companion.separation = 'Companion';
                         companion.role = 'Companion';
                         companion.parentStarIdx = sys.stars.length - 1;
-                        let d1 = tRoll1D(`${def.sep} Comp Orbit D1`);
-                        let d2 = tRoll2D(`${def.sep} Comp Orbit D2`);
-                        companion.orbitId = (d1 / 10) + ((d2 - 7) / 100);
+                        companion.orbitId = _rollCompanionOrbit(`${def.sep} Comp`);
                         companion.eccentricity = determineEccentricity(true, 0, sys.age, companion.orbitId, false, 0);
                         sys.stars.push(companion);
                         if (companion.sType === 'D') { applyWhiteDwarfPhysics(companion, sys.age); }
@@ -809,9 +848,7 @@
                 primaryCompanion.separation = 'Companion';
                 primaryCompanion.role = 'Companion';
                 primaryCompanion.parentStarIdx = 0;
-                let d1 = tRoll1D('Primary Comp Orbit D1');
-                let d2 = tRoll2D('Primary Comp Orbit D2');
-                primaryCompanion.orbitId = (d1 / 10) + ((d2 - 7) / 100);
+                primaryCompanion.orbitId = _rollCompanionOrbit('Primary Comp');
                 primaryCompanion.eccentricity = determineEccentricity(true, 0, sys.age, primaryCompanion.orbitId, false, 0);
                 sys.stars.push(primaryCompanion);
                 if (primaryCompanion.sType === 'D') { applyWhiteDwarfPhysics(primaryCompanion, sys.age); }

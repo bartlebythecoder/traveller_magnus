@@ -27,6 +27,12 @@
     const _tResult = (typeof tResult === 'function') ? tResult : (label, val, source) => _log(`${label}: ${val}`);
     const _isManual = (typeof isManual === 'function') ? isManual : () => false;
 
+    // A Companion star orbits well inside its parent's Orbit 0 (0.2 AU) — T5's ORBIT_AU table
+    // has no entry below that, so it isn't a numbered orbit slot at all; give it a fixed
+    // close-in separation instead. Mirrors the same constant in t5_stellar_engine.js and the
+    // 0.05 AU already used by traveller_worlds_importer.js for OTU-imported companions.
+    const T5_COMPANION_AU = 0.05;
+
     const HZ_DATA = {
         'O': { 'Ia': 15, 'Ib': 15, 'II': 14, 'III': 13, 'IV': 12, 'V': 11, 'D': 1 },
         'B': { 'Ia': 13, 'Ib': 13, 'II': 12, 'III': 11, 'IV': 10, 'V': 9, 'D': 0 },
@@ -191,6 +197,135 @@
 
     // --- PIPELINE IMPLEMENTATION ---
 
+    // Initializes each star's 20-slot orbit array (used by findAvailableOrbit/placeCategory
+    // later) and resolves a companion star's distAU from its seeded orbit position. Shared by
+    // generateT5System (below) and buildT5StarOnlyPreview (System Editor star-only orrery
+    // preview, OW-49) — extracted so both get the exact same companion-positioning treatment,
+    // including the orbitID/orbitId fallback (OW-46): T5's own star objects use `orbitID`
+    // (capital ID, see the classic non-seeded homestar-parsing path above), but
+    // system_editor.js's engine-agnostic _buildSeedSys builds every engine's star seed with
+    // `orbitId` (lowercase d) — a System-Editor-placed/repositioned companion star's `orbitID`
+    // is therefore undefined, and without this fallback `Math.floor(undefined)` corrupts its
+    // distAU to NaN.
+    function _initStars(stars) {
+        stars.forEach(star => {
+            star.orbits = [];
+            for (let i = 0; i < 20; i++) {
+                star.orbits.push({ orbit: i, distAU: T5_Data.ORBIT_AU[i], contents: null });
+            }
+        });
+        stars.slice(1).forEach(star => {
+            const orbitIdVal = star.orbitID != null ? star.orbitID : star.orbitId;
+            if (orbitIdVal == null) {
+                // Companion: no numbered orbit slot — a pre-set distAU (from ROLE_SLOTS,
+                // System Editor's orbitAU, or the OTU importer) wins; T5_COMPANION_AU is only
+                // the last-resort default.
+                star.distAU = star.distAU != null ? star.distAU : T5_COMPANION_AU;
+                return;
+            }
+            const tbl  = T5_Data.ORBIT_AU;
+            const idx  = Math.floor(orbitIdVal);
+            const frac = orbitIdVal - idx;
+            const lo   = tbl[Math.min(idx, tbl.length - 1)] || 0;
+            const hi   = idx < tbl.length - 1 ? tbl[idx + 1] : lo;
+            star.distAU = lo + frac * (hi - lo);
+        });
+        return stars;
+    }
+
+    // Builds a star-only preview system (System Editor "Create System", before any body has
+    // been added yet) — no mainworld, no worlds, just the resolved star(s) at their real
+    // positions. Does NOT invoke generateT5System: that function's Phase 1 requires a real
+    // mainworldBase by design (T5's "Continuation Method" — the mainworld must exist before the
+    // system does, unlike CT/MgT2E which elect one after structure exists), and relaxing that
+    // guard would mean null-checking mainworld-dependent code throughout Phase 1 for a need
+    // that's purely about preview rendering. See OW-49, directives/project_manifest.md.
+    function buildT5StarOnlyPreview(seedSys) {
+        if (!seedSys || !(seedSys.stars || []).length) return null;
+        const stars = _initStars(seedSys.stars.map(s => Object.assign({}, s)));
+        return { stars, mainworld: null, sggCount: 0, hzOrbit: getStarHZ(stars[0]) };
+    }
+
+    /**
+     * Parses a flat T5 "homestar" string (e.g. "F7 V M3 V K2 V") into up to 8 star objects.
+     * T5 RAW (see OW-N, directives/project_manifest.md): a system has a Primary, and each of
+     * Close/Near/Far may independently exist, and each of Primary/Close/Near/Far may
+     * independently have its own Companion — up to 8 stars total. A flat spectral-type list
+     * (from a TravellerMap/OTU import, or a fresh homestar override) gives no way to know
+     * which token is which role, so role/orbit assignment here is a positional guess —
+     * consistent with the project's "guess, don't gate" policy (a wrong guess is corrected
+     * via the System Editor's existing Role dropdown, not a blocking UI). Close/Near/Far
+     * orbits use T5's real placement dice (1D-1 / 5+1D / 11+1D); Companions use the existing
+     * "tightly inside Orbit 0 of the parent star" placeholder (no RAW roll formula given for
+     * the exact sub-orbit).
+     *
+     * Shared by generateT5System's homestar branch (below) and js/io_manager.js's OTU
+     * importer (importT5Tab) — previously two divergent copies of this same tokenizer, one of
+     * which (the importer) never decomposed spectral type at all and defaulted every
+     * secondary star to a flat 'Companion' role with no orbit data.
+     */
+    function parseT5HomestarString(rawStarsString) {
+        if (!rawStarsString || !rawStarsString.trim()) return [];
+
+        let starStrings = [];
+        let tokens = rawStarsString.trim().split(/\s+/);
+        for (let i = 0; i < tokens.length; i++) {
+            if (i > 0 && /^(Ia|Ib|II|III|IV|V|VI|VII|D|BD)$/i.test(tokens[i]) && !starStrings[starStrings.length - 1].includes(" ")) {
+                starStrings[starStrings.length - 1] += " " + tokens[i];
+            } else {
+                starStrings.push(tokens[i]);
+            }
+        }
+
+        // Canonical 8-slot role/orbit assignment. orbitID for Close/Near/Far is rolled fresh
+        // (via this module's seeded _roll1D) each time this function runs, matching T5 RAW's
+        // placement dice — not a fixed constant. parentStarIdx (Companions only) indexes back
+        // into this same array: 0=Primary, 1=Close, 2=Near, 3=Far.
+        const ROLE_SLOTS = [
+            { role: 'Primary',   orbitID: 0,                 parentStarIdx: null },
+            { role: 'Close',     orbitID: _roll1D() - 1,      parentStarIdx: null }, // RAW: 1D-1, range 0-5
+            { role: 'Near',      orbitID: 5 + _roll1D(),      parentStarIdx: null }, // RAW: 5+1D, range 6-11
+            { role: 'Far',       orbitID: 11 + _roll1D(),     parentStarIdx: null }, // RAW: 11+1D, range 12-17
+            // Companions aren't a numbered orbit slot (see T5_COMPANION_AU above) — no orbitID.
+            { role: 'Companion', orbitID: null, distAU: T5_COMPANION_AU, parentStarIdx: 0 },    // of Primary
+            { role: 'Companion', orbitID: null, distAU: T5_COMPANION_AU, parentStarIdx: 1 },    // of Close
+            { role: 'Companion', orbitID: null, distAU: T5_COMPANION_AU, parentStarIdx: 2 },    // of Near
+            { role: 'Companion', orbitID: null, distAU: T5_COMPANION_AU, parentStarIdx: 3 },    // of Far
+        ];
+
+        if (starStrings.length > ROLE_SLOTS.length) {
+            _log(`T5 Star Parse: homestar string has ${starStrings.length} stars — T5's maximum is ${ROLE_SLOTS.length} (Primary/Close/Near/Far, each with an optional Companion). Extra tokens ignored: ${starStrings.slice(ROLE_SLOTS.length).join(', ')}`);
+        }
+
+        return starStrings.slice(0, ROLE_SLOTS.length).map((sStr, idx) => {
+            let rawType = sStr.split(' ')[0] || '';
+            let sType = rawType.length > 0 ? rawType[0] : 'M';
+            let subTypeMatch = rawType.match(/\d/);
+            let decimal = subTypeMatch ? parseInt(subTypeMatch[0]) : 0;
+            let sClass = sStr.split(' ')[1] || 'V';
+            if (sType === 'D') { sClass = 'D'; decimal = 0; }
+            if (rawType === 'BD') { sType = 'BD'; sClass = 'V'; decimal = 0; }
+            const slot = ROLE_SLOTS[idx];
+            return {
+                role: slot.role,
+                // Reconstructed, formula-based label — kept identical to this function's
+                // pre-extraction formula for generateT5System's own consumers. Has a known,
+                // pre-existing quirk for D/BD stars (produces "D D"/"BD V") — see rawName.
+                name: `${sType}${rawType !== 'D' && rawType !== 'BD' ? decimal : ''} ${sClass}`,
+                rawName: sStr, // the untouched original token (e.g. "D", "F7 V") — callers that
+                                // need a name a downstream spectral-type parser can round-trip
+                                // (e.g. io_manager.js's importer) should use this instead of
+                                // `name` above.
+                type: sType,
+                decimal: decimal,
+                size: sClass,
+                orbitID: slot.orbitID,
+                distAU: slot.distAU,
+                parentStarIdx: slot.parentStarIdx,
+            };
+        });
+    }
+
     /**
      * Main T5 Top-Down Generation Orchestrator.
      * Executes the 4-Phase pipeline for system generation.
@@ -205,34 +340,8 @@
             // homestar-string-parsing/default-star fallback below entirely.
             sysStars = seedSys.stars.map(s => Object.assign({}, s));
         } else if (mainworldBase && mainworldBase.homestar && mainworldBase.homestar.trim() !== '') {
-            let overrideStars = [];
-            let tokens = mainworldBase.homestar.trim().split(/\s+/);
-            for (let i = 0; i < tokens.length; i++) {
-                if (i > 0 && /^(Ia|Ib|II|III|IV|V|VI|VII|D|BD)$/i.test(tokens[i]) && !overrideStars[overrideStars.length - 1].includes(" ")) {
-                    overrideStars[overrideStars.length - 1] += " " + tokens[i];
-                } else {
-                    overrideStars.push(tokens[i]);
-                }
-            }
-            if (overrideStars.length > 0) {
-                sysStars = overrideStars.map((sStr, idx) => {
-                    let rawType = sStr.split(' ')[0] || '';
-                    let sType = rawType.length > 0 ? rawType[0] : 'M';
-                    let subTypeMatch = rawType.match(/\d/);
-                    let decimal = subTypeMatch ? parseInt(subTypeMatch[0]) : 0;
-                    let sClass = sStr.split(' ')[1] || 'V';
-                    if (sType === 'D') { sClass = 'D'; decimal = 0; }
-                    if (rawType === 'BD') { sType = 'BD'; sClass = 'V'; decimal = 0; }
-                    return {
-                        role: idx === 0 ? 'Primary' : (idx === 1 ? 'Close' : (idx === 2 ? 'Near' : 'Far')),
-                        name: `${sType}${rawType !== 'D' && rawType !== 'BD' ? decimal : ''} ${sClass}`,
-                        type: sType,
-                        decimal: decimal,
-                        size: sClass,
-                        orbitID: idx === 0 ? 0 : (idx === 1 ? 0.5 : (idx === 2 ? 6.0 : 12.0))
-                    };
-                });
-            }
+            const parsed = parseT5HomestarString(mainworldBase.homestar);
+            if (parsed.length > 0) sysStars = parsed;
         }
 
         if (!sysStars) {
@@ -245,32 +354,17 @@
             sggCount: 0
         };
 
-        // Initialize Independent Subsystems for each star
-        sys.stars.forEach(star => {
-            star.orbits = [];
-            for (let i = 0; i < 20; i++) {
-                star.orbits.push({ orbit: i, distAU: T5_Data.ORBIT_AU[i], contents: null });
-            }
-        });
+        _initStars(sys.stars);
 
         const primary = sys.stars[0];
 
-        // Set distAU on companion stars so the system viewer positions them correctly,
-        // and build the reserved-orbit set so findAvailableOrbit won't place planets there.
-        sys.stars.slice(1).forEach(star => {
-            const tbl  = T5_Data.ORBIT_AU;
-            const idx  = Math.floor(star.orbitID);
-            const frac = star.orbitID - idx;
-            const lo   = tbl[Math.min(idx, tbl.length - 1)] || 0;
-            const hi   = idx < tbl.length - 1 ? tbl[idx + 1] : lo;
-            star.distAU = lo + frac * (hi - lo);
-        });
-
-        const companionOrbitIndices = new Set(
-            sys.stars.slice(1)
-                .map(s => Math.round(s.orbitID))
-                .filter(i => i >= 0 && i < 20)
-        );
+        // A companion star sits close in beside its parent, not in a numbered orbit slot (see
+        // T5_COMPANION_AU above) — but a world still shouldn't be placed on top of it at the
+        // parent's own Orbit 0. Reserve Orbit 0 of the primary specifically when the primary has
+        // a companion (the only host star this reservation set is ever applied to, below).
+        const primaryHasCompanion = sys.stars.slice(1)
+            .some(s => s.role === 'Companion' && (s.parentStarIdx ?? 0) === 0);
+        const companionOrbitIndices = primaryHasCompanion ? new Set([0]) : new Set();
 
         // System Editor seed-body placement: place every seeded body at its own orbit BEFORE
         // any dice-rolled inventory/placement runs, and before Phase 1 (mainworld anchor), since
@@ -281,11 +375,24 @@
         // separate reserved-orbit bookkeeping is needed.
         const hasSeedWorlds = !!(seedSys && Array.isArray(seedSys.worlds) && seedSys.worlds.length > 0);
         const allowAddBodies = !!(seedSys && seedSys._allowAddBodies);
+        // Whether this call came from the System Editor at all (vs. a classic stochastic macro
+        // call, which always passes seedSys=null — see generateT5System's default parameter and
+        // Algorithm 6's safety guarantee in directives/project_manifest.md). Deliberately NOT
+        // the same thing as hasSeedWorlds: T5.write() (t5_editor_adapter.js) always excludes the
+        // mainworld body from seed.worlds by design (it's threaded separately via
+        // seed.mainworldUWP), so a system whose *only* body is the mainworld produces an empty
+        // seed.worlds — hasSeedWorlds alone would (and did, see OW-42, directives/
+        // project_manifest.md) wrongly treat that as "nothing was seeded" and let the inventory
+        // roll below fire anyway, ignoring the user's unchecked "Allow engine to add additional
+        // bodies" box. isEditorSeeded mirrors MgT2E's own `!seedSys || seedSys._allowAddBodies`
+        // gate (mgt2e_bottomup_generator.js) instead of inventing a T5-specific signal.
+        const isEditorSeeded = !!seedSys;
         if (hasSeedWorlds) {
             seedSys.worlds.forEach(w => {
                 const starIdx = w.parentStarIdx || 0;
                 const hostStar = sys.stars[starIdx] || primary;
                 const resolved = findAvailableOrbit(hostStar, w.orbitId, hostStar === primary ? companionOrbitIndices : new Set());
+                _log(`[SEED PLACEMENT] "${w.name || w.type}" (_id=${w._id}, type=${w.type}) target orbitId=${w.orbitId} parentStarIdx=${starIdx} moons=${(w.moons || []).length} -> ${resolved >= 0 ? `placed at Orbit ${resolved}` : 'DROPPED — no available orbit slot found'}`);
                 if (resolved < 0) return;
                 const body = createBodyPlaceholder(_seedCategory(w.type), w);
                 hostStar.orbits[resolved].contents = body;
@@ -302,12 +409,13 @@
         }
 
         // PHASE 2 (PRE-REQUISITE): System Inventory (Moved up for Continuation Method)
-        // Locked to 0 when the System Editor supplied a seeded body list and the user hasn't
-        // checked "Allow engine to add additional bodies" — the seeded bodies above are the
-        // entire inventory in that case.
-        let ggCountTotal = (hasSeedWorlds && !allowAddBodies) ? 0 : Math.max(0, Math.floor(_roll2D() / 2) - 2);
-        let beltCountTotal = (hasSeedWorlds && !allowAddBodies) ? 0 : Math.max(0, _roll1D() - 3);
-        const otherTerrTotal = (hasSeedWorlds && !allowAddBodies) ? 0 : _roll2D(); // Inventory = MW + GG + Belt + 2D.
+        // Locked to 0 when this is a System Editor call and the user hasn't checked "Allow
+        // engine to add additional bodies" — the seeded bodies (mainworld included, even though
+        // it's not part of seedSys.worlds — see isEditorSeeded above) are the entire inventory
+        // in that case.
+        let ggCountTotal = (isEditorSeeded && !allowAddBodies) ? 0 : Math.max(0, Math.floor(_roll2D() / 2) - 2);
+        let beltCountTotal = (isEditorSeeded && !allowAddBodies) ? 0 : Math.max(0, _roll1D() - 3);
+        const otherTerrTotal = (isEditorSeeded && !allowAddBodies) ? 0 : _roll2D(); // Inventory = MW + GG + Belt + 2D.
 
         const hzOrbit = getStarHZ(primary);
         sys.hzOrbit = hzOrbit; // star-physics HZ orbit, independent of mainworld placement — read by system_viewer.js
@@ -348,6 +456,10 @@
 
         if (isSatellite) {
             let parent = null;
+            // True when `parent` was found already sitting in a star's orbits (placed earlier by
+            // the seeded-body pass) rather than freshly synthesized below — see the placement
+            // guard at the bottom of this block (OW-59).
+            let parentAlreadyPlaced = false;
 
             // System Editor seed: the mainworld's parent body was already placed above (it's a
             // real body the user placed in the working copy, not a fresh roll) — find it by _id
@@ -356,6 +468,10 @@
                 const hostStar = sys.stars[mainworldBase.parentStarIdx || 0];
                 const found = hostStar && hostStar.orbits.find(o => o.contents && o.contents._id === mainworldBase.parentBodyId);
                 parent = found ? found.contents : null;
+                parentAlreadyPlaced = !!parent;
+                _log(`[MAINWORLD PARENT LOOKUP] parentBodyId=${mainworldBase.parentBodyId} parentStarIdx=${mainworldBase.parentStarIdx ?? 0} -> ${parent ? `FOUND (${parent.type}, _id=${parent._id})` : 'NOT FOUND — host star\'s placed orbits: [' + ((hostStar && hostStar.orbits || []).filter(o => o.contents).map(o => `Orbit ${o.orbit}: ${o.contents.type} _id=${o.contents._id}`).join(' | ')) + ']'}`);
+            } else {
+                _log(`[MAINWORLD PARENT LOOKUP] mainworldBase.parentBodyId is not set (isSatellite=true via ${mainworldBase.isPreMoon === true ? 'isPreMoon' : 'tradeCodes/lunar roll'}) — skipping lookup, going straight to fallback.`);
             }
 
             if (!parent && ggCountTotal > 0) {
@@ -391,8 +507,18 @@
             tResult('Mainworld Status', 'LUNAR SELECTION', 'T5 1.3: Orbit Allocation');
             _log(`[MAINWORLD LOG] Hex ${mainworldBase.hexId || 'null'}: T5 Mainworld is a MOON attached to a ${parent.type} (Sub-Orbit ${sys.mainworld.orbitLetter})`);
 
-            mwTarget = findAvailableOrbit(primary, mwTarget, companionOrbitIndices);
-            if (mwTarget >= 0) primary.orbits[mwTarget].contents = parent;
+            // Only place `parent` into a fresh orbit slot when it's a newly-synthesized fallback
+            // (BigWorld or a new Gas Giant) — those have nowhere to live yet. A `parent` found via
+            // the parentBodyId lookup above is *already* sitting in its seeded orbit slot; placing
+            // it again here would put the same object reference into a second, different empty
+            // slot (findAvailableOrbit naturally picks an empty one, since the real slot is
+            // occupied by this very object), duplicating the Gas Giant and every one of its
+            // moons — including the mainworld — everywhere the system gets walked (biography log,
+            // UWP auditor, System Editor accordion, orrery) (OW-59).
+            if (!parentAlreadyPlaced) {
+                mwTarget = findAvailableOrbit(primary, mwTarget, companionOrbitIndices);
+                if (mwTarget >= 0) primary.orbits[mwTarget].contents = parent;
+            }
         } else {
             // Mainworld as standalone planet (or belt)
             if (sys.mainworld.size === 0) sys.mainworld.worldType = 'Belt';
@@ -457,6 +583,16 @@
                 atm: seedOverride.atm,
                 hydro: seedOverride.hydro,
                 pop: seedOverride.pop,
+                // gov/law/starport/tl were missing here even after _t5UwpLockFor (t5_editor_adapter.js)
+                // started marking them manual (T5 overhaul punch-list item 2) — _manualFields
+                // correctly claimed these fields were locked, but the actual seeded values never
+                // reached the placed body, so generateT5SubordinateUWP's `!_isManual(...)` guard
+                // correctly skipped rolling them, leaving them permanently undefined instead of
+                // holding the previous roll. See OW-45, directives/project_manifest.md.
+                gov: seedOverride.gov,
+                law: seedOverride.law,
+                starport: seedOverride.starport,
+                tl: seedOverride.tl,
                 _manualFields: seedOverride._manualFields || [],
             });
         }
@@ -490,9 +626,14 @@
         });
 
         // PHASE 6: Fleshing and Audit
-        // capToExisting: when the System Editor locked the body count (seeded, allowAddBodies
-        // unchecked), don't let generateT5Satellites roll additional moons beyond what was seeded.
-        fleshOutSubordinates(sys, hasSeedWorlds && !allowAddBodies);
+        // capToExisting: when the System Editor locked the body count (editor-driven,
+        // allowAddBodies unchecked), don't let generateT5Satellites roll additional moons beyond
+        // what was seeded. Gated on isEditorSeeded, not hasSeedWorlds — see the inventory-count
+        // gate above for why (a mainworld-only system has an empty seedSys.worlds by design, so
+        // hasSeedWorlds alone wrongly signals "nothing was seeded" here too, letting a
+        // mainworld's own moon count re-roll fresh — and fluctuate, not just grow — on every
+        // single Preview/Fill & Save; see OW-43, directives/project_manifest.md).
+        fleshOutSubordinates(sys, isEditorSeeded && !allowAddBodies);
 
         // --- PHASE 7: JOURNEY MATH SWEEP (Phase 2 Integration) ---
         if (typeof MgT2EMath !== 'undefined' && MgT2EMath.performJourneyMathSweep) {
@@ -788,5 +929,5 @@
         world.uwpSecondary = world.uwp;
     }
 
-    return { generateT5System };
+    return { generateT5System, buildT5StarOnlyPreview, parseT5HomestarString };
 }));

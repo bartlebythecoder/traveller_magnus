@@ -543,7 +543,19 @@ const SystemViewer = (() => {
             // (OW-60). Default an unresolved Gas Giant to the same 317.8 T5 already uses once
             // resolved, so there's nothing left to visibly snap to.
             mass:          (typeof w.mass === 'number' ? w.mass : w.massEarths) ?? (type === 'Gas Giant' ? 317.8 : null),
-            diamKm:        w.diamKm    || null,
+            // Same gap as the mass default above (OW-60), just never covered by that fix: a
+            // freshly-added Gas Giant (System Editor, before its first full physics resolution)
+            // has no diamKm yet either, so this fell through to _moonPeriodYears' own
+            // `parentWorld.diamKm || 12742` default — Earth's diameter, roughly 15-20x smaller
+            // than a real Gas Giant's (calculateT5PhysicalStats: diamKm = sizeVal * 10000,
+            // ~210,000-310,000 km depending on size letter). Since orbital radius scales with
+            // parent diameter and period scales as radius^1.5, that made an unresolved GG's
+            // moons visibly whip around far too fast in the live preview, snapping to their
+            // correct, much slower speed once Preview/Save resolved a real diamKm. 215000 matches
+            // a brand-new '+GG' body's default tier (ggType 'GS'/Small — system_editor.js's
+            // _addBody — sizes 'M'/'N', 210000/220000 km) so there's nothing to visibly snap to,
+            // mirroring the mass default's own reasoning exactly.
+            diamKm:        w.diamKm    || (type === 'Gas Giant' ? 215000 : null),
             gravity:       w.gravity   || null,
             meanTempK:     w.meanTempK || null,
             moons:         (w.satellites || []).map(m => _normMoon(m, mainworldRef)),

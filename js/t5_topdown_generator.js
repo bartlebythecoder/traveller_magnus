@@ -679,11 +679,19 @@
             const moon = { type: 'Moon', parentBody: (isGG ? 'Gas Giant' : 'Planet'), _manualFields: [] };
             generateT5SubordinateUWP(moon, orbit, hostHZ, maxSubPop, true);
 
-            // T5 RAW physics constraint: Moon must be smaller than Parent.
-            // Normalize alpha sizes for comparison (e.g., GG Size M = 22).
+            // T5 RAW physics constraint: Moon must be smaller than Parent. A Gas Giant's own
+            // `.size` is T5's own lettered tier code (M/N for Small, P/Q/R/S/T/U/V/W/X for
+            // Large — generateGasGiantStats above) — a standard eHex digit, except 'R'/'S'
+            // specifically collide with fromEHex's CT-specific Ring/Small-moon sentinels
+            // (0.1/0.5). Resolve those two to their real eHex value (R=25, S=26 — confirmed via
+            // Sean's Requirements Agent) directly instead of falling through into fromEHex's
+            // CT-flavored intercept; every other GG size letter already resolves correctly via
+            // fromEHex with no collision.
             let pSize = parent.size;
             if (isGG) {
-                pSize = (typeof parent.size === 'string') ? fromEHex(parent.size) : parent.size;
+                if (parent.size === 'R') pSize = 25;
+                else if (parent.size === 'S') pSize = 26;
+                else pSize = (typeof parent.size === 'string') ? fromEHex(parent.size) : parent.size;
             }
 
             if (pSize !== undefined && moon.size >= pSize) {
@@ -749,7 +757,14 @@
                 if (body.satellites) {
                     body.satellites.forEach(s => {
                         if (!_isManual(s, 'climateZone')) s.climateZone = body.climateZone;
-                        if (s !== sys.mainworld && s.uwp === undefined) {
+                        // t5_editor_adapter.js's _t5BodySeed always seeds an ungenerated moon's
+                        // uwp as `null` (`m.uwp || null`), never `undefined` — the old strict
+                        // `=== undefined` check never matched a seeded-but-not-yet-generated
+                        // moon, silently skipping worldType/size/atm/etc. generation for every
+                        // manually-added moon that hadn't already completed one full Preview/
+                        // Fill & Save (an already-generated moon carries a real, truthy .uwp
+                        // string and still correctly skips re-generation here).
+                        if (s !== sys.mainworld && !s.uwp) {
                             generateT5SubordinateUWP(s, o.orbit, hostHZ, maxSubPop, true);
                         }
                         

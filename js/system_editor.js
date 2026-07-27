@@ -1229,6 +1229,13 @@ const SystemEditor = (() => {
             nameInput.addEventListener('change', () => {
                 _pushHistory(); body.name = nameInput.value;
                 summaryLabel.textContent = `${body.isMainworld ? '★ ' : ''}${typeLabel}${body.name ? ` "${body.name}"` : ''}${uwpStr}${orbitStr}`;
+                // Every other field's change handler calls this to regenerate+commit the working
+                // copy into hexStates (_preview → _generateAndCommit → _finalizeCommittedState,
+                // which is what actually copies a mainworld's name onto stateObj.name) — this one
+                // didn't, so a renamed mainworld's new name never reached hexStates.name (what
+                // exportSystemJson/the hex accordion actually read) until some other field
+                // happened to be edited afterward, or Preview/Fill & Save was clicked separately.
+                _renderAndPreview();
             });
             nameRow.append(nameLbl, nameInput);
             detailPad.appendChild(nameRow);
@@ -1549,7 +1556,9 @@ const SystemEditor = (() => {
                         flex: '1', background: 'transparent', border: `1px solid ${P.border}`,
                         color: moon.isMainworld ? P.mw : P.sub, fontFamily: 'inherit', fontSize: '11px', padding: '2px 4px',
                     });
-                    moonNameInput.addEventListener('change', () => { _pushHistory(); moon.name = moonNameInput.value; });
+                    // Same gap as the body-level Name input above — a renamed mainworld moon's
+                    // new name never reached hexStates.name without this.
+                    moonNameInput.addEventListener('change', () => { _pushHistory(); moon.name = moonNameInput.value; _renderAndPreview(); });
                     const isMoonMW = moon.isMainworld;
                     moonRow.appendChild(moonNameInput);
                     moonRow.appendChild(_btn(
@@ -2567,9 +2576,10 @@ const SystemEditor = (() => {
         // AoW age-conflict gate (design decision 2, see directives/project_manifest.md OW-9):
         // aow_seed_bridge.js's reconcileSystemAge sets sys.ageConflict when manually-chosen
         // spectral types across stars imply system-age windows with no overlap — the system was
-        // still generated (using a best-effort compromise age), so this is a warn-and-proceed,
-        // same shape as the OW-3 audit gate below, just checked first since an age conflict is
-        // upstream of everything else the audit might also flag.
+        // still generated (using a best-effort compromise age), so this is a warn-and-proceed.
+        // Unrelated to the UWP Auditor, which no longer shows a popup here at all (Sean-
+        // requested removal) — each engine's own auditor still logs failures to the console and
+        // window.auditBacklog at generation time.
         const ageConflict = result.newSys && result.newSys.ageConflict;
         if (ageConflict) {
             const starList = (ageConflict.stars || [])
@@ -2580,38 +2590,13 @@ const SystemEditor = (() => {
                 `The system was generated using a best-effort compromise age. You can proceed anyway, ` +
                 `or go back and adjust one of the stars' spectral types.`,
                 [
-                    { label: 'Proceed Anyway', cls: 'btn-cancel', onClick: () => _checkAuditThenFinish(hexId, result) },
-                    { label: 'Go Back & Fix',  cls: 'btn-save',   onClick: () => {} },
-                ]
-            );
-            return;
-        }
-
-        _checkAuditThenFinish(hexId, result);
-    }
-
-    // OW-3: UWP Auditor gate. Not every engine's generator populates auditResult (only
-    // MgT2E/CT/T5/AoW do today), so this is a no-op for engines that haven't been wired up yet.
-    // The system is already committed to hexStates by this point (_generateAndCommit already
-    // ran), so "Go Back & Fix" can't un-commit it — it just leaves the editor open (same as
-    // dismissing any other warning) so the user can keep adjusting bodies and re-run Fill & Save,
-    // instead of closing over a failing result. Split out from _fillAndSave() so the age-conflict
-    // gate above it can defer to this same check after "Proceed Anyway".
-    function _checkAuditThenFinish(hexId, result) {
-        const audit = result.newSys && result.newSys.auditResult;
-        if (audit && audit.pass === false) {
-            const errCount = (audit.errors || []).length;
-            _showWarn('Audit Warnings Found',
-                `The UWP Auditor found ${errCount} issue${errCount !== 1 ? 's' : ''} with this system ` +
-                `(see browser console for details). You can proceed anyway, or go back and adjust ` +
-                `the system before saving.`,
-                [
                     { label: 'Proceed Anyway', cls: 'btn-cancel', onClick: () => _finishFillAndSave(hexId) },
                     { label: 'Go Back & Fix',  cls: 'btn-save',   onClick: () => {} },
                 ]
             );
             return;
         }
+
         _finishFillAndSave(hexId);
     }
 

@@ -358,13 +358,16 @@
 
         const primary = sys.stars[0];
 
-        // A companion star sits close in beside its parent, not in a numbered orbit slot (see
-        // T5_COMPANION_AU above) — but a world still shouldn't be placed on top of it at the
-        // parent's own Orbit 0. Reserve Orbit 0 of the primary specifically when the primary has
-        // a companion (the only host star this reservation set is ever applied to, below).
-        const primaryHasCompanion = sys.stars.slice(1)
-            .some(s => s.role === 'Companion' && (s.parentStarIdx ?? 0) === 0);
-        const companionOrbitIndices = primaryHasCompanion ? new Set([0]) : new Set();
+        // A Companion star (distinct from a numbered Close/Near/Far secondary) is placed "well
+        // inside Orbit 0" (T5_COMPANION_AU, 0.05 AU vs. Orbit 0's 0.2 AU) and RAW defines no
+        // orbital-stability exclusion zone around it — confirmed via Sean's Requirements Agent,
+        // directives/project_manifest.md — unlike Book 6: Scouts, which pushed planets away from
+        // secondary stars mathematically. Orbit 0 is therefore fully available to a world
+        // whenever the primary has a Companion, exactly as if it didn't — the only thing that
+        // ever precludes a low orbit number is the primary star's own physical size
+        // (T5_PRECLUDED_ORBITS, consulted inside findAvailableOrbit). A prior pass had
+        // findAvailableOrbit reserve Orbit 0 whenever the primary had a Companion, with no RAW
+        // basis — removed.
 
         // System Editor seed-body placement: place every seeded body at its own orbit BEFORE
         // any dice-rolled inventory/placement runs, and before Phase 1 (mainworld anchor), since
@@ -391,7 +394,7 @@
             seedSys.worlds.forEach(w => {
                 const starIdx = w.parentStarIdx || 0;
                 const hostStar = sys.stars[starIdx] || primary;
-                const resolved = findAvailableOrbit(hostStar, w.orbitId, hostStar === primary ? companionOrbitIndices : new Set());
+                const resolved = findAvailableOrbit(hostStar, w.orbitId);
                 _log(`[SEED PLACEMENT] "${w.name || w.type}" (_id=${w._id}, type=${w.type}) target orbitId=${w.orbitId} parentStarIdx=${starIdx} moons=${(w.moons || []).length} -> ${resolved >= 0 ? `placed at Orbit ${resolved}` : 'DROPPED — no available orbit slot found'}`);
                 if (resolved < 0) return;
                 const body = createBodyPlaceholder(_seedCategory(w.type), w);
@@ -516,13 +519,13 @@
             // moons — including the mainworld — everywhere the system gets walked (biography log,
             // UWP auditor, System Editor accordion, orrery) (OW-59).
             if (!parentAlreadyPlaced) {
-                mwTarget = findAvailableOrbit(primary, mwTarget, companionOrbitIndices);
+                mwTarget = findAvailableOrbit(primary, mwTarget);
                 if (mwTarget >= 0) primary.orbits[mwTarget].contents = parent;
             }
         } else {
             // Mainworld as standalone planet (or belt)
             if (sys.mainworld.size === 0) sys.mainworld.worldType = 'Belt';
-            mwTarget = findAvailableOrbit(primary, mwTarget, companionOrbitIndices);
+            mwTarget = findAvailableOrbit(primary, mwTarget);
             if (mwTarget >= 0) primary.orbits[mwTarget].contents = sys.mainworld;
         }
 
@@ -544,10 +547,7 @@
                 const maxOrbitLimit = (hostStar === primary) ? 19 : Math.max(0, hostStar.orbitID - 3);
 
                 const targetOrbit = placementLogic(hostHZ, i === count - 1);
-                const resolved = findAvailableOrbit(
-                    hostStar, targetOrbit,
-                    hostStar === primary ? companionOrbitIndices : new Set()
-                );
+                const resolved = findAvailableOrbit(hostStar, targetOrbit);
 
                 if (resolved >= 0 && resolved <= maxOrbitLimit) {
                     const body = createBodyPlaceholder(category);

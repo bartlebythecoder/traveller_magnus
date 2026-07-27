@@ -46,7 +46,12 @@
     // treatment of these same four fields.
     function _t5UwpLockFor(body) {
         const raw = body._raw || {};
-        if (!body.uwp || !body._raw) return { fields: {}, mf: [] };
+        // Gated on _raw presence alone, not body.uwp — a mainworld whose _raw carries real prior
+        // digits (atm, hydro, pop, ...) can still have a momentarily falsy .uwp (see the freshRoll
+        // fix below), and gating on .uwp here would throw all of that away. A genuinely blank body
+        // (_addBody's `_raw: {}`) still locks nothing: every raw.X check below is undefined either
+        // way, so fields/mf come back empty regardless of which guard is used.
+        if (!body._raw) return { fields: {}, mf: [] };
         const fields = {};
         const mf = [];
         if (raw.worldType !== undefined) fields.worldType = raw.worldType;
@@ -107,24 +112,39 @@
 
     // Per-body seed construction shared by T5's `write()` for both top-level worlds and the
     // owner-of-a-moon-mainworld case (Algorithm 7 / _t5ElectMainworldIfNeeded above).
+    //
+    // Typed "Seed UWP digits" on a not-yet-generated subordinate body/moon (b._uwpSeed /
+    // m._uwpSeed — system_editor.js only shows these boxes while !body.uwp) used to never be
+    // read here at all: the mainworld's write() branches (above) apply theirs via applyUwpSeed,
+    // but this function only ever spread the locked (_raw-sourced) fields, so a freshly typed
+    // digit on a brand-new subordinate world/moon was silently discarded on Fill & Save — same
+    // family of bug as the mainworld one, just never wired up here in the first place. Overlay
+    // applies only to keys actually present in _uwpSeed; applyUwpSeed no-ops (returns the locked
+    // fields unchanged) when _uwpSeed is null/undefined, which is every already-generated body
+    // that never had digits typed — no behavior change for those.
     function _t5BodySeed(b, starIdxById) {
         const { fields: uwpLock, mf: extraMF } = _t5UwpLockFor(b);
+        const seeded = SE().applyUwpSeed({ ...uwpLock, _manualFields: [...extraMF] }, b._uwpSeed);
         return {
             _id: b._id,
             type: b.type === 'Gas Giant' ? (b.ggType === 'GS' ? 'Small Gas Giant' : 'Large Gas Giant')
                 : b.type === 'Belt' ? 'Planetoid Belt' : 'Terrestrial World',
             name: b.name || '', uwp: b.uwp || null,
-            ...uwpLock,
+            worldType: seeded.worldType, size: seeded.size, atm: seeded.atm, hydro: seeded.hydro,
+            pop: seeded.pop, gov: seeded.gov, law: seeded.law, starport: seeded.starport, tl: seeded.tl,
             orbitId: b.orbitId, parentStarIdx: starIdxById[b.parentStarId] ?? 0,
             travelZone: SE().normTz(b.travelZone),
             moons: (b.moons || []).map(m => {
                 const { fields: mLock, mf: mMF } = _t5UwpLockFor(m);
+                const mSeeded = SE().applyUwpSeed({ ...mLock, _manualFields: [...mMF] }, m._uwpSeed);
                 return {
-                    _id: m._id, name: m.name || '', uwp: m.uwp || null, ...mLock,
-                    _manualFields: [...(m._manualFields || []), ...mMF],
+                    _id: m._id, name: m.name || '', uwp: m.uwp || null,
+                    worldType: mSeeded.worldType, size: mSeeded.size, atm: mSeeded.atm, hydro: mSeeded.hydro,
+                    pop: mSeeded.pop, gov: mSeeded.gov, law: mSeeded.law, starport: mSeeded.starport, tl: mSeeded.tl,
+                    _manualFields: [...(m._manualFields || []), ...mSeeded._manualFields],
                 };
             }),
-            _manualFields: [...(b._manualFields || []), ...extraMF],
+            _manualFields: [...(b._manualFields || []), ...seeded._manualFields],
         };
     }
 
@@ -204,25 +224,49 @@
             const mwBody      = mwRefBody || mwMoon || wc.bodies.find(b => b.isMainworld);
             const isMoonMW    = !!mwMoon;
 
-            const { fields: mwLock } = _t5UwpLockFor(mwBody || {});
+            const { fields: mwLock, mf: mwLockMF } = _t5UwpLockFor(mwBody || {});
 
             // OW-44 (directives/project_manifest.md): a brand-new mainworld (no prior .uwp) was
             // never actually generated at all — this used to fall back to a literal placeholder
             // UWP string unconditionally. Roll a real one via the classic flow's own
             // generateT5Mainworld (t5_world_engine.js), seeded with any typed "Seed UWP digits"
             // via the shared applyUwpSeed (the same call CT/MgT2E's write() already make —
-            // wiring up T5's seed-digit boxes for the first time here too). Once a mainworld has
-            // been generated once (mwBody.uwp truthy), _t5UwpLockFor above already covers all
-            // nine relevant fields (OW-45) — that path is untouched.
+            // wiring up T5's seed-digit boxes for the first time here too).
+            //
+            // The seed used to start from a blank `{ _manualFields: [] }` — fine for a body
+            // that's never been generated at all, but if mwBody._raw already carries real prior
+            // digits (atm, hydro, pop, ...) despite .uwp itself being momentarily falsy, that blank
+            // slate threw all of it away: generateT5Mainworld only skips rolling a field when it's
+            // marked manual, and nothing here marked the untyped ones, so every field the user
+            // DIDN'T type in this Save got a fresh, unrelated dice roll (e.g. atm silently jumping
+            // from 0 to a random value after only typing a new Starport). Seed from mwLock (same
+            // lock the already-generated-mainworld path below uses) so only fields with no prior
+            // value at all — and no typed digit — actually get rolled.
             let freshRoll = null;
             if (mwBody && !mwBody.uwp && typeof T5_World_Engine !== 'undefined') {
-                const editorSeed = SE().applyUwpSeed({ _manualFields: [] }, mwBody._uwpSeed);
+                const editorSeed = SE().applyUwpSeed({ ...mwLock, _manualFields: [...mwLockMF] }, mwBody._uwpSeed);
                 freshRoll = T5_World_Engine.generateT5Mainworld(wc.hexId, editorSeed);
+            }
+
+            // OW-XX: typed "Seed UWP digits" on an ALREADY-generated mainworld (mwBody.uwp
+            // truthy) used to be silently discarded — mwBody._uwpSeed was only ever read inside
+            // the freshRoll branch above, so re-typing e.g. Starport on an existing/imported
+            // mainworld and hitting Fill & Save left the old locked value (mwLock, sourced from
+            // mwBody._raw — the pre-edit snapshot) untouched, and the typed digit never made it
+            // into .uwp either (mainworldUWP.uwp fell straight back to mwBody.uwp). Overlay the
+            // seed digits onto the locked fields here so a typed digit always wins, whether the
+            // mainworld is brand-new or already generated; fields the user didn't type keep their
+            // locked (mwLock) values via applyUwpSeed's in-place merge.
+            let seeded = null;
+            if (mwBody && mwBody.uwp && mwBody._uwpSeed) {
+                seeded = SE().applyUwpSeed({ ...mwLock, _manualFields: [] }, mwBody._uwpSeed);
             }
 
             const mainworldUWP = mwBody ? {
                 _id: mwBody._id,
-                uwp: freshRoll ? freshRoll.uwp : (mwBody.uwp || 'A788899-9'),
+                uwp: freshRoll ? freshRoll.uwp
+                    : seeded ? `${seeded.starport}${toEHex(seeded.size)}${toEHex(seeded.atm)}${toEHex(seeded.hydro)}${toEHex(seeded.pop)}${toEHex(seeded.gov)}${toEHex(seeded.law)}-${toEHex(seeded.tl)}`
+                    : (mwBody.uwp || 'A788899-9'),
                 name: mwBody.name || '',
                 travelZone: SE().normTz(mwBody.travelZone),
                 isPreMoon: isMoonMW,
@@ -230,6 +274,11 @@
                 parentBodyId:  isMoonMW ? ownerOfMoon._id : null,
                 parentStarIdx: isMoonMW ? (starIdxById[ownerOfMoon.parentStarId] ?? 0) : null,
                 ...mwLock,
+                ...(seeded ? {
+                    worldType: seeded.worldType, starport: seeded.starport, size: seeded.size,
+                    atm: seeded.atm, hydro: seeded.hydro, pop: seeded.pop,
+                    gov: seeded.gov, law: seeded.law, tl: seeded.tl,
+                } : {}),
                 ...(freshRoll ? {
                     worldType: freshRoll.worldType, starport: freshRoll.starport, size: freshRoll.size,
                     atm: freshRoll.atm, hydro: freshRoll.hydro, pop: freshRoll.pop,

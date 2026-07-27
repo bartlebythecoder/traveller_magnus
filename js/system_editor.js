@@ -460,9 +460,15 @@ const SystemEditor = (() => {
             ...siblingBodies.map(b => _orbitIdToAU(b.orbitId) ?? b.au ?? b.orbitAU ?? 0)
         );
 
+        // First body on a star: CT and T5 both start their orbit-number table at Orbit 0 = 0.2
+        // AU (a real, occupiable slot — see _orbitIdToAU above), unlike MgT2E/RTT/AoW's table,
+        // which starts at Orbit 0 = 0 AU (literally on the star, unusable for a world). Defaulting
+        // to Orbit 1 here for every engine used to skip CT/T5's own valid innermost slot for no
+        // reason.
+        const firstBodyOrbit = (_workingCopy.engine === 'CT' || _workingCopy.engine === 'T5') ? 0 : 1;
         let candidate = siblingBodies.length > 0
             ? Math.max(...siblingBodies.map(b => b.orbitId || 0)) + 1
-            : 1;
+            : firstBodyOrbit;
 
         // Bump the candidate slot until its AU actually exceeds every sibling WORLD's (captured
         // planets included). Guarded to avoid looping forever if a CT orbit table clamps to a
@@ -1234,6 +1240,11 @@ const SystemEditor = (() => {
             orbitLbl.textContent = 'Orbit #:';
             Object.assign(orbitLbl.style, { color: P.sub, minWidth: '38px' });
             const isCtOrbitSlot = _workingCopy.engine === 'CT';
+            // CT and T5 both place bodies into a fixed 20-slot integer array (star.orbits[0..19]
+            // in t5_topdown_generator.js's _initStars, matching CT's own ORBIT_AU array lookup) —
+            // MgT2E's own placement has no such array and genuinely accepts a continuous orbitId/
+            // AU value, so it's excluded here.
+            const isDiscreteOrbitSlot = isCtOrbitSlot || _workingCopy.engine === 'T5';
 
             // A CT Captured Planet (RAW Book 6 anomaly) never occupies a discrete orbit slot —
             // it keeps its own already-rolled fractional orbit/distance permanently (see
@@ -1256,13 +1267,17 @@ const SystemEditor = (() => {
             const orbitInput = document.createElement('input');
             orbitInput.type = 'number'; orbitInput.value = body.orbitId != null ? parseFloat(body.orbitId.toFixed(3)) : '';
             orbitInput.min = '0';
-            // CT orbits are discrete integer slots (0="Orbit 0"=0.2 AU, 1=0.4 AU, ...) via
-            // ORBIT_AU, not a continuous AU value — a fractional entry here (e.g. 0.2, meant as
-            // an AU distance) missed CT's array lookup entirely and silently corrupted the
-            // body's real distance to a hardcoded 1.0 AU fallback, which also scrambled the hex
-            // info panel's by-distance sort order (see ct_bottomup_generator.js's fix). Other
-            // engines keep the finer step for their own continuous-AU orbit conventions.
-            orbitInput.step = isCtOrbitSlot ? '1' : '0.001';
+            // CT and T5 orbits are discrete integer slots (0="Orbit 0"=0.2 AU, 1=0.4 AU, ...) via
+            // each engine's own ORBIT_AU table, not a continuous AU value — a fractional entry
+            // here (e.g. 0.2, meant as an AU distance) misses the array lookup entirely. For CT
+            // this silently corrupted the body's real distance to a hardcoded 1.0 AU fallback,
+            // which also scrambled the hex info panel's by-distance sort order (see
+            // ct_bottomup_generator.js's fix). For T5, findAvailableOrbit (t5_topdown_generator.js)
+            // can never resolve a fractional target to a real array index — the body is silently
+            // dropped from the system entirely (never placed, never shown in the orrery), no
+            // error surfaced. MgT2E keeps the finer step for its own genuinely continuous-AU
+            // orbit convention (no fixed-slot array in its generator).
+            orbitInput.step = isDiscreteOrbitSlot ? '1' : '0.001';
             orbitInput.placeholder = 'auto';
             Object.assign(orbitInput.style, {
                 width: '60px', background: 'transparent', border: `1px solid ${P.border}`,
@@ -1270,7 +1285,7 @@ const SystemEditor = (() => {
             });
             orbitInput.addEventListener('change', () => {
                 let newOrbitId = orbitInput.value !== '' ? parseFloat(orbitInput.value) : null;
-                if (isCtOrbitSlot && newOrbitId != null) newOrbitId = Math.round(newOrbitId);
+                if (isDiscreteOrbitSlot && newOrbitId != null) newOrbitId = Math.round(newOrbitId);
                 if (_wouldReorder(body, false, newOrbitId)) {
                     orbitInput.value = body.orbitId != null ? parseFloat(body.orbitId.toFixed(3)) : '';
                     _showWarn('Use Drag & Drop',

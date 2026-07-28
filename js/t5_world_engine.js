@@ -384,7 +384,22 @@
         if (!world || world.size === undefined) return;
 
         const isGG = (world.type && (world.type.includes('Gas Giant') || world.type === 'Ice Giant'));
-        const sizeVal = (world.size === '0' || world.size === 0) ? 0.35 : (typeof world.size === 'string' ? fromEHex(world.size) : world.size);
+        // Gas Giant size letters are T5's own tier code (M/N Small; P/Q/R/S/T/U/V/W/X Large —
+        // generateGasGiantStats, t5_topdown_generator.js), a standard eHex digit, except 'R'/'S'
+        // specifically collide with fromEHex's CT-specific Ring/Small-moon sentinels (0.1/0.5).
+        // Resolve those two to their real eHex value (R=25, S=26) directly instead of falling
+        // through fromEHex's CT-flavored intercept — same collision already worked around in
+        // this file's own moon-size clamp (see generateT5Satellites, t5_topdown_generator.js).
+        let sizeVal;
+        if (world.size === '0' || world.size === 0) {
+            sizeVal = 0.35;
+        } else if (isGG && world.size === 'R') {
+            sizeVal = 25;
+        } else if (isGG && world.size === 'S') {
+            sizeVal = 26;
+        } else {
+            sizeVal = (typeof world.size === 'string') ? fromEHex(world.size) : world.size;
+        }
 
         // 1. Diameter Calculation
         if (!_isManual(world, 'diamKm')) {

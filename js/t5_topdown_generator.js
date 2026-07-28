@@ -121,7 +121,13 @@
             type = 'Small Gas Giant';
         } else {
             type = 'Large Gas Giant';
-            const chars = "PQRS TUVWX"; // Mapping for 2D rolls 4-12
+            // T5 Basic Placement Chart, rolls 4-12: P Q R S T U V W X (confirmed via Sean's
+            // Requirements Agent). A stray space previously sat between 'S' and 'T'
+            // ("PQRS TUVWX", 10 chars for 9 rolls), silently shifting T-X down one slot and
+            // making the single most likely Large GG roll (8, the 2D6 peak) resolve to a blank
+            // size code instead of 'T' — every downstream diamKm/mass/gravity calc for that GG
+            // then read an unrecognized size and fell through to 0-ish defaults.
+            const chars = "PQRSTUVWX"; // Mapping for 2D rolls 4-12
             size = chars[roll - 4] || 'S';
         }
         return { size, type };
@@ -243,7 +249,8 @@
     function buildT5StarOnlyPreview(seedSys) {
         if (!seedSys || !(seedSys.stars || []).length) return null;
         const stars = _initStars(seedSys.stars.map(s => Object.assign({}, s)));
-        return { stars, mainworld: null, sggCount: 0, hzOrbit: getStarHZ(stars[0]) };
+        const hzOrbit = (seedSys.hzco != null) ? seedSys.hzco : getStarHZ(stars[0]);
+        return { stars, mainworld: null, sggCount: 0, hzOrbit };
     }
 
     /**
@@ -420,8 +427,13 @@
         let beltCountTotal = (isEditorSeeded && !allowAddBodies) ? 0 : Math.max(0, _roll1D() - 3);
         const otherTerrTotal = (isEditorSeeded && !allowAddBodies) ? 0 : _roll2D(); // Inventory = MW + GG + Belt + 2D.
 
-        const hzOrbit = getStarHZ(primary);
-        sys.hzOrbit = hzOrbit; // star-physics HZ orbit, independent of mainworld placement — read by system_viewer.js
+        // System Editor HZCO override (seedSys.hzco, same generic field CT/MgT2E honor via
+        // _resolveHzOrbit/seedSys.hzco || 0) — null/undefined means "auto", derive from the
+        // primary's own spectral type/size as before. Clearing the editor's HZCO box sets
+        // _workingCopy.hzco back to null, which _buildSeedSys carries through unchanged, so the
+        // next Preview/Fill & Save falls right back to the star-physics-derived value.
+        const hzOrbit = (seedSys && seedSys.hzco != null) ? seedSys.hzco : getStarHZ(primary);
+        sys.hzOrbit = hzOrbit; // star-physics HZ orbit (or System Editor override) — read by system_viewer.js
         const hzResult = generateHZAndClimate(primary.type);
 
         // PHASE 1: THE ANCHOR (Mainworld)
@@ -658,7 +670,9 @@
 
     /**
      * Generates subordinate satellites (moons) for a body.
-     * Uses 2D-2 for Gas Giants, 1D-3 for Terrestrial.
+     * T5 RAW ("For Each World in the System", confirmed via Sean's Requirements Agent): the
+     * satellite-count dice modifier depends on the PARENT's own zone, not just Gas-Giant-vs-not —
+     * Gas Giant 1D-1 (any zone); non-GG Inner 1D-5, Hospitable 1D-4, Outer 1D-3.
      */
     function generateT5Satellites(parent, orbit, hostHZ, maxSubPop, capToExisting) {
         if (!parent || parent.type === 'Empty' || parent.worldType === 'Belt') return;
@@ -667,9 +681,28 @@
         const startIdx = parent.satellites.length;
 
         const isGG = (parent.type && (parent.type.includes('Gas Giant') || parent.type === 'Ice Giant'));
+        let countDM;
+        if (isGG) {
+            countDM = -1;
+        } else if (orbit <= hostHZ - 2) {
+            countDM = -5; // Inner
+        } else if (orbit >= hostHZ + 2) {
+            countDM = -3; // Outer
+        } else {
+            countDM = -4; // Hospitable
+        }
+        // A roll of exactly 0 means "Ring, reroll for the real solid-moon count" (T5 RAW). This
+        // app doesn't model Rings for T5 yet (Sean-confirmed stopgap) — reroll until the count
+        // resolves to something other than exactly 0 instead of producing a phantom Ring body.
+        // Bounded so a pathological DM can't spin forever; falls back to 0 moons if it never
+        // clears (shouldn't happen for any of the four real DMs above, all of which have a
+        // nonzero result on 5 of 6 faces).
+        let rawCount = _roll1D() + countDM;
+        for (let guard = 0; rawCount === 0 && guard < 20; guard++) rawCount = _roll1D() + countDM;
+        const rolledCount = Math.max(0, rawCount);
         // capToExisting (System Editor, seeded + allowAddBodies unchecked): never roll additional
         // moons beyond what the user placed.
-        const moonCount = capToExisting ? startIdx : (isGG ? Math.max(0, _roll2D() - 2) : Math.max(0, _roll1D() - 3));
+        const moonCount = capToExisting ? startIdx : rolledCount;
 
         if (moonCount > startIdx) {
             _log(`Satellite Generation: Body in Orbit ${orbit} rolling for ${moonCount} satellites (already has ${startIdx}).`);
@@ -805,8 +838,19 @@
         let roll = Math.floor(_rng() * 6) + 1;
         let type;
         if (isZoneA) {
-            const table = ['Inferno', 'InnerWorld', 'BigWorld', 'StormWorld', 'RadWorld', 'Hospitable'];
-            type = table[roll - 1];
+            // T5's "Inner And HZ Satellites" table (confirmed via Sean's Requirements Agent) is
+            // distinct from the primary-world Zone A table below — a moon in the HZ/inner zone
+            // can only ever be Worldlet/IceWorld/BigWorld/RadWorld, never Inferno/InnerWorld/
+            // Hospitable/Stormworld. Zone B already branched on isSatellite for exactly this
+            // reason (see the else below); Zone A never did, so a moon here was silently rolling
+            // on the primary-world table instead until now.
+            if (isSatellite) {
+                const table = ['Worldlet', 'IceWorld', 'BigWorld', 'IceWorld', 'RadWorld', 'IceWorld'];
+                type = table[roll - 1];
+            } else {
+                const table = ['Inferno', 'InnerWorld', 'BigWorld', 'StormWorld', 'RadWorld', 'Hospitable'];
+                type = table[roll - 1];
+            }
         } else {
             if (isSatellite) {
                 const table = ['Worldlet', 'IceWorld', 'BigWorld', 'StormWorld', 'RadWorld', 'IceWorld'];
@@ -849,7 +893,10 @@
             else if (type === 'Inferno') world.size = _roll1D() + 6;
             else if (type === 'BigWorld') world.size = _roll2D() + 7;
             else if (type === 'Worldlet') world.size = Math.max(0, _roll1D() - 3);
-            else if (['RadWorld', 'StormWorld'].includes(type)) world.size = _roll2D();
+            // T5's size overrides are specifically Worldlet/BigWorld/Stormworld (confirmed via
+            // Sean's Requirements Agent) — RadWorld was previously lumped in with Stormworld's
+            // 2D-exactly roll instead of falling to the standard 2D-2 below.
+            else if (type === 'StormWorld') world.size = _roll2D();
             else world.size = Math.max(1, _roll2D() - 2);
         }
 
@@ -860,6 +907,11 @@
             if (type === 'Inferno') {
                 world.atm = fromEHex('B');
             } else if (type === 'Belt') {
+                world.atm = 0;
+            } else if (sizeVal === 0) {
+                // T5 RAW: Size 0 always forces Atmosphere 0, regardless of Flux — a size-0
+                // Worldlet (its size roll floors at 0) was previously still able to roll a
+                // nonzero atmosphere from Flux alone.
                 world.atm = 0;
             } else if (world.atm === undefined) {
                 let dm = (type === 'StormWorld') ? 4 : 0;

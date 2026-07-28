@@ -345,8 +345,12 @@ const SystemEditor = (() => {
             const mwMoon = (b.moons || []).find(m => m.isMainworld);
             if (mwMoon) { mainworldRef = mwMoon._id; break; }
         }
+        // T5 stores its horizon value under `hzOrbit`, not the generic `hzco` every other
+        // engine uses (t5_topdown_generator.js's own sys.hzOrbit, also what system_viewer.js's
+        // T5 normalizer reads to draw the orrery ring) — fall back to it so reopening a T5
+        // system doesn't show a permanently blank/auto HZCO box despite a real resolved value.
         return { hexId, engine, allowAddBodies: false, mainworldRef, stars, bodies,
-                 age: raw.age ?? null, hzco: raw.hzco ?? null };
+                 age: raw.age ?? null, hzco: (raw.hzco ?? raw.hzOrbit) ?? null };
     }
 
     function _buildBlankWorkingCopy(hexId, engine, starSpec) {
@@ -1460,13 +1464,16 @@ const SystemEditor = (() => {
             }
 
             // UWP seed boxes — only for newly added terrestrial/mainworld bodies (no generated UWP yet).
-            // CT and MgT2E Planetoid Belts are also allowed in (starport/pop/gov/law/tl only — see
-            // seedKeys below): unlike a Gas Giant, a belt's population isn't forced to 0 in either
-            // engine (CT: rules/ct_data.js's FORCED_ZERO_POP.TYPES omits 'Planetoid Belt'; MgT2E:
-            // generateSubordinateSocial/mgt2e_socio_engine.js has no belt-type exclusion for pop/
-            // gov/law/starport/tl either), matching both editions' allowance for belt outposts/
-            // colonies — so its social digits are meaningful to seed in both.
-            const isEditableBelt = body.type === 'Belt' && (_workingCopy.engine === 'CT' || _workingCopy.engine === 'MgT2E');
+            // CT, MgT2E, and T5 Planetoid Belts are also allowed in (starport/pop/gov/law/tl only —
+            // see seedKeys below): unlike a Gas Giant, a belt's population isn't forced to 0 in any
+            // of the three (CT: rules/ct_data.js's FORCED_ZERO_POP.TYPES omits 'Planetoid Belt';
+            // MgT2E: generateSubordinateSocial/mgt2e_socio_engine.js has no belt-type exclusion for
+            // pop/gov/law/starport/tl either; T5: generateT5SubordinateUWP/t5_topdown_generator.js
+            // only forces size/atm/hydro to 0 for type==='Belt', pop/starport/gov/law/tl all roll
+            // normally), matching all three editions' allowance for belt outposts/colonies — so its
+            // social digits are meaningful to seed in all three.
+            const isEditableBelt = body.type === 'Belt' &&
+                (_workingCopy.engine === 'CT' || _workingCopy.engine === 'MgT2E' || _workingCopy.engine === 'T5');
             if (!body.uwp && body.type !== 'Gas Giant' && (body.type !== 'Belt' || isEditableBelt)) {
                 const seedSection = document.createElement('div');
                 Object.assign(seedSection.style, { marginTop: '4px', marginBottom: '3px' });
@@ -2426,8 +2433,22 @@ const SystemEditor = (() => {
     // only _generateAndCommit's caller-side flow refreshes the accordion; _regenerateBody
     // instead re-renders the editor tree directly) and are left to each caller.
     function _finalizeCommittedState(hexId, stateObj) {
-        const mwBody = _workingCopy.bodies.find(b => b._id === _workingCopy.mainworldRef)
+        let mwBody = _workingCopy.bodies.find(b => b._id === _workingCopy.mainworldRef)
             || _workingCopy.bodies.find(b => b.isMainworld);
+        if (!mwBody) {
+            // Mainworld may be a moon (lunar mainworld, e.g. T5's isLunarMainworld) rather than a
+            // top-level body — the search above only ever checked top-level bodies, so a lunar
+            // mainworld's real current name was silently never found here. stateObj.name then
+            // fell through to the `else if` below, which no-ops once stateObj.name is already
+            // set (from an earlier save) — freezing the exported/displayed system name at
+            // whatever it was before the mainworld became/was renamed as a moon, instead of
+            // tracking the current mainworld. Mirrors the same nested-moon lookup
+            // _buildWorkingCopyFromState already does when reading a system in.
+            for (const b of _workingCopy.bodies) {
+                const mwMoon = (b.moons || []).find(m => m._id === _workingCopy.mainworldRef || m.isMainworld);
+                if (mwMoon) { mwBody = mwMoon; break; }
+            }
+        }
         const mwName = mwBody && mwBody.name ? mwBody.name : null;
         if (mwName) {
             stateObj.name = mwName;
@@ -2529,7 +2550,10 @@ const SystemEditor = (() => {
                 if (wcStar.mao  == null && genStar.mao  != null) wcStar.mao  = genStar.mao;
             });
             if (_workingCopy.age  == null && newSys.age  != null) _workingCopy.age  = newSys.age;
-            if (_workingCopy.hzco == null && newSys.hzco != null) _workingCopy.hzco = newSys.hzco;
+            // newSys.hzco covers CT/MgT2E/RTT/AoW; T5's generator output names the same value
+            // hzOrbit instead (see the read-side fallback in _buildWorkingCopyFromState above).
+            const _genHzco = newSys.hzco ?? newSys.hzOrbit;
+            if (_workingCopy.hzco == null && _genHzco != null) _workingCopy.hzco = _genHzco;
 
             // Body/moon backfill (hillSpanPd, moon pd/pos/eccentricity/retrograde, moon-list
             // resort to match the generator's own order) is per-engine shape, same as

@@ -22,8 +22,9 @@
 // 2026-07-12: gained restoreManualFields(), moved here (also verbatim) from
 // system_editor.js's _restoreDisplayManualFields() — that was the one part of the 2026-07-11
 // adapter-file split that hadn't actually moved yet (still a per-engine if/else-if chain in
-// system_editor.js). See _ENGINE_ADAPTERS' comment block there. T5 has no backfillFromGenerated
-// — _preview() never had a T5 branch before this split either, so there's nothing to move.
+// system_editor.js). See _ENGINE_ADAPTERS' comment block there. T5 had no backfillFromGenerated
+// at all until later (see that method below) — _preview() never had a T5 branch before this
+// split either, so there was nothing to move at the time.
 // =============================================================================
 
 'use strict';
@@ -64,6 +65,18 @@
         if (raw.starport !== undefined) { fields.starport = raw.starport; mf.push('starport'); }
         if (raw.tl       !== undefined) { fields.tl       = raw.tl;       mf.push('tl'); }
         return { fields, mf };
+    }
+
+    // Mainworld-only trade-codes lock — a deliberate sibling to _t5UwpLockFor, not folded into it
+    // (see write()'s call site for why: _t5UwpLockFor's manual-fields list also feeds
+    // _t5BodySeed's subordinate/moon seeds, which never forward tradeCodes to the generator).
+    // _raw here is either an imported flat t5Data object or a previously generated mainworld's own
+    // _raw — either way, once a mainworld has passed through this editor, its trade codes are
+    // locked unless the user changes them, matching how every other UWP digit is already treated.
+    function _t5MainworldTradeCodesLock(mwBody) {
+        const raw = mwBody && mwBody._raw;
+        if (!raw || raw.tradeCodes === undefined) return null;
+        return raw.tradeCodes;
     }
 
     // Algorithm 7 (directives/project_manifest.md): elects a mainworld when the user hasn't
@@ -212,6 +225,33 @@
                     _raw: w,
                 });
             });
+
+            // OTU-imported systems (io_manager.js importT5Tab) store the mainworld as flat
+            // t5System.mainworld data but never place it into any star's orbits[].contents — flatWorlds
+            // above is built exclusively by walking that structure, so it's always empty for a fresh
+            // import. Synthesize one working-copy body from raw.mainworld here, in the exact shape the
+            // isMainworld branch above already produces, so it's indistinguishable from a normal
+            // mainworld to the rest of the editor. _t5UwpLockFor already reads body._raw.X for exactly
+            // this field set (starport/size/atm/hydro/pop/gov/law/tl) with zero changes needed.
+            // Skipped once any flatWorlds body is already flagged isMainworld — true for every non-import
+            // system, and true for an imported system that has already been through one Fill & Save since
+            // this fix shipped (its mainworld is then a real orbits[].contents entry).
+            if (raw.mainworld && !bodies.some(b => b.isMainworld)) {
+                const mw = raw.mainworld;
+                bodies.push({
+                    _id: SE().uid('body'), type: 'World', ggType: null,
+                    name: mw.name || '', uwp: mw.uwp || null,
+                    au: mw.au ?? (mw.orbitId != null ? SE().orbitIdToAU(mw.orbitId) : null),
+                    orbitId: mw.orbitId ?? null,
+                    travelZone: mw.travelZone || 'G',
+                    parentStarId: starIdByIdx(mw.parentStarIdx ?? 0),
+                    isMainworld: true,
+                    moons: [],
+                    _manualFields: mw._manualFields ? [...mw._manualFields] : [],
+                    _raw: mw,
+                });
+            }
+
             return bodies;
         },
 
@@ -225,6 +265,7 @@
             const isMoonMW    = !!mwMoon;
 
             const { fields: mwLock, mf: mwLockMF } = _t5UwpLockFor(mwBody || {});
+            const mwTradeCodes = _t5MainworldTradeCodesLock(mwBody);
 
             // OW-44 (directives/project_manifest.md): a brand-new mainworld (no prior .uwp) was
             // never actually generated at all — this used to fall back to a literal placeholder
@@ -274,6 +315,8 @@
                 parentBodyId:  isMoonMW ? ownerOfMoon._id : null,
                 parentStarIdx: isMoonMW ? (starIdxById[ownerOfMoon.parentStarId] ?? 0) : null,
                 ...mwLock,
+                ...(mwTradeCodes !== null ? { tradeCodes: mwTradeCodes } : {}),
+                _manualFields: [...mwLockMF, ...(mwTradeCodes !== null ? ['tradeCodes'] : [])],
                 ...(seeded ? {
                     worldType: seeded.worldType, starport: seeded.starport, size: seeded.size,
                     atm: seeded.atm, hydro: seeded.hydro, pop: seeded.pop,
@@ -337,6 +380,47 @@
                 (wcBody.moons || []).forEach(wcMoon => {
                     const genMoon = (genBody.satellites || []).find(m => m._id === wcMoon._id);
                     if (genMoon) genMoon._manualFields = wcMoon._manualFields ? [...wcMoon._manualFields] : [];
+                });
+            });
+        },
+
+        // Backfills each working-copy body/moon's rolled UWP digits (+ trade codes, mainworld
+        // only) into _raw right after every Preview. Without this, _t5UwpLockFor/
+        // _t5MainworldTradeCodesLock have nothing to lock onto for a body added and generated
+        // within the same editing session — _addBody seeds _raw as `{}`, which only ever gets
+        // real data from readBodies() after a Fill & Save + reopen round-trip — so every
+        // subsequent Preview, and the final Fill & Save itself, independently re-rolled that
+        // body's entire UWP from scratch (T5 had no backfillFromGenerated at all — see this
+        // file's header comment — so this was true for every newly added body's first editing
+        // session, not just the mainworld). Mirrors CT's identical fix (_ctEditorAdapter.js
+        // backfillFromGenerated), adapted to T5's shape: bodies live under
+        // newSys.stars[].orbits[].contents, moons under .satellites (not .moons). The
+        // mainworld — top-level or a moon — is already the SAME object reference
+        // generateT5System placed into that structure (t5_topdown_generator.js Phase 1), so no
+        // separate mainworld lookup/special-casing is needed beyond the isMainworld check that
+        // decides whether tradeCodes also gets backfilled.
+        backfillFromGenerated(wc, newSys) {
+            const genBodies = [];
+            (newSys.stars || []).forEach(star => (star.orbits || []).forEach(o => { if (o.contents) genBodies.push(o.contents); }));
+
+            const lockFields = ['worldType', 'size', 'atm', 'hydro', 'pop', 'gov', 'law', 'starport', 'tl'];
+            function backfill(wcObj, genObj, isMainworld) {
+                if (!genObj) return;
+                wcObj._raw = wcObj._raw || {};
+                lockFields.forEach(f => { if (genObj[f] !== undefined) wcObj._raw[f] = genObj[f]; });
+                // tradeCodes is only ever read back out of _raw for the mainworld
+                // (_t5MainworldTradeCodesLock) — see that function's comment for why subordinate
+                // bodies/moons deliberately don't get the same treatment (_t5BodySeed never
+                // forwards a tradeCodes field to the generator for them).
+                if (isMainworld && genObj.tradeCodes !== undefined) wcObj._raw.tradeCodes = genObj.tradeCodes;
+            }
+
+            wc.bodies.forEach(wcBody => {
+                const genBody = genBodies.find(b => b._id === wcBody._id);
+                backfill(wcBody, genBody, wcBody.isMainworld);
+                (wcBody.moons || []).forEach(wcMoon => {
+                    const genMoon = genBody && (genBody.satellites || []).find(m => m._id === wcMoon._id);
+                    backfill(wcMoon, genMoon, wcMoon.isMainworld);
                 });
             });
         },

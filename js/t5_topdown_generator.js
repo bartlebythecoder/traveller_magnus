@@ -443,11 +443,9 @@
         let mwTarget = (mainworldBase.orbitId != null)
             ? mainworldBase.orbitId
             : clampUWP(hzOrbit + hzResult.hzVariance, 0, 19);
-        sys.mainworld.climateZone = hzResult.climate;
-        if (hzResult.tradeCode) {
-            if (!sys.mainworld.tradeCodes) sys.mainworld.tradeCodes = [];
-            if (!sys.mainworld.tradeCodes.includes(hzResult.tradeCode)) sys.mainworld.tradeCodes.push(hzResult.tradeCode);
-        }
+        // Climate/trade-code assignment (Tr/Tu/Fr) is deliberately deferred until mwTarget holds
+        // its FINAL resolved value, after the satellite/standalone placement block below — see
+        // the comment down there for why.
 
         // Action 6.3: T5 Continuation Method - Handle Predefined Satellite Injection
         let isSatellite = mainworldBase.isPreMoon === true ||
@@ -553,6 +551,41 @@
             if (sys.mainworld.size === 0) sys.mainworld.worldType = 'Belt';
             mwTarget = findAvailableOrbit(primary, mwTarget);
             if (mwTarget >= 0) primary.orbits[mwTarget].contents = sys.mainworld;
+        }
+
+        // Climate/trade-code assignment (Tr/Tu/Fr), deferred until here so it reads mwTarget's
+        // FINAL resolved value — for a standalone mainworld that's its own orbit slot (line 552
+        // above); for a lunar mainworld it's the PARENT's slot (the moon's actual distance from
+        // the star is the parent's, not some pre-placement estimate), whether the parent was a
+        // pre-existing seeded body (mwTarget untouched since it was set from mainworldBase.orbitId
+        // — t5_editor_adapter.js's write() already threads the OWNER's orbitId through for a
+        // moon-mainworld) or freshly synthesized just above (mwTarget reassigned at line 546).
+        // Previously this ran BEFORE the satellite/standalone block even existed (right after
+        // hzOrbit was known), using an independent rollFlux() draw with no relationship to the
+        // body's actual final position — so moving a mainworld's orbit in the System Editor and
+        // hitting Preview several times could roll a *different* climate code each time, and
+        // since the old code only checked "is this exact code already present" before pushing,
+        // two mutually-exclusive codes (e.g. Tu and Tr — Cold vs Hot, only one can ever be true)
+        // could both end up in tradeCodes permanently. Recomputing deterministically from the
+        // actual final orbit-vs-HZ distance (same formula T5_World_Engine.calculateT5Climate
+        // already uses for subordinate worlds' climateZone: variance = orbit - hzOrbit, clamped
+        // to T5_Data.CLIMATE_MAPPING's -2..2 range) fixes both: it always matches wherever the
+        // body actually ends up, and stripping any prior Tr/Tu/Fr before adding the new one
+        // guarantees at most one is ever present. Runs unconditionally (not gated by
+        // _isManual(sys.mainworld,'tradeCodes')) — climate/trade-code here is meant to always
+        // track the body's real position, the same way an imported/locked mainworld's *other*
+        // trade codes stay untouched by every other step in this function; a locked mainworld's
+        // Tr/Tu/Fr can still shift on its first post-import Preview if the import didn't carry a
+        // real orbit slot (imports never do — see io_manager.js importT5Tab), same as any other
+        // freshly-placed body.
+        if (mwTarget >= 0) {
+            const climateMapping = (typeof T5_Data !== 'undefined' && T5_Data.CLIMATE_MAPPING) ? T5_Data.CLIMATE_MAPPING : {};
+            const climateVariance = clampUWP(mwTarget - hzOrbit, -2, 2);
+            sys.mainworld.climateZone = climateMapping[String(climateVariance)] || '';
+            const climateTradeCode = climateVariance === -1 ? 'Tr' : climateVariance === 1 ? 'Tu' : climateVariance === 2 ? 'Fr' : '';
+            if (!sys.mainworld.tradeCodes) sys.mainworld.tradeCodes = [];
+            sys.mainworld.tradeCodes = sys.mainworld.tradeCodes.filter(c => c !== 'Tr' && c !== 'Tu' && c !== 'Fr');
+            if (climateTradeCode) sys.mainworld.tradeCodes.push(climateTradeCode);
         }
 
         // Social and Inventory Flags for Mainworld

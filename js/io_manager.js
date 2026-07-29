@@ -1767,6 +1767,20 @@ function importT5Tab(fileContent, fileName, forcedSectorSlot = null, bulkMode = 
             t5System.orbits = [];
         }
 
+        // Mirror t5_topdown_generator.js's own `sys.mainworld = {...mainworldBase, type:'Mainworld'}`
+        // (generateT5System, ~line 359) so an imported system's t5System has the same shape the
+        // generator produces for a normally-generated system. t5Data's field names already match what
+        // the generator/editor expect — no renaming needed. Cloning tradeCodes (not referencing) keeps
+        // this array independent of t5Data.tradeCodes; without it, the generator's unconditional
+        // hz-climate trade-code push (t5_topdown_generator.js ~line 448-449) would mutate both in place.
+        t5System.mainworld = {
+            ...t5Data,
+            tradeCodes: [...(t5Data.tradeCodes || [])],
+            type: 'Mainworld',
+            isMainworld: true,
+            parentStarIdx: 0,
+        };
+
         const stateObj = {
             type: 'SYSTEM_PRESENT',
             name: name,

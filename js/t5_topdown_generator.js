@@ -454,17 +454,19 @@
             (mainworldBase.tradeCodes && (mainworldBase.tradeCodes.includes('Sa') || mainworldBase.tradeCodes.includes('Lk')));
 
         // Objective 1: Step B2 Intercept (Random Lunar Attachment for standard worlds)
+        // The 'Lk'/'Sa' pushes here are provisional — isMoon/isSatellite/isTidallyLocked aren't
+        // set on sys.mainworld yet at this point, so a full calculateT5TradeCodes recompute
+        // couldn't derive them correctly here even if we ran it now. The real recompute happens
+        // below (after the flags are set), which supersedes these; isTidallyLocked is recorded
+        // here so that later recompute can tell Close (Lk) apart from Far (Sa).
         if (!isSatellite && mainworldBase.isPreMoon !== false) {
             const lunarFlux = rollFlux();
             if (lunarFlux === -3) {
                 isSatellite = true;
-                if (!sys.mainworld.tradeCodes) sys.mainworld.tradeCodes = [];
-                if (!sys.mainworld.tradeCodes.includes('Lk')) sys.mainworld.tradeCodes.push('Lk');
+                sys.mainworld.isTidallyLocked = true;
                 tResult('Lunar Trigger', 'LOCKED SATELLITE (Lk)', 'T5 1.3: Orbit Allocation');
             } else if (lunarFlux <= -4) {
                 isSatellite = true;
-                if (!sys.mainworld.tradeCodes) sys.mainworld.tradeCodes = [];
-                if (!sys.mainworld.tradeCodes.includes('Sa')) sys.mainworld.tradeCodes.push('Sa');
                 tResult('Lunar Trigger', 'FAR SATELLITE (Sa)', 'T5 1.3: Orbit Allocation');
             }
         }
@@ -517,6 +519,18 @@
             sys.mainworld.isLunarMainworld = true;
             sys.mainworld.parentType = parent.type;
             sys.mainworld.parentBody = parent.type; // Needed for the T5 Biography Logger
+
+            // Recompute trade codes now that isMoon/isSatellite/isTidallyLocked are known — this
+            // is the ONLY place a manually-designated satellite mainworld (System Editor
+            // isPreMoon, as opposed to the random lunar-attachment roll above) ever gets a
+            // chance to pick up 'Sa'/'Lk'. generateT5Mainworld computed tradeCodes once already,
+            // long before the mainworld's satellite status was known, so a full recompute here
+            // (not just patching in Sa/Lk) also re-validates every other trade code against the
+            // now-final worldType/travelZone — mirrors MgT2E's own unconditional recompute at the
+            // end of its socioeconomic pass (mgt2e_socio_engine.js).
+            if (!_isManual(sys.mainworld, 'tradeCodes') && T5_World_Engine && T5_World_Engine.calculateT5TradeCodes) {
+                sys.mainworld.tradeCodes = T5_World_Engine.calculateT5TradeCodes(sys.mainworld);
+            }
 
             // SEAN PROTOCOL: Moon-Mainworld Selection Logging
             tResult('Mainworld Status', 'LUNAR SELECTION', 'T5 1.3: Orbit Allocation');

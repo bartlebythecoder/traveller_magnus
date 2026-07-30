@@ -233,10 +233,17 @@
             // isMainworld branch above already produces, so it's indistinguishable from a normal
             // mainworld to the rest of the editor. _t5UwpLockFor already reads body._raw.X for exactly
             // this field set (starport/size/atm/hydro/pop/gov/law/tl) with zero changes needed.
-            // Skipped once any flatWorlds body is already flagged isMainworld — true for every non-import
-            // system, and true for an imported system that has already been through one Fill & Save since
-            // this fix shipped (its mainworld is then a real orbits[].contents entry).
-            if (raw.mainworld && !bodies.some(b => b.isMainworld)) {
+            // Skipped once any flatWorlds body — or moon, e.g. a gas-giant-satellite mainworld the
+            // user deliberately re-designated — is already flagged isMainworld: true for every
+            // non-import system, and true for an imported system that has already been through one
+            // Fill & Save since this fix shipped (its mainworld is then a real orbits[].contents
+            // entry, top-level or nested). Checking only top-level bodies here (as this used to)
+            // never recognized a lunar mainworld as "already present," so raw.mainworld (still the
+            // stale pre-edit OTU data — nothing ever clears it) kept getting resynthesized as a
+            // second, duplicate top-level mainworld on every subsequent load after the user moved
+            // their mainworld onto a moon. Mirrors the same top-level-or-moon check system_editor.js
+            // already uses when identifying mainworldRef generically (~line 341-345).
+            if (raw.mainworld && !bodies.some(b => b.isMainworld || (b.moons || []).some(m => m.isMainworld))) {
                 const mw = raw.mainworld;
                 bodies.push({
                     _id: SE().uid('body'), type: 'World', ggType: null,

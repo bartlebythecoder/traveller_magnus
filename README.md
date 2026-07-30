@@ -1,4 +1,4 @@
-# As Above, So Below (v0.16.2.0)
+# As Above, So Below (v0.16.2.1)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -17,10 +17,13 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 - **Multi-Era Engine:** Toggle between **Classic Traveller (Book 6)**, **Mongoose Traveller (2nd Edition)**, **Traveller 5 (T5)**  and **RTT** expansion logic.
 - **Interstellar Connectivity:** Automatic generation of X-boat trade lanes based on world Importance {Ix} scores.
 - **Manual Routing:** Draw and color-code custom routes (Xboat, Trade, Secondary) directly on the hex map.
+- **Point-to-Point Route Builder:** Chart a route through any number of mandatory waypoints — reorder stops freely, see each one's name and hex ID, and have every route slot remember its setup so you can reopen and extend a route later instead of rebuilding it.
 - **TravellerMap XML Integration:** Import and export TravellerMap-format metadata XML files — load route networks from community sector files directly into your route manager, or export your routes for use with TravellerMap and other tools.
 - **Full TSV Export Fidelity:** Sector exports now correctly populate Ix, Ex, and Cx extension fields for Mongoose-generated worlds, using the engine's own computed socioeconomic values.
 - **Cluster Field:** A freeform Cluster field is available on every system — assign individually, bulk-assign via right-click, and filter by cluster name across all engines.
+- **Cross-Engine Stellar Filtering:** Filter worlds by star class, spectral type, and subtype across all five generation engines (Classic Traveller, Mongoose 2E, Traveller 5, RTT, and AoW).
 - **Full System Generation:** Dynamic stellar classification, gravity derivation, and automated moon/satellite inventory.
+- **Obsidian Export World Images:** Choose the projection used for exported world images — Globe (Hemispheres), Sinusoidal, Mercator, Mollweide, or Diamond.
 
 ## Usage
 1. **Launch the App:** Click the [Live Demo](https://bartlebythecoder.github.io/traveller_magnus/hex_map.html) link above.
@@ -62,7 +65,10 @@ Want to replace any of these sectors with your own file?
 ---
 ## 📜 Changelog
 
-### [v0.16.2.0] - In Progress
+### [v0.16.2.1] - In Progress
+1. **Filter:** The System Name filter now accepts multiple comma-separated names (e.g. "Sol, Ara") and shows any system matching at least one of them, instead of only matching a single literal string; matching is now "contains" rather than "starts with"
+
+### [v0.16.2.0] - 2026-07-30
 1. **System Editor:** Refactored the internal logic that tracks which fields a user has manually edited (star spectral type/class, mainworld flag, orbit position, derived stellar properties, UWP seed digits, moon orbit distance) onto the app's existing shared tracking mechanism instead of 29 separate copies of the same logic scattered across the file — internal cleanup, no behavior change
 2. **System Editor:** Consolidated duplicated mainworld-name-preservation and system-commit logic shared by the "↻ Regenerate this body" button and the main Preview/Fill & Save path into one shared internal function — internal cleanup, no behavior change
 3. **System Editor:** Hoisted a duplicated companion-star default-orbit lookup table into a single shared constant — internal cleanup, no behavior change

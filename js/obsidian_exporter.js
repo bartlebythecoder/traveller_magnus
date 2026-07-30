@@ -8,8 +8,9 @@
 // Entry point: ObsidianExporter.startExport(sectorNum, subsectorChar, options)
 // options: { includeImages, skipAirless, includeSystemImages,
 //            onProgress(done,total,msg), onDone(fileCount), onError(msg) }
-// includeSystemImages: true → captures a PNG orrery per system hub page AND
-//                             a PNG hex-map snapshot for the subsector index page.
+// includeSystemImages: true → captures a PNG orrery per system hub page.
+// The subsector index page's hex-map snapshot is always captured, independent
+// of includeSystemImages.
 // =============================================================================
 
 const ObsidianExporter = (() => {
@@ -1025,7 +1026,7 @@ const ObsidianExporter = (() => {
         return atm === 0 && hyd === 0;
     }
 
-    async function _renderWorldImage(worldData, seedHexId) {
+    async function _renderWorldImage(worldData, seedHexId, projection) {
         if (!_canRenderImage(worldData)) return null;
         if (typeof PlanetRenderer === 'undefined') return null;
 
@@ -1042,13 +1043,18 @@ const ObsidianExporter = (() => {
             hydrographics: hyd,
             temperature:   tempBand,
             temperatureK:  tempK,
+            size:          worldData.size ?? 0,
             uwp,
         };
 
-        const canvas  = document.createElement('canvas');
-        canvas.height = 300;
-        canvas.width  = 700;
-        PlanetRenderer.renderPlanetHemispheres(canvas, rendererData, seedHexId);
+        const canvas = document.createElement('canvas');
+        if (!projection || projection === 'globe') {
+            canvas.height = 300;
+            canvas.width  = 700;
+            PlanetRenderer.renderPlanetHemispheres(canvas, rendererData, seedHexId);
+        } else {
+            PlanetRenderer.renderFlatMap(canvas, rendererData, seedHexId, { projection });
+        }
 
         return new Promise(resolve => {
             canvas.toBlob(blob => {
@@ -1061,7 +1067,7 @@ const ObsidianExporter = (() => {
     // ── Export orchestrator ───────────────────────────────────────────────────
 
     async function startExport(sectorNum, subsectorChar, options) {
-        const { includeImages, skipAirless, includeSystemImages, useSubfolders, onProgress, onDone, onError } = options || {};
+        const { includeImages, imageProjection, skipAirless, includeSystemImages, useSubfolders, onProgress, onDone, onError } = options || {};
 
         const report = (done, total, msg) => onProgress && onProgress(done, total, msg);
 
@@ -1086,9 +1092,11 @@ const ObsidianExporter = (() => {
         const prefix        = useSubfolders ? `Subsector ${subsectorChar}/` : '';
         const subsectorLink = `[[${_sanitize(sectorName)} - Subsector ${subsectorChar}]]`;
 
-        // Optional subsector map image embedded in the index page
+        // Subsector map image embedded in the index page — independent of the
+        // "Include system orrery images" setting, which only controls per-system
+        // orrery snapshots.
         let mapImageFilename = null;
-        if (includeSystemImages && typeof captureSubsector !== 'undefined') {
+        if (typeof captureSubsector !== 'undefined') {
             report(0, systems.length, 'Capturing subsector map image…');
             const mapPng = await captureSubsector(sectorNum, subsectorChar, 900, 1000);
             if (mapPng) {
@@ -1169,7 +1177,7 @@ const ObsidianExporter = (() => {
                 const wantImage = includeImages && _canRenderImage(world) &&
                                   !(skipAirless && _isAirless(world));
                 if (wantImage) {
-                    const imgData = await _renderWorldImage(world, `${hexId}-w${wi}`);
+                    const imgData = await _renderWorldImage(world, `${hexId}-w${wi}`, imageProjection);
                     if (imgData) {
                         imageFilename = _bodyFilename(systemName, worldName, hexCode, 'png');
                         files.push({ name: prefix + 'images/' + imageFilename, data: imgData });
@@ -1191,7 +1199,7 @@ const ObsidianExporter = (() => {
                     const wantMoonImage = includeImages && _canRenderImage(moon) &&
                                          !(skipAirless && _isAirless(moon));
                     if (wantMoonImage) {
-                        const imgData = await _renderWorldImage(moon, `${hexId}-w${wi}-m${mi}`);
+                        const imgData = await _renderWorldImage(moon, `${hexId}-w${wi}-m${mi}`, imageProjection);
                         if (imgData) {
                             moonImageFilename = `${_sanitize(systemName)} - ${_sanitize(worldName)} - ${_sanitize(moonName)} (${hexCode}).png`;
                             files.push({ name: prefix + 'images/' + moonImageFilename, data: imgData });
@@ -1210,15 +1218,11 @@ const ObsidianExporter = (() => {
         report(systems.length, systems.length, 'Building ZIP…');
 
         const zipData = _buildZip(files);
-        const blob    = new Blob([zipData], { type: 'application/zip' });
-        const url     = URL.createObjectURL(blob);
-        const a       = document.createElement('a');
-        a.href        = url;
-        a.download    = `${_sanitize(sectorName)}_Subsector_${subsectorChar}_Wiki.zip`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        downloadBlob(
+            zipData,
+            `${_sanitize(sectorName)}_Subsector_${subsectorChar}_Wiki.zip`,
+            'application/zip'
+        );
 
         onDone && onDone(files.length);
     }

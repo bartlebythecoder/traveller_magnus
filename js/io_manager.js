@@ -17,18 +17,11 @@ function downloadBatchLog(actionName, hexCount) {
     const fileName = `${timestamp}_${actionName}_${hexCount}_Hexes.txt`;
     const content = window.batchLogData.join('\n');
 
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const ok = downloadBlob(content, fileName, 'text/plain;charset=utf-8');
 
-    // Clear memory
-    window.batchLogData = [];
+    // Clear memory — but only once the download was actually handed off, so a
+    // failure doesn't discard the only copy of the log with no way to re-export.
+    if (ok) window.batchLogData = [];
 }
 
 // Save thresholds (in JSON string character count, which approximates UTF-8 bytes for ASCII JSON)
@@ -45,17 +38,50 @@ function readFileAsText(file) {
     });
 }
 
-/** Trigger a single blob download. */
+/**
+ * Trigger a browser download for in-memory content. Single entry point for every
+ * download in the app — keep it that way rather than re-inlining this pattern.
+ *
+ * Cleanup is deferred deliberately: revoking the blob URL (or detaching the
+ * anchor) in the same tick as click() can abort the download before the browser
+ * has finished reading the blob. This was reproduced as intermittent total
+ * failure on a 170-byte CSV, and the risk scales with payload size — the chunked
+ * save path below writes blobs of up to 250 MB.
+ *
+ * @param   {string|BufferSource} content   Blob body.
+ * @param   {string}              filename  Suggested download name.
+ * @param   {string}              [mimeType]
+ * @returns {boolean} true if the download was handed off to the browser. Note
+ *          this cannot confirm the file actually landed — the browser gives no
+ *          such signal for anchor-triggered downloads.
+ */
+function downloadBlob(content, filename, mimeType = 'application/octet-stream') {
+    let url = null;
+    try {
+        const blob = new Blob([content], { type: mimeType });
+        url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href     = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+
+        setTimeout(() => {
+            if (a.parentNode) a.parentNode.removeChild(a);
+            URL.revokeObjectURL(url);
+        }, 1000);
+        return true;
+    } catch (err) {
+        console.error(`[Download] Failed to trigger "${filename}":`, err);
+        if (url) { try { URL.revokeObjectURL(url); } catch (_) {} }
+        return false;
+    }
+}
+window.downloadBlob = downloadBlob;
+
+/** Trigger a single JSON blob download. */
 function triggerDownload(content, filename) {
-    const blob = new Blob([content], { type: 'application/json' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    return downloadBlob(content, filename, 'application/json');
 }
 
 function setupSaveLoad() {
@@ -152,6 +178,9 @@ function setupSaveLoad() {
                 );
                 if (!confirmed) return;
 
+                let sentParts = 0;
+                const failedParts = [];
+
                 for (let i = 0; i < numChunks; i++) {
                     const chunkEntries = entries.slice(i * perChunk, (i + 1) * perChunk);
                     const chunkObj = {
@@ -176,17 +205,33 @@ function setupSaveLoad() {
                         chunkObj.regionPaths             = Array.from((window.regionPaths || new Map()).entries());
                     }
 
-                    triggerDownload(
+                    const ok = triggerDownload(
                         JSON.stringify(chunkObj),
                         `traveller_map_Part${i + 1}of${numChunks}.json`
                     );
+                    if (ok) sentParts++; else failedParts.push(i + 1);
 
                     // Brief pause so the browser doesn't suppress sequential downloads
                     if (i < numChunks - 1) await new Promise(r => setTimeout(r, 400));
                 }
 
-                if (typeof showToast === 'function') {
-                    showToast(`Saved in ${numChunks} parts. Select all files together when loading.`, 6000);
+                // Report what actually happened. Every part is required to reload,
+                // so a silently dropped chunk would otherwise surface only on a
+                // failed load, long after the in-browser copy might be gone.
+                if (failedParts.length > 0) {
+                    console.error('[Save] Chunk write failed for parts:', failedParts);
+                    alert(
+                        `Save incomplete — ${failedParts.length} of ${numChunks} parts could not be written ` +
+                        `(part${failedParts.length > 1 ? 's' : ''} ${failedParts.join(', ')}).\n\n` +
+                        `All ${numChunks} parts are required to reload this map, so this save cannot be used ` +
+                        `as-is. Please try saving again.`
+                    );
+                } else if (typeof showToast === 'function') {
+                    showToast(
+                        `Sent ${sentParts} parts to your browser. Confirm all ${sentParts} files are present ` +
+                        `in your downloads — every part is required to reload this map.`,
+                        8000
+                    );
                 }
             }
         } catch (err) {
@@ -806,6 +851,8 @@ function setupObsidianExport() {
     const sectorSel    = document.getElementById('obs-sector-select');
     const subsectorSel = document.getElementById('obs-subsector-select');
     const incImages          = document.getElementById('obs-include-images');
+    const projectionRow      = document.getElementById('obs-image-projection-row');
+    const projectionSel      = document.getElementById('obs-image-projection');
     const skipAirlessRow     = document.getElementById('obs-skip-airless-row');
     const skipAirlessChk     = document.getElementById('obs-skip-airless');
     const incSystemImages    = document.getElementById('obs-include-system-images');
@@ -851,6 +898,7 @@ function setupObsidianExport() {
 
     incImages.addEventListener('change', () => {
         if (skipAirlessRow) skipAirlessRow.style.display = incImages.checked ? 'flex' : 'none';
+        if (projectionRow)  projectionRow.style.display  = incImages.checked ? 'block' : 'none';
     });
 
     openBtn.addEventListener('click', () => {
@@ -882,6 +930,7 @@ function setupObsidianExport() {
         const sectorNum     = parseInt(sectorSel.value);
         const subsectorChar = subsectorSel.value;
         const includeImages       = !!(incImages       && incImages.checked);
+        const imageProjection     = (projectionSel && projectionSel.value) || 'globe';
         const skipAirless         = includeImages && !!(skipAirlessChk  && skipAirlessChk.checked);
         const includeSystemImages = !!(incSystemImages && incSystemImages.checked);
         const useSubfolders       = !!(useSubfoldersChk && useSubfoldersChk.checked);
@@ -895,6 +944,7 @@ function setupObsidianExport() {
         try {
             await ObsidianExporter.startExport(sectorNum, subsectorChar, {
                 includeImages,
+                imageProjection,
                 skipAirless,
                 includeSystemImages,
                 useSubfolders,
@@ -998,15 +1048,7 @@ function exportRoutesToXML(sectorID) {
     xmlLines.push('</Routes>');
     xmlLines.push('</Sector>');
     const content = xmlLines.join('\n');
-    const blob = new Blob([content], { type: 'text/xml;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Sector_${sectorID}_Routes.xml`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    downloadBlob(content, `Sector_${sectorID}_Routes.xml`, 'text/xml;charset=utf-8');
 }
 
 /**
@@ -1276,15 +1318,7 @@ function exportMetadataXml(sectorID) {
     xmlLines.push('</Sector>');
 
     const content = xmlLines.join('\n');
-    const blob    = new Blob([content], { type: 'text/xml;charset=utf-8' });
-    const url     = URL.createObjectURL(blob);
-    const link    = document.createElement('a');
-    link.href     = url;
-    link.download = `Sector_${sectorID}_Metadata.xml`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    downloadBlob(content, `Sector_${sectorID}_Metadata.xml`, 'text/xml;charset=utf-8');
 
     const parts = [];
     if (routeLines.length > 0) parts.push(`${routeLines.length} route(s)`);
@@ -1430,15 +1464,7 @@ function generateT5TabData(sectorID) {
     });
 
     const content = lines.join('\n');
-    const blob = new Blob([content], { type: 'text/tab-separated-values;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Sector_${sectorID}.tab`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    downloadBlob(content, `Sector_${sectorID}.tab`, 'text/tab-separated-values;charset=utf-8');
 }
 
 /**

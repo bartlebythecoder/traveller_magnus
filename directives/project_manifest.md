@@ -1,5 +1,5 @@
 # PROJECT AS ABOVE, SO BELOW - Feature Manifest
-**Version:** 0.16.2.0 (in progress)
+**Version:** 0.16.2.1 (in progress)
 **Target:** 
 **Architecture Standard:** The "Sean Protocol" (Directives -> Orchestration -> Execution)
 
@@ -1391,6 +1391,94 @@ Sean noticed that right after adding a Gas Giant with moons in the System Editor
 **Verified:** `node --check js/system_viewer.js` passes. Not yet re-tested in-browser by Sean.
 
 *Spec ref: Sean-reported 2026-07-24, same session as OW-59, following up on OW-56's fix in the same function.*
+
+**OW-61 — ✅ CLOSED 2026-07-30 (user-reported via Sean; heavy Point-to-Point user building routes with 18+ waypoints): the P2P waypoint builder was unusable at scale — list clipped, no memory, hex-only labels, no reordering**
+
+Four separate defects in the Route Manager's Point-to-Point automation panel, all surfaced by one user who builds far longer waypoint chains than the UI was designed for.
+
+1. **List clipped around the 18th waypoint.** Not a waypoint limit — `hex_map.html`'s `.route-auto-option.open .route-auto-config` caps the accordion body at `max-height: 600px; overflow: hidden`. Rows past the pixel ceiling were still created and still generated, but could not be seen or reached. Fixed by giving `#route-auto-p2p-waypoints-list` its own `max-height: 260px; overflow-y: auto`. The accordion cap was deliberately left alone (Sean's call) since it is shared by all four automation types. **Knock-on that had to be solved first:** `.wac-dropdown` was `position: absolute` inside each row, so a scroll container would have clipped the autocomplete — the very control used to enter waypoints. It is now `position: fixed` with JS positioning (`_wacPositionDropdown` in `ui_menus.js`, including flip-up near the viewport bottom) and **one shared** scroll/resize listener rather than a pair per input, which would leak with 25 rows.
+
+2. **No memory of an existing setup.** `openRouteAutoPanel` deliberately wiped everything on open (unchecked radios, overwrote start/end from hex selection, `wpList.innerHTML = ''`), so reopening a configured route to add one waypoint meant retyping all of them. Now snapshotted to `routeDefinitions[].automationRef` — the previously unused placeholder field — on each successful generate, for **all four** automation types, and restored by `_restoreAutomationConfig`. No save/load plumbing was needed: `routeDefinitions` is persisted wholesale (structured-cloned to IndexedDB, `JSON.stringify`d into the sector JSON), so extra fields round-trip untouched. Worlds are stored as resolved hex IDs, not raw field text, so a later rename still restores and re-renders with the current name. Saved config intentionally wins over the hex-selection prefill.
+
+3. **Rows showed bare hex IDs.** The autocomplete did `inputEl.value = m.hexId`, discarding the name the user had just typed. Now fills `Name (hexId)` via `formatWorldLabel`; `resolveWorldInput` parses the suffix and **prefers the explicit hex ID over the name**, since names can duplicate across a sector. Bare name and bare hex ID entry both still work.
+
+4. **No reordering.** `addWaypointRow` only appended. Added ▲/▼ controls plus position badges, with `renumberWaypoints` disabling them at the ends.
+
+**Fix:** `js/ui_menus.js`, `hex_map.html`. One self-inflicted bug caught during the work: `addWaypointRow` was wired as `addEventListener('click', addWaypointRow)`, so once it gained a `prefillValue` parameter the click Event would have been assigned as the field's value — now wrapped in an arrow function.
+
+**Verified:** in-browser Playwright. 25 rows scroll with the last reachable; `elementFromPoint` confirms the dropdown paints *outside* the scroll box and is genuinely hittable; `collectWaypointRaws()` (what actually feeds `generatePointToPointRoute`) reflects the new order after a move; config survives a JSON round-trip; a slot with no saved config still resets cleanly; `maxBTN: null` ("no cap") restores as a blank field, not the string "null". Zero console errors.
+
+*Spec ref: user-reported via Sean, 2026-07-30.*
+
+**OW-62 — ✅ CLOSED 2026-07-30 (user-reported "extremely flaky" route CSV export; investigation widened to every download in the app)**
+
+The user reported that the Route Manager's CSV export "downloaded to my downloads folder, but it is extremely flaky — I had to do multiple tries after opening and closing it," and separately that nothing told them where the file went.
+
+**Root cause:** `exportRouteSystemsCSV` called `URL.revokeObjectURL(url)` synchronously right after `a.click()`, which can abort the download before the browser has finished reading the blob. Reproduced as intermittent total failure on a **170-byte** file. A second, independent defect: the export icon was double-wired — `addEventListener` in `renderRouteWindow` **and** `.onclick` in `refreshRouteWindowCounts` — so one click opened the modal twice, the second call cloning away the Download button the first had just wired. Both fixed; the render path now uses `.onclick` so it cannot stack.
+
+**Widened scope — the same pattern existed at seven other sites**, and the risk scales with payload size:
+- **The chunked (multi-part) save was the worst.** It loops `triggerDownload` over blobs of **up to 250 MB**. Line 184 already carried the comment *"Brief pause so the browser doesn't suppress sequential downloads"* — someone had previously hit failures here and patched the *rate* (a 400 ms gap) without touching the revoke. A dropped chunk produced an incomplete set while still reporting `Saved in N parts`. Mitigating factor: the **load** path is already defensive (validates `saveType`/`totalParts`, detects count mismatch and missing parts), so the failure surfaces at load with a clear message rather than as silent corruption. The gap was purely save-time reporting.
+- `downloadBatchLog` also **destroyed its own source** — `window.batchLogData = []` ran regardless of outcome, leaving no way to re-export a failed log.
+
+**Fix:** one shared `downloadBlob(content, filename, mimeType)` in `js/io_manager.js` with deferred cleanup and a boolean return; all **eight** call sites now route through it (sector JSON, chunked save, batch log, routes XML, metadata XML, `.tab`, Obsidian ZIP, filter rules, route CSV). `triggerDownload` survives as a thin JSON wrapper so its three existing callers were untouched. `filter_engine.js`'s copy was migrated too even though it was already correct — the duplication *is* the defect, and eight copies is why this recurred. Batch log now clears only on successful handoff. Chunked save counts per-part outcomes and warns explicitly naming failed parts instead of always claiming success. **Deliberately not overstated:** the helper's doc comment records that it *cannot* confirm a file actually landed — browsers give no such signal for anchor-triggered downloads — so it only reports what was successfully handed off, and the user-facing message asks them to confirm all parts are present.
+
+Also added (user request): the export modal now names the target file, and a toast reports filename and world count.
+
+**Verified:** in-browser Playwright — five consecutive exports all produced identical 170-byte files; anchor cleanup confirmed deferred and non-leaking (1 → 2 → 0); batch log cleared on success and **preserved on simulated failure**; failure path returns `false` without throwing. **Not verified:** an actual 250 MB chunked save — impractical to test here. The branch was read back for scoping correctness and its failure reporting exercised against a simulated `createObjectURL` throw, but the real large-map path is untested and worth a manual run.
+
+*Spec ref: user-reported via Sean, 2026-07-30.*
+
+**OW-63 — ✅ CLOSED 2026-07-30 (user-reported as "stellar types select no worlds"; the real scope was far wider than reported): the Stellar Info filter matched nothing at all in CT, T5, and RTT sectors — three of the five engines**
+
+⚠️ **Architectural note worth reading before touching any code that reads star fields.** The five engines record the same three star properties under **different property names**:
+
+| Engine | Spectral type | Luminosity class | Subtype |
+|---|---|---|---|
+| MgT2E | `sType` | `sClass` | `subType` |
+| AoW | `sType` | `sClass` | `subType` |
+| **CT** | `type` | `size` | `decimal` |
+| **T5** | `type` | `size` | `decimal` |
+| **RTT** | `type` | `luminosityClass` | *(none)* |
+
+`matchesStellarFilter` read only `sType`/`sClass`/`subType`, so on CT/T5/RTT systems every one of those was `undefined` and **every world failed silently, with no error** — including the Subtype field, which was broken the same way. This also explains why it read as *default* behaviour: `scanForConditionalFields` gates the section on `sys.stars.length > 0`, which is engine-agnostic, so the controls appeared for CT/T5/RTT worlds and then matched nothing.
+
+The naming is misleading but the meaning is certain — CT parses `size` as `parts[1] || 'V'` (the luminosity class) and T5 renders star names as `` `${type}${decimal} ${size}` `` → "G2 V". The stored **values** already agree with the dropdown options (`O..M`/`D`/`BD`, and `V/IV/III/II/Ib/Ia/VI`), so this was purely field resolution — no value remapping involved.
+
+**Fix:** read-time resolvers `_starSpectralType` / `_starLuminosityClass` / `_starSubtype` in `js/filter_engine.js` only. Per Sean's explicit choice, **no engine and no `rules/` file was touched** — the alternative (normalising the engines to a shared shape) would have risked every downstream consumer (`system_viewer`, `obsidian_exporter`, the editors, the auditors). The table above is reproduced as a comment at the fix site.
+
+**Verified:** in-browser Playwright with one G2 V world per engine in that engine's real star shape. All five now match by type and by class; CT/T5/MgT2E/AoW match by subtype; RTT correctly returns `false` for subtype (its stars carry none, and the documented contract is "no data never matches"); negative controls (an M star, and subtype 7) correctly excluded.
+
+⚠️ **Not audited:** how many *other* features read `star.sType`/`star.sClass` directly and are therefore silently wrong for CT/T5/RTT. Sean chose the contained filter-only fix; a wider audit of those call sites remains open and is probably worth doing.
+
+*Spec ref: user-reported via Sean, 2026-07-30.*
+
+**OW-64 — ✅ CLOSED 2026-07-30 (user-reported: "I somehow screwed something up and now no longer see stellar types ... I had to clear the canvas and reload the map to get them to reappear")**
+
+Two coupled problems, the second considerably more serious than the reported one.
+
+**Reported:** `scanForConditionalFields` has exactly **one** call site — inside `toggleFilterModal`'s *opening* branch — so conditional sections are only re-evaluated when the modal is opened. Nothing re-scans when `hexStates` changes. If the scan ran while the sector had no star data, `#filter-stellar-section` was set `display: none` and stayed hidden until a close/reopen with data present. Generating systems while the filter is open also left it hidden.
+
+**Found while investigating, and worse:** hiding a section **never cleared its inputs** (unlike `clearFilterInputs`, which does), and `applyActiveFilters` harvests every input **unconditionally, with no visibility check**. So a hidden section could still hold live selections that were actively filtering — section hides → selections survive → `hasStellarFilter` stays true → every world runs through `matchesStellarFilter` → no star data → `false` → **the entire sector excluded, with the control causing it invisible.**
+
+**Fix (`js/filter_engine.js`):** the Stellar Info section is now **never hidden** — when the sector has no star data it stays visible but disabled, dimmed, with an amber note placed after the accordion header so it reads even while collapsed. Its inputs are cleared when unavailable. The same clear-on-hide treatment was extended to the six conditional numeric fields (T5 Ix, Mgt Importance, WTN, GWP, Gravity, Temperature), which had the identical trap — those remain hidden as before (no UI clutter added), but can no longer strand a live value. If anything was cleared, `applyActiveFilters()` is re-run so the stale exclusion lifts immediately rather than persisting until the user happens to touch a control.
+
+**Rejected approach, and why:** the obvious fix — re-scanning on data-change hooks — was costed and declined. It would mean ~35 hook sites (mirroring the existing `reapplyAllRules()` convention), the scan always walks all of `hexStates` (its early-exit is a `return` inside a `forEach`, which continues rather than breaks) so per-hex hooking would be O(n²), it would not fix discoverability at all, and it would *increase* exposure to the invisible-filter trap by creating more opportunities to hide a populated section. Fixing the destructive hide addresses the actual user-visible confusion in one function.
+
+**Verified:** in-browser Playwright, four cases — no star data (section visible, noted, disabled, inputs cleared); the trap reproduced end-to-end (stale stellar *and* gravity criteria cleared, 0 of 2 worlds left wrongly hidden); data restored (note hidden, controls re-enabled); filtering still correct when enabled. Zero console errors.
+
+*Spec ref: user-reported via Sean, 2026-07-30.*
+
+**OW-65 — 🟡 OPEN / DEFERRED 2026-07-30 (three items deliberately parked pending evidence — do not restart these without new information)**
+
+1. **Filter state appears stale across sessions — awaiting user retest.** Reported as "it holds filter rules across sessions, and you have to change something in the filter to get things to populate." **Could not reproduce.** The obvious hypothesis (browser form-restoration on reload leaving criteria displayed but unapplied) was tested and ruled out — headless Chromium did not restore the multi-select on `page.reload()`. Note the term is ambiguous between two subsystems: the transient filter **bar** (pure DOM, no persistence) and the **Rules Ledger** `window.activeFilterRules` (persisted by design into the sector JSON, reapplied via `reapplyAllRules()` on load). **Strong likelihood this was OW-64's invisible-criterion trap all along** — "you have to change something to get things to populate" is exactly what a stale hidden criterion produces. Parked for the reporting user to retest against the OW-64 build before any further work.
+
+2. **File System Access API for saves — deferred.** Would replace anchor downloads with `showDirectoryPicker` for the chunked path, upgrading OW-62's honest-but-hedged reporting to real write confirmation (`await writable.close()` resolving means bytes landed). **Key design constraint if this is ever built:** `showSaveFilePicker` requires transient user activation, consumed by the first call — so N pickers for N chunks is *not* viable; it must be one `showDirectoryPicker` plus N writes through that handle. Verified that both APIs exist and `isSecureContext` is true on **both** `file://` and localhost in Chromium. Chromium-only, so the anchor fallback would be **permanent** — every FSA feature is two code paths forever, which is a high bar. Also unresolved: writing into a chosen directory silently overwrites same-named files, where the anchor path produces `(1)` suffixes. Playwright cannot drive native dialogs, so this needs manual verification. **Revisit trigger:** a user actually hitting the >250 MB chunked path.
+
+3. **`JSON.stringify` size ceiling — deferred, but higher priority than item 2 if it ever bites.** `io_manager.js` builds the *entire* map as one string purely to compare its length against `SAVE_CHUNK_THRESHOLD`. V8 caps strings near ~512 M chars, so a large enough map throws `RangeError` **before** chunking can help — the feature that exists to handle huge maps is gated behind an operation huge maps break. Affects **all browsers**; a hard failure, not degraded reporting. **Symptom to recognise:** save silently does nothing on a very large map, console shows `RangeError: Invalid string length`. **Fix does not need FSA:** `new Blob([...])` accepts an **array** of parts and concatenates internally, so serialise in fragments, size-check by summing fragment lengths (or reading `blob.size`), and hand the array to `new Blob(fragments)` — one code path, every browser. Needs its own design pass to preserve the exact save format for backward compatibility.
+
+**The one question that settles items 2 and 3 at zero cost:** ask the heavy user whether they have ever seen the *"your map is approximately N MB — it will be saved in N parts"* prompt, and how large their `traveller_map.json` actually is. Under ~250 MB, both stay parked indefinitely.
+
+*Spec ref: Sean's explicit direction 2026-07-30 — "leave this until more users try it."*
 
 **OW-20 — ✅ CLOSED 2026-07-12 (found and fixed same day, Sean-reported): a CT Captured Planet's name and moons weren't round-tripping through the System Editor, and its orbit field misleadingly read "auto"**
 

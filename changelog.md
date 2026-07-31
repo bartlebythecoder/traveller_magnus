@@ -1,4 +1,4 @@
-### [v0.16.2.1] - In Progress
+### [v0.16.2.1] - 2026-07-31
 1. **Filter:** The System Name filter now accepts multiple comma-separated names (e.g. "Sol, Ara") and shows any system matching at least one of them, instead of only matching a single literal string; matching is now "contains" rather than "starts with"
 2. **Obsidian Exporter:** World images can now be exported using a flat-map projection (Sinusoidal, Mercator, Mollweide, or Diamond) in addition to the existing Globe (Hemispheres) view, selectable from a new dropdown that appears when "Include world images" is checked
 3. **Obsidian Exporter:** Fixed a bug where unchecking "Include system orrery images" also silently removed the subsector map image from the subsector index page, even though that image has nothing to do with per-system orrery snapshots; the subsector map image is now always included

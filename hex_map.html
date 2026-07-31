@@ -505,10 +505,10 @@
         }
         .wac-dropdown {
             display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            min-width: 100%;
+            /* Fixed (not absolute) so the dropdown is never clipped by a
+               scrollable ancestor such as the waypoint list. Its top/left/width
+               are set in JS from the input's bounding rect. */
+            position: fixed;
             background: #0d1117;
             border: 1px solid #45a29e;
             border-top: none;
@@ -540,7 +540,25 @@
             cursor: pointer; padding: 0 4px; line-height: 1; flex-shrink: 0;
         }
         .p2p-waypoint-remove:hover { color: #ff6b6b; }
+        .p2p-waypoint-index {
+            font-size: 0.72rem; color: #45a29e; font-family: 'Courier New', monospace;
+            min-width: 22px; text-align: right; flex-shrink: 0;
+        }
+        .p2p-waypoint-move {
+            background: none; border: none; color: #45a29e; font-size: 0.6rem;
+            cursor: pointer; padding: 0 2px; line-height: 1; flex-shrink: 0;
+        }
+        .p2p-waypoint-move:hover:not(:disabled) { color: #66fcf1; }
+        .p2p-waypoint-move:disabled { color: #2a3a3a; cursor: default; }
         #route-auto-p2p-waypoints-section { margin: 2px 0 4px; }
+        /* Long waypoint lists scroll here rather than being clipped by the
+           .route-auto-config accordion cap. */
+        #route-auto-p2p-waypoints-list {
+            max-height: 260px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 2px;
+        }
         #route-auto-p2p-waypoints-label {
             font-size: 0.72rem; color: #45a29e; margin-bottom: 4px; letter-spacing: 0.03em;
         }
@@ -739,9 +757,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above<br> So Below</span></h1>
-            <div class="splash-banner">New This Version: Full System Editor</div>
+            <div class="splash-banner">New: Edit T5 Systems</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.16.1.0</div>
+            <div class="splash-version">v0.16.2.1</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -1222,7 +1240,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.16.1.0</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.16.2.1</span>
             </p>
         </div>
 
@@ -1402,8 +1420,8 @@
                 <label style="color: #c5c6c7; cursor: pointer; display: flex; align-items: center; gap: 10px;">
                     <input type="radio" name="se-engine-choice" value="CT"> Classic Traveller (CT)
                 </label>
-                <label style="color: #6b6f73; cursor: not-allowed; display: flex; align-items: center; gap: 10px;" title="Not yet available in the System Editor">
-                    <input type="radio" name="se-engine-choice" value="T5" disabled> Traveller 5 (T5) <span style="font-size: 0.75rem; color: #45a29e;">(coming soon)</span>
+                <label style="color: #c5c6c7; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                    <input type="radio" name="se-engine-choice" value="T5"> Traveller 5 (T5)
                 </label>
                 <label style="color: #6b6f73; cursor: not-allowed; display: flex; align-items: center; gap: 10px;" title="Not yet available in the System Editor">
                     <input type="radio" name="se-engine-choice" value="AoW" disabled> Architect of Worlds (AoW) <span style="font-size: 0.75rem; color: #45a29e;">(coming soon)</span>
@@ -1594,6 +1612,18 @@
                     <input type="checkbox" id="obs-include-images" checked>
                     Include world images
                 </label>
+
+                <!-- World image projection (sub-option, shown when include images is checked) -->
+                <div id="obs-image-projection-row" style="padding-left:24px;">
+                    <label style="display:block;margin-bottom:4px;color:#a0a8b0;font-size:0.85em;">WORLD IMAGE PROJECTION</label>
+                    <select id="obs-image-projection" style="width:100%;padding:6px;background:#1a2332;color:#cdd6e3;border:1px solid #45a29e;border-radius:4px;">
+                        <option value="globe" selected>Globe (Hemispheres)</option>
+                        <option value="sinusoidal">Sinusoidal</option>
+                        <option value="mercator">Mercator</option>
+                        <option value="mollweide">Mollweide</option>
+                        <option value="diamond">Diamond</option>
+                    </select>
+                </div>
 
                 <!-- Skip airless (sub-option, shown when include images is checked) -->
                 <label id="obs-skip-airless-row" style="display:flex;align-items:center;gap:8px;cursor:pointer;padding-left:24px;">

@@ -31,6 +31,14 @@
         const isGG = typeStr.includes('Gas Giant') || typeStr === 'Ice Giant';
         if (size === 'S' && !isGG) return 0.4;
         if (size === 'R' && !isGG) return 0;
+        // A T5 Gas Giant's own size letter (P/Q/R/S/T/U/V/W/X large, M/N small —
+        // generateGasGiantStats, t5_topdown_generator.js) is a standard eHex digit, not a size
+        // this function should special-case at all — but 'R'/'S' specifically collide with
+        // fromEHex's CT-specific Ring/Small-moon sentinels (0.1/0.5) below. Resolve those two
+        // to their real eHex value (R=25, S=26 — confirmed via Sean's Requirements Agent)
+        // directly for a GG instead of falling through into fromEHex's CT-flavored intercept.
+        if (isGG && size === 'R') return 25;
+        if (isGG && size === 'S') return 26;
         if (typeof size === 'number') return size;
         if (typeof size === 'string') return fromEHex(size);
         return 0;

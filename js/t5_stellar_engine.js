@@ -19,6 +19,12 @@
     const { rollFlux } = UniversalMath;
     const { HZ_DATA, ORBIT_AU } = T5_Data;
 
+    // A Companion star orbits well inside its parent's Orbit 0 (0.2 AU) — T5's ORBIT_AU table
+    // has no entry below that, so it isn't a numbered orbit slot at all; give it a fixed
+    // close-in separation instead. Mirrors the same constant in t5_topdown_generator.js and the
+    // 0.05 AU already used by traveller_worlds_importer.js for OTU-imported companions.
+    const T5_COMPANION_AU = 0.05;
+
     // Safe Fallback Utilities
     const _rng = (typeof rng === 'function') ? rng : Math.random;
     const _roll1D = (typeof tRoll1D === 'function') ? tRoll1D : (label) => Math.floor(_rng() * 6) + 1;
@@ -243,14 +249,16 @@
             if (far) stars.push(far);
 
             const currentStars = [...stars];
-            currentStars.forEach(parent => {
+            currentStars.forEach((parent, parentIdx) => {
                 const cFlux = rollFlux();
                 _log(`Companion check for ${parent.role} (${parent.name}) Flux Roll: ${cFlux >= 0 ? '+' : ''}${cFlux}`);
                 if (cFlux >= 3) {
                     const compProfile = generateStar(`${parent.role} Companion`, 0, null, true, pTFlux, pSFlux);
-                    const compOrbit = parent.orbitID + 0.1;
-                    compProfile.orbitID = compOrbit;
-                    _log(`  [YES] Companion present for ${parent.role}: ${compProfile.name} at Orbit ${compOrbit}`);
+                    // Not a numbered orbit slot — see T5_COMPANION_AU above.
+                    compProfile.orbitID = null;
+                    compProfile.distAU = T5_COMPANION_AU;
+                    compProfile.parentStarIdx = parentIdx;
+                    _log(`  [YES] Companion present for ${parent.role}: ${compProfile.name} at ${T5_COMPANION_AU} AU`);
                     stars.push(compProfile);
                 } else {
                     _log(`  [NO] No companion for ${parent.role}.`);

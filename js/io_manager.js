@@ -17,18 +17,11 @@ function downloadBatchLog(actionName, hexCount) {
     const fileName = `${timestamp}_${actionName}_${hexCount}_Hexes.txt`;
     const content = window.batchLogData.join('\n');
 
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const ok = downloadBlob(content, fileName, 'text/plain;charset=utf-8');
 
-    // Clear memory
-    window.batchLogData = [];
+    // Clear memory — but only once the download was actually handed off, so a
+    // failure doesn't discard the only copy of the log with no way to re-export.
+    if (ok) window.batchLogData = [];
 }
 
 // Save thresholds (in JSON string character count, which approximates UTF-8 bytes for ASCII JSON)
@@ -45,17 +38,50 @@ function readFileAsText(file) {
     });
 }
 
-/** Trigger a single blob download. */
+/**
+ * Trigger a browser download for in-memory content. Single entry point for every
+ * download in the app — keep it that way rather than re-inlining this pattern.
+ *
+ * Cleanup is deferred deliberately: revoking the blob URL (or detaching the
+ * anchor) in the same tick as click() can abort the download before the browser
+ * has finished reading the blob. This was reproduced as intermittent total
+ * failure on a 170-byte CSV, and the risk scales with payload size — the chunked
+ * save path below writes blobs of up to 250 MB.
+ *
+ * @param   {string|BufferSource} content   Blob body.
+ * @param   {string}              filename  Suggested download name.
+ * @param   {string}              [mimeType]
+ * @returns {boolean} true if the download was handed off to the browser. Note
+ *          this cannot confirm the file actually landed — the browser gives no
+ *          such signal for anchor-triggered downloads.
+ */
+function downloadBlob(content, filename, mimeType = 'application/octet-stream') {
+    let url = null;
+    try {
+        const blob = new Blob([content], { type: mimeType });
+        url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href     = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+
+        setTimeout(() => {
+            if (a.parentNode) a.parentNode.removeChild(a);
+            URL.revokeObjectURL(url);
+        }, 1000);
+        return true;
+    } catch (err) {
+        console.error(`[Download] Failed to trigger "${filename}":`, err);
+        if (url) { try { URL.revokeObjectURL(url); } catch (_) {} }
+        return false;
+    }
+}
+window.downloadBlob = downloadBlob;
+
+/** Trigger a single JSON blob download. */
 function triggerDownload(content, filename) {
-    const blob = new Blob([content], { type: 'application/json' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    return downloadBlob(content, filename, 'application/json');
 }
 
 function setupSaveLoad() {
@@ -152,6 +178,9 @@ function setupSaveLoad() {
                 );
                 if (!confirmed) return;
 
+                let sentParts = 0;
+                const failedParts = [];
+
                 for (let i = 0; i < numChunks; i++) {
                     const chunkEntries = entries.slice(i * perChunk, (i + 1) * perChunk);
                     const chunkObj = {
@@ -176,17 +205,33 @@ function setupSaveLoad() {
                         chunkObj.regionPaths             = Array.from((window.regionPaths || new Map()).entries());
                     }
 
-                    triggerDownload(
+                    const ok = triggerDownload(
                         JSON.stringify(chunkObj),
                         `traveller_map_Part${i + 1}of${numChunks}.json`
                     );
+                    if (ok) sentParts++; else failedParts.push(i + 1);
 
                     // Brief pause so the browser doesn't suppress sequential downloads
                     if (i < numChunks - 1) await new Promise(r => setTimeout(r, 400));
                 }
 
-                if (typeof showToast === 'function') {
-                    showToast(`Saved in ${numChunks} parts. Select all files together when loading.`, 6000);
+                // Report what actually happened. Every part is required to reload,
+                // so a silently dropped chunk would otherwise surface only on a
+                // failed load, long after the in-browser copy might be gone.
+                if (failedParts.length > 0) {
+                    console.error('[Save] Chunk write failed for parts:', failedParts);
+                    alert(
+                        `Save incomplete — ${failedParts.length} of ${numChunks} parts could not be written ` +
+                        `(part${failedParts.length > 1 ? 's' : ''} ${failedParts.join(', ')}).\n\n` +
+                        `All ${numChunks} parts are required to reload this map, so this save cannot be used ` +
+                        `as-is. Please try saving again.`
+                    );
+                } else if (typeof showToast === 'function') {
+                    showToast(
+                        `Sent ${sentParts} parts to your browser. Confirm all ${sentParts} files are present ` +
+                        `in your downloads — every part is required to reload this map.`,
+                        8000
+                    );
                 }
             }
         } catch (err) {
@@ -806,6 +851,8 @@ function setupObsidianExport() {
     const sectorSel    = document.getElementById('obs-sector-select');
     const subsectorSel = document.getElementById('obs-subsector-select');
     const incImages          = document.getElementById('obs-include-images');
+    const projectionRow      = document.getElementById('obs-image-projection-row');
+    const projectionSel      = document.getElementById('obs-image-projection');
     const skipAirlessRow     = document.getElementById('obs-skip-airless-row');
     const skipAirlessChk     = document.getElementById('obs-skip-airless');
     const incSystemImages    = document.getElementById('obs-include-system-images');
@@ -851,6 +898,7 @@ function setupObsidianExport() {
 
     incImages.addEventListener('change', () => {
         if (skipAirlessRow) skipAirlessRow.style.display = incImages.checked ? 'flex' : 'none';
+        if (projectionRow)  projectionRow.style.display  = incImages.checked ? 'block' : 'none';
     });
 
     openBtn.addEventListener('click', () => {
@@ -882,6 +930,7 @@ function setupObsidianExport() {
         const sectorNum     = parseInt(sectorSel.value);
         const subsectorChar = subsectorSel.value;
         const includeImages       = !!(incImages       && incImages.checked);
+        const imageProjection     = (projectionSel && projectionSel.value) || 'globe';
         const skipAirless         = includeImages && !!(skipAirlessChk  && skipAirlessChk.checked);
         const includeSystemImages = !!(incSystemImages && incSystemImages.checked);
         const useSubfolders       = !!(useSubfoldersChk && useSubfoldersChk.checked);
@@ -895,6 +944,7 @@ function setupObsidianExport() {
         try {
             await ObsidianExporter.startExport(sectorNum, subsectorChar, {
                 includeImages,
+                imageProjection,
                 skipAirless,
                 includeSystemImages,
                 useSubfolders,
@@ -998,15 +1048,7 @@ function exportRoutesToXML(sectorID) {
     xmlLines.push('</Routes>');
     xmlLines.push('</Sector>');
     const content = xmlLines.join('\n');
-    const blob = new Blob([content], { type: 'text/xml;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Sector_${sectorID}_Routes.xml`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    downloadBlob(content, `Sector_${sectorID}_Routes.xml`, 'text/xml;charset=utf-8');
 }
 
 /**
@@ -1276,15 +1318,7 @@ function exportMetadataXml(sectorID) {
     xmlLines.push('</Sector>');
 
     const content = xmlLines.join('\n');
-    const blob    = new Blob([content], { type: 'text/xml;charset=utf-8' });
-    const url     = URL.createObjectURL(blob);
-    const link    = document.createElement('a');
-    link.href     = url;
-    link.download = `Sector_${sectorID}_Metadata.xml`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    downloadBlob(content, `Sector_${sectorID}_Metadata.xml`, 'text/xml;charset=utf-8');
 
     const parts = [];
     if (routeLines.length > 0) parts.push(`${routeLines.length} route(s)`);
@@ -1430,15 +1464,7 @@ function generateT5TabData(sectorID) {
     });
 
     const content = lines.join('\n');
-    const blob = new Blob([content], { type: 'text/tab-separated-values;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Sector_${sectorID}.tab`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    downloadBlob(content, `Sector_${sectorID}.tab`, 'text/tab-separated-values;charset=utf-8');
 }
 
 /**
@@ -1745,22 +1771,41 @@ function importT5Tab(fileContent, fileName, forcedSectorSlot = null, bulkMode = 
             const rawStars = row[idxStars].trim();
             t5Data.homestar = rawStars;
 
-            const tokens = rawStars.split(/\s+/);
-            const parsedStars = [];
-            for (let i = 0; i < tokens.length; i++) {
-                if (i > 0 && /^(Ia|Ib|II|III|IV|V|VI|VII|D|BD)$/i.test(tokens[i]) && !parsedStars[parsedStars.length - 1].includes(" ")) {
-                    parsedStars[parsedStars.length - 1] += " " + tokens[i];
-                } else {
-                    parsedStars.push(tokens[i]);
-                }
-            }
-            t5System.stars = parsedStars.map((sn, idx) => ({ name: sn, role: idx === 0 ? 'Primary' : 'Companion', orbits: [] }));
+            // Shared with generateT5System's own homestar parsing (js/t5_topdown_generator.js)
+            // — see OW-N, directives/project_manifest.md. Previously this importer had its own
+            // inferior copy that never decomposed spectral type (every star silently displayed
+            // as generic "G V" downstream) and flatly labeled every secondary 'Companion' with
+            // no orbit data. Falls back to the old naive behavior only if the generator module
+            // somehow isn't loaded yet (shouldn't happen — script order in hex_map.html loads
+            // t5_topdown_generator.js well before io_manager.js).
+            const parsedStars = (typeof T5_TopDown_Generator !== 'undefined' && T5_TopDown_Generator.parseT5HomestarString)
+                ? T5_TopDown_Generator.parseT5HomestarString(rawStars)
+                : rawStars.split(/\s+/).map((sn, idx) => ({ name: sn, role: idx === 0 ? 'Primary' : 'Companion' }));
+            // Use rawName (the untouched OTU token) as the stored name, not the reconstructed
+            // `name` — the reconstruction formula has a known pre-existing quirk for D/BD stars
+            // that js/add_otu_system_info.js's parseStarType() can't parse back correctly; the
+            // literal imported token always round-trips.
+            t5System.stars = parsedStars.map(s => Object.assign({}, s, { name: s.rawName || s.name, orbits: [] }));
             t5System.orbits = [];
         } else {
             t5Data.homestar = "";
             t5System.stars = [];
             t5System.orbits = [];
         }
+
+        // Mirror t5_topdown_generator.js's own `sys.mainworld = {...mainworldBase, type:'Mainworld'}`
+        // (generateT5System, ~line 359) so an imported system's t5System has the same shape the
+        // generator produces for a normally-generated system. t5Data's field names already match what
+        // the generator/editor expect — no renaming needed. Cloning tradeCodes (not referencing) keeps
+        // this array independent of t5Data.tradeCodes; without it, the generator's unconditional
+        // hz-climate trade-code push (t5_topdown_generator.js ~line 448-449) would mutate both in place.
+        t5System.mainworld = {
+            ...t5Data,
+            tradeCodes: [...(t5Data.tradeCodes || [])],
+            type: 'Mainworld',
+            isMainworld: true,
+            parentStarIdx: 0,
+        };
 
         const stateObj = {
             type: 'SYSTEM_PRESENT',

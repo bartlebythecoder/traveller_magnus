@@ -188,6 +188,60 @@
     * Scans the current hexStates to determine if advanced socioeconomic properties exist.
     * Shows/hides the conditional inputs based on presence.
     */
+    /**
+     * Shows the Stellar Info section in an enabled or disabled state — it is
+     * deliberately never hidden. Hiding it made the control vanish with no
+     * explanation, and because applyActiveFilters() harvests every input
+     * regardless of visibility, any selection left behind kept filtering
+     * invisibly and excluded every world in the sector.
+     *
+     * Returns true if a stale selection had to be cleared.
+     */
+    function _setStellarSectionAvailable(available) {
+        const section = document.getElementById('filter-stellar-section');
+        if (!section) return false;
+
+        section.style.display = 'block';
+
+        const classSel = document.getElementById('filter-stellar-class');
+        const typeSel  = document.getElementById('filter-stellar-type');
+        const subIn    = document.getElementById('filter-stellar-subtype');
+        const primary  = document.getElementById('filter-stellar-primary-only');
+
+        let cleared = false;
+        if (!available) {
+            [classSel, typeSel].forEach(sel => {
+                if (!sel) return;
+                Array.from(sel.options).forEach(o => {
+                    if (o.selected) { o.selected = false; cleared = true; }
+                });
+            });
+            if (subIn && subIn.value !== '')  { subIn.value = '';    cleared = true; }
+            if (primary && primary.checked)   { primary.checked = false; cleared = true; }
+        }
+
+        [classSel, typeSel, subIn, primary].forEach(el => { if (el) el.disabled = !available; });
+
+        const body = document.getElementById('stellar-accordion-body');
+        if (body) body.style.opacity = available ? '' : '0.45';
+
+        // Explanatory note, placed after the accordion header so it is visible
+        // even while the accordion is collapsed.
+        let note = document.getElementById('filter-stellar-unavailable');
+        if (!note) {
+            note = document.createElement('div');
+            note.id = 'filter-stellar-unavailable';
+            note.style.cssText = 'font-size:0.7rem; color:#c5883a; padding:2px 0 4px; line-height:1.3;';
+            const header = section.querySelector('.filter-accordion-header');
+            if (header && header.nextSibling) section.insertBefore(note, header.nextSibling);
+            else section.appendChild(note);
+        }
+        note.textContent = available ? '' : 'No stellar data in this sector — generate systems to enable.';
+        note.style.display = available ? 'none' : 'block';
+
+        return cleared;
+    }
+
     function scanForConditionalFields() {
         if (typeof tSection === 'function') tSection("Scan Sector for Conditional Fields");
 
@@ -238,17 +292,70 @@
             writeLogLine(`Scan Complete: T5Ix=${hasT5Ix}, MgImp=${hasMgImportance}, MgWTN=${hasMgWTN}, MgGWP=${hasMgGWP}, Stellar=${hasStellarData}`);
         }
 
-        document.getElementById('filter-field-t5-ix').style.display = hasT5Ix ? 'flex' : 'none';
-        document.getElementById('filter-field-mgt-importance').style.display = hasMgImportance ? 'flex' : 'none';
-        document.getElementById('filter-field-mgt-wtn').style.display = hasMgWTN ? 'flex' : 'none';
-        document.getElementById('filter-field-mgt-gwp').style.display = hasMgGWP ? 'flex' : 'none';
-        document.getElementById('filter-field-gravity').style.display = hasGravity ? 'flex' : 'none';
-        document.getElementById('filter-field-temperature').style.display = hasTemp ? 'flex' : 'none';
+        // These numeric fields stay hidden when the sector has no such data, but
+        // hiding must also clear them: applyActiveFilters() harvests every input
+        // regardless of visibility, so a value stranded in a hidden field would
+        // keep filtering with no on-screen control to explain the result.
+        let cleared = false;
+        const setFieldAvailable = (wrapperId, inputId, available) => {
+            const wrap = document.getElementById(wrapperId);
+            if (wrap) wrap.style.display = available ? 'flex' : 'none';
+            if (available) return;
+            const input = document.getElementById(inputId);
+            if (input && input.value !== '') { input.value = ''; cleared = true; }
+        };
+
+        setFieldAvailable('filter-field-t5-ix',          'filter-t5-ix',          hasT5Ix);
+        setFieldAvailable('filter-field-mgt-importance', 'filter-mgt-importance', hasMgImportance);
+        setFieldAvailable('filter-field-mgt-wtn',        'filter-mgt-wtn',        hasMgWTN);
+        setFieldAvailable('filter-field-mgt-gwp',        'filter-mgt-gwp',        hasMgGWP);
+        setFieldAvailable('filter-field-gravity',        'filter-gravity',        hasGravity);
+        setFieldAvailable('filter-field-temperature',    'filter-temperature',    hasTemp);
 
         const conditionalSection = document.getElementById('filter-conditional-section');
         conditionalSection.style.display = (hasT5Ix || hasMgImportance || hasMgWTN || hasMgGWP || hasGravity || hasTemp) ? 'block' : 'none';
 
-        document.getElementById('filter-stellar-section').style.display = hasStellarData ? 'block' : 'none';
+        if (_setStellarSectionAvailable(hasStellarData)) cleared = true;
+
+        // Re-run the filter so any exclusion the just-cleared inputs were still
+        // imposing is lifted immediately, rather than persisting until the user
+        // happens to touch a control.
+        if (cleared) {
+            if (typeof writeLogLine === 'function') {
+                writeLogLine('Filter: cleared criteria whose data is absent from this sector; results refreshed.');
+            }
+            if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
+        }
+    }
+
+    // ── Cross-engine star field resolution ───────────────────────────────────
+    // The five generation engines name the same three properties differently:
+    //
+    //   engine   spectral type   luminosity class   subtype
+    //   MgT2E    sType           sClass             subType
+    //   AoW      sType           sClass             subType
+    //   CT       type            size               decimal
+    //   T5       type            size               decimal
+    //   RTT      type            luminosityClass    (none)
+    //
+    // The filter previously read only sType/sClass/subType, so CT, T5 and RTT
+    // systems silently matched nothing. The stored values already agree with the
+    // dropdown options (O..M/D/BD, and V/IV/III/II/Ib/Ia/VI), so resolving the
+    // field name is sufficient — no value remapping is involved.
+    //
+    // "size" is a luminosity class here despite the name: CT parses it as
+    // parts[1] || 'V' and T5 renders star names as `${type}${decimal} ${size}`.
+
+    function _starSpectralType(star) {
+        return star.sType ?? star.type ?? null;
+    }
+
+    function _starLuminosityClass(star) {
+        return star.sClass ?? star.size ?? star.luminosityClass ?? null;
+    }
+
+    function _starSubtype(star) {
+        return star.subType ?? star.decimal ?? null;
     }
 
     /**
@@ -265,9 +372,9 @@
             : sys.stars;
 
         return starsToCheck.some(star => {
-            if (criteria.classes.length > 0 && !criteria.classes.includes(star.sClass)) return false;
-            if (criteria.types.length > 0 && !criteria.types.includes(star.sType)) return false;
-            if (criteria.subtype && !matchesStellarNumericRange(star.subType, criteria.subtype)) return false;
+            if (criteria.classes.length > 0 && !criteria.classes.includes(_starLuminosityClass(star))) return false;
+            if (criteria.types.length > 0 && !criteria.types.includes(_starSpectralType(star))) return false;
+            if (criteria.subtype && !matchesStellarNumericRange(_starSubtype(star), criteria.subtype)) return false;
             return true;
         });
     }
@@ -368,12 +475,13 @@
                 gasGiantCount: state.gasGiantCount ?? 0
             };
 
-            // Name prefix filter (case-insensitive, applied before UWP filters)
+            // Name filter (case-insensitive contains, comma-separated terms treated as OR, applied before UWP filters)
             let isVisible = true;
             const nameQuery = activeFilters.name.trim().toLowerCase();
             if (nameQuery) {
                 const worldName = (evalObject.name || evalObject.systemName || state.name || '').toLowerCase();
-                if (!worldName.startsWith(nameQuery)) isVisible = false;
+                const nameTerms = nameQuery.split(',').map(t => t.trim()).filter(t => t.length > 0);
+                if (nameTerms.length > 0 && !nameTerms.some(term => worldName.includes(term))) isVisible = false;
             }
             // Strip non-UWP keys before passing to UniversalMath
             const uwpFilters = Object.assign({}, activeFilters);
@@ -745,22 +853,15 @@
         if (typeof writeLogLine === 'function') writeLogLine(`Exporting ${window.activeFilterRules.length} rules to JSON...`);
 
         const rulesJson = JSON.stringify(window.activeFilterRules, null, 4);
-        const blob = new Blob([rulesJson], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        
-        a.href = url;
-        a.download = `traveller_filter_rules_${Date.now()}.json`;
-        document.body.appendChild(a);
-        a.click();
-        
-        // Cleanup
-        setTimeout(() => {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }, 100);
+        const ok = downloadBlob(
+            rulesJson,
+            `traveller_filter_rules_${Date.now()}.json`,
+            'application/json'
+        );
 
-        if (typeof showToast === 'function') showToast("Rules exported successfully.", 2000);
+        if (typeof showToast === 'function') {
+            showToast(ok ? "Rules exported successfully." : "Rules export failed — see the console for details.", 2000);
+        }
     };
 
     /**

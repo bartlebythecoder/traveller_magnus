@@ -978,6 +978,43 @@ function getWorldName(state) {
  * Matching worlds appear as "Name  HXXX" rows; selecting one writes the
  * hex ID into the input. Typing a raw hex ID directly still works.
  */
+// ── World autocomplete dropdown positioning ──────────────────────────────────
+// .wac-dropdown is position:fixed so it is never clipped by a scrollable
+// ancestor (the P2P waypoint list scrolls once it passes ~10 rows). Fixed
+// elements do not move with a scrolling container, so the visible dropdown is
+// repositioned on scroll/resize. One shared listener is used rather than a pair
+// per input — waypoint rows are created and destroyed freely and would leak.
+let _wacActive = null;
+
+function _wacPositionDropdown(inputEl, dropdownEl) {
+    const r = inputEl.getBoundingClientRect();
+    dropdownEl.style.width = `${r.width}px`;
+    dropdownEl.style.left  = `${r.left}px`;
+
+    // Flip above the input when there isn't room for the list below it.
+    const dropH     = dropdownEl.offsetHeight || 160;
+    const roomBelow = window.innerHeight - r.bottom;
+    const flipUp    = roomBelow < dropH && r.top > roomBelow;
+
+    dropdownEl.style.top          = flipUp ? `${r.top - dropH}px` : `${r.bottom}px`;
+    dropdownEl.style.borderRadius = flipUp ? '3px 3px 0 0' : '0 0 3px 3px';
+    dropdownEl.style.borderTop    = flipUp ? '1px solid #45a29e' : 'none';
+    dropdownEl.style.borderBottom = flipUp ? 'none' : '1px solid #45a29e';
+}
+
+function _wacSyncPosition() {
+    if (!_wacActive) return;
+    const { inputEl, dropdownEl } = _wacActive;
+    if (!dropdownEl.isConnected || dropdownEl.style.display !== 'block') {
+        _wacActive = null;
+        return;
+    }
+    _wacPositionDropdown(inputEl, dropdownEl);
+}
+
+window.addEventListener('scroll', _wacSyncPosition, true);
+window.addEventListener('resize', _wacSyncPosition);
+
 function setupWorldAutocomplete(inputEl, dropdownEl) {
     let activeIndex = -1;
 
@@ -995,7 +1032,11 @@ function setupWorldAutocomplete(inputEl, dropdownEl) {
 
     function renderDropdown(matches) {
         dropdownEl.innerHTML = '';
-        if (matches.length === 0) { dropdownEl.style.display = 'none'; return; }
+        if (matches.length === 0) {
+            dropdownEl.style.display = 'none';
+            if (_wacActive && _wacActive.dropdownEl === dropdownEl) _wacActive = null;
+            return;
+        }
         matches.forEach((m) => {
             const item = document.createElement('div');
             item.className = 'wac-item';
@@ -1003,7 +1044,7 @@ function setupWorldAutocomplete(inputEl, dropdownEl) {
             item.innerHTML = `<span class="wac-name">${m.name}</span><span class="wac-hexid">${m.hexId}</span>`;
             item.addEventListener('mousedown', (e) => {
                 e.preventDefault();
-                inputEl.value = m.hexId;
+                inputEl.value = formatWorldLabel(m.hexId, m.name);
                 dropdownEl.style.display = 'none';
                 activeIndex = -1;
             });
@@ -1011,6 +1052,8 @@ function setupWorldAutocomplete(inputEl, dropdownEl) {
         });
         activeIndex = -1;
         dropdownEl.style.display = 'block';
+        _wacActive = { inputEl, dropdownEl };
+        _wacPositionDropdown(inputEl, dropdownEl);
     }
 
     function updateActive() {
@@ -1036,7 +1079,11 @@ function setupWorldAutocomplete(inputEl, dropdownEl) {
         } else if (e.key === 'Enter' && activeIndex >= 0) {
             e.preventDefault();
             const hexId = items[activeIndex]?.dataset.hexId;
-            if (hexId) { inputEl.value = hexId; dropdownEl.style.display = 'none'; activeIndex = -1; }
+            if (hexId) {
+                inputEl.value = formatWorldLabel(hexId);
+                dropdownEl.style.display = 'none';
+                activeIndex = -1;
+            }
         } else if (e.key === 'Escape') {
             dropdownEl.style.display = 'none'; activeIndex = -1;
         }
@@ -1053,15 +1100,35 @@ function setupWorldAutocomplete(inputEl, dropdownEl) {
 }
 
 /**
+ * Renders a world as "Name (hexId)" for display in a Start/End/Waypoint field.
+ * Long waypoint lists are unreadable as bare hex IDs, so both are shown.
+ * Falls back to the bare hex ID when the world has no name.
+ */
+function formatWorldLabel(hexId, name) {
+    const label = name || (hexStates.has(hexId) ? getWorldName(hexStates.get(hexId)) : '');
+    return label ? `${label} (${hexId})` : hexId;
+}
+
+/**
  * Resolves a P2P input value to a hex ID.
- * Accepts a raw hex ID or a system name (case-insensitive, first match wins).
+ * Accepts a raw hex ID, a system name (case-insensitive, first match wins),
+ * or the "Name (hexId)" form written by the autocomplete.
  * Returns null if nothing matches.
  */
 function resolveWorldInput(value) {
     const v = value.trim();
     if (!v) return null;
     if (hexStates.has(v) && hexStates.get(v).type === 'SYSTEM_PRESENT') return v;
-    const q = v.toLowerCase();
+
+    // "Name (hexId)" — trust the explicit hex ID in the suffix over the name,
+    // which may be duplicated across the sector.
+    const suffix = v.match(/^(.*)\s+\(([^()]+)\)$/);
+    if (suffix) {
+        const hexId = suffix[2].trim();
+        if (hexStates.has(hexId) && hexStates.get(hexId).type === 'SYSTEM_PRESENT') return hexId;
+    }
+
+    const q = (suffix ? suffix[1] : v).trim().toLowerCase();
     let found = null;
     hexStates.forEach((state, hexId) => {
         if (found) return;
@@ -1266,7 +1333,8 @@ function _buildRouteExportModal() {
                 <button id="route-export-none" class="menu-btn" style="padding:4px 12px; font-size:0.75rem;">Select None</button>
             </div>
             <div style="overflow-y:auto; flex:1; padding-right:4px;">${gridHtml}</div>
-            <div style="display:flex; gap:8px; justify-content:flex-end; border-top:1px solid #2a3a3a; padding-top:12px;">
+            <div id="route-export-dest" style="font-size:0.78rem; color:#8b9398; border-top:1px solid #2a3a3a; padding-top:10px;"></div>
+            <div style="display:flex; gap:8px; justify-content:flex-end; padding-top:2px;">
                 <button id="route-export-cancel" class="menu-btn" style="padding:8px 20px;">Cancel</button>
                 <button id="route-export-download" class="menu-btn" style="padding:8px 20px; background:#45a29e; color:#0b0c10; border-color:#45a29e;">Download CSV</button>
             </div>
@@ -1283,9 +1351,24 @@ function _buildRouteExportModal() {
     modal.addEventListener('click', e => { if (e.target === modal) modal.style.display = 'none'; });
 }
 
+/** Filename this route's CSV will be written as. Sanitised to a safe charset. */
+function _routeCsvFilename(routeName) {
+    return `route_${String(routeName).replace(/[^a-z0-9_\-]/gi, '_')}.csv`;
+}
+
 function openRouteExportModal(routeId, routeName) {
     _buildRouteExportModal();
     const modal = document.getElementById('route-export-modal');
+
+    // Tell the user what the file is called and where it lands — a browser
+    // download gives no other feedback, so a silent failure was previously
+    // indistinguishable from a successful one.
+    const destEl = modal.querySelector('#route-export-dest');
+    if (destEl) {
+        destEl.innerHTML =
+            `Saves as <span style="color:#66fcf1; font-family:'Courier New',monospace;">` +
+            `${_routeCsvFilename(routeName)}</span> to your browser's download folder.`;
+    }
 
     // Restore checkbox state from localStorage or fall back to defaults
     let savedFields;
@@ -1336,16 +1419,19 @@ function exportRouteSystemsCSV(routeId, routeName, fieldIds) {
         }).join(',')
     ).join('\r\n');
 
-    const safe = routeName.replace(/[^a-z0-9_\-]/gi, '_');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = `route_${safe}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const filename = _routeCsvFilename(routeName);
+    // Shared helper in io_manager.js — it defers blob-URL cleanup, without which
+    // this download intermittently produced no file at all.
+    const ok = downloadBlob(csv, filename, 'text/csv;charset=utf-8');
+
+    const worldCount = rows.length - 1;
+    if (typeof showToast === 'function') {
+        showToast(ok
+            ? `Exported ${worldCount} world(s) to "${filename}" — check your browser's downloads.`
+            : `Export failed — "${filename}" could not be written. See the console for details.`,
+            4000);
+    }
+    return ok ? filename : null;
 }
 
 window.openRouteSystemsPanel = function (routeId, routeName) {
@@ -1403,13 +1489,16 @@ window.closeRouteSystemsPanel = function () {
 // WAYPOINT HELPERS (P2P Route Builder)
 // ============================================================================
 
-function addWaypointRow() {
+function addWaypointRow(prefillValue = '', doFocus = true) {
     const list = document.getElementById('route-auto-p2p-waypoints-list');
     if (!list) return;
-    const index = list.children.length + 1;
 
     const row = document.createElement('div');
     row.className = 'p2p-waypoint-row';
+
+    // Position badge — kept in sync by renumberWaypoints() after any reorder.
+    const idxEl = document.createElement('span');
+    idxEl.className = 'p2p-waypoint-index';
 
     const wrap = document.createElement('div');
     wrap.className = 'wac-wrap';
@@ -1418,13 +1507,41 @@ function addWaypointRow() {
     const input = document.createElement('input');
     input.type = 'text';
     input.className = 'wac-input p2p-waypoint-input';
-    input.placeholder = `Waypoint ${index}`;
+    if (prefillValue) input.value = prefillValue;
 
     const drop = document.createElement('div');
     drop.className = 'wac-dropdown';
 
     wrap.appendChild(input);
     wrap.appendChild(drop);
+
+    const upBtn = document.createElement('button');
+    upBtn.type = 'button';
+    upBtn.className = 'p2p-waypoint-move';
+    upBtn.title = 'Move up';
+    upBtn.textContent = '▲';
+    upBtn.addEventListener('click', () => {
+        const prev = row.previousElementSibling;
+        if (prev) {
+            list.insertBefore(row, prev);
+            renumberWaypoints();
+            row.scrollIntoView({ block: 'nearest' });
+        }
+    });
+
+    const downBtn = document.createElement('button');
+    downBtn.type = 'button';
+    downBtn.className = 'p2p-waypoint-move';
+    downBtn.title = 'Move down';
+    downBtn.textContent = '▼';
+    downBtn.addEventListener('click', () => {
+        const next = row.nextElementSibling;
+        if (next) {
+            list.insertBefore(next, row);
+            renumberWaypoints();
+            row.scrollIntoView({ block: 'nearest' });
+        }
+    });
 
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
@@ -1436,17 +1553,35 @@ function addWaypointRow() {
         renumberWaypoints();
     });
 
+    row.appendChild(idxEl);
     row.appendChild(wrap);
+    row.appendChild(upBtn);
+    row.appendChild(downBtn);
     row.appendChild(removeBtn);
     list.appendChild(row);
 
     setupWorldAutocomplete(input, drop);
-    input.focus();
+    renumberWaypoints();
+    if (doFocus) {
+        input.focus();
+        row.scrollIntoView({ block: 'nearest' });
+    }
 }
 
+// Re-syncs position badges, placeholders, and move-button enablement after any
+// add / remove / reorder.
 function renumberWaypoints() {
-    document.querySelectorAll('#route-auto-p2p-waypoints-list .p2p-waypoint-input').forEach((inp, i) => {
-        if (!inp.value) inp.placeholder = `Waypoint ${i + 1}`;
+    const rows = [...document.querySelectorAll('#route-auto-p2p-waypoints-list .p2p-waypoint-row')];
+    rows.forEach((row, i) => {
+        const idxEl = row.querySelector('.p2p-waypoint-index');
+        if (idxEl) idxEl.textContent = `${i + 1}.`;
+
+        const inp = row.querySelector('.p2p-waypoint-input');
+        if (inp && !inp.value) inp.placeholder = `Waypoint ${i + 1}`;
+
+        const moves = row.querySelectorAll('.p2p-waypoint-move');
+        if (moves[0]) moves[0].disabled = (i === 0);
+        if (moves[1]) moves[1].disabled = (i === rows.length - 1);
     });
 }
 
@@ -1454,6 +1589,101 @@ function collectWaypointRaws() {
     return Array.from(document.querySelectorAll('#route-auto-p2p-waypoints-list .p2p-waypoint-input'))
         .map(inp => inp.value.trim())
         .filter(v => v !== '');
+}
+
+// ============================================================================
+// AUTOMATION CONFIG PERSISTENCE (routeDefinitions[].automationRef)
+// ============================================================================
+// Reopening a slot's Automation Panel used to reset every field, so building a
+// long Point-to-Point route in passes meant retyping every waypoint. The last
+// successful generation is snapshotted onto the route definition instead.
+//
+// No save/load plumbing is needed: routeDefinitions is persisted wholesale —
+// structured-cloned into IndexedDB by dbManager.saveRouteDefinitions() and
+// JSON.stringify'd into the sector file — so extra fields round-trip as-is.
+//
+// Worlds are stored as resolved hex IDs rather than the raw field text, so a
+// later rename still restores correctly (and re-renders with the current name).
+
+function _saveAutomationConfig(routeId, type, params) {
+    const def = (window.routeDefinitions || []).find(d => d.id === routeId);
+    if (!def) return;
+    def.automationRef = { type, params, savedAt: new Date().toISOString() };
+    if (window.dbManager) window.dbManager.saveRouteDefinitions?.();
+}
+
+/**
+ * Repopulates the Automation Panel from a slot's saved automationRef.
+ * Returns true if a config was restored, false if the slot has none.
+ */
+function _restoreAutomationConfig(routeId) {
+    const def = (window.routeDefinitions || []).find(d => d.id === routeId);
+    const ref = def && def.automationRef;
+    if (!ref || !ref.type || !ref.params) return false;
+    const p = ref.params;
+
+    const setNum = (id, v) => {
+        const el = document.getElementById(id);
+        if (el && Number.isFinite(v)) el.value = v;
+    };
+    const setChk = (id, v) => {
+        const el = document.getElementById(id);
+        if (el) el.checked = !!v;
+    };
+    const showOpts = (id, on) => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = on ? 'block' : 'none';
+    };
+
+    if (ref.type === 'xboat') {
+        setNum('route-auto-xboat-jump',   p.maxJump);
+        setNum('route-auto-xboat-range',  p.maxRange);
+        setNum('route-auto-xboat-min-ix', p.minIx);
+
+    } else if (ref.type === 'btn') {
+        setNum('route-auto-btn-lower', p.lowerBTN);
+        setNum('route-auto-btn-min',   p.minBTN);
+        // Max BTN is intentionally blankable — null means "no cap".
+        const maxEl = document.getElementById('route-auto-btn-max');
+        if (maxEl) maxEl.value = (p.maxBTN === null || p.maxBTN === undefined) ? '' : p.maxBTN;
+        setNum('route-auto-btn-jump',  p.maxJump);
+        setNum('route-auto-btn-range', p.range);
+
+    } else if (ref.type === 'network') {
+        setNum('route-auto-network-jump',      p.maxJump);
+        setNum('route-auto-network-range',     p.maxRange);
+        setChk('route-auto-network-allow-empty', p.allowEmptyHexes);
+        setNum('route-auto-network-max-empty', p.maxEmptyJumps);
+        showOpts('route-auto-network-empty-opts', p.allowEmptyHexes);
+
+    } else if (ref.type === 'p2p') {
+        const startEl = document.getElementById('route-auto-p2p-start');
+        const endEl   = document.getElementById('route-auto-p2p-end');
+        if (startEl && p.startId) startEl.value = formatWorldLabel(p.startId);
+        if (endEl   && p.endId)   endEl.value   = formatWorldLabel(p.endId);
+
+        const list = document.getElementById('route-auto-p2p-waypoints-list');
+        if (list) {
+            list.innerHTML = '';
+            // doFocus=false — restoring 20 rows must not fight for focus/scroll.
+            (p.waypointIds || []).forEach(id => addWaypointRow(formatWorldLabel(id), false));
+        }
+        setNum('route-auto-p2p-jump', p.maxJump);
+        setChk('route-auto-p2p-allow-empty', p.allowEmptyHexes);
+        setNum('route-auto-p2p-max-empty', p.maxEmptyJumps);
+        showOpts('route-auto-p2p-empty-opts', p.allowEmptyHexes);
+
+    } else {
+        return false;
+    }
+
+    // Select the saved type and open its accordion via the existing handler.
+    const radio = document.querySelector(`input[name="route-auto-type"][value="${ref.type}"]`);
+    if (radio) {
+        radio.checked = true;
+        radio.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    return true;
 }
 
 // ============================================================================
@@ -1561,6 +1791,7 @@ function setupRouteWindow() {
                 const { maxJump, maxRange, minIx } = configs.xboat;
                 saveHistoryState('Generate Xboat Routes');
                 generateXboatRoutes(maxJump, maxRange, minIx, routeId, `xboat_${routeId}`);
+                _saveAutomationConfig(routeId, 'xboat', { maxJump, maxRange, minIx });
                 if (window.dbManager) window.dbManager.saveRoutes();
                 requestAnimationFrame(draw);
                 window.closeRouteAutoPanel();
@@ -1589,6 +1820,13 @@ function setupRouteWindow() {
                     showToast('No route segments could be generated for the current filter.', 2500);
                     return;
                 }
+                // filterRules is deliberately not persisted — network generation
+                // reads the live filter at generate time, and it is not ours to own.
+                _saveAutomationConfig(routeId, 'network', {
+                    maxJump, maxRange,
+                    allowEmptyHexes: netAllowEmpty,
+                    maxEmptyJumps:   netMaxEmpty
+                });
                 if (window.dbManager) window.dbManager.saveRoutes();
                 requestAnimationFrame(draw);
                 window.closeRouteAutoPanel();
@@ -1640,6 +1878,12 @@ function setupRouteWindow() {
                     showToast(`No path found from ${startId} to ${endId}${wpNote} within Jump-${maxJump}.`, 3000);
                     return;
                 }
+                _saveAutomationConfig(routeId, 'p2p', {
+                    startId, endId, waypointIds,
+                    maxJump,
+                    allowEmptyHexes: p2pAllowEmpty,
+                    maxEmptyJumps:   p2pMaxEmpty
+                });
                 if (window.dbManager) window.dbManager.saveRoutes();
                 requestAnimationFrame(draw);
                 window.closeRouteAutoPanel();
@@ -1673,6 +1917,7 @@ function setupRouteWindow() {
                 if (window.isLoggingEnabled && window.batchLogData && window.batchLogData.length > 0) {
                     downloadBatchLog('BTN_Routes', result.included);
                 }
+                _saveAutomationConfig(routeId, 'btn', { lowerBTN, minBTN, maxBTN, maxJump, range });
                 if (window.dbManager) window.dbManager.saveRoutes();
                 requestAnimationFrame(draw);
                 window.closeRouteAutoPanel();
@@ -1716,7 +1961,8 @@ function setupRouteWindow() {
 
     // Wire "Add Waypoint" button
     const addWpBtn = document.getElementById('btn-p2p-add-waypoint');
-    if (addWpBtn) addWpBtn.addEventListener('click', addWaypointRow);
+    // Wrapped, not passed directly — the click Event would land in prefillValue.
+    if (addWpBtn) addWpBtn.addEventListener('click', () => addWaypointRow());
 }
 
 window.ensureFreeRouteSlot = function () {
@@ -1838,8 +2084,11 @@ window.renderRouteWindow = function () {
         }
 
         const exportBtn = row.querySelector('.route-export-btn');
-        if (exportBtn && segCount > 0) {
-            exportBtn.addEventListener('click', () => openRouteExportModal(def.id, def.name));
+        if (exportBtn) {
+            // .onclick, not addEventListener — refreshRouteWindowCounts() assigns
+            // this same property, and a listener here would stack alongside it so
+            // one click opened the export modal twice.
+            exportBtn.onclick = segCount > 0 ? () => openRouteExportModal(def.id, def.name) : null;
         }
 
         const autoBtn = row.querySelector('.route-auto-btn');
@@ -1956,8 +2205,8 @@ window.openRouteAutoPanel = function (routeId, routeName) {
     const selArray = typeof selectedHexes !== 'undefined' ? [...selectedHexes] : [];
     const startIn = document.getElementById('route-auto-p2p-start');
     const endIn   = document.getElementById('route-auto-p2p-end');
-    if (startIn) startIn.value = selArray[0] || '';
-    if (endIn)   endIn.value   = selArray[1] || '';
+    if (startIn) startIn.value = selArray[0] ? formatWorldLabel(selArray[0]) : '';
+    if (endIn)   endIn.value   = selArray[1] ? formatWorldLabel(selArray[1]) : '';
 
     // Clear any waypoints from a previous session
     const wpList = document.getElementById('route-auto-p2p-waypoints-list');
@@ -1973,6 +2222,11 @@ window.openRouteAutoPanel = function (routeId, routeName) {
     const p2pEmptyOptsEl = document.getElementById('route-auto-p2p-empty-opts');
     if (p2pEmptyCb) p2pEmptyCb.checked = false;
     if (p2pEmptyOptsEl) p2pEmptyOptsEl.style.display = 'none';
+
+    // Restore this slot's last generated setup, if it has one. Runs after the
+    // resets above so it wins, and takes precedence over the hex-selection
+    // prefill — reopening a configured route is for editing it, not restarting.
+    _restoreAutomationConfig(routeId);
 
     panel.style.display = 'block';
     panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

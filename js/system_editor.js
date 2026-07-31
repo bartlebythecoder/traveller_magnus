@@ -19,6 +19,8 @@ const SystemEditor = (() => {
     let _dragBodyId         = null;
     let _dragStarId         = null;
     let _dragCompanionId    = null;   // _id of the companion star being dragged
+    let _dragMoonId         = null;   // _id of the moon being dragged (T5 manual reorder — OW-47)
+    let _dragMoonParentId   = null;   // _id of that moon's parent body
     let _previewOriginalState = null; // { hexId, existed, state } — snapshot before first Preview
 
     const HISTORY_CAP = 50;
@@ -48,6 +50,41 @@ const SystemEditor = (() => {
         { value: 'D',   label: 'D — White Dwarf' },
     ];
 
+    // Default orbitAU seed for a newly added companion star, by separation/role. Shared by
+    // _addStar() (new companion's initial orbitId) and the companion "Role" dropdown's change
+    // handler (re-seeds orbitId when role changes and the user hasn't manually set one) — was
+    // previously two identical object literals.
+    const _ORBIT_AU_BY_SEPARATION = { Companion: 0.15, Close: 0.5, Near: 6.0, Far: 12.0 };
+
+    // T5-only: a Companion star has no numbered orbit slot (see T5_COMPANION_AU in
+    // t5_stellar_engine.js/t5_topdown_generator.js) — orbitAU is set directly instead of going
+    // through _ORBIT_AU_BY_SEPARATION + orbitId like every other engine's separation labels.
+    const _T5_COMPANION_AU = 0.05;
+
+    // Returns the RAW-fixed spectral-class/subtype pairing for the two exotic star types (D —
+    // White Dwarf is always class D, subtype 0; BD — Brown Dwarf is always class V, subtype 0),
+    // or null for a normal spectral type. Shared by the primary star, companion star, and
+    // create-dialog Type dropdowns — previously three separate copies of the same two `if`s
+    // (one working copy fields, one raw <select> elements), which risked drifting out of sync
+    // if the rule ever changed in only one place.
+    function _exoticStarDefaults(sType) {
+        if (sType === 'D')  return { sClass: 'D', subType: 0 };
+        if (sType === 'BD') return { sClass: 'V', subType: 0 };
+        return null;
+    }
+
+    // Star fields shown in each star's "Derived Properties" group: [field, rowLabel, unit,
+    // formatter]. Drives _buildDerivedGroup() below — was previously five near-identical copies
+    // of the same push-history/set/toggle-manual-field block, differing only in these four values.
+    const _fmt4 = v => v != null ? parseFloat(v.toFixed(4)) : null;
+    const _DERIVED_STAR_FIELDS = [
+        ['mass', 'Mass:', 'M☉', _fmt4],
+        ['lum',  'Lum:',  'L☉', _fmt4],
+        ['diam', 'Diam:', 'D☉', _fmt4],
+        ['temp', 'Temp:', 'K',  v => v != null ? Math.round(v) : null],
+        ['mao',  'MAO:',  'orb', _fmt4],
+    ];
+
     // ── ID generator ──────────────────────────────────────────────────────────
 
     let _nextId = 0;
@@ -74,6 +111,24 @@ const SystemEditor = (() => {
             if (!ctTbl) return null;
             const idx = Math.max(0, Math.min(Math.floor(orbitId), ctTbl.length - 1));
             return ctTbl[idx];
+        }
+
+        // T5's ORBIT_AU table starts at Orbit 0 = 0.2 AU, not 0 AU like MgT2E's — falling
+        // through to the MgT2E table below (as this used to do unconditionally) silently used
+        // 0 AU for T5's Orbit 0, corrupting any AU comparison that involves it (e.g.
+        // _wouldReorder wrongly thinking a body moving to Orbit 0 crosses a companion sitting a
+        // little inside true Orbit 0, because the comparison range started at 0 AU instead of
+        // 0.2 AU). Mirrors t5_topdown_generator.js's own _initStars interpolation exactly, so
+        // this editor-side preview always agrees with what the generator actually produces.
+        if (_workingCopy && _workingCopy.engine === 'T5') {
+            const t5Tbl = (typeof T5_Data !== 'undefined' && T5_Data.ORBIT_AU) ? T5_Data.ORBIT_AU
+                : (typeof window !== 'undefined' && window.T5_Data ? window.T5_Data.ORBIT_AU : null);
+            if (!t5Tbl) return null;
+            const idx  = Math.max(0, Math.floor(orbitId));
+            const frac = orbitId - idx;
+            const lo   = t5Tbl[Math.min(idx, t5Tbl.length - 1)] || 0;
+            const hi   = idx < t5Tbl.length - 1 ? t5Tbl[idx + 1] : lo;
+            return lo + frac * (hi - lo);
         }
 
         const tbl = (window.MgT2EData && window.MgT2EData.stellar && window.MgT2EData.stellar.orbitAu) || null;
@@ -125,6 +180,19 @@ const SystemEditor = (() => {
         if (!mwRef || !w) return false;
         if (w === mwRef)  return true;
         return mwRef.uwp && w.uwp && mwRef.uwp === w.uwp && mwRef.name === w.name;
+    }
+
+    // ── Manual-field helpers ──────────────────────────────────────────────────
+    // markManual/clearManual (core.js) are the real, already-established mechanism generators
+    // check via isManual() — see directives/project_manifest.md Phase 3 "Key Discovery". This
+    // module used to push/filter _manualFields inline at every call site instead of using them
+    // (a gap the manifest's Algorithms 1 and 3 each separately had to note as a correction).
+    // _setManualField is the one new piece: a thin wrapper for fields with a "clear back to
+    // auto" UI affordance (derived star props, UWP seed digits, moon pd), which need to mark
+    // *or* clear depending on whether the field currently holds a value.
+    function _setManualField(obj, field, present) {
+        if (present) markManual(obj, field);
+        else clearManual(obj, field);
     }
 
     // ── Moon builder ──────────────────────────────────────────────────────────
@@ -215,7 +283,12 @@ const SystemEditor = (() => {
         const stars = (raw.stars || []).map((s, i) => {
             let orbitAU = null;
             if (i > 0) {
-                const slotNum = s.orbitId ?? (typeof s.orbit === 'number' ? s.orbit : null);
+                // s.orbitID (capital ID) is T5's own native companion-orbit field (see OW-46) —
+                // distinct from s.orbitId (System Editor/seed convention). Without this fallback,
+                // reopening a natively-generated T5 system reads every companion's orbit as null,
+                // which sorts it to Infinity in the merged body/companion list (see OW-46-class
+                // bug found 2026-07-17: new worlds sorted before companions regardless of AU).
+                const slotNum = s.orbitId ?? s.orbitID ?? (typeof s.orbit === 'number' ? s.orbit : null);
                 orbitAU = s.distAU ?? s.orbitAU
                     ?? (slotNum != null ? _orbitIdToAU(slotNum) : null)
                     ?? (engine === 'CT'
@@ -232,7 +305,7 @@ const SystemEditor = (() => {
                 subType:       s.decimal != null ? s.decimal : (s.subType != null ? s.subType : 5),
                 sClass:        s.size   || s.sClass || 'V',
                 name:          s.name  || '',
-                orbitId:       i === 0 ? null : (s.orbitId ?? (typeof s.orbit === 'number' ? s.orbit : null)),
+                orbitId:       i === 0 ? null : (s.orbitId ?? s.orbitID ?? (typeof s.orbit === 'number' ? s.orbit : null)),
                 orbitAU,
                 parentStarId:  null,
                 mass:          s.mass  ?? null,
@@ -272,8 +345,12 @@ const SystemEditor = (() => {
             const mwMoon = (b.moons || []).find(m => m.isMainworld);
             if (mwMoon) { mainworldRef = mwMoon._id; break; }
         }
+        // T5 stores its horizon value under `hzOrbit`, not the generic `hzco` every other
+        // engine uses (t5_topdown_generator.js's own sys.hzOrbit, also what system_viewer.js's
+        // T5 normalizer reads to draw the orrery ring) — fall back to it so reopening a T5
+        // system doesn't show a permanently blank/auto HZCO box despite a real resolved value.
         return { hexId, engine, allowAddBodies: false, mainworldRef, stars, bodies,
-                 age: raw.age ?? null, hzco: raw.hzco ?? null };
+                 age: raw.age ?? null, hzco: (raw.hzco ?? raw.hzOrbit) ?? null };
     }
 
     function _buildBlankWorkingCopy(hexId, engine, starSpec) {
@@ -367,36 +444,53 @@ const SystemEditor = (() => {
 
     // ── Structural operations ─────────────────────────────────────────────────
 
-    // "Append at the end" is supposed to mean "farther out than everything else in this star's
-    // orbit", but a CT Captured Planet (RAW anomaly, always orbitId === null, real AU can be far
-    // beyond every slot-numbered body — see OW-20) and a companion star (its own orbitId in the
-    // same shared sequence — _insertAtOrbit/_wouldReorder already treat "bodies + companion
-    // stars" as one combined pool, this didn't) were both invisible to a slot-number-only
-    // `max(orbitId) + 1`. That could return a slot whose AU falls *short* of an already-farther-
-    // out captured planet or companion, silently inserting the new body in the middle of the
-    // list instead of at the true end (OW-21). Compare AU, not just slot numbers, to guarantee
-    // the candidate slot is actually farther out than every sibling.
+    // "Append at the end" means "after the last WORLD" — stars (Close/Near/Far/Companion) are a
+    // separate track and are deliberately ignored for this: a companion/secondary star sitting
+    // at a numerically high orbit must not push a new world past it (Sean, 2026-07-23 — worlds
+    // and stars don't compete for "how far out", a new world always goes right after the last
+    // world regardless of where any star sits).
+    //
+    // A CT Captured Planet is a different case (RAW anomaly, always orbitId === null, real AU
+    // can be far beyond every slot-numbered body — see OW-20) and stays covered: without
+    // comparing AU among bodies, a plain `max(orbitId) + 1` could return a slot whose AU falls
+    // *short* of an already-farther-out captured planet, silently inserting the new body in the
+    // middle of the list instead of at the true end (OW-21).
     function _nextOrbitId(parentStarId) {
         const siblingBodies = _workingCopy.bodies.filter(b => b.parentStarId === parentStarId);
         const siblingStars  = _workingCopy.stars.filter(s => s.parentStarId === parentStarId);
 
-        const maxSiblingAU = Math.max(
+        const maxBodyAU = Math.max(
             0,
-            ...siblingBodies.map(b => _orbitIdToAU(b.orbitId) ?? b.au ?? b.orbitAU ?? 0),
-            ...siblingStars.map(s => _orbitIdToAU(s.orbitId) ?? s.orbitAU ?? 0)
+            ...siblingBodies.map(b => _orbitIdToAU(b.orbitId) ?? b.au ?? b.orbitAU ?? 0)
         );
 
+        // First body on a star: CT and T5 both start their orbit-number table at Orbit 0 = 0.2
+        // AU (a real, occupiable slot — see _orbitIdToAU above), unlike MgT2E/RTT/AoW's table,
+        // which starts at Orbit 0 = 0 AU (literally on the star, unusable for a world). Defaulting
+        // to Orbit 1 here for every engine used to skip CT/T5's own valid innermost slot for no
+        // reason.
+        const firstBodyOrbit = (_workingCopy.engine === 'CT' || _workingCopy.engine === 'T5') ? 0 : 1;
         let candidate = siblingBodies.length > 0
             ? Math.max(...siblingBodies.map(b => b.orbitId || 0)) + 1
-            : 1;
+            : firstBodyOrbit;
 
-        // Bump the candidate slot until its AU actually exceeds every sibling's (captured
-        // planets/companions included). Guarded to avoid looping forever if a CT orbit table
-        // clamps to a fixed max AU short of an extreme captured-planet distance.
+        // Bump the candidate slot until its AU actually exceeds every sibling WORLD's (captured
+        // planets included). Guarded to avoid looping forever if a CT orbit table clamps to a
+        // fixed max AU short of an extreme captured-planet distance.
         let guard = 0;
-        while (maxSiblingAU > 0 && (_orbitIdToAU(candidate) ?? Infinity) <= maxSiblingAU && guard++ < 100) {
+        while (maxBodyAU > 0 && (_orbitIdToAU(candidate) ?? Infinity) <= maxBodyAU && guard++ < 100) {
             candidate++;
         }
+
+        // Not an AU/ordering decision — just avoid two different objects (a world and a
+        // companion/secondary star) both claiming the exact same numbered orbit slot, which
+        // would render at the identical AU and visually overlap.
+        const starSlots = new Set(siblingStars.map(s => Math.round(s.orbitId ?? -1)));
+        guard = 0;
+        while (starSlots.has(candidate) && guard++ < 100) {
+            candidate++;
+        }
+
         return candidate;
     }
 
@@ -429,13 +523,17 @@ const SystemEditor = (() => {
             }
         }
 
-        const _orbitBySep = { Companion: 0.15, Close: 0.5, Near: 6.0, Far: 12.0 };
         _pushHistory();
+        // T5 companions aren't a numbered orbit slot at all (see T5_COMPANION_AU in
+        // t5_stellar_engine.js/t5_topdown_generator.js — T5's ORBIT_AU table has no entry below
+        // Orbit 0's 0.2 AU, so any numbered-slot value for a companion pushes outward instead of
+        // inward) — seed orbitAU directly instead of orbitId for this one case.
+        const isT5Companion = _workingCopy.engine === 'T5' && separation === 'Companion';
         _workingCopy.stars.push({
             _id: _uid('star'), role: separation,
             sType: 'M', subType: 0, sClass: 'V', name: 'M0V',
-            orbitId: _orbitBySep[separation] ?? 12.0,
-            orbitAU: null, parentStarId,
+            orbitId: isT5Companion ? null : (_ORBIT_AU_BY_SEPARATION[separation] ?? 12.0),
+            orbitAU: isT5Companion ? _T5_COMPANION_AU : null, parentStarId,
             mass: null, lum: null, diam: null, temp: null, mao: null,
             _manualFields: [], _raw: {},
         });
@@ -594,14 +692,14 @@ const SystemEditor = (() => {
                 const moon = parent.moons.find(m => m._id === bodyId);
                 if (moon) {
                     moon.isMainworld = true;
-                    if (!moon._manualFields.includes('isMainworld')) moon._manualFields.push('isMainworld');
+                    markManual(moon, 'isMainworld');
                 }
             }
         } else {
             const body = _workingCopy.bodies.find(b => b._id === bodyId);
             if (body) {
                 body.isMainworld = true;
-                if (!body._manualFields.includes('isMainworld')) body._manualFields.push('isMainworld');
+                markManual(body, 'isMainworld');
             }
         }
         _workingCopy.mainworldRef = bodyId;
@@ -703,26 +801,11 @@ const SystemEditor = (() => {
             }
         }
 
-        // Preserve mainworld name (same pattern as _preview and _fillAndSave).
-        const mwBody = _workingCopy.bodies.find(b => b._id === _workingCopy.mainworldRef)
-            || _workingCopy.bodies.find(b => b.isMainworld);
-        const mwName = mwBody && mwBody.name ? mwBody.name : null;
-        if (mwName) {
-            stateObj.name = mwName;
-            if (stateObj.mgt2eData) stateObj.mgt2eData.name = mwName;
-            if (stateObj.ctData)    stateObj.ctData.name    = mwName;
-            if (stateObj.t5Data)    stateObj.t5Data.name    = mwName;
-            if (stateObj.rttData)   stateObj.rttData.name   = mwName;
-        } else if (!stateObj.name && typeof getNextSystemName === 'function') {
-            stateObj.name = getNextSystemName(hexId);
-        }
+        // Preserve mainworld name, finalize, and commit to hexStates — shared with
+        // _generateAndCommit (see _finalizeCommittedState, below the adapter-dispatch
+        // helpers, and OW-40 in directives/project_manifest.md).
+        _finalizeCommittedState(hexId, stateObj);
 
-        stateObj.type = 'SYSTEM_PRESENT';
-        if (typeof computeSystemCounts === 'function') computeSystemCounts(stateObj);
-        if (typeof hexStates !== 'undefined') hexStates.set(hexId, stateObj);
-        if (typeof requestAnimationFrame === 'function' && typeof draw === 'function') {
-            requestAnimationFrame(draw);
-        }
         if (typeof SystemViewer !== 'undefined' && SystemViewer.isOpen()) {
             SystemViewer.refresh(hexId);
         }
@@ -753,7 +836,7 @@ const SystemEditor = (() => {
             pool.forEach(obj => {
                 if (obj.orbitId >= targetOrbitId && obj.orbitId < oldOrbit) {
                     obj.orbitId += 1;
-                    if (!obj._manualFields.includes('orbitId')) obj._manualFields.push('orbitId');
+                    markManual(obj, 'orbitId');
                 }
             });
         } else {
@@ -761,13 +844,31 @@ const SystemEditor = (() => {
             pool.forEach(obj => {
                 if (obj.orbitId > oldOrbit && obj.orbitId <= targetOrbitId) {
                     obj.orbitId -= 1;
-                    if (!obj._manualFields.includes('orbitId')) obj._manualFields.push('orbitId');
+                    markManual(obj, 'orbitId');
                 }
             });
         }
 
         draggedObj.orbitId = targetOrbitId;
-        if (!draggedObj._manualFields.includes('orbitId')) draggedObj._manualFields.push('orbitId');
+        markManual(draggedObj, 'orbitId');
+        _renderAndPreview();
+    }
+
+    // Moves a moon to a new position within its parent's moon list (T5 manual reorder — OW-47).
+    // T5 has no physical orbital-distance concept for moons (confirmed via Requirements Agent
+    // ruling, directives/project_manifest.md) — only an ordinal sequence, which for a moon list
+    // is simply its position in `parentBody.moons`. So reordering is a plain array splice, no
+    // AU/orbitId bookkeeping and no _wouldReorder-style guard needed (unlike body/companion
+    // orbit moves, there's no competing AU-derived invariant to protect), and no manual-field
+    // marking either — T5's generator never reorders `satellites[]` on its own the way it
+    // recalculates `orbitId`, so there's nothing here that generation could silently undo.
+    function _reorderMoon(parentBody, fromIndex, toIndex) {
+        if (fromIndex === toIndex) return;
+        const moons = parentBody.moons;
+        if (!moons || fromIndex < 0 || fromIndex >= moons.length || toIndex < 0 || toIndex >= moons.length) return;
+        _pushHistory();
+        const [moved] = moons.splice(fromIndex, 1);
+        moons.splice(toIndex, 0, moved);
         _renderAndPreview();
     }
 
@@ -947,6 +1048,54 @@ const SystemEditor = (() => {
             return row;
         }
 
+        // ── Helper: builds one row of single-character UWP seed-digit input boxes for a
+        // not-yet-generated body or moon (target._uwpSeed), filtered to `seedKeys`. Shared by
+        // the body detail pad and the moon list below it — was previously two copies differing
+        // only in the target object, its seedKeys list, and a slightly smaller font/padding for
+        // moon cells (passed here via `cellOpts`).
+        function _buildUwpSeedRow(target, seedKeys, cellOpts) {
+            if (!target._uwpSeed) target._uwpSeed = { st:null, s:null, a:null, h:null, p:null, g:null, l:null, tl:null };
+            const opts = cellOpts || {};
+            const fontSize = opts.fontSize || '11px';
+            const padding  = opts.padding  || '2px 0';
+
+            const row = document.createElement('div');
+            Object.assign(row.style, { display: 'flex', gap: '5px', alignItems: 'flex-end' });
+            seedKeys.forEach(([key, lbl]) => {
+                const cell = document.createElement('div');
+                Object.assign(cell.style, { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px' });
+                const cellLbl = document.createElement('span');
+                cellLbl.textContent = lbl;
+                Object.assign(cellLbl.style, { fontSize: '9px', color: P.dim });
+                const inp = document.createElement('input');
+                inp.type = 'text'; inp.maxLength = 1;
+                inp.value = target._uwpSeed[key] || '';
+                Object.assign(inp.style, {
+                    width: '20px', textAlign: 'center', background: 'transparent',
+                    border: `1px solid ${target._uwpSeed[key] ? P.accent : P.border}`,
+                    color: target._uwpSeed[key] ? P.accent : P.dim,
+                    fontFamily: 'inherit', fontSize, padding,
+                });
+                inp.addEventListener('input', () => {
+                    const v = _uwpSeedFilter(key, inp.value);
+                    if (inp.value !== v) inp.value = v;
+                    inp.style.color = v ? P.accent : P.dim;
+                    inp.style.borderColor = v ? P.accent : P.border;
+                });
+                inp.addEventListener('change', () => {
+                    const v = _uwpSeedFilter(key, inp.value);
+                    inp.value = v;
+                    _pushHistory();
+                    target._uwpSeed[key] = v || null;
+                    const fieldName = _UWP_SEED_FIELD_MAP[key];
+                    if (fieldName) _setManualField(target, fieldName, !!v);
+                });
+                cell.append(cellLbl, inp);
+                row.appendChild(cell);
+            });
+            return row;
+        }
+
         // ── Helper: builds the collapsible Derived Properties group for a star
         function _buildDerivedGroup(star) {
             const grp = document.createElement('details');
@@ -959,33 +1108,12 @@ const SystemEditor = (() => {
             const pad = document.createElement('div');
             Object.assign(pad.style, { paddingLeft: '4px', paddingTop: '2px' });
 
-            const fmt4 = v => v != null ? parseFloat(v.toFixed(4)) : null;
-
-            pad.appendChild(_derivedRow('Mass:', fmt4(star.mass), 'M☉', val => {
-                _pushHistory(); star.mass = val;
-                if (val != null) { if (!star._manualFields.includes('mass')) star._manualFields.push('mass'); }
-                else { star._manualFields = star._manualFields.filter(f => f !== 'mass'); }
-            }));
-            pad.appendChild(_derivedRow('Lum:', fmt4(star.lum), 'L☉', val => {
-                _pushHistory(); star.lum = val;
-                if (val != null) { if (!star._manualFields.includes('lum')) star._manualFields.push('lum'); }
-                else { star._manualFields = star._manualFields.filter(f => f !== 'lum'); }
-            }));
-            pad.appendChild(_derivedRow('Diam:', fmt4(star.diam), 'D☉', val => {
-                _pushHistory(); star.diam = val;
-                if (val != null) { if (!star._manualFields.includes('diam')) star._manualFields.push('diam'); }
-                else { star._manualFields = star._manualFields.filter(f => f !== 'diam'); }
-            }));
-            pad.appendChild(_derivedRow('Temp:', star.temp != null ? Math.round(star.temp) : null, 'K', val => {
-                _pushHistory(); star.temp = val;
-                if (val != null) { if (!star._manualFields.includes('temp')) star._manualFields.push('temp'); }
-                else { star._manualFields = star._manualFields.filter(f => f !== 'temp'); }
-            }));
-            pad.appendChild(_derivedRow('MAO:', fmt4(star.mao), 'orb', val => {
-                _pushHistory(); star.mao = val;
-                if (val != null) { if (!star._manualFields.includes('mao')) star._manualFields.push('mao'); }
-                else { star._manualFields = star._manualFields.filter(f => f !== 'mao'); }
-            }));
+            _DERIVED_STAR_FIELDS.forEach(([field, label, unit, fmt]) => {
+                pad.appendChild(_derivedRow(label, fmt(star[field]), unit, val => {
+                    _pushHistory(); star[field] = val;
+                    _setManualField(star, field, val != null);
+                }));
+            });
 
             grp.appendChild(pad);
             return grp;
@@ -1105,6 +1233,13 @@ const SystemEditor = (() => {
             nameInput.addEventListener('change', () => {
                 _pushHistory(); body.name = nameInput.value;
                 summaryLabel.textContent = `${body.isMainworld ? '★ ' : ''}${typeLabel}${body.name ? ` "${body.name}"` : ''}${uwpStr}${orbitStr}`;
+                // Every other field's change handler calls this to regenerate+commit the working
+                // copy into hexStates (_preview → _generateAndCommit → _finalizeCommittedState,
+                // which is what actually copies a mainworld's name onto stateObj.name) — this one
+                // didn't, so a renamed mainworld's new name never reached hexStates.name (what
+                // exportSystemJson/the hex accordion actually read) until some other field
+                // happened to be edited afterward, or Preview/Fill & Save was clicked separately.
+                _renderAndPreview();
             });
             nameRow.append(nameLbl, nameInput);
             detailPad.appendChild(nameRow);
@@ -1116,6 +1251,11 @@ const SystemEditor = (() => {
             orbitLbl.textContent = 'Orbit #:';
             Object.assign(orbitLbl.style, { color: P.sub, minWidth: '38px' });
             const isCtOrbitSlot = _workingCopy.engine === 'CT';
+            // CT and T5 both place bodies into a fixed 20-slot integer array (star.orbits[0..19]
+            // in t5_topdown_generator.js's _initStars, matching CT's own ORBIT_AU array lookup) —
+            // MgT2E's own placement has no such array and genuinely accepts a continuous orbitId/
+            // AU value, so it's excluded here.
+            const isDiscreteOrbitSlot = isCtOrbitSlot || _workingCopy.engine === 'T5';
 
             // A CT Captured Planet (RAW Book 6 anomaly) never occupies a discrete orbit slot —
             // it keeps its own already-rolled fractional orbit/distance permanently (see
@@ -1138,13 +1278,17 @@ const SystemEditor = (() => {
             const orbitInput = document.createElement('input');
             orbitInput.type = 'number'; orbitInput.value = body.orbitId != null ? parseFloat(body.orbitId.toFixed(3)) : '';
             orbitInput.min = '0';
-            // CT orbits are discrete integer slots (0="Orbit 0"=0.2 AU, 1=0.4 AU, ...) via
-            // ORBIT_AU, not a continuous AU value — a fractional entry here (e.g. 0.2, meant as
-            // an AU distance) missed CT's array lookup entirely and silently corrupted the
-            // body's real distance to a hardcoded 1.0 AU fallback, which also scrambled the hex
-            // info panel's by-distance sort order (see ct_bottomup_generator.js's fix). Other
-            // engines keep the finer step for their own continuous-AU orbit conventions.
-            orbitInput.step = isCtOrbitSlot ? '1' : '0.001';
+            // CT and T5 orbits are discrete integer slots (0="Orbit 0"=0.2 AU, 1=0.4 AU, ...) via
+            // each engine's own ORBIT_AU table, not a continuous AU value — a fractional entry
+            // here (e.g. 0.2, meant as an AU distance) misses the array lookup entirely. For CT
+            // this silently corrupted the body's real distance to a hardcoded 1.0 AU fallback,
+            // which also scrambled the hex info panel's by-distance sort order (see
+            // ct_bottomup_generator.js's fix). For T5, findAvailableOrbit (t5_topdown_generator.js)
+            // can never resolve a fractional target to a real array index — the body is silently
+            // dropped from the system entirely (never placed, never shown in the orrery), no
+            // error surfaced. MgT2E keeps the finer step for its own genuinely continuous-AU
+            // orbit convention (no fixed-slot array in its generator).
+            orbitInput.step = isDiscreteOrbitSlot ? '1' : '0.001';
             orbitInput.placeholder = 'auto';
             Object.assign(orbitInput.style, {
                 width: '60px', background: 'transparent', border: `1px solid ${P.border}`,
@@ -1152,7 +1296,7 @@ const SystemEditor = (() => {
             });
             orbitInput.addEventListener('change', () => {
                 let newOrbitId = orbitInput.value !== '' ? parseFloat(orbitInput.value) : null;
-                if (isCtOrbitSlot && newOrbitId != null) newOrbitId = Math.round(newOrbitId);
+                if (isDiscreteOrbitSlot && newOrbitId != null) newOrbitId = Math.round(newOrbitId);
                 if (_wouldReorder(body, false, newOrbitId)) {
                     orbitInput.value = body.orbitId != null ? parseFloat(body.orbitId.toFixed(3)) : '';
                     _showWarn('Use Drag & Drop',
@@ -1162,7 +1306,7 @@ const SystemEditor = (() => {
                 }
                 _pushHistory();
                 body.orbitId = newOrbitId;
-                if (!body._manualFields.includes('orbitId')) body._manualFields.push('orbitId');
+                markManual(body, 'orbitId');
                 _renderAndPreview();
             });
             const orbitAuSpan = document.createElement('span');
@@ -1262,6 +1406,56 @@ const SystemEditor = (() => {
                 detailPad.appendChild(ggRow);
             }
 
+            // Gas Giant size (T5 — two tiers, no Medium, per t5_topdown_generator.js's
+            // generateGasGiantStats: a 2D6 roll of 2-3 is Small (size letter M/N), 4-12 is Large
+            // (size letter P-X) — same two-tier shape as CT, different roll table. Never had a UI
+            // control before — ggType was fixed at creation ('+GG' always defaults to 'GS') or
+            // read from a previously-generated body (t5_editor_adapter.js's readBodies, via the
+            // shared ggTypeFrom helper). `_t5BodySeed` (t5_editor_adapter.js) already turns
+            // ggType back into the `'Small Gas Giant'`/`'Large Gas Giant'` type string T5's
+            // generator expects — the round-trip already worked, only the control was missing.
+            // `_t5UwpLockFor` carries `_raw.size` forward unconditionally once a body has a uwp
+            // (so a re-save doesn't reroll an already-generated GG's size letter) — without
+            // clearing it here, changing tiers via this dropdown would keep the OLD tier's size
+            // letter (e.g. a Small's 'M'/'N' surviving into a Large body), which
+            // calculateT5PhysicalStats (t5_world_engine.js) would then read via fromEHex() as a
+            // wildly wrong diameter for the new tier. diamKm isn't manual-locked by
+            // _t5UwpLockFor, so it re-derives from the fresh size letter on the next Preview
+            // without needing to be cleared explicitly, but it's cleared anyway for consistency
+            // with CT/MgT2E's own reset list above and defensiveness against future lock changes.
+            if (body.type === 'Gas Giant' && _workingCopy.engine === 'T5') {
+                const ggRow = document.createElement('div');
+                Object.assign(ggRow.style, { display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px', fontSize: '11px' });
+                const ggLbl = document.createElement('label');
+                ggLbl.textContent = 'Size:';
+                Object.assign(ggLbl.style, { color: P.sub, minWidth: '38px' });
+                const ggSel = document.createElement('select');
+                Object.assign(ggSel.style, {
+                    background: '#0d1117', border: `1px solid ${P.border}`,
+                    color: P.accent, fontFamily: 'inherit', fontSize: '11px', padding: '2px 4px',
+                });
+                [['GL', 'Large'], ['GS', 'Small']].forEach(([val, label]) => {
+                    const opt = document.createElement('option');
+                    opt.value = val; opt.textContent = label;
+                    if ((body.ggType || 'GS') === val) opt.selected = true;
+                    ggSel.appendChild(opt);
+                });
+                ggSel.addEventListener('change', () => {
+                    _pushHistory();
+                    body.ggType = ggSel.value;
+                    body._raw = body._raw || {};
+                    delete body._raw.size;
+                    delete body._raw.diamKm;
+                    delete body._raw.gravity;
+                    delete body._raw.mass;
+                    delete body._raw.massEarths;
+                    delete body._raw.density;
+                    _renderAndPreview();
+                });
+                ggRow.append(ggLbl, ggSel);
+                detailPad.appendChild(ggRow);
+            }
+
             if (body.uwp) {
                 const uwpRow = document.createElement('div');
                 Object.assign(uwpRow.style, { fontSize: '11px', color: P.sub, marginBottom: '2px' });
@@ -1270,64 +1464,29 @@ const SystemEditor = (() => {
             }
 
             // UWP seed boxes — only for newly added terrestrial/mainworld bodies (no generated UWP yet).
-            // CT and MgT2E Planetoid Belts are also allowed in (starport/pop/gov/law/tl only — see
-            // seedKeys below): unlike a Gas Giant, a belt's population isn't forced to 0 in either
-            // engine (CT: rules/ct_data.js's FORCED_ZERO_POP.TYPES omits 'Planetoid Belt'; MgT2E:
-            // generateSubordinateSocial/mgt2e_socio_engine.js has no belt-type exclusion for pop/
-            // gov/law/starport/tl either), matching both editions' allowance for belt outposts/
-            // colonies — so its social digits are meaningful to seed in both.
-            const isEditableBelt = body.type === 'Belt' && (_workingCopy.engine === 'CT' || _workingCopy.engine === 'MgT2E');
+            // CT, MgT2E, and T5 Planetoid Belts are also allowed in (starport/pop/gov/law/tl only —
+            // see seedKeys below): unlike a Gas Giant, a belt's population isn't forced to 0 in any
+            // of the three (CT: rules/ct_data.js's FORCED_ZERO_POP.TYPES omits 'Planetoid Belt';
+            // MgT2E: generateSubordinateSocial/mgt2e_socio_engine.js has no belt-type exclusion for
+            // pop/gov/law/starport/tl either; T5: generateT5SubordinateUWP/t5_topdown_generator.js
+            // only forces size/atm/hydro to 0 for type==='Belt', pop/starport/gov/law/tl all roll
+            // normally), matching all three editions' allowance for belt outposts/colonies — so its
+            // social digits are meaningful to seed in all three.
+            const isEditableBelt = body.type === 'Belt' &&
+                (_workingCopy.engine === 'CT' || _workingCopy.engine === 'MgT2E' || _workingCopy.engine === 'T5');
             if (!body.uwp && body.type !== 'Gas Giant' && (body.type !== 'Belt' || isEditableBelt)) {
-                if (!body._uwpSeed) body._uwpSeed = { st:null, s:null, a:null, h:null, p:null, g:null, l:null, tl:null };
                 const seedSection = document.createElement('div');
                 Object.assign(seedSection.style, { marginTop: '4px', marginBottom: '3px' });
                 const seedLabel = document.createElement('div');
                 seedLabel.textContent = 'Seed UWP digits (optional):';
                 Object.assign(seedLabel.style, { fontSize: '10px', color: P.dim, marginBottom: '2px' });
                 seedSection.appendChild(seedLabel);
-                const boxRow = document.createElement('div');
-                Object.assign(boxRow.style, { display: 'flex', gap: '5px', alignItems: 'flex-end' });
                 // A belt's size/atm/hydro are RAW-fixed constants (always 0), not user choices —
                 // omit those three digit boxes so they can't be typo'd into a non-zero override.
                 const seedKeys = isEditableBelt
                     ? [['st','St'],['p','P'],['g','G'],['l','L'],['tl','TL']]
                     : [['st','St'],['s','S'],['a','A'],['h','H'],['p','P'],['g','G'],['l','L'],['tl','TL']];
-                seedKeys.forEach(([key, lbl]) => {
-                    const cell = document.createElement('div');
-                    Object.assign(cell.style, { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px' });
-                    const cellLbl = document.createElement('span');
-                    cellLbl.textContent = lbl;
-                    Object.assign(cellLbl.style, { fontSize: '9px', color: P.dim });
-                    const inp = document.createElement('input');
-                    inp.type = 'text'; inp.maxLength = 1;
-                    inp.value = body._uwpSeed[key] || '';
-                    Object.assign(inp.style, {
-                        width: '20px', textAlign: 'center', background: 'transparent',
-                        border: `1px solid ${body._uwpSeed[key] ? P.accent : P.border}`,
-                        color: body._uwpSeed[key] ? P.accent : P.dim,
-                        fontFamily: 'inherit', fontSize: '11px', padding: '2px 0',
-                    });
-                    inp.addEventListener('input', () => {
-                        const v = _uwpSeedFilter(key, inp.value);
-                        if (inp.value !== v) inp.value = v;
-                        inp.style.color = v ? P.accent : P.dim;
-                        inp.style.borderColor = v ? P.accent : P.border;
-                    });
-                    inp.addEventListener('change', () => {
-                        const v = _uwpSeedFilter(key, inp.value);
-                        inp.value = v;
-                        _pushHistory();
-                        body._uwpSeed[key] = v || null;
-                        const fieldName = _UWP_SEED_FIELD_MAP[key];
-                        if (fieldName) {
-                            if (v) { if (!body._manualFields.includes(fieldName)) body._manualFields.push(fieldName); }
-                            else { body._manualFields = body._manualFields.filter(f => f !== fieldName); }
-                        }
-                    });
-                    cell.append(cellLbl, inp);
-                    boxRow.appendChild(cell);
-                });
-                seedSection.appendChild(boxRow);
+                seedSection.appendChild(_buildUwpSeedRow(body, seedKeys));
                 detailPad.appendChild(seedSection);
             }
             if (body.travelZone && body.travelZone !== 'G') {
@@ -1354,9 +1513,49 @@ const SystemEditor = (() => {
                 Object.assign(moonContainer.style, {
                     borderLeft: `1px solid ${P.border}`, marginLeft: '8px', paddingLeft: '8px', marginTop: '2px',
                 });
-                body.moons.forEach(moon => {
+                const isT5 = _workingCopy.engine === 'T5';
+                body.moons.forEach((moon, moonIdx) => {
                     const moonRow = document.createElement('div');
                     Object.assign(moonRow.style, { display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '2px', fontSize: '11px' });
+
+                    // T5 has no physical orbital-distance concept for moons — only an ordinal
+                    // sequence (Requirements Agent ruling, OW-47). Give T5 moons a drag handle
+                    // to manually reorder within `body.moons` instead of the pd number field
+                    // shown below for every other engine.
+                    if (isT5) {
+                        const dragHandle = document.createElement('span');
+                        dragHandle.textContent = '≡';
+                        dragHandle.title = 'Drag to reorder';
+                        Object.assign(dragHandle.style, { color: P.dim, cursor: 'grab', fontSize: '12px', flexShrink: '0' });
+                        moonRow.appendChild(dragHandle);
+                        moonRow.draggable = true;
+                        moonRow.addEventListener('dragstart', e => {
+                            _dragMoonId = moon._id;
+                            _dragMoonParentId = body._id;
+                            e.dataTransfer.effectAllowed = 'move';
+                            setTimeout(() => { moonRow.style.opacity = '0.4'; }, 0);
+                        });
+                        moonRow.addEventListener('dragend', () => {
+                            moonRow.style.opacity = '1';
+                            _dragMoonId = null; _dragMoonParentId = null;
+                            moonContainer.querySelectorAll(':scope > div').forEach(el => { el.style.borderColor = ''; });
+                        });
+                        moonRow.addEventListener('dragover', e => {
+                            if (!_dragMoonId || _dragMoonId === moon._id || _dragMoonParentId !== body._id) return;
+                            e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+                            moonRow.style.border = `1px solid ${P.accent}`;
+                        });
+                        moonRow.addEventListener('dragleave', () => { moonRow.style.border = ''; });
+                        moonRow.addEventListener('drop', e => {
+                            e.preventDefault();
+                            moonRow.style.border = '';
+                            if (!_dragMoonId || _dragMoonParentId !== body._id) return;
+                            const fromIdx = body.moons.findIndex(m => m._id === _dragMoonId);
+                            if (fromIdx === -1) return;
+                            _reorderMoon(body, fromIdx, moonIdx);
+                        });
+                    }
+
                     const moonNameInput = document.createElement('input');
                     moonNameInput.type = 'text'; moonNameInput.value = moon.name || '';
                     moonNameInput.placeholder = moon.isMainworld ? '★ Mainworld Moon' : 'Moon name…';
@@ -1364,7 +1563,9 @@ const SystemEditor = (() => {
                         flex: '1', background: 'transparent', border: `1px solid ${P.border}`,
                         color: moon.isMainworld ? P.mw : P.sub, fontFamily: 'inherit', fontSize: '11px', padding: '2px 4px',
                     });
-                    moonNameInput.addEventListener('change', () => { _pushHistory(); moon.name = moonNameInput.value; });
+                    // Same gap as the body-level Name input above — a renamed mainworld moon's
+                    // new name never reached hexStates.name without this.
+                    moonNameInput.addEventListener('change', () => { _pushHistory(); moon.name = moonNameInput.value; _renderAndPreview(); });
                     const isMoonMW = moon.isMainworld;
                     moonRow.appendChild(moonNameInput);
                     moonRow.appendChild(_btn(
@@ -1378,8 +1579,10 @@ const SystemEditor = (() => {
 
                     // Orbit distance (pd) — directly editable, same pattern as the star
                     // Derived Properties fields. Clearing hands the moon back to the engine
-                    // to roll a fresh position on the next Preview.
-                    moonContainer.appendChild(_derivedRow(
+                    // to roll a fresh position on the next Preview. Not shown for T5 — T5 has
+                    // no physical orbital-distance concept for moons (OW-47); reordering above
+                    // is the only relevant "position" a T5 moon has.
+                    if (!isT5) moonContainer.appendChild(_derivedRow(
                         'Orbit (⌀):',
                         moon.pd != null ? Math.round(moon.pd * 100) / 100 : null,
                         'pd',
@@ -1389,51 +1592,15 @@ const SystemEditor = (() => {
                             // `pd !== undefined` to decide whether to re-roll a position; `null`
                             // would incorrectly be treated as "already positioned at null".
                             moon.pd = (val == null) ? undefined : val;
-                            if (val != null) { if (!moon._manualFields.includes('pd')) moon._manualFields.push('pd'); }
-                            else { moon._manualFields = moon._manualFields.filter(f => f !== 'pd'); }
+                            _setManualField(moon, 'pd', val != null);
                         }
                     ));
 
                     // UWP seed boxes for newly added moons (no generated UWP yet)
                     if (!moon.uwp) {
-                        if (!moon._uwpSeed) moon._uwpSeed = { st:null, s:null, a:null, h:null, p:null, g:null, l:null, tl:null };
-                        const moonSeedRow = document.createElement('div');
-                        Object.assign(moonSeedRow.style, { display: 'flex', gap: '5px', alignItems: 'flex-end', marginBottom: '4px', marginLeft: '2px' });
-                        [['st','St'],['s','S'],['a','A'],['h','H'],['p','P'],['g','G'],['l','L'],['tl','TL']].forEach(([key, lbl]) => {
-                            const cell = document.createElement('div');
-                            Object.assign(cell.style, { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px' });
-                            const cellLbl = document.createElement('span');
-                            cellLbl.textContent = lbl;
-                            Object.assign(cellLbl.style, { fontSize: '9px', color: P.dim });
-                            const inp = document.createElement('input');
-                            inp.type = 'text'; inp.maxLength = 1;
-                            inp.value = moon._uwpSeed[key] || '';
-                            Object.assign(inp.style, {
-                                width: '20px', textAlign: 'center', background: 'transparent',
-                                border: `1px solid ${moon._uwpSeed[key] ? P.accent : P.border}`,
-                                color: moon._uwpSeed[key] ? P.accent : P.dim,
-                                fontFamily: 'inherit', fontSize: '10px', padding: '1px 0',
-                            });
-                            inp.addEventListener('input', () => {
-                                const v = _uwpSeedFilter(key, inp.value);
-                                if (inp.value !== v) inp.value = v;
-                                inp.style.color = v ? P.accent : P.dim;
-                                inp.style.borderColor = v ? P.accent : P.border;
-                            });
-                            inp.addEventListener('change', () => {
-                                const v = _uwpSeedFilter(key, inp.value);
-                                inp.value = v;
-                                _pushHistory();
-                                moon._uwpSeed[key] = v || null;
-                                const fieldName = _UWP_SEED_FIELD_MAP[key];
-                                if (fieldName) {
-                                    if (v) { if (!moon._manualFields.includes(fieldName)) moon._manualFields.push(fieldName); }
-                                    else { moon._manualFields = moon._manualFields.filter(f => f !== fieldName); }
-                                }
-                            });
-                            cell.append(cellLbl, inp);
-                            moonSeedRow.appendChild(cell);
-                        });
+                        const moonSeedKeys = [['st','St'],['s','S'],['a','A'],['h','H'],['p','P'],['g','G'],['l','L'],['tl','TL']];
+                        const moonSeedRow = _buildUwpSeedRow(moon, moonSeedKeys, { fontSize: '10px', padding: '1px 0' });
+                        Object.assign(moonSeedRow.style, { marginBottom: '4px', marginLeft: '2px' });
                         moonContainer.appendChild(moonSeedRow);
                     }
                 });
@@ -1471,7 +1638,9 @@ const SystemEditor = (() => {
             compSummary.appendChild(compDragHandle);
 
             const compOrbitStr = () => star.orbitId != null ? ` ·${parseFloat(star.orbitId.toFixed(3))}` :
-                                       star.orbitAU != null ? ` ·${Number(star.orbitAU).toFixed(1)}AU` : '';
+                                       // toFixed(2) — a T5 companion's fixed 0.05 AU rounds to "0.1" at
+                                       // 1 decimal place, disagreeing with the detail row's more precise display.
+                                       star.orbitAU != null ? ` ·${Number(star.orbitAU).toFixed(2)}AU` : '';
             const compLabel = document.createElement('span');
             compLabel.textContent = `⊙ ${star.role}: ${star.sType}${star.subType}${star.sClass}${compOrbitStr()}`;
             Object.assign(compLabel.style, { color: P.star, fontWeight: 'bold', fontSize: '12px', flex: '1' });
@@ -1529,19 +1698,19 @@ const SystemEditor = (() => {
             const _compIsExotic = (star.sType === 'D' || star.sType === 'BD');
             compDetailPad.appendChild(_starSelectRow('Type:', star.sType, _STAR_TYPE_CHOICES, false, val => {
                 _pushHistory(); star.sType = val;
-                if (val === 'D')  { star.sClass = 'D'; star.subType = 0; }
-                if (val === 'BD') { star.sClass = 'V'; star.subType = 0; }
-                if (!star._manualFields.includes('sType')) star._manualFields.push('sType');
-                if (val === 'D' || val === 'BD') { _renderAndPreview(); } else { updateCompLabel(); _preview(); }
+                const exo = _exoticStarDefaults(val);
+                if (exo) { star.sClass = exo.sClass; star.subType = exo.subType; }
+                markManual(star, 'sType');
+                if (exo) { _renderAndPreview(); } else { updateCompLabel(); _preview(); }
             }));
             compDetailPad.appendChild(_starSelectRow('Subtype:', star.subType, _STAR_SUBTYPE_CHOICES, _compIsExotic, val => {
                 _pushHistory(); star.subType = parseInt(val);
-                if (!star._manualFields.includes('subType')) star._manualFields.push('subType');
+                markManual(star, 'subType');
                 updateCompLabel(); _preview();
             }));
             compDetailPad.appendChild(_starSelectRow('Class:', star.sClass, _STAR_CLASS_CHOICES, _compIsExotic, val => {
                 _pushHistory(); star.sClass = val;
-                if (!star._manualFields.includes('sClass')) star._manualFields.push('sClass');
+                markManual(star, 'sClass');
                 updateCompLabel(); _preview();
             }));
 
@@ -1552,7 +1721,6 @@ const SystemEditor = (() => {
             // recognize, which was silently possible even after +Comp itself was removed (OW-17).
             const _isCT          = _workingCopy.engine === 'CT';
             const _roleChoices   = _isCT ? ['Close', 'Far'] : ['Companion', 'Close', 'Near', 'Far'];
-            const _orbitBySep    = { Companion: 0.15, Close: 0.5, Near: 6.0, Far: 12.0 };
             const sepRow = document.createElement('div');
             Object.assign(sepRow.style, { display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px', fontSize: '11px' });
             const sepLbl = document.createElement('label');
@@ -1573,7 +1741,14 @@ const SystemEditor = (() => {
                 _pushHistory();
                 star.role = sepSel.value;
                 if (!star._manualFields.includes('orbitId')) {
-                    star.orbitId = _orbitBySep[sepSel.value] ?? star.orbitId;
+                    if (_workingCopy.engine === 'T5' && sepSel.value === 'Companion') {
+                        // No numbered orbit slot for a T5 companion — see _T5_COMPANION_AU above.
+                        star.orbitId = null;
+                        star.orbitAU = _T5_COMPANION_AU;
+                    } else {
+                        star.orbitId = _ORBIT_AU_BY_SEPARATION[sepSel.value] ?? star.orbitId;
+                        star.orbitAU = null;
+                    }
                 }
                 updateCompLabel();
                 _renderAndPreview();
@@ -1591,11 +1766,14 @@ const SystemEditor = (() => {
                 }
                 _pushHistory();
                 star.orbitId = newOrbitId;
-                if (!star._manualFields.includes('orbitId')) star._manualFields.push('orbitId');
+                markManual(star, 'orbitId');
                 _renderAndPreview();
             });
             const compOrbitAuSpan = document.createElement('span');
-            const _compAu = _orbitIdToAU(star.orbitId);
+            // Companion with no numbered orbit slot (T5 — see T5_COMPANION_AU in
+            // t5_stellar_engine.js/t5_topdown_generator.js): fall back to the fixed orbitAU set
+            // at generation/creation time instead of showing nothing.
+            const _compAu = _orbitIdToAU(star.orbitId) ?? star.orbitAU;
             compOrbitAuSpan.textContent = _compAu != null ? `→ ${_compAu.toFixed(2)} AU` : '';
             Object.assign(compOrbitAuSpan.style, { color: P.dim, fontSize: '11px' });
             compOrbitRow.appendChild(compOrbitAuSpan);
@@ -1711,19 +1889,19 @@ const SystemEditor = (() => {
         const _primaryIsExotic = (primaryStar.sType === 'D' || primaryStar.sType === 'BD');
         primaryDetailPad.appendChild(_starSelectRow('Type:', primaryStar.sType, _STAR_TYPE_CHOICES, false, val => {
             _pushHistory(); primaryStar.sType = val;
-            if (val === 'D')  { primaryStar.sClass = 'D'; primaryStar.subType = 0; }
-            if (val === 'BD') { primaryStar.sClass = 'V'; primaryStar.subType = 0; }
-            if (!primaryStar._manualFields.includes('sType')) primaryStar._manualFields.push('sType');
-            if (val === 'D' || val === 'BD') { _renderAndPreview(); } else { updatePrimaryLabel(); _preview(); }
+            const exo = _exoticStarDefaults(val);
+            if (exo) { primaryStar.sClass = exo.sClass; primaryStar.subType = exo.subType; }
+            markManual(primaryStar, 'sType');
+            if (exo) { _renderAndPreview(); } else { updatePrimaryLabel(); _preview(); }
         }));
         primaryDetailPad.appendChild(_starSelectRow('Subtype:', primaryStar.subType, _STAR_SUBTYPE_CHOICES, _primaryIsExotic, val => {
             _pushHistory(); primaryStar.subType = parseInt(val);
-            if (!primaryStar._manualFields.includes('subType')) primaryStar._manualFields.push('subType');
+            markManual(primaryStar, 'subType');
             updatePrimaryLabel(); _preview();
         }));
         primaryDetailPad.appendChild(_starSelectRow('Class:', primaryStar.sClass, _STAR_CLASS_CHOICES, _primaryIsExotic, val => {
             _pushHistory(); primaryStar.sClass = val;
-            if (!primaryStar._manualFields.includes('sClass')) primaryStar._manualFields.push('sClass');
+            markManual(primaryStar, 'sClass');
             updatePrimaryLabel(); _preview();
         }));
         primaryDetailPad.appendChild(_buildDerivedGroup(primaryStar));
@@ -2040,6 +2218,17 @@ const SystemEditor = (() => {
             if (star.mao == null && typeof eng.getMAO === 'function') {
                 star.mao = eng.getMAO(sType, subType, sClass);
             }
+
+            // _buildSeedSys mirrors the pre-resolution (often still-null) `lum` into
+            // `luminosity` for CT's benefit (CT's own code reads `luminosity`, never `lum` —
+            // see the CT branch above), assumed harmless for other engines since none of their
+            // *generators* read it. T5's pre-existing, unconditional logT5BodyBiography
+            // diagnostic (t5_stellar_engine.js) is the exception — it reads `body.luminosity`
+            // on every single generation pass with no isLoggingEnabled gate, so a stale null
+            // here crashed every T5 Preview/Fill & Save on a freshly-created system (found
+            // 2026-07-16 while root-causing OW-19). Resync here too, same as CT, rather than
+            // patch the T5-specific symptom.
+            star.luminosity = star.lum;
         };
 
         for (const star of seedSys.stars) {
@@ -2103,6 +2292,26 @@ const SystemEditor = (() => {
             // classification (getZoneForOrbit/zoneHTable) for any star that passes through here.
             specKey:      `${s.sType || 'G'}${s.subType != null ? s.subType : 5}`,
             orbitId:      s.orbitId != null ? s.orbitId : undefined,
+            // T5's own generator prefers `orbitID` (capital ID) over `orbitId` when both are
+            // present (OW-46's fallback, t5_topdown_generator.js's _initStars) — without setting
+            // it explicitly here too, the `...(s._raw || {})` spread above leaks a *stale*
+            // `orbitID` through untouched whenever a star's _raw came from a previous native
+            // generation (e.g. this star was a real, numbered-orbit Close star before the user
+            // switched its Role to Companion). _initStars would then see that stale numbered
+            // orbit, treat the star as NOT a companion, and silently ignore both `orbitId: null`
+            // and the `distAU` override below. Mirroring the same value under both field names
+            // guarantees they can never disagree.
+            orbitID:      s.orbitId != null ? s.orbitId : undefined,
+            // T5-only field, read by t5_topdown_generator.js's _initStars for a companion star
+            // (orbitId/orbitID both null — no numbered orbit slot). Without this, the
+            // `...(s._raw || {})` spread above silently leaks a stale distAU from this star's
+            // *previous* role/orbit (e.g. a Close star's real generated AU) through unchanged
+            // when the user switches its Role to Companion — the working copy's own orbitAU is
+            // already correct at that point (set by the Role dropdown / _addStar), it just never
+            // reached the seed. Harmless for engines other than T5, and for T5 stars that keep a
+            // numbered orbit — _initStars always recomputes distAU from orbitId in that case,
+            // overwriting this.
+            distAU:       s.orbitAU,
             parentStarIdx: s.parentStarId != null ? (starIdxById[s.parentStarId] ?? 0) : 0,
             separation:   s.role === 'Primary' ? null : (s.role || 'Companion'),
             _manualFields: s._manualFields ? [...s._manualFields] : [],
@@ -2215,6 +2424,50 @@ const SystemEditor = (() => {
     // Preview click, or a missing one on Fill & Save.
     // Returns { hexId, stateObj, newSys } on success, or null if generation failed (a warning
     // dialog has already been shown to the user in that case).
+    // Preserves the working copy's mainworld name onto stateObj (and its per-engine *Data name
+    // mirrors), or assigns a fresh generated name if there's no mainworld yet — then finalizes
+    // stateObj as a committed system (type, computed counts) and writes it to hexStates.
+    // Shared tail of _generateAndCommit() and _regenerateBody() — was previously two identical
+    // ~20-line copies (see OW-40, directives/project_manifest.md). Does not touch the viewer/
+    // accordion refresh or editor-tree re-render — those differ between the two callers (e.g.
+    // only _generateAndCommit's caller-side flow refreshes the accordion; _regenerateBody
+    // instead re-renders the editor tree directly) and are left to each caller.
+    function _finalizeCommittedState(hexId, stateObj) {
+        let mwBody = _workingCopy.bodies.find(b => b._id === _workingCopy.mainworldRef)
+            || _workingCopy.bodies.find(b => b.isMainworld);
+        if (!mwBody) {
+            // Mainworld may be a moon (lunar mainworld, e.g. T5's isLunarMainworld) rather than a
+            // top-level body — the search above only ever checked top-level bodies, so a lunar
+            // mainworld's real current name was silently never found here. stateObj.name then
+            // fell through to the `else if` below, which no-ops once stateObj.name is already
+            // set (from an earlier save) — freezing the exported/displayed system name at
+            // whatever it was before the mainworld became/was renamed as a moon, instead of
+            // tracking the current mainworld. Mirrors the same nested-moon lookup
+            // _buildWorkingCopyFromState already does when reading a system in.
+            for (const b of _workingCopy.bodies) {
+                const mwMoon = (b.moons || []).find(m => m._id === _workingCopy.mainworldRef || m.isMainworld);
+                if (mwMoon) { mwBody = mwMoon; break; }
+            }
+        }
+        const mwName = mwBody && mwBody.name ? mwBody.name : null;
+        if (mwName) {
+            stateObj.name = mwName;
+            if (stateObj.mgt2eData) stateObj.mgt2eData.name = mwName;
+            if (stateObj.ctData)    stateObj.ctData.name    = mwName;
+            if (stateObj.t5Data)    stateObj.t5Data.name    = mwName;
+            if (stateObj.rttData)   stateObj.rttData.name   = mwName;
+        } else if (!stateObj.name && typeof getNextSystemName === 'function') {
+            stateObj.name = getNextSystemName(hexId);
+        }
+
+        stateObj.type = 'SYSTEM_PRESENT';
+        if (typeof computeSystemCounts === 'function') computeSystemCounts(stateObj);
+        if (typeof hexStates !== 'undefined') hexStates.set(hexId, stateObj);
+        if (typeof requestAnimationFrame === 'function' && typeof draw === 'function') {
+            requestAnimationFrame(draw);
+        }
+    }
+
     function _generateAndCommit(errorLabel) {
         const hexId   = _workingCopy.hexId;
         const engine  = _workingCopy.engine;
@@ -2250,26 +2503,8 @@ const SystemEditor = (() => {
         // Fresh blank creation: override generator's travel zone with Green
         if (_workingCopy.bodies.length === 0) _forceGreenTravelZone(stateObj);
 
-        // Preserve name from working copy mainworld
-        const mwBody = _workingCopy.bodies.find(b => b._id === _workingCopy.mainworldRef)
-            || _workingCopy.bodies.find(b => b.isMainworld);
-        const mwName = mwBody && mwBody.name ? mwBody.name : null;
-        if (mwName) {
-            stateObj.name = mwName;
-            if (stateObj.mgt2eData) stateObj.mgt2eData.name = mwName;
-            if (stateObj.ctData)    stateObj.ctData.name    = mwName;
-            if (stateObj.t5Data)    stateObj.t5Data.name    = mwName;
-            if (stateObj.rttData)   stateObj.rttData.name   = mwName;
-        } else if (!stateObj.name && typeof getNextSystemName === 'function') {
-            stateObj.name = getNextSystemName(hexId);
-        }
+        _finalizeCommittedState(hexId, stateObj);
 
-        stateObj.type = 'SYSTEM_PRESENT';
-        if (typeof computeSystemCounts === 'function') computeSystemCounts(stateObj);
-        if (typeof hexStates !== 'undefined') hexStates.set(hexId, stateObj);
-        if (typeof requestAnimationFrame === 'function' && typeof draw === 'function') {
-            requestAnimationFrame(draw);
-        }
         if (typeof populateEditorAccordions === 'function' &&
             typeof editingHexId !== 'undefined' && editingHexId === hexId) {
             populateEditorAccordions(stateObj);
@@ -2315,7 +2550,10 @@ const SystemEditor = (() => {
                 if (wcStar.mao  == null && genStar.mao  != null) wcStar.mao  = genStar.mao;
             });
             if (_workingCopy.age  == null && newSys.age  != null) _workingCopy.age  = newSys.age;
-            if (_workingCopy.hzco == null && newSys.hzco != null) _workingCopy.hzco = newSys.hzco;
+            // newSys.hzco covers CT/MgT2E/RTT/AoW; T5's generator output names the same value
+            // hzOrbit instead (see the read-side fallback in _buildWorkingCopyFromState above).
+            const _genHzco = newSys.hzco ?? newSys.hzOrbit;
+            if (_workingCopy.hzco == null && _genHzco != null) _workingCopy.hzco = _genHzco;
 
             // Body/moon backfill (hillSpanPd, moon pd/pos/eccentricity/retrograde, moon-list
             // resort to match the generator's own order) is per-engine shape, same as
@@ -2362,9 +2600,10 @@ const SystemEditor = (() => {
         // AoW age-conflict gate (design decision 2, see directives/project_manifest.md OW-9):
         // aow_seed_bridge.js's reconcileSystemAge sets sys.ageConflict when manually-chosen
         // spectral types across stars imply system-age windows with no overlap — the system was
-        // still generated (using a best-effort compromise age), so this is a warn-and-proceed,
-        // same shape as the OW-3 audit gate below, just checked first since an age conflict is
-        // upstream of everything else the audit might also flag.
+        // still generated (using a best-effort compromise age), so this is a warn-and-proceed.
+        // Unrelated to the UWP Auditor, which no longer shows a popup here at all (Sean-
+        // requested removal) — each engine's own auditor still logs failures to the console and
+        // window.auditBacklog at generation time.
         const ageConflict = result.newSys && result.newSys.ageConflict;
         if (ageConflict) {
             const starList = (ageConflict.stars || [])
@@ -2375,38 +2614,13 @@ const SystemEditor = (() => {
                 `The system was generated using a best-effort compromise age. You can proceed anyway, ` +
                 `or go back and adjust one of the stars' spectral types.`,
                 [
-                    { label: 'Proceed Anyway', cls: 'btn-cancel', onClick: () => _checkAuditThenFinish(hexId, result) },
-                    { label: 'Go Back & Fix',  cls: 'btn-save',   onClick: () => {} },
-                ]
-            );
-            return;
-        }
-
-        _checkAuditThenFinish(hexId, result);
-    }
-
-    // OW-3: UWP Auditor gate. Not every engine's generator populates auditResult (only
-    // MgT2E/CT/T5/AoW do today), so this is a no-op for engines that haven't been wired up yet.
-    // The system is already committed to hexStates by this point (_generateAndCommit already
-    // ran), so "Go Back & Fix" can't un-commit it — it just leaves the editor open (same as
-    // dismissing any other warning) so the user can keep adjusting bodies and re-run Fill & Save,
-    // instead of closing over a failing result. Split out from _fillAndSave() so the age-conflict
-    // gate above it can defer to this same check after "Proceed Anyway".
-    function _checkAuditThenFinish(hexId, result) {
-        const audit = result.newSys && result.newSys.auditResult;
-        if (audit && audit.pass === false) {
-            const errCount = (audit.errors || []).length;
-            _showWarn('Audit Warnings Found',
-                `The UWP Auditor found ${errCount} issue${errCount !== 1 ? 's' : ''} with this system ` +
-                `(see browser console for details). You can proceed anyway, or go back and adjust ` +
-                `the system before saving.`,
-                [
                     { label: 'Proceed Anyway', cls: 'btn-cancel', onClick: () => _finishFillAndSave(hexId) },
                     { label: 'Go Back & Fix',  cls: 'btn-save',   onClick: () => {} },
                 ]
             );
             return;
         }
+
         _finishFillAndSave(hexId);
     }
 
@@ -2425,6 +2639,13 @@ const SystemEditor = (() => {
         window.addEventListener('keydown', _onKeyDown, true);
         // For a create flow, hexStates has no entry yet so the viewer open above was a no-op.
         // Auto-preview now to generate a starter system and open the viewer.
+        //
+        // T5's own blank-create case (zero bodies, no mainworld yet) used to fail here outright
+        // (OW-48, 2026-07-16 — T5.run() had no way to represent "star only, no mainworld" and
+        // returned null, showing a confusing "No system was produced" dialog and leaving
+        // SystemViewer closed). Fixed at the source (OW-49): T5.run() now builds a star-only
+        // preview via T5_TopDown_Generator.buildT5StarOnlyPreview() whenever there's no
+        // mainworld yet, so this auto-preview succeeds for T5 too, exactly like MgT2E/CT.
         if (typeof SystemViewer !== 'undefined' && !SystemViewer.isOpen()) {
             _preview();
         }
@@ -2504,9 +2725,9 @@ const SystemEditor = (() => {
         if (dlgTypeSel) {
             dlgTypeSel.addEventListener('change', () => {
                 const v = dlgTypeSel.value;
-                const exotic = (v === 'D' || v === 'BD');
-                if (v === 'D')  { dlgClassSel.value = 'D'; dlgSubtypeSel.value = '0'; }
-                if (v === 'BD') { dlgClassSel.value = 'V'; dlgSubtypeSel.value = '0'; }
+                const exo = _exoticStarDefaults(v);
+                const exotic = !!exo;
+                if (exo) { dlgClassSel.value = exo.sClass; dlgSubtypeSel.value = String(exo.subType); }
                 if (dlgSubtypeSel) { dlgSubtypeSel.disabled = exotic; dlgSubtypeSel.style.opacity = exotic ? '0.55' : '1'; }
                 if (dlgClassSel)   { dlgClassSel.disabled   = exotic; dlgClassSel.style.opacity   = exotic ? '0.55' : '1'; }
             });

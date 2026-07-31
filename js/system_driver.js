@@ -80,7 +80,18 @@
                                        return (w.moons || []).find(m => m._id === seedSys._mainworldRef) || null;
                                    }, null);
                     if (mwBody && mwBody.uwp) {
-                        resolvedUWP = Object.assign({}, mwBody, { uwp: mwBody.uwp });
+                        // Merge mwBody's fresher uwp/name/lock fields onto the existing
+                        // mainworldUWP instead of replacing it outright. mainworldUWP (built by
+                        // t5_editor_adapter.js's write()) already correctly resolves
+                        // parentBodyId/parentStarIdx/isPreMoon for a moon-mainworld — Phase 1 of
+                        // generateT5System uses those to re-attach the mainworld to its real
+                        // parent body. mwBody is a bare seed.worlds moon/body entry with none of
+                        // those linking fields, so replacing wholesale (as this used to do)
+                        // silently dropped them on any re-save of an already-generated
+                        // moon-mainworld: Phase 1's parent lookup then failed and fell through to
+                        // its fallback, spawning a second, synthetic Gas Giant to hold the
+                        // mainworld while the real one was left in place too (OW-57).
+                        resolvedUWP = Object.assign({}, mainworldUWP, mwBody, { uwp: mwBody.uwp });
                     }
                 }
                 if (!resolvedUWP) {

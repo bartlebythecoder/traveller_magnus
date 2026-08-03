@@ -840,14 +840,21 @@ function setupSectorPicker() {
 }
 
 // ============================================================================
-// OBSIDIAN WIKI EXPORT
+// WIKI EXPORT (Obsidian Markdown / HTML website)
 // ============================================================================
+// One modal serves both formats (D6 in directives/html_extract_manifest.md) —
+// every option applies to both except the subfolder checkbox, and Release 2's
+// fog-of-war controls will apply to both too. The element ids keep their historic
+// `obs-` / `btn-export-obsidian` prefix so this stays a small diff; only the
+// user-visible labels say "Wiki".
 
 function setupObsidianExport() {
     const openBtn      = document.getElementById('btn-export-obsidian');
     const modal        = document.getElementById('obsidian-export-modal');
     const cancelBtn    = document.getElementById('obs-cancel-btn');
     const exportBtn    = document.getElementById('obs-export-btn');
+    const formatSel    = document.getElementById('obs-format');
+    const formatHint   = document.getElementById('obs-format-hint');
     const sectorSel    = document.getElementById('obs-sector-select');
     const subsectorSel = document.getElementById('obs-subsector-select');
     const incImages          = document.getElementById('obs-include-images');
@@ -857,11 +864,29 @@ function setupObsidianExport() {
     const skipAirlessChk     = document.getElementById('obs-skip-airless');
     const incSystemImages    = document.getElementById('obs-include-system-images');
     const useSubfoldersChk   = document.getElementById('obs-use-subfolders');
+    const useSubfoldersRow   = document.getElementById('obs-use-subfolders-row');
     const progressRow     = document.getElementById('obs-progress-row');
     const progressBar  = document.getElementById('obs-progress-bar');
     const progressTxt  = document.getElementById('obs-progress-text');
 
     if (!openBtn) return;
+
+    const _format = () => (formatSel && formatSel.value) || 'obsidian';
+
+    // The subfolder choice is Obsidian-only. HTML must always use subfolders,
+    // because its relative hrefs/srcs are computed against that folder layout —
+    // see section 2.1 of the manifest. Hide the control rather than leaving a
+    // checkbox that silently does nothing.
+    function _applyFormat() {
+        const html = _format() === 'html';
+        if (useSubfoldersRow) useSubfoldersRow.style.display = html ? 'none' : 'flex';
+        if (exportBtn) exportBtn.textContent = html ? 'Export HTML ZIP' : 'Export ZIP';
+        if (formatHint) {
+            formatHint.textContent = html
+                ? 'A browsable website — one page per system. Extract every subsector of a sector into the same folder.'
+                : 'One Markdown file per star, world and moon, for an Obsidian vault.';
+        }
+    }
 
     function _updateExportBtn() {
         const ready = !!(sectorSel.value && subsectorSel.value);
@@ -895,6 +920,7 @@ function setupObsidianExport() {
     });
 
     subsectorSel.addEventListener('change', _updateExportBtn);
+    if (formatSel) formatSel.addEventListener('change', _applyFormat);
 
     incImages.addEventListener('change', () => {
         if (skipAirlessRow) skipAirlessRow.style.display = incImages.checked ? 'flex' : 'none';
@@ -920,6 +946,7 @@ function setupObsidianExport() {
         if (exportBtn) exportBtn.disabled    = true;
         if (cancelBtn) cancelBtn.textContent = 'Cancel';
         if (cancelBtn) cancelBtn.disabled    = false;
+        _applyFormat();
 
         modal.style.display = 'flex';
     });
@@ -941,13 +968,26 @@ function setupObsidianExport() {
         progressBar.style.width   = '0%';
         progressTxt.textContent   = 'Starting export…';
 
+        const html = _format() === 'html';
+        const exporter = html ? window.HtmlExporter : window.ObsidianExporter;
+
+        if (!exporter) {
+            progressTxt.textContent = `Error: ${html ? 'HtmlExporter' : 'ObsidianExporter'} not loaded.`;
+            cancelBtn.disabled = false;
+            exportBtn.disabled = false;
+            return;
+        }
+
         try {
-            await ObsidianExporter.startExport(sectorNum, subsectorChar, {
+            await exporter.startExport(sectorNum, subsectorChar, {
                 includeImages,
                 imageProjection,
                 skipAirless,
                 includeSystemImages,
-                useSubfolders,
+                // HTML ignores this and always uses subfolders; passing true keeps the
+                // option object identical between the two so a future third format,
+                // and Release 2's disclosure options, only have to be added once.
+                useSubfolders: html ? true : useSubfolders,
                 onProgress: (done, total, msg) => {
                     const pct = total > 0 ? Math.round((done / total) * 100) : 0;
                     progressBar.style.width = `${pct}%`;
@@ -955,7 +995,9 @@ function setupObsidianExport() {
                 },
                 onDone: (fileCount) => {
                     progressBar.style.width = '100%';
-                    progressTxt.textContent = `Done — ${fileCount} files exported.`;
+                    progressTxt.textContent = html
+                        ? `Done — ${fileCount} files. Extract into your sector folder.`
+                        : `Done — ${fileCount} files exported.`;
                     cancelBtn.disabled      = false;
                     cancelBtn.textContent   = 'Close';
                 },

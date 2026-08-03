@@ -1,4 +1,4 @@
-# As Above, So Below (v0.16.2.1)
+# As Above, So Below (v0.17.0)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -28,7 +28,7 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 - **Regions:** Define named regions in the Region Manager (**G**), then assign them per-system in World Details or in bulk via right-click → Assign Region. Regions can be outlined and labelled on the map, and filtered on across all engines.
 - **Cross-Engine Stellar Filtering:** Filter worlds by star class, spectral type, and subtype across all five generation engines (Classic Traveller, Mongoose 2E, Traveller 5, RTT, and AoW).
 - **Full System Generation:** Dynamic stellar classification, gravity derivation, and automated moon/satellite inventory.
-- **Obsidian Wiki Export:** Package a subsector as a cross-linked Markdown vault — a page per system, star, world, and moon, plus a subsector index and map. Choose the projection used for exported world images — Globe (Hemispheres), Sinusoidal, Mercator, Mollweide, or Diamond.
+- **Wiki Export (Obsidian or HTML):** Package a subsector as a cross-linked **Obsidian** Markdown vault — a page per system, star, world, and moon — or as a standalone **HTML website** with one page per system, a sortable and filterable system index, light/dark themes, and print-ready pages. The HTML version needs no server or software beyond a browser; unzip and double-click. Both include the subsector map and world images, with a choice of projection — Globe (Hemispheres), Sinusoidal, Mercator, Mollweide, or Diamond.
 
 ## Usage
 1. **Launch the App:** Click the [Live Demo](https://bartlebythecoder.github.io/traveller_magnus/hex_map.html) link above.
@@ -68,6 +68,12 @@ Want to replace any of these sectors with your own file?
 
 ---
 ## 📜 Changelog
+
+### [v0.17.0] - In Progress
+1. **New — HTML Website Export:** The wiki export can now produce a browsable website instead of Obsidian Markdown, for users who don't use Obsidian. The menu entry is now **Export Wiki**, with a Format dropdown at the top of the export window offering "Obsidian Wiki (Markdown)" or "HTML Website"; every other option applies to both. The HTML version writes one page per system — its stars, worlds and moons become sections of that page with a contents list, rather than hundreds of separate files — plus a sortable, filterable index of every system in the subsector, the subsector map, and all the same world and orrery images. It needs no internet connection, no web server and no software beyond a browser: unzip it and double-click. Pages follow your system's light or dark setting, have a toggle to override it, and print legibly. Each subsector exports as its own ZIP that extracts into a shared sector folder, so subsectors you export at different times join up into one site rather than becoming disconnected islands
+2. **Wiki Export:** Moved the exporter's shared machinery into a new internal module (`js/export_core.js`) — ZIP building, filenames, per-edition data lookup, world image rendering, and the definitions of every per-body field are now written once rather than being duplicated the moment a second export format exists. Each body's fields are also now recorded as structured data instead of pre-formatted Markdown text, which is what will later allow a single field to be shown or hidden per system. The exported wiki is byte-for-byte identical to before — internal cleanup, no behavior change
+3. **Wiki Export (Architect of Worlds):** Fixed a bug where Architect of Worlds worlds and moons exported with almost none of their detail — every body showed only gravity, diameter and temperature, because the exporter had no way to find an AoW body at all. AoW is in fact the most detailed of the five engines. Worlds and moons now show distance, eccentricity, mass, density, gravity, diameter, axial tilt, albedo, mean temperature, atmospheric pressure, water coverage, breathability, world class, lithosphere and magnetic field; AoW mainworlds gain their full socioeconomic breakdown, which the exporter had been looking for in the wrong place; and naval, scout and corsair bases now appear in the HTML index. Affects both the Obsidian and HTML exports. A number of AoW-specific readings are still not shown pending confirmation of what they mean and what units they use
+4. **Obsidian Exporter (RTT Traveller):** Fixed a bug where RTT Traveller worlds and moons exported with none of their detailed physical data — World Class, Chemistry, Biosphere, Rings, Habitation, Desirability, Industry, Starport and Terraforming Potential were missing from every RTT page, because the exporter looked for RTT bodies in a location the RTT engine has never stored them in. Every other edition was unaffected, as were RTT star pages and world lists, which is why the gap was easy to miss. A 45-system RTT subsector gains these fields on 453 worlds and moons
 
 ### [v0.16.2.1] - 2026-07-31
 1. **Filter:** The System Name filter now accepts multiple comma-separated names (e.g. "Sol, Ara") and shows any system matching at least one of them, instead of only matching a single literal string; matching is now "contains" rather than "starts with"

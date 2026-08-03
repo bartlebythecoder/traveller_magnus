@@ -22,7 +22,14 @@
       "Bash(npx --yes playwright --version)",
       "Bash(npm ls *)",
       "Bash(npx --yes playwright install chromium)",
-      "Bash(NODE_PATH=\"/c/Users/sean/Documents/github/traveller_magnus/node_modules\" node *)"
+      "Bash(NODE_PATH=\"/c/Users/sean/Documents/github/traveller_magnus/node_modules\" node *)",
+      "Bash(npx --version)",
+      "Bash(sed -i \"s|const REPO = 'C:/Users/sean/Documents/github/traveller_magnus';|const REPO = require\\('path'\\).resolve\\(__dirname, '../..'\\).replace\\(/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\/g, '/'\\);|\" export_runner.js build_fixture.js)",
+      "Bash(sed -i \"s|require\\('C:/Users/sean/Documents/github/traveller_magnus/node_modules/playwright'\\)|require\\(require\\('path'\\).resolve\\(__dirname, '../../node_modules/playwright'\\)\\)|\" export_runner.js build_fixture.js)",
+      "Bash(awk '/^#/ {print NR\": \"$0}' directives/project_manifest.md)",
+      "Bash(awk 'NR>=852 && NR<=1809 && /^#### |^### /' directives/project_manifest.md)",
+      "Bash(awk -F: '{print $2}')",
+      "Bash(awk 'NR<14{s2+=length\\($0\\)+1} NR>=14&&NR<551{s2b+=length\\($0\\)+1} NR>=551&&NR<573{s34+=length\\($0\\)+1} NR>=573&&NR<852{s5+=length\\($0\\)+1} NR>=852&&NR<1802{s6+=length\\($0\\)+1} NR>=1802{s7+=length\\($0\\)+1} END{printf \"hdr+goal: %d\\\\nSec2 editor: %d\\\\nSec3+4: %d\\\\nSec5 stubs: %d\\\\nSec6 OW: %d\\\\nSec7: %d\\\\n\",s2,s2b,s34,s5,s6,s7}' directives/project_manifest.md)"
     ]
   }
 }

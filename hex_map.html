@@ -80,7 +80,9 @@
     <script src="js/aow_editor_adapter.js" defer></script>
     <script src="js/system_editor.js" defer></script>
     <script src="js/surface_viewer.js" defer></script>
+    <script src="js/export_core.js" defer></script>
     <script src="js/obsidian_exporter.js" defer></script>
+    <script src="js/html_exporter.js" defer></script>
     <script src="js/canvas_input.js" defer></script>
     <script src="js/keyboard_shortcuts.js" defer></script>
     <script src="js/macro_orchestrator.js" defer></script>
@@ -757,9 +759,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above<br> So Below</span></h1>
-            <div class="splash-banner">New: Edit T5 Systems</div>
+            <div class="splash-banner">New: Extract Updates</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.16.2.1</div>
+            <div class="splash-version">v0.17.0</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -1042,7 +1044,7 @@
                 </button>
                 <button class="menu-btn" id="btn-export-obsidian"
                     style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <i class="fas fa-book"></i> Export Obsidian Wiki
+                    <i class="fas fa-book"></i> Export Wiki
                 </button>
                 <button class="menu-btn" id="btn-import-sector"
                     style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;"
@@ -1240,7 +1242,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.16.2.1</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.17.0</span>
             </p>
         </div>
 
@@ -1587,9 +1589,20 @@
     <!-- Obsidian Export Modal -->
     <div id="obsidian-export-modal" class="modal-overlay" style="display:none;">
         <div class="modal-content" style="max-width:420px;width:90%;">
-            <h3><i class="fas fa-book"></i> Export Obsidian Wiki</h3>
+            <h3><i class="fas fa-book"></i> Export Wiki</h3>
 
             <div style="display:flex;flex-direction:column;gap:12px;margin:16px 0;">
+
+                <!-- Format (D6) — everything below applies to both formats except
+                     the subfolder checkbox, which is mandatory for HTML (see 2.1) -->
+                <div>
+                    <label style="display:block;margin-bottom:4px;color:#a0a8b0;font-size:0.85em;">FORMAT</label>
+                    <select id="obs-format" style="width:100%;padding:6px;background:#1a2332;color:#cdd6e3;border:1px solid #45a29e;border-radius:4px;">
+                        <option value="obsidian" selected>Obsidian Wiki (Markdown)</option>
+                        <option value="html">HTML Website</option>
+                    </select>
+                    <p id="obs-format-hint" style="margin:4px 0 0;color:#8fa0b5;font-size:0.78em;"></p>
+                </div>
 
                 <!-- Sector -->
                 <div>
@@ -1637,8 +1650,9 @@
                     Include system orrery images
                 </label>
 
-                <!-- Subsector subfolders -->
-                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                <!-- Subsector subfolders — Obsidian only. HTML always uses them,
+                     because its relative hrefs/srcs depend on the folder layout. -->
+                <label id="obs-use-subfolders-row" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
                     <input type="checkbox" id="obs-use-subfolders">
                     Subsector details in subfolders
                 </label>
@@ -1656,6 +1670,7 @@
             <div class="editor-buttons" style="margin-top:8px;">
                 <button class="btn-cancel" id="obs-cancel-btn">Cancel</button>
                 <button class="btn-confirm" id="obs-export-btn" disabled>Export ZIP</button>
+
             </div>
         </div>
     </div>

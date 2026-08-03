@@ -1,7 +1,65 @@
 # PROJECT AS ABOVE, SO BELOW - Feature Manifest
-**Version:** 0.16.2.1 (in progress)
-**Target:** 
+**Version:** 0.17.0 (in progress) — the **exports** series
 **Architecture Standard:** The "Sean Protocol" (Directives -> Orchestration -> Execution)
+
+**Companion manifest:** `directives/html_extract_manifest.md` — the HTML wiki export, the
+**active** work. Read it before touching `js/export_core.js`, `js/obsidian_exporter.js`
+or `js/html_exporter.js`. Its section 0 is the cold-start handover.
+
+**This document covers the v0.16.x System Editor**, which is paused, not abandoned. It is
+the reference for resuming RTT and AoW editor support.
+
+---
+
+## 0. Current State (2026-08-01)
+
+### 0.1 Where the project is
+
+| | |
+|---|---|
+| **Active work** | **v0.17.x — exports.** HTML wiki exporter. See the companion manifest; nothing in *this* document is in progress. |
+| **This document** | v0.16.x System Editor. **Paused** after MgT2E, CT and T5 were brought fully online. |
+| **Paused** | RTT and AoW editor support — the reason this manifest is retained. |
+
+### 0.2 System Editor engine support — verified against code 2026-08-01
+
+**MgT2E, CT and T5 are operational for both Create and Edit. RTT and AoW are neither.**
+
+| Engine | Create | Edit | Notes |
+|---|---|---|---|
+| MgT2E | ✅ | ✅ | first engine online |
+| CT | ✅ | ✅ | online 2026-07-04 |
+| T5 | ✅ | ✅ | closed out 2026-07-16 (see index: OW-19, 42-49) |
+| RTT | ❌ | ❌ | **paused** — radio `disabled`, "(coming soon)" |
+| AoW | ❌ | ❌ | **paused** — radio `disabled`; generator groundwork exists, see OW-9 in 6.2 |
+
+The three gates that must be changed together to enable an engine — they have drifted
+before, see pattern 4 in 6.1:
+
+1. `js/system_viewer.js:1125` — orrery "Edit System" button:
+   `if (edition === 'MgT2E' || edition === 'CT' || edition === 'T5')`
+2. `js/canvas_input.js:84-85` — `_seCanEdit`, the right-click gate: checks
+   `mgt2eData/mgtSystem`, `ctData/ctSystem`, `t5Data/t5System`
+3. `hex_map.html:1419-1431` — `#se-engine-dialog` Create radios: AoW and RTT carry
+   `disabled`
+
+### 0.3 Resuming RTT or AoW
+
+1. **Section 5** — the per-engine stub inventory. This is the actual handoff document and
+   was left at full detail deliberately.
+2. **Section 6.1** — nine recurring failure patterns drawn from the MgT2E/CT/T5 work.
+   Expect them to recur; pattern 1 (seeded bodies skipping generation steps) and
+   pattern 6 (RTT's flat body layout) are the two most likely to bite.
+3. **Section 6.2** — OW-9 in particular: AoW's readiness audit and what `aow_seed_bridge.js`
+   had to solve. OW-3 (per-engine UWP auditor) and OW-5 (commit-path layer 2) are both
+   still open and both apply to any new engine.
+
+### 0.4 Document history
+
+Condensed 2026-08-01 from ~356 KB to ~159 KB. Section 6 previously carried 65 work items
+and 7 bugs in full forensic detail; closed items are now a one-line index (6.3) with the
+transferable lessons distilled into 6.1. Sections 2 and 5 were kept at full detail because
+they are the RTT/AoW handoff.
 
 ---
 
@@ -9,11 +67,14 @@
 An easy to use Traveller/Cepheus system builder and navigator
 
 
-## 2. Next Update
+## 2. System Editor — Design Reference (v0.16.x, delivered)
 
-### Feature: Full System Editor (v0.16.0)
+**Status: delivered for MgT2E, CT and T5; paused for RTT and AoW.** This section is no
+longer a forward plan — it is the design reference for the editor as built, retained
+because RTT/AoW work will need it. "Next Update" framing below has been left in place
+where it still describes real behaviour.
 
-A new full-screen system editor allowing users to create star systems from scratch or structurally edit existing generated systems. The result must be indistinguishable from an engine-generated system in hexStates, JSON export, and map display.
+A full-screen system editor allowing users to create star systems from scratch or structurally edit existing generated systems. The result must be indistinguishable from an engine-generated system in hexStates, JSON export, and map display.
 
 ---
 
@@ -29,7 +90,7 @@ A new full-screen system editor allowing users to create star systems from scrat
 - No duplication of engine logic
 
 #### Creating vs Editing
-- **New system:** Engine selection dialog appears first. **UPDATED 2026-07-04:** MgT2E and CT are both live — in `hex_map.html`'s `#se-engine-dialog`, the MgT2E and CT radio buttons are enabled; AoW, T5, and RTT remain `disabled`, marked "(coming soon)". T5 / RTT / AoW are staged for a controlled rollout per Section 5, same pattern CT just went through — stubs exist in `system_editor.js`, and AoW's generator-level plumbing is further along than T5/RTT (see Supported Engines note below). Editor then opens blank. **SUPERSEDED 2026-07-05 then RE-RESTRICTED 2026-07-11:** by 2026-07-05 all five radios were enabled (no engine disabled at Create time — see the per-engine "UI exposure" notes in Section 5). That part hasn't changed back — **Create still allows all five engines today.** What changed 2026-07-11 is Edit-only: see the Supported Engines note above.
+- **New system:** Engine selection dialog appears first, then the editor opens blank. **Current as of 2026-08-01:** in `hex_map.html`'s `#se-engine-dialog` (lines 1419-1431) the MgT2E, CT and T5 radios are enabled; **AoW and RTT carry `disabled` and are marked "(coming soon)"**. Create and Edit therefore support the same three engines — see section 0.2. (This bullet previously accumulated four layers of superseded corrections, including a claim that Create allowed all five engines; that was untrue by 2026-08-01 and has been replaced with the verified state.)
 - **Existing system:** Engine is locked to whatever generated it. No engine switching in v1. **As of 2026-07-11, "existing system" only reaches the editor at all for MgT2E/CT** — see the Supported Engines note above.
 - Minimum required to unlock Fill & Save: **a primary star must exist** (all its fields can be blank)
 
@@ -50,14 +111,24 @@ Stars (primary, companion), terrestrial worlds, gas giants, planetoid belts, moo
 - ~~If no mainworld at Fill time: warn, offer user the choice to pick one or let engine decide~~ — **CORRECTED 2026-07-03, see OW-2 (CLOSED):** no warning needed. A null mainworld at Fill time already falls through to the generator's normal habitability-based election automatically — this already is "let engine decide," with no dialog required.
 - T5 gets a dedicated one-off mainworld selection algorithm (T5 does not designate mainworld the same way as other engines) — **deferred to v0.16.1; see Algorithm 7 and Section 5**
 
-#### Supported Engines (UPDATED 2026-07-05 — Edit System scope; RE-RESTRICTED 2026-07-11 — see below)
+#### Supported Engines — CURRENT as of 2026-08-01 (verified against code)
 
-**UPDATED 2026-07-11 — Edit System scope pulled back to MgT2E/CT only.** Every "UI-exposed"/"fully online" claim in this subsection and throughout Section 5 describes the state as of 2026-07-05, when all five engines could be edited. That has changed: **T5, RTT, and AoW's editor support is preliminary and slated for a full overhaul, not incremental fixes** — per Sean's 2026-07-11 direction, users can currently only **edit** MgT2E and CT systems. Both gates were pulled back to match: `system_viewer.js`'s "Edit System" button (`#sv-edit-btn`) now only renders `if (edition === 'MgT2E' || edition === 'CT')`; `canvas_input.js`'s `_seCanEdit` right-click gate now only checks `mgt2eData`/`mgtSystem`/`ctData`/`ctSystem`. **Create is untouched** — `hex_map.html`'s `#se-engine-dialog` still has all five radio buttons enabled with no `disabled` attribute, so users can still create a fresh T5/RTT/AoW system; they just can't re-open an already-generated one for editing. See the new banner at the top of Section 5 for full detail and the consolidated overhaul punch list.
+**MgT2E, CT and T5 support both Create and Edit. RTT and AoW support neither — paused.**
+The authoritative summary, with the three gate locations, is in **section 0.2**; this
+subsection covers per-engine implementation detail only.
+
+The history is worth one line because Section 5 still reflects it: all five engines were
+briefly UI-exposed on 2026-07-05; T5/RTT/AoW were pulled back on 2026-07-11 as
+preliminary and needing overhaul; **T5 was overhauled and re-enabled 2026-07-16**
+(index items OW-19, OW-42 to OW-49). RTT and AoW never came back. Treat any
+"UI-exposed"/"fully online" claim for RTT or AoW in Section 5 as describing the
+2026-07-05 state, not today.
 
 - **MgT2E** (Mongoose Traveller 2nd Ed) — bottom-up fill; `js/mgt2e_bottomup_generator.js`. Both entry points (`canvas_input.js` right-click gate, `system_viewer.js`'s "Edit System" button) recognize `mgt2eData`/`mgtSystem` or `edition === 'MgT2E'` respectively.
-- **CT** (Classic Traveller) — bottom-up fill; `js/ct_bottomup_generator.js`. **UI-exposed 2026-07-04** — the same two entry points now also recognize `ctData`/`ctSystem` or `edition === 'CT'`. Has its own `_ENGINE_ADAPTERS.CT` entry, `sys.auditResult` coverage, and `capturedPlanets` support — see the "CT is now fully online" note under v0.16.1 SEQUENCING above and the corrected CT subsection in Section 5.
-- **T5 / RTT** — both UI-exposed (2026-07-05 / 2026-07-04 respectively) via the same pattern; see Section 5's "T5 is now fully online" / "RTT is now fully online" notes. (This section's header historically read "Deferred Engines (AoW / T5 / RTT)" — stale as of both engines going live; not corrected in full here, see Section 5 for the authoritative per-engine status.)
-- **AoW (Architect of Worlds) — UI-exposed 2026-07-05.** Both entry points now recognize `aowSystem` / `edition === 'AoW'`. Has its own `_ENGINE_ADAPTERS.AoW` entry, `sys.auditResult` coverage (`js/aow_uwp_auditor.js`, newly built — didn't exist before this pass), and a dedicated new module `js/aow_seed_bridge.js` handling the star-physics/hierarchy/disk-worksheet work OW-9 found was needed beyond a normal gating pass. See the "AoW" subsection in Section 5 and OW-9 (Section 6) for the full writeup.
+- **CT** (Classic Traveller) — bottom-up fill; `js/ct_bottomup_generator.js`. **Online 2026-07-04** — the same two entry points also recognize `ctData`/`ctSystem` or `edition === 'CT'`. Has its own `_ENGINE_ADAPTERS.CT` entry, `sys.auditResult` coverage, and `capturedPlanets` support — see the corrected CT subsection in Section 5.
+- **T5** (Traveller 5) — **online 2026-07-16** after a dedicated overhaul pass. `t5_topdown_generator.js`'s `generateT5System()` takes and fully consults `seedSys`; moon counts cap via `generateT5Satellites`'s `capToExisting`. Closed items OW-19, OW-42 to OW-49 cover that pass; OW-50 to OW-60 cover the OTU-import and companion-star follow-ups.
+- **RTT (RTT Worldgen) — PAUSED, not online.** Editor support is preliminary and slated for a full overhaul rather than incremental fixes. See Section 5's RTT subsection for the stub inventory. **Note pattern 6 in 6.1 before starting**: RTT stores bodies flat in `star.planetarySystem.orbits[]` with no `.contents` wrapper, and has no `sys.worlds` — a layout that has already caused one silent, long-lived bug elsewhere in the codebase.
+- **AoW (Architect of Worlds) — PAUSED, not online.** Further along at the generator level than RTT: `js/aow_seed_bridge.js` (star-physics solver, disk-worksheet synthesis) and `js/aow_uwp_auditor.js` were both built 2026-07-05, and an `_ENGINE_ADAPTERS.AoW` entry exists. **Never verified in-browser** — see OW-9 in 6.2 for the full readiness audit and what remains.
 
 #### Fill & Save — The Commit Action
 - One-time, whole-system commit — not iterative
@@ -564,7 +635,19 @@ Both the orrery and accordion now correctly highlight a lunar mainworld. The `_n
 
 ## 4. Known Issues / To Do
 
-*See **Section 6** at the end of this document for the full outstanding work item and bug tracker.*
+**Open items in this document (all in 6.2):**
+
+- **OW-3** — per-engine UWP auditor coverage at Fill & Save. Done for MgT2E/CT/T5; each
+  new engine needs its own populated `sys.auditResult` before Fill & Save is trustworthy.
+- **OW-5 layer 2** — `commitEditorSystem()` shared by the macros *and* the editor was
+  never built. The editor's `_clearSystemData()` and `macro_orchestrator.js`'s inline
+  clear-block are still drifting. Revisit before a new engine's macro and editor commit
+  paths need to agree.
+- **OW-65** — three route/filter items deliberately parked pending user evidence. Not
+  editor work; do not restart without new information.
+
+Everything else is closed — see the 6.3 index. Active work is in
+`directives/html_extract_manifest.md`, not here.
 
 ---
 
@@ -849,14 +932,91 @@ The engine selection dialog HTML (`#se-engine-dialog`, in `hex_map.html`) has Mg
 
 ## 6. Outstanding Work Items & Bugs
 
-### Spec Gaps — implemented in the manifest but not yet in the code
+**Condensed 2026-08-01.** This section previously held 65 OW items plus 7 numbered bugs
+in full forensic detail — about 223 KB, 63% of this document. With the v0.16.x editor
+work closed for MgT2E/CT/T5 and RTT/AoW paused, per-bug narrative no longer earns that
+space. What survives, and why:
 
-**OW-1 — CLOSED (2026-07-03): Primary star validation gate deemed unnecessary**
-Reviewed against the actual UI and found the scenario the gate was meant to catch is structurally unreachable: the Primary star row (`system_editor.js` ~line 1510) has no delete button — only companion rows get `Del★` — and `_deleteStar()` (line 511) independently refuses to delete the last remaining star regardless. Separately, `_workingCopy.stars[0]` is treated as "the primary" by array position throughout the editor (`_addStar` always `.push()`es to the end, `_deleteStar` only filters, `_insertAtOrbit` explicitly excludes index 0 via `.slice(1)`), so no editor operation can ever displace the primary from index 0 or leave the array empty. A Fill-time check would be dead code. No implementation needed; Algorithm 5 Step 1 is retracted.
+- **6.1** — the recurring failure patterns distilled from those items. This is the part
+  that actually transfers to RTT/AoW, and the reason the detail was read rather than
+  simply deleted.
+- **6.2** — items still open or partially done, kept **verbatim**.
+- **6.3** — a one-line index of every closed item, so any of them is still findable.
 
-**OW-2 — CLOSED (2026-07-03): Mainworld validation dialog deemed unnecessary**
-Traced what actually happens when `_workingCopy.mainworldRef === null` at Fill time: both `mgt2e_bottomup_generator.js` (~line 264) and `aow_bottomup_generator.js` (~line 274) already fall through to `WorldEngine.evaluateMainworldCandidates(candidates)` whenever `seedSys._mainworldRef` is absent or not found — this **is** option [B] "Let engine decide," running automatically with no prompt needed. The election uses the same habitability → resourceRating → GG-presence → size tiebreak order as normal generation, over whatever Terrestrial/Satellite/Belt bodies exist in the working copy. [A] "Let me pick one" is redundant with existing UX (the user can just click ☆MW before Fill), and [C] "Cancel" is already available via the Cancel button. No dialog needed; Algorithm 5 Step 2 is retracted.
-Known edge case (not addressed, considered rare enough to defer): if the working copy has zero eligible candidates (e.g. a system consisting solely of a moonless Gas Giant), `evaluateMainworldCandidates([])` returns `null` and `sys.mainworld` is left unset after Fill & Save. Pre-existing generator behavior, not introduced by the System Editor.
+### 6.1 Recurring patterns to expect when bringing RTT or AoW online
+
+Nine failure modes repeated across MgT2E, CT and T5. Assume they will recur. Each cites
+the closed items it was drawn from (see 6.3).
+
+**1. Seeded and manually-added bodies skip generation steps entirely.**
+The single most common failure. A body created in the editor bypasses whatever phase
+normally populates a field, so the field is never set by *anyone* — not even freshly
+rolled, because the roll code never runs. OW-9 (AoW's whole Phase 3 physical pipeline was
+unreachable: every function early-returns on empty `sys.diskWorksheets`, and only
+`generatePlanetaryDisks` populates it — the exact function seeding skips), OW-24 / OW-31
+(CT moons never got distance, gravity, mass, temperature, rotation or tilt), OW-28 (CT
+belts never got `size`), OW-44 (a new T5 mainworld never got a UWP at all).
+→ **For RTT/AoW: enumerate every generation phase and ask, per editor-exposed field,
+what populates it when the body was seeded rather than rolled.**
+
+**2. Already-generated data silently re-rolls on a no-edit Preview/Save.**
+OW-10 and OW-14 (CT — gas giants have no natural "already generated" signal), OW-34 (a CT
+companion's worlds re-rolled their entire UWP every time), OW-43 (T5 moon counts
+fluctuated, not just grew), OW-45 (T5 subordinate gov/law/starport/TL), OW-38 (an MgT2E
+ring vanished on the very first Preview).
+→ **Test: open, Preview, Fill & Save, reopen, repeat — with zero edits. Nothing may
+change.**
+
+**3. A "fixed" manual-field guard is usually only partial.**
+OW-26: starport had a guard, gov/law/TL did not, and a comment claimed the field was
+already fixed.
+→ **Check every field a fix claims to cover, not just the one it names.**
+
+**4. Two UI gates must agree.**
+Edit availability is gated in **both** `js/system_viewer.js` (the orrery's Edit button)
+and `js/canvas_input.js` (`_seCanEdit`, right-click). Enabling an engine means changing
+both, and a third gate — `hex_map.html`'s `#se-engine-dialog` radios — controls Create.
+These have drifted before.
+→ **Change all three together; grep for the engine name to confirm.**
+
+**5. Null or empty orbit slots become phantom bodies.**
+`Object.assign({}, null, {...})` yields a plain object with no `type`, and a filter like
+`w.type !== 'Empty'` passes it straight through because `undefined !== 'Empty'`. Found in
+T5's per-star fallback.
+→ **Guard the null before spreading, not after filtering.**
+
+**6. A secondary body list is invisible to a function that walks only the primary one.**
+CT's `capturedPlanets` live outside `orbits`. RTT stores bodies **flat** in
+`star.planetarySystem.orbits[]` with no `.contents` wrapper — which is precisely how the
+RTT branch of the Obsidian exporter stayed dead code unnoticed (HX-6 in
+`directives/html_extract_manifest.md`). OW-20, OW-58.
+→ **For RTT especially: every traversal must handle the flat layout, and `sys.worlds` /
+`star.orbits` do not exist on it.**
+
+**7. The three surfaces disagree.**
+Edit panel, accordion and orrery each derive position independently, so a change can land
+in one and not the others. OW-15 and OW-17 (companion stars), OW-25 (a cached `au` never
+refreshed when Orbit # changed), OW-56, OW-59, OW-60.
+→ **Verify every structural change on all three surfaces, not just the one you edited.**
+
+**8. The same fix is needed in two places.**
+Bug #6/#7: the gas-giant flag had to be derived from the actual body list in both MgT2E
+and CT, because the counter it previously trusted (`sys.gasGiants`) is only populated by
+an inventory phase the editor skips. The editor's `_clearSystemData()` and
+`macro_orchestrator.js`'s inline clear-block still differ today — see OW-5 layer 2, which
+remains open.
+→ **Derive from the real body list rather than trusting a counter, and check whether the
+macro path needs the same change.**
+
+**9. In-browser testing finds what static review cannot — three for three.**
+T5 phantom bodies, RTT's missing `star.classification`, AoW's missing `planet.Rmin`: each
+found by an actual Create → add bodies → Preview → Fill & Save → reopen → modify → Save
+round-trip, and **none** by careful reading, including a deliberate plan-review pass.
+`node --check` is not verification.
+→ **Budget for at least one real bug per engine found this way. A clean first pass is
+suspicious, not reassuring.**
+
+### 6.2 Open / partial items — full text retained
 
 **OW-3 — ✅ DONE for MgT2E (2026-07-04) and CT (2026-07-04, Phase B item 3); still open per-engine for AoW/T5/RTT: UWP Auditor step (Fill & Save)**
 After the generator runs, the UWP Auditor should be called. If it returns errors, show a warn-and-proceed dialog: [Proceed anyway] / [Go back and fix].
@@ -865,9 +1025,6 @@ After the generator runs, the UWP Auditor should be called. If it returns errors
 **Gate is engine-agnostic and opt-in:** `_fillAndSave()` checks `audit && audit.pass === false` generically, so it's silently inert for AoW/T5/RTT until each of those generators gets the same one-line `sys.auditResult = ...` attachment once their own `seedSys` gating work is done (Section 5) — CT already got this (`ct_uwp_auditor.js`'s new `runAndLog`, wired into `ct_system_driver.js`). **Sequencing still applies going forward:** each new engine needs its own auditor coverage (its own populated `sys.auditResult`) before it's trustworthy to Fill & Save against — OW-3's MgT2E/CT work does not automatically cover them.
 *Spec ref: Algorithm 5, Step 5*
 
-**OW-4 — CLOSED (2026-07-03): `manually_edited: true` flag dropped as a requirement**
-Neither `_fillAndSave()` nor `_preview()` sets `stateObj.manually_edited = true`, and nothing in `js/` currently reads that field either. Intent was to flag editor-produced systems for possible future use (e.g. excluding them from bulk re-generation, or visually marking them), but there's no active consumer today and no near-term plan for one. Deprioritized to low-priority/someday rather than an outstanding requirement — revisit if a concrete use for the flag comes up. Not implementing now.
-*Spec ref: Algorithm 5 Step 6; Architecture Constraints*
 
 **OW-5 — 🟡 PARTIALLY DONE (decided 2026-07-03; layer 1 completed 2026-07-04): Extract commit path before any new-engine work begins**
 The spec calls for a `commitEditorSystem(hexId, sys, engine)` function in `macro_orchestrator.js` as the shared commit gate. The full commit (clear old data, write new engine data, `computeSystemCounts`, `hexStates.set`, redraw) was duplicated inline between `_fillAndSave()` and `_preview()` in `system_editor.js`, and diverges from the separate commit blocks already living in `macro_orchestrator.js`'s macro functions.
@@ -878,56 +1035,6 @@ Per the design-care note below, the two behavioral differences were deliberately
 **❌ Layer 2 NOT DONE — explicit scope decision (2026-07-04):** Sean chose "system_editor.js only" for this pass over "full consolidation" when asked directly, given the added risk of reconciling `macro_orchestrator.js`'s batch-macro commit block (which carries extra logic — `StatisticalAuditor` hooks, its own mainworld-lookup-including-lunar-search, its own old-data-clearing field list that already differs from `system_editor.js`'s `_clearSystemData()`) with the editor's per-hex preview/undo semantics. **The macro_orchestrator.js layer remains open** — a `commitEditorSystem()` shared by macros AND the editor has not been built, and the drift between the editor's `_clearSystemData()` and the macro's inline clear-block (Bug #6/#7's root cause pattern) is still live. Revisit before or during Phase B if a new engine's macro and editor commit paths need to agree.
 *Spec ref: Phase 2 Modified Files table; Phase 4 Step 7*
 
-**OW-6 — ✅ DONE (found 2026-07-04; fixed 2026-07-04): Seed-restoration matching logic lives in the MgT2E orchestrator, not an engine**
-`mgt2e_bottomup_generator.js`'s own header states "This module contains ZERO generation logic. It only manages state and calls engine functions in the correct sequence" — but two blocks violated that: the seed-world-to-generated-body nearest-orbit matching/restoration logic and the post-`generatePhysicals` moon-trim-back logic were real matching algorithms, not sequencing.
-**Implementation:** extracted both into a new standalone, engine-agnostic module `js/seed_restoration.js` (UMD-wrapped, same pattern as `mgt2e_uwp_auditor.js` etc.), exposing `SeedRestoration.restoreSeedWorldsIntoGenerated(sys, seedSys)`, `SeedRestoration.captureSeededMoonCaps(sys, seedSys)`, and `SeedRestoration.trimGeneratedMoonsToSeededCaps(sys, seedSys, caps)`. `mgt2e_bottomup_generator.js` now calls these three (each guarded `typeof SeedRestoration !== 'undefined'` — the safe pattern, not the bare-global style flagged in OW-7) instead of carrying ~75 lines of matching logic inline. `hex_map.html` loads `js/seed_restoration.js` before the per-edition engine block so it's available to any bottom-up generator.
-**Checked but not touched:** `aow_bottomup_generator.js` has no equivalent seed-restoration block at all today — not a second copy to consolidate, and adding the behavior to AoW would be new functionality, not extraction, so it was left alone.
-**Still to do when RTT reaches this point (Phase B):** wire its bottom-up generator to call the same `SeedRestoration` functions once it gains broader field-level `seedSys` gating, rather than re-inlining this logic.
-**CT update (2026-07-04):** CT's own Phase B pass (field-level gating, item 1) did **not** wire in `SeedRestoration` — worth flagging as an open question, not a confirmed gap. MgT2E needed nearest-orbit matching because its seeded bodies can still be reconciled against a fresh roll; CT's seeded path (`generateSystemSkeleton`, `ct_bottomup_generator.js` ~line 135) substitutes `seedSys.orbits`/`seedSys.capturedPlanets` directly by reference when `_allowAddBodies` is false, with no separate reconciliation pass — so it may simply not need this module the same way. Not verified either way; check before assuming CT needs the same wiring RTT will.
-*Spec ref: found during the pre-Phase-B `system_editor.js`/MgT2E cleanup audit requested 2026-07-04.*
-
-**OW-7 — ✅ DONE (found 2026-07-04; fixed 2026-07-04): `MgT2EMath` guard inconsistency + duplicated auditor-logging block**
-`mgt2e_bottomup_generator.js:369` and `mgt2e_topdown_generator.js:203,372` guarded with a bare `if (MgT2EMath && MgT2EMath.performJourneyMathSweep)`, while every other generator (`ct_bottomup_generator.js`, `ct_topdown_generator.js`, `t5_topdown_generator.js`) used the safer `typeof MgT2EMath !== 'undefined' && MgT2EMath.performJourneyMathSweep`. Harmless in practice (fixed script load order in `hex_map.html`) but inconsistent with the `typeof`-guard style used for every other optional dependency in the same files, and one load-order change away from a `ReferenceError`.
-**Fix 1:** both files (all three call sites — bottom-up's one, top-down's two, the second inside `expandLoadedSocioeconomics`) now use `typeof MgT2EMath !== 'undefined' && ...`.
-**Fix 2:** the audit-and-push-to-`window.auditBacklog` block, previously duplicated verbatim between `mgt2e_bottomup_generator.js` and `mgt2e_topdown_generator.js` (with a minor console-message format difference between the two), is now one shared `MgT2E_UWP_Auditor.runAndLog(sys, hexId, options)` in `js/mgt2e_uwp_auditor.js`. It runs `auditMgT2ESystem`, attaches `sys.auditResult` (previously only the bottom-up generator did this, for OW-3), and on failure logs + backlogs using the bottom-up generator's more readable bulleted message format for both. Both generators now call `activeAuditor.runAndLog(sys, hexId, { mode: '...' })` instead of carrying the ~20-line block inline. Net: bottom-up generator −60 lines, top-down generator −16 lines, auditor +37 lines (one reusable function instead of two divergent copies).
-**Not touched:** CT's equivalent duplication (`ct_bottomup_generator.js`/`ct_topdown_generator.js` use their own `ct_uwp_auditor.js`) — consolidating across engine boundaries wasn't part of this pass; CT can adopt the same `runAndLog` pattern in its own auditor module independently, whenever convenient.
-*Spec ref: found during the pre-Phase-B `system_editor.js`/MgT2E cleanup audit requested 2026-07-04.*
-
-**OW-8 — ✅ DONE (found 2026-07-04; fixed 2026-07-04; verified in-browser by Sean 2026-07-04): Per-engine adapter pattern for `js/system_editor.js`**
-`_buildWorkingCopyFromState()`, `_buildSeedSys()`, and `_runGenerator()` each had a separate near-parallel `if/else if engine === '...'` branch — adding CT/T5/RTT meant editing the same four places (those three plus `_detectEngine()`) again. This was the last item blocking Phase A sign-off.
-**Decision (asked directly, 2026-07-04):** adapters live inline in `system_editor.js` (not split into separate per-engine files), and this pass covers **MgT2E only** — AoW/CT/T5/RTT get their own adapters later, in Phase B, as each engine's editor support is actually built out.
-**Implementation:** added a module-level `_ENGINE_ADAPTERS` registry (`system_editor.js`, right before `_buildWorkingCopyFromState`). Each adapter implements four methods:
-```js
-{
-  detect(stateObj)              -> { raw, engine } | null
-  readBodies(raw, starIdByIdx)  -> bodies[]   // working-copy body list
-  write(wc, starIdxById)        -> partial seedSys fields to merge in (e.g. { worlds })
-  run(hexId, seedSys, stateObj) -> newSys | null
-}
-```
-Only `MgT2E` is registered. All four call sites (`_detectEngine`, the body-building section of `_buildWorkingCopyFromState`, the per-engine section of `_buildSeedSys`, and `_runGenerator`) now do `const adapter = _ENGINE_ADAPTERS[engine]; if (adapter) { ...delegate... }` — falling through to the **exact original inline branches, untouched**, for AoW/CT/T5/RTT when no adapter is registered. MgT2E's four branch-bodies were moved verbatim into the adapter (including hoisting its `_uwpLockFor`/`_physSeed`/`_extSocioSeedFor` helpers, previously redefined on every single `_buildSeedSys()` call, up to module scope as `_mgt2eUwpLockFor`/`_mgt2ePhysSeed`/`_mgt2eExtSocioSeedFor` — defined once now instead of per-call).
-**AoW wrinkle:** MgT2E and AoW previously shared one literal branch (`if (engine === 'MgT2E' || engine === 'AoW')`) in both `_buildWorkingCopyFromState` and `_buildSeedSys`. Rather than route AoW through the new MgT2E adapter (coupling AoW's behavior to MgT2E's future changes) or duplicate the adapter's logic under an `AoW` key (moving the duplication rather than removing it), AoW's copy was left exactly where it was, now reached via `else if (engine === 'AoW')` in the same two functions. AoW becomes a genuine adapter of its own, independently, whenever its Phase B work happens — this is a deliberate, documented, temporary duplication, not an oversight.
-**Also normalized:** `_buildSeedSys()` and `_runGenerator()` previously read `_workingCopy` via closure; both now take it as an explicit `workingCopy` parameter (both call sites — `_regenerateBody` and `_generateAndCommit` — updated to pass `_workingCopy`). Required for the adapter's `write()`/`run()` to be pure functions of their inputs; also fixed the one non-MgT2E branch that referenced `_workingCopy` directly (RTT's `extractRTTMainworld(newSys, workingCopy.mainworldRef)` in `_runGenerator`) to use the parameter instead — mechanical, zero behavior change.
-**Verified:** `node --check js/system_editor.js` passes; Sean manually tested Create System (MgT2E) → add world → Preview → Fill & Save, and Edit System → change a body → Fill & Save, on a real hex map — "everything works fine."
-*Spec ref: v0.16.1 SEQUENCING Phase A item 3; found during the pre-Phase-B `system_editor.js`/MgT2E cleanup audit requested 2026-07-04.*
-
-**REVERSED 2026-07-11: adapters now DO live in separate per-engine files.** This item's "Decision" line above ("adapters live inline in `system_editor.js`, not split into separate per-engine files") was the deliberate call for the 2026-07-04 pass, scoped to MgT2E only. Once all five engines had their own `_ENGINE_ADAPTERS` entry inline (per Section 5's per-engine "is now fully online" notes), Sean asked for the opposite split — each engine's adapter (and any engine-only helper functions like `_ctUwpLockFor`/`_t5ElectMainworldIfNeeded`/`_rttUwpLockFor`) moved out of `system_editor.js` into its own file, so that troubleshooting one engine's editor support can no longer accidentally touch another's. Done for all five in one session (2026-07-11):
-- `js/mgt2e_editor_adapter.js`, `js/ct_editor_adapter.js`, `js/t5_editor_adapter.js`, `js/rtt_editor_adapter.js`, `js/aow_editor_adapter.js` — each a self-contained IIFE registering its adapter object on `window.SystemEditorAdapters.<Engine>`.
-- Truly shared helpers (`_uid`/`_orbitIdToAU`/`_canonType`/`_ggTypeFrom`/`_isMW`/`_buildMoon`/`_normTz`/`_applyUwpSeed`/`_clearSystemData`) stay in `system_editor.js` and are exposed to the adapter files via `window.SystemEditorShared`.
-- Each adapter file accesses `SystemEditorShared` through a lazy `SE()` accessor (`function SE() { return window.SystemEditorShared; }`), not a captured reference at load time — adapter methods only ever run long after every script has finished loading, so it doesn't matter that `SystemEditorShared` isn't set yet when an adapter file's own `<script>` tag executes.
-- One load-order constraint **does** matter: each `js/<engine>_editor_adapter.js` must load **before** `system_editor.js` in `hex_map.html`, because `system_editor.js`'s `_ENGINE_ADAPTERS` object literal reads `window.SystemEditorAdapters.<Engine>` synchronously while its own script runs (not lazily) — current order is `mgt2e_editor_adapter.js` → `ct_editor_adapter.js` → `t5_editor_adapter.js` → `rtt_editor_adapter.js` → `aow_editor_adapter.js` → `system_editor.js`.
-- Engine-specific true globals each adapter still calls directly (not through `SE()`, since they're not part of `system_editor.js`'s closure at all): CT's `getZoneForOrbit` (`ct_bottomup_generator.js`) and `window.CT_Generator`; T5's `T5_Stellar_Engine`, `rng` (`core.js`), and `window.System_Driver`; RTT's `computeRTTBodyUWP`/`generateRTTSectorStep1`/`extractRTTMainworld` (`rtt_engine.js`); AoW's `window.AoWBottomUpGenerator`.
-- **Every per-engine subsection below in Section 5 that says "`_ENGINE_ADAPTERS.<Engine>` in `system_editor.js`" is now a stale file-location citation** — the adapter object itself still exists as `_ENGINE_ADAPTERS.<Engine>` (now just a reference: `<Engine>: window.SystemEditorAdapters.<Engine>`), but the actual `detect`/`readBodies`/`write`/`run` logic and any engine-only helpers live in that engine's own new file.
-- Verified per-engine with an in-browser Playwright round trip (create via the real `#se-engine-dialog` → add body → Preview → Save → re-open Edit → add another body → Preview → Save again), re-running every already-extracted engine's script after each new extraction to confirm no regression — all clean, zero console errors, across MgT2E/CT/T5/RTT/AoW.
-*Spec ref: supersedes OW-8's "Decision" line above; this pass's own prep work ahead of the planned T5/RTT/AoW overhaul (see the Section 5 banner and the new punch list).*
-
-**FOLLOW-UP 2026-07-12: the 2026-07-11 split had one gap — `_restoreDisplayManualFields()` and part of `_preview()` still had per-engine `if/else if` chains left inline in `system_editor.js`.** Found during a general "does `system_editor.js` need any refactoring after yesterday's changes" review, requested by Sean. Both functions reach into each engine's differently-shaped generated output (`newSys.worlds` vs `newSys.orbits[].contents`/`capturedPlanets` vs `newSys.stars[].orbits[].contents` vs `newSys.stars[].planetarySystem.orbits[]`) — exactly the kind of engine-shape knowledge OW-8's split was meant to move out of `system_editor.js`, but these two were missed the first time. Moved (verbatim, no logic changes) into two new optional adapter methods:
-- `restoreManualFields(wc, newSys)` — re-stamps display-only `_manualFields` onto generated bodies/moons so the accordion doesn't paint every pre-existing field as "manually edited" after a regenerate. Added to all four adapters that had a branch in the old chain: `mgt2e_editor_adapter.js`, `ct_editor_adapter.js`, `t5_editor_adapter.js`, `rtt_editor_adapter.js`. AoW never had a branch here (pre-existing gap, not touched).
-- `backfillFromGenerated(wc, newSys)` — copies generator-derived fields (Hill Sphere `hillSpanPd`, moon `pd`/`pos`/`eccentricity`/`retrograde`) back onto the working copy after a Preview, and re-sorts each body's moon list to match the generator's own order. Only MgT2E and CT had a branch in the old chain, so only those two adapters got this method — T5/RTT/AoW still have no backfill (unchanged from before).
-- `system_editor.js` now dispatches through `_ENGINE_ADAPTERS[engine].restoreManualFields(...)`/`.backfillFromGenerated(...)` with an optional-method check (`typeof adapter.X === 'function'`), same pattern as the four required methods.
-- CT's two new methods share a new small helper, `_ctFlattenBodies(newSys)`, added in `ct_editor_adapter.js` to stop the `orbits[].contents` + `capturedPlanets[]` flattening pass from being written out twice in that one file (MgT2E/T5/RTT didn't have the equivalent duplication, so no analogous helper was needed there).
-**Verified:** `node --check` on all six touched files passes; in-browser Playwright round trip (Create → add World → add Moon → Preview → Preview again with no edits → Save) for both live-edit engines (MgT2E, CT) — zero console errors, and the moon's orbit distance (pd) stayed stable across the second no-edit Preview for both, confirming `backfillFromGenerated` behaves identically to the pre-move inline code.
-*Spec ref: Sean-requested `system_editor.js` refactor review, 2026-07-12, day after the OW-8 adapter-file split.*
 
 **OW-9 — ✅ CLOSED 2026-07-05 (found and fixed same day, pre-Phase-B AoW readiness audit): AoW's Phase 3 pipeline was architecturally unreachable in the System Editor's seeded path**
 **Resolution:** option (a) below was chosen and built — a new module `js/aow_seed_bridge.js` synthesizes real `sys.diskWorksheets` from resolved stars + seeded bodies (reusing `aow_world_engine.js`'s own `buildNodes`/`buildDiskWorksheet`), and `isManual()` guards were threaded into the ~6 functions/points that compute editor-exposed fields (not all 13 — most of the 13 functions' fields are pure internal simulation state the editor never exposes, so those were left fully random by design rather than over-gated). The star-side half of the problem (Phase 1 had no path to accept a user-chosen star at all) also needed new solver logic — a bisection search from spectral type to `initialMass`, age-window reconciliation across multiple stars with conflict detection (warn-and-proceed dialog, not silent averaging), and a hierarchy/orbit mapper — none of which existed before this pass. `js/aow_uwp_auditor.js` was also built from scratch (didn't exist at all), `_ENGINE_ADAPTERS.AoW` was added (OW-8 pattern), and UI exposure was flipped. See the "AoW is now fully online" note under v0.16.1 SEQUENCING (Section 5 header) for the full implementation writeup, and the corrected AoW subsection in Section 5. **Not yet verified in-browser** — per the project's own recorded lesson from T5/RTT verification, an in-browser Playwright pass is the natural next step before treating this as fully proven.
@@ -939,534 +1046,6 @@ The manifest previously claimed (Section 5 header, "Next up" note) that AoW was 
 **Decided with Sean (2026-07-05) and implemented same day:** option (a) — synthesize `diskWorksheets` from seeded bodies rather than accepting Phase 3 doesn't run (option b) — with two refinements that emerged during design discussion: (1) never jitter a user-set value (matches every other engine's convention), and (2) system age is derived to fit the chosen spectral type(s) rather than rolled independently, with a warn-and-proceed dialog if multiple stars' implied age windows don't overlap.
 *Spec ref: Section 5's "AoW" subsection; supersedes the "field-level gating both present" claim in the v0.16.1 SEQUENCING header and the per-engine table in Section 5.*
 
-**OW-10 — ✅ CLOSED for CT (2026-07-06, found and fixed same day): two more places CT re-rolled already-generated data — satellite quantity, and the entire gov/law/starport/tl pass**
-Found while investigating an unrelated user report (a gas giant sharing an orbit number with a companion star, causing it to render as missing in the System Viewer — a separate, already-fixed bug in `CT_StellarEngine.isOrbitValid`). While explaining why the System Editor regenerates a whole system on every Preview/Fill & Save, a second question ("why does the moon count keep growing across edits?") led to two real, previously-undocumented gaps in CT's field-level gating — folded into CT's original Phase B work per Sean's direction (2026-07-06: "we will include this change as part of the original development of the system editor for CT... assumed this was already done"), not logged as a dated changelog bug fix.
-**Gap 1 — Satellite/moon quantity was never locked at all.** `processBottomUpSatellites()` (`ct_bottomup_generator.js`) and `generateSatellites()` (`ct_physical_library.js`) both used `if (!parent.satellites) parent.satellites = []` — this only initializes an *absent* array, it never clears an *existing* one. Quantity was re-rolled (fresh 2D for a Large Gas Giant, etc.) and **appended** on every single Preview/Fill & Save, on every eligible body in the whole system, since CT has no per-body "Regenerate" action (that's MgT2E-only — `_regenerateBody()` explicitly refuses to run for any other engine) — any edit-and-save cycle on the system re-triggers this for every gas giant/terrestrial in it. This is how a gas giant can end up with 20+ moons after a few edit sessions, well outside the 2D (max 12) range a single roll could ever produce.
-**Fix:** both functions now check `if (parent.uwp) return;` before rolling — a body only reaches a `uwp` after a complete generation pass, so this reuses the exact signal `processBottomUpDesignation`'s mainworld fixed-anchor branch already relies on (`if (socialGen && !winner.uwp) socialGen(winner);`). Manually-added/renamed moons (which arrive already inside `parent.satellites` via the seed, before the roll would even run) are preserved untouched; a genuinely new body (no `uwp` yet) still gets its first roll normally.
-**Gap 2 — Government/Law/Starport/Tech Level were completely unguarded.** This one *was* already flagged in the manifest as a "known, deliberately-deferred follow-up, not a blocker" (Section 5, 5b) — but the actual severity wasn't previously spelled out: `finalizeSubordinateSocial()` (`ct_world_engine.js`) had **zero** manual-field checks on any of these four rolls, unlike `atm`/`hydro`/`pop` which were already gated via `_ctFieldIsManual`. Every non-mainworld world's government, law level, starport, and tech level were completely re-rolled from scratch on every Preview/Fill & Save — not just when the user touched that specific body, but system-wide, on any edit at all. MgT2E's equivalent lock helper (`_mgt2eUwpLockFor`) already covers these four fields; CT's (`_ctUwpLockFor`) simply never did.
-**Fix:** `_ctUwpLockFor` (`system_editor.js`) now also seeds/marks `gov`/`law`/`starport`/`tl` as manual (mirroring `_mgt2eUwpLockFor` exactly), and `finalizeSubordinateSocial` now wraps each of the four rolls in an `_ctFieldIsManual` guard, matching the existing atm/hydro/pop pattern in `generatePhysicals`. The pop-0/environmental-floor deterministic overrides were left untouched (those are RAW rule enforcement, not dice rerolls, and are skipped entirely when the underlying field is manual-locked, same as the atm/hydro exotic-override checks already do).
-**Root cause, in one sentence:** the System Editor's entire preservation model rests on a single convention — "once a body has already been generated (has a `uwp`, or its field is in `_manualFields`), don't reroll it" — and these were simply the two places on CT that convention was never wired up, not a different kind of bug.
-**Why this matters beyond CT — test T5/RTT/AoW for the same gap when each is next touched:**
-1. **Satellite/moon-quantity locking was never audited for *any* engine before this pass** — it's a different check than the gov/law/tl/starport gap (which was already tracked). Specifically verify: does repeatedly opening a system with gas-giant/planet moons and clicking Preview or Fill & Save (with no other edits) cause the moon count to grow? If yes, apply the same `if (parent.uwp) return;`-style guard (or that engine's equivalent "already generated" signal) at that engine's moon-quantity roll site.
-2. **T5** has the *documented* twin of Gap 2 (Section 5, 5d / the per-engine table: "gov/law/tl/starport deliberately deferred, same as CT") — apply the identical fix (locate T5's equivalent of `finalizeSubordinateSocial`, add manual-field guards, extend `_t5UwpLockFor` to carry the four fields forward) when T5's follow-up is picked up.
-3. **RTT and AoW are both currently documented as already covering gov/law/tl/starport-equivalent fields** (RTT explicitly; AoW via its `isManual()`-guarded field list) — that claim predates this finding and was never re-checked against the *specific* append/no-lock failure mode Gap 1 revealed. Don't assume "already gated" for one field automatically means "no accumulation risk" for another (satellites) — verify each engine's satellite/moon generation code independently rather than inferring it from the UWP-digit gating status.
-*Spec ref: Section 5's CT subsection (`finalizeSubordinateSocial`/`processBottomUpSatellites`/`generateSatellites` notes) and the per-engine table; supersedes the "deliberately-deferred" framing of gov/law/tl/starport for CT specifically (T5's is still accurately deferred).*
-
-**OW-11 — ✅ CLOSED for CT (2026-07-06, found and fixed same day): blank "Create System" wasn't blank, and CT had no equivalent of MgT2E's moon-cap trim safety net**
-Found while investigating a follow-up report: choosing CT in "Create System" (a genuinely blank working copy, zero bodies) and confirming produced a fully populated system — star, gas giants, belts, terrestrials — instead of the blank canvas MgT2E correctly produces for the same action, and separately, that adding a single world in CT could come back with an automatically-rolled moon in a way Sean didn't recall MgT2E ever doing. Folded into CT's original Phase B scope per Sean's direction (same treatment as OW-10), not logged as a dated changelog fix.
-**Gap 1 — The orbit-skeleton skip gate required a non-empty seed.** `generateSystemSkeleton()` (`ct_bottomup_generator.js`) combined two independent concerns — creating the orbit/zone skeleton, and rolling random content into it — behind one gate: `if (seedSys && !(seedSys._allowAddBodies !== false) && (seedSys.orbits || []).length > 0)`. A brand-new blank system has zero seeded orbits, so this always evaluated false regardless of `_allowAddBodies`, falling through to the full stochastic skeleton roll (Step 2G: gas giants, belts, terrestrials) every time a blank system was created. MgT2E's equivalent gate never had the body-count requirement — it's purely `if (!seedSys || seedSys._allowAddBodies)`.
-**Fix:** split the gate. Orbit/zone classification (`generateSystemOrbits(sys)`) still runs whenever the seed has no bodies yet (a blank system still needs valid zone-classified orbit slots to build onto). The random-content roll (Step 2G) is now gated purely on `_allowAddBodies`: `if ((!seedSys || seedSys._allowAddBodies) && rollSkeleton) { ... }`. Editing an existing system (seed has bodies) and the "allow engine to add additional bodies" checked case are both unaffected — behavior only changes for the previously-broken blank-with-no-bodies case.
-**Gap 2 — CT never had MgT2E's satellite-cap capture/trim safety net.** MgT2E's bottom-up generator snapshots every world's moon count via `SeedRestoration.captureSeededMoonCaps()` before `generatePhysicals()` runs (which itself unconditionally rolls a fresh moon-quantity check for every world, same as CT), then trims each world's moon list back down to that snapshot via `SeedRestoration.trimGeneratedMoonsToSeededCaps()` — active whenever `_allowAddBodies` is false. Net effect: a brand-new body added via "+World" (0 moons before generation) always comes back moonless in MgT2E; moons only appear if the user explicitly adds them. This exact gap was flagged as an open, *unverified* question under OW-6 ("CT... did not wire in `SeedRestoration`... Not verified either way") — now confirmed real: CT had no equivalent step, so a freshly-added body's moon-quantity roll (OW-10 Gap 1 already locks *repeat* rolls via the `uwp` check, but does nothing for a body's *first* roll) simply survived, uncapped.
-**Fix:** added CT-shape-aware equivalents — `captureCTSatelliteCaps(sys, seedSys)` and `trimCTSatellitesToSeededCaps(sys, seedSys, caps)` (`ct_bottomup_generator.js`), adapted to CT's two separate body lists (`sys.orbits[].contents.satellites` / `sys.capturedPlanets[].satellites`) rather than MgT2E's flat `sys.worlds[].moons`, using parallel positional arrays instead of `SeedRestoration`'s approach since CT's shape doesn't fit that module's existing function signatures. Wired into `ct_system_driver.js`'s `generateSystem()`: capture right before `socialProcessor(skeleton)` runs, trim right after — same placement MgT2E uses around its `generatePhysicals` call.
-**Root cause, in one sentence:** both gaps are variations on the same theme as OW-10 — CT's "don't touch what's already there" conventions were built up incrementally per-field/per-mechanism, and structural body-count control (Gap 1) and moon-cap trimming (Gap 2) were two more places that convention was never extended to.
-**Why this matters beyond CT — test T5/RTT/AoW for both gaps when each is next touched:**
-1. **Blank-creation body-count gate (Gap 1):** verify each engine's equivalent of `generateSystemSkeleton`'s seeded-body gate doesn't have the same "requires a non-empty seed" trap — confirm a genuinely blank Create System (zero bodies, `_allowAddBodies` false) actually stays blank for T5/RTT/AoW too, not just when editing an already-populated system.
-2. **Moon-cap capture/trim (Gap 2):** confirm whether T5/RTT/AoW have their own equivalent of MgT2E's `SeedRestoration.captureSeededMoonCaps`/`trimGeneratedMoonsToSeededCaps` pair, or CT's new `captureCTSatelliteCaps`/`trimCTSatellitesToSeededCaps`. If neither exists for a given engine, adding a brand-new body via the editor may produce dice-rolled moons that a per-engine OW-10-style "lock repeat rolls" fix wouldn't catch, since that lock only stops *repeat* rolls on already-generated bodies, not a body's *first* roll.
-*Spec ref: Section 5's CT subsection (structural-seeding bullet) and the per-engine table's "Structural seeding" column; OW-6 (superseded — its "not verified either way" on whether CT needs `SeedRestoration` is now resolved: it did).*
-
-**OW-12 — ✅ CLOSED for CT and MgT2E (2026-07-07, found and fixed same day): lunar mainworld's `isMainworld` flag never reached the System Editor, causing a second mainworld to be elected on Preview/Save**
-Found from a user report: a CT bottom-up system whose mainworld is a moon of a Gas Giant showed the correct highlight in the orrery, but *no* body showed the ★ highlight in the System Editor's body list — and pressing Preview/Fill & Save elected a brand-new mainworld, leaving two bodies flagged as mainworld.
-**Root cause.** `processBottomUpDesignation` (`ct_bottomup_generator.js`) stamps the winning body's `.type = 'Mainworld'` (and, for a lunar winner, `.isLunarMainworld`/`.parentBody`) but never sets an `.isMainworld` boolean on it. `readBodies()`'s CT adapter (`system_editor.js`) compensates for this for **top-level** bodies with a fallback check (`_isMW(w, mwRef) || w.type === 'Mainworld'`), but built moons with a bare `.map(_buildMoon)` — no equivalent fallback — so `_buildMoon`'s `isMainworld: !!m.isMainworld` came out `false` for a lunar mainworld even though its `.type` correctly said `'Mainworld'`. That cascades: no ★ highlight anywhere → `wc.mainworldRef` (derived by scanning for `isMainworld: true`) resolves to `null` → the seed's `_mainworldRef` is `null` → `ct_system_driver.js`'s seed-designates-a-mainworld pre-set block (line 68) is skipped → `processBottomUpDesignation` falls through to a fresh `designateMainworld()` election — whose candidate list (`['Terrestrial Planet', 'Planetoid Belt', 'Captured Planet', 'Satellite']`) doesn't even include `'Mainworld'`, so the original moon can't be re-picked either. Net result: the original moon keeps `type: 'Mainworld'` untouched, a second body gets newly elected and flagged the same way, and the orrery shows two mainworlds.
-**Fix:** CT's `readBodies()` now builds moons the same way T5's adapter already did (T5 hit this exact issue before and was fixed with this pattern) — `isMainworld: !!(m.isMainworld || m.type === 'Mainworld' || _isMW(m, mwRef))` — computed before handing off to `_buildMoon`. Verified end-to-end in an isolated logic simulation: the moon now gets `isMainworld: true`, `mainworldRef` resolves to it, and the Fixed Anchor path engages instead of re-electing.
-**MgT2E confirmed to have the identical live bug and fixed the same day:** `mgt2e_bottomup_generator.js`'s mainworld election (`mainworld.type = 'Mainworld'; sys.mainworld = mainworld;`) never sets `.isMainworld` either — grepped all of `mgt2e_world_engine.js` and every `isMainworld` reference is a local variable checking `.type`, never a stamped property — and its own `_mainworldRef` seed lookup already searches moons by `_id` (symmetric to CT's), so the generator side was fully ready. The break was the same one line: MgT2E's `readBodies` (`system_editor.js`, MgT2E adapter) built moons with a bare `.map(_buildMoon)`. Fixed with the identical `isMainworld: !!(m.isMainworld || m.type === 'Mainworld' || _isMW(m, mwRef))` pattern.
-**Root cause, in one sentence:** the generator only ever proves "this is the mainworld" via `.type === 'Mainworld'`, and the one place that fact gets translated into the editor's `isMainworld` boolean (`readBodies`) forgot to apply that translation to moons, only to top-level bodies — true for both CT and MgT2E, since both engines' mainworld-election code follows the exact same `winner.type = 'Mainworld'`-only convention.
-**Why this matters beyond CT/MgT2E — check RTT/AoW's `readBodies` for the identical gap:**
-1. **RTT's adapter has the exact same unguarded pattern today** — `moons: (body.moons || body.satellites || []).map(_buildMoon)` with no `mwRef`/`type` fallback (confirmed by reading the code; not yet confirmed whether it manifests as a *live* bug — RTT's own mainworld-election code hasn't been checked for whether it sets `.isMainworld`, only assumed absent by analogy to CT/MgT2E). RTT's top-level check is also weaker than CT's/MgT2E's: `isMainworld = !!body.isMainworld` has no `|| type === 'Mainworld'` fallback even for top-level bodies, so RTT may have a second, broader version of this same gap worth checking first.
-2. **AoW's `readBodies` has the same bare `.map(_buildMoon)` for moons** (noted to Sean when the CT fix shipped, not yet investigated further).
-3. When each engine's lunar-mainworld handling is next touched, reproduce directly: generate a system whose mainworld is a moon, open Edit System, and check whether the moon shows the ★ highlight and whether a no-edit Preview/Fill & Save keeps exactly one mainworld. If not, apply the same `_isMW(m, mwRef) || m.type === 'Mainworld'` fallback used in CT/MgT2E/T5's fix (and, for RTT, add the equivalent fallback to the top-level check too).
-*Spec ref: found via a user-reported orrery/System Editor investigation, 2026-07-07; MgT2E confirmed and fixed same day after Sean asked "is there a fix required for MgT2E?"*
-
-**OW-13 — ✅ CLOSED for CT (2026-07-07, found and fixed same day): a Captured Planet could roll the exact same orbit number as a companion star, and even after that was fixed the two still rendered at the same radius in the orrery**
-Found from a user report: the orrery showed a captured planet apparently sharing an orbit with a secondary star.
-**Root cause 1 (data model).** `CT_StellarEngine.resolveAnomalies()` (`ct_stellar_engine.js`) deliberately exempts Captured Planets from the Book 6 inner/outer zone-destruction rules that apply to Empty Orbits (captured planets are supposed to survive orbits that would vaporize a normal body) — but nothing stopped a captured planet's rolled orbit (`baseline(2D) + deviation((2D-7)×0.1)`) from landing on the *exact* integer orbit a companion star already occupies, a distinct, narrower collision the destruction-rule exemption was never meant to cover. Confirmed with Sean's requirements-agent research: Book 6 treats orbital tracks as exclusive (duplicate-orbit rerolls elsewhere; "a companion star already placed in one remains there") even though captured planets are otherwise exempt from the broader destruction rules.
-**Fix 1:** `resolveAnomalies` now nudges a captured planet's orbit by `+0.1` whenever it exactly equals a companion star's integer orbit, leaving the zone-destruction exemption untouched for every other case.
-**Root cause 2 (rendering — found while verifying Fix 1).** The `+0.1` nudge alone didn't actually move the orrery position: captured-planet `distAU` was computed via `orbitalAU[Math.floor(p.orbit)]` (`ct_bottomup_generator.js`, `ct_topdown_generator.js`) — a flat table lookup that discards the fractional part entirely — while the *viewer's* companion-star position (`system_viewer.js`'s `_orbitToAU`) interpolates on that same fractional part. `Math.floor(10.0)` and `Math.floor(10.1)` are both `10`, so the nudge changed the stored number but not the rendered radius.
-**Fix 2:** added `CT_StellarEngine.interpolateOrbitAU(table, orbit)` (same `lo + frac×(hi−lo)` formula as the viewer's `_orbitToAU`) and switched both generators' captured-planet `distAU` calc to use it instead of flooring. Verified end-to-end with a node simulation: a companion star at orbit 10 (77 AU) and a nudged captured planet at orbit 10.1 now resolve to different AU (84.7 AU vs. 77 AU). Side effect (a strict improvement, not a behavior risk): *every* captured planet now renders at its true fractional AU distance instead of snapping to the next-lower integer orbit's AU — integer-orbit bodies are unaffected since interpolation is a no-op when the fractional part is 0.
-**Why this matters beyond CT:** "Captured Planet" itself is a CT/Book-6-only mechanic (grepped for it across `js/` — no MgT2E/T5/RTT/AoW file references it), so this specific anomaly-type collision won't recur verbatim in another engine. The *general* lesson is worth carrying forward, though: **any place a generator computes a body's `distAU`/orbital-AU position from a possibly-fractional orbit number should be checked against how the System Viewer independently computes position for the same body type** — a mismatch between "floor the fractional orbit" (generation-time) and "interpolate the fractional orbit" (render-time) is exactly the kind of silent, hard-to-spot divergence that caused this bug, and could recur wherever a future engine introduces its own fractional-orbit body type. MgT2E's own `_orbitToAU` (the one CT's companion stars are rendered through today) already interpolates, so MgT2E is not currently believed exposed to this pattern — not independently re-verified as part of this fix, though.
-*Spec ref: found via a user-reported orrery investigation, 2026-07-07; fix required a requirements-agent ruling on Book 6 anomaly rules before implementation (Halt & Challenge) — see conversation for the full ruling text.*
-
-**OW-14 — ✅ CLOSED for CT (2026-07-07, found and fixed same day): Gas Giants have no natural "already generated" signal, so a no-edit Preview/Fill & Save silently mutated them — refines OW-10 Gap 1**
-Found from a user report: opening System Editor on a CT bottom-up system and pressing Preview with *zero* edits made gas giant moons visibly slow down in the orrery.
-**Root cause 1 (physical fields silently dropped).** `_ctUwpLockFor()` (`system_editor.js`) — the function that carries a body's already-generated physical fields forward into the seed on every Preview/Fill & Save — only ever knew about `atm/hydro/pop/gov/law/starport/tl/size`. A Gas Giant's `mass`/`gravity`/`diamKm` are set exactly once, during the one-time skeleton-placement roll (`ct_bottomup_generator.js`), which is *skipped entirely* once a system is seeded from the editor — so after just one Preview, a Gas Giant's `mass`/`gravity` silently became `undefined`, and `processCTDerivedPhysics` (`ct_physical_library.js`), seeing a missing `diamKm`, re-rolled a brand-new random one every single Preview. The orrery's `_moonPeriodYears` (`system_viewer.js`) computes orbital period from `parentWorld.mass || 1` — a Large Gas Giant's real 300-Earth-mass falling back to `1` alone inflates the computed period by roughly √300 ≈ 17×, i.e. the reported "slow down."
-**Root cause 2 (moons silently re-rolled).** `processBottomUpSatellites()`'s (`ct_bottomup_generator.js`) "already generated, don't reroll" lock — the same mechanism OW-10 Gap 1 introduced — checks `if (parent.uwp) return;`. Gas Giants never receive a `.uwp` (that's a world-stat string; GGs only ever have `size/gravity/mass/diamKm`), so this lock silently never engaged for Gas Giants: every Preview re-rolled a fresh batch of moon quantity/size/`pd`, pushed them onto the existing (seeded) moon list, and a later trim step sliced back down to the original count — silently swapping some real moons for freshly-rolled ones with different `pd` (hence different period). **OW-10 Gap 1's own fix and "why this matters" section did not catch this** — it verified the *general* satellite-quantity-locking gap and its `if (parent.uwp) return;` fix, but never separately checked whether that exact signal actually covers Gas Giant parents specifically, as distinct from terrestrial/captured-planet parents.
-**Fix:** `_ctUwpLockFor` now also preserves a Gas Giant's `mass`/`gravity`/`diamKm` regardless of the `.uwp` gate (added a GG-specific block ahead of the uwp-gated early return). A new `_satellitesGenerated` boolean is stamped on a Gas Giant the first time `processBottomUpSatellites` processes it (even if the roll comes up zero) and carried forward through the same preservation path; the lock check is now `parent.type === 'Gas Giant' ? !!parent._satellitesGenerated : !!parent.uwp`. (A same-pass diamKm/mass-presence check was considered and rejected — Phase 1 skeleton placement sets those fields synchronously *before* Phase 3 satellites runs even on a genuinely fresh, non-seeded generation, so gating on their presence would have incorrectly skipped rolling moons on a system's very first-ever generation. The explicit flag avoids that trap because it's only ever set *after* Phase 3 completes.) Verified in an isolated node simulation across three scenarios: fresh GG rolls and locks, a seeded/already-generated GG (including one that legitimately rolled zero moons) stays locked and untouched on the next pass.
-**Root cause, in one sentence:** CT's "once generated, don't reroll" convention keys everything off `.uwp`, and Gas Giants are the one body type that never has one — the same class of gap as OW-10/OW-11, just not caught by either of those passes because both were framed around fields worlds have (UWP digits, moon counts) rather than the one body type that has neither a UWP nor an obvious substitute.
-**Why this matters beyond CT — check whether other engines' Gas-Giant-equivalent bodies have their own already-generated signal:**
-1. **MgT2E is not believed to have Root Cause 1** — its `_mgt2ePhysSeed()`/`_MGT2E_PHYS_FIELDS` list (`system_editor.js`) already includes `diamKm`/`mass`/`gravity` and is applied "for all body types" per its own comment, unlike CT's `_ctUwpLockFor` which had no generic phys-field carry-over at all. Not independently re-verified end-to-end as part of this fix — worth a quick confirmation (create an MgT2E system with a Gas Giant that has moons, Preview with no edits, check the moons' apparent speed) before assuming it's clean.
-2. **T5/RTT/AoW's Gas-Giant-equivalent lock signal has not been checked at all.** Each engine's satellite-quantity lock (audited generically under OW-10 Gap 1) should be re-checked specifically for whichever body type in that engine has no natural "already generated" field the way CT's Gas Giants don't — reproduce with the same test: open an existing system with a moon-bearing Gas Giant (or that engine's equivalent), Preview with zero edits, and confirm neither the moon count/positions nor the parent's own physical fields change.
-*Spec ref: found via the same 2026-07-07 orrery investigation as OW-12/OW-13; supersedes OW-10 Gap 1's implicit assumption that `if (parent.uwp) return;` covers every body type it was applied to.*
-
-**OW-15 — ✅ CLOSED for CT (2026-07-09, found and fixed same day): dragging a companion star in the System Editor moved it in the body list but not in the orrery**
-
-Found from a user report: added a companion star to a CT system, pressed Preview, and it appeared in the orrery but not where the body list said it should be; confirmed as a drag-and-drop bug — dragging a companion star to reposition it works correctly for MgT2E but not CT.
-
-**Root cause.** `_normalizeCT` (`system_viewer.js`) derives a companion star's orrery distance only from CT's *native* stochastic-generation fields — `s.orbit` (number or `'Close'`) / `s.distAU`, set by `resolveCompanionOrbit` (`ct_stellar_engine.js`). A companion added or repositioned in the System Editor never gets those fields — the editor only ever writes `orbitId` (the same shared position key `_insertAtOrbit` uses for worlds, updated on every drag-and-drop). Since none of `_normalizeCT`'s checks ever matched an editor-authored companion, it always fell through to a hardcoded `10 AU` default — so the star rendered at the same fixed spot regardless of where it was dropped. MgT2E doesn't have this problem because its normalizer passes `sys.stars` straight through unmodified, letting the shared render-time helper `_starCompanionAU()` (`s.orbitAU ?? _orbitToAU(s.orbitId || 0.5)`) pick up the editor's `orbitId` directly.
-
-**Fix:** added `orbitId`/`orbitAU` fallbacks to `_normalizeCT`'s companion-orbit branch, checked after CT's native fields but before the hardcoded default — mirroring the equivalent read-side fallback chain that already existed in `system_editor.js`'s `_buildWorkingCopyFromState` (orbitAU derivation for CT/RTT stars, lines ~978-989). CT's native stochastic-generation fields still take priority, so ordinary (non-edited) generation is unaffected.
-
-**Why this matters beyond CT — RTT has the identical gap, not yet fixed:** `_normalizeCT`'s sibling normalizer for RTT (`system_viewer.js`, ~line 521-545) has the same shape of bug — its companion-orbit lookup (`_RTT_COMPANION_AU`, keyed off `s.orbitType`) never falls back to `orbitId`/`orbitAU` either, so a System-Editor-repositioned RTT companion star almost certainly renders at a fixed default distance in the orrery the same way CT's did before this fix. Not yet reproduced or fixed — when RTT's System Editor companion support is next touched, check this first: add/drag a companion star in an RTT system, Preview, and confirm the orrery position matches the body list. If it doesn't, apply the same `orbitId`/`orbitAU` fallback pattern used in this fix.
-
-*Spec ref: found via a user-reported orrery investigation, 2026-07-09.*
-
-**OW-16 — ✅ CLOSED for MgT2E (2026-07-09, found and fixed same day): editing a Belt's type/size away from Belt could crash Preview/Fill & Save with `Cannot read properties of null (reading 'toFixed')`**
-
-Found from a user report: goofing around editing an existing MgT2E bottom-up system, Preview started throwing a console error on every attempt to save, stack trace rooted in `generateRotationalDynamics`'s `processBody` (`mgt2e_world_engine.js:1698`).
-
-**Root cause.** `processBody` deliberately sets `siderealHours`/`solarDayHours`/`axialTilt` to `null` for a Planetoid Belt (or size-0/Ring body) — rotational dynamics don't apply, so it skips the calculation and returns early (`mgt2e_world_engine.js:1604-1621`). `_mgt2ePhysSeed()` (`system_editor.js`), which seeds a body's already-generated physical fields forward on every Preview/Fill & Save and marks them manual so the generator won't reroll them, only excluded `undefined` — not `null` — so those deliberately-nulled fields got seeded and locked in as "preserved" too. Changing that body's type or size away from Belt in the editor doesn't clear the stale lock: on the next Preview, `processBody` takes the full rotational-dynamics branch, sees `isManual(w, 'solarDayHours') === true`, skips recomputing it, and calls `.toFixed(2)` on the still-`null` value.
-
-**Fix:** `_mgt2ePhysSeed()` now excludes both `undefined` and `null` from what it seeds/locks. This helper is shared verbatim by AoW (`_MGT2E_PHYS_FIELDS`/`_mgt2ePhysSeed`), so the fix covers that path too.
-
-**Audited the other four engines for the same failure shape (a generator that deliberately nulls a field for one body shape, paired with an editor lock helper that doesn't filter null) — only MgT2E had it:**
-1. **CT, T5, RTT are not vulnerable.** Their equivalent lock helpers (`_ctUwpLockFor`/`_ctMoonLockFor`, `_t5UwpLockFor`, `_rttUwpLockFor`) only preserve UWP-style digit fields (atm/hydro/pop/gov/law/tl/starport/size and friends) plus, for CT, Gas Giant mass/gravity/diamKm — none of which `ct_world_engine.js`/`ct_physical_library.js` ever deliberately null for a particular body shape (uninhabited bodies get `0`, not `null`). CT's moon lock does carry `axialTilt`/`rotationPeriod`, which *can* end up as the string `'N/A'` for a Ring/size-0 moon (`ct_physical_library.js:79`), but grepped all live call sites and confirmed nothing ever calls `.toFixed()` on a CT moon's `axialTilt`/`rotationPeriod` (only MgT2E and AoW do) — a latent oddity, not a live crash.
-2. **AoW not confirmed vulnerable, but not exhaustively audited either.** AoW's `write()` adapter doesn't go through `_mgt2ePhysSeed` at all — it threads `_raw` straight into `aow_seed_bridge.js`'s own, separate seed/manual-field system. Its rotation-period step (`stepRotationPeriod`, `aow_world_engine.js`) skips Gas Giants/Belts entirely but *unconditionally* recomputes `rotationPeriod` for every other body every pass with no manual-lock guard, so a stale null can't survive a shape change the way MgT2E's did. Grepped AoW's other `isManual()`-guarded fields (density, radius, surfaceGravity, albedo) for an equivalent "nulled by shape" assignment and found none — but the engine is large (~4000 lines in `aow_world_engine.js` alone) and this was a targeted grep, not a full trace. Worth a closer look if an AoW user ever reports the same class of crash after changing a body's type/size mid-edit.
-
-*Spec ref: found via a user-reported console-error/stack-trace report, 2026-07-09.*
-
-**OW-17 — ✅ CLOSED for CT (2026-07-09, found and fixed same day): a companion star added via the System Editor's `+Comp` rendered in a different relative position on all three surfaces (Edit panel, accordion, orrery)**
-
-Found from a user report: a CT bottom-up system ("Rybalka"), companion added via `+Comp`, appeared first (closest to primary) in the orrery, second (after the mainworld) in the Edit System panel, and last (after every other body) in the hex editor's System Details accordion — a three-way disagreement, none of which reflected any real CT-rule-derived distance.
-
-**Root cause.** The System Editor's companion-star UI (`_buildCompanionBlock`, `system_editor.js`) is shared, engine-agnostic code. It positions a companion via a generic `role` dropdown (`Companion`/`Close`/`Near`/`Far`) mapped to a placeholder `orbitId` (`{ Companion: 0.15, Close: 0.5, Near: 6.0, Far: 12.0 }`), interpolated against the same fractional orbit→AU table used for planets (`_orbitIdToAU`). That's what the **Edit System panel** and the **orrery** both read directly (`_orbitIdToAU`/`_orbitToAU` on `star.orbitId`), so those two agree with each other. But CT's own engine has no such concept — real CT companion placement is a 2D6 roll on `CT_COMPANION_ORBIT_TABLE` (`ct_stellar_engine.js`'s `resolveCompanionOrbit`), which produces `.orbit` (`'Close'` / a numeric orbit slot / `'Far'`) and `.distAU`, not `orbitId`. `CT.write()` (`system_editor.js`) never translates the editor's `orbitId`/`role` into those native fields, and `generateSystemSkeleton()` (`ct_bottomup_generator.js:119-120`) clones seeded stars verbatim rather than resolving them through `resolveCompanionOrbit`, so a System-Editor-added CT companion is saved with `orbit`/`distAU` both `undefined`. The **accordion**'s `_ctCompAU()` (`hex_editor.js:981-991`) checks `distAU`, then `orbit` as a number, then `orbit === 'Close'`, and falls through all three to a hardcoded `return 10` (AU) — larger than every real body in a typical system, hence "last." (`ct_bottomup_generator.js`'s own companion-orbit-exclusion logic, which also keys off `star.orbit`, is exposed to the same gap, though it wasn't this bug's visible symptom.)
-
-**Why this is a rules question, not just a field-name bug:** CT has no "Companion" or "Near" separation category at all — only Close, a rolled numeric slot, or Far (`CT_COMPANION_ORBIT_TABLE`, `rules/ct_data.js`). Per the Zero-Assumption Policy, inventing a CT-specific mapping for the editor's generic role dropdown would have meant guessing at RPG rules, so this was raised to Sean rather than silently patched (Halt & Challenge).
-
-**Fix (Sean's decision, 2026-07-09):** rather than teach the editor to roll CT companions correctly, the `+Comp` button is removed entirely for CT systems — both the primary star's `+Comp` and the nested `+Comp` used to add a sub-companion to an existing secondary (`system_editor.js`, gated on `_workingCopy.engine !== 'CT'`). Real CT companions now only ever arise from the original Binary/Trinary Nature roll at generation time, which already produces correct, mutually-consistent `.orbit`/`.distAU` data that all three surfaces read correctly. This is also now the origin of **System Viewer Rules** (Section 3, above) as an explicit, canonical statement — the underlying rule ("all three surfaces must show the same order") existed piecemeal before this but had never been written down as one cross-cutting requirement.
-
-**Scope decision — `+Secondary` intentionally left alone:** `+Secondary` (`_addStar('Far', primaryStar._id)`) shares the identical underlying mechanism and the identical gap, and was flagged to Sean before this fix shipped. His explicit call was to leave it in place regardless — see the "Known residual gap" note in Section 3.
-
-**Remediation for systems already affected:** this fix only prevents *new* CT companions from being added this way — it does not repair a system saved before the fix (e.g. the reported Rybalka system). Open it in the System Editor and delete the companion (`Del★`) before saving again.
-
-*Spec ref: found via a user-reported System Editor/orrery/accordion three-way discrepancy, 2026-07-09; fix scope required two Halt & Challenge rounds with Sean (companion orbit semantics, then `+Comp`-vs-`+Secondary` scope) before implementation.*
-
-**OW-18 — ✅ CLOSED for CT (2026-07-09, same-day follow-up to OW-17): CT Edit System gap audit — `+Secondary`'s residual gap was worse than scoped, plus a rejected fix idea worth recording**
-
-Found from a Sean-requested audit: "ensure our CT EDIT SYSTEM (a) follows our CT rules and (b) follows our System Viewer Rules — what are the current gaps," run immediately after OW-17 shipped.
-
-**Gap 1 — Role dropdown reopened OW-17.** `_buildCompanionBlock`'s Role selector (`system_editor.js`) rendered `['Companion', 'Close', 'Near', 'Far']` unconditionally, with no CT gate. Removing the `+Comp` button (OW-17) didn't close this: a user could add a star via the still-enabled `+Secondary` (defaults to `Far`) and then switch its Role dropdown to `Companion`, fully reproducing OW-17's original bug (`orbitId: 0.15`, no real `.orbit`/`.distAU`) through a route OW-17 never touched.
-**Fix:** for CT, the dropdown now only offers `Close`/`Far` — `CT_COMPANION_ORBIT_TABLE`'s (`rules/ct_data.js`) only two non-numeric-orbit categories; `Companion` and `Near` aren't real CT separations at all. The typed-Orbit#-triggered auto-relabeling (`_roleFromOrbit`, same file) is likewise restricted to Close/Far for CT, so typing a raw orbit number can't silently relabel a CT star `Near` either.
-
-**Gap 2 — the accordion's fallback never got OW-15's fix.** Restricting the dropdown's *labels* doesn't fix what OW-17 actually diagnosed: `CT.write()` still never populates `.orbit`/`.distAU` for *any* editor-added CT companion, regardless of which role is selected — only the placeholder `orbitId`. `hex_editor.js`'s `_ctCompAU()` still fell through to its hardcoded `10 AU` default for a Close- or Far-labeled editor-added star exactly as it did for a Companion-labeled one. `system_viewer.js`'s orrery already got the fix for this identical gap under **OW-15** (`orbitId`/`orbitAU` fallback added to `_normalizeCT`) — but the accordion's equivalent function never received the same treatment.
-**Fix:** added the same `orbitId`/`orbitAU` fallback to `_ctCompAU`, checked after CT's native fields (`distAU`, numeric `orbit`, `'Close'`) and before the hardcoded `10` default — mirrors OW-15's fix pattern verbatim, just in the third surface (accordion) that pattern hadn't reached yet.
-
-**Considered and rejected: orbit-slot collision validation on add.** Initially scoped as "Gap 2" — validate a `+Secondary`-added companion against existing planet orbit slots the way `resolveAnomalies` nudges a colliding captured planet during native generation (OW-13). Investigating `CT_StellarEngine.isOrbitValid` showed this would have been dead code: it only evaluates a candidate orbit slot against a companion whose `.orbit` is a real **number** — `Close` and `Far` are both non-numeric by definition and explicitly skipped by that check (`typeof star.orbit !== 'number'`). Once the Role dropdown is restricted to Close/Far (Gap 1's fix), a `+Secondary`-added CT star can never occupy a numeric orbit slot in the first place, so it structurally cannot collide with an existing planet under CT's own rule encoding. No fix needed; the Gap 2 accordion fallback above is what actually closes the residual Rule 3 risk.
-
-**Gap 3 — Far companions' nested systems are invisible everywhere, not just in the editor.** `star.nestedSystem` (built in `generateSystemOrbits`, `ct_bottomup_generator.js:325-341`, for any companion whose rolled/assigned orbit is `'Far'`) has zero references in `system_editor.js` or `system_viewer.js`, and the accordion's `renderCtStar` hard-codes an empty body list for any companion (`hex_editor.js`). Traced whether this hides real data: `rollSkeleton` (Step 2G — the actual gas-giant/belt/terrestrial placement roll) is only ever called once, on the root system, never recursively on a nested system — so under current CT bottom-up generation, a Far companion's nested system always has zone-classified orbit slots but zero actual bodies. **Not fixed — genuinely open**, since it's a Book-6-rules-scope question, not a bug: should a Far companion actually roll its own planetary system? Per the Zero-Assumption Policy this needs a Requirements Agent ruling rather than an assumption; see the "Still open" note in Section 3. Low risk in the meantime — there's currently no generated content anywhere for the gap to hide.
-
-*Spec ref: Sean-requested CT Edit System gap audit, 2026-07-09, same day as and immediately following OW-17.*
-
-**OW-19 — ✅ ROOT-CAUSED AND CLOSED 2026-07-16 (original framing was a false alarm; the real bug was a separate, more severe regression) — see OW-42 below for a second, genuinely new bug found during the same re-verification**
-
-Originally filed 2026-07-11 as "an added Gas Giant doesn't persist into `stateObj.t5System.worlds` on a T5 system's second Fill & Save," with root cause unknown. Re-investigated 2026-07-16 as part of a pre-T5-overhaul cleanup pass, using an in-browser Playwright script driving the real `SystemEditor` (Create T5 → +World → Preview → Fill & Save → Edit → +GG → Preview → Fill & Save → Edit again), matching this project's established verification pattern (see [[feedback_t5_editor_verification]]).
-
-**The original `.worlds`-empty framing was itself a false alarm.** `t5System.worlds` is a field `t5_topdown_generator.js` **never populates, by design** — confirmed by grepping the entire codebase for `t5System.worlds`/`sys.worlds` inside T5 generator code: zero hits. Every T5 body lives exclusively in `sys.stars[].orbits[].contents`, which is exactly why `T5.readBodies()` (`t5_editor_adapter.js`) already falls back to walking `raw.stars[].orbits[]` whenever `raw.worlds` is empty. Checking `.worlds.length` to verify the Gas Giant persisted was checking a field that is *supposed* to always be empty — the 2026-07-11 test needed to check `stars[].orbits[].contents` instead, the same place `readBodies()` already looks.
-
-**What was actually happening (found today):** the 2026-07-11 repro's own Fill & Save calls were **silently failing outright** — not committing an empty-but-otherwise-fine system, but throwing before `hexStates` was ever written to, on both the first and second save. `_generateAndCommit`'s try/catch swallowed the error into a warning dialog (`[SystemEditor] Preview failed: TypeError: Cannot read properties of null (reading 'toFixed')` at `t5_stellar_engine.js:388`, inside `logT5BodyBiography`, called unconditionally — no `isLoggingEnabled` gate — from `walkT5System` on every single T5 generation pass). This is why `stateObj.t5System` was empty either way: generation never completed, so there was never a "worlds is empty but everything else worked" state to investigate in the first place.
-
-**Root cause:** a regression introduced by commit `93ad802` (2026-07-13, two days *after* OW-19 was originally filed) — the CT captured-planet/luminosity fix added an unconditional `luminosity: s.lum` mirror to `_buildSeedSys()`'s star-seed object (needed because CT's own generator code reads `star.luminosity`, never `star.lum`) and a matching resync (`star.luminosity = star.lum;`) to CT's branch of `_resolveStarPhysics()` — but not to the generic branch shared by T5/MgT2E/RTT/AoW. Consequence: a brand-new star's `lum` starts `null`; `_buildSeedSys()` copies that null into both `lum` and `luminosity`; `_resolveStarPhysics()` then resolves `.lum` to a real number but never touches the now-stale `.luminosity`; T5's long-standing (commit `77dd22e`, predates the System Editor entirely) `logT5BodyBiography` diagnostic reads `body.luminosity.toFixed(3)`, guarded only by `!== undefined` (which does not catch `null`), and throws. Since this fires on every single T5 generation pass with no way to disable it, **every Preview/Fill & Save on a freshly-created T5 system was completely broken** as of 2026-07-13 — a much bigger and more recent problem than the narrow "Gas Giant" framing OW-19 originally had.
-
-**Fix:** added the same resync line, `star.luminosity = star.lum;`, to the generic (non-CT) branch of `_resolveStarPhysics()` in `system_editor.js`, mirroring the existing CT precedent exactly rather than special-casing T5.
-
-**Verified:** re-ran the same in-browser Playwright script post-fix — zero console/page errors on both saves; `hasT5System: true` after both; re-opening Edit System after the second save showed exactly 2 bodies (Mainworld + Small Gas Giant), matching what was actually added, confirming the Gas Giant does persist correctly (in `stars[].orbits[].contents`, never in `.worlds`) once generation can actually complete.
-
-**Also note — Create System for T5 is currently unreachable through the real UI, not just Edit.** `hex_map.html`'s `#se-engine-dialog` T5 radio is `disabled` with a "(coming soon)" label — contradicting the Section 5 banner's claim that "Create System is unaffected... all five engine radios remain enabled." This Playwright script only reached T5 by force-checking the disabled radio via direct DOM manipulation, bypassing what a real user can do. See the Section 5 banner correction below — this manifest's own "Verify before trusting a 'Known gap' claim" warning applies to its own "still works" claims too, not just its "known gap" ones.
-
-*Spec ref: original filing found during the 2026-07-11 adapter-file extraction's Playwright verification pass; re-investigated and closed 2026-07-16 as a pre-T5-overhaul cleanup item, Sean-requested.*
-
-**OW-42 — ✅ CLOSED 2026-07-16 (found and fixed same day): a T5 system with only a mainworld (the minimal, most common case) ignored "Allow engine to add additional bodies" and rolled a full random inventory anyway**
-
-Found via the same Playwright script used to close OW-19, immediately after the luminosity fix let generation actually complete. First Fill & Save (Create T5 → add one World, auto-elected mainworld by Algorithm 7, `_allowAddBodies` unchecked) produced **6 bodies** instead of 1: `Mainworld, Terrestrial World, Planetoid Belt, Terrestrial World, Planetoid Belt, Terrestrial World`. The very next Fill & Save (same system, now with a user-added Gas Giant as a second body) correctly produced exactly the 2 expected bodies with no extras — proving the lock mechanism itself works and this is specifically a mainworld-only-system gap, not a general "seeded inventory gating is broken" problem.
-
-**Root cause:** `t5_topdown_generator.js`'s `generateT5System()` computed `hasSeedWorlds = !!(seedSys && Array.isArray(seedSys.worlds) && seedSys.worlds.length > 0)` and gated the dice-rolled `ggCountTotal`/`beltCountTotal`/`otherTerrTotal` inventory to `0` only `if (hasSeedWorlds && !allowAddBodies)`. But `T5.write()` (`t5_editor_adapter.js`) always excludes the mainworld body from `seed.worlds` by design (it's threaded separately via `seed.mainworldUWP`, per the Write-stub notes above) — so a system whose *only* body is the mainworld always produced an empty `seed.worlds`, making `hasSeedWorlds` false regardless of the "Allow engine to add additional bodies" checkbox state. The zero-lock gate never engaged, and the generator fell through to a full stochastic roll exactly as if the user had asked for one. Same shape of bug as OW-11's CT "blank-creation body-count gate" (closed 2026-07-06 for CT) — but distinct in mechanism: CT's gap was a genuinely-empty seed; T5's was that its own mainworld-exclusion convention made even a *non-empty*, fully-intentional single-mainworld system look empty to this specific check.
-
-**Fix:** added a new `isEditorSeeded = !!seedSys` flag — "was this call made from the System Editor at all" (always truthy when called via `T5.run()`, always `null`/falsy for the classic stochastic macro path per `generateT5System`'s `seedSys = null` default) — and replaced `hasSeedWorlds` with `isEditorSeeded` in the three inventory-count gates only. This mirrors MgT2E's own already-established pattern for the identical decision (`mgt2e_bottomup_generator.js`'s `if (!seedSys || seedSys._allowAddBodies)`) instead of inventing a new T5-specific signal. `hasSeedWorlds` itself is untouched and still correctly gates the seeded-body placement loop just above (harmless either way, since looping an empty array is a no-op) — only the inventory-roll decision needed the broader "was this editor-driven" signal instead of "did the editor seed a non-mainworld body."
-
-**Verified:** `node --check js/t5_topdown_generator.js` passes; re-ran the same in-browser Playwright script — first Fill & Save (mainworld only, `_allowAddBodies` unchecked) now correctly produces exactly 1 body (`Mainworld`), second Fill & Save (added Gas Giant) still correctly produces exactly 2 (`Mainworld`, `Small Gas Giant`), zero console/page errors both times. The classic/macro (non-editor) generation path is provably unaffected: `isEditorSeeded` is `false` whenever `seedSys` is `null`, exactly matching `hasSeedWorlds`'s prior behavior for that path — no behavior change for anything except the mainworld-only editor case this item targets.
-
-*Spec ref: found and fixed 2026-07-16, Sean-requested same-day follow-up to OW-19, during the pre-T5-overhaul cleanup pass.*
-
-**OW-43 — ✅ CLOSED 2026-07-16 (found and fixed same day, working through the T5 overhaul punch list's item 1 — satellite/moon-quantity locking): a T5 body's moon count fluctuated randomly (not just grew) across repeated no-edit Preview/Fill & Saves**
-
-Found immediately while testing punch-list item 1 ("open an existing system with a moon-bearing body, Preview with zero edits, confirm the moon count doesn't grow") via in-browser Playwright. A mainworld-only T5 system's own moon count (starting at 2, from `isPreMoon`/random initial roll) went `2 → 0 → 2` across three consecutive no-edit Fill & Saves — worse than "grows," it's fully non-deterministic every single save.
-
-**Root cause: the exact same bug as OW-42, at a second call site I missed when fixing that one.** `generateT5System()` passes `capToExisting` to `fleshOutSubordinates(sys, capToExisting)` — which controls whether `generateT5Satellites()` locks a body's moon count to what's already there (`capToExisting ? startIdx : <fresh roll>`) — but the value passed in was still `hasSeedWorlds && !allowAddBodies` (line ~508), not the `isEditorSeeded` flag OW-42 introduced for the *inventory*-count gate a few lines above. Since `T5.write()` always excludes the mainworld from `seed.worlds` by design, a mainworld-only system's `hasSeedWorlds` is false regardless of what's actually seeded — so `capToExisting` was false, and `generateT5Satellites` re-rolled a fresh `1D-3` moon count for the mainworld itself on every single pass, with no memory of the previous roll (the loop `for (let i = startIdx; i < moonCount; i++)` neither trims excess when the new roll is lower nor remembers the old count when it's higher — it just diverges further from whatever was there before).
-
-**Fix:** replaced `hasSeedWorlds && !allowAddBodies` with `isEditorSeeded && !allowAddBodies` at this second call site, identical reasoning to OW-42.
-
-**Verified:** `node --check js/t5_topdown_generator.js` passes; re-ran the mainworld-only Playwright scenario — moon count now stable (`0 → 0 → 0`, this run's random roll) across 3 consecutive no-edit saves. Separately re-verified a mainworld **+** Gas-Giant-with-2-user-added-moons scenario (the more realistic "moon-bearing body" case the punch list item literally describes) — moon count correctly stable at `2 → 2 → 2` across the same 3-save sequence, confirming the fix doesn't disturb the already-working non-mainworld-only case. (First attempt at this second test gave a false `0` for the Gas Giant's moon count — traced to the test script's own `+Moon` click landing on the mainworld's button instead of the Gas Giant's, since both bodies have one and the naive "first button matching this text" selector grabbed the wrong body's; not an app bug, a test-methodology error, fixed by scoping the click to the Gas Giant's own row.)
-
-*Spec ref: found and fixed 2026-07-16, working through the T5 overhaul punch list's item 1, same session as OW-19/OW-42.*
-
-**OW-44 — ✅ CLOSED 2026-07-16 (found while investigating punch-list item 2; planned via plan mode and implemented later the same session): the System Editor never actually generated a real UWP for a brand-new T5 mainworld at all**
-
-Found while testing whether typed "Seed UWP digits" (Starport/Pop, etc.) on a brand-new T5 body have any effect before its first generation. They don't — and tracing why surfaced something bigger than the seed-digit wiring itself.
-
-**What's actually happening:** `t5_editor_adapter.js`'s `write()` builds the mainworld seed object directly from the working-copy body: `uwp: mwBody.uwp || 'A788899-9'`. For a brand-new mainworld (no prior `.uwp`), this is **always** the literal fallback string — confirmed by noticing both the OW-19 and OW-42 Playwright verification runs independently produced the exact same UWP (`A788899-9`) for two unrelated systems, which is not a coincidence. `generateT5System()`'s Phase 1 then places this already-"complete" object into an orbit slot as-is; nothing downstream ever rolls real starport/size/atm/hydro/pop/gov/law/tl values for it. Confirmed by directly typing Starport='A' and Pop='9' into a new World's seed boxes pre-Preview: the resulting UWP after Fill & Save was still the unmodified literal `A788899-9`, proving neither the seed digits nor any dice roll ever touch the mainworld's fields.
-
-**Root cause — architectural, not a bug in the usual sense.** T5's classic (non-editor) flow has a dedicated, fully dice-driven mainworld generator, `generateT5Mainworld(hexId)` (`t5_world_engine.js`) — rolls stellar constellation, starport (hex-seeded), size, atmosphere, hydrographics, population, gov, law, tl, trade codes, the works. `macro_orchestrator.js` and `ui_menus.js` both call this *before* handing the result to `System_Driver.generateSystem(...)` as `mainworldUWP`. The System Editor's T5 adapter has no equivalent step — it was built (2026-07-05, Phase B) synthesizing `mainworldUWP` purely from working-copy fields, on the assumption a body already has (or the generator will roll) real values, which turns out to be false specifically for a body's very first generation pass.
-
-**Scope check — this is mainworld-only, not a T5-wide gap.** Subordinate (non-mainworld) bodies *do* go through real generation (`generateT5SubordinateUWP` inside `fleshOutSubordinates`), and `_t5UwpLockFor` genuinely locks worldType/size/atm/hydro/pop on those once generated — see OW-2-numbered punch-list item 2 (gov/law/tl/starport) below, which is real and narrower in scope than this item. This item is specifically: **every T5 system ever created via the System Editor has a mainworld permanently stuck with a placeholder UWP**, regardless of star type, habitable zone, seed digits, or anything else.
-
-**Deferred initially, then planned and implemented later the same session (2026-07-16).** Sean asked for a plan before implementation; the approved plan reused the classic flow's existing dedicated mainworld generator rather than writing a parallel one.
-
-**Fix, two files:**
-1. **`js/t5_world_engine.js`** — `generateT5Mainworld(hexId)` gained an optional second parameter, `editorSeed`. When supplied (an object carrying any pre-filled fields plus `_manualFields`, built by the caller via the shared `applyUwpSeed()`): the stellar-constellation roll (step 0) is skipped entirely — confirmed harmless, since `generateT5System()` never reads a seeded `mainworldBase.stars` when `seedSys.stars` is present (always true from the System Editor), and none of this function's own UWP fields depend on star type — and every roll step (starport, size, atm, hydro, pop, gov, law, tl) is gated with `!_isManual(world, field)`, mirroring `generateT5SubordinateUWP`'s existing per-field gating exactly. `world` is now assembled *before* the first roll (previously `starport` was rolled into a bare local variable before `world` even existed) so every step, including starport, can check the same object. Existing callers (`macro_orchestrator.js`, `ui_menus.js`) pass no second argument, so `editorSeed` is `undefined`, the stellar roll still runs, and every `_isManual` check returns `false` — identical output to before this change, the same safety guarantee this codebase relies on everywhere a seed parameter gates a generator (Algorithm 6). The unused `const primary = stars[0];` (dead code, confirmed via grep — never referenced anywhere in the function) was dropped as part of restructuring the stellar-situation block.
-2. **`js/t5_editor_adapter.js`'s `write()`** — when `mwBody.uwp` is falsy (brand-new mainworld), builds `SE().applyUwpSeed({ _manualFields: [] }, mwBody._uwpSeed)` (the same call CT/MgT2E's `write()` already make — this is also what fixes "Seed UWP digits do nothing" for T5, since nothing called `applyUwpSeed` for T5 at all before this), calls `T5_World_Engine.generateT5Mainworld(wc.hexId, editorSeed)`, and uses its real `uwp` plus the nine individual rolled fields (`worldType`/`starport`/`size`/`atm`/`hydro`/`pop`/`gov`/`law`/`tl`) instead of the hardcoded `'A788899-9'` string. The already-generated case (`mwBody.uwp` truthy) is untouched — `_t5UwpLockFor` already covers all nine fields there since OW-45.
-
-**Verified:** `node --check` on both files passes. In-browser Playwright, three scenarios plus the full existing regression suite:
-- Typed Starport='A'/Pop='9' into a brand-new mainworld's Seed UWP digit boxes before the first Preview → Fill & Save → resulting UWP `A88599B-9` (starport A, pop 9 — the typed digits took effect; not the old placeholder).
-- Two fresh unseeded T5 systems on different hexes → UWPs `C434444-9` and `B4326BB-B` — different from each other and from the old hardcoded string, confirming real per-hex dice generation.
-- Mainworld + subordinate body, 3 consecutive saves (first + 2 no-edit re-saves) → mainworld UWP `B425322-D` and subordinate `Y540345-1` identical across all three — confirms this change doesn't disturb OW-45's already-working re-save lock.
-- Re-ran all 7 of this session's existing scratch Playwright scripts (OW-19/42/43/46 repros plus the gov/law, GG-lock, and moon-cap checks) unchanged — all still pass, zero console errors. `ow19_repro.js`'s output now shows a real mainworld UWP (`A868311-8`) in place of the old placeholder, confirming the fix is live everywhere the editor touches a T5 mainworld.
-
-*Spec ref: Sean-requested; planned via Claude Code's plan-mode workflow, approved, then implemented 2026-07-16, closing the item deferred earlier the same session.*
-
-*Spec ref: found 2026-07-16 while investigating punch-list item 2, same session as OW-19/OW-42/OW-43 — deliberately deferred per Sean's direction to finish narrower items first.*
-
-**OW-45 — ✅ CLOSED 2026-07-16 (found and fixed same day, the narrower half of punch-list item 2): a subordinate (non-mainworld) T5 body's government, law level, starport, and tech level re-rolled from scratch on every Preview/Fill & Save**
-
-Verified via in-browser Playwright: created a T5 system with a mainworld + a second Terrestrial World, Fill & Saved, then re-opened Edit System and Fill & Saved twice more with zero edits. `size`/`atm` correctly stayed locked (matching `_t5UwpLockFor`'s existing coverage), but `law` and `tl` changed on every single save (`4→2→1`, `6→7→5`); `gov`/`starport` happened to look stable in this run but only because both rolls landed on the same value/RAW-forced floor by chance, not because anything locked them.
-
-**Root cause, two layers, both fixed:**
-1. `_t5UwpLockFor` (`t5_editor_adapter.js`) never seeded or marked `gov`/`law`/`starport`/`tl` manual at all — even though `generateT5SubordinateUWP` (`t5_topdown_generator.js`) already gates all four behind `!_isManual(world, ...)`, exactly the same engine-side guard CT/MgT2E rely on. The lock-for function simply never told the generator these four fields were already decided. Fixed by adding the same four lines `_ctUwpLockFor` already has for these fields.
-2. **That fix alone made things worse, not better** — first re-verification pass showed `gov`/`law`/`starport`/`tl` becoming `undefined` entirely after one re-save, then re-appearing with *different* values on the next. Root cause: `createBodyPlaceholder()` (`t5_topdown_generator.js`), which builds the actual body object placed into `orbits[].contents` from a seed, copies `atm`/`hydro`/`pop`/`_manualFields` from the seed override but was **never copying `gov`/`law`/`starport`/`tl` at all** — a separate, pre-existing gap in the generator itself, not in the adapter. So `_manualFields` correctly claimed these four fields were locked, but the values behind that claim never reached the actual body: `!_isManual(world, 'gov')` correctly evaluated to skip-rolling, but `world.gov` was `undefined`, and stayed `undefined` forever (the second re-save's return to real values was actually the lock silently giving up — `_t5UwpLockFor`'s `raw.gov !== undefined` check saw the corrupted `undefined` from the previous round and stopped trying to lock `gov` at all, so it rolled completely fresh again). Fixed by adding `gov`/`law`/`starport`/`tl` to `createBodyPlaceholder`'s seed-copy, alongside `atm`/`hydro`/`pop`.
-
-**Verified:** `node --check` on both touched files passes; re-ran the same 3-save Playwright sequence — `gov`/`law`/`starport`/`tl` (and the full UWP string) now identical across all three saves (`Y9D4004-6` throughout, this run's values). Also re-ran the OW-19/OW-42/OW-43 regression scenarios (mainworld-only, mainworld+GG-with-moons) to confirm `createBodyPlaceholder`'s change — used for every seeded body, not just this test's — didn't disturb anything already fixed: all three still pass with stable results and zero console errors.
-
-*Spec ref: found and fixed 2026-07-16, working through the T5 overhaul punch list's item 2 (narrowed scope — see OW-44 for the separate, bigger mainworld-generation gap this investigation also surfaced), same session as OW-19/OW-42/OW-43.*
-
-**OW-46 — ✅ CLOSED 2026-07-16 (found and fixed same day, working through the T5 overhaul punch list's item 7 — companion-star drag position reaching the orrery): a System-Editor-placed or repositioned T5 companion star got a corrupted (`NaN`) `distAU` baked directly into the generated system**
-
-Verified via in-browser Playwright: created a T5 system with a primary + a Companion star (via "+Comp"), Fill & Saved, then read `t5System.stars[1].distAU` directly. It was `NaN` (surfaces as `null` once serialized through `JSON.stringify`), not a small-but-wrong default — the star's position was genuinely corrupted, not merely mis-defaulted.
-
-**Root cause: a star-seed field-name mismatch, T5-specific.** `system_editor.js`'s `_buildSeedSys()` builds every engine's star seed object with `orbitId: s.orbitId != null ? s.orbitId : undefined` (lowercase d) — one shared, engine-agnostic function used by MgT2E/CT/T5/RTT/AoW alike. But T5's own native star convention (`t5_topdown_generator.js`'s classic non-seeded path, e.g. `orbitID: idx === 0 ? 0 : ...`) uses **`orbitID`** (capital ID) — a completely different property name. `generateT5System()`'s companion-`distAU` computation (`sys.stars.slice(1).forEach(star => { const idx = Math.floor(star.orbitID); ... })`, run immediately after `sysStars = seedSys.stars.map(s => Object.assign({}, s))`) read `star.orbitID` directly with no fallback — for a System-Editor-seeded companion, that property was simply `undefined`, so `Math.floor(undefined)` produced `NaN`, and `star.distAU` came out `NaN` for every single editor-placed companion, unconditionally. The same missing-fallback pattern also affected the `companionOrbitIndices` reserved-orbit set built two lines later (`.map(s => Math.round(s.orbitID))`).
-
-**Distinct from, and more severe than, RTT's version of this same class of bug (OW-15).** RTT's gap is in its *display-layer* normalizer (`_normalizeCT`-equivalent) failing to fall back correctly when reading an already-correctly-generated companion's position — the underlying generated data is fine, only the orrery's read of it is wrong. T5's gap corrupted the position **inside the generator itself**, so the bad value was permanently baked into `stateObj.t5System` and would have been wrong on every surface that reads it (System Editor tree, accordion, orrery), not just the orrery.
-
-**Fix:** added a fallback read (`star.orbitID != null ? star.orbitID : star.orbitId`) at both call sites (the `distAU` computation and the `companionOrbitIndices` set), so the code resolves correctly whether the star came from T5's classic non-seeded path (`orbitID`) or the System Editor's seed (`orbitId`).
-
-**Verified:** `node --check js/t5_topdown_generator.js` passes; re-ran the Playwright scenario — a "Companion"-role companion (seeded `orbitId: 0.15`) now resolves to `distAU: 0.23` (a small, correctly-interpolated AU value, no longer `NaN`); a "Far"-role companion (seeded `orbitId: 12.0`, added via "+Secondary") resolves to `distAU: 308` — correctly differentiated from the near companion, confirming the fix reads the actual seeded value rather than coincidentally producing a fixed number.
-
-*Spec ref: found and fixed 2026-07-16, working through the T5 overhaul punch list's item 7, same session as OW-19/OW-42/OW-43/OW-44/OW-45.*
-
-**OW-47 — ✅ CLOSED 2026-07-16 (found while investigating punch-list item 8; planned via plan mode and implemented later the same session, after Sean's Requirements Agent ruled on the underlying rules question): T5 has no per-moon orbital-distance concept at all**
-
-The punch-list item as originally phrased ("T5's generator doesn't sort satellites by `pd` the way CT's does post-fix") assumes T5 moons have a `pd` (planetary-diameters-from-parent) value the way CT's/MgT2E's do, just unsorted. That's not what's actually true.
-
-**What's actually true:** grepped `t5_topdown_generator.js` and `t5_world_engine.js` for `.pd` — zero hits in either file. T5 never rolls, assigns, or reads a per-moon orbital-distance value anywhere. This is a missing data model, not a missing sort step.
-
-**Consequence, traced through `system_viewer.js`:** the orrery's radial moon spacing (`_drawWorld`'s `mDist = r + 10 + mi * 6`) already uses each moon's **array index**, not `pd` — so there's no cross-surface *mismatch* the way CT's OW-17-class bugs had (editor/orrery/accordion all consistently iterate `satellites[]` in the same generation order). But `_moonPeriodYears` falls back to a hardcoded `pd = 20` for every single T5 moon (since `m.pd` is always `undefined`) — meaning every moon of every T5 body orbits at the *identical* synthetic period in the orrery, indistinguishable in speed regardless of how many moons a body has or which one is "closer." The System Editor's "Orbit (⌀)" pd input (`_derivedRow`, shown for every engine's moons, not gated per-engine) is consequently pure UI decoration for T5 — typing a value there has no effect, since nothing downstream ever reads a T5 moon's `.pd`.
-
-**Deferred initially — needed a rules decision, not a guess.** Per the Zero-Assumption Policy (`CLAUDE.md`), inventing a plausible-looking T5 moon-distance formula without an actual T5 RAW citation would have been exactly the kind of "fill in the rule from training data" this project's Critical Rules say to stop and ask about instead. Routed to Sean's Requirements Agent.
-
-**Ruling received (2026-07-16):** T5 does not define a mathematical formula/table for a satellite's exact physical orbital distance (no CT Book 6 / MgT2E World Builder's Handbook equivalent) — it abstracts placement as a broad location band plus an **ordinal sequence** only. Consequences for implementation: (1) use ordinal position, not an AU/distance field, for T5 moons; (2) users must be able to manually reorder T5 moons in the editor — not read-only/generator-order-only; (3) body-to-star orbit numbers already map to a real AU via the existing `T5_Data.ORBIT_AU` table and are unrelated/unaffected; (4) a moon-mainworld's meaningful "distance" is to the body it orbits, not the star, confirming ordinal position among sibling moons is the only relevant concept — no separate star-distance field needed for moon mainworlds.
-
-**What was already correct, confirmed during planning — narrowed the actual work needed:**
-- `hex_editor.js`'s T5 accordion already modeled this correctly: `renderT5Star` labels each satellite purely `Satellite ${satIdx + 1}`, an ordinal computed from array position at render time, with no distance field anywhere in the T5 satellite block.
-- The orrery's radial moon spacing (`system_viewer.js`'s `_drawWorld`, `mDist = r + 10 + mi * 6`) already uses array index, not `pd` — visual ordering was already consistent for T5.
-- Moon array order already survived the full round-trip with no independent re-sort at any stage — `t5_editor_adapter.js`'s `_t5BodySeed`/`T5.readBodies()` and `t5_topdown_generator.js`'s seed-body placement/`capToExisting` locking (OW-43) all preserve array order, never reorder it themselves.
-- The **one actual gap**: `system_editor.js`'s moon-rendering code inside `_buildBodyEl` showed the same `pd`-based `_derivedRow('Orbit (⌀):', ...)` control for every engine's moons, unconditionally — decorative for T5 (typing did nothing), and there was no way to reorder a T5 moon at all.
-
-**Fix, one file, `js/system_editor.js`:**
-1. The pd-based `_derivedRow` is now gated to skip T5 (`isT5` check) — CT/MgT2E/RTT/AoW moon rendering is untouched.
-2. T5 moon rows gained a drag handle (`≡`, matching the existing body/companion drag pattern) with `dragstart`/`dragover`/`dragleave`/`drop`/`dragend` listeners, tracked via two new module-level variables (`_dragMoonId`, `_dragMoonParentId`, alongside the existing `_dragBodyId`/`_dragCompanionId`).
-3. New helper `_reorderMoon(parentBody, fromIndex, toIndex)` (next to `_insertAtOrbit`) splices `parentBody.moons` directly. No AU/orbitId bookkeeping and no `_wouldReorder`-style guard needed — there's no competing AU-derived invariant to protect for T5 moons — and no manual-field marking needed, since T5's generator never reorders `satellites[]` on its own (unlike `orbitId`, which it actively recalculates), so there's nothing a lock would need to protect against being undone.
-
-**Not touched:** `t5_editor_adapter.js`, `t5_topdown_generator.js` (moon order already round-tripped correctly); the orrery's orbital-*period* uniformity (all T5 moons still share a synthetic `pd=20`-derived speed — a separate, lower-priority cosmetic gap, deliberately left for a future pass since fabricating an ordinal-based speed scale wasn't what was asked); RTT/AoW's own moon-ordering status (unaudited, out of scope).
-
-**Verified:** `node --check js/system_editor.js` passes. In-browser Playwright: created a T5 mainworld + Gas Giant with 3 named moons (Alpha/Beta/Gamma), Fill & Saved (order `["Alpha","Beta","Gamma"]`); simulated a drag of the first moon row onto the third row's drop zone — working copy immediately reflected `["Beta","Gamma","Alpha"]`; Fill & Saved again — persisted order matched; re-opened Edit System a third time — order still `["Beta","Gamma","Alpha"]`, confirming full round-trip persistence with zero adapter/generator changes. Separately confirmed MgT2E moon rendering is completely unaffected (pd field still present, zero draggable moon rows, no drag-handle text) and re-ran the existing T5 moon-count regression scripts (`t5_moonlock.js`, `t5_moonlock2.js`, `t5_mooncap.js`) unchanged — all still pass, zero console errors throughout every test.
-
-*Spec ref: found 2026-07-16 while investigating punch-list item 8; ruling requested from and provided by Sean's Requirements Agent same session; planned via Claude Code's plan-mode workflow and implemented immediately after, closing the item deferred earlier the same session.*
-
-**Punch-list item 3 (blank-creation body-count gate) — ✅ VERIFIED CLEAN for T5, 2026-07-16, no code change needed.** Tested a genuinely blank "Create System" (T5, zero bodies added, `_allowAddBodies` false by default) via in-browser Playwright: the auto-preview that fires immediately on Create (see Algorithm 8) correctly produces **no** system at all — `_generateAndCommit` shows its existing "No system was produced. Check the browser console for details." warning, `hexStates` gets no entry, zero console errors — rather than falling through to a full stochastic roll the way CT did until 2026-07-06 (OW-11). This is structurally guaranteed by T5's own architecture, not a coincidence: `_t5ElectMainworldIfNeeded` (Algorithm 7 step 6) proceeds with no mainworld when there are zero eligible bodies, so `write()`'s `mainworldUWP` is `null`, and `T5.run()`'s existing guard (`if (... && seedSys.mainworldUWP)`) already refuses to call the generator at all in that case — T5 simply cannot represent a system without a mainworld, unlike CT/MgT2E which can have a valid empty stellar system. **Minor, non-blocking UX rough edge noted but not fixed at the time — later confirmed to actually confuse real usage and closed as OW-48, see below.**
-
-*Spec ref: found and fixed 2026-07-16, working through the T5 overhaul punch list's item 1, same session as OW-19/OW-42.*
-
-**OW-48 — ✅ CLOSED 2026-07-16 (Sean-reported same day he started manual testing, immediately after T5 Create/Edit was enabled): confirming a T5 "Create System" with zero bodies made it look like the editor had closed entirely**
-
-Sean reported: after choosing a star class/type for a new T5 system and clicking "Open Editor," he got "Preview Failed — No system was produced," clicked OK, and was left looking at the ordinary hex map canvas — "never entered the system editor."
-
-**Root cause, confirmed via in-browser Playwright reproducing the exact real flow (right-click canvas → Create System → choose T5 → confirm):** this was the exact UX rough edge already noted (but not fixed) under punch-list item 3 above. `_openWithWorkingCopy()` auto-previews immediately after a Create dialog is confirmed, to show a starter system right away — but T5 structurally cannot generate anything without a mainworld (Algorithm 7 step 6 + `T5.run()`'s `mainworldUWP` guard), so for a genuinely blank working copy this auto-preview always failed. Because the failure means `SystemViewer` never actually opens its full-screen overlay, the System Editor panel — while technically still open, in the DOM, and fully functional — is only a narrow 340px strip pinned to the right of an otherwise-untouched hex map canvas. Confirmed directly: `document.getElementById('se-editor-panel')` existed with real content and `display: flex` the whole time; `#system-viewer-overlay` simply didn't exist yet. Easy to mistake for having been kicked out of the editor entirely, especially on a wide window where the canvas dominates the view.
-
-**Fix (as originally shipped):** `_openWithWorkingCopy()` (`system_editor.js`) skipped the automatic first preview specifically when `wc.engine === 'T5'` and the working copy had zero bodies. Scoped to T5 only — MgT2E/CT/RTT/AoW's existing immediate-starter-system preview was untouched.
-
-**Superseded same day by OW-49, below** — Sean asked for the *better* fix: show the star in the orrery immediately, matching MgT2E/CT parity, instead of just suppressing the dialog and leaving nothing visible. The `_skipBlankAutoPreview` special-case this fix added was removed again as part of OW-49, once `T5.run()` itself could return a valid star-only object instead of `null`.
-
-**Verified (original fix, before OW-49 superseded it):** `node --check js/system_editor.js` passes. In-browser Playwright reproducing the real right-click → Create System → T5 → confirm flow: no dialog appeared at all after confirming a blank T5 create; adding a body (`+World`) and clicking Preview then succeeded normally. Re-verified MgT2E's blank-create flow was completely unaffected. Re-ran the full set of this session's T5 regression scripts unchanged — all passed, zero console errors.
-
-*Spec ref: Sean-reported 2026-07-16, the same day T5 Create/Edit access was re-enabled in the System Editor UI — found during his first real manual test; superseded same day by OW-49.*
-
-**OW-49 — ✅ CLOSED 2026-07-16 (Sean-requested, same day as OW-48, planned via plan mode): the T5 System Editor now shows the star in the orrery immediately after Create, before any body is added — matching MgT2E/CT parity**
-
-Sean asked for parity with MgT2E/CT: after choosing a star class/type in "Create System," the orrery should show the star right away, not wait until a body has been added and generated.
-
-**Why this needed a design decision, not a quick patch:** `t5_topdown_generator.js`'s `generateT5System()` has an explicit, deliberate guard — `if (!mainworldBase) throw new Error("Sean Protocol Violation: Phase 1 requires mainworldBase.")` — reflecting T5's real generation model (the "Continuation Method": the mainworld must exist *before* the system does, unlike CT/MgT2E which elect one after structure already exists). Phase 1 and everything after it reads `mainworldBase.X`/`sys.mainworld.X` throughout; null-checking all of that to support a "no mainworld yet" path would touch a lot of shared generation logic (also used by the classic macro/UI call path) for what's really just a preview-rendering need — this is exactly the class of decision OW-44/47 were also planned for.
-
-**Fix, three files:**
-1. **`js/t5_topdown_generator.js`** — extracted the existing star-setup block from `generateT5System` (initializing each star's 20-slot `orbits[]` array, and resolving a companion star's `distAU` via `T5_Data.ORBIT_AU` with the OW-46 `orbitID`/`orbitId` fallback) into a shared helper, `_initStars(stars)` — pure extraction, `generateT5System` calls it in exactly the same place that code already ran, no behavior change there. Added one new exported function, `buildT5StarOnlyPreview(seedSys)`, which calls `_initStars` on the seeded stars and returns `{ stars, mainworld: null, sggCount: 0, hzOrbit: getStarHZ(stars[0]) }` — entirely bypassing `generateT5System`'s mainworld-anchored pipeline. Exported alongside `generateT5System` in the module's return statement.
-2. **`js/t5_editor_adapter.js`'s `run()`** — when there's no `seedSys.mainworldUWP` yet (the blank-create case) but the working copy has at least a primary star, calls `window.T5_TopDown_Generator.buildT5StarOnlyPreview(seedSys)` instead of leaving `newSys` as `null`. (Confirmed the real global name is `T5_TopDown_Generator` — `T5_Generator` is only a local parameter alias inside `system_driver.js`'s own closure, not a second global.) Once the user adds a body and Algorithm 7 elects a mainworld, `seedSys.mainworldUWP` becomes truthy on the next Preview/Fill & Save, so the real-generation branch fires instead and the shell is naturally replaced — no extra bookkeeping needed.
-3. **`js/system_editor.js`** — removed OW-48's `_skipBlankAutoPreview` special-case in `_openWithWorkingCopy()`: no longer needed, since `T5.run()` now returns a valid object for the blank case instead of `null`, so the auto-preview succeeds instead of failing. T5's Create flow is now identical in shape to MgT2E/CT's.
-
-**Not touched:** `generateT5System`'s mainworld-anchored Phase 1 and everything after it; `_normalizeT5` (`system_viewer.js`, already tolerates `sys.mainworld == null` and empty/absent `sys.worlds`/`stars[].orbits[]` — confirmed by reading it, the same code path MgT2E/CT's own blank-create already exercises); RTT/AoW (out of scope, T5-only).
-
-**Verified:** `node --check` on all three touched files passes. In-browser Playwright: confirmed a T5 star (G2V) via the real Create flow → no dialog, `hexStates` gets a real `t5System` with `mainworld: null` and the resolved primary star (mass `1.02`, etc.), `SystemViewer`'s overlay opens immediately. Added a companion star (`+Comp`) *before* any body — resolved to a real, non-`NaN` `distAU` (`0.23`), confirming the `_initStars` extraction correctly reused OW-46's fallback. Added `+World` and clicked Preview — the shell was correctly replaced by a real generated system with a real, non-placeholder mainworld UWP (`D240320-8`, confirming OW-44 still applies on top of this). Re-ran the full set of this session's T5 regression scripts (OW-19/42/43/44/45/46/47) plus the MgT2E blank-create check, all unchanged — every one still passes, zero console errors throughout.
-
-*Spec ref: Sean-requested 2026-07-16, planned via Claude Code's plan-mode workflow and implemented the same day, superseding OW-48's narrower fix.*
-
-**OW-50 — ✅ CLOSED 2026-07-22 (Sean-reported, found while designing OTU-import star-role assignment, planned via plan mode): T5 systems with 5+ stars silently collapsed every star past the 4th onto "Far", and the OTU importer never decomposed spectral type at all**
-
-Found while designing how the System Editor should handle stars in a T5 system imported from TravellerMap/OTU sector data (which lists stars as one flat spectral-type string, e.g. `"F7 V M3 V K2 V"`, with no role indication). Two independent, divergent parsers of this string already existed:
-
-- **`js/io_manager.js`'s `importT5Tab`** tokenized the string but never decomposed spectral type into `type`/`decimal`/`size` — every imported star displayed as a generic "G V" in the System Editor (`_buildWorkingCopyFromState` reads `s.type || s.sType || 'G'`, and imported stars only had a raw `.name` string), and every non-primary star was flatly labeled `'Companion'` with no orbit data.
-- **`generateT5System()`'s** own homestar-parsing branch (`js/t5_topdown_generator.js`, the actual "Expand System" button's generator) did decompose spectral type correctly, but assigned role via a 4-branch ternary (`idx 0→Primary, 1→Close, 2→Near, else→Far`) with fixed placeholder orbits (`0`/`0.5`/`6.0`/`12.0`). Index 3 *and everything after it* fell into the same `'Far'`/`12.0` branch — a system with 5+ stars (T5 RAW allows up to 8: Primary/Close/Near/Far, each optionally with its own Companion) silently collapsed every star past the 4th onto an identical, colliding role and orbit.
-
-**Product decisions made with Sean before fixing (see chat, not re-litigated in future sessions):**
-1. A positionally-guessed role (we cannot know from a flat spectral-type string which token is which role) is trusted as "good enough" — no forced confirmation UI is being built in the System Editor for this.
-2. The existing System Editor Role dropdown (`js/system_editor.js`'s companion-star `<select>`, options `Companion`/`Close`/`Near`/`Far`) and its existing "+Comp" button (which already supports attaching a Companion to any star, not just Primary) are the correction mechanism for a wrong guess — no new UI needed.
-3. Sean's Requirements Agent supplied the actual T5 RAW star-placement procedure: Close/Near/Far orbits are rolled (`1D-1` → range 0-5, `5+1D` → range 6-11, `11+1D` → range 12-17), not fixed constants; Companions are placed "tightly inside Orbit 0 of their respective parent star" (no explicit roll formula given for the sub-orbit). This descoped one part of the original ask — RAW's *stochastic* multi-star generation (secondary spectral type/size derived from the Primary's own rolls ± a DM) describes building a system's stars from nothing, which nothing in this codebase does today (the only "no data" fallback anywhere in `generateT5System` is a single default G2 V primary) — out of scope, since this fix parses *already-known, real* imported spectral types, not rolled ones.
-
-**Fix:** added one new shared function, `parseT5HomestarString(rawStarsString)`, exported from `js/t5_topdown_generator.js` alongside `generateT5System`/`buildT5StarOnlyPreview`. It tokenizes the string (same regex-reglue logic as before, unchanged), decomposes each token into `{sType, decimal, sClass}` (same per-token logic as the old generator branch, just shared), and assigns role/orbitID/parentStarIdx via an 8-entry canonical table instead of the old 4-branch ternary:
-```
-idx 0: Primary,   orbitID = 0             parentStarIdx null
-idx 1: Close,     orbitID = 1D-1          parentStarIdx null   (range 0-5, real RAW roll)
-idx 2: Near,      orbitID = 5+1D          parentStarIdx null   (range 6-11, real RAW roll)
-idx 3: Far,       orbitID = 11+1D         parentStarIdx null   (range 12-17, real RAW roll)
-idx 4-7: Companion, orbitID = 0.15 (existing placeholder), parentStarIdx 0/1/2/3 (of Primary/Close/Near/Far respectively)
-```
-Tokens beyond index 7 (T5's 8-star max) are logged and dropped, not silently truncated. Each returned star carries both `name` (the existing reconstruction formula, unchanged, for `generateT5System`'s own consumers) and `rawName` (the untouched original OTU token) — needed because the reconstruction formula has a pre-existing quirk for D/BD stars (produces `"D D"`/`"BD V"` instead of bare `"D"`/`"BD"`) that `js/add_otu_system_info.js`'s `parseStarType()` can't parse back correctly; `io_manager.js` now stores `rawName` as the star's `.name` so imports keep the literal, round-trippable OTU token, sidestepping that quirk instead of inheriting it.
-
-`generateT5System`'s homestar branch now just calls `parseT5HomestarString(mainworldBase.homestar)`. `io_manager.js`'s `importT5Tab` now calls `T5_TopDown_Generator.parseT5HomestarString(rawStars)` (guarded `typeof T5_TopDown_Generator !== 'undefined'`, matching this codebase's existing defensive-guard convention; script order in `hex_map.html` already loads the generator before `io_manager.js`, so the fallback to the old naive behavior is effectively unreachable in practice).
-
-**No changes needed in `js/system_editor.js` or `js/system_driver.js`.** `_buildWorkingCopyFromState()` already correctly reads `type`/`decimal`/`size`/`orbitID`/`_raw.parentStarIdx` off each star and nests Companions under whichever star they're attached to when the upstream data is well-formed — the bug was purely in how the two parsers *produced* malformed/collided data, not in how the editor *consumed* it. `restoreT5ManualFields`'s index-based star matching is unaffected: star count/order comes from tokenizing the same string both times, not from role/orbit assignment.
-
-**Explicitly out of scope, flagged not fixed:** `js/mgt2e_stellar_engine.js` has the *identical* 4-branch collision bug for its own homestar-override parsing (confirmed during design review) — a separate engine's own bug surface, not touched here. **Fixed separately same day, see OW-51.** `js/ct_stellar_engine.js`'s `parseManualStars()` is unaffected by design — CT's Role model only supports `Close`/`Far`, so an 8-slot extension doesn't apply there. The pre-existing D/BD name-reconstruction quirk in the `name` formula itself is unrelated and not fixed. One further pre-existing tokenizer quirk noted during verification, not fixed (out of scope, unchanged from the original regex): two isolated single-token stars named exactly `"D"` and `"BD"` adjacent to each other in the same homestar string mis-glue into one combined star (`"D BD"`) instead of two separate ones, since the trailing-luminosity-class regluing regex can't distinguish that from a legitimate two-token spectral string — an edge case of an already-rare edge case, not introduced by this fix.
-
-**Flagging one remaining assumption:** the canonical *order* assumed for stars 5-8 (Companion-of-Primary, then -Close, then -Near, then -Far) is a reasonable guess, not a verified TravellerMap listing convention — consistent with the "guess, don't gate" policy above.
-
-**Verified:** `node --check` on both touched files passes. Standalone logic test (stubbed seeded RNG) confirmed: a 3-star string produces Primary/Close/Near with orbits correctly landing inside 0-5/6-11 respectively; an 8-token string (accidentally 6 real stars after the pre-existing D/BD tokenizer quirk above consumed 2 tokens as one) correctly produced Primary/Close/Near/Far/Companion/Companion with `parentStarIdx` 0 and 1 on the two Companions; a 9-token string correctly capped at 8 stars with the 9th logged and dropped.
-
-*Spec ref: Sean-reported 2026-07-22, planned via Claude Code's plan-mode workflow (RAW placement formulas supplied by Sean's Requirements Agent mid-design) and implemented the same day.*
-
-**OW-51 — ✅ CLOSED 2026-07-22 (found same day as OW-50, its explicitly-flagged sibling bug; planned via plan mode): MgT2E's cross-engine expansion of a 5+ star OTU import had the identical "Far" collision, plus no Companion concept at all in that path**
-
-Sibling fix to OW-50, same day. TravellerMap/OTU sector data always comes in one flat spectral-type-list format with no per-engine role semantics. The bug here only shows up when a user imports such a system, then uses this app's existing cross-engine expansion feature to expand that hex with the **Mongoose (MgT2E)** engine instead of T5's own engine: `generateStellarSystem()`'s "OVERRIDE PARSE LOGIC" branch (`js/mgt2e_stellar_engine.js`) re-parses the same `mainworldBase.homestar` string, but only knew 3 secondary roles (Close/Near/Far) via a 3-branch ternary — token index 2 and everything after it collapsed onto `'Far'` — and had **no Companion concept at all** in this branch (every override star got `parentStarIdx = 0` unconditionally, no way to produce a `'Companion'` role).
-
-**Confirmed directly with Sean (do not re-litigate):** there is no official MgT2E or TravellerMap rule for how to interpret a flat, role-less star list beyond the Primary — an initial idea to draft a question for Sean's Requirements Agent was withdrawn once Sean clarified TravellerMap only ever exports the one flat OTU format (no MgT2E-native role data exists to look up) — this is squarely an "invent something and be consistent" situation. Decision: reuse the same 8-slot canonical guessing convention already built for T5 (Close, Near, Far, then Companion-of-Primary/-Close/-Near/-Far in that order) for consistency between the two engines' sibling fixes — same reasoning as OW-50 (nobody can know the true roles from a flat list; the System Editor's existing Role dropdown is the correction mechanism for a wrong guess, no forced UI).
-
-**Unlike OW-50, no new RAW research was needed.** MgT2E's own *real* (non-override, dice-rolled) generation path, a few lines below the bug in the same file, already implements the fully correct model for this exact role system: Close/Near/Far each independently rolled for presence with real orbit formulas, and *every* star (Primary included) independently rolled for its own Companion with a real companion-orbit formula. The fix reuses those exact formulas rather than inventing new ones or porting T5's.
-
-**Fix, two parts in `js/mgt2e_stellar_engine.js`:**
-1. Extracted 4 tiny orbit-roll helpers — `_rollCloseOrbit()`, `_rollNearOrbit()`, `_rollFarOrbit()`, `_rollCompanionOrbit(label)` — pure extractions of formulas that already existed inline in the real (dice-rolled) generation path (`Close Roll`/`Near Roll`/`Far Roll` 1D rolls, and the companion orbit formula `(d1/10) + ((d2-7)/100)`, which was itself duplicated twice — once for a secondary's companion, once for the Primary's — now both call the one shared helper). Same trace-log labels, same roll sequence, zero behavior change for existing non-override systems.
-2. The override branch's `if (overrideStars.length > 1)` block now uses an 8-slot canonical table (`OVERRIDE_ROLE_SLOTS`) instead of the 3-branch ternary: Close/Near/Far (using the newly-shared `_rollCloseOrbit`/`_rollNearOrbit`/`_rollFarOrbit`, real dice rolls within the correct ranges, not fixed placeholder constants) followed by Companion-of-Primary/-Close/-Near/-Far (using `_rollCompanionOrbit`, with `parentStarIdx` 0/1/2/3 respectively). Tokens beyond the 8-star max are logged and dropped. Close/Near/Far stars keep `parentStarIdx = 0` (matching the real generation path's own convention — they orbit the primary, only Companions get a different parent).
-
-**No changes needed in `js/system_editor.js` or `js/system_driver.js`** — same reasoning as OW-50: the System Editor's working-copy builder already reads `orbitId`/`_raw.parentStarIdx` generically regardless of engine.
-
-**Verified:** `node --check js/mgt2e_stellar_engine.js` passes. Standalone logic test confirmed: a 4-total-star override produces Close/Near/Far with orbits landing in the correct 0-5/6-11/12-17 ranges (not fixed constants); an 8-total-star override (Primary + 7) correctly produces Close/Near/Far/Companion×4 with `parentStarIdx` 0/1/2/3 on the four Companions; a 10-total-star override correctly caps at 8 with the 2 extra tokens logged and dropped.
-
-*Spec ref: found same day as OW-50, its explicitly-flagged sibling bug; planned via Claude Code's plan-mode workflow, implemented 2026-07-22.*
-
-**OW-52 — ✅ CLOSED 2026-07-23 (Sean-requested, part of a T5 Edit System / OTU-import overhaul): a T5 companion star's distance was calculated as *more* than Orbit 0 (0.2 AU) instead of "well inside" it**
-
-Sean asked for a way to represent a companion star's orbit as something less than Orbit 0's 0.2 AU — T5 fluff text describes a Companion as orbiting well inside its parent's Orbit 0, but no code path actually produced a distance smaller than 0.2 AU. Investigation found three separate call sites already encoding a fractional "sub-orbit" convention for this (`parent.orbitID + 0.1` in `t5_stellar_engine.js`, `orbitID: 0.15` in `t5_topdown_generator.js`'s `ROLE_SLOTS`/`system_editor.js`'s `_ORBIT_AU_BY_SEPARATION`) — none of which worked. Root cause: `T5_Data.ORBIT_AU` (`rules/t5_data.js`, read-only) has no entry below Orbit 0's `0.2`, so linearly interpolating a fractional orbit number between index 0 (`0.2`) and index 1 (`0.4`) always pushes the result **outward** (e.g. `0.15` → `0.23`), never inward. This was silently accepted as correct in OW-46/OW-49's own verification at the time (a companion's `distAU` resolving to `0.23` was treated as "a real, non-`NaN` value", not checked against Orbit 0). MgT2E's sibling fractional-orbit convention (`(d1/10) + ((d2-7)/100)`, see OW-51) isn't affected — `MGT2E_ORBIT_AU` has a genuine `0` AU anchor at index 0, so the same interpolation trick works correctly there.
-
-**Decision (confirmed with Sean via AskUserQuestion, do not re-litigate):** drop the numbered-orbit-slot concept for T5 companions entirely rather than patch the interpolation — `orbitID: null` (not a slot on the `ORBIT_AU` table at all) plus a fixed `distAU` of **0.05 AU**, matching the value `traveller_worlds_importer.js` already used for OTU-imported P-type companions.
-
-**Fix, four files:**
-1. **`js/t5_stellar_engine.js`** (native flux-roll generation, `determineStellarConstellation`) — companion creation now sets `orbitID: null`, `distAU: T5_COMPANION_AU` (new local constant, `0.05`) instead of a fractional `orbitID`. Also now sets `parentStarIdx` on the companion (previously never set at all in this path — every companion silently defaulted to the primary downstream regardless of whether it was actually a companion of Close/Near/Far).
-2. **`js/t5_topdown_generator.js`** — `ROLE_SLOTS`' four Companion entries now carry `orbitID: null, distAU: T5_COMPANION_AU` (same constant) instead of `0.15`; `parseT5HomestarString`'s return object passes `distAU` through. `_initStars` now special-cases `orbitID == null`: uses the star's own pre-set `distAU` if present (round-trips a previously-generated companion's value via `_raw`), else falls back to `T5_COMPANION_AU`, instead of running the broken table interpolation. `companionOrbitIndices` (reserves Orbit 0 of the primary so a world doesn't land on top of a companion) reworked from "round every companion's fractional `orbitID`" to "does the primary specifically have a companion" (`role === 'Companion' && parentStarIdx === 0`) — more correct than before, which reserved primary's Orbit 0 for *any* companion in the system regardless of which star it actually belonged to.
-3. **`js/system_editor.js`** — `_addStar()` and the companion "Role:" dropdown's change handler now special-case T5 Companion: `orbitId: null, orbitAU: 0.05` (new local constant `_T5_COMPANION_AU`) instead of going through `_ORBIT_AU_BY_SEPARATION`'s `0.15`. `_ORBIT_AU_BY_SEPARATION` itself is untouched (still used for CT/MgT2E/RTT/AoW's own Companion default, which isn't affected by this bug). The companion block's "Orbit #: → X.XX AU" preview span now falls back to `star.orbitAU` when `orbitId` is `null`, instead of showing nothing.
-4. **No change needed:** `traveller_worlds_importer.js` (already used `orbitID: null, distAU: 0.05` for OTU P-type companions), `js/io_manager.js` (shares `parseT5HomestarString`, inherits the fix), `js/system_viewer.js` (already reads `s.distAU` directly for any non-primary star, no interpolation involved on the read side).
-
-**Verified:** `node --check` passes on all three edited JS files. Not yet re-verified in-browser (Playwright) at the time of the initial fix — Sean's own manual testing (below, OW-53) found two further real bugs the same day.
-
-*Spec ref: Sean-requested 2026-07-23, first item of a T5 Edit System / System Viewer / OTU-import overhaul; suggestions and trade-offs presented via AskUserQuestion before implementation.*
-
-**OW-53 — ✅ CLOSED 2026-07-23 (Sean-reported, found manually testing OW-52 on a real imported OTU subsector): changing a T5 star's Role to Companion rejected Orbit 0 for other bodies, and the companion rendered farther from the primary than the mainworld**
-
-Sean imported an Imperium subsector, opened a 3-star system in the T5 System Editor, and changed the Close secondary star's Role to Companion (correctly showing "auto" orbit / 0.05 AU in the accordion, per OW-52). Two symptoms followed, both pre-existing bugs unmasked by OW-52 rather than caused by it:
-
-1. **Setting the mainworld's Orbit # to `0` was rejected** ("Use Drag & Drop... reorder"), even though 0.05 AU (the companion) is well inside true Orbit 0 (0.2 AU) and shouldn't conflict. Root cause: `system_editor.js`'s `_orbitIdToAU()` has a T5-shaped bug identical in spirit to OW-52's — it special-cases CT but falls through to **MgT2E's** `orbitAu` table for every other engine, including T5. MgT2E's table starts at `0` AU for Orbit 0; T5's real table (`T5_Data.ORBIT_AU`) starts at `0.2`. So `_wouldReorder()`'s crossing check computed the mainworld's move as `0 AU → 0.4 AU` instead of `0.2 AU → 0.4 AU`, and the companion's real `0.05 AU` falsely fell inside that wider `[0, 0.4)` range, triggering the reorder guard. Every other T5 orbit number was unaffected — T5 and MgT2E's tables happen to agree exactly from index 1 onward, so this only ever bit Orbit 0 (or a fractional orbit id below 1).
-2. **The companion rendered outside the mainworld's orbit** in the live orrery, despite being 8× closer (0.05 AU vs 0.4 AU). Root cause, two layers deep — the first fix attempt (below, part of the same session) addressed the shallower layer but Sean's re-test showed the position was still wrong:
-   - **Layer 1:** `_buildSeedSys()`'s `engStars` mapping spreads `...(s._raw || {})` to preserve prior engine-computed fields, but never explicitly overrode `distAU` — so a star that **just changed role** (Close → Companion) kept the stale `distAU` baked into `_raw` from when it was still a Close star (a real, much larger generated AU), instead of adopting the working copy's freshly-correct `orbitAU` (0.05).
-   - **Layer 2 (the one that actually mattered here — found on re-test):** `t5_topdown_generator.js`'s `_initStars` prefers `star.orbitID` (capital ID) over `star.orbitId` when both are present (OW-46's fallback, for a different original reason — see that entry). `_buildSeedSys()`'s `engStars` mapping only ever set the lowercase `orbitId`, never the capitalized `orbitID` — so the `...(s._raw || {})` spread's *stale* `orbitID` (a real numbered orbit, e.g. `3`, left over from when this star was a native-generated Close star) survived untouched. `_initStars` saw that stale numbered `orbitID`, concluded the star was **not** a companion at all, and fell through to the ordinary table-interpolation branch — silently discarding both `orbitId: null` and the Layer-1 `distAU` fix. This is why Sean's re-test (after the Layer-1 fix) still showed the companion far from the primary: Layer 1 alone was necessary but not sufficient.
-
-**Fix, both in `js/system_editor.js`:**
-1. `_orbitIdToAU()` gained a T5 branch (mirroring the existing CT one, placed right before the MgT2E fallback): reads `T5_Data.ORBIT_AU` and interpolates fractional orbit ids exactly the way `t5_topdown_generator.js`'s `_initStars` does, instead of silently reusing MgT2E's table. Fixes both the false reorder-block and makes the editor's own "→ AU" preview label accurate for T5 at low orbit numbers generally, not just for this one case.
-2. `_buildSeedSys()`'s `engStars` mapping now explicitly sets **both** `orbitId` and `orbitID` to the same current value (`s.orbitId != null ? s.orbitId : undefined`) — guaranteeing the two never disagree regardless of what stale value `_raw` contributed via the spread — plus `distAU: s.orbitAU`. Harmless for engines other than T5 and for T5 stars with a real numbered orbit (`_initStars` always recomputes `distAU` from the orbit id in that case, overwriting the seeded value); decisive for a star whose Role just changed.
-
-**Verified:** `node --check js/system_editor.js` passes. Not yet re-tested in-browser by Claude — this is the second fix attempt for symptom 2, prompted by Sean's own re-test of the first attempt; his next manual pass (same imported subsector, Close→Companion role change, checking the companion's on-screen position relative to the mainworld) is the real verification.
-
-*Spec ref: Sean-reported 2026-07-23, found manually testing OW-52 the same day; symptom 2's fix required two passes after Sean's re-test screenshot showed the first attempt was incomplete.*
-
-**OW-54 — ⤺ REVERTED 2026-07-23, same day as proposed (Sean-proposed workflow change, discussed via AskUserQuestion, then reverted after Sean walked through a concrete example): gap-filling for a newly-added world on a non-primary star**
-
-Sean initially proposed that `+World` on a non-primary star (Close/Near/Far/Companion) should fill the lowest unoccupied local orbit slot instead of always landing past every existing body, to avoid a manual drag-to-reposition after adding a world to a sparsely-populated imported secondary (see the original proposal reasoning below, still accurate context). Implemented and confirmed via `AskUserQuestion` (three decisions: which symptom, engine-vs-role scoping, which star roles — see prior version of this entry in git history for the full writeup).
-
-**Reverted the same day** once Sean worked through a concrete example: worlds manually placed at local orbits 0, 1, and 3 (skipping 2 on purpose), then a plain `+World` click — gap-filling would jump the new world into the empty slot 2, but Sean wants `+World` to always continue past the highest existing orbit (→ slot 4 here) regardless of star role. Gaps are fine, but only when the user puts a body there deliberately (typed orbit # or drag) — never as an automatic side effect of clicking `+World`. This applies uniformly to every star, primary included, which is exactly the pre-OW-54 behavior.
-
-**Fix:** removed the non-primary branch from `_nextOrbitId()` (`js/system_editor.js`), restoring the single unconditional path for every star: candidate = `max(sibling orbitId) + 1`, then bumped until its real AU exceeds every sibling's (bodies and companion stars alike) — the exact logic from OW-21, now applying to all stars again, non-primary included.
-
-**Verified:** `node --check js/system_editor.js` passes. Not yet tested in-browser.
-
-*Spec ref: Sean-proposed 2026-07-23, implemented via `AskUserQuestion`, then reverted the same session after Sean walked through a concrete gap scenario and confirmed the always-append behavior is what he actually wants, uniformly, for every star.*
-
-**OW-55 — ✅ CLOSED 2026-07-23 (Sean-proposed, same day as OW-54's revert): `+World`'s auto-placement now ignores companion/secondary stars entirely — a new world always goes right after the last WORLD, never detours past a star**
-
-Immediate follow-up to OW-54's revert. Sean's actual target all along was narrower than either OW-54 attempt: `_nextOrbitId()`'s AU-comparison bump loop folded *every* sibling — bodies **and** companion/secondary stars (`siblingStars`, same `parentStarId`) — into one `maxSiblingAU` ceiling. So if a Far star sat at, say, orbit 9 under the primary (Close/Near/Far stars default to `parentStarId` = primary, per `_buildWorkingCopyFromState`'s backfill), adding a world after the last *world* at orbit 3 would still bump the candidate past orbit 9 to 10, detouring around a star that isn't a world at all. Sean: worlds and stars are separate tracks — a new world should always land right after the last world, full stop, regardless of where any star sits.
-
-**Fix, `js/system_editor.js`'s `_nextOrbitId()`:** split the single `maxSiblingAU` into two independent checks. The AU-comparison bump loop (OW-21 — a CT Captured Planet always carries `orbitId === null` with a real AU far beyond any slot-numbered body, so a plain `max(orbitId) + 1` could land short of one) now only considers sibling **bodies** — companion/secondary stars no longer contribute to it at all. A second, separate pass still nudges the candidate off an *exact* numbered-slot collision with a star (not an AU comparison — just avoiding two different objects both claiming the identical `orbitId`, which would render at the identical AU and visually overlap). This keeps OW-21's captured-planet protection intact while dropping star-AU from the "how far out" decision entirely, matching what Sean asked for.
-
-**Verified:** `node --check js/system_editor.js` passes. Not yet tested in-browser.
-
-*Spec ref: Sean-proposed 2026-07-23, immediate follow-up to OW-54's revert, walked through with a concrete "Far companion at orbit 9" example.*
-
-**OW-56 — ✅ CLOSED 2026-07-23 (Sean-reported, found manually testing the new T5 Gas Giant size editor from OW-55's session): hovering a T5 Gas Giant in the orrery showed no tooltip at all, and none of its moons rendered**
-
-Sean created two Gas Giants (one Small, one Large) with moons via the System Editor and noticed, in the orrery: hovering a Gas Giant produced no tooltip (worked for every other body type), and none of a Gas Giant's moons appeared (moons of terrestrial worlds rendered fine). Investigated — one root cause explains both symptoms, and it isn't specific to manually-created Gas Giants: it hits *any* T5 Gas Giant, generated or manual.
-
-T5 RAW gives a Gas Giant a literal string for `mass` — `calculateT5PhysicalStats()` (`js/t5_world_engine.js`) sets `world.mass = 'Variable (Giant)'` (plus a separate numeric `world.massEarths = 317.8` alongside it) for any Gas Giant, unlike every other T5 body type which gets a real numeric `mass`. `system_viewer.js`'s `_normT5World()` passed that string straight through to the normalized world object with no conversion, and two places downstream assumed `mass` was always numeric:
-1. **Tooltip** (`_showTooltip`): `w.mass.toFixed(2)` on the string threw a `TypeError`, aborting the function before `_tooltip.innerHTML` was ever set — so hovering a Gas Giant showed nothing at all.
-2. **Moon period** (`_moonPeriodYears`): `(parentWorld.mass || 1) * M_EARTH_KG` — the truthy string skips the `|| 1` fallback, and `string * number` coerces to `NaN`, propagating through the Kepler period math into a `NaN` screen position for every moon of that Gas Giant — invisible and unhoverable, no exception thrown so the rest of the draw call (including the Gas Giant itself) completed normally.
-
-CT and MgT2E don't have this problem — both give Gas Giants real numeric mass (CT: fixed constants per size; MgT2E: dice-rolled), so this was T5-specific.
-
-**Fix, `js/system_viewer.js`'s `_normT5World()`:** `mass: (typeof w.mass === 'number' ? w.mass : w.massEarths) || null` — falls back to the numeric `massEarths` whenever `mass` isn't already a number. Single-point fix in the normalizer; the generic tooltip/period code (shared by every engine) wasn't touched.
-
-**Verified:** `node --check js/system_viewer.js` passes. Not yet re-tested in-browser by Sean.
-
-*Spec ref: Sean-reported 2026-07-23, found manually testing the OW-55 Gas Giant size editor addition the same session.*
-
-**OW-57 — ✅ CLOSED 2026-07-23 (Sean-reported, screenshot supplied, found testing manually-added Gas Giants with moons): re-saving a T5 system with a moon-mainworld spawned a phantom second Gas Giant, and the orrery showed the mainworld twice**
-
-Sean added a Gas Giant with moons (one of them the system's mainworld) via the System Editor. After it had been generated once (so the mainworld moon already had a rolled `uwp`), a subsequent Preview/Save showed **two** Gas Giants in the orrery, each with its own copy of the same mainworld-flagged moon at two different orbital positions — even though the System Editor's own accordion still correctly showed only one Gas Giant.
-
-Root cause, `js/system_driver.js`'s `generateSystem()` (T5 top-down branch): `t5_editor_adapter.js`'s `write()` already builds a correct `mainworldUWP` seed object for a moon-mainworld, including `parentBodyId` (the Gas Giant's `_id`), `parentStarIdx`, and `isPreMoon` — `generateT5System`'s Phase 1 (the mainworld anchor step) uses those three fields to find the mainworld's real existing parent body and re-attach the mainworld to it instead of manufacturing a new one. But `generateSystem()` has its own fallback, gated on `seedSys._mainworldRef` (always set when called from the System Editor): once the mainworld moon already has a `uwp` (true on any second-or-later Preview/Save — not the first, which is why this wasn't caught by earlier moon-mainworld verification, e.g. OW-49), it **wholesale replaced** `resolvedUWP` with a bare copy of the raw moon entry from `seedSys.worlds[].moons[]` — which, being a moon-seed object (`_t5BodySeed`'s moon mapping only ever carries `_id`/`name`/`uwp`/lock fields/`_manualFields`), has no `parentBodyId`, `parentStarIdx`, or `isPreMoon` at all. With `parentBodyId` gone, Phase 1's parent lookup failed, fell through to its "no GG found" fallback, and manufactured a **brand-new synthetic Gas Giant** with the mainworld as its only satellite — while the real, original Gas Giant (already correctly placed earlier in the same generation pass, by the seeded-body placement loop) was left in place too, unaware anything had gone wrong.
-
-**Fix:** merge `mwBody`'s fresher `uwp`/name/lock fields *onto* the existing `mainworldUWP` instead of replacing it outright — `Object.assign({}, mainworldUWP, mwBody, { uwp: mwBody.uwp })`. Since a bare moon-seed object never defines `parentBodyId`/`parentStarIdx`/`isPreMoon` as keys at all, `Object.assign` leaves `mainworldUWP`'s own correct values for those three fields untouched, while still picking up whatever fresher fields `mwBody` does carry.
-
-**Verified:** `node --check js/system_driver.js` passes. Not yet re-tested in-browser by Sean.
-
-*Spec ref: Sean-reported 2026-07-23, screenshot supplied (`two_mainworlds.jpg`), same session as OW-55/OW-56.*
-
-**OW-58 — ✅ CLOSED 2026-07-23 (Sean-reported, found editing an OTU-imported T5 system): manually-added bodies on a star that also had OTU-imported bodies were silently dropped during generation — no error beyond a downstream "No Mainworld found" audit message when the dropped body happened to be the mainworld**
-
-Sean added five bodies (2 Gas Giants, 3 terrestrial worlds) to the primary of an OTU-imported T5 system, one of which had a moon he flagged as the mainworld. After Save, one Gas Giant and one terrestrial world were both silently gone — not just the one holding the mainworld (OW-57's symptom). Sean's framing: "nothing should be regenerated, anything missing should be generated, anything provided by the user should be locked in — just like Mongoose and CT." Investigated and found a data-model mismatch, not another placement-fallback bug like OW-57.
-
-`traveller_worlds_importer.js`'s OTU importer stores **two different orbit values** on each imported body: `baseOrbit` (a real integer — the actual slot in `star.orbits[0..19]` a body was placed at) and a separate `orbitId = baseOrbit + orbit.increment / 10` (a fractional value used only to disambiguate *display* order when multiple objects share a base slot — see the importer's own `buildT5System`, which places bodies by `baseOrbit`, never by `orbitId`). `t5_editor_adapter.js`'s `readBodies()` read the **fractional** `orbitId` straight into the System Editor working copy's `orbitId` field, never touching `baseOrbit` at all. Every downstream consumer of that field assumes it's a real integer slot number:
-- `_nextOrbitId()` (`system_editor.js`) computes `max(sibling orbitId) + 1` for a newly-added body — once any sibling under that star carried a fractional `orbitId` (routine for an OTU import), every body added *after* it inherited a fractional base too.
-- `findAvailableOrbit()` (`t5_topdown_generator.js`) requires an exact integer array-index match (`star.orbits[o]`) to place a body — a fractional target (e.g. `4.7`) never matches, and its "search nearby slots" adjustment loop only ever tries other fractional values (`5.7`, `3.7`, ...), so it returns "no slot found" no matter how many real slots are free. The seeded-body placement loop drops the body silently on that result (`if (resolved < 0) return;`) — no warning, no console message, nothing. The only reason OW-57's case produced *any* signal was that the dropped body happened to be the mainworld's parent, which the UWP auditor separately checks for.
-
-This explains why only some of Sean's five additions were affected: whichever were added *before* a fractional-orbitId sibling first became the star's `max`, got a clean integer and placed fine; everything added after inherited the poisoned fractional base and silently vanished at generation.
-
-**Fix:** `t5_editor_adapter.js`'s `readBodies()` now prefers `w.baseOrbit` over `w.orbitId` when building the working copy's `orbitId` field (`orbitId: w.baseOrbit ?? w.orbitId ?? null`). Natively-generated (non-imported) T5 systems never set `baseOrbit` on a body at all, so this is a no-op for them — the fix only changes behavior for OTU-imported bodies, giving the working copy the same real-integer-slot `orbitId` convention every other consumer already assumes.
-
-**Separately flagged, not fixed here:** `_checkAuditThenFinish()` (`system_editor.js`) shows the "Audit Warnings Found" dialog *after* `_generateAndCommit()` has already written the (possibly broken) result to `hexStates` — its own code comment confirms "'Go Back & Fix' can't un-commit it." This is why the broken system was visible in the hex accordion regardless of which button Sean clicked. Independent of OW-58's root cause, and worth a design decision (block the commit on audit failure? real undo?) before touching it.
-
-**Verified:** `node --check js/t5_editor_adapter.js` passes. Not yet re-tested in-browser by Sean.
-
-*Spec ref: Sean-reported 2026-07-23, same OTU-import editing session as OW-57; root cause narrowed down via two follow-up questions (which star, how many pre-existing bodies) before any code was changed.*
-
-**OW-59 — ✅ CLOSED 2026-07-24 (Sean-reported, root-caused via trace-log instrumentation added specifically to diagnose this): flagging a moon as mainworld on an already-placed Gas Giant duplicated that Gas Giant and its entire moon tree**
-
-Follow-up to OW-57/OW-58, same T5 moon-mainworld area, found via a multi-round troubleshooting session: earlier guesses (orbit-slot exhaustion, fractional orbitId) didn't match what Sean was seeing, so rather than guess a fourth time, added targeted `_log()` instrumentation to `generateT5System`'s seeded-body placement loop and mainworld-parent lookup (both in `t5_topdown_generator.js`), then had Sean reproduce with Batch Logging enabled and share the resulting trace. The log made the mechanism unambiguous: `[SEED PLACEMENT] "Assiniboia" ... -> placed at Orbit 5` followed by `[MAINWORLD PARENT LOOKUP] parentBodyId=body-31 ... -> FOUND (Large Gas Giant, _id=body-31)` — the lookup succeeded, the Gas Giant was never re-created — yet the system biography and UWP auditor both showed Assiniboia (and its 5 moons, Regina included) listed twice, and the auditor flagged "Multiple Mainworlds found (2)" and inflated the Gas Giant count from 1 to 3.
-
-Root cause, Phase 1 (mainworld anchor) of `generateT5System`: after resolving `parent` — either found via the `parentBodyId` lookup (already sitting in a star's orbits, placed earlier by the seeded-body pass) or freshly synthesized as a fallback (BigWorld or a new Gas Giant, when no existing parent is found and none has nowhere to live yet) — the code unconditionally ran:
-```js
-mwTarget = findAvailableOrbit(primary, mwTarget, companionOrbitIndices);
-if (mwTarget >= 0) primary.orbits[mwTarget].contents = parent;
-```
-For the fallback cases this is correct and necessary. But for a `parent` found via lookup, this placed the *same object reference* into a second, different empty orbit slot — `findAvailableOrbit` naturally lands on an empty one, since the Gas Giant's real slot (Orbit 5) is occupied by this very object. Same Gas Giant, same moons, same mainworld, now reachable from two different orbits — duplicated everywhere the system gets walked: biography log, UWP auditor, System Editor accordion, and the orrery.
-
-**Fix:** track whether `parent` was found (pre-existing, `parentAlreadyPlaced`) versus freshly synthesized, and only run the re-placement block when it wasn't already placed.
-
-**Verified:** `node --check js/t5_topdown_generator.js` passes. The diagnostic logging added to isolate this (`[SEED PLACEMENT]`, `[MAINWORLD PARENT LOOKUP]`) was left in place — low-noise (one line per seeded body, gated behind the existing Batch Logging toggle) and proved valuable enough this session to keep for next time. Not yet re-tested in-browser by Sean.
-
-*Spec ref: Sean-reported 2026-07-24, root-caused over a multi-round session using the app's own trace logger (Settings → Enable Batch Logging) rather than further guessing — see OW-57/OW-58 for the earlier, related but distinct bugs in the same area found the day before.*
-
-**OW-60 — ✅ CLOSED 2026-07-24 (Sean-reported, follow-up to OW-56, same session as OW-59): a Gas Giant's moons visibly sped up then abruptly slowed down in the orrery right after adding it, even though the end state was always correct**
-
-Sean noticed that right after adding a Gas Giant with moons in the System Editor, the moons orbited very fast in the live orrery preview, then snapped to a much slower, correct-looking speed once the system was saved. Root cause, `_normT5World()` (`system_viewer.js`, the same normalizer OW-56 fixed): a freshly-added Gas Giant has neither `mass` (T5 gives it the literal string `'Variable (Giant)'`) nor `massEarths` (the real numeric ~317.8-Earth-mass value) set until its first full physics resolution pass. Before that, OW-56's fallback chain (`typeof w.mass === 'number' ? w.mass : w.massEarths`) had nothing to fall back to, so it fell all the way through to `_moonPeriodYears`' own default, `parentWorld.mass || 1` — treating the not-yet-resolved Gas Giant as if it weighed one Earth mass. Since orbital period scales as `1/√mass`, a body assumed to be ~318× lighter than its real self produces moons that orbit far faster than they should — then the instant the Gas Giant resolves (Preview/Save sets `massEarths` for real), the period recalculates against the correct heavy mass and the moons visibly snap to their true, much slower speed. The final state was always physically correct; only the transition was jarring.
-
-**Fix:** default an unresolved Gas Giant's mass to `317.8` directly in `_normT5World()` — the same value T5 already assigns once resolution happens (`type === 'Gas Giant' ? 317.8 : null`, only reached when neither `mass` nor `massEarths` is present yet). Since the placeholder and the real resolved value are now identical, there's nothing left to visibly snap to — the moons start at (approximately) their correct speed immediately and simply stay there.
-
-**Verified:** `node --check js/system_viewer.js` passes. Not yet re-tested in-browser by Sean.
-
-*Spec ref: Sean-reported 2026-07-24, same session as OW-59, following up on OW-56's fix in the same function.*
-
-**OW-61 — ✅ CLOSED 2026-07-30 (user-reported via Sean; heavy Point-to-Point user building routes with 18+ waypoints): the P2P waypoint builder was unusable at scale — list clipped, no memory, hex-only labels, no reordering**
-
-Four separate defects in the Route Manager's Point-to-Point automation panel, all surfaced by one user who builds far longer waypoint chains than the UI was designed for.
-
-1. **List clipped around the 18th waypoint.** Not a waypoint limit — `hex_map.html`'s `.route-auto-option.open .route-auto-config` caps the accordion body at `max-height: 600px; overflow: hidden`. Rows past the pixel ceiling were still created and still generated, but could not be seen or reached. Fixed by giving `#route-auto-p2p-waypoints-list` its own `max-height: 260px; overflow-y: auto`. The accordion cap was deliberately left alone (Sean's call) since it is shared by all four automation types. **Knock-on that had to be solved first:** `.wac-dropdown` was `position: absolute` inside each row, so a scroll container would have clipped the autocomplete — the very control used to enter waypoints. It is now `position: fixed` with JS positioning (`_wacPositionDropdown` in `ui_menus.js`, including flip-up near the viewport bottom) and **one shared** scroll/resize listener rather than a pair per input, which would leak with 25 rows.
-
-2. **No memory of an existing setup.** `openRouteAutoPanel` deliberately wiped everything on open (unchecked radios, overwrote start/end from hex selection, `wpList.innerHTML = ''`), so reopening a configured route to add one waypoint meant retyping all of them. Now snapshotted to `routeDefinitions[].automationRef` — the previously unused placeholder field — on each successful generate, for **all four** automation types, and restored by `_restoreAutomationConfig`. No save/load plumbing was needed: `routeDefinitions` is persisted wholesale (structured-cloned to IndexedDB, `JSON.stringify`d into the sector JSON), so extra fields round-trip untouched. Worlds are stored as resolved hex IDs, not raw field text, so a later rename still restores and re-renders with the current name. Saved config intentionally wins over the hex-selection prefill.
-
-3. **Rows showed bare hex IDs.** The autocomplete did `inputEl.value = m.hexId`, discarding the name the user had just typed. Now fills `Name (hexId)` via `formatWorldLabel`; `resolveWorldInput` parses the suffix and **prefers the explicit hex ID over the name**, since names can duplicate across a sector. Bare name and bare hex ID entry both still work.
-
-4. **No reordering.** `addWaypointRow` only appended. Added ▲/▼ controls plus position badges, with `renumberWaypoints` disabling them at the ends.
-
-**Fix:** `js/ui_menus.js`, `hex_map.html`. One self-inflicted bug caught during the work: `addWaypointRow` was wired as `addEventListener('click', addWaypointRow)`, so once it gained a `prefillValue` parameter the click Event would have been assigned as the field's value — now wrapped in an arrow function.
-
-**Verified:** in-browser Playwright. 25 rows scroll with the last reachable; `elementFromPoint` confirms the dropdown paints *outside* the scroll box and is genuinely hittable; `collectWaypointRaws()` (what actually feeds `generatePointToPointRoute`) reflects the new order after a move; config survives a JSON round-trip; a slot with no saved config still resets cleanly; `maxBTN: null` ("no cap") restores as a blank field, not the string "null". Zero console errors.
-
-*Spec ref: user-reported via Sean, 2026-07-30.*
-
-**OW-62 — ✅ CLOSED 2026-07-30 (user-reported "extremely flaky" route CSV export; investigation widened to every download in the app)**
-
-The user reported that the Route Manager's CSV export "downloaded to my downloads folder, but it is extremely flaky — I had to do multiple tries after opening and closing it," and separately that nothing told them where the file went.
-
-**Root cause:** `exportRouteSystemsCSV` called `URL.revokeObjectURL(url)` synchronously right after `a.click()`, which can abort the download before the browser has finished reading the blob. Reproduced as intermittent total failure on a **170-byte** file. A second, independent defect: the export icon was double-wired — `addEventListener` in `renderRouteWindow` **and** `.onclick` in `refreshRouteWindowCounts` — so one click opened the modal twice, the second call cloning away the Download button the first had just wired. Both fixed; the render path now uses `.onclick` so it cannot stack.
-
-**Widened scope — the same pattern existed at seven other sites**, and the risk scales with payload size:
-- **The chunked (multi-part) save was the worst.** It loops `triggerDownload` over blobs of **up to 250 MB**. Line 184 already carried the comment *"Brief pause so the browser doesn't suppress sequential downloads"* — someone had previously hit failures here and patched the *rate* (a 400 ms gap) without touching the revoke. A dropped chunk produced an incomplete set while still reporting `Saved in N parts`. Mitigating factor: the **load** path is already defensive (validates `saveType`/`totalParts`, detects count mismatch and missing parts), so the failure surfaces at load with a clear message rather than as silent corruption. The gap was purely save-time reporting.
-- `downloadBatchLog` also **destroyed its own source** — `window.batchLogData = []` ran regardless of outcome, leaving no way to re-export a failed log.
-
-**Fix:** one shared `downloadBlob(content, filename, mimeType)` in `js/io_manager.js` with deferred cleanup and a boolean return; all **eight** call sites now route through it (sector JSON, chunked save, batch log, routes XML, metadata XML, `.tab`, Obsidian ZIP, filter rules, route CSV). `triggerDownload` survives as a thin JSON wrapper so its three existing callers were untouched. `filter_engine.js`'s copy was migrated too even though it was already correct — the duplication *is* the defect, and eight copies is why this recurred. Batch log now clears only on successful handoff. Chunked save counts per-part outcomes and warns explicitly naming failed parts instead of always claiming success. **Deliberately not overstated:** the helper's doc comment records that it *cannot* confirm a file actually landed — browsers give no such signal for anchor-triggered downloads — so it only reports what was successfully handed off, and the user-facing message asks them to confirm all parts are present.
-
-Also added (user request): the export modal now names the target file, and a toast reports filename and world count.
-
-**Verified:** in-browser Playwright — five consecutive exports all produced identical 170-byte files; anchor cleanup confirmed deferred and non-leaking (1 → 2 → 0); batch log cleared on success and **preserved on simulated failure**; failure path returns `false` without throwing. **Not verified:** an actual 250 MB chunked save — impractical to test here. The branch was read back for scoping correctness and its failure reporting exercised against a simulated `createObjectURL` throw, but the real large-map path is untested and worth a manual run.
-
-*Spec ref: user-reported via Sean, 2026-07-30.*
-
-**OW-63 — ✅ CLOSED 2026-07-30 (user-reported as "stellar types select no worlds"; the real scope was far wider than reported): the Stellar Info filter matched nothing at all in CT, T5, and RTT sectors — three of the five engines**
-
-⚠️ **Architectural note worth reading before touching any code that reads star fields.** The five engines record the same three star properties under **different property names**:
-
-| Engine | Spectral type | Luminosity class | Subtype |
-|---|---|---|---|
-| MgT2E | `sType` | `sClass` | `subType` |
-| AoW | `sType` | `sClass` | `subType` |
-| **CT** | `type` | `size` | `decimal` |
-| **T5** | `type` | `size` | `decimal` |
-| **RTT** | `type` | `luminosityClass` | *(none)* |
-
-`matchesStellarFilter` read only `sType`/`sClass`/`subType`, so on CT/T5/RTT systems every one of those was `undefined` and **every world failed silently, with no error** — including the Subtype field, which was broken the same way. This also explains why it read as *default* behaviour: `scanForConditionalFields` gates the section on `sys.stars.length > 0`, which is engine-agnostic, so the controls appeared for CT/T5/RTT worlds and then matched nothing.
-
-The naming is misleading but the meaning is certain — CT parses `size` as `parts[1] || 'V'` (the luminosity class) and T5 renders star names as `` `${type}${decimal} ${size}` `` → "G2 V". The stored **values** already agree with the dropdown options (`O..M`/`D`/`BD`, and `V/IV/III/II/Ib/Ia/VI`), so this was purely field resolution — no value remapping involved.
-
-**Fix:** read-time resolvers `_starSpectralType` / `_starLuminosityClass` / `_starSubtype` in `js/filter_engine.js` only. Per Sean's explicit choice, **no engine and no `rules/` file was touched** — the alternative (normalising the engines to a shared shape) would have risked every downstream consumer (`system_viewer`, `obsidian_exporter`, the editors, the auditors). The table above is reproduced as a comment at the fix site.
-
-**Verified:** in-browser Playwright with one G2 V world per engine in that engine's real star shape. All five now match by type and by class; CT/T5/MgT2E/AoW match by subtype; RTT correctly returns `false` for subtype (its stars carry none, and the documented contract is "no data never matches"); negative controls (an M star, and subtype 7) correctly excluded.
-
-⚠️ **Not audited:** how many *other* features read `star.sType`/`star.sClass` directly and are therefore silently wrong for CT/T5/RTT. Sean chose the contained filter-only fix; a wider audit of those call sites remains open and is probably worth doing.
-
-*Spec ref: user-reported via Sean, 2026-07-30.*
-
-**OW-64 — ✅ CLOSED 2026-07-30 (user-reported: "I somehow screwed something up and now no longer see stellar types ... I had to clear the canvas and reload the map to get them to reappear")**
-
-Two coupled problems, the second considerably more serious than the reported one.
-
-**Reported:** `scanForConditionalFields` has exactly **one** call site — inside `toggleFilterModal`'s *opening* branch — so conditional sections are only re-evaluated when the modal is opened. Nothing re-scans when `hexStates` changes. If the scan ran while the sector had no star data, `#filter-stellar-section` was set `display: none` and stayed hidden until a close/reopen with data present. Generating systems while the filter is open also left it hidden.
-
-**Found while investigating, and worse:** hiding a section **never cleared its inputs** (unlike `clearFilterInputs`, which does), and `applyActiveFilters` harvests every input **unconditionally, with no visibility check**. So a hidden section could still hold live selections that were actively filtering — section hides → selections survive → `hasStellarFilter` stays true → every world runs through `matchesStellarFilter` → no star data → `false` → **the entire sector excluded, with the control causing it invisible.**
-
-**Fix (`js/filter_engine.js`):** the Stellar Info section is now **never hidden** — when the sector has no star data it stays visible but disabled, dimmed, with an amber note placed after the accordion header so it reads even while collapsed. Its inputs are cleared when unavailable. The same clear-on-hide treatment was extended to the six conditional numeric fields (T5 Ix, Mgt Importance, WTN, GWP, Gravity, Temperature), which had the identical trap — those remain hidden as before (no UI clutter added), but can no longer strand a live value. If anything was cleared, `applyActiveFilters()` is re-run so the stale exclusion lifts immediately rather than persisting until the user happens to touch a control.
-
-**Rejected approach, and why:** the obvious fix — re-scanning on data-change hooks — was costed and declined. It would mean ~35 hook sites (mirroring the existing `reapplyAllRules()` convention), the scan always walks all of `hexStates` (its early-exit is a `return` inside a `forEach`, which continues rather than breaks) so per-hex hooking would be O(n²), it would not fix discoverability at all, and it would *increase* exposure to the invisible-filter trap by creating more opportunities to hide a populated section. Fixing the destructive hide addresses the actual user-visible confusion in one function.
-
-**Verified:** in-browser Playwright, four cases — no star data (section visible, noted, disabled, inputs cleared); the trap reproduced end-to-end (stale stellar *and* gravity criteria cleared, 0 of 2 worlds left wrongly hidden); data restored (note hidden, controls re-enabled); filtering still correct when enabled. Zero console errors.
-
-*Spec ref: user-reported via Sean, 2026-07-30.*
 
 **OW-65 — 🟡 OPEN / DEFERRED 2026-07-30 (three items deliberately parked pending evidence — do not restart these without new information)**
 
@@ -1480,328 +1059,96 @@ Two coupled problems, the second considerably more serious than the reported one
 
 *Spec ref: Sean's explicit direction 2026-07-30 — "leave this until more users try it."*
 
-**OW-20 — ✅ CLOSED 2026-07-12 (found and fixed same day, Sean-reported): a CT Captured Planet's name and moons weren't round-tripping through the System Editor, and its orbit field misleadingly read "auto"**
-
-Sean opened Edit System on a real CT bottom-up system (`18-F-1620`) and noticed a Captured Planet ("Aegina VI" in the accordion) showed up in the System Editor tree as a nameless "World", with a blank Name field, an "auto"-placeholder Orbit # (no listed value), and no moons — despite the accordion showing 3 moons (Aegina VI-a/b/c) under it. Three separate root causes, all in code the accordion never touches (so it displayed correctly while the editor didn't):
-
-1. **Moons — critical, active data loss.** `ct_editor_adapter.js`'s `readCaptured()` hardcoded `moons: []` for every captured planet, never reading `w.satellites` (unlike `readOrbitSlots`, which already does `w.moons || w.satellites`). Worse than a display gap: `write()`'s `buildCaptured()` re-serializes `satellites: (b.moons || []).map(...)` straight from that same always-empty array — so **Preview or Fill & Save on any CT system with a moon-bearing captured planet silently deleted those moons.** Fixed by mirroring `readOrbitSlots`' moon-reading (including the lunar-mainworld `isMainworld` detection wrapper) in `readCaptured`.
-
-2. **Orbit # read "auto".** A CT Captured Planet never occupies a discrete orbit slot — RAW models it as an anomaly with its own already-rolled fractional orbit, permanently fixed (this is why `ct_editor_adapter.js`'s `write()` already carries it forward from `_raw` unchanged with a comment noting "there's no UI to move one"). `orbitId` is therefore always `null` for one — which the editor rendered as a plain editable number input with an `auto` placeholder, indistinguishable from a genuinely-undecided field the engine will roll on the next Preview. Fixed in `system_editor.js`'s `_buildBodyEl`: when `engine === 'CT' && body.orbitId == null && body._raw.orbit != null`, render the real fixed value read-only (e.g. `7 → 10.00 AU (fixed — captured planet)`) instead of an editable "auto" field.
-
-3. **Name was blank.** The accordion's displayed name (e.g. "Aegina VI") turned out to be a **placeholder, not a stored value** — `hex_editor.js` computes `${sysName} ${toRoman(bodyIdx+1)}` on the fly and shows it via the name `<input>`'s `placeholder` attribute whenever `w.name` is empty. The real bug was upstream in `core.js`'s `applyCTOrbitalNames()`: it only auto-names bodies in `sys.orbits[]` — `sys.capturedPlanets[]` was never included in the ordinal Roman-numeral naming pass (only checked as a possible mainworld). So a captured planet's `.name` has been blank since generation for every CT system, not just ones opened in the editor. Fixed by merging `sys.orbits[]` bodies and `sys.capturedPlanets[]` into one combined list, sorted by real distance (`distAU`) to match the interleaved order `hex_editor.js`'s accordion already renders them in, before assigning ordinal names — so captured planets now get a real name matching what the accordion's placeholder always implied they should have.
-
-**Verified:** `node --check` on all three touched files (`core.js`, `system_editor.js`, `ct_editor_adapter.js`); in-browser Playwright test — generated fresh stochastic CT systems via `CT_Generator.generateSystem()` (no seed) until one rolled a captured planet with moons, confirmed the System Editor showed the real name and moon count and the fixed-orbit display, then ran Preview → Fill & Save and re-inspected `stateObj.ctSystem.capturedPlanets` — the moons (2 of them) survived the round trip, zero console errors.
-
-*Spec ref: Sean-reported bug, 2026-07-12, found while inspecting a real hex map system in the browser (not a Playwright-first find, unlike OW-19).*
-
-**OW-21 — ✅ CLOSED 2026-07-12 (found and fixed same day, Sean-reported immediately after OW-20): "+World"/"+GG"/"+Belt" could insert the new body in the middle of the orbit list instead of appending it at the true end**
-
-Sean re-created a CT system with the OW-20 fixes in place, opened Edit System, clicked "+World" on the primary star, and found the new body appearing *before* a captured planet and a companion star instead of at the far end of the list as expected.
-
-**Root cause:** `_nextOrbitId()` (`system_editor.js`) computed the next slot as `max(existing sibling orbitId) + 1` — a pure slot-number comparison. Two kinds of siblings were invisible to it:
-- A CT Captured Planet always has `orbitId === null` (RAW anomaly, not slot-based — see OW-20), so `b.orbitId || 0` treated it as slot 0, contributing nothing to the max even when its real distance (e.g. 33 AU) was far beyond every slot-numbered body.
-- A companion star was never considered at all, even though `_insertAtOrbit`/`_wouldReorder` already treat "bodies + non-primary companion stars" as one combined pool for reordering purposes — `_nextOrbitId` was the one place that didn't.
-
-Either gap meant the new body's assigned slot could correspond to a *smaller* AU than an already-farther-out captured planet or companion, silently inserting it mid-list.
-
-**Fix:** `_nextOrbitId` now computes `maxSiblingAU` across sibling bodies (via `_orbitIdToAU(orbitId) ?? au ?? orbitAU`, covering slot bodies via their AU and captured planets via their `au` fallback) and sibling companion stars, then bumps the candidate slot upward until its own AU exceeds that maximum — guaranteeing "append" always means "farther out than everything," not just "next unused slot number."
-
-**Verified:** `node --check` on `system_editor.js`; two in-browser Playwright reproductions against fresh stochastic CT systems — (1) a system with a captured planet at 33 AU (far past the last real slot): before the fix, a new "+World" landed *before* it in the rendered order; after the fix, it correctly lands *after*. (2) a system with a "Far" secondary star at orbit 11 and no captured planet, isolating the companion-star half of the bug: before the fix this would have landed before the star (same root cause); after the fix the new body (assigned orbit 12) lands after it. Zero console errors in both.
-
-*Spec ref: Sean-reported bug, 2026-07-12, found immediately after testing the OW-20 fix on a freshly re-created system.*
-
-**OW-22 — ✅ CLOSED 2026-07-12 (found and fixed same day, Sean-reported): CT's "Seed UWP digits" Size box couldn't accept 'S' (Small) or 'R' (Ring)**
-
-Sean asked for CT edits to allow `S`/`R` in the Size seed digit — real Book 6 satellite-size codes (`rules/ct_data.js`'s `CT_SATELLITE_LOGIC.SIZE_DETERMINATION`: a moon's size roll of exactly 0 → `'R'` Ring, negative → `'S'` Small; both size-0-equivalent, and every downstream consumer — `ct_bottomup_generator.js`'s satellite-size roll, `ct_physical_library.js`, `ct_world_engine.js` — already special-cases `size === 'S' || size === 'R'`). This already round-trips fine for an *existing* generated moon (`_ctMoonLockFor` copies `raw.size` verbatim), but couldn't be *typed* via the editor's "Seed UWP digits" boxes (used for a not-yet-generated body/moon).
-
-**Root cause — two layers, both in `system_editor.js`, both shared across all five engines:**
-1. The digit-box keystroke filter restricted every non-starport field to `/[^0-9A-F]/g`, stripping `S`/`R` from the size digit the instant they were typed.
-2. `_applyUwpSeed()` converted every non-starport digit via `parseInt(ch, 16)` uniformly — `NaN` for `S`/`R`, so even a character that got past step 1 would have been silently discarded.
-
-**Fix:** added a shared `_uwpSeedFilter(key, raw)` helper (replacing 4 duplicated inline ternaries — body-level and moon-level input/change handlers) that allows `S`/`R` for the size digit specifically, **gated to `_workingCopy.engine === 'CT'`** so the other four engines' seed boxes are untouched. `_applyUwpSeed()` gained a size-specific branch (mirroring how starport is already handled as a letter, not a hex digit) that passes `S`/`R` through directly instead of `parseInt`.
-
-**Scope decision (Sean confirmed):** applies to both the top-level body's seed box and the moon's — even though RAW-wise `S`/`R` only ever arises from a *moon's* size roll (a top-level body's size always comes from the standard 2D-2 planetary roll), every consumer of `.size` already tolerates `S`/`R` regardless of whether it's attached to a top-level body or a moon, so gating by body-vs-moon would have added complexity with no safety benefit.
-
-**False-alarm side note:** initial testing appeared to show a much bigger, separate bug — a seeded moon's UWP digits (not just size) failing to survive Preview when added to a **brand-new, not-yet-generated** body, as opposed to an already-generated one. Investigated further and found it was an artifact of the *test script*, not the app: when a new body and a new moon are both UWP-less at once, each renders its own "Seed UWP digits" box, and the test's DOM query grabbed the body's box instead of the moon's. Once corrected, seeding worked identically for both an already-generated body's new moon and a brand-new body's new moon. No underlying generator gap — `captureCTSatelliteCaps`/`trimCTSatellitesToSeededCaps` (ct_bottomup_generator.js) already correctly preserve a seeded satellite's full content, not just its count.
-
-**Verified:** `node --check` on `system_editor.js`; in-browser Playwright tests — (1) typing `S`/`R` into the moon size box on an already-generated CT body, Preview, confirmed the generated satellite has `size: "R"`; (2) same test on a brand-new body + brand-new moon created in one session, confirmed `size: "S"` survives into the final UWP string (`"YS00066-7"`). Zero console errors.
-
-*Spec ref: Sean-requested feature, 2026-07-12, found immediately after OW-21.*
-
-**OW-23 — ✅ CLOSED 2026-07-12 (found and fixed same day, Sean-requested feature): CT's Gas Giant size (Large/Small) had no editor control, and existing bodies' size was misread on open**
-
-Sean asked for the System Editor to let a user view/change a CT Gas Giant's size — RAW Book 3/6 has exactly two tiers, no Medium (`rules/ct_data.js`'s `CT_BODY_SIZES.GG`: a 1D roll of 1-3 is Large, 4-6 is Small; `ct_world_engine.js`'s skeleton placement hardcodes `gravity`/`mass` by size — 2.5G/300 Earth masses Large, 0.8G/50 Small — and rolls a size-appropriate `diamKm`). Investigating turned up two things, one a feature gap (as asked) and one an active, separate bug found along the way:
-
-1. **No UI control at all.** `ggType` (`'GL'`/`'GS'`, the working-copy's internal size marker) was only ever set once, at `+GG` creation time (always defaulting to `'GS'`) — there was no way to view or change it afterward. The summary line showed it (`Gas Giant (${body.ggType})`) but nothing in the detail pad let it be edited.
-2. **Active bug: existing Gas Giants were always misread as Large, regardless of their real size.** `ct_editor_adapter.js`'s `readOrbitSlots` computed `ggType` via `w.size === 'S' ? 'GS' : 'GL'` — but a CT Gas Giant's `.size` is the full word `'Small'`/`'Large'` (per `ct_world_engine.js`'s skeleton placement: `size: gg.size`), never the single letter `'S'`. That comparison never matched, so every real Small Gas Giant was silently read into the working copy as `ggType: 'GL'`. Since `write()`'s `buildOrbits` derives the seed's `size` field purely from `body.ggType` (`ggSize = b.ggType === 'GS' ? 'Small' : 'Large'`), opening Edit System on a system with a Small Gas Giant and clicking Preview/Fill & Save **without touching it at all** would have silently flipped it to Large on the next save — same failure shape as OW-20's captured-planet name bug (a read-side mismatch masked because nothing else in the UI cross-checked it).
-
-**Fix:**
-- `ct_editor_adapter.js`: `w.size === 'Small'` (matching the real value) instead of `w.size === 'S'`.
-- `system_editor.js`: new Size dropdown (Large/Small) in a Gas Giant body's detail pad, gated to `_workingCopy.engine === 'CT'`. On change, updates `body.ggType` and also directly updates `body._raw.gravity`/`body._raw.mass` to the new size's hardcoded constants (2.5/300 Large, 0.8/50 Small) and clears `body._raw.diamKm` — otherwise `_ctUwpLockFor`'s unconditional Gas-Giant mass/gravity/diamKm preservation (added for OW-14/satellite-lock stability) would have carried the *old* size's physical stats forward onto the newly-relabeled body, leaving e.g. a "Small" Gas Giant with Large-scale mass and gravity until some other edit happened to clear them.
-
-**Verified:** `node --check` on both touched files; in-browser Playwright tests against a real generated system containing 3 Large + 1 Small Gas Giant (bodies matched to the test's ground truth by orbit slot, not "first Gas Giant found" — an earlier draft of this same test grabbed the wrong Gas Giant when multiple were present, see [[project_ct_uwp_seed_size_codes]]'s methodology note for the same lesson recurring) — (1) all 4 read back into the editor's new dropdown with the correct size; (2) a no-touch Preview left the Small one still Small (mass 50, gravity 0.8) — confirming the silent-flip regression is fixed; (3) changing it to Large via the dropdown and Preview produced `size: "Large", mass: 300, gravity: 2.5`, and a freshly-rolled `diamKm` distinct from the old Small-scale value. Zero console errors.
-
-*Spec ref: Sean-requested feature, 2026-07-12, found immediately after OW-22.*
-
-**OW-24 — ✅ CLOSED 2026-07-12 (found and fixed same day, Sean-reported): a manually-created CT moon (e.g. a Gas Giant's moon set as mainworld) never received physical stats — distance, gravity, mass, temperature, rotation, tilt all permanently blank**
-
-Sean manually built a CT system (Gas Giant "Assiniboia" + a moon "Regina" set as mainworld) and found Regina's accordion entry had a real-looking UWP (`A788887-C`) but every physical stat field — Distance (AU), Gravity (G), Mass (M⊕), Temp (K), Day, Tilt (°) — blank.
-
-**Root cause:** `processBottomUpSatellites()` (`ct_bottomup_generator.js`), the function that rolls a parent's satellite family, only ever calls `physicalGen`/`popGen`/`derivedPhysicsProcessor` (the calls that set distAU/gravity/mass/temperature/rotationPeriod/axialTilt) on satellites it **freshly creates** in its own dice-roll loop. It never touches a satellite that's already present in `parent.satellites` before that loop runs — i.e., any moon added via the System Editor's `+Moon`. Separately, `processBottomUpDesignation()` (Phase 4, mainworld designation) calls `socialGen()` on the mainworld if it lacks a `.uwp` — which is a *different* code path (starport/size/atm/hydro/pop/gov/law/tl only), producing a plausible-looking UWP from what were still mostly-undefined physical fields. Confirmed this wasn't mainworld-specific: a plain non-mainworld moon added to a new Gas Giant showed the identical pattern (real UWP, no distAU/gravity/mass/etc.) — the gap is "any System-Editor-seeded CT moon," not "a lunar mainworld" specifically.
-
-**Fix:** added a backfill pass in `processBottomUpSatellites`, run before the existing fresh-roll loop (sharing its `occupiedRadii`/`cumulativeDM` collision-avoidance state so backfilled and freshly-rolled moons can't land on the same orbital slot): for any satellite in `parent.satellites` missing `distAU` (the tell that it never went through generation), roll its size (respecting an already-seeded size, including OW-22's `'S'`/`'R'` codes) and orbital position if not already set, then run the same `physicalGen`/`popGen`/`derivedPhysicsProcessor` sequence — or, for a `'R'` (Ring) result, the same zero-atm/hydro/pop shortcut the fresh-roll loop already uses, skipping physical-body stats entirely (Rings never get mass/gravity/diameter in this model). The final orbital-distance sort now runs unconditionally (previously gated on `count > 0`) since the backfill pass can assign `pd` on its own with zero freshly-rolled satellites added.
-
-**Verified:** `node --check` on `ct_bottomup_generator.js`; in-browser Playwright tests — (1) Regina's exact scenario (Gas Giant + mainworld moon), Preview: the moon came back with `size: "S"`, `pd`, `distAU: 0.4`, `mass: 0`, `gravity: 0` (correct zero-mass/gravity for a Small body), `diamKm: 500`, `temperature: 509`, `rotationPeriod: "160h"`, `axialTilt: 16`, plus real social stats — full parity with a naturally-rolled moon; (2) a plain non-mainworld moon on a separate new Gas Giant, which happened to roll as a Ring, correctly got the Ring treatment (no mass/gravity/diameter, zero atm/hydro/pop) matching pre-existing natural-roll behavior; (3) a no-touch resave of scenario 1's already-generated system left every physical field byte-for-byte identical (only the working-copy's own internal `_id`, which is never persisted business data, differed) — confirming the fix doesn't destabilize an already-generated body on a second Preview/Save. Zero console errors across all three.
-
-**OW-25 — ✅ CLOSED 2026-07-12 (found and fixed same day, Sean-reported): the orrery kept showing two CT bodies at the same orbit after one was moved via the System Editor, even after Preview/Save/close/reopen**
-
-Sean manually built a CT system, accidentally put two planets (Olybrius, Burgund) on the same orbit, then fixed it by changing Olybrius to orbit 2 and Burgund to orbit 3 via the editor's Orbit # field. The System Editor's own tree and the "→ AU" display correctly showed 0.70 AU / 1.00 AU for the two — but the orrery kept rendering them at the same position, surviving Preview, Fill & Save, and a full close/reopen.
-
-**Root cause — a stale cached distance, not a numbering bug:** `ct_editor_adapter.js`'s `write()` → `buildOrbits()` built each seeded orbit slot's `distAU` as `b.au != null ? b.au : (SE().orbitIdToAU(b.orbitId) ?? null)` — preferring the working-copy body's cached `au` field over recalculating from the current `orbitId`. That `au` field is set exactly once, when the body is first read into the editor (`readBodies`'s `au: slot.distAU ?? null`), and is **never refreshed** when the user later edits Orbit # — the orbit-input's change handler (`system_editor.js`) only updates `orbitId`, never `au`. So after Olybrius moved to orbit 2, its cached `au` kept reflecting wherever it originally was (the collision point with Burgund). That stale value then reached the orrery: `system_viewer.js`'s `_normCTWorld` resolves position as `au || w.distAU || 0` — for a regular orbit-slot body, the caller was passing `slot.distAU` (the seed's stale echo) as `au`, which won out over `w.distAU` (the body's own distance, correctly recalculated from the *current* orbit by `internalPhysicalPass` on every Preview) since the stale value was non-zero and therefore truthy. Confirmed this only manifests once a body's orbit is edited *after* its first read — a freshly-generated, never-edited system doesn't hit it, since captured planets (`system_viewer.js`, two lines below) already correctly read `w.distAU` directly and never had this problem.
-
-**Fix (two parts, same root cause, different layers):**
-1. `ct_editor_adapter.js`: `distAU` is now recomputed from the current `orbitId` first (`SE().orbitIdToAU(b.orbitId) ?? b.au ?? null`), falling back to the cached `au` only if that fails — matching the orbitId-first priority `system_editor.js`'s own `_sortAU` already uses correctly.
-2. `system_viewer.js`: regular orbit-slot bodies now pass `w.distAU` (the body's own, always-fresh distance) into `_normCTWorld` instead of `slot.distAU` (the fragile, write-time-only seed echo) — matching the pattern already used correctly for captured planets and Far-companion nested orbits two lines away.
-
-**Verified:** `node --check` on both files; in-browser Playwright test reproducing the exact scenario — created two bodies, force-collided them onto the same orbit (bypassing the UI's drag-and-drop-only reorder guard to match "I made a mistake and put two planets on the same orbit"), confirmed both showed the same `distAU` (0.7) at both the seed and body level; then moved the second body to a new orbit via the editor's Orbit # field and Saved — the seed's `distAU` now correctly updated to `1` (matching the body's own, no longer stuck at the stale `0.7`). Zero console errors.
-
-*Spec ref: Sean-reported bug, 2026-07-12, found immediately after OW-24.*
-
-**OW-26 — ✅ CLOSED 2026-07-12 (found and fixed same day, Sean-reported): a manually-typed CT mainworld UWP changed after Save**
-
-Sean manually created a CT system, typed a full UWP for the mainworld via the "Seed UWP digits" boxes, and found the saved UWP didn't match what was typed.
-
-**Root cause:** `finalizeMainworldSocial()` (`ct_world_engine.js`) — the function that sets a mainworld's Government, Law Level, and Tech Level and composes the final UWP string — unconditionally rolled `gov`, `law`, and `tl` with no `_ctFieldIsManual` guard at all, discarding whatever the user had typed for those three digits every time. This was a partial fix left over from an earlier pass: `generateSocial()` (the function that calls `finalizeMainworldSocial`) already had a `_ctFieldIsManual(world, 'starport')` guard, and its own comment explicitly noted "this mainworld path never did [check `_ctFieldIsManual`]" — but only starport actually got fixed at the time; gov/law/tl were missed. The sibling function for *subordinate* worlds, `finalizeSubordinateSocial`, already had `_ctFieldIsManual` guards for gov/law/starport/tl — so a subordinate body's typed digits were already safe; only the mainworld's own gov/law/tl were exposed. (Starport, size, atm, hydro, and pop for the mainworld were already correctly guarded elsewhere — `generateSocial`'s own starport check, and `generatePhysicals`/`generatePopulation`'s existing atm/hydro/pop checks.)
-
-**Fix:** added `_ctFieldIsManual` guards for `gov`, `law`, and `tl` in `finalizeMainworldSocial`, mirroring the exact pattern already used in `finalizeSubordinateSocial` — skip the roll and keep the typed value when the field is marked manual, matching what `generateSocial`'s starport check already did next to this same function.
-
-**Verified:** `node --check` on `ct_world_engine.js`; in-browser Playwright test — created a CT mainworld, typed all 8 UWP digits via the Seed UWP boxes (`A88899 5-A`), Saved: the final mainworld UWP matched exactly (`A888995-A`, TL A = 10). Regression check — 6 fresh, fully random (no seed digits typed) mainworlds still produced varied gov/law/tl values, confirming the new guard only engages when a value was actually typed. Zero console errors.
-
-*Spec ref: Sean-reported bug, 2026-07-12, found immediately after OW-25.*
-
-**OW-27 — ✅ CLOSED 2026-07-13 (found and fixed same day, Sean-reported): filling in several blank CT worlds out of order made the mainworld pick and rolled stats jump between bodies before Save**
-
-Sean added several blank CT worlds via +World, then filled in details out of order (3rd, then 2nd, then 1st) — the ★ mainworld designation and each untouched body's rolled stats (atm/hydro/pop/gov/law/tl) appeared to jump between worlds on every edit, before ever clicking Save. Never happened when worlds were added and completed one at a time.
-
-**Root cause — two gaps in `ct_editor_adapter.js`:** (1) `_ctUwpLockFor` only protected a body's rolled stats from reroll once `body.uwp` was truthy — but the working copy's `body.uwp` is never backfilled after a mere Preview (only `readBodies()`, on reopening an already-saved system, sets it). So any body added mid-session kept re-rolling atm/hydro/pop/etc. on *every single Preview* for its entire first editing session, no matter how many fields had already been typed via the Seed UWP digit boxes. (2) `designateMainworld` (`ct_bottomup_generator.js`) re-scores every candidate by freshly-rolled population from scratch on every Preview, with zero memory of the previous winner (only `_workingCopy.mainworldRef`, normally set by a manual ★ click, pins it via CT's existing "Fixed Anchor" path). With several bodies all still rerolling per (1), the "best" candidate could flip to a different body on every unrelated edit, since all bodies share one continuous seeded RNG stream and which bodies are locked/unlocked at any moment shifts how many dice calls precede each still-unlocked body's roll.
-
-**Fix:** `backfillFromGenerated` (`ct_editor_adapter.js`) now (a) freezes the first auto-designated mainworld into `wc.mainworldRef`/`isMainworld` the moment one is chosen, mirroring what a manual ★ click already does, and (b) copies each body's rolled fields into `wcBody._raw` right after its first Preview. `_ctUwpLockFor`'s gate was loosened from `!body.uwp` to `!body._raw` (always populated as `{}`, so the real gating is the existing per-field `raw.x !== undefined` checks) so locking engages immediately instead of waiting for a Fill & Save + reopen round-trip. Deliberately did *not* set `body.uwp` itself — that would hide the "Seed UWP digits" boxes (gated on `!body.uwp`) the instant a body is first auto-rolled, killing the manual-seed-digit feature for brand-new bodies.
-
-**Verified:** in-browser Playwright — added 3 blank CT worlds, typed names into body 3 → 2 → 1 (reverse order). Pre-fix, no mainworld ever surfaced in the working copy during the session at all. Post-fix, ★ correctly appears after the first body's own first Preview and stays pinned to that same body throughout out-of-order edits to the others; Seed UWP digit boxes remained visible on all three bodies (not prematurely hidden).
-
-**Noticed but not fixed (separate, out of scope):** satellite quantity determination in `processBottomUpSatellites` (`ct_bottomup_generator.js`) uses the same `!!parent.uwp` proxy for "already generated" on non-Gas-Giant bodies — since `wc.body.uwp` is still never set mid-session, a body's moon count could in principle still re-roll/grow on every Preview until Fill & Save, independent of OW-11's cap/trim safety net. Not confirmed as a live issue; flagged for a follow-up if seen in practice. (See OW-30 below, which extended the same cap/trim mechanism's *reach*, not this specific per-body lock signal.)
-
-*Spec ref: Sean-reported bug, 2026-07-13.*
-
-**OW-28 — ✅ CLOSED 2026-07-13 (found and fixed same day, Sean-reported): CT's +Belt gave no way to enter a UWP, and Fill & Save failed the UWP auditor**
-
-Clicking +Belt in the CT System Editor gave no way to enter any UWP digits, and Fill & Save then failed the UWP auditor with "Geometry Error: Planetoid Belt has size undefined (must be 0)."
-
-**Root cause:** `generatePhysicals` (`ct_world_engine.js`) returns immediately for `type === 'Planetoid Belt'` without ever setting `body.size` — it assumes size was already stamped to 0 during automatic skeleton placement (`ct_bottomup_generator.js`'s `slot.contents = { type: 'Planetoid Belt', size: 0, ... }`). A belt added via the System Editor's +Belt button never goes through that placement step, so `size` stayed `undefined` for the entire session. Beyond the audit failure, `processCTDerivedPhysics` (`ct_physical_library.js`) computed `Number(undefined)` → `NaN`, silently corrupting mass/gravity/diamKm too. Also, the "Seed UWP digits" UI was unconditionally hidden for `type !== 'Belt'`, so there was no way to type a fix in manually either. Compared against MgT2E's own belt handling (`mgt2e_world_engine.js`), which unconditionally self-sets `body.size = 0` regardless of how the body was created — CT had no equivalent defensive line.
-
-**Fix (3 parts):** (1) `generatePhysicals` now unconditionally sets `body.size = 0` for any Planetoid Belt before returning — the actual root-cause fix, mirroring MgT2E's existing pattern, works regardless of entry path. (2) `_addBody` (`system_editor.js`) now seeds `_raw: { size: 0, gravity: 0, temperature: 100 }` for a freshly-added Belt, matching skeleton-placement's own defaults, so the accordion reflects correct values immediately rather than waiting on a Preview round-trip. (3) The "Seed UWP digits" box is now shown for CT Belts too, but only starport/pop/gov/law/tl — size/atm/hydro are deliberately omitted since they're RAW-fixed constants (`rules/ct_data.js`'s `FORCED_ZERO_POP.TYPES` omits 'Planetoid Belt', confirming belt population is a real, non-forced stat per Book 6 outposts/colonies). Scoped to CT only at the time (`_workingCopy.engine === 'CT'` gate) since MgT2E's own belt-seeding behavior hadn't yet been verified against a manually-typed belt — **superseded 2026-07-14, see OW-36 below, which extended this same gate to MgT2E.**
-
-**Verified:** in-browser Playwright — added a CT belt, confirmed the accordion shows exactly St/P/G/L/TL (no S/A/H), Fill & Save completes with no audit warning dialog, and the saved body has `size: 0, mass: 0, gravity: 0, uwp: 'B000595-D'` (no NaN). Regression-checked a plain +World body still shows all 8 seed digits unchanged.
-
-*Spec ref: Sean-reported bug, 2026-07-13, same session as OW-27 — this fix builds on that one's `backfillFromGenerated`/`_ctUwpLockFor` infrastructure, since `_raw.size` seeded here flows through the same lock path.*
-
-**OW-29 — ✅ CLOSED 2026-07-14 (found and fixed same day, Sean-reported): editing a CT companion star's Orbit # silently hid its own +World/+GG/+Belt buttons**
-
-Sean added a Far companion star, edited its orbit, then found no way to add worlds/gas giants/belts to it — the buttons had disappeared with no warning.
-
-**Root cause:** the companion block only renders +World/+GG/+Belt when `star.role === 'Far'` for CT (`system_editor.js`'s `_buildCompanionBlock`) — by design, a CT `Close` companion sits in a single slot of the primary's own orbit sequence and structurally can't host its own bodies. But the companion's "Orbit #" input handler unconditionally recomputed `star.role` from the typed orbit number via a `_roleFromOrbit` heuristic (`id => id <= 5 ? 'Close' : 'Far'` for CT) on every edit, with no guard protecting an explicitly-set role. Typing any orbit slot number ≤ 5 — a perfectly natural value in CT's 0-12 orbit-slot range — silently reclassified a `Far` companion as `Close`, instantly hiding its add-body buttons.
-
-**Fix:** removed the auto-role-reclassification from the orbit-input handler entirely, along with the now-unused `_roleFromOrbit` helper. `role` is now set exclusively at creation (`+Secondary`/`+Comp`) or via the explicit Role dropdown — editing the Orbit # field only moves the star, never silently changes its category.
-
-**Verified:** `node --check` on `system_editor.js`.
-
-*Spec ref: Sean-reported bug, 2026-07-14.*
-
-**OW-30 — ✅ CLOSED 2026-07-14 (found and fixed same day, Sean-reported): a manually-created body orbiting a CT companion star got dice-rolled moons that were never trimmed back down**
-
-Sean manually built a CT system and added a body (initially suspected to be a Gas Giant, confirmed to be a terrestrial world orbiting a secondary/companion star) that came back with moons no one asked for, despite "Allow engine to add additional bodies" being unchecked.
-
-**Root cause:** CT's moon-cap safety net (`captureCTSatelliteCaps`/`trimCTSatellitesToSeededCaps`, `ct_bottomup_generator.js`, OW-11) — which snapshots a body's satellite count before generation and trims dice-rolled moons back down to that count when `_allowAddBodies` is false — only ever looked at the top-level `sys.orbits`/`sys.capturedPlanets`. It never recursed into `sys.stars[].nestedSystem`, where a Far companion's own worlds live. `processBottomUpSatellites()` *does* recurse into `nestedSystem` to roll moons for companion-star bodies (`ct_bottomup_generator.js`'s own `sys.stars.forEach(star => star.nestedSystem)` pattern) — so a companion-star body's moons got rolled, but the safety net meant to cap them back down never reached that far, and any dice-rolled moons simply stuck around.
-
-**Fix:** extended both `captureCTSatelliteCaps` and `trimCTSatellitesToSeededCaps` to recurse into `sys.stars[].nestedSystem`, mirroring the same recursion pattern `processBottomUpSatellites` itself already uses.
-
-**Verified:** `node --check` on `ct_bottomup_generator.js`; an isolated logic simulation confirmed a companion-star body that picked up 2 unwanted moons during generation now correctly trims back to 0 when its seeded cap was 0.
-
-*Spec ref: Sean-reported bug, 2026-07-14.*
-
-**OW-31 — ✅ CLOSED 2026-07-14 (found and fixed same day, Sean-reported): moons added to an already-generated CT parent never received physical stats**
-
-Sean's System Editor screenshot showed two moons ("Theta Gee"/"Theta En") with a real-looking UWP but every physical stat field — Distance, Gravity, Mass, Temp, Day, Tilt — permanently blank.
-
-**Root cause:** `processBottomUpSatellites()`'s per-parent "already generated, don't reroll" lock (`_satellitesGenerated` for Gas Giants, `.uwp` for worlds — the OW-14 mechanism) used an early `return` once a parent was locked. That early return skipped the *entire* per-parent block, including the physical-stat backfill pass OW-24 had added for a manually-seeded moon lacking `distAU`. So: a moon added to a brand-new, never-generated parent worked fine (backfill ran). A moon added to a parent that had *already* been generated once before (a reopened system, or a second Preview) skipped backfill entirely, leaving its stats permanently blank.
-
-**Fix:** restructured so the moon-*quantity* roll (and the lock stamp) still only happens on first generation, but the backfill pass and final orbital-distance sort now always run — a new moon added later still gets backfilled, while the moon family size stays locked (no re-rolling extra moons). Also seeded the collision-avoidance set (`occupiedRadii`) with existing moons' orbits when the parent is locked, so a newly-backfilled moon can't land on an orbit an existing moon already occupies.
-
-**Verified:** `node --check` on `ct_bottomup_generator.js`.
-
-*Spec ref: Sean-reported bug, 2026-07-14, same investigation as OW-30.*
-
-**OW-32 — ✅ DONE 2026-07-14 (Sean-requested feature): CT orrery now renders a Ring (moon size 'R') as a thin static ring instead of an orbiting dot**
-
-The orrery previously drew every moon identically regardless of type, including a CT satellite whose size rolled as 'R' (Ring) — RAW-wise a band around the planet, not a discrete body.
-
-**Implementation:** `system_viewer.js`'s `_drawWorld()` now checks `m.size === 'R'` (not `m.type === 'Ring'` — CT's Bottom-Up path sets both, but Top-Down only sets `size`) and, for a match, draws a thin static stroked circle centered on the planet at the moon's slot distance instead of an animated orbiting dot, skipping the per-frame orbital angle entirely. Styling is deliberately distinct from `_drawBeltRing`'s dashed belt-orbit line (solid, thinner, silvery) so the two read as different things at a glance. The drawing code was extracted into a shared `_drawStaticRing(ctx, px, py, dist)` helper — see OW-37 below, which reuses it for MgT2E.
-
-**Verified:** in-browser headless render (Playwright, offscreen canvas via `SystemViewer.renderSnapshot`) — a synthetic Gas Giant with 2 regular moons and 1 Ring satellite rendered the ring as a clean, distinct thin circle around the planet, correctly separated from both the moon dots and the habitable-zone band. Zero console errors.
-
-*Spec ref: Sean-requested feature, 2026-07-14.*
-
-**OW-33 — ✅ CLOSED 2026-07-14 (found and fixed same day, found while investigating a related report): CT drag-and-drop reordering could silently corrupt an unrelated companion-star body's orbit**
-
-Found while investigating a Sean-reported UWP-drift issue (see OW-34) — not independently reported as its own symptom, but confirmed as a real, separate bug in the same code path.
-
-**Root cause:** `_insertAtOrbit()`'s (`system_editor.js`) reorder-shifting pool pulled in every body/companion star in the entire working copy, with no filter on `parentStarId`:
-```js
-const pool = [..._workingCopy.bodies, ...nonPrimaryStars].filter(obj => obj !== draggedObj && obj.orbitId != null);
-```
-A Far companion runs its own independent 0..N orbit-number sequence, entirely separate from the primary's. So dragging a body under the primary star could silently shift an unrelated companion-star body's `orbitId` whenever the two numbers happened to coincide — even though the two are never shown in the same drop zone and the user never touched the companion's body.
-
-**Fix:** scoped the pool to `obj.parentStarId === draggedObj.parentStarId`.
-
-**Verified:** `node --check` on `system_editor.js`.
-
-*Spec ref: found 2026-07-14 while investigating OW-34's UWP-drift report.*
-
-**OW-34 — ✅ CLOSED 2026-07-14 (found and fixed same day, Sean-reported): a CT companion star's own worlds re-rolled their entire UWP from scratch on every single Preview/Fill & Save**
-
-Sean manually built a CT system, added a companion star with its own world, and found the world's UWP had changed after Save — initially suspected to be caused by drag-and-drop reordering (see OW-33), but confirmed to be a separate, more fundamental structural gap that didn't require dragging to trigger at all.
-
-**Root cause:** `_ctFlattenBodies()` (`ct_editor_adapter.js`) — the shared helper both `restoreManualFields()` and `backfillFromGenerated()` use to match a working-copy body to its freshly-generated counterpart — only ever looked at the top-level `newSys.orbits[]`/`newSys.capturedPlanets[]`. It never recursed into `newSys.stars[].nestedSystem`, where a Far companion's own worlds live. So for any world orbiting a companion star, `backfillFromGenerated`'s `genBodies.find(b => b._id === wcBody._id)` always failed — its `_raw` never got backfilled with the rolled Starport/Size/Atm/Hydro/Pop/Gov/Law/TL, `_ctUwpLockFor`'s lock never engaged, and the world's entire UWP re-rolled from scratch on every single Preview/Fill & Save.
-
-**Fix:** extended `_ctFlattenBodies` to recurse into `sys.stars[].nestedSystem`, mirroring the same recursion pattern already used by `captureCTSatelliteCaps`/`processBottomUpSatellites` (see OW-30).
-
-**Verified:** `node --check` on `ct_editor_adapter.js`; an isolated logic test confirmed both a primary-star body and a companion-star body are now found by the flatten pass. Full round-trip confirmed live in-browser separately: a companion star's world with typed UWP digits kept its exact UWP across two consecutive no-edit Fill & Saves.
-
-*Spec ref: Sean-reported bug, 2026-07-14 — the most significant fix of this session's CT work.*
-
-**OW-35 — ✅ CLOSED 2026-07-14 (found and fixed same day, Sean-reported): a CT moon's typed orbit distance reverted after every Preview, and the "Clear" button never actually triggered a re-roll**
-
-Sean reported "fighting the orbit" while manually entering CT moons one at a time — typing a new orbit value and hitting Tab/Enter, only to see it silently change back.
-
-**Root cause:** `_ctMoonLockFor()` (`ct_editor_adapter.js`) — the function that seeds a moon's orbit distance (`pd`) into the Preview/Save seed — read `pd` only from `m._raw.pd` (a cache of the *last generated* value), never from the live `m.pd` field the "Orbit (⌀)" input actually edits. So: typing a new orbit set `moon.pd` on the working copy, but the seed sent to the generator still carried the *old* `_raw.pd`; the generator (correctly) echoed that old value back as "already positioned"; and `backfillFromGenerated()` then unconditionally copied that unchanged result back onto `moon.pd`, silently reverting the user's edit. The same stale-raw path also blocked the "×" Clear button, which is supposed to hand the moon back to the engine for a fresh roll — the stale `raw.pd` leaked through regardless.
-
-**Fix:** `_ctMoonLockFor` now sources `pd` from the live `m.pd` exclusively (removed from the generic raw-fields loop, added as its own explicit `if (m.pd !== undefined) fields.pd = m.pd;` check) — since `backfillFromGenerated` already keeps `m.pd` in sync with the generator's own result after every successful Preview, `_raw.pd` was never more current and was purely a source of staleness. This fixes both the revert bug and the Clear button in one change (clearing sets `m.pd` to `undefined`, which now correctly leaves `fields.pd` unset so the generator rolls fresh, instead of the old stale value leaking through).
-
-**Verified:** `node --check` on `ct_editor_adapter.js`.
-
-*Spec ref: Sean-reported bug, 2026-07-14.*
-
-**OW-36 — ✅ DONE 2026-07-14 (Sean-requested feature): MgT2E Planetoid Belts can now have their Starport/Pop/Gov/Law/TL seeded, matching CT (OW-28)**
-
-CT's belt-editing feature (OW-28) was deliberately scoped to CT only, since MgT2E's own belt-generation logic hadn't been verified against a manually-seeded belt. A research pass confirmed MgT2E's generator (`mgt2e_world_engine.js`'s `generatePhysicals`/`generateAtmospherics`, `mgt2e_socio_engine.js`'s `generateSubordinateSocial`) already treats a Belt as a normal `_manualFields`-gated subordinate/mainworld candidate for Starport/Pop/Gov/Law/TL, with no belt-type exclusion for any of those five fields — only Size/Atm/Hydro are RAW-forced to 0, exactly like CT. `rules/mgt2e_data.js` was also checked directly and has no belt-specific social-field restriction table. The editor adapter (`mgt2e_editor_adapter.js`) was already type-agnostic and needed no changes.
-
-**Implementation:** `system_editor.js`'s `isEditableBelt` gate (previously `body.type === 'Belt' && _workingCopy.engine === 'CT'`) now also includes MgT2E. The existing narrowed seed-key list (St/P/G/L/TL, no S/A/H) applies automatically since it was already keyed off `isEditableBelt`, not a CT-specific check.
-
-**Verified:** in-browser Playwright — confirmed the MgT2E belt accordion shows exactly the same 5 seed boxes as CT; typed St=B/P=5/G=7/L=3/TL=A into a new belt, Fill & Saved, got `UWP: B000573-A` (exact match); reopened and Fill & Saved again with zero edits — UWP stayed identical, confirming the lock engaged (the belt had also been auto-elected the system's sole Mainworld in this test, and the seeded values survived that path too).
-
-*Spec ref: Sean-requested feature, 2026-07-14.*
-
-**OW-37 — ✅ DONE 2026-07-14 (Sean-requested feature): MgT2E orrery now renders rings too, matching CT (OW-32)**
-
-Requested as parity with CT's new ring rendering (OW-32). Research found MgT2E's ring model is RAW-equivalent to CT's (a moon-size roll of "Ring" produces a ring instead of a moon — `mgt2e_world_engine.js`'s moon-size-roll-of-'R' branches) but stored differently: on the planet itself as a separate `w.rings[]` array (each entry eventually gaining `center`/`span` fields), not inside `w.moons[]` the way CT's is.
-
-**Implementation:** `system_viewer.js`'s `_normalizeMgT2E` needed no change — it already passes `rings` through for free via its `Object.assign({}, w, {...})` spread pattern (unlike CT/T5/RTT/AoW's normalizers, which build fresh object literals and would have needed an explicit copy). `_drawWorld()` gained a second loop, separate from the moon loop, over `w.rings[]`, reusing the same `_drawStaticRing()` helper OW-32 extracted, with its own close-in index-based offset (rings aren't interleaved into the moon list's index sequence the way CT's are). Not using `center`/`span` for precise geometry, matching CT's own schematic (not-to-scale) approach.
-
-**Verified:** in-browser headless render — a synthetic Gas Giant with 2 moons and 1 `rings[]` entry rendered the ring correctly, distinct from the moon dots.
-
-*Spec ref: Sean-requested feature, 2026-07-14.*
-
-**OW-38 — ✅ CLOSED 2026-07-14 (found and fixed same day, found while verifying OW-37): an already-generated MgT2E world's ring silently vanished on the very first Preview/Fill & Save, even with zero edits**
-
-Found while testing OW-37's new visualization end-to-end — not independently reported, but confirmed as a real, pre-existing gap that would have made the new rendering invisible for any edited (as opposed to freshly-generated) system.
-
-**Root cause:** `write()` (`mgt2e_editor_adapter.js`) never carried an already-generated world's `.rings` forward into the regeneration seed at all. `mgt2e_world_engine.js`'s `w.rings = w.rings || []` (run at the start of every satellite pass) then saw an undefined seed field and defaulted it to a fresh empty array, silently wiping any existing ring — with no equivalent to the moon-count cap/trim safety net (`SeedRestoration`) that already protects `.moons`.
-
-**Fix:** added `rings: (b._raw && b._raw.rings) || []` to the per-world seed object in `write()`, carried forward the same way `.moons` already is.
-
-**Verified:** in-browser Playwright — before the fix, a seeded ring (`rings.length: 1`) dropped to `0` after a single no-edit Fill & Save. After the fix, the same ring survived two consecutive no-edit Fill & Saves unchanged.
-
-*Spec ref: found 2026-07-14 while verifying OW-37.*
-
-**OW-39 — ✅ DONE 2026-07-16 (Sean-requested refactor review): `system_editor.js`'s `_manualFields` mark/clear logic de-duplicated onto `core.js`'s real `markManual`/`clearManual`**
-
-A cleanup review of `system_editor.js` (2538 lines) found the same `_manualFields` add/remove pattern repeated at 29 call sites across star fields, body fields, and moon fields — each one open-coding either `if (!obj._manualFields.includes(f)) obj._manualFields.push(f)` (mark-only) or that plus an `else` branch filtering the field back out (toggle, for fields with a "clear to auto" UI affordance: derived star props, UWP seed digits, moon `pd`). Per Phase 3's "Key Discovery" (above), `core.js` already exports `markManual(obj, field)`/`clearManual(obj, field)`/`isManual(obj, field)` as the intended native mechanism — but Algorithms 1 and 3 each independently had to note, as a correction, that the editor didn't actually call them and pushed to the array inline instead. That gap is now closed.
-
-**Implementation:**
-- 21 mark-only sites (`isMainworld` ×2, orbit-reorder shifts ×5, star `sType`/`subType`/`sClass` on both the primary and companion panels ×6, typed orbit# on body/companion ×2 — plus the constructor-literal sites, which were never touched since they were never a duplication) now call `markManual(obj, field)` directly — the real `core.js` global, not a new local one.
-- 8 toggle sites (star `mass`/`lum`/`diam`/`temp`/`mao`, body UWP-seed field, moon `pd`, moon UWP-seed field) now call a new one-line local wrapper, `_setManualField(obj, field, present)`, which itself just calls `markManual`/`clearManual` — the only new code added by this pass.
-- One matched site (the companion "Role" dropdown's `if (!star._manualFields.includes('orbitId'))` guard, used to decide whether to auto-set `orbitId` from the new role) was deliberately left untouched — it's a read-only check, not a mark/clear mutation, and doesn't fit either helper.
-- `core.js` loads before `system_editor.js` in `hex_map.html`'s script order, so the globals are available with no load-order change needed.
-
-**Verified:** `node --check js/system_editor.js` passes; grepped the file afterward to confirm zero remaining inline `_manualFields.push`/`.filter(f => f !== ...)` mutation sites outside the new helper itself.
-
-**Found but NOT fixed (pre-existing, out of scope for this pass):** the typed "Orbit #" input on both a body and a companion star marks `orbitId` manual unconditionally on every `change` event — including when the field is cleared back to empty (`newOrbitId = null`), which is supposed to mean "let the engine auto-place this." Every other nullable field in the editor (derived star props, moon `pd`, UWP seed digits) correctly un-marks itself when cleared; typed orbit# does not. This was true before this refactor and is preserved as-is (the refactor is a mechanical extraction, not a behavior change) — worth its own OW item if Sean wants it fixed. Locations: `system_editor.js`'s body orbit-input `change` handler and the companion `compOrbitRow` `change` handler (both call `markManual(obj, 'orbitId')` unconditionally rather than `_setManualField(obj, 'orbitId', newOrbitId != null)`).
-
-*Spec ref: Sean-requested `system_editor.js` refactor review, 2026-07-16 — cleanup-only pass, no generator or UI behavior change intended.*
-
-**OW-40 — ✅ DONE 2026-07-16 (Sean-requested refactor, prioritized follow-up to the OW-39 review): three more `system_editor.js` duplications collapsed — mainworld-name/commit tail, companion-orbit-by-separation constant, and the D/BD exotic-star rule**
-
-Continuation of the same cleanup review. Cross-checked each candidate against this manifest before touching anything; two were re-scored based on what the manifest showed (see the "still an opportunity?" discussion this entry is a spec ref for) and deferred rather than attempted this pass — the `_nextOrbitId`/`_insertAtOrbit`/`_wouldReorder` "combined orbit pool" logic (recent OW-20/OW-21 bug history in this exact area — consolidating risks reintroducing what those two fixes closed) and the CT-vs-MgT2E Gas Giant size dropdown (the two blocks differ in almost everything but the `<select>` boilerplate, so a shared wrapper buys little for the engine-specific risk). Three lower-risk items were done:
-
-1. **Mainworld-name preservation + commit finalize, was duplicated verbatim between `_regenerateBody` and `_generateAndCommit`.** This is the same class of duplication OW-5 (Section 6, above) already fixed once for `_preview()`/`_fillAndSave()` — `_regenerateBody` had simply regrown it independently. Extracted the shared ~20-line tail (mainworld-name lookup and per-engine `*Data.name` mirrors, fallback to `getNextSystemName`, `stateObj.type`/`computeSystemCounts`/`hexStates.set`/`requestAnimationFrame(draw)`) into a new `_finalizeCommittedState(hexId, stateObj)`, called by both. Left `_regenerateBody`'s and `_generateAndCommit`'s surrounding logic (per-body snapshot/restore, MgT2E-only gate, error dialogs, viewer/accordion refresh) untouched — the two functions still diverge there for real reasons, not just duplication.
-   - **Found but NOT fixed, pre-existing:** the two functions' post-commit refresh isn't actually symmetric. `_generateAndCommit`'s callers refresh `populateEditorAccordions` when the Hex Editor is open on the same hex; `_regenerateBody` never does, so per-body "↻ Regenerate" may leave a stale accordion open behind the System Editor. Separately, `_generateAndCommit` shows a "No system was produced" warning when `_runGenerator` returns null; `_regenerateBody`'s equivalent check (`if (!newSys) return;`) silently no-ops with no dialog. Both predate this refactor and were left as-is (mechanical extraction, not a behavior change) — candidates for their own OW item if worth fixing.
-2. **`_addStar`'s companion-orbit-by-separation object (`{ Companion: 0.15, Close: 0.5, Near: 6.0, Far: 12.0 }`)** was defined identically in `_addStar()` and again in the companion "Role" dropdown's change handler. Hoisted to a module-level `_ORBIT_AU_BY_SEPARATION` const; both sites now reference it. Confirmed this doesn't touch `_addStar`'s AoW companion-topology validation block (design decision 3, Section 5) — that logic runs earlier in the function and never touched the orbit-by-separation object.
-3. **The D/BD exotic-star rule** (D → class D, subtype 0; BD → class V, subtype 0) was independently encoded three times: the primary star Type dropdown, the companion star Type dropdown, and the create-dialog Type `<select>` (the third of which operates on raw DOM elements, not a working-copy star object, so a single mutate-in-place helper wouldn't have covered it). Replaced all three with one `_exoticStarDefaults(sType)` returning `{ sClass, subType } | null`, which each call site applies to whichever fields/properties it holds.
-
-**Verified:** `node --check js/system_editor.js` passes after each of the three changes; grepped for `stateObj.name = mwName`, `_orbitBySep`, and `val === 'D'`/`v === 'D'` afterward to confirm no duplicate copies remain outside the new shared helpers.
-
-*Spec ref: Sean-requested prioritized follow-up to the 2026-07-16 `system_editor.js` refactor review (OW-39) — items #2/#4/#3 of that review's ranked list, in that order.*
-
-**OW-41 — ✅ DONE 2026-07-16 (Sean-requested refactor, second follow-up to the OW-39 review): shared UWP-seed-digit box builder and data-driven star "Derived Properties" panel**
-
-Continuation of OW-39/OW-40's cleanup review — the two remaining lowest-risk items from that review's ranked list.
-
-1. **UWP seed-digit box builder, was duplicated between a body's detail pad and its moon list.** Both built an identical row of single-character Starport/Size/Atm/Hydro/Pop/Gov/Law/TL input boxes (same cell/label/input/style/filter/change-handler shape), differing only in the target object (body vs. moon), its `seedKeys` list (a belt omits Size/Atm/Hydro; a moon always gets all eight), and a slightly smaller font/padding for moon cells. Extracted to `_buildUwpSeedRow(target, seedKeys, cellOpts)` — a nested helper alongside the existing `_starInputRow`/`_starSelectRow`/`_derivedRow` builders (same closure-over-`P`-palette pattern), called once from the body section and once from the moon loop, with `cellOpts` carrying the moon-specific font-size/padding difference.
-2. **`_buildDerivedGroup`'s five fields (Mass/Lum/Diam/Temp/MAO), each a near-identical copy of the same push-history/set/`_setManualField` block**, differing only in field name, row label, unit, and (for Temp only) a `Math.round` formatter instead of the usual 4-decimal one. Extracted to a module-level `_DERIVED_STAR_FIELDS` table (`[field, label, unit, formatter]` per row) that `_buildDerivedGroup` now iterates with a single `.forEach`.
-
-**Verified:** `node --check js/system_editor.js` passes after each change; grepped afterward for the seed-box cell-building code and confirmed only one copy remains (inside `_buildUwpSeedRow` itself).
-
-*Spec ref: Sean-requested second follow-up to the 2026-07-16 `system_editor.js` refactor review (OW-39) — items #1/#2 of that review's ranked list.*
-
----
-
-### Fixed bugs (for reference)
-
-**Bug #1 — CLOSED (2026-06-24): Fill & Save causes hex map dot to disappear**
-Could not be reproduced after the exhaustive rework of `_buildSeedSys`, `_runGenerator`, and the commit path. Considered resolved by the cumulative fixes in this version.
-
-**Bug #2 — FIXED (2026-06-22): Double mainworld after adding Companion + Preview (MgT2E)**
-`_buildWorkingCopyFromState` returned `mainworldRef: null` even when one body had `isMainworld: true`. Fix: now scans all bodies and moons for `isMainworld: true` before returning.
-
-**Bug #3 — FIXED (2026-06-22): MgT2E companion `orbitId` lost on editor load**
-`_buildWorkingCopyFromState` read companion position as `s.distAU ?? s.orbitAU ?? null`, missing `s.orbitId`. Fix: reads `s.orbitId ?? (typeof s.orbit === 'number' ? s.orbit : null)`. CT string orbits ("Close"/"Near"/"Far") correctly produce `null`.
-
-**Bug #4 — FIXED (2026-06-24): Orrery not updating after orbit# change + Preview**
-`_buildSeedSys` used stale `b.au` (captured at editor-open time) as the AU for bodies even after the user changed `orbitId`. The generator received the old AU, so the orrery showed orbits in their original positions. Fix: `_buildSeedSys` now derives AU from `orbitId` when set (`_orbitIdToAU(b.orbitId) ?? b.au ?? 1.0`).
-
-**Bug #5 — FULLY FIXED (2026-06-25): Gas giant moon mainworld not highlighted in orrery or accordion**
-Root cause: `generateAtmospherics` in `mgt2e_world_engine.js` hardcoded `syncRes.type = 'Satellite'` when rebuilding each GG moon after `processWorld`, stamping the lunar mainworld's type field.
-- 2026-06-24: Orrery patched via `_normalizeMgT2E` in `js/system_viewer.js` — identifies lunar mainworld by `_id` match and restores `type:'Mainworld'` before rendering. Accordion still broken.
-- 2026-06-25: Root-cause fix in `js/mgt2e_world_engine.js`: `syncRes.type = m.type` (was `'Satellite'`). Accordion now works. `_normalizeMgT2E` retained as defense-in-depth.
-
-**Bug #6 — FIXED (2026-06-25): MgT2E bottom-up sector shows GG symbol on systems with no gas giant**
-Root cause: `generateMainworldUWP` in `mgt2e_socio_engine.js` independently rolls 2d6 for gas giant presence (≤9 = true, ~83% hit rate) and writes to `existingWorld.gasGiant`. In top-down this roll is authoritative. In bottom-up, `sys.gasGiants` from the stellar engine is authoritative, but the socio roll was overwriting it. Fix: in `mgt2e_bottomup_generator.js`, after `SocioEngine.generateMainworldUWP`, override with `sys.mainworld.gasGiant = sys.gasGiants > 0`. Defense-in-depth: same override added in `macro_orchestrator.js` `runMgT2EBottomUpMacro` before `stateObj.mgt2eData` is set.
-
-**Bug #7 — FIXED (2026-07-01): System Editor — adding/removing a Gas Giant via "+GG"/delete didn't toggle the map/orrery GG symbol (MgT2E, CT)**
-Root cause: the Bug #6 fix (`sys.mainworld.gasGiant = sys.gasGiants > 0`) assumed `sys.gasGiants` is always authoritative, but `sys.gasGiants` is only populated by `StellarEngine.generateSystemInventory()` — which the System Editor's Fill/Preview path explicitly skips whenever `_allowAddBodies` is false (the "Allow engine to add additional bodies" checkbox default). So a Gas Giant added by hand in the editor landed correctly in `sys.worlds`, but `sys.gasGiants` stayed 0 and the flag never flipped on.
-- **MgT2E fix** (`js/mgt2e_bottomup_generator.js`): `sys.mainworld.gasGiant` now derives directly from the actual world list — `sys.worlds.some(w => w.type === 'Gas Giant')` — instead of the `sys.gasGiants` counter. Self-corrects on both add and remove regardless of whether the inventory phase ran.
-- **CT fix** (`js/ct_bottomup_generator.js`, `processBottomUpDesignation`): had the same stale-counter issue (`sys.gasGiant`, singular, only set when the skeleton-roll phase runs), plus a second bug — the "Fixed Anchor" branch (hit whenever the System Editor pre-designates a mainworld via `_mainworldRef`, i.e. essentially every editor Fill/Preview on an existing system) returned early and never assigned `winner.gasGiant` at all. Fix: derive `hasGasGiant` once from `sys.orbits.some(o => o.contents && o.contents.type === 'Gas Giant')` and assign it to `winner.gasGiant` in both the Fixed Anchor branch and the normal-election branch.
-- **RTT** — audited, no fix needed. `extractRTTMainworld` in `js/rtt_engine.js` already derives the flag live from `sys.stars[].planetarySystem.orbits[].worldClass === 'Jovian'` at extraction time, and Step 3's classification pass reclassifies every body (seeded or rolled) on every run.
-- **T5** — not fixed; see Section 7, "T5 — Gas Giant / Body-List Sync Gap."
-- Neither the CT fix nor the T5 gap were reachable by users at the time of this investigation — System Editor editing is currently enabled for MgT2E only (not AoW — see the Supported Engines note in Section 3/Phase 5), per Section 5. The CT fix was applied anyway since it was low-risk and self-contained; it will already be correct whenever CT editing ships in v0.16.1.
+### 6.3 Closed items index
+
+Sixty-one closed items, one line each. Engine column is a hint parsed from the original
+title, not authoritative. Full forensic detail was removed 2026-08-01; the patterns worth
+carrying forward are in 6.1.
+
+| Item | Engine | Closed | Summary |
+|---|---|---|---|
+| OW-1 | — | 2026-07-03 | Primary star validation gate deemed unnecessary |
+| OW-2 | — | 2026-07-03 | Mainworld validation dialog deemed unnecessary |
+| OW-4 | — | 2026-07-03 | `manually_edited: true` flag dropped as a requirement |
+| OW-6 | MgT2E | 2026-07-04 | Seed-restoration matching logic lives in the MgT2E orchestrator, not an engine |
+| OW-7 | MgT2E | 2026-07-04 | `MgT2EMath` guard inconsistency + duplicated auditor-logging block |
+| OW-8 | — | 2026-07-04 | Per-engine adapter pattern for `js/system_editor.js` |
+| OW-10 | CT | 2026-07-06 | two more places CT re-rolled already-generated data — satellite quantity, and the entire gov/law/starport/tl pass |
+| OW-11 | CT/MgT2E | 2026-07-06 | blank "Create System" wasn't blank, and CT had no equivalent of MgT2E's moon-cap trim safety net |
+| OW-12 | CT/MgT2E | 2026-07-07 | lunar mainworld's `isMainworld` flag never reached the System Editor, causing a second mainworld to be elected on Preview/Save |
+| OW-13 | CT | 2026-07-07 | a Captured Planet could roll the exact same orbit number as a companion star, and even after that was fixed the two still rendered at the same radius in the orrery |
+| OW-14 | CT | 2026-07-07 | Gas Giants have no natural "already generated" signal, so a no-edit Preview/Fill & Save silently mutated them — refines OW-10 Gap 1 |
+| OW-15 | CT | 2026-07-09 | dragging a companion star in the System Editor moved it in the body list but not in the orrery |
+| OW-16 | MgT2E | 2026-07-09 | editing a Belt's type/size away from Belt could crash Preview/Fill & Save with `Cannot read properties of null (reading 'toFixed')` |
+| OW-17 | CT | 2026-07-09 | a companion star added via the System Editor's `+Comp` rendered in a different relative position on all three surfaces (Edit panel, accordion, orrery) |
+| OW-18 | CT | 2026-07-09 | CT Edit System gap audit — `+Secondary`'s residual gap was worse than scoped, plus a rejected fix idea worth recording |
+| OW-19 | — | 2026-07-16 | ✅ ROOT-CAUSED AND CLOSED 2026-07-16 (original framing was a false alarm; the real bug was a separate, more severe regression) — see OW-42 below for a second, genuinely new bug found during the same re-verification |
+| OW-20 | CT | 2026-07-12 | a CT Captured Planet's name and moons weren't round-tripping through the System Editor, and its orbit field misleadingly read "auto" |
+| OW-21 | — | 2026-07-12 | "+World"/"+GG"/"+Belt" could insert the new body in the middle of the orbit list instead of appending it at the true end |
+| OW-22 | CT | 2026-07-12 | CT's "Seed UWP digits" Size box couldn't accept 'S' (Small) or 'R' (Ring) |
+| OW-23 | CT | 2026-07-12 | CT's Gas Giant size (Large/Small) had no editor control, and existing bodies' size was misread on open |
+| OW-24 | CT | 2026-07-12 | a manually-created CT moon (e.g. a Gas Giant's moon set as mainworld) never received physical stats — distance, gravity, mass, temperature, rotation, tilt all permanently blank |
+| OW-25 | CT | 2026-07-12 | the orrery kept showing two CT bodies at the same orbit after one was moved via the System Editor, even after Preview/Save/close/reopen |
+| OW-26 | CT | 2026-07-12 | a manually-typed CT mainworld UWP changed after Save |
+| OW-27 | CT | 2026-07-13 | filling in several blank CT worlds out of order made the mainworld pick and rolled stats jump between bodies before Save |
+| OW-28 | CT | 2026-07-13 | CT's +Belt gave no way to enter a UWP, and Fill & Save failed the UWP auditor |
+| OW-29 | CT | 2026-07-14 | editing a CT companion star's Orbit # silently hid its own +World/+GG/+Belt buttons |
+| OW-30 | CT | 2026-07-14 | a manually-created body orbiting a CT companion star got dice-rolled moons that were never trimmed back down |
+| OW-31 | CT | 2026-07-14 | moons added to an already-generated CT parent never received physical stats |
+| OW-32 | CT | 2026-07-14 | CT orrery now renders a Ring (moon size 'R') as a thin static ring instead of an orbiting dot |
+| OW-33 | CT | 2026-07-14 | CT drag-and-drop reordering could silently corrupt an unrelated companion-star body's orbit |
+| OW-34 | CT | 2026-07-14 | a CT companion star's own worlds re-rolled their entire UWP from scratch on every single Preview/Fill & Save |
+| OW-35 | CT | 2026-07-14 | a CT moon's typed orbit distance reverted after every Preview, and the "Clear" button never actually triggered a re-roll |
+| OW-36 | CT/MgT2E | 2026-07-14 | MgT2E Planetoid Belts can now have their Starport/Pop/Gov/Law/TL seeded, matching CT (OW-28) |
+| OW-37 | CT/MgT2E | 2026-07-14 | MgT2E orrery now renders rings too, matching CT (OW-32) |
+| OW-38 | MgT2E | 2026-07-14 | an already-generated MgT2E world's ring silently vanished on the very first Preview/Fill & Save, even with zero edits |
+| OW-39 | — | 2026-07-16 | `system_editor.js`'s `_manualFields` mark/clear logic de-duplicated onto `core.js`'s real `markManual`/`clearManual` |
+| OW-40 | — | 2026-07-16 | three more `system_editor.js` duplications collapsed — mainworld-name/commit tail, companion-orbit-by-separation constant, and the D/BD exotic-star rule |
+| OW-41 | — | 2026-07-16 | shared UWP-seed-digit box builder and data-driven star "Derived Properties" panel |
+| OW-42 | T5 | 2026-07-16 | a T5 system with only a mainworld (the minimal, most common case) ignored "Allow engine to add additional bodies" and rolled a full random inventory anyway |
+| OW-43 | T5 | 2026-07-16 | a T5 body's moon count fluctuated randomly (not just grew) across repeated no-edit Preview/Fill & Saves |
+| OW-44 | T5 | 2026-07-16 | the System Editor never actually generated a real UWP for a brand-new T5 mainworld at all |
+| OW-45 | T5 | 2026-07-16 | a subordinate (non-mainworld) T5 body's government, law level, starport, and tech level re-rolled from scratch on every Preview/Fill & Save |
+| OW-46 | T5 | 2026-07-16 | a System-Editor-placed or repositioned T5 companion star got a corrupted (`NaN`) `distAU` baked directly into the generated system |
+| OW-47 | T5 | 2026-07-16 | T5 has no per-moon orbital-distance concept at all |
+| OW-48 | T5 | 2026-07-16 | confirming a T5 "Create System" with zero bodies made it look like the editor had closed entirely |
+| OW-49 | CT/T5/MgT2E | 2026-07-16 | the T5 System Editor now shows the star in the orrery immediately after Create, before any body is added — matching MgT2E/CT parity |
+| OW-50 | T5 | 2026-07-22 | T5 systems with 5+ stars silently collapsed every star past the 4th onto "Far", and the OTU importer never decomposed spectral type at all |
+| OW-51 | MgT2E | 2026-07-22 | MgT2E's cross-engine expansion of a 5+ star OTU import had the identical "Far" collision, plus no Companion concept at all in that path |
+| OW-52 | T5 | 2026-07-23 | a T5 companion star's distance was calculated as *more* than Orbit 0 (0.2 AU) instead of "well inside" it |
+| OW-53 | T5 | 2026-07-23 | changing a T5 star's Role to Companion rejected Orbit 0 for other bodies, and the companion rendered farther from the primary than the mainworld |
+| OW-54 | — | 2026-07-23 | ⤺ reverted — gap-filling for a newly-added world on a non-primary star |
+| OW-55 | — | 2026-07-23 | `+World`'s auto-placement now ignores companion/secondary stars entirely — a new world always goes right after the last WORLD, never detours past a star |
+| OW-56 | T5 | 2026-07-23 | hovering a T5 Gas Giant in the orrery showed no tooltip at all, and none of its moons rendered |
+| OW-57 | T5 | 2026-07-23 | re-saving a T5 system with a moon-mainworld spawned a phantom second Gas Giant, and the orrery showed the mainworld twice |
+| OW-58 | T5 | 2026-07-23 | manually-added bodies on a star that also had OTU-imported bodies were silently dropped during generation — no error beyond a downstream "No Mainworld found" audit message when the dropped body happened to be the mainworld |
+| OW-59 | — | 2026-07-24 | flagging a moon as mainworld on an already-placed Gas Giant duplicated that Gas Giant and its entire moon tree |
+| OW-60 | — | 2026-07-24 | a Gas Giant's moons visibly sped up then abruptly slowed down in the orrery right after adding it, even though the end state was always correct |
+| OW-61 | — | 2026-07-30 | the P2P waypoint builder was unusable at scale — list clipped, no memory, hex-only labels, no reordering |
+| OW-62 | — | 2026-07-30 | route CSV export "extremely flaky"; investigation widened to every download in the app — all now share one routine |
+| OW-63 | CT/T5/RTT | 2026-07-30 | the Stellar Info filter matched nothing at all in CT, T5, and RTT sectors — three of the five engines |
+| OW-64 | — | 2026-07-30 | a filter criterion whose control had become unavailable kept filtering invisibly, hiding worlds with no visible cause |
+
+**Bugs #1–#7 (2026-06-22 → 2026-07-01)** — the pre-OW numbering, all closed. #1 hex dot
+vanishing after Fill & Save (not reproducible after the `_buildSeedSys` rework); #2 double
+mainworld after adding a companion; #3 MgT2E companion `orbitId` lost on editor load; #4
+orrery not updating after an orbit change (stale `b.au`); #5 gas-giant moon mainworld not
+highlighted — root-caused to `generateAtmospherics` stamping `type = 'Satellite'`; #6 GG
+symbol on systems with no gas giant; #7 "+GG"/delete not toggling the GG symbol. #6 and #7
+are the source of pattern 8 above; #5 is the origin of the moon-type-preservation rule.
 
 ---
 
 ## 7. Future Release Notes
 
-### T5 — Gas Giant / Body-List Sync Gap (found 2026-07-01) — ✅ CLOSED 2026-07-05
+Nothing outstanding. The former contents — the T5 Gas Giant / body-list sync gap found
+2026-07-01 — closed 2026-07-05 when `generateT5System()` gained its `seedSys` parameter
+(seeded bodies placed before Phase 1, `_allowAddBodies` gating the rolled inventory, moon
+counts capped via `generateT5Satellites`'s `capToExisting`).
 
-`t5_topdown_generator.js`'s `generateT5System()` now takes a `seedSys` second parameter and fully consults it — seeded bodies are placed at their own orbits in a pass that runs before Phase 1, `_allowAddBodies` gates whether the dice-rolled GG/Belt/Terrestrial inventory rolls at all, and moon counts are capped to what was seeded via `generateT5Satellites`'s new `capToExisting` param. Adding or removing a body via the System Editor's "+GG"/"+World"/"+Belt" buttons on a T5 system now has full effect on Fill & Save's output — see "T5 is now fully online" under Section 5's v0.16.1 SEQUENCING header for the complete implementation writeup, and Section 4/6 for the phantom-body bug found and fixed during verification.
-
-`restoreT5ManualFields` / `generateT5SystemPreservingManuals` in `system_driver.js` were left untouched, per the original plan — they remain the working implementation behind `ui_menus.js`'s right-click "regenerate T5 system" action, a separate, still-valid use case (bulk regen across selected hexes, no System Editor working copy involved), distinct from the new structural `seedSys` gating used by the System Editor's Fill & Save path.
-
+**One deliberate carve-out worth remembering:** `restoreT5ManualFields` and
+`generateT5SystemPreservingManuals` in `system_driver.js` were left untouched by that
+work. They remain the implementation behind `ui_menus.js`'s right-click "regenerate T5
+system" — a separate, still-valid path (bulk regeneration across selected hexes, no
+System Editor working copy involved), distinct from the structural `seedSys` gating the
+editor's Fill & Save uses. Do not consolidate them without checking that use case.

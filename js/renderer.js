@@ -1421,7 +1421,12 @@ function drawRegionNames() {
 // Called by ObsidianExporter to embed a map image in the subsector index page.
 // ============================================================================
 
-async function captureSubsector(sectorNum, subsectorChar, outputWidth, outputHeight) {
+// opts.withTransform — resolve `{ png, transform, hexPoly }` instead of bare PNG bytes,
+// so a caller can lay a clickable overlay over the captured image (WP3 of the HTML
+// export; see directives/html_extract_manifest.md 3.3). `hexPoly(q, r)` deliberately
+// lives here rather than in the exporter: it reuses this file's own hex geometry, so
+// the overlay cannot drift away from what was actually drawn.
+async function captureSubsector(sectorNum, subsectorChar, outputWidth, outputHeight, opts) {
     outputWidth  = outputWidth  || 900;
     outputHeight = outputHeight || 1000;
 
@@ -1490,7 +1495,37 @@ async function captureSubsector(sectorNum, subsectorChar, outputWidth, outputHei
     return new Promise(resolve => {
         offscreen.toBlob(blob => {
             if (!blob) { resolve(null); return; }
-            blob.arrayBuffer().then(buf => resolve(new Uint8Array(buf)));
+            blob.arrayBuffer().then(buf => {
+                const png = new Uint8Array(buf);
+                if (!opts || !opts.withTransform) { resolve(png); return; }
+
+                // World -> captured-image pixel space. Mirrors the draw() transform
+                // applied above: ctx.scale(capZoom) then ctx.translate(-capCam).
+                const toPx = (wx, wy) => [
+                    (wx - capCamX) * capZoom,
+                    (wy - capCamY) * capZoom,
+                ];
+
+                // Same centre and vertex math as the grid loop and getHexPath().
+                const hexPoly = (q, r) => {
+                    const cx = widthStep * q;
+                    const cy = heightStep * (r + ((q & 1) ? 0.5 : 0));
+                    const pts = [];
+                    for (let i = 0; i < 6; i++) {
+                        const a = (Math.PI / 180) * (60 * i);
+                        const [px, py] = toPx(cx + size * Math.cos(a), cy + size * Math.sin(a));
+                        pts.push([px, py]);
+                    }
+                    return pts;
+                };
+
+                resolve({
+                    png,
+                    transform: { zoom: capZoom, camX: capCamX, camY: capCamY, size,
+                                 q0, q1, r0, r1, width: outputWidth, height: outputHeight },
+                    hexPoly,
+                });
+            });
         }, 'image/png');
     });
 }

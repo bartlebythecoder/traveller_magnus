@@ -88,6 +88,9 @@ const HtmlExporter = (() => {
     //
     // Only these two exist, because D2 gives every body a home on its system page.
 
+    // `systemName` must be the DISCLOSED name — the same string the
+    // orchestrator names the file from. Passing the real name here while the
+    // file is written under the disclosed one 404s every link.
     const linkSystem    = (systemName, hexCode, anchor) =>
         ({ kind: 'system', systemName, hexCode, anchor: anchor || null });
     const linkSubsector = (subsectorChar) => ({ kind: 'subsector', subsectorChar });
@@ -270,6 +273,31 @@ ${extraJs || ''}
         return `<figure${cls ? ' class="' + cls + '"' : ''}><img src="${_encPath(src)}" alt="${_esc(alt)}" loading="lazy"></figure>`;
     }
 
+    // ── Release 2: fog of war (WP5 slice 5b) ─────────────────────────────────
+    // Mirrors obsidian_exporter.js exactly. `_playerMode` false => _levelFor()
+    // returns null => filterBlocks() is the identity function => GM output is
+    // byte-identical.
+    let _playerMode = false;
+
+    function _levelFor(hexId) {
+        if (!_playerMode) return null;
+        return (typeof window !== 'undefined' && window.DisclosureModel)
+            ? window.DisclosureModel.get(hexId)
+            : 'g';
+    }
+
+    const _F = (blocks, context, lvl) => EC.filterBlocks(blocks, context, lvl);
+
+    const _show = (lvl, required) =>
+        !lvl || (window.DisclosureModel
+                 ? window.DisclosureModel.atLeast(lvl, required)
+                 : false);
+
+    // Referee notes never appear in a players' export (HX-5).
+    function _notesFor(state) {
+        return _playerMode ? [] : EC.notesBlocks(state);
+    }
+
     // Edition-aware physical data for a world, mirroring obsidian_exporter's
     // dispatch. Written for all five engines now because the shape is identical
     // and already proven; only MgT2E is verified in slice 2a (see manifest 4.2).
@@ -309,7 +337,8 @@ ${extraJs || ''}
         const { hexId, hexCode, sectorName, subsectorChar, state, normalized,
                 sysImage, worldImages } = ctx;
 
-        const systemName = EC.resolveSystemName(state);
+        const LV         = _levelFor(hexId);   // null on the GM path
+        const systemName = EC.resolveSystemName(state, LV, hexCode);
         const edition    = normalized.edition || 'Unknown';
         const stars      = normalized.stars  || [];
         const worlds     = normalized.worlds || [];
@@ -319,11 +348,14 @@ ${extraJs || ''}
 
         // Assign every anchor up front so the contents list and the sections agree.
         const used = new Set(['overview', 'notes', 'contents']);
-        const starIds  = stars.map((s, i) => _uniqueSlug(EC.starDisplayName(s, i, isMulti), used));
-        const worldIds = worlds.map((w, i) => _uniqueSlug(EC.worldDisplayName(w, i), used));
+        // Anchor slugs are built from the DISCLOSED name, not the real one —
+        // an id="prometheus" would leak the body's name straight into the URL
+        // bar and the contents list even when the heading says "World 3".
+        const starIds  = stars.map((s, i) => _uniqueSlug(EC.starDisplayName(s, i, isMulti, LV), used));
+        const worldIds = worlds.map((w, i) => _uniqueSlug(EC.worldDisplayName(w, i, LV), used));
         const moonIds  = worlds.map((w, wi) =>
             (w.moons || []).map((m, mi) =>
-                _uniqueSlug(`${EC.worldDisplayName(w, wi)}-${EC.moonDisplayName(m, mi)}`, used)));
+                _uniqueSlug(`${EC.worldDisplayName(w, wi, LV)}-${EC.moonDisplayName(m, mi, LV)}`, used)));
 
         const H = [];
 
@@ -339,11 +371,17 @@ ${extraJs || ''}
         // Header + metadata block (the visible replacement for YAML frontmatter)
         H.push('<header class="page">');
         H.push(`<h1>${_esc(systemName)}</h1>`);
+        // Hand-rolled metadata, not block-model output — filterBlocks() cannot
+        // see it, so each row is gated explicitly against the `identity`
+        // context. Mainworld UWP is (g): this block was the reason a full UWP
+        // still reached level (a) in the first leak run.
         H.push('<dl class="meta">');
-        H.push(`<dt>Hex</dt><dd>${_esc(hexCode)}</dd>`);
-        H.push(`<dt>Edition</dt><dd>${_esc(edition)}</dd>`);
-        H.push(`<dt>Mainworld UWP</dt><dd><code>${_esc(mwUwp)}</code></dd>`);
-        if (state.allegiance) H.push(`<dt>Allegiance</dt><dd>${_esc(state.allegiance)}</dd>`);
+        if (_show(LV, 'a')) H.push(`<dt>Hex</dt><dd>${_esc(hexCode)}</dd>`);
+        if (_show(LV, 'a')) H.push(`<dt>Edition</dt><dd>${_esc(edition)}</dd>`);
+        if (mwUwp && _show(LV, 'g'))
+            H.push(`<dt>Mainworld UWP</dt><dd><code>${_esc(mwUwp)}</code></dd>`);
+        if (state.allegiance && _show(LV, 'a'))
+            H.push(`<dt>Allegiance</dt><dd>${_esc(state.allegiance)}</dd>`);
         H.push('</dl>');
         H.push('</header>');
 
@@ -353,116 +391,183 @@ ${extraJs || ''}
         H.push('<nav id="contents" class="toc"><h2>Contents</h2><ul>');
         H.push('<li><a href="#overview">System Overview</a></li>');
         stars.forEach((s, i) =>
-            H.push(`<li><a href="#${starIds[i]}">${_esc(EC.starDisplayName(s, i, isMulti))}</a> <span class="dim">star</span></li>`));
-        worlds.forEach((w, i) => {
-            H.push(`<li><a href="#${worldIds[i]}">${_esc(EC.worldDisplayName(w, i))}</a> <span class="dim">${_esc(w.type || '')}</span>`);
+            H.push(`<li><a href="#${starIds[i]}">${_esc(EC.starDisplayName(s, i, isMulti, LV))}</a> <span class="dim">star</span></li>`));
+        // Body count is (d). Below it NO body appears in the contents list, gets
+        // a section, or gets an anchor — emptying the sections is not enough,
+        // because their number and type still show. Manifest 5.2.2 asked for
+        // exactly this ("sections must not be generated, not merely blanked");
+        // reported by Sean 2026-08-04 after seeing 45 empty bodies listed at (a).
+        const showBodies = _show(LV, 'd');
+        if (showBodies) worlds.forEach((w, i) => {
+            // The type annotation is dropped WHOLESALE below (g), not just for
+            // the mainworld. SystemViewer.normalizeSystem overwrites a
+            // mainworld's real type with the literal 'Mainworld'
+            // (system_viewer.js:265), and mainworld identification is (g)
+            // (§1.10). Blanking only that one body would single it out just as
+            // effectively, and the real type cannot be recovered without
+            // guessing. Little is lost: worldDisplayName already encodes the
+            // category as "World N" / "Giant N" / "Belt N".
+            const _tAnn = _show(LV, 'g') ? _esc(w.type || '') : '';
+            H.push(`<li><a href="#${worldIds[i]}">${_esc(EC.worldDisplayName(w, i, LV))}</a> <span class="dim">${_tAnn}</span>`);
             const ms = w.moons || [];
             if (ms.length) {
                 H.push('<ul>');
                 ms.forEach((m, mi) =>
-                    H.push(`<li><a href="#${moonIds[i][mi]}">${_esc(EC.moonDisplayName(m, mi))}</a></li>`));
+                    H.push(`<li><a href="#${moonIds[i][mi]}">${_esc(EC.moonDisplayName(m, mi, LV))}</a></li>`));
                 H.push('</ul>');
             }
             H.push('</li>');
         });
-        H.push('<li><a href="#notes">Referee Notes</a></li>');
+        // The nav link must go with the section — an entry reading "Referee
+        // Notes" tells a player notes exist even though the section is gone.
+        if (!_playerMode) H.push('<li><a href="#notes">Referee Notes</a></li>');
         H.push('</ul></nav>');
 
         // System overview
         H.push('<section id="overview" class="body">');
         H.push('<h2>System Overview</h2>');
-        const ov = EC.systemOverviewBlocks(state);
-        H.push(ov.length ? _render(_stripHeading(ov)) : '<p class="dim">No system-level data recorded.</p>');
+        const ov = _F(EC.systemOverviewBlocks(state), 'system', LV);
+        // Gas giant PRESENCE is (c); the count is (d). In the (c) window the
+        // bodies are still withheld, so say only that some exist. Uses the same
+        // boolean the subsector map's single GG marker and the index column
+        // read, so page, map and index cannot disagree.
+        const ggOnly = _playerMode && _show(LV, 'c') && !_show(LV, 'd')
+                       && EC.indexRowData(state, hexCode, LV).gasGiant;
+        const ovHtml = ov.length ? _render(_stripHeading(ov)) : '';
+        const ggHtml = ggOnly
+            ? '<dl class="fields"><dt>Gas Giants</dt><dd>Present</dd></dl>' : '';
+        H.push((ovHtml + ggHtml) || '<p class="dim">No system-level data recorded.</p>');
         H.push('</section>');
 
         // Stars
         stars.forEach((s, i) => {
-            const name = EC.starDisplayName(s, i, isMulti);
+            const name = EC.starDisplayName(s, i, isMulti, LV);
             H.push(_sectionOpen(starIds[i], name, 'star'));
-            H.push('<dl class="fields">');
-            H.push(`<dt>Role</dt><dd>${_esc(s.role)}</dd>`);
-            // .trim() because a brown dwarf has no luminosity class, which would
-            // otherwise leave a trailing space in the value and in any data-* attribute.
-            H.push(`<dt>Type</dt><dd>${_esc(`${s.sType}${s.subType ?? ''} ${s.sClass ?? ''}`.trim())}</dd>`);
-            H.push('</dl>');
-            H.push(_render(_starPhysBlocks(state, i, s, i === 0)));
+            // NOT block-model output — these two are hand-rolled <dl> rows, so
+            // filterBlocks() cannot see them. Both are stellar detail, (b).
+            // Missing this would have leaked a star's spectral type at level (a).
+            if (_show(LV, 'b')) {
+                H.push('<dl class="fields">');
+                H.push(`<dt>Role</dt><dd>${_esc(s.role)}</dd>`);
+                // .trim() because a brown dwarf has no luminosity class, which would
+                // otherwise leave a trailing space in the value and in any data-* attribute.
+                H.push(`<dt>Type</dt><dd>${_esc(`${s.sType}${s.subType ?? ''} ${s.sClass ?? ''}`.trim())}</dd>`);
+                H.push('</dl>');
+            }
+            H.push(_render(_F(_starPhysBlocks(state, i, s, i === 0), 'star', LV)));
 
+            // Also not block-model: a hand-built table whose third column is the
+            // body's UWP — (g) — and whose first is its NAME — (d). The body
+            // list itself is the (d) world count. Columns are dropped
+            // individually rather than the table as a whole, so a player at (d)
+            // still sees which bodies orbit which star.
             const orbiting = worlds
                 .map((w, wi) => ({ w, wi }))
                 .filter(({ w }) => (w.parentStarIdx ?? 0) === i);
-            if (orbiting.length) {
-                H.push(_render([EC.tbl(['Body', 'Type', 'UWP'], orbiting.map(({ w, wi }) => [
-                    raw(`<a href="#${worldIds[wi]}">${_esc(EC.worldDisplayName(w, wi))}</a>`),
-                    w.type || '—',
-                    w.uwp || '—',
-                ]))]));
-            } else {
+            if (orbiting.length && _show(LV, 'd')) {
+                const cols = ['Body', 'Type'];
+                if (_show(LV, 'g')) cols.push('UWP');
+                H.push(_render([EC.tbl(cols, orbiting.map(({ w, wi }) => {
+                    const row = [
+                        raw(`<a href="#${worldIds[wi]}">${_esc(EC.worldDisplayName(w, wi, LV))}</a>`),
+                        // Same (g) gate as the contents list: a mainworld's
+                        // type reads literally 'Mainworld'. Missing this here
+                        // is why the first fix left the leak in place.
+                        _show(LV, 'g') ? (w.type || '—') : '—',
+                    ];
+                    if (_show(LV, 'g')) row.push(w.uwp || '—');
+                    return row;
+                }))]));
+            } else if (!orbiting.length) {
                 H.push('<p class="dim">No bodies recorded for this star.</p>');
             }
+            // Below (d) the orbiting-body list is withheld and NOTHING is
+            // printed in its place — "withheld = absent", so a player must not
+            // be able to tell a withheld list from a star with no bodies.
             H.push('</section>');
         });
 
-        // Worlds, each followed by its moons
-        worlds.forEach((w, wi) => {
-            const name = EC.worldDisplayName(w, wi);
+        // Worlds, each followed by its moons — omitted entirely below (d).
+        if (showBodies) worlds.forEach((w, wi) => {
+            const name = EC.worldDisplayName(w, wi, LV);
             const isMainworldBody = w.type === 'Mainworld';
             const rawWorld = EC.findRawWorld(state, w);
 
-            H.push(_sectionOpen(worldIds[wi], name, isMainworldBody ? 'world mainworld' : 'world'));
-            if (isMainworldBody) H.push('<p class="tag">Mainworld</p>');
+            // Both the CSS class and the tag identify the mainworld, which is
+            // (g). The class matters as much as the tag — the stylesheet
+            // highlights .mainworld, so leaving it would mark the body visually.
+            const _mwOk = _show(LV, 'g');
+            H.push(_sectionOpen(worldIds[wi], name,
+                (isMainworldBody && _mwOk) ? 'world mainworld' : 'world'));
+            if (isMainworldBody && _mwOk) H.push('<p class="tag">Mainworld</p>');
 
             const img = worldImages.get(`w${wi}`);
             if (img) H.push(_imageFigure('images/' + img, name));
 
-            if (w.uwp) {
+            // UWP string and its breakdown are both (g), never partial — §7.2.
+            if (w.uwp && _show(LV, 'g')) {
                 H.push('<h3>UWP Breakdown</h3>');
                 H.push(`<p class="uwp"><code>${_esc(w.uwp)}</code></p>`);
                 H.push(_render(EC.uwpTableBlocks(w.uwp)));
             }
 
-            H.push('<h3>Details</h3>');
-            H.push(_render(_stripHeading(EC.detailBlocks(w))));
-            H.push(_render(_worldPhysBlocks(state, rawWorld, w, isMainworldBody)));
-            if (isMainworldBody) H.push(_render(EC.socioBlocks(state, rawWorld)));
+            const detailB = _F(_stripHeading(EC.detailBlocks(w)), 'details', LV);
+            const physB   = _F(_worldPhysBlocks(state, rawWorld, w, isMainworldBody), 'world', LV);
+            if (detailB.length) { H.push('<h3>Details</h3>'); H.push(_render(detailB)); }
+            H.push(_render(physB));
+            if (isMainworldBody) H.push(_render(_F(EC.socioBlocks(state, rawWorld), 'socio', LV)));
             H.push('</section>');
 
             (w.moons || []).forEach((m, mi) => {
-                const mName = EC.moonDisplayName(m, mi);
+                const mName = EC.moonDisplayName(m, mi, LV);
                 const isLunarMw = m.type === 'Mainworld' || m.isLunarMainworld;
                 const rawMoon = EC.findRawMoon(state, rawWorld, m, mi);
 
-                H.push(_sectionOpen(moonIds[wi][mi], `${name} — ${mName}`, isLunarMw ? 'moon mainworld' : 'moon'));
-                if (isLunarMw) H.push('<p class="tag">Mainworld</p>');
+                H.push(_sectionOpen(moonIds[wi][mi], `${name} — ${mName}`,
+                    (isLunarMw && _mwOk) ? 'moon mainworld' : 'moon'));
+                if (isLunarMw && _mwOk) H.push('<p class="tag">Mainworld</p>');
                 H.push(`<p class="dim">Moon of <a href="#${worldIds[wi]}">${_esc(name)}</a></p>`);
 
                 const mImg = worldImages.get(`w${wi}m${mi}`);
                 if (mImg) H.push(_imageFigure('images/' + mImg, mName));
 
-                if (m.uwp) {
+                if (m.uwp && _show(LV, 'g')) {
                     H.push('<h3>UWP Breakdown</h3>');
                     H.push(`<p class="uwp"><code>${_esc(m.uwp)}</code></p>`);
                     H.push(_render(EC.uwpTableBlocks(m.uwp)));
                 }
 
-                H.push('<h3>Details</h3>');
-                H.push(_render(_stripHeading(EC.detailBlocks(m))));
-                H.push(_render(_moonPhysBlocks(state, rawMoon, m, isLunarMw)));
-                if (isLunarMw) H.push(_render(EC.socioBlocks(state, rawMoon)));
+                const mDetailB = _F(_stripHeading(EC.detailBlocks(m)), 'details', LV);
+                const mPhysB   = _F(_moonPhysBlocks(state, rawMoon, m, isLunarMw), 'moon', LV);
+                if (mDetailB.length) { H.push('<h3>Details</h3>'); H.push(_render(mDetailB)); }
+                H.push(_render(mPhysB));
+                if (isLunarMw) H.push(_render(_F(EC.socioBlocks(state, rawMoon), 'socio', LV)));
                 H.push('</section>');
             });
         });
 
-        // Referee notes — GM-facing. Release 2 must gate this; see manifest 5.2.4.
-        H.push('<section id="notes" class="body notes">');
-        H.push('<h2>Referee Notes</h2>');
-        H.push(_render(_stripHeading(EC.notesBlocks(state))));
-        H.push('</section>');
+        // Referee notes — GM-facing, and NEVER exported to players at any level
+        // (manifest 5.2.4, HX-5). The whole section goes, not just its text:
+        // an empty "Referee Notes" heading advertises that notes exist.
+        if (!_playerMode) {
+            H.push('<section id="notes" class="body notes">');
+            H.push('<h2>Referee Notes</h2>');
+            H.push(_render(_stripHeading(EC.notesBlocks(state))));
+            H.push('</section>');
+        }
 
-        return _shell(`${systemName} (${hexCode})`, '../style.css', {
-            hex: hexCode, hexid: hexId, sector: sectorName,
-            subsector: subsectorChar, edition, uwp: mwUwp,
-            allegiance: state.allegiance || '',
-        }, H.join('\n'));
+        // The root data-* attributes are the §6 replacement for Obsidian's YAML
+        // frontmatter, and they carry the SAME values as the visible metadata —
+        // so they need the same gates. `data-uwp` in particular held a full UWP
+        // on every page at every level until the leak check found it: invisible
+        // to any rendered-text search, which is why that check reads raw ZIP
+        // bytes rather than the DOM.
+        const dataAttrs = { hex: hexCode, hexid: hexId, sector: sectorName,
+                            subsector: subsectorChar, edition };
+        if (mwUwp && _show(LV, 'g'))            dataAttrs.uwp = mwUwp;
+        if (state.allegiance && _show(LV, 'a')) dataAttrs.allegiance = state.allegiance;
+
+        return _shell(`${systemName} (${hexCode})`, '../style.css', dataAttrs, H.join('\n'));
     }
 
     // ── Subsector index ───────────────────────────────────────────────────────
@@ -475,16 +580,22 @@ ${extraJs || ''}
     // Starport and TL duplicate UWP digits 1 and 9 on purpose — they exist so those
     // values can be sorted and filtered on, not because the UWP lacks them. Gas Giant
     // and Bases are the two operational facts that are NOT in the UWP.
+    // `lvl` is the Release 2 disclosure level each column inherits from the
+    // field it displays (fog_of_war_field_tags §10 — columns inherit, they are
+    // not decided separately). UWP, Starport, TL, Trade Codes and Bases are all
+    // (g) because they describe the MAINWORLD, and mainworld identification is
+    // itself (g). A level (b) index is therefore two columns wide, which is
+    // intended — see §1.10a, do not "fix" it by promoting columns.
     const COLUMNS = [
-        { key: 'hex',        label: 'Hex' },
-        { key: 'name',       label: 'System',      nosort: false },
-        { key: 'uwp',        label: 'UWP' },
-        { key: 'starport',   label: 'Starport' },
-        { key: 'tl',         label: 'TL',          num: true },
-        { key: 'tradeCodes', label: 'Trade Codes' },
-        { key: 'gasGiant',   label: 'GG',          num: true },
-        { key: 'bases',      label: 'Bases' },
-        { key: 'zone',       label: 'Zone' },
+        { key: 'hex',        label: 'Hex',                       lvl: 'a' },
+        { key: 'name',       label: 'System',      nosort: false, lvl: 'd' },
+        { key: 'uwp',        label: 'UWP',                       lvl: 'g' },
+        { key: 'starport',   label: 'Starport',                  lvl: 'g' },
+        { key: 'tl',         label: 'TL',          num: true,    lvl: 'g' },
+        { key: 'tradeCodes', label: 'Trade Codes',               lvl: 'g' },
+        { key: 'gasGiant',   label: 'GG',          num: true,    lvl: 'c' },
+        { key: 'bases',      label: 'Bases',                     lvl: 'g' },
+        { key: 'zone',       label: 'Zone',                      lvl: 'a' },
     ];
 
     // ── Clickable map overlay (WP3) ───────────────────────────────────────────
@@ -512,10 +623,17 @@ ${extraJs || ''}
                 const hexId = (typeof getHexId === 'function') ? getHexId(q, r) : null;
                 if (!hexId || !byHex.has(hexId)) continue;
                 const s = byHex.get(hexId);
-                const d = EC.indexRowData(s.state, s.hexCode);
+                const mlv = _levelFor(hexId);
+                const d = EC.indexRowData(s.state, s.hexCode, mlv);
                 const pts = cap.hexPoly(q, r)
                     .map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
-                const label = `${d.name} (${d.hex})` + (d.uwp ? ` — ${d.uwp}` : '');
+                // Hover tooltips inherit their fields' levels (§9.4). This
+                // carried "Name (hex) — UWP" unconditionally and was the last
+                // place a full UWP survived at level (a): it is SVG <title>
+                // text, so it appears in no rendered body copy and no <dt>/<dd>
+                // sweep would have found it.
+                const label = `${d.name} (${d.hex})`
+                            + (d.uwp && _show(mlv, 'g') ? ` — ${d.uwp}` : '');
                 parts.push(
                     `<a href="${_href(linkSystem(d.name, d.hex), 'subsector')}">` +
                     `<title>${_esc(label)}</title>` +
@@ -562,7 +680,24 @@ ${extraJs || ''}
         // Sorted by hex ascending — the default a reader expects, and the order the
         // table falls back to when JS is unavailable.
         const rows = systems
-            .map(s => ({ s, d: EC.indexRowData(s.state, s.hexCode) }))
+            .map(s => {
+                const lv = _levelFor(s.hexId);
+                const d = EC.indexRowData(s.state, s.hexCode, lv);
+                // Keep the disclosed name for LINK building before the column
+                // gate blanks the display cell — the href must still resolve to
+                // the page, which is named from this same string.
+                d.__pageName = d.name;
+                if (lv) {
+                    // Blank each cell this system's level does not permit. Rows
+                    // in one subsector can sit at different levels, so gating is
+                    // per CELL; the "drop empty columns" pass below then removes
+                    // any column no system discloses, with no extra machinery.
+                    COLUMNS.forEach(c => { if (!_show(lv, c.lvl)) d[c.key] = ''; });
+                    // Corsair bases are 'never', at any level (§7.13).
+                    if (d.bases) d.bases = d.bases.split(/\s+/).filter(x => x !== 'P').join(' ');
+                }
+                return { s, d };
+            })
             .sort((a, b) => a.d.hex.localeCompare(b.d.hex));
 
         // Drop columns no system in this subsector has any value for — CT, for
@@ -581,10 +716,17 @@ ${extraJs || ''}
             `<th scope="col"${c.num ? ' data-type="num"' : ''}>${_esc(c.label)}</th>`).join('') + '</tr></thead>');
         H.push('<tbody>');
 
-        for (const { d } of rows) {
+        for (const { s: sysRef, d } of rows) {
+            const rlv = _levelFor(sysRef.hexId);
             const tds = cols.map(c => {
                 if (c.key === 'name')
-                    return `<td>${_a(linkSystem(d.name, d.hex), 'subsector', d.name)}</td>`;
+                    return `<td>${_a(linkSystem(d.__pageName, d.hex), 'subsector', d.name)}</td>`;
+                // Below (d) the System column is blank and usually dropped, which
+                // would leave the index with no route to the system page at all.
+                // The hex is (a) and the page exists, so link from the hex instead
+                // — navigation, disclosing nothing the reader does not already have.
+                if (c.key === 'hex' && rlv && !_show(rlv, 'd'))
+                    return `<td>${_a(linkSystem(d.__pageName, d.hex), 'subsector', d.hex)}</td>`;
                 if (c.key === 'uwp')
                     return `<td><code>${_esc(d.uwp)}</code></td>`;
                 if (c.key === 'tl') {
@@ -784,7 +926,11 @@ tbody tr:nth-child(even) { background:var(--panel);
 
     async function startExport(sectorNum, subsectorChar, options) {
         const { includeImages, imageProjection, skipAirless, includeSystemImages,
-                onProgress, onDone, onError } = options || {};
+                playerVersion, onProgress, onDone, onError } = options || {};
+
+        // Release 2. Absent/false keeps every existing call on the GM path.
+        _playerMode = !!playerVersion;
+
         const report = (d, t, m) => onProgress && onProgress(d, t, m);
 
         const systems = [];
@@ -793,12 +939,17 @@ tbody tr:nth-child(even) { background:var(--panel);
             const p = hexId.split('-');
             if (parseInt(p[0]) !== sectorNum) return;
             if (!state || state.type === 'EMPTY') return;
+            // Level (0): no page, no index row, no filename, and no hex counted
+            // towards the sector index either — the system is absent entirely.
+            if (_playerMode && _levelFor(hexId) === '0') return;
             subCounts.set(p[1], (subCounts.get(p[1]) || 0) + 1);
             if (p[1] === subsectorChar) systems.push({ hexId, hexCode: p[2], state });
         });
 
         if (systems.length === 0) {
-            onError && onError('No systems found in this subsector.');
+            onError && onError(_playerMode
+                ? 'No systems in this subsector are disclosed to players.'
+                : 'No systems found in this subsector.');
             return;
         }
 
@@ -820,8 +971,11 @@ tbody tr:nth-child(even) { background:var(--panel);
             report(0, systems.length, 'Capturing subsector map…');
             // withTransform gives back the hex geometry needed for the clickable
             // overlay. Older renderers return bare bytes; handle both.
+            // WP6: the map is drawn at each hex's disclosure level, so a
+            // players' export no longer ships a picture of every UWP.
             const cap = await captureSubsector(sectorNum, subsectorChar, 900, 1000,
-                                               { withTransform: true });
+                                               { withTransform: true,
+                                                 disclosure: _playerMode ? _levelFor : null });
             const png = (cap && cap.png) ? cap.png : cap;
             if (cap && cap.png) mapCap = cap;
             if (png) {
@@ -835,7 +989,8 @@ tbody tr:nth-child(even) { background:var(--panel);
 
         for (let si = 0; si < systems.length; si++) {
             const { hexId, hexCode, state } = systems[si];
-            const systemName = EC.resolveSystemName(state);
+            const oLV = _levelFor(hexId);
+            const systemName = EC.resolveSystemName(state, oLV, hexCode);
             report(si, systems.length, `Processing ${systemName}…`);
 
             const normalized = (typeof SystemViewer !== 'undefined')
@@ -858,8 +1013,12 @@ tbody tr:nth-child(even) { background:var(--panel);
             // Images, keyed so the page builder can look them up without re-deriving.
             const worldImages = new Map();
             let sysImage = null;
-            if (includeSystemImages && typeof SystemViewer !== 'undefined') {
-                const img = await SystemViewer.renderSnapshot(state, 900, 500);
+            // Orrery images are gated at (d): one glance gives world count,
+            // belts and gas giants (§5.2.3). Below (g) they are RE-RENDERED with
+            // generic body labels and no mainworld highlight — the labels are
+            // pixels, so no downstream filter could remove them (§9.2a).
+            if (includeSystemImages && _show(oLV, 'd') && typeof SystemViewer !== 'undefined') {
+                const img = await SystemViewer.renderSnapshot(state, 900, 500, { level: oLV });
                 if (img) {
                     sysImage = EC.systemFilename(systemName, hexCode, 'png');
                     files.push({ name: `${sub}/images/${sysImage}`, data: img });
@@ -869,10 +1028,13 @@ tbody tr:nth-child(even) { background:var(--panel);
             const worlds = normalized.worlds || [];
             for (let wi = 0; wi < worlds.length; wi++) {
                 const w = worlds[wi];
-                if (includeImages && EC.canRenderImage(w) && !(skipAirless && EC.isAirless(w))) {
+                // A rendered world IS a picture of its hydrographics and
+                // atmosphere, both (e) — so the image gates at (e) regardless of
+                // the "include world images" checkbox (§5.2.3 / §9.1).
+                if (includeImages && _show(oLV, 'e') && EC.canRenderImage(w) && !(skipAirless && EC.isAirless(w))) {
                     const img = await EC.renderWorldImage(w, `${hexId}-w${wi}`, imageProjection);
                     if (img) {
-                        const fn = EC.bodyFilename(systemName, EC.worldDisplayName(w, wi), hexCode, 'png');
+                        const fn = EC.bodyFilename(systemName, EC.worldDisplayName(w, wi, oLV), hexCode, 'png');
                         files.push({ name: `${sub}/images/${fn}`, data: img });
                         worldImages.set(`w${wi}`, fn);
                     }
@@ -880,10 +1042,12 @@ tbody tr:nth-child(even) { background:var(--panel);
                 const moons = w.moons || [];
                 for (let mi = 0; mi < moons.length; mi++) {
                     const m = moons[mi];
-                    if (includeImages && EC.canRenderImage(m) && !(skipAirless && EC.isAirless(m))) {
+                    if (includeImages && _show(oLV, 'e') && EC.canRenderImage(m) && !(skipAirless && EC.isAirless(m))) {
                         const img = await EC.renderWorldImage(m, `${hexId}-w${wi}-m${mi}`, imageProjection);
                         if (img) {
-                            const fn = `${EC.sanitize(systemName)} - ${EC.sanitize(EC.worldDisplayName(w, wi))} - ${EC.sanitize(EC.moonDisplayName(m, mi))} (${hexCode}).png`;
+                            const fn = EC.bodyFilename(systemName,
+                                `${EC.worldDisplayName(w, wi, oLV)} - ${EC.moonDisplayName(m, mi, oLV)}`,
+                                hexCode, 'png');
                             files.push({ name: `${sub}/images/${fn}`, data: img });
                             worldImages.set(`w${wi}m${mi}`, fn);
                         }
@@ -901,7 +1065,7 @@ tbody tr:nth-child(even) { background:var(--panel);
 
         report(systems.length, systems.length, 'Building ZIP…');
         downloadBlob(EC.buildZip(files),
-            `${root}_Subsector_${subsectorChar}_HTML.zip`, 'application/zip');
+            `${root}_Subsector_${subsectorChar}_HTML${_playerMode ? '_PLAYERS' : ''}.zip`, 'application/zip');
         onDone && onDone(files.length);
     }
 

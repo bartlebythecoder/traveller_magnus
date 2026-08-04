@@ -47,6 +47,8 @@
     <script src="js/routes.js" defer></script>
     <script src="js/borders.js" defer></script>
     <script src="js/regions.js" defer></script>
+    <script src="js/disclosure.js" defer></script>
+    <script src="js/disclosure_grid.js" defer></script>
     <script src="rules/t5_data.js" defer></script>
     <script src="js/t5_stellar_engine.js" defer></script>
     <script src="js/t5_world_engine.js" defer></script>
@@ -725,6 +727,18 @@
             max-height: 530px;
             overflow-y: auto;
         }
+        /* Disclosure uses 2 columns, not 4: its labels are full phrases
+           ("Stellar Details", "Population & TL") rather than short region
+           names, and 8 rungs at 4-up would wrap mid-label. Two columns also
+           keeps the modal clear of the viewport bottom on a 720px screen. */
+        #disclosure-assign-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 4px;
+            max-height: 420px;
+            overflow-y: auto;
+        }
         .border-assign-btn {
             background: #1a1a2e;
             border: 2px solid currentColor;
@@ -759,9 +773,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above<br> So Below</span></h1>
-            <div class="splash-banner">New: Extract Updates</div>
+            <div class="splash-banner">New: Player Fog of War Exports</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.17.0</div>
+            <div class="splash-version">v0.17.0.1</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -1242,7 +1256,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.17.0</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.17.0.1</span>
             </p>
         </div>
 
@@ -1292,6 +1306,24 @@
             </p>
             <div id="region-assign-grid"></div>
             <button id="btn-region-assign-cancel" class="btn-cancel"
+                style="width: 100%; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Player Disclosure (Fog of War) Assignment Modal -->
+    <div id="disclosure-assign-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="width: 400px; text-align: left;">
+            <h3 style="text-align: center; margin-bottom: 8px;">Assign Player Disclosure</h3>
+            <p style="color: #c5c6c7; font-size: 0.85rem; margin: 0 0 4px;">
+                Setting <strong id="disclosure-assign-modal-count" style="color: #66fcf1;"></strong> hex(es) to disclosure level:
+            </p>
+            <p id="disclosure-assign-current" style="color: #8a8f98; font-size: 0.78rem; margin: 0 0 12px;"></p>
+            <div id="disclosure-assign-grid"></div>
+            <p style="color: #8a8f98; font-size: 0.75rem; margin: 12px 0 10px; line-height: 1.4;">
+                Controls how much of each system a <em>players'</em> export reveals. Your own
+                view and the GM export are never affected.
+            </p>
+            <button id="btn-disclosure-assign-cancel" class="btn-cancel"
                 style="width: 100%; padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem;">Cancel</button>
         </div>
     </div>
@@ -1604,6 +1636,24 @@
                     <p id="obs-format-hint" style="margin:4px 0 0;color:#8fa0b5;font-size:0.78em;"></p>
                 </div>
 
+                <!-- Version (Release 2 fog of war) — applies to both formats -->
+                <div>
+                    <label style="display:block;margin-bottom:4px;color:#a0a8b0;font-size:0.85em;">VERSION</label>
+                    <select id="obs-version" style="width:100%;padding:6px;background:#1a2332;color:#cdd6e3;border:1px solid #45a29e;border-radius:4px;">
+                        <option value="gm" selected>Referee — everything</option>
+                        <option value="player">Players — fog of war</option>
+                    </select>
+                    <p id="obs-version-hint" style="margin:4px 0 0;color:#8fa0b5;font-size:0.78em;"></p>
+                    <div id="obs-version-warning" style="display:none;margin:8px 0 0;padding:8px 10px;background:rgba(102,252,241,0.10);border-left:3px solid #45a29e;border-radius:3px;">
+                        <p style="margin:0;color:#a8d8d4;font-size:0.78em;line-height:1.45;">
+                            Systems set to <em>Unknown</em> are left out entirely — no page, no index row,
+                            no filename. Everything else, <strong>including the subsector map and the
+                            orrery images</strong>, is drawn at its own disclosure level. Referee notes
+                            are never included. Worth a look over the result before you hand it out.
+                        </p>
+                    </div>
+                </div>
+
                 <!-- Sector -->
                 <div>
                     <label style="display:block;margin-bottom:4px;color:#a0a8b0;font-size:0.85em;">SECTOR</label>
@@ -1808,6 +1858,7 @@
                 <button class="context-menu-item" id="ctx-open-filter" onclick="toggleFilterModal()">Filter Manager (F)</button>
                 <button class="context-menu-item" id="ctx-open-region-window">Region Manager (G)</button>
                 <button class="context-menu-item" id="ctx-open-route-window">Route Manager (R)</button>
+                <button class="context-menu-item" id="ctx-open-disclosure-grid">Player Disclosure (D)</button>
             </div>
         </div>
         <!-- ASSIGN Menu -->
@@ -1818,6 +1869,7 @@
                 <button class="context-menu-item" id="ctx-assign-border">Assign Border</button>
                 <button class="context-menu-item" id="ctx-assign-region">Assign Region</button>
                 <button class="context-menu-item" id="ctx-assign-bg-color">Assign Background Color</button>
+                <button class="context-menu-item" id="ctx-assign-disclosure">Assign Player Disclosure</button>
             </div>
         </div>
 

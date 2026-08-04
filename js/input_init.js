@@ -98,6 +98,7 @@ function initializeInput() {
     setupRouteWindow();
     setupBorderWindow();
     setupRegionWindow();
+    setupDisclosureUI();
 }
 
 // ============================================================================

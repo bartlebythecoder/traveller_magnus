@@ -37,6 +37,12 @@ body {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
     z-index: 200;
     min-width: 150px;
+    /* NO overflow here. `.submenu` is absolutely positioned and escapes this
+       box horizontally, so any overflow value other than `visible` clips every
+       submenu — they keep their layout rect (geometry checks still pass) but
+       become invisible and unclickable. Tried and reverted 2026-08-04; the
+       hit-test in ctxmenu_check.js is what caught it. The top-level menu is
+       kept on screen by the boundary maths in canvas_input.js instead. */
 }
 
 #context-menu.visible {
@@ -91,6 +97,8 @@ body {
     min-width: 180px;
     z-index: 201;
     /* Above parent menu */
+    max-height: calc(100vh - 16px);
+    overflow-y: auto;
 }
 
 .context-menu-item.has-submenu:hover>.submenu {
@@ -102,6 +110,10 @@ body {
     right: 100%;
 }
 
+/* Retained for compatibility only. canvas_input.js no longer adds `flip-up`:
+   flipping swapped one overflow for another (a long submenu opened near the
+   bottom then ran off the TOP), so it now sets an inline `top` that clamps the
+   submenu into the viewport. An inline style would win over this rule anyway. */
 .context-menu-item.has-submenu.flip-up > .submenu {
     top: auto;
     bottom: 0;

@@ -1,10 +1,15 @@
 # HTML EXTRACT — Feature Manifest
 
-**Version:** 0.17.0 (in progress)
-**Status (2026-08-02): RELEASE 1 COMPLETE.** WP1, WP2 and WP3 all done and verified.
-`js/html_exporter.js` ships, reachable from the real UI, verified on all five engines,
-with a clickable subsector map. HX-6, HX-7.1/7.2, HX-8, HX-9 and Q1 all resolved.
-**Next action: Release 2 (fog of war, WP4-6) — blocked on the questions in 5.3.**
+**Version:** 0.17.0 shipped; **0.17.0.1 in progress — the fog-of-war release**
+**Status (2026-08-03): RELEASE 1 SHIPPED. RELEASE 2 PLANNING UNDER WAY.**
+WP1, WP2 and WP3 all done and verified. `js/html_exporter.js` ships, reachable from the
+real UI, verified on all five engines, with a clickable subsector map. HX-6, HX-7.1/7.2,
+HX-8, HX-9 and Q1 all resolved.
+**ALL Release 2 disclosure questions are answered as of 2026-08-03, with nothing
+outstanding.** HX-2 to HX-5 in 5.3; **HX-1 closed** — the complete field-level answer key
+is `directives/fog_of_war_field_tags.md` §3.5, its WP5 implementation checklist is §12,
+and the player-map spec is §9.3a. **HX-1a was cancelled**, not deferred.
+**RELEASE 2 IS COMPLETE (2026-08-04): WP4, WP5 and WP6 all done and verified.**
 **Architecture Standard:** The "Sean Protocol" (Directives -> Orchestration -> Execution)
 **Related:** `directives/project_manifest.md` (main manifest), `js/export_core.js` (shared
 core, new), `js/obsidian_exporter.js` (the model for this work)
@@ -40,19 +45,22 @@ in progress.**
    node export_runner.js check fast
    ```
    Compare the `sha256` values in `baseline_check/_summary.json` against
-   `baseline_hx8_summary.json` (or the table in 7.1). Expect 6/6 match. If they do not
+   `baseline_fmt_summary.json` (or the table in 7.1). Expect 6/6 match. If they do not
    match, something changed since the break — find out what before proceeding.
-3. **Release 1 is finished — do not start Release 2 code yet.** WP4-6 are blocked on
-   the five disclosure questions in 5.3, HX-1 above all (every emitted field needs a
-   level assignment). Get those answered first; guessing at them is explicitly out of
-   bounds. When they are answered, start at WP4 (the per-hex data model) per 4.
+3. **Release 1 is finished. Release 2 is fully unblocked** (updated 2026-08-03).
+   Every disclosure question is answered — HX-2 to HX-5 in 5.3, **HX-1 in
+   `directives/fog_of_war_field_tags.md`**. Read that file's **§3.5** (the answer key),
+   **§12** (WP5 checklist) and **§9.3a** (player-map spec) before writing Release 2 code;
+   do not re-derive or re-ask any of it. **Start at WP4 (per-hex data model).**
+   Nothing is outstanding. **HX-1a was cancelled** — there is no derivation map and none
+   is needed; every field carries an explicit level.
    The harness in `.tmp/html_export_harness/` has eight check scripts covering links,
    orphaned images, field parity, merge, theme/print, the real UI, map geometry, and
    index-header geometry — extend rather than rewrite.
 
 ### 0.3 Standing rules for this work
 
-- **Every slice ends with the Obsidian suite at 8/8** against `baseline_hx8_summary.json`.
+- **Every slice ends with the Obsidian suite at 8/8** against `baseline_fmt_summary.json`.
   Anything touching `export_core.js` can change Markdown output; if it does, that is a
   bug unless deliberately intended and re-baselined (as HX-6 and HX-8 were).
 - **`node --check` is not verification** — see 7.2. Test in a real browser.
@@ -186,9 +194,9 @@ transparent SVG overlay over the image. No new coordinate math needed;
 | **WP1** | `js/export_core.js` — extract format-agnostic code; convert `_format*` to structured `{label, value}` records | **DONE 2026-08-01** | 3 slices, 3 full-suite diffs, all 8/8 byte-identical. See 4.0. |
 | **WP2** | `js/html_exporter.js` — GM version | **DONE 2026-08-01** | All five slices; 823 lines. See 4.2.3-4.2.7. |
 | **WP3** | Clickable subsector map | **DONE 2026-08-01** | SVG overlay, geometry verified to 1e-13 px. See 4.3. **Release 1 complete.** |
-| **WP4** | Disclosure data model | Release 2 | Per-hex level field, save/load in `io_manager.js`, bulk-set UI via existing `selectedHexes`. Export-agnostic. |
-| **WP5** | Players' export + leak audit | Release 2 | Apply filter in core; gate pages, images, index, notes. |
-| **WP6** | Fogged map rendering | Release 2 | `draw()` learns per-hex disclosure. Needs `renderer.js` surgery. |
+| **WP4** | Disclosure data model | **DONE 2026-08-03** | `js/disclosure.js` (new). Save/load needed **no work** — see 4.4. 38/38 in-browser checks. |
+| **WP5** | Players' export + leak audit | **DONE 2026-08-03** | All five slices, see 4.5. Guard 8/8 throughout. **Map PNG still leaks — WP6.** |
+| **WP6** | Fogged map rendering | **DONE 2026-08-04** | `draw()` learns per-hex disclosure. See 4.6. **Release 2 complete.** |
 
 WP4 and WP5 deliver a fogged **Obsidian** wiki for free, since the filter sits in the
 shared core.
@@ -653,6 +661,693 @@ false confidence in both directions.
 regression guard **8/8 byte-identical** (the new argument is opt-in, so Markdown output
 is untouched). `js/html_exporter.js` 830 -> 897 lines.
 
+### 4.4 WP4 — disclosure data model. COMPLETE 2026-08-03.
+
+**`js/disclosure.js`** (new, 155 lines; script tag at `hex_map.html:50`, after
+`regions.js`; `setupDisclosureUI()` called from `input_init.js`). Built to mirror
+`regions.js` deliberately — same per-hex-field shape, same bulk-assign-over-`selectedHexes`
+modal, same `saveHistoryState`/`showToast` bookends — so there is one pattern to learn
+rather than two.
+
+**The model is export-agnostic on purpose.** It stores and edits a value and exposes
+`DisclosureModel.atLeast(current, required)`; it knows nothing about pages or drawing.
+WP5 and WP6 both consume that one primitive.
+
+| Piece | Detail |
+|---|---|
+| Field | `state.disclosure`, a level id `'0'`–`'g'` |
+| Default | **`'g'`** — an absent field means *full* disclosure |
+| API | `get`, `set`, `def`, `atLeast`, `isHexDisclosed` on `window.DisclosureModel` |
+| UI | ASSIGN → **Assign Player Disclosure**, `#disclosure-assign-modal` |
+| Undo | `saveHistoryState('Assign Disclosure')`, verified via a real Ctrl+Z |
+
+**Why the default is `g` and not `0`.** Absent ⇒ full disclosure means every sector saved
+before this feature behaves exactly as it did, and a player export can never silently omit
+data the GM never chose to hide. The opposite default would have retroactively fogged every
+existing map. A GM who wants everything hidden selects the sector and assigns *Unknown*
+once — two clicks — so the convenience is symmetrical while the risk is not.
+
+`get()` also normalises: an absent, unknown, or hand-edited-to-garbage value reads as `g`
+rather than throwing or returning `undefined`.
+
+#### Save/load needed no work at all
+
+`io_manager.js:121` serialises each hex state **verbatim** (`hexObj[key] = value`), and the
+load path at 620-621 does the same in reverse; the chunked save at 193 stores
+`[hexId, state]` pairs unchanged. **A new field on the state object therefore persists for
+free** — no schema, no migration, no version bump. Verified by round-tripping through the
+real serialisation shape rather than assumed. The WP table's "save/load in `io_manager.js`"
+was a prediction that turned out to be unnecessary; `io_manager.js` was not modified.
+
+#### Verification — `.tmp/html_export_harness/disclosure_check.js`, 38/38
+
+In-browser per 7.2, not `node --check`. Drives the **real** right-click → hover ASSIGN →
+menu item → level button path; the only thing faked is the hex *selection*, because
+selection mechanics are pre-existing and `regions.js` reads the same global.
+
+Covers: API shape and ladder order; `atLeast` cumulative, blocking, and rejecting bad
+input; absent/corrupt/unknown-hex normalisation; the real UI path end to end; unselected
+hexes untouched; mixed-selection reporting; cancel; save→load round trip; a real Ctrl+Z
+undo labelled `Assign Disclosure`; zero console errors; and modal layout geometry.
+
+**Obsidian regression guard: 6/6 byte-identical** against `baseline_fmt_summary.json`
+(fast set). `hex_map.html` changed, `export_core.js` did not.
+
+##### The bug the screenshot found — fifth time, same lesson
+
+All 36 checks passed while the modal rendered as a **ragged staircase**: the grid rule at
+`hex_map.html:720` names `#border-assign-grid, #region-assign-grid` only, so
+`#disclosure-assign-grid` fell back to shrink-to-fit and every button sized to its own
+label. Computed styles, ids, links and behaviour were all correct — nothing automated could
+see it.
+
+Fixed with a dedicated 2-column rule (the ladder's labels are full phrases, and 8 rungs
+4-up would wrap mid-label; it also cut the modal from 696px to 492px tall, clearing the
+bottom of a 720px viewport). **New assertion added: all level buttons must share one
+distinct width.** That is the check that catches this class of bug.
+
+This is the fifth time in this work that looking at rendered output found what green checks
+missed — 2c's scrolled-away header and empty column, 2d's duplicated heading, HX-9's sticky
+row, now this. **The standing rule in 0.3 holds; do not skip the screenshot.**
+
+##### One methodology note worth keeping
+
+The first baseline comparison script reported "1 match, 0 differ" and was **wrong** — it
+keyed on `r.name` where the summary uses `r.id`, so every lookup collapsed to `undefined`
+and one bogus row compared clean. A passing result from a check you just wrote is not
+evidence until you have confirmed the check is looking at the right thing. Same lesson as
+`project_ct_gas_giant_size_editor` and `project_ct_uwp_seed_size_codes` in memory.
+
+### 4.5 WP5 — players' export. IN PROGRESS: 5a complete 2026-08-03.
+
+Sliced like WP1/WP2, for the same reason: small verifiable steps, and **every slice ends
+with the Obsidian guard at 6/6/8/8**.
+
+| Slice | Scope | Status |
+|---|---|---|
+| **5a** | Field disclosure tag table + `filterBlocks()` in `export_core.js` | ✅ **DONE 2026-08-03** — 24/24, guard 6/6 |
+| **5b** | Wire the filter into both exporters; suppress notes, sections and level-0 systems | ✅ **DONE 2026-08-03** — 40/40 leak check, guard 6/6, all-engine 6/6 |
+| **5c** | Generic body/star/system labels; filenames follow the disclosed name | ✅ **DONE 2026-08-03** — 54/54 leak check, guard 6/6 |
+| **5d** | Image gating + orrery re-render | ✅ **DONE 2026-08-03** — 67/67 leak check, guard **8/8** (full run) |
+| **5e** | Export-modal UI (Referee vs Players' version) | ✅ **DONE 2026-08-03** — 17/17 real-UI check, guard **8/8** |
+
+#### 4.5.1 Slice 5a — the tag table
+
+`export_core.js` gained `FIELD_LEVELS`, `fieldLevel`, `blockLevel`, `filterBlocks`,
+`getUnknownFieldLabels`. It is the executable form of
+`directives/fog_of_war_field_tags.md` §3.5 — **that file stays the authority; do not change
+a level in one without the other.**
+
+**Tagging is keyed on (context, label), not label alone.** This is not defensive
+over-engineering — three labels genuinely collide:
+
+| Label | star | world |
+|---|---|---|
+| `Mass` | **b** | **e** |
+| `Eccentricity` | **b** | **d** |
+| `Orbit ID` | **b** | **d** |
+
+A flat label map would have leaked stellar data at world level or hidden world data that
+should show. Seven contexts: `star`, `world` (belt and gas-giant labels fold in here, being
+unique), `moon` (= world + the one moon-only field), `socio`, `system`, `details`,
+`identity`.
+
+**Fail-closed.** An untagged field returns `'g'`, so a field added later can never leak
+into a low-level players' export. Because that failure is silent, every omission is
+recorded in `getUnknownFieldLabels()` and the harness asserts the set is empty.
+
+**GM path is identity.** `filterBlocks(blocks, ctx, 'g'|null)` returns the *same array
+object* — no copy, no allocation, no behaviour change. That is what keeps the guard at 6/6.
+
+#### 4.5.2 Two gaps closed before writing, one found by the sweep
+
+- **`Rings` (RTT)** matched none of the eight groups — not classification, geology,
+  atmosphere or development. Raised with Sean, assigned **(d)** with body classification
+  (a ring system is remotely observable).
+- **`Orbit (⌀)`** is moon-only with no world counterpart to inherit from. §5 requires such
+  fields to be *flagged, not defaulted*, so it was raised rather than silently assigned:
+  **(d)**, Group 1.
+- **T5 role labels — found by the completeness sweep, not by reading the code.** The T5
+  branch of `systemOverviewBlocks` emits `f(s.role, …)`, so the *label is data*:
+  `Primary`, `Close`, `Far`, `Near`, `Primary Companion`, `Close Companion`,
+  `Far Companion`, `Near Companion`. No static map can enumerate that, and all eight were
+  failing closed to `'g'` — i.e. every T5 star line would have vanished from a players'
+  export at every level below full. Fixed with an optional per-block `lvl` override
+  (`blockLevel()`), set to `'b'` at that site. **Adding a property to the block does not
+  change either renderer's output — guard still 6/6.**
+
+  That site also carries the star's *name* in its value, which is (d) data. Filtering
+  cannot fix that; slice 5c must substitute a generic label. Comment left at the site.
+
+#### 4.5.3 The check, and the bug in the check
+
+`.tmp/html_export_harness/disclosure_tags_check.js` — 24 assertions covering ladder
+plumbing, context sensitivity, fail-closed behaviour, `filterBlocks` semantics (including
+that an `h2` whose content sits under an `h3` is not wrongly pruned), and completeness.
+
+**The first version of the completeness sweep was worthless and looked fine.** It used
+`ExportCore.resolveWorldData(state, hexId)` expecting a normalised system; that function
+actually returns the mainworld UWP object (`export_core.js:160`), so `wd.worlds` was always
+`undefined` and the sweep reported **0 bodies, 0 moons** while asserting completeness —
+i.e. the world and moon contexts, which carry most of the 111 labels, were never exercised.
+Fixed to use `SystemViewer.normalizeSystem` (what the exporters themselves use,
+`html_exporter.js:841`); coverage went to **1979 bodies and 2620 moons across 279 systems,
+356 stars**. The assertion now requires non-zero counts in every category, so this cannot
+recur silently.
+
+Third methodology incident of this work — after the `r.name`/`r.id` baseline comparison in
+4.4 — of a check that passes while measuring nothing. Same lesson as
+`project_ct_gas_giant_size_editor` in memory: **confirm the check is looking at the right
+thing before trusting a pass.**
+
+#### 4.5.4 Slice 5b — wiring the filter in. COMPLETE 2026-08-03.
+
+Both exporters gained the same four-piece shim, deliberately identical so there is one
+pattern rather than two:
+
+```
+let _playerMode = false;                  // set from options.playerVersion
+_levelFor(hexId)  -> null on the GM path, else DisclosureModel.get(hexId)
+_F(blocks, ctx, lvl)                      // ExportCore.filterBlocks
+_show(lvl, required)                      // for content gated as a unit
+_notesFor(state)                          // [] in player mode
+```
+
+**The GM path is the identity function.** `playerVersion` absent/false ⇒ `_levelFor()`
+returns null ⇒ `filterBlocks` returns *the same array object*. That is what keeps the
+Obsidian guard at 6/6 and the all-engine HTML checks at 6/6.
+
+**Level (0) systems are dropped in `startExport`**, before any page or index row exists —
+not filtered afterwards. A file named `Regina (1910).html` proves Regina exists whatever
+the page says (5.2.2). An all-(0) subsector returns an explicit "No systems in this
+subsector are disclosed to players" rather than the generic empty-subsector error.
+
+**Referee notes: the section AND its contents-nav link.** Gating the section alone left
+`<li><a href="#notes">Referee Notes</a></li>` in the table of contents, which tells a
+player notes exist. Found by the leak check.
+
+##### Four leaks that were NOT block-model output
+
+`filterBlocks` only sees blocks. These four emit HTML directly and every one of them
+carried gated data:
+
+| Site | Leaked | Now |
+|---|---|---|
+| Star `Role`/`Type` `<dl>` | spectral type at level (a) | gated to (b) |
+| Orbiting-bodies table | body names (d) + **UWP (g)** | table gated (d), UWP column (g) |
+| Page metadata `<dl class="meta">` | **Mainworld UWP** on every page | UWP gated (g) |
+| Root `data-*` attributes | **`data-uwp` with the full UWP** | UWP gated (g) |
+| Map hotspot SVG `<title>` | `Name (hex) — UWP` on every hotspot | name (d), UWP (g) |
+
+The last two are the ones worth remembering: `data-uwp` is the §6 frontmatter-replacement
+convention, and the tooltip is SVG `<title>` text. **Neither appears in any rendered body
+copy**, so a DOM sweep or a field-parity check would have walked straight past both. They
+were caught only because the leak check searches **raw ZIP bytes** — pages, filenames and
+attributes together. Keep it that way.
+
+##### The check: `.tmp/html_export_harness/disclosure_leak_check.js`, 40/40
+
+Exports the same subsector at every level 0–g and asserts forbidden strings are absent and
+permitted ones present, including monotonic growth a→g. Index columns are gated **per
+cell**, not per table, because rows in one subsector can sit at different levels; the
+pre-existing "drop columns with no data" pass then removes wholly-withheld columns with no
+new machinery. Corsair bases are stripped from the index at every level (§7.13).
+
+**Three of the first run's four failures were defects in the CHECK, not the code** —
+recorded because each looked exactly like a leak:
+
+1. *"Socioeconomics absent below g"* failed at c–f. **Correct behaviour**: the T5 socio
+   block legitimately carries Belts (d), Gas Giants (c) and Worlds (d), the three
+   documented system-inventory exceptions, so its heading rightly survives. The assertion
+   now targets real socio *fields* (`Government Profile`, `Cultural Quirks`,
+   `World Trade Number`) and separately asserts the exceptions are **not** over-filtered.
+2. *"Hydrographics present at e"* failed because that label appears **zero times even in
+   the GM export** of this subsector. The paired "absent below e" was therefore passing
+   while proving nothing. Now every such pair is preceded by a **GM-control assertion**
+   that the label exists at all — a vacuous test must fail loudly.
+3. *"Index has no System-name column at b"* failed because `/<th[^>]*>System/` also matches
+   the **sector** index's `<th>Systems</th>` count column. Now anchored with a trailing `<`.
+
+That is the fourth, fifth and sixth time in this work that a check passed or failed while
+measuring the wrong thing. **A red result is not evidence either** — confirm what the
+check is actually looking at before changing code.
+
+##### Known and deliberate: the map PNG still leaks. That is WP6.
+
+`disclosure_leak_check.js` searches `.html`/`.css` and filenames. The **subsector map image
+itself is still the live `draw()` output** and still carries UWP strings, trade codes,
+starport class and zone rings as pixels (5.2.1) — and still nondeterministically, since it
+inherits whatever display toggles were on at export time. **A players' export is therefore
+NOT leak-free until WP6 lands.** Do not describe it as such in the changelog until then.
+
+#### 4.5.5 Slice 5c — names and filenames. COMPLETE 2026-08-03.
+
+Four helpers in `export_core.js` gained an **optional trailing `lvl`**; null/absent is the
+GM path and behaves exactly as before.
+
+| Helper | Name disclosed at | Falls back to |
+|---|---|---|
+| `worldDisplayName` | **g** (HX-2) | `World 3` / `Giant 1` / `Belt 2` |
+| `moonDisplayName` | **g** (HX-2) | `Moon 4` |
+| `starDisplayName` | **d** (§3.11a) | `Star A` / `Star` |
+| `resolveSystemName` | **d** (§1.1) | `System 1910` |
+
+**The fallbacks are the labels the exporter already used for genuinely unnamed bodies.**
+That is deliberate: a player cannot distinguish a withheld name from a body that never had
+one, which is the "withheld = absent" rule applied to names.
+
+`starDisplayName` deliberately does **not** use the star's role in its generic form, even
+though role is (b) data — stars are visible from (a), so a role-based label would leak role
+one level early. A fixed vocabulary avoids a label whose wording shifts with the level.
+
+##### Filenames are NOT gated separately — and that was a real design correction
+
+The first attempt gave `systemFilename` and `bodyFilename` their own `lvl` parameter,
+emitting `1910.md` below (d). **That would have broken every wikilink in the Obsidian
+export**: Obsidian resolves `[[Name]]` by name, so the link text and the filename stem must
+be the same string, and the links were still being built from `[[Regina (1910)]]`.
+
+The fix was to remove the gate from the filename helpers entirely and gate **the name
+instead**. Callers already pass the disclosed name, so filenames, wikilinks, hrefs and
+headings all derive from one string and cannot drift apart. `indexRowData` gained an
+optional `lvl` for the same reason, and the HTML index keeps the disclosed name on
+`d.__pageName` for link building *before* the column gate blanks the display cell.
+
+**One gate, at the name.** Anything that names a file or a link must read from it.
+
+##### The leak the SCREENSHOT found — mainworld identification
+
+54 text assertions passed while the rendered contents list read **"World 2  Mainworld"**.
+Mainworld identification is **(g)** (§1.10), and it reached the page three ways, none of
+them a field:
+
+- `w.type` — `SystemViewer.normalizeSystem` overwrites a mainworld's real type with the
+  literal string `'Mainworld'` (`system_viewer.js:265`)
+- `<p class="tag">Mainworld</p>`
+- the section's `mainworld` CSS class, which the stylesheet highlights
+
+**The type annotation is now dropped wholesale below (g), for every body — not just the
+mainworld.** Blanking only that row would single it out just as effectively, and the real
+type is unrecoverable without guessing. Little is lost: `worldDisplayName` already encodes
+the category as `World N` / `Giant N` / `Belt N`.
+
+Obsidian needed the same treatment in three places: both world tables' Type column, the
+hub's `**Mainworld:**` pointer line, and the world file's `type: mainworld` frontmatter.
+
+**The first fix was incomplete** and the check caught it: the star section's
+orbiting-bodies table has its own Type column, which still read `Mainworld`. Gating one
+site is not gating the concept.
+
+##### Check additions
+
+`disclosure_leak_check.js` 40 → **54 assertions**: every real system and body name in the
+subsector is now collected from the app and searched for across pages *and* filenames, plus
+mainworld/CSS-class assertions and a **link-integrity sweep at four levels** — the specific
+risk 5c introduces, since filenames now derive from disclosed names.
+
+One more check defect worth recording: the body-name assertion initially failed at d/e/f.
+**It was correct behaviour** — a mainworld normally shares its system's name, and the
+system name is legitimately disclosed at (d). §1.10b already covers this: the export says
+*a* world is called Regina but never *which*. The check now excludes body names that match
+a system name. Also, collecting names from `state.name` found only **1** system in the
+fixture; it uses `ExportCore.resolveSystemName` and finds **38**.
+
+`player_page_shot.js` renders a real player page to PNG — keep using it, per 0.3.
+
+#### 4.5.6 Slice 5d — images and the orrery re-render. COMPLETE 2026-08-03.
+
+| Surface | Gate | Notes |
+|---|---|---|
+| World images | **(e)** | A rendered planet *is* a picture of its hydrographics and atmosphere — both (e). Gated regardless of the "include world images" checkbox |
+| Orrery images | **(d)** | One glance gives world count, belts and gas giants |
+| Orrery labels | re-rendered | Below (g) the body names are absent and the mainworld highlight is off |
+| Image filenames | (from 5c) | Derived from the disclosed name, so no separate gate |
+
+##### `SystemViewer.renderSnapshot` gained an optional 4th argument
+
+`renderSnapshot(state, w, h, { level })`. Absent = GM, unchanged — which is why the
+**full 8-run guard, including both image-heavy runs, is still byte-identical**.
+
+The orrery is the one leak no downstream filter can touch: **body names are drawn as
+pixels**. A players' export cannot reuse the GM image, it has to be drawn again. The
+existing `_hideMainworldHighlight` module flag turned out to be exactly what mainworld
+suppression needed.
+
+**Policy stays in the exporter; mechanics stay in the viewer** — the same split that put
+`hexPoly()` in `renderer.js` for WP3. `renderSnapshot` copies the normalised system rather
+than mutating it, because that object can share references with the live `hexState` and
+must never alter the GM's own data.
+
+##### One level, not two booleans — found by looking at the PNG
+
+The first version took `{ genericNames, hideMainworld }`, both driven off `< (g)`. Every
+assertion passed. But the rendered image drew **"Star A" at levels (d)–(f) while the page
+said "K0 V A"** — star names are (d), so the image was over-restricted and the two
+disagreed. Not a leak, but wrong.
+
+Replaced with a single `{ level }`, which `renderSnapshot` feeds straight into ExportCore's
+display-name helpers. Those already encode the per-entity rules (worlds and moons (g),
+stars (d)), so **the image and the page cannot diverge by construction**. Verified by eye:
+at (d) the star label is the real `W D`, the world name is gone, the highlight is gone.
+
+That is the **seventh** time in this work that looking at rendered output found what green
+checks missed. It is also the second time the fix was to delete a parameter rather than add
+one.
+
+##### Check additions — `disclosure_leak_check.js` 54 → **67**
+
+Image assertions need their own runs (everything before them runs with images off).
+Covers: no orrery below (d), present from (d); no world image below (e), present from (e);
+image filenames carry no real body name; **no page references a withheld image** (a broken
+`<img>` would itself advertise the removal); and the two that matter most —
+
+- the orrery at **(d) differs in bytes** from the GM render, proving the re-render actually
+  ran rather than the gate silently reusing the cached image;
+- the orrery at **(g) matches the GM render byte-for-byte**, proving the re-render path is
+  a no-op at full disclosure.
+
+A byte difference alone does not prove the labels are generic, so `player_page_shot.js` is
+joined by a manual orrery comparison — keep looking at the images.
+
+#### 4.5.7 Slice 5e — the UI. COMPLETE 2026-08-03. **WP5 COMPLETE.**
+
+A **VERSION** dropdown in the existing Export Wiki modal (`#obs-version`), directly under
+FORMAT: *Referee — everything* (default) or *Players — fog of war*. It applies to **both
+formats**, because the filter lives in `export_core` — the Obsidian wiki gets fog of war
+for free, exactly as 4.1 predicted.
+
+Per D6 this reuses the one modal rather than building a second. Element ids keep the
+historic `obs-` prefix; `io_manager.js` and `hex_map.html` must agree, so do not rename
+them casually.
+
+**Three places say which version you are holding**, because sharing the wrong ZIP cannot
+be undone:
+
+| | Referee | Players |
+|---|---|---|
+| Export button | `Export ZIP` | `Export ZIP (Players)` |
+| ZIP filename | `..._Wiki.zip` | `..._Wiki_PLAYERS.zip` |
+| Completion text | `Done — N files exported.` | `… PLAYERS' VERSION — check the map image before sharing.` |
+
+**The amber warning is deliberate and load-bearing.** It appears only for the players'
+version and states plainly that **the subsector map image is not yet filtered and still
+shows full UWPs**, with the workaround (turn map display options off before exporting, or
+delete the image from the ZIP). Until WP6 lands this is the honest description of what the
+feature does. **Do not soften or remove it before WP6.** It also names where the level is
+set, since the export modal is where a GM will first wonder.
+
+##### Verification — `disclosure_ui_check.js`, 17/17
+
+Driven through the **real** UI: splash → cog → "Import / Export" → Export Wiki → the
+dropdowns → the export button. Every earlier disclosure check called `startExport()`
+directly, so until this one nothing proved a user could reach the feature at all.
+
+Uses a **deliberately heterogeneous** subsector — hexes cycled through levels 0/b/d/g —
+rather than a uniform one, since a real map is mixed and per-hex resolution is the whole
+point. Asserts the warning shows and hides in step with the dropdown (two UI states that
+must stay in sync — the same class of bug as 2.1's subfolder row), that both ZIP names are
+distinct, that no Referee Notes survive, and that **exactly** the level-0 systems produced
+no page: 27 pages = 38 exportable − 11 hidden.
+
+One more check defect: that last assertion first read "27 pages, 20 hidden" and failed. The
+level loop stamps **every** 18-H hex including empty ones, so counting level-0 *hexes*
+massively overstates the pages suppressed. It now counts exportable hexes using the same
+filter `startExport` uses. Eighth instance in this work of a check measuring the wrong
+thing.
+
+##### WP5 is complete — with one honest caveat
+
+All five slices done; the Obsidian guard is **8/8 byte-identical** at every step, so the
+GM export is provably unchanged. But **`draw()` still renders the subsector map with full
+UWPs, trade codes and starport classes**, and the players' export embeds it. The UI says
+so. **WP6 is not optional polish — it is the last real leak.**
+
+### 4.6 WP6 — the fogged map. COMPLETE 2026-08-04. **RELEASE 2 COMPLETE.**
+
+The last real leak. `captureSubsector()` produces the map by calling the live `draw()`, so
+a players' export shipped a picture of every UWP, trade code and starport class in the
+subsector — **as pixels**, which no text filter, parity check or DOM sweep can reach.
+
+**`renderer.js` gained a per-hex gate**: `setMapDisclosure(fn)` where `fn(hexId)` returns a
+level, plus `_mapShow(hexId, required)`. `_mapDisclosure` is null for every normal call, so
+the on-screen map and the referee export are untouched — every gate short-circuits to true.
+`captureSubsector` installs it **for one frame inside a `try/finally`**, so a throw
+mid-draw can never leave the live map fogged.
+
+| Element | Level | Site |
+|---|---|---|
+| whole hex (skip entirely) | **0** | top of the per-hex loop |
+| dot, travel-zone ring, allegiance colour | **a** | ungated |
+| gas giant marker | **c** | presentation view |
+| system name | **d** | presentation + dev view |
+| UWP, trade codes, socio strings | **g** | presentation + dev view |
+| starport class | **g** | presentation + dev view |
+| naval / scout base | **g** | presentation view |
+
+Corsair bases are never drawn by this renderer at all, so §7.13 needs nothing here.
+
+**The development view is gated too.** `devView` is a user toggle and `captureSubsector`
+inherits whatever it is set to; leaving that branch open would have made the leak depend on
+a checkbox rather than on the disclosure level. This also corrects the claim in 5.2.1 —
+see below.
+
+#### 4.6.1 Correction to §5.2.1: the leak was NOT toggle-dependent
+
+5.2.1 said the export "inherits whatever display toggles the GM had switched on, so the
+leak is nondeterministic." **That was wrong about the part that mattered.** Verified
+2026-08-04:
+
+- The name/UWP/trade-code/starport labels are gated only on `zoom > 0.4`
+  (`renderer.js:904` in the dev branch; the presentation branch draws them unconditionally).
+- `captureSubsector` computes its own `capZoom` to fit the subsector
+  (`renderer.js:1462`) — about **1.09**, independent of the GM's live zoom.
+
+So the core leak was **unconditional and deterministic**, not toggle-dependent. Some *other*
+elements (borders, region names, print mode, `rttShowIndustry`) do follow toggles, but not
+the ones carrying the data. **There was never a "turn the labels off" setting** — Visual
+Options has no such control. Any interim advice to that effect was incorrect; the only
+manual remedy would have been deleting the map from the ZIP, which is why WP6 was done
+rather than shipped around.
+
+#### 4.6.2 Verification
+
+`disclosure_leak_check.js` 67 → **77**. The map is a PNG, so the assertions mirror the
+orrery's: it must **differ in bytes** from the GM render at every level below (g), **match
+byte-for-byte** at (g), be **never omitted**, and grow monotonically (b ≤ d ≤ g). Measured:
+236,882 → 289,274 → 336,577 bytes.
+
+Confirmed by eye on a **deliberately mixed** subsector (levels cycled 0/a/c/d/g), which
+shows the whole ladder in one image: level-0 hexes absent entirely, (a) a bare dot with its
+travel-zone ring, (c) gaining a gas-giant marker, (d) gaining the name, (g) full detail.
+That image is the clearest single artefact of what Release 2 does — regenerate it if the
+map rendering is ever touched.
+
+**Obsidian guard 8/8 byte-identical**, both image-heavy runs included; WP3 map geometry
+checks pass; all-engine 6/6; UI 17/17.
+
+#### 4.6.3 The export-modal note was rewritten
+
+It previously warned that the map was unfiltered and told the user to delete it. That is no
+longer true and would now be actively misleading. It states plainly that the map and
+orreries are drawn at their own disclosure level, and suggests a look over the result —
+which is advice, not a workaround.
+
+### 4.7 Body-count leak — FIXED 2026-08-04. Reported by Sean.
+
+**A players' export at (a) still carried one section per body.** Every field was filtered
+out, but the section, its heading, its contents entry and its anchor all remained. Measured
+on one fixture system at level (a): **45 body sections — 7 gas giants and 36 moons.** So a
+player learned the number, the ordering and the *type* of every body in the system. In
+Obsidian it was worse: one `.md` **per body**, so the file listing alone disclosed the same
+thing even with every page blank.
+
+Body count is **(d)**. This was a straight miss on my part — 5.2.2 had specified it in
+plain words ("pages and sections must **not be generated**, not merely blanked") and slice
+5b implemented only the page half, not the section half.
+
+**Emptying a container is not withholding it.** That is the general lesson; the field
+filter was never going to catch this because the leak is in the *structure*, not the values.
+
+#### What changed
+
+- **No body sections below (d)** — HTML: no contents entries, no `<section>`s, no anchors.
+  Obsidian: no per-body `.md` files at all, and no rows in the hub or star-page tables
+  (a row count *is* a body count).
+- **Gas giant presence at (c)** is now a single `Gas Giants: Present` line, no number, no
+  sections. It drops away at (d) where the bodies themselves appear. Reads the same boolean
+  the map marker and the index column use, so the three cannot disagree.
+- **`Gas Giants` socio field retagged (c) → (d).** It is a COUNT, and the ladder grants
+  only presence at (c) — an inconsistency in my own 5a tagging that this exposed.
+
+#### Two more leaks the Obsidian-specific check then found
+
+Writing `disclosure_obsidian_check.js` (this exporter had never had its own check — every
+other one drives the HTML side) immediately turned up two more, both in hand-written output
+that `filterBlocks` cannot see:
+
+1. **`**Role:**` and `**Type:**` on star pages** — star pages exist from (a), spectral type
+   is (b), so a level-(a) export published every star's spectral class. Exact twin of the
+   HTML star `<dl>` fixed in 4.5.4.
+2. **YAML frontmatter** — `spectralType`, `luminosityClass`, `role` on stars; `uwp`,
+   `starport`, `tl`, `tradeCodes` on worlds and moons. **This is the Obsidian counterpart
+   of the `data-uwp` leak**: machine-readable metadata that appears in no rendered text, so
+   no body-copy assertion would ever notice it.
+
+That both formats had the same two classes of leak, found months apart, says the pattern is
+the thing to watch: **whenever output is assembled by hand rather than through the block
+model, it bypasses the filter entirely.** Grep for template literals building output when
+auditing a new surface.
+
+#### Verification
+
+`disclosure_leak_check.js` 77 → **85** (no body named or listed at a/b/c; bodies present at
+d; presence line at c only; no GG count at c). New **`disclosure_obsidian_check.js`, 22
+assertions**, covering per-body files, frontmatter and the star header at four levels.
+
+Obsidian guard **8/8 byte-identical**; all-engine 6/6; tags 24/24 (one assertion updated —
+it required the old `Gas Giants: c`); model 38/38; UI 17/17; context menu 53/53.
+
+### 4.8 Player Disclosure grid — ADDED 2026-08-04. Sean's request.
+
+There was no way to see what each system was set to; the only view was the assign modal,
+one selection at a time. **`js/disclosure_grid.js`** (new) is a status-and-edit window:
+systems down the left, one radio per level across, live counts per column, sortable by hex,
+name or level, with a search box and a bulk "set all shown" action. Shortcut **D**;
+also under MANAGERS in the right-click menu.
+
+**Radios, not checkboxes.** Sean proposed checkboxes; a system has exactly one level, so
+checkboxes could express "two levels" or "none" — states the model cannot hold. Radios keep
+the same visual scan and one-click editing while making an invalid state unrepresentable.
+
+#### 4.8.1 "Never set" is the point of the screen
+
+The default is **full disclosure**, so a system nobody has reviewed exports *everything*.
+The most useful number is therefore not the distribution but **how many systems have never
+been touched** — and until now an untouched system and one deliberately set to Full UWP
+were indistinguishable, both reading `'g'`.
+
+`js/disclosure.js` gained `isSet()`, `getRaw()` and `clear()`. **`get()`'s contract is
+deliberately unchanged** — absent or corrupt still reads `'g'` — because every exporter
+depends on it. The new state is purely additive and changes no export output. That is why
+the 38 pre-existing model assertions passed untouched, and the Obsidian guard stayed 8/8.
+
+#### 4.8.2 Kept out of the existing files, on request
+
+Sean asked that this not bloat `hex_map.html` or the working modules. The module owns its
+own markup (built at runtime), its own stylesheet (injected once, namespaced under
+`#disclosure-grid-window`), its own `keydown` listener, and self-initialises. Outside it:
+
+- **`hex_map.html`** — two lines: a `<script>` tag and one MANAGERS menu entry.
+- **`js/disclosure.js`** — the additive functions above.
+
+Nothing else changed. `keyboard_shortcuts.js` and `input_init.js` were not touched at all;
+the typing guard from `keyboard_shortcuts.js:8` is **duplicated on purpose** rather than
+edited in — a few repeated lines are cheaper than a change to a working file.
+
+Free shortcut letters were checked first: F, R, B, G, A and 1-9 were taken. (`A` still
+calls `toggleAllegianceWindow`, removed in 2026-05 — likely dead, not touched here.)
+
+#### 4.8.3 The bug the screenshot found
+
+24 assertions passed while the window opened on **the wrong subsector**. `_defaultScope()`
+re-derived scope on every open and fell back to "first sector with data" whenever
+`selectedHexes` was empty — which it normally is, since assigning clears the selection. On
+a Universe import that means it always opened on sector 1, never where the referee was
+working. A stale search filter also survived, so it could open looking empty for no visible
+reason.
+
+Fixed by remembering the last scope between openings and clearing the filter on open. Both
+now asserted. **Eighth time in this feature that looking at the render found what the
+assertions could not** — the checks were all measuring the window's internals, and none of
+them asked "is this the subsector I asked for".
+
+#### 4.8.4 Verification
+
+`.tmp/html_export_harness/disclosure_grid_check.js`, **27 assertions**: the additive model
+(never-set vs explicit `g` vs corrupt vs cleared, with `get()` unchanged throughout), the
+real **D** shortcut, nine radios per row sharing one group, the warning text naming the
+actual risk, a real radio click writing to `hexStates` and **Ctrl+Z reverting it**, counts
+tracking edits without a rebuild, bulk apply, the search filter, Escape, the typing guard,
+and scope memory.
+
+Full regression: Obsidian guard **8/8 byte-identical**; model 38/38, leak 85/85, Obsidian
+22/22, tags 24/24, UI 17/17, context menu 53/53.
+
+### 4.9 Numeric display rounding — 2026-08-04. Sean's request.
+
+AoW stores raw floats and the formatters interpolated them directly, so an export read
+`5.980074992877245 M⊕` and `3.1104000000000003 AU` — the latter a float artifact of 3.1104.
+
+**`ExportCore.fmtNum(v, maxDp = 2)`** now formats every numeric field at render time.
+`f()` applies it automatically to any value passed as a **number**, which covered ~40 call
+sites without touching them; the ~58 sites that build a template string with a unit
+(`` `${x} AU` ``) were wrapped individually.
+
+#### 4.9.1 The rule is significant figures, not decimal places
+
+Sean's ask was "never more than two decimal places". Taken literally that **corrupts data**:
+eccentricity `0.0043`, a small moon at `0.0032 M⊕` and a trace atmosphere at `0.004 bar`
+all render `0.00`. The agreed rule is therefore **at most two decimals, but always at least
+two significant figures** — below 0.1, `toPrecision(2)` takes over.
+
+```
+5.980074992877245        -> 5.98
+3.1104000000000003       -> 3.11
+0.13999999999999999      -> 0.14
+0.0131                   -> 0.013
+0.0000040901847192818184 -> 0.0000041
+7                        -> 7        (integers gain no ".00")
+```
+
+**Both thresholds were wrong before the data corrected them**, and each was caught only by
+diffing real values:
+
+1. The first version applied the fallback **only when a value rounded to exactly zero** —
+   narrower than what had been agreed. Result: `0.0072`, `0.0089` and `0.0096 M⊕`, three
+   different moons, all rendered `0.01`.
+2. The second used a 0.01 threshold, matching the agreed wording. But two decimals cannot
+   carry two significant figures until 0.1, so **454 values in the 0.01–0.099 band were
+   distorted by more than 5%** — worst case `0.0131 -> 0.01`, a 23.7% error. Raised with
+   Sean, who chose to extend the rule to 0.1.
+
+#### 4.9.2 Engine values are untouched — deliberately
+
+~570 of the codebase's 695 `toFixed` calls live inside engines. **None were touched.**
+Rounding at generation would change generated worlds, invalidate the frozen fixture and
+stray into rules territory. This is display-time only, so it is fully reversible and cannot
+alter a saved sector.
+
+#### 4.9.3 Verification — a field diff replaces the byte guard
+
+The byte-identical guard cannot protect a change whose whole purpose is to change output,
+so `.tmp/html_export_harness/fieldvals.js` was written to replace it: it captures every
+`**Label:** value` pair from a GM export across all five engines and diffs before/after.
+
+| | |
+|---|---|
+| Field values compared | **67,052** across MgT2E, CT, T5, RTT, AoW |
+| Changed | 3,677 (5.5%) |
+| **Values collapsed to zero** | **0** |
+| **Values distorted by >5%** | **0** |
+| Field counts before/after | **identical** — nothing gained or lost |
+| File counts in all 8 runs | **identical** — formatting only, no structural change |
+
+`05_rtt` and `08_uwponly_stub` are byte-identical to the old baseline, which is a useful
+cross-check: RTT's physical fields are all categorical (World Class, Chemistry, Biosphere)
+and the stub path has no bodies, so neither *should* have moved. `06_aow` shrank most
+(−17.6 KB), consistent with it having had the longest decimals.
+
+**Baseline re-captured as `baseline_fmt_summary.json`** — a deliberate re-baseline, the
+third in this work after HX-6 and HX-8. Hashes are in 7.1. All other checks pass unchanged:
+leak 85/85, Obsidian 22/22, tags 24/24, model 38/38, grid 27/27, all-engine 6/6 (field
+parity included, confirming no field was lost).
+
+**Still outstanding:** the in-app panels (World Details, system viewer, surface viewer,
+menus) — roughly 350 sites — were **not** touched. Sean wanted to judge whether the
+formatter pass was enough before committing to that sweep. `fmtNum` is exported and ready
+to reuse; if it is wanted in-app it should probably move to `js/universal_math.js`, which
+loads before everything that would need it.
+
 ### 4.1 Why WP1 is not optional
 
 Release 2's disclosure ladder is a filter over **fields**. Level (e) discloses
@@ -720,24 +1415,53 @@ every mainworld page. Since WP1 slice 3 this is `ExportCore.notesBlocks()`
 gate should go. Called from two sites in `obsidian_exporter.js`; `html_exporter.js` will
 be a third.
 
-### 5.3 Release 2 open questions — NOT YET ANSWERED
+### 5.3 Release 2 open questions — HX-2 to HX-5 ANSWERED 2026-08-03; HX-1 OPEN
 
-Deliberately deferred on 2026-08-01 so Release 1 could start. Do not guess at these.
+HX-2, HX-3, HX-4 and HX-5 were put to Sean on 2026-08-03 and answered. **HX-1 remains
+the one blocker**, and is now a concrete artifact: `directives/fog_of_war_field_tags.md`.
 
-- **HX-1** — Every emitted field needs a level assignment (gravity, density, axial tilt,
-  orbital period, composition, taints, habitability, RU, WTN, government profile,
-  cultural quirks, ...). Sean was offered a draft tagging table for markup; not yet
-  produced or agreed.
-- **HX-2** — Do worlds have **names** before they have stats? At (e) each world gets
-  Size/Hydro/Atm — are names revealed too, or "World 1, World 2"? A name arguably reveals
-  more than a stat, as it implies someone has been there.
-- **HX-3** — Is the level per-system only, or can the GM override per-body? Per-system is
-  assumed (matches how Sean described it) but unconfirmed. Affects WP4's data model.
-- **HX-4** — Which fields are always visible regardless of level? Assumed: system name,
-  hex, travel zone (the point of an Amber zone is that travellers know). Allegiance
-  unconfirmed.
-- **HX-5** — Is a separate **player-facing notes** field wanted, distinct from GM notes
-  and always exported? Cheap now, awkward to retrofit.
+- **HX-1 — OPEN, blocks WP5.** Every emitted field needs a level assignment. Sized
+  2026-08-03 against the code, not estimated: **194 field emissions, 111 distinct
+  labels** across the twelve `format*` functions plus the six shared block builders in
+  `js/export_core.js`. The draft tagging table now exists at
+  `directives/fog_of_war_field_tags.md` and awaits Sean's markup. Only the ~8 fields the
+  ladder names explicitly are pre-filled; the rest are deliberately blank. **Do not fill
+  them in by inference** — Zero-Assumption Policy, §5.1.
+- **HX-2 — ANSWERED: generic labels until (g).** Worlds are "World 1", "World 2",
+  "Belt 1" at every level below (g); real names appear only at full-UWP disclosure. Sean's
+  reasoning matches the framing in this manifest: a name implies someone has *been* there
+  and named it, which reveals more than a physical stat does.
+  **Consequence for WP5 — image filenames.** World images are gated at (e)+ per 5.2.3, so
+  at (e) and (f) an image is emitted for a world whose name is withheld. The current
+  `bodyFilename` scheme (`Regina - Prometheus (1910).png`) would leak the name through the
+  filesystem, exactly the 5.2.2 failure. Player exports must name body images by their
+  generic label at (e)/(f), and only use real names at (g).
+- **HX-3 — ANSWERED: per-system only.** One level per hex; no per-body override, and no
+  mainworld exception. WP4's data model is therefore a single field on the hex state,
+  bulk-settable through the existing `selectedHexes` machinery.
+- **HX-4 — ANSWERED: nothing is unconditionally visible.** Sean explicitly rejected all
+  four candidates (system name, hex, travel zone, allegiance, region). **There is no
+  always-visible set.** This is a stronger answer than the manifest previously assumed
+  and has three consequences:
+  1. `System Name`, `Hex`, `Travel Zone`, `Allegiance` and `Region` are ordinary rows in
+     the HX-1 tagging table like any other field, and each needs its own level.
+  2. **Page filenames cannot carry the system name** below whatever level discloses it —
+     the 5.2.2 leak applies to system pages, not just body pages. Hex-based filenames
+     (`1910.html`) are the likely answer, pending HX-1.
+  3. The subsector and sector **index tables** are themselves disclosure surfaces. The
+     Q1 column set (Hex, System, UWP, Starport, TL, Trade Codes, GG, Bases, Zone) is
+     almost entirely gated data; a player index may legitimately be near-empty at low
+     levels.
+- **HX-5 — ANSWERED: no.** No player-facing notes field. GM notes are suppressed outright
+  and nothing replaces them, so the `ExportCore.notesBlocks()` gate (5.2.4) is a plain
+  on/off for the player export rather than a swap. Simplifies WP4 — no new state field,
+  no save/load change, no editor UI.
+- **Withheld vs absent — ANSWERED 2026-08-03: show nothing.** A withheld field is simply
+  omitted, indistinguishable from a field that has no data. No "Unsurveyed" placeholder,
+  not even for a wholly withheld section. This resolves the concern parked in 4.2.4
+  ("an omitted row and a withheld row look identical to a player") **in favour of that
+  being the desired behaviour**, and means HTML's existing empty-row omission needs no
+  change. Do not add a placeholder later without asking.
 
 ### 5.4 HX-6 — RTT rich formatter was dead code — **FIXED 2026-08-01, after WP1**
 
@@ -867,7 +1591,7 @@ Index table stayed well-formed (9 columns, 35 rows, 0 malformed), 9 rows now car
 codes. **All-engine parity still 6/6** — as expected, since both exporters received the
 same change. Merge, style/print and real-UI checks all still pass.
 
-**Baseline recaptured**: `baseline_hx8_summary.json` supersedes the HX-6 one; only
+**Baseline recaptured**: `baseline_fmt_summary.json` supersedes the HX-6 one; only
 `06_aow` differs between them.
 
 #### Original finding (kept for context)
@@ -990,7 +1714,7 @@ reproduced the recorded hashes.
 | `export_runner.js` | Runs the Obsidian exporter against the fixture, writes ZIPs + `_summary.json` |
 | `build_fixture.js` | Rebuilds the fixture from scratch. Only needed if the fixture is lost |
 | `zipread.js` | Minimal reader for the exporter's stored ZIPs; also a CLI (`node zipread.js <zip> [pattern] [cat]`) |
-| `baseline_hx8_summary.json` | The reference hashes (the ZIPs themselves were not kept — 109 MB) |
+| `baseline_fmt_summary.json` | The reference hashes (the ZIPs themselves were not kept — 109 MB) |
 
 **To verify nothing has changed:**
 
@@ -1000,20 +1724,23 @@ node export_runner.js check          # or: node export_runner.js check fast
 ```
 
 then compare each run's `sha256` in `baseline_check/_summary.json` against
-`baseline_hx8_summary.json`. `fast` skips the two image-heavy runs (~4 min saved) and is
+`baseline_fmt_summary.json`. `fast` skips the two image-heavy runs (~4 min saved) and is
 for iteration only — **the full 8 are required before calling a slice done**.
 
-**Reference hashes (post-WP1, post-HX-6, post-HX-8 — the current correct output):**
+**Reference hashes — RE-BASELINED 2026-08-04** after the numeric display rounding
+(section 4.9). The previous post-HX-8 set is superseded; only `05_rtt` and
+`08_uwponly_stub` are unchanged from it, because RTT's physical fields are all categorical
+and the stub path has no bodies.
 
 | Run | Files | Bytes | SHA-256 |
 |---|---|---|---|
-| `01_mgt2e_real_images` | 1307 | 24636912 | `d7776e6da43712b1d6013617032a0241aca474866e94e7c92a624a32a15a7c70` |
-| `02_mgt2e_real_nosub` | 1193 | 1856566 | `0d5eea51abfc7ee368495791821f6b88c7213bf0d615619c6219a571ed2d82c7` |
-| `03_ct` | 1054 | 1377939 | `46e5ec7f4d8789a36a75356b1f10ebf9383a818528b9b58e2c4d9a8d651aefa5` |
-| `04_t5` | 906 | 1299370 | `03360de8e8c1e3a246f2c2f6b006d789a223e812fd6ebba3c51588eacd7deaec` |
+| `01_mgt2e_real_images` | 1307 | 24636604 | `1e1f0c4b54d6836db56f04dcadc2413833595e78d4b84e946b6c879434748dc4` |
+| `02_mgt2e_real_nosub` | 1193 | 1856258 | `22e99f4e8439396d6334ac0950d5e7cd8e702b902bb3f4178643510907ad537c` |
+| `03_ct` | 1054 | 1372227 | `25036da93409c8c98d75ffd7cfc4de2e1e529afe2a041cc441414d6888bc73f8` |
+| `04_t5` | 906 | 1298196 | `5377f14329ecf6d39f20aabc73136d6a6278667398d9f40f751497226269ed74` |
 | `05_rtt` | 566 | 877887 | `28ca7a184c3da26ece3833f021ad6444c1bb224e44c86eb17b75b27326315d47` |
-| `06_aow` | 594 | 1043119 | `84b313eceb7e04fc0c70e97843f47589c05a58e15f0907431dc85bbc04d93845` |
-| `07_mgt2e_gen_mercator` | 1217 | 82918743 | `eebc457aad1451b2d1e90fab00703d05bf49fefaa832c62d18a9dacba98abd53` |
+| `06_aow` | 594 | 1025528 | `1d0e0198718aae0c0a1249d6caf21bec4382844c5133449cc86982b1819c7403` |
+| `07_mgt2e_gen_mercator` | 1217 | 82891242 | `785aa0c83362066c0ba73e7f9021781996f8937dddb3b14ed8c8d14dd911ec03` |
 | `08_uwponly_stub` | 42 | 256350 | `a5b886a461cd2c8416e1c58f10499fc17df8f4a9882be842cc469e55654f8034` |
 
 These hashes are also duplicated here in the manifest on purpose: if `.tmp/` is ever
@@ -1124,6 +1851,102 @@ safety net is gone. Replace it with:
   viewport widths — no previous check compared geometry. Full regression re-run:
   all-engine 6/6, merge, style/print, map, real-UI, Obsidian guard 8/8 byte-identical.
 
+- **2026-08-03** — **Release 2 planning opened.** Version bumped to v0.17.0.1
+  ("Player Fog of War Exports"). HX-2, HX-3, HX-4 and HX-5 put to Sean and answered, plus
+  the withheld-vs-absent question parked in 4.2.4 — all five recorded in 5.3. HX-4 came
+  back stronger than assumed (**nothing** is unconditionally visible), which makes page
+  filenames and the index tables disclosure surfaces in their own right. HX-1 sized
+  against the code rather than estimated: **194 field emissions, 111 distinct labels**.
+  Draft tagging table created at `directives/fog_of_war_field_tags.md` — only the ~8
+  fields the ladder names explicitly are pre-filled. No code written.
+- **2026-08-03 (2)** — **HX-1 CLOSED; Release 2 fully unblocked.** Roughly twenty
+  sequenced questions, one at a time at Sean's request so each answer could shape the
+  next. Per-body fields were assigned by **category rather than field** (eight groups
+  across all five engines) — see §3.5 of the tagging table, the authoritative answer key.
+  Sean took the strict option at nearly every UWP-adjacent question, so low-level exports
+  are deliberately sparse (a level (b) subsector index is two columns wide); §1.10a records
+  that this is intended. Sequencing surfaced **four leaks a field-by-field pass would have
+  missed**: star names embed the system name (§3.11a); orrery images carry body labels as
+  pixels (§9.2a); Travel Zone's absence already encodes "Green", so gating it would have
+  *misreported* Red systems as safe (§1.6a); and the mainworld's name leaks via
+  `resolveSystemName`'s fallback (§1.10b). One new ladder rung was added — **level (0)
+  "Unknown"** — because (a) was otherwise an unavoidable baseline, contradicting HX-4.
+  No code written.
+- **2026-08-03 (3)** — **Derived-value rule reversed; HX-1a cancelled.** The
+  input-inheritance rule adopted earlier the same day (derived fields auto-appear once all
+  their inputs are visible) was replaced by **every field assigned independently** — a
+  derived value is shown only when explicitly called out. Sean's call, made before any
+  code was written. Consequences: WP5 needs no dependency graph, just a flat lookup;
+  HX-1a (extracting a per-engine derivation map from ~15,000 lines of engine code) was
+  started and immediately stopped, producing no findings and needing none; Gravity, Mass
+  and Density were assigned **(e)** explicitly; Trade Codes became an explicit **(g)**,
+  same outcome as before; and the Habitability conflict dissolved, leaving Group 6's
+  **(f)** standing. §11.1 carries the revision history so the rule is not silently
+  restored. **Release 2 now has nothing outstanding.** No code written.
+- **2026-08-03 (4)** — **WP4 complete.** `js/disclosure.js` (new, 155 lines) — per-hex
+  `state.disclosure`, `DisclosureModel.atLeast()` as the primitive WP5/WP6 build on, and a
+  bulk-assign modal reached from ASSIGN → Assign Player Disclosure. Modelled on
+  `regions.js` throughout. **Save/load required no changes** — `io_manager.js` serialises
+  hex states verbatim, so the field persists for free (verified, not assumed). Default is
+  `'g'` so existing sectors are unaffected. 38/38 in-browser checks
+  (`.tmp/html_export_harness/disclosure_check.js`), including a real Ctrl+Z undo; Obsidian
+  guard 6/6 byte-identical. A screenshot caught a ragged-staircase layout bug that all 36
+  prior checks passed — see 4.4. **Next: WP5.**
+- **2026-08-03 (5)** — **WP5 slices 5a and 5b complete.** 5a: the field disclosure tag
+  table and `filterBlocks()` in `export_core.js`, keyed on (context, label) because `Mass`,
+  `Eccentricity` and `Orbit ID` genuinely differ between star and world. Fails closed, with
+  every omission recorded so the harness can assert none exist; completeness proven over
+  1979 bodies and 2620 moons. `Rings` and `Orbit (⌀)` were raised with Sean rather than
+  defaulted; T5's role-labelled overview lines needed a per-block `lvl` override. 5b: both
+  exporters wired, notes and level-0 systems suppressed, and **five non-block leaks** found
+  and closed — including `data-uwp` on the root element and the map hotspot's SVG `<title>`,
+  neither of which appears in rendered body copy. 24/24 + 40/40 in-browser; Obsidian guard
+  6/6 byte-identical; all-engine 6/6. **The map PNG still leaks — that is WP6.**
+  **Next: 5c (generic labels and filenames).**
+- **2026-08-03 (6)** — **WP5 slice 5c complete.** Generic labels for worlds/moons (g),
+  stars (d) and systems (d), falling back to the exporter's existing unnamed-body
+  vocabulary so a withheld name is indistinguishable from an absent one. **Filenames are
+  gated at the NAME, not separately** — the first attempt gave the filename helpers their
+  own level and would have broken every Obsidian wikilink, since Obsidian resolves
+  `[[Name]]` by name. A screenshot then found mainworld identification leaking three ways
+  (`w.type` = literal 'Mainworld', a `<p class="tag">`, and a highlighted CSS class), none
+  of them a field; the first fix for it missed the star section's own Type column. Leak
+  check 40 → **54 assertions**, now including real-name sweeps over 38 systems / 1069 body
+  names and link integrity at four levels. Obsidian guard 6/6 byte-identical; all-engine
+  6/6; tags 24/24; WP4 model 38/38. **Next: 5d (image gating + orrery re-render).**
+- **2026-08-03 (7)** — **WP5 slice 5d complete.** World images gated at (e), orreries at
+  (d), and the orrery **re-rendered** below (g) with generic labels and no mainworld
+  highlight — the one leak no filter can reach, since those labels are pixels.
+  `SystemViewer.renderSnapshot` took an optional `{ level }`; the first attempt used two
+  booleans and drew "Star A" at (d)-(f) while the page said "K0 V A", found by looking at
+  the PNG. Passing the level instead makes image and page share ExportCore's display-name
+  helpers, so they cannot diverge. Leak check 54 → **67**, including that the (d) orrery
+  differs in bytes from GM and the (g) one matches it exactly. **Full 8-run Obsidian guard
+  8/8 byte-identical**, both image-heavy runs included; all-engine 6/6; WP3 map checks
+  pass. **Next: 5e (export-modal UI) — the last slice of WP5.**
+- **2026-08-03 (8)** — **WP5 COMPLETE (slice 5e).** A VERSION dropdown in the existing
+  Export Wiki modal (D6, one modal not two), applying to **both** formats — the Obsidian
+  wiki gains fog of war for free, as 4.1 predicted. Referee is the default; the players'
+  version is announced three ways (button label, `_PLAYERS` in the ZIP name, completion
+  text) because sharing the wrong ZIP is unrecoverable. An amber warning names the
+  **unfiltered map image** and its workaround — leave it until WP6. 17/17 through the real
+  three-deep UI on a deliberately mixed-level subsector; exactly the level-0 systems
+  produced no page. **Obsidian guard 8/8 byte-identical**; leak 67/67, tags 24/24, model
+  38/38, all-engine 6/6, slice-2e UI checks pass. **Next: WP6 — the fogged map, the last
+  real leak.**
+- **2026-08-04** — **WP6 complete. RELEASE 2 COMPLETE.** `renderer.js` gained a per-hex
+  disclosure gate (`setMapDisclosure`/`_mapShow`), installed by `captureSubsector` for one
+  frame inside a try/finally; null for every normal call, so the on-screen map and referee
+  export are untouched. Hexes at (0) are skipped entirely; gas giant at (c), name at (d),
+  UWP/trade codes/starport/bases at (g). The **development view is gated too**, since
+  `devView` is a toggle the capture inherits. **Corrected 5.2.1**: the leak was *not*
+  toggle-dependent — the labels gate only on `zoom > 0.4` and `capZoom` is ~1.09
+  regardless of the GM's zoom, so it was unconditional; there was never a setting that
+  suppressed them. Leak check 67 → **77** with byte-comparison assertions mirroring the
+  orrery's, plus a mixed-level map confirmed by eye. Obsidian guard **8/8**; WP3 map
+  checks, all-engine 6/6, UI 17/17 all pass. The modal note was rewritten — it no longer
+  warns about an unfiltered map, because there isn't one.
+
 ---
 
 ## 9. Consolidated Open Items
@@ -1133,13 +1956,32 @@ Nothing here is a blocker for WP2 unless marked. Ordered by when it needs answer
 | ID | Item | Needs | Blocks |
 |---|---|---|---|
 | **CAVEAT** | ~~Records may not carry everything HTML needs~~ **CLOSED 2026-08-01 (slice 2b)** — parity verified across all five engines, every page, plus 3294 UWP values exactly. No data loss | — | — |
-| **HX-3** | Disclosure level per-system, or per-body override? | Sean | **WP4** data model |
-| **HX-2** | Do worlds have names before they have stats? | Sean | WP5 |
-| **HX-4** | Which fields are always visible regardless of level? | Sean | WP5 |
-| **HX-5** | Separate player-facing notes field, distinct from GM notes? | Sean — cheap now, awkward later | WP4/WP5 |
-| **HX-1** | Every emitted field needs a disclosure-level assignment (100+ fields) | Sean to mark up a draft tagging table | **WP5** — the largest single unknown |
+*(Nothing open. Release 2 has no unanswered questions.)*
 
 **Closed:**
+
+- **HX-1a** — **CANCELLED 2026-08-03, do not do this work.** It existed only to support
+  the input-inheritance rule for derived fields; Sean reversed that rule the same day, so
+  nothing consults a derivation map. Started and stopped immediately; no findings
+  produced, none needed. Reopen only if input-inheritance is ever reinstated — see §11.1a
+  of the tagging table for the two traps that still apply if so.
+
+- **HX-1** — **CLOSED 2026-08-03.** Every field, image, map element and index column now
+  carries a level. Agreed with Sean across ~20 sequenced questions in one session; the
+  answer key is §3.5 of `directives/fog_of_war_field_tags.md`, with §12 carrying the
+  WP5 implementation checklist. **WP5 is unblocked, with nothing outstanding** — HX-1a
+  was cancelled the same day when the derived-value rule was reversed.
+
+- **HX-2** — worlds have **generic labels until (g)**. Answered 2026-08-03, see 5.3.
+  Carries a filename consequence for world images at (e)/(f).
+- **HX-3** — **per-system only**, no per-body override. Answered 2026-08-03, see 5.3.
+  **WP4 is unblocked** and can start independently of HX-1.
+- **HX-4** — **nothing is unconditionally visible.** Answered 2026-08-03, see 5.3. Sean
+  rejected all four candidates; system name, hex, travel zone, allegiance and region are
+  all ordinary gated fields. Do not reintroduce an always-visible set.
+- **HX-5** — **no player-facing notes field.** Answered 2026-08-03, see 5.3.
+- **Withheld vs absent** — **show nothing, no placeholder.** Answered 2026-08-03, see 5.3.
+  This closes the "revisit for Release 2" note parked in 4.2.4.
 
 - **Q1 — index table columns.** Decided 2026-08-01: **Hex, System, UWP, Starport, TL,
   Trade Codes, GG, Bases, Zone**, sorted by hex ascending, with empty columns dropped

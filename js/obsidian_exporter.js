@@ -105,12 +105,60 @@ const ObsidianExporter = (() => {
     // notesBlocks() / systemOverviewBlocks() — both are shared with the HTML
     // exporter, and notes are a Release 2 leak gate (see manifest 5.2.4).
 
+    // ── Release 2: fog of war (WP5 slice 5b) ─────────────────────────────────
+    // `_playerMode` is false for every existing call, so _levelFor() returns
+    // null, ExportCore.filterBlocks() returns its input array unchanged, and the
+    // GM export is byte-identical. That is the property the regression guard
+    // checks — do not make the null path do work.
+    let _playerMode = false;
+
+    function _levelFor(hexId) {
+        if (!_playerMode) return null;
+        return (typeof window !== 'undefined' && window.DisclosureModel)
+            ? window.DisclosureModel.get(hexId)
+            : 'g';
+    }
+
+    // Shorthand used at every formatter call site below.
+    const _F = (blocks, context, lvl) => ExportCore.filterBlocks(blocks, context, lvl);
+
+    // Is a whole block of content permitted? `lvl` null is the GM path.
+    // Used for things gated as a unit rather than field by field — the UWP
+    // breakdown table, images, whole sections.
+    const _show = (lvl, required) =>
+        !lvl || (window.DisclosureModel
+                 ? window.DisclosureModel.atLeast(lvl, required)
+                 : false);
+
+    // Referee notes NEVER appear in a players' export, at any level (HX-5:
+    // there is no player-facing notes field either, so nothing replaces them).
+    function _notesFor(state) {
+        return _playerMode ? [] : ExportCore.notesBlocks(state);
+    }
+
+    // A body's Type column. SystemViewer.normalizeSystem overwrites a
+    // mainworld's real type with the literal 'Mainworld'
+    // (system_viewer.js:265), and mainworld identification is (g) (§1.10).
+    // The annotation is therefore dropped for EVERY body below (g), not just
+    // the mainworld — blanking one row would single it out just as clearly,
+    // and the real type is not recoverable without guessing. The body's own
+    // generic name ("World 3", "Giant 1") still carries the category.
+    function _typeAnn(body, lvl) {
+        return _show(lvl, 'g') ? (body.type || '—') : '—';
+    }
+
     // ── Markdown builders ─────────────────────────────────────────────────────
 
     function _buildSubsectorIndex(sectorName, subsectorChar, systems, mapImageFilename) {
         const rows = systems.map(s => {
-            const name = _resolveSystemName(s.state);
-            const uwp  = _resolveUWP(s.state);
+            const lv   = _levelFor(s.hexId);
+            const name = _resolveSystemName(s.state, lv, s.hexCode);
+            // UWP is (g); below it the column is blank rather than omitted,
+            // because a Markdown table must keep its column count.
+            const uwp  = _show(lv, 'g') ? _resolveUWP(s.state) : '';
+            // `name` is already the disclosed form ("System 1910" below d),
+            // and the orchestrator names the file from the same string, so one
+            // link shape works at every level.
             const link = `[[${_sanitize(name)} (${s.hexCode})]]`;
             return `| ${s.hexCode} | ${link} | ${uwp} |`;
         });
@@ -146,7 +194,8 @@ const ObsidianExporter = (() => {
     }
 
     function _buildSystemHub(hexId, hexCode, sectorName, subsectorChar, state, normalized, imageFilename, subsectorLink) {
-        const systemName = _resolveSystemName(state);
+        const _LV = _levelFor(hexId);
+        const systemName = _resolveSystemName(state, _LV, hexCode);
         const edition    = normalized.edition || 'Unknown';
         const allegiance = state.allegiance || '—';
         const stars      = normalized.stars  || [];
@@ -156,15 +205,18 @@ const ObsidianExporter = (() => {
 
         const isMultiStar = stars.length > 1;
         const starRows = stars.map((s, i) => {
-            const sName = _starDisplayName(s, i, isMultiStar);
+            const sName = _starDisplayName(s, i, isMultiStar, _LV);
             const link  = `[[${_sanitize(systemName)} - ${_sanitize(sName)} (${hexCode})]]`;
-            return `| ${link} | ${s.sType}${s.subType ?? ''} ${s.sClass} | ${s.role} |`;
+            const spec = _show(_LV, 'b') ? `${s.sType}${s.subType ?? ''} ${s.sClass}` : '—';
+            return `| ${link} | ${spec} | ${_show(_LV, 'b') ? s.role : '—'} |`;
         });
 
-        const worldRows = worlds.map((w, i) => {
-            const wName = _worldDisplayName(w, i);
+        // Body count is (d): below it the table has no rows at all. Blanking the
+        // cells would still disclose how many bodies exist. See manifest 4.7.
+        const worldRows = !_show(_LV, 'd') ? [] : worlds.map((w, i) => {
+            const wName = _worldDisplayName(w, i, _LV);
             const link  = `[[${_sanitize(systemName)} - ${_sanitize(wName)} (${hexCode})]]`;
-            return `| ${link} | ${w.type} | ${w.uwp || '—'} |`;
+            return `| ${link} | ${_typeAnn(w, _LV)} | ${_show(_LV, 'g') ? (w.uwp || '—') : '—'} |`;
         });
 
         const lines = [
@@ -192,13 +244,13 @@ const ObsidianExporter = (() => {
             lines.push('', `![[${imageFilename}]]`);
         }
 
-        lines.push(..._mdRender(ExportCore.systemOverviewBlocks(state)));
+        lines.push(..._mdRender(_F(ExportCore.systemOverviewBlocks(state), 'system', _LV)));
 
         // Pass 1: mainworld is a top-level world
         let mwLink = null;
         if (mainworld) {
             const mwIdx  = worlds.indexOf(mainworld);
-            const mwName = _worldDisplayName(mainworld, mwIdx);
+            const mwName = _worldDisplayName(mainworld, mwIdx, _LV);
             mwLink = `[[${_sanitize(systemName)} - ${_sanitize(mwName)} (${hexCode})]]`;
         } else {
             // Pass 2: mainworld is a moon of another body (lunar mainworld)
@@ -207,8 +259,8 @@ const ObsidianExporter = (() => {
                 for (let mi = 0; mi < moons.length; mi++) {
                     const moon = moons[mi];
                     if (moon.type === 'Mainworld' || moon.isLunarMainworld) {
-                        const parentName = _worldDisplayName(worlds[wi], wi);
-                        const moonName   = _moonDisplayName(moon, mi);
+                        const parentName = _worldDisplayName(worlds[wi], wi, _LV);
+                        const moonName   = _moonDisplayName(moon, mi, _LV);
                         mwLink = `[[${_sanitize(systemName)} - ${_sanitize(parentName)} - ${_sanitize(moonName)} (${hexCode})]]`;
                         break outer;
                     }
@@ -216,7 +268,7 @@ const ObsidianExporter = (() => {
             }
         }
         if (mwLink) {
-            lines.push(`**Mainworld:** ${mwLink}  `);
+            if (_show(_LV, 'g')) lines.push(`**Mainworld:** ${mwLink}  `);
         }
 
         lines.push(
@@ -234,24 +286,35 @@ const ObsidianExporter = (() => {
             ...(worldRows.length > 0 ? worldRows : ['| — | — | — |']),
         );
 
-        lines.push(..._mdRender(ExportCore.notesBlocks(state)));
+        lines.push(..._mdRender(_notesFor(state)));
 
         return lines.join('\n');
     }
 
     function _buildStarFile(star, starIdx, hexId, hexCode, sectorName, systemName, worlds, isMultiStar, state, subsectorLink) {
-        const starName   = _starDisplayName(star, starIdx, isMultiStar);
+        const _LV = _levelFor(hexId);
+        const starName   = _starDisplayName(star, starIdx, isMultiStar, _LV);
         const systemLink = `[[${_sanitize(systemName)} (${hexCode})]]`;
         const isPrimary  = starIdx === 0;
 
-        const orbitingRows = worlds
+        // Same (d) gate as the hub: the row count IS the body count.
+        const orbitingRows = !_show(_LV, 'd') ? [] : worlds
             .filter(w => (w.parentStarIdx ?? 0) === starIdx)
             .map(w => {
-                const wName = _worldDisplayName(w, worlds.indexOf(w));
+                const wName = _worldDisplayName(w, worlds.indexOf(w), _LV);
                 const link  = `[[${_sanitize(systemName)} - ${_sanitize(wName)} (${hexCode})]]`;
-                return `| ${link} | ${w.type} | ${w.uwp || '—'} |`;
+                return `| ${link} | ${_typeAnn(w, _LV)} | ${_show(_LV, 'g') ? (w.uwp || '—') : '—'} |`;
             });
 
+        // YAML frontmatter is the Obsidian counterpart of the HTML page's root
+        // data-* attributes and leaks exactly the same way — machine-readable
+        // metadata that no rendered-text check would ever see. `data-uwp` was
+        // this same bug on the HTML side (4.5.4).
+        //
+        // Spectral type, luminosity class and role are stellar detail, (b), but
+        // star PAGES exist from (a). Without these gates a level-(a) export
+        // published every star's spectral class, in the frontmatter AND in the
+        // body. Found 2026-08-04 by the Obsidian-specific check.
         const lines = [
             '---',
             'type: star',
@@ -260,30 +323,38 @@ const ObsidianExporter = (() => {
             `sector: ${_yamlStr(sectorName)}`,
             `system: ${_yamlStr(systemName)}`,
             `name: ${_yamlStr(starName)}`,
-            `spectralType: "${star.sType}${star.subType ?? ''}"`,
-            `luminosityClass: "${star.sClass}"`,
-            `role: "${star.role}"`,
+        ];
+        if (_show(_LV, 'b')) {
+            lines.push(`spectralType: "${star.sType}${star.subType ?? ''}"`);
+            lines.push(`luminosityClass: "${star.sClass}"`);
+            lines.push(`role: "${star.role}"`);
+        }
+        lines.push(
             '---',
             '',
             `# ${starName}`,
             '',
             `**Subsector:** ${subsectorLink}  `,
             `**System:** ${systemLink}  `,
-            `**Role:** ${star.role}  `,
-            `**Type:** ${star.sType}${star.subType ?? ''} ${star.sClass}`,
-        ];
+        );
+        // Hand-written lines, NOT block-model output, so filterBlocks() cannot
+        // see them — the same trap as the HTML exporter's star <dl>.
+        if (_show(_LV, 'b')) {
+            lines.push(`**Role:** ${star.role}  `);
+            lines.push(`**Type:** ${star.sType}${star.subType ?? ''} ${star.sClass}`);
+        }
 
         // Edition-aware star physical data
         if (state) {
             const rawStar = _findRawStar(state, starIdx);
             if (state.mgtSystem) {
-                lines.push(..._mdRender(_formatMgtStarFields(rawStar, isPrimary)));
+                lines.push(..._mdRender(_F(_formatMgtStarFields(rawStar, isPrimary), 'star', _LV)));
             } else if (state.ctSystem) {
-                lines.push(..._mdRender(_formatCtStarFields(rawStar, starIdx)));
+                lines.push(..._mdRender(_F(_formatCtStarFields(rawStar, starIdx), 'star', _LV)));
             } else if (state.t5System) {
-                lines.push(..._mdRender(_formatT5StarFields(rawStar, starIdx)));
+                lines.push(..._mdRender(_F(_formatT5StarFields(rawStar, starIdx), 'star', _LV)));
             } else {
-                lines.push(..._mdRender(ExportCore.fallbackStarBlocks(star)));
+                lines.push(..._mdRender(_F(ExportCore.fallbackStarBlocks(star), 'star', _LV)));
             }
         }
 
@@ -303,12 +374,13 @@ const ObsidianExporter = (() => {
     }
 
     function _buildWorldFile(world, worldIdx, hexId, hexCode, sectorName, systemName, stars, starIdx, imageFilename, state, rawWorld, subsectorLink) {
-        const worldName  = _worldDisplayName(world, worldIdx);
+        const _LV = _levelFor(hexId);
+        const worldName  = _worldDisplayName(world, worldIdx, _LV);
         const systemLink  = `[[${_sanitize(systemName)} (${hexCode})]]`;
         const isMultiStar = stars.length > 1;
         const star        = stars[starIdx];
         const starName    = star
-            ? _starDisplayName(star, starIdx, isMultiStar)
+            ? _starDisplayName(star, starIdx, isMultiStar, _LV)
             : `Star ${starIdx + 1}`;
         const starLink    = `[[${_sanitize(systemName)} - ${_sanitize(starName)} (${hexCode})]]`;
         const travelZone  = ExportCore.travelZone(world);
@@ -316,7 +388,7 @@ const ObsidianExporter = (() => {
 
         const lines = [
             '---',
-            `type: ${isMainworld ? 'mainworld' : 'world'}`,
+            `type: ${(isMainworld && _show(_LV, 'g')) ? 'mainworld' : 'world'}`,
             `hexId: ${_yamlStr(hexId)}`,
             `hexCode: ${_yamlStr(hexCode)}`,
             `sector: ${_yamlStr(sectorName)}`,
@@ -324,10 +396,12 @@ const ObsidianExporter = (() => {
             `name: ${_yamlStr(worldName)}`,
         ];
 
-        if (world.uwp)        lines.push(`uwp: ${_yamlStr(world.uwp)}`);
-        if (world.starport)   lines.push(`starport: "${world.starport}"`);
-        if (world.tl != null) lines.push(`tl: "${world.tl}"`);
-        const tc = world.tradeCodes || [];
+        // Frontmatter gates, matching the page body. UWP, starport and trade
+        // codes are (g); tech level is (f). Travel zone is (a) and stays.
+        if (world.uwp && _show(_LV, 'g'))        lines.push(`uwp: ${_yamlStr(world.uwp)}`);
+        if (world.starport && _show(_LV, 'g'))   lines.push(`starport: "${world.starport}"`);
+        if (world.tl != null && _show(_LV, 'f')) lines.push(`tl: "${world.tl}"`);
+        const tc = _show(_LV, 'g') ? (world.tradeCodes || []) : [];
         lines.push(`tradeCodes: [${tc.map(c => `"${c}"`).join(', ')}]`);
         lines.push(`travelZone: "${travelZone}"`);
         lines.push('---', '');
@@ -343,40 +417,44 @@ const ObsidianExporter = (() => {
             lines.push(`![[${imageFilename}]]`, '');
         }
 
-        if (world.uwp) {
+
+        // The whole UWP breakdown table is (g) — never partial. See
+        // fog_of_war_field_tags §7.2: a half-filled table advertises how many
+        // digits are being withheld, which breaks "withheld = absent".
+        if (world.uwp && _show(_LV, 'g')) {
             lines.push(..._mdRender([_h(2, 'UWP Breakdown'), ...ExportCore.uwpTableBlocks(world.uwp), _GAP]));
         }
 
-        lines.push(..._mdRender(ExportCore.detailBlocks(world)));
+        lines.push(..._mdRender(_F(ExportCore.detailBlocks(world), 'details', _LV)));
 
         // Edition-aware physical data
         if (state && rawWorld) {
             if (state.mgtSystem) {
-                lines.push(..._mdRender(_formatMgtWorldFields(rawWorld, isMainworld, state)));
+                lines.push(..._mdRender(_F(_formatMgtWorldFields(rawWorld, isMainworld, state), 'world', _LV)));
             } else if (state.ctSystem) {
-                lines.push(..._mdRender(_formatCtBodyFields(rawWorld.w, rawWorld.o, isMainworld, state)));
+                lines.push(..._mdRender(_F(_formatCtBodyFields(rawWorld.w, rawWorld.o, isMainworld, state), 'world', _LV)));
             } else if (state.t5System) {
-                lines.push(..._mdRender(_formatT5WorldFields(rawWorld.w, rawWorld.o, isMainworld, state)));
+                lines.push(..._mdRender(_F(_formatT5WorldFields(rawWorld.w, rawWorld.o, isMainworld, state), 'world', _LV)));
             } else if (state.rttSystem) {
-                lines.push(..._mdRender(_formatRttBodyFields(rawWorld, isMainworld, state)));
+                lines.push(..._mdRender(_F(_formatRttBodyFields(rawWorld, isMainworld, state), 'world', _LV)));
             } else if (state.aowSystem) {
-                lines.push(..._mdRender(ExportCore.formatAoWBodyFields(rawWorld, isMainworld, state)));
+                lines.push(..._mdRender(_F(ExportCore.formatAoWBodyFields(rawWorld, isMainworld, state), 'world', _LV)));
             }
         } else {
-            lines.push(..._mdRender(ExportCore.fallbackPhysicalBlocks(world)));
+            lines.push(..._mdRender(_F(ExportCore.fallbackPhysicalBlocks(world), 'world', _LV)));
         }
 
         // Socioeconomics (mainworld only)
         if (isMainworld && state) {
-            lines.push(..._mdRender(ExportCore.socioBlocks(state, rawWorld)));
-            lines.push(..._mdRender(ExportCore.notesBlocks(state)));
+            lines.push(..._mdRender(_F(ExportCore.socioBlocks(state, rawWorld), 'socio', _LV)));
+            lines.push(..._mdRender(_notesFor(state)));
         }
 
         const moons = world.moons || [];
         if (moons.length > 0) {
             lines.push('', '## Moons', '', '| Name | UWP |', '|---|---|');
             moons.forEach((m, mi) => {
-                const mName = _moonDisplayName(m, mi);
+                const mName = _moonDisplayName(m, mi, _LV);
                 const link  = `[[${_sanitize(systemName)} - ${_sanitize(worldName)} - ${_sanitize(mName)} (${hexCode})]]`;
                 lines.push(`| ${link} | ${m.uwp || '—'} |`);
             });
@@ -386,7 +464,8 @@ const ObsidianExporter = (() => {
     }
 
     function _buildMoonFile(moon, moonIdx, parentWorldName, hexId, hexCode, sectorName, systemName, imageFilename, state, rawMoon, subsectorLink) {
-        const moonName    = _moonDisplayName(moon, moonIdx);
+        const _LV = _levelFor(hexId);
+        const moonName    = _moonDisplayName(moon, moonIdx, _LV);
         const systemLink  = `[[${_sanitize(systemName)} (${hexCode})]]`;
         const worldLink   = `[[${_sanitize(systemName)} - ${_sanitize(parentWorldName)} (${hexCode})]]`;
         const isLunarMainworld = moon.type === 'Mainworld' || moon.isLunarMainworld;
@@ -402,8 +481,8 @@ const ObsidianExporter = (() => {
             `parentWorld: ${_yamlStr(parentWorldName)}`,
         ];
 
-        if (moon.uwp)        lines.push(`uwp: ${_yamlStr(moon.uwp)}`);
-        if (moon.tl != null) lines.push(`tl: "${moon.tl}"`);
+        if (moon.uwp && _show(_LV, 'g'))        lines.push(`uwp: ${_yamlStr(moon.uwp)}`);
+        if (moon.tl != null && _show(_LV, 'f')) lines.push(`tl: "${moon.tl}"`);
         lines.push('---', '');
 
         lines.push(`# ${moonName}`, '');
@@ -417,32 +496,34 @@ const ObsidianExporter = (() => {
             lines.push(`![[${imageFilename}]]`, '');
         }
 
-        if (moon.uwp) {
+
+        if (moon.uwp && _show(_LV, 'g')) {
             lines.push(..._mdRender([_h(2, 'UWP Breakdown'), ...ExportCore.uwpTableBlocks(moon.uwp), _GAP]));
         }
 
-        lines.push(..._mdRender(ExportCore.detailBlocks(moon)));
+        lines.push(..._mdRender(_F(ExportCore.detailBlocks(moon), 'details', _LV)));
 
-        // Edition-aware physical data
+        // Edition-aware physical data. Context is 'moon' — §5, moons inherit
+        // their parent world's levels, plus the one moon-only field.
         if (state && rawMoon) {
             if (state.mgtSystem) {
-                lines.push(..._mdRender(_formatMgtMoonFields(rawMoon)));
+                lines.push(..._mdRender(_F(_formatMgtMoonFields(rawMoon), 'moon', _LV)));
             } else if (state.ctSystem) {
-                lines.push(..._mdRender(_formatCtSatFields(rawMoon, isLunarMainworld, state)));
+                lines.push(..._mdRender(_F(_formatCtSatFields(rawMoon, isLunarMainworld, state), 'moon', _LV)));
             } else if (state.t5System) {
-                lines.push(..._mdRender(_formatT5SatFields(rawMoon)));
+                lines.push(..._mdRender(_F(_formatT5SatFields(rawMoon), 'moon', _LV)));
             } else if (state.rttSystem) {
-                lines.push(..._mdRender(_formatRttBodyFields(rawMoon, isLunarMainworld, state)));
+                lines.push(..._mdRender(_F(_formatRttBodyFields(rawMoon, isLunarMainworld, state), 'moon', _LV)));
             } else if (state.aowSystem) {
-                lines.push(..._mdRender(ExportCore.formatAoWBodyFields(rawMoon, isLunarMainworld, state)));
+                lines.push(..._mdRender(_F(ExportCore.formatAoWBodyFields(rawMoon, isLunarMainworld, state), 'moon', _LV)));
             }
         } else {
-            lines.push(..._mdRender(ExportCore.fallbackPhysicalBlocks(moon)));
+            lines.push(..._mdRender(_F(ExportCore.fallbackPhysicalBlocks(moon), 'moon', _LV)));
         }
 
         // Socioeconomics for lunar mainworlds
         if (isLunarMainworld && state) {
-            lines.push(..._mdRender(ExportCore.socioBlocks(state, rawMoon)));
+            lines.push(..._mdRender(_F(ExportCore.socioBlocks(state, rawMoon), 'socio', _LV)));
         }
 
         return lines.join('\n');
@@ -451,7 +532,11 @@ const ObsidianExporter = (() => {
     // ── Export orchestrator ───────────────────────────────────────────────────
 
     async function startExport(sectorNum, subsectorChar, options) {
-        const { includeImages, imageProjection, skipAirless, includeSystemImages, useSubfolders, onProgress, onDone, onError } = options || {};
+        const { includeImages, imageProjection, skipAirless, includeSystemImages, useSubfolders, playerVersion, onProgress, onDone, onError } = options || {};
+
+        // Release 2. Absent/false keeps every existing call on the GM path, where
+        // _levelFor() returns null and filterBlocks() is the identity function.
+        _playerMode = !!playerVersion;
 
         const report = (done, total, msg) => onProgress && onProgress(done, total, msg);
 
@@ -461,11 +546,18 @@ const ObsidianExporter = (() => {
             if (parseInt(parts[0]) !== sectorNum) return;
             if (parts[1] !== subsectorChar) return;
             if (!state || state.type === 'EMPTY') return;
+            // Level (0) "Unknown": the system does not appear in a players'
+            // export AT ALL — no page, no index row, no filename. Filtering its
+            // fields would not be enough, because a file called
+            // "Regina (1910).md" proves Regina exists (manifest 5.2.2).
+            if (_playerMode && _levelFor(hexId) === '0') return;
             systems.push({ hexId, hexCode: parts[2], state });
         });
 
         if (systems.length === 0) {
-            onError && onError('No systems found in this subsector.');
+            onError && onError(_playerMode
+                ? 'No systems in this subsector are disclosed to players.'
+                : 'No systems found in this subsector.');
             return;
         }
 
@@ -482,7 +574,8 @@ const ObsidianExporter = (() => {
         let mapImageFilename = null;
         if (typeof captureSubsector !== 'undefined') {
             report(0, systems.length, 'Capturing subsector map image…');
-            const mapPng = await captureSubsector(sectorNum, subsectorChar, 900, 1000);
+            const mapPng = await captureSubsector(sectorNum, subsectorChar, 900, 1000,
+                                                  { disclosure: _playerMode ? _levelFor : null });
             if (mapPng) {
                 mapImageFilename = `${_sanitize(sectorName)} - Subsector ${subsectorChar} - Map.png`;
                 files.push({ name: prefix + 'images/' + mapImageFilename, data: mapPng });
@@ -497,7 +590,8 @@ const ObsidianExporter = (() => {
 
         for (let si = 0; si < systems.length; si++) {
             const { hexId, hexCode, state } = systems[si];
-            const systemName = _resolveSystemName(state);
+            const _oLV = _levelFor(hexId);
+            const systemName = _resolveSystemName(state, _oLV, hexCode);
 
             report(si, systems.length, `Processing ${systemName}…`);
 
@@ -528,8 +622,10 @@ const ObsidianExporter = (() => {
 
             // Optional orrery snapshot image for the system hub page
             let sysImageFilename = null;
-            if (includeSystemImages && typeof SystemViewer !== 'undefined') {
-                const imgData = await SystemViewer.renderSnapshot(state, 900, 500);
+            // Orrery gated at (d); re-rendered with generic labels and no
+            // mainworld highlight below (g) — the labels are pixels (§9.2a).
+            if (includeSystemImages && _show(_oLV, 'd') && typeof SystemViewer !== 'undefined') {
+                const imgData = await SystemViewer.renderSnapshot(state, 900, 500, { level: _oLV });
                 if (imgData) {
                     sysImageFilename = _systemFilename(systemName, hexCode, 'png');
                     files.push({ name: prefix + 'images/' + sysImageFilename, data: imgData });
@@ -543,22 +639,28 @@ const ObsidianExporter = (() => {
             const isMultiStar = stars.length > 1;
             for (let starI = 0; starI < stars.length; starI++) {
                 const star     = stars[starI];
-                const starName = _starDisplayName(star, starI, isMultiStar);
+                const starName = _starDisplayName(star, starI, isMultiStar, _oLV);
                 const starMd   = _buildStarFile(star, starI, hexId, hexCode, sectorName, systemName, worlds, isMultiStar, state, subsectorLink);
                 files.push({ name: prefix + _bodyFilename(systemName, starName, hexCode, 'md'), data: enc.encode(starMd) });
             }
 
-            // Worlds and moons
-            for (let wi = 0; wi < worlds.length; wi++) {
+            // Worlds and moons — NO body files at all below (d). In this
+            // exporter each body is its own .md, so the file listing alone
+            // discloses the body count and type ("… - Giant 3 (1910).md").
+            // Suppressing the file is the only way to withhold that.
+            for (let wi = 0; _show(_oLV, 'd') && wi < worlds.length; wi++) {
                 const world     = worlds[wi];
-                const worldName = _worldDisplayName(world, wi);
+                const worldName = _worldDisplayName(world, wi, _oLV);
                 const starIdx   = world.parentStarIdx ?? 0;
 
                 // Look up raw world for extended fields
                 const rawWorld = _findRawWorld(state, world);
 
                 let imageFilename = null;
-                const wantImage = includeImages && _canRenderImage(world) &&
+                // A rendered world is a picture of its hydrographics and
+                // atmosphere — both (e) — so it gates at (e) whatever the
+                // "include world images" checkbox says (§5.2.3 / §9.1).
+                const wantImage = includeImages && _show(_oLV, 'e') && _canRenderImage(world) &&
                                   !(skipAirless && _isAirless(world));
                 if (wantImage) {
                     const imgData = await _renderWorldImage(world, `${hexId}-w${wi}`, imageProjection);
@@ -574,13 +676,13 @@ const ObsidianExporter = (() => {
                 // Moons
                 for (let mi = 0; mi < (world.moons || []).length; mi++) {
                     const moon     = world.moons[mi];
-                    const moonName = _moonDisplayName(moon, mi);
+                    const moonName = _moonDisplayName(moon, mi, _oLV);
 
                     // Look up raw moon for extended fields
                     const rawMoon = _findRawMoon(state, rawWorld, moon, mi);
 
                     let moonImageFilename = null;
-                    const wantMoonImage = includeImages && _canRenderImage(moon) &&
+                    const wantMoonImage = includeImages && _show(_oLV, 'e') && _canRenderImage(moon) &&
                                          !(skipAirless && _isAirless(moon));
                     if (wantMoonImage) {
                         const imgData = await _renderWorldImage(moon, `${hexId}-w${wi}-m${mi}`, imageProjection);
@@ -604,7 +706,7 @@ const ObsidianExporter = (() => {
         const zipData = _buildZip(files);
         downloadBlob(
             zipData,
-            `${_sanitize(sectorName)}_Subsector_${subsectorChar}_Wiki.zip`,
+            `${_sanitize(sectorName)}_Subsector_${subsectorChar}_Wiki${_playerMode ? '_PLAYERS' : ''}.zip`,
             'application/zip'
         );
 

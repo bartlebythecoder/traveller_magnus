@@ -1051,6 +1051,35 @@ const PlanetRenderer = (() => {
         return 'Hot';
     }
 
+    // ── Image seed ────────────────────────────────────────────────────────────
+    //
+    // THE single definition of a body's image seed. Every surface that renders
+    // a world must build its seed through here, or the same world renders as a
+    // different planet depending on where you look at it.
+    //
+    // Keyed on the body's NAME, not its position in a list. The obvious scheme
+    // — hexId + list index — cannot work: the hex editor's accordion walks a
+    // per-star tree sorted by AU, while the exporters walk the flattened
+    // SystemViewer.normalizeSystem().worlds, and for CT, T5 and RTT those are
+    // different traversals of different structures with no shared index. (CT,
+    // T5 and RTT do not populate `sys.worlds` at all.) Reconciling them would
+    // mean reimplementing all five normalizers inside hex_editor.js — the
+    // parallel-path pattern System Viewer Rule 3 exists to prevent.
+    //
+    // Names were verified unique within a system across the reference fixture:
+    // 4599 bodies, 239 systems, all five engines, ZERO duplicates. Only 10
+    // bodies (MgT2E worlds) were unnamed, which is what `fallback` is for.
+    // Re-run .tmp/html_export_harness/seedname_check.js if that assumption is
+    // ever in doubt.
+    //
+    // Seeds read RAW body data, never a disclosed/display name, so a players'
+    // fog-of-war export and the referee's export of the same world stay
+    // byte-identical.
+    function imageSeed(hexId, body, fallback) {
+        const name = (body && typeof body.name === 'string') ? body.name.trim() : '';
+        return `${hexId || '0000'}-${name || fallback || 'w0'}`;
+    }
+
     // ── Entry point ───────────────────────────────────────────────────────────
 
     function renderPlanetHemispheres(canvas, worldData, hexId) {
@@ -1334,7 +1363,7 @@ const PlanetRenderer = (() => {
         ctx.putImageData(imageData, 0, 0);
     }
 
-    return { renderPlanetHemispheres, renderFlatMap, renderApproachFrame, tempBandFromKelvin, test, testMolten, testFlatMap };
+    return { renderPlanetHemispheres, renderFlatMap, renderApproachFrame, imageSeed, tempBandFromKelvin, test, testMolten, testFlatMap };
 
 })();
 

@@ -741,7 +741,7 @@ function populateEditorAccordions(stateObj) {
                             const _phName  = (w.name || '').replace(/"/g, '&quot;');
                             const _phSize  = Number(w.size ?? 0).toString(16);
                             const _phUwp   = (w.uwpSecondary || w.uwp || '').replace(/"/g, '&quot;');
-                            html += `<button data-action="open-ph" data-ph-atm="${_phAtm}" data-ph-hydro="${_phHydro}" data-ph-temp="${_phTemp}" data-ph-temp-k="${_phTempK}" data-ph-name="${_phName}" data-ph-size="${_phSize}" data-ph-uwp="${_phUwp}" style="margin-top:6px;width:100%;padding:4px 8px;background:transparent;border:1px solid #45a29e88;color:#66fcf1;cursor:pointer;font-family:'Share Tech Mono','Courier New',monospace;font-size:10px;letter-spacing:0.06em;border-radius:3px;">◎ &nbsp;VIEW WORLD IMAGE</button>`;
+                            html += `<button data-action="open-ph" data-ph-atm="${_phAtm}" data-ph-hydro="${_phHydro}" data-ph-temp="${_phTemp}" data-ph-temp-k="${_phTempK}" data-ph-name="${_phName}" data-ph-size="${_phSize}" data-ph-uwp="${_phUwp}" data-ph-seed-fb="w${realWidx}" style="margin-top:6px;width:100%;padding:4px 8px;background:transparent;border:1px solid #45a29e88;color:#66fcf1;cursor:pointer;font-family:'Share Tech Mono','Courier New',monospace;font-size:10px;letter-spacing:0.06em;border-radius:3px;">◎ &nbsp;VIEW WORLD IMAGE</button>`;
                         }
                     }
 
@@ -842,7 +842,7 @@ function populateEditorAccordions(stateObj) {
                                 const _mphName  = (m.name || '').replace(/"/g, '&quot;');
                                 const _mphSize  = Number(m.size ?? 0).toString(16);
                                 const _mphUwp   = (m.uwpSecondary || m.uwp || '').replace(/"/g, '&quot;');
-                                html += `<button data-action="open-ph" data-ph-atm="${_mphAtm}" data-ph-hydro="${_mphHydro}" data-ph-temp="${_mphTemp}" data-ph-temp-k="${_mphTempK}" data-ph-name="${_mphName}" data-ph-size="${_mphSize}" data-ph-uwp="${_mphUwp}" style="margin-top:6px;width:100%;padding:4px 8px;background:transparent;border:1px solid #45a29e88;color:#66fcf1;cursor:pointer;font-family:'Share Tech Mono','Courier New',monospace;font-size:10px;letter-spacing:0.06em;border-radius:3px;">◎ &nbsp;VIEW WORLD IMAGE</button>`;
+                                html += `<button data-action="open-ph" data-ph-atm="${_mphAtm}" data-ph-hydro="${_mphHydro}" data-ph-temp="${_mphTemp}" data-ph-temp-k="${_mphTempK}" data-ph-name="${_mphName}" data-ph-size="${_mphSize}" data-ph-uwp="${_mphUwp}" data-ph-seed-fb="w${realWidx}-m${moonIdx}" style="margin-top:6px;width:100%;padding:4px 8px;background:transparent;border:1px solid #45a29e88;color:#66fcf1;cursor:pointer;font-family:'Share Tech Mono','Courier New',monospace;font-size:10px;letter-spacing:0.06em;border-radius:3px;">◎ &nbsp;VIEW WORLD IMAGE</button>`;
                             }
 
                             if (isMoonMainworld) {
@@ -1986,7 +1986,11 @@ window.handleT5ZoneChange = function (el) {
 // WORLD IMAGE PANEL
 // =============================================================================
 
-function openBodyImagePanel(worldData, label) {
+// `seedFallback` is a positional suffix used only when the body has no name;
+// see PlanetRenderer.imageSeed for why the seed is name-based.
+function openBodyImagePanel(worldData, label, seedFallback) {
+    const _seed = PlanetRenderer.imageSeed(editingHexId, worldData, seedFallback);
+
     const existing = document.getElementById('world-image-panel');
     if (existing) existing.remove();
 
@@ -2026,7 +2030,7 @@ function openBodyImagePanel(worldData, label) {
     });
     openMapBtn.addEventListener('click', () => {
         panel.remove();
-        openFlatMapPanel(worldData, editingHexId, label);
+        openFlatMapPanel(worldData, _seed, label, editingHexId);
     });
 
     const closeBtn = document.createElement('button');
@@ -2047,7 +2051,7 @@ function openBodyImagePanel(worldData, label) {
     panel.append(title, canvas, btnRow);
     document.body.appendChild(panel);
 
-    PlanetRenderer.renderPlanetHemispheres(canvas, worldData, editingHexId);
+    PlanetRenderer.renderPlanetHemispheres(canvas, worldData, _seed);
 }
 
 function openWorldImagePanel() {
@@ -2071,6 +2075,20 @@ function openWorldImagePanel() {
     };
 
     const worldName = worldData.name || editingHexId;
+
+    // Seed from the MAINWORLD BODY's own name, not src.name — they are not
+    // always the same string. RTT names the body "West Odessa VI" while
+    // rttData.name holds the bare system name "West Odessa" (0 of 19 fixture
+    // systems agreed), so seeding off src.name left every RTT mainworld image
+    // mismatched against its export. The exporter seeds from the normalized
+    // body, so reading the same object is what guarantees they agree.
+    let _seedBody = worldData;
+    try {
+        const _norm = SystemViewer.normalizeSystem(stateObj);
+        const _mw   = _norm && (_norm.worlds || []).find(w => w.type === 'Mainworld');
+        if (_mw && _mw.name) _seedBody = _mw;
+    } catch (e) { /* fall back to src.name below */ }
+    const _seed = PlanetRenderer.imageSeed(editingHexId, _seedBody);
 
     const existing = document.getElementById('world-image-panel');
     if (existing) existing.remove();
@@ -2111,7 +2129,7 @@ function openWorldImagePanel() {
     });
     openMapBtn.addEventListener('click', () => {
         panel.remove();
-        openFlatMapPanel(worldData, editingHexId, worldName + '  ·  ' + editingHexId);
+        openFlatMapPanel(worldData, _seed, worldName + '  ·  ' + editingHexId, editingHexId);
     });
 
     const closeBtn = document.createElement('button');
@@ -2132,10 +2150,14 @@ function openWorldImagePanel() {
     panel.append(title, canvas, btnRow);
     document.body.appendChild(panel);
 
-    PlanetRenderer.renderPlanetHemispheres(canvas, worldData, editingHexId);
+    PlanetRenderer.renderPlanetHemispheres(canvas, worldData, _seed);
 }
 
-function openFlatMapPanel(worldData, hexId, titleText) {
+// `seed` is a fully-built PlanetRenderer.imageSeed value, NOT a bare hex id —
+// both callers compute it so the flat map matches the globe it opened from.
+// `hexLabel` is the bare hex id, kept separate because it is printed in the
+// map header where a seed string would be meaningless.
+function openFlatMapPanel(worldData, seed, titleText, hexLabel) {
     const existing = document.getElementById('world-image-panel');
     if (existing) existing.remove();
 
@@ -2208,13 +2230,13 @@ function openFlatMapPanel(worldData, hexId, titleText) {
     // Renders the terrain for the current projection then repaints the header
     // strip. Called on open and on every projection switch.
     function _doRender() {
-        PlanetRenderer.renderFlatMap(canvas, worldData, hexId, { projection: currentProjection });
+        PlanetRenderer.renderFlatMap(canvas, worldData, seed, { projection: currentProjection });
 
         const hCtx    = canvas.getContext('2d');
         const mapData = hCtx.getImageData(0, 0, 800, 400);
 
         const hName  = (worldData.name || '').toUpperCase();
-        const hLine1 = [hName, hexId].filter(Boolean).join('   ');
+        const hLine1 = [hName, hexLabel].filter(Boolean).join('   ');
         const hLine2 = worldData.uwp || '';
         const hLines = [hLine1, hLine2].filter(Boolean);
         const headerH = 46;
@@ -2353,7 +2375,11 @@ function setupHexEditor() {
         };
 
         const label = phName || editingHexId;
-        openBodyImagePanel(worldData, label);
+        // Only consulted for an unnamed body. Written by the MgT2E sites, whose
+        // raw index provably equals the exporter's (verified 76/76 systems);
+        // the other engines' accordion index does NOT match, so they leave it
+        // unset — they have no unnamed bodies. See PlanetRenderer.imageSeed.
+        openBodyImagePanel(worldData, label, btn.dataset.phSeedFb || undefined);
     });
 
     // Use delegation on document because panels may have been moved out of #hex-editor to body

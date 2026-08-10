@@ -1032,7 +1032,7 @@ tbody tr:nth-child(even) { background:var(--panel);
                 // atmosphere, both (e) — so the image gates at (e) regardless of
                 // the "include world images" checkbox (§5.2.3 / §9.1).
                 if (includeImages && _show(oLV, 'e') && EC.canRenderImage(w) && !(skipAirless && EC.isAirless(w))) {
-                    const img = await EC.renderWorldImage(w, `${hexId}-w${wi}`, imageProjection);
+                    const img = await EC.renderWorldImage(w, hexId, imageProjection, `w${wi}`);
                     if (img) {
                         const fn = EC.bodyFilename(systemName, EC.worldDisplayName(w, wi, oLV), hexCode, 'png');
                         files.push({ name: `${sub}/images/${fn}`, data: img });
@@ -1043,7 +1043,7 @@ tbody tr:nth-child(even) { background:var(--panel);
                 for (let mi = 0; mi < moons.length; mi++) {
                     const m = moons[mi];
                     if (includeImages && _show(oLV, 'e') && EC.canRenderImage(m) && !(skipAirless && EC.isAirless(m))) {
-                        const img = await EC.renderWorldImage(m, `${hexId}-w${wi}-m${mi}`, imageProjection);
+                        const img = await EC.renderWorldImage(m, hexId, imageProjection, `w${wi}-m${mi}`);
                         if (img) {
                             const fn = EC.bodyFilename(systemName,
                                 `${EC.worldDisplayName(w, wi, oLV)} - ${EC.moonDisplayName(m, mi, oLV)}`,

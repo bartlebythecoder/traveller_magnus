@@ -663,7 +663,7 @@ const ObsidianExporter = (() => {
                 const wantImage = includeImages && _show(_oLV, 'e') && _canRenderImage(world) &&
                                   !(skipAirless && _isAirless(world));
                 if (wantImage) {
-                    const imgData = await _renderWorldImage(world, `${hexId}-w${wi}`, imageProjection);
+                    const imgData = await _renderWorldImage(world, hexId, imageProjection, `w${wi}`);
                     if (imgData) {
                         imageFilename = _bodyFilename(systemName, worldName, hexCode, 'png');
                         files.push({ name: prefix + 'images/' + imageFilename, data: imgData });
@@ -685,7 +685,7 @@ const ObsidianExporter = (() => {
                     const wantMoonImage = includeImages && _show(_oLV, 'e') && _canRenderImage(moon) &&
                                          !(skipAirless && _isAirless(moon));
                     if (wantMoonImage) {
-                        const imgData = await _renderWorldImage(moon, `${hexId}-w${wi}-m${mi}`, imageProjection);
+                        const imgData = await _renderWorldImage(moon, hexId, imageProjection, `w${wi}-m${mi}`);
                         if (imgData) {
                             moonImageFilename = `${_sanitize(systemName)} - ${_sanitize(worldName)} - ${_sanitize(moonName)} (${hexCode}).png`;
                             files.push({ name: prefix + 'images/' + moonImageFilename, data: imgData });

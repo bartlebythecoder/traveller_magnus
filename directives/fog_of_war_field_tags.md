@@ -1,30 +1,61 @@
 # FOG OF WAR — Field Disclosure Tagging Table (HX-1)
 
-**Status: DRAFT AWAITING SEAN'S MARKUP.** Created 2026-08-03.
-**Blocks:** WP5 (players' export). Nothing in Release 2 can be built until this is filled in.
-**Parent manifest:** `directives/html_extract_manifest.md` — read §5.1 (the ladder), §5.2
-(the leak audit) and §5.3 (the answered questions) before using this table.
+**Status: COMPLETE AND IN FORCE.** Created 2026-08-03 as a draft; **filled in and closed
+the same day** across ~20 sequenced questions with Sean. Implemented in WP5/WP6
+(2026-08-03/04). Header corrected 2026-08-06 — it had been left reading "DRAFT AWAITING
+SEAN'S MARKUP / blocks WP5" for three days after it stopped being either.
+
+**This is the authoritative answer key.** §3.5 carries the per-category assignments, §12
+the WP5 implementation checklist, §9.3a the player-map spec.
+
+> ### ⚠️ This file and `js/export_core.js` are two halves of one thing
+> `FIELD_LEVELS` (`export_core.js:550`) is the executable form of this table. **Changing a
+> level in one without the other makes them silently disagree** — and the code is what
+> ships, so the divergence favours whatever the code says while this file misleads the next
+> reader.
+>
+> **Audited 2026-08-06 by diffing the two mechanically**, not by reading. 91 tagged labels
+> in `FIELD_LEVELS` against 58 explicitly-levelled rows here. **One real drift:**
+> `Gas Giants`, live since 2026-08-04 — the code was right, this table was not (§8). Two
+> apparent mismatches were **correct**: `Mass` and `Eccentricity` legitimately differ
+> between the `star` and `world` contexts (b/e and b/d), which is exactly why tagging is
+> keyed on **(context, label)** rather than label alone. Everything else agreed.
+>
+> **When auditing this, compare per context.** A flat label comparison reports the three
+> deliberate collisions — `Mass`, `Eccentricity`, `Orbit ID` — as failures, and the
+> temptation is then to "fix" one of them, which would leak stellar data at world level or
+> hide world data that should show.
+
+**Parent manifest:** `directives/html_extract_manifest.md` — §5.1 (the ladder), §5.2 (the
+leak audit, now closed) and §5.3 (the answered questions). Its §0.3 carries the standing
+rules; its §4.5-4.7 describe how this table was implemented, including the leaks a
+field-by-field pass missed.
 
 ---
 
-## 0. How to fill this in
+## 0. How this was filled in — historical, retained for the reasoning
 
-Put a letter in the **Lvl** column of every row:
+The instructions below were written for Sean's markup pass. **That pass is done; nothing
+here is awaiting input.** They are kept because the conventions still govern how the table
+reads, and because §11.1's reversed rule must not be silently restored.
 
 | Entry | Meaning |
 |---|---|
 | `0`–`g` | The **lowest** level at which this field becomes visible. Cumulative — a field marked `d` is visible at d, e, f and g. |
 | `never` | Never exported to players at any level. |
-| `?` | Leave as `?` if you want to discuss it rather than decide it now. |
+| `?` | Was "discuss rather than decide now". **No `?` rows remain.** |
 
 There is deliberately **no `derived` entry** — every field carries its own explicit level.
 See §11.1; that rule was proposed, adopted, and reversed on the same day, so check there
 before reintroducing it.
 
-**Pre-filled rows are marked ✓** — those are the fields your ladder names explicitly, so
-they are not guesses. Everything else is blank on purpose. Per the Zero-Assumption Policy
-I have not inferred a level for any field the ladder does not name, including ones where
-an assignment might seem obvious.
+**Rows marked ✓ were pre-filled** — the fields the ladder names explicitly, so not guesses.
+Everything else was blank on purpose and answered by Sean. Per the Zero-Assumption Policy no
+level was inferred for any field the ladder does not name, including ones where an
+assignment might seem obvious. **The same applies to any field added from here on:** an
+untagged field fails closed to `'g'` and is recorded by
+`ExportCore.getUnknownFieldLabels()`, which the harness asserts is empty — so a new field
+cannot leak, but it will fail the check until it is tagged here *and* in `FIELD_LEVELS`.
 
 ### The ladder, for reference (§5.1, cumulative)
 
@@ -431,8 +462,15 @@ them. **(f) stays limited to the headline Population and Tech Level the ladder n
 
 Three rows are **not** governed by this and keep their earlier, lower assignments, because
 they are system-inventory facts that happen to be stored in the T5 socio object rather
-than socioeconomics at all: **Belts (d)**, **Gas Giants (c)**, **Worlds (d)**. Do not
+than socioeconomics at all: **Belts (d)**, **Gas Giants (d)**, **Worlds (d)**. Do not
 sweep them to (g) when implementing.
+
+> **`Gas Giants` was corrected (c) → (d) on 2026-08-04**, during the body-count leak fix
+> (manifest §4.7). It is a **count**, and the ladder grants only *presence* at (c) — so (c)
+> was an inconsistency in this table's own reasoning, not a deliberate exception. Gas giant
+> presence at (c) is a separate, numberless `Gas Giants: Present` line (§4 below / manifest
+> §4.7); the count arrives at (d) with the bodies themselves. `export_core.js:529` reads
+> `'Gas Giants': 'd'` and is the executable authority — **these two must always agree.**
 
 `Total Population` is **(f)**, not (g) — it is the ladder's own Pop.
 
@@ -482,7 +520,7 @@ gap** — worth fixing one day against the T5 rules, out of scope for Release 2.
 |---|---|---|
 | 8.24 | Pop Multiplier | |
 | 8.25 | Belts | ✓ **d** (belt presence) |
-| 8.26 | Gas Giants | ✓ **c** (GG presence) |
+| 8.26 | Gas Giants | ✓ **d** (GG **count**) — corrected from `c` 2026-08-04, see §8 note |
 | 8.27 | Worlds | ✓ **d** (world count) |
 | 8.28 | Importance (Ix) | |
 | 8.29 | Resource Units (RU) | |
@@ -673,18 +711,35 @@ export shows a set of equally-detailed unnamed worlds and does not say which one
 no pending questions, no `?` entries and no verification tasks. **WP4, WP5 and WP6 are all
 unblocked**; WP6's spec is §9.3a and WP5's checklist is below.
 
-### Implementation checklist for WP5 — the items with no text-filter equivalent
+### Implementation checklist for WP5 — **ALL DELIVERED. Retained as the audit list.**
 
-These will not be caught by field filtering, parity checks or link sweeps. Each needs its
-own handling and its own verification:
+These are the items with no text-filter equivalent: field filtering, parity checks and link
+sweeps cannot catch any of them. All seven were implemented and verified in WP5/WP6
+(2026-08-03/04). **Re-check this list against any new export surface** — it is the set of
+things that leak through a filter that only sees blocks.
 
-1. **Generic body labels** below (g) — worlds, belts, and **stars** (§3.11a).
-2. **Page filenames** hex-only below (d) (§0), **image filenames** generic below (g) (§9.1).
-3. **Orrery re-render** with generic labels below (g) (§9.2a) — a second render path, the
-   hardest single item in WP5.
-4. **Subsector map** driven by disclosure level, ignoring live display toggles (§9.3a).
-5. **Corsair bases suppressed** at every level (§7.13).
-6. **Travel Zone must not be gated** without first emitting an explicit `Zone: Green`
-   (§1.6a) — otherwise a withheld Red zone reads as safe.
-7. **Moon fields with no world counterpart** (`Orbit (⌀)`, the narrower CT/T5 satellite
-   sets) have nothing to inherit — flag, do not default (§5).
+| # | Item | Delivered |
+|---|---|---|
+| 1 | **Generic body labels** below (g) — worlds, belts, and **stars** (§3.11a) | 5c. Fallbacks reuse the exporter's existing unnamed-body vocabulary, so withheld is indistinguishable from absent |
+| 2 | **Page filenames** hex-only below (d) (§0); **image filenames** generic below (g) (§9.1) | 5c — but **gated at the name, not the filename**. Giving the filename helpers their own level broke every Obsidian wikilink, since Obsidian resolves `[[Name]]` by name. One gate, at the name; everything that names a file or link reads from it |
+| 3 | **Orrery re-render** below (g) (§9.2a) — "the hardest single item in WP5" | 5d. `SystemViewer.renderSnapshot(state, w, h, { level })`. It took **one level, not two booleans** — the first version drew "Star A" at (d)–(f) while the page said "K0 V A" |
+| 4 | **Subsector map** driven by disclosure level (§9.3a) | WP6. `setMapDisclosure`/`_mapShow` in `renderer.js`, installed for one frame in a `try/finally` |
+| 5 | **Corsair bases suppressed** at every level (§7.13) | 5b, index included. The map renderer never draws them at all |
+| 6 | **Travel Zone must not be gated** without an explicit `Zone: Green` (§1.6a) | Honoured — absence already encodes Green, so gating it alone would have **misreported Red systems as safe** |
+| 7 | **Moon fields with no world counterpart** — flag, do not default (§5) | `Orbit (⌀)` was raised with Sean rather than assigned: **(d)**, Group 1 |
+
+**Correction to item 4's original wording.** It said the map should ignore "live display
+toggles", on the assumption that the leak was toggle-dependent. It was not — see manifest
+§4.6.1: the labels gate only on `zoom > 0.4`, and `captureSubsector` computes its own
+`capZoom` (~1.09) regardless of the GM's zoom, so the leak was unconditional and there was
+never a setting that suppressed it. The *implementation* is right either way — the
+development view is gated too, precisely because `devView` is a toggle the capture inherits.
+
+**Two things this checklist did not anticipate**, both real leaks found later:
+
+- **Structure, not values.** Below (d) the *sections themselves* had to go, not just their
+  fields — a blank section still discloses that a body exists, and Obsidian's per-body files
+  disclose it from the file listing alone. See manifest §4.7.
+- **Hand-assembled output.** Anything built with template literals rather than through the
+  block model bypasses `filterBlocks` entirely: HTML's `data-uwp` and SVG `<title>`,
+  Obsidian's YAML frontmatter. None appears in rendered body copy.

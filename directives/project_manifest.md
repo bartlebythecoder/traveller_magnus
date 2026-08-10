@@ -1,27 +1,36 @@
 # PROJECT AS ABOVE, SO BELOW - Feature Manifest
-**Version:** 0.17.0 (in progress) — the **exports** series
+**Version:** v0.17.0.1 — the **exports** series. v0.17.0 (GM wiki) shipped 2026-08-03;
+v0.17.0.1 (player fog of war) code-complete 2026-08-04.
 **Architecture Standard:** The "Sean Protocol" (Directives -> Orchestration -> Execution)
 
-**Companion manifest:** `directives/html_extract_manifest.md` — the HTML wiki export, the
-**active** work. Read it before touching `js/export_core.js`, `js/obsidian_exporter.js`
-or `js/html_exporter.js`. Its section 0 is the cold-start handover.
+**Companion manifest:** `directives/html_extract_manifest.md` — the wiki export, and where
+**all recent work has happened**. Read it before touching `js/export_core.js`,
+`js/obsidian_exporter.js`, `js/html_exporter.js`, `js/disclosure.js`,
+`js/disclosure_grid.js`, or the disclosure gate in `js/renderer.js`. Its section 0 is the
+cold-start handover. A third directive,
+`directives/fog_of_war_field_tags.md`, is the authoritative per-field disclosure answer key.
 
 **This document covers the v0.16.x System Editor**, which is paused, not abandoned. It is
 the reference for resuming RTT and AoW editor support.
 
 ---
 
-## 0. Current State (2026-08-01)
+## 0. Current State (2026-08-06)
 
 ### 0.1 Where the project is
 
 | | |
 |---|---|
-| **Active work** | **v0.17.x — exports.** HTML wiki exporter. See the companion manifest; nothing in *this* document is in progress. |
+| **Most recent work** | **v0.17.x — exports.** Both releases of the wiki exporter are complete and committed (HEAD `9971e99`). See the companion manifest; nothing in *this* document is in progress. |
 | **This document** | v0.16.x System Editor. **Paused** after MgT2E, CT and T5 were brought fully online. |
 | **Paused** | RTT and AoW editor support — the reason this manifest is retained. |
+| **Open here** | Three items only, all in 6.2: OW-3, OW-5 layer 2, OW-65. See section 4. |
 
-### 0.2 System Editor engine support — verified against code 2026-08-01
+**Nothing is currently in progress in either manifest.** The companion's section 9 lists
+two non-blocking open items (an in-app number-formatting sweep, and dating the v0.17.0.1
+changelog entry); this document's section 4 lists three. There is no half-finished work.
+
+### 0.2 System Editor engine support — verified against code 2026-08-06
 
 **MgT2E, CT and T5 are operational for both Create and Edit. RTT and AoW are neither.**
 
@@ -34,14 +43,21 @@ the reference for resuming RTT and AoW editor support.
 | AoW | ❌ | ❌ | **paused** — radio `disabled`; generator groundwork exists, see OW-9 in 6.2 |
 
 The three gates that must be changed together to enable an engine — they have drifted
-before, see pattern 4 in 6.1:
+before, see pattern 4 in 6.1. **Line numbers re-verified 2026-08-06:**
 
 1. `js/system_viewer.js:1125` — orrery "Edit System" button:
    `if (edition === 'MgT2E' || edition === 'CT' || edition === 'T5')`
-2. `js/canvas_input.js:84-85` — `_seCanEdit`, the right-click gate: checks
+2. `js/canvas_input.js:84-86` — `_seCanEdit`, the right-click gate: checks
    `mgt2eData/mgtSystem`, `ctData/ctSystem`, `t5Data/t5System`
-3. `hex_map.html:1419-1431` — `#se-engine-dialog` Create radios: AoW and RTT carry
-   `disabled`
+3. `hex_map.html:1444-1466` — `#se-engine-dialog` Create radios. MgT2E (1452), CT (1455)
+   and T5 (1458) are enabled; **AoW (1461) and RTT (1464) carry `disabled`** plus a
+   "(coming soon)" label and a `not-allowed` cursor on their wrapping `<label>` — four
+   things to change per engine, not one.
+
+> **Gate 3's line numbers had drifted by ~25 lines** between 2026-08-01 and 2026-08-06 —
+> `hex_map.html` gained the export modal's FORMAT/VERSION controls above it. Gates 1 and 2
+> did not move. Re-check all three before trusting them; they are the exact kind of
+> reference that rots silently.
 
 ### 0.3 Resuming RTT or AoW
 
@@ -60,6 +76,12 @@ Condensed 2026-08-01 from ~356 KB to ~159 KB. Section 6 previously carried 65 wo
 and 7 bugs in full forensic detail; closed items are now a one-line index (6.3) with the
 transferable lessons distilled into 6.1. Sections 2 and 5 were kept at full detail because
 they are the RTT/AoW handoff.
+
+**Audited 2026-08-06** against the code, alongside the companion manifest. No code changed.
+Header and section 0 refreshed; gate 3's line numbers corrected (they had drifted ~25
+lines); the companion manifest's standing complaint that "section 2 still describes the
+v0.16.0 System Editor" was **retired** — that cleanup happened in the 2026-08-01
+condensation, and section 2 is now explicitly labelled a delivered design reference.
 
 ---
 
@@ -646,8 +668,12 @@ Both the orrery and accordion now correctly highlight a lunar mainworld. The `_n
 - **OW-65** — three route/filter items deliberately parked pending user evidence. Not
   editor work; do not restart without new information.
 
-Everything else is closed — see the 6.3 index. Active work is in
-`directives/html_extract_manifest.md`, not here.
+Everything else is closed — see the 6.3 index.
+
+**All recent work has been in `directives/html_extract_manifest.md`, not here** — and as of
+2026-08-04 that work is complete too, so **nothing anywhere is currently in progress.** The
+three items above are the System Editor's own residue; picking any of them up means
+resuming the paused RTT/AoW work, for which section 0.3 is the entry point.
 
 ---
 

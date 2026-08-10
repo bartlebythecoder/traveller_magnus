@@ -240,6 +240,23 @@ const ExportCore = (() => {
 
     function _findMgtRawWorld(state, nw) {
         const worlds = (state.mgtSystem && state.mgtSystem.worlds) || [];
+        // NAME FIRST — orbitId is NOT unique. Two bodies legitimately share an
+        // orbit slot (e.g. Maracaibo A-I and A-II both at orbitId 0.284 under
+        // the same star), and matching on it made `.find()` return whichever
+        // came first, so the page described one world while printing its
+        // neighbour's mass, density, gravity, diameter, tilt and temperature.
+        // The name check below it could never be reached to correct this.
+        // Measured before the fix: 14 of 688 fixture worlds took another
+        // body's physical stats. MgT2E was the only engine ordered this way.
+        //
+        // Names are safe to lead with: verified unique WITHIN a system across
+        // 4599 bodies / 239 systems / all five engines, zero duplicates
+        // (.tmp/html_export_harness/seedname_check.js). orbitId remains the
+        // fallback for the handful of bodies with no name.
+        if (nw.name) {
+            const byName = worlds.find(w => w.name === nw.name);
+            if (byName) return byName;
+        }
         if (nw.orbitId != null) {
             const m = worlds.find(w =>
                 Math.abs((w.orbitId || 0) - nw.orbitId) < 0.001 &&
@@ -247,7 +264,6 @@ const ExportCore = (() => {
             );
             if (m) return m;
         }
-        if (nw.name) return worlds.find(w => w.name === nw.name) || null;
         if (nw.type === 'Mainworld') return worlds.find(w => w.type === 'Mainworld' || w.isLunarMainworld) || null;
         return null;
     }
@@ -1179,9 +1195,15 @@ const ExportCore = (() => {
         return atm === 0 && hyd === 0;
     }
 
-    async function renderWorldImage(worldData, seedHexId, projection) {
+    // `hexId` is the bare hex id; `seedFallback` is a positional suffix used
+    // only for a body with no name. The seed itself is built by
+    // PlanetRenderer.imageSeed — the one definition shared with the in-app
+    // viewers, so an exported world and the same world on screen are the same
+    // planet. Do not reconstruct a seed string here.
+    async function renderWorldImage(worldData, hexId, projection, seedFallback) {
         if (!canRenderImage(worldData)) return null;
         if (typeof PlanetRenderer === 'undefined') return null;
+        const seedHexId = PlanetRenderer.imageSeed(hexId, worldData, seedFallback);
 
         const uwp  = worldData.uwp || '';
         const atm  = uwp.length >= 3 ? (parseInt(uwp[2], 16) || 0) : 0;

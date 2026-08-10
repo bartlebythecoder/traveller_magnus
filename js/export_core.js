@@ -95,6 +95,32 @@ const ExportCore = (() => {
         return (str || 'Unknown').replace(/[/\\:*?"<>|]/g, '-').replace(/\s+/g, ' ').trim();
     }
 
+    // ── Release 2: name disclosure (WP5 slice 5c) ─────────────────────────────
+    //
+    // Every helper below takes an OPTIONAL trailing `lvl`. Null/absent is the GM
+    // path and behaves exactly as before — that is what keeps the guard at 6/6.
+    //
+    // When a name is withheld the helper falls back to the SAME generic label
+    // the exporter already used for genuinely unnamed bodies ("World 3",
+    // "Belt 1"). That is deliberate: a player then cannot tell a withheld name
+    // from a body that never had one, which is the "withheld = absent" rule.
+    //
+    //   worlds, moons — names at (g), HX-2
+    //   stars         — names at (d), §3.11a: a star name embeds the system name
+    //   system        — name  at (d), §1.1
+    function _nameOk(lvl, required) { return !lvl || _atLeast(lvl, required); }
+
+    // Filenames take NO level argument, deliberately. They are built from the
+    // names their callers already resolved, and those callers pass the DISCLOSED
+    // name — "System 1910" below (d), "World 3" below (g). So the §5.2.2
+    // filename leak is closed at the source, in resolveSystemName() and the
+    // display-name helpers, rather than by a second gate here.
+    //
+    // This matters because Obsidian wikilinks resolve BY NAME: the link text and
+    // the filename stem must be the same string. An earlier version of this
+    // slice gave these two functions their own level parameter and produced
+    // "1910.md" while every link still said "[[Regina (1910)]]" — every link
+    // below (d) would have broken. One gate, at the name, keeps them in step.
     function systemFilename(systemName, hexCode, ext) {
         return `${sanitize(systemName)} (${hexCode}).${ext}`;
     }
@@ -103,28 +129,39 @@ const ExportCore = (() => {
         return `${sanitize(systemName)} - ${sanitize(bodyName)} (${hexCode}).${ext}`;
     }
 
-    function worldDisplayName(world, idx) {
-        if (world.name) return world.name;
+    function worldDisplayName(world, idx, lvl) {
+        if (world.name && _nameOk(lvl, 'g')) return world.name;
         const t = world.type || 'Body';
         if (t === 'Gas Giant')      return `Giant ${idx + 1}`;
         if (t === 'Planetoid Belt') return `Belt ${idx + 1}`;
         return `World ${idx + 1}`;
     }
 
-    function moonDisplayName(moon, idx) {
-        return moon.name || `Moon ${idx + 1}`;
+    function moonDisplayName(moon, idx, lvl) {
+        return (moon.name && _nameOk(lvl, 'g')) ? moon.name : `Moon ${idx + 1}`;
     }
 
     // In multi-star systems append the conventional letter (A, B, C …) so that
     // two stars of identical spectral type never produce the same filename/link.
-    function starDisplayName(star, starIdx, isMultiStar) {
+    function starDisplayName(star, starIdx, isMultiStar, lvl) {
+        if (!_nameOk(lvl, 'd')) {
+            // Deliberately NOT the star's role, even though role is (b) data:
+            // stars are visible from (a), so a role-based label would leak role
+            // one level early. A fixed vocabulary avoids a label whose wording
+            // changes with the level.
+            return isMultiStar ? `Star ${String.fromCharCode(65 + starIdx)}` : 'Star';
+        }
         const base = star.name || `Star ${starIdx + 1}`;
         return isMultiStar ? `${base} ${String.fromCharCode(65 + starIdx)}` : base;
     }
 
     // ── System name / UWP resolvers ───────────────────────────────────────────
 
-    function resolveSystemName(state) {
+    // `hexCode` and `lvl` are optional and used only by the players' export:
+    // below (d) the system is identified by its hex, since the hex is (a) and
+    // inherently disclosed by any map dot anyway.
+    function resolveSystemName(state, lvl, hexCode) {
+        if (!_nameOk(lvl, 'd')) return hexCode ? `System ${hexCode}` : 'Unsurveyed';
         if (state.name) return state.name;
         const sys = state.mgtSystem || state.ctSystem || state.t5System || state.rttSystem;
         if (sys && sys.name) return sys.name;
@@ -161,7 +198,7 @@ const ExportCore = (() => {
         return state.mgt2eData || state.ctData || state.t5Data || state.rttData || null;
     }
 
-    function indexRowData(state, hexCode) {
+    function indexRowData(state, hexCode, lvl) {
         const d = resolveWorldData(state) || {};
         const uwp = resolveUWP(state);
         const tc = Array.isArray(d.tradeCodes) ? d.tradeCodes : [];
@@ -181,7 +218,7 @@ const ExportCore = (() => {
         }
         return {
             hex:        hexCode,
-            name:       resolveSystemName(state),
+            name:       resolveSystemName(state, lvl, hexCode),
             uwp,
             starport:   d.starport || (uwp && uwp[0]) || '',
             tl:         d.tl != null ? String(d.tl) : (uwp && uwp.length >= 9 ? uwp[8] : ''),
@@ -203,6 +240,23 @@ const ExportCore = (() => {
 
     function _findMgtRawWorld(state, nw) {
         const worlds = (state.mgtSystem && state.mgtSystem.worlds) || [];
+        // NAME FIRST — orbitId is NOT unique. Two bodies legitimately share an
+        // orbit slot (e.g. Maracaibo A-I and A-II both at orbitId 0.284 under
+        // the same star), and matching on it made `.find()` return whichever
+        // came first, so the page described one world while printing its
+        // neighbour's mass, density, gravity, diameter, tilt and temperature.
+        // The name check below it could never be reached to correct this.
+        // Measured before the fix: 14 of 688 fixture worlds took another
+        // body's physical stats. MgT2E was the only engine ordered this way.
+        //
+        // Names are safe to lead with: verified unique WITHIN a system across
+        // 4599 bodies / 239 systems / all five engines, zero duplicates
+        // (.tmp/html_export_harness/seedname_check.js). orbitId remains the
+        // fallback for the handful of bodies with no name.
+        if (nw.name) {
+            const byName = worlds.find(w => w.name === nw.name);
+            if (byName) return byName;
+        }
         if (nw.orbitId != null) {
             const m = worlds.find(w =>
                 Math.abs((w.orbitId || 0) - nw.orbitId) < 0.001 &&
@@ -210,7 +264,6 @@ const ExportCore = (() => {
             );
             if (m) return m;
         }
-        if (nw.name) return worlds.find(w => w.name === nw.name) || null;
         if (nw.type === 'Mainworld') return worlds.find(w => w.type === 'Mainworld' || w.isLunarMainworld) || null;
         return null;
     }
@@ -358,12 +411,251 @@ const ExportCore = (() => {
     // descriptor lands in WP2, once the HTML anchor/path scheme is concrete —
     // designing it before then would be guesswork.
 
+    // ── Numeric display formatting (2026-08-04) ───────────────────────────────
+    //
+    // Sean: "there is never a need for more than two decimal places". True for
+    // almost everything, but a flat toFixed(2) turns real values into zero —
+    // eccentricity 0.0043, a small moon's mass 0.0032 M⊕, a trace atmosphere at
+    // 0.004 bar would all render "0.00", which is wrong rather than merely
+    // coarse. So: AT MOST two decimals, but never round a non-zero value away.
+    //
+    //   5.980074992877245 -> "5.98"      (AoW stores raw floats)
+    //   3.1104000000000003 -> "3.11"     (a float artifact of 3.1104)
+    //   0.0032            -> "0.0032"    (kept: 2 significant figures)
+    //   7                 -> "7"         (integers gain no ".00")
+    //
+    // DISPLAY ONLY. Engine values are untouched — rounding at generation would
+    // change generated worlds, invalidate the frozen fixture and stray into
+    // rules territory. This runs at render time and nowhere else.
+    function fmtNum(v, maxDp) {
+        const dp = (maxDp == null) ? 2 : maxDp;
+        const num = (typeof v === 'number') ? v : parseFloat(v);
+        if (!isFinite(num)) return v;                 // strings, NaN, ±Infinity pass through
+        if (Number.isInteger(num)) return String(num);
+
+        // Below 0.01, two decimals cannot carry two significant figures, so use
+        // significant figures instead. Without this, 0.0072, 0.0089 and 0.0096
+        // M⊕ — three different moons — all render "0.01", and anything under
+        // 0.005 renders "0.00". An earlier version applied this only when the
+        // result was exactly zero, which missed the flattening case entirely;
+        // the before/after field diff caught it.
+        // Guarantee two significant figures. Two DECIMALS only carry two
+        // significant figures once a value reaches 0.1 — below that, toFixed(2)
+        // leaves one figure or none, so 0.0131 renders "0.01" (a 23.7% error)
+        // and 0.0032 renders "0.00". Switch to significant figures there.
+        //
+        // Confirmed against real data: this affects 454 values in the fixture
+        // and eliminates every distortion over 5%. Values at 0.1 and above are
+        // untouched and still show at most two decimals — 5.98, 0.23, 3.11.
+        const mag = Math.abs(num);
+        if (mag > 0 && mag < 0.1) return String(Number(num.toPrecision(2)));
+        return String(Number(num.toFixed(dp)));
+    }
+
+    // `n` is the shorthand used at the formatter call sites below.
+    const n = fmtNum;
+
     const GAP = { t: 'gap' };
     const h   = (level, text)  => ({ t: 'h', level, text });
-    const f   = (label, value) => ({ t: 'f', label, value });
+    // A bare number passed as a value is formatted here, which covers the ~40
+    // call sites that hand over a raw field with no unit. Sites that build a
+    // template string ("`${x} AU`") produce a string and so must call n()
+    // themselves — those are wrapped individually below.
+    const f   = (label, value) =>
+        ({ t: 'f', label, value: (typeof value === 'number') ? fmtNum(value) : value });
     const fc  = (label, value) => ({ t: 'f', label, value, code: true });
     const txt = (text)         => ({ t: 'txt', text });
     const tbl = (headers, rows) => ({ t: 'tbl', headers, rows });
+
+    // ── Release 2: field disclosure tagging (WP5 slice 5a) ────────────────────
+    //
+    // Every level below is Sean's, agreed 2026-08-03 and recorded in
+    // directives/fog_of_war_field_tags.md §3.5. That file is the authority; this
+    // is its executable form. DO NOT change a level here without changing it
+    // there, and do not invent a level for a new field — see the fail-closed
+    // note below.
+    //
+    // Tagging is by (context, label), NOT by label alone. The same label means
+    // different things in different places and carries different levels:
+    //   'Mass'         — (b) on a star, (e) on a world
+    //   'Eccentricity' — (b) on a star, (d) on a world
+    //   'Orbit ID'     — (b) on a star, (d) on a world
+    // A flat label map would have leaked stellar data at world level, or hidden
+    // world data that should show. Contexts are supplied by the call sites,
+    // which always know whether they are formatting a star, world, moon, etc.
+    //
+    // Belt and gas-giant fields live in the `world` context: they are emitted
+    // from inside the world formatters, and their labels (Span, Bulk, M-Type,
+    // SAH Code, …) are unique, so there is no collision to disambiguate.
+
+    const _LVL_STAR = {                                   // §3 — all stellar detail is (b)
+        'Spectral Type': 'b', 'Luminosity Class': 'b', 'Decimal': 'b',
+        'Luminosity': 'b', 'Mass': 'b', 'Separation': 'b',
+        'Orbit ID': 'b', 'Eccentricity': 'b', 'MAO': 'b', 'Orbit': 'b',
+    };
+
+    const _LVL_WORLD = {
+        // Group 1 — orbital position & motion (d)
+        'Distance': 'd', 'Orbit': 'd', 'Orbit ID': 'd', 'Orbit Type': 'd',
+        'Period': 'd', 'Orbital Period': 'd', 'Eccentricity': 'd',
+        'Axial Tilt': 'd', 'Rotation': 'd', 'Rotation Period': 'd',
+        'Solar Day': 'd', 'Zone': 'd',
+        // Group 5 — body classification (d), plus Rings (assigned 2026-08-03)
+        'Classification': 'd', 'World Type': 'd', 'World Class': 'd',
+        'Type': 'd', 'Chemistry': 'd', 'Rings': 'd',
+        // Group 2 — bulk physical & geology (e)
+        'Composition': 'e', 'Lithosphere': 'e', 'Magnetic Field': 'e', 'Albedo': 'e',
+        // Group 3 — atmosphere detail (e)
+        'Gases': 'e', 'O₂ Fraction': 'e', 'Pressure': 'e', 'Taints': 'e',
+        'Breathability': 'e',
+        // Group 4 — temperature (e)
+        'Mean': 'e', 'Low': 'e', 'High': 'e', 'Temperature': 'e',
+        'Mean Temperature': 'e', 'Mean Temp': 'e', 'Climate Zone': 'e',
+        // Explicitly fixed outside the groups (e)
+        'Diameter': 'e', 'Hydrographics': 'e', 'Atmosphere': 'e',
+        'Water Coverage': 'e', 'Gravity': 'e', 'Mass': 'e', 'Density': 'e',
+        // Group 6 — biology & habitability (f)
+        'Native Life': 'f', 'Biosphere': 'f', 'Habitability': 'f',
+        // Group 7 — development & economy (f)
+        'Resource Rating': 'f', 'Secondary RU': 'f', 'Desirability': 'f',
+        'Industry': 'f', 'Habitation': 'f', 'Terraforming Potential': 'f',
+        // Group 8b — belt profile (f)
+        'Profile': 'f', 'Span': 'f', 'Bulk': 'f',
+        'M-Type': 'f', 'S-Type': 'f', 'C-Type': 'f', 'O-Type': 'f',
+        // Group 8a — gas giant profile (g), and the UWP's own digit 1
+        'SAH Code': 'g', 'Starport': 'g',
+        // Chart data (a)
+        'Allegiance': 'a', 'Region': 'a',
+    };
+
+    // §5 — moons inherit their parent world's levels wholesale. 'Orbit (⌀)' is
+    // the one moon-only field with no world counterpart; assigned (d) as Group 1
+    // orbital position, raised with Sean rather than defaulted (2026-08-03).
+    const _LVL_MOON = Object.assign({}, _LVL_WORLD, { 'Orbit (⌀)': 'd' });
+
+    // §8 — the whole socioeconomic block is (g). The three exceptions are
+    // system-inventory facts that merely happen to live in the T5 socio object.
+    const _LVL_SOCIO_EXCEPTIONS = {
+        'Total Population': 'f',      // the ladder's own Pop
+        // NOTE these three are COUNTS. The ladder grants gas giant *presence*
+        // at (c), not a number, so the count moves to (d) where the bodies
+        // themselves become visible; presence at (c) is expressed as a separate
+        // yes/no line by the exporters. Belts and Worlds are (d) either way.
+        // Corrected 2026-08-04 — see manifest 4.7.
+        'Belts': 'd', 'Gas Giants': 'd', 'Worlds': 'd',
+    };
+
+    const _LVL_SYSTEM = {            // §2 — system overview
+        'Age': 'b', 'HZco (Primary)': 'b', 'P-Type HZco': 'b',
+        'P-Type Inner Limit': 'b', 'Nature': 'd', 'Total Orbits': 'd',
+        'Travel Zone': 'a',
+    };
+
+    const _LVL_DETAILS = {           // detailBlocks
+        'Trade Codes': 'g', 'Travel Zone': 'a', 'Tech Level': 'f',
+    };
+
+    const _LVL_IDENTITY = {          // page metadata, index columns
+        'Hex': 'a', 'Sector': 'a', 'Subsector': 'a', 'Edition': 'a',
+        'Allegiance': 'a', 'Region': 'a', 'Travel Zone': 'a',
+        'System Name': 'd', 'System': 'd',
+        'UWP': 'g', 'Mainworld UWP': 'g', 'Starport': 'g', 'TL': 'g',
+        'Trade Codes': 'g', 'Bases': 'g', 'GG': 'c',
+    };
+
+    const FIELD_LEVELS = {
+        star:     _LVL_STAR,
+        world:    _LVL_WORLD,
+        moon:     _LVL_MOON,
+        socio:    _LVL_SOCIO_EXCEPTIONS,   // everything else in this context is 'g'
+        system:   _LVL_SYSTEM,
+        details:  _LVL_DETAILS,
+        identity: _LVL_IDENTITY,
+    };
+
+    // Contexts whose unlisted labels default to something other than fail-closed
+    // 'g'. Only `socio`, because §8 assigns that entire block to (g) — an
+    // unlisted socio label is therefore correctly (g), not a gap.
+    const _CONTEXT_DEFAULT = { socio: 'g' };
+
+    // Labels asked for but not tagged. Purely diagnostic: the harness asserts
+    // this is empty after a full export, so a field added later cannot quietly
+    // acquire a fail-closed level and vanish from every players' export without
+    // anyone noticing.
+    const _unknownFieldLabels = new Set();
+
+    // A block may carry its own `lvl`, which wins over the (context, label)
+    // lookup. This exists for fields whose LABEL is data rather than a fixed
+    // string — T5's system overview emits one line per star labelled with the
+    // star's role ('Primary', 'Close Companion', …), so no static map can
+    // enumerate them and every one would otherwise fail closed to 'g'.
+    // Found by the completeness sweep, not by reading the code.
+    function blockLevel(block, context) {
+        return block.lvl || fieldLevel(context, block.label);
+    }
+
+    function fieldLevel(context, label) {
+        const map = FIELD_LEVELS[context];
+        if (!map) { _unknownFieldLabels.add(`<bad context:${context}>`); return 'g'; }
+        const lvl = map[label];
+        if (lvl !== undefined) return lvl;
+        const dflt = _CONTEXT_DEFAULT[context];
+        if (dflt) return dflt;
+        // FAIL CLOSED. An untagged field is treated as maximally restricted, so
+        // a new field can never leak into a low-level players' export. It is
+        // recorded above so the omission surfaces as a check failure instead.
+        _unknownFieldLabels.add(`${context}:${label}`);
+        return 'g';
+    }
+
+    function getUnknownFieldLabels() { return [..._unknownFieldLabels]; }
+    function clearUnknownFieldLabels() { _unknownFieldLabels.clear(); }
+
+    // Level comparison lives in js/disclosure.js (WP4) — the single definition
+    // of the ladder. If that module did not load, fail closed rather than
+    // silently disclosing everything. The GM path never reaches here: `level`
+    // is null/'g' and filterBlocks returns early.
+    function _atLeast(current, required) {
+        const M = (typeof window !== 'undefined') && window.DisclosureModel;
+        return (M && typeof M.atLeast === 'function') ? M.atLeast(current, required) : false;
+    }
+
+    // Drop `f` blocks the level does not permit, then remove headings left with
+    // nothing under them. A heading is empty only if no content precedes the
+    // next heading at the SAME OR SHALLOWER depth — otherwise an h2 whose
+    // content sits under an h3 would be wrongly discarded.
+    function _pruneEmptySections(blocks) {
+        const out = [];
+        for (let i = 0; i < blocks.length; i++) {
+            const b = blocks[i];
+            if (b.t === 'h') {
+                let hasContent = false;
+                for (let j = i + 1; j < blocks.length; j++) {
+                    const n = blocks[j];
+                    if (n.t === 'h' && n.level <= b.level) break;
+                    if (n.t === 'f' || n.t === 'tbl' || (n.t === 'txt' && n.text)) {
+                        hasContent = true; break;
+                    }
+                }
+                if (!hasContent) continue;
+            }
+            // Collapse runs of blank lines left behind by dropped fields.
+            if (b.t === 'gap' && out.length && out[out.length - 1].t === 'gap') continue;
+            out.push(b);
+        }
+        while (out.length && out[out.length - 1].t === 'gap') out.pop();
+        return out;
+    }
+
+    // THE filter. `level` null or 'g' is the GM path and returns the input
+    // untouched — no allocation, no behaviour change, which is what keeps the
+    // existing exports byte-identical.
+    function filterBlocks(blocks, context, level) {
+        if (!level || level === 'g') return blocks;
+        const kept = blocks.filter(b =>
+            b.t !== 'f' || _atLeast(level, blockLevel(b, context)));
+        return _pruneEmptySections(kept);
+    }
 
     // ── Shared content builders ───────────────────────────────────────────────
     // Per-entity content both exporters need, as blocks.
@@ -406,16 +698,16 @@ const ExportCore = (() => {
     // Used when no raw body could be resolved for an edition-aware formatter.
     function fallbackPhysicalBlocks(body) {
         const b = [];
-        if (body.gravity != null)   b.push(f('Gravity', `${body.gravity} G`));
+        if (body.gravity != null)   b.push(f('Gravity', `${n(body.gravity)} G`));
         if (body.diamKm != null)    b.push(f('Diameter', `${body.diamKm.toLocaleString()} km`));
-        if (body.meanTempK != null) b.push(f('Mean Temp', `${body.meanTempK} K`));
+        if (body.meanTempK != null) b.push(f('Mean Temp', `${n(body.meanTempK)} K`));
         return b;
     }
 
     function fallbackStarBlocks(star) {
         const b = [];
-        if (star.lum  != null) b.push(f('Luminosity', `${star.lum} L☉`));
-        if (star.mass != null) b.push(f('Mass', `${star.mass} M☉`));
+        if (star.lum  != null) b.push(f('Luminosity', `${n(star.lum)} L☉`));
+        if (star.mass != null) b.push(f('Mass', `${n(star.mass)} M☉`));
         return b;
     }
 
@@ -445,7 +737,16 @@ const ExportCore = (() => {
             b.push(GAP, h(2, 'System Overview'));
             if (sys.stars) {
                 sys.stars.forEach(s => {
-                    b.push(f(s.role, `${s.name} (Lum: ${s.luminosity ? s.luminosity.toFixed(3) : '?'})`));
+                    // The LABEL here is the star's role — data, not a fixed
+                    // string — so it cannot be tagged in FIELD_LEVELS. Carry an
+                    // explicit level instead: this is stellar detail, (b).
+                    // NOTE for WP5 slice 5b: the VALUE carries the star's name,
+                    // which is gated to (d) per fog_of_war_field_tags §3.11a.
+                    // Filtering alone does not fix that — the name must be
+                    // replaced with a generic label below (d).
+                    b.push(Object.assign(
+                        f(s.role, `${s.name} (Lum: ${s.luminosity ? s.luminosity.toFixed(3) : '?'})`),
+                        { lvl: 'b' }));
                 });
             }
             const mwb = state.t5Data || state.mgt2eData;
@@ -469,7 +770,7 @@ const ExportCore = (() => {
         b.push(GAP, h(3, 'Orbital Data'));
         if (raw.orbitId  != null) b.push(f('Orbit ID', raw.orbitId.toFixed(2)));
         if (raw.orbitType)        b.push(f('Orbit Type', raw.orbitType));
-        if (raw.au != null)       b.push(f('Distance', `${raw.au} AU`));
+        if (raw.au != null)       b.push(f('Distance', `${n(raw.au)} AU`));
         if (raw.eccentricity != null) b.push(f('Eccentricity', raw.eccentricity));
         if (raw.periodYears != null) {
             const ps = raw.periodYears < 1
@@ -486,17 +787,17 @@ const ExportCore = (() => {
             b.push(GAP, h(3, 'Physical Properties'));
             if (raw.composition != null) b.push(f('Composition', raw.composition));
             if (raw.density != null)     b.push(f('Density', `${Number(raw.density).toFixed(3)} ρ⊕`));
-            if (raw.gravity != null)     b.push(f('Gravity', `${raw.gravity} G`));
-            if (raw.mass != null)        b.push(f('Mass', `${raw.mass} M⊕`));
+            if (raw.gravity != null)     b.push(f('Gravity', `${n(raw.gravity)} G`));
+            if (raw.mass != null)        b.push(f('Mass', `${n(raw.mass)} M⊕`));
             if (!isGG && raw.diamKm != null)   b.push(f('Diameter', `${Math.round(raw.diamKm).toLocaleString()} km`));
-            if (isGG && raw.diamTerra != null) b.push(f('Diameter', `${raw.diamTerra} T⊕`));
-            if (raw.hydroPercent != null) b.push(f('Hydrographics', `${raw.hydroPercent}%`));
+            if (isGG && raw.diamTerra != null) b.push(f('Diameter', `${n(raw.diamTerra)} T⊕`));
+            if (raw.hydroPercent != null) b.push(f('Hydrographics', `${n(raw.hydroPercent)}%`));
 
             if (raw.meanTempK != null) {
                 b.push(GAP, h(3, 'Temperature'));
-                b.push(f('Mean', `${kToC(raw.meanTempK)} °C`));
-                if (raw.lowTempK  != null && !isNaN(raw.lowTempK))  b.push(f('Low', `${kToC(raw.lowTempK)} °C`));
-                if (raw.highTempK != null && !isNaN(raw.highTempK)) b.push(f('High', `${kToC(raw.highTempK)} °C`));
+                b.push(f('Mean', `${n(kToC(raw.meanTempK))} °C`));
+                if (raw.lowTempK  != null && !isNaN(raw.lowTempK))  b.push(f('Low', `${n(kToC(raw.lowTempK))} °C`));
+                if (raw.highTempK != null && !isNaN(raw.highTempK)) b.push(f('High', `${n(kToC(raw.highTempK))} °C`));
             }
 
             b.push(GAP, h(3, 'Atmosphere'));
@@ -506,7 +807,7 @@ const ExportCore = (() => {
                 b.push(f('O₂ Fraction', raw.oxygenFraction));
             else
                 b.push(f('Atmosphere', 'None'));
-            if (raw.totalPressureBar != null) b.push(f('Pressure', `${raw.totalPressureBar} bar`));
+            if (raw.totalPressureBar != null) b.push(f('Pressure', `${n(raw.totalPressureBar)} bar`));
             if (raw.taints) {
                 const arr = Array.isArray(raw.taints) ? raw.taints : [raw.taints];
                 if (arr.length) b.push(f('Taints', arr.join(', ')));
@@ -517,9 +818,9 @@ const ExportCore = (() => {
                 if (raw.solarDayHours === Infinity || raw.isTwilightZone)
                     b.push(f('Solar Day', 'Twilight Zone'));
                 else
-                    b.push(f('Solar Day', `${raw.solarDayHours} hrs`));
+                    b.push(f('Solar Day', `${n(raw.solarDayHours)} hrs`));
             }
-            if (raw.axialTilt != null) b.push(f('Axial Tilt', `${raw.axialTilt}°`));
+            if (raw.axialTilt != null) b.push(f('Axial Tilt', `${n(raw.axialTilt)}°`));
         }
 
         if (isGG && raw.uwpGG) {
@@ -533,17 +834,17 @@ const ExportCore = (() => {
             if (raw.span != null)           b.push(f('Span', raw.span));
             if (raw.bulk != null)           b.push(f('Bulk', raw.bulk));
             if (raw.resourceRating != null) b.push(f('Resource Rating', raw.resourceRating));
-            if (raw.mType != null)          b.push(f('M-Type', `${raw.mType}%`));
-            if (raw.sType != null)          b.push(f('S-Type', `${raw.sType}%`));
-            if (raw.cType != null)          b.push(f('C-Type', `${raw.cType}%`));
-            if (raw.oType != null)          b.push(f('O-Type', `${raw.oType}%`));
+            if (raw.mType != null)          b.push(f('M-Type', `${n(raw.mType)}%`));
+            if (raw.sType != null)          b.push(f('S-Type', `${n(raw.sType)}%`));
+            if (raw.cType != null)          b.push(f('C-Type', `${n(raw.cType)}%`));
+            if (raw.oType != null)          b.push(f('O-Type', `${n(raw.oType)}%`));
         }
 
         if (!isBelt && !noBody) {
             if (raw.lifeProfile != null || raw.habitability != null || raw.resourceRating != null) {
                 b.push(GAP, h(3, 'Habitability'));
                 if (raw.lifeProfile != null)    b.push(f('Native Life', raw.lifeProfile));
-                if (raw.habitability != null)   b.push(f('Habitability', `${raw.habitability}/15`));
+                if (raw.habitability != null)   b.push(f('Habitability', `${n(raw.habitability)}/15`));
                 if (raw.resourceRating != null) b.push(f('Resource Rating', raw.resourceRating));
                 if (raw.secRU != null && raw.secPop > 0) b.push(f('Secondary RU', raw.secRU));
             }
@@ -566,23 +867,23 @@ const ExportCore = (() => {
 
         if (raw.pd != null)           b.push(f('Orbit (⌀)', raw.pd));
         if (raw.eccentricity != null) b.push(f('Eccentricity', raw.eccentricity));
-        if (raw.periodHrs != null)    b.push(f('Period', `${raw.periodHrs} hrs`));
+        if (raw.periodHrs != null)    b.push(f('Period', `${n(raw.periodHrs)} hrs`));
 
         const noBody = raw.size == 0 || raw.size === 'R';
         if (!noBody) {
             b.push(GAP, h(3, 'Physical Properties'));
             if (raw.composition != null) b.push(f('Composition', raw.composition));
             if (raw.density != null)     b.push(f('Density', `${Number(raw.density).toFixed(3)} ρ⊕`));
-            if (raw.gravity != null)     b.push(f('Gravity', `${raw.gravity} G`));
-            if (raw.mass != null)        b.push(f('Mass', `${raw.mass} M⊕`));
+            if (raw.gravity != null)     b.push(f('Gravity', `${n(raw.gravity)} G`));
+            if (raw.mass != null)        b.push(f('Mass', `${n(raw.mass)} M⊕`));
             if (raw.diamKm != null)      b.push(f('Diameter', `${Math.round(raw.diamKm).toLocaleString()} km`));
-            if (raw.hydroPercent != null) b.push(f('Hydrographics', `${raw.hydroPercent}%`));
+            if (raw.hydroPercent != null) b.push(f('Hydrographics', `${n(raw.hydroPercent)}%`));
 
             if (raw.meanTempK != null) {
                 b.push(GAP, h(3, 'Temperature'));
-                b.push(f('Mean', `${kToC(raw.meanTempK)} °C`));
-                if (raw.lowTempK  != null && !isNaN(raw.lowTempK))  b.push(f('Low', `${kToC(raw.lowTempK)} °C`));
-                if (raw.highTempK != null && !isNaN(raw.highTempK)) b.push(f('High', `${kToC(raw.highTempK)} °C`));
+                b.push(f('Mean', `${n(kToC(raw.meanTempK))} °C`));
+                if (raw.lowTempK  != null && !isNaN(raw.lowTempK))  b.push(f('Low', `${n(kToC(raw.lowTempK))} °C`));
+                if (raw.highTempK != null && !isNaN(raw.highTempK)) b.push(f('High', `${n(kToC(raw.highTempK))} °C`));
             }
 
             b.push(GAP, h(3, 'Atmosphere'));
@@ -592,7 +893,7 @@ const ExportCore = (() => {
                 b.push(f('O₂ Fraction', raw.oxygenFraction));
             else
                 b.push(f('Atmosphere', 'None'));
-            if (raw.totalPressureBar != null) b.push(f('Pressure', `${raw.totalPressureBar} bar`));
+            if (raw.totalPressureBar != null) b.push(f('Pressure', `${n(raw.totalPressureBar)} bar`));
             if (raw.taints) {
                 const arr = Array.isArray(raw.taints) ? raw.taints : [raw.taints];
                 if (arr.length) b.push(f('Taints', arr.join(', ')));
@@ -603,14 +904,14 @@ const ExportCore = (() => {
                 if (raw.solarDayHours === Infinity || raw.isTwilightZone)
                     b.push(f('Solar Day', 'Twilight Zone'));
                 else
-                    b.push(f('Solar Day', `${raw.solarDayHours} hrs`));
+                    b.push(f('Solar Day', `${n(raw.solarDayHours)} hrs`));
             }
-            if (raw.axialTilt != null) b.push(f('Axial Tilt', `${raw.axialTilt}°`));
+            if (raw.axialTilt != null) b.push(f('Axial Tilt', `${n(raw.axialTilt)}°`));
 
             if (raw.lifeProfile != null || raw.habitability != null || raw.resourceRating != null) {
                 b.push(GAP, h(3, 'Habitability'));
                 if (raw.lifeProfile != null)    b.push(f('Native Life', raw.lifeProfile));
-                if (raw.habitability != null)   b.push(f('Habitability', `${raw.habitability}/15`));
+                if (raw.habitability != null)   b.push(f('Habitability', `${n(raw.habitability)}/15`));
                 if (raw.resourceRating != null) b.push(f('Resource Rating', raw.resourceRating));
             }
         }
@@ -620,8 +921,8 @@ const ExportCore = (() => {
     function formatMgtStarFields(raw, isPrimary) {
         if (!raw) return [];
         const b = [];
-        if (raw.mass != null) b.push(f('Mass', `${raw.mass} M☉`));
-        if (raw.lum  != null) b.push(f('Luminosity', `${raw.lum} L☉`));
+        if (raw.mass != null) b.push(f('Mass', `${n(raw.mass)} M☉`));
+        if (raw.lum  != null) b.push(f('Luminosity', `${n(raw.lum)} L☉`));
         if (!isPrimary) {
             if (raw.separation)           b.push(f('Separation', raw.separation));
             if (raw.orbitId != null)      b.push(f('Orbit ID', raw.orbitId));
@@ -637,7 +938,7 @@ const ExportCore = (() => {
         if (s.pValue != null)       b.push(f('pValue', s.pValue));
         if (s.totalWorldPop)        b.push(f('Total Population', s.totalWorldPop.toLocaleString()));
         if (s.pcr != null)          b.push(f('PCR', s.pcr));
-        if (s.urbanPercent != null) b.push(f('Urban %', `${s.urbanPercent}%`));
+        if (s.urbanPercent != null) b.push(f('Urban %', `${n(s.urbanPercent)}%`));
         if (s.totalUrbanPop)        b.push(f('Urban Population', s.totalUrbanPop.toLocaleString()));
         if (s.majorCities != null)  b.push(f('Major Cities', s.majorCities));
         if (s.totalMajorCityPop)    b.push(f('Major City Population', s.totalMajorCityPop.toLocaleString()));
@@ -670,14 +971,14 @@ const ExportCore = (() => {
             b.push(f('Orbit', orb.orbit));
             if (orb.zone) b.push(f('Zone', orb.zone));
         }
-        if (raw.distAU != null)         b.push(f('Distance', `${raw.distAU} AU`));
-        if (raw.orbitalPeriod != null)  b.push(f('Orbital Period', `${raw.orbitalPeriod} yr`));
+        if (raw.distAU != null)         b.push(f('Distance', `${n(raw.distAU)} AU`));
+        if (raw.orbitalPeriod != null)  b.push(f('Orbital Period', `${n(raw.orbitalPeriod)} yr`));
         if (raw.diamKm != null)         b.push(f('Diameter', `${Math.round(raw.diamKm).toLocaleString()} km`));
-        if (raw.gravity != null)        b.push(f('Gravity', `${raw.gravity} G`));
-        if (raw.mass != null)           b.push(f('Mass', `${raw.mass} M⊕`));
-        if (raw.temperature != null)    b.push(f('Temperature', `${raw.temperature} K`));
+        if (raw.gravity != null)        b.push(f('Gravity', `${n(raw.gravity)} G`));
+        if (raw.mass != null)           b.push(f('Mass', `${n(raw.mass)} M⊕`));
+        if (raw.temperature != null)    b.push(f('Temperature', `${n(raw.temperature)} K`));
         if (raw.rotationPeriod != null) b.push(f('Rotation Period', raw.rotationPeriod));
-        if (raw.axialTilt != null)      b.push(f('Axial Tilt', `${raw.axialTilt}°`));
+        if (raw.axialTilt != null)      b.push(f('Axial Tilt', `${n(raw.axialTilt)}°`));
         if (isMainworld) {
             if (state.allegiance) b.push(f('Allegiance', state.allegiance));
             if (state.cluster)    b.push(f('Region', state.cluster));
@@ -688,12 +989,12 @@ const ExportCore = (() => {
     function formatCtSatFields(raw, isMainworld, state) {
         if (!raw) return [];
         const b = [GAP, h(2, 'Physical Data')];
-        if (raw.distAU != null)         b.push(f('Distance', `${raw.distAU} AU`));
-        if (raw.gravity != null)        b.push(f('Gravity', `${raw.gravity} G`));
-        if (raw.mass != null)           b.push(f('Mass', `${raw.mass} M⊕`));
-        if (raw.temperature != null)    b.push(f('Temperature', `${raw.temperature} K`));
+        if (raw.distAU != null)         b.push(f('Distance', `${n(raw.distAU)} AU`));
+        if (raw.gravity != null)        b.push(f('Gravity', `${n(raw.gravity)} G`));
+        if (raw.mass != null)           b.push(f('Mass', `${n(raw.mass)} M⊕`));
+        if (raw.temperature != null)    b.push(f('Temperature', `${n(raw.temperature)} K`));
         if (raw.rotationPeriod != null) b.push(f('Rotation Period', raw.rotationPeriod));
-        if (raw.axialTilt != null)      b.push(f('Axial Tilt', `${raw.axialTilt}°`));
+        if (raw.axialTilt != null)      b.push(f('Axial Tilt', `${n(raw.axialTilt)}°`));
         if (isMainworld) {
             if (state.allegiance) b.push(f('Allegiance', state.allegiance));
             if (state.cluster)    b.push(f('Region', state.cluster));
@@ -717,9 +1018,9 @@ const ExportCore = (() => {
         if (raw.worldType)             b.push(f('World Type', raw.worldType));
         if (raw.climateZone)           b.push(f('Climate Zone', raw.climateZone));
         if (raw.diamKm != null)        b.push(f('Diameter', `${Math.round(raw.diamKm).toLocaleString()} km`));
-        if (raw.gravity !== undefined) b.push(f('Gravity', `${raw.gravity} G`));
+        if (raw.gravity !== undefined) b.push(f('Gravity', `${n(raw.gravity)} G`));
         const mv = raw.massEarths ?? raw.mass;
-        if (mv != null)                b.push(f('Mass', `${mv} M⊕`));
+        if (mv != null)                b.push(f('Mass', `${n(mv)} M⊕`));
         if (raw.rotationState !== undefined) b.push(f('Rotation', raw.rotationState));
         if (isMainworld) {
             if (state.allegiance) b.push(f('Allegiance', state.allegiance));
@@ -734,9 +1035,9 @@ const ExportCore = (() => {
         if (raw.worldType)             b.push(f('World Type', raw.worldType));
         if (raw.climateZone)           b.push(f('Climate Zone', raw.climateZone));
         if (raw.diamKm != null)        b.push(f('Diameter', `${Math.round(raw.diamKm).toLocaleString()} km`));
-        if (raw.gravity !== undefined) b.push(f('Gravity', `${raw.gravity} G`));
+        if (raw.gravity !== undefined) b.push(f('Gravity', `${n(raw.gravity)} G`));
         const mv = raw.massEarths ?? raw.mass;
-        if (mv != null)                b.push(f('Mass', `${mv} M⊕`));
+        if (mv != null)                b.push(f('Mass', `${n(mv)} M⊕`));
         if (raw.rotationState !== undefined) b.push(f('Rotation', raw.rotationState));
         return b;
     }
@@ -798,23 +1099,23 @@ const ExportCore = (() => {
         const b = [GAP, h(2, 'Physical Data')];
 
         const au = raw.orbitalRadius ?? raw.orbitId;
-        if (au != null)                b.push(f('Distance', `${au} AU`));
+        if (au != null)                b.push(f('Distance', `${n(au)} AU`));
         if (raw.eccentricity != null)  b.push(f('Eccentricity', raw.eccentricity));
 
         b.push(GAP, h(3, 'Physical Properties'));
-        if (raw.mass != null)          b.push(f('Mass', `${raw.mass} M⊕`));
-        if (raw.density != null)       b.push(f('Density', `${raw.density} ρ⊕`));
+        if (raw.mass != null)          b.push(f('Mass', `${n(raw.mass)} M⊕`));
+        if (raw.density != null)       b.push(f('Density', `${n(raw.density)} ρ⊕`));
         const g = raw.surfaceGravity ?? raw.gravity;
-        if (g != null)                 b.push(f('Gravity', `${g} G`));
+        if (g != null)                 b.push(f('Gravity', `${n(g)} G`));
         if (raw.radius != null)        b.push(f('Diameter', `${Math.round(raw.radius * 2).toLocaleString()} km`));
-        if (raw.obliquity != null)     b.push(f('Axial Tilt', `${raw.obliquity}°`));
+        if (raw.obliquity != null)     b.push(f('Axial Tilt', `${n(raw.obliquity)}°`));
         if (raw.albedo != null)        b.push(f('Albedo', raw.albedo));
 
         if (raw.avgSurfaceTemp != null || raw.atmPressure != null) {
             b.push(GAP, h(3, 'Surface'));
-            if (raw.avgSurfaceTemp != null) b.push(f('Mean Temperature', `${raw.avgSurfaceTemp} K`));
-            if (raw.atmPressure != null)    b.push(f('Pressure', `${raw.atmPressure} bar`));
-            if (raw.waterCoverage != null)  b.push(f('Water Coverage', `${raw.waterCoverage}%`));
+            if (raw.avgSurfaceTemp != null) b.push(f('Mean Temperature', `${n(raw.avgSurfaceTemp)} K`));
+            if (raw.atmPressure != null)    b.push(f('Pressure', `${n(raw.atmPressure)} bar`));
+            if (raw.waterCoverage != null)  b.push(f('Water Coverage', `${n(raw.waterCoverage)}%`));
             if (raw.breathability) {
                 const arr = Array.isArray(raw.breathability) ? raw.breathability : [raw.breathability];
                 if (arr.length) b.push(f('Breathability', arr.join(', ')));
@@ -870,7 +1171,7 @@ const ExportCore = (() => {
         if (raw.starport && raw.habitationType !== 'Uninhabited')
             b.push(f('Starport', raw.starport));
         if (raw.canBeTerraformed && raw.terraformPoints != null)
-            b.push(f('Terraforming Potential', `${raw.terraformPoints} pts`));
+            b.push(f('Terraforming Potential', `${n(raw.terraformPoints)} pts`));
         if (isMainworld) {
             if (state.allegiance) b.push(f('Allegiance', state.allegiance));
             if (state.cluster)    b.push(f('Region', state.cluster));
@@ -894,9 +1195,15 @@ const ExportCore = (() => {
         return atm === 0 && hyd === 0;
     }
 
-    async function renderWorldImage(worldData, seedHexId, projection) {
+    // `hexId` is the bare hex id; `seedFallback` is a positional suffix used
+    // only for a body with no name. The seed itself is built by
+    // PlanetRenderer.imageSeed — the one definition shared with the in-app
+    // viewers, so an exported world and the same world on screen are the same
+    // planet. Do not reconstruct a seed string here.
+    async function renderWorldImage(worldData, hexId, projection, seedFallback) {
         if (!canRenderImage(worldData)) return null;
         if (typeof PlanetRenderer === 'undefined') return null;
+        const seedHexId = PlanetRenderer.imageSeed(hexId, worldData, seedFallback);
 
         const uwp  = worldData.uwp || '';
         const atm  = uwp.length >= 3 ? (parseInt(uwp[2], 16) || 0) : 0;
@@ -944,7 +1251,10 @@ const ExportCore = (() => {
         // shared content
         travelZone, uwpTableBlocks, notesBlocks, detailBlocks,
         fallbackPhysicalBlocks, fallbackStarBlocks, systemOverviewBlocks,
-        resolveWorldData, indexRowData,
+        resolveWorldData, indexRowData, fmtNum,
+        // Release 2 disclosure (WP5)
+        FIELD_LEVELS, fieldLevel, blockLevel, filterBlocks,
+        getUnknownFieldLabels, clearUnknownFieldLabels,
         // edition-aware formatters
         formatMgtWorldFields, formatMgtMoonFields, formatMgtStarFields, formatMgtSocio, formatCtBodyFields, formatCtSatFields, formatCtStarFields, formatT5WorldFields, formatT5SatFields, formatT5StarFields, formatT5Socio, formatRttBodyFields,
         formatAoWBodyFields, socioBlocks,

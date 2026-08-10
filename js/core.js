@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.17.0";
-const APP_BANNER = "v0.17.0: New: Extract Updates";
+const APP_VERSION = "v0.17.0.1";
+const APP_BANNER = "v0.17.0.1: New: Player Fog of War Exports";
 
 // -----------------------------------------------------------------------------
 // Application State

@@ -6,6 +6,36 @@ let canvas;
 let ctx;
 
 // -----------------------------------------------------------------------------
+// Player-map disclosure (Release 2, WP6)
+// -----------------------------------------------------------------------------
+// The subsector map is produced by captureSubsector() calling this same draw(),
+// so without a gate here a players' export ships a picture of every UWP, trade
+// code and starport class in the subsector — the one leak no text filter can
+// touch, because it is pixels. See manifest 5.2.1 and fog_of_war_field_tags
+// §9.3a, which specifies exactly what the map may show at each level:
+//
+//   (0) nothing        (a) star dot, travel-zone ring, allegiance colour
+//   (c) + gas giant    (d) + system name
+//   (g) + UWP, trade codes, starport class, naval/scout bases
+//
+// `_mapDisclosure` is null for every normal call, so the on-screen map and the
+// referee export are completely unaffected — every gate short-circuits to true.
+let _mapDisclosure = null;   // (hexId) => level string, or null for GM
+
+function setMapDisclosure(fn) { _mapDisclosure = (typeof fn === 'function') ? fn : null; }
+
+function _mapLevel(hexId) {
+    return _mapDisclosure ? _mapDisclosure(hexId) : null;
+}
+
+// True on the GM path; otherwise only when the hex's level permits `required`.
+function _mapShow(hexId, required) {
+    if (!_mapDisclosure) return true;
+    const lv = _mapDisclosure(hexId);
+    return !!(window.DisclosureModel && window.DisclosureModel.atLeast(lv, required));
+}
+
+// -----------------------------------------------------------------------------
 // Initialization Helper (Lazy Loading)
 // -----------------------------------------------------------------------------
 function initCanvas() {
@@ -441,6 +471,10 @@ function draw() {
                 // and skip if the filter is active.
                 // RTT: sets isStellarOnly on rttData when no bodies are generated.
                 // AoW: hide if no mainworld was elected; gas-giant-only systems render as a blank dot.
+                // Level (0): this system is not disclosed to players at all.
+                // Nothing is drawn — no dot, no ring, no label. WP6.
+                if (_mapDisclosure && _mapLevel(hexId) === '0') continue;
+
                 if (hideNoPlanetSystems) {
                     const aowStellarOnly = stateObj.aowSystem &&
                         !stateObj.aowSystem.mainworld;
@@ -496,7 +530,7 @@ function draw() {
 
                     if (data) {
                         // 2. Starport letter — above world dot
-                        if (showText && data.starport) {
+                        if (showText && data.starport && _mapShow(hexId, 'g')) {
                             ctx.font = `bold ${pFontPort}px 'Inter', sans-serif`;
                             ctx.fillStyle = pTextColor;
                             ctx.textBaseline = 'bottom';
@@ -740,8 +774,8 @@ function draw() {
                             ctx.restore();
                         }
 
-                        // 4. UWP string — just below dot
-                        if (showText && data.uwp) {
+                        // 4. UWP string — just below dot. (g), WP6.
+                        if (showText && data.uwp && _mapShow(hexId, 'g')) {
                             ctx.font = `${pFontSmall}px 'Inter', sans-serif`;
                             ctx.fillStyle = pTextColor;
                             ctx.textBaseline = 'top';
@@ -752,7 +786,9 @@ function draw() {
                         }
 
                         // 5. System name — bottom of hex (Sean Protocol: Typography Suite)
-                        if (data.name) {
+                        // (d), WP6 — a named dot tells a player the system has
+                        // been surveyed, which is exactly what (d) grants.
+                        if (data.name && _mapShow(hexId, 'd')) {
                             const custom = stateObj.custom_ui || {};
                             let displayName = data.name;
 
@@ -794,7 +830,7 @@ function draw() {
                         const symOffset = dotRadius + GUI_CONFIG.OFFSETS.SYM_GAP;
 
                         // 6. Gas Giant — Optimized Positioning & Variant Selection
-                        if (showText && data.gasGiant) {
+                        if (showText && data.gasGiant && _mapShow(hexId, 'c')) {
                             const gx = cx + symOffset + GUI_CONFIG.GAS_GIANT.X_OFFSET;
                             const gy = cy + GUI_CONFIG.GAS_GIANT.Y_OFFSET;
                             const gr = GUI_CONFIG.GAS_GIANT.RADIUS;
@@ -827,7 +863,7 @@ function draw() {
                         }
 
                         // 7. Scout Base — filled triangle BOTTOM-LEFT of dot
-                        if (showText && data.scoutBase) {
+                        if (showText && data.scoutBase && _mapShow(hexId, 'g')) {
                             const tx = cx - symOffset + GUI_CONFIG.OFFSETS.BASE_X_ADJ;
                             const ty = cy + symOffset * GUI_CONFIG.OFFSETS.SCOUT_Y_FACTOR;
                             const ts = GUI_CONFIG.BASE_ICONS.RADIUS;
@@ -841,7 +877,7 @@ function draw() {
                         }
 
                         // 8. Naval Base — 6-point star TOP-LEFT of dot
-                        if (showText && data.navalBase) {
+                        if (showText && data.navalBase && _mapShow(hexId, 'g')) {
                             const sx = cx - symOffset + GUI_CONFIG.OFFSETS.BASE_X_ADJ;
                             const sy = cy - symOffset * GUI_CONFIG.OFFSETS.NAVAL_Y_FACTOR;
                             const sr = GUI_CONFIG.BASE_ICONS.RADIUS;
@@ -910,11 +946,16 @@ function draw() {
 
                         let label = hexId;
 
-                        if (data && data.uwp) {
+                        // DEVELOPMENT VIEW. Gated too — devView is a user toggle
+                        // and captureSubsector inherits whatever it is set to, so
+                        // leaving this branch open would make the leak depend on a
+                        // checkbox rather than on the disclosure level. WP6.
+                        if (data && data.uwp && _mapShow(hexId, 'g')) {
                             let tcs = data.tradeCodes ? data.tradeCodes.join(" ") : "";
                             if (tcs.length > 0) tcs = " " + tcs;
 
-                            const topLabel = data.name ? `${data.name} (${hexId})` : hexId;
+                            const topLabel = (data.name && _mapShow(hexId, 'd'))
+                                ? `${data.name} (${hexId})` : hexId;
                             const displayUwp910 = (window.rttShowIndustry && stateObj.rttData && data.industry != null)
                                 ? data.uwp.slice(0, -1) + data.industry
                                 : data.uwp;
@@ -933,7 +974,12 @@ function draw() {
                                 }
                             }
                         } else if (data) {
-                            ctx.fillText(`${label} [${data.starport}]`, cx, cy - (size * 0.75));
+                            // Starport class is (g); below it fall back to the
+                            // bare hex label rather than bracketing the class.
+                            ctx.fillText(
+                                (data.starport && _mapShow(hexId, 'g'))
+                                    ? `${label} [${data.starport}]` : label,
+                                cx, cy - (size * 0.75));
                         } else {
                             ctx.fillText(label, cx, cy - (size * 0.75));
                         }
@@ -1482,7 +1528,16 @@ async function captureSubsector(sectorNum, subsectorChar, outputWidth, outputHei
     cameraY = capCamY;
 
     // ── Render one frame ───────────────────────────────────────────────────────
-    draw();
+    // WP6: opts.disclosure is (hexId) => level. Installed only for this frame
+    // and restored in a finally, so a throw mid-draw can never leave the live
+    // on-screen map fogged.
+    const savedDisclosure = _mapDisclosure;
+    try {
+        setMapDisclosure(opts && opts.disclosure);
+        draw();
+    } finally {
+        _mapDisclosure = savedDisclosure;
+    }
 
     // ── Restore live renderer state ────────────────────────────────────────────
     canvas  = savedCanvas;

@@ -863,6 +863,9 @@ function setupObsidianExport() {
     const skipAirlessRow     = document.getElementById('obs-skip-airless-row');
     const skipAirlessChk     = document.getElementById('obs-skip-airless');
     const incSystemImages    = document.getElementById('obs-include-system-images');
+    const versionSel    = document.getElementById('obs-version');
+    const versionHint   = document.getElementById('obs-version-hint');
+    const versionWarn   = document.getElementById('obs-version-warning');
     const useSubfoldersChk   = document.getElementById('obs-use-subfolders');
     const useSubfoldersRow   = document.getElementById('obs-use-subfolders-row');
     const progressRow     = document.getElementById('obs-progress-row');
@@ -880,12 +883,31 @@ function setupObsidianExport() {
     function _applyFormat() {
         const html = _format() === 'html';
         if (useSubfoldersRow) useSubfoldersRow.style.display = html ? 'none' : 'flex';
-        if (exportBtn) exportBtn.textContent = html ? 'Export HTML ZIP' : 'Export ZIP';
+        const player = _isPlayerVersion();
+        if (exportBtn) exportBtn.textContent =
+            (html ? 'Export HTML ZIP' : 'Export ZIP') + (player ? ' (Players)' : '');
         if (formatHint) {
             formatHint.textContent = html
                 ? 'A browsable website — one page per system. Extract every subsector of a sector into the same folder.'
                 : 'One Markdown file per star, world and moon, for an Obsidian vault.';
         }
+    }
+
+    // Release 2. The players' version applies to BOTH formats — the disclosure
+    // filter lives in export_core, so the Obsidian wiki gets it for free.
+    function _isPlayerVersion() {
+        return !!(versionSel && versionSel.value === 'player');
+    }
+
+    function _applyVersion() {
+        const player = _isPlayerVersion();
+        if (versionWarn) versionWarn.style.display = player ? 'block' : 'none';
+        if (versionHint) {
+            versionHint.textContent = player
+                ? 'Filtered to each system’s disclosure level (right-click → ASSIGN → Assign Player Disclosure). Referee notes are never included.'
+                : 'The full export. Nothing is withheld.';
+        }
+        _applyFormat();   // the export button label depends on both
     }
 
     function _updateExportBtn() {
@@ -920,7 +942,8 @@ function setupObsidianExport() {
     });
 
     subsectorSel.addEventListener('change', _updateExportBtn);
-    if (formatSel) formatSel.addEventListener('change', _applyFormat);
+    if (formatSel)  formatSel.addEventListener('change', _applyFormat);
+    if (versionSel) versionSel.addEventListener('change', _applyVersion);
 
     incImages.addEventListener('change', () => {
         if (skipAirlessRow) skipAirlessRow.style.display = incImages.checked ? 'flex' : 'none';
@@ -946,7 +969,7 @@ function setupObsidianExport() {
         if (exportBtn) exportBtn.disabled    = true;
         if (cancelBtn) cancelBtn.textContent = 'Cancel';
         if (cancelBtn) cancelBtn.disabled    = false;
-        _applyFormat();
+        _applyVersion();   // also calls _applyFormat()
 
         modal.style.display = 'flex';
     });
@@ -961,6 +984,7 @@ function setupObsidianExport() {
         const skipAirless         = includeImages && !!(skipAirlessChk  && skipAirlessChk.checked);
         const includeSystemImages = !!(incSystemImages && incSystemImages.checked);
         const useSubfolders       = !!(useSubfoldersChk && useSubfoldersChk.checked);
+        const playerVersion       = _isPlayerVersion();
 
         exportBtn.disabled        = true;
         cancelBtn.disabled        = true;
@@ -988,6 +1012,9 @@ function setupObsidianExport() {
                 // option object identical between the two so a future third format,
                 // and Release 2's disclosure options, only have to be added once.
                 useSubfolders: html ? true : useSubfolders,
+                // Release 2. Both exporters honour this; when false they take
+                // the identity path and produce byte-identical GM output.
+                playerVersion,
                 onProgress: (done, total, msg) => {
                     const pct = total > 0 ? Math.round((done / total) * 100) : 0;
                     progressBar.style.width = `${pct}%`;
@@ -995,9 +1022,14 @@ function setupObsidianExport() {
                 },
                 onDone: (fileCount) => {
                     progressBar.style.width = '100%';
-                    progressTxt.textContent = html
+                    const base = html
                         ? `Done — ${fileCount} files. Extract into your sector folder.`
                         : `Done — ${fileCount} files exported.`;
+                    // Say plainly which version was written. The two ZIPs are
+                    // easy to mix up, and sharing the wrong one is unrecoverable.
+                    progressTxt.textContent = playerVersion
+                        ? `${base} PLAYERS' VERSION.`
+                        : base;
                     cancelBtn.disabled      = false;
                     cancelBtn.textContent   = 'Close';
                 },

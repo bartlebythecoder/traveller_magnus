@@ -1852,9 +1852,26 @@ const SystemViewer = (() => {
     // PNG bytes as a Uint8Array.  Safe to call while the live viewer is closed;
     // all module-level render state is saved and fully restored afterwards.
     // Returns null if the state has no detectable system.
-    async function renderSnapshot(state, width, height) {
+    // `opts` (optional, Release 2 / WP5 slice 5d):
+    //   level — a disclosure level ('a'..'g'). Absent/null = GM, unchanged.
+    //
+    // Deliberately ONE level rather than a pair of booleans. The per-entity
+    // rules already live in ExportCore's display-name helpers (worlds and moons
+    // at (g), stars at (d)), so passing the level makes the image use exactly
+    // the labels the page uses. An earlier version passed a single
+    // `genericNames` flag and drew "Star A" at (d)-(f) while the page said
+    // "K0 V A" — not a leak, but the two disagreed. Found by looking at the
+    // rendered PNG, not by any assertion.
+    //
+    // This exists because an orrery draws body names as PIXELS. No field filter,
+    // parity check or DOM sweep can see them, so a players' export cannot simply
+    // reuse the GM image — it has to be re-rendered. The DECISION about which
+    // level warrants which labels stays in the exporter; this function only
+    // obeys, the same split that puts hexPoly() in renderer.js (WP3).
+    async function renderSnapshot(state, width, height, opts) {
         width  = width  || 900;
         height = height || 500;
+        opts   = opts   || {};
 
         const found = _detectSystem(state);
         if (!found) return null;
@@ -1865,6 +1882,27 @@ const SystemViewer = (() => {
         else if (found.edition === 'CT')    normalised = _normalizeCT(found.raw);
         else if (found.edition === 'T5')    normalised = _normalizeT5(found.raw);
         else                                normalised = _normalizeRTT(found.raw);
+
+        const EC2 = (typeof ExportCore !== 'undefined') ? ExportCore : null;
+        if (opts.level && EC2) {
+            // Copy rather than mutate — `normalised` may share objects with the
+            // live hexState, and this must never alter the GM's own data.
+            // ExportCore is resolved at call time, not load time, so script
+            // order does not matter.
+            const stars = normalised.stars || [];
+            const multi = stars.length > 1;
+            normalised = Object.assign({}, normalised, {
+                stars: stars.map((s, i) => Object.assign({}, s, {
+                    name: EC2.starDisplayName(s, i, multi, opts.level),
+                })),
+                worlds: (normalised.worlds || []).map((w, i) => Object.assign({}, w, {
+                    name: EC2.worldDisplayName(w, i, opts.level),
+                    moons: (w.moons || []).map((m, j) => Object.assign({}, m, {
+                        name: EC2.moonDisplayName(m, j, opts.level),
+                    })),
+                })),
+            });
+        }
 
         // Save every module-level variable that _drawOrrery() reads or writes
         const saved = {
@@ -1907,7 +1945,10 @@ const SystemViewer = (() => {
         _orbitOpacity           = 0.3;    // light orbit rings add context without clutter
         _hideMoons              = false;
         _hideHZ                 = false;
-        _hideMainworldHighlight = false;
+        // The mainworld highlight is identification, which is (g) — a coloured
+        // body says "this is the one that matters" as loudly as a caption.
+        _hideMainworldHighlight = !!(opts.level && EC2 &&
+            !(window.DisclosureModel && window.DisclosureModel.atLeast(opts.level, 'g')));
         _hitBodies              = [];
 
         _drawOrrery();

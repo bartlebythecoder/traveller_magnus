@@ -122,21 +122,54 @@ function setupCanvasEvents() {
             contextMenu.classList.remove('reverse-submenus');
         }
 
-        // Check if each submenu will go off-screen downward; flip up if needed
-        contextMenu.querySelectorAll('.has-submenu').forEach(item => {
-            item.classList.remove('flip-up');
-            item.addEventListener('mouseenter', function onEnter() {
-                const submenu = this.querySelector('.submenu');
-                if (!submenu) return;
-                const rect = submenu.getBoundingClientRect();
-                if (rect.bottom > window.innerHeight) {
-                    this.classList.add('flip-up');
-                } else {
-                    this.classList.remove('flip-up');
-                }
-            }, { once: true });
-        });
+        // Clear any inline offsets left by a previous opening, so each submenu
+        // is measured at its natural position next time it is hovered.
+        contextMenu.querySelectorAll('.submenu').forEach(sm => { sm.style.top = ''; });
+        contextMenu.querySelectorAll('.has-submenu').forEach(it => it.classList.remove('flip-up'));
     });
+
+    // Keep every submenu fully on screen.
+    //
+    // This replaces a `flip-up` class that swapped `top: 0` for `bottom: 0`.
+    // Flipping only moves the overflow: a submenu opened near the bottom of the
+    // window then ran off the TOP instead, hiding its LAST entries — which is
+    // how ASSIGN (the longest submenu) could lose "Assign Player Disclosure".
+    // Clamping fits the submenu into the viewport instead, so no entry is ever
+    // unreachable; if it is genuinely taller than the window, the CSS
+    // max-height lets it scroll.
+    //
+    // Delegated and attached ONCE at setup. The previous version added a
+    // `{ once: true }` mouseenter listener per item on every right-click, which
+    // (a) never re-evaluated if you hovered the same item twice, and
+    // (b) accumulated listeners each time the menu opened without being hovered.
+    function _positionSubmenu(item) {
+        const submenu = item.querySelector(':scope > .submenu');
+        if (!submenu) return;
+
+        submenu.style.top = '';                       // measure unshifted
+        const itemRect = item.getBoundingClientRect();
+        const height   = submenu.offsetHeight;
+        const MARGIN   = 8;
+
+        // Where the submenu would like to sit, in viewport coordinates, and the
+        // range it may actually occupy.
+        const lowest  = window.innerHeight - height - MARGIN;
+        const clamped = Math.max(MARGIN, Math.min(itemRect.top, lowest));
+
+        // `.submenu` is absolutely positioned within the item, so convert the
+        // chosen viewport position back into an offset from the item's top.
+        submenu.style.top = `${Math.round(clamped - itemRect.top)}px`;
+    }
+
+    // `contextMenu` above is scoped to the contextmenu handler, so resolve the
+    // element again here rather than reaching into it.
+    const ctxMenuEl = document.getElementById('context-menu');
+    if (ctxMenuEl) {
+        ctxMenuEl.addEventListener('mouseover', (e) => {
+            const item = e.target.closest('.context-menu-item.has-submenu');
+            if (item && ctxMenuEl.contains(item)) _positionSubmenu(item);
+        });
+    }
 
     // 3. Mouse Down: Start Pan, Paint, or Hex Editor
     mapCanvas.addEventListener('mousedown', (e) => {

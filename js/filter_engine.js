@@ -124,6 +124,9 @@
 
         if (isOpening) {
             modal.classList.add('visible');
+            // Opening the manager is re-engaging with the filter; a bypassed
+            // one here would contradict the match count shown in this window.
+            if (typeof window.restoreFilterView === 'function') window.restoreFilterView(false);
             window.populateFilterRegionDropdown();
             scanForConditionalFields();
             if (typeof writeLogLine === 'function') writeLogLine("Filter Modal Opened - Performing data scan for Ix/GWP/WTN.");
@@ -138,6 +141,70 @@
      */
     window.closeFilterModal = function() {
         document.getElementById('filter-modal').classList.remove('visible');
+    };
+
+    // ── Filter bypass (Shift+F) ──────────────────────────────────────────────
+    // Building a route or reading the map with a filter on means half the
+    // sector is invisible, and there is no on-screen sign the filter is even
+    // active once the window is closed. This bypasses it for viewing without
+    // disturbing it: the form controls are the filter's source of truth and are
+    // never touched, so nothing has to be retyped afterwards.
+
+    /**
+     * Counts worlds the live filter currently admits. Reads isHiddenByFilter,
+     * which stays truthful while suspended, so this reports the real filter
+     * rather than what is on screen.
+     */
+    function _filterMatchCounts() {
+        let match = 0, total = 0;
+        hexStates.forEach(state => {
+            if (state.type !== 'SYSTEM_PRESENT') return;
+            total++;
+            if (!state.isHiddenByFilter) match++;
+        });
+        return { match, total };
+    }
+
+    window.isFilterSuspended = function () {
+        return window.filterSuspended === true;
+    };
+
+    /**
+     * Restores the filter view if it is bypassed. Safe to call unconditionally.
+     * Returns true if it actually changed anything.
+     */
+    window.restoreFilterView = function (announce) {
+        if (!window.filterSuspended) return false;
+        window.filterSuspended = false;
+        if (typeof draw === 'function') requestAnimationFrame(draw);
+        if (typeof window.updateRouteFilterSummary === 'function') window.updateRouteFilterSummary();
+        if (announce && typeof showToast === 'function') {
+            const { match, total } = _filterMatchCounts();
+            showToast(`Filter restored — showing ${match} of ${total} worlds.`, 2200);
+        }
+        return true;
+    };
+
+    window.toggleFilterSuspension = function () {
+        if (window.filterSuspended) {
+            window.restoreFilterView(true);
+            return;
+        }
+
+        // Nothing to bypass — say so rather than leaving the user wondering
+        // whether the key did anything.
+        if (typeof hasAnyActiveFilter === 'function' && !hasAnyActiveFilter()) {
+            if (typeof showToast === 'function') showToast('No filter is active.', 1800);
+            return;
+        }
+
+        window.filterSuspended = true;
+        if (typeof draw === 'function') requestAnimationFrame(draw);
+        if (typeof window.updateRouteFilterSummary === 'function') window.updateRouteFilterSummary();
+        if (typeof showToast === 'function') {
+            const { total } = _filterMatchCounts();
+            showToast(`Filter suspended — showing all ${total} worlds. Shift+F to restore.`, 3000);
+        }
     };
 
     /**
@@ -405,8 +472,13 @@
      * Main entry point for filter changes. Implements 300ms debounce.
      */
     function onFilterChanged() {
+        // Editing the filter while it is bypassed would show the user a map
+        // that ignores the very criteria they are typing. Re-engaging with the
+        // filter ends the bypass.
+        if (typeof window.restoreFilterView === 'function') window.restoreFilterView(false);
+
         if (filterDebounceTimer) clearTimeout(filterDebounceTimer);
-        
+
         filterDebounceTimer = setTimeout(() => {
             if (typeof tSection === 'function') tSection("Debounced Filter Triggered");
             window.applyActiveFilters();

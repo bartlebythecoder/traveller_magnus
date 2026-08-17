@@ -1063,6 +1063,8 @@ function setupWorldAutocomplete(inputEl, dropdownEl) {
 
     inputEl.addEventListener('input', () => {
         renderDropdown(getMatches(inputEl.value.trim()));
+        // A hex ID typed by hand can be deep space; flag it as the user types.
+        refreshStopFieldStyles();
     });
 
     inputEl.addEventListener('keydown', (e) => {
@@ -1106,19 +1108,30 @@ function setupWorldAutocomplete(inputEl, dropdownEl) {
  */
 function formatWorldLabel(hexId, name) {
     const label = name || (hexStates.has(hexId) ? getWorldName(hexStates.get(hexId)) : '');
-    return label ? `${label} (${hexId})` : hexId;
+    if (label) return `${label} (${hexId})`;
+    // A nameless stop is either vacant space the user deliberately chose or an
+    // unnamed system. Naming the vacancy is what tells a deep-space stop apart
+    // from a typo in the field.
+    if (isVacantHex(hexId)) return `Deep Space (${hexId})`;
+    return hexId;
 }
 
 /**
  * Resolves a P2P input value to a hex ID.
  * Accepts a raw hex ID, a system name (case-insensitive, first match wins),
  * or the "Name (hexId)" form written by the autocomplete.
+ *
+ * A vacant hex resolves to itself: a stop may be deep space, not only a world.
+ * Vacant hexes have no name to match, so they are reachable by clicking the map
+ * or by typing the hex ID — never through the name autocomplete.
+ *
  * Returns null if nothing matches.
  */
 function resolveWorldInput(value) {
     const v = value.trim();
     if (!v) return null;
     if (hexStates.has(v) && hexStates.get(v).type === 'SYSTEM_PRESENT') return v;
+    if (isVacantHex(v)) return v;
 
     // "Name (hexId)" — trust the explicit hex ID in the suffix over the name,
     // which may be duplicated across the sector.
@@ -1126,6 +1139,7 @@ function resolveWorldInput(value) {
     if (suffix) {
         const hexId = suffix[2].trim();
         if (hexStates.has(hexId) && hexStates.get(hexId).type === 'SYSTEM_PRESENT') return hexId;
+        if (isVacantHex(hexId)) return hexId;   // "Deep Space (1-A-1910)"
     }
 
     const q = (suffix ? suffix[1] : v).trim().toLowerCase();
@@ -1135,6 +1149,27 @@ function resolveWorldInput(value) {
         if (state.type === 'SYSTEM_PRESENT' && getWorldName(state).toLowerCase() === q) found = hexId;
     });
     return found;
+}
+
+/**
+ * Flags every P2P stop field that currently holds a vacant hex.
+ *
+ * A deep-space stop is legitimate but unusual, and there is no checkbox
+ * announcing it — so the field itself has to say so. Called from MapPick._sync
+ * (which runs after every pick), from the autocomplete's input handler, and
+ * wherever fields are populated programmatically.
+ */
+function refreshStopFieldStyles() {
+    const inputs = [
+        document.getElementById('route-auto-p2p-start'),
+        document.getElementById('route-auto-p2p-end'),
+        ...document.querySelectorAll('#route-auto-p2p-waypoints-list .p2p-waypoint-input')
+    ];
+    inputs.forEach(input => {
+        if (!input) return;
+        const id = resolveWorldInput(input.value);
+        input.classList.toggle('wac-input-vacant', !!id && isVacantHex(id));
+    });
 }
 
 // ============================================================================
@@ -1224,7 +1259,7 @@ const _ROUTE_EXPORT_LS_KEY = 'traveller_routeExportFields';
 
 function _getRouteExportValue(fieldId, hexId, state, data) {
     switch (fieldId) {
-        case 'name':      return getWorldName(state) || '(unnamed)';
+        case 'name':      return getWorldName(state) || (isVacantHex(hexId) ? 'Deep Space' : '(unnamed)');
         case 'hex': {
             const parts = hexId.split('-');
             return parts[parts.length - 1];
@@ -1405,7 +1440,10 @@ function exportRouteSystemsCSV(routeId, routeName, fieldIds) {
     const rows = [labels];
 
     worlds.forEach(hexId => {
-        const state = hexStates.get(hexId);
+        // A vacant stop may have no hexStates entry at all; it still belongs in
+        // the export, as a row of dashes under "Deep Space", rather than
+        // vanishing and leaving the route looking one stop shorter than it is.
+        const state = hexStates.get(hexId) || (isVacantHex(hexId) ? { type: 'BLANK' } : null);
         if (!state) return;
         const data = state.rttData || state.t5Data || state.mgt2eData || state.ctData || {};
         rows.push(fieldIds.map(id => _getRouteExportValue(id, hexId, state, data)));
@@ -1460,7 +1498,9 @@ window.openRouteSystemsPanel = function (routeId, routeName) {
     } else {
         worlds.forEach((hexId, i) => {
             const state = hexStates.get(hexId);
-            const name  = getWorldName(state) || '(unnamed)';
+            // A route may now stop in, or pass through, empty space — say so
+            // rather than listing it as an unnamed world.
+            const name  = getWorldName(state) || (isVacantHex(hexId) ? 'Deep Space' : '(unnamed)');
             const item  = document.createElement('div');
             item.className = 'route-systems-item';
             const marker = ordered ? `${i + 1}.` : '•';
@@ -1483,6 +1523,243 @@ window.closeRouteSystemsPanel = function () {
     if (!panel) return;
     panel.style.display = 'none';
     panel.dataset.routeId = '';
+};
+
+// ============================================================================
+// MAP PICK (fill a P2P stop by clicking a hex on the map)
+// ============================================================================
+// The Route Manager is a non-modal floating palette, so the map underneath it
+// stays live — a stop can be chosen by clicking it instead of typing it.
+//
+// Both modes share ONE controller with a single `mode` field rather than a
+// pair of booleans: "armed for a field" and "chain mode" must never both be
+// true, and two parallel state machines would drift apart.
+//   'field' — one named input is armed; the next map click fills it.
+//   'chain' — every map click extends the route. First click sets Start, the
+//             second sets End, and from then on the standing End is demoted to
+//             a waypoint and the hex just clicked becomes the new End. Last
+//             click wins, which is how a route gets traced across a map by hand.
+//
+// Delivery happens on mouseup, and only when the pointer barely moved (see
+// canvas_input.js), so drag-to-pan keeps working while a pick is armed.
+
+const MapPick = {
+    mode: null,         // null | 'field' | 'chain'
+    targetInput: null,  // 'field' mode only — the input being filled
+    targetLabel: ''
+};
+window.MapPick = MapPick;
+
+// The orrery takes canvas input over wholesale, so picking refuses to arm
+// while it is open rather than competing with it for clicks.
+function _mapPickBlocked() {
+    return !!(window.SystemViewer && window.SystemViewer.isOpen && window.SystemViewer.isOpen());
+}
+
+// "1-B-1910" → "1910". Toasts name the hex the way the map labels it.
+function _mapPickHexLabel(hexId) {
+    const parts = String(hexId).split('-');
+    return parts[parts.length - 1];
+}
+
+MapPick.isArmed = function () {
+    return this.mode !== null;
+};
+
+MapPick.armField = function (inputEl, label) {
+    if (!inputEl) return;
+    if (_mapPickBlocked()) {
+        showToast('Close the system view before picking on the map.', 2500);
+        return;
+    }
+    // Clicking an already-armed button disarms it.
+    if (this.mode === 'field' && this.targetInput === inputEl) { this.cancel(); return; }
+    this.mode = 'field';
+    this.targetInput = inputEl;
+    this.targetLabel = label || 'this stop';
+    this._sync();
+};
+
+MapPick.startChain = function () {
+    if (this.mode === 'chain') { this.cancel(); return; }
+    if (_mapPickBlocked()) {
+        showToast('Close the system view before picking on the map.', 2500);
+        return;
+    }
+
+    const startEl = document.getElementById('route-auto-p2p-start');
+    const endEl   = document.getElementById('route-auto-p2p-end');
+    const wpList  = document.getElementById('route-auto-p2p-waypoints-list');
+
+    // Chain mode rewrites End on every click, so it starts from an empty route
+    // rather than silently demoting something the user typed by hand.
+    const hasAny = !!((startEl && startEl.value.trim()) ||
+                      (endEl && endEl.value.trim()) ||
+                      (wpList && wpList.children.length > 0));
+    if (hasAny) {
+        if (!confirm('Build Route on Map starts from an empty route.\n\nClear the current Start, End and waypoints?')) return;
+        if (startEl) startEl.value = '';
+        if (endEl)   endEl.value   = '';
+        if (wpList)  wpList.innerHTML = '';
+    }
+
+    this.mode = 'chain';
+    this.targetInput = null;
+    this.targetLabel = '';
+    this._sync();
+};
+
+MapPick.cancel = function (msg) {
+    if (this.mode === null) return;
+    this.mode = null;
+    this.targetInput = null;
+    this.targetLabel = '';
+    this._sync();
+    if (msg) showToast(msg, 2000);
+};
+
+MapPick.deliver = function (hexId) {
+    if (this.mode === null) return;
+    if (_mapPickBlocked()) { this.cancel(); return; }
+
+    // A stop may be a populated world or vacant space — some referees let
+    // players jump into empty hexes, and deliberately choosing one IS the
+    // opt-in, so there is no separate setting to check here. Anything else
+    // (an id off the grid, say) would fail much later as a bare "no path".
+    const state = hexStates.get(hexId);
+    const isSystem = !!(state && state.type === 'SYSTEM_PRESENT');
+    if (!isSystem && !isVacantHex(hexId)) {
+        showToast(`${_mapPickHexLabel(hexId)} cannot be used as a stop.`, 2200);
+        return;
+    }
+
+    if (this.mode === 'field') this._deliverField(hexId);
+    else                       this._deliverChain(hexId);
+};
+
+MapPick._deliverField = function (hexId) {
+    const input = this.targetInput;
+    // Waypoint rows are created and destroyed freely, so the armed row may
+    // have been removed while the pick was open.
+    if (!input || !input.isConnected) {
+        this.cancel('That field is gone — pick cancelled.');
+        return;
+    }
+
+    const label = formatWorldLabel(hexId);
+    input.value = label;
+
+    // Auto-advance Start → End, but only when End is still empty: reopening a
+    // saved route to change one field must not drag the user into the next.
+    const startEl = document.getElementById('route-auto-p2p-start');
+    const endEl   = document.getElementById('route-auto-p2p-end');
+    if (input === startEl && endEl && !endEl.value.trim()) {
+        showToast(`Start: ${label}`, 1600);
+        this.armField(endEl, 'End');
+        return;
+    }
+
+    showToast(`${this.targetLabel}: ${label}`, 1600);
+    this.cancel();
+};
+
+MapPick._deliverChain = function (hexId) {
+    const startEl = document.getElementById('route-auto-p2p-start');
+    const endEl   = document.getElementById('route-auto-p2p-end');
+    if (!startEl || !endEl) { this.cancel(); return; }
+
+    const label = formatWorldLabel(hexId);
+
+    if (!startEl.value.trim()) {
+        startEl.value = label;
+        showToast(`Start: ${label}`, 1600);
+
+    } else if (!endEl.value.trim()) {
+        if (resolveWorldInput(startEl.value) === hexId) {
+            showToast('That is already the start of the route.', 2000);
+            return;
+        }
+        endEl.value = label;
+        showToast(`End: ${label}`, 1600);
+
+    } else {
+        if (resolveWorldInput(endEl.value) === hexId) {
+            showToast('That is already the last stop.', 2000);
+            return;
+        }
+        // Last click wins: the standing End becomes the next waypoint. It is
+        // appended at the bottom because it was the furthest stop so far, and
+        // legs are walked in list order.
+        //
+        // doFocus=false — focus must stay on the map, and the panel must not
+        // scroll out from under the cursor on every click.
+        addWaypointRow(endEl.value, false);
+        endEl.value = label;
+        const wpCount = document.querySelectorAll('#route-auto-p2p-waypoints-list .p2p-waypoint-row').length;
+        showToast(`End: ${label} — ${wpCount} waypoint${wpCount !== 1 ? 's' : ''}`, 1800);
+    }
+
+    this._sync();  // the hint text depends on how far along the chain is
+};
+
+MapPick._hintText = function () {
+    if (this.mode === 'field') {
+        return `Click a system on the map to set ${this.targetLabel}. Esc cancels.`;
+    }
+    const startEl = document.getElementById('route-auto-p2p-start');
+    const endEl   = document.getElementById('route-auto-p2p-end');
+    if (startEl && !startEl.value.trim()) return 'Click the system this route starts from. Esc cancels.';
+    if (endEl   && !endEl.value.trim())   return 'Click the next system — it becomes the End. Esc cancels.';
+    return 'Keep clicking: each system becomes the new End, and the one before it becomes a waypoint.';
+};
+
+// Repaints every piece of pick-mode feedback: button states, the map cursor,
+// and the hint bar. Called after any state change so there is one place where
+// what the user sees is derived from `mode`.
+MapPick._sync = function () {
+    const armedInput = this.mode === 'field' ? this.targetInput : null;
+
+    document.querySelectorAll('.p2p-pick-btn').forEach(btn => {
+        // Waypoint buttons carry a direct reference (rows are dynamic); the
+        // Start/End buttons name their input in markup.
+        const target = btn._pickInput ||
+                       (btn.dataset.pickTarget ? document.getElementById(btn.dataset.pickTarget) : null);
+        btn.classList.toggle('armed', !!target && target === armedInput);
+    });
+
+    const chainBtn = document.getElementById('btn-p2p-chain');
+    if (chainBtn) {
+        const on = this.mode === 'chain';
+        chainBtn.classList.toggle('armed', on);
+        chainBtn.innerHTML = on ? '◉ Building — click the map' : '◎ Build Route on Map';
+    }
+
+    const canvas = document.getElementById('map-canvas');
+    if (canvas) canvas.classList.toggle('picking', this.isArmed());
+
+    refreshStopFieldStyles();
+
+    const hint = document.getElementById('route-auto-p2p-pick-hint');
+    if (!hint) return;
+    if (!this.isArmed()) {
+        hint.style.display = 'none';
+        hint.innerHTML = '';
+        return;
+    }
+
+    hint.innerHTML = '';
+    const text = document.createElement('span');
+    text.className = 'pick-hint-text';
+    text.textContent = this._hintText();
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = this.mode === 'chain' ? 'Done' : 'Cancel';
+    btn.addEventListener('click', () => MapPick.cancel());
+
+    hint.appendChild(text);
+    hint.appendChild(btn);
+    hint.style.display = 'flex';
 };
 
 // ============================================================================
@@ -1514,6 +1791,19 @@ function addWaypointRow(prefillValue = '', doFocus = true) {
 
     wrap.appendChild(input);
     wrap.appendChild(drop);
+
+    const pickBtn = document.createElement('button');
+    pickBtn.type = 'button';
+    pickBtn.className = 'p2p-pick-btn';
+    pickBtn.title = 'Pick on map';
+    pickBtn.textContent = '◎';
+    pickBtn._pickInput = input;   // read back by MapPick._sync()
+    pickBtn.addEventListener('click', () => {
+        // Numbered at click time — rows reorder freely, so the position is not
+        // fixed at creation.
+        const rows = [...document.querySelectorAll('#route-auto-p2p-waypoints-list .p2p-waypoint-row')];
+        MapPick.armField(input, `Waypoint ${rows.indexOf(row) + 1}`);
+    });
 
     const upBtn = document.createElement('button');
     upBtn.type = 'button';
@@ -1549,12 +1839,16 @@ function addWaypointRow(prefillValue = '', doFocus = true) {
     removeBtn.title = 'Remove waypoint';
     removeBtn.textContent = '×';
     removeBtn.addEventListener('click', () => {
+        // Disarm eagerly if this row's pick is open, so the hint bar cannot
+        // sit there naming a field that no longer exists.
+        if (MapPick.targetInput === input) MapPick.cancel();
         row.remove();
         renumberWaypoints();
     });
 
     row.appendChild(idxEl);
     row.appendChild(wrap);
+    row.appendChild(pickBtn);
     row.appendChild(upBtn);
     row.appendChild(downBtn);
     row.appendChild(removeBtn);
@@ -1562,6 +1856,7 @@ function addWaypointRow(prefillValue = '', doFocus = true) {
 
     setupWorldAutocomplete(input, drop);
     renumberWaypoints();
+    refreshStopFieldStyles();
     if (doFocus) {
         input.focus();
         row.scrollIntoView({ block: 'nearest' });
@@ -1677,6 +1972,8 @@ function _restoreAutomationConfig(routeId) {
         return false;
     }
 
+    refreshStopFieldStyles();
+
     // Select the saved type and open its accordion via the existing handler.
     const radio = document.querySelector(`input[name="route-auto-type"][value="${ref.type}"]`);
     if (radio) {
@@ -1744,6 +2041,8 @@ function setupRouteWindow() {
             if (radio.value === 'p2p' || radio.value === 'network') {
                 window.updateRouteFilterSummary();
             }
+            // Switching away from P2P hides the fields a pick would fill.
+            if (radio.value !== 'p2p') MapPick.cancel();
             const genBtn = document.getElementById('btn-route-auto-generate');
             if (genBtn) genBtn.disabled = false;
         });
@@ -1963,6 +2262,18 @@ function setupRouteWindow() {
     const addWpBtn = document.getElementById('btn-p2p-add-waypoint');
     // Wrapped, not passed directly — the click Event would land in prefillValue.
     if (addWpBtn) addWpBtn.addEventListener('click', () => addWaypointRow());
+
+    // Wire the Start/End "pick on map" buttons and the chain-mode toggle.
+    // Waypoint rows wire their own button in addWaypointRow().
+    document.querySelectorAll('#route-auto-config-p2p .p2p-pick-btn[data-pick-target]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            MapPick.armField(document.getElementById(btn.dataset.pickTarget),
+                             btn.dataset.pickLabel || 'this stop');
+        });
+    });
+
+    const chainBtn = document.getElementById('btn-p2p-chain');
+    if (chainBtn) chainBtn.addEventListener('click', () => MapPick.startChain());
 }
 
 window.ensureFreeRouteSlot = function () {
@@ -2141,6 +2452,7 @@ window.toggleRouteWindow = function () {
 };
 
 window.closeRouteWindow = function () {
+    MapPick.cancel();
     const win = document.getElementById('route-window');
     if (win) win.classList.remove('visible');
 };
@@ -2195,6 +2507,7 @@ window.openRouteAutoPanel = function (routeId, routeName) {
     const panel = document.getElementById('route-auto-panel');
     const nameEl = document.getElementById('route-auto-panel-route-name');
     if (!panel || !nameEl) return;
+    MapPick.cancel();   // never inherit an armed pick from the previous slot
     panel.dataset.targetRouteId = routeId;
     nameEl.textContent = routeName;
     document.querySelectorAll('input[name="route-auto-type"]').forEach(r => r.checked = false);
@@ -2227,6 +2540,7 @@ window.openRouteAutoPanel = function (routeId, routeName) {
     // resets above so it wins, and takes precedence over the hex-selection
     // prefill — reopening a configured route is for editing it, not restarting.
     _restoreAutomationConfig(routeId);
+    refreshStopFieldStyles();
 
     panel.style.display = 'block';
     panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -2235,6 +2549,7 @@ window.openRouteAutoPanel = function (routeId, routeName) {
 window.closeRouteAutoPanel = function () {
     const panel = document.getElementById('route-auto-panel');
     if (!panel) return;
+    MapPick.cancel();   // the crosshair must not outlive the panel
     panel.style.display = 'none';
     panel.dataset.targetRouteId = '';
     document.querySelectorAll('input[name="route-auto-type"]').forEach(r => r.checked = false);
@@ -2263,6 +2578,14 @@ window.updateRouteFilterSummary = function () {
 
         html = `<span class="filter-active">${matchCount} world${matchCount !== 1 ? 's' : ''} match active filter</span>` +
                `<div style="margin-top:5px;"><button class="inline-link" onclick="window.toggleFilterModal()">Edit Filter</button></div>`;
+
+        // The Shift+F bypass hides the filter on screen but not from route
+        // generation, so the map and this count deliberately disagree. Say so
+        // here rather than letting it read as a bug.
+        if (window.filterSuspended) {
+            html = `<span class="filter-suspended">Filter is suspended on screen (Shift+F) ` +
+                   `— it still applies to route generation.</span><div style="margin-top:5px;"></div>` + html;
+        }
     }
 
     ['route-auto-filter-summary-p2p', 'route-auto-filter-summary-network'].forEach(id => {

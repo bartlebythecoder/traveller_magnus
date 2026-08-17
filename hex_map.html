@@ -473,6 +473,10 @@
         .route-auto-filter-summary .filter-active {
             color: #66fcf1;
         }
+        .route-auto-filter-summary .filter-suspended {
+            color: #e0b040;
+            display: block;
+        }
         .route-auto-filter-summary .filter-none {
             color: #a0a8b0;
             font-style: italic;
@@ -506,6 +510,13 @@
             border-radius: 3px;
             font-size: 0.82rem;
             font-family: 'Courier New', monospace;
+        }
+        /* A stop in empty space. There is no checkbox announcing a deep-space
+           stop — deliberately choosing one is the opt-in — so the field is what
+           tells the user, and a misclick on blank space stays visible. */
+        .wac-input.wac-input-vacant {
+            color: #e0b040;
+            border-color: #e0b040;
         }
         .wac-dropdown {
             display: none;
@@ -566,6 +577,37 @@
         #route-auto-p2p-waypoints-label {
             font-size: 0.72rem; color: #45a29e; margin-bottom: 4px; letter-spacing: 0.03em;
         }
+        /* ── Map Pick (fill a P2P stop by clicking a hex) ───────────────── */
+        .p2p-pick-btn {
+            background: none; border: 1px solid rgba(69, 162, 158, 0.55); color: #45a29e;
+            font-size: 0.72rem; cursor: pointer; padding: 1px 5px; line-height: 1.35;
+            border-radius: 3px; flex-shrink: 0; margin-left: 4px;
+        }
+        .p2p-pick-btn:hover { color: #66fcf1; border-color: #66fcf1; }
+        .p2p-pick-btn.armed { color: #0b0c10; background: #66fcf1; border-color: #66fcf1; }
+        .p2p-chain-btn {
+            width: 100%; background: none; border: 1px solid rgba(69, 162, 158, 0.55);
+            color: #45a29e; padding: 3px 8px; border-radius: 3px; cursor: pointer;
+            font-size: 0.78rem; letter-spacing: 0.04em; font-family: inherit;
+        }
+        .p2p-chain-btn:hover { color: #66fcf1; border-color: #66fcf1; }
+        .p2p-chain-btn.armed {
+            color: #0b0c10; background: #66fcf1; border-color: #66fcf1; font-weight: bold;
+        }
+        #route-auto-p2p-pick-hint {
+            background: rgba(102, 252, 241, 0.10);
+            border: 1px solid rgba(102, 252, 241, 0.45);
+            border-radius: 3px; padding: 5px 8px; margin: 0 0 6px;
+            font-size: 0.75rem; color: #66fcf1; line-height: 1.35;
+            display: flex; align-items: center; justify-content: space-between; gap: 8px;
+        }
+        #route-auto-p2p-pick-hint .pick-hint-text { flex: 1; min-width: 0; }
+        #route-auto-p2p-pick-hint button {
+            background: none; border: 1px solid #66fcf1; color: #66fcf1; border-radius: 3px;
+            cursor: pointer; font-size: 0.72rem; padding: 1px 7px; flex-shrink: 0;
+            font-family: inherit;
+        }
+        #route-auto-p2p-pick-hint button:hover { background: rgba(102, 252, 241, 0.2); }
         .route-auto-actions {
             display: flex;
             justify-content: flex-end;
@@ -773,9 +815,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above<br> So Below</span></h1>
-            <div class="splash-banner">New: Player Fog of War Exports</div>
+            <div class="splash-banner">New: Waypoint updates</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.17.0.1</div>
+            <div class="splash-version">v0.17.1</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -793,9 +835,11 @@
                     <div class="shortcut-item"><strong>Ctrl + Alt + R</strong><span>Full RTT Macro</span></div>
                     <div class="shortcut-item"><strong>Ctrl + Alt + 5</strong><span>Full T5 Macro</span></div>
                     <div class="shortcut-item"><strong>F Key</strong><span>Open Filter Window</span></div>
+                    <div class="shortcut-item"><strong>Shift + F</strong><span>Suspend / Restore Filter</span></div>
                     <div class="shortcut-item"><strong>R Key</strong><span>Open Route Manager</span></div>
                     <div class="shortcut-item"><strong>B Key</strong><span>Open Border Manager</span></div>
                     <div class="shortcut-item"><strong>G Key</strong><span>Open Region Manager</span></div>
+                    <div class="shortcut-item"><strong>D Key</strong><span>Open Player Disclosure</span></div>
                     <div class="shortcut-item"><strong>Escape</strong><span>Cancel / Close All</span></div>
                     <div class="shortcut-item"><strong>Ctrl + Delete</strong><span>Clear Canvas</span></div>
                 </div>
@@ -1256,7 +1300,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.17.0.1</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.17.1</span>
             </p>
         </div>
 
@@ -1287,9 +1331,11 @@
                     <strong>Ctrl + Shift + Z</strong><span>Redo Action</span>
                     <strong>Ctrl + Delete</strong><span style="color: #e74c3c;">Clear Canvas</span>
                     <strong>F Key</strong><span>Open Filter Window</span>
+                    <strong>Shift + F</strong><span>Suspend / Restore Filter</span>
                     <strong>R Key</strong><span>Open Route Manager</span>
                     <strong>B Key</strong><span>Open Border Manager</span>
                     <strong>G Key</strong><span>Open Region Manager</span>
+                    <strong>D Key</strong><span>Open Player Disclosure</span>
                 </div>
             </div>
 
@@ -1959,7 +2005,12 @@
 
             <div class="editor-full-row" style="margin-top: 10px;">
                 <label>Referee Notes:</label>
-                <textarea id="edit-notes" style="width: 100%; height: 60px; background: #0b0c10; border: 1px solid #45a29e; color: #fff; font-family: inherit; font-size: 0.9em; padding: 5px; resize: none; border-radius: 4px; box-sizing: border-box;"></textarea>
+                <!-- resize: vertical, not both — the box is width:100% inside a
+                     fixed-width panel, so horizontal dragging would push content
+                     outside the window. Height is remembered between sessions;
+                     see the notes-height helpers in hex_editor.js. -->
+                <textarea id="edit-notes" title="Drag the bottom-right corner to resize"
+                    style="width: 100%; height: 120px; min-height: 60px; max-height: 70vh; background: #0b0c10; border: 1px solid #45a29e; color: #fff; font-family: inherit; font-size: 0.9em; padding: 5px; resize: vertical; border-radius: 4px; box-sizing: border-box;"></textarea>
             </div>
 
             <div class="editor-grid">
@@ -2703,12 +2754,18 @@
                         Custom Point-to-Point
                     </label>
                     <div class="route-auto-config" id="route-auto-config-p2p">
+                        <div id="route-auto-p2p-pick-hint" style="display:none;"></div>
+                        <div style="margin-bottom:6px;">
+                            <button type="button" id="btn-p2p-chain" class="p2p-chain-btn">&#9678; Build Route on Map</button>
+                        </div>
                         <div class="route-auto-param">
                             <label>Start:</label>
                             <div class="wac-wrap">
                                 <input type="text" id="route-auto-p2p-start" class="wac-input" placeholder="Name or hex ID">
                                 <div id="route-auto-p2p-start-drop" class="wac-dropdown"></div>
                             </div>
+                            <button type="button" class="p2p-pick-btn" data-pick-target="route-auto-p2p-start"
+                                    data-pick-label="Start" title="Pick on map">&#9678;</button>
                         </div>
                         <div class="route-auto-param">
                             <label>End:</label>
@@ -2716,6 +2773,8 @@
                                 <input type="text" id="route-auto-p2p-end" class="wac-input" placeholder="Name or hex ID">
                                 <div id="route-auto-p2p-end-drop" class="wac-dropdown"></div>
                             </div>
+                            <button type="button" class="p2p-pick-btn" data-pick-target="route-auto-p2p-end"
+                                    data-pick-label="End" title="Pick on map">&#9678;</button>
                         </div>
                         <div id="route-auto-p2p-waypoints-section">
                             <div id="route-auto-p2p-waypoints-label">Waypoints (optional — mandatory stops along the way):</div>

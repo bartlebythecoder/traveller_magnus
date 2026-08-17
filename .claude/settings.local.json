@@ -40,7 +40,10 @@
       "Bash(node zipread.js baseline_check/01_mgt2e_real_images.zip \"images/Aoba - Aoba A-III\" cat)",
       "Bash(node zipread.js baseline_check/01_mgt2e_real_images.zip \"images/Aoba - Aoba A-V \" cat)",
       "Bash(cp js/export_core.js /tmp/export_core_fixed.bak)",
-      "Bash(python -c ' *)"
+      "Bash(python -c ' *)",
+      "Bash(sed -n '/^### \\\\[v0.17.1\\\\]/,/^### \\\\[v0.17.0.1\\\\]/p' README.md)",
+      "Bash(grep -n \"^| \\\\*\\\\*\\\\`\\\\?f\\\\`\\\\?\\\\|Filter Manager\\\\|filter \\(\\\\`f\\\\`\\)\\\\|\\(\\\\`f\\\\`\\)\" faq.md)",
+      "Bash(awk 'NR>=2020 && NR<=2100 && \\(/btn|button|Save|<\\\\/div>/\\)' hex_map.html)"
     ]
   }
 }

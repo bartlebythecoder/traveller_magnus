@@ -189,8 +189,13 @@ function _buildEmptyHexCandidates(traversalWorlds, maxJump) {
                 if (getHexDistance(world.q, world.r, nq, nr) > maxJump) continue;
                 const hexId = getHexId(nq, nr);
                 if (!hexId || result.has(hexId)) continue;
-                const state = hexStates.get(hexId);
-                if (state && state.type === 'EMPTY') {
+                // isVacantHex, not a bare type === 'EMPTY' test: a hex that was
+                // never touched, or that became 'BLANK' when it was tagged with
+                // a region, is just as empty as one marked EMPTY by hand. The
+                // old check made this feature work on imported sectors (which
+                // back-fill EMPTY everywhere) and quietly do nothing on
+                // hand-built ones.
+                if (isVacantHex(hexId)) {
                     result.set(hexId, { id: hexId, q: nq, r: nr });
                 }
             }
@@ -233,8 +238,14 @@ function _bfsPathWithEmpty(startId, endId, worlds, maxJump, worldById, emptyById
                 const newStreak = streak + 1;
                 const vKey = `${eId}:${newStreak}`;
                 if (visited.has(vKey)) continue;
+                const newPath = [...path, eId];
+                // Terminate on an empty destination too. The system-neighbour
+                // loop above owns the only other endId check, so a leg ending
+                // on an empty hex used to run to exhaustion and report "no
+                // path" even when the hex was one hop away.
+                if (eId === endId) return newPath;
                 visited.add(vKey);
-                queue.push({ path: [...path, eId], streak: newStreak });
+                queue.push({ path: newPath, streak: newStreak });
             }
         }
     }
@@ -501,6 +512,10 @@ function clearAutoRouteGroup(groupId) {
  * Waypoints are mandatory intermediate stops; BFS runs independently on each leg.
  * Does NOT clear existing routes — appends to window.sectorRoutes.
  *
+ * Any stop may be a vacant hex (deep space) as well as a populated world —
+ * see the note beside the stop-injection loop. Vacant stops are independent of
+ * allowEmptyHexes, which governs only opportunistic empty hops along the way.
+ *
  * @param {string}   startId        - Starting hex ID.
  * @param {string}   endId          - Ending hex ID.
  * @param {number}   maxJump        - Max single-hop distance (hex units).
@@ -532,13 +547,38 @@ function generatePointToPointRoute(startId, endId, maxJump, color, groupId, name
 
     const worldById = new Map(worlds.map(w => [w.id, w]));
 
-    // Verify all stops exist as populated worlds.
+    // Vacant stops are nodes too.
+    //
+    // `worlds` here means "hexes a ship may occupy", not "populated worlds":
+    // some referees let players jump into empty space, so a vacant hex the user
+    // deliberately chose as a Start, End, or Waypoint belongs in the graph even
+    // though the generator would never route through it on its own.
+    //
+    // They go in here rather than into the empty-traversal candidate set below
+    // so that choosing one does NOT require Allow Empty Hexes, and so
+    // maxEmptyJumps keeps meaning exactly what it always has — a deliberate
+    // stop is not an opportunistic hop and must not consume that budget.
+    for (const stopId of allStops) {
+        if (worldById.has(stopId)) continue;
+        if (!isVacantHex(stopId)) continue;   // neither a world nor valid vacant space
+        const coords = getHexCoords(stopId);
+        const node = { id: stopId, q: coords.q, r: coords.r };
+        worlds.push(node);
+        worldById.set(stopId, node);
+    }
+
+    // Verify all stops exist as reachable nodes.
     for (const stopId of allStops) {
         if (!worldById.has(stopId)) return null;
     }
 
     // Pre-build empty hex candidates if the option is enabled
     const emptyById = allowEmptyHexes ? _buildEmptyHexCandidates(worlds, maxJump) : new Map();
+
+    // A chosen stop is already a node in `worlds`; leaving it in the empty set
+    // as well would let BFS expand it a second time under a streak it should
+    // never consume.
+    for (const stopId of allStops) emptyById.delete(stopId);
 
     const stops = [startId, ...waypointIds, endId];
     const extras = { subtype: 'PointToPoint', color, groupId, name };

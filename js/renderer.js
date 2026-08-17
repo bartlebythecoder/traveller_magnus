@@ -462,7 +462,12 @@ function draw() {
                 hexStates.set(hexId, stateObj);
             }
             const stateType = stateObj ? stateObj.type : 'BLANK';
-            const isHidden = stateObj ? stateObj.isHiddenByFilter : false;
+            // Shift+F bypasses the filter for viewing only — the flag itself is
+            // left alone so everything that reads it (route generation, the
+            // Route Manager's match count) keeps seeing the real filter.
+            const isHidden = window.filterSuspended
+                ? false
+                : (stateObj ? stateObj.isHiddenByFilter : false);
 
             if (stateType === 'SYSTEM_PRESENT' && !isHidden) {
                 const data = stateObj.rttData || stateObj.t5Data || stateObj.mgt2eData || stateObj.ctData;

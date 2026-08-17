@@ -24,6 +24,13 @@ body {
     cursor: grabbing;
 }
 
+/* Armed to pick a hex for a Route Manager field (see MapPick in ui_menus.js).
+   Declared after .dragging so the crosshair wins while both classes are on —
+   panning to reach the hex you want does not mean the pick has ended. */
+#map-canvas.picking {
+    cursor: crosshair;
+}
+
 /* Context Menu */
 #context-menu {
     position: absolute;
@@ -355,6 +362,15 @@ body {
     font-family: 'Inter', sans-serif;
     font-size: 14px;
     gap: 0;
+
+    /* The panel opens at top: 50px (input_init.js) but the base class caps it
+       at 95vh, and those only coexist when 50px <= 5vh — a window at least
+       1000px tall. On anything shorter the panel is guaranteed to hang off the
+       bottom of the screen, taking the pinned Save/Cancel row with it.
+       Measuring the cap from the same 50px offset instead fixes that.
+       This is inert on tall screens: the panel's natural height (~704px) is
+       below both caps there, so nothing about the layout changes. */
+    max-height: calc(100vh - 60px);
 }
 
 #hex-editor h3 {

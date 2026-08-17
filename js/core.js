@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.17.0.1";
-const APP_BANNER = "v0.17.0.1: New: Player Fog of War Exports";
+const APP_VERSION = "v0.17.1";
+const APP_BANNER = "v0.17.1: New: Waypoint updates";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -96,6 +96,13 @@ usedNames = new Set(); // Reset every load for machine-agnostic determinism
 
 // Hex properties - Renderer needs this immediately
 baseHexSize = 50;
+
+// Filter bypass (Shift+F). Session-only and deliberately NOT part of hexStates:
+// it is a way of looking at the map, not a property of it, so it must never be
+// saved, undone, or restored with a sector. The filter itself keeps running —
+// state.isHiddenByFilter stays truthful and route generation keeps honouring it
+// — only the renderer looks the other way. See toggleFilterSuspension().
+window.filterSuspended = false;
 
 // Grid dimensions — default 7×5 (35 sectors).
 // These are runtime variables; the Universe importer will change them.
@@ -242,6 +249,31 @@ function getHexCoords(hexId) {
     const localQ = parseInt(parts[2].substring(0, 2)) - 1;
     const localR = parseInt(parts[2].substring(2, 4)) - 1;
     return { q: sectorX * 32 + localQ, r: sectorY * 40 + localR };
+}
+
+// ── Hex vacancy ─────────────────────────────────────────────────────────────
+// "Blank" is three different things in hexStates, and code that checks only one
+// of them silently disagrees with what the map shows:
+//   • no entry at all — a hex nothing has ever touched. The renderer already
+//     treats a missing entry as 'BLANK' (see renderer.js).
+//   • { type: 'BLANK' } — materialized when a vacant hex is tagged with a
+//     region, allegiance, or disclosure level.
+//   • { type: 'EMPTY' } — explicitly marked empty by hand, by a generation pass
+//     that rolled no system, or by the TSV importer back-filling a sector.
+// All three are vacant space. Route code must treat them alike; checking only
+// one made whether a feature worked depend on how the sector happened to be
+// built (an imported sector gets EMPTY everywhere, a hand-drawn one does not).
+//
+// Returns false for a malformed id or anything off the grid, so this doubles as
+// a validator for typed input.
+function isVacantHex(hexId) {
+    if (!hexId) return false;
+    const coords = getHexCoords(hexId);
+    if (!coords || !Number.isFinite(coords.q) || !Number.isFinite(coords.r)) return false;
+    // getHexCoords is lenient about malformed ids; the round trip is the guard.
+    if (getHexId(coords.q, coords.r) !== hexId) return false;
+    const state = hexStates.get(hexId);
+    return !state || state.type === 'BLANK' || state.type === 'EMPTY';
 }
 
 function getHexDistance(q1, r1, q2, r2) {

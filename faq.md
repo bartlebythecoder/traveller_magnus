@@ -279,7 +279,7 @@ The top section holds the editable mainworld fields:
 - **Travel Zone** (Green / Amber / Red)
 - **Allegiance** and **Region**
 - **Naval Base**, **Scout Base**, and the other base flags
-- **Referee Notes** — freeform text, saved with the hex
+- **Referee Notes** — freeform text, saved with the hex. Drag the bottom-right corner of the box to make it taller if you write at length; the size you choose is remembered between sessions. Notes appear in the referee wiki export and are never shown to players
 
 Type your changes and click **Save**. **Cancel** discards them.
 
@@ -432,8 +432,8 @@ Four methods are available:
 | Method | What it does |
 |---|---|
 | **X-Boat Routes** | Builds a communication backbone across the sector using T5 Importance (Ix). Worlds at or above the **Min Ix** threshold become backbone nodes; pathfinding fills in the hops between them. |
-| **Custom Network** | Connects every world currently matching the active **Filter** into a network. You define the selection; the tool does the wiring. Requires a filter to be set — press **f** to open the Filter Manager. |
-| **Point-to-Point** | Routes from a named **Start** world to a named **End** world through any number of mandatory **Waypoints**. Fields accept a world name or a hex ID and autocomplete as you type; waypoints can be reordered. |
+| **Custom Network** | Connects every world currently matching the active **Filter** into a network. You define the selection; the tool does the wiring. Requires a filter to be set — press **f** to open the Filter Manager, or **Shift+F** to suspend an active filter on screen without disturbing it. |
+| **Point-to-Point** | Routes from a named **Start** world to a named **End** world through any number of mandatory **Waypoints**. Press **Shift+F** at any time to suspend the filter and see the whole map while you plot, then again to restore it — route generation keeps using the real filter either way. Fields accept a world name or a hex ID and autocomplete as you type; waypoints can be reordered. Stops can also be clicked directly on the map — a **◎** button beside any field arms it for the next map click, and **Build Route on Map** traces a whole route click by click, each new stop becoming the End and pushing the previous one into the waypoint list. Any stop may be an **empty hex** for referees who allow jumps into deep space; no setting is needed, and such stops show as "Deep Space" in amber. |
 | **BTN Trade Routes** | Generates an economically-grounded trade web from Basic Trade Numbers (GURPS *Far Trader*). Layer major and minor lanes across two slots using different BTN thresholds. |
 
 Shared parameters worth understanding:

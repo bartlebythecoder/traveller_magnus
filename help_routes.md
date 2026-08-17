@@ -74,9 +74,15 @@ A **route slot** (#1–#9) is a configuration container with a name, colour, and
 
 By default, BFS pathfinding only steps through hexes that contain a populated world. Enabling **Allow Empty Hexes** lets the path hop through uninhabited hexes, bridging gaps that would otherwise be impassable. **Max Empty Jumps** controls how many consecutive empty hops are allowed before the path must land on a system again.
 
+This setting governs only what the router does *on its own initiative*. Choosing an empty hex yourself as a Point-to-Point Start, End, or waypoint is a separate thing and needs no setting — see [Deep Space Stops](#deep-space-stops) under Point-to-Point.
+
 ### The Filter Connection
 
 The **Filter** (opened with `f` or via the right-click menu) controls which worlds are currently *visible* on the map. Two route types — Custom Network and Point-to-Point — use the active filter's result set to decide which worlds are eligible as traversal nodes. If the filter matches no worlds, those route types cannot generate.
+
+**Suspending the filter while you work (`Shift+F`).** Plotting a route with a filter on means most of the sector is invisible, which makes it hard to see where a route should go. `Shift+F` brings every world back; `Shift+F` again returns to the filtered view. Your filter settings are never touched — there is nothing to retype — and the bypass is forgotten when you close the app.
+
+The bypass is **display only**. Route generation continues to use the real filter, so a Custom Network built while the map is bypassed still connects your filtered worlds and not the whole sector. The Automation Panel says so while a bypass is active, and its match count keeps reporting the true figure. The filter also restores itself as soon as you open the Filter Manager or edit any filter field.
 
 ---
 
@@ -160,8 +166,43 @@ The filter summary inside the Automation Panel shows how many worlds currently m
 The Start, End, and Waypoint fields accept either:
 - A **world name** — type the first few letters; a dropdown autocomplete list appears. Use arrow keys to navigate and Enter to select.
 - A **hex ID** directly (e.g. `0304`).
+- A **click on the map** — see below.
+- An **empty hex**, for referees who allow jumps into deep space — see below.
 
 Names are matched case-insensitively. If more than one world starts with the same letters, the autocomplete will list all matches.
+
+#### Deep Space Stops
+
+Any stop — Start, End, or a waypoint — may be an **empty hex** rather than a world, for tables where players are allowed to jump into deep space. Click one on the map, or type its hex ID; the field then reads **Deep Space (1-A-1910)** in amber so an intentional void stop is never confused with a misclick on blank space.
+
+There is no setting to switch on: deliberately choosing an empty hex *is* the opt-in. In particular this does **not** require **Allow Empty Hexes**, which governs something different — whether the router may *pass through* empty hexes of its own accord while finding a path. The two are independent:
+
+| | Allow Empty Hexes off | Allow Empty Hexes on |
+|---|---|---|
+| **All stops are worlds** | Route hops world to world (the default) | Route may also slip through empty hexes en route |
+| **A stop is deep space** | That stop is reached directly; every hop between stops is still world-to-world | Both apply |
+
+A deep-space stop still has to be *reachable* — the hop to it obeys Max Jump like any other. If it is out of range from every neighbouring stop, the route fails as it always would.
+
+Empty hexes have no name, so the name autocomplete cannot suggest them; they are reached by clicking the map or typing the hex ID. In the route's system list and its CSV export they appear as **Deep Space**, with the physical columns blank.
+
+**Not modelled:** whether such a jump is legal at your table, and what it costs in fuel or risk, is a referee's ruling. The tool draws the route you ask for and takes no position on it.
+
+#### Picking Worlds from the Map
+
+Every world field has a **◎** button beside it. Click it and the field arms: the map cursor becomes a crosshair, a banner appears in the panel, and the next system you click on the map fills that field. The Route Manager stays open throughout — you can still pan and zoom to reach the hex you want, because only a click that doesn't drag counts as a pick.
+
+- Picking **Start** while End is still empty arms End next, so a simple two-stop route is two clicks.
+- Clicking an **empty hex** is refused with a message and the pick stays armed — every stop must be a populated world.
+- **Esc**, or the **Cancel** button in the banner, ends the pick without closing the Route Manager.
+
+#### Building a Whole Route on the Map
+
+**◎ Build Route on Map** turns the panel into a running route-tracer. Your first click sets Start and the second sets End; from then on, **each further click becomes the new End and the previous End drops into the waypoint list**. Clicking your way A → B → C → D therefore leaves Start = A, End = D, and waypoints B and C in travel order — you trace the route across the map in the order you'd fly it.
+
+Clicking the same system twice in a row is ignored, so a double-click cannot insert a stop twice. Finish with **Done** or **Esc**; the fields are left populated for editing, and nothing is drawn until you press Generate.
+
+Because the mode rewrites End on every click, it starts from an empty route: if Start, End, or any waypoint is already filled, you are asked first whether to clear them.
 
 #### Waypoints
 
@@ -174,8 +215,8 @@ Remove a waypoint with the × button on its row.
 | Parameter | Effect |
 |---|---|
 | **Max Jump** | Maximum single-hop distance for all legs. |
-| **Allow Empty Hexes** | Permit hops through uninhabited hexes. |
-| **Max Empty Jumps** | Max consecutive empty-hex hops before a system is required. |
+| **Allow Empty Hexes** | Permit hops *through* uninhabited hexes while pathfinding. Independent of choosing an empty hex as a stop, which needs no setting. |
+| **Max Empty Jumps** | Max consecutive empty-hex hops before a system is required. A deep-space *stop* does not count against this — it is a destination, not a hop of convenience — and neither does starting in one. |
 
 #### How the Filter Affects P2P
 
@@ -187,9 +228,9 @@ This means you can use the filter to restrict a route to a specific allegiance o
 
 - If the tool returns **"No path found"**, the most common causes are:
   - Max Jump is too low for the gap between worlds.
-  - A waypoint hex doesn't contain a populated system.
   - The active filter excludes all valid intermediate worlds.
-- Start and End must be different worlds.
+  - A stop lies outside the sector grid entirely (an empty hex inside it is fine).
+- Start and End must be different stops.
 - The Systems Panel displays P2P worlds in **order** (numbered 1, 2, 3…) rather than alphabetically.
 
 ---

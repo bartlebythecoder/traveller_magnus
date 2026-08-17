@@ -6,6 +6,13 @@ function setupCanvasEvents() {
     // Grab a private reference to the canvas that won't conflict with renderer.js
     const mapCanvas = document.getElementById('map-canvas');
 
+    // Map-pick tracking (Route Manager — see MapPick in ui_menus.js). A pick is
+    // delivered on mouseup, and only when the pointer barely moved, so
+    // drag-to-pan still works while one is armed: the user has to be able to
+    // reach the hex they mean to click.
+    let pickDownX = 0, pickDownY = 0, pickDownArmed = false;
+    const PICK_SLOP_PX = 4;
+
     // 1. Hide context menu when clicking OUTSIDE it
     window.addEventListener('mousedown', (e) => {
         if (e.target.closest('#context-menu') === null) {
@@ -175,6 +182,8 @@ function setupCanvasEvents() {
     mapCanvas.addEventListener('mousedown', (e) => {
         if (e.button !== 0) return; // ONLY process Left-Click here
 
+        pickDownArmed = false;      // re-armed below only on a plain left-click
+
         const world = getMouseWorldCoords(e);
         const coords = pixelToHex(world.x, world.y, baseHexSize);
         const hexId = getHexId(coords.q, coords.r);
@@ -213,6 +222,10 @@ function setupCanvasEvents() {
                 requestAnimationFrame(draw);
             } else {
                 // Plain Left-Click: ONLY Panning (No selection logic whatsoever)
+                // — or, when a Route Manager pick is armed, a candidate pick.
+                pickDownArmed = !!(window.MapPick && window.MapPick.isArmed());
+                pickDownX = e.clientX;
+                pickDownY = e.clientY;
                 isDragging = true;
                 lastMouseX = e.clientX;
                 lastMouseY = e.clientY;
@@ -254,6 +267,18 @@ function setupCanvasEvents() {
 
     // 5. Mouse Up: Stop Actions entirely
     window.addEventListener('mouseup', (e) => {
+        // Deliver an armed Route Manager pick — a click, not a drag.
+        if (pickDownArmed && window.MapPick && window.MapPick.isArmed() && !e.ctrlKey && !e.shiftKey) {
+            const moved = Math.hypot(e.clientX - pickDownX, e.clientY - pickDownY);
+            if (moved <= PICK_SLOP_PX) {
+                const pw = getMouseWorldCoords(e);
+                const pc = pixelToHex(pw.x, pw.y, baseHexSize);
+                const pickedId = getHexId(pc.q, pc.r);
+                if (pickedId) window.MapPick.deliver(pickedId);
+            }
+        }
+        pickDownArmed = false;
+
         if (isAltDragging && altDragStartId && altDragRouteId != null) {
             const world = getMouseWorldCoords(e);
             const coords = pixelToHex(world.x, world.y, baseHexSize);

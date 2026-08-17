@@ -2337,9 +2337,65 @@ function closeHexEditor() {
     hexEditor.classList.remove('visible');
 }
 
+// ============================================================================
+// REFEREE NOTES — remembered height
+// ============================================================================
+// The notes box is resizable by its bottom-right grip. The browser writes the
+// dragged height as an inline style, which survives switching between hexes
+// (openHexEditor only sets .value — the element is never rebuilt) but is lost
+// on reload. Persisting it means a referee who works in long notes sets the
+// size once rather than every session.
+
+const NOTES_HEIGHT_STORAGE_KEY = 'traveller_notesHeight';
+const NOTES_HEIGHT_MIN = 60;
+
+// Never taller than the viewport allows: a height saved on a large monitor must
+// not open off-screen on a laptop.
+function _notesMaxHeight() {
+    return Math.max(NOTES_HEIGHT_MIN, Math.round(window.innerHeight * 0.7));
+}
+
+function restoreNotesHeight() {
+    const el = document.getElementById('edit-notes');
+    if (!el) return;
+    let h = parseInt(localStorage.getItem(NOTES_HEIGHT_STORAGE_KEY) || '', 10);
+    if (!Number.isFinite(h)) return;   // never resized — keep the markup default
+    h = Math.min(Math.max(h, NOTES_HEIGHT_MIN), _notesMaxHeight());
+    el.style.height = `${h}px`;
+}
+
+function setupNotesResizePersistence() {
+    const el = document.getElementById('edit-notes');
+    if (!el || typeof ResizeObserver === 'undefined') return;
+
+    restoreNotesHeight();
+
+    // ResizeObserver rather than a mouseup handler: it catches the drag however
+    // it ends, including outside the element.
+    let saveTimer = null;
+    const observer = new ResizeObserver(() => {
+        // Ignore the observer's own initial callback and any resize while the
+        // panel is hidden, where the measured height is meaningless.
+        if (!document.getElementById('hex-editor')?.classList.contains('visible')) return;
+
+        // offsetHeight, NOT entry.contentRect: the box is border-box, so
+        // style.height includes padding and border while contentRect excludes
+        // them. Round-tripping contentRect would shrink the field by 12px on
+        // every save/restore cycle.
+        const h = Math.round(el.offsetHeight);
+        if (!h) return;
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => {
+            try { localStorage.setItem(NOTES_HEIGHT_STORAGE_KEY, String(h)); } catch (e) {}
+        }, 250);
+    });
+    observer.observe(el);
+}
+
 function setupHexEditor() {
     document.getElementById('btn-editor-cancel').addEventListener('click', closeHexEditor);
     document.getElementById('btn-editor-save').addEventListener('click', saveHexEditorChanges);
+    setupNotesResizePersistence();
 
     // Image button delegation — buttons are injected into accordion HTML at render time
     document.addEventListener('click', (e) => {

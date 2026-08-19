@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.17.1";
-const APP_BANNER = "v0.17.1: New: Waypoint updates";
+const APP_VERSION = "v0.17.2";
+const APP_BANNER = "v0.17.2: New: Point to Point Route updates";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -170,12 +170,28 @@ function clampUWP(val, min, max) {
 window.undoStack = [];
 window.redoStack = [];
 
-function saveHistoryState(actionName) {
+/**
+ * @param {string} actionName - label shown by "Undid: …"
+ * @param {Object} [opts]
+ * @param {boolean} [opts.includeRouteDefinitions] - also snapshot
+ *        window.routeDefinitions, for actions that add or remove route slots.
+ */
+function saveHistoryState(actionName, opts = {}) {
     const stateSnapshot = {
         action: actionName,
         routes: JSON.parse(JSON.stringify(window.sectorRoutes || [])),
         hexStates: JSON.parse(JSON.stringify(Array.from(hexStates.entries())))
     };
+
+    // Opt-in, not automatic. A route's name, colour, shortcut and visibility are
+    // all edited without pushing a history entry of their own, so a snapshot
+    // that always carried the definitions would let an undo of some unrelated
+    // action — painting a hex, say — silently revert a rename made afterwards.
+    // Only actions that add or remove slots record them, and undo restores them
+    // only from a snapshot that has them.
+    if (opts.includeRouteDefinitions) {
+        stateSnapshot.routeDefinitions = JSON.parse(JSON.stringify(window.routeDefinitions || []));
+    }
     // Cap undo history by grid size: 50 snapshots for the default 7×5 canvas,
     // 5 for larger canvases where each snapshot can be hundreds of MB.
     const undoLimit = (gridWidth * gridHeight) > 35 ? 5 : 50;

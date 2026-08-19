@@ -261,6 +261,44 @@
             background: #0d2a2a;
             border-color: #66fcf1;
         }
+        #route-orphan-notice {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 4px 8px;
+            padding: 5px 8px;
+            border: 1px solid #e0b040;
+            border-radius: 3px;
+            background: rgba(224, 176, 64, 0.08);
+            color: #e0b040;
+            font-size: 0.75rem;
+            line-height: 1.3;
+        }
+        .route-orphan-remove {
+            margin-left: auto;
+            flex-shrink: 0;
+            background: none;
+            border: 1px solid #e0b040;
+            border-radius: 3px;
+            color: #e0b040;
+            cursor: pointer;
+            padding: 2px 8px;
+            font-size: 0.72rem;
+        }
+        .route-orphan-remove:hover {
+            background: rgba(224, 176, 64, 0.18);
+            color: #fff;
+        }
+        /* Save / load one route's connections. Grouped in a single cell so the
+           row gains one column rather than two. */
+        .route-file-cell {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            flex-shrink: 0;
+            font-size: 0.8rem;
+        }
+        .route-save-btn:hover, .route-load-btn:hover { color: #66fcf1 !important; }
         .route-seg-count {
             font-size: 0.7rem;
             min-width: 28px;
@@ -815,9 +853,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above<br> So Below</span></h1>
-            <div class="splash-banner">New: Waypoint updates</div>
+            <div class="splash-banner">New: Point to Point Route updates</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.17.1</div>
+            <div class="splash-version">v0.17.2</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -1300,7 +1338,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.17.1</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.17.2</span>
             </p>
         </div>
 
@@ -2675,6 +2713,11 @@
                 </label>
             </div>
             <div id="route-window-list"></div>
+            <!-- One picker shared by every route row; see _pickRouteFileFor() -->
+            <input type="file" id="file-import-route" accept=".json,application/json" style="display:none;">
+
+            <!-- Empty duplicate slots left by the pre-v0.17.2 resolveRouteId() -->
+            <div id="route-orphan-notice" style="display: none;"></div>
 
             <!-- Route Systems Panel (shown when segment-count pill is clicked) -->
             <div id="route-systems-panel" style="display: none;">

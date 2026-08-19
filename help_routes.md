@@ -35,6 +35,9 @@ Each row in the Route Window represents one route slot:
 | **Shortcut key** | A single key you can press anywhere on the map to toggle this route's visibility. Letters `f` and `r` are reserved and cannot be used. |
 | **Vis checkbox** | Toggles route visibility on the map without deleting segments. |
 | **C (Clear)** | Removes all map segments for this slot. Can be undone with **Ctrl+Z**. |
+| **⬇ (Export CSV)** | Exports a spreadsheet of the **worlds** this route passes through, with a choice of fields. A reference table — it cannot be loaded back in. |
+| **Save to file** | Writes this route's **connections** to a `.json` route file. See [Saving and Loading a Route](#saving-and-loading-a-route). |
+| **Load from file** | Reads a route file into this row. Available even when the slot is empty. |
 | **⚙ Auto** | Opens the Automation Panel where you choose a generation method and run it. |
 | **× (Delete)** | Deletes the slot and all its segments entirely. Can be undone with **Ctrl+Z**. |
 
@@ -314,6 +317,26 @@ Click the **segment count pill** on any route row (when it shows a number, not a
 
 The footer shows the total segment count and world count. Click the × button or the pill again to close.
 
+### Saving and Loading a Route
+
+Two buttons on each route row move a single route in and out of a file — useful for keeping a route you may want back later, rebuilding one on a second map, or handing a trade network to another referee.
+
+- **Save** writes that slot's connections to a `.json` file named after the route, e.g. `route_Spinward_Main.json`. Greyed out when the slot has nothing in it.
+- **Load** reads a route file into the row you clicked. Always available, including on an empty slot — that is the normal case.
+
+**The file carries connections and nothing else.** No name, no colour, no shortcut key. A loaded route takes on the identity of whichever slot you put it in, which is why there is never anything to reconcile and nothing of yours is overwritten. If you want the route drawn in magenta and called "Spinward Main", set that slot up first and then load into it.
+
+| Situation | What happens |
+|---|---|
+| Loading into an empty slot | Happens straight away |
+| Loading into a slot that already has segments | Asks first, then replaces them. **Ctrl+Z restores what was there.** |
+| Loading the same file twice | Leaves one route, not two copies stacked on each other |
+| A route crossing several sectors | Saved and loaded whole, however many sectors it spans |
+
+**A route file only works on a map with the same sector grid it was saved from.** A file saved from a 7×5 map will not load into an 8×6 one; it is refused with an explanation rather than being drawn in the wrong place. The same applies to a file that is damaged, was written by a newer version of the application, or refers to a hex your map does not have. In all of these cases nothing is loaded and the map is untouched.
+
+**This is not the ⬇ button beside it.** That exports a spreadsheet of the *worlds* a route passes through — names, UWPs, trade codes and so on — for reading and printing. It records nothing about which hex joins which, so it cannot be loaded back in. The two exist side by side because they answer different questions: ⬇ is *what is on this route*, Save is *what this route is*.
+
 ### Clearing on Hex Delete
 
 If you delete a populated hex from the map (right-click → Clear Hex), all route segments connected to that hex are automatically removed from every route slot.
@@ -380,6 +403,16 @@ These keys are reserved for the Filter window (`f`) and the Route Window (`r`). 
 
 **Q: Some worlds on my BTN route generation were "skipped." Why?**  
 BTN generation requires each world to have a pre-computed WTN (World Trade Number), which comes from socioeconomic data. Worlds that only have a basic mainworld UWP but have not had socioeconomics generated will be skipped. The generation toast reports how many were included and how many were skipped.
+
+---
+
+**Q: Can I send a route to another referee?**
+Yes. Press **Save** on its row and send them the `.json` file. They load it into any slot in their own Route Manager and it takes on that slot's name and colour — so the route arrives looking however they have that slot set up, not however you had yours. Their map must use the same sector grid as yours, and should have worlds in the hexes the route runs through; the route will draw regardless, but a route through empty space is rarely what was intended.
+
+---
+
+**Q: I loaded a route file and the route is the wrong colour.**
+That is intentional. A route file carries no colour — it takes the colour of the slot you loaded it into. Change the slot's colour swatch and the route follows immediately.
 
 ---
 

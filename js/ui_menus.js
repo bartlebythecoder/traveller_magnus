@@ -986,6 +986,40 @@ function getWorldName(state) {
 // per input — waypoint rows are created and destroyed freely and would leak.
 let _wacActive = null;
 
+// ── Dropdown portal ──────────────────────────────────────────────────────────
+// position:fixed only means "positioned against the viewport" while no ancestor
+// establishes a containing block for it, and .draggable-palette establishes one:
+// its backdrop-filter makes the Route Manager the containing block for every
+// fixed descendant. The viewport coordinates measured above were therefore read
+// back as offsets from the window's own corner, so the list appeared ~112px
+// below its field — and vanished entirely, clipped by the palette's
+// overflow:hidden, once the window was dragged right or down. Parking the
+// dropdown on <body> while it is open is what makes those coordinates mean what
+// this code assumes. It goes home again on close, so removing a waypoint row
+// still disposes of that row's dropdown along with it.
+function _wacPortalOpen(dropdownEl) {
+    if (dropdownEl._wacHome) return;
+    dropdownEl._wacHome = dropdownEl.parentNode;
+    document.body.appendChild(dropdownEl);
+}
+
+function _wacPortalClose(dropdownEl) {
+    const home = dropdownEl._wacHome;
+    if (!home) return;
+    dropdownEl._wacHome = null;
+    home.appendChild(dropdownEl);
+}
+
+// Closes whichever dropdown is open. Global because a portaled dropdown is no
+// longer inside the panel: hiding the panel no longer hides it.
+function _wacHideActive() {
+    if (!_wacActive) return;
+    const { dropdownEl } = _wacActive;
+    dropdownEl.style.display = 'none';
+    _wacPortalClose(dropdownEl);
+    _wacActive = null;
+}
+
 function _wacPositionDropdown(inputEl, dropdownEl) {
     const r = inputEl.getBoundingClientRect();
     dropdownEl.style.width = `${r.width}px`;
@@ -1005,8 +1039,10 @@ function _wacPositionDropdown(inputEl, dropdownEl) {
 function _wacSyncPosition() {
     if (!_wacActive) return;
     const { inputEl, dropdownEl } = _wacActive;
-    if (!dropdownEl.isConnected || dropdownEl.style.display !== 'block') {
-        _wacActive = null;
+    // The input's liveness, not the dropdown's: a portaled dropdown is parented
+    // to <body>, so it stays connected even after its waypoint row is removed.
+    if (!inputEl.isConnected || dropdownEl.style.display !== 'block') {
+        _wacHideActive();
         return;
     }
     _wacPositionDropdown(inputEl, dropdownEl);
@@ -1017,6 +1053,13 @@ window.addEventListener('resize', _wacSyncPosition);
 
 function setupWorldAutocomplete(inputEl, dropdownEl) {
     let activeIndex = -1;
+
+    function hideDropdown() {
+        dropdownEl.style.display = 'none';
+        _wacPortalClose(dropdownEl);
+        if (_wacActive && _wacActive.dropdownEl === dropdownEl) _wacActive = null;
+        activeIndex = -1;
+    }
 
     function getMatches(query) {
         if (!query) return [];
@@ -1033,8 +1076,7 @@ function setupWorldAutocomplete(inputEl, dropdownEl) {
     function renderDropdown(matches) {
         dropdownEl.innerHTML = '';
         if (matches.length === 0) {
-            dropdownEl.style.display = 'none';
-            if (_wacActive && _wacActive.dropdownEl === dropdownEl) _wacActive = null;
+            hideDropdown();
             return;
         }
         matches.forEach((m) => {
@@ -1045,12 +1087,12 @@ function setupWorldAutocomplete(inputEl, dropdownEl) {
             item.addEventListener('mousedown', (e) => {
                 e.preventDefault();
                 inputEl.value = formatWorldLabel(m.hexId, m.name);
-                dropdownEl.style.display = 'none';
-                activeIndex = -1;
+                hideDropdown();
             });
             dropdownEl.appendChild(item);
         });
         activeIndex = -1;
+        _wacPortalOpen(dropdownEl);
         dropdownEl.style.display = 'block';
         _wacActive = { inputEl, dropdownEl };
         _wacPositionDropdown(inputEl, dropdownEl);
@@ -1083,11 +1125,10 @@ function setupWorldAutocomplete(inputEl, dropdownEl) {
             const hexId = items[activeIndex]?.dataset.hexId;
             if (hexId) {
                 inputEl.value = formatWorldLabel(hexId);
-                dropdownEl.style.display = 'none';
-                activeIndex = -1;
+                hideDropdown();
             }
         } else if (e.key === 'Escape') {
-            dropdownEl.style.display = 'none'; activeIndex = -1;
+            hideDropdown();
         }
     });
 
@@ -1097,7 +1138,7 @@ function setupWorldAutocomplete(inputEl, dropdownEl) {
     });
 
     inputEl.addEventListener('blur', () => {
-        setTimeout(() => { dropdownEl.style.display = 'none'; activeIndex = -1; }, 150);
+        setTimeout(hideDropdown, 150);
     });
 }
 
@@ -1387,6 +1428,199 @@ function _buildRouteExportModal() {
 }
 
 /** Filename this route's CSV will be written as. Sanitised to a safe charset. */
+// ============================================================================
+// ROUTE FILES (save / load one route's connections)
+// ============================================================================
+// Spec: directives/route_file_spec.md
+//
+// A route file carries connections and nothing else — no colour, no name, no
+// group. Identity belongs to the slot you load into, which is what keeps this
+// feature small: the whole-sector XML importer has to *derive* identity from
+// the file, and every one of its failure modes (two routes merging because they
+// shared a colour, names lost, running out of slots) comes from that guesswork.
+// Here the user answered the question by choosing which row to load into.
+//
+// Distinct from the CSV beside it: that exports the *worlds* a route passes
+// through, richly and configurably, and carries no connections at all.
+
+const ROUTE_FILE_FORMAT  = 'asab-route';
+const ROUTE_FILE_VERSION = 1;
+
+function _routeFileFilename(routeName) {
+    return `route_${String(routeName).replace(/[^a-z0-9_\-]/gi, '_')}.json`;
+}
+
+/**
+ * Is this a hex that actually exists on the current grid?
+ *
+ * getHexCoords is lenient about malformed ids, so the round trip is the guard —
+ * the same test isVacantHex uses. Kept local rather than shared with core.js:
+ * two copies of a three-line idiom is not yet a duplication worth editing
+ * working generation code to remove.
+ */
+function _isRealHexId(hexId) {
+    if (typeof hexId !== 'string' || !hexId) return false;
+    const c = getHexCoords(hexId);
+    if (!c || !Number.isFinite(c.q) || !Number.isFinite(c.r)) return false;
+    return getHexId(c.q, c.r) === hexId;
+}
+
+/**
+ * Writes one route slot's connections to a .json file.
+ * Returns the filename on success, null otherwise.
+ */
+function exportRouteFile(routeId, routeName) {
+    const segs = (window.sectorRoutes || []).filter(r => r.routeId === routeId);
+    if (segs.length === 0) {
+        showToast(`"${routeName}" has no connections to save.`, 2500);
+        return null;
+    }
+
+    const payload = {
+        format:  ROUTE_FILE_FORMAT,
+        version: ROUTE_FILE_VERSION,
+        grid:    { width: gridWidth, height: gridHeight },
+        savedAs: routeName,
+        savedAt: new Date().toISOString(),
+        segments: segs.map(r => [r.startId, r.endId])
+    };
+
+    // subtype is topology, not decoration: getRouteSystemList lists a route in
+    // travel order only when it sees 'PointToPoint'. Recorded only when every
+    // segment agrees, so a slot holding mixed output makes no false claim.
+    const subtypes = new Set(segs.map(s => s.subtype));
+    if (subtypes.size === 1 && segs[0].subtype) payload.subtype = segs[0].subtype;
+
+    const filename = _routeFileFilename(routeName);
+    // downloadBlob, not a hand-rolled anchor — it defers blob-URL cleanup,
+    // without which large downloads intermittently produce no file at all.
+    const ok = downloadBlob(JSON.stringify(payload, null, 2), filename, 'application/json');
+    showToast(ok
+        ? `Saved ${segs.length} connection(s) to "${filename}" — check your browser's downloads.`
+        : `Save failed — "${filename}" could not be written. See the console for details.`,
+        4000);
+    return ok ? filename : null;
+}
+
+/**
+ * Validates route-file text. Pure — no side effects, nothing touched — so the
+ * whole error table can be exercised without a map loaded.
+ * @returns {{ok: true, data: Object} | {ok: false, error: string}}
+ */
+function _parseRouteFile(text) {
+    let data;
+    try {
+        data = JSON.parse(text);
+    } catch (_) {
+        return { ok: false, error: "That file isn't a route file — it could not be read as JSON." };
+    }
+
+    if (!data || data.format !== ROUTE_FILE_FORMAT) {
+        return { ok: false, error: "That isn't a route file. Route files are saved from the Route Manager." };
+    }
+    if (data.version !== ROUTE_FILE_VERSION) {
+        return { ok: false, error: `This route file is in format v${data.version}, which this version of the app cannot read.` };
+    }
+
+    const g = data.grid;
+    if (!g || !Number.isFinite(g.width) || !Number.isFinite(g.height)) {
+        return { ok: false, error: 'That route file does not say which sector grid it was saved from.' };
+    }
+    // Absolute hex ids on a resized grid still resolve to perfectly valid
+    // hexes — just the wrong ones — so this has to be a refusal rather than a
+    // silently misplaced route.
+    if (g.width !== gridWidth || g.height !== gridHeight) {
+        return { ok: false, error: `This route file was saved from a map of ${g.width}×${g.height} sectors. `
+            + `This map is ${gridWidth}×${gridHeight}. Route files don't survive a change to the sector grid.` };
+    }
+
+    if (!Array.isArray(data.segments) || data.segments.length === 0) {
+        return { ok: false, error: 'That route file contains no connections.' };
+    }
+
+    for (const pair of data.segments) {
+        if (!Array.isArray(pair) || pair.length !== 2) {
+            return { ok: false, error: 'That route file is damaged — one of its connections is not a pair of hexes.' };
+        }
+        for (const id of pair) {
+            if (!_isRealHexId(id)) {
+                return { ok: false, error: `This route file refers to a hex that doesn't exist on this map (${id}). Nothing was loaded.` };
+            }
+        }
+    }
+
+    return { ok: true, data };
+}
+
+/**
+ * Loads a route file into one slot, replacing whatever that slot held.
+ * The slot's name, colour, shortcut and visibility are never touched.
+ */
+function importRouteFile(routeId, routeName, file) {
+    readFileAsText(file).then(text => {
+        const parsed = _parseRouteFile(text);
+        if (!parsed.ok) { showToast(parsed.error, 5000); return; }
+
+        const data     = parsed.data;
+        const existing = (window.sectorRoutes || []).filter(r => r.routeId === routeId).length;
+        const source   = data.savedAs
+            ? `"${data.savedAs}" (${data.segments.length} connections)`
+            : `${data.segments.length} connections`;
+
+        // Replacing someone's work asks first; filling an empty slot does not.
+        if (existing > 0 && !window.confirm(
+            `Load ${source} into "${routeName}"?\n\n`
+            + `This replaces the ${existing} segment(s) currently in "${routeName}".\n`
+            + `It keeps that route's name and colour, and can be undone with Ctrl+Z.`)) return;
+
+        saveHistoryState(`Import route: ${routeName}`);
+        window.sectorRoutes = (window.sectorRoutes || []).filter(r => r.routeId !== routeId);
+
+        // The same mapping canvas_input.js uses for hand-drawn segments. An
+        // imported segment has to be indistinguishable from one drawn by hand
+        // on the same slot, or the renderer draws it on a different layer.
+        const typeMap = { 1: 'Xboat', 2: 'Trade', 3: 'Secondary' };
+        const type    = typeMap[routeId] || 'Filter';
+
+        data.segments.forEach(([startId, endId]) => {
+            const extras = { routeId };
+            // Filter routes are de-duplicated per group, so one is required.
+            if (type === 'Filter') extras.groupId = `import_${routeId}`;
+            if (data.subtype) extras.subtype = data.subtype;
+            // Deliberately no `color`: the renderer prefers the definition's
+            // colour and only falls back to the segment's, so leaving it off is
+            // what makes the route wear the destination slot's colour.
+            addRoute(startId, endId, type, null, extras);
+        });
+
+        const added = (window.sectorRoutes || []).filter(r => r.routeId === routeId).length;
+        if (window.dbManager) window.dbManager.saveRoutes();
+        requestAnimationFrame(draw);
+        window.refreshRouteWindowCounts();
+        showToast(`Loaded ${added} segment(s) into "${routeName}".`, 3000);
+    }).catch(err => {
+        console.error('[Route File]', err);
+        showToast('That route file could not be read.', 3000);
+    });
+}
+
+/**
+ * Opens the shared file picker on behalf of one route row.
+ * onchange is assigned rather than added — every row shares one input, and
+ * listeners would stack one import per row visited.
+ */
+function _pickRouteFileFor(routeId, routeName) {
+    const input = document.getElementById('file-import-route');
+    if (!input) return;
+    input.value = '';
+    input.onchange = (e) => {
+        const f = e.target.files[0];
+        e.target.value = '';
+        if (f) importRouteFile(routeId, routeName, f);
+    };
+    input.click();
+}
+
 function _routeCsvFilename(routeName) {
     return `route_${String(routeName).replace(/[^a-z0-9_\-]/gi, '_')}.csv`;
 }
@@ -1984,6 +2218,89 @@ function _restoreAutomationConfig(routeId) {
 }
 
 // ============================================================================
+// ATOMIC ROUTE GENERATION
+// ============================================================================
+
+/**
+ * Turns a Point-to-Point failure into a sentence that names what to go and look
+ * at. The message used to name the route's Start and End, which on a long route
+ * points at the two stops least likely to be the problem: a twenty-waypoint
+ * route that cannot get from stop 7 to stop 8 reported "no path from A to T".
+ *
+ * Stops are named the way the builder's fields name them — "Regina (1-A-1910)"
+ * — because a bare hex ID is not something a user can place on the map.
+ */
+function _p2pFailureMessage(outcome, maxJump) {
+    const f = outcome && outcome.failure;
+
+    if (f && f.kind === 'stop') {
+        return `${formatWorldLabel(f.stopId)} can't be used as a stop — it is marked `
+             + `as a system but has no system data. Nothing was changed.`;
+    }
+
+    if (f && f.kind === 'leg') {
+        const where = f.total > 1 ? `leg ${f.index} of ${f.total}` : 'this route';
+        return `No path for ${where}: ${formatWorldLabel(f.fromId)} → ${formatWorldLabel(f.toId)} `
+             + `within Jump-${maxJump}. Nothing was changed.`;
+    }
+
+    return `No path found within Jump-${maxJump}. Nothing was changed.`;
+}
+
+/**
+ * Clears a route slot, runs a generator into it, and puts everything back
+ * exactly as it was if the generator produced nothing.
+ *
+ * Every route generator is destructive before it is productive: the slot is
+ * emptied and only then does the search for paths begin. A run that came up
+ * empty therefore used to cost the user the route they already had, on top of
+ * not giving them a new one — and a Point-to-Point run that gave up midway
+ * left the legs it had already committed lying on the map.
+ *
+ * Failure is judged by what actually landed in the slot rather than by the
+ * count a generator reports, because those counts are not all trustworthy:
+ * generateBTNRoutes measures the array's net growth, which reads as zero on
+ * any segment that evicted a rival as it was added.
+ *
+ * @param {string}   actionName - undo label, as passed to saveHistoryState
+ * @param {number}   routeId    - the slot to clear and generate into
+ * @param {Function} generate   - performs the generation; its return value is
+ *                                passed back as .result
+ * @returns {{ result: *, produced: boolean }} produced is false when the slot
+ *          was left empty and everything was rolled back. Callers must test
+ *          this rather than re-inspecting the slot: after a rollback the slot
+ *          holds the restored route again and is indistinguishable from a
+ *          successful run.
+ */
+function _generateIntoSlot(actionName, routeId, generate) {
+    // A shallow copy is enough: generation pushes to and splices this array but
+    // never mutates the segment objects inside it, so anything evicted along
+    // the way survives in the snapshot.
+    const routesBefore = (window.sectorRoutes || []).slice();
+    const redoBefore   = window.redoStack;
+
+    saveHistoryState(actionName);
+    window.sectorRoutes = (window.sectorRoutes || []).filter(r => r.routeId !== routeId);
+
+    let result;
+    let produced = false;
+    try {
+        result = generate();
+        produced = (window.sectorRoutes || []).some(r => r.routeId === routeId);
+    } finally {
+        if (!produced) {
+            window.sectorRoutes = routesBefore;
+            // Drop the undo entry recorded for our own clear and restore the
+            // redo stack it discarded: nothing happened in the end, so Ctrl+Z
+            // must not step through a snapshot identical to the current state.
+            window.undoStack.pop();
+            window.redoStack = redoBefore;
+        }
+    }
+    return { result, produced };
+}
+
+// ============================================================================
 // ROUTE WINDOW
 // ============================================================================
 
@@ -2088,15 +2405,19 @@ function setupRouteWindow() {
 
             if (type === 'xboat') {
                 const { maxJump, maxRange, minIx } = configs.xboat;
-                saveHistoryState('Generate Xboat Routes');
-                generateXboatRoutes(maxJump, maxRange, minIx, routeId, `xboat_${routeId}`);
+                const xbRun = _generateIntoSlot('Generate Xboat Routes', routeId,
+                    () => generateXboatRoutes(maxJump, maxRange, minIx, routeId, `xboat_${routeId}`));
+                if (!xbRun.produced) {
+                    showToast(`No XBoat routes could be generated at Ix ${minIx}+ — nothing was changed.`, 3500);
+                    return;
+                }
+                const xbCount = (window.sectorRoutes || []).filter(r => r.type === 'Xboat' && r.routeId === routeId).length;
                 _saveAutomationConfig(routeId, 'xboat', { maxJump, maxRange, minIx });
                 if (window.dbManager) window.dbManager.saveRoutes();
                 requestAnimationFrame(draw);
                 window.closeRouteAutoPanel();
                 window.refreshRouteWindowCounts();
-                const count = (window.sectorRoutes || []).filter(r => r.type === 'Xboat' && r.routeId === routeId).length;
-                showToast(`XBoat routes generated: ${count} segment(s) added to Route #${routeId}.`, 3000);
+                showToast(`XBoat routes generated: ${xbCount} segment(s) added to Route #${routeId}.`, 3000);
                 return;
             }
 
@@ -2112,11 +2433,11 @@ function setupRouteWindow() {
                 }
                 const { maxJump, maxRange, allowEmptyHexes: netAllowEmpty, maxEmptyJumps: netMaxEmpty } = configs.network;
                 const groupId = `net_${routeId}`;
-                saveHistoryState(`Generate Custom Network: ${routeName}`);
-                window.sectorRoutes = (window.sectorRoutes || []).filter(r => r.routeId !== routeId);
-                const count = generateAutoRoutes(filteredIds, maxJump, maxRange, routeDef.color, groupId, routeName, routeId, netAllowEmpty, netMaxEmpty);
-                if (count === 0) {
-                    showToast('No route segments could be generated for the current filter.', 2500);
+                const netRun = _generateIntoSlot(`Generate Custom Network: ${routeName}`, routeId,
+                    () => generateAutoRoutes(filteredIds, maxJump, maxRange, routeDef.color, groupId, routeName, routeId, netAllowEmpty, netMaxEmpty));
+                const count = netRun.result;
+                if (!netRun.produced) {
+                    showToast('No route segments could be generated for the current filter — nothing was changed.', 3000);
                     return;
                 }
                 // filterRules is deliberately not persisted — network generation
@@ -2169,14 +2490,13 @@ function setupRouteWindow() {
 
                 const filteredIds = getFilteredHexIds();
                 const groupId = `p2p_${routeId}`;
-                saveHistoryState(`Generate Point-to-Point: ${routeName}`);
-                window.sectorRoutes = (window.sectorRoutes || []).filter(r => r.routeId !== routeId);
-                const count = generatePointToPointRoute(startId, endId, maxJump, routeDef.color, groupId, routeName, true, filteredIds, routeId, waypointIds, p2pAllowEmpty, p2pMaxEmpty);
-                if (count === null) {
-                    const wpNote = waypointIds.length > 0 ? ` via ${waypointIds.length} waypoint(s)` : '';
-                    showToast(`No path found from ${startId} to ${endId}${wpNote} within Jump-${maxJump}.`, 3000);
+                const p2pRun = _generateIntoSlot(`Generate Point-to-Point: ${routeName}`, routeId,
+                    () => generatePointToPointRoute(startId, endId, maxJump, routeDef.color, groupId, routeName, true, filteredIds, routeId, waypointIds, p2pAllowEmpty, p2pMaxEmpty));
+                if (!p2pRun.produced) {
+                    showToast(_p2pFailureMessage(p2pRun.result, maxJump), 6000);
                     return;
                 }
+                const count = p2pRun.result.segments;
                 _saveAutomationConfig(routeId, 'p2p', {
                     startId, endId, waypointIds,
                     maxJump,
@@ -2207,12 +2527,16 @@ function setupRouteWindow() {
                     return;
                 }
                 const groupId = `btn_${routeId}`;
-                saveHistoryState(`Generate BTN Routes: ${routeName}`);
-                window.sectorRoutes = (window.sectorRoutes || []).filter(r => r.routeId !== routeId);
-                const result = generateBTNRoutes({
-                    lowerBTN, minBTN, maxBTN, maxJump, range,
-                    color: routeDef.color, groupId, name: routeName, routeId
-                });
+                const btnRun = _generateIntoSlot(`Generate BTN Routes: ${routeName}`, routeId,
+                    () => generateBTNRoutes({
+                        lowerBTN, minBTN, maxBTN, maxJump, range,
+                        color: routeDef.color, groupId, name: routeName, routeId
+                    }));
+                const result = btnRun.result;
+                if (!btnRun.produced) {
+                    showToast(`"${routeName}": no world pairs met BTN ${minBTN}${maxBTN !== null ? `–${maxBTN}` : '+'} — nothing was changed.`, 4000);
+                    return;
+                }
                 if (window.isLoggingEnabled && window.batchLogData && window.batchLogData.length > 0) {
                     downloadBatchLog('BTN_Routes', result.included);
                 }
@@ -2292,6 +2616,70 @@ window.ensureFreeRouteSlot = function () {
     return true;
 };
 
+/**
+ * Route definitions left behind by the pre-fix resolveRouteId(), which created
+ * one for every Filter groupId it did not recognise — so a slot's first
+ * Point-to-Point, Custom Network or BTN generation added an empty duplicate,
+ * named after the route being generated.
+ *
+ * The three conditions are a conjunction on purpose. A groupId alone does NOT
+ * mark a phantom: migrateToRouteDefinitions() legitimately stamps one on every
+ * definition it rebuilds from a pre-v0.10 save file, and those own segments.
+ * Requiring the slot to be empty and unconfigured as well is what makes the
+ * test safe on an imported sector.
+ */
+function getOrphanRouteDefinitions() {
+    const used = new Set((window.sectorRoutes || []).map(r => r.routeId));
+    return (window.routeDefinitions || []).filter(d =>
+        d.groupId && !used.has(d.id) && !d.automationRef);
+}
+
+/**
+ * Shows the "duplicate empty slots" notice when there is anything to clean up.
+ * Removal is offered rather than done: the detection is a heuristic about data
+ * this app previously wrote, and a slot the user has renamed and is about to
+ * fill would look identical to a phantom.
+ */
+function renderOrphanRouteNotice() {
+    const notice = document.getElementById('route-orphan-notice');
+    if (!notice) return;
+
+    const orphans = getOrphanRouteDefinitions();
+    if (orphans.length === 0) {
+        notice.style.display = 'none';
+        notice.innerHTML = '';
+        return;
+    }
+
+    notice.innerHTML = '';
+    const text = document.createElement('span');
+    text.textContent = orphans.length === 1
+        ? '1 empty duplicate route slot was left behind by an earlier bug.'
+        : `${orphans.length} empty duplicate route slots were left behind by an earlier bug.`;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'route-orphan-remove';
+    btn.textContent = 'Remove';
+    btn.addEventListener('click', () => {
+        const names = orphans.map(d => `  • ${d.name}`).join('\n');
+        if (!window.confirm(
+            `Remove ${orphans.length} empty duplicate route slot${orphans.length !== 1 ? 's' : ''}?\n\n${names}\n\n` +
+            'None of them holds any map segments. This can be undone with Ctrl+Z.')) return;
+
+        saveHistoryState('Remove duplicate route slots', { includeRouteDefinitions: true });
+        const doomed = new Set(orphans.map(d => d.id));
+        window.routeDefinitions = (window.routeDefinitions || []).filter(d => !doomed.has(d.id));
+        if (window.dbManager) window.dbManager.saveRouteDefinitions();
+        window.renderRouteWindow();
+        showToast(`Removed ${doomed.size} duplicate route slot${doomed.size !== 1 ? 's' : ''}.`, 2500);
+    });
+
+    notice.appendChild(text);
+    notice.appendChild(btn);
+    notice.style.display = 'flex';
+}
+
 window.renderRouteWindow = function () {
     const list = document.getElementById('route-window-list');
     if (!list) return;
@@ -2325,6 +2713,10 @@ window.renderRouteWindow = function () {
             <i class="fas fa-eye${def.visible ? '' : '-slash'} route-eye-btn" style="color:${def.visible ? '#45a29e' : '#666'};cursor:pointer;font-size:0.8rem;" title="${def.visible ? 'Disable route' : 'Enable route'}"></i>
             <button class="route-clear-btn" title="Remove all map segments for this route">C</button>
             <i class="fas fa-download route-export-btn" style="color:${segCount > 0 ? '#45a29e' : '#333'};cursor:${segCount > 0 ? 'pointer' : 'default'};font-size:0.8rem;opacity:${segCount > 0 ? '1' : '0.3'};" title="${segCount > 0 ? 'Export systems to CSV' : 'No segments to export'}"></i>
+            <span class="route-file-cell">
+                <i class="fas fa-file-export route-save-btn" style="color:${segCount > 0 ? '#45a29e' : '#333'};cursor:${segCount > 0 ? 'pointer' : 'default'};opacity:${segCount > 0 ? '1' : '0.3'};" title="${segCount > 0 ? 'Save this route to a file' : 'No connections to save'}"></i>
+                <i class="fas fa-file-import route-load-btn" style="color:#45a29e;cursor:pointer;" title="Load a route file into '${def.name.replace(/'/g, "&#39;")}'"></i>
+            </span>
             <button class="route-auto-btn" title="Set up automation for ${def.name}">&#9881; Auto</button>
             <i class="fas fa-times route-delete-btn" style="color:#ff4500;cursor:pointer;font-size:0.8rem;" title="Delete route '${def.name.replace(/'/g, "&#39;")}'"></i>
         `;
@@ -2377,7 +2769,10 @@ window.renderRouteWindow = function () {
             const segments = (window.sectorRoutes || []).filter(r => r.routeId === def.id);
             const segMsg = segments.length > 0 ? `\nThis will also clear its ${segments.length} segment(s).` : '';
             if (!window.confirm(`Delete route "${def.name}"?${segMsg}\n\nThis can be undone with Ctrl+Z.`)) return;
-            saveHistoryState(`Delete ${def.name}`);
+            // The confirm above promises Ctrl+Z will bring it back, and until
+            // the snapshot carried the definitions that was only half true: the
+            // segments returned, orphaned, to a slot that no longer existed.
+            saveHistoryState(`Delete ${def.name}`, { includeRouteDefinitions: true });
             window.sectorRoutes = (window.sectorRoutes || []).filter(r => r.routeId !== def.id);
             window.routeDefinitions = (window.routeDefinitions || []).filter(d => d.id !== def.id);
             if (window.dbManager) { window.dbManager.saveRoutes(); window.dbManager.saveRouteDefinitions(); }
@@ -2393,6 +2788,17 @@ window.renderRouteWindow = function () {
             pill.title = `${segCount} segment(s) — click to view systems`;
             pill.addEventListener('click', () => window.openRouteSystemsPanel(def.id, def.name));
         }
+
+        // .onclick for save, matching the export button below and for the same
+        // reason: refreshRouteWindowCounts() re-assigns it as counts change, and
+        // a listener here would stack alongside that one.
+        const saveBtn = row.querySelector('.route-save-btn');
+        if (saveBtn) saveBtn.onclick = segCount > 0 ? () => exportRouteFile(def.id, def.name) : null;
+
+        // Load is always available — filling an empty slot is the normal case —
+        // and refreshRouteWindowCounts() never touches it, so a listener is safe.
+        const loadBtn = row.querySelector('.route-load-btn');
+        if (loadBtn) loadBtn.addEventListener('click', () => _pickRouteFileFor(def.id, def.name));
 
         const exportBtn = row.querySelector('.route-export-btn');
         if (exportBtn) {
@@ -2431,6 +2837,8 @@ window.renderRouteWindow = function () {
         list.appendChild(row);
     });
 
+    renderOrphanRouteNotice();
+
     // Sync the "Show All" header checkbox to the current visibility state.
     const visAllCb = document.getElementById('route-vis-all-check');
     if (visAllCb) {
@@ -2453,6 +2861,7 @@ window.toggleRouteWindow = function () {
 
 window.closeRouteWindow = function () {
     MapPick.cancel();
+    _wacHideActive();   // portaled onto <body>; hiding the window won't hide it
     const win = document.getElementById('route-window');
     if (win) win.classList.remove('visible');
 };
@@ -2490,6 +2899,15 @@ window.refreshRouteWindowCounts = function () {
             pill.style.cursor = '';
             pill.title = '0 segment(s)';
             if (routeId === sysPanelRouteId) window.closeRouteSystemsPanel();
+        }
+
+        const saveBtn = row.querySelector('.route-save-btn');
+        if (saveBtn) {
+            saveBtn.style.color   = count > 0 ? '#45a29e' : '#333';
+            saveBtn.style.cursor  = count > 0 ? 'pointer'  : 'default';
+            saveBtn.style.opacity = count > 0 ? '1' : '0.3';
+            saveBtn.title   = count > 0 ? 'Save this route to a file' : 'No connections to save';
+            saveBtn.onclick = count > 0 ? () => exportRouteFile(routeId, routeName) : null;
         }
 
         const exportBtn = row.querySelector('.route-export-btn');
@@ -2550,6 +2968,7 @@ window.closeRouteAutoPanel = function () {
     const panel = document.getElementById('route-auto-panel');
     if (!panel) return;
     MapPick.cancel();   // the crosshair must not outlive the panel
+    _wacHideActive();   // portaled onto <body>; hiding the panel won't hide it
     panel.style.display = 'none';
     panel.dataset.targetRouteId = '';
     document.querySelectorAll('input[name="route-auto-type"]').forEach(r => r.checked = false);

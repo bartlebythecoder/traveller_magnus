@@ -37,10 +37,21 @@ const ROUTE_TYPE_TO_ID = { 'Xboat': 1, 'Trade': 2, 'Secondary': 3 };
 
 /**
  * Resolves the routeId for a segment being added.
- * Standard types map to fixed IDs 1-3. Filter routes look up their
- * groupId in routeDefinitions; if not found, a new definition is created.
+ * An explicit extras.routeId always wins. Otherwise standard types map to fixed
+ * IDs 1-3, and Filter routes look up their groupId in routeDefinitions, creating
+ * a definition if there is none.
  */
 function resolveRouteId(type, extras) {
+    // The caller already knows which slot these segments belong to, and every
+    // live caller supplies one. Consulting the definitions anyway was not merely
+    // redundant, it was destructive: an unrecognised groupId sent us down the
+    // branch below, which *creates* a definition — so the first Point-to-Point,
+    // Custom Network or BTN generation on a slot silently added an empty
+    // duplicate slot to the Route Manager, named after the very route being
+    // generated. The id it returned was then discarded by the spread in
+    // addRoute, so the phantom was pure side effect.
+    if (extras.routeId != null) return extras.routeId;
+
     if (type !== 'Filter') return ROUTE_TYPE_TO_ID[type] || 1;
 
     const defs = window.routeDefinitions || [];
@@ -65,27 +76,10 @@ function resolveRouteId(type, extras) {
     return newId;
 }
 
-window.ensureFreeRouteSlot = function () {
-    if (!window.routeDefinitions) window.routeDefinitions = [];
-    const segCounts = new Map();
-    (window.sectorRoutes || []).forEach(r => {
-        if (r.routeId != null) segCounts.set(r.routeId, (segCounts.get(r.routeId) || 0) + 1);
-    });
-    const free = window.routeDefinitions.find(d => !segCounts.has(d.id));
-    if (free) return false;
-    const nextId = window.routeDefinitions.length > 0
-        ? Math.max(...window.routeDefinitions.map(d => d.id)) + 1 : 1;
-    window.routeDefinitions.push({
-        id:           nextId,
-        name:         `Route ${nextId}`,
-        color:        '#ffffff',
-        shortcut:     null,
-        visible:      true,
-        automationRef: null,
-    });
-    if (window.dbManager) window.dbManager.saveRouteDefinitions?.();
-    return true;
-};
+// ensureFreeRouteSlot() lives in ui_menus.js, beside the Route Manager UI that
+// is the reason a free slot has to exist. A second copy lived here and was dead
+// on arrival — ui_menus.js assigns the same global and loads after this file,
+// so this one was overwritten before anything could call it.
 
 /**
  * Global helper to add a route with duplicate prevention.
@@ -148,27 +142,112 @@ function _ufBuild(routes) {
     return { find, union, connected };
 }
 
+// ── Spatial index ─────────────────────────────────────────────────────
+// The searches below used to answer "what is within one jump of here?" by
+// walking the entire world list and measuring the distance to every world in
+// the sector — an O(worlds) scan inside an O(worlds) loop. Invisible on one
+// sector (~1,300 worlds, 0.1s for a long route); crippling on an OTU import
+// (~16,000 worlds, 25s of frozen browser for the same route, measured
+// 2026-08-19 — see directives/route_forcing_spec.md §9).
+//
+// Worlds are bucketed by position so a neighbour lookup costs the size of the
+// neighbourhood instead of the size of the sector.
+//
+// Buckets are keyed in CUBE coordinates, not the (q,r) offset coordinates the
+// rest of the app uses. That matters for correctness: a hex within N of another
+// can be up to ~1.5N away in offset r, so an offset-space box of ±N would miss
+// real neighbours and silently change routes. In cube space the ±N box is
+// exact. The conversion is the same one getHexDistance performs internally.
+
+function _cubeX(q)      { return q; }
+function _cubeZ(q, r)   { return r - (q - (q & 1)) / 2; }
+
+function _buildWorldIndex(worlds, maxJump) {
+    const size = Math.max(1, maxJump);
+    const buckets = new Map();
+    for (let i = 0; i < worlds.length; i++) {
+        const w = worlds[i];
+        const key = `${Math.floor(_cubeX(w.q) / size)},${Math.floor(_cubeZ(w.q, w.r) / size)}`;
+        let b = buckets.get(key);
+        if (!b) { b = []; buckets.set(key, b); }
+        b.push(i);   // ascending by construction — we walk `worlds` in order
+    }
+    return { size, buckets, worlds };
+}
+
+// Cached per world-array identity. generateBTNRoutes calls the search once per
+// qualifying world pair with the same array, so rebuilding per call would cost
+// more than the scan it replaces. Length is part of the validity check because
+// generatePointToPointRoute appends vacant stops to its list before searching.
+const _worldIndexCache = new WeakMap();
+
+function _getWorldIndex(worlds, maxJump) {
+    const hit = _worldIndexCache.get(worlds);
+    if (hit && hit.maxJump === maxJump && hit.count === worlds.length) return hit.index;
+    const index = _buildWorldIndex(worlds, maxJump);
+    _worldIndexCache.set(worlds, { maxJump, count: worlds.length, index });
+    return index;
+}
+
+/**
+ * Indices into index.worlds of every world that MIGHT be within maxJump of
+ * (q,r). Over-collects — the caller still measures the real distance — but
+ * never under-collects, which is the property that keeps routes identical.
+ *
+ * Returned in ascending index order, i.e. exactly the order a
+ * plain "for (const w of worlds)" loop produced. BFS returns whichever equal-length
+ * path it reaches first, so neighbour order decides which of several equally
+ * short routes comes back; preserving it is what makes this refactor invisible.
+ */
+function _indexNeighbours(index, q, r, maxJump) {
+    const x = _cubeX(q), z = _cubeZ(q, r);
+    const bx0 = Math.floor((x - maxJump) / index.size);
+    const bx1 = Math.floor((x + maxJump) / index.size);
+    const bz0 = Math.floor((z - maxJump) / index.size);
+    const bz1 = Math.floor((z + maxJump) / index.size);
+
+    const out = [];
+    for (let bx = bx0; bx <= bx1; bx++) {
+        for (let bz = bz0; bz <= bz1; bz++) {
+            const b = index.buckets.get(`${bx},${bz}`);
+            if (b) for (let i = 0; i < b.length; i++) out.push(b[i]);
+        }
+    }
+    out.sort((a, b) => a - b);
+    return out;
+}
+
 // ── BFS path finder ───────────────────────────────────────────────────
 // Finds the shortest hop path (each hop <= maxJump) between startId and
 // endId through any populated world. Returns an array of hex IDs forming
 // the path (inclusive of start and end), or null if unreachable.
 
 function _bfsPath(startId, endId, worlds, maxJump, worldById) {
-    const queue = [[startId]];
+    const index = _getWorldIndex(worlds, maxJump);
+    const queue = [startId];
+    let head = 0;                                  // index cursor, not shift()
     const visited = new Set([startId]);
+    const parent = new Map();
 
-    while (queue.length > 0) {
-        const path = queue.shift();
-        const current = worldById.get(path[path.length - 1]);
+    while (head < queue.length) {
+        const currentId = queue[head++];
+        const current = worldById.get(currentId);
         if (!current) continue;
 
-        for (const w of worlds) {
+        const near = _indexNeighbours(index, current.q, current.r, maxJump);
+        for (let n = 0; n < near.length; n++) {
+            const w = index.worlds[near[n]];
             if (visited.has(w.id)) continue;
             if (getHexDistance(current.q, current.r, w.q, w.r) <= maxJump) {
-                const newPath = [...path, w.id];
-                if (w.id === endId) return newPath;
+                if (w.id === endId) {
+                    const path = [w.id];
+                    let step = currentId;
+                    while (step !== undefined) { path.push(step); step = parent.get(step); }
+                    return path.reverse();
+                }
+                parent.set(w.id, currentId);
                 visited.add(w.id);
-                queue.push(newPath);
+                queue.push(w.id);
             }
         }
     }
@@ -204,48 +283,81 @@ function _buildEmptyHexCandidates(traversalWorlds, maxJump) {
     return result;
 }
 
+// Cached per Map identity: generatePointToPointRoute builds emptyById once and
+// searches it once per leg, so this array is built once rather than per leg.
+const _emptyListCache = new WeakMap();
+
+function _getEmptyList(emptyById) {
+    const hit = _emptyListCache.get(emptyById);
+    if (hit && hit.count === emptyById.size) return hit.list;
+    const list = [...emptyById.values()];
+    _emptyListCache.set(emptyById, { count: emptyById.size, list });
+    return list;
+}
+
 // Like _bfsPath but allows intermediate hops through EMPTY hexes.
 // emptyById: Map<hexId, {id,q,r}> of candidate empty hexes.
 // maxEmptyJumps: max consecutive empty hops before a system is required.
 
 function _bfsPathWithEmpty(startId, endId, worlds, maxJump, worldById, emptyById, maxEmptyJumps) {
-    const queue = [{ path: [startId], streak: 0 }];
-    const visited = new Set([`${startId}:0`]);
+    const worldIndex = _getWorldIndex(worlds, maxJump);
+    // emptyById is a Map; the index needs positional order, and Map iteration
+    // order is insertion order, so this array matches the old `for...of` exactly.
+    const emptyList  = _getEmptyList(emptyById);
+    const emptyIndex = _getWorldIndex(emptyList, maxJump);
 
-    while (queue.length > 0) {
-        const { path, streak } = queue.shift();
-        const currentId = path[path.length - 1];
+    const queue = [{ id: startId, streak: 0 }];
+    let head = 0;
+    const visited = new Set([`${startId}:0`]);
+    const parent = new Map();   // "id:streak" -> { id, streak } it was reached from
+
+    const rebuild = (endHexId, endStreak) => {
+        const path = [endHexId];
+        let step = parent.get(`${endHexId}:${endStreak}`);
+        while (step) {
+            path.push(step.id);
+            step = parent.get(`${step.id}:${step.streak}`);
+        }
+        return path.reverse();
+    };
+
+    while (head < queue.length) {
+        const { id: currentId, streak } = queue[head++];
         const current = worldById.get(currentId) || emptyById.get(currentId);
         if (!current) continue;
 
         // System neighbors — landing on a system resets the consecutive empty streak
-        for (const w of worlds) {
+        const nearW = _indexNeighbours(worldIndex, current.q, current.r, maxJump);
+        for (let n = 0; n < nearW.length; n++) {
+            const w = worldIndex.worlds[nearW[n]];
             const dist = getHexDistance(current.q, current.r, w.q, w.r);
             if (dist === 0 || dist > maxJump) continue;
             const vKey = `${w.id}:0`;
             if (visited.has(vKey)) continue;
-            const newPath = [...path, w.id];
-            if (w.id === endId) return newPath;
+            parent.set(vKey, { id: currentId, streak });
+            if (w.id === endId) return rebuild(w.id, 0);
             visited.add(vKey);
-            queue.push({ path: newPath, streak: 0 });
+            queue.push({ id: w.id, streak: 0 });
         }
 
         // Empty hex neighbors — only if the streak budget allows another empty hop
         if (streak < maxEmptyJumps) {
-            for (const [eId, eCoords] of emptyById) {
-                const dist = getHexDistance(current.q, current.r, eCoords.q, eCoords.r);
+            const nearE = _indexNeighbours(emptyIndex, current.q, current.r, maxJump);
+            for (let n = 0; n < nearE.length; n++) {
+                const e = emptyIndex.worlds[nearE[n]];
+                const dist = getHexDistance(current.q, current.r, e.q, e.r);
                 if (dist === 0 || dist > maxJump) continue;
                 const newStreak = streak + 1;
-                const vKey = `${eId}:${newStreak}`;
+                const vKey = `${e.id}:${newStreak}`;
                 if (visited.has(vKey)) continue;
-                const newPath = [...path, eId];
+                parent.set(vKey, { id: currentId, streak });
                 // Terminate on an empty destination too. The system-neighbour
                 // loop above owns the only other endId check, so a leg ending
                 // on an empty hex used to run to exhaustion and report "no
                 // path" even when the hex was one hop away.
-                if (eId === endId) return newPath;
+                if (e.id === endId) return rebuild(e.id, newStreak);
                 visited.add(vKey);
-                queue.push({ path: newPath, streak: newStreak });
+                queue.push({ id: e.id, streak: newStreak });
             }
         }
     }
@@ -512,6 +624,9 @@ function clearAutoRouteGroup(groupId) {
  * Waypoints are mandatory intermediate stops; BFS runs independently on each leg.
  * Does NOT clear existing routes — appends to window.sectorRoutes.
  *
+ * All or nothing: if any leg has no path this commits nothing at all, so a
+ * failed call never leaves a partial route behind.
+ *
  * Any stop may be a vacant hex (deep space) as well as a populated world —
  * see the note beside the stop-injection loop. Vacant stops are independent of
  * allowEmptyHexes, which governs only opportunistic empty hops along the way.
@@ -526,7 +641,16 @@ function clearAutoRouteGroup(groupId) {
  * @param {string[]} filteredHexIds - Hex IDs allowed as BFS traversal nodes (filteredOnly mode).
  * @param {number|null} routeIdOverride - If set, overrides computed routeId on all segments.
  * @param {string[]} waypointIds    - Ordered mandatory intermediate stops (default empty).
- * @returns {number|null} Total segments added across all legs, or null if any leg has no path.
+ * @returns {{ segments: number|null, failure: Object|null }}
+ *          On success, segments is the total added and failure is null.
+ *          On failure, segments is null and failure names what went wrong:
+ *            { kind: 'stop', stopId }                        — that stop cannot be
+ *              used at all: it is neither vacant space nor a system with data.
+ *            { kind: 'leg', index, total, fromId, toId }     — that one leg has no
+ *              path (index is 1-based).
+ *          The caller needs this to say where the problem is: naming the route's
+ *          own Start and End is actively misleading on a long route, since those
+ *          two stops are usually the ones that were fine.
  */
 function generatePointToPointRoute(startId, endId, maxJump, color, groupId, name, filteredOnly = false, filteredHexIds = [], routeIdOverride = null, waypointIds = [], allowEmptyHexes = false, maxEmptyJumps = 1) {
     if (!window.sectorRoutes) window.sectorRoutes = [];
@@ -567,9 +691,11 @@ function generatePointToPointRoute(startId, endId, maxJump, color, groupId, name
         worldById.set(stopId, node);
     }
 
-    // Verify all stops exist as reachable nodes.
+    // Verify all stops exist as reachable nodes. A stop can survive the UI's own
+    // check and still fail here: a hex marked SYSTEM_PRESENT that carries no
+    // edition data is a world by type but has nothing to route through.
     for (const stopId of allStops) {
-        if (!worldById.has(stopId)) return null;
+        if (!worldById.has(stopId)) return { segments: null, failure: { kind: 'stop', stopId } };
     }
 
     // Pre-build empty hex candidates if the option is enabled
@@ -584,12 +710,32 @@ function generatePointToPointRoute(startId, endId, maxJump, color, groupId, name
     const extras = { subtype: 'PointToPoint', color, groupId, name };
     if (routeIdOverride != null) extras.routeId = routeIdOverride;
 
-    let totalSegments = 0;
+    // Two passes, deliberately: every leg is resolved before any of it is
+    // committed. Legs used to be written to the map as they were found, so a
+    // route that failed on its third leg left the first two drawn — segments
+    // belonging to a route the user never got, described by no configuration
+    // the Route Manager would ever show, and indistinguishable from the real
+    // thing. Deleting a waypoint is exactly what stretches a leg past maxJump,
+    // so editing a route was the common way to hit it.
+    const legs = [];
     for (let i = 0; i < stops.length - 1; i++) {
         const path = allowEmptyHexes
             ? _bfsPathWithEmpty(stops[i], stops[i + 1], worlds, maxJump, worldById, emptyById, maxEmptyJumps)
             : _bfsPath(stops[i], stops[i + 1], worlds, maxJump, worldById);
-        if (!path) return null;
+        if (!path) {
+            return { segments: null, failure: {
+                kind:  'leg',
+                index: i + 1,
+                total: stops.length - 1,
+                fromId: stops[i],
+                toId:   stops[i + 1]
+            } };
+        }
+        legs.push(path);
+    }
+
+    let totalSegments = 0;
+    for (const path of legs) {
         for (let k = 0; k < path.length - 1; k++) {
             addRoute(path[k], path[k + 1], 'Filter', null, extras);
         }
@@ -598,7 +744,7 @@ function generatePointToPointRoute(startId, endId, maxJump, color, groupId, name
 
     const legDesc = waypointIds.length > 0 ? `, ${stops.length - 1} leg(s)` : '';
     console.log(`Point-to-Point "${name}" (Jump-${maxJump}): ${totalSegments} segment(s) from ${startId} to ${endId}${legDesc}.`);
-    return totalSegments;
+    return { segments: totalSegments, failure: null };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

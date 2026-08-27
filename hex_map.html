@@ -392,6 +392,28 @@
         .route-systems-item-num  { color: #45a29e; min-width: 22px; text-align: right; font-size: 0.75rem; flex-shrink: 0; }
         .route-systems-item-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .route-systems-item-id   { color: #45a29e; font-size: 0.72rem; flex-shrink: 0; }
+        /* Shown when a route never reached its End. Amber rather than red: the
+           route is usable and correct as far as it goes — it is unfinished, not
+           broken. #route-systems-list scrolls, so this scrolls away with the
+           list it describes rather than pinning to the panel. */
+        .route-systems-shortfall {
+            background: rgba(224, 176, 64, 0.10);
+            border-left: 3px solid #e0b040;
+            color: #d8c08a;
+            font-family: inherit;
+            font-size: 0.75rem;
+            line-height: 1.45;
+            padding: 5px 7px;
+            margin-bottom: 5px;
+            border-radius: 2px;
+        }
+        .route-systems-shortfall strong { color: #e0b040; }
+        .route-systems-item-stopped { background: rgba(224, 176, 64, 0.10); }
+        .route-systems-item-stopped .route-systems-item-name { color: #e0b040; }
+        .route-systems-item-stopmark {
+            color: #e0b040; font-size: 0.68rem; letter-spacing: 0.03em;
+            flex-shrink: 0; text-transform: uppercase;
+        }
         #route-systems-footer {
             font-size: 0.72rem;
             color: #45a29e;
@@ -610,7 +632,14 @@
             max-height: 260px;
             overflow-y: auto;
             overflow-x: hidden;
-            padding-right: 2px;
+            /* Vertical padding is load-bearing, not spacing. A focus ring is
+               painted OUTSIDE the input's border box, and this container clips
+               at its padding box — so with no padding the first row's input sat
+               flush against the clip edge and the top of its ring was shaved
+               off. box-sizing keeps max-height meaning the same 260px it did
+               before the padding was added. */
+            padding: 4px 2px 4px 0;
+            box-sizing: border-box;
         }
         #route-auto-p2p-waypoints-label {
             font-size: 0.72rem; color: #45a29e; margin-bottom: 4px; letter-spacing: 0.03em;
@@ -853,9 +882,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above<br> So Below</span></h1>
-            <div class="splash-banner">New: Point to Point Route updates</div>
+            <div class="splash-banner">Partial Point to Point Routes</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.17.2</div>
+            <div class="splash-version">v0.17.3</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -1338,7 +1367,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.17.2</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.17.3</span>
             </p>
         </div>
 
@@ -2836,6 +2865,14 @@
                                 <label>Max Empty Jumps (1–10):</label>
                                 <input type="number" id="route-auto-p2p-max-empty" min="1" max="10" value="1">
                             </div>
+                        </div>
+                        <!-- Allow Empty Hexes above changes HOW the route is built; this
+                             changes what happens when it CANNOT be built. Default off, so
+                             the one-and-done workflow is completely untouched. -->
+                        <div class="route-auto-param">
+                            <label title="If a leg cannot be routed, keep the route as far as it got — up to the closest world it can reach to the next stop — and stop there. Never exceeds Max Jump, never ignores the filter, never enters empty hexes.">
+                                <input type="checkbox" id="route-auto-p2p-allow-partial"> Build as far as possible
+                            </label>
                         </div>
                         <div id="route-auto-filter-summary-p2p" class="route-auto-filter-summary"></div>
                     </div>

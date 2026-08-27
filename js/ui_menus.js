@@ -1727,8 +1727,31 @@ window.openRouteSystemsPanel = function (routeId, routeName) {
     const { ordered, worlds } = getRouteSystemList(routeId);
     listEl.innerHTML = '';
 
+    // A route that never reached its End says so at the top, before the list.
+    // Read through getRouteShortfall so a mark left over from a generation the
+    // user has since edited past is not repeated back to them as current.
+    const sf = (typeof getRouteShortfall === 'function') ? getRouteShortfall(routeId) : null;
+    if (sf) {
+        const hexes = sf.distance === 1 ? '1 hex' : `${sf.distance} hexes`;
+        const notice = document.createElement('div');
+        notice.className = 'route-systems-shortfall';
+        notice.innerHTML = `<strong>Stopped short.</strong> This route could not reach `
+                         + `${formatWorldLabel(sf.targetId)} and ends at `
+                         + `${formatWorldLabel(sf.reachedId)}, ${hexes} away. `
+                         + `Add a waypoint near there and generate again to carry it on.`;
+        listEl.appendChild(notice);
+    }
+
     if (worlds.length === 0) {
-        listEl.innerHTML = '<div style="color:#555;font-style:italic;padding:4px 0;">No systems found.</div>';
+        // Appended, not assigned: assigning innerHTML here would wipe the
+        // shortfall notice above. A shortfall cannot currently coexist with an
+        // empty list — getRouteShortfall returns null when the slot has no
+        // segments — but the two are independent enough that relying on it is
+        // asking for a silent regression.
+        const none = document.createElement('div');
+        none.style.cssText = 'color:#555;font-style:italic;padding:4px 0;';
+        none.textContent = 'No systems found.';
+        listEl.appendChild(none);
     } else {
         worlds.forEach((hexId, i) => {
             const state = hexStates.get(hexId);
@@ -1737,16 +1760,24 @@ window.openRouteSystemsPanel = function (routeId, routeName) {
             const name  = getWorldName(state) || (isVacantHex(hexId) ? 'Deep Space' : '(unnamed)');
             const item  = document.createElement('div');
             item.className = 'route-systems-item';
+            // The world the route ran out at is marked in the list too, so the
+            // notice above and the row it refers to are visibly the same place.
+            if (sf && hexId === sf.reachedId) item.classList.add('route-systems-item-stopped');
             const marker = ordered ? `${i + 1}.` : '•';
             item.innerHTML = `<span class="route-systems-item-num">${marker}</span>`
                            + `<span class="route-systems-item-name">${name}</span>`
-                           + `<span class="route-systems-item-id">${hexId}</span>`;
+                           + `<span class="route-systems-item-id">${hexId}</span>`
+                           + (sf && hexId === sf.reachedId
+                               ? '<span class="route-systems-item-stopmark" title="As far as this route could get">stops here</span>'
+                               : '');
             listEl.appendChild(item);
         });
     }
 
     const segCount = (window.sectorRoutes || []).filter(r => r.routeId === routeId).length;
-    footerEl.textContent = `${segCount} segment${segCount !== 1 ? 's' : ''} · ${worlds.length} world${worlds.length !== 1 ? 's' : ''}`;
+    footerEl.textContent = `${segCount} segment${segCount !== 1 ? 's' : ''} · `
+                         + `${worlds.length} world${worlds.length !== 1 ? 's' : ''}`
+                         + (sf ? ' · incomplete' : '');
 
     panel.style.display = 'block';
     panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -2201,6 +2232,7 @@ function _restoreAutomationConfig(routeId) {
         setChk('route-auto-p2p-allow-empty', p.allowEmptyHexes);
         setNum('route-auto-p2p-max-empty', p.maxEmptyJumps);
         showOpts('route-auto-p2p-empty-opts', p.allowEmptyHexes);
+        setChk('route-auto-p2p-allow-partial', p.allowPartial);
 
     } else {
         return false;
@@ -2230,7 +2262,7 @@ function _restoreAutomationConfig(routeId) {
  * Stops are named the way the builder's fields name them — "Regina (1-A-1910)"
  * — because a bare hex ID is not something a user can place on the map.
  */
-function _p2pFailureMessage(outcome, maxJump) {
+function _p2pFailureMessage(outcome, maxJump, allowPartial) {
     const f = outcome && outcome.failure;
 
     if (f && f.kind === 'stop') {
@@ -2240,8 +2272,29 @@ function _p2pFailureMessage(outcome, maxJump) {
 
     if (f && f.kind === 'leg') {
         const where = f.total > 1 ? `leg ${f.index} of ${f.total}` : 'this route';
-        return `No path for ${where}: ${formatWorldLabel(f.fromId)} → ${formatWorldLabel(f.toId)} `
-             + `within Jump-${maxJump}. Nothing was changed.`;
+        let msg = `No path for ${where}: ${formatWorldLabel(f.fromId)} → ${formatWorldLabel(f.toId)} `
+                + `within Jump-${maxJump}.`;
+
+        // Naming how far the search actually got turns "it failed" into "bridge
+        // from here" — the closest reachable world is exactly the one a user
+        // would add as a waypoint to get past the obstacle. This costs the user
+        // nothing and changes no state, so it is said whether or not they have
+        // asked for partial routes.
+        //
+        // reachedId is null when nothing reachable was closer to the target than
+        // the leg's own start: there is then no useful world to name, and
+        // pointing at one further away would be worse than saying nothing.
+        if (f.reachedId) {
+            const hexes = f.shortfallDistance === 1 ? '1 hex' : `${f.shortfallDistance} hexes`;
+            msg += ` The closest it could reach was ${formatWorldLabel(f.reachedId)}, ${hexes} short`;
+            // Only worth saying when the option is off — it is the thing that
+            // would have turned this failure into a usable route, and a user who
+            // has never noticed the checkbox will not go looking for it.
+            msg += allowPartial
+                ? '.'
+                : ' — tick "Build as far as possible" to keep the route up to there.';
+        }
+        return msg + ' Nothing was changed.';
     }
 
     return `No path found within Jump-${maxJump}. Nothing was changed.`;
@@ -2395,7 +2448,8 @@ function setupRouteWindow() {
                            endRaw:          document.getElementById('route-auto-p2p-end').value,
                            maxJump:         parseInt(document.getElementById('route-auto-p2p-jump').value, 10),
                            allowEmptyHexes: document.getElementById('route-auto-p2p-allow-empty')?.checked || false,
-                           maxEmptyJumps:   parseInt(document.getElementById('route-auto-p2p-max-empty')?.value || '1', 10) },
+                           maxEmptyJumps:   parseInt(document.getElementById('route-auto-p2p-max-empty')?.value || '1', 10),
+                           allowPartial:    document.getElementById('route-auto-p2p-allow-partial')?.checked || false },
                 network: { maxJump:         parseInt(document.getElementById('route-auto-network-jump').value, 10),
                            maxRange:        parseInt(document.getElementById('route-auto-network-range').value, 10),
                            filterRules:     window.activeFilterRules || [],
@@ -2456,7 +2510,7 @@ function setupRouteWindow() {
             }
 
             if (type === 'p2p') {
-                const { startRaw, endRaw, maxJump, allowEmptyHexes: p2pAllowEmpty, maxEmptyJumps: p2pMaxEmpty } = configs.p2p;
+                const { startRaw, endRaw, maxJump, allowEmptyHexes: p2pAllowEmpty, maxEmptyJumps: p2pMaxEmpty, allowPartial: p2pAllowPartial } = configs.p2p;
                 const startId = resolveWorldInput(startRaw);
                 const endId   = resolveWorldInput(endRaw);
                 if (!startRaw.trim() || !endRaw.trim()) {
@@ -2491,9 +2545,14 @@ function setupRouteWindow() {
                 const filteredIds = getFilteredHexIds();
                 const groupId = `p2p_${routeId}`;
                 const p2pRun = _generateIntoSlot(`Generate Point-to-Point: ${routeName}`, routeId,
-                    () => generatePointToPointRoute(startId, endId, maxJump, routeDef.color, groupId, routeName, true, filteredIds, routeId, waypointIds, p2pAllowEmpty, p2pMaxEmpty));
+                    () => generatePointToPointRoute(startId, endId, maxJump, routeDef.color, groupId, routeName, true, filteredIds, routeId, waypointIds, p2pAllowEmpty, p2pMaxEmpty, p2pAllowPartial));
                 if (!p2pRun.produced) {
-                    showToast(_p2pFailureMessage(p2pRun.result, maxJump), 6000);
+                    // Duration scales with the message: naming the closest world it
+                    // could reach, and pointing at the option that would have kept
+                    // the route, makes this far longer than the 6s it used to get —
+                    // and it is the one message here the user most needs to finish.
+                    const failMsg = _p2pFailureMessage(p2pRun.result, maxJump, p2pAllowPartial);
+                    showToast(failMsg, failMsg.length > 180 ? 12000 : 9000);
                     return;
                 }
                 const count = p2pRun.result.segments;
@@ -2501,14 +2560,37 @@ function setupRouteWindow() {
                     startId, endId, waypointIds,
                     maxJump,
                     allowEmptyHexes: p2pAllowEmpty,
-                    maxEmptyJumps:   p2pMaxEmpty
+                    maxEmptyJumps:   p2pMaxEmpty,
+                    allowPartial:    p2pAllowPartial,
+                    // Persisted so reopening the panel can still say this route
+                    // never reached its End. Regenerating rewrites it; hand-editing
+                    // the segments afterwards makes it stale, which is accepted —
+                    // the alternative was storing the whole generated path, which
+                    // goes stale the same way and is far bigger.
+                    shortfall:       p2pRun.result.shortfall || null
                 });
                 if (window.dbManager) window.dbManager.saveRoutes();
                 requestAnimationFrame(draw);
                 window.closeRouteAutoPanel();
                 window.refreshRouteWindowCounts();
-                const wpNote = waypointIds.length > 0 ? ` via ${waypointIds.length} waypoint(s)` : '';
-                showToast(`"${routeName}" generated: ${count} segment(s) from ${startId} to ${endId}${wpNote}.`, 3000);
+                const sf = p2pRun.result.shortfall;
+                if (sf) {
+                    // Never say "from X to Y" here: Y is the End it did NOT reach.
+                    // Reporting the stop it actually ended on is the whole point.
+                    const hexes = sf.distance === 1 ? '1 hex' : `${sf.distance} hexes`;
+                    showToast(`"${routeName}": ${count} segment(s), but stopped short at `
+                            + `${formatWorldLabel(sf.reachedId)} — ${hexes} from `
+                            + `${formatWorldLabel(sf.targetId)}, which could not be reached.`, 9000);
+                } else {
+                    const wpNote = waypointIds.length > 0 ? ` via ${waypointIds.length} waypoint(s)` : '';
+                    // formatWorldLabel, not the bare hex IDs this used to print:
+                    // every other message in this flow names a stop the way the
+                    // builder's own fields do, and a bare hex number is not
+                    // something the user can place on the map at a glance.
+                    // 4s rather than 3s — the labels make it about a third longer.
+                    showToast(`"${routeName}" generated: ${count} segment(s) from `
+                            + `${formatWorldLabel(startId)} to ${formatWorldLabel(endId)}${wpNote}.`, 4000);
+                }
                 return;
             }
 

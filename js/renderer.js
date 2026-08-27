@@ -395,6 +395,35 @@ function draw() {
             });
         }
 
+        // --- "Stopped short here" markers ---------------------------------
+        // A route that ran out of reachable worlds ends at an ordinary-looking
+        // hex. Without a mark, "this is where I was going" and "this is as far
+        // as it could get" are indistinguishable on the map — which is exactly
+        // the thing the user opened the map to find out.
+        //
+        // Drawn as a dashed open ring in the route's own colour: dashed reads as
+        // unfinished and survives any palette the user picks, where a fixed
+        // warning colour would collide with their own route colours. Drawn last
+        // so it sits above every route line.
+        if (typeof getRouteShortfall === 'function' && zoom >= 0.25) {
+            ctx.save();
+            ctx.setLineDash([5, 4]);
+            ctx.lineWidth = 2;
+            defs.forEach(def => {
+                if (def.visible === false) return;
+                const sf = getRouteShortfall(def.id);
+                if (!sf) return;
+                const coords = getHexCoords(sf.reachedId);
+                if (!coords) return;
+                const px = getHexPixel(coords.q, coords.r);
+                ctx.strokeStyle = def.color || '#ffffff';
+                ctx.beginPath();
+                ctx.arc(px.x, px.y, gap * 0.85, 0, 2 * Math.PI);
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+
         ctx.restore();
     }
 

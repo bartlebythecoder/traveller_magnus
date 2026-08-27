@@ -220,6 +220,57 @@ Remove a waypoint with the × button on its row.
 | **Max Jump** | Maximum single-hop distance for all legs. |
 | **Allow Empty Hexes** | Permit hops *through* uninhabited hexes while pathfinding. Independent of choosing an empty hex as a stop, which needs no setting. |
 | **Max Empty Jumps** | Max consecutive empty-hex hops before a system is required. A deep-space *stop* does not count against this — it is a destination, not a hop of convenience — and neither does starting in one. |
+| **Build as far as possible** | When a leg cannot be routed, keep the route up to the closest world it *could* reach instead of failing. Off by default. See below. |
+
+#### Build As Far As Possible
+
+Normally a Point-to-Point route is all or nothing: if any leg cannot be routed, nothing is
+drawn and nothing on the map changes. That is the right behaviour for a short route you can
+simply rebuild with different settings.
+
+It is the wrong behaviour for a long route across many sectors, where a single unroutable
+leg throws away nineteen good ones and leaves you to work out *why* with no evidence.
+
+Ticking **Build as far as possible** changes only what happens when the search comes up
+short. The route is drawn as far as it actually got — up to the closest world it could reach
+to the stop it was aiming for — and that world is marked:
+
+- **On the map**, with a dashed ring in the route's own colour.
+- **In the Route Systems panel**, with a notice naming the stop that could not be reached
+  and how many hexes away it is, and a **STOPS HERE** tag on the world the route ends at.
+- **In the panel footer**, which reads `… · incomplete`.
+
+To carry the route on, add a waypoint near where it stopped and generate again.
+
+**The mark looks after itself.** It is not a flag you have to clear — it is simply a
+statement that the route ends there, and it disappears as soon as that stops being true.
+So it goes away when you regenerate the route, when you extend it past that point by hand
+(hold the route's shortcut key and drag), when you connect it through to the stop it
+missed, or when you delete the segments. Extending the *other* end of the route leaves it
+in place, because the route still stops where it says it does.
+
+**What it does not do.** This is not a "force" option. Nothing about how paths are found
+changes:
+
+- **Max Jump is never exceeded.** It is a claim about what your ships can do, and a route
+  nobody can fly is worse than no route.
+- **The filter is obeyed exactly as before.** The route will not detour through worlds you
+  have filtered out.
+- **Allow Empty Hexes still means what it says.** If it is off, the route will not enter
+  empty hexes to get further, and the world it stops at is always a real world — never a
+  point in deep space.
+
+Because all three still hold, **a route may still stop well short of where you wanted it**.
+A rift wider than your Max Jump with nothing in it cannot be crossed by any of this. What
+you get is the part of the route that works, plus the exact location and size of the
+problem.
+
+**On multi-leg routes it stops at the first leg it cannot complete** rather than skipping
+ahead to later legs. That keeps the route a single unbroken chain, so the Systems panel can
+still list it in travel order.
+
+**Even with the box off**, a failed route now tells you the closest world it could reach and
+how far short that leaves it — which is usually the world you want to add as a waypoint.
 
 #### How the Filter Affects P2P
 
@@ -233,8 +284,13 @@ This means you can use the filter to restrict a route to a specific allegiance o
   - Max Jump is too low for the gap between worlds.
   - The active filter excludes all valid intermediate worlds.
   - A stop lies outside the sector grid entirely (an empty hex inside it is fine).
+  - The message names the closest world the search *could* reach and how many hexes short
+    that leaves it. That world is usually the one to add as a waypoint.
 - Start and End must be different stops.
 - The Systems Panel displays P2P worlds in **order** (numbered 1, 2, 3…) rather than alphabetically.
+- A route built with **Build as far as possible** keeps its mark only for as long as the
+  route really does stop there. Regenerate it, extend it past that point by hand, connect it
+  through to the missed stop, or delete the segments, and the mark clears itself.
 
 ---
 

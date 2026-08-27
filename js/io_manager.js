@@ -593,7 +593,11 @@ function applyLoadedSettings(settings) {
 }
 
 function applyLoadedMapData(parsedData) {
-    saveHistoryState('Load Map JSON');
+    // includeRouteDefinitions, because loading a map replaces window.routeDefinitions
+    // wholesale from the file below. Without it Ctrl+Z restored the previous hexes
+    // and segments but left the loaded file's route slots in place, so the segments
+    // came back belonging to slots that were no longer theirs.
+    saveHistoryState('Load Map JSON', { includeRouteDefinitions: true });
     hexStates.clear();
 
     if (parsedData.hexStates) {
@@ -1989,7 +1993,11 @@ function _applyXmlRoutesForGroup(segments, slotNum, sectorX, sectorY, targetRout
 // ── Auto route assigner ───────────────────────────────────────────────────────
 
 function _autoAssignXmlRoutes(groups, slotNum) {
-    saveHistoryState('Import XML Metadata');
+    // includeRouteDefinitions, because this function edits the definitions and
+    // not just the segments: ensureFreeRouteSlot() creates slots, and each group
+    // recolours and may rename the slot it lands in. Without it Ctrl+Z took the
+    // segments back but left the created, recoloured and renamed slots behind.
+    saveHistoryState('Import XML Metadata', { includeRouteDefinitions: true });
     const coordLookup = _buildSectorCoordLookup();
     const sectorX     = (slotNum - 1) % gridWidth;
     const sectorY     = Math.floor((slotNum - 1) / gridWidth);

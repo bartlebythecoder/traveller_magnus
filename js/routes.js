@@ -148,7 +148,7 @@ function _ufBuild(routes) {
 // the sector — an O(worlds) scan inside an O(worlds) loop. Invisible on one
 // sector (~1,300 worlds, 0.1s for a long route); crippling on an OTU import
 // (~16,000 worlds, 25s of frozen browser for the same route, measured
-// 2026-08-19 — see directives/route_forcing_spec.md §9).
+// 2026-08-19 — see directives/route_partial_spec.md §9).
 //
 // Worlds are bucketed by position so a neighbour lookup costs the size of the
 // neighbourhood instead of the size of the sector.
@@ -222,12 +222,33 @@ function _indexNeighbours(index, q, r, maxJump) {
 // endId through any populated world. Returns an array of hex IDs forming
 // the path (inclusive of start and end), or null if unreachable.
 
-function _bfsPath(startId, endId, worlds, maxJump, worldById) {
+function _bfsPath(startId, endId, worlds, maxJump, worldById, outBest) {
     const index = _getWorldIndex(worlds, maxJump);
     const queue = [startId];
     let head = 0;                                  // index cursor, not shift()
     const visited = new Set([startId]);
     const parent = new Map();
+
+    // ── Best-effort tracking (optional) ──────────────────────────────────────
+    // When the caller supplies `outBest`, an exhausted search reports the
+    // reachable world CLOSEST to the target instead of only saying "no". That is
+    // what lets Point-to-Point draw the route as far as it actually got and name
+    // the world to bridge from.
+    //
+    // Everything here is behind `if (target)`. The other callers — Custom
+    // Network, and BTN which calls this once per qualifying world pair — pass
+    // nothing and pay nothing, not even the per-node distance measurement.
+    //
+    // bestDist starts at the START's own distance to the target and only
+    // strictly-closer nodes are accepted, so a "partial route" always represents
+    // progress. If nothing reachable is closer than where we began, the start is
+    // already the best bridging point and there is no partial worth drawing.
+    const target = outBest ? worldById.get(endId)   : null;
+    const origin = outBest ? worldById.get(startId) : null;
+    let bestDist = (target && origin)
+        ? getHexDistance(origin.q, origin.r, target.q, target.r)
+        : -1;
+    let bestId = null;
 
     while (head < queue.length) {
         const currentId = queue[head++];
@@ -248,8 +269,30 @@ function _bfsPath(startId, endId, worlds, maxJump, worldById) {
                 parent.set(w.id, currentId);
                 visited.add(w.id);
                 queue.push(w.id);
+
+                if (target) {
+                    // Strictly-closer only. BFS dequeues in nondecreasing hop
+                    // order and _indexNeighbours returns world-array order, so
+                    // the first node accepted at a given distance is the one
+                    // with the fewest hops, then the earliest in the world
+                    // array — the same tie-break discipline that makes this
+                    // search's output reproducible.
+                    const d = getHexDistance(w.q, w.r, target.q, target.r);
+                    if (d < bestDist) { bestDist = d; bestId = w.id; }
+                }
             }
         }
+    }
+
+    if (outBest && bestId) {
+        const path = [bestId];
+        let step = parent.get(bestId);
+        while (step !== undefined) { path.push(step); step = parent.get(step); }
+        path.reverse();
+        outBest.id       = bestId;
+        outBest.distance = bestDist;
+        outBest.path     = path;
+        outBest.hops     = path.length - 1;
     }
     return null;
 }
@@ -299,7 +342,7 @@ function _getEmptyList(emptyById) {
 // emptyById: Map<hexId, {id,q,r}> of candidate empty hexes.
 // maxEmptyJumps: max consecutive empty hops before a system is required.
 
-function _bfsPathWithEmpty(startId, endId, worlds, maxJump, worldById, emptyById, maxEmptyJumps) {
+function _bfsPathWithEmpty(startId, endId, worlds, maxJump, worldById, emptyById, maxEmptyJumps, outBest) {
     const worldIndex = _getWorldIndex(worlds, maxJump);
     // emptyById is a Map; the index needs positional order, and Map iteration
     // order is insertion order, so this array matches the old `for...of` exactly.
@@ -321,6 +364,18 @@ function _bfsPathWithEmpty(startId, endId, worlds, maxJump, worldById, emptyById
         return path.reverse();
     };
 
+    // Best-effort tracking — see the long note in _bfsPath. One difference:
+    // the candidate must be a WORLD, never an empty hex, even though this search
+    // is allowed to travel through empty hexes. The point of reporting it is to
+    // hand the user somewhere to bridge from, and a route that stops in deep
+    // space is a jump to nowhere. Only the system-neighbour loop below tracks.
+    const target = outBest ? (worldById.get(endId) || emptyById.get(endId)) : null;
+    const origin = outBest ? (worldById.get(startId) || emptyById.get(startId)) : null;
+    let bestDist = (target && origin)
+        ? getHexDistance(origin.q, origin.r, target.q, target.r)
+        : -1;
+    let bestId = null;
+
     while (head < queue.length) {
         const { id: currentId, streak } = queue[head++];
         const current = worldById.get(currentId) || emptyById.get(currentId);
@@ -338,6 +393,11 @@ function _bfsPathWithEmpty(startId, endId, worlds, maxJump, worldById, emptyById
             if (w.id === endId) return rebuild(w.id, 0);
             visited.add(vKey);
             queue.push({ id: w.id, streak: 0 });
+
+            if (target) {
+                const d = getHexDistance(w.q, w.r, target.q, target.r);
+                if (d < bestDist) { bestDist = d; bestId = w.id; }
+            }
         }
 
         // Empty hex neighbors — only if the streak budget allows another empty hop
@@ -360,6 +420,16 @@ function _bfsPathWithEmpty(startId, endId, worlds, maxJump, worldById, emptyById
                 queue.push({ id: e.id, streak: newStreak });
             }
         }
+    }
+
+    if (outBest && bestId) {
+        // Worlds are always reached at streak 0 — landing on a system resets the
+        // consecutive-empty budget — so that is the key the path rebuilds from.
+        const path = rebuild(bestId, 0);
+        outBest.id       = bestId;
+        outBest.distance = bestDist;
+        outBest.path     = path;
+        outBest.hops     = path.length - 1;
     }
     return null;
 }
@@ -641,18 +711,27 @@ function clearAutoRouteGroup(groupId) {
  * @param {string[]} filteredHexIds - Hex IDs allowed as BFS traversal nodes (filteredOnly mode).
  * @param {number|null} routeIdOverride - If set, overrides computed routeId on all segments.
  * @param {string[]} waypointIds    - Ordered mandatory intermediate stops (default empty).
- * @returns {{ segments: number|null, failure: Object|null }}
- *          On success, segments is the total added and failure is null.
+ * @param {boolean}  allowPartial   - When a leg cannot be routed, commit the route as
+ *              far as the search actually reached instead of failing outright. Stops at
+ *              the FIRST shortfall, so the route stays one unbroken chain. Default off,
+ *              which leaves today's behaviour untouched.
+ * @returns {{ segments: number|null, failure: Object|null, shortfall: Object|null }}
+ *          On success, segments is the total added and failure is null. `shortfall` is
+ *          non-null when allowPartial saved a route that never reached its End:
+ *            { legIndex, total, fromId, targetId, reachedId, distance, finalStop }
  *          On failure, segments is null and failure names what went wrong:
  *            { kind: 'stop', stopId }                        — that stop cannot be
  *              used at all: it is neither vacant space nor a system with data.
- *            { kind: 'leg', index, total, fromId, toId }     — that one leg has no
- *              path (index is 1-based).
+ *            { kind: 'leg', index, total, fromId, toId, reachedId, shortfallDistance }
+ *              — that one leg has no path (index is 1-based). reachedId names the
+ *              closest world the search could actually reach, so the message can say
+ *              how far it got even when allowPartial is off; it is null when nothing
+ *              reachable was closer than the leg's own start.
  *          The caller needs this to say where the problem is: naming the route's
  *          own Start and End is actively misleading on a long route, since those
  *          two stops are usually the ones that were fine.
  */
-function generatePointToPointRoute(startId, endId, maxJump, color, groupId, name, filteredOnly = false, filteredHexIds = [], routeIdOverride = null, waypointIds = [], allowEmptyHexes = false, maxEmptyJumps = 1) {
+function generatePointToPointRoute(startId, endId, maxJump, color, groupId, name, filteredOnly = false, filteredHexIds = [], routeIdOverride = null, waypointIds = [], allowEmptyHexes = false, maxEmptyJumps = 1, allowPartial = false) {
     if (!window.sectorRoutes) window.sectorRoutes = [];
 
     const filteredSet = new Set(filteredHexIds);
@@ -695,7 +774,7 @@ function generatePointToPointRoute(startId, endId, maxJump, color, groupId, name
     // check and still fail here: a hex marked SYSTEM_PRESENT that carries no
     // edition data is a world by type but has nothing to route through.
     for (const stopId of allStops) {
-        if (!worldById.has(stopId)) return { segments: null, failure: { kind: 'stop', stopId } };
+        if (!worldById.has(stopId)) return { segments: null, shortfall: null, failure: { kind: 'stop', stopId } };
     }
 
     // Pre-build empty hex candidates if the option is enabled
@@ -718,17 +797,50 @@ function generatePointToPointRoute(startId, endId, maxJump, color, groupId, name
     // thing. Deleting a waypoint is exactly what stretches a leg past maxJump,
     // so editing a route was the common way to hit it.
     const legs = [];
+    let shortfall = null;
     for (let i = 0; i < stops.length - 1; i++) {
+        // `best` is filled in only when the search exhausts. It is requested on
+        // EVERY run, not just when allowPartial is on, because the strict
+        // failure message names how far the route got too — knowing the closest
+        // world it could reach is most of what the user needs in order to fix
+        // the route, and it costs one distance measurement per visited node.
+        const best = {};
         const path = allowEmptyHexes
-            ? _bfsPathWithEmpty(stops[i], stops[i + 1], worlds, maxJump, worldById, emptyById, maxEmptyJumps)
-            : _bfsPath(stops[i], stops[i + 1], worlds, maxJump, worldById);
+            ? _bfsPathWithEmpty(stops[i], stops[i + 1], worlds, maxJump, worldById, emptyById, maxEmptyJumps, best)
+            : _bfsPath(stops[i], stops[i + 1], worlds, maxJump, worldById, best);
+
         if (!path) {
-            return { segments: null, failure: {
+            const gotSomewhere = !!best.id && !!best.path && best.path.length >= 2;
+
+            // Stop at the first shortfall rather than skipping to the next leg.
+            // The route therefore stays a single unbroken chain, which is what
+            // keeps getRouteSystemList able to list it in travel order — a
+            // gapped route is two chains, four dead ends, and it silently falls
+            // back to listing worlds alphabetically.
+            if (allowPartial && gotSomewhere) {
+                legs.push(best.path);
+                shortfall = {
+                    legIndex:   i + 1,
+                    total:      stops.length - 1,
+                    fromId:     stops[i],
+                    targetId:   stops[i + 1],
+                    reachedId:  best.id,
+                    distance:   best.distance,
+                    finalStop:  i + 1 === stops.length - 1
+                };
+                break;
+            }
+
+            return { segments: null, shortfall: null, failure: {
                 kind:  'leg',
                 index: i + 1,
                 total: stops.length - 1,
                 fromId: stops[i],
-                toId:   stops[i + 1]
+                toId:   stops[i + 1],
+                // Null when the search could get no closer than its own start —
+                // there is then no useful world to name and nothing to bridge from.
+                reachedId:         gotSomewhere ? best.id       : null,
+                shortfallDistance: gotSomewhere ? best.distance : null
             } };
         }
         legs.push(path);
@@ -743,9 +855,59 @@ function generatePointToPointRoute(startId, endId, maxJump, color, groupId, name
     }
 
     const legDesc = waypointIds.length > 0 ? `, ${stops.length - 1} leg(s)` : '';
-    console.log(`Point-to-Point "${name}" (Jump-${maxJump}): ${totalSegments} segment(s) from ${startId} to ${endId}${legDesc}.`);
-    return { segments: totalSegments, failure: null };
+    const shortDesc = shortfall ? ` — STOPPED SHORT at ${shortfall.reachedId}, ${shortfall.distance} hex(es) from ${shortfall.targetId}` : '';
+    console.log(`Point-to-Point "${name}" (Jump-${maxJump}): ${totalSegments} segment(s) from ${startId} to ${endId}${legDesc}${shortDesc}.`);
+    return { segments: totalSegments, failure: null, shortfall };
 }
+
+/**
+ * The live shortfall for a route slot, or null.
+ *
+ * A shortfall is recorded on the slot's automationRef when a Point-to-Point run
+ * with "Build as far as possible" could not reach a stop and kept the route as
+ * far as it got. It describes THAT GENERATION, so it can go stale the moment the
+ * segments are edited by hand — which is why every reader goes through here
+ * rather than trusting the stored object.
+ *
+ * The mark asserts exactly one thing: THE ROUTE STOPS HERE. So the test is not
+ * "is that world still on the route" but "is it still an END of it" — which is
+ * what the degree count below is for. Three ways the assertion goes false:
+ *
+ *   • degree 0 — the world is no longer on the route at all.
+ *   • degree > 1 — the route now runs THROUGH it. The user has extended the
+ *     route past where it originally gave up, so it demonstrably does not stop
+ *     there any more. Extending the other end instead leaves the degree at 1,
+ *     and the mark correctly stays.
+ *   • the stop it says could NOT be reached is now on the route — the user has
+ *     bridged all the way to it.
+ *
+ * Any of those and the mark is out of date; showing it would be worse than
+ * showing nothing. There is deliberately no way to dismiss a mark that is still
+ * true: keeping it purely derived means it never has to be maintained,
+ * invalidated, or saved, and if a ring is on screen the route really does end
+ * there.
+ *
+ * Lives here rather than in ui_menus.js because renderer.js needs it too, and
+ * routes.js is the file both of them already depend on for route semantics.
+ */
+function getRouteShortfall(routeId) {
+    const def = (window.routeDefinitions || []).find(d => d.id === routeId);
+    const sf  = def && def.automationRef && def.automationRef.params
+              && def.automationRef.params.shortfall;
+    if (!sf || !sf.reachedId) return null;
+
+    const segs = (window.sectorRoutes || []).filter(r => r.routeId === routeId);
+    if (segs.length === 0) return null;
+
+    const degree = new Map();
+    const bump = id => degree.set(id, (degree.get(id) || 0) + 1);
+    for (const seg of segs) { bump(seg.startId); bump(seg.endId); }
+
+    if ((degree.get(sf.reachedId) || 0) !== 1) return null;
+    if (degree.has(sf.targetId))               return null;
+    return sf;
+}
+window.getRouteShortfall = getRouteShortfall;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BTN (Basic Trade Number) Route Generation

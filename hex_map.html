@@ -299,6 +299,68 @@
             font-size: 0.8rem;
         }
         .route-save-btn:hover, .route-load-btn:hover { color: #66fcf1 !important; }
+        /* WP5, legibility. The row carries three file-shaped icons and adding a
+           fourth control made them indistinguishable at a glance. The CSV export
+           is the one whose shape misdescribes it — it exports the WORLDS a route
+           passes through, not the route — so it becomes a word, leaving the two
+           icons that really are route files paired together in .route-file-cell. */
+        .route-csv-btn {
+            background: #1a1a2e;
+            border: 1px solid #45a29e;
+            color: #45a29e;
+            padding: 1px 5px;
+            font-size: 0.66rem;
+            letter-spacing: 0.04em;
+            border-radius: 3px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .route-csv-btn:hover:not(:disabled) { background: #0d2a2a; color: #66fcf1; border-color: #66fcf1; }
+        .route-csv-btn:disabled { opacity: 0.3; cursor: default; }
+        .route-combine-btn { flex-shrink: 0; font-size: 0.8rem; cursor: pointer; }
+        .route-combine-btn:hover:not(.disabled) { color: #66fcf1 !important; }
+        .route-combine-btn.disabled { opacity: 0.3; cursor: default; }
+
+        /* Portalled to <body>, never left inside #route-window: backdrop-filter on
+           .draggable-palette makes it the containing block for position:fixed
+           children and its overflow:hidden then clips them. That trap cost most of
+           v0.17.2 item 1. */
+        #route-combine-picker {
+            position: fixed;
+            z-index: 100000;
+            min-width: 240px;
+            max-width: 340px;
+            background: #0d1117;
+            border: 1px solid #45a29e;
+            border-radius: 4px;
+            box-shadow: 0 6px 22px rgba(0,0,0,0.75);
+            font-family: 'Share Tech Mono', 'Courier New', monospace;
+            font-size: 0.78rem;
+            color: #c5c6c7;
+            overflow: hidden;
+        }
+        #route-combine-picker .rcp-head {
+            padding: 6px 10px;
+            border-bottom: 1px solid #2a3a3a;
+            color: #66fcf1;
+            font-size: 0.72rem;
+        }
+        #route-combine-picker .rcp-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #161b22;
+        }
+        #route-combine-picker .rcp-item:last-child { border-bottom: none; }
+        #route-combine-picker .rcp-item:hover { background: #14212a; }
+        #route-combine-picker .rcp-swatch {
+            width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0;
+            border: 1px solid rgba(255,255,255,0.25);
+        }
+        #route-combine-picker .rcp-name { color: #c5c6c7; }
+        #route-combine-picker .rcp-meta { margin-left: auto; color: #7b8a8a; font-size: 0.68rem; }
         .route-seg-count {
             font-size: 0.7rem;
             min-width: 28px;
@@ -882,9 +944,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above<br> So Below</span></h1>
-            <div class="splash-banner">Partial Point to Point Routes</div>
+            <div class="splash-banner">Continue and Combine Routes</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.17.3</div>
+            <div class="splash-version">v0.17.4</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -1367,7 +1429,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.17.3</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.17.4</span>
             </p>
         </div>
 
@@ -2874,6 +2936,17 @@
                                 <input type="checkbox" id="route-auto-p2p-allow-partial"> Build as far as possible
                             </label>
                         </div>
+                        <!-- Build as far as possible changes what happens when a route
+                             CANNOT be built; this changes what Generate does to the route
+                             already in the slot. Deliberately NOT persisted with the route
+                             (unlike the box above): it modifies one press rather than
+                             describing how the route should be built, and left silently
+                             ticked it would append when the user expected a rebuild. -->
+                        <div class="route-auto-param">
+                            <label id="route-auto-p2p-continue-label">
+                                <input type="checkbox" id="route-auto-p2p-continue"> Continue existing route
+                            </label>
+                        </div>
                         <div id="route-auto-filter-summary-p2p" class="route-auto-filter-summary"></div>
                     </div>
                 </div>
@@ -2958,6 +3031,12 @@
     </div>
 
     <!-- Toast Notifications -->
+    <!-- Always-visible notice that worlds are being hidden. Lives directly in
+         <body>, never inside a .draggable-palette: backdrop-filter on those makes
+         them the containing block for position:fixed children, which displaces and
+         then clips them (see the v0.17.2 autocomplete fix). -->
+    <div id="filter-active-indicator" style="display:none;" title="Open the Filter Manager"></div>
+
     <div id="toast-container"></div>
 
 

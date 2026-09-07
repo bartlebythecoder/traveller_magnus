@@ -1224,36 +1224,23 @@ function getRouteSystemList(routeId) {
     const isP2P = segments[0].subtype === 'PointToPoint';
 
     if (isP2P) {
-        // Build adjacency map from segments
-        const adj = new Map();
-        segments.forEach(seg => {
-            if (!adj.has(seg.startId)) adj.set(seg.startId, []);
-            if (!adj.has(seg.endId))   adj.set(seg.endId,   []);
-            adj.get(seg.startId).push(seg.endId);
-            adj.get(seg.endId).push(seg.startId);
-        });
+        // walkRouteChain (js/routes.js) — the single definition of "is this one
+        // unbroken chain", shared with Continue and Combine so the three cannot
+        // drift apart.
+        //
+        // It is also STRICTER than the walk that used to live here, which tested
+        // only for exactly two degree-1 nodes. A chain plus a separate closed
+        // loop passes that test — the loop contributes no ends — and the walk
+        // then stopped at the end of the chain and returned ordered:true while
+        // silently omitting every world in the loop. Measured 2026-09-01: 3 of 6
+        // worlds listed, here and in the CSV export alike. walkRouteChain checks
+        // coverage and rejects it, so such a route now lists unordered — every
+        // world present — instead of ordered and incomplete.
+        const walk = walkRouteChain(segments);
+        if (walk.ok) return { ordered: true, worlds: walk.path };
 
-        // Endpoints are nodes with exactly one neighbour (degree 1)
-        const endpoints = [...adj.keys()].filter(id => adj.get(id).length === 1);
-
-        // Guard: if not a clean chain, fall back to unordered
-        if (endpoints.length !== 2) {
-            const allIds = [...new Set(segments.flatMap(s => [s.startId, s.endId]))];
-            return { ordered: false, worlds: allIds };
-        }
-
-        // Walk the chain from one endpoint to the other
-        const path = [endpoints[0]];
-        const visited = new Set([endpoints[0]]);
-        let current = endpoints[0];
-        while (true) {
-            const next = (adj.get(current) || []).find(n => !visited.has(n));
-            if (!next) break;
-            path.push(next);
-            visited.add(next);
-            current = next;
-        }
-        return { ordered: true, worlds: path };
+        const allIds = [...new Set(segments.flatMap(s => [s.startId, s.endId]))];
+        return { ordered: false, worlds: allIds };
     }
 
     // Network / XBoat / AutoRoute — collect unique IDs, sort by world name
@@ -2145,6 +2132,95 @@ function renumberWaypoints() {
     });
 }
 
+// ── Continue mode (route_extend_spec.md §4) ──────────────────────────────────
+// Ticking "Continue existing route" changes what the Start/End/waypoint fields
+// MEAN, so it has to change what they contain: the panel otherwise shows the
+// stops of the route as it already is, while Generate would try to add them to
+// itself. Unticking must put the form back exactly, so trying the box costs
+// nothing.
+let _continueStash = null;
+
+/**
+ * The stored P2P setup for a slot, or null. Used to orient the chain walk so
+ * "the far end" means the end away from the route's own Start rather than
+ * whichever end adjacency order happened to produce.
+ */
+function _storedP2pParams(routeId) {
+    const def = (window.routeDefinitions || []).find(d => d.id === routeId);
+    const ref = def && def.automationRef;
+    return (ref && ref.type === 'p2p' && ref.params) ? ref.params : null;
+}
+
+function _applyContinueMode(on) {
+    const startEl = document.getElementById('route-auto-p2p-start');
+    const endEl   = document.getElementById('route-auto-p2p-end');
+    const wpList  = document.getElementById('route-auto-p2p-waypoints-list');
+    const panel   = document.getElementById('route-auto-panel');
+    if (!startEl || !endEl || !wpList || !panel) return;
+    const routeId = parseInt(panel.dataset.targetRouteId, 10);
+
+    if (on) {
+        _continueStash = {
+            start:     startEl.value,
+            end:       endEl.value,
+            waypoints: collectWaypointRaws()
+        };
+        const stored = _storedP2pParams(routeId);
+        const chain  = getRouteChain(routeId, stored ? stored.startId : undefined);
+        // Pre-fill the far end — the end away from the route's Start. On a route
+        // that stopped short this is C, the ringed world, which is exactly the
+        // world to bridge from. The field stays editable so the other end can be
+        // typed instead and the route extended backwards.
+        startEl.value = chain.ok ? formatWorldLabel(chain.path[chain.path.length - 1]) : '';
+        endEl.value   = '';
+        wpList.innerHTML = '';
+    } else if (_continueStash) {
+        startEl.value = _continueStash.start;
+        endEl.value   = _continueStash.end;
+        wpList.innerHTML = '';
+        // doFocus=false — restoring rows must not fight for focus or scroll.
+        _continueStash.waypoints.forEach(v => addWaypointRow(v, false));
+        _continueStash = null;
+    }
+    refreshStopFieldStyles();
+}
+
+/**
+ * Resets the Continue box to off and sets whether it can be used at all.
+ *
+ * Off on every open is deliberate (spec C6): the box modifies one press, and a
+ * remembered tick would silently append where the user expected a rebuild.
+ */
+function _syncContinueControl(routeId) {
+    const cb = document.getElementById('route-auto-p2p-continue');
+    if (!cb) return;
+    const label = document.getElementById('route-auto-p2p-continue-label');
+
+    cb.checked = false;
+    _continueStash = null;
+
+    const segCount = (window.sectorRoutes || []).filter(r => r.routeId === routeId).length;
+    const chain = getRouteChain(routeId);
+    cb.disabled = !chain.ok;
+
+    let title;
+    if (segCount === 0) {
+        title = 'This route has no segments yet, so there is nothing to continue. ' +
+                'Generate one first.';
+    } else if (!chain.ok) {
+        title = chain.reason === 'cycle'
+            ? 'This route forms a closed loop, so it has no end to continue from.'
+            : 'This route is not one unbroken line, so it has no single end to continue ' +
+              'from. Continue works on routes that run from one world to another.';
+    } else {
+        title = `Add to this route instead of replacing it. Generate will append to it, ` +
+                `starting from ${formatWorldLabel(chain.ends[0])} or ` +
+                `${formatWorldLabel(chain.ends[1])}. The rest of the route is left alone.`;
+    }
+    if (label) label.title = title;
+    if (label) label.style.opacity = cb.disabled ? '0.45' : '';
+}
+
 function collectWaypointRaws() {
     return Array.from(document.querySelectorAll('#route-auto-p2p-waypoints-list .p2p-waypoint-input'))
         .map(inp => inp.value.trim())
@@ -2325,21 +2401,31 @@ function _p2pFailureMessage(outcome, maxJump, allowPartial) {
  *          holds the restored route again and is indistinguishable from a
  *          successful run.
  */
-function _generateIntoSlot(actionName, routeId, generate) {
+function _generateIntoSlot(actionName, routeId, generate, opts = {}) {
     // A shallow copy is enough: generation pushes to and splices this array but
     // never mutates the segment objects inside it, so anything evicted along
     // the way survives in the snapshot.
     const routesBefore = (window.sectorRoutes || []).slice();
     const redoBefore   = window.redoStack;
+    const countBefore  = routesBefore.filter(r => r.routeId === routeId).length;
 
     saveHistoryState(actionName);
-    window.sectorRoutes = (window.sectorRoutes || []).filter(r => r.routeId !== routeId);
+    // opts.append — Continue adds to the route already in the slot, so the one
+    // destructive step every generator otherwise takes is skipped. Everything
+    // else, including the restore-on-failure below, is unchanged: a continuation
+    // that finds nothing must cost the user nothing.
+    if (!opts.append) {
+        window.sectorRoutes = (window.sectorRoutes || []).filter(r => r.routeId !== routeId);
+    }
 
     let result;
     let produced = false;
     try {
         result = generate();
-        produced = (window.sectorRoutes || []).some(r => r.routeId === routeId);
+        const countAfter = (window.sectorRoutes || []).filter(r => r.routeId === routeId).length;
+        // In append mode the slot already held segments, so "did anything land"
+        // has to be measured as growth rather than as presence.
+        produced = opts.append ? (countAfter > countBefore) : (countAfter > 0);
     } finally {
         if (!produced) {
             window.sectorRoutes = routesBefore;
@@ -2449,7 +2535,8 @@ function setupRouteWindow() {
                            maxJump:         parseInt(document.getElementById('route-auto-p2p-jump').value, 10),
                            allowEmptyHexes: document.getElementById('route-auto-p2p-allow-empty')?.checked || false,
                            maxEmptyJumps:   parseInt(document.getElementById('route-auto-p2p-max-empty')?.value || '1', 10),
-                           allowPartial:    document.getElementById('route-auto-p2p-allow-partial')?.checked || false },
+                           allowPartial:    document.getElementById('route-auto-p2p-allow-partial')?.checked || false,
+                           continueExisting: document.getElementById('route-auto-p2p-continue')?.checked || false },
                 network: { maxJump:         parseInt(document.getElementById('route-auto-network-jump').value, 10),
                            maxRange:        parseInt(document.getElementById('route-auto-network-range').value, 10),
                            filterRules:     window.activeFilterRules || [],
@@ -2510,7 +2597,7 @@ function setupRouteWindow() {
             }
 
             if (type === 'p2p') {
-                const { startRaw, endRaw, maxJump, allowEmptyHexes: p2pAllowEmpty, maxEmptyJumps: p2pMaxEmpty, allowPartial: p2pAllowPartial } = configs.p2p;
+                const { startRaw, endRaw, maxJump, allowEmptyHexes: p2pAllowEmpty, maxEmptyJumps: p2pMaxEmpty, allowPartial: p2pAllowPartial, continueExisting: p2pContinue } = configs.p2p;
                 const startId = resolveWorldInput(startRaw);
                 const endId   = resolveWorldInput(endRaw);
                 if (!startRaw.trim() || !endRaw.trim()) {
@@ -2544,6 +2631,120 @@ function setupRouteWindow() {
 
                 const filteredIds = getFilteredHexIds();
                 const groupId = `p2p_${routeId}`;
+
+                // ── Continue: add to the route rather than replace it ─────────
+                if (p2pContinue) {
+                    const stored = _storedP2pParams(routeId);
+                    const chain  = getRouteChain(routeId, stored ? stored.startId : undefined);
+                    if (!chain.ok) {
+                        showToast(`"${routeName}" is not one unbroken route, so there is no end `
+                                + `to continue from. Nothing was changed.`, 4000);
+                        return;
+                    }
+                    // The Start must be an END of the route. Joining anywhere else
+                    // gives a branch, and a route with three ends silently loses
+                    // travel order everywhere it is shown.
+                    if (chain.ends.indexOf(startId) === -1) {
+                        showToast(`${formatWorldLabel(startId)} is not an end of "${routeName}". `
+                                + `Continue from ${formatWorldLabel(chain.ends[0])} or `
+                                + `${formatWorldLabel(chain.ends[1])}. Nothing was changed.`, 6000);
+                        return;
+                    }
+
+                    const contRun = _generateIntoSlot(`Continue: ${routeName}`, routeId,
+                        () => generatePointToPointRoute(startId, endId, maxJump, routeDef.color, groupId, routeName, true, filteredIds, routeId, waypointIds, p2pAllowEmpty, p2pMaxEmpty, p2pAllowPartial),
+                        { append: true });
+
+                    if (!contRun.produced) {
+                        const failMsg = _p2pFailureMessage(contRun.result, maxJump, p2pAllowPartial);
+                        showToast(failMsg, failMsg.length > 180 ? 12000 : 9000);
+                        return;
+                    }
+
+                    const added = contRun.result.segments;
+
+                    // Travel order is gated on segments[0].subtype — the first
+                    // segment IN THE ARRAY — so a route assembled from a generated
+                    // part and a hand-drawn or imported one would list in travel
+                    // order or alphabetically depending on nothing but array
+                    // position. Stamp it, but only when the result really is a
+                    // chain. See route_extend_spec.md §6.
+                    stampRouteSubtype(routeId);
+                    const merged = getRouteChain(routeId, chain.path[0]);
+
+                    // Accumulate the saved setup so it still describes the WHOLE
+                    // route: reopening the panel shows every stop, and a later
+                    // plain Generate rebuilds all of it rather than just this leg.
+                    if (stored) {
+                        const oldWps = Array.isArray(stored.waypointIds) ? stored.waypointIds.slice() : [];
+                        const extendedFarEnd = (startId === chain.path[chain.path.length - 1]);
+                        const acc = extendedFarEnd
+                            // Forward: the end we grew from becomes a waypoint and
+                            // the new target becomes the End. On a route that
+                            // stopped short this is also what drops the stop it
+                            // never reached — the user is steering now.
+                            ? { startId: stored.startId,
+                                endId:   endId,
+                                waypointIds: oldWps.concat([startId], waypointIds) }
+                            // Backward: mirror image. The new target becomes the
+                            // Start and the old Start slides into the waypoints,
+                            // which are held in travel order, hence the reverse.
+                            : { startId: endId,
+                                endId:   stored.endId,
+                                waypointIds: waypointIds.slice().reverse().concat([startId], oldWps) };
+
+                        _saveAutomationConfig(routeId, 'p2p', {
+                            startId:         acc.startId,
+                            endId:           acc.endId,
+                            waypointIds:     acc.waypointIds,
+                            maxJump,
+                            allowEmptyHexes: p2pAllowEmpty,
+                            maxEmptyJumps:   p2pMaxEmpty,
+                            allowPartial:    p2pAllowPartial,
+                            // A new shortfall wins; otherwise KEEP the old one.
+                            // Overwriting it with null would silently drop the ring
+                            // from a route that still stops short, since extending
+                            // one end does not reach the stop the other end missed.
+                            // getRouteShortfall's degree guard decides whether it is
+                            // still true, so keeping it is safe.
+                            shortfall: contRun.result.shortfall || stored.shortfall || null
+                        });
+                    }
+                    // No stored setup (imported, loaded from a route file, or drawn
+                    // by hand): deliberately none is invented. Such a route's real
+                    // STOPS are unknown — only the path it happens to take — so a
+                    // manufactured setup would either be empty, letting a later
+                    // plain Generate silently replace the route with a direct line,
+                    // or would list every intermediate world as a waypoint. Continue
+                    // keeps working regardless: the chain is walked fresh from the
+                    // segments every time. See route_extend_spec.md OQ-4.
+
+                    if (window.dbManager) window.dbManager.saveRoutes();
+                    requestAnimationFrame(draw);
+                    window.closeRouteAutoPanel();
+                    window.refreshRouteWindowCounts();
+
+                    const sf = contRun.result.shortfall;
+                    if (sf) {
+                        const hexes = sf.distance === 1 ? '1 hex' : `${sf.distance} hexes`;
+                        showToast(`"${routeName}": ${added} segment(s) added, but stopped short at `
+                                + `${formatWorldLabel(sf.reachedId)} — ${hexes} from `
+                                + `${formatWorldLabel(sf.targetId)}, which could not be reached.`, 9000);
+                    } else if (!merged.ok) {
+                        // Committed on purpose: the segments are real and draw
+                        // correctly. What is lost is ordered listing, so say so
+                        // rather than let the panel quietly go alphabetical.
+                        showToast(`"${routeName}": ${added} segment(s) added, but the new leg rejoins `
+                                + `the route, so it no longer runs end to end — its worlds will be `
+                                + `listed alphabetically rather than in travel order.`, 9000);
+                    } else {
+                        showToast(`"${routeName}": ${added} segment(s) added — the route now runs `
+                                + `${formatWorldLabel(merged.ends[0])} to `
+                                + `${formatWorldLabel(merged.ends[1])}.`, 5000);
+                    }
+                    return;
+                }
+
                 const p2pRun = _generateIntoSlot(`Generate Point-to-Point: ${routeName}`, routeId,
                     () => generatePointToPointRoute(startId, endId, maxJump, routeDef.color, groupId, routeName, true, filteredIds, routeId, waypointIds, p2pAllowEmpty, p2pMaxEmpty, p2pAllowPartial));
                 if (!p2pRun.produced) {
@@ -2654,6 +2855,14 @@ function setupRouteWindow() {
         p2pAllowEmpty.addEventListener('change', () => {
             p2pEmptyOpts.style.display = p2pAllowEmpty.checked ? 'block' : 'none';
         });
+    }
+
+    // Continue mode rewrites the form on tick and restores it on untick.
+    // Attached once at init, like the checkbox above — the panel's markup is
+    // static, so listeners cannot stack.
+    const p2pContinueCb = document.getElementById('route-auto-p2p-continue');
+    if (p2pContinueCb) {
+        p2pContinueCb.addEventListener('change', () => _applyContinueMode(p2pContinueCb.checked));
     }
 
     // Wire world autocomplete to the P2P start/end inputs (runs once at init)
@@ -2794,11 +3003,12 @@ window.renderRouteWindow = function () {
             <input type="text" class="route-shortcut-input" maxlength="1" placeholder="key" value="${def.shortcut || ''}" title="Shortcut key" />
             <i class="fas fa-eye${def.visible ? '' : '-slash'} route-eye-btn" style="color:${def.visible ? '#45a29e' : '#666'};cursor:pointer;font-size:0.8rem;" title="${def.visible ? 'Disable route' : 'Enable route'}"></i>
             <button class="route-clear-btn" title="Remove all map segments for this route">C</button>
-            <i class="fas fa-download route-export-btn" style="color:${segCount > 0 ? '#45a29e' : '#333'};cursor:${segCount > 0 ? 'pointer' : 'default'};font-size:0.8rem;opacity:${segCount > 0 ? '1' : '0.3'};" title="${segCount > 0 ? 'Export systems to CSV' : 'No segments to export'}"></i>
+            <button class="route-csv-btn route-export-btn"${segCount > 0 ? '' : ' disabled'} title="${segCount > 0 ? 'Export the worlds this route passes through, as a spreadsheet' : 'No segments to export'}">CSV</button>
             <span class="route-file-cell">
                 <i class="fas fa-file-export route-save-btn" style="color:${segCount > 0 ? '#45a29e' : '#333'};cursor:${segCount > 0 ? 'pointer' : 'default'};opacity:${segCount > 0 ? '1' : '0.3'};" title="${segCount > 0 ? 'Save this route to a file' : 'No connections to save'}"></i>
                 <i class="fas fa-file-import route-load-btn" style="color:#45a29e;cursor:pointer;" title="Load a route file into '${def.name.replace(/'/g, "&#39;")}'"></i>
             </span>
+            <i class="fas fa-link route-combine-btn" style="color:#45a29e;" title="Combine another route into this one"></i>
             <button class="route-auto-btn" title="Set up automation for ${def.name}">&#9881; Auto</button>
             <i class="fas fa-times route-delete-btn" style="color:#ff4500;cursor:pointer;font-size:0.8rem;" title="Delete route '${def.name.replace(/'/g, "&#39;")}'"></i>
         `;
@@ -2807,6 +3017,14 @@ window.renderRouteWindow = function () {
         const shortIn = row.querySelector('.route-shortcut-input');
         const eyeBtn  = row.querySelector('.route-eye-btn');
         const delBtn  = row.querySelector('.route-delete-btn');
+        const combBtn = row.querySelector('.route-combine-btn');
+        if (combBtn) {
+            combBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (combBtn.classList.contains('disabled')) return;
+                _openCombinePicker(def.id, combBtn);
+            });
+        }
 
         nameIn.addEventListener('change', () => {
             def.name = nameIn.value;
@@ -2948,6 +3166,179 @@ window.closeRouteWindow = function () {
     if (win) win.classList.remove('visible');
 };
 
+// ── Combine (route_extend_spec.md §5) ────────────────────────────────────────
+
+let _combinePickerEl = null;
+
+/**
+ * The picker lives on <body>, not inside #route-window. `.draggable-palette`
+ * carries backdrop-filter, which makes it the containing block for position:fixed
+ * descendants, and its overflow:hidden then clips them — the failure is invisible
+ * (built, display:block, correct contents, painted somewhere off-screen) and it
+ * cost most of v0.17.2 item 1.
+ */
+function _ensureCombinePicker() {
+    if (_combinePickerEl && document.body.contains(_combinePickerEl)) return _combinePickerEl;
+    const el = document.createElement('div');
+    el.id = 'route-combine-picker';
+    el.style.display = 'none';
+    document.body.appendChild(el);
+    _combinePickerEl = el;
+    return el;
+}
+
+function _closeCombinePicker() {
+    if (_combinePickerEl) _combinePickerEl.style.display = 'none';
+}
+
+document.addEventListener('mousedown', (e) => {
+    if (!_combinePickerEl || _combinePickerEl.style.display === 'none') return;
+    if (_combinePickerEl.contains(e.target)) return;
+    if (e.target.closest && e.target.closest('.route-combine-btn')) return;
+    _closeCombinePicker();
+});
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') _closeCombinePicker();
+});
+
+function _openCombinePicker(routeId, anchorEl) {
+    const def = (window.routeDefinitions || []).find(d => d.id === routeId);
+    if (!def) return;
+    const cands = getCombineCandidates(routeId);
+    if (cands.length === 0) {
+        showToast(`No other route meets "${def.name}" end to end, so there is nothing to `
+                + `combine it with.`, 4000);
+        return;
+    }
+
+    const el = _ensureCombinePicker();
+    el.innerHTML = '';
+
+    const head = document.createElement('div');
+    head.className = 'rcp-head';
+    head.textContent = `Combine into "${def.name}"`;
+    el.appendChild(head);
+
+    cands.forEach(c => {
+        const row = document.createElement('div');
+        row.className = 'rcp-item';
+
+        const sw = document.createElement('span');
+        sw.className = 'rcp-swatch';
+        sw.style.background = c.color || '#888';
+        row.appendChild(sw);
+
+        const nm = document.createElement('span');
+        nm.className = 'rcp-name';
+        nm.textContent = c.name;
+        row.appendChild(nm);
+
+        const meta = document.createElement('span');
+        meta.className = 'rcp-meta';
+        meta.textContent = c.sharedIds.length === 1
+            ? `meets at ${formatWorldLabel(c.sharedIds[0])}`
+            : `${c.segCount} segment(s)`;
+        row.appendChild(meta);
+
+        row.title = `${c.segCount} segment(s) will move into "${def.name}".`;
+        row.addEventListener('click', () => {
+            _closeCombinePicker();
+            _combineRoutes(routeId, c);
+        });
+        el.appendChild(row);
+    });
+
+    el.style.display = 'block';
+    const r = anchorEl.getBoundingClientRect();
+    const w = el.offsetWidth || 260;
+    const h = el.offsetHeight || 120;
+    let left = r.left;
+    let top  = r.bottom + 4;
+    if (left + w > window.innerWidth - 8)  left = window.innerWidth - w - 8;
+    if (top  + h > window.innerHeight - 8) top  = Math.max(8, r.top - h - 4);
+    el.style.left = `${Math.max(8, left)}px`;
+    el.style.top  = `${top}px`;
+}
+
+/**
+ * Folds `cand` into `destId`. The destination keeps its name, colour and shortcut;
+ * the absorbed slot is removed (M4).
+ */
+function _combineRoutes(destId, cand) {
+    const defs    = window.routeDefinitions || [];
+    const destDef = defs.find(d => d.id === destId);
+    const srcDef  = defs.find(d => d.id === cand.routeId);
+    if (!destDef || !srcDef) return;
+
+    const all      = window.sectorRoutes || [];
+    const destSegs = all.filter(r => r.routeId === destId);
+    const srcSegs  = all.filter(r => r.routeId === cand.routeId);
+    if (srcSegs.length === 0) return;
+
+    const where = cand.sharedIds.length === 1
+        ? `They meet at ${formatWorldLabel(cand.sharedIds[0])}.`
+        : `They share ${cand.sharedIds.length} worlds.`;
+    const ok = window.confirm(
+        `Combine "${srcDef.name}" into "${destDef.name}"?\n\n` +
+        `${where}\n` +
+        `${srcSegs.length} segment(s) move across, and they take on "${destDef.name}"'s colour.\n` +
+        `"${srcDef.name}" is then removed from the Route Manager.\n\n` +
+        `This can be undone with Ctrl+Z.`
+    );
+    if (!ok) return;
+
+    // includeRouteDefinitions: a definition is being deleted, and without it the
+    // absorbed slot would not come back on undo — the segments would return
+    // belonging to a route that no longer exists.
+    saveHistoryState(`Combine ${srcDef.name} into ${destDef.name}`, { includeRouteDefinitions: true });
+
+    // The same typeMap canvas_input, the XML importer and route-file import all
+    // use. An absorbed segment has to be indistinguishable from one drawn on the
+    // destination, or the renderer draws it on a different layer and the alt-drag
+    // toggle behaves inconsistently.
+    const typeMap = { 1: 'Xboat', 2: 'Trade', 3: 'Secondary' };
+    const type    = typeMap[destId] || 'Filter';
+    const groupId = (destSegs.length && destSegs[0].groupId) ? destSegs[0].groupId : `p2p_${destId}`;
+
+    const key  = seg => [seg.startId, seg.endId].slice().sort().join('|');
+    const have = new Set(destSegs.map(key));
+
+    let moved = 0, duplicates = 0;
+    for (const seg of srcSegs) {
+        if (have.has(key(seg))) { duplicates++; continue; }   // left behind, dropped below
+        seg.routeId = destId;
+        seg.type    = type;
+        if (type === 'Filter') seg.groupId = groupId; else delete seg.groupId;
+        // No colour of its own: the renderer prefers the definition's colour and
+        // only falls back to seg.color, so dropping it is what makes the segment
+        // wear the destination's colour.
+        delete seg.color;
+        have.add(key(seg));
+        moved++;
+    }
+
+    // Anything still carrying the source id is a duplicate of a segment the
+    // destination already had, so this both removes the old slot's segments and
+    // performs the dedupe.
+    window.sectorRoutes = all.filter(r => r.routeId !== cand.routeId);
+
+    stampRouteSubtype(destId);
+    window.routeDefinitions = defs.filter(d => d.id !== cand.routeId);
+
+    if (window.dbManager) { window.dbManager.saveRoutes(); window.dbManager.saveRouteDefinitions(); }
+    window.renderRouteWindow();
+    requestAnimationFrame(draw);
+
+    const merged = getRouteChain(destId);
+    const dupNote = duplicates > 0 ? ` ${duplicates} duplicate segment(s) were not added twice.` : '';
+    if (merged.ok) {
+        showToast(`Combined into "${destDef.name}": ${moved} segment(s) added — the route now runs `
+                + `${formatWorldLabel(merged.ends[0])} to ${formatWorldLabel(merged.ends[1])}.${dupNote}`, 6000);
+    } else {
+        showToast(`Combined into "${destDef.name}": ${moved} segment(s) added.${dupNote}`, 5000);
+    }
+}
+
 window.refreshRouteWindowCounts = function () {
     const win = document.getElementById('route-window');
     if (!win || !win.classList.contains('visible')) return;
@@ -2992,12 +3383,29 @@ window.refreshRouteWindowCounts = function () {
             saveBtn.onclick = count > 0 ? () => exportRouteFile(routeId, routeName) : null;
         }
 
+        // Eligibility depends on the segments in EVERY slot, so it changes whenever
+        // any route does. Setting it only in renderRouteWindow would leave the icon
+        // stale the moment a route was generated.
+        const combBtn2 = row.querySelector('.route-combine-btn');
+        if (combBtn2) {
+            const eligible = count > 0 && getCombineCandidates(routeId).length > 0;
+            combBtn2.classList.toggle('disabled', !eligible);
+            combBtn2.style.color = eligible ? '#45a29e' : '#333';
+            combBtn2.title = eligible
+                ? 'Combine another route into this one'
+                : (count === 0
+                    ? 'This route has no segments to combine into'
+                    : 'No other route meets this one end to end');
+        }
+
         const exportBtn = row.querySelector('.route-export-btn');
         if (exportBtn) {
-            exportBtn.style.color  = count > 0 ? '#45a29e' : '#333';
-            exportBtn.style.cursor = count > 0 ? 'pointer'  : 'default';
-            exportBtn.style.opacity = count > 0 ? '1' : '0.3';
-            exportBtn.title = count > 0 ? 'Export systems to CSV' : 'No segments to export';
+            // A <button> since WP5, so enablement is `disabled` rather than
+            // inline opacity — .route-csv-btn:disabled carries the styling.
+            exportBtn.disabled = count === 0;
+            exportBtn.title = count > 0
+                ? 'Export the worlds this route passes through, as a spreadsheet'
+                : 'No segments to export';
             exportBtn.onclick = count > 0 ? () => openRouteExportModal(routeId, routeName) : null;
         }
     });
@@ -3040,6 +3448,11 @@ window.openRouteAutoPanel = function (routeId, routeName) {
     // resets above so it wins, and takes precedence over the hex-selection
     // prefill — reopening a configured route is for editing it, not restarting.
     _restoreAutomationConfig(routeId);
+
+    // After the restore, so the box is off however the slot was last left (C6),
+    // and its enabled state reflects the segments actually in the slot now.
+    _syncContinueControl(routeId);
+
     refreshStopFieldStyles();
 
     panel.style.display = 'block';

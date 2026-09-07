@@ -117,8 +117,11 @@ function setupSaveLoad() {
         };
 
         // Build hexStates as a plain object (current format, backward compatible)
+        // stripHexViewState (core.js): a saved map must carry map data only. The
+        // filter's per-hex verdict is derived from a form this file cannot contain,
+        // so shipping it would hand whoever opens the file a filter they never set.
         const hexObj = {};
-        hexStates.forEach((value, key) => { hexObj[key] = value; });
+        hexStates.forEach((value, key) => { hexObj[key] = stripHexViewState(value); });
 
         const stateObj = {
             version:              APP_VERSION,
@@ -166,7 +169,8 @@ function setupSaveLoad() {
                 // ---- Chunked save ----
                 const sizeMB     = Math.round(jsonStr.length / (1024 * 1024));
                 const numChunks  = Math.ceil(jsonStr.length / SAVE_CHUNK_SIZE);
-                const entries    = Array.from(hexStates.entries());
+                const entries    = Array.from(hexStates.entries())
+                                        .map(([id, st]) => [id, stripHexViewState(st)]);
                 const perChunk   = Math.ceil(entries.length / numChunks);
 
                 const confirmed = confirm(

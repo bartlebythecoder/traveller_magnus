@@ -25,10 +25,28 @@
     window.addEventListener('DOMContentLoaded', () => {
         setupFilterListeners();
         setupFilterCloseButton();
+        setupFilterIndicator();
         restoreDesignCheckboxes();
         // initDraggable(); // Now handled globally in input_init.js
         initializeDefaultStyleRule();
     });
+
+    /**
+     * Click-through from the filter-active notice to the Filter Manager.
+     */
+    function setupFilterIndicator() {
+        const el = document.getElementById('filter-active-indicator');
+        if (!el) return;
+        el.addEventListener('click', () => {
+            const modal = document.getElementById('filter-modal');
+            // Only open it; clicking the notice must never close the window the
+            // user is about to read.
+            if (modal && !modal.classList.contains('visible') &&
+                typeof window.toggleFilterModal === 'function') {
+                window.toggleFilterModal();
+            }
+        });
+    }
 
     /**
      * Sean Protocol: Dedicated listener for the draggable palette close button.
@@ -165,6 +183,42 @@
         return { match, total };
     }
 
+    /**
+     * The always-visible notice that worlds are being hidden.
+     *
+     * A filtered map looks exactly like a sparse one. That is why a filter could
+     * outlive the form that created it without anyone being able to see why their
+     * worlds were missing — the map simply looked emptier than it should. This
+     * removes the ambiguity: if anything is hidden, it says so, permanently.
+     *
+     * Derived on every call from isHiddenByFilter, never stored, so it cannot go
+     * stale the way the flags themselves did.
+     */
+    window.updateFilterIndicator = function () {
+        const el = document.getElementById('filter-active-indicator');
+        if (!el) return;
+
+        const { match, total } = _filterMatchCounts();
+        const hidden = total - match;
+
+        // Nothing hidden means nothing to say — an indicator that is always on
+        // screen is furniture, and stops being read.
+        if (hidden <= 0) {
+            el.style.display = 'none';
+            return;
+        }
+
+        const suspended = window.filterSuspended === true;
+        el.style.display = 'flex';
+        el.classList.toggle('suspended', suspended);
+        el.textContent = suspended
+            ? `Filter suspended — showing all ${total} worlds · Shift+F to reapply`
+            : `Filter active — showing ${match} of ${total} worlds`;
+        el.title = suspended
+            ? 'The filter is bypassed for viewing. Click to open the Filter Manager.'
+            : `${hidden} world(s) hidden by the current filter. Click to open the Filter Manager.`;
+    };
+
     window.isFilterSuspended = function () {
         return window.filterSuspended === true;
     };
@@ -178,6 +232,7 @@
         window.filterSuspended = false;
         if (typeof draw === 'function') requestAnimationFrame(draw);
         if (typeof window.updateRouteFilterSummary === 'function') window.updateRouteFilterSummary();
+        window.updateFilterIndicator();
         if (announce && typeof showToast === 'function') {
             const { match, total } = _filterMatchCounts();
             showToast(`Filter restored — showing ${match} of ${total} worlds.`, 2200);
@@ -201,6 +256,7 @@
         window.filterSuspended = true;
         if (typeof draw === 'function') requestAnimationFrame(draw);
         if (typeof window.updateRouteFilterSummary === 'function') window.updateRouteFilterSummary();
+        window.updateFilterIndicator();
         if (typeof showToast === 'function') {
             const { total } = _filterMatchCounts();
             showToast(`Filter suspended — showing all ${total} worlds. Shift+F to restore.`, 3000);
@@ -589,6 +645,9 @@
 
         // 5. Refresh Route Manager filter summary if it's open
         if (typeof window.updateRouteFilterSummary === 'function') window.updateRouteFilterSummary();
+
+        // 6. The always-visible "worlds are hidden" notice
+        window.updateFilterIndicator();
     };
 
     /**

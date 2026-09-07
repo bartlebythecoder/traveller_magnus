@@ -2497,7 +2497,7 @@ per-hex bugs, and per-hex resolution is the entire point of the feature.
 | ID | Item | Needs | Blocks |
 |---|---|---|---|
 | **OPEN-1** | **In-app numeric rounding.** 4.9 covered the exporters only. World Details, the system viewer, the surface viewer and menus — roughly 350 sites — still print raw floats, so the app shows `5.980074992877245 M⊕` where the export now shows `5.98`. `ExportCore.fmtNum` is exported and ready to reuse; if wanted in-app it should move to `js/universal_math.js`, which loads before everything that needs it. **Parked deliberately** — Sean wanted to judge the exporter pass first. | Sean's call | nothing |
-| **OPEN-2** | **Release housekeeping for v0.17.0.1.** `changelog.md` still reads `[v0.17.0.1] - In Progress` with six entries. Entry 1 ends "This release stores and edits the setting only — it does not yet change any export", which was true on 08-03 and is now contradicted by entries 2 and 4 in the same section. Reconcile and date it when the release is cut. See 9.1. | a release decision | nothing |
+| ~~**OPEN-2**~~ | **CLOSED 2026-09-01.** Both halves are now resolved. The dating claim was already stale — that entry has read `[v0.17.0.1] - 2026-08-10` since the release was cut. The second claim was real and outlived it: entry 1 still ended "This release stores and edits the setting only — it does not yet change any export", which entries 2 and 4 in the same section flatly contradict. That sentence is now removed from **both** `changelog.md` and `README.md`. | closed | nothing |
 
 **Closed:**
 
@@ -2557,13 +2557,10 @@ per-hex bugs, and per-hex resolution is the entire point of the feature.
 
 - ~~`changelog.md` / `README.md` have an **empty `[v0.17.0] - In Progress` section**.~~
   **DONE 2026-08-01**, and **v0.17.0 was dated 2026-08-03 with five entries.**
-- **`[v0.17.0.1] - In Progress` — OPEN-2 in section 9.** Six entries are written and
-  accurate individually, but entry 1 (the WP4 groundwork) still carries its
-  "does not yet change any export" caveat, which entries 2 and 4 now contradict. It was
-  written when WP4 shipped alone. Fold it into entry 2 or drop the caveat when the release
-  is dated. `APP_VERSION`/`APP_BANNER` (`js/core.js:8-9`) already read `v0.17.0.1`; per
-  `directives/update_version.md` the splash and shortcut-help screens in `hex_map.html`
-  are the other two sites to check.
+- ~~**`[v0.17.0.1] - In Progress` — OPEN-2 in section 9.**~~ **RESOLVED 2026-09-01.** The
+  entry has been dated `2026-08-10` since the release was cut, and entry 1's
+  "does not yet change any export" caveat — contradicted by entries 2 and 4 in the same
+  section — has now been dropped from `changelog.md` and `README.md` alike.
 - ~~`directives/project_manifest.md` is stale — its section 2 "Next Update" still
   describes the v0.16.0 System Editor.~~ **RESOLVED.** Section 2 is now explicitly
   "System Editor — Design Reference (v0.16.x, delivered)", the document was condensed

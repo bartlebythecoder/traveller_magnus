@@ -663,30 +663,15 @@ function generateAutoRoutes(filteredHexIds, maxJump, maxRange, color, groupId, n
     return addedRoutes.length;
 }
 
-/**
- * Returns an array of Auto Route group descriptors for the Clear modal.
- * Each entry: { groupId, name, color, count }
- */
-function getAutoRouteGroups() {
-    if (!window.sectorRoutes) return [];
-    const groups = new Map();
-    window.sectorRoutes.forEach(r => {
-        if (r.type !== 'Filter' || !r.groupId) return;
-        if (!groups.has(r.groupId)) {
-            groups.set(r.groupId, { groupId: r.groupId, name: r.name || r.groupId, color: r.color || '#ffffff', count: 0 });
-        }
-        groups.get(r.groupId).count++;
-    });
-    return Array.from(groups.values());
-}
-
-/**
- * Removes all routes belonging to a specific Auto Route group.
- */
-function clearAutoRouteGroup(groupId) {
-    if (!window.sectorRoutes) return;
-    window.sectorRoutes = window.sectorRoutes.filter(r => r.groupId !== groupId);
-}
+// getAutoRouteGroups() and clearAutoRouteGroup() were removed here on 2026-09-01.
+// Both were dead: the "Clear modal" the first was written to populate no longer
+// exists, and nothing anywhere called either — verified across every .js, .html,
+// .md and .json in the repo, including dynamic-dispatch spellings.
+//
+// The second dead-code removal from this file (see the duplicate
+// ensureFreeRouteSlot, v0.17.2 item 6). Both were the troublesome kind: plausible,
+// well-commented, and adjacent to live code doing a similar job, so a future fix
+// could reasonably have been applied to them and silently had no effect.
 
 // ─────────────────────────────────────────────────────────────────────────────
 /**
@@ -908,6 +893,173 @@ function getRouteShortfall(routeId) {
     return sf;
 }
 window.getRouteShortfall = getRouteShortfall;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CHAIN MACHINERY — shared by Continue and Combine (route_extend_spec.md §7)
+//
+// A Point-to-Point route is only listed in travel order — in the Route Systems
+// panel and in the CSV export — when its segments form ONE unbroken chain. That
+// invariant is what every refusal and warning in those two features protects, so
+// the test for it lives here, once, rather than being restated at each call site.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Walks a set of route segments as a single chain.
+ *
+ * @param {Array}  segments       - route segments ({ startId, endId, … })
+ * @param {string} [preferStartId] - orient the walk to begin here when it is one
+ *        of the two ends. The walk direction is otherwise arbitrary (it depends
+ *        on adjacency insertion order, i.e. on segment array order), which is not
+ *        something callers should have to reason about.
+ * @returns {{ok:boolean, path:string[], ends:string[], reason:string|null}}
+ *        `reason` is 'empty' | 'branch' | 'cycle' | 'disconnected' when !ok.
+ */
+function walkRouteChain(segments, preferStartId) {
+    const fail = reason => ({ ok: false, path: [], ends: [], reason });
+    if (!segments || segments.length === 0) return fail('empty');
+
+    // Adjacency as Sets, not arrays: a duplicated segment must not inflate a
+    // node's degree and turn a legitimate chain into a phantom branch.
+    const adj = new Map();
+    const link = (a, b) => {
+        if (!adj.has(a)) adj.set(a, new Set());
+        adj.get(a).add(b);
+    };
+    for (const seg of segments) {
+        if (!seg || !seg.startId || !seg.endId) continue;
+        if (seg.startId === seg.endId) continue;   // a self-loop links nothing
+        link(seg.startId, seg.endId);
+        link(seg.endId, seg.startId);
+    }
+
+    const nodes = Array.from(adj.keys());
+    if (nodes.length === 0) return fail('empty');
+
+    // A chain has no node of degree > 2 …
+    for (const n of nodes) if (adj.get(n).size > 2) return fail('branch');
+
+    // … and exactly two of degree 1.
+    const ends = nodes.filter(n => adj.get(n).size === 1);
+    if (ends.length === 0)  return fail('cycle');
+    if (ends.length !== 2)  return fail('disconnected');   // 4, 6, … = several chains
+
+    const startFrom = (preferStartId && ends.indexOf(preferStartId) !== -1) ? preferStartId : ends[0];
+    const path = [startFrom];
+    const seen = new Set([startFrom]);
+    let cur = startFrom;
+    for (;;) {
+        let next = null;
+        for (const n of adj.get(cur)) { if (!seen.has(n)) { next = n; break; } }
+        if (next === null) break;
+        path.push(next);
+        seen.add(next);
+        cur = next;
+    }
+
+    // COVERAGE. Two degree-1 nodes is NOT sufficient on its own: a chain plus a
+    // separate closed loop satisfies it, because the loop contributes no ends at
+    // all — and the walk then stops at the end of the chain, silently omitting
+    // every world in the loop.
+    //
+    // This was live in the shipped getRouteSystemList and measured on 2026-09-01:
+    // a 3-world chain plus a 3-world triangle in one slot reported ordered:true
+    // and listed 3 of the 6 worlds, in the panel and the CSV alike.
+    if (path.length !== nodes.length) return fail('disconnected');
+
+    return { ok: true, path, ends: [path[0], path[path.length - 1]], reason: null };
+}
+window.walkRouteChain = walkRouteChain;
+
+/**
+ * walkRouteChain for the segments currently in a route slot.
+ */
+function getRouteChain(routeId, preferStartId) {
+    const segs = (window.sectorRoutes || []).filter(r => r.routeId === routeId);
+    return walkRouteChain(segs, preferStartId);
+}
+window.getRouteChain = getRouteChain;
+
+/**
+ * Marks every segment of a route as PointToPoint, but only when the route really
+ * is a chain.
+ *
+ * getRouteSystemList gates travel order on `segments[0].subtype` — the first
+ * segment IN THE ARRAY. Hand-drawn, imported and XML-loaded segments carry no
+ * subtype, so a route assembled from a mixture lists in travel order or
+ * alphabetically depending purely on which segment happens to sit first.
+ * Combining the same two routes in the opposite order would answer differently.
+ *
+ * Stamping is safe because subtype is read as topology — "is this a chain worth
+ * ordering" — rather than as a record of how a segment was drawn. See
+ * route_extend_spec.md §6, which also records why the alternative (deciding from
+ * the shape inside getRouteSystemList) was rejected as too wide a change.
+ *
+ * @returns {number} how many segments were changed.
+ */
+function stampRouteSubtype(routeId) {
+    const segs = (window.sectorRoutes || []).filter(r => r.routeId === routeId);
+    if (segs.length === 0) return 0;
+    if (!walkRouteChain(segs).ok) return 0;
+    let changed = 0;
+    for (const seg of segs) {
+        if (seg.subtype !== 'PointToPoint') { seg.subtype = 'PointToPoint'; changed++; }
+    }
+    return changed;
+}
+window.stampRouteSubtype = stampRouteSubtype;
+
+/**
+ * The routes that could be combined into `routeId` — route_extend_spec.md §5, M1.
+ *
+ * Eligibility is tested on the MERGED SHAPE, not on "do their ends touch". Two
+ * routes can meet end to end and still branch, if they also overlap somewhere
+ * else; testing the union catches that, along with shared mid-route worlds and
+ * pairs that do not touch at all, in one check. It also correctly ADMITS a case
+ * a naive ends-test would reject: a route in two disconnected pieces that this
+ * one bridges into a single line.
+ *
+ * The picker shows only what this returns, so an invalid combine is never
+ * offered rather than being refused after the fact (M2).
+ *
+ * @returns {Array<{routeId, name, color, segCount, sharedIds}>}
+ */
+function getCombineCandidates(routeId) {
+    const all  = window.sectorRoutes || [];
+    const mine = all.filter(r => r.routeId === routeId);
+    if (mine.length === 0) return [];
+    if (!walkRouteChain(mine).ok) return [];
+
+    const myWorlds = new Set();
+    for (const seg of mine) { myWorlds.add(seg.startId); myWorlds.add(seg.endId); }
+
+    const out = [];
+    for (const def of (window.routeDefinitions || [])) {
+        if (def.id === routeId) continue;
+        const theirs = all.filter(r => r.routeId === def.id);
+        if (theirs.length === 0) continue;
+
+        // The whole test. Note it is deliberately NOT conditioned on `theirs`
+        // being a chain on its own.
+        if (!walkRouteChain(mine.concat(theirs)).ok) continue;
+
+        const shared = [];
+        const seen = new Set();
+        for (const seg of theirs) {
+            for (const id of [seg.startId, seg.endId]) {
+                if (myWorlds.has(id) && !seen.has(id)) { seen.add(id); shared.push(id); }
+            }
+        }
+        out.push({
+            routeId:   def.id,
+            name:      def.name,
+            color:     def.color,
+            segCount:  theirs.length,
+            sharedIds: shared
+        });
+    }
+    return out;
+}
+window.getCombineCandidates = getCombineCandidates;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BTN (Basic Trade Number) Route Generation

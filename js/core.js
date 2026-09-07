@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.17.3";
-const APP_BANNER = "v0.17.3: Partial Point to Point Routes";
+const APP_VERSION = "v0.17.4";
+const APP_BANNER = "v0.17.4: Continue and Combine Routes";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -290,6 +290,34 @@ function isVacantHex(hexId) {
     if (getHexId(coords.q, coords.r) !== hexId) return false;
     const state = hexStates.get(hexId);
     return !state || state.type === 'BLANK' || state.type === 'EMPTY';
+}
+
+// Keys on a hex state that are DERIVED VIEW STATE, not map data.
+//
+// state.isHiddenByFilter is recomputed from the filter form every time
+// applyActiveFilters() runs and is meaningless without it. It was nonetheless
+// being written to IndexedDB and into saved .json files, because both persist
+// hex states whole — so a filter outlived the fields that produced it and the
+// map reopened filtered with an empty form (see input_init.js startup).
+//
+// Startup now recomputes, which fixes the symptom; stripping here stops the
+// pollution at source, so a saved map file carries map data only and cannot
+// hand someone else a filter they never set.
+//
+// Returns the ORIGINAL object when there is nothing to strip, so the common
+// case allocates nothing.
+const HEX_VIEW_STATE_KEYS = ['isHiddenByFilter'];
+
+function stripHexViewState(state) {
+    if (!state || typeof state !== 'object') return state;
+    let copy = null;
+    for (const key of HEX_VIEW_STATE_KEYS) {
+        if (key in state) {
+            if (!copy) copy = { ...state };
+            delete copy[key];
+        }
+    }
+    return copy || state;
 }
 
 function getHexDistance(q1, r1, q2, r2) {

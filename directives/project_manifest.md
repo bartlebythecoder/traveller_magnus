@@ -1,24 +1,49 @@
 # PROJECT AS ABOVE, SO BELOW - Feature Manifest
-**Version:** v0.17.3 — the **routes** series; §0.0 below is the current cold start. v0.17.2
-shipped 2026-08-19, v0.17.3 on 2026-08-27. The exports series (v0.17.0 / v0.17.0.1) shipped
-2026-08-03 and 08-04.
+**Version:** v0.17.4 — the **routes** series; §0.0 below is the current cold start. v0.17.2
+shipped 2026-08-19, v0.17.3 on 2026-08-27, v0.17.4 on 2026-09-01. The exports series
+(v0.17.0 / v0.17.0.1) shipped 2026-08-03 and 08-04.
 **Architecture Standard:** The "Sean Protocol" (Directives -> Orchestration -> Execution)
 
 ---
 
-## 0.0 COLD START — read this first (updated 2026-08-27)
+## 0.0 COLD START — read this first (updated 2026-09-01)
 
-**v0.17.3 is complete.** Both route series — v0.17.2 (eight items) and v0.17.3 (six) — are
-written, verified in-browser and documented. Neither this document's System Editor content
-(§0.1 onward) nor the exports manifest is in progress.
+**v0.17.4 is complete.** Three route releases are now written, verified in-browser and
+documented: v0.17.2 (eight items), v0.17.3 (six) and v0.17.4 (seven). Neither this
+document's System Editor content (§0.1 onward) nor the exports manifest is in progress.
+**Nothing anywhere is half-finished.**
 
-**Read §0.0.2 before anything else if you are picking this up cold:** route *forcing* was
-designed in full and then dropped, and the older parts of this document and of
-`route_partial_spec.md` still contain its reasoning. §0.0.2 says plainly what is and is not
-being built.
+**Two things to know before you touch anything:**
 
-**Nothing is committed.** Everything in the working tree from v0.17.3 is unstaged —
-**git is Sean's, never touch it.**
+1. **Route *forcing* was designed in full and then dropped** (2026-08-19 → 08-27). Older
+   parts of this document and of `route_partial_spec.md` still carry its reasoning. §0.0.2
+   says plainly what is and is not being built. Do not resurrect it without asking Sean.
+2. **Git is Sean's — never touch it, not even to read.** He stages and commits everything
+   himself. (v0.17.2 is `aeeb884`, v0.17.3 is `6943908`; the v0.17.4 working tree is his to
+   deal with. The line that used to sit here claiming "nothing is committed" was stale for
+   a week — do not restate the commit position in this document, it rots.)
+
+### What shipped in v0.17.4
+
+Seven changelog entries. Two new features, four bug fixes, one cleanup.
+
+1. **Continue an existing route** — the feature. A P2P route can be added to instead of
+   rebuilt: tick the box, the Start pre-fills with one of the route's two ends, and the
+   rest of the route is never re-searched. Off on every panel open.
+2. **Combine two routes** — a 🔗 on each Route Manager row folds another route into this
+   one, when the *merged shape* would be a single unbroken line.
+3. **R9, open since 2026-07-30: a filter outlived its own form.** The filter's per-hex
+   *result* was persisted; its *inputs* were not. See §0.0.7 — it is the most transferable
+   thing in this release.
+4. **The Systems panel and CSV could omit worlds** — a line plus a separate closed loop
+   passed the "exactly two loose ends" test, and the walk then listed 3 of 6 worlds while
+   reporting itself ordered. Found by extracting the chain walk, not by looking for it.
+5. **The CSV button is now a word**, not a third file-shaped icon.
+6. **Multi-sector OTU import undo** — it *looked* like it undid the import while actually
+   reverting unrelated earlier work. Now not undoable at all, like the universe import.
+7. Two more dead functions removed from `js/routes.js`.
+
+### The route directives — the authoritative documents
 
 ### What shipped in v0.17.3
 
@@ -35,12 +60,12 @@ Six changelog entries, all verified in a real browser with Playwright.
 Also, not user-visible: `utilities/route_corpus.js`, `route_perf.js` and
 `route_test_common.js` are new and **committed this time** (§0.0.5).
 
-### Route directives — the authoritative documents
 
 | Directive | Covers | Status |
 |---|---|---|
 | `directives/route_file_spec.md` | Saving/loading one route's connections to `.json` | **IMPLEMENTED** in v0.17.2 |
 | `directives/route_partial_spec.md` | Point-to-Point routes that keep what they could build when a leg cannot be routed. §13 records route *forcing*, designed and then dropped; §14 holds the wider route-editing design | **IMPLEMENTED** in v0.17.3 |
+| `directives/route_extend_spec.md` | **Continue** an existing P2P route with another leg, and **Combine** two routes that meet end to end. Both keep the route a single chain, which is the rule that governs the whole design | **IMPLEMENTED** in v0.17.4 |
 
 ### What shipped in v0.17.2
 
@@ -84,10 +109,17 @@ tree — **git is Sean's, never touch it.**
   it home on close. The symptom is "the list never appears" — it IS built, `display:block`,
   correct contents, painted somewhere invisible. Diagnose by measuring the offset: if it
   equals the palette's top-left, it is this.
-- **A hex within N of another can be up to ~1.5N away in offset `r`.** Cube coordinates are
-  exact, offset coordinates are not. Anything that boxes a neighbourhood in `(q,r)` will
-  silently miss real neighbours. `_buildEmptyHexCandidates` in `js/routes.js` still does
-  this — it under-collects empty hexes at the fringe. Not fixed, low impact, but real.
+- ~~**A hex within N of another can be up to ~1.5N away in offset `r`**, so
+  `_buildEmptyHexCandidates` under-collects empty hexes at the fringe.~~
+  **FALSE ALARM — RETRACTED 2026-09-01. Do not "fix" this.** Measured against the app's own
+  `getHexDistance` for N = 1..6, from origin columns of both parities: **max |Δq| = N and
+  max |Δr| = N exactly.** In this app's odd-q, flat-top layout the offset `r` coordinate
+  absorbs the column shift (`r = z + floor(q/2)`), so a `±N` box in `(q,r)` is precisely
+  sufficient — it is the general warning about offset coordinates applied to a layout where
+  it does not bite. `_buildEmptyHexCandidates` was then audited directly against an
+  exhaustive scan of the whole grid at maxJump 1, 2, 3, 4 and 6 on a 249-world sparse map:
+  **0 missed and 0 extra at every range.** The function is exact. The wider caution about
+  offset coordinates is still worth holding — it is simply not true of these two axes.
 
 ### 0.0.2 The next feature — SUPERSEDED, read this first
 
@@ -195,6 +227,16 @@ approved adding them to the repo.
 | `utilities/route_test_common.js` | Shared bootstrap: launches `hex_map.html` past the splash, builds a deterministic map, fingerprints segments |
 | `utilities/route_corpus.js` | The corpus differ — 19 scenarios × 2 maps = **38 scenarios, ~18,000 segments** |
 | `utilities/route_perf.js` | The performance measure — long leg, full-exhaustion leg, and a 19-leg route at six map sizes |
+| `utilities/route_continue.js` | Continue — 15 checks, drives the real panel (v0.17.4) |
+| `utilities/route_combine.js` | Combine — 13 checks, including eligibility rejection (v0.17.4) |
+| `utilities/filter_persistence.js` | R9 — 11 checks across restart, store, save file and indicator (v0.17.4) |
+| `utilities/otu_import_undo.js` | Multi-sector import undo — 6 checks, drives the real modal **offline** by seeding the importer's localStorage cache and stubbing `fetch` to throw (v0.17.4) |
+
+**Every suite carries a negative control**, and this is not ceremony. Three of the four
+would pass vacuously without one: "nothing is hidden" passes on a map where the filter never
+ran; "the route is a chain" passes on an empty slot; "Ctrl+Z changed nothing" passes when the
+undo stack is empty *however broken undo is*. Each control removes the behaviour under test
+and asserts the check fails. Add one to anything new.
 
 **Usage, from the repo root:**
 
@@ -247,6 +289,35 @@ past the splash, then drive the app through `page.evaluate` — all the generato
 `hexStates` are globals. Note `hexStates` is **empty** on a fresh launch; a harness must
 build its own map. Redo is **Ctrl+Shift+Z**, not Ctrl+Y. Escape closes the route panel.
 
+### 0.0.7 R9 — the pattern worth carrying forward
+
+A filter survived a browser restart while its input fields did not, so the map reopened
+filtered by criteria present nowhere in the UI. Reported 2026-07-30, could not be reproduced,
+parked for a year, reported again 2026-09-01 and fixed the same day.
+
+**The pattern: a derived value stored on the thing it describes gets persisted along with
+it.** `applyActiveFilters()` writes its verdict onto each hex as `state.isHiddenByFilter`;
+`db_manager` persists hex states *whole* (`store.put(state, hexId)`), and so does the Map
+JSON save. So the filter's result was saved and its inputs were not.
+
+**The tell: two functions answering the same question from different sources.**
+`hasAnyActiveFilter()` reads the DOM; `getFilteredHexIds()` reads the persisted flags. After
+a restart they flatly disagreed. That disagreement *is* the bug, stated in one line — worth
+grepping for elsewhere.
+
+**Why it hid for a year:** the flag only reached disk if a save ran *while* the filter was
+applied. Filtering alone pushes no history entry, so whether it reproduced depended entirely
+on what you did next.
+
+**The consequence nobody reported** was the serious one: P2P passes `filteredOnly = true`
+with `getFilteredHexIds()`, so route generation was silently restricted to the survivors —
+measured, a nine-segment detour where five direct segments existed.
+
+**The fix, three parts:** recompute after `loadFromDB()` (`input_init.js`), which also
+self-heals an already-polluted store; `stripHexViewState()` (`core.js`) applied at all five
+persistence boundaries; and an always-visible indicator, because the root usability failure
+is that **a filtered map is indistinguishable from a sparse one.**
+
 ### 0.0.6 Open items, none blocking
 
 - ~~`_autoAssignXmlRoutes` (`js/io_manager.js`) calls `saveHistoryState` **without**
@@ -263,9 +334,17 @@ build its own map. Redo is **Ctrl+Shift+Z**, not Ctrl+Y. Escape closes the route
     ("skip per-sector saveHistoryState … all done once after the loop") describes a
     deferred snapshot that **does not exist** in the post-loop block — that block does
     `reapplyAllRules`, `applyActiveFilters`, `syncAllHexes`, `saveSectorNames` and no
-    history save. So either the comment is wrong or a multi-sector OTU import is silently
-    not undoable. Not investigated further; needs Sean's call on whether an import that
-    large should be undoable at all.
+    history save. **FIXED 2026-09-01.** `runImport()` now clears `undoStack` and `redoStack`
+    the way `executeUniverseImport()` always has, and both copies of the false `bulkMode`
+    comment are corrected. **The behaviour was worse than "not undoable":** reproduced in a
+    browser, Ctrl+Z after an import *looked* like it worked — the imported hexes did vanish
+    — while actually restoring a much older snapshot and silently reverting an unrelated
+    edit made before the import. Snapshotting instead was rejected: a pre-import copy of
+    `hexStates` is exactly the size the undo cap (5 on large grids) exists to avoid. The
+    stacks are cleared **before** the work, so an import that fails partway cannot leave a
+    stale snapshot either. Regression test: `utilities/otu_import_undo.js`, 6 checks, which
+    drives the real modal entirely offline by seeding the importer's localStorage sector
+    cache and stubbing `fetch` to throw.
   - ~~**`applyLoadedMapData` (`js/io_manager.js`, "Load Map JSON") has the identical
     bug**~~ **FIXED 2026-08-27** on Sean's go-ahead. It called plain
     `saveHistoryState('Load Map JSON')` and then replaced `window.routeDefinitions`
@@ -277,8 +356,11 @@ build its own map. Redo is **Ctrl+Shift+Z**, not Ctrl+Y. Escape closes the route
 - Three file-shaped icons now sit in each Route Manager row (⬇ CSV, save, load), hard to
   tell apart without hovering. Standing reservation needing Sean's eye in real use —
   `route_file_spec.md` OQ-1.
-- `getAutoRouteGroups()` and `clearAutoRouteGroup()` in `js/routes.js` appear to have no
-  callers. Not exhaustively verified; check before assuming they are dead.
+- ~~`getAutoRouteGroups()` and `clearAutoRouteGroup()` in `js/routes.js` appear to have no
+  callers.~~ **DONE 2026-09-01 — verified dead and removed.** No reference in any `.js`,
+  `.html`, `.md` or `.json` in the repo, dynamic-dispatch spellings included; the "Clear
+  modal" the first was written to populate no longer exists. Corpus re-run after removal:
+  38 scenarios, 18,079 segments, identical.
 
 ### How this work was verified — reuse the method
 

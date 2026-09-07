@@ -1671,3 +1671,44 @@ body.print-mode .settings-section-header i {
 body.print-mode .settings-section {
     border-top-color: rgba(13, 107, 100, 0.3);
 }
+/* ---------------------------------------------------------------------------
+   Filter-active indicator
+   ---------------------------------------------------------------------------
+   A filtered map is indistinguishable from a sparse one, which is how a filter
+   was able to outlive the fields that created it without anyone being able to
+   see why worlds were missing. This says so, permanently, whenever anything is
+   hidden. Bottom-right is the toast stack, so this sits top-centre.
+   --------------------------------------------------------------------------- */
+#filter-active-indicator {
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 14px;
+    background: rgba(11, 12, 16, 0.92);
+    border: 1px solid #ffa500;
+    color: #ffa500;
+    font-family: 'Share Tech Mono', 'Courier New', monospace;
+    font-size: 13px;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+}
+
+#filter-active-indicator:hover {
+    background: rgba(11, 12, 16, 0.98);
+    border-color: #ffb399;
+    color: #ffb399;
+}
+
+/* Shift+F bypass: the filter still exists, the map just isn't obeying it.
+   Teal rather than amber — nothing is being hidden, so it is not a caution. */
+#filter-active-indicator.suspended {
+    border-color: #45a29e;
+    color: #45a29e;
+}

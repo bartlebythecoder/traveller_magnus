@@ -298,7 +298,27 @@ window.addEventListener('load', async () => {
     // a blank map flash. loadFromDB() resolves quickly even for large datasets.
     if (window.dbManager) {
         const hadData = await window.dbManager.loadFromDB();
-        if (hadData && typeof draw === 'function') requestAnimationFrame(draw);
+        if (hadData) {
+            // Recompute the filter before the first draw.
+            //
+            // The filter's RESULT lives on each hex (state.isHiddenByFilter) and so
+            // comes back with them from IndexedDB; the filter's INPUTS are plain DOM
+            // fields and do not. Every other path that repopulates hexStates already
+            // calls this — applyLoadedMapData, the T5 tab import, the OTU importer —
+            // and startup was the one that did not, so the map reopened filtered by
+            // criteria that existed nowhere in the UI: worlds hidden, the form empty,
+            // hasAnyActiveFilter() answering false, Shift+F replying "No filter is
+            // active", and route generation silently restricted to the survivors
+            // (getFilteredHexIds reads the flags, not the fields).
+            //
+            // Recomputing from the empty form is what makes the two agree again, and
+            // it self-heals a store already polluted by an earlier build.
+            if (typeof window.applyActiveFilters === 'function') {
+                window.applyActiveFilters();
+            } else if (typeof draw === 'function') {
+                requestAnimationFrame(draw);
+            }
+        }
     }
 
     initializeInput();

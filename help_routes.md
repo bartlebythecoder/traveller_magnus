@@ -12,6 +12,8 @@
    - [3.1 X-Boat Routes](#31-x-boat-routes)
    - [3.2 Custom Network](#32-custom-network)
    - [3.3 Point-to-Point](#33-point-to-point)
+     - [Continuing a Route](#continuing-a-route)
+     - [Combining Two Routes](#combining-two-routes)
    - [3.4 BTN Trade Routes](#34-btn-trade-routes)
 4. [Managing Routes](#4-managing-routes)
 5. [FAQ](#5-faq)
@@ -35,15 +37,16 @@ Each row in the Route Window represents one route slot:
 | **Shortcut key** | A single key you can press anywhere on the map to toggle this route's visibility. Letters `f` and `r` are reserved and cannot be used. |
 | **Vis checkbox** | Toggles route visibility on the map without deleting segments. |
 | **C (Clear)** | Removes all map segments for this slot. Can be undone with **Ctrl+Z**. |
-| **⬇ (Export CSV)** | Exports a spreadsheet of the **worlds** this route passes through, with a choice of fields. A reference table — it cannot be loaded back in. |
+| **CSV** | Exports a spreadsheet of the **worlds** this route passes through, with a choice of fields. A reference table — it cannot be loaded back in. Labelled with a word rather than an icon precisely because it is *not* one of the two route-file buttons beside it. |
 | **Save to file** | Writes this route's **connections** to a `.json` route file. See [Saving and Loading a Route](#saving-and-loading-a-route). |
 | **Load from file** | Reads a route file into this row. Available even when the slot is empty. |
+| **🔗 (Combine)** | Folds another route into this one. Only lit when a route exists that joins this one end to end. See [Combining Two Routes](#combining-two-routes). |
 | **⚙ Auto** | Opens the Automation Panel where you choose a generation method and run it. |
 | **× (Delete)** | Deletes the slot and all its segments entirely. Can be undone with **Ctrl+Z**. |
 
 ### The Automation Panel
 
-Clicking **⚙ Auto** on any row opens a sub-panel attached to that slot. You pick one of four **automation types** using the radio buttons, configure its parameters, and click **Generate**. Each generation run replaces all existing segments for that slot (use Ctrl+Z to revert).
+Clicking **⚙ Auto** on any row opens a sub-panel attached to that slot. You pick one of four **automation types** using the radio buttons, configure its parameters, and click **Generate**. Each generation run replaces all existing segments for that slot (use Ctrl+Z to revert) — unless you tick **Continue existing route** in the Point-to-Point builder, which adds to the route instead. See [Continuing a Route](#continuing-a-route).
 
 ---
 
@@ -221,6 +224,7 @@ Remove a waypoint with the × button on its row.
 | **Allow Empty Hexes** | Permit hops *through* uninhabited hexes while pathfinding. Independent of choosing an empty hex as a stop, which needs no setting. |
 | **Max Empty Jumps** | Max consecutive empty-hex hops before a system is required. A deep-space *stop* does not count against this — it is a destination, not a hop of convenience — and neither does starting in one. |
 | **Build as far as possible** | When a leg cannot be routed, keep the route up to the closest world it *could* reach instead of failing. Off by default. See below. |
+| **Continue existing route** | Add to the route already in this slot rather than replacing it. Off every time the panel opens. See [Continuing a Route](#continuing-a-route). |
 
 #### Build As Far As Possible
 
@@ -268,6 +272,71 @@ problem.
 **On multi-leg routes it stops at the first leg it cannot complete** rather than skipping
 ahead to later legs. That keeps the route a single unbroken chain, so the Systems panel can
 still list it in travel order.
+
+#### Continuing a Route
+
+A long route is rarely built in one go. **Continue existing route** lets you add to a route
+that already exists instead of entering all of its stops again and rebuilding it.
+
+Tick the box and the form changes to describe the *new* piece rather than the whole route:
+
+- **Start** is filled in with the world at the end of the route.
+- **End** is left blank, for wherever you want to go next.
+- **Waypoints** are cleared, ready for stops belonging to the new piece.
+
+Untick it and the whole setup comes straight back, so there is no cost to looking.
+
+Enter an End, optionally some waypoints, and generate. **The rest of the route is not
+touched** — not re-searched, not redrawn — so anything you have adjusted by hand stays as
+you left it, and a nineteen-leg route is not rebuilt to add a twentieth.
+
+**The Start must be one of the route's two ends**, and either will do: a route can be
+extended backwards from where it begins just as easily as onwards from where it finishes.
+Type a world from the middle and the generation is refused, with a message naming the two
+ends you can actually continue from. This is not fussiness — a route that forks has more
+than two ends, and the Systems panel can only list a route in travel order while it runs
+from one end to another.
+
+**The route's saved setup grows with it**, so reopening the builder afterwards still shows
+every stop in travel order, and an ordinary Generate later rebuilds the whole route rather
+than just the last piece. (A route that was imported, loaded from a file, or drawn by hand
+has no saved setup to grow — it can still be continued as often as you like, but the
+builder cannot reconstruct stops it never knew about, so it does not pretend to.)
+
+**The box is always off when the panel opens.** Generate therefore always means "replace"
+unless you have said otherwise for this press, and can never quietly add to a route when
+you meant to rebuild one.
+
+It works on **any** route that runs from one world to another, including imported ones.
+Where there is nothing to continue — an empty slot, or a route that branches or forms a
+loop — the box is greyed out and its tooltip says which.
+
+If the new leg finds no path, the route is left exactly as it was. If the new leg happens
+to route back through the route's own worlds, it is still drawn — the connections are real
+— but you are told that the route now branches and will be listed alphabetically rather
+than in travel order.
+
+#### Combining Two Routes
+
+Where **Continue** adds a new leg, **Combine** joins a route you already have. Click the
+**🔗** button on the row of the route you want to *keep*, and pick from the list of routes
+that join it.
+
+- The route you clicked keeps its **name, colour and shortcut key**.
+- The other route's connections move across and take on that colour.
+- The other route's now-empty slot is **removed**, freeing its shortcut key.
+
+**Only combinations that give a single unbroken route are offered.** Two routes meeting in
+the *middle* of one of them are not, because the result forks; nor are two that never touch.
+The test is made on **what the combined route would actually look like**, so a pair that
+meets at one end but doubles back over itself elsewhere is excluded as well — and a route
+that exists in two separate pieces *is* offered, when the route you are combining it into
+bridges the gap between them.
+
+The button is only lit when something is available, so which routes can be joined is visible
+without clicking anything. You are asked to confirm first — told where the two meet and how
+many connections will move — and **Ctrl+Z** undoes the whole thing, bringing the absorbed
+route's slot back with its name and shortcut key intact.
 
 **Even with the box off**, a failed route now tells you the closest world it could reach and
 how far short that leaves it — which is usually the world you want to add as a waypoint.

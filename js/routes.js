@@ -831,13 +831,18 @@ function generatePointToPointRoute(startId, endId, maxJump, color, groupId, name
         legs.push(path);
     }
 
-    let totalSegments = 0;
+    // Counted as segments actually WRITTEN, not as edges walked. addRoute skips a
+    // pair the slot already holds, and a route whose next leg doubles back along
+    // the one before it hands it the same pairs again — so counting path length
+    // reported segments that were never drawn. Measured 2026-09-10: a two-leg
+    // route that backtracked announced "9 segment(s)" over a map showing 6.
+    const writtenBefore = (window.sectorRoutes || []).length;
     for (const path of legs) {
         for (let k = 0; k < path.length - 1; k++) {
             addRoute(path[k], path[k + 1], 'Filter', null, extras);
         }
-        totalSegments += path.length - 1;
     }
+    const totalSegments = (window.sectorRoutes || []).length - writtenBefore;
 
     const legDesc = waypointIds.length > 0 ? `, ${stops.length - 1} leg(s)` : '';
     const shortDesc = shortfall ? ` — STOPPED SHORT at ${shortfall.reachedId}, ${shortfall.distance} hex(es) from ${shortfall.targetId}` : '';
@@ -978,6 +983,97 @@ function getRouteChain(routeId, preferStartId) {
     return walkRouteChain(segs, preferStartId);
 }
 window.getRouteChain = getRouteChain;
+
+/**
+ * The loose ends of a route, on the weaker test that Continue actually needs.
+ *
+ * walkRouteChain above answers "is this ONE unbroken line", which is what travel
+ * order and Combine require: a world of degree 3 or more means there is no such
+ * order to list. Continue needs far less. All it has to know is where the route
+ * has a loose END, so it can check the Start against them and prefill one.
+ *
+ * Point-to-Point produces routes the strict test rejects as a matter of course,
+ * because it resolves every leg with its own BFS:
+ *   • a leg routed back through a world an earlier leg used gives that world
+ *     degree 4 — the route crosses itself but still has two proper ends;
+ *   • a leg that doubles back along the one before it hands addRoute the same
+ *     pairs again, which it skips, leaving the world you turned around at as a
+ *     loose THIRD end. A waypoint behind you produces exactly this.
+ * Both are ordinary results of asking for a route with waypoints, and a round
+ * trip is close to guaranteed to be one of them. Gating Continue on the strict
+ * test refused all of them, leaving a tick-box that could not be ticked above a
+ * tooltip claiming the route had no end when it had three.
+ *
+ * Still refused, because neither offers an end to grow from: a pure loop, and a
+ * route sitting in disconnected pieces. Connectivity is checked rather than
+ * inferred from the number of ends — a line plus a separate closed loop has a
+ * perfectly ordinary-looking two, and continuing it would grow the line and
+ * silently leave the loop behind.
+ *
+ * @param {Array}  segments       - route segments ({ startId, endId, … })
+ * @param {string} [preferStartId] - orient the result so ends[0] is this world
+ *        when it is one of them, which makes ends[1] "the far end" on the
+ *        two-ended routes where that phrase means anything.
+ * @returns {{ok:boolean, ends:string[], crosses:boolean, reason:string|null}}
+ *        `reason` is 'empty' | 'cycle' | 'disconnected' when !ok. `crosses` is
+ *        true when some world is visited more than twice — i.e. exactly when
+ *        walkRouteChain would call this a branch. Callers that record a route's
+ *        list of stops must check `ends.length > 2`: such a route has no single
+ *        run of stops, so a setup written for it would not describe it.
+ */
+function walkRouteEnds(segments, preferStartId) {
+    const fail = reason => ({ ok: false, ends: [], crosses: false, reason });
+    if (!segments || segments.length === 0) return fail('empty');
+
+    // Adjacency built exactly as walkRouteChain builds it — Sets, self-loops and
+    // malformed segments dropped — so the two tests can never disagree about the
+    // shape of a route, only about which shapes they accept.
+    const adj = new Map();
+    const link = (a, b) => {
+        if (!adj.has(a)) adj.set(a, new Set());
+        adj.get(a).add(b);
+    };
+    for (const seg of segments) {
+        if (!seg || !seg.startId || !seg.endId) continue;
+        if (seg.startId === seg.endId) continue;
+        link(seg.startId, seg.endId);
+        link(seg.endId, seg.startId);
+    }
+
+    const nodes = Array.from(adj.keys());
+    if (nodes.length === 0) return fail('empty');
+
+    const ends = nodes.filter(n => adj.get(n).size === 1);
+    if (ends.length === 0) return fail('cycle');
+
+    // Every world must hang off the same run of segments. The count of ends says
+    // nothing about this on its own — a line PLUS a separate closed loop has
+    // exactly two, because the loop contributes none — so walk it.
+    const seen = new Set([ends[0]]);
+    const queue = [ends[0]];
+    while (queue.length > 0) {
+        const cur = queue.shift();
+        for (const n of adj.get(cur)) if (!seen.has(n)) { seen.add(n); queue.push(n); }
+    }
+    if (seen.size !== nodes.length) return fail('disconnected');
+
+    const crosses = nodes.some(n => adj.get(n).size > 2);
+    const at = ends.indexOf(preferStartId);
+    const oriented = (preferStartId && at > 0)
+        ? [ends[at], ...ends.slice(0, at), ...ends.slice(at + 1)]
+        : ends;
+    return { ok: true, ends: oriented, crosses, reason: null };
+}
+window.walkRouteEnds = walkRouteEnds;
+
+/**
+ * walkRouteEnds for the segments currently in a route slot.
+ */
+function getRouteEnds(routeId, preferStartId) {
+    const segs = (window.sectorRoutes || []).filter(r => r.routeId === routeId);
+    return walkRouteEnds(segs, preferStartId);
+}
+window.getRouteEnds = getRouteEnds;
 
 /**
  * Marks every segment of a route as PointToPoint, but only when the route really

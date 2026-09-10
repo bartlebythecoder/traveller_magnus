@@ -168,7 +168,17 @@
 
         /* Route Manager Window */
         #route-window {
-            width: 430px;
+            /* Wide enough for a route row at its natural width (480px measured:
+               eleven controls plus ten 5px gaps) PLUS room for the vertical
+               scrollbar the Auto panel makes inevitable. At the old 430px the
+               row was squeezed below its own min-content width, which shrank
+               the colour swatch from 50px to a 14px sliver, clipped the delete
+               cross, and put a horizontal scrollbar under the whole palette
+               the moment the list grew tall enough to scroll. The ~20px over
+               the strict minimum is deliberate: scrollbar width and font
+               metrics vary by machine, and a width that only just fits here
+               would start scrolling again on someone else's. */
+            width: 520px;
             padding: 25px;
             color: #c5c6c7;
             font-family: 'Inter', sans-serif;
@@ -944,9 +954,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above<br> So Below</span></h1>
-            <div class="splash-banner">Continue and Combine Routes</div>
+            <div class="splash-banner">New: Point to Point Route upgrades</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.17.4</div>
+            <div class="splash-version">v0.17.5</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -1429,7 +1439,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.17.4</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.17.5</span>
             </p>
         </div>
 
@@ -2802,6 +2812,7 @@
                 <label style="display:flex;align-items:center;gap:5px;cursor:pointer;color:#c5c6c7;font-size:0.82em;">
                     <input type="checkbox" id="route-vis-all-check"> Show All Routes
                 </label>
+                <button id="btn-route-add" class="menu-btn" style="margin-left:auto;padding:2px 10px;font-size:0.78em;" title="Add a new empty route"><i class="fas fa-plus"></i> Add Route</button>
             </div>
             <div id="route-window-list"></div>
             <!-- One picker shared by every route row; see _pickRouteFileFor() -->

@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.17.4";
-const APP_BANNER = "v0.17.4: Continue and Combine Routes";
+const APP_VERSION = "v0.17.5";
+const APP_BANNER = "v0.17.5: New: Point to Point Route upgrades";
 
 // -----------------------------------------------------------------------------
 // Application State

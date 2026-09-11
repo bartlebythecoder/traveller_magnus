@@ -2,6 +2,24 @@
 // KEYBOARD_SHORTCUTS.JS - Hotkeys and Key Event Listeners
 // ============================================================================
 
+/**
+ * Puts the route slots back from a history snapshot that carries them.
+ *
+ * Most snapshots do not: see the note in saveHistoryState(). Repainting the
+ * Route Manager wholesale rather than calling refreshRouteWindowCounts() is
+ * deliberate — restoring a deleted slot has to put its row back, and the count
+ * refresh only updates rows that already exist.
+ */
+function _restoreRouteDefinitions(snap) {
+    if (!snap.routeDefinitions) return;
+    window.routeDefinitions = snap.routeDefinitions;
+    if (window.dbManager) window.dbManager.saveRouteDefinitions?.();
+    const win = document.getElementById('route-window');
+    if (win && win.classList.contains('visible') && window.renderRouteWindow) {
+        window.renderRouteWindow();
+    }
+}
+
 function setupKeyboardShortcuts() {
     window.addEventListener('keydown', async (e) => {
         // Skip shortcuts if the user is typing in an input field or textarea, except for Escape
@@ -161,10 +179,14 @@ function setupKeyboardShortcuts() {
                         routes: JSON.parse(JSON.stringify(window.sectorRoutes || [])),
                         hexStates: JSON.parse(JSON.stringify(Array.from(hexStates.entries())))
                     };
+                    if (snap.routeDefinitions) {
+                        current.routeDefinitions = JSON.parse(JSON.stringify(window.routeDefinitions || []));
+                    }
                     window.undoStack.push(current);
                     window.sectorRoutes = snap.routes;
                     hexStates.clear();
                     snap.hexStates.forEach(([id, st]) => hexStates.set(id, st));
+                    _restoreRouteDefinitions(snap);
                     showToast(`Redid: ${snap.action}`, 2000);
                     requestAnimationFrame(draw);
                     if (window.dbManager) { window.dbManager.syncAllHexes(); window.dbManager.saveRoutes(); }
@@ -178,10 +200,14 @@ function setupKeyboardShortcuts() {
                         routes: JSON.parse(JSON.stringify(window.sectorRoutes || [])),
                         hexStates: JSON.parse(JSON.stringify(Array.from(hexStates.entries())))
                     };
+                    if (snap.routeDefinitions) {
+                        current.routeDefinitions = JSON.parse(JSON.stringify(window.routeDefinitions || []));
+                    }
                     window.redoStack.push(current);
                     window.sectorRoutes = snap.routes;
                     hexStates.clear();
                     snap.hexStates.forEach(([id, st]) => hexStates.set(id, st));
+                    _restoreRouteDefinitions(snap);
                     showToast(`Undid: ${snap.action}`, 2000);
                     requestAnimationFrame(draw);
                     if (window.dbManager) { window.dbManager.syncAllHexes(); window.dbManager.saveRoutes(); }

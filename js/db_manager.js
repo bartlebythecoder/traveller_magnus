@@ -140,6 +140,14 @@
     }
 
     // -------------------------------------------------------------------------
+    // Every write below goes through stripHexViewState() (core.js). Hex states are
+    // persisted WHOLE, so any derived field on them is persisted too — which is how
+    // state.isHiddenByFilter, recomputed from the filter form on every run, ended up
+    // outliving the form itself and reopening the map filtered with empty fields.
+    // The store holds map data; view state is recomputed, never restored.
+    // -------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------
     // Save all hexes belonging to one sector by numeric sector number.
     // Called after importT5Tab — efficient because it only touches one sector.
     // -------------------------------------------------------------------------
@@ -150,7 +158,7 @@
             const tx     = db.transaction(STORE_HEX, 'readwrite');
             const store  = tx.objectStore(STORE_HEX);
             for (const [hexId, state] of hexStates) {
-                if (hexId.startsWith(prefix)) store.put(state, hexId);
+                if (hexId.startsWith(prefix)) store.put(stripHexViewState(state), hexId);
             }
         } catch (err) {
             console.warn('[DB] saveHexesBySectorNum failed:', err);
@@ -169,7 +177,7 @@
             const store = tx.objectStore(STORE_HEX);
             for (const hexId of hexIds) {
                 const state = hexStates.get(hexId);
-                if (state !== undefined) store.put(state, hexId);
+                if (state !== undefined) store.put(stripHexViewState(state), hexId);
             }
         } catch (err) {
             console.warn('[DB] saveHexes failed:', err);
@@ -197,7 +205,7 @@
             const tx    = db2.transaction(STORE_HEX, 'readwrite');
             const store = tx.objectStore(STORE_HEX);
             for (const [hexId, state] of hexStates) {
-                store.put(state, hexId);
+                store.put(stripHexViewState(state), hexId);
             }
         } catch (err) {
             console.warn('[DB] syncAllHexes failed:', err);

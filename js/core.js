@@ -5,8 +5,8 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.17.1";
-const APP_BANNER = "v0.17.1: New: Waypoint updates";
+const APP_VERSION = "v0.17.5";
+const APP_BANNER = "v0.17.5: New: Point to Point Route upgrades";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -170,12 +170,28 @@ function clampUWP(val, min, max) {
 window.undoStack = [];
 window.redoStack = [];
 
-function saveHistoryState(actionName) {
+/**
+ * @param {string} actionName - label shown by "Undid: …"
+ * @param {Object} [opts]
+ * @param {boolean} [opts.includeRouteDefinitions] - also snapshot
+ *        window.routeDefinitions, for actions that add or remove route slots.
+ */
+function saveHistoryState(actionName, opts = {}) {
     const stateSnapshot = {
         action: actionName,
         routes: JSON.parse(JSON.stringify(window.sectorRoutes || [])),
         hexStates: JSON.parse(JSON.stringify(Array.from(hexStates.entries())))
     };
+
+    // Opt-in, not automatic. A route's name, colour, shortcut and visibility are
+    // all edited without pushing a history entry of their own, so a snapshot
+    // that always carried the definitions would let an undo of some unrelated
+    // action — painting a hex, say — silently revert a rename made afterwards.
+    // Only actions that add or remove slots record them, and undo restores them
+    // only from a snapshot that has them.
+    if (opts.includeRouteDefinitions) {
+        stateSnapshot.routeDefinitions = JSON.parse(JSON.stringify(window.routeDefinitions || []));
+    }
     // Cap undo history by grid size: 50 snapshots for the default 7×5 canvas,
     // 5 for larger canvases where each snapshot can be hundreds of MB.
     const undoLimit = (gridWidth * gridHeight) > 35 ? 5 : 50;
@@ -274,6 +290,34 @@ function isVacantHex(hexId) {
     if (getHexId(coords.q, coords.r) !== hexId) return false;
     const state = hexStates.get(hexId);
     return !state || state.type === 'BLANK' || state.type === 'EMPTY';
+}
+
+// Keys on a hex state that are DERIVED VIEW STATE, not map data.
+//
+// state.isHiddenByFilter is recomputed from the filter form every time
+// applyActiveFilters() runs and is meaningless without it. It was nonetheless
+// being written to IndexedDB and into saved .json files, because both persist
+// hex states whole — so a filter outlived the fields that produced it and the
+// map reopened filtered with an empty form (see input_init.js startup).
+//
+// Startup now recomputes, which fixes the symptom; stripping here stops the
+// pollution at source, so a saved map file carries map data only and cannot
+// hand someone else a filter they never set.
+//
+// Returns the ORIGINAL object when there is nothing to strip, so the common
+// case allocates nothing.
+const HEX_VIEW_STATE_KEYS = ['isHiddenByFilter'];
+
+function stripHexViewState(state) {
+    if (!state || typeof state !== 'object') return state;
+    let copy = null;
+    for (const key of HEX_VIEW_STATE_KEYS) {
+        if (key in state) {
+            if (!copy) copy = { ...state };
+            delete copy[key];
+        }
+    }
+    return copy || state;
 }
 
 function getHexDistance(q1, r1, q2, r2) {

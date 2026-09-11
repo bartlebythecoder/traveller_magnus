@@ -1,7 +1,377 @@
 # PROJECT AS ABOVE, SO BELOW - Feature Manifest
-**Version:** v0.17.0.1 — the **exports** series. v0.17.0 (GM wiki) shipped 2026-08-03;
-v0.17.0.1 (player fog of war) code-complete 2026-08-04.
+**Version:** v0.17.4 — the **routes** series; §0.0 below is the current cold start. v0.17.2
+shipped 2026-08-19, v0.17.3 on 2026-08-27, v0.17.4 on 2026-09-01. The exports series
+(v0.17.0 / v0.17.0.1) shipped 2026-08-03 and 08-04.
 **Architecture Standard:** The "Sean Protocol" (Directives -> Orchestration -> Execution)
+
+---
+
+## 0.0 COLD START — read this first (updated 2026-09-01)
+
+**v0.17.4 is complete.** Three route releases are now written, verified in-browser and
+documented: v0.17.2 (eight items), v0.17.3 (six) and v0.17.4 (seven). Neither this
+document's System Editor content (§0.1 onward) nor the exports manifest is in progress.
+**Nothing anywhere is half-finished.**
+
+**Two things to know before you touch anything:**
+
+1. **Route *forcing* was designed in full and then dropped** (2026-08-19 → 08-27). Older
+   parts of this document and of `route_partial_spec.md` still carry its reasoning. §0.0.2
+   says plainly what is and is not being built. Do not resurrect it without asking Sean.
+2. **Git is Sean's — never touch it, not even to read.** He stages and commits everything
+   himself. (v0.17.2 is `aeeb884`, v0.17.3 is `6943908`; the v0.17.4 working tree is his to
+   deal with. The line that used to sit here claiming "nothing is committed" was stale for
+   a week — do not restate the commit position in this document, it rots.)
+
+### What shipped in v0.17.4
+
+Seven changelog entries. Two new features, four bug fixes, one cleanup.
+
+1. **Continue an existing route** — the feature. A P2P route can be added to instead of
+   rebuilt: tick the box, the Start pre-fills with one of the route's two ends, and the
+   rest of the route is never re-searched. Off on every panel open.
+2. **Combine two routes** — a 🔗 on each Route Manager row folds another route into this
+   one, when the *merged shape* would be a single unbroken line.
+3. **R9, open since 2026-07-30: a filter outlived its own form.** The filter's per-hex
+   *result* was persisted; its *inputs* were not. See §0.0.7 — it is the most transferable
+   thing in this release.
+4. **The Systems panel and CSV could omit worlds** — a line plus a separate closed loop
+   passed the "exactly two loose ends" test, and the walk then listed 3 of 6 worlds while
+   reporting itself ordered. Found by extracting the chain walk, not by looking for it.
+5. **The CSV button is now a word**, not a third file-shaped icon.
+6. **Multi-sector OTU import undo** — it *looked* like it undid the import while actually
+   reverting unrelated earlier work. Now not undoable at all, like the universe import.
+7. Two more dead functions removed from `js/routes.js`.
+
+### The route directives — the authoritative documents
+
+### What shipped in v0.17.3
+
+Six changelog entries, all verified in a real browser with Playwright.
+
+1. **Build as far as possible** — the feature. A P2P route that cannot reach a stop is kept
+   up to the closest world it could reach, which is named and ringed. Off by default.
+2. **"No path found" names that world too**, whether or not the option is on.
+3. **The completion toast names worlds**, not bare hex IDs, like every other message.
+4. **The top of a new waypoint field was clipped** by its own scroll container.
+5. **Undo after a TravellerMap XML route import** now restores the slots it created.
+6. **Undo after loading a Map JSON** now restores the route slots it replaced.
+
+Also, not user-visible: `utilities/route_corpus.js`, `route_perf.js` and
+`route_test_common.js` are new and **committed this time** (§0.0.5).
+
+
+| Directive | Covers | Status |
+|---|---|---|
+| `directives/route_file_spec.md` | Saving/loading one route's connections to `.json` | **IMPLEMENTED** in v0.17.2 |
+| `directives/route_partial_spec.md` | Point-to-Point routes that keep what they could build when a leg cannot be routed. §13 records route *forcing*, designed and then dropped; §14 holds the wider route-editing design | **IMPLEMENTED** in v0.17.3 |
+| `directives/route_extend_spec.md` | **Continue** an existing P2P route with another leg, and **Combine** two routes that meet end to end. Both keep the route a single chain, which is the rule that governs the whole design | **IMPLEMENTED** in v0.17.4 |
+
+### What shipped in v0.17.2
+
+Eight changelog entries, all verified in-browser with Playwright. Unstaged in the working
+tree — **git is Sean's, never touch it.**
+
+1. **Autocomplete list never appeared.** `.draggable-palette`'s `backdrop-filter` makes it
+   the containing block for `position:fixed` children, so the list was displaced by the
+   window's own offset and clipped away by `overflow:hidden`. Fixed by portaling it to
+   `<body>`. **This trap applies to every palette in the app** — see §0.0.1.
+2. **Generation is atomic.** `_generateIntoSlot()` in `js/ui_menus.js`: a run producing
+   nothing restores the map, the route and the undo entry. Failure is judged by what landed
+   in the slot, not by the count a generator reports — `generateBTNRoutes` measures net
+   array growth, which reads zero for a segment that evicted a rival as it was added.
+3. **"No path found" names the failing leg**, and names stops the way the builder does.
+4. **Phantom route slots** no longer created (`resolveRouteId` returns `extras.routeId`
+   before consulting definitions), plus a guarded cleanup for sectors that already have
+   them. The guard is a conjunction — `groupId` alone is NOT a phantom marker, because
+   `migrateToRouteDefinitions` legitimately stamps one on definitions rebuilt from
+   pre-v0.10 save files, and those own segments.
+5. **Undo covers route definitions** — `saveHistoryState(name, { includeRouteDefinitions: true })`.
+   **Opt-in on purpose**: names, colours, shortcuts and visibility are edited without
+   pushing history entries, so an always-on snapshot would let an undo of an unrelated
+   action silently revert a rename made afterwards.
+6. **Dead duplicate `ensureFreeRouteSlot`** removed from `js/routes.js`. The live one is in
+   `js/ui_menus.js`, which loads later and had always overwritten it.
+7. **Save/load a single route** — one new column in the Route Manager row. See
+   `route_file_spec.md`.
+8. **Pathfinder scaling** (WP0 of the forcing spec). Cube-coordinate bucket index plus
+   parent pointers. A 19-leg route across ~16,000 worlds went from **25.3 s of frozen
+   browser to 0.2 s**; growth is now linear rather than quadratic. Proved route-identical
+   across 19 scenarios and 2,603 segments.
+
+### 0.0.1 Two traps this session paid for — do not rediscover them
+
+- **`backdrop-filter` on `.draggable-palette` makes it the containing block for
+  `position:fixed` descendants**, and its `overflow:hidden` then clips them. Any dropdown,
+  tooltip or popover placed inside `#route-window`, `#hex-editor`, `#filter-modal`,
+  `#border-window` or `#region-window` will be displaced by exactly the palette's top-left
+  offset and vanish once the window is dragged. Portal it to `<body>` while open and return
+  it home on close. The symptom is "the list never appears" — it IS built, `display:block`,
+  correct contents, painted somewhere invisible. Diagnose by measuring the offset: if it
+  equals the palette's top-left, it is this.
+- ~~**A hex within N of another can be up to ~1.5N away in offset `r`**, so
+  `_buildEmptyHexCandidates` under-collects empty hexes at the fringe.~~
+  **FALSE ALARM — RETRACTED 2026-09-01. Do not "fix" this.** Measured against the app's own
+  `getHexDistance` for N = 1..6, from origin columns of both parities: **max |Δq| = N and
+  max |Δr| = N exactly.** In this app's odd-q, flat-top layout the offset `r` coordinate
+  absorbs the column shift (`r = z + floor(q/2)`), so a `±N` box in `(q,r)` is precisely
+  sufficient — it is the general warning about offset coordinates applied to a layout where
+  it does not bite. `_buildEmptyHexCandidates` was then audited directly against an
+  exhaustive scan of the whole grid at maxJump 1, 2, 3, 4 and 6 on a 249-world sparse map:
+  **0 missed and 0 extra at every range.** The function is exact. The wider caution about
+  offset coordinates is still worth holding — it is simply not true of these two axes.
+
+### 0.0.2 The next feature — SUPERSEDED, read this first
+
+**Route "forcing" was designed in full on 2026-08-19 and then DROPPED on 2026-08-27.**
+Everything below the line in the old version of this section — the filter-relaxing second
+pass, the weighted penalty search, `forced: true` segment flags, dashed rendering, the
+"Detour outside the filter if needed" checkbox — **is not being built.** Do not resurrect it
+without talking to Sean. That spec has been rewritten as `route_partial_spec.md`; its §13
+records what forcing was and why it went.
+
+**What replaced it: partial route generation.** From a power user, via Sean:
+
+> "I personally like it to generate as far as it can so I can manually bridge it and tell it
+> to continue. That's the least amount of work."
+
+So: when a Point-to-Point leg cannot be routed, the generator commits the route as far as
+the search actually reached — call that world **C**, the reachable world closest to the
+target — names it, and stops. The user bridges with a waypoint and regenerates, which is
+0.2 s at Imperium scale post-WP0.
+
+**Decisions, settled 2026-08-27:**
+
+| | |
+|---|---|
+| Max Jump, the filter, Allow Empty Hexes | all **hard**. Nothing is relaxed, ever. This is the whole simplification |
+| Multi-leg | **stop at the first shortfall.** Later legs are not attempted, so the route stays ONE unbroken chain — which is why `getRouteSystemList` needs no change |
+| C | the reachable world **closest to the target**, tie-broken by fewest hops then world-array order |
+| C must be a **world** | never an empty hex, even in Allow Empty Hexes mode. C exists to be bridged from, and a route ending in deep space is a jump to nowhere |
+| No progress | if nothing reachable is closer than the start, there is no partial. Report the plain failure |
+| Control | a **checkbox, default off**, so today's one-and-done behaviour is untouched |
+| The strict failure message names C too | even with the checkbox off. Pure information, changes no state |
+| A route that stops short **is a route** | it commits, with the shortfall marked. This does change what a route slot can hold |
+
+### 0.0.2.1 Progress — v0.17.3 partial routes
+
+| Step | State |
+|---|---|
+| 1. Waypoint input top clipped by its scroll container | **DONE** — `hex_map.html`, padding on `#route-auto-p2p-waypoints-list` |
+| 2. Close v0.17.2 | **DONE** — dated 2026-08-19 |
+| 3. `_autoAssignXmlRoutes` + `applyLoadedMapData` undo | **DONE** — both now pass `includeRouteDefinitions` |
+| 4. Rebuild test harness into `utilities/` | **DONE** — see §0.0.5 |
+| 5. Engine: partial generation | **DONE** — see the contract below |
+| 6. Failure message names C | **DONE** — `_p2pFailureMessage`, plus its toast 6s -> 9s |
+| 7. The checkbox + persistence + toast | **DONE** — `route-auto-p2p-allow-partial`, "Build as far as possible" |
+| 8. Marker at C + the panel line | **DONE** — dashed ring in `renderer.js`, notice + STOPS HERE row in the panel, `getRouteShortfall()` staleness guard in `routes.js`. **Amended 2026-08-27:** the guard now tests C's *degree*, not mere presence — a route manually extended past C used to keep the ring while visibly carrying on through it. No dismiss control, by design: the mark stays purely derived |
+| 9. Docs, spec rewrite, changelog | **DONE** — v0.17.3 bumped in all 4 places; 6 changelog entries; `help_routes.md`; spec rewritten as `route_partial_spec.md` |
+
+**The engine contract, as built (step 5):**
+
+- `_bfsPath(startId, endId, worlds, maxJump, worldById, outBest)` and
+  `_bfsPathWithEmpty(..., maxEmptyJumps, outBest)` take an **optional** out-parameter. Their
+  `path | null` return is unchanged. When `outBest` is supplied and the search exhausts, it
+  is filled with `{ id, path, distance, hops }`. **All tracking is behind a null check**, so
+  Custom Network and BTN — which calls the search once per qualifying world pair — pay
+  nothing.
+- `generatePointToPointRoute(..., maxEmptyJumps, allowPartial = false)` returns
+  `{ segments, failure, shortfall }`. `shortfall` is
+  `{ legIndex, total, fromId, targetId, reachedId, distance, finalStop }`, non-null only
+  when a partial route was committed. `failure.reachedId` / `failure.shortfallDistance` are
+  populated on a strict failure so the message can name C; both are null when nothing
+  reachable was closer than the leg's own start.
+- **`best` is requested on every P2P run**, not only when `allowPartial` is on, because the
+  strict failure message wants C as well. Measured cost at 16,000 worlds: full-exhaustion
+  leg 31.4 → 32.4 ms, 19-leg route 147 → 151 ms. Long leg unchanged.
+- **Proved not to disturb pass 1:** `utilities/route_corpus.js` reports all 38 scenarios and
+  18,079 segments identical with `allowPartial` off.
+
+### 0.0.3 Where the code is
+
+| Thing | Where |
+|---|---|
+| Route generation entry points | `js/routes.js` — `generatePointToPointRoute`, `generateAutoRoutes`, `generateXboatRoutes`, `generateBTNRoutes` |
+| The pathfinder + new index | `js/routes.js` — `_bfsPath`, `_bfsPathWithEmpty`, `_buildWorldIndex`, `_getWorldIndex`, `_indexNeighbours` |
+| Atomic generation | `js/ui_menus.js` — `_generateIntoSlot` |
+| Route Manager UI, rows, panels | `js/ui_menus.js` — `renderRouteWindow`, `openRouteAutoPanel`, `getRouteSystemList` |
+| Route files | `js/ui_menus.js` — `exportRouteFile`, `_parseRouteFile`, `importRouteFile`, `_pickRouteFileFor` |
+| Autocomplete + its portal | `js/ui_menus.js` — `setupWorldAutocomplete`, `_wacPortalOpen`, `_wacHideActive` |
+| Phantom-slot cleanup | `js/ui_menus.js` — `getOrphanRouteDefinitions`, `renderOrphanRouteNotice` |
+| P2P panel markup | `hex_map.html` — `#route-auto-config-p2p`, around line 2796 |
+| Undo | `js/core.js` `saveHistoryState`, `js/keyboard_shortcuts.js` `_restoreRouteDefinitions` |
+
+### 0.0.4 Housekeeping not yet done
+
+- ~~**The v0.17.2 changelog entry is still marked "In Progress"**~~ **DONE 2026-08-27.**
+  Dated `2026-08-19` in both `changelog.md` and `README.md` — the date the eight items were
+  finished and committed, matching the sibling v0.17.1 entry, rather than the later date the
+  series was formally closed. `APP_VERSION`, `APP_BANNER`, the splash screen and the
+  shortcut help panel already read `v0.17.2` and needed no change.
+- The eight shipped items are committed as `aeeb884`; only directives were outstanding
+  after that.
+- **Unrelated, noticed while closing this out:** `html_extract_manifest.md` OPEN-2 (and its
+  §9.1 note) still says `changelog.md` reads `[v0.17.0.1] - In Progress`. It does not — that
+  entry is dated `2026-08-10`. OPEN-2 is stale on the dating point; whether its *other*
+  claim holds — that entry 1 is contradicted by entries 2 and 4 in the same section — was
+  not checked here.
+
+### 0.0.5 The test harness — REBUILT AND COMMITTED 2026-08-27
+
+Last session's Playwright scripts lived in a session temp directory and were lost. They have
+now been rebuilt and **committed to `utilities/`**, so this cannot happen again. Sean
+approved adding them to the repo.
+
+| File | What |
+|---|---|
+| `utilities/route_test_common.js` | Shared bootstrap: launches `hex_map.html` past the splash, builds a deterministic map, fingerprints segments |
+| `utilities/route_corpus.js` | The corpus differ — 19 scenarios × 2 maps = **38 scenarios, ~18,000 segments** |
+| `utilities/route_perf.js` | The performance measure — long leg, full-exhaustion leg, and a 19-leg route at six map sizes |
+| `utilities/route_continue.js` | Continue — 15 checks, drives the real panel (v0.17.4) |
+| `utilities/route_combine.js` | Combine — 13 checks, including eligibility rejection (v0.17.4) |
+| `utilities/filter_persistence.js` | R9 — 11 checks across restart, store, save file and indicator (v0.17.4) |
+| `utilities/otu_import_undo.js` | Multi-sector import undo — 6 checks, drives the real modal **offline** by seeding the importer's localStorage cache and stubbing `fetch` to throw (v0.17.4) |
+
+**Every suite carries a negative control**, and this is not ceremony. Three of the four
+would pass vacuously without one: "nothing is hidden" passes on a map where the filter never
+ran; "the route is a chain" passes on an empty slot; "Ctrl+Z changed nothing" passes when the
+undo stack is empty *however broken undo is*. Each control removes the behaviour under test
+and asserts the check fails. Add one to anything new.
+
+**Usage, from the repo root:**
+
+```
+node utilities/route_corpus.js --out tmp/before.json     # before a change
+node utilities/route_corpus.js --against tmp/before.json # after — exits 1 if routes moved
+node utilities/route_perf.js --json tmp/perf.json
+```
+
+`tmp/` is gitignored, which is deliberate: the harnesses are committed, the baselines are
+regenerated fresh each time (~30 s) rather than stored.
+
+**Properties that make it worth trusting** — each was verified, not assumed:
+
+- **Deterministic.** Two runs of unchanged code produce byte-identical corpora. The map is
+  built by a frozen LCG in `route_test_common.js`, *not* the app's `mulberry32`, so the
+  corpus cannot drift when `js/core.js` changes. Fingerprints are sorted and carry nothing
+  time-based.
+- **Sensitive.** A tampered corpus (2 segments removed from one scenario, 1 fake segment
+  added to another) is caught in both directions, naming the exact segments, exit code 1.
+- **Not vacuous.** The first draft passed `filteredHexIds: []` while `filteredOnly` was
+  true, so the traversal graph held only the stops and **every P2P scenario silently
+  produced zero segments**. A corpus of zeroes compares equal to itself forever. The
+  scenario segment counts are printed on every run for exactly this reason — read them.
+  The only legitimate zeroes are `p2p_island_*` (unreachable by design) and `p2p_j2` on the
+  sparse multi map.
+- **Exercises every generator.** XBoat needs `starport`/`tl`/`pop`/`tradeCodes`/bases for
+  `calculateT5Ix`; BTN needs a finite `data.WTN`. Omitting either does not error — it
+  silently yields an empty route. The world generator's `tl` and `pop` ranges are tuned so
+  Ix reaches 4+, because a flat spread made the app's default `minIx: 4` find nothing.
+
+**Baseline captured 2026-08-27**, before any partial-route work, in `tmp/perf_baseline.json`
+and `tmp/corpus_baseline.json`. The perf numbers independently reproduce the spec's post-WP0
+§9.1 table:
+
+|  worlds | long leg | no path (full exhaustion) | 19-leg route |
+|--------:|---------:|--------------------------:|-------------:|
+|     432 |   1.2 ms |                      1.0 ms |       2.0 ms |
+|   1,152 |   2.5 ms |                      2.2 ms |       5.3 ms |
+|   2,512 |   4.8 ms |                      4.7 ms |      15.7 ms |
+|   5,712 |   8.8 ms |                     10.8 ms |      36.1 ms |
+|  10,192 |  13.3 ms |                     19.7 ms |      86.0 ms |
+|  15,952 |  19.7 ms |                     31.4 ms |     147.3 ms |
+
+Growth is linear — worlds ×1.57 → time ×1.48 to ×1.71. Compare any future reading on the
+same machine; an idle laptop and a busy one differ by more than some changes being measured.
+
+**Bootstrapping note:** open `hex_map.html` via `file://`, click `#btn-launch-app` to get
+past the splash, then drive the app through `page.evaluate` — all the generators and
+`hexStates` are globals. Note `hexStates` is **empty** on a fresh launch; a harness must
+build its own map. Redo is **Ctrl+Shift+Z**, not Ctrl+Y. Escape closes the route panel.
+
+### 0.0.7 R9 — the pattern worth carrying forward
+
+A filter survived a browser restart while its input fields did not, so the map reopened
+filtered by criteria present nowhere in the UI. Reported 2026-07-30, could not be reproduced,
+parked for a year, reported again 2026-09-01 and fixed the same day.
+
+**The pattern: a derived value stored on the thing it describes gets persisted along with
+it.** `applyActiveFilters()` writes its verdict onto each hex as `state.isHiddenByFilter`;
+`db_manager` persists hex states *whole* (`store.put(state, hexId)`), and so does the Map
+JSON save. So the filter's result was saved and its inputs were not.
+
+**The tell: two functions answering the same question from different sources.**
+`hasAnyActiveFilter()` reads the DOM; `getFilteredHexIds()` reads the persisted flags. After
+a restart they flatly disagreed. That disagreement *is* the bug, stated in one line — worth
+grepping for elsewhere.
+
+**Why it hid for a year:** the flag only reached disk if a save ran *while* the filter was
+applied. Filtering alone pushes no history entry, so whether it reproduced depended entirely
+on what you did next.
+
+**The consequence nobody reported** was the serious one: P2P passes `filteredOnly = true`
+with `getFilteredHexIds()`, so route generation was silently restricted to the survivors —
+measured, a nine-segment detour where five direct segments existed.
+
+**The fix, three parts:** recompute after `loadFromDB()` (`input_init.js`), which also
+self-heals an already-polluted store; `stripHexViewState()` (`core.js`) applied at all five
+persistence boundaries; and an always-visible indicator, because the root usability failure
+is that **a filtered map is indistinguishable from a sparse one.**
+
+### 0.0.6 Open items, none blocking
+
+- ~~`_autoAssignXmlRoutes` (`js/io_manager.js`) calls `saveHistoryState` **without**
+  `includeRouteDefinitions`~~ **FIXED 2026-08-27.** Now passes
+  `{ includeRouteDefinitions: true }`. Verified in-browser: an import that renames and
+  recolours two slots and adds 3 segments is fully reverted by Ctrl+Z and fully restored by
+  Ctrl+Shift+Z. A negative control — stripping the option at runtime — confirms the test
+  detects the bug rather than passing vacuously.
+- **Two findings from the "check `js/otu_importer.js` for the same" sweep:**
+  - `js/otu_importer.js` contains **no `saveHistoryState` call at all**, so the option does
+    not apply there. The *universe* import (~line 476) deliberately clears `undoStack` and
+    `redoStack` — it wipes IndexedDB and rebuilds a 16×8 grid, so it is a new-document
+    operation, correctly not undoable. But the **multi-sector** import's `bulkMode` comment
+    ("skip per-sector saveHistoryState … all done once after the loop") describes a
+    deferred snapshot that **does not exist** in the post-loop block — that block does
+    `reapplyAllRules`, `applyActiveFilters`, `syncAllHexes`, `saveSectorNames` and no
+    history save. **FIXED 2026-09-01.** `runImport()` now clears `undoStack` and `redoStack`
+    the way `executeUniverseImport()` always has, and both copies of the false `bulkMode`
+    comment are corrected. **The behaviour was worse than "not undoable":** reproduced in a
+    browser, Ctrl+Z after an import *looked* like it worked — the imported hexes did vanish
+    — while actually restoring a much older snapshot and silently reverting an unrelated
+    edit made before the import. Snapshotting instead was rejected: a pre-import copy of
+    `hexStates` is exactly the size the undo cap (5 on large grids) exists to avoid. The
+    stacks are cleared **before** the work, so an import that fails partway cannot leave a
+    stale snapshot either. Regression test: `utilities/otu_import_undo.js`, 6 checks, which
+    drives the real modal entirely offline by seeding the importer's localStorage sector
+    cache and stubbing `fetch` to throw.
+  - ~~**`applyLoadedMapData` (`js/io_manager.js`, "Load Map JSON") has the identical
+    bug**~~ **FIXED 2026-08-27** on Sean's go-ahead. It called plain
+    `saveHistoryState('Load Map JSON')` and then replaced `window.routeDefinitions`
+    wholesale from the file, so Ctrl+Z restored hexes and segments but left the loaded
+    file's route slots in place — segments came back belonging to slots that were no longer
+    theirs. Verified in-browser: loading a file carrying two foreign slots over a map with a
+    renamed, recoloured slot 1 is fully reverted by Ctrl+Z (all 9 slots and 24 hexes back,
+    the custom name and colour intact) and restored by Ctrl+Shift+Z.
+- Three file-shaped icons now sit in each Route Manager row (⬇ CSV, save, load), hard to
+  tell apart without hovering. Standing reservation needing Sean's eye in real use —
+  `route_file_spec.md` OQ-1.
+- ~~`getAutoRouteGroups()` and `clearAutoRouteGroup()` in `js/routes.js` appear to have no
+  callers.~~ **DONE 2026-09-01 — verified dead and removed.** No reference in any `.js`,
+  `.html`, `.md` or `.json` in the repo, dynamic-dispatch spellings included; the "Clear
+  modal" the first was written to populate no longer exists. Corpus re-run after removal:
+  38 scenarios, 18,079 segments, identical.
+
+### How this work was verified — reuse the method
+
+Every fix was reproduced in a real browser with Playwright (already in `node_modules`)
+before being fixed, and re-verified after. `node --check` alone has repeatedly missed real
+bugs in this codebase. The highest-value pattern used here: **capture a corpus of generated
+routes before a refactor, re-run after, diff.** That is what made "WP0 changes no routes" a
+measurement rather than a claim.
+
+---
+
 
 **Companion manifest:** `directives/html_extract_manifest.md` — the wiki export, and where
 **all recent work has happened**. Read it before touching `js/export_core.js`,
@@ -16,6 +386,10 @@ the reference for resuming RTT and AoW editor support.
 ---
 
 ## 0. Current State (2026-08-06)
+
+> **Superseded by §0.0 above (2026-08-19).** The section below describes the project as
+> of the exports series and is kept for the System Editor detail it carries. Where the two
+> disagree about what is current, §0.0 is right.
 
 ### 0.1 Where the project is
 

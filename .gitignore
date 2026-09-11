@@ -26,3 +26,7 @@ package-lock.json
 # OS
 .DS_Store
 Thumbs.db
+
+# Editor / IDE (local to one machine, not part of the app)
+*.code-workspace
+.vscode/

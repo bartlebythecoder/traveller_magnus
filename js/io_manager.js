@@ -117,8 +117,11 @@ function setupSaveLoad() {
         };
 
         // Build hexStates as a plain object (current format, backward compatible)
+        // stripHexViewState (core.js): a saved map must carry map data only. The
+        // filter's per-hex verdict is derived from a form this file cannot contain,
+        // so shipping it would hand whoever opens the file a filter they never set.
         const hexObj = {};
-        hexStates.forEach((value, key) => { hexObj[key] = value; });
+        hexStates.forEach((value, key) => { hexObj[key] = stripHexViewState(value); });
 
         const stateObj = {
             version:              APP_VERSION,
@@ -166,7 +169,8 @@ function setupSaveLoad() {
                 // ---- Chunked save ----
                 const sizeMB     = Math.round(jsonStr.length / (1024 * 1024));
                 const numChunks  = Math.ceil(jsonStr.length / SAVE_CHUNK_SIZE);
-                const entries    = Array.from(hexStates.entries());
+                const entries    = Array.from(hexStates.entries())
+                                        .map(([id, st]) => [id, stripHexViewState(st)]);
                 const perChunk   = Math.ceil(entries.length / numChunks);
 
                 const confirmed = confirm(
@@ -593,7 +597,11 @@ function applyLoadedSettings(settings) {
 }
 
 function applyLoadedMapData(parsedData) {
-    saveHistoryState('Load Map JSON');
+    // includeRouteDefinitions, because loading a map replaces window.routeDefinitions
+    // wholesale from the file below. Without it Ctrl+Z restored the previous hexes
+    // and segments but left the loaded file's route slots in place, so the segments
+    // came back belonging to slots that were no longer theirs.
+    saveHistoryState('Load Map JSON', { includeRouteDefinitions: true });
     hexStates.clear();
 
     if (parsedData.hexStates) {
@@ -1989,7 +1997,11 @@ function _applyXmlRoutesForGroup(segments, slotNum, sectorX, sectorY, targetRout
 // ── Auto route assigner ───────────────────────────────────────────────────────
 
 function _autoAssignXmlRoutes(groups, slotNum) {
-    saveHistoryState('Import XML Metadata');
+    // includeRouteDefinitions, because this function edits the definitions and
+    // not just the segments: ensureFreeRouteSlot() creates slots, and each group
+    // recolours and may rename the slot it lands in. Without it Ctrl+Z took the
+    // segments back but left the created, recoloured and renamed slots behind.
+    saveHistoryState('Import XML Metadata', { includeRouteDefinitions: true });
     const coordLookup = _buildSectorCoordLookup();
     const sectorX     = (slotNum - 1) % gridWidth;
     const sectorY     = Math.floor((slotNum - 1) / gridWidth);

@@ -12,6 +12,8 @@
    - [3.1 X-Boat Routes](#31-x-boat-routes)
    - [3.2 Custom Network](#32-custom-network)
    - [3.3 Point-to-Point](#33-point-to-point)
+     - [Continuing a Route](#continuing-a-route)
+     - [Combining Two Routes](#combining-two-routes)
    - [3.4 BTN Trade Routes](#34-btn-trade-routes)
 4. [Managing Routes](#4-managing-routes)
 5. [FAQ](#5-faq)
@@ -35,12 +37,16 @@ Each row in the Route Window represents one route slot:
 | **Shortcut key** | A single key you can press anywhere on the map to toggle this route's visibility. Letters `f` and `r` are reserved and cannot be used. |
 | **Vis checkbox** | Toggles route visibility on the map without deleting segments. |
 | **C (Clear)** | Removes all map segments for this slot. Can be undone with **Ctrl+Z**. |
+| **CSV** | Exports a spreadsheet of the **worlds** this route passes through, with a choice of fields. A reference table — it cannot be loaded back in. Labelled with a word rather than an icon precisely because it is *not* one of the two route-file buttons beside it. |
+| **Save to file** | Writes this route's **connections** to a `.json` route file. See [Saving and Loading a Route](#saving-and-loading-a-route). |
+| **Load from file** | Reads a route file into this row. Available even when the slot is empty. |
+| **🔗 (Combine)** | Folds another route into this one. Only lit when a route exists that joins this one end to end. See [Combining Two Routes](#combining-two-routes). |
 | **⚙ Auto** | Opens the Automation Panel where you choose a generation method and run it. |
 | **× (Delete)** | Deletes the slot and all its segments entirely. Can be undone with **Ctrl+Z**. |
 
 ### The Automation Panel
 
-Clicking **⚙ Auto** on any row opens a sub-panel attached to that slot. You pick one of four **automation types** using the radio buttons, configure its parameters, and click **Generate**. Each generation run replaces all existing segments for that slot (use Ctrl+Z to revert).
+Clicking **⚙ Auto** on any row opens a sub-panel attached to that slot. You pick one of four **automation types** using the radio buttons, configure its parameters, and click **Generate**. Each generation run replaces all existing segments for that slot (use Ctrl+Z to revert) — unless you tick **Continue existing route** in the Point-to-Point builder, which adds to the route instead. See [Continuing a Route](#continuing-a-route).
 
 ---
 
@@ -217,6 +223,123 @@ Remove a waypoint with the × button on its row.
 | **Max Jump** | Maximum single-hop distance for all legs. |
 | **Allow Empty Hexes** | Permit hops *through* uninhabited hexes while pathfinding. Independent of choosing an empty hex as a stop, which needs no setting. |
 | **Max Empty Jumps** | Max consecutive empty-hex hops before a system is required. A deep-space *stop* does not count against this — it is a destination, not a hop of convenience — and neither does starting in one. |
+| **Build as far as possible** | When a leg cannot be routed, keep the route up to the closest world it *could* reach instead of failing. Off by default. See below. |
+| **Continue existing route** | Add to the route already in this slot rather than replacing it. Off every time the panel opens. See [Continuing a Route](#continuing-a-route). |
+
+#### Build As Far As Possible
+
+Normally a Point-to-Point route is all or nothing: if any leg cannot be routed, nothing is
+drawn and nothing on the map changes. That is the right behaviour for a short route you can
+simply rebuild with different settings.
+
+It is the wrong behaviour for a long route across many sectors, where a single unroutable
+leg throws away nineteen good ones and leaves you to work out *why* with no evidence.
+
+Ticking **Build as far as possible** changes only what happens when the search comes up
+short. The route is drawn as far as it actually got — up to the closest world it could reach
+to the stop it was aiming for — and that world is marked:
+
+- **On the map**, with a dashed ring in the route's own colour.
+- **In the Route Systems panel**, with a notice naming the stop that could not be reached
+  and how many hexes away it is, and a **STOPS HERE** tag on the world the route ends at.
+- **In the panel footer**, which reads `… · incomplete`.
+
+To carry the route on, add a waypoint near where it stopped and generate again.
+
+**The mark looks after itself.** It is not a flag you have to clear — it is simply a
+statement that the route ends there, and it disappears as soon as that stops being true.
+So it goes away when you regenerate the route, when you extend it past that point by hand
+(hold the route's shortcut key and drag), when you connect it through to the stop it
+missed, or when you delete the segments. Extending the *other* end of the route leaves it
+in place, because the route still stops where it says it does.
+
+**What it does not do.** This is not a "force" option. Nothing about how paths are found
+changes:
+
+- **Max Jump is never exceeded.** It is a claim about what your ships can do, and a route
+  nobody can fly is worse than no route.
+- **The filter is obeyed exactly as before.** The route will not detour through worlds you
+  have filtered out.
+- **Allow Empty Hexes still means what it says.** If it is off, the route will not enter
+  empty hexes to get further, and the world it stops at is always a real world — never a
+  point in deep space.
+
+Because all three still hold, **a route may still stop well short of where you wanted it**.
+A rift wider than your Max Jump with nothing in it cannot be crossed by any of this. What
+you get is the part of the route that works, plus the exact location and size of the
+problem.
+
+**On multi-leg routes it stops at the first leg it cannot complete** rather than skipping
+ahead to later legs. That keeps the route a single unbroken chain, so the Systems panel can
+still list it in travel order.
+
+#### Continuing a Route
+
+A long route is rarely built in one go. **Continue existing route** lets you add to a route
+that already exists instead of entering all of its stops again and rebuilding it.
+
+Tick the box and the form changes to describe the *new* piece rather than the whole route:
+
+- **Start** is filled in with the world at the end of the route.
+- **End** is left blank, for wherever you want to go next.
+- **Waypoints** are cleared, ready for stops belonging to the new piece.
+
+Untick it and the whole setup comes straight back, so there is no cost to looking.
+
+Enter an End, optionally some waypoints, and generate. **The rest of the route is not
+touched** — not re-searched, not redrawn — so anything you have adjusted by hand stays as
+you left it, and a nineteen-leg route is not rebuilt to add a twentieth.
+
+**The Start must be one of the route's two ends**, and either will do: a route can be
+extended backwards from where it begins just as easily as onwards from where it finishes.
+Type a world from the middle and the generation is refused, with a message naming the two
+ends you can actually continue from. This is not fussiness — a route that forks has more
+than two ends, and the Systems panel can only list a route in travel order while it runs
+from one end to another.
+
+**The route's saved setup grows with it**, so reopening the builder afterwards still shows
+every stop in travel order, and an ordinary Generate later rebuilds the whole route rather
+than just the last piece. (A route that was imported, loaded from a file, or drawn by hand
+has no saved setup to grow — it can still be continued as often as you like, but the
+builder cannot reconstruct stops it never knew about, so it does not pretend to.)
+
+**The box is always off when the panel opens.** Generate therefore always means "replace"
+unless you have said otherwise for this press, and can never quietly add to a route when
+you meant to rebuild one.
+
+It works on **any** route that runs from one world to another, including imported ones.
+Where there is nothing to continue — an empty slot, or a route that branches or forms a
+loop — the box is greyed out and its tooltip says which.
+
+If the new leg finds no path, the route is left exactly as it was. If the new leg happens
+to route back through the route's own worlds, it is still drawn — the connections are real
+— but you are told that the route now branches and will be listed alphabetically rather
+than in travel order.
+
+#### Combining Two Routes
+
+Where **Continue** adds a new leg, **Combine** joins a route you already have. Click the
+**🔗** button on the row of the route you want to *keep*, and pick from the list of routes
+that join it.
+
+- The route you clicked keeps its **name, colour and shortcut key**.
+- The other route's connections move across and take on that colour.
+- The other route's now-empty slot is **removed**, freeing its shortcut key.
+
+**Only combinations that give a single unbroken route are offered.** Two routes meeting in
+the *middle* of one of them are not, because the result forks; nor are two that never touch.
+The test is made on **what the combined route would actually look like**, so a pair that
+meets at one end but doubles back over itself elsewhere is excluded as well — and a route
+that exists in two separate pieces *is* offered, when the route you are combining it into
+bridges the gap between them.
+
+The button is only lit when something is available, so which routes can be joined is visible
+without clicking anything. You are asked to confirm first — told where the two meet and how
+many connections will move — and **Ctrl+Z** undoes the whole thing, bringing the absorbed
+route's slot back with its name and shortcut key intact.
+
+**Even with the box off**, a failed route now tells you the closest world it could reach and
+how far short that leaves it — which is usually the world you want to add as a waypoint.
 
 #### How the Filter Affects P2P
 
@@ -230,8 +353,13 @@ This means you can use the filter to restrict a route to a specific allegiance o
   - Max Jump is too low for the gap between worlds.
   - The active filter excludes all valid intermediate worlds.
   - A stop lies outside the sector grid entirely (an empty hex inside it is fine).
+  - The message names the closest world the search *could* reach and how many hexes short
+    that leaves it. That world is usually the one to add as a waypoint.
 - Start and End must be different stops.
 - The Systems Panel displays P2P worlds in **order** (numbered 1, 2, 3…) rather than alphabetically.
+- A route built with **Build as far as possible** keeps its mark only for as long as the
+  route really does stop there. Regenerate it, extend it past that point by hand, connect it
+  through to the missed stop, or delete the segments, and the mark clears itself.
 
 ---
 
@@ -314,6 +442,26 @@ Click the **segment count pill** on any route row (when it shows a number, not a
 
 The footer shows the total segment count and world count. Click the × button or the pill again to close.
 
+### Saving and Loading a Route
+
+Two buttons on each route row move a single route in and out of a file — useful for keeping a route you may want back later, rebuilding one on a second map, or handing a trade network to another referee.
+
+- **Save** writes that slot's connections to a `.json` file named after the route, e.g. `route_Spinward_Main.json`. Greyed out when the slot has nothing in it.
+- **Load** reads a route file into the row you clicked. Always available, including on an empty slot — that is the normal case.
+
+**The file carries connections and nothing else.** No name, no colour, no shortcut key. A loaded route takes on the identity of whichever slot you put it in, which is why there is never anything to reconcile and nothing of yours is overwritten. If you want the route drawn in magenta and called "Spinward Main", set that slot up first and then load into it.
+
+| Situation | What happens |
+|---|---|
+| Loading into an empty slot | Happens straight away |
+| Loading into a slot that already has segments | Asks first, then replaces them. **Ctrl+Z restores what was there.** |
+| Loading the same file twice | Leaves one route, not two copies stacked on each other |
+| A route crossing several sectors | Saved and loaded whole, however many sectors it spans |
+
+**A route file only works on a map with the same sector grid it was saved from.** A file saved from a 7×5 map will not load into an 8×6 one; it is refused with an explanation rather than being drawn in the wrong place. The same applies to a file that is damaged, was written by a newer version of the application, or refers to a hex your map does not have. In all of these cases nothing is loaded and the map is untouched.
+
+**This is not the ⬇ button beside it.** That exports a spreadsheet of the *worlds* a route passes through — names, UWPs, trade codes and so on — for reading and printing. It records nothing about which hex joins which, so it cannot be loaded back in. The two exist side by side because they answer different questions: ⬇ is *what is on this route*, Save is *what this route is*.
+
 ### Clearing on Hex Delete
 
 If you delete a populated hex from the map (right-click → Clear Hex), all route segments connected to that hex are automatically removed from every route slot.
@@ -380,6 +528,16 @@ These keys are reserved for the Filter window (`f`) and the Route Window (`r`). 
 
 **Q: Some worlds on my BTN route generation were "skipped." Why?**  
 BTN generation requires each world to have a pre-computed WTN (World Trade Number), which comes from socioeconomic data. Worlds that only have a basic mainworld UWP but have not had socioeconomics generated will be skipped. The generation toast reports how many were included and how many were skipped.
+
+---
+
+**Q: Can I send a route to another referee?**
+Yes. Press **Save** on its row and send them the `.json` file. They load it into any slot in their own Route Manager and it takes on that slot's name and colour — so the route arrives looking however they have that slot set up, not however you had yours. Their map must use the same sector grid as yours, and should have worlds in the hexes the route runs through; the route will draw regardless, but a route through empty space is rarely what was intended.
+
+---
+
+**Q: I loaded a route file and the route is the wrong colour.**
+That is intentional. A route file carries no colour — it takes the colour of the slot you loaded it into. Change the slot's colour swatch and the route follows immediately.
 
 ---
 

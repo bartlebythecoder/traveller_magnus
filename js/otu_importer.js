@@ -306,6 +306,28 @@
 
         closeModal();
 
+        // A multi-sector import is a new-document operation, not an edit.
+        //
+        // It replaces whole sectors — tens of thousands of hexes — and takes no
+        // history snapshot of its own. That used to leave whatever snapshot
+        // happened to be on top of the undo stack sitting there untouched, so
+        // Ctrl+Z afterwards LOOKED like it undid the import (the imported hexes
+        // did disappear) while actually restoring a much older state and silently
+        // discarding editing done before the import. Measured 2026-09-01: with two
+        // ordinary edits made beforehand, one was reverted by an undo the user
+        // would reasonably read as "undo the import".
+        //
+        // Taking a snapshot instead was considered and rejected: a pre-import copy
+        // of hexStates is precisely the size the undo cap — already down to 5
+        // snapshots on large grids — exists to avoid. So this matches
+        // executeUniverseImport(), which has cleared the stacks all along for the
+        // same reason.
+        //
+        // Cleared BEFORE the work rather than after, so an import that fails
+        // partway through cannot leave a stale snapshot behind either.
+        window.undoStack = [];
+        window.redoStack = [];
+
         // Fetch and import one sector at a time. Each sector makes two API calls
         // (TSV then metadata) with a 1-second pause between each live call.
         const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -339,8 +361,13 @@
 
                     const text = tsvFromCache ? cached : await fetchAndCacheSector(name);
 
-                    // bulkMode=true: skip per-sector saveHistoryState, rule re-application,
-                    // allegiance scan, draw, and DB write — all done once after the loop.
+                    // bulkMode=true: skip the per-sector rule re-application,
+                    // allegiance scan, draw and DB write — those are done once after
+                    // the loop. NOT saveHistoryState: this comment used to promise a
+                    // deferred snapshot "done once after the loop" that was never
+                    // written, and the post-loop block does no history save. A bulk
+                    // import is deliberately not undoable — see where the undo stacks
+                    // are cleared, above.
                     if (typeof importT5Tab === 'function') {
                         importT5Tab(text, name, slot, true);
                     } else {
@@ -539,8 +566,13 @@
 
                         const text = tsvFromCache ? cached : await fetchAndCacheUniverseSector(name);
 
-                        // bulkMode=true: skip per-sector saveHistoryState, rule re-application,
-                        // allegiance scan, draw, and DB write — all done once after the loop.
+                        // bulkMode=true: skip the per-sector rule re-application,
+                        // allegiance scan, draw and DB write — those are done once after
+                        // the loop. NOT saveHistoryState: this comment used to promise a
+                        // deferred snapshot "done once after the loop" that was never
+                        // written, and the post-loop block does no history save. A bulk
+                        // import is deliberately not undoable — see where the undo stacks
+                        // are cleared, above.
                         if (typeof importT5Tab === 'function') {
                             importT5Tab(text, name, defaultSlot, true);
                         } else {

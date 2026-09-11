@@ -986,6 +986,40 @@ function getWorldName(state) {
 // per input — waypoint rows are created and destroyed freely and would leak.
 let _wacActive = null;
 
+// ── Dropdown portal ──────────────────────────────────────────────────────────
+// position:fixed only means "positioned against the viewport" while no ancestor
+// establishes a containing block for it, and .draggable-palette establishes one:
+// its backdrop-filter makes the Route Manager the containing block for every
+// fixed descendant. The viewport coordinates measured above were therefore read
+// back as offsets from the window's own corner, so the list appeared ~112px
+// below its field — and vanished entirely, clipped by the palette's
+// overflow:hidden, once the window was dragged right or down. Parking the
+// dropdown on <body> while it is open is what makes those coordinates mean what
+// this code assumes. It goes home again on close, so removing a waypoint row
+// still disposes of that row's dropdown along with it.
+function _wacPortalOpen(dropdownEl) {
+    if (dropdownEl._wacHome) return;
+    dropdownEl._wacHome = dropdownEl.parentNode;
+    document.body.appendChild(dropdownEl);
+}
+
+function _wacPortalClose(dropdownEl) {
+    const home = dropdownEl._wacHome;
+    if (!home) return;
+    dropdownEl._wacHome = null;
+    home.appendChild(dropdownEl);
+}
+
+// Closes whichever dropdown is open. Global because a portaled dropdown is no
+// longer inside the panel: hiding the panel no longer hides it.
+function _wacHideActive() {
+    if (!_wacActive) return;
+    const { dropdownEl } = _wacActive;
+    dropdownEl.style.display = 'none';
+    _wacPortalClose(dropdownEl);
+    _wacActive = null;
+}
+
 function _wacPositionDropdown(inputEl, dropdownEl) {
     const r = inputEl.getBoundingClientRect();
     dropdownEl.style.width = `${r.width}px`;
@@ -1005,8 +1039,10 @@ function _wacPositionDropdown(inputEl, dropdownEl) {
 function _wacSyncPosition() {
     if (!_wacActive) return;
     const { inputEl, dropdownEl } = _wacActive;
-    if (!dropdownEl.isConnected || dropdownEl.style.display !== 'block') {
-        _wacActive = null;
+    // The input's liveness, not the dropdown's: a portaled dropdown is parented
+    // to <body>, so it stays connected even after its waypoint row is removed.
+    if (!inputEl.isConnected || dropdownEl.style.display !== 'block') {
+        _wacHideActive();
         return;
     }
     _wacPositionDropdown(inputEl, dropdownEl);
@@ -1017,6 +1053,13 @@ window.addEventListener('resize', _wacSyncPosition);
 
 function setupWorldAutocomplete(inputEl, dropdownEl) {
     let activeIndex = -1;
+
+    function hideDropdown() {
+        dropdownEl.style.display = 'none';
+        _wacPortalClose(dropdownEl);
+        if (_wacActive && _wacActive.dropdownEl === dropdownEl) _wacActive = null;
+        activeIndex = -1;
+    }
 
     function getMatches(query) {
         if (!query) return [];
@@ -1033,8 +1076,7 @@ function setupWorldAutocomplete(inputEl, dropdownEl) {
     function renderDropdown(matches) {
         dropdownEl.innerHTML = '';
         if (matches.length === 0) {
-            dropdownEl.style.display = 'none';
-            if (_wacActive && _wacActive.dropdownEl === dropdownEl) _wacActive = null;
+            hideDropdown();
             return;
         }
         matches.forEach((m) => {
@@ -1045,12 +1087,12 @@ function setupWorldAutocomplete(inputEl, dropdownEl) {
             item.addEventListener('mousedown', (e) => {
                 e.preventDefault();
                 inputEl.value = formatWorldLabel(m.hexId, m.name);
-                dropdownEl.style.display = 'none';
-                activeIndex = -1;
+                hideDropdown();
             });
             dropdownEl.appendChild(item);
         });
         activeIndex = -1;
+        _wacPortalOpen(dropdownEl);
         dropdownEl.style.display = 'block';
         _wacActive = { inputEl, dropdownEl };
         _wacPositionDropdown(inputEl, dropdownEl);
@@ -1083,11 +1125,10 @@ function setupWorldAutocomplete(inputEl, dropdownEl) {
             const hexId = items[activeIndex]?.dataset.hexId;
             if (hexId) {
                 inputEl.value = formatWorldLabel(hexId);
-                dropdownEl.style.display = 'none';
-                activeIndex = -1;
+                hideDropdown();
             }
         } else if (e.key === 'Escape') {
-            dropdownEl.style.display = 'none'; activeIndex = -1;
+            hideDropdown();
         }
     });
 
@@ -1097,7 +1138,7 @@ function setupWorldAutocomplete(inputEl, dropdownEl) {
     });
 
     inputEl.addEventListener('blur', () => {
-        setTimeout(() => { dropdownEl.style.display = 'none'; activeIndex = -1; }, 150);
+        setTimeout(hideDropdown, 150);
     });
 }
 
@@ -1183,36 +1224,23 @@ function getRouteSystemList(routeId) {
     const isP2P = segments[0].subtype === 'PointToPoint';
 
     if (isP2P) {
-        // Build adjacency map from segments
-        const adj = new Map();
-        segments.forEach(seg => {
-            if (!adj.has(seg.startId)) adj.set(seg.startId, []);
-            if (!adj.has(seg.endId))   adj.set(seg.endId,   []);
-            adj.get(seg.startId).push(seg.endId);
-            adj.get(seg.endId).push(seg.startId);
-        });
+        // walkRouteChain (js/routes.js) — the single definition of "is this one
+        // unbroken chain", shared with Continue and Combine so the three cannot
+        // drift apart.
+        //
+        // It is also STRICTER than the walk that used to live here, which tested
+        // only for exactly two degree-1 nodes. A chain plus a separate closed
+        // loop passes that test — the loop contributes no ends — and the walk
+        // then stopped at the end of the chain and returned ordered:true while
+        // silently omitting every world in the loop. Measured 2026-09-01: 3 of 6
+        // worlds listed, here and in the CSV export alike. walkRouteChain checks
+        // coverage and rejects it, so such a route now lists unordered — every
+        // world present — instead of ordered and incomplete.
+        const walk = walkRouteChain(segments);
+        if (walk.ok) return { ordered: true, worlds: walk.path };
 
-        // Endpoints are nodes with exactly one neighbour (degree 1)
-        const endpoints = [...adj.keys()].filter(id => adj.get(id).length === 1);
-
-        // Guard: if not a clean chain, fall back to unordered
-        if (endpoints.length !== 2) {
-            const allIds = [...new Set(segments.flatMap(s => [s.startId, s.endId]))];
-            return { ordered: false, worlds: allIds };
-        }
-
-        // Walk the chain from one endpoint to the other
-        const path = [endpoints[0]];
-        const visited = new Set([endpoints[0]]);
-        let current = endpoints[0];
-        while (true) {
-            const next = (adj.get(current) || []).find(n => !visited.has(n));
-            if (!next) break;
-            path.push(next);
-            visited.add(next);
-            current = next;
-        }
-        return { ordered: true, worlds: path };
+        const allIds = [...new Set(segments.flatMap(s => [s.startId, s.endId]))];
+        return { ordered: false, worlds: allIds };
     }
 
     // Network / XBoat / AutoRoute — collect unique IDs, sort by world name
@@ -1387,6 +1415,199 @@ function _buildRouteExportModal() {
 }
 
 /** Filename this route's CSV will be written as. Sanitised to a safe charset. */
+// ============================================================================
+// ROUTE FILES (save / load one route's connections)
+// ============================================================================
+// Spec: directives/route_file_spec.md
+//
+// A route file carries connections and nothing else — no colour, no name, no
+// group. Identity belongs to the slot you load into, which is what keeps this
+// feature small: the whole-sector XML importer has to *derive* identity from
+// the file, and every one of its failure modes (two routes merging because they
+// shared a colour, names lost, running out of slots) comes from that guesswork.
+// Here the user answered the question by choosing which row to load into.
+//
+// Distinct from the CSV beside it: that exports the *worlds* a route passes
+// through, richly and configurably, and carries no connections at all.
+
+const ROUTE_FILE_FORMAT  = 'asab-route';
+const ROUTE_FILE_VERSION = 1;
+
+function _routeFileFilename(routeName) {
+    return `route_${String(routeName).replace(/[^a-z0-9_\-]/gi, '_')}.json`;
+}
+
+/**
+ * Is this a hex that actually exists on the current grid?
+ *
+ * getHexCoords is lenient about malformed ids, so the round trip is the guard —
+ * the same test isVacantHex uses. Kept local rather than shared with core.js:
+ * two copies of a three-line idiom is not yet a duplication worth editing
+ * working generation code to remove.
+ */
+function _isRealHexId(hexId) {
+    if (typeof hexId !== 'string' || !hexId) return false;
+    const c = getHexCoords(hexId);
+    if (!c || !Number.isFinite(c.q) || !Number.isFinite(c.r)) return false;
+    return getHexId(c.q, c.r) === hexId;
+}
+
+/**
+ * Writes one route slot's connections to a .json file.
+ * Returns the filename on success, null otherwise.
+ */
+function exportRouteFile(routeId, routeName) {
+    const segs = (window.sectorRoutes || []).filter(r => r.routeId === routeId);
+    if (segs.length === 0) {
+        showToast(`"${routeName}" has no connections to save.`, 2500);
+        return null;
+    }
+
+    const payload = {
+        format:  ROUTE_FILE_FORMAT,
+        version: ROUTE_FILE_VERSION,
+        grid:    { width: gridWidth, height: gridHeight },
+        savedAs: routeName,
+        savedAt: new Date().toISOString(),
+        segments: segs.map(r => [r.startId, r.endId])
+    };
+
+    // subtype is topology, not decoration: getRouteSystemList lists a route in
+    // travel order only when it sees 'PointToPoint'. Recorded only when every
+    // segment agrees, so a slot holding mixed output makes no false claim.
+    const subtypes = new Set(segs.map(s => s.subtype));
+    if (subtypes.size === 1 && segs[0].subtype) payload.subtype = segs[0].subtype;
+
+    const filename = _routeFileFilename(routeName);
+    // downloadBlob, not a hand-rolled anchor — it defers blob-URL cleanup,
+    // without which large downloads intermittently produce no file at all.
+    const ok = downloadBlob(JSON.stringify(payload, null, 2), filename, 'application/json');
+    showToast(ok
+        ? `Saved ${segs.length} connection(s) to "${filename}" — check your browser's downloads.`
+        : `Save failed — "${filename}" could not be written. See the console for details.`,
+        4000);
+    return ok ? filename : null;
+}
+
+/**
+ * Validates route-file text. Pure — no side effects, nothing touched — so the
+ * whole error table can be exercised without a map loaded.
+ * @returns {{ok: true, data: Object} | {ok: false, error: string}}
+ */
+function _parseRouteFile(text) {
+    let data;
+    try {
+        data = JSON.parse(text);
+    } catch (_) {
+        return { ok: false, error: "That file isn't a route file — it could not be read as JSON." };
+    }
+
+    if (!data || data.format !== ROUTE_FILE_FORMAT) {
+        return { ok: false, error: "That isn't a route file. Route files are saved from the Route Manager." };
+    }
+    if (data.version !== ROUTE_FILE_VERSION) {
+        return { ok: false, error: `This route file is in format v${data.version}, which this version of the app cannot read.` };
+    }
+
+    const g = data.grid;
+    if (!g || !Number.isFinite(g.width) || !Number.isFinite(g.height)) {
+        return { ok: false, error: 'That route file does not say which sector grid it was saved from.' };
+    }
+    // Absolute hex ids on a resized grid still resolve to perfectly valid
+    // hexes — just the wrong ones — so this has to be a refusal rather than a
+    // silently misplaced route.
+    if (g.width !== gridWidth || g.height !== gridHeight) {
+        return { ok: false, error: `This route file was saved from a map of ${g.width}×${g.height} sectors. `
+            + `This map is ${gridWidth}×${gridHeight}. Route files don't survive a change to the sector grid.` };
+    }
+
+    if (!Array.isArray(data.segments) || data.segments.length === 0) {
+        return { ok: false, error: 'That route file contains no connections.' };
+    }
+
+    for (const pair of data.segments) {
+        if (!Array.isArray(pair) || pair.length !== 2) {
+            return { ok: false, error: 'That route file is damaged — one of its connections is not a pair of hexes.' };
+        }
+        for (const id of pair) {
+            if (!_isRealHexId(id)) {
+                return { ok: false, error: `This route file refers to a hex that doesn't exist on this map (${id}). Nothing was loaded.` };
+            }
+        }
+    }
+
+    return { ok: true, data };
+}
+
+/**
+ * Loads a route file into one slot, replacing whatever that slot held.
+ * The slot's name, colour, shortcut and visibility are never touched.
+ */
+function importRouteFile(routeId, routeName, file) {
+    readFileAsText(file).then(text => {
+        const parsed = _parseRouteFile(text);
+        if (!parsed.ok) { showToast(parsed.error, 5000); return; }
+
+        const data     = parsed.data;
+        const existing = (window.sectorRoutes || []).filter(r => r.routeId === routeId).length;
+        const source   = data.savedAs
+            ? `"${data.savedAs}" (${data.segments.length} connections)`
+            : `${data.segments.length} connections`;
+
+        // Replacing someone's work asks first; filling an empty slot does not.
+        if (existing > 0 && !window.confirm(
+            `Load ${source} into "${routeName}"?\n\n`
+            + `This replaces the ${existing} segment(s) currently in "${routeName}".\n`
+            + `It keeps that route's name and colour, and can be undone with Ctrl+Z.`)) return;
+
+        saveHistoryState(`Import route: ${routeName}`);
+        window.sectorRoutes = (window.sectorRoutes || []).filter(r => r.routeId !== routeId);
+
+        // The same mapping canvas_input.js uses for hand-drawn segments. An
+        // imported segment has to be indistinguishable from one drawn by hand
+        // on the same slot, or the renderer draws it on a different layer.
+        const typeMap = { 1: 'Xboat', 2: 'Trade', 3: 'Secondary' };
+        const type    = typeMap[routeId] || 'Filter';
+
+        data.segments.forEach(([startId, endId]) => {
+            const extras = { routeId };
+            // Filter routes are de-duplicated per group, so one is required.
+            if (type === 'Filter') extras.groupId = `import_${routeId}`;
+            if (data.subtype) extras.subtype = data.subtype;
+            // Deliberately no `color`: the renderer prefers the definition's
+            // colour and only falls back to the segment's, so leaving it off is
+            // what makes the route wear the destination slot's colour.
+            addRoute(startId, endId, type, null, extras);
+        });
+
+        const added = (window.sectorRoutes || []).filter(r => r.routeId === routeId).length;
+        if (window.dbManager) window.dbManager.saveRoutes();
+        requestAnimationFrame(draw);
+        window.refreshRouteWindowCounts();
+        showToast(`Loaded ${added} segment(s) into "${routeName}".`, 3000);
+    }).catch(err => {
+        console.error('[Route File]', err);
+        showToast('That route file could not be read.', 3000);
+    });
+}
+
+/**
+ * Opens the shared file picker on behalf of one route row.
+ * onchange is assigned rather than added — every row shares one input, and
+ * listeners would stack one import per row visited.
+ */
+function _pickRouteFileFor(routeId, routeName) {
+    const input = document.getElementById('file-import-route');
+    if (!input) return;
+    input.value = '';
+    input.onchange = (e) => {
+        const f = e.target.files[0];
+        e.target.value = '';
+        if (f) importRouteFile(routeId, routeName, f);
+    };
+    input.click();
+}
+
 function _routeCsvFilename(routeName) {
     return `route_${String(routeName).replace(/[^a-z0-9_\-]/gi, '_')}.csv`;
 }
@@ -1493,8 +1714,31 @@ window.openRouteSystemsPanel = function (routeId, routeName) {
     const { ordered, worlds } = getRouteSystemList(routeId);
     listEl.innerHTML = '';
 
+    // A route that never reached its End says so at the top, before the list.
+    // Read through getRouteShortfall so a mark left over from a generation the
+    // user has since edited past is not repeated back to them as current.
+    const sf = (typeof getRouteShortfall === 'function') ? getRouteShortfall(routeId) : null;
+    if (sf) {
+        const hexes = sf.distance === 1 ? '1 hex' : `${sf.distance} hexes`;
+        const notice = document.createElement('div');
+        notice.className = 'route-systems-shortfall';
+        notice.innerHTML = `<strong>Stopped short.</strong> This route could not reach `
+                         + `${formatWorldLabel(sf.targetId)} and ends at `
+                         + `${formatWorldLabel(sf.reachedId)}, ${hexes} away. `
+                         + `Add a waypoint near there and generate again to carry it on.`;
+        listEl.appendChild(notice);
+    }
+
     if (worlds.length === 0) {
-        listEl.innerHTML = '<div style="color:#555;font-style:italic;padding:4px 0;">No systems found.</div>';
+        // Appended, not assigned: assigning innerHTML here would wipe the
+        // shortfall notice above. A shortfall cannot currently coexist with an
+        // empty list — getRouteShortfall returns null when the slot has no
+        // segments — but the two are independent enough that relying on it is
+        // asking for a silent regression.
+        const none = document.createElement('div');
+        none.style.cssText = 'color:#555;font-style:italic;padding:4px 0;';
+        none.textContent = 'No systems found.';
+        listEl.appendChild(none);
     } else {
         worlds.forEach((hexId, i) => {
             const state = hexStates.get(hexId);
@@ -1503,16 +1747,24 @@ window.openRouteSystemsPanel = function (routeId, routeName) {
             const name  = getWorldName(state) || (isVacantHex(hexId) ? 'Deep Space' : '(unnamed)');
             const item  = document.createElement('div');
             item.className = 'route-systems-item';
+            // The world the route ran out at is marked in the list too, so the
+            // notice above and the row it refers to are visibly the same place.
+            if (sf && hexId === sf.reachedId) item.classList.add('route-systems-item-stopped');
             const marker = ordered ? `${i + 1}.` : '•';
             item.innerHTML = `<span class="route-systems-item-num">${marker}</span>`
                            + `<span class="route-systems-item-name">${name}</span>`
-                           + `<span class="route-systems-item-id">${hexId}</span>`;
+                           + `<span class="route-systems-item-id">${hexId}</span>`
+                           + (sf && hexId === sf.reachedId
+                               ? '<span class="route-systems-item-stopmark" title="As far as this route could get">stops here</span>'
+                               : '');
             listEl.appendChild(item);
         });
     }
 
     const segCount = (window.sectorRoutes || []).filter(r => r.routeId === routeId).length;
-    footerEl.textContent = `${segCount} segment${segCount !== 1 ? 's' : ''} · ${worlds.length} world${worlds.length !== 1 ? 's' : ''}`;
+    footerEl.textContent = `${segCount} segment${segCount !== 1 ? 's' : ''} · `
+                         + `${worlds.length} world${worlds.length !== 1 ? 's' : ''}`
+                         + (sf ? ' · incomplete' : '');
 
     panel.style.display = 'block';
     panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -1880,6 +2132,184 @@ function renumberWaypoints() {
     });
 }
 
+// ── Continue mode (route_extend_spec.md §4) ──────────────────────────────────
+// Ticking "Continue existing route" changes what the Start/End/waypoint fields
+// MEAN, so it has to change what they contain: the panel otherwise shows the
+// stops of the route as it already is, while Generate would try to add them to
+// itself. Unticking must put the form back exactly, so trying the box costs
+// nothing.
+let _continueStash = null;
+
+/**
+ * The stored P2P setup for a slot, or null. Used to orient the chain walk so
+ * "the far end" means the end away from the route's own Start rather than
+ * whichever end adjacency order happened to produce.
+ */
+function _storedP2pParams(routeId) {
+    const def = (window.routeDefinitions || []).find(d => d.id === routeId);
+    const ref = def && def.automationRef;
+    return (ref && ref.type === 'p2p' && ref.params) ? ref.params : null;
+}
+
+function _applyContinueMode(on) {
+    const startEl = document.getElementById('route-auto-p2p-start');
+    const endEl   = document.getElementById('route-auto-p2p-end');
+    const wpList  = document.getElementById('route-auto-p2p-waypoints-list');
+    const panel   = document.getElementById('route-auto-panel');
+    if (!startEl || !endEl || !wpList || !panel) return;
+    const routeId = parseInt(panel.dataset.targetRouteId, 10);
+
+    if (on) {
+        _continueStash = {
+            start:     startEl.value,
+            end:       endEl.value,
+            waypoints: collectWaypointRaws()
+        };
+        const stored = _storedP2pParams(routeId);
+        const ends   = getRouteEnds(routeId, stored ? stored.startId : undefined);
+        // Pre-fill the far end — the end away from the route's Start. On a route
+        // that stopped short this is C, the ringed world, which is exactly the
+        // world to bridge from. The field stays editable so the other end can be
+        // typed instead and the route extended backwards.
+        // ends[0] is the route's own Start when it is still an end, so ends[1] is
+        // the far one. On a route with three ends that is simply another end —
+        // the field stays editable and the guard on Generate names them all.
+        const far = ends.ok ? (ends.ends[1] || ends.ends[0]) : null;
+        startEl.value = far ? formatWorldLabel(far) : '';
+        endEl.value   = '';
+        wpList.innerHTML = '';
+    } else if (_continueStash) {
+        startEl.value = _continueStash.start;
+        endEl.value   = _continueStash.end;
+        wpList.innerHTML = '';
+        // doFocus=false — restoring rows must not fight for focus or scroll.
+        _continueStash.waypoints.forEach(v => addWaypointRow(v, false));
+        _continueStash = null;
+    }
+    refreshStopFieldStyles();
+}
+
+/**
+ * Resets the Continue box to off and sets whether it can be used at all.
+ *
+ * Off on every open is deliberate (spec C6): the box modifies one press, and a
+ * remembered tick would silently append where the user expected a rebuild.
+ *
+ * Eligibility is getRouteEnds, NOT getRouteChain. Continue only needs the route
+ * to have two ends to grow from; requiring one unbroken line also refused every
+ * route that crosses back over itself, which any waypointed route can do — see
+ * walkRouteEnds in routes.js.
+ *
+ * @param {boolean} [resetTick=true] - false when called because the segments
+ *        changed under an open panel, where the user's own tick must survive.
+ */
+/**
+ * "Regina (1-A-1910)", "A or B", "A, B or C" — a route may now have any number
+ * of loose ends, and every message that offers them has to read as English.
+ */
+function _formatEndList(ids) {
+    // Arrow, not a bare reference: formatWorldLabel's second parameter is a name
+    // override, and .map hands it the index — which rendered the second end as
+    // "1 (1-B-1106)" and the third as "2 (…)".
+    const labels = (ids || []).map(id => formatWorldLabel(id));
+    if (labels.length === 0) return '';
+    if (labels.length === 1) return labels[0];
+    return `${labels.slice(0, -1).join(', ')} or ${labels[labels.length - 1]}`;
+}
+
+/**
+ * Forgets a slot's stored Point-to-Point setup.
+ *
+ * Used when a continuation leaves the route with more than two loose ends. The
+ * setup is a single run of stops — Start, waypoints, End — and a route with
+ * three ends is not one run, so there is no honest way to write it down. Keeping
+ * the old one would be worse than having none: reopening the panel would show
+ * stops that no longer describe the route, and an ordinary Generate would
+ * silently replace what is on the map with what the stale setup says.
+ *
+ * Continue itself does not need it — the ends are walked from the segments every
+ * time — so this costs nothing but the remembered Max Jump. It is the same
+ * position the feature already takes for imported, file-loaded and hand-drawn
+ * routes, whose real stops are equally unknown (route_extend_spec.md OQ-4).
+ */
+function _clearAutomationConfig(routeId) {
+    const def = (window.routeDefinitions || []).find(d => d.id === routeId);
+    if (!def || !def.automationRef) return false;
+    def.automationRef = null;
+    if (window.dbManager) window.dbManager.saveRouteDefinitions?.();
+    return true;
+}
+
+function _syncContinueControl(routeId, resetTick = true) {
+    const cb = document.getElementById('route-auto-p2p-continue');
+    if (!cb) return;
+    const label = document.getElementById('route-auto-p2p-continue-label');
+
+    if (resetTick) {
+        cb.checked = false;
+        _continueStash = null;
+    }
+
+    const segCount = (window.sectorRoutes || []).filter(r => r.routeId === routeId).length;
+    const ends = getRouteEnds(routeId);
+    cb.disabled = !ends.ok;
+
+    let title;
+    if (segCount === 0) {
+        title = 'This route has no segments yet, so there is nothing to continue. ' +
+                'Generate one first.';
+    } else if (!ends.ok) {
+        title = ends.reason === 'cycle'
+            ? 'This route forms a closed loop, so it has no loose end to continue from.'
+            : 'This route is in more than one piece. Continuing it would grow one ' +
+              'piece and leave the rest behind, so join them up first — or use the ' +
+              'link button to combine them into one route.';
+    } else {
+        title = `Add to this route instead of replacing it. Generate will append to it, ` +
+                `starting from ${_formatEndList(ends.ends)}. The rest of the route ` +
+                `is left alone.`;
+        if (ends.crosses) {
+            title += ' This route crosses back over itself, so its worlds are listed ' +
+                     'alphabetically rather than in travel order.';
+        }
+        if (ends.ends.length > 2) {
+            title += ` It has ${ends.ends.length} loose ends, so it is not a single run ` +
+                     `of stops: continuing it will clear its saved setup rather than ` +
+                     `keep one that no longer describes it.`;
+        }
+    }
+    if (label) label.title = title;
+    if (label) label.style.opacity = cb.disabled ? '0.45' : '';
+
+    // The tick cannot outlive its own precondition. If the route stopped being
+    // continuable while the box was ticked, put the form back the way Continue
+    // found it — leaving it ticked-but-disabled would send the fields Continue
+    // rewrote (Start = an end, End blank) into a plain rebuild.
+    if (!resetTick && cb.checked && cb.disabled) {
+        cb.checked = false;
+        _applyContinueMode(false);
+    }
+}
+
+/**
+ * Re-runs the eligibility test for whichever route the Automation Panel is open
+ * on, without disturbing the user's tick.
+ *
+ * The box used to be set once, when the panel opened, and never again — so every
+ * way of changing a slot's segments with the panel already open left it stale.
+ * Drawing segments by hand is the one that bites: open the panel on an empty
+ * slot, draw a route on the map, and the box stayed greyed out insisting the
+ * route had no segments. That is a tick-box the user can see and cannot tick,
+ * with nothing on screen to say why.
+ */
+function _refreshContinueControl() {
+    const panel = document.getElementById('route-auto-panel');
+    if (!panel || panel.style.display !== 'block') return;
+    const routeId = parseInt(panel.dataset.targetRouteId, 10);
+    if (!Number.isFinite(routeId)) return;
+    _syncContinueControl(routeId, false);
+}
+
 function collectWaypointRaws() {
     return Array.from(document.querySelectorAll('#route-auto-p2p-waypoints-list .p2p-waypoint-input'))
         .map(inp => inp.value.trim())
@@ -1967,6 +2397,7 @@ function _restoreAutomationConfig(routeId) {
         setChk('route-auto-p2p-allow-empty', p.allowEmptyHexes);
         setNum('route-auto-p2p-max-empty', p.maxEmptyJumps);
         showOpts('route-auto-p2p-empty-opts', p.allowEmptyHexes);
+        setChk('route-auto-p2p-allow-partial', p.allowPartial);
 
     } else {
         return false;
@@ -1981,6 +2412,120 @@ function _restoreAutomationConfig(routeId) {
         radio.dispatchEvent(new Event('change', { bubbles: true }));
     }
     return true;
+}
+
+// ============================================================================
+// ATOMIC ROUTE GENERATION
+// ============================================================================
+
+/**
+ * Turns a Point-to-Point failure into a sentence that names what to go and look
+ * at. The message used to name the route's Start and End, which on a long route
+ * points at the two stops least likely to be the problem: a twenty-waypoint
+ * route that cannot get from stop 7 to stop 8 reported "no path from A to T".
+ *
+ * Stops are named the way the builder's fields name them — "Regina (1-A-1910)"
+ * — because a bare hex ID is not something a user can place on the map.
+ */
+function _p2pFailureMessage(outcome, maxJump, allowPartial) {
+    const f = outcome && outcome.failure;
+
+    if (f && f.kind === 'stop') {
+        return `${formatWorldLabel(f.stopId)} can't be used as a stop — it is marked `
+             + `as a system but has no system data. Nothing was changed.`;
+    }
+
+    if (f && f.kind === 'leg') {
+        const where = f.total > 1 ? `leg ${f.index} of ${f.total}` : 'this route';
+        let msg = `No path for ${where}: ${formatWorldLabel(f.fromId)} → ${formatWorldLabel(f.toId)} `
+                + `within Jump-${maxJump}.`;
+
+        // Naming how far the search actually got turns "it failed" into "bridge
+        // from here" — the closest reachable world is exactly the one a user
+        // would add as a waypoint to get past the obstacle. This costs the user
+        // nothing and changes no state, so it is said whether or not they have
+        // asked for partial routes.
+        //
+        // reachedId is null when nothing reachable was closer to the target than
+        // the leg's own start: there is then no useful world to name, and
+        // pointing at one further away would be worse than saying nothing.
+        if (f.reachedId) {
+            const hexes = f.shortfallDistance === 1 ? '1 hex' : `${f.shortfallDistance} hexes`;
+            msg += ` The closest it could reach was ${formatWorldLabel(f.reachedId)}, ${hexes} short`;
+            // Only worth saying when the option is off — it is the thing that
+            // would have turned this failure into a usable route, and a user who
+            // has never noticed the checkbox will not go looking for it.
+            msg += allowPartial
+                ? '.'
+                : ' — tick "Build as far as possible" to keep the route up to there.';
+        }
+        return msg + ' Nothing was changed.';
+    }
+
+    return `No path found within Jump-${maxJump}. Nothing was changed.`;
+}
+
+/**
+ * Clears a route slot, runs a generator into it, and puts everything back
+ * exactly as it was if the generator produced nothing.
+ *
+ * Every route generator is destructive before it is productive: the slot is
+ * emptied and only then does the search for paths begin. A run that came up
+ * empty therefore used to cost the user the route they already had, on top of
+ * not giving them a new one — and a Point-to-Point run that gave up midway
+ * left the legs it had already committed lying on the map.
+ *
+ * Failure is judged by what actually landed in the slot rather than by the
+ * count a generator reports, because those counts are not all trustworthy:
+ * generateBTNRoutes measures the array's net growth, which reads as zero on
+ * any segment that evicted a rival as it was added.
+ *
+ * @param {string}   actionName - undo label, as passed to saveHistoryState
+ * @param {number}   routeId    - the slot to clear and generate into
+ * @param {Function} generate   - performs the generation; its return value is
+ *                                passed back as .result
+ * @returns {{ result: *, produced: boolean }} produced is false when the slot
+ *          was left empty and everything was rolled back. Callers must test
+ *          this rather than re-inspecting the slot: after a rollback the slot
+ *          holds the restored route again and is indistinguishable from a
+ *          successful run.
+ */
+function _generateIntoSlot(actionName, routeId, generate, opts = {}) {
+    // A shallow copy is enough: generation pushes to and splices this array but
+    // never mutates the segment objects inside it, so anything evicted along
+    // the way survives in the snapshot.
+    const routesBefore = (window.sectorRoutes || []).slice();
+    const redoBefore   = window.redoStack;
+    const countBefore  = routesBefore.filter(r => r.routeId === routeId).length;
+
+    saveHistoryState(actionName);
+    // opts.append — Continue adds to the route already in the slot, so the one
+    // destructive step every generator otherwise takes is skipped. Everything
+    // else, including the restore-on-failure below, is unchanged: a continuation
+    // that finds nothing must cost the user nothing.
+    if (!opts.append) {
+        window.sectorRoutes = (window.sectorRoutes || []).filter(r => r.routeId !== routeId);
+    }
+
+    let result;
+    let produced = false;
+    try {
+        result = generate();
+        const countAfter = (window.sectorRoutes || []).filter(r => r.routeId === routeId).length;
+        // In append mode the slot already held segments, so "did anything land"
+        // has to be measured as growth rather than as presence.
+        produced = opts.append ? (countAfter > countBefore) : (countAfter > 0);
+    } finally {
+        if (!produced) {
+            window.sectorRoutes = routesBefore;
+            // Drop the undo entry recorded for our own clear and restore the
+            // redo stack it discarded: nothing happened in the end, so Ctrl+Z
+            // must not step through a snapshot identical to the current state.
+            window.undoStack.pop();
+            window.redoStack = redoBefore;
+        }
+    }
+    return { result, produced };
 }
 
 // ============================================================================
@@ -2001,6 +2546,9 @@ function setupRouteWindow() {
             window.toggleRouteWindow();
         });
     }
+
+    const addBtn = document.getElementById('btn-route-add');
+    if (addBtn) addBtn.addEventListener('click', () => window.addRouteSlot());
 
     const visAllCb = document.getElementById('route-vis-all-check');
     if (visAllCb) {
@@ -2078,7 +2626,9 @@ function setupRouteWindow() {
                            endRaw:          document.getElementById('route-auto-p2p-end').value,
                            maxJump:         parseInt(document.getElementById('route-auto-p2p-jump').value, 10),
                            allowEmptyHexes: document.getElementById('route-auto-p2p-allow-empty')?.checked || false,
-                           maxEmptyJumps:   parseInt(document.getElementById('route-auto-p2p-max-empty')?.value || '1', 10) },
+                           maxEmptyJumps:   parseInt(document.getElementById('route-auto-p2p-max-empty')?.value || '1', 10),
+                           allowPartial:    document.getElementById('route-auto-p2p-allow-partial')?.checked || false,
+                           continueExisting: document.getElementById('route-auto-p2p-continue')?.checked || false },
                 network: { maxJump:         parseInt(document.getElementById('route-auto-network-jump').value, 10),
                            maxRange:        parseInt(document.getElementById('route-auto-network-range').value, 10),
                            filterRules:     window.activeFilterRules || [],
@@ -2088,15 +2638,19 @@ function setupRouteWindow() {
 
             if (type === 'xboat') {
                 const { maxJump, maxRange, minIx } = configs.xboat;
-                saveHistoryState('Generate Xboat Routes');
-                generateXboatRoutes(maxJump, maxRange, minIx, routeId, `xboat_${routeId}`);
+                const xbRun = _generateIntoSlot('Generate Xboat Routes', routeId,
+                    () => generateXboatRoutes(maxJump, maxRange, minIx, routeId, `xboat_${routeId}`));
+                if (!xbRun.produced) {
+                    showToast(`No XBoat routes could be generated at Ix ${minIx}+ — nothing was changed.`, 3500);
+                    return;
+                }
+                const xbCount = (window.sectorRoutes || []).filter(r => r.type === 'Xboat' && r.routeId === routeId).length;
                 _saveAutomationConfig(routeId, 'xboat', { maxJump, maxRange, minIx });
                 if (window.dbManager) window.dbManager.saveRoutes();
                 requestAnimationFrame(draw);
                 window.closeRouteAutoPanel();
                 window.refreshRouteWindowCounts();
-                const count = (window.sectorRoutes || []).filter(r => r.type === 'Xboat' && r.routeId === routeId).length;
-                showToast(`XBoat routes generated: ${count} segment(s) added to Route #${routeId}.`, 3000);
+                showToast(`XBoat routes generated: ${xbCount} segment(s) added to Route #${routeId}.`, 3000);
                 return;
             }
 
@@ -2112,11 +2666,11 @@ function setupRouteWindow() {
                 }
                 const { maxJump, maxRange, allowEmptyHexes: netAllowEmpty, maxEmptyJumps: netMaxEmpty } = configs.network;
                 const groupId = `net_${routeId}`;
-                saveHistoryState(`Generate Custom Network: ${routeName}`);
-                window.sectorRoutes = (window.sectorRoutes || []).filter(r => r.routeId !== routeId);
-                const count = generateAutoRoutes(filteredIds, maxJump, maxRange, routeDef.color, groupId, routeName, routeId, netAllowEmpty, netMaxEmpty);
-                if (count === 0) {
-                    showToast('No route segments could be generated for the current filter.', 2500);
+                const netRun = _generateIntoSlot(`Generate Custom Network: ${routeName}`, routeId,
+                    () => generateAutoRoutes(filteredIds, maxJump, maxRange, routeDef.color, groupId, routeName, routeId, netAllowEmpty, netMaxEmpty));
+                const count = netRun.result;
+                if (!netRun.produced) {
+                    showToast('No route segments could be generated for the current filter — nothing was changed.', 3000);
                     return;
                 }
                 // filterRules is deliberately not persisted — network generation
@@ -2135,7 +2689,7 @@ function setupRouteWindow() {
             }
 
             if (type === 'p2p') {
-                const { startRaw, endRaw, maxJump, allowEmptyHexes: p2pAllowEmpty, maxEmptyJumps: p2pMaxEmpty } = configs.p2p;
+                const { startRaw, endRaw, maxJump, allowEmptyHexes: p2pAllowEmpty, maxEmptyJumps: p2pMaxEmpty, allowPartial: p2pAllowPartial, continueExisting: p2pContinue } = configs.p2p;
                 const startId = resolveWorldInput(startRaw);
                 const endId   = resolveWorldInput(endRaw);
                 if (!startRaw.trim() || !endRaw.trim()) {
@@ -2169,26 +2723,210 @@ function setupRouteWindow() {
 
                 const filteredIds = getFilteredHexIds();
                 const groupId = `p2p_${routeId}`;
-                saveHistoryState(`Generate Point-to-Point: ${routeName}`);
-                window.sectorRoutes = (window.sectorRoutes || []).filter(r => r.routeId !== routeId);
-                const count = generatePointToPointRoute(startId, endId, maxJump, routeDef.color, groupId, routeName, true, filteredIds, routeId, waypointIds, p2pAllowEmpty, p2pMaxEmpty);
-                if (count === null) {
-                    const wpNote = waypointIds.length > 0 ? ` via ${waypointIds.length} waypoint(s)` : '';
-                    showToast(`No path found from ${startId} to ${endId}${wpNote} within Jump-${maxJump}.`, 3000);
+
+                // ── Continue: add to the route rather than replace it ─────────
+                if (p2pContinue) {
+                    const stored = _storedP2pParams(routeId);
+                    const chain  = getRouteEnds(routeId, stored ? stored.startId : undefined);
+                    if (!chain.ok) {
+                        showToast(chain.reason === 'cycle'
+                            ? `"${routeName}" forms a closed loop, so there is no loose end `
+                              + `to continue from. Nothing was changed.`
+                            : `"${routeName}" is in more than one piece, so continuing it would `
+                              + `grow one piece and leave the rest behind. Nothing was changed.`, 6000);
+                        return;
+                    }
+                    // The Start must be a loose END of the route. Joining anywhere
+                    // else adds a branch to a route that did not have one, which
+                    // is a change to its shape rather than a continuation of it.
+                    if (chain.ends.indexOf(startId) === -1) {
+                        showToast(`${formatWorldLabel(startId)} is not an end of "${routeName}". `
+                                + `Continue from ${_formatEndList(chain.ends)}. `
+                                + `Nothing was changed.`, 6000);
+                        return;
+                    }
+
+                    const contRun = _generateIntoSlot(`Continue: ${routeName}`, routeId,
+                        () => generatePointToPointRoute(startId, endId, maxJump, routeDef.color, groupId, routeName, true, filteredIds, routeId, waypointIds, p2pAllowEmpty, p2pMaxEmpty, p2pAllowPartial),
+                        { append: true });
+
+                    if (!contRun.produced) {
+                        // A continuation can produce nothing WITHOUT failing: the
+                        // path was found, and every connection on it was one this
+                        // route already had, so addRoute skipped all of them.
+                        // Continuing towards a world the route already reaches is
+                        // the ordinary way to arrive here, and reporting it as
+                        // "no path found within Jump-N" sent the user off to
+                        // raise a jump number that was never the problem.
+                        if (contRun.result && !contRun.result.failure) {
+                            showToast(`"${routeName}" already connects `
+                                    + `${formatWorldLabel(startId)} to ${formatWorldLabel(endId)}, `
+                                    + `so there was nothing to add. Nothing was changed.`, 6000);
+                            return;
+                        }
+                        const failMsg = _p2pFailureMessage(contRun.result, maxJump, p2pAllowPartial);
+                        showToast(failMsg, failMsg.length > 180 ? 12000 : 9000);
+                        return;
+                    }
+
+                    const added = contRun.result.segments;
+
+                    // Travel order is gated on segments[0].subtype — the first
+                    // segment IN THE ARRAY — so a route assembled from a generated
+                    // part and a hand-drawn or imported one would list in travel
+                    // order or alphabetically depending on nothing but array
+                    // position. Stamp it, but only when the result really is a
+                    // chain. See route_extend_spec.md §6.
+                    stampRouteSubtype(routeId);
+                    const merged = getRouteChain(routeId, chain.ends[0]);
+
+                    // Accumulate the saved setup so it still describes the WHOLE
+                    // route: reopening the panel shows every stop, and a later
+                    // plain Generate rebuilds all of it rather than just this leg.
+                    //
+                    // Only a two-ended route HAS a single run of stops to write
+                    // down. The accumulation below folds the new leg in by
+                    // deciding whether the far end or the start end was grown,
+                    // and on a route with a third end — a waypoint doubled back
+                    // on, which Point-to-Point produces routinely — the world
+                    // grown from is neither, so the result would be a setup that
+                    // no longer describes the route. Drop it instead.
+                    const merged0 = getRouteEnds(routeId);
+                    const clearedSetup = (merged0.ends.length > 2) && _clearAutomationConfig(routeId);
+                    if (stored && !clearedSetup) {
+                        const oldWps = Array.isArray(stored.waypointIds) ? stored.waypointIds.slice() : [];
+                        const extendedFarEnd = (startId === chain.ends[1]);
+                        const acc = extendedFarEnd
+                            // Forward: the end we grew from becomes a waypoint and
+                            // the new target becomes the End. On a route that
+                            // stopped short this is also what drops the stop it
+                            // never reached — the user is steering now.
+                            ? { startId: stored.startId,
+                                endId:   endId,
+                                waypointIds: oldWps.concat([startId], waypointIds) }
+                            // Backward: mirror image. The new target becomes the
+                            // Start and the old Start slides into the waypoints,
+                            // which are held in travel order, hence the reverse.
+                            : { startId: endId,
+                                endId:   stored.endId,
+                                waypointIds: waypointIds.slice().reverse().concat([startId], oldWps) };
+
+                        _saveAutomationConfig(routeId, 'p2p', {
+                            startId:         acc.startId,
+                            endId:           acc.endId,
+                            waypointIds:     acc.waypointIds,
+                            maxJump,
+                            allowEmptyHexes: p2pAllowEmpty,
+                            maxEmptyJumps:   p2pMaxEmpty,
+                            allowPartial:    p2pAllowPartial,
+                            // A new shortfall wins; otherwise KEEP the old one.
+                            // Overwriting it with null would silently drop the ring
+                            // from a route that still stops short, since extending
+                            // one end does not reach the stop the other end missed.
+                            // getRouteShortfall's degree guard decides whether it is
+                            // still true, so keeping it is safe.
+                            shortfall: contRun.result.shortfall || stored.shortfall || null
+                        });
+                    }
+                    // No stored setup (imported, loaded from a route file, or drawn
+                    // by hand): deliberately none is invented. Such a route's real
+                    // STOPS are unknown — only the path it happens to take — so a
+                    // manufactured setup would either be empty, letting a later
+                    // plain Generate silently replace the route with a direct line,
+                    // or would list every intermediate world as a waypoint. Continue
+                    // keeps working regardless: the chain is walked fresh from the
+                    // segments every time. See route_extend_spec.md OQ-4.
+
+                    if (window.dbManager) window.dbManager.saveRoutes();
+                    requestAnimationFrame(draw);
+                    window.closeRouteAutoPanel();
+                    window.refreshRouteWindowCounts();
+
+                    // Said out loud rather than left to be discovered: the panel
+                    // will come back empty next time it is opened, and a plain
+                    // Generate will no longer rebuild this route.
+                    const setupNote = clearedSetup
+                        ? ` Its saved setup was cleared — with ${merged0.ends.length} loose ends `
+                          + `this route is no longer a single run of stops, so a later Generate `
+                          + `will not rebuild it from settings that no longer fit.`
+                        : '';
+
+                    const sf = contRun.result.shortfall;
+                    if (sf) {
+                        const hexes = sf.distance === 1 ? '1 hex' : `${sf.distance} hexes`;
+                        showToast(`"${routeName}": ${added} segment(s) added, but stopped short at `
+                                + `${formatWorldLabel(sf.reachedId)} — ${hexes} from `
+                                + `${formatWorldLabel(sf.targetId)}, which could not be reached.`
+                                + setupNote, 12000);
+                    } else if (!merged.ok) {
+                        // Committed on purpose: the segments are real and draw
+                        // correctly. What is lost is ordered listing, so say so
+                        // rather than let the panel quietly go alphabetical.
+                        // chain.crosses is the state BEFORE this continuation, so
+                        // a route that already crossed itself is not told the new
+                        // leg did it.
+                        showToast((chain.crosses || chain.ends.length > 2
+                            ? `"${routeName}": ${added} segment(s) added. This route does not run `
+                              + `end to end, as it already did not, so its worlds are listed `
+                              + `alphabetically rather than in travel order.`
+                            : `"${routeName}": ${added} segment(s) added, but the new leg rejoins `
+                              + `the route, so it no longer runs end to end — its worlds will be `
+                              + `listed alphabetically rather than in travel order.`) + setupNote, 12000);
+                    } else {
+                        showToast(`"${routeName}": ${added} segment(s) added — the route now runs `
+                                + `${formatWorldLabel(merged.ends[0])} to `
+                                + `${formatWorldLabel(merged.ends[1])}.` + setupNote, 5000);
+                    }
                     return;
                 }
+
+                const p2pRun = _generateIntoSlot(`Generate Point-to-Point: ${routeName}`, routeId,
+                    () => generatePointToPointRoute(startId, endId, maxJump, routeDef.color, groupId, routeName, true, filteredIds, routeId, waypointIds, p2pAllowEmpty, p2pMaxEmpty, p2pAllowPartial));
+                if (!p2pRun.produced) {
+                    // Duration scales with the message: naming the closest world it
+                    // could reach, and pointing at the option that would have kept
+                    // the route, makes this far longer than the 6s it used to get —
+                    // and it is the one message here the user most needs to finish.
+                    const failMsg = _p2pFailureMessage(p2pRun.result, maxJump, p2pAllowPartial);
+                    showToast(failMsg, failMsg.length > 180 ? 12000 : 9000);
+                    return;
+                }
+                const count = p2pRun.result.segments;
                 _saveAutomationConfig(routeId, 'p2p', {
                     startId, endId, waypointIds,
                     maxJump,
                     allowEmptyHexes: p2pAllowEmpty,
-                    maxEmptyJumps:   p2pMaxEmpty
+                    maxEmptyJumps:   p2pMaxEmpty,
+                    allowPartial:    p2pAllowPartial,
+                    // Persisted so reopening the panel can still say this route
+                    // never reached its End. Regenerating rewrites it; hand-editing
+                    // the segments afterwards makes it stale, which is accepted —
+                    // the alternative was storing the whole generated path, which
+                    // goes stale the same way and is far bigger.
+                    shortfall:       p2pRun.result.shortfall || null
                 });
                 if (window.dbManager) window.dbManager.saveRoutes();
                 requestAnimationFrame(draw);
                 window.closeRouteAutoPanel();
                 window.refreshRouteWindowCounts();
-                const wpNote = waypointIds.length > 0 ? ` via ${waypointIds.length} waypoint(s)` : '';
-                showToast(`"${routeName}" generated: ${count} segment(s) from ${startId} to ${endId}${wpNote}.`, 3000);
+                const sf = p2pRun.result.shortfall;
+                if (sf) {
+                    // Never say "from X to Y" here: Y is the End it did NOT reach.
+                    // Reporting the stop it actually ended on is the whole point.
+                    const hexes = sf.distance === 1 ? '1 hex' : `${sf.distance} hexes`;
+                    showToast(`"${routeName}": ${count} segment(s), but stopped short at `
+                            + `${formatWorldLabel(sf.reachedId)} — ${hexes} from `
+                            + `${formatWorldLabel(sf.targetId)}, which could not be reached.`, 9000);
+                } else {
+                    const wpNote = waypointIds.length > 0 ? ` via ${waypointIds.length} waypoint(s)` : '';
+                    // formatWorldLabel, not the bare hex IDs this used to print:
+                    // every other message in this flow names a stop the way the
+                    // builder's own fields do, and a bare hex number is not
+                    // something the user can place on the map at a glance.
+                    // 4s rather than 3s — the labels make it about a third longer.
+                    showToast(`"${routeName}" generated: ${count} segment(s) from `
+                            + `${formatWorldLabel(startId)} to ${formatWorldLabel(endId)}${wpNote}.`, 4000);
+                }
                 return;
             }
 
@@ -2207,12 +2945,16 @@ function setupRouteWindow() {
                     return;
                 }
                 const groupId = `btn_${routeId}`;
-                saveHistoryState(`Generate BTN Routes: ${routeName}`);
-                window.sectorRoutes = (window.sectorRoutes || []).filter(r => r.routeId !== routeId);
-                const result = generateBTNRoutes({
-                    lowerBTN, minBTN, maxBTN, maxJump, range,
-                    color: routeDef.color, groupId, name: routeName, routeId
-                });
+                const btnRun = _generateIntoSlot(`Generate BTN Routes: ${routeName}`, routeId,
+                    () => generateBTNRoutes({
+                        lowerBTN, minBTN, maxBTN, maxJump, range,
+                        color: routeDef.color, groupId, name: routeName, routeId
+                    }));
+                const result = btnRun.result;
+                if (!btnRun.produced) {
+                    showToast(`"${routeName}": no world pairs met BTN ${minBTN}${maxBTN !== null ? `–${maxBTN}` : '+'} — nothing was changed.`, 4000);
+                    return;
+                }
                 if (window.isLoggingEnabled && window.batchLogData && window.batchLogData.length > 0) {
                     downloadBatchLog('BTN_Routes', result.included);
                 }
@@ -2250,6 +2992,14 @@ function setupRouteWindow() {
         });
     }
 
+    // Continue mode rewrites the form on tick and restores it on untick.
+    // Attached once at init, like the checkbox above — the panel's markup is
+    // static, so listeners cannot stack.
+    const p2pContinueCb = document.getElementById('route-auto-p2p-continue');
+    if (p2pContinueCb) {
+        p2pContinueCb.addEventListener('change', () => _applyContinueMode(p2pContinueCb.checked));
+    }
+
     // Wire world autocomplete to the P2P start/end inputs (runs once at init)
     const p2pStartIn   = document.getElementById('route-auto-p2p-start');
     const p2pStartDrop = document.getElementById('route-auto-p2p-start-drop');
@@ -2284,13 +3034,163 @@ window.ensureFreeRouteSlot = function () {
     });
     const hasFree = window.routeDefinitions.some(d => (segCounts.get(d.id) || 0) === 0);
     if (hasFree) return false;
-    const nextId = window.routeDefinitions.length > 0 ? Math.max(...window.routeDefinitions.map(d => d.id)) + 1 : 1;
+    const nextId = _nextRouteSlotId();
     window.routeDefinitions.push({
-        id: nextId, name: `Route ${nextId}`, color: '#00ff00',
-        shortcut: null, visible: true, automationRef: null,
+        id: nextId, name: `Route ${nextId}`, color: _nextRouteColor(),
+        shortcut: _nextRouteShortcut(), visible: true, automationRef: null,
     });
     return true;
 };
+
+/**
+ * The next free slot id.
+ *
+ * Counts the SEGMENTS as well as the definitions. Deleting the highest-numbered
+ * route frees its number, and max + 1 would hand that number straight back to
+ * the next slot created — which would then adopt any segment still carrying it.
+ * Delete clears its own segments, so the everyday path is safe, but a route file
+ * loaded into a slot that was later removed, or an import that left segments
+ * behind, is not: the new route would silently arrive with someone else's
+ * connections already drawn on it.
+ *
+ * Non-numeric ids are ignored rather than trusted, so one malformed definition
+ * in a loaded file cannot make Math.max return NaN and poison every slot created
+ * afterwards.
+ */
+function _nextRouteSlotId() {
+    const ids = [
+        ...(window.routeDefinitions || []).map(d => d.id),
+        ...(window.sectorRoutes     || []).map(r => r.routeId),
+    ].map(Number).filter(n => Number.isFinite(n));
+    return ids.length > 0 ? Math.max(...ids) + 1 : 1;
+}
+
+/**
+ * A colour for a new slot: the first of the nine defaults not already on the
+ * map, so a map whose routes have been deleted and rebuilt looks like a fresh
+ * one rather than a column of identical green. Past nine routes the palette is
+ * exhausted and a random colour is used, which the user can change anyway.
+ */
+function _nextRouteColor() {
+    const used = new Set((window.routeDefinitions || [])
+        .map(d => (d.color || '').toLowerCase()));
+    const free = getDefaultRouteDefinitions().map(d => d.color)
+        .find(c => !used.has(c.toLowerCase()));
+    if (free) return free;
+    return '#' + Math.floor(Math.random() * 0x1000000).toString(16).padStart(6, '0');
+}
+
+/**
+ * The lowest digit key not already bound to a route, or null when all nine are
+ * taken. Deleting a route frees its key, so a rebuilt map gets its 1-9 back.
+ */
+function _nextRouteShortcut() {
+    const used = new Set((window.routeDefinitions || [])
+        .map(d => (d.shortcut || '').toLowerCase()).filter(Boolean));
+    return '123456789'.split('').find(k => !used.has(k)) || null;
+}
+
+/**
+ * Adds an empty route slot on demand — the Add Route button.
+ *
+ * ensureFreeRouteSlot() above is a safety net, not a way to make routes: it
+ * tops the list up to exactly one spare and only when every existing slot is
+ * already in use, so a user who has deleted slots down to a set that still
+ * contains one empty one has no way to obtain a second. This is that way.
+ */
+window.addRouteSlot = function () {
+    if (!window.routeDefinitions) window.routeDefinitions = getDefaultRouteDefinitions();
+    saveHistoryState('Add route', { includeRouteDefinitions: true });
+
+    const id = _nextRouteSlotId();
+    const def = {
+        id,
+        name: `Route ${id}`,
+        color: _nextRouteColor(),
+        shortcut: _nextRouteShortcut(),
+        visible: true,
+        automationRef: null,
+    };
+    window.routeDefinitions.push(def);
+    if (window.dbManager) window.dbManager.saveRouteDefinitions();
+
+    window.renderRouteWindow();
+
+    // Put the cursor in the new row's name so it can be named straight away —
+    // the row is appended at the bottom, which on a long list is off-screen.
+    const row = document.querySelector(`#route-window-list .route-row[data-route-id="${def.id}"]`);
+    if (row) {
+        row.scrollIntoView({ block: 'nearest' });
+        const nameIn = row.querySelector('.route-name-input');
+        if (nameIn) { nameIn.focus(); nameIn.select(); }
+    }
+    showToast(`Added "${def.name}". Ctrl+Z removes it.`, 2500);
+};
+
+
+/**
+ * Route definitions left behind by the pre-fix resolveRouteId(), which created
+ * one for every Filter groupId it did not recognise — so a slot's first
+ * Point-to-Point, Custom Network or BTN generation added an empty duplicate,
+ * named after the route being generated.
+ *
+ * The three conditions are a conjunction on purpose. A groupId alone does NOT
+ * mark a phantom: migrateToRouteDefinitions() legitimately stamps one on every
+ * definition it rebuilds from a pre-v0.10 save file, and those own segments.
+ * Requiring the slot to be empty and unconfigured as well is what makes the
+ * test safe on an imported sector.
+ */
+function getOrphanRouteDefinitions() {
+    const used = new Set((window.sectorRoutes || []).map(r => r.routeId));
+    return (window.routeDefinitions || []).filter(d =>
+        d.groupId && !used.has(d.id) && !d.automationRef);
+}
+
+/**
+ * Shows the "duplicate empty slots" notice when there is anything to clean up.
+ * Removal is offered rather than done: the detection is a heuristic about data
+ * this app previously wrote, and a slot the user has renamed and is about to
+ * fill would look identical to a phantom.
+ */
+function renderOrphanRouteNotice() {
+    const notice = document.getElementById('route-orphan-notice');
+    if (!notice) return;
+
+    const orphans = getOrphanRouteDefinitions();
+    if (orphans.length === 0) {
+        notice.style.display = 'none';
+        notice.innerHTML = '';
+        return;
+    }
+
+    notice.innerHTML = '';
+    const text = document.createElement('span');
+    text.textContent = orphans.length === 1
+        ? '1 empty duplicate route slot was left behind by an earlier bug.'
+        : `${orphans.length} empty duplicate route slots were left behind by an earlier bug.`;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'route-orphan-remove';
+    btn.textContent = 'Remove';
+    btn.addEventListener('click', () => {
+        const names = orphans.map(d => `  • ${d.name}`).join('\n');
+        if (!window.confirm(
+            `Remove ${orphans.length} empty duplicate route slot${orphans.length !== 1 ? 's' : ''}?\n\n${names}\n\n` +
+            'None of them holds any map segments. This can be undone with Ctrl+Z.')) return;
+
+        saveHistoryState('Remove duplicate route slots', { includeRouteDefinitions: true });
+        const doomed = new Set(orphans.map(d => d.id));
+        window.routeDefinitions = (window.routeDefinitions || []).filter(d => !doomed.has(d.id));
+        if (window.dbManager) window.dbManager.saveRouteDefinitions();
+        window.renderRouteWindow();
+        showToast(`Removed ${doomed.size} duplicate route slot${doomed.size !== 1 ? 's' : ''}.`, 2500);
+    });
+
+    notice.appendChild(text);
+    notice.appendChild(btn);
+    notice.style.display = 'flex';
+}
 
 window.renderRouteWindow = function () {
     const list = document.getElementById('route-window-list');
@@ -2299,9 +3199,18 @@ window.renderRouteWindow = function () {
     window.closeRouteAutoPanel();
     window.closeRouteSystemsPanel();
 
-    if (typeof window.ensureFreeRouteSlot === 'function') {
-        if (window.ensureFreeRouteSlot() && window.dbManager) window.dbManager.saveRouteDefinitions();
-    }
+    // No ensureFreeRouteSlot() here. It used to top the list up to one spare
+    // every time the window drew, which put it in direct conflict with Delete:
+    // deleting the last free slot re-created it on the spot, with the same id
+    // (max + 1 hands back the number just freed), the same first-unused colour
+    // and the same first-free shortcut — so the row reappeared identical to the
+    // one just removed, under a toast saying it had been deleted. Deleting the
+    // fourth of four routes looked like it had simply not worked.
+    //
+    // The Add Route button makes the top-up unnecessary as well as harmful:
+    // slots are now created when the user asks for one. It still runs on the
+    // import paths, where a bulk import can fill every slot and the user has not
+    // just asked for one to go away.
 
     const segCounts = new Map();
     (window.sectorRoutes || []).forEach(r => {
@@ -2324,7 +3233,12 @@ window.renderRouteWindow = function () {
             <input type="text" class="route-shortcut-input" maxlength="1" placeholder="key" value="${def.shortcut || ''}" title="Shortcut key" />
             <i class="fas fa-eye${def.visible ? '' : '-slash'} route-eye-btn" style="color:${def.visible ? '#45a29e' : '#666'};cursor:pointer;font-size:0.8rem;" title="${def.visible ? 'Disable route' : 'Enable route'}"></i>
             <button class="route-clear-btn" title="Remove all map segments for this route">C</button>
-            <i class="fas fa-download route-export-btn" style="color:${segCount > 0 ? '#45a29e' : '#333'};cursor:${segCount > 0 ? 'pointer' : 'default'};font-size:0.8rem;opacity:${segCount > 0 ? '1' : '0.3'};" title="${segCount > 0 ? 'Export systems to CSV' : 'No segments to export'}"></i>
+            <button class="route-csv-btn route-export-btn"${segCount > 0 ? '' : ' disabled'} title="${segCount > 0 ? 'Export the worlds this route passes through, as a spreadsheet' : 'No segments to export'}">CSV</button>
+            <span class="route-file-cell">
+                <i class="fas fa-file-export route-save-btn" style="color:${segCount > 0 ? '#45a29e' : '#333'};cursor:${segCount > 0 ? 'pointer' : 'default'};opacity:${segCount > 0 ? '1' : '0.3'};" title="${segCount > 0 ? 'Save this route to a file' : 'No connections to save'}"></i>
+                <i class="fas fa-file-import route-load-btn" style="color:#45a29e;cursor:pointer;" title="Load a route file into '${def.name.replace(/'/g, "&#39;")}'"></i>
+            </span>
+            <i class="fas fa-link route-combine-btn" style="color:#45a29e;" title="Combine another route into this one"></i>
             <button class="route-auto-btn" title="Set up automation for ${def.name}">&#9881; Auto</button>
             <i class="fas fa-times route-delete-btn" style="color:#ff4500;cursor:pointer;font-size:0.8rem;" title="Delete route '${def.name.replace(/'/g, "&#39;")}'"></i>
         `;
@@ -2333,6 +3247,14 @@ window.renderRouteWindow = function () {
         const shortIn = row.querySelector('.route-shortcut-input');
         const eyeBtn  = row.querySelector('.route-eye-btn');
         const delBtn  = row.querySelector('.route-delete-btn');
+        const combBtn = row.querySelector('.route-combine-btn');
+        if (combBtn) {
+            combBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (combBtn.classList.contains('disabled')) return;
+                _openCombinePicker(def.id, combBtn);
+            });
+        }
 
         nameIn.addEventListener('change', () => {
             def.name = nameIn.value;
@@ -2377,7 +3299,10 @@ window.renderRouteWindow = function () {
             const segments = (window.sectorRoutes || []).filter(r => r.routeId === def.id);
             const segMsg = segments.length > 0 ? `\nThis will also clear its ${segments.length} segment(s).` : '';
             if (!window.confirm(`Delete route "${def.name}"?${segMsg}\n\nThis can be undone with Ctrl+Z.`)) return;
-            saveHistoryState(`Delete ${def.name}`);
+            // The confirm above promises Ctrl+Z will bring it back, and until
+            // the snapshot carried the definitions that was only half true: the
+            // segments returned, orphaned, to a slot that no longer existed.
+            saveHistoryState(`Delete ${def.name}`, { includeRouteDefinitions: true });
             window.sectorRoutes = (window.sectorRoutes || []).filter(r => r.routeId !== def.id);
             window.routeDefinitions = (window.routeDefinitions || []).filter(d => d.id !== def.id);
             if (window.dbManager) { window.dbManager.saveRoutes(); window.dbManager.saveRouteDefinitions(); }
@@ -2393,6 +3318,17 @@ window.renderRouteWindow = function () {
             pill.title = `${segCount} segment(s) — click to view systems`;
             pill.addEventListener('click', () => window.openRouteSystemsPanel(def.id, def.name));
         }
+
+        // .onclick for save, matching the export button below and for the same
+        // reason: refreshRouteWindowCounts() re-assigns it as counts change, and
+        // a listener here would stack alongside that one.
+        const saveBtn = row.querySelector('.route-save-btn');
+        if (saveBtn) saveBtn.onclick = segCount > 0 ? () => exportRouteFile(def.id, def.name) : null;
+
+        // Load is always available — filling an empty slot is the normal case —
+        // and refreshRouteWindowCounts() never touches it, so a listener is safe.
+        const loadBtn = row.querySelector('.route-load-btn');
+        if (loadBtn) loadBtn.addEventListener('click', () => _pickRouteFileFor(def.id, def.name));
 
         const exportBtn = row.querySelector('.route-export-btn');
         if (exportBtn) {
@@ -2431,6 +3367,8 @@ window.renderRouteWindow = function () {
         list.appendChild(row);
     });
 
+    renderOrphanRouteNotice();
+
     // Sync the "Show All" header checkbox to the current visibility state.
     const visAllCb = document.getElementById('route-vis-all-check');
     if (visAllCb) {
@@ -2453,9 +3391,183 @@ window.toggleRouteWindow = function () {
 
 window.closeRouteWindow = function () {
     MapPick.cancel();
+    _wacHideActive();   // portaled onto <body>; hiding the window won't hide it
     const win = document.getElementById('route-window');
     if (win) win.classList.remove('visible');
 };
+
+// ── Combine (route_extend_spec.md §5) ────────────────────────────────────────
+
+let _combinePickerEl = null;
+
+/**
+ * The picker lives on <body>, not inside #route-window. `.draggable-palette`
+ * carries backdrop-filter, which makes it the containing block for position:fixed
+ * descendants, and its overflow:hidden then clips them — the failure is invisible
+ * (built, display:block, correct contents, painted somewhere off-screen) and it
+ * cost most of v0.17.2 item 1.
+ */
+function _ensureCombinePicker() {
+    if (_combinePickerEl && document.body.contains(_combinePickerEl)) return _combinePickerEl;
+    const el = document.createElement('div');
+    el.id = 'route-combine-picker';
+    el.style.display = 'none';
+    document.body.appendChild(el);
+    _combinePickerEl = el;
+    return el;
+}
+
+function _closeCombinePicker() {
+    if (_combinePickerEl) _combinePickerEl.style.display = 'none';
+}
+
+document.addEventListener('mousedown', (e) => {
+    if (!_combinePickerEl || _combinePickerEl.style.display === 'none') return;
+    if (_combinePickerEl.contains(e.target)) return;
+    if (e.target.closest && e.target.closest('.route-combine-btn')) return;
+    _closeCombinePicker();
+});
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') _closeCombinePicker();
+});
+
+function _openCombinePicker(routeId, anchorEl) {
+    const def = (window.routeDefinitions || []).find(d => d.id === routeId);
+    if (!def) return;
+    const cands = getCombineCandidates(routeId);
+    if (cands.length === 0) {
+        showToast(`No other route meets "${def.name}" end to end, so there is nothing to `
+                + `combine it with.`, 4000);
+        return;
+    }
+
+    const el = _ensureCombinePicker();
+    el.innerHTML = '';
+
+    const head = document.createElement('div');
+    head.className = 'rcp-head';
+    head.textContent = `Combine into "${def.name}"`;
+    el.appendChild(head);
+
+    cands.forEach(c => {
+        const row = document.createElement('div');
+        row.className = 'rcp-item';
+
+        const sw = document.createElement('span');
+        sw.className = 'rcp-swatch';
+        sw.style.background = c.color || '#888';
+        row.appendChild(sw);
+
+        const nm = document.createElement('span');
+        nm.className = 'rcp-name';
+        nm.textContent = c.name;
+        row.appendChild(nm);
+
+        const meta = document.createElement('span');
+        meta.className = 'rcp-meta';
+        meta.textContent = c.sharedIds.length === 1
+            ? `meets at ${formatWorldLabel(c.sharedIds[0])}`
+            : `${c.segCount} segment(s)`;
+        row.appendChild(meta);
+
+        row.title = `${c.segCount} segment(s) will move into "${def.name}".`;
+        row.addEventListener('click', () => {
+            _closeCombinePicker();
+            _combineRoutes(routeId, c);
+        });
+        el.appendChild(row);
+    });
+
+    el.style.display = 'block';
+    const r = anchorEl.getBoundingClientRect();
+    const w = el.offsetWidth || 260;
+    const h = el.offsetHeight || 120;
+    let left = r.left;
+    let top  = r.bottom + 4;
+    if (left + w > window.innerWidth - 8)  left = window.innerWidth - w - 8;
+    if (top  + h > window.innerHeight - 8) top  = Math.max(8, r.top - h - 4);
+    el.style.left = `${Math.max(8, left)}px`;
+    el.style.top  = `${top}px`;
+}
+
+/**
+ * Folds `cand` into `destId`. The destination keeps its name, colour and shortcut;
+ * the absorbed slot is removed (M4).
+ */
+function _combineRoutes(destId, cand) {
+    const defs    = window.routeDefinitions || [];
+    const destDef = defs.find(d => d.id === destId);
+    const srcDef  = defs.find(d => d.id === cand.routeId);
+    if (!destDef || !srcDef) return;
+
+    const all      = window.sectorRoutes || [];
+    const destSegs = all.filter(r => r.routeId === destId);
+    const srcSegs  = all.filter(r => r.routeId === cand.routeId);
+    if (srcSegs.length === 0) return;
+
+    const where = cand.sharedIds.length === 1
+        ? `They meet at ${formatWorldLabel(cand.sharedIds[0])}.`
+        : `They share ${cand.sharedIds.length} worlds.`;
+    const ok = window.confirm(
+        `Combine "${srcDef.name}" into "${destDef.name}"?\n\n` +
+        `${where}\n` +
+        `${srcSegs.length} segment(s) move across, and they take on "${destDef.name}"'s colour.\n` +
+        `"${srcDef.name}" is then removed from the Route Manager.\n\n` +
+        `This can be undone with Ctrl+Z.`
+    );
+    if (!ok) return;
+
+    // includeRouteDefinitions: a definition is being deleted, and without it the
+    // absorbed slot would not come back on undo — the segments would return
+    // belonging to a route that no longer exists.
+    saveHistoryState(`Combine ${srcDef.name} into ${destDef.name}`, { includeRouteDefinitions: true });
+
+    // The same typeMap canvas_input, the XML importer and route-file import all
+    // use. An absorbed segment has to be indistinguishable from one drawn on the
+    // destination, or the renderer draws it on a different layer and the alt-drag
+    // toggle behaves inconsistently.
+    const typeMap = { 1: 'Xboat', 2: 'Trade', 3: 'Secondary' };
+    const type    = typeMap[destId] || 'Filter';
+    const groupId = (destSegs.length && destSegs[0].groupId) ? destSegs[0].groupId : `p2p_${destId}`;
+
+    const key  = seg => [seg.startId, seg.endId].slice().sort().join('|');
+    const have = new Set(destSegs.map(key));
+
+    let moved = 0, duplicates = 0;
+    for (const seg of srcSegs) {
+        if (have.has(key(seg))) { duplicates++; continue; }   // left behind, dropped below
+        seg.routeId = destId;
+        seg.type    = type;
+        if (type === 'Filter') seg.groupId = groupId; else delete seg.groupId;
+        // No colour of its own: the renderer prefers the definition's colour and
+        // only falls back to seg.color, so dropping it is what makes the segment
+        // wear the destination's colour.
+        delete seg.color;
+        have.add(key(seg));
+        moved++;
+    }
+
+    // Anything still carrying the source id is a duplicate of a segment the
+    // destination already had, so this both removes the old slot's segments and
+    // performs the dedupe.
+    window.sectorRoutes = all.filter(r => r.routeId !== cand.routeId);
+
+    stampRouteSubtype(destId);
+    window.routeDefinitions = defs.filter(d => d.id !== cand.routeId);
+
+    if (window.dbManager) { window.dbManager.saveRoutes(); window.dbManager.saveRouteDefinitions(); }
+    window.renderRouteWindow();
+    requestAnimationFrame(draw);
+
+    const merged = getRouteChain(destId);
+    const dupNote = duplicates > 0 ? ` ${duplicates} duplicate segment(s) were not added twice.` : '';
+    if (merged.ok) {
+        showToast(`Combined into "${destDef.name}": ${moved} segment(s) added — the route now runs `
+                + `${formatWorldLabel(merged.ends[0])} to ${formatWorldLabel(merged.ends[1])}.${dupNote}`, 6000);
+    } else {
+        showToast(`Combined into "${destDef.name}": ${moved} segment(s) added.${dupNote}`, 5000);
+    }
+}
 
 window.refreshRouteWindowCounts = function () {
     const win = document.getElementById('route-window');
@@ -2492,15 +3604,48 @@ window.refreshRouteWindowCounts = function () {
             if (routeId === sysPanelRouteId) window.closeRouteSystemsPanel();
         }
 
+        const saveBtn = row.querySelector('.route-save-btn');
+        if (saveBtn) {
+            saveBtn.style.color   = count > 0 ? '#45a29e' : '#333';
+            saveBtn.style.cursor  = count > 0 ? 'pointer'  : 'default';
+            saveBtn.style.opacity = count > 0 ? '1' : '0.3';
+            saveBtn.title   = count > 0 ? 'Save this route to a file' : 'No connections to save';
+            saveBtn.onclick = count > 0 ? () => exportRouteFile(routeId, routeName) : null;
+        }
+
+        // Eligibility depends on the segments in EVERY slot, so it changes whenever
+        // any route does. Setting it only in renderRouteWindow would leave the icon
+        // stale the moment a route was generated.
+        const combBtn2 = row.querySelector('.route-combine-btn');
+        if (combBtn2) {
+            const eligible = count > 0 && getCombineCandidates(routeId).length > 0;
+            combBtn2.classList.toggle('disabled', !eligible);
+            combBtn2.style.color = eligible ? '#45a29e' : '#333';
+            combBtn2.title = eligible
+                ? 'Combine another route into this one'
+                : (count === 0
+                    ? 'This route has no segments to combine into'
+                    : 'No other route meets this one end to end');
+        }
+
         const exportBtn = row.querySelector('.route-export-btn');
         if (exportBtn) {
-            exportBtn.style.color  = count > 0 ? '#45a29e' : '#333';
-            exportBtn.style.cursor = count > 0 ? 'pointer'  : 'default';
-            exportBtn.style.opacity = count > 0 ? '1' : '0.3';
-            exportBtn.title = count > 0 ? 'Export systems to CSV' : 'No segments to export';
+            // A <button> since WP5, so enablement is `disabled` rather than
+            // inline opacity — .route-csv-btn:disabled carries the styling.
+            exportBtn.disabled = count === 0;
+            exportBtn.title = count > 0
+                ? 'Export the worlds this route passes through, as a spreadsheet'
+                : 'No segments to export';
             exportBtn.onclick = count > 0 ? () => openRouteExportModal(routeId, routeName) : null;
         }
     });
+
+    // The Continue box has the same problem the Combine icon above has, and for
+    // the same reason: it describes the segments in a slot, so it goes stale the
+    // moment they change. Every path that alters a slot's segments with the
+    // Automation Panel open — drawing on the map, Clear, loading a route file —
+    // passes through here.
+    _refreshContinueControl();
 };
 
 window.openRouteAutoPanel = function (routeId, routeName) {
@@ -2540,6 +3685,11 @@ window.openRouteAutoPanel = function (routeId, routeName) {
     // resets above so it wins, and takes precedence over the hex-selection
     // prefill — reopening a configured route is for editing it, not restarting.
     _restoreAutomationConfig(routeId);
+
+    // After the restore, so the box is off however the slot was last left (C6),
+    // and its enabled state reflects the segments actually in the slot now.
+    _syncContinueControl(routeId);
+
     refreshStopFieldStyles();
 
     panel.style.display = 'block';
@@ -2550,6 +3700,7 @@ window.closeRouteAutoPanel = function () {
     const panel = document.getElementById('route-auto-panel');
     if (!panel) return;
     MapPick.cancel();   // the crosshair must not outlive the panel
+    _wacHideActive();   // portaled onto <body>; hiding the panel won't hide it
     panel.style.display = 'none';
     panel.dataset.targetRouteId = '';
     document.querySelectorAll('input[name="route-auto-type"]').forEach(r => r.checked = false);

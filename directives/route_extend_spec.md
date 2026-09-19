@@ -65,6 +65,13 @@ cannot describe.
 
 **Everything below follows from wanting that invariant to survive.**
 
+> **AMENDED v0.17.5 (2026-09-11).** Everything above is still true of
+> `getRouteSystemList`, and the invariant still **gates Combine** (M1) and still decides
+> whether a route lists in travel order. What changed is that it no longer gates
+> **Continue**. Requiring it there refused routes Point-to-Point produces as a matter of
+> course, which is a different question from whether the result can be listed in order —
+> that one is answered by warning, per C9. See C1, C4 and §4.1.
+
 ---
 
 ## 4. Decisions — Continue
@@ -73,10 +80,10 @@ Settled with Sean, 2026-09-01.
 
 | # | Decision | Rationale |
 |---|---|---|
-| C1 | **The Start must be one of the route's two end worlds.** Pre-filled, editable; anything else is refused with a message | The only way the result stays one chain. Editable rather than locked so the route can be extended *backwards* from its other end, which a locked field would make impossible without rebuilding |
+| C1 | ~~**The Start must be one of the route's two end worlds.**~~ **AMENDED v0.17.5: the Start must be one of the route's loose ends — of which there may be more than two.** Pre-filled with one, editable; anything else is refused with a message that **names every end** | Joining anywhere else adds a branch the route did not have, which changes its shape rather than continuing it. Editable rather than locked so the route can be extended *backwards* from another end, which a locked field would make impossible without rebuilding. `_formatEndList` exists to render "A, B or C" for the refusal message |
 | C2 | **Ticking the box rewrites the form**: Start := the route's end, End := blank, waypoints cleared. Unticking restores the full saved setup | The form otherwise shows the old route's stops while meaning something entirely different, and Generate straight after ticking would try to re-add legs the route already has. The clear waypoint list is then free for stops belonging to the *new* leg |
 | C3 | **The saved setup accumulates.** The old End slides into the waypoint list; the new target becomes the End | Keeps the stored setup describing the whole route, so reopening the panel shows every stop in travel order and a later plain Generate rebuilds all of it — valuable after changing Max Jump or the filter. The alternative, storing only the last leg, is the `automationRef`-becomes-a-lie bug class that shipped and was fixed in v0.17.2 item 2 |
-| C4 | **Any slot whose segments form a clean chain is eligible**, whether or not this app generated it. A route with no stored setup gets one manufactured by walking the chain | Routes long enough to be worth extending are exactly the ones people import or load from a route file. Restricting to app-generated routes would exclude the main case |
+| C4 | ~~**Any slot whose segments form a clean chain is eligible.**~~ **AMENDED v0.17.5: a slot is eligible when its segments form ONE CONNECTED PIECE with AT LEAST ONE LOOSE END** — whether or not this app generated it. Still refused: a **closed loop** (no end to grow from) and a route in **disconnected pieces** (continuing it would grow one piece and silently leave the rest behind; the message points at Combine instead). A route with no stored setup still gets none manufactured — see OQ-4 | Routes long enough to be worth extending are exactly the ones people import or load from a route file, so restricting to app-generated routes would exclude the main case. **The clean-chain test was strictly stronger than Continue needs**, and Point-to-Point violates it routinely: it resolves every leg with its own BFS, so a leg routed back through a world an earlier leg used gives that world degree 4, and a leg that doubles back hands `addRoute` pairs the slot already holds — they are skipped, leaving the turnaround world as a loose **third** end. A waypoint behind you produces exactly that, and a round trip is close to guaranteed to. All of them were refused, above a tooltip claiming the route had no end when it had three |
 | C5 | **On a route that stopped short, the Start pre-fills with C** — the ringed world — and the End is left blank. The unreached target drops out of the setup | C is the world to bridge from; this is the workflow v0.17.3's ring was built to enable. Pre-filling the End with the unreached target instead would invite an immediate second failure, since that is precisely the leg that just failed |
 | C6 | **The box always resets to off when the panel opens** | It modifies one action; it is not a property of the route. Left silently ticked, a later Generate appends when the user expected a rebuild. Contrast `allowPartial`, which *is* persisted, because it describes how the route should be built rather than what this press will do |
 | C7 | **Existing legs are never re-searched.** Only the new leg is | The whole point: a nineteen-leg route must not be rebuilt to add a twentieth, and any hand-editing of the existing segments must survive |
@@ -93,6 +100,24 @@ Settled with Sean, 2026-09-01.
 - **One Ctrl+Z** undoes an entire continuation.
 - Label: **"Continue existing route"**.
 - **Point-to-Point only.**
+
+### 4.1 Amended in v0.17.5 (2026-09-11)
+
+C1 and C4 above are struck and restated. Four behaviours follow from the weaker rule that
+the original decisions had no reason to cover:
+
+| # | Decision | Rationale |
+|---|---|---|
+| C10 | **A continuation that leaves the route with more than two loose ends CLEARS its saved setup**, and the toast says so | C3's accumulation writes a single run of stops — Start, waypoints, End. A route with three ends is not one run, so the world grown from is neither the Start nor the End and the accumulated setup would no longer describe the route. Keeping it is worse than having none: the panel would show stops that do not match the map, and a later plain Generate would silently rebuild from them. Continue itself is unaffected — it walks the ends from the segments every time. This is OQ-4's position, reached again |
+| C11 | **The tick-box is re-tested whenever the slot's segments change**, without disturbing a tick the user has already made | It was computed once, on panel open, and never again — so every way of changing a slot with the panel open left it describing the route as it used to be. Drawing segments by hand is the case that bites, and it is the natural thing to do when a route stops short: open the panel on an empty slot, draw the route, and the box stayed greyed out insisting there were no segments. `refreshRouteWindowCounts` is the funnel every such path already goes through — the same wiring note §8.2 makes for Combine |
+| C12 | **A tick cannot outlive its own precondition.** If the route stops being continuable while the box is ticked, the box unticks itself **and the form Continue rewrote is put back** | Leaving it ticked-but-disabled would send C2's rewritten fields — Start = an end, End blank — into a plain rebuild, which is a route the user never asked for. C2 already stashes the original form for unticking; this reuses it |
+| C13 | **A continuation that adds nothing because the two worlds are ALREADY CONNECTED says so**, rather than reporting no path | The path is found and every connection on it turns out to be one the route already has, so `addRoute` skips them all. Reporting that as "no path found within Jump-N" sent the user off to raise a jump limit that was never the problem. Distinct from C8: nothing is changed either way, but the reason differs |
+
+**Two tests now exist, deliberately, and must not be merged.** `walkRouteChain` /
+`getRouteChain` is the strict one — one unbroken line, exactly two ends — and still governs
+travel order (§3) and Combine (M1). `walkRouteEnds` / `getRouteEnds` is the weak one and
+governs Continue alone. They build their adjacency identically, on purpose, so the two can
+never disagree about the *shape* of a route, only about which shapes they accept.
 
 ---
 
@@ -230,7 +255,10 @@ may change a route generated by any existing path.
 3. Start that is neither end → refused, nothing changed.
 4. Ticking rewrites the form; unticking restores it exactly.
 5. Setup accumulates; a later plain Generate reproduces the whole route.
-6. Continue an imported route with no stored setup (C4); setup manufactured correctly.
+6. Continue an imported route with no stored setup (C4). **Corrected 2026-09-11:** this
+   item said "setup manufactured correctly", which is C4 as originally drafted. **OQ-4
+   reversed that and the code follows OQ-4** — no setup is invented for a route that had
+   none, and the suite asserts exactly that.
 7. Continue a route that stopped short; Start pre-fills with C; **the ring clears** once C
    gains a second connection.
 8. Continuation that finds no path leaves the route completely unchanged (C8).
@@ -252,6 +280,33 @@ may change a route generated by any existing path.
 19. One Ctrl+Z restores both routes, both slots, both names and colours.
 20. Combining a P2P route with an **imported** one lists in travel order — §6, and it must
     pass **in both directions**, which is the assertion that catches the array-order trap.
+
+**Continue — added v0.17.5, for the weakened rule (C1, C4, C10–C13)**
+
+Each of the first four **must be paired with the strict test refusing the same segments**
+(`getRouteChain().ok === false`). Without that pairing the check cannot tell the new rule
+from the old one, and would go vacuous the moment the rule were reverted.
+
+21. A **three-ended Y** is eligible; the tooltip names all three ends and warns the setup
+    will be dropped.
+22. A **self-crossing route with two ends** is eligible, and says travel order is lost.
+23. A **closed loop** is refused, for that reason.
+24. A **line beside a detached loop** is refused as more than one piece — and it presents
+    exactly **two** loose ends, which is what makes "count the ends" the wrong test. Same
+    shape as the §14.1 bug; it must be checked here too.
+25. A bad Start on a three-ended route is refused naming **all three**, in English, with no
+    stray indexes (`_formatEndList` hands `.map` the index if called carelessly).
+26. C11: drawing segments under an open panel enables the box; a re-test leaves an existing
+    tick alone.
+27. C12: a tick that loses its precondition unticks itself **and restores the form**.
+28. C10: continuing past two ends clears the saved setup, and the toast says so. Aim the new
+    leg at a **fresh** world — aiming it at one of the route's own ends joins two ends to each
+    other, leaves one end, and the setup is then correctly kept.
+29. C13: "already connects", not "no path found", and nothing changes on the map.
+30. The announced segment count equals the number actually drawn. **At Jump-1.** At Jump-3
+    the pathfinder shortcuts past the route's own edges, nothing is retraced, and the
+    miscount cannot be reproduced — the suite's helper hardcoded Jump-3.
+
 
 **Negative control.** At least one test must be shown to fail when the behaviour it checks
 is removed. A suite asserting "the route is a clean chain" passes just as happily on an
@@ -330,22 +385,36 @@ R9 regression test, which carries an explicit negative control for this reason.
 | **WP5** — row legibility | **DONE.** The CSV control is now a text button rather than a third file-shaped icon — see §8.2 and OQ-2 |
 | **WP6** — docs | **DONE.** v0.17.4 bumped in all four sites per `update_version.md`; seven changelog entries in `changelog.md` and `README.md`; `help_routes.md` gains *Continuing a Route* and *Combining Two Routes* plus a corrected row table; manifest §0.0 rewritten as the v0.17.4 cold start |
 
-**Verification:** two suites, both driving the real UI rather than the generators, both
-carrying a **negative control** — without one, a suite asserting "the route is a chain"
-passes just as happily on an empty slot.
+**Verification:** three suites (two at v0.17.4, a third added in v0.17.5), all driving the
+real UI rather than the generators, all carrying a **negative control** — without one, a
+suite asserting "the route is a chain" passes just as happily on an empty slot.
 
 | Suite | Checks | Negative control |
 |---|---|---|
-| `utilities/route_continue.js` | 15 | With the box off, Generate must still *replace* — otherwise every "it appended" assertion proves nothing |
+| `utilities/route_continue.js` | 15 → **38** (v0.17.5) | With the box off, Generate must still *replace* — otherwise every "it appended" assertion proves nothing. **Each V-check additionally pairs with the strict test refusing the same shape**, so a reverted rule fails rather than passing vacuously |
 | `utilities/route_combine.js` | 13 | Of three candidate routes (one eligible, one non-touching, one joining mid-route) exactly **one** is offered — otherwise the eligibility checks pass vacuously |
+| `utilities/route_add_slot.js` | 11 (v0.17.5) | Two added slots must differ from each other in colour **and** key — otherwise every allocation assertion would pass on the old behaviour, which was always green with no key |
 
 Route corpus re-run after every work package: 38 scenarios, 18,079 segments, identical
 throughout.
 
-**Measured, not assumed:** the row still fits its 430px column exactly (scrollWidth ===
-clientWidth), and the picker renders on `<body>` at the icon's own coordinates — explicitly
-asserted *not* to be displaced by the palette's top-left offset, which is the signature of
-the `backdrop-filter` trap in §8.3.
+**Measured, not assumed:** the picker renders on `<body>` at the icon's own coordinates —
+explicitly asserted *not* to be displaced by the palette's top-left offset, which is the
+signature of the `backdrop-filter` trap in §8.3.
+
+> **CORRECTED 2026-09-11.** This paragraph also claimed the row "still fits its 430px
+> column exactly (scrollWidth === clientWidth)". **It never fitted.** v0.17.5 item 2
+> establishes that a row needs **467px** to fit at all and 480px to sit at its natural size
+> — eleven controls and ten gaps — so every row was already squeezed below its own minimum,
+> and the 50px colour swatch was rendering as a **14px sliver**. Opening a tall automation
+> panel added a vertical scrollbar and turned the squeeze into a horizontal overflow. The
+> window is now **520px** (`hex_map.html`, `#route-window`).
+>
+> **The lesson is in the assertion, not the number.** `scrollWidth === clientWidth` cannot
+> detect this: flex children absorb a shortfall by *shrinking*, so the equality holds
+> precisely **because** the row was compressed. The check passed for the reason it should
+> have failed. Measuring a control against its own specified width — the swatch against its
+> 50px — would have caught it; measuring for overflow never could.
 
 ### 14.1 A bug found and fixed on the way
 

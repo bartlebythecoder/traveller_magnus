@@ -1200,11 +1200,10 @@ const ExportCore = (() => {
     // PlanetRenderer.imageSeed — the one definition shared with the in-app
     // viewers, so an exported world and the same world on screen are the same
     // planet. Do not reconstruct a seed string here.
-    async function renderWorldImage(worldData, hexId, projection, seedFallback) {
-        if (!canRenderImage(worldData)) return null;
-        if (typeof PlanetRenderer === 'undefined') return null;
-        const seedHexId = PlanetRenderer.imageSeed(hexId, worldData, seedFallback);
-
+    // The shape the renderers want, built from the export's own world record.
+    // Shared by the world image and the regional sheet so the two cannot end up
+    // drawing different planets from the same row.
+    function _rendererData(worldData) {
         const uwp  = worldData.uwp || '';
         const atm  = uwp.length >= 3 ? (parseInt(uwp[2], 16) || 0) : 0;
         const hyd  = uwp.length >= 4 ? (parseInt(uwp[3], 16) || 0) : 0;
@@ -1212,8 +1211,7 @@ const ExportCore = (() => {
         const tempBand = (tempK > 0 && typeof PlanetRenderer.tempBandFromKelvin === 'function')
             ? PlanetRenderer.tempBandFromKelvin(tempK)
             : (worldData.temperature || '');
-
-        const rendererData = {
+        return {
             atmosphere:    atm,
             hydrographics: hyd,
             temperature:   tempBand,
@@ -1221,6 +1219,14 @@ const ExportCore = (() => {
             size:          worldData.size ?? 0,
             uwp,
         };
+    }
+
+    async function renderWorldImage(worldData, hexId, projection, seedFallback) {
+        if (!canRenderImage(worldData)) return null;
+        if (typeof PlanetRenderer === 'undefined') return null;
+        const seedHexId = PlanetRenderer.imageSeed(hexId, worldData, seedFallback);
+
+        const rendererData = _rendererData(worldData);
 
         const canvas = document.createElement('canvas');
         if (!projection || projection === 'globe') {
@@ -1239,6 +1245,113 @@ const ExportCore = (() => {
         });
     }
 
+    // ── Regional survey sheets (v0.18) ───────────────────────────────────────
+    //
+    // Only PINNED sites are exported. A pin is a deliberate human choice, so the
+    // volume is bounded by intent rather than by sector size — a sector with no
+    // pins costs nothing at all. Each sheet is a full terrain render of roughly
+    // two seconds, so emitting one per world automatically would put a 400-world
+    // sector at about a quarter of an hour and 160 MB.
+    //
+    // FOG OF WAR. Callers MUST gate these exactly as they gate the world image.
+    // A sheet shows the same physical facts at finer scale, and like any image it
+    // is opaque to filterBlocks() — which only ever sees blocks. The only way to
+    // withhold one is to not generate it.
+
+    // Pins for one body, read from the hex state where terrain_pins.js keeps
+    // them. Returns [] for anything missing, so a caller never has to check.
+    function pinnedSitesFor(hexId, bodyName) {
+        try {
+            if (typeof hexStates === 'undefined' || !hexStates || !hexStates.get) return [];
+            const st = hexStates.get(hexId);
+            const all = st && st.terrainPins;
+            // Normalise through TerrainPins so a nameless body is looked up
+            // under the same 'Unnamed' the panel filed it as.
+            const nm = window.TerrainPins
+                ? TerrainPins.bodyNameOf(bodyName)
+                : ((typeof bodyName === 'string' ? bodyName.trim() : '') || 'Unnamed');
+            const m = all && all[nm];
+            if (!m) return [];
+            return Object.keys(m)
+                .sort(function (a, b) { return (+a) - (+b); })
+                .map(function (k) {
+                    const p = m[k];
+                    return { slot: +k, lat: p.lat, lon: p.lon, label: p.label };
+                })
+                .filter(function (p) {
+                    return typeof p.lat === 'number' && typeof p.lon === 'number';
+                });
+        } catch (e) { return []; }
+    }
+
+    function canRenderSheet() {
+        return !!(window.TerrainFrame && window.TerrainFrame.renderSheet
+                  && window.TerrainFrame.sheetSetup && window.TerrainField
+                  && window.TerrainRender && window.TerrainNames);
+    }
+
+    // One sheet. Uses TerrainFrame.sheetSetup() and TerrainFrame.renderSheet() —
+    // the same two calls the in-app panel makes — so an exported sheet is the
+    // sheet the user saw. Returns PNG bytes, or null if the terrain modules are
+    // absent, so the export degrades rather than throwing.
+    async function renderRegionalSheet(worldData, hexId, bodyName, pin, seedFallback) {
+        if (!canRenderSheet() || !canRenderImage(worldData)) return null;
+        if (typeof PlanetRenderer === 'undefined') return null;
+        try {
+            const rd = _rendererData(worldData);
+            const name = window.TerrainPins ? TerrainPins.bodyNameOf(bodyName) : bodyName;
+            const seed = PlanetRenderer.imageSeed(hexId, worldData, seedFallback);
+            const ms = (typeof masterSeed !== 'undefined') ? masterSeed : 'default';
+            const S = TerrainFrame.sheetSetup(rd, seed, ms);
+            const W = 960, H = Math.round(W * 2 / 3);
+
+            const r = TerrainFrame.renderSheet({
+                ctx: S.ctx, worldData: rd,
+                worldType: S.worldType, atmCode: S.atmCode, seaLevel: S.seaLevel,
+                planetRadiusKm: S.planetRadiusKm, planetReliefM: S.planetReliefM,
+                latDeg: pin.lat, lonDeg: pin.lon, widthKm: S.widthKm, W: W, H: H,
+                localReliefM: S.localReliefM, landformKm: S.landformKm,
+                lightAltDeg: 38,
+                hydrology: (window.terrainFieldVersion || 1) >= 2 && S.hydro >= 1,
+                labels: true,
+                masterSeed: ms, hexId: seed, bodyName: name,
+            });
+            if (!r) return null;
+
+            const canvas = document.createElement('canvas');
+            TerrainFrame.compose(canvas, {
+                mapCanvas: r.plate, field: r.f, legend: r.out.legend,
+                worldType: S.worldType,
+                worldData: {
+                    uwp: worldData.uwp || '',
+                    diameterKm: S.planetRadiusKm * 2,
+                    temperatureK: rd.temperatureK,
+                },
+                title: name,
+                subtitle: 'Regional Survey',
+                office: (window.sectorName || 'Sector') + ' Survey Office',
+                surveyId: TerrainFrame.surveyId(hexId, name, pin.lat, pin.lon, S.widthKm),
+                date: new Date().toISOString().slice(0, 10),
+            });
+
+            return await new Promise(function (resolve) {
+                canvas.toBlob(function (blob) {
+                    if (!blob) { resolve(null); return; }
+                    blob.arrayBuffer().then(function (buf) { resolve(new Uint8Array(buf)); });
+                }, 'image/png');
+            });
+        } catch (e) {
+            console.warn('[export] regional sheet failed:', e);
+            return null;
+        }
+    }
+
+    // A pin's label, for filenames and captions.
+    function sheetLabel(pin) {
+        const l = (pin && pin.label ? String(pin.label) : '').trim();
+        return l || ('Site ' + (((pin && pin.slot) | 0) + 1));
+    }
+
     return {
         crc32, buildZip,
         sanitize, systemFilename, bodyFilename,
@@ -1246,6 +1359,7 @@ const ExportCore = (() => {
         resolveSystemName, resolveUWP, kToC,
         findRawWorld, findRawMoon, findRawStar,
         canRenderImage, isAirless, renderWorldImage,
+        pinnedSitesFor, canRenderSheet, renderRegionalSheet, sheetLabel,
         // block model
         GAP, h, f, fc, txt, tbl,
         // shared content

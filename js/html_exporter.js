@@ -335,7 +335,7 @@ ${extraJs || ''}
 
     function _buildSystemPage(ctx) {
         const { hexId, hexCode, sectorName, subsectorChar, state, normalized,
-                sysImage, worldImages } = ctx;
+                sysImage, worldImages, worldSheets } = ctx;
 
         const LV         = _levelFor(hexId);   // null on the GM path
         const systemName = EC.resolveSystemName(state, LV, hexCode);
@@ -503,6 +503,14 @@ ${extraJs || ''}
 
             const img = worldImages.get(`w${wi}`);
             if (img) H.push(_imageFigure('images/' + img, name));
+
+            const sheets = (worldSheets && worldSheets.get(`w${wi}`)) || [];
+            if (sheets.length) {
+                H.push('<h3>Regional Surveys</h3>');
+                for (const s of sheets) {
+                    H.push(_imageFigure('images/' + s.fn, `${name} — ${s.label}`));
+                }
+            }
 
             // UWP string and its breakdown are both (g), never partial — §7.2.
             if (w.uwp && _show(LV, 'g')) {
@@ -1012,6 +1020,8 @@ tbody tr:nth-child(even) { background:var(--panel);
 
             // Images, keyed so the page builder can look them up without re-deriving.
             const worldImages = new Map();
+            // key `w{i}` / `w{i}m{j}` -> [{ fn, label }]  (regional survey sheets)
+            const worldSheets = new Map();
             let sysImage = null;
             // Orrery images are gated at (d): one glance gives world count,
             // belts and gas giants (§5.2.3). Below (g) they are RE-RENDERED with
@@ -1038,6 +1048,22 @@ tbody tr:nth-child(even) { background:var(--panel);
                         files.push({ name: `${sub}/images/${fn}`, data: img });
                         worldImages.set(`w${wi}`, fn);
                     }
+                    // Regional survey sheets for PINNED sites only. Inside this
+                    // same gate on purpose: a sheet is the world image at finer
+                    // scale, so it must be withheld from a fogged world in
+                    // exactly the same circumstances — and being an image, not
+                    // generating it is the only way to withhold it.
+                    const pins = EC.pinnedSitesFor(hexId, w.name);
+                    for (const pin of pins) {
+                        const sheet = await EC.renderRegionalSheet(w, hexId, w.name, pin, `w${wi}`);
+                        if (!sheet) continue;
+                        const lbl = EC.sheetLabel(pin);
+                        const sfn = EC.bodyFilename(systemName,
+                            `${EC.worldDisplayName(w, wi, oLV)} - ${lbl}`, hexCode, 'png');
+                        files.push({ name: `${sub}/images/${sfn}`, data: sheet });
+                        if (!worldSheets.has(`w${wi}`)) worldSheets.set(`w${wi}`, []);
+                        worldSheets.get(`w${wi}`).push({ fn: sfn, label: lbl });
+                    }
                 }
                 const moons = w.moons || [];
                 for (let mi = 0; mi < moons.length; mi++) {
@@ -1057,7 +1083,7 @@ tbody tr:nth-child(even) { background:var(--panel);
 
             put(pageFile, _buildSystemPage({
                 hexId, hexCode, sectorName, subsectorChar, state, normalized,
-                sysImage, worldImages,
+                sysImage, worldImages, worldSheets,
             }));
 
             await new Promise(r => setTimeout(r, 0));

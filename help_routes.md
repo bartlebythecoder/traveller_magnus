@@ -355,7 +355,10 @@ This means you can use the filter to restrict a route to a specific allegiance o
   - A stop lies outside the sector grid entirely (an empty hex inside it is fine).
   - The message names the closest world the search *could* reach and how many hexes short
     that leaves it. That world is usually the one to add as a waypoint.
-- Start and End must be different stops.
+- Start and End **may be the same world**, which builds a round trip — but only with at
+  least one waypoint, since there is no path from a world to itself. With a single
+  waypoint the return leg usually retraces the outbound one and you get an out-and-back
+  line; two or more waypoints is what closes a loop.
 - The Systems Panel displays P2P worlds in **order** (numbered 1, 2, 3…) rather than alphabetically.
 - A route built with **Build as far as possible** keeps its mark only for as long as the
   route really does stop there. Regenerate it, extend it past that point by hand, connect it

@@ -21,6 +21,7 @@ For a deep dive on routes specifically, see the [Route Manager Help Manual](help
 11. [How do I draw routes manually?](#11-how-do-i-draw-routes-manually)
 12. [How do I create automated routes?](#12-how-do-i-create-automated-routes)
 13. [How do I get world images?](#13-how-do-i-get-world-images)
+14. [How do I get regional surface maps?](#14-how-do-i-get-regional-surface-maps)
 
 ---
 
@@ -500,11 +501,134 @@ flat projections. **Include system orrery images** adds a rendered orrery snapsh
 
 ### Tuning the look
 
-**Settings → Visual Options → World Image Generation** has two sliders that affect every world
-rendered afterwards:
+**Settings → Visual Options → World Image Generation** affects every world rendered afterwards:
 
+- **Use Classic World Images** — off by default, which is **Tectonic**; tick it for **Classic**.
+  See [Classic vs Tectonic](#classic-vs-tectonic) below.
 - **Continental Definition** (default 0.55) — how sharply land masses separate from ocean
 - **Coastline Complexity** (default 0.45) — how intricate the coastlines are
+
+### Going closer
+
+For a zoomed-in view of a patch of the surface rather than the whole globe, see
+[regional surface maps](#14-how-do-i-get-regional-surface-maps).
+
+---
+
+## 14. How do I get regional surface maps?
+
+A regional map zooms in on one patch of a world's surface and draws it as a survey sheet — shaded
+relief inside a graticule, with a scale bar, compass rose, terrain key, a globe locator inset and a
+survey ID in the footer. The window is fixed at roughly 120–220 km across depending on the size of
+the world, so a sheet is always at the same regional scale.
+
+Like the world image, the terrain is derived from the world's UWP and the map seed, so the same
+world always produces the same landscape.
+
+### Opening one
+
+**Ctrl + Click** a hex to open World Details → **◎ VIEW WORLD IMAGE** → **Open Map** → **Regional
+Maps →**, at the right-hand end of the projection row.
+
+This works from any body's world image, not only the mainworld — open a moon or an outer planet from
+the **System** accordion and its flat map carries the same button.
+
+### Moving around
+
+- **Drag the sheet** to pan. The terrain is anchored to the world, so the ground under the cursor is
+  the same ground wherever you drag it — panning reframes the view, it does not generate a new
+  landscape.
+- **Click the small world map** under **LOCATION** to open the full-world locator. This is a large
+  map of the whole planet showing a 30° graticule, your five site slots, and the current survey
+  window as a red reticle. Latitude and longitude are read out at the bottom right as you move the
+  cursor. Click to place the survey window there and close the locator; **Esc** or **Cancel** backs
+  out without moving anything.
+
+The small map is a preview, not a picker. At 200 pixels for 360° of longitude, one of its pixels is
+roughly the width of the entire survey window — which is why clicking it opens the large map rather
+than jumping straight to a location.
+
+There is no zoom, deliberately. Landform size and steepness are properties of the planet rather than
+of the framing, so magnifying the window changed almost nothing you could see.
+
+### Sites and pins
+
+**SITES** lists five slots. An unpinned slot holds an automatically chosen location — the five most
+dramatic stretches of dry land on the world, kept at least 25° apart, as a starting shortlist of
+places worth surveying.
+
+- **Go** jumps the sheet to that slot.
+- **Pin** overwrites the slot with wherever the sheet is now, and names it.
+- **×** clears a pin and hands the slot back to its automatic location.
+
+Five pins per body is the limit. **Pins are saved inside the map**, so they travel with a saved
+`.json` file, ride the automatic browser save, and survive moving to another machine.
+
+### What the controls do
+
+| Control | Effect |
+|---|---|
+| **Resolution** | Fast / Balanced / Detailed. Sharpness and render time only — the terrain is the same. |
+| **Sun angle °** | Height of the sun, 5 to 85. A low sun throws long shadows and exaggerates relief. |
+| **Rivers & lakes** | Traces a drainage network, cuts channels into the terrain, and fills the basins that hold standing water. One box governs both — switching it off takes the lakes away with the rivers. |
+| **Feature labels** | Names the landforms on the sheet. |
+| **Cartographic frame** | The survey-sheet furniture. Untick it for the bare terrain plate. |
+
+### Why is Rivers & lakes greyed out?
+
+Because it could not do anything, and the box says which reason applies:
+
+- **"Not available on Classic world images"** — the hydrology pass only runs on Tectonic terrain,
+  so untick **Use Classic World Images**.
+- **"This world has no surface water"** — hydrographics 0. There is nothing to drain.
+
+### Where are the cities, roads and starports?
+
+Deliberately absent. A regional map shows landscape and physical features only, and names only
+natural ones. Anything built is a job for a finer, site-scale tier that does not exist yet.
+
+### Classic vs Tectonic
+
+**Settings → Visual Options → World Image Generation → Use Classic World Images** picks how
+terrain is generated, and applies to world images and regional maps alike:
+
+- **Classic** — the original terrain. Every world looks exactly as it always has.
+- **Tectonic** — a plate model, producing linear mountain ranges, trenches and rift valleys. It also
+  brings green vegetation to warm, wet, breathable worlds and a distinct cold-desert palette to
+  frozen dry ones, and it is the only model on which rivers and lakes can be drawn.
+
+World images are never stored — they are recomputed from the seed every time you look at one — so
+changing the model changes every world in the sector. That is exactly why the setting exists:
+**Classic is frozen**, so a sector built before this feature arrived looks identical until you
+choose otherwise — such a file reopens with the box already ticked, whatever your default. The
+choice is saved with the sector rather than with the browser, so a file always reopens under the
+model it was saved with, and a new sector starts on Tectonic.
+
+### Do regional maps appear in exports?
+
+Yes, for **pinned sites only** — an unpinned slot exports nothing. Both **Export HTML** and **Export
+Obsidian Wiki** add a **Regional Surveys** section to any world that has pins, with one full sheet
+per pin.
+
+Sheets follow the **Include world images** toggle, and obey fog of war on exactly the same terms: a
+sheet is the world image at a finer scale, so a world hidden from the reader does not get one.
+
+### Saving a single sheet
+
+**Download PNG** saves the sheet as displayed, named after the world and its coordinates.
+
+### One of my sites has turned amber
+
+That pin was made under a different map seed. A pin stores a latitude and longitude, not a picture,
+and the surface is rebuilt from the seed every time you view it — so under a new seed the
+coordinates are still valid but the ground beneath them is not the ground you pinned. The pin is
+flagged rather than hidden; hover it for the details, then re-pin or clear it.
+
+### Is any of this from a rulebook?
+
+No. No Traveller edition publishes tables for surface topography, so the terrain is invented rather
+than rolled. What constrains it is the world's own UWP — size, atmosphere, hydrographics and
+temperature all steer the result, and the sheet's data block quotes them.
 
 ---
 

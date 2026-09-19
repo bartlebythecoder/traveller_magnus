@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Regional Terrain Spike — As Above, So Below</title>
+<style>
+    :root {
+        --bg:      #0a0e14;
+        --panel:   #121821;
+        --edge:    #222c3a;
+        --ink:     #c8d2e0;
+        --dim:     #6d7c90;
+        --accent:  #5aa7d8;
+        --warn:    #d8954a;
+    }
+    * { box-sizing: border-box; }
+    body {
+        margin: 0; background: var(--bg); color: var(--ink);
+        font: 13px/1.5 "Segoe UI", system-ui, sans-serif;
+        display: flex; min-height: 100vh;
+    }
+    #controls {
+        width: 310px; flex: 0 0 310px; background: var(--panel);
+        border-right: 1px solid var(--edge); padding: 14px; overflow-y: auto;
+        max-height: 100vh;
+    }
+    #stage { flex: 1; padding: 16px; overflow: auto; }
+    h1 { font-size: 15px; letter-spacing: .10em; text-transform: uppercase;
+         margin: 0 0 2px; font-weight: 600; }
+    .sub { color: var(--dim); font-size: 11px; margin-bottom: 14px; }
+    h2 { font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+         color: var(--accent); margin: 16px 0 7px; font-weight: 600;
+         border-bottom: 1px solid var(--edge); padding-bottom: 4px; }
+    label { display: flex; align-items: center; justify-content: space-between;
+            gap: 8px; margin: 5px 0; font-size: 12px; }
+    label > span:first-child { color: var(--dim); }
+    input[type=text], input[type=number], select {
+        background: #0b1017; border: 1px solid var(--edge); color: var(--ink);
+        padding: 3px 6px; border-radius: 3px; width: 108px; font: inherit;
+        font-size: 12px;
+    }
+    input[type=range] { width: 108px; }
+    input[type=checkbox] { accent-color: var(--accent); }
+    .val { color: var(--accent); font-variant-numeric: tabular-nums;
+           min-width: 42px; text-align: right; font-size: 11px; }
+    button {
+        background: #1b2736; border: 1px solid #2f4056; color: var(--ink);
+        padding: 7px 10px; border-radius: 3px; cursor: pointer; font: inherit;
+        font-size: 12px; width: 100%; margin-top: 6px;
+    }
+    button:hover { background: #243347; border-color: var(--accent); }
+    button.primary { background: #1c3e5a; border-color: var(--accent); font-weight: 600; }
+    .row { display: flex; gap: 6px; }
+    .row button { margin-top: 6px; }
+    .presets button { width: auto; flex: 1; font-size: 11px; padding: 5px 4px; }
+    canvas { display: block; border: 1px solid var(--edge); background: #000;
+             max-width: 100%; image-rendering: auto; }
+    .card { margin-bottom: 18px; }
+    .card h3 { font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+               color: var(--dim); margin: 0 0 6px; font-weight: 600; }
+    #status { margin-bottom: 12px; padding: 8px 10px; background: var(--panel);
+              border: 1px solid var(--edge); border-radius: 3px; font-size: 12px;
+              font-variant-numeric: tabular-nums; white-space: pre-wrap; }
+    #legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; }
+    #legend div { display: flex; align-items: center; gap: 6px; font-size: 11px;
+                  color: var(--dim); }
+    #legend i { width: 15px; height: 11px; display: block; border: 1px solid #0006; }
+    #canvas-global { cursor: crosshair; }
+    .pair { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-start; }
+    .note { font-size: 11px; color: var(--warn); line-height: 1.45; margin-top: 8px;
+            padding: 7px 9px; background: #1a140a; border: 1px solid #3a2c14;
+            border-radius: 3px; }
+    .slot { display: flex; align-items: center; gap: 5px; margin: 4px 0;
+            font-size: 11px; padding: 4px 5px; border-radius: 3px;
+            background: #0d131b; border: 1px solid var(--edge); }
+    .slot.pinned { border-color: var(--accent); background: #10202c; }
+    .slot .idx { color: var(--dim); width: 13px; flex: 0 0 13px; text-align: right; }
+    .slot .nm { flex: 1; overflow: hidden; text-overflow: ellipsis;
+                white-space: nowrap; cursor: text; }
+    .slot.pinned .nm { color: var(--accent); }
+    .slot .co { color: var(--dim); font-variant-numeric: tabular-nums;
+                font-size: 10px; flex: 0 0 auto; }
+    .slot button { width: auto; margin: 0; padding: 2px 5px; font-size: 10px;
+                   line-height: 1.3; }
+    .hint { font-size: 11px; color: var(--dim); margin-top: 6px; line-height: 1.45; }
+</style>
+</head>
+<body>
+
+<div id="controls">
+    <h1>Regional Terrain</h1>
+    <div class="sub">v0.18 spike — no app code touched</div>
+
+    <h2>World Preset</h2>
+    <div class="row presets">
+        <button data-preset="ice">Icy</button>
+        <button data-preset="standard">Water</button>
+        <button data-preset="desert">Desert</button>
+        <button data-preset="rock">Airless</button>
+    </div>
+
+    <h2>Seed &amp; World</h2>
+    <label><span>Master seed</span><input type="text" id="masterSeed" value="TravellerMagnus"></label>
+    <label><span>Hex ID</span><input type="text" id="hexId" value="1105"></label>
+    <label><span>Size (UWP)</span><input type="number" id="uwpSize" value="5" min="0" max="15"></label>
+    <label><span>Atmosphere</span><input type="number" id="uwpAtm" value="1" min="0" max="15"></label>
+    <label><span>Hydrographics</span><input type="number" id="uwpHydro" value="6" min="0" max="15"></label>
+    <label><span>Temp (K)</span><input type="number" id="tempK" value="210" min="0" max="2000"></label>
+    <label><span>Body name</span><input type="text" id="bodyName" value="Kteiroa"></label>
+    <div class="hint" id="typeNote"></div>
+
+    <h2>Window</h2>
+    <label><span>Latitude °</span><input type="number" id="lat" value="0" step="0.5" min="-90" max="90"></label>
+    <label><span>Longitude °</span><input type="number" id="lon" value="81" step="0.5" min="-180" max="180"></label>
+    <label><span>Width (km)</span><input type="number" id="widthKm" value="150" min="2" max="20000"></label>
+    <label><span>Resolution</span>
+        <select id="res">
+            <option value="640">Fast (640)</option>
+            <option value="960" selected>Balanced (960)</option>
+            <option value="1400">Detailed (1400)</option>
+        </select>
+    </label>
+
+    <h2>Terrain</h2>
+    <label><span>Local relief (m)</span><input type="range" id="localRelief" min="200" max="9000" step="100" value="3500"><span class="val" id="localReliefV">3500</span></label>
+    <label><span>Planet relief (m)</span><input type="range" id="planetRelief" min="2000" max="30000" step="500" value="12000"><span class="val" id="planetReliefV">12000</span></label>
+    <label><span>Landform size km</span><input type="range" id="landformKm" min="2" max="200" value="20"><span class="val" id="landformKmV">20</span></label>
+    <label><span>Ridged</span><input type="checkbox" id="ridged" checked></label>
+    <label><span>Erosion</span><input type="checkbox" id="erosionOn" checked></label>
+    <label><span>Droplets ×area</span><input type="range" id="erosionAmt" min="0" max="60" value="18"><span class="val" id="erosionAmtV">0.18</span></label>
+
+    <h2>Sheet</h2>
+    <label><span>Cartographic frame</span><input type="checkbox" id="frameOn" checked></label>
+    <label><span>Survey office</span><input type="text" id="office" value="Trojan Reach Survey Office"></label>
+
+    <h2>Feature Labels</h2>
+    <label><span>Show labels</span><input type="checkbox" id="labelsOn" checked></label>
+    <label><span>Min share %</span><input type="number" id="minShare" value="0.20" step="0.05" min="0.01" max="5"></label>
+    <label><span>Min frame width %</span><input type="range" id="labelMinPct" min="2" max="40" value="12"><span class="val" id="labelMinPctV">12</span></label>
+    <label><span>Max labels/map</span><input type="number" id="labelMax" value="12" min="1" max="40"></label>
+    <div class="hint" id="featNote"></div>
+
+    <h2>Lighting</h2>
+    <label><span>Light azimuth °</span><input type="range" id="lightAz" min="0" max="359" value="315"><span class="val" id="lightAzV">315</span></label>
+    <label><span>Light altitude °</span><input type="range" id="lightAlt" min="5" max="85" value="38"><span class="val" id="lightAltV">38</span></label>
+    <label><span>Cast shadows</span><input type="checkbox" id="shadowsOn" checked></label>
+    <label><span>Ambient occlusion</span><input type="checkbox" id="aoOn" checked></label>
+    <label><span>Micro-texture</span><input type="range" id="micro" min="0" max="40" value="10"><span class="val" id="microV">0.10</span></label>
+
+    <h2>Site Slots</h2>
+    <label><span>How many</span><input type="number" id="siteCount" value="5" min="1" max="24"></label>
+    <div class="hint">Each slot is <b>derived</b> from the seed until you pin your
+    own location over it. Pinned slots are never recomputed. Up to
+    <b id="maxPinsLbl">5</b> pins per body.</div>
+    <div id="siteRow"></div>
+    <button id="btnClearPins">Clear all pins on this body</button>
+
+    <h2>Run</h2>
+    <button class="primary" id="btnRender">Render</button>
+    <button id="btnCompare">Compare: erosion on / off</button>
+    <button id="btnGrey">Show elevation (greyscale)</button>
+    <button id="btnDeterminism">Determinism check (render ×2)</button>
+    <button id="btnDownload">Download PNG</button>
+</div>
+
+<div id="stage">
+    <div id="status">Ready.</div>
+
+    <div class="card">
+        <h3>Regional view</h3>
+        <canvas id="canvas-main" width="960" height="640"></canvas>
+        <div id="legend"></div>
+    </div>
+
+    <div class="pair">
+        <div class="card">
+            <h3>Whole-world context (base field only)</h3>
+            <canvas id="canvas-global" width="440" height="220"></canvas>
+            <div class="hint"><b style="color:var(--accent)">Click anywhere on this map</b> to render that location —
+            poles included.<br>Red box = rendered region. This is the same base field the
+            existing<br>whole-world map draws, so coastlines and ranges must agree.</div>
+        </div>
+        <div class="card" id="compareCard" style="display:none">
+            <h3 id="compareTitle">Comparison</h3>
+            <canvas id="canvas-compare" width="480" height="320"></canvas>
+        </div>
+    </div>
+
+    <div class="note">
+        Fine detail is <b>invented at zoom time</b>. It does not exist in the whole-world
+        view because that view has no resolution to hold it. Coastlines, ranges and basins
+        match the global map; individual peaks do not. Expected, not a bug.
+    </div>
+</div>
+
+<script>
+// hashString / mulberry32 are copied verbatim from js/core.js so this harness
+// stays standalone (core.js expects app DOM). If those ever change, change here.
+function hashString(str) {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < str.length; i++) {
+        h = Math.imul(h ^ str.charCodeAt(i), 16777619);
+    }
+    return h >>> 0;
+}
+function mulberry32(a) {
+    return function () {
+        let t = a += 0x6D2B79F5;
+        t = Math.imul(t ^ t >>> 15, t | 1);
+        t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    }
+}
+</script>
+<script src="../js/terrain_field.js"></script>
+<script src="../js/terrain_render.js"></script>
+<script src="../js/terrain_pins.js"></script>
+<script src="../js/terrain_names.js"></script>
+<script src="../js/terrain_frame.js"></script>
+<script>
+(() => {
+    const $ = id => document.getElementById(id);
+    const status = $('status');
+
+    const PRESETS = {
+        ice:      { uwpSize: 5, uwpAtm: 1, uwpHydro: 6, tempK: 210, localRelief: 3200, widthKm: 150 },
+        standard: { uwpSize: 8, uwpAtm: 6, uwpHydro: 7, tempK: 288, localRelief: 3800, widthKm: 150 },
+        desert:   { uwpSize: 6, uwpAtm: 4, uwpHydro: 0, tempK: 300, localRelief: 2400, widthKm: 150 },
+        rock:     { uwpSize: 3, uwpAtm: 0, uwpHydro: 0, tempK: 180, localRelief: 3000, widthKm: 150 },
+    };
+
+    // Live-updating range readouts.
+    const ranges = [
+        ['erosionAmt', v => (v / 100).toFixed(2)],
+        ['localRelief', v => v],
+        ['planetRelief', v => v],
+        ['landformKm', v => v],
+        ['labelMinPct', v => v],
+        ['lightAz', v => v],
+        ['lightAlt', v => v],
+        ['micro', v => (v / 100).toFixed(2)],
+    ];
+    ranges.forEach(([id, fmt]) => {
+        const el = $(id), out = $(id + 'V');
+        const sync = () => { out.textContent = fmt(+el.value); };
+        el.addEventListener('input', sync);
+        sync();
+    });
+
+    function readOpts() {
+        const size = +$('uwpSize').value;
+        return {
+            masterSeed: $('masterSeed').value || 'TravellerMagnus',
+            hexId:      $('hexId').value || '0000',
+            worldData: {
+                size,
+                atmosphere:     +$('uwpAtm').value,
+                hydrographics:  +$('uwpHydro').value,
+                temperatureK:   +$('tempK').value,
+            },
+            latDeg:   +$('lat').value,
+            lonDeg:   +$('lon').value,
+            widthKm:  +$('widthKm').value,
+            resW:     +$('res').value,
+            localReliefM:  +$('localRelief').value,
+            planetReliefM: +$('planetRelief').value,
+            landformKm: +$('landformKm').value,
+            ridged:    $('ridged').checked,
+            erosionOn: $('erosionOn').checked,
+            erosionAmt: +$('erosionAmt').value / 100,
+            lightAzDeg: +$('lightAz').value,
+            lightAltDeg: +$('lightAlt').value,
+            shadowsOn: $('shadowsOn').checked,
+            aoOn:      $('aoOn').checked,
+            micro:     +$('micro').value / 100,
+            // Traveller size digit → diameter in km (size × 1600).
+            planetRadiusKm: Math.max(400, size * 800),
+        };
+    }
+
+    function updateTypeNote() {
+        const o = readOpts();
+        const t = TerrainRender.worldTypeOf(o.worldData);
+        const d = o.planetRadiusKm * 2;
+        $('typeNote').innerHTML =
+            `Classified as <b style="color:var(--accent)">${t}</b> · diameter ${d.toLocaleString()} km`;
+    }
+    ['uwpSize','uwpAtm','uwpHydro','tempK'].forEach(id =>
+        $(id).addEventListener('input', updateTypeNote));
+    $('siteCount').addEventListener('change', () => refreshSites());
+
+    document.querySelectorAll('[data-preset]').forEach(b => {
+        b.addEventListener('click', () => {
+            const p = PRESETS[b.dataset.preset];
+            for (const k in p) { $(k).value = p[k]; }
+            ranges.forEach(([id]) => $(id).dispatchEvent(new Event('input')));
+            updateTypeNote();
+            const sites = refreshSites();
+            const s0 = sites.find(x => !x.empty);
+            if (s0) { $('lat').value = s0.lat.toFixed(2);
+                      $('lon').value = s0.lon.toFixed(2); }
+            render();
+        });
+    });
+
+    let lastField = null;
+
+    // Build field + shade. Returns timings and the shaded result.
+    function build(o, overrides) {
+        overrides = overrides || {};
+        const erosionOn = overrides.erosionOn !== undefined ? overrides.erosionOn : o.erosionOn;
+        const W = overrides.resW || o.resW;
+        const H = Math.round(W * 2 / 3);
+
+        const t0 = performance.now();
+        const ctx = TerrainField.buildContext(o.masterSeed, o.hexId, 0.55, 0.45);
+        const t1 = performance.now();
+
+        const f = TerrainField.buildRegional({
+            ctx,
+            latDeg: o.latDeg, lonDeg: o.lonDeg,
+            widthKm: o.widthKm, planetRadiusKm: o.planetRadiusKm,
+            W, H,
+            localReliefM: o.localReliefM,
+            planetReliefM: o.planetReliefM,
+            seaLevel: Math.max(0.05, Math.min(1,
+                TerrainRender.parseStat(o.worldData.hydrographics) / 10)),
+            landformKm: o.landformKm,
+            ridged: o.ridged,
+            erosionIterations: erosionOn ? Math.round(W * H * o.erosionAmt) : 0,
+        });
+        const t2 = performance.now();
+
+        const hydro = TerrainRender.parseStat(o.worldData.hydrographics);
+        const seaLevel = Math.max(0.05, Math.min(1, hydro / 10));
+
+        const out = TerrainRender.shade(f, ctx, {
+            worldData: o.worldData,
+            seaLevelM: o.planetReliefM * seaLevel,
+            lightAzDeg: o.lightAzDeg,
+            lightAltDeg: o.lightAltDeg,
+            shadowSteps: o.shadowsOn ? Math.round(W * 0.09) : 0,
+            aoRadius:    o.aoOn ? Math.max(4, Math.round(W * 0.012)) : 0,
+            microTexture: o.micro,
+        });
+        const t3 = performance.now();
+
+        lastCtx = ctx;
+        return {
+            ctx, field: f, out, W, H,
+            timing: { context: t1 - t0, field: t2 - t1, shade: t3 - t2, total: t3 - t0 },
+        };
+    }
+
+    function paint(canvas, img, W, H) {
+        canvas.width = W; canvas.height = H;
+        canvas.getContext('2d').putImageData(img, 0, 0);
+    }
+
+    // ── Feature labels ───────────────────────────────────────────────────────
+    // Detection is world-anchored (see terrain_names.js). THIS is the separate,
+    // view-dependent half: which of the world's named features are legible on
+    // this particular map. A feature's name never changes — only whether there
+    // is room to letter it here.
+    function drawLabels(canvas, f, o) {
+        if (!$('labelsOn').checked) { $('featNote').textContent = ''; return; }
+        const ctx2 = canvas.getContext('2d');
+        const hydro = TerrainRender.parseStat(o.worldData.hydrographics);
+        const seaLevel = Math.max(0.05, Math.min(1, hydro / 10));
+        const worldType = TerrainRender.worldTypeOf(o.worldData);
+
+        const feats = TerrainNames.featuresFor(lastCtx, {
+            worldType, seaLevel,
+            planetRadiusKm: o.planetRadiusKm,
+            masterSeed: o.masterSeed, hexId: o.hexId,
+            bodyName: $('bodyName').value,
+            minShare: (+$('minShare').value || 0.2) / 100,
+        });
+        $('featNote').innerHTML =
+            `<b style="color:var(--accent)">${feats.length}</b> named features on this world`;
+
+        // Local frame at the window centre — same basis the projection uses.
+        const lat0 = o.latDeg * Math.PI / 180, lon0 = o.lonDeg * Math.PI / 180;
+        const cl0 = Math.cos(lat0), sl0 = Math.sin(lat0);
+        const cn0 = Math.cos(lon0), sn0 = Math.sin(lon0);
+        const cX =  cl0 * cn0, cY = sl0,  cZ =  cl0 * sn0;
+        const eX = -sn0,       eY = 0,    eZ =  cn0;
+        const nX = -sl0 * cn0, nY = cl0,  nZ = -sl0 * sn0;
+        const halfW = (f.widthKm / 2) / o.planetRadiusKm;
+        const halfH = (f.heightKm / 2) / o.planetRadiusKm;
+
+        const minCov = (+$('labelMinPct').value / 100);
+        const maxLab = +$('labelMax').value || 12;
+
+        // Sample a lattice across the window and ask the membership map which
+        // feature each point belongs to. This answers "is it actually in shot?"
+        // rather than "do the bounding circles overlap", and the mean of a
+        // feature's own hits is the centre of its VISIBLE portion — which is
+        // where a cartographer would letter it.
+        const GW = TerrainNames.GRID_W, GH = TerrainNames.GRID_H;
+        const mem = feats.membership;
+        const SX = 41, SY = 27;
+        // Second moments as well as the mean: the covariance of a feature's
+        // visible sample points gives its principal axis and how elongated it
+        // is, which is what decides linear-vs-areal lettering below.
+        const tally = feats.map(() => ({ n: 0, sx: 0, sy: 0, sxx: 0, syy: 0, sxy: 0 }));
+        let total = 0;
+
+        for (let j = 0; j < SY; j++) {
+            const dy = halfH * (1 - 2 * (j + 0.5) / SY);
+            for (let i = 0; i < SX; i++) {
+                const dx = halfW * (2 * (i + 0.5) / SX - 1);
+                const rr = Math.sqrt(dx * dx + dy * dy);
+                let px3, py3, pz3;
+                if (rr < 1e-12) { px3 = cX; py3 = cY; pz3 = cZ; }
+                else {
+                    const cr = Math.cos(rr), sr = Math.sin(rr) / rr;
+                    px3 = cX * cr + (eX * dx + nX * dy) * sr;
+                    py3 = cY * cr + (eY * dx + nY * dy) * sr;
+                    pz3 = cZ * cr + (eZ * dx + nZ * dy) * sr;
+                }
+                const la = Math.asin(Math.max(-1, Math.min(1, py3)));
+                const lo = Math.atan2(pz3, px3);
+                const gx = Math.min(GW - 1, Math.max(0, Math.floor((lo + Math.PI) / (2 * Math.PI) * GW)));
+                const gy = Math.min(GH - 1, Math.max(0, Math.floor((Math.PI / 2 - la) / Math.PI * GH)));
+                const k = mem ? mem[gy * GW + gx] : -1;
+                total++;
+                if (k < 0 || k >= tally.length) continue;
+                const pxc = ((i + 0.5) / SX) * canvas.width;
+                const pyc = ((j + 0.5) / SY) * canvas.height;
+                const t = tally[k];
+                t.n++; t.sx += pxc; t.sy += pyc;
+                t.sxx += pxc * pxc; t.syy += pyc * pyc; t.sxy += pxc * pyc;
+            }
+        }
+
+        const order = feats.map((f, k) => ({ f, k, cov: tally[k].n / Math.max(1, total) }))
+                           .filter(e => e.cov >= minCov)
+                           .sort((a, b) => b.cov - a.cov);
+
+        // Draw one run of text, letter by letter, with explicit tracking and an
+        // optional rotation. Done manually rather than via ctx.letterSpacing so
+        // it works regardless of browser support, and so the per-character path
+        // is already in place if curved baselines are added later.
+        function drawRun(chars, cx, cy, tracking, rot, fill) {
+            const widths = chars.map(ch => ctx2.measureText(ch).width);
+            let wTotal = -tracking;
+            for (const w of widths) wTotal += w + tracking;
+            ctx2.save();
+            ctx2.translate(cx, cy);
+            if (rot) ctx2.rotate(rot);
+            ctx2.textAlign = 'left';
+            ctx2.textBaseline = 'middle';
+            let x = -wTotal / 2;
+            for (let i = 0; i < chars.length; i++) {
+                ctx2.lineWidth = 3.5;
+                ctx2.strokeStyle = 'rgba(8,12,18,0.78)';
+                ctx2.strokeText(chars[i], x, 0);
+                ctx2.fillStyle = fill;
+                ctx2.fillText(chars[i], x, 0);
+                x += widths[i] + tracking;
+            }
+            ctx2.restore();
+            return wTotal;
+        }
+
+        const drawn = [];
+        for (const e of order) {
+            if (drawn.length >= maxLab) break;
+            const t = tally[e.k];
+
+            // Covariance of the visible points, in pixels.
+            const mx = t.sx / t.n, my = t.sy / t.n;
+            const cxx = t.sxx / t.n - mx * mx;
+            const cyy = t.syy / t.n - my * my;
+            const cxy = t.sxy / t.n - mx * my;
+            const tr = cxx + cyy;
+            const det = Math.sqrt(Math.max(0, (cxx - cyy) * (cxx - cyy) + 4 * cxy * cxy));
+            const l1 = (tr + det) / 2, l2 = Math.max(1e-6, (tr - det) / 2);
+            const elong = Math.sqrt(l1 / l2);
+            const majorPx = 4 * Math.sqrt(Math.max(0, l1));   // roughly +/-2 sigma
+            let angle = 0.5 * Math.atan2(2 * cxy, cxx - cyy);
+            // Never set text upside-down.
+            if (angle > Math.PI / 2) angle -= Math.PI;
+            if (angle < -Math.PI / 2) angle += Math.PI;
+
+            // LINEAR features follow their own axis; AREAL features stay
+            // horizontal. That is the rule the reference maps use: only the
+            // mountain range is set along its spine, every sea and waste is
+            // level.
+            //
+            // The test is the feature's CLASS, not its in-frame shape. Judging
+            // by measured elongation alone rotated everything, because the
+            // rectangular frame clips any large feature into a band and a band
+            // measures as highly elongated. Elongation only gates it further,
+            // so a genuinely blobby range is still set level.
+            const linear = e.f.cls === 'range' && elong > 1.35 && t.n >= 8;
+
+            const big = e.cov > 0.45 || majorPx > canvas.width * 0.7;
+            const fontPx = big ? 19 : 15;
+            ctx2.font = (big ? 600 : 500) + ' ' + fontPx + 'px "Segoe UI", system-ui, sans-serif';
+            const fill = e.f.cls === 'sea' ? '#cfe4f5' : '#f2f5f8';
+
+            const words = e.f.label.toUpperCase().split(' ');
+            const plain = words.join(' ');
+            const plainW = ctx2.measureText(plain).width;
+
+            // Track the label out toward the feature's own span, so a big
+            // feature carries a big label — the third convention the reference
+            // uses. Capped so it never runs past the frame.
+            const targetW = Math.min(majorPx * 0.85, canvas.width * 0.88);
+            const spanW = Math.max(plainW, Math.min(targetW, plainW * 2.6));
+
+            if (linear) {
+                const chars = plain.split('');
+                const tracking = Math.max(0, Math.min(fontPx * 0.85,
+                    (spanW - plainW) / Math.max(1, chars.length - 1)));
+                // Keep the rotated run inside the frame.
+                const halfSpan = spanW / 2;
+                const padX = halfSpan * Math.abs(Math.cos(angle)) + 10;
+                const padY = halfSpan * Math.abs(Math.sin(angle)) + 12;
+                const cx = Math.max(padX, Math.min(canvas.width - padX, mx));
+                const cy = Math.max(padY, Math.min(canvas.height - padY, my));
+                if (drawn.some(d => Math.abs(d.x - cx) < 150 && Math.abs(d.y - cy) < 30)) continue;
+                drawn.push({ x: cx, y: cy });
+                drawRun(chars, cx, cy, tracking, angle, fill);
+                continue;
+            }
+
+            // Areal: horizontal, tracked, and stacked onto two lines when the
+            // name is wide relative to the ground it covers.
+            let lines = [plain];
+            if (words.length >= 2 && plainW > majorPx * 0.95) {
+                let bestI = 1, bestDiff = Infinity;
+                for (let i = 1; i < words.length; i++) {
+                    const a = words.slice(0, i).join(' ').length;
+                    const b = words.slice(i).join(' ').length;
+                    if (Math.abs(a - b) < bestDiff) { bestDiff = Math.abs(a - b); bestI = i; }
+                }
+                lines = [words.slice(0, bestI).join(' '), words.slice(bestI).join(' ')];
+            }
+
+            const lineH = fontPx * 1.18;
+            let widest = 0;
+            for (const ln of lines) widest = Math.max(widest, ctx2.measureText(ln).width);
+            const longest = lines.reduce((a, b) => a.length >= b.length ? a : b);
+            const tracking = Math.max(0, Math.min(fontPx * 0.32,
+                (Math.min(targetW, widest * 1.45) - widest) / Math.max(1, longest.length - 1)));
+            const halfRun = (widest + tracking * Math.max(0, longest.length - 1)) / 2;
+            const padY2 = (lines.length - 1) * lineH / 2;
+            const cx = Math.max(halfRun + 8, Math.min(canvas.width - halfRun - 8, mx));
+            const cy = Math.max(18 + padY2, Math.min(canvas.height - 14 - padY2, my));
+            if (drawn.some(d => Math.abs(d.x - cx) < 150 && Math.abs(d.y - cy) < 34)) continue;
+            drawn.push({ x: cx, y: cy });
+            lines.forEach(function (ln, li) {
+                drawRun(ln.split(''), cx, cy - padY2 + li * lineH, tracking, 0, fill);
+            });
+        }
+        return drawn.length;
+    }
+
+    function drawLegend(legend) {
+        $('legend').innerHTML = legend.map(m =>
+            `<div><i style="background:rgb(${m.c[0]},${m.c[1]},${m.c[2]})"></i>` +
+            `${m.label} <span style="opacity:.6">${(m.share * 100).toFixed(1)}%</span></div>`
+        ).join('');
+    }
+
+    function drawGlobal(ctx, o) {
+        const c = $('canvas-global');
+        const GW = 440, GH = 220;
+        const g = TerrainField.buildGlobalPreview(ctx, GW, GH);
+        const hydro = TerrainRender.parseStat(o.worldData.hydrographics);
+        const seaLevel = Math.max(0.05, Math.min(1, hydro / 10));
+        // Same palette as the map itself, so the inset cannot show an ice world
+        // as a temperate one.
+        const wType = TerrainRender.worldTypeOf(o.worldData);
+        const img = new ImageData(GW, GH);
+        for (let i = 0; i < g.height.length; i++) {
+            const rgb = TerrainRender.previewColor(wType, g.height[i], seaLevel,
+                TerrainRender.parseStat(o.worldData.atmosphere), ctx.oceanRng);
+            const q = i * 4;
+            img.data[q] = rgb[0]; img.data[q+1] = rgb[1]; img.data[q+2] = rgb[2];
+            img.data[q+3] = 255;
+        }
+        c.width = GW; c.height = GH;
+        const cx = c.getContext('2d');
+        cx.putImageData(img, 0, 0);
+
+        // Locator box. The window's angular half-width is constant now that the
+        // projection carries its own frame, but an equirectangular world map
+        // still stretches longitude by 1/cos(lat), so the BOX must be widened
+        // to sit correctly on this projection. That is a property of the
+        // preview, not of the region.
+        const halfW  = (o.widthKm / 2) / o.planetRadiusKm;
+        const halfH  = (o.widthKm * (2 / 3) / 2) / o.planetRadiusKm;
+        const latR   = o.latDeg * Math.PI / 180;
+        const px = ((o.lonDeg * Math.PI / 180 + Math.PI) / (2 * Math.PI)) * GW;
+        const py = ((Math.PI / 2 - latR) / Math.PI) * GH;
+        const bw = Math.max(3, (halfW * 2 / Math.max(0.02, Math.cos(latR)) / (2 * Math.PI)) * GW);
+        const bh = Math.max(3, (halfH * 2 / Math.PI) * GH);
+        // Minimum box size keeps the locator visible when the window is a tiny
+        // fraction of the world.
+        const bwv = Math.max(bw, 7), bhv = Math.max(bh, 5);
+        cx.strokeStyle = 'rgba(0,0,0,0.65)'; cx.lineWidth = 3.5;
+        cx.strokeRect(px - bwv / 2, py - bhv / 2, bwv, bhv);
+        cx.strokeStyle = '#ff4040'; cx.lineWidth = 1.8;
+        cx.strokeRect(px - bwv / 2, py - bhv / 2, bwv, bhv);
+    }
+
+    // ── Click-to-pick ────────────────────────────────────────────────────────
+    // Inverse of the equirectangular preview mapping. Any point on the world is
+    // renderable now that the projection has no polar singularity, so this is
+    // unrestricted — including directly over a pole.
+    $('canvas-global').addEventListener('click', ev => {
+        const c = $('canvas-global');
+        const r = c.getBoundingClientRect();
+        const fx = (ev.clientX - r.left) / r.width;
+        const fy = (ev.clientY - r.top)  / r.height;
+        const lon = fx * 360 - 180;
+        const lat = 90 - fy * 180;
+        $('lat').value = lat.toFixed(2);
+        $('lon').value = lon.toFixed(2);
+        render();
+    });
+
+    function report(r, o, extra) {
+        const t = r.timing;
+        const f = r.field;
+        const hydro = TerrainRender.parseStat(o.worldData.hydrographics);
+        const seaM = o.planetReliefM * Math.max(0.05, Math.min(1, hydro / 10));
+        const above = f.elevMaxM - seaM;
+        const below = seaM - f.elevMinM;
+        const wet = above <= 0 ? 'ENTIRELY BELOW SEA LEVEL'
+                  : below <= 0 ? 'entirely dry'
+                  : 'coastal (spans sea level)';
+        status.textContent =
+            `${r.W}×${r.H}  ·  ${o.widthKm} km across  ·  ${f.metresPerPx.toFixed(0)} m/px  ·  ` +
+            `${f.detailOctaves} detail octaves  ·  ${f.erosionIterations.toLocaleString()} droplets\n` +
+            `elevation ${f.elevMinM.toFixed(0)} … ${f.elevMaxM.toFixed(0)} m  ·  ` +
+            `sea level ${seaM.toFixed(0)} m  ·  ${wet}\n` +
+            `context ${t.context.toFixed(0)} ms  ·  field+erosion ${t.field.toFixed(0)} ms  ·  ` +
+            `shading ${t.shade.toFixed(0)} ms  ·  TOTAL ${(t.total / 1000).toFixed(2)} s` +
+            (extra ? `\n${extra}` : '');
+    }
+
+    // ── Site slots ───────────────────────────────────────────────────────────
+    // Derived sites are a pure function of the field, so they are recomputed
+    // freely. Pins are user intent, so they are read from storage and layered
+    // on top — never recomputed, never overwritten.
+    let derivedCache = null;
+    let lastCtx = null;
+
+    function pinKey() {
+        const o = readOpts();
+        return TerrainPins.bodyKey(o.masterSeed, o.hexId, $('bodyName').value);
+    }
+
+    function siteCount() {
+        return Math.max(1, Math.min(24, +$('siteCount').value || 5));
+    }
+
+    function getDerived(count) {
+        const o = readOpts();
+        const key = [o.masterSeed, o.hexId, o.worldData.hydrographics, count].join('|');
+        if (derivedCache && derivedCache.key === key) return derivedCache.sites;
+        const ctx = TerrainField.buildContext(o.masterSeed, o.hexId, 0.55, 0.45);
+        const hydro = TerrainRender.parseStat(o.worldData.hydrographics);
+        const seaLevel = Math.max(0.05, Math.min(1, hydro / 10));
+        const sites = TerrainField.findSites(ctx, seaLevel, count);
+        derivedCache = { key, sites };
+        return sites;
+    }
+
+    function goToSite(s) {
+        if (s.empty) return;
+        $('lat').value = s.lat.toFixed(2);
+        $('lon').value = s.lon.toFixed(2);
+        if (s.pinned && s.widthKm) $('widthKm').value = s.widthKm;
+        render();
+    }
+
+    // Signature of everything the slot list displays. Rebuilding the list when
+    // nothing changed is not merely wasteful — it destroys the button nodes
+    // between mousedown and mouseup, so the click event never fires. That is
+    // reachable in normal use: blurring the site-count field by clicking a Pin
+    // button fires the field's native change event first, which lands here.
+    let renderedSig = null;
+
+    function refreshSites(force) {
+        const count  = siteCount();
+        const key    = pinKey();
+        const pinMap = TerrainPins.load(key);
+        const merged = TerrainPins.mergeSites(getDerived(count), pinMap, count);
+        const row    = $('siteRow');
+        $('maxPinsLbl').textContent = TerrainPins.MAX_PINS;
+
+        const sig = key + '#' + merged.map(s =>
+            `${s.slot}:${s.pinned ? 1 : 0}:${s.label}:${s.empty ? '' : s.lat.toFixed(3) + ',' + s.lon.toFixed(3)}`
+        ).join('|');
+        if (!force && sig === renderedSig) return merged;
+        renderedSig = sig;
+
+        row.innerHTML = '';
+        merged.forEach(s => {
+            const d = document.createElement('div');
+            d.className = 'slot' + (s.pinned ? ' pinned' : '');
+
+            const idx = document.createElement('span');
+            idx.className = 'idx';
+            idx.textContent = (s.slot + 1);
+            d.appendChild(idx);
+
+            const nm = document.createElement('span');
+            nm.className = 'nm';
+            nm.textContent = (s.pinned ? '◉ ' : '') + s.label;
+            nm.title = s.pinned ? 'Click to rename' : 'Derived from seed';
+            if (s.pinned) {
+                nm.addEventListener('click', ev => {
+                    ev.stopPropagation();
+                    const v = prompt('Name for this location:', s.label);
+                    if (v === null) return;
+                    TerrainPins.setPin(key, s.slot,
+                        { lat: s.lat, lon: s.lon, widthKm: s.widthKm, label: v.trim() });
+                    refreshSites();
+                });
+            }
+            d.appendChild(nm);
+
+            const co = document.createElement('span');
+            co.className = 'co';
+            co.textContent = s.empty ? '—'
+                : `${s.lat.toFixed(1)}, ${s.lon.toFixed(1)}`;
+            d.appendChild(co);
+
+            const go = document.createElement('button');
+            go.textContent = 'Go';
+            go.disabled = !!s.empty;
+            go.addEventListener('click', () => goToSite(s));
+            d.appendChild(go);
+
+            const pin = document.createElement('button');
+            pin.textContent = 'Pin';
+            pin.title = 'Pin the CURRENT view into this slot';
+            pin.addEventListener('click', () => {
+                const o = readOpts();
+                const r = TerrainPins.setPin(key, s.slot, {
+                    lat: o.latDeg, lon: o.lonDeg, widthKm: o.widthKm,
+                    label: s.pinned ? s.label : `Location ${s.slot + 1}`,
+                });
+                if (!r.ok) { alert(r.reason); return; }
+                refreshSites();
+            });
+            d.appendChild(pin);
+
+            if (s.pinned) {
+                const x = document.createElement('button');
+                x.textContent = '×';
+                x.title = 'Unpin — revert this slot to its derived site';
+                x.addEventListener('click', () => {
+                    TerrainPins.clearPin(key, s.slot);
+                    refreshSites();
+                });
+                d.appendChild(x);
+            }
+            row.appendChild(d);
+        });
+
+        const used = TerrainPins.pinnedCount(key);
+        const note = document.createElement('div');
+        note.className = 'hint';
+        note.textContent = `${used} of ${TerrainPins.MAX_PINS} pins used on this body.`;
+        row.appendChild(note);
+
+        return merged;
+    }
+
+    $('btnClearPins').addEventListener('click', () => {
+        if (!confirm('Remove every pin on this body? Slots revert to derived sites.')) return;
+        TerrainPins.clearAll(pinKey());
+        refreshSites();
+    });
+    $('bodyName').addEventListener('change', () => refreshSites());
+    ['labelsOn','minShare','labelMinPct','labelMax','frameOn','office'].forEach(id =>
+        $(id).addEventListener('change', () => render()));
+
+    function busy(msg, fn) {
+        status.textContent = msg;
+        setTimeout(fn, 20);
+    }
+
+    // Build the finished survey sheet: terrain plate + labels inside the
+    // cartographic frame.
+    function composeSheet(outCanvas, plate, r, o) {
+        const size = +$('uwpSize').value;
+        const uwp = [
+            'C', size.toString(16), (+$('uwpAtm').value).toString(16),
+            (+$('uwpHydro').value).toString(16),
+        ].join('').toUpperCase();
+        TerrainFrame.compose(outCanvas, {
+            mapCanvas: plate,
+            field: r.field,
+            legend: r.out.legend,
+            worldType: r.out.worldType,
+            worldData: {
+                uwp: uwp + '···',
+                diameterKm: o.planetRadiusKm * 2,
+                temperatureK: o.worldData.temperatureK,
+            },
+            title: $('bodyName').value || 'Unnamed',
+            subtitle: o.widthKm <= 60 ? 'Site Survey' : 'Regional Survey',
+            globeCanvas: $('canvas-global'),
+            office: $('office').value,
+            surveyId: TerrainFrame.surveyId($('hexId').value, $('bodyName').value,
+                                            o.latDeg, o.lonDeg, o.widthKm),
+            date: new Date().toISOString().slice(0, 10),
+        });
+    }
+
+    function render() {
+        const o = readOpts();
+        busy('Rendering…', () => {
+            const r = build(o);
+            const plate = document.createElement('canvas');
+            paint(plate, r.out.image, r.W, r.H);
+            const n = drawLabels(plate, r.field, o);
+            drawLegend(r.out.legend);
+            drawGlobal(r.ctx, o);
+            if ($('frameOn').checked) {
+                composeSheet($('canvas-main'), plate, r, o);
+            } else {
+                const c = $('canvas-main');
+                c.width = r.W; c.height = r.H;
+                c.getContext('2d').drawImage(plate, 0, 0);
+            }
+            $('compareCard').style.display = 'none';
+            lastField = r;
+            report(r, o, n ? `${n} feature label(s) drawn.` : 'No feature large enough to label at this scale.');
+        });
+    }
+
+    $('btnRender').addEventListener('click', render);
+
+    $('btnCompare').addEventListener('click', () => {
+        const o = readOpts();
+        busy('Rendering both…', () => {
+            const withEro = build(o, { erosionOn: true });
+            const noEro   = build(o, { erosionOn: false, resW: Math.min(o.resW, 720) });
+            paint($('canvas-main'), withEro.out.image, withEro.W, withEro.H);
+            drawLegend(withEro.out.legend);
+            drawGlobal(withEro.ctx, o);
+            paint($('canvas-compare'), noEro.out.image, noEro.W, noEro.H);
+            $('compareTitle').textContent = 'Same seed, erosion OFF';
+            $('compareCard').style.display = '';
+            lastField = withEro;
+            report(withEro, o, 'Main = erosion ON. Inset = erosion OFF (noise only).');
+        });
+    });
+
+    $('btnGrey').addEventListener('click', () => {
+        const o = readOpts();
+        busy('Rendering elevation…', () => {
+            const r = build(o);
+            const g = TerrainRender.heightToGrey(r.field);
+            paint($('canvas-main'), g.image, r.W, r.H);
+            $('legend').innerHTML = '';
+            drawGlobal(r.ctx, o);
+            $('compareCard').style.display = 'none';
+            lastField = r;
+            report(r, o, `Elevation range ${g.min.toFixed(3)} … ${g.max.toFixed(3)} (normalised units)`);
+        });
+    });
+
+    $('btnDeterminism').addEventListener('click', () => {
+        const o = readOpts();
+        busy('Rendering twice…', () => {
+            const a = build(o, { resW: Math.min(o.resW, 720) });
+            const b = build(o, { resW: Math.min(o.resW, 720) });
+            const da = a.out.image.data, db = b.out.image.data;
+            let diff = 0;
+            for (let i = 0; i < da.length; i++) if (da[i] !== db[i]) diff++;
+            paint($('canvas-main'), a.out.image, a.W, a.H);
+            drawLegend(a.out.legend);
+            drawGlobal(a.ctx, o);
+            report(a, o, diff === 0
+                ? `DETERMINISM PASS — ${(da.length / 4).toLocaleString()} px identical across two independent renders.`
+                : `DETERMINISM FAIL — ${diff} differing channel values.`);
+        });
+    });
+
+    $('btnDownload').addEventListener('click', () => {
+        const c = $('canvas-main');
+        const a = document.createElement('a');
+        a.download = `regional_${$('hexId').value}_${$('lat').value}_${$('lon').value}.png`;
+        a.href = c.toDataURL('image/png');
+        a.click();
+    });
+
+    updateTypeNote();
+    {
+        const sites = refreshSites();
+        const s0 = sites.find(x => !x.empty);
+        if (s0) { $('lat').value = s0.lat.toFixed(2);
+                  $('lon').value = s0.lon.toFixed(2); }
+    }
+    render();
+})();
+</script>
+</body>
+</html>

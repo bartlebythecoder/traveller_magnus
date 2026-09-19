@@ -104,6 +104,10 @@ function setupSaveLoad() {
             borderMinSystems:            window.borderMinSystems            ?? 20,
             planetContinentalDefinition: window.planetContinentalDefinition ?? 0.55,
             planetCoastlineComplexity:   window.planetCoastlineComplexity   ?? 0.45,
+            // Which terrain model this map's world images use -- one value for
+            // every sector in the file, not per-sector. Absent in files written
+            // before the flag existed, which load as 1.
+            terrainFieldVersion:         window.terrainFieldVersion         ?? 1,
             generationPopMax:            window.generationPopMax            ?? 20,
             generationPopMod:            window.generationPopMod            ?? 0,
             generationTlMax:             window.generationTlMax             ?? 20,
@@ -518,6 +522,29 @@ function applyLoadedSettings(settings) {
     localStorage.setItem('traveller_border_min_systems', String(borderMinSystems));
 
     // --- Planet rendering ---
+    // No localStorage mirror for this one, unlike its neighbours: the terrain
+    // model is a property of the MAP -- a single value governing every sector
+    // in the file -- not a user preference, so a stale browser value must never
+    // override what the loaded file says.
+    //
+    // THIS FALLBACK IS 1 AND MUST STAY 1, even though a new map now starts
+    // on 2 (see TERRAIN_MODEL_DEFAULT in ui_menus.js). A file with no
+    // terrainFieldVersion key was written before the flag existed, so its
+    // worlds were drawn on the Classic field. World images are recomputed from
+    // the seed rather than stored, so raising this to 2 would silently redraw
+    // every world in every map saved before v0.18 -- the exact outcome the
+    // version flag exists to prevent.
+    window.terrainFieldVersion = s.terrainFieldVersion ?? 1;
+    const classicImagesEl = document.getElementById('input-classic-world-images');
+    if (classicImagesEl) {
+        classicImagesEl.checked = window.terrainFieldVersion < 2;
+        // Refresh the note without the "model changed" toast a change event
+        // would raise -- nothing changed, a file was opened.
+        if (typeof window.syncTerrainModelControl === 'function') {
+            window.syncTerrainModelControl();
+        }
+    }
+
     const continentDef = s.planetContinentalDefinition ?? 0.55;
     window.planetContinentalDefinition = continentDef;
     const continentDefEl = document.getElementById('input-continent-def');

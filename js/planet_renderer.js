@@ -34,6 +34,24 @@ const PlanetRenderer = (() => {
     let _maskWeight   = 0.55;  // Continental Definition (0 = pure noise, 1 = pure seeds)
     let _warpStrength = 0.45;  // Coastline Complexity (0 = smooth, 1 = highly irregular)
 
+    // TERRAIN FIELD VERSION — which generation model this sector's world images
+    // use. Set the same way as the two above.
+    //
+    // World images are never stored; they are recomputed from the seed on every
+    // view. So any change to the field function silently redraws every world in
+    // every existing sector the moment a user upgrades — same UWP, same name,
+    // different planet. This flag is what makes such a change opt-in instead.
+    //
+    // Version 1 is the shipped terrain and MUST NEVER CHANGE. Saves written
+    // before this flag existed have no such key and load as 1, so they keep the
+    // terrain they have always had.
+    let _fieldVersion = 1;
+
+    // Built per render alongside the noise grids when version 2 is active.
+    let _plates = null;
+    let _v2Grid = null;
+    let _v2Seed = 0;
+
     // ── 3-D value noise ───────────────────────────────────────────────────────
 
     function _buildGrid3D(rng) {
@@ -187,7 +205,39 @@ const PlanetRenderer = (() => {
             wz + dz * _warpStrength,
             6, 0.43);
 
-        return mask * _maskWeight + detail * (1 - _maskWeight);
+        const base = mask * _maskWeight + detail * (1 - _maskWeight);
+        if (_fieldVersion >= 2) return _continentHeightV2(base, wx, wy, wz);
+        return base;
+    }
+
+    // Version 2 — plate tectonics replaces the round continent-seed mask.
+    //
+    // Not a layer on top of version 1: the seed blobs ARE the thing being
+    // replaced. Keeping them and adding ranges would produce mountain arcs that
+    // ignore their own coastlines, when on a real planet both come from the
+    // same process.
+    //
+    // The detail fBm is still mixed in at the same weight, so Coastline
+    // Complexity keeps working; _maskWeight now balances plate structure
+    // against noise rather than blobs against noise.
+    //
+    // `base` (the version-1 value) is deliberately unused — kept in the
+    // signature so the two versions read as alternatives rather than as a
+    // pipeline.
+    function _continentHeightV2(base, wx, wy, wz) {
+        if (!_plates || !window.TerrainTectonics) return base;
+        const tect = TerrainTectonics.sample(_plates, wx, wy, wz);
+        const f  = WARP_FREQ;
+        const dx = _fbm3D(_v2Grid, wx * f + 1.7, wy * f + 9.2, wz * f + 3.4, 3, 0.50) - 0.5;
+        const dy = _fbm3D(_v2Grid, wx * f + 8.3, wy * f + 2.8, wz * f + 5.1, 3, 0.50) - 0.5;
+        const dz = _fbm3D(_v2Grid, wx * f + 4.6, wy * f + 7.1, wz * f + 0.9, 3, 0.50) - 0.5;
+        // Table-free noise for the smooth component: the 32-cell lookup grid
+        // that version 1 uses becomes visible as rectilinear blocks once a
+        // regional window is narrower than a few of its cells.
+        const detail = TerrainTectonics.detailFbm(
+            wx + dx * _warpStrength, wy + dy * _warpStrength, wz + dz * _warpStrength,
+            _v2Seed, 5, 0.45, CONTINENT_FREQ);
+        return tect * _maskWeight + detail * (1 - _maskWeight);
     }
 
     // ── Empirical CDF helpers ─────────────────────────────────────────────────
@@ -211,13 +261,31 @@ const PlanetRenderer = (() => {
     }
 
     // Binary-search the sorted CDF array and return h's percentile rank in [0,1].
+    // Percentile remap through the CDF.
+    //
+    // Version 1 returns the raw integer RANK, which quantises height to 1/2048.
+    // That is invisible on a whole-planet image but visibly TERRACED the
+    // regional map under hillshading, so terrain_field.js interpolates between
+    // CDF samples instead. Two almost-identical copies of the same maths is
+    // exactly the kind of thing that drifts, so version 2 adopts the
+    // interpolated form and the two agree exactly.
+    //
+    // VERSION 1 MUST KEEP THE RAW RANK. Changing it moves coastlines by a pixel
+    // wherever a threshold falls inside the gap, i.e. it redraws every world in
+    // every existing sector. utilities/verify_field_v1.html is what proves it
+    // has not been changed.
     function _remapHeight(h, cdf) {
         let lo = 0, hi = cdf.length - 1;
         while (lo < hi) {
             const mid = (lo + hi) >> 1;
             if (cdf[mid] < h) lo = mid + 1; else hi = mid;
         }
-        return lo / cdf.length;
+        if (_fieldVersion < 2) return lo / cdf.length;
+        if (lo === 0) return 0;
+        const a = cdf[lo - 1], b = cdf[lo];
+        let t = (b > a) ? (h - a) / (b - a) : 0;
+        if (t < 0) t = 0; else if (t > 1) t = 1;
+        return (lo - 1 + t) / cdf.length;
     }
 
     // ── Color helpers ─────────────────────────────────────────────────────────
@@ -262,6 +330,40 @@ const PlanetRenderer = (() => {
         return 0;
     }
 
+    // ── Shared climate predicates ────────────────────────────────────────────
+    //
+    // DUPLICATED IN terrain_render.js, deliberately. The two modules cannot
+    // import one another — utilities/verify_field_v1.html loads this file
+    // WITHOUT terrain_render, and utilities/test_regional_terrain.html loads
+    // terrain_render WITHOUT this file. The `isIce` test below is already
+    // duplicated across the same gap for the same reason.
+    //
+    // KEEP THE TWO COPIES IDENTICAL, or a world image and its regional map will
+    // disagree about what kind of world they are showing.
+
+    // Cold enough that dry ground is frost rather than sand. 223 K is REUSED
+    // from the isIce test, not a second threshold.
+    function _isColdDry(worldData) {
+        const tempK = worldData.temperatureK || 0;
+        const tempStr = (worldData.temperature || '').toLowerCase();
+        return (tempK > 0 && tempK < 223) || (tempK === 0 && tempStr.includes('frozen'));
+    }
+
+    // Warm, wet and breathable enough to carry plant cover. An ART judgement,
+    // not a Traveller rule — no edition describes surface vegetation, so
+    // nothing here derives from one. Reads only facts the UWP already states.
+    function _isVegetated(worldData) {
+        const atm   = _parseStat(worldData.atmosphere);
+        const hydro = _parseStat(worldData.hydrographics);
+        const tempK = worldData.temperatureK || 0;
+        const tempStr = (worldData.temperature || '').toLowerCase();
+        if (atm < 2 || atm > 9) return false;
+        if (hydro < 3) return false;
+        if (tempK > 0) return tempK >= 255 && tempK <= 330;
+        return !(tempStr.includes('frozen') || tempStr.includes('cold') ||
+                 tempStr.includes('hot'));
+    }
+
     function _buildPalette(worldData, oceanRng) {
         const atm   = _parseStat(worldData.atmosphere);    // 0–15 (UWP hex digit)
         const hydro = _parseStat(worldData.hydrographics); // 0–10
@@ -282,14 +384,28 @@ const PlanetRenderer = (() => {
                     || (tempK === 0 && (worldData.temperature || '').toLowerCase().includes('frozen')))));
         const isExoticDry = !isMolten && (isExotic && hydro === 0);
         const isExoticWet = !isMolten && (isExotic && hydro > 0);
-        const isDesert   = !isMolten && (!isRock && !isIce && !isExoticDry && !isExoticWet && hydro === 0);
+        const isDryWorld = !isMolten && (!isRock && !isIce && !isExoticDry && !isExoticWet && hydro === 0);
+        // v0.18: a dry world that is also cold gets its own palette, and a warm
+        // wet breathable one gets vegetation. BOTH ARE TERRAIN MODEL 2 ONLY —
+        // version 1 keeps exactly the two branches it always had, which is what
+        // stops every existing sector redrawing itself on upgrade.
+        const _v2 = _fieldVersion >= 2;
+        const isColdDesert = _v2 && isDryWorld && _isColdDry(worldData);
+        const isDesert   = isDryWorld && !isColdDesert;
+        const isVegetated = _v2 && !isMolten && !isRock && !isIce && !isExoticDry
+                            && !isExoticWet && !isDryWorld && _isVegetated(worldData);
         // else: standard blue water world (atm 1-9 or D-F, hydro > 0)
 
         // Polar cap threshold (radians from equator). Math.PI is unreachable from
         // the ±90° lat range, so setting it means "no polar overlay".
         const tempStr = (worldData.temperature || '').toLowerCase();
         let polarAngle;
-        if (isMolten || isRock || isIce)     polarAngle = Math.PI;  // no polar overlay
+        // isColdDesert joins these: its whole surface is frost-bound already,
+        // so a cap would count the same ice twice. Matches terrain_render's
+        // polarOverlay(), which must agree or the world image and the regional
+        // map would cap the same world differently.
+        if (isMolten || isRock || isIce || isColdDesert)
+                                            polarAngle = Math.PI;  // no polar overlay
         else if (tempStr.includes('frozen')) polarAngle = Math.PI * 40 / 180;
         else if (tempStr.includes('cold'))   polarAngle = Math.PI * 55 / 180;
         else if (tempStr.includes('cool'))   polarAngle = Math.PI * 68 / 180;
@@ -395,6 +511,19 @@ const PlanetRenderer = (() => {
                 { t: ls + (1-ls) * 0.85,   c: ov.mountains },
                 { t: 1.0,                  c: ov.peaks     },
             ];
+        } else if (isColdDesert) {
+            // Dry AND cold: no liquid to pool, no heat to drive a dune sea.
+            // Frost-bound regolith and wind-stripped rock, desaturated blue-grey
+            // so it reads as neither the warm tan desert nor an ice world.
+            // Terrain model 2 only — see isColdDesert above.
+            stops = [
+                { t: 0.0, c: [201, 206, 211] },
+                { t: 0.2, c: [172, 177, 182] },
+                { t: 0.4, c: [146, 150, 155] },
+                { t: 0.6, c: [124, 126, 129] },
+                { t: 0.8, c: [104, 105, 107] },
+                { t: 1.0, c: [ 84,  85,  88] },
+            ];
         } else if (isDesert) {
             // Dry world with atmosphere but no ocean
             stops = [
@@ -404,6 +533,25 @@ const PlanetRenderer = (() => {
                 { t: 0.6, c: [182, 138,  68] },
                 { t: 0.8, c: [142, 106,  55] },
                 { t: 1.0, c: [112,  82,  46] },
+            ];
+        } else if (isVegetated) {
+            // Standard water world, warm and wet enough to carry plant cover.
+            // Terrain model 2 only. Ocean stops are IDENTICAL to the arid
+            // version below — only the land ramp differs, so a world does not
+            // change its seas when it grows vegetation.
+            const ls = seaLevel;
+            stops = [
+                { t: 0.0,                  c: [ 10,  30, 100] },  // abyssal
+                { t: ls * 0.35,            c: [ 20,  68, 152] },  // deep
+                { t: ls * 0.70,            c: [ 48, 118, 188] },  // mid ocean
+                { t: ls * 0.92,            c: [ 85, 158, 212] },  // shallow
+                { t: ls,                   c: [194, 172, 112] },  // beach
+                { t: ls + (1-ls) * 0.06,   c: [136, 150,  92] },  // coastal green
+                { t: ls + (1-ls) * 0.28,   c: [ 92, 122,  64] },  // lowland, deepest
+                { t: ls + (1-ls) * 0.52,   c: [100, 116,  72] },  // upland, thinning
+                { t: ls + (1-ls) * 0.70,   c: [112, 114,  90] },  // treeline
+                { t: ls + (1-ls) * 0.84,   c: [112, 108, 106] },  // mountain rock
+                { t: 1.0,                  c: [222, 228, 240] },  // snow peaks
             ];
         } else {
             // Standard blue water ocean (atm 1-9, D-F, hydro > 0)
@@ -433,7 +581,10 @@ const PlanetRenderer = (() => {
         else                cloudColor = [240, 244, 250];  // standard white
 
         // Specular ocean highlight — only worlds with a liquid surface
-        const hasSpecular = !isMolten && !isRock && !isIce && !isDesert && hydro > 0;
+        // Cold deserts are dry too, so they get no specular highlight either —
+        // isDesert alone no longer covers every dry world.
+        const hasSpecular = !isMolten && !isRock && !isIce && !isDesert && !isColdDesert
+                            && hydro > 0;
 
         // Atmospheric limb haze — coloured glow at disk edge driven by atm type
         let limbColor = null, limbStrength = 0;
@@ -1083,6 +1234,8 @@ const PlanetRenderer = (() => {
     // ── Entry point ───────────────────────────────────────────────────────────
 
     function renderPlanetHemispheres(canvas, worldData, hexId) {
+        _fieldVersion = (typeof window.terrainFieldVersion === 'number')
+                        ? window.terrainFieldVersion : 1;
         _maskWeight   = typeof window.planetContinentalDefinition === 'number' ? window.planetContinentalDefinition : 0.55;
         _warpStrength = typeof window.planetCoastlineComplexity   === 'number' ? window.planetCoastlineComplexity   : 0.45;
 
@@ -1103,6 +1256,10 @@ const PlanetRenderer = (() => {
         const heightGrid    = _buildGrid3D(mulberry32(baseSeed));
         const continentSeed = hashString(ms + '-' + (hexId || '0000') + '-cn');
         const seeds         = _buildContinentSeeds(mulberry32(continentSeed));
+        _plates = (_fieldVersion >= 2 && window.TerrainTectonics)
+            ? TerrainTectonics.buildPlates(mulberry32(continentSeed)) : null;
+        _v2Grid = heightGrid;
+        _v2Seed = continentSeed | 0;
         const heightCDF     = _buildCDF(heightGrid, seeds, 2048);
 
         const hasAtmo   = _parseStat(worldData.atmosphere) > 0;
@@ -1159,6 +1316,8 @@ const PlanetRenderer = (() => {
     // ── Flat map entry point ──────────────────────────────────────────────────
 
     function renderFlatMap(canvas, worldData, hexId, options) {
+        _fieldVersion = (typeof window.terrainFieldVersion === 'number')
+                        ? window.terrainFieldVersion : 1;
         _maskWeight   = typeof window.planetContinentalDefinition === 'number' ? window.planetContinentalDefinition : 0.55;
         _warpStrength = typeof window.planetCoastlineComplexity   === 'number' ? window.planetCoastlineComplexity   : 0.45;
 
@@ -1178,6 +1337,10 @@ const PlanetRenderer = (() => {
         const heightGrid    = _buildGrid3D(mulberry32(baseSeed));
         const continentSeed = hashString(ms + '-' + (hexId || '0000') + '-cn');
         const seeds         = _buildContinentSeeds(mulberry32(continentSeed));
+        _plates = (_fieldVersion >= 2 && window.TerrainTectonics)
+            ? TerrainTectonics.buildPlates(mulberry32(continentSeed)) : null;
+        _v2Grid = heightGrid;
+        _v2Seed = continentSeed | 0;
         const heightCDF     = _buildCDF(heightGrid, seeds, 2048);
         const oceanSeed     = hashString(ms + '-' + (hexId || '0000') + '-oc');
         const oceanRng   = mulberry32(oceanSeed)();
@@ -1324,6 +1487,8 @@ const PlanetRenderer = (() => {
     // Called 24 times by ApproachViewer to build the rotating-sphere sprite strip.
 
     function renderApproachFrame(canvas, worldData, hexId, lonOffset) {
+        _fieldVersion = (typeof window.terrainFieldVersion === 'number')
+                        ? window.terrainFieldVersion : 1;
         _maskWeight   = typeof window.planetContinentalDefinition === 'number' ? window.planetContinentalDefinition : 0.55;
         _warpStrength = typeof window.planetCoastlineComplexity   === 'number' ? window.planetCoastlineComplexity   : 0.45;
 
@@ -1339,6 +1504,10 @@ const PlanetRenderer = (() => {
         const heightGrid    = _buildGrid3D(mulberry32(baseSeed));
         const continentSeed = hashString(ms + '-' + (hexId || '0000') + '-cn');
         const seeds         = _buildContinentSeeds(mulberry32(continentSeed));
+        _plates = (_fieldVersion >= 2 && window.TerrainTectonics)
+            ? TerrainTectonics.buildPlates(mulberry32(continentSeed)) : null;
+        _v2Grid = heightGrid;
+        _v2Seed = continentSeed | 0;
         const heightCDF     = _buildCDF(heightGrid, seeds, 2048);
 
         const hasAtmo   = _parseStat(worldData.atmosphere) > 0;

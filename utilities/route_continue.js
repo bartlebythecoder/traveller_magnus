@@ -1,12 +1,17 @@
 /**
  * route_continue.js — verification for "Continue existing route".
  *
- * Spec: directives/route_extend_spec.md §4 (C1–C9) and §6.
+ * Spec: directives/route_extend_spec.md §4 (C1–C9, amended C1/C4), §4.1 (C10–C13,
+ * the v0.17.5 additions), §6, and test plan items 1–12 and 21–30.
  *
  * Drives the real UI — the checkbox, the form, the Generate button — rather than
  * calling the generator directly, because most of this feature IS the UI
  * behaviour: what the fields contain, when the box is enabled, what the saved
  * setup becomes. node --check would see none of it.
+ *
+ * The C-checks came with v0.17.4 and all lay clean two-ended chains. The V-checks
+ * came with v0.17.5 and lay the shapes those cannot reach: three-ended routes,
+ * self-crossing ones, loops, and a line beside a detached loop.
  *
  *   node utilities/route_continue.js
  */
@@ -44,6 +49,16 @@ const HELPERS = `
                 window.sectorRoutes.push(seg);
             }
         },
+        // Lay an ARBITRARY shape, not a chain. The v0.17.5 checks need routes the
+        // strict chain test refuses and the weak end test accepts, and a chain is
+        // by definition never one of those.
+        layShape(routeId, pairs) {
+            window.sectorRoutes = (window.sectorRoutes || []).filter(r => r.routeId !== routeId);
+            pairs.forEach(p => window.sectorRoutes.push({
+                startId: p[0], endId: p[1], type: 'Trade', subtype: 'PointToPoint',
+                routeId: routeId, groupId: 'p2p_' + routeId
+            }));
+        },
         setStored(routeId, params) {
             const d = (window.routeDefinitions || []).find(x => x.id === routeId);
             d.automationRef = params ? { type: 'p2p', params: params } : null;
@@ -68,7 +83,10 @@ const HELPERS = `
                     document.querySelectorAll('#route-auto-p2p-waypoints-list input[type=text]')
                 ).map(i => i.value),
                 continueDisabled: document.getElementById('route-auto-p2p-continue').disabled,
-                continueChecked:  document.getElementById('route-auto-p2p-continue').checked
+                continueChecked:  document.getElementById('route-auto-p2p-continue').checked,
+                // The tooltip is the only place the reason lives, so a box that is
+                // correctly disabled for the wrong reason has to be catchable.
+                continueTitle: (document.getElementById('route-auto-p2p-continue-label') || {}).title || ''
             };
         },
         fill(start, end, waypoints) {
@@ -78,8 +96,11 @@ const HELPERS = `
             list.innerHTML = '';
             (waypoints || []).forEach(w => addWaypointRow(w, false));
         },
-        generate() {
-            document.getElementById('route-auto-p2p-jump').value = '3';
+        // jump defaults to 3. Jump-1 matters for the segment-count check: at
+        // Jump-3 the pathfinder shortcuts past the route's own edges, so nothing
+        // is ever retraced and the miscount cannot be reproduced.
+        generate(jump) {
+            document.getElementById('route-auto-p2p-jump').value = String(jump || 3);
             document.getElementById('btn-route-auto-generate').disabled = false;
             document.getElementById('btn-route-auto-generate').click();
         },
@@ -248,6 +269,239 @@ const HELPERS = `
     check('C9: a rejoining leg is committed and the loss of travel order is reported',
         r.after > r.before && /listed alphabetically/.test(r.toast || ''),
         r.toast);
+
+    // ════════════════════════════════════════════════════════════════════════
+    // v0.17.5 — Continue's eligibility rule was WEAKENED here.
+    //
+    //   was: one unbroken chain, exactly two ends   (walkRouteChain)
+    //   now: one piece, at least one loose end      (walkRouteEnds)
+    //
+    // Every scenario above lays a clean two-ended chain, which BOTH rules accept
+    // — so all fifteen of them would still pass if the old rule were put back.
+    // The checks below are the ones that would not. Each shape is paired with
+    // the strict test as its own control: if `strictOk` is ever true, the shape
+    // has stopped being one the old rule refused and the check has gone vacuous.
+    // ════════════════════════════════════════════════════════════════════════
+
+    // ── V1: a Y. Three loose ends — what a doubled-back waypoint leaves ──────
+    r = await page.evaluate(([A, B, C, D]) => {
+        // A—B—C with a spur B—D, so B has degree 3 and the ends are A, C and D.
+        window.__T.layShape(4, [[A, B], [B, C], [B, D]]);
+        window.__T.setStored(4, null);
+        window.__T.openPanel(4);
+        const ends = getRouteEnds(4).ends;
+        return {
+            form: window.__T.form(),
+            ends,
+            labels: ends.map(id => formatWorldLabel(id)),
+            strictOk: getRouteChain(4).ok
+        };
+    }, [A, B, C, D]);
+    check('V1: a route with THREE loose ends can be continued',
+        r.form.continueDisabled === false && r.ends.length === 3,
+        r.ends.length + ' ends, disabled=' + r.form.continueDisabled);
+    check('V1: the tooltip offers EVERY end, not the first two',
+        r.labels.length === 3 && r.labels.every(l => r.form.continueTitle.indexOf(l) !== -1),
+        r.labels.join(' | '));
+    check('V1: the tooltip warns that the saved setup will be dropped',
+        /3 loose ends/.test(r.form.continueTitle) && /clear its saved setup/.test(r.form.continueTitle));
+    check('V1 CONTROL: the OLD rule really does refuse this shape',
+        r.strictOk === false,
+        r.strictOk ? 'strict test accepts it too (check is vacuous)' : 'refused, as expected');
+
+    // ── V2: a route that crosses itself but still has exactly two ends ───────
+    r = await page.evaluate(([A, B, C, D, E]) => {
+        // A—B—C—D—E plus a shortcut B—D: B and D reach degree 3, ends stay A/E.
+        window.__T.layShape(4, [[A, B], [B, C], [C, D], [D, E], [B, D]]);
+        window.__T.setStored(4, null);
+        window.__T.openPanel(4);
+        const w = getRouteEnds(4);
+        return { form: window.__T.form(), ends: w.ends, crosses: w.crosses,
+                 strictOk: getRouteChain(4).ok };
+    }, [A, B, C, D, E]);
+    check('V2: a self-crossing route with two ends can be continued',
+        r.form.continueDisabled === false && r.ends.length === 2 && r.crosses === true,
+        r.ends.length + ' ends, crosses=' + r.crosses);
+    check('V2: the tooltip says travel order is lost',
+        /listed[\s\S]*alphabetically/.test(r.form.continueTitle), r.form.continueTitle);
+    check('V2 CONTROL: the OLD rule really does refuse this shape',
+        r.strictOk === false,
+        r.strictOk ? 'strict test accepts it too (check is vacuous)' : 'refused, as expected');
+
+    // ── V3: a closed loop is STILL refused — it has no end anywhere ──────────
+    r = await page.evaluate(([A, B, C]) => {
+        window.__T.layShape(4, [[A, B], [B, C], [C, A]]);
+        window.__T.setStored(4, null);
+        window.__T.openPanel(4);
+        return { form: window.__T.form(), reason: getRouteEnds(4).reason };
+    }, [A, B, C]);
+    check('V3: a closed loop is still refused, and the tooltip says why',
+        r.form.continueDisabled === true && r.reason === 'cycle' &&
+        /closed loop/.test(r.form.continueTitle),
+        r.reason + ' — ' + r.form.continueTitle);
+
+    // ── V4: a line PLUS a separate loop. Two ends, and still refused ─────────
+    // The shape that makes "count the ends" wrong: the loop contributes none, so
+    // a naive test sees an ordinary two-ended route and continues it, growing the
+    // line and silently leaving the loop behind.
+    r = await page.evaluate(([A, B, C, D, E, F]) => {
+        window.__T.layShape(4, [[A, B], [B, C], [D, E], [E, F], [F, D]]);
+        window.__T.setStored(4, null);
+        window.__T.openPanel(4);
+        const w = getRouteEnds(4);
+        return { form: window.__T.form(), reason: w.reason,
+                 // What the naive test would have seen: A and C, and nothing else.
+                 looseCount: [A, B, C, D, E, F].filter(id =>
+                     new Set((window.sectorRoutes || [])
+                         .filter(s => s.routeId === 4)
+                         .flatMap(s => s.startId === id ? [s.endId] : s.endId === id ? [s.startId] : [])
+                     ).size === 1).length };
+    }, [A, B, C, D, E, F]);
+    check('V4: a line plus a detached loop is refused as more than one piece',
+        r.form.continueDisabled === true && r.reason === 'disconnected' &&
+        /more than one piece/.test(r.form.continueTitle),
+        r.reason + ' — ' + r.form.continueTitle);
+    check('V4 CONTROL: it really does present exactly two loose ends',
+        r.looseCount === 2,
+        r.looseCount + ' loose ends — connectivity, not the end count, is what refused it');
+
+    // ── V5: on a three-ended route, a bad Start is told all three ────────────
+    r = await page.evaluate(([A, B, C, D, E]) => {
+        window.__T.layShape(4, [[A, B], [B, C], [B, D]]);
+        window.__T.setStored(4, null);
+        window.__T.openPanel(4);
+        window.__T.tickContinue(true);
+        const before = window.__T.segs(4);
+        window.__T.fill(formatWorldLabel(B), formatWorldLabel(E), []);  // B is the junction
+        window.__T.generate();
+        return { before, after: window.__T.segs(4), toast: window.__lastToast,
+                 labels: getRouteEnds(4).ends.map(id => formatWorldLabel(id)) };
+    }, [A, B, C, D, E]);
+    check('V5: a Start that is not an end is refused and NAMES all three ends',
+        JSON.stringify(r.before) === JSON.stringify(r.after) &&
+        r.labels.length === 3 && r.labels.every(l => (r.toast || '').indexOf(l) !== -1),
+        r.toast);
+    check('V5: the end list reads as English and carries no stray indexes',
+        / or /.test(r.toast || '') && !/\b[12] \(\d-[A-Z]-\d{4}\)/.test(r.toast || ''),
+        r.toast);
+
+    // ── V6-V8: the box is re-tested when the segments change beneath it ──────
+    // refreshRouteWindowCounts() is the funnel every such path goes through, and
+    // it returns early unless the Route Manager is actually open — so open it.
+    r = await page.evaluate(([A, B, C]) => {
+        window.sectorRoutes = [];
+        window.__T.setStored(4, null);
+        if (!document.getElementById('route-window').classList.contains('visible')) {
+            window.toggleRouteWindow();
+        }
+        window.__T.openPanel(4);
+        const empty = window.__T.form();                 // disabled: no segments
+        window.__T.layChain(4, [A, B, C]);               // "drawn on the map"
+        window.refreshRouteWindowCounts();
+        const drawn = window.__T.form();
+        return { empty, drawn };
+    }, [A, B, C]);
+    check('V6: drawing segments under an open panel enables the box',
+        r.empty.continueDisabled === true && r.drawn.continueDisabled === false,
+        'empty=' + r.empty.continueDisabled + ' drawn=' + r.drawn.continueDisabled);
+    check('V6 CONTROL: the disabled tooltip named the real reason',
+        /no segments yet/.test(r.empty.continueTitle), r.empty.continueTitle);
+
+    r = await page.evaluate(([A, B, C, D]) => {
+        window.__T.layChain(4, [A, B, C]);
+        window.__T.setStored(4, null);
+        window.__T.openPanel(4);
+        window.__T.tickContinue(true);
+        const ticked = window.__T.form();
+        window.__T.layChain(4, [A, B, C, D]);            // still continuable
+        window.refreshRouteWindowCounts();
+        return { ticked, after: window.__T.form() };
+    }, [A, B, C, D]);
+    check('V7: a re-test does not disturb a tick the user already made',
+        r.ticked.continueChecked === true && r.after.continueChecked === true &&
+        r.after.continueDisabled === false);
+
+    r = await page.evaluate(([A, B, C]) => {
+        window.__T.layChain(4, [A, B, C]);
+        window.__T.setStored(4, { startId: A, endId: C, waypointIds: [B], maxJump: 3 });
+        window.__T.openPanel(4);
+        const before = window.__T.form();
+        window.__T.tickContinue(true);
+        window.sectorRoutes = [];                        // the route is cleared
+        window.refreshRouteWindowCounts();
+        return { before, after: window.__T.form() };
+    }, [A, B, C]);
+    check('V8: a tick cannot outlive its precondition — it unticks itself',
+        r.after.continueChecked === false && r.after.continueDisabled === true,
+        'checked=' + r.after.continueChecked + ' disabled=' + r.after.continueDisabled);
+    check('V8: and the form Continue rewrote is put back, not left half-edited',
+        r.after.start === r.before.start && r.after.end === r.before.end &&
+        JSON.stringify(r.after.waypoints) === JSON.stringify(r.before.waypoints),
+        JSON.stringify(r.after));
+
+    await page.evaluate(() => window.closeRouteWindow());
+
+    // ── V9: continuing past two ends drops the saved setup, and says so ──────
+    r = await page.evaluate(([A, B, C, D, E]) => {
+        window.__T.layShape(4, [[A, B], [B, C], [B, D]]);
+        window.__T.setStored(4, { startId: A, endId: C, waypointIds: [B], maxJump: 3 });
+        window.__T.openPanel(4);
+        window.__T.tickContinue(true);
+        // Grow end C out to a FRESH world. Aiming at D instead would join two of
+        // the route's own ends to each other and leave it with one — the setup
+        // would then be kept, correctly, and this check would prove nothing.
+        window.__T.fill(formatWorldLabel(C), formatWorldLabel(E), []);
+        window.__T.generate();
+        return { setup: window.__T.setup(4), toast: window.__lastToast,
+                 ends: getRouteEnds(4).ends.length };
+    }, [A, B, C, D, E]);
+    check('V9: a route with more than two ends has its saved setup cleared',
+        r.setup === null && r.ends > 2,
+        r.ends + ' ends, setup=' + JSON.stringify(r.setup));
+    check('V9: and the toast says so rather than leaving it to be discovered',
+        /saved setup was cleared/.test(r.toast || ''), r.toast);
+
+    // ── V10: the announced count is what was DRAWN, not what was walked ──────
+    // At Jump-1 a leg that doubles back must retrace the route's own edges, and
+    // addRoute skips every pair the slot already holds. Path length and segments
+    // written therefore differ — which is the whole bug.
+    r = await page.evaluate(([A, B, C, D]) => {
+        window.__T.layChain(4, [A, B, C]);
+        window.__T.setStored(4, { startId: A, endId: C, waypointIds: [B], maxJump: 1 });
+        window.__T.openPanel(4);
+        window.__T.tickContinue(true);
+        const before = window.__T.segs(4).length;
+        // From end C, back through A, then on to D: leg 1 retraces C-B-A entirely.
+        window.__T.fill(formatWorldLabel(C), formatWorldLabel(D), [formatWorldLabel(A)]);
+        window.__T.generate(1);
+        const toast = window.__lastToast || '';
+        const m = toast.match(/(\d+) segment\(s\) added/);
+        return { before, after: window.__T.segs(4).length,
+                 announced: m ? parseInt(m[1], 10) : null, toast };
+    }, [A, B, C, D]);
+    check('V10: the toast counts segments actually drawn, not edges walked',
+        r.announced !== null && r.announced === (r.after - r.before),
+        'announced ' + r.announced + ', drew ' + (r.after - r.before) + ' — ' + r.toast);
+    check('V10 CONTROL: the leg really did retrace, so the two counts could differ',
+        (r.after - r.before) === 1,
+        (r.after - r.before) + ' drawn from a 5-edge walk');
+
+    // ── V11: continuing towards a world the route already reaches ────────────
+    r = await page.evaluate(([A, B, C]) => {
+        window.__T.layChain(4, [A, B, C]);
+        window.__T.setStored(4, { startId: A, endId: C, waypointIds: [B], maxJump: 3 });
+        window.__T.openPanel(4);
+        window.__T.tickContinue(true);
+        const before = window.__T.segs(4);
+        window.__T.fill(formatWorldLabel(A), formatWorldLabel(B), []);   // already joined
+        window.__T.generate();
+        return { before, after: window.__T.segs(4), toast: window.__lastToast };
+    }, [A, B, C]);
+    check('V11: "already connects" is reported, not "no path found"',
+        /already connects/.test(r.toast || '') && !/Jump-/.test(r.toast || ''),
+        r.toast);
+    check('V11: and nothing on the map changed',
+        JSON.stringify(r.before) === JSON.stringify(r.after));
 
     // ── Undo ────────────────────────────────────────────────────────────────
     // Undo lives inline in the keydown handler with no callable entry point, so

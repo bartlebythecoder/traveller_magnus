@@ -27,7 +27,7 @@ Locate the title line `# As Above, So Below (vX.X.X)` in `README.md` and update 
 
 Make all of the following changes:
 
-1. **`js/core.js`** — update `APP_VERSION` to `"v{new_version}"` and `APP_BANNER` to `"v{new_version}: {banner_text}"`.
+1. **`js/core.js`** — update `APP_VERSION` to `"v{new_version}"`.
 2. **`hex_map.html`** — update the text inside `<div class="splash-banner">` to `{banner_text}`.
 3. **`hex_map.html`** — update the text inside `<div class="splash-version">` to `"v{new_version}"`.
 4. **`hex_map.html`** — update the text inside `<span id="app-version">` to `"v{new_version}"`.

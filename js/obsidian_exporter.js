@@ -37,6 +37,9 @@ const ObsidianExporter = (() => {
     const _canRenderImage    = ExportCore.canRenderImage;
     const _isAirless         = ExportCore.isAirless;
     const _renderWorldImage  = ExportCore.renderWorldImage;
+    const _pinnedSitesFor    = ExportCore.pinnedSitesFor;
+    const _renderRegionalSheet = ExportCore.renderRegionalSheet;
+    const _sheetLabel        = ExportCore.sheetLabel;
 
     // ── YAML helper (Obsidian-specific, stays here) ───────────────────────────
 
@@ -373,7 +376,7 @@ const ObsidianExporter = (() => {
         return lines.join('\n');
     }
 
-    function _buildWorldFile(world, worldIdx, hexId, hexCode, sectorName, systemName, stars, starIdx, imageFilename, state, rawWorld, subsectorLink) {
+    function _buildWorldFile(world, worldIdx, hexId, hexCode, sectorName, systemName, stars, starIdx, imageFilename, state, rawWorld, subsectorLink, sheetFiles) {
         const _LV = _levelFor(hexId);
         const worldName  = _worldDisplayName(world, worldIdx, _LV);
         const systemLink  = `[[${_sanitize(systemName)} (${hexCode})]]`;
@@ -417,6 +420,14 @@ const ObsidianExporter = (() => {
             lines.push(`![[${imageFilename}]]`, '');
         }
 
+        // Regional survey sheets, one per pinned site. Already fog-gated by the
+        // caller — this list arrives empty whenever the world image was withheld.
+        if (sheetFiles && sheetFiles.length) {
+            lines.push('## Regional Surveys', '');
+            for (const sh of sheetFiles) {
+                lines.push(`**${sh.label}**`, '', `![[${sh.fn}]]`, '');
+            }
+        }
 
         // The whole UWP breakdown table is (g) — never partial. See
         // fog_of_war_field_tags §7.2: a half-filled table advertises how many
@@ -670,7 +681,24 @@ const ObsidianExporter = (() => {
                     }
                 }
 
-                const worldMd = _buildWorldFile(world, wi, hexId, hexCode, sectorName, systemName, stars, starIdx, imageFilename, state, rawWorld, subsectorLink);
+                // Regional survey sheets for PINNED sites only. Gated on the
+                // SAME condition as the world image on purpose: a sheet is that
+                // image at finer scale, so it must be withheld from a fogged
+                // world in exactly the same circumstances — and being an image,
+                // not generating it is the only way to withhold it.
+                const sheetFiles = [];
+                if (wantImage) {
+                    for (const pin of _pinnedSitesFor(hexId, world.name)) {
+                        const sheet = await _renderRegionalSheet(world, hexId, world.name, pin, `w${wi}`);
+                        if (!sheet) continue;
+                        const lbl = _sheetLabel(pin);
+                        const sfn = `${_sanitize(systemName)} - ${_sanitize(worldName)} - ${_sanitize(lbl)} (${hexCode}).png`;
+                        files.push({ name: prefix + 'images/' + sfn, data: sheet });
+                        sheetFiles.push({ fn: sfn, label: lbl });
+                    }
+                }
+
+                const worldMd = _buildWorldFile(world, wi, hexId, hexCode, sectorName, systemName, stars, starIdx, imageFilename, state, rawWorld, subsectorLink, sheetFiles);
                 files.push({ name: prefix + _bodyFilename(systemName, worldName, hexCode, 'md'), data: enc.encode(worldMd) });
 
                 // Moons

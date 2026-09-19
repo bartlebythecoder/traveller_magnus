@@ -70,8 +70,20 @@
     <script src="rules/expectations_data.js" defer></script>
     <script src="js/statistical_auditor.js" defer></script>
     <!-- Planet hemisphere renderer -->
+    <!-- Shared tectonic field (terrain field v2). Loads before
+         planet_renderer so both map tiers can call it. -->
+    <script src="js/terrain_tectonics.js" defer></script>
     <script src="js/planet_renderer.js" defer></script>
     <script src="js/approach_viewer.js" defer></script>
+    <!-- Regional surface maps (v0.18). Load after planet_renderer: the base
+         field mirrors its constants, and terrain_panel reads imageSeed(). -->
+    <script src="js/terrain_field.js" defer></script>
+    <script src="js/terrain_render.js" defer></script>
+    <script src="js/terrain_names.js" defer></script>
+    <script src="js/terrain_pins.js" defer></script>
+    <script src="js/terrain_rivers.js" defer></script>
+    <script src="js/terrain_frame.js" defer></script>
+    <script src="js/terrain_panel.js" defer></script>
     <!-- Modular JavaScript Input Handling -->
     <script src="js/input_init.js" defer></script>
     <script src="js/system_viewer.js" defer></script>
@@ -954,9 +966,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above<br> So Below</span></h1>
-            <div class="splash-banner">New: Point to Point Route upgrades</div>
+            <div class="splash-banner">New: Regional Surface Maps</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.17.5</div>
+            <div class="splash-version">v0.18.0</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -1066,6 +1078,13 @@
                     </button>
                 </div>
                 <div style="font-size:0.7rem;color:#45a29e;letter-spacing:0.06em;text-transform:uppercase;padding-top:4px;border-top:1px solid #1f2833;">World Image Generation</div>
+                <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:3px;display:flex;">
+                    <div style="display:flex;width:100%;justify-content:space-between;align-items:center;">
+                        <label for="input-classic-world-images" style="font-size:0.8rem;color:#c5c6c7;">Use Classic World Images</label>
+                        <input type="checkbox" id="input-classic-world-images" style="cursor:pointer;accent-color:#66fcf1;">
+                    </div>
+                    <div id="terrain-model-note" style="font-size:0.68rem;color:#8ab8b5;line-height:1.35;"></div>
+                </div>
                 <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:3px;display:flex;">
                     <div style="display:flex;width:100%;justify-content:space-between;align-items:center;">
                         <label for="input-continent-def" style="font-size:0.8rem;color:#c5c6c7;">Continental Definition</label>
@@ -1439,7 +1458,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.17.5</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.18.0</span>
             </p>
         </div>
 

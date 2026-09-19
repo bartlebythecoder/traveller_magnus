@@ -573,12 +573,15 @@ function populateEditorAccordions(stateObj) {
                 if (isCompanion) {
                     const compAU = star.distAU ?? _mgtCompAU(star);
                     if (compAU != null) html += `<span>Distance: <strong>${compAU.toFixed(3)} AU</strong></span>`;
-                    if (star.orbitId !== null) {
+                    // Legacy sectors (pre-v0.14) saved companion stars with no orbitId field
+                    // at all; `!== null` let undefined through and .toFixed() threw, which aborted
+                    // populateEditorAccordions and left the whole system accordion blank.
+                    if (star.orbitId != null) {
                         html += `<span>Orbit ID: <strong>${star.orbitId.toFixed(2)}</strong></span>`;
-                        html += `<span>Ecc: ${_mgtStarNum(star, 'eccentricity', starIdx, 0, 1)}</span>`;
-                        if (star.mao !== undefined) {
-                            html += `<span>MAO: ${_mgtStarNum(star, 'mao', starIdx, 0, 100)}</span>`;
-                        }
+                    }
+                    html += `<span>Ecc: ${_mgtStarNum(star, 'eccentricity', starIdx, 0, 1)}</span>`;
+                    if (star.mao !== undefined) {
+                        html += `<span>MAO: ${_mgtStarNum(star, 'mao', starIdx, 0, 100)}</span>`;
                     }
                 }
                 html += `</div>`;
@@ -2225,6 +2228,26 @@ function openFlatMapPanel(worldData, seed, titleText, hexLabel) {
         projBtns[key] = btn;
         projRow.appendChild(btn);
     });
+
+    // ── Regional surface maps (v0.18) ─────────────────────────────────────────
+    // Zooms into a patch of this world's surface. All of its UI lives in
+    // terrain_panel.js; this is the only hook. Guarded so the app still works
+    // if the terrain modules are absent.
+    if (window.TerrainPanel) {
+        const regionalBtn = document.createElement('button');
+        regionalBtn.textContent = 'Regional Maps \u2192';
+        Object.assign(regionalBtn.style, projBtnStyle, { marginLeft: 'auto' });
+        regionalBtn.addEventListener('mouseenter', () => {
+            regionalBtn.style.borderColor = '#66fcf1'; regionalBtn.style.color = '#66fcf1';
+        });
+        regionalBtn.addEventListener('mouseleave', () => {
+            Object.assign(regionalBtn.style, projBtnStyle, { marginLeft: 'auto' });
+        });
+        regionalBtn.addEventListener('click', () => {
+            TerrainPanel.open(worldData, seed, titleText, hexLabel);
+        });
+        projRow.appendChild(regionalBtn);
+    }
 
     // ── Render + header helper ────────────────────────────────────────────────
     // Renders the terrain for the current projection then repaints the header

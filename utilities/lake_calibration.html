@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Lake Calibration</title>
+<style>
+ body{background:#0a0e14;color:#c8d2e0;font:13px/1.5 "Segoe UI",system-ui,sans-serif;padding:18px}
+ h1{font-size:15px;letter-spacing:.1em;text-transform:uppercase;color:#66fcf1;margin:0 0 4px}
+ .sub{color:#7d8b9c;font-size:11px;margin-bottom:14px;max-width:78ch;line-height:1.5}
+ table{border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:12px}
+ td,th{padding:2px 14px 2px 0;text-align:left}
+ th{color:#7d8b9c;font-weight:400;border-bottom:1px solid #24303f}
+ .ok{color:#6ec177}.bad{color:#e06c5a;font-weight:600}.dim{color:#5b6879}
+ #verdict{margin:14px 0;padding:9px 12px;border:1px solid #24303f;border-radius:3px}
+</style></head><body>
+<h1>Lake Calibration</h1>
+<div class="sub">
+A lake fills only while its catchment delivers more water than its own surface evaporates
+&mdash; <b>catchment &ge; K &times; lakeArea</b>, with K driven by hydrographics
+(<code>LAKE_K0</code> and <code>LAKE_K_DECADE</code> in <code>js/terrain_field.js</code>).
+Counting every closed basin instead gives a <i>dry</i> world MORE lakes than a wet one, which
+is backwards.
+<br><br>
+The calibration target is <b>Earth</b>, which is hydrographics&nbsp;7: lakes cover about
+<b>2% of land</b>. The count must also fall monotonically as the world dries, reaching
+effectively zero by hydrographics&nbsp;1. <b>Re-run this page after changing either constant,
+the pit-fill, or the flow accumulation.</b>
+<br><br>Open this file directly &mdash; no server needed. Takes a minute or two.
+</div>
+<div id="verdict">Measuring&hellip;</div>
+<table id="rows"><tr><th>Hydro</th><th>Lakes % of land</th><th>&ge;10 km&sup2;</th>
+<th>1&ndash;10 km&sup2;</th><th>0.25&ndash;1 km&sup2;</th><th>per sheet</th></tr></table>
+
+<script src="../js/terrain_tectonics.js"></script>
+<script src="../js/terrain_field.js"></script>
+<script>
+// Standalone: core.js is not loaded, so the two RNG helpers terrain_field needs
+// are provided here. They are copies of the definitions in js/core.js and must
+// stay identical to them, or this page measures a different world.
+function hashString(str){let h=2166136261>>>0;
+  for(let i=0;i<str.length;i++){h=Math.imul(h^str.charCodeAt(i),16777619);}return h>>>0;}
+function mulberry32(a){return function(){let t=a+=0x6D2B79F5;
+  t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);
+  return ((t^t>>>14)>>>0)/4294967296;};}
+
+const W=600,H=400,PLANET_RELIEF=12000,RELIEF=5000,WIDTH_KM=125,WINDOWS=5;
+const CELL_KM2=Math.pow((WIDTH_KM*1000/W)/1000,2);
+const TARGET_PCT=2.0, TOLERANCE=0.6;          // Earth, +/- a generous band
+
+function measure(hydro){
+  const seaPct=hydro/10, seaM=PLANET_RELIEF*seaPct;
+  window.terrainFieldVersion=2;
+  const ctx=TerrainField.buildContext('TravellerMagnus','1105-Demo',0.55,0.45,2);
+  const sites=TerrainField.findSites(ctx,seaPct,WINDOWS,6000);
+  let landKm2=0,lakeKm2=0,big=0,mid=0,small=0,n=0;
+  for(const st of sites){
+    const f=TerrainField.buildRegional({ctx,latDeg:st.lat,lonDeg:st.lon,widthKm:WIDTH_KM,
+      planetRadiusKm:6400,W,H,localReliefM:RELIEF,planetReliefM:PLANET_RELIEF,
+      seaLevel:seaPct,landformKm:25,erosionIterations:Math.round(W*H*0.18),hydrology:true});
+    n++;
+    const L=f.lakeLevel; if(!L) continue;
+    for(let i=0;i<W*H;i++){
+      if(f.elev[i]>=seaM){ landKm2+=CELL_KM2; if(L[i]>0) lakeKm2+=CELL_KM2; }
+    }
+    const done=new Uint8Array(W*H);
+    for(let i0=0;i0<W*H;i0++){
+      if(!L[i0]||done[i0])continue;
+      let sz=0;const stack=[i0];done[i0]=1;
+      while(stack.length){const i=stack.pop();sz++;
+        const y=(i/W)|0,x=i-y*W;
+        for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+          const nx=x+dx,ny=y+dy;
+          if(nx<0||ny<0||nx>=W||ny>=H)continue;
+          const j=ny*W+nx; if(L[j]&&!done[j]){done[j]=1;stack.push(j);}}}
+      const km2=sz*CELL_KM2;
+      if(km2>=10)big++; else if(km2>=1)mid++; else if(km2>=0.25)small++;
+    }
+  }
+  return {pct:100*lakeKm2/Math.max(1,landKm2), big:big/n, mid:mid/n, small:small/n, n};
+}
+
+(async()=>{
+  const rows=document.getElementById('rows');
+  const got=[];
+  for(const h of [9,7,5,3,1]){
+    await new Promise(r=>setTimeout(r,0));
+    const m=measure(h); got.push([h,m]);
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td>'+h+'</td><td>'+m.pct.toFixed(2)+'%</td><td>'+m.big.toFixed(1)+
+      '</td><td>'+m.mid.toFixed(1)+'</td><td>'+m.small.toFixed(1)+
+      '</td><td class="dim">'+(WIDTH_KM*WIDTH_KM*2/3|0)+' km&sup2; &times; '+m.n+' windows</td>';
+    rows.appendChild(tr);
+  }
+  const earth=got.find(g=>g[0]===7)[1];
+  const onTarget=Math.abs(earth.pct-TARGET_PCT)<=TOLERANCE;
+  let monotonic=true;
+  for(let i=1;i<got.length;i++) if(got[i][1].pct>got[i-1][1].pct+0.01) monotonic=false;
+  const v=document.getElementById('verdict');
+  const fails=[];
+  if(!onTarget) fails.push('hydrographics 7 is '+earth.pct.toFixed(2)+'% of land, not '+
+    TARGET_PCT.toFixed(1)+'% +/- '+TOLERANCE);
+  if(!monotonic) fails.push('lake cover does not fall monotonically as the world dries');
+  v.className = fails.length ? 'bad' : 'ok';
+  v.textContent = fails.length
+    ? 'FAIL — ' + fails.join('; ')
+    : 'PASS — hydrographics 7 sits at ' + earth.pct.toFixed(2) +
+      '% of land (Earth is ~2%), and cover falls monotonically to ' +
+      got[got.length-1][1].pct.toFixed(2) + '% at hydrographics 1.';
+  window.__REPORT = JSON.stringify(got, null, 1);
+})();
+</script>
+</body></html>

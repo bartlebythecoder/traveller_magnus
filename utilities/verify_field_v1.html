@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Terrain Field v1 Baseline</title>
+<style>
+ body{background:#0a0e14;color:#c8d2e0;font:13px/1.5 "Segoe UI",system-ui,sans-serif;padding:18px}
+ h1{font-size:15px;letter-spacing:.1em;text-transform:uppercase;color:#66fcf1;margin:0 0 4px}
+ .sub{color:#7d8b9c;font-size:11px;margin-bottom:14px;max-width:70ch;line-height:1.5}
+ table{border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:12px}
+ td,th{padding:2px 12px 2px 0;text-align:left}
+ .ok{color:#6ec177}.bad{color:#e06c5a;font-weight:600}
+ #verdict{margin:14px 0;padding:9px 12px;border:1px solid #24303f;border-radius:3px;font-size:13px}
+</style></head><body>
+<h1>Terrain Field v1 Baseline</h1>
+<div class="sub">
+World images are never stored &mdash; they are recomputed from the seed on every view. So any
+change to the terrain field silently redraws every world in every existing sector. This page
+renders 30 images at <b>terrainFieldVersion&nbsp;1</b> and compares them against hashes
+recorded on 2026-09-13. <b>They must all match.</b> If any differs, version&nbsp;1 has been
+disturbed and every user's existing worlds will look different after upgrading.
+<br><br>Open this file directly &mdash; no server needed.
+</div>
+<div id="verdict">Rendering&hellip;</div>
+<table id="rows"></table>
+
+<script src="../js/terrain_tectonics.js"></script>
+<script src="../js/planet_renderer.js"></script>
+<script>
+function hashString(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),16777619);}return h>>>0;}
+function mulberry32(a){return function(){let t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return ((t^t>>>14)>>>0)/4294967296;}}
+</script>
+<script src="verify_field_v1_baseline.js"></script>
+<script>
+window.addEventListener('load',()=>{
+  window.terrainFieldVersion = 1;
+  const worlds=[
+    ['ice',{name:'A',atmosphere:1,hydrographics:6,temperatureK:210,size:5}],
+    ['std',{name:'B',atmosphere:6,hydrographics:7,temperatureK:288,size:8}],
+    ['des',{name:'C',atmosphere:4,hydrographics:0,temperatureK:300,size:6}],
+    ['rock',{name:'D',atmosphere:0,hydrographics:0,temperatureK:180,size:3}],
+    ['exo',{name:'E',atmosphere:11,hydrographics:7,temperatureK:288,size:8}],
+    // Added 2026-09-14. A COLD DRY world (Kteiroa's shape, C560164-8) classifies
+    // as plain 'desert' today, sharing the hot-desert palette with 'des' above.
+    // The v0.18 ruling moves it to a new cold_desert type under terrain model 2
+    // ONLY; this row exists so that if the split is ever applied at version 1 by
+    // mistake, the test fires instead of passing while real sectors change.
+    ['cold',{name:'F',atmosphere:6,hydrographics:0,temperatureK:210,size:5}]];
+  const projs=['sinusoidal','mercator','mollweide','diamond'];
+  const hc=c=>{const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
+    let h=2166136261>>>0;for(let i=0;i<d.length;i+=4)h=Math.imul(h^d[i]^(d[i+1]<<8)^(d[i+2]<<16),16777619);
+    return (h>>>0).toString(16);};
+  const got={};
+  for(const [tag,wd] of worlds){
+    const seed=PlanetRenderer.imageSeed('0101',wd);
+    for(const pr of projs){const c=document.createElement('canvas');
+      PlanetRenderer.renderFlatMap(c,wd,seed,{projection:pr}); got[tag+'/'+pr]=hc(c);}
+    const h=document.createElement('canvas'); h.height=200;
+    PlanetRenderer.renderPlanetHemispheres(h,wd,seed); got[tag+'/hemi']=hc(h);
+  }
+  const base = window.TERRAIN_V1_BASELINE || {};
+  const keys = Object.keys(got);
+  let bad=0, lines=['key\texpected\tgot\tstatus'];
+  const rows=document.getElementById('rows');
+  rows.innerHTML='<tr><th>render</th><th>expected</th><th>got</th><th></th></tr>';
+  for(const k of keys){
+    const exp=base[k]||'(not recorded)';
+    const ok=exp===got[k];
+    if(!ok)bad++;
+    rows.insertAdjacentHTML('beforeend',
+      `<tr><td>${k}</td><td>${exp}</td><td>${got[k]}</td>`+
+      `<td class="${ok?'ok':'bad'}">${ok?'match':'CHANGED'}</td></tr>`);
+    lines.push(`${k}\t${exp}\t${got[k]}\t${ok?'match':'CHANGED'}`);
+  }
+  const v=document.getElementById('verdict');
+  v.textContent = bad===0
+    ? `PASS \u2014 all ${keys.length} renders identical to the recorded v1 baseline.`
+    : `FAIL \u2014 ${bad} of ${keys.length} renders CHANGED. Version 1 has been disturbed.`;
+  v.className = bad===0 ? 'ok' : 'bad';
+  window.__REPORT = JSON.stringify(got, null, 1);
+  document.title='done';
+});
+</script></body></html>

@@ -69,7 +69,7 @@ Generation logs are gated on `window.isLoggingEnabled` and downloaded as `.txt` 
 ## Version Update Procedure
 
 When bumping the version, update these locations (see `directives/update_version.md`):
-1. `js/core.js` — `APP_VERSION` and `APP_BANNER` constants
+1. `js/core.js` — `APP_VERSION` constant
 2. `README.md` — version header
 3. `changelog.md` — add entry at top with date and description
 4. `hex_map.html` — update entries on splash screen and shortcut help screen

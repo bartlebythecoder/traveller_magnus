@@ -1927,12 +1927,19 @@ MapPick._deliverChain = function (hexId) {
         showToast(`Start: ${label}`, 1600);
 
     } else if (!endEl.value.trim()) {
-        if (resolveWorldInput(startEl.value) === hexId) {
-            showToast('That is already the start of the route.', 2000);
+        // Clicking the start again CLOSES the route into a loop — legal, and the
+        // natural way to draw a round trip on the map. Refused only while there
+        // is no waypoint yet, because a leg from a world to itself has no path;
+        // see the matching check in the generate handler.
+        if (resolveWorldInput(startEl.value) === hexId && collectWaypointRaws().length === 0) {
+            showToast('That is already the start of the route. Click somewhere else first — '
+                    + 'a circular route needs at least one waypoint.', 3000);
             return;
         }
         endEl.value = label;
-        showToast(`End: ${label}`, 1600);
+        showToast(resolveWorldInput(startEl.value) === hexId
+            ? `End: ${label} — the route now closes back to its start`
+            : `End: ${label}`, 1600);
 
     } else {
         if (resolveWorldInput(endEl.value) === hexId) {
@@ -2490,6 +2497,52 @@ function _p2pFailureMessage(outcome, maxJump, allowPartial) {
  *          holds the restored route again and is indistinguishable from a
  *          successful run.
  */
+/**
+ * Confirms a generation that will DELETE the segments already in a slot.
+ *
+ * Every generator except Continue starts by emptying its slot, and it used to do
+ * it silently. Reported by a user on 2026-09-17: they had a Custom Network in a
+ * slot, opened Point-to-Point to extend it, forgot to tick "Continue existing
+ * route", and the network was gone. It IS undoable — the clear sits behind
+ * saveHistoryState — but nothing on screen said anything had been destroyed, so
+ * there was no reason to reach for Ctrl+Z.
+ *
+ * The guard lives here rather than in the four generate handlers because the
+ * destructive step lives here: one clear, one warning. It cannot fire for
+ * Continue, which passes append and never clears.
+ *
+ * The advice is tailored, because "tick Continue" is wrong for a route that
+ * cannot be continued — a closed loop or a route in pieces has nothing to append
+ * to, and getRouteEnds already knows which.
+ *
+ * @returns {boolean} true to go ahead.
+ */
+function _confirmReplaceRoute(routeId, segCount) {
+    const def  = (window.routeDefinitions || []).find(d => d.id === routeId);
+    const name = def && def.name ? def.name : `Route #${routeId}`;
+    const ends = (typeof getRouteEnds === 'function') ? getRouteEnds(routeId) : { ok: false, reason: null };
+
+    let advice;
+    if (ends.ok) {
+        advice = 'To ADD to it instead, click Cancel, tick "Continue existing route" in the '
+               + 'Point-to-Point section, and generate again.';
+    } else if (ends.reason === 'cycle') {
+        advice = 'It forms a closed loop, so it has no loose end to continue from — it can only '
+               + 'be replaced.';
+    } else {
+        advice = 'It is in more than one piece, so it cannot be continued as it stands — join the '
+               + 'pieces first if you meant to keep them.';
+    }
+
+    return confirm(
+        `"${name}" already has ${segCount} connection${segCount !== 1 ? 's' : ''}.\n\n`
+        + `Generating will DELETE ${segCount !== 1 ? 'them' : 'it'} and build a new route in `
+        + `${segCount !== 1 ? 'their' : 'its'} place.\n\n`
+        + advice + '\n\n'
+        + 'OK replaces the route. Cancel keeps it. (Ctrl+Z undoes a replacement.)'
+    );
+}
+
 function _generateIntoSlot(actionName, routeId, generate, opts = {}) {
     // A shallow copy is enough: generation pushes to and splices this array but
     // never mutates the segment objects inside it, so anything evicted along
@@ -2497,6 +2550,12 @@ function _generateIntoSlot(actionName, routeId, generate, opts = {}) {
     const routesBefore = (window.sectorRoutes || []).slice();
     const redoBefore   = window.redoStack;
     const countBefore  = routesBefore.filter(r => r.routeId === routeId).length;
+
+    // Ask BEFORE saveHistoryState, so declining leaves no undo entry to step
+    // through and nothing at all has happened.
+    if (!opts.append && countBefore > 0 && !_confirmReplaceRoute(routeId, countBefore)) {
+        return { result: null, produced: false, cancelled: true };
+    }
 
     saveHistoryState(actionName);
     // opts.append — Continue adds to the route already in the slot, so the one
@@ -2525,7 +2584,10 @@ function _generateIntoSlot(actionName, routeId, generate, opts = {}) {
             window.redoStack = redoBefore;
         }
     }
-    return { result, produced };
+    // cancelled is always present so a caller can test it without knowing
+    // whether the guard ran: a generation that simply found nothing must still
+    // report its own failure message.
+    return { result, produced, cancelled: false };
 }
 
 // ============================================================================
@@ -2640,6 +2702,7 @@ function setupRouteWindow() {
                 const { maxJump, maxRange, minIx } = configs.xboat;
                 const xbRun = _generateIntoSlot('Generate Xboat Routes', routeId,
                     () => generateXboatRoutes(maxJump, maxRange, minIx, routeId, `xboat_${routeId}`));
+                if (xbRun.cancelled) return;   // the user kept the existing route
                 if (!xbRun.produced) {
                     showToast(`No XBoat routes could be generated at Ix ${minIx}+ — nothing was changed.`, 3500);
                     return;
@@ -2668,6 +2731,7 @@ function setupRouteWindow() {
                 const groupId = `net_${routeId}`;
                 const netRun = _generateIntoSlot(`Generate Custom Network: ${routeName}`, routeId,
                     () => generateAutoRoutes(filteredIds, maxJump, maxRange, routeDef.color, groupId, routeName, routeId, netAllowEmpty, netMaxEmpty));
+                if (netRun.cancelled) return;   // the user kept the existing route
                 const count = netRun.result;
                 if (!netRun.produced) {
                     showToast('No route segments could be generated for the current filter — nothing was changed.', 3000);
@@ -2704,10 +2768,6 @@ function setupRouteWindow() {
                     showToast(`Cannot find world: "${endRaw.trim()}"`, 2500);
                     return;
                 }
-                if (startId === endId) {
-                    showToast('Start and End must be different worlds.', 2500);
-                    return;
-                }
 
                 // Resolve waypoints
                 const waypointRaws = collectWaypointRaws();
@@ -2719,6 +2779,25 @@ function setupRouteWindow() {
                         return;
                     }
                     waypointIds.push(wpId);
+                }
+
+                // A ROUND TRIP IS A LEGAL ROUTE. Start and End may name the same
+                // world, which asks for a circular route: out through the
+                // waypoints and back again. This check therefore sits below the
+                // waypoints, because whether the same-hex case is legal depends
+                // entirely on them.
+                //
+                // With NO waypoint it is still refused, and not as a matter of
+                // taste — `stops` becomes [A, A], and `_bfsPath` seeds `visited`
+                // with its own start, so a leg from a world to itself can never
+                // match and the search exhausts. The engine would report a leg
+                // with no path within Jump-N, which is true and useless. Saying
+                // what is actually missing is the whole difference.
+                if (startId === endId && waypointIds.length === 0) {
+                    showToast(`Start and End are both ${formatWorldLabel(startId)}. `
+                            + `A circular route needs at least one waypoint to travel out to `
+                            + `and come back from — add one, or choose a different End.`, 6000);
+                    return;
                 }
 
                 const filteredIds = getFilteredHexIds();
@@ -2882,6 +2961,7 @@ function setupRouteWindow() {
 
                 const p2pRun = _generateIntoSlot(`Generate Point-to-Point: ${routeName}`, routeId,
                     () => generatePointToPointRoute(startId, endId, maxJump, routeDef.color, groupId, routeName, true, filteredIds, routeId, waypointIds, p2pAllowEmpty, p2pMaxEmpty, p2pAllowPartial));
+                if (p2pRun.cancelled) return;   // the user kept the existing route
                 if (!p2pRun.produced) {
                     // Duration scales with the message: naming the closest world it
                     // could reach, and pointing at the option that would have kept
@@ -2919,13 +2999,53 @@ function setupRouteWindow() {
                             + `${formatWorldLabel(sf.targetId)}, which could not be reached.`, 9000);
                 } else {
                     const wpNote = waypointIds.length > 0 ? ` via ${waypointIds.length} waypoint(s)` : '';
-                    // formatWorldLabel, not the bare hex IDs this used to print:
-                    // every other message in this flow names a stop the way the
-                    // builder's own fields do, and a bare hex number is not
-                    // something the user can place on the map at a glance.
-                    // 4s rather than 3s — the labels make it about a third longer.
-                    showToast(`"${routeName}" generated: ${count} segment(s) from `
-                            + `${formatWorldLabel(startId)} to ${formatWorldLabel(endId)}${wpNote}.`, 4000);
+                    // A ROUND TRIP LANDS IN ONE OF THREE SHAPES, and which one is
+                    // not predictable from the stop list, so it is read back off
+                    // the segments through the same walk Continue and the systems
+                    // panel use. Measured on a 50-world block at Jump-2:
+                    //
+                    //   ok     — TWO LOOSE ENDS: it did not close. Every leg is a
+                    //            shortest path, so with one waypoint the return leg
+                    //            is the outbound leg reversed; addRoute skips pairs
+                    //            the slot already holds, the second leg writes
+                    //            nothing, and an out-and-back LINE is what is left.
+                    //   cycle  — a clean closed circle, worlds == segments, every
+                    //            node degree 2. Lists in travel order.
+                    //   branch — closed, but the outbound and return legs share
+                    //            some hexes, leaving a tail off the circle. This is
+                    //            the COMMON result, not an error: route_extend_spec
+                    //            §5 C4 records that a round trip is close to
+                    //            guaranteed to produce it.
+                    if (startId === endId) {
+                        const walk = walkRouteChain((window.sectorRoutes || []).filter(r => r.routeId === routeId));
+                        let msg, dur;
+                        if (walk.ok) {
+                            msg = `"${routeName}" generated: ${count} segment(s) from `
+                                + `${formatWorldLabel(startId)}${wpNote} and back. The return leg `
+                                + `retraced the outbound one, so this is an out-and-back line rather `
+                                + `than a loop — add a waypoint the return can route around to close it.`;
+                            dur = 11000;
+                        } else if (walk.reason === 'cycle') {
+                            msg = `"${routeName}" generated: ${count} segment(s) — a closed circular `
+                                + `route from ${formatWorldLabel(startId)}${wpNote} and back.`;
+                            dur = 5000;
+                        } else {
+                            msg = `"${routeName}" generated: ${count} segment(s) — a round trip from `
+                                + `${formatWorldLabel(startId)}${wpNote} and back. Part of the return `
+                                + `shares hexes with the way out, so it is a loop with a tail rather `
+                                + `than a clean circle, and its worlds list unordered.`;
+                            dur = 9000;
+                        }
+                        showToast(msg, dur);
+                    } else {
+                        // formatWorldLabel, not the bare hex IDs this used to print:
+                        // every other message in this flow names a stop the way the
+                        // builder's own fields do, and a bare hex number is not
+                        // something the user can place on the map at a glance.
+                        // 4s rather than 3s — the labels make it about a third longer.
+                        showToast(`"${routeName}" generated: ${count} segment(s) from `
+                                + `${formatWorldLabel(startId)} to ${formatWorldLabel(endId)}${wpNote}.`, 4000);
+                    }
                 }
                 return;
             }
@@ -2950,6 +3070,7 @@ function setupRouteWindow() {
                         lowerBTN, minBTN, maxBTN, maxJump, range,
                         color: routeDef.color, groupId, name: routeName, routeId
                     }));
+                if (btnRun.cancelled) return;   // the user kept the existing route
                 const result = btnRun.result;
                 if (!btnRun.produced) {
                     showToast(`"${routeName}": no world pairs met BTN ${minBTN}${maxBTN !== null ? `–${maxBTN}` : '+'} — nothing was changed.`, 4000);
@@ -4181,6 +4302,56 @@ function setupSettingsPanel() {
             starportModInput.value = val;
             window.generationStarportMod = val;
             localStorage.setItem('traveller_gen_starport_mod', String(val));
+        });
+    }
+
+    // Terrain model (field version). Unlike its neighbours this deliberately
+    // does NOT persist to localStorage: the model is a property of the MAP --
+    // one value for the whole gridWidth x gridHeight grid of sectors, carried
+    // in the save file -- so a stale browser value must never override what a
+    // loaded file says. A fresh session therefore starts on Tectonic and stays
+    // there until a file or the user says otherwise; ticking the box puts the
+    // whole map back on the Classic terrain.
+    //
+    // TWO DEFAULTS LIVE IN THIS FEATURE AND THEY ARE NOT THE SAME NUMBER.
+    // This one is the model a NEW map starts on, and it is 2. The other is in
+    // io_manager's load path, where a file carrying no terrainFieldVersion key
+    // must still come back as 1 -- those files were written before the flag
+    // existed and their worlds were drawn on the Classic field. Never make that
+    // fallback follow this default: world images are recomputed from the seed
+    // rather than stored, so doing so would silently redraw every world in
+    // every map saved before v0.18.
+    const TERRAIN_MODEL_DEFAULT = 2;
+    window.terrainFieldVersion = window.terrainFieldVersion ?? TERRAIN_MODEL_DEFAULT;
+
+    const classicImagesInput = document.getElementById('input-classic-world-images');
+    const terrainModelNote   = document.getElementById('terrain-model-note');
+    if (classicImagesInput) {
+        // "On this map", not "in this sector": there is one terrainFieldVersion
+        // for the entire grid of sectors. The rivers/lakes clause is not decor
+        // -- the flag also gates hydrology in the regional terrain panel
+        // (terrain_panel.js) and in the HTML export's terrain sheets
+        // (export_core.js), which users otherwise meet only as a disabled box.
+        const describe = v => (v >= 2
+            ? 'Tectonic: plate boundaries give linear ranges, trenches and rifts. Rivers and lakes need this model.'
+            : 'Classic: the original terrain, exactly as worlds have always looked. Rivers and lakes are unavailable.')
+            + ' Applies to every world image on this map, in every sector.';
+        const sync = () => {
+            const v = classicImagesInput.checked ? 1 : TERRAIN_MODEL_DEFAULT;
+            window.terrainFieldVersion = v;
+            if (terrainModelNote) terrainModelNote.textContent = describe(v);
+        };
+        classicImagesInput.checked = (window.terrainFieldVersion || TERRAIN_MODEL_DEFAULT) < 2;
+        sync();
+        // Loading a file must show the file's model in this box WITHOUT the
+        // "changed" toast, which would be a lie mid-load. io_manager calls this
+        // rather than firing a change event at the control.
+        window.syncTerrainModelControl = sync;
+        classicImagesInput.addEventListener('change', () => {
+            sync();
+            if (typeof showToast === 'function') {
+                showToast('Terrain model changed \u2014 reopen a world image to see it.', 4000);
+            }
         });
     }
 

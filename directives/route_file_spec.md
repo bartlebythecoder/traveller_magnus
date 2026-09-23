@@ -302,9 +302,7 @@ has repeatedly missed real bugs in this codebase.
 - **OQ-1 — Icon or menu? RESOLVED: one new column holding two icons.** Sean chose to try
   the extra column rather than a menu. Implemented as a single `.route-file-cell` holding
   `fa-file-export` (save) and `fa-file-import` (load), so the row gains one column rather
-  than two. Nothing overflows the 430px window. Standing reservation: three file-shaped
-  icons in one row (⬇ CSV, save, load) are hard to tell apart without hovering, and the
-  CSV button may want relabelling if that proves annoying in use.
+  than two. Nothing overflows the 430px window.
 - **OQ-2 — Save inside the CSV modal? RESOLVED: no, kept separate.** They answer different
   questions — the CSV is *what is on this route* (worlds, richly, unreadable back in), the
   route file is *what this route is* (connections, nothing else). Merging them would have

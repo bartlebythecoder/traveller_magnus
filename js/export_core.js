@@ -1359,6 +1359,13 @@ const ExportCore = (() => {
         resolveSystemName, resolveUWP, kToC,
         findRawWorld, findRawMoon, findRawStar,
         canRenderImage, isAirless, renderWorldImage,
+        // rendererData is the ONE adapter from a world record to the shape
+        // PlanetRenderer actually wants (atmosphere/hydrographics as parsed UWP
+        // digits, plus temperatureK and its band). Exported 2026-09-21 so the
+        // system sheet uses this definition rather than growing a second copy —
+        // a world drawn on the sheet, in an export and on screen must be the
+        // same planet, and that only holds while one function builds the input.
+        rendererData: _rendererData,
         pinnedSitesFor, canRenderSheet, renderRegionalSheet, sheetLabel,
         // block model
         GAP, h, f, fc, txt, tbl,

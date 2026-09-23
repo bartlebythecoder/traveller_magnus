@@ -539,6 +539,15 @@ ${extraJs || ''}
                 const mImg = worldImages.get(`w${wi}m${mi}`);
                 if (mImg) H.push(_imageFigure('images/' + mImg, mName));
 
+                // Same key shape as the moon image above: `w<wi>m<mi>`.
+                const mSheets = (worldSheets && worldSheets.get(`w${wi}m${mi}`)) || [];
+                if (mSheets.length) {
+                    H.push('<h3>Regional Surveys</h3>');
+                    for (const sh of mSheets) {
+                        H.push(_imageFigure('images/' + sh.fn, `${mName} — ${sh.label}`));
+                    }
+                }
+
                 if (m.uwp && _show(LV, 'g')) {
                     H.push('<h3>UWP Breakdown</h3>');
                     H.push(`<p class="uwp"><code>${_esc(m.uwp)}</code></p>`);
@@ -1076,6 +1085,25 @@ tbody tr:nth-child(even) { background:var(--panel);
                                 hexCode, 'png');
                             files.push({ name: `${sub}/images/${fn}`, data: img });
                             worldImages.set(`w${wi}m${mi}`, fn);
+                        }
+                        // Sheets for sites pinned on a MOON. The image panel is
+                        // body-agnostic — openBodyImagePanel offers Regional Maps
+                        // for any body — so a moon can hold pins, and before
+                        // 2026-09-21 they saved and were silently never exported.
+                        // Matters most for a LUNAR MAINWORLD, which is exactly the
+                        // moon a reader wants a survey of. Kept inside the moon
+                        // image's own gate, for the reason the worlds loop gives.
+                        const mPins = EC.pinnedSitesFor(hexId, m.name);
+                        for (const pin of mPins) {
+                            const sheet = await EC.renderRegionalSheet(m, hexId, m.name, pin, `w${wi}-m${mi}`);
+                            if (!sheet) continue;
+                            const lbl = EC.sheetLabel(pin);
+                            const sfn = EC.bodyFilename(systemName,
+                                `${EC.worldDisplayName(w, wi, oLV)} - ${EC.moonDisplayName(m, mi, oLV)} - ${lbl}`,
+                                hexCode, 'png');
+                            files.push({ name: `${sub}/images/${sfn}`, data: sheet });
+                            if (!worldSheets.has(`w${wi}m${mi}`)) worldSheets.set(`w${wi}m${mi}`, []);
+                            worldSheets.get(`w${wi}m${mi}`).push({ fn: sfn, label: lbl });
                         }
                     }
                 }

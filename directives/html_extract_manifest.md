@@ -1,5 +1,36 @@
 # HTML EXTRACT — Feature Manifest
 
+## WHAT THIS DOCUMENT IS FOR — read this before you read anything else
+
+**This manifest exists for one reason: to bring an AI agent back up to speed after its context
+has been cleared.** It is written for a reader who knows nothing about this project and is
+about to change its code.
+
+**It is NOT a project history, a changelog, or a record of work done.** `changelog.md`,
+`README.md` and git history are the record. This is not.
+
+It holds exactly **two kinds of item**:
+
+1. **Past items that still matter today.** A design decision that constrains what you are
+   allowed to change; a trap that will cost a session if it is rediscovered the hard way; an
+   issue that is still open. A closed bug belongs here only if its LESSON still binds.
+2. **Future items already agreed.** Work that has been decided on and not yet done, with
+   enough context to start it without re-asking.
+
+**Everything else must be deleted.** If an item is closed and has no bearing on any future
+decision, remove it — do not strike it through, do not keep it "for the record". Strikethrough
+is reserved for the rare case where the crossing-out IS the lesson: a retracted false alarm
+that would otherwise be "fixed" again, or a design-spec line marked *do not implement this*.
+
+**The test to apply whenever you are tempted to keep something:** *would an agent who has never
+seen this project make a worse decision tomorrow without it?* If no, it goes. Length is a cost
+paid by every future session, so prune as you work — leaving stale content in place is a defect
+in this document, not a neutral act.
+
+**So: an item still written down here is an item still live.**
+
+---
+
 **Version:** v0.17.0 shipped 2026-08-03; **v0.17.0.1 — the fog-of-war release — code
 complete 2026-08-04, changelog still marked "In Progress"**
 **Status (2026-08-06): RELEASE 1 AND RELEASE 2 BOTH COMPLETE AND COMMITTED.**
@@ -16,8 +47,8 @@ complete 2026-08-04, changelog still marked "In Progress"**
   The field-level answer key is `directives/fog_of_war_field_tags.md` §3.5, its WP5
   implementation checklist §12, the player-map spec §9.3a.
 
-**Open items: two, neither blocking — see section 9.** The in-app numeric rounding sweep
-(~350 sites, parked for Sean's judgement) and the changelog/README release housekeeping.
+**No open items.** The changelog/README housekeeping closed 2026-09-01; the in-app numeric
+rounding sweep was dropped 2026-09-21 — see section 9.
 
 **Architecture Standard:** The "Sean Protocol" (Directives -> Orchestration -> Execution)
 **Related:** `directives/project_manifest.md` (main manifest, v0.16.x System Editor —
@@ -322,7 +353,7 @@ separate items that landed after Release 2 was declared complete:
 |---|---|---|---|
 | **4.7** | Body-count leak | **FIXED 2026-08-04** | Sections/files survived below (d) with every field blanked. A real shipped leak. |
 | **4.8** | Player Disclosure grid (**D**) | **ADDED 2026-08-04** | `js/disclosure_grid.js` (new). Surfaces "never set", which is the point of the screen. |
-| **4.9** | Numeric display rounding | **DONE 2026-08-04** | `ExportCore.fmtNum`. Re-baselined. In-app panels still outstanding — section 9. |
+| **4.9** | Numeric display rounding | **DONE 2026-08-04** | `ExportCore.fmtNum`. Re-baselined. Exporters only, by design — the in-app sweep was considered and dropped 2026-09-21. |
 | **4.10** | Context-menu submenu clamping | **FIXED 2026-08-04** | Assign Player Disclosure was unreachable on short windows. Written up 2026-08-06. |
 | **4.11** | World-image seed mismatch | **FIXED 2026-08-06** | Exported worlds were different planets from the app's. **Not a fog-of-war bug** — referee exports too. Fourth re-baseline. |
 | **4.12** | Bodies took their neighbour's physical stats | **FIXED 2026-08-06** | `orbitId` is not unique; co-orbital bodies mis-paired. MgT2E only, 14 of 688 worlds. Fifth re-baseline. |
@@ -1474,11 +1505,10 @@ third in this work after HX-6 and HX-8. Hashes are in 7.1. All other checks pass
 leak 85/85, Obsidian 22/22, tags 24/24, model 38/38, grid 27/27, all-engine 6/6 (field
 parity included, confirming no field was lost).
 
-**Still outstanding — the one open item from this work, see section 9:** the in-app panels
-(World Details, system viewer, surface viewer, menus) — roughly 350 sites — were **not**
-touched. Sean wanted to judge whether the formatter pass was enough before committing to
-that sweep. `fmtNum` is exported and ready to reuse; if it is wanted in-app it should
-probably move to `js/universal_math.js`, which loads before everything that would need it.
+**Scope note — the in-app panels were deliberately NOT touched, and that is final.** Sean
+wanted to judge whether the exporter pass was enough before committing to a ~350-site sweep.
+It was: checked on 2026-09-21, the panels round the numbers they display, and the sweep was
+dropped rather than parked. `fmtNum` stays in `export_core.js`, where its only callers are.
 
 ### 4.10 Context-menu submenu clamping — FIXED 2026-08-04. Reported by Sean.
 
@@ -2492,11 +2522,16 @@ per-hex bugs, and per-hex resolution is the entire point of the feature.
 
 ## 9. Consolidated Open Items
 
-**Two open items as of 2026-08-06. Neither blocks anything; neither is a defect.**
+**No open items. OPEN-2 closed 2026-09-01 (its row is kept below only because the
+contradiction it records is the kind that can be reintroduced). The in-app rounding sweep,
+formerly OPEN-1, was DROPPED on 2026-09-21 and its entry deleted: Sean looked for the
+unrounded numbers it described and could not find any. Mass is rounded in both places it is shown (`_mgtNum`'s 2-decimal
+default at `hex_editor.js:448`, `toFixed(2)` at `system_viewer.js:1744`), so the
+`5.980074992877245 M⊕` example did not reproduce. It will be raised again if it is ever
+actually seen.**
 
 | ID | Item | Needs | Blocks |
 |---|---|---|---|
-| **OPEN-1** | **In-app numeric rounding.** 4.9 covered the exporters only. World Details, the system viewer, the surface viewer and menus — roughly 350 sites — still print raw floats, so the app shows `5.980074992877245 M⊕` where the export now shows `5.98`. `ExportCore.fmtNum` is exported and ready to reuse; if wanted in-app it should move to `js/universal_math.js`, which loads before everything that needs it. **Parked deliberately** — Sean wanted to judge the exporter pass first. | Sean's call | nothing |
 | ~~**OPEN-2**~~ | **CLOSED 2026-09-01.** Both halves are now resolved. The dating claim was already stale — that entry has read `[v0.17.0.1] - 2026-08-10` since the release was cut. The second claim was real and outlived it: entry 1 still ended "This release stores and edits the setting only — it does not yet change any export", which entries 2 and 4 in the same section flatly contradict. That sentence is now removed from **both** `changelog.md` and `README.md`. | closed | nothing |
 
 **Closed:**

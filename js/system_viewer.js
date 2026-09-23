@@ -1136,6 +1136,39 @@ const SystemViewer = (() => {
             });
         }
 
+        // System Sheet — renders the one-page reference sheet for this system
+        // and saves it as a PNG. Guarded on the module being present so the
+        // viewer still works if js/system_sheet.js is absent, exactly as the
+        // flat-map panel guards on window.TerrainPanel.
+        let sheetBtn = null;
+        if (window.SystemSheet) {
+            sheetBtn = document.createElement('button');
+            sheetBtn.id = 'sv-sheet-btn';
+            sheetBtn.textContent = 'System Sheet';
+            sheetBtn.title = 'Download a one-page reference sheet for this system as a PNG';
+            Object.assign(sheetBtn.style, {
+                background: 'transparent', border: `1px solid ${P.badge}`,
+                color: P.accent, padding: '3px 10px', cursor: 'pointer',
+                fontFamily: 'inherit', fontSize: '11px', whiteSpace: 'nowrap'
+            });
+            sheetBtn.addEventListener('click', async () => {
+                const st = hexStates.get(_hexId);
+                if (!st) return;
+                const original = sheetBtn.textContent;
+                sheetBtn.textContent = 'Charting…';
+                sheetBtn.disabled = true;
+                try {
+                    await SystemSheet.download(st, _hexId);
+                } catch (err) {
+                    console.error('[System Sheet] render failed:', err);
+                    if (typeof showToast === 'function') showToast('The system sheet could not be drawn — see the console.', 4000);
+                } finally {
+                    sheetBtn.textContent = original;
+                    sheetBtn.disabled = false;
+                }
+            });
+        }
+
         const closeBtn = document.createElement('button');
         closeBtn.textContent = '✕';
         Object.assign(closeBtn.style, {
@@ -1145,7 +1178,7 @@ const SystemViewer = (() => {
         });
         closeBtn.addEventListener('click', close);
 
-        header.append(...[title, editionBadge, sub, hint, yearWrap, dayWrap, speedWrap, linearWrap, orbitWrap, hideMoonsWrap, hideHZWrap, hideHighlightWrap, _pauseBtn, editBtn, closeBtn].filter(Boolean));
+        header.append(...[title, editionBadge, sub, hint, yearWrap, dayWrap, speedWrap, linearWrap, orbitWrap, hideMoonsWrap, hideHZWrap, hideHighlightWrap, _pauseBtn, sheetBtn, editBtn, closeBtn].filter(Boolean));
         _overlay.appendChild(header);
 
         _orrCanvas = document.createElement('canvas');
@@ -1980,7 +2013,17 @@ const SystemViewer = (() => {
         });
     }
 
-    return { open, close, isOpen, refresh, handleWheel, normalizeSystem, renderSnapshot };
+    // orbitToAU is exported so the system sheet converts a companion star's
+    // orbitId with THIS definition rather than a second copy -- it reads the
+    // RAW table at MgT2EData.stellar.orbitAu, which is the authority.
+    // NOTE the difference from the private _starCompanionAU above: that one
+    // falls back to `s.orbitId || 0.5` for a star with no recorded orbit, which
+    // is fine for laying out an orrery and NOT fine for a printed sheet, where
+    // it would state an invented distance as fact. Callers that must not invent
+    // are expected to check `orbitId != null` themselves first (loose, because
+    // legacy saves omit the key entirely -- see project_manifest.md).
+    return { open, close, isOpen, refresh, handleWheel, normalizeSystem, renderSnapshot,
+             orbitToAU: _orbitToAU };
 
 })();
 

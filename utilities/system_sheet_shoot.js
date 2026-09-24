@@ -20,9 +20,11 @@ const fs = require('fs');
 const path = require('path');
 const REPO = path.resolve(__dirname, '..').replace(/\\/g, '/');
 const SECTOR = SECTOR_ARG || (REPO + '/sectors/solo_6.json');
-const OUT  = __dirname + '/_sheet_out';
+// Renders go to .tmp/ (gitignored), never utilities/ - see project_manifest.md.
+const OUT  = REPO + '/.tmp/_sheet_out';
 
-const IDS = process.argv.slice(2).length ? process.argv.slice(2)
+const HEX_ARGS = process.argv.slice(2).filter(a => !/\.json$/i.test(a));
+const IDS = HEX_ARGS.length ? HEX_ARGS
           : ['18-E-0313', '18-L-2623', '18-B-1402'];
 
 (async () => {

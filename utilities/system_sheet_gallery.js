@@ -25,7 +25,12 @@ const fs = require('fs');
 const path = require('path');
 const REPO = path.resolve(__dirname, '..').replace(/\\/g, '/');
 const SECTOR = SECTOR_ARG || (REPO + '/sectors/solo_6.json');
-const OUT  = __dirname + '/gallery';
+// Renders go to .tmp/ (gitignored), never utilities/ - see project_manifest.md.
+// Default: .tmp/galleries/<sector file name>; override with --out=<dir>.
+const OUT_ARG = process.argv.find(a => a.startsWith('--out='));
+const OUT  = OUT_ARG ? OUT_ARG.slice(6)
+           : path.resolve(__dirname, '..', '.tmp', 'galleries',
+                          path.basename(SECTOR_ARG || 'solo_6.json', '.json').replace(/\W+/g, '_'));
 
 (async () => {
     if (!fs.existsSync(OUT)) fs.mkdirSync(OUT, { recursive: true });
@@ -59,14 +64,30 @@ const OUT  = __dirname + '/gallery';
     console.log('injected.');
 
     // ── 1. CENSUS ───────────────────────────────────────────────────────────
-    const census = await page.evaluate(() => {
+    let census = await page.evaluate(() => {
         const rows = [];
         for (const [hexId, st] of hexStates.entries()) {
             let nsys = null;
             try { nsys = SystemViewer.normalizeSystem(st); } catch (e) { nsys = null; }
             if (!nsys) continue;
             const bodies = (nsys.worlds || []).filter(w => w && w.type !== 'Empty');
-            if (!bodies.length) continue;
+            // THE TWO BODILESS SHAPES (R5 and the stars-only ruling, 2026-09-23).
+            // Skipping them left Spinward with a gallery of ZERO sheets - the
+            // "green suite can be blind" failure: a missing shape, not a
+            // missing assertion. They are censused separately so the charted
+            // statistics below are unchanged.
+            if (!bodies.length) {
+                const rmw = nsys.reportedMainworld;
+                rows.push({
+                    hexId, kind: rmw ? 'reduced' : 'starsOnly',
+                    name: st.name || (rmw && rmw.name) || '',
+                    edition: nsys.edition, stars: (nsys.stars || []).length,
+                    bodies: 0, belts: 0, ggs: 0, moons: 0, topMW: !!rmw, moonMW: false,
+                    maxName: String(st.name || (rmw && rmw.name) || '').length, maxAU: 0,
+                    zone: rmw ? String(rmw.travelZone || '') : '',
+                });
+                continue;
+            }
 
             const isBelt = w => /belt/i.test(String(w.type || '')) || /belt/i.test(String(w.composition || ''));
             const isGG   = w => /gas ?giant/i.test(String(w.type || '')) || /\bGG\b/.test(String(w.composition || ''));
@@ -79,7 +100,7 @@ const OUT  = __dirname + '/gallery';
             for (const b of bodies) maxName = Math.max(maxName, String(b.name || '').length);
 
             rows.push({
-                hexId, name: nsys.name || '',
+                hexId, kind: 'full', name: nsys.name || '',
                 edition: nsys.edition,
                 stars: (nsys.stars || []).length,
                 bodies: bodies.length,
@@ -92,6 +113,10 @@ const OUT  = __dirname + '/gallery';
         }
         return rows;
     });
+    const bodiless = census.filter(r => r.kind !== 'full');
+    census = census.filter(r => r.kind === 'full');
+    console.log('bodiless hexes    : reduced ' + bodiless.filter(r => r.kind === 'reduced').length
+        + '  stars-only ' + bodiless.filter(r => r.kind === 'starsOnly').length);
 
     console.log('\n════ CENSUS — ' + census.length + ' systems with body data ════\n');
 
@@ -141,6 +166,20 @@ const OUT  = __dirname + '/gallery';
     // Spread the remainder evenly across the sector for ordinary cases.
     const step = Math.max(1, Math.floor(census.length / 8));
     for (let i = 0; i < census.length && picks.length < 21; i += step) add('spread', census[i]);
+
+    // The bodiless shapes get their own extremes: binary/trinary, the longest
+    // name (the brief spans two columns), each travel zone, and a spread.
+    const reduced = bodiless.filter(r => r.kind === 'reduced');
+    const starsOnly = bodiless.filter(r => r.kind === 'starsOnly');
+    add('reduced: most stars',   maxBy(reduced, r => r.stars));
+    add('reduced: longest name', maxBy(reduced, r => r.maxName));
+    add('reduced: Red zone',     reduced.find(r => /^r/i.test(r.zone)));
+    add('reduced: Amber zone',   reduced.find(r => /^a/i.test(r.zone)));
+    add('reduced: Green zone',   reduced.find(r => /^g/i.test(r.zone)));
+    const rstep = Math.max(1, Math.floor(reduced.length / 4));
+    for (let i = 0, k = 0; i < reduced.length && k < 4; i += rstep, k++) add('reduced: spread', reduced[i]);
+    add('stars only: most stars', maxBy(starsOnly, r => r.stars));
+    add('stars only: single',     starsOnly.find(r => r.stars === 1));
 
     console.log('\n════ RENDERING ' + picks.length + ' SHEETS ════\n');
     console.log('why'.padEnd(21) + 'hex'.padEnd(12) + 'name'.padEnd(15)

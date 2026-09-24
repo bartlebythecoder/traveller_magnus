@@ -2066,7 +2066,13 @@ function openWorldImagePanel() {
     const src = stateObj.mgt2eData || stateObj.t5Data || stateObj.rttData || stateObj.ctData;
     if (!src) return;
 
-    const _tempK = src.meanTempK || src.avgSurfaceTemp || 0;
+    // CT stores Kelvin as `temperature` (ct_physical_library.js). Scoped to
+    // ctData so no other engine's `temperature` field is read as Kelvin.
+    // Sean ruled 2026-09-23: without it this was the ONLY view drawing a CT
+    // world temperature-blind - the body-row button, the system sheet and the
+    // exporters all use it, so the same mainworld looked different here.
+    const _ctK = (src === stateObj.ctData && typeof src.temperature === 'number') ? src.temperature : 0;
+    const _tempK = src.meanTempK || src.avgSurfaceTemp || _ctK || 0;
     const worldData = {
         name:          src.name      || '',
         atmosphere:    src.atmCode   ?? src.atm   ?? 0,

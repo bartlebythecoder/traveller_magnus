@@ -30,48 +30,33 @@ in this document, not a neutral act.
 **So: an item still written down here is an item still live.**
 
 ---
-**Version:** **v0.18.0 SHIPPED 2026-09-20 and is committed** — regional surface maps, five
-changelog entries. That closed the terrain work begun 2026-09-11, so §0.0.A is now the RECORD
-of a finished release rather than a work-in-progress section, and §0.0.0's candidate list is
-retired as a release plan.
-**v0.18.1 is OPEN. Its subject is IMAGE EXPORTS — system images and "world on a page" PDFs**
-(Sean, 2026-09-21) — plus terrain updates as user feedback on v0.18.0 arrives. **Start at
-§0.0.B**, which carries the agreed scope, the approved mockup and everything that mockup
-proved. **Nothing is half-finished.**
-Earlier: v0.17.2 (2026-08-19), v0.17.3 (08-27), v0.17.4 (09-01) and v0.17.5 (09-11) were the
-routes series; v0.17.0 / v0.17.0.1 (08-03 / 08-04) were the exports series.
+**Version:** **v0.18.1 is OPEN and nearly done** (2026-09-24). `APP_VERSION` is already
+`v0.18.1`. Its subject is **IMAGE EXPORTS** (Sean, 2026-09-21); this release delivers the
+**SYSTEM SHEET** as an in-app download. **All code for it is built and verified; what remains is
+Sean's gallery review and the release housekeeping (§0.0.C).** "World on a page" is undesigned
+and is not part of v0.18.1. **v0.18.2 = the sheet in the exporters + PNG vs JPEG.**
+Earlier: v0.18.0 (2026-09-20) regional terrain; v0.17.2–v0.17.5 (08-19 → 09-11) routes;
+v0.17.0 / v0.17.0.1 (08-03 / 08-04) exports.
 **Architecture Standard:** The "Sean Protocol" (Directives -> Orchestration -> Execution)
 
 ---
 
-## 0.0 COLD START — read this first (updated 2026-09-21)
+## 0.0 COLD START — read this first (updated 2026-09-24)
 
-**v0.18.0 shipped on 2026-09-20.** Regional surface maps and the Tectonic/Classic terrain
-model. **§0.0.A holds the constraints it left behind — treat them as law, not as history.**
-They bind anything that touches a world image.
+**IF YOU ARE STARTING FRESH, READ IN THIS ORDER:**
 
-**IF YOU ARE STARTING FRESH, READ 0.0.C FIRST — it is the handoff written
-2026-09-23 and it says exactly what is built, what is unverified, and what to do next.**
+1. **§0.0.C below** — the handoff: exactly where v0.18.1 stands and the steps left to ship it.
+2. **`directives/system_sheet_spec.md`** — **the authority for the system sheet, as built**: the
+   four shapes of hex, R1–R8, the sixteen further rulings, the harnesses, acceptance.
+3. **§0.0.B** — the design rulings and traps behind the sheet that still bind.
+4. **§0.0.A / `directives/terrain_spec.md`** before touching anything that draws a world.
 
-**v0.18.1 is open, and the active thread is THE SYSTEM SHEET — a one-page, print-style
-reference sheet for a single system.** See **§0.0.B**, which carries the design direction, an
-agreed scope, and the findings from a working mockup Sean approved on 2026-09-21
-(*"I am very happy with your mockup image so we have an excellent starting place"*).
-
-**Start there, and look at the mockup before writing anything** — it is a real artefact, not a
-sketch, and it already answers the questions a fresh session would otherwise spend a day on.
-
-**Every pre-work job from the v0.18.0 review is done.** The terrain directive is now
-`directives/terrain_spec.md` — read it before touching any terrain code — and clean circles
-list in travel order in the Route Systems panel AND the CSV export.
-
-**Nothing anywhere is half-finished, and every open item has been ruled on.** The whole
-outstanding list was worked through with Sean on 2026-09-21: two items were fixed and verified,
-five were ruled and closed, and four became pre-work jobs — **all of which are now done or
-have been dropped as requirements.** **Closed items were then
-DELETED from this document** — so an item still written down here is an item still live.
-Neither this document's System Editor content (§0.1 onward) nor the exports manifest is in
-progress.
+**ASK QUESTIONS ONE AT A TIME, IN THEIR OWN MESSAGE OR THE QUESTION TOOL.** Sean, 2026-09-23:
+*"Please don't ask me questions or things that need clarification in the body of a large
+response I will miss them"*, and *"answers to some questions might result in new or different
+questions."* **The working pattern that worked all through 2026-09-23/24:** state the problem
+with measured numbers, give ONE recommendation, ask with the question tool, build it, verify it
+(verify + sweep + a render you actually look at), then present the next decision.
 
 **Three things to know before you touch anything:**
 
@@ -80,644 +65,194 @@ progress.
    field silently redraws every world in every sector anyone has ever saved. **Version 1 is
    frozen for good.** Read §0.0.A's "The terrain field version" before editing anything under
    `js/terrain_*` or `js/planet_renderer.js`, and run `utilities/verify_field_v1.html`
-   afterwards.
+   afterwards. (Changing a renderer INPUT — as the CT temperature ruling did — changes what a
+   world looks like without touching the field. It needs Sean's ruling, not a version bump.)
 2. **Route *forcing* was designed in full and then dropped** (2026-08-19 → 08-27). Older
    parts of this document and of `route_partial_spec.md` still carry its reasoning. §0.0.2
    says plainly what was built instead. Do not resurrect forcing without asking Sean.
 3. **Git is Sean's — never touch it, not even to read.** He stages and commits everything
-   himself. **Do not record commit hashes or the commit position in this document.** That was
-   tried twice and was stale within a week both times; the hashes that used to sit here have
-   been removed for that reason. If you need to know what is committed, ask him.
+   himself. **Do not record commit hashes or the commit position in this document.** If you
+   need to know what is committed, ask him.
 
-### 0.0.C HANDOFF — written 2026-09-23. START HERE.
+### 0.0.C HANDOFF — written 2026-09-24. START HERE.
 
-**The system sheet is BUILT and works across every shape a real sector contains.**
-`js/system_sheet.js`, reached from a **System Sheet** button in the orrery toolbar, saving a
-PNG. §0.0.B carries the decisions; the census and the six fixes are recorded there in full.
-**Do not re-derive any of it.**
+**THE SYSTEM SHEET IS FINISHED IN CODE.** Every requirement (R1–R8), every decision that was
+waiting (D1, D2, D3) and twelve further rulings from the 2026-09-23/24 session are **built and
+verified across all six test sectors**: `system_sheet_verify.js` reports zero FAILs, and
+`system_sheet_sweep.js` renders **all 3,513 sheets with zero exceptions**. The full list, with
+where each lives, is `system_sheet_spec.md` §4–§5. **Nothing is half-finished and nothing is
+waiting on a ruling.**
 
-#### THE ONE THING THAT MATTERS MOST: THE CORPUS IS ONE ENGINE
+#### THE STEPS LEFT TO SHIP v0.18.1 — in order
 
-**Every system ever tested against this sheet was MgT2E, and every one was fully generated.**
-Measured 2026-09-23 over `solo_6.json`: **438 of 438 systems MgT2E**, and **0 hexes that cannot
-be charted** — every world has a complete generated system.
+1. **Sean reviews the gallery — THE ACCEPTANCE GATE.** 109 sheets in `.tmp/galleries/`, one
+   folder per sector (`solo_6`, `ct_bu`, `t5_top_down`, `rtt_bu`, `aow_bu`, `spinward_marches`);
+   each file name says why it was picked. Regenerated 2026-09-24 against the final code. **If he
+   finds something, fix it, then re-run verify + sweep + the gallery for the affected sectors.**
+2. **Rewrite `changelog.md`'s v0.18.1 entry 4 — REWRITE, do not append.** It predates all of
+   this and is now wrong (it says each world's temperature band "is shown three times over in
+   the same six colours", which R2 made false on T5 and RTT and CT's placeholders made false for
+   CT gas giants). Describe the sheet as built: the four shapes, the per-engine column sets,
+   two-column tables, fitted page height. `changelog.md` is **LF-only** — detect, don't assume.
+3. **Check `README.md` and the `hex_map.html` splash/shortcut screens** per
+   `directives/update_version.md`. `APP_VERSION` is already `v0.18.1`.
+4. **Behaviour changes OUTSIDE the sheet that the changelog must mention**, because a user will
+   see them:
+   * **CT world images now use CT temperature** everywhere — exports, the sheet and the in-app
+     mainworld image button (`hex_editor.js` `openWorldImagePanel`). ~69% of CT world images
+     look different from before. Sean ruled it: all views now agree.
+   * **RTT orrery**: discs sized from real diameters; hovering a gas giant no longer throws
+     ("Gravity: Variable (Giant)"); moons show UWPs; Red-zone lunar mainworlds (12 in rtt_bu)
+     now read Red instead of Green — **this also corrects RTT export pages.**
+   * **T5 orrery hover** shows "Orbit #" (the normaliser now carries T5 `orbitId`).
+   * **RTT export pages** gain a Diameter line (fog-gated like any block).
+   * **The System Sheet button now opens a pop-up** (added 2026-09-24 at Sean's request) instead
+     of downloading straight away — `SystemSheet.open()` in `system_sheet.js`, styled like the
+     world image panel, with **Download PNG** (saves the same full-resolution canvas) and
+     **Close**. Esc / backdrop click close it; the orrery's Esc handler defers to
+     `SystemSheet.isOpen()` so the orrery stays open. Verified in-browser across all five engines.
 
-**So two whole classes of input have NEVER been run:**
+#### FILES CHANGED IN THE 2026-09-23/24 SESSION — for Sean's commit
 
-1. **CT, T5, RTT and AoW.** `normalizeSystem` has a separate normaliser per engine returning
-   genuinely different shapes — CT and T5 keep moons in `satellites[]`, not `moons[]` — and
-   `system_sheet.js` reads `moons[]` throughout via `liveMoons()`. **Expect it to be wrong on
-   four of the five engines.** `liveMoons()` is the single place to reconcile that.
-2. **A world with a UWP and no generated system.** A TravellerMap import, or a System Editor
-   world built as a mainworld and nothing else. `normalizeSystem` returns null, `render()`
-   returns null, and the button refuses with "No system data to chart on this hex."
+`js/system_sheet.js` (most of the work), `js/system_viewer.js` (normaliser wiring, the
+`invented` lists, `reportedMainworld`, the tooltip fix), `js/hex_editor.js` (one CT temperature
+fallback), `directives/system_sheet_spec.md` (rewritten as built), this manifest, and the
+harnesses: `utilities/system_sheet_verify.js`, `system_sheet_gallery.js`,
+`system_sheet_shoot.js` (all extended), **`system_sheet_sweep.js` (new)**. Scratch renders are in
+`.tmp/` only.
 
-#### SEAN'S RULING, 2026-09-23: BUILD THE REDUCED SHEET
+#### v0.18.2 — AGREED, NOT STARTED
 
-**A world with a UWP and nothing else must still produce a sheet** — mainworld panels and its
-table row, with the orbital strip simply absent rather than the whole sheet refused. His words,
-on being asked whether to refuse or reduce: *"I think a reduced sheet is a good idea."*
-The reasoning that went with it: a referee asking for a handout on a world does not care that
-its system was never rolled.
+* **Wire the system sheet into the HTML and Obsidian exporters**, replacing the 900x500
+  `SystemViewer.renderSnapshot` PNG (`html_exporter.js` ~1031, `obsidian_exporter.js` ~639).
+  **The disclosure gate is the whole job**: an image can only be withheld by not generating it,
+  and the sheet shows everything — the mainworld ring alone identifies the mainworld (the
+  snapshot already gates that highlight on level (g)). Plan it against
+  `directives/fog_of_war_field_tags.md` before writing code. **Test it by exporting.**
+* **PNG vs JPEG.** A sheet is ~0.4–1.1 MB; a sector export multiplies it by the world count.
+  Three `toBlob` call sites.
 
-**Note this changes what `render()` returning null means.** Today null means "nothing to draw";
-after this it should mean only "no world here at all".
+#### STILL OPEN BEYOND v0.18.2
 
-#### NEXT SESSION, IN ORDER
+* **"World on a page"** — the other half of v0.18.1's original subject, **nothing designed.** It
+  is a linear document, so **the block-model ruling (§0.0.B) governs it** — the sheet departed
+  from that ruling only because it needs numbers. Do not carry `normalizeSystem` across to it by
+  habit.
+* **Multi-star beyond binaries, and the habitable-zone band** — both deliberately absent (§0.0.B).
 
-1. **Sean is supplying saves from the other engines and a UWP-only sector.** Ask for the paths
-   if they are not already given. Run `node utilities/system_sheet_gallery.js <thatSector>` on
-   each — it censuses first, so it reports what the sector actually contains before rendering.
-2. **Build the reduced sheet** per the ruling above.
-3. **Then the single-body layout**, which is a design question and not a bug: one disc adrift
-   in a very wide strip, an empty Satellites panel and a one-row table. See 18-F-1515 Bermarmi,
-   the only single-body system in solo_6. *(The one real bug there is fixed: `step` is 0 when
-   n === 1, so the label width collapsed to its 26 px floor and the world was captioned
-   "M…" for "Mainworld".)*
+#### THE TWO RULES THIS RELEASE KEPT RE-LEARNING
 
-#### THE HARNESSES ARE IN `utilities/` — they are not in a scratchpad this time
-
-The terrain session lost its whole suite to a session scratchpad and this document still says
-so. These were moved into the repo for that reason. **All four take an optional sector path and
-default to solo_6 — PASS THE NEW SECTOR:**
-
-| File | What it does |
-|---|---|
-| `utilities/system_sheet_gallery.js` | **The important one.** Censuses a sector (engine mix, bodies, moons, stars, name lengths, lunar mainworlds), then renders systems chosen by EXTREME — fewest/most bodies, longest name, most moons/giants/stars, lunar mainworld, widest/tightest. **Picking at random would have shown twenty ordinary systems and none of the five failures it actually found.** |
-| `utilities/system_sheet_shoot.js` | Renders named hexes: `node utilities/system_sheet_shoot.js 18-E-0313 18-L-2623` |
-| `utilities/system_sheet_verify.js` | Corpus assertion: no panel may drop a row; every mainworld is found |
-| `utilities/system_sheet_binary.js` | Both companion branches, by stripping/injecting `orbitId` — solo_6 can only exercise one |
-
-**`fetch` is blocked on `file://`.** Every harness reads the sector in node and injects it in
-2,000-hex chunks. Do not "fix" that by fetching.
-
-#### THE RULE THIS RELEASE KEEPS RE-LEARNING
-
-**Any panel on the sheet that lays out a variable number of rows must DERIVE its pitch from the
-row count, and no row loop may stop without announcing that it did.** Four panels had the same
-silent-drop defect — planetary table, System Data, Mainworld Data, mainworld brief — and **two
-were introduced while fixing the first.** Three of the four were found by whole-corpus checks,
-not by looking at a sheet. **A new panel must be assumed to have this bug until a corpus run
-says otherwise.**
-
-#### STILL OPEN AFTER THE ENGINE WORK
-
-* **Exporter wiring**, where the disclosure gate is the whole job — an image can only be
-  withheld by not generating it (§0.0.B's traps, `directives/fog_of_war_field_tags.md`).
-* **PNG vs JPEG**, still parked. A sheet is ~400 KB–1.1 MB; it matters once a sector-wide
-  export multiplies that by the world count. Three `toBlob` call sites.
+1. **A panel that lays out a variable number of rows must DERIVE its pitch from the count, and
+   no row loop may stop without announcing it.** Four panels had the silent-drop defect; two
+   were introduced while fixing the first. Assume a new panel has it until a corpus run says not.
+2. **Assertions check what a sheet would print; only rendering proves it can be drawn.** Wiring
+   RTT `diameter` passed every check in `system_sheet_verify.js` and crashed the sheet (the
+   Jovians store a string). And the gallery rendered **zero** Spinward sheets for a day because
+   it only censused hexes with bodies. **After any change: verify, sweep, and look at renders.**
 
 ---
 
-### 0.0.B v0.18.1 — IMAGE EXPORTS (open, written 2026-09-21)
+### 0.0.B v0.18.1 — THE SYSTEM SHEET: rulings and traps that still bind
 
-**This supersedes §0.0.0.** Sean named the subject on 2026-09-21: **"more image exports"**,
-specifically **"system images and 'world on a page' PDFs"**. Over that day the shape was
-settled by building a mockup and ruling on it: **the active work is a SYSTEM SHEET, screen
-resolution, PDF deferred, single-star with no gas giants or moons to begin with.** The scope
-table, the mockup and its findings are below. **Read them before writing code — most of the
-expensive questions are already answered.**
+The requirements and as-built detail are in **`directives/system_sheet_spec.md`**. What follows
+is the design ground under it — **decided with Sean; do not re-derive or re-litigate.**
 
-**No v0.18.1 application code has changed yet.** The working tree carries the version bump
-(`APP_VERSION` in `js/core.js`, `changelog.md`, `README.md`, `hex_map.html`), the moon-sheet
-export fix in `js/html_exporter.js` and `js/obsidian_exporter.js`, and the terrain-rivers
-cleanup — all recorded below and in `changelog.md` under v0.18.1.
-
-#### What already exists — established by reading the code 2026-09-21, so nobody re-derives it
-
-* **System images already ship in BOTH exporters.** `SystemViewer.renderSnapshot(state, 900,
-  500, { level })` is called at `js/html_exporter.js:1031` and `js/obsidian_exporter.js:639`.
-  It draws the orrery to an **off-screen** canvas and returns PNG bytes. It is careful code:
-  it saves and restores **seventeen** module-level variables around the draw, forces `T=0` so
-  body positions are deterministic, forces dark mode, and **gates the mainworld highlight on
-  disclosure level (g)** — a coloured body identifies the mainworld as loudly as a caption
-  would. So "more system images" is an EXTENSION of something that already works, which makes
-  defining the scope the first job rather than the last.
-* **World images and regional survey sheets also already ship**, through
-  `ExportCore.canRenderImage` / `pinnedSitesFor` / `renderRegionalSheet` (v0.18.0, §0.0.A
-  decision 4).
-* **There is no PDF capability anywhere in this repo.** The only match for "pdf" in the whole
-  tree is a URL string inside `js/foreven_mixon_data.js`. Both exporters build a **ZIP by
-  hand** — `crc32` and `buildZip` at the top of `js/export_core.js` — and hand it to
-  `downloadBlob`. A PDF is therefore genuinely new, and this project **has no build step, no
-  bundler and no runtime dependencies**: a PDF library would have to be vendored into the repo
-  and added as a `<script>` tag in `hex_map.html`, which would be a first. The alternative — a
-  print stylesheet and the browser's own "Print to PDF" — costs nothing and adds no dependency,
-  but gives up control of pagination and of the file's name.
-
-#### DECIDED 2026-09-21 — the page is built on the BLOCK MODEL
-
-**The first real v0.18.1 ruling, and it settles more than it looks like it does.** "World on a
-page" takes its content from **`ExportCore`'s block model** — the same blocks both exporters
-already render — and NOT from the on-screen panels.
-
-Two things fall out of it, which is why it was worth deciding before the questions below:
-
-* **Fog of war is inherited rather than re-implemented.** `filterBlocks()` only ever sees
-  blocks; a page assembled outside the block model would have to re-derive every disclosure
-  decision by hand, and the first trap in this section says what that costs. Building on blocks
-  means the page is filtered by the mechanism that already works.
-* **Numbers arrive already rounded.** The exporters format every numeric field through
-  `ExportCore.fmtNum`, so a page built on blocks inherits consistent precision instead of
-  having to impose it.
-
-**This does not answer question 2 below.** Where the page is DELIVERED — an in-app download, a
-file inside the existing exports, or a third exporter — is still open. Only its data source is
-settled.
-
-#### SCOPE AGREED 2026-09-21 — start here
-
-Sean set the direction after seeing the mockup. **These are decisions, not guesses:**
+#### SCOPE AND FORM — decided 2026-09-21
 
 | | Ruling |
 |---|---|
-| **What a "system image" is** | A **system sheet**: one system, one page, landscape, dark, dense — an orbital strip of rendered bodies plus data panels. Sean's reference is `C:\Users\sean\Downloads\2.jpg` (a Kteiroa "ORBITAL MAP" sheet, hand-made). **Look at it.** |
-| **Resolution** | **Screen first.** Print was explicitly deferred — *"my inclination is to start with just the screen."* This is what makes disc quality tractable; see the supersampling finding below |
-| **PDF** | **Not now.** *"We don't have to worry about PDF right now. Let's focus on images."* The routes and their costs are recorded below for when it returns |
-| **Multi-star systems** | **Assume none for now.** Sean: *"we're going to have to work together on how to handle multi star systems"* — it is the single biggest layout unknown and he wants to design it jointly |
-| **Gas giants and moons** | **Assume none for now.** *"we're gonna have to come up with [an answer] ourselves"* — a design job, not a lookup |
-| **Missing stats** | **Ignore them.** *"If they happen to have stats that we don't have I'm not worried about it, we'll just use the stats we have."* Do NOT invent jump shadow, comm range, metallicity or average TL |
-| **Data source** | The block model — see the ruling above |
-
-**Still genuinely open:** PNG vs JPEG (parked, and cheap to change — three `toBlob` call sites),
-and what fills the space where the reference has hand-written lore.
-
-#### THE MOCKUP — built and approved 2026-09-21. Look at it first.
-
-**Files: `C:\Users\sean\Downloads\system_sheet_mockup\`** — deliberately outside the repo.
-
-| File | What |
-|---|---|
-| `system_sheet_mock.png` | The approved image, 3440x1756 |
-| `system_sheet_mock.html` | **Live source.** Open in a browser and the discs render for real, loading `js/planet_renderer.js` and `js/terrain_tectonics.js` by absolute `file:///` path |
-| `mock_data.js` | Real data for **Makarov, hex 18-E-0313**, extracted from `sectors/solo_6.json` |
-| `shot.js` | Playwright screenshot driver |
-
-**It is HTML/CSS + canvas.** Edit the CSS, reload, see the change — that is the fastest way to
-move the look without rebuilding anything.
-
-#### WHAT THE MOCKUP PROVED — do not re-derive these
-
-* **NO PLUGIN, LIBRARY OR EXTERNAL PROGRAM IS NEEDED.** Sean's opening assumption was that one
-  would be. It is not: every disc on that sheet came out of
-  `PlanetRenderer.renderApproachFrame(canvas, worldData, hexId, lonOffset)`, which draws a lit
-  sphere to **any canvas at any size**. This was demonstrated, not argued.
-* **SUPERSAMPLING IS THE TECHNIQUE THAT MAKES SMALL DISCS WORK.** Render each disc at **3x** the
-  display size and let the browser downscale (`canvas.width = px*3`, `style.width = px`).
-  Terminators and coastlines stay clean at 34-74 px. Rendering at native size does not.
-* **DISC SIZE MUST BE LOG-SCALED AND CLAMPED, never true scale.** The mockup maps
-  1,600-17,600 km onto 34-74 px logarithmically. A 1,600 km rock reads as a pebble beside a
-  17,600 km world without vanishing.
-* **ORBIT SPACING IS ORDINAL, not distance-proportional.** 0.72 AU to 26.32 AU sit evenly and
-  the AU labels carry the truth. Proportional spacing bunches everything against the left edge.
-* **The mainworld needs a highlight** — a green ring plus a coloured name. It is what makes the
-  strip scannable.
-* **One semantic colour set, reused in three places** — legend, table gutter, and the Band
-  column — is what makes the sheet read as systematic rather than decorated.
-* **Use OUR temperature bands, not the reference's.** `PlanetRenderer.tempBandFromKelvin` gives
-  Frozen <230, Cold <265, Cool <290, Temperate <330, Warm <360, Hot >=360. The reference image
-  uses different names and boundaries. Ours are already baked into every world-image palette, so
-  a planet's colour dot must agree with how that planet actually looks.
-
-#### THE ARCHITECTURAL FORK — DECIDED 2026-09-21: CANVAS
-
-**Sean ruled CANVAS**, against the lean this document previously recorded toward HTML/CSS.
-The reasoning, so it is not re-litigated:
-
-* **He asked for images, and a page is not one.** An HTML page prints well and drops into the
-  wiki export, but it cannot go into Obsidian, a VTT or a message to a player as a picture.
-* **Canvas REPLACES something; HTML would have ADDED something.** A 900x500 system snapshot
-  PNG already ships in both exporters (`html_exporter.js:1040`, `obsidian_exporter.js:651`,
-  both calling `SystemViewer.renderSnapshot`). The sheet is that thing done properly. As a page
-  it would have sat beside the snapshot rather than superseding it.
-* **The canvas text precedent was larger than expected.** `terrain_frame.js:355` already has
-  the key/value row the star and mainworld panels use, and `:404` the label-plus-percentage row
-  the temperature key uses, plus titles, footers and scale bars. Most of the left and right
-  columns were a pattern that already worked.
-
-**What was given up:** free print-to-PDF. Accepted — PDF is deferred, and a canvas PNG on a
-print stylesheet reaches it anyway.
-
-**DELIVERY — DECIDED 2026-09-21: in-app download FIRST, exporters second.** This answers
-question 2. A **System Sheet** button sits in the orrery toolbar (`system_viewer.js`, guarded on
-`window.SystemSheet` exactly as the flat-map panel guards on `window.TerrainPanel`) and saves a
-PNG, mirroring the regional map panel's **Download PNG** (`terrain_panel.js:794`). The reason is
-the feedback loop: judging the sheet means looking at twenty systems, which costs a click this
-way and a full sector export the other way. It also keeps the first pass clear of the fog of
-war entirely — an in-app download is the user looking at their own map. **Wiring it into the
-exporters is a second step, and the disclosure gate is the whole of that step.**
-
-#### AS BUILT — `js/system_sheet.js`, 2026-09-21
-
-`SystemSheet.render(state, hexId, opts)` returns a canvas; `SystemSheet.download(state, hexId)`
-saves it. **1720x878 LOGICAL units drawn through a scale transform**, default scale 2 = the
-mockup's 3440x1756. Change `SCALE`, never the layout numbers.
-
-**THE DATA SOURCE IS `SystemViewer.normalizeSystem(state)`, NOT the block model.** This
-knowingly departs from the ruling recorded above, and the reason is shape: blocks are
-pre-formatted label/value PAIRS (`f('Gravity', '0.47 G')`), and a sheet needs `gravity` as a
-NUMBER to scale a disc, sort a column and place a body on an axis. normalizeSystem returns
-exactly that, reconciled across all five engines, and **it is what the orrery itself draws
-from — so the sheet and the orrery agree about a system by construction.** The ruling's two
-justifications both survive anyway: numbers still go through `ExportCore.fmtNum`, so precision
-matches the exports to the digit; and fog of war is a GENERATION-TIME gate, which works
-whatever the data source. **The block-model ruling still stands for "world on a page"**, which
-is a linear document and the shape blocks were built for.
-
-**Two traps in `PlanetRenderer.renderApproachFrame`, both hit, both now commented in place:**
-
-1. **The third parameter is NAMED `hexId` and is actually the whole per-body SEED KEY** — every
-   seed inside is `masterSeed + '-' + <that> + '-xx'`. Passing a bare hexId gives **every body
-   in the system the same heightfield, continents and craters**: eight identical planets in a
-   row, which is exactly what the first render produced. Pass
-   `PlanetRenderer.imageSeed(hexId, world, fallback)`, which is keyed on the body's NAME.
-2. **It does not accept a normalizeSystem world.** It reads `atmosphere` and `hydrographics` as
-   parsed UWP digits plus `temperatureK` — none of which that shape carries — so `_buildPalette`
-   classified every body as an airless rock and **the whole strip came out grey.**
-   `ExportCore._rendererData` was the existing adapter and was private; it is now **exported as
-   `ExportCore.rendererData`** so the sheet uses the same definition as the world images and the
-   regional sheets rather than growing a second copy.
-
-**NO HABITABLE ZONE BAND, and do not add one from luminosity.** `normalizeSystem` falls back to
-`_orbitToAU(3)` when `sys.hzco` is absent, which it is throughout `solo_6.json` — so **every**
-system claims an HZ at 1.00 AU, including Makarov's M0 III at luminosity 330. The mockup's
-`sqrt(luminosity)` was invented, not RAW. Real sources are `MGT2E_HZ_DEVIATION`
-(`js/constants.js`) and CT's `hasHZ`/`hzOverride`. Until one is wired in the band stays off,
-per Sean's ruling that missing stats are simply not shown.
-
-**Belts ARE handled**, though moons and gas giants are not. Without belt support the moonless
-single-star test corpus is one system rather than three — Alayor II is a Planetoid Belt. A belt
-is drawn as a seeded flattened scatter, never as a sphere, and its diameter/gravity cells read
-`—` rather than 0.
-
-**Three layout rules that came out of rendering it, not from the mockup:**
-
-* **Every disc gets a faint radial SEAT.** An airless rock is genuinely very dark and its limb
-  vanishes against a near-black panel — magnified, Alayor's 1,600 km mainworld was a perfectly
-  good cratered world that read on the sheet as an empty ring.
-* **The mainworld ring offset SCALES with the body.** At a fixed +7 px with a 5 px glow it was
-  1.5x the width of a 30 px disc and outshouted the world it was pointing at.
-* **The table panel is sized to its CONTENT.** A full-height box under an eight-row system
-  leaves a quarter of the sheet as an empty bordered rectangle, and a three-body system is far
-  worse. This is the content-density finding, addressed for the table; **the mainworld brief
-  still has visible slack and is the remaining case.**
-
-**Measured, all three test systems:** 3440x1756, **0.96–1.10 MB**, **2.6–3.6 s** to render, no
-page errors. Size is worth watching if the sheet ever enters a sector-wide export — see the
-size trap above.
-
-**Still to do:** the ~20-system gallery as the real quality test (one good example proves
-nothing); multi-star, gas giants and moons, all of which Sean wants to design jointly; and the
-exporter wiring with its disclosure gate.
-
-#### THE GALLERY CENSUS — RUN 2026-09-21 OVER `solo_6.json`. READ THIS BEFORE PLANNING ANYTHING.
-
-**438 systems with body data. TWO of them — 0.5% — fall inside the sheet's agreed scope.**
-That single number retires the scope assumption recorded above. "Assume no gas giants or moons
-for now" is not a simplification of the problem; it is a description of a system that barely
-exists.
-
-| | count | share |
-|---|---|---|
-| **In current scope** (1 star, 0 gas giants, 0 moons) | **2** | **0.5%** |
-| Has gas giant(s) | 431 | **98.4%** |
-| Has moon(s) | 432 | **98.6%** |
-| **MAINWORLD IS A MOON** | 257 | **58.7%** |
-| Multi-star | 79 | 18.0% |
-| Has belt(s) | 134 | 30.6% |
-
-Bodies per system: min 1, **median 8, p95 11, max 16.** Longest body name: median 13, **p95 22,
-max 25.** All 438 are MgT2E — this sector exercises one engine, so the other four are still
-untested against a real corpus.
-
-**The three systems this document nominated as the test corpus are not representative and were
-never going to be.** They were selected FOR being unusual.
-
-#### FIVE FAILURES THE GALLERY FOUND — none visible on the three nominated systems
-
-1. ~~**A LUNAR MAINWORLD PRODUCES AN EMPTY SHEET.**~~ **FIXED 2026-09-21.** Both mainworld panels read
-   "No mainworld recorded" and a third of the sheet is blank. `system_sheet.js` finds the
-   mainworld with `bodies.find(isMainworld)` over `nsys.worlds`, and a mainworld that is a moon
-   lives in `world.moons[]`, which that search never visits. `normalizeSystem` deliberately
-   re-tags such moons as type `Mainworld`, so **the data is right and the lookup is wrong.**
-   This is the recurring shape in this codebase — a secondary list invisible to a function —
-   and it is the same one that produced the CT captured-planet and moon-type bugs.
-2. ~~**GAS GIANTS ARE DRAWN AS ROCKY TERRESTRIAL WORLDS.**~~ **FIXED 2026-09-21.** Every gas giant goes
-   through `renderApproachFrame`, which draws a lit rocky surface, so a 50,000 km gas giant
-   renders as a big grey cratered moon. They also carry no UWP, so the UWP column reads `—`,
-   and they all share one diameter (50,000 km) so they all clamp to the same disc size.
-3. ~~**THE TABLE SILENTLY DROPS ROWS.**~~ **FIXED 2026-09-21.** Nidau (18-P-2632) reports
-   "Catalogued Orbits 16" in the System Data panel and lists **12** — the row loop stops at the
-   panel edge with `if (rowY > y + h - 12) return;`. **A sheet that quietly omits four worlds is
-   worse than one that fails**, and it is the same class of defect as the route panel listing
-   3 of 6 worlds in v0.17.4.
-4. ~~**THE ORBITAL STRIP COLLAPSES BEYOND ~10 BODIES.**~~ **FIXED 2026-09-21.** At 16 the discs overlap, every name
-   truncates to "Nidau …" and the AU labels run together into one unreadable line. The strip
-   was laid out against an eight-body system, which is the median — so it breaks on the top
-   half of the distribution.
-5. ~~**MOONS ARE ABSENT ENTIRELY.**~~ **FIXED 2026-09-21.** Currently silent rather than wrong, which
-   was the agreed behaviour — but at that share it means the sheet omits real content almost
-   always.
-
-#### FIXES 1 AND 2 — DONE 2026-09-21, VERIFIED OVER ALL 438 SYSTEMS
-
-Both were correctness rather than design, so they were taken without a design pass.
-
-**The lunar-mainworld lookup.** `findMainworld(bodies)` returns `{ body, parent }` and searches
-`worlds[]` then every `world.moons[]`. **The rule it establishes, and the one every future
-consumer must follow: the ORBIT belongs to the parent, the physical STATS belong to the body.**
-Getting that wrong is not hypothetical — the first cut of the fix printed "Orbital Distance
-0.005 AU" and "Year Length 0 standard years" in the Mainworld Data panel, which is the moon's
-circuit of its own planet rounded away and presented as its orbit of the star. The panel now
-labels those rows "Primary's Orbital Distance" / "Primary's Year Length" and adds "Orbits" and
-"Distance from Primary". The strip rings the PARENT and names the moon beneath it.
-**A second follow-on the fix created and closed:** the populated-bodies count walked only
-top-level bodies, so a sheet whose entire subject is a populated lunar mainworld announced
-"0 of 16 bodies are populated". It now counts moons too.
-
-**The table pitch.** Derived from the body count, clamped to 16–29 px, with the font following
-it down (12/11/10 px). Capacity runs 11 rows at the comfortable pitch to 21 at the tightest.
-The `rowY > y + h - 12` guard is kept as belt and braces but now **announces** an omission in
-red instead of returning silently — the rule is that the table must be structurally incapable
-of dropping a row, and a guard that can only ever shout is how that is proved.
-
-**Verified across the CORPUS, not a sample** (`scratchpad/verify_rows.js`): 438 systems checked,
-**0 would drop a row**, **257 mainworlds found via the moon lookup** — matching the census
-exactly — and **0 systems left with no mainworld**. Nidau now lists all 16 of 16 rows under a
-System Data panel reading "Catalogued Orbits 16".
-
-#### FIXES 3 AND 4 — DONE 2026-09-21. They had to be taken together.
-
-They interact: a gas giant must be drawn LARGER to read as a giant, which makes crowding worse,
-so sizing and spacing could not be settled separately.
-
-**Gas giants — `drawGasGiant()` in `js/system_sheet.js`.** Seeded latitudinal bands from one of
-five palettes, slight oblateness, a storm oval on about half of them, then limb darkening and a
-terminator lit from the upper left — the same direction `planet_renderer` lights everything
-else from, so a giant and a rock on one strip agree about where the star is.
-
-* **IT DELIBERATELY DOES NOT LIVE IN `planet_renderer.js`.** That file is behind the frozen
-  terrain-field guarantee (`directives/terrain_spec.md` §3) and a gas giant needs none of its
-  heightfield machinery. Keeping the banding out of it means `verify_field_v1` is untouched.
-* **Gas giants get their OWN size band, 84–108 px, which does not overlap the terrestrial
-  34–76.** Sharing one scale is not an option: every gas giant in solo_6 reports exactly
-  50,000 km, so on the terrestrial curve they all clamp to the same value as a large rock. The
-  non-overlap guarantees the one thing true of all of them — any giant is larger than any rock.
-* **It made the sheet much FASTER, which was not the point but is worth knowing.** Giants no
-  longer go through the per-pixel sphere renderer: Starrfield (13 giants) fell from **1,653 ms
-  to 47 ms**, and Nidau from 1,630 ms to 205 ms.
-
-**The strip — three changes, and the first is worth more than the other two.**
-
-1. **DROP THE SYSTEM NAME FROM THE LABEL.** "Nidau A-I" through "Nidau A-XVI" repeats the
-   sheet's own title sixteen times and was the entire reason names truncated to "Nidau …".
-   Stripping it takes a label from ~12 characters to 3–5 and costs nothing. **Two guards it
-   needs:** never strip to nothing, and — because a mainworld is very often named exactly after
-   its system — label that case "Mainworld" rather than falling back to a name that then
-   truncates anyway ("Royal Leami…").
-2. **Scale the disc SET to the column, not each disc.** Natural sizes are computed first, then
-   the whole set is scaled so the largest fits with a gap. Scaling the set preserves the
-   relative sizes, which is the only thing the sizes exist to convey.
-3. **Stagger the AU labels** onto two interleaved rows when a column is narrower than its label.
-
-**Verified over the same extremes** — Nidau at 16 bodies and 9 giants, Starrfield at 14 bodies
-and 13 giants, Gokumenon at 5 stars, Royal Leamington S at a 25-character name. No page errors,
-nothing truncated, no overlap.
-
-#### FIX 5 — MOONS, DONE 2026-09-21. The numbers decided the design.
-
-**FULL ENUMERATION IS ARITHMETICALLY IMPOSSIBLE.** Measured over solo_6: moons per system run to
-a **median of 19**, p75 27, p95 40 and a **maximum of 64**; **65.5% of systems carry 16 or more**.
-Listing every moon needs a median of **27 rows and up to 76**, against a planetary table that
-holds **21 at its tightest pitch** — so the MEDIAN system already overflows. Write that down
-before anyone proposes indenting moons under their parents.
-
-So the question is never "how do we fit the moons"; it is **"which moons earn a row"**, with
-everything else carried as a COUNT. Nothing is hidden — only the detail is rationed:
-
-* **A `Moons` column in the planetary table**, and a **`Satellites` total in System Data**.
-* **A moon count under every disc on the strip.**
-* **A `Satellites` panel** listing one group in full: the mainworld's siblings when the
-  mainworld is a moon, its own moons when it is a planet, and otherwise the richest satellite
-  group in the system. Sorted largest first, with "N further satellites not listed — M in
-  total" whenever it elides any.
-
-**"Populated" was the obvious filter and it does not work.** MgT2E populates moons freely —
-Starrfield reports **33 of 67 bodies populated** — so that filter selects almost everything and
-blows the budget. **Proximity to the mainworld** is the filter that does work.
-
-**The Band Key panel was deleted to make room**, and it should have gone anyway: it repeated the
-six bands the header legend already listed, adding only the Kelvin ranges. Those ranges moved
-into the legend. One definition, stated once.
-
-#### THE SILENT-ROW-DROP DEFECT HAS NOW APPEARED THREE TIMES IN THIS ONE FILE
-
-Worth stating as a rule rather than as three bugs, because the third was found by a
-whole-corpus check rather than by looking at a sheet:
-
-1. **The planetary table** — printed "Catalogued Orbits 16" above twelve rows.
-2. **System Data** — the moment a `Satellites` row was added, "Outermost Orbit" stopped being
-   drawn. Fixed by splitting the panel into two columns.
-3. **Mainworld Data** — nine rows of space, and a LUNAR mainworld needs eleven, so **"Liquid"
-   and "Trade Codes" were never drawn** and nothing said so. Invisible on any ordinary system;
-   it only appears on the 58.7% with a lunar mainworld, and only in the last two rows.
-
-**THE RULE: any panel on this sheet that lays out a variable number of rows must DERIVE its
-pitch from the row count. Never assume the count fits, and never `break` out of a row loop
-without announcing it.** All three now derive their pitch, and each keeps its edge guard purely
-as a loud fallback — a guard that can only ever shout is how "cannot drop a row" is proved.
-
-**Verified over all 438 systems** (`scratchpad/verify_moons.js`): planetary table overflows **0**,
-System Data needs 136 px of 140, largest single satellite group is **8** against a Satellites
-panel capacity of 5 — so the elision line is exercised and correct.
-
-#### FIX 6 — MULTI-STAR, DONE 2026-09-21. And the data forced the design.
-
-**A COMPANION'S ORBIT MAY SIMPLY NOT BE RECORDED, AND solo_6 IS THE CASE THAT PROVES IT.** The
-shipped engine writes `orbitId` and `separation` onto every companion
-(`mgt2e_stellar_engine.js` ~815), but `solo_6.json` is a **v0.13.3** file written before those
-fields existed: all **86 of its companions carry only a `role` WORD** — "Very Close", "Close",
-"Moderate" — plus `mao`. There is **no RAW table in MgT2E mapping those words to a distance**,
-so placing such a star on the orbit axis would state an invented figure as fact, exactly as the
-mockup's `sqrt(luminosity)` habitable zone did. **Both branches are therefore built:**
-
-| | |
-|---|---|
-| `orbitId` present (a modern save) | The companion is **placed on the strip** at `SystemViewer.orbitToAU(orbitId)`, interleaved with the bodies by distance, drawn as a gold ✶ with a star glow, its spectral type and role beneath, and its AU below that |
-| `orbitId` absent (a legacy save) | The companion is **named in the star panel** with its role word and **no position at all**, and the panel states **"N (orbits not recorded)"** |
-
-**`!= null`, never `!== null`** — legacy saves omit the key entirely, so both null and undefined
-occur. This is the trap already recorded under "Legacy saves omit fields"; this is its second
-confirmed sighting.
-
-**`SystemViewer.orbitToAU` was EXPORTED for this** rather than copied. Note the deliberate
-difference from the private `_starCompanionAU` beside it: that one falls back to
-`s.orbitId || 0.5` for a star with no recorded orbit, which is fine for laying out an orrery
-and **not** fine for a printed sheet. The export carries a comment saying so.
-
-**ORBIT NUMBERS BELONG TO BODIES ONLY.** A companion on the strip does not consume an index, or
-the strip and the planetary table would stop agreeing about which world is orbit 7.
-
-**In the star panel:** the title becomes "Stars", the primary's glyph shrinks and lifts, and the
-companions are drawn beneath it as small glyphs with their type and either their AU or their
-role. A `Companions` row joins the primary's stats.
-
-**TESTED ON BOTH BRANCHES, because solo_6 can only exercise one**
-(`scratchpad/test_binary.js`): Gokumenon (5 stars) and Normannia (2) each rendered twice, once
-with `orbitId` stripped and once with the values the shipped engine writes. Legacy placed **0**
-companions on the strip and said so; modern placed **4** and **1** respectively, correctly
-interleaved. No page errors on any of the four.
-
-#### A FOURTH SILENT ROW-DROP — and the rule now has four instances behind it
-
-`_mainworldBrief`'s bullet loop was the fourth: `if (ly > y + h - 14) break;`, silent. It now
-announces. **Four panels on one sheet had the same defect** — planetary table, System Data,
-Mainworld Data, mainworld brief — and two of them were introduced *while fixing the first*.
-**THE RULE, restated because it keeps earning its place: any panel here that lays out a
-variable number of rows must DERIVE its pitch from the count, and no row loop may stop without
-saying that it did.**
-
-#### WHAT THE CENSUS CHANGES
-
-**Gas giants and moons are not a later phase; they are the feature.** The order that follows
-from the numbers, rather than from the original scope:
-
-1. ~~The lunar-mainworld lookup.~~ **DONE.**
-2. ~~The table must never drop a row.~~ **DONE.**
-3. ~~Gas giants.~~ **DONE.**
-4. ~~The strip must hold 16 bodies.~~ **DONE.**
-5. ~~Moons.~~ **DONE** — option B (count everywhere, detail for the mainworld's neighbourhood).
-6. ~~Multi-star.~~ **DONE.** Full account above. What follows was the plan before it was built.
-   **Multi-star** — was the only item left. **And it is really a BINARY problem:** 75 of the 79
-   multi-star systems are exactly two stars; 3+ stars occurs **four times in the whole sector**.
-   The data already carries `parentStarIdx` and `orbitType` (S-Type/P-Type) on every body, so
-   which star a world orbits is a lookup rather than a derivation. Agreed approach, not yet
-   built: **companions listed in the Primary Star panel, AND drawn on the existing strip as a
-   star glyph at their own ordinal position**, rather than a second strip — which would pay a
-   permanent layout cost for 17% of systems.
-
-**The harness is `scratchpad/gallery.js`** — it censuses a sector, picks systems by EXTREME
-(fewest/most bodies, longest name, most moons/gas giants/stars, lunar mainworld, widest and
-tightest) rather than at random, and writes `census.json` beside the sheets. **Re-run it after
-any layout change.** Picking at random would have shown twenty ordinary eight-body systems and
-none of the five failures above.
-
-#### FINDINGS THAT WILL BITE — from actually building it
-
-* **CONTENT DENSITY IS THE REAL PROBLEM, NOT RENDERING.** The reference looks dense because it
-  carries **hand-written lore** ("Once known as Stross…") that we cannot generate. The mockup has
-  visible empty space in the mainworld panel, and a sparser system will be worse. Either derive
-  more content or make the layout adapt to how much there is.
-* **FIELD NAMES LIE. VERIFY SEMANTICS, NEVER ASSUME.** The mockup printed "Number of Worlds:
-  960" from a field literally called `totalWorlds`. The system has **8**. At sector scale a sheet
-  will do this silently on any field nobody checked.
-* **A CANVAS BITMAP MUST MATCH ITS DISPLAYED BOX.** A 1990x1180 bitmap in a 1120x330 box squashes
-  everything drawn on it by 3.6x vertically — the orbit axis survived, the habitable-zone label
-  compressed into invisibility, and it read as "the canvas is not drawing". Size the bitmap from
-  `getBoundingClientRect()` after layout.
-* **THE HABITABLE ZONE NEEDS REAL ENGINE DATA.** The mockup uses `sqrt(luminosity)`, which is
-  **invented and not RAW** — it is why the band lands awkwardly off the right edge. The real
-  sources are `MGT2E_HZ_DEVIATION` (`js/constants.js`) and CT's `hasHZ` / `hzOverride`.
-* **ONE GOOD EXAMPLE PROVES NOTHING. Render a gallery of ~20 wildly different systems as the
-  actual quality test.** The reference was laid out by hand for one system, under no obligation
-  to be repeatable. Ours must hold up automatically across a whole universe, with unpredictable
-  name lengths and body counts.
-* **Makarov is a POOR showcase, and that is itself a finding.** Its M0 III giant puts six of
-  eight worlds in the "Hot" band, so the sheet reads very red. It is real, not flattering.
-* **`solo_6.json` contains only THREE single-star, no-gas-giant systems**, so the simplified
-  scope has a small test corpus: **18-E-0313 Makarov** (8 worlds, 0 moons — the mockup),
-  **18-L-2623 Alayor** (8 worlds, 0 moons), **18-B-1402 Waihi** (9 worlds, 3 moons).
-
-#### Three traps this release walks straight into
-
-* **An image is opaque to the fog of war, and a PDF is worse.** `filterBlocks()` only ever sees
-  *blocks*; it cannot look inside a PNG, and it cannot look inside a page assembled outside the
-  block model either. The only way to withhold an image is **not to generate it**, which is why
-  v0.18.0's sheets sit inside the existing `_show(oLV, 'e')` gate. **Every image, and every page
-  of a PDF, must be filtered at GENERATION time.** See `directives/fog_of_war_field_tags.md` and
-  §0.0.A's decision-4 note.
+| **What it is** | One system, one page, landscape, dark, dense: an orbital strip of rendered bodies plus data panels. Sean's reference: `C:\Users\sean\Downloads\2.jpg` (a hand-made Kteiroa "ORBITAL MAP"). |
+| **Canvas, not HTML** | Sean ruled CANVAS: *he asked for images, and a page is not one* — a PNG goes into Obsidian, a VTT or a message; and it REPLACES the existing orrery snapshot rather than sitting beside it. Free print-to-PDF was given up knowingly. |
+| **Resolution** | **Screen first**; print deferred. |
+| **PDF** | **Not now.** There is no PDF capability anywhere in the repo, and no build step — a library would have to be vendored, a first. |
+| **Missing stats** | **Ignore them.** Never invent jump shadow, comm range, metallicity or average TL. This is the root of R4. |
+| **Delivery** | **In-app download FIRST, exporters second** — judging the sheet means looking at twenty systems, which costs a click this way. |
+
+**The approved mockup** is at `C:\Users\sean\Downloads\system_sheet_mockup\` (outside the repo):
+`system_sheet_mock.png` (Makarov, 18-E-0313), the live `system_sheet_mock.html`, and its data.
+Sean: *"I am very happy with your mockup image so we have an excellent starting place."*
+
+#### WHAT THE MOCKUP PROVED — do not re-derive
+
+* **No plugin or external program is needed.** `PlanetRenderer.renderApproachFrame` draws a lit
+  sphere to any canvas at any size.
+* **SUPERSAMPLE small discs 3x** and let the browser downscale; native-size discs lose their
+  terminators and coastlines.
+* **Disc size is LOG-SCALED and CLAMPED**, never true scale: terrestrial 34–76 px, gas giants
+  their own 84–108 px band (every solo_6 giant reports 50,000 km, so a shared curve cannot tell
+  them apart — the non-overlap guarantees any giant is larger than any rock).
+* **Orbit spacing is ORDINAL**, with AU labels carrying the truth.
+* **Use OUR temperature bands** (`PlanetRenderer.tempBandFromKelvin`: Frozen <230, Cold <265,
+  Cool <290, Temperate <330, Warm <360, Hot), not the reference's — they are baked into every
+  world-image palette, so a dot must agree with how the planet looks.
+
+#### AS-BUILT TRAPS — each hit once, each commented in place
+
+* **`renderApproachFrame`'s third parameter is NAMED `hexId` and is the whole per-body SEED
+  KEY.** Pass `PlanetRenderer.imageSeed(hexId, world, fallback)` (keyed on the body's NAME —
+  orbitId is not unique), or every body in the system gets the same terrain.
+* **It does not accept a `normalizeSystem` world** — it wants parsed UWP digits and
+  `temperatureK`. Go through **`ExportCore.rendererData`**, the one adapter shared with world
+  images and regional sheets, or the whole strip renders grey.
+* **Gas giants are drawn by `drawGasGiant()` in `system_sheet.js`, deliberately NOT in
+  `planet_renderer.js`**, which is behind the frozen terrain-field guarantee. (It also made the
+  sheet fast: Starrfield 1,653 ms → 47 ms.)
+* **NO HABITABLE-ZONE BAND, and do not derive one from luminosity.** `normalizeSystem` falls back
+  to `_orbitToAU(3)` when `hzco` is absent — throughout solo_6 — so every system would claim an
+  HZ at 1.00 AU. The mockup's `sqrt(luminosity)` was invented. Real sources, if ever wired:
+  `MGT2E_HZ_DEVIATION` (`js/constants.js`), CT `hasHZ`/`hzOverride`.
+* **A LUNAR MAINWORLD: the ORBIT belongs to the parent, the physical STATS to the body.**
+  58.7% of solo_6 mainworlds are moons. `findMainworld()` searches `moons[]`; the strip rings
+  the PARENT; Mainworld Data labels "Primary's Orbital Distance". Getting it backwards printed
+  "Year Length 0 standard years".
+* **COMPANION STARS:** placed on the strip only from a recorded position. MgT2E: `orbitId`
+  present (modern save) → placed via `SystemViewer.orbitToAU`; absent (solo_6 is v0.13.3 — all
+  86 companions carry only a role WORD) → named by role, "N (orbits not recorded)". **`!= null`,
+  never `!== null`** — legacy saves omit the key. T5: only a recorded `distAU` (D1). RTT: never
+  (its AU is synthesised). `orbitToAU` is exported deliberately; the private
+  `_starCompanionAU` falls back to `orbitId || 0.5`, fine for an orrery, wrong for a printed sheet.
+* **Orbit numbers belong to BODIES only** — a companion never consumes an index, or the strip
+  and table disagree about which world is orbit 7.
+* **MOONS CANNOT BE ENUMERATED.** solo_6: median 19 moons a system, max 64; listing them needs up
+  to 76 rows against a table of ~21. Moons are a COUNT (table column, strip glyph, System Data
+  total) plus one Satellites panel for the mainworld's neighbourhood. "Populated" does not work
+  as a filter (Starrfield: 33 of 67 bodies populated); **proximity to the mainworld** does.
+* **FIELD NAMES LIE.** `totalWorlds` read 960 for a system of 8. Check the raw save and the
+  engine's units (spec §6.2).
+
+#### THE BLOCK-MODEL RULING — 2026-09-21, still governs "world on a page"
+
+A linear page takes its content from **`ExportCore`'s block model**, not the on-screen panels:
+fog of war is then inherited (`filterBlocks()` only ever sees blocks) and numbers arrive through
+`ExportCore.fmtNum`. The system sheet departed from it **only** because it needs numbers; its
+numbers still go through `fmtNum`.
+
+#### THREE TRAPS WAITING FOR v0.18.2
+
+* **An image is opaque to the fog of war.** Withhold it by not generating it — v0.18.0's
+  regional sheets sit inside `_show(oLV, 'e')` for this reason. See §0.0.A decision 4.
 * **Test an exporter by exporting.** The Obsidian export was broken for three days by one
-  missing parameter while `node --check` and every piece-level assertion passed. Stub
-  `downloadBlob`, scan the bytes for `PK\x03\x04`, read the member names and bodies out of the
-  ZIP's local headers — and **watch it fail first.** Full account in §0.0.A, 2026-09-17.
-* **Size.** A regional sheet is **~1.0 MB**; a system snapshot is a 900x500 PNG. A per-world
-  page multiplies whatever it embeds by the number of worlds in the sector. The levers are
-  plate resolution and JPEG-instead-of-PNG. Decide before, not after, somebody exports a
-  1,600-world sector.
+  missing parameter while `node --check` passed. Stub `downloadBlob`, scan for `PK\x03\x04`,
+  read members out of the ZIP, and **watch it fail first.** Recipe for a small export: generate
+  a block, pin a world, **trim `hexStates` to that one hex**, export.
+* **Size** — see v0.18.2 above.
 
-#### PRE-WORK — ALL DONE, nothing outstanding
+#### v0.18.0 DECISIONS THAT STILL BIND — ruled 2026-09-21
 
-**Every pre-work job from the v0.18.0 review is finished.** The three below are kept only
-because each names a contract or a measured consequence that still binds. **The active thread
-is the system sheet above.**
-
-1. ~~**Write the terrain directive.**~~ **DONE 2026-09-21 — `directives/terrain_spec.md`.**
-   17 sections, every cited line number verified against the code. §0.0.A above is now
-   secondary to it. *(Original scope note kept below, because it is also the spec's own
-   table of contents.)* Every prior series has one (`route_*_spec.md`,
-   `html_extract_manifest.md`); the terrain work has only §0.0.A, which is a session log rather
-   than a specification. **Sean chose to write it BEFORE v0.18.1** because v0.18.1 touches
-   exactly this code and needs a contract to build against rather than a diary to reconstruct
-   one from. Scope: the
-   shipped v0.18.0 system, stated as rules — the field-version contract and the v1 freeze, the
-   `sheetSetup` / `renderSheet` contract the panel and both exporters share, the pin storage
-   shape on the hex state, the deliberately duplicated climate predicates, the guard that must
-   stay identical in two places, and the rule that an image can only be withheld by not
-   generating it.
-2. ~~**Order clean circles in the Route Systems panel.**~~ **DONE 2026-09-21**, extended to
-   the CSV export on Sean's instruction (*"circular point to point routes should be in order
-   when the destinations are exported"*) — both consumers read the one `getRouteSystemList`,
-   so the export came with it. `walkRouteCycle` in `js/routes.js` is the third chain test;
-   `directives/route_extend_spec.md` §4 carries the contract. **The consequence stands and is
-   not a defect: the panel orders a clean circle and not a loop with a tail, and a user cannot
-   tell them apart by eye** — the orderable shape is the RARE one (24 trials per row at
-   Jump-2: clean circle 7/24 at two waypoints, 4/24 at three, **0/24 at five**; loop with a
-   tail 16, 19 and 24). **Two calls made without Sean, both cheap to reverse:** a circle lists
-   each world ONCE, with the return shown as its own panel line rather than a repeated entry
-   (repeating it would duplicate a CSV row and inflate every `worlds.length` count); and a
-   hand-drawn or imported circle, having no stored Start, is ordered anyway from the lowest
-   hex ID rather than left as bullets.
-3. ~~Finish the moon-sheet export verification.~~ **DONE AND VERIFIED 2026-09-21.** A pin on a
-   moon used to save and then never reach an export — `openBodyImagePanel` is body-agnostic, so
-   a moon can hold pins, but both exporters called `pinnedSitesFor` in the **worlds** loop only.
-   Moons now get sheets, mirroring the worlds block inside the existing image/disclosure gate in
-   `html_exporter.js` (the moons loop, plus the moon section of `_buildSystemPage`) and in
-   `obsidian_exporter.js` (the moons loop, plus `_buildMoonFile`, whose new `moonSheetFiles`
-   parameter was added to the SIGNATURE first — see the missing-parameter trap).
-
-   **Verified by exporting, with a real negative control** — the pre-edit exporters were swapped
-   back in, the run repeated, and the current files restored and hash-checked:
-
-   | | pre-edit | current |
-   |---|---|---|
-   | HTML export files | 29 | **30** |
-   | Obsidian export files | 57 | **58** |
-   | Moon sheet PNG | 0 | **1 in each** |
-   | HTML page embedding it | 0 | **1** |
-   | Moon `.md` with `## Regional Surveys` | absent | **present** |
-
-   **Recipe, because the first attempt took half an hour:** generate a block of hexes, find a
-   world with a moon, pin it, then **trim `hexStates` to that one hex** before exporting. The
-   export path is unchanged; it simply has one system to walk instead of forty-eight.
-
-#### The v0.18.0 standing decisions — ALL RULED 2026-09-21
-
-Sean was walked through each one. **Nothing here is waiting on him.**
-
-* **Lake-adjacent land shading — KEEP. DO NOT "FIX" THIS.** P4's water fill moves **1.4-9.7%
-  of land pixels**, all within 8 cells of a lake shore. That is correct and deliberate: the
-  water plane genuinely is there, and the old code occluded from the lake BED, which is not.
-  The one-line "fill sea only" narrowing was considered and **rejected** — it re-splits sea
-  from lake, the exact inconsistency the 09-16/09-17 work existed to remove.
-* **The route-replace prompt — KEEP AS-IS.** It fires on every pass of an iterated P2P route
-  and that cost was accepted. The `automationRef` narrowing is **rejected on a fact worth
-  keeping: SEGMENTS CARRY NO PROVENANCE.** A segment is `{startId, endId, type, routeId,
-  ...extras}`, and `automationRef` lives on the route DEFINITION — so nothing can tell a
-  pristine generated route from one generated and then hand-edited, and the narrowing would
-  silently wipe hand edits on a same-type rebuild. Third ruling the same way: *"the clear was
-  never the bug; the silence was."*
-* **Round trips in travel order — BUILT 2026-09-21, clean circles only.** Pre-work job 2
-  above carries the measured shape distribution and the consequence that follows from it.
+* **Lake-adjacent land shading — KEEP. DO NOT "FIX" THIS.** P4's water fill moves 1.4–9.7% of
+  land pixels within 8 cells of a lake shore, correctly: the old code occluded from the lake
+  BED. "Fill sea only" was rejected — it re-splits sea from lake.
+* **The route-replace prompt — KEEP AS-IS.** **Segments carry no provenance** (`{startId, endId,
+  type, routeId, …}`; `automationRef` lives on the route definition), so nothing can tell a
+  pristine generated route from a hand-edited one. *"The clear was never the bug; the silence
+  was."*
+* **Round trips list in travel order for CLEAN CIRCLES only** (`walkRouteCycle` in
+  `js/routes.js`, contract in `route_extend_spec.md` §4), in the Route Systems panel and the CSV
+  export. A loop with a tail is not ordered, and a user cannot tell the two apart by eye — not a
+  defect. A circle lists each world once; an imported circle with no Start is ordered from the
+  lowest hex ID.
+* **Moons get regional sheets in both exporters** (verified by exporting with a negative
+  control, 2026-09-21).
 
 ### 0.0.A THE TERRAIN SYSTEM — rules you must not break (shipped v0.18.0)
 
@@ -1443,14 +978,14 @@ matches the one reported, or you have only proved that today's code runs.
 | | |
 |---|---|
 | **Most recent work** | **v0.18.0 — regional surface maps**, shipped 2026-09-20; its constraints are §0.0.A. Before it, v0.17.2–v0.17.5 — routes. Nothing in *this* document's own subject matter (the System Editor) moved during either, apart from one legacy-save bug — see "Legacy saves omit fields" in §0.0.A, which still binds any code reading a loaded sector. |
-| **Current release** | **v0.18.1 — image exports**, open, §0.0.B. |
+| **Current release** | **v0.18.1 — image exports (the system sheet)**, code complete, awaiting Sean's gallery review — §0.0.C. |
 | **This document** | v0.16.x System Editor. **Paused** after MgT2E, CT and T5 were brought fully online. |
 | **Paused** | RTT and AoW editor support — the reason this manifest is retained. |
 | **Open here** | **None.** The last three were deleted 2026-09-21 — see section 4. |
 
-**Nothing is half-finished in either manifest.** v0.18.1 is open and its subject is named, but
-no application code has been written for the system sheet yet — see §0.0.B. Its pre-work is
-all done. The companion manifest has **no** open items. This document's section 4 lists three.
+**Nothing is half-finished in either manifest.** v0.18.1's system sheet is built and verified
+and waits only on Sean's gallery review and the release housekeeping — see §0.0.C. The
+companion manifest has **no** open items. This document's section 4 lists three.
 
 ### 0.2 System Editor engine support — verified against code 2026-08-06
 

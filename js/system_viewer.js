@@ -282,7 +282,10 @@ const SystemViewer = (() => {
     }
 
     // Shared moon normaliser for CT and T5 (both use world.satellites[]).
-    function _normMoon(m, mainworldRef) {
+    // `ctKelvin`: CT stores a moon's temperature as `temperature`, in Kelvin
+    // (ct_physical_library.js getThermalStats). Scoped to CT by the caller so a
+    // T5 field of the same name could never be misread as Kelvin.
+    function _normMoon(m, mainworldRef, ctKelvin) {
         const isMainworld = _isSameWorld(m, mainworldRef);
         return {
             type:        isMainworld ? 'Mainworld' : (m.type || 'Satellite'),
@@ -295,10 +298,26 @@ const SystemViewer = (() => {
             diamKm:      m.diamKm     || null,
             mass:        m.mass       || null,
             gravity:     m.gravity    || null,
-            meanTempK:   m.meanTempK  || null,
+            meanTempK:   m.meanTempK  || (ctKelvin && typeof m.temperature === 'number' ? m.temperature : null),
+            invented:    (ctKelvin && !m.travelZone && !m.zone) ? ['travelZone'] : [],
             size:        m.size       ?? null,
             pd:          m.pd         || null,
         };
+    }
+
+    // R4 (system sheet, ruled 2026-09-23): NO INVENTED VALUE IS PRINTED AS FACT.
+    // Several normalisers default a missing field (`mass || 1`, `age || 0`) so
+    // the orrery has a number to animate with. The VALUES stay - the orrery
+    // needs them - but the field names that were defaulted are listed in
+    // `invented`, so a reader that PRINTS numbers (the system sheet) can show a
+    // dash instead. Measured: T5 stores no star mass, RTT no star mass/diam/lum,
+    // CT and T5 no system age.
+    function _inventedStarFields(s, lumKey) {
+        const out = [];
+        if (!s.mass)     out.push('mass');
+        if (!s.diam)     out.push('diam');
+        if (!s[lumKey])  out.push('lum');
+        return out;
     }
 
     function _isSameWorld(a, b) {
@@ -340,6 +359,7 @@ const SystemViewer = (() => {
                 diam:           s.diam        || 1,
                 temp:           null,
                 lum:            s.luminosity  || 1,
+                invented:       _inventedStarFields(s, 'luminosity'),
                 role:           s.role || (i === 0 ? 'Primary' : 'Companion'),
                 separation:     i > 0 ? (typeof s.orbit === 'string' ? s.orbit : null) : null,
                 orbitId:        typeof s.orbit === 'number' ? s.orbit : null,
@@ -418,7 +438,8 @@ const SystemViewer = (() => {
         }
         if (hzAU == null && !hzKnownAbsent) hzAU = (mw && mw.distAU) ? mw.distAU : 1.0;
 
-        return { edition: 'CT', age: sys.age || 0, hzAU, stars, worlds };
+        return { edition: 'CT', age: sys.age || 0, hzAU, stars, worlds,
+                 invented: sys.age ? [] : ['age'] };
     }
 
     function _normCTWorld(w, au, mainworldRef, parentStarIdx) {
@@ -438,8 +459,27 @@ const SystemViewer = (() => {
             mass:          w.mass     || null,
             diamKm:        w.diamKm   || null,
             gravity:       w.gravity  || null,
-            meanTempK:     w.meanTempK|| null,
-            moons:         (w.satellites || []).map(m => _normMoon(m, mainworldRef)),
+            // CT stores temperature as `temperature`, in Kelvin (ct_physical_library.js:66).
+            // Sean ruled 2026-09-23 to wire it: the in-app body image button already fed
+            // it to the renderer (hex_editor.js ~1145), so exports and the system sheet
+            // drew CT worlds temperature-blind while the viewer did not. This CHANGES the
+            // palette of ~69% of CT world images in exports - accepted, to make them agree.
+            meanTempK:     w.meanTempK || (typeof w.temperature === 'number' ? w.temperature : null),
+            // R4: CT gives every Gas Giant ("GC Baseline") and Planetoid Belt a
+            // fixed 100 K (ct_physical_library.js) - a placeholder, not a
+            // calculation. Sean ruled 2026-09-23: flag it, so the system sheet
+            // prints a dash. A belt MAINWORLD is typed 'Mainworld' and gets a
+            // real thermal calculation, so it is correctly not flagged.
+            // R4: CT records no travel zone - the 'G' below is a fill-in, so it is
+            // flagged and the system sheet prints a dash rather than "Green".
+            invented:      ((!w.meanTempK && (w.type === 'Gas Giant' || w.type === 'Planetoid Belt'))
+                               ? ['meanTempK'] : [])
+                               .concat(w.travelZone || w.zone ? [] : ['travelZone']),
+            // CT stores the orbital period as `orbitalPeriod`, in years (checked against
+            // Kepler on ct_bu: 0.2 AU around 0.49 M☉ stores 0.128). Unread before
+            // v0.18.1, so the system sheet's Year column was blank on every CT world.
+            periodYears:   w.orbitalPeriod ?? null,
+            moons:         (w.satellites || []).map(m => _normMoon(m, mainworldRef, true)),
             uwp:           w.uwp      || null,
             name:          w.name     || null,
             starport:      w.starport || null,
@@ -465,6 +505,7 @@ const SystemViewer = (() => {
             diam:          s.diam        || 1,
             temp:          null,
             lum:           s.luminosity  || 1,
+            invented:      _inventedStarFields(s, 'luminosity'),
             role:          s.role || (i === 0 ? 'Primary' : 'Companion'),
             separation:    i > 0 ? (s.role || null) : null,
             orbitId:       s.orbitID     || null,
@@ -494,7 +535,8 @@ const SystemViewer = (() => {
         let hzAU = (sys.hzOrbit != null) ? _orbitToAU(sys.hzOrbit) : null;
         if (hzAU == null) hzAU = (mw && mw.distAU) ? mw.distAU : 1.0;
 
-        return { edition: 'T5', age: sys.age || 0, hzAU, stars, worlds };
+        return { edition: 'T5', age: sys.age || 0, hzAU, stars, worlds,
+                 invented: sys.age ? [] : ['age'] };
     }
 
     function _normT5World(w, au, parentStarIdx, mainworldRef) {
@@ -565,7 +607,9 @@ const SystemViewer = (() => {
             tl:            w.tl        ?? null,
             tradeCodes:    w.tradeCodes || [],
             travelZone:    w.travelZone || 'G',
-            orbitId:       null,
+            // T5 stores the orbit number on the body itself (100% of bodies in
+            // t5_top_down); this was hardcoded null.
+            orbitId:       w.orbitId ?? null,
         };
     }
 
@@ -601,6 +645,9 @@ const SystemViewer = (() => {
                 diam:          s.diam || 1,
                 temp:          null,
                 lum:           s.lum  || 1,
+                // orbitAU below comes from _RTT_COMPANION_AU - a separation WORD
+                // turned into a number. Invented, like the zone AU of the worlds.
+                invented:      _inventedStarFields(s, 'lum').concat(i > 0 ? ['orbitAU'] : []),
                 role:          s.role || (i === 0 ? 'Primary' : 'Companion'),
                 separation:    i > 0 ? (s.orbitType || null) : null,
                 orbitId:       null,
@@ -626,7 +673,10 @@ const SystemViewer = (() => {
 
         const mw   = worlds.find(w => w.type === 'Mainworld');
         const hzAU = mw ? mw.au : 1.0;
-        return { edition: 'RTT', age: sys.age || 0, hzAU, stars, worlds };
+        // RTT is the ONLY engine whose world AU is synthesised (_RTT_ZONE_AU):
+        // its raw orbits carry orbitNumber and zone and no distance at all.
+        return { edition: 'RTT', age: sys.age || 0, hzAU, stars, worlds,
+                 invented: (sys.age ? [] : ['age']).concat(['au']) };
     }
 
     function _normRTTWorld(body, au, parentStarIdx) {
@@ -644,24 +694,37 @@ const SystemViewer = (() => {
             type = 'Planetoid Belt';
         }
 
-        // Build a compact UWP string if the body has social data
-        let uwp = null;
+        // Build a compact UWP string if the body has social data. Moons carry
+        // the same raw fields, so they get the same construction: before
+        // 2026-09-23 moons were hardcoded `uwp: null`, and an RTT lunar
+        // mainworld showed no UWP on the system sheet (Sean's ruling).
         const _eh = (v) => (typeof window.getEHexLetter === 'function') ? window.getEHexLetter(v || 0) : String(v || 0);
-        if (body.starport && body.population != null) {
-            const sz = (typeof body.size === 'number') ? _eh(body.size) : (body.size || '0');
-            uwp = `${body.starport}${sz}${_eh(body.atmosphere)}${_eh(body.hydrosphere)}` +
-                  `${_eh(body.population)}${_eh(body.government)}${_eh(body.lawLevel)}-${_eh(body.tl)}`;
-        }
+        const _rttUwp = (o) => {
+            if (!(o.starport && o.population != null)) return null;
+            const sz = (typeof o.size === 'number') ? _eh(o.size) : (o.size || '0');
+            return `${o.starport}${sz}${_eh(o.atmosphere)}${_eh(o.hydrosphere)}` +
+                   `${_eh(o.population)}${_eh(o.government)}${_eh(o.lawLevel)}-${_eh(o.tl)}`;
+        };
+        const uwp = _rttUwp(body);
 
         const moons = (body.satellites || []).map(m => ({
             type:       m.isMainworld ? 'Mainworld' : 'Satellite',
             name:       m.name       || null,
-            uwp:        null,
+            uwp:        _rttUwp(m),
             starport:   m.starport   || null,
             tl:         m.tl         ?? null,
             tradeCodes: m.tradeCodes || [],
-            travelZone: 'G',
-            diamKm:     m.diamKm     || null,
+            // Same rule as RTT worlds below, which is the rule rtt_engine.js
+            // applies to the mainworld. Hardcoded 'G' showed Red-zone lunar
+            // mainworlds as Green in the orrery, the exports and the sheet.
+            travelZone: (m.bases || []).includes('Z') ? 'Red' : 'G',
+            // RTT stores `diameter`, not `diamKm`; the old read left every RTT
+            // disc sized from nothing. diamKm kept first for any edited system.
+            // NUMBERS ONLY: RTT Jovians store the string "Variable (Giant)"
+            // here (924 bodies in rtt_bu), which made disc sizes NaN and
+            // crashed the system sheet the first time it was wired.
+            diamKm:     m.diamKm     || (typeof m.diameter === 'number' ? m.diameter : null),
+            composition: m.composition || null,
             mass:       null,
             gravity:    m.gravity    || null,
             meanTempK:  m.meanTempK  || null,
@@ -674,7 +737,9 @@ const SystemViewer = (() => {
             orbitType:    'S-Type',
             eccentricity: 0,
             mass:         null,
-            diamKm:       body.diamKm    || null,
+            // RTT field is `diameter`; numbers only - Jovians store "Variable (Giant)".
+            diamKm:       body.diamKm    || (typeof body.diameter === 'number' ? body.diameter : null),
+            composition:  body.composition || null,
             gravity:      body.gravity   || null,
             meanTempK:    body.meanTempK || null,
             moons,
@@ -743,6 +808,20 @@ const SystemViewer = (() => {
             const au      = w.orbitalRadius ?? w.orbitId ?? null;
             const diamKm  = (w.radius != null) ? Math.round(w.radius * 2) : null;
 
+            // AoW `worldClass` (Step 26) fills the Composition column - the same
+            // kind of label MgT2E puts there. Its class chain ends in a
+            // fall-through 'Class 6 (Luna-type)', which lands on ~95% of gas
+            // giants and belts; Sean ruled 2026-09-23 to show NO class for gas
+            // giants and belts rather than print "Luna-type" on a gas giant.
+            const _pt = String(w.planetType || '');
+            const _aowClass = (type === 'Gas Giant' || type === 'Planetoid Belt'
+                               || _pt.includes('Gas Giant') || _pt === 'Planetoid Belt')
+                ? null : (w.worldClass ?? null);
+            // AoW `orbitalPeriod` is in HOURS: Step 18 computes sqrt(a^3/M) x 8770.
+            // Dividing by the engine's own 8770 gives standard years exactly.
+            // (`localYear` is in LOCAL DAYS and is not a year length - do not use it.)
+            const _aowYears = (typeof w.orbitalPeriod === 'number') ? w.orbitalPeriod / 8770 : null;
+
             const moons = (w.satellites || []).map(m => ({
                 type:      m.type || 'Satellite',
                 name:      m.name       ?? null,
@@ -756,6 +835,7 @@ const SystemViewer = (() => {
                 mass:      m.mass       ?? null,
                 gravity:   m.gravity    ?? null,
                 meanTempK: m.avgSurfaceTemp ?? null,
+                composition: m.worldClass ?? null,   // see _aowClass below
                 size:      m.size       ?? null,
             }));
 
@@ -771,6 +851,8 @@ const SystemViewer = (() => {
                 mass:         w.mass       ?? null,
                 gravity:      w.gravity    ?? null,
                 meanTempK:    w.avgSurfaceTemp ?? null,
+                periodYears:  _aowYears,
+                composition:  _aowClass,
                 size:         w.size       ?? null,
                 atm:          w.atmCode    ?? w.atm ?? null,
                 hydro:        w.hydroCode  ?? w.hydro ?? null,
@@ -1137,15 +1219,15 @@ const SystemViewer = (() => {
         }
 
         // System Sheet — renders the one-page reference sheet for this system
-        // and saves it as a PNG. Guarded on the module being present so the
-        // viewer still works if js/system_sheet.js is absent, exactly as the
-        // flat-map panel guards on window.TerrainPanel.
+        // and shows it in a pop-up with a Download PNG button. Guarded on the
+        // module being present so the viewer still works if js/system_sheet.js
+        // is absent, exactly as the flat-map panel guards on window.TerrainPanel.
         let sheetBtn = null;
         if (window.SystemSheet) {
             sheetBtn = document.createElement('button');
             sheetBtn.id = 'sv-sheet-btn';
             sheetBtn.textContent = 'System Sheet';
-            sheetBtn.title = 'Download a one-page reference sheet for this system as a PNG';
+            sheetBtn.title = 'Show a one-page reference sheet for this system (downloadable as a PNG)';
             Object.assign(sheetBtn.style, {
                 background: 'transparent', border: `1px solid ${P.badge}`,
                 color: P.accent, padding: '3px 10px', cursor: 'pointer',
@@ -1158,7 +1240,10 @@ const SystemViewer = (() => {
                 sheetBtn.textContent = 'Charting…';
                 sheetBtn.disabled = true;
                 try {
-                    await SystemSheet.download(st, _hexId);
+                    // Yield one frame so "Charting…" paints before the
+                    // synchronous render blocks the page.
+                    await new Promise(r => requestAnimationFrame(() => r()));
+                    SystemSheet.open(st, _hexId);
                 } catch (err) {
                     console.error('[System Sheet] render failed:', err);
                     if (typeof showToast === 'function') showToast('The system sheet could not be drawn — see the console.', 4000);
@@ -1732,6 +1817,13 @@ const SystemViewer = (() => {
         }
     }
 
+    // Gravity may be a STRING: RTT gas giants store "Variable (Giant)". It is
+    // RAW data, so it prints as stored (Sean, 2026-09-23); calling .toFixed on
+    // it threw and killed the tooltip on every RTT gas giant.
+    function _fmtGravity(g) {
+        return typeof g === 'number' ? `${g.toFixed(2)} G` : String(g);
+    }
+
     function _showTooltip(hit, mx, my) {
         if (!_tooltip) return;
         const body    = hit.body;
@@ -1775,7 +1867,7 @@ const SystemViewer = (() => {
                                    html += `<div>Zone: ${w.travelZone}</div>`;
             if (w.diamKm)          html += `<div style="margin-top:4px">Diameter: ${w.diamKm.toLocaleString()} km</div>`;
             if (w.mass)            html += `<div>Mass: ${w.mass.toFixed(2)} M⊕</div>`;
-            if (w.gravity)         html += `<div>Gravity: ${w.gravity.toFixed(2)} G</div>`;
+            if (w.gravity)         html += `<div>Gravity: ${_fmtGravity(w.gravity)}</div>`;
             if (w.meanTempK)       html += `<div>Mean Temp: ${Math.round(w.meanTempK - 273.15)}°C</div>`;
             const moons = (w.moons || []).filter(m => m.type !== 'Empty');
             if (moons.length)      html += `<div style="margin-top:4px">Moons: ${moons.length}</div>`;
@@ -1797,7 +1889,7 @@ const SystemViewer = (() => {
                                    html += `<div>Zone: ${m.travelZone}</div>`;
             if (m.diamKm)          html += `<div style="margin-top:4px">Diameter: ${m.diamKm.toLocaleString()} km</div>`;
             if (m.mass)            html += `<div>Mass: ${m.mass.toFixed(2)} M⊕</div>`;
-            if (m.gravity)         html += `<div>Gravity: ${m.gravity.toFixed(2)} G</div>`;
+            if (m.gravity)         html += `<div>Gravity: ${_fmtGravity(m.gravity)}</div>`;
             if (m.meanTempK)       html += `<div>Mean Temp: ${Math.round(m.meanTempK - 273.15)}°C</div>`;
             if (m.size != null)    html += `<div>Size: ${m.size}</div>`;
 
@@ -1835,6 +1927,7 @@ const SystemViewer = (() => {
     // ── ESC ───────────────────────────────────────────────────────────────────
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape' && isOpen() &&
+            !(window.SystemSheet    && window.SystemSheet.isOpen()) &&
             !(window.SurfaceViewer  && window.SurfaceViewer.isOpen()) &&
             !(window.ApproachViewer && window.ApproachViewer.isOpen())) close();
     });
@@ -1842,11 +1935,44 @@ const SystemViewer = (() => {
     function normalizeSystem(state) {
         const found = _detectSystem(state);
         if (!found) return null;
-        if      (found.edition === 'AoW')   return _normalizeAoW(found.raw);
-        else if (found.edition === 'MgT2E') return _normalizeMgT2E(found.raw);
-        else if (found.edition === 'CT')    return _normalizeCT(found.raw);
-        else if (found.edition === 'T5')    return _normalizeT5(found.raw);
-        else                                return _normalizeRTT(found.raw);
+        let n;
+        if      (found.edition === 'AoW')   n = _normalizeAoW(found.raw);
+        else if (found.edition === 'MgT2E') n = _normalizeMgT2E(found.raw);
+        else if (found.edition === 'CT')    n = _normalizeCT(found.raw);
+        else if (found.edition === 'T5')    n = _normalizeT5(found.raw);
+        else                                n = _normalizeRTT(found.raw);
+        _attachReported(n, found, state);
+        return n;
+    }
+
+    // REPORTED BUT NOT CHARTED (system sheet R5, ruled 2026-09-23). A hex can
+    // carry real stars and a full mainworld record with no orbits at all - every
+    // hex of a TravellerMap import (Spinward Marches: 439/439). `worlds` stays
+    // EMPTY, so the orrery and exporters see exactly what they always did; the
+    // mainworld is offered separately as `reportedMainworld`, with NO distance
+    // (it has none - never invent one), plus the counts the save reports.
+    // Only CT and T5 world normalisers are wired here: they are the editions
+    // whose raw `mainworld` is a UWP-bearing record. AoW's bodiless hexes carry
+    // a barren-system stub with no UWP, and RTT's an X000000-0 placeholder -
+    // neither is a reported world, and both are left alone.
+    function _attachReported(n, found, state) {
+        if (!n) return;
+        const live = (n.worlds || []).some(w => w && w.type !== 'Empty');
+        const rmw = found.raw && found.raw.mainworld;
+        if (live || !rmw || !rmw.uwp) return;
+        let w = null;
+        if (found.edition === 'T5')      w = _normT5World(rmw, 0, 0, rmw);
+        else if (found.edition === 'CT') w = _normCTWorld(rmw, 0, rmw, 0);
+        if (!w) return;
+        w.type = 'Mainworld';
+        w.au = null;
+        w.moons = [];
+        n.reportedMainworld = w;
+        n.reported = {
+            belts:     state.beltCount     ?? rmw.planetoidBelts ?? null,
+            gasGiants: state.gasGiantCount ?? rmw.gasGiantsCount ?? null,
+            worlds:    rmw.worldCount      ?? found.raw.totalWorlds ?? null,
+        };
     }
 
     // ── Snapshot auto-fit ────────────────────────────────────────────────────

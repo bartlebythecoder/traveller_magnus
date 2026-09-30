@@ -1245,6 +1245,41 @@ const ExportCore = (() => {
         });
     }
 
+    // ── System sheet (v0.18.1.1) ────────────────────────────────────────────
+    //
+    // The ONE place both exporters render the sheet, so they cannot drift.
+    // Returns { data: Uint8Array, ext } or null.
+    //
+    // THE CALLER GATES IT AT (g). The sheet names every body, prints UWPs and
+    // (e)/(f) columns, and has whole panels that single out the mainworld; an
+    // image cannot be filtered, only withheld (Sean, 2026-09-24). Below (g) the
+    // exporters keep SystemViewer.renderSnapshot, which is level-aware.
+    //
+    // JPEG 0.85 at scale 2 (Sean, 2026-09-24): measured on 27 sheets across all
+    // six test sectors, mean 303 KB against 819 KB as PNG, with no visible loss
+    // at 6x zoom. Scale 1 JPEG rang visibly round text. The in-app download
+    // stays full-resolution PNG - this applies to exports only.
+    const SHEET_EXPORT = { scale: 2, type: 'image/jpeg', quality: 0.85, ext: 'jpg' };
+
+    async function renderSystemSheet(state, hexId) {
+        if (typeof SystemSheet === 'undefined') return null;
+        let canvas;
+        try {
+            canvas = SystemSheet.render(state, hexId, { scale: SHEET_EXPORT.scale });
+        } catch (e) {
+            console.warn('[export] system sheet failed:', hexId, e);
+            return null;
+        }
+        if (!canvas) return null;
+        const data = await new Promise(resolve => {
+            canvas.toBlob(blob => {
+                if (!blob) { resolve(null); return; }
+                blob.arrayBuffer().then(buf => resolve(new Uint8Array(buf)));
+            }, SHEET_EXPORT.type, SHEET_EXPORT.quality);
+        });
+        return data ? { data, ext: SHEET_EXPORT.ext } : null;
+    }
+
     // ── Regional survey sheets (v0.18) ───────────────────────────────────────
     //
     // Only PINNED sites are exported. A pin is a deliberate human choice, so the
@@ -1358,7 +1393,7 @@ const ExportCore = (() => {
         worldDisplayName, moonDisplayName, starDisplayName,
         resolveSystemName, resolveUWP, kToC,
         findRawWorld, findRawMoon, findRawStar,
-        canRenderImage, isAirless, renderWorldImage,
+        canRenderImage, isAirless, renderWorldImage, renderSystemSheet,
         // rendererData is the ONE adapter from a world record to the shape
         // PlanetRenderer actually wants (atmosphere/hydrographics as parsed UWP
         // digits, plus temperatureK and its band). Exported 2026-09-21 so the

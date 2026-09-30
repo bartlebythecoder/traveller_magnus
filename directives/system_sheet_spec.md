@@ -1,8 +1,8 @@
 # SYSTEM SHEET — SPECIFICATION (AS BUILT)
 
-**Status (2026-09-24):** v0.18.1, open. **R1–R8 and every follow-on ruling below are BUILT
-and verified.** One gate remains before shipping: **Sean's review of the regenerated gallery**
-(§8). Then the release housekeeping in `project_manifest.md` §0.0.C.
+**Status (2026-09-25):** v0.18.1.1, open (moved from v0.18.1 by Sean, 2026-09-24). **R1–R8 and every follow-on ruling below are BUILT
+and verified.** **Sean's gallery review passed 2026-09-24** (§8) — the sheet is accepted. **The
+exporter wiring is built and verified by exporting** (2026-09-25, §9).
 
 **This document is the contract for `js/system_sheet.js`.** `project_manifest.md` §0.0.B
 carries the standing traps and the design history that still binds; **this document does not
@@ -13,7 +13,7 @@ repeat it.** Every ruling here is Sean's — do not re-litigate one without aski
 ## 1. WHAT THE SHEET IS
 
 `SystemSheet.render(state, hexId, opts)` returns a canvas; `SystemSheet.download(state, hexId)`
-saves it as PNG. Layout is **1720x878 LOGICAL units through a scale transform**, default
+saves it as PNG; `SystemSheet.open(state, hexId)` shows it in a pop-up (`isOpen()`, `close()`). Layout is **1720x878 LOGICAL units through a scale transform**, default
 scale 2. **Change `SCALE`, never the layout numbers.**
 
 **The page height FITS ITS CONTENT (D2).** Layout is computed on the full 878 so a dense
@@ -22,7 +22,11 @@ and draws the footer there. A full sheet with satellites is 3440x1756; Bermarmi 
 3440x1404; a stars-only sheet ~3440x880.
 
 Reached from a **System Sheet** button in the orrery toolbar (`system_viewer.js`, guarded on
-`window.SystemSheet`). **In-app download only in v0.18.1** — see §9.
+`window.SystemSheet`). The button opens **a pop-up** styled like the world image panel: the
+full-resolution canvas shrunk by CSS to fit, **Download PNG** (saves that same canvas, not a
+re-render) and **Close**; Esc and a backdrop click close it, and the orrery's own Esc handler
+defers to `SystemSheet.isOpen()` so the orrery stays open (Sean, 2026-09-24). **The sheet is
+also in the HTML and Obsidian exports** (built 2026-09-25), see §9. The footer prints no version, deliberately (Sean, 2026-09-24).
 
 The data source is **`SystemViewer.normalizeSystem(state)`**, not the block model: the sheet
 needs `gravity` as a NUMBER to size a disc and sort a column, and blocks are pre-formatted
@@ -141,8 +145,9 @@ orrery and exporters see nothing new.
     (`ExportCore.travelZone`, the editor's `_normTz`): anything recorded that is not Red or Amber
     is Green, including MgT2E's legacy "-". CT records none → dash. The temperature band is
     stated in the brief's temperature line.
-16. **D3 — v0.18.1 ships the sheet as an in-app download.** Exporter wiring and PNG vs JPEG are
-    v0.18.2 (§9).
+16. **D3 — the sheet ships in-app first** (a pop-up with a PNG download), exporters second.
+    Both are in v0.18.1.1 — Sean moved the exporter wiring and PNG vs JPEG there from v0.18.2
+    on 2026-09-24. Exporters built 2026-09-25 (§9).
 
 ---
 
@@ -174,7 +179,7 @@ WOULD print; `system_sheet_sweep.js` renders every hex. **Run both after any cha
 
 ### 6.5 AN IMAGE CAN ONLY BE WITHHELD BY NOT GENERATING IT
 
-`filterBlocks()` cannot see inside a PNG. This is the whole of the v0.18.2 exporter job.
+`filterBlocks()` cannot see inside a PNG. This is the whole of the exporter job (§9).
 
 ### 6.6 ENGINE DETECTION IS PRIORITY-BASED — latent risk
 
@@ -194,6 +199,7 @@ engine. Not a live defect today.
 | `system_sheet_coverage.js` | Per-engine field coverage of `normalizeSystem`. Several sectors per run. |
 | `system_sheet_shoot.js` | Renders named hexes to `.tmp/_sheet_out/`. |
 | `system_sheet_binary.js` | Both companion branches, by stripping/injecting `orbitId` (MgT2E). |
+| `system_sheet_export_check.js` | **Exports** (HTML + Obsidian, GM and levels g/f/d/c) five one-hex cases and reads the ZIP: sheet JPEG 3440 wide at GM/(g), 900x500 orrery PNG at (d)–(f), nothing at (c), every embedded image present. No sector argument — the cases name their own. Also asserts the HTML sheet links to itself at full size. **Failed 20/181 before the wiring, as intended** (2026-09-24); **191/191 after** (2026-09-25). |
 
 Run from the repo root, e.g. `node utilities/system_sheet_verify.js "$PWD/.tmp/aow_bu.json"`.
 **`fetch` is blocked on `file://`** — harnesses inject the sector in 2,000-hex chunks; do not
@@ -208,19 +214,54 @@ Done and passing 2026-09-24, all six sectors: coverage run; verify with zero FAI
 zero exceptions over 3,513 sheets; no "UNNAMED" title; no all-dash column; no invented value
 (raw-checked); 439 reduced sheets; AoW 32 rows with no warning.
 
-**REMAINING: Sean looks at every sheet in `.tmp/galleries/`** (109 sheets:
+**DONE 2026-09-24: Sean reviewed sheets in `.tmp/galleries/` by hand — "looking good"** (109 sheets:
 `solo_6`, `ct_bu`, `t5_top_down`, `rtt_bu`, `aow_bu`, `spinward_marches`). The AoW overflow was
 invisible to every assertion and obvious in the image within a second — this gate is not a
 formality.
 
 ---
 
-## 9. OUT OF SCOPE FOR v0.18.1 — v0.18.2
+## 9. THE SHEET IN THE EXPORTERS — built 2026-09-25
 
-* **Exporter wiring** — the sheet into the HTML and Obsidian exports, replacing the 900x500
-  `SystemViewer.renderSnapshot`. The disclosure gate is the whole job (§6.5): the mainworld
-  highlight alone identifies the mainworld.
-* **PNG vs JPEG** — ~0.4–1.1 MB a sheet; matters once a sector-wide export multiplies it.
-* Known cosmetic residue, accepted: AoW's longest class "Class 2 (Dulcinea-type)" clips in the
-  two-column table; long trade-code strings clip in the narrow Mainworld Data panel (the brief
-  carries them in full).
+**Which image, by level (Sean, 2026-09-24):**
+
+| Export | System image |
+|---|---|
+| GM, or player at **(g)** | **the sheet** — `ExportCore.renderSystemSheet(state, hexId)` |
+| player at **(d)–(f)** | the existing level-aware 900x500 orrery (`SystemViewer.renderSnapshot(…, { level })`) |
+| player below (d) | none |
+
+**Why (g) only (§6.5):** the sheet names every body, prints UWPs and (e)/(f) columns, and has
+whole panels that single out the mainworld. Audited panel by panel: everything on it is at or
+below (g) and nothing is `never` (no bases, no referee notes) — so at (g) it is exactly right,
+and below (g) it cannot be shown. A level-aware sheet was offered and declined. **Do not pass a
+level into `SystemSheet.render` to "fix" this without asking Sean** — it would duplicate
+`FIELD_LEVELS` by hand, in pixels, where no filter or parity check can see it.
+
+**Built as:**
+
+* **`ExportCore.renderSystemSheet`** is the one render path for both exporters. **JPEG 0.85 at
+  scale 2** (`SHEET_EXPORT`), filename `.jpg`. Measured on 27 sheets across all six sectors:
+  mean 303 KB vs 819 KB as PNG (max 512 vs 1207), no visible loss at 6x zoom; scale 1 JPEG rang
+  round text. Exports only — the in-app download stays full-resolution PNG. World images and
+  regional survey sheets stay PNG (Sean: sheet only).
+* **The caller gates it** at `_show(level, 'g')` inside the existing `(d)` gate, in
+  `html_exporter.js` and `obsidian_exporter.js`. If the sheet fails to render at (g) the
+  orrery is drawn instead (safe: at (g) everything it shows is disclosed).
+* **HTML:** caption "`<System>` system sheet" (orrery keeps "orrery"); the sheet is wrapped in a
+  link to itself, opening full size in a new tab — 3440 px in a ~926 px column is unreadable
+  (Sean, 2026-09-25). Obsidian already opens an image on click.
+* Export dialog checkbox reads "Include system images (system sheet / orrery)"; the players'
+  help text says the full sheet appears only at Full UWP.
+* **Render cost:** ~0.2–1.6 s a sheet at scale 2 (one outlier 3.4 s).
+
+**Verified by exporting** — `utilities/system_sheet_export_check.js`, 191/191 (§7), after
+failing 20/181 against the unwired code. The Release 2 scratch harness
+`.tmp/html_export_harness/disclosure_leak_check.js` had two assertions that assumed the GM
+image was an orrery PNG; they were re-pointed, not dropped: the (d) orrery is now compared
+against an un-levelled orrery rendered in-page (still differs: re-render proven), and the GM
+control counts sheets and asserts no orrery.
+
+Known cosmetic residue, accepted: AoW's longest class "Class 2 (Dulcinea-type)" clips in the
+two-column table; long trade-code strings clip in the narrow Mainworld Data panel (the brief
+carries them in full).

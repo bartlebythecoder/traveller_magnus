@@ -30,22 +30,26 @@ in this document, not a neutral act.
 **So: an item still written down here is an item still live.**
 
 ---
-**Version:** **v0.18.1 is OPEN and nearly done** (2026-09-24). `APP_VERSION` is already
-`v0.18.1`. Its subject is **IMAGE EXPORTS** (Sean, 2026-09-21); this release delivers the
-**SYSTEM SHEET** as an in-app download. **All code for it is built and verified; what remains is
-Sean's gallery review and the release housekeeping (§0.0.C).** "World on a page" is undesigned
-and is not part of v0.18.1. **v0.18.2 = the sheet in the exporters + PNG vs JPEG.**
-Earlier: v0.18.0 (2026-09-20) regional terrain; v0.17.2–v0.17.5 (08-19 → 09-11) routes;
-v0.17.0 / v0.17.0.1 (08-03 / 08-04) exports.
+**Version:** **v0.18.1.1 is RELEASED — dated 2026-09-25** (opened 2026-09-24). `APP_VERSION` is already
+`v0.18.1.1`; splash banner "New: System Images". Its subject is **IMAGE EXPORTS** (Sean,
+2026-09-21) — **moved here from v0.18.1 by Sean on 2026-09-24**, when v0.18.1 was closed and
+dated with its other three items (moon survey export fix, river code removal, round-trip route
+order). This release delivers the **SYSTEM SHEET**: **part 1, the in-app pop-up with a PNG download, is
+built, verified and accepted** by Sean's gallery review (2026-09-24). **Part 2 — the sheet in the
+HTML and Obsidian exporters, as JPEG — is BUILT and verified by exporting** (2026-09-25; Sean
+moved it here from v0.18.2 on 2026-09-24). Nothing is left to ship — see §0.0.C.
+"World on a page" is undesigned and is not part of v0.18.1.1.
+Earlier: v0.18.1 (2026-09-24) fixes and route order; v0.18.0 (2026-09-20) regional terrain;
+v0.17.2–v0.17.5 (08-19 → 09-11) routes; v0.17.0 / v0.17.0.1 (08-03 / 08-04) exports.
 **Architecture Standard:** The "Sean Protocol" (Directives -> Orchestration -> Execution)
 
 ---
 
-## 0.0 COLD START — read this first (updated 2026-09-24)
+## 0.0 COLD START — read this first (updated 2026-09-25)
 
 **IF YOU ARE STARTING FRESH, READ IN THIS ORDER:**
 
-1. **§0.0.C below** — the handoff: exactly where v0.18.1 stands and the steps left to ship it.
+1. **§0.0.C below** — the handoff: exactly where v0.18.1.1 stands and the steps left to ship it.
 2. **`directives/system_sheet_spec.md`** — **the authority for the system sheet, as built**: the
    four shapes of hex, R1–R8, the sixteen further rulings, the harnesses, acceptance.
 3. **§0.0.B** — the design rulings and traps behind the sheet that still bind.
@@ -74,67 +78,52 @@ with measured numbers, give ONE recommendation, ask with the question tool, buil
    himself. **Do not record commit hashes or the commit position in this document.** If you
    need to know what is committed, ask him.
 
-### 0.0.C HANDOFF — written 2026-09-24. START HERE.
+### 0.0.C HANDOFF — updated 2026-09-25. START HERE.
 
-**THE SYSTEM SHEET IS FINISHED IN CODE.** Every requirement (R1–R8), every decision that was
-waiting (D1, D2, D3) and twelve further rulings from the 2026-09-23/24 session are **built and
-verified across all six test sectors**: `system_sheet_verify.js` reports zero FAILs, and
-`system_sheet_sweep.js` renders **all 3,513 sheets with zero exceptions**. The full list, with
-where each lives, is `system_sheet_spec.md` §4–§5. **Nothing is half-finished and nothing is
-waiting on a ruling.**
+**v0.18.1.1 IS FINISHED IN CODE — both halves.** Nothing is half-finished and nothing is
+waiting on a ruling.
 
-#### THE STEPS LEFT TO SHIP v0.18.1 — in order
+* **Part 1, the sheet in-app** (2026-09-23/24): the System Sheet button opens
+  `SystemSheet.open()`, a modal with **Download PNG** (full resolution) and **Close**; Esc and a
+  backdrop click close it, and the orrery's Esc handler defers to `SystemSheet.isOpen()`. R1–R8,
+  D1–D3 and the further rulings are built; `system_sheet_verify.js` zero FAILs,
+  `system_sheet_sweep.js` renders all 3,513 sheets with zero exceptions; Sean's gallery review
+  passed (*"they are looking good"*). Detail: `system_sheet_spec.md` §4–§5, §8.
+* **Part 2, the sheet in the exporters** (2026-09-25): **the SHEET on GM exports and at (g);
+  the existing level-aware 900x500 ORRERY at (d)–(f); nothing below (d)** (Sean, 2026-09-24 —
+  a level-aware sheet was offered and declined). **JPEG 0.85 at scale 2**, sheet only (world
+  images and regional sheets stay PNG). One render path, `ExportCore.renderSystemSheet`; the
+  HTML sheet links to itself at full size (Sean, 2026-09-25). Detail and measurements:
+  `system_sheet_spec.md` §9; the disclosure ruling is `fog_of_war_field_tags.md` §9.2b.
+  **Verified by exporting:** `utilities/system_sheet_export_check.js` failed 20/181 before the
+  wiring and passes 191/191 after; the Release 2 scratch harnesses in
+  `.tmp/html_export_harness/` (disclosure_check, disclosure_leak_check,
+  disclosure_obsidian_check, html_check, html_check_all) all pass. `disclosure_leak_check.js`
+  had two assertions that assumed the GM image was an orrery PNG — **re-pointed, not dropped**
+  (spec §9 says how). An exported page was opened and looked at.
 
-1. **Sean reviews the gallery — THE ACCEPTANCE GATE.** 109 sheets in `.tmp/galleries/`, one
-   folder per sector (`solo_6`, `ct_bu`, `t5_top_down`, `rtt_bu`, `aow_bu`, `spinward_marches`);
-   each file name says why it was picked. Regenerated 2026-09-24 against the final code. **If he
-   finds something, fix it, then re-run verify + sweep + the gallery for the affected sectors.**
-2. **Rewrite `changelog.md`'s v0.18.1 entry 4 — REWRITE, do not append.** It predates all of
-   this and is now wrong (it says each world's temperature band "is shown three times over in
-   the same six colours", which R2 made false on T5 and RTT and CT's placeholders made false for
-   CT gas giants). Describe the sheet as built: the four shapes, the per-engine column sets,
-   two-column tables, fitted page height. `changelog.md` is **LF-only** — detect, don't assume.
-3. **Check `README.md` and the `hex_map.html` splash/shortcut screens** per
-   `directives/update_version.md`. `APP_VERSION` is already `v0.18.1`.
-4. **Behaviour changes OUTSIDE the sheet that the changelog must mention**, because a user will
-   see them:
-   * **CT world images now use CT temperature** everywhere — exports, the sheet and the in-app
-     mainworld image button (`hex_editor.js` `openWorldImagePanel`). ~69% of CT world images
-     look different from before. Sean ruled it: all views now agree.
-   * **RTT orrery**: discs sized from real diameters; hovering a gas giant no longer throws
-     ("Gravity: Variable (Giant)"); moons show UWPs; Red-zone lunar mainworlds (12 in rtt_bu)
-     now read Red instead of Green — **this also corrects RTT export pages.**
-   * **T5 orrery hover** shows "Orbit #" (the normaliser now carries T5 `orbitId`).
-   * **RTT export pages** gain a Diameter line (fog-gated like any block).
-   * **The System Sheet button now opens a pop-up** (added 2026-09-24 at Sean's request) instead
-     of downloading straight away — `SystemSheet.open()` in `system_sheet.js`, styled like the
-     world image panel, with **Download PNG** (saves the same full-resolution canvas) and
-     **Close**. Esc / backdrop click close it; the orrery's Esc handler defers to
-     `SystemSheet.isOpen()` so the orrery stays open. Verified in-browser across all five engines.
+#### RELEASE STATUS — v0.18.1.1 DATED 2026-09-25
 
-#### FILES CHANGED IN THE 2026-09-23/24 SESSION — for Sean's commit
+Changelog headers dated **2026-09-25** in `changelog.md` and `README.md` (same five-item
+entry in both, one sentence per item — Sean's changelog style, 2026-09-25). Version bump was
+already done. **Nothing is left to ship.** The next session starts by asking Sean what the
+next version is (`.claude/commands/new_version.md`).
 
-`js/system_sheet.js` (most of the work), `js/system_viewer.js` (normaliser wiring, the
-`invented` lists, `reportedMainworld`, the tooltip fix), `js/hex_editor.js` (one CT temperature
-fallback), `directives/system_sheet_spec.md` (rewritten as built), this manifest, and the
-harnesses: `utilities/system_sheet_verify.js`, `system_sheet_gallery.js`,
-`system_sheet_shoot.js` (all extended), **`system_sheet_sweep.js` (new)**. Scratch renders are in
-`.tmp/` only.
+#### FILES CHANGED — for Sean's commit
 
-#### v0.18.2 — AGREED, NOT STARTED
+**2026-09-25 (exporter wiring):** `js/export_core.js` (`renderSystemSheet`, `SHEET_EXPORT`),
+`js/html_exporter.js` (the (g) gate, caption, full-size link), `js/obsidian_exporter.js` (the
+(g) gate), `hex_map.html` (export dialog checkbox + players' help text),
+`utilities/system_sheet_export_check.js` (**new**), `changelog.md`, `README.md`,
+`directives/system_sheet_spec.md`, `directives/fog_of_war_field_tags.md`, this manifest.
+**2026-09-23/24 (the sheet):** `js/system_sheet.js`, `js/system_viewer.js`, `js/hex_editor.js`,
+the version bump (`js/core.js`, `hex_map.html`, `README.md`, `changelog.md`),
+`utilities/system_sheet_verify.js`, `system_sheet_gallery.js`, `system_sheet_shoot.js`,
+`system_sheet_sweep.js`. Scratch renders and measurements are in `.tmp/` only.
 
-* **Wire the system sheet into the HTML and Obsidian exporters**, replacing the 900x500
-  `SystemViewer.renderSnapshot` PNG (`html_exporter.js` ~1031, `obsidian_exporter.js` ~639).
-  **The disclosure gate is the whole job**: an image can only be withheld by not generating it,
-  and the sheet shows everything — the mainworld ring alone identifies the mainworld (the
-  snapshot already gates that highlight on level (g)). Plan it against
-  `directives/fog_of_war_field_tags.md` before writing code. **Test it by exporting.**
-* **PNG vs JPEG.** A sheet is ~0.4–1.1 MB; a sector export multiplies it by the world count.
-  Three `toBlob` call sites.
+#### STILL OPEN BEYOND v0.18.1.1
 
-#### STILL OPEN BEYOND v0.18.2
-
-* **"World on a page"** — the other half of v0.18.1's original subject, **nothing designed.** It
+* **"World on a page"** — the other half of the image-exports subject, **nothing designed.** It
   is a linear document, so **the block-model ruling (§0.0.B) governs it** — the sheet departed
   from that ruling only because it needs numbers. Do not carry `normalizeSystem` across to it by
   habit.
@@ -152,7 +141,7 @@ harnesses: `utilities/system_sheet_verify.js`, `system_sheet_gallery.js`,
 
 ---
 
-### 0.0.B v0.18.1 — THE SYSTEM SHEET: rulings and traps that still bind
+### 0.0.B v0.18.1.1 — THE SYSTEM SHEET: rulings and traps that still bind
 
 The requirements and as-built detail are in **`directives/system_sheet_spec.md`**. What follows
 is the design ground under it — **decided with Sean; do not re-derive or re-litigate.**
@@ -227,15 +216,16 @@ fog of war is then inherited (`filterBlocks()` only ever sees blocks) and number
 `ExportCore.fmtNum`. The system sheet departed from it **only** because it needs numbers; its
 numbers still go through `fmtNum`.
 
-#### THREE TRAPS WAITING FOR v0.18.2
+#### TWO EXPORTER TRAPS — honoured by the v0.18.1.1 wiring, still binding for any new image
 
 * **An image is opaque to the fog of war.** Withhold it by not generating it — v0.18.0's
-  regional sheets sit inside `_show(oLV, 'e')` for this reason. See §0.0.A decision 4.
+  regional sheets sit inside `_show(oLV, 'e')`, and the system sheet inside `_show(level, 'g')`,
+  for this reason. See §0.0.A decision 4.
 * **Test an exporter by exporting.** The Obsidian export was broken for three days by one
   missing parameter while `node --check` passed. Stub `downloadBlob`, scan for `PK\x03\x04`,
-  read members out of the ZIP, and **watch it fail first.** Recipe for a small export: generate
-  a block, pin a world, **trim `hexStates` to that one hex**, export.
-* **Size** — see v0.18.2 above.
+  read members out of the ZIP, and **watch it fail first.** Recipe for a small export: load a
+  sector, **trim `hexStates` to one hex**, export — `utilities/system_sheet_export_check.js` is
+  a working example.
 
 #### v0.18.0 DECISIONS THAT STILL BIND — ruled 2026-09-21
 
@@ -758,7 +748,7 @@ Earth sets, or if cover stops falling monotonically as the world dries. **Run it
 ### 0.0.0 Candidate work — RETIRED as a release plan 2026-09-21
 
 **This was the v0.18.0 candidate list and it is no longer a plan for anything.** v0.18.0 went
-to regional surface maps (§0.0.A) and v0.18.1 is image exports (§0.0.B). The table is kept
+to regional surface maps (§0.0.A) and v0.18.1.1 is image exports (§0.0.B). The table is kept
 because every row is still a real thread that nobody has picked up. **None is committed to, and
 the order is not a recommendation.**
 
@@ -978,13 +968,13 @@ matches the one reported, or you have only proved that today's code runs.
 | | |
 |---|---|
 | **Most recent work** | **v0.18.0 — regional surface maps**, shipped 2026-09-20; its constraints are §0.0.A. Before it, v0.17.2–v0.17.5 — routes. Nothing in *this* document's own subject matter (the System Editor) moved during either, apart from one legacy-save bug — see "Legacy saves omit fields" in §0.0.A, which still binds any code reading a loaded sector. |
-| **Current release** | **v0.18.1 — image exports (the system sheet)**, code complete, awaiting Sean's gallery review — §0.0.C. |
+| **Current release** | **v0.18.1.1 — image exports (the system sheet)**, in-app sheet accepted 2026-09-24; **exporter wiring (also v0.18.1.1) not started** — §0.0.C. (v0.18.1 closed 2026-09-24 with fixes and route order.) |
 | **This document** | v0.16.x System Editor. **Paused** after MgT2E, CT and T5 were brought fully online. |
 | **Paused** | RTT and AoW editor support — the reason this manifest is retained. |
 | **Open here** | **None.** The last three were deleted 2026-09-21 — see section 4. |
 
-**Nothing is half-finished in either manifest.** v0.18.1's system sheet is built and verified
-and waits only on Sean's gallery review and the release housekeeping — see §0.0.C. The
+**Nothing is half-finished in either manifest.** v0.18.1.1's system sheet is built and verified
+and accepted (gallery review 2026-09-24); the exporter wiring, also in v0.18.1.1, is not started — see §0.0.C. The
 companion manifest has **no** open items. This document's section 4 lists three.
 
 ### 0.2 System Editor engine support — verified against code 2026-08-06
@@ -1607,7 +1597,7 @@ OW-65 — were deleted on 2026-09-21: each was conditional on resuming the pause
 work, and none described a fault anyone had actually seen. The patterns worth carrying forward
 are in 6.1, and §6.2 keeps the AoW readiness audit as the worked example.
 
-**v0.18.1 is image exports (§0.0.B), not editor work**, and no recent release has been in this
+**v0.18.1.1 is image exports (§0.0.B), not editor work**, and no recent release has been in this
 document's subject matter. Resuming RTT/AoW means starting at section 0.3.
 
 **One editor rule from outside this section still binds:** see "Legacy saves omit fields" in

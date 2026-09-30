@@ -269,8 +269,15 @@ ${extraJs || ''}
                `<h2>${_esc(title)} <a class="ph" href="#${_esc(id)}" aria-label="Link to this section">#</a></h2>`;
     }
 
-    function _imageFigure(src, alt, cls) {
-        return `<figure${cls ? ' class="' + cls + '"' : ''}><img src="${_encPath(src)}" alt="${_esc(alt)}" loading="lazy"></figure>`;
+    // `linkFull` wraps the image in a link to itself, opening at full size in a
+    // new tab. The system sheet needs it: 3440 px shown ~926 px wide in the page
+    // column leaves its table text unreadable (Sean, 2026-09-25).
+    function _imageFigure(src, alt, cls, linkFull) {
+        const img = `<img src="${_encPath(src)}" alt="${_esc(alt)}" loading="lazy">`;
+        const body = linkFull
+            ? `<a href="${_encPath(src)}" target="_blank" rel="noopener" title="Open full size">${img}</a>`
+            : img;
+        return `<figure${cls ? ' class="' + cls + '"' : ''}>${body}</figure>`;
     }
 
     // ── Release 2: fog of war (WP5 slice 5b) ─────────────────────────────────
@@ -335,7 +342,7 @@ ${extraJs || ''}
 
     function _buildSystemPage(ctx) {
         const { hexId, hexCode, sectorName, subsectorChar, state, normalized,
-                sysImage, worldImages, worldSheets } = ctx;
+                sysImage, sysImageAlt, sysIsSheet, worldImages, worldSheets } = ctx;
 
         const LV         = _levelFor(hexId);   // null on the GM path
         const systemName = EC.resolveSystemName(state, LV, hexCode);
@@ -385,7 +392,7 @@ ${extraJs || ''}
         H.push('</dl>');
         H.push('</header>');
 
-        if (sysImage) H.push(_imageFigure('images/' + sysImage, `${systemName} orrery`));
+        if (sysImage) H.push(_imageFigure('images/' + sysImage, sysImageAlt, '', sysIsSheet));
 
         // Contents — the substitute for Obsidian's per-file navigation
         H.push('<nav id="contents" class="toc"><h2>Contents</h2><ul>');
@@ -1031,16 +1038,29 @@ tbody tr:nth-child(even) { background:var(--panel);
             const worldImages = new Map();
             // key `w{i}` / `w{i}m{j}` -> [{ fn, label }]  (regional survey sheets)
             const worldSheets = new Map();
-            let sysImage = null;
-            // Orrery images are gated at (d): one glance gives world count,
-            // belts and gas giants (§5.2.3). Below (g) they are RE-RENDERED with
-            // generic body labels and no mainworld highlight — the labels are
-            // pixels, so no downstream filter could remove them (§9.2a).
-            if (includeSystemImages && _show(oLV, 'd') && typeof SystemViewer !== 'undefined') {
-                const img = await SystemViewer.renderSnapshot(state, 900, 500, { level: oLV });
-                if (img) {
-                    sysImage = EC.systemFilename(systemName, hexCode, 'png');
-                    files.push({ name: `${sub}/images/${sysImage}`, data: img });
+            let sysImage = null, sysImageAlt = '', sysIsSheet = false;
+            // System images are gated at (d): one glance gives world count,
+            // belts and gas giants (§5.2.3).
+            // At (g) and on the GM path it is the SYSTEM SHEET. Below (g) the
+            // sheet is never generated — it names bodies, prints UWPs and
+            // singles out the mainworld, and an image can only be withheld, not
+            // filtered (Sean, 2026-09-24). Instead the orrery is RE-RENDERED
+            // with generic body labels and no mainworld highlight (§9.2a). The
+            // orrery is also the fallback if a sheet fails to render at (g).
+            if (includeSystemImages && _show(oLV, 'd')) {
+                const sheet = _show(oLV, 'g') ? await EC.renderSystemSheet(state, hexId) : null;
+                if (sheet) {
+                    sysImage = EC.systemFilename(systemName, hexCode, sheet.ext);
+                    sysImageAlt = `${systemName} system sheet`;
+                    sysIsSheet = true;
+                    files.push({ name: `${sub}/images/${sysImage}`, data: sheet.data });
+                } else if (typeof SystemViewer !== 'undefined') {
+                    const img = await SystemViewer.renderSnapshot(state, 900, 500, { level: oLV });
+                    if (img) {
+                        sysImage = EC.systemFilename(systemName, hexCode, 'png');
+                        sysImageAlt = `${systemName} orrery`;
+                        files.push({ name: `${sub}/images/${sysImage}`, data: img });
+                    }
                 }
             }
 
@@ -1111,7 +1131,7 @@ tbody tr:nth-child(even) { background:var(--panel);
 
             put(pageFile, _buildSystemPage({
                 hexId, hexCode, sectorName, subsectorChar, state, normalized,
-                sysImage, worldImages, worldSheets,
+                sysImage, sysImageAlt, sysIsSheet, worldImages, worldSheets,
             }));
 
             await new Promise(r => setTimeout(r, 0));

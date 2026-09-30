@@ -643,15 +643,25 @@ const ObsidianExporter = (() => {
             const stars  = normalized.stars  || [];
             const worlds = normalized.worlds || [];
 
-            // Optional orrery snapshot image for the system hub page
+            // Optional system image for the hub page, gated at (d).
+            // At (g) and on the GM path it is the SYSTEM SHEET; below (g) the
+            // sheet is never generated — it names bodies, prints UWPs and
+            // singles out the mainworld, and an image can only be withheld, not
+            // filtered (Sean, 2026-09-24). Instead the orrery is re-rendered
+            // with generic labels and no mainworld highlight (§9.2a). The
+            // orrery is also the fallback if a sheet fails to render at (g).
             let sysImageFilename = null;
-            // Orrery gated at (d); re-rendered with generic labels and no
-            // mainworld highlight below (g) — the labels are pixels (§9.2a).
-            if (includeSystemImages && _show(_oLV, 'd') && typeof SystemViewer !== 'undefined') {
-                const imgData = await SystemViewer.renderSnapshot(state, 900, 500, { level: _oLV });
-                if (imgData) {
-                    sysImageFilename = _systemFilename(systemName, hexCode, 'png');
-                    files.push({ name: prefix + 'images/' + sysImageFilename, data: imgData });
+            if (includeSystemImages && _show(_oLV, 'd')) {
+                const sheet = _show(_oLV, 'g') ? await ExportCore.renderSystemSheet(state, hexId) : null;
+                if (sheet) {
+                    sysImageFilename = _systemFilename(systemName, hexCode, sheet.ext);
+                    files.push({ name: prefix + 'images/' + sysImageFilename, data: sheet.data });
+                } else if (typeof SystemViewer !== 'undefined') {
+                    const imgData = await SystemViewer.renderSnapshot(state, 900, 500, { level: _oLV });
+                    if (imgData) {
+                        sysImageFilename = _systemFilename(systemName, hexCode, 'png');
+                        files.push({ name: prefix + 'images/' + sysImageFilename, data: imgData });
+                    }
                 }
             }
 

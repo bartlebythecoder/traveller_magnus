@@ -1058,6 +1058,9 @@ const SystemSheet = (function () {
         // ORBIT NUMBERS BELONG TO BODIES ONLY. A companion star must never
         // consume an index, or the strip and the planetary table stop agreeing
         // about which world is orbit 7.
+        // `orbitNo` stays 0-based because it is the seed fallback for unnamed
+        // bodies (changing it would redraw them); only the PRINTED number is
+        // 1-based, to match the table `#` and the Roman-numeral body names.
         let orbitNo = -1;
 
         items.forEach((it, i) => {
@@ -1103,7 +1106,7 @@ const SystemSheet = (function () {
             // Index
             ctx.font = '700 ' + (n > 12 ? 12 : 14) + 'px ' + SANS;
             ctx.fillStyle = THEME.ink;
-            ctx.fillText(String(orbitNo), cx, y + 58);
+            ctx.fillText(String(orbitNo + 1), cx, y + 58);
 
             // Name, with the system prefix removed.
             ctx.font = (isMW ? '600 ' : '') + (n > 12 ? 10 : 11) + 'px ' + SANS;
@@ -1299,10 +1302,13 @@ const SystemSheet = (function () {
                         so.cxString && `Cultural ${so.cxString}`,
                         (so.RU ?? so.resourceUnits) != null && `RU ${so.RU ?? so.resourceUnits}`]
                        .filter(Boolean).join(' · '));
-        // A reduced sheet has ONE row by construction: "Orbit 0 of 1 - the only
+        // A reduced sheet has ONE row by construction: "Position 1 of 1 - the only
         // populated body" would be an invented fact about an uncharted system.
+        // POSITION, NOT ORBIT, AND 1-BASED. This is the rank from the star
+        // (the parent's rank for a lunar mainworld), matching the strip and the
+        // table `#`. "Orbit" read as the Traveller Orbit #, which it is not.
         if (idx >= 0 && !reduced) {
-            lines.push(`Orbit ${idx} of ${ordered.length}` +
+            lines.push(`Position ${idx + 1} of ${ordered.length} from the star` +
                 (populated === 1 ? ' — the only populated body in the system'
                                  : ` — ${populated} of ${totalBodies} bodies are populated`));
         }
@@ -1371,7 +1377,7 @@ const SystemSheet = (function () {
             const band = bandOf(b);
             const isMW = !!(mw && b === mw);
             const cells = {
-                idx:  String(i),
+                idx:  String(i + 1),
                 name: (isMW ? '★ ' : '') + (b.name || (isBelt(b) ? 'Belt' : 'Body')),
                 au:   b.au != null ? num(b.au, 3) : '—',
                 uwp:  b.uwp || '—',

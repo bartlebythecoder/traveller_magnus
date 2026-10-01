@@ -8,7 +8,7 @@
 // link resolution, escaping, and anchor IDs.
 //
 // Entry point: HtmlExporter.startExport(sectorNum, subsectorChar, options)
-// options: { includeImages, imageProjection, skipAirless, includeSystemImages,
+// options: { includeImages, imageProjection, skipAirless, systemImages,
 //            onProgress(done,total,msg), onDone(fileCount), onError(msg) }
 //
 // Structural differences from the Obsidian export, both deliberate (D2/D3 in
@@ -342,7 +342,7 @@ ${extraJs || ''}
 
     function _buildSystemPage(ctx) {
         const { hexId, hexCode, sectorName, subsectorChar, state, normalized,
-                sysImage, sysImageAlt, sysIsSheet, worldImages, worldSheets } = ctx;
+                sysImages, worldImages, worldSheets } = ctx;
 
         const LV         = _levelFor(hexId);   // null on the GM path
         const systemName = EC.resolveSystemName(state, LV, hexCode);
@@ -392,7 +392,8 @@ ${extraJs || ''}
         H.push('</dl>');
         H.push('</header>');
 
-        if (sysImage) H.push(_imageFigure('images/' + sysImage, sysImageAlt, '', sysIsSheet));
+        for (const si of sysImages || [])
+            H.push(_imageFigure('images/' + si.fn, si.alt, '', si.linkFull));
 
         // Contents — the substitute for Obsidian's per-file navigation
         H.push('<nav id="contents" class="toc"><h2>Contents</h2><ul>');
@@ -949,8 +950,9 @@ tbody tr:nth-child(even) { background:var(--panel);
     // ── Export orchestrator ───────────────────────────────────────────────────
 
     async function startExport(sectorNum, subsectorChar, options) {
-        const { includeImages, imageProjection, skipAirless, includeSystemImages,
+        const { includeImages, imageProjection, skipAirless,
                 playerVersion, onProgress, onDone, onError } = options || {};
+        const sysImageMode = EC.systemImageMode(options);
 
         // Release 2. Absent/false keeps every existing call on the GM path.
         _playerMode = !!playerVersion;
@@ -1038,29 +1040,25 @@ tbody tr:nth-child(even) { background:var(--panel);
             const worldImages = new Map();
             // key `w{i}` / `w{i}m{j}` -> [{ fn, label }]  (regional survey sheets)
             const worldSheets = new Map();
-            let sysImage = null, sysImageAlt = '', sysIsSheet = false;
+            // [{ fn, alt, linkFull }] in page order — sheet, then orrery.
+            const sysImages = [];
             // System images are gated at (d): one glance gives world count,
-            // belts and gas giants (§5.2.3).
-            // At (g) and on the GM path it is the SYSTEM SHEET. Below (g) the
-            // sheet is never generated — it names bodies, prints UWPs and
-            // singles out the mainworld, and an image can only be withheld, not
-            // filtered (Sean, 2026-09-24). Instead the orrery is RE-RENDERED
-            // with generic body labels and no mainworld highlight (§9.2a). The
-            // orrery is also the fallback if a sheet fails to render at (g).
-            if (includeSystemImages && _show(oLV, 'd')) {
-                const sheet = _show(oLV, 'g') ? await EC.renderSystemSheet(state, hexId) : null;
-                if (sheet) {
-                    sysImage = EC.systemFilename(systemName, hexCode, sheet.ext);
-                    sysImageAlt = `${systemName} system sheet`;
-                    sysIsSheet = true;
-                    files.push({ name: `${sub}/images/${sysImage}`, data: sheet.data });
-                } else if (typeof SystemViewer !== 'undefined') {
-                    const img = await SystemViewer.renderSnapshot(state, 900, 500, { level: oLV });
-                    if (img) {
-                        sysImage = EC.systemFilename(systemName, hexCode, 'png');
-                        sysImageAlt = `${systemName} orrery`;
-                        files.push({ name: `${sub}/images/${sysImage}`, data: img });
-                    }
+            // belts and gas giants (§5.2.3). The dialog chooses the SYSTEM
+            // SHEET, the ORRERY or both. The sheet only at (g) and on the GM
+            // path — it names bodies, prints UWPs and singles out the
+            // mainworld, and an image can only be withheld, not filtered
+            // (Sean, 2026-09-24). Below (g) the orrery is RE-RENDERED with
+            // generic body labels and no mainworld highlight (§9.2a). The
+            // choice lives in ExportCore so the two exporters cannot drift.
+            if (sysImageMode !== 'none' && _show(oLV, 'd')) {
+                const imgs = await EC.renderSystemImages(state, hexId, {
+                    mode: sysImageMode, sheetAllowed: _show(oLV, 'g'), level: oLV,
+                    systemName, hexCode });
+                for (const im of imgs) {
+                    const isSheet = im.kind === 'sheet';
+                    sysImages.push({ fn: im.filename, linkFull: isSheet,
+                                     alt: `${systemName} ${isSheet ? 'system sheet' : 'orrery'}` });
+                    files.push({ name: `${sub}/images/${im.filename}`, data: im.data });
                 }
             }
 
@@ -1131,7 +1129,7 @@ tbody tr:nth-child(even) { background:var(--panel);
 
             put(pageFile, _buildSystemPage({
                 hexId, hexCode, sectorName, subsectorChar, state, normalized,
-                sysImage, sysImageAlt, sysIsSheet, worldImages, worldSheets,
+                sysImages, worldImages, worldSheets,
             }));
 
             await new Promise(r => setTimeout(r, 0));

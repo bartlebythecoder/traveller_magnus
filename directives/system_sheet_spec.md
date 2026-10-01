@@ -262,6 +262,37 @@ image was an orrery PNG; they were re-pointed, not dropped: the (d) orrery is no
 against an un-levelled orrery rendered in-page (still differs: re-render proven), and the GM
 control counts sheets and asserts no orrery.
 
+### 9.1 Sheet, orrery or both — built 2026-10-01
+
+The dialog checkbox became a **System images** dropdown (`#obs-system-images`), passed to both
+exporters as `options.systemImages`:
+
+| Choice | GM / (g) | (d)–(f) | below (d) |
+|---|---|---|---|
+| **System sheet** (default) | sheet | orrery | none |
+| **Orrery** | orrery | orrery | none |
+| **System sheet and orrery** | sheet, then orrery | orrery | none |
+| **None** | none | none | none |
+
+* **The choice can only REMOVE an image** — it never moves the (d) or (g) gate. Below (g),
+  *Sheet* and *Both* fall back to the level-aware orrery, exactly as before. A sheet that fails
+  to render falls back to the orrery under any choice except *Orrery*/*None*.
+* **One decision path:** `ExportCore.renderSystemImages(state, hexId, { mode, sheetAllowed,
+  level, systemName, hexCode })` returns the images in page order; both exporters only embed
+  them. `ExportCore.systemImageMode(options)` normalises the option; the legacy boolean
+  `includeSystemImages: true` still means *sheet* (the harnesses use it).
+* **The orrery file is `<System> (<hex>) Orrery.png`** (`ExportCore.orreryFilename`) at every
+  level, so it can never share a stem with the sheet's `<System> (<hex>).jpg`. It deliberately
+  has **no `" - "`**: that separator marks a body image, and `disclosure_leak_check.js` tells
+  orreries from world images by it.
+* HTML: each image is its own figure; the sheet keeps its full-size link and "system sheet"
+  caption, the orrery keeps "orrery". Obsidian: one `![[…]]` per image on the hub page.
+* **Verified by exporting:** `system_sheet_export_check.js` now runs every choice at every
+  level (plus the legacy boolean at GM and (d)) and asserts the image set, the page order and
+  the captions — 1256/1256. `disclosure_leak_check.js` (dCode regex re-pointed to the new
+  orrery name) 86/86. The dialog was driven in-browser: default *System sheet*, and the
+  selected value reaches both exporters.
+
 Known cosmetic residue, accepted: AoW's longest class "Class 2 (Dulcinea-type)" clips in the
 two-column table; long trade-code strings clip in the narrow Mainworld Data panel (the brief
 carries them in full).

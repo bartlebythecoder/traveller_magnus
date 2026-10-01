@@ -1280,6 +1280,53 @@ const ExportCore = (() => {
         return data ? { data, ext: SHEET_EXPORT.ext } : null;
     }
 
+    // ── System images: sheet, orrery or both (Sean, 2026-10-01) ────────────
+    //
+    // The export dialog's choice, normalised. Older callers (the harnesses)
+    // still pass the boolean `includeSystemImages`; true means 'sheet', the
+    // behaviour it always had.
+    const SYSTEM_IMAGE_MODES = ['none', 'sheet', 'orrery', 'both'];
+
+    function systemImageMode(options) {
+        const o = options || {};
+        if (SYSTEM_IMAGE_MODES.indexOf(o.systemImages) !== -1) return o.systemImages;
+        return o.includeSystemImages ? 'sheet' : 'none';
+    }
+
+    // The orrery's filename. Suffixed so it never shares a stem with the sheet
+    // when both are exported. NO " - " in it on purpose: that separator marks a
+    // BODY image (bodyFilename), and the leak harness tells the two apart by it.
+    function orreryFilename(systemName, hexCode) {
+        return `${sanitize(systemName)} (${hexCode}) Orrery.png`;
+    }
+
+    // The ONE place both exporters decide which system images to draw.
+    // Returns [{ kind: 'sheet'|'orrery', filename, data }], in page order.
+    //
+    // THE CALLER GATES THE WHOLE THING AT (d) and passes sheetAllowed = (g).
+    // The user's choice can only ever REMOVE an image, never add the sheet
+    // below (g): there 'sheet' and 'both' fall back to the level-aware orrery,
+    // exactly as before this option existed. A sheet that fails to render
+    // falls back to the orrery too, so 'sheet' never silently yields nothing.
+    async function renderSystemImages(state, hexId, opts) {
+        const { mode, sheetAllowed, level, systemName, hexCode } = opts;
+        const out = [];
+        if (mode === 'none') return out;
+
+        const wantSheet = (mode === 'sheet' || mode === 'both') && sheetAllowed;
+        const sheet = wantSheet ? await renderSystemSheet(state, hexId) : null;
+        if (sheet) {
+            out.push({ kind: 'sheet', data: sheet.data,
+                       filename: systemFilename(systemName, hexCode, sheet.ext) });
+        }
+        if ((mode === 'orrery' || mode === 'both' || !sheet) && typeof SystemViewer !== 'undefined') {
+            const img = await SystemViewer.renderSnapshot(state, 900, 500, { level });
+            if (img) out.push({ kind: 'orrery', data: img,
+                                filename: orreryFilename(systemName, hexCode) });
+        }
+        return out;
+    }
+
     // ── Regional survey sheets (v0.18) ───────────────────────────────────────
     //
     // Only PINNED sites are exported. A pin is a deliberate human choice, so the
@@ -1394,6 +1441,7 @@ const ExportCore = (() => {
         resolveSystemName, resolveUWP, kToC,
         findRawWorld, findRawMoon, findRawStar,
         canRenderImage, isAirless, renderWorldImage, renderSystemSheet,
+        systemImageMode, orreryFilename, renderSystemImages,
         // rendererData is the ONE adapter from a world record to the shape
         // PlanetRenderer actually wants (atmosphere/hydrographics as parsed UWP
         // digits, plus temperatureK and its band). Exported 2026-09-21 so the

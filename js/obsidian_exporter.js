@@ -6,11 +6,13 @@
 // Optionally embeds a procedurally rendered image for each terrestrial world.
 //
 // Entry point: ObsidianExporter.startExport(sectorNum, subsectorChar, options)
-// options: { includeImages, skipAirless, includeSystemImages,
+// options: { includeImages, skipAirless, systemImages,
 //            onProgress(done,total,msg), onDone(fileCount), onError(msg) }
-// includeSystemImages: true → captures a PNG orrery per system hub page.
+// systemImages: 'none' | 'sheet' | 'orrery' | 'both' — the images on each
+// system hub page (ExportCore.renderSystemImages). The legacy boolean
+// includeSystemImages is still accepted: true means 'sheet'.
 // The subsector index page's hex-map snapshot is always captured, independent
-// of includeSystemImages.
+// of systemImages.
 // =============================================================================
 
 const ObsidianExporter = (() => {
@@ -196,7 +198,7 @@ const ObsidianExporter = (() => {
         return parts.join('\n');
     }
 
-    function _buildSystemHub(hexId, hexCode, sectorName, subsectorChar, state, normalized, imageFilename, subsectorLink) {
+    function _buildSystemHub(hexId, hexCode, sectorName, subsectorChar, state, normalized, imageFilenames, subsectorLink) {
         const _LV = _levelFor(hexId);
         const systemName = _resolveSystemName(state, _LV, hexCode);
         const edition    = normalized.edition || 'Unknown';
@@ -243,8 +245,9 @@ const ObsidianExporter = (() => {
             `**Allegiance:** ${allegiance}`,
         ];
 
-        if (imageFilename) {
-            lines.push('', `![[${imageFilename}]]`);
+        // Sheet then orrery, one after the other, when both were chosen.
+        for (const fn of imageFilenames || []) {
+            lines.push('', `![[${fn}]]`);
         }
 
         lines.push(..._mdRender(_F(ExportCore.systemOverviewBlocks(state), 'system', _LV)));
@@ -555,7 +558,8 @@ const ObsidianExporter = (() => {
     // ── Export orchestrator ───────────────────────────────────────────────────
 
     async function startExport(sectorNum, subsectorChar, options) {
-        const { includeImages, imageProjection, skipAirless, includeSystemImages, useSubfolders, playerVersion, onProgress, onDone, onError } = options || {};
+        const { includeImages, imageProjection, skipAirless, useSubfolders, playerVersion, onProgress, onDone, onError } = options || {};
+        const sysImageMode = ExportCore.systemImageMode(options);
 
         // Release 2. Absent/false keeps every existing call on the GM path, where
         // _levelFor() returns null and filterBlocks() is the identity function.
@@ -592,8 +596,8 @@ const ObsidianExporter = (() => {
         const subsectorLink = `[[${_sanitize(sectorName)} - Subsector ${subsectorChar}]]`;
 
         // Subsector map image embedded in the index page — independent of the
-        // "Include system orrery images" setting, which only controls per-system
-        // orrery snapshots.
+        // "System images" setting, which only controls the per-system sheet
+        // and orrery.
         let mapImageFilename = null;
         if (typeof captureSubsector !== 'undefined') {
             report(0, systems.length, 'Capturing subsector map image…');
@@ -643,29 +647,26 @@ const ObsidianExporter = (() => {
             const stars  = normalized.stars  || [];
             const worlds = normalized.worlds || [];
 
-            // Optional system image for the hub page, gated at (d).
-            // At (g) and on the GM path it is the SYSTEM SHEET; below (g) the
-            // sheet is never generated — it names bodies, prints UWPs and
-            // singles out the mainworld, and an image can only be withheld, not
-            // filtered (Sean, 2026-09-24). Instead the orrery is re-rendered
-            // with generic labels and no mainworld highlight (§9.2a). The
-            // orrery is also the fallback if a sheet fails to render at (g).
-            let sysImageFilename = null;
-            if (includeSystemImages && _show(_oLV, 'd')) {
-                const sheet = _show(_oLV, 'g') ? await ExportCore.renderSystemSheet(state, hexId) : null;
-                if (sheet) {
-                    sysImageFilename = _systemFilename(systemName, hexCode, sheet.ext);
-                    files.push({ name: prefix + 'images/' + sysImageFilename, data: sheet.data });
-                } else if (typeof SystemViewer !== 'undefined') {
-                    const imgData = await SystemViewer.renderSnapshot(state, 900, 500, { level: _oLV });
-                    if (imgData) {
-                        sysImageFilename = _systemFilename(systemName, hexCode, 'png');
-                        files.push({ name: prefix + 'images/' + sysImageFilename, data: imgData });
-                    }
+            // Optional system images for the hub page, gated at (d): the
+            // SYSTEM SHEET, the ORRERY or both, as chosen in the dialog.
+            // The sheet only at (g) and on the GM path — it names bodies,
+            // prints UWPs and singles out the mainworld, and an image can only
+            // be withheld, not filtered (Sean, 2026-09-24). Below (g) the
+            // orrery is re-rendered with generic labels and no mainworld
+            // highlight (§9.2a). The choice lives in ExportCore so the two
+            // exporters cannot drift.
+            const sysImageFilenames = [];
+            if (sysImageMode !== 'none' && _show(_oLV, 'd')) {
+                const imgs = await ExportCore.renderSystemImages(state, hexId, {
+                    mode: sysImageMode, sheetAllowed: _show(_oLV, 'g'), level: _oLV,
+                    systemName, hexCode });
+                for (const im of imgs) {
+                    sysImageFilenames.push(im.filename);
+                    files.push({ name: prefix + 'images/' + im.filename, data: im.data });
                 }
             }
 
-            const hubMd = _buildSystemHub(hexId, hexCode, sectorName, subsectorChar, state, normalized, sysImageFilename, subsectorLink);
+            const hubMd = _buildSystemHub(hexId, hexCode, sectorName, subsectorChar, state, normalized, sysImageFilenames, subsectorLink);
             files.push({ name: prefix + _systemFilename(systemName, hexCode, 'md'), data: enc.encode(hubMd) });
 
             // Stars

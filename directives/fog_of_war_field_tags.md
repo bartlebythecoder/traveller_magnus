@@ -593,6 +593,10 @@ no system image. Nothing on the sheet is `never` (it prints no bases and no refe
 A per-level sheet was offered and declined: it would re-implement this table by hand, in pixels,
 where no filter or parity check can see it. Detail: `system_sheet_spec.md` §9.
 
+**Since 2026-10-01 the user chooses sheet, orrery, both or none** (`system_sheet_spec.md` §9.1).
+The choice can only **remove** an image: the (d) gate and the (g) gate on the sheet are
+unchanged, so below (g) *Sheet* and *Both* still give only the level-aware orrery.
+
 **Note on 9.1 under HX-2:** at (e) and (f) an image is emitted for a world whose *name* is
 withheld. Image filenames must therefore use the generic label ("World 2"), not the real
 name, or the filesystem leaks what the page withholds.

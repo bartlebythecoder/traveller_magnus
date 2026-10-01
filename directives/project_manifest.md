@@ -101,6 +101,14 @@ waiting on a ruling.
   disclosure_obsidian_check, html_check, html_check_all) all pass. `disclosure_leak_check.js`
   had two assertions that assumed the GM image was an orrery PNG — **re-pointed, not dropped**
   (spec §9 says how). An exported page was opened and looked at.
+* **Part 3, sheet / orrery / both** (released as **v0.18.1.2**, 2026-10-01): the export dialog's
+  checkbox became a **System images** dropdown — *System sheet* (default, the old behaviour),
+  *Orrery*, *System sheet and orrery* (sheet first, then orrery) or *None*. **The choice can
+  only remove an image**: below (g) *Sheet* and *Both* still give only the orrery. This
+  revises the "replaces rather than sits beside" ruling below (Sean, 2026-10-01). One decision
+  path, `ExportCore.renderSystemImages`; the orrery file is now `<System> (<hex>) Orrery.png`.
+  Detail: `system_sheet_spec.md` §9.1. `system_sheet_export_check.js` 1256/1256 (every mode at
+  every level, plus the legacy boolean); `disclosure_leak_check.js` 86/86.
 
 #### RELEASE STATUS — v0.18.1.1 DATED 2026-09-25
 
@@ -151,7 +159,7 @@ is the design ground under it — **decided with Sean; do not re-derive or re-li
 | | Ruling |
 |---|---|
 | **What it is** | One system, one page, landscape, dark, dense: an orbital strip of rendered bodies plus data panels. Sean's reference: `C:\Users\sean\Downloads\2.jpg` (a hand-made Kteiroa "ORBITAL MAP"). |
-| **Canvas, not HTML** | Sean ruled CANVAS: *he asked for images, and a page is not one* — a PNG goes into Obsidian, a VTT or a message; and it REPLACES the existing orrery snapshot rather than sitting beside it. Free print-to-PDF was given up knowingly. |
+| **Canvas, not HTML** | Sean ruled CANVAS: *he asked for images, and a page is not one* — a PNG goes into Obsidian, a VTT or a message; and it REPLACES the existing orrery snapshot rather than sitting beside it. Free print-to-PDF was given up knowingly. **Revised 2026-10-01:** the exporters now let the user choose sheet, orrery or both — `system_sheet_spec.md` §9.1. |
 | **Resolution** | **Screen first**; print deferred. |
 | **PDF** | **Not now.** There is no PDF capability anywhere in the repo, and no build step — a library would have to be vendored, a first. |
 | **Missing stats** | **Ignore them.** Never invent jump shadow, comm range, metallicity or average TL. This is the root of R4. |

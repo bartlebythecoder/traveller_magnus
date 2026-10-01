@@ -1,3 +1,6 @@
+### [v0.18.1.2] - 2026-10-01
+1. **New — choose your system images on export:** HTML and Obsidian exports can include the system sheet, the orrery, both or neither; players' exports still show the sheet only at *Full UWP*.
+
 ### [v0.18.1.1] - 2026-09-25
 1. **New — System Sheet:** **System Sheet** in the system view opens a one-page image of the whole system (rendered bodies in orbit order, star details, planetary table, mainworld called out) with **Download PNG**; all five engines.
 2. **New — System Sheet in exports:** HTML and Obsidian exports use the sheet (JPEG) in place of the orrery; players' exports show it only at *Full UWP* and keep the orrery below that.

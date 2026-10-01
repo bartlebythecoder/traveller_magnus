@@ -900,10 +900,16 @@ const TerrainField = (() => {
             // Land is never cut below sea level; that would open false inlets
             // along the whole course instead of only at the mouth. And a cell
             // that is ALREADY submerged is never cut at all — it is floored at
-            // its own height, so Math.max leaves it exactly as it was. This is
-            // the same guard TerrainRivers.carve() has always used. The
+            // its own height, so Math.max leaves it exactly as it was. The
             // -Infinity that used to sit here exempted lake and sea beds from
             // the rule entirely, and the incision carved a channel across them.
+            //
+            // This rule used to exist in THREE places and was missing from this
+            // one, which is exactly how the bug got through. The third copy,
+            // TerrainRivers.carve(), was deleted on 2026-09-21 with the rest of
+            // the superseded local path, so there are now TWO: this one, and
+            // TerrainRivers.buildNetwork's "sea drains nowhere". Two copies is
+            // still two chances to disagree — change one, change the other.
             const floor = elev[i] >= seaLevelM ? seaLevelM : elev[i];
             elev[i] = Math.max(floor, elev[i] - inc[i]);
         }

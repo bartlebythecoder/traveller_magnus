@@ -976,6 +976,104 @@ function walkRouteChain(segments, preferStartId) {
 window.walkRouteChain = walkRouteChain;
 
 /**
+ * Walks a CLEAN CIRCLE — a route whose segments form one closed loop with
+ * nothing hanging off it — and returns its worlds in travel order.
+ *
+ * walkRouteChain rejects such a route with reason 'cycle', correctly: it asks
+ * "is this one unbroken LINE", and a circle is not one. But a circle does have
+ * a genuine travel order; what it lacks is a distinguished first world and a
+ * direction. Both are supplied here, so a round trip lists 1. 2. 3. … in the
+ * Route Systems panel and exports to CSV in the order you would fly it,
+ * instead of falling back to unordered bullets.
+ *
+ * THE SHAPE THIS ACCEPTS IS NARROW, AND DELIBERATELY SO. Every node must have
+ * degree exactly 2 and the loop must cover every node — one circle, nothing
+ * else in the slot. A LOOP WITH A TAIL IS NOT ORDERABLE and must keep its
+ * bullets: its junction has degree 3, so a walk reaching it has two ways on
+ * and no stored fact to choose between them — and the order actually flown is
+ * not recorded anywhere. It is also by far the commoner shape (measured over
+ * 24 trials per row at Jump-2: a clean circle occurred 7/24 at two waypoints,
+ * 4/24 at three and 0/24 at five, against 16, 19 and 24 for a loop with a
+ * tail), so most round trips will still list unordered. That is the accepted
+ * consequence of ordering one shape and not the other.
+ *
+ * Each world appears ONCE. The circle closes back to path[0], but repeating it
+ * would put a duplicate row in the CSV export and inflate every count that
+ * reads `worlds.length`.
+ *
+ * @param {Array}  segments      - route segments ({ startId, endId, … })
+ * @param {string} [preferStartId] - begin the walk here when it is on the
+ *        circle. This is the route's own stored Start, so a generated round
+ *        trip lists from the world the user actually typed.
+ * @param {string} [preferNextId] - walk towards this neighbour when it is one
+ *        of the start's two. This is the stored FIRST WAYPOINT, which is what
+ *        distinguishes "out via X, home via Y" from its mirror image.
+ * @returns {{ok:boolean, path:string[], reason:string|null}}
+ *        `reason` is 'empty' | 'not-a-circle' when !ok.
+ */
+function walkRouteCycle(segments, preferStartId, preferNextId) {
+    const fail = reason => ({ ok: false, path: [], reason });
+    if (!segments || segments.length === 0) return fail('empty');
+
+    // Adjacency built exactly as walkRouteChain builds it — Sets, self-loops
+    // and malformed segments dropped — so the two can never disagree about the
+    // shape of a route, only about which shapes they accept.
+    const adj = new Map();
+    const link = (a, b) => {
+        if (!adj.has(a)) adj.set(a, new Set());
+        adj.get(a).add(b);
+    };
+    for (const seg of segments) {
+        if (!seg || !seg.startId || !seg.endId) continue;
+        if (seg.startId === seg.endId) continue;
+        link(seg.startId, seg.endId);
+        link(seg.endId, seg.startId);
+    }
+
+    const nodes = Array.from(adj.keys());
+    if (nodes.length === 0) return fail('empty');
+
+    // Degree exactly 2 everywhere. Degree 1 is a loose end (a line, or a loop
+    // with a tail); degree 3+ is a junction. Either way, not a clean circle.
+    for (const n of nodes) if (adj.get(n).size !== 2) return fail('not-a-circle');
+
+    // A STABLE ANCHOR, NOT THE FIRST SEGMENT. Falling back to segments[0] would
+    // make the listing depend on array order, so the same circle could list
+    // differently after a reload, a re-import, or segments being added in a
+    // different order by hand. The lowest hex ID is a property of the route
+    // itself and survives all three — and renames, since it is not the name.
+    const startFrom = (preferStartId && adj.has(preferStartId))
+        ? preferStartId
+        : nodes.slice().sort()[0];
+
+    const neighbours = Array.from(adj.get(startFrom)).sort();
+    const first = (preferNextId && neighbours.indexOf(preferNextId) !== -1)
+        ? preferNextId
+        : neighbours[0];
+
+    const path = [startFrom];
+    const seen = new Set([startFrom]);
+    let prev = startFrom, cur = first;
+    while (cur && !seen.has(cur)) {
+        path.push(cur);
+        seen.add(cur);
+        let next = null;
+        for (const n of adj.get(cur)) { if (n !== prev) { next = n; break; } }
+        prev = cur;
+        cur = next;
+    }
+
+    // COVERAGE, for the same reason walkRouteChain checks it. Degree 2
+    // everywhere is satisfied by TWO SEPARATE CIRCLES in one slot, and the walk
+    // would then close the first one and silently omit every world in the
+    // second. Two triangles keep their bullets.
+    if (path.length !== nodes.length) return fail('not-a-circle');
+
+    return { ok: true, path, reason: null };
+}
+window.walkRouteCycle = walkRouteCycle;
+
+/**
  * walkRouteChain for the segments currently in a route slot.
  */
 function getRouteChain(routeId, preferStartId) {

@@ -1,48 +1,276 @@
 # PROJECT AS ABOVE, SO BELOW - Feature Manifest
-**Version:** v0.17.5 shipped and closed the **routes** series; §0.0 below is the current cold
-start. v0.17.2 shipped 2026-08-19, v0.17.3 on 2026-08-27, v0.17.4 on 2026-09-01 and v0.17.5
-on 2026-09-11. The exports series (v0.17.0 / v0.17.0.1) shipped 2026-08-03 and 08-04.
-**v0.18.0 is IN PROGRESS — regional surface maps.** See §0.0.A, which supersedes §0.0.0.
-The newest work is 2026-09-17: **P4 closed — the sea is shaded as water, not as its bed**, a
-**crash in the Obsidian wiki export** found and fixed, **circular Point-to-Point routes**
-allowed, and **a confirmation before any generation destroys the route already in a slot**.
-Start at "FIXED 2026-09-17" and the NEXT STEPS list under it. The day before, 2026-09-16, fixed
-four hydrology/classification bugs and added the **lake model**.
+
+## WHAT THIS DOCUMENT IS FOR — read this before you read anything else
+
+**This manifest exists for one reason: to bring an AI agent back up to speed after its context
+has been cleared.** It is written for a reader who knows nothing about this project and is
+about to change its code.
+
+**It is NOT a project history, a changelog, or a record of work done.** `changelog.md`,
+`README.md` and git history are the record. This is not.
+
+It holds exactly **two kinds of item**:
+
+1. **Past items that still matter today.** A design decision that constrains what you are
+   allowed to change; a trap that will cost a session if it is rediscovered the hard way; an
+   issue that is still open. A closed bug belongs here only if its LESSON still binds.
+2. **Future items already agreed.** Work that has been decided on and not yet done, with
+   enough context to start it without re-asking.
+
+**Everything else must be deleted.** If an item is closed and has no bearing on any future
+decision, remove it — do not strike it through, do not keep it "for the record". Strikethrough
+is reserved for the rare case where the crossing-out IS the lesson: a retracted false alarm
+that would otherwise be "fixed" again, or a design-spec line marked *do not implement this*.
+
+**The test to apply whenever you are tempted to keep something:** *would an agent who has never
+seen this project make a worse decision tomorrow without it?* If no, it goes. Length is a cost
+paid by every future session, so prune as you work — leaving stale content in place is a defect
+in this document, not a neutral act.
+
+**So: an item still written down here is an item still live.**
+
+---
+**Version:** **v0.18.1.1 is RELEASED — dated 2026-09-25** (opened 2026-09-24). `APP_VERSION` is already
+`v0.18.1.1`; splash banner "New: System Images". Its subject is **IMAGE EXPORTS** (Sean,
+2026-09-21) — **moved here from v0.18.1 by Sean on 2026-09-24**, when v0.18.1 was closed and
+dated with its other three items (moon survey export fix, river code removal, round-trip route
+order). This release delivers the **SYSTEM SHEET**: **part 1, the in-app pop-up with a PNG download, is
+built, verified and accepted** by Sean's gallery review (2026-09-24). **Part 2 — the sheet in the
+HTML and Obsidian exporters, as JPEG — is BUILT and verified by exporting** (2026-09-25; Sean
+moved it here from v0.18.2 on 2026-09-24). Nothing is left to ship — see §0.0.C.
+"World on a page" is undesigned and is not part of v0.18.1.1.
+Earlier: v0.18.1 (2026-09-24) fixes and route order; v0.18.0 (2026-09-20) regional terrain;
+v0.17.2–v0.17.5 (08-19 → 09-11) routes; v0.17.0 / v0.17.0.1 (08-03 / 08-04) exports.
 **Architecture Standard:** The "Sean Protocol" (Directives -> Orchestration -> Execution)
 
 ---
 
-## 0.0 COLD START — read this first (updated 2026-09-11)
+## 0.0 COLD START — read this first (updated 2026-09-25)
 
-**v0.17.5 is complete, and it closes the routes series.** Four route releases are written,
-verified in-browser and documented: v0.17.2 (eight items), v0.17.3 (six), v0.17.4 (seven)
-and v0.17.5 (six). Neither this document's System Editor content (§0.1 onward) nor the
-exports manifest is in progress. **Nothing anywhere is half-finished.**
+**IF YOU ARE STARTING FRESH, READ IN THIS ORDER:**
 
-**v0.18.0 WAS chosen on 2026-09-11 — regional surface maps — and is in progress.**
-**Read §0.0.A, not this paragraph or §0.0.0.** The sentence that used to stand here ("open and
-nothing has been chosen") was true only on the day it was written; §0.0.0's candidate list is
-kept for reference and none of it is the current plan. `changelog.md` still carries a
-`[v0.18.0] - In Progress` heading and is **deliberately not written up yet** — see §0.0.A's
-NEXT STEPS item 1.
+1. **§0.0.C below** — the handoff: exactly where v0.18.1.1 stands and the steps left to ship it.
+2. **`directives/system_sheet_spec.md`** — **the authority for the system sheet, as built**: the
+   four shapes of hex, R1–R8, the sixteen further rulings, the harnesses, acceptance.
+3. **§0.0.B** — the design rulings and traps behind the sheet that still bind.
+4. **§0.0.A / `directives/terrain_spec.md`** before touching anything that draws a world.
 
-**Two things to know before you touch anything:**
+**ASK QUESTIONS ONE AT A TIME, IN THEIR OWN MESSAGE OR THE QUESTION TOOL.** Sean, 2026-09-23:
+*"Please don't ask me questions or things that need clarification in the body of a large
+response I will miss them"*, and *"answers to some questions might result in new or different
+questions."* **The working pattern that worked all through 2026-09-23/24:** state the problem
+with measured numbers, give ONE recommendation, ask with the question tool, build it, verify it
+(verify + sweep + a render you actually look at), then present the next decision.
 
-1. **Route *forcing* was designed in full and then dropped** (2026-08-19 → 08-27). Older
+**Three things to know before you touch anything:**
+
+1. **The terrain field version flag is the most dangerous thing in this codebase.** World
+   images are never stored — they are recomputed from the seed on every view — so changing the
+   field silently redraws every world in every sector anyone has ever saved. **Version 1 is
+   frozen for good.** Read §0.0.A's "The terrain field version" before editing anything under
+   `js/terrain_*` or `js/planet_renderer.js`, and run `utilities/verify_field_v1.html`
+   afterwards. (Changing a renderer INPUT — as the CT temperature ruling did — changes what a
+   world looks like without touching the field. It needs Sean's ruling, not a version bump.)
+2. **Route *forcing* was designed in full and then dropped** (2026-08-19 → 08-27). Older
    parts of this document and of `route_partial_spec.md` still carry its reasoning. §0.0.2
    says plainly what was built instead. Do not resurrect forcing without asking Sean.
-2. **Git is Sean's — never touch it, not even to read.** He stages and commits everything
-   himself. **Do not record commit hashes or the commit position in this document.** That was
-   tried twice and was stale within a week both times; the hashes that used to sit here have
-   been removed for that reason. If you need to know what is committed, ask him.
+3. **Git is Sean's — never touch it, not even to read.** He stages and commits everything
+   himself. **Do not record commit hashes or the commit position in this document.** If you
+   need to know what is committed, ask him.
 
-### 0.0.A v0.18.0 — REGIONAL SURFACE MAPS (in progress, updated 2026-09-17)
+### 0.0.C HANDOFF — updated 2026-09-25. START HERE.
 
-**This supersedes §0.0.0 below.** v0.18.0 was chosen on 2026-09-11: procedurally generated
-regional surface maps — zoom into a patch of a world's surface and render it as a survey
-sheet. §0.0.0's candidate list is stale; leave it for reference only.
+**v0.18.1.1 IS FINISHED IN CODE — both halves.** Nothing is half-finished and nothing is
+waiting on a ruling.
 
-**Nothing here is committed. Ask Sean what is staged.**
+* **Part 1, the sheet in-app** (2026-09-23/24): the System Sheet button opens
+  `SystemSheet.open()`, a modal with **Download PNG** (full resolution) and **Close**; Esc and a
+  backdrop click close it, and the orrery's Esc handler defers to `SystemSheet.isOpen()`. R1–R8,
+  D1–D3 and the further rulings are built; `system_sheet_verify.js` zero FAILs,
+  `system_sheet_sweep.js` renders all 3,513 sheets with zero exceptions; Sean's gallery review
+  passed (*"they are looking good"*). Detail: `system_sheet_spec.md` §4–§5, §8.
+* **Part 2, the sheet in the exporters** (2026-09-25): **the SHEET on GM exports and at (g);
+  the existing level-aware 900x500 ORRERY at (d)–(f); nothing below (d)** (Sean, 2026-09-24 —
+  a level-aware sheet was offered and declined). **JPEG 0.85 at scale 2**, sheet only (world
+  images and regional sheets stay PNG). One render path, `ExportCore.renderSystemSheet`; the
+  HTML sheet links to itself at full size (Sean, 2026-09-25). Detail and measurements:
+  `system_sheet_spec.md` §9; the disclosure ruling is `fog_of_war_field_tags.md` §9.2b.
+  **Verified by exporting:** `utilities/system_sheet_export_check.js` failed 20/181 before the
+  wiring and passes 191/191 after; the Release 2 scratch harnesses in
+  `.tmp/html_export_harness/` (disclosure_check, disclosure_leak_check,
+  disclosure_obsidian_check, html_check, html_check_all) all pass. `disclosure_leak_check.js`
+  had two assertions that assumed the GM image was an orrery PNG — **re-pointed, not dropped**
+  (spec §9 says how). An exported page was opened and looked at.
+* **Part 3, sheet / orrery / both** (released as **v0.18.1.2**, 2026-10-01): the export dialog's
+  checkbox became a **System images** dropdown — *System sheet* (default, the old behaviour),
+  *Orrery*, *System sheet and orrery* (sheet first, then orrery) or *None*. **The choice can
+  only remove an image**: below (g) *Sheet* and *Both* still give only the orrery. This
+  revises the "replaces rather than sits beside" ruling below (Sean, 2026-10-01). One decision
+  path, `ExportCore.renderSystemImages`; the orrery file is now `<System> (<hex>) Orrery.png`.
+  Detail: `system_sheet_spec.md` §9.1. `system_sheet_export_check.js` 1256/1256 (every mode at
+  every level, plus the legacy boolean); `disclosure_leak_check.js` 86/86.
+
+#### RELEASE STATUS — v0.18.1.1 DATED 2026-09-25
+
+Changelog headers dated **2026-09-25** in `changelog.md` and `README.md` (same five-item
+entry in both, one sentence per item — Sean's changelog style, 2026-09-25). Version bump was
+already done. **Nothing is left to ship.** The next session starts by asking Sean what the
+next version is (`.claude/commands/new_version.md`).
+
+#### FILES CHANGED — for Sean's commit
+
+**2026-09-25 (exporter wiring):** `js/export_core.js` (`renderSystemSheet`, `SHEET_EXPORT`),
+`js/html_exporter.js` (the (g) gate, caption, full-size link), `js/obsidian_exporter.js` (the
+(g) gate), `hex_map.html` (export dialog checkbox + players' help text),
+`utilities/system_sheet_export_check.js` (**new**), `changelog.md`, `README.md`,
+`directives/system_sheet_spec.md`, `directives/fog_of_war_field_tags.md`, this manifest.
+**2026-09-23/24 (the sheet):** `js/system_sheet.js`, `js/system_viewer.js`, `js/hex_editor.js`,
+the version bump (`js/core.js`, `hex_map.html`, `README.md`, `changelog.md`),
+`utilities/system_sheet_verify.js`, `system_sheet_gallery.js`, `system_sheet_shoot.js`,
+`system_sheet_sweep.js`. Scratch renders and measurements are in `.tmp/` only.
+
+#### STILL OPEN BEYOND v0.18.1.1
+
+* **"World on a page"** — the other half of the image-exports subject, **nothing designed.** It
+  is a linear document, so **the block-model ruling (§0.0.B) governs it** — the sheet departed
+  from that ruling only because it needs numbers. Do not carry `normalizeSystem` across to it by
+  habit.
+* **Multi-star beyond binaries, and the habitable-zone band** — both deliberately absent (§0.0.B).
+
+#### THE TWO RULES THIS RELEASE KEPT RE-LEARNING
+
+1. **A panel that lays out a variable number of rows must DERIVE its pitch from the count, and
+   no row loop may stop without announcing it.** Four panels had the silent-drop defect; two
+   were introduced while fixing the first. Assume a new panel has it until a corpus run says not.
+2. **Assertions check what a sheet would print; only rendering proves it can be drawn.** Wiring
+   RTT `diameter` passed every check in `system_sheet_verify.js` and crashed the sheet (the
+   Jovians store a string). And the gallery rendered **zero** Spinward sheets for a day because
+   it only censused hexes with bodies. **After any change: verify, sweep, and look at renders.**
+
+---
+
+### 0.0.B v0.18.1.1 — THE SYSTEM SHEET: rulings and traps that still bind
+
+The requirements and as-built detail are in **`directives/system_sheet_spec.md`**. What follows
+is the design ground under it — **decided with Sean; do not re-derive or re-litigate.**
+
+#### SCOPE AND FORM — decided 2026-09-21
+
+| | Ruling |
+|---|---|
+| **What it is** | One system, one page, landscape, dark, dense: an orbital strip of rendered bodies plus data panels. Sean's reference: `C:\Users\sean\Downloads\2.jpg` (a hand-made Kteiroa "ORBITAL MAP"). |
+| **Canvas, not HTML** | Sean ruled CANVAS: *he asked for images, and a page is not one* — a PNG goes into Obsidian, a VTT or a message; and it REPLACES the existing orrery snapshot rather than sitting beside it. Free print-to-PDF was given up knowingly. **Revised 2026-10-01:** the exporters now let the user choose sheet, orrery or both — `system_sheet_spec.md` §9.1. |
+| **Resolution** | **Screen first**; print deferred. |
+| **PDF** | **Not now.** There is no PDF capability anywhere in the repo, and no build step — a library would have to be vendored, a first. |
+| **Missing stats** | **Ignore them.** Never invent jump shadow, comm range, metallicity or average TL. This is the root of R4. |
+| **Delivery** | **In-app download FIRST, exporters second** — judging the sheet means looking at twenty systems, which costs a click this way. |
+
+**The approved mockup** is at `C:\Users\sean\Downloads\system_sheet_mockup\` (outside the repo):
+`system_sheet_mock.png` (Makarov, 18-E-0313), the live `system_sheet_mock.html`, and its data.
+Sean: *"I am very happy with your mockup image so we have an excellent starting place."*
+
+#### WHAT THE MOCKUP PROVED — do not re-derive
+
+* **No plugin or external program is needed.** `PlanetRenderer.renderApproachFrame` draws a lit
+  sphere to any canvas at any size.
+* **SUPERSAMPLE small discs 3x** and let the browser downscale; native-size discs lose their
+  terminators and coastlines.
+* **Disc size is LOG-SCALED and CLAMPED**, never true scale: terrestrial 34–76 px, gas giants
+  their own 84–108 px band (every solo_6 giant reports 50,000 km, so a shared curve cannot tell
+  them apart — the non-overlap guarantees any giant is larger than any rock).
+* **Orbit spacing is ORDINAL**, with AU labels carrying the truth.
+* **Use OUR temperature bands** (`PlanetRenderer.tempBandFromKelvin`: Frozen <230, Cold <265,
+  Cool <290, Temperate <330, Warm <360, Hot), not the reference's — they are baked into every
+  world-image palette, so a dot must agree with how the planet looks.
+
+#### AS-BUILT TRAPS — each hit once, each commented in place
+
+* **`renderApproachFrame`'s third parameter is NAMED `hexId` and is the whole per-body SEED
+  KEY.** Pass `PlanetRenderer.imageSeed(hexId, world, fallback)` (keyed on the body's NAME —
+  orbitId is not unique), or every body in the system gets the same terrain.
+* **It does not accept a `normalizeSystem` world** — it wants parsed UWP digits and
+  `temperatureK`. Go through **`ExportCore.rendererData`**, the one adapter shared with world
+  images and regional sheets, or the whole strip renders grey.
+* **Gas giants are drawn by `drawGasGiant()` in `system_sheet.js`, deliberately NOT in
+  `planet_renderer.js`**, which is behind the frozen terrain-field guarantee. (It also made the
+  sheet fast: Starrfield 1,653 ms → 47 ms.)
+* **NO HABITABLE-ZONE BAND, and do not derive one from luminosity.** `normalizeSystem` falls back
+  to `_orbitToAU(3)` when `hzco` is absent — throughout solo_6 — so every system would claim an
+  HZ at 1.00 AU. The mockup's `sqrt(luminosity)` was invented. Real sources, if ever wired:
+  `MGT2E_HZ_DEVIATION` (`js/constants.js`), CT `hasHZ`/`hzOverride`.
+* **A LUNAR MAINWORLD: the ORBIT belongs to the parent, the physical STATS to the body.**
+  58.7% of solo_6 mainworlds are moons. `findMainworld()` searches `moons[]`; the strip rings
+  the PARENT; Mainworld Data labels "Primary's Orbital Distance". Getting it backwards printed
+  "Year Length 0 standard years".
+* **COMPANION STARS:** placed on the strip only from a recorded position. MgT2E: `orbitId`
+  present (modern save) → placed via `SystemViewer.orbitToAU`; absent (solo_6 is v0.13.3 — all
+  86 companions carry only a role WORD) → named by role, "N (orbits not recorded)". **`!= null`,
+  never `!== null`** — legacy saves omit the key. T5: only a recorded `distAU` (D1). RTT: never
+  (its AU is synthesised). `orbitToAU` is exported deliberately; the private
+  `_starCompanionAU` falls back to `orbitId || 0.5`, fine for an orrery, wrong for a printed sheet.
+* **Orbit numbers belong to BODIES only** — a companion never consumes an index, or the strip
+  and table disagree about which world is orbit 7.
+* **MOONS CANNOT BE ENUMERATED.** solo_6: median 19 moons a system, max 64; listing them needs up
+  to 76 rows against a table of ~21. Moons are a COUNT (table column, strip glyph, System Data
+  total) plus one Satellites panel for the mainworld's neighbourhood. "Populated" does not work
+  as a filter (Starrfield: 33 of 67 bodies populated); **proximity to the mainworld** does.
+* **FIELD NAMES LIE.** `totalWorlds` read 960 for a system of 8. Check the raw save and the
+  engine's units (spec §6.2).
+
+#### THE BLOCK-MODEL RULING — 2026-09-21, still governs "world on a page"
+
+A linear page takes its content from **`ExportCore`'s block model**, not the on-screen panels:
+fog of war is then inherited (`filterBlocks()` only ever sees blocks) and numbers arrive through
+`ExportCore.fmtNum`. The system sheet departed from it **only** because it needs numbers; its
+numbers still go through `fmtNum`.
+
+#### TWO EXPORTER TRAPS — honoured by the v0.18.1.1 wiring, still binding for any new image
+
+* **An image is opaque to the fog of war.** Withhold it by not generating it — v0.18.0's
+  regional sheets sit inside `_show(oLV, 'e')`, and the system sheet inside `_show(level, 'g')`,
+  for this reason. See §0.0.A decision 4.
+* **Test an exporter by exporting.** The Obsidian export was broken for three days by one
+  missing parameter while `node --check` passed. Stub `downloadBlob`, scan for `PK\x03\x04`,
+  read members out of the ZIP, and **watch it fail first.** Recipe for a small export: load a
+  sector, **trim `hexStates` to one hex**, export — `utilities/system_sheet_export_check.js` is
+  a working example.
+
+#### v0.18.0 DECISIONS THAT STILL BIND — ruled 2026-09-21
+
+* **Lake-adjacent land shading — KEEP. DO NOT "FIX" THIS.** P4's water fill moves 1.4–9.7% of
+  land pixels within 8 cells of a lake shore, correctly: the old code occluded from the lake
+  BED. "Fill sea only" was rejected — it re-splits sea from lake.
+* **The route-replace prompt — KEEP AS-IS.** **Segments carry no provenance** (`{startId, endId,
+  type, routeId, …}`; `automationRef` lives on the route definition), so nothing can tell a
+  pristine generated route from a hand-edited one. *"The clear was never the bug; the silence
+  was."*
+* **Round trips list in travel order for CLEAN CIRCLES only** (`walkRouteCycle` in
+  `js/routes.js`, contract in `route_extend_spec.md` §4), in the Route Systems panel and the CSV
+  export. A loop with a tail is not ordered, and a user cannot tell the two apart by eye — not a
+  defect. A circle lists each world once; an imported circle with no Start is ordered from the
+  lowest hex ID.
+* **Moons get regional sheets in both exporters** (verified by exporting with a negative
+  control, 2026-09-21).
+
+### 0.0.A THE TERRAIN SYSTEM — rules you must not break (shipped v0.18.0)
+
+> **THE CONTRACT NOW LIVES IN `directives/terrain_spec.md` (written 2026-09-21). READ THAT
+> FIRST.** It states the shipped system as rules — the field-version contract and the v1
+> freeze, the `sheetSetup`/`renderSheet` pipeline, the pin storage shape, the duplicated-
+> definition register, the standing gates and the procedure for changing terrain code. Every
+> line number in it was verified against the code the day it was written. What remains below
+> is the same material in its original session-log form; where the two ever disagree, the
+> spec is the authority.
+
+Regional surface maps shipped in v0.18.0 on 2026-09-20: zoom into a patch of a world's surface
+and render it as a survey sheet. **What follows is not an account of that release — it is the
+set of constraints it left behind.** Every item here either forbids a change, names a contract
+two callers share, or records a decision that will otherwise be re-made wrongly. The narrative
+of what was fixed on which day was removed on 2026-09-21; `changelog.md` and the code comments
+hold it.
+
+**If you change anything under `js/terrain_*` or `js/planet_renderer.js`, read the terrain field
+version rules below FIRST, and run `utilities/verify_field_v1.html` after.**
 
 #### What it is
 
@@ -136,290 +364,110 @@ The 12 that never move are the pure `putImageData` renders, mercator and mollwei
 two match on every world, the field and the palette are intact whatever the other rows say.**
 See the trap of the same name below.
 
-#### Fixed window and reduced controls — DONE 2026-09-13
+#### The regional map panel — the constraints, not the history
 
-The first two open decisions are built, in `js/terrain_panel.js` only. Nothing else was
-touched, and **the terrain field was not touched at all** — `verify_field_v1.html` passes
-25/25 after the change, as it must.
+* **The survey window is FIXED** at `suggested().widthKm` (`VIEW_WIDTH_KM`), 120-220 km across
+  every legal size code, so a sheet is always the regional tier.
+* **Wheel zoom was removed deliberately** (Sean, 2026-09-13: slow, and doing almost nothing).
+  Landform size is a property of the PLANET, not of the framing, so magnifying the window
+  changed very little. **Do not re-add it.**
+* **The field is world-anchored and must stay so.** It is what makes a dragged plate the same
+  ground rather than a new landscape, and what keeps the regional map agreeing with the world
+  image. `view.s` is retained at 1 rather than removed, so the drawImage path and
+  `viewToWindow()` keep ONE scale-aware coordinate path instead of growing a second, subtly
+  different one.
+* `LANDFORM_KM` and `STEEPNESS` are per-world constants read once from `suggested()` and not
+  exposed — a control could only ever contradict the world's own physics.
+* **The control is "Rivers & lakes" and governs BOTH**, because both come out of the one
+  hydrology pass. Keep label and behaviour in step.
+* That box is **disabled, with the reason shown**, when hydrology cannot run — field version
+  < 2, or hydrographics 0. `riversWhy` is read once at open, which is safe only because the
+  panel is modal.
+* A pin's stored `widthKm` is written but **ignored** on Go, so pre-2026-09-13 pins still load.
 
-* **The survey window is fixed** at `suggested().widthKm`, held in `VIEW_WIDTH_KM`. In
-  practice that is 120-220 km across every legal size code, so the sheet is always the
-  regional tier and always says "Regional Survey".
-* **Wheel zoom is gone.** Panning by drag stays, and **the world-anchored field was
-  deliberately left intact** — it is what makes a dragged plate the same ground rather than a
-  new landscape, and what keeps the regional map agreeing with the world image. `view.s` is
-  retained at 1 rather than removed, so the drawImage path and `viewToWindow()` keep one
-  scale-aware set of coordinate maths instead of growing a second, subtly different one.
-* **Landform size and steepness are now per-world constants** (`LANDFORM_KM`, `STEEPNESS`),
-  read once from `suggested()` and not exposed. Both are properties of the planet, not of the
-  framing, so a control could only ever contradict the world's own physics.
-* **Controls removed:** Width, Landform km, Steepness m/km, and the "Reset to suggested"
-  button, which had nothing left to reset. **Kept** (Sean's call, 2026-09-13): Resolution,
-  Sun angle, Rivers, Feature labels, Cartographic frame. The sidebar is now VIEW / SHEET /
-  LOCATION / SITES.
-* A pin's stored `widthKm` is **written but ignored** on Go, so pins recorded before this
-  change still load.
-* **The Rivers box is disabled when it cannot do anything** (added same day). Hydrology runs
-  only at field version >= 2 *and* hydrographics >= 1; previously the box was tickable and
-  silently inert in both cases, and on Tectonic + hydro 0 it was even ticked. It now carries
-  the reason as a note and a tooltip. `riversWhy` is read once at open, which is safe because
-  the panel is modal — the terrain model cannot change underneath it. The redundant guard in
-  `renderPass` was deliberately left in place; the field-version stakes justify belt and
-  braces. No render output changed: hydrology was already skipped in exactly these cases.
-
-Verified in a real browser: both tiers render with no page errors, the wheel is ignored, the
-width holds across a pan, and the pan moves the *right distance* — 40% of an 876 px map at
-125 km and latitude -50.56 should shift longitude by 0.70 degrees, and it shifted 0.71.
-
-#### Pins are saved in the map — DONE 2026-09-14
-
-The `*** SWAP POINT ***` in `terrain_pins.js` has been taken; **the marker is gone and so is
-the localStorage stopgap** for the app. Pins now live on the hex state:
+#### Pins — the storage contract
 
 ```
 state.terrainPins = { "<body name>": { "0": {...}, "3": {...} } }
 ```
 
-* **No serialisation code was needed.** `io_manager.js` and `db_manager.js` both persist hex
-  states *whole*, so a pin travels with a saved `.json`, rides the IndexedDB autosave, and
-  survives a browser change, for free.
-* **`terrainPins` must never join `HEX_VIEW_STATE_KEYS`.** That list strips DERIVED view state
-  at save time (see R9, §0.0.7); a pin is the opposite — a deliberate human choice, and
-  stripping it would throw it away. Verified by test, not by reading.
-* **The key dropped `masterSeed`.** The old flat key carried it only because localStorage is
-  shared across every sector a browser has ever opened; inside one hex of one file there is
-  nothing left to disambiguate. **Consequence Sean should know about:** `masterSeed` is *not*
-  in the save envelope at all (it lives in `localStorage` as `traveller_gen_seed`), so a file
-  opened under a different seed shows different terrain anyway — pins then point at ground
-  that has changed. Judged acceptable because changing the seed on a populated sector is
-  already a regenerate-everything act, and the body names change with it so most pins
-  self-orphan. Reversible: store the seed on the pin record and filter in `load()`.
-* **`bodyKey()` now returns a compound key**, not a string, because the store needs the hex
-  and the body separately. It carries a `toString()` returning the old flat form — required,
-  not cosmetic: `utilities/test_regional_terrain.html` builds a redraw signature with
-  `key + '#' + ...`, and an object would coerce to `"[object Object]"` there, dropping the
-  body from the signature and suppressing a redraw when switching bodies.
-* **The harness still uses localStorage.** `test_regional_terrain.html` loads the module
-  without `core.js`, so there is no `hexStates`; the backend falls back. The app never takes
-  that path.
-* **Old pins are carried over** on first open of that body, and the localStorage copy is
-  removed only once the new one reads back — a failed move leaves the original alone.
+* **No serialisation code exists, and none is needed.** `io_manager.js` and `db_manager.js`
+  both persist hex states *whole*, so a pin travels with a saved `.json`, rides the IndexedDB
+  autosave and survives a browser change for free.
+* **`terrainPins` must NEVER join `HEX_VIEW_STATE_KEYS`.** That list strips DERIVED view state
+  at save time (§0.0.7); a pin is the opposite — a deliberate human choice — and stripping it
+  would throw it away.
+* **`bodyKey()` returns a compound object carrying a `toString()`** that yields the old flat
+  form. The `toString` is **required, not cosmetic**: `utilities/test_regional_terrain.html`
+  builds a redraw signature with `key + '#' + ...`, and an object would coerce to
+  `"[object Object]"`, dropping the body and suppressing a redraw when switching bodies.
+* **Body identity is the NAME.** `TerrainPins.bodyNameOf()` is the one definition — a nameless
+  body files under `'Unnamed'`, and an exporter looking up `''` silently finds nothing.
 * **Pinning takes no undo snapshot, deliberately.** `saveStateForUndo()` deep-clones every hex
-  state, which core.js puts at hundreds of MB on a large canvas. It therefore schedules its own
-  `dbManager.saveHexes([hexId])`. The trade: an undo of a *later* action restores a snapshot
-  taken before the pin and drops it — which is how this application treats every edit that
-  takes no snapshot.
+  state, which core.js puts at hundreds of MB on a large canvas; pinning schedules its own
+  `dbManager.saveHexes([hexId])` instead. An undo of a LATER action therefore drops the pin,
+  which is how this app treats every edit that takes no snapshot.
+* **`masterSeed` is not in the save envelope at all** (it lives in `localStorage` as
+  `traveller_gen_seed`), so a file opened under a different seed shows different terrain and
+  its pins point at ground that has changed. Accepted — changing the seed on a populated
+  sector is already a regenerate-everything act. Reversible by storing the seed on the pin.
+* `test_regional_terrain.html` falls back to localStorage because it loads the module without
+  `core.js`, so there is no `hexStates`. **The app never takes that path.**
 
-Verified in a real browser: 25 assertions covering key shape and string coercion, the write
-landing on the hex state, survival of `stripHexViewState`, a full JSON round trip, clearing
-leaving no empty container behind, carry-over, a failed carry-over preserving the original,
-and the harness still working — plus an end-to-end pass clicking **Pin** in the real panel and
-reopening it.
+#### THE RULE THAT GOVERNS EVERY TERRAIN IMPROVEMENT
 
-#### Decisions taken 2026-09-14 — NONE OUTSTANDING, all seven ruled
+**Every improvement goes behind Tectonic (v2). Classic (v1) is frozen.** Seven separate
+rulings landed on this shape independently, which makes Classic vs Tectonic a larger visual
+jump than terrain shape alone. That is accepted and deliberate — it is the price of never
+disturbing an existing sector.
 
-Sean was walked through every open item one at a time. **Nothing is waiting on him.** These
-are rulings, not yet implementations — build order and status below.
+Behind v2: vegetation, `cold_desert`, `remapHeight`'s interpolated form, and plate tectonics
+itself.
 
-**The unifying principle he chose: every improvement goes behind Tectonic (v2); Classic (v1)
-is frozen.** Decisions 1, 2 and 3 each independently landed on that shape, which makes
-"Classic vs Tectonic" a larger visual jump than terrain shape alone. That is accepted and
-deliberate — it is the price of never disturbing an existing sector.
-
-| # | Decision | Ruling | v1 safe? |
-|---|---|---|---|
-| 1 | **Vegetation** — **BUILT 2026-09-14** | Green on warm + wet + breathable worlds; tan where dry or cold. **v2 only.** Exotic non-water oceans keep green under both — a different palette path, never in conflict | yes |
-| 2 | **Cold deserts** — **BUILT 2026-09-14** | New `cold_desert` type at `hydro === 0 && tempK < 223`. **v2 only.** Materials: permafrost, frost-shattered rock, ice-cemented regolith, scree, wind-scoured pavement. **223 K is reused from the existing ice branch, not invented** | yes |
-| 3 | **`remapHeight` divergence** — **BUILT 2026-09-14** | `planet_renderer` adopts `terrain_field`'s interpolated form **under v2 only**; v1 keeps the raw integer rank verbatim. Closes the drift warning without spending the guarantee | yes |
-| 4 | **Regional maps in the export** — **BUILT 2026-09-14** | **Pinned sites only** — volume bounded by deliberate choice, costs nothing until a pin exists | n/a |
-| 5 | **`APP_BANNER`** | **Remove it**, and amend `CLAUDE.md` §Version Update Procedure and `.claude/commands/new_version.md` to stop asking for it. Sean approved touching both | n/a |
-| 6 | **Pin seed guard** | **Record `masterSeed` on each pin record; show mismatched pins FLAGGED, never hidden.** Sean's reason: *"users might change their seed at any time"* — this is about anyone using the tool, not his own habits | n/a |
-| 7 | **Rivers greying** | **Keep both cases** (Classic, and hydrographics 0 under Tectonic). Already built and verified | n/a |
-
-#### How 1, 2 and 3 were built (2026-09-14)
-
-* **Vegetation is a RAMP SWAP, nothing more.** `RAMP.standard_veg` in `terrain_render.js`
-  colours exactly the generic-ground band (beach → lowland → upland → highland); snow,
-  exposed mountain rock and every water material stay discrete and untouched, so the legend
-  keeps its labels and a world does not change its seas when it grows plants.
-  `planet_renderer` gets a matching `isVegetated` stop set whose **ocean stops are identical**
-  to the arid version.
-* **`cold_desert` needed four things, not one:** a `MATERIALS` table, a `RAMP` + `RAMP_IDS`
+* **Vegetation is a RAMP SWAP and nothing more.** `RAMP.standard_veg` colours exactly the
+  generic-ground band (beach → lowland → upland → highland); snow, exposed mountain rock and
+  every water material stay discrete and untouched, so a world does not change its seas when
+  it grows plants. `planet_renderer`'s matching `isVegetated` stop set has **ocean stops
+  identical** to the arid version.
+* **`cold_desert` is `hydro === 0 && tempK < 223`.** The 223 K is **reused from the existing
+  ice branch, not invented.**
+* **A NEW WORLD TYPE NEEDS FOUR THINGS, NOT ONE:** a `MATERIALS` table, a `RAMP` + `RAMP_IDS`
   entry, a `classify()` branch, and **a `VOCAB` entry in `terrain_names.js`** — without the
   last it falls back to `standard` and a waterless world gets handed "Oceans" and "Great
-  Plains".
-* **`polarOverlay` had to exclude `cold_desert` too.** Caught by rendering, not by reasoning:
-  below 223 K the frozen band puts the cap edge at 40°, so the first Kteiroa sheet came out
-  solid white with a terrain key reading **"Polar Ice Cap 100.0%"**. The surface is already
-  frost-bound — that is what the palette says — so a cap counts the same ice twice. This is
-  the identical reason `ice` was already excluded.
-* **The climate predicates are DUPLICATED** in `planet_renderer.js` and `terrain_render.js`,
-  deliberately. The two cannot import one another: `test_regional_terrain.html` loads
-  terrain_render **without** planet_renderer, and `verify_field_v1.html` loads planet_renderer
-  **without** terrain_render. `isIce` was already duplicated across that same gap, so this
-  follows the established pattern rather than inventing load-order coupling. **Both copies
-  carry a comment naming the other. Keep them identical.**
+  Plains". It may also need excluding from `polarOverlay`: below 223 K the frozen band puts
+  the cap edge at 40°, so a cap counts the same ice twice and the sheet renders solid white
+  with a key reading "Polar Ice Cap 100.0%". `ice` and `cold_desert` are both excluded for
+  exactly this reason.
+* **The climate predicates are DUPLICATED in `planet_renderer.js` and `terrain_render.js`,
+  deliberately.** The two cannot import one another: `test_regional_terrain.html` loads
+  terrain_render WITHOUT planet_renderer, and `verify_field_v1.html` loads planet_renderer
+  WITHOUT terrain_render. Both copies carry a comment naming the other. **Keep them
+  identical.**
+* **The plate field must be invariant under ANY permutation of the ranking**, not merely one
+  of them. `_boundaryDelta(I, J)` orders its pair internally so it is exactly symmetric;
+  `sample()` sums over **unordered pairs** of the nearest plates weighted by the product of
+  their softmin weights; the base is a softmin blend; and every plate's weight is **tapered to
+  zero before the `NEAR` cut**, so the NEAR-th/(NEAR+1)-th swap cannot make a weight appear
+  from nothing. Anchoring to nearest/second-nearest instead produces hard-edged polygonal
+  wedges radiating from every triple junction. See the rank-ties trap.
 
-Verified: `verify_field_v1` **30/30 after every step**, plus 23 assertions on classification,
-the vegetation predicate and measured land colour. Measured swing, cloud/snow/cap excluded:
-garden median greenness **−18 → +15**, Kteiroa warmth **+94 → −5**, hot desert **−34 → −35**
-(unchanged, as intended).
+#### The sheet pipeline — one definition, three callers
 
-**A measurement trap worth keeping.** The first colour test failed, and the code was right —
-a plain mean over non-ocean pixels measures **cloud**, not ground. An atm-6 world draws heavy
-cloud, and with snow peaks and polar caps on top every world averaged to near-neutral grey,
-hiding a 33-point swing. The fix was a better metric (exclude anything bright enough to be
-cloud/snow/cap, take a median), **not a looser threshold**.
+`TerrainFrame.sheetSetup(worldData, seed, masterSeed)` returns every per-world parameter;
+`TerrainFrame.renderSheet(opts)` does field, hydrology, shading, rivers and labels. **The panel
+and BOTH exporters call these same two functions**, which is what stops an exported sheet
+disagreeing with the one the user saw. It was EXTRACTED from `terrain_panel.js` rather than
+copied, because `remapHeight` and `isIce` had already drifted exactly that way.
 
-#### FIXED 2026-09-14 — plate boundaries rendered as hard-edged wedges (v2 only)
-
-Every Tectonic world image carried large **polygonal wedges with hard straight edges**. It was
-**not** caused by the vegetation / cold-desert / remap work — confirmed by swapping the
-pre-patch `planet_renderer.js` back in and re-rendering.
-
-**Root cause: the field depended on plate RANK, and rank ties are discontinuities.** The
-elevation was a function of the nearest plate A and the second-nearest B. Where the second and
-third nearest are equidistant, B's identity flips, and both the base elevation and the boundary
-normal flip with it. Those tie loci are arcs radiating from every triple junction — which is
-exactly a wedge.
-
-**Two wrong attempts, both worth knowing about.** Neither was a waste; each measured the next
-one into view.
-
-1. Crossfading the pairs `(A,B)` and `(A,C)` as B and C tie. Removed the B/C tie, left the A/B
-   one: crossing an A-B boundary near a triple junction swaps the SECONDARY pair from `(A,C)`
-   to `(B,C)`, which are *different plates*. Residual step 0.277.
-2. Making the base a rank-free softmin but leaving the features anchored to A. Same residual,
-   because the problem was in the features, not the base.
-
-**The fix that worked** — the field must be invariant under *any* permutation of the ranking,
-not merely one of them:
-
-* `_boundaryDelta(I, J)` orders the pair internally so A is always the nearer plate, making it
-  **exactly symmetric** in its two arguments.
-* `sample()` sums over **unordered pairs** of the nearest plates, weighted by the product of
-  their softmin weights — a quantity no permutation can change.
-* The base is a **softmin blend** over the nearest plates, weights depending only on distance.
-* Every plate's weight is **tapered to zero** before the `NEAR` cut, so the NEAR-th/(NEAR+1)-th
-  swap cannot make a weight appear out of nothing. Without this the residual was 0.045.
-
-**How it was measured, which is the transferable part.** Ratio statistics were nearly useless:
-a legitimate mountain belt is genuinely steep, so max/median ran to ~76x on a *correct* field
-and could not distinguish a cliff from a discontinuity. **The test that worked was bisection** —
-find the worst neighbouring step, then halve the interval 14 times and watch what the step
-does. A steep gradient shrinks with the interval; a discontinuity does not.
-
-| stage | worst step | after 14 halvings | verdict |
-|---|---|---|---|
-| original | 0.28-0.30 | unchanged | discontinuity |
-| attempt 1 & 2 | 0.036-0.049 | unchanged | discontinuity |
-| **fixed** | 0.023-0.091 | **~1/16,200** | **smooth** (2^14 = 16,384) |
-
-Cost: Tectonic flat map **621 ms -> 715 ms** (+15%); Classic unchanged at ~290 ms.
-`verify_field_v1` **30/30** — v1 never calls `TerrainTectonics.sample()` at all.
-
-#### How decision 4 was built (2026-09-14) — regional sheets in the export
-
-Pinned sites become full survey sheets in both the HTML and Obsidian exports.
-
-* **The sheet pipeline was EXTRACTED, not copied.** It lived inside `terrain_panel.js`; a
-  second copy in `export_core.js` would have drifted exactly as `remapHeight` and `isIce`
-  already did. It now lives in `terrain_frame.js`, which already owned sheet composition, as
-  two functions the panel and the exporters both call:
-  `TerrainFrame.sheetSetup(worldData, seed, masterSeed)` — every per-world parameter,
-  including the isostatic steepness derivation — and `TerrainFrame.renderSheet(opts)` —
-  field, hydrology, shading, rivers and feature labels.
-* **Both extractions were PROVEN INERT.** The panel's composed canvas was hashed for three
-  worlds before, after the pipeline move, and again after the `sheetSetup` move: identical all
-  three times. Re-use `scratchpad/sheethash.js` if this code is touched again.
-* **Fog.** Sheets are generated *inside* the existing `_show(oLV, 'e')` world-image gate in
-  both exporters. That is deliberate and load-bearing: a sheet is the world image at finer
-  scale, and like any image it is opaque to `filterBlocks()`, which only ever sees blocks.
-  **Not generating it is the only way to withhold it.**
-* **An identity bug caught before it shipped.** The panel files a nameless body's pins under
-  `'Unnamed'`, but the exporter would have looked up `''` and silently found none. Fixed with
-  one definition — `TerrainPins.bodyNameOf()` — now used by both. Third time the
-  NAME-as-identity rule has bitten here.
+* Sheets are generated INSIDE the exporters' existing `_show(oLV, 'e')` world-image gate.
+  **This is load-bearing:** an image is opaque to `filterBlocks()`, so **not generating it is
+  the only way to withhold it.**
 * `renderRegionalSheet()` returns **null rather than throwing** when the terrain stack is
-  absent, so the export degrades instead of failing.
-
-**Size, corrected.** A sheet is **~1.0 MB**, not the ~400 KB estimated when the decision was
-put to Sean — so 30 pins is roughly **30 MB and 60 s**, not 12 MB. Still bounded by intent,
-and still nothing at all for a sector with no pins, but the estimate was out by 2.5x. If that
-is too heavy the levers are plate resolution (960 wide) or JPEG instead of PNG.
-
-Verified: 16 assertions on the export path, plus every existing suite re-run green — 25 pins,
-23 v2 palette, rivers 3/3, and `verify_field_v1` **30/30**.
-
-**Two traps carried by these rulings:**
-
-* **`verify_field_v1` only half polices decisions 1 and 2.** It began with five sample worlds
-  — ice, standard, hot desert, airless rock and exotic — and **a cold-dry world was added the
-  same day (2026-09-14), taking it to 30 renders.** Cold deserts are therefore covered.
-  **A temperate GARDEN world is still missing**, so a v1-breaking change to the vegetation
-  palette would pass 30/30 while real sectors changed. The version gate is the real protection
-  here; the test is not. See [[feedback-green-suite-can-be-blind]] — a weakened rule leaves every
-  old fixture passing. **Add the garden shape to the baseline before touching that palette.**
-* **Decision 4 needs its own fog gate.** Images are generated outside `filterBlocks`, which
-  only sees blocks, so a fogged world's regional sheet must be suppressed at GENERATION time.
-  It cannot inherit fog filtering. See [[feedback-handbuilt-output-bypasses-filter]].
-
-#### FIXED 2026-09-16 — rivers ran through lakes, and there was no lake model at all
-
-Sean reported rivers drawn straight across bodies of water. It was **four defects in a chain**,
-each one hidden by the one in front of it, and the last turned out to be the only reason the
-sheets had any lakes at all. Read all four before touching hydrology again.
-
-**1. The hydrology pass carved channels into lake and sea beds.** `_hydrology()` seeds every
-sub-sea cell as an outlet — correct — and then routed flow straight through them anyway. Its D8
-loop had no sea test, `flow` is seeded at 1 on every cell including water, and the incision
-floor read `elev[i] >= seaLevelM ? seaLevelM : -Infinity`: the "never cut below sea level" rule
-protected land and **exempted anything already submerged**. Measured: **100% of sub-sea pixels
-incised**, up to 132 m, with 7,523 cells of accumulation sitting on open water and the depth
-bands flipping on 84 pixels of a single window. It rendered as a darker, hillshaded,
-river-shaped trench across the lake — made of terrain, not of stroke.
-
-**The smoking gun: the same guard already existed twice elsewhere**, and was missing only in the
-copy the sheet uses. `buildNetwork` carries `if (filled[i] < seaLevel) continue;` with the
-comment "sea drains nowhere"; `carve()` floors a submerged cell at its own height. `_hydrology`
-had neither. All three respects fixed, and `maxFlow` is now taken over **land only** — a shore
-cell receives an entire catchment and then stops, so counting it put the whole basin into the
-divisor every land river is measured against.
-
-**2. River strokes overshot the waterline.** `linesFromField` pushed the first sub-sea cell's
-CENTRE onto the polyline before breaking, and `drawLocal` adds a round cap plus up to
-2.6 x widthScale of soft pad on top of that. The trace now interpolates to the sea-level
-crossing and stops there. Measured after: mouth vertices sit **0.0 m** below the waterline,
-mean and worst, across 35 mouths.
-
-**3. LAND WAS BEING PAINTED AS WATER. This is the one that produced Sean's screenshots**, and
-neither of the two fixes above touched it. `shade()` measures the hypsometric band from the
-LOCAL base level, and `classify()` then decides land against water on `e < 0` — while erosion
-and river incision cut valley floors and basins **below their own base level** as a matter of
-course. So `e` went negative on dry land and the pixel was painted `shallow`.
-
-Measured: **6.8% of all land pixels** in a temperate window rendered as water — roughly **twice
-the area of the real water in the same frame** — and **10.1% of every river vertex on the map**
-lay on one of those false lakes. The river was correctly in its valley; the valley was being
-coloured blue around it. The comment directly above the line said "Snow line and water remain
-absolute, which is physically right", so the author believed water was decided absolutely and
-had not noticed erosion could push `e` under zero. **The land branch is now clamped at zero.**
-Land and water are told apart by `aboveSeaM`, which is an absolute fact about the world; `e`
-only ever picks a band within one of them.
-
-**4. And that revealed there was no lake model.** The false-water bug had been acting as a crude
-one — and positionally a decent one, putting water in incised basins at any altitude, which the
-sea-level datum can never do. Removing it took most of the visible water with it:
-
-| Hydrographics | Water bodies per sheet, before | after |
-|---|---|---|
-| 9 | 2.8 | 2.0 |
-| 7 | 2.2 | **0.8** |
-| 5 | 2.2 | **0.3** |
-| 3 | 1.5 | **0.0** |
-
-A genuine lake could only ever be an enclosed basin that happened to punch below planetary sea
-level: **0 of 8 sampled windows below hydrographics 7**. So a lake model was built.
+  absent, so an export degrades instead of failing.
+* **Only PINNED sites are exported**, so the volume is bounded by deliberate human choice and
+  costs nothing until a pin exists.
+* **A sheet is ~1.0 MB** at 960 wide — so 30 pins is roughly 30 MB and 60 s. If that needs
+  reducing, the levers are plate resolution first, then JPEG.
 
 #### The lake model — NEW 2026-09-16, in `_hydrology()` in `js/terrain_field.js`
 
@@ -445,13 +493,10 @@ rejecting an earlier "2 bodies per sheet" figure, which was **a resolution artif
 threshold behind it meant 7 km2 at one resolution and 0.77 km2 at another. **State lake targets
 in km2, never in pixels.**
 
-| Hydro | Lakes % of land | >=10 km2 | 1-10 km2 | 0.25-1 km2 |
-|---|---|---|---|---|
-| 9 | 7.13% | 12.0 | 26.0 | 43.4 |
-| **7** | **1.90%** | 5.0 | 16.4 | 22.8 |
-| 5 | 0.29% | 0.0 | 7.0 | 14.0 |
-| 3 | 0.02% | 0.0 | 0.0 | 3.0 |
-| 1 | 0.00% | 0.0 | 0.0 | 0.0 |
+**Do not trust a lake figure written down here — run `utilities/lake_calibration.html`.**
+The table that used to sit in this spot was measured on 2026-09-16 and had already drifted by
+2026-09-21 (hydro 9 7.13% -> 8.07%, hydro 7 1.90% -> 1.70%) with the gate still passing. See
+the Verification section.
 
 **Three things had to follow from the lake mask, not one:**
 
@@ -466,278 +511,101 @@ in km2, never in pixels.**
 **The panel control is now "Rivers & lakes"** (`terrain_panel.js`). It governs both, because both
 come out of the hydrology pass; the old label would have lied. **Keep the two in step.**
 
-#### Verification of the 2026-09-16 work
+#### Water is shaded as water, not as its bed
 
-* **151,560 river vertices** across 12 windows at hydro 9/7/5: **0 more than one cell inside a
-  lake, 0 inside the sea.** 494 rivers terminate at a lake shore. Every shore-adjacent point
-  measured at depth exactly 1 — Chaikin and rounding noise, not penetration. **Measure depth
-  from the shore; a raw "is this vertex on water" count reads about 1% and looks like a bug.**
-* Every lake surface flat to 1e-3 m; every lake cell below its own surface.
-* `utilities/lake_calibration.html` **PASS** in Chromium, reproducing the node figures exactly.
-* `utilities/verify_field_v1.html` **PASS 30/30** after every step.
-* `utilities/test_regional_terrain.html` still renders with no page errors. Note it does **not**
-  load `terrain_rivers.js`, so `window.TerrainRivers` is absent there and the sheet degrades —
-  pre-existing, not a regression.
+All of this is in `shade()` in `js/terrain_render.js`.
 
-#### FIXED 2026-09-17 — P4, the sea was shaded from its bed
-
-**The whole change is in `shade()` in `js/terrain_render.js`, and it is small.** Nothing else was
-touched: not the field, not the panel, not the exporters, not `planet_renderer.js`.
-
-The fault was the one the lake model had already fixed for lakes and left standing for the sea.
-Normals, slope and micro-texture all describe the ground UNDER the water, so an ocean drew its
-drowned hills as though they were dry land — hillshaded seabed ridges, cast shadows between
-them, the lot. It is why a mid-ocean sheet looked embossed rather than surveyed.
-
-**Three lines of behaviour changed:**
-
-* `water` — a mask of every pixel `classify()` paints as water, built from the SAME test the
-  albedo pass uses (below the per-pixel datum: a lake's own surface where there is one, the
-  planetary sea level otherwise). It replaces the lake-only `lakeFlat` flag, so sea and lake now
-  take the same path. Only `ice`, `standard` and `exotic_wet` are considered — the three types
-  with a water branch. **A dry world can carry pixels below its datum with none of them wet**,
-  and flat-shading those would drain the relief out of desert, cold desert and rock worlds.
-  Measured: zero pixels change on any of the three dry types.
-* `surfF` — the same field with every water cell raised to its own surface, passed to
-  `castShadows` and `computeAO` in place of the bed. This is what keeps the two facts that
-  belong to the water (a cliff shades the water beside it; basin walls close the sky over it)
-  while dropping the one that belongs to the bed (a submerged ridge shadowing open ocean from
-  below — the bed showing through by a second route, which flat normals alone would not have
-  removed).
+* **`water`** is a mask of every pixel `classify()` paints as water, built from the SAME test
+  the albedo pass uses — below the per-pixel datum, which is a lake's own surface where there
+  is one and the planetary sea level otherwise. Sea and lake take the same path.
+* **Only `ice`, `standard` and `exotic_wet` are considered** — the three types with a water
+  branch. **A dry world can carry pixels below its datum with none of them wet**, and
+  flat-shading those would drain the relief out of desert, cold desert and rock worlds.
+* **`surfF`** is the same field with every water cell raised to its own surface, passed to
+  `castShadows` and `computeAO` in place of the bed. That keeps the two facts belonging to the
+  water — a cliff shades the water beside it, basin walls close the sky over it — while
+  dropping the one belonging to the bed.
 * Water pixels are lit flat: `ndl = Lz`, slope 0, sky term 1, micro-texture off. **Depth still
   shows, because depth is real** — through the hypsometric bands and the `em` albedo
-  modulation, both of which TINT rather than light. What is gone is the directional cue, which
-  was the part claiming the sea had a topography of its own.
+  modulation, which TINT rather than light.
 
-**Measured, 36 windows across 9 world types, same field rendered through the pre-patch module
-and the patched one:**
+**Consequences to know before "fixing" any of it:** a window that is entirely open ocean is
+now a nearly featureless blue plate, which is correct — open ocean has no surface features at
+130 m/px. And lake-adjacent land shifts slightly, because a lake's surface can perch above
+ground just outside its rim and neither sampler visits every cell. Both are ruled final in
+§0.0.B.
 
-| Quantity | before | after |
-|---|---|---|
-| Interior-water luminance gradient, mean of 21 wet windows | 2.400 | **0.518** |
-| Worst single interior-water gradient | 124.35 | **16.72** |
-| Interior-water luminance sd, mean | 11.10 | 8.44 |
-| Open-ocean window (ice h6), gradient / sd | 15.349 / 44.87 | **0.391 / 6.39** |
-| `shade()` cost, mean of 36 | 118 ms | **116 ms** |
+#### Round-trip Point-to-Point routes — the behaviour to preserve
 
-**The sea fill cannot touch land, and that is a proof rather than an estimate.** Land is by
-definition at or above the planetary datum, so a seabed raised TO that datum never stands above
-a land pixel; AO ignores anything lower than the pixel it samples for, and the shadow ray only
-climbs. Measured directly against `castShadows`/`computeAO`, which are exported: across ten
-windows and **1.04 M land pixels, zero moved.**
+`generatePointToPointRoute` builds `stops = [startId, ...waypointIds, endId]` and resolves each
+consecutive pair with its own BFS, so `[A, W, A]` is simply two ordinary legs. The engine never
+needed changing; the only obstacle was a UI refusal.
 
-**A lake fill is different, and the measurement is what said so — not the reasoning.** A lake's
-surface can perch above ground just outside its rim. The rim always dominates in principle, being
-at exactly the lake's level and nearer, but **neither sampler visits every cell**, so a one-cell
-rim can be stepped over and the water plane behind it seen instead. Measured: **1.4–9.7% of land
-pixels move, every one of them within 8 cells of a lake shore**, which is the AO radius. That is
-a correction rather than a regression — the water plane is genuinely there, and the old code was
-occluding from the lake BED, which is not — but it does mean **lake-adjacent land shifts slightly
-against what was verified on 2026-09-14.** Sean's call if that is unwanted; filling sea only is a
-one-line narrowing.
+* **A round trip REQUIRES at least one waypoint**, and the refusal for zero is not taste:
+  `stops` becomes `[A, A]` and `_bfsPath` seeds `visited` with its own start, so the search
+  exhausts and reports "no path within Jump-N", which is true and useless.
+* **One waypoint almost never loops** — the return leg is the outbound reversed, `addRoute`
+  skips pairs the slot already holds, and the result is a line. Two or more is needed for a
+  genuine loop, and a loop WITH A TAIL is the commonest outcome. The completion message reports
+  the shape actually built, read back with `walkRouteChain` rather than guessed.
+* **Continue** returns `'cycle'` for a clean circle and refuses it — there is no loose end.
+  A loop with a tail returns `ok` and Continue works from the tail tip.
+* **Combine** uses the stricter `walkRouteChain`, so a circle is correctly not offered.
 
-**Consequence worth knowing:** a window that is entirely open ocean is now a nearly featureless
-blue plate. That is correct — open ocean has no surface features at 130 m/px — but it is a
-visible change from a sheet that used to be full of (wrong) detail. Sites come from `findSites()`,
-which requires dry land, so the case arises only when the user pans out to sea.
+#### Generating into an occupied slot
 
-#### FIXED 2026-09-17 — the Obsidian wiki export crashed on EVERY world
+The clear lives in **`_generateIntoSlot` in `js/ui_menus.js`** — `if (!opts.append)
+window.sectorRoutes = sectorRoutes.filter(...)` — and that is the right place for it, so the
+confirmation lives there too rather than in the four generate handlers. It therefore covers
+XBoat, Custom Network, Point-to-Point and BTN alike, and cannot fire for Continue, which
+passes `append` and never clears.
 
-Sean reported `Error: sheetFiles is not defined` from Export Wiki after pinning a site.
+* It fires only when the slot **already holds segments**, and runs **before
+  `saveHistoryState`**, so declining leaves no undo entry to step through.
+* **`_generateIntoSlot` returns `cancelled`** because `produced: false` had come to mean two
+  different things — without it, the callers report "no path found" at a user who just chose
+  to keep their route.
+* **Auto-ticking Continue was considered and rejected**, and had already been rejected once in
+  `hex_map.html`'s own comment: a silently-ticked box "would append when the user expected a
+  rebuild". A confirmation asks; a default guesses.
 
-**One missing parameter.** `_buildWorldFile()` in `js/obsidian_exporter.js` reads `sheetFiles`
-at what is now line 425, and the caller passes it as a 13th argument — but the function's
-parameter list stopped at `subsectorLink`. Added `sheetFiles` to the signature; that is the
-entire fix.
+#### Legacy saves omit fields that the engine now always writes
 
-**It was not about pins, and it was not intermittent.** Reading an undeclared identifier throws
-a `ReferenceError` whatever its value would have been, and `_buildWorldFile` runs for every world
-at disclosure level (d). **So the Obsidian wiki export has aborted on the first world of the
-first system since the code was added on 2026-09-14** — pinned or not, images on or off. The
-HTML exporter carries the same feature through a `Map` that is passed properly and was never
-affected.
+`sectors/solo_6.json` is `"version": "v0.13.3"` and ships bundled with the app. Its MgT2E
+companion stars carry only:
 
-**How it was verified, which is the part that matters.** A real sector was generated in the app
-(`runMgT2EMacro` over 40 hexes), a pin placed on a mainworld, and `ObsidianExporter.startExport`
-run with `downloadBlob` intercepted and the resulting ZIP's local headers parsed:
+    age, diam, eccentricity, lum, mao, mass, massEarths, name, role, sClass, sType, subType
 
-* **Negative control first.** With the parameter removed again, the run reproduces Sean's exact
-  message: `Uncaught (in promise) ReferenceError: sheetFiles is not defined`, and no ZIP is
-  produced. A fix that is not watched to fail first is not a tested fix.
-* With the parameter present: **889 files**, including `images/Preto - Preto - Test Site
-  (0102).png` — the regional sheet — and the world's markdown carrying
+Missing against what `mgt2e_stellar_engine.js` writes today: **`orbitId`, `parentStarIdx`,
+`separation`, `distAU`** — across **86 companions in 79 multi-star systems** in that one file.
+The engine sets `primary.orbitId = null` but older saves OMIT the key, so **`null` and
+`undefined` both occur in the wild**.
 
-  ```
-  ## Regional Surveys
+**Use `!= null` (loose), never `!== null`, on anything read out of a loaded sector**, and check
+any new field read against the list above before assuming it exists. **Verify against a real
+old preset, not a freshly generated system** — fresh generation always has every field, so it
+can never reproduce this class of bug.
 
-  **Test Site**
+**AND THE DIAGNOSTIC THAT GOES WITH IT: A BLANK EDITOR ACCORDION IS A THROW, NOT MISSING
+DATA.** Every engine block in `populateEditorAccordions()` starts with `root.innerHTML = ''`,
+so an exception anywhere after that leaves the container emptied and never refilled. The throw
+also aborts the rest of `openHexEditor()`, which runs afterwards — so the PBG and Stellar
+quick-stat fields never get set and **still show the PREVIOUSLY opened hex's values.** That
+mismatch is the fingerprint: a header reading `G5 V` beside a Stellar field reading `K0 V`. No
+page error reaches the console, because the click handler swallows it — so the symptom looks
+like a data problem and sends you hunting through the sector JSON. Reproduce it in seconds
+with `hexStates.set(id, state); try { openHexEditor(id) } catch (e) { e.stack }`.
 
-  ![[Preto - Preto - Test Site (0102).png]]
-  ```
+#### The two river-network paths
 
-**Why 2026-09-14's "16 assertions on the export path" did not catch it.** Those assertions
-exercised `pinnedSitesFor`, `renderRegionalSheet` and `sheetLabel` — the pieces — and never
-called `startExport`. A ReferenceError in the assembly is invisible to any test that does not
-RUN the export. **Exporters must be tested by exporting.** The interception recipe above is
-cheap enough that there is no excuse: stub `downloadBlob`, scan the ZIP for `PK\x03\x04`, read
-the member names and bodies straight out of the local headers.
-
-#### Verification of the P4 work (2026-09-17)
-
-The wiki-export fix above carries its own verification; this covers the sea shading.
-
-* `utilities/verify_field_v1.html` **PASS 30/30**. Expected, and worth stating plainly: that page
-  does not load `terrain_render.js` at all, so this change cannot reach version 1.
-* `utilities/lake_calibration.html` **PASS** — hydrographics 7 at 1.90% of land, cover falling
-  monotonically to 0.00% at hydrographics 1. Unchanged figures; hydrology was not touched.
-* `utilities/test_regional_terrain.html` renders with no page errors.
-* **The real app, end to end.** `hex_map.html` loaded in Chromium with its full script set,
-  `TerrainPanel.open()` called exactly as the Regional Maps button calls it, Render clicked, the
-  survey sheet read back off its canvas: sheet renders, five site slots present, **no page
-  errors**, and interior water measures a mean gradient of 1.22 against a terrain key reading
-  Shallow Water 11.2% / Abyssal Depths 9.0% / Continental Shelf 7.4% / Deep Ocean 7.2%.
-* A before/after pair of the same coastal window confirms by eye what the numbers say: the sea
-  loses its drowned hills, the land keeps every ridge, snowfield, lake and river unchanged, and
-  an offshore island reads as an island instead of merging into shaded seabed.
-
-#### NEW 2026-09-17 — circular Point-to-Point routes (Start and End may be the same world)
-
-Sean asked for it: same origin and destination, which with waypoints means a round trip.
-
-**The engine already did this.** `generatePointToPointRoute` has always built `stops =
-[startId, ...waypointIds, endId]` and resolved each consecutive pair with its own BFS, so
-`[A, W, A]` is two ordinary legs and needs no engine change whatsoever. **The only thing
-standing in the way was one UI refusal**, `'Start and End must be different worlds.'` in
-`js/ui_menus.js`. Three edits, all in that file:
-
-1. **The refusal moved BELOW waypoint resolution and now depends on it.** Same-hex is legal with
-   at least one waypoint; with none it is still refused, and not on taste — `stops` becomes
-   `[A, A]`, and `_bfsPath` seeds `visited` with its own start, so a leg from a world to itself
-   can never match and the search exhausts. The engine would report "no path within Jump-N",
-   which is true and useless. The new message names the world and says to add a waypoint.
-2. **Map chain-building can close the loop.** `MapPick._deliverChain` refused to set End to the
-   Start; it now refuses only while there is no waypoint yet, and says so when the click closes
-   the route. (Clicking *past* the start already worked — the standing End is promoted to a
-   waypoint — so the chain builder could already put a loop in the fields; only Generate refused.)
-3. **The success message reports the shape that was actually built**, read back off the segments
-   with `walkRouteChain` rather than guessed from the stop list.
-
-**A ROUND TRIP LANDS IN ONE OF THREE SHAPES, and which one is not predictable.** Every leg is a
-shortest path, so the return leg often reuses the way out — and `addRoute` skips pairs the slot
-already holds. Measured over 24 trials per row, 81 worlds, Jump-2:
-
-| Waypoints | Out-and-back LINE | Clean CIRCLE | Loop with a TAIL |
-|---|---|---|---|
-| 1 | **23** | 1 | 0 |
-| 2 | 1 | **7** | 16 |
-| 3 | 1 | 4 | **19** |
-| 4 | 1 | 2 | **21** |
-| 5 | 0 | 0 | **24** |
-
-* **One waypoint almost never loops** — the return is the outbound reversed, the second leg
-  writes nothing, and the result is a line. The toast says exactly that and what to do.
-* **A clean circle is the minority even at 2-3 waypoints**, and by 5 it never happened: the more
-  stops, the likelier two legs share a hex. `route_extend_spec.md` §5 C4 already recorded this —
-  *"a round trip is close to guaranteed to"* produce a loose third end — so this is the shape the
-  design expected, not a defect.
-
-**What the other route features do with a loop, all pre-existing and all correct:**
-
-* **Continue** — `walkRouteEnds` returns `'cycle'` for a clean circle, and the existing message
-  already says *"forms a closed loop, so there is no loose end to continue from."* A loop with a
-  tail returns `ok` with one loose end and `crosses: true`, so Continue works from the tail tip.
-* **Combine** — `getCombineCandidates` uses the stricter `walkRouteChain`, so a circle is not
-  offered. Correct: there is no end to join to.
-* **Route Systems panel** — a circle lists **unordered** (bullets, every world present) because
-  `walkRouteChain` answers "is this one unbroken chain" and a cycle is not. **This is the one
-  visible rough edge.** Ordering a circle is easy in principle — start at the stored Start and
-  walk round — but a loop WITH A TAIL is genuinely ambiguous, and the traversal order is not
-  stored (deliberately: see the shortfall note against storing whole paths). Left alone. If Sean
-  wants round trips to list in travel order it is a real piece of design, not a tweak.
-
-**Verified in the real app, driving the panel's own fields and its Generate button** — not the
-engine underneath it — on a freshly generated 50-world block at Jump-2:
-
-| Case | Result |
-|---|---|
-| Same Start/End, no waypoint | **refused**, with the new message naming the world |
-| Same Start/End, 1 waypoint | 3 segments, two loose ends, "out-and-back line" message |
-| Same Start/End, 3 waypoints | 11 segments, closed with a tail, matching message |
-| Ordinary A -> D with a waypoint | 7 segments, travel order, message unchanged |
-
-No page errors in any case. A clean circle was also generated and photographed on the map:
-five worlds, five segments, drawn as a closed pentagon.
-
-#### FIXED 2026-09-17 — generating into an occupied slot destroyed the route silently
-
-**Reported by a user.** They had a Custom Network in a slot, opened Point-to-Point to extend it,
-**forgot to tick "Continue existing route"**, generated — and the network was gone.
-
-**The clear was never the bug; the silence was.** Every generator except Continue begins by
-emptying its slot:
-
-```js
-if (!opts.append) window.sectorRoutes = sectorRoutes.filter(r => r.routeId !== routeId);
-```
-
-That is `_generateIntoSlot` in `js/ui_menus.js`, and it is correct — a rebuild rebuilds. It is
-also **undoable**, because the clear sits behind `saveHistoryState`. But nothing on screen said
-anything had been destroyed, so there was no reason to reach for Ctrl+Z, and by the time the
-loss was noticed the undo was buried.
-
-**The fix is a confirmation in `_generateIntoSlot`, not in the four generate handlers**, because
-the destructive step lives there: one clear, one warning, and it cannot fire for Continue, which
-passes `append` and never clears. It therefore covers **XBoat, Custom Network, Point-to-Point and
-BTN alike** — the user hit it with P2P, but all four wiped a slot the same way.
-
-* It fires only when the slot **already holds segments**, so a first generation is silent.
-* It runs **before `saveHistoryState`**, so declining leaves no undo entry to step through.
-* `_generateIntoSlot` now returns `cancelled`, because `produced: false` had come to mean two
-  different things. Without it the four callers would report "no path found within Jump-N" at a
-  user who had just chosen to keep their route. Each caller gained one line.
-* **The advice is tailored**, via `getRouteEnds`: "tick Continue" is wrong for a route that
-  cannot be continued, so a closed loop is told it has no loose end and a route in pieces is told
-  to join them first.
-
-The message:
-
-```
-"XBoat Route" already has 6 connections.
-
-Generating will DELETE them and build a new route in their place.
-
-To ADD to it instead, click Cancel, tick "Continue existing route" in the
-Point-to-Point section, and generate again.
-
-OK replaces the route. Cancel keeps it. (Ctrl+Z undoes a replacement.)
-```
-
-**Auto-ticking Continue was considered and rejected — the codebase had already rejected it.**
-The comment above the checkbox in `hex_map.html` says a silently-ticked box "would append when
-the user expected a rebuild", which is the mirror image of this bug. A confirmation asks; a
-default guesses.
-
-**Verified in the real app, driving the panel and its Generate button**, with a route seeded into
-the slot as hand-written segments so the guard was tested against segments this app did not
-generate either:
-
-| Case | Result |
-|---|---|
-| Occupied slot, user clicks **Cancel** | 6 segments -> **6**. Work kept, no toast, no undo entry |
-| Occupied slot, user clicks **OK** | 6 -> 7, replaced, normal success toast |
-| **Empty** slot | **no dialog at all**, route generated |
-| **Continue ticked** | 3 -> 8 appended, **no dialog** — the append path never asks |
-| Replace, then **Ctrl+Z** | 8 -> 2 -> **8**, and the restored segments are **identical** to the originals — so the dialog's own claim about undo is true |
-
-No page errors in any case.
-
-**The one cost, and it is real:** iterating on a Point-to-Point route — generate, add a waypoint,
-generate again — now prompts on every pass, and §0.0.A records that building a long route in
-passes is a normal workflow. If that grates, the narrowing is one condition: skip the prompt when
-`routeDef.automationRef.type` equals the type being generated, which keeps the warning for the
-case actually reported (a network replaced by a P2P) and for hand-drawn or imported segments,
-which carry no `automationRef` at all. **Not done — ask Sean first**, because it also silences
-the warning for a same-type rebuild over hand-edited segments.
+* **The LOCAL path is gone** (2026-09-21). `localNetwork` and `carve` were superseded by
+  `linesFromField` and `_hydrology()`; `js/terrain_rivers.js` went 763 -> 543 lines.
+* **THE GLOBAL PATH IS RETAINED DELIBERATELY — do not delete it as dead code.**
+  `buildNetwork`, `networkFor` and `inflowFor` have no callers and stay anyway: it is the only
+  whole-world drainage network in the codebase, and the flat world image draws no rivers at
+  all yet. The module header carries the same note.
+* **The "never cut below sea level" rule now exists in exactly TWO places** — `_hydrology()`
+  and `buildNetwork`'s "sea drains nowhere". **Change one, change the other.**
 
 #### "I'm not seeing any lakes" — measured, and the model is behaving
 
@@ -766,39 +634,6 @@ calibrated to do (`LAKE_K0 = 75`, `LAKE_K_DECADE = 0.45`, fitted to Earth at hyd
 that the Terrain Model is **Tectonic** (hydrology never runs at version 1); that **Rivers & lakes**
 is ticked and not greyed out; and that you are looking at the **regional survey sheet** and not
 the whole-world flat map — **the world image has no lakes at all, by design.**
-
-#### NEXT STEPS (written 2026-09-17 — nothing is half-finished)
-
-The four 2026-09-16 fixes, the lake model, P4 and the wiki-export crash are all complete and
-verified, and **uncommitted — ask Sean what is staged.** In rough priority:
-
-1. **The changelog still owes the terrain work.** The two ROUTE items were written up on
-   2026-09-18 — round trips and the replace warning, entries 3 and 4 of v0.18.0, in
-   `changelog.md` **and** in README.md's mirrored copy. **There are two changelogs and they must
-   stay in step**; README's v0.18.0 block was empty, so the two existing terrain entries were
-   copied across to keep the numbering identical. What is still unrecorded is the 2026-09-16 and
-   2026-09-17 TERRAIN work: the four hydrology fixes, the lake model, the flat sea, and the wiki
-   export crash. Sean deferred those deliberately; write them before the version closes.
-   **`changelog.md` and `README.md` are LF-only** while the rest of the repo is CRLF — detect
-   per file before writing to either.
-2. **`TerrainRivers` exports a `draw` that does not exist** (the return list in
-   `js/terrain_rivers.js`). It silently resolves to `renderer.js`'s global `draw()` — the
-   whole-map canvas repaint — because the IIFE's scope chain reaches global scope. Harmless
-   today, since nothing calls `TerrainRivers.draw`, but anyone who does gets a full map redraw.
-   **Delete the word `draw,` from the export list.** Found because the module threw a
-   ReferenceError in a node harness, where `renderer.js` is not loaded.
-3. **A pin on a MOON is saved and never exported.** `openBodyImagePanel` is reachable for any
-   body in the accordion, moons included, so its Open Map -> Regional Maps -> Pin path files a
-   pin under the moon's name. But both exporters only ever call `pinnedSitesFor(hexId,
-   world.name)` inside the worlds loop — the moons loop does world IMAGES only, in the HTML
-   exporter as well as the Obsidian one. So the pin persists, costs nothing, and silently never
-   appears in an export. Decide whether moons get sheets or the button gets hidden for them.
-4. **No directive exists for the v0.18 terrain work.** Every prior series has one
-   (`route_*_spec.md`, `html_extract_manifest.md`); this section and the code comments are the
-   only record.
-5. `buildNetwork`, `networkFor`, `localNetwork`, `inflowFor` and `carve` in `terrain_rivers.js`
-   now have **no callers** — only `linesFromField` and `drawLocal` are used. Decide whether the
-   global-network path is still wanted before it rots.
 
 #### Traps, all of them found the hard way
 
@@ -868,6 +703,20 @@ verified, and **uncommitted — ask Sean what is staged.** In rough priority:
   truncates a float march to integer cells. Both can step over a one-cell ridge. The proof held
   for the sea, where the fill never exceeds any land height, and failed for lakes for exactly
   this reason — **measured, after being argued the other way.**
+* **STUBBING A MODULE'S EXPORT DOES NOT REACH A CONSUMER THAT CAPTURED IT AT LOAD TIME.**
+  `obsidian_exporter.js` does `const _pinnedSitesFor = ExportCore.pinnedSitesFor` at module
+  load, so replacing `window.ExportCore.pinnedSitesFor` later changes nothing the exporter ever
+  calls. A negative control built that way **passes silently and proves nothing** — it reported
+  "the test may not reach the code", which reads like a broken test rather than a broken
+  control. **To prove an export change really fires, swap the PRE-CHANGE source file back in,
+  re-run, and diff the file counts** — then restore and hash-check. Anything less is measuring
+  your own stub.
+* **AN EXPORTED NAME WITH NO LOCAL DEFINITION RESOLVES TO A GLOBAL.** `terrain_rivers.js`
+  exported `draw` and defined no such function, so the IIFE's scope chain reached global scope
+  and `TerrainRivers.draw` silently WAS `renderer.js`'s whole-map repaint. No error, no
+  warning, and a caller would simply have got the wrong behaviour. Found only because the
+  module threw a ReferenceError in a node harness, where `renderer.js` is not loaded. **Check
+  every name in a module's return list against a definition in that module.**
 * **Every source file in this repo is CRLF.** A scripted edit that reads with Python's
   universal newlines and writes back flattens the whole file to LF, which shows up as a
   diff against every line. Read and write bytes, or convert back before finishing.
@@ -886,91 +735,57 @@ existing sector's world images will look different after an upgrade. It currentl
 — **in a software rasteriser. Re-run any FAIL with `--disable-gpu` before believing it**, and
 check whether mercator and mollweide are among the failures; if they are not, the field is fine.
 
+**THE RECORDED LAKE FIGURES HAVE MOVED, AND NOBODY KNOWS WHY YET (found 2026-09-21).** The
+gate still PASSes, but its whole table differs from the one recorded on 2026-09-16 below:
+hydro 9 **7.13% -> 8.07%**, hydro 7 **1.90% -> 1.70%**, hydro 5 **0.29% -> 0.27%**. The harness
+is fully deterministic — fixed seed `'TravellerMagnus','1105-Demo'`, no RNG — so this is not
+sampling noise, and it reproduced exactly on a second run. It is **not** the 2026-09-21
+river-path deletion: that changed no code in `terrain_field.js` at all, proven by diffing every
+non-comment line. The P4 verification of 2026-09-17 explicitly recorded 1.90% as unchanged, so
+the shift happened **between 2026-09-17 and the release**. Two candidates, and they cannot be
+told apart without git history, which is Sean's: either the field or hydrology moved slightly
+during the v0.18.0 endgame, or the harness's own parameters changed (it now reports **5
+windows**; the 2026-09-16 run did not record a window count). **Ask Sean before treating either
+table as the baseline.** 1.70% is comfortably inside the 2.0 ± 0.6 band either way.
+
 **`utilities/lake_calibration.html`** (new 2026-09-16) — the second standing gate. It measures
 lake cover across hydrographics and FAILs if hydrographics 7 leaves the 2% ± 0.6 band that
 Earth sets, or if cover stops falling monotonically as the world dries. **Run it after changing
 `LAKE_K0`, `LAKE_K_DECADE`, the pit-fill or the flow accumulation.** It currently passes.
 
-### 0.0.0 v0.18.0 — open, nothing chosen (2026-09-11)
+### 0.0.0 Candidate work — RETIRED as a release plan 2026-09-21
 
-The threads that already exist in this document, listed so a fresh session is not starting
-from a blank page. **None is committed to, and the order is not a recommendation.**
+**This was the v0.18.0 candidate list and it is no longer a plan for anything.** v0.18.0 went
+to regional surface maps (§0.0.A) and v0.18.1.1 is image exports (§0.0.B). The table is kept
+because every row is still a real thread that nobody has picked up. **None is committed to, and
+the order is not a recommendation.**
 
 | Candidate | Where to start | What it is |
 |---|---|---|
 | **RTT and AoW editor bring-up** | §0.3 is the entry point, §5 the inventory | The largest deliberate gap. AoW is the further along — `js/aow_seed_bridge.js` and `js/aow_uwp_auditor.js` exist, but AoW was **never verified in-browser** (OW-9). RTT is slated for a full overhaul rather than incremental fixes |
-| **OW-5 layer 2 — the shared commit path** | §6.2 | A `commitEditorSystem()` shared by the editor *and* `macro_orchestrator.js` was never built, so the editor's `_clearSystemData()` and the macro's inline clear-block are still drifting. This document already says to settle it **before** a new engine arrives, which makes it a prerequisite of the row above rather than a rival to it |
-| **OW-3 — per-engine UWP auditor** | §6.2 | Same shape: any engine brought online needs its own populated `sys.auditResult` before Fill & Save is trustworthy. Done for MgT2E, CT and T5 only |
-| **The two route file icons** | `route_file_spec.md` OQ-1, §0.0.6 | Save and load sit side by side as near-identical file glyphs. v0.17.4 removed the third by turning CSV into a word; the remaining pair is a standing reservation needing Sean's eye in real use |
-| **OW-65 — three parked route/filter items** | §6.2 | **Deliberately parked pending user evidence — do not restart without new information.** The single question that settles two of the three at zero cost is written out in OW-65 |
 
-### What shipped in v0.17.5
+### What the routes series left behind (v0.17.2 - v0.17.5)
 
-Six changelog entries. One new feature, one layout fix, four route-logic bugs — all in the
-Route Manager and its Point-to-Point panel. **No directive was written for this release**;
-these six entries and the code comments are the record.
+The 27 changelog entries are in `changelog.md` and `README.md`. **Three things from that series
+still bind:**
 
-1. **+ Add Route** — the feature. Routes could be deleted but never created, because the only
-   thing that ever made one was a top-up firing solely when *every* slot was in use. A list cut
-   down to three, one of them empty, was stuck there permanently. The new button
-   (`hex_map.html` `#btn-route-add`, `window.addRouteSlot` in `js/ui_menus.js`) adds one on
-   demand, taking the first standard colour **not already on the map** and the lowest free
-   **1–9** shortcut, so a rebuilt list is not a column of identical green with no keys.
-2. **The Route Manager was too narrow for its own rows.** A row needs 467px to fit and 480px to
-   sit naturally — eleven controls and ten gaps — inside a 430px window, so the 50px colour
-   swatch had been rendering as a **14px sliver** all along; opening a tall automation panel
-   added a vertical scrollbar and turned the squeeze into an overflow. Now 520px
-   (`hex_map.html`, `#route-window`), deliberately above the strict minimum because scrollbar
-   widths and font metrics differ between machines.
-3. **Continue demanded more of a route than it needed.** It required one unbroken chain with
-   exactly two ends — but P2P resolves each leg with its own BFS, so a waypointed route
-   routinely revisits a world (degree 4) or doubles back and leaves a loose *third* end. Both
-   are ordinary results, and a round trip is close to guaranteed to be one of them. Continue now
-   asks only that the route is in **one piece** with **at least one loose end**, and offers every
-   end it has. Closed loops and disconnected pieces are still refused, for reasons about the
-   route rather than the test. **This is the new `walkRouteEnds` / `getRouteEnds` pair in
-   `js/routes.js`** — strict `walkRouteChain` is unchanged and still governs Combine and travel
-   order. The box also **went stale**: computed once on panel open and never re-tested, so
-   drawing segments by hand with the panel open left it greyed out. It is now re-tested on every
-   route change, without disturbing a tick already made.
-4. **P2P reported more segments than it drew** — it counted path length, not connections
-   actually written, so the duplicates a doubling-back leg produces were counted too. Measured:
-   9 announced over a map showing 6.
-5. **Continuing towards a world the route already reaches** reported "no path found" and named
-   the Jump number, sending the user off to raise a limit that was never the problem. It now
-   says the two worlds are already connected.
-6. **Deleting the last spare route undid itself.** The top-up ran on every render, so the row was
-   removed and re-created in the same breath — same number, colour and key, hence invisible.
-   With + Add Route providing slots on request the top-up is both unnecessary and opposed to what
-   Delete is for, so it no longer runs on render; it still runs after a file or TravellerMap
-   import. A new slot also no longer takes a number that orphaned **segments** are still using.
-
-
-### What shipped in v0.17.4
-
-Seven changelog entries. Two new features, four bug fixes, one cleanup.
-
-1. **Continue an existing route** — the feature. A P2P route can be added to instead of
-   rebuilt: tick the box, the Start pre-fills with one of the route's two ends, and the
-   rest of the route is never re-searched. Off on every panel open.
-2. **Combine two routes** — a 🔗 on each Route Manager row folds another route into this
-   one, when the *merged shape* would be a single unbroken line.
-3. **R9, open since 2026-07-30: a filter outlived its own form.** The filter's per-hex
-   *result* was persisted; its *inputs* were not. See §0.0.7 — it is the most transferable
-   thing in this release.
-4. **The Systems panel and CSV could omit worlds** — a line plus a separate closed loop
-   passed the "exactly two loose ends" test, and the walk then listed 3 of 6 worlds while
-   reporting itself ordered. Found by extracting the chain walk, not by looking for it.
-5. **The CSV button is now a word**, not a third file-shaped icon.
-6. **Multi-sector OTU import undo** — it *looked* like it undid the import while actually
-   reverting unrelated earlier work. Now not undoable at all, like the universe import.
-7. Two more dead functions removed from `js/routes.js`.
-
+* **The two eligibility tests are deliberately different and must not be merged.**
+  `walkRouteEnds` / `getRouteEnds` is the WEAK one — one piece, at least one loose end — and
+  gates **Continue**. `walkRouteChain` / `getRouteChain` is the STRICT one — a single unbroken
+  line with exactly two ends — and governs **Combine** and travel order. Both in `js/routes.js`.
+* **A suite can be green, honest and blind at once.** Every pre-v0.17.5 Continue check laid a
+  clean two-ended chain, a shape BOTH the old rule and the new one accept, so all fifteen
+  passed unchanged and would still pass if the rule were silently reverted. **What was missing
+  was not assertions but SHAPES.**
+* **A row in the Route Manager needs 467px** and the window is 520px. It was 430px, which
+  rendered the 50px colour swatch as a 14px sliver. Mind this before adding a control.
 
 ### The route directives — the authoritative documents
 
-*(This heading and its table had drifted apart — the table had ended up below v0.17.3's
-entries, under the wrong heading. Rejoined 2026-09-11.)*
+*(This heading and its table had drifted apart — the table had ended up under the wrong
+heading, below the v0.17.3 entries. Rejoined 2026-09-11; those entries were themselves
+condensed into the table above on 2026-09-21, and this one was deliberately NOT condensed —
+the three route specs remain authoritative documents.)*
 
 | Directive | Covers | Status |
 |---|---|---|
@@ -983,54 +798,6 @@ eligibility rule ("a clean chain") for ten days after the code stopped using it.
 invariant in its §3 still governs **Combine** and travel order — it is only Continue's gate
 that was weakened. See §4.1 of that spec.
 
-
-### What shipped in v0.17.3
-
-Six changelog entries, all verified in a real browser with Playwright.
-
-1. **Build as far as possible** — the feature. A P2P route that cannot reach a stop is kept
-   up to the closest world it could reach, which is named and ringed. Off by default.
-2. **"No path found" names that world too**, whether or not the option is on.
-3. **The completion toast names worlds**, not bare hex IDs, like every other message.
-4. **The top of a new waypoint field was clipped** by its own scroll container.
-5. **Undo after a TravellerMap XML route import** now restores the slots it created.
-6. **Undo after loading a Map JSON** now restores the route slots it replaced.
-
-Also, not user-visible: `utilities/route_corpus.js`, `route_perf.js` and
-`route_test_common.js` are new and **committed this time** (§0.0.5).
-
-
-### What shipped in v0.17.2
-
-Eight changelog entries, all verified in-browser with Playwright. Unstaged in the working
-tree — **git is Sean's, never touch it.**
-
-1. **Autocomplete list never appeared.** `.draggable-palette`'s `backdrop-filter` makes it
-   the containing block for `position:fixed` children, so the list was displaced by the
-   window's own offset and clipped away by `overflow:hidden`. Fixed by portaling it to
-   `<body>`. **This trap applies to every palette in the app** — see §0.0.1.
-2. **Generation is atomic.** `_generateIntoSlot()` in `js/ui_menus.js`: a run producing
-   nothing restores the map, the route and the undo entry. Failure is judged by what landed
-   in the slot, not by the count a generator reports — `generateBTNRoutes` measures net
-   array growth, which reads zero for a segment that evicted a rival as it was added.
-3. **"No path found" names the failing leg**, and names stops the way the builder does.
-4. **Phantom route slots** no longer created (`resolveRouteId` returns `extras.routeId`
-   before consulting definitions), plus a guarded cleanup for sectors that already have
-   them. The guard is a conjunction — `groupId` alone is NOT a phantom marker, because
-   `migrateToRouteDefinitions` legitimately stamps one on definitions rebuilt from
-   pre-v0.10 save files, and those own segments.
-5. **Undo covers route definitions** — `saveHistoryState(name, { includeRouteDefinitions: true })`.
-   **Opt-in on purpose**: names, colours, shortcuts and visibility are edited without
-   pushing history entries, so an always-on snapshot would let an undo of an unrelated
-   action silently revert a rename made afterwards.
-6. **Dead duplicate `ensureFreeRouteSlot`** removed from `js/routes.js`. The live one is in
-   `js/ui_menus.js`, which loads later and had always overwritten it.
-7. **Save/load a single route** — one new column in the Route Manager row. See
-   `route_file_spec.md`.
-8. **Pathfinder scaling** (WP0 of the forcing spec). Cube-coordinate bucket index plus
-   parent pointers. A 19-leg route across ~16,000 worlds went from **25.3 s of frozen
-   browser to 0.2 s**; growth is now linear rather than quadratic. Proved route-identical
-   across 19 scenarios and 2,603 segments.
 
 ### 0.0.1 Two traps the v0.17.2 session paid for — do not rediscover them
 
@@ -1054,40 +821,16 @@ tree — **git is Sean's, never touch it.**
   **0 missed and 0 extra at every range.** The function is exact. The wider caution about
   offset coordinates is still worth holding — it is simply not true of these two axes.
 
-### 0.0.2 Partial routes — what was built, and the forcing design that was dropped
+### 0.0.2 Route forcing was designed in full and DROPPED
 
-**Route "forcing" was designed in full on 2026-08-19 and DROPPED on 2026-08-27. It was never
-built and is not pending.** The filter-relaxing second pass, the weighted penalty search,
-`forced: true` segment flags, dashed rendering, the "Detour outside the filter if needed"
-checkbox — **none of it exists.** Do not resurrect it without talking to Sean. That spec was
-rewritten as `route_partial_spec.md`; its §13 records what forcing was and why it went, and
-§14 holds the wider route-editing design.
+**Designed 2026-08-19, dropped 2026-08-27. It was never built and is not pending.** The
+filter-relaxing second pass, the weighted penalty search and the rest of it are still described
+in older parts of `route_partial_spec.md` (§13). **Do not resurrect forcing without asking
+Sean.**
 
-**What was built instead: partial route generation — shipped in v0.17.3, complete.** What
-follows is the design record for behaviour that is live today, not a plan. It began with a
-power user, via Sean:
-
-> "I personally like it to generate as far as it can so I can manually bridge it and tell it
-> to continue. That's the least amount of work."
-
-So: when a Point-to-Point leg cannot be routed, the generator commits the route as far as
-the search actually reached — call that world **C**, the reachable world closest to the
-target — names it, and stops. The user bridges with a waypoint and regenerates, which is
-0.2 s at Imperium scale post-WP0.
-
-**Decisions, settled 2026-08-27:**
-
-| | |
-|---|---|
-| Max Jump, the filter, Allow Empty Hexes | all **hard**. Nothing is relaxed, ever. This is the whole simplification |
-| Multi-leg | **stop at the first shortfall.** Later legs are not attempted, so the route stays ONE unbroken chain — which is why `getRouteSystemList` needs no change |
-| C | the reachable world **closest to the target**, tie-broken by fewest hops then world-array order |
-| C must be a **world** | never an empty hex, even in Allow Empty Hexes mode. C exists to be bridged from, and a route ending in deep space is a jump to nowhere |
-| No progress | if nothing reachable is closer than the start, there is no partial. Report the plain failure |
-| Control | a **checkbox, default off**, so today's one-and-done behaviour is untouched |
-| The strict failure message names C too | even with the checkbox off. Pure information, changes no state |
-| A route that stops short **is a route** | it commits, with the shortfall marked. This does change what a route slot can hold |
-
+What was built instead is **partial routes**: a P2P route that cannot reach a stop keeps what it
+could build, up to the closest world it reached, which is named and ringed. Off by default. The
+engine contract is below.
 
 ### 0.0.2.1 The partial-route engine contract, as built
 
@@ -1131,164 +874,51 @@ removed 2026-09-11; what remains is the part that is still reference.)*
 | Travel order and Combine — the **strict** test | `js/routes.js` — `walkRouteChain`, `getRouteChain`. One unbroken line, exactly two ends. **These two tests are deliberately different; do not merge them** |
 | Route Manager width | `hex_map.html` — `#route-window`, `width: 520px`. A row needs 467px to fit at all (v0.17.5) |
 
-### 0.0.4 Housekeeping — open items only (rewritten 2026-09-11)
+### 0.0.4 Cross-document notes
 
-*(Everything previously listed here was struck through and done: the v0.17.2 changelog dating,
-and the note about which commit carried it. Removed rather than kept as strikethrough.)*
+**Nothing outstanding.** One lesson kept from the last item that stood here: a complaint that
+`html_extract_manifest.md` OPEN-2 was stale **outlived by twenty days the thing it complained
+about**, because OPEN-2 had been closed and the pointer to it sat here unread. **A pointer into
+another document rots faster than the thing it points at** — re-read the target before trusting
+any cross-manifest note.
 
-- ~~**`route_extend_spec.md` C4 is out of date.**~~ **AMENDED 2026-09-11.** C1 and C4 now
-  state the weak rule, §4.1 records the four v0.17.5 behaviours the original decisions did not
-  cover, and §3 carries a pointer saying the chain invariant still governs Combine and travel
-  order but no longer gates Continue. §10 and §14 were brought in line at the same time.
-  **One error corrected in passing:** §14 claimed the Route Manager row "still fits its 430px
-  column exactly". v0.17.5 item 2 establishes it never did — a row needs 467px, and the 50px
-  colour swatch had been rendering as a 14px sliver.
-- ~~**`utilities/route_continue.js` predates v0.17.5** and has no coverage of the weak
-  eligibility test, + Add Route, the segment-count fix or the "already connected"
-  message.~~ **CLOSED 2026-09-11 — see §0.0.5.** The suite was first re-run unchanged against
-  v0.17.5 to settle the question it was flagged for: **15/15 passed**, so it was blind rather
-  than broken. It now carries 23 more checks (15 → 38), and `utilities/route_add_slot.js`
-  is new, with 11.
-- **Unrelated, carried forward:** `html_extract_manifest.md` OPEN-2 (and its §9.1 note) still
-  says `changelog.md` reads `[v0.17.0.1] - In Progress`. It does not — that entry is dated
-  `2026-08-10`. OPEN-2 is stale on the dating point; its *other* claim, that entry 1 is
-  contradicted by entries 2 and 4 in the same section, has still never been checked.
+### 0.0.5 The committed test harness
 
-
-### 0.0.5 The test harness — REBUILT AND COMMITTED 2026-08-27
-
-Last session's Playwright scripts lived in a session temp directory and were lost. They have
-now been rebuilt and **committed to `utilities/`**, so this cannot happen again. Sean
-approved adding them to the repo.
+In `utilities/`, committed so they cannot be lost with a session. **Open the `.html` ones
+directly — no server.**
 
 | File | What |
 |---|---|
-| `utilities/route_test_common.js` | Shared bootstrap: launches `hex_map.html` past the splash, builds a deterministic map, fingerprints segments |
-| `utilities/route_corpus.js` | The corpus differ — 19 scenarios × 2 maps = **38 scenarios, ~18,000 segments** |
-| `utilities/route_perf.js` | The performance measure — long leg, full-exhaustion leg, and a 19-leg route at six map sizes |
-| `utilities/route_continue.js` | Continue — **38 checks**, drives the real panel. The C-checks are v0.17.4; the **V-checks are v0.17.5's weakened eligibility rule** |
-| `utilities/route_add_slot.js` | **+ Add Route — 11 checks** (v0.17.5): colour and shortcut allocation, the cursor landing in the new name, Ctrl+Z, and that the removed render-time top-up no longer undoes a deletion |
-| `utilities/route_combine.js` | Combine — 13 checks, including eligibility rejection (v0.17.4) |
-| `utilities/filter_persistence.js` | R9 — 11 checks across restart, store, save file and indicator (v0.17.4) |
-| `utilities/otu_import_undo.js` | Multi-sector import undo — 6 checks, drives the real modal **offline** by seeding the importer's localStorage cache and stubbing `fetch` to throw (v0.17.4) |
+| `route_test_common.js` | Shared bootstrap: launches `hex_map.html` past the splash, builds a deterministic map, fingerprints segments |
+| `route_corpus.js` | The corpus differ — 19 scenarios x 2 maps, ~18,000 segments. Fingerprints route OUTPUT, so it is the tool for proving a refactor changed nothing |
+| `route_perf.js` | Long leg, full-exhaustion leg, and a 19-leg route at six map sizes |
+| `route_continue.js` | Continue — 38 checks against the real panel |
+| `route_add_slot.js` | + Add Route — 11 checks |
+| `route_combine.js` | Combine — 13 checks |
+| `filter_persistence.js` | R9 — 11 checks across restart, store, save file and indicator |
+| `otu_import_undo.js` | Multi-sector import undo — 6 checks, driven OFFLINE by seeding the importer's localStorage cache and stubbing `fetch` to throw |
+| `verify_field_v1.html` | **Standing gate.** 30 renders at terrain field version 1 vs recorded hashes |
+| `lake_calibration.html` | **Standing gate.** Lake cover across hydrographics |
+| `test_regional_terrain.html` | Terrain harness. Does NOT load `terrain_rivers.js`, so the sheet degrades there — pre-existing, not a regression |
 
-**Coverage reaches v0.17.5 as of 2026-09-11.** The gap and how it was closed, because the
-shape of it recurs:
+**The coverage lesson, which is the transferable part:** eleven scenarios (V1-V11) had to be
+added because every existing check laid a shape both the old and new rules accepted. They lay a
+three-ended Y, a self-crossing route, a closed loop, and a line beside a detached loop — each
+**paired with `getRouteChain().ok === false` on the same segments**, so if the eligibility rule
+is ever reverted the check fails instead of quietly going vacuous. The line-beside-a-loop case
+earns its place separately: it presents exactly TWO loose ends and must still be refused, which
+is what makes "count the ends" the wrong test.
 
-Every C-check in `route_continue.js` lays a clean two-ended chain — a shape **both** the old
-eligibility rule and the new one accept. So all fifteen passed against v0.17.5 unchanged, and
-all fifteen would still pass if the rule were silently put back. A suite can be green, honest
-and blind at the same time; green says nothing about which *version* of the behaviour it
-pins. **What was missing was not assertions but shapes.**
+**Also worth keeping:** the segment-count check must run at **Jump-1**. At Jump-3 the pathfinder
+shortcuts past the route's own edges, nothing is ever retraced, and the bug is unreproducible.
 
-Eleven new scenarios (V1–V11, 23 checks) now lay the shapes the C-checks cannot reach — a three-ended Y, a
-self-crossing route, a closed loop, and a line beside a detached loop — and each is paired
-with `getRouteChain().ok === false` on the same segments as its own control. **That pairing is
-the point:** it asserts the shape really is one the old rule refused, so if the eligibility
-rule is ever reverted the check fails instead of quietly going vacuous. The
-line-beside-a-loop case earns its place separately — it presents exactly **two** loose ends
-and must still be refused, which is what makes "count the ends" the wrong test.
+### 0.0.6 Open items
 
-Also now covered: the staleness re-test (including that it leaves a user's tick alone, and
-that a tick which loses its precondition unticks itself **and restores the form**), the
-setup-clearing on a route with more than two ends, the "already connects" message, and the
-segment count — the last asserted as *announced equals actually drawn*, at **Jump-1**, because
-at Jump-3 the pathfinder shortcuts past the route's own edges and nothing is ever retraced.
-The bug is unreproducible at the jump number every other check happens to use.
+**None here.** Everything that stood in this section was ruled on 2026-09-21 and is now
+either a closed ruling in §0.0.B or work that has since been done.
 
-The corpus differ (`route_corpus.js`) was unaffected throughout: it fingerprints route
-*output*, and none of v0.17.5 changes what the generator draws.
-
-**Every suite carries a negative control**, and this is not ceremony. Three of the four
-would pass vacuously without one: "nothing is hidden" passes on a map where the filter never
-ran; "the route is a chain" passes on an empty slot; "Ctrl+Z changed nothing" passes when the
-undo stack is empty *however broken undo is*. Each control removes the behaviour under test
-and asserts the check fails. Add one to anything new.
-
-**Usage, from the repo root:**
-
-```
-node utilities/route_corpus.js --out tmp/before.json     # before a change
-node utilities/route_corpus.js --against tmp/before.json # after — exits 1 if routes moved
-node utilities/route_perf.js --json tmp/perf.json
-```
-
-`tmp/` is gitignored, which is deliberate: the harnesses are committed, the baselines are
-regenerated fresh each time (~30 s) rather than stored.
-
-**Properties that make it worth trusting** — each was verified, not assumed:
-
-- **Deterministic.** Two runs of unchanged code produce byte-identical corpora. The map is
-  built by a frozen LCG in `route_test_common.js`, *not* the app's `mulberry32`, so the
-  corpus cannot drift when `js/core.js` changes. Fingerprints are sorted and carry nothing
-  time-based.
-- **Sensitive.** A tampered corpus (2 segments removed from one scenario, 1 fake segment
-  added to another) is caught in both directions, naming the exact segments, exit code 1.
-- **Not vacuous.** The first draft passed `filteredHexIds: []` while `filteredOnly` was
-  true, so the traversal graph held only the stops and **every P2P scenario silently
-  produced zero segments**. A corpus of zeroes compares equal to itself forever. The
-  scenario segment counts are printed on every run for exactly this reason — read them.
-  The only legitimate zeroes are `p2p_island_*` (unreachable by design) and `p2p_j2` on the
-  sparse multi map.
-- **Exercises every generator.** XBoat needs `starport`/`tl`/`pop`/`tradeCodes`/bases for
-  `calculateT5Ix`; BTN needs a finite `data.WTN`. Omitting either does not error — it
-  silently yields an empty route. The world generator's `tl` and `pop` ranges are tuned so
-  Ix reaches 4+, because a flat spread made the app's default `minIx: 4` find nothing.
-
-**Baseline captured 2026-08-27**, before any partial-route work, in `tmp/perf_baseline.json`
-and `tmp/corpus_baseline.json`. The perf numbers independently reproduce the spec's post-WP0
-§9.1 table:
-
-|  worlds | long leg | no path (full exhaustion) | 19-leg route |
-|--------:|---------:|--------------------------:|-------------:|
-|     432 |   1.2 ms |                      1.0 ms |       2.0 ms |
-|   1,152 |   2.5 ms |                      2.2 ms |       5.3 ms |
-|   2,512 |   4.8 ms |                      4.7 ms |      15.7 ms |
-|   5,712 |   8.8 ms |                     10.8 ms |      36.1 ms |
-|  10,192 |  13.3 ms |                     19.7 ms |      86.0 ms |
-|  15,952 |  19.7 ms |                     31.4 ms |     147.3 ms |
-
-Growth is linear — worlds ×1.57 → time ×1.48 to ×1.71. Compare any future reading on the
-same machine; an idle laptop and a busy one differ by more than some changes being measured.
-
-**Bootstrapping note:** open `hex_map.html` via `file://`, click `#btn-launch-app` to get
-past the splash, then drive the app through `page.evaluate` — all the generators and
-`hexStates` are globals. Note `hexStates` is **empty** on a fresh launch; a harness must
-build its own map. Redo is **Ctrl+Shift+Z**, not Ctrl+Y. Escape closes the route panel.
-
-### 0.0.6 Open items — one live, none blocking (rewritten 2026-09-11)
-
-**Live:**
-
-- **The two route file icons.** A save glyph (`fa-file-export`) and a load glyph
-  (`fa-file-import`) sit side by side in each Route Manager row, near-identical without
-  hovering. v0.17.4 removed the third of the set by turning CSV into a word; the remaining pair
-  was left alone on purpose. Standing reservation needing Sean's eye in real use —
-  `route_file_spec.md` OQ-1.
-
-**Also open, but recorded elsewhere:** OW-3, OW-5 layer 2 and OW-65 are System Editor and
-route/filter items and live in §6.2, summarised in §0.0.0 and §4. **OW-65's three items are
-parked pending user evidence — do not restart them without new information.**
-
-**Closed during this series.** Kept as three lines rather than deleted, because the reasoning
-transfers; the full accounts are in the changelog entries for the release named.
-
-- `_autoAssignXmlRoutes` and `applyLoadedMapData` (`js/io_manager.js`) both called
-  `saveHistoryState` **without** `includeRouteDefinitions`, so an undo restored hexes and
-  segments while leaving foreign route slots in place. Fixed 2026-08-27 (v0.17.3), both verified
-  in-browser with a negative control that strips the option at runtime to prove the test can
-  fail.
-- The multi-sector OTU import's `bulkMode` comment described a deferred history snapshot **that
-  did not exist**. The real behaviour was worse than "not undoable": Ctrl+Z *looked* like it
-  undid the import while actually restoring a much older snapshot and silently reverting
-  unrelated earlier work. Fixed 2026-09-01 (v0.17.4) by clearing the undo/redo stacks the way
-  the universe import always has — snapshotting was rejected because a pre-import copy of
-  `hexStates` is exactly the size the 5-entry undo cap exists to avoid. Test:
-  `utilities/otu_import_undo.js`.
-- `getAutoRouteGroups()` and `clearAutoRouteGroup()` in `js/routes.js` were verified dead — no
-  reference in any `.js`, `.html`, `.md` or `.json`, dynamic-dispatch spellings included — and
-  removed 2026-09-01. Corpus re-run after removal: 38 scenarios, 18,079 segments, identical.
-
+**And none anywhere else either.** The System Editor and route/filter residue that used to be
+recorded here — OW-3, OW-5 layer 2, OW-65 — was deleted on 2026-09-21.
 
 ### 0.0.7 R9 — the pattern worth carrying forward
 
@@ -1320,26 +950,18 @@ persistence boundaries; and an always-visible indicator, because the root usabil
 is that **a filtered map is indistinguishable from a sparse one.**
 
 
-### How this work was verified — reuse the method
+### The method that works here
 
-Every fix was reproduced in a real browser with Playwright (already in `node_modules`)
-before being fixed, and re-verified after. `node --check` alone has repeatedly missed real
-bugs in this codebase. The highest-value pattern used here: **capture a corpus of generated
-routes before a refactor, re-run after, diff.** That is what made "WP0 changes no routes" a
-measurement rather than a claim.
+Every fix in this project's recent history was reproduced **in a real browser with Playwright**
+(already in `node_modules`) BEFORE being fixed, and re-verified after. **`node --check` has
+repeatedly passed on real bugs in this codebase** — float32 precision, routing cycles, a lookup
+grid showing through, a slider pinned to its minimum, a missing function parameter.
 
----
+The highest-value pattern: **capture a corpus of generated output before a refactor, re-run
+after, diff.** That is what made "WP0 changes no routes" a measurement rather than a claim.
 
-
-**Companion manifest:** `directives/html_extract_manifest.md` — the wiki export, and where
-**all recent work has happened**. Read it before touching `js/export_core.js`,
-`js/obsidian_exporter.js`, `js/html_exporter.js`, `js/disclosure.js`,
-`js/disclosure_grid.js`, or the disclosure gate in `js/renderer.js`. Its section 0 is the
-cold-start handover. A third directive,
-`directives/fog_of_war_field_tags.md`, is the authoritative per-field disclosure answer key.
-
-**This document covers the v0.16.x System Editor**, which is paused, not abandoned. It is
-the reference for resuming RTT and AoW editor support.
+**And watch a test fail before believing it passes** — re-break the fix and confirm the error
+matches the one reported, or you have only proved that today's code runs.
 
 ---
 
@@ -1353,16 +975,15 @@ the reference for resuming RTT and AoW editor support.
 
 | | |
 |---|---|
-| **Most recent work** | **v0.17.2–v0.17.5 — routes**, closed 2026-09-11. See §0.0; nothing in *this* document's own subject matter (the System Editor) moved during it. The exports series (v0.17.0 / v0.17.0.1) closed before it — see the companion manifest. |
+| **Most recent work** | **v0.18.0 — regional surface maps**, shipped 2026-09-20; its constraints are §0.0.A. Before it, v0.17.2–v0.17.5 — routes. Nothing in *this* document's own subject matter (the System Editor) moved during either, apart from one legacy-save bug — see "Legacy saves omit fields" in §0.0.A, which still binds any code reading a loaded sector. |
+| **Current release** | **v0.18.1.1 — image exports (the system sheet)**, in-app sheet accepted 2026-09-24; **exporter wiring (also v0.18.1.1) not started** — §0.0.C. (v0.18.1 closed 2026-09-24 with fixes and route order.) |
 | **This document** | v0.16.x System Editor. **Paused** after MgT2E, CT and T5 were brought fully online. |
 | **Paused** | RTT and AoW editor support — the reason this manifest is retained. |
-| **Open here** | Three items only, all in 6.2: OW-3, OW-5 layer 2, OW-65. See section 4. |
+| **Open here** | **None.** The last three were deleted 2026-09-21 — see section 4. |
 
-**Nothing is currently in progress in either manifest, and v0.18.0 is open with nothing
-chosen — see §0.0.0.** The companion's section 9 lists two non-blocking open items (an in-app
-number-formatting sweep, and dating the v0.17.0.1 changelog entry — the second of which is
-itself stale, see §0.0.4); this document's section 4 lists three. There is no half-finished
-work.
+**Nothing is half-finished in either manifest.** v0.18.1.1's system sheet is built and verified
+and accepted (gallery review 2026-09-24); the exporter wiring, also in v0.18.1.1, is not started — see §0.0.C. The
+companion manifest has **no** open items. This document's section 4 lists three.
 
 ### 0.2 System Editor engine support — verified against code 2026-08-06
 
@@ -1400,36 +1021,12 @@ before, see pattern 4 in 6.1. **Line numbers re-verified 2026-08-06:**
 2. **Section 6.1** — nine recurring failure patterns drawn from the MgT2E/CT/T5 work.
    Expect them to recur; pattern 1 (seeded bodies skipping generation steps) and
    pattern 6 (RTT's flat body layout) are the two most likely to bite.
-3. **Section 6.2** — OW-9 in particular: AoW's readiness audit and what `aow_seed_bridge.js`
-   had to solve. OW-3 (per-engine UWP auditor) and OW-5 (commit-path layer 2) are both
+3. **Section 6.2** — OW-9: AoW's readiness audit and what `aow_seed_bridge.js`
+   had to solve. Two things it does NOT record any more, both deleted 2026-09-21 but both
+   still true of the code: a new engine needs its own populated `sys.auditResult` before
+   Fill & Save is trustworthy, and `commitEditorSystem()` was never built, so the editor's
+   `_clearSystemData()` and `macro_orchestrator.js`'s inline clear-block are two copies. Both
    still open and both apply to any new engine.
-
-### 0.4 Document history
-
-Condensed 2026-08-01 from ~356 KB to ~159 KB. Section 6 previously carried 65 work items
-and 7 bugs in full forensic detail; closed items are now a one-line index (6.3) with the
-transferable lessons distilled into 6.1. Sections 2 and 5 were kept at full detail because
-they are the RTT/AoW handoff.
-
-**Refreshed 2026-09-11** for v0.17.5, the release that closed the routes series. No code
-changed. The header, §0.0 and §0.1 were brought up to date; a new §0.0.0 lists the v0.18.0
-candidates (nothing is chosen); §0.0.2 was retitled and its nine-row all-DONE progress table
-removed, keeping the engine contract; §0.0.4 and §0.0.6 were rewritten to drop items that were
-struck through and done; §0.0.6 was moved back above §0.0.7, where it belongs. Three pieces of
-drift were found and corrected in passing: the route-directives table had ended up under the
-wrong heading, §0.0.6 still described **three** file-shaped icons in a Route Manager row when
-v0.17.4 had turned one of them into a word, and the commit hashes §0.0 was told not to keep
-were being kept anyway. Two new pieces of drift are now **recorded rather than fixed**, both
-in §0.0.4: `route_extend_spec.md` C4 no longer matches the code, and
-`utilities/route_continue.js` has no coverage of v0.17.5.
-
-**Audited 2026-08-06** against the code, alongside the companion manifest. No code changed.
-Header and section 0 refreshed; gate 3's line numbers corrected (they had drifted ~25
-lines); the companion manifest's standing complaint that "section 2 still describes the
-v0.16.0 System Editor" was **retired** — that cleanup happened in the 2026-08-01
-condensation, and section 2 is now explicitly labelled a delivered design reference.
-
----
 
 ## 1. Project Goal
 An easy to use Traveller/Cepheus system builder and navigator
@@ -1502,7 +1099,7 @@ preliminary and needing overhaul; **T5 was overhauled and re-enabled 2026-07-16*
 - One-time, whole-system commit — not iterative
 - **MgT2E, CT, T5, RTT, and AoW (all UI-exposed as of 2026-07-05):** all run their bottom-up (or top-down, for T5) engine sequence with a "check user first, generate if missing" gate at every decision point. User-set values feed downstream decisions correctly (e.g. user-set spectral type informs habitable zone; for AoW, a user-set spectral type is resolved to concrete star physics by `js/aow_seed_bridge.js`'s solver — see the AoW subsection in Section 5).
 - **Checkbox (unchecked by default):** "Allow engine to add additional bodies" — when unchecked, Fill only fills fields on bodies the user placed; when checked, engine may add bodies per its normal rules
-- Physical inconsistencies trigger a warning; user may correct or proceed. **This is OW-3 (UWP Auditor) — DONE for all five engines (MgT2E/CT 2026-07-04, T5/RTT 2026-07-04/05, AoW 2026-07-05), see Section 6.**
+- Physical inconsistencies trigger a warning; user may correct or proceed. **The UWP Auditor gate is DONE for all five engines (MgT2E/CT 2026-07-04, T5/RTT 2026-07-04/05, AoW 2026-07-05).**
 
 #### UX & Safety
 - Cancel → warn-and-confirm → discard copy (original untouched)
@@ -1576,8 +1173,8 @@ function generateMgT2ESystemBottomUp(hexId, seedSys = null) {
 }
 ```
 
-#### The Commit Path — 🟡 PARTIALLY BUILT, ACCEPTED FINAL STATE (see OW-5, Section 6)
-Original plan: after Fill runs, `system_editor.js` would call `commitEditorSystem(hexId, engineResult, engine)` in `macro_orchestrator.js`, writing the completed system to hexStates and triggering a map redraw. **`commitEditorSystem` in `macro_orchestrator.js` does not exist and, per Sean's explicit 2026-07-04 decision, is not planned** — see OW-5 in Section 6. What was built instead: `system_editor.js`'s own internal duplication between `_fillAndSave()`/`_preview()` was extracted into a shared `_generateAndCommit()` (2026-07-04). The separate duplication in `macro_orchestrator.js`'s macro commit blocks remains un-consolidated — a deliberate, accepted scope decision, not an oversight. Also drop the `manually_edited: true` detail from this description — that flag was retired, see OW-4.
+#### The Commit Path — 🟡 PARTIALLY BUILT, ACCEPTED FINAL STATE
+Original plan: after Fill runs, `system_editor.js` would call `commitEditorSystem(hexId, engineResult, engine)` in `macro_orchestrator.js`, writing the completed system to hexStates and triggering a map redraw. **`commitEditorSystem` in `macro_orchestrator.js` does not exist and, per Sean's explicit 2026-07-04 decision, is not planned**. What was built instead: `system_editor.js`'s own internal duplication between `_fillAndSave()`/`_preview()` was extracted into a shared `_generateAndCommit()` (2026-07-04). The separate duplication in `macro_orchestrator.js`'s macro commit blocks remains un-consolidated — a deliberate, accepted scope decision, not an oversight. Also drop the `manually_edited: true` detail from this description — that flag was retired, see OW-4.
 
 ---
 
@@ -1733,7 +1330,7 @@ _fillAndSave():
      T5    → System_Driver.generateSystem({ edition: 'T5', ... })
      RTT   → generateRTTSectorStep1(hexId, { seedSys })
 
-  5. RUN UWP AUDITOR — ✅ DONE for MgT2E and CT (2026-07-04). See OW-3 (Section 6).
+  5. RUN UWP AUDITOR — ✅ DONE for MgT2E and CT (2026-07-04).
      Each generator attaches its audit result to `sys.auditResult` (`auditMgT2ESystem`/
      `MgT2E_UWP_Auditor.runAndLog` for MgT2E; `auditCTSystem`/`CT_Auditor.runAndLog` for
      CT, wired into `ct_system_driver.js`). `_fillAndSave()` reads `result.newSys.auditResult`
@@ -1741,7 +1338,7 @@ _fillAndSave():
      [Proceed anyway] [Go back and fix]. Still a no-op for AoW/T5/RTT until each gets
      its own `sys.auditResult` attachment.
 
-  6. COMMIT — 🟡 PARTIALLY EXTRACTED, ACCEPTED FINAL STATE. See OW-5 (Section 6).
+  6. COMMIT — 🟡 PARTIALLY EXTRACTED, ACCEPTED FINAL STATE.
      `_generateAndCommit(errorLabel)` (2026-07-04) is now the shared function called by
      both `_preview()` and `_fillAndSave()`: build seedSys → run generator (via
      `_ENGINE_ADAPTERS` for MgT2E/CT) → restore-display-manual-fields → preserve
@@ -1751,7 +1348,7 @@ _fillAndSave():
      ~~commitEditorSystem(hexId, result, engine)~~ in `macro_orchestrator.js` — does not
      exist and is not planned (Sean's call, 2026-07-04): only `system_editor.js`'s own
      internal duplication was consolidated; the separate `macro_orchestrator.js` commit
-     blocks remain un-consolidated. See OW-5's scope note in Section 6.
+     blocks remain un-consolidated.
 ```
 
 ---
@@ -1840,14 +1437,14 @@ Sub-steps and regression status (UPDATED 2026-07-05 — CT and T5 have both comp
 - **5d T5:** ✅ Done (2026-07-05) — structural + field-level (worldType/size/atm/hydro/pop) gating complete, Algorithm 7 mainworld election implemented, own `_ENGINE_ADAPTERS` entry, own UWP-auditor coverage, **UI-exposed**. Gov/law/tl/starport gating deliberately deferred (not a blocker, same as CT was — CT's has since been closed, see 5b above). Verified end-to-end in-browser via Playwright. **Not yet checked: satellite/moon-quantity locking (OW-10) — T5 was never audited for the append-instead-of-lock pattern CT had; verify before/when this deferred item is next picked up.**
 - **5e RTT:** ✅ Done (2026-07-04) — this bullet was left stale after RTT actually went live; see the RTT subsection in Section 5 for the accurate, current writeup (structural + full field-level gating, own adapter, own auditor coverage, UI-exposed, verified in-browser).
 
-**Before AoW/RTT is UI-exposed:** finish its remaining gating work above, give it its own `_ENGINE_ADAPTERS` entry (OW-8 pattern), AND give it its own UWP-auditor coverage (OW-3 pattern, per-engine — MgT2E's/CT's/T5's coverage does not extend to other engines). CT's and T5's Phase B work (Section 5, "CT is now fully online" / "T5 is now fully online") are the worked reference implementations for this whole sequence.
+**Before AoW/RTT is UI-exposed:** finish its remaining gating work above, give it its own `_ENGINE_ADAPTERS` entry (OW-8 pattern), AND give it its own UWP-auditor coverage (per-engine — MgT2E's/CT's/T5's coverage does not extend to other engines). CT's and T5's Phase B work (Section 5, "CT is now fully online" / "T5 is now fully online") are the worked reference implementations for this whole sequence.
 
 ---
 
 #### Step 6 — Fill & Save Orchestration — DONE for MgT2E and CT (UPDATED 2026-07-04)
 **Files:** `js/system_editor.js`
 
-Fill & Save button exists and works for MgT2E and CT. Actual current sequence (see corrected Algorithm 5): `_buildSeedSys()` → call generator (via `_ENGINE_ADAPTERS` for MgT2E/CT) → `_generateAndCommit()`'s shared commit block (`hexStates.set`/redraw) → **OW-3 audit gate** (`result.newSys.auditResult`; warn-and-proceed dialog if `pass === false`) → close editor → `SystemViewer.open(hexId)`. The "validate → mainworld dialog" steps this used to describe are retracted (OW-1/OW-2, closed as unnecessary). The UWP auditor step is implemented and live for MgT2E and CT; still a no-op for AoW/T5/RTT until each gets its own `sys.auditResult` attachment (see OW-3 in Section 6).
+Fill & Save button exists and works for MgT2E and CT. Actual current sequence (see corrected Algorithm 5): `_buildSeedSys()` → call generator (via `_ENGINE_ADAPTERS` for MgT2E/CT) → `_generateAndCommit()`'s shared commit block (`hexStates.set`/redraw) → **the audit gate** (`result.newSys.auditResult`; warn-and-proceed dialog if `pass === false`) → close editor → `SystemViewer.open(hexId)`. The "validate → mainworld dialog" steps this used to describe are retracted (OW-1/OW-2, closed as unnecessary). The UWP auditor step is implemented and live for MgT2E and CT; still a no-op for AoW/T5/RTT until each gets its own `sys.auditResult` attachment.
 
 `_buildSeedSys()`: deep-clone working copy stars and bodies (preserving `_manualFields`) into seedSys object with `_allowAddBodies` and `_mainworldRef` — confirmed real and matches the corrected Seed Object Schema in Phase 2.
 
@@ -1857,10 +1454,10 @@ Fill & Save button exists and works for MgT2E and CT. Actual current sequence (s
 
 ---
 
-#### Step 7 — Commit Path — 🟡 PARTIALLY DONE, ACCEPTED FINAL STATE (UPDATED 2026-07-04, see OW-5 in Section 6)
+#### Step 7 — Commit Path — 🟡 PARTIALLY DONE, ACCEPTED FINAL STATE (UPDATED 2026-07-04)
 **Files:** `js/system_editor.js`, `js/macro_orchestrator.js`
 
-`commitEditorSystem(hexId, sys, engine)` in `macro_orchestrator.js` (shared by macros AND the editor) does **not** exist and is **not planned** — Sean explicitly scoped this down (2026-07-04) to "system_editor.js only." What was built instead: `system_editor.js`'s own internal duplication between `_fillAndSave()`/`_preview()` is extracted into a shared `_generateAndCommit(errorLabel)` — see OW-5 Layer 1 in Section 6 for the full method list (build seedSys → run generator → restore-display-manual-fields → mainworld-name preservation → `computeSystemCounts` → `hexStates.set` → redraw). The `macro_orchestrator.js` commit-block layer (Layer 2) remains a separate, un-consolidated path — revisit only if a future engine's macro and editor commit paths need to agree, per OW-5's note.
+`commitEditorSystem(hexId, sys, engine)` in `macro_orchestrator.js` (shared by macros AND the editor) does **not** exist and is **not planned** — Sean explicitly scoped this down (2026-07-04) to "system_editor.js only." What was built instead: `system_editor.js`'s own internal duplication between `_fillAndSave()`/`_preview()` is extracted into a shared `_generateAndCommit(errorLabel)` (build seedSys → run generator → restore-display-manual-fields → mainworld-name preservation → `computeSystemCounts` → `hexStates.set` → redraw). The `macro_orchestrator.js` commit-block layer (Layer 2) remains a separate, un-consolidated path — revisit only if a future engine's macro and editor commit paths need to agree.
 
 - **Verified (MgT2E, in-browser by Sean):** Committed system on hex map; System Viewer renders it; Hex Editor shows correct fields; macro re-run on same hex overwrites correctly; map-level Ctrl+Z reverts to pre-edit state
 - **CT (2026-07-04):** same `_generateAndCommit()` code path (CT's `_ENGINE_ADAPTERS.CT.run()` writes `stateObj.ctSystem`/`ctData` the same way MgT2E's adapter does) — not yet exercised in-browser, see Step 6 above
@@ -1870,7 +1467,7 @@ Fill & Save button exists and works for MgT2E and CT. Actual current sequence (s
 
 ### Phase 5 — Implementation Notes & Design Decisions (2026-06-22)
 
-Steps 1–4 of the Phase 4 sequence are fully implemented. **UPDATED 2026-07-04:** Steps 5–6 are done for MgT2E and CT (still open for AoW/T5/RTT); Step 7 is intentionally left partial as an accepted final state (see OW-5, Section 6) rather than "not yet implemented." See Section 6 for current per-item status. The following design decisions were made during or after implementation and are not reflected in Phases 2–4.
+Steps 1–4 of the Phase 4 sequence are fully implemented. **UPDATED 2026-07-04:** Steps 5–6 are done for MgT2E and CT (still open for AoW/T5/RTT); Step 7 is intentionally left partial as an accepted final state rather than "not yet implemented." The following design decisions were made during or after implementation and are not reflected in Phases 2–4.
 
 #### Preview Button & Auto-Preview (updated 2026-06-24)
 
@@ -2003,26 +1600,17 @@ Both the orrery and accordion now correctly highlight a lunar mainworld. The `_n
 
 ## 4. Known Issues / To Do
 
-**Open items in this document (all in 6.2):**
+**None.** Everything this document tracked is closed. The last three — OW-3, OW-5 layer 2 and
+OW-65 — were deleted on 2026-09-21: each was conditional on resuming the paused RTT/AoW editor
+work, and none described a fault anyone had actually seen. The patterns worth carrying forward
+are in 6.1, and §6.2 keeps the AoW readiness audit as the worked example.
 
-- **OW-3** — per-engine UWP auditor coverage at Fill & Save. Done for MgT2E/CT/T5; each
-  new engine needs its own populated `sys.auditResult` before Fill & Save is trustworthy.
-- **OW-5 layer 2** — `commitEditorSystem()` shared by the macros *and* the editor was
-  never built. The editor's `_clearSystemData()` and `macro_orchestrator.js`'s inline
-  clear-block are still drifting. Revisit before a new engine's macro and editor commit
-  paths need to agree.
-- **OW-65** — three route/filter items deliberately parked pending user evidence. Not
-  editor work; do not restart without new information.
+**v0.18.1.1 is image exports (§0.0.B), not editor work**, and no recent release has been in this
+document's subject matter. Resuming RTT/AoW means starting at section 0.3.
 
-Everything else is closed — see the 6.3 index.
-
-**No recent work has been in this document's subject matter.** v0.17.0/0.17.0.1 were the
-exports series (`directives/html_extract_manifest.md`, complete 2026-08-04) and
-v0.17.2–v0.17.5 were the routes series (§0.0, complete 2026-09-11), so **nothing anywhere is
-currently in progress** and v0.18.0 is open with nothing chosen. The three items above are
-the System Editor's own residue; picking any of them up means resuming the paused RTT/AoW
-work, for which section 0.3 is the entry point. §0.0.0 lists them alongside the other
-candidates.
+**One editor rule from outside this section still binds:** see "Legacy saves omit fields" in
+§0.0.A before touching any code that reads star or world fields off a loaded sector — an editor
+bug of exactly that kind reached production in v0.17.5.
 
 ---
 
@@ -2059,12 +1647,12 @@ candidates.
 > Work on the next version happens in two strict phases. Phase A is now fully signed off — **Phase B (new engines) may begin.**
 >
 > **Phase A — Clean up and architect the System Editor, MgT2E only, no new engines touched: — ✅ ALL ITEMS DONE**
-> 1. **OW-5** (Section 6, hard prerequisite): extract the commit path. **🟡 PARTIALLY DONE 2026-07-04, and that's the accepted final state** — see corrected OW-5 status in Section 6. `system_editor.js`'s own internal duplication (`_preview()` vs `_fillAndSave()`) is extracted into a shared `_generateAndCommit()`. The `macro_orchestrator.js` commit-block layer was deliberately scoped out (Sean's call, 2026-07-04) and does not block Phase A sign-off — revisit only if a future engine's macro and editor commit paths need to agree.
-> 2. **OW-3** (Section 6, open, prioritized): implement the UWP Auditor step in Fill & Save. **✅ DONE for MgT2E, 2026-07-04** — see corrected OW-3 status in Section 6. Still needs its own per-engine hookup (a `sys.auditResult` attachment in each generator) before AoW/CT/T5/RTT can rely on it — that per-engine coverage is Phase B work, not a Phase A blocker.
+> 1. **Extract the commit path** (hard prerequisite). **🟡 PARTIALLY DONE 2026-07-04, and that's the accepted final state.** `system_editor.js`'s own internal duplication (`_preview()` vs `_fillAndSave()`) is extracted into a shared `_generateAndCommit()`. The `macro_orchestrator.js` commit-block layer was deliberately scoped out (Sean's call, 2026-07-04) and does not block Phase A sign-off — revisit only if a future engine's macro and editor commit paths need to agree.
+> 2. **Implement the UWP Auditor step in Fill & Save.** **✅ DONE for MgT2E, 2026-07-04.** Still needs its own per-engine hookup (a `sys.auditResult` attachment in each generator) before AoW/CT/T5/RTT can rely on it — that per-engine coverage is Phase B work, not a Phase A blocker.
 > 3. **OW-8 (✅ DONE 2026-07-04, verified in-browser by Sean)** — the per-engine adapter/config pattern for `js/system_editor.js`. `_buildWorkingCopyFromState()`, `_buildSeedSys()`, and `_runGenerator()` each had a separate near-parallel `if/else if` branch per engine; this was the last item blocking Phase A sign-off. See OW-8 in Section 6 for the full implementation writeup. The same 2026-07-04 audit that raised this also turned up two smaller items, both done: **OW-6 (✅ DONE)** — seed-restoration matching logic that lived inline in `mgt2e_bottomup_generator.js` is now `js/seed_restoration.js`; **OW-7 (✅ DONE)** — the `MgT2EMath` guard-consistency fix and the duplicated auditor-logging cleanup (now `MgT2E_UWP_Auditor.runAndLog()`), see Section 6.
 >
 > **Phase B — Expand to additional engines (now unblocked):**
-> Bring engines online one at a time per the per-engine remaining-work lists in Section 5 below (CT needs field-level `isManual` gating; T5 needs both structural and field-level gating plus Algorithm 7; RTT needs broader field-level gating). Each engine's UI entry point (`canvas_input.js`/`system_viewer.js` gates, `hex_map.html` dialog radio buttons) should only be switched on once that engine's generator work *and* its own UWP-auditor coverage are both complete — OW-3's auditor work from Phase A does not automatically cover new engines, each needs its own. Per OW-8, bringing each engine online should also mean giving it its own adapter in `_ENGINE_ADAPTERS` (see Section 6) instead of adding another inline branch.
+> Bring engines online one at a time per the per-engine remaining-work lists in Section 5 below (CT needs field-level `isManual` gating; T5 needs both structural and field-level gating plus Algorithm 7; RTT needs broader field-level gating). Each engine's UI entry point (`canvas_input.js`/`system_viewer.js` gates, `hex_map.html` dialog radio buttons) should only be switched on once that engine's generator work *and* its own UWP-auditor coverage are both complete — Phase A's auditor work does not automatically cover new engines, each needs its own. Per OW-8, bringing each engine online should also mean giving it its own adapter in `_ENGINE_ADAPTERS` (see Section 6) instead of adding another inline branch.
 >
 > **CT is now fully online (2026-07-04) — first engine through the full Phase B sequence:**
 > 1. Field-level `isManual` gating for size/atm/hydro/pop (`ct_world_engine.js` + `system_editor.js`'s `_ctUwpLockFor`)
@@ -2107,7 +1695,7 @@ candidates.
 > 4. **New file `js/aow_uwp_auditor.js`** — didn't exist at all before this pass, despite being `require()`d by `aow_bottomup_generator.js`'s own module wiring (the audit call was permanently dead code). Built mirroring `t5_uwp_auditor.js`'s `runAndLog` shape: mainworld-count structure check, belt-size integrity, satellite-vs-parent size, population cap — all wired through `sys.auditResult` the same way CT/T5 already work.
 > 5. **`_ENGINE_ADAPTERS.AoW` entry** (OW-8 pattern) — AoW's old inline `else if (engine === 'AoW')` branches deleted from all four call sites (`_detectEngine`, `_buildWorkingCopyFromState`, `_buildSeedSys`, `_runGenerator`). Deliberately thin per design decision 5 — the adapter's `write()` just carries working-copy bodies through with the fields the bridge needs; the actual field-locking logic lives in `aow_seed_bridge.js`, not `system_editor.js`.
 > 6. **Companion topology restricted at build time, not just Fill time** (design decision 3) — `_addStar()` now caps AoW systems at 4 stars and requires a 4th star to pair with the most recently added companion, matching the 5 hierarchy shapes `mapHierarchy()` actually supports. A flat 3+-companion arrangement is also generally astrophysically unstable, so this is a fidelity fix, not just a UI restriction.
-> 7. **Age-conflict warn-and-proceed dialog** (design decision 2) — when manually-chosen spectral types across stars imply system-age windows with no overlap, `_fillAndSave()` shows a dialog (`[Proceed Anyway]` / `[Go Back & Fix]`) rather than silently picking an inconsistent age, reusing the same UI pattern as the OW-3 audit gate.
+> 7. **Age-conflict warn-and-proceed dialog** (design decision 2) — when manually-chosen spectral types across stars imply system-age windows with no overlap, `_fillAndSave()` shows a dialog (`[Proceed Anyway]` / `[Go Back & Fix]`) rather than silently picking an inconsistent age, reusing the same UI pattern as the audit gate.
 > 8. UI switches flipped: `canvas_input.js`'s `_seCanEdit` gate, `system_viewer.js`'s Edit-button gate, and `hex_map.html`'s `#se-engine-dialog` AoW radio button all now include/enable AoW.
 >
 > **Real bug found and fixed during in-browser verification (2026-07-05), same pattern as T5/RTT's own verification passes:** `stepNaturalSatellites` (Step 17, called immediately after `stepPhysicalParameters` inside `generatePhysicals` — one of the 13 Phase-3 functions already confirmed to run unconditionally) requires `planet.Rmin` for its Hill Radius calculation, but `Rmin`/`Rmax` are normally set by `generateOrbitalDynamics` (Chunk 5) — which stays deliberately skipped for seeded systems (eccentricity isn't an editor-exposed field for a body's own orbit). This dependency was missed during the original 13-function trace (which focused on `stepPhysicalParameters`'s need for `planet.mass`) because it's a same-function-call cross-dependency, not an isManual-gating question. Reproduced 100% of the time: create an AoW system, add any body via "+World"/"+GG", Preview → `TypeError: Cannot read properties of undefined (reading 'toFixed')` at `aow_world_engine.js:1398`, caught and shown as a "Preview Error" dialog (not a silent failure, but blocking). Fixed in `aow_seed_bridge.js`'s `synthesizeDiskWorksheets()` by seeding `Rmin: orbitalRadius, Rmax: orbitalRadius` on each synthesized planet (zero-eccentricity default) — matching the exact convention `aow_world_engine.js` itself already uses for its own no-eccentricity case (`generateOrbitalDynamics` line ~885-886).
@@ -2166,7 +1754,7 @@ T5 and RTT are both fully online (see their own "is now fully online" notes abov
 - **Confirmed:** `node --check` passes on all three touched JS files. Cannot verify in-browser this session — first real end-to-end test (Create System, Edit System, Fill & Save, Preview, undo/redo) is now unblocked and up to Sean.
 
 **UWP-auditor coverage — `js/ct_uwp_auditor.js` / `js/ct_system_driver.js` — DONE 2026-07-04 (Phase B, item 3):**
-- ✅ **Done.** Added `runAndLog(sys, hexId)` to `ct_uwp_auditor.js`, mirroring `MgT2E_UWP_Auditor.runAndLog` (`mgt2e_uwp_auditor.js:400-423`, added under OW-7) — runs `auditCTSystem`, attaches the result to `sys.auditResult` (the field `system_editor.js`'s Fill & Save OW-3 gate reads — that gate is engine-agnostic, so it required no changes), and on failure `console.warn`s plus pushes each error to `window.auditBacklog` as `{ hexId, orbitId: null, engine: 'CT', message }`. `orbitId` is always `null` for CT since `auditCTSystem`'s `errors` array holds plain strings (not MgT2E's `{orbitId, message}` objects) — irrelevant to the Fill & Save dialog either way, since it only reads `audit.errors.length` for a count.
+- ✅ **Done.** Added `runAndLog(sys, hexId)` to `ct_uwp_auditor.js`, mirroring `MgT2E_UWP_Auditor.runAndLog` (`mgt2e_uwp_auditor.js:400-423`, added under OW-7) — runs `auditCTSystem`, attaches the result to `sys.auditResult` (the field `system_editor.js`'s Fill & Save audit gate reads — that gate is engine-agnostic, so it required no changes), and on failure `console.warn`s plus pushes each error to `window.auditBacklog` as `{ hexId, orbitId: null, engine: 'CT', message }`. `orbitId` is always `null` for CT since `auditCTSystem`'s `errors` array holds plain strings (not MgT2E's `{orbitId, message}` objects) — irrelevant to the Fill & Save dialog either way, since it only reads `audit.errors.length` for a count.
 - `ct_system_driver.js`'s `generateSystem()` (the function CT's System Editor dispatch always calls, both bottom-up and top-down) now does `sys.audit = auditRunAndLog ? auditRunAndLog(sys, hexId) : auditor(sys);` in place of the old bare `auditor(sys)` call — `sys.audit` keeps working for existing consumers (same result object), `sys.auditResult` is now also set as a side effect. The existing `writeLogLine`-based trace logging right below this line is untouched (a different, complementary consumer — in-app trace log vs. `runAndLog`'s console/backlog).
 - **Not done, deliberately out of scope:** `ct_bottomup_generator.js`/`ct_topdown_generator.js` still don't call the full auditor themselves (only a couple of narrow hand-written edge cases go straight to `auditBacklog`) — no duplication existed to consolidate here (unlike MgT2E's OW-7, which had two call sites), so no `runAndLog` call was added to either generator file. `system_driver.js` (the separate "Universal" driver used for T5 and some MgT2E regen paths) has its own CT-audit-attaching code but is never reached by CT's System-Editor dispatch — left untouched.
 - **Confirmed:** `node --check js/ct_uwp_auditor.js` and `node --check js/ct_system_driver.js` both pass. CT is now UI-exposed (item 5, done later the same session) — the Fill & Save dialog itself still hasn't been exercised in-browser; that's the first real end-to-end test, up to Sean.
@@ -2281,7 +1869,7 @@ Mirrors `ct_uwp_auditor.js`/`t5_uwp_auditor.js`'s `runAndLog` shape exactly: `au
 
 **Companion topology restriction — NEW, design decision 3.** `system_editor.js`'s `_addStar()` now caps AoW systems at 4 stars and requires a 4th star to pair with the most recently added companion — enforced at build time in the editor, not just at Fill time, matching the 5 hierarchy shapes `aow_seed_bridge.js`'s `mapHierarchy()` actually supports.
 
-**Age-conflict dialog — NEW, design decision 2.** `_fillAndSave()` now checks `result.newSys.ageConflict` (set by the bridge's `reconcileSystemAge` when manually-chosen spectral types imply non-overlapping age windows) and shows a warn-and-proceed dialog, reusing the same UI pattern as the OW-3 audit gate, before falling through to the audit check.
+**Age-conflict dialog — NEW, design decision 2.** `_fillAndSave()` now checks `result.newSys.ageConflict` (set by the bridge's `reconcileSystemAge` when manually-chosen spectral types imply non-overlapping age windows) and shows a warn-and-proceed dialog, reusing the same UI pattern as the audit gate, before falling through to the audit check.
 
 ---
 
@@ -2316,12 +1904,11 @@ space. What survives, and why:
   that actually transfers to RTT/AoW, and the reason the detail was read rather than
   simply deleted.
 - **6.2** — items still open or partially done, kept **verbatim**.
-- **6.3** — a one-line index of every closed item, so any of them is still findable.
 
 ### 6.1 Recurring patterns to expect when bringing RTT or AoW online
 
 Nine failure modes repeated across MgT2E, CT and T5. Assume they will recur. Each cites
-the closed items it was drawn from (see 6.3).
+the closed items it was drawn from.
 
 **1. Seeded and manually-added bodies skip generation steps entirely.**
 The single most common failure. A body created in the editor bypasses whatever phase
@@ -2378,8 +1965,8 @@ refreshed when Orbit # changed), OW-56, OW-59, OW-60.
 Bug #6/#7: the gas-giant flag had to be derived from the actual body list in both MgT2E
 and CT, because the counter it previously trusted (`sys.gasGiants`) is only populated by
 an inventory phase the editor skips. The editor's `_clearSystemData()` and
-`macro_orchestrator.js`'s inline clear-block still differ today — see OW-5 layer 2, which
-remains open.
+`macro_orchestrator.js`'s inline clear-block still differ today, and consolidating them was
+deliberately never done.
 → **Derive from the real body list rather than trusting a counter, and check whether the
 macro path needs the same change.**
 
@@ -2391,25 +1978,14 @@ round-trip, and **none** by careful reading, including a deliberate plan-review 
 → **Budget for at least one real bug per engine found this way. A clean first pass is
 suspicious, not reassuring.**
 
-### 6.2 Open / partial items — full text retained
+### 6.2 The AoW readiness audit — kept for its findings, not as open work
 
-**OW-3 — ✅ DONE for MgT2E (2026-07-04) and CT (2026-07-04, Phase B item 3); still open per-engine for AoW/T5/RTT: UWP Auditor step (Fill & Save)**
-After the generator runs, the UWP Auditor should be called. If it returns errors, show a warn-and-proceed dialog: [Proceed anyway] / [Go back and fix].
-**Implementation (2026-07-04):** `mgt2e_bottomup_generator.js` already computed a full `auditMgT2ESystem()` result internally on every run but discarded it after logging/backlog-pushing; it now also attaches it to the returned system as `sys.auditResult`, so callers can read it without re-running the (recursive, trace-logging) audit a second time. `system_editor.js`'s `_fillAndSave()` checks `result.newSys.auditResult` after `_generateAndCommit()` runs; on `pass === false` it shows a warn-and-proceed dialog (`Proceed Anyway` / `Go Back & Fix`) instead of silently closing the editor. The close-editor/reopen-viewer tail was split into `_finishFillAndSave(hexId)` so "Proceed Anyway" can run it without redoing generation; "Go Back & Fix" is a no-op that just leaves the editor open.
-**Known limitation, accepted as out of scope for this pass:** by the time the audit result is available, `_generateAndCommit()` has already written the (possibly failing) system into `hexStates` — `_runGenerator` mutates the live `stateObj` mid-generation rather than staging to a copy, so "Go Back & Fix" cannot literally un-commit the write. It only keeps the editor open for further edits; the map-level `Ctrl+Z` undo (already saved via `saveHistoryState()` before generation) remains the actual rollback path if the user wants one. A true "nothing touched until Fill & Save confirms" would require `_runGenerator`/the generators to stage writes rather than mutate live state — a bigger change, not attempted here.
-**Gate is engine-agnostic and opt-in:** `_fillAndSave()` checks `audit && audit.pass === false` generically, so it's silently inert for AoW/T5/RTT until each of those generators gets the same one-line `sys.auditResult = ...` attachment once their own `seedSys` gating work is done (Section 5) — CT already got this (`ct_uwp_auditor.js`'s new `runAndLog`, wired into `ct_system_driver.js`). **Sequencing still applies going forward:** each new engine needs its own auditor coverage (its own populated `sys.auditResult`) before it's trustworthy to Fill & Save against — OW-3's MgT2E/CT work does not automatically cover them.
-*Spec ref: Algorithm 5, Step 5*
-
-
-**OW-5 — 🟡 PARTIALLY DONE (decided 2026-07-03; layer 1 completed 2026-07-04): Extract commit path before any new-engine work begins**
-The spec calls for a `commitEditorSystem(hexId, sys, engine)` function in `macro_orchestrator.js` as the shared commit gate. The full commit (clear old data, write new engine data, `computeSystemCounts`, `hexStates.set`, redraw) was duplicated inline between `_fillAndSave()` and `_preview()` in `system_editor.js`, and diverges from the separate commit blocks already living in `macro_orchestrator.js`'s macro functions.
-**Decision:** Sean does not want to compound this duplication by adding CT/T5/RTT/AoW branches on top of it. This must be resolved — for MgT2E only, no new engines involved — **before** any engine-expansion work starts, not deferred to "whenever we touch the next engine."
-**Scope note:** the duplication is two-layered — (1) `_fillAndSave()` vs `_preview()` duplicated the same name-preservation/`computeSystemCounts`/`hexStates.set`/redraw block inside `system_editor.js` itself, and (2) that block also duplicates logic already present in `macro_orchestrator.js`'s existing macro commit blocks (~lines 499-555 as of Phase 2). A full fix consolidates both layers into one shared function used by all three call sites (macros, Fill & Save, Preview) — extracting only the editor's own duplication without touching the macro commit blocks leaves a second parallel path exactly like the one that caused Bug #6 (the gas-giant-sync fix needing to be applied in two places).
-**✅ Layer 1 DONE (2026-07-04):** `system_editor.js`'s internal duplication is extracted into a shared `_generateAndCommit(errorLabel)` (private to the module, ~line 2196), called by both `_preview()` and `_fillAndSave()`. It owns: build seedSys → `_resolveStarPhysics` → resolve/create `stateObj` → run generator (try/catch, parameterized error-dialog text) → `_restoreDisplayManualFields` → `_forceGreenTravelZone` → mainworld-name preservation across `mgt2eData`/`ctData`/`t5Data`/`rttData` → `stateObj.type` → `computeSystemCounts` → `hexStates.set` → `requestAnimationFrame(draw)` → `populateEditorAccordions`. Returns `{ hexId, stateObj, newSys }` or `null` (dialog already shown) on failure.
-Per the design-care note below, the two behavioral differences were deliberately kept in the callers rather than folded into the shared function: `_preview()` still takes its own `_previewOriginalState` snapshot before calling it, and still does its own post-commit viewer-refresh + derived-property backfill; `_fillAndSave()` still calls `saveHistoryState()` before calling it, and still does its own post-commit editor-close + viewer-reopen. Net change: `system_editor.js` shrank by ~31 lines (79 deleted, 48 added); `node --check js/system_editor.js` passes.
-**❌ Layer 2 NOT DONE — explicit scope decision (2026-07-04):** Sean chose "system_editor.js only" for this pass over "full consolidation" when asked directly, given the added risk of reconciling `macro_orchestrator.js`'s batch-macro commit block (which carries extra logic — `StatisticalAuditor` hooks, its own mainworld-lookup-including-lunar-search, its own old-data-clearing field list that already differs from `system_editor.js`'s `_clearSystemData()`) with the editor's per-hex preview/undo semantics. **The macro_orchestrator.js layer remains open** — a `commitEditorSystem()` shared by macros AND the editor has not been built, and the drift between the editor's `_clearSystemData()` and the macro's inline clear-block (Bug #6/#7's root cause pattern) is still live. Revisit before or during Phase B if a new engine's macro and editor commit paths need to agree.
-*Spec ref: Phase 2 Modified Files table; Phase 4 Step 7*
-
+**Nothing in this section is outstanding.** OW-3 (per-engine UWP auditor), OW-5 layer 2 (the
+shared commit path) and OW-65 (three parked route/filter items) were **deleted on 2026-09-21**
+at Sean's instruction: all three were conditional on resuming RTT/AoW, none described a fault
+anyone had seen, and carrying them was costing every session more than they were worth. **Do
+not reinstate them from git history.** What remains below is OW-9, kept because its audit is
+the worked example of what bringing an engine online actually involves.
 
 **OW-9 — ✅ CLOSED 2026-07-05 (found and fixed same day, pre-Phase-B AoW readiness audit): AoW's Phase 3 pipeline was architecturally unreachable in the System Editor's seeded path**
 **Resolution:** option (a) below was chosen and built — a new module `js/aow_seed_bridge.js` synthesizes real `sys.diskWorksheets` from resolved stars + seeded bodies (reusing `aow_world_engine.js`'s own `buildNodes`/`buildDiskWorksheet`), and `isManual()` guards were threaded into the ~6 functions/points that compute editor-exposed fields (not all 13 — most of the 13 functions' fields are pure internal simulation state the editor never exposes, so those were left fully random by design rather than over-gated). The star-side half of the problem (Phase 1 had no path to accept a user-chosen star at all) also needed new solver logic — a bisection search from spectral type to `initialMass`, age-window reconciliation across multiple stars with conflict detection (warn-and-proceed dialog, not silent averaging), and a hierarchy/orbit mapper — none of which existed before this pass. `js/aow_uwp_auditor.js` was also built from scratch (didn't exist at all), `_ENGINE_ADAPTERS.AoW` was added (OW-8 pattern), and UI exposure was flipped. See the "AoW is now fully online" note under v0.16.1 SEQUENCING (Section 5 header) for the full implementation writeup, and the corrected AoW subsection in Section 5. **Not yet verified in-browser** — per the project's own recorded lesson from T5/RTT verification, an in-browser Playwright pass is the natural next step before treating this as fully proven.
@@ -2422,108 +1998,10 @@ The manifest previously claimed (Section 5 header, "Next up" note) that AoW was 
 *Spec ref: Section 5's "AoW" subsection; supersedes the "field-level gating both present" claim in the v0.16.1 SEQUENCING header and the per-engine table in Section 5.*
 
 
-**OW-65 — 🟡 OPEN / DEFERRED 2026-07-30 (three items deliberately parked pending evidence — do not restart these without new information)**
+## 7. A carve-out that must not be tidied away
 
-1. **Filter state appears stale across sessions — awaiting user retest.** Reported as "it holds filter rules across sessions, and you have to change something in the filter to get things to populate." **Could not reproduce.** The obvious hypothesis (browser form-restoration on reload leaving criteria displayed but unapplied) was tested and ruled out — headless Chromium did not restore the multi-select on `page.reload()`. Note the term is ambiguous between two subsystems: the transient filter **bar** (pure DOM, no persistence) and the **Rules Ledger** `window.activeFilterRules` (persisted by design into the sector JSON, reapplied via `reapplyAllRules()` on load). **Strong likelihood this was OW-64's invisible-criterion trap all along** — "you have to change something to get things to populate" is exactly what a stale hidden criterion produces. Parked for the reporting user to retest against the OW-64 build before any further work.
-
-2. **File System Access API for saves — deferred.** Would replace anchor downloads with `showDirectoryPicker` for the chunked path, upgrading OW-62's honest-but-hedged reporting to real write confirmation (`await writable.close()` resolving means bytes landed). **Key design constraint if this is ever built:** `showSaveFilePicker` requires transient user activation, consumed by the first call — so N pickers for N chunks is *not* viable; it must be one `showDirectoryPicker` plus N writes through that handle. Verified that both APIs exist and `isSecureContext` is true on **both** `file://` and localhost in Chromium. Chromium-only, so the anchor fallback would be **permanent** — every FSA feature is two code paths forever, which is a high bar. Also unresolved: writing into a chosen directory silently overwrites same-named files, where the anchor path produces `(1)` suffixes. Playwright cannot drive native dialogs, so this needs manual verification. **Revisit trigger:** a user actually hitting the >250 MB chunked path.
-
-3. **`JSON.stringify` size ceiling — deferred, but higher priority than item 2 if it ever bites.** `io_manager.js` builds the *entire* map as one string purely to compare its length against `SAVE_CHUNK_THRESHOLD`. V8 caps strings near ~512 M chars, so a large enough map throws `RangeError` **before** chunking can help — the feature that exists to handle huge maps is gated behind an operation huge maps break. Affects **all browsers**; a hard failure, not degraded reporting. **Symptom to recognise:** save silently does nothing on a very large map, console shows `RangeError: Invalid string length`. **Fix does not need FSA:** `new Blob([...])` accepts an **array** of parts and concatenates internally, so serialise in fragments, size-check by summing fragment lengths (or reading `blob.size`), and hand the array to `new Blob(fragments)` — one code path, every browser. Needs its own design pass to preserve the exact save format for backward compatibility.
-
-**The one question that settles items 2 and 3 at zero cost:** ask the heavy user whether they have ever seen the *"your map is approximately N MB — it will be saved in N parts"* prompt, and how large their `traveller_map.json` actually is. Under ~250 MB, both stay parked indefinitely.
-
-*Spec ref: Sean's explicit direction 2026-07-30 — "leave this until more users try it."*
-
-### 6.3 Closed items index
-
-Sixty-one closed items, one line each. Engine column is a hint parsed from the original
-title, not authoritative. Full forensic detail was removed 2026-08-01; the patterns worth
-carrying forward are in 6.1.
-
-| Item | Engine | Closed | Summary |
-|---|---|---|---|
-| OW-1 | — | 2026-07-03 | Primary star validation gate deemed unnecessary |
-| OW-2 | — | 2026-07-03 | Mainworld validation dialog deemed unnecessary |
-| OW-4 | — | 2026-07-03 | `manually_edited: true` flag dropped as a requirement |
-| OW-6 | MgT2E | 2026-07-04 | Seed-restoration matching logic lives in the MgT2E orchestrator, not an engine |
-| OW-7 | MgT2E | 2026-07-04 | `MgT2EMath` guard inconsistency + duplicated auditor-logging block |
-| OW-8 | — | 2026-07-04 | Per-engine adapter pattern for `js/system_editor.js` |
-| OW-10 | CT | 2026-07-06 | two more places CT re-rolled already-generated data — satellite quantity, and the entire gov/law/starport/tl pass |
-| OW-11 | CT/MgT2E | 2026-07-06 | blank "Create System" wasn't blank, and CT had no equivalent of MgT2E's moon-cap trim safety net |
-| OW-12 | CT/MgT2E | 2026-07-07 | lunar mainworld's `isMainworld` flag never reached the System Editor, causing a second mainworld to be elected on Preview/Save |
-| OW-13 | CT | 2026-07-07 | a Captured Planet could roll the exact same orbit number as a companion star, and even after that was fixed the two still rendered at the same radius in the orrery |
-| OW-14 | CT | 2026-07-07 | Gas Giants have no natural "already generated" signal, so a no-edit Preview/Fill & Save silently mutated them — refines OW-10 Gap 1 |
-| OW-15 | CT | 2026-07-09 | dragging a companion star in the System Editor moved it in the body list but not in the orrery |
-| OW-16 | MgT2E | 2026-07-09 | editing a Belt's type/size away from Belt could crash Preview/Fill & Save with `Cannot read properties of null (reading 'toFixed')` |
-| OW-17 | CT | 2026-07-09 | a companion star added via the System Editor's `+Comp` rendered in a different relative position on all three surfaces (Edit panel, accordion, orrery) |
-| OW-18 | CT | 2026-07-09 | CT Edit System gap audit — `+Secondary`'s residual gap was worse than scoped, plus a rejected fix idea worth recording |
-| OW-19 | — | 2026-07-16 | ✅ ROOT-CAUSED AND CLOSED 2026-07-16 (original framing was a false alarm; the real bug was a separate, more severe regression) — see OW-42 below for a second, genuinely new bug found during the same re-verification |
-| OW-20 | CT | 2026-07-12 | a CT Captured Planet's name and moons weren't round-tripping through the System Editor, and its orbit field misleadingly read "auto" |
-| OW-21 | — | 2026-07-12 | "+World"/"+GG"/"+Belt" could insert the new body in the middle of the orbit list instead of appending it at the true end |
-| OW-22 | CT | 2026-07-12 | CT's "Seed UWP digits" Size box couldn't accept 'S' (Small) or 'R' (Ring) |
-| OW-23 | CT | 2026-07-12 | CT's Gas Giant size (Large/Small) had no editor control, and existing bodies' size was misread on open |
-| OW-24 | CT | 2026-07-12 | a manually-created CT moon (e.g. a Gas Giant's moon set as mainworld) never received physical stats — distance, gravity, mass, temperature, rotation, tilt all permanently blank |
-| OW-25 | CT | 2026-07-12 | the orrery kept showing two CT bodies at the same orbit after one was moved via the System Editor, even after Preview/Save/close/reopen |
-| OW-26 | CT | 2026-07-12 | a manually-typed CT mainworld UWP changed after Save |
-| OW-27 | CT | 2026-07-13 | filling in several blank CT worlds out of order made the mainworld pick and rolled stats jump between bodies before Save |
-| OW-28 | CT | 2026-07-13 | CT's +Belt gave no way to enter a UWP, and Fill & Save failed the UWP auditor |
-| OW-29 | CT | 2026-07-14 | editing a CT companion star's Orbit # silently hid its own +World/+GG/+Belt buttons |
-| OW-30 | CT | 2026-07-14 | a manually-created body orbiting a CT companion star got dice-rolled moons that were never trimmed back down |
-| OW-31 | CT | 2026-07-14 | moons added to an already-generated CT parent never received physical stats |
-| OW-32 | CT | 2026-07-14 | CT orrery now renders a Ring (moon size 'R') as a thin static ring instead of an orbiting dot |
-| OW-33 | CT | 2026-07-14 | CT drag-and-drop reordering could silently corrupt an unrelated companion-star body's orbit |
-| OW-34 | CT | 2026-07-14 | a CT companion star's own worlds re-rolled their entire UWP from scratch on every single Preview/Fill & Save |
-| OW-35 | CT | 2026-07-14 | a CT moon's typed orbit distance reverted after every Preview, and the "Clear" button never actually triggered a re-roll |
-| OW-36 | CT/MgT2E | 2026-07-14 | MgT2E Planetoid Belts can now have their Starport/Pop/Gov/Law/TL seeded, matching CT (OW-28) |
-| OW-37 | CT/MgT2E | 2026-07-14 | MgT2E orrery now renders rings too, matching CT (OW-32) |
-| OW-38 | MgT2E | 2026-07-14 | an already-generated MgT2E world's ring silently vanished on the very first Preview/Fill & Save, even with zero edits |
-| OW-39 | — | 2026-07-16 | `system_editor.js`'s `_manualFields` mark/clear logic de-duplicated onto `core.js`'s real `markManual`/`clearManual` |
-| OW-40 | — | 2026-07-16 | three more `system_editor.js` duplications collapsed — mainworld-name/commit tail, companion-orbit-by-separation constant, and the D/BD exotic-star rule |
-| OW-41 | — | 2026-07-16 | shared UWP-seed-digit box builder and data-driven star "Derived Properties" panel |
-| OW-42 | T5 | 2026-07-16 | a T5 system with only a mainworld (the minimal, most common case) ignored "Allow engine to add additional bodies" and rolled a full random inventory anyway |
-| OW-43 | T5 | 2026-07-16 | a T5 body's moon count fluctuated randomly (not just grew) across repeated no-edit Preview/Fill & Saves |
-| OW-44 | T5 | 2026-07-16 | the System Editor never actually generated a real UWP for a brand-new T5 mainworld at all |
-| OW-45 | T5 | 2026-07-16 | a subordinate (non-mainworld) T5 body's government, law level, starport, and tech level re-rolled from scratch on every Preview/Fill & Save |
-| OW-46 | T5 | 2026-07-16 | a System-Editor-placed or repositioned T5 companion star got a corrupted (`NaN`) `distAU` baked directly into the generated system |
-| OW-47 | T5 | 2026-07-16 | T5 has no per-moon orbital-distance concept at all |
-| OW-48 | T5 | 2026-07-16 | confirming a T5 "Create System" with zero bodies made it look like the editor had closed entirely |
-| OW-49 | CT/T5/MgT2E | 2026-07-16 | the T5 System Editor now shows the star in the orrery immediately after Create, before any body is added — matching MgT2E/CT parity |
-| OW-50 | T5 | 2026-07-22 | T5 systems with 5+ stars silently collapsed every star past the 4th onto "Far", and the OTU importer never decomposed spectral type at all |
-| OW-51 | MgT2E | 2026-07-22 | MgT2E's cross-engine expansion of a 5+ star OTU import had the identical "Far" collision, plus no Companion concept at all in that path |
-| OW-52 | T5 | 2026-07-23 | a T5 companion star's distance was calculated as *more* than Orbit 0 (0.2 AU) instead of "well inside" it |
-| OW-53 | T5 | 2026-07-23 | changing a T5 star's Role to Companion rejected Orbit 0 for other bodies, and the companion rendered farther from the primary than the mainworld |
-| OW-54 | — | 2026-07-23 | ⤺ reverted — gap-filling for a newly-added world on a non-primary star |
-| OW-55 | — | 2026-07-23 | `+World`'s auto-placement now ignores companion/secondary stars entirely — a new world always goes right after the last WORLD, never detours past a star |
-| OW-56 | T5 | 2026-07-23 | hovering a T5 Gas Giant in the orrery showed no tooltip at all, and none of its moons rendered |
-| OW-57 | T5 | 2026-07-23 | re-saving a T5 system with a moon-mainworld spawned a phantom second Gas Giant, and the orrery showed the mainworld twice |
-| OW-58 | T5 | 2026-07-23 | manually-added bodies on a star that also had OTU-imported bodies were silently dropped during generation — no error beyond a downstream "No Mainworld found" audit message when the dropped body happened to be the mainworld |
-| OW-59 | — | 2026-07-24 | flagging a moon as mainworld on an already-placed Gas Giant duplicated that Gas Giant and its entire moon tree |
-| OW-60 | — | 2026-07-24 | a Gas Giant's moons visibly sped up then abruptly slowed down in the orrery right after adding it, even though the end state was always correct |
-| OW-61 | — | 2026-07-30 | the P2P waypoint builder was unusable at scale — list clipped, no memory, hex-only labels, no reordering |
-| OW-62 | — | 2026-07-30 | route CSV export "extremely flaky"; investigation widened to every download in the app — all now share one routine |
-| OW-63 | CT/T5/RTT | 2026-07-30 | the Stellar Info filter matched nothing at all in CT, T5, and RTT sectors — three of the five engines |
-| OW-64 | — | 2026-07-30 | a filter criterion whose control had become unavailable kept filtering invisibly, hiding worlds with no visible cause |
-
-**Bugs #1–#7 (2026-06-22 → 2026-07-01)** — the pre-OW numbering, all closed. #1 hex dot
-vanishing after Fill & Save (not reproducible after the `_buildSeedSys` rework); #2 double
-mainworld after adding a companion; #3 MgT2E companion `orbitId` lost on editor load; #4
-orrery not updating after an orbit change (stale `b.au`); #5 gas-giant moon mainworld not
-highlighted — root-caused to `generateAtmospherics` stamping `type = 'Satellite'`; #6 GG
-symbol on systems with no gas giant; #7 "+GG"/delete not toggling the GG symbol. #6 and #7
-are the source of pattern 8 above; #5 is the origin of the moon-type-preservation rule.
-
----
-
-## 7. Future Release Notes
-
-Nothing outstanding. The former contents — the T5 Gas Giant / body-list sync gap found
-2026-07-01 — closed 2026-07-05 when `generateT5System()` gained its `seedSys` parameter
-(seeded bodies placed before Phase 1, `_allowAddBodies` gating the rolled inventory, moon
-counts capped via `generateT5Satellites`'s `capToExisting`).
-
-**One deliberate carve-out worth remembering:** `restoreT5ManualFields` and
-`generateT5SystemPreservingManuals` in `system_driver.js` were left untouched by that
-work. They remain the implementation behind `ui_menus.js`'s right-click "regenerate T5
-system" — a separate, still-valid path (bulk regeneration across selected hexes, no
-System Editor working copy involved), distinct from the structural `seedSys` gating the
-editor's Fill & Save uses. Do not consolidate them without checking that use case.
+`restoreT5ManualFields` and `generateT5SystemPreservingManuals` in `system_driver.js` look like
+dead duplicates of the editor's `seedSys` path. **They are not.** They implement
+`ui_menus.js`'s right-click "regenerate T5 system" — bulk regeneration across selected hexes
+with no System Editor working copy involved — which is a separate and still-valid path. **Do
+not consolidate them without checking that use case.**

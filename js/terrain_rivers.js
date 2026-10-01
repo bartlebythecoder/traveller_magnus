@@ -25,6 +25,20 @@
 // into any window at any zoom and the world map and a regional map cannot
 // disagree about where a river runs.
 //
+// TWO PATHS LIVED HERE. The LOCAL one — localNetwork() and carve() — was
+// deleted on 2026-09-21: TerrainField.buildRegional + _hydrology() and this
+// module's own linesFromField() do that job now, and a superseded copy sitting
+// beside the live code is exactly how remapHeight and isIce drifted.
+//
+// So incision is NOT gone, it MOVED: _hydrology() in terrain_field.js cuts the
+// channels before shading. The "vector overlay" rule above describes what this
+// module does, not what the sheet does.
+//
+// The GLOBAL path below — buildNetwork / networkFor / inflowFor — is RETAINED
+// DELIBERATELY although nothing calls it today (Sean, 2026-09-21). It is the
+// only whole-world drainage network in the codebase, and the flat world image
+// draws no rivers at all yet. Delete it only with that decision reversed.
+//
 // Exposes: window.TerrainRivers
 // =============================================================================
 
@@ -298,176 +312,10 @@ const TerrainRivers = (() => {
         return val;
     }
 
-    // ── Local re-trace ───────────────────────────────────────────────────────
-    //
-    // The global network is ~39 km per cell. Projected into a 600 km window
-    // that is 15 cells across, so it draws as a right-angle staircase that cuts
-    // straight over ridges — the terrain beneath it is 600x finer. Unusable.
-    //
-    // So a regional window runs the same pipeline again on its OWN high
-    // resolution elevation, and the global network contributes only what it is
-    // good for: how much water enters the frame and where. The trunk therefore
-    // stays where the world map put it while following the real valleys.
-    //
-    // A window is also free of the equirectangular distortion that plagues the
-    // global pass: cells are square and uniform, so D8 behaves properly here.
-    //
-    // f    — a field from TerrainField.buildRegional
-    // opts — { seaLevelM, inflow: [{x, y, flowKm2}], minShare }
-    function localNetwork(f, opts) {
-        const W = f.W, H = f.H, N = W * H;
-        const elev = f.elev;
-        const seaM = opts.seaLevelM;
-        const cellKm = f.metresPerPx / 1000;
-        const cellKm2 = cellKm * cellKm;
-
-        // Float64, and an epsilon scaled to the data — NOT Float32 with a fixed
-        // 1e-4. Local elevations are METRES and can reach ~15,000, where
-        // float32's ULP is about 0.001: adding 1e-4 rounds to no change at all.
-        // The fill then produced exact ties rather than a gradient, every
-        // neighbour tested as "not lower", and flow died within a few cells.
-        // Largest catchment in a 240,000 km2 window came out at 454 km2.
-        //
-        // The global pass is unaffected because it works in percentile units
-        // near 1.0, where its 1e-6 epsilon is comfortably representable.
-        const filled = new Float64Array(elev);
-        const seen = new Uint8Array(N);
-        const heap = makeHeap(N);
-        const popOrder = new Int32Array(N);
-        let popN = 0;
-
-        // Outlets: anything below sea level, plus the whole border — water is
-        // entitled to leave the frame, and an inland window has no sea at all.
-        for (let i = 0; i < N; i++) {
-            const y = (i / W) | 0, x = i - y * W;
-            if (elev[i] < seaM || x === 0 || y === 0 || x === W - 1 || y === H - 1) {
-                seen[i] = 1; heap.push(elev[i], i);
-            }
-        }
-        // Scale-aware: always above the representable step at this magnitude.
-        let maxAbs = 0;
-        for (let i = 0; i < N; i++) { const a = Math.abs(elev[i]); if (a > maxAbs) maxAbs = a; }
-        const EPS = Math.max(1e-4, maxAbs * 1e-9);
-        while (heap.size > 0) {
-            const i = heap.pop();
-            popOrder[popN++] = i;
-            const y = (i / W) | 0, x = i - y * W;
-            for (let dy = -1; dy <= 1; dy++) {
-                const ny = y + dy;
-                if (ny < 0 || ny >= H) continue;
-                for (let dx = -1; dx <= 1; dx++) {
-                    if (!dx && !dy) continue;
-                    const nx = x + dx;
-                    if (nx < 0 || nx >= W) continue;
-                    const j = ny * W + nx;
-                    if (seen[j]) continue;
-                    seen[j] = 1;
-                    if (filled[j] <= filled[i]) filled[j] = filled[i] + EPS;
-                    heap.push(filled[j], j);
-                }
-            }
-        }
-
-        // Routing surface = filled terrain plus a WHISPER of the original.
-        //
-        // Pit-filling makes a depression exactly level, so D8 has no gradient to
-        // follow and ends up tracing the order the fill happened to visit cells
-        // in. That is what draws long dead-straight channels marching across
-        // low ground and over ridges.
-        //
-        // Adding a scaled copy of the true elevation breaks those ties using the
-        // real micro-relief, so a channel crossing a flat follows the ground's
-        // own shape. The term is deliberately tiny — larger than the fill's
-        // epsilon, far smaller than any genuine drop — so it decides only where
-        // the filled surface is otherwise flat.
-        let eLo = Infinity, eHi = -Infinity;
-        for (let i = 0; i < N; i++) {
-            if (elev[i] < eLo) eLo = elev[i];
-            if (elev[i] > eHi) eHi = elev[i];
-        }
-        const tie = (EPS * 50) / Math.max(1, eHi - eLo);
-        const route = new Float64Array(N);
-        for (let i = 0; i < N; i++) route[i] = filled[i] + (elev[i] - eLo) * tie;
-
-        // D8. Cells are square here, so the only correction is the diagonal.
-        const down = new Int32Array(N).fill(-1);
-        for (let i = 0; i < N; i++) {
-            const y = (i / W) | 0, x = i - y * W;
-            if (x === 0 || y === 0 || x === W - 1 || y === H - 1) continue;
-            let best = -1, bestGrad = 0;
-            for (let dy = -1; dy <= 1; dy++) {
-                for (let dx = -1; dx <= 1; dx++) {
-                    if (!dx && !dy) continue;
-                    const j = (y + dy) * W + (x + dx);
-                    const drop = route[i] - route[j];
-                    if (drop <= 0) continue;
-                    const g = drop / ((dx && dy) ? 1.41421356 : 1);
-                    if (g > bestGrad) { bestGrad = g; best = j; }
-                }
-            }
-            down[i] = best;
-        }
-
-        // Accumulation. The pit-fill popped cells low-to-high, so walking that
-        // record backwards is high-to-low — no sort needed.
-        const acc = new Float32Array(N).fill(cellKm2);
-        const IN = 4;                        // keep clear of the outlet ring
-        for (const inj of (opts.inflow || [])) {
-            const x = Math.max(IN, Math.min(W - 1 - IN, Math.round(inj.x)));
-            const y = Math.max(IN, Math.min(H - 1 - IN, Math.round(inj.y)));
-            acc[y * W + x] += inj.flowKm2;      // water arriving from off-frame
-        }
-        for (let k = popN - 1; k >= 0; k--) {
-            const i = popOrder[k], d = down[i];
-            if (d >= 0) acc[d] += acc[i];
-        }
-
-        // Threshold as a share of the window, so density reads the same at any
-        // zoom and finer tributaries appear as you close in — as on a real map.
-        const winKm2 = N * cellKm2;
-        const minAcc = Math.max(cellKm2 * 24, winKm2 * (opts.minShare || 0.012));
-        // Depression tolerance relative to the window's own relief. A fixed
-        // metre value is meaningless across worlds whose windows range from a
-        // few hundred metres of relief to nearly twenty kilometres.
-        const fillTol = Math.max(40, (f.elevMaxM - f.elevMinM) * 0.02);
-
-        const isCh = new Uint8Array(N);
-        for (let i = 0; i < N; i++) {
-            if (elev[i] >= seaM && acc[i] >= minAcc && filled[i] - elev[i] < fillTol) isCh[i] = 1;
-        }
-        const hasUp = new Uint8Array(N);
-        for (let i = 0; i < N; i++) {
-            if (!isCh[i]) continue;
-            const d = down[i];
-            if (d >= 0 && isCh[d]) hasUp[d] = 1;
-        }
-
-        const lines = [];
-        const visited = new Uint8Array(N);
-        let maxFlow = 1;
-        for (let i = 0; i < N; i++) {
-            if (!isCh[i] || hasUp[i]) continue;
-            const pts = [];
-            let cur = i, guard = 0;
-            while (cur >= 0 && guard++ < N) {
-                const y = (cur / W) | 0, x = cur - y * W;
-                pts.push({ x, y, flow: acc[cur] });
-                if (acc[cur] > maxFlow) maxFlow = acc[cur];
-                if (elev[cur] < seaM) break;
-                const was = visited[cur];
-                visited[cur] = 1;
-                if (was && pts.length > 1) break;
-                cur = down[cur];
-            }
-            if (pts.length >= 4) lines.push(smoothLine(pts, 2));
-        }
-        return { lines, maxFlow };
-    }
-
     // Chaikin corner-cutting. A traced channel steps cell to cell, so raw it is
     // a pixel staircase; two rounds turn it into a curve without moving it far
-    // enough to leave its own valley. Applied inside localNetwork so the carve
-    // and the stroke use exactly the same geometry.
+    // enough to leave its own valley. Applied inside linesFromField, so the
+    // traced channel and the drawn stroke use exactly the same geometry.
     function smoothLine(pts, iters) {
         let cur = pts;
         for (let n = 0; n < (iters || 2); n++) {
@@ -484,74 +332,6 @@ const TerrainRivers = (() => {
             cur = next;
         }
         return cur;
-    }
-
-    // ── Carving ──────────────────────────────────────────────────────────────
-    //
-    // THE reason rivers otherwise read as lines painted over a picture: the
-    // terrain has no idea they are there. Hillshading, cast shadows and ambient
-    // occlusion are all computed from a surface with no channel in it, and a
-    // blue stroke is laid on afterwards.
-    //
-    // Incising the channel BEFORE shading gives the river banks that catch the
-    // light, a floor that ambient occlusion darkens, and ground low enough for
-    // the material classifier to call it lowland. It is also honest: real
-    // rivers carve their valleys, and this stands in for the erosion history
-    // the field does not simulate.
-    //
-    // Must be called after localNetwork and before TerrainRender.shade.
-    function carve(f, local, opts) {
-        if (!local || !local.lines.length) return f;
-        const W = f.W, H = f.H, elev = f.elev;
-        const seaM = opts.seaLevelM;
-        const relief = Math.max(50, f.elevMaxM - f.elevMinM);
-        // Valley depth scales with the window's own relief, bounded so a
-        // gentle world does not get canyons and a rugged one does not get a
-        // scratch. Width follows flow, so trunks cut broader valleys.
-        const maxDepth = Math.min(420, Math.max(25, relief * 0.020));
-        const maxRad   = Math.max(2.5, Math.min(9, W / 190));
-
-        // Deepest cut wins rather than accumulating, or confluences would dig
-        // a pit where two channels overlap.
-        const cut = new Float32Array(W * H);
-        for (const ln of local.lines) {
-            for (const pt of ln) {
-                const t = Math.sqrt(Math.min(1, pt.flow / local.maxFlow));
-                const depth = maxDepth * (0.30 + 0.70 * t);
-                const rad = Math.max(1.2, maxRad * (0.35 + 0.65 * t));
-                const r2 = rad * rad;
-                const x0 = Math.max(0, Math.floor(pt.x - rad));
-                const x1 = Math.min(W - 1, Math.ceil(pt.x + rad));
-                const y0 = Math.max(0, Math.floor(pt.y - rad));
-                const y1 = Math.min(H - 1, Math.ceil(pt.y + rad));
-                for (let y = y0; y <= y1; y++) {
-                    for (let x = x0; x <= x1; x++) {
-                        const dx = x - pt.x, dy = y - pt.y;
-                        const d2 = dx * dx + dy * dy;
-                        if (d2 > r2) continue;
-                        // Smooth profile: flat-ish floor, sloping banks.
-                        const u = 1 - Math.sqrt(d2) / rad;
-                        const w = u * u * (3 - 2 * u);
-                        const v = depth * w;
-                        const i = y * W + x;
-                        if (v > cut[i]) cut[i] = v;
-                    }
-                }
-            }
-        }
-
-        let lo = Infinity, hi = -Infinity;
-        for (let i = 0; i < elev.length; i++) {
-            if (cut[i] > 0) {
-                // Never cut land below sea level: that would open fake inlets
-                // all along the course instead of only at the mouth.
-                elev[i] = Math.max(elev[i] >= seaM ? seaM : elev[i], elev[i] - cut[i]);
-            }
-            if (elev[i] < lo) lo = elev[i];
-            if (elev[i] > hi) hi = elev[i];
-        }
-        f.elevMinM = lo; f.elevMaxM = hi;
-        return f;
     }
 
     // Where does the global network enter this window, and carrying how much?
@@ -753,9 +533,9 @@ const TerrainRivers = (() => {
         return n;
     }
 
-    return { buildNetwork, networkFor, draw, localNetwork, inflowFor, drawLocal,
+    return { buildNetwork, networkFor, inflowFor, drawLocal,
              linesFromField,
-             carve, smoothLine,
+             smoothLine,
              GRID_W, GRID_H,
              DEFAULT_DRAIN_FRACTION };
 })();

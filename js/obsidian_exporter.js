@@ -6,11 +6,13 @@
 // Optionally embeds a procedurally rendered image for each terrestrial world.
 //
 // Entry point: ObsidianExporter.startExport(sectorNum, subsectorChar, options)
-// options: { includeImages, skipAirless, includeSystemImages,
+// options: { includeImages, skipAirless, systemImages,
 //            onProgress(done,total,msg), onDone(fileCount), onError(msg) }
-// includeSystemImages: true → captures a PNG orrery per system hub page.
+// systemImages: 'none' | 'sheet' | 'orrery' | 'both' — the images on each
+// system hub page (ExportCore.renderSystemImages). The legacy boolean
+// includeSystemImages is still accepted: true means 'sheet'.
 // The subsector index page's hex-map snapshot is always captured, independent
-// of includeSystemImages.
+// of systemImages.
 // =============================================================================
 
 const ObsidianExporter = (() => {
@@ -196,7 +198,7 @@ const ObsidianExporter = (() => {
         return parts.join('\n');
     }
 
-    function _buildSystemHub(hexId, hexCode, sectorName, subsectorChar, state, normalized, imageFilename, subsectorLink) {
+    function _buildSystemHub(hexId, hexCode, sectorName, subsectorChar, state, normalized, imageFilenames, subsectorLink) {
         const _LV = _levelFor(hexId);
         const systemName = _resolveSystemName(state, _LV, hexCode);
         const edition    = normalized.edition || 'Unknown';
@@ -243,8 +245,9 @@ const ObsidianExporter = (() => {
             `**Allegiance:** ${allegiance}`,
         ];
 
-        if (imageFilename) {
-            lines.push('', `![[${imageFilename}]]`);
+        // Sheet then orrery, one after the other, when both were chosen.
+        for (const fn of imageFilenames || []) {
+            lines.push('', `![[${fn}]]`);
         }
 
         lines.push(..._mdRender(_F(ExportCore.systemOverviewBlocks(state), 'system', _LV)));
@@ -474,7 +477,11 @@ const ObsidianExporter = (() => {
         return lines.join('\n');
     }
 
-    function _buildMoonFile(moon, moonIdx, parentWorldName, hexId, hexCode, sectorName, systemName, imageFilename, state, rawMoon, subsectorLink) {
+    // NOTE: moonSheetFiles is the LAST parameter and must stay in this
+    // signature. _buildWorldFile read an argument its parameter list did not
+    // declare, and the wiki export threw a ReferenceError on the first world
+    // of every run for three days (fixed 2026-09-17). Same call shape here.
+    function _buildMoonFile(moon, moonIdx, parentWorldName, hexId, hexCode, sectorName, systemName, imageFilename, state, rawMoon, subsectorLink, moonSheetFiles) {
         const _LV = _levelFor(hexId);
         const moonName    = _moonDisplayName(moon, moonIdx, _LV);
         const systemLink  = `[[${_sanitize(systemName)} (${hexCode})]]`;
@@ -507,6 +514,14 @@ const ObsidianExporter = (() => {
             lines.push(`![[${imageFilename}]]`, '');
         }
 
+        // Regional survey sheets, one per pinned site. Already fog-gated by the
+        // caller — this list arrives empty whenever the moon image was withheld.
+        if (moonSheetFiles && moonSheetFiles.length) {
+            lines.push('## Regional Surveys', '');
+            for (const sh of moonSheetFiles) {
+                lines.push(`**${sh.label}**`, '', `![[${sh.fn}]]`, '');
+            }
+        }
 
         if (moon.uwp && _show(_LV, 'g')) {
             lines.push(..._mdRender([_h(2, 'UWP Breakdown'), ...ExportCore.uwpTableBlocks(moon.uwp), _GAP]));
@@ -543,7 +558,8 @@ const ObsidianExporter = (() => {
     // ── Export orchestrator ───────────────────────────────────────────────────
 
     async function startExport(sectorNum, subsectorChar, options) {
-        const { includeImages, imageProjection, skipAirless, includeSystemImages, useSubfolders, playerVersion, onProgress, onDone, onError } = options || {};
+        const { includeImages, imageProjection, skipAirless, useSubfolders, playerVersion, onProgress, onDone, onError } = options || {};
+        const sysImageMode = ExportCore.systemImageMode(options);
 
         // Release 2. Absent/false keeps every existing call on the GM path, where
         // _levelFor() returns null and filterBlocks() is the identity function.
@@ -580,8 +596,8 @@ const ObsidianExporter = (() => {
         const subsectorLink = `[[${_sanitize(sectorName)} - Subsector ${subsectorChar}]]`;
 
         // Subsector map image embedded in the index page — independent of the
-        // "Include system orrery images" setting, which only controls per-system
-        // orrery snapshots.
+        // "System images" setting, which only controls the per-system sheet
+        // and orrery.
         let mapImageFilename = null;
         if (typeof captureSubsector !== 'undefined') {
             report(0, systems.length, 'Capturing subsector map image…');
@@ -631,19 +647,26 @@ const ObsidianExporter = (() => {
             const stars  = normalized.stars  || [];
             const worlds = normalized.worlds || [];
 
-            // Optional orrery snapshot image for the system hub page
-            let sysImageFilename = null;
-            // Orrery gated at (d); re-rendered with generic labels and no
-            // mainworld highlight below (g) — the labels are pixels (§9.2a).
-            if (includeSystemImages && _show(_oLV, 'd') && typeof SystemViewer !== 'undefined') {
-                const imgData = await SystemViewer.renderSnapshot(state, 900, 500, { level: _oLV });
-                if (imgData) {
-                    sysImageFilename = _systemFilename(systemName, hexCode, 'png');
-                    files.push({ name: prefix + 'images/' + sysImageFilename, data: imgData });
+            // Optional system images for the hub page, gated at (d): the
+            // SYSTEM SHEET, the ORRERY or both, as chosen in the dialog.
+            // The sheet only at (g) and on the GM path — it names bodies,
+            // prints UWPs and singles out the mainworld, and an image can only
+            // be withheld, not filtered (Sean, 2026-09-24). Below (g) the
+            // orrery is re-rendered with generic labels and no mainworld
+            // highlight (§9.2a). The choice lives in ExportCore so the two
+            // exporters cannot drift.
+            const sysImageFilenames = [];
+            if (sysImageMode !== 'none' && _show(_oLV, 'd')) {
+                const imgs = await ExportCore.renderSystemImages(state, hexId, {
+                    mode: sysImageMode, sheetAllowed: _show(_oLV, 'g'), level: _oLV,
+                    systemName, hexCode });
+                for (const im of imgs) {
+                    sysImageFilenames.push(im.filename);
+                    files.push({ name: prefix + 'images/' + im.filename, data: im.data });
                 }
             }
 
-            const hubMd = _buildSystemHub(hexId, hexCode, sectorName, subsectorChar, state, normalized, sysImageFilename, subsectorLink);
+            const hubMd = _buildSystemHub(hexId, hexCode, sectorName, subsectorChar, state, normalized, sysImageFilenames, subsectorLink);
             files.push({ name: prefix + _systemFilename(systemName, hexCode, 'md'), data: enc.encode(hubMd) });
 
             // Stars
@@ -720,7 +743,22 @@ const ObsidianExporter = (() => {
                         }
                     }
 
-                    const moonMd   = _buildMoonFile(moon, mi, worldName, hexId, hexCode, sectorName, systemName, moonImageFilename, state, rawMoon, subsectorLink);
+                    // Sheets for sites pinned on a MOON — see the note in the HTML
+                    // exporter's moons loop. Gated on wantMoonImage for the same
+                    // reason the world's sheets are gated on wantImage.
+                    const moonSheetFiles = [];
+                    if (wantMoonImage) {
+                        for (const pin of _pinnedSitesFor(hexId, moon.name)) {
+                            const sheet = await _renderRegionalSheet(moon, hexId, moon.name, pin, `w${wi}-m${mi}`);
+                            if (!sheet) continue;
+                            const lbl = _sheetLabel(pin);
+                            const sfn = `${_sanitize(systemName)} - ${_sanitize(worldName)} - ${_sanitize(moonName)} - ${_sanitize(lbl)} (${hexCode}).png`;
+                            files.push({ name: prefix + 'images/' + sfn, data: sheet });
+                            moonSheetFiles.push({ fn: sfn, label: lbl });
+                        }
+                    }
+
+                    const moonMd   = _buildMoonFile(moon, mi, worldName, hexId, hexCode, sectorName, systemName, moonImageFilename, state, rawMoon, subsectorLink, moonSheetFiles);
                     const moonFile = `${_sanitize(systemName)} - ${_sanitize(worldName)} - ${_sanitize(moonName)} (${hexCode}).md`;
                     files.push({ name: prefix + moonFile, data: enc.encode(moonMd) });
                 }

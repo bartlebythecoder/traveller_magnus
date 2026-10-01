@@ -1236,11 +1236,38 @@ function getRouteSystemList(routeId) {
         // worlds listed, here and in the CSV export alike. walkRouteChain checks
         // coverage and rejects it, so such a route now lists unordered — every
         // world present — instead of ordered and incomplete.
-        const walk = walkRouteChain(segments);
-        if (walk.ok) return { ordered: true, worlds: walk.path };
+        // The stored setup orients BOTH walks below. Without it the direction
+        // falls out of adjacency insertion order — i.e. out of segment array
+        // order — so a route could list from either end depending on how its
+        // segments happened to be stored. Passing the route's own Start makes
+        // a generated route list from the world the user actually typed.
+        const stored = (typeof _storedP2pParams === 'function') ? _storedP2pParams(routeId) : null;
+        const startId = stored && stored.startId;
+
+        const walk = walkRouteChain(segments, startId);
+        if (walk.ok) return { ordered: true, cyclic: false, worlds: walk.path };
+
+        // A CLEAN CIRCLE IS ORDERABLE; walkRouteChain simply does not answer
+        // that question. It asks "is this one unbroken line", and a round trip
+        // closed back on itself is not one — so it returns 'cycle' and this
+        // used to drop straight to the unordered bullets below, which is the
+        // one shape where travel order genuinely exists and was being thrown
+        // away. walkRouteCycle (js/routes.js) supplies the two things a circle
+        // lacks: a first world (the stored Start, else the lowest hex ID) and
+        // a direction (the stored first waypoint, else the lower-ID
+        // neighbour). A LOOP WITH A TAIL still lands here as 'branch' and
+        // still lists unordered — its traversal is genuinely ambiguous and the
+        // order flown is not recorded. See walkRouteCycle for why that is the
+        // commoner shape of the two.
+        if (walk.reason === 'cycle' && typeof walkRouteCycle === 'function') {
+            const firstWp = (stored && Array.isArray(stored.waypointIds))
+                ? stored.waypointIds[0] : null;
+            const loop = walkRouteCycle(segments, startId, firstWp);
+            if (loop.ok) return { ordered: true, cyclic: true, worlds: loop.path };
+        }
 
         const allIds = [...new Set(segments.flatMap(s => [s.startId, s.endId]))];
-        return { ordered: false, worlds: allIds };
+        return { ordered: false, cyclic: false, worlds: allIds };
     }
 
     // Network / XBoat / AutoRoute — collect unique IDs, sort by world name
@@ -1711,7 +1738,7 @@ window.openRouteSystemsPanel = function (routeId, routeName) {
     panel.dataset.routeId = String(routeId);
     nameEl.textContent = routeName;
 
-    const { ordered, worlds } = getRouteSystemList(routeId);
+    const { ordered, cyclic, worlds } = getRouteSystemList(routeId);
     listEl.innerHTML = '';
 
     // A route that never reached its End says so at the top, before the list.
@@ -1759,11 +1786,29 @@ window.openRouteSystemsPanel = function (routeId, routeName) {
                                : '');
             listEl.appendChild(item);
         });
+
+        // A circle lists each world ONCE, so nothing in the numbered rows says
+        // the last one leads back to the first. This closing line does, as a
+        // row of its own rather than a sixth entry — repeating the start world
+        // as a list item would also repeat it in the CSV export and add one to
+        // every count that reads worlds.length.
+        if (cyclic) {
+            const back = document.createElement('div');
+            back.className = 'route-systems-item route-systems-item-return';
+            back.style.cssText = 'color:#777;font-style:italic;';
+            const firstName = getWorldName(hexStates.get(worlds[0]))
+                           || (isVacantHex(worlds[0]) ? 'Deep Space' : '(unnamed)');
+            back.innerHTML = `<span class="route-systems-item-num">↩</span>`
+                           + `<span class="route-systems-item-name">returns to ${firstName}</span>`
+                           + `<span class="route-systems-item-id">${worlds[0]}</span>`;
+            listEl.appendChild(back);
+        }
     }
 
     const segCount = (window.sectorRoutes || []).filter(r => r.routeId === routeId).length;
     footerEl.textContent = `${segCount} segment${segCount !== 1 ? 's' : ''} · `
                          + `${worlds.length} world${worlds.length !== 1 ? 's' : ''}`
+                         + (cyclic ? ' · round trip' : '')
                          + (sf ? ' · incomplete' : '');
 
     panel.style.display = 'block';

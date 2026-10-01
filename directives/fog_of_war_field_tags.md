@@ -546,7 +546,7 @@ manifest. Provisional levels from §5.2.3 are marked ⚠ — they were the agent
 | # | Surface | Lvl | Why it leaks |
 |---|---|---|---|
 | 9.1 | World images (globe / flat-map) | ✓ **e** | A rendered planet *is* a picture of its hydrographics and atmosphere — so it gates at the level of the data it depicts, the same principle as §11.1 |
-| 9.2 | Orrery / system images | ✓ **d** | Reveals world count, belts and gas giants at a glance. **Must re-render with generic body labels below (g)** — see 9.2a |
+| 9.2 | Orrery / system images | ✓ **d** | Reveals world count, belts and gas giants at a glance. **Must re-render with generic body labels below (g)** — see 9.2a. **Since v0.18.1.1 the image at (g) is the SYSTEM SHEET; (d)–(f) keep the orrery** — see 9.2b |
 | 9.3 | Subsector map PNG | ✓ **inherit** | Each drawn element gates at its own field's level — see 9.3a. This is WP6 |
 | 9.4 | Hex-map hover tooltips (SVG `<title>`) | ✓ **inherit** | Carries the system name, so it follows §1.1 — no label below (d) |
 | 9.5 | Map hotspot *existence* | ✓ **a** | Automatic: a hotspot means the hex has a page, and only level (0) has no page |
@@ -582,6 +582,20 @@ place in Release 2 where the fog cannot be applied downstream of the exporter.
 
 Note this is the *same class of bug* as §5.2.1's subsector map — a picture that bypasses
 the field filter — and the reason WP6 exists. Budget for it accordingly.
+
+### 9.2b — The system sheet is a (g) image (Sean, 2026-09-24; built 2026-09-25)
+
+v0.18.1.1's system sheet replaced the orrery in both exporters **at (g) and on the GM path
+only.** It prints body names, UWPs and (e)/(f) physical columns, and whole panels exist to single
+out the mainworld (§1.10, **g**) — so it is a (g) image as a whole, and it is withheld below (g)
+by not being generated. **(d)–(f) keep the level-aware orrery of 9.2a unchanged**; below (d),
+no system image. Nothing on the sheet is `never` (it prints no bases and no referee notes).
+A per-level sheet was offered and declined: it would re-implement this table by hand, in pixels,
+where no filter or parity check can see it. Detail: `system_sheet_spec.md` §9.
+
+**Since 2026-10-01 the user chooses sheet, orrery, both or none** (`system_sheet_spec.md` §9.1).
+The choice can only **remove** an image: the (d) gate and the (g) gate on the sheet are
+unchanged, so below (g) *Sheet* and *Both* still give only the level-aware orrery.
 
 **Note on 9.1 under HX-2:** at (e) and (f) an image is emitted for a world whose *name* is
 withheld. Image filenames must therefore use the generic label ("World 2"), not the real

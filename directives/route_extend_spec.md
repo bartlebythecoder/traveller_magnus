@@ -113,11 +113,36 @@ the original decisions had no reason to cover:
 | C12 | **A tick cannot outlive its own precondition.** If the route stops being continuable while the box is ticked, the box unticks itself **and the form Continue rewrote is put back** | Leaving it ticked-but-disabled would send C2's rewritten fields — Start = an end, End blank — into a plain rebuild, which is a route the user never asked for. C2 already stashes the original form for unticking; this reuses it |
 | C13 | **A continuation that adds nothing because the two worlds are ALREADY CONNECTED says so**, rather than reporting no path | The path is found and every connection on it turns out to be one the route already has, so `addRoute` skips them all. Reporting that as "no path found within Jump-N" sent the user off to raise a jump limit that was never the problem. Distinct from C8: nothing is changed either way, but the reason differs |
 
-**Two tests now exist, deliberately, and must not be merged.** `walkRouteChain` /
+**THREE tests now exist, deliberately, and must not be merged.** `walkRouteChain` /
 `getRouteChain` is the strict one — one unbroken line, exactly two ends — and still governs
 travel order (§3) and Combine (M1). `walkRouteEnds` / `getRouteEnds` is the weak one and
-governs Continue alone. They build their adjacency identically, on purpose, so the two can
-never disagree about the *shape* of a route, only about which shapes they accept.
+governs Continue alone. **`walkRouteCycle` is the third, added 2026-09-21**: it accepts only
+a CLEAN CIRCLE — every node of degree exactly 2, the loop covering every node — and returns
+its worlds in travel order, so a round trip lists 1. 2. 3. … in the Route Systems panel and
+exports to CSV in the order you would fly it. It is consulted by `getRouteSystemList` only
+when `walkRouteChain` has already refused the route with `reason: 'cycle'`, so it can never
+widen what counts as a chain. All three build their adjacency identically, on purpose, so
+they can never disagree about the *shape* of a route, only about which shapes they accept.
+
+**A LOOP WITH A TAIL IS STILL NOT ORDERABLE, and that is the commoner shape.** Its junction
+has degree 3, so `walkRouteChain` calls it a branch, `walkRouteCycle` rejects it as not a
+circle, and it keeps its bullets. Measured over 24 trials per row at Jump-2: a clean circle
+occurred 7/24 at two waypoints, 4/24 at three and **0/24 at five**, against 16, 19 and 24 for
+a loop with a tail. **Consequence accepted up front: the panel orders one shape and not the
+other, and a user cannot tell them apart by eye.**
+
+**A circle lists each world ONCE.** The closing return is shown as its own line in the panel
+(`↩ returns to X`) rather than as a repeated list entry — repeating it would put a duplicate
+row in the CSV export and add one to every count that reads `worlds.length`.
+
+**The two free choices a circle leaves are taken from the stored setup.** A circle has a
+genuine cyclic order but no distinguished first world and no direction, so `getRouteSystemList`
+passes `automationRef.params.startId` as the first world and `waypointIds[0]` as the
+direction. Where there is no stored setup — a hand-drawn or imported circle — it falls back to
+**the lowest hex ID and its lower-ID neighbour**, which is a property of the route itself and
+so survives a reload, a re-import, segments being added in a different order, and renames.
+**Do not fall back to `segments[0]`**: that makes the listing depend on array order, and the
+same circle would then list differently on different days.
 
 ---
 
@@ -203,8 +228,7 @@ though this one is deliberately *not* persisted, C6).
 A new icon on the Route Manager row, opening a picker of eligible partners.
 
 **The row is already crowded.** It carries six controls today — eye, `C` (clear), ⬇ (CSV),
-💾 (save), ⬆ (load), ⚙ Auto, ✕ — of which three are file-shaped and, per `route_file_spec.md`
-OQ-1, already hard to tell apart without hovering. This adds a seventh.
+💾 (save), ⬆ (load), ⚙ Auto, ✕ — of which three are file-shaped. This adds a seventh.
 
 **Therefore a legibility pass ships with this feature, not after it** (WP5). The likely
 answer is a short text label on the CSV button, which is the one whose shape misdescribes it

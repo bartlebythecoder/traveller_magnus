@@ -1,4 +1,4 @@
-# As Above, So Below (v0.18.0)
+# As Above, So Below (v0.18.1.2)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -72,12 +72,27 @@ Want to replace any of these sectors with your own file?
 ---
 ## 📜 Changelog
 
-### [v0.18.0] - In Progress
-1. **New — regional surface maps:** Opening a world's image and pressing **Open Map → Regional Maps →** renders a patch of that world's real surface as a printable survey sheet — shaded relief, coastlines, named landforms, a scale bar, a globe inset, a terrain key listing what the ground is made of, and a **Download PNG** button. The window is fixed at the world's own scale and moved by dragging the map or clicking the globe; each world keeps **five site slots** you can **pin** to locations of your choosing, and pinned sites save with the sector and appear in the HTML and Obsidian exports under *Regional Surveys*.
-2. **New — a choice of terrain model, Tectonic or Classic:** **Settings → World Image Generation** now offers **Use Classic World Images** — leave it unticked for **Tectonic**, which builds continents from moving plates and so produces linear mountain ranges, trenches and rifts, adds vegetation to warm wet worlds, and draws cold dry worlds as frost pans rather than hot sand. The setting is saved with the sector rather than the browser, so a file you open looks the way its author made it, and older sector files load as Classic so nothing you already have changes unless you change it.
-3. **New — round-trip Point-to-Point routes:** Start and End may now be **the same world**, which builds a round trip out through your waypoints and back; on the map, clicking your starting world again closes the route into a loop. It needs **at least one waypoint**, and because every leg takes the shortest path a single waypoint usually retraces itself — use **two or more** for a genuine loop; the completion message now tells you which of the two you got.
-4. **Generating a route now warns before it deletes the one already there:** Every route type except "Continue existing route" replaces whatever is in the slot, and it used to do so silently. You now get a confirmation naming the route and how many connections would be deleted, with **Cancel** leaving everything untouched; empty slots and ticking **Continue** are unaffected.
-5. **Fixed — the MgT2E System accordion opened blank on every multi-star system in an older save:** Expanding **MgT2E System** on a multi-star world from a pre-v0.14 sector file showed an empty panel with stale PBG and Stellar values from the previously opened world — 79 worlds in Solo 6 alone, including the bundled copy. The editor now tolerates the missing field and renders those systems correctly; no sector file was altered, and existing maps load as they are.
+### [v0.18.1.2] - 2026-10-01
+1. **New — choose your system images on export:** HTML and Obsidian exports can include the system sheet, the orrery, both or neither; players' exports still show the sheet only at *Full UWP*.
+
+### [v0.18.1.1] - 2026-09-25
+1. **New — System Sheet:** **System Sheet** in the system view opens a one-page image of the whole system (rendered bodies in orbit order, star details, planetary table, mainworld called out) with **Download PNG**; all five engines.
+2. **New — System Sheet in exports:** HTML and Obsidian exports use the sheet (JPEG) in place of the orrery; players' exports show it only at *Full UWP* and keep the orrery below that.
+3. **Changed — CT world images now use each world's temperature** in every view; about two in three will look different.
+4. **Fixed — RTT:** gas giant hover no longer fails, moons show UWPs, Red-zone lunar mainworlds read Red.
+5. **Improved — T5:** hovering a body shows its Orbit #.
+
+### [v0.18.1] - 2026-09-24
+1. **Fixed — survey sites pinned on a moon now reach your exports**, under **Regional Surveys**, withheld from players' exports exactly as the moon's own image is.
+2. **Housekeeping — about 220 lines of unused river code removed** from the terrain engine; nothing you see changes.
+3. **Improved — round-trip routes list and export in travel order:** a clean circular Point-to-Point route is numbered from your Start in the Route Systems panel and the CSV export, and a straight route now lists from the Start you typed.
+
+### [v0.18.0] - 2026-09-20
+1. **New — regional surface maps:** **Open Map → Regional Maps** renders a printable survey sheet of any patch of a world's surface, with five pinnable sites per world that save with the sector and appear in the HTML and Obsidian exports.
+2. **New — Tectonic or Classic terrain:** **Settings → World Image Generation** chooses between plate-tectonic continents and the classic model; the choice saves with the sector, and older files load as Classic so nothing you have changes.
+3. **New — round-trip Point-to-Point routes:** Start and End may be the same world; use two or more waypoints for a genuine loop.
+4. **Improved — generating a route now asks before replacing the route already in that slot.**
+5. **Fixed — the MgT2E System accordion no longer opens blank** on multi-star systems from pre-v0.14 sector files.
 
 ---
 *For a full history of changes, see the [Changelog](changelog.md).*

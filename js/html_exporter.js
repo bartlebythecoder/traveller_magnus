@@ -8,7 +8,7 @@
 // link resolution, escaping, and anchor IDs.
 //
 // Entry point: HtmlExporter.startExport(sectorNum, subsectorChar, options)
-// options: { includeImages, imageProjection, skipAirless, includeSystemImages,
+// options: { includeImages, imageProjection, skipAirless, systemImages,
 //            onProgress(done,total,msg), onDone(fileCount), onError(msg) }
 //
 // Structural differences from the Obsidian export, both deliberate (D2/D3 in
@@ -269,8 +269,15 @@ ${extraJs || ''}
                `<h2>${_esc(title)} <a class="ph" href="#${_esc(id)}" aria-label="Link to this section">#</a></h2>`;
     }
 
-    function _imageFigure(src, alt, cls) {
-        return `<figure${cls ? ' class="' + cls + '"' : ''}><img src="${_encPath(src)}" alt="${_esc(alt)}" loading="lazy"></figure>`;
+    // `linkFull` wraps the image in a link to itself, opening at full size in a
+    // new tab. The system sheet needs it: 3440 px shown ~926 px wide in the page
+    // column leaves its table text unreadable (Sean, 2026-09-25).
+    function _imageFigure(src, alt, cls, linkFull) {
+        const img = `<img src="${_encPath(src)}" alt="${_esc(alt)}" loading="lazy">`;
+        const body = linkFull
+            ? `<a href="${_encPath(src)}" target="_blank" rel="noopener" title="Open full size">${img}</a>`
+            : img;
+        return `<figure${cls ? ' class="' + cls + '"' : ''}>${body}</figure>`;
     }
 
     // ── Release 2: fog of war (WP5 slice 5b) ─────────────────────────────────
@@ -335,7 +342,7 @@ ${extraJs || ''}
 
     function _buildSystemPage(ctx) {
         const { hexId, hexCode, sectorName, subsectorChar, state, normalized,
-                sysImage, worldImages, worldSheets } = ctx;
+                sysImages, worldImages, worldSheets } = ctx;
 
         const LV         = _levelFor(hexId);   // null on the GM path
         const systemName = EC.resolveSystemName(state, LV, hexCode);
@@ -385,7 +392,8 @@ ${extraJs || ''}
         H.push('</dl>');
         H.push('</header>');
 
-        if (sysImage) H.push(_imageFigure('images/' + sysImage, `${systemName} orrery`));
+        for (const si of sysImages || [])
+            H.push(_imageFigure('images/' + si.fn, si.alt, '', si.linkFull));
 
         // Contents — the substitute for Obsidian's per-file navigation
         H.push('<nav id="contents" class="toc"><h2>Contents</h2><ul>');
@@ -538,6 +546,15 @@ ${extraJs || ''}
 
                 const mImg = worldImages.get(`w${wi}m${mi}`);
                 if (mImg) H.push(_imageFigure('images/' + mImg, mName));
+
+                // Same key shape as the moon image above: `w<wi>m<mi>`.
+                const mSheets = (worldSheets && worldSheets.get(`w${wi}m${mi}`)) || [];
+                if (mSheets.length) {
+                    H.push('<h3>Regional Surveys</h3>');
+                    for (const sh of mSheets) {
+                        H.push(_imageFigure('images/' + sh.fn, `${mName} — ${sh.label}`));
+                    }
+                }
 
                 if (m.uwp && _show(LV, 'g')) {
                     H.push('<h3>UWP Breakdown</h3>');
@@ -933,8 +950,9 @@ tbody tr:nth-child(even) { background:var(--panel);
     // ── Export orchestrator ───────────────────────────────────────────────────
 
     async function startExport(sectorNum, subsectorChar, options) {
-        const { includeImages, imageProjection, skipAirless, includeSystemImages,
+        const { includeImages, imageProjection, skipAirless,
                 playerVersion, onProgress, onDone, onError } = options || {};
+        const sysImageMode = EC.systemImageMode(options);
 
         // Release 2. Absent/false keeps every existing call on the GM path.
         _playerMode = !!playerVersion;
@@ -1022,16 +1040,25 @@ tbody tr:nth-child(even) { background:var(--panel);
             const worldImages = new Map();
             // key `w{i}` / `w{i}m{j}` -> [{ fn, label }]  (regional survey sheets)
             const worldSheets = new Map();
-            let sysImage = null;
-            // Orrery images are gated at (d): one glance gives world count,
-            // belts and gas giants (§5.2.3). Below (g) they are RE-RENDERED with
-            // generic body labels and no mainworld highlight — the labels are
-            // pixels, so no downstream filter could remove them (§9.2a).
-            if (includeSystemImages && _show(oLV, 'd') && typeof SystemViewer !== 'undefined') {
-                const img = await SystemViewer.renderSnapshot(state, 900, 500, { level: oLV });
-                if (img) {
-                    sysImage = EC.systemFilename(systemName, hexCode, 'png');
-                    files.push({ name: `${sub}/images/${sysImage}`, data: img });
+            // [{ fn, alt, linkFull }] in page order — sheet, then orrery.
+            const sysImages = [];
+            // System images are gated at (d): one glance gives world count,
+            // belts and gas giants (§5.2.3). The dialog chooses the SYSTEM
+            // SHEET, the ORRERY or both. The sheet only at (g) and on the GM
+            // path — it names bodies, prints UWPs and singles out the
+            // mainworld, and an image can only be withheld, not filtered
+            // (Sean, 2026-09-24). Below (g) the orrery is RE-RENDERED with
+            // generic body labels and no mainworld highlight (§9.2a). The
+            // choice lives in ExportCore so the two exporters cannot drift.
+            if (sysImageMode !== 'none' && _show(oLV, 'd')) {
+                const imgs = await EC.renderSystemImages(state, hexId, {
+                    mode: sysImageMode, sheetAllowed: _show(oLV, 'g'), level: oLV,
+                    systemName, hexCode });
+                for (const im of imgs) {
+                    const isSheet = im.kind === 'sheet';
+                    sysImages.push({ fn: im.filename, linkFull: isSheet,
+                                     alt: `${systemName} ${isSheet ? 'system sheet' : 'orrery'}` });
+                    files.push({ name: `${sub}/images/${im.filename}`, data: im.data });
                 }
             }
 
@@ -1077,13 +1104,32 @@ tbody tr:nth-child(even) { background:var(--panel);
                             files.push({ name: `${sub}/images/${fn}`, data: img });
                             worldImages.set(`w${wi}m${mi}`, fn);
                         }
+                        // Sheets for sites pinned on a MOON. The image panel is
+                        // body-agnostic — openBodyImagePanel offers Regional Maps
+                        // for any body — so a moon can hold pins, and before
+                        // 2026-09-21 they saved and were silently never exported.
+                        // Matters most for a LUNAR MAINWORLD, which is exactly the
+                        // moon a reader wants a survey of. Kept inside the moon
+                        // image's own gate, for the reason the worlds loop gives.
+                        const mPins = EC.pinnedSitesFor(hexId, m.name);
+                        for (const pin of mPins) {
+                            const sheet = await EC.renderRegionalSheet(m, hexId, m.name, pin, `w${wi}-m${mi}`);
+                            if (!sheet) continue;
+                            const lbl = EC.sheetLabel(pin);
+                            const sfn = EC.bodyFilename(systemName,
+                                `${EC.worldDisplayName(w, wi, oLV)} - ${EC.moonDisplayName(m, mi, oLV)} - ${lbl}`,
+                                hexCode, 'png');
+                            files.push({ name: `${sub}/images/${sfn}`, data: sheet });
+                            if (!worldSheets.has(`w${wi}m${mi}`)) worldSheets.set(`w${wi}m${mi}`, []);
+                            worldSheets.get(`w${wi}m${mi}`).push({ fn: sfn, label: lbl });
+                        }
                     }
                 }
             }
 
             put(pageFile, _buildSystemPage({
                 hexId, hexCode, sectorName, subsectorChar, state, normalized,
-                sysImage, worldImages, worldSheets,
+                sysImages, worldImages, worldSheets,
             }));
 
             await new Promise(r => setTimeout(r, 0));

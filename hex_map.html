@@ -95,6 +95,7 @@
     <script src="js/system_editor.js" defer></script>
     <script src="js/surface_viewer.js" defer></script>
     <script src="js/export_core.js" defer></script>
+    <script src="js/system_sheet.js" defer></script>
     <script src="js/obsidian_exporter.js" defer></script>
     <script src="js/html_exporter.js" defer></script>
     <script src="js/canvas_input.js" defer></script>
@@ -966,9 +967,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above<br> So Below</span></h1>
-            <div class="splash-banner">New: Regional Surface Maps</div>
+            <div class="splash-banner">New: System Images</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.18.0</div>
+            <div class="splash-version">v0.18.1.2</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -1458,7 +1459,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.18.0</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.18.1.2</span>
             </p>
         </div>
 
@@ -1852,7 +1853,7 @@
                         <p style="margin:0;color:#a8d8d4;font-size:0.78em;line-height:1.45;">
                             Systems set to <em>Unknown</em> are left out entirely — no page, no index row,
                             no filename. Everything else, <strong>including the subsector map and the
-                            orrery images</strong>, is drawn at its own disclosure level. Referee notes
+                            system images</strong>, is drawn at its own disclosure level — the full system sheet only at <em>Full UWP</em>, the orrery below it (even when the sheet is chosen). Referee notes
                             are never included. Worth a look over the result before you hand it out.
                         </p>
                     </div>
@@ -1898,11 +1899,18 @@
                     Skip airless worlds (atm 0, hydro 0)
                 </label>
 
-                <!-- Include system orrery images -->
-                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                    <input type="checkbox" id="obs-include-system-images" checked>
-                    Include system orrery images
-                </label>
+                <!-- System images: the system sheet (GM / full disclosure only), the
+                     orrery, or both one after the other. Below Full UWP a players'
+                     export always falls back to the orrery. -->
+                <div>
+                    <label style="display:block;margin-bottom:4px;color:#a0a8b0;font-size:0.85em;">SYSTEM IMAGES</label>
+                    <select id="obs-system-images" style="width:100%;padding:6px;background:#1a2332;color:#cdd6e3;border:1px solid #45a29e;border-radius:4px;">
+                        <option value="sheet" selected>System sheet</option>
+                        <option value="orrery">Orrery</option>
+                        <option value="both">System sheet and orrery</option>
+                        <option value="none">None</option>
+                    </select>
+                </div>
 
                 <!-- Subsector subfolders — Obsidian only. HTML always uses them,
                      because its relative hrefs/srcs depend on the folder layout. -->

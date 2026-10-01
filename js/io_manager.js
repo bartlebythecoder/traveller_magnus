@@ -897,7 +897,7 @@ function setupObsidianExport() {
     const projectionSel      = document.getElementById('obs-image-projection');
     const skipAirlessRow     = document.getElementById('obs-skip-airless-row');
     const skipAirlessChk     = document.getElementById('obs-skip-airless');
-    const incSystemImages    = document.getElementById('obs-include-system-images');
+    const systemImagesSel    = document.getElementById('obs-system-images');
     const versionSel    = document.getElementById('obs-version');
     const versionHint   = document.getElementById('obs-version-hint');
     const versionWarn   = document.getElementById('obs-version-warning');
@@ -1017,7 +1017,8 @@ function setupObsidianExport() {
         const includeImages       = !!(incImages       && incImages.checked);
         const imageProjection     = (projectionSel && projectionSel.value) || 'globe';
         const skipAirless         = includeImages && !!(skipAirlessChk  && skipAirlessChk.checked);
-        const includeSystemImages = !!(incSystemImages && incSystemImages.checked);
+        // 'sheet' | 'orrery' | 'both' | 'none' — see ExportCore.renderSystemImages.
+        const systemImages        = (systemImagesSel && systemImagesSel.value) || 'sheet';
         const useSubfolders       = !!(useSubfoldersChk && useSubfoldersChk.checked);
         const playerVersion       = _isPlayerVersion();
 
@@ -1042,7 +1043,7 @@ function setupObsidianExport() {
                 includeImages,
                 imageProjection,
                 skipAirless,
-                includeSystemImages,
+                systemImages,
                 // HTML ignores this and always uses subfolders; passing true keeps the
                 // option object identical between the two so a future third format,
                 // and Release 2's disclosure options, only have to be added once.

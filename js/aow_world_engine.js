@@ -4226,6 +4226,16 @@
 
         for (let wsIdx = 0; wsIdx < sys.diskWorksheets.length; wsIdx++) {
             const worksheet = sys.diskWorksheets[wsIdx];
+            // THE STAR A DISK BELONGS TO is the first star of its focal group:
+            // an A-B circumbinary disk is the primary's, B-C is B's (v0.18.1.3,
+            // Sean 2026-10-17). Before this the WORKSHEET index was stored as
+            // the star, so a Binary's A-B planets claimed a star 2 that does not
+            // exist and (A-B, C)'s C planets were named and filed as star B.
+            // Matched by reference first, then by the node label's letter.
+            const focal0 = (worksheet.focalStars || [])[0];
+            let starIdx = focal0 ? (sys.stars || []).indexOf(focal0) : -1;
+            if (starIdx < 0 && /^[A-Z]/.test(worksheet.label || '')) starIdx = worksheet.label.charCodeAt(0) - 65;
+            if (!(starIdx >= 0 && starIdx < (sys.stars || []).length)) starIdx = 0;
 
             for (const planet of (worksheet.planets || [])) {
                 // Map AoW planetType → MgT2E type string
@@ -4246,9 +4256,12 @@
                 planet.gravity = planet.surfaceGravity ?? null;
                 planet.moons.forEach(sat => { sat.gravity = sat.surfaceGravity ?? null; });
 
-                // orbitId used by naming sort; parentStarIdx used by multi-star prefix
+                // orbitId used by naming sort; parentStarIdx used by multi-star
+                // prefix, the accordion and the viewers - a STAR index. The disk
+                // it formed in is kept separately as diskNodeIdx.
                 planet.orbitId       = planet.orbitalRadius || 0;
-                planet.parentStarIdx = wsIdx;
+                planet.parentStarIdx = starIdx;
+                planet.diskNodeIdx   = wsIdx;
 
                 sys.worlds.push(planet);
             }

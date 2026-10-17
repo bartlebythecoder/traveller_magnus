@@ -773,7 +773,38 @@ const SystemViewer = (() => {
         // Companion orbit AU from sys.orbits[], sorted by R ascending
         const sortedOrbits = [...(sys.orbits || [])].sort((a, b) => a.R - b.R);
 
-        const stars = (sys.stars || []).map((star, idx) => {
+        // WHICH STAR EACH STAR AND EACH WORLD BELONGS TO (v0.18.1.3). AoW builds
+        // planets on DISK NODES - one star, or a pair sharing a circumbinary
+        // disk - and stamps the NODE index on each planet as `parentStarIdx`
+        // (aow_world_engine.js populateAoWWorldsList). That index is not a star
+        // index: in a Binary the A-B disk is node 2, so its planets were drawn
+        // round star B, and in (A-B, C) star C's planets were drawn round B.
+        // The node list is rebuilt here with the engine's own buildNodes, and
+        // each node is filed under the FIRST star of its focal group, so an A-B
+        // disk belongs to the primary exactly as an MgT2E P-Type orbit does.
+        // Each star's own orbit is read from the hierarchy too: sorting
+        // sys.orbits by R handed star B the inner B-C pair's orbit in
+        // (A, B-C). Unknown hierarchy or no engine loaded: the old behaviour.
+        const rawStars = sys.stars || [];
+        const orbs = sys.orbits || [];
+        const STAR_ORBITS = {
+            'Binary':                [null, [orbs[0], 0]],
+            'Trinary (A, B-C)':      [null, [orbs[1], 0], [orbs[0], 1]],
+            'Trinary (A-B, C)':      [null, [orbs[0], 0], [orbs[1], 0]],
+            'Quaternary (A-B, C-D)': [null, [orbs[0], 0], [orbs[2], 0], [orbs[1], 2]],
+        }[sys.hierarchy] || null;
+        let nodeStar = null;
+        if (window.AoWWorldEngine && AoWWorldEngine.buildNodes) {
+            try {
+                nodeStar = AoWWorldEngine.buildNodes(sys).map(n => {
+                    const first = rawStars.indexOf((n.focalStars || [])[0]);
+                    return { star: first >= 0 ? first : 0,
+                             pType: n.type === 'P' && first === 0 };
+                });
+            } catch (e) { nodeStar = null; }
+        }
+
+        const stars = rawStars.map((star, idx) => {
             let sType = 'G', subType = 5, sClass = 'V';
             const sc = star.spectralClassification || '';
             if (star.state === 'White Dwarf') {
@@ -784,9 +815,12 @@ const SystemViewer = (() => {
                 const m = sc.match(/^([OBAFGKM])(\d+)\s*(Ia|Ib|II|III|IV|V)$/i);
                 if (m) { sType = m[1].toUpperCase(); subType = parseInt(m[2]); sClass = m[3]; }
             }
-            const orbitAU = (idx > 0 && sortedOrbits[idx - 1]) ? sortedOrbits[idx - 1].R : null;
+            const own = STAR_ORBITS && STAR_ORBITS[idx];
+            const orbitAU = own ? (own[0] && own[0].R != null ? own[0].R : null)
+                          : (idx > 0 && sortedOrbits[idx - 1]) ? sortedOrbits[idx - 1].R : null;
             return {
                 role:          idx === 0 ? 'Primary' : 'Companion',
+                parentStarIdx: own ? own[1] : 0,
                 sType, subType, sClass,
                 mass:          star.wdMass || star.initialMass || 1.0,
                 lum:           star.luminosity ?? null,
@@ -839,13 +873,18 @@ const SystemViewer = (() => {
                 size:      m.size       ?? null,
             }));
 
-            const parentStarIdx = Math.min(w.parentStarIdx ?? 0, Math.max(0, stars.length - 1));
+            // The disk node: `diskNodeIdx` on systems generated since v0.18.1.3,
+            // whose `parentStarIdx` is already a star; on older saves the node
+            // index IS `parentStarIdx` - see nodeStar above.
+            const node = nodeStar && nodeStar[w.diskNodeIdx ?? w.parentStarIdx ?? 0];
+            const parentStarIdx = node ? node.star
+                : Math.min(w.parentStarIdx ?? 0, Math.max(0, stars.length - 1));
 
             return {
                 type, ggType,
                 au, orbitId: au,
                 parentStarIdx,
-                orbitType:    'S-Type',
+                orbitType:    node && node.pType ? 'P-Type' : 'S-Type',
                 eccentricity: w.eccentricity ?? 0,
                 diamKm,
                 mass:         w.mass       ?? null,
@@ -951,6 +990,7 @@ const SystemViewer = (() => {
 
     function close() {
         if (!_overlay) return;
+        _closeGifDialog();
         window.removeEventListener('mousemove', _onWindowMouseMove);
         window.removeEventListener('mouseup',   _onWindowMouseUp);
         cancelAnimationFrame(_animFrameId);
@@ -1254,6 +1294,22 @@ const SystemViewer = (() => {
             });
         }
 
+        // GIF — records the orrery as an animated GIF with the current view and
+        // settings. Guarded like the sheet button on its module being loaded.
+        let gifBtn = null;
+        if (window.GifEncoder) {
+            gifBtn = document.createElement('button');
+            gifBtn.id = 'sv-gif-btn';
+            gifBtn.textContent = 'GIF';
+            gifBtn.title = 'Record the orrery as an animated GIF, using the current view and settings';
+            Object.assign(gifBtn.style, {
+                background: 'transparent', border: `1px solid ${P.badge}`,
+                color: P.accent, padding: '3px 10px', cursor: 'pointer',
+                fontFamily: 'inherit', fontSize: '11px', whiteSpace: 'nowrap'
+            });
+            gifBtn.addEventListener('click', _openGifDialog);
+        }
+
         const closeBtn = document.createElement('button');
         closeBtn.textContent = '✕';
         Object.assign(closeBtn.style, {
@@ -1263,7 +1319,7 @@ const SystemViewer = (() => {
         });
         closeBtn.addEventListener('click', close);
 
-        header.append(...[title, editionBadge, sub, hint, yearWrap, dayWrap, speedWrap, linearWrap, orbitWrap, hideMoonsWrap, hideHZWrap, hideHighlightWrap, _pauseBtn, sheetBtn, editBtn, closeBtn].filter(Boolean));
+        header.append(...[title, editionBadge, sub, hint, yearWrap, dayWrap, speedWrap, linearWrap, orbitWrap, hideMoonsWrap, hideHZWrap, hideHighlightWrap, _pauseBtn, sheetBtn, gifBtn, editBtn, closeBtn].filter(Boolean));
         _overlay.appendChild(header);
 
         _orrCanvas = document.createElement('canvas');
@@ -1926,6 +1982,9 @@ const SystemViewer = (() => {
 
     // ── ESC ───────────────────────────────────────────────────────────────────
     document.addEventListener('keydown', e => {
+        // The GIF dialog sits on top of the orrery: Escape closes it (and
+        // cancels any recording) without also closing the orrery.
+        if (e.key === 'Escape' && _gifDialog) { _closeGifDialog(); return; }
         if (e.key === 'Escape' && isOpen() &&
             !(window.SystemSheet    && window.SystemSheet.isOpen()) &&
             !(window.SurfaceViewer  && window.SurfaceViewer.isOpen()) &&
@@ -2006,6 +2065,431 @@ const SystemViewer = (() => {
         return Math.max(0.5, Math.min(zoom, 20.0));
     }
 
+    // ── Off-screen render state ──────────────────────────────────────────────
+    // Every module-level variable _drawOrrery() reads or writes. An off-screen
+    // render (the PNG snapshot, each GIF frame) installs its own values, draws,
+    // and puts the live viewer's values back. Add to BOTH functions below if
+    // _drawOrrery ever starts reading another module variable, or off-screen
+    // renders will silently pick up the live viewer's value instead.
+    function _captureRenderState() {
+        return {
+            orrCtx:                 _orrCtx,
+            canvasW:                _canvasW,
+            canvasH:                _canvasH,
+            sys:                    _sys,
+            hexId:                  _hexId,
+            gameYear:               _gameYear,
+            gameDay:                _gameDay,
+            viewZoom:               _viewZoom,
+            viewOffX:               _viewOffX,
+            viewOffY:               _viewOffY,
+            lightMode:              _lightMode,
+            linearScale:            _linearScale,
+            orbitOpacity:           _orbitOpacity,
+            hitBodies:              _hitBodies,
+            hideMoons:              _hideMoons,
+            hideHZ:                 _hideHZ,
+            hideMainworldHighlight: _hideMainworldHighlight,
+        };
+    }
+
+    function _installRenderState(s) {
+        _orrCtx                 = s.orrCtx;
+        _canvasW                = s.canvasW;
+        _canvasH                = s.canvasH;
+        _sys                    = s.sys;
+        _hexId                  = s.hexId;
+        _gameYear               = s.gameYear;
+        _gameDay                = s.gameDay;
+        _viewZoom               = s.viewZoom;
+        _viewOffX               = s.viewOffX;
+        _viewOffY               = s.viewOffY;
+        _lightMode              = s.lightMode;
+        _linearScale            = s.linearScale;
+        _orbitOpacity           = s.orbitOpacity;
+        _hitBodies              = s.hitBodies || [];
+        _hideMoons              = s.hideMoons;
+        _hideHZ                 = s.hideHZ;
+        _hideMainworldHighlight = s.hideMainworldHighlight;
+    }
+
+    // Draws one frame with `state` installed and always restores the live
+    // values, even if the draw throws. Synchronous by design: nothing else can
+    // run between install and restore, so the live animation loop never sees
+    // a half-swapped state.
+    function _drawWith(state) {
+        const saved = _captureRenderState();
+        _installRenderState(state);
+        try {
+            _drawOrrery();
+        } finally {
+            _installRenderState(saved);
+        }
+    }
+
+    // ── Animated GIF export ──────────────────────────────────────────────────
+    // Records the open orrery as an animated GIF using the viewer's CURRENT
+    // view and settings (Sean, 2026-10-17): zoom and pan, speed, Hide Moons /
+    // HZ / MW, linear scale, orbit-line opacity, light mode, and the date on
+    // screen as the first frame. In-app only — the exporters still use the
+    // static PNG from renderSnapshot.
+    //
+    // Body positions are a pure function of elapsed_years (see _drawOrrery),
+    // so frame k is simply "draw at start + k steps"; nothing depends on wall
+    // clock time, and the same settings always give the same GIF.
+
+    const _GIF_WIDTHS      = [480, 640, 800, 1024, 1280];
+    const _GIF_FPS         = [10, 15, 20, 25];
+    const _GIF_MAX_SECONDS = 60;
+
+    let _gifJob    = null;   // { cancelled } while a recording runs
+    let _gifDialog = null;   // the GIF options dialog element, when open
+
+    // Output sizes offered for the current window: never wider than the live
+    // canvas, and tall enough that _drawOrrery's fixed 70px margin still
+    // leaves room for the system.
+    function _gifSizes() {
+        const sizes = _GIF_WIDTHS
+            .filter(w => w <= _canvasW)
+            .map(w => ({ w, h: Math.round(w * _canvasH / _canvasW) }))
+            .filter(s => Math.min(s.w, s.h) / 2 - 70 >= 40);
+        if (!sizes.length) sizes.push({ w: Math.round(_canvasW), h: Math.round(_canvasH) });
+        return sizes;
+    }
+
+    // The body whose orbit the "one orbit" preset loops on: the mainworld, or
+    // for a lunar mainworld its parent planet, since that is the motion the
+    // orrery shows around the star. Star mass is chosen exactly as
+    // _drawOrrery chooses it, so the period matches what is drawn.
+    // Returns { name, periodYears } or null.
+    function _mainworldOrbit(sys) {
+        if (!sys) return null;
+        const worlds = (sys.worlds || []).filter(w => w.type !== 'Empty');
+        let w = worlds.find(x => x.type === 'Mainworld');
+        let name = w && w.name;
+        if (!w) {
+            w = worlds.find(x => (x.moons || []).some(m => m.type === 'Mainworld'));
+            if (!w) return null;
+            const moon = w.moons.find(m => m.type === 'Mainworld');
+            name = (moon && moon.name) || w.name;
+        }
+        const stars = sys.stars || [];
+        const sIdx  = (w.orbitType === 'S-Type' && w.parentStarIdx > 0) ? w.parentStarIdx : 0;
+        const mass  = ((stars[sIdx] || {}).mass) || 1;
+        const periodYears = _worldPeriodYears(w, mass);
+        if (!(periodYears > 0) || !isFinite(periodYears)) return null;
+        return { name: name || 'mainworld', periodYears };
+    }
+
+    // Frame plan for the dialog's choices. In orbit mode the step is adjusted
+    // (by less than one frame's worth) so the last frame lands exactly one
+    // period after the first, which is what makes the loop seamless.
+    function _gifPlan(seconds, fps, orbitMode) {
+        const delayCs     = Math.round(100 / fps);
+        const daysPerFrame = _speedDaysPerSec * delayCs / 100;
+        let frames = Math.max(2, Math.round(seconds * 100 / delayCs));
+        let yearsPerFrame = daysPerFrame / 365.25;
+        if (orbitMode) {
+            const orbit = _mainworldOrbit(_sys);
+            if (orbit) {
+                const want = Math.round(orbit.periodYears / yearsPerFrame);
+                frames = Math.max(2, Math.min(want, Math.round(_GIF_MAX_SECONDS * 100 / delayCs)));
+                if (want === frames) yearsPerFrame = orbit.periodYears / frames;
+            }
+        }
+        return { delayCs, frames, yearsPerFrame, daysPerFrame: yearsPerFrame * 365.25 };
+    }
+
+    // Renders the GIF. opts: { width, fps, seconds, orbit }.
+    // onProgress(done, total) is called between batches. Resolves to
+    // { bytes, width, height, frames } or null when cancelled.
+    //
+    // The live animation loop is stopped for the duration and restarted at
+    // the end. Each frame is drawn through _drawWith, which installs and
+    // restores state synchronously, but the recording itself yields between
+    // batches so the progress bar can paint; stopping the loop means the
+    // live view cannot advance (or be drawn) while that happens.
+    async function renderGif(opts, onProgress) {
+        if (!_overlay || !_sys) throw new Error('The orrery is not open.');
+        if (_gifJob) throw new Error('A GIF is already being recorded.');
+        if (typeof GifEncoder === 'undefined') throw new Error('js/gif_encoder.js is not loaded.');
+
+        const job = { cancelled: false };
+        _gifJob = job;
+        cancelAnimationFrame(_animFrameId);
+        _animFrameId = null;
+
+        try {
+            const sizes = _gifSizes();
+            const size  = sizes.find(s => s.w === opts.width) || sizes[sizes.length - 1];
+            const outW  = size.w, outH = size.h;
+            const plan  = _gifPlan(opts.seconds, opts.fps, !!opts.orbit);
+
+            // Match the screen: same framing at a smaller size. Body sizes and
+            // label text are fixed in pixels (semantic zoom), so rather than
+            // shrinking the whole picture, the zoom is rescaled so the orbits
+            // fill the same fraction of the frame as they do on screen.
+            const s        = outW / _canvasW;
+            const liveBase = Math.min(_canvasW, _canvasH) / 2 - 70;
+            const outBase  = Math.min(outW, outH) / 2 - 70;
+
+            const canvas  = document.createElement('canvas');
+            canvas.width  = outW;
+            canvas.height = outH;
+            const ctx     = canvas.getContext('2d', { willReadFrequently: true });
+            const bg      = _lightMode ? '#ffffff' : '#000000';
+
+            const base = Object.assign(_captureRenderState(), {
+                orrCtx:   ctx,
+                canvasW:  outW,
+                canvasH:  outH,
+                viewZoom: _viewZoom * (liveBase * s) / outBase,
+                viewOffX: _viewOffX * s,
+                viewOffY: _viewOffY * s,
+                gameYear: 0,
+                hitBodies: [],
+            });
+            const startYears = _gameYear + (_gameDay - 1) / 365.25;
+
+            // _drawOrrery computes elapsed_years = _gameYear + (_gameDay - 1) / 365.25,
+            // so year 0 with a fractional day gives an exact elapsed time.
+            function frame(k) {
+                base.gameDay = 1 + (startYears + k * plan.yearsPerFrame) * 365.25;
+                _drawWith(base);
+                ctx.save();
+                ctx.globalCompositeOperation = 'destination-over';
+                ctx.fillStyle = bg;
+                ctx.fillRect(0, 0, outW, outH);
+                ctx.restore();
+                return ctx.getImageData(0, 0, outW, outH).data;
+            }
+
+            // One palette for the whole animation, from evenly spaced sample frames.
+            const SAMPLES = Math.min(8, plan.frames);
+            const samples = [];
+            for (let i = 0; i < SAMPLES; i++)
+                samples.push(frame(Math.round(i * (plan.frames - 1) / Math.max(1, SAMPLES - 1))));
+            const enc = GifEncoder.create(outW, outH, GifEncoder.buildPalette(samples), { loop: 0 });
+            samples.length = 0;
+
+            let lastYield = performance.now();
+            for (let k = 0; k < plan.frames; k++) {
+                if (job.cancelled) return null;
+                enc.addFrame(frame(k), plan.delayCs);
+                if (performance.now() - lastYield > 40) {
+                    if (onProgress) onProgress(k + 1, plan.frames);
+                    await new Promise(r => setTimeout(r, 0));
+                    lastYield = performance.now();
+                }
+            }
+            if (job.cancelled) return null;
+            if (onProgress) onProgress(plan.frames, plan.frames);
+            return { bytes: enc.finish(), width: outW, height: outH, frames: plan.frames };
+        } finally {
+            _gifJob = null;
+            if (_overlay && _animFrameId === null) _startLoop();
+        }
+    }
+
+    function _gifFilename() {
+        const state = (typeof hexStates !== 'undefined') ? hexStates.get(_hexId) : null;
+        let name = _hexId;
+        if (state && window.SystemSheet && SystemSheet.resolveSystemName) {
+            const orbit = _mainworldOrbit(_sys);
+            name = SystemSheet.resolveSystemName(normalizeSystem(state), state,
+                                                 orbit ? { name: orbit.name } : null, _hexId);
+        }
+        const safe = s => String(s).replace(/[^a-z0-9]+/gi, '_');
+        return `${safe(name)}_${safe(_hexId)}_orrery.gif`;
+    }
+
+    function _closeGifDialog() {
+        if (_gifJob) _gifJob.cancelled = true;
+        if (_gifDialog) _gifDialog.remove();
+        _gifDialog = null;
+    }
+
+    function _openGifDialog() {
+        if (_gifDialog || !_overlay) return;
+
+        const P = _lightMode
+            ? { bg: '#ffffff', border: '#45a29e', text: '#1a1a2e', accent: '#0d6b64', sub: '#4a5568', warn: '#b45309' }
+            : { bg: '#0b0f14', border: '#45a29e', text: '#c5c6c7', accent: '#66fcf1', sub: '#8a8f94', warn: '#f0b45a' };
+
+        const backdrop = document.createElement('div');
+        backdrop.id = 'sv-gif-dialog';
+        Object.assign(backdrop.style, {
+            position: 'fixed', inset: '0', zIndex: '9200',
+            background: 'rgba(0,0,0,0.45)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: '"Share Tech Mono", "Courier New", monospace'
+        });
+        const box = document.createElement('div');
+        Object.assign(box.style, {
+            background: P.bg, color: P.text, border: `1px solid ${P.border}`,
+            padding: '16px 20px', width: '380px', maxWidth: 'calc(100vw - 32px)',
+            fontSize: '12px', lineHeight: '1.6'
+        });
+        backdrop.appendChild(box);
+
+        const el = (tag, text, style) => {
+            const e = document.createElement(tag);
+            if (text != null) e.textContent = text;
+            if (style) Object.assign(e.style, style);
+            return e;
+        };
+        const inputStyle = {
+            background: 'transparent', border: `1px solid ${P.border}`, color: P.accent,
+            fontFamily: 'inherit', fontSize: '12px', padding: '2px 4px'
+        };
+        const btnStyle = {
+            background: 'transparent', border: `1px solid ${P.border}`, color: P.accent,
+            padding: '3px 12px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '12px'
+        };
+        const row = (label, ...controls) => {
+            const r = el('div', null, { display: 'flex', alignItems: 'center', gap: '8px', margin: '6px 0' });
+            r.append(el('span', label, { color: P.sub, width: '90px', flexShrink: '0' }), ...controls);
+            return r;
+        };
+
+        const title = el('div', 'Export Orrery GIF', { color: P.accent, fontSize: '14px', fontWeight: 'bold', marginBottom: '4px' });
+
+        const settingsLine = el('div', [
+            `Speed ${_speedDaysPerSec < 10 ? _speedDaysPerSec.toFixed(1) : Math.round(_speedDaysPerSec)} d/s`,
+            _hideMoons ? 'moons hidden' : 'moons shown',
+            _hideHZ ? 'HZ hidden' : 'HZ shown',
+            _linearScale ? 'linear scale' : 'log scale',
+        ].join(' · '), { color: P.sub, marginBottom: '8px' });
+        const settingsHint = el('div', 'Uses the current view and settings. Change them in the orrery header first.',
+            { color: P.sub, fontSize: '11px', marginBottom: '8px' });
+
+        const secInput = el('input', null, Object.assign({ width: '60px' }, inputStyle));
+        secInput.type = 'number'; secInput.min = '1'; secInput.max = String(_GIF_MAX_SECONDS);
+        secInput.step = '0.5'; secInput.value = '6';
+
+        const orbit = _mainworldOrbit(_sys);
+        let orbitMode = false;
+        const orbitBtn = el('button', orbit ? `One orbit of ${orbit.name}` : 'No mainworld orbit',
+            Object.assign({}, btnStyle, { padding: '2px 8px', fontSize: '11px' }));
+        orbitBtn.disabled = !orbit;
+        if (!orbit) orbitBtn.style.opacity = '0.5';
+
+        const fpsSel = el('select', null, inputStyle);
+        _GIF_FPS.forEach(f => {
+            const o = el('option', `${f} fps`); o.value = String(f);
+            if (f === 15) o.selected = true;
+            fpsSel.appendChild(o);
+        });
+
+        const sizes   = _gifSizes();
+        const sizeSel = el('select', null, inputStyle);
+        const defW    = (sizes.find(s => s.w === 800) || sizes[sizes.length - 1]).w;
+        sizes.forEach(s => {
+            const o = el('option', `${s.w} × ${s.h}`); o.value = String(s.w);
+            if (s.w === defW) o.selected = true;
+            sizeSel.appendChild(o);
+        });
+
+        const info = el('div', '', { color: P.sub, marginTop: '8px' });
+        const warn = el('div', '', { color: P.warn, fontSize: '11px' });
+
+        const barWrap = el('div', null, { height: '6px', border: `1px solid ${P.border}`, marginTop: '10px', display: 'none' });
+        const bar     = el('div', null, { height: '100%', width: '0%', background: P.accent });
+        barWrap.appendChild(bar);
+
+        const recordBtn = el('button', 'Record', btnStyle);
+        const cancelBtn = el('button', 'Cancel', btnStyle);
+        const btnRow = el('div', null, { display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '12px' });
+        btnRow.append(recordBtn, cancelBtn);
+
+        function seconds() {
+            const v = parseFloat(secInput.value);
+            return Math.min(_GIF_MAX_SECONDS, Math.max(1, isFinite(v) ? v : 6));
+        }
+
+        function refreshInfo() {
+            const fps  = parseInt(fpsSel.value, 10);
+            const plan = _gifPlan(seconds(), fps, orbitMode);
+            const secs = plan.frames * plan.delayCs / 100;
+            const size = sizes.find(s => s.w === parseInt(sizeSel.value, 10)) || sizes[0];
+            info.textContent = `${plan.frames} frames · ${secs.toFixed(1)} s · ${size.w} × ${size.h} · ${plan.daysPerFrame < 1 ? plan.daysPerFrame.toFixed(2) : plan.daysPerFrame.toFixed(1)} days per frame`;
+
+            const notes = [];
+            if (orbitMode && orbit) {
+                const want = orbit.periodYears * 365.25 / _speedDaysPerSec;
+                if (want > _GIF_MAX_SECONDS)
+                    notes.push(`One orbit of ${orbit.name} takes ${Math.round(want)} s at this speed — capped at ${_GIF_MAX_SECONDS} s, so it will not loop cleanly. Raise the speed to fit a full orbit.`);
+            }
+            const hasMoons = (_sys.worlds || []).some(w => (w.moons || []).some(m => m.type !== 'Empty' && m.size !== 'R'));
+            if (!_hideMoons && hasMoons && plan.daysPerFrame > 1)
+                notes.push(`Each frame jumps ${plan.daysPerFrame.toFixed(1)} days, so fast moons will appear to hop about. Hide Moons or slow the speed for smoother moons.`);
+            warn.textContent = notes.join(' ');
+        }
+
+        orbitBtn.addEventListener('click', () => {
+            if (!orbit) return;
+            orbitMode = true;
+            const plan = _gifPlan(_GIF_MAX_SECONDS, parseInt(fpsSel.value, 10), true);
+            secInput.value = String(Math.round(plan.frames * plan.delayCs) / 100);
+            refreshInfo();
+        });
+        secInput.addEventListener('input', () => { orbitMode = false; refreshInfo(); });
+        fpsSel.addEventListener('change', () => {
+            if (orbitMode) {
+                const plan = _gifPlan(_GIF_MAX_SECONDS, parseInt(fpsSel.value, 10), true);
+                secInput.value = String(Math.round(plan.frames * plan.delayCs) / 100);
+            }
+            refreshInfo();
+        });
+        sizeSel.addEventListener('change', refreshInfo);
+
+        // Escape is handled by the viewer's own Escape listener (see "ESC"),
+        // which closes this dialog before it would close the orrery.
+        cancelBtn.addEventListener('click', _closeGifDialog);
+        backdrop.addEventListener('mousedown', e => { if (e.target === backdrop && !_gifJob) _closeGifDialog(); });
+
+        recordBtn.addEventListener('click', async () => {
+            [secInput, fpsSel, sizeSel, orbitBtn, recordBtn].forEach(c => { c.disabled = true; });
+            recordBtn.textContent = 'Recording…';
+            barWrap.style.display = 'block';
+            try {
+                const result = await renderGif({
+                    width:   parseInt(sizeSel.value, 10),
+                    fps:     parseInt(fpsSel.value, 10),
+                    seconds: seconds(),
+                    orbit:   orbitMode,
+                }, (done, total) => {
+                    bar.style.width = (100 * done / total).toFixed(1) + '%';
+                    info.textContent = `Recording frame ${done} of ${total}…`;
+                });
+                if (!result) return;   // cancelled
+                const name = _gifFilename();
+                const ok = (typeof downloadBlob === 'function')
+                    ? downloadBlob(result.bytes, name, 'image/gif') : false;
+                if (typeof showToast === 'function') {
+                    showToast(ok ? `Saved ${name} (${Math.round(result.bytes.length / 1024)} KB)`
+                                 : 'The GIF could not be downloaded — see the console.', ok ? 3000 : 4000);
+                }
+                _closeGifDialog();
+            } catch (err) {
+                console.error('[Orrery GIF] recording failed:', err);
+                if (typeof showToast === 'function') showToast('The GIF could not be recorded — see the console.', 4000);
+                _closeGifDialog();
+            }
+        });
+
+        box.append(title, settingsLine, settingsHint,
+            row('Length (s)', secInput, orbitBtn),
+            row('Frame rate', fpsSel),
+            row('Size', sizeSel),
+            info, warn, barWrap, btnRow);
+
+        document.body.appendChild(backdrop);
+        _gifDialog = backdrop;
+        refreshInfo();
+        recordBtn.focus();
+    }
+
     // ── Snapshot export ───────────────────────────────────────────────────────
     // Renders one static orrery frame to an off-screen canvas and returns the
     // PNG bytes as a Uint8Array.  Safe to call while the live viewer is closed;
@@ -2063,73 +2547,32 @@ const SystemViewer = (() => {
             });
         }
 
-        // Save every module-level variable that _drawOrrery() reads or writes
-        const saved = {
-            orrCtx:       _orrCtx,
-            canvasW:      _canvasW,
-            canvasH:      _canvasH,
-            sys:          _sys,
-            hexId:        _hexId,
-            gameYear:     _gameYear,
-            gameDay:      _gameDay,
-            viewZoom:     _viewZoom,
-            viewOffX:     _viewOffX,
-            viewOffY:     _viewOffY,
-            lightMode:    _lightMode,
-            linearScale:  _linearScale,
-            orbitOpacity:          _orbitOpacity,
-            hitBodies:             _hitBodies,
-            hideMoons:              _hideMoons,
-            hideHZ:                 _hideHZ,
-            hideMainworldHighlight: _hideMainworldHighlight,
-        };
-
-        // Create an off-screen canvas and install snapshot render state
+        // Off-screen canvas, drawn with snapshot render state installed
         const canvas  = document.createElement('canvas');
         canvas.width  = width;
         canvas.height = height;
 
-        _orrCtx       = canvas.getContext('2d');
-        _canvasW      = width;
-        _canvasH      = height;
-        _sys          = normalised;
-        _hexId        = saved.hexId || 'snapshot';
-        _gameYear     = 0;   // T=0 → deterministic epoch positions
-        _gameDay      = 1;
-        _viewZoom     = _autoFitZoom(normalised, width, height);
-        _viewOffX     = 0;
-        _viewOffY     = 0;
-        _lightMode    = false;  // always dark-mode for export
-        _linearScale  = false;
-        _orbitOpacity           = 0.3;    // light orbit rings add context without clutter
-        _hideMoons              = false;
-        _hideHZ                 = false;
-        // The mainworld highlight is identification, which is (g) — a coloured
-        // body says "this is the one that matters" as loudly as a caption.
-        _hideMainworldHighlight = !!(opts.level && EC2 &&
-            !(window.DisclosureModel && window.DisclosureModel.atLeast(opts.level, 'g')));
-        _hitBodies              = [];
-
-        _drawOrrery();
-
-        // Restore every saved variable before yielding
-        _orrCtx       = saved.orrCtx;
-        _canvasW      = saved.canvasW;
-        _canvasH      = saved.canvasH;
-        _sys          = saved.sys;
-        _hexId        = saved.hexId;
-        _gameYear     = saved.gameYear;
-        _gameDay      = saved.gameDay;
-        _viewZoom     = saved.viewZoom;
-        _viewOffX     = saved.viewOffX;
-        _viewOffY     = saved.viewOffY;
-        _lightMode    = saved.lightMode;
-        _linearScale  = saved.linearScale;
-        _orbitOpacity           = saved.orbitOpacity;
-        _hitBodies              = saved.hitBodies;
-        _hideMoons              = saved.hideMoons;
-        _hideHZ                 = saved.hideHZ;
-        _hideMainworldHighlight = saved.hideMainworldHighlight;
+        _drawWith({
+            orrCtx:       canvas.getContext('2d'),
+            canvasW:      width,
+            canvasH:      height,
+            sys:          normalised,
+            hexId:        _hexId || 'snapshot',
+            gameYear:     0,   // T=0 → deterministic epoch positions
+            gameDay:      1,
+            viewZoom:     _autoFitZoom(normalised, width, height),
+            viewOffX:     0,
+            viewOffY:     0,
+            lightMode:    false,  // always dark-mode for export
+            linearScale:  false,
+            orbitOpacity: 0.3,    // light orbit rings add context without clutter
+            hideMoons:    false,
+            hideHZ:       false,
+            // The mainworld highlight is identification, which is (g) — a coloured
+            // body says "this is the one that matters" as loudly as a caption.
+            hideMainworldHighlight: !!(opts.level && EC2 &&
+                !(window.DisclosureModel && window.DisclosureModel.atLeast(opts.level, 'g'))),
+        });
 
         return new Promise(resolve => {
             canvas.toBlob(blob => {
@@ -2149,7 +2592,7 @@ const SystemViewer = (() => {
     // are expected to check `orbitId != null` themselves first (loose, because
     // legacy saves omit the key entirely -- see project_manifest.md).
     return { open, close, isOpen, refresh, handleWheel, normalizeSystem, renderSnapshot,
-             orbitToAU: _orbitToAU };
+             renderGif, orbitToAU: _orbitToAU };
 
 })();
 

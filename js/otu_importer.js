@@ -1,7 +1,9 @@
 /**
  * PROJECT AS ABOVE, SO BELOW
  * Module: OTU Importer
- * Description: Handles the "Import the Imperium" feature.
+ * Description: Handles the "Import the Imperium", "Import the Universe" and
+ *   "Import a Neighbourhood" (chosen sector + 8 neighbours) features.
+ *   Imperium:
  *   - Loads the sector list from /sectors/imperium.tsv
  *   - Presents a modal for sector selection and slot assignment
  *   - Fetches each selected sector from the travellermap API
@@ -320,7 +322,7 @@
         // Taking a snapshot instead was considered and rejected: a pre-import copy
         // of hexStates is precisely the size the undo cap — already down to 5
         // snapshots on large grids — exists to avoid. So this matches
-        // executeUniverseImport(), which has cleared the stacks all along for the
+        // executeBulkImport(), which has cleared the stacks all along for the
         // same reason.
         //
         // Cleared BEFORE the work rather than after, so an import that fails
@@ -478,26 +480,23 @@
     }
 
     /**
-     * Bulk-imports every sector in UNIVERSE_SECTORS into a freshly resized 16×8 canvas.
-     * Called after the user confirms in the modal. Clears all existing data.
+     * Wipes the map and resizes the canvas for a new-document bulk import.
+     * Shared by the Universe and Neighbourhood imports so the two cannot drift
+     * apart (mirrors clearCanvas in io_manager.js, minus the confirm prompt).
      */
-    async function executeUniverseImport(opts) {
-        const needsMeta = opts.importRoutes || opts.importBorders || opts.importRegions;
-
-        let sectors;
-        try {
-            sectors = getUniverseSectors();
-        } catch (err) {
-            alert(`Cannot import: ${err.message}`);
-            return;
-        }
+    async function resetCanvasForBulkImport(width, height) {
+        // Leave the System Viewer stack if open — its system belongs to a hex
+        // that is about to be wiped. Innermost first, as in clearCanvas.
+        if (typeof ApproachViewer !== 'undefined' && ApproachViewer.isOpen()) ApproachViewer.close();
+        if (typeof SurfaceViewer  !== 'undefined' && SurfaceViewer.isOpen())  SurfaceViewer.close();
+        if (typeof SystemViewer   !== 'undefined' && SystemViewer.isOpen())   SystemViewer.close();
 
         // Wipe IndexedDB before clearing memory so no stale data remains.
-        if (window.dbManager) await window.dbManager.clearDB();
+        // The sector download cache is kept — this import is about to read from it.
+        if (window.dbManager) await window.dbManager.clearDB({ keepTsvCache: true });
 
-        // Resize canvas to 16×8 and clear all in-memory state (mirrors clearCanvas).
-        gridWidth  = 16;
-        gridHeight = 8;
+        gridWidth  = width;
+        gridHeight = height;
         hexStates.clear();
         window.sectorNames        = {};
         window.sectorRoutes       = [];
@@ -516,18 +515,38 @@
 
         // Persist the new grid dimensions immediately.
         if (window.dbManager) window.dbManager.saveGridDimensions();
+    }
+
+    /**
+     * Bulk-imports a list of sectors into a freshly resized canvas.
+     * Clears all existing data first.
+     *
+     * @param {Array}  sectors - [{ name, x, y, slot }] — x,y are travellermap
+     *                           galaxy coords, slot is the canvas slot string.
+     * @param {number} width   - Canvas width in sectors.
+     * @param {number} height  - Canvas height in sectors.
+     * @param {object} opts    - { importSector, importRoutes, importBorders,
+     *                             importRegions, mixonForeven, importSystemData }
+     * @param {string} label   - "Universe" / "Neighbourhood", used in messages.
+     */
+    async function executeBulkImport(sectors, width, height, opts, label) {
+        const needsMeta = opts.importRoutes || opts.importBorders || opts.importRegions;
+
+        await resetCanvasForBulkImport(width, height);
 
         const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
         let errorCount = 0;
 
-        // Build coord lookup from all universe sectors using their default slots.
+        // Build coord lookup from only the sectors being imported, so routes
+        // leading out of the imported block are skipped rather than resolved
+        // to the wrong slot.
         const coordLookup = new Map();
-        sectors.forEach(s => coordLookup.set(`${s.x},${s.y}`, parseInt(s.defaultSlot, 10)));
+        sectors.forEach(s => coordLookup.set(`${s.x},${s.y}`, parseInt(s.slot, 10)));
 
         const universeMetas = [];
         const metaFailures = [];
         for (let i = 0; i < sectors.length; i++) {
-            const { name, defaultSlot, x, y } = sectors[i];
+            const { name, slot: defaultSlot, x, y } = sectors[i];
             let tsvFromCache = false;
 
             const isMixonForeven = opts.mixonForeven && name === 'Foreven';
@@ -585,7 +604,7 @@
                         }
                     }
                 } catch (err) {
-                    console.warn(`[Universe Import] Failed to import "${name}": ${err.message}`);
+                    console.warn(`[${label} Import] Failed to import "${name}": ${err.message}`);
                     errorCount++;
                 }
 
@@ -647,14 +666,130 @@
         requestAnimationFrame(draw);
 
         let summary = errorCount > 0
-            ? `Universe import complete. ${errorCount} sector(s) failed — see console for details.`
-            : `Universe import complete! ${sectors.length} sector(s) loaded.`;
+            ? `${label} import complete. ${errorCount} sector(s) failed — see console for details.`
+            : `${label} import complete! ${sectors.length} sector(s) loaded.`;
         if (metaFailures.length > 0) {
             const preview = metaFailures.slice(0, 3).join(', ') + (metaFailures.length > 3 ? `… (+${metaFailures.length - 3} more)` : '');
             summary += ` ${metaFailures.length} metadata fetch(es) failed (no borders/routes): ${preview}`;
-            console.warn(`[Universe Import] Metadata fetch failed for: ${metaFailures.join(', ')}`);
+            console.warn(`[${label} Import] Metadata fetch failed for: ${metaFailures.join(', ')}`);
         }
         if (typeof showToast === 'function') showToast(summary, 6000);
+    }
+
+    // =========================================================================
+    // IMPORT A NEIGHBOURHOOD (chosen sector + its 8 neighbours, 3×3 canvas)
+    // =========================================================================
+
+    const NEIGHBOURHOOD_DEFAULT = 'Spinward Marches';
+
+    /**
+     * Returns the 3×3 block centred on the named sector, as 9 cells in slot
+     * order (row-major, top-left = slot 1, centre = slot 5). Neighbours outside
+     * the universe list are returned with sector = null; their slots stay blank.
+     */
+    function getNeighbourhood(centreName) {
+        const sectors = getUniverseSectors();
+        const centre = sectors.find(s => s.name === centreName);
+        if (!centre) return null;
+        const byCoord = new Map(sectors.map(s => [`${s.x},${s.y}`, s]));
+        const cells = [];
+        for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+                const sector = byCoord.get(`${centre.x + dx},${centre.y + dy}`) || null;
+                cells.push({ slot: String(cells.length + 1), sector });
+            }
+        }
+        return cells;
+    }
+
+    /** Draw the 3×3 name preview for the currently selected centre sector. */
+    function renderNeighbourhoodPreview() {
+        const grid = document.getElementById('neighbourhood-preview');
+        const select = document.getElementById('neighbourhood-sector-select');
+        if (!grid || !select) return;
+        const mixon = document.getElementById('neighbourhood-opt-mixon-foreven')?.checked;
+        const cells = getNeighbourhood(select.value) || [];
+        grid.innerHTML = '';
+        cells.forEach((cell, idx) => {
+            const div = document.createElement('div');
+            const isCentre = idx === 4;
+            div.style.cssText = [
+                'padding:8px 4px', 'border-radius:4px', 'text-align:center',
+                'font-size:0.78rem', 'min-height:2.4em',
+                'display:flex', 'align-items:center', 'justify-content:center',
+                `background:${isCentre ? '#45a29e' : '#0d1117'}`,
+                `color:${isCentre ? '#0b0c10' : (cell.sector ? '#c5c6c7' : '#555')}`,
+                `font-weight:${isCentre ? 'bold' : 'normal'}`,
+                'border:1px solid #2a3a3a'
+            ].join(';');
+            let text = cell.sector ? cell.sector.name : '(none)';
+            if (mixon && cell.sector && cell.sector.name === 'Foreven') text += ' (Mixon)';
+            div.textContent = text;
+            grid.appendChild(div);
+        });
+    }
+
+    /** Open the Neighbourhood import modal, populating the sector picker once. */
+    function openNeighbourhoodModal() {
+        let sectors;
+        try {
+            sectors = getUniverseSectors();
+        } catch (err) {
+            alert(`Cannot import: ${err.message}`);
+            return;
+        }
+        const select = document.getElementById('neighbourhood-sector-select');
+        if (select && select.options.length === 0) {
+            [...sectors]
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s.name;
+                    opt.textContent = s.name;
+                    select.appendChild(opt);
+                });
+            select.value = NEIGHBOURHOOD_DEFAULT;
+            if (!select.value && select.options.length) select.selectedIndex = 0;
+        }
+        renderNeighbourhoodPreview();
+        document.getElementById('neighbourhood-import-modal').style.display = 'flex';
+    }
+
+    /** Close the Neighbourhood import modal. */
+    function closeNeighbourhoodModal() {
+        document.getElementById('neighbourhood-import-modal').style.display = 'none';
+    }
+
+    /** Read the modal, then run a 3×3 bulk import centred on the chosen sector. */
+    function runNeighbourhoodImport() {
+        const select = document.getElementById('neighbourhood-sector-select');
+        let cells;
+        try {
+            cells = select ? getNeighbourhood(select.value) : null;
+        } catch (err) {
+            alert(`Cannot import: ${err.message}`);
+            return;
+        }
+        if (!cells) {
+            alert('No sector selected.');
+            return;
+        }
+
+        const opts = readImportOptions('neighbourhood-opt-sector', 'neighbourhood-opt-routes',
+                                       'neighbourhood-opt-borders', 'neighbourhood-opt-regions');
+        if (!opts.importSector && !opts.importRoutes && !opts.importBorders && !opts.importRegions) {
+            alert('No import options selected.');
+            return;
+        }
+        opts.mixonForeven     = document.getElementById('neighbourhood-opt-mixon-foreven')?.checked ?? false;
+        opts.importSystemData = false;
+
+        const entries = cells
+            .filter(c => c.sector)
+            .map(c => ({ name: c.sector.name, x: c.sector.x, y: c.sector.y, slot: c.slot }));
+
+        closeNeighbourhoodModal();
+        executeBulkImport(entries, 3, 3, opts, 'Neighbourhood');
     }
 
     /** Wire up all event listeners once the DOM is ready. */
@@ -678,14 +813,46 @@
                 const mixonEl = document.getElementById('universe-opt-mixon-foreven');
                 const systemDataEl = document.getElementById('universe-opt-system-data');
                 closeUniverseModal();
-                executeUniverseImport({
+                let sectors;
+                try {
+                    sectors = getUniverseSectors();
+                } catch (err) {
+                    alert(`Cannot import: ${err.message}`);
+                    return;
+                }
+                const entries = sectors.map(s => ({ name: s.name, x: s.x, y: s.y, slot: s.defaultSlot }));
+                executeBulkImport(entries, 16, 8, {
                     importSector:     true,
                     importRoutes:     true,
                     importBorders:    true,
                     importRegions:    true,
                     mixonForeven:     mixonEl ? mixonEl.checked : false,
                     importSystemData: systemDataEl ? systemDataEl.checked : false,
-                });
+                }, 'Universe');
+            });
+        }
+
+        // "Import a Neighbourhood" settings button — opens modal
+        const btnNeighbourhood = document.getElementById('btn-import-neighbourhood');
+        if (btnNeighbourhood) {
+            btnNeighbourhood.addEventListener('click', openNeighbourhoodModal);
+        }
+
+        const nbSelect = document.getElementById('neighbourhood-sector-select');
+        if (nbSelect) nbSelect.addEventListener('change', renderNeighbourhoodPreview);
+        const nbMixon = document.getElementById('neighbourhood-opt-mixon-foreven');
+        if (nbMixon) nbMixon.addEventListener('change', renderNeighbourhoodPreview);
+
+        const btnNbSubmit = document.getElementById('neighbourhood-submit');
+        if (btnNbSubmit) btnNbSubmit.addEventListener('click', runNeighbourhoodImport);
+
+        const btnNbCancel = document.getElementById('neighbourhood-cancel');
+        if (btnNbCancel) btnNbCancel.addEventListener('click', closeNeighbourhoodModal);
+
+        const nbModal = document.getElementById('neighbourhood-import-modal');
+        if (nbModal) {
+            nbModal.addEventListener('click', (e) => {
+                if (e.target === nbModal) closeNeighbourhoodModal();
             });
         }
 

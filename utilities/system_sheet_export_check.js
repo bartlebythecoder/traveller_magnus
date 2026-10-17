@@ -24,6 +24,11 @@
 //   * The legacy boolean includeSystemImages:true still means 'sheet'.
 //   * Every image a page references is actually in the ZIP (catches a page
 //     still pointing at .png after the file became .jpg).
+//   * v0.18.1.3 (Sean, 2026-10-17): ONE SHEET PER STAR. Each companion with
+//     bodies of its own (SystemSheet.starViews) adds "(hex) Star B.jpg", a
+//     full sheet, wherever the main sheet is exported and NEVER where it is
+//     not - it names bodies exactly as the main sheet does. The system page
+//     embeds every one of them.
 //
 // Each case trims hexStates to ONE hex, so an export is one system and quick.
 // Sector files under .tmp/ are gitignored - if one is missing, ask Sean.
@@ -46,6 +51,8 @@ const CASES = [
     { sector: '.tmp/aow_bu.json',           hex: '18-D-3005', what: 'AoW, 32 bodies (split table)' },
     { sector: '.tmp/spinward marches.json', hex: '18-C-1910', what: 'T5 import, reduced sheet' },
     { sector: '.tmp/rtt_bu.json',           hex: '18-A-0106', what: 'RTT, stars-only sheet' },
+    { sector: '.tmp/t5_top_down.json',      hex: '18-A-0101', what: 'T5 binary, star B has its own body' },
+    { sector: '.tmp/aow_bu.json',           hex: '18-A-0106', what: 'AoW (A-B, C), every body orbits C' },
 ];
 const LEVELS = [null, 'g', 'f', 'd', 'c'];      // null = GM export
 // 'legacy' passes the old boolean includeSystemImages:true and no systemImages;
@@ -152,6 +159,22 @@ function assessExport(kind, c, level, mode, zip) {
           `${tag}: page shows [${want.join(', ') || 'none'}] in that order`,
           (pageOrder || []).join(', ') || 'none');
 
+    // ONE SHEET PER STAR - the companions' own sheets go wherever the main
+    // sheet goes, and nowhere else.
+    const starRe = new RegExp(`\\(${hexCode}\\) Star ([A-Z])\\.jpg$`, 'i');
+    const starImgs = names.filter(n => /(^|\/)images\//.test(n) && starRe.test(n));
+    const wantStars = want.includes('sheet') ? (c.starLetters || []) : [];
+    const gotStars = starImgs.map(n => n.match(starRe)[1].toUpperCase()).sort();
+    check(JSON.stringify(gotStars) === JSON.stringify(wantStars.slice().sort()),
+          `${tag}: companion star sheets are [${wantStars.join(', ') || 'none'}]`,
+          starImgs.map(n => path.basename(n)).join(', ') || 'none');
+    check(starImgs.every(n => { const i = imageInfo(zip.get(n)); return i.type === 'jpeg' && i.w === SHEET_W; }),
+          `${tag}: companion star sheets are full-size JPEG sheets`);
+    const embedded = names.filter(n => /\.(html|md)$/i.test(n))
+        .map(n => zip.get(n).toString('utf8')).join('\n');
+    check(starImgs.every(n => embedded.includes(path.basename(n)) || embedded.includes(encodeURIComponent(path.basename(n)))),
+          `${tag}: every companion star sheet is shown on the page`);
+
     if (kind === 'HTML') {
         check(!sheetAltSaysOrrery, `${tag}: the sheet is not captioned "orrery"`);
         check(!orreryAltSaysSheet, `${tag}: the orrery is captioned "orrery"`);
@@ -203,6 +226,11 @@ function assessExport(kind, c, level, mode, zip) {
                 window.__cap = { filename, b64: btoa(bin) };
             };
         }, { hex: c.hex, st, names: sector.sectorNames, settings: sector.settings });
+        // The companions that get a sheet of their own, from the sheet module
+        // itself - the exporters must agree with it.
+        c.starLetters = await page.evaluate(hex =>
+            SystemSheet.starViews(hexStates.get(hex)).filter(v => v.idx !== 0).map(v => v.letter), c.hex);
+        console.log(`${c.hex}: companion sheets expected [${c.starLetters.join(', ') || 'none'}]`);
 
         const [sec, sub] = c.hex.split('-');
         for (const kind of ['HTML', 'Obsidian']) {

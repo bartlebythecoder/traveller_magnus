@@ -1261,11 +1261,13 @@ const ExportCore = (() => {
     // stays full-resolution PNG - this applies to exports only.
     const SHEET_EXPORT = { scale: 2, type: 'image/jpeg', quality: 0.85, ext: 'jpg' };
 
-    async function renderSystemSheet(state, hexId) {
+    // `star` (v0.18.1.3): which star's sheet - see SystemSheet.starViews.
+    // Omitted, it is the primary's, which is the only sheet most hexes have.
+    async function renderSystemSheet(state, hexId, star) {
         if (typeof SystemSheet === 'undefined') return null;
         let canvas;
         try {
-            canvas = SystemSheet.render(state, hexId, { scale: SHEET_EXPORT.scale });
+            canvas = SystemSheet.render(state, hexId, { scale: SHEET_EXPORT.scale, star: star || 0 });
         } catch (e) {
             console.warn('[export] system sheet failed:', hexId, e);
             return null;
@@ -1300,8 +1302,19 @@ const ExportCore = (() => {
         return `${sanitize(systemName)} (${hexCode}) Orrery.png`;
     }
 
+    // A companion star's own sheet (v0.18.1.3): "Name (0101) Star B.jpg".
+    // Same rule as the orrery - a suffix, and never " - ".
+    function starSheetFilename(systemName, hexCode, letter, ext) {
+        return `${sanitize(systemName)} (${hexCode}) Star ${letter}.${ext}`;
+    }
+
     // The ONE place both exporters decide which system images to draw.
-    // Returns [{ kind: 'sheet'|'orrery', filename, data }], in page order.
+    // Returns [{ kind: 'sheet'|'orrery', filename, data, star }], in page
+    // order. `star` is the sheet's star letter: 'A' on the primary's sheet,
+    // and one more 'sheet' entry for each companion with bodies of its own
+    // (v0.18.1.3), straight after it. They are sheets in every respect - the
+    // same (g) gate, the same fallback - so a caller that handles one sheet
+    // handles them all.
     //
     // THE CALLER GATES THE WHOLE THING AT (d) and passes sheetAllowed = (g).
     // The user's choice can only ever REMOVE an image, never add the sheet
@@ -1316,8 +1329,15 @@ const ExportCore = (() => {
         const wantSheet = (mode === 'sheet' || mode === 'both') && sheetAllowed;
         const sheet = wantSheet ? await renderSystemSheet(state, hexId) : null;
         if (sheet) {
-            out.push({ kind: 'sheet', data: sheet.data,
+            out.push({ kind: 'sheet', data: sheet.data, star: 'A',
                        filename: systemFilename(systemName, hexCode, sheet.ext) });
+            const views = SystemSheet.starViews ? SystemSheet.starViews(state) : [];
+            for (const v of views) {
+                if (v.idx === 0) continue;
+                const ss = await renderSystemSheet(state, hexId, v.idx);
+                if (ss) out.push({ kind: 'sheet', data: ss.data, star: v.letter,
+                                   filename: starSheetFilename(systemName, hexCode, v.letter, ss.ext) });
+            }
         }
         if ((mode === 'orrery' || mode === 'both' || !sheet) && typeof SystemViewer !== 'undefined') {
             const img = await SystemViewer.renderSnapshot(state, 900, 500, { level });
@@ -1441,7 +1461,7 @@ const ExportCore = (() => {
         resolveSystemName, resolveUWP, kToC,
         findRawWorld, findRawMoon, findRawStar,
         canRenderImage, isAirless, renderWorldImage, renderSystemSheet,
-        systemImageMode, orreryFilename, renderSystemImages,
+        systemImageMode, orreryFilename, starSheetFilename, renderSystemImages,
         // rendererData is the ONE adapter from a world record to the shape
         // PlanetRenderer actually wants (atmosphere/hydrographics as parsed UWP
         // digits, plus temperatureK and its band). Exported 2026-09-21 so the

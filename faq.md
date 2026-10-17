@@ -22,6 +22,10 @@ For a deep dive on routes specifically, see the [Route Manager Help Manual](help
 12. [How do I create automated routes?](#12-how-do-i-create-automated-routes)
 13. [How do I get world images?](#13-how-do-i-get-world-images)
 14. [How do I get regional surface maps?](#14-how-do-i-get-regional-surface-maps)
+15. [How do I draw borders and regions?](#15-how-do-i-draw-borders-and-regions)
+16. [How do I filter and colour the map?](#16-how-do-i-filter-and-colour-the-map)
+17. [How do I make a players' version?](#17-how-do-i-make-a-players-version)
+18. [How do I change how the map looks?](#18-how-do-i-change-how-the-map-looks)
 
 ---
 
@@ -50,8 +54,11 @@ Run the stages yourself, which lets you stop and inspect (or hand-edit) between 
    (**Manual: Set Empty** marks it deliberately empty; **Manual: Reset Clear** wipes it back to
    undetermined.)
 2. **GENERATE MAINWORLD →** *CT / MgT2E / T5* — rolls the mainworld UWP only.
-3. **EXPAND SYSTEM →** *Book 6 (CT) / MgT2E / T5 / RTT* — builds the stars, planets, belts,
-   gas giants, and moons around that mainworld.
+3. **EXPAND SYSTEM →** *Book 6 (CT) / MgT2E / T5* — builds the stars, planets, belts, gas
+   giants, and moons around that mainworld. (The fourth entry, **RTT (Re-run Biographer Only)**,
+   is different: on a system RTT has already built, it re-rolls each body's physical biography
+   and social stats while leaving the stars and orbits alone. RTT systems themselves come from
+   the **BOTTOM UP** commands.)
 4. **EXPAND SOCIOECONOMIC →** *MgT2E / T5* — adds trade codes, importance, and economic
    extensions.
 
@@ -94,6 +101,10 @@ Four bulk macros have keyboard shortcuts that do the same thing without the menu
 | **Ctrl + Alt + R** | Full RTT WorldGen (bottom-up) sequence |
 
 Each macro populates, generates, and expands every selected hex in one pass.
+
+> **Want to see a finished sector first?** **Settings → Presets → Load Sector Solo 6** loads a
+> complete sample sector. It replaces whatever is on the canvas (you're asked to confirm first),
+> so save your own map before you try it.
 
 ### Controlling how dense the sector is
 
@@ -162,15 +173,32 @@ This is also how you replace one sector of an existing map — note the target s
 Fetches the 35 sectors of the Third Imperium (Spinward Marches through Spica) directly from
 travellermap.com. A dialog lets you pick exactly which sectors to bring in and which slot each
 one lands in, and which data layers you want: **Sector Data**, **Route Data**, **Border Data**,
-and **Region Data**.
+and **Region Data**. Only the slots you import into are replaced; the rest of your map is left
+alone.
 
 ### Import the Universe
 
 Marked experimental, and it means it. This resizes the canvas to 16×8 sectors (128 positions),
-**erases all existing hex data and routes**, and fetches up to 128 sectors. Cached sectors load
-instantly; live fetches are deliberately spaced one second apart to be polite to the server, so
-a full run takes a couple of minutes. There is an option to substitute the Terry Mixon version
-of Foreven. This cannot be undone.
+**erases all existing hex data and routes**, and fetches up to 128 sectors with all four data
+layers. Live fetches are deliberately spaced one second apart to be polite to the server, and
+each sector takes two (world data, then metadata), so a first run takes around five minutes.
+Downloaded sectors are cached for 24 hours, so a repeat import within that window is much
+faster. There is an option to substitute the Terry Mixon version of Foreven. This cannot be
+undone.
+
+### Import a Neighbourhood
+
+Pick any one sector and get a 3×3 map: that sector in the middle (slot 5) and its eight
+neighbours around it. For example, Spinward Marches brings in Foreven, Deneb, Trojan Reach and
+the rest of its ring. The dialog shows a 3×3 preview of the sector names before anything is
+downloaded, and has the same **Sector / Route / Border / Region Data** choices as Import the
+Imperium, plus the Terry Mixon Foreven option.
+
+Like Import the Universe, this resizes the canvas (to 3×3) and **erases all existing hex data and
+routes**, and it cannot be undone. Xboat routes and borders that cross between the nine sectors
+join up; routes that lead out of the 3×3 block are dropped. If you pick a sector on the outer edge
+of the 16×8 block that Import the Universe covers, neighbours that don't exist show as *(none)* in the preview and those slots are
+left blank. A first run takes about 20 seconds; within 24 hours a repeat is near-instant.
 
 ### Import Metadata (.xml)
 
@@ -237,12 +265,23 @@ Yes, in several formats depending on what the recipient needs.
 | **Map JSON** | Settings → Map Files → Save Map JSON | Everything — all hexes, full system detail, routes, borders, regions, filters, settings | Sharing with another user of this app. Nothing is lost. |
 | **Sector (.tsv)** | Settings → Import / Export → Export Sector (.tsv) | One sector's world records: UWP, bases, trade codes, zones, allegiance, stellar data, and the Ix / Ex / Cx extensions | TravellerMap, and virtually every other Traveller tool. Universal, but system detail below the mainworld is not represented. |
 | **Metadata (.xml)** | Settings → Import / Export → Export Metadata (.xml) | Routes, borders, and regions in TravellerMap's metadata format | Publishing your route network or political boundaries for use with TravellerMap. |
-| **Obsidian Wiki (ZIP)** | Settings → Import / Export → Export Obsidian Wiki | A fully cross-linked Markdown vault — a page per system, star, world, and moon, plus a subsector index and map | Handing a subsector to players, or to anyone without the app. Readable as plain Markdown. |
+| **Wiki (ZIP)** | Settings → Import / Export → Export Wiki | Either an **Obsidian** vault (one cross-linked Markdown file per star, world, and moon) or an **HTML website** (one page per system), plus a subsector index and map | Handing a subsector to players, or to anyone without the app. Obsidian reads as plain Markdown; the HTML version opens in any browser. |
 
-The Obsidian export runs **one subsector at a time**: pick the sector, then the subsector within
-it. You choose whether to include **world images** (with a projection selector — see
-[question 13](#13-how-do-i-get-world-images)), **system orrery images**, and whether to nest
-subsector details in subfolders. The subsector map image is always included.
+**Export Wiki** runs **one subsector at a time**. The dialog asks for:
+
+- **Format**: *Obsidian Wiki (Markdown)* or *HTML Website*. For HTML, extract every subsector of
+  a sector into the same folder so the links between them work.
+- **Version**: *Referee* (everything) or *Players* (fog of war; see
+  [question 17](#17-how-do-i-make-a-players-version))
+- **Sector** and **Subsector**
+- **Include world images**, with a **World Image Projection** choice (see
+  [question 13](#13-how-do-i-get-world-images)) and **Skip airless worlds** (atmosphere 0,
+  hydrographics 0), which is on by default
+- **System Images**: the *System sheet* (default; see
+  [question 9](#9-how-do-i-see-system-maps-and-details)), the *Orrery*, *both*, or *None*
+- **Subsector details in subfolders** (Obsidian only; HTML always uses subfolders)
+
+The subsector map image is always included.
 
 For a complete, lossless handoff, send the Map JSON. For anything that needs to work outside
 this app, send the .tsv (plus the .xml if routes matter).
@@ -279,7 +318,8 @@ The top section holds the editable mainworld fields:
   **Government**, **Law Level**, **Tech Level**
 - **Travel Zone** (Green / Amber / Red)
 - **Allegiance** and **Region**
-- **Naval Base**, **Scout Base**, and the other base flags
+- **Naval Base**, **Scout Base**, and the other base and facility flags, plus **Gas Giant**
+- **Trade Codes**, space-separated
 - **Referee Notes** — freeform text, saved with the hex. Drag the bottom-right corner of the box to make it taller if you write at length; the size you choose is remembered between sessions. Notes appear in the referee wiki export and are never shown to players
 
 Type your changes and click **Save**. **Cancel** discards them.
@@ -340,7 +380,41 @@ Inside it:
 The System Viewer's default opening date is configurable in **Settings → Visual Options →
 System Viewer**.
 
-Orrery snapshots can also be exported as images as part of the Obsidian Wiki export.
+### The System Sheet
+
+Click **System Sheet** in the System Viewer's header for a one-page reference sheet for the
+system. A strip of rendered bodies runs across the top, data panels surround it, and a table of
+planets sits below. **Download PNG** saves it.
+
+Each star with bodies of its own gets its own sheet. When there's more than one, buttons above
+the sheet switch between them (**Home** is the primary star). You can also click a companion on
+the strip; it's marked with how many bodies it has.
+
+The System Sheet is also the default system image in **Export Wiki** (see
+[question 6](#6-can-i-share-my-sectors)), which can include the orrery instead or as well.
+
+### Recording the orrery as an animated GIF
+
+Click **GIF** in the System Viewer's header. The GIF records exactly what you're looking at: the
+current zoom and pan, speed, and display options (moons, HZ, log or linear scale). So set the
+view up first, then open the dialog. The dialog sums up those settings at the top as a reminder.
+
+- **Length** — a number of seconds (default 6, up to 60), or click **One orbit of *mainworld*** to
+  make the GIF exactly one orbit long so it loops seamlessly. For a moon mainworld, the loop
+  follows its parent planet around the star.
+- **Frame rate** — 10, 15, 20 or 25 fps (default 15)
+- **Size** — 480 up to 1280 pixels wide, limited to what fits your current window
+
+Below the options, a line shows the frame count, length, size and how many days each frame
+covers. The dialog warns you if you chose **One orbit** but that orbit takes longer than 60 seconds at
+your current speed (the GIF is cut off and won't loop cleanly; raise the speed), or if moons are
+shown and each frame jumps more than a day (fast moons will appear to hop; hide moons or slow
+down).
+
+**Record** shows a progress bar and then downloads the file as
+*SystemName_hex_orrery.gif*. **Cancel** stops a recording in progress. The same settings always
+produce the same GIF. GIFs are made in the app only; the wiki and HTML exports still use still
+images.
 
 ---
 
@@ -365,10 +439,10 @@ On a star's row:
 | **+World** | A terrestrial world |
 | **+GG** | A gas giant |
 | **+Belt** | A planetoid belt |
-| **+Comp** | A companion star to that star |
+| **+Comp** | A companion star to that star (not offered for CT systems, where companions only come from the generation roll) |
 | **+Secondary** | A secondary star (Close / Near / Far) |
 
-On a body's row, **+Moon** adds a satellite. A system supports up to eight stars.
+On a body's row, **+Moon** adds a satellite.
 
 ### Removing
 
@@ -417,7 +491,8 @@ Notes:
 - Segments connect **adjacent hexes only**. A long route is a chain of individual segments.
 - **Ctrl + Z** undoes the last segment; **Ctrl + Shift + Z** redoes it.
 - Names, colours, and shortcut keys are all editable in the Route Manager (press **R**). The
-  letters **f** and **r** are reserved (Filter and Route Manager) and can't be used as shortcuts.
+  letters **f**, **r**, **b**, **g** and **d** open windows (Filter, Route, Border, Region and
+  Player Disclosure), so they can't be used as route shortcuts.
 - Deleting a populated hex removes every route segment attached to it, across all slots.
 
 ---
@@ -494,10 +569,12 @@ captioned with the world's name, hex ID, and UWP.
 
 ### Bulk export
 
-**Settings → Import / Export → Export Obsidian Wiki** generates images for an entire subsector at
-once and packages them into the Markdown vault. Tick **Include world images** and a
+**Settings → Import / Export → Export Wiki** generates images for an entire subsector at once and
+packages them into the Obsidian vault or HTML website. Tick **Include world images** and a
 **World Image Projection** dropdown appears, offering **Globe (Hemispheres)** plus the same four
-flat projections. **Include system orrery images** adds a rendered orrery snapshot per system.
+flat projections. **Skip airless worlds** (on by default) leaves out worlds with atmosphere 0 and
+hydrographics 0. Separately, **System Images** adds a System Sheet, an orrery, or both for each
+system.
 
 ### Tuning the look
 
@@ -606,9 +683,9 @@ model it was saved with, and a new sector starts on Tectonic.
 
 ### Do regional maps appear in exports?
 
-Yes, for **pinned sites only** — an unpinned slot exports nothing. Both **Export HTML** and **Export
-Obsidian Wiki** add a **Regional Surveys** section to any world that has pins, with one full sheet
-per pin.
+Yes, for **pinned sites only**; an unpinned slot exports nothing. **Export Wiki**, in both its
+Obsidian and HTML formats, adds a **Regional Surveys** section to any world that has pins, with
+one full sheet per pin.
 
 Sheets follow the **Include world images** toggle, and obey fog of war on exactly the same terms: a
 sheet is the world image at a finer scale, so a world hidden from the reader does not get one.
@@ -629,6 +706,142 @@ flagged rather than hidden; hover it for the details, then re-pin or clear it.
 No. No Traveller edition publishes tables for surface topography, so the terrain is invented rather
 than rolled. What constrains it is the world's own UWP — size, atmosphere, hydrographics and
 temperature all steer the result, and the sheet's data block quotes them.
+
+---
+
+## 15. How do I draw borders and regions?
+
+There are two kinds of map overlay, and both work the same way: select hexes, then assign them.
+
+- **Borders** are political boundaries, drawn as a coloured outline around the hexes in them.
+- **Regions** are named areas (clusters, reaches, provinces) shaded in behind the hexes.
+
+### Assigning hexes
+
+Select the hexes (**Shift + Drag**, **Ctrl + B** for a subsector, **Ctrl + S** for a sector),
+then right-click → **ASSIGN**:
+
+- **Assign Border**: pick a border slot, or **Clear Border** to take the hexes out of whatever
+  border they're in. There's always one unused slot at the end of the list; assign to it to start
+  a new border.
+- **Assign Region**: works the same way for regions. A single world's region can also be set from
+  the **Region** dropdown in World Details.
+- **Assign Allegiance** sets the allegiance code (for example *ImDd*) on every selected system.
+- **Assign Background Color** tints the selected hexes. It obeys the **Hex Background Fill**
+  toggle in the Filter Manager.
+
+Every assignment can be undone with **Ctrl + Z**.
+
+### The Border and Region Managers
+
+**B** opens the **Border Manager** and **G** the **Region Manager** (also under right-click →
+**MANAGERS**). Each row is one slot, showing how many hexes it covers. You can:
+
+- type a new **name**
+- pick a **colour**
+- use the **eye** to show or hide it (**Show All** toggles every slot at once)
+- use **C** to remove every hex from it while keeping the slot
+- use **×** to delete it (you're asked to confirm, and Ctrl + Z brings it back)
+
+OTU imports bring in travellermap's borders and regions automatically (see
+[question 4](#4-can-i-download-otu-systems)), and **Import Metadata (.xml)** adds them to a map you
+already have. **Settings → Visual Options** controls how they look: **Fill Border Territories**,
+**Show Border Names**, and **Show Region Names**.
+
+---
+
+## 16. How do I filter and colour the map?
+
+Press **F** (or right-click → **MANAGERS → Filter Manager**) to open the **Filter Manager**.
+
+### Filtering
+
+Set criteria in the accordion sections:
+
+- **Physical & Social (UWP)**: system name, each UWP digit, total population, trade codes
+- **Stellar Info**: class, type and subtype, optionally for the primary star only
+- **Polities**: allegiance and region
+- **Zones Belts GG**: belts, gas giants, travel zone
+- **Advanced Data**: T5 Importance, WTN, GWP, gravity, temperature
+
+Systems that don't match are hidden, and the footer shows how many match. **Clear** removes the
+filter. **Shift + F** hides the filter for a moment without losing it, then brings it back. The
+filter also decides which worlds the **Custom Network** route generator connects (see
+[question 12](#12-how-do-i-create-automated-routes)).
+
+### Styling rules
+
+The **Advanced Styling Rules** panel turns a filter into a lasting style: a primary colour, a ring
+colour, an icon shape, the name in italic or underlined, and an optional hex background fill.
+**Apply as New Rule** adds it to **Active Styling Rules**, which are applied in order. For
+example, you can draw every high-population world in red with a ring. Use **Export** and
+**Import** to save a rule set to a file and reuse it on another map.
+
+---
+
+## 17. How do I make a players' version?
+
+Give each system a **disclosure level**, then export with **Version: Players**. The export then
+holds exactly what the players' characters know, and nothing more.
+
+### The levels
+
+From least to most disclosed:
+
+| Level | Players see |
+|---|---|
+| **0: Unknown** | Nothing. The hex is blank, with no dot, no page, and no index row. |
+| **A: Star Present** | The star(s), travel zone, allegiance, and region |
+| **B: Stellar Details** | + spectral type, luminosity, mass, and star orbits |
+| **C: Gas Giants** | + whether there are gas giants |
+| **D: System Layout** | + world count, belts, orbits, body types, and the name |
+| **E: Physical Data** | + size, hydrographics, atmosphere, and temperature |
+| **F: Population & TL** | + population, tech level, biosphere, and economy |
+| **G: Full UWP** | Everything: UWP, starport, government, socioeconomics |
+
+A system that has never been set counts as **Full UWP**. That way, maps made before this feature
+existed export exactly as they did, but it also means **an unreviewed system gives everything
+away**. To start from the other end, select the whole sector and set it to **Unknown** first.
+
+### Setting levels
+
+- **In bulk**: select hexes, then right-click → **ASSIGN → Assign Player Disclosure**.
+- **System by system**: press **D** for the **Player Disclosure** window. It lists every system in
+  the chosen sector and subsector with one column per level; click to set each one. A search box
+  narrows the list, **Set all shown to** changes everything listed at once, and a warning counts
+  the systems you have never set.
+
+Changes can be undone with **Ctrl + Z**. Levels only affect the players' export; the map on your
+screen always shows everything.
+
+### The players' export
+
+**Settings → Import / Export → Export Wiki → Version: Players** works with both the Obsidian and
+HTML formats. Systems set to *Unknown* are left out entirely. Everything else, including the
+subsector map and the system images, is drawn at that system's own level. The system's name
+appears from **System Layout**, but its individual worlds keep generic labels ("World 2") until
+**Full UWP**. The full System Sheet appears only at **Full UWP** (the orrery
+is used below that), and **referee notes are never included**. Look through the result before you
+hand it out.
+
+---
+
+## 18. How do I change how the map looks?
+
+**Settings → Visual Options** covers the map display:
+
+| Option | Effect |
+|---|---|
+| **Hide systems without planets** | Hides star-only systems so only systems with worlds are drawn |
+| **Show Subsector Borders** | The subsector grid lines |
+| **Fill Border Territories** / **Show Border Names** | How borders are drawn (see [question 15](#15-how-do-i-draw-borders-and-regions)) |
+| **Show Region Names** | Labels the regions |
+| **White Background Mode** | Draws the map on a white background instead of the dark one |
+| **Show Sector Names** / **Edit Sector Names** | Labels each sector, and lets you rename them on a grid laid out like the map |
+| **Default World Color** | The colour of a world dot when no styling rule applies |
+
+The same section holds the **World Image Generation** settings (see
+[question 13](#13-how-do-i-get-world-images)) and the **System Viewer** default start date.
 
 ---
 

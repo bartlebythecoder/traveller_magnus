@@ -34,7 +34,7 @@ Each row in the Route Window represents one route slot:
 | **Segment count pill** | Shows how many map segments this route currently has. A dash (—) means empty. Click the pill to open the **Systems Panel** listing all worlds on this route. |
 | **Name field** | Editable label. Changes are saved automatically. |
 | **Colour swatch** | Click to pick the colour routes in this slot are drawn in. |
-| **Shortcut key** | A single key you can press anywhere on the map to toggle this route's visibility. Letters `f` and `r` are reserved and cannot be used. |
+| **Shortcut key** | A single key you hold while dragging between two adjacent hexes to draw (or erase) a segment of this route. Letters `f`, `r`, `b`, `g` and `d` are reserved and cannot be used. |
 | **Vis checkbox** | Toggles route visibility on the map without deleting segments. |
 | **C (Clear)** | Removes all map segments for this slot. Can be undone with **Ctrl+Z**. |
 | **CSV** | Exports a spreadsheet of the **worlds** this route passes through, with a choice of fields. A reference table — it cannot be loaded back in. Labelled with a word rather than an icon precisely because it is *not* one of the two route-file buttons beside it. |
@@ -424,10 +424,13 @@ Click directly into the **name field** on any route row and type a new name — 
 
 ### Shortcut Keys
 
-Each slot can have a single-character shortcut key. Press that key anywhere on the map to toggle the route's visibility. Two keys are reserved by the application and cannot be assigned:
+Each slot can have a single-character shortcut key. Hold that key and drag from one hex to an adjacent hex to lay a segment of the route; doing the same over an existing segment erases it. Five keys are reserved by the application and cannot be assigned:
 
 - `f` — opens/closes the Filter
 - `r` — opens/closes the Route Window
+- `b` — opens/closes the Border Manager
+- `g` — opens/closes the Region Manager
+- `d` — opens/closes the Player Disclosure window
 
 ### Visibility vs. Clear
 
@@ -524,8 +527,8 @@ Ix (Importance Extension) is the T5 scoring system for how significant a world i
 
 ---
 
-**Q: Why can't I use 'f' or 'r' as shortcut keys?**  
-These keys are reserved for the Filter window (`f`) and the Route Window (`r`). If you try to assign them, the field rejects the input and reverts to the previous value.
+**Q: Why can't I use 'f', 'r', 'b', 'g' or 'd' as shortcut keys?**  
+These keys open the Filter window (`f`), the Route Window (`r`), the Border Manager (`b`), the Region Manager (`g`) and the Player Disclosure window (`d`). If you try to assign them, the field rejects the input and reverts to the previous value.
 
 ---
 

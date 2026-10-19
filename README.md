@@ -72,13 +72,17 @@ Want to replace any of these sectors with your own file?
 ---
 ## 📜 Changelog
 
-### [v0.18.1.3] - In Progress
+### [v0.18.1.3] - 2026-10-19
 1. **Improved — one System Sheet per star:** each sheet now shows only the bodies orbiting one star, so a companion's planets no longer appear among the primary's at the wrong distances.
 2. **New — companion star sheets:** a companion with its own bodies is marked on the strip with a body count; click it (or use the star buttons above the sheet) to switch to its sheet, and **Home** returns to the primary.
 3. **New — companion sheets in exports:** HTML and Obsidian exports add "Name (hex) Star B.jpg" for each companion with bodies, under the same *Full UWP* rule as the main sheet.
 4. **Fixed — AoW:** planets are now filed under the right star in the orrery, sheet and exports (circumbinary disks with the first star of their pair), and each companion's distance is read from its own orbit.
 5. **Fixed — AoW planet names:** newly generated planets take the letter of, and are listed in the accordion under, the star they actually orbit (a planet of star C was named "B-XII"); existing saves keep their names.
 6. **New — animated orrery GIFs:** **GIF** in the system view records the orrery as an animated GIF using your current view, speed and display settings, for a length in seconds or one full orbit of the mainworld.
+7. **New — Import a Neighbourhood:** pick any sector and import it with its eight neighbours onto a 3×3 canvas, with borders, regions and xboat routes joined up across all nine.
+8. **Fixed — OTU import cache:** Import the Universe (and Import a Neighbourhood) no longer wipe their own 24-hour download cache, so a repeat import loads in under a second instead of re-downloading every sector.
+9. **Fixed — route shortcut keys:** **b**, **g** and **d** can no longer be assigned as route shortcuts, since they open the Border, Region and Player Disclosure windows.
+10. **Changed — Load Sector Solo 6** now asks before replacing your current map.
 
 ### [v0.18.1.2] - 2026-10-01
 1. **New — choose your system images on export:** HTML and Obsidian exports can include the system sheet, the orrery, both or neither; players' exports still show the sheet only at *Full UWP*.

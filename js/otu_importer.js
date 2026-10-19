@@ -518,21 +518,73 @@
     }
 
     /**
-     * Bulk-imports a list of sectors into a freshly resized canvas.
-     * Clears all existing data first.
+     * Clears only the given sector slots ahead of an in-place bulk import,
+     * leaving the canvas size and every other sector untouched. Used by the
+     * Neighbourhood import when its 3×3 block fits inside the current canvas.
+     *
+     * @param {number[]} slotNums - Every slot in the block, including slots
+     *                              whose neighbour is missing (they end blank).
+     * @param {object}   opts     - The import options (see executeBulkImport).
+     */
+    function clearBlockForBulkImport(slotNums, opts) {
+        // Leave the System Viewer stack if open — its hex may be about to be
+        // wiped. Innermost first, as in clearCanvas.
+        if (typeof ApproachViewer !== 'undefined' && ApproachViewer.isOpen()) ApproachViewer.close();
+        if (typeof SurfaceViewer  !== 'undefined' && SurfaceViewer.isOpen())  SurfaceViewer.close();
+        if (typeof SystemViewer   !== 'undefined' && SystemViewer.isOpen())   SystemViewer.close();
+
+        // Not undoable, for the same reason as runImport() — see the comment there.
+        window.undoStack = [];
+        window.redoStack = [];
+        selectedHexes.clear();
+
+        const inBlock = (hexId) => slotNums.includes(parseInt(String(hexId).split('-')[0], 10));
+
+        if (opts.importSector) {
+            slotNums.forEach(clearSectorSlotData);
+            // Routes touching a cleared sector have lost their world, so they go too.
+            if (window.sectorRoutes) {
+                window.sectorRoutes = window.sectorRoutes.filter(r => !inBlock(r.startId) && !inBlock(r.endId));
+            }
+        } else if (opts.importRoutes && window.sectorRoutes) {
+            // Replace only the block's Xboat routes (Route 1, as in runImport).
+            window.sectorRoutes = window.sectorRoutes.filter(r =>
+                r.routeId !== 1 || (!inBlock(r.startId) && !inBlock(r.endId)));
+        }
+
+        // Region outlines are keyed "<slot>:<label>"; drop the block's so a
+        // re-import does not leave the previous sector's outlines behind.
+        if (opts.importRegions && window.regionPaths) {
+            for (const key of [...window.regionPaths.keys()]) {
+                if (slotNums.includes(parseInt(key.split(':')[0], 10))) window.regionPaths.delete(key);
+            }
+        }
+    }
+
+    /**
+     * Bulk-imports a list of sectors.
+     *
+     * By default the canvas is resized to width × height and all existing data
+     * is cleared first. With opts.blockSlots set, the canvas is left as it is
+     * and only those slots are cleared (width/height are then ignored).
      *
      * @param {Array}  sectors - [{ name, x, y, slot }] — x,y are travellermap
      *                           galaxy coords, slot is the canvas slot string.
      * @param {number} width   - Canvas width in sectors.
      * @param {number} height  - Canvas height in sectors.
      * @param {object} opts    - { importSector, importRoutes, importBorders,
-     *                             importRegions, mixonForeven, importSystemData }
+     *                             importRegions, mixonForeven, importSystemData,
+     *                             blockSlots }
      * @param {string} label   - "Universe" / "Neighbourhood", used in messages.
      */
     async function executeBulkImport(sectors, width, height, opts, label) {
         const needsMeta = opts.importRoutes || opts.importBorders || opts.importRegions;
 
-        await resetCanvasForBulkImport(width, height);
+        if (opts.blockSlots) {
+            clearBlockForBulkImport(opts.blockSlots, opts);
+        } else {
+            await resetCanvasForBulkImport(width, height);
+        }
 
         const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
         let errorCount = 0;
@@ -663,6 +715,10 @@
             applyOtuSystemData();
         }
 
+        // An in-place import kept the rest of the map in the DB, so persist the
+        // routes, borders and regions it changed alongside it.
+        if (opts.blockSlots && window.dbManager) window.dbManager.scheduleSyncAll();
+
         requestAnimationFrame(draw);
 
         let summary = errorCount > 0
@@ -783,6 +839,20 @@
         }
         opts.mixonForeven     = document.getElementById('neighbourhood-opt-mixon-foreven')?.checked ?? false;
         opts.importSystemData = false;
+
+        // Place the 3×3 block in the middle of the current canvas (rounding
+        // up-left on an even dimension) and leave every other sector alone.
+        // A canvas too small to hold it falls back to a fresh 3×3 canvas.
+        const fits = gridWidth >= 3 && gridHeight >= 3;
+        if (fits) {
+            const ox = Math.floor((gridWidth  - 3) / 2);
+            const oy = Math.floor((gridHeight - 3) / 2);
+            cells.forEach((c, idx) => {
+                const col = idx % 3, row = Math.floor(idx / 3);
+                c.slot = String((oy + row) * gridWidth + (ox + col) + 1);
+            });
+            opts.blockSlots = cells.map(c => parseInt(c.slot, 10));
+        }
 
         const entries = cells
             .filter(c => c.sector)

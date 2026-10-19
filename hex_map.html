@@ -1470,8 +1470,9 @@
             <div style="background:#2a1500; border:1px solid #c0392b; border-radius:4px; padding:12px;
                         color:#e74c3c; font-size:0.82rem; line-height:1.6;">
                 &#9888; Import a Neighbourhood will:<br>
-                &bull;&nbsp;Resize the canvas to 3&times;3 sectors<br>
-                &bull;&nbsp;Erase ALL existing hex data and routes<br>
+                &bull;&nbsp;Place a 3&times;3 block of sectors in the middle of the canvas<br>
+                &bull;&nbsp;Erase the hex data and routes in those 9 sectors (other sectors are untouched)<br>
+                &bull;&nbsp;If the canvas is smaller than 3&times;3, resize it to 3&times;3 and erase ALL data<br>
                 &bull;&nbsp;Fetch the chosen sector and its 8 neighbours from travellermap.com<br>
                 &nbsp;&nbsp;&nbsp;(cached sectors load instantly; live fetches are 1 second apart)<br><br>
                 This cannot be undone.

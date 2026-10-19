@@ -399,15 +399,17 @@
 
     // -------------------------------------------------------------------------
     // Wipe the entire database.
-    // Called before Universe import or when the user starts a new map.
+    // Called by Clear Canvas and before the bulk OTU imports (Universe /
+    // Neighbourhood). The bulk imports pass keepTsvCache so the sector
+    // download cache they are about to read from survives the wipe — clearing
+    // it there meant every bulk import re-downloaded every sector.
     // -------------------------------------------------------------------------
-    async function clearDB() {
+    async function clearDB({ keepTsvCache = false } = {}) {
         try {
             const db = await _openDB();
-            const tx = db.transaction([STORE_HEX, STORE_APP, STORE_TSV], 'readwrite');
-            tx.objectStore(STORE_HEX).clear();
-            tx.objectStore(STORE_APP).clear();
-            tx.objectStore(STORE_TSV).clear();
+            const stores = keepTsvCache ? [STORE_HEX, STORE_APP] : [STORE_HEX, STORE_APP, STORE_TSV];
+            const tx = db.transaction(stores, 'readwrite');
+            stores.forEach(name => tx.objectStore(name).clear());
         } catch (err) {
             console.warn('[DB] clearDB failed:', err);
         }

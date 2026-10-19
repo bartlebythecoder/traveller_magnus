@@ -3433,7 +3433,10 @@ window.renderRouteWindow = function () {
             requestAnimationFrame(draw);
         });
         shortIn.addEventListener('change', () => {
-            const RESERVED = ['f', 'r'];
+            // Single-key window shortcuts: Filter, Route, Border, Region (keyboard_shortcuts.js)
+            // and Player Disclosure (disclosure_grid.js). A route slot on one of these keys
+            // would open that window every time the user held it to draw a segment.
+            const RESERVED = ['f', 'r', 'b', 'g', 'd'];
             const typed = shortIn.value.toLowerCase();
             if (RESERVED.includes(typed)) {
                 showToast(`'${typed}' is reserved for a window shortcut.`, 2500);

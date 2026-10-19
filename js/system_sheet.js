@@ -168,7 +168,9 @@ const SystemSheet = (function () {
     // both null and undefined occur in the wild.
     function resolveCompanions(nsys) {
         const out = [];
-        for (const s of (nsys.stars || []).slice(1)) {
+        const all = nsys.stars || [];
+        for (let idx = 1; idx < all.length; idx++) {
+            const s = all[idx];
             if (!s) continue;
             let au = null;
             // R4: an RTT companion's orbitAU is a separation WORD turned into a
@@ -182,13 +184,59 @@ const SystemSheet = (function () {
             else if (s.orbitId != null && window.SystemViewer && SystemViewer.orbitToAU) {
                 au = SystemViewer.orbitToAU(s.orbitId);
             }
-            out.push({ star: s, au: au });
+            out.push({ star: s, au: au, idx: idx });
         }
         return out;
     }
 
     function starLabel(s) {
         return s.name || ((s.sType || '?') + (s.subType != null ? s.subType : '') + ' ' + (s.sClass || '')).trim();
+    }
+
+    // ── One star at a time (v0.18.1.3) ──────────────────────────────────
+    //
+    // EVERY DISTANCE ON A SHEET IS MEASURED FROM ONE STAR. A world's `au` is
+    // its distance from the star it ORBITS, not from the primary, so sorting a
+    // whole binary onto one axis put a world 0.8 AU from star B between the
+    // primary's 0.7 and 1.0 AU worlds - looking for all the world like it
+    // circled A - while B itself sat out at 40 AU with none of its planets
+    // anywhere near it. So a sheet is drawn for ONE star: its own bodies, and
+    // the companions that orbit IT. A companion that has bodies of its own gets
+    // a sheet of its own (Sean, 2026-10-17). Single-star systems - all but a
+    // fifth of a sector - have one view and draw exactly as before.
+    //
+    // Circumbinary (P-Type) bodies belong to the primary, as in the orrery.
+    // An out-of-range index files the body under the primary rather than
+    // losing it - the table must never drop a row.
+    const starLetter = i => String.fromCharCode(65 + i);
+
+    function starOfBody(nsys, b) {
+        if (!b || b.orbitType === 'P-Type') return 0;
+        const p = b.parentStarIdx;
+        return (p != null && p > 0 && p < (nsys.stars || []).length) ? p : 0;
+    }
+
+    function parentOfStar(nsys, i) {
+        const s = (nsys.stars || [])[i];
+        const p = s && s.parentStarIdx;
+        return (p != null && p >= 0 && p < nsys.stars.length && p !== i) ? p : 0;
+    }
+
+    // The stars that get a view: always the primary, then every star with at
+    // least one body of its own. Ascending, so 'A' is always first.
+    function viewStarsOf(nsys, bodies) {
+        const set = new Set([0]);
+        for (const b of bodies) set.add(starOfBody(nsys, b));
+        return Array.from(set).sort((a, b) => a - b);
+    }
+
+    // "B · K3 V" - a separator, because a white dwarf's label is just "D" and
+    // "B D" reads as one word. AoW names already lead with their label
+    // ("B: K3V") - not twice.
+    function starTag(s, i) {
+        const l = starLabel(s || {});
+        const L = starLetter(i);
+        return (l === L || l.startsWith(L + ':') || l.startsWith(L + ' ')) ? l : `${L} · ${l}`;
     }
 
     // Returns { body, parent } - `parent` is the planet a lunar mainworld
@@ -593,9 +641,6 @@ const SystemSheet = (function () {
         // is real data, so it gets a sheet that SAYS it is empty, rather than
         // a hollow one of "No mainworld recorded" boxes or a refusal.
         const starsOnly = !bodies.length && !reduced;
-        const worlds = bodies.filter(w => !isBelt(w));
-        const belts  = bodies.filter(isBelt);
-        const ggs    = bodies.filter(isGasGiant);
         // A MAINWORLD CAN BE A MOON, AND USUALLY IS. Measured over solo_6 on
         // 2026-09-21: 257 of 438 systems - 58.7% - have their mainworld in a
         // planet's `moons[]` rather than in `worlds[]`. Searching only the top
@@ -608,20 +653,70 @@ const SystemSheet = (function () {
         const mwFound  = findMainworld(bodies);
         const mw       = mwFound.body;
         const mwParent = mwFound.parent;   // null when the mainworld orbits the star
-        const star   = (nsys.stars || [])[0] || {};
 
         // `_orderAU` survives R4's suppression of an invented AU, so an RTT
         // system still lists in orbit order with no distance printed.
-        const ordered = bodies.slice().sort((a, b) => (a._orderAU || 0) - (b._orderAU || 0));
+        const allOrdered = bodies.slice().sort((a, b) => (a._orderAU || 0) - (b._orderAU || 0));
+
+        // ONE STAR PER SHEET - see starOfBody. `focus` is the star this sheet
+        // is drawn for; an unknown or bodiless star falls back to the primary.
+        const views = (reduced || starsOnly) ? [0] : viewStarsOf(nsys, allOrdered);
+        const multiView = views.length > 1;
+        const focus = views.includes(o.star) ? o.star : 0;
+        const inView = b => !multiView || starOfBody(nsys, b) === focus;
+        const ordered = allOrdered.filter(inView);
+        const star   = (nsys.stars || [])[focus] || {};
+        const worlds = ordered.filter(w => !isBelt(w));
+        const belts  = ordered.filter(isBelt);
+        const ggs    = ordered.filter(isGasGiant);
+        // The mainworld panels are the SAME on every star's sheet, so their
+        // position fact is counted among the mainworld's own star's bodies.
+        const mwStar = mw ? starOfBody(nsys, mwParent || mw) : 0;
+        const mwOrdered = multiView ? allOrdered.filter(b => starOfBody(nsys, b) === mwStar) : allOrdered;
 
         // The strip carries bodies AND any companion star whose orbit is known,
         // interleaved by distance. `ordered` stays bodies-only, because it is
         // what numbers the table -- a star must never consume an orbit index.
+        // Only companions that orbit THIS star: a companion's distance is from
+        // its own parent, so one orbiting B placed on A's axis is the same
+        // misplacement as B's planets were.
+        // `gi` is the body's place in the WHOLE system: it seeds unnamed
+        // bodies' images, which must not change with the view they appear in.
         const companions = resolveCompanions(nsys);
-        const stripItems = ordered.map(b => ({ kind: 'body', b: b, au: b.au }))
-            .concat(companions.filter(c => c.au != null)
-                              .map(c => ({ kind: 'star', s: c.star, au: c.au })))
+        const bodyCount = i => allOrdered.filter(b => starOfBody(nsys, b) === i).length;
+        const stripItems = ordered.map(b => ({ kind: 'body', b: b, au: b.au, gi: allOrdered.indexOf(b) }))
+            .concat(companions.filter(c => c.au != null && parentOfStar(nsys, c.idx) === focus)
+                              .map(c => ({ kind: 'star', s: c.star, au: c.au, idx: c.idx,
+                                           own: multiView && views.includes(c.idx) ? bodyCount(c.idx) : 0 })))
             .sort((a, b) => (a.au || 0) - (b.au || 0));
+        // Where a click on the in-app sheet goes. Logical (unscaled) units.
+        const hits = [];
+        // The strip's one-line context: which star this sheet is for and what
+        // it orbits, or - on the primary's sheet - where the mainworld went.
+        let note = null;
+        if (multiView && focus !== 0) {
+            const p = parentOfStar(nsys, focus);
+            const c = companions.find(cc => cc.idx === focus);
+            note = { star: p, color: THEME.dim,
+                     text: `Orbiting Star ${starTag(nsys.stars[p], p)}`
+                         + (c && c.au != null ? ` at ${num(c.au, 2)} AU`
+                            : (star.role ? ` · ${star.role}` : '')) };
+        } else if (multiView && mw && mwStar !== focus) {
+            note = { star: mwStar, color: THEME.green,
+                     text: `Mainworld orbits Star ${starTag(nsys.stars[mwStar], mwStar)} — see its sheet` };
+        } else if (multiView) {
+            // A companion with a sheet of its own but NO PLACE on the strip
+            // (its distance is not recorded - every RTT companion) would
+            // otherwise leave no sign on this sheet that its bodies exist.
+            const unseen = views.filter(i => i !== focus && parentOfStar(nsys, i) === focus
+                                        && !stripItems.some(it => it.kind === 'star' && it.idx === i));
+            if (unseen.length) {
+                note = { star: unseen[0], color: THEME.gold,
+                         text: unseen.map(i => `Star ${starTag(nsys.stars[i], i)}: ${bodyCount(i)} `
+                                            + (bodyCount(i) === 1 ? 'body' : 'bodies')).join(' · ')
+                               + (unseen.length === 1 ? ' on its own sheet' : ' on their own sheets') };
+            }
+        }
 
         const canvas = o.canvas || document.createElement('canvas');
         canvas.width  = Math.round(W * scale);
@@ -638,7 +733,8 @@ const SystemSheet = (function () {
         // and the Satellites gutter. When nothing on this sheet has a band
         // (T5, RTT, CT belts-only...) a legend explains nothing - drop it.
         const showLegend = bodies.some(b => bandOf(b) || liveMoons(b).some(bandOf));
-        _header(ctx, sysName, hexId, nsys, showLegend, !reduced && !starsOnly);
+        _header(ctx, sysName, hexId, nsys, showLegend, !reduced && !starsOnly,
+                multiView ? `Star ${starTag(star, focus)}` : null);
 
         // ── Row 1 ───────────────────────────────────────────────────────────
         const R1Y = 66, R1H = 330;
@@ -647,7 +743,7 @@ const SystemSheet = (function () {
         const CX = M + LW + 16;               // centre column x
         const CW = W - M - RW - 16 - CX;
 
-        _starPanel(ctx, M, R1Y, LW, 176, star, nsys, companions);
+        _starPanel(ctx, M, R1Y, LW, 176, nsys, companions, focus);
         // T5 socioeconomics on T5 sheets ONLY (Sean, 2026-09-23). solo_6 is
         // MgT2E and still carries `t5Socio` on every hex; printing it there
         // would put one edition's extensions on another edition's world.
@@ -663,9 +759,12 @@ const SystemSheet = (function () {
             _mainworldBrief(ctx, CX, R1Y, W - M - CX, R1H, mw, ordered, nsys, mwParent,
                             { reduced: true, socio });
         } else {
-            _systemPanel(ctx, M, R1Y + 190, LW, R1H - 190, nsys, ordered, worlds, belts, ggs, mw, mwParent);
-            _orbitStrip(ctx, CX, R1Y, CW, R1H, stripItems, hexId, scale, mw, mwParent, sysName);
-            _mainworldBrief(ctx, W - M - RW, R1Y, RW, R1H, mw, ordered, nsys, mwParent, { socio });
+            _systemPanel(ctx, M, R1Y + 190, LW, R1H - 190, nsys, ordered, worlds, belts, ggs, mw, mwParent,
+                         multiView ? { focus, mwStar } : null);
+            _orbitStrip(ctx, CX, R1Y, CW, R1H, stripItems, hexId, scale, mw, mwParent, sysName, note, hits);
+            _mainworldBrief(ctx, W - M - RW, R1Y, RW, R1H, mw, mwOrdered, nsys, mwParent,
+                            { socio, allBodies: allOrdered,
+                              fromStar: multiView ? `Star ${starLetter(mwStar)}` : null });
         }
 
         // ── Row 2 ───────────────────────────────────────────────────────────
@@ -696,8 +795,11 @@ const SystemSheet = (function () {
                      Math.min(MAX_PITCH, Math.floor(usable / Math.max(1, perColRows))));
         // Sized to CONTENT, so a three-body system does not sit under a
         // quarter-sheet of empty bordered rectangle.
-        const tableH = Math.min(R2H, HEAD + perColRows * rowH + PADB);
-        _planetTable(ctx, M, R2Y, W - M - RW - 16 - M, tableH, ordered, mw, rowH, splitCols);
+        // A star's sheet with no bodies of its own (a primary whose planets all
+        // circle a companion) has no table: the strip already says so.
+        const tableH = ordered.length ? Math.min(R2H, HEAD + perColRows * rowH + PADB) : 0;
+        if (ordered.length)
+            _planetTable(ctx, M, R2Y, W - M - RW - 16 - M, tableH, ordered, mw, rowH, splitCols);
         const mwPanelH = 246;
         _mainworldData(ctx, W - M - RW, R2Y, RW, mwPanelH, mw, mwParent, reduced);
         // D2 (Sean, 2026-09-23): NO EMPTY PANELS. A system with no satellites
@@ -707,9 +809,11 @@ const SystemSheet = (function () {
         let bottom = Math.max(R2Y + tableH, R2Y + mwPanelH);
         if (anyMoons) {
             _satellites(ctx, W - M - RW, R2Y + mwPanelH + 16, RW, R2H - mwPanelH - 16,
-                        mw, mwParent, ordered, sysName, reduced);
+                        mw, mwParent, allOrdered, sysName, reduced);
             bottom = R2Y + R2H;
         }
+        canvas._sheetHits = hits;
+        canvas._sheetView = { focus, views };
         return _finish(canvas, ctx, scale, bottom, nsys, reduced, false);
     }
 
@@ -733,7 +837,7 @@ const SystemSheet = (function () {
         return canvas;
     }
 
-    function _header(ctx, sysName, hexId, nsys, showLegend, showMapTitle) {
+    function _header(ctx, sysName, hexId, nsys, showLegend, showMapTitle, viewTag) {
         ctx.textAlign = 'left';
         ctx.font = '700 30px ' + SANS;
         ctx.fillStyle = THEME.ink;
@@ -744,7 +848,7 @@ const SystemSheet = (function () {
         const sectorNum = parseInt(String(hexId).split('-')[0], 10);
         const sectorName = (window.sectorNames && window.sectorNames[sectorNum])
                          || (isFinite(sectorNum) ? `Sector ${sectorNum}` : '');
-        ctx.fillText(`${sectorName} • Hex ${hexId}`, M + 5, 57);
+        ctx.fillText(`${sectorName} • Hex ${hexId}` + (viewTag ? ` • ${viewTag}` : ''), M + 5, 57);
 
         // Centre legend — the same colours the table's gutter and Band column use.
         ctx.textAlign = 'center';
@@ -791,8 +895,19 @@ const SystemSheet = (function () {
                  T5: 'Traveller 5', RTT: 'Revised Traveller', AoW: 'Architect of Worlds' }[ed] || String(ed || '');
     }
 
-    function _starPanel(ctx, x, y, w, h, star, nsys, companions) {
-        const comps = companions || [];
+    // The panel describes the sheet's OWN star, with every other star in the
+    // system beneath it - so on star B's sheet the primary is in the row, and
+    // nothing about the system's make-up is hidden by changing sheets.
+    function _starPanel(ctx, x, y, w, h, nsys, companions, focus) {
+        const f = focus || 0;
+        const all = nsys.stars || [];
+        const star = all[f] || {};
+        const multi = all.length > 1;
+        const comps = all.map((s, i) => {
+            if (i === f || !s) return null;
+            const c = (companions || []).find(cc => cc.idx === i);
+            return { star: s, idx: i, au: c ? c.au : null, primary: i === 0 };
+        }).filter(Boolean);
         const title = comps.length ? 'Stars' : 'Primary Star';
         const cy = panel(ctx, x, y, w, h, title);
 
@@ -804,26 +919,36 @@ const SystemSheet = (function () {
         drawStarGlow(ctx, gx, gy, comps.length ? 36 : 46, star.sType);
 
         if (comps.length) {
-            const per = Math.min(comps.length, 4);
+            // EVERY STAR IS SHOWN. Up to six fit; past two the columns are too
+            // narrow for "B · M5 V" and "20 AU", which truncated to "B · ..."
+            // and "20 ...", so a column steps down to what fits: the full
+            // label or just the letter, the distance with its unit, bare, or
+            // not at all. The letter is what the strip and the sheets use.
+            const per = Math.min(comps.length, 6);
             const sw = 104 / Math.max(per, 1);
-            comps.slice(0, 4).forEach((c, i) => {
+            const fit = (t, mw) => (t && ctx.measureText(t).width <= mw ? t : null);
+            comps.slice(0, 6).forEach((c, i) => {
                 const ccx = x + 14 + sw * (i + 0.5);
                 drawStarGlow(ctx, ccx, y + h - 42, Math.min(13, sw * 0.42), c.star.sType);
                 ctx.font = '9px ' + SANS;
                 ctx.fillStyle = THEME.dim;
                 ctx.textAlign = 'center';
-                ctx.fillText(truncate(ctx, starLabel(c.star), sw - 2), ccx, y + h - 20);
+                const full = multi ? starTag(c.star, c.idx) : starLabel(c.star);
+                const lab = fit(full, sw - 2) || (multi ? starLetter(c.idx) : truncate(ctx, full, sw - 2));
+                ctx.fillText(lab, ccx, y + h - 20);
                 ctx.fillStyle = THEME.faint;
-                ctx.fillText(truncate(ctx, c.au != null ? num(c.au, 2) + ' AU'
-                                                       : (c.star.separation || c.star.role || '\u2014'), sw - 2),
-                             ccx, y + h - 9);
+                const sub = c.primary ? (fit('Primary', sw - 2) || '') :
+                            c.au != null ? (fit(num(c.au, 2) + ' AU', sw - 2) || fit(num(c.au, 2), sw - 2) || '')
+                                         : truncate(ctx, c.star.separation || c.star.role || '\u2014', sw - 2);
+                if (sub) ctx.fillText(sub, ccx, y + h - 9);
             });
             ctx.textAlign = 'left';
         }
 
         const tx = x + 130, tw = w - 130 - 18;
         let ry = cy + 8;
-        const name = star.name || `${star.sType || '?'}${star.subType ?? ''} ${star.sClass || ''}`.trim();
+        const name = multi ? starTag(star, f)
+                   : star.name || `${star.sType || '?'}${star.subType ?? ''} ${star.sClass || ''}`.trim();
         kvRow(ctx, tx, ry, tw, 'Type', name); ry += 24;
         // R4: a field the normaliser defaulted (`mass || 1`, `age || 0`) is
         // listed in `invented` and prints as a dash - the row stays, so the
@@ -836,7 +961,14 @@ const SystemSheet = (function () {
         const ageInvented = star.age == null && (nsys.invented || []).includes('age');
         const age = star.age ?? nsys.age;
         if (age != null) { kvRow(ctx, tx, ry, tw, 'Age', ageInvented ? '\u2014' : `${num(age)} Gyr`); ry += 24; }
-        if (comps.length) {
+        if (f !== 0) {
+            // A companion's sheet says what it orbits, in place of a count.
+            const p = parentOfStar(nsys, f);
+            const own = (companions || []).find(cc => cc.idx === f);
+            kvRow(ctx, tx, ry, tw, 'Orbits',
+                  `Star ${starLetter(p)}` + (own && own.au != null ? ` · ${num(own.au, 2)} AU`
+                                            : (star.separation || star.role ? ` · ${star.separation || star.role}` : '')));
+        } else if (comps.length) {
             const unplaced = comps.filter(c => c.au == null).length;
             kvRow(ctx, tx, ry, tw, 'Companions',
                   String(comps.length) + (unplaced ? ' (orbits not recorded)' : ''),
@@ -882,8 +1014,11 @@ const SystemSheet = (function () {
                      x + 16, ry0 + rows.length * 21 + 4);
     }
 
-    function _systemPanel(ctx, x, y, w, h, nsys, ordered, worlds, belts, ggs, mw, mwParent) {
-        const ry0 = panel(ctx, x, y, w, h, 'System Data');
+    // `view` (multi-star sheets only): { focus, mwStar }. The counts are this
+    // star's, so the title says whose they are, and the mainworld's orbit is
+    // named with the star it is measured from.
+    function _systemPanel(ctx, x, y, w, h, nsys, ordered, worlds, belts, ggs, mw, mwParent, view) {
+        const ry0 = panel(ctx, x, y, w, h, view ? `System Data — Star ${starLetter(view.focus)}` : 'System Data');
         const outer = ordered.length ? ordered[ordered.length - 1].au : null;
         const moonTotal = ordered.reduce((a, b) => a + liveMoons(b).length, 0);
         const rows = [
@@ -896,7 +1031,8 @@ const SystemSheet = (function () {
             // THE ORBIT IS THE PARENT'S. A lunar mainworld has no `au` of its
             // own - it has a planetary distance from the planet it circles.
             ['Mainworld Orbit',   (mwParent || mw) && (mwParent || mw).au != null
-                                    ? `${num((mwParent || mw).au, 3)} AU` : '\u2014'],
+                                    ? (view ? `${starLetter(view.mwStar)} \u00b7 ` : '')
+                                      + `${num((mwParent || mw).au, 3)} AU` : '\u2014'],
             ['Outermost Orbit',   outer != null ? `${num(outer, 2)} AU` : '\u2014'],
         ];
 
@@ -959,12 +1095,25 @@ const SystemSheet = (function () {
         return b;
     }
 
-    function _orbitStrip(ctx, x, y, w, h, items, hexId, scale, mw, mwParent, sysName) {
+    // `note` (multi-star sheets only): { text, color, star } - one line at the
+    // strip's top left saying what this star orbits, or where the mainworld
+    // is. `hits` collects click targets for the in-app sheet: each companion
+    // with a sheet of its own, and the note, which leads to the star it names.
+    function _orbitStrip(ctx, x, y, w, h, items, hexId, scale, mw, mwParent, sysName, note, hits) {
         // The strip holds bodies that orbit the STAR, so a lunar mainworld is
         // represented by ringing its PARENT. Interim: moons proper are their
         // own design job and will supersede this.
         const ringed = mwParent || mw;
         panel(ctx, x, y, w, h, null, { fill: '#05070b' });
+
+        if (note) {
+            ctx.font = '600 11px ' + SANS;
+            ctx.fillStyle = note.color;
+            ctx.textAlign = 'left';
+            const t = truncate(ctx, note.text, w - 28);
+            ctx.fillText(t, x + 14, y + 22);
+            if (hits) hits.push({ x: x + 10, y: y + 8, w: ctx.measureText(t).width + 8, h: 20, star: note.star });
+        }
 
         if (!items.length) {
             ctx.font = '13px ' + SANS; ctx.fillStyle = THEME.faint; ctx.textAlign = 'center';
@@ -1061,6 +1210,9 @@ const SystemSheet = (function () {
         // `orbitNo` stays 0-based because it is the seed fallback for unnamed
         // bodies (changing it would redraw them); only the PRINTED number is
         // 1-based, to match the table `#` and the Roman-numeral body names.
+        // Per-star sheets (v0.18.1.3) number from 1 on every star but seed from
+        // the body's place in the WHOLE system (`gi`), so a body looks the
+        // same on every sheet and as it did before sheets were split.
         let orbitNo = -1;
 
         items.forEach((it, i) => {
@@ -1081,13 +1233,26 @@ const SystemSheet = (function () {
                 ctx.fillText('\u2736', cx, y + 58);
                 ctx.font = '600 ' + (n > 12 ? 10 : 11) + 'px ' + SANS;
                 ctx.fillStyle = THEME.gold;
-                const sl = nameCleared(i) ? null : fitsOrNull(starLabel(s), colW);
+                const sl = nameCleared(i) ? null : fitsOrNull(starTag(s, it.idx), colW);
                 if (sl) ctx.fillText(sl, cx, y + 76);
                 if (s.role) {
                     ctx.font = (n > 12 ? 9 : 10) + 'px ' + SANS;
                     ctx.fillStyle = THEME.faint;
                     const rl = nameCleared(i) ? null : fitsOrNull(s.role, colW);
                     if (rl) ctx.fillText(rl, cx, y + 90);
+                }
+                // A companion with bodies of its own says so, because they are
+                // NOT on this sheet - they are on its own. In the app the star
+                // is the way there.
+                if (it.own) {
+                    ctx.font = '600 ' + (n > 12 ? 9 : 10) + 'px ' + SANS;
+                    ctx.fillStyle = THEME.gold;
+                    const ol = fitsOrNull(`${it.own} ${it.own === 1 ? 'body' : 'bodies'}`, colW);
+                    if (ol) ctx.fillText(ol, cx, y + 104);
+                    if (hits) {
+                        const r = Math.max(size / 2, 22);
+                        hits.push({ x: cx - r, y: y + 62, w: 2 * r, h: baseY + r - (y + 62), star: it.idx });
+                    }
                 }
                 drawStarGlow(ctx, cx, baseY, size / 2, s.sType);
                 ctx.font = '11px ' + MONO;
@@ -1099,6 +1264,7 @@ const SystemSheet = (function () {
 
             const b = it.b;
             orbitNo++;
+            const seedNo = it.gi != null ? it.gi : orbitNo;
             const belt = isBelt(b);
             const gg = isGasGiant(b);
             const isMW = ringed && b === ringed;
@@ -1137,7 +1303,7 @@ const SystemSheet = (function () {
             }
 
             if (belt) {
-                drawBelt(ctx, cx, baseY, Math.max(size, 40), hexId + '|' + (b.name || orbitNo));
+                drawBelt(ctx, cx, baseY, Math.max(size, 40), hexId + '|' + (b.name || seedNo));
             } else {
                 // A SEAT UNDER EVERY DISC. An airless rock is genuinely very
                 // dark, and against a near-black panel its limb disappears —
@@ -1166,8 +1332,8 @@ const SystemSheet = (function () {
                 }
 
                 if (gg) drawGasGiant(ctx, cx, baseY, size,
-                                     PlanetRenderer.imageSeed(hexId, b, 'w' + orbitNo));
-                else    drawDisc(ctx, b, hexId, cx, baseY, size, scale, 'w' + orbitNo);
+                                     PlanetRenderer.imageSeed(hexId, b, 'w' + seedNo));
+                else    drawDisc(ctx, b, hexId, cx, baseY, size, scale, 'w' + seedNo);
             }
 
             // Moon count under the disc. The strip cannot show sixty moons and
@@ -1264,8 +1430,10 @@ const SystemSheet = (function () {
         // only top-level bodies produced "Orbit 12 of 16 - 0 of 16 bodies are
         // populated" on a sheet whose whole subject is a populated mainworld.
         const isPop = b => { const d = b && b.uwp && b.uwp[4]; return !!d && d !== '0'; };
+        // `ordered` is the mainworld's own star's bodies; the population count
+        // is over the whole system (`allBodies`), as it always was.
         let populated = 0, totalBodies = 0;
-        for (const b of ordered) {
+        for (const b of ((opt && opt.allBodies) || ordered)) {
             totalBodies++;
             if (isPop(b)) populated++;
             for (const m of (b.moons || [])) {
@@ -1308,7 +1476,7 @@ const SystemSheet = (function () {
         // (the parent's rank for a lunar mainworld), matching the strip and the
         // table `#`. "Orbit" read as the Traveller Orbit #, which it is not.
         if (idx >= 0 && !reduced) {
-            lines.push(`Position ${idx + 1} of ${ordered.length} from the star` +
+            lines.push(`Position ${idx + 1} of ${ordered.length} from ${(opt && opt.fromStar) || 'the star'}` +
                 (populated === 1 ? ' — the only populated body in the system'
                                  : ` — ${populated} of ${totalBodies} bodies are populated`));
         }
@@ -1735,6 +1903,22 @@ const SystemSheet = (function () {
         return _save(canvas, state, hexId);
     }
 
+    // The sheets a hex has, one per star with bodies of its own - see
+    // starOfBody. Fewer than two means one sheet, drawn exactly as before.
+    // [{ idx, letter, label, bodies }], primary first. The exporters and the
+    // pop-up both read this, so they cannot disagree about which stars get one.
+    function starViews(state) {
+        const nsys = (window.SystemViewer && SystemViewer.normalizeSystem)
+            ? SystemViewer.normalizeSystem(state) : null;
+        if (!nsys) return [];
+        const bodies = displayBodies(nsys);
+        if (!bodies.length) return [];
+        return viewStarsOf(nsys, bodies).map(i => ({
+            idx: i, letter: starLetter(i), label: starTag(nsys.stars[i], i),
+            bodies: bodies.filter(b => starOfBody(nsys, b) === i).length,
+        }));
+    }
+
     // Saves an already-rendered sheet, so the pop-up's Download button writes
     // exactly the canvas on screen rather than drawing it a second time.
     function _save(canvas, state, hexId) {
@@ -1744,7 +1928,9 @@ const SystemSheet = (function () {
         return new Promise(resolve => {
             canvas.toBlob(blob => {
                 if (!blob) { resolve(false); return; }
-                const name = `${safe}_${String(hexId).replace(/[^a-z0-9]+/gi, '_')}_system_sheet.png`;
+                const f = canvas._sheetView ? canvas._sheetView.focus : 0;
+                const name = `${safe}_${String(hexId).replace(/[^a-z0-9]+/gi, '_')}_system_sheet`
+                           + (f ? `_star_${starLetter(f)}` : '') + '.png';
                 if (typeof downloadBlob === 'function') {
                     resolve(!!downloadBlob(blob, name, 'image/png'));
                 } else {
@@ -1769,7 +1955,10 @@ const SystemSheet = (function () {
     function close()  { const p = document.getElementById(PANEL_ID); if (p) p.remove(); }
 
     function open(state, hexId, opts) {
-        const canvas = render(state, hexId, opts);
+        const views = starViews(state);
+        let focus = 0;
+        const draw = () => render(state, hexId, Object.assign({}, opts || {}, { star: focus }));
+        let canvas = draw();
         if (!canvas) {
             if (typeof showToast === 'function') showToast('No system data to chart on this hex.', 3000);
             return false;
@@ -1791,17 +1980,9 @@ const SystemSheet = (function () {
         });
 
         const title = document.createElement('div');
-        title.textContent = sysName + '  ·  ' + hexId + '  —  System Sheet';
         Object.assign(title.style, {
             color: '#66fcf1', fontSize: '13px',
             marginBottom: '12px', letterSpacing: '0.05em',
-        });
-
-        Object.assign(canvas.style, {
-            border: '1px solid #45a29e55',
-            display: 'block',
-            width: 'auto', height: 'auto',
-            maxWidth: '94vw', maxHeight: 'calc(100vh - 110px)',
         });
 
         const btnStyle = {
@@ -1810,6 +1991,68 @@ const SystemSheet = (function () {
             color: '#66fcf1', cursor: 'pointer',
             fontFamily: 'inherit', fontSize: '12px',
         };
+
+        // ONE SHEET PER STAR (v0.18.1.3). A star bar when the system has more
+        // than one sheet; a companion on the strip, and the strip's note, are
+        // clickable too. "Home" is the primary's sheet.
+        const starBar = document.createElement('div');
+        Object.assign(starBar.style, { display: 'flex', gap: '8px', marginBottom: '10px',
+                                       flexWrap: 'wrap', justifyContent: 'center' });
+        const starBtns = views.length > 1 ? views.map(v => {
+            const b = document.createElement('button');
+            b.textContent = v.idx === 0 ? `Home · Star ${v.label}` : `Star ${v.label}`;
+            b.title = `${v.bodies} ${v.bodies === 1 ? 'body' : 'bodies'} orbiting star ${v.letter}`;
+            Object.assign(b.style, btnStyle, { marginTop: '0', padding: '4px 14px' });
+            b.addEventListener('click', () => show(v.idx));
+            starBar.appendChild(b);
+            return { v, b };
+        }) : [];
+
+        const styleCanvas = c => Object.assign(c.style, {
+            border: '1px solid #45a29e55',
+            display: 'block',
+            width: 'auto', height: 'auto',
+            maxWidth: '94vw', maxHeight: `calc(100vh - ${starBtns.length ? 150 : 110}px)`,
+        });
+
+        // A pointer event in the sheet's LOGICAL units. The sheet keeps its
+        // aspect ratio when CSS shrinks it, so one factor serves both axes.
+        const hitAt = (c, e) => {
+            const r = c.getBoundingClientRect();
+            const k = W / r.width;
+            const lx = (e.clientX - r.left) * k, ly = (e.clientY - r.top) * k;
+            return (c._sheetHits || []).find(h => lx >= h.x && lx <= h.x + h.w && ly >= h.y && ly <= h.y + h.h);
+        };
+        const wire = c => {
+            styleCanvas(c);
+            c.addEventListener('click', e => { const h = hitAt(c, e); if (h) show(h.star); });
+            c.addEventListener('mousemove', e => { c.style.cursor = hitAt(c, e) ? 'pointer' : 'default'; });
+        };
+
+        const refresh = () => {
+            const v = views.find(vv => vv.idx === focus);
+            title.textContent = sysName + '  ·  ' + hexId + '  —  System Sheet'
+                              + (starBtns.length && v ? `  ·  Star ${v.label}` : '');
+            for (const { v: sv, b } of starBtns) {
+                const on = sv.idx === focus;
+                b.style.background = on ? '#45a29e33' : 'transparent';
+                b.style.fontWeight = on ? '700' : '400';
+            }
+        };
+
+        function show(idx) {
+            if (idx === focus || !views.some(v => v.idx === idx)) return;
+            focus = idx;
+            const next = draw();
+            if (!next) return;
+            wire(next);
+            canvas.replaceWith(next);
+            canvas = next;
+            refresh();
+        }
+
+        wire(canvas);
+        refresh();
 
         const dlBtn = document.createElement('button');
         dlBtn.textContent = 'Download PNG';
@@ -1836,7 +2079,9 @@ const SystemSheet = (function () {
         Object.assign(btnRow.style, { display: 'flex', gap: '10px' });
         btnRow.append(dlBtn, closeBtn);
 
-        panel.append(title, canvas, btnRow);
+        panel.append(title);
+        if (starBtns.length) panel.append(starBar);
+        panel.append(canvas, btnRow);
         document.body.appendChild(panel);
         return true;
     }
@@ -1849,7 +2094,7 @@ const SystemSheet = (function () {
         if (e.key === 'Escape' && isOpen()) { e.stopPropagation(); close(); }
     });
 
-    return { render, download, open, close, isOpen, resolveSystemName, tableLayout, displayBodies, bandOf, W, H, THEME, BAND_COLOR, discSize, truncate, wrap };
+    return { render, download, open, close, isOpen, starViews, resolveSystemName, tableLayout, displayBodies, bandOf, W, H, THEME, BAND_COLOR, discSize, truncate, wrap };
 })();
 
 window.SystemSheet = SystemSheet;

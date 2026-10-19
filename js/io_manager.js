@@ -346,6 +346,15 @@ function setupSaveLoad() {
                 alert("Solo 6 sector data not found. Run convert_solo6.ps1 to generate js/solo_6_data.js.");
                 return;
             }
+            // Loading the preset replaces the whole map, exactly like Load Map JSON,
+            // so it asks first in the same way Clear Canvas does.
+            const confirmed = confirm(
+                'Load Sector Solo 6 will replace your current map — all hex data, routes,\n' +
+                'borders, and regions — with the Solo 6 sample sector.\n\n' +
+                'Save your map first (Settings → Map Files → Save Map JSON) if you want to keep it.\n\n' +
+                'Continue?'
+            );
+            if (!confirmed) return;
             applyLoadedMapData(window.SOLO_6_DATA);
         });
     }

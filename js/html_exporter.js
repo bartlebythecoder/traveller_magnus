@@ -1056,8 +1056,10 @@ tbody tr:nth-child(even) { background:var(--panel);
                     systemName, hexCode });
                 for (const im of imgs) {
                     const isSheet = im.kind === 'sheet';
+                    const which = !isSheet ? 'orrery'
+                                : im.star && im.star !== 'A' ? `system sheet, star ${im.star}` : 'system sheet';
                     sysImages.push({ fn: im.filename, linkFull: isSheet,
-                                     alt: `${systemName} ${isSheet ? 'system sheet' : 'orrery'}` });
+                                     alt: `${systemName} ${which}` });
                     files.push({ name: `${sub}/images/${im.filename}`, data: im.data });
                 }
             }

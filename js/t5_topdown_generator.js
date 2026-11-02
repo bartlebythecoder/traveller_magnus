@@ -20,7 +20,8 @@
 
     // --- Internal Helpers & Tables (Drawn from T5 Logic) ---
     // Note: Uses global rng/roll functions if available (e.g., from core.js), otherwise fallbacks.
-    const _rng = (typeof rng === 'function') ? rng : Math.random;
+    // Read rng at each call: reseedForHex replaces it, so a copy taken at load never re-seeds.
+    const _rng = () => (typeof rng === 'function') ? rng() : Math.random();
     const _roll1D = (typeof roll1D === 'function') ? roll1D : () => Math.floor(_rng() * 6) + 1;
     const _roll2D = (typeof roll2D === 'function') ? roll2D : () => _roll1D() + _roll1D();
     const _log = (typeof writeLogLine === 'function') ? writeLogLine : console.log;
@@ -33,53 +34,19 @@
     // 0.05 AU already used by traveller_worlds_importer.js for OTU-imported companions.
     const T5_COMPANION_AU = 0.05;
 
-    const HZ_DATA = {
-        'O': { 'Ia': 15, 'Ib': 15, 'II': 14, 'III': 13, 'IV': 12, 'V': 11, 'D': 1 },
-        'B': { 'Ia': 13, 'Ib': 13, 'II': 12, 'III': 11, 'IV': 10, 'V': 9, 'D': 0 },
-        'A': { 'Ia': 12, 'Ib': 11, 'II': 9, 'III': 7, 'IV': 7, 'V': 7, 'D': 0 },
-        'F': { 'Ia': 11, 'Ib': 10, 'II': 9, 'III': 6, 'IV': 6, 'V': 4, 'VI': 3, 'D': 0 },
-        'G': { 'Ia': 12, 'Ib': 10, 'II': 9, 'III': 7, 'IV': 5, 'V': 3, 'VI': 2, 'D': 0 },
-        'K': { 'Ia': 12, 'Ib': 10, 'II': 9, 'III': 8, 'IV': 5, 'V': 2, 'VI': 1, 'D': 0 },
-        'M': { 'Ia': 12, 'Ib': 11, 'II': 10, 'III': 9, 'V': 0, 'VI': 0, 'D': 0 }
-    };
-
     /**
-     * Determines the Habitable Zone (HZ) orbit for a star based on Spectral Type and Size.
+     * Determines the Habitable Zone (HZ) orbit for a star based on Spectral Type and Size
+     * (T5_Data.HZ_DATA). A Brown Dwarf's type is 'BD' — read whole, not as a 'B' star.
      */
     function getStarHZ(star) {
         if (!star) return 3;
-        const type = (star.type || 'G').charAt(0).toUpperCase();
+        const rawType = (star.type || 'G').toUpperCase();
+        const type = rawType === 'BD' ? 'BD' : rawType.charAt(0);
         const size = star.size || 'V';
-        const typeMap = HZ_DATA[type] || HZ_DATA['G'];
+        const typeMap = T5_Data.HZ_DATA[type] || T5_Data.HZ_DATA['G'];
         let hz = typeMap[size];
-        if (hz === undefined) hz = typeMap['V'] || 3;
+        if (hz === undefined) hz = typeMap['V'] ?? 3;   // ?? — an HZ of Orbit 0 is real, not missing
         return clampUWP(hz, 0, 19);
-    }
-
-    /**
-     * T5 ORBIT LABEL HELPER
-     * Returns a combined label consisting of [Positional / Climate]
-     * per Traveller 5 RAW requirements.
-     */
-    function getT5OrbitLabel(orbit, hzOrbit) {
-        let positional = "";
-        if (orbit <= hzOrbit - 2) positional = "Inner";
-        else if (orbit >= hzOrbit - 1 && orbit <= hzOrbit + 1) positional = "Hospitable";
-        else if (orbit >= hzOrbit + 2) positional = "Outer";
-
-        let climate = "";
-        // Special Orbit Labels: 0 or 1 get Twilight Zone (Tz)
-        if (orbit === 0 || orbit === 1) {
-            climate = "Tz";
-        } else {
-            if (orbit <= hzOrbit - 1) climate = "Hot / Tropic";
-            else if (orbit === hzOrbit) climate = "Temperate";
-            else if (orbit >= hzOrbit + 1 && orbit <= hzOrbit + 5) climate = "Cold / Tundra";
-            else if (orbit >= hzOrbit + 6) climate = "Frozen";
-        }
-
-        if (positional && climate) return `${positional} / ${climate}`;
-        return positional || climate || "None";
     }
 
     /**
@@ -397,6 +364,9 @@
         // bodies" box. isEditorSeeded mirrors MgT2E's own `!seedSys || seedSys._allowAddBodies`
         // gate (mgt2e_bottomup_generator.js) instead of inventing a T5-specific signal.
         const isEditorSeeded = !!seedSys;
+        // Where a seeded mainworld moon sat in its planet's moon list, so Phase 1 puts it back in
+        // the same place instead of at the end (-1 = not a seeded moon).
+        let seededMwMoonIdx = -1;
         if (hasSeedWorlds) {
             seedSys.worlds.forEach(w => {
                 const starIdx = w.parentStarIdx || 0;
@@ -411,6 +381,8 @@
                     // (below) places sys.mainworld into this same parent's satellites separately;
                     // including it here too would duplicate it.
                     const mwId = seedSys.mainworldUWP && seedSys.mainworldUWP._id;
+                    const mwIdx = mwId ? w.moons.findIndex(m => m._id === mwId) : -1;
+                    if (mwIdx >= 0) seededMwMoonIdx = mwIdx;
                     body.satellites = w.moons
                         .filter(m => !mwId || m._id !== mwId)
                         .map(m => Object.assign({ type: 'Moon', _manualFields: [] }, m));
@@ -450,25 +422,44 @@
         // Action 6.3: T5 Continuation Method - Handle Predefined Satellite Injection
         let isSatellite = mainworldBase.isPreMoon === true ||
             (mainworldBase.tradeCodes && (mainworldBase.tradeCodes.includes('Sa') || mainworldBase.tradeCodes.includes('Lk')));
+        // A seeded mainworld already carrying Lk stays a Close Satellite across re-saves.
+        if (mainworldBase.tradeCodes && mainworldBase.tradeCodes.includes('Lk')) sys.mainworld.isCloseSatellite = true;
+        // Ruling (Sean, 2026-11-01): a moon the user makes mainworld in the System Editor that
+        // has no Close/Far yet (a brand-new moon) rolls 2D like other moons, 7- Close
+        // (T5_Data.TIDAL_LOCK.LOGIC.OTHER_SATELLITES). One carrying Sa or Lk was already
+        // decided — a Far mainworld saved before isCloseSatellite = false was stored has only Sa.
+        if (mainworldBase.isPreMoon === true && typeof sys.mainworld.isCloseSatellite !== 'boolean') {
+            if (mainworldBase.tradeCodes && mainworldBase.tradeCodes.includes('Sa')) {
+                sys.mainworld.isCloseSatellite = false;
+            } else {
+                const closeRoll = _roll2D();
+                sys.mainworld.isCloseSatellite = closeRoll <= T5_Data.TIDAL_LOCK.CLOSE_SATELLITE_MAX_ROLL;
+                _tResult('Satellite Close/Far', `2D ${closeRoll} -> ${sys.mainworld.isCloseSatellite ? 'Close' : 'Far'}`, 'T5 1.3: Orbit Allocation');
+            }
+        }
 
         // Objective 1: Step B2 Intercept (Random Lunar Attachment for standard worlds)
         // The 'Lk'/'Sa' pushes here are provisional — isMoon/isSatellite/isTidallyLocked aren't
         // set on sys.mainworld yet at this point, so a full calculateT5TradeCodes recompute
         // couldn't derive them correctly here even if we ran it now. The real recompute happens
-        // below (after the flags are set), which supersedes these; isTidallyLocked is recorded
-        // here so that later recompute can tell Close (Lk) apart from Far (Sa).
+        // below (after the flags are set), which supersedes these; isCloseSatellite is recorded
+        // here so that later recompute can tell Close (Lk) apart from Far (Sa), and so
+        // calculateT5RotationalDynamics keeps it locked (T5_Data.TIDAL_LOCK.LOGIC.PARENT_LOCK).
         if (!isSatellite && mainworldBase.isPreMoon !== false) {
             const lunarFlux = rollFlux();
             if (lunarFlux === -3) {
                 isSatellite = true;
+                sys.mainworld.isCloseSatellite = true;
                 sys.mainworld.isTidallyLocked = true;
                 tResult('Lunar Trigger', 'LOCKED SATELLITE (Lk)', 'T5 1.3: Orbit Allocation');
             } else if (lunarFlux <= -4) {
                 isSatellite = true;
+                sys.mainworld.isCloseSatellite = false;   // stored, so a System Editor re-save never rolls it
                 tResult('Lunar Trigger', 'FAR SATELLITE (Sa)', 'T5 1.3: Orbit Allocation');
             }
         }
 
+        let parentIsGG = false;
         if (isSatellite) {
             let parent = null;
             // True when `parent` was found already sitting in a star's orbits (placed earlier by
@@ -489,13 +480,22 @@
                 _log(`[MAINWORLD PARENT LOOKUP] mainworldBase.parentBodyId is not set (isSatellite=true via ${mainworldBase.isPreMoon === true ? 'isPreMoon' : 'tradeCodes/lunar roll'}) — skipping lookup, going straight to fallback.`);
             }
 
-            if (!parent && ggCountTotal > 0) {
+            // T5_Data.TIDAL_LOCK.LOGIC.MAINWORLD_PARENT: Chart 2C's GG? column is its own Flux
+            // roll, made only for a new parent (a seeded one is already known).
+            if (!parent) {
+                const ggFlux = rollFlux();
+                parentIsGG = ggFlux <= T5_Data.TIDAL_LOCK.CHART_2C.PARENT_GAS_GIANT_MAX_FLUX;
+                _tResult('Parent World (GG?)', `Flux ${ggFlux} -> ${parentIsGG ? 'Gas Giant' : 'Planet'}${parentIsGG && ggCountTotal <= 0 ? ' (no Gas Giant in system: BigWorld)' : ''}`, 'T5 1.3: Orbit Allocation');
+            }
+
+            if (!parent && parentIsGG && ggCountTotal > 0) {
                 // T5 RAW: Pre-defined moon consumes one GG from inventory
                 ggCountTotal--;
                 const ggStats = generateGasGiantStats();
                 parent = { ...ggStats, type: ggStats.type, satellites: [sys.mainworld] };
             } else if (!parent) {
-                // No GGs rolled? Spawn a free BigWorld parent (T5 RAW Backup)
+                // GG? rolled Planet, or Gas Giant with none in the system: a new BigWorld parent
+                parentIsGG = false;
                 parent = {
                     type: 'BigWorld',
                     worldType: 'BigWorld',
@@ -504,12 +504,16 @@
                 };
             } else {
                 if (!parent.satellites) parent.satellites = [];
-                parent.satellites.push(sys.mainworld);
+                // A seeded moon keeps its place in the System Editor's moon list
+                if (seededMwMoonIdx >= 0 && seededMwMoonIdx < parent.satellites.length) {
+                    parent.satellites.splice(seededMwMoonIdx, 0, sys.mainworld);
+                } else {
+                    parent.satellites.push(sys.mainworld);
+                }
             }
 
-            // Objective 2: Sub-Orbit Flux Roll (Ay through Zee naming convention)
-            let satFlux = rollFlux();
-            sys.mainworld.orbitLetter = String.fromCharCode(97 + (satFlux + 6)); // Flux -6..6 maps to a..m
+            // Objective 2: Satellite Orbit Letter (Chart 2C Close or Far column)
+            assignT5SatelliteOrbit(sys.mainworld, sys.mainworld.isCloseSatellite === true);
 
             // CRITICAL UI FIX: Apply the Universal Project Flags so the map renderer sees the moon
             sys.mainworld.isMoon = true;
@@ -567,9 +571,7 @@
         // since the old code only checked "is this exact code already present" before pushing,
         // two mutually-exclusive codes (e.g. Tu and Tr — Cold vs Hot, only one can ever be true)
         // could both end up in tradeCodes permanently. Recomputing deterministically from the
-        // actual final orbit-vs-HZ distance (same formula T5_World_Engine.calculateT5Climate
-        // already uses for subordinate worlds' climateZone: variance = orbit - hzOrbit, clamped
-        // to T5_Data.CLIMATE_MAPPING's -2..2 range) fixes both: it always matches wherever the
+        // actual final orbit-vs-HZ distance (orbit - hzOrbit) fixes both: it always matches wherever the
         // body actually ends up, and stripping any prior Tr/Tu/Fr before adding the new one
         // guarantees at most one is ever present. Runs unconditionally (not gated by
         // _isManual(sys.mainworld,'tradeCodes')) — climate/trade-code here is meant to always
@@ -579,21 +581,20 @@
         // real orbit slot (imports never do — see io_manager.js importT5Tab), same as any other
         // freshly-placed body.
         if (mwTarget >= 0) {
-            const climateMapping = (typeof T5_Data !== 'undefined' && T5_Data.CLIMATE_MAPPING) ? T5_Data.CLIMATE_MAPPING : {};
-            const climateVariance = clampUWP(mwTarget - hzOrbit, -2, 2);
-            sys.mainworld.climateZone = climateMapping[String(climateVariance)] || '';
-            const climateTradeCode = climateVariance === -1 ? 'Tr' : climateVariance === 1 ? 'Tu' : climateVariance === 2 ? 'Fr' : '';
-            if (!sys.mainworld.tradeCodes) sys.mainworld.tradeCodes = [];
-            sys.mainworld.tradeCodes = sys.mainworld.tradeCodes.filter(c => c !== 'Tr' && c !== 'Tu' && c !== 'Fr');
-            if (climateTradeCode) sys.mainworld.tradeCodes.push(climateTradeCode);
+            // T5_Data.TIDAL_LOCK.LOGIC.CLIMATE: a standalone planet in Orbit 0/1 takes Tz instead
+            // of an HZ-variance climate code. A gas giant or belt takes no Tz (Sean, 2026-11-01).
+            const isTz = !isSatellite && T5_Data.TIDAL_LOCK.STAR_LOCK_ORBITS.includes(mwTarget);
+            // Chart D: one climate code from the position vs the HZ (T5_World_Engine.getT5ClimateCode)
+            T5_World_Engine.applyT5ClimateCode(sys.mainworld, mwTarget - hzOrbit, isTz);
+            // The Climate Zone text follows the code (Sean, 2026-11-01)
+            sys.mainworld.climateZone = T5_World_Engine.getT5ClimateText(sys.mainworld);
         }
 
         // Social and Inventory Flags for Mainworld
         if (T5_World_Engine && T5_World_Engine.generateT5Bases) {
             T5_World_Engine.generateT5Bases(sys.mainworld);
         }
-        sys.mainworld.gasGiantsCount = ggCountTotal;
-        sys.mainworld.gasGiant = (ggCountTotal > 0 || isSatellite); // If moon of GG, flag is true
+        // gasGiantsCount/gasGiant are set after Phase 5, from the gas giants actually placed
 
         // Shared helper for Rotating Placement
         function placeCategory(category, count, targetStars, placementLogic) {
@@ -684,6 +685,20 @@
             return T5_Data.P2_PLACEMENT_CHART.WORLD1[arrayIndex];
         });
 
+        // PBG gas giants and belts (Sean, 2026-11-01): count the bodies actually placed in an
+        // orbit — a mainworld's parent gas giant and a belt mainworld included, a rolled one with
+        // no orbit to fit into left out.
+        let placedGG = 0, placedBelts = 0;
+        sys.stars.forEach(star => star.orbits.forEach(o => {
+            const c = o.contents;
+            if (!c || !c.type) return;
+            if (c.type.includes('Gas Giant') || c.type === 'Ice Giant') placedGG++;
+            else if (c.type === 'Planetoid Belt' || c.worldType === 'Belt') placedBelts++;
+        }));
+        sys.mainworld.gasGiantsCount = placedGG;
+        sys.mainworld.gasGiant = placedGG > 0;
+        sys.mainworld.planetoidBelts = placedBelts;
+
         // PHASE 6: Fleshing and Audit
         // capToExisting: when the System Editor locked the body count (editor-driven,
         // allowAddBodies unchecked), don't let generateT5Satellites roll additional moons beyond
@@ -713,6 +728,24 @@
         if (typeof applyT5OrbitalNames === 'function') applyT5OrbitalNames(sys);
 
         return sys;
+    }
+
+    /**
+     * T5_Data.TIDAL_LOCK.CHART_2C: gives a satellite its orbit letter from the Close or Far
+     * column with a Flux roll. A letter it already holds in the right column (a System Editor
+     * re-save) is kept; one from the wrong column (saves made before Chart 2C) is re-rolled.
+     */
+    function assignT5SatelliteOrbit(sat, isClose) {
+        const chart = T5_Data.TIDAL_LOCK.CHART_2C;
+        const column = chart.ORBITS[isClose ? 'CLOSE' : 'FAR'];
+        const held = sat.orbitLetter ? String(sat.orbitLetter).toUpperCase() : null;
+        let row = held ? Object.values(column).find(r => r.letter === held) : null;
+        if (!row) {
+            const flux = clampUWP(rollFlux(), chart.FLUX_MIN, chart.FLUX_MAX);
+            row = column[String(flux)];
+            _tResult('Satellite Orbit', `Flux ${flux} -> ${row.name} (${row.letter}), ${isClose ? 'Close' : 'Far'}`, 'T5 1.3: Orbit Allocation');
+        }
+        sat.orbitLetter = row.letter;
     }
 
     /**
@@ -810,14 +843,22 @@
         const mwPop = sys.mainworld.pop || 0;
         const maxSubPop = Math.max(0, mwPop - 1);
 
-        sys.stars.forEach(star => {
+        sys.stars.forEach((star, si) => {
             const hostHZ = getStarHZ(star);
+            // Chart D climate codes measure from the same HZ the mainworld uses: the System
+            // Editor's HZ override (sys.hzOrbit) for the primary's bodies, the star's own HZ otherwise.
+            const climateHZ = (si === 0 && sys.hzOrbit != null) ? sys.hzOrbit : hostHZ;
+            // Every world gets a Chart D climate code, not only the mainworld (Sean, 2026-11-02).
+            // A satellite measures from its planet's orbit, like a satellite mainworld does. A
+            // hand-typed trade code list is left alone.
+            const applyClimateCode = (w, orbit) => {
+                if (w === sys.mainworld || _isManual(w, 'tradeCodes')) return;
+                T5_World_Engine.applyT5ClimateCode(w, orbit - climateHZ);
+            };
             star.orbits.forEach(o => {
                 const body = o.contents;
                 if (!body || body.type === 'Empty') return;
 
-                // Apply Full T5 Orbit Labeling (Positional + Climate)
-                if (!_isManual(body, 'climateZone')) body.climateZone = getT5OrbitLabel(o.orbit, hostHZ);
                 // Generator placeholders don't carry their own orbitId (position is implied by
                 // array index) — stamp it here so calculateT5RotationalDynamics below can tell
                 // orbit 0/1 (tidally locked to the star) from everything else.
@@ -836,7 +877,6 @@
                 // 3. Flesh out existing satellites (e.g. injected Mainworld)
                 if (body.satellites) {
                     body.satellites.forEach(s => {
-                        if (!_isManual(s, 'climateZone')) s.climateZone = body.climateZone;
                         // t5_editor_adapter.js's _t5BodySeed always seeds an ungenerated moon's
                         // uwp as `null` (`m.uwp || null`), never `undefined` — the old strict
                         // `=== undefined` check never matched a seeded-but-not-yet-generated
@@ -854,16 +894,37 @@
                         // orbitId and could be wrongly flagged "tidally locked to the star".
                         if (s.isMoon === undefined && s.isSatellite === undefined) s.isMoon = true;
 
+                        // T5_Data.TIDAL_LOCK.LOGIC.OTHER_SATELLITES: 2D for Close (7-) or Far
+                        // (8+), once — a seeded moon keeps the status it was given. The mainworld's
+                        // was decided by Chart 2C's Satellite? column in Phase 1.
+                        if (s !== sys.mainworld) {
+                            if (typeof s.isCloseSatellite !== 'boolean') {
+                                const closeRoll = _roll2D();
+                                s.isCloseSatellite = closeRoll <= T5_Data.TIDAL_LOCK.CLOSE_SATELLITE_MAX_ROLL;
+                                _tResult('Satellite Close/Far', `2D ${closeRoll} -> ${s.isCloseSatellite ? 'Close' : 'Far'}`, 'T5 1.3: Orbit Allocation');
+                            }
+                            assignT5SatelliteOrbit(s, s.isCloseSatellite);
+                        }
+
                         // PHASE 2.1 FINAL FIX: Ensure physics are recalculated for EVERY satellite
                         T5_World_Engine.calculateT5PhysicalStats(s);
-                        if (T5_World_Engine.calculateT5Climate) T5_World_Engine.calculateT5Climate(s, 1.0);
                         if (T5_World_Engine.calculateT5RotationalDynamics) T5_World_Engine.calculateT5RotationalDynamics(s);
+
+                        // Trade codes were first worked out (generateT5SubordinateUWP) before this
+                        // moon was flagged a satellite, so Lk could never apply — recompute now.
+                        if (s !== sys.mainworld && !_isManual(s, 'tradeCodes') && T5_World_Engine.calculateT5TradeCodes) {
+                            s.tradeCodes = T5_World_Engine.calculateT5TradeCodes(s);
+                        }
+                        applyClimateCode(s, o.orbit);
+                        // The Climate Zone text follows the (now final) climate code
+                        if (T5_World_Engine.calculateT5Climate) T5_World_Engine.calculateT5Climate(s);
                     });
                 }
 
                 // PHASE 2.1 FINAL FIX: Absolute last step for the main body
                 T5_World_Engine.calculateT5PhysicalStats(body);
-                if (T5_World_Engine.calculateT5Climate) T5_World_Engine.calculateT5Climate(body, 1.0);
+                applyClimateCode(body, o.orbit);
+                if (T5_World_Engine.calculateT5Climate) T5_World_Engine.calculateT5Climate(body);
                 if (T5_World_Engine.calculateT5RotationalDynamics) T5_World_Engine.calculateT5RotationalDynamics(body);
             });
         });
@@ -1020,7 +1081,6 @@
         }
 
         T5_World_Engine.calculateT5PhysicalStats(world);
-        if (T5_World_Engine.calculateT5Climate) T5_World_Engine.calculateT5Climate(world, 1.0);
 
         // --- 8. Social: Trade Codes ---
         if (!_isManual(world, 'tradeCodes') && T5_World_Engine && T5_World_Engine.calculateT5TradeCodes) {
@@ -1030,6 +1090,7 @@
                 if (!world.tradeCodes.includes(code)) world.tradeCodes.push(code);
             });
         }
+        if (T5_World_Engine.calculateT5Climate) T5_World_Engine.calculateT5Climate(world);
 
         // --- NEW: Bases and GG flag for Subordinates ---
         if (T5_World_Engine && T5_World_Engine.generateT5Bases && world.starport !== 'Y') {

@@ -1282,6 +1282,18 @@ function populateEditorAccordions(stateObj) {
                 const val = (obj[field] !== undefined && obj[field] !== null) ? String(obj[field]).replace(/"/g, '&quot;') : '';
                 return `<input type="text" class="rtt-field-input${_t5Mc(obj, field)}" data-t5-field="${field}" data-t5-staridx="${sIdx}" data-t5-orbitidx="${oIdx}" data-t5-satidx="${satIdx}" value="${val}">`;
             }
+            // The mainworld's codes live on mwBase (as the Codes line reads them)
+            function _t5WithMwCodes(obj, isMw) {
+                return (isMw && mwBase && mwBase.tradeCodes) ? { ...obj, tradeCodes: mwBase.tradeCodes } : obj;
+            }
+            function _t5ClimateDisplay(obj) {
+                return (typeof T5_World_Engine !== 'undefined' && T5_World_Engine.getT5ClimateDisplay)
+                    ? T5_World_Engine.getT5ClimateDisplay(obj) : (obj.climateZone || '');
+            }
+            function _t5RotationDisplay(obj) {
+                return (typeof T5_World_Engine !== 'undefined' && T5_World_Engine.getT5RotationDisplay)
+                    ? T5_World_Engine.getT5RotationDisplay(obj) : (obj.rotationState || '');
+            }
             function _t5Array(obj, field, sIdx, oIdx, satIdx) {
                 const val = Array.isArray(obj[field]) ? obj[field].join(' ') : (obj[field] || '');
                 return `<input type="text" class="rtt-field-input${_t5Mc(obj, field)}" data-t5-field="${field}" data-t5-staridx="${sIdx}" data-t5-orbitidx="${oIdx}" data-t5-satidx="${satIdx}" value="${String(val).replace(/"/g, '&quot;')}">`;
@@ -1371,6 +1383,11 @@ function populateEditorAccordions(stateObj) {
                                          ['Gas Giant', 'Large Gas Giant', 'Small Gas Giant', 'Ice Giant'].includes(w.worldType);
                             const isBelt = w.type === 'Planetoid Belt';
                             const isMainworld = w.type === 'Mainworld';
+                            // Climate Zone follows the climate code; gas giants and belts (a belt
+                            // mainworld included) have none. Old saves' stale text is not shown.
+                            const _t5NoClimate = isGG || isBelt || (typeof T5_World_Engine !== 'undefined' &&
+                                T5_World_Engine.isT5GGorBelt && T5_World_Engine.isT5GGorBelt(w));
+                            const _t5ClimateShown = _t5NoClimate ? '' : _t5ClimateDisplay(_t5WithMwCodes(w, isMainworld));
 
                             let uwp = isMainworld ? (mwBase ? mwBase.uwp : (w.uwp || '-')) : (w.uwpSecondary || w.uwp || '-');
                             let typeLabel = w.worldType || w.type;
@@ -1391,7 +1408,7 @@ function populateEditorAccordions(stateObj) {
                             const _t5BodyNAttr = `data-t5-field="name" data-t5-staridx="${starIdx}" data-t5-orbitidx="${oIdx}" data-t5-satidx="-1"`;
 
                             html += `<details ${isMainworld ? 'open' : ''}>`;
-                            html += `<summary ${summaryStyle}><input type="text" class="${_t5BodyNCls}" ${_t5BodyNAttr} value="${_t5BodyNVal}" placeholder="${_t5BodyNPh}" onclick="event.stopPropagation()" style="max-width:160px;"> Orbit ${o.orbit} [${w.climateZone || 'Cold'}] <span class="sys-title-info">${typeLabel}${zoneLabel}</span></summary>`;
+                            html += `<summary ${summaryStyle}><input type="text" class="${_t5BodyNCls}" ${_t5BodyNAttr} value="${_t5BodyNVal}" placeholder="${_t5BodyNPh}" onclick="event.stopPropagation()" style="max-width:160px;"> Orbit ${o.orbit}${_t5ClimateShown ? ` [${_t5ClimateShown}]` : ''} <span class="sys-title-info">${typeLabel}${zoneLabel}</span></summary>`;
                             html += `<div class="system-node">`;
 
                             if (!isGG) {
@@ -1421,13 +1438,13 @@ function populateEditorAccordions(stateObj) {
                             html += `<span>Distance: <strong>${(o.distAU || 0).toFixed(2)} AU</strong></span>`;
                             if (!isGG && !isBelt) {
                                 html += `<span>World Type: ${_t5WorldType(w, starIdx, oIdx, -1)}</span>`;
-                                html += `<span>Climate Zone: ${_t5Text(w, 'climateZone', starIdx, oIdx, -1)}</span>`;
+                                if (!_t5NoClimate) html += `<span>Climate Zone: ${_t5Text({ ...w, climateZone: _t5ClimateShown }, 'climateZone', starIdx, oIdx, -1)}</span>`;
                             }
                             if (w.diamKm) html += `<span>Diameter (km): ${_t5Num(w, 'diamKm', starIdx, oIdx, -1, 0, 200000)}</span>`;
                             if (w.gravity !== undefined) html += `<span>Gravity (G): ${_t5Num(w, 'gravity', starIdx, oIdx, -1, 0, 100)}</span>`;
                             const massField = w.massEarths !== undefined ? 'massEarths' : (w.mass !== undefined ? 'mass' : null);
                             if (massField) html += `<span>Mass (M⊕): ${_t5Num(w, massField, starIdx, oIdx, -1, 0, 100000)}</span>`;
-                            if (!isGG && !isBelt && w.rotationState !== undefined) html += `<span>Rotation: ${_t5Text(w, 'rotationState', starIdx, oIdx, -1)}</span>`;
+                            if (!isGG && !isBelt && w.rotationState !== undefined) html += `<span>Rotation: ${_t5Text({ ...w, rotationState: _t5RotationDisplay(w) }, 'rotationState', starIdx, oIdx, -1)}</span>`;
                             html += `</div>`;
 
                             html += buildJourneyTimesUI(w, star, stateObj.isStellarMaskingActive);
@@ -1494,15 +1511,19 @@ function populateEditorAccordions(stateObj) {
                                     }
 
                                     html += `<div class="system-stats">`;
+                                    // T5 Chart 2C satellite orbit, e.g. "Dee (D)"
+                                    const _t5SatOrbit = (typeof T5_World_Engine !== 'undefined' && T5_World_Engine.getT5SatelliteOrbit)
+                                        ? T5_World_Engine.getT5SatelliteOrbit(sat) : null;
+                                    if (_t5SatOrbit) html += `<span>Orbit: ${_t5SatOrbit.name} (${_t5SatOrbit.letter})</span>`;
                                     if (!isSatGG && !isSatBelt) {
                                         html += `<span>World Type: ${_t5WorldType(sat, starIdx, oIdx, satIdx)}</span>`;
-                                        html += `<span>Climate Zone: ${_t5Text(sat, 'climateZone', starIdx, oIdx, satIdx)}</span>`;
+                                        html += `<span>Climate Zone: ${_t5Text({ ...sat, climateZone: _t5ClimateDisplay(_t5WithMwCodes(sat, isSatMW)) }, 'climateZone', starIdx, oIdx, satIdx)}</span>`;
                                     }
                                     if (sat.diamKm) html += `<span>Diameter (km): ${_t5Num(sat, 'diamKm', starIdx, oIdx, satIdx, 0, 200000)}</span>`;
                                     if (sat.gravity !== undefined) html += `<span>Gravity (G): ${_t5Num(sat, 'gravity', starIdx, oIdx, satIdx, 0, 100)}</span>`;
                                     const satMassField = sat.massEarths !== undefined ? 'massEarths' : (sat.mass !== undefined ? 'mass' : null);
                                     if (satMassField) html += `<span>Mass (M⊕): ${_t5Num(sat, satMassField, starIdx, oIdx, satIdx, 0, 100000)}</span>`;
-                                    if (!isSatGG && !isSatBelt && sat.rotationState !== undefined) html += `<span>Rotation: ${_t5Text(sat, 'rotationState', starIdx, oIdx, satIdx)}</span>`;
+                                    if (!isSatGG && !isSatBelt && sat.rotationState !== undefined) html += `<span>Rotation: ${_t5Text({ ...sat, rotationState: _t5RotationDisplay(sat) }, 'rotationState', starIdx, oIdx, satIdx)}</span>`;
                                     html += `</div>`;
 
                                     html += buildJourneyTimesUI(sat, star, stateObj.isStellarMaskingActive, o.distAU);

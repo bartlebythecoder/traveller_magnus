@@ -1,3 +1,35 @@
+### [v0.18.1.4] - In Progress
+1. **New — White Background images:** the System Sheet, the orrery and regional survey sheets now follow the White Background Mode setting, both in the app and in HTML and Obsidian exports.
+2. **Fixed — White Background world images:** exported world images and downloaded flat maps now have a white background instead of a transparent one when White Background Mode is on.
+3. **New — Subsector names:** right-click any hex and choose **ASSIGN → Name Subsector…** to name its subsector; names are saved with the map, and maps saved before this version load as before with none named.
+4. **New — Show Subsector Names:** a new toggle in Settings → Visual Options draws subsector names along the top of each subsector at mid zoom.
+5. **New — Imported subsector names:** TravellerMap imports bring in each sector's published subsector names when the new *Subsector Names* option is ticked.
+6. **Improved — Subsector names in exports:** HTML and Obsidian subsector pages show the name in their headings, while file names and links stay "Subsector A".
+7. **Fixed — Chunked saves:** maps large enough to save in parts now keep their sector names, route slots, borders and regions when reloaded.
+8. **Fixed — Sector names after a refresh:** loading a map file now updates the autosave, so refreshing the browser no longer brings back the previous map's sector names.
+9. **New — Add Border:** a new **Add Border** button in the Border Manager adds an empty border whenever you want one, so you are no longer limited to five until they are all in use.
+10. **Fixed — T5 Twilight Zone worlds:** planets in Orbit 0 or 1 now carry the Tz code instead of a Tropic, Tundra or Frozen code, matching their "Twilight Zone (Tz)" climate.
+11. **Fixed — T5 locked moons:** a mainworld in a Close orbit around its planet now shows as tidally locked to it instead of "Undefined".
+12. **New — T5 satellite orbits:** every T5 satellite now has an orbit from Book 3's Chart 2C (Close orbits Ay to Em, Far orbits En to Zee), shown as "Orbit: Dee (D)" in the orrery, the hex accordion, the System Sheet and HTML and Obsidian exports.
+13. **Fixed — T5 Far mainworld orbits:** a mainworld in a Far orbit around its planet now gets a Far orbit instead of a Close one.
+14. **New — T5 mainworld parents:** a mainworld that is a satellite now rolls whether it orbits a gas giant or a planet, as Chart 2C's GG? column says.
+15. **New — T5 Close moons:** every other moon is now placed in a Close or Far orbit, and Close moons are tidally locked to their planet and carry Lk.
+16. **Changed — T5 Sa code:** Sa now appears only on a mainworld that is a satellite.
+17. **Changed — T5 generation:** because of these new rolls, a T5 system generated from the same seed now comes out differently; saved maps are not affected.
+18. **Fixed — T5 gas giant count:** the PBG gas giant count now matches the gas giants actually in the system, including the one a mainworld orbits and leaving out any that could not be placed in an orbit.
+19. **Fixed — T5 belt count:** the PBG belt count now matches the planetoid belts actually in the system, including a belt mainworld, instead of coming from a separate roll.
+20. **Fixed — T5 Tropic, Tundra and Frozen codes:** a mainworld now gets Tr, Tu or Fr only when its size, atmosphere and hydrographics meet Book 3's Chart D as well as its orbit, so belts and most other worlds no longer carry them.
+21. **New — T5 Hot and Cold remarks:** a mainworld one orbit inside the habitable zone that does not qualify for Tr now carries Ho, and one orbit outside that does not qualify for Tu carries Co.
+22. **Changed — T5 Climate Zone:** a T5 world's Climate Zone now follows its climate code (Twilight Zone for Tz, Hot / Tropic for Tr or Ho, Cold / Tundra for Tu or Co, Frozen for Fr) and is blank when it has none, so moons no longer all read "Hot / Tropic" and maps saved earlier show the same.
+23. **Fixed — T5 brown dwarfs:** a brown dwarf's habitable zone is now Orbit 0, where the generator had treated it as a B star with its habitable zone at Orbit 9.
+24. **Fixed — T5 gas giants and belts:** gas giants and belts no longer show a Climate Zone in the hex accordion or in HTML and Obsidian exports (including maps saved earlier), and a belt mainworld no longer carries a Tz, Ho or Co code.
+25. **Fixed — T5 repeatable generation:** generating a T5 hex again with the same seed now gives the same system every time, where its planets and moons used to change depending on what else had been generated that session.
+26. **Changed — T5 Rotation:** a tidally locked T5 world's Rotation now reads "Tidally Locked to Star (no day/night cycle)" or "Tidally Locked to Parent (day = orbit length)", including in maps saved earlier, with any hand-typed Rotation kept as typed.
+27. **Fixed — T5 System Editor moon mainworld:** a new moon set as mainworld in the System Editor now rolls Close or Far like any other moon (2D, 7 or less Close), where it was always Far.
+28. **New — T5 climate for every world:** every T5 planet and moon now gets its own Chart D climate code (Tr, Tu, Fr, Ho or Co, with moons using their planet's orbit) and the matching Climate Zone, in newly generated systems and in any system saved again from the System Editor.
+29. **Fixed — T5 System Editor moon order:** a moon set as mainworld in the System Editor now keeps its place in its planet's moon list instead of moving to the end.
+30. **Fixed — T5 moons in the orrery:** T5 moons are now drawn in order of their orbit letter, Ay innermost to Zee outermost with Close moons inside Far ones, where they were drawn in list order and could show a Far moon inside a Close one.
+
 ### [v0.18.1.3] - 2026-10-19
 1. **Improved — one System Sheet per star:** each sheet now shows only the bodies orbiting one star, so a companion's planets no longer appear among the primary's at the wrong distances.
 2. **New — companion star sheets:** a companion with its own bodies is marked on the strip with a body count; click it (or use the star buttons above the sheet) to switch to its sheet, and **Home** returns to the primary.

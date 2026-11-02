@@ -1098,6 +1098,50 @@ function draw() {
         }
     }
 
+    // Subsector names (v0.18.1.4) — a BAND of zoom, not a threshold. Below
+    // 0.12 a subsector is under ~70 px across and a name is a smudge; from 0.3
+    // the hexes carry their own text. Each name sits along its subsector's top
+    // edge, clear of the sector name, which is drawn rotated through the corner
+    // where F, G, J and K meet. A long sector name still crosses row I-L's
+    // labels, and every label sits among world dots, so each one gets a halo
+    // in the background colour. A fixed screen size: shrunk to fit down to
+    // 10 px, then cut with an ellipsis - shrinking further was unreadable.
+    if (showSubsectorNames && zoom >= 0.12 && zoom < 0.3 && window.subsectorNames) {
+        ctx.save();
+        const subW = 8 * widthStep, subH = 10 * heightStep;
+        const fontPx = 13 / zoom, minPx = 10 / zoom;
+        const font = px => `bold ${px}px 'Courier New', Courier, monospace`;
+        ctx.fillStyle = window.printMode ? 'rgba(0,0,0,0.70)' : 'rgba(255,255,255,0.80)';
+        ctx.strokeStyle = window.printMode ? '#ffffff' : '#0b0c10';
+        ctx.lineWidth = 4 / zoom;
+        ctx.lineJoin = 'round';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        for (const [key, name] of Object.entries(window.subsectorNames)) {
+            const [sNumStr, sub] = key.split('-');
+            const sNum = parseInt(sNumStr, 10);
+            const subIdx = sub ? sub.charCodeAt(0) - 65 : -1;
+            if (!(sNum >= 1 && sNum <= gridWidth * gridHeight) || subIdx < 0 || subIdx > 15) continue;
+            const sX = (sNum - 1) % gridWidth, sY = Math.floor((sNum - 1) / gridWidth);
+            const left = ((sX * 4 + subIdx % 4) * 8 - 0.5) * widthStep;
+            const top  = ((sY * 4 + Math.floor(subIdx / 4)) * 10 - 0.5) * heightStep;
+            if (left > viewRight || left + subW < viewLeft || top > viewBottom || top + subH < viewTop) continue;
+            const maxW = subW * 0.9;
+            ctx.font = font(fontPx);
+            let text = name;
+            const w = ctx.measureText(text).width;
+            if (w > maxW) {
+                const px = Math.max(minPx, fontPx * maxW / w);
+                ctx.font = font(px);
+                while (text.length > 1 && ctx.measureText(text).width > maxW) text = text.slice(0, -2) + '…';
+            }
+            const tx = left + subW / 2, ty = top + 6 / zoom;
+            ctx.strokeText(text, tx, ty);
+            ctx.fillText(text, tx, ty);
+        }
+        ctx.restore();
+    }
+
     // =========================================================================
     // FINAL PASS: BORDER NAMES + REGION NAMES (drawn last so they sit above all other content)
     // =========================================================================

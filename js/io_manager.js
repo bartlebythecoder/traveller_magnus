@@ -137,6 +137,9 @@ function setupSaveLoad() {
             aesthetics,
             settings,
             sectorNames:          window.sectorNames || {},
+            // Always written, even empty, so a file says what it holds. Files
+            // from before v0.18.1.4 lack it and load with none named.
+            subsectorNames:       window.subsectorNames || {},
             hexStates:            hexObj,
             borderDefinitions:       window.borderDefinitions || [],
             hexBorderAssignments:    Array.from((window.hexBorderAssignments || new Map()).entries()),
@@ -200,17 +203,13 @@ function setupSaveLoad() {
                         gridHeight,
                         hexStates:  chunkEntries   // array of [hexId, state] pairs
                     };
-                    // Routes, aesthetics, settings, and border/region state travel with Part 1 only
+                    // Everything except the hexes travels with Part 1 only - taken
+                    // from stateObj itself, so Part 1 cannot fall behind the single
+                    // file again. A hand-kept field list here silently dropped sector
+                    // names and route slots from every chunked save (v0.18.1.4).
                     if (i === 0) {
-                        chunkObj.routes               = window.sectorRoutes || [];
-                        chunkObj.rules                = window.activeFilterRules || [];
-                        chunkObj.aesthetics           = aesthetics;
-                        chunkObj.settings             = settings;
-                        chunkObj.borderDefinitions       = window.borderDefinitions || [];
-                        chunkObj.hexBorderAssignments    = Array.from((window.hexBorderAssignments || new Map()).entries());
-                        chunkObj.borderPaths             = Array.from((window.borderPaths || new Map()).entries());
-                        chunkObj.regionDefinitions       = window.regionDefinitions || [];
-                        chunkObj.regionPaths             = Array.from((window.regionPaths || new Map()).entries());
+                        const { hexStates: _hexes, ...mapLevel } = stateObj;
+                        Object.assign(chunkObj, mapLevel);
                     }
 
                     const ok = triggerDownload(
@@ -316,15 +315,18 @@ function setupSaveLoad() {
                     }
                 }
 
-                // Build a unified data object using metadata from Part 1
+                // Build a unified data object from EVERYTHING in Part 1 except the
+                // chunk bookkeeping. A hand-kept field list here dropped borders and
+                // regions that Part 1 did carry (v0.18.1.4). Whatever an older Part 1
+                // lacks is left absent, and applyLoadedMapData defaults it exactly
+                // as it does for a single file.
+                const { saveType: _st, part: _p, totalParts: _tp, hexStates: _hs, ...mapLevel } = parts[0];
                 const merged = {
-                    version:    parts[0].version,
-                    gridWidth:  parts[0].gridWidth,
-                    gridHeight: parts[0].gridHeight,
-                    routes:     parts[0].routes     || [],
-                    rules:      parts[0].rules       || [],
-                    aesthetics: parts[0].aesthetics  || {},
-                    settings:   parts[0].settings   || {},
+                    ...mapLevel,
+                    routes:     mapLevel.routes     || [],
+                    rules:      mapLevel.rules      || [],
+                    aesthetics: mapLevel.aesthetics || {},
+                    settings:   mapLevel.settings   || {},
                     hexStates:  mergedHexStates
                 };
 
@@ -394,6 +396,7 @@ async function clearCanvas() {
     // Clear all in-memory state
     hexStates.clear();
     window.sectorNames        = {};
+    window.subsectorNames     = {};
     window.sectorRoutes      = [];
     window.routeDefinitions  = (typeof getDefaultRouteDefinitions === 'function') ? getDefaultRouteDefinitions() : [];
     window.undoStack         = [];
@@ -640,6 +643,10 @@ function applyLoadedMapData(parsedData) {
     saveHistoryState('Load Map JSON', { includeRouteDefinitions: true });
     hexStates.clear();
 
+    // Outside the hexStates branch below: the flat legacy format carries no
+    // names either, and must not inherit the previous map's.
+    window.subsectorNames = normalizeSubsectorNames(parsedData.subsectorNames);
+
     if (parsedData.hexStates) {
         if (typeof tSection === 'function') tSection("JSON Import: Analyzing Map Manifest");
 
@@ -808,6 +815,9 @@ function applyLoadedMapData(parsedData) {
         window.dbManager.syncAllHexes();
         window.dbManager.saveRoutes();
         window.dbManager.saveGridDimensions();
+        // Without these a refresh restored the PREVIOUS map's names (v0.18.1.4).
+        window.dbManager.saveSectorNames();
+        window.dbManager.saveSubsectorNames();
         window.dbManager.saveBorderDefinitions?.();
         window.dbManager.saveBorderAssignments?.();
         window.dbManager.saveBorderPaths?.();

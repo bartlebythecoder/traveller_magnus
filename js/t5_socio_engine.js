@@ -19,7 +19,8 @@
     const { toEHex, rollFlux } = UniversalMath;
 
     // Safe Fallback Utilities
-    const _rng = (typeof rng === 'function') ? rng : Math.random;
+    // Read rng at each call: reseedForHex replaces it, so a copy taken at load never re-seeds.
+    const _rng = () => (typeof rng === 'function') ? rng() : Math.random();
     const _roll1D = (typeof tRoll1D === 'function') ? tRoll1D : (label) => Math.floor(_rng() * 6) + 1;
     const _roll2D = (typeof tRoll2D === 'function') ? tRoll2D : (label) => Math.floor(_rng() * 6) + 1 + Math.floor(_rng() * 6) + 1;
     const _log = (typeof writeLogLine === 'function') ? writeLogLine : console.log;

@@ -59,7 +59,12 @@ const SystemSheet = (function () {
     const SCALE_DEFAULT = 2;          // 3440 x 1756 — the mockup's resolution
     const M = 20;                     // outer margin
 
-    const THEME = {
+    // WHITE BACKGROUND (v0.18.1.4). The in-app sheet and the exported sheets
+    // both follow the White Background setting, but render() itself is dark
+    // unless the caller passes `light: true`. THEME, BAND_COLOR and TZ_COLOR are swapped
+    // for the length of one render() and always put back, and every dark value
+    // below is the literal it replaced - the dark sheet must not move a pixel.
+    const THEME_DARK = {
         sheet:   '#07090e',
         panel:   '#0b1017',
         panelHi: '#0e141d',
@@ -69,12 +74,44 @@ const SystemSheet = (function () {
         faint:   '#4a5665',
         gold:    '#d9a441',
         green:   '#4caf6e',
+        alert:   '#e05545',
+        strip:   '#05070b',                  // orbit strip panel, and the moon glyph's cut-out
+        axis:    'rgba(120,150,190,0.16)',
+        seat:    '120,150,190',              // rgb of the lift under each disc
+        mwHalo:  'rgba(76,175,110,0.16)',
+        mwRow:   'rgba(76,175,110,0.10)',
+        belt:    '190,180,165',              // rgb of belt particles
+        starfield: true,
+        starCore:  null,                     // null: white-cored glow
     };
+    const THEME_LIGHT = {
+        sheet:   '#ffffff',
+        panel:   '#f6f8fb',
+        panelHi: '#eef2f7',
+        rule:    '#c9d2dd',
+        ink:     '#1a1f27',
+        dim:     '#4a5568',
+        faint:   '#7a8696',
+        gold:    '#9a6b10',
+        green:   '#2e7d4a',
+        alert:   '#c0392b',
+        strip:   '#f1f4f8',
+        axis:    'rgba(60,80,110,0.25)',
+        seat:    '60,80,110',
+        mwHalo:  'rgba(46,125,74,0.20)',
+        mwRow:   'rgba(46,125,74,0.10)',
+        belt:    '110,95,75',
+        starfield: false,
+        // A white core vanishes on white; the orrery's light-mode star colours.
+        starCore: { O: '#3a5cc2', B: '#5070cc', A: '#6080b8', F: '#b88a00',
+                    G: '#c86800', K: '#c04800', M: '#b82800', D: '#6070a0' },
+    };
+    let THEME = THEME_DARK;
 
     // ONE semantic colour set, reused in three places — the legend, the table's
     // left gutter and the Band column. That reuse is what makes the sheet read
     // as systematic rather than decorated.
-    const BAND_COLOR = {
+    const BAND_COLOR_DARK = {
         Frozen:    '#7fb9e6',
         Cold:      '#4a90d9',
         Cool:      '#3fc0c8',
@@ -82,6 +119,16 @@ const SystemSheet = (function () {
         Warm:      '#e8973f',
         Hot:       '#e05545',
     };
+    // Same hues, darkened until each reads as text on white.
+    const BAND_COLOR_LIGHT = {
+        Frozen:    '#3a7fb5',
+        Cold:      '#1f5fa8',
+        Cool:      '#14848c',
+        Temperate: '#2e7d4a',
+        Warm:      '#b8641a',
+        Hot:       '#c0392b',
+    };
+    let BAND_COLOR = BAND_COLOR_DARK;
     const BAND_RANGE = {
         Frozen: '<230 K', Cold: '230–265 K', Cool: '265–290 K',
         Temperate: '290–330 K', Warm: '330–360 K', Hot: '360+ K',
@@ -133,7 +180,9 @@ const SystemSheet = (function () {
     // editor's _normTz): Red and Amber are stated; anything else recorded -
     // 'G', 'Green', MgT2E's legacy '-', or absent on a body - is Green. Only a
     // zone the normaliser flagged INVENTED (CT, which records none) is null.
-    const TZ_COLOR = { Red: '#e05545', Amber: '#e8a13a' };
+    const TZ_COLOR_DARK  = { Red: '#e05545', Amber: '#e8a13a' };
+    const TZ_COLOR_LIGHT = { Red: '#c0392b', Amber: '#b36b00' };
+    let TZ_COLOR = TZ_COLOR_DARK;
     function travelZoneOf(w) {
         if (!w || (w.travelZone === null && 'travelZone' in w)) return null;
         const z = String(w.travelZone || '');
@@ -547,7 +596,7 @@ const SystemSheet = (function () {
             const px = cx + Math.cos(a) * r;
             const py = cy + Math.sin(a) * r * 0.42;       // flattened — seen near edge-on
             const d = 0.5 + rnd() * 1.2;
-            ctx.fillStyle = `rgba(190,180,165,${0.25 + rnd() * 0.55})`;
+            ctx.fillStyle = `rgba(${THEME.belt},${0.25 + rnd() * 0.55})`;
             ctx.beginPath();
             ctx.arc(px, py, d, 0, Math.PI * 2);
             ctx.fill();
@@ -558,10 +607,18 @@ const SystemSheet = (function () {
         const tint = { O: '#9db8ff', B: '#bcd0ff', A: '#eaf0ff', F: '#fff6e8',
                        G: '#ffe9a8', K: '#ffc06a', M: '#ff8a52' }[String(sType || 'G')[0]] || '#ffd98a';
         const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-        g.addColorStop(0,    '#ffffff');
-        g.addColorStop(0.35, tint);
-        g.addColorStop(0.62, tint);
-        g.addColorStop(1,    'rgba(0,0,0,0)');
+        if (THEME.starCore) {
+            const core = THEME.starCore[String(sType || 'G')[0]] || THEME.starCore.G;
+            g.addColorStop(0,    core);
+            g.addColorStop(0.35, core);
+            g.addColorStop(0.62, tint);
+            g.addColorStop(1,    'rgba(255,255,255,0)');
+        } else {
+            g.addColorStop(0,    '#ffffff');
+            g.addColorStop(0.35, tint);
+            g.addColorStop(0.62, tint);
+            g.addColorStop(1,    'rgba(0,0,0,0)');
+        }
         ctx.fillStyle = g;
         ctx.beginPath();
         ctx.arc(cx, cy, r, 0, Math.PI * 2);
@@ -573,6 +630,7 @@ const SystemSheet = (function () {
     function drawBackdrop(ctx, seedStr) {
         ctx.fillStyle = THEME.sheet;
         ctx.fillRect(0, 0, W, H);
+        if (!THEME.starfield) return;
         let s = 2166136261;
         for (let i = 0; i < String(seedStr).length; i++) s = ((s ^ String(seedStr).charCodeAt(i)) * 16777619) >>> 0;
         const rnd = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
@@ -615,7 +673,22 @@ const SystemSheet = (function () {
         return (nsys.worlds || []).filter(w => w && w.type !== 'Empty').map(clean);
     }
 
+    // `opts.light` draws the white-background sheet. open() and
+    // ExportCore.renderSystemSheet both pass the White Background setting;
+    // a caller that omits it gets the dark sheet.
     function render(state, hexId, opts) {
+        const light = !!(opts && opts.light);
+        THEME      = light ? THEME_LIGHT      : THEME_DARK;
+        BAND_COLOR = light ? BAND_COLOR_LIGHT : BAND_COLOR_DARK;
+        TZ_COLOR   = light ? TZ_COLOR_LIGHT   : TZ_COLOR_DARK;
+        try {
+            return _renderSheet(state, hexId, opts);
+        } finally {
+            THEME = THEME_DARK; BAND_COLOR = BAND_COLOR_DARK; TZ_COLOR = TZ_COLOR_DARK;
+        }
+    }
+
+    function _renderSheet(state, hexId, opts) {
         const o = opts || {};
         const scale = o.scale || SCALE_DEFAULT;
 
@@ -1104,7 +1177,7 @@ const SystemSheet = (function () {
         // represented by ringing its PARENT. Interim: moons proper are their
         // own design job and will supersede this.
         const ringed = mwParent || mw;
-        panel(ctx, x, y, w, h, null, { fill: '#05070b' });
+        panel(ctx, x, y, w, h, null, { fill: THEME.strip });
 
         if (note) {
             ctx.font = '600 11px ' + SANS;
@@ -1149,7 +1222,7 @@ const SystemSheet = (function () {
         if (n === 1 && items[0].kind === 'body') sizes = [Math.min(HERO_MAX, natural[0] * 2)];
 
         // The axis, behind the bodies.
-        ctx.strokeStyle = 'rgba(120,150,190,0.16)';
+        ctx.strokeStyle = THEME.axis;
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(x + pad - 18, baseY);
@@ -1312,8 +1385,8 @@ const SystemSheet = (function () {
                 // is a faint lift, not a glow: enough to separate a dark limb
                 // from the background without lighting it from behind.
                 const seat = ctx.createRadialGradient(cx, baseY, size * 0.40, cx, baseY, size * 0.78);
-                seat.addColorStop(0, 'rgba(120,150,190,0.13)');
-                seat.addColorStop(1, 'rgba(120,150,190,0)');
+                seat.addColorStop(0, `rgba(${THEME.seat},0.13)`);
+                seat.addColorStop(1, `rgba(${THEME.seat},0)`);
                 ctx.fillStyle = seat;
                 ctx.beginPath(); ctx.arc(cx, baseY, size * 0.78, 0, Math.PI * 2); ctx.fill();
 
@@ -1323,7 +1396,7 @@ const SystemSheet = (function () {
                 // closely as a large one.
                 if (isMW) {
                     const rr = size / 2 + Math.max(4, size * 0.085);
-                    ctx.strokeStyle = 'rgba(76,175,110,0.16)';
+                    ctx.strokeStyle = THEME.mwHalo;
                     ctx.lineWidth = 3.5;
                     ctx.beginPath(); ctx.arc(cx, baseY, rr, 0, Math.PI * 2); ctx.stroke();
                     ctx.strokeStyle = THEME.green;
@@ -1355,7 +1428,7 @@ const SystemSheet = (function () {
                 ctx.beginPath();
                 ctx.arc(gx + 4, gy - 3, 3.6, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.fillStyle = '#05070b';
+                ctx.fillStyle = THEME.strip;
                 ctx.beginPath();
                 ctx.arc(gx + 6.2, gy - 4.2, 3.2, 0, Math.PI * 2);
                 ctx.fill();
@@ -1453,7 +1526,8 @@ const SystemSheet = (function () {
         const orb = mwParent || mw;
         if (mwParent) {
             lines.push(`A moon of ${mwParent.name || 'its primary'}`
-                + (mw.pd != null ? `, ${num(mw.pd, 1)} planetary diameters out` : ''));
+                + (mw.pd != null ? `, ${num(mw.pd, 1)} planetary diameters out` : '')
+                + (mw.satelliteOrbit ? `, in orbit ${mw.satelliteOrbit.name} (${mw.satelliteOrbit.letter})` : ''));
         }
         if (orb.au != null && orb.periodYears != null)
             lines.push(`${mwParent ? 'That world orbits' : 'Orbits'} at ${num(orb.au, 2)} AU`
@@ -1500,7 +1574,7 @@ const SystemSheet = (function () {
         // without saying that it did.
         if (shownLines < lines.length) {
             ctx.font = 'italic 10px ' + SANS;
-            ctx.fillStyle = '#e05545';
+            ctx.fillStyle = THEME.alert;
             ctx.textAlign = 'left';
             ctx.fillText((lines.length - shownLines) + ' more not shown', x + 18, y + h - 8);
         }
@@ -1650,7 +1724,7 @@ const SystemSheet = (function () {
                 if (ri >= fit) { dropped++; return; }
 
                 if (isMW) {
-                    ctx.fillStyle = 'rgba(76,175,110,0.10)';
+                    ctx.fillStyle = THEME.mwRow;
                     ctx.fillRect(bx - 6, rowY - Math.min(19, rowH - 3), blockW + 12, rowH - 4);
                 }
 
@@ -1677,7 +1751,7 @@ const SystemSheet = (function () {
         }
         if (dropped > 0) {
             ctx.font = '600 12px ' + SANS;
-            ctx.fillStyle = '#e05545';
+            ctx.fillStyle = THEME.alert;
             ctx.textAlign = 'left';
             ctx.fillText('⚠ ' + dropped + ' further '
                 + (dropped === 1 ? 'body' : 'bodies')
@@ -1707,6 +1781,8 @@ const SystemSheet = (function () {
         if (mwParent) {
             rows.push(['Orbits', mwParent.name || 'its primary']);
             if (mw.pd != null) rows.push(['Distance from Primary', `${num(mw.pd, 1)} planetary diameters`]);
+            // T5 Chart 2C satellite orbit
+            if (mw.satelliteOrbit) rows.push(['Satellite Orbit', `${mw.satelliteOrbit.name} (${mw.satelliteOrbit.letter})`]);
         }
         rows.push(
             [mwParent ? 'Primary’s Orbital Distance' : 'Orbital Distance',
@@ -1752,7 +1828,7 @@ const SystemSheet = (function () {
         }
         if (shown < rows.length) {
             ctx.font = 'italic 10px ' + SANS;
-            ctx.fillStyle = '#e05545';
+            ctx.fillStyle = THEME.alert;
             ctx.textAlign = 'left';
             ctx.fillText((rows.length - shown) + ' more not shown', tx, y + h - 6);
         }
@@ -1813,9 +1889,13 @@ const SystemSheet = (function () {
         const showing = sorted.slice(0, sorted.length > capacity ? capacity - 1 : capacity);
 
         const cName = x + 30, cUwp = x + w - 150, cDiam = x + w - 18;
+        // T5 Chart 2C orbit column, only when some satellite here has one
+        const cOrbit = showing.some(m => m.satelliteOrbit) ? cUwp - 64 : null;
+        const nameEnd = cOrbit != null ? cOrbit : cUwp;
         ctx.font = '600 10px ' + SANS;
         ctx.fillStyle = THEME.faint;
         ctx.textAlign = 'left';  ctx.fillText('NAME', cName, ry - 4);
+        if (cOrbit != null) ctx.fillText('ORBIT', cOrbit, ry - 4);
         ctx.fillText('UWP', cUwp, ry - 4);
         ctx.textAlign = 'right'; ctx.fillText('DIAM (KM)', cDiam, ry - 4);
         ctx.textAlign = 'left';
@@ -1832,7 +1912,12 @@ const SystemSheet = (function () {
             ctx.fillStyle = isMW ? THEME.green : THEME.ink;
             ctx.textAlign = 'left';
             ctx.fillText(truncate(ctx, (isMW ? '★ ' : '') + stripSystemName(m.name, sysName)
-                                      || 'Satellite', cUwp - cName - 8), cName, ry);
+                                      || 'Satellite', nameEnd - cName - 8), cName, ry);
+            if (cOrbit != null) {
+                ctx.font = '11px ' + SANS;
+                ctx.fillStyle = THEME.dim;
+                ctx.fillText(truncate(ctx, m.satelliteOrbit ? `${m.satelliteOrbit.name} (${m.satelliteOrbit.letter})` : '—', cUwp - cOrbit - 6), cOrbit, ry);
+            }
             ctx.font = '10px ' + MONO;
             ctx.fillStyle = THEME.dim;
             ctx.fillText(truncate(ctx, m.uwp || '—', 110), cUwp, ry);
@@ -1957,7 +2042,10 @@ const SystemSheet = (function () {
     function open(state, hexId, opts) {
         const views = starViews(state);
         let focus = 0;
-        const draw = () => render(state, hexId, Object.assign({}, opts || {}, { star: focus }));
+        // Read once, as the orrery does: every star's sheet in this pop-up
+        // matches, even if the setting changes while it is open.
+        const light = !!window.printMode;
+        const draw = () => render(state, hexId, Object.assign({ light }, opts || {}, { star: focus }));
         let canvas = draw();
         if (!canvas) {
             if (typeof showToast === 'function') showToast('No system data to chart on this hex.', 3000);
@@ -2094,7 +2182,7 @@ const SystemSheet = (function () {
         if (e.key === 'Escape' && isOpen()) { e.stopPropagation(); close(); }
     });
 
-    return { render, download, open, close, isOpen, starViews, resolveSystemName, tableLayout, displayBodies, bandOf, W, H, THEME, BAND_COLOR, discSize, truncate, wrap };
+    return { render, download, open, close, isOpen, starViews, resolveSystemName, tableLayout, displayBodies, bandOf, W, H, THEME: THEME_DARK, BAND_COLOR: BAND_COLOR_DARK, discSize, truncate, wrap };
 })();
 
 window.SystemSheet = SystemSheet;

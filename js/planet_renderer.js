@@ -1247,7 +1247,6 @@ const PlanetRenderer = (() => {
 
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        if (window.printMode) { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
 
         // Local seeded RNGs — never touch the global rng.
         const ms        = (typeof masterSeed !== 'undefined') ? masterSeed : 'default';
@@ -1311,6 +1310,21 @@ const PlanetRenderer = (() => {
         ctx.textAlign = 'center';
         ctx.fillText('Western', lcx, H - 3);
         ctx.fillText('Eastern', rcx, H - 3);
+        _whiteBehind(ctx, W, H);
+    }
+
+    // White Background: paint white UNDER the finished image. A fill before
+    // drawing does not survive - putImageData replaces every pixel, writing
+    // alpha 0 around the disks - so the image looked white on screen (the page
+    // behind it was white) but exported transparent. Dark mode stays
+    // transparent, as it always has been.
+    function _whiteBehind(ctx, W, H) {
+        if (!window.printMode) return;
+        ctx.save();
+        ctx.globalCompositeOperation = 'destination-over';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, W, H);
+        ctx.restore();
     }
 
     // ── Flat map entry point ──────────────────────────────────────────────────
@@ -1329,7 +1343,6 @@ const PlanetRenderer = (() => {
 
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, W, H);
-        if (window.printMode) { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H); }
 
         // Same seed chain as renderPlanetHemispheres — guarantees terrain match.
         const ms         = (typeof masterSeed !== 'undefined') ? masterSeed : 'default';
@@ -1379,6 +1392,7 @@ const PlanetRenderer = (() => {
             }
             _drawLobeSeparators(ctx, W, H, numLobes);
         }
+        _whiteBehind(ctx, W, H);
     }
 
     // ── Test helpers ──────────────────────────────────────────────────────────

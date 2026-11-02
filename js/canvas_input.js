@@ -42,12 +42,14 @@ function setupCanvasEvents() {
             document.getElementById('ctx-select-hex').style.display = 'block';
             document.getElementById('ctx-select-sector').style.display = 'block';
             document.getElementById('ctx-select-subsector').style.display = 'block';
+            document.getElementById('ctx-name-subsector').style.display = 'block';
         } else {
             // Hide selection options if clicking empty space
             contextHexId = null;
             document.getElementById('ctx-select-hex').style.display = 'none';
             document.getElementById('ctx-select-sector').style.display = 'none';
             document.getElementById('ctx-select-subsector').style.display = 'none';
+            document.getElementById('ctx-name-subsector').style.display = 'none';
         }
 
         const contextMenu = document.getElementById('context-menu');

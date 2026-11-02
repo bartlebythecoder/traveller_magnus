@@ -670,15 +670,16 @@ ${extraJs || ''}
         return { html: `<figure class="map">${parts.join('')}</figure>`, hits };
     }
 
-    function _buildSubsectorIndex(sectorName, subsectorChar, systems, mapImage, mapCap) {
+    function _buildSubsectorIndex(sectorName, sectorNum, subsectorChar, systems, mapImage, mapCap) {
+        const label = EC.subsectorLabel(sectorNum, subsectorChar);
         const H = [];
         H.push('<nav class="crumbs">',
             _a(linkSector(), 'subsector', sectorName),
-            `<span>›</span><strong>Subsector ${_esc(subsectorChar)}</strong>`,
+            `<span>›</span><strong>${_esc(label)}</strong>`,
             '<button id="theme-toggle" type="button" title="Toggle light/dark">◐</button>',
             '</nav>');
         H.push('<header class="page">');
-        H.push(`<h1>${_esc(sectorName)} — Subsector ${_esc(subsectorChar)}</h1>`);
+        H.push(`<h1>${_esc(sectorName)} — ${_esc(label)}</h1>`);
         H.push(`<p class="dim">${systems.length} system${systems.length === 1 ? '' : 's'}</p>`);
         H.push('</header>');
 
@@ -773,7 +774,7 @@ ${extraJs || ''}
         }
         H.push('</tbody></table></div></section>');
 
-        return _shell(`${sectorName} — Subsector ${subsectorChar}`, '../style.css',
+        return _shell(`${sectorName} — ${label}`, '../style.css',
             { sector: sectorName, subsector: subsectorChar }, H.join('\n'), TABLE_JS);
     }
 
@@ -796,7 +797,7 @@ ${extraJs || ''}
         H.push('<div class="tw"><table><thead><tr><th>Subsector</th><th>Systems</th></tr></thead><tbody>');
         for (const s of presentSubs) {
             H.push('<tr>' +
-                `<td>${_a(linkSubsector(s.char), 'sector', 'Subsector ' + s.char)}</td>` +
+                `<td>${_a(linkSubsector(s.char), 'sector', EC.subsectorLabel(sectorNum, s.char))}</td>` +
                 `<td>${s.count}</td></tr>`);
         }
         H.push('</tbody></table></div>');
@@ -1011,7 +1012,7 @@ tbody tr:nth-child(even) { background:var(--panel);
         }
 
         put(`${sub}/index.html`,
-            _buildSubsectorIndex(sectorName, subsectorChar, systems, mapImage, mapCap));
+            _buildSubsectorIndex(sectorName, sectorNum, subsectorChar, systems, mapImage, mapCap));
 
         for (let si = 0; si < systems.length; si++) {
             const { hexId, hexCode, state } = systems[si];

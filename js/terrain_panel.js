@@ -65,6 +65,10 @@ const TerrainPanel = (() => {
         }
 
         const ms = (typeof masterSeed !== 'undefined') ? masterSeed : 'default';
+        // The sheet's frame follows White Background, read once at open() as
+        // the orrery does, so one panel never mixes the two.
+        const light = !!window.printMode;
+        const sheetTheme = light ? TerrainFrame.THEME_LIGHT : TerrainFrame.THEME;
         const bodyName = TerrainPins.bodyNameOf(worldData.name);
         // Per-world parameters and the field context both come from
         // TerrainFrame.sheetSetup(), which the exporters call too — so an
@@ -608,7 +612,7 @@ const TerrainPanel = (() => {
             g.beginPath();
             g.rect(r.x, r.y, r.w, r.h);
             g.clip();
-            g.fillStyle = TerrainFrame.THEME.sheet;
+            g.fillStyle = sheetTheme.sheet;
             g.fillRect(r.x, r.y, r.w, r.h);
             g.translate(r.x, r.y);
             g.imageSmoothingEnabled = true;
@@ -677,6 +681,7 @@ const TerrainPanel = (() => {
                     office: (window.sectorName || 'Sector') + ' Survey Office',
                     surveyId: TerrainFrame.surveyId(hexLabel, bodyName, r.lat, r.lon, r.widthKm),
                     date: new Date().toISOString().slice(0, 10),
+                    light,
                 });
             } else {
                 // Quick pass (or frame off): keep the sheet's footprint so the

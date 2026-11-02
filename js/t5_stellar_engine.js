@@ -26,7 +26,8 @@
     const T5_COMPANION_AU = 0.05;
 
     // Safe Fallback Utilities
-    const _rng = (typeof rng === 'function') ? rng : Math.random;
+    // Read rng at each call: reseedForHex replaces it, so a copy taken at load never re-seeds.
+    const _rng = () => (typeof rng === 'function') ? rng() : Math.random();
     const _roll1D = (typeof tRoll1D === 'function') ? tRoll1D : (label) => Math.floor(_rng() * 6) + 1;
     const _roll2D = (typeof tRoll2D === 'function') ? tRoll2D : (label) => Math.floor(_rng() * 6) + 1 + Math.floor(_rng() * 6) + 1;
     const _log = (typeof writeLogLine === 'function') ? writeLogLine : console.log;
@@ -282,7 +283,7 @@
         let hz = typeMap[star.size];
         if (hz === undefined) {
             _log(`[ERROR] Invalid Star: ${star.type}${star.size} has no HZ defined. Defaulting to Size V.`);
-            hz = typeMap['V'] || 3;
+            hz = typeMap['V'] ?? 3;   // ?? — an HZ of Orbit 0 is real, not missing
         }
         return Math.max(0, Math.min(19, hz));
     }

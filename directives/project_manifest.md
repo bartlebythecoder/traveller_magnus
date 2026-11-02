@@ -30,28 +30,27 @@ in this document, not a neutral act.
 **So: an item still written down here is an item still live.**
 
 ---
-**Version:** **v0.18.1.1 is RELEASED — dated 2026-09-25** (opened 2026-09-24). `APP_VERSION` is already
-`v0.18.1.1`; splash banner "New: System Images". Its subject is **IMAGE EXPORTS** (Sean,
-2026-09-21) — **moved here from v0.18.1 by Sean on 2026-09-24**, when v0.18.1 was closed and
-dated with its other three items (moon survey export fix, river code removal, round-trip route
-order). This release delivers the **SYSTEM SHEET**: **part 1, the in-app pop-up with a PNG download, is
-built, verified and accepted** by Sean's gallery review (2026-09-24). **Part 2 — the sheet in the
-HTML and Obsidian exporters, as JPEG — is BUILT and verified by exporting** (2026-09-25; Sean
-moved it here from v0.18.2 on 2026-09-24). Nothing is left to ship — see §0.0.C.
-"World on a page" is undesigned and is not part of v0.18.1.1.
-Earlier: v0.18.1 (2026-09-24) fixes and route order; v0.18.0 (2026-09-20) regional terrain;
+**Version:** **v0.18.1.4 is BUILT, NOT YET DATED** (updated 2026-11-02). `APP_VERSION` is already
+`v0.18.1.4`; its changelog entry ("In Progress") holds items 1–27 in `changelog.md` and
+`README.md`. Items 1–9 are white-background images, subsector names, two save fixes and Add
+Border; **items 10–27 are the T5 satellite/climate work in §0.0.D** (24 = gas giants/belts have
+no climate, 25 = T5 repeatable generation, 26 = T5 Rotation text, 27 = editor moon-mainworld
+Close/Far), which also holds the outstanding checklist. Earlier: v0.18.1.3 (2026-10-19) one System Sheet per star, orrery GIFs,
+neighbourhood import; v0.18.1.2 (2026-10-01) sheet/orrery/both export choice; v0.18.1.1
+(2026-09-25) the System Sheet; v0.18.1 (2026-09-24); v0.18.0 (2026-09-20) regional terrain;
 v0.17.2–v0.17.5 (08-19 → 09-11) routes; v0.17.0 / v0.17.0.1 (08-03 / 08-04) exports.
 **Architecture Standard:** The "Sean Protocol" (Directives -> Orchestration -> Execution)
 
 ---
 
-## 0.0 COLD START — read this first (updated 2026-09-25)
+## 0.0 COLD START — read this first (updated 2026-11-02)
 
 **IF YOU ARE STARTING FRESH, READ IN THIS ORDER:**
 
-1. **§0.0.C below** — the handoff: exactly where v0.18.1.1 stands and the steps left to ship it.
-2. **`directives/system_sheet_spec.md`** — **the authority for the system sheet, as built**: the
-   four shapes of hex, R1–R8, the sixteen further rulings, the harnesses, acceptance.
+1. **§0.0.D below** — the handoff: where v0.18.1.4 stands, **the next steps**, and
+   Sean's T5 rulings from 2026-10-24 → 11-01.
+2. **§0.0.C / `directives/system_sheet_spec.md`** — before touching the System Sheet or the
+   exporters' system images.
 3. **§0.0.B** — the design rulings and traps behind the sheet that still bind.
 4. **§0.0.A / `directives/terrain_spec.md`** before touching anything that draws a world.
 
@@ -78,10 +77,243 @@ with measured numbers, give ONE recommendation, ask with the question tool, buil
    himself. **Do not record commit hashes or the commit position in this document.** If you
    need to know what is committed, ask him.
 
-### 0.0.C HANDOFF — updated 2026-09-25. START HERE.
+### 0.0.D HANDOFF — v0.18.1.4, updated 2026-11-02 (end of session). START HERE.
 
-**v0.18.1.1 IS FINISHED IN CODE — both halves.** Nothing is half-finished and nothing is
-waiting on a ruling.
+**v0.18.1.4 is built and verified, not yet dated.** Every change is built, documented
+(changelog/README items 1–30, identical copies) and passes the harness (49/49). Nothing is
+half-written in the code. Sean commits; **ask him what is committed** rather than assuming — at
+the 2026-11-02 context clear, items 10–30 had never been confirmed committed. The T5 work was
+settled one ruling at a time with Sean (2026-10-24 → 2026-11-02) — the rulings below are
+**decided; do not re-derive or re-litigate them.**
+
+#### NEXT STEPS — the outstanding checklist (2026-11-02)
+
+Ask Sean which to take first, **one question at a time**. Nothing here may be guessed from
+training data (CLAUDE.md, Zero-Assumption Policy).
+
+**In progress — pick up here**
+
+10. [ ] **Subsector export: some hexes get world images and some don't** (Sean, 2026-11-02).
+    INVESTIGATING, no code changed. The world-image gate is in `html_exporter.js` (~line 1074,
+    worlds; ~1101, moons) and the same in `obsidian_exporter.js` (~699/738):
+    `includeImages && _show(oLV,'e') && EC.canRenderImage(w) && !(skipAirless && EC.isAirless(w))`,
+    and a hex whose `SystemViewer.normalizeSystem(state)` is null gets a "No system data
+    generated" page with no images at all. Measured so far (scratchpad diagnostic, every
+    SYSTEM_PRESENT hex run through those gates):
+    * **`sectors/solo_6.json`:** 3,119 hexes are UWP-only (imported mainworld, never generated)
+      → normaliser null → **no images**; 438 generated MgT2E hexes do get images, **94 of them
+      have only airless worlds**. No subsector in solo_6 mixes UWP-only and generated hexes, so
+      the UWP-only cause can't explain "some hexes" within one subsector of that map.
+    * **"Skip airless worlds" is TICKED by default** (`hex_map.html` ~2021, `#obs-skip-airless`),
+      so with defaults an all-airless hex gets no world image — the leading suspect.
+    * Export fixture (`.tmp/html_export_harness/fixture_sector.json`): RTT 3 hexes and AoW 3
+      hexes end with no renderable world; AoW has 96 bodies with no `uwp` (gas giants seen so far).
+    * **Next:** finish the real-export check — export the solo_6 subsector with the most
+      all-airless hexes with skip-airless ON and OFF and list the system pages with no `<img>`.
+      Read the ZIP in Node with `.tmp/html_export_harness/zipread.js` (`readZip`) — the app's
+      ZIP is its own stored-format writer, **JSZip is not on the page**. The half-built script is
+      `export_subsector_images.js` in the 2026-11-02 session scratchpad (may be gone; it loads the
+      map into `hexStates`, stubs `window.downloadBlob`, calls `HtmlExporter.startExport(sector,
+      sub, { includeImages:true, imageProjection:'globe', skipAirless, systemImages:'none' })`).
+    * **Then ask Sean** (one question at a time): which map/subsector/exporter he saw it in;
+      whether the hexes missing images are the airless ones; and whether UWP-only hexes should
+      get a mainworld image from the UWP alone (a design decision — don't build it unasked).
+
+**Waiting on Sean**
+
+11. [ ] **User request: edit mainworld details from right-click → Edit System.** Today mainworld
+    details are editable only by Ctrl+click; the user finds the right-click route more intuitive
+    and asks whether both could work. A design decision for Sean before any code. (Remember the
+    two editor UI gates — orrery button + context menu — must stay in sync.)
+
+**Release v0.18.1.4 — Sean said do these LAST (2026-11-02)**
+
+1. [ ] **Hand-check in the app** (Sean, or Claude with the built-in browser) — things no harness
+   drove with a real mouse or eye:
+   * **Hover a moon in the orrery:** "Orbit: Dee (D)" appears.
+   * **Orrery moon rings** (item 30): zoom in on a planet with Close and Far moons — Close moons
+     inside, Far outside, inner moons faster; the tooltip shows no "PD from parent" line for T5.
+   * **T5 hex accordion Rotation** (item 26): a Tz planet reads "Tidally Locked to Star (no
+     day/night cycle)", a Close moon "Tidally Locked to Parent (day = orbit length)".
+   * **T5 hex accordion Climate Zone on non-mainworld bodies** (item 28): text follows each
+     body's own code; gas giants and belts blank.
+   * **System Editor +Moon → ☆MW** (item 27): the new moon-mainworld gets a Close or Far letter,
+     Sa, and Lk when Close, and keeps them through a second Save.
+   * **System Editor ☆MW on an existing first/middle moon** (item 29): it stays in place.
+2. [ ] **Date it:** replace "In Progress" in the `### [v0.18.1.4]` header of `changelog.md` and
+   `README.md` (identical copies). Do this last, after item 1. If item 10 or 11 ships in this
+   release, add its changelog/README entry first.
+
+**Deferred by Sean to the NEXT release (2026-11-02) — do not start unasked**
+
+5. [ ] **Twilight Zone width.** Sean's Book 3 notes (p.49) describe the Twilight Zone as a band
+   ~1,000 km wide; `TIDAL_LOCK.MAP` in `rules/` says a strip one world hex wide. Whether those
+   agree is unknown. Only matters for item 6 — settle it before item 6 starts.
+6. [ ] **World images ignore tidal lock**, in every engine. `TIDAL_LOCK.MAP` (zones 41 Baked /
+   42 Twilight / 43 Frozen) is drawn by nothing. It changes a renderer input, so §0.0.A's
+   field-version rules apply and it needs his ruling before any code.
+7. [ ] **CT, RTT and AoW repeatability is unchecked.** T5 kept a load-time copy of `rng` (trap 9,
+   fixed); MgT2E was checked and is clean. `grep` found no other `const _rng = rng` copy outside
+   `js/archive/`, but CT/RTT/AoW were not run through the repeat test: generate a hex, generate
+   it again, generate 3 other hexes, generate it a third time, and compare `JSON.stringify` with
+   `name`/`names`/`_*` keys dropped (the used-names list is separate state).
+
+**DONE 2026-11-02 (kept for the record)**
+
+3. [x] **`TIDAL_LOCK.LOGIC.CLIMATE`** in `rules/t5_data.js` replaced with Sean's Book 3 p.226
+   quote (one-time `rules/` permission). Documentation only — no code reads it.
+4. [x] **Climate codes for every world** (changelog item 28). Sean ruled all worlds get Chart D.
+   `T5_World_Engine.getT5ClimateCode` / `applyT5ClimateCode` serve the mainworld step and
+   `fleshOutSubordinates`; a moon measures from its planet's orbit; the primary's bodies use
+   `sys.hzOrbit` (HZ override), other stars their own HZ; a hand-typed trade code list is left
+   alone. 10,768 of 22,188 other worlds now have Climate Zone text. Old saves gain codes only
+   when regenerated or re-saved in the System Editor.
+8. [x] **Moon made mainworld kept its place** (changelog item 29). `t5_topdown_generator.js`
+   filtered the mainworld out of its planet's seeded moons and Phase 1 `push`ed it back; it now
+   records `seededMwMoonIdx` and splices it back in place. Harness section 4; shown to FAIL with
+   the splice disabled.
+9. [x] **T5 moons in the orrery** (changelog item 30). The orrery drew moons by list index and
+   ignored the letter; every T5 moon used the 20-PD default speed; 1,540 of 3,469 multi-moon
+   planets drew a Far moon inside a Close one. Sean's ruling: T5 gives no moon distances or
+   periods; tracks run Ay (innermost) to Zee (outermost). `system_viewer.js` `_t5MoonRings` gives
+   each normalised T5 moon `ring` (rank of its letter; same letter = same ring; +0.5 gap between
+   Close and Far; unlettered moons outside in list order) and `drawPd` (display-only speed,
+   `10 + ring × 5`) — never `pd`, so the tooltip, System Sheet and exports print nothing
+   invented. Verified by measuring drawn moon distances in a rendered frame; harness check
+   `orreryRing` shown to FAIL with it off.
+
+**Session lessons (2026-11-02)**
+
+* **Don't toggle code with `sed -i` in Git Bash** — it silently rewrote a CRLF file as LF.
+  Use the Edit tool for a temporary on/off, then check `tr -cd '\r' | wc -c` equals the LF count.
+* **Prove a new harness check can fail** by switching the fix off for one run — done for items
+  8 and 9.
+
+#### SEAN'S T5 RULINGS — binding
+
+* **Sa only on a satellite mainworld, always** (Close or Far) — a house rule; RAW pairs Sa with
+  Far only. **Lk on every Close satellite**, mainworld or not, so a Close mainworld carries
+  Sa + Lk. No other moon ever carries Sa. Close satellites are tidally locked to their planet.
+* **Chart 2C (Book 3 p.24) is a mainworld chart.** Satellite? = the existing lunar trigger
+  (Flux −5/−4 Far, −3 Close, else a planet). **GG? is a separate Flux roll, made only when the
+  mainworld is a satellite** and its parent isn't already seeded: 0 or less = a gas giant taken
+  from the inventory; above 0, or no gas giant in the system = a **new BigWorld** in the
+  mainworld's orbit.
+* **Orbit letters:** Flux −6..+6 on the Close column A (Ay) … M (Em) or the Far column
+  N (En) … Z (Zee), stored as an uppercase letter in `orbitLetter`; plain Flux never reaches
+  the ±6 rows. **Other moons** (a house rule — 2C itself is mainworld-only): 2D 7- Close /
+  8+ Far, then Flux on the same columns. **A brand-new moon made mainworld in the System Editor
+  rolls the same 2D 7-** (2026-11-01). Shown as **"Orbit: Dee (D)"** in the orrery hover,
+  the hex accordion, the System Sheet and the export moon field `Orbit` (fog level (d), like a
+  world's Orbit).
+* **PBG gas giants and belts = the bodies actually placed in orbits** — a belt mainworld and a
+  mainworld's parent gas giant included, a rolled body with no orbit to fit into left out.
+* **Mainworld climate code (Chart D p.26), exactly one or none:** Tz in Orbit 0/1 (not belts,
+  gas giants or satellites); otherwise the **first** entry of `rules/` `CLIMATE_TRADE_CODES`
+  that fits — Tr / Tu (size 6–9, atm 4–9, hydro 3–7, at HZ −1 / +1), Fr (size 2–9, hydro 1–A,
+  any atm, at HZ +2 or beyond), then Ho / Co (position only, HZ −1 / +1). **Tr instead of Ho,
+  Tu instead of Co — the array's ORDER is the rule.**
+* **Every world gets a Chart D climate code, not only the mainworld** (2026-11-02), by the same
+  rule; a satellite measures its HZ position from its planet's orbit.
+* **Brown dwarf habitable zone = Orbit 0** (`HZ_DATA.BD`, sizes V/VI/D).
+* **Gas giants and belts: no Tz code and no climate label**, in any orbit, and **a belt
+  mainworld takes no climate code at all** — Ho/Co dropped too (2026-11-01).
+* **Climate Zone text follows the climate code** (2026-11-01): Tz → "Twilight Zone (Tz)",
+  Tr/Ho → "Hot / Tropic", Tu/Co → "Cold / Tundra", Fr → "Frozen" (the words are
+  `CLIMATE_MAPPING`'s at that code's HZ position). **No code, no text** — "Temperate" and
+  "Inferno" are no longer shown. A hand-typed Climate Zone is kept as typed.
+* **Day length (Book 3, Sean's check 2026-11-01):** T5 gives one only for Lk (day = satellite
+  orbit length, p.226, quoted in `LK_DAY_LENGTH`) and Tz (no day/night cycle, p.17); everything
+  else is referee discretion. **Text only, never hours** — T5 has no orbit periods. Rotation
+  reads "Tidally Locked to Star (no day/night cycle)" / "Tidally Locked to Parent (day = orbit
+  length)" / "Undefined (Referee Discretion)".
+* **Book 3 pages** (in the `TIDAL_LOCK` comment): p.17 Orbit 0/1 rule, p.226 Lk day length,
+  p.24 Chart 2C, p.49 Tz world maps.
+* **Each `rules/` edit was its own one-time permission** (eight, 10-24 → 11-02). None carries
+  forward: ask again for the next one.
+
+#### AS BUILT — where it lives
+
+* **`rules/t5_data.js`:** `HZ_DATA.BD`; `CLIMATE_TRADE_CODES`; `TIDAL_LOCK` — `LOGIC` (quoted
+  footnotes, the rulings marked as rulings), `STAR_LOCK_ORBITS`, `CLOSE_SATELLITE_MAX_ROLL`,
+  `CODES`, `CHART_2C`, `MAP`.
+* **`js/t5_world_engine.js`:** `isT5StarLocked`, `isT5CloseSatellite`, `getT5SatelliteOrbit`
+  (null for a letter in the wrong column — pre-2C saves gave Far mainworlds a Close letter, and
+  a wrong orbit is never shown), `calculateT5TradeCodes` (Sa/Lk/Tz), `isT5GGorBelt`,
+  `getT5ClimateText` (text from codes), `getT5ClimateDisplay` (what the accordion and exports
+  show — re-derived, so old saves' stale text is hidden; manual kept), `calculateT5Climate(world)`
+  (call only after the trade codes are final), `getT5ClimateCode` / `applyT5ClimateCode` (Chart D,
+  every world — 2026-11-02), `calculateT5RotationalDynamics` (Rotation text
+  from `ROTATION_TEXT`), `getT5RotationDisplay` (maps old saves' "1:1 to Star/Parent" wording to
+  the new text; manual kept — it does NOT re-work-out the lock).
+* **`js/t5_topdown_generator.js`:** `getStarHZ` (reads `rules/` `HZ_DATA`; `BD` read whole);
+  Phase 1 lunar trigger (its Far branch stores `isCloseSatellite = false`), the System Editor
+  moon-mainworld 2D roll (only `isPreMoon` with no stored Close/Far and no Sa — a Sa-only one is
+  stored Far), GG? roll, `assignT5SatelliteOrbit` (keeps a right-column letter, re-rolls a wrong
+  one); the mainworld climate step; the PBG count after Phase 5;
+  `fleshOutSubordinates` (other moons' Close/Far and letter, their trade codes recomputed after
+  `isMoon` is set, climate text after those codes). `getT5OrbitLabel` is gone.
+* **`js/t5_editor_adapter.js`:** `_t5SatelliteOrbitSeed` + `backfillFromGenerated` carry
+  `orbitLetter` / `isCloseSatellite` so Preview and Save never re-roll them.
+* **Display:** `system_viewer.js` (`_normT5World` → `moons[].satelliteOrbit`, moon tooltip;
+  `_t5MoonRings` → `moons[].ring` / `drawPd`, read by `_drawWorld` and `_moonPeriodYears`),
+  `hex_editor.js` (T5 accordion — `_t5ClimateDisplay`, and `_t5WithMwCodes` because a
+  mainworld's codes live on `mwBase`; no `[climate]` bracket in the summary when there is no
+  text), `system_sheet.js` (the "A moon of …" line, a Satellite Orbit row, an ORBIT column in the
+  Satellites panel), `export_core.js` (`formatT5SatFields`; `_t5Climate`, with the mainworld's
+  codes taken from `state.t5Data`; `_t5Rotation`). `hex_editor.js` also has `_t5RotationDisplay`.
+  The System Sheet and orrery never show Climate Zone or Rotation.
+* **All four T5 engines** (`t5_world_engine.js`, `t5_topdown_generator.js`,
+  `t5_stellar_engine.js`, `t5_socio_engine.js`): `const _rng = () => rng()` (reads the global at
+  each call — trap 9).
+* **Harness:** `node utilities/t5_satellite_climate_check.js` (needs Playwright — set
+  `NODE_PATH` to a `node_modules` that has it) — 49 checks (49/49 on 2026-11-02): 1,280 systems, Rotation text, a
+  System Editor round trip, and section 3 (brand-new moon made mainworld via the real +Moon/☆MW
+  buttons; an old-save Far mainworld stays Far); 44/44 on 2026-11-01. Its two repeatability
+  checks fingerprint the whole system (names aside) and were shown to FAIL with the old `_rng`
+  line restored.
+  Measured before the fixes: 91 of 94 gas-giant-parent systems under-counted PBG, 291 of 345
+  Tr/Tu/Fr codes broke Chart D, and 299 of 327 mainworlds' climate text contradicted their code.
+
+#### TRAPS THIS WORK PAID FOR
+
+1. **Git Bash `sed -i` strips CRLF** — it flattened three files in one session. Use the Edit
+   tool or `sed -b`, and recount with `tr` afterwards.
+2. **`x || 3` turns a real 0 into 3.** HZ Orbit 0 silently became Orbit 3; both `getStarHZ`
+   fallbacks now use `??`.
+3. **T5 has two `getStarHZ`s** (generator and `t5_stellar_engine.js`); the generator kept its own
+   copy of the HZ table and read `BD` as a B star. It now reads `rules/`; keep the two
+   functions agreeing.
+4. **Climate Zone text was written three times** (Phase 1, `getT5OrbitLabel`,
+   `calculateT5Climate`) and the last one won; it had used a literal HZ of 1.0, so every moon
+   read "Hot / Tropic". Now it is derived from the codes only, and `getT5OrbitLabel` is removed.
+5. **A moon's trade codes are first computed before it is flagged a moon** — anything that
+   depends on `isMoon` / `isCloseSatellite` needs the recompute after the flags.
+6. **Every new roll shifts the RNG stream**: the same seed now gives a different T5 system
+   (the `_rng` fix shifted it again). Saved maps are unaffected (hexes are stored); changelog
+   item 17 tells users.
+7. **`universal_math.js` will not load under plain Node** — test T5 in the browser.
+8. **Anything the generator rolls for a seeded body must be carried by the editor adapter**
+   (seed + backfill), or every Preview/Save re-rolls it.
+9. **Never keep a load-time copy of `rng`.** `reseedForHex` (`core.js`) *replaces* the global
+   `rng`, so `const _rng = rng` keeps the original stream forever: T5 subordinate worlds changed
+   with whatever had been generated earlier in the session, while the mainworld (rolled through
+   the `core.js` dice, which read `rng` at call time) stayed put — so a mainworld-only
+   "same seed" check passed for months. Copying the dice *functions* (`tRoll2D` etc.) is fine.
+10. **Climate Zone text is derived, not stored truth.** It must be (re)computed *after* the
+   body's trade codes are final (`calculateT5Climate` runs after the moon trade-code recompute
+   and after `generateT5SubordinateUWP`'s code step), and the displays re-derive it so stale text
+   in old saves never shows. Nothing in generation reads `climateZone`.
+11. **"Not stored" is not "false".** Random Far satellite mainworlds never stored
+   `isCloseSatellite`, so a rule "roll when it isn't a boolean" would have re-rolled every old
+   Far mainworld (58% to Close) on its next editor save. Gate on the old evidence too (Sa without
+   Lk = Far) and store `false` explicitly from now on.
+12. **Text in `rules/` is not proof of a rule.** The two `DAY_LENGTH` lines were copied on
+   2026-10-24 from the v0.6 `rules/guideline_2_5_rotational_dynamics.md` (pre-Zero-Assumption)
+   and read like book quotes; Sean was surprised by them. Check a `rules/` line's source with
+   Sean before building on it.
+
+### 0.0.C v0.18.1.1 – v0.18.1.2 — THE SYSTEM SHEET IN-APP AND IN EXPORTS (shipped)
 
 * **Part 1, the sheet in-app** (2026-09-23/24): the System Sheet button opens
   `SystemSheet.open()`, a modal with **Download PNG** (full resolution) and **Close**; Esc and a
@@ -110,26 +342,10 @@ waiting on a ruling.
   Detail: `system_sheet_spec.md` §9.1. `system_sheet_export_check.js` 1256/1256 (every mode at
   every level, plus the legacy boolean); `disclosure_leak_check.js` 86/86.
 
-#### RELEASE STATUS — v0.18.1.1 DATED 2026-09-25
+**Changelog style (Sean, 2026-09-25):** one sentence per item; the `README.md` entry is an
+identical copy of `changelog.md`'s.
 
-Changelog headers dated **2026-09-25** in `changelog.md` and `README.md` (same five-item
-entry in both, one sentence per item — Sean's changelog style, 2026-09-25). Version bump was
-already done. **Nothing is left to ship.** The next session starts by asking Sean what the
-next version is (`.claude/commands/new_version.md`).
-
-#### FILES CHANGED — for Sean's commit
-
-**2026-09-25 (exporter wiring):** `js/export_core.js` (`renderSystemSheet`, `SHEET_EXPORT`),
-`js/html_exporter.js` (the (g) gate, caption, full-size link), `js/obsidian_exporter.js` (the
-(g) gate), `hex_map.html` (export dialog checkbox + players' help text),
-`utilities/system_sheet_export_check.js` (**new**), `changelog.md`, `README.md`,
-`directives/system_sheet_spec.md`, `directives/fog_of_war_field_tags.md`, this manifest.
-**2026-09-23/24 (the sheet):** `js/system_sheet.js`, `js/system_viewer.js`, `js/hex_editor.js`,
-the version bump (`js/core.js`, `hex_map.html`, `README.md`, `changelog.md`),
-`utilities/system_sheet_verify.js`, `system_sheet_gallery.js`, `system_sheet_shoot.js`,
-`system_sheet_sweep.js`. Scratch renders and measurements are in `.tmp/` only.
-
-#### STILL OPEN BEYOND v0.18.1.1
+#### STILL OPEN FROM THE SYSTEM SHEET WORK (not scheduled)
 
 * **"World on a page"** — the other half of the image-exports subject, **nothing designed.** It
   is a linear document, so **the block-model ruling (§0.0.B) governs it** — the sheet departed
@@ -914,10 +1130,9 @@ shortcuts past the route's own edges, nothing is ever retraced, and the bug is u
 
 ### 0.0.6 Open items
 
-**None here.** Everything that stood in this section was ruled on 2026-09-21 and is now
-either a closed ruling in §0.0.B or work that has since been done.
-
-**And none anywhere else either.** The System Editor and route/filter residue that used to be
+**None for routes.** Everything that stood in this section was ruled on 2026-09-21 and is now
+either a closed ruling in §0.0.B or work that has since been done. **The project's open items
+are the checklist in §0.0.D.** The System Editor and route/filter residue that used to be
 recorded here — OW-3, OW-5 layer 2, OW-65 — was deleted on 2026-09-21.
 
 ### 0.0.7 R9 — the pattern worth carrying forward
@@ -976,14 +1191,10 @@ matches the one reported, or you have only proved that today's code runs.
 | | |
 |---|---|
 | **Most recent work** | **v0.18.0 — regional surface maps**, shipped 2026-09-20; its constraints are §0.0.A. Before it, v0.17.2–v0.17.5 — routes. Nothing in *this* document's own subject matter (the System Editor) moved during either, apart from one legacy-save bug — see "Legacy saves omit fields" in §0.0.A, which still binds any code reading a loaded sector. |
-| **Current release** | **v0.18.1.1 — image exports (the system sheet)**, in-app sheet accepted 2026-09-24; **exporter wiring (also v0.18.1.1) not started** — §0.0.C. (v0.18.1 closed 2026-09-24 with fixes and route order.) |
+| **Current release** | **v0.18.1.4 — built, not dated** (2026-11-02); its handoff and open items are §0.0.D. |
 | **This document** | v0.16.x System Editor. **Paused** after MgT2E, CT and T5 were brought fully online. |
 | **Paused** | RTT and AoW editor support — the reason this manifest is retained. |
-| **Open here** | **None.** The last three were deleted 2026-09-21 — see section 4. |
-
-**Nothing is half-finished in either manifest.** v0.18.1.1's system sheet is built and verified
-and accepted (gallery review 2026-09-24); the exporter wiring, also in v0.18.1.1, is not started — see §0.0.C. The
-companion manifest has **no** open items. This document's section 4 lists three.
+| **Open here** | The §0.0.D checklist only. |
 
 ### 0.2 System Editor engine support — verified against code 2026-08-06
 
@@ -1600,13 +1811,15 @@ Both the orrery and accordion now correctly highlight a lunar mainworld. The `_n
 
 ## 4. Known Issues / To Do
 
-**None.** Everything this document tracked is closed. The last three — OW-3, OW-5 layer 2 and
+**The open items are the checklist in §0.0.D** (v0.18.1.4 release steps, questions for Sean,
+deferred T5 work). Nothing else is tracked. The last three older items — OW-3, OW-5 layer 2 and
 OW-65 — were deleted on 2026-09-21: each was conditional on resuming the paused RTT/AoW editor
 work, and none described a fault anyone had actually seen. The patterns worth carrying forward
 are in 6.1, and §6.2 keeps the AoW readiness audit as the worked example.
 
-**v0.18.1.1 is image exports (§0.0.B), not editor work**, and no recent release has been in this
-document's subject matter. Resuming RTT/AoW means starting at section 0.3.
+**The T5 work in v0.18.1.4 did touch the System Editor**: `t5_editor_adapter.js` now carries each
+satellite's Close/Far and orbit letter through Preview and Save (§0.0.D). Resuming RTT/AoW
+editor work still means starting at section 0.3.
 
 **One editor rule from outside this section still binds:** see "Legacy saves omit fields" in
 §0.0.A before touching any code that reads star or world fields off a loaded sector — an editor

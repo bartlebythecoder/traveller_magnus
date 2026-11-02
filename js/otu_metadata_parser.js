@@ -44,7 +44,8 @@
      * @param {number} sectorX     - Grid X position of this sector.
      * @param {number} sectorY     - Grid Y position of this sector.
      * @param {Map}    coordLookup - Map<"x,y" → slotNum> for all known sectors.
-     * @param {object} [options]   - { importRoutes: bool, importBorders: bool, importRegions: bool } — defaults to all true.
+     * @param {object} [options]   - { importRoutes: bool, importBorders: bool, importRegions: bool,
+     *                               importSubsectorNames: bool } — defaults to all true.
      */
     function parseAndAddOtuRoutes(sectorName, xmlText, slotNum, sectorX, sectorY, coordLookup, options) {
         if (!xmlText) return;
@@ -52,6 +53,7 @@
         const importRoutes  = !options || options.importRoutes  !== false;
         const importBorders = !options || options.importBorders !== false;
         const importRegions = !options || options.importRegions !== false;
+        const importSubsectorNames = !options || options.importSubsectorNames !== false;
 
         // Strip <DataFile .../> before parsing — its Author attribute sometimes
         // contains unescaped double quotes (e.g. Jason "Flynn" Kemp) which
@@ -146,6 +148,22 @@
             }
         }
 
+        // <Subsectors><Subsector Index="A">Shivva</Subsector>...</Subsectors>
+        // A sector that publishes names replaces this slot's names outright; one
+        // that publishes none leaves whatever the slot already has alone.
+        if (importSubsectorNames) {
+            const named = [];
+            doc.querySelectorAll('Subsectors > Subsector').forEach(el => {
+                const idx  = (el.getAttribute('Index') || '').trim().toUpperCase();
+                const name = (el.textContent || '').trim();
+                if (/^[A-P]$/.test(idx) && name) named.push([idx, name]);
+            });
+            if (named.length > 0) {
+                clearSubsectorNamesForSector(slotNum);
+                for (const [idx, name] of named) window.subsectorNames[`${slotNum}-${idx}`] = name;
+                console.log(`[OTU Metadata] "${sectorName}": ${named.length} subsector name(s) imported.`);
+            }
+        }
     }
 
     window.parseAndAddOtuRoutes = parseAndAddOtuRoutes;

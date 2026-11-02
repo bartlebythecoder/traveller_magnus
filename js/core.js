@@ -5,7 +5,7 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.18.1.3";
+const APP_VERSION = "v0.18.1.4";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -55,11 +55,48 @@ showSubsectorBorders = true;
 devView = false;
 hideNoPlanetSystems = true;
 showSectorNames = false;
+showSubsectorNames = false;
 window.borderNamesEnabled = false;
 window.regionNamesEnabled = false;
 
 // Sector name store — keyed by integer sector number
 window.sectorNames = {};
+
+// Subsector name store — keyed by the hexId prefix "<sectorNum>-<A-P>", e.g.
+// "18-A". An unnamed subsector has no entry. Every way a map comes in (file,
+// chunked file, autosave) goes through normalizeSubsectorNames below.
+window.subsectorNames = {};
+
+const SUBSECTOR_KEY_RE = /^(\d+)-([A-P])$/;
+
+// Maps saved before v0.18.1.4 have no subsectorNames at all: absent, null and
+// {} all mean "none named". A hand-edited or damaged file must not throw or
+// put junk on the map, so anything that is not a plain object of
+// "<num>-<A-P>" -> non-blank string is dropped, and the drop is logged.
+// Keys are rewritten canonically ("0018-D" -> "18-D"): the renderer parses the
+// number but the exporters look the key up as text, so both must agree.
+function normalizeSubsectorNames(raw) {
+    const out = {};
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return out;
+    const dropped = [];
+    for (const [key, val] of Object.entries(raw)) {
+        const name = typeof val === 'string' ? val.trim() : '';
+        const m = SUBSECTOR_KEY_RE.exec(key);
+        const num = m ? parseInt(m[1], 10) : 0;
+        if (num >= 1 && name) out[`${num}-${m[2]}`] = name;
+        else dropped.push(key);
+    }
+    if (dropped.length) console.warn(`[Subsector names] ${dropped.length} invalid entr${dropped.length === 1 ? 'y' : 'ies'} ignored:`, dropped);
+    return out;
+}
+
+// Removes every subsector name belonging to one sector slot.
+function clearSubsectorNamesForSector(sectorNum) {
+    const prefix = sectorNum + '-';
+    for (const key of Object.keys(window.subsectorNames || {})) {
+        if (key.startsWith(prefix)) delete window.subsectorNames[key];
+    }
+}
 
 // Hex state (Map of hexId -> STATE)
 hexStates = new Map();

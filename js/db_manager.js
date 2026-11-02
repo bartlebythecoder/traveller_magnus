@@ -79,6 +79,8 @@
             if (appState.sectorNames && typeof appState.sectorNames === 'object') {
                 window.sectorNames = appState.sectorNames;
             }
+            // Absent for anyone upgrading from before v0.18.1.4 -> none named.
+            window.subsectorNames = normalizeSubsectorNames(appState.subsectorNames);
 
             // Restore routeDefinitions, or migrate from legacy segments if missing
             if (Array.isArray(appState.routeDefinitions) && appState.routeDefinitions.length > 0) {
@@ -398,6 +400,19 @@
     }
 
     // -------------------------------------------------------------------------
+    // Persist subsector names (window.subsectorNames keyed "<sectorNum>-<A-P>").
+    // -------------------------------------------------------------------------
+    async function saveSubsectorNames() {
+        try {
+            const db = await _openDB();
+            const tx = db.transaction(STORE_APP, 'readwrite');
+            tx.objectStore(STORE_APP).put(window.subsectorNames || {}, 'subsectorNames');
+        } catch (err) {
+            console.warn('[DB] saveSubsectorNames failed:', err);
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // Wipe the entire database.
     // Called by Clear Canvas and before the bulk OTU imports (Universe /
     // Neighbourhood). The bulk imports pass keepTsvCache so the sector
@@ -434,6 +449,7 @@
         saveRegionDefinitions,
         saveRegionPaths,
         saveSectorNames,
+        saveSubsectorNames,
         clearDB,
         getTsvCache,
         putTsvCache

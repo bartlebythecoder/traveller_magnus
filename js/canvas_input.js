@@ -80,6 +80,11 @@ function setupCanvasEvents() {
         {
             const createBtn = document.getElementById('ctx-create-system');
             const editBtn   = document.getElementById('ctx-edit-system');
+            // World Details (the Ctrl+click panel), offered beside Edit System
+            // for the same single selected hex.
+            const detailsBtn = document.getElementById('ctx-world-details');
+            if (detailsBtn) detailsBtn.style.display = (selectedHexes.size === 1 &&
+                canOpenHexEditor(hexStates.get([...selectedHexes][0]))) ? 'block' : 'none';
             if (selectedHexes.size === 1) {
                 const _seHexId = [...selectedHexes][0];
                 const _seState = hexStates.get(_seHexId);
@@ -177,6 +182,16 @@ function setupCanvasEvents() {
         ctxMenuEl.addEventListener('mouseover', (e) => {
             const item = e.target.closest('.context-menu-item.has-submenu');
             if (item && ctxMenuEl.contains(item)) _positionSubmenu(item);
+        });
+    }
+
+    // Right-click > WORLD DETAILS: the same panel as Ctrl+click, for the one
+    // selected hex (the hex Edit System would open).
+    const ctxDetailsBtn = document.getElementById('ctx-world-details');
+    if (ctxDetailsBtn) {
+        ctxDetailsBtn.addEventListener('click', (e) => {
+            ctxMenuEl.classList.remove('visible');
+            if (selectedHexes.size === 1) openHexEditor([...selectedHexes][0], e);
         });
     }
 

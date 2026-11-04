@@ -91,9 +91,17 @@ function formatJourneyTimesHTML(times, eligible, isMaskingActive) {
 // HEX EDITOR MAIN FUNCTIONS
 // ============================================================================
 
+// Which hexes World Details can open. Also gates the right-click menu's
+// WORLD DETAILS entry (canvas_input.js), so the entry never shows for a hex
+// this function would refuse.
+function canOpenHexEditor(stateObj) {
+    return !!(stateObj && stateObj.type === 'SYSTEM_PRESENT' &&
+        (stateObj.ctData || stateObj.mgt2eData || stateObj.t5Data || stateObj.rttData));
+}
+
 function openHexEditor(hexId, e = null) {
     const stateObj = hexStates.get(hexId);
-    if (!stateObj || stateObj.type !== 'SYSTEM_PRESENT' || (!stateObj.ctData && !stateObj.mgt2eData && !stateObj.t5Data && !stateObj.rttData)) {
+    if (!canOpenHexEditor(stateObj)) {
         return;
     }
 

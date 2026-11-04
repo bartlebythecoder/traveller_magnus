@@ -76,7 +76,7 @@ Want to replace any of these sectors with your own file?
 1. **New — White Background images:** the System Sheet, the orrery and regional survey sheets now follow the White Background Mode setting, both in the app and in HTML and Obsidian exports.
 2. **Fixed — White Background world images:** exported world images and downloaded flat maps now have a white background instead of a transparent one when White Background Mode is on.
 3. **New — Subsector names:** right-click any hex and choose **ASSIGN → Name Subsector…** to name its subsector; names are saved with the map, and maps saved before this version load as before with none named.
-4. **New — Show Subsector Names:** a new toggle in Settings → Visual Options draws subsector names along the top of each subsector at mid zoom.
+4. **New — Show Subsector Names:** a new toggle in Settings → Visual Options draws each subsector's name large and diagonally across it, in the style of the sector names, and keeps it showing, fainter and behind the worlds, when you zoom in past the point where sector names disappear.
 5. **New — Imported subsector names:** TravellerMap imports bring in each sector's published subsector names when the new *Subsector Names* option is ticked.
 6. **Improved — Subsector names in exports:** HTML and Obsidian subsector pages show the name in their headings, while file names and links stay "Subsector A".
 7. **Fixed — Chunked saves:** maps large enough to save in parts now keep their sector names, route slots, borders and regions when reloaded.
@@ -103,6 +103,10 @@ Want to replace any of these sectors with your own file?
 28. **New — T5 climate for every world:** every T5 planet and moon now gets its own Chart D climate code (Tr, Tu, Fr, Ho or Co, with moons using their planet's orbit) and the matching Climate Zone, in newly generated systems and in any system saved again from the System Editor.
 29. **Fixed — T5 System Editor moon order:** a moon set as mainworld in the System Editor now keeps its place in its planet's moon list instead of moving to the end.
 30. **Fixed — T5 moons in the orrery:** T5 moons are now drawn in order of their orbit letter, Ay innermost to Zee outermost with Close moons inside Far ones, where they were drawn in list order and could show a Far moon inside a Close one.
+31. **Fixed — export world image hex grids:** CT, T5 and RTT planet images in HTML and Obsidian exports now show their hex grid in the Sinusoidal and Diamond projections, and their regional survey sheets now use the planet's real size, where both treated every such planet as size 0.
+32. **New — World Details from the right-click menu:** with one hex selected, the right-click menu now has a WORLD DETAILS entry beside EDIT SYSTEM that opens the same World Details panel as Ctrl+click, which still works.
+33. **Changed — T5 size-0 planets:** a size-0 planet no longer rolls moons, though any moon you place on one in the System Editor is kept.
+34. **Fixed — T5 orrery moon speed:** moons of a size-0 world no longer whip around it about a hundred times too fast.
 
 ### [v0.18.1.3] - 2026-10-19
 1. **Improved — one System Sheet per star:** each sheet now shows only the bodies orbiting one star, so a companion's planets no longer appear among the primary's at the wrong distances.

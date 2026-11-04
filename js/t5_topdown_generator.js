@@ -756,6 +756,12 @@
      */
     function generateT5Satellites(parent, orbit, hostHZ, maxSubPop, capToExisting) {
         if (!parent || parent.type === 'Empty' || parent.worldType === 'Belt') return;
+        // A size-0 planet rolls no moons (Sean, 2026-11-03). Moons already placed on it (System
+        // Editor) are kept; only new ones are not rolled. Gas Giant sizes are letters, never 0.
+        if (parent.size === 0 || parent.size === '0') {
+            _log(`Satellite Generation: Body in Orbit ${orbit} is size 0 — no satellites rolled.`);
+            return;
+        }
 
         if (!parent.satellites) parent.satellites = [];
         const startIdx = parent.satellites.length;

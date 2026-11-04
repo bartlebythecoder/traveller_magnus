@@ -1245,7 +1245,10 @@ const ExportCore = (() => {
             hydrographics: hyd,
             temperature:   tempBand,
             temperatureK:  tempK,
-            size:          worldData.size ?? 0,
+            // The CT, T5 and RTT planet normalisers carry no `size`, which left
+            // every one of their flat-map images without a hex grid (size is
+            // the grid's only input). Fall back to the UWP's size digit.
+            size:          worldData.size ?? (uwp.length >= 2 ? uwp[1] : 0),
             uwp,
         };
     }

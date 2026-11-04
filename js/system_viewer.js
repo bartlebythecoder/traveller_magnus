@@ -206,7 +206,7 @@ const SystemViewer = (() => {
         if (m.periodHrs && m.periodHrs > 0) return m.periodHrs / (365.25 * 24);
         const G            = 6.674e-11;
         const M_EARTH_KG   = 5.972e24;
-        const parentMassKg = (parentWorld.mass || 1) * M_EARTH_KG;
+        const parentMassKg = (parentWorld.mass || parentWorld.drawMass || 1) * M_EARTH_KG;   // drawMass: T5 size 0 (_normT5World)
         const parentDiamKm = parentWorld.diamKm || 12742;
         const pd           = m.pd || m.drawPd || 20;   // drawPd: T5's display-only stand-in (_t5MoonRings)
         const r_m          = pd * parentDiamKm * 1000;   // orbital radius metres
@@ -619,6 +619,11 @@ const SystemViewer = (() => {
             // _addBody — sizes 'M'/'N', 210000/220000 km) so there's nothing to visibly snap to,
             // mirroring the mass default's own reasoning exactly.
             diamKm:        w.diamKm    || (type === 'Gas Giant' ? 215000 : null),
+            // drawMass: display-only stand-in for _moonPeriodYears. A size-0 world has mass 0
+            // (WORLD_DIMENSIONS has no size 0), which the `|| 1` default read as 1 Earth mass in a
+            // 500 km body, so its moons spun ~100x too fast. Earth density from its diameter
+            // instead; never `mass`, so the tooltip, System Sheet and exports print nothing invented.
+            drawMass:      (w.mass === 0 && w.diamKm > 0) ? Math.pow(w.diamKm / 12742, 3) : null,
             gravity:       w.gravity   || null,
             meanTempK:     w.meanTempK || null,
             // satelliteOrbit: Chart 2C orbit { letter, name } (null when none, or not trusted)

@@ -30,12 +30,13 @@ in this document, not a neutral act.
 **So: an item still written down here is an item still live.**
 
 ---
-**Version:** **v0.18.1.4 is BUILT, NOT YET DATED** (updated 2026-11-02). `APP_VERSION` is already
-`v0.18.1.4`; its changelog entry ("In Progress") holds items 1–27 in `changelog.md` and
+**Version:** **v0.18.1.4 is BUILT, NOT YET DATED** (updated 2026-11-03). `APP_VERSION` is already
+`v0.18.1.4`; its changelog entry ("In Progress") holds items 1–34 in `changelog.md` and
 `README.md`. Items 1–9 are white-background images, subsector names, two save fixes and Add
-Border; **items 10–27 are the T5 satellite/climate work in §0.0.D** (24 = gas giants/belts have
+Border; **items 10–30 are the T5 satellite/climate work in §0.0.D** (24 = gas giants/belts have
 no climate, 25 = T5 repeatable generation, 26 = T5 Rotation text, 27 = editor moon-mainworld
-Close/Far), which also holds the outstanding checklist. Earlier: v0.18.1.3 (2026-10-19) one System Sheet per star, orrery GIFs,
+Close/Far); 31 = export hex grids, 32 = right-click WORLD DETAILS, 33 = T5 size-0 planets roll no
+moons, 34 = orrery speed for moons of size-0 worlds. §0.0.D also holds the outstanding checklist. Earlier: v0.18.1.3 (2026-10-19) one System Sheet per star, orrery GIFs,
 neighbourhood import; v0.18.1.2 (2026-10-01) sheet/orrery/both export choice; v0.18.1.1
 (2026-09-25) the System Sheet; v0.18.1 (2026-09-24); v0.18.0 (2026-09-20) regional terrain;
 v0.17.2–v0.17.5 (08-19 → 09-11) routes; v0.17.0 / v0.17.0.1 (08-03 / 08-04) exports.
@@ -77,56 +78,22 @@ with measured numbers, give ONE recommendation, ask with the question tool, buil
    himself. **Do not record commit hashes or the commit position in this document.** If you
    need to know what is committed, ask him.
 
-### 0.0.D HANDOFF — v0.18.1.4, updated 2026-11-02 (end of session). START HERE.
+### 0.0.D HANDOFF — v0.18.1.4, updated 2026-11-03. START HERE.
 
 **v0.18.1.4 is built and verified, not yet dated.** Every change is built, documented
-(changelog/README items 1–30, identical copies) and passes the harness (49/49). Nothing is
-half-written in the code. Sean commits; **ask him what is committed** rather than assuming — at
-the 2026-11-02 context clear, items 10–30 had never been confirmed committed. The T5 work was
-settled one ruling at a time with Sean (2026-10-24 → 2026-11-02) — the rulings below are
-**decided; do not re-derive or re-litigate them.**
+(changelog/README items 1–34, identical copies) and verified. Nothing is half-written in the
+code. **Only the two release steps below are left** — no open investigations, nothing waiting
+on a design decision. Sean commits; **ask him what is committed** rather than assuming — items
+10–34 had not been confirmed committed at the end of 2026-11-03. The T5 work was settled one
+ruling at a time with Sean (2026-10-24 → 2026-11-02) — the rulings below are **decided; do not
+re-derive or re-litigate them.**
 
-#### NEXT STEPS — the outstanding checklist (2026-11-02)
+#### NEXT STEPS — the to-do list (2026-11-02, late)
 
 Ask Sean which to take first, **one question at a time**. Nothing here may be guessed from
 training data (CLAUDE.md, Zero-Assumption Policy).
 
-**In progress — pick up here**
-
-10. [ ] **Subsector export: some hexes get world images and some don't** (Sean, 2026-11-02).
-    INVESTIGATING, no code changed. The world-image gate is in `html_exporter.js` (~line 1074,
-    worlds; ~1101, moons) and the same in `obsidian_exporter.js` (~699/738):
-    `includeImages && _show(oLV,'e') && EC.canRenderImage(w) && !(skipAirless && EC.isAirless(w))`,
-    and a hex whose `SystemViewer.normalizeSystem(state)` is null gets a "No system data
-    generated" page with no images at all. Measured so far (scratchpad diagnostic, every
-    SYSTEM_PRESENT hex run through those gates):
-    * **`sectors/solo_6.json`:** 3,119 hexes are UWP-only (imported mainworld, never generated)
-      → normaliser null → **no images**; 438 generated MgT2E hexes do get images, **94 of them
-      have only airless worlds**. No subsector in solo_6 mixes UWP-only and generated hexes, so
-      the UWP-only cause can't explain "some hexes" within one subsector of that map.
-    * **"Skip airless worlds" is TICKED by default** (`hex_map.html` ~2021, `#obs-skip-airless`),
-      so with defaults an all-airless hex gets no world image — the leading suspect.
-    * Export fixture (`.tmp/html_export_harness/fixture_sector.json`): RTT 3 hexes and AoW 3
-      hexes end with no renderable world; AoW has 96 bodies with no `uwp` (gas giants seen so far).
-    * **Next:** finish the real-export check — export the solo_6 subsector with the most
-      all-airless hexes with skip-airless ON and OFF and list the system pages with no `<img>`.
-      Read the ZIP in Node with `.tmp/html_export_harness/zipread.js` (`readZip`) — the app's
-      ZIP is its own stored-format writer, **JSZip is not on the page**. The half-built script is
-      `export_subsector_images.js` in the 2026-11-02 session scratchpad (may be gone; it loads the
-      map into `hexStates`, stubs `window.downloadBlob`, calls `HtmlExporter.startExport(sector,
-      sub, { includeImages:true, imageProjection:'globe', skipAirless, systemImages:'none' })`).
-    * **Then ask Sean** (one question at a time): which map/subsector/exporter he saw it in;
-      whether the hexes missing images are the airless ones; and whether UWP-only hexes should
-      get a mainworld image from the UWP alone (a design decision — don't build it unasked).
-
-**Waiting on Sean**
-
-11. [ ] **User request: edit mainworld details from right-click → Edit System.** Today mainworld
-    details are editable only by Ctrl+click; the user finds the right-click route more intuitive
-    and asks whether both could work. A design decision for Sean before any code. (Remember the
-    two editor UI gates — orrery button + context menu — must stay in sync.)
-
-**Release v0.18.1.4 — Sean said do these LAST (2026-11-02)**
+**Release v0.18.1.4 — the only work left. Sean said do these LAST (2026-11-02)**
 
 1. [ ] **Hand-check in the app** (Sean, or Claude with the built-in browser) — things no harness
    drove with a real mouse or eye:
@@ -140,9 +107,21 @@ training data (CLAUDE.md, Zero-Assumption Policy).
    * **System Editor +Moon → ☆MW** (item 27): the new moon-mainworld gets a Close or Far letter,
      Sa, and Lk when Close, and keeps them through a second Save.
    * **System Editor ☆MW on an existing first/middle moon** (item 29): it stays in place.
+   * **Export hex grids** (item 31): export a CT, T5 or RTT subsector with the Diamond (or
+     Sinusoidal) projection — planet images show the hex grid, as moons always did.
+   * **Right-click → WORLD DETAILS** (item 32): select one hex, right-click — the entry sits
+     under EDIT SYSTEM and opens the Ctrl+click panel for that hex.
+   * **Size-0 planets** (item 33): a new T5 system's size-0 planets have no moons; a moon added
+     to one in the System Editor survives Save.
+   * **Subsector names** (item 4, restyled 2026-11-03): with Show Subsector Names on, each named
+     subsector shows its name diagonally (30°, like the sector names) from zoom 0.12 to 1.0,
+     faint and under the worlds from 0.3. `drawSubsectorNames` in `renderer.js`, drawn before
+     PASS 2. Check a long name (shrinks, then an ellipsis) and White Background Mode.
+   * **Orrery speed** (item 34): a moon on a size-0 planet (old save, or added in the editor)
+     orbits at the same pace as a moon on the same ring of an Earth-size planet, not ~1 hour.
 2. [ ] **Date it:** replace "In Progress" in the `### [v0.18.1.4]` header of `changelog.md` and
-   `README.md` (identical copies). Do this last, after item 1. If item 10 or 11 ships in this
-   release, add its changelog/README entry first.
+   `README.md` (identical copies). Do this last, after item 1. Items 31–34 are already in
+   both files.
 
 **Deferred by Sean to the NEXT release (2026-11-02) — do not start unasked**
 
@@ -182,12 +161,57 @@ training data (CLAUDE.md, Zero-Assumption Policy).
    invented. Verified by measuring drawn moon distances in a rendered frame; harness check
    `orreryRing` shown to FAIL with it off.
 
+10. [x] **Subsector export: some hexes get world images and some don't** (Sean, 2026-11-02).
+    **CLOSED — working as designed, plus one real fix.** Sean's own conclusion, confirmed in
+    code: the missing images were a red flag raised by a Claude test export made with the
+    dialog's defaults. **"Skip airless worlds" is TICKED by default** (`hex_map.html` ~2021,
+    `#obs-skip-airless`) and skips ANY planet or moon with atm 0 and hydro 0, whatever its size
+    (`ExportCore.isAirless`). In `solo_6`, 94 of 438 generated hexes are all-airless, so their
+    pages have no world images. UWP-only hexes (never generated) get a "No system data
+    generated" page with no images — also by design. **Before running any export test, check
+    the dialog defaults.**
+    **The real fix (changelog item 31): missing HEX GRIDS.** `ExportCore._rendererData` read
+    `worldData.size ?? 0`, but the CT, T5 and RTT *planet* normalisers in `system_viewer.js`
+    carry no `size` (moons do; MgT2E copies the raw record and AoW passes it explicitly), so
+    every such planet drew at size 0 — no grid, and its regional sheet sized as a 400 km body.
+    It now falls back to the UWP size digit. The in-app viewers read the raw body's size and
+    were always right. Verified: all 469 CT/T5/RTT fixture planets went from no grid to the
+    right size (check shown to FAIL with the fix off), sample Diamond PNG looked at.
+
+11. [x] **User request: edit mainworld details from right-click → Edit System.** DONE 2026-11-02
+    (changelog item 32). Sean chose a right-click menu entry over putting mainworld fields in
+    the System Editor (that would have made two edit paths to keep in sync). `#ctx-world-details`
+    ("WORLD DETAILS", beside EDIT SYSTEM in `hex_map.html`) opens `openHexEditor` — the Ctrl+click
+    panel — for the ONE selected hex, the same hex Edit System uses. Shown only when
+    `canOpenHexEditor(state)` (new, `hex_editor.js`, also used by `openHexEditor` itself) is
+    true, so it shows for RTT where Edit System does not. Visibility + click wired in
+    `canvas_input.js`. Verified with real right-clicks/clicks in Playwright, 19/19 (MgT2E, CT,
+    T5, RTT shown and open the right hex; UWP-only, empty, 0 or 2 selected hidden).
+
+12. [x] **Fast-spinning size-0 moon in the T5 orrery** (Sean, 2026-11-03; changelog items 33–34).
+    **Rulings (Sean, 2026-11-03):** Worldlet size `1D-3` of 0 or less = **Size 0** (the existing
+    `Math.max(0, …)` is correct — size-0 moons are valid); **a size-0 planet gets no moons.**
+    (a) `generateT5Satellites` (`t5_topdown_generator.js`) now returns before rolling moons for a
+    size-0 parent; seeded moons (System Editor) are kept. (b) A size-0 world has `mass` 0
+    (`WORLD_DIMENSIONS` has no 0), which `_moonPeriodYears`' `mass || 1` read as one Earth mass in
+    a 500 km body — moons orbited in ~1 hour. `_normT5World` adds display-only `drawMass`
+    (Earth density from `diamKm`, only when `mass === 0`); `mass` itself is untouched. Verified
+    in-browser: 2,000 systems, 0 of 561 size-0 planets with moons (331 of 560 with the guard off);
+    period ~1 h → ~126 h, matching an Earth-size parent's moon on the same ring.
+    **Testing note:** the browser pane renders `file://` as a static snapshot with no scripts —
+    serve the page via `.claude/launch.json` (python http.server, port 8765).
+
 **Session lessons (2026-11-02)**
 
 * **Don't toggle code with `sed -i` in Git Bash** — it silently rewrote a CRLF file as LF.
   Use the Edit tool for a temporary on/off, then check `tr -cd '\r' | wc -c` equals the LF count.
 * **Prove a new harness check can fail** by switching the fix off for one run — done for items
-  8 and 9.
+  8, 9 and 10 (the grid fix).
+* **Check an exporter dialog's DEFAULTS before treating a test export as evidence.** Item 10
+  was opened on "missing images" that were just "Skip airless worlds" doing its job.
+* **A context menu left open covers the next click point.** In Playwright, close
+  `#context-menu` before each forced right-click on the canvas, or the click lands on the stale
+  menu and its handler never re-runs (cost one false failure on item 11).
 
 #### SEAN'S T5 RULINGS — binding
 
@@ -1191,7 +1215,7 @@ matches the one reported, or you have only proved that today's code runs.
 | | |
 |---|---|
 | **Most recent work** | **v0.18.0 — regional surface maps**, shipped 2026-09-20; its constraints are §0.0.A. Before it, v0.17.2–v0.17.5 — routes. Nothing in *this* document's own subject matter (the System Editor) moved during either, apart from one legacy-save bug — see "Legacy saves omit fields" in §0.0.A, which still binds any code reading a loaded sector. |
-| **Current release** | **v0.18.1.4 — built, not dated** (2026-11-02); its handoff and open items are §0.0.D. |
+| **Current release** | **v0.18.1.4 — built, not dated** (2026-11-03); its handoff and open items are §0.0.D. |
 | **This document** | v0.16.x System Editor. **Paused** after MgT2E, CT and T5 were brought fully online. |
 | **Paused** | RTT and AoW editor support — the reason this manifest is retained. |
 | **Open here** | The §0.0.D checklist only. |

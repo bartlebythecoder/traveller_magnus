@@ -23,7 +23,13 @@
 
 const TerrainFrame = (() => {
 
-    const THEME = {
+    // WHITE BACKGROUND (v0.18.1.4). compose() draws the light frame when passed
+    // `light: true`; the in-app panel and the exporters both pass the White
+    // Background setting. Only the frame changes - the map plate, its labels
+    // and the graticule drawn over it are terrain, and stay as they are. THEME
+    // is swapped for the length of one compose() and always put back, and every
+    // dark value is the literal it replaced, so the dark sheet does not move.
+    const THEME_DARK = {
         sheet:  '#080b11',
         panel:  '#0b1017',
         rule:   '#1e2836',
@@ -32,7 +38,27 @@ const TerrainFrame = (() => {
         accent: '#5aa7d8',
         grid:   'rgba(214,230,246,0.20)',
         gridHi: 'rgba(214,230,246,0.34)',
+        scaleAlt: '#24303f',                    // the scale bar's dark segments
+        pct:      '#5a6676',                    // terrain key percentages
+        compassMajor: 'rgba(223,230,239,0.85)',
+        compassMinor: 'rgba(125,139,156,0.55)',
     };
+    // Same values as the System Sheet's light theme, so the two read as a set.
+    const THEME_LIGHT = {
+        sheet:  '#ffffff',
+        panel:  '#f6f8fb',
+        rule:   '#c9d2dd',
+        ink:    '#1a1f27',
+        dim:    '#4a5568',
+        accent: '#1f6fa8',
+        grid:   THEME_DARK.grid,
+        gridHi: THEME_DARK.gridHi,
+        scaleAlt: '#ffffff',
+        pct:      '#7a8696',
+        compassMajor: 'rgba(26,31,39,0.85)',
+        compassMinor: 'rgba(74,85,104,0.45)',
+    };
+    let THEME = THEME_DARK;
 
     // Gutters are asymmetric: the left/right edges carry latitude labels like
     // "35°00'N", which need far more room than the longitude labels above and
@@ -248,7 +274,7 @@ const TerrainFrame = (() => {
         ctx.textBaseline = 'top';
         const h = 6;
         for (let i = 0; i < segs; i++) {
-            ctx.fillStyle = (i % 2) ? THEME.ink : '#24303f';
+            ctx.fillStyle = (i % 2) ? THEME.ink : THEME.scaleAlt;
             ctx.fillRect(x + i * segPx, y, segPx, h);
         }
         ctx.strokeStyle = THEME.dim;
@@ -284,7 +310,7 @@ const TerrainFrame = (() => {
             ctx.lineTo(-Math.cos(a) * wdt * 0.35, -Math.sin(a) * wdt * 0.35);
             ctx.lineTo(-Math.cos(a1) * wdt, -Math.sin(a1) * wdt);
             ctx.closePath();
-            ctx.fillStyle = (i % 2 === 0) ? 'rgba(223,230,239,0.85)' : 'rgba(125,139,156,0.55)';
+            ctx.fillStyle = (i % 2 === 0) ? THEME.compassMajor : THEME.compassMinor;
             ctx.fill();
             ctx.stroke();
         }
@@ -303,8 +329,17 @@ const TerrainFrame = (() => {
     // ── Compose ──────────────────────────────────────────────────────────────
     //
     // opts: { mapCanvas, field, legend, worldType, worldData, title, subtitle,
-    //         globeCanvas, surveyId, date, extraRows }
+    //         globeCanvas, surveyId, date, extraRows, light }
     function compose(out, opts) {
+        THEME = (opts && opts.light) ? THEME_LIGHT : THEME_DARK;
+        try {
+            return _compose(out, opts);
+        } finally {
+            THEME = THEME_DARK;
+        }
+    }
+
+    function _compose(out, opts) {
         const map = opts.mapCanvas;
         const f   = opts.field;
         const RW  = map.width, RH = map.height;
@@ -405,7 +440,7 @@ const TerrainFrame = (() => {
                 ctx.textAlign = 'left';
                 ctx.fillText(m.label, SXo + 23, y);
                 ctx.textAlign = 'right';
-                ctx.fillStyle = '#5a6676';
+                ctx.fillStyle = THEME.pct;
                 ctx.fillText((m.share * 100).toFixed(1) + '%', SXo + SW, y);
                 ctx.textAlign = 'left';
                 y += 14;
@@ -689,7 +724,8 @@ const TerrainFrame = (() => {
     }
 
     return {
-        sheetSetup, renderSheet, compose, surveyId, THEME, PAD_X, PAD_Y, SIDEBAR, niceDistance, fmtDMS, chooseStep };
+        sheetSetup, renderSheet, compose, surveyId, PAD_X, PAD_Y, SIDEBAR, niceDistance, fmtDMS, chooseStep,
+        THEME: THEME_DARK, THEME_LIGHT };
 })();
 
 window.TerrainFrame = TerrainFrame;

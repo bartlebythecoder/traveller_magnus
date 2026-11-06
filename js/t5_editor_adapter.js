@@ -79,6 +79,17 @@
         return raw.tradeCodes;
     }
 
+    // A satellite's Chart 2C Close/Far status and orbit letter (T5_Data.TIDAL_LOCK.CHART_2C),
+    // read back from _raw — the generator rolls only what isn't here.
+    function _t5SatelliteOrbitSeed(body) {
+        const raw = body && body._raw;
+        const seed = {};
+        if (!raw) return seed;
+        if (typeof raw.isCloseSatellite === 'boolean') seed.isCloseSatellite = raw.isCloseSatellite;
+        if (raw.orbitLetter) seed.orbitLetter = raw.orbitLetter;
+        return seed;
+    }
+
     // Algorithm 7 (directives/project_manifest.md): elects a mainworld when the user hasn't
     // designated one. Runs over WORKING-COPY bodies (not generated output) because T5's
     // generator needs its mainworld anchor *before* generation starts — unlike CT/MgT2E, which
@@ -154,6 +165,8 @@
                     _id: m._id, name: m.name || '', uwp: m.uwp || null,
                     worldType: mSeeded.worldType, size: mSeeded.size, atm: mSeeded.atm, hydro: mSeeded.hydro,
                     pop: mSeeded.pop, gov: mSeeded.gov, law: mSeeded.law, starport: mSeeded.starport, tl: mSeeded.tl,
+                    // Chart 2C Close/Far and orbit letter, kept so a re-save doesn't re-roll them
+                    ..._t5SatelliteOrbitSeed(m),
                     _manualFields: [...(m._manualFields || []), ...mSeeded._manualFields],
                 };
             }),
@@ -321,6 +334,7 @@
                 orbitId: isMoonMW ? ownerOfMoon.orbitId : mwBody.orbitId,
                 parentBodyId:  isMoonMW ? ownerOfMoon._id : null,
                 parentStarIdx: isMoonMW ? (starIdxById[ownerOfMoon.parentStarId] ?? 0) : null,
+                ...(isMoonMW ? _t5SatelliteOrbitSeed(mwBody) : {}),
                 ...mwLock,
                 ...(mwTradeCodes !== null ? { tradeCodes: mwTradeCodes } : {}),
                 _manualFields: [...mwLockMF, ...(mwTradeCodes !== null ? ['tradeCodes'] : [])],
@@ -410,7 +424,9 @@
             const genBodies = [];
             (newSys.stars || []).forEach(star => (star.orbits || []).forEach(o => { if (o.contents) genBodies.push(o.contents); }));
 
-            const lockFields = ['worldType', 'size', 'atm', 'hydro', 'pop', 'gov', 'law', 'starport', 'tl'];
+            // orbitLetter/isCloseSatellite aren't locks — _t5SatelliteOrbitSeed reads them back so
+            // a satellite added this session keeps its Chart 2C orbit from Preview to Save.
+            const lockFields = ['worldType', 'size', 'atm', 'hydro', 'pop', 'gov', 'law', 'starport', 'tl', 'orbitLetter', 'isCloseSatellite'];
             function backfill(wcObj, genObj, isMainworld) {
                 if (!genObj) return;
                 wcObj._raw = wcObj._raw || {};

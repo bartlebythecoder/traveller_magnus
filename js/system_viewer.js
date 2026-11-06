@@ -206,9 +206,9 @@ const SystemViewer = (() => {
         if (m.periodHrs && m.periodHrs > 0) return m.periodHrs / (365.25 * 24);
         const G            = 6.674e-11;
         const M_EARTH_KG   = 5.972e24;
-        const parentMassKg = (parentWorld.mass || 1) * M_EARTH_KG;
+        const parentMassKg = (parentWorld.mass || parentWorld.drawMass || 1) * M_EARTH_KG;   // drawMass: T5 size 0 (_normT5World)
         const parentDiamKm = parentWorld.diamKm || 12742;
-        const pd           = m.pd || 20;
+        const pd           = m.pd || m.drawPd || 20;   // drawPd: T5's display-only stand-in (_t5MoonRings)
         const r_m          = pd * parentDiamKm * 1000;   // orbital radius metres
         const T_sec        = 2 * Math.PI * Math.sqrt(Math.pow(r_m, 3) / (G * parentMassKg));
         return T_sec / (365.25 * 24 * 3600);
@@ -539,6 +539,27 @@ const SystemViewer = (() => {
                  invented: sys.age ? [] : ['age'] };
     }
 
+    // T5 satellite orbits are lettered tracks, Ay (innermost) to Zee (outermost), with Close
+    // (A-M) inside Far (N-Z); T5 gives them no distance or period (Sean, 2026-11-02). Each moon
+    // gets `ring`, its drawn slot: lettered moons by the rank of their letter (two moons on one
+    // letter share a ring), half a ring of extra gap between the Close and Far groups, and moons
+    // with no usable letter outside them in list order. `drawPd` is a display-only stand-in
+    // planetary-diameter distance that only sets the orrery's animation speed (inner moons
+    // faster) — it is NOT `pd`, so nothing prints it as a T5 value. The array order is kept.
+    function _t5MoonRings(moons) {
+        const letters = [...new Set(moons.map(m => m.satelliteOrbit && m.satelliteOrbit.letter).filter(Boolean))].sort();
+        const hasClose = letters.some(l => l < 'N');
+        const ringOf = {};
+        letters.forEach((l, i) => { ringOf[l] = i + (hasClose && l >= 'N' ? 0.5 : 0); });
+        let next = letters.length ? Math.max(...Object.values(ringOf)) + 1 : 0;
+        moons.forEach(m => {
+            const l = m.satelliteOrbit && m.satelliteOrbit.letter;
+            m.ring = l ? ringOf[l] : next++;
+            m.drawPd = 10 + m.ring * 5;
+        });
+        return moons;
+    }
+
     function _normT5World(w, au, parentStarIdx, mainworldRef) {
         const isMainworld = _isSameWorld(w, mainworldRef) || w.type === 'Mainworld';
         let type  = 'Terrestrial Planet';
@@ -598,9 +619,18 @@ const SystemViewer = (() => {
             // _addBody — sizes 'M'/'N', 210000/220000 km) so there's nothing to visibly snap to,
             // mirroring the mass default's own reasoning exactly.
             diamKm:        w.diamKm    || (type === 'Gas Giant' ? 215000 : null),
+            // drawMass: display-only stand-in for _moonPeriodYears. A size-0 world has mass 0
+            // (WORLD_DIMENSIONS has no size 0), which the `|| 1` default read as 1 Earth mass in a
+            // 500 km body, so its moons spun ~100x too fast. Earth density from its diameter
+            // instead; never `mass`, so the tooltip, System Sheet and exports print nothing invented.
+            drawMass:      (w.mass === 0 && w.diamKm > 0) ? Math.pow(w.diamKm / 12742, 3) : null,
             gravity:       w.gravity   || null,
             meanTempK:     w.meanTempK || null,
-            moons:         (w.satellites || []).map(m => _normMoon(m, mainworldRef)),
+            // satelliteOrbit: Chart 2C orbit { letter, name } (null when none, or not trusted)
+            moons:         _t5MoonRings((w.satellites || []).map(m => Object.assign(_normMoon(m, mainworldRef), {
+                satelliteOrbit: (typeof T5_World_Engine !== 'undefined' && T5_World_Engine.getT5SatelliteOrbit)
+                    ? T5_World_Engine.getT5SatelliteOrbit(m) : null,
+            }))),
             uwp:           w.uwp       || null,
             name:          w.name      || null,
             starport:      w.starport  || null,
@@ -1693,7 +1723,8 @@ const SystemViewer = (() => {
 
         const moons = (w.moons || []).filter(m => m.type !== 'Empty');
         if (!_hideMoons) moons.forEach((m, mi) => {
-            const mDist = r + 10 + mi * 6;
+            // T5 moons are drawn by orbit letter (`ring`, _t5MoonRings); others by list order
+            const mDist = r + 10 + (m.ring != null ? m.ring : mi) * 6;
 
             // A Ring (CT: size === 'R', from either generation path — Bottom-Up also sets
             // type:'Ring' but Top-Down doesn't, so size is the one field both paths agree on)
@@ -1935,6 +1966,7 @@ const SystemViewer = (() => {
             const typeLabel   = isMainworld ? 'Mainworld Satellite' : 'Satellite';
             html += `<div style="color:${TH};margin-bottom:5px;border-bottom:1px solid ${TBORDER};padding-bottom:4px">`;
             html += `${label} <span style="color:${TSUB}">(${typeLabel})</span></div>`;
+            if (m.satelliteOrbit)  html += `<div>Orbit: ${m.satelliteOrbit.name} (${m.satelliteOrbit.letter})</div>`;
             if (m.pd != null)      html += `<div>Orbit: ${m.pd.toFixed(1)} PD from parent</div>`;
             if (m.uwp)             html += `<div style="margin-top:4px">UWP: <strong>${m.uwp}</strong></div>`;
             if (m.starport)        html += `<div>Starport: ${m.starport}</div>`;
@@ -2547,13 +2579,17 @@ const SystemViewer = (() => {
             });
         }
 
-        // Off-screen canvas, drawn with snapshot render state installed
+        // Off-screen canvas, drawn with snapshot render state installed.
+        // Follows the White Background setting, as the exported world images
+        // and system sheets do.
+        const light   = !!window.printMode;
         const canvas  = document.createElement('canvas');
         canvas.width  = width;
         canvas.height = height;
+        const ctx     = canvas.getContext('2d');
 
         _drawWith({
-            orrCtx:       canvas.getContext('2d'),
+            orrCtx:       ctx,
             canvasW:      width,
             canvasH:      height,
             sys:          normalised,
@@ -2563,7 +2599,7 @@ const SystemViewer = (() => {
             viewZoom:     _autoFitZoom(normalised, width, height),
             viewOffX:     0,
             viewOffY:     0,
-            lightMode:    false,  // always dark-mode for export
+            lightMode:    light,
             linearScale:  false,
             orbitOpacity: 0.3,    // light orbit rings add context without clutter
             hideMoons:    false,
@@ -2573,6 +2609,17 @@ const SystemViewer = (() => {
             hideMainworldHighlight: !!(opts.level && EC2 &&
                 !(window.DisclosureModel && window.DisclosureModel.atLeast(opts.level, 'g'))),
         });
+
+        // Light mode draws no star field, so the PNG would otherwise be dark ink
+        // on transparency - unreadable on a dark page. The dark snapshot stays
+        // transparent, as it always has been.
+        if (light) {
+            ctx.save();
+            ctx.globalCompositeOperation = 'destination-over';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+            ctx.restore();
+        }
 
         return new Promise(resolve => {
             canvas.toBlob(blob => {

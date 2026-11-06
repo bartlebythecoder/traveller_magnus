@@ -47,16 +47,24 @@ window.ensureFreeBorderSlot = function () {
         !window.borderPaths.has(d.id)
     );
     if (free) return false;
+    window.addBorderDefinition();
+    return true;
+};
+
+// Append a new empty border slot unconditionally (Border Manager "+ Add Border").
+window.addBorderDefinition = function () {
+    if (!window.borderDefinitions) window.borderDefinitions = getDefaultBorderDefinitions();
     const nextId = window.borderDefinitions.length > 0
         ? Math.max(...window.borderDefinitions.map(d => d.id)) + 1 : 1;
-    window.borderDefinitions.push({
+    const def = {
         id:      nextId,
         name:    `Border ${nextId}`,
         color:   BORDER_COLOR_CYCLE[(nextId - 1) % BORDER_COLOR_CYCLE.length],
         visible: true,
-    });
+    };
+    window.borderDefinitions.push(def);
     if (window.dbManager) window.dbManager.saveBorderDefinitions?.();
-    return true;
+    return def;
 };
 
 // Sort used border slots alphabetically, trim excess free slots to one sentinel,
@@ -1369,6 +1377,15 @@ function setupBorderWindow() {
 
     const closeBtnFooter = document.getElementById('btn-close-border-window-footer');
     if (closeBtnFooter) closeBtnFooter.addEventListener('click', window.closeBorderWindow);
+
+    const addBtn = document.getElementById('btn-add-border');
+    if (addBtn) addBtn.addEventListener('click', () => {
+        const def = window.addBorderDefinition();
+        window.renderBorderWindow();
+        const list = document.getElementById('border-window-list');
+        const input = list && list.querySelector(`.border-row[data-border-id="${def.id}"] .border-name-input`);
+        if (input) { input.scrollIntoView({ block: 'nearest' }); input.focus(); input.select(); }
+    });
 
     const ctxBtn = document.getElementById('ctx-open-border-window');
     if (ctxBtn) {

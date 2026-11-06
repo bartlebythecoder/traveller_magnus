@@ -193,6 +193,7 @@
             if (hexId.startsWith(prefix)) hexStates.delete(hexId);
         }
         delete window.sectorNames[slotNum];
+        clearSubsectorNamesForSector(slotNum);
         if (window.hexBorderAssignments) {
             for (const hexId of window.hexBorderAssignments.keys()) {
                 if (hexId.startsWith(prefix)) window.hexBorderAssignments.delete(hexId);
@@ -204,14 +205,21 @@
      * Read the four import-option checkboxes from a modal by element ID.
      * Falls back to true for any missing element so old call sites stay safe.
      */
-    function readImportOptions(sectorElId, routesElId, bordersElId, regionsElId) {
+    function readImportOptions(sectorElId, routesElId, bordersElId, regionsElId, subsectorNamesElId) {
         const checked = id => { const el = document.getElementById(id); return el ? el.checked : true; };
         return {
             importSector:  checked(sectorElId),
             importRoutes:  checked(routesElId),
             importBorders: checked(bordersElId),
             importRegions: checked(regionsElId),
+            importSubsectorNames: checked(subsectorNamesElId),
         };
+    }
+
+    // Subsector names live in the same metadata XML as routes, borders and
+    // regions, so asking for them alone still means fetching it.
+    function needsMetadata(opts) {
+        return !!(opts.importRoutes || opts.importBorders || opts.importRegions || opts.importSubsectorNames);
     }
 
     /**
@@ -284,9 +292,10 @@
      * Pre-flight check, then fetch and import each selected sector in sequence.
      */
     async function runImport() {
-        const opts = readImportOptions('otu-opt-sector', 'otu-opt-routes', 'otu-opt-borders', 'otu-opt-regions');
+        const opts = readImportOptions('otu-opt-sector', 'otu-opt-routes', 'otu-opt-borders', 'otu-opt-regions',
+                                       'otu-opt-subsector-names');
         opts.importSystemData = document.getElementById('otu-opt-system-data')?.checked ?? false;
-        const needsMeta = opts.importRoutes || opts.importBorders || opts.importRegions;
+        const needsMeta = needsMetadata(opts);
 
         const rows = document.querySelectorAll('.otu-sector-row');
         const selected = [];
@@ -436,6 +445,9 @@
             if (typeof window.renderBorderWindow === 'function') window.renderBorderWindow();
         }
 
+        // Clearing a slot and the metadata pass can both change subsector names.
+        if (window.dbManager) window.dbManager.saveSubsectorNames();
+
         if (opts.importSystemData && typeof applyOtuSystemData === 'function') {
             applyOtuSystemData();
         }
@@ -499,6 +511,7 @@
         gridHeight = height;
         hexStates.clear();
         window.sectorNames        = {};
+        window.subsectorNames     = {};
         window.sectorRoutes       = [];
         window.routeDefinitions   = (typeof getDefaultRouteDefinitions === 'function') ? getDefaultRouteDefinitions() : [];
         window.undoStack          = [];
@@ -578,7 +591,7 @@
      * @param {string} label   - "Universe" / "Neighbourhood", used in messages.
      */
     async function executeBulkImport(sectors, width, height, opts, label) {
-        const needsMeta = opts.importRoutes || opts.importBorders || opts.importRegions;
+        const needsMeta = needsMetadata(opts);
 
         if (opts.blockSlots) {
             clearBlockForBulkImport(opts.blockSlots, opts);
@@ -711,6 +724,9 @@
         if (typeof window.renderBorderWindow === 'function') window.renderBorderWindow();
         if (typeof window.renderRegionWindow === 'function') window.renderRegionWindow();
 
+        // Clearing a slot and the metadata pass can both change subsector names.
+        if (window.dbManager) window.dbManager.saveSubsectorNames();
+
         if (opts.importSystemData && typeof applyOtuSystemData === 'function') {
             applyOtuSystemData();
         }
@@ -832,8 +848,9 @@
         }
 
         const opts = readImportOptions('neighbourhood-opt-sector', 'neighbourhood-opt-routes',
-                                       'neighbourhood-opt-borders', 'neighbourhood-opt-regions');
-        if (!opts.importSector && !opts.importRoutes && !opts.importBorders && !opts.importRegions) {
+                                       'neighbourhood-opt-borders', 'neighbourhood-opt-regions',
+                                       'neighbourhood-opt-subsector-names');
+        if (!opts.importSector && !needsMetadata(opts)) {
             alert('No import options selected.');
             return;
         }
@@ -896,6 +913,7 @@
                     importRoutes:     true,
                     importBorders:    true,
                     importRegions:    true,
+                    importSubsectorNames: true,
                     mixonForeven:     mixonEl ? mixonEl.checked : false,
                     importSystemData: systemDataEl ? systemDataEl.checked : false,
                 }, 'Universe');

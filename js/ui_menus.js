@@ -3999,6 +3999,54 @@ function setupSettingsPanel() {
         requestAnimationFrame(draw);
     });
 
+    document.getElementById('toggle-subsector-names').addEventListener('change', (e) => {
+        showSubsectorNames = e.target.checked;
+        requestAnimationFrame(draw);
+    });
+
+    // --- Subsector Name (right-click > ASSIGN > Name Subsector…) ---
+    // Names the subsector under the right-clicked hex. Like sector names, a
+    // rename is not an undo step; it is saved with the map and to autosave.
+    let _namingSubsector = null;
+    const subsectorModal = document.getElementById('subsector-name-modal');
+    const subsectorInput = document.getElementById('subsector-name-input');
+
+    function closeSubsectorNameModal() {
+        subsectorModal.style.display = 'none';
+        _namingSubsector = null;
+    }
+
+    function saveSubsectorName() {
+        if (!_namingSubsector) return;
+        const name = subsectorInput.value.trim();
+        if (name) window.subsectorNames[_namingSubsector] = name;
+        else delete window.subsectorNames[_namingSubsector];
+        if (window.dbManager) window.dbManager.saveSubsectorNames();
+        closeSubsectorNameModal();
+        requestAnimationFrame(draw);
+    }
+
+    document.getElementById('ctx-name-subsector').addEventListener('click', () => {
+        document.getElementById('context-menu').classList.remove('visible');
+        if (!contextSubsectorPrefix) return;
+        _namingSubsector = contextSubsectorPrefix;
+        const [sNum, sub] = contextSubsectorPrefix.split('-');
+        const sectorLabel = (window.sectorNames && window.sectorNames[parseInt(sNum, 10)]) || `Sector ${sNum}`;
+        document.getElementById('subsector-name-modal-label').textContent = `Subsector ${sub} of ${sectorLabel}`;
+        subsectorInput.value = window.subsectorNames[contextSubsectorPrefix] || '';
+        subsectorModal.style.display = 'flex';
+        subsectorInput.focus();
+        subsectorInput.select();
+    });
+    document.getElementById('btn-subsector-name-save').addEventListener('click', saveSubsectorName);
+    document.getElementById('btn-subsector-name-cancel').addEventListener('click', closeSubsectorNameModal);
+    // Handled here and stopped: Escape would otherwise reach the global
+    // shortcut handler, which deselects every hex when nothing else is open.
+    subsectorInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter')  { e.preventDefault(); e.stopPropagation(); saveSubsectorName(); }
+        if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeSubsectorNameModal(); }
+    });
+
     // --- Sector Name Editor ---
     document.getElementById('btn-edit-sector-names').addEventListener('click', () => {
         const modal = document.getElementById('sector-name-editor-modal');

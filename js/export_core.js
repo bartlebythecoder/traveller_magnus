@@ -91,6 +91,15 @@ const ExportCore = (() => {
 
     // ── Filename / display-name helpers ───────────────────────────────────────
 
+    // "Subsector A — Shivva", or "Subsector A" when unnamed (v0.18.1.4).
+    // DISPLAY ONLY - headings and titles. File names, folder names and wiki
+    // links stay "Subsector A": a rename must not break a vault or site that
+    // was exported before it.
+    function subsectorLabel(sectorNum, subsectorChar) {
+        const name = window.subsectorNames && window.subsectorNames[`${sectorNum}-${subsectorChar}`];
+        return name ? `Subsector ${subsectorChar} — ${name}` : `Subsector ${subsectorChar}`;
+    }
+
     function sanitize(str) {
         return (str || 'Unknown').replace(/[/\\:*?"<>|]/g, '-').replace(/\s+/g, ' ').trim();
     }
@@ -1011,17 +1020,33 @@ const ExportCore = (() => {
         return b;
     }
 
+    // The Climate Zone follows the world's climate code (none for gas giants and belts); saves
+    // made before 2026-11-01 still carry the old text, so it is worked out again here.
+    function _t5Climate(raw) {
+        return typeof T5_World_Engine !== 'undefined' && T5_World_Engine.getT5ClimateDisplay
+            ? T5_World_Engine.getT5ClimateDisplay(raw) : (raw.climateZone || '');
+    }
+
+    // Saves made before 2026-11-01 carry the old Rotation wording; it is brought up to date here.
+    function _t5Rotation(raw) {
+        return typeof T5_World_Engine !== 'undefined' && T5_World_Engine.getT5RotationDisplay
+            ? T5_World_Engine.getT5RotationDisplay(raw) : raw.rotationState;
+    }
+
     function formatT5WorldFields(raw, orb, isMainworld, state) {
         if (!raw) return [];
         const b = [GAP, h(2, 'Physical Data')];
         if (orb && orb.distAU != null) b.push(f('Distance', `${orb.distAU.toFixed(2)} AU`));
         if (raw.worldType)             b.push(f('World Type', raw.worldType));
-        if (raw.climateZone)           b.push(f('Climate Zone', raw.climateZone));
+        // The mainworld's codes live on state.t5Data
+        const climate = _t5Climate(isMainworld && state && state.t5Data && state.t5Data.tradeCodes
+            ? { ...raw, tradeCodes: state.t5Data.tradeCodes } : raw);
+        if (climate)                   b.push(f('Climate Zone', climate));
         if (raw.diamKm != null)        b.push(f('Diameter', `${Math.round(raw.diamKm).toLocaleString()} km`));
         if (raw.gravity !== undefined) b.push(f('Gravity', `${n(raw.gravity)} G`));
         const mv = raw.massEarths ?? raw.mass;
         if (mv != null)                b.push(f('Mass', `${n(mv)} M⊕`));
-        if (raw.rotationState !== undefined) b.push(f('Rotation', raw.rotationState));
+        if (raw.rotationState !== undefined) b.push(f('Rotation', _t5Rotation(raw)));
         if (isMainworld) {
             if (state.allegiance) b.push(f('Allegiance', state.allegiance));
             if (state.cluster)    b.push(f('Region', state.cluster));
@@ -1032,13 +1057,17 @@ const ExportCore = (() => {
     function formatT5SatFields(raw) {
         if (!raw) return [];
         const b = [GAP, h(2, 'Physical Data')];
+        // Chart 2C satellite orbit, e.g. "Dee (D)" — same (d) level as a world's Orbit
+        const so = (typeof T5_World_Engine !== 'undefined' && T5_World_Engine.getT5SatelliteOrbit)
+            ? T5_World_Engine.getT5SatelliteOrbit(raw) : null;
+        if (so)                        b.push(f('Orbit', `${so.name} (${so.letter})`));
         if (raw.worldType)             b.push(f('World Type', raw.worldType));
-        if (raw.climateZone)           b.push(f('Climate Zone', raw.climateZone));
+        if (_t5Climate(raw))           b.push(f('Climate Zone', _t5Climate(raw)));
         if (raw.diamKm != null)        b.push(f('Diameter', `${Math.round(raw.diamKm).toLocaleString()} km`));
         if (raw.gravity !== undefined) b.push(f('Gravity', `${n(raw.gravity)} G`));
         const mv = raw.massEarths ?? raw.mass;
         if (mv != null)                b.push(f('Mass', `${n(mv)} M⊕`));
-        if (raw.rotationState !== undefined) b.push(f('Rotation', raw.rotationState));
+        if (raw.rotationState !== undefined) b.push(f('Rotation', _t5Rotation(raw)));
         return b;
     }
 
@@ -1216,7 +1245,10 @@ const ExportCore = (() => {
             hydrographics: hyd,
             temperature:   tempBand,
             temperatureK:  tempK,
-            size:          worldData.size ?? 0,
+            // The CT, T5 and RTT planet normalisers carry no `size`, which left
+            // every one of their flat-map images without a hex grid (size is
+            // the grid's only input). Fall back to the UWP's size digit.
+            size:          worldData.size ?? (uwp.length >= 2 ? uwp[1] : 0),
             uwp,
         };
     }
@@ -1267,7 +1299,8 @@ const ExportCore = (() => {
         if (typeof SystemSheet === 'undefined') return null;
         let canvas;
         try {
-            canvas = SystemSheet.render(state, hexId, { scale: SHEET_EXPORT.scale, star: star || 0 });
+            canvas = SystemSheet.render(state, hexId, { scale: SHEET_EXPORT.scale, star: star || 0,
+                                                        light: !!window.printMode });
         } catch (e) {
             console.warn('[export] system sheet failed:', hexId, e);
             return null;
@@ -1434,6 +1467,7 @@ const ExportCore = (() => {
                 office: (window.sectorName || 'Sector') + ' Survey Office',
                 surveyId: TerrainFrame.surveyId(hexId, name, pin.lat, pin.lon, S.widthKm),
                 date: new Date().toISOString().slice(0, 10),
+                light: !!window.printMode,
             });
 
             return await new Promise(function (resolve) {
@@ -1456,7 +1490,7 @@ const ExportCore = (() => {
 
     return {
         crc32, buildZip,
-        sanitize, systemFilename, bodyFilename,
+        sanitize, systemFilename, bodyFilename, subsectorLabel,
         worldDisplayName, moonDisplayName, starDisplayName,
         resolveSystemName, resolveUWP, kToC,
         findRawWorld, findRawMoon, findRawStar,

@@ -154,7 +154,9 @@ const ObsidianExporter = (() => {
 
     // ── Markdown builders ─────────────────────────────────────────────────────
 
-    function _buildSubsectorIndex(sectorName, subsectorChar, systems, mapImageFilename) {
+    function _buildSubsectorIndex(sectorName, sectorNum, subsectorChar, systems, mapImageFilename) {
+        // Display only: the file name and every [[link]] keep "Subsector X".
+        const label = ExportCore.subsectorLabel(sectorNum, subsectorChar);
         const rows = systems.map(s => {
             const lv   = _levelFor(s.hexId);
             const name = _resolveSystemName(s.state, lv, s.hexCode);
@@ -175,10 +177,10 @@ const ObsidianExporter = (() => {
             `subsector: ${_yamlStr(subsectorChar)}`,
             '---',
             '',
-            `# ${sectorName} — Subsector ${subsectorChar}`,
+            `# ${sectorName} — ${label}`,
             '',
             `**Sector:** ${sectorName}  `,
-            `**Subsector:** ${subsectorChar}  `,
+            `**Subsector:** ${label.replace(/^Subsector /, '')}  `,
             `**Systems:** ${systems.length}`,
         ];
 
@@ -609,7 +611,7 @@ const ObsidianExporter = (() => {
             }
         }
 
-        const indexMd   = _buildSubsectorIndex(sectorName, subsectorChar, systems, mapImageFilename);
+        const indexMd   = _buildSubsectorIndex(sectorName, sectorNum, subsectorChar, systems, mapImageFilename);
         const indexName = `${_sanitize(sectorName)} - Subsector ${subsectorChar}.md`;
         files.push({ name: indexName, data: enc.encode(indexMd) });
 

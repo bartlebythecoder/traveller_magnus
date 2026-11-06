@@ -30,7 +30,10 @@
             'F': { 'Ia': 11, 'Ib': 10, 'II': 9, 'III': 6, 'IV': 6, 'V': 4, 'VI': 3, 'D': 0 },
             'G': { 'Ia': 12, 'Ib': 10, 'II': 9, 'III': 7, 'IV': 5, 'V': 3, 'VI': 2, 'D': 0 },
             'K': { 'Ia': 12, 'Ib': 10, 'II': 9, 'III': 8, 'IV': 5, 'V': 2, 'VI': 1, 'D': 0 },
-            'M': { 'Ia': 12, 'Ib': 11, 'II': 10, 'III': 9, 'V': 0, 'VI': 0, 'D': 0 }
+            'M': { 'Ia': 12, 'Ib': 11, 'II': 10, 'III': 9, 'V': 0, 'VI': 0, 'D': 0 },
+            // Brown Dwarf: HZ at Orbit 0, with the dwarf end of the scale (Charts H1/J1/K1;
+            // confirmed by Sean, 2026-11-01). BDs are stored with size 'V', 'VI' or 'D'.
+            'BD': { 'V': 0, 'VI': 0, 'D': 0 }
         },
 
         // Orbit distances in AU
@@ -209,12 +212,106 @@
             { code: "Ri", reqs: { atm: [6, 8], pop: [6, 7, 8] } }
         ],
 
+        // Climate Trade Classifications (Chart D, Book 3 p.26): UWP requirements plus a position
+        // relative to the HZ (orbit - HZ orbit). hzMin/hzMax bound that position; no hzMax = any
+        // orbit further out. A req left out (Fr atm) means any value.
+        // ORDER MATTERS: the first entry that fits is the world's one climate code. Ho and Co are
+        // climate remarks, not properly TCs (p.26), with no UWP requirements — listed after Tr and
+        // Tu so a world gets Tr instead of Ho (Tu instead of Co), and Ho/Co only when it misses
+        // Tr/Tu's UWP (ruling confirmed by Sean, 2026-11-01).
+        CLIMATE_TRADE_CODES: [
+            { code: "Tr", reqs: { size: range(6, 9), atm: range(4, 9), hydro: range(3, 7) }, hzMin: -1, hzMax: -1 },
+            { code: "Tu", reqs: { size: range(6, 9), atm: range(4, 9), hydro: range(3, 7) }, hzMin: 1, hzMax: 1 },
+            { code: "Fr", reqs: { size: range(2, 9), hydro: range(1, 10) }, hzMin: 2 },
+            { code: "Ho", reqs: {}, hzMin: -1, hzMax: -1 },
+            { code: "Co", reqs: {}, hzMin: 1, hzMax: 1 }
+        ],
+
         CLIMATE_MAPPING: {
             "-2": "Inferno",
             "-1": "Hot / Tropic",
              "0": "Temperate",
              "1": "Cold / Tundra",
              "2": "Frozen"
+        },
+
+        // T5 Tidal Locking, Twilight Zone & Locked Satellites (Book 3: Worlds and Adventures)
+        // Page refs — p.17 (Orbit 0/1 rule), p.226 (Lk day length), p.24 (Chart 2C satellite tables), p.49 (Tz world maps)
+        TIDAL_LOCK: {
+            LOGIC: {
+                STAR_LOCK: "A Planet in Orbit 0 or Orbit 1 is tidally locked to its star. Although the world may be in the HZ, hospitable conditions are present only in a narrow Twilight Zone.",
+                STAR_LOCK_SCOPE: "Applies to the Mainworld and to other worlds in the system. Fixed at Orbits 0-1; does not vary with spectral type or size.",
+                PARENT_LOCK: "A Satellite in Close Orbit to its planet is Locked to it. Far Satellites are not locked.",
+                SATELLITE_NO_TZ: "Satellites do not have Twilight Zones.",
+                CODES: "Tz = star-locked planet (Orbit 0-1). Lk = Close Satellite locked to its planet. A star-locked planet receives Tz, never Lk. Lk, Tz, Ho, and Co refer to climate but are not properly TCs.",
+                SATELLITE_CODES: "House rule: Sa is used only for a satellite mainworld, which always carries it (Close or Far); Lk is used for any satellite in a Close orbit, mainworld or not, so a Close satellite mainworld carries Sa + Lk. RAW (Chart 2C) heads the Close column =LK and the Far column =SA.",
+                CHART_2C_SATELLITE: "Satellite? Is Mainworld Planet or Close or Far Satellite?",
+                CHART_2C_GG: "GG? If Satellite, is parent world Gas Giant or Planet?",
+                CHART_2C_ORBIT_LETTER: "Note Satellite Orbit Letter.",
+                CHART_2C_CLOSE: "Close is Tidally Locked to Primary.",
+                MAINWORLD_PARENT: "Ruling (Sean, 2026-11-01): the GG? column is read from a separate Flux roll, made only when the mainworld is a satellite. GG = the parent is a Gas Giant; if the system has no Gas Giant, the parent is a new BigWorld. no = the parent is a new BigWorld (Planet) in the mainworld's orbit.",
+                OTHER_SATELLITES: "Ruling (Sean, 2026-11-01): Chart 2C is a mainworld chart. A satellite that is not the mainworld rolls 2D for Close (7-) or Far (8+), then Flux on the Close or Far column of Chart 2C for its orbit letter.",
+                CLIMATE: "Orbit 0 or 1 is a Tz Twilight Zone World. Tz = Twilight Zone. Tidally locked with Twilight Zone, plus Hot and Cold Hemispheres.",  // Book 3 p.226, quoted
+                LK_DAY_LENGTH: "For an Lk satellite, day length equals satellite orbit length.",  // Book 3 p.226, quoted
+                TZ_DAY_LENGTH: "A Tz world has no day/night cycle; one hemisphere always faces the star."
+            },
+            STAR_LOCK_ORBITS: [0, 1],
+            CLOSE_SATELLITE_MAX_ROLL: 7,   // 2D: 7- = Close (Lk), 8+ = Far
+            CODES: { STAR_LOCKED: 'Tz', PARENT_LOCKED: 'Lk', SATELLITE: 'Sa' },
+
+            // Chart 2C (Book 3 p.24): Satellite? (mainworld only), GG? (separate Flux roll) and Satellite Orbit Letter.
+            // Each column is read with Flux; rows -6 and +6 are reachable only with a modifier.
+            CHART_2C: {
+                FLUX_MIN: -6,
+                FLUX_MAX: 6,
+                // Satellite? — any Flux not listed means the mainworld is a Planet
+                MAINWORLD_SATELLITE: { '-5': 'Far', '-4': 'Far', '-3': 'Close' },
+                // GG? — Flux at or below this = Gas Giant parent; above = Planet parent
+                PARENT_GAS_GIANT_MAX_FLUX: 0,
+                ORBITS: {
+                    CLOSE: {
+                        '-6': { letter: 'A', name: 'Ay' },
+                        '-5': { letter: 'B', name: 'Bee' },
+                        '-4': { letter: 'C', name: 'Cee' },
+                        '-3': { letter: 'D', name: 'Dee' },
+                        '-2': { letter: 'E', name: 'Ee' },
+                        '-1': { letter: 'F', name: 'Eff' },
+                        '0':  { letter: 'G', name: 'Gee' },
+                        '1':  { letter: 'H', name: 'Aitch' },
+                        '2':  { letter: 'I', name: 'Eye' },
+                        '3':  { letter: 'J', name: 'Jay' },
+                        '4':  { letter: 'K', name: 'Kay' },
+                        '5':  { letter: 'L', name: 'Ell' },
+                        '6':  { letter: 'M', name: 'Em' }
+                    },
+                    FAR: {
+                        '-6': { letter: 'N', name: 'En' },
+                        '-5': { letter: 'O', name: 'Oh' },
+                        '-4': { letter: 'P', name: 'Pee' },
+                        '-3': { letter: 'Q', name: 'Que' },
+                        '-2': { letter: 'R', name: 'Arr' },
+                        '-1': { letter: 'S', name: 'Ess' },
+                        '0':  { letter: 'T', name: 'Tee' },
+                        '1':  { letter: 'U', name: 'Yu' },
+                        '2':  { letter: 'V', name: 'Vee' },
+                        '3':  { letter: 'W', name: 'Dub' },
+                        '4':  { letter: 'X', name: 'Ex' },
+                        '5':  { letter: 'Y', name: 'Wye' },
+                        '6':  { letter: 'Z', name: 'Zee' }
+                    }
+                }
+            },
+
+            // Tz world map: day side, night side, and a twilight strip between them
+            MAP: {
+                TWILIGHT_WIDTH_WORLD_HEXES: 1,   // 1,000 km
+                ZONES: {
+                    BAKED:    { code: 41, side: 'star-facing', oceanBecomes: 'Desert' },
+                    TWILIGHT: { code: 42, side: 'terminator',  oceanBecomes: null },  // normal terrain and liquid water
+                    FROZEN:   { code: 43, side: 'dark-facing', oceanBecomes: 'Ice Fields' }
+                },
+                TERMINATOR: "The boundary between day and night sides is drawn as a vertical line between the poles."
+            }
         }
     };
 }));

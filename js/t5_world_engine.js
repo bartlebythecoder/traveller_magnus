@@ -19,7 +19,8 @@
     const { toEHex, fromEHex, clampUWP, rollFlux } = UniversalMath;
 
     // Safe Fallback Utilities
-    const _rng = (typeof rng === 'function') ? rng : Math.random;
+    // Read rng at each call: reseedForHex replaces it, so a copy taken at load never re-seeds.
+    const _rng = () => (typeof rng === 'function') ? rng() : Math.random();
     const _roll1D = (typeof tRoll1D === 'function') ? tRoll1D : (label) => Math.floor(_rng() * 6) + 1;
     const _roll2D = (typeof tRoll2D === 'function') ? tRoll2D : (label) => Math.floor(_rng() * 6) + 1 + Math.floor(_rng() * 6) + 1;
     const _log = (typeof writeLogLine === 'function') ? writeLogLine : console.log;
@@ -439,27 +440,88 @@
     }
 
     /**
+     * T5_Data.TIDAL_LOCK.LOGIC.STAR_LOCK: a planet (not a satellite) in Orbit 0 or 1 is
+     * tidally locked to its star.
+     */
+    function isT5StarLocked(world) {
+        const isSatellite = world.isMoon || world.isSatellite || world.type === 'Satellite';
+        return !isSatellite && T5_Data.TIDAL_LOCK.STAR_LOCK_ORBITS.includes(world.orbitId);
+    }
+
+    /**
+     * A gas giant or belt, by either field the engines set. Ruling (Sean, 2026-11-01): neither
+     * takes Tz, and neither has a climate label.
+     */
+    function isT5GGorBelt(world) {
+        if (!world) return false;
+        const isGiant = t => typeof t === 'string' && (t.includes('Gas Giant') || t === 'Ice Giant');
+        return world.worldType === 'Belt' || world.type === 'Planetoid Belt' ||
+            isGiant(world.type) || isGiant(world.worldType);
+    }
+
+    /**
+     * T5_Data.TIDAL_LOCK.LOGIC.PARENT_LOCK: a Close Satellite is locked to its planet; a Far
+     * Satellite is not. isCloseSatellite is set by t5_topdown_generator.js: the mainworld's
+     * lunar trigger (Chart 2C Satellite?), or the 2D Close/Far roll for every other satellite.
+     */
+    function isT5CloseSatellite(world) {
+        const isSatellite = world.isMoon || world.isSatellite || world.type === 'Satellite';
+        return isSatellite && (world.worldType === 'Close Satellite' || world.isCloseSatellite === true);
+    }
+
+    /**
+     * T5_Data.TIDAL_LOCK.CHART_2C: a satellite's orbit as { letter, name, isClose }, e.g.
+     * { letter: 'D', name: 'Dee', isClose: true }. Returns null when the body has no letter, or
+     * when its letter is in the wrong column for its Close/Far status (saves made before Chart
+     * 2C gave Far mainworlds a Close letter) — a wrong orbit is never shown.
+     */
+    function getT5SatelliteOrbit(world) {
+        if (!world || !world.orbitLetter) return null;
+        // A mainworld moved off a moon in the System Editor can keep its old letter.
+        if (!(world.isMoon || world.isSatellite || world.type === 'Satellite' || world.type === 'Moon')) return null;
+        const letter = String(world.orbitLetter).toUpperCase();
+        // Saves made before isCloseSatellite existed record a Close mainworld only by its Lk code.
+        const isClose = world.isCloseSatellite === true || world.worldType === 'Close Satellite' ||
+            (Array.isArray(world.tradeCodes) && world.tradeCodes.includes(T5_Data.TIDAL_LOCK.CODES.PARENT_LOCKED));
+        const column = T5_Data.TIDAL_LOCK.CHART_2C.ORBITS[isClose ? 'CLOSE' : 'FAR'];
+        const row = Object.values(column).find(r => r.letter === letter);
+        return row ? { letter: row.letter, name: row.name, isClose } : null;
+    }
+
+    // Rotation text. T5_Data.TIDAL_LOCK.LOGIC.TZ_DAY_LENGTH / LK_DAY_LENGTH: a star-locked world
+    // has no day/night cycle; a Close satellite's day equals its orbit length. T5 gives no orbit
+    // periods, so no hours are shown.
+    const ROTATION_TEXT = {
+        STAR: 'Tidally Locked to Star (no day/night cycle)',
+        PARENT: 'Tidally Locked to Parent (day = orbit length)',
+        FREE: 'Undefined (Referee Discretion)'
+    };
+    // Saves made before 2026-11-01 carry the old wording.
+    const LEGACY_ROTATION_TEXT = {
+        'Tidally Locked (1:1 to Star)': ROTATION_TEXT.STAR,
+        'Tidally Locked (1:1 to Parent)': ROTATION_TEXT.PARENT
+    };
+
+    /**
      * T5 2.5: ROTATIONAL DYNAMICS
      * Evaluates tidal locking for planets in inner orbits and close satellites.
      * Standard day length is undefined in T5 and left to Referee Discretion.
      */
     function calculateT5RotationalDynamics(world) {
-        const isSatellite = world.isMoon || world.isSatellite || world.type === 'Satellite';
-
         let isLocked = false;
         let lockType = "Free";
-        let rotationState = "Undefined (Referee Discretion)";
+        let rotationState = ROTATION_TEXT.FREE;
 
-        if (!isSatellite && (world.orbitId === 0 || world.orbitId === 1)) {
+        if (isT5StarLocked(world)) {
             isLocked = true;
             lockType = "Locked (Star)";
-            rotationState = "Tidally Locked (1:1 to Star)";
+            rotationState = ROTATION_TEXT.STAR;
         }
 
-        if (isSatellite && world.worldType === 'Close Satellite') {
+        if (isT5CloseSatellite(world)) {
             isLocked = true;
             lockType = "Locked (Parent)";
-            rotationState = "Tidally Locked (1:1 to Parent)";
+            rotationState = ROTATION_TEXT.PARENT;
         }
 
         if (!_isManual(world, 'isTidallyLocked')) world.isTidallyLocked = isLocked;
@@ -502,8 +564,15 @@
         });
 
         // (These remain hardcoded as they depend on the world's physical relationship to the system)
-        if (world.worldType === 'Far Satellite' || world.isMoon || world.isSatellite || world.type === 'Satellite') codes.push("Sa");
-        if (world.worldType === 'Close Satellite' || world.isTidallyLocked) codes.push("Lk");
+        // T5_Data.TIDAL_LOCK.LOGIC.SATELLITE_CODES (house rule): Sa only for a satellite
+        // mainworld, and any Close Satellite adds Lk (LOGIC.CODES) — a star-locked planet gets
+        // Tz, never Lk.
+        const isMainworld = world.type === 'Mainworld' || world.isLunarMainworld === true || world.isMainworld === true;
+        const isSatellite = world.worldType === 'Far Satellite' || world.isMoon || world.isSatellite || world.type === 'Satellite';
+        if (isMainworld && isSatellite) codes.push(T5_Data.TIDAL_LOCK.CODES.SATELLITE);
+        // Gas giants and belts never take Tz (Sean, 2026-11-01).
+        if (isT5CloseSatellite(world)) codes.push(T5_Data.TIDAL_LOCK.CODES.PARENT_LOCKED);
+        if (isT5StarLocked(world) && !isT5GGorBelt(world)) codes.push(T5_Data.TIDAL_LOCK.CODES.STAR_LOCKED);
 
         // Travel Zone Specials
         if (world.travelZone === 'Red' && !codes.includes("Fo")) codes.push("Fo");
@@ -696,26 +765,74 @@
         if (wayStation) world.bases.push('W');
     }
 
+    // The CLIMATE_MAPPING position whose words name each climate code's text.
+    const CLIMATE_TEXT_POSITION = { Tr: '-1', Ho: '-1', Tu: '1', Co: '1', Fr: '2' };
+
     /**
-     * T5 2.4: THERMAL LOGIC — Zone-locked climate assignment.
-     * T5 uses HZ variance rather than thermodynamic math.
+     * T5 2.4: THERMAL LOGIC — the Climate Zone text. Ruling (Sean, 2026-11-01): the text follows
+     * the world's climate code (Tz, Tr/Ho, Tu/Co, Fr), and a world with none of them — every
+     * gas giant and belt included — has no climate text.
      */
-    function calculateT5Climate(world, sysHzco) {
-        const isSatellite = world.isMoon || world.isSatellite || world.type === 'Satellite';
-        const hzVariance = Math.round((world.orbitId || 0) - (sysHzco || 0));
-        const clampedVariance = Math.max(-2, Math.min(2, hzVariance));
+    function getT5ClimateText(world) {
+        if (!world || isT5GGorBelt(world)) return '';
+        const codes = Array.isArray(world.tradeCodes) ? world.tradeCodes
+            : String(world.tradeCodes || '').split(/\s+/);
+        if (codes.includes(T5_Data.TIDAL_LOCK.CODES.STAR_LOCKED)) return 'Twilight Zone (Tz)';
+        const code = codes.find(c => CLIMATE_TEXT_POSITION[c]);
+        return code ? (T5_Data.CLIMATE_MAPPING[CLIMATE_TEXT_POSITION[code]] || '') : '';
+    }
 
-        // Twilight Zone override: orbit 0 or 1 — but NOT for satellites (they orbit a parent, not the star)
-        if (!_isManual(world, 'climateZone')) {
-            if (!isSatellite && (world.orbitId === 0 || world.orbitId === 1)) {
-                world.climateZone = "Twilight Zone (Tz)";
-            } else {
-                const mapping = (T5_Data && T5_Data.CLIMATE_MAPPING) ? T5_Data.CLIMATE_MAPPING : {};
-                world.climateZone = mapping[String(clampedVariance)] || "Temperate";
-            }
-        }
+    // The Climate Zone to show: a hand-typed one as typed, otherwise the text for the world's
+    // codes — so a save made before 2026-11-01 shows what a fresh generation would.
+    function getT5ClimateDisplay(world) {
+        if (!world || isT5GGorBelt(world)) return '';
+        return _isManual(world, 'climateZone') ? (world.climateZone || '') : getT5ClimateText(world);
+    }
 
-        tResult('Climate Zone', world.climateZone, 'T5 2.4: Thermal Logic');
+    // The Rotation to show: a hand-typed one as typed, otherwise the stored text with the
+    // pre-2026-11-01 wording brought up to date. The lock itself is not re-worked out here.
+    function getT5RotationDisplay(world) {
+        if (!world || world.rotationState == null) return '';
+        if (_isManual(world, 'rotationState')) return world.rotationState;
+        return LEGACY_ROTATION_TEXT[world.rotationState] || world.rotationState;
+    }
+
+    /**
+     * T5_Data.CLIMATE_TRADE_CODES (Chart D, Book 3 p.26): the world's one climate code, or ''.
+     * hzPosition = orbit - HZ orbit (a satellite uses its planet's orbit). Tr/Tu/Fr need the
+     * right UWP as well as the right position; the first entry that fits wins, so a world at
+     * HZ -1/+1 that misses Tr/Tu falls through to Ho/Co. isTz: the world is star-locked and
+     * takes Tz instead (left out = isT5StarLocked). A gas giant or belt takes no climate code at
+     * all (Sean, 2026-11-01). Applies to every world, not only the mainworld (Sean, 2026-11-02).
+     */
+    function getT5ClimateCode(world, hzPosition, isTz) {
+        if (!world || isT5GGorBelt(world)) return '';
+        if (isTz === undefined) isTz = isT5StarLocked(world);
+        if (isTz) return T5_Data.TIDAL_LOCK.CODES.STAR_LOCKED;
+        const size = typeof world.size === 'string' ? fromEHex(world.size) : (world.size || 0);
+        const tc = T5_Data.CLIMATE_TRADE_CODES.find(c =>
+            hzPosition >= c.hzMin && (c.hzMax === undefined || hzPosition <= c.hzMax) &&
+            (!c.reqs.size || c.reqs.size.includes(size)) &&
+            (!c.reqs.atm || c.reqs.atm.includes(world.atm || 0)) &&
+            (!c.reqs.hydro || c.reqs.hydro.includes(world.hydro || 0)));
+        return tc ? tc.code : '';
+    }
+
+    // Replaces any climate code (Tz, Tr, Tu, Fr, Ho, Co) in world.tradeCodes with getT5ClimateCode's
+    // one, so a world never carries two.
+    function applyT5ClimateCode(world, hzPosition, isTz) {
+        const code = getT5ClimateCode(world, hzPosition, isTz);
+        if (!code && !world.tradeCodes) return '';   // a gas giant has no trade code list
+        const climateCodes = [T5_Data.TIDAL_LOCK.CODES.STAR_LOCKED, ...T5_Data.CLIMATE_TRADE_CODES.map(tc => tc.code)];
+        world.tradeCodes = (world.tradeCodes || []).filter(c => !climateCodes.includes(c));
+        if (code) world.tradeCodes.push(code);
+        return code;
+    }
+
+    // Call after the world's trade codes are final.
+    function calculateT5Climate(world) {
+        if (!_isManual(world, 'climateZone')) world.climateZone = getT5ClimateText(world);
+        tResult('Climate Zone', world.climateZone || 'None (no climate code)', 'T5 2.4: Thermal Logic');
     }
 
     return {
@@ -729,8 +846,15 @@
         generateT5TechLevelByWorldType,
         calculateT5TradeCodes,
         calculateT5RotationalDynamics,
+        getT5RotationDisplay,
+        getT5SatelliteOrbit,
         calculateT5PhysicalStats,
         calculateT5Climate,
+        getT5ClimateCode,
+        applyT5ClimateCode,
+        getT5ClimateText,
+        getT5ClimateDisplay,
+        isT5GGorBelt,
         generateT5Bases,
         generateT5Mainworld
     };

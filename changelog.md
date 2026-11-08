@@ -1,4 +1,7 @@
-### [v0.18.1.4] - In Progress
+### [v0.18.1.4.1] - In Progress
+1. **Fixed — hex grids on very large worlds:** exported world images of planets of size G and above, such as T5 Big Worlds, now show their hex grid in HTML and Obsidian exports, where it was missing.
+
+### [v0.18.1.4] - 2026-11-08
 1. **New — White Background images:** the System Sheet, the orrery and regional survey sheets now follow the White Background Mode setting, both in the app and in HTML and Obsidian exports.
 2. **Fixed — White Background world images:** exported world images and downloaded flat maps now have a white background instead of a transparent one when White Background Mode is on.
 3. **New — Subsector names:** right-click any hex and choose **ASSIGN → Name Subsector…** to name its subsector; names are saved with the map, and maps saved before this version load as before with none named.

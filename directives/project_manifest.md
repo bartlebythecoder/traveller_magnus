@@ -80,6 +80,11 @@ with measured numbers, give ONE recommendation, ask with the question tool, buil
 
 ### 0.0.D HANDOFF — v0.18.1.4, updated 2026-11-03. START HERE.
 
+**2026-11-08: v0.18.1.4 dated 2026-11-08 and v0.18.1.4.1 opened "In Progress"** (Sean, via
+the `new_version` skill, init mode). v0.18.1.4.1 item 1 = the eHex hex-grid fix recorded
+under item 10 below. Whether the item 1 hand-checks below were done before dating was not
+stated — ask Sean before treating them as done.
+
 **v0.18.1.4 is built and verified, not yet dated.** Every change is built, documented
 (changelog/README items 1–34, identical copies) and verified. Nothing is half-written in the
 code. **Only the two release steps below are left** — no open investigations, nothing waiting
@@ -177,6 +182,19 @@ training data (CLAUDE.md, Zero-Assumption Policy).
     It now falls back to the UWP size digit. The in-app viewers read the raw body's size and
     were always right. Verified: all 469 CT/T5/RTT fixture planets went from no grid to the
     right size (check shown to FAIL with the fix off), sample Diamond PNG looked at.
+    **Follow-up 2026-11-08 (user bug report, Kanikit `HHFA466-5` / Calendula II `YHFA142-A`):
+    the UWP fallback still dropped the grid for sizes G and up.** The digit is eHex, but
+    `_parseStat` (`planet_renderer.js`) read it as plain hex — `parseInt('H', 16)` is NaN → 0.
+    T5 Big Worlds (`2D+7`) roll G–K about 28% of the time. Sean chose the renderer-level fix:
+    `_parseStat` and its twin `parseStat` (`terrain_render.js`, KEEP IDENTICAL) read a single
+    character as eHex (skipping I and O); `S`/`R` (CT small/ring) stay 0; longer strings stay
+    hex (`"11"` = 17, as the accordion's `toString(16)` sizes send). Atmosphere/hydro never
+    exceed F, so terrain and palette are unchanged. Verified with a real T5 Obsidian export
+    (seed TravellerMagnus, subsector 0-A, Diamond, Playwright `--disable-gpu`): 549 PNGs, 16
+    changed with the fix on vs off — exactly the 16 Big Worlds whose size arrived as a letter;
+    the other 2 Big Worlds (moons) arrive with a numeric size and always had a grid; the
+    other 533 PNGs were byte-identical. Size H and K PNGs looked at. The in-app per-planet
+    "VIEW WORLD IMAGE" button needed no change (it sends hex, not eHex).
 
 11. [x] **User request: edit mainworld details from right-click → Edit System.** DONE 2026-11-02
     (changelog item 32). Sean chose a right-click menu entry over putting mainworld fields in

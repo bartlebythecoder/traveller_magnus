@@ -28,10 +28,20 @@ const TerrainRender = (() => {
     // Mirrors _buildPalette() in planet_renderer.js so a regional map never
     // disagrees with the whole-world map about what kind of world this is.
 
+    // eHex for a single UWP digit (S and R, CT size codes, stay 0); longer
+    // strings are hex numbers. KEEP IDENTICAL to _parseStat() in
+    // planet_renderer.js.
+    const EHEX_DIGITS = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ';
     function parseStat(v) {
         if (typeof v === 'number') return v;
-        if (typeof v === 'string') return parseInt(v, 16) || 0;
-        return 0;
+        if (typeof v !== 'string') return 0;
+        const s = v.trim().toUpperCase();
+        if (s.length === 1) {
+            if (s === 'S' || s === 'R') return 0;
+            const i = EHEX_DIGITS.indexOf(s);
+            return i >= 0 ? i : 0;
+        }
+        return parseInt(s, 16) || 0;
     }
 
     // Which terrain model is in force. v0.18 rule: every visual improvement is

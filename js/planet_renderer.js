@@ -324,10 +324,23 @@ const PlanetRenderer = (() => {
 
     // ── Palette builder ───────────────────────────────────────────────────────
 
+    // A single UWP digit is eHex (0-9, A-Z skipping I and O), so T5 Big World
+    // sizes G and up read as 16+; plain hex read them as 0, which dropped the
+    // hex grid from their flat maps. S and R are CT size codes (small world,
+    // ring), not eHex 26/25: they stay 0. Longer strings are hex numbers, as
+    // the accordion's toString(16) sizes ("11" = 17) have always been.
+    // KEEP IDENTICAL to parseStat() in terrain_render.js.
+    const _EHEX_DIGITS = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ';
     function _parseStat(v) {
         if (typeof v === 'number') return v;
-        if (typeof v === 'string') return parseInt(v, 16) || 0;
-        return 0;
+        if (typeof v !== 'string') return 0;
+        const s = v.trim().toUpperCase();
+        if (s.length === 1) {
+            if (s === 'S' || s === 'R') return 0;
+            const i = _EHEX_DIGITS.indexOf(s);
+            return i >= 0 ? i : 0;
+        }
+        return parseInt(s, 16) || 0;
     }
 
     // ── Shared climate predicates ────────────────────────────────────────────

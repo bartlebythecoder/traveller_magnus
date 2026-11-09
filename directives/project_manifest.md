@@ -84,6 +84,56 @@ with measured numbers, give ONE recommendation, ask with the question tool, buil
 the `new_version` skill, init mode). v0.18.1.4.1 item 1 = the eHex hex-grid fix recorded
 under item 10 below. Whether the item 1 hand-checks below were done before dating was not
 stated — ask Sean before treating them as done.
+**Later 2026-11-08: v0.18.1.4.1 promoted by Sean and dated 2026-11-08; v0.18.2 opened "In
+Progress" (empty), banner "New: Upgraded World Images".**
+
+**2026-11-09: v0.18.2 — climate codes drive Tectonic world images (BUILT + VERIFIED
+2026-11-09; changelog/README item 1; FAQ "Do trade or climate codes change a world image?";
+terrain_spec §4/§5).** Verified in-app: 15 T5 bodies — every Fr/Tu/Co/Tr/Ho one changes
+with the box on, every uncoded one and every v1 render identical; Kelvin world unchanged;
+regional `worldTypeOf`/`tempBand`/`polarOverlay` agree; save writes the key, no-key/legacy
+loads off; Classic greys the box; in-app mainworld image hash == exporter hash;
+`verify_field_v1.html` 30/30 PASS (`--disable-gpu`; GPU pane gives the usual false 18/30).
+**Craters on ice worlds with air (Sean, 2026-11-09): removed, ONLY with the Use Climate
+Codes box on** (item 2), every edition — so existing maps (box off) keep them and nothing
+redraws. `_buildPalette` `isAirless = isRock || (isIce && !_airIce)`. Verified: v1 and
+box-off identical; Kelvin ice-with-air loses craters only box-on; airless ice and rock keep
+them; `verify_field_v1` 30/30 (`--disable-gpu`).
+Found: world images read only atm, hydro, temperatureK and a temperature band word, never
+trade codes or climate codes. MgT2E, CT and AoW carry Kelvin; **T5 and RTT carry none**, so
+every T5/RTT world renders as Temperate. Rulings:
+* **Classic (v1) never changes** — the Settings note now says Classic ignores trade/climate
+  codes (`ui_menus.js` `describe`). Every new effect goes behind `_fieldVersion >= 2`.
+* **Scope (Sean, 2026-11-09): climate codes only.** Not Tz look, not Ga/Ag vegetation
+  override, not social codes (In/Hi/Pi). Physical codes (De, Ic, Wa…) already show because
+  they derive from the UWP digits the renderer reads.
+* Plan: (1) carry tradeCodes (+ RTT worldClass/zone) into the renderer data at every call
+  site (`export_core._rendererData`, `hex_editor` x3, `system_sheet`, `approach_viewer`);
+  (2) when temperatureK is 0, derive the band from the climate code — both duplicated
+  predicate copies (`planet_renderer.js` + `terrain_render.js`); (3) prove v1 byte-identical
+  (`verify_field_v1.html`, `--disable-gpu`) and v2 unchanged for MgT2E/CT/AoW; (4) FAQ,
+  terrain_spec §4, changelog.
+* **T5 code → band (Sean, 2026-11-09): follow Chart D text.** Tr/Ho = Hot, Tu/Co = Cold,
+  Fr = Frozen (a world with seas renders as solid ice), no climate code = Temperate.
+* **RTT (Sean, 2026-11-09): left as is** — stays Temperate; rtt_worldgen.md states no zone
+  temperatures. v0.18.2 changes T5 images only, so step (1) needs no RTT worldClass/zone.
+* **Redraw (Sean, 2026-11-09): make it a new opt-in.** Existing Tectonic maps must keep their
+  images; climate-coded images happen only when the user opts in.
+* **Opt-in form (Sean, 2026-11-09): a separate tick-box, "Use Climate Codes"**, under World
+  Image Generation. Saved WITH THE MAP like `terrainFieldVersion` (no localStorage mirror).
+  **Two defaults, like the terrain model:** a save without the key loads OFF (existing maps
+  keep their images); a NEW map starts ON. Greyed out while Classic is ticked, and inert under
+  v1 even if set. v2 itself is NOT changed — with the box off, v2 renders byte-identical.
+* **Revised plan:** (1) the setting: `hex_map.html` row, `ui_menus.js` control + note,
+  `io_manager.js` save/load with the off-when-absent fallback, a window global read at render
+  time beside `terrainFieldVersion`; (2) carry T5 `tradeCodes` into the renderer data at every
+  call site (`export_core._rendererData`, `hex_editor` x3, `system_sheet`, `approach_viewer`);
+  (3) when v2 + box on + temperatureK is 0 + a climate code is present, the band comes from the
+  code — in BOTH duplicated copies (`planet_renderer.js`, `terrain_render.js`); (4) prove it:
+  v1 byte-identical (`verify_field_v1.html`, `--disable-gpu`), v2 with the box off
+  byte-identical, box on changes only T5 Fr/Tu/Co/Tr/Ho worlds, an old save loads off, a new
+  map starts on, export output matches the in-app image; (5) FAQ, terrain_spec §4, changelog.
+  **All rulings are in; nothing open.**
 
 **v0.18.1.4 is built and verified, not yet dated.** Every change is built, documented
 (changelog/README items 1–34, identical copies) and verified. Nothing is half-written in the

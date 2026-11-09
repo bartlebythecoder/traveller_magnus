@@ -51,6 +51,8 @@ const ApproachViewer = (() => {
             population:    uwp[4] || '0',
             temperature:   world.temperature || '',
             temperatureK:  world.meanTempK   || 0,
+            // T5 climate codes stand in for a missing temperature (v0.18.2).
+            tradeCodes:    world.tradeCodes  || [],
             size:          (parseInt(uwp[1], 16) || 0),
         };
     }

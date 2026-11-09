@@ -63,11 +63,30 @@ const TerrainRender = (() => {
     // KEEP THE TWO COPIES IDENTICAL. If one changes, change the other, or a
     // world image and its regional map will disagree about what world it is.
 
+    // The world's temperature band word, lower-cased. T5 records no
+    // temperature at all, so on Tectonic with the map's Use Climate Codes box
+    // on, its one Chart D climate code stands in, mapped by the Chart D text
+    // (Sean, 2026-11-09): Tr/Ho Hot, Tu/Co Cold, Fr Frozen. Only for a world
+    // with NO temperature of its own, so MgT2E/CT/AoW never change, and never
+    // at version 1 or with the box off, so those render byte-identical.
+    const CLIMATE_CODE_BAND = { Tr: 'hot', Ho: 'hot', Tu: 'cold', Co: 'cold', Fr: 'frozen' };
+    function tempStrOf(worldData) {
+        const s = (worldData.temperature || '').toLowerCase();
+        if (s || (worldData.temperatureK || 0) > 0) return s;
+        if (fieldV() < 2 || typeof window === 'undefined' || window.terrainClimateCodes !== true) return s;
+        const tc = worldData.tradeCodes;
+        const codes = Array.isArray(tc) ? tc : (typeof tc === 'string' ? tc.split(/[\s,]+/) : []);
+        for (const c of codes) {
+            if (Object.prototype.hasOwnProperty.call(CLIMATE_CODE_BAND, c)) return CLIMATE_CODE_BAND[c];
+        }
+        return s;
+    }
+
     // Cold enough that a dry surface is frost and ice-bound ground rather than
     // sand. 223 K is REUSED from the ice test below, not a second threshold.
     function isColdDry(worldData) {
         const tempK = worldData.temperatureK || 0;
-        const tempStr = (worldData.temperature || '').toLowerCase();
+        const tempStr = tempStrOf(worldData);
         return (tempK > 0 && tempK < 223) || (tempK === 0 && tempStr.includes('frozen'));
     }
 
@@ -79,7 +98,7 @@ const TerrainRender = (() => {
         const atm   = parseStat(worldData.atmosphere);
         const hydro = parseStat(worldData.hydrographics);
         const tempK = worldData.temperatureK || 0;
-        const tempStr = (worldData.temperature || '').toLowerCase();
+        const tempStr = tempStrOf(worldData);
         if (atm < 2 || atm > 9) return false;      // exotic/corrosive or trace
         if (hydro < 3) return false;               // too dry to green over
         if (tempK > 0) return tempK >= 255 && tempK <= 330;
@@ -91,7 +110,7 @@ const TerrainRender = (() => {
         const atm   = parseStat(worldData.atmosphere);
         const hydro = parseStat(worldData.hydrographics);
         const tempK = worldData.temperatureK || 0;
-        const tempStr = (worldData.temperature || '').toLowerCase();
+        const tempStr = tempStrOf(worldData);
 
         const isMolten = (hydro === 15) || (hydro === 0 && tempK > 1000);
         const isExotic = (atm >= 10 && atm <= 12);
@@ -291,7 +310,7 @@ const TerrainRender = (() => {
 
     // Thresholds transcribed from PlanetRenderer.tempBandFromKelvin().
     function tempBand(worldData) {
-        const s = (worldData.temperature || '').toLowerCase();
+        const s = tempStrOf(worldData);
         if (s) return s;
         const k = worldData.temperatureK || 0;
         if (!k) return 'temperate';

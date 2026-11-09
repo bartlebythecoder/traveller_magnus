@@ -1250,6 +1250,9 @@ const ExportCore = (() => {
             // the grid's only input). Fall back to the UWP's size digit.
             size:          worldData.size ?? (uwp.length >= 2 ? uwp[1] : 0),
             uwp,
+            // A T5 world's climate code stands in for its missing temperature
+            // when the map's Use Climate Codes box is on (v0.18.2, Tectonic only).
+            tradeCodes:    worldData.tradeCodes || [],
         };
     }
 

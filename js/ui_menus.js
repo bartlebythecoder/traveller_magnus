@@ -4430,12 +4430,13 @@ function setupSettingsPanel() {
         // (export_core.js), which users otherwise meet only as a disabled box.
         const describe = v => (v >= 2
             ? 'Tectonic: plate boundaries give linear ranges, trenches and rifts. Rivers and lakes need this model.'
-            : 'Classic: the original terrain, exactly as worlds have always looked. Rivers and lakes are unavailable.')
+            : 'Classic: the original terrain, exactly as worlds have always looked. A world\'s trade codes (Ag, De, Ic, Wa…) and climate codes (Fr, Tu, Tr, Tz…) never change its image. Rivers and lakes are unavailable.')
             + ' Applies to every world image on this map, in every sector.';
         const sync = () => {
             const v = classicImagesInput.checked ? 1 : TERRAIN_MODEL_DEFAULT;
             window.terrainFieldVersion = v;
             if (terrainModelNote) terrainModelNote.textContent = describe(v);
+            if (typeof window.syncClimateCodeControl === 'function') window.syncClimateCodeControl();
         };
         classicImagesInput.checked = (window.terrainFieldVersion || TERRAIN_MODEL_DEFAULT) < 2;
         sync();
@@ -4447,6 +4448,54 @@ function setupSettingsPanel() {
             sync();
             if (typeof showToast === 'function') {
                 showToast('Terrain model changed \u2014 reopen a world image to see it.', 4000);
+            }
+        });
+    }
+
+    // Climate codes in world images (v0.18.2). A property of the MAP, saved in
+    // the file beside terrainFieldVersion, with no localStorage mirror -- same
+    // reasoning as the terrain model above.
+    //
+    // TWO DEFAULTS AGAIN, deliberately different: a NEW map starts ON (true
+    // here), but io_manager loads a file with no terrainClimateCodes key as
+    // OFF. Those maps were drawn without climate codes, and world images are
+    // recomputed rather than stored, so loading them as on would redraw every
+    // T5 Fr/Tu/Co/Tr/Ho world in every existing Tectonic map (Sean, 2026-11-09).
+    //
+    // Only effective on Tectonic (v2): the renderers ignore it under v1, and the
+    // box is disabled while Classic is ticked so it cannot claim otherwise.
+    const CLIMATE_CODES_DEFAULT = true;
+    window.terrainClimateCodes = window.terrainClimateCodes ?? CLIMATE_CODES_DEFAULT;
+
+    const climateCodeInput = document.getElementById('input-climate-code-images');
+    const climateCodeLabel = document.getElementById('climate-code-images-label');
+    const climateCodeNote  = document.getElementById('climate-code-note');
+    if (climateCodeInput) {
+        const syncClimate = () => {
+            const classic = (window.terrainFieldVersion || 1) < 2;
+            climateCodeInput.checked  = !!window.terrainClimateCodes;
+            climateCodeInput.disabled = classic;
+            climateCodeInput.style.cursor = classic ? 'not-allowed' : 'pointer';
+            if (climateCodeLabel) climateCodeLabel.style.opacity = classic ? '0.5' : '1';
+            if (climateCodeNote) {
+                climateCodeNote.textContent = classic
+                    ? 'Not available on Classic world images.'
+                    : (window.terrainClimateCodes
+                        ? 'On: a T5 world with no temperature takes its climate from its climate code \u2014 Tr or Ho draws it Hot, Tu or Co Cold, Fr Frozen (its seas freeze solid). Other editions already use their own temperatures. A frozen world with an atmosphere, in any edition, is drawn without craters.'
+                        : 'Off: climate codes do not change world images; every T5 world is drawn as Temperate.')
+                      + (classic ? '' : ' Applies to every world image on this map, in every sector.');
+            }
+        };
+        syncClimate();
+        // io_manager and the terrain model box call this to refresh the box
+        // without the "changed" toast a change event would raise.
+        window.syncClimateCodeControl = syncClimate;
+        climateCodeInput.addEventListener('change', () => {
+            window.terrainClimateCodes = climateCodeInput.checked;
+            syncClimate();
+            if (typeof showToast === 'function') {
+                showToast('Climate codes ' + (climateCodeInput.checked ? 'on' : 'off') +
+                          ' \u2014 reopen a world image to see it.', 4000);
             }
         });
     }

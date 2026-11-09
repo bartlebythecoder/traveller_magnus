@@ -1,4 +1,8 @@
-### [v0.18.1.4.1] - In Progress
+### [v0.18.2] - In Progress
+1. **New — Use Climate Codes:** a new setting under Settings → Visual Options → World Image Generation lets a T5 world's climate code shape its Tectonic world image and regional maps (Tr or Ho draws it Hot, Tu or Co Cold, and Fr Frozen, with its seas frozen solid); it starts on for new maps and off for maps saved before this version, so their worlds look exactly as before until you tick it.
+2. **Improved — Frozen worlds with air:** with Use Climate Codes ticked, a frozen world that has an atmosphere, in any edition, is no longer drawn with the craters of an airless moon.
+
+### [v0.18.1.4.1] - 2026-11-08
 1. **Fixed — hex grids on very large worlds:** exported world images of planets of size G and above, such as T5 Big Worlds, now show their hex grid in HTML and Obsidian exports, where it was missing.
 
 ### [v0.18.1.4] - 2026-11-08

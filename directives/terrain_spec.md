@@ -120,8 +120,22 @@ the reason the v2 branch was built and proven inert before anything went behind 
 larger visual jump than terrain shape alone, and that is accepted: it is the price of never
 disturbing an existing sector.
 
-Currently behind v2: **plate tectonics**, **vegetation**, **`cold_desert`**, and
-**`remapHeight`'s interpolated form**.
+Currently behind v2: **plate tectonics**, **vegetation**, **`cold_desert`**,
+**`remapHeight`'s interpolated form**, and **climate codes** (v0.18.2).
+
+* **Climate codes are a SECOND opt-in inside v2.** `window.terrainClimateCodes`, the per-map
+  "Use Climate Codes" box, saved with the map beside `terrainFieldVersion`. **Two defaults again:**
+  a new map starts `true` (`ui_menus.js` `CLIMATE_CODES_DEFAULT`), a file without the key loads
+  `false` (`io_manager.js`) so existing Tectonic maps keep their images. With the box off, v2
+  renders byte-identical to before it existed. With it on, a world with **no temperature at all**
+  (no `temperature` word, `temperatureK` 0 — in practice T5) takes its band from its Chart D code:
+  Tr/Ho `hot`, Tu/Co `cold`, Fr `frozen` (Sean, 2026-11-09). Read through `tempStrOf` /
+  `_tempStrOf`, which every temperature-word read in both modules now goes through. Renderer data
+  carries `tradeCodes` from every call site for this.
+* **The same box drops craters from ice worlds WITH air** (`isIce && atm > 0`), any edition
+  (Sean, 2026-11-09): `_buildPalette` `isAirless`, gated by `_climateCodesOn()`. Airless ice and
+  rock keep craters. Craters have their own seed (`-cr`), so nothing else shifts. Whole-world
+  image only — the regional map has no craters, so this has no twin.
 
 * **Vegetation is a RAMP SWAP and nothing more.** `RAMP.standard_veg` colours exactly the
   generic-ground band (beach → lowland → upland → highland). Snow, exposed mountain rock and
@@ -162,6 +176,7 @@ necessary**; each pair carries a comment naming its twin. **Keep them identical.
 |---|---|---|---|
 | `isColdDry` | `terrain_render.js:58` | `planet_renderer.js:346` | The two modules cannot import one another: `test_regional_terrain.html` loads terrain_render **without** planet_renderer, and `verify_field_v1.html` loads planet_renderer **without** terrain_render |
 | `isVegetated` | `terrain_render.js:68` | `planet_renderer.js:355` | as above |
+| `tempStrOf` (climate code → band) | `terrain_render.js` `tempStrOf` | `planet_renderer.js` `_tempStrOf` | as above |
 | "sea drains nowhere" | `_hydrology()`, `terrain_field.js:725` | `buildNetwork`, `terrain_rivers.js:207` | Two independent drainage passes — the regional one and the whole-world one |
 
 **A GUARD THAT EXISTS IN A SIBLING FUNCTION IS NOT A GUARD.** The "sea drains nowhere" rule was

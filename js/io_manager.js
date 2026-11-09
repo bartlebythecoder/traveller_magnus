@@ -108,6 +108,9 @@ function setupSaveLoad() {
             // every sector in the file, not per-sector. Absent in files written
             // before the flag existed, which load as 1.
             terrainFieldVersion:         window.terrainFieldVersion         ?? 1,
+            // Whether T5 climate codes set a world image's temperature band
+            // (v0.18.2, Tectonic only). Absent in older files, which load OFF.
+            terrainClimateCodes:         window.terrainClimateCodes         ?? false,
             generationPopMax:            window.generationPopMax            ?? 20,
             generationPopMod:            window.generationPopMod            ?? 0,
             generationTlMax:             window.generationTlMax             ?? 20,
@@ -555,6 +558,15 @@ function applyLoadedSettings(settings) {
         if (typeof window.syncTerrainModelControl === 'function') {
             window.syncTerrainModelControl();
         }
+    }
+
+    // THIS FALLBACK IS false AND MUST STAY false, even though a new map starts
+    // ON (CLIMATE_CODES_DEFAULT in ui_menus.js). A file with no
+    // terrainClimateCodes key was drawn without climate codes; loading it as on
+    // would silently redraw its T5 Fr/Tu/Co/Tr/Ho worlds (Sean, 2026-11-09).
+    window.terrainClimateCodes = s.terrainClimateCodes === true;
+    if (typeof window.syncClimateCodeControl === 'function') {
+        window.syncClimateCodeControl();
     }
 
     const continentDef = s.planetContinentalDefinition ?? 0.55;

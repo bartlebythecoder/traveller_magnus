@@ -1468,7 +1468,8 @@ function populateEditorAccordions(stateObj) {
                                     const _t5Name  = (w.name || '').replace(/"/g, '&quot;');
                                     const _t5Size  = Number(w.size ?? 0).toString(16);
                                     const _t5Uwp   = (w.uwpSecondary || w.uwp || '').replace(/"/g, '&quot;');
-                                    html += `<button data-action="open-ph" data-ph-atm="${_t5Atm}" data-ph-hydro="${_t5Hydro}" data-ph-temp="${_t5Temp}" data-ph-temp-k="${_t5TempK}" data-ph-name="${_t5Name}" data-ph-size="${_t5Size}" data-ph-uwp="${_t5Uwp}" style="margin-top:6px;width:100%;padding:4px 8px;background:transparent;border:1px solid #45a29e88;color:#66fcf1;cursor:pointer;font-family:'Share Tech Mono','Courier New',monospace;font-size:10px;letter-spacing:0.06em;border-radius:3px;">◎ &nbsp;VIEW WORLD IMAGE</button>`;
+                                    const _t5Tc    = (w.tradeCodes || []).join(' ').replace(/"/g, '&quot;');
+                                    html += `<button data-action="open-ph" data-ph-atm="${_t5Atm}" data-ph-hydro="${_t5Hydro}" data-ph-temp="${_t5Temp}" data-ph-temp-k="${_t5TempK}" data-ph-name="${_t5Name}" data-ph-size="${_t5Size}" data-ph-uwp="${_t5Uwp}" data-ph-tc="${_t5Tc}" style="margin-top:6px;width:100%;padding:4px 8px;background:transparent;border:1px solid #45a29e88;color:#66fcf1;cursor:pointer;font-family:'Share Tech Mono','Courier New',monospace;font-size:10px;letter-spacing:0.06em;border-radius:3px;">◎ &nbsp;VIEW WORLD IMAGE</button>`;
                                 }
                             }
 
@@ -1547,7 +1548,8 @@ function populateEditorAccordions(stateObj) {
                                             const _t5SatName  = (sat.name || '').replace(/"/g, '&quot;');
                                             const _t5SatSize  = Number(sat.size ?? 0).toString(16);
                                             const _t5SatUwp   = (sat.uwpSecondary || sat.uwp || '').replace(/"/g, '&quot;');
-                                            html += `<button data-action="open-ph" data-ph-atm="${_t5SatAtm}" data-ph-hydro="${_t5SatHydro}" data-ph-temp="${_t5SatTemp}" data-ph-temp-k="${_t5SatTempK}" data-ph-name="${_t5SatName}" data-ph-size="${_t5SatSize}" data-ph-uwp="${_t5SatUwp}" style="margin-top:6px;width:100%;padding:4px 8px;background:transparent;border:1px solid #45a29e88;color:#66fcf1;cursor:pointer;font-family:'Share Tech Mono','Courier New',monospace;font-size:10px;letter-spacing:0.06em;border-radius:3px;">◎ &nbsp;VIEW WORLD IMAGE</button>`;
+                                            const _t5SatTc    = (sat.tradeCodes || []).join(' ').replace(/"/g, '&quot;');
+                                            html += `<button data-action="open-ph" data-ph-atm="${_t5SatAtm}" data-ph-hydro="${_t5SatHydro}" data-ph-temp="${_t5SatTemp}" data-ph-temp-k="${_t5SatTempK}" data-ph-name="${_t5SatName}" data-ph-size="${_t5SatSize}" data-ph-uwp="${_t5SatUwp}" data-ph-tc="${_t5SatTc}" style="margin-top:6px;width:100%;padding:4px 8px;background:transparent;border:1px solid #45a29e88;color:#66fcf1;cursor:pointer;font-family:'Share Tech Mono','Courier New',monospace;font-size:10px;letter-spacing:0.06em;border-radius:3px;">◎ &nbsp;VIEW WORLD IMAGE</button>`;
                                         }
                                     }
 
@@ -2110,6 +2112,9 @@ function openWorldImagePanel() {
         temperatureK:  _tempK,
         size:          src.size      ?? 0,
         uwp:           src.uwp       || '',
+        // A T5 mainworld's codes live on t5Data; its climate code stands in
+        // for the temperature T5 does not record (v0.18.2, Tectonic only).
+        tradeCodes:    src.tradeCodes || [],
     };
 
     const worldName = worldData.name || editingHexId;
@@ -2473,6 +2478,8 @@ function setupHexEditor() {
         const phName   = btn.dataset.phName || '';
         const phSize   = parseInt(btn.dataset.phSize || '0', 16) || 0;
         const phUwp    = btn.dataset.phUwp || '';
+        // Space-separated trade codes; only the T5 buttons write them (v0.18.2).
+        const phTc     = (btn.dataset.phTc || '').split(/\s+/).filter(Boolean);
 
         if (!phTemp && phTempK > 0 && window.PlanetRenderer) {
             phTemp = PlanetRenderer.tempBandFromKelvin(phTempK);
@@ -2486,6 +2493,7 @@ function setupHexEditor() {
             temperatureK:  phTempK,
             size:          phSize,
             uwp:           phUwp,
+            tradeCodes:    phTc,
         };
 
         const label = phName || editingHexId;

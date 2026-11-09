@@ -354,11 +354,36 @@ const PlanetRenderer = (() => {
     // KEEP THE TWO COPIES IDENTICAL, or a world image and its regional map will
     // disagree about what kind of world they are showing.
 
+    // The world's temperature band word, lower-cased. T5 records no
+    // temperature at all, so on Tectonic with the map's Use Climate Codes box
+    // on, its one Chart D climate code stands in, mapped by the Chart D text
+    // (Sean, 2026-11-09): Tr/Ho Hot, Tu/Co Cold, Fr Frozen. Only for a world
+    // with NO temperature of its own, so MgT2E/CT/AoW never change, and never
+    // at version 1 or with the box off, so those render byte-identical.
+    // KEEP IDENTICAL to tempStrOf() in terrain_render.js.
+    const _CLIMATE_CODE_BAND = { Tr: 'hot', Ho: 'hot', Tu: 'cold', Co: 'cold', Fr: 'frozen' };
+    // Tectonic AND the map's Use Climate Codes box. Also gates the no-craters
+    // rule for ice worlds with air in _buildPalette (Sean, 2026-11-09).
+    function _climateCodesOn() {
+        return _fieldVersion >= 2 && typeof window !== 'undefined' && window.terrainClimateCodes === true;
+    }
+    function _tempStrOf(worldData) {
+        const s = (worldData.temperature || '').toLowerCase();
+        if (s || (worldData.temperatureK || 0) > 0) return s;
+        if (!_climateCodesOn()) return s;
+        const tc = worldData.tradeCodes;
+        const codes = Array.isArray(tc) ? tc : (typeof tc === 'string' ? tc.split(/[\s,]+/) : []);
+        for (const c of codes) {
+            if (Object.prototype.hasOwnProperty.call(_CLIMATE_CODE_BAND, c)) return _CLIMATE_CODE_BAND[c];
+        }
+        return s;
+    }
+
     // Cold enough that dry ground is frost rather than sand. 223 K is REUSED
     // from the isIce test, not a second threshold.
     function _isColdDry(worldData) {
         const tempK = worldData.temperatureK || 0;
-        const tempStr = (worldData.temperature || '').toLowerCase();
+        const tempStr = _tempStrOf(worldData);
         return (tempK > 0 && tempK < 223) || (tempK === 0 && tempStr.includes('frozen'));
     }
 
@@ -369,7 +394,7 @@ const PlanetRenderer = (() => {
         const atm   = _parseStat(worldData.atmosphere);
         const hydro = _parseStat(worldData.hydrographics);
         const tempK = worldData.temperatureK || 0;
-        const tempStr = (worldData.temperature || '').toLowerCase();
+        const tempStr = _tempStrOf(worldData);
         if (atm < 2 || atm > 9) return false;
         if (hydro < 3) return false;
         if (tempK > 0) return tempK >= 255 && tempK <= 330;
@@ -394,7 +419,7 @@ const PlanetRenderer = (() => {
         const isIce      = !isMolten && ((atm === 0 && hydro > 0)
             || (!isExotic && atm > 0 && hydro > 0        // water ocean frozen solid:
                 && ((tempK > 0 && tempK < 223)           //   below -50°C by Kelvin
-                    || (tempK === 0 && (worldData.temperature || '').toLowerCase().includes('frozen')))));
+                    || (tempK === 0 && _tempStrOf(worldData).includes('frozen')))));
         const isExoticDry = !isMolten && (isExotic && hydro === 0);
         const isExoticWet = !isMolten && (isExotic && hydro > 0);
         const isDryWorld = !isMolten && (!isRock && !isIce && !isExoticDry && !isExoticWet && hydro === 0);
@@ -411,7 +436,7 @@ const PlanetRenderer = (() => {
 
         // Polar cap threshold (radians from equator). Math.PI is unreachable from
         // the ±90° lat range, so setting it means "no polar overlay".
-        const tempStr = (worldData.temperature || '').toLowerCase();
+        const tempStr = _tempStrOf(worldData);
         let polarAngle;
         // isColdDesert joins these: its whole surface is frost-bound already,
         // so a cap would count the same ice twice. Matches terrain_render's
@@ -613,9 +638,16 @@ const PlanetRenderer = (() => {
             limbStrength = 0.35 + 0.30 * hz;
         }
 
+        // An ice world WITH air is a frozen planet, not an airless iceball, so
+        // it takes no craters (Sean, 2026-11-09). Rides on the Use Climate
+        // Codes box, which is what made such worlds common (every T5 Fr world
+        // with air): with it off, every existing map keeps its craters on
+        // every edition's worlds, exactly as before. Craters use their own
+        // seed, so dropping them shifts nothing else in the image.
+        const _airIce = isIce && atm > 0 && _climateCodesOn();
         return { seaLevel, stops, polarColor, polarAngle, polarFade,
                  cloudColor, hasSpecular, limbColor, limbStrength,
-                 isAirless: isRock || isIce };
+                 isAirless: isRock || (isIce && !_airIce) };
     }
 
     // ── Hemisphere renderer ───────────────────────────────────────────────────

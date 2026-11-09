@@ -582,6 +582,8 @@ system.
 
 - **Use Classic World Images** — off by default, which is **Tectonic**; tick it for **Classic**.
   See [Classic vs Tectonic](#classic-vs-tectonic) below.
+- **Use Climate Codes** — Tectonic only; on for new maps, off for maps saved before v0.18.2.
+  See [Do trade or climate codes change a world image?](#do-trade-or-climate-codes-change-a-world-image) below.
 - **Continental Definition** (default 0.55) — how sharply land masses separate from ocean
 - **Coastline Complexity** (default 0.45) — how intricate the coastlines are
 
@@ -680,6 +682,24 @@ changing the model changes every world in the sector. That is exactly why the se
 choose otherwise — such a file reopens with the box already ticked, whatever your default. The
 choice is saved with the sector rather than with the browser, so a file always reopens under the
 model it was saved with, and a new sector starts on Tectonic.
+
+### Do trade or climate codes change a world image?
+
+Trade codes do not. Codes such as De, Ic, Wa and Va come from the same Size, Atmosphere and
+Hydrographics digits the image is drawn from, so the image already agrees with them.
+
+Climate codes can, for **T5 worlds on Tectonic** with **Use Climate Codes** ticked. T5 records no
+temperature, so without the box every T5 world is drawn as Temperate. With it, the world's climate
+code stands in: **Tr** or **Ho** draws it Hot (almost no polar caps), **Tu** or **Co** Cold (large
+caps), and **Fr** Frozen (any seas frozen solid). Tz worlds are not drawn differently. Other editions
+already draw from their own temperatures, so the box does not change their climates.
+
+The box also stops a frozen world that has an atmosphere, in any edition, from being drawn with
+craters; craters are kept for airless worlds.
+
+The box is saved with the map. A map saved before v0.18.2 reopens with it unticked, so its worlds
+look exactly as they did; a new map starts with it ticked. It is greyed out under Classic, which
+never uses trade or climate codes.
 
 ### Do regional maps appear in exports?
 

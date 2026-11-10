@@ -177,7 +177,7 @@ function setupKeyboardShortcuts() {
                     const current = {
                         action: snap.action,
                         routes: JSON.parse(JSON.stringify(window.sectorRoutes || [])),
-                        hexStates: JSON.parse(JSON.stringify(Array.from(hexStates.entries())))
+                        hexStates: cloneHexStateEntries()
                     };
                     if (snap.routeDefinitions) {
                         current.routeDefinitions = JSON.parse(JSON.stringify(window.routeDefinitions || []));
@@ -198,7 +198,7 @@ function setupKeyboardShortcuts() {
                     const current = {
                         action: snap.action,
                         routes: JSON.parse(JSON.stringify(window.sectorRoutes || [])),
-                        hexStates: JSON.parse(JSON.stringify(Array.from(hexStates.entries())))
+                        hexStates: cloneHexStateEntries()
                     };
                     if (snap.routeDefinitions) {
                         current.routeDefinitions = JSON.parse(JSON.stringify(window.routeDefinitions || []));

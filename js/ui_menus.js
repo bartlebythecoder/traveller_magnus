@@ -4481,7 +4481,7 @@ function setupSettingsPanel() {
                 climateCodeNote.textContent = classic
                     ? 'Not available on Classic world images.'
                     : (window.terrainClimateCodes
-                        ? 'On: a T5 world with no temperature takes its climate from its climate code \u2014 Tr or Ho draws it Hot, Tu or Co Cold, Fr Frozen (its seas freeze solid). Other editions already use their own temperatures. A frozen world with an atmosphere, in any edition, is drawn without craters.'
+                        ? 'On: a T5 world with no temperature takes its climate from its climate code \u2014 Tr or Ho draws it Hot, Tu or Co Cold, Fr Frozen (its seas freeze solid). A T5 Tz world with an atmosphere gets a Baked day side, a Frozen night side and a 1,000 km Twilight ring between them. Other editions already use their own temperatures. A frozen world with an atmosphere, in any edition, is drawn without craters.'
                         : 'Off: climate codes do not change world images; every T5 world is drawn as Temperate.')
                       + (classic ? '' : ' Applies to every world image on this map, in every sector.');
             }

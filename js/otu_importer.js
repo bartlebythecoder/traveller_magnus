@@ -879,6 +879,376 @@
         executeBulkImport(entries, 3, 3, opts, 'Neighbourhood');
     }
 
+    // =========================================================================
+    // CUSTOM OTU IMPORT (drag a rectangle over a map of the OTU sectors)
+    // =========================================================================
+
+    // Limits. Measured 2026-11-09 on a real Universe import (128 sectors): about
+    // 0.57 MB of save file and 0.75 MB of memory per imported sector, and about
+    // 2.5 s per uncached sector (world data + metadata, 1 s apart). The whole map
+    // (400 sectors with world data: 233 OTU + 167 Zhodani Core Route) imports to
+    // roughly 230 MB, inside the 250 MB single-file save. The danger is what comes
+    // after: a generated system is ~10x an imported one, which is what the >WARN
+    // confirm spells out.
+    const CUSTOM_OTU_WARN_SECTORS     = 128;   // Import the Universe's size — proven
+    const CUSTOM_OTU_MAX_SECTORS      = 400;   // hard cap, enforced at Import
+    const CUSTOM_OTU_SAVE_MB_PER      = 0.57;
+    const CUSTOM_OTU_SECONDS_UNCACHED = 2.5;
+
+    // The Import the Universe block, outlined on the map for orientation.
+    const UNIVERSE_BLOCK = { x1: -8, y1: -3, x2: 7, y2: 4 };
+
+    const customOtu = {
+        sel: { ...UNIVERSE_BLOCK },   // inclusive travellermap sector coords; kept between opens
+        byCoord: null,                // "x,y" -> { name, x, y, tags }
+        cached: null,                 // Set of sector names with a fresh TSV cache, or null while checking
+        anchor: { x: UNIVERSE_BLOCK.x1, y: UNIVERSE_BLOCK.y1 },   // fixed corner; Shift-click stretches from it
+        drag: false,
+        lastPointer: null,            // { clientX, clientY } while dragging, for autoscroll
+        scrollRaf: null,
+    };
+
+    function getOtuSectorMap() {
+        if (!window.OTU_SECTOR_MAP || !window.OTU_SECTOR_MAP_BOUNDS) {
+            throw new Error('OTU sector map not loaded. Run utilities/convert_universe.ps1 to regenerate js/universe_data.js.');
+        }
+        return { sectors: window.OTU_SECTOR_MAP, bounds: window.OTU_SECTOR_MAP_BOUNDS };
+    }
+
+    /** Sectors inside the current selection, with the canvas slot each lands in. */
+    function getCustomOtuSelection() {
+        const { x1, y1, x2, y2 } = customOtu.sel;
+        const width = x2 - x1 + 1, height = y2 - y1 + 1;
+        const entries = [];
+        for (let y = y1; y <= y2; y++) {
+            for (let x = x1; x <= x2; x++) {
+                const s = customOtu.byCoord.get(`${x},${y}`);
+                if (s) entries.push({ name: s.name, x, y, slot: String((y - y1) * width + (x - x1) + 1) });
+            }
+        }
+        return { entries, width, height };
+    }
+
+    function sectorFill(tags) {
+        const t = ' ' + (tags || '') + ' ';
+        if (/ (Official|Preserve) /.test(t)) return '#3f8f8a';
+        if (/ (InReview|Unreviewed|Unofficial) /.test(t)) return '#5a4a2a';
+        if (/ ZCR /.test(t)) return '#5e3f7d';
+        return '#2b4f6e';
+    }
+
+    /** Pixel geometry of the map canvas for its current on-screen width. */
+    function customOtuGeometry() {
+        const { bounds } = getOtuSectorMap();
+        const canvas = document.getElementById('custom-otu-map');
+        const cols = bounds.xMax - bounds.xMin + 1, rows = bounds.yMax - bounds.yMin + 1;
+        const cssW = Math.max(200, canvas.parentElement.clientWidth);
+        const cell = cssW / cols;
+        return { canvas, wrap: canvas.parentElement, bounds, cols, rows, cell, cssW, cssH: cell * rows };
+    }
+
+    /**
+     * Scroll the map to the selection: centred when it fits, otherwise showing its
+     * lower edge (where it meets the OTU proper, below the Zhodani Core Route).
+     */
+    function scrollCustomOtuToSelection() {
+        const g = customOtuGeometry();
+        const s = customOtu.sel;
+        const top = (s.y1 - g.bounds.yMin) * g.cell, bottom = (s.y2 - g.bounds.yMin + 1) * g.cell;
+        const view = g.wrap.clientHeight;
+        g.wrap.scrollTop = Math.max(0, bottom - top <= view ? (top + bottom - view) / 2 : bottom - view);
+    }
+
+    function drawCustomOtuMap() {
+        const g = customOtuGeometry();
+        // The map is ~190 sectors tall (the Zhodani Core Route), so a full-DPR
+        // backing store would be tens of MB; one pixel per CSS pixel is plenty.
+        const dpr = 1;
+        const { canvas, bounds, cell } = g;
+        canvas.style.height = g.cssH + 'px';
+        canvas.width = Math.round(g.cssW * dpr);
+        canvas.height = Math.round(g.cssH * dpr);
+        const ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.fillStyle = '#0a0f16';
+        ctx.fillRect(0, 0, g.cssW, g.cssH);
+
+        const px = x => (x - bounds.xMin) * cell, py = y => (y - bounds.yMin) * cell;
+        customOtu.byCoord.forEach(s => {
+            ctx.fillStyle = sectorFill(s.tags);
+            ctx.fillRect(px(s.x) + 0.5, py(s.y) + 0.5, cell - 1, cell - 1);
+        });
+
+        // Short labels when the cells are big enough to hold them.
+        if (cell >= 18) {
+            ctx.fillStyle = 'rgba(230,235,240,0.75)';
+            ctx.font = `${Math.min(10, cell * 0.42)}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            customOtu.byCoord.forEach(s => {
+                ctx.fillText(s.name.replace(/[^A-Za-z]/g, '').slice(0, 3), px(s.x) + cell / 2, py(s.y) + cell / 2);
+            });
+        }
+
+        // Import the Universe block, for orientation.
+        ctx.setLineDash([4, 3]);
+        ctx.strokeStyle = 'rgba(197,198,199,0.7)';
+        ctx.lineWidth = 1;
+        const u = UNIVERSE_BLOCK;
+        ctx.strokeRect(px(u.x1) + 0.5, py(u.y1) + 0.5, (u.x2 - u.x1 + 1) * cell - 1, (u.y2 - u.y1 + 1) * cell - 1);
+        ctx.setLineDash([]);
+
+        // Selection.
+        const { entries } = getCustomOtuSelection();
+        const n = entries.length;
+        const color = n > CUSTOM_OTU_MAX_SECTORS ? '#e74c3c' : n > CUSTOM_OTU_WARN_SECTORS ? '#f39c12' : '#66fcf1';
+        const s = customOtu.sel;
+        ctx.fillStyle = color + '33';
+        ctx.fillRect(px(s.x1), py(s.y1), (s.x2 - s.x1 + 1) * cell, (s.y2 - s.y1 + 1) * cell);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(px(s.x1) + 1, py(s.y1) + 1, (s.x2 - s.x1 + 1) * cell - 2, (s.y2 - s.y1 + 1) * cell - 2);
+
+        renderCustomOtuSummary();
+    }
+
+    function renderCustomOtuSummary() {
+        const el = document.getElementById('custom-otu-summary');
+        const submit = document.getElementById('custom-otu-submit');
+        const { entries, width, height } = getCustomOtuSelection();
+        const n = entries.length;
+        const s = customOtu.sel;
+        const saveMB = Math.max(1, Math.round(n * CUSTOM_OTU_SAVE_MB_PER));
+
+        let timeText;
+        if (!customOtu.cached) {
+            timeText = 'checking the download cache…';
+        } else {
+            const uncached = entries.filter(e => !customOtu.cached.has(e.name)).length;
+            const secs = uncached * CUSTOM_OTU_SECONDS_UNCACHED;
+            timeText = uncached === 0 ? 'all cached, a few seconds'
+                : `${uncached} to download, about ${secs < 90 ? Math.ceil(secs) + ' s' : Math.ceil(secs / 60) + ' min'}`;
+        }
+
+        const lines = [
+            `<b style="color:#66fcf1;">${width} × ${height}</b> sectors (X ${s.x1}…${s.x2}, Y ${s.y1}…${s.y2}) ` +
+            `· <b style="color:#66fcf1;">${n}</b> with data · canvas becomes ${width} × ${height}`,
+            `Estimated save file ~${saveMB} MB before any systems are generated · first import: ${timeText}`,
+        ];
+        let blocked = false;
+        if (n === 0) {
+            lines.push('<span style="color:#e74c3c;">No OTU sectors in this rectangle.</span>');
+            blocked = true;
+        } else if (n > CUSTOM_OTU_MAX_SECTORS) {
+            lines.push(`<span style="color:#e74c3c;">Too many sectors: ${n} of a ${CUSTOM_OTU_MAX_SECTORS} maximum. Shrink the rectangle.</span>`);
+            blocked = true;
+        } else if (n > CUSTOM_OTU_WARN_SECTORS) {
+            lines.push(`<span style="color:#f39c12;">Larger than Import the Universe (${CUSTOM_OTU_WARN_SECTORS} sectors). ` +
+                       `You will be asked to confirm the risks before it starts.</span>`);
+        }
+        el.innerHTML = lines.join('<br>');
+        if (submit) {
+            submit.disabled = blocked;
+            submit.style.opacity = blocked ? '0.45' : '1';
+            submit.style.cursor = blocked ? 'not-allowed' : 'pointer';
+        }
+    }
+
+    /** Sector coords under a pointer event, clamped to the map. */
+    function customOtuCellAt(e) {
+        const g = customOtuGeometry();
+        const r = g.canvas.getBoundingClientRect();
+        const col = Math.min(g.cols - 1, Math.max(0, Math.floor((e.clientX - r.left) / (r.width / g.cols))));
+        const row = Math.min(g.rows - 1, Math.max(0, Math.floor((e.clientY - r.top) / (r.height / g.rows))));
+        return { x: g.bounds.xMin + col, y: g.bounds.yMin + row };
+    }
+
+    /** Select the rectangle between two corners; redraws only when it changed. */
+    function setCustomOtuSelection(a, b) {
+        const next = { x1: Math.min(a.x, b.x), y1: Math.min(a.y, b.y), x2: Math.max(a.x, b.x), y2: Math.max(a.y, b.y) };
+        const s = customOtu.sel;
+        customOtu.anchor = { x: a.x, y: a.y };
+        if (next.x1 === s.x1 && next.y1 === s.y1 && next.x2 === s.x2 && next.y2 === s.y2) return;
+        customOtu.sel = next;
+        drawCustomOtuMap();
+    }
+
+    /**
+     * While dragging, scroll the map when the pointer is near (or past) its top or
+     * bottom edge, faster the further out it is, and keep stretching the rectangle.
+     */
+    function customOtuAutoScroll() {
+        customOtu.scrollRaf = null;
+        if (!customOtu.drag || !customOtu.lastPointer) return;
+        const wrap = document.getElementById('custom-otu-map-wrap');
+        const r = wrap.getBoundingClientRect();
+        const EDGE = 36, y = customOtu.lastPointer.clientY;
+        let dy = 0;
+        if (y < r.top + EDGE) dy = -Math.min(40, Math.ceil((r.top + EDGE - y) / 3));
+        else if (y > r.bottom - EDGE) dy = Math.min(40, Math.ceil((y - (r.bottom - EDGE)) / 3));
+        if (dy === 0) return;
+        const before = wrap.scrollTop;
+        wrap.scrollTop += dy;
+        if (wrap.scrollTop !== before) setCustomOtuSelection(customOtu.anchor, customOtuCellAt(customOtu.lastPointer));
+        customOtu.scrollRaf = requestAnimationFrame(customOtuAutoScroll);
+    }
+
+    function showCustomOtuHover(cell) {
+        const el = document.getElementById('custom-otu-hover');
+        if (!el) return;
+        const s = cell && customOtu.byCoord.get(`${cell.x},${cell.y}`);
+        el.textContent = s ? `${s.name} (${s.x}, ${s.y})${/Official/.test(s.tags) ? ' · Official' : ''}` : '';
+    }
+
+    /** Find which sectors already have a fresh download cached, for the time estimate. */
+    async function scanCustomOtuCache() {
+        const found = new Set();
+        for (const s of customOtu.byCoord.values()) {
+            try { if (await getCachedUniverseSector(s.name)) found.add(s.name); } catch (_) { /* treat as uncached */ }
+        }
+        customOtu.cached = found;
+        if (document.getElementById('custom-otu-import-modal').style.display !== 'none') renderCustomOtuSummary();
+    }
+
+    function openCustomOtuModal() {
+        let map;
+        try {
+            map = getOtuSectorMap();
+        } catch (err) {
+            alert(`Cannot import: ${err.message}`);
+            return;
+        }
+        if (!customOtu.byCoord) customOtu.byCoord = new Map(map.sectors.map(s => [`${s.x},${s.y}`, s]));
+        document.getElementById('custom-otu-max').textContent = CUSTOM_OTU_MAX_SECTORS;
+        document.getElementById('custom-otu-warn').textContent = CUSTOM_OTU_WARN_SECTORS;
+        document.getElementById('custom-otu-import-modal').style.display = 'flex';
+        customOtu.cached = null;
+        drawCustomOtuMap();
+        scrollCustomOtuToSelection();
+        scanCustomOtuCache();
+    }
+
+    function closeCustomOtuModal() {
+        customOtu.drag = false;
+        document.getElementById('custom-otu-import-modal').style.display = 'none';
+    }
+
+    function runCustomOtuImport() {
+        const { entries, width, height } = getCustomOtuSelection();
+        const n = entries.length;
+        if (n === 0) { alert('No OTU sectors in the selected rectangle.'); return; }
+        if (n > CUSTOM_OTU_MAX_SECTORS) {
+            alert(`Too many sectors: ${n}. Custom OTU Import allows at most ${CUSTOM_OTU_MAX_SECTORS}.`);
+            return;
+        }
+
+        const opts = readImportOptions('custom-otu-opt-sector', 'custom-otu-opt-routes',
+                                       'custom-otu-opt-borders', 'custom-otu-opt-regions',
+                                       'custom-otu-opt-subsector-names');
+        if (!opts.importSector && !needsMetadata(opts)) {
+            alert('No import options selected.');
+            return;
+        }
+        opts.mixonForeven     = document.getElementById('custom-otu-opt-mixon-foreven')?.checked ?? false;
+        opts.importSystemData = false;
+
+        if (n > CUSTOM_OTU_WARN_SECTORS) {
+            const uncached = customOtu.cached ? entries.filter(e => !customOtu.cached.has(e.name)).length : n;
+            const mins = Math.max(1, Math.ceil(uncached * CUSTOM_OTU_SECONDS_UNCACHED / 60));
+            const saveMB = Math.round(n * CUSTOM_OTU_SAVE_MB_PER);
+            const ok = confirm(
+                `You are about to import ${n} sectors onto a ${width} × ${height} canvas — ` +
+                `more than the ${CUSTOM_OTU_WARN_SECTORS} of Import the Universe.\n\n` +
+                `Risks:\n` +
+                `• Your browser may slow down or run out of memory, especially zoomed out or on a computer with little RAM.\n` +
+                `• ${uncached > 0 ? `${uncached} sectors must be downloaded, which takes about ${mins} minute${mins > 1 ? 's' : ''}. Keep this tab open.` : 'All sectors are cached, so the download step is quick.'}\n` +
+                `• The save file starts around ${saveMB} MB; above 250 MB it is written in several parts.\n` +
+                `• Generating full systems multiplies the map's size (a generated system is about ten times an imported one), ` +
+                `so expanding many sectors can exhaust your computer's memory.\n` +
+                `• ALL existing hex data and routes on the canvas will be erased. This cannot be undone.\n\n` +
+                `Continue?`
+            );
+            if (!ok) return;
+        }
+
+        closeCustomOtuModal();
+        executeBulkImport(entries, width, height, opts, 'Custom OTU');
+    }
+
+    function wireCustomOtuModal() {
+        const btn = document.getElementById('btn-import-custom-otu');
+        if (btn) btn.addEventListener('click', openCustomOtuModal);
+
+        const canvas = document.getElementById('custom-otu-map');
+        if (canvas) {
+            canvas.addEventListener('pointerdown', (e) => {
+                if (e.button !== 0) return;
+                const c = customOtuCellAt(e);
+                // Shift-click stretches the rectangle from its fixed corner to here,
+                // so a tall selection can be made by scrolling between two clicks.
+                const anchor = e.shiftKey ? customOtu.anchor : c;
+                customOtu.drag = true;
+                customOtu.lastPointer = { clientX: e.clientX, clientY: e.clientY };
+                canvas.setPointerCapture(e.pointerId);
+                customOtu.sel = { x1: NaN };   // force a redraw
+                setCustomOtuSelection(anchor, c);
+                e.preventDefault();
+            });
+            canvas.addEventListener('pointermove', (e) => {
+                const c = customOtuCellAt(e);
+                showCustomOtuHover(c);
+                if (customOtu.drag) {
+                    customOtu.lastPointer = { clientX: e.clientX, clientY: e.clientY };
+                    setCustomOtuSelection(customOtu.anchor, c);
+                    if (!customOtu.scrollRaf) customOtu.scrollRaf = requestAnimationFrame(customOtuAutoScroll);
+                }
+            });
+            const endDrag = (e) => {
+                customOtu.drag = false;
+                customOtu.lastPointer = null;
+                if (canvas.hasPointerCapture && canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
+            };
+            canvas.addEventListener('pointerup', endDrag);
+            canvas.addEventListener('pointercancel', endDrag);
+            canvas.addEventListener('pointerleave', () => { if (!customOtu.drag) showCustomOtuHover(null); });
+            // A wheel scroll mid-drag moves the map under a still pointer: follow it.
+            canvas.parentElement.addEventListener('scroll', () => {
+                if (customOtu.drag && customOtu.lastPointer) setCustomOtuSelection(customOtu.anchor, customOtuCellAt(customOtu.lastPointer));
+            });
+        }
+
+        const presetUniverse = document.getElementById('custom-otu-preset-universe');
+        if (presetUniverse) presetUniverse.addEventListener('click', () => {
+            const u = UNIVERSE_BLOCK;
+            setCustomOtuSelection({ x: u.x1, y: u.y1 }, { x: u.x2, y: u.y2 });
+            scrollCustomOtuToSelection();
+        });
+        const presetZcr = document.getElementById('custom-otu-preset-zcr');
+        if (presetZcr) presetZcr.addEventListener('click', () => {
+            const zcr = getOtuSectorMap().sectors.filter(s => / ZCR /.test(' ' + s.tags + ' '));
+            if (zcr.length === 0) return;
+            const xs = zcr.map(s => s.x), ys = zcr.map(s => s.y);
+            setCustomOtuSelection({ x: Math.min(...xs), y: Math.min(...ys) }, { x: Math.max(...xs), y: Math.max(...ys) });
+            scrollCustomOtuToSelection();
+        });
+        const presetAll = document.getElementById('custom-otu-preset-all');
+        if (presetAll) presetAll.addEventListener('click', () => {
+            const b = getOtuSectorMap().bounds;
+            setCustomOtuSelection({ x: b.xMin, y: b.yMin }, { x: b.xMax, y: b.yMax });
+        });
+
+        const submit = document.getElementById('custom-otu-submit');
+        if (submit) submit.addEventListener('click', runCustomOtuImport);
+        const cancel = document.getElementById('custom-otu-cancel');
+        if (cancel) cancel.addEventListener('click', closeCustomOtuModal);
+        const modal = document.getElementById('custom-otu-import-modal');
+        if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) closeCustomOtuModal(); });
+
+        window.addEventListener('resize', () => {
+            if (modal && modal.style.display !== 'none' && customOtu.byCoord) drawCustomOtuMap();
+        });
+    }
+
     /** Wire up all event listeners once the DOM is ready. */
     document.addEventListener('DOMContentLoaded', () => {
         // "Import the Imperium" settings button
@@ -930,6 +1300,8 @@
         if (nbSelect) nbSelect.addEventListener('change', renderNeighbourhoodPreview);
         const nbMixon = document.getElementById('neighbourhood-opt-mixon-foreven');
         if (nbMixon) nbMixon.addEventListener('change', renderNeighbourhoodPreview);
+
+        wireCustomOtuModal();
 
         const btnNbSubmit = document.getElementById('neighbourhood-submit');
         if (btnNbSubmit) btnNbSubmit.addEventListener('click', runNeighbourhoodImport);

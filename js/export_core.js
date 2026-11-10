@@ -1459,7 +1459,8 @@ const ExportCore = (() => {
             const canvas = document.createElement('canvas');
             TerrainFrame.compose(canvas, {
                 mapCanvas: r.plate, field: r.f, legend: r.out.legend,
-                worldType: S.worldType,
+                // The sheet's own type: on a T5 Tz world it depends on the pin.
+                worldType: r.out.worldType || S.worldType,
                 worldData: {
                     uwp: worldData.uwp || '',
                     diameterKm: S.planetRadiusKm * 2,

@@ -158,30 +158,69 @@ function setupSaveLoad() {
         await new Promise(r => setTimeout(r, 100));
 
         try {
-            const jsonStr = JSON.stringify(stateObj);
+            // The file is JSON.stringify(stateObj), built in pieces. Stringifying
+            // the whole map at once made one string the size of the map, and
+            // browsers cap a string at ~512 MB, so a big map failed here before
+            // the chunked path below could ever run. Each hex is stringified on
+            // its own and the pieces go straight into a Blob, which has no such
+            // cap. Object.entries walks keys in the order JSON.stringify does, and
+            // a hex JSON cannot hold is left out as JSON.stringify leaves it out,
+            // so the bytes are identical to the old single-string file.
+            const HEX_SLOT = '\u0000hexStates\u0000';
+            const shell = JSON.stringify({ ...stateObj, hexStates: HEX_SLOT });
+            const [head, tail] = shell.split(JSON.stringify(HEX_SLOT));
+            const parts = [head, '{'];
+            let jsonLength = head.length + tail.length + 2;
+            let first = true;
+            for (const [id, st] of Object.entries(hexObj)) {
+                const s = JSON.stringify(st);
+                if (s === undefined) continue;
+                const piece = (first ? '' : ',') + JSON.stringify(id) + ':' + s;
+                parts.push(piece);
+                jsonLength += piece.length;
+                first = false;
+            }
+            parts.push('}', tail);
 
-            if (jsonStr.length <= SAVE_CHUNK_THRESHOLD) {
+            if (jsonLength <= SAVE_CHUNK_THRESHOLD) {
                 // ---- Single file (the common case) ----
+                const fileBlob = new Blob(parts, { type: 'application/json' });
                 if (window.showSaveFilePicker) {
                     const handle = await window.showSaveFilePicker({
                         suggestedName: 'traveller_map.json',
                         types: [{ description: 'JSON Files', accept: { 'application/json': ['.json'] } }],
                     });
                     const writable = await handle.createWritable();
-                    await writable.write(jsonStr);
+                    await writable.write(fileBlob);
                     await writable.close();
                 } else {
-                    triggerDownload(jsonStr, 'traveller_map.json');
+                    triggerDownload(fileBlob, 'traveller_map.json');
                 }
                 if (typeof showToast === 'function') showToast('Map saved successfully.', 3000);
 
             } else {
                 // ---- Chunked save ----
-                const sizeMB     = Math.round(jsonStr.length / (1024 * 1024));
-                const numChunks  = Math.ceil(jsonStr.length / SAVE_CHUNK_SIZE);
+                parts.length = 0;   // free the pieces; each part is rebuilt below
+                const sizeMB     = Math.round(jsonLength / (1024 * 1024));
                 const entries    = Array.from(hexStates.entries())
                                         .map(([id, st]) => [id, stripHexViewState(st)]);
-                const perChunk   = Math.ceil(entries.length / numChunks);
+                // Split by size, not by hex count: a generated system is ~200x
+                // an empty hex, so equal counts could put most of the map in
+                // one part and push that part past the string cap. A part
+                // closes once it reaches SAVE_CHUNK_SIZE.
+                const chunks = [];
+                let current = [], currentLen = 0;
+                for (const entry of entries) {
+                    const len = JSON.stringify(entry).length + 1;
+                    if (current.length > 0 && currentLen + len > SAVE_CHUNK_SIZE) {
+                        chunks.push(current);
+                        current = []; currentLen = 0;
+                    }
+                    current.push(entry);
+                    currentLen += len;
+                }
+                if (current.length > 0 || chunks.length === 0) chunks.push(current);
+                const numChunks  = chunks.length;
 
                 const confirmed = confirm(
                     `Your map is approximately ${sizeMB} MB — too large for a single file.\n\n` +
@@ -196,7 +235,7 @@ function setupSaveLoad() {
                 const failedParts = [];
 
                 for (let i = 0; i < numChunks; i++) {
-                    const chunkEntries = entries.slice(i * perChunk, (i + 1) * perChunk);
+                    const chunkEntries = chunks[i];
                     const chunkObj = {
                         version:    APP_VERSION,
                         saveType:   'chunked',

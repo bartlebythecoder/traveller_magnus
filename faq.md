@@ -200,6 +200,27 @@ join up; routes that lead out of the 3×3 block are dropped. If you pick a secto
 of the 16×8 block that Import the Universe covers, neighbours that don't exist show as *(none)* in the preview and those slots are
 left blank. A first run takes about 20 seconds; within 24 hours a repeat is near-instant.
 
+### Custom OTU Import
+
+Shows a map of every sector TravellerMap has world data for in the Official Traveller Universe
+(233 sectors) and along the Zhodani Core Route (167 more, a one-sector-wide line running far
+coreward — scroll up to see it): 400 in all, far more than the 16×8 block of Import the
+Universe, which is outlined on the map for orientation. Sectors TravellerMap knows only by name
+are left off. Drag a rectangle over the sectors you want (hover a cell to see its name); drag to
+the top or bottom edge of the map and it scrolls, or click one corner, scroll, and Shift-click
+the other. **Select the Universe block**, **Select the Zhodani Core Route** and **Select
+everything** do the common ones for you. Below the map you see the rectangle's size, how many
+sectors in it have data, the estimated save-file size and how many sectors still need
+downloading. The same **Sector / Route / Border / Region Data**, Subsector Names and Mixon
+Foreven options apply.
+
+Like Import the Universe, this resizes the canvas to your rectangle and **erases all existing
+hex data and routes**, and it cannot be undone. Empty space inside the rectangle costs nothing;
+only sectors with data count. Above 128 sectors (Import the Universe's size) you are asked to
+confirm a list of risks first, and 400 sectors is the hard limit. Other fan settings (Orion OB1,
+the Faraway sectors) are not on the map. A first import of the whole map takes about a quarter
+of an hour, because live downloads are spaced out to be polite to TravellerMap.
+
 ### Import Metadata (.xml)
 
 Loads a TravellerMap metadata XML file — borders, route networks, region definitions — without
@@ -691,7 +712,15 @@ Hydrographics digits the image is drawn from, so the image already agrees with t
 Climate codes can, for **T5 worlds on Tectonic** with **Use Climate Codes** ticked. T5 records no
 temperature, so without the box every T5 world is drawn as Temperate. With it, the world's climate
 code stands in: **Tr** or **Ho** draws it Hot (almost no polar caps), **Tu** or **Co** Cold (large
-caps), and **Fr** Frozen (any seas frozen solid). Tz worlds are not drawn differently. Other editions
+caps), and **Fr** Frozen (any seas frozen solid).
+
+A **Tz** world (a planet tidally locked to its star) with an atmosphere is split as T5 describes it:
+desert **Baked Lands** on the side facing the star (its old seabeds become dry basins), ice-bound
+**Frozen Lands** on the far side (its seas become ice fields), and a **Twilight** ring 1,000 km wide
+between them that keeps its normal seas, coasts and land. The Baked side is the lit western half of
+the world image, and there are no polar caps. Regional maps follow the pin: one on the Baked side is
+a desert survey, one on the Frozen side an ice survey. **Lk** (locked) moons are not split — T5 gives
+satellites no Twilight Zone. Other editions
 already draw from their own temperatures, so the box does not change their climates.
 
 The box also stops a frozen world that has an atmosphere, in any edition, from being drawn with

@@ -255,10 +255,21 @@ const TerrainPanel = (() => {
             cv.width = p.W; cv.height = p.H;
             const img = new ImageData(p.W, p.H);
             const polar = TerrainRender.polarOverlay(worldType, worldData);
+            // A T5 Tz world shows its Baked / Twilight / Frozen sides here too,
+            // so a pin can be placed knowing which side it lands on. Same
+            // equirectangular convention as TerrainField.buildGlobalPreview.
+            const tzOn = !!(TerrainRender.tzSplit && TerrainRender.tzSplit(worldData));
             for (let i = 0; i < p.height.length; i++) {
                 const row = Math.floor(i / p.W);
                 const latAbs = Math.abs(90 - ((row + 0.5) / p.H) * 180);
-                const c = TerrainRender.previewColor(worldType, p.height[i],
+                let pType = worldType;
+                if (tzOn) {
+                    const lat = Math.PI / 2 - ((row + 0.5) / p.H) * Math.PI;
+                    const lon = (((i % p.W) + 0.5) / p.W) * 2 * Math.PI - Math.PI;
+                    pType = TerrainRender.worldTypeAtPoint(worldData,
+                        Math.cos(lat) * Math.cos(lon), Math.cos(lat) * Math.sin(lon));
+                }
+                const c = TerrainRender.previewColor(pType, p.height[i],
                                                      seaLevel, atmCode, ctx.oceanRng,
                                                      polar, latAbs);
                 const q = i * 4;
@@ -670,7 +681,8 @@ const TerrainPanel = (() => {
             if (inFrame.checked && !r.quick) {
                 TerrainFrame.compose(canvas, {
                     mapCanvas: r.plate, field: r.f, legend: r.out.legend,
-                    worldType, worldData: {
+                    // The sheet's own type: on a T5 Tz world it depends on the pin.
+                    worldType: r.out.worldType || worldType, worldData: {
                         uwp: worldData.uwp || '',
                         diameterKm: planetRadiusKm * 2,
                         temperatureK: worldData.temperatureK,

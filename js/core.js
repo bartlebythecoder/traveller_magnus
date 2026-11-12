@@ -5,7 +5,7 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.18.1.4.1";
+const APP_VERSION = "v0.18.2";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -207,6 +207,25 @@ window.undoStack = [];
 window.redoStack = [];
 
 /**
+ * Deep copy of every hex state, as [hexId, state] pairs, for undo/redo snapshots.
+ *
+ * Gives the same result as JSON.parse(JSON.stringify(Array.from(hexStates.entries())))
+ * but round-trips one hex at a time. The whole-map version built one string the size
+ * of the map, and browsers cap a string at ~512 MB, so on a big map every generate
+ * action threw before it started (a fully generated 128-sector Universe is ~690 MB).
+ * A value JSON cannot hold (undefined) becomes null, exactly as it did inside the array.
+ */
+function cloneHexStateEntries() {
+    const out = new Array(hexStates.size);
+    let i = 0;
+    hexStates.forEach((state, hexId) => {
+        const s = JSON.stringify(state);
+        out[i++] = [hexId, s === undefined ? null : JSON.parse(s)];
+    });
+    return out;
+}
+
+/**
  * @param {string} actionName - label shown by "Undid: …"
  * @param {Object} [opts]
  * @param {boolean} [opts.includeRouteDefinitions] - also snapshot
@@ -216,7 +235,7 @@ function saveHistoryState(actionName, opts = {}) {
     const stateSnapshot = {
         action: actionName,
         routes: JSON.parse(JSON.stringify(window.sectorRoutes || [])),
-        hexStates: JSON.parse(JSON.stringify(Array.from(hexStates.entries())))
+        hexStates: cloneHexStateEntries()
     };
 
     // Opt-in, not automatic. A route's name, colour, shortcut and visibility are

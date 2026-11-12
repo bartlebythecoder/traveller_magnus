@@ -670,6 +670,16 @@ const TerrainFrame = (() => {
         const W = o.W, H = o.H;
         const stop = o.abort || function () { return false; };
 
+        // A T5 Tz world's type depends on WHERE the window is: Baked side →
+        // desert, Frozen side → ice / cold desert, Twilight ring → its own
+        // (Sean, 2026-11-09). Every other world gets back exactly o.worldType.
+        // Baked and Frozen lands carry no liquid water, so no rivers there.
+        const tzType = (o.worldData && TerrainRender.worldTypeAt)
+            ? TerrainRender.worldTypeAt(o.worldData, o.latDeg, o.lonDeg) : o.worldType;
+        if (tzType !== o.worldType && o.worldData && TerrainRender.tzSplit(o.worldData)) {
+            o = Object.assign({}, o, { worldType: tzType, _tzType: tzType, hydrology: false });
+        }
+
         const f = TerrainField.buildRegional({
             ctx: o.ctx, latDeg: o.latDeg, lonDeg: o.lonDeg, widthKm: o.widthKm,
             planetRadiusKm: o.planetRadiusKm, W: W, H: H,
@@ -694,6 +704,9 @@ const TerrainFrame = (() => {
         }
 
         const out = TerrainRender.shade(f, o.ctx, {
+            // Only a Tz sheet names its type; every other sheet lets shade()
+            // derive it from worldData exactly as before.
+            worldType: o._tzType,
             worldData: o.worldData,
             seaLevelM: o.planetReliefM * o.seaLevel,
             lightAzDeg: 315, lightAltDeg: o.lightAltDeg,

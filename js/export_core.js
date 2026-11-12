@@ -1250,6 +1250,9 @@ const ExportCore = (() => {
             // the grid's only input). Fall back to the UWP's size digit.
             size:          worldData.size ?? (uwp.length >= 2 ? uwp[1] : 0),
             uwp,
+            // A T5 world's climate code stands in for its missing temperature
+            // when the map's Use Climate Codes box is on (v0.18.2, Tectonic only).
+            tradeCodes:    worldData.tradeCodes || [],
         };
     }
 
@@ -1456,7 +1459,8 @@ const ExportCore = (() => {
             const canvas = document.createElement('canvas');
             TerrainFrame.compose(canvas, {
                 mapCanvas: r.plate, field: r.f, legend: r.out.legend,
-                worldType: S.worldType,
+                // The sheet's own type: on a T5 Tz world it depends on the pin.
+                worldType: r.out.worldType || S.worldType,
                 worldData: {
                     uwp: worldData.uwp || '',
                     diameterKm: S.planetRadiusKm * 2,

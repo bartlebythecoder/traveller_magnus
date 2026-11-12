@@ -968,9 +968,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above<br> So Below</span></h1>
-            <div class="splash-banner">fixed hex  grid on unusually large planets</div>
+            <div class="splash-banner">New: Upgraded World Images</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.18.1.4.1</div>
+            <div class="splash-version">v0.18.2</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -1090,6 +1090,13 @@
                         <input type="checkbox" id="input-classic-world-images" style="cursor:pointer;accent-color:#66fcf1;">
                     </div>
                     <div id="terrain-model-note" style="font-size:0.68rem;color:#8ab8b5;line-height:1.35;"></div>
+                </div>
+                <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:3px;display:flex;">
+                    <div style="display:flex;width:100%;justify-content:space-between;align-items:center;">
+                        <label for="input-climate-code-images" id="climate-code-images-label" style="font-size:0.8rem;color:#c5c6c7;">Use Climate Codes</label>
+                        <input type="checkbox" id="input-climate-code-images" style="cursor:pointer;accent-color:#66fcf1;">
+                    </div>
+                    <div id="climate-code-note" style="font-size:0.68rem;color:#8ab8b5;line-height:1.35;"></div>
                 </div>
                 <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:3px;display:flex;">
                     <div style="display:flex;width:100%;justify-content:space-between;align-items:center;">
@@ -1290,6 +1297,10 @@
                 <button class="menu-btn" id="btn-import-neighbourhood"
                     style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
                     <i class="fas fa-th"></i> Import a Neighbourhood
+                </button>
+                <button class="menu-btn" id="btn-import-custom-otu"
+                    style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <i class="fas fa-vector-square"></i> Custom OTU Import
                 </button>
             </div>
         </div>
@@ -1553,6 +1564,116 @@
         </div>
     </div>
 
+    <!-- Custom OTU import: drag a rectangle over a map of the OTU sectors -->
+    <div id="custom-otu-import-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+               background:rgba(0,0,0,0.75); z-index:2000;
+               align-items:center; justify-content:center;">
+        <div style="background:#1f2833; border:1px solid #45a29e; border-radius:8px;
+                    padding:20px; width:min(860px, calc(100vw - 32px)); max-height:94vh; overflow-y:auto;
+                    box-sizing:border-box;
+                    display:flex; flex-direction:column; gap:10px; box-shadow:0 8px 32px rgba(0,0,0,0.6);">
+
+            <h3 style="margin:0; color:#66fcf1; font-size:1.1rem;">Custom OTU Import</h3>
+
+            <!-- Warning -->
+            <div style="background:#2a1500; border:1px solid #c0392b; border-radius:4px; padding:10px 12px;
+                        color:#e74c3c; font-size:0.8rem; line-height:1.55;">
+                &#9888; EXPERIMENTAL FEATURE &mdash; USE AT YOUR OWN RISK &#9888;<br>
+                Drag a rectangle over the sectors you want (only sectors with world data are shown). Custom OTU Import will:<br>
+                &bull;&nbsp;Resize the canvas to the rectangle and erase ALL existing hex data and routes<br>
+                &bull;&nbsp;Fetch every sector inside it from travellermap.com
+                    (cached sectors load instantly; live fetches are 1 second apart)<br>
+                &bull;&nbsp;Allow at most <span id="custom-otu-max">400</span> sectors; above
+                    <span id="custom-otu-warn">128</span> it asks you to confirm the risks first<br><br>
+                This cannot be undone.
+            </div>
+
+            <!-- Sector map (drawn by otu_importer.js) -->
+            <!-- Scrolls: the Zhodani Core Route runs ~170 sectors coreward (up). -->
+            <div id="custom-otu-map-wrap"
+                style="position:relative; width:100%; box-sizing:border-box; max-height:52vh; flex-shrink:0; overflow-y:auto; overflow-x:hidden;
+                       border:1px solid #2a3a3a; border-radius:4px; background:#0a0f16;">
+                <canvas id="custom-otu-map"
+                    style="display:block; width:100%; cursor:crosshair; touch-action:none;"></canvas>
+            </div>
+
+            <!-- Legend + hover readout -->
+            <div style="display:flex; flex-wrap:wrap; gap:6px 16px; align-items:center;
+                        font-size:0.75rem; color:#c5c6c7;">
+                <span><span style="display:inline-block; width:10px; height:10px; background:#3f8f8a; vertical-align:middle;"></span> Official</span>
+                <span><span style="display:inline-block; width:10px; height:10px; background:#2b4f6e; vertical-align:middle;"></span> OTU</span>
+                <span><span style="display:inline-block; width:10px; height:10px; background:#5a4a2a; vertical-align:middle;"></span> In review / unreviewed</span>
+                <span><span style="display:inline-block; width:10px; height:10px; background:#5e3f7d; vertical-align:middle;"></span> Zhodani Core Route (scroll up)</span>
+                <span><span style="display:inline-block; width:10px; height:10px; border:1px dashed #c5c6c7; vertical-align:middle;"></span> Import the Universe block</span>
+                <span id="custom-otu-hover" style="margin-left:auto; color:#66fcf1; min-height:1.2em;"></span>
+            </div>
+
+            <!-- Selection summary -->
+            <div id="custom-otu-summary"
+                style="background:#0d1117; border:1px solid #2a3a3a; border-radius:4px; padding:8px 10px;
+                       font-size:0.82rem; color:#c5c6c7; line-height:1.5;"></div>
+
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button id="custom-otu-preset-universe" class="menu-btn" style="padding:4px 12px; font-size:0.8rem;">Select the Universe block</button>
+                <button id="custom-otu-preset-zcr" class="menu-btn" style="padding:4px 12px; font-size:0.8rem;">Select the Zhodani Core Route</button>
+                <button id="custom-otu-preset-all" class="menu-btn" style="padding:4px 12px; font-size:0.8rem;">Select everything</button>
+                <span style="align-self:center; font-size:0.75rem; color:#8a9499;">
+                    Drag near the top or bottom edge to scroll · Shift-click to stretch the rectangle to a sector</span>
+            </div>
+
+            <!-- Import options -->
+            <div style="border-top:1px solid #2a3a3a; padding-top:10px;">
+                <div style="color:#66fcf1; font-size:0.8rem; margin-bottom:8px;
+                            text-transform:uppercase; letter-spacing:0.05em;">Import Options</div>
+                <div style="display:flex; flex-wrap:wrap; gap:6px 18px;">
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="custom-otu-opt-sector" checked
+                            style="cursor:pointer; accent-color:#66fcf1;">
+                        <span style="color:#c5c6c7; font-size:0.85rem;">Sector Data</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="custom-otu-opt-routes" checked
+                            style="cursor:pointer; accent-color:#66fcf1;">
+                        <span style="color:#c5c6c7; font-size:0.85rem;">Route Data</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="custom-otu-opt-borders" checked
+                            style="cursor:pointer; accent-color:#66fcf1;">
+                        <span style="color:#c5c6c7; font-size:0.85rem;">Border Data</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="custom-otu-opt-regions" checked
+                            style="cursor:pointer; accent-color:#66fcf1;">
+                        <span style="color:#c5c6c7; font-size:0.85rem;">Region Data</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="custom-otu-opt-subsector-names" checked
+                            style="cursor:pointer; accent-color:#66fcf1;">
+                        <span style="color:#c5c6c7; font-size:0.85rem;">Subsector Names</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="custom-otu-opt-mixon-foreven"
+                            style="cursor:pointer; accent-color:#66fcf1;">
+                        <span style="color:#c5c6c7; font-size:0.85rem;">Replace Foreven with Terry Mixon version</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div style="display:flex; gap:8px; justify-content:flex-end;
+                        border-top:1px solid #45a29e; padding-top:12px;">
+                <button id="custom-otu-cancel" class="menu-btn"
+                    style="padding:6px 18px;">Cancel</button>
+                <button id="custom-otu-submit" class="menu-btn"
+                    style="padding:6px 18px; background:#c0392b; color:#fff;
+                           font-weight:bold; border-color:#c0392b;">
+                    Import
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Help Panel (formerly help-modal) -->
     <div id="help-panel" class="side-panel left">
         <div class="settings-header">
@@ -1562,7 +1683,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.18.1.4.1</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.18.2</span>
             </p>
         </div>
 

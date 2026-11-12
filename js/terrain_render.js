@@ -63,11 +63,86 @@ const TerrainRender = (() => {
     // KEEP THE TWO COPIES IDENTICAL. If one changes, change the other, or a
     // world image and its regional map will disagree about what world it is.
 
+    // The world's temperature band word, lower-cased. T5 records no
+    // temperature at all, so on Tectonic with the map's Use Climate Codes box
+    // on, its one Chart D climate code stands in, mapped by the Chart D text
+    // (Sean, 2026-11-09): Tr/Ho Hot, Tu/Co Cold, Fr Frozen. Only for a world
+    // with NO temperature of its own, so MgT2E/CT/AoW never change, and never
+    // at version 1 or with the box off, so those render byte-identical.
+    const CLIMATE_CODE_BAND = { Tr: 'hot', Ho: 'hot', Tu: 'cold', Co: 'cold', Fr: 'frozen' };
+    function tempStrOf(worldData) {
+        const s = (worldData.temperature || '').toLowerCase();
+        if (s || (worldData.temperatureK || 0) > 0) return s;
+        if (fieldV() < 2 || typeof window === 'undefined' || window.terrainClimateCodes !== true) return s;
+        const tc = worldData.tradeCodes;
+        const codes = Array.isArray(tc) ? tc : (typeof tc === 'string' ? tc.split(/[\s,]+/) : []);
+        for (const c of codes) {
+            if (Object.prototype.hasOwnProperty.call(CLIMATE_CODE_BAND, c)) return CLIMATE_CODE_BAND[c];
+        }
+        return s;
+    }
+
+    // ── T5 Tz hemispheres (v0.18.2, Sean 2026-11-09) ─────────────────────────
+    //
+    // Baked Lands face the star, Frozen Lands face away, a Twilight ring 1,000
+    // km wide runs along both terminator meridians (Book 3 Chart 11 steps
+    // 24-25). The star point is planet_renderer's light, ~135°W on the
+    // equator. Only worlds with air (atm 1-9 or D-F) split; no polar caps on
+    // them. Tectonic + Use Climate Codes only.
+    //
+    // KEEP IDENTICAL to _tzSplit()/_tzWeights() in planet_renderer.js, or a
+    // world image and its regional map will put the hemispheres in different
+    // places.
+    const TZ_SX = -Math.SQRT1_2, TZ_SZ = -Math.SQRT1_2;   // star point, world space
+    function tzSplit(worldData) {
+        if (fieldV() < 2 || typeof window === 'undefined' || window.terrainClimateCodes !== true) return null;
+        const tc = worldData.tradeCodes;
+        const codes = Array.isArray(tc) ? tc : (typeof tc === 'string' ? tc.split(/[\s,]+/) : []);
+        if (codes.indexOf('Tz') < 0) return null;
+        const atm   = parseStat(worldData.atmosphere);
+        const hydro = parseStat(worldData.hydrographics);
+        const tempK = worldData.temperatureK || 0;
+        if (!((atm >= 1 && atm <= 9) || (atm >= 13 && atm <= 15))) return null;
+        if (hydro === 15 || (hydro === 0 && tempK > 1000)) return null;          // molten
+        if (hydro > 0 && ((tempK > 0 && tempK < 223)
+                          || (tempK === 0 && tempStrOf(worldData).includes('frozen')))) return null;  // all ice
+        // Same radius as terrain_frame.js sheetSetup (T5: Size x 1,600 km diameter).
+        const radiusKm = Math.max(400, parseStat(worldData.size) * 800);
+        const halfRad  = Math.min(1.2, 500 / radiusKm);
+        return { halfRad, blendRad: halfRad * 0.8, wet: hydro > 0 };
+    }
+    function tzWeights(split, wx, wz) {
+        let d = wx * TZ_SX + wz * TZ_SZ;
+        d = d > 1 ? 1 : (d < -1 ? -1 : d);
+        const a  = Math.asin(d);
+        const lo = split.halfRad - split.blendRad / 2, hi = split.halfRad + split.blendRad / 2;
+        const ss = x => { if (x <= lo) return 0; if (x >= hi) return 1;
+                          const t = (x - lo) / (hi - lo); return t * t * (3 - 2 * t); };
+        return { baked: ss(a), frozen: ss(-a) };
+    }
+    // The world type a regional sheet uses at one point. A survey window is
+    // ~125 km across against a 1,000 km ring, so the type at its centre is
+    // the type of the window: Baked → desert (old seabeds as salt-pan basins),
+    // Frozen → ice (or cold desert when dry), Twilight → the world's own.
+    function worldTypeAtPoint(worldData, wx, wz) {
+        const split = tzSplit(worldData);
+        if (split) {
+            const w = tzWeights(split, wx, wz);
+            if (w.baked > 0.5)  return 'desert';
+            if (w.frozen > 0.5) return split.wet ? 'ice' : 'cold_desert';
+        }
+        return worldTypeOf(worldData);
+    }
+    function worldTypeAt(worldData, latDeg, lonDeg) {
+        const la = latDeg * Math.PI / 180, lo = lonDeg * Math.PI / 180;
+        return worldTypeAtPoint(worldData, Math.cos(la) * Math.cos(lo), Math.cos(la) * Math.sin(lo));
+    }
+
     // Cold enough that a dry surface is frost and ice-bound ground rather than
     // sand. 223 K is REUSED from the ice test below, not a second threshold.
     function isColdDry(worldData) {
         const tempK = worldData.temperatureK || 0;
-        const tempStr = (worldData.temperature || '').toLowerCase();
+        const tempStr = tempStrOf(worldData);
         return (tempK > 0 && tempK < 223) || (tempK === 0 && tempStr.includes('frozen'));
     }
 
@@ -79,7 +154,7 @@ const TerrainRender = (() => {
         const atm   = parseStat(worldData.atmosphere);
         const hydro = parseStat(worldData.hydrographics);
         const tempK = worldData.temperatureK || 0;
-        const tempStr = (worldData.temperature || '').toLowerCase();
+        const tempStr = tempStrOf(worldData);
         if (atm < 2 || atm > 9) return false;      // exotic/corrosive or trace
         if (hydro < 3) return false;               // too dry to green over
         if (tempK > 0) return tempK >= 255 && tempK <= 330;
@@ -91,7 +166,7 @@ const TerrainRender = (() => {
         const atm   = parseStat(worldData.atmosphere);
         const hydro = parseStat(worldData.hydrographics);
         const tempK = worldData.temperatureK || 0;
-        const tempStr = (worldData.temperature || '').toLowerCase();
+        const tempStr = tempStrOf(worldData);
 
         const isMolten = (hydro === 15) || (hydro === 0 && tempK > 1000);
         const isExotic = (atm >= 10 && atm <= 12);
@@ -291,7 +366,7 @@ const TerrainRender = (() => {
 
     // Thresholds transcribed from PlanetRenderer.tempBandFromKelvin().
     function tempBand(worldData) {
-        const s = (worldData.temperature || '').toLowerCase();
+        const s = tempStrOf(worldData);
         if (s) return s;
         const k = worldData.temperatureK || 0;
         if (!k) return 'temperate';
@@ -315,6 +390,9 @@ const TerrainRender = (() => {
         // cold_desert palette says — so a cap on top is counting it twice.
         if (type === 'molten' || type === 'rock' || type === 'ice'
             || type === 'cold_desert') return null;
+        // A split Tz world's climate runs by longitude: no caps anywhere on it,
+        // matching planet_renderer's polarAngle for the same world.
+        if (worldData && tzSplit(worldData)) return null;
         const s = tempBand(worldData || {});
         let deg;
         if (s.includes('frozen'))    deg = 40;
@@ -1069,7 +1147,8 @@ const TerrainRender = (() => {
                 c[2] + (POLAR_COLOR[2] - c[2]) * pb];
     }
 
-    return { shade, worldTypeOf, heightToGrey, previewColor, materialsFor, rampFor,
+    return { shade, worldTypeOf, worldTypeAt, worldTypeAtPoint, tzSplit,
+             heightToGrey, previewColor, materialsFor, rampFor,
              isColdDry, isVegetated,
              waterColors,
              polarOverlay, polarBlend, tempBand,

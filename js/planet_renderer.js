@@ -310,7 +310,10 @@ const PlanetRenderer = (() => {
         return stops[stops.length - 1].c;
     }
 
-    function _heightToRGB(h, lat, palette) {
+    // wx, wz: the world-space point, read only for a split Tz world. Every
+    // other world takes the original path below, untouched.
+    function _heightToRGB(h, lat, palette, wx, wz) {
+        if (palette.tz) return _tzRGB(h, palette, wx, wz);
         const { stops, polarColor, polarAngle, polarFade } = palette;
         const absLat = Math.abs(lat);
         const base   = _colorFromStops(h, stops);
@@ -321,6 +324,59 @@ const PlanetRenderer = (() => {
         }
         return base;
     }
+
+    // A split Tz world: Twilight is the world's own palette; Baked is the
+    // desert palette, its former seabeds the low end of the ramp (desert
+    // basins); Frozen is the ice palette, or the cold-desert palette on a dry
+    // world. No polar overlay.
+    //
+    // The Frozen ice FOLLOWS THE GROUND (Sean, 2026-11-09): former seas take
+    // the blue lower third of the ice ramp by depth, so old basins and shelves
+    // still read through the ice field, and frozen land climbs the rest from
+    // pale ice to white peaks. A single flat tone for the seas left most of a
+    // wet world's dark side one featureless colour.
+    function _tzRGB(h, palette, wx, wz) {
+        const tz   = palette.tz;
+        const base = _colorFromStops(h, palette.stops);
+        const w    = _tzWeights(tz.split, wx, wz);
+        if (w.baked <= 0 && w.frozen <= 0) return base;
+        let c = base;
+        if (w.baked > 0) c = _lerpRGB(c, _colorFromStops(h, _DESERT_STOPS), w.baked);
+        if (w.frozen > 0) {
+            const sea = palette.seaLevel;
+            const fc = tz.split.wet
+                ? _colorFromStops(h < sea ? 0.35 * h / Math.max(0.05, sea)
+                                          : 0.40 + 0.60 * (h - sea) / Math.max(0.05, 1 - sea), _ICE_STOPS)
+                : _colorFromStops(h, _COLD_DESERT_STOPS);
+            c = _lerpRGB(c, fc, w.frozen);
+        }
+        return c;
+    }
+
+    // Shared by _buildPalette's own branches and the Tz hemispheres, so the
+    // Baked and Frozen lands are exactly the desert, ice and cold-desert worlds.
+    const _ICE_STOPS = [
+        { t: 0.0, c: [125, 152, 198] },
+        { t: 0.4, c: [165, 188, 222] },
+        { t: 0.7, c: [196, 212, 232] },
+        { t: 1.0, c: [232, 240, 252] },
+    ];
+    const _COLD_DESERT_STOPS = [
+        { t: 0.0, c: [201, 206, 211] },
+        { t: 0.2, c: [172, 177, 182] },
+        { t: 0.4, c: [146, 150, 155] },
+        { t: 0.6, c: [124, 126, 129] },
+        { t: 0.8, c: [104, 105, 107] },
+        { t: 1.0, c: [ 84,  85,  88] },
+    ];
+    const _DESERT_STOPS = [
+        { t: 0.0, c: [142, 112,  60] },
+        { t: 0.2, c: [178, 146,  82] },
+        { t: 0.4, c: [202, 165,  88] },
+        { t: 0.6, c: [182, 138,  68] },
+        { t: 0.8, c: [142, 106,  55] },
+        { t: 1.0, c: [112,  82,  46] },
+    ];
 
     // ── Palette builder ───────────────────────────────────────────────────────
 
@@ -354,11 +410,86 @@ const PlanetRenderer = (() => {
     // KEEP THE TWO COPIES IDENTICAL, or a world image and its regional map will
     // disagree about what kind of world they are showing.
 
+    // The world's temperature band word, lower-cased. T5 records no
+    // temperature at all, so on Tectonic with the map's Use Climate Codes box
+    // on, its one Chart D climate code stands in, mapped by the Chart D text
+    // (Sean, 2026-11-09): Tr/Ho Hot, Tu/Co Cold, Fr Frozen. Only for a world
+    // with NO temperature of its own, so MgT2E/CT/AoW never change, and never
+    // at version 1 or with the box off, so those render byte-identical.
+    // KEEP IDENTICAL to tempStrOf() in terrain_render.js.
+    const _CLIMATE_CODE_BAND = { Tr: 'hot', Ho: 'hot', Tu: 'cold', Co: 'cold', Fr: 'frozen' };
+    // Tectonic AND the map's Use Climate Codes box. Also gates the no-craters
+    // rule for ice worlds with air in _buildPalette (Sean, 2026-11-09).
+    function _climateCodesOn() {
+        return _fieldVersion >= 2 && typeof window !== 'undefined' && window.terrainClimateCodes === true;
+    }
+    function _tempStrOf(worldData) {
+        const s = (worldData.temperature || '').toLowerCase();
+        if (s || (worldData.temperatureK || 0) > 0) return s;
+        if (!_climateCodesOn()) return s;
+        const tc = worldData.tradeCodes;
+        const codes = Array.isArray(tc) ? tc : (typeof tc === 'string' ? tc.split(/[\s,]+/) : []);
+        for (const c of codes) {
+            if (Object.prototype.hasOwnProperty.call(_CLIMATE_CODE_BAND, c)) return _CLIMATE_CODE_BAND[c];
+        }
+        return s;
+    }
+
+    // ── T5 Tz hemispheres (v0.18.2, Sean 2026-11-09) ─────────────────────────
+    //
+    // A star-locked (Tz) world has Baked Lands facing its star, Frozen Lands
+    // facing away, and a Twilight ring between them that keeps its normal
+    // terrain and water (Book 3 Chart 11 steps 24-25; rules/t5_data.js
+    // TIDAL_LOCK.MAP). Rulings:
+    //  * the star point is this renderer's existing light, ~135°W, taken on
+    //    the equator ("a vertical line between the poles"), so the lit
+    //    western disc shows the Baked side;
+    //  * the Twilight ring runs along BOTH terminator meridians and is a
+    //    literal 1,000 km wide, so its angle scales with the world's radius;
+    //  * only worlds with air (atm 1-9 or D-F) split; airless, exotic A-C,
+    //    all-ice and molten worlds stay as they are;
+    //  * no polar caps on a split world.
+    // Tectonic + Use Climate Codes only, so Classic and existing maps never
+    // change. Lk needs nothing: satellites have no Twilight Zone (RAW).
+    //
+    // KEEP IDENTICAL to tzSplit()/tzWeights() in terrain_render.js.
+    const _TZ_SX = -Math.SQRT1_2, _TZ_SZ = -Math.SQRT1_2;  // star point, world space
+    function _tzSplit(worldData) {
+        if (!_climateCodesOn()) return null;
+        const tc = worldData.tradeCodes;
+        const codes = Array.isArray(tc) ? tc : (typeof tc === 'string' ? tc.split(/[\s,]+/) : []);
+        if (codes.indexOf('Tz') < 0) return null;
+        const atm   = _parseStat(worldData.atmosphere);
+        const hydro = _parseStat(worldData.hydrographics);
+        const tempK = worldData.temperatureK || 0;
+        if (!((atm >= 1 && atm <= 9) || (atm >= 13 && atm <= 15))) return null;
+        if (hydro === 15 || (hydro === 0 && tempK > 1000)) return null;          // molten
+        if (hydro > 0 && ((tempK > 0 && tempK < 223)
+                          || (tempK === 0 && _tempStrOf(worldData).includes('frozen')))) return null;  // all ice
+        // Radius from the size code, the same formula as the regional sheet
+        // (terrain_frame.js sheetSetup) and T5's own diameter (Size x 1,600 km).
+        const radiusKm = Math.max(400, _parseStat(worldData.size) * 800);
+        const halfRad  = Math.min(1.2, 500 / radiusKm);     // half of 1,000 km
+        return { halfRad, blendRad: halfRad * 0.8, wet: hydro > 0 };
+    }
+    // Weights of the Baked and Frozen zones at world-space point (wx, ·, wz);
+    // the Twilight weight is what is left. `a` is the angular distance from
+    // the terminator great circle, + toward the star.
+    function _tzWeights(split, wx, wz) {
+        let d = wx * _TZ_SX + wz * _TZ_SZ;
+        d = d > 1 ? 1 : (d < -1 ? -1 : d);
+        const a  = Math.asin(d);
+        const lo = split.halfRad - split.blendRad / 2, hi = split.halfRad + split.blendRad / 2;
+        const ss = x => { if (x <= lo) return 0; if (x >= hi) return 1;
+                          const t = (x - lo) / (hi - lo); return t * t * (3 - 2 * t); };
+        return { baked: ss(a), frozen: ss(-a) };
+    }
+
     // Cold enough that dry ground is frost rather than sand. 223 K is REUSED
     // from the isIce test, not a second threshold.
     function _isColdDry(worldData) {
         const tempK = worldData.temperatureK || 0;
-        const tempStr = (worldData.temperature || '').toLowerCase();
+        const tempStr = _tempStrOf(worldData);
         return (tempK > 0 && tempK < 223) || (tempK === 0 && tempStr.includes('frozen'));
     }
 
@@ -369,7 +500,7 @@ const PlanetRenderer = (() => {
         const atm   = _parseStat(worldData.atmosphere);
         const hydro = _parseStat(worldData.hydrographics);
         const tempK = worldData.temperatureK || 0;
-        const tempStr = (worldData.temperature || '').toLowerCase();
+        const tempStr = _tempStrOf(worldData);
         if (atm < 2 || atm > 9) return false;
         if (hydro < 3) return false;
         if (tempK > 0) return tempK >= 255 && tempK <= 330;
@@ -394,7 +525,7 @@ const PlanetRenderer = (() => {
         const isIce      = !isMolten && ((atm === 0 && hydro > 0)
             || (!isExotic && atm > 0 && hydro > 0        // water ocean frozen solid:
                 && ((tempK > 0 && tempK < 223)           //   below -50°C by Kelvin
-                    || (tempK === 0 && (worldData.temperature || '').toLowerCase().includes('frozen')))));
+                    || (tempK === 0 && _tempStrOf(worldData).includes('frozen')))));
         const isExoticDry = !isMolten && (isExotic && hydro === 0);
         const isExoticWet = !isMolten && (isExotic && hydro > 0);
         const isDryWorld = !isMolten && (!isRock && !isIce && !isExoticDry && !isExoticWet && hydro === 0);
@@ -411,7 +542,7 @@ const PlanetRenderer = (() => {
 
         // Polar cap threshold (radians from equator). Math.PI is unreachable from
         // the ±90° lat range, so setting it means "no polar overlay".
-        const tempStr = (worldData.temperature || '').toLowerCase();
+        const tempStr = _tempStrOf(worldData);
         let polarAngle;
         // isColdDesert joins these: its whole surface is frost-bound already,
         // so a cap would count the same ice twice. Matches terrain_render's
@@ -453,12 +584,7 @@ const PlanetRenderer = (() => {
             ];
         } else if (isIce) {
             // Frozen body: no atmosphere, surface entirely ice
-            stops = [
-                { t: 0.0, c: [125, 152, 198] },
-                { t: 0.4, c: [165, 188, 222] },
-                { t: 0.7, c: [196, 212, 232] },
-                { t: 1.0, c: [232, 240, 252] },
-            ];
+            stops = _ICE_STOPS;
         } else if (isExoticDry) {
             // Venus-like: exotic/corrosive atmo, no ocean — dark volcanic rock
             stops = [
@@ -529,24 +655,10 @@ const PlanetRenderer = (() => {
             // Frost-bound regolith and wind-stripped rock, desaturated blue-grey
             // so it reads as neither the warm tan desert nor an ice world.
             // Terrain model 2 only — see isColdDesert above.
-            stops = [
-                { t: 0.0, c: [201, 206, 211] },
-                { t: 0.2, c: [172, 177, 182] },
-                { t: 0.4, c: [146, 150, 155] },
-                { t: 0.6, c: [124, 126, 129] },
-                { t: 0.8, c: [104, 105, 107] },
-                { t: 1.0, c: [ 84,  85,  88] },
-            ];
+            stops = _COLD_DESERT_STOPS;
         } else if (isDesert) {
             // Dry world with atmosphere but no ocean
-            stops = [
-                { t: 0.0, c: [142, 112,  60] },
-                { t: 0.2, c: [178, 146,  82] },
-                { t: 0.4, c: [202, 165,  88] },
-                { t: 0.6, c: [182, 138,  68] },
-                { t: 0.8, c: [142, 106,  55] },
-                { t: 1.0, c: [112,  82,  46] },
-            ];
+            stops = _DESERT_STOPS;
         } else if (isVegetated) {
             // Standard water world, warm and wet enough to carry plant cover.
             // Terrain model 2 only. Ocean stops are IDENTICAL to the arid
@@ -613,9 +725,21 @@ const PlanetRenderer = (() => {
             limbStrength = 0.35 + 0.30 * hz;
         }
 
-        return { seaLevel, stops, polarColor, polarAngle, polarFade,
-                 cloudColor, hasSpecular, limbColor, limbStrength,
-                 isAirless: isRock || isIce };
+        // An ice world WITH air is a frozen planet, not an airless iceball, so
+        // it takes no craters (Sean, 2026-11-09). Rides on the Use Climate
+        // Codes box, which is what made such worlds common (every T5 Fr world
+        // with air): with it off, every existing map keeps its craters on
+        // every edition's worlds, exactly as before. Craters use their own
+        // seed, so dropping them shifts nothing else in the image.
+        const _airIce = isIce && atm > 0 && _climateCodesOn();
+        // T5 Tz: Baked / Twilight / Frozen hemispheres, coloured per pixel by
+        // _tzRGB. No polar caps (Sean, 2026-11-09), and no ocean glint: the
+        // lit side is the Baked side, where there is no water to shine.
+        const _tz = _tzSplit(worldData);
+        return { seaLevel, stops, polarColor, polarAngle: _tz ? Math.PI : polarAngle, polarFade,
+                 cloudColor, hasSpecular: _tz ? false : hasSpecular, limbColor, limbStrength,
+                 isAirless: isRock || (isIce && !_airIce),
+                 tz: _tz ? { split: _tz } : null };
     }
 
     // ── Hemisphere renderer ───────────────────────────────────────────────────
@@ -671,7 +795,7 @@ const PlanetRenderer = (() => {
                 const h  = _continentHeight(heightGrid, seeds, wx, wy, wz);
                 const hN = _remapHeight(h, heightCDF);
 
-                let [r, g, b] = _heightToRGB(hN, lat, palette);
+                let [r, g, b] = _heightToRGB(hN, lat, palette, wx, wz);
 
                 // Craters — albedo modifier applied before lighting so rim
                 // brightness and floor shadow interact with the sun angle.
@@ -853,7 +977,7 @@ const PlanetRenderer = (() => {
 
                     const h         = _continentHeight(heightGrid, seeds, wx, wy, wz);
                     const hN        = _remapHeight(h, heightCDF);
-                    const [r, g, b] = _heightToRGB(hN, lat, palette);
+                    const [r, g, b] = _heightToRGB(hN, lat, palette, wx, wz);
                     const idx       = (py * W + px) * 4;
                     data[idx]       = r;
                     data[idx + 1]   = g;
@@ -884,7 +1008,7 @@ const PlanetRenderer = (() => {
                 const wz  = cosLat * Math.sin(lon);
                 const h   = _continentHeight(heightGrid, seeds, wx, wy, wz);
                 const hN  = _remapHeight(h, heightCDF);
-                const [r, g, b] = _heightToRGB(hN, lat, palette);
+                const [r, g, b] = _heightToRGB(hN, lat, palette, wx, wz);
                 const idx = (py * W + px) * 4;
                 data[idx] = r; data[idx + 1] = g; data[idx + 2] = b; data[idx + 3] = 255;
             }
@@ -932,7 +1056,7 @@ const PlanetRenderer = (() => {
                 const wz  = cosLat * Math.sin(lon);
                 const h   = _continentHeight(heightGrid, seeds, wx, wy, wz);
                 const hN  = _remapHeight(h, heightCDF);
-                const [r, g, b] = _heightToRGB(hN, lat, palette);
+                const [r, g, b] = _heightToRGB(hN, lat, palette, wx, wz);
                 const idx = (py * W + px) * 4;
                 data[idx] = r; data[idx + 1] = g; data[idx + 2] = b; data[idx + 3] = 255;
             }
@@ -977,7 +1101,7 @@ const PlanetRenderer = (() => {
                     const wz      = cosLat * Math.sin(lon);
                     const h       = _continentHeight(heightGrid, seeds, wx, sinLat, wz);
                     const hN      = _remapHeight(h, heightCDF);
-                    const [r, g, b] = _heightToRGB(hN, lat, palette);
+                    const [r, g, b] = _heightToRGB(hN, lat, palette, wx, wz);
                     const idx     = (py * W + px) * 4;
                     data[idx] = r; data[idx + 1] = g; data[idx + 2] = b; data[idx + 3] = 255;
                 }
@@ -997,7 +1121,7 @@ const PlanetRenderer = (() => {
                 const wz  = cosLat * Math.sin(lon);
                 const h   = _continentHeight(heightGrid, seeds, wx, sinLat, wz);
                 const hN  = _remapHeight(h, heightCDF);
-                const [r, g, b] = _heightToRGB(hN, lat, palette);
+                const [r, g, b] = _heightToRGB(hN, lat, palette, wx, wz);
                 const idx = (py * W + px) * 4;
                 data[idx] = r; data[idx + 1] = g; data[idx + 2] = b; data[idx + 3] = 255;
             }
@@ -1025,7 +1149,7 @@ const PlanetRenderer = (() => {
                     const wz      = cosLat * Math.sin(lon);
                     const h       = _continentHeight(heightGrid, seeds, wx, sinLat, wz);
                     const hN      = _remapHeight(h, heightCDF);
-                    const [r, g, b] = _heightToRGB(hN, lat, palette);
+                    const [r, g, b] = _heightToRGB(hN, lat, palette, wx, wz);
                     const idx     = (py * W + px) * 4;
                     data[idx] = r; data[idx + 1] = g; data[idx + 2] = b; data[idx + 3] = 255;
                 }

@@ -84,6 +84,144 @@ with measured numbers, give ONE recommendation, ask with the question tool, buil
 the `new_version` skill, init mode). v0.18.1.4.1 item 1 = the eHex hex-grid fix recorded
 under item 10 below. Whether the item 1 hand-checks below were done before dating was not
 stated — ask Sean before treating them as done.
+**Later 2026-11-08: v0.18.1.4.1 promoted by Sean and dated 2026-11-08; v0.18.2 opened "In
+Progress" (empty), banner "New: Upgraded World Images".**
+
+**2026-11-09: whole-map string cap fixed (R12) — BUILT + VERIFIED; changelog/README v0.18.2
+item 4.** Prompted by a user request for a bigger OTU import (proposed "Custom OTU": drag a
+rectangle over an OTU sector map, warning popup above 128 sectors, hard cap ~400 — BUILT the
+same day, see the next entry). Measured on a real Universe import (128 sectors): every hex of an
+imported sector is stored (163,840, EMPTY = 74 B), 49,010 worlds at ~1.4 KB, save 73 MB,
+~0.75 MB heap per sector, 320 s cold / 11 s cached; a T5-generated world is ~14 KB, so a fully
+generated Universe is ~690 MB. Two sites built ONE string of the whole map and hit V8's
+~512 MB cap: `saveHistoryState` (so every generate action threw before starting) and Save
+(failed before its chunked path could run). Fix: `cloneHexStateEntries()` in core.js
+round-trips per hex (used by saveHistoryState and Ctrl+Z / Ctrl+Shift+Z in
+keyboard_shortcuts.js); Save stringifies per hex into a Blob, byte-identical to the old file;
+chunked parts now close at SAVE_CHUNK_SIZE by size, not equal hex counts (equal counts could
+put every generated system in one oversized part). Verified with the cap simulated at 30 MB
+on the real Universe (save identical to `JSON.stringify` of its own parse, 0/163,840 hex
+mismatches; generate + undo + redo work) and a 2 MB-threshold chunked save that reloads with
+every field intact; with each fix switched off, the matching checks FAIL. Still open: undo
+keeps up to 5 whole-map copies in memory, so a ~500 MB map needs ~3 GB of heap — not a string
+cap, but the next ceiling.
+
+**2026-11-09: Custom OTU Import (BUILT; changelog/README v0.18.2 item 5; FAQ "Custom OTU
+Import").** Settings button `#btn-import-custom-otu` → `#custom-otu-import-modal`; code in the
+"CUSTOM OTU IMPORT" section of `js/otu_importer.js`, which hands the selection to the shared
+`executeBulkImport` (fresh canvas sized to the rectangle; slot = row-major from the top-left).
+Data: `utilities/convert_universe.ps1` now also writes `window.OTU_SECTOR_MAP` (+ `_BOUNDS`)
+into `js/universe_data.js` — every sector from `/api/universe?milieu=M1105&requireData=1`
+whose Tags include `OTU` or `ZCR`, in X −23…14, Y −175…17 (38×193 cells): 233 OTU + 167
+Zhodani Core Route = **400**, so "Select everything" sits exactly on the cap. Sean asked for
+the ZCR line (2026-11-09). `requireData` matters: 155 OTU-tagged sectors and every ZCR sector
+off the X = −7 spine are names only ("# No world data available"); the first build listed them
+and counted them as "with data". The Universe block's 128 all have data. `UNIVERSE_SECTORS`
+came out identical when regenerated. The picker scrolls (`max-height:52vh`; needs
+`flex-shrink:0` or the flex column squashes it to a few px), draws at 1 px per CSS pixel
+(the canvas is ~4,000 px tall), autoscrolls while a drag holds near an edge, follows a wheel
+scroll mid-drag, and Shift-click stretches from the fixed corner. The script's output path pointed at `utilities/js/`, which does not
+exist (it was written before the script moved into utilities/), so it could not have been
+re-run; now fixed to the repo's `js/`. Engineering choices, not asked (no game fact): OTU +
+ZCR tags only, so OrionOB1 / Faraway fan sectors are not offered; always a fresh canvas;
+`CUSTOM_OTU_WARN_SECTORS` 128 (confirm() listing the risks), `CUSTOM_OTU_MAX_SECTORS` 400 (Import
+disabled above it); estimates use 0.57 MB and 2.5 s
+per uncached sector (measured). **Test trap:** the Launch button's handler is attached only
+after `loadFromDB` resolves, so a harness that hides the splash and imports at once races the
+autosave load and gets a mixed map; users cannot hit this. Wait for the splash to hide after a
+Launch click.
+
+**2026-11-09: v0.18.2 — climate codes drive Tectonic world images (BUILT + VERIFIED
+2026-11-09; changelog/README item 1; FAQ "Do trade or climate codes change a world image?";
+terrain_spec §4/§5).** Verified in-app: 15 T5 bodies — every Fr/Tu/Co/Tr/Ho one changes
+with the box on, every uncoded one and every v1 render identical; Kelvin world unchanged;
+regional `worldTypeOf`/`tempBand`/`polarOverlay` agree; save writes the key, no-key/legacy
+loads off; Classic greys the box; in-app mainworld image hash == exporter hash;
+`verify_field_v1.html` 30/30 PASS (`--disable-gpu`; GPU pane gives the usual false 18/30).
+**2026-11-09: T5 Tz / Lk hemisphere climates (BUILT + VERIFIED 2026-11-09; changelog/README
+item 3; FAQ; terrain_spec §4/§5 has the as-built).** Verified: `verify_field_v1` 30/30
+(`--disable-gpu`; the shared `_DESERT/_ICE/_COLD_DESERT_STOPS` refactor is inert); v1 and
+box-off identical for Tz/plain/vacuum/exotic; box on changes only Tz-with-air (and Lk+Co via
+the Co band); ring 8.95° at Size 8, 17.9° at Size 4; regional pins: Baked → desert (Salt Pan),
+Frozen → ice (Sea Ice), Twilight → standard (coast), no caps; in-app mainworld image hash ==
+exporter hash (0207 A77A57B-A Tz); Regional Maps panel opens, no console errors.
+**Looks worth a second opinion from Sean:** Mercator/flat maps show the twilight ring widening
+toward the poles (correct for a constant-km ring through the poles). **Frozen side textured
+(Sean, 2026-11-09, after reviewing Duvall 18-G-2220):** the ice now follows the ground —
+former seas by depth on the blue lower third of the ice ramp, land climbing to white — instead
+of one flat sea tone; v1 gate still 30/30. World image only: the regional `ice` type already
+shades sea ice by depth. Tectonic plate-boundary straight edges now read through the ice; they
+are in the base terrain (visible with the box off), not this change. Source:
+Sean's summary of Book 3 Chart 11 steps 24-25, matching `rules/t5_data.js`
+`TIDAL_LOCK.MAP`. Tz (star-locked planet): Baked Lands (41) on the star side, oceans → Desert;
+Frozen Lands (43) on the dark side, oceans → Ice Field; a Twilight strip (42) 1 world hex
+(1,000 km) wide keeps the normal terrain and liquid water; the boundary is a vertical line
+between the poles. **Lk: no image change** — satellites have no Twilight Zone (RAW), and an
+Lk world's Ho/Co already drives its image via Use Climate Codes. T5 only for now; our own
+renderer, not T5's hand-map symbols. Rulings so far:
+* **Day side = lit side (Sean, 2026-11-09):** the Baked hemisphere is centred on the
+  longitude of the renderer's existing light (substellar point ~135°W), so the western disc
+  shows Baked lands lit and the eastern disc shows Frozen lands in shadow.
+* **Twilight = full ring, 1,000 km wide (Sean, 2026-11-09):** along BOTH terminator
+  meridians (±90° from the star point), so a complete ring through the poles; width is
+  literal 1,000 km, so its angle scales with world diameter (~9° at Size 8, ~18° at Size 4);
+  short soft blends at its edges.
+* **Hemisphere looks reuse our palettes (Sean, 2026-11-09):** Baked = the existing desert
+  palette, former seabeds as low desert basins; Frozen = the existing ice palette, former seas
+  as flat ice fields; the twilight ring keeps the world's normal look (oceans, coasts,
+  vegetation if it qualifies). The world's own relief is kept everywhere.
+* **Which worlds split (Sean, 2026-11-09): any Tz world with air** — atmosphere 1-9 or D-F.
+  A dry one (hydro 0) gets frost on its Frozen side, desert elsewhere. Airless rock, all-ice
+  (atm 0 + water) and molten worlds stay as they are; exotic A-C keep their exotic look.
+* **No polar caps on a split Tz world (Sean, 2026-11-09):** its climate runs by longitude;
+  the poles show whatever the hemisphere or twilight ring puts there.
+* **Engineering defaults (no game fact; stated to Sean, not asked):** gated like the rest of
+  v0.18.2 — Tectonic + Use Climate Codes box on, so Classic and existing maps never change;
+  the zone test lives in BOTH duplicated copies so the regional map shows the same hemisphere
+  at a pin; clouds unchanged; the band is taken from the zone (twilight = the world's normal
+  Temperate band, since Tz carries no other climate code); boundaries are meridians (the
+  substellar point treated as on the equator, per "a vertical line between the poles").
+
+**Craters on ice worlds with air (Sean, 2026-11-09): removed, ONLY with the Use Climate
+Codes box on** (item 2), every edition — so existing maps (box off) keep them and nothing
+redraws. `_buildPalette` `isAirless = isRock || (isIce && !_airIce)`. Verified: v1 and
+box-off identical; Kelvin ice-with-air loses craters only box-on; airless ice and rock keep
+them; `verify_field_v1` 30/30 (`--disable-gpu`).
+Found: world images read only atm, hydro, temperatureK and a temperature band word, never
+trade codes or climate codes. MgT2E, CT and AoW carry Kelvin; **T5 and RTT carry none**, so
+every T5/RTT world renders as Temperate. Rulings:
+* **Classic (v1) never changes** — the Settings note now says Classic ignores trade/climate
+  codes (`ui_menus.js` `describe`). Every new effect goes behind `_fieldVersion >= 2`.
+* **Scope (Sean, 2026-11-09): climate codes only.** Not Tz look, not Ga/Ag vegetation
+  override, not social codes (In/Hi/Pi). Physical codes (De, Ic, Wa…) already show because
+  they derive from the UWP digits the renderer reads.
+* Plan: (1) carry tradeCodes (+ RTT worldClass/zone) into the renderer data at every call
+  site (`export_core._rendererData`, `hex_editor` x3, `system_sheet`, `approach_viewer`);
+  (2) when temperatureK is 0, derive the band from the climate code — both duplicated
+  predicate copies (`planet_renderer.js` + `terrain_render.js`); (3) prove v1 byte-identical
+  (`verify_field_v1.html`, `--disable-gpu`) and v2 unchanged for MgT2E/CT/AoW; (4) FAQ,
+  terrain_spec §4, changelog.
+* **T5 code → band (Sean, 2026-11-09): follow Chart D text.** Tr/Ho = Hot, Tu/Co = Cold,
+  Fr = Frozen (a world with seas renders as solid ice), no climate code = Temperate.
+* **RTT (Sean, 2026-11-09): left as is** — stays Temperate; rtt_worldgen.md states no zone
+  temperatures. v0.18.2 changes T5 images only, so step (1) needs no RTT worldClass/zone.
+* **Redraw (Sean, 2026-11-09): make it a new opt-in.** Existing Tectonic maps must keep their
+  images; climate-coded images happen only when the user opts in.
+* **Opt-in form (Sean, 2026-11-09): a separate tick-box, "Use Climate Codes"**, under World
+  Image Generation. Saved WITH THE MAP like `terrainFieldVersion` (no localStorage mirror).
+  **Two defaults, like the terrain model:** a save without the key loads OFF (existing maps
+  keep their images); a NEW map starts ON. Greyed out while Classic is ticked, and inert under
+  v1 even if set. v2 itself is NOT changed — with the box off, v2 renders byte-identical.
+* **Revised plan:** (1) the setting: `hex_map.html` row, `ui_menus.js` control + note,
+  `io_manager.js` save/load with the off-when-absent fallback, a window global read at render
+  time beside `terrainFieldVersion`; (2) carry T5 `tradeCodes` into the renderer data at every
+  call site (`export_core._rendererData`, `hex_editor` x3, `system_sheet`, `approach_viewer`);
+  (3) when v2 + box on + temperatureK is 0 + a climate code is present, the band comes from the
+  code — in BOTH duplicated copies (`planet_renderer.js`, `terrain_render.js`); (4) prove it:
+  v1 byte-identical (`verify_field_v1.html`, `--disable-gpu`), v2 with the box off
+  byte-identical, box on changes only T5 Fr/Tu/Co/Tr/Ho worlds, an old save loads off, a new
+  map starts on, export output matches the in-app image; (5) FAQ, terrain_spec §4, changelog.
+  **All rulings are in; nothing open.**
 
 **v0.18.1.4 is built and verified, not yet dated.** Every change is built, documented
 (changelog/README items 1–34, identical copies) and verified. Nothing is half-written in the

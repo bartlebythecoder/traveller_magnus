@@ -1,4 +1,4 @@
-# As Above, So Below (v0.18.1.4.1)
+# As Above, So Below (v0.18.2)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -72,7 +72,14 @@ Want to replace any of these sectors with your own file?
 ---
 ## 📜 Changelog
 
-### [v0.18.1.4.1] - In Progress
+### [v0.18.2] - 2026-11-10
+1. **New — Use Climate Codes:** a new setting under Settings → Visual Options → World Image Generation lets a T5 world's climate code shape its Tectonic world image and regional maps (Tr or Ho draws it Hot, Tu or Co Cold, and Fr Frozen, with its seas frozen solid); it starts on for new maps and off for maps saved before this version, so their worlds look exactly as before until you tick it.
+2. **Improved — Frozen worlds with air:** with Use Climate Codes ticked, a frozen world that has an atmosphere, in any edition, is no longer drawn with the craters of an airless moon.
+3. **New — T5 Twilight Zone worlds:** with Use Climate Codes ticked, a T5 Tz world with an atmosphere is drawn as T5 describes it, with desert Baked Lands on the side facing its star, ice-bound Frozen Lands on the far side and a 1,000 km Twilight ring between them that keeps its seas and coasts, in its world image, flat map and regional maps alike.
+4. **Fixed — Very large maps:** maps of roughly 500 MB or more can now be saved, generated in and undone, where all three used to fail with "Failed to save file" or silently do nothing, and maps big enough to save in parts are now split by size so no single part grows too large to write.
+5. **New — Custom OTU Import:** a new **Custom OTU Import** button in Settings shows a scrolling map of the 400 TravellerMap sectors with world data in the Official Traveller Universe and up the Zhodani Core Route, and you drag a rectangle over the ones you want to import them onto a canvas of that size, with an estimate of the file size and download time, a warning to confirm above 128 sectors and a limit of 400.
+
+### [v0.18.1.4.1] - 2026-11-08
 1. **Fixed — hex grids on very large worlds:** exported world images of planets of size G and above, such as T5 Big Worlds, now show their hex grid in HTML and Obsidian exports, where it was missing.
 
 ### [v0.18.1.4] - 2026-11-08

@@ -10,6 +10,16 @@
  * deliberate — restoring a deleted slot has to put its row back, and the count
  * refresh only updates rows that already exist.
  */
+// Undo/redo of a placed border/region name (v0.18.3). Like route definitions,
+// positions travel only in snapshots that recorded them.
+function _snapshotLabelPositionsInto(current, snap) {
+    if (snap.labelPositions) current.labelPositions = captureLabelPositions();
+}
+function _restoreLabelPositions(snap) {
+    if (snap.labelPositions) restoreLabelPositions(snap.labelPositions);
+    if (typeof window.invalidateMapLabelCaches === 'function') window.invalidateMapLabelCaches();
+}
+
 function _restoreRouteDefinitions(snap) {
     if (!snap.routeDefinitions) return;
     window.routeDefinitions = snap.routeDefinitions;
@@ -163,6 +173,13 @@ function setupKeyboardShortcuts() {
         } else if (key === 'g' && !e.ctrlKey) {
             e.preventDefault();
             if (typeof window.toggleRegionWindow === 'function') window.toggleRegionWindow();
+        } else if (key === 'l' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+            // Same path as the Settings tick-box and the window's X, so the
+            // tick-box and the saved preference stay in step.
+            e.preventDefault();
+            if (typeof window.setMapLegendEnabled === 'function') {
+                window.setMapLegendEnabled(window.mapLegendEnabled !== true);
+            }
         // NOTE: the 'A' key used to open an Allegiance Manager window. That
         // window was removed and #allegiance-window no longer exists, so the
         // shortcut swallowed the key and did nothing. Assigning allegiances is
@@ -182,12 +199,15 @@ function setupKeyboardShortcuts() {
                     if (snap.routeDefinitions) {
                         current.routeDefinitions = JSON.parse(JSON.stringify(window.routeDefinitions || []));
                     }
+                    _snapshotLabelPositionsInto(current, snap);
                     window.undoStack.push(current);
                     window.sectorRoutes = snap.routes;
                     hexStates.clear();
                     snap.hexStates.forEach(([id, st]) => hexStates.set(id, st));
                     _restoreRouteDefinitions(snap);
+                    _restoreLabelPositions(snap);
                     showToast(`Redid: ${snap.action}`, 2000);
+                    if (typeof window.refreshMapLegend === 'function') window.refreshMapLegend();
                     requestAnimationFrame(draw);
                     if (window.dbManager) { window.dbManager.syncAllHexes(); window.dbManager.saveRoutes(); }
                 }
@@ -203,12 +223,15 @@ function setupKeyboardShortcuts() {
                     if (snap.routeDefinitions) {
                         current.routeDefinitions = JSON.parse(JSON.stringify(window.routeDefinitions || []));
                     }
+                    _snapshotLabelPositionsInto(current, snap);
                     window.redoStack.push(current);
                     window.sectorRoutes = snap.routes;
                     hexStates.clear();
                     snap.hexStates.forEach(([id, st]) => hexStates.set(id, st));
                     _restoreRouteDefinitions(snap);
+                    _restoreLabelPositions(snap);
                     showToast(`Undid: ${snap.action}`, 2000);
+                    if (typeof window.refreshMapLegend === 'function') window.refreshMapLegend();
                     requestAnimationFrame(draw);
                     if (window.dbManager) { window.dbManager.syncAllHexes(); window.dbManager.saveRoutes(); }
                 }

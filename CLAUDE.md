@@ -32,6 +32,12 @@ rulings are settled. Don't re-derive them or reopen them.
 4. **Extend before you create.** Check `js/` for an existing module before adding a file.
 5. **No git at all.** Don't run any git command, not even `status`, `log` or `diff`. Sean does
    all staging and committing by hand. To know what is committed, ask him.
+6. **Older saved files must always load and work.** A `.json` map saved by any earlier version
+   must open in the current app without errors and stay fully usable. Every new saved field is
+   optional: decide what a file without it means (usually "as before") and handle its absence
+   in the loader. Never require a field, rename or repurpose one, or change what an existing
+   value means. When a change touches saving, loading or anything a save holds, load real
+   older saves to prove it, such as `sectors/solo_6.json` (v0.13.3).
 
 ## Running and Verifying
 

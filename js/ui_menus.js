@@ -4197,6 +4197,34 @@ function setupSettingsPanel() {
         });
     }
 
+    // --- Ringed gas giant icon for a mainworld that orbits a gas giant ---
+    // ON unless explicitly turned off (Sean, 2026-11-14), so a browser that has
+    // never stored the key starts ticked.
+    const ringedGGToggle = document.getElementById('toggle-ringed-gg');
+    if (ringedGGToggle) {
+        const saved = localStorage.getItem('traveller_ringed_gg_satellites');
+        window.ringedGasGiantSatellites = saved !== 'false';
+        ringedGGToggle.checked = window.ringedGasGiantSatellites;
+        ringedGGToggle.addEventListener('change', () => {
+            window.ringedGasGiantSatellites = ringedGGToggle.checked;
+            localStorage.setItem('traveller_ringed_gg_satellites', String(window.ringedGasGiantSatellites));
+            requestAnimationFrame(draw);
+        });
+    }
+
+    // --- Map legend (v0.18.3, js/map_legend.js) ---
+    // OFF unless explicitly turned on. Saved with the map too (io_manager.js).
+    const mapLegendToggle = document.getElementById('toggle-map-legend');
+    if (mapLegendToggle) {
+        window.mapLegendEnabled = localStorage.getItem('traveller_map_legend') === 'true';
+        mapLegendToggle.checked = window.mapLegendEnabled;
+        mapLegendToggle.addEventListener('change', () => {
+            if (typeof window.setMapLegendEnabled === 'function') {
+                window.setMapLegendEnabled(mapLegendToggle.checked);
+            }
+        });
+    }
+
     // --- Generation Options: TL Max ---
     const tlMaxInput = document.getElementById('input-tl-max');
     if (tlMaxInput) {

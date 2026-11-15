@@ -5,7 +5,7 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.18.2";
+const APP_VERSION = "v0.18.3";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -58,6 +58,11 @@ showSectorNames = false;
 showSubsectorNames = false;
 window.borderNamesEnabled = false;
 window.regionNamesEnabled = false;
+// Ringed gas giant icon for a mainworld that orbits a gas giant (v0.18.3).
+// ON by default, for new maps and for saves made before the option existed.
+window.ringedGasGiantSatellites = true;
+// v0.18.3 map legend window (js/map_legend.js). Off unless turned on.
+window.mapLegendEnabled = false;
 
 // Sector name store — keyed by integer sector number
 window.sectorNames = {};
@@ -225,11 +230,42 @@ function cloneHexStateEntries() {
     return out;
 }
 
+// Placed border/region name positions (v0.18.3), for undo. Regions are matched
+// by name (hexes reference a region by name) and borders by id (hex assignments
+// reference a border by id), the same keys the map itself uses.
+function captureLabelPositions() {
+    const copy = p => (p ? { hex: p.hex, dx: p.dx, dy: p.dy } : null);
+    return {
+        regions: (window.regionDefinitions || []).map(d => [d.name, copy(d.labelPos)]),
+        borders: (window.borderDefinitions || []).map(d => [d.id, copy(d.labelPos)]),
+    };
+}
+
+function restoreLabelPositions(snap) {
+    if (!snap) return;
+    const apply = (defs, pairs, key) => {
+        const byKey = new Map(pairs);
+        (defs || []).forEach(d => {
+            if (!byKey.has(d[key])) return;
+            const p = byKey.get(d[key]);
+            if (p) d.labelPos = { hex: p.hex, dx: p.dx, dy: p.dy }; else delete d.labelPos;
+        });
+    };
+    apply(window.regionDefinitions, snap.regions || [], 'name');
+    apply(window.borderDefinitions, snap.borders || [], 'id');
+    if (window.dbManager) {
+        window.dbManager.saveRegionDefinitions?.();
+        window.dbManager.saveBorderDefinitions?.();
+    }
+}
+
 /**
  * @param {string} actionName - label shown by "Undid: …"
  * @param {Object} [opts]
  * @param {boolean} [opts.includeRouteDefinitions] - also snapshot
  *        window.routeDefinitions, for actions that add or remove route slots.
+ * @param {boolean} [opts.includeLabelPositions] - also snapshot placed
+ *        border/region name positions (a name move or reset).
  */
 function saveHistoryState(actionName, opts = {}) {
     const stateSnapshot = {
@@ -247,6 +283,15 @@ function saveHistoryState(actionName, opts = {}) {
     if (opts.includeRouteDefinitions) {
         stateSnapshot.routeDefinitions = JSON.parse(JSON.stringify(window.routeDefinitions || []));
     }
+    // Placed border/region names (v0.18.3), opt-in for the same reason: only a
+    // name move or reset records them, and only such a snapshot restores them.
+    if (opts.includeLabelPositions) {
+        stateSnapshot.labelPositions = captureLabelPositions();
+    }
+    // Every undoable action is about to change the map, and the border/region
+    // name caches are keyed on counts that an assignment or rename can leave
+    // unchanged. The mutation runs synchronously after this, before any draw.
+    if (typeof window.invalidateMapLabelCaches === 'function') window.invalidateMapLabelCaches();
     // Cap undo history by grid size: 50 snapshots for the default 7×5 canvas,
     // 5 for larger canvases where each snapshot can be hundreds of MB.
     const undoLimit = (gridWidth * gridHeight) > 35 ? 5 : 50;
@@ -346,6 +391,98 @@ function isVacantHex(hexId) {
     const state = hexStates.get(hexId);
     return !state || state.type === 'BLANK' || state.type === 'EMPTY';
 }
+
+// ---------------------------------------------------------------------------
+// Ringed gas giant icon (v0.18.3, Sean 2026-11-14; manifest §0.0.D)
+// ---------------------------------------------------------------------------
+// The map rings its gas giant icon only for a mainworld with Sa whose parent
+// IS a gas giant. An Sa mainworld around anything else, or whose parent is not
+// recorded (TravellerMap imports, Hex Editor worlds, mainworld-only hexes),
+// gets the normal icon.
+//
+// Each edition names the parent differently: CT/MgT2E 'Gas Giant', T5
+// 'Large Gas Giant' / 'Small Gas Giant', RTT worldClass 'Jovian'.
+const _GG_PARENT_RE = /gas giant|ice giant|jovian|^[sl]?gg$/i;
+
+function _isGasGiantBody(b) {
+    if (!b || typeof b !== 'object') return false;
+    // RTT: the world CLASS decides, and only 'Jovian' counts (Sean, 2026-11-14).
+    // A Chthonian is in the Jovian group with type 'Jovian Planet', but its
+    // atmosphere is stripped, so it is not a gas giant -- matching RTT's own
+    // gasGiant flag (rtt_engine.js extractRTTMainworld).
+    if (typeof b.worldClass === 'string' && b.worldClass) return b.worldClass === 'Jovian';
+    return [b.type, b.worldType].some(t => typeof t === 'string' && _GG_PARENT_RE.test(t));
+}
+
+// Finds the body that holds `mw` in its satellites/moons list, walking the
+// system object generically (the shapes differ per edition). The mainworld is
+// matched by object identity first, then by NAME (orbitId is not unique, and a
+// loaded save breaks identity), then by a moon flagged as the mainworld: RTT's
+// map copy (extractRTTMainworld) is a new object named after the SYSTEM, while
+// the real moon in rttSystem carries isMainworld.
+function _findMainworldParent(system, mw) {
+    if (!system || typeof system !== 'object' || !mw) return null;
+    const seen = new Set();
+    const stack = [system];
+    let byName = null;
+    let byFlag = null;
+    while (stack.length) {
+        const node = stack.pop();
+        if (!node || typeof node !== 'object' || seen.has(node)) continue;
+        seen.add(node);
+        for (const key of ['satellites', 'moons']) {
+            const list = node[key];
+            if (!Array.isArray(list)) continue;
+            for (const m of list) {
+                if (m === mw) return node;
+                if (!byName && m && mw.name != null && m.name === mw.name) byName = node;
+                if (!byFlag && m && m.isMainworld === true) byFlag = node;
+            }
+        }
+        for (const k in node) {
+            const v = node[k];
+            if (v && typeof v === 'object') stack.push(v);
+        }
+    }
+    return byName || byFlag;
+}
+
+// Cache keyed on the mainworld object, because the renderer asks every frame.
+// Each entry also remembers its inputs (system object, parent names), so a
+// world that is still being built -- the generation-time log lines call this
+// before parentType is set -- can never pin a stale answer.
+const _ringedGGCache = new WeakMap();
+
+// True only when the mainworld has Sa AND its parent is a gas giant.
+// `stateObj` is optional (generation-time callers have only the world).
+function mainworldOrbitsGasGiant(mw, stateObj) {
+    if (!mw || !Array.isArray(mw.tradeCodes) || !mw.tradeCodes.includes('Sa')) return false;
+    const system = stateObj
+        ? (stateObj.rttSystem || stateObj.t5System || stateObj.mgtSystem ||
+           stateObj.ctSystem || stateObj.aowSystem || null)
+        : null;
+    const cached = _ringedGGCache.get(mw);
+    if (cached && cached.system === system && cached.parentType === mw.parentType &&
+        cached.parentBody === mw.parentBody) {
+        return cached.result;
+    }
+
+    let result = null;
+    // 1. The system structure is the truth, when the hex has one.
+    if (system) {
+        const parent = _findMainworldParent(system, mw);
+        if (parent) result = _isGasGiantBody(parent);
+    }
+    // 2. Otherwise the parent name the engine recorded on the world.
+    if (result === null) {
+        const named = [mw.parentType, mw.parentBody].filter(t => typeof t === 'string');
+        result = named.length > 0 && named.some(t => _GG_PARENT_RE.test(t));
+    }
+    // 3. No parent known at all: normal icon (false).
+    _ringedGGCache.set(mw, { system, parentType: mw.parentType, parentBody: mw.parentBody, result });
+    return result;
+}
+window.mainworldOrbitsGasGiant = mainworldOrbitsGasGiant;
 
 // Keys on a hex state that are DERIVED VIEW STATE, not map data.
 //

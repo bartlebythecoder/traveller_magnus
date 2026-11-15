@@ -99,6 +99,8 @@ function initializeInput() {
     setupBorderWindow();
     setupRegionWindow();
     setupDisclosureUI();
+    // Map legend (v0.18.3): shows the window if the setting was left on.
+    if (typeof window.updateMapLegendVisibility === 'function') window.updateMapLegendVisibility();
 }
 
 // ============================================================================

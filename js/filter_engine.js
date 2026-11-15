@@ -648,6 +648,9 @@
 
         // 6. The always-visible "worlds are hidden" notice
         window.updateFilterIndicator();
+
+        // 7. Hidden worlds drop out of the map legend (v0.18.3)
+        if (typeof window.refreshMapLegend === 'function') window.refreshMapLegend();
     };
 
     /**
@@ -758,13 +761,58 @@
             row.innerHTML = `
                 <div style="display: flex; align-items: center; flex: 1; overflow: hidden;">
                     ${styleIndicator}
-                    <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${rule.description}">${rule.description}</span>
+                    <span class="rule-label" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></span>
                 </div>
+                <i class="fas fa-pen rule-rename" style="color: #45a29e; cursor: pointer; margin-left: 8px; font-size: 0.7rem;" title="Name this rule for the Map Legend"></i>
                 <i class="fas fa-eye${isHidden ? '-slash' : ''}" style="color: ${isHidden ? '#666' : '#45a29e'}; cursor: pointer; margin-left: 8px; font-size: 0.8rem;" title="${isHidden ? 'Enable rule' : 'Disable rule'}" onclick="toggleFilterRuleVisibility('${rule.id}')"></i>
                 <i class="fas fa-times" style="color: #ff4500; cursor: pointer; margin-left: 8px; font-size: 0.8rem;" onclick="deleteFilterRule('${rule.id}')"></i>
             `;
+            // The name is user text, so it goes in as text, never as markup.
+            const label = row.querySelector('.rule-label');
+            if (rule.name) {
+                label.textContent = rule.name;
+                label.style.fontWeight = '600';
+                label.title = `${rule.name} — ${rule.description}`;
+            } else {
+                label.textContent = rule.description;
+                label.title = rule.description;
+            }
+            row.querySelector('.rule-rename').addEventListener('click', () => _editRuleName(rule, label));
             listContainer.appendChild(row);
         });
+
+        if (typeof window.refreshMapLegend === 'function') window.refreshMapLegend();
+    }
+
+    // In-place rename for the Map Legend (v0.18.3). Enter or leaving the field
+    // keeps the text, Escape cancels; an empty name removes it, so the legend
+    // falls back to the rule's description.
+    function _editRuleName(rule, label) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.maxLength = 60;
+        input.value = rule.name || '';
+        input.placeholder = 'Legend name';
+        input.style.cssText = 'flex: 1; min-width: 0; padding: 1px 4px; background: #1f2833; border: 1px solid #66fcf1; color: #fff; font-size: 0.7rem;';
+        label.replaceWith(input);
+        input.focus();
+        input.select();
+        let done = false;
+        const finish = (keep) => {
+            if (done) return;
+            done = true;
+            if (keep) {
+                const v = input.value.trim();
+                if (v) rule.name = v; else delete rule.name;
+            }
+            window.renderRulesLedger();
+        };
+        input.addEventListener('keydown', e => {
+            e.stopPropagation();   // keep map shortcuts out of the field
+            if (e.key === 'Enter') finish(true);
+            else if (e.key === 'Escape') finish(false);
+        });
+        input.addEventListener('blur', () => finish(true));
     }
 
     /**
@@ -779,6 +827,12 @@
                 state.custom_ui = { appliedColors: [] };
             }
         });
+
+        // Which rules matched each hex, for the Map Legend (v0.18.3). Kept OFF the
+        // hex states and the rule objects on purpose: both are saved and exported,
+        // and this is derived view state that a rule pass rebuilds from scratch.
+        const matchesByHex = new Map();
+        window.ruleMatchesByHex = matchesByHex;
 
         // 2. Iterate through rules (skip hidden ones)
         window.activeFilterRules.forEach(rule => {
@@ -831,12 +885,17 @@
                     // Background fill applies to all hex types (SYSTEM_PRESENT, BLANK, EMPTY)
                     if (rule.bgFillColor) state.custom_ui.bgFillColor = rule.bgFillColor;
 
+                    let list = matchesByHex.get(hexId);
+                    if (!list) { list = []; matchesByHex.set(hexId, list); }
+                    list.push(rule.id);
+
                     ruleMatchCount++;
                 }
             });
             if (typeof writeLogLine === 'function') writeLogLine(`Rule Completed: ${ruleMatchCount} systems updated.`);
         });
 
+        if (typeof window.refreshMapLegend === 'function') window.refreshMapLegend();
         if (typeof draw === 'function') requestAnimationFrame(draw);
     };
 
@@ -952,6 +1011,14 @@
             isUnderline: ruleState.isUnderline,
             description: description
         };
+
+        // Optional Map Legend name (v0.18.3, Sean 2026-11-14). Written only when
+        // given, so a rule without one looks exactly as it always did; rules from
+        // older saves and rule files have no `name` and fall back to the description.
+        const nameInput = document.getElementById('design-rule-name');
+        const ruleName = nameInput ? nameInput.value.trim() : '';
+        if (ruleName) newRule.name = ruleName;
+        if (nameInput) nameInput.value = '';
 
         window.activeFilterRules.push(newRule);
         

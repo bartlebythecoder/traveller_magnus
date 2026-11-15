@@ -30,26 +30,26 @@ in this document, not a neutral act.
 **So: an item still written down here is an item still live.**
 
 ---
-**Version:** **v0.18.1.4 is BUILT, NOT YET DATED** (updated 2026-11-03). `APP_VERSION` is already
-`v0.18.1.4`; its changelog entry ("In Progress") holds items 1–34 in `changelog.md` and
-`README.md`. Items 1–9 are white-background images, subsector names, two save fixes and Add
-Border; **items 10–30 are the T5 satellite/climate work in §0.0.D** (24 = gas giants/belts have
-no climate, 25 = T5 repeatable generation, 26 = T5 Rotation text, 27 = editor moon-mainworld
-Close/Far); 31 = export hex grids, 32 = right-click WORLD DETAILS, 33 = T5 size-0 planets roll no
-moons, 34 = orrery speed for moons of size-0 worlds. §0.0.D also holds the outstanding checklist. Earlier: v0.18.1.3 (2026-10-19) one System Sheet per star, orrery GIFs,
-neighbourhood import; v0.18.1.2 (2026-10-01) sheet/orrery/both export choice; v0.18.1.1
-(2026-09-25) the System Sheet; v0.18.1 (2026-09-24); v0.18.0 (2026-09-20) regional terrain;
-v0.17.2–v0.17.5 (08-19 → 09-11) routes; v0.17.0 / v0.17.0.1 (08-03 / 08-04) exports.
+**Version:** **v0.18.3 released 2026-11-14** (banner "New: Map Legends"; changelog/README items
+1–6: ringed gas giant icon, Map Legend, styling rule names, symbols on unnamed worlds, movable
+border and region names, stale names fixed). **No version is open** — start the next one with
+the `new_version` skill (init). Earlier: v0.18.2 (2026-11-10) climate-coded world images, T5 Tz
+hemispheres, very large maps, Custom OTU Import; v0.18.1.4.1 / v0.18.1.4 (2026-11-08) export hex
+grids, white-background images, subsector names, T5 satellites and climate; v0.18.1.3
+(2026-10-19) one System Sheet per star, orrery GIFs, neighbourhood import; v0.18.1.2
+(2026-10-01) sheet/orrery/both export choice; v0.18.1.1 (2026-09-25) the System Sheet; v0.18.1
+(2026-09-24); v0.18.0 (2026-09-20) regional terrain; v0.17.2–v0.17.5 (08-19 → 09-11) routes;
+v0.17.0 / v0.17.0.1 (08-03 / 08-04) exports.
 **Architecture Standard:** The "Sean Protocol" (Directives -> Orchestration -> Execution)
 
 ---
 
-## 0.0 COLD START — read this first (updated 2026-11-02)
+## 0.0 COLD START — read this first (updated 2026-11-14)
 
 **IF YOU ARE STARTING FRESH, READ IN THIS ORDER:**
 
-1. **§0.0.D below** — the handoff: where v0.18.1.4 stands, **the next steps**, and
-   Sean's T5 rulings from 2026-10-24 → 11-01.
+1. **§0.0.D below** — the handoff: v0.18.3 as released, **the open items**, and the
+   rulings that still bind (v0.18.3, v0.18.2 and Sean's T5 rulings).
 2. **§0.0.C / `directives/system_sheet_spec.md`** — before touching the System Sheet or the
    exporters' system images.
 3. **§0.0.B** — the design rulings and traps behind the sheet that still bind.
@@ -78,296 +78,127 @@ with measured numbers, give ONE recommendation, ask with the question tool, buil
    himself. **Do not record commit hashes or the commit position in this document.** If you
    need to know what is committed, ask him.
 
-### 0.0.D HANDOFF — v0.18.1.4, updated 2026-11-03. START HERE.
+### 0.0.D HANDOFF — v0.18.3 released 2026-11-14. START HERE.
 
-**2026-11-08: v0.18.1.4 dated 2026-11-08 and v0.18.1.4.1 opened "In Progress"** (Sean, via
-the `new_version` skill, init mode). v0.18.1.4.1 item 1 = the eHex hex-grid fix recorded
-under item 10 below. Whether the item 1 hand-checks below were done before dating was not
-stated — ask Sean before treating them as done.
-**Later 2026-11-08: v0.18.1.4.1 promoted by Sean and dated 2026-11-08; v0.18.2 opened "In
-Progress" (empty), banner "New: Upgraded World Images".**
+**Nothing is in progress or half-built.** v0.18.3 is dated in `changelog.md` and `README.md`
+(identical copies, items 1–6). No version is open: before adding a changelog item, open the next
+version with the `new_version` skill (init mode). Sean commits by hand — ask him what is
+committed. The rulings below are **decided; do not re-derive or re-litigate them.**
 
-**2026-11-09: whole-map string cap fixed (R12) — BUILT + VERIFIED; changelog/README v0.18.2
-item 4.** Prompted by a user request for a bigger OTU import (proposed "Custom OTU": drag a
-rectangle over an OTU sector map, warning popup above 128 sectors, hard cap ~400 — BUILT the
-same day, see the next entry). Measured on a real Universe import (128 sectors): every hex of an
-imported sector is stored (163,840, EMPTY = 74 B), 49,010 worlds at ~1.4 KB, save 73 MB,
-~0.75 MB heap per sector, 320 s cold / 11 s cached; a T5-generated world is ~14 KB, so a fully
-generated Universe is ~690 MB. Two sites built ONE string of the whole map and hit V8's
-~512 MB cap: `saveHistoryState` (so every generate action threw before starting) and Save
-(failed before its chunked path could run). Fix: `cloneHexStateEntries()` in core.js
-round-trips per hex (used by saveHistoryState and Ctrl+Z / Ctrl+Shift+Z in
-keyboard_shortcuts.js); Save stringifies per hex into a Blob, byte-identical to the old file;
-chunked parts now close at SAVE_CHUNK_SIZE by size, not equal hex counts (equal counts could
-put every generated system in one oversized part). Verified with the cap simulated at 30 MB
-on the real Universe (save identical to `JSON.stringify` of its own parse, 0/163,840 hex
-mismatches; generate + undo + redo work) and a 2 MB-threshold chunked save that reloads with
-every field intact; with each fix switched off, the matching checks FAIL. Still open: undo
-keeps up to 5 whole-map copies in memory, so a ~500 MB map needs ~3 GB of heap — not a string
-cap, but the next ceiling.
+#### OPEN ITEMS — none scheduled; ask Sean before starting any, one question at a time
 
-**2026-11-09: Custom OTU Import (BUILT; changelog/README v0.18.2 item 5; FAQ "Custom OTU
-Import").** Settings button `#btn-import-custom-otu` → `#custom-otu-import-modal`; code in the
-"CUSTOM OTU IMPORT" section of `js/otu_importer.js`, which hands the selection to the shared
-`executeBulkImport` (fresh canvas sized to the rectangle; slot = row-major from the top-left).
-Data: `utilities/convert_universe.ps1` now also writes `window.OTU_SECTOR_MAP` (+ `_BOUNDS`)
-into `js/universe_data.js` — every sector from `/api/universe?milieu=M1105&requireData=1`
-whose Tags include `OTU` or `ZCR`, in X −23…14, Y −175…17 (38×193 cells): 233 OTU + 167
-Zhodani Core Route = **400**, so "Select everything" sits exactly on the cap. Sean asked for
-the ZCR line (2026-11-09). `requireData` matters: 155 OTU-tagged sectors and every ZCR sector
-off the X = −7 spine are names only ("# No world data available"); the first build listed them
-and counted them as "with data". The Universe block's 128 all have data. `UNIVERSE_SECTORS`
-came out identical when regenerated. The picker scrolls (`max-height:52vh`; needs
-`flex-shrink:0` or the flex column squashes it to a few px), draws at 1 px per CSS pixel
-(the canvas is ~4,000 px tall), autoscrolls while a drag holds near an edge, follows a wheel
-scroll mid-drag, and Shift-click stretches from the fixed corner. The script's output path pointed at `utilities/js/`, which does not
-exist (it was written before the script moved into utilities/), so it could not have been
-re-run; now fixed to the repo's `js/`. Engineering choices, not asked (no game fact): OTU +
-ZCR tags only, so OrionOB1 / Faraway fan sectors are not offered; always a fresh canvas;
-`CUSTOM_OTU_WARN_SECTORS` 128 (confirm() listing the risks), `CUSTOM_OTU_MAX_SECTORS` 400 (Import
-disabled above it); estimates use 0.57 MB and 2.5 s
-per uncached sector (measured). **Test trap:** the Launch button's handler is attached only
-after `loadFromDB` resolves, so a harness that hides the splash and imports at once races the
-autosave load and gets a mixed map; users cannot hit this. Wait for the splash to hide after a
-Launch click.
+1. [ ] **Hand-check, v0.18.3:** on Windows Chrome, does releasing Alt after an Alt + drag of a
+   border/region name move focus to Chrome's menu button? A headless browser cannot show it.
+2. [ ] **Hand-checks from v0.18.1.4 — never confirmed done** (it was dated 2026-11-08 without
+   saying). Orrery: hovering a moon shows "Orbit: Dee (D)"; Close moons ring inside Far ones and
+   T5 tooltips show no "PD from parent" line; a moon of a size-0 planet orbits at Earth-size
+   pace. T5 hex accordion: Rotation text for Tz / Close moons; Climate Zone on non-mainworlds
+   follows each body's code (gas giants and belts blank). System Editor: +Moon → ☆MW gets a
+   Close/Far letter, Sa (+Lk when Close) and keeps them through a second Save; ☆MW on an
+   existing moon keeps its place; a new T5 system's size-0 planets have no moons. Exports: CT /
+   T5 / RTT planets show hex grids in Diamond/Sinusoidal. Right-click → WORLD DETAILS opens the
+   Ctrl+click panel. Subsector names: long names shrink then ellipsis; White Background Mode.
+3. [ ] **World images ignore tidal lock outside T5** (deferred by Sean 2026-11-02). T5 Tz worlds
+   got split hemispheres in v0.18.2 behind Use Climate Codes; `TIDAL_LOCK.MAP` is drawn by
+   nothing else. It changes a renderer input, so §0.0.A applies and it needs his ruling first.
+4. [ ] **CT, RTT and AoW repeatability is unchecked** (deferred 2026-11-02). T5 was fixed (trap
+   9 below) and MgT2E is clean. Test: generate a hex, generate it again, generate 3 other hexes,
+   generate it a third time; compare `JSON.stringify` with `name`/`names`/`_*` keys dropped.
+5. [ ] **Undo memory on huge maps.** Undo keeps up to 5 whole-map copies, so a ~500 MB map
+   needs ~3 GB of heap. Not a string cap (R12 fixed those) — the next ceiling.
+6. [ ] **Suspected, not verified:** undo snapshots hold hexes, routes and (opt-in) route
+   definitions and name positions — not `hexBorderAssignments` or the border/region definitions —
+   yet the Border Manager's delete prompt says "can be undone with Ctrl+Z". Check before relying
+   on it.
+7. [ ] **Not exercised:** System Editor-built satellite mainworlds (ringed gas giant, legend).
+   CT bottom-up and MgT2E bottom-up produced 0 Sa mainworlds in 640 hexes each (pre-existing,
+   not investigated). The Map Legend is not drawn into exports.
+8. [ ] **Worth a second opinion from Sean:** on Mercator/flat maps the T5 Tz twilight ring widens
+   toward the poles (correct for a constant-km ring through the poles).
 
-**2026-11-09: v0.18.2 — climate codes drive Tectonic world images (BUILT + VERIFIED
-2026-11-09; changelog/README item 1; FAQ "Do trade or climate codes change a world image?";
-terrain_spec §4/§5).** Verified in-app: 15 T5 bodies — every Fr/Tu/Co/Tr/Ho one changes
-with the box on, every uncoded one and every v1 render identical; Kelvin world unchanged;
-regional `worldTypeOf`/`tempBand`/`polarOverlay` agree; save writes the key, no-key/legacy
-loads off; Classic greys the box; in-app mainworld image hash == exporter hash;
-`verify_field_v1.html` 30/30 PASS (`--disable-gpu`; GPU pane gives the usual false 18/30).
-**2026-11-09: T5 Tz / Lk hemisphere climates (BUILT + VERIFIED 2026-11-09; changelog/README
-item 3; FAQ; terrain_spec §4/§5 has the as-built).** Verified: `verify_field_v1` 30/30
-(`--disable-gpu`; the shared `_DESERT/_ICE/_COLD_DESERT_STOPS` refactor is inert); v1 and
-box-off identical for Tz/plain/vacuum/exotic; box on changes only Tz-with-air (and Lk+Co via
-the Co band); ring 8.95° at Size 8, 17.9° at Size 4; regional pins: Baked → desert (Salt Pan),
-Frozen → ice (Sea Ice), Twilight → standard (coast), no caps; in-app mainworld image hash ==
-exporter hash (0207 A77A57B-A Tz); Regional Maps panel opens, no console errors.
-**Looks worth a second opinion from Sean:** Mercator/flat maps show the twilight ring widening
-toward the poles (correct for a constant-km ring through the poles). **Frozen side textured
-(Sean, 2026-11-09, after reviewing Duvall 18-G-2220):** the ice now follows the ground —
-former seas by depth on the blue lower third of the ice ramp, land climbing to white — instead
-of one flat sea tone; v1 gate still 30/30. World image only: the regional `ice` type already
-shades sea ice by depth. Tectonic plate-boundary straight edges now read through the ice; they
-are in the base terrain (visible with the box off), not this change. Source:
-Sean's summary of Book 3 Chart 11 steps 24-25, matching `rules/t5_data.js`
-`TIDAL_LOCK.MAP`. Tz (star-locked planet): Baked Lands (41) on the star side, oceans → Desert;
-Frozen Lands (43) on the dark side, oceans → Ice Field; a Twilight strip (42) 1 world hex
-(1,000 km) wide keeps the normal terrain and liquid water; the boundary is a vertical line
-between the poles. **Lk: no image change** — satellites have no Twilight Zone (RAW), and an
-Lk world's Ho/Co already drives its image via Use Climate Codes. T5 only for now; our own
-renderer, not T5's hand-map symbols. Rulings so far:
-* **Day side = lit side (Sean, 2026-11-09):** the Baked hemisphere is centred on the
-  longitude of the renderer's existing light (substellar point ~135°W), so the western disc
-  shows Baked lands lit and the eastern disc shows Frozen lands in shadow.
-* **Twilight = full ring, 1,000 km wide (Sean, 2026-11-09):** along BOTH terminator
-  meridians (±90° from the star point), so a complete ring through the poles; width is
-  literal 1,000 km, so its angle scales with world diameter (~9° at Size 8, ~18° at Size 4);
-  short soft blends at its edges.
-* **Hemisphere looks reuse our palettes (Sean, 2026-11-09):** Baked = the existing desert
-  palette, former seabeds as low desert basins; Frozen = the existing ice palette, former seas
-  as flat ice fields; the twilight ring keeps the world's normal look (oceans, coasts,
-  vegetation if it qualifies). The world's own relief is kept everywhere.
-* **Which worlds split (Sean, 2026-11-09): any Tz world with air** — atmosphere 1-9 or D-F.
-  A dry one (hydro 0) gets frost on its Frozen side, desert elsewhere. Airless rock, all-ice
-  (atm 0 + water) and molten worlds stay as they are; exotic A-C keep their exotic look.
-* **No polar caps on a split Tz world (Sean, 2026-11-09):** its climate runs by longitude;
-  the poles show whatever the hemisphere or twilight ring puts there.
-* **Engineering defaults (no game fact; stated to Sean, not asked):** gated like the rest of
-  v0.18.2 — Tectonic + Use Climate Codes box on, so Classic and existing maps never change;
-  the zone test lives in BOTH duplicated copies so the regional map shows the same hemisphere
-  at a pin; clouds unchanged; the band is taken from the zone (twilight = the world's normal
-  Temperate band, since Tz carries no other climate code); boundaries are meridians (the
-  substellar point treated as on the equator, per "a vertical line between the poles").
+#### v0.18.3 — RULINGS AND AS-BUILT (Sean, 2026-11-14)
 
-**Craters on ice worlds with air (Sean, 2026-11-09): removed, ONLY with the Use Climate
-Codes box on** (item 2), every edition — so existing maps (box off) keep them and nothing
-redraws. `_buildPalette` `isAirless = isRock || (isIce && !_airIce)`. Verified: v1 and
-box-off identical; Kelvin ice-with-air loses craters only box-on; airless ice and rock keep
-them; `verify_field_v1` 30/30 (`--disable-gpu`).
-Found: world images read only atm, hydro, temperatureK and a temperature band word, never
-trade codes or climate codes. MgT2E, CT and AoW carry Kelvin; **T5 and RTT carry none**, so
-every T5/RTT world renders as Temperate. Rulings:
-* **Classic (v1) never changes** — the Settings note now says Classic ignores trade/climate
-  codes (`ui_menus.js` `describe`). Every new effect goes behind `_fieldVersion >= 2`.
-* **Scope (Sean, 2026-11-09): climate codes only.** Not Tz look, not Ga/Ag vegetation
-  override, not social codes (In/Hi/Pi). Physical codes (De, Ic, Wa…) already show because
-  they derive from the UWP digits the renderer reads.
-* Plan: (1) carry tradeCodes (+ RTT worldClass/zone) into the renderer data at every call
-  site (`export_core._rendererData`, `hex_editor` x3, `system_sheet`, `approach_viewer`);
-  (2) when temperatureK is 0, derive the band from the climate code — both duplicated
-  predicate copies (`planet_renderer.js` + `terrain_render.js`); (3) prove v1 byte-identical
-  (`verify_field_v1.html`, `--disable-gpu`) and v2 unchanged for MgT2E/CT/AoW; (4) FAQ,
-  terrain_spec §4, changelog.
-* **T5 code → band (Sean, 2026-11-09): follow Chart D text.** Tr/Ho = Hot, Tu/Co = Cold,
-  Fr = Frozen (a world with seas renders as solid ice), no climate code = Temperate.
-* **RTT (Sean, 2026-11-09): left as is** — stays Temperate; rtt_worldgen.md states no zone
-  temperatures. v0.18.2 changes T5 images only, so step (1) needs no RTT worldClass/zone.
-* **Redraw (Sean, 2026-11-09): make it a new opt-in.** Existing Tectonic maps must keep their
-  images; climate-coded images happen only when the user opts in.
-* **Opt-in form (Sean, 2026-11-09): a separate tick-box, "Use Climate Codes"**, under World
-  Image Generation. Saved WITH THE MAP like `terrainFieldVersion` (no localStorage mirror).
-  **Two defaults, like the terrain model:** a save without the key loads OFF (existing maps
-  keep their images); a NEW map starts ON. Greyed out while Classic is ticked, and inert under
-  v1 even if set. v2 itself is NOT changed — with the box off, v2 renders byte-identical.
-* **Revised plan:** (1) the setting: `hex_map.html` row, `ui_menus.js` control + note,
-  `io_manager.js` save/load with the off-when-absent fallback, a window global read at render
-  time beside `terrainFieldVersion`; (2) carry T5 `tradeCodes` into the renderer data at every
-  call site (`export_core._rendererData`, `hex_editor` x3, `system_sheet`, `approach_viewer`);
-  (3) when v2 + box on + temperatureK is 0 + a climate code is present, the band comes from the
-  code — in BOTH duplicated copies (`planet_renderer.js`, `terrain_render.js`); (4) prove it:
-  v1 byte-identical (`verify_field_v1.html`, `--disable-gpu`), v2 with the box off
-  byte-identical, box on changes only T5 Fr/Tu/Co/Tr/Ho worlds, an old save loads off, a new
-  map starts on, export output matches the in-app image; (5) FAQ, terrain_spec §4, changelog.
-  **All rulings are in; nothing open.**
+**Ringed gas giant icon** (`#toggle-ringed-gg`, `window.ringedGasGiantSatellites`, settings key
+`ringedGasGiantSatellites`, localStorage `traveller_ringed_gg_satellites`).
+* **On:** gas giant present + mainworld not Sa → plain; Sa around a gas giant → ringed; Sa
+  around a non-GG ("big world") → plain; no gas giant → no icon. **Off:** never ringed.
+* **Sa with an unknown parent** (TravellerMap imports, Hex Editor worlds, mainworld-only hexes)
+  → plain, even with the option on. **RTT: Jovian only** — a Chthonian parent is not a gas
+  giant (matches RTT's own `gasGiant` flag; `_isGasGiantBody` decides by `worldClass`).
+* **Default ON**, and a missing key on load means ON (unlike `terrainClimateCodes`).
+* One helper, `mainworldOrbitsGasGiant(mw, stateObj)` in `core.js` (walks the system for the
+  mainworld's parent — identity, then name, then a moon flagged `isMainworld`, which RTT needs
+  because `rttData` is named after the system — else `parentType`/`parentBody`; WeakMap cache).
+  Parent names differ per edition: CT/MgT2E `'Gas Giant'`, T5 `'Large/Small Gas Giant'`, RTT
+  worldClass `'Jovian'`. Keep the two log-only copies (`io_manager.js` ~1855,
+  `mgt2e_socio_engine.js` ~467) in step.
 
-**v0.18.1.4 is built and verified, not yet dated.** Every change is built, documented
-(changelog/README items 1–34, identical copies) and verified. Nothing is half-written in the
-code. **Only the two release steps below are left** — no open investigations, nothing waiting
-on a design decision. Sean commits; **ask him what is committed** rather than assuming — items
-10–34 had not been confirmed committed at the end of 2026-11-03. The T5 work was settled one
-ruling at a time with Sean (2026-10-24 → 2026-11-02) — the rulings below are **decided; do not
-re-derive or re-litigate them.**
+**Map Legend** (`js/map_legend.js`; `#map-legend`, `#toggle-map-legend`).
+* **Whole map**, not the viewport; recomputed on change, never per frame (Universe = 163,840
+  hexes; scan ≈ 16 ms). **World symbols and styling rules only** — no routes, borders, regions
+  or manual fills. A rule is listed only if it matched AND part of its style shows on that hex.
+* **Optional rule `name`** (Legend Name field, ledger pencil); without one, the description.
+  Old saves and rule files have no `name`.
+* **On/off saved with the map** (`mapLegendEnabled`) + localStorage mirror; **off** for new maps
+  and when the key is missing. Window position is browser-only (localStorage).
+* `reapplyAllRules` publishes `window.ruleMatchesByHex` — derived, never on hex states or rules
+  (both are saved). An autosave reopen has no rule pass, so the legend runs one once.
 
-#### NEXT STEPS — the to-do list (2026-11-02, late)
+**Map symbols** are drawn by shared functions at the top of `renderer.js` (`drawWorldIcon`,
+`drawWorldRing`, `drawGasGiantSymbol`, `drawScoutBaseSymbol`, `drawNavalBaseSymbol`,
+`drawTravelZoneHalo`), used by `draw()` and the legend. They are no longer inside the system-name
+block: an unnamed world shows its gas giant (gate (c)) and bases (gate (g)), and a players'
+export at (c) shows the gas giant as `html_extract_manifest.md` §4.6 says. **Any change to them:
+rerun `utilities/map_symbols_pixels.js` against a baseline taken on the same machine.**
 
-Ask Sean which to take first, **one question at a time**. Nothing here may be guessed from
-training data (CLAUDE.md, Zero-Assumption Policy).
+**Movable border and region names.**
+* **Alt + drag** on a name moves it; plain drag (and Alt + drag elsewhere) pans. **Exports:** a
+  placed name prints **once**, on its own subsector's map (`captureSubsector` sets
+  `_labelCaptureSub`); an unplaced one prints on every subsector map its area touches, as before.
+  **Both** border and region names.
+* Stored as `def.labelPos = { hex, dx, dy }` on the border/region definition (saved with the map
+  and the autosave, kept through renames); absent or unusable → automatic placement, exactly as
+  before. A placed name stays put when panning. Undoable (`saveHistoryState(…, {
+  includeLabelPositions })`; regions keyed by name, borders by id); right-click → RESET NAME
+  POSITION.
+* **The name caches are keyed on hex counts**, which an assignment, clear or rename can leave
+  unchanged. Every `saveHistoryState` invalidates them (the mutation runs synchronously after
+  it), and the paths with no history entry call `invalidateMapLabelCaches()` themselves.
+  **New code that changes `state.cluster` or `hexBorderAssignments` without a history entry
+  must call it too.**
 
-**Release v0.18.1.4 — the only work left. Sean said do these LAST (2026-11-02)**
+**Harnesses** (`utilities/`, Playwright): `map_symbols_pixels.js` (`--named`, `--labels`),
+`map_legend_check.js` (44), `map_labels_check.js` (31). Older saves to load after any save/load
+change: `sectors/solo_6.json` (v0.13.3), `.tmp/*.json` (v0.18.1),
+`.tmp/html_export_harness/fixture_sector.json` (no version, settings or rules).
 
-1. [ ] **Hand-check in the app** (Sean, or Claude with the built-in browser) — things no harness
-   drove with a real mouse or eye:
-   * **Hover a moon in the orrery:** "Orbit: Dee (D)" appears.
-   * **Orrery moon rings** (item 30): zoom in on a planet with Close and Far moons — Close moons
-     inside, Far outside, inner moons faster; the tooltip shows no "PD from parent" line for T5.
-   * **T5 hex accordion Rotation** (item 26): a Tz planet reads "Tidally Locked to Star (no
-     day/night cycle)", a Close moon "Tidally Locked to Parent (day = orbit length)".
-   * **T5 hex accordion Climate Zone on non-mainworld bodies** (item 28): text follows each
-     body's own code; gas giants and belts blank.
-   * **System Editor +Moon → ☆MW** (item 27): the new moon-mainworld gets a Close or Far letter,
-     Sa, and Lk when Close, and keeps them through a second Save.
-   * **System Editor ☆MW on an existing first/middle moon** (item 29): it stays in place.
-   * **Export hex grids** (item 31): export a CT, T5 or RTT subsector with the Diamond (or
-     Sinusoidal) projection — planet images show the hex grid, as moons always did.
-   * **Right-click → WORLD DETAILS** (item 32): select one hex, right-click — the entry sits
-     under EDIT SYSTEM and opens the Ctrl+click panel for that hex.
-   * **Size-0 planets** (item 33): a new T5 system's size-0 planets have no moons; a moon added
-     to one in the System Editor survives Save.
-   * **Subsector names** (item 4, restyled 2026-11-03): with Show Subsector Names on, each named
-     subsector shows its name diagonally (30°, like the sector names) from zoom 0.12 to 1.0,
-     faint and under the worlds from 0.3. `drawSubsectorNames` in `renderer.js`, drawn before
-     PASS 2. Check a long name (shrinks, then an ellipsis) and White Background Mode.
-   * **Orrery speed** (item 34): a moon on a size-0 planet (old save, or added in the editor)
-     orbits at the same pace as a moon on the same ring of an Earth-size planet, not ~1 hour.
-2. [ ] **Date it:** replace "In Progress" in the `### [v0.18.1.4]` header of `changelog.md` and
-   `README.md` (identical copies). Do this last, after item 1. Items 31–34 are already in
-   both files.
+#### v0.18.2 — RULINGS THAT STILL BIND (Sean, 2026-11-09)
 
-**Deferred by Sean to the NEXT release (2026-11-02) — do not start unasked**
+* **Use Climate Codes** (Tectonic only; under World Image Generation): T5 climate code → the
+  world image's temperature band when it has no Kelvin — Tr/Ho Hot, Tu/Co Cold, Fr Frozen (seas
+  render as solid ice), none Temperate. **Climate codes only** — not Ga/Ag vegetation, not
+  social codes. **RTT stays Temperate.** Saved with the map (no localStorage mirror): **a save
+  without the key loads OFF, a new map starts ON.** Greyed and inert under Classic (v1), and v2
+  with the box off renders byte-identical. The band test lives in BOTH copies
+  (`planet_renderer.js`, `terrain_render.js`).
+* **T5 Tz worlds with air** (atm 1-9 or D-F; box on) split by longitude: Baked (desert palette)
+  centred on the lit side (~135°W), Frozen (ice palette, former seas by depth) on the dark side,
+  a full **1,000 km Twilight ring** along both terminators keeping the normal look; no polar
+  caps. Airless, all-ice, molten and exotic A-C worlds unchanged. Lk changes nothing.
+* **Craters on ice worlds with air are removed only with the box on**, every edition.
+* **Custom OTU Import** (`js/otu_importer.js`): OTU + ZCR sectors with data only
+  (`requireData=1`, 400 = the cap); always a fresh canvas; warn above 128.
+* **Very large maps (R12):** never build one string of the whole map — `cloneHexStateEntries()`
+  for undo, per-hex Blob parts for Save; chunked saves close by size.
 
-5. [ ] **Twilight Zone width.** Sean's Book 3 notes (p.49) describe the Twilight Zone as a band
-   ~1,000 km wide; `TIDAL_LOCK.MAP` in `rules/` says a strip one world hex wide. Whether those
-   agree is unknown. Only matters for item 6 — settle it before item 6 starts.
-6. [ ] **World images ignore tidal lock**, in every engine. `TIDAL_LOCK.MAP` (zones 41 Baked /
-   42 Twilight / 43 Frozen) is drawn by nothing. It changes a renderer input, so §0.0.A's
-   field-version rules apply and it needs his ruling before any code.
-7. [ ] **CT, RTT and AoW repeatability is unchecked.** T5 kept a load-time copy of `rng` (trap 9,
-   fixed); MgT2E was checked and is clean. `grep` found no other `const _rng = rng` copy outside
-   `js/archive/`, but CT/RTT/AoW were not run through the repeat test: generate a hex, generate
-   it again, generate 3 other hexes, generate it a third time, and compare `JSON.stringify` with
-   `name`/`names`/`_*` keys dropped (the used-names list is separate state).
+**eHex sizes:** `_parseStat` (`planet_renderer.js`) and `parseStat` (`terrain_render.js`) read a
+single character as eHex (G and up; S/R = 0). **Keep the two identical.**
 
-**DONE 2026-11-02 (kept for the record)**
-
-3. [x] **`TIDAL_LOCK.LOGIC.CLIMATE`** in `rules/t5_data.js` replaced with Sean's Book 3 p.226
-   quote (one-time `rules/` permission). Documentation only — no code reads it.
-4. [x] **Climate codes for every world** (changelog item 28). Sean ruled all worlds get Chart D.
-   `T5_World_Engine.getT5ClimateCode` / `applyT5ClimateCode` serve the mainworld step and
-   `fleshOutSubordinates`; a moon measures from its planet's orbit; the primary's bodies use
-   `sys.hzOrbit` (HZ override), other stars their own HZ; a hand-typed trade code list is left
-   alone. 10,768 of 22,188 other worlds now have Climate Zone text. Old saves gain codes only
-   when regenerated or re-saved in the System Editor.
-8. [x] **Moon made mainworld kept its place** (changelog item 29). `t5_topdown_generator.js`
-   filtered the mainworld out of its planet's seeded moons and Phase 1 `push`ed it back; it now
-   records `seededMwMoonIdx` and splices it back in place. Harness section 4; shown to FAIL with
-   the splice disabled.
-9. [x] **T5 moons in the orrery** (changelog item 30). The orrery drew moons by list index and
-   ignored the letter; every T5 moon used the 20-PD default speed; 1,540 of 3,469 multi-moon
-   planets drew a Far moon inside a Close one. Sean's ruling: T5 gives no moon distances or
-   periods; tracks run Ay (innermost) to Zee (outermost). `system_viewer.js` `_t5MoonRings` gives
-   each normalised T5 moon `ring` (rank of its letter; same letter = same ring; +0.5 gap between
-   Close and Far; unlettered moons outside in list order) and `drawPd` (display-only speed,
-   `10 + ring × 5`) — never `pd`, so the tooltip, System Sheet and exports print nothing
-   invented. Verified by measuring drawn moon distances in a rendered frame; harness check
-   `orreryRing` shown to FAIL with it off.
-
-10. [x] **Subsector export: some hexes get world images and some don't** (Sean, 2026-11-02).
-    **CLOSED — working as designed, plus one real fix.** Sean's own conclusion, confirmed in
-    code: the missing images were a red flag raised by a Claude test export made with the
-    dialog's defaults. **"Skip airless worlds" is TICKED by default** (`hex_map.html` ~2021,
-    `#obs-skip-airless`) and skips ANY planet or moon with atm 0 and hydro 0, whatever its size
-    (`ExportCore.isAirless`). In `solo_6`, 94 of 438 generated hexes are all-airless, so their
-    pages have no world images. UWP-only hexes (never generated) get a "No system data
-    generated" page with no images — also by design. **Before running any export test, check
-    the dialog defaults.**
-    **The real fix (changelog item 31): missing HEX GRIDS.** `ExportCore._rendererData` read
-    `worldData.size ?? 0`, but the CT, T5 and RTT *planet* normalisers in `system_viewer.js`
-    carry no `size` (moons do; MgT2E copies the raw record and AoW passes it explicitly), so
-    every such planet drew at size 0 — no grid, and its regional sheet sized as a 400 km body.
-    It now falls back to the UWP size digit. The in-app viewers read the raw body's size and
-    were always right. Verified: all 469 CT/T5/RTT fixture planets went from no grid to the
-    right size (check shown to FAIL with the fix off), sample Diamond PNG looked at.
-    **Follow-up 2026-11-08 (user bug report, Kanikit `HHFA466-5` / Calendula II `YHFA142-A`):
-    the UWP fallback still dropped the grid for sizes G and up.** The digit is eHex, but
-    `_parseStat` (`planet_renderer.js`) read it as plain hex — `parseInt('H', 16)` is NaN → 0.
-    T5 Big Worlds (`2D+7`) roll G–K about 28% of the time. Sean chose the renderer-level fix:
-    `_parseStat` and its twin `parseStat` (`terrain_render.js`, KEEP IDENTICAL) read a single
-    character as eHex (skipping I and O); `S`/`R` (CT small/ring) stay 0; longer strings stay
-    hex (`"11"` = 17, as the accordion's `toString(16)` sizes send). Atmosphere/hydro never
-    exceed F, so terrain and palette are unchanged. Verified with a real T5 Obsidian export
-    (seed TravellerMagnus, subsector 0-A, Diamond, Playwright `--disable-gpu`): 549 PNGs, 16
-    changed with the fix on vs off — exactly the 16 Big Worlds whose size arrived as a letter;
-    the other 2 Big Worlds (moons) arrive with a numeric size and always had a grid; the
-    other 533 PNGs were byte-identical. Size H and K PNGs looked at. The in-app per-planet
-    "VIEW WORLD IMAGE" button needed no change (it sends hex, not eHex).
-
-11. [x] **User request: edit mainworld details from right-click → Edit System.** DONE 2026-11-02
-    (changelog item 32). Sean chose a right-click menu entry over putting mainworld fields in
-    the System Editor (that would have made two edit paths to keep in sync). `#ctx-world-details`
-    ("WORLD DETAILS", beside EDIT SYSTEM in `hex_map.html`) opens `openHexEditor` — the Ctrl+click
-    panel — for the ONE selected hex, the same hex Edit System uses. Shown only when
-    `canOpenHexEditor(state)` (new, `hex_editor.js`, also used by `openHexEditor` itself) is
-    true, so it shows for RTT where Edit System does not. Visibility + click wired in
-    `canvas_input.js`. Verified with real right-clicks/clicks in Playwright, 19/19 (MgT2E, CT,
-    T5, RTT shown and open the right hex; UWP-only, empty, 0 or 2 selected hidden).
-
-12. [x] **Fast-spinning size-0 moon in the T5 orrery** (Sean, 2026-11-03; changelog items 33–34).
-    **Rulings (Sean, 2026-11-03):** Worldlet size `1D-3` of 0 or less = **Size 0** (the existing
-    `Math.max(0, …)` is correct — size-0 moons are valid); **a size-0 planet gets no moons.**
-    (a) `generateT5Satellites` (`t5_topdown_generator.js`) now returns before rolling moons for a
-    size-0 parent; seeded moons (System Editor) are kept. (b) A size-0 world has `mass` 0
-    (`WORLD_DIMENSIONS` has no 0), which `_moonPeriodYears`' `mass || 1` read as one Earth mass in
-    a 500 km body — moons orbited in ~1 hour. `_normT5World` adds display-only `drawMass`
-    (Earth density from `diamKm`, only when `mass === 0`); `mass` itself is untouched. Verified
-    in-browser: 2,000 systems, 0 of 561 size-0 planets with moons (331 of 560 with the guard off);
-    period ~1 h → ~126 h, matching an Earth-size parent's moon on the same ring.
-    **Testing note:** the browser pane renders `file://` as a static snapshot with no scripts —
-    serve the page via `.claude/launch.json` (python http.server, port 8765).
-
-**Session lessons (2026-11-02)**
-
-* **Don't toggle code with `sed -i` in Git Bash** — it silently rewrote a CRLF file as LF.
-  Use the Edit tool for a temporary on/off, then check `tr -cd '\r' | wc -c` equals the LF count.
-* **Prove a new harness check can fail** by switching the fix off for one run — done for items
-  8, 9 and 10 (the grid fix).
-* **Check an exporter dialog's DEFAULTS before treating a test export as evidence.** Item 10
-  was opened on "missing images" that were just "Skip airless worlds" doing its job.
-* **A context menu left open covers the next click point.** In Playwright, close
-  `#context-menu` before each forced right-click on the canvas, or the click lands on the stale
-  menu and its handler never re-runs (cost one false failure on item 11).
+**Test traps still worth knowing:** the splash screen fades out over the map and swallows mouse
+events — wait until `document.elementFromPoint(…)` is `map-canvas`; the Launch button's handler
+is attached only after `loadFromDB` resolves; a context menu left open covers the next click
+point, so close `#context-menu` before each forced right-click; the built-in browser pane can
+serve cached copies of edited scripts after a reload — fetch each with `{cache:'reload'}` first.
 
 #### SEAN'S T5 RULINGS — binding
 
@@ -1294,6 +1125,9 @@ directly — no server.**
 | `filter_persistence.js` | R9 — 11 checks across restart, store, save file and indicator |
 | `otu_import_undo.js` | Multi-sector import undo — 6 checks, driven OFFLINE by seeding the importer's localStorage cache and stubbing `fetch` to throw |
 | `verify_field_v1.html` | **Standing gate.** 30 renders at terrain field version 1 vs recorded hashes |
+| `map_symbols_pixels.js` | Pixel fingerprint of the hex map's symbols (live canvas, `captureSubsector`, and players' export maps at each disclosure level). `--out before.json`, change, `--compare before.json`; `--named` names every world. Same-machine baselines only |
+| `map_legend_check.js` | Map Legend — 44 checks (`--perf` adds a Universe-sized scan timing) |
+| `map_labels_check.js` | Movable border/region names — 31 checks (drag, pan, undo, reset, exports, save/load, autosave, old saves). `map_symbols_pixels.js --labels` is its pixel companion |
 | `lake_calibration.html` | **Standing gate.** Lake cover across hydrographics |
 | `test_regional_terrain.html` | Terrain harness. Does NOT load `terrain_rivers.js`, so the sheet degrades there — pre-existing, not a regression |
 

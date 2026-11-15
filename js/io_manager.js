@@ -100,7 +100,11 @@ function setupSaveLoad() {
             borderFillEnabled:           window.borderFillEnabled           ?? false,
             borderNamesEnabled:          window.borderNamesEnabled          ?? false,
             regionNamesEnabled:          window.regionNamesEnabled          ?? false,
-            rttShowIndustry:             window.rttShowIndustry             ?? false,
+            // v0.18.3. Absent in older files, which load ON (Sean, 2026-11-14).
+            ringedGasGiantSatellites:    window.ringedGasGiantSatellites    !== false,
+            // v0.18.3 map legend. Absent in older files, which load OFF.
+            mapLegendEnabled:            window.mapLegendEnabled            === true,
+            rttShowIndustry:            window.rttShowIndustry             ?? false,
             borderMinSystems:            window.borderMinSystems            ?? 20,
             planetContinentalDefinition: window.planetContinentalDefinition ?? 0.55,
             planetCoastlineComplexity:   window.planetCoastlineComplexity   ?? 0.45,
@@ -453,6 +457,7 @@ async function clearCanvas() {
     window.regionDefinitions    = (typeof getDefaultRegionDefinitions === 'function') ? getDefaultRegionDefinitions() : [];
     if (typeof window.renderBorderWindow === 'function') window.renderBorderWindow();
     if (typeof window.renderRegionWindow === 'function') window.renderRegionWindow();
+    if (typeof window.invalidateMapLabelCaches === 'function') window.invalidateMapLabelCaches();
 
     // Re-centre camera on the fresh 7×5 canvas
     centerCameraOnGrid();
@@ -562,6 +567,22 @@ function applyLoadedSettings(settings) {
     const regionNamesEl = document.getElementById('toggle-region-names');
     if (regionNamesEl) regionNamesEl.checked = regionNamesEnabled;
     localStorage.setItem('traveller_region_names', String(regionNamesEnabled));
+
+    // Missing key = ON, for saves made before v0.18.3 (Sean, 2026-11-14) --
+    // unlike terrainClimateCodes below. Only an explicit saved false turns it off.
+    const ringedGG = s.ringedGasGiantSatellites !== false;
+    window.ringedGasGiantSatellites = ringedGG;
+    const ringedGGEl = document.getElementById('toggle-ringed-gg');
+    if (ringedGGEl) ringedGGEl.checked = ringedGG;
+    localStorage.setItem('traveller_ringed_gg_satellites', String(ringedGG));
+
+    // Map legend (v0.18.3): only an explicit saved true turns it on, so maps
+    // saved before it existed open without one.
+    if (typeof window.setMapLegendEnabled === 'function') {
+        window.setMapLegendEnabled(s.mapLegendEnabled === true);
+    } else {
+        window.mapLegendEnabled = s.mapLegendEnabled === true;
+    }
 
     const rttShowIndustry = s.rttShowIndustry ?? false;
     window.rttShowIndustry = rttShowIndustry;
@@ -854,6 +875,7 @@ function applyLoadedMapData(parsedData) {
     }
 
     applyLoadedSettings(parsedData.settings);
+    if (typeof window.invalidateMapLabelCaches === 'function') window.invalidateMapLabelCaches();
 
     selectedHexes.clear();
     document.getElementById('context-menu').classList.remove('visible');
@@ -1840,12 +1862,13 @@ function importT5Tab(fileContent, fileName, forcedSectorSlot = null, bulkMode = 
             let ggVariant = 'SOLID';
             let reason = 'Default (Solid)';
             
-            if (t5Data.tradeCodes && t5Data.tradeCodes.includes('Sa')) {
+            // Mirrors renderer.js: an imported world records no parent, so an
+            // Sa world here is never known to orbit a gas giant (Sean, 2026-11-14).
+            if (window.ringedGasGiantSatellites !== false && mainworldOrbitsGasGiant(t5Data)) {
                 ggVariant = 'RINGED';
-                reason = "Condition 1: 'Sa' trade code present";
-            } else if (t5Data.isMoon || t5Data.isSatellite) {
-                ggVariant = 'RINGED';
-                reason = "Condition 2: Main world is a moon/satellite";
+                reason = "Sa mainworld orbiting a gas giant";
+            } else if (t5Data.tradeCodes && t5Data.tradeCodes.includes('Sa')) {
+                reason = "Sa mainworld, parent not a gas giant or not known";
             }
             
             writeLogLine(`[GAS GIANT LOG] Hex ${hexId}: Icon Variant = ${ggVariant} (${reason})`);

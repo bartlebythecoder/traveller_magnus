@@ -797,6 +797,21 @@ OTU imports bring in travellermap's borders and regions automatically (see
 already have. **Settings → Visual Options** controls how they look: **Fill Border Territories**,
 **Show Border Names**, and **Show Region Names**.
 
+### Moving a border or region name
+
+A name is placed automatically in the middle of its area. To put it somewhere else, hold **Alt**
+and drag the name. With Alt held over a name, the pointer changes to show it can be moved. A
+plain drag still pans the map.
+
+A name you've moved stays where you put it when you pan, saves with the map, and comes back when
+you open the file. **Ctrl + Z** undoes a move. To hand a name back to automatic placement,
+right-click it and choose **RESET NAME POSITION**.
+
+In HTML and Obsidian exports, a name you've moved appears once, on the map of the subsector it
+sits in. A name you haven't moved appears on every subsector map its area touches, as before.
+
+A name too small to read at the current zoom isn't drawn, so zoom in to grab it.
+
 ---
 
 ## 16. How do I filter and colour the map?
@@ -825,6 +840,11 @@ colour, an icon shape, the name in italic or underlined, and an optional hex bac
 **Apply as New Rule** adds it to **Active Styling Rules**, which are applied in order. For
 example, you can draw every high-population world in red with a ring. Use **Export** and
 **Import** to save a rule set to a file and reuse it on another map.
+
+Fill in **Legend Name** before applying to give the rule a name for the
+[Map Legend](#is-there-a-map-legend). To name or rename a rule already in the list, click its
+pencil, type, and press Enter. Clear the name to remove it. A rule with no name is keyed by its
+filter description.
 
 ---
 
@@ -887,10 +907,45 @@ hand it out.
 | **Show Region Names** | Labels the regions |
 | **White Background Mode** | Draws the map on a white background instead of the dark one |
 | **Show Sector Names** / **Edit Sector Names** | Labels each sector, and lets you rename them on a grid laid out like the map |
+| **Show Subsector Names** | Writes each named subsector's name across it while the map is zoomed out |
+| **Ringed Gas Giant icon for Mainworld Gas Giant satellites** | Rings the gas giant symbol when the mainworld is a moon of a gas giant (see below) |
+| **Show Map Legend** | Opens a movable key to the map's symbols and styling rules (see below) |
 | **Default World Color** | The colour of a world dot when no styling rule applies |
 
 The same section holds the **World Image Generation** settings (see
 [question 13](#13-how-do-i-get-world-images)) and the **System Viewer** default start date.
+
+### What do the gas giant symbols mean?
+
+A small filled circle beside a world means the system has at least one gas giant. With **Ringed
+Gas Giant icon for Mainworld Gas Giant satellites** ticked, the circle gets a ring when the
+mainworld itself orbits a gas giant (it carries the **Sa** trade code). A mainworld that orbits
+something else keeps the plain circle: a rocky planet, a planetoid belt, or in RTT a Chthonian.
+So does a mainworld whose parent the map doesn't know, such as a world imported from
+TravellerMap or typed in by hand. A system with no gas giants shows no circle, even if its
+mainworld is a moon.
+
+The setting is on for new maps and for maps saved before it existed. Untick it to show the plain
+circle everywhere.
+
+### Is there a map legend?
+
+Tick **Show Map Legend** to open a small window keying every symbol and styling rule in use
+anywhere on the map, not just the part on screen. Drag it by its title bar. It reopens where you
+left it. Close it with its **×** or by unticking the box.
+
+It has two parts:
+
+- **Map Symbols:** the world dot, gas giants (plain and ringed), naval and scout bases, and Amber
+  and Red zones. Each appears only if the map shows it somewhere.
+- **Styling Rules:** each rule that visibly styles at least one world, by its Legend Name or, if
+  it has none, its filter description. A rule that matches nothing, is switched off, or whose
+  look a later rule completely overrides is left out. Routes, borders and regions aren't keyed.
+
+Worlds hidden by the filter don't count, except while **Shift + F** shows them. In Development
+view the map draws no symbols, so the legend says so instead. The setting saves with the map. It
+starts off, and maps saved before it existed open without it. The legend doesn't appear in
+exports.
 
 ---
 

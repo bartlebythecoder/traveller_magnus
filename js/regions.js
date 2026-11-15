@@ -130,6 +130,7 @@ window.renderRegionWindow = function () {
             hexStates.forEach(state => {
                 if (state.cluster === oldName) state.cluster = newName;
             });
+            if (typeof window.invalidateMapLabelCaches === 'function') window.invalidateMapLabelCaches();
             // Invalidate stored region paths for the old name
             if (window.regionPaths) {
                 window.regionPaths.forEach((val, key) => {
@@ -195,6 +196,7 @@ window.renderRegionWindow = function () {
             hexStates.forEach(state => {
                 if (state.cluster === def.name) state.cluster = '----';
             });
+            if (typeof window.invalidateMapLabelCaches === 'function') window.invalidateMapLabelCaches();
             if (window.regionPaths) {
                 window.regionPaths.forEach((val, key) => {
                     if (key.endsWith(':' + def.name)) window.regionPaths.delete(key);

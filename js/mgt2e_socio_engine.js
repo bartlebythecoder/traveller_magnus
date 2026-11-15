@@ -463,12 +463,12 @@
                 if (w.gasGiant && window.isLoggingEnabled) {
                     let ggVariant = 'SOLID';
                     let reason = 'Default (Solid)';
-                    if (w.tradeCodes && w.tradeCodes.includes('Sa')) {
+                    // Mirrors renderer.js (Sean, 2026-11-14): ringed only for Sa around a gas giant.
+                    if (window.ringedGasGiantSatellites !== false && mainworldOrbitsGasGiant(w)) {
                         ggVariant = 'RINGED';
-                        reason = "Condition 1: 'Sa' trade code present";
-                    } else if (w.isMoon || w.isSatellite) {
-                        ggVariant = 'RINGED';
-                        reason = "Condition 2: Main world is a moon/satellite";
+                        reason = "Sa mainworld orbiting a gas giant";
+                    } else if (w.tradeCodes && w.tradeCodes.includes('Sa')) {
+                        reason = "Sa mainworld, parent not a gas giant or not known";
                     }
                     writeLogLine(`[GAS GIANT LOG] Hex ${w.hexId || sys.hexId}: Icon Variant = ${ggVariant} (${reason})`);
                 }

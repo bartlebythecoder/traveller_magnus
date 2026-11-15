@@ -2,8 +2,9 @@
 # Converts sectors/solo_6.json into js/solo_6_data.js for automatic loading in hex_map.html
 # Run this script whenever you regenerate solo_6.json
 
-$inputFile  = Join-Path $PSScriptRoot "sectors\solo_6.json"
-$outputFile = Join-Path $PSScriptRoot "js\solo_6_data.js"
+$repoRoot   = Split-Path $PSScriptRoot -Parent
+$inputFile  = Join-Path $repoRoot "sectors\solo_6.json"
+$outputFile = Join-Path $repoRoot "js\solo_6_data.js"
 
 if (-not (Test-Path $inputFile)) {
     Write-Error "solo_6.json not found at $inputFile"

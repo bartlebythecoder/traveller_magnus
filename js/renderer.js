@@ -85,6 +85,314 @@ function getHexPath(x, y, size) {
     return path;
 }
 
+// ============================================================================
+// MAP SYMBOLS — shared by draw() and the map legend (js/map_legend.js)
+// Lifted out of draw() unchanged for v0.18.3 so the legend draws its swatches
+// with the map's own code and can never drift from it. Each takes the context
+// to draw on; `zoom` is the map zoom (the legend passes 1). Proved
+// pixel-identical by utilities/map_symbols_pixels.js — rerun it after any change.
+// ============================================================================
+
+// Amber/Red travel zone halo around a world dot.
+function drawTravelZoneHalo(ctx, cx, cy, dotRadius, zoneColor, zoom) {
+    ctx.save();
+    ctx.beginPath();
+    // Slightly larger than the world dot
+    const haloRadius = dotRadius + 5;
+    ctx.arc(cx, cy, haloRadius, 0, 2 * Math.PI);
+
+    // Faint fill (0.2 opacity)
+    ctx.globalAlpha = 0.2;
+    ctx.fillStyle = zoneColor;
+    ctx.fill();
+
+    // Solid stroke (2-3px)
+    ctx.globalAlpha = 1.0;
+    ctx.strokeStyle = zoneColor;
+    ctx.lineWidth = 2.5 / zoom;
+    ctx.stroke();
+
+    ctx.closePath();
+    ctx.restore();
+}
+
+// A world icon in a filter rule's style. `colors` is the stacked rule colours
+// (or null), `baseColor` the default world colour, `primary` the first colour.
+// An unknown style draws nothing, as draw() always did.
+function drawWorldIcon(ctx, cx, cy, dotRadius, iconStyle, colors, baseColor, primary, zoom) {
+    if (iconStyle === 'Asteroid Belt') {
+        const aPositions = [
+            { dx: -8, dy: -2 }, { dx: 0, dy: -5 }, { dx: 8, dy: -2 },
+            { dx: -5, dy: 5 }, { dx: 5, dy: 4 }
+        ];
+        aPositions.forEach((p, index) => {
+            ctx.beginPath();
+            ctx.arc(cx + p.dx, cy + p.dy, 2.5, 0, 2 * Math.PI);
+            
+            // Magic Multi-Color Cycling
+            let rockColor = primary;
+            if (colors && colors.length > 0) {
+                rockColor = colors[index % colors.length]; 
+            }
+            
+            ctx.fillStyle = rockColor;
+            ctx.fill();
+            ctx.closePath();
+        });
+    } else if (iconStyle === 'Rounded Rectangle') {
+        // Geometry fix: Calculate dimensions so the furthest corners fit exactly
+        // within the dotRadius circle that defines the Ring boundary.
+        const rectWidth = dotRadius * 1.6;
+        const rectHeight = dotRadius * 1.0;
+        const rx = cx - rectWidth / 2;
+        const ry = cy - rectHeight / 2;
+        const cornerRadius = dotRadius * 0.3; // Proportionally adjusted
+
+        ctx.save();
+        ctx.beginPath();
+        // Use modern roundRect if available, fallback to standard rect
+        if (ctx.roundRect) {
+            ctx.roundRect(rx, ry, rectWidth, rectHeight, cornerRadius);
+        } else {
+            ctx.rect(rx, ry, rectWidth, rectHeight);
+        }
+        ctx.clip(); // Mask the drawing area to the rounded shape
+
+        if (colors && colors.length > 0) {
+            const stripeWidth = rectWidth / colors.length;
+            for (let i = 0; i < colors.length; i++) {
+                ctx.fillStyle = colors[i];
+                ctx.fillRect(rx + (i * stripeWidth), ry, stripeWidth + 1, rectHeight); // +1 prevents rendering gaps
+            }
+        } else {
+            ctx.fillStyle = baseColor;
+            ctx.fillRect(rx, ry, rectWidth, rectHeight);
+        }
+        ctx.restore();
+    } else if (iconStyle === 'Square') {
+        // Geometry: Side length = dotRadius * 1.414 (sqrt 2) to fit corners exactly inside the ring
+        const side = dotRadius * 1.414;
+        const rx = cx - side / 2;
+        const ry = cy - side / 2;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(rx, ry, side, side);
+        ctx.clip(); // Mask for stripes
+
+        if (colors && colors.length > 0) {
+            const stripeWidth = side / colors.length;
+            for (let i = 0; i < colors.length; i++) {
+                ctx.fillStyle = colors[i];
+                ctx.fillRect(rx + (i * stripeWidth), ry, stripeWidth + 1, side);
+            }
+        } else {
+            ctx.fillStyle = baseColor;
+            ctx.fillRect(rx, ry, side, side);
+        }
+        ctx.restore();
+    } else if (iconStyle === 'Diamond') {
+        // Geometry: Four points touching the exact edge of the dotRadius ring
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - dotRadius); // Top
+        ctx.lineTo(cx + dotRadius, cy); // Right
+        ctx.lineTo(cx, cy + dotRadius); // Bottom
+        ctx.lineTo(cx - dotRadius, cy); // Left
+        ctx.closePath();
+        ctx.clip(); // Mask for stripes
+
+        if (colors && colors.length > 0) {
+            const bboxWidth = dotRadius * 2;
+            const rx = cx - dotRadius;
+            const ry = cy - dotRadius;
+            const stripeWidth = bboxWidth / colors.length;
+            for (let i = 0; i < colors.length; i++) {
+                ctx.fillStyle = colors[i];
+                ctx.fillRect(rx + (i * stripeWidth), ry, stripeWidth + 1, bboxWidth);
+            }
+        } else {
+            ctx.fillStyle = baseColor;
+            ctx.fill();
+        }
+        ctx.restore();
+    } else if (iconStyle === 'Octagon') {
+        // 8-point regular polygon inscribed in dotRadius
+        ctx.save();
+        ctx.beginPath();
+        for (let i = 0; i < 8; i++) {
+            const angle = (Math.PI / 4) * i - Math.PI / 8;
+            const px = cx + dotRadius * Math.cos(angle);
+            const py = cy + dotRadius * Math.sin(angle);
+            i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.clip();
+
+        if (colors && colors.length > 0) {
+            const bboxWidth = dotRadius * 2;
+            const rx = cx - dotRadius;
+            const ry = cy - dotRadius;
+            const stripeWidth = bboxWidth / colors.length;
+            for (let i = 0; i < colors.length; i++) {
+                ctx.fillStyle = colors[i];
+                ctx.fillRect(rx + (i * stripeWidth), ry, stripeWidth + 1, bboxWidth);
+            }
+        } else {
+            ctx.fillStyle = baseColor;
+            ctx.fill();
+        }
+        ctx.restore();
+    } else if (iconStyle === 'Asteroid Grid') {
+        // 3-4-3 Structured Hex Grid Pattern
+        const gridPositions = [
+            { dx: -5, dy: -4.5 }, { dx: 0, dy: -4.5 }, { dx: 5, dy: -4.5 },         // Top 3
+            { dx: -7.5, dy: 0 }, { dx: -2.5, dy: 0 }, { dx: 2.5, dy: 0 }, { dx: 7.5, dy: 0 }, // Middle 4
+            { dx: -5, dy: 4.5 }, { dx: 0, dy: 4.5 }, { dx: 5, dy: 4.5 }           // Bottom 3
+        ];
+        
+        gridPositions.forEach((p, index) => {
+            ctx.beginPath();
+            ctx.arc(cx + p.dx, cy + p.dy, 1.8, 0, 2 * Math.PI);
+            
+            // Magic Multi-Color Cycling
+            let dotColor = primary;
+            if (colors && colors.length > 0) {
+                dotColor = colors[index % colors.length]; 
+            }
+            
+            ctx.fillStyle = dotColor;
+            ctx.fill();
+            ctx.closePath();
+        });
+    } else if (iconStyle === 'Classic') {
+        if (colors && colors.length > 0) {
+            const sliceAngle = (2 * Math.PI) / colors.length;
+            for (let i = 0; i < colors.length; i++) {
+                const startAngle = i * sliceAngle;
+                const endAngle = (i + 1) * sliceAngle;
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.arc(cx, cy, dotRadius, startAngle, endAngle);
+                ctx.closePath();
+                ctx.fillStyle = colors[i];
+                ctx.fill();
+            }
+        } else {
+            // No rules: Solid Dot
+            ctx.beginPath();
+            ctx.arc(cx, cy, dotRadius, 0, 2 * Math.PI);
+            ctx.fillStyle = baseColor;
+            ctx.fill();
+            ctx.closePath();
+        }
+    } else if (iconStyle === 'Refined') {
+        // Glow Sphere
+        ctx.save();
+        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, dotRadius + 8);
+        grad.addColorStop(0, primary);
+        grad.addColorStop(0.3, primary);
+        grad.addColorStop(1, 'transparent');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, dotRadius + 8, 0, 2 * Math.PI);
+        ctx.fill();
+        // White core for systems
+        ctx.beginPath();
+        ctx.arc(cx, cy, dotRadius * 0.4, 0, 2 * Math.PI);
+        ctx.fillStyle = '#ffffff'; 
+        ctx.fill();
+        ctx.restore();
+    } else if (iconStyle === 'Minimal') {
+        // Crosshair
+        ctx.save();
+        ctx.strokeStyle = primary;
+        ctx.lineWidth = 1.5 / zoom;
+        ctx.beginPath();
+        const l = dotRadius + 5;
+        ctx.moveTo(cx - l, cy); ctx.lineTo(cx + l, cy);
+        ctx.moveTo(cx, cy - l); ctx.lineTo(cx, cy + l);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(cx, cy, dotRadius * 0.5, 0, 2 * Math.PI);
+        ctx.strokeStyle = primary;
+        ctx.stroke();
+        ctx.restore();
+    }
+}
+
+// A filter rule's ring around a world icon.
+function drawWorldRing(ctx, cx, cy, dotRadius, ringColor) {
+    ctx.save();
+    ctx.beginPath();
+
+    // Align the ring's center path EXACTLY with the dot's edge.
+    ctx.arc(cx, cy, dotRadius, 0, 2 * Math.PI);
+
+    ctx.strokeStyle = ringColor;
+
+    // NEW LOGIC: Scale thickness proportionally to the dot size, 
+    // rather than forcing a fixed screen thickness with '/ zoom'.
+    // This ensures the ring shrinks perfectly alongside the planet.
+    ctx.lineWidth = dotRadius * 0.3;
+
+    ctx.stroke();
+    ctx.closePath();
+    ctx.restore();
+}
+
+// Gas giant symbol, plain or ringed, centred on (gx, gy).
+function drawGasGiantSymbol(ctx, gx, gy, color, ringed, zoom) {
+    const gr = GUI_CONFIG.GAS_GIANT.RADIUS;
+    ctx.beginPath();
+    ctx.arc(gx, gy, gr, 0, 2 * Math.PI);
+    ctx.fillStyle = color;
+    ctx.fill();
+
+    if (ringed) {
+        // Ring (ellipse drawn as scaled arc)
+        ctx.save();
+        ctx.translate(gx, gy);
+        ctx.scale(GUI_CONFIG.GAS_GIANT.RING_SCALE_X, GUI_CONFIG.GAS_GIANT.RING_SCALE_Y);
+        ctx.beginPath();
+        ctx.arc(0, 0, gr + 2, 0, 2 * Math.PI);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = GUI_CONFIG.GAS_GIANT.RING_WIDTH / zoom;
+        ctx.stroke();
+        ctx.restore();
+    }
+}
+
+// Scout base: filled triangle centred on (tx, ty).
+function drawScoutBaseSymbol(ctx, tx, ty, color) {
+    const ts = GUI_CONFIG.BASE_ICONS.RADIUS;
+    ctx.beginPath();
+    ctx.moveTo(tx, ty - ts);
+    ctx.lineTo(tx + ts, ty + ts * 0.6);
+    ctx.lineTo(tx - ts, ty + ts * 0.6);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+}
+
+// Naval base: 6-point star centred on (sx, sy).
+function drawNavalBaseSymbol(ctx, sx, sy, color) {
+    const sr = GUI_CONFIG.BASE_ICONS.RADIUS;
+    const sir = sr * 0.45;
+    const pts = 6;
+    ctx.beginPath();
+    for (let i = 0; i < pts * 2; i++) {
+        const angle = (Math.PI / pts) * i - Math.PI / 2;
+        const r = i % 2 === 0 ? sr : sir;
+        const px = sx + Math.cos(angle) * r;
+        const py = sy + Math.sin(angle) * r;
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+}
+
 function draw() {
     // 1. Structural Safety Check
     if (!initCanvas()) return;
@@ -529,25 +837,7 @@ function draw() {
                     // --- Travel Zone Halo (Amber/Red) ---
                     if (showText && data && data.travelZone && data.travelZone !== 'Green' && data.travelZone !== 'G') {
                         const zoneColor = data.travelZone === 'Red' ? '#FF0000' : '#FFBF00';
-                        ctx.save();
-                        ctx.beginPath();
-                        // Slightly larger than the world dot
-                        const haloRadius = dotRadius + 5;
-                        ctx.arc(cx, cy, haloRadius, 0, 2 * Math.PI);
-
-                        // Faint fill (0.2 opacity)
-                        ctx.globalAlpha = 0.2;
-                        ctx.fillStyle = zoneColor;
-                        ctx.fill();
-
-                        // Solid stroke (2-3px)
-                        ctx.globalAlpha = 1.0;
-                        ctx.strokeStyle = zoneColor;
-                        ctx.lineWidth = 2.5 / zoom;
-                        ctx.stroke();
-
-                        ctx.closePath();
-                        ctx.restore();
+                        drawTravelZoneHalo(ctx, cx, cy, dotRadius, zoneColor, zoom);
                     }
 
                     const pTextColor = isSelected ? '#ffb399' : (window.printMode ? '#000000' : '#ffffff');
@@ -591,224 +881,13 @@ function draw() {
                             ctx.fillStyle = primary;
                             ctx.fill();
                             ctx.closePath();
-                        } else if (iconStyle === 'Asteroid Belt') {
-                            const aPositions = [
-                                { dx: -8, dy: -2 }, { dx: 0, dy: -5 }, { dx: 8, dy: -2 },
-                                { dx: -5, dy: 5 }, { dx: 5, dy: 4 }
-                            ];
-                            aPositions.forEach((p, index) => {
-                                ctx.beginPath();
-                                ctx.arc(cx + p.dx, cy + p.dy, 2.5, 0, 2 * Math.PI);
-                                
-                                // Magic Multi-Color Cycling
-                                let rockColor = primary;
-                                if (colors && colors.length > 0) {
-                                    rockColor = colors[index % colors.length]; 
-                                }
-                                
-                                ctx.fillStyle = rockColor;
-                                ctx.fill();
-                                ctx.closePath();
-                            });
-                        } else if (iconStyle === 'Rounded Rectangle') {
-                            // Geometry fix: Calculate dimensions so the furthest corners fit exactly
-                            // within the dotRadius circle that defines the Ring boundary.
-                            const rectWidth = dotRadius * 1.6;
-                            const rectHeight = dotRadius * 1.0;
-                            const rx = cx - rectWidth / 2;
-                            const ry = cy - rectHeight / 2;
-                            const cornerRadius = dotRadius * 0.3; // Proportionally adjusted
-
-                            ctx.save();
-                            ctx.beginPath();
-                            // Use modern roundRect if available, fallback to standard rect
-                            if (ctx.roundRect) {
-                                ctx.roundRect(rx, ry, rectWidth, rectHeight, cornerRadius);
-                            } else {
-                                ctx.rect(rx, ry, rectWidth, rectHeight);
-                            }
-                            ctx.clip(); // Mask the drawing area to the rounded shape
-
-                            if (colors && colors.length > 0) {
-                                const stripeWidth = rectWidth / colors.length;
-                                for (let i = 0; i < colors.length; i++) {
-                                    ctx.fillStyle = colors[i];
-                                    ctx.fillRect(rx + (i * stripeWidth), ry, stripeWidth + 1, rectHeight); // +1 prevents rendering gaps
-                                }
-                            } else {
-                                ctx.fillStyle = baseColor;
-                                ctx.fillRect(rx, ry, rectWidth, rectHeight);
-                            }
-                            ctx.restore();
-                        } else if (iconStyle === 'Square') {
-                            // Geometry: Side length = dotRadius * 1.414 (sqrt 2) to fit corners exactly inside the ring
-                            const side = dotRadius * 1.414;
-                            const rx = cx - side / 2;
-                            const ry = cy - side / 2;
-
-                            ctx.save();
-                            ctx.beginPath();
-                            ctx.rect(rx, ry, side, side);
-                            ctx.clip(); // Mask for stripes
-
-                            if (colors && colors.length > 0) {
-                                const stripeWidth = side / colors.length;
-                                for (let i = 0; i < colors.length; i++) {
-                                    ctx.fillStyle = colors[i];
-                                    ctx.fillRect(rx + (i * stripeWidth), ry, stripeWidth + 1, side);
-                                }
-                            } else {
-                                ctx.fillStyle = baseColor;
-                                ctx.fillRect(rx, ry, side, side);
-                            }
-                            ctx.restore();
-                        } else if (iconStyle === 'Diamond') {
-                            // Geometry: Four points touching the exact edge of the dotRadius ring
-                            ctx.save();
-                            ctx.beginPath();
-                            ctx.moveTo(cx, cy - dotRadius); // Top
-                            ctx.lineTo(cx + dotRadius, cy); // Right
-                            ctx.lineTo(cx, cy + dotRadius); // Bottom
-                            ctx.lineTo(cx - dotRadius, cy); // Left
-                            ctx.closePath();
-                            ctx.clip(); // Mask for stripes
-
-                            if (colors && colors.length > 0) {
-                                const bboxWidth = dotRadius * 2;
-                                const rx = cx - dotRadius;
-                                const ry = cy - dotRadius;
-                                const stripeWidth = bboxWidth / colors.length;
-                                for (let i = 0; i < colors.length; i++) {
-                                    ctx.fillStyle = colors[i];
-                                    ctx.fillRect(rx + (i * stripeWidth), ry, stripeWidth + 1, bboxWidth);
-                                }
-                            } else {
-                                ctx.fillStyle = baseColor;
-                                ctx.fill();
-                            }
-                            ctx.restore();
-                        } else if (iconStyle === 'Octagon') {
-                            // 8-point regular polygon inscribed in dotRadius
-                            ctx.save();
-                            ctx.beginPath();
-                            for (let i = 0; i < 8; i++) {
-                                const angle = (Math.PI / 4) * i - Math.PI / 8;
-                                const px = cx + dotRadius * Math.cos(angle);
-                                const py = cy + dotRadius * Math.sin(angle);
-                                i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
-                            }
-                            ctx.closePath();
-                            ctx.clip();
-
-                            if (colors && colors.length > 0) {
-                                const bboxWidth = dotRadius * 2;
-                                const rx = cx - dotRadius;
-                                const ry = cy - dotRadius;
-                                const stripeWidth = bboxWidth / colors.length;
-                                for (let i = 0; i < colors.length; i++) {
-                                    ctx.fillStyle = colors[i];
-                                    ctx.fillRect(rx + (i * stripeWidth), ry, stripeWidth + 1, bboxWidth);
-                                }
-                            } else {
-                                ctx.fillStyle = baseColor;
-                                ctx.fill();
-                            }
-                            ctx.restore();
-                        } else if (iconStyle === 'Asteroid Grid') {
-                            // 3-4-3 Structured Hex Grid Pattern
-                            const gridPositions = [
-                                { dx: -5, dy: -4.5 }, { dx: 0, dy: -4.5 }, { dx: 5, dy: -4.5 },         // Top 3
-                                { dx: -7.5, dy: 0 }, { dx: -2.5, dy: 0 }, { dx: 2.5, dy: 0 }, { dx: 7.5, dy: 0 }, // Middle 4
-                                { dx: -5, dy: 4.5 }, { dx: 0, dy: 4.5 }, { dx: 5, dy: 4.5 }           // Bottom 3
-                            ];
-                            
-                            gridPositions.forEach((p, index) => {
-                                ctx.beginPath();
-                                ctx.arc(cx + p.dx, cy + p.dy, 1.8, 0, 2 * Math.PI);
-                                
-                                // Magic Multi-Color Cycling
-                                let dotColor = primary;
-                                if (colors && colors.length > 0) {
-                                    dotColor = colors[index % colors.length]; 
-                                }
-                                
-                                ctx.fillStyle = dotColor;
-                                ctx.fill();
-                                ctx.closePath();
-                            });
-                        } else if (iconStyle === 'Classic') {
-                            if (colors && colors.length > 0) {
-                                const sliceAngle = (2 * Math.PI) / colors.length;
-                                for (let i = 0; i < colors.length; i++) {
-                                    const startAngle = i * sliceAngle;
-                                    const endAngle = (i + 1) * sliceAngle;
-                                    ctx.beginPath();
-                                    ctx.moveTo(cx, cy);
-                                    ctx.arc(cx, cy, dotRadius, startAngle, endAngle);
-                                    ctx.closePath();
-                                    ctx.fillStyle = colors[i];
-                                    ctx.fill();
-                                }
-                            } else {
-                                // No rules: Solid Dot
-                                ctx.beginPath();
-                                ctx.arc(cx, cy, dotRadius, 0, 2 * Math.PI);
-                                ctx.fillStyle = baseColor;
-                                ctx.fill();
-                                ctx.closePath();
-                            }
-                        } else if (iconStyle === 'Refined') {
-                            // Glow Sphere
-                            ctx.save();
-                            const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, dotRadius + 8);
-                            grad.addColorStop(0, primary);
-                            grad.addColorStop(0.3, primary);
-                            grad.addColorStop(1, 'transparent');
-                            ctx.fillStyle = grad;
-                            ctx.beginPath();
-                            ctx.arc(cx, cy, dotRadius + 8, 0, 2 * Math.PI);
-                            ctx.fill();
-                            // White core for systems
-                            ctx.beginPath();
-                            ctx.arc(cx, cy, dotRadius * 0.4, 0, 2 * Math.PI);
-                            ctx.fillStyle = '#ffffff'; 
-                            ctx.fill();
-                            ctx.restore();
-                        } else if (iconStyle === 'Minimal') {
-                            // Crosshair
-                            ctx.save();
-                            ctx.strokeStyle = primary;
-                            ctx.lineWidth = 1.5 / zoom;
-                            ctx.beginPath();
-                            const l = dotRadius + 5;
-                            ctx.moveTo(cx - l, cy); ctx.lineTo(cx + l, cy);
-                            ctx.moveTo(cx, cy - l); ctx.lineTo(cx, cy + l);
-                            ctx.stroke();
-                            ctx.beginPath();
-                            ctx.arc(cx, cy, dotRadius * 0.5, 0, 2 * Math.PI);
-                            ctx.strokeStyle = primary;
-                            ctx.stroke();
-                            ctx.restore();
+                        } else {
+                            drawWorldIcon(ctx, cx, cy, dotRadius, iconStyle, colors, baseColor, primary, zoom);
                         }
 
                         // --- Draw the Ring (Applies to any shape) ---
                         if (showText && custom.ringColor) {
-                            ctx.save();
-                            ctx.beginPath();
-
-                            // Align the ring's center path EXACTLY with the dot's edge.
-                            ctx.arc(cx, cy, dotRadius, 0, 2 * Math.PI);
-
-                            ctx.strokeStyle = custom.ringColor;
-
-                            // NEW LOGIC: Scale thickness proportionally to the dot size, 
-                            // rather than forcing a fixed screen thickness with '/ zoom'.
-                            // This ensures the ring shrinks perfectly alongside the planet.
-                            ctx.lineWidth = dotRadius * 0.3;
-
-                            ctx.stroke();
-                            ctx.closePath();
-                            ctx.restore();
+                            drawWorldRing(ctx, cx, cy, dotRadius, custom.ringColor);
                         }
 
                         // 4. UWP string — just below dot. (g), WP6.
@@ -862,77 +941,49 @@ function draw() {
                             }
                             
                             ctx.textBaseline = 'top';
-                                             // ---- Symbols (relative to dot center) (Sean Protocol: GUI Optimization) ----
+                        }
+
                         // ---- Symbols (relative to dot center) (Sean Protocol: GUI Optimization) ----
+                        // Drawn whether or not the world has a name, each behind its
+                        // own disclosure gate: gas giant (c), bases (g). They used to
+                        // sit inside the name block above by accident (v0.18.3 fix), so
+                        // an unnamed world (blank-named TravellerMap imports, names
+                        // cleared in the Hex Editor) lost them, and a players' export at
+                        // level (c) never showed the gas giant it grants.
                         const symOffset = dotRadius + GUI_CONFIG.OFFSETS.SYM_GAP;
 
                         // 6. Gas Giant — Optimized Positioning & Variant Selection
                         if (showText && data.gasGiant && _mapShow(hexId, 'c')) {
                             const gx = cx + symOffset + GUI_CONFIG.GAS_GIANT.X_OFFSET;
                             const gy = cy + GUI_CONFIG.GAS_GIANT.Y_OFFSET;
-                            const gr = GUI_CONFIG.GAS_GIANT.RADIUS;
                             
                             // Variant Selection Logic (Sean Protocol: Data-Driven)
                             let ggVariant = 'SOLID';
                             
-                            // Condition 1: 'Sa' (Satellite/Ring) trade code is present
-                            if (data.tradeCodes && data.tradeCodes.includes('Sa')) {
+                            // Ringed only when the option is on AND the mainworld has Sa
+                            // around a gas giant (Sean, 2026-11-14; core.js helper). Sa
+                            // around anything else, or with no known parent, stays solid.
+                            if (window.ringedGasGiantSatellites !== false &&
+                                mainworldOrbitsGasGiant(data, stateObj)) {
                                 ggVariant = 'RINGED';
                             }
 
-                            ctx.beginPath();
-                            ctx.arc(gx, gy, gr, 0, 2 * Math.PI);
-                            ctx.fillStyle = pTextColor;
-                            ctx.fill();
-                            
-                            if (ggVariant === 'RINGED') {
-                                // Ring (ellipse drawn as scaled arc)
-                                ctx.save();
-                                ctx.translate(gx, gy);
-                                ctx.scale(GUI_CONFIG.GAS_GIANT.RING_SCALE_X, GUI_CONFIG.GAS_GIANT.RING_SCALE_Y);
-                                ctx.beginPath();
-                                ctx.arc(0, 0, gr + 2, 0, 2 * Math.PI);
-                                ctx.strokeStyle = pTextColor;
-                                ctx.lineWidth = GUI_CONFIG.GAS_GIANT.RING_WIDTH / zoom;
-                                ctx.stroke();
-                                ctx.restore();
-                            }
+                            drawGasGiantSymbol(ctx, gx, gy, pTextColor, ggVariant === 'RINGED', zoom);
                         }
 
                         // 7. Scout Base — filled triangle BOTTOM-LEFT of dot
                         if (showText && data.scoutBase && _mapShow(hexId, 'g')) {
                             const tx = cx - symOffset + GUI_CONFIG.OFFSETS.BASE_X_ADJ;
                             const ty = cy + symOffset * GUI_CONFIG.OFFSETS.SCOUT_Y_FACTOR;
-                            const ts = GUI_CONFIG.BASE_ICONS.RADIUS;
-                            ctx.beginPath();
-                            ctx.moveTo(tx, ty - ts);
-                            ctx.lineTo(tx + ts, ty + ts * 0.6);
-                            ctx.lineTo(tx - ts, ty + ts * 0.6);
-                            ctx.closePath();
-                            ctx.fillStyle = pTextColor;
-                            ctx.fill();
+                            drawScoutBaseSymbol(ctx, tx, ty, pTextColor);
                         }
 
                         // 8. Naval Base — 6-point star TOP-LEFT of dot
                         if (showText && data.navalBase && _mapShow(hexId, 'g')) {
                             const sx = cx - symOffset + GUI_CONFIG.OFFSETS.BASE_X_ADJ;
                             const sy = cy - symOffset * GUI_CONFIG.OFFSETS.NAVAL_Y_FACTOR;
-                            const sr = GUI_CONFIG.BASE_ICONS.RADIUS;
-                            const sir = sr * 0.45;
-                            const pts = 6;
-                            ctx.beginPath();
-                            for (let i = 0; i < pts * 2; i++) {
-                                const angle = (Math.PI / pts) * i - Math.PI / 2;
-                                const r = i % 2 === 0 ? sr : sir;
-                                const px = sx + Math.cos(angle) * r;
-                                const py = sy + Math.sin(angle) * r;
-                                i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
-                            }
-                            ctx.closePath();
-                            ctx.fillStyle = pTextColor;
-                            ctx.fill();
+                            drawNavalBaseSymbol(ctx, sx, sy, pTextColor);
                         }
-           }
                     } else {
                         // No data yet — use global baseline dot color
                         ctx.beginPath();
@@ -955,19 +1006,7 @@ function draw() {
                     // --- Travel Zone Halo (Amber/Red) ---
                     if (data && data.travelZone && data.travelZone !== 'Green' && data.travelZone !== 'G') {
                         const zoneColor = data.travelZone === 'Red' ? '#FF0000' : '#FFBF00';
-                        ctx.save();
-                        ctx.beginPath();
-                        const haloRadius = dotRadius + 5;
-                        ctx.arc(cx, cy, haloRadius, 0, 2 * Math.PI);
-                        ctx.globalAlpha = 0.2;
-                        ctx.fillStyle = zoneColor;
-                        ctx.fill();
-                        ctx.globalAlpha = 1.0;
-                        ctx.strokeStyle = zoneColor;
-                        ctx.lineWidth = 2.5 / zoom;
-                        ctx.stroke();
-                        ctx.closePath();
-                        ctx.restore();
+                        drawTravelZoneHalo(ctx, cx, cy, dotRadius, zoneColor, zoom);
                     }
                     ctx.arc(cx, cy, dotRadius, 0, 2 * Math.PI);
                     ctx.fillStyle = window.printMode ? '#000000' : '#ffffff';
@@ -1104,10 +1143,17 @@ function draw() {
     // =========================================================================
     // FINAL PASS: BORDER NAMES + REGION NAMES (drawn last so they sit above all other content)
     // =========================================================================
+    if (_labelCaptureSub === null) _mapLabelHits.length = 0;   // rebuilt by the two calls below
     drawBorderNames();
     drawRegionNames();
 
     ctx.restore();
+
+    // Map legend (v0.18.3): a cheap signature check that schedules a rescan
+    // only when something the legend depends on has changed. Never scans here.
+    if (window.mapLegendEnabled === true && typeof window.mapLegendAfterDraw === 'function') {
+        window.mapLegendAfterDraw();
+    }
 }
 
 // ============================================================================
@@ -1361,10 +1407,6 @@ function drawBorderNames() {
 
     if (window.hexBorderAssignments.size !== _bnCacheSize) _rebuildBorderNamesCache();
 
-    const size         = baseHexSize;
-    const MIN_LABEL_PX = 10;
-    const MAX_LABEL_PX = 22;
-
     // Viewport in world coordinates
     const viewLeft   = cameraX;
     const viewRight  = cameraX + window.innerWidth  / zoom;
@@ -1381,18 +1423,72 @@ function drawBorderNames() {
         if (def.visible === false) return;
         const info = _bnCacheMap.get(def.id);
         if (!info || info.hexCount === 0) return;
+        _drawNameLabel('border', def, info, viewLeft, viewRight, viewTop, viewBottom);
+    });
 
-        // Skip if border's bounding box doesn't intersect the viewport at all
+    ctx.restore();
+}
+
+// ============================================================================
+// PLACEABLE NAMES (v0.18.3) — one drawer for border and region names
+// ============================================================================
+// A name the user has moved (Alt + drag, canvas_input.js) carries
+//   def.labelPos = { hex, dx, dy }
+// on its border/region definition: the hex its centre sits over and the offset
+// from that hex's centre, in world units. Saved with the map because the
+// definitions are. Absent or unusable → automatic placement, exactly as before
+// (older saves; CLAUDE.md rule 6).
+//
+// Automatic: the centroid of the hexes, clamped into the part of the area on
+// screen, so it slides as you pan and every subsector export the area touches
+// gets a copy. Placed: drawn where it was put, and in a subsector export only on
+// the map of the subsector it sits in (Sean, 2026-11-14).
+
+let _labelCaptureSub = null;   // 'S-L-' hexId prefix while captureSubsector draws
+const _mapLabelHits  = [];     // live map only: [{ kind, def, x, y, w, h, cx, cy }]
+window.getMapLabelHits = function () { return _mapLabelHits; };
+
+// Assigning, clearing or renaming changes which hexes a name covers without
+// changing the hex count the caches are keyed on, so mutators call this.
+window.invalidateMapLabelCaches = function () { _bnCacheSize = -1; _rnCacheSize = -1; };
+
+function getPlacedLabelCentre(def) {
+    const p = def && def.labelPos;
+    if (!p || typeof p.hex !== 'string' || !Number.isFinite(p.dx) || !Number.isFinite(p.dy)) return null;
+    const c = getHexCoords(p.hex);
+    if (!c) return null;
+    const px = getHexPixel(c.q, c.r);
+    return { x: px.x + p.dx, y: px.y + p.dy, hex: p.hex };
+}
+window.getPlacedLabelCentre = getPlacedLabelCentre;
+
+function _drawNameLabel(kind, def, info, viewLeft, viewRight, viewTop, viewBottom) {
+    const size         = baseHexSize;
+    const MIN_LABEL_PX = 10;
+    const MAX_LABEL_PX = 22;
+    const placed = getPlacedLabelCentre(def);
+
+    if (placed) {
+        // Exports: once, on its own subsector's map.
+        if (_labelCaptureSub !== null && !placed.hex.startsWith(_labelCaptureSub)) return;
+    } else {
+        // Skip if the area's bounding box doesn't intersect the viewport at all
         if (info.maxX < viewLeft  || info.minX > viewRight ||
             info.maxY < viewTop   || info.minY > viewBottom) return;
+    }
 
-        const worldFontSize  = 0.4 * size * Math.sqrt(info.hexCount);
-        const screenFontSize = worldFontSize * zoom;
-        if (screenFontSize < MIN_LABEL_PX) return;
+    const worldFontSize  = 0.4 * size * Math.sqrt(info.hexCount);
+    const screenFontSize = worldFontSize * zoom;
+    if (screenFontSize < MIN_LABEL_PX) return;
 
-        const displayWorldFont = Math.min(worldFontSize, MAX_LABEL_PX / zoom);
+    const displayWorldFont = Math.min(worldFontSize, MAX_LABEL_PX / zoom);
 
-        // Clamp centroid to the raw intersection of border AABB and viewport.
+    let labelX, labelY;
+    if (placed) {
+        labelX = placed.x;
+        labelY = placed.y;
+    } else {
+        // Clamp centroid to the raw intersection of the area's AABB and viewport.
         // No padding — padding in world-space blows up at low zoom.
         const clampL = Math.max(info.minX, viewLeft);
         const clampR = Math.min(info.maxX, viewRight);
@@ -1400,42 +1496,45 @@ function drawBorderNames() {
         const clampB = Math.min(info.maxY, viewBottom);
         if (clampL >= clampR || clampT >= clampB) return; // degenerate intersection
 
-        const labelX = Math.max(clampL, Math.min(clampR, info.cx));
-        const labelY = Math.max(clampT, Math.min(clampB, info.cy));
+        labelX = Math.max(clampL, Math.min(clampR, info.cx));
+        labelY = Math.max(clampT, Math.min(clampB, info.cy));
+    }
 
-        ctx.font = `bold ${displayWorldFont}px 'Courier New', Courier, monospace`;
+    ctx.font = `bold ${displayWorldFont}px 'Courier New', Courier, monospace`;
 
-        const label      = def.name.toUpperCase();
-        const textWidth  = ctx.measureText(label).width;
-        const hPad       = displayWorldFont * 0.35;
-        const vPad       = displayWorldFont * 0.20;
-        const bgX        = labelX - textWidth / 2 - hPad;
-        const bgY        = labelY - displayWorldFont / 2 - vPad;
-        const bgW        = textWidth + hPad * 2;
-        const bgH        = displayWorldFont + vPad * 2;
-        const radius     = displayWorldFont * 0.25;
+    const label      = def.name.toUpperCase();
+    const textWidth  = ctx.measureText(label).width;
+    const hPad       = displayWorldFont * 0.35;
+    const vPad       = displayWorldFont * 0.20;
+    const bgX        = labelX - textWidth / 2 - hPad;
+    const bgY        = labelY - displayWorldFont / 2 - vPad;
+    const bgW        = textWidth + hPad * 2;
+    const bgH        = displayWorldFont + vPad * 2;
+    const radius     = displayWorldFont * 0.25;
 
-        // Subtle dark pill behind the text
-        ctx.globalAlpha = 0.50;
-        ctx.fillStyle   = '#000000';
-        ctx.beginPath();
-        ctx.roundRect(bgX, bgY, bgW, bgH, radius);
-        ctx.fill();
+    // Subtle dark pill behind the text
+    ctx.globalAlpha = 0.50;
+    ctx.fillStyle   = '#000000';
+    ctx.beginPath();
+    ctx.roundRect(bgX, bgY, bgW, bgH, radius);
+    ctx.fill();
 
-        // Dark outline then colored fill
-        ctx.globalAlpha = 0.75;
-        ctx.strokeStyle = '#000000';
-        ctx.lineWidth   = 3 / zoom;
-        ctx.strokeText(label, labelX, labelY);
+    // Dark outline then colored fill
+    ctx.globalAlpha = 0.75;
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth   = 3 / zoom;
+    ctx.strokeText(label, labelX, labelY);
 
-        ctx.globalAlpha = 0.95;
-        ctx.fillStyle   = def.color;
-        ctx.fillText(label, labelX, labelY);
+    ctx.globalAlpha = 0.95;
+    ctx.fillStyle   = def.color;
+    ctx.fillText(label, labelX, labelY);
 
-        ctx.globalAlpha = 1.0;
-    });
+    ctx.globalAlpha = 1.0;
 
-    ctx.restore();
+    // Where the user can grab it (world units), live map only.
+    if (_labelCaptureSub === null) {
+        _mapLabelHits.push({ kind, def, x: bgX, y: bgY, w: bgW, h: bgH, cx: labelX, cy: labelY });
+    }
 }
 
 // ============================================================================
@@ -1486,10 +1585,6 @@ function drawRegionNames() {
 
     if (hexStates.size !== _rnCacheSize) _rebuildRegionNamesCache();
 
-    const size         = baseHexSize;
-    const MIN_LABEL_PX = 10;
-    const MAX_LABEL_PX = 22;
-
     const viewLeft   = cameraX;
     const viewRight  = cameraX + window.innerWidth  / zoom;
     const viewTop    = cameraY;
@@ -1505,53 +1600,7 @@ function drawRegionNames() {
         if (def.visible === false) return;
         const info = _rnCacheMap.get(def.name);
         if (!info || info.hexCount === 0) return;
-
-        if (info.maxX < viewLeft  || info.minX > viewRight ||
-            info.maxY < viewTop   || info.minY > viewBottom) return;
-
-        const worldFontSize  = 0.4 * size * Math.sqrt(info.hexCount);
-        const screenFontSize = worldFontSize * zoom;
-        if (screenFontSize < MIN_LABEL_PX) return;
-
-        const displayWorldFont = Math.min(worldFontSize, MAX_LABEL_PX / zoom);
-
-        const clampL = Math.max(info.minX, viewLeft);
-        const clampR = Math.min(info.maxX, viewRight);
-        const clampT = Math.max(info.minY, viewTop);
-        const clampB = Math.min(info.maxY, viewBottom);
-        if (clampL >= clampR || clampT >= clampB) return;
-
-        const labelX = Math.max(clampL, Math.min(clampR, info.cx));
-        const labelY = Math.max(clampT, Math.min(clampB, info.cy));
-
-        ctx.font = `bold ${displayWorldFont}px 'Courier New', Courier, monospace`;
-
-        const label      = def.name.toUpperCase();
-        const textWidth  = ctx.measureText(label).width;
-        const hPad       = displayWorldFont * 0.35;
-        const vPad       = displayWorldFont * 0.20;
-        const bgX        = labelX - textWidth / 2 - hPad;
-        const bgY        = labelY - displayWorldFont / 2 - vPad;
-        const bgW        = textWidth + hPad * 2;
-        const bgH        = displayWorldFont + vPad * 2;
-        const radius     = displayWorldFont * 0.25;
-
-        ctx.globalAlpha = 0.50;
-        ctx.fillStyle   = '#000000';
-        ctx.beginPath();
-        ctx.roundRect(bgX, bgY, bgW, bgH, radius);
-        ctx.fill();
-
-        ctx.globalAlpha = 0.75;
-        ctx.strokeStyle = '#000000';
-        ctx.lineWidth   = 3 / zoom;
-        ctx.strokeText(label, labelX, labelY);
-
-        ctx.globalAlpha = 0.95;
-        ctx.fillStyle   = def.color;
-        ctx.fillText(label, labelX, labelY);
-
-        ctx.globalAlpha = 1.0;
+        _drawNameLabel('region', def, info, viewLeft, viewRight, viewTop, viewBottom);
     });
 
     ctx.restore();
@@ -1630,9 +1679,12 @@ async function captureSubsector(sectorNum, subsectorChar, outputWidth, outputHei
     const savedDisclosure = _mapDisclosure;
     try {
         setMapDisclosure(opts && opts.disclosure);
+        // A placed border/region name prints only on its own subsector's map.
+        _labelCaptureSub = `${sectorNum}-${subsectorChar}-`;
         draw();
     } finally {
         _mapDisclosure = savedDisclosure;
+        _labelCaptureSub = null;
     }
 
     // ── Restore live renderer state ────────────────────────────────────────────

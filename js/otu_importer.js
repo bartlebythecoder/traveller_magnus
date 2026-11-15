@@ -199,6 +199,7 @@
                 if (hexId.startsWith(prefix)) window.hexBorderAssignments.delete(hexId);
             }
         }
+        if (typeof window.invalidateMapLabelCaches === 'function') window.invalidateMapLabelCaches();
     }
 
     /**
@@ -521,6 +522,7 @@
         window.borderPaths          = new Map();
         window.regionPaths          = new Map();
         window.borderDefinitions    = (typeof getDefaultBorderDefinitions === 'function') ? getDefaultBorderDefinitions() : [];
+        if (typeof window.invalidateMapLabelCaches === 'function') window.invalidateMapLabelCaches();
         window.regionDefinitions    = (typeof getDefaultRegionDefinitions === 'function') ? getDefaultRegionDefinitions() : [];
 
         centerCameraOnGrid();

@@ -230,6 +230,7 @@ window.renderBorderWindow = function () {
             }
             if (window.borderPaths) window.borderPaths.delete(def.id);
             if (window.dbManager) window.dbManager.saveBorderAssignments?.();
+            if (typeof window.invalidateMapLabelCaches === 'function') window.invalidateMapLabelCaches();
             requestAnimationFrame(draw);
             window.renderBorderWindow();
             showToast(`Cleared all hexes for "${def.name}".`, 2000);
@@ -993,6 +994,7 @@ window.importBordersFromXml = function (bordersElement, slotNum) {
         window.dbManager.saveBorderPaths?.();
     }
 
+    if (typeof window.invalidateMapLabelCaches === 'function') window.invalidateMapLabelCaches();
     return { assigned, skipped };
 };
 
@@ -1368,6 +1370,7 @@ window.importRegionsFromXml = function (regionsElement, slotNum) {
     if (typeof window.sortAndTrimRegionDefinitions === 'function') window.sortAndTrimRegionDefinitions();
     if (typeof window.renderRegionWindow === 'function') window.renderRegionWindow();
 
+    if (typeof window.invalidateMapLabelCaches === 'function') window.invalidateMapLabelCaches();
     return { assigned, skipped };
 };
 

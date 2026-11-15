@@ -105,6 +105,7 @@
     <script src="js/hex_editor.js" defer></script>
     <script src="js/ui_menus.js" defer></script>
     <script src="js/filter_engine.js" defer></script>
+    <script src="js/map_legend.js" defer></script>
     <script src="js/io_manager.js" defer></script>
     <script src="js/traveller_worlds_importer.js" defer></script>
     <script src="js/db_manager.js" defer></script>
@@ -813,6 +814,30 @@
             margin-top: 2px;
         }
 
+        /* ── Map Legend (v0.18.3, js/map_legend.js) ──────────────────────── */
+        #map-legend {
+            width: 270px;
+            padding: 25px 25px 12px 25px;
+            color: #c5c6c7;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            border: 2px solid #66fcf1;
+            max-height: 70vh;
+        }
+        #map-legend .modal-drag-handle { flex-shrink: 0; margin-bottom: 8px; padding: 10px 15px; }
+        #map-legend .modal-drag-handle h2 { font-size: 1rem; color: #66fcf1; }
+        #map-legend .btn-close-palette { top: 4px; }
+        #map-legend .palette-content { flex: 1; min-height: 0; overflow-y: auto; padding: 0; gap: 4px; }
+        .map-legend-heading {
+            font-size: 0.68rem; color: #45a29e; letter-spacing: 0.06em; text-transform: uppercase;
+            padding-top: 4px; border-top: 1px solid #1f2833;
+        }
+        .map-legend-heading:first-child { border-top: none; padding-top: 0; }
+        .map-legend-row { display: flex; align-items: center; gap: 10px; }
+        .map-legend-swatch { flex-shrink: 0; border: 1px solid #1f2833; border-radius: 3px; }
+        .map-legend-label { flex: 1; min-width: 0; overflow-wrap: anywhere; line-height: 1.25; }
+        .map-legend-empty { font-size: 0.75rem; color: #8ab8b5; line-height: 1.35; }
+
         /* ── Border Manager Window ───────────────────────────────────────── */
         #border-window {
             width: 390px;
@@ -968,9 +993,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above<br> So Below</span></h1>
-            <div class="splash-banner">New: Upgraded World Images</div>
+            <div class="splash-banner">New: Map Legends</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.18.2</div>
+            <div class="splash-version">v0.18.3</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -993,6 +1018,7 @@
                     <div class="shortcut-item"><strong>B Key</strong><span>Open Border Manager</span></div>
                     <div class="shortcut-item"><strong>G Key</strong><span>Open Region Manager</span></div>
                     <div class="shortcut-item"><strong>D Key</strong><span>Open Player Disclosure</span></div>
+                    <div class="shortcut-item"><strong>L Key</strong><span>Show / Hide Map Legend</span></div>
                     <div class="shortcut-item"><strong>Escape</strong><span>Cancel / Close All</span></div>
                     <div class="shortcut-item"><strong>Ctrl + Delete</strong><span>Clear Canvas</span></div>
                 </div>
@@ -1071,6 +1097,14 @@
                 <div class="settings-row" style="display:flex;align-items:center;gap:10px;">
                     <input type="checkbox" id="toggle-subsector-names">
                     <label for="toggle-subsector-names" style="cursor:pointer;">Show Subsector Names</label>
+                </div>
+                <div class="settings-row" style="display:flex;align-items:center;gap:10px;">
+                    <input type="checkbox" id="toggle-ringed-gg" checked>
+                    <label for="toggle-ringed-gg" style="cursor:pointer;" title="Draws the gas giant symbol with a ring when the mainworld (Sa) orbits a gas giant. A mainworld orbiting anything else, or whose parent is not known, keeps the plain symbol.">Ringed Gas Giant icon for Mainworld Gas Giant satellites</label>
+                </div>
+                <div class="settings-row" style="display:flex;align-items:center;gap:10px;">
+                    <input type="checkbox" id="toggle-map-legend">
+                    <label for="toggle-map-legend" style="cursor:pointer;" title="A movable window keying every map symbol and styling rule in use anywhere on the map. Saved with the map.">Show Map Legend</label>
                 </div>
                 <div class="settings-row" style="display:flex;align-items:center;justify-content:space-between;">
                     <label style="font-size:0.8rem;color:#c5c6c7;">Default World Color</label>
@@ -1683,7 +1717,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.18.2</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.18.3</span>
             </p>
         </div>
 
@@ -1693,6 +1727,7 @@
                     Selection</h3>
                 <div class="help-grid">
                     <strong>Left Click + Drag</strong><span>Pan Map</span>
+                    <strong>Alt + Drag</strong><span>Move Border / Region Name</span>
                     <strong>Scroll Wheel</strong><span>Zoom In / Out</span>
                     <strong>Shift + Click</strong><span>Toggle Select Hex</span>
                     <strong>Shift + Drag</strong><span>Paint Multiple Hexes</span>
@@ -1719,6 +1754,7 @@
                     <strong>B Key</strong><span>Open Border Manager</span>
                     <strong>G Key</strong><span>Open Region Manager</span>
                     <strong>D Key</strong><span>Open Player Disclosure</span>
+                    <strong>L Key</strong><span>Show / Hide Map Legend</span>
                 </div>
             </div>
 
@@ -2304,6 +2340,8 @@
         <button class="context-menu-item" id="ctx-create-system" style="display: none;">CREATE MANUAL SYSTEM</button>
         <button class="context-menu-item" id="ctx-edit-system" style="display: none;">EDIT SYSTEM</button>
         <button class="context-menu-item" id="ctx-world-details" style="display: none;">WORLD DETAILS</button>
+        <!-- v0.18.3: shown only when right-clicking a border/region name that was moved with Alt + drag -->
+        <button class="context-menu-item" id="ctx-reset-label" style="display: none;">RESET NAME POSITION</button>
 
         <div style="border-top: 1px solid #45a29e; margin: 4px 0;"></div>
 
@@ -3035,6 +3073,13 @@
                         </div>
                     </div>
                 </div>
+                <div class="design-field" style="margin-top: 10px;">
+                    <label for="design-rule-name">Legend Name (optional)</label>
+                    <input type="text" id="design-rule-name" maxlength="60"
+                        placeholder="e.g. Water worlds"
+                        title="Shown for this rule in the Map Legend. Left blank, the legend shows the rule's filter description."
+                        style="width: 100%; box-sizing: border-box; padding: 4px 6px; background: #1f2833; border: 1px solid #45a29e; color: #fff; font-size: 0.75rem;">
+                </div>
                 <button class="btn-batch-apply" onclick="applyBatchStyles()" style="margin-top: 10px;">Apply as New
                     Rule</button>
 
@@ -3313,6 +3358,15 @@
         <div class="region-window-footer">
             <button id="btn-close-region-window-footer" class="btn-cancel" style="padding: 4px 12px; font-size: 0.8rem;">Close</button>
         </div>
+    </div>
+
+    <!-- Map Legend (v0.18.3) — Settings > Visual Options > Show Map Legend; js/map_legend.js -->
+    <div id="map-legend" class="draggable-palette">
+        <div class="modal-drag-handle">
+            <h2>Map Legend</h2>
+            <button id="btn-close-map-legend" class="btn-close-palette" title="Hide the legend"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="palette-content" id="map-legend-list"></div>
     </div>
 
     <!-- Toast Notifications -->

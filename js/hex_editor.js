@@ -3231,6 +3231,7 @@ function saveHexEditorChanges() {
         if (cluster && cluster !== '----') window.regionPaths.delete(`${sn}:${cluster}`);
     }
     stateObj.cluster = cluster;
+    if (typeof window.invalidateMapLabelCaches === 'function') window.invalidateMapLabelCaches();
     stateObj.notes = notes;
 
     // 1. Update MgT2E Socio Profile (Expansion or Native)

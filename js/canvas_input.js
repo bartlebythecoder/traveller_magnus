@@ -13,6 +13,11 @@ function setupCanvasEvents() {
     let pickDownX = 0, pickDownY = 0, pickDownArmed = false;
     const PICK_SLOP_PX = 4;
 
+    // Alt + drag on a border or region name moves it (v0.18.3, Sean 2026-11-14).
+    // { hit, grabDx, grabDy, downX, downY, moved } while a name is held.
+    let labelDrag = null;
+    let contextLabelHit = null;   // the placed name a right-click landed on
+
     // 1. Hide context menu when clicking OUTSIDE it
     window.addEventListener('mousedown', (e) => {
         if (e.target.closest('#context-menu') === null) {
@@ -53,7 +58,15 @@ function setupCanvasEvents() {
         }
 
         const contextMenu = document.getElementById('context-menu');
-        
+
+        // RESET NAME POSITION — only on a border/region name that was moved.
+        {
+            const hit = hitTestMapLabel(world);
+            contextLabelHit = (hit && hit.def.labelPos) ? hit : null;
+            const resetBtn = document.getElementById('ctx-reset-label');
+            if (resetBtn) resetBtn.style.display = contextLabelHit ? 'block' : 'none';
+        }
+
         // DEV VIEW Toggle for advanced socio expansion
         const socioDev = document.getElementById('ctx-expand-socio-mgt2e-dev');
         if (socioDev) socioDev.style.display = (window.devView === true) ? 'block' : 'none';
@@ -185,6 +198,21 @@ function setupCanvasEvents() {
         });
     }
 
+    // Right-click > RESET NAME POSITION: back to automatic placement (undoable).
+    const ctxResetLabel = document.getElementById('ctx-reset-label');
+    if (ctxResetLabel) {
+        ctxResetLabel.addEventListener('click', () => {
+            ctxMenuEl.classList.remove('visible');
+            const hit = contextLabelHit;
+            contextLabelHit = null;
+            if (!hit || !hit.def.labelPos) return;
+            saveHistoryState(`Reset ${hit.def.name} name position`, { includeLabelPositions: true });
+            delete hit.def.labelPos;
+            saveMapLabelDefinitions(hit.kind);
+            requestAnimationFrame(draw);
+        });
+    }
+
     // Right-click > WORLD DETAILS: the same panel as Ctrl+click, for the one
     // selected hex (the hex Edit System would open).
     const ctxDetailsBtn = document.getElementById('ctx-world-details');
@@ -204,6 +232,19 @@ function setupCanvasEvents() {
         const world = getMouseWorldCoords(e);
         const coords = pixelToHex(world.x, world.y, baseHexSize);
         const hexId = getHexId(coords.q, coords.r);
+
+        // Alt + drag on a border/region name: pick it up. Anywhere else, Alt
+        // changes nothing and the click carries on as before.
+        if (e.altKey && !e.ctrlKey && !e.shiftKey) {
+            const hit = hitTestMapLabel(world);
+            if (hit) {
+                e.preventDefault();
+                labelDrag = { hit, grabDx: world.x - hit.cx, grabDy: world.y - hit.cy,
+                              downX: e.clientX, downY: e.clientY, moved: false };
+                mapCanvas.style.cursor = 'grabbing';
+                return;
+            }
+        }
 
         if (e.ctrlKey) {
             // Ctrl+Left-Click: Open Hex Editor
@@ -256,6 +297,33 @@ function setupCanvasEvents() {
         currentMouseX = e.clientX;
         currentMouseY = e.clientY;
 
+        if (labelDrag) {
+            if (!labelDrag.moved) {
+                if (Math.hypot(e.clientX - labelDrag.downX, e.clientY - labelDrag.downY) <= PICK_SLOP_PX) return;
+                labelDrag.moved = true;
+                // One undo entry per move, taken before the first change.
+                saveHistoryState(`Move ${labelDrag.hit.def.name} name`, { includeLabelPositions: true });
+            }
+            const w = getMouseWorldCoords(e);
+            const cx = w.x - labelDrag.grabDx;
+            const cy = w.y - labelDrag.grabDy;
+            const c = pixelToHex(cx, cy, baseHexSize);
+            const anchor = getHexId(c.q, c.r);
+            if (anchor) {   // off the map: the name stays at its last spot on it
+                const p = getHexPixel(c.q, c.r);
+                labelDrag.hit.def.labelPos = { hex: anchor, dx: cx - p.x, dy: cy - p.y };
+                requestAnimationFrame(draw);
+            }
+            return;
+        }
+
+        // Alt over a name shows it can be moved.
+        if (!isDragging && !isPainting && !isAltDragging && e.target === mapCanvas) {
+            const over = e.altKey && hitTestMapLabel(getMouseWorldCoords(e));
+            const want = over ? 'move' : '';
+            if (mapCanvas.style.cursor !== want) mapCanvas.style.cursor = want;
+        }
+
         if (isPainting) {
             const world = getMouseWorldCoords(e);
             const coords = pixelToHex(world.x, world.y, baseHexSize);
@@ -284,6 +352,15 @@ function setupCanvasEvents() {
 
     // 5. Mouse Up: Stop Actions entirely
     window.addEventListener('mouseup', (e) => {
+        if (labelDrag) {
+            const { hit, moved } = labelDrag;
+            labelDrag = null;
+            mapCanvas.style.cursor = '';
+            if (moved) saveMapLabelDefinitions(hit.kind);
+            requestAnimationFrame(draw);
+            return;
+        }
+
         // Deliver an armed Route Manager pick — a click, not a drag.
         if (pickDownArmed && window.MapPick && window.MapPick.isArmed() && !e.ctrlKey && !e.shiftKey) {
             const moved = Math.hypot(e.clientX - pickDownX, e.clientY - pickDownY);
@@ -369,6 +446,27 @@ function setupCanvasEvents() {
         cameraY = mouseWorldY - e.clientY / zoom;
         requestAnimationFrame(draw);
     }, { passive: false });
+}
+
+// ============================================================================
+// PLACEABLE NAMES (v0.18.3)
+// ============================================================================
+
+// The border/region name under a world point, topmost first, from the boxes
+// the last draw() recorded (renderer.js). Names too small to draw are not there.
+function hitTestMapLabel(world) {
+    const hits = (typeof window.getMapLabelHits === 'function') ? window.getMapLabelHits() : [];
+    for (let i = hits.length - 1; i >= 0; i--) {
+        const h = hits[i];
+        if (world.x >= h.x && world.x <= h.x + h.w && world.y >= h.y && world.y <= h.y + h.h) return h;
+    }
+    return null;
+}
+
+function saveMapLabelDefinitions(kind) {
+    if (!window.dbManager) return;
+    if (kind === 'region') window.dbManager.saveRegionDefinitions?.();
+    else window.dbManager.saveBorderDefinitions?.();
 }
 
 // ============================================================================

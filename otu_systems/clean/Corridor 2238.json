@@ -1,0 +1,208 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Corridor",
+  "hex": "2238",
+  "sector_abbreviation": "Corr",
+  "subsector": "Sinta",
+  "name": "Divad",
+  "sources": [
+    {
+      "page": "Divad (world)",
+      "revid": 1036222,
+      "timestamp": "2026-04-06T23:20:32Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Divad (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Kateri",
+          "type": "M5 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Kateri",
+      "stars": [
+        {
+          "name": "Kateri",
+          "type": "M5 V"
+        }
+      ],
+      "labels": [
+        "Divad"
+      ],
+      "pages": [
+        "Divad (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Planetoid belt",
+          "raw": "F000485-7",
+          "kind": "world",
+          "uwp": "F000485-7",
+          "distance": {
+            "raw": "0.1",
+            "value": 0.1,
+            "unit": "AU"
+          },
+          "sources": [
+            "Divad (world)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Divad",
+          "raw": "C8C0885-8",
+          "kind": "world",
+          "uwp": "C8C0885-8",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Divad (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 2,
+          "name": "Kleslin",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "0.32",
+            "value": 0.32,
+            "unit": "AU"
+          },
+          "sources": [
+            "Divad (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Galidesh",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "0.48",
+            "value": 0.48,
+            "unit": "AU"
+          },
+          "sources": [
+            "Divad (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Planetoid belt",
+          "raw": "F000385-7",
+          "kind": "world",
+          "uwp": "F000385-7",
+          "distance": {
+            "raw": "0.72",
+            "value": 0.72,
+            "unit": "AU"
+          },
+          "sources": [
+            "Divad (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Divad (world)",
+      "label": "Divad",
+      "stars": [
+        {
+          "name": "Kateri",
+          "type": "M5 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Planetoid belt",
+          "raw": "F000485-7",
+          "kind": "world",
+          "uwp": "F000485-7",
+          "distance": {
+            "raw": "0.1",
+            "value": 0.1,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Divad",
+          "raw": "C8C0885-8",
+          "kind": "world",
+          "uwp": "C8C0885-8",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Kleslin",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "0.32",
+            "value": 0.32,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Galidesh",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "0.48",
+            "value": 0.48,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Planetoid belt",
+          "raw": "F000385-7",
+          "kind": "world",
+          "uwp": "F000385-7",
+          "distance": {
+            "raw": "0.72",
+            "value": 0.72,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Divad",
+    "UWP": "C8C0885-9",
+    "Stellar": "M5 V",
+    "PBG": "422",
+    "Bases": "S",
+    "Remarks": "He Ph Pz (Brinn)9"
+  }
+}

@@ -1,0 +1,159 @@
+[[File:Alien Moon 128b-0_Tiny.jpg|250 px|right]]
+{{StellarDataQuery
+|name= {{World|Dashi|Dagudashaag|Pact|1723}}
+|First Survey name=Shudu
+}}
+{{InfoboxSystem
+|name=Dashi
+|subsector=Pact
+|sector=Dagudashaag
+|hex=1723
+|star=Hemen
+|type=M2 V
+|P1=Dashi
+|Dist1=0.2
+|UWP1=C55098B-E
+|P1M1=Splinter
+|Dist1M1=17
+|UWP1M1=YS00100-D
+|P2=Kaltra|Dist2=0.4
+|UWP2='''Small GG'''
+|P2M1=Necros
+|Dist2M1=10
+|UWP2M1=FS0056B-D
+|P2M2=Dalin|Dist2M2=20
+|UWP2M2=HS00300-D
+|P3=Bellatrix|Dist3=0.7
+|UWP3='''Large GG'''
+|P3M1=Angros
+|Dist3M1=5
+|UWP3M1=Y630000-0
+|P3M2=Debendra
+|Dist3M2=10
+|UWP3M2=Y610000-0
+|P3M3=Vestri
+|Dist3M3=25
+|UWP3M3=Y430000-0
+|P3M4=Koshi
+|Dist3M4=50
+|UWP3M4=CS0036A-E
+|P4=Aprisal
+|Dist4=1.0
+|UWP4='''Small GG'''
+|P5=Avende
+|Dist5=1.7
+|UWP5='''Small GG'''
+}}
+
+== Astrography and Planetology == 
+{{DaMain}}
+
+=== Stellar Data ===
+{{MonostellarSystem
+|name           = Dashi
+|primary        = M2 V 
+|PrimaryName   = Hemen
+}}
+
+=== Mainworld Data ===
+This is a [[desert world]] run by a business conglomerate of seven corporations known locally as the [[Dashi Combine]]. The [[planet]] is mainly self-sufficient in water and food as a result of intensive hydroponics, mining of the ice rings of a nearby [[gas giant]], and strict water recycling.
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Dashi|Size= 5}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Dashi|Atmosphere= 5}}
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Dashi|Hydrosphere= 0}}
+
+=== Native Lifeform: Dashi Algae ===
+Although classed as a desert planet the entire surface is covered in metre-high layers of Dashi algae, a blue-green plant which has been genetically altered to convert ultra-violet rays into oxygen. As a side product, the algae can be milked to produce insulin. This alga is harvested and mixed with essential proteins to provide a basic diet for Dashi's millions. The planet itself is relatively flat with no mountains over 1km and is almost entirety devoid of water. What little is present can only be found deep underground. Violent and intense storms plague the desert, tearing through the algae covering and releasing the particles of silica and glass which can rip through organics in seconds and strip metal in minutes. These storms occur on an extremely frequent basis. The algae will regrow in less than a day, repairing any damage inflicted by storms or harvesting.
+
+== History and Background ==
+Due to its size and lack of apparent resources the [[planet]] was initially named (''Shudu'') and then ignored throughout the [[First Imperium|first]] and [[Second Imperium]]. 
+
+It was eventually colonized as a frontier post during the time of the [[Medurma Pact]], and at that time a discovery of fine [[platinum]] and gold caused a minor rush. Due to the nature of the planet and the need to import all water in the form of ice from the rings of Kaltra, only the traders got rich. It was they who built the first pyramid cities and began building electronic manufacturing sites on planet. 
+
+Several [[Megacorporation]]s bought in and gradually absorbed the original companies. The pure silicon desert, dry climate and ready supply of pure metals made the world an ideal manufacturing site and within a short period of time seven companies had virtually total control of the planet. The large Eurasian [[Solomani]] population was imported from [[Argi Subsector|Argi]] and [[Sapphyre Subsector|Sapphyre]] subsectors to act as cheap labour. Within 100 years Shudu had become a major force in the domestic electronics market, making cheap tri-vees, holorecorders etc, as well as a major exporter of electrical components. 
+
+In [[485]] Shudu entered the main political arena when Emperor [[Cleon IV]] elected Himuu Asaria as Sector Duke of Dagudashaag and granted him a free hand to "deal with" the deposed Duke [[Tarek Viisarikaa]] who had refused to accept his succession to the throne. He unleashed Admiral Jenkins, who ordered the nuclear destruction of Sennii city in the mistaken belief that the deposed duke was sheltering there. Over 32,000,000 died as a result. The city was totally destroyed, reduced to a plain of glass. As a reminder of this terrible tragedy the planet was renamed ''Dashi'' (Japanese: Great Death). 
+
+=== World Starport (St) ===
+{{Starport|name= Dashi|Starport= C}}
+
+==== Urbanization ====
+Dashi -- the planet of glass pyramids. Every building on Dashi is formed from the silicon desert, either as fused silica blocks or as screens of brilliantly coloured glass panels. The entire population reside either in the pyramids or in the hollowed-out warrens that lie beneath. There are no independent dwellings. These massive pyramids of fused multicoloured glass tower up to a height of 15km from the ground and burrow down a further 20km under the surface. Despite this, living space is extremely limited. In the warrens, entire extended families live in a single room 10m by 10m. 
+
+Major cities include:
+
+* Shagukaar (''[[Naasirka]]''): 830,000,000; Corporate Starport Facilities only (CSF)
+* Kadaka (''[[Makhidkarun]]''): 750,000,000; (CSF)
+* Lantau (''[[Delgado Trading]]''): 608,000,000; (CSF)
+* Ki Phlaem (Independent): 702,000,000; Starport C
+* Hei ling (''[[Sternmetal Horizons]]''): 503,500,000; Spaceport F
+* Clearwater (''[[Instellarms]]''): 401,500,000; Starport C
+* Junk (''[[Ling-Standard Products]]''): 311,000,000; Spaceport F
+* Cleops (''[[SuSAG]]''): 230,000,000; (CSF)/Spaceport F
+* T'suen (GTL): 104,000,000; No port
+* Shek-Chu (Independent): 40,000,000
+* Shahtin (Independent): 33,000,000
+* Xuen Tu (Independent): 20,000,000
+
+=== World Government ===
+The seven companies that make up the [[Dashi Combine]] own the planet. Most have planetary specialties and interests beyond manufacturing.
+
+* ''[[Delgado Trading]]'' - owns 20% of the shares. Company colour - Blue. Runs the bureaucracy and ice mining and transport facilities.
+* ''[[Instellarms]]'' – owns 5% of the shares. Company colour - Purple. Responsible for planetary defense and overall coordination of security.
+* ''[[Ling-Standard Products]]'' - owns 8% of the shares. Company colour - Yellow. Oversees the credit facilities and offworld contracts.
+* ''[[Makhidkarun]]'' - owns 21% of the shares. Company colour - Red. Responsible for water distribution and power (mainly solar).
+* ''[[Naasirka]]'' - owns 28% of the shares. Company colour - Black. Runs the Algae harvesting, water and protein reclamation facilities and Euthanasia Centres.
+* ''[[Sternmetal Horizons]]'' - owns 11% of the shares. Company colour - Grey. Runs the tourist facilities and entertainment.
+* ''[[SuSAG]]'' – owns 7% of the shares. Company colour - Green. Responsible for education, on-planet transport and health.
+
+[[File:Delgado_Trading.jpg|75px]] [[File:Instellarms.jpg|150px]] [[File:Logo Ling Standard Products Basic.png|60 px]] [[File:Logo Makhidkarun.png|125 px]] [[File:Naasirka.png|85 px]] [[File:Sternmetal_Horizons.jpg|100px]] [[File:SuSAG.jpg|100px]]
+
+=== World Economy ===
+Its major export is cheap electrical and electronic equipment and components. Dashi is a major producer of a wide variety of low-cost, high-tech goods. Billions of people exist on the planet either in the massive glass built pyramid cities or in the deep caverns carved out beneath. Dashi is a favorite stop-over as its markets are full of cheap electronic goods and its culture is renowned for its extremely liberal social mores.
+
+In [[1117]] the planet, under the guidance of ''[[Instellarms]]'', geared up to produce electronic military equipment, primarily for Medurman forces.
+
+===World Culture===
+Three Dashian expressions sum up the local culture's attitude: 
+
+* ''Mai pen rai'': Generally translated as "never mind", a shrugging off of the unimportant and transient. It is the tendency to accept difficulties casually.
+* ''Pai-tio'': To stroll, to wander about with no particular aim, to see what's happening in the teeming chaos around you. 
+* ''Sanuk'': "Fun", but with a greater meaning of deep-rooted and irrepressible joy in life. Everything is automatically divided into a category of ''sanuk'' or ''mai sanuk'' (never fun).
+
+Dashians also display a great curiosity about subjects that would often be considered private by offworlders.
+
+=== Point of Interest: Citizen's Credit ===
+Almost from birth a Dashian child begins to accumulate credit. All clothes, toys etc. (except food which is supplied free to all children until their fifth birthday) are automatically added to the child's own credit rating. The cost associated with the actual birth is considered the parent's responsibility. Once a Megacorporation has been chosen as a source of Credit all other sources of credit close. Interest is chargeable at a universal rate of 10% per annum -- there is only one exception, children up to the age of 16 do not accumulate interest. Excessive or abusive use of credit will lead to credit withdrawal. If an individual dies leaving an outstanding credit balance, the other members of the extended family have a period of five years, or until a child reaches the age of 16 whichever is longer, to pay off the debt with the interest frozen. After that period interest rates are resumed.
+
+== References and Contributors  ==
+{{Intermediate}}
+{{Sources
+|S1= {{Ludography cite|name=Signal-GK 02|page=26-33|article=Port of Call: Dashi}} via {{HIWG}}
+|S2= {{Ludography cite|name=First Survey|page=83}}
+|S3= {{Ludography cite|name=Encyclopaedia Dagudashaag|page=83}}
+}}
+
+
+[[Category: Dashi Combine worlds]]
+[[Category: Delgado Trading worlds]]
+[[Category: First Imperium worlds]]
+[[Category: Humaniti worlds]]
+[[Category: Instellarms worlds]]
+[[Category: Ling-Standard Products worlds]]
+[[Category: Makhidkarun worlds]]
+[[Category: Medurma Pact worlds]]
+[[Category: Mining worlds]]
+[[Category: Naasirka worlds]]
+[[Category: Null-G Kabbadi]]
+[[Category: Rule of Man worlds]]
+[[Category: Second Imperium worlds]]
+[[Category: Sternmetal Horizons worlds]]
+[[Category: SuSAG worlds]]
+[[Category: Thunderball worlds]]
+[[Category: Ziru Sirka worlds]]
+{{LEN|T5 Second Survey worlds}}

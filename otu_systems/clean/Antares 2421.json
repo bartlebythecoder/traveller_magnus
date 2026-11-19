@@ -1,0 +1,314 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Antares",
+  "hex": "2421",
+  "sector_abbreviation": "Anta",
+  "subsector": "Antares",
+  "name": "Antares",
+  "sources": [
+    {
+      "page": "Antares (system)",
+      "revid": 1009750,
+      "timestamp": "2026-02-17T21:13:25Z"
+    }
+  ],
+  "star_templates": [],
+  "systems": [
+    {
+      "star": "Antares A",
+      "stars": [
+        {
+          "name": "Antares A",
+          "type": "M1.5 Ib"
+        }
+      ],
+      "labels": [
+        "Antares"
+      ],
+      "pages": [
+        "Antares (system)"
+      ],
+      "orbits": [
+        {
+          "orbit": 7,
+          "name": "Aspida",
+          "raw": "<small>'''''?'''??????-'''?'''''</small>",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "18",
+            "value": 18.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Antares (system)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "-",
+          "raw": "<small><small>''(Empty Orbit)''</small></small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "40",
+            "value": 40.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Antares (system)"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Dory",
+          "raw": "<small>'''''?'''??????-'''?'''''</small>",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "73",
+            "value": 73.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Antares (system)"
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Antares Belt",
+          "raw": "<small>A000ADA-D</small>",
+          "kind": "world",
+          "uwp": "A000ADA-D",
+          "distance": {
+            "raw": "213",
+            "value": 213.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Antares (system)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 12,
+          "name": "-",
+          "raw": "<small><small>''(Empty Orbit)''</small></small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "300",
+            "value": 300.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Antares (system)"
+          ]
+        },
+        {
+          "orbit": 13,
+          "name": "Antares B",
+          "name_raw": "'''Antares B'''",
+          "raw": "'''''B3 V'''''",
+          "kind": "star",
+          "type": "B3 V",
+          "distance": {
+            "raw": "540",
+            "value": 540.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ],
+          "sources": [
+            "Antares (system)"
+          ]
+        },
+        {
+          "orbit": 14,
+          "name": "-",
+          "raw": "<small><small>''(Empty Orbit)''</small></small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "1230",
+            "value": 1230.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Antares (system)"
+          ]
+        },
+        {
+          "orbit": 15,
+          "name": "The Dwarf",
+          "name_raw": "'''The Dwarf'''",
+          "raw": "'''''L7 V'''''",
+          "kind": "star",
+          "type": "L7 V",
+          "distance": {
+            "raw": "2000",
+            "value": 2000.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ],
+          "planets": [
+            {
+              "name": "Antares Prime",
+              "name_raw": "[[Antares (An 2421) (world)|Antares Prime]]",
+              "raw": "<small>A762ADA-D</small>",
+              "kind": "world",
+              "uwp": "A762ADA-D",
+              "distance": {
+                "raw": "0.012 <small>AU</small>",
+                "value": 0.012,
+                "unit": "AU"
+              }
+            }
+          ],
+          "sources": [
+            "Antares (system)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Antares (system)",
+      "label": "Antares",
+      "stars": [
+        {
+          "name": "Antares A",
+          "type": "M1.5 Ib"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 7,
+          "name": "Aspida",
+          "raw": "<small>'''''?'''??????-'''?'''''</small>",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "18",
+            "value": 18.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 9,
+          "name": "-",
+          "raw": "<small><small>''(Empty Orbit)''</small></small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "40",
+            "value": 40.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 10,
+          "name": "Dory",
+          "raw": "<small>'''''?'''??????-'''?'''''</small>",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "73",
+            "value": 73.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 11,
+          "name": "Antares Belt",
+          "raw": "<small>A000ADA-D</small>",
+          "kind": "world",
+          "uwp": "A000ADA-D",
+          "distance": {
+            "raw": "213",
+            "value": 213.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 12,
+          "name": "-",
+          "raw": "<small><small>''(Empty Orbit)''</small></small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "300",
+            "value": 300.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 13,
+          "name": "Antares B",
+          "name_raw": "'''Antares B'''",
+          "raw": "'''''B3 V'''''",
+          "kind": "star",
+          "type": "B3 V",
+          "distance": {
+            "raw": "540",
+            "value": 540.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ]
+        },
+        {
+          "orbit": 14,
+          "name": "-",
+          "raw": "<small><small>''(Empty Orbit)''</small></small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "1230",
+            "value": 1230.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 15,
+          "name": "The Dwarf",
+          "name_raw": "'''The Dwarf'''",
+          "raw": "'''''L7 V'''''",
+          "kind": "star",
+          "type": "L7 V",
+          "distance": {
+            "raw": "2000",
+            "value": 2000.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ],
+          "planets": [
+            {
+              "name": "Antares Prime",
+              "name_raw": "[[Antares (An 2421) (world)|Antares Prime]]",
+              "raw": "<small>A762ADA-D</small>",
+              "kind": "world",
+              "uwp": "A762ADA-D",
+              "distance": {
+                "raw": "0.012 <small>AU</small>",
+                "value": 0.012,
+                "unit": "AU"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Antares",
+    "UWP": "A000ADA-D",
+    "Stellar": "M1 Ib B3 V",
+    "PBG": "800",
+    "Bases": "NS",
+    "Remarks": "As Hi In Na Va Cs Pz Ht"
+  }
+}

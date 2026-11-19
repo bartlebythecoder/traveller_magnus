@@ -1,0 +1,209 @@
+[[File:Alien Moon 121c-0 Tiny.jpg|250 px|right]]
+{{StellarDataQuery
+ |name= {{World|Garoo|Spinward Marches|Darrian|0130}}
+ |era=Milieu 1116
+}}
+
+{{InfoboxSystem
+|name=Garoo
+|sector=Spinward Marches
+|subsector=Darrian
+|hex=0130
+|star='''Harzah'''  |type='''M1 V'''
+|P0=Hazmat    |Dist0=0.2|UWP0=Y250000-0
+|P1=Spangle   |Dist1=0.4|UWP1=H30211A-A
+|P2=Rounder   |Dist2=0.7|UWP2=F000400-B
+|P3=Garoo     |Dist3=1.0|UWP3=A2008CB-B
+|P4=Heap      |Dist4=1.4|UWP4=Y331000-0
+|P5=Graveyard |Dist5=1.7|UWP5=GS0032A-B
+|P6='''Leocen'''    |Dist6=100|UWP6='''M5 V'''
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+{{SpMain}}
+* It is on the [[Sisters' Reach]].
+
+=== Stellar Data ===
+'''Garoo''' is a binary star system.
+* Both are red main sequence stars, named ''Harzah'' and ''Leocen'' respectively.
+
+{{BinaryStarSystem
+|name            = Garoo
+|primary         = M1 V
+|secondary       = M5 V
+|PrimaryName     = Harzah
+|PrimaryNotes    = 
+|SecondaryName   = Leocen
+|SecondaryNotes  = 
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]], orbiting the primary star.
+* x7 secondary [[world|rocky worlds]]. Four orbit the primary star, three orbit the secondary star. The primary star's worlds include:
+** ''Hazmat'', currently used as a dumping ground for the system's garbage.
+** ''Spangle'', a special containment facility constructed to support the local world military. Several now disused military labs and test ranges dot the surface of the world. It has been rumored to also be a safehouse for the local intel and security services for rather unsavory activities.
+** ''Graveyard'', so named because of its strange attraction to misjumped ships. A large number of vessels that have misjumped have crashed here in the system's long history, and a community of scavengers used to live on the world to benefit from this unusual phenomenon. A research station has been established in conjunction with the Regency Navy to study this mystery, and a naval rescue station has been set up to intercept and rescue other victims before they slam into the world.
+* x1 [[planetoid belt]] named ''Rounder'', orbiting the primary star.
+** It is a rich source of minerals that are in short supply on Garoo, as well as dangerous low-G manufacturing that the authorities want to keep contained away from the world environment.
+
+=== Mainworld Data ===
+'''Garoo''' orbits within the [[Outer World|outer system]].
+* It receives very low levels of [[Electromagnetic Spectrum|stellar energy]].
+
+[[File:Chart Orbit Outer Region Simple.png|600 px]]
+
+==== Extended Mainworld UWP Data ====
+: [[Gravity|Gravity: 0.256 G]]
+: Rotation Period (local day): [[Hour|21.3 standard hours]]
+: Orbital Period (local year): [[Year|8.2 standard years]] ([[Day|2995.5 standard days]])
+: [[Celsius|Mean Surface Temperature: -146°C]]
+: Trade Goods: Ores, Radioactives, Crystals, Metals, Non-Metals, Parts, Consumables, Weapons, Recordings, Software.
+: Psychology: Conservative/Advancing, Passive/Conciliatory, Harmonious/Friendly 
+: Legal: B-99BAB 
+: Tech: BB-BDDDD-CCCD-AB-E
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Garoo|Size= 2}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Garoo|Atmosphere= 0}}
+* [[Vacuum World|Vacuum worlds]] have no [[climate]], but experience extreme differences in [[Celsius|temperature]] between direct starlight and shade.
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Garoo|Hydrosphere= 0}}
+
+==== Mainworld Geography and Topography ====
+Garoo is an airless world located near the end of the [[Spinward Main]], at the interface with [[Foreven Sector|Foreven]]. The world is unusual in having a molten core, and significant amounts of water in subsurface aquifers created by ancient volcanism. While Garoo lacks tectonic plates, the world possesses massive shield volcanoes of the same type as Olympus Mons on Mars. These volcanoes tower some 30-40 km in height, and have a base nearly ten times that in diameter. Heavy metal ores are mixed in with ancient lava flows, especially large amounts of manganese, chromium and platinum group metals. While not as active as in the past, these volcanoes still spew small amounts of gas and steam, and hot springs can be found in the ancient calderas of most of them.
+
+Garoo is an outer system world, and is a frigid -146&deg; celsius. The world surface is covered in a mixture of frozen rock, ice, and volcanic pumice and gas. Near geothermal heat sources, the ground texture changes markedly, creating huge lens-shaped depressions created by the melting of the permafrost under the surface rock. These depressions are quite large, and many of the world's settlements are built within these huge ice lenses, constructed into the sides with a containment dome constructed overhead.
+
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+* Locally, detailed maps may be available.
+
+[[File:Blank World Map Gray.png|500 px]] <br> (''Blank map, vacuum world''.)
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Garoo''' was settled by [[Solomani]] from the [[Itzin Fleet]] sometime around [[-1500s|-1510]]: these were part of the same wave of explorers that contacted the [[Daryen]]s and utilized [[Sacnoth (world)|Sacnoth]] as a base. The colonists on Garoo built sturdy domed cities, and tapped the core water for life support and power purposes. Because of the ample sources of water and geothermal heat, the Garooians were little disposed towards maintaining their original technological level. Being isolated on a world that provided them with everything they needed allowed them to scrap their colony ship, and subsist at a tech level of {{TL|7}}-{{TL|8}}. 
+
+Garoo was contacted by [[Darrian]] exploration ships around [[-1370]], but expressed no interest in joining the growing [[Darrian Confederation|Confederation]]. This did not deter the Darrians from trying various strategies to coerce or persuade them. Repeated meddling eventually escalated into several violent confrontations and Darrian interdiction of the system. The Garooians have never forgotten these aggressions, and bitter enmity with the Darrians has existed ever since. The world was slightly affected by the [[Maghiz]] event, though it was more beneficial than harmful because it ended the Darrian blockade of the system. 
+
+Garoo received [[Zhodani]] contact in [[-334]], was recontacted by the Darrians in [[-208]], and was contacted by the [[Third Imperium]] in [[255]]. This steady accumulation of expansionistic powers unsettled them, especially the growing linkage between the Imperials and the Darrians. The world government pursued a policy of neutrality, playing various factions against each other through adroit diplomatic maneuvering. A trade fleet was acquired, and trade and diplomatic ties were established with a number of polities in neighboring [[Foreven Sector|Foreven]] and [[Beyond Sector|Beyond]]. 
+
+Garoo was aided by the enmity between the Zhodani and the expanding Third Imperium. They played the two sides off against one another, milking whichever ally they had for the moment for their own gain, and all the while remaining quietly neutral in the conflict. After the [[Third Frontier War]], the Garooians mostly sided with the Zhodani, intensifying their conflict with the Darrians. 
+
+Despite the occasional gust of war, Garoo managed to continue building up its economic and military power. As the Darrians began to return, with Imperial aid, to the level of their pre-Maghiz society, Garoo's nominally peaceful government percieved the loss of their independence. They unified their government under a military council, and began to act proactively against the Confederacy. In the last few years before the Imperial Civil War, the Garoo military seized neighboring [[886-945 (world)|886-945]], which had one of the few gas giants in rimward Daryen subsector, and resubjugated [[Uniqua (world)| Uniqua]], a world colonised and inhabited by Garooians. With these conquests, and Zhodani blessing, it seemed that they were intent upon creating their own interstellar polity aimed at challenging the [[Darrian]]s and the {{Imperium}} for control of the Daryen/Five Sisters/Reidain/Urnian interface. 
+
+=== [[Starport|World Starport]] (St) ===
+{{Starport|name= Garoo|Starport= A}}
+
+=== [[Population|World Population]] (P) ===
+{{WorldPop|name= Garoo|multiplier= 2|Population= 8}}
+* The population almost entirely consists of [[Garoo]].
+
+==== Urbanization ====
+Most of Garoo's settlements are found close to water and geothermal sources. Most of the older cities are domed lens cities, while the newer ones are underground arcologies. Four volcanic clusters dominate the world, and near these are the four main clusters of settlements. 
+These clusters include the:
+# '''Salka Cluster''': which includes the capitol and main downport.
+# '''Corben Hotdome''': Most volcanically active region on the planet, and the most lightly populated.
+# '''Ataturk Massif''': Richest mineral resources, and the majority of the world's manufacturing are located here, including several large munitions works.
+# '''Gyduran Geysers''': Large underground geothermal aquifer. The name is an exaggeration, and simply refers to the very high steam and water pressure that is found within the aquifer. Famous throughout the Spin Extents for its hot mineral baths and tourist spas. Also famous for its unusual but delicious beers made from certain mineral-laden waters.
+
+==== Linguistic Topography ====
+The most commonly heard [[language]]s are:
+
+* Native [[Garoo]] languages.
+* [[Anglic|Riftian Anglic]]: a dialect of [[Anglic]], one of the principal languages of the {{Imperium}}.
+
+=== [[Technology Level|World Technology Level]] (T) ===
+{{WorldTech|name= Garoo|WorldTech= A}}
+
+=== [[Government|World Government]] (G) ===
+{{WorldGov|name= Garoo|Government= C}}
+
+=== [[Law Level|World Law]] (L) ===
+{{WorldLaw|name= Garoo|Law= B}}
+
+=== Cultural Data ===
+Garooians are descended from straight [[Solomani]] stock. As such they profess the same love of political freedom as their SolCon cousins. Their adopted world’s harsh environment forced them to adapt their culture in many significant ways, however. As a group,individualism is tolerated to a point. Children are indulged as regards their education. Free speech and conscience are encouraged. But Garooians recognize that too much of these freedoms are counterproductive to their survival. While all of the usual Solomani institutions are in evidence, a strong backbone of tradition exist throughout the entire fabric of their society, ensuring communal cooperation. 
+
+Much of this cooperativeness is a byproduct of their past struggles with the Darrians. Squabbling between colonies nearly resulted in the capture or surrender to their enemies. Garooians love to argue and contest each other in sports and politics. But on issues of survival paramount to the entire world, they move with a ruthless unity that would shock even [[Vilani]]. 
+
+Wealth and luxury are the pinnacle of local society. While consensus exists that the community comes first at a certain point, local society isn't monolithic, and gaps of wealth and power exist to differentiate the local society into an exacting pecking order of money and power. This isn't selfish wealth, as all local companies and enterprises are owned in collective by the world government. For a person to succeed to a lofty position requires single-minded devotion and willingness to sacrifice for the community, on the battlefield of commercial success. Of course those most successful in their service are handsomely rewarded by the planetary government. 
+
+The ultimate sign of success is to qualify for Garoo's Register, sort of a planetary Who's Who. Those that qualify are afforded more than the usual cramped quarters available to the vast majority of the locals; they receive huge airy vaults filled with living plants, running water, and freestanding buildings. These individuals are also virtually guaranteed political legitimacy, and a seat upon one of the various political councils, or a managerial position in a major bureaucracy. Of course, these luxuries and privileges are provided in kind, for their continuing contributions. People who slack off are demoted from the Register, and are sent back into the masses. Needless to say, it creates no small amount of intrigue among the "upper" classes. 
+
+Interestingly, while most Garooians profess a belief in the individual freedom of their children, arrange for their children's marriages years in advance. Mostly this is due to a desire for upper mobility, with families searching for the best possible candidates from the best potential families and backgrounds to marry their progeny.
+
+=== Trade Data ===
+* [[Importance Extension|Importance]]: 2 (ordinary)
+
+=== World Economy ===
+* [[Resource]]s:                       B (abundant)
+* [[Labor]]:                           7 (tens of millions)
+* [[Infrastructure]]:                  B (very extensive)
+* [[Efficiency]]:                      +4 (advanced)
+
+=== World Culture ===
+* [[Homogeneity|Heterogenity]]:        A (discordant)
+* [[Acceptance]]:                      A (very friendly)
+* [[Strangeness]]:                     7 (confusing)
+* [[Symbol]]s:                         C (very abstract)
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+
+* [[-399]]: a number of worlds in the region are settled by [[Terran]]s who fled a civil war in the [[Old Earth Union]], in the [[Solomani Rim Sector|Solomani Rim]], and made their escape though [[Aslan Space]]. Most notably these refugees founded the [[Sword Worlds]], but settlements were established on a number of other worlds, including Garoo.
+* [[-200]]: contact between the [[Old Earth Union]] and the [[Terran]] settlements in the {{Sm}} is cut due to shifting [[Aslan]] politics.
+* [[-186]]: the [[Sacnoth Dominate]], the first [[Sword Worlds]]' government forms.
+* [[0|The Year 0]]: the [[Third Imperium]] is founded.
+* [[60]]: development of the sector begins in earnest with the {{Imperial}} settlement of [[Mora (world)|Mora]]. The {{Imperial}} frontier gradually expands into the sector.
+* [[73]]: {{Imperial}} traders exploring to [[spinward]] establish contact with the [[Sword Worlds]].
+* [[75]]: [[Regina (world)|Regina]] is settled. A bubble of {{Imperial}} territory grows around it.
+* [[300]]: [[Pretoria (world)|Pretoria]], in [[Deneb Sector]], is settled by the {{Imperium}} and eventually becomes the administrative center for the [[Aramis Trace]] in the [[Spinward Marches]].
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[400s|late 400s]]: the [[Zhodani]] begin settlement within the sector.
+* [[589]]-[[604]]: [[First Frontier War]].
+* [[604]]-[[622]]: the [[Civil War]].
+* [[615]]-[[620]]: [[Second Frontier War]].
+* [[624]]: the [[Express Boat Network]] is established.
+* [[800]]-[[820]]: the [[Psionics Suppressions]].
+* [[979]]-[[986]]: [[Third Frontier War]].
+** [[986]]: [[Battle of Porozlo]].
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] charts the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+* [[1082]]-[[1084]]: [[Fourth Frontier War]], also known as the ''False War''.
+** [[1084]]: [[Battle of Two Suns]].
+* [[1107]]-[[1110]]: [[Fifth Frontier War]].
+
+=== Later Historical Eras ===
+==== The Collapse ====
+Then came the [[Collapse]]. The people of Uniqua managed to stage a revolt with massive Darrian aid, leading to the partial ouster of the Garoo occupation force. The Uniqua conflict led to a protracted military conflict with the Confederacy at [[Kardin (world)|Kardin]] and [[Bularia (world)|Bularia]], which ended only when the [[Regency]] threatened to bury both sides under an avalanche of naval firepower. Recognizing the world's insecurity and humiliation after the implosion of their republic, the Regency offered to make Garoo a protectorate, placing them under the [[RQS]] security blanket and giving its exports preferential clearance. Garoo reluctantly accepted becoming a client state by a closely contested referendum in [[1137]]. A Regency naval base was built insystem, and gave the world a much needed kickstart for its economy. The world remains on high alert against further Darrian aggression on Uniqua and in other parts of Daryen and [[Reidain Subsector]]s, though relations with the Regency have warmed up since they took over.
+
+=== Political Data ===
+Garoo has traditionally been a representative democracy, with representation based within its upper classes. The continuing standoff with the Darrians has preserved the long standing war council, which really isn't much of departure from the old system when seen up close. The Council, otherwise known as the War Register, consists of three dozen of the wealthiest and most powerful people on the planet. All of these people have made considerable contributions through the public cartels, the military or in the intelligence services, and have an absolute say over the planet and their fellow citizens based upon the War Charter of [[1119]] that enshrined and legitimized the current Register. 
+
+One lingering bad effect has been the steady loss of democratic tradition. Previously, people acceded to the Register, and then were chosen again for political office, based upon election by fellow citizens within "wards" divided amoungst the various communities. Nowadays, election is by consensus among the other members of the Register, which is creating a social rift between the classes that continues to widen. Many of the world’s traditionalists suspect that the War Register is simply using the supposed conflict with the Darrians and the conflict on Uniqua to institutionalize their position without competition, and eliminate democratic rule all together.
+
+== References & Contributors (Sources) ==
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=8-9}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=The Regency Sourcebook|page=44}} (UWP only)
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=34-35,46}}
+ | {{Ludography cite|name=The Spinward States|page=108}} (UWP only)
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=80-84,86,88}} (UWP only)
+ | [[Peter Gray]] - [https://web.archive.org/web/20110103025557/http://www.downport.com/bard/bard/opal/opal9526.html BARD-OPAL 9526]
+}}
+
+[[Category: Anomaly worlds]]
+[[Category: GT]]
+[[Category: Izmir Corporation worlds]]
+[[Category: Sisters' Reach worlds]]
+{{LE|Binary Star System|T5 Second Survey worlds}}
+{{LEN|BARD}}

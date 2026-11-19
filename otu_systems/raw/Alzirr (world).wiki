@@ -1,0 +1,127 @@
+{{UWP 
+|name= {{World|Alzirr|Aldebaran|Firdausi|2504}}
+|uc    = E410455-9 
+|popc  = 2
+|zonec = green
+ |u1= 
+|alg     = NaHu
+|class   = Ni
+|trade   = ni
+|climate = TBD
+|gravity = TBD
+|nblty   = -
+|bases   = -
+|primary = F5 IV 
+|belts   = 0
+|GGcount = 1
+}}
+{{World summary |name= Alzirr|trade= Ni}}
+{{World summary NaHu|sector= Aldebaran|subsector= Firdausi}}
+{{World summary comment|trade= Lk}}
+* It is a member of the [[Palermo Cluster]]. 
+
+{{InfoboxSystem
+ |name= Alzirr |subsector= Firdausi
+ |sector= Aldebaran |hex= 2504
+ |star= Primary |type= F5 IV
+ |P1=     Sudig                            | Dist1= ?         | UWP1= Y300000-0
+ |P2=     Wexteir                          | Dist2= ?         | UWP2= Y4A3000-0
+ |P3=     Grohdag                          | Dist3= ?         | UWP3= Y101000-0
+ |P4=     Azirr                            | Dist4= ?         | UWP4= E410455-9
+ |P5=     Trestranne                       | Dist5= ?         | UWP5= Small GG
+}}
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Alzirr''' has a solitary primary star.
+* It is a turbulent white subgiant named ''[[Alzir (star)|Alzir]]''. It is also known as ''[[Alzir (star)|Xi Geminorum]]''
+
+{{MonostellarSystem
+|name           = Alzirr
+|primary        = F5 IV  
+|PrimaryName    = [[Alzir (star)|Alzirr]]
+|PrimaryNotes   = [[Flare Star]].
+}}
+
+The Alzirr System orbits a white subgiant in the late stages of expansion into a full giant star. Expansion is accelerating but the time frame is still in the millions of years. However, the primary is prone to flares and matter ejections which disrupted an otherwise promising terraforming project.
+
+=== System Data ===
+
+=== Mainworld Data ===
+No information yet available.
+
+==== Mainworld Geography & Topography ====
+Azirr is barren and almost airless, and has few easily accessible deposits of minerals. 
+
+==== Mainworld Map ====
+No information yet available.
+
+=== Native Lifeforms ===
+No native life.
+
+== History & Background (Dossier) ==
+Around 60% of personnel on Alzirr are "contract-citizens". They are given citizenship for a few years to help reinforce a claim to the system as a "territorial anchor" but to most of them Alzirr is more of a workplace than a home. 
+
+=== World Starport ===
+{{Starport|name= Alzirr|Starport=E}}
+
+=== World Technology Level ===
+{{WorldTech|name= Alzirr|WorldTech=9}}
+
+=== World Government ===
+{{WorldGov|name= Alzirr|Government=5}}  
+
+==== World Law Level ====
+No information yet available. 
+
+==== World Military ====
+No information yet available. 
+
+=== World Economy ===
+No information yet available. 
+
+==== Trade Data ====
+No information yet available. 
+
+=== World Demographics ===
+No information yet available. 
+
+=== World Culture ===
+No information yet available. 
+
+==== Urbanization ====
+No information yet available. 
+
+=== Historical Data ===
+No information yet available. 
+
+==== World Timeline ====
+No information yet available.
+
+==== UWP Listing ====
+No information yet available.
+
+== References ==
+{{Intermediate}}
+{{Detail}}
+{{Sources
+| {{CT}} [[Solomani (Alien Module)|Alien Module 6: Solomani]] (named but no further data)
+| {{MT}} [[Alien - Solomani & Aslan|Solomani & Aslan]] (dot map provided)
+| Periodical: [[Imperial Lines 2]] by Author: [[Steven Eric Schwartz]]
+| [[Mongoose Traveller: Solomani]]
+| {{Ludography cite|name=The Order of Prometheus|page=18}}
+| [http://111george.com/core/astrogat/jG.htm CORE Data Site]
+| [http://home.earthlink.net/~ngc5139/FDA/aldebarn.html Federation Development Agency]
+| [http://zho.berka.com/data/CLASSIC/sector.pl?sector=ALDEBARA Zho Berka's Maps]
+| Author & Contributor: [[User:Garnfellow|Garnfellow]] 
+| Author & Contributor: [[Leroy W.L. Guatney]] of the Federation Development Agency (FDA)
+}}
+
+[[Category: Humaniti worlds]]
+[[Category: Palermo Cluster worlds]]
+[[Category: Rule of Man worlds]]
+[[Category: Second Imperium worlds]]
+[[Category: Solomani worlds]]
+[[Category: Solomani Sphere worlds]]
+[[Category: Terran Confederation worlds]]
+[[Category: Terran Mercantile Community worlds]]
+{{LE|}}

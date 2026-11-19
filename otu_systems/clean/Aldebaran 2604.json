@@ -1,0 +1,569 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Aldebaran",
+  "hex": "2604",
+  "sector_abbreviation": "Alde",
+  "subsector": "Firdausi",
+  "name": "Merope",
+  "sources": [
+    {
+      "page": "Merope (world)",
+      "revid": 934525,
+      "timestamp": "2025-06-01T10:34:46Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Merope (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Sisyphus",
+          "type": "G3 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Sisyphus",
+      "stars": [
+        {
+          "name": "Sisyphus",
+          "type": "G3 V"
+        }
+      ],
+      "labels": [
+        "Merope"
+      ],
+      "pages": [
+        "Merope (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Amceden",
+          "raw": "Y7CA000-0",
+          "kind": "world",
+          "uwp": "Y7CA000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Merope (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Merope",
+          "raw": "D7647A7-6",
+          "kind": "world",
+          "uwp": "D7647A7-6",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Merope (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 3,
+          "name": "Cor. Belt",
+          "raw": "F000575-A",
+          "kind": "world",
+          "uwp": "F000575-A",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Merope (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Braci",
+          "raw": "G111467-A",
+          "kind": "world",
+          "uwp": "G111467-A",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Merope (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Comab's W.",
+          "raw": "G6AA514-A",
+          "kind": "world",
+          "uwp": "G6AA514-A",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Merope (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Trab",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Merope (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Strufacc",
+          "raw": "G5A3467-A",
+          "kind": "world",
+          "uwp": "G5A3467-A",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Merope (world)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Murid",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Merope (world)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Theban Belt",
+          "raw": "G000418-A",
+          "kind": "world",
+          "uwp": "G000418-A",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Merope (world)"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Intueste",
+          "raw": "G411367-A",
+          "kind": "world",
+          "uwp": "G411367-A",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Merope (world)"
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Ceimti",
+          "raw": "G610468-A",
+          "kind": "world",
+          "uwp": "G610468-A",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Merope (world)"
+          ]
+        },
+        {
+          "orbit": 12,
+          "name": "Intuebi",
+          "raw": "HAA1318-A",
+          "kind": "world",
+          "uwp": "HAA1318-A",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Merope (world)"
+          ]
+        },
+        {
+          "orbit": 13,
+          "name": "Entramme",
+          "raw": "Y9A1000-0",
+          "kind": "world",
+          "uwp": "Y9A1000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Merope (world)"
+          ]
+        },
+        {
+          "orbit": 14,
+          "name": "Inarrio",
+          "raw": "Y400000-0",
+          "kind": "world",
+          "uwp": "Y400000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Merope (world)"
+          ]
+        },
+        {
+          "orbit": 15,
+          "name": "Spatahae",
+          "raw": "GAA3475-A",
+          "kind": "world",
+          "uwp": "GAA3475-A",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Merope (world)"
+          ]
+        },
+        {
+          "orbit": 16,
+          "name": "Fortise",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Merope (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Merope (world)",
+      "label": "Merope",
+      "stars": [
+        {
+          "name": "Sisyphus",
+          "type": "G3 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Amceden",
+          "raw": "Y7CA000-0",
+          "kind": "world",
+          "uwp": "Y7CA000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Merope",
+          "raw": "D7647A7-6",
+          "kind": "world",
+          "uwp": "D7647A7-6",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Cor. Belt",
+          "raw": "F000575-A",
+          "kind": "world",
+          "uwp": "F000575-A",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Braci",
+          "raw": "G111467-A",
+          "kind": "world",
+          "uwp": "G111467-A",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Comab's W.",
+          "raw": "G6AA514-A",
+          "kind": "world",
+          "uwp": "G6AA514-A",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Trab",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Strufacc",
+          "raw": "G5A3467-A",
+          "kind": "world",
+          "uwp": "G5A3467-A",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Murid",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Theban Belt",
+          "raw": "G000418-A",
+          "kind": "world",
+          "uwp": "G000418-A",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Intueste",
+          "raw": "G411367-A",
+          "kind": "world",
+          "uwp": "G411367-A",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Ceimti",
+          "raw": "G610468-A",
+          "kind": "world",
+          "uwp": "G610468-A",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 12,
+          "name": "Intuebi",
+          "raw": "HAA1318-A",
+          "kind": "world",
+          "uwp": "HAA1318-A",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 13,
+          "name": "Entramme",
+          "raw": "Y9A1000-0",
+          "kind": "world",
+          "uwp": "Y9A1000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 14,
+          "name": "Inarrio",
+          "raw": "Y400000-0",
+          "kind": "world",
+          "uwp": "Y400000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 15,
+          "name": "Spatahae",
+          "raw": "GAA3475-A",
+          "kind": "world",
+          "uwp": "GAA3475-A",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 16,
+          "name": "Fortise",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Merope",
+    "UWP": "D7647A7-6",
+    "Stellar": "G3 V",
+    "PBG": "223",
+    "Bases": "",
+    "Remarks": "Ag Ri Dolp0"
+  }
+}

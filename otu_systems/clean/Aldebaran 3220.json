@@ -1,0 +1,1038 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Aldebaran",
+  "hex": "3220",
+  "sector_abbreviation": "Alde",
+  "subsector": "Kursa",
+  "name": "Acton",
+  "sources": [
+    {
+      "page": "Acton (system)",
+      "revid": 1019842,
+      "timestamp": "2026-03-11T20:22:23Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Acton (system)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Endinho",
+          "type": "M1 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Endinho",
+      "stars": [
+        {
+          "name": "Endinho",
+          "type": "M1 V"
+        }
+      ],
+      "labels": [
+        "Acton"
+      ],
+      "pages": [
+        "Acton (system)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Dan",
+          "raw": "YCB0000-0",
+          "kind": "world",
+          "uwp": "YCB0000-0",
+          "distance": {
+            "raw": "0.279",
+            "value": 0.279,
+            "unit": "AU"
+          },
+          "sources": [
+            "Acton (system)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Acton",
+          "raw": "A631226-A",
+          "kind": "world",
+          "uwp": "A631226-A",
+          "distance": {
+            "raw": "0.514",
+            "value": 0.514,
+            "unit": "AU"
+          },
+          "sources": [
+            "Acton (system)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 3,
+          "name": "Piojun",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "0.846",
+            "value": 0.846,
+            "unit": "AU"
+          },
+          "sources": [
+            "Acton (system)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Natregun",
+          "raw": "Y6C5000-0",
+          "kind": "world",
+          "uwp": "Y6C5000-0",
+          "distance": {
+            "raw": "1.25",
+            "value": 1.25,
+            "unit": "AU"
+          },
+          "sources": [
+            "Acton (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Acton (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Lotu",
+          "raw": "Y6A5000-0",
+          "kind": "world",
+          "uwp": "Y6A5000-0",
+          "distance": {
+            "raw": "2.03",
+            "value": 2.03,
+            "unit": "AU"
+          },
+          "sources": [
+            "Acton (system)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Elye Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "2.54",
+            "value": 2.54,
+            "unit": "AU"
+          },
+          "sources": [
+            "Acton (system)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Trepen",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "4.54",
+            "value": 4.54,
+            "unit": "AU"
+          },
+          "sources": [
+            "Acton (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y420000-0",
+              "kind": "world",
+              "uwp": "Y420000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Acton (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Rojunyen",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "6.74",
+            "value": 6.74,
+            "unit": "AU"
+          },
+          "sources": [
+            "Acton (system)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Stasiki",
+          "raw": "YCFA000-0",
+          "kind": "world",
+          "uwp": "YCFA000-0",
+          "distance": {
+            "raw": "12.6",
+            "value": 12.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Acton (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Acton (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Acton (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Acton (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Irke Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "37.5",
+            "value": 37.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Acton (system)"
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Nurtec",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "51.2",
+            "value": 51.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Acton (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Acton (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y9AA000-0",
+              "kind": "world",
+              "uwp": "Y9AA000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Acton (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y667000-0",
+              "kind": "world",
+              "uwp": "Y667000-0",
+              "distance": {
+                "raw": "4 Diam",
+                "value": 4.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Acton (system)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Moon",
+              "raw": "Y320000-0",
+              "kind": "world",
+              "uwp": "Y320000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Acton (system)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Moon",
+              "raw": "YDB9000-0",
+              "kind": "world",
+              "uwp": "YDB9000-0",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Acton (system)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "12 Diam",
+                "value": 12.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Acton (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 12,
+          "name": "Fillon",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "95.5",
+            "value": 95.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Acton (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Acton (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Acton (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "4 Diam",
+                "value": 4.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Acton (system)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Acton (system)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Acton (system)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Moon",
+              "raw": "Y310000-0",
+              "kind": "world",
+              "uwp": "Y310000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Acton (system)"
+              ]
+            },
+            {
+              "index": 7,
+              "name": "Moon",
+              "raw": "Y432000-0",
+              "kind": "world",
+              "uwp": "Y432000-0",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Acton (system)"
+              ]
+            },
+            {
+              "index": 8,
+              "name": "Moon",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "12 Diam",
+                "value": 12.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Acton (system)"
+              ]
+            },
+            {
+              "index": 9,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "13 Diam",
+                "value": 13.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Acton (system)"
+              ]
+            },
+            {
+              "index": 10,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Acton (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 13,
+          "name": "Zan",
+          "raw": "Y4A6000-0",
+          "kind": "world",
+          "uwp": "Y4A6000-0",
+          "distance": {
+            "raw": "141.1",
+            "value": 141.1,
+            "unit": "AU"
+          },
+          "sources": [
+            "Acton (system)"
+          ]
+        },
+        {
+          "orbit": 14,
+          "name": "Emman",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "153.6",
+            "value": 153.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Acton (system)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Acton (system)",
+      "label": "Acton",
+      "stars": [
+        {
+          "name": "Endinho",
+          "type": "M1 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Dan",
+          "raw": "YCB0000-0",
+          "kind": "world",
+          "uwp": "YCB0000-0",
+          "distance": {
+            "raw": "0.279",
+            "value": 0.279,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Acton",
+          "raw": "A631226-A",
+          "kind": "world",
+          "uwp": "A631226-A",
+          "distance": {
+            "raw": "0.514",
+            "value": 0.514,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Piojun",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "0.846",
+            "value": 0.846,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Natregun",
+          "raw": "Y6C5000-0",
+          "kind": "world",
+          "uwp": "Y6C5000-0",
+          "distance": {
+            "raw": "1.25",
+            "value": 1.25,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Lotu",
+          "raw": "Y6A5000-0",
+          "kind": "world",
+          "uwp": "Y6A5000-0",
+          "distance": {
+            "raw": "2.03",
+            "value": 2.03,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Elye Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "2.54",
+            "value": 2.54,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Trepen",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "4.54",
+            "value": 4.54,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y420000-0",
+              "kind": "world",
+              "uwp": "Y420000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Rojunyen",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "6.74",
+            "value": 6.74,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 9,
+          "name": "Stasiki",
+          "raw": "YCFA000-0",
+          "kind": "world",
+          "uwp": "YCFA000-0",
+          "distance": {
+            "raw": "12.6",
+            "value": 12.6,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Irke Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "37.5",
+            "value": 37.5,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 11,
+          "name": "Nurtec",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "51.2",
+            "value": 51.2,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y9AA000-0",
+              "kind": "world",
+              "uwp": "Y9AA000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y667000-0",
+              "kind": "world",
+              "uwp": "Y667000-0",
+              "distance": {
+                "raw": "4 Diam",
+                "value": 4.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Moon",
+              "raw": "Y320000-0",
+              "kind": "world",
+              "uwp": "Y320000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 5,
+              "name": "Moon",
+              "raw": "YDB9000-0",
+              "kind": "world",
+              "uwp": "YDB9000-0",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 6,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "12 Diam",
+                "value": 12.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 12,
+          "name": "Fillon",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "95.5",
+            "value": 95.5,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "4 Diam",
+                "value": 4.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 5,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 6,
+              "name": "Moon",
+              "raw": "Y310000-0",
+              "kind": "world",
+              "uwp": "Y310000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 7,
+              "name": "Moon",
+              "raw": "Y432000-0",
+              "kind": "world",
+              "uwp": "Y432000-0",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 8,
+              "name": "Moon",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "12 Diam",
+                "value": 12.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 9,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "13 Diam",
+                "value": 13.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 10,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 13,
+          "name": "Zan",
+          "raw": "Y4A6000-0",
+          "kind": "world",
+          "uwp": "Y4A6000-0",
+          "distance": {
+            "raw": "141.1",
+            "value": 141.1,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 14,
+          "name": "Emman",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "153.6",
+            "value": 153.6,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Acton",
+    "UWP": "A631226-A",
+    "Stellar": "M1 V",
+    "PBG": "123",
+    "Bases": "KM",
+    "Remarks": "Lo Po Tz"
+  }
+}

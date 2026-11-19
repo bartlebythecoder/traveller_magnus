@@ -1,0 +1,276 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "0130",
+  "sector_abbreviation": "Spin",
+  "subsector": "Darrian",
+  "name": "Garoo",
+  "sources": [
+    {
+      "page": "Garoo (world)",
+      "revid": 964544,
+      "timestamp": "2025-08-07T13:00:41Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Garoo (world)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Harzah",
+          "type": "M1 V",
+          "notes": null
+        },
+        {
+          "role": "Secondary",
+          "name": "Leocen",
+          "type": "M5 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Harzah",
+      "stars": [
+        {
+          "name": "Harzah",
+          "type": "M1 V"
+        }
+      ],
+      "labels": [
+        "Garoo"
+      ],
+      "pages": [
+        "Garoo (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Hazmat",
+          "raw": "Y250000-0",
+          "kind": "world",
+          "uwp": "Y250000-0",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Garoo (world)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Spangle",
+          "raw": "H30211A-A",
+          "kind": "world",
+          "uwp": "H30211A-A",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Garoo (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Rounder",
+          "raw": "F000400-B",
+          "kind": "world",
+          "uwp": "F000400-B",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Garoo (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Garoo",
+          "raw": "A2008CB-B",
+          "kind": "world",
+          "uwp": "A2008CB-B",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Garoo (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 4,
+          "name": "Heap",
+          "raw": "Y331000-0",
+          "kind": "world",
+          "uwp": "Y331000-0",
+          "distance": {
+            "raw": "1.4",
+            "value": 1.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Garoo (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Graveyard",
+          "raw": "GS0032A-B",
+          "kind": "world",
+          "uwp": "GS0032A-B",
+          "distance": {
+            "raw": "1.7",
+            "value": 1.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Garoo (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Leocen",
+          "name_raw": "'''Leocen'''",
+          "raw": "'''M5 V'''",
+          "kind": "star",
+          "type": "M5 V",
+          "distance": {
+            "raw": "100",
+            "value": 100.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ],
+          "sources": [
+            "Garoo (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Garoo (world)",
+      "label": "Garoo",
+      "stars": [
+        {
+          "name": "Harzah",
+          "type": "M1 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Hazmat",
+          "raw": "Y250000-0",
+          "kind": "world",
+          "uwp": "Y250000-0",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Spangle",
+          "raw": "H30211A-A",
+          "kind": "world",
+          "uwp": "H30211A-A",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Rounder",
+          "raw": "F000400-B",
+          "kind": "world",
+          "uwp": "F000400-B",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Garoo",
+          "raw": "A2008CB-B",
+          "kind": "world",
+          "uwp": "A2008CB-B",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Heap",
+          "raw": "Y331000-0",
+          "kind": "world",
+          "uwp": "Y331000-0",
+          "distance": {
+            "raw": "1.4",
+            "value": 1.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Graveyard",
+          "raw": "GS0032A-B",
+          "kind": "world",
+          "uwp": "GS0032A-B",
+          "distance": {
+            "raw": "1.7",
+            "value": 1.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Leocen",
+          "name_raw": "'''Leocen'''",
+          "raw": "'''M5 V'''",
+          "kind": "star",
+          "type": "M5 V",
+          "distance": {
+            "raw": "100",
+            "value": 100.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Garoo",
+    "UWP": "A2008CB-A",
+    "Stellar": "M1 V M5 V",
+    "PBG": "210",
+    "Bases": "",
+    "Remarks": "Na Va Ph Pi Pz (Garoo)"
+  }
+}

@@ -1,0 +1,67 @@
+{{StellarDataQuery
+|name= {{World|Likhukam|Dagudashaag|Arnakhish|2204}}
+|First Survey name    = Likhukam
+|Non-canon trade codes= Ht
+}}
+{{InfoboxSystem
+|name     = Likhukam
+|subsector= Arnakhish
+|sector   = Dagudashaag
+|hex      = 2204
+|star     = Primary
+|type     = M5 III
+|P1       = Khelphin
+|Dist1    = 5
+|UWP1     = Large GG
+|P1M1     = Likhukam
+|Dist1M1  = 30
+|UWP1M1   = B200953-F
+}}
+
+== Astrography and Planetology == 
+Likhukam is a member of the [[Shegimuud Trace]].
+
+=== Stellar Data === 
+{{MonostellarSystem
+|name           = Likhukam
+|primary        = M5 III 
+}}
+
+=== System Data ===
+The gigantic central star retains a tiny system, consisting of a single [[gas giant]] called Khelphin and its single [[moon]], Likhukam. 
+
+=== Mainworld Data ===
+Likhunam is a tiny, cratered [[airless world]] covered by a network of mountains and hills. 
+
+== History and Background ==
+Likhukam is a major transport and communications hub. The [[Imperial Navy]] has declared ''Khelphin'', the gas giant, of strategic importance and has placed it under Imperial control. It is a [[Nexus World]].
+
+The [[Government]] is drawn from the upper management of the various [[corporation]]s active on the world. Legislative decisions are based on economic factors, usually to the benefit of one or more corporations.
+
+=== Point of interest: Likhukam Underground Arcologies ===
+The [[planet]] has a population of five billion who live in enormous underground cities. All of the cities are interconnected, and there are estimated to be more than thirty million kilometers of tunnels below the surface. Each city has its own [[starport]] and is usually connected with a single corporation. 
+
+[[Society]] on the world is deeply stratified, with the altitude a citizen inhabits (in relation to the surface) dictating their social status, the range of available jobs and the quality of their life support. The upper levels of cities are dominated by huge windows giving panoramic views of the central star and the night sky. They have regular fresh air, excellent food, the parks are filled with real plants, citizens fill managerial or executive roles. 
+ 
+The mid-levels are darker and harsher, with adequate life support and a limited range of corporate shops. Most of the citizens perform skilled laboring work or fill minor administrative positions. The lowest levels are hot, overcrowded, and only get sporadic life support. The citizens perform unskilled work (if they work at all). Crime is rife in these areas, with a thriving [[black market]], and huge areas controlled by criminal organizations.
+
+=== [[Starport|World Starport]] (Sp) ===
+{{Starport|name= Likhukam|Starport=B}}
+* There is an associated Imperial [[Naval Base]], hosting elements of the [[205th Fleet]]. 
+
+== References and Contributors ==
+{{Intermediate}}
+{{Sources
+|S1= {{Ludography cite|name=Signal-GK 10|page=55|article=Library Data: Arnakhish Subsector}} via. {{HIWG}}
+|S2= {{Ludography cite|name=First Survey|page=79}}
+|S3= {{Ludography cite|name=Encyclopaedia Dagudashaag|page=225}}
+}}
+
+[[Category: 205th Fleet worlds]]
+[[Category: First Imperium worlds]]
+[[Category: Humaniti worlds]]
+[[Category: Megastructures]]
+[[Category: Rule of Man worlds]]
+[[Category: Second Imperium worlds]]
+[[Category: Shegimuud Trace worlds]]
+{{LEN|T5 Second Survey worlds}}

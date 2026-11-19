@@ -1,0 +1,97 @@
+{{InfoboxStar
+  |name=Deneb
+|image    = [[File: Traveller_Imperial_Science_Societies_Sunburst_logo.svg|45 px]]
+  |spectral=A2 Ia
+  |type=Supergiant <br> <small>(Alpha Cygni variable)</small>
+  |multiple=
+  |radius= 200-300 
+  |rrank= 31<sup>st</sup>
+  |lum= 60,000-250,000 
+  |mag= -8.73
+  |lref= 1.25 (19<sup>th</sup>)|lrworld=[[Terra (SR 1827) (world)|Terra]]
+  |lref2= -4.7 (1<sup>st</sup>?)|lrworld2=[[Vland (world)|Vland]]
+  |temp= 8,400 
+  |mass= 20-25 
+  |mrank=
+  |companion=
+}}
+The star [[Deneb (star)|Deneb]] (also known as '''Alpha Cygni''' or '''Arided''') is a blue-white spectral class '''A2''' supergiant star with a diameter of approximately 200-300 times that of [[Sol (star)|Sol]], which gives its name to the class of variable stars known as ''Alpha Cygni variables''. It lies at the edge of the ''Cygnus OB7 Association'' (a part of the star-forming region known as the ''Cygnus Molecular Cloud Complex'' that also contains the ''[[North America Nebula]]'' and the ''[[Pelican Nebula]]'').
+
+== Description (Specifications) ==
+Estimates for [[Deneb (star)|Deneb's]]  luminosity range from about 60,000 times the brightness of Sol to 250,000 times Sol's brightness (an [[magnitude|absolute magnitude]] of −8.73). 
+* The mass of the star is calculated to be 20-25 M<sub>Sol</sub>, meaning that the star will have a short lifespan and will probably become a supernova within a few million years. It has already stopped fusing hydrogen in its core. 
+* [[Deneb (star)|Deneb]]  is the prototype of a class of variable stars known as ''Alpha Cygni variables''. Its surface undergoes non-radial fluctuations, which cause its brightness and spectral type to change slightly.
+* [[Deneb (star)|Deneb]]  is the 19th brightest star as seen from [[Terra]], it is the 26th brightest star in the galaxy, and one of the brightest in [[Charted Space]]. [[Deneb (star)|Deneb]] is also the 31st largest star in the galaxy.
+* From [[Vland (world)|Vland]], [[Deneb (star)|Deneb]]  is visible during daylight as a magnitude -4.7 star, as it is for all worlds lying at Vland's distance from [[Deneb (star)|Deneb]]  (presuming the world in question has an atmosphere that permits the viewing of stars from the surface).
+
+===Deneb Stellar System ===
+The ''Deneb'' star system lies approximately 432.9pc from [[Terra]], and is located in a Corespinward/Spinward direction from [[Terra]] at bearing 084.3<sup>o</sup> Galactic Longitude and +2.0<sup>o</sup> North Galactic Latitude.
+{{InfoboxSystem
+|name=Deneb
+|sector=Deneb|subsector=Usani|hex=1925
+|star='''[[Deneb (star)|Deneb Primary]]'''|type='''A2 Ia'''
+|P0= - |Dist0=0.2|UWP0= <small>(Empty Orbit)</small>
+|P1= - |Dist1=0.4|UWP1= <small>(Empty Orbit)</small>
+|P2= - |Dist2=0.7|UWP2= <small>(Empty Orbit)</small>
+|P3= - |Dist3=1.0|UWP3= <small>(Empty Orbit)</small>
+|P4= - |Dist4=1.6|UWP4= <small>(Empty Orbit)</small>
+|P5= - |Dist5=2.0|UWP5= <small>(Empty Orbit)</small>
+|P6= - |Dist6=5.2|UWP6= <small>(Empty Orbit)</small>
+|P7=Deneb VII Belt|Dist7=10|UWP7=Y000000-0
+|P8= - |Dist8=19.6|UWP8= <small>(Empty Orbit)</small>
+|P9=Deneb IX|Dist9=38.8|UWP9=Y000000-0
+|P10= - |Dist10=77.2|UWP10= <small>(Empty Orbit)</small>
+|P11=Gashimuu|Dist11=154|UWP11=B660000-B
+|P12=Deneb|Dist12=307.4|UWP12=B537ADD-C
+|P12M1=Cova|Dist12M1=12|UWP12M1=Y100000-0
+|P12M2=Liye|Dist12M2=35|UWP12M2=YS00000-0
+|P12M3=Shanuasifehaemo|Dist12M3=50|UWP12M3=YS00000-0
+|P13= - |Dist13=618.4|UWP13= <small>(Empty Orbit)</small>
+|P14=Deneb XIV|Dist14=1229.2|UWP14=Y000000-0
+|P15= - |Dist15=2458|UWP15= <small>(Empty Orbit)</small>
+}}
+
+== History & Background (Dossier) ==
+'''Deneb''' is the primary star of the world {{World|Deneb|Deneb|Usani|1925}}.  It should not be confused with the star ''[[Dheneb (star)|Dheneb]]'', which is the proper name for the star ''[[Eta Ceti (star)|Eta Ceti]]'', nor should it be confused with the stars ''Deneb Algedi'' (''Delta Capricorni'') or ''Deneb Kaitos'' (''Beta Ceti'').  
+
+=== Image Repository ===
+[[TravellerMap]] <small>([[T5SS]])</small>: <br> [https://travellermap.com/?options=58363&scale=128&y=55.5&x=-67.983]
+
+=== Stellar Origin ===
+'''Deneb''' spent much of its early life as a 23 M<sub>Sol</sub> O-type main-sequence star, but has since exhausted its supply of hydrogen in its core and has begun to cool and expand.
+
+=== [[Gashimuu (world)|Gashimuu]] ===
+
+[[Gashimuu (world)|Gashimuu]], a world orbiting the star Deneb in the life zone, one orbit in from the world Deneb, was settled around [[-2400]] by [[Vilani]] fleeing the [[Rule of Man]]. Like most such colonies, it regressed technologically, but not as much as many, and it regained jump capability around [[-80]].  A lot heavy industry had already been placed on the next world out from Gashimuu, and as the years went by, the population rose until it finally overtook Gashimuu as the system mainworld. Inevitably, it became known as [[Deneb_(world)|Deneb]].
+
+=== [[Deneb_(world)|Deneb]] ===
+'''[[Deneb_(world)|Deneb]]''' is an average-sized world with a dense atmosphere tainted with the by-products of its extensive industrialization.
+
+==== Point of Interest: [[Deneb_(world)|Deneb]] Moon Structure ====
+''[[Deneb_(world)|Deneb]]'' has three natural moons: 
+# '''Cova''', with a diameter of 1,200 kilometers, 
+# '''Liye''', with a diameter of 500 kilometers and... 
+# '''Shanuasifehaemo''', a captured asteroid with a diameter of 17 kilometers.
+
+== References & Contributors (Sources) ==
+{{Metadata}}
+{{Advanced}}
+{{Wikipedia|Deneb}}
+{{Sources
+|S1= {{CT}} [[Atlas of the Imperium]] (dotmap only)
+|S2= {{CT}} [[The Early Adventures]] in Article: 'Deneb Sector: Library data'
+|S3= Periodical: [[MegaTraveller Journal 3]] in Article: 'Domain of Deneb: Sector Data'
+|S4= {{TDref|19}} in Article: 'Data/Library: Deneb'
+|S5= {{TNE}} [[The Regency Sourcebook]]
+|S6= [[Mongoose Traveller: Deneb Sector]]
+|S7= {{MT}} CD-ROM: Preliminary Traveller Map (Hand-drawn)
+|S8= EXTERNAL LINK: [https://simbad.cds.unistra.fr/mobile/index.html ''SIMBAD @ University of Strasbourg'']
+|S9= [[Traveller Wiki Editorial Team]]
+|S10= Author & Contributor: [[User:Rimguy|Rimguy]]
+|S11= Author & Contributor: Lord & Chief Marshall (Count) [[User:Dcorrin|Dan Corrin]] of the [[Office of the Emperor]]
+|S12= Author & Contributor: [[User:WHULorigan|WHULorigan]]
+  
+}}
+
+
+{{LE|Star}}

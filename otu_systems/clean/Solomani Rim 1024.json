@@ -1,0 +1,252 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Solomani Rim",
+  "hex": "1024",
+  "sector_abbreviation": "Solo",
+  "subsector": "Dingir",
+  "name": "Fomalhaut (SR 1024)",
+  "sources": [
+    {
+      "page": "Fomalhaut (SR 1024) (system)",
+      "revid": 633446,
+      "timestamp": "2021-02-08T21:09:45Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Fomalhaut (SR 1024) (system)",
+      "template": "TrinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Fomalhaut",
+          "type": "A3 V",
+          "notes": "Alpha Piscis Austrini A"
+        },
+        {
+          "role": "Secondary",
+          "name": "ɑ-Piscis Austrini B",
+          "type": "K5 V",
+          "notes": "Alpha Piscis Austrini B (TW Piscis Austrini)"
+        },
+        {
+          "role": "Tertiary",
+          "name": "ɑ-Piscis Austrini C",
+          "type": "M4 V",
+          "notes": "Alpha Piscis Austrini C (LP 876-10)"
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Fomalhaut A",
+      "stars": [
+        {
+          "name": "Fomalhaut A",
+          "type": "A3 V"
+        }
+      ],
+      "labels": [
+        "Fomalhaut (SR 1024)"
+      ],
+      "pages": [
+        "Fomalhaut (SR 1024) (system)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Fomalhaut Prime",
+          "raw": "B8C8469-C",
+          "kind": "world",
+          "uwp": "B8C8469-C",
+          "distance": {
+            "raw": "(?)",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Fomalhaut (SR 1024) (system)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 7,
+          "name": "Nepal-in-Exile",
+          "raw": "D6A0436-A",
+          "kind": "world",
+          "uwp": "D6A0436-A",
+          "distance": {
+            "raw": "~100",
+            "value": 100.0,
+            "unit": "AU",
+            "qualifier": "~"
+          },
+          "flags": [
+            "dist-approximate"
+          ],
+          "sources": [
+            "Fomalhaut (SR 1024) (system)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Dagon",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "~115",
+            "value": 115.0,
+            "unit": "AU",
+            "qualifier": "~"
+          },
+          "flags": [
+            "dist-approximate"
+          ],
+          "sources": [
+            "Fomalhaut (SR 1024) (system)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Fomalhaut B",
+          "raw": "K5 V",
+          "kind": "star",
+          "type": "K5 V",
+          "distance": {
+            "raw": "60000",
+            "value": 60000.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ],
+          "sources": [
+            "Fomalhaut (SR 1024) (system)"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Fomalhaut C",
+          "raw": "M4 V",
+          "kind": "star",
+          "type": "M4 V",
+          "distance": {
+            "raw": "166667",
+            "value": 166667.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ],
+          "sources": [
+            "Fomalhaut (SR 1024) (system)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Fomalhaut (SR 1024) (system)",
+      "label": "Fomalhaut (SR 1024)",
+      "stars": [
+        {
+          "name": "Fomalhaut A",
+          "type": "A3 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Fomalhaut Prime",
+          "raw": "B8C8469-C",
+          "kind": "world",
+          "uwp": "B8C8469-C",
+          "distance": {
+            "raw": "(?)",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Nepal-in-Exile",
+          "raw": "D6A0436-A",
+          "kind": "world",
+          "uwp": "D6A0436-A",
+          "distance": {
+            "raw": "~100",
+            "value": 100.0,
+            "unit": "AU",
+            "qualifier": "~"
+          },
+          "flags": [
+            "dist-approximate"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Dagon",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "~115",
+            "value": 115.0,
+            "unit": "AU",
+            "qualifier": "~"
+          },
+          "flags": [
+            "dist-approximate"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Fomalhaut B",
+          "raw": "K5 V",
+          "kind": "star",
+          "type": "K5 V",
+          "distance": {
+            "raw": "60000",
+            "value": 60000.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Fomalhaut C",
+          "raw": "M4 V",
+          "kind": "star",
+          "type": "M4 V",
+          "distance": {
+            "raw": "166667",
+            "value": 166667.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Fomalhaut",
+    "UWP": "B8C8469-C",
+    "Stellar": "A3 V K5 V",
+    "PBG": "802",
+    "Bases": "",
+    "Remarks": "Fl Ni Da Mr Ht"
+  }
+}

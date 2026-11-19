@@ -1,0 +1,158 @@
+{{StellarDataQuery
+|name                 = {{World|Depot (Da 3121)|Dagudashaag|Gadde|3121}}
+|First Survey name    = Shenpe
+|Non-canon trade codes= Ht
+}}
+{{InfoboxSystem
+ |name=Depot
+ |subsector=Gadde
+ |sector=Dagudashaag
+ |hex=3121
+ |star=Minowara
+ |type=M1 V
+ |P1=Kasigi |Dist1=0.2|UWP1=A31046A-F
+ |P2=Belt   |Dist2=0.4|UWP2=F000167-F
+ |P3=Kure   |Dist3=1  |UWP3=F813000-0
+}}
+
+== Description (Astrography & Planetology) == 
+{{SyMain}}
+
+=== Stellar Data ===
+{{MonostellarSystem
+|name           = Depot
+|primary        = M1 V 
+|PrimaryName    = Minowara
+}}
+
+=== System Data ===
+
+==== Planetoid Belt ====
+Planetoid Belt. 
+* Mean Orbital Distance: 0.4 AU. 
+* Body Diameter: 1/100 km. 
+* Belt zones: nickel/iron-50; mixed-30; carbon/ice-20. 
+* Belt Width: 0.1 AU.
+
+Minowara's planetoid belt is the focus of many areas of research, especially in those areas of high energy physics and gravitics. The entire belt is patrolled regularly by unusually modified vessels. Whilst these vessels do carry out security patrols, it has led to reports of an anti-matter containment facility within the belt. Credence is lent to these reports by a huge and unusual explosion in the belt in [[1112]] that was said to have "fed" on the planetoids.
+
+==== Kure ====
+This is the outermost [[planet]] in the planetary system. This world's heavier gravity has led to it suffering even more than Kasigi from meteorite damage. The planet itself, despite its size, consists almost entirely of rock.
+
+There are strata of ice crystals trapped within the world, and these are mined by the Imperial Navy for fuel and oxygen. The world is also the system's primary training ground for Marines. The lack of habitation and atmosphere permits long range firing practice available at few other places within the Imperium. The world's unusual characteristics also make it a prime location for the training of drop troops. These two traits mean that this world is also used by many sections of the Imperial Army. It is also used by the Imperial Guard for marksmanship refresher courses.
+
+=== Mainworld Data ===
+Kasigi is the [[mainworld]] of Minowara system. The population figure refers to the permanent civilian population of the world. The number of transient civilian contractors and military personnel number several tens of thousands. Many of these people live on Yokohama orbital.
+
+World: '''Kasigi''' 
+* Mean Orbital Radius: 0.2 AU. 
+* Period: 57.3 Standard days. 
+* Diameter: 4741 km. 
+* Mass: 0.039 terra. 
+* Rocky body. 
+* Density: 0.74. 
+* Mean Surface Gravity: 0:278g 
+* Rotational period: 22h 37m 30s 
+* Axial Tilt: 12 degrees.
+* Energy absorption: 0.829.
+* Surface Atmospheric pressure: 0.07 standard.
+* Composition none.
+* Hydrographic percentage: 0%.
+* Mean Surface Temperature: 16.6 degrees c.
+
+==== Highport ====
+Yokohama Orbital is the main inhabited structure in the Depot system. There are several other large structures in orbit around Kasigi, some of which are larger than Yokohama, but these are mostly repair and construction yards. Yokohama houses most of the research facilities that exist in the system as well as housing the [[Yiisarikaa Naval Academy]]. The total population of the station is 600,000, almost entirely consisting of naval and marine staff or temporary civilian contractors.
+
+In addition to research and training facilities, Yokohama Orbital is also the home for the Depot Security Fleet. As such, it has facilities to support ships of up to a million tons displacement, and can contain up to four numbered fleets within its cavernous bays simultaneously. Such an event occurs once every two years, when the fleets of Dagudashaag take part in wargames and maneuvers, which are centered around this region of space. No aggressor fleet is maintained, and thus opposition to the Dagudashaag fleets comes from among themselves, or from fleets from [[Core Sector]].
+
+Yokohama Orbital also has extensive repair and refit facilities. Anything up to severe damage to the main ship structure can be repaired here. For more serious damage, construction and so on, recourse must be made to one of the dozen or so construction yards that orbit Kasigi. The advanced technology prototypes are repaired and refitted here.
+
+==== Mainworld Geography & Topography ====
+The planet is almost deserted. Vast tracts of it were dug-up long ago in the search for minerals. Some of these tracts are up to 1km deep, and are referred to as "trench canyons". These channels are actually quite narrow in places as the mineral veins had been followed. These deep and narrow channels are now used for planetary defense bases for fighters and [[System Defense Boat|SDBs]]. The mineral poor areas are pockmarked by meteorite craters, the largest of which is 100 km across. Geological research has indicated that the world always has been dead, and some of the craters have been dated as being over a billion years old. The low gravity and trace atmosphere make the world very suitable for mothballed ships. Ship's armor makes micrometeorites of no concern, and the very extensive planetary defenses can eliminate larger meteors. Some of the ships on the surface date back to the [[Ilelish Revolt]]. Over a million tons of vessels are on the world, with over 4,000 ships of 1,000 tons or less. Also in orbit around Kasogi is the mothball fleet. Some forty million tons of starships displacing over 1,000 tons are kept in orbit. Many of the ship are extremely old and of dubious combat worth.
+
+== History and Background ==
+This is the [[Imperial Navy]] [[Depot]] system for [[Dagudashaag Sector]]. This system has been known by different names:
+
+* '' '''Duurishaam''' '', the name of the system and primary during the [[First Imperium]].
+* '' '''Minowara''' '', the name of the system during the [[Second Imperium]], and still the name of the primary star. 
+* '' '''Shenpe''' '' up through the end of the [[Long Night]], including during the ''[[Kuriishe Eraki]]'' years. 
+* '' '''Kasigi''' '', the current name of the system's [[mainworld]].
+* '' '''Yokohama Orbital''' '', the name of the main [[starport]] and primary population center. 
+* '' '''Depot for the Dagudashaag Sector''' '' '' ('''<small>Depot - Dagudashaag (3121)</small>''')'', the current name of the system, and the name on the maps. 
+
+The last prototype to go through the Yokohama Orbital was the "Enterprise” a {{TL|16}} heavy cruiser. It is rumored that this ship is one of the first in the Imperium to receive a highly experimental antimatter power plant. Regardless of the truth, the ship is always escorted by a battle squadron of "Tigress"" dreadnoughts who have been known to shoot first, ask questions later.
+
+Among the vessels in the mothball fleet is the last "Leviathan"-class super-heavy dreadnought. This class was the product of [[Cleon III|Cleon the Mad]], displaced two million tons, and carried two spinal mounts and thousands of fighters. Also among the mothball fleet are many of the failed prototypes from contractors who bid for, and failed to get, naval contracts. 
+
+The entire area is a hive of activity, as ships are periodically run up to full power to test their systems. Some five per cent of the fleet is temporarily active in this manner. Many of the older vessels are also powered up, however for the last time, and they are modified to serve as target drones on the gunnery ranges. 
+
+Needless to say, visiting starships are advised to arrive in-system some distance from Kasigi to prevent an untimely demise!
+
+==== Additional Starport Data ====
+Due to a lack of ready fuel resources at any location except Yokohama Orbital, there is no normal reason for starships to enter this system. Hence under normal circumstances, entry to the system is prohibited. If a ship enters the system, it will be boarded and loaded into a tender, where it will be taken to Yokohama orbital. If intent to enter the system is established, Imperial Naval Law is enacted. The punishment may range from a Cr 1,000 fine to a ten year sentence and confiscation of starship.
+
+Even authorized civilian transports must follow the same procedure. This secrecy is due to the amount of research and development being carried out in the system and also in response to the Dynam incident, which involved the hijacking of a number of mothballed ships by Vilani terrorists in [[1105]] from the [[Lishun Sector]] Depot.
+
+=== World Technology Level ===
+{{WorldTech|name= Depot|WorldTech=F}}
+* Technology Profile: DD-EFFFF-EEEF-EF-G
+
+=== World Government ===
+{{WorldGov|name= Depot|Government=6}}  
+* World Government: civilian. Representative Democracy. All functions are earned out by a 21-strong body that is elected every year.
+* Law Profile: 4-43503
+
+=== Imperial Landed Nobility ===
+{{Imperial Nobility|name= Kasigi (Depot - Dagudashaag (3121)|Noble=B}}
+
+=== World Demographics ===
+Population Breakdown: civilian. 96.2% [[Humaniti]], mixed, Imperial; 3.6% other races.
+
+=== World Culture ===
+Social Outlook: Progressive, advancing, competitive, neutral, harmonious, friendly.
+
+==== Urbanization ====
+Primary Cities: Yokohama orbital, starport A
+
+=== Historical Data ===
+==== Pre-Imperial History ====
+This system was never colonized during the ''[[Ziru Sirka]]'' because surveys conducted in [[-7985]] found no useful resources. 
+
+During the [[Rule of Man]] era, the advanced densitometers of the [[Solomani]] discovered deposits of [[lanthanum]] that the less sophisticated Vilani systems had missed. The system's name was changed from Duurishaam to Minowara by the Japanese Solomani prospectors. These deposits became important for the region. During the [[Long Night]], due to a lack of life support, the miners left, leaving some deposits behind.
+
+The system was acquired by the ''[[Kuriishe Eraki]]'' as Dagudashaag climbed out of the [[Long Night]]. By dawn the deposits had been played out, and the ''Kuriishe'' left the system. The rise of the Third Imperium left the system behind, and it missed the horrors of the [[Pacification Campaigns]].
+
+==== Imperial History==== 
+The system's isolation made it very suitable as a base for the pirates that plagued the area in the years after the [[Pacification Campaigns]], lasting from [[130]] to [[155]]. Indeed, the system served as the headquarters for the largest of the pirate bands and included the remnants of several of the petty state navies that were destroyed during the campaigns. As such, extensive bases were established in the system for repairing even the largest of combatants. The system itself was the last of the pirate bases to fall. 
+
+The commanding Imperial admiral was quick to recognize the importance of the base, as it was one of the largest anywhere in the Imperium of the [[150s]]. Hence, whilst battleships traded fire, a huge marine drop was organized. Horrific casualties were taken by the marines during the drop, but once on the ground, their superior skill quickly ended the pirates' resistance. With their home and dependents captured, the pirate fleet surrendered. As was typical of the early Imperial era, many of these ships and crew were directly incorporated into the Imperial Navy for service on the frontier to return to their dependents only when "rehabilitated". Indeed, the modern [[209th Fleet]] is a direct descendant of the pirate fleet defeated in [[155]].
+
+With its impressive facilities, the system was taken over by the Depot. It became one of the largest bases in the Imperium, utilized by the Navy as the primary testing, training, and evaluation facility in the Vilani Archdukedom. Being situated in the core of the Imperium, the system saw no fighting, but witnessed many fleets going through work-up for wars against the [[Julian Protectorate]], the [[Aslan]], and the [[Vargr]]. The system was raided once during the [[Ilelish Revolt]] of [[418]] to [[435]], but otherwise continued to work in peace. Naturally enough, when the latest border threat posed by the [[Zhodani]] caused the fleets to be mobilized again, no one knew what the ramifications of that war would be. 
+
+The base's size and importance mean that it became a key staging post during the [[Civil War]]. Indeed, the base was used by [[Arbellatra]] during the final conclusive battles of the War. Arbellatra recognized the use made of the Dagudashaag Depot by many of the claimants to the Imperial throne (including, of course, herself) and, in an effort to repeat the events of that conflict when depots were emptied for the fighting, she began a reorganization of the depot system.
+
+Among the changes carried out was a downgrading of the depots of the sectors that neighbored Core, and the facilities and ships redistributed among the depot systems of the Core and border areas.
+
+Depot's facilities since that war until the current day have three main roles. The system serves as a base for mothball fleets. These ships are {{TL|13}} or earlier, and thus, while more effective than many of the Imperium's foes, pose little threat to the Imperial Navy. The system provides the main training facility for the Imperial, colonial and planetary navies in the sector.
+
+Also, the system sees the majority of the sector's naval technological research and development. Hence, despite the system's nominal {{TL|13}}, it sees, in certain areas, {{TL|16}}. This tech level has a visible presence in the sector's Advanced Technology Demonstrator Squadrons, the [[8161st Squadron]] and [[9770th Squadron]]. Whilst these units are based at [[Ushra (Da 1016) (world)|Ushra]] (Dagudashaag 1016) and {{WorldS|Medurma|Dagudashaag|2124}}, for maintenance purposes they spend most of their time at Depot.
+
+== References & Contributors (Sources) ==
+{{Intermediate}}
+{{Sources
+|S1= {{Ludography cite|name= Atlas of the Imperium|page=14}}
+|S2= {{Ludography cite|name= Signal-GK 06|page=10-12|article=Port of Call: Depot}} via {{HIWG}}
+|S3= {{Ludography cite|name= First Survey|page=86}}
+|S4= {{Ludography cite|name= Encyclopaedia Dagudashaag|page=88}}
+}}
+
+[[Category: First Imperium worlds]]
+[[Category: Highport worlds]]
+[[Category: Humaniti worlds]]
+[[Category: Kuriishe Eraki worlds]]
+[[Category: Lanthanum worlds]]
+[[Category: Mining worlds]]
+[[Category: Naval Depot worlds]]
+[[Category: Rule of Man worlds]]
+[[Category: Second Imperium worlds]]
+{{LEN|T5 Second Survey worlds}}

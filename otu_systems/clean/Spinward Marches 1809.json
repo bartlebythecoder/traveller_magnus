@@ -1,0 +1,314 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "1809",
+  "sector_abbreviation": "Spin",
+  "subsector": "Regina",
+  "name": "Ruie",
+  "sources": [
+    {
+      "page": "Ruie (world)",
+      "revid": 1043785,
+      "timestamp": "2026-04-16T20:46:19Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Ruie (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Wahrheit",
+          "type": "G5 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Ohrreit",
+      "stars": [
+        {
+          "name": "Ohrreit",
+          "type": "G5 V"
+        }
+      ],
+      "labels": [
+        "Ruie"
+      ],
+      "pages": [
+        "Ruie (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.1",
+            "value": 0.1,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ruie (world)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Sustro",
+          "raw": "X300000-0",
+          "kind": "world",
+          "uwp": "X300000-0",
+          "distance": {
+            "raw": "0.3",
+            "value": 0.3,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ruie (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Qorgon",
+          "raw": "X111000-0",
+          "kind": "world",
+          "uwp": "X111000-0",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ruie (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Ruie",
+          "raw": "C776977-7",
+          "kind": "world",
+          "uwp": "C776977-7",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ruie (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 4,
+          "name": "Peori",
+          "raw": "X505000-0",
+          "kind": "world",
+          "uwp": "X505000-0",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ruie (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Orissa",
+          "raw": "X310000-0",
+          "kind": "world",
+          "uwp": "X310000-0",
+          "distance": {
+            "raw": "2.4",
+            "value": 2.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ruie (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Nustir",
+          "raw": "X705000-0",
+          "kind": "world",
+          "uwp": "X705000-0",
+          "distance": {
+            "raw": "5.0",
+            "value": 5.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ruie (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Renli",
+          "raw": "'''LGG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ruie (world)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Mennet",
+          "raw": "X211000-0",
+          "kind": "world",
+          "uwp": "X211000-0",
+          "distance": {
+            "raw": "19",
+            "value": 19.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ruie (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Ruie (world)",
+      "label": "Ruie",
+      "stars": [
+        {
+          "name": "Ohrreit",
+          "type": "G5 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.1",
+            "value": 0.1,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Sustro",
+          "raw": "X300000-0",
+          "kind": "world",
+          "uwp": "X300000-0",
+          "distance": {
+            "raw": "0.3",
+            "value": 0.3,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Qorgon",
+          "raw": "X111000-0",
+          "kind": "world",
+          "uwp": "X111000-0",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Ruie",
+          "raw": "C776977-7",
+          "kind": "world",
+          "uwp": "C776977-7",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Peori",
+          "raw": "X505000-0",
+          "kind": "world",
+          "uwp": "X505000-0",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Orissa",
+          "raw": "X310000-0",
+          "kind": "world",
+          "uwp": "X310000-0",
+          "distance": {
+            "raw": "2.4",
+            "value": 2.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Nustir",
+          "raw": "X705000-0",
+          "kind": "world",
+          "uwp": "X705000-0",
+          "distance": {
+            "raw": "5.0",
+            "value": 5.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Renli",
+          "raw": "'''LGG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 8,
+          "name": "Mennet",
+          "raw": "X211000-0",
+          "kind": "world",
+          "uwp": "X211000-0",
+          "distance": {
+            "raw": "19",
+            "value": 19.0,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Ruie",
+    "UWP": "C776977-7",
+    "Stellar": "G5 V",
+    "PBG": "701",
+    "Bases": "",
+    "Remarks": "Hi In Pz Di(Daccamites)"
+  }
+}

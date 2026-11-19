@@ -1,0 +1,105 @@
+'''''The original two unmodified alterative write-ups for the Antares system are detailed below.'''''
+
+----
+----
+
+= Version 1 =
+
+{{InfoboxSystem|name=Antares
+  |sector=Antares|subsector=Antares|hex=2421
+  |star='''[[Antares (star)|Antares A]]'''|type='''M1.5 Iab-Ib'''
+  |P11=Antares (An 2421)|Dist11=213|UWP11=A762ADA-D
+  |P12='''Antares B'''|Dist12=550|UWP12='''B2.5 V'''
+}}
+
+[[Antares (star)|Antares]] being the largest star in [[Charted Space]] at 700 solar radii (3.26 AU), the jump exit point for the system is 651 AU from the centre (or 90 light hours) and 300 AU beyond the orbit of Antares B.
+
+With the huge size of Antares, navigation from an area 56 degrees around the star would be blocked by the 100 diameter limit of the primary star, causing an in-system trip of up to 651+1229 AU (to get to orbit 14) or at 6G, 35 days of travel. (At 1 G 87 days).
+ 
+Antares A is estimated between 7 and 9 million years old, far too young to have any planets formed around it. The world Antares is a captured interstellar wanderer, probably ejected from its formation system between one and two billion years ago. Best estimates show the world has been in orbit around Antares A for between 40,000 and 50,000 years. The current planetary  orbit isn't stable, the tidal forces between Antares A and Antares B will eventually either force the orbit inside the habitable zone or eject the planet from the system altogether. 
+{{LEN|A}}
+
+= Version 2 =
+{{InfoboxSystem|name=Antares
+  |sector=Antares|subsector=Antares|hex=2421
+  |star='''[[Antares (star)|Antares A]]'''|type='''M5 Iab-Ib'''
+  |P12='''Antares B'''|Dist12=540|UWP12='''B4 V'''
+  |P18='''Dwarf'''|Dist18=2000|UWP18='''L7 V'''
+  |P18M1=Antares|Dist18M1=0.012 <small>AU</small>|UWP18M1=A762ADA-D
+}}
+
+== The System ==
+
+Antares: M5 Iab-Ib red supergiant
+: Mass: 15 M<sub>Sol</sub>
+: Luminosity: 9120 L<sub>Sol</sub>
+: Radius: 5 <small>AU</small> (1077 R<sub>Sol</sub>)
+: Age: 12.7 million years
+
+Companion: B4 V Main Sequence
+: Mass: 7 M<sub>Sol</sub>
+: Luminosity: 1900 L<sub>Sol</sub>
+: Radius: 0.0186 <small>AU</small> (4 R<sub>Sol</sub>)
+: Orbit: 540 <small>AU</small> from Antares.
+: Orbital Period around Antares: 3,253 years
+: Age: 12.7 million years
+
+No planets or resources are in either system, other than the odd lump of rock or ice. No Oort cloud either.
+
+The Dwarf: L7 V Brown Dwarf
+: Mass: 0.030 M<sub>Sol</sub> (30 M<sub>J</sub>)
+: Luminosity: 0.0000504 L<sub>Sol</sub>
+: Radius: 77,426 km
+: Temperature: 1580 K
+: Orbit: 2000 <small>AU</small>
+: Orbital Period around Antares: 23,186.63 yrs
+: Age: 200 Ma
+: Appearance: Dimly glowing red star-like object, with dark 'cloud' streaks.
+: Orbital Inclination around Antares: 40 degrees
+: Rotation Period: 6.5 hours
+: Surface gravity: 66.4g
+
+Deuterium burning in the core of the dwarf finished about 190 million years ago. As a result the temperature of the Dwarf (and planet) has dropped somewhat since then. Silicon/Iron clouds have formed in the Dwarf's atmosphere, giving it a banded appearance. Now it's just cooling off gradually. The Dwarf and its moon formed separately from Antares and its companion, but it was captured by the Antares Binary about 6 million years ago.
+
+
+The Planet:
+: Age: 200 Ma
+: Radius: 6000 km (Diameter: 7500 miles)
+: Orbital distance from Dwarf: 1,800,000 km
+: Orbital Period around Dwarf: 66 hours 48mins
+: Tidal evolution: no orbital evolution other than circularisation of orbit. Inclination 0°. Tide-locked.
+: Blackbody temperature: 214 K
+: Albedo: 0.21
+: Greenhouse effect: 0.202
+: Average Temperature: 242 K (*1.2 for tidelock = 291 K)
+: Surface gravity: 0.855g
+: Atmospheric pressure: 1.15 atmospheres
+: Atmospheric composition: N2, CO2, CH4, O2 (terraformed)
+
+The Planet formed at 1,800,000 km from Dwarf and has not been significantly moved by tides. Tidal bulge height is fixed at 2.9 km and is static (the orbit is completely circular and in the plane of Dwarf's equator) - there is barely any tidal flexing. The system is still fairly young, but the planet has completely formed now. The Dwarf's system is clear of significant debris, since the dwarf itself has mopped it all up - though meteor showers do still happen. Planet's surface is solid and rocky, atmosphere is standard pressure. Volcanic and tectonic activity is extensive, since the internal heat flow from radiogenic decay is quite large, most of the volcanic activity is concentrated on the night side where the crust is thinner, and does extend up to the twilight zone. Volcanoes are rarer in the dayside, but some do exist. Earthquakes are fairly common too, though rarely reach dangerous magnitudes since the stresses on the plate boundaries are being relieved quite often.
+
+Before humans arrived, the atmospheric composition was similar to that of primitive Earth - lots of nitrogen, with the rest consisting of carbon dioxide and methane. Imperial [[terraforming]] since the ''[[Ziru Sirka]]'' has changed the composition however, adding enough oxygen to make the atmosphere breathable and reducing the CO<sub>2</sub> and methane. However, not all the CO<sub>2</sub> and CH<sub>4</sub> can be removed - there has to be enough to maintain the greenhouse effect that is keeping the world warm (without it, the average temperature would be -30°C!). While the methane has been terraformed away, more CO<sub>2</sub> and CH<sub>4</sub> (and other gases) are being erupted by the volcanoes all the time, so it's a constant struggle to keep the terraformed balance. The oxygen pressure is just about breathable, so the air is hard to breathe, but it's just about bearable without a mask. The only life here are the terraforming algae and bacteria, and the 80 billion colonists.
+
+About 100 million years ago, the luminosity dropped and the planet cooled down enough for the rains to start falling. Since then, most of the water has been transported to the nightside, where it is locked up as snow and land-locked ice sheets (with the odd pool melted by volcanic activity). Small oceans and lakes occupy a band between about 30 and 50 degrees (0 degrees is the day/night terminator, +90 is the sub-Dwarf point), but the terrain nightward of this band is rocky tundra that eventually is covered with ice sheets. The weather has since stabilized, though most rainfall occurs in a band between the 20 and 50 degree latitude on the dayside (centered around the subdwarf point), the skies below the subdwarf point tends to be clearer. The nightside weather is generally stable, and blizzards and storms are rare. Average nightside temperatures do not drop below about -20 degrees C because of atmospheric circulation.
+
+Cloud cover is generally concentrated in a band between +60 degrees and -20 degrees becoming more progressively broken toward the hot and cold poles. , is a bit more broken around the rain latitudes, and is mostly clear for about a 30 degree radius around the subdwarf point. In the rain zone, it's pretty much raining or overcast most of the time.
+
+==The view==
+The view from the planet is impressive. Despite being at a distance of 2000 AU, Antares itself is still a red-tinged disk about half the size of Earth's sun in the sky (16 arc-minutes 45 arc-seconds). The B4 V Companion Star is a brilliant blue-white dot 5 arc-seconds across, that ventures a maximum of 29 degrees from Antares in the sky as it progresses on its millennia long orbit. Right now, the Companion is about 20 degrees to the right of Antares, on the same side of the supergiant as the Dwarf, and the Antares-Companion pair is tilted by about 40 degrees relative to the flat horizon because of the inclination of the Dwarf's orbit around the pair.
+
+The Dwarf itself is a huge dimly glowing red orb, streaked with dimly visible dark bands (iron/silicon clouds). It appears 10 times larger in its moon's sky than the sun and moon are in the Earth's sky (nearly 5 degrees in size). It spins around its axis once every 6.5 hours and has a slightly flattened appearance. If one was to stand on the Planet's actual equator (i.e. in the plane of its orbit around the Dwarf), one would see the dark bands on the Dwarf oriented parallel to the horizon. At the Planet's geographic poles (not the hot/cold poles) the bands would be oriented at 90 degrees to the Horizon. In between, the angle of rotation of the bands depends on what geographical latitude you're at (same thing happens with the Moon on Earth). Thus the bands can be used as a navigational aid to determine roughly what latitude you're at.
+
+The entire sky is suffused with a dim (to the naked eye, but shows up spectacularly in photographs) amber yellow-orange glow, caused by light reflecting from gas shed by Antares in the past. This diffuse gas cloud extends many light-years beyond the Dwarf.
+
+Although tidally locked, there is a day/night cycle equal to the Planet's orbital period around the Dwarf, as Antares and the Companion rise and set in the sky. However, the temperature changes from Antares and the Companion are barely noticeable.
+
+
+{{Sources
+|S1= External Link: Antares System Bible, (c) 2003 [http://forums.sjgames.com/showpost.php?p=1238873&postcount=9 SJGames boards]
+|S2= Authors: [[Paul Drye]] & [[Constantine Thomas]]  
+|S3= 
+|S4= 
+}}
+
+
+{{LE}}

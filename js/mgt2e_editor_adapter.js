@@ -139,6 +139,9 @@
                     moons:         (w.moons || w.satellites || []).map(m => SE().buildMoon(
                         Object.assign({}, m, { isMainworld: !!(m.isMainworld || m.type === 'Mainworld' || SE().isMW(m, mwRef)) })
                     )),
+                    // Rings live on the planet (w.rings[]), not among its moons. Copied, so
+                    // +Ring / ✕ in the editor never touch the saved map until Save.
+                    rings:         (w.rings || []).map(r => Object.assign({}, r)),
                     _manualFields: w._manualFields ? [...w._manualFields] : [],
                     _raw: w,
                 });
@@ -191,7 +194,13 @@
                     // []` (run at the start of every satellite pass) always saw an undefined
                     // seed field and silently wiped an already-generated ring back to empty on
                     // every single Preview/Fill & Save, even with zero user edits.
-                    rings: (b._raw && b._raw.rings) || [],
+                    // Since 2026-11-18 the working copy's own `rings` (editable with +Ring / ✕)
+                    // is the source; `_raw.rings` is the fallback for a body that has none.
+                    // Fresh copies, so the engine's push() never lands in the saved map's array.
+                    // A belt never has rings (the engine skips belts in the satellite pass).
+                    rings: engType === 'Planetoid Belt' ? [] :
+                        (Array.isArray(b.rings) ? b.rings : ((b._raw && b._raw.rings) || []))
+                        .map(r => Object.assign({}, r)),
                     moons: (b.moons || []).map(m => {
                         const { fields: mUwpLock, mf: mExtraMF } = _mgt2eUwpLockFor(m);
                         const { fields: mRotFields, mf: mRotMF } = _mgt2ePhysSeed(m._raw || {});
@@ -203,6 +212,8 @@
                             ...mUwpLock,
                             ...mRotFields,
                             isMainworld:  !!m.isMainworld,
+                            // Only written when true, so untouched moons save exactly as before.
+                            ...(m.editorAdded && { editorAdded: true }),
                             pd:           m.pd,
                             pos:          m.pos,
                             eccentricity: m.eccentricity,

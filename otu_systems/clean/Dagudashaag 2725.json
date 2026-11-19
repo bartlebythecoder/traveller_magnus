@@ -1,0 +1,495 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Dagudashaag",
+  "hex": "2725",
+  "sector_abbreviation": "Dagu",
+  "subsector": "Gadde",
+  "name": "Collette",
+  "sources": [
+    {
+      "page": "Collette (System)",
+      "revid": 486089,
+      "timestamp": "2019-03-28T13:38:41Z"
+    }
+  ],
+  "star_templates": [],
+  "systems": [
+    {
+      "star": "Primary",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "M3 V"
+        }
+      ],
+      "labels": [
+        "Collette"
+      ],
+      "pages": [
+        "Collette (System)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Collette",
+          "raw": "<small>A542644-C</small>",
+          "kind": "world",
+          "uwp": "A542644-C",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Collette (System)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 1,
+          "name": "Yoshua",
+          "raw": "<small>Large GG</small>",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Collette (System)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring System",
+              "name_raw": "<small>Ring System</small>",
+              "raw": "<small>YR00000-0</small>",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Collette (System)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Satellite",
+              "name_raw": "<small>Satellite</small>",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "6",
+                "value": 6.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Collette (System)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Satellite",
+              "name_raw": "<small>Satellite</small>",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Collette (System)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Halthome",
+              "name_raw": "[[Halthome (world)|Halthome]]",
+              "raw": "<small>A686510-7</small>",
+              "kind": "world",
+              "uwp": "A686510-7",
+              "distance": {
+                "raw": "11",
+                "value": 11.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Collette (System)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Caleb Belt",
+          "raw": "<small>?000???-?</small>",
+          "kind": "world",
+          "uwp": "?000???-?",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Collette (System)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Shammua",
+          "raw": "<small>Large GG</small>",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Collette (System)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Maurice",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Collette (System)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Henri",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Collette (System)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Claude",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Collette (System)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Bertran",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "10.0",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Collette (System)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Ammiel",
+          "raw": "<small>Small GG</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "19.6",
+            "value": 19.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Collette (System)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Sidonie",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "38.8",
+            "value": 38.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Collette (System)"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Hoshea",
+          "raw": "<small>Small GG</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "77.6",
+            "value": 77.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Collette (System)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Collette (System)",
+      "label": "Collette",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "M3 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Collette",
+          "raw": "<small>A542644-C</small>",
+          "kind": "world",
+          "uwp": "A542644-C",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Yoshua",
+          "raw": "<small>Large GG</small>",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring System",
+              "name_raw": "<small>Ring System</small>",
+              "raw": "<small>YR00000-0</small>",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Satellite",
+              "name_raw": "<small>Satellite</small>",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "6",
+                "value": 6.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Satellite",
+              "name_raw": "<small>Satellite</small>",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Halthome",
+              "name_raw": "[[Halthome (world)|Halthome]]",
+              "raw": "<small>A686510-7</small>",
+              "kind": "world",
+              "uwp": "A686510-7",
+              "distance": {
+                "raw": "11",
+                "value": 11.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Caleb Belt",
+          "raw": "<small>?000???-?</small>",
+          "kind": "world",
+          "uwp": "?000???-?",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Shammua",
+          "raw": "<small>Large GG</small>",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Maurice",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Henri",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Claude",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Bertran",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "10.0",
+            "value": 10.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 8,
+          "name": "Ammiel",
+          "raw": "<small>Small GG</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "19.6",
+            "value": 19.6,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 9,
+          "name": "Sidonie",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "38.8",
+            "value": 38.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 10,
+          "name": "Hoshea",
+          "raw": "<small>Small GG</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "77.6",
+            "value": 77.6,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Collette",
+    "UWP": "A542644-C",
+    "Stellar": "M3 V",
+    "PBG": "414",
+    "Bases": "NS",
+    "Remarks": "He Ni Po Cp Ht"
+  }
+}

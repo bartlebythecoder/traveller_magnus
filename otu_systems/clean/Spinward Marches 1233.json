@@ -1,0 +1,618 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "1233",
+  "sector_abbreviation": "Spin",
+  "subsector": "District 268",
+  "name": "Flexos",
+  "sources": [
+    {
+      "page": "Flexos (world)",
+      "revid": 1028298,
+      "timestamp": "2026-03-28T03:42:02Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Flexos (world)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Girehredh",
+          "type": "M1 V",
+          "notes": null
+        },
+        {
+          "role": "Secondary",
+          "name": "Onu",
+          "type": "M2 V",
+          "notes": "Approximately 0.04 AU from the primary."
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Girehredh",
+      "stars": [
+        {
+          "name": "Girehredh",
+          "type": "M1 V"
+        }
+      ],
+      "labels": [
+        "Flexos"
+      ],
+      "pages": [
+        "Flexos (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Onu",
+          "raw": "M2 V",
+          "kind": "star",
+          "type": "M2 V",
+          "distance": {
+            "raw": "0.04",
+            "value": 0.04,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ],
+          "sources": [
+            "Flexos (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Flexos",
+          "raw": "E5A1422-6",
+          "kind": "world",
+          "uwp": "E5A1422-6",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Flexos (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Rerihld",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Flexos (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Dinetas",
+              "raw": "H202231-6",
+              "kind": "world",
+              "uwp": "H202231-6",
+              "distance": {
+                "raw": "20 Diam",
+                "value": 20.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Flexos (world)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 3,
+          "name": "Nilungedh",
+          "raw": "Y101114-6",
+          "kind": "world",
+          "uwp": "Y101114-6",
+          "distance": {
+            "raw": "0.5",
+            "value": 0.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Flexos (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Gihlabh",
+          "raw": "H100365-6",
+          "kind": "world",
+          "uwp": "H100365-6",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Flexos (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Bagihmeh",
+          "raw": "YCB1000-0",
+          "kind": "world",
+          "uwp": "YCB1000-0",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Flexos (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Zem",
+              "raw": "Y231000-0",
+              "kind": "world",
+              "uwp": "Y231000-0",
+              "distance": {
+                "raw": "4 Diam",
+                "value": 4.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Flexos (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Narihdea",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Flexos (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Reren",
+              "raw": "Y400212-6",
+              "kind": "world",
+              "uwp": "Y400212-6",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Flexos (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Dizeneh",
+          "raw": "Y627000-0",
+          "kind": "world",
+          "uwp": "Y627000-0",
+          "distance": {
+            "raw": "1.3",
+            "value": 1.3,
+            "unit": "AU"
+          },
+          "sources": [
+            "Flexos (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Dabeh",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Flexos (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Leyr",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "1.5",
+            "value": 1.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Flexos (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Behrel",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Flexos (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Yuldeh",
+              "raw": "FS00362-6",
+              "kind": "world",
+              "uwp": "FS00362-6",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Flexos (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Zdeyr",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Flexos (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Gugh",
+          "raw": "H401263-6",
+          "kind": "world",
+          "uwp": "H401263-6",
+          "distance": {
+            "raw": "2.0",
+            "value": 2.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Flexos (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ldeh",
+              "raw": "Y310000-0",
+              "kind": "world",
+              "uwp": "Y310000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Flexos (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Asagh Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "9.5",
+            "value": 9.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Flexos (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Flexos (world)",
+      "label": "Flexos",
+      "stars": [
+        {
+          "name": "Girehredh",
+          "type": "M1 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Onu",
+          "raw": "M2 V",
+          "kind": "star",
+          "type": "M2 V",
+          "distance": {
+            "raw": "0.04",
+            "value": 0.04,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Flexos",
+          "raw": "E5A1422-6",
+          "kind": "world",
+          "uwp": "E5A1422-6",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Rerihld",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Dinetas",
+              "raw": "H202231-6",
+              "kind": "world",
+              "uwp": "H202231-6",
+              "distance": {
+                "raw": "20 Diam",
+                "value": 20.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Nilungedh",
+          "raw": "Y101114-6",
+          "kind": "world",
+          "uwp": "Y101114-6",
+          "distance": {
+            "raw": "0.5",
+            "value": 0.5,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Gihlabh",
+          "raw": "H100365-6",
+          "kind": "world",
+          "uwp": "H100365-6",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Bagihmeh",
+          "raw": "YCB1000-0",
+          "kind": "world",
+          "uwp": "YCB1000-0",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Zem",
+              "raw": "Y231000-0",
+              "kind": "world",
+              "uwp": "Y231000-0",
+              "distance": {
+                "raw": "4 Diam",
+                "value": 4.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Narihdea",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Reren",
+              "raw": "Y400212-6",
+              "kind": "world",
+              "uwp": "Y400212-6",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Dizeneh",
+          "raw": "Y627000-0",
+          "kind": "world",
+          "uwp": "Y627000-0",
+          "distance": {
+            "raw": "1.3",
+            "value": 1.3,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Dabeh",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Leyr",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "1.5",
+            "value": 1.5,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Behrel",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Yuldeh",
+              "raw": "FS00362-6",
+              "kind": "world",
+              "uwp": "FS00362-6",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Zdeyr",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Gugh",
+          "raw": "H401263-6",
+          "kind": "world",
+          "uwp": "H401263-6",
+          "distance": {
+            "raw": "2.0",
+            "value": 2.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ldeh",
+              "raw": "Y310000-0",
+              "kind": "world",
+              "uwp": "Y310000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Asagh Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "9.5",
+            "value": 9.5,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Flexos",
+    "UWP": "E5A1422-8",
+    "Stellar": "M1 V M2 V",
+    "PBG": "610",
+    "Bases": "",
+    "Remarks": "Fl He Ni"
+  }
+}

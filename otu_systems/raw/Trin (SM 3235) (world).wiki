@@ -1,0 +1,298 @@
+[[File:Ringed Planet 01.jpg|250 px|right]]
+{{Milieu header}}
+{{StellarDataQuery
+  |name= {{World|Trin (SM 3235)|Spinward Marches|Trin's Veil|3235}}  
+  |era= Milieu 1116
+}}
+{{InfoboxSystem
+|name= [[Trin (SM 3235) (world)|Trin]]
+  |sector=Spinward Marches
+  |subsector=Trin's Veil
+  |hex=3235
+  |star=''<big>Zaiden</big>''|type=''<big>G0 V</big>''
+  |P0= Karita|Dist0=0.2|UWP0=Y200000-0
+  |P1= Teermad|Dist1=0.4|UWP1=Y410000-0
+  |P2=Scorcher|Dist2=0.7|UWP2=F420668-E
+  |P3= -- |Dist3=1.0|UWP3= ''<small>"Empty Orbit"</small>''
+  |P4=Trin|Dist4=1.6|UWP4=A894A96-F
+  |P4M1=Veil|Dist4M1= ''<small>R= 1</small>''|UWP4M1=YR00000-0
+  |P5=LSP Spinward|Dist5=2.8|UWP5=F738414-E
+  |P6=Featherwind|Dist6=5.2|UWP6=C859205-F
+  |P7=Orslei|Dist7=10|UWP7='''LGG'''
+  |P7M1=Marianne|Dist7M1= ''<small>R= 5</small>''|UWP7M1=Y400000-0
+  |P7M2=Desseloss|Dist7M2= ''<small>R= 7</small>''|UWP7M2=Y100000-0
+  |P7M3=Desparon|Dist7M3= ''<small>R= 13</small>''|UWP7M3=G500366-E
+  |P7M4=Hendeford|Dist7M4= ''<small>R= 30</small>''|UWP7M4=Y4A1000-0
+  |P7M5=Lythic|Dist7M5= ''<small>R= 45</small>''|UWP7M5=Y606000-0
+  |P7M6=Desmond|Dist7M6= ''<small>R= 50</small>''|UWP7M6=Y100000-0
+  |P8=Armin|Dist8=19.6|UWP8=Y400000-0
+}}
+{{World summary |name= Trin|trade= Hi In}}
+{{World summary NaHu|sector= Spinward Marches|subsector= Trin's Veil}}
+{{World summary comment|trade= Tp}}
+{{World summary comment|trade= Ht}}
+{{World summary comment|trade= Cp}}
+{{World summary bases|bases= NS}}
+* {{Deneb visible}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Trin''' has a solitary primary star named ''Zaiden''.
+* It is a yellow main sequence.
+
+{{MonostellarSystem
+|name           = Trin
+|primary        = G0 V 
+|PrimaryName    = Zaiden
+|PrimaryNotes   = None
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* Trin, the [[mainworld]]. It orbits within Zaiden's [[habitable zone]]
+* x6 secondary [[world|rocky worlds]]. They are named (in order out from the star):
+** ''Karita'', ''Teermad'', and ''Scorcher'' (hot [[Inner World|inner system worlds]])
+** ''LSP Spinward'', ''Featherwind'', and ''Armin'' (cold [[Outer World|outer system worlds]]).
+* x1 [[gas giant]], named ''Orslei'', orbiting in the [[Outer World|outer system]].
+** It has six [[Natural Satellite|major moons]].
+
+[[Ling-Standard Products]] has a major facility within the Trin System, on a cold rockball world called ''Ling Standard Products Spinward''. Originally planned as the regional HQ for LSP, to replace the facilities at [[Mora (world)|Mora]], it instead became an R&D and manufacturing site.
+
+There is a mining colony on Scorcher and a prison camp on Desparon, the [[Natural Satellite|largest moon]] of the [[gas giant]] ''Orslei''.
+
+There is a [[Scout Base]] on Featherwind that serves as an [[X-boat]] logistical and service base. Named for the IISS survey vessel which first landed on Trin in 087-[[0s|67]], the base does does little exploratory work.
+
+Centrally held map of the system within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+[[File:Trin Sistem Map.jpg|500 px]] <br> ''(canon map provided by Megatraveller Manhunt adventure module)''
+
+=== Mainworld Data ===
+Trin has a dense, tainted atmosphere and relatively low water coverage. There is no [[Natural Satellite|moon]], but the reflective ring of debris of the moon that once orbitted Trin, and gives the name to the subsector, still gives an impressive light show at dawn and dusk.
+
+It orbits within its star's [[habitable zone]].
+
+[[File:Chart Orbit HZ Region Detailed.png|600 px]]
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Trin|Size= 8}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Trin|Atmosphere= 9}}
+* It experiences [[Celsius|generally moderate temperatures]].
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Trin|Hydrosphere= 4}}
+* Coastal regions have lush forests and jungles. The continental interiors are arid.
+
+==== Mainworld Geography and Topography ====
+
+[[File:Garden World Type 02a3.jpg|500 px]] [[File:World Rugged Mountains 04a2.jpg|500 px]]
+
+<br>
+===== ''»» Mainworld Map'' =====
+[[File:Trin World Map.jpg|600 px]] <br> ''(canon map provided by Megatraveller Manhunt adventure module & Colored)''
+
+A centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+==== Satellites ====
+'''Trin''' does not retain [[Natural Satellite|any moons]]. However, it does retain a spectacular ring system that fills its skies and lends its name to the subsector.
+
+[[File:Ring System 02.jpg|300 px]]
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+Colonized not long after [[Mora (world)|Mora]], Trin is viewed as the ''back door to the Marches''. Reachable by Jump-2 ships from a rich trade route in the [[Deneb Sector]], from where it is possible to reach [[coreward]] and join the [[Spinward Main]] or [[spinward]] towards [[Glisten (world)|Glisten]]. 
+
+Ground vehicles are rare on Trin, other for industrial or agricultural use. Maglev trains and grav buses provide the bulk internal city and inter-city transport, with some grav vehicles for rapid city to city transport.
+
+The education level in Trin is very high, and upward mobility is available through work promotions as normal, but there are also government sponsorships for people working in the arts or sports, or pursuing interesting ideas in technology or business.
+
+There is a robust social safety net for those who find themselves on hard times, and the standard of living for the poor is higher than that found on frontier or most industrial worlds.
+
+The efficient social system, coupled with Trin's high Tech Level, means that Trin is an industrial powerhouse and exporter of goods to a wide range of markets. This is facilitated by its location, with access to the [[Spinward Main]] and [[Deneb Sector]].
+
+=== World Starport (St) ===
+{{Starport|name= Trin|Starport= A}}
+* The world is host to a [[Naval Base]].
+* The world is host to a [[Scout Base]].
+
+Large quantities of goods move through Trin's excellent [[highport]]. The Highport is host to many brokerages and commercial dispute resolution firms. While many of the facilities are geared toward larger ships, generally for the larger transshipment/trading corps and [[megacorporation]]s, the repair and dockyard facilities are available to smaller ships, if they can afford the fees.
+
+The Highport is also Home to the [[Imperial Trin Institute of Commerce]] or ITICk, a large facility for training spacer crews, as well other merchant activities such as brokerage and law. It is a common destination for those who seek higher learning in a merchant career, and many of the spacers also join the Naval Reserves, undertaking training at the Imperial Navy base within the system.
+
+The [[Naval Base]] in far orbit around Trin serves as HQ for the subsector fleet and as a base for the heavy squadrons of the Sector Fleet. Local ground defenses are controlled groundside on Trin, but many of the [[System Defense Boat]]s berth at the naval base. It is also associated with an inactive ship facility for decommissioned naval vessels.
+* Elements of the [[207th Fleet]] are based at Trin, but like the rest of the fleet it is under-strength and reliant on its reserve enlisted and commissioned officers for any major deployment or action.
+
+=== World Population (P) ===
+{{WorldPop|name= Trin|multiplier= 1|Population= A}}
+
+==== Urbanization ====
+Many of the tens of billions of people on Trin live in [[Arcology|arcologies]] surrounded by farmland. The intense, well-regulated and high tech farming methods allow Trin to be almost fully self-sufficient, and the standard of living in Trin is well-known and respected throughout much of [[Charted Space]].
+
+[[Gravity control technology|Grav technology]] was available at the founding of Trin, and the arcologies and other architecture tend toward tall, graceful structures surrounded by recreational areas and parkland. Living space is generous for the size of the population, and Trin [[citizen]]s generally think of their environment in three dimensions, the idea of being confined to ground level being an alien concept.
+
+==== Linguistic Topography ====
+The following [[language]]s are most commonly heard:
+* [[Riftian|Riftian Galanglic]], one of the principal dialects of one of the two official languages of the {{Imperium}}.
+* [[Vilani (language)|Vilani]], one of the two official languages of the {{Imperium}}.
+
+=== World Technology Level (T) ===
+{{WorldTech|name= Trin|WorldTech= F}}
+
+=== World Government (G) ===
+{{WorldGov|name= Trin|Government= 9}}
+
+=== World Law (L) ===
+{{WorldLaw|name= Trin|Law= 6}}
+
+=== [[Imperial Nobility#Distinguishment|Imperial Landed Nobility]] (N) === 
+'''Trin''', as a member world of the [[Third Imperium]], holds the estate of an {{Imperial}} [[knight]] who acts as an Imperial representative to the world, and the [[fiefdom]]s of two members of the [[Imperial Nobility#Distinguishment|Imperial Landed Nobility]], who oversee affairs regarding the world at an Interstellar and Imperial level. 
+* This world is the fiefdom of an Imperial Subsector Duke: [[Trin (SM 3235) (world), Nobles of|His/Her Grace the Duke of Trin]], who also conducts affairs regarding the entire subsector at the Interstellar and Imperial level.
+* It contains the fiefdom of an Imperial Count: [[Trin (SM 3235) (world), Nobles of|His/Her Lordship the Count of Trin]]
+* It contains the estate of an Imperial Knight: [[Trin (SM 3235) (world), Nobles of|The Honourable Knight of Trin]], the Imperial representative to the world.
+
+: ''See: [[Nobles of Trin (SM 3235)|Nobles of Trin]]''
+:* ''Trin is the center of the Local Subsector Government.''
+
+=== Trade Data ===
+* [[Importance Extension|Importance]] {Ix}:     5 (very important)
+
+=== [[Economic Extension|World Economy]] (Ex) ===
+* Resources:      D (very abundant)
+* Labor:          9 (billions)
+* Infrastructure: H (very comprehensive)
+* Efficiency:     +4 (advanced)
+
+=== [[Cultural Extension|World Culture]] [Cx] ===
+* Heterogenity: 9 (discordant)
+* Acceptance:   F (extremely xenophilic)
+* Strangeness:  4 (somewhat distinct)
+* Symbols:      E (extremely abstract)
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+* [[0|The Year 0]]: the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[589]]-[[604]]: [[First Frontier War]].
+* [[604]]-[[622]]: the [[Civil War]].
+* [[615]]-[[620]]: [[Second Frontier War]].
+* [[624]]: the [[Express Boat Network]] is established.
+* [[979]]-[[986]]: [[Third Frontier War]].
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] charts the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+* [[1082]]-[[1084]]: [[Fourth Frontier War]], also known as the ''False War''.
+* [[1107]]-[[1110]]: [[Fifth Frontier War]].
+
+<br>
+----
+----
+
+=== Historical-Era: <small>Milieu:1120</small> ===
+{{hidden
+  |header = Trin in the Continuing Imperium <small>(Click Expand to reveal)</small>
+  |ta1 = left
+  |headercss = 
+  |content =
+----
+{{GURPS Worlds paragraph 
+ |hex         = 3235 
+ |gtZone      = Green 
+ |name        = Trin 
+ |alg         = Imperial 
+ |gtStarport  = Class V <small>(Class A)</small> 
+ |gtBase      = Naval & Scout bases 
+ |gtDiameter  = 8000 
+ |gtGravity   = 1.00 
+ |gtAtmosphere= Dense oxygen-nitrogen Tainted 
+ |gtHydro     = 40 
+ |gtClimate   = Normal 
+ |gtPopulation= 10s billions [[sophont]]s
+ |gtGovernment= [[Impersonal Bureaucracy]]
+ |gtCL        =  
+ |gtTL        = 12 (TTL=15)
+ |gtWTN       = 6.5
+}}
+-----
+
+
+  |contentcss = 
+  |ta2 = left
+}}
+----
+=== Historical-Era: <small>Regency/Milieu:1200</small> === 
+{{hidden
+|header = The Regency: Trin in the New Era <small>(Click Expand to reveal)</small>
+|ta1 = left
+|content =
+==== Rape of Trin (1139)====
+In [[1139]], Trin was attacked by a vampire ship, the former [[Ziru Sirka]]an battleship ''[[Kishkii]]'', which destroyed much of the orbital facilities, then bombarded the surface for several hours before crashing itself into the surface. ''Kishkii'' was the sole survivor af a vampire fleet of 60 to 80 ships, which seemed to have crossed four sectors with the sole aim of destroying Trin.
+
+Three billion people died in the initial assault, however, 10 million more died from the effects of radiation.  With all surface and orbital infrastructure decimated, the world could not maintain its surviving population, and many of its citizens where forced to emigrate.
+
+The subsector was renamed ''[[Trin's Shroud Subsector|Trin's Shroud]]'' as a result of the attack.
+
+==== History-Era: Regency Era (Milieu:1130) ====
+The naval ship reserve was relatively untouched by the attack of the ''Kishkii'', as was the Naval base, which was based around the orbit on the far side of Trin. The Naval HQ was moved due to the loss of dirtside resources, but the inactive fleet station, NavInacShipFac was quickly repaired.
+
+==== Trin Lives ====
+That is the first thing that hit's you as you come out of jump, and hear the enormous amount of radio traffic that all busy ports have. Freighters and scouts, yachts and warships, all of the typical retinue of a major port is here.
+
+Only as you near the white orb of Trin - with it's thin, sky blue belt - can you spot the carnage. Several large impact craters which dot the northern hemisphere. Black scar marks, which pepper hundred's of square kilometers of the Von Herrio Glacers. Above all, the orbiting hulk of dead cities, once home to 800 million people, now fly in a twisted, ghastly dance over the fair world of Trin.
+
+Docking at New Sorrom Highport, the visitor is accosted with rules and regulations. While necessary in the Quarantine Zone, the rigor and harshness of the Navy seem more apparent here than anywhere else.
+
+The actual starport itself is ample for any need or service. The inhabitants of high ports are famous for living a world apart from the folks dirtside, and the 80 million inhabitants of New Sorrom are no different. The famous Trin friendliness, patriotism and love of travel still flourishes here, but is slowly giving way to the Trin Survival Movements. The local Naval base, home of the 207th fleet, is known as the last one to see a major action against piracy, in 1159.
+
+Non-Trin starships can land only at Sorrom Down. It is a must to apply for a permit before going dirtside, as _any_ unauthorized craft will be blown out of the sky. Without warning. Fortunately, the Authorization procedure is quite simple, merely a battery of tests to insure that your ship and equipment is Virus-free. Moreover, they will install a "Slaver", that will insure that your ship will dock under the control of Sorrow Down, not the pilot.
+
+At Sorrow Down, the local government will board your craft as soon as you dock. Before the [[High efficiency plasma recombustion|HEPlaR]] is cooled, armed Investigators will be onboard, combing every electronic gadget, computer, wrist comp, and every piece of every lot of cargo onboard.
+
+If any non-Trin ship is caught carrying Infected merchandise, the ship is seized: only Noble influence can return it. If they are caught ''Smuggling'' merchandise (Infected or not), the entire crew is shot, on the spot. The penalties are less harsh for Trin citizens: simply a massive fine and "personality reshaping", respectively.
+
+O.K., so you pass inspection. It will still prove impossible to sell electronic merchandise to anyone but another trader. Even harmless goods from anyplace but Trin's neighbor, Hazel (Trin's Veil 3236: C645747-5) will be viewed with suspicion. Three billion died because of a batch of Infected scribble tablets, after all.
+
+About the only thing going for you is that you can defend your cargo and person from any Survivalist attack: There are no weaponry laws. None. You probably won't need to draw your weapon, though: the days of the Night Hits, when Survivalists and the Union of Merchants & Traders would attack each other with fusion rifles have been over for 20 years. Just make a good acquaintance with the Union, and pay your dues, and the Union will look after your ship and cargo.
+
+If you are a member of the Regency Navy or the Quarantine Service, it would be wise to leave your uniforms in your cabins. The Trin blame those groups, especially the [[Regency Quarantine Service]], for the [[Rape of Trin]]. While physical violence is not out of the question, the Trin - especially the old-timers - are more likely to spit on your shoes or make obscene remarks.
+
+About the only place where foreigners are welcomed is at Leormen's Point, an undersea settlement of 25 million refugees of the Aslan Incursion. The locals, Akimen and Glistenites, remain favorably disposed to traders since their religion insists on hospitality to strangers from the stars. Even here, though, don't expect anyone to ask to borrow your hand comp.
+
+Trin culture tends to revolve around the themes of Survival and Rebuilding. The young, especially, are considered the responsibility and the future of the entire community. They tend to be spoiled shamelessly, and have a rather high view of themselves. Trin art also emphasizes the theme of rebuilding from the ruins, and many refugees of the Wilds admit to a attraction to the entrancing LightDances and mournful, graceful Thinsong of modern Trin art. Indeed, the upper classes all strive to patronize the best of Trin art, as prestige is measured in the number of notable artistic works you can own.
+
+Although the dominant culture of Trin is generally vehemently anti-foreigner, there is still a soft spot for nobility and a strong sentimental attachment to the Regency government, especially to Norris and his heirs; and unlike many Infected worlds, Trin has retained its technology, using it to create the best anti-Viral programs in the sector rather than retreat into a anti-technological never-neverland.
+
+Still, these are but candles in the dark, and as long as the people and government of Trin focus on nursing their wounds, they cannot truly give local trade and subsector government the leadership needed for the New Era.
+|contentcss = 
+|ta2 = left
+}}
+----
+----
+
+== References & Contributors ([[Sources]]) ==
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=34-35}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=The Regency Sourcebook|page=51}}
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=117-123}}
+ | {{Ludography cite|name=The Spinward States|page=115}} (UWP only)
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=137-138}}
+ | {{Ludography cite|name=Manhunt: The Onnesium Quest, Vol. 1 | page=6-9}}
+ | [[Peter Keel]] - [https://web.archive.org/web/20050420142557/http://seegras.discordia.ch/Roleplay/Traveller/Space/Sectors/spinward/sec_p.html#trin InfoData Library] 
+}}
+
+[[Category: 207th Fleet worlds]]
+[[Category: Baraccai Technum worlds]]
+[[Category: GT]]
+[[Category: Highport worlds]]
+[[Category: Orbital Facility]]
+[[Category: Ling-Standard Products worlds]]
+[[Category: Megastructure]]
+[[Category: MindGames worlds]]
+[[Category: Religion]]
+[[Category: Worlds with a X-Boat Station]]
+{{LE|T5 Second Survey worlds}}
+{{LEN|}}

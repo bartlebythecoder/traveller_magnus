@@ -1,0 +1,629 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Massilia",
+  "hex": "2411",
+  "sector_abbreviation": "Mass",
+  "subsector": "Forquee",
+  "name": "Kerak",
+  "sources": [
+    {
+      "page": "Kerak (world)",
+      "revid": 1089967,
+      "timestamp": "2026-11-04T22:14:39Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Kerak (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Heko",
+          "type": "M2 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Heko",
+      "stars": [
+        {
+          "name": "Heko",
+          "type": "M2 V"
+        }
+      ],
+      "labels": [
+        "Kerak"
+      ],
+      "pages": [
+        "Kerak (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Gelmorth",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "0.193",
+            "value": 0.193,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kerak (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kerak (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Letro",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "0.568",
+            "value": 0.568,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kerak (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kerak (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kerak (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Kerak",
+          "raw": "B100576-D",
+          "kind": "world",
+          "uwp": "B100576-D",
+          "distance": {
+            "raw": "0.8",
+            "value": 0.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kerak (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 4,
+          "name": "Hotov",
+          "raw": "Y310000-0",
+          "kind": "world",
+          "uwp": "Y310000-0",
+          "distance": {
+            "raw": "1.63",
+            "value": 1.63,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kerak (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Lavoth",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "3.43",
+            "value": 3.43,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kerak (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kerak (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "B Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kerak (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kerak (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kerak (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Pillosie",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "4.91",
+            "value": 4.91,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kerak (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y310000-0",
+              "kind": "world",
+              "uwp": "Y310000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kerak (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y421000-0",
+              "kind": "world",
+              "uwp": "Y421000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kerak (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kerak (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Moon",
+              "raw": "Y433000-0",
+              "kind": "world",
+              "uwp": "Y433000-0",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kerak (world)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "12 Diam",
+                "value": 12.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kerak (world)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Moon",
+              "raw": "Y210000-0",
+              "kind": "world",
+              "uwp": "Y210000-0",
+              "distance": {
+                "raw": "13 Diam",
+                "value": 13.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kerak (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Paccao",
+          "raw": "Y531000-0",
+          "kind": "world",
+          "uwp": "Y531000-0",
+          "distance": {
+            "raw": "5.42",
+            "value": 5.42,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kerak (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Kerak (world)",
+      "label": "Kerak",
+      "stars": [
+        {
+          "name": "Heko",
+          "type": "M2 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Gelmorth",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "0.193",
+            "value": 0.193,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Letro",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "0.568",
+            "value": 0.568,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Kerak",
+          "raw": "B100576-D",
+          "kind": "world",
+          "uwp": "B100576-D",
+          "distance": {
+            "raw": "0.8",
+            "value": 0.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Hotov",
+          "raw": "Y310000-0",
+          "kind": "world",
+          "uwp": "Y310000-0",
+          "distance": {
+            "raw": "1.63",
+            "value": 1.63,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Lavoth",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "3.43",
+            "value": 3.43,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "B Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Pillosie",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "4.91",
+            "value": 4.91,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y310000-0",
+              "kind": "world",
+              "uwp": "Y310000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y421000-0",
+              "kind": "world",
+              "uwp": "Y421000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Moon",
+              "raw": "Y433000-0",
+              "kind": "world",
+              "uwp": "Y433000-0",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 5,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "12 Diam",
+                "value": 12.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 6,
+              "name": "Moon",
+              "raw": "Y210000-0",
+              "kind": "world",
+              "uwp": "Y210000-0",
+              "distance": {
+                "raw": "13 Diam",
+                "value": 13.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Paccao",
+          "raw": "Y531000-0",
+          "kind": "world",
+          "uwp": "Y531000-0",
+          "distance": {
+            "raw": "5.42",
+            "value": 5.42,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Kerak",
+    "UWP": "B100576-D",
+    "Stellar": "M2 V",
+    "PBG": "604",
+    "Bases": "S",
+    "Remarks": "Ni Va Ht"
+  }
+}

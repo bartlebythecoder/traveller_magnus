@@ -1,0 +1,85 @@
+The [[Cipango (system)|Cipango system]] is a [[System|star system]].
+* It consists of a central [[star]], its family of [[world]]s, and their [[Natural Satellite|various moons]].
+* The [[system]]'s [[mainworld]] is [[Cipango (world)|Cipango]].
+
+{{InfoboxSystem
+  |name=Cipango
+  |subsector=Cronor
+  |sector=Spinward Marches
+  |hex=0705
+  |star='''Cipango-Taiyoo'''
+  |type='''G2V'''
+  |P1=Zero-Belt
+  |Dist1=0.5|UWP1=Y000000-0
+  |P2=Himawari
+  |Dist2=0.7|UWP2=HS00000-0
+  |P3=Kusai
+  |Dist3=0.9|UWP3=F596267-C
+  |P4=Cipango
+  |Dist4=1.1|UWP4=A886865-C
+  |P4M1=* ''Yubiwa-Ring''
+  |Dist4M1=2|UWP4M1=YR00000-0
+  |P4M2=* ''Tsuki-Shivva''
+  |Dist4M2=25|UWP4M2=F646668-C
+  |P5=Yon-Belt
+  |Dist5=1.5|UWP5=G000268-C
+  |P6=Doitsu
+  |Dist6=2.3|UWP6=H7A0167-B
+  |P6M1=* ''Bavaria-32''
+  |Dist6M1=12|UWP6M1=H100363-B
+  |P7=Fukuzawa
+  |Dist7=7.1|UWP7='''Small GG'''
+  |P7M1=* ''F-8''
+  |Dist7M1=8|UWP7M1=HS00167-B
+  |P7M2=* ''F-11 prim''
+  |Dist7M2=11|UWP7M2=HS00000-0
+  |P7M3=* ''F-11 bis''
+  |Dist7M3=11|UWP7M3=HS00163-B
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+They '''Cipango system''' has a solitary primary star.
+* It is a yellow main sequence named ''Cipango-Taiyoo''.
+
+{{MonostellarSystem
+|name           = Cipango
+|primary        = G2 V
+|PrimaryName    = Cipango-Taiyoo
+|PrimaryNotes   = 
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]].
+* x6 secondary [[world|rocky worlds]]. The inner three are a large [[Inner World|inner system]] [[planetoid]] named ''Himawari'', tropical ''Kusai'', and tiny ''Doitsu'', lying beyond Cipango's orbit. Three additional unnamed frozen worlds orbit in the [[Outer World|far outer system]].
+* x2 [[planetoid belt]]s, named the ''Zero-Belt'', orbiting close to the star, and the ''Yon-Belt'', lying between Cipango and Doitsu.
+* x1 [[gas giant]], named ''Fukuzawa''. It orbits beyond Doitsu, in the [[Outer World|outer system]].
+** It retains a family of [[Natural Satellite|three moons]].
+
+The Cipango system is not very impressive, but it still has three garden worlds: Kusai, Cipango itself, and Tsuki-Shivva, Cipango's moon.
+
+Kusai orbits within the inner part of the [[habitable zone]]. Its climate is [[Celsius|a little too hot]] for human comfort, the atmosphere has a foul smell, and there is dangerous [[Lifeform|local wildlife]], so it has not attracted a large population. It orbits within the star's [[Jump Shadow]], so it is rarely visited by interstellar traders.
+
+Cipango itself has a large moon, Tsuki-Shivva, which has been colonized. It is considered a fairly nice place that has a cooler climate than Cipango itself. Most of the new colonists from the Consulate have settled here.
+
+== History & Background (Dossier) ==
+Fukuzawa, the system's solitary [[gas giant]], has [[Natural Satellite|three moons]]. These are F-8 (the innermost, orbiting at 8 radii,) and the twin moons of ''F-11 prim'' and ''F-11 bis'' (both orbiting at 11 radii, but with 60 degrees separation between them). All three are cold, airless chunks of rock.
+
+== References & Contributors (Sources) ==
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=4-5}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=The Regency Sourcebook|page=36}} (UWP only)
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=41}}
+ | {{Ludography cite|name=The Spinward States|page=98}} (UWP only)
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=26}}
+ | [[P-O "BeRKA" Bergstedt]] - [https://zhodani.space/data/spinward/chronor/cipango/ Cipango Landgrab] & [https://zhodani.space/data/spinward/chronor/cipango/cipsystem.html Cipango System]
+}}
+
+{{LE|GT|T5 Second Survey worlds}}
+{{LEN}}

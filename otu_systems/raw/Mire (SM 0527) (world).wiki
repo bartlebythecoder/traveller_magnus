@@ -1,0 +1,168 @@
+[[File:Alien Moon 273b-0.jpg|250 px|right]]
+{{Milieu header}}{{StellarDataQuery
+ |name= {{World|Mire (SM 0527)|Spinward Marches|Darrian|0527}}
+ |Non-canon trade codes= Ht 
+ |era= Milieu 1116
+}}
+{{InfoboxSystem|name=Mire
+ |subsector=Darrian|sector=Spinward Marches|hex=0527
+ |star='''Primary'''|type='''K6 V'''
+ |P0=Mire (SM 0527)|Dist0=0.2|UWP0=A665A95-B
+ |P1=Rydem|Dist1=0.4|UWP1=F765866-A
+ |P2=Gamma|Dist2=0.7|UWP2=Y100200-A
+ |P3=Delta|Dist3=1.0|UWP3=Y133533-A
+ |P4=Esse|Dist4=1.7|UWP4=Y202569-B
+ |P5=Firzhen|Dist5=2.2|UWP5=Y564416-A
+ |P5M1=* ''One''|Dist5M1=7|UWP5M1=Y203200-B
+ |P5M2=* ''Two''|Dist5M2=25|UWP5M2=G100300-A
+ |P5M3=* ''Vuhlnoh''|Dist5M3=55|UWP5M3=G462667-A
+ |P6=Epsilon|Dist6=3.3|UWP6=Y200000-0
+ |P6M1=* ''Ring''|Dist6M1=1|UWP6M1=YR00000-0
+ |P6M2=* ''One''|Dist6M2=35|UWP6M2=YS00210-A
+ |P6M3=* ''Two''|Dist6M3=40|UWP6M3=GS00533-A
+ |P7=Sigma|Dist7=4.4|UWP7=G451167-B
+ |P8=Psi|Dist8=5.5|UWP8=Y000000-0
+}}
+* {{SpMain}}
+* It is a member of the [[Darrian Group]].
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Mire''' has a solitary primary star.
+* It is an orange main sequence.
+
+{{MonostellarSystem
+|name           = Mire
+|primary        = K6 V
+|PrimaryName    = Primary
+|PrimaryNotes   = 
+}}
+
+=== Mainworld Data ===
+Mire has become an underground world, which allows the surface to be used for agriculture and natural preserves.
+
+It orbits within the [[habitable zone]].
+* It receives moderate levels of [[Electromagnetic Spectrum|stellar energy]].
+
+[[File:Chart Orbit HZ Region Simple.png|600 px]]
+
+== History & Background ([[Dossier]]) ==
+Government is a major industry on Mire. Bureaucrats and military personnel are to be found everywhere. Most of the large corporations in the [[Darrian Confederation]] keep offices here.
+
+=== [[Starport|World Starport]] (Sp) ===
+{{Starport|name= Mire|Starport= A}}
+
+====World Demographics====
+In addition to the [[Darrian]] population there is a enclave of some 70 million [[Dolphin]]s. 
+
+====World Languages====
+* ''[[Te-Zlodh]]''
+** Written ''te-zlodh'' uses a syllabary of flowing symbols, known as ''yaser te-yulep'' (the old script). When the [[Solomani]] arrived at Darrian, a new [[Latin]]-based alphabet, ''rome te-yulep'' ('the Roman script'), was introduced. Currently, ''yaser te-yulep'' remains in use for legal documentation, classic literature, poetry and news bulletins, where the speed and efficiency of the syllabary allows for rapid reading. Scientific and educational documentation are written in ''rome te-yulep''.
+* [[Delphinic Trinary]]
+
+=== World Law (L) ===
+{{WorldLaw|name= Mire|Law= 5}}
+* The [[Taledh Code]] is the basis of Darrian law.
+
+=== Economic ===
+==== Corporations ====
+The following corporations operate within this region:
+* ''[[Dhoshu Systems]]'': a [[Darrian]] [[corporation]] involved in food production and distribution.
+* ''[[Iro]] [[Inc.]]'': a [[corporation]] producing weaponry, armaments, and armor. It particularly caters to the upper elements of society.
+* ''[[Pthanth Shipyards]]'': a [[starship]]-manufacturing and [[Naval Architect|naval architecture]] [[corporation]] with facilities in [[starport]]s across the region.
+* ''[[Tharnitia Denus]]'': a transport and logistics [[corporation]] that operates postal services and maintains terminals on all worlds within the Darrian Confederation. <br> The name literally translates as "Transport Company". 
+* ''[[Zloril]]'': a manufacturing [[corporation]] specializing in electronic equipment such as [[computer]]s, [[Ship Sensor Suite|sensor systems]], and entertainment devices.
+
+[[File:Dhoshu_Systems.jpg|130 px]] [[File:Logo Iro Inc.png|150 px]] [[File:Logo Pthanth Shipyards.png|130 px]] [[File:Logo Tharnitia Denus.png|175 px]] [[File:Logo Zloril.png|175 px]]
+
+=== History of Mire ===
+Mire was founded in the early days of the pre-''[[Maghiz]]'' Confederation, and was the first outsystem colony that the Darrians attempted. It was chosen because of its incredibly friendly environment which was amazingly similar to that of Darrian. Among the first colonists were a large contingent of sentient [[Dolphin]]s that had accompanied the Solomani when they settled on Darrian. 
+
+Even at its founding, the populace was focused on environmental concerns, trying to live the lessons learned on Darrian. While the colonists of [[Rorre (world)|Rorre]] were focused on living an ecologically friendly lifestyle by avoiding technology, the colonists of Mire wanted to live in an ecologically friendly manner while enjoying the benefits of technology. As a result of this, the majority of each population center created by the colonists was situated underground. 
+
+These underground structures were not closed, small spaces, but large and open. They were directly connected to the surface allowing a natural ventilation process. 
+
+The government of Mire was originally a feudal technocracy (like Darrian), but the bureaucracy needed to manage the rules and regulations that surrounded its ecological efforts caused it to quickly migrate to an impersonal bureaucracy. Despite the change, the underlying structure was still that of the old feudal technocracy. 
+
+Mire was founded as an agricultural colony.  However, because of its wonderful ecosphere, its reputation as a beautiful world caused it to become a popular destination for immigrants. Because of this, its population quickly grew to the point where it had a population of over a billion people. 
+
+While all of the other Darrian colonies operated as true, subject colonies, Mire was the only one to see its status rise to the point where Mire was directly represented in the Darrian government. No other colony had such representation because no other colony had reached the size or influence necessary for that to occur. 
+
+Also, as a result of this, Mire was just as technologically sophisticated as Darrian.  Because of the overall ecological restrictions, the technology was not obvious, but Mire truly was a TL G world along with Darrian itself.
+
+===The Chaos===
+After the ''[[Maghiz]]'', the immediate colonies around Darrian did get advanced warning.  All of the colonies used the warning as wisely as possible and tried to protect all of their sensitive equipment. Unfortunately for Mire, they were just too close to the epicenter of the disaster. 
+
+The ''Maghiz'' effects still destroyed 99% of all electronics, computer and gravitic devices. Unlike on Darrian where vehicles and even entire cities came falling out of the sky, Mire suffered no such widespread devastation. Another advantage Mire had is that since its underground cities were open systems, the systems failures caused almost no loss of life. The people of Mire were still alive, they just had no electronics. 
+
+Then things got ugly. Despite the ironic fact that Mire was originally an agricultural colony, it had no way to feed its people. Mire was as technologically dependent as Darrian, and without that technology they had no way to run their agricultural systems. So, while Darrian's fate was an immediate catastrophe, Mire's fate was long and lingering suffering. 
+
+The initial phases of the recovery were hellish and brutal. Most people just couldn't understand how they were starving in a veritable garden. Many people lost their lives in the sudden violence caused by the fight over the scarce resources. Many more people would have lost their lives in the fight over food if the Dolphins did not come to their aid. The Dolphins were able to help the humans harvest food from the seas and the people of Mire were able to overcome the famine in a much shorter period of time that they otherwise would have. 
+
+It took over a decade for order to be restored and another century before Mire was able to reconstitute a world government. The new government was just a pure bureaucracy with no traces of the old technocracy. 
+
+Once the famine was conquered and order was restored, Mire began to work to regain the lost technology. Despite their horrible beginning, they were in a much better position that Darrian as they still had the majority of their population and its base of knowledge, and plenty of undestroyed (but unworking) artifacts to work from. 
+
+The pace of progress was still slow as they were not willing to completely forsake their ecological heritage. Mire was determined to regain high technology without pillaging their world. They eventually succeeded. 
+
+===Return to Space ===
+The people of Mire regained TL 8 in [[-438]] and began reexploring their solar system. One direct result of this was the recolonization of [[Rydem (world)|Rydem]]. By [[-275]] they had reached TL A and rediscovered jump drive. Once they had jump drive they quickly began making a small fleet to recontact the other colonies. 
+
+After making contact, Mire quickly organized the [[Darrian Group]]. It was a loose affiliation of the former Darrian colonies directly run by Mire. It was not a true government, but more of a outreach program of the Mire government. The program took on attributes of a true interstellar government over time, but was still completely run by Mire. All of the surviving former colonies were brought together under the banner of the Darrian Group, except for [[Zamine (world)|Zamine]] and [[Entrope (world)|Entrope]] who were too far away to be formally included. 
+
+Mire used the Darrian Group organization to try and help the other colonies recover.  While some, like Jacent, quickly took to the efforts and made great technological gains.  Others, like [[Laberv (world)|Laberv]] and Condaria, resented Mire's paternalistic approach and didn't make much progress at all. 
+
+One side result of the way Mire ran the Darrian Group was that many people who became disenchanted (and sometimes disenfranchised) chose to emigrate to Zamine and Entrope where they felt they could escape Mire's influence. The Mire government was actually pleased with this result and, many times, would subtly try to encourage such migration. 
+
+Another development was the realization that they were no longer alone. Instead of being able to explore and discover a vast region of space without rivals, they now had to deal with two polities: the [[Zhodani Consulate]] and the [[Sword Worlds]]. While the Zhodani were the greater danger with their psionic powers and immense size, the Sword Worlds were the more immediate concern because of the proximity and bellicose nature. Fortunately for the Darrian Group, the Sword Worlds were very fragmented and spent most of their energies fighting amongst themselves. 
+
+That suddenly changed when the Sword Worlds unified for the first time as the [[Sacnoth Dominate]]. Presented with this potential danger, Mire immediately began creating a unified military and started establishing military bases. Significantly, [[Spume (world|Spume]], which had been left uninhabited up to this point, gained a small outpost and a military base. Also, the colony world of [[Nosea (world)|Nosea]] was formally added to the Darrian Group and gained a military base, too. 
+
+The [[Sacnoth Dominate]] didn't last long, but because Mire now knew that they could unite at any time, the military of the Darrian Group was maintained and strengthened. As with the Darrian Group beauracracy, the military command was headquartered at Mire. 
+
+Finally, in [[148]] contact was made with the Third Imperium. Realizing the huge potential that trade with the Imperium presented, Mire finally was forced to realized that a true interstellar government was required. To this end the Darrian Confederation was organized, and was set up as a government completely separate from the government of Mire (though Mire was made the capital of the Confederation as a consolation). All of the worlds of the Darrian Group joined, as well as Trifuge, Terant 340, Zamine and Nonym. 
+
+As a result of having most of the world's economy focused on beaucracy, its tech level stagnated. It reached TL B as a result of the military buildup prior to the founding of the Darrian Confederation. Since then, however, it has not progressed for over a thousand years. 
+
+A result of this was that all military ship building and much of the high-end private ship building migrated to the shipyards at [[Jacent (world)|Jacent]] and Darrian. Mire's shipyard was relegated to mass-produced, less lucrative private and commercial craft.
+
+=== Present ===
+As the capital of the Darrian Confederation, Mire also houses the vast Confederation government. The two governments manage to stay separated, despite the immense size of both governments and their colocation in Theh'ld, the capital city. 
+
+In addition to the vast underground cities, there are some smaller "sky" cities, and an orbital city. Unlike most systems that have a linked "highport" and "downport", Mire has its main starport (and shipyard) in the orbital city. The other major cities planetside only have "downport" style facilities.  
+
+Recently Mire has roused itself from its technological stupor and has been making progress in advancing its technology. Steady progress has been made and it should qualify for TL C within the decade. It is hoped that by making these improvements their starport will gain more high-end commercial business.
+
+While the command structure of the naval base resides in Theh'ld, the operational portion (and majority) of the base actually resides on Esse. Esse was chosen because of its isolation in the system, and the ready availability of fuel (in the form of its ice "oceans"). The population listed for Esse are actually dependents and support staff for the naval base; there is no true civilian population on Esse.
+
+== References & Contributors ([[Sources]]) ==
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=8-9}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name= Darrians|version=Classic Traveller|page=23,32}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=The Regency Sourcebook|page=44}}
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=48}}
+ | {{Ludography cite|name=The Spinward States|page=108}} (UWP only)
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=80-84,86,88}} (UWP only)
+ | [[Craig Janssen]] -[http://www.caddocourt.com/traveller/mire/history.html Mire history] TML Land Grab
+}}
+
+[[Category: Aslan worlds]]
+[[Category: Imperial Aslan worlds]]
+[[Category: Darrian Group worlds]]
+[[Category: Daryen worlds]]
+[[Category: Dhoshu Systems worlds]]
+[[Category: Dolphin worlds]]
+[[Category: Highport worlds]]
+[[Category: Iro worlds]]
+[[Category: Orbital Facility]]
+[[Category: Pthanth Shipyards worlds]]
+[[Category: Psionics worlds]]
+[[Category: Shipyard worlds]]
+[[Category: Te-Zlodh worlds]]
+{{LE|T5 Second Survey worlds}}
+{{LEN}}

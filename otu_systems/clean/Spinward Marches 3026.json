@@ -1,0 +1,549 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "3026",
+  "sector_abbreviation": "Spin",
+  "subsector": "Mora",
+  "name": "Grille",
+  "sources": [
+    {
+      "page": "Grille (world)",
+      "revid": 1063882,
+      "timestamp": "2026-07-19T14:49:37Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Grille (world)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Primary",
+          "type": "M2 V",
+          "notes": null
+        },
+        {
+          "role": "Secondary",
+          "name": "Companion",
+          "type": "M2 V",
+          "notes": "Approximately 100 AU from the primary."
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": null,
+      "stars": [
+        {
+          "name": null,
+          "type": "M2 V"
+        }
+      ],
+      "labels": [
+        "Grille"
+      ],
+      "pages": [
+        "Grille (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Rocky World",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "0.09",
+            "value": 0.09,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grille (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Rocky World",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "0.17",
+            "value": 0.17,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grille (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Rocky World",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "0.26",
+            "value": 0.26,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grille (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Rocky World",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "0.35",
+            "value": 0.35,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grille (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Rocky World",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "0.44",
+            "value": 0.44,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grille (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Rocky World",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "0.61",
+            "value": 0.61,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grille (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Rocky World",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "0.88",
+            "value": 0.88,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grille (world)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Icy World",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "1.21",
+            "value": 1.21,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grille (world)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Icy World",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "1.66",
+            "value": 1.66,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grille (world)"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Icy World",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "2.35",
+            "value": 2.35,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grille (world)"
+          ]
+        }
+      ]
+    },
+    {
+      "star": null,
+      "stars": [
+        {
+          "name": null,
+          "type": "M2 V"
+        }
+      ],
+      "labels": [
+        "Grille Companion"
+      ],
+      "pages": [
+        "Grille (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Vengeance",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "0.43",
+            "value": 0.43,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grille (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Nashorn",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "4 Diam",
+                "value": 4.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Grille (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Wespe",
+              "raw": "H3A0000-0",
+              "kind": "world",
+              "uwp": "H3A0000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Grille (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Ziege",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "11 Diam",
+                "value": 11.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Grille (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Gepard",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "20 Diam",
+                "value": 20.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Grille (world)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Grille",
+              "raw": "E410335-7",
+              "kind": "world",
+              "uwp": "E410335-7",
+              "distance": {
+                "raw": "35 Diam",
+                "value": 35.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Grille (world)"
+              ],
+              "mainworld": true
+            }
+          ]
+        }
+      ],
+      "placement": {
+        "orbit": null,
+        "au": 100.0,
+        "from": "star template notes"
+      }
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Grille (world)",
+      "label": "Grille",
+      "stars": [
+        {
+          "name": null,
+          "type": "M2 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Rocky World",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "0.09",
+            "value": 0.09,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Rocky World",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "0.17",
+            "value": 0.17,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Rocky World",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "0.26",
+            "value": 0.26,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Rocky World",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "0.35",
+            "value": 0.35,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Rocky World",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "0.44",
+            "value": 0.44,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Rocky World",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "0.61",
+            "value": 0.61,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Rocky World",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "0.88",
+            "value": 0.88,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 8,
+          "name": "Icy World",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "1.21",
+            "value": 1.21,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 9,
+          "name": "Icy World",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "1.66",
+            "value": 1.66,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 10,
+          "name": "Icy World",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "2.35",
+            "value": 2.35,
+            "unit": "AU"
+          }
+        }
+      ]
+    },
+    {
+      "page": "Grille (world)",
+      "label": "Grille Companion",
+      "stars": [
+        {
+          "name": null,
+          "type": "M2 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Vengeance",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "0.43",
+            "value": 0.43,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Nashorn",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "4 Diam",
+                "value": 4.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Wespe",
+              "raw": "H3A0000-0",
+              "kind": "world",
+              "uwp": "H3A0000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Ziege",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "11 Diam",
+                "value": 11.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Gepard",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "20 Diam",
+                "value": 20.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 5,
+              "name": "Grille",
+              "raw": "E410335-7",
+              "kind": "world",
+              "uwp": "E410335-7",
+              "distance": {
+                "raw": "35 Diam",
+                "value": 35.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Grille",
+    "UWP": "E410335-7",
+    "Stellar": "M2 V M2 V",
+    "PBG": "701",
+    "Bases": "",
+    "Remarks": "Lo"
+  }
+}

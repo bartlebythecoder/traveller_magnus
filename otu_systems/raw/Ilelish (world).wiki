@@ -1,0 +1,282 @@
+[[File:Ilelish World Basic.jpg|250 px|right]]
+{{UWP
+|name= {{World|Ilelish|Ilelish|Ilelish|2907}}
+|uc    = E674A83-A
+|popc  = 2
+|zonec = green
+ |u0= 
+|alg     = ImDi 
+|class   = Hi In / (Suerrat) (Suggested: An)
+|trade   = in
+|climate = TBD
+|nblty   = BE
+|bases   = -
+|primary = M0 V
+|belts   = 0
+|GGcount = 4
+}}
+{{World summary |name= Ilelish |trade=Hi In}}
+{{World summary comment|trade=An}} 
+{{World summary ImDi|sector= Ilelish |subsector=Ilelish}}
+* It is the [[homeworld]] of the [[Suerrat]]. 
+{{InfoboxSystem
+|name= Ilelish
+|sector=Ilelish|subsector=Ilelish|hex=2907
+|star= [[Vogut (star)|Vogut]] |type= M0 V 
+|P0= Bakap      |Dist0   = 0.157   |UWP0= LGG
+|P1= Ilelish    |Dist1   = 0.4     |UWP1= E674A83-A
+|P1M1= Komboko  |Dist1M1 = 29 <small>Radii</small> |UWP1M1= ?10076?-?
+|P2= Katlek     |Dist2   = 0.651   |UWP2= LGG
+|P2M1= ?        |Dist2M1 = ? <small>Radii</small> |UWP2M1= ?
+|P2M2= ?        |Dist2M2 = ? <small>Radii</small> |UWP2M2= ?
+|P2M3= ?        |Dist2M3 = ? <small>Radii</small> |UWP2M3= ?
+|P2M4= ?        |Dist2M4 = ? <small>Radii</small> |UWP2M4= ?
+|P2M5= ?        |Dist2M5 = ? <small>Radii</small> |UWP2M5= ?
+|P3= Maklob     |Dist3   = 1.03    |UWP3= LGG
+|P3M1= Ring     |Dist3M1 = ? <small>Radii</small> |UWP3M1= YR00000-0
+|P3M2= ?        |Dist3M2 = ? <small>Radii</small> |UWP3M2= ?
+|P4= Navop      |Dist4   = 1.61    |UWP4= LGG
+|P4M1= ?        |Dist4M1 = ? <small>Radii</small> |UWP4M1= ?
+|P4M2= ?        |Dist4M2 = ? <small>Radii</small> |UWP4M2= ?
+|P4M3= ?        |Dist4M3 = ? <small>Radii</small> |UWP4M3= ?
+|P4M4= ?        |Dist4M4 = ? <small>Radii</small> |UWP4M4= ?
+|P5= Zaklotak   |Dist5   = 2.68    |UWP5= H311000-0
+|P6= Watok      |Dist6   = 4.06    |UWP6= Y000210-9
+|P7= Patlobat   |Dist7   = 6.58    |UWP7= H000401-B
+|P8= Nakanto    |Dist8   = 10.3    |UWP8= YDC8030-5
+|P9= Mavoto     |Dist9   = 16.9    |UWP9= Y110011-7
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+No information yet available. 
+
+=== Stellar Data ===
+'''Ilelish''' has a solitary primary star, named ''Vogut''.
+* It is a red main sequence.
+
+{{MonostellarSystem
+|name           = Ilelish
+|primary        = M0 V 
+|PrimaryName    = Vogut
+|PrimaryNotes   = Unusually stable star displaying almost no [[Flare Star|flare activity]].
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]]
+* x5 secondary [[world|rocky worlds]] (Zaklotak, Watok, Patlobat, Nakanto, and Mavoto)
+* x4 [[gas giant]]s (Bakap, Katlek, Maklob, and Navop)
+
+=== Mainworld Data ===
+'''Ilelish''' has a relatively slow rotation period: one local day is equivalent to [[Hour|36.5 standard hours]].
+* Geological and geomagnetic evidence suggests that in the ancient past the world rotated far more slowly.
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Ilelish|Size= 6}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Ilelish|Atmosphere= 7}}
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Ilelish|Hydrosphere= 4}}
+
+=== Satellites ===
+Ilelish has a single [[Natural Satellite|moon]], named Komboko ([[Planetary Size|diameter]] [[Kilometer|2,293 kilometers]]).
+* Geological and hydrological evidence strongly suggests that the moon was placed in orbit around the world in the ancient past.
+* It has an elliptical orbit, swinging out towards the star and then circling back in again.
+
+[[File:Ilelish Komboko Basic.jpg|500 px]]
+
+==== Mainworld Geography and Topography ====
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+[[File:Blank World Map Arid.png|500 px]] <br> (''Blank map, predominantly dry world''.)
+
+* Te'Asaat: Single supercontinent
+* Shamkirku Valley
+* Sigiim
+** Lisgamag River
+* Tete’imaser Temporal Forest
+** Ne’aa’alu: Capital City
+* Tiaka'etam Plains
+** Maaa'irani'ar Enisud (singing stones)
+* Zuruarl River
+
+Northern Hemisphere:
+* Pem Ocean (partially frozen)
+* Trare Sea (partially frozen)
+** Raalah River Delta
+* Two major mountain ranges
+
+Equatorial Zone:
+* Alutirni sea (shallow inland sea)
+* Rotukeneu Oi'erasaasur: Plain of Retribution and Despair ([[Ilelish Revolt]] punative damage)
+** Province of Kiafess 
+** Masakes: Former capital city, evacuated then destroyed
+
+Southern Hemisphere:
+* Handuu Sea (small inland sea)
+* Nansug Sea (inland sea)
+** Tase'at Island
+* Lipansho Sea (small inland sea)
+* Sirono Sea 
+* Tauker Sea (small inland sea)
+* Two notable mountain ranges
+
+=== Native Lifeforms ===
+The world has abundant [[Lifeform|native life]] occupying every available ecological niche outside of the equatorial zone.
+
+Flora:
+
+Ilelish plants do not produce flowers or fruit, but rather seedpods or spores. The colouration of foliage ranges from deep greens and blues to purple-black, with darker plant types occurring closer to the poles.
+
+* ''Giiraste'': One of the three staple grains of the Suerrat
+* ''Halsuu'': One of the three staple grains of the Suerrat
+* ''Lareri'' Tree
+* ''Nuslah'': One of the three staple grains of the Suerrat
+* [[Rhala Tree]]
+
+Fauna:
+
+Species are divided into three main groups -- true vertebrates, pseudo-vertebrates and invertebrates. Megafauna is common.
+
+* ''Aginkam'': Highly successful true vertebrate predators 
+* ''Gagluki'': Sessile tree-like pseudo-vertebrates found in the forested savannahs 
+* ''Keshim'': Large solo apex predators of the forested savannahs. A true vertebrate, one of the few Ilelish predators which is bipedal
+* ''Migukas'': Descendants of the ''aginkam'' and the first species domesticated by prehistoric Suerrat
+* ''Nishma'': Pseudo-vertebrate megafauna herbivores which dwell on the forested savannahs 
+* ''Shudu'': A smaller species of ''nishma'', found in semi-tropical rivers and wetlands
+
+== History & Background ([[Dossier]]) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Ilelish'''  is the [[homeworld]] of the [[Suerrat]], a [[minor human race]]. The ancestral Suerrat were transported to Ilelish by the [[Ancient]]s, and were well adapted to their new homeworld’s lush equatorial forests. The world is considered by many to be an [[Ancient]]s site and many xeno-archaeologists have been busy unearthing remains and artifacts of what some conjecture was a battlefield during the [[Final War]].
+* While this theory is popular with many, there is still considerable dissent within the academic community.
+* There is evidence of [[Droyne]] having once been present on the world.
+
+The world's name comes from the ''[[Na'ans]]'' language of the [[Suerrat]].
+
+The Suerrat prospered and expanded, eventually developing sub-light drives and colonizing nearby worlds, and had established a small interstellar state by the time they were contacted by the [[Vilani]] during the ''[[Ziru Sirka]]'' period. Ilelish was conquered during the [[Consolidation Wars]] and the Suerrat became a grudging subject race to the Vilani. The Suerrat finally revolted in the late [[Interstellar Wars]] period, following the [[Battle of Three Suns]] ([[-2224]]): their uprising is often seen as one of the final blows to the First Imperium.
+
+Following the [[Long Night]] Ilelish was swiftly absorbed by the growing Third Imperium and became the sector capital. 
+* The [[Ilelish Revolt]] ([[418]]-[[435]]) was a popular independence movement that began on Ilelish, but rapidly spread to other high population worlds. The region affected by the Revolt had been going through an economic depression, and it was felt that the Imperium was more interested in conquering new worlds than in supporting the worlds it already had. 
+* Worlds in Ilelish sector petitioned the Emperor to establish an autonomous district, on the model of the [[League of Antares]], but the Emperor refused. Following this, Ilelish and several other worlds seceded. The Imperium defeated the revolt, essentially by encircling it, containing it, and squeezing. To create an example, the Emperor ordered the [[Imperial Navy]] to sterilize a large portion of the world.
+* In [[435]], the {{Imperium}} mandated the evacuation of the entire population residing within the lush equatorial zones, then scrubbed the zones of their flora and fauna. It still bears the scars to this day: seven hundred years later, the equatorial zone of llelish remains a sterile desert.
+
+''[[Llelish Interstellar Information Interchange|Llelish Interstellar]]'', the leading media [[corporation]] within [[Ilelish Sector]], maintains facilities and offices on the world.
+
+=== World Starport (St) ===
+{{Starport|name= Ilelish|Starport= E}}
+
+Several large and well-equipped spaceports located in the larger cities make up for the shortfall of a missing starport of any note.
+
+=== World Population (P) ===
+{{WorldPop|name= Ilelish|multiplier= 2|Population= A}}
+* The population almost entirely consists of [[Suerrat]].
+
+Ilelish is the [[homeworld]] of the [[Suerrat]].
+
+[[File:Suerrat Rob Caswell.jpg|250 px|right]]
+
+==== Linguistic Topography ====
+The following languages are most typically heard:
+* [[Anglic]]: One of the two official languages of the {{Imperium}}.
+* ''[[Na'ans]]'': The most widely spoken [[Suerrat]] language.
+* [[Vilani (language)|Vilani]]: One of the two official languages of the {{Imperium}}.
+* ''[[Yaudal (language)|Yaudal]]'': A commonly spoken [[Suerrat]] language.
+
+==== Urbanization ====
+[[Suerrat]] cities are very crowded. [[Suerrat]] populations are at a density where other species find the mental health of the inhabitants deteriorates; by contrast, [[Suerrat]] thrive in these conditions.
+* [[Suerrat]] like natural surroundings and will incorporate vegetation and even small animals into their urban areas, wherever possible.
+* Transport is relegated to the lower levels of Suerrat cities. Where gravitics are unavailable, ground vehicles prevail. Roads are built intertwining between trees and below foot traffic.
+
+=== World Technology Level (T) ===
+{{WorldTech|name= Ilelish|WorldTech= A}}
+
+=== World Government (G) ===
+{{WorldGov|name= Ilelish|Government= 8}}
+* The capital city of Ilelish is ''Anitarra''. The fomer capital, [[Masakes]], was abandoned and destroyed following the [[Ilelish Revolt]].
+
+Ilelish is also part of the [[Suerrat Cultural Region]]. The Suerrat United Worlds Council is funded through payments of all member worlds, calculated based on each world's population and economic wealth; it also receives voluntary donations from large organisations and businesses, both within and without the cultural zone.
+
+=== World Law (L) ===
+{{WorldLaw|name= Ilelish|Law= 3}}
+
+=== Imperial Landed Nobility ===
+{{Imperial Nobility|name= Ilelish|Noble=BE}}
+: ''See: [[Nobles of Ilelish]]''
+
+=== World Military ===
+For peacekeeping purposes, the Suerrat United Worlds Council can request troops and vessels volunteered from member worlds to be deployed under its purview, but only within the boundaries of the Suerrat Cultural Region.
+
+The largest vessel in the Ilelish fleet is ''Tuli'eii Ilelish'', an ancient Inukerku-class light cruiser purchased from the Imperial Navy when it was superseded by more advanced vessels.
+
+=== Trade Data ===
+* Importance:     2 (ordinary)
+
+[[File:Logo Llelish Interstellar Information Interchange Basic.png|150 px|right]]
+Ilelish is the headquarters of the ''[[Llelish Interstellar Information Interchange]]''.
+
+=== World Economy ===
+* Resources:      G (extremely abundant)
+* Labor:          9 (billions)
+* Infrastructure: C (very extensive)
+* Efficiency:     -1 (average)
+
+=== World Culture ===
+* Heterogenity: 7 (discordant)
+* Acceptance:   C (xenophilic)
+* Strangeness:  2 (typical)
+* Symbols:      7 (somewhat concrete)
+
+=== Historical Data ===
+
+==== World Timeline ====
+[[Image:Ziru Sirka (-2422).png|right|thumb|400px]]
+Major events that have affected this world and the wider region that it lies within:
+* [[Ancient|ca -250,000]]: The [[Suerrat]] are transplanted to Ilelish by the [[Ancient]]s.
+* [[-9235]]: The [[Vilani]] discover [[jump drive]] technology. Over many centuries, pioneers and settlers gradually spread out from [[Vland (world)|Vland]], their [[homeworld]].
+* [[-8100|prior to -8100]]: A [[Suerrat]] [[Jump Drive|pre-Jump]] multi-world civilization flourishes, centered on Ilelish.
+* [[-8100|circa -8100]]: The [[Vilani]] make contact with the [[Suerrat]] and sell them [[Jump Drive|jump technology]].
+* [[-5400|prior to -5400]]: The [[Suerrat]] have established a multi-world [[polity]] using [[jump drive]]s. It will become one of the first targets of the [[Vilani]] [[Consolidation Wars]].
+* [[-4045]] to [[-2204]]: The ''[[First Imperium|Ziru Sirka]]'' controls the world.
+* [[-2404]] to [[-2215]]: The [[Interstellar Wars]].
+* [[-2204]] to [[-1776]]: The [[Rule of Man]] administers the worlds of the region.
+* [[-1776]] to [[0]]: The [[Long Night]]. There is widespread regression within the sector and some worlds [[Barren World|become barren]].
+* [[0|The Year 0]]: The [[Third Imperium]] is founded.
+* [[76]]: [[Ilelish Pacification Campaign]].
+* [[300]]-[[420]]: The [[First Survey]] charts the system.
+* [[418]]-[[435]]: The [[Ilelish Revolt]].
+* [[435]]: Ilelish's equatorial zones are scrubbed of flora and fauna.
+* [[604]]-[[622]]: The [[Civil War]].
+* [[624]]: The [[Express Boat Network]] is established.
+* [[995]]-[[1065]]: The [[Second Survey]] charts the system.
+* [[1065]]: The [[Second Survey]] is published.
+
+== References & Contributors ([[Sources]]) ==
+{{Advanced}}
+{{Detail}}
+{{Sources
+| {{MT}} [[Alien - Vilani & Vargr]] Article: "Vilani Space: Then and Now"
+| {{MT}} [[Imperial Encyclopedia]]
+| Periodical: {{MT}} [[Challenge43|Challenge 43]] - [[TNS_1120#023-1120_Ilelish_.28Ilelish_2707.29|TNS Entry]] "Ilelish Xeno-archaeological Entry"
+| {{Ludography cite|name= Interstellar Wars}}
+| {{Ludography cite|name= Atlas of the Imperium |page= page 20}}
+| {{Ludography cite|name= Rebellion Sourcebook |page= page 47}}
+| {{Ludography cite|name= Vilani & Vargr |page= 11}} (Ziru Sirka worlds: dot map provided)
+| {{Ludography cite|name= First Survey |page= pages 34-37, 95-101}}
+| {{Ludography cite|name= Bearers of the Flame}}
+| {{Ludography cite|name= Aliens of Charted Space: Volume 4|page=24}}
+| Contributor: [[Maksim-Smelchak]] (50+ words)
+}}
+
+[[Category: Ancients Site worlds]]
+[[Category: Delgado Trading worlds]]
+[[Category: Droyne worlds]]
+[[Category: First Imperium worlds]]
+[[Category: Homeworld]]
+[[Category: Kirgaasanakka Publishing worlds]]
+[[Category: Llelish Interstellar Information Interchange worlds]]
+[[Category: Suerrat worlds]]
+[[Category: Rule of Man worlds]]
+[[Category: Archduke worlds]]
+{{LE|Era: Milieu 1116|T5 Second Survey worlds}}

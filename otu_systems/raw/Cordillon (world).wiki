@@ -1,0 +1,106 @@
+{{UWP
+|name= {{World|Cordillon|Trojan Reach|Sindal|2411}}
+|uc    = C431210-B
+|popc  = 2
+|zonec = green
+|alg     = ImDd
+|class   = Lo Po
+|trade   = lo
+|nblty   = B
+|bases   = -
+|primary = K1 V
+|belts   = 2
+|GGcount = 2
+}}
+
+{{World summary |name= Cordillon |trade=Lo Po}}
+{{World summary ImDd|sector= Trojan Reach |subsector=Sindal}}
+
+{{InfoboxSystem
+|name= Cordillon
+|sector=Trojan Reach|subsector=Sindal|hex=2411
+|star= [[Bizitza (star)|Bizitza ]] |type= K1 V 
+|P0= Ash          |Dist0   = ?       |UWP0= X200000-0
+|P1= Castille     |Dist1   = ?       |UWP1= X300000-0
+|P2= Inner Belt   |Dist2   = ?       |UWP2= X000000-0
+|P3= Cordillon    |Dist3   = ?       |UWP3= C431210-C
+|P3M1= Watchtower |Dist3M1 = 1 Diam  |UWP3M1= G100160-C
+|P3M2= Pinzen     |Dist3M2 = 15 Diam |UWP3M2= XS00000-0
+|P4= Ghourgia     |Dist4   = ?       |UWP4= X300000-0
+|P5= Outer Belt   |Dist5   = ?       |UWP5= G000160-C
+|P6= Cimarron     |Dist6   = ?       |UWP6= SGG
+|P6M1= Ring System|Dist6M1 = 0 Diam  |UWP6M1= YR00000-0
+|P6M2= Ingot      |Dist6M2 = 1 Diam  |UWP6M2= X100000-0
+|P6M3= Byz        |Dist6M3 = 2 Diam  |UWP6M3= X200000-0
+|P6M4= Dryb       |Dist6M4 = 3 Diam  |UWP6M4= XS00000-0
+|P7= Goget        |Dist7   = ?       |UWP7= X200000-0
+|P8= Doxing       |Dist8   = ?       |UWP8= X501000-0
+|P8M1= Prime      |Dist8M1 = 1 Diam  |UWP8M1= X100000-0
+|P9= Malinge      |Dist9   = ?       |UWP9= X300000-0
+|P10= Hoard       |Dist10  = ?       |UWP10= LGG
+|P10M1= Hoard–0   |Dist10M1= 1 Diam  |UWP10M1= X100000-0
+|P10M2= Hoard–1   |Dist10M2= 3 Diam  |UWP10M2= X100000-0
+|P10M3= Hoard–2   |Dist10M3= 6 Diam  |UWP10M3= X200000-0
+|P10M4= Hoard–3   |Dist10M4= 10 Diam |UWP10M4= X100000-0
+|P10M5= Hoard–4   |Dist10M5= 12 Diam |UWP10M5= X501000-0
+|P10M6= Hoard–5   |Dist10M6= 16 Diam |UWP10M6= X300000-0
+|P10M7= Hoard–6   |Dist10M7= 22 Diam |UWP10M7= XS00000-0
+|P10M8= Hoard–7   |Dist10M8= 30 Diam |UWP10M8= X400000-0
+|P11= Bakartik    |Dist11  = ?       |UWP11= X200000-0
+}}
+
+== Description (Planetology) ==
+
+=== Stellar Data ===
+{{MonostellarSystem
+ |primary = K1 V
+ |PrimaryName = Bizitza
+}}
+
+=== System Data ===
+The system's largest gas giant is Hoard, a super jovian with roughly four times the mass of [[Jupiter (world)|Jupiter]]. Its immense gravitational pull and magnetic field make it dangerous for wilderness refuelling.
+
+The system's two planetoid belts are being dredged for iceballs to drop on Cordillon as part of the terraforming process. Increased traffic in these zones has attracted a fledgling belter community.
+
+=== Mainworld Data ===
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Cordillon|Size= 4}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Cordillon|Atmosphere= 3}}
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Cordillon|Hydrosphere= 1}}
+
+==== Mainworld Geography and Topography ====
+A map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+[[File:Worldmap Cordillon.jpg|600px|frameless|Left]]
+
+World Map acording to Mongoose Publishing from Secrets of the Ancients.
+***Note that this is Cordillon approximately year -300,000.
+This is not relevant to 1105 Cordillon, read the description.
+
+== History & Background (Dossier) ==
+[[Cordillon (world)|Cordillon]] (alternate spelling: Cordillion) is a poor, low-population world. It is currently subject to significant terraforming by nearby {{WorldS|Albe|Trojan Reach|2211}}.
+
+Cordillion is a small empty world on the fringe of the {{Imperium}}. Until recently it was deemed unnecessary and unsuitable for colonization and remained uninhabited. However, in the neighboring system of [[Albe (world)|Albe]], population pressures have caused famine, crime, and over-crowding to became unmanageable. To help solve the problem, Albe's government has commissioned ''[[Shape of Earth]]'', LIC to terraform Cordillon and make it suitable for colonization, thus relieving Albe of its population problems.{{Page cite|name=Third Imperium 01|page=10|article=Out of the Egg|citeName=TI01-10}}
+
+In the three years since the terraforming project began, Cordillon has gained a very thin [[atmosphere]] and 10% [[hydrosphere|hydrographics]]. Its rotational velocity has been increased to 43 hours, and its newly built-up electromagnetic field now filters out a large percentage of its sun's harmful radiation. Because its spin is still relatively slow however, the planet's temperature changes from a warm 30&deg;C during the day to an icy -40&deg;C at night. As yet there is no plant or animal life on Cordillon and most of its surface is still a rocky wasteland.{{Page cite|citeName=TI01-10}}
+
+=== [[Starport|World Starport]] (Sp) ===
+{{Starport|name= Cordillon|Starport= C}}
+* Five bases have been set up on the planet's surface to monitor the asteroid falls and operate the starport. They control the terraforming operation and maintain facilities for the asteroid movers. The world's main starport is type C, and is located at Base 1. The other four bases have starports of type D.{{Page cite|citeName=TI01-10}}
+
+== References ==
+{{Sources 
+ | {{Ludography cite|name= Atlas of the Imperium|page=11}}
+ | {{Ludography cite|name= Third Imperium 01|page=8,10|article=Out of the Egg}}
+ | {{Ludography cite|name= The Regency Sourcebook|page=66}} (UWP only)
+ | {{Ludography cite|name= Aslan|version=Mongoose Traveller|}}
+ | {{Ludography cite|name= Journal of the Travellers' Aid Society volume 3 | article=Cordillon, Bold new world | page=2-8 }}
+}}
+
+[[Category: Terraforming]]
+{{LE|T5 Second Survey worlds}}

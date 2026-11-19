@@ -1,0 +1,156 @@
+[[File:Alien Moon 315h-0 Small.jpg|250 px|right]]
+The [[Valhalla (SM 2811) (system)|Valhalla System]] is a [[star system]].
+* It consists of multiple worlds orbiting a central [[star]].
+* [[Valhalla (SM 2811) (world)|Valhalla]] is designated the [[mainworld]]
+
+{{InfoboxSystem
+ |name=Valhalla
+ |subsector=Rhylanor
+ |sector=Spinward Marches
+ |hex=2811
+ |star='''Losteye'''
+ |type='''G4 V'''
+ |P1=Anvil|Dist1=0.9|UWP1=
+ |P2=Valhalla (SM 2811)|Dist2=2.5|UWP2=E365432-5
+ |P2M1=* ''Eye''|Dist2M1=12|UWP2M1=
+ |P3=Hammer|Dist3=3.6|UWP3=
+ |P4=Inner Belt|Dist4=3.9|UWP4=
+ |P5=Freya|Dist5=5|UWP5='''Gas Giant'''
+ |P5M1=* ''Shepherd Moons''|Dist5M1=<5|UWP5M1=
+ |P5M2=* ''Hunter''|Dist5M2=20|UWP5M2=
+ |P6=Outer Belt|Dist6=7|UWP6=
+ |P7=Odin|Dist7=11|UWP7='''Ice Giant'''
+ |P7M1=* ''Shepherd Moons''|Dist7M1=<5|UWP7M1=
+ |P7M2=* ''Blitz''|Dist7M2=9|UWP7M2=
+ |P7M3=* ''Donner''|Dist7M3=16|UWP7M3=
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Valhalla''' has a solitary primary star.
+* It is a yellow main sequence named ''Losteye''.
+
+{{MonostellarSystem
+|name           = Valhalla
+|primary        = G4 V
+|PrimaryName    = Losteye
+|PrimaryNotes   = 
+}}
+
+=== System Overview ===
+The Valhalla system is characterized by its large central star, its dense, metal-rich inner planets, and its double-belt arrangement.  System age is roughly 6.5 billion years.
+
+{| border="1"
+!Main Contents           !!Stars                                !!Orbital Distances (AU)
+|-
+|* Central star         ||* Primary 	        Losteye, G4 V  ||* Inner limit 	0.9
+|-
+|* 3 terrestrial worlds ||* Temperature (K) 	6400            ||* Inner life 		2.200
+|-
+|* Inner belt           ||* Luminosity (sols) 	4.36            ||* Outer life 		3.650 
+|-
+|* Large Gas giant      ||* Mass (sols)	1.35            ||* Snow line 		6.02	
+|-
+|* Outer belt           ||* Radius (AU) 	0.0110          ||* Outer limit 	48.0
+|-
+|* Large Ice giant      ||* Stable life 	3.5 billion yrs || --
+|}
+
+===Worlds===
+{| border="1"
+!Orbit!!SubOrbit!!Name!!Diameter!!Density!!Gravity!!Rotation!!Revolution!!e!!World Type
+|-
+|0.9||--||Anvil||2200||6.2||0.30||tl||273.5d||0.00||Terrestrial
+|-
+|2.5||--||Valhalla||3400||6.1||0.40||26.2h||1266.25d||0.02||Terrestrial
+|-
+|2.5||10||Eye||1000||6.0||0.08||tl||19d||0.03||Terrestrial
+|-
+|3.6||--||Hammer||2900||5.4||0.27||28.1h||6.0y||0.05||Terrestrial
+|-
+|6||--||Freya||85400||1.5||1.15||11.31h||12.9y||0.01||Gas Giant
+|-
+|6||<5||2 shepherd moons||<400||5.9||--||--||--||0.01||Terrestrial
+|-
+|6||20||Hunter||500||6.1||0.02||tl||11.1d||0.04||Terrestrial
+|-
+|12||--||Odin||18500||1.3||1.15||16.27h||36.5y||0.05||Gas Giant
+|-
+|12||<5||4 shepherd moons||<400||3.4||--||--||--||0.01||Terrestrial
+|-
+|12||9||Blitz||500||3.1||0.007||3d||6.4d||0.08||Terrestrial
+|-
+|12||16||Donner||800||3.4||0.009||5d||17.2d||0.03||Terrestrial
+|}
+
+'''Units'''
+*Orbit is in AU or planetary radii for satellites
+*Diam = diameter in miles (X 1.609 for km)
+*Dens = average density in g/cc
+*Grav = 'surface' gravity in G's
+*Rot/Rev = rotation or revolution period in hours (h), days (d), or years (y) ; tl = tide-locked
+*e = orbital eccentricity
+*Type = G:Space/FI classification
+
+* '''Anvil:''' Anvil is a tidally-locked rock with no atmosphere, the typical huge temperature difference between night and day, and deposits of methane-water on the night side. A high-security, subterranean prison complex is maintained within a crater at the northern pole.  This prison holds the more dangerous prisoners from Valhalla and Hammer.
+
+* '''Hammer:''' Hammer is a smaller, colder world with large ice caps and no oceans.  Like its sister world, it has a strong magnetic field which allows it to retain a thin, breathable atmosphere.  Geologically, it is active but much less so than Valhalla.  Its population is roughly 5,000; it is primarily scientific with a small military presence.  A frontier starport exists here for supplies, and is tightly controlled by the military presence.  The main settlement is Glas, a "town" burrowed into a large glacier on the northern icepack.  The settlement is known primarily for scientific research and ice sculpture.
+
+* '''Inner Belt:''' The inner belt is a typical belt containing planetoids that are of similar makeup to the inner planets.
+
+* '''Freya:''' A large gas giant with a relatively sparse family of moons.
+
+* '''Outer Belt:''' A second planetoid belt circles between the giant planets.  It appears to be made of less dense materials than the inner belt, and its planetoids have a significantly lower average size than most belts.
+
+* '''Odin:''' A large ice giant with a relatively sparse family of moons.  Interestingly, its moons are not yet tidally locked, and are of a less dense consistency from the inner planetoids.
+
+=== Valhalla ===
+==== World Data ====
+*Mass : 0.62 earth
+*Apparent day length : 26.2 hours
+*Axial Tilt : 16.5 degrees
+*Atmospheric pressure : 0.95 atm
+*Atmospheric composition : nitrogen 82%, oxygen 14%, others 4%
+*Hydrographics : 50%, water oceans
+*Albedo : 0.35
+*Greenhouse effect : 0.12
+*Average surface temperature (G:Space) : 302 K (Warm)
+*Weather factor : 12 (Earth=10, so less stable)
+*Life : complex animals, max IQ 6 (no primate/cetacean equivalents);
+*Moons: 1 large
+
+{| border="1"
+!Orbit!!Name!!Diameter!!Density!!Gravity!!Rotation!!Revolution!!e!!World Type
+|-
+|10 ||Eye||1000||6.0||0.08||tl||19d||0.03||Terrestrial
+|}
+
+Tidal : G:FI tidal factor 
+Other units are as per the World table, above.
+
+== History & Background ([[Dossier]]) ==
+No information yet available.
+
+== Sources ==
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=20-21}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller 1: The Zhodani Conspiracy}}
+ | {{Ludography cite|name=Megatraveller 2: Quest for the Ancients}}
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=The Regency Sourcebook|page=38}} (UWP only)
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=79}}
+ | {{Ludography cite|name=The Spinward States|page=103}} (UWP only)
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=40-45}} (UWP only)
+ | {{Ludography cite|name=Secrets of the Ancients|page=255}}
+ | [[Jim Vassilakos]] - [https://zhodani.space/data/CLASSIC/writeup.cgi?loc=1802&planY=Yres&sector=SPINMAR&realsubname=Regina&subsector=REGINA.DAT&subsectorletter=C Yres Writeup] at Zhodani Base
+}}
+
+[[Category: Battle of Two Suns worlds]]
+[[Category: Fifth Frontier War worlds]]
+[[Category: Imperial Vargr worlds]]
+{{LE|GT|Mining worlds|T5 Second Survey worlds}}
+{{LEN}}

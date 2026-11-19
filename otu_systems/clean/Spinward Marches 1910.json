@@ -1,0 +1,992 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "1910",
+  "sector_abbreviation": "Spin",
+  "subsector": "Regina",
+  "name": "Regina",
+  "sources": [
+    {
+      "page": "Regina (system)",
+      "revid": 633329,
+      "timestamp": "2021-02-08T13:19:33Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Regina (system)",
+      "template": "TrinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Lusor",
+          "type": "F7 V",
+          "notes": "Lusor Regina System Primary"
+        },
+        {
+          "role": "Secondary",
+          "name": "Speck",
+          "type": "BD",
+          "notes": "Speck Close Companion. Pink/Cerise/Magenta-hued Brown Dwarf companion in close orbit to \"Lusor\""
+        },
+        {
+          "role": "Tertiary",
+          "name": "Darida",
+          "type": "M3 V",
+          "notes": "Darida Far Companion - Subsystem. 5,000 AU distance from Regina system."
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Lusor",
+      "stars": [
+        {
+          "name": "Lusor",
+          "type": "F7 V"
+        },
+        {
+          "name": "Speck",
+          "type": "BD"
+        }
+      ],
+      "labels": [
+        "Regina"
+      ],
+      "pages": [
+        "Regina (system)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Clement",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Regina (system)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Ausun",
+          "raw": "Y300169-9",
+          "kind": "world",
+          "uwp": "Y300169-9",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Regina (system)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Burgund",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Regina (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Cent",
+              "name_raw": "* ''Cent''",
+              "raw": "Y400367-9",
+              "kind": "world",
+              "uwp": "Y400367-9",
+              "distance": {
+                "raw": "3",
+                "value": 3.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Regina (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Thermidor",
+              "name_raw": "* ''Thermidor''",
+              "raw": "Y560000-0",
+              "kind": "world",
+              "uwp": "Y560000-0",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Regina (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Olybrius",
+          "raw": "F75022A-9",
+          "kind": "world",
+          "uwp": "F75022A-9",
+          "distance": {
+            "raw": "1.5",
+            "value": 1.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Regina (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Alise",
+              "name_raw": "* ''Alise''",
+              "raw": "Y20016C-9",
+              "kind": "world",
+              "uwp": "Y20016C-9",
+              "distance": {
+                "raw": "25",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Regina (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Assiniboia",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "3",
+            "value": 3.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Regina (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Redes",
+              "name_raw": "* ''Redes''",
+              "raw": "F595269-9",
+              "kind": "world",
+              "uwp": "F595269-9",
+              "distance": {
+                "raw": "3",
+                "value": 3.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Regina (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Printemps",
+              "name_raw": "* ''Printemps''",
+              "raw": "F20036C-A",
+              "kind": "world",
+              "uwp": "F20036C-A",
+              "distance": {
+                "raw": "6",
+                "value": 6.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Regina (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Brumaire",
+              "name_raw": "* ''Brumaire''",
+              "raw": "F564669-9",
+              "kind": "world",
+              "uwp": "F564669-9",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Regina (system)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Harcourt",
+              "name_raw": "* ''Harcourt''",
+              "raw": "H43556C-A",
+              "kind": "world",
+              "uwp": "H43556C-A",
+              "distance": {
+                "raw": "30",
+                "value": 30.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Regina (system)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Regina",
+              "name_raw": "* '''''[[Regina (world)|Regina]]'''''",
+              "raw": "A788899-C",
+              "kind": "world",
+              "uwp": "A788899-C",
+              "distance": {
+                "raw": "55",
+                "value": 55.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Regina (system)"
+              ],
+              "mainworld": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "star": "Darida",
+      "stars": [
+        {
+          "name": "Darida",
+          "type": "M3 V"
+        }
+      ],
+      "labels": [
+        "Far Companion: Darida"
+      ],
+      "pages": [
+        "Regina (system)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Augur",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Regina (system)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Kirunda",
+          "raw": "Y210000-0",
+          "kind": "world",
+          "uwp": "Y210000-0",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Regina (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Irkirka",
+              "name_raw": "* ''Irkirka''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Regina (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Arkurer",
+              "name_raw": "* ''Arkurer''",
+              "raw": "HS00137-9",
+              "kind": "world",
+              "uwp": "HS00137-9",
+              "distance": {
+                "raw": "11",
+                "value": 11.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Regina (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Irgurkar",
+              "name_raw": "* ''Irgurkar''",
+              "raw": "Y10046A-A",
+              "kind": "world",
+              "uwp": "Y10046A-A",
+              "distance": {
+                "raw": "13",
+                "value": 13.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Regina (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Elazair",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Regina (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Lashir",
+              "name_raw": "* ''Lashir''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "3",
+                "value": 3.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Regina (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Diuur lmar",
+              "name_raw": "* ''Diuur lmar''",
+              "raw": "G2200269-9",
+              "kind": "world",
+              "uwp_malformed": null,
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "uwp": "G200269-9",
+              "uwp_source": "travellermap.com (Sean, 2026-11-16)",
+              "corrected": true,
+              "sources": [
+                "Regina (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Shamardae",
+              "name_raw": "* ''Shamardae''",
+              "raw": "Y500000-0",
+              "kind": "world",
+              "uwp": "Y500000-0",
+              "distance": {
+                "raw": "9",
+                "value": 9.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Regina (system)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Arapan",
+              "name_raw": "* ''Arapan''",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "20",
+                "value": 20.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Regina (system)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Edaku",
+              "name_raw": "* ''Edaku''",
+              "raw": "Y210000-0",
+              "kind": "world",
+              "uwp": "Y210000-0",
+              "distance": {
+                "raw": "50",
+                "value": 50.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Regina (system)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Gagamshir",
+              "name_raw": "* ''Gagamshir''",
+              "raw": "F534328-A",
+              "kind": "world",
+              "uwp": "F534328-A",
+              "distance": {
+                "raw": "125",
+                "value": 125.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Regina (system)"
+              ]
+            }
+          ]
+        }
+      ],
+      "placement": {
+        "orbit": null,
+        "au": 5000.0,
+        "from": "star template notes"
+      }
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Regina (system)",
+      "label": "Regina",
+      "stars": [
+        {
+          "name": "Lusor",
+          "type": "F7 V"
+        },
+        {
+          "name": "Speck",
+          "type": "BD"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Clement",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Ausun",
+          "raw": "Y300169-9",
+          "kind": "world",
+          "uwp": "Y300169-9",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Burgund",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Cent",
+              "name_raw": "* ''Cent''",
+              "raw": "Y400367-9",
+              "kind": "world",
+              "uwp": "Y400367-9",
+              "distance": {
+                "raw": "3",
+                "value": 3.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Thermidor",
+              "name_raw": "* ''Thermidor''",
+              "raw": "Y560000-0",
+              "kind": "world",
+              "uwp": "Y560000-0",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Olybrius",
+          "raw": "F75022A-9",
+          "kind": "world",
+          "uwp": "F75022A-9",
+          "distance": {
+            "raw": "1.5",
+            "value": 1.5,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Alise",
+              "name_raw": "* ''Alise''",
+              "raw": "Y20016C-9",
+              "kind": "world",
+              "uwp": "Y20016C-9",
+              "distance": {
+                "raw": "25",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Assiniboia",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "3",
+            "value": 3.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Redes",
+              "name_raw": "* ''Redes''",
+              "raw": "F595269-9",
+              "kind": "world",
+              "uwp": "F595269-9",
+              "distance": {
+                "raw": "3",
+                "value": 3.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Printemps",
+              "name_raw": "* ''Printemps''",
+              "raw": "F20036C-A",
+              "kind": "world",
+              "uwp": "F20036C-A",
+              "distance": {
+                "raw": "6",
+                "value": 6.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Brumaire",
+              "name_raw": "* ''Brumaire''",
+              "raw": "F564669-9",
+              "kind": "world",
+              "uwp": "F564669-9",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Harcourt",
+              "name_raw": "* ''Harcourt''",
+              "raw": "H43556C-A",
+              "kind": "world",
+              "uwp": "H43556C-A",
+              "distance": {
+                "raw": "30",
+                "value": 30.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Regina",
+              "name_raw": "* '''''[[Regina (world)|Regina]]'''''",
+              "raw": "A788899-C",
+              "kind": "world",
+              "uwp": "A788899-C",
+              "distance": {
+                "raw": "55",
+                "value": 55.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Regina (system)",
+      "label": "Far Companion: Darida",
+      "stars": [
+        {
+          "name": "Darida",
+          "type": "M3 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Augur",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Kirunda",
+          "raw": "Y210000-0",
+          "kind": "world",
+          "uwp": "Y210000-0",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Irkirka",
+              "name_raw": "* ''Irkirka''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Arkurer",
+              "name_raw": "* ''Arkurer''",
+              "raw": "HS00137-9",
+              "kind": "world",
+              "uwp": "HS00137-9",
+              "distance": {
+                "raw": "11",
+                "value": 11.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Irgurkar",
+              "name_raw": "* ''Irgurkar''",
+              "raw": "Y10046A-A",
+              "kind": "world",
+              "uwp": "Y10046A-A",
+              "distance": {
+                "raw": "13",
+                "value": 13.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Elazair",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Lashir",
+              "name_raw": "* ''Lashir''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "3",
+                "value": 3.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Diuur lmar",
+              "name_raw": "* ''Diuur lmar''",
+              "raw": "G2200269-9",
+              "kind": "world",
+              "uwp_malformed": null,
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "uwp": "G200269-9",
+              "uwp_source": "travellermap.com (Sean, 2026-11-16)",
+              "corrected": true
+            },
+            {
+              "index": 3,
+              "name": "Shamardae",
+              "name_raw": "* ''Shamardae''",
+              "raw": "Y500000-0",
+              "kind": "world",
+              "uwp": "Y500000-0",
+              "distance": {
+                "raw": "9",
+                "value": 9.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Arapan",
+              "name_raw": "* ''Arapan''",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "20",
+                "value": 20.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Edaku",
+              "name_raw": "* ''Edaku''",
+              "raw": "Y210000-0",
+              "kind": "world",
+              "uwp": "Y210000-0",
+              "distance": {
+                "raw": "50",
+                "value": 50.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Gagamshir",
+              "name_raw": "* ''Gagamshir''",
+              "raw": "F534328-A",
+              "kind": "world",
+              "uwp": "F534328-A",
+              "distance": {
+                "raw": "125",
+                "value": 125.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Regina",
+    "UWP": "A788899-C",
+    "Stellar": "F7 V BD M3 V",
+    "PBG": "703",
+    "Bases": "NS",
+    "Remarks": "Ri Pa Ph An Cp (Amindii)2 Varg0 Asla0 Sa Ht"
+  }
+}

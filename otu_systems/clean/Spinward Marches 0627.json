@@ -1,0 +1,1100 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "0627",
+  "sector_abbreviation": "Spin",
+  "subsector": "Darrian",
+  "name": "Darrian",
+  "sources": [
+    {
+      "page": "Darrian (world)",
+      "revid": 1059939,
+      "timestamp": "2026-06-04T03:20:10Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Darrian (world)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Tarnis",
+          "type": "G1 V",
+          "notes": "Primary"
+        },
+        {
+          "role": "Secondary",
+          "name": "Lilimes",
+          "type": "D",
+          "notes": "Companion - Degenerate Dwarf"
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Tarnis",
+      "stars": [
+        {
+          "name": "Tarnis",
+          "type": "G1 V"
+        }
+      ],
+      "labels": [
+        "Darrian"
+      ],
+      "pages": [
+        "Darrian (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Belt",
+          "raw": "<small>G000021-8</small>",
+          "kind": "world",
+          "uwp": "G000021-8",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Darrian (world)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "--",
+          "raw": "",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "flags": [
+            "placeholder-row-empty"
+          ],
+          "sources": [
+            "Darrian (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "--",
+          "raw": "",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "flags": [
+            "placeholder-row-empty"
+          ],
+          "sources": [
+            "Darrian (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Daryen",
+          "raw": "<small>A463955-G</small>",
+          "kind": "world",
+          "uwp": "A463955-G",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Darrian (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 4,
+          "name": "Leryin",
+          "name_raw": "'''Leryin'''",
+          "raw": "'''SGG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Darrian (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Bebh",
+              "name_raw": "» Bebh",
+              "raw": "''<small>YS00001-F</small>''",
+              "kind": "world",
+              "uwp": "YS00001-F",
+              "distance": {
+                "raw": "''<small>R= 7</small>''",
+                "value": 7.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Darrian (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Telaret",
+              "name_raw": "» Telaret",
+              "raw": "''<small>Y300366-G</small>''",
+              "kind": "world",
+              "uwp": "Y300366-G",
+              "distance": {
+                "raw": "''<small>R= 11</small>''",
+                "value": 11.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Darrian (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Zaladh",
+              "name_raw": "» Zaladh",
+              "raw": "''<small>YS00127-F</small>''",
+              "kind": "world",
+              "uwp": "YS00127-F",
+              "distance": {
+                "raw": "''<small>R= 12</small>''",
+                "value": 12.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Darrian (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Iredh",
+              "name_raw": "» Iredh",
+              "raw": "''<small>G100000-G</small>''",
+              "kind": "world",
+              "uwp": "G100000-G",
+              "distance": {
+                "raw": "''<small>R= 25</small>''",
+                "value": 25.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Darrian (world)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Zdos",
+              "name_raw": "» Zdos",
+              "raw": "''<small>YS00000-0</small>''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''<small>R= 45</small>''",
+                "value": 45.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Darrian (world)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Yimut",
+              "name_raw": "» Yimut",
+              "raw": "''<small>FS00400-F</small>''",
+              "kind": "world",
+              "uwp": "FS00400-F",
+              "distance": {
+                "raw": "''<small>R= 55</small>''",
+                "value": 55.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Darrian (world)"
+              ]
+            },
+            {
+              "index": 7,
+              "name": "Lubhilzadh",
+              "name_raw": "» Lubhilzadh",
+              "raw": "''<small>HS00300-F</small>''",
+              "kind": "world",
+              "uwp": "HS00300-F",
+              "distance": {
+                "raw": "''<small>R= 150</small>''",
+                "value": 150.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Darrian (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Bidhes",
+          "name_raw": "'''Bidhes'''",
+          "raw": "'''SGG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Darrian (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Poror",
+              "name_raw": "» Poror",
+              "raw": "''<small>Y200317-G</small>''",
+              "kind": "world",
+              "uwp": "Y200317-G",
+              "distance": {
+                "raw": "''<small>R=   8</small>''",
+                "value": 8.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Darrian (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Tildong",
+              "name_raw": "» Tildong",
+              "raw": "''<small>F300263-F</small>''",
+              "kind": "world",
+              "uwp": "F300263-F",
+              "distance": {
+                "raw": "''<small>R=  55</small>''",
+                "value": 55.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Darrian (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Zinadh",
+              "name_raw": "» Zinadh",
+              "raw": "''<small>G300526-F</small>''",
+              "kind": "world",
+              "uwp": "G300526-F",
+              "distance": {
+                "raw": "''<small>R= 175</small>''",
+                "value": 175.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Darrian (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "--",
+          "raw": "",
+          "kind": "empty",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "flags": [
+            "placeholder-row-empty"
+          ],
+          "sources": [
+            "Darrian (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "--",
+          "raw": "",
+          "kind": "empty",
+          "distance": {
+            "raw": "10.6",
+            "value": 10.6,
+            "unit": "AU"
+          },
+          "flags": [
+            "placeholder-row-empty"
+          ],
+          "sources": [
+            "Darrian (world)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "--",
+          "raw": "<br><br>",
+          "kind": "empty",
+          "distance": {
+            "raw": "19.8",
+            "value": 19.8,
+            "unit": "AU"
+          },
+          "flags": [
+            "placeholder-row-empty"
+          ],
+          "sources": [
+            "Darrian (world)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Lilimes",
+          "name_raw": "'''''Lilimes'''''",
+          "raw": "<span style=\"color:#F0F0F0\">.....</span> '''''<big> D</big>''''' <br>'''''<sup>(Companion)</sup>'''''",
+          "kind": "star",
+          "type": "D",
+          "remark": "Companion",
+          "distance": {
+            "raw": "'''40'''",
+            "value": 40.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ],
+          "planets": [
+            {
+              "name": "Belt",
+              "raw": "<small>G000000-F</small>",
+              "kind": "world",
+              "uwp": "G000000-F",
+              "distance": {
+                "raw": "''<small>0.2 <small>AU</small></small>''",
+                "value": 0.2,
+                "unit": "AU"
+              }
+            },
+            {
+              "name": "Ranyat",
+              "raw": "<small>H100267-F</small>",
+              "kind": "world",
+              "uwp": "H100267-F",
+              "distance": {
+                "raw": "''<small>0.4 <small>AU</small></small>''",
+                "value": 0.4,
+                "unit": "AU"
+              }
+            },
+            {
+              "name": "Bangan",
+              "raw": "<small>G100366-F</small>",
+              "kind": "world",
+              "uwp": "G100366-F",
+              "distance": {
+                "raw": "''<small>0.7 <small>AU</small></small>''",
+                "value": 0.7,
+                "unit": "AU"
+              }
+            }
+          ],
+          "sources": [
+            "Darrian (world)"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "--",
+          "raw": "<br>",
+          "kind": "empty",
+          "distance": {
+            "raw": "<br>77",
+            "value": 77.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "placeholder-row-empty"
+          ],
+          "sources": [
+            "Darrian (world)"
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "--",
+          "raw": "",
+          "kind": "empty",
+          "distance": {
+            "raw": "152",
+            "value": 152.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "placeholder-row-empty"
+          ],
+          "sources": [
+            "Darrian (world)"
+          ]
+        },
+        {
+          "orbit": 12,
+          "name": "--",
+          "raw": "",
+          "kind": "empty",
+          "distance": {
+            "raw": "308",
+            "value": 308.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "placeholder-row-empty"
+          ],
+          "sources": [
+            "Darrian (world)"
+          ]
+        },
+        {
+          "orbit": 13,
+          "name": "Panusam",
+          "name_raw": "'''Panusam'''",
+          "raw": "'''LGG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "615",
+            "value": 615.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Darrian (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Nighis",
+              "name_raw": "» Nighis",
+              "raw": "''<small>Y213324-F</small>''",
+              "kind": "world",
+              "uwp": "Y213324-F",
+              "distance": {
+                "raw": "''<small>R= 11</small>''",
+                "value": 11.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Darrian (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Nelyegh",
+              "name_raw": "» Nelyegh",
+              "raw": "''<small>G300000-F</small>''",
+              "kind": "world",
+              "uwp": "G300000-F",
+              "distance": {
+                "raw": "''<small>R= 40</small>''",
+                "value": 40.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Darrian (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Delung",
+              "name_raw": "» Delung",
+              "raw": "''<small>G640266-F</small>''",
+              "kind": "world",
+              "uwp": "G640266-F",
+              "distance": {
+                "raw": "''<small>R= 45</small>''",
+                "value": 45.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Darrian (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 14,
+          "name": "Renadh",
+          "name_raw": "'''Renadh'''",
+          "raw": "'''SGG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1230",
+            "value": 1230.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Darrian (world)"
+          ]
+        },
+        {
+          "orbit": 15,
+          "name": "Pondam",
+          "name_raw": "'''Pondam'''",
+          "raw": "'''SGG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "2500",
+            "value": 2500.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Darrian (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Darrian (world)",
+      "label": "Darrian",
+      "stars": [
+        {
+          "name": "Tarnis",
+          "type": "G1 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Belt",
+          "raw": "<small>G000021-8</small>",
+          "kind": "world",
+          "uwp": "G000021-8",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "--",
+          "raw": "",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "flags": [
+            "placeholder-row-empty"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "--",
+          "raw": "",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "flags": [
+            "placeholder-row-empty"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Daryen",
+          "raw": "<small>A463955-G</small>",
+          "kind": "world",
+          "uwp": "A463955-G",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Leryin",
+          "name_raw": "'''Leryin'''",
+          "raw": "'''SGG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Bebh",
+              "name_raw": "» Bebh",
+              "raw": "''<small>YS00001-F</small>''",
+              "kind": "world",
+              "uwp": "YS00001-F",
+              "distance": {
+                "raw": "''<small>R= 7</small>''",
+                "value": 7.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Telaret",
+              "name_raw": "» Telaret",
+              "raw": "''<small>Y300366-G</small>''",
+              "kind": "world",
+              "uwp": "Y300366-G",
+              "distance": {
+                "raw": "''<small>R= 11</small>''",
+                "value": 11.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Zaladh",
+              "name_raw": "» Zaladh",
+              "raw": "''<small>YS00127-F</small>''",
+              "kind": "world",
+              "uwp": "YS00127-F",
+              "distance": {
+                "raw": "''<small>R= 12</small>''",
+                "value": 12.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Iredh",
+              "name_raw": "» Iredh",
+              "raw": "''<small>G100000-G</small>''",
+              "kind": "world",
+              "uwp": "G100000-G",
+              "distance": {
+                "raw": "''<small>R= 25</small>''",
+                "value": 25.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Zdos",
+              "name_raw": "» Zdos",
+              "raw": "''<small>YS00000-0</small>''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''<small>R= 45</small>''",
+                "value": 45.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Yimut",
+              "name_raw": "» Yimut",
+              "raw": "''<small>FS00400-F</small>''",
+              "kind": "world",
+              "uwp": "FS00400-F",
+              "distance": {
+                "raw": "''<small>R= 55</small>''",
+                "value": 55.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 7,
+              "name": "Lubhilzadh",
+              "name_raw": "» Lubhilzadh",
+              "raw": "''<small>HS00300-F</small>''",
+              "kind": "world",
+              "uwp": "HS00300-F",
+              "distance": {
+                "raw": "''<small>R= 150</small>''",
+                "value": 150.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Bidhes",
+          "name_raw": "'''Bidhes'''",
+          "raw": "'''SGG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Poror",
+              "name_raw": "» Poror",
+              "raw": "''<small>Y200317-G</small>''",
+              "kind": "world",
+              "uwp": "Y200317-G",
+              "distance": {
+                "raw": "''<small>R=   8</small>''",
+                "value": 8.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Tildong",
+              "name_raw": "» Tildong",
+              "raw": "''<small>F300263-F</small>''",
+              "kind": "world",
+              "uwp": "F300263-F",
+              "distance": {
+                "raw": "''<small>R=  55</small>''",
+                "value": 55.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Zinadh",
+              "name_raw": "» Zinadh",
+              "raw": "''<small>G300526-F</small>''",
+              "kind": "world",
+              "uwp": "G300526-F",
+              "distance": {
+                "raw": "''<small>R= 175</small>''",
+                "value": 175.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "--",
+          "raw": "",
+          "kind": "empty",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "flags": [
+            "placeholder-row-empty"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "--",
+          "raw": "",
+          "kind": "empty",
+          "distance": {
+            "raw": "10.6",
+            "value": 10.6,
+            "unit": "AU"
+          },
+          "flags": [
+            "placeholder-row-empty"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "--",
+          "raw": "<br><br>",
+          "kind": "empty",
+          "distance": {
+            "raw": "19.8",
+            "value": 19.8,
+            "unit": "AU"
+          },
+          "flags": [
+            "placeholder-row-empty"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Lilimes",
+          "name_raw": "'''''Lilimes'''''",
+          "raw": "<span style=\"color:#F0F0F0\">.....</span> '''''<big> D</big>''''' <br>'''''<sup>(Companion)</sup>'''''",
+          "kind": "star",
+          "type": "D",
+          "remark": "Companion",
+          "distance": {
+            "raw": "'''40'''",
+            "value": 40.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ],
+          "planets": [
+            {
+              "name": "Belt",
+              "raw": "<small>G000000-F</small>",
+              "kind": "world",
+              "uwp": "G000000-F",
+              "distance": {
+                "raw": "''<small>0.2 <small>AU</small></small>''",
+                "value": 0.2,
+                "unit": "AU"
+              }
+            },
+            {
+              "name": "Ranyat",
+              "raw": "<small>H100267-F</small>",
+              "kind": "world",
+              "uwp": "H100267-F",
+              "distance": {
+                "raw": "''<small>0.4 <small>AU</small></small>''",
+                "value": 0.4,
+                "unit": "AU"
+              }
+            },
+            {
+              "name": "Bangan",
+              "raw": "<small>G100366-F</small>",
+              "kind": "world",
+              "uwp": "G100366-F",
+              "distance": {
+                "raw": "''<small>0.7 <small>AU</small></small>''",
+                "value": 0.7,
+                "unit": "AU"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "--",
+          "raw": "<br>",
+          "kind": "empty",
+          "distance": {
+            "raw": "<br>77",
+            "value": 77.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "placeholder-row-empty"
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "--",
+          "raw": "",
+          "kind": "empty",
+          "distance": {
+            "raw": "152",
+            "value": 152.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "placeholder-row-empty"
+          ]
+        },
+        {
+          "orbit": 12,
+          "name": "--",
+          "raw": "",
+          "kind": "empty",
+          "distance": {
+            "raw": "308",
+            "value": 308.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "placeholder-row-empty"
+          ]
+        },
+        {
+          "orbit": 13,
+          "name": "Panusam",
+          "name_raw": "'''Panusam'''",
+          "raw": "'''LGG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "615",
+            "value": 615.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Nighis",
+              "name_raw": "» Nighis",
+              "raw": "''<small>Y213324-F</small>''",
+              "kind": "world",
+              "uwp": "Y213324-F",
+              "distance": {
+                "raw": "''<small>R= 11</small>''",
+                "value": 11.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Nelyegh",
+              "name_raw": "» Nelyegh",
+              "raw": "''<small>G300000-F</small>''",
+              "kind": "world",
+              "uwp": "G300000-F",
+              "distance": {
+                "raw": "''<small>R= 40</small>''",
+                "value": 40.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Delung",
+              "name_raw": "» Delung",
+              "raw": "''<small>G640266-F</small>''",
+              "kind": "world",
+              "uwp": "G640266-F",
+              "distance": {
+                "raw": "''<small>R= 45</small>''",
+                "value": 45.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 14,
+          "name": "Renadh",
+          "name_raw": "'''Renadh'''",
+          "raw": "'''SGG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1230",
+            "value": 1230.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 15,
+          "name": "Pondam",
+          "name_raw": "'''Pondam'''",
+          "raw": "'''SGG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "2500",
+            "value": 2500.0,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Darrian",
+    "UWP": "A463955-G",
+    "Stellar": "G1 V D",
+    "PBG": "225",
+    "Bases": "",
+    "Remarks": "Hi An Pr (Daryen)8 Asla0 Ht"
+  }
+}

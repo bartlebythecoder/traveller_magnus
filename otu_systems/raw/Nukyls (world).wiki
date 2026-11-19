@@ -1,0 +1,112 @@
+{{UWP 
+|name= {{World|Nukyls|Gushemege|Laeth|1033}}
+|uc    = B540610-A
+|popc  = 7
+|zonec = green
+ |u1= 
+|alg     = ImDv
+|class   = De He Ni Po
+|trade   = he
+|climate = TBD
+|orbit   = TBD
+|gravity = TBD
+|nblty   = B
+|bases   = N
+|primary = K2 V 
+|belts   = 1
+|GGcount = 1
+}}
+{{InfoboxSystem
+ |name=Nukyls
+ |subsector=Laeth
+ |sector=Gushemege
+ |hex=1033
+ |star=Yradon
+ |type=K2 V
+ |P1=Yradon 1
+ |Dist1=0.2
+ |UWP1=Y200000-0
+ |P2=Yradon 2
+ |Dist2=0.4
+ |UWP2=YS00000-0
+ |P3=Nukyls
+ |Dist3=0.7
+ |UWP3=B540610-A
+ |P4=Yradon 4
+ |Dist4=1.0
+ |UWP4=LGG
+ |P5=Yradon 5
+ |Dist5=1.6
+ |UWP5=Y000000-0
+ |P6= Yradon 6
+ |Dist6=1.8
+ |UWP6=Y502000-0
+ |P7=Yradon 7
+ |Dist7=2.8
+ |UWP7=YAA7000-0
+}}
+{{World summary |name= Nukyls|trade=De He Ni Po}}
+{{World summary ImDv|sector= Gushemege |subsector=Laeth}}
+{{World summary bases|bases=N}}
+* {{Alternate world name|name=Ksis Sa}}
+
+== Description (Astrography & Planetology) ==
+This system is part of the [[Sidurii Cluster]].
+
+=== Stellar Data ===
+'''Nukyls''' has a solitary primary star, named ''Yradon''.
+
+{{MonostellarSystem
+|name           = Nukyls
+|primary        = K2 V 
+|PrimaryName   = Yradon
+}}
+
+== History & Background (Dossier) ==
+
+=== Imperial High (Landed Nobility) ===
+{{Imperial Nobility|name= Nukyls|Noble=B}}
+
+=== World Starport ===
+{{Starport|name= Nukyls|Starport=B}}
+* There is an associated Imperial [[Naval Base]], hosting elements of the [[39th Fleet]].
+
+=== World Population (P) ===
+{{WorldPop|name= Nukyls|multiplier= 7|Population= 6}}
+
+==== Linguistic Topography ====
+* [[Anglic]]: One of the two official languages of the [[Third Imperium]].
+* ''[[Ushi (language)|Ushi]]'': A language used throughout [[Gushemege Sector]].
+* [[Vilani (language)|Vilani]]: One of the two official languages of the [[Third Imperium]].
+
+==== Urbanization ====
+Upper class homes make extensive use of glass in their construction -- the area of glass being proportional to their wealth.
+
+=== World Technology Level ===
+{{WorldTech|name= Nukyls|WorldTech=A}}
+
+=== World Government ===
+{{WorldGov|name= Nukyls|Government=1}}
+
+Before the [[Third Imperium]] and corporate dominance -- during the last years of the [[Long Night]] -- the government followed a feudal technocracy model. There was a nominal queen, but her role wasn't that of an overlord but rather to co-ordinate the public assemblies which were elected in each town. Through her vassals she exercised some judicial powers.
+
+=== World Culture ===
+The planetary religion is Bicon -- a form of interactive monotheism which includes allowing believers to choose the creature into which they will be reincarnated when they die. Rigorous attendance at the ritualistic weekly services is required of all believers.
+
+The culture has a vehement predilection for vegetarianism.
+
+Children chose their own first names on adulthood.
+
+== Reference ==
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=Atlas of the Imperium|page=13}} 
+ | {{Ludography cite|name=First Survey|page=73}}
+ | {{Ludography cite|name=Long Way Home|page=58}}
+ | Author & Contributor: [[David Burden]] of the {{HIWG}}
+}}
+ 
+[[Category: 39th Fleet worlds]]
+[[Category: Sidurii Cluster worlds]]
+[[Category: Vilani Main worlds]]
+{{LE|T5 Second Survey worlds}}

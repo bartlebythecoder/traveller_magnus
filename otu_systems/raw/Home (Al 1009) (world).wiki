@@ -1,0 +1,217 @@
+[[File:Alien Moon 171f-0.jpg|250 px|right]]
+{{UWP 
+|name    = {{World|Home (Al 1009)|Aldebaran|Aldebaran|1009}}
+|era     = Milieu 1116
+|system  = Dril (system)
+|uc      = A86699A-E
+|popc    = 1
+|zonec   = green
+|alg     = SoCf
+|class   = Hi Ga Pr / Tp Ht Cx
+|trade   = ga
+|climate = Tp
+|gravity = -
+|bases   = KM
+|primary = G2 V
+|belts   = 2
+|GGcount = 1
+}}
+{{World summary |name= Home|trade= Hi Ga Pr}}
+{{World summary SoCf|sector= Aldebaran|subsector= Aldebaran}}
+{{World summary comment|trade= Tp}}
+{{World summary comment|trade= Ht}}
+{{World summary comment|trade= Cx}}
+{{World summary bases|bases= KM}}
+
+{{InfoboxSystem
+ |name= Home |subsector= Aldebaran
+ |sector= Aldebaran |hex= 1009
+ |star= [[Dril (system)|Dril]] |type= G2 V
+ |P1=     Planet 1                          | Dist1= 0.18         | UWP1= Y100000-0
+ |P2=     Planet 2                          | Dist2= 0.35         | UWP2= H300168-D
+ |P3=     Planet 3                          | Dist3= 0.71         | UWP3= F52066B-D
+ |P3M1=     Moon                            |   Dist3M1= 7 Diam   |   UWP3M1= YS00000-0
+ |P4=     Home                              | Dist4= 1.02         | UWP4= A86699A-E
+ |P5=     Stony Belt                        | Dist5= 1.45         | UWP5= F000769-E
+ |P6=     Gas Giant                         | Dist6= 2.89         | UWP6= LGG
+ |P6M1=     Moon                            |   Dist6M1= 8 Diam   |   UWP6M1= G201228-D
+ |P6M2=     Moon                            |   Dist6M2= 15 Diam  |   UWP6M2= H2A0000-0
+ |P6M3=     Moon                            |   Dist6M3= 20 Diam  |   UWP6M3= G300109-D
+ |P7=     Planet 4                          | Dist7= 5.35         | UWP7= GDC121B-D
+ |P7M1=     Moon                            |   Dist7M1= 25 Diam  |   UWP7M1= Y310000-0
+ |P8=     Planet 5                          | Dist8= 11.1         | UWP8= G403318-D
+ |P9=     Planet 6                          | Dist9= 15.4         | UWP9= F20056C-E
+ |P10=    Icy Belt                          | Dist10= 25.7        | UWP10= H000117-D
+ |P11=    Planet 7                          | Dist11= 165.0       | UWP11= Y100000-0
+ |P11M1=    Moon                            |   Dist11M1= 9 Diam  |   UWP11M1= YS00000-0
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Home''' has a solitary primary star.
+* It is a yellow main sequence named [[Dril (system)|''Dril'']].
+
+{{MonostellarSystem
+|name           = Home
+|primary        = G2 V
+|PrimaryName    = [[Dril (system)|Dril]]
+|PrimaryNotes   = 
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]].
+* x7 secondary [[world|rocky worlds]].
+* x2 [[planetoid belt]]s.
+* x1 [[gas giant]].
+
+=== Mainworld Data ===
+'''Home''' is [[Kilometer|12,422 kilometers]] in diameter and has a [[standard atmosphere]]. 
+* It has no natural satellites.  
+
+It orbits in the prime region of [[Dril (system)|Dril]]'s [[habitable zone]].
+
+[[File:Chart Orbit HZ Region Detailed.png|600 px]]
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Home|Size= 8}}
+* Home has an axial tilt of 12°. Its seasons are less severe than those of [[Terra]].
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Home|Atmosphere= 6}}
+* Slight differences in geography and physical data give Home a lower albedo than [[Terra]] (about 0.285 compared to [[Terra]]'s 0.300), which means that Home absorbs somewhat more energy than does [[Terra]].
+* Even though Home is slightly farther from its star, its average [[Celsius|temperature]] is a moderate [[Celsius|18°C]].
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Home|Hydrosphere= 6}}
+
+==== Mainworld Geography and Topography ====
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+Sixty percent of the world's surface is covered by water, dividing the surface into three major continents, one large subcontinental landmass, and many large islands and archipelagos. Approximately one tenth of Home's surface is covered by icecaps.
+
+[[File:Blank World Map Watery.png|500 px]] <br> (''Blank map, predominantly watery world''.)
+
+==== Native Lifeforms ====
+Abundant [[Lifeform|native life]] occupying every available ecological niche. Its metabolic functions drive the process of atmospheric renewal.
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Home''' is a [[Hi Population World|high population]] [[garden world]] and the [[capital]] of the [[Solomani Confederation]].
+
+It is the headquarters of ''[[Solomani Maschinenbau|Solomani Maschinenbau AG]]'', a large [[corporation]] involved in the manufacture of [[starship]]s and military equipment for the [[Solomani Confederation|Confederation]].
+
+With the end of the [[Solomani Rim War]] in [[1002]], the Confederation's former capital {{WorldS|Terra (SR 1827)|Solomani Rim|1827}} was occupied by {{Imperial}} forces and the [[Solomani]] were forced to establish a new capital approximately [[Parsec|30 parsecs]] to [[rimward]]. Home was selected for its close proximity to [[Terra]] physically, for the similarities between its star and [[Sol (star)|Sol]], and for its distance from the {{Imperial}} border.
+* Prior to becoming the [[Solomani Confederation|Confederation]] [[capital]], Home's history was uneventful. Small [[Sanctaterra|Sancaterrist]] farming communities dotted the world, many of which still exist in Home's scenic outback.
+
+[[Solomani Security]] keeps a close eye on things to ensure the security of the [[Solomani Confederation|Confederation]] and the well-being of its loyal citizens. Almost anyone ''could'' be a [[Solomani Security|SolSec]] informant, passing on all sorts of useful information: some gain a reward or benefit for their actions, others are coerced, but many see it as an act of duty to help protect the [[Solomani Confederation|Solomani state]] and its interests.
+
+==== Point of Interest: First City Highport ====
+The [[Secretariat]] meets in gargantuan chambers in Home's First City. Home's hive-like orbital highport, ''Resolution'' (popularly known as ''Wolfe's Rock''), was carved from a [[planetoid]] that was positioned in orbit. Resolution houses the secure chambers of the [[Solomani High Council]] as well as the ''Ivan Wolfe Naval Base'', the adjacent ''Albadawi Naval Academy'', and a large [[Solomani Confederation|Confederation]] [[Marine|Marine garrison]].
+* Resolution orbits every [[Hour|25 hours]], as it rests higher than the geosynchronous altitude. Thus, it progresses visibly each day as viewed from the surface.
+
+=== [[Starport|World Starport]] (St) ===
+{{Starport|name= Home|Starport= A}}
+* This world is host to a [[Solomani Confederation|Confederation]] [[Naval Base]].
+* This world is host to a major [[Military Base]].
+
+[[File:Logo Solomani Confederation Alternate Small.png|160 px|right]]
+
+=== [[Population|World Population]] (P) ===
+{{WorldPop|name= Home|multiplier= 1|Population= 9}}
+* The population almost entirely consists of [[Solomani]] humans.
+
+==== Urbanization ====
+Most urban centers have been designed and built from the ground up (and down) using {{TL|14}} techniques, materials, and design patterns. Each structure is intended to last for thousands of years and be both interesting and unique.
+
+Smaller cities and towns are built to capture the look-and-feel of specific areas of Old Earth.
+
+==== Linguistic Topography ====
+The most commonly heard [[language]]s are:
+* [[Rim Anglic]], a dialect of [[Anglic]] and the principal language of the [[Solomani Confederation|Confederation]].
+
+=== [[Technology Level|World Technology Level]] (T) ===
+{{WorldTech|name= Home|WorldTech= E}}
+
+=== [[Government|World Government]] (G) ===
+{{WorldGov|name= Home|Government= 9}}
+
+=== [[Law Level|World Law]] (L) ===
+{{WorldLaw|name= Home|Law= A}}
+
+=== Trade Data ===
+* [[Importance Extension|Importance]]: 4 (important)
+
+=== World Economy ===
+Home has a fully-developed world economy with a full-spread of industries. 
+
+* [[Resource]]s:                       A (abundant)
+* [[Labor]]:                           8 (hundreds of millions)
+* [[Infrastructure]]:                  8 (generally available)
+* [[Efficiency]]:                      +3 (improved)
+
+=== World Culture ===
+Home is the standard for the [[Terra]]n culture in exile.
+
+On the surface, there are many states and sub-states that maintain officially recognized bastions of [[Terra]]n culture.
+
+* [[Homogeneity|Heterogenity]]:        D (fragmented)
+* [[Acceptance]]:                      D (very xenophilic)
+* [[Strangeness]]:                     1 (very typical)
+* [[Symbol]]s:                         E (extremely abstract)
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+
+* [[-9235]]: Far to [[coreward]], the [[Vilani]] discover [[jump drive]] technology. Over the centuries pioneers and settlers gradually spread across [[Charted Space]].
+* [[-4045]] to [[-2204]]: The ''[[First Imperium|Ziru Sirka]]'' controls vast territories.
+* [[-2431]]: [[Terran]]s discover [[jump drive]] technology.
+* [[-2404]] to [[-2215]]: The [[Interstellar Wars]].
+* [[-2204]] to [[-1776]]: The [[Rule of Man]] administers the former ''[[First Imperium|Ziru Sirka]]''.
+* [[-1776]] to [[0]]: The [[Long Night]].
+* [[0|The Year 0]]: To [[coreward]], the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: The {{Imperial}} [[First Survey]] charts the system.
+* [[604]]-[[622]]: The {{Imperial}} [[Civil War]].
+* [[624]]: The {{Imperial}} [[Express Boat Network]] is established.
+* [[704]]: The [[Solomani Autonomous Region]] is formed.
+* [[800]]-[[820]]: The [[Psionics Suppressions]].
+* [[871]]: The [[Solomani Confederation]] is founded.
+* [[940]]: The [[Solomani Autonomous Region]] is dissolved.
+* [[990]]-[[1002]]: The [[Solomani Rim War]].
+* [[995]]-[[1065]]: The {{Imperial}} [[Second Survey]] includes data for the system.
+* [[1065]]: The [[Second Survey]] is published. Information about the system becomes widely available.
+
+== References & Contributors ([[Sources]]) ==
+{{Intermediate}}
+{{Detail}}
+{{Sources
+|S1= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (A-M)|Supplement 8 Library Data (A-M)]]'', ([[Game Designers Workshop]], 1981), various pages. (Library data entries)
+|S2= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (N-Z)|Supplement 11 Library Data (N-Z)]]'', ([[Game Designers Workshop]], 1982), various pages. (Library data entries)
+|S3= {{Ludography cite|name= Solomani |version= Classic Traveller|page= IFC, pages 3, 28}} (sector named, background for the sector)
+|S4= {{Ludography cite|name= Solomani & Aslan |page= pages 8-11, various others}} (dot map locating the worlds of the sector, background for the sector)
+|S5= [[Steven Eric Schwartz]]. {{MT}} Periodical ''[[Imperiallines 2 (fanzine)|Imperiallines 2]]'', 1991, page 5. ([[Bootean Federation]], background for the sector) 
+|S6= {{Ludography cite|name= Fighting Ships of the Solomani|page= page 5}} (background for the sector)
+|S7= {{Ludography cite|name= Solomani |version= Mongoose Traveller|page= pages 50, 118, 119, various others}} (background for the sector)
+|S8= {{Ludography cite|name= The Order of Prometheus|page= various pages}} (scenarios and background for the sector)
+|S9= [http://zho.berka.com/data/CLASSIC/sector.pl?sector=ALDEBARA Zho Berka's Maps] (Classic Era [[Universal World Profile|UWP Data]] for the world)
+|S10= [http://111george.com/core/astrogat/jG.htm CORE Data Site] ([[Universal World Profile|UWP Data]] for the world)
+|S11= Author & Contributor: [[User:Garnfellow|Garnfellow]] (development of the sector)
+|S12= Author & Contributor: [[Leroy W.L. Guatney]] of the Federation Development Agency (FDA) (development of the sector)
+}}
+
+[[Category: Humaniti worlds]]
+[[Category: Highport worlds]]
+[[Category: Orbital Facility]]
+[[Category: Panstellar worlds]]
+[[Category: Rising Phoenix News Service worlds]]
+[[Category: Rule of Man worlds]]
+[[Category: Sanctaterra]]
+[[Category: Sanctaterra worlds]]
+[[Category: Second Imperium worlds]]
+[[Category: Solomani]]
+[[Category: Solomani Maschinenbau worlds]]
+[[Category: Solomani worlds]]
+[[Category: Solomani Sphere worlds]]
+[[Category: Terran Confederation worlds]]
+[[Category: Terran Mercantile Community worlds]]
+{{LE|T5 Second Survey worlds}}

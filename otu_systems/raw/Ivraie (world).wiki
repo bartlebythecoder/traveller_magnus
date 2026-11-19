@@ -1,0 +1,226 @@
+[[File:Alien Moon 269c-0.jpg|250 px|right]]
+{{UWP 
+|name    = {{World|Ivraie|Aldebaran|Euxene|0309}}
+|era     = Milieu 1116
+|uc      = B758799-A
+|popc    = 2
+|zonec   = green
+|alg     = SoFr
+|class   = Ag / Tp
+|trade   = ag
+|climate = Tp
+|gravity = -
+|bases   = -
+|primary = G8 V
+|belts   = 0
+|GGcount = 2
+}}
+{{World summary |name= Ivraie|trade= Ag}}
+{{World summary SoFr|sector= Aldebaran|subsector= Euxene}}
+{{World summary comment|trade= Tp}}
+* It is home to a substantial community of [[Kwaz]].
+
+{{InfoboxSystem
+ |name= Ivraie |subsector= Star Bridge
+ |sector= Aldebaran |hex= 0309
+ |star= Primary |type= G8 V
+ |P1=     Planet 1                          | Dist1= 0.24         | UWP1= Y100000-0
+ |P2=     Planet 2                          | Dist2= 0.47         | UWP2= Y7C0000-0
+ |P3=     Verre                             | Dist3= 0.72         | UWP3= F320218-9
+ |P4=     Ivraie                            | Dist4= 0.94         | UWP4= B758799-A
+ |P4M1=     Coupe                           |   Dist4M1= 16 Diam  |   UWP4M1= G20056A-A
+ |P5=     Magnum                            | Dist5= 1.63         | UWP5= G7A2319-9
+ |P6=     Planet 5                          | Dist6= 3.51         | UWP6= Y610000-0
+ |P6M1=     Moon                            |   Dist6M1= 35 Diam  |   UWP6M1= Y210000-0
+ |P7=     Bouteille                         | Dist7= 5.27         | UWP7= Large GG
+ |P7M1=     Champan                         |   Dist7M1= 9 Diam   |   UWP7M1= Y201000-0
+ |P7M2=     Rose                            |   Dist7M2= 11 Diam  |   UWP7M2= G5A2435-9
+ |P7M3=     Rouge                           |   Dist7M3= 15 Diam  |   UWP7M3= H312000-0
+ |P7M4=     Noir                            |   Dist7M4= 20 Diam  |   UWP7M4= Y200000-0
+ |P8=     Planet 6                          | Dist8= 8.84         | UWP8= Y302000-0
+ |P9=     Capitaine                         | Dist9= 13.1         | UWP9= G9C1167-A
+ |P10=    Noah                              | Dist10= 26.2        | UWP10= Small GG
+ |P10M1=    Moon                            |   Dist10M1= 15 Diam |   UWP10M1= H313000-0
+ |P11=    Planet 8                          | Dist11= 125         | UWP11= Y204000-0
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Ivraie''' has a solitary primary star.
+* It is a yellow main sequence.
+ 
+{{MonostellarSystem
+|name           = Ivraie
+|primary        = G8 V 
+|PrimaryName    = Primary
+|PrimaryNotes   = 
+}}
+
+The star is unusually young, with an age of approximately [[Year|2.4 billion years]].
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]].
+* x8 secondary [[world|rocky worlds]].
+** The inhabited worlds are named ''Verre'', ''Magnum'', and ''Capitaine''.
+* x2 [[gas giant]]s, named ''Bouteille'' and ''Noah''.
+
+=== Mainworld Data ===
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Ivraie|Size= 7}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Ivraie|Atmosphere= 5}}
+* It experiences [[Celsius|generally moderate temperatures]].
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Ivraie|Hydrosphere= 8}}
+
+==== Satellites ====
+'''Ivraie''' retains a single [[Natural Satellite|vacuum moon]] named ''Coupe''.
+* It orbits once every few days.
+
+[[File:World Blue Moons 01a-1.jpg|600 px]]
+
+==== Mainworld Geography and Topography ====
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+Ivraie is a young planet, with very active plate tectonics. Tremors and earthquakes are common. It is largely an ocean world, with two continents, named ''La Grand Plat'' and ''La Petite Plat'' and numerous archipelagos and islands.  
+
+[[File:Blank World Map Watery.png|500 px]] <br> (''Blank map, predominantly watery world''.)
+
+==== Native Lifeforms ====
+Abundant aquatic [[Lifeform|native life]] occupying every available marine ecological niche. Its metabolic functions drive the process of atmospheric renewal.
+* The most advanced native land lifeforms are simple plants and a few species of tiny [[insectoid]]s.
+* A number of the ocean's lifeforms, including enormous apex predators, are being studied by Ivraien scientists.
+
+An entire land ecosystem has been imported from offworld and is thriving, with many previously barren regions now exhibiting dense vegetation and many types of animals, including escaped agricultural beasts that have become feral.
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Ivraie''' was originally settled by colonists from [[Euxene (world)|Euxene]] via the [[Gir (world)|Gir system]] in [[945]]. The colonization drive was based on partial data recovered from a dead Scout whose ship had misjumped. The settlement ship, ''La Voyageur'', was captained by Antoine de Bougainville who also made the final astronavigational calculations. Legend has it that he couldn't determine a final critical value, so he literally drank 3 liters of good champagne, guessed, and jumped. When they arrived two subjective weeks (or an eternity) later, in system, the colonists, crew, and poor Captain Bougainville had apparently bookended the voyage by consuming the entirety of champagne brought with them… and named the system Ivraie, loosely translated as ''drunken'' from the ancient Terran Latin ''ēbrius''. Others take it as meaning "chaff", as the long voyage separated the "good grain" – those willing to work together to deal with the situation they found themselves in – from the "chaff" – those who were present for their own selfish reasons.
+
+''La Voyageur'' remains in orbit, maintained as a historical museum. Once every decade, its Jump-4 drive is spun up for an in-system micro-Jump. Champagne is involved.
+
+The bioengineering industry remains prominent, and the crops and livestock developed for this world are well-adapted. Many citizens of Ivraie have used this local bioengineering prowess to slightly modify themselves and their children over the last two centuries to better deal with various atmospheric pressures, including [[Thin Atmosphere|thin]] and [[Dense Atmosphere|dense]] pressures; Ivraien citizens are at home both on Ivraie and [[Euxene (world)|Euxene]]. Crop yields are good, and are very nutrient-rich and generally highly flavorful. Nonetheless, there is a small but vocal minority who oppose the widespread use of bioengineering, and seek to return to more natural farming stocks.
+
+During the [[Solomani Rim War|Rim War]] the [[Solomani Confederation|Confederation]] attempted to "relocate" a number of non-human races to other worlds, principally to fill gaps in the labor market caused by humans serving in the military. Large numbers of [[Kwaz]] were shipped to the world to assist with agricultural tasks. Their services are in demand, they have integrated relatively well, and generally they are thriving.
+
+[[Solomani Security]] keeps a close eye on things to ensure the security of the [[Solomani Confederation|Confederation]] and the well-being of its loyal citizens. Almost anyone ''could'' be a [[Solomani Security|SolSec]] informant, passing on all sorts of useful information: some gain a reward or benefit for their actions, others are coerced, but many see it as an act of duty to help protect the [[Solomani Confederation|Solomani state]] and its interests.
+
+=== [[Starport|World Starport]] (St) ===
+{{Starport|name= Ivraie|Starport= B}}
+* The Ivraien [[Highport]] is dubbed ''The Toast of Ivraie'' or simply ''The Toast''. Its construction was largely funded by the government of [[Euxene (world)|Euxene]] approximately 50 years ago.
+* The primary [[downport]] is ''La Cave'', located on La Grand Plat, within an ancient, very large crater which likely gives it its name. The [[Startown|La Cave startown]] is rather perfunctory, and mostly serves as a customs depot and passpoint to the Capitol.
+* La Petite Plat also has a [[downport]], named ''Fountaine''.
+
+=== [[Population|World Population]] (P) ===
+[[File:Kwaz Sophont Comparison.jpg|300 px|right]]
+{{WorldPop|name= Ivraie|multiplier= 2|Population= 7}}
+* About 95% of the population (roughly 19 million individuals) is made up of [[Solomani]] humans.
+* Around 5% of the population (approximately 1 million individuals) consists of [[Kwaz]].
+
+==== Urbanization ====
+The planetary Capitol is Bougainville, named after Capitain Antoine de Bougainville of the Colony ship ''La Voyageur'' which made orbit in [[945]]. It sits close to the base of an older mountain range on the continent of La Grand Plat and is the closest urban center to ''La Cave''. The architecture reflects the tectonic dynamicism, being highly reinforced, low, and Brutalist in nature. Most large cities are found near the coastlines, but there are many farming villages and towns in the interior. The coastal cities are built with sea-walls, berms, and pumping stations to deal with tsunamis.
+
+The [[Kwaz]] present on the world live in their own communities, generally built close to human settlements. Structures are constructed to serve their physiological needs and are generally far too small for humans to comfortably enter.
+
+==== Linguistic Topography ====
+The most commonly heard [[language]]s are:
+* A local dialect of [[Euxene French (language)|Euxene French]], a [[Terran]] language principally spoken in the [[Euxene Cluster]].
+* Native [[Kwaz]] languages.
+* [[Rim Anglic]], a dialect of [[Anglic]] and the principal language of the [[Solomani Confederation|Confederation]].
+
+=== [[Technology Level|World Technology Level]] (T) ===
+{{WorldTech|name= Ivraie|WorldTech= A}}
+
+Although the world has abundant resources, due to the lack of certain key raw materials the technological level has not significantly advanced since colonization.
+
+=== [[Government|World Government]] (G) ===
+{{WorldGov|name= Ivraie|Government= 9}}
+
+==== World Military ====
+Ivraie operates a handful of [[System Defense Boat]]s (SDB) for in-system exploration, patrols, and defense against pirates. It depends on the Republic to handle any larger threat.
+
+=== [[Law Level|World Law]] (L) ===
+{{WorldLaw|name= Ivraie|Law= 9}}
+
+=== Trade Data ===
+* [[Importance Extension|Importance]]: 3 (ordinary)
+
+=== World Economy ===
+The economy is largely agrarian, using vast swaths of the available landmass for the slow growth crops that grow in the thin atmosphere, and a stock of bioengineered cattle adapted to the same.
+The Ivraien grass, called "ivraie", is also highly bioengineered to be convertible into an alcoholic bubbly wine. This wine is then distilled into local brandies and cognacs… and sometimes a liquid fuel for farm vehicles. All of the above can be generically referred to as ''ivraie''.
+
+The world's exports are principally foodstuffs of all kinds, and is especially known for its alcoholic beverages. It also provides specialty enzymes and scientific consulting.
+
+* [[Resource]]s:                       A (abundant)
+* [[Labor]]:                           6 (millions)
+* [[Infrastructure]]:                  C (very extensive)
+* [[Efficiency]]:                      -1 (average)
+
+=== World Culture ===
+The culture is derived from that of [[Euxene (world)|Euxene]], but has regressed somewhat. The [[Euxene French (language)|Euxene French]] spoken here is now a distinct dialect, although largely understandable by native speakers.
+
+* [[Homogeneity|Heterogenity]]:        3 (monolithic)
+* [[Acceptance]]:                      A (very friendly)
+* [[Strangeness]]:                     6 (very distinct)
+* [[Symbol]]s:                         6 (somewhat concrete)
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+
+* [[-9235]]: far to [[coreward]], the [[Vilani]] discover [[jump drive]] technology. Over the centuries pioneers and settlers gradually spread across [[Charted Space]].
+* [[-4045]] to [[-2204]]: the [[First Imperium|Ziru Sirka]] controls vast territories.
+* [[-2431]]: [[Terran]]s discover [[jump drive]] technology.
+* [[-2404]] to [[-2215]]: the [[Interstellar Wars]]. The young [[Terran Confederation]] battles against the ancient [[Vilani]] [[First Imperium|Ziru Sirka]].
+* [[-2204]] to [[-1776]]: the [[Rule of Man]] administers the former [[First Imperium|Ziru Sirka]].
+* [[-1999]]: the [[Aslan]] gain [[jump drive]] technology.
+* [[-1862]] to [[-1110]]: the [[Terran Mercantile Community]] is active within the region.
+* [[-1776]] to [[0]]: the [[Long Night]].
+* [[-1118]] to [[380]]: the [[Aslan Border Wars]].
+* [[-1110]] to [[588]]: the [[Terran Mercantile Community]] gradually becomes the [[Old Earth Union]], shrinking to control the region around [[Terra]].
+* [[0|The Year 0]]: to [[coreward]], the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[380]]: the [[Peace of Ftahalr]] ends the ongoing [[Aslan Border Wars]] and establishes understandings regarding human and [[Aslan]] influence. 
+* [[588]]: the [[Old Earth Union]] and the former territories of the [[Terran Mercantile Community]] are annexed by the {{Imperium}}, moving its border adjacent to the [[Aslan Hierate]].
+* [[604]]-[[622]]: the {{Imperial}} [[Civil War]].
+* [[624]]: the {{Imperial}} [[Express Boat Network]] is established.
+* [[704]]: the [[Solomani Autonomous Region]] is formed.
+* [[800]]-[[820]]: the [[Psionics Suppressions]].
+* [[871]]: the [[Solomani Confederation]] is founded.
+* [[940]]: the [[Solomani Autonomous Region]] is dissolved.
+* [[990]]-[[1002]]: the [[Solomani Rim War]].
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] includes data for the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+
+== References & Contributors (Sources) ==
+{{Metadata}}
+{{Detail}}
+{{Sources
+|S1= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (A-M)|Supplement 8 Library Data (A-M)]]'', ([[Game Designers Workshop]], 1981), various pages. (Library data entries)
+|S2= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (N-Z)|Supplement 11 Library Data (N-Z)]]'', ([[Game Designers Workshop]], 1982), various pages. (Library data entries)
+|S3= {{Ludography cite|name= Solomani |version= Classic Traveller|page= IFC, pages 3, 28}} (sector named, background for the sector)
+|S4= {{Ludography cite|name= Solomani & Aslan |page= pages 8-11, various others}} (dot map locating the worlds of the sector, background for the sector)
+|S5= [[Steven Eric Schwartz]]. {{MT}} Periodical ''[[Imperiallines 2 (fanzine)|Imperiallines 2]]'', 1991, page 5. ([[Bootean Federation]], background for the sector) 
+|S6= {{Ludography cite|name= Fighting Ships of the Solomani|page= page 5}} (background for the sector)
+|S7= {{Ludography cite|name= Solomani |version= Mongoose Traveller|page= pages 50, 118, 119, various others}} (background for the sector)
+|S8= {{Ludography cite|name= The Order of Prometheus|page= various pages}} (scenarios and background for the sector)
+|S9= [http://zho.berka.com/data/CLASSIC/sector.pl?sector=ALDEBARA Zho Berka's Maps] (Classic Era [[Universal World Profile|UWP Data]] for the world)
+|S10= [http://111george.com/core/astrogat/jG.htm CORE Data Site] ([[Universal World Profile|UWP Data]] for the world)
+|S11= Author & Contributor: [[User:Garnfellow|Garnfellow]] (development of the sector)
+|S12= Author & Contributor: [[Leroy W.L. Guatney]] of the Federation Development Agency (FDA) (development of the sector)
+|S13= Author & Contributor: [[User:Dochsavage|Dochsavage]] 
+}}
+
+ 
+[[Category: Humaniti worlds]]
+[[Category: Kwaz worlds]]
+[[Category: Rule of Man worlds]]
+[[Category: Second Imperium worlds]]
+[[Category: Solomani worlds]]
+[[Category: Solomani Sphere worlds]]
+[[Category: Terran Confederation worlds]]
+[[Category: Terran Mercantile Community worlds]]
+{{LE|Era: Milieu 1116|T5 Second Survey}}

@@ -1,0 +1,189 @@
+[[File:Alien Moon 40c-0.jpg|250 px|right]]
+{{UWP
+|name= {{World|Divad|Corridor|Sinta|2238}}
+|u0    = C8C0533-5
+|pop0  = 8
+|uc    = C8C0885-9
+|popc  = 4
+|zonec = amber
+ |u1= 
+|alg     = ImDv
+|class   = He Ph / Pz / (Brinn)9 Huma1
+|trade   = he
+|climate = TBD
+|nblty   = Be
+|bases   = S
+|primary = M5 V
+|GGcount = 2
+|belts   = 2
+}}
+
+{{World summary |name= Divad |trade=He Ph}}
+{{World summary comment|trade=Pz}} 
+{{World summary ImDv|sector= Corridor |subsector=Sinta}}
+{{World summary bases|bases=S}}
+* During the [[Long Night]] the world was named ''Kateri''.
+* It is notable as the homeworld of the [[Brinn]], a xenophobic [[Minor Race]]. 
+* About 90% of the population is composed of [[Brinn]].
+* About 10% of the population is composed of baseline [[human]]s and other non-human [[sophont]]s.
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+The [[Brinn]] homeworld Divad circles around the main sequence M5 star Kateri in the [[Corridor Sector]], within the [[Tainbee Cluster]]. 
+
+=== Stellar Data ===
+By astronomical standards, Kateri is a very unimpressive star and it wasn't considered a likely candidate for life-bearing worlds prior to its exploration by [[Vilani]] scouts in [[-4576]]. Kateri has an absolute bolometric [[magnitude]] of 10.2 and a luminosity of only 0.007, making it much fainter and weaker than Sol. It is roughly one-third the size and mass of Terra's star and has a surface temperature of only 2,800K. There are five orbits about the star which are occupied. 
+{{MonostellarSystem
+|name           = Divad
+|primary        = M5 V 
+|PrimaryName   = Kateri
+}}
+ 
+=== System Data ===
+The worlds of the system are as follows:
+
+{{InfoboxSystem
+|name      = Divad
+|sector    = Corridor
+|subsector = Sinta
+|hex       = 2238
+|
+|star = '''Kateri'''
+|type = '''M5 V'''
+|
+|P0     = Planetoid belt
+|Dist0  = 0.1
+|UWP0   = F000485-7
+|P1     = Divad
+|Dist1  = 0.2
+|UWP1   = C8C0885-8
+|P2     = Kleslin
+|Dist2  = 0.32
+|UWP2   = '''Large GG'''
+|P3     = Galidesh
+|Dist3  = 0.48
+|UWP3   = '''Small GG'''
+|P4     = Planetoid belt
+|Dist4  = 0.72
+|UWP4   = F000385-7
+}}
+
+==== Orbit 0 ====
+The innermost orbit, at a distance of roughly 15 million kilometers (0.1 AU), is filled by an unusually dense ring of asteroids. When the Brinn first began to explore their system (less than fifty years before their first contact with [[Humaniti]]) they found a treasure trove of ores in these rocks. To this day, a population of almost 35,000 prospectors works amid these mineral-rich planetoids.
+
+==== Orbit 1 ====
+In the second orbital position, at a distance of 0.2 AUs, is the [[Brinn]] homeworld, Divad. In Human terms, a less hospitable world would be hard to find. If it were not for the need to oversee the native race, it is doubtful that the Imperium would ever established any form of colony or outpost here. 
+
+'''Divad''' is 13,120 kilometers in diameter with a rocky core. Its density is only 0.76, giving it a mass of 0.82 standard and a surface gravity of only 0.78 gees. Divad turns on its axis every 36.7 hours and circles Kateri every 12.28 local days (18.78 standard days). Divad’s axial tilt is 16”, while its orbital eccentricity is 0.02. Divad has no moons. 
+
+The atmosphere which shrouds Divad is a mixture of hydrogen (70%) and methane (28%). The remaining 2% is made up of various elements which are non-toxic to the Brinn, but quite deadly to Humans. The atmospheric pressure is 1.9 standard. There is very little precipitation on the world and only 4.7% of the surface is covered by liquid. In almost all cases, this is hydrogen cyanide which, although vital to Brinn metabolism, is quickly lethal to Humans (and most other oxygen-breathing races known to the Imperium). 
+
+Because Kateri is such a weak star, Divad is a cold world despite its close proximity. On the average, the surface temperature is almost -100&deg;C. On the poles, this can fall to as low as -170&deg;. Regions near the equator have been known to reach temperatures of -55&deg; during the height of summer.
+
+Unlike worlds with molten cores, Divad’s crust is not broken into multiple tectonic plates. In fact, geologically it is quite stable and has been for a very long time.
+
+==== Orbit 2 ====
+The third and fourth orbits, at 0.32 and 0.48 AU, are occupied by Jovian worlds similar to Assiniboia in the [[Regina (world)|Regina]] system or Jupiter in the Terra system. 
+
+The innermost of these two is 150,000 kilometers in diameter and has been named Kleslin in [[Galanglic]]. It has 11 major moons, five of which are currently home to various Brinn installations, and a pronounced ring of ice. 
+
+==== Orbit 3 ====
+The outer of the two gas giants is Galidesh, and it is only half the size of its sister world. It has only 6 major moons, two of which are occupied by the Brinn. Although Galidesh has its own ring system, it is much fainter and far less spectacular than that of Kleslin. 
+
+==== Orbit 4 ====
+The farthest occupied orbit in the Kateri system is 0.72 AUs from the star. Like the innermost orbit, it features an asteroid belt. This one, unlike the first, is sparse and geologically average. It has seen some exploitation by the Brinn during their history, but is normally home to fewer than 5,000 prospectors at any given time.
+
+=== Mainworld Data ===
+No information yet available.
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Divad|Size= 8}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Divad|Atmosphere= C}}
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Divad|Hydrosphere= 0}}
+
+==== Mainworld Geography & Topography ====
+
+[[File:Exotic World Arid Type 02b1.jpg|600 px]]
+
+=== Native Sophont: [[Brinn]] ===
+A non-Humanoid species of exotic arthropods.
+
+== History & Background (Dossier) ==
+Divad was first explored by [[Vilani]] scouts in [[-4576]].
+
+The mainstream Brinn culture on Divad follows a religion known only as the Truth. The Truth states that the Brinn (and all other lifeforms) were created by a single divine being of an unfathomable nature.
+
+* [[H'Tykk'Ral]]
+* [[R'Earst'Ahlann]]
+
+=== Imperial Landed Nobility ===
+{{Imperial Nobility|name= Divad|Noble=Be}}
+
+=== [[Starport|World Starport]] (Sp) ===
+{{Starport|name= Divad|Starport= C}}
+
+=== [[Population|World Population]] (P) ===
+{{WorldPop|name= Divad|multiplier= 4|Population= 8}}
+
+==== World Demographics ====
+* [[Brinn]], population 90% 
+* [[Human]], population 10%
+
+==== Urbanization ====
+The major Brinn cities include:
+
+* B'Rel'Lhas (population 80,000,000)
+* T'Horis'An
+* V'Hol'Dahl
+
+=== [[Government|World Government]] (G) ===
+{{WorldGov|name= Divad|Government= 8}}
+
+Divad is ruled specifically by a bureaucracy known as the Grand Dominion. Under Imperial guidance and control, the Dominion has been restoring a limited form of self-rule to the Brinn after centuries under a Human military government. The Dominion is made up of over three dozen councils, each controlling one area of society. The more important councils are those of Wealth (economics), Truth (religion), Knowledge (education), and Service (public welfare). Each is composed of 15 members known as Dominators, who are grouped into three internal councils.
+
+=== World Law (L) ===
+{{WorldLaw|name= Divad|Law= 5}}
+
+=== Historical Data ===
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+* [[Ancient|circa -250,000]]: The [[Ancient]]s transplant Humans onto the world of [[Kukhun (world)|Kukhun]].
+* [[-9235]]: The [[Vilani]] discover [[jump drive]] technology, and over the centuries pioneers and settlers gradually spread across [[Charted Space]]. The [[Lancian|Kukhunen culture]] acquires [[Jump Drive|jump technology]] from these wanderers.
+* [[-5400|circa -5400]]: The [[Vilani]] [[Consolidation Wars]] -- the [[Lancian|Kukhunen region]] is eventually conquered.
+* [[-4576]]: [[Vilani]] scouts explore Divad and make contact with the [[Brinn]].
+* [[-4045]] to [[-2204]]: The ''[[First Imperium|Ziru Sirka]]'' claims and settles worlds across the region.
+* [[-2404]] to [[-2215]]: The [[Interstellar Wars]].
+* [[-2204]] to [[-1776]]: The [[Rule of Man]] administers the worlds of the region.
+* [[-1776]] to [[0]]: The [[Long Night]]. There is widespread regression within the area and some worlds [[Barren World|become barren]].
+** Terran dictators are driven out of the Kateri system by the [[Brinn]], who capture much of their equipment and assemble a formidable space fleet. Human settlements in neighboring systems are located and attacked.
+* [[-1700|circa -1700]]: The reemergent [[Lancian|Kukhunen region]] gradually collapses into civil war.
+* [[-1200]]: The [[Lancian]] movement rises to dominance on [[Kukhun (world)|Kukhun]] and within [[Lancian|Kukhunen space]]. Few ships are available throughout the period but limited contact is maintained.
+* [[-143]]: The [[Lancian]]s gain modern [[Jump Drive|jump technology]] from [[Sylean]] traders and use it to establish the [[Lancian Confederation]].
+* [[0|The Year 0]]: The [[Third Imperium]] is founded. There are frictions with the [[Lancian]]s.
+* [[76]]-[[84]]: The [[Vilani Pacification Campaign]] results in the absorbtion of [[Lancian Confederation|the Confederation]].
+* [[300]]-[[420]]: The {{Imperial}} [[First Survey]] charts the system.
+* [[604]]-[[622]]: The [[Civil War]].
+* [[624]]: The [[Express Boat Network]] is established.
+* [[639]]: The [[Lancian Cultural Region]] is established.
+* [[995]]-[[1065]]: The {{Imperial}} [[Second Survey]] charts the system.
+* [[1065]]: The [[Second Survey]] is published. Information about the system becomes widely available.
+
+== References & Contributors (Sources) ==
+{{Sources
+|S1= {{TDref|12}}
+|S2= [[Marc Miller's Traveller]] [[T4 First Survey]]
+}}
+
+[[Category: Brinn worlds]]
+[[Category: Mining worlds]]
+[[Category: First Imperium worlds]]
+[[Category: Rule of Man worlds]]
+[[Category: Second Imperium worlds]]
+[[Category: Tainbee Cluster worlds]]
+[[Category: Thunderball worlds]]
+{{LE|T5 Second Survey worlds}}
+{{LEN|Era: Milieu 0|Homeworld|Worlds with a Scout Base}}

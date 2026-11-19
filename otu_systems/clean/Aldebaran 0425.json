@@ -1,0 +1,446 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Aldebaran",
+  "sector_as_written": "Massilia",
+  "hex": "0425",
+  "sector_abbreviation": "Alde",
+  "subsector": "The Barrens",
+  "name": "Hiemalis",
+  "sources": [
+    {
+      "page": "Hiemalis (world)",
+      "revid": 1017695,
+      "timestamp": "2026-03-09T13:49:50Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Hiemalis (world)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Alseran",
+          "type": "K5 III",
+          "notes": "Unstable pulsating star. It produces high levels of EM noise."
+        },
+        {
+          "role": "Secondary",
+          "name": "Tork",
+          "type": "M1 V",
+          "notes": "Approximately 1700 AU from Alseran."
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Alseran",
+      "stars": [
+        {
+          "name": "Alseran",
+          "type": "K5 III"
+        }
+      ],
+      "labels": [
+        "Hiemalis"
+      ],
+      "pages": [
+        "Hiemalis (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Planet 1",
+          "raw": "YCC0000-0",
+          "kind": "world",
+          "uwp": "YCC0000-0",
+          "distance": {
+            "raw": "37.9",
+            "value": 37.9,
+            "unit": "AU"
+          },
+          "sources": [
+            "Hiemalis (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Hiemalis (world)"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "star": "Tork",
+      "stars": [
+        {
+          "name": "Tork",
+          "type": "M1 V"
+        }
+      ],
+      "labels": [
+        "Hiemalis"
+      ],
+      "pages": [
+        "Hiemalis (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Planet 2",
+          "raw": "G5A020B-A",
+          "kind": "world",
+          "uwp": "G5A020B-A",
+          "distance": {
+            "raw": "0.24",
+            "value": 0.24,
+            "unit": "AU"
+          },
+          "sources": [
+            "Hiemalis (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Planet 3",
+          "raw": "F54132B-B",
+          "kind": "world",
+          "uwp": "F54132B-B",
+          "distance": {
+            "raw": "0.33",
+            "value": 0.33,
+            "unit": "AU"
+          },
+          "sources": [
+            "Hiemalis (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Hiemalis",
+          "raw": "B78748C-B",
+          "kind": "world",
+          "uwp": "B78748C-B",
+          "distance": {
+            "raw": "0.49",
+            "value": 0.49,
+            "unit": "AU"
+          },
+          "sources": [
+            "Hiemalis (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 4,
+          "name": "Planet 4",
+          "raw": "Y310000-0",
+          "kind": "world",
+          "uwp": "Y310000-0",
+          "distance": {
+            "raw": "7.65",
+            "value": 7.65,
+            "unit": "AU"
+          },
+          "sources": [
+            "Hiemalis (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Planet 5",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "10.3",
+            "value": 10.3,
+            "unit": "AU"
+          },
+          "sources": [
+            "Hiemalis (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Planet 6",
+          "raw": "Y5A0000-0",
+          "kind": "world",
+          "uwp": "Y5A0000-0",
+          "distance": {
+            "raw": "12.8",
+            "value": 12.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Hiemalis (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Gas Giant",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "15.5",
+            "value": 15.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Hiemalis (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Hiemalis (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y4A1000-0",
+              "kind": "world",
+              "uwp": "Y4A1000-0",
+              "distance": {
+                "raw": "11 Diam",
+                "value": 11.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Hiemalis (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "G30231A-B",
+              "kind": "world",
+              "uwp": "G30231A-B",
+              "distance": {
+                "raw": "20 Diam",
+                "value": 20.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Hiemalis (world)"
+              ]
+            }
+          ]
+        }
+      ],
+      "placement": {
+        "orbit": null,
+        "au": 1700.0,
+        "from": "star template notes"
+      }
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Hiemalis (world)",
+      "label": "Hiemalis",
+      "stars": [
+        {
+          "name": "Alseran",
+          "type": "K5 III"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Planet 1",
+          "raw": "YCC0000-0",
+          "kind": "world",
+          "uwp": "YCC0000-0",
+          "distance": {
+            "raw": "37.9",
+            "value": 37.9,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Hiemalis (world)",
+      "label": "Hiemalis",
+      "stars": [
+        {
+          "name": "Tork",
+          "type": "M1 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Planet 2",
+          "raw": "G5A020B-A",
+          "kind": "world",
+          "uwp": "G5A020B-A",
+          "distance": {
+            "raw": "0.24",
+            "value": 0.24,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Planet 3",
+          "raw": "F54132B-B",
+          "kind": "world",
+          "uwp": "F54132B-B",
+          "distance": {
+            "raw": "0.33",
+            "value": 0.33,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Hiemalis",
+          "raw": "B78748C-B",
+          "kind": "world",
+          "uwp": "B78748C-B",
+          "distance": {
+            "raw": "0.49",
+            "value": 0.49,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Planet 4",
+          "raw": "Y310000-0",
+          "kind": "world",
+          "uwp": "Y310000-0",
+          "distance": {
+            "raw": "7.65",
+            "value": 7.65,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Planet 5",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "10.3",
+            "value": 10.3,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Planet 6",
+          "raw": "Y5A0000-0",
+          "kind": "world",
+          "uwp": "Y5A0000-0",
+          "distance": {
+            "raw": "12.8",
+            "value": 12.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Gas Giant",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "15.5",
+            "value": 15.5,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y4A1000-0",
+              "kind": "world",
+              "uwp": "Y4A1000-0",
+              "distance": {
+                "raw": "11 Diam",
+                "value": 11.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "G30231A-B",
+              "kind": "world",
+              "uwp": "G30231A-B",
+              "distance": {
+                "raw": "20 Diam",
+                "value": 20.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Hiemalis",
+    "UWP": "B78748C-B",
+    "Stellar": "K5 III M1 V",
+    "PBG": "301",
+    "Bases": "",
+    "Remarks": "Ni Ga Pa Da Tu Tz"
+  }
+}

@@ -993,9 +993,9 @@
     <div id="splash-screen">
         <div class="splash-content">
             <h1>Bartleby the Coder's:<br><span class="highlight">As Above<br> So Below</span></h1>
-            <div class="splash-banner">New: Map Legends</div>
+            <div class="splash-banner">New: Traveller Wiki System Imports</div>
             <p class="splash-subtitle">High-Fidelity Star System Generator</p>
-            <div class="splash-version">v0.18.3</div>
+            <div class="splash-version">v0.19.0</div>
 
             <div id="splash-shortcuts">
                 <h3>Controls & Shortcuts</h3>
@@ -1297,44 +1297,49 @@
                 <i class="fas fa-chevron-down"></i>
             </div>
             <div class="settings-section-body" style="display:none;flex-direction:column;gap:6px;padding-top:4px;">
-                <button class="menu-btn" id="btn-open-sector-export"
+                <button class="menu-btn" id="btn-open-sector-export" title="Saves a sector as a TravellerMap tab-delimited file, along with its metadata (.xml)."
                     style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
                     <i class="fas fa-file-export"></i> Export Sector (.tsv)
                 </button>
-                <button class="menu-btn" id="btn-export-xml-metadata"
+                <button class="menu-btn" id="btn-export-xml-metadata" title="Saves only a sector&#39;s TravellerMap metadata file (.xml), such as its routes."
                     style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
                     <i class="fas fa-code"></i> Export Metadata (.xml)
                 </button>
-                <button class="menu-btn" id="btn-export-obsidian"
+                <button class="menu-btn" id="btn-export-obsidian" title="Saves the map as an Obsidian wiki or an HTML website."
                     style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
                     <i class="fas fa-book"></i> Export Wiki
                 </button>
-                <button class="menu-btn" id="btn-import-sector"
+                <button class="menu-btn" id="btn-import-sector" title="Loads a TravellerMap tab-delimited sector file into the sector position you choose."
                     style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;"
                     onclick="document.getElementById('file-import-sector').click()">
                     <i class="fas fa-file-import"></i> Import Sector (.tsv)
                 </button>
                 <input type="file" id="file-import-sector" accept=".tab,.tsv,.txt" style="display:none;">
-                <button class="menu-btn" id="btn-import-xml-metadata"
+                <button class="menu-btn" id="btn-import-xml-metadata" title="Loads a TravellerMap metadata file (.xml) into the sector position you choose."
                     style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
                     <i class="fas fa-code"></i> Import Metadata (.xml)
                 </button>
                 <input type="file" id="file-import-xml-metadata" accept=".xml" style="display:none;">
-                <button class="menu-btn" id="btn-import-imperium"
+                <button class="menu-btn" id="btn-import-imperium" title="Imports the Third Imperium sectors you tick from TravellerMap, each into the position you set."
                     style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
                     <i class="fas fa-globe"></i> Import the Imperium
                 </button>
-                <button class="menu-btn" id="btn-import-universe"
+                <button class="menu-btn" id="btn-import-universe" title="Imports the whole charted universe from TravellerMap onto a 16×8-sector map, erasing everything on the current map."
                     style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <i class="fas fa-meteor"></i> Import the Universe
+                    <i class="fas fa-meteor"></i> Import the OTU Universe
                 </button>
-                <button class="menu-btn" id="btn-import-neighbourhood"
+                <button class="menu-btn" id="btn-import-neighbourhood" title="Imports a sector and its 8 neighbours from TravellerMap into the middle of the map, replacing only those 9 sectors."
                     style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <i class="fas fa-th"></i> Import a Neighbourhood
+                    <i class="fas fa-th"></i> Import an OTU Neighbourhood
                 </button>
-                <button class="menu-btn" id="btn-import-custom-otu"
+                <button class="menu-btn" id="btn-import-custom-otu" title="Imports the block of sectors you drag out on a sector map, resizing the map to fit and erasing everything on it."
                     style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
                     <i class="fas fa-vector-square"></i> Custom OTU Import
+                </button>
+                <!-- v0.19.0: load published system data (wiki snapshot) into every matching hex -->
+                <button class="menu-btn" id="btn-import-published-systems" title="Adds traveller wiki planets and moons to every world on the map that matches one, and asks before replacing details."
+                    style="width:100%;padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <i class="fas fa-sun"></i> Import Wiki-Published Systems
                 </button>
             </div>
         </div>
@@ -1380,6 +1385,32 @@
     </div>
 
     <!-- OTU Import Modal -->
+    <!-- v0.19.0: choose a published system (wiki snapshot) for one hex -->
+    <div id="published-system-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+               background:rgba(0,0,0,0.75); z-index:2000;
+               align-items:center; justify-content:center;">
+        <div style="background:#1f2833; border:1px solid #45a29e; border-radius:8px;
+                    padding:24px; width:480px; max-width:calc(100vw - 32px); max-height:80vh;
+                    display:flex; flex-direction:column; gap:12px; box-shadow:0 8px 32px rgba(0,0,0,0.6);">
+            <h3 style="margin:0; color:#66fcf1; font-size:1.1rem;">Load Wiki-Published System</h3>
+            <div id="published-system-hint" style="color:#c5c6c7; font-size:0.8rem;"></div>
+            <input type="text" id="published-system-filter" placeholder="Filter by name or sector"
+                style="background:#0b0c10; border:1px solid #45a29e; color:#c5c6c7;
+                       padding:6px 8px; border-radius:4px; font-size:0.85rem;">
+            <select id="published-system-list" size="12"
+                style="background:#0b0c10; border:1px solid #45a29e; color:#c5c6c7;
+                       font-size:0.85rem; flex:1; min-height:200px;"></select>
+            <div style="display:flex; gap:8px; justify-content:flex-end;
+                        border-top:1px solid #45a29e; padding-top:12px;">
+                <button id="published-system-cancel" class="menu-btn"
+                    style="padding:6px 18px;">Cancel</button>
+                <button id="published-system-load" class="menu-btn"
+                    style="padding:6px 18px; background:#45a29e; color:#0b0c10; font-weight:bold;">Load</button>
+            </div>
+        </div>
+    </div>
+
     <div id="otu-import-modal"
         style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
                background:rgba(0,0,0,0.75); z-index:2000;
@@ -1420,10 +1451,10 @@
                             style="cursor:pointer; accent-color:#66fcf1;">
                         <span style="color:#c5c6c7; font-size:0.85rem;">Subsector Names</span>
                     </label>
-                    <label style="display:none; align-items:center; gap:8px; cursor:pointer;">
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
                         <input type="checkbox" id="otu-opt-system-data"
                             style="cursor:pointer; accent-color:#66fcf1;">
-                        <span style="color:#c5c6c7; font-size:0.85rem;">Published System Data (planets &amp; moons)</span>
+                        <span style="color:#c5c6c7; font-size:0.85rem;">Wiki-Published System Data (planets &amp; moons)</span>
                     </label>
                 </div>
             </div>
@@ -1465,13 +1496,13 @@
                     padding:24px; width:480px;
                     display:flex; flex-direction:column; gap:12px; box-shadow:0 8px 32px rgba(0,0,0,0.6);">
 
-            <h3 style="margin:0; color:#66fcf1; font-size:1.1rem;">Import the Universe</h3>
+            <h3 style="margin:0; color:#66fcf1; font-size:1.1rem;">Import the OTU Universe</h3>
 
             <!-- Warning -->
             <div style="background:#2a1500; border:1px solid #c0392b; border-radius:4px; padding:12px;
                         color:#e74c3c; font-size:0.82rem; line-height:1.6;">
                 &#9888; EXPERIMENTAL FEATURE &mdash; USE AT YOUR OWN RISK &#9888;<br>
-                Import the Universe will:<br>
+                Import the OTU Universe will:<br>
                 &bull;&nbsp;Resize the canvas to 16&times;8 sectors (128 positions)<br>
                 &bull;&nbsp;Erase ALL existing hex data and routes<br>
                 &bull;&nbsp;Fetch up to <span id="universe-modal-sector-count">128</span> sectors
@@ -1488,11 +1519,11 @@
                         style="cursor:pointer; accent-color:#66fcf1;">
                     Replace Foreven with Terry Mixon version
                 </label>
-                <label style="display:none; align-items:center; gap:8px; cursor:pointer;
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;
                                color:#c5c6c7; font-size:0.85rem; margin-top:6px;">
                     <input type="checkbox" id="universe-opt-system-data"
                         style="cursor:pointer; accent-color:#66fcf1;">
-                    Published System Data (planets &amp; moons)
+                    Wiki-Published System Data (planets &amp; moons)
                 </label>
             </div>
 
@@ -1518,12 +1549,12 @@
                     padding:24px; width:540px; max-height:90vh; overflow-y:auto;
                     display:flex; flex-direction:column; gap:12px; box-shadow:0 8px 32px rgba(0,0,0,0.6);">
 
-            <h3 style="margin:0; color:#66fcf1; font-size:1.1rem;">Import a Neighbourhood</h3>
+            <h3 style="margin:0; color:#66fcf1; font-size:1.1rem;">Import an OTU Neighbourhood</h3>
 
             <!-- Warning -->
             <div style="background:#2a1500; border:1px solid #c0392b; border-radius:4px; padding:12px;
                         color:#e74c3c; font-size:0.82rem; line-height:1.6;">
-                &#9888; Import a Neighbourhood will:<br>
+                &#9888; Import an OTU Neighbourhood will:<br>
                 &bull;&nbsp;Place a 3&times;3 block of sectors in the middle of the canvas<br>
                 &bull;&nbsp;Erase the hex data and routes in those 9 sectors (other sectors are untouched)<br>
                 &bull;&nbsp;If the canvas is smaller than 3&times;3, resize it to 3&times;3 and erase ALL data<br>
@@ -1580,6 +1611,11 @@
                         <input type="checkbox" id="neighbourhood-opt-mixon-foreven"
                             style="cursor:pointer; accent-color:#66fcf1;">
                         <span style="color:#c5c6c7; font-size:0.85rem;">Replace Foreven with Terry Mixon version</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="neighbourhood-opt-system-data"
+                            style="cursor:pointer; accent-color:#66fcf1;">
+                        <span style="color:#c5c6c7; font-size:0.85rem;">Wiki-Published System Data (planets &amp; moons)</span>
                     </label>
                 </div>
             </div>
@@ -1639,7 +1675,7 @@
                 <span><span style="display:inline-block; width:10px; height:10px; background:#2b4f6e; vertical-align:middle;"></span> OTU</span>
                 <span><span style="display:inline-block; width:10px; height:10px; background:#5a4a2a; vertical-align:middle;"></span> In review / unreviewed</span>
                 <span><span style="display:inline-block; width:10px; height:10px; background:#5e3f7d; vertical-align:middle;"></span> Zhodani Core Route (scroll up)</span>
-                <span><span style="display:inline-block; width:10px; height:10px; border:1px dashed #c5c6c7; vertical-align:middle;"></span> Import the Universe block</span>
+                <span><span style="display:inline-block; width:10px; height:10px; border:1px dashed #c5c6c7; vertical-align:middle;"></span> Import the OTU Universe block</span>
                 <span id="custom-otu-hover" style="margin-left:auto; color:#66fcf1; min-height:1.2em;"></span>
             </div>
 
@@ -1691,6 +1727,11 @@
                             style="cursor:pointer; accent-color:#66fcf1;">
                         <span style="color:#c5c6c7; font-size:0.85rem;">Replace Foreven with Terry Mixon version</span>
                     </label>
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="custom-otu-opt-system-data"
+                            style="cursor:pointer; accent-color:#66fcf1;">
+                        <span style="color:#c5c6c7; font-size:0.85rem;">Wiki-Published System Data (planets &amp; moons)</span>
+                    </label>
                 </div>
             </div>
 
@@ -1717,7 +1758,7 @@
         </div>
         <div
             style="text-align: center; border-bottom: 1px solid rgba(69, 162, 158, 0.3); padding-bottom: 10px; margin-bottom: 20px;">
-            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.18.3</span>
+            <p style="margin: 5px 0; color: #c5c6c7; font-size: 14px;">Version: <span id="app-version">v0.19.0</span>
             </p>
         </div>
 
@@ -2340,6 +2381,8 @@
         <button class="context-menu-item" id="ctx-create-system" style="display: none;">CREATE MANUAL SYSTEM</button>
         <button class="context-menu-item" id="ctx-edit-system" style="display: none;">EDIT SYSTEM</button>
         <button class="context-menu-item" id="ctx-world-details" style="display: none;">WORLD DETAILS</button>
+        <!-- v0.19.0: one hex = choose any published system; several = load the matching ones -->
+        <button class="context-menu-item" id="ctx-load-published" style="display: none;">LOAD WIKI-PUBLISHED SYSTEM</button>
         <!-- v0.18.3: shown only when right-clicking a border/region name that was moved with Alt + drag -->
         <button class="context-menu-item" id="ctx-reset-label" style="display: none;">RESET NAME POSITION</button>
 

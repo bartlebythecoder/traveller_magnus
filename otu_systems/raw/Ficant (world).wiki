@@ -1,0 +1,193 @@
+[[File:Alien Moon 381c-0 Small.jpg|250 px|right]]
+{{UWP 
+|name= {{World|Ficant|Spinward Marches|Vilis|1417}} 
+ |era=Milieu 1116
+|uc    = E567353-5
+|popc  = 9
+|zonec = green
+ |u1= 
+|alg     = ImDd
+|class   = Lo / Tp Lt
+|trade   = lo
+|nblty   = B
+|bases   = -
+|primary = M0 V M1 V
+|belts   = 1
+|GGcount = 0
+}}
+{{InfoboxSystem
+|name= Ficant|subsector= Vilis|sector= Spinward Marches|hex= 1417
+|star= Netali |type= M0 V
+|P1= Netali I             |Dist1= 0.17   |UWP1=
+|P2= Netali II            |Dist2= 0.38   |UWP2=
+|P3= Ficant               |Dist3= 0.57   |UWP3=C567353-5
+|P4= Netali IV            |Dist4= 1.15   |UWP4=
+|P5= Netali V             |Dist5= 1.95   |UWP5=
+|P6= Planetoid Belt       |Dist6= 3.35   |UWP6=
+}}
+{{InfoboxSystem
+|name= Ficant|subsector= Vilis|sector= Spinward Marches|hex= 1417
+|star= Netali Bis |type= M1 V
+|P1= Bis I                |Dist1= 0.15   |UWP1=
+|P2= Bis II               |Dist2= 0.31   |UWP2=
+|P3= Bis III              |Dist3= 0.64   |UWP3=
+|P4= Bis IV               |Dist4= 0.97   |UWP4=
+|P5= Bis V                |Dist5= 1.35   |UWP5=
+|P6= Bis VI               |Dist6= 1.85   |UWP6=
+|P7= Bis VII              |Dist7= 3.34   |UWP7=
+}}
+{{World summary |name= Ficant|trade= Lo}}
+{{World summary ImDd|sector= Spinward Marches|subsector= Vilis}}
+{{World summary comment|trade= Tp}}
+{{World summary comment|trade= Lt}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Ficant''' is a binary star system.
+* Both are red main sequence stars.
+
+{{BinaryStarSystem
+|name           = Ficant
+|primary        = M0 V  
+|secondary      = M1 V 
+|PrimaryName    = Netali
+|PrimaryNotes   = Young star: it is only 2 billion years old.
+|SecondaryName  = Netali Bis
+|SecondaryNotes = [[Astronomical Unit|Approximately 18.0 AU]] from the primary.
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]], the third world orbiting the system's primary star.
+* x11 secondary [[world|rocky worlds]]. Four orbit the primary star, seven orbit the secondary star.
+* x1 [[planetoid belt]].
+
+=== Mainworld Data ===
+Ficant is an unremarkable {{Imperial}} world near the [[Sword Worlds]] border. It orbits Netali, an ordinary red main sequence star at a distance of [[Astronomical Unit|approximately 0.57 AU]]<ref><small>Non-canon</small></ref>.
+
+Ficant is a member of a young system, and its relative youth has prevented the [[mainworld]] from becoming fully [[Twilight Zone World|tidally locked]] to its star. However, it is expected that it will become [[Twilight Zone World|tidally locked]] within the next 500 million years, at which point its atmosphere's volatiles will freeze out on the night side and the planet will die. Despite this, the world has evolved a thriving ecosystem with a wide range of primitive flora and fauna (very roughly equivalent to [[Terra]]'s Carboniferous period) and is of considerable interest to biologists.
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Ficant|Size= 5}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Ficant|Atmosphere= 6}}
+* It experiences [[Celsius|low to moderate temperatures]].
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Ficant|Hydrosphere= 7}}
+
+[[File:Garden World Type 19a2.jpg|600 px]]
+
+==== Mainworld Geography and Topography ====
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+Ficant is a small world with oceans covering 69% of its surface. Despite its cool climate it does not posses extensive polar ice caps as none of its five continents are located in the polar regions, thus preventing their formation. This lack of ice caps has contributed to keeping its overall albedo low and results in a climate far warmer than would normally be expected. One curious fact is its surprisingly high atmospheric pressure given its small size, but like much on the world, this has not yet been investigated and no plausible explanation has been advanced.
+
+[[File:Blank World Map Watery.png|500 px]] <br> (''Blank map, predominantly watery world''.)
+
+==== Native Lifeforms<ref><small>Non-canon</small></ref> ====
+Ficant's indigenous life has only developed to a primitive state. As might be expected, life on Ficant originated in the seas and they now posses a rich variety of life forms. However, the "invasion" of the land has only just begun and Ficant has few native land animals other than invertebrates. Much of the planet's landmass is covered by massive bogs and swamps of tree sized spore propagating plants (similar to terrestrial club-mosses, ferns and horsetails). Forests of primitive seeding trees dominate the remainder. It is expected that the world's combination of low gravity and high atmospheric pressure will lead to the evolution of a wide variety of aerial life, but as yet only a few species have taken to the air (mostly invertebrates). This combination of low gravity and high pressure has also lead to the evolution of a number of triphibian creatures.
+
+Ficant's swamps and bogs teem with life. The wetlands are covered in a thick layer of rich decaying organic material and support a vast array of creatures; ranging from tiny invertebrates to massive amphibians such as the Arngalds. This dense organic soup also produces a number of valuable chemical compounds and provides the planet's sole source of off-world income. Much of the world remains unexplored and only a tiny hand-full of Ficant's creatures have yet been classified.
+
+Despite the scarcity of large land animals, Ficant's has a diverse range of amphibian creatures, some of which grow to quite respectable size. Many of these amphibians are aggressive carnivores and travel through these areas can be quite hazardous. The largest thus far discovered is the Svensson's Arngald. This creature can grow up to 18 meters in length and mass over 300 kilograms and has no hesitation in attacking humans.
+
+In addition to its native flora and fauna, several species of off-world plants and animals have been introduced (either deliberately or by accident). These off-world species have thrived on Ficant and indeed are replacing many native species around the areas of human settlement. Recently Ficant's Governing Council introduced strict control on the importation of off-world life forms in an attempt to protect the native ecosystem.
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+Despite being almost a [[garden world]], Ficant has never been targeted for significant colonization. Human settlement on Ficant is limited to the lush equatorial coastal swamps. Here warm ocean currents combine with the equatorial climate to produce a pleasant Earth like environment. The biological basis of Ficant's life is extremely similar to that of Terra and all human dietary needs can be met from the local ecosystem. 
+
+Human colonization has been limited to one of the smaller continents straddling the equator. The first human settlers are thought to have arrived around [[450]]. It is not known for certain where these settlers came from, as this was not an organized colonization effort, but it is believed that they originated from the [[Sword Worlds]]. This disorganised settlement continued for the next 150 years and by [[600s|600]] the population had grown to around 1,000.
+
+It was during the [[First Frontier War]] that the world first came to official notice. At this time a substantial proportion of the population was of Sword Worlds descent and Imperial forces came to regard it as a potential security threat. In [[596]], Grand Admiral [[Olav hault-Plankwell|Plankwell]] ordered Ficant's annexation. With its incorporation into the Imperium an official colonisation program was envisaged and in [[602]] 1,500 Imperial colonists arrived. It was intended that these were to be just the first wave of an intensive colonization program, but with the outbreak of the [[Civil War]] this program was abandoned and no further official colonization was to ever take place. From this point onwards, Ficant lapsed back into obscurity. Despite this official apathy, Ficant's population has continued to grow slowly and according to the census of [[1116]], it has a population of 9,250.
+
+=== World Starport (St) ===
+{{Starport|name= Ficant|Starport= E}}
+
+=== World Population (P) ===
+{{WorldPop|name= Ficant|multiplier= 9|Population= 3}}
+
+==== Urbanization ====
+The largest settlement on Ficant is Atterdag, location of the world's E class starport. Atterdag is a quiet agricultural town of some 2,400 inhabitants. Located here is the entirety of the world's limited manufacturing capacity, which consists of a few light-engineering workshops. Atterdag's economy is based around servicing the needs of the planet's widely spread population. It is also the seat of the Ficant Governing Council, providing Ficant with administrative services and handling offworld contacts.
+
+The majority of the population lives in back country homesteads and makes their living extracting valuable organic material from Ficant's coastal swamps. The usual homestead consists of a single family of two to three adults with a similar number of children. Usually four or five homesteads will be clustered in the same general area and they will share harvesting grounds and pool resources to increase their efficiency.
+
+==== Linguistic Topography ====
+The following [[language]]s are most commonly heard:
+* [[Anglic]], one of the two official languages of the {{Imperium}}.
+* [[Vilani (language)|Vilani]], one of the two official languages of the {{Imperium}}.
+
+=== World Technology Level (T) ===
+{{WorldTech|name= Ficant|WorldTech= 5}}
+
+=== World Government (G) ===
+{{WorldGov|name= Ficant|Government= 5}}
+
+=== World Law (L) ===
+{{WorldLaw|name= Ficant|Law= 3}}
+
+=== Imperial Landed Nobility ===
+{{Imperial Nobility|name= Ficant|Noble= B}}
+
+=== Trade Data ===
+* Importance:     -3 (very unimportant)
+
+=== World Economy ===
+* Resources:      5 (scarce)
+* Labor:          2 (hundreds)
+* Infrastructure: 0 (non-existent)
+* Efficiency:     -5 (extremely poor)
+
+Most of Ficant's inhabitants make their living by harvesting the rich organics found in the equatorial swamps.
+
+=== World Culture ===
+* Heterogenity: 1 (monolithic)
+* Acceptance:   1 (extremely xenophobic)
+* Strangeness:  2 (typical)
+* Symbols:      2 (very concrete)
+
+The people of Ficant are generally conservative and honest. Having little contact with offworld culture they appear to most uninformed travellers as either quaint or hopelessly insular, caring little for technological advancement or personal aggrandizement. This opinion is mistaken. Most natives see the advantages of high tech tools, but the world's restricted industrial base severely limits their usefulness. Many Ficant natives travel offworld to attend higher education and the world has a strong tradition of military service (approximately 35% of the world's population has served a term or two in the Imperial armed forces). However, most of the population are content with their lives and find the faster pace of Imperial culture unsettling and consequently prefer to remain at home.
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+* [[0|The Year 0]]: the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[589]]-[[604]]: [[First Frontier War]].
+* [[604]]-[[622]]: the [[Civil War]].
+* [[615]]-[[620]]: [[Second Frontier War]].
+* [[624]]: the [[Express Boat Network]] is established.
+* [[979]]-[[986]]: [[Third Frontier War]].
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] charts the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+* [[1082]]-[[1084]]: [[Fourth Frontier War]], also known as the ''False War''.
+* [[1107]]-[[1110]]: [[Fifth Frontier War]].
+
+=== Later Historical Eras ===
+
+==== Era: Milieu 1248 ====
+Ficant has, like many other worlds in the quadrant, been overrun by [[Zhodani]] refugees, but its government has withstood the influx. Unlike [[728-907 (world)|Iazhipl]] where a [[Zhodani]] social model is used, Ficant instead uses a Regency social model. While there are still some communities that continue to use the traditional Zhodani model, most of the former refugees have successfully integrated into Ficant society.
+
+----
+
+{{GURPS Worlds paragraph |hex=1417 |gtZone= |name=Ficant |alg=Imperial |gtStarport=Class I |gtBase= |gtDiameter=5222 |gtGravity= |gtAtmosphere=Standard oxygen-nitrogen |gtHydro=69 |gtClimate=Cool |gtPopulation=9,250 |gtGovernment=Technocracy |gtCL=1 |gtTL=6 |gtWTN=2}}
+
+== References & Contributors (Sources) ==
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=14-15}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=The Regency Sourcebook|page=40-41}} (UWP only)
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=66}}
+ | [[Mark Gellis]]. "Ficant", ''[[JTAS Online]]'' (June 16, 2009)
+ | {{Ludography cite|name=The Spinward States|page=100}}
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=61-66}} (UWP only)
+ | [[Andrea Vallance]] - [https://web.archive.org/web/20170821122143/http://www.downport.com/amv/Library/Ficant.html Ficant Landgrab]
+}}
+
+{{LE|Binary Star System|GT|T5 Second Survey worlds}}
+{{LEN}}

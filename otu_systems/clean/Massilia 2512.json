@@ -1,0 +1,486 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Massilia",
+  "hex": "2512",
+  "sector_abbreviation": "Mass",
+  "subsector": "Palasha",
+  "name": "The Maralee",
+  "sources": [
+    {
+      "page": "The Maralee (world)",
+      "revid": 1075808,
+      "timestamp": "2026-09-26T17:45:42Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "The Maralee (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Tuus",
+          "type": "K7 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Tuus",
+      "stars": [
+        {
+          "name": "Tuus",
+          "type": "K7 V"
+        }
+      ],
+      "labels": [
+        "The Maralee"
+      ],
+      "pages": [
+        "The Maralee (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Vivera",
+          "raw": "Y6B0000-0",
+          "kind": "world",
+          "uwp": "Y6B0000-0",
+          "distance": {
+            "raw": "0.09",
+            "value": 0.09,
+            "unit": "AU"
+          },
+          "sources": [
+            "The Maralee (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Thadikar",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "0.183",
+            "value": 0.183,
+            "unit": "AU"
+          },
+          "sources": [
+            "The Maralee (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Vadopia",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "0.248",
+            "value": 0.248,
+            "unit": "AU"
+          },
+          "sources": [
+            "The Maralee (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "The Maralee (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "The Maralee (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "B Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "The Maralee (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "9 Diam",
+                "value": 9.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "The Maralee (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Prao",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "0.313",
+            "value": 0.313,
+            "unit": "AU"
+          },
+          "sources": [
+            "The Maralee (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Foxan",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "0.327",
+            "value": 0.327,
+            "unit": "AU"
+          },
+          "sources": [
+            "The Maralee (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Delopia",
+          "raw": "YC9A000-0",
+          "kind": "world",
+          "uwp": "YC9A000-0",
+          "distance": {
+            "raw": "0.376",
+            "value": 0.376,
+            "unit": "AU"
+          },
+          "sources": [
+            "The Maralee (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "The Maralee (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Poolreus",
+          "raw": "Y7A1000-0",
+          "kind": "world",
+          "uwp": "Y7A1000-0",
+          "distance": {
+            "raw": "0.432",
+            "value": 0.432,
+            "unit": "AU"
+          },
+          "sources": [
+            "The Maralee (world)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "The Maralee",
+          "raw": "D57379A-6",
+          "kind": "world",
+          "uwp": "D57379A-6",
+          "distance": {
+            "raw": "0.516",
+            "value": 0.516,
+            "unit": "AU"
+          },
+          "sources": [
+            "The Maralee (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 9,
+          "name": "Niibos",
+          "raw": "Y310000-0",
+          "kind": "world",
+          "uwp": "Y310000-0",
+          "distance": {
+            "raw": "0.592",
+            "value": 0.592,
+            "unit": "AU"
+          },
+          "sources": [
+            "The Maralee (world)"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Biule",
+          "raw": "YBFA000-0",
+          "kind": "world",
+          "uwp": "YBFA000-0",
+          "distance": {
+            "raw": "0.634",
+            "value": 0.634,
+            "unit": "AU"
+          },
+          "sources": [
+            "The Maralee (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "The Maralee (world)",
+      "label": "The Maralee",
+      "stars": [
+        {
+          "name": "Tuus",
+          "type": "K7 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Vivera",
+          "raw": "Y6B0000-0",
+          "kind": "world",
+          "uwp": "Y6B0000-0",
+          "distance": {
+            "raw": "0.09",
+            "value": 0.09,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Thadikar",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "0.183",
+            "value": 0.183,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Vadopia",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "0.248",
+            "value": 0.248,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "B Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "9 Diam",
+                "value": 9.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Prao",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "0.313",
+            "value": 0.313,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Foxan",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "0.327",
+            "value": 0.327,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Delopia",
+          "raw": "YC9A000-0",
+          "kind": "world",
+          "uwp": "YC9A000-0",
+          "distance": {
+            "raw": "0.376",
+            "value": 0.376,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Poolreus",
+          "raw": "Y7A1000-0",
+          "kind": "world",
+          "uwp": "Y7A1000-0",
+          "distance": {
+            "raw": "0.432",
+            "value": 0.432,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 8,
+          "name": "The Maralee",
+          "raw": "D57379A-6",
+          "kind": "world",
+          "uwp": "D57379A-6",
+          "distance": {
+            "raw": "0.516",
+            "value": 0.516,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 9,
+          "name": "Niibos",
+          "raw": "Y310000-0",
+          "kind": "world",
+          "uwp": "Y310000-0",
+          "distance": {
+            "raw": "0.592",
+            "value": 0.592,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 10,
+          "name": "Biule",
+          "raw": "YBFA000-0",
+          "kind": "world",
+          "uwp": "YBFA000-0",
+          "distance": {
+            "raw": "0.634",
+            "value": 0.634,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "The Maralee",
+    "UWP": "D57379A-6",
+    "Stellar": "K7 V",
+    "PBG": "803",
+    "Bases": "",
+    "Remarks": "Pi"
+  }
+}

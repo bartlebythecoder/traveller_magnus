@@ -1,0 +1,413 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Dagudashaag",
+  "hex": "1331",
+  "sector_abbreviation": "Dagu",
+  "subsector": "Argi",
+  "name": "Gateway",
+  "sources": [
+    {
+      "page": "Gateway (Da 1331) (world)",
+      "revid": 1039108,
+      "timestamp": "2026-04-09T00:15:45Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Gateway (Da 1331) (world)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Ukaa",
+          "type": "M1 V",
+          "notes": null
+        },
+        {
+          "role": "Secondary",
+          "name": "Gagamshuu",
+          "type": "M9 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Ukaa",
+      "stars": [
+        {
+          "name": "Ukaa",
+          "type": "M1 V"
+        }
+      ],
+      "labels": [
+        "Gateway"
+      ],
+      "pages": [
+        "Gateway (Da 1331) (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Gagamshuu",
+          "name_raw": "'''Gagamshuu'''",
+          "raw": "'''M9 D'''",
+          "kind": "star",
+          "type": "M9 V",
+          "distance": {
+            "raw": "<0.1",
+            "value": 0.1,
+            "unit": "AU",
+            "qualifier": "<"
+          },
+          "corrected": true,
+          "sources": [
+            "Gateway (Da 1331) (world)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Gateway",
+          "raw": "B98A654-D",
+          "kind": "world",
+          "uwp": "B98A654-D",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Gateway (Da 1331) (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ukumikuug",
+              "name_raw": "* ''Ukumikuug''",
+              "raw": "FS00250-C",
+              "kind": "world",
+              "uwp": "FS00250-C",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Gateway (Da 1331) (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Shir",
+              "name_raw": "* ''Shir''",
+              "raw": "FS11310-C",
+              "kind": "world",
+              "uwp": "FS11310-C",
+              "distance": {
+                "raw": "12",
+                "value": 12.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Gateway (Da 1331) (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Lishashukh",
+              "name_raw": "* ''Lishashukh''",
+              "raw": "FS32310-C",
+              "kind": "world",
+              "uwp": "FS32310-C",
+              "distance": {
+                "raw": "25",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Gateway (Da 1331) (world)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 2,
+          "name": "Piileirkhash",
+          "raw": "'''LGG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Gateway (Da 1331) (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Shaidamina",
+              "name_raw": "* ''Shaidamina''",
+              "raw": "H321110-A",
+              "kind": "world",
+              "uwp": "H321110-A",
+              "distance": {
+                "raw": "12",
+                "value": 12.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Gateway (Da 1331) (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "lir",
+              "name_raw": "* ''lir''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "25",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Gateway (Da 1331) (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Kukamashni",
+          "raw": "Y420000-0",
+          "kind": "world",
+          "uwp": "Y420000-0",
+          "distance": {
+            "raw": "1.7",
+            "value": 1.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Gateway (Da 1331) (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Luuashegakhu",
+          "raw": "F431452-D",
+          "kind": "world",
+          "uwp": "F431452-D",
+          "distance": {
+            "raw": "2.5",
+            "value": 2.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Gateway (Da 1331) (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Gateway (Da 1331) (world)",
+      "label": "Gateway",
+      "stars": [
+        {
+          "name": "Ukaa",
+          "type": "M1 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Gagamshuu",
+          "name_raw": "'''Gagamshuu'''",
+          "raw": "'''M9 D'''",
+          "kind": "star",
+          "type": "M9 V",
+          "distance": {
+            "raw": "<0.1",
+            "value": 0.1,
+            "unit": "AU",
+            "qualifier": "<"
+          },
+          "corrected": true
+        },
+        {
+          "orbit": 1,
+          "name": "Gateway",
+          "raw": "B98A654-D",
+          "kind": "world",
+          "uwp": "B98A654-D",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ukumikuug",
+              "name_raw": "* ''Ukumikuug''",
+              "raw": "FS00250-C",
+              "kind": "world",
+              "uwp": "FS00250-C",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Shir",
+              "name_raw": "* ''Shir''",
+              "raw": "FS11310-C",
+              "kind": "world",
+              "uwp": "FS11310-C",
+              "distance": {
+                "raw": "12",
+                "value": 12.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Lishashukh",
+              "name_raw": "* ''Lishashukh''",
+              "raw": "FS32310-C",
+              "kind": "world",
+              "uwp": "FS32310-C",
+              "distance": {
+                "raw": "25",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Piileirkhash",
+          "raw": "'''LGG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Shaidamina",
+              "name_raw": "* ''Shaidamina''",
+              "raw": "H321110-A",
+              "kind": "world",
+              "uwp": "H321110-A",
+              "distance": {
+                "raw": "12",
+                "value": 12.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "lir",
+              "name_raw": "* ''lir''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "25",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Kukamashni",
+          "raw": "Y420000-0",
+          "kind": "world",
+          "uwp": "Y420000-0",
+          "distance": {
+            "raw": "1.7",
+            "value": 1.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Luuashegakhu",
+          "raw": "F431452-D",
+          "kind": "world",
+          "uwp": "F431452-D",
+          "distance": {
+            "raw": "2.5",
+            "value": 2.5,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Gateway",
+    "UWP": "B98A654-D",
+    "Stellar": "M1 V M9 V",
+    "PBG": "701",
+    "Bases": "N",
+    "Remarks": "Ni Ri Wa Ht"
+  }
+}

@@ -1,0 +1,189 @@
+[[File:Alien Moon 146d-0.jpg|250 px|right]]
+{{UWP 
+|name= {{World|Collace|Spinward Marches|District 268|1237}}
+ |era = Milieu 1116
+|uc    = B628943-D
+|popc  = 1
+|zonec = green
+ |u1= 
+|alg     = CsIm
+|class   = Hi In / Ht
+|trade   = hi
+|bases   = S
+|primary = F1 V M3 V
+|belts   = 0
+|GGcount = 1
+}}
+{{World summary |name= Collace|trade= Hi In}}
+{{World summary CsIm|sector= Spinward Marches|subsector= District 268}}
+{{World summary comment|trade= Ht}}
+{{World summary bases|bases= S}}
+* {{SpMain}}
+* It lies on the [[Collace Arm]]. 
+{{InfoboxSystem
+|name= Collace
+|sector=Spinward Marches|subsector=District 268|hex=1237
+|star= ''<big>[[Gorie (star)|Gorie]]</big>'' <br> ''<big>[[Sonor (Star)|Sonor]]</big>'' <br><br>|type= ''<big>F1 V</big>'' <br> ''<big>M3 V</big>'' <br><br>
+|P0= ?          |Dist0   = 0.2       |UWP0 = 
+|P1= ?          |Dist1   = 0.4       |UWP1 = 
+|P2= ?          |Dist2   = 0.7       |UWP2 = 
+|P3= ?          |Dist3   = 1.0       |UWP3 = 
+|P4= Collace    |Dist4   = 1.6       |UWP4= B628843-D
+|P4M1= Kirkton  |Dist4M1 = ''<small>R= ?</small>'' |UWP4M1= ''<small>F200562-D</small>''
+|P5= Elkhorn    |Dist5   = ?       |UWP5= X100000-0 
+|P6= '''Enborne'''    |Dist6   = ?       |UWP6= '''SGG'''
+|P6M1= Cathay   |Dist6M1 = ''<small>R= ?</small>'' |UWP6M1= ''<small>F311564-D</small>''
+|P6M2= Alcalall |Dist6M2 = ''<small>R= ?</small>'' |UWP6M2= ''<small>GAA4262-C</small>''
+|P6M3= Innivar  |Dist6M3 = ''<small>R= ?</small>'' |UWP6M3= ''<small>H201315-A</small>''
+|P6M4= Orkist   |Dist6M4 = ''<small>R= ?</small>'' |UWP6M4= ''<small>H200200-9</small>''
+|P7= Hali.       |Dist7   = ?       |UWP7= X7A9000-0
+|P7M1= Auros     |Dist7M1 = ''<small>R= ?</small>'' |UWP7M1= ''<small>XS00000-0</small>''
+|P8= Scint      |Dist8   = ?       |UWP8= X211000-0
+}}
+
+== Astrography & Planetology == 
+=== Stellar Data ===
+'''Collace''' is a binary star system.
+* The primary is a white main sequence named ''Gorie''.
+* The secondary is a red main sequence named ''Sonor''.
+
+{{BinaryStarSystem
+|name            = Collace
+|primary         = F1 V 
+|secondary       = M3 V 
+|PrimaryName     = Gorie
+|PrimaryNotes    = 
+|SecondaryName   = Sonor
+|SecondaryNotes  = 
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]].
+* x3 secondary [[world|rocky worlds]].
+* x1 [[gas giant]].
+
+=== Mainworld Data ===
+Collace is a world of water, with huge oceans that cover a full four-fifths of its surface. The atmosphere is very thin, providing little protection against the glaring sunlight of the system’s primary star, and is also badly tainted. Accordingly, those who wish to move around in the open must use [[filter respirator combination]] and wear thorough protection against sunburn.
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Collace|Size= 6}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Collace|Atmosphere= 2}}
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Collace|Hydrosphere= 8}}
+
+[[File:Twilight Zone World Shore Type 02m3.jpg|600 px]]
+
+==== Mainworld Geography and Topography ====
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+[[File:Blank World Map Watery.png|500 px]] <br> (''Blank map, predominantly watery world''.)
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+Collace was the site of a [[Sindalian Empire]] mining colony that was cut off by the fall of the empire. The population was in serious decline when it was found by [[Darrian]] scouts in [[-1300s|-1310]]. The Darrians provided enough technological advice to let Collace develop a stable, self-sustainable infrastructure that would keep them alive. 
+
+It is part of the [[Kaharoht Run]], a [[Mewey]] trade route that forms part of the [[Collace Arm]] of the [[Spinward Main]].
+
+=== World Starport (St) ===
+{{Starport|name= Collace|Starport= B}}
+* The world is host to a [[Scout Base]].
+
+=== World Population (P) ===
+{{WorldPop|name= Collace|multiplier= 1|Population= 9}}
+* Some suspect that there was a population on this world by the [[400]]'s, who were descendants of marooned [[Sindalian Empire]] miners.
+
+Collace's population now stands at approximately a billion. Population pressure could well have become a problem, given the planet's large population and relative lack of dry land on which to build. However, this problem was solved by housing most of Collace’s inhabitants in arcologies, often built in clusters. A baneful consequence of “clustering” is that the middle- and upper-classes have tended to gravitate into newer, more expensive, high-security arcologies, leaving the older and less expensive structures to the working class and poor. Many of the lower-class arcologies have become increasingly run-down and experience high levels of criminal activity, much of it ‘run’ by organized criminal gangs. 
+
+=== World Technology Level (T) ===
+{{WorldTech|name= Collace|WorldTech= D}}
+
+=== World Government (G) ===
+{{WorldGov|name= Collace|Government= 4}}
+
+==== World Military ====
+Collace has sought to join the Imperium and hosts the largest Imperial scout base in District 268. Indeed, the term “scout base” does not accurately convey the vast scale of the [[IISS]] presence, which includes facilities (training sites, supply depots, early warning stations, etc.) on half a dozen other planets and satellites in the system in addition to the main base on Kirkton -- Collace’s principal moon. The intimate relationship between the Imperial and local military is demonstrated by the fact that elements of Collace’s armed forces provide ground and close orbit defense for both themselves and the IISS facilities.
+
+=== World Law (L) ===
+{{WorldLaw|name= Collace|Law= 3}}
+
+Visitors should be aware that Collace is a high-crime planet (including many violent crimes involving firearms) and that offworlders are preferred targets.
+
+=== Trade Data ===
+* Importance:     4 (important)
+
+=== World Economy ===
+Collace is the wealthiest and most important world in District 268. It has the largest population in the subsector, is a major industrial world renowned for producing low-cost, high-tech goods, and is also the site of a major ''[[SuSAG]]'' pharmaceutical factory. Moreover, settlers from Collace have colonized [[Inchin (world)|Inchin]] and [[Avastan (world)|Avastan]], which occupy strategic positions on the J-1 main running between the [[Glisten Subsector|Glisten]] and [[Five Sisters Subsector|Five Sisters]] subsectors (though Collace's government has effectively disowned their governments). Collace is the prime candidate for permanent subsector capital (replacing the temporary one at [[Mertactor (world)|Mertactor]]) if and when District 268 is integrated into the Imperium.
+
+* Resources:      C (very abundant)
+* Labor:          8 (hundreds of millions)
+* Infrastructure: G (very comprehensive)
+* Efficiency:     +1 (average)
+
+The industrial combine ''Colmetal, Inc.'', registered on Collace, maintains mines throughout the subsector.
+
+=== World Culture ===
+* Heterogenity: 6 (harmonious)
+* Acceptance:   D (very xenophilic)
+* Strangeness:  2 (typical)
+* Symbols:      A (abstract)
+
+=== Historical Data ===
+Over the past two millennia, Collace has experienced steady growth and its population now stands at approximately a billion. Population pressure could well have become a problem, given the planet's large population and relative lack of dry land on which to build. However, this problem was solved by housing most of Collace’s inhabitants in arcologies, often built in clusters. A baneful consequence of "clustering" is that the middle- and upper-classes have tended to gravitate into newer, more expensive, high-security arcologies, leaving the older and less expensive structures to the working class and poor. Many of the lower-class arcologies have become increasingly run-down and experience high levels of criminal activity, much of it ‘run’ by organized criminal gangs. 
+
+Despite this, Collace is the wealthiest and most important world in District 268. It has the largest population in the subsector, is a major industrial world renowned for producing low-cost, high-tech goods, and is also the site of a major [[SuSAG]] pharmaceutical factory. Moreover, settlers from Collace have colonized [[Inchin (world)|Inchin]] and [[Avastan (world)|Avastan]], which occupy strategic positions on the J-1 main running between the [[Glisten Subsector|Glisten]] and [[Five Sisters Subsector|Five Sisters]] subsectors (though Collace’s government has effectively disowned their governments). Collace is the prime candidate for permanent subsector capital (replacing the temporary one at [[Mertactor (world)|Mertactor]]) if and when District 268 is integrated into the Imperium.
+
+Collace has sought to join the Imperium and hosts the largest Imperial scout base in District 268. Indeed, the term "scout base" does not accurately convey the vast scale of the [[IISS]] presence, which includes facilities (training sites, supply depots, early warning stations, etc.) on half a dozen other planets and satellites in the system in addition to the main base on Kirkton -- Collace's principal moon. The intimate relationship between the Imperial and local military is demonstrated by the fact that elements of Collace's armed forces provide ground and close orbit defense for both themselves and the IISS facilities.
+
+The only reason why Collace has not yet joined the Imperium is the opposition of nearby {{WorldS|Trexalon|Spinward Marches|1339}} - with which it is in a state of "cold war." Trexalon is dominated by the [[Trexalon Technical Consortium]] (TTC), a large interlocking corporate trust which controls the starport and has monopoly on industry in that system. The TTC is vociferously anti-Imperial because it perceives the Imperium as an impediment to its expansionist ambitions in District 268. Since the Imperial authorities are reluctant to risk inflaming the situation, Collace’s admission to the Imperium has been "put on the back burner."
+
+One of the key points of contention between Collace and Trexalon is the {{WorldS|Pavabid|Spinward Marches|1238}} system, which lies directly between them just one parsec away. Ever since iridium deposits were discovered there, the TTC and Collace have been competing for influence with the ruling religious dictatorship to secure mineral exploitation rights. To date, however, the xenophobic offshoot of the [[Church of the Stellar Divinity]] on Pavabid has rejected both parties’ advances due to fears that introducing large numbers of off-world miners would irrevocably pollute its pure theocratic society.
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+* [[0|The Year 0]]: the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[502]]: [[Tarsus (SM 1138) (world)|Tarsus]] and Collace open new markets.
+* [[589]]-[[604]]: [[First Frontier War]].
+* [[604]]-[[622]]: the [[Civil War]].
+* [[615]]-[[620]]: [[Second Frontier War]].
+* [[624]]: the [[Express Boat Network]] is established.
+* [[979]]-[[986]]: [[Third Frontier War]].
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] charts the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+* [[1082]]-[[1084]]: [[Fourth Frontier War]], also known as the ''False War''.
+* [[1105]]: Pro-{{Imperial}} Collace enters into a "cold war" with pro-Sword Worlds [[Trexalon (world)|Trexalon]].
+* [[1107]]-[[1110]]: [[Fifth Frontier War]].
+
+== References & Contributors (Sources) ==
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=Divine Intervention/Night of Conquest|page=DI6}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=Security Leak 03|article=Collace is Pending|page=}}
+ | {{Ludography cite|name=The Regency Sourcebook|page=48-49}} (UWP only)
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=75}}
+ | [[Hans Rancke-Madsen]], "The Outrim Frontier." ''[[JTAS Online]]'' (June 19, 2007)
+ | {{Ludography cite|name=The Spinward States|page=110}} (UWP only)
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=123-127}} (UWP only)
+ | {{Ludography cite|name=Enemy of My Enemy | version=Mongoose 2nd|page=18-29}} (World map included)
+}}
+
+[[Category: Church of the Stellar Divinity worlds]]
+[[Category: Collace Arm worlds]]
+[[Category: GT]]
+[[Category: Humaniti worlds]]
+[[Category: Kaharoht Run worlds]]
+[[Category: Liisharara Dii worlds]]
+[[Category: Mining worlds]]
+[[Category: Nirkuazh’t worlds]]
+[[Category: SuSAG worlds]]
+{{LE|Binary Star System|T5 Second Survey worlds|}}
+{{LEN|}}

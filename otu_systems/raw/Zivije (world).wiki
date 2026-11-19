@@ -1,0 +1,250 @@
+[[File:Alien Moon 176c-0.jpg|250 px|right]]
+{{StellarDataQuery
+ |name= {{World|Zivije|Spinward Marches|Rhylanor|2812}} 
+ |era= Milieu 1116
+}}
+* {{SpMain}}
+
+{{InfoboxSystem
+|name=Zivije
+|subsector=Rhylanor
+|sector=Spinward Marches
+|hex=2812
+|star= ''Zvyozdochka''
+|type='''G6 V'''
+|P1=Myshka
+|Dist1=0.4
+|UWP1=E200101B
+|P2=Zivije
+|Dist2=0.9
+|UWP2=C6B199C-8
+|P2M1=*''Golden Mean OA''
+|Dist2M1=16
+|UWP2M1=A07149C-B
+|P3=Dun
+|Dist3=2.6
+|UWP3=E300209C
+|P3M1=*''Hirogiri SO''
+|Dist3M1=32
+|UWP3M1=D07129A-B
+|P4=Inner Belt
+|Dist4=3.9
+|UWP4=
+|P5=Zivije IV
+|Dist5=5.3
+|UWP5='''Gas Giant'''
+|P5M1=*''Marrestie OA''
+|Dist5M1=40
+|UWP5M1=CS005DB-9
+|P6=Outer Belt
+|Dist6=25
+|UWP6=
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Zivije''' has a solitary primary star.
+* It is a yellow main sequence named ''Zvyozdochka''.
+
+{{MonostellarSystem
+|name           = Zivije
+|primary        = G6 V 
+|PrimaryName    = Zvyozdochka
+|PrimaryNotes   = 
+}}
+
+=== System Data ===
+The Zivije system is characterized by its small, young central star, its single gas giant, and its double-belt arrangement.  System age is roughly 3.5 billion years.
+
+{| border="1"
+!Main Contents           
+!Stars                                
+!Orbital Distances (AU)
+|-
+|* Central star         
+|* Primary 	        Zvyozdochka, G6 V  
+|* Inner limit 	0.85
+|-
+|* 3 terrestrial worlds 
+|* Temperature (K) 	6400            
+|* Inner life 		0.850
+|-
+|* Inner belt           
+|* Luminosity (sols) 	4.8            
+|* Outer life 		1.45 
+|-
+|* Large Gas giant      
+|* Mass (sols)	0.97            
+|* Snow line 		5.93	
+|-
+|* Outer belt           
+|* Radius (AU) 	0.0106         
+|* Outer limit 	48.0
+|-
+|*      
+|* Stable life 	3.5 billion yrs 
+| --
+|}
+ 
+==== Worlds ====
+{| border="1"
+!Orbit!!SubOrbit!!Name!!Diameter!!Density!!Gravity!!Rotation!!Revolution!!e!!World Type
+|-
+|0.4||--||Myshka||2100||5.2||0.25||tl||91.5d||0.00||Terrestrial
+|-
+|0.9||--||Zivije||5836||5.5||0.70||22.6h||320d||0.02||Terrestrial
+|-
+|0.9||16.18||Golden Mean OA||20||1.0||1.0||na||7d||na||Artificial
+|-
+|2.6||--||Dun||2929||5.2||0.31||26.6h||2.0y||0.05||Terrestrial
+|-
+|2.6||32|| Hirogiri SO||0||1.0||1.0||na||28d||na||Artificial
+|-
+|5.3||--||Zivije IV||89300||1.4||1.05||12.75h||12.7y||0.01||Gas Giant
+|-
+|5.3||40||Marrestie OA||24||1.1||1.0||--||--||0.01||Artificial
+|}
+
+'''Units'''
+*Orbit is in AU or planetary radii for satellites
+*Diam = diameter in miles (X 1.609 for km)
+*Dens = average density in g/cc
+*Grav = 'surface' gravity in G's
+*Rot/Rev = rotation or revolution period in hours (h), days (d), or years (y) ; tl = tide-locked
+*e = orbital eccentricity
+*Type = G:Space/FI classification
+
+===== Myshka =====
+Myshka is a tidally-locked rock with no atmosphere, the typical huge temperature difference between night and day, and deposits of methane-water on the night side.
+
+A solar observatory with a small, rotating staff is positioned in the south polar region.
+
+=====Dun=====
+Dun is a smaller, colder world which acts as a gravitational center for the Hirogiri Stellar Observatory.  The Observatory maintains a high-bandwidth connection with Zivijie and the Golden Mean Archology.
+
+=====Inner Belt=====
+The inner belt is a typical belt containing planetoids that are of similar makeup to the inner planets.
+
+=====Zivije IV=====
+A large gas giant with a relatively sparse family of moons, but home to the Marrestie Orbital Arcology.  The arcology is the exclusive domain of the mainstream [[Church of the Stellar Divinity]], and its 468,000 inhabitants are not very solicitous of visitors.
+
+=====Outer Belt=====
+A second planetoid belt circles outside the giant planet.  Prospectors from the Arcology are occasionally found here.
+
+=== Mainworld Data ===
+*Mass : 0.58 earth
+*Apparent day length : 22.6 hours
+*Axial Tilt : 11.0 degrees
+*Atmospheric pressure : 1.15 atm
+*Atmospheric composition : nitrogen 72%, sulfur dioxide 14%, carbon dioxide 10%, others 4%
+*Hydrographics : 10%, acidic lakes
+*Albedo : 0.45
+*Greenhouse effect : 0.32
+*Average surface temperature (G:Space) : 303 K (Warm)
+*Weather factor : 14 (Earth=10, so less stable)
+*Life : no animals, max IQ 0 (no primate/cetacean equivalents);
+*Moons: no natural satellites, 1 large orbital structure
+
+Other units are as per the World table, above.
+
+==== Mainworld Orbit ====
+Zivije orbits within its star's [[habitable zone]].
+* It receives moderate levels of [[Electromagnetic Spectrum|stellar energy]].
+
+[[File:Chart Orbit HZ Region Simple.png|600 px]]
+
+==== Mainworld Geography & Topography ====
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+Zivije is warm world with a thick, corrosive atmosphere.  The small amount of free standing water is saturated with sulfur compounds and highly acidic. The thick atmosphere allows the small planet to retain significant heat from its star.  The nitrogen-based atmosphere contains a high percentage of sulfur dioxide and carbon dioxide; these compounds appear to contain the planetary oxygen. Geology is somewhat active, with 11 tectonic plates and several large mountain ranges. Moderate earthquakes can be expected once every 10 years along known fault lines. Volcanic activity is rare. The atmosphere ranges from lightly foggy to opaque, with a maximum VFR distance of 3 miles.
+
+[[File:Blank World Map Exotic.png|500 px]] <br> (''Blank map, exotic world''.)
+
+=== Native Lifeforms ===
+Due to the youth of the system, the life that exists on the surface consists of very primitive creatures adapted to the extreme elements.
+
+== History & Background (Dossier) ==
+Zivije has an excellent infrastructure, required to support the large population on this rather hostile world. The starport contains a large research installation, used by the [[Glisten Institute of Planetological Studies]] to carry on their research into terraforming Zivije to yield a more hospitable climate.
+
+=== Imperial Landed Nobility ===
+{{Imperial Nobility|name= Zivije|Noble=BE}}
+: Zivije is also associated with the ''[[Celepina, County of | County of Celepina]]'', as the [[Nobles of Celepina|Count of Celepina]] also holds the title of ''Baron of Zivije''.
+: ''See: [[Nobles of Zivije]]''
+
+=== World Government ===
+{{WorldGov|name= Zivije|Government=9}}  
+
+The current Executive Prime, Joerg Balkmann, is known, trusted and in his 3rd 5-year term of office. Balkmann is still relatively young at 55 years old.  He is thought to be on good professional terms with the current Baron Knowln and the Count, [[Celepina, Count Knowln of |Knowln]]. Cities and towns usually have an Executive Mayor, advised by a legislative council, elected periodically by adults older than 25 with educational certificates from the school system.
+
+==== World Law Level ====
+The world's seemingly oppressive government and law level are reflective of the stress of maintaining infrastructure and life support on this world. In actuality, political debate is free and flowing, and criticism of the government is tolerated. Political office is open to any meritorious individual. The laws merely reflect the stringent environmental regulations and containment laws that keep the population alive.  The head of state is the current Baron or Baroness, currently David Edmund Knowln. The immediate lieutenant of the Baron is the Executive Prime.  A unicameral legislature creates laws and sets policy at the discretion of the Baron, who can veto any decisions. A regimented Judicial court system reviews the laws.
+
+==== Golden Mean Arcology ====
+The headquarters of the Zivijie Planetary Navy and COACC forces.
+
+=== World Culture ===
+Local culture is heavily influenced by Imperium transmissions, though fashions are typically 5 years behind. Education is provided to age of 22, focusing on mathematics, engineering or science education. All cities and some towns are home to Universities. Marriage customs vary by cultural and subcultural standards, but generally follow Imperium norms. Burial customs typically involve desolution, where the deceased is dissolved. Any solids remaining are either crushed or melted into a remembrance object.
+
+The Zivijie starport is home to the [[Naravisji Planetary University]], which is a former extension program of the [[Glisten Institute of Planetological Studies]] (GLIPS). 
+
+Terraforming projects carried out by both institutions have not profited, and the world remains under heavy study in hopes of future transformation of the atmosphere. 
+
+Architectural styles tend to the purely functional with militaristic/tactical features on the exterior, but the interior designs can range from inspired to breathtaking.
+
+==== Urbanization ====
+Zivijie City is the largest city and the world capital.
+
+The other population centers are:
+* Pusuurk City, a modern city and financial hub.
+* Karirbush, a city located at a relatively high altitude (+2km).  Occasional sky views.
+* Kashar, a mining town and manufacturing center.
+* Mikuunki, architectural and art center.
+* Kafka Town, small city on the shores of a larger lake.  Power production center.
+* Kiiki, remote terraforming research center.
+
+There are advanced, global communications networks in place with triple redundancy.
+
+==== Zivijie Grand Library ====
+The pyramidal [[Zivijie Grand Library]] has been rebuilt to an amazing standard, and contains the largest collection of physical tomes and codices in the County.
+
+=== Historical Data ===
+Considerable resources attracted major corporate and Imperial investment as early as 420, and its industry and population steadily grew throughout the Antebellum period.  Sternmetal Horizons maintains a number of orbital industrial facilities, and its presence insystem is second in size only to its Regency headquarters in Rhylanor. 
+
+In 604 the Zivije system was the site of the famed [[Battle of Zivije]], one of the climactic battles of the [[First Frontier War]], where Grand Admiral [[Olav hault-Plankwell]] smashed the gathered [[Zhodani]]/[[Vargr]] expeditionary fleet.
+
+In 1075 [[Ine Givar]] agents smuggled a fusion warhead into Kashar, killing 2.8 million people.
+
+During the Fifth Frontier War, the world became the farthest trailing advance point of the Zhodani invasion force, being the site of bitter fighting that almost went the Zho's way. Zivije was a primary military target and the Zhodani made several attempts to occupy the planet, including landing an assault division. However, the Zhodani were never able to secure Zivije, and their troops had to contend with a pre-planted insurgency movement. The repulse of these forces held up the Zhodani invasion of Rhylanor subsector, and they were crushed weeks later at Rhylanor by reinforcements from Corridor Sector, being the decisive victory that led to the successful prosecution of the war.
+
+== References & Contributors (Sources) ==
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=30-31}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=The Regency Sourcebook|page=43}} (UWP only)
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=107}}
+ | {{Ludography cite|name=The Spinward States|page=104}} (UWP only)
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name=Behind the Claw|version=Mongoose 2nd|page=74-79}} (UWP only)
+ | Author & Contributor: [[User:Dochsavage|Doch Savage]] 
+}}
+
+[[Category: Republic of Regina worlds]]
+[[Category: Church of the Stellar Divinity worlds]]
+[[Category: Educational Institute]]
+[[Category: GT]]
+[[Category: Highport worlds]]
+[[Category: Humaniti worlds]]
+[[Category: Ine Givar worlds]]
+[[Category: Naravisji Planetary University]]
+[[Category: Naravisji Planetary University worlds]]
+[[Category: Orbital Facility]]
+[[Category: Megastructures]]
+[[Category: Mining worlds]]
+[[Category: Sternmetal Horizons worlds]]
+[[Category: Terraforming worlds]]
+[[Category: University worlds]]
+{{LE|T5 Second Survey worlds}}
+{{LEN}}

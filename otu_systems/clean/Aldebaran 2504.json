@@ -1,0 +1,228 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Aldebaran",
+  "hex": "2504",
+  "sector_abbreviation": "Alde",
+  "subsector": "Firdausi",
+  "name": "Alzirr",
+  "sources": [
+    {
+      "page": "Alzirr (world)",
+      "revid": 902460,
+      "timestamp": "2025-02-19T08:26:03Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Alzirr (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Alzirr",
+          "type": "F5 IV",
+          "notes": "Flare Star."
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Primary",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "F5 IV"
+        }
+      ],
+      "labels": [
+        "Alzirr"
+      ],
+      "pages": [
+        "Alzirr (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Sudig",
+          "raw": "Y300000-0",
+          "kind": "world",
+          "uwp": "Y300000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Alzirr (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Wexteir",
+          "raw": "Y4A3000-0",
+          "kind": "world",
+          "uwp": "Y4A3000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Alzirr (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Grohdag",
+          "raw": "Y101000-0",
+          "kind": "world",
+          "uwp": "Y101000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Alzirr (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Azirr",
+          "raw": "E410455-9",
+          "kind": "world",
+          "uwp": "E410455-9",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Alzirr (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 5,
+          "name": "Trestranne",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Alzirr (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Alzirr (world)",
+      "label": "Alzirr",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "F5 IV"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Sudig",
+          "raw": "Y300000-0",
+          "kind": "world",
+          "uwp": "Y300000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Wexteir",
+          "raw": "Y4A3000-0",
+          "kind": "world",
+          "uwp": "Y4A3000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Grohdag",
+          "raw": "Y101000-0",
+          "kind": "world",
+          "uwp": "Y101000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Azirr",
+          "raw": "E410455-9",
+          "kind": "world",
+          "uwp": "E410455-9",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Trestranne",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Alzirr",
+    "UWP": "E410455-9",
+    "Stellar": "F5 IV",
+    "PBG": "201",
+    "Bases": "",
+    "Remarks": "Ni Lk"
+  }
+}

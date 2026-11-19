@@ -1,0 +1,75 @@
+{{StellarDataQuery
+|name= {{World|Masiruu|Dagudashaag|Arnakhish|2106}}
+|First Survey name=Nadvluur Khuum
+}}
+{{InfoboxSystem
+|name=Masiruu
+|subsector=Arnakhish
+|sector=Dagudashaag
+|hex=2106
+|star=Urudu
+| type=K4 V
+|P1=Kinshasa
+|UWP1=F465538-A
+|Dist1=0.2
+|P2=UN 
+|UWP2=X1000000-0 
+|Dist2=0.4
+|P3=UN 
+|UWP3=X2000000-0 
+|Dist3=0.7
+|P4=UN 
+|UWP4=Small GG
+|Dist4=1.6
+|P5=UN
+|UWP5=M9 V
+|Dist5=5000
+|P5M1=Masiruu
+|UWP5M1=B0006B7-A
+|Dist5M1=0.17AU
+}}
+
+== Astrography and Planetology == 
+Masiruu is a member of the [[Shegimuud Trace]].
+
+=== Stellar Data ===
+{{BinaryStarSystem
+|name          = Masiruu
+|primary       = K4 V
+|PrimaryName   = Urudu
+|secondary     = M9 V
+|SecondaryName = Urudu Companion
+}}
+
+=== System Data ===
+Masiruu is two separate star systems approximately 5,000 AU apart. The extensive asteroid belt designated as the [[mainworld]] orbits the secondary star in the system. It contains a significant number of large nickel-iron bodies and is a major source of industrial quality metals and minerals. 
+
+One enormous rock has been hollowed out and serves as the [[starport]]. Known locally as ''Primus'', it is run by a matriarch who controls an extensive bureaucracy.  Various [[Megacorporation]]s and mining consortiums work areas of the belt. All pay heavy duties and taxes to the Matriarch for the privilege of a mining license. The port includes an Imperial Navy reserve base which houses destroyer escorts from 2318th and 2319th patrol flotillas.
+
+The [[system]]'s primary, an orange main sequence star called Urudu, has a family of three [[planet]]s and one [[gas giant]]. Kinshasa, the innermost of the three planets, has a temperate climate, native life, and an independent government. Kinshasa was once designated the [[mainworld]], but with continued growth within the Masiruu asteroid belt emphasis has shifted away from it. 
+
+== History and Background ==
+The community on Primus rely on Kinshasa for bulk food shipments, and Kinshasa makes sure that it receives fair payment.
+
+=== World Starport (St) ===
+{{Starport|name= Masiruu|Starport= B}}
+* There is an associated Imperial [[Naval Base]], hosting elements of the [[205th Fleet]].
+
+== References and Contributors ==
+{{Intermediate}}
+{{Sources
+|S1= {{Ludography cite|name=Signal-GK 10|page=56|article=Library Data: Arnakhish Subsector}} via {{HIWG}}
+|S2= {{Ludography cite|name=First Survey|page=79}}
+|S3= {{Ludography cite|name=Encyclopaedia Dagudashaag|page=235}}
+}}
+
+[[Category: 205th Fleet worlds]]
+[[Category: First Imperium worlds]]
+[[Category: Humaniti worlds]]
+[[Category: Mining worlds]]
+[[Category: Rule of Man worlds]]
+[[Category: Second Imperium worlds]]
+[[Category: Shegimuud Trace worlds]]
+[[Category: Matriarchy]]
+[[Category: Ziru Sirka worlds]]
+{{LEN|Binary Star System|T5 Second Survey worlds}}

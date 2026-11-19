@@ -1,0 +1,809 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "0527",
+  "sector_abbreviation": "Spin",
+  "subsector": "Darrian",
+  "name": "Mire",
+  "sources": [
+    {
+      "page": "Mire (SM 0527) (world)",
+      "revid": 960595,
+      "timestamp": "2025-07-19T12:28:29Z"
+    },
+    {
+      "page": "Rydem (world)",
+      "revid": 947864,
+      "timestamp": "2025-06-16T16:13:54Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Mire (SM 0527) (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Primary",
+          "type": "K6 V",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "page": "Rydem (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": null,
+          "type": "K6 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Primary",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "K6 V"
+        }
+      ],
+      "labels": [
+        "Mire",
+        "Rydem"
+      ],
+      "pages": [
+        "Mire (SM 0527) (world)",
+        "Rydem (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Mire",
+          "name_raw": "Mire (SM 0527)",
+          "raw": "A665A95-B",
+          "kind": "world",
+          "uwp": "A665A95-B",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mire (SM 0527) (world)",
+            "Rydem (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 1,
+          "name": "Rydem",
+          "raw": "F765866-A",
+          "kind": "world",
+          "uwp": "F765866-A",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mire (SM 0527) (world)",
+            "Rydem (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Gamma",
+          "raw": "Y100200-A",
+          "kind": "world",
+          "uwp": "Y100200-A",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mire (SM 0527) (world)",
+            "Rydem (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Delta",
+          "raw": "Y133533-A",
+          "kind": "world",
+          "uwp": "Y133533-A",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mire (SM 0527) (world)",
+            "Rydem (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Esse",
+          "raw": "Y202569-B",
+          "kind": "world",
+          "uwp": "Y202569-B",
+          "distance": {
+            "raw": "1.7",
+            "value": 1.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mire (SM 0527) (world)",
+            "Rydem (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Firzhen",
+          "raw": "Y564416-A",
+          "kind": "world",
+          "uwp": "Y564416-A",
+          "distance": {
+            "raw": "2.2",
+            "value": 2.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mire (SM 0527) (world)",
+            "Rydem (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "One",
+              "name_raw": "* ''One''",
+              "raw": "Y203200-B",
+              "kind": "world",
+              "uwp": "Y203200-B",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Mire (SM 0527) (world)",
+                "Rydem (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Two",
+              "name_raw": "* ''Two''",
+              "raw": "G100300-A",
+              "kind": "world",
+              "uwp": "G100300-A",
+              "distance": {
+                "raw": "25",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Mire (SM 0527) (world)",
+                "Rydem (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Vuhlnoh",
+              "name_raw": "* ''Vuhlnoh''",
+              "raw": "G462667-A",
+              "kind": "world",
+              "uwp": "G462667-A",
+              "distance": {
+                "raw": "55",
+                "value": 55.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Mire (SM 0527) (world)",
+                "Rydem (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Epsilon",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "3.3",
+            "value": 3.3,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mire (SM 0527) (world)",
+            "Rydem (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "name_raw": "* ''Ring''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1",
+                "value": 1.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Mire (SM 0527) (world)",
+                "Rydem (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "One",
+              "name_raw": "* ''One''",
+              "raw": "YS00210-A",
+              "kind": "world",
+              "uwp": "YS00210-A",
+              "distance": {
+                "raw": "35",
+                "value": 35.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Mire (SM 0527) (world)",
+                "Rydem (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Two",
+              "name_raw": "* ''Two''",
+              "raw": "GS00533-A",
+              "kind": "world",
+              "uwp": "GS00533-A",
+              "distance": {
+                "raw": "40",
+                "value": 40.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Mire (SM 0527) (world)",
+                "Rydem (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Sigma",
+          "raw": "G451167-B",
+          "kind": "world",
+          "uwp": "G451167-B",
+          "distance": {
+            "raw": "4.4",
+            "value": 4.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mire (SM 0527) (world)",
+            "Rydem (world)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Psi",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "5.5",
+            "value": 5.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mire (SM 0527) (world)",
+            "Rydem (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Mire (SM 0527) (world)",
+      "label": "Mire",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "K6 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Mire",
+          "name_raw": "Mire (SM 0527)",
+          "raw": "A665A95-B",
+          "kind": "world",
+          "uwp": "A665A95-B",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Rydem",
+          "raw": "F765866-A",
+          "kind": "world",
+          "uwp": "F765866-A",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Gamma",
+          "raw": "Y100200-A",
+          "kind": "world",
+          "uwp": "Y100200-A",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Delta",
+          "raw": "Y133533-A",
+          "kind": "world",
+          "uwp": "Y133533-A",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Esse",
+          "raw": "Y202569-B",
+          "kind": "world",
+          "uwp": "Y202569-B",
+          "distance": {
+            "raw": "1.7",
+            "value": 1.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Firzhen",
+          "raw": "Y564416-A",
+          "kind": "world",
+          "uwp": "Y564416-A",
+          "distance": {
+            "raw": "2.2",
+            "value": 2.2,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "One",
+              "name_raw": "* ''One''",
+              "raw": "Y203200-B",
+              "kind": "world",
+              "uwp": "Y203200-B",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Two",
+              "name_raw": "* ''Two''",
+              "raw": "G100300-A",
+              "kind": "world",
+              "uwp": "G100300-A",
+              "distance": {
+                "raw": "25",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Vuhlnoh",
+              "name_raw": "* ''Vuhlnoh''",
+              "raw": "G462667-A",
+              "kind": "world",
+              "uwp": "G462667-A",
+              "distance": {
+                "raw": "55",
+                "value": 55.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Epsilon",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "3.3",
+            "value": 3.3,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "name_raw": "* ''Ring''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1",
+                "value": 1.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "One",
+              "name_raw": "* ''One''",
+              "raw": "YS00210-A",
+              "kind": "world",
+              "uwp": "YS00210-A",
+              "distance": {
+                "raw": "35",
+                "value": 35.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Two",
+              "name_raw": "* ''Two''",
+              "raw": "GS00533-A",
+              "kind": "world",
+              "uwp": "GS00533-A",
+              "distance": {
+                "raw": "40",
+                "value": 40.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Sigma",
+          "raw": "G451167-B",
+          "kind": "world",
+          "uwp": "G451167-B",
+          "distance": {
+            "raw": "4.4",
+            "value": 4.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 8,
+          "name": "Psi",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "5.5",
+            "value": 5.5,
+            "unit": "AU"
+          }
+        }
+      ]
+    },
+    {
+      "page": "Rydem (world)",
+      "label": "Rydem",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "K6 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Mire",
+          "name_raw": "Mire (SM 0527)",
+          "raw": "A665A95-B",
+          "kind": "world",
+          "uwp": "A665A95-B",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Rydem",
+          "raw": "F765866-A",
+          "kind": "world",
+          "uwp": "F765866-A",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Gamma",
+          "raw": "Y100200-A",
+          "kind": "world",
+          "uwp": "Y100200-A",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Delta",
+          "raw": "Y133533-A",
+          "kind": "world",
+          "uwp": "Y133533-A",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Esse",
+          "raw": "Y202569-B",
+          "kind": "world",
+          "uwp": "Y202569-B",
+          "distance": {
+            "raw": "1.7",
+            "value": 1.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Firzhen",
+          "raw": "Y564416-A",
+          "kind": "world",
+          "uwp": "Y564416-A",
+          "distance": {
+            "raw": "2.2",
+            "value": 2.2,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "One",
+              "name_raw": "* ''One''",
+              "raw": "Y203200-B",
+              "kind": "world",
+              "uwp": "Y203200-B",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Two",
+              "name_raw": "* ''Two''",
+              "raw": "G100300-A",
+              "kind": "world",
+              "uwp": "G100300-A",
+              "distance": {
+                "raw": "25",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Vuhlnoh",
+              "name_raw": "* ''Vuhlnoh''",
+              "raw": "G462667-A",
+              "kind": "world",
+              "uwp": "G462667-A",
+              "distance": {
+                "raw": "55",
+                "value": 55.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Epsilon",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "3.3",
+            "value": 3.3,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "name_raw": "* ''Ring''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1",
+                "value": 1.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "One",
+              "name_raw": "* ''One''",
+              "raw": "YS00210-A",
+              "kind": "world",
+              "uwp": "YS00210-A",
+              "distance": {
+                "raw": "35",
+                "value": 35.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Two",
+              "name_raw": "* ''Two''",
+              "raw": "GS00533-A",
+              "kind": "world",
+              "uwp": "GS00533-A",
+              "distance": {
+                "raw": "40",
+                "value": 40.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Sigma",
+          "raw": "G451167-B",
+          "kind": "world",
+          "uwp": "G451167-B",
+          "distance": {
+            "raw": "4.4",
+            "value": 4.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 8,
+          "name": "Psi",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "5.5",
+            "value": 5.5,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Mire",
+    "UWP": "A665A95-C",
+    "Stellar": "K6 V",
+    "PBG": "110",
+    "Bases": "KM",
+    "Remarks": "Hi Ga Cx Dary8 Asla1 Ht"
+  }
+}

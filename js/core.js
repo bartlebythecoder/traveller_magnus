@@ -5,7 +5,7 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.18.3";
+const APP_VERSION = "v0.19.0";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -913,10 +913,20 @@ function _toRoman(n) {
 
 function _assignMoonNames(moons, parentName) {
     if (!moons || moons.length === 0) return;
+    // A letter already used by a named moon is skipped, so a moon added in the System
+    // Editor inward of a named one can't take its name (names identify bodies — see
+    // CLAUDE.md Known Traps). With no names yet (a fresh generation) this is the same
+    // a, b, c… by position as before. Existing names are never changed.
+    const used = new Set(moons.map(m => m.name).filter(Boolean));
     let idx = 0;
     moons.forEach(m => {
         if (m.isLunarMainworld || m.type === 'Mainworld' || m.isMainworld) return;
-        if (!m.name) m.name = `${parentName}-${String.fromCharCode(97 + idx)}`;
+        if (!m.name) {
+            let name = `${parentName}-${String.fromCharCode(97 + idx)}`;
+            while (used.has(name)) { idx++; name = `${parentName}-${String.fromCharCode(97 + idx)}`; }
+            m.name = name;
+            used.add(name);
+        }
         idx++;
     });
 }

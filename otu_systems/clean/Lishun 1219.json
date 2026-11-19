@@ -1,0 +1,807 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Lishun",
+  "hex": "1219",
+  "sector_abbreviation": "Lish",
+  "subsector": "Masionia",
+  "name": "Dynam",
+  "sources": [
+    {
+      "page": "Dynam (world)",
+      "revid": 1088519,
+      "timestamp": "2026-10-29T00:50:11Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Dynam (world)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Erg",
+          "type": "F7 V",
+          "notes": "None"
+        },
+        {
+          "role": "Secondary",
+          "name": "Shushan",
+          "type": "M0 V",
+          "notes": "None"
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Erg",
+      "stars": [
+        {
+          "name": "Erg",
+          "type": "F7 V"
+        }
+      ],
+      "labels": [
+        "Dynam"
+      ],
+      "pages": [
+        "Dynam (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Dynam",
+          "raw": "D788367-7",
+          "kind": "world",
+          "uwp": "D788367-7",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dynam (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 2,
+          "name": "Trojan",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dynam (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Calescene",
+              "name_raw": "* ''Calescene''",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "9",
+                "value": 9.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dynam (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Candescene",
+              "name_raw": "*''Candescene''",
+              "raw": "C210365-D",
+              "kind": "world",
+              "uwp": "C210365-D",
+              "distance": {
+                "raw": "11",
+                "value": 11.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dynam (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Calefact",
+              "name_raw": "* ''Calefact''",
+              "raw": "Y756000-0",
+              "kind": "world",
+              "uwp": "Y756000-0",
+              "distance": {
+                "raw": "35",
+                "value": 35.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dynam (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Cryomet",
+              "name_raw": "* ''Cryomet''",
+              "raw": "G500169-D",
+              "kind": "world",
+              "uwp": "G500169-D",
+              "distance": {
+                "raw": "45",
+                "value": 45.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dynam (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Belt",
+          "raw": "G000000-0",
+          "kind": "world",
+          "uwp": "G000000-0",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dynam (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dynam (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Electra",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dynam (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "name_raw": "* ''Ring''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1",
+                "value": 1.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dynam (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Pyros",
+              "name_raw": "* ''Pyros''",
+              "raw": "Y410000-0",
+              "kind": "world",
+              "uwp": "Y410000-0",
+              "distance": {
+                "raw": "4",
+                "value": 4.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dynam (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Radia",
+              "name_raw": "* ''Radia''",
+              "raw": "Y701000-0",
+              "kind": "world",
+              "uwp": "Y701000-0",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dynam (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Calea",
+              "name_raw": "* ''Calea''",
+              "raw": "Y310000-0",
+              "kind": "world",
+              "uwp": "Y310000-0",
+              "distance": {
+                "raw": "9",
+                "value": 9.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dynam (world)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Tepe",
+              "name_raw": "* ''Tepe''",
+              "raw": "Y700000-0",
+              "kind": "world",
+              "uwp": "Y700000-0",
+              "distance": {
+                "raw": "10",
+                "value": 10.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dynam (world)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Torre",
+              "name_raw": "* ''Torre''",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "11",
+                "value": 11.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dynam (world)"
+              ]
+            },
+            {
+              "index": 7,
+              "name": "Teura",
+              "name_raw": "* ''Teura''",
+              "raw": "Y420000-0",
+              "kind": "world",
+              "uwp": "Y420000-0",
+              "distance": {
+                "raw": "30",
+                "value": 30.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dynam (world)"
+              ]
+            },
+            {
+              "index": 8,
+              "name": "Tropa",
+              "name_raw": "* ''Tropa''",
+              "raw": "Y420000-0",
+              "kind": "world",
+              "uwp": "Y420000-0",
+              "distance": {
+                "raw": "45",
+                "value": 45.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dynam (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Shushan",
+          "name_raw": "'''Shushan'''",
+          "raw": "'''M0 V Companion'''",
+          "kind": "star",
+          "type": "M0 V",
+          "remark": "Companion",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ],
+          "sources": [
+            "Dynam (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Anema",
+          "raw": "Y500000-0",
+          "kind": "world",
+          "uwp": "Y500000-0",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dynam (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Aama",
+              "name_raw": "* ''Aama''",
+              "raw": "Y310000-0",
+              "kind": "world",
+              "uwp": "Y310000-0",
+              "distance": {
+                "raw": "3",
+                "value": 3.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dynam (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Nipuum",
+              "name_raw": "* ''Nipuum''",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "10",
+                "value": 10.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dynam (world)"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Dynam (world)",
+      "label": "Dynam",
+      "stars": [
+        {
+          "name": "Erg",
+          "type": "F7 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Dynam",
+          "raw": "D788367-7",
+          "kind": "world",
+          "uwp": "D788367-7",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Trojan",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Calescene",
+              "name_raw": "* ''Calescene''",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "9",
+                "value": 9.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Candescene",
+              "name_raw": "*''Candescene''",
+              "raw": "C210365-D",
+              "kind": "world",
+              "uwp": "C210365-D",
+              "distance": {
+                "raw": "11",
+                "value": 11.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Calefact",
+              "name_raw": "* ''Calefact''",
+              "raw": "Y756000-0",
+              "kind": "world",
+              "uwp": "Y756000-0",
+              "distance": {
+                "raw": "35",
+                "value": 35.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Cryomet",
+              "name_raw": "* ''Cryomet''",
+              "raw": "G500169-D",
+              "kind": "world",
+              "uwp": "G500169-D",
+              "distance": {
+                "raw": "45",
+                "value": 45.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Belt",
+          "raw": "G000000-0",
+          "kind": "world",
+          "uwp": "G000000-0",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Electra",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "name_raw": "* ''Ring''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1",
+                "value": 1.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Pyros",
+              "name_raw": "* ''Pyros''",
+              "raw": "Y410000-0",
+              "kind": "world",
+              "uwp": "Y410000-0",
+              "distance": {
+                "raw": "4",
+                "value": 4.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Radia",
+              "name_raw": "* ''Radia''",
+              "raw": "Y701000-0",
+              "kind": "world",
+              "uwp": "Y701000-0",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Calea",
+              "name_raw": "* ''Calea''",
+              "raw": "Y310000-0",
+              "kind": "world",
+              "uwp": "Y310000-0",
+              "distance": {
+                "raw": "9",
+                "value": 9.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Tepe",
+              "name_raw": "* ''Tepe''",
+              "raw": "Y700000-0",
+              "kind": "world",
+              "uwp": "Y700000-0",
+              "distance": {
+                "raw": "10",
+                "value": 10.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Torre",
+              "name_raw": "* ''Torre''",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "11",
+                "value": 11.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 7,
+              "name": "Teura",
+              "name_raw": "* ''Teura''",
+              "raw": "Y420000-0",
+              "kind": "world",
+              "uwp": "Y420000-0",
+              "distance": {
+                "raw": "30",
+                "value": 30.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 8,
+              "name": "Tropa",
+              "name_raw": "* ''Tropa''",
+              "raw": "Y420000-0",
+              "kind": "world",
+              "uwp": "Y420000-0",
+              "distance": {
+                "raw": "45",
+                "value": 45.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Shushan",
+          "name_raw": "'''Shushan'''",
+          "raw": "'''M0 V Companion'''",
+          "kind": "star",
+          "type": "M0 V",
+          "remark": "Companion",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Anema",
+          "raw": "Y500000-0",
+          "kind": "world",
+          "uwp": "Y500000-0",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Aama",
+              "name_raw": "* ''Aama''",
+              "raw": "Y310000-0",
+              "kind": "world",
+              "uwp": "Y310000-0",
+              "distance": {
+                "raw": "3",
+                "value": 3.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Nipuum",
+              "name_raw": "* ''Nipuum''",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "10",
+                "value": 10.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Depot",
+    "UWP": "A78846A-D",
+    "Stellar": "F7 V M0 V",
+    "PBG": "510",
+    "Bases": "D",
+    "Remarks": "Ni Pa Da Mr Ht"
+  },
+  "single_hex_only": true
+}

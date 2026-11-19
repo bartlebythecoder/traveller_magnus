@@ -735,6 +735,9 @@ function populateEditorAccordions(stateObj) {
                         }
                     }
 
+                    // MgT2E keeps rings on the planet, not among its moons (Sean, 2026-11-18).
+                    if (w.rings && w.rings.length > 0) html += `<span>Rings: ${w.rings.length}</span>`;
+
                     html += `</div>`;
 
                     if (w.type !== 'Gas Giant' && w.type !== 'Planetoid Belt' && w.size != 0 && w.size !== 'R') {

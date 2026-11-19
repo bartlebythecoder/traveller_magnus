@@ -1,0 +1,271 @@
+[[File:Alien Moon 312c-0 Tiny.jpg|250 px|right]]
+{{UWP
+|name    = {{World|Kerak|Massilia|Forquee|2411}}
+|uc      = B100576-D
+ |u0     = C100544-A
+|popc    = 6
+|zonec   = green
+|alg     = ImDc
+|class   = Ni Va / Ht 
+|trade   = va
+|climate = Va
+|nblty   = B
+|bases   = S
+|primary = M2 V 
+|belts   = 0
+|GGcount = 4
+}}
+{{World summary |name= Kerak|trade= Ni Va}}
+{{World summary ImDc|sector= Massilia |subsector=Forquee}}
+{{World summary comment|trade= Ht}}
+{{World summary bases|bases= S}} 
+
+{{InfoboxSystem
+ |name= Kerak |subsector= Forquee
+ |sector= Massilia |hex= 2411
+ |star= Heko |type= M2 V
+ |P1=     Gelmorth                          | Dist1= 0.193        | UWP1= Small GG
+ |P1M1=     Moon                            |   Dist1M1= 1 Diam   | UWP1M1= Y100000-0
+ |P2=     Letro                             | Dist2= 0.568        | UWP2= Small GG
+ |P2M1=     A Ring                          |   Dist2M1= 1 Diam   |   UWP2M1= YR00000-0
+ |P2M2=     Moon                            |   Dist2M2= 2 Diam   |   UWP2M2= YS00000-0
+ |P3=     Kerak                             | Dist3= 0.8          | UWP3= B100576-D
+ |P4=     Hotov                             | Dist4= 1.63         | UWP4= Y310000-0
+ |P5=     Lavoth                            | Dist5= 3.43         | UWP5= Large GG
+ |P5M1=     A Ring                          |   Dist5M1= 1 Diam   |   UWP5M1= YR00000-0
+ |P5M2=     B Ring                          |   Dist5M2= 2 Diam   |   UWP5M2= YR00000-0
+ |P5M3=     Moon                            |   Dist5M3= 5 Diam   |   UWP5M3= Y200000-0
+ |P5M4=     Moon                            |   Dist5M4= 7 Diam   |   UWP5M4= Y100000-0
+ |P6=     Pillosie                          | Dist6= 4.91         | UWP6= Large GG
+ |P6M1=     Moon                            |   Dist6M1= 5 Diam   |   UWP6M1= Y310000-0
+ |P6M2=     Moon                            |   Dist6M2= 7 Diam   |   UWP6M2= Y421000-0
+ |P6M3=     Moon                            |   Dist6M3= 8 Diam   |   UWP6M3= Y100000-0
+ |P6M4=     Moon                            |   Dist6M4= 10 Diam  |   UWP6M4= Y433000-0
+ |P6M5=     Moon                            |   Dist6M5= 12 Diam  |   UWP6M5= Y200000-0
+ |P6M6=     Moon                            |   Dist6M6= 13 Diam  |   UWP6M6= Y210000-0
+ |P7=     Paccao                            | Dist7= 5.42         | UWP7= Y531000-0
+}}
+
+== Description ([[Astrography]] & [[Planetology]])<ref>Additional system and world details by [[User:Nichollsr1970|Roger Nicholls]]</ref> == 
+Kerak lies on the [[Delphi Main]].
+* At the founding of the {{Imperium}} this world was known as ''Uuduud''.
+
+=== Stellar Data ===
+'''Kerak''' has a solitary primary star.
+* It is a red main sequence named ''Heko''.
+ 
+{{MonostellarSystem
+|name           = Kerak
+|primary        = M2 V 
+|PrimaryName    = Heko
+|PrimaryNotes   = 
+}}
+
+* The star and its system are 3.9Gyr old.
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]].
+* x2 secondary [[world|rocky worlds]].
+** Hotov, an [[ice world]] orbiting in the [[Outer World|outer system]].
+** Paccao, an [[ice world]] orbiting in the [[Outer World|outer system]].
+* x4 [[gas giant]]s.
+** Gelmorth, a small gas giant orbiting in the [[habitable zone]].
+** Letro, a small gas giant orbiting in the [[Outer World|outer system]].
+** Lavoth, a large gas giant orbiting in the [[Outer World|outer system]].
+** Pillosie, a large gas giant orbiting in the [[Outer World|outer system]].
+
+[[File:Chart Kerak System Basic 2.png|800 px]]
+
+=== Mainworld Data ===
+* The planet has an axial tilt of 28.44 degrees
+* Kerak has a sidereal day of 41.1 hours in length
+* The planet takes 251.6 days to rotate around its star.
+* Kerak is not located in the Habitable Zone of its star.
+* No life has been found to exist on Kerak.
+* Kerak has no major tectonic plates.
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Kerak|Size= 1}}
+* Following extensive survey the planet has been confirmed as having a diameter of 2353Km.
+* The planetary survey confirmed that Kerak has a mostly rock core with a density of 0.59 Standard
+* Surface gravity of the planet is 0.11g
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Kerak|Atmosphere= 0}}
+* Due to the lack of atmosphere the local population live in sealed environments and only venture outside in appropriate protective equipment.
+* The plant of Kerak is little more than a cold rockball. Mean surface temperature of the planet is -110c / -166f.
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Kerak|Hydrosphere= 0}}
+* Hydrosphere of the planet has been surveyed at 4%. The water on the planet is not free standing but held in the form of ice in deep crevices and caves located across the planet's surface.
+* Although the ice does exist there is insufficient quantity in a single location to provide a strong water source for a sophont population to survive without imported additional supplies.
+* The ice is dispersed across the entire planet with no single area having any significant volume at this time having been located.
+
+==== Mainworld Geography and Topography ====
+
+[[File:Blank World Map Gray.png|500 px]] <br> (''Blank map, vacuum world''.)
+
+== History & Background (Dossier)<ref>Additional population and social details by [[User:Nichollsr1970|Roger Nicholls]]</ref> ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Kerak''' lies on the [[Delphi Main]], an important [[trade route]] straddling the border between [[Massilia Sector]] and [[Delphi Sector]].
+
+=== World Starport (St) ===
+{{Starport|name= Kerak|Starport= B}}
+* This world is host to a [[Scout Base]].
+* Located on the [[Delphi Main]] Kerak is a planet that does have a steady flow of ships arriving with goods and people.
+* In any given week c10 vessels will pass through the system.
+* Kerak starport consists of Kerak Downport located on the planetary surface and Kerak Orbital located in orbit above the planet.
+** Kerak Downport 
+*** Substantial starport providing a gateway to the planet and also the 3 corporate areas on the planetary surface. 
+*** Repair and overhaul facilities exist for small ships and small robotic factory facilities exist at the starport for production of standard parts required for repairs. 
+*** Extensive warehousing and logistics facilities are located in the downport along with regular shuttle services to both the Kerak Orbital and orbiting starships where required.
+*** The Imperium also maintains a small garrison of soldiers at the starport who supplement the private corporate security firm to ensure sovereignty and control of the starport is maintained.
+*** There are no shipbuilding capabilities on Kerak at this time.
+** Kerak Orbital
+*** Primary location of the Imperial Scout Service base in the system. 
+*** Also acts as additional starport facilities to those located at the downport and can host larger vessels that are unable to land on the planets surface.
+
+=== World Population (P) ===
+{{WorldPop|name= Kerak|multiplier= 6|Population= 5}}
+
+* There are 3 cities located on the surface, each managed, maintained and governed by a different corporation. The cities are purpose built arcologies designed to house the corporations' workforce and their families. 
+* The population of the planet is centred around a corporate lifestyle of prospecting and initial exploration of the mineral wealth that has been identified across the planet. Each corporation is therefore staking claims in various regions of the surface based upon their findings.
+* Besides the 3 cities there are many small corporate facilities both fixed and mobile, both on the surface and also in areas beneath the surface, that are being investigated. 
+
+==== Urbanization ====
+There are three major cities.
+
+The cities are all constructed in a similar way to each other. Prefab modular units are initially connected, everything from living accommodations to office complexes. These units are interconnected with prefab corridor units. Over time, expansions are added from building materials that have been brought to the planet, and the original modular units are encompassed within the larger on-planet assemblies. Throughout the cities airlocks and sealed spaces are the norm to ensure the population's safety.
+
+'''Galebright''': Population: c.165,235
+* The home of ''Gale Industries'' on Kerak.
+* Largest city on the planet and situated 150 miles from the starport in the southern hemisphere.
+
+'''Heelong''' : Population: c.142,510
+* Home to ''Ashgaag Mineral Extraction''
+* Located in the northern hemisphere close to the north pole of the planet.
+
+'''Nantus''': Population: 124,490
+* Home to ''Tyllichar Chemicals''
+* Located deep within a large ravine in the southern hemisphere.
+
+The remaining population c167,765 are located either at the starport (some 12,000 people) or spread across the planet in small, relatively isolated communities. Almost the entire population are employees of one of the 3 corporations who are operating on the planet.
+
+==== Linguistic Topography ====
+The most commonly heard [[language]]s are:
+* [[Anglic]], one of the two official languages of the {{Imperium}}.
+* [[Vilani (language)|Vilani]], one of the two official languages of the {{Imperium}}.
+
+=== World Technology Level (T) ===
+{{WorldTech|name= Kerak|WorldTech= D}}
+*The following tech levels can be applied to Kerak. It should be noted that although the world is effectively balkanised and being operated by 3 independent corporations, each of those corporations is almost identical in terms of capabilities and tech level engaged.
+**High Common TL:D
+** Low Common TL:B
+** Further Subcategories:-
+*** Energy TL:F (Energy provision on the planet is provided by advanced fusion reactors. Such technology was not initially developed on the planet but rather brought in as part of the colonisation)
+*** Electronics TL:D (Advanced meson comms is used in day to day activities)
+*** Manufacturing TL:B (Kerak is not a major manufacturing base and such does not invest extensively. It does however make use of advanced robotics in small manufacturing plants used to maintain local infrastructure and requirements.)
+*** Medical TL:D (Medical facilities on Kerak are of a very high standard with capabilities to carry out organ cloning amongst other high tech medical procedures)
+*** Environmental TL:D (Environmental technology is such that within the urban areas the population lives in excellent living conditions with "artificial" environments including open green spaces)
+*** Land Transport TL:D (At this level of capability Land Transport is replaced by grav vehicles)
+*** Water Transport TL:D (At this level of capability Water Transport is replaced by grav vehicles)
+*** Air Transport TL:D (At this level of capability Air Transport is replaced by grav vehicles)
+*** Space Transport TL:D (At this level Jump 5 ships can be serviced and maintained which does enable the starport on the planet to support the large long range bulk freighters)
+*** Personal Military TL:C (High tech weaponry could in theory be developed and maintained on Kerak however there is currently no authorised manufacture of such items)
+*** Heavy Military TL:C (High tech heavy military could in theory be developed and maintained on Kerak however there is currently no authorised manufacture of such items)
+
+=== World Government (G) ===
+{{WorldGov|name= Kerak|Government= 7}}
+* Kerak has no central government authority. The planet is "governed" by 3 distinct corporations all of whom claim regions of the planet as their own.
+* The three corporations are:-
+** Gale Industries
+** Ashgaag Mineral Extraction
+** Tyllicar Chemicals
+* Each corporation maintains law and order within their territories however a common agreement exists between all 3 to the level of such activities. Employees and contractors for one corporation only enter another's territory provided appropriate paperwork and licences are in place.
+* Each of the corporation's has a legislative authoritative organisational function. They set the rules and structure that society abides by and how it is governed. Each of the corporations however operates with different lower level organisational constructs:-
+** Gale Industries has a very loose organisation structure that relies on the communal and collective mindset of the employees. Every employee has a voice/vote that on a regular basis supports and shapes the direction that the corporation and how it governs on Kerak is going.
+** Ashgaag Mineral Extraction has single Director that sits at the top of the organisation and effectively makes all the key decisions albeit supported by several other senior managers who help them in that process.
+*** Recently Ashgaag Minerals has faced some significant issues with employees pushing back against decisions being taken that have impacted daily life. Such decisions have caused considerable disquiet amongst those living and working on the planet.
+** Tyllicar Chemicals operates with a Board of Directors located on the planet who are ultimately answerable to their parent company based elsewhere in the sector.
+
+=== World Law (L) ===
+{{WorldLaw|name= Kerak|Law= 6}}
+* The Law on Kerak does have subtle differences between each corporate entity and also how the starport operates, however overall their is some level of consistency that is relatively standardised across the planet and the different factions. The system of law is best described as "traditional" with a process involving judges, jury's and robust criminal investigation of alleged crimes.
+* Each corporation does have the right to create specific local law and does do this, however such laws are readily available to Travellers to try and prevent actual breaches occurring.
+* Any defendant is presumed innocent until proven otherwise regardless of which faction is prosecuting the case.
+* For the most extreme cases the death penalty does exist within the Kerak legal systems, however it has been many years since it was last enacted.
+* The law level like all worlds has differing levels and categories and the following levels apply. Although each corporation interprets some of the details differently the following levels are consistent across Kerak.
+**Overall Level: 6
+**Weapons and Armour: 6 (All firearms except shotguns and stun weapons are illegal. Even shotguns and stun weapons do require a permit/licence and are rarely seen in the hands of the general population.)
+**Economic: 6 (Moderate permitting and zoning laws are in place. Registration fees are required for professional licences and proof of capability to carry out Professional roles is required)
+**Criminal Law: 6 (Public surveillance is carried out with cameras located throughout most urban and public areas)
+**Private Law: 6 (All disputes that break the legal code must be held in a corporate managed venue with appropriate management oversight)
+**Personal Rights: 8 (The corporations absolutely control day to day life in relation to personal information. Each employee is corporate registered and all data access and controls are strictly maintained.)
+* Security and policing across Kerak with the exception of the starport is carried out by Corporate Security. Starport security is maintained by a privately contracted security corporation who operate several startports across Massilia.
+
+=== Imperial Landed Nobility ===
+{{Imperial Nobility|name= Kerak|Noble= B}}
+
+=== Trade Data ===
+* Importance:     1 (ordinary)
+* Additional Economic indicators:-
+** Gross World Product per Capita: 151,200cr
+** World Trade Number: 8
+** Inequality Rating: 43
+*** c.43% of the population are living at a lower standard than the rest of the population. These individuals are in roles that are traditionally seen as menial or lower grade roles. In addition such individuals and their families  are likely to be living in older, substandard facilities and having to work extended hours to provide for themselves.
+** Development Score: 71
+** Tariffs - Varying Tariffs
+*** Each corporation applies tariffs to their goods and services and as such there is no standard in place that is consistent across the planet.
+
+=== World Economy ===
+* Resources:      B (abundant)
+** Significant quantities of rare elements such as lanthanides have been located on the planet along with quantities of silicate minerals.
+* Labor:          4 (tens of thousands)
+** Dominated and driven by the corporate work force and their families that live and work on Kerak.
+* Infrastructure: 5 (limited)
+** Outside of the urban areas there is almost no existing infrastructure and all travel is via grav vehicles purely to travel to a prospecting region.
+* Efficiency:     +1 (average)
+
+=== World Culture ===
+* Heterogenity: 4 (harmonious)
+** Society on Kerak despite being spread across 3 distinct corporate groups is relatively harmonious. Each corporation operates in a distinct region of the planet and keeps a discrete distance from each other.
+* Acceptance:   6 (aloof)
+** Locals are all aligned with their company values and lifestyles. Although visitors are welcome there is a local view that visitors don't always fully understand the nuances of life on Kerak.
+* Strangeness:  4 (somewhat distinct)
+** Due to the nature of life on Kerak e.g. hostile external environment combined with excellent environmental living conditions in the urban areas, Kerak does have a distinct style of its own.
+* Symbols:      C (very abstract)
+** Symbology in and of itself is not particularly abstract, however the way each corporation operates and their "localised" usage of similar words and phrases that often have different meanings can and has caused problems over the years.
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+
+* [[Ancients|circa -250,000]]: The [[Ancient]]s are active within the sector.
+* [[-9000s|circa -9,000]]: The [[Geonee]] encounter the [[Vilani]].
+* [[-5400]] to [[-4015]]: The [[Vilani]] [[Consolidation Wars]].
+* [[-4045]] to [[-2204]]: The region is part of the ''[[First Imperium|Ziru Sirka]]''.
+* [[-2204]] to [[-1776]]: The region becomes part of the [[Rule of Man]].
+* [[-1776]] to [[0]]: The [[Long Night]].
+* [[0|The Year 0]]: The [[Third Imperium]] is founded.
+* [[300]]-[[420]]: The {{Imperial}} [[First Survey]] charts the system.
+* [[604]]-[[622]]: The [[Civil War]].
+* [[624]]: The [[Express Boat Network]] is established.
+* [[995]]-[[1065]]: The {{Imperial}} [[Second Survey]] charts the system.
+* [[1065]]: The [[Second Survey]] is published. Information about the system becomes widely available.
+
+== References==
+{{Sources
+ | {{Ludography cite|name= Atlas of the Imperium |page= page 22|version= Classic Traveller}} (world location and some additional system data)
+ | {{Ludography cite|name= The Travellers' Digest 11 |page= pages 6-25}} (sector background and history, plus details for the [[Geonee]])
+ | {{Ludography cite|name= Vilani & Vargr |page= page 11}} (dot map provided, locating the world)
+ | {{Ludography cite|name= Knightfall |page= pages 74-80}} (sector data including the world, sector background and history)
+ | {{Ludography cite|name= First Survey |page= pages 4, 38-41, 102-109}} (sector data including the world circa [[0|The Year 0]]) 
+ | {{Ludography cite|name= Solomani |page= pages 57, 59|version= Mongoose Traveller}} (sector background and history)
+}}
+
+[[Category: 64th Fleet worlds]]
+[[Category: Delphi Main worlds]]
+[[Category: First Imperium worlds]]
+[[Category: Rule of Man worlds]]
+[[Category: Second Imperium worlds]]
+{{LE|T5 Second Survey worlds|}}

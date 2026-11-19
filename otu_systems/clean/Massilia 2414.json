@@ -1,0 +1,683 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Massilia",
+  "hex": "2414",
+  "sector_abbreviation": "Mass",
+  "subsector": "Forquee",
+  "name": "Rode",
+  "sources": [
+    {
+      "page": "Rode (world)",
+      "revid": 1089961,
+      "timestamp": "2026-11-04T21:46:31Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Rode (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Ustrelli",
+          "type": "M2 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Ustrelli",
+      "stars": [
+        {
+          "name": "Ustrelli",
+          "type": "M2 V"
+        }
+      ],
+      "labels": [
+        "Rode"
+      ],
+      "pages": [
+        "Rode (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Rode",
+          "raw": "B755220-B",
+          "kind": "world",
+          "uwp": "B755220-B",
+          "distance": {
+            "raw": "0.242",
+            "value": 0.242,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rode (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 2,
+          "name": "Nollanus",
+          "raw": "YBG9000-0",
+          "kind": "world",
+          "uwp": "YBG9000-0",
+          "distance": {
+            "raw": "0.969",
+            "value": 0.969,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rode (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Bocosie",
+          "raw": "Y7A7000-0",
+          "kind": "world",
+          "uwp": "Y7A7000-0",
+          "distance": {
+            "raw": "2.57",
+            "value": 2.57,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rode (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rode (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Gaduurshi",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "6.21",
+            "value": 6.21,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rode (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rode (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rode (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rode (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Kaalanii",
+          "raw": "Y6A1000-0",
+          "kind": "world",
+          "uwp": "Y6A1000-0",
+          "distance": {
+            "raw": "19.9",
+            "value": 19.9,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rode (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Hiibos",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "37.7",
+            "value": 37.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rode (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rode (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y310000-0",
+              "kind": "world",
+              "uwp": "Y310000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rode (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rode (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "14 Diam",
+                "value": 14.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rode (world)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Moon",
+              "raw": "Y411000-0",
+              "kind": "world",
+              "uwp": "Y411000-0",
+              "distance": {
+                "raw": "18 Diam",
+                "value": 18.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rode (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Zyke",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "45.42",
+            "value": 45.42,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rode (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rode (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "4 Diam",
+                "value": 4.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rode (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rode (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rode (world)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rode (world)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rode (world)"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Rode (world)",
+      "label": "Rode",
+      "stars": [
+        {
+          "name": "Ustrelli",
+          "type": "M2 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Rode",
+          "raw": "B755220-B",
+          "kind": "world",
+          "uwp": "B755220-B",
+          "distance": {
+            "raw": "0.242",
+            "value": 0.242,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Nollanus",
+          "raw": "YBG9000-0",
+          "kind": "world",
+          "uwp": "YBG9000-0",
+          "distance": {
+            "raw": "0.969",
+            "value": 0.969,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Bocosie",
+          "raw": "Y7A7000-0",
+          "kind": "world",
+          "uwp": "Y7A7000-0",
+          "distance": {
+            "raw": "2.57",
+            "value": 2.57,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Gaduurshi",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "6.21",
+            "value": 6.21,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Kaalanii",
+          "raw": "Y6A1000-0",
+          "kind": "world",
+          "uwp": "Y6A1000-0",
+          "distance": {
+            "raw": "19.9",
+            "value": 19.9,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Hiibos",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "37.7",
+            "value": 37.7,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y310000-0",
+              "kind": "world",
+              "uwp": "Y310000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "14 Diam",
+                "value": 14.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 5,
+              "name": "Moon",
+              "raw": "Y411000-0",
+              "kind": "world",
+              "uwp": "Y411000-0",
+              "distance": {
+                "raw": "18 Diam",
+                "value": 18.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Zyke",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "45.42",
+            "value": 45.42,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "4 Diam",
+                "value": 4.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 5,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 6,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Rode",
+    "UWP": "B755220-B",
+    "Stellar": "M2 V",
+    "PBG": "403",
+    "Bases": "",
+    "Remarks": "Lo Ga"
+  }
+}

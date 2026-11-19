@@ -209,6 +209,8 @@ const SystemEditor = (() => {
             pos:           m.pos,
             eccentricity:  m.eccentricity,
             retrograde:    m.retrograde,
+            // Added in the System Editor (see _addMoon). Older saves have no flag = false.
+            editorAdded:   !!m.editorAdded,
             _manualFields: m._manualFields ? [...m._manualFields] : [],
             _uwpSeed:      null,
             _raw:          m,
@@ -351,6 +353,16 @@ const SystemEditor = (() => {
         // system doesn't show a permanently blank/auto HZCO box despite a real resolved value.
         return { hexId, engine, allowAddBodies: false, mainworldRef, stars, bodies,
                  age: raw.age ?? null, hzco: (raw.hzco ?? raw.hzOrbit) ?? null };
+    }
+
+    // True for a star name worth keeping: not empty, not just a spectral type ("G2 V", "M9 D",
+    // "BD", "D"), not a bare role word. See _buildSeedSys.
+    function _keepStarName(name) {
+        const n = String(name || '').trim();
+        if (!n) return false;
+        if (/^(Primary|Secondary|Tertiary|Quaternary|Companion|Close|Near|Far)$/i.test(n)) return false;
+        if (/^(BD|D[A-Z]?|[OBAFGKMLTY]\d*(\.\d+)?\s*(Ia|Ib|III|II|IV|VII|VI|V|D)?)$/i.test(n)) return false;
+        return true;
     }
 
     function _buildBlankWorkingCopy(hexId, engine, starSpec) {
@@ -572,14 +584,36 @@ const SystemEditor = (() => {
         // defined pd as locked (mgt2e_world_engine.js: `if (w.moons[mn].pd !== undefined)`).
         const SLOT_SPACING = 5; // simple fixed step, in planetary diameters
         const existingPds = (parent.moons || []).map(m => m.pd).filter(v => v != null);
-        const nextPd = existingPds.length > 0 ? Math.max(...existingPds) + SLOT_SPACING : SLOT_SPACING;
+        const lastPd = existingPds.length > 0 ? Math.max(...existingPds) : 0;
+        let nextPd = lastPd + SLOT_SPACING;
+        // hillSpanPd is MgT2E-only (other engines never set it, so this is a no-op for them).
         const hillLimit = parent._raw && parent._raw.hillSpanPd;
-        const willCrowdHill = hillLimit != null && nextPd > hillLimit;
+        // A slot past the Hill Sphere limit used to be kept as-is and the moon was then
+        // destroyed on Save (Roche Shred). Place it inside instead, halfway between the
+        // outermost moon and the limit. With no room for that (under 2.5 pd left), it goes
+        // just outside the outermost moon (1.25 pd, the engine's minimum spacing), or at
+        // 0.9 × the limit (min 1 pd, clear of the surface) when there are no moons; it is
+        // protected, so it is kept either way. Never placed inward of an existing moon, which
+        // would reorder the moons. Sean, 2026-11-18.
+        let willCrowdHill = false;
+        if (hillLimit != null && nextPd > hillLimit) {
+            if (hillLimit - lastPd >= 2.5) {
+                nextPd = (lastPd + hillLimit) / 2;
+            } else {
+                nextPd = lastPd > 0 ? lastPd + 1.25 : Math.max(1, hillLimit * 0.9);
+                willCrowdHill = true;
+            }
+        }
 
         parent.moons.push({
             _id: _uid('moon'), type: 'Satellite',
             name: '', uwp: null, isMainworld: false,
             travelZone: 'G', _uwpSeed: null, _raw: {},
+            // Added by the user here, not rolled: MgT2E never destroys it for lack of Hill
+            // Sphere room (mgt2e_world_engine.js) and never trims it in favour of a rolled
+            // moon (seed_restoration.js). Saved with the moon; absent in older saves = not
+            // protected, as before. Sean, 2026-11-18.
+            editorAdded: true,
             // hillLimit unknown (parent never previewed yet) — fall back to undefined and let
             // the engine roll a position once, same as before this fix.
             // Not added to _manualFields: locking only requires pd !== undefined (see engine
@@ -595,9 +629,9 @@ const SystemEditor = (() => {
 
         if (willCrowdHill) {
             _showWarn('Hill Sphere Crowded',
-                `This moon's orbit (${nextPd.toFixed(1)} pd) exceeds the gas giant's Hill Sphere limit ` +
-                `(${hillLimit.toFixed(1)} pd) — it may be destroyed when the system regenerates. ` +
-                `You can lower its orbit (⌀) value manually.`,
+                `This world has little room for another moon: its Hill Sphere ends at ` +
+                `${hillLimit.toFixed(1)} pd, so the new moon has been placed at ${nextPd.toFixed(1)} pd. ` +
+                `It will be kept when you save, and you can change its orbit (⌀) value.`,
                 [{ label: 'OK', cls: 'btn-save', onClick: () => {} }]);
         }
     }
@@ -625,6 +659,29 @@ const SystemEditor = (() => {
         } else {
             doDelete();
         }
+    }
+
+    // MgT2E rings (w.rings[]). A ring added here carries editorAdded: the engine never wipes
+    // it for lack of Hill Sphere room (mgt2e_world_engine.js), the same protection as an
+    // added moon (Sean, 2026-11-18). Rings have no names or ids, so they are addressed by
+    // index; the seeded ring cap (seed_restoration.js) keeps exactly the rings listed here.
+    function _addRing(parentBodyId) {
+        const parent = _workingCopy.bodies.find(b => b._id === parentBodyId);
+        if (!parent) return;
+        _pushHistory();
+        parent.rings = parent.rings || [];
+        parent.rings.push({ editorAdded: true });
+        _renderAndPreview();
+        const bodyEl = _editorPanel && _editorPanel.querySelector(`details[data-body-id="${parentBodyId}"]`);
+        if (bodyEl) bodyEl.open = true;
+    }
+
+    function _deleteRing(parentBodyId, ringIdx) {
+        const parent = _workingCopy.bodies.find(b => b._id === parentBodyId);
+        if (!parent || !parent.rings || ringIdx < 0 || ringIdx >= parent.rings.length) return;
+        _pushHistory();
+        parent.rings.splice(ringIdx, 1);
+        _renderAndPreview();
     }
 
     function _deleteMoon(parentBodyId, moonId) {
@@ -1210,6 +1267,11 @@ const SystemEditor = (() => {
             if (body.type !== 'Belt') {
                 summary.appendChild(_btn('+Moon', 'Add moon', () => _addMoon(body._id)));
             }
+            // MgT2E keeps rings on the planet (w.rings[]), so only it gets +Ring; CT rings are
+            // size-R moons typed into a moon's Size box instead.
+            if (body.type !== 'Belt' && _workingCopy.engine === 'MgT2E') {
+                summary.appendChild(_btn('+Ring', 'Add ring', () => _addRing(body._id)));
+            }
             summary.appendChild(_btn('↻', 'Regenerate this body', () => _regenerateBody(body._id)));
             summary.appendChild(_btn('✕', 'Delete body', () => _deleteBody(body._id)));
             bodyEl.appendChild(summary);
@@ -1605,6 +1667,33 @@ const SystemEditor = (() => {
                     }
                 });
                 detailPad.appendChild(moonContainer);
+            }
+
+            // Rings (MgT2E) — listed after the moons; each can be deleted.
+            if (_workingCopy.engine === 'MgT2E' && body.type !== 'Belt' && body.rings && body.rings.length > 0) {
+                const ringHeader = document.createElement('div');
+                Object.assign(ringHeader.style, {
+                    fontSize: '10px', color: P.sub, marginTop: '4px', marginBottom: '2px',
+                    textTransform: 'uppercase', letterSpacing: '0.5px',
+                });
+                ringHeader.textContent = `Rings (${body.rings.length})`;
+                detailPad.appendChild(ringHeader);
+
+                const ringContainer = document.createElement('div');
+                Object.assign(ringContainer.style, {
+                    borderLeft: `1px solid ${P.border}`, marginLeft: '8px', paddingLeft: '8px', marginTop: '2px',
+                });
+                body.rings.forEach((ring, ringIdx) => {
+                    const ringRow = document.createElement('div');
+                    Object.assign(ringRow.style, { display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '2px', fontSize: '11px' });
+                    const ringLbl = document.createElement('span');
+                    ringLbl.textContent = `Ring ${ringIdx + 1}${ring.editorAdded ? ' (added)' : ''}`;
+                    Object.assign(ringLbl.style, { flex: '1', color: P.sub });
+                    ringRow.appendChild(ringLbl);
+                    ringRow.appendChild(_btn('✕', 'Delete ring', () => _deleteRing(body._id, ringIdx)));
+                    ringContainer.appendChild(ringRow);
+                });
+                detailPad.appendChild(ringContainer);
             }
 
             bodyEl.appendChild(detailPad);
@@ -2285,7 +2374,18 @@ const SystemEditor = (() => {
             size:         s.sClass || 'V',
             sClass:       s.sClass || 'V',
             role:         s.role || 'Primary',
-            name:         `${s.sType || 'G'}${s.subType != null ? s.subType : '5'} ${s.sClass || 'V'}`,
+            // A star keeps a real name (Sean, 2026-11-16 — e.g. a published system's "Lusor").
+            // A name that is only a spectral type ("G2 V", as generators name stars) or a bare
+            // role word is rebuilt from the type, so changing the type still renames it.
+            name:         _keepStarName(s.name)
+                ? s.name
+                : `${s.sType || 'G'}${s.subType != null ? s.subType : '5'} ${s.sClass || 'V'}`,
+            // T5: a companion keeps its stored distance while its orbit is unchanged (Darida's
+            // published 5,000 AU, not orbit 16's table 4,900). _initStars honours this flag;
+            // moving the star to another orbit drops it and the table distance applies.
+            keepDistAU:   !!(s._raw && s._raw.distAU != null && s.orbitId != null &&
+                             (s._raw.orbitID ?? s._raw.orbitId) === s.orbitId &&
+                             s.orbitAU === s._raw.distAU),
             // CT's own convention (ct_stellar_engine.js's _specKey) is type+decimal only, e.g.
             // "G5" — no luminosity class suffix. ZONE_H_TABLE/ZONE_TABLES key on that exact
             // format; appending sClass here (e.g. "G5V") never matches, silently breaking zone

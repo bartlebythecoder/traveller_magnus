@@ -1,0 +1,816 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "2715",
+  "sector_abbreviation": "Spin",
+  "subsector": "Rhylanor",
+  "name": "Porozlo",
+  "sources": [
+    {
+      "page": "Porozlo (world)",
+      "revid": 1058541,
+      "timestamp": "2026-05-25T17:30:45Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Porozlo (world)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Primary",
+          "type": "M1 V",
+          "notes": null
+        },
+        {
+          "role": "Secondary",
+          "name": "Secondary",
+          "type": "M9 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Corusca",
+      "stars": [
+        {
+          "name": "Corusca",
+          "type": "M1 V"
+        }
+      ],
+      "labels": [
+        "Porozlo"
+      ],
+      "pages": [
+        "Porozlo (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Corusca Prime",
+          "name_raw": "''Corusca Prime''",
+          "raw": "<small>'''?'''??????-?</small>",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Porozlo (world)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Porozlo",
+          "raw": "<small>A867A74-B</small>",
+          "kind": "world",
+          "uwp": "A867A74-B",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Porozlo (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Jelorba",
+              "raw": "<small>G546467-B</small>",
+              "kind": "world",
+              "uwp": "G546467-B",
+              "distance": {
+                "raw": "''<small><span style=\"color:#F0F0F0\">..</span> R= 50</small>''",
+                "value": 50.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Porozlo (world)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 2,
+          "name": "---",
+          "raw": "<br><br><br>",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "flags": [
+            "placeholder-row-empty"
+          ],
+          "sources": [
+            "Porozlo (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Glint",
+          "name_raw": "'''''Glint'''''",
+          "raw": "'''''<big>M9 V</big>''''' <br><small><sup>'''''(Companion)'''''</sup></small>",
+          "kind": "star",
+          "type": "M9 V",
+          "remark": "Companion",
+          "distance": {
+            "raw": "'''1.0'''",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ],
+          "planets": [
+            {
+              "name": "Czaczezhnia",
+              "name_raw": "'''Czaczezhnia'''",
+              "raw": "<small> - '''LGG''' - </small><br><small><sup>(Size=60)</sup></small>",
+              "kind": "gas_giant",
+              "size_class": "Large",
+              "size_value": "60",
+              "distance": {
+                "raw": "<small><span style=\"color:#F0F0F0\">..</span> 0.2 <small>AU</small></small>",
+                "value": 0.2,
+                "unit": "AU"
+              },
+              "moons": [
+                {
+                  "name": "(Ring 1)",
+                  "name_raw": "»» <small>(Ring 1)</small>",
+                  "raw": "<small>YR00000-0</small>",
+                  "kind": "world",
+                  "uwp": "YR00000-0",
+                  "distance": {
+                    "raw": "''<small><span style=\"color:#F0F0F0\">...</span> R= 1</small>''",
+                    "value": 1.0,
+                    "unit": "Radii"
+                  },
+                  "flags": [
+                    "dist-radii"
+                  ]
+                },
+                {
+                  "name": "(Ring 2)",
+                  "name_raw": "»» <small>(Ring 2)</small>",
+                  "raw": "<small>YR00000-0</small>",
+                  "kind": "world",
+                  "uwp": "YR00000-0",
+                  "distance": {
+                    "raw": "''<small><span style=\"color:#F0F0F0\">...</span> R= 2</small>''",
+                    "value": 2.0,
+                    "unit": "Radii"
+                  },
+                  "flags": [
+                    "dist-radii"
+                  ]
+                },
+                {
+                  "name": "Glyph",
+                  "name_raw": "»» <small>Glyph</small>",
+                  "raw": "<small>Y300000-0</small>",
+                  "kind": "world",
+                  "uwp": "Y300000-0",
+                  "distance": {
+                    "raw": "''<small><span style=\"color:#F0F0F0\">...</span> R= 5</small>''",
+                    "value": 5.0,
+                    "unit": "Radii"
+                  },
+                  "flags": [
+                    "dist-radii"
+                  ]
+                },
+                {
+                  "name": "Tybalt",
+                  "name_raw": "»» <small>Tybalt</small>",
+                  "raw": "<small>Y100000-0</small>",
+                  "kind": "world",
+                  "uwp": "Y100000-0",
+                  "distance": {
+                    "raw": "''<small><span style=\"color:#F0F0F0\">...</span> R= 7</small>''",
+                    "value": 7.0,
+                    "unit": "Radii"
+                  },
+                  "flags": [
+                    "dist-radii"
+                  ]
+                },
+                {
+                  "name": "Aamed",
+                  "name_raw": "»» <small>Aamed</small>",
+                  "raw": "<small>Y200000-0</small>",
+                  "kind": "world",
+                  "uwp": "Y200000-0",
+                  "distance": {
+                    "raw": "''<small><span style=\"color:#F0F0F0\">...</span> R= 13</small>''",
+                    "value": 13.0,
+                    "unit": "Radii"
+                  },
+                  "flags": [
+                    "dist-radii"
+                  ]
+                },
+                {
+                  "name": "Padenton",
+                  "name_raw": "»» <small>Padenton</small>",
+                  "raw": "<small>YS00000-0</small>",
+                  "kind": "world",
+                  "uwp": "YS00000-0",
+                  "distance": {
+                    "raw": "''<small><span style=\"color:#F0F0F0\">...</span> R= 55</small>''",
+                    "value": 55.0,
+                    "unit": "Radii"
+                  },
+                  "flags": [
+                    "dist-radii"
+                  ]
+                }
+              ]
+            }
+          ],
+          "sources": [
+            "Porozlo (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Brazhorno",
+          "raw": "<small>Y1A0102-B</small>",
+          "kind": "world",
+          "uwp": "Y1A0102-B",
+          "distance": {
+            "raw": "<br>1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Porozlo (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Alec",
+              "raw": "<small>YS00000-0</small>",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''<small><span style=\"color:#F0F0F0\">..</span> R= 13</small>''",
+                "value": 13.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Porozlo (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Cela",
+              "raw": "<small>GS00207-A</small>",
+              "kind": "world",
+              "uwp": "GS00207-A",
+              "distance": {
+                "raw": "''<small><span style=\"color:#F0F0F0\">..</span> R= 40</small>''",
+                "value": 40.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Porozlo (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Mílano",
+          "raw": "<small>Y600000-0</small>",
+          "kind": "world",
+          "uwp": "Y600000-0",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Porozlo (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Borges",
+          "raw": "<small>F410663-A</small>",
+          "kind": "world",
+          "uwp": "F410663-A",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Porozlo (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Blanca",
+              "raw": "<small>Y100000-0</small>",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "''<small><span style=\"color:#F0F0F0\">..</span> R= 8</small>''",
+                "value": 8.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Porozlo (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Sinai",
+              "raw": "<small>HS00107-B</small>",
+              "kind": "world",
+              "uwp": "HS00107-B",
+              "distance": {
+                "raw": "''<small><span style=\"color:#F0F0F0\">..</span> R= 35</small>''",
+                "value": 35.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Porozlo (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Calyph Orga",
+          "raw": "<small>G500636-B</small>",
+          "kind": "world",
+          "uwp": "G500636-B",
+          "distance": {
+            "raw": "10.0",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Porozlo (world)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Mandrigora",
+          "raw": "<small>H643437-B</small>",
+          "kind": "world",
+          "uwp": "H643437-B",
+          "distance": {
+            "raw": "20.0",
+            "value": 20.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Porozlo (world)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "(Corusca VIII)",
+          "name_raw": "''(Corusca VIII)''",
+          "raw": "<small>???????-?</small>",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "40.0",
+            "value": 40.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Porozlo (world)"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "(Corusca IX)",
+          "name_raw": "''(Corusca IX)''",
+          "raw": "<small>???????-?</small>",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "77.2",
+            "value": 77.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Porozlo (world)"
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "(Corusca X)",
+          "name_raw": "''(Corusca X)''",
+          "raw": "<small>???????-?</small>",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "154.0",
+            "value": 154.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Porozlo (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Porozlo (world)",
+      "label": "Porozlo",
+      "stars": [
+        {
+          "name": "Corusca",
+          "type": "M1 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Corusca Prime",
+          "name_raw": "''Corusca Prime''",
+          "raw": "<small>'''?'''??????-?</small>",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Porozlo",
+          "raw": "<small>A867A74-B</small>",
+          "kind": "world",
+          "uwp": "A867A74-B",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Jelorba",
+              "raw": "<small>G546467-B</small>",
+              "kind": "world",
+              "uwp": "G546467-B",
+              "distance": {
+                "raw": "''<small><span style=\"color:#F0F0F0\">..</span> R= 50</small>''",
+                "value": 50.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "---",
+          "raw": "<br><br><br>",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "flags": [
+            "placeholder-row-empty"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Glint",
+          "name_raw": "'''''Glint'''''",
+          "raw": "'''''<big>M9 V</big>''''' <br><small><sup>'''''(Companion)'''''</sup></small>",
+          "kind": "star",
+          "type": "M9 V",
+          "remark": "Companion",
+          "distance": {
+            "raw": "'''1.0'''",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ],
+          "planets": [
+            {
+              "name": "Czaczezhnia",
+              "name_raw": "'''Czaczezhnia'''",
+              "raw": "<small> - '''LGG''' - </small><br><small><sup>(Size=60)</sup></small>",
+              "kind": "gas_giant",
+              "size_class": "Large",
+              "size_value": "60",
+              "distance": {
+                "raw": "<small><span style=\"color:#F0F0F0\">..</span> 0.2 <small>AU</small></small>",
+                "value": 0.2,
+                "unit": "AU"
+              },
+              "moons": [
+                {
+                  "name": "(Ring 1)",
+                  "name_raw": "»» <small>(Ring 1)</small>",
+                  "raw": "<small>YR00000-0</small>",
+                  "kind": "world",
+                  "uwp": "YR00000-0",
+                  "distance": {
+                    "raw": "''<small><span style=\"color:#F0F0F0\">...</span> R= 1</small>''",
+                    "value": 1.0,
+                    "unit": "Radii"
+                  },
+                  "flags": [
+                    "dist-radii"
+                  ]
+                },
+                {
+                  "name": "(Ring 2)",
+                  "name_raw": "»» <small>(Ring 2)</small>",
+                  "raw": "<small>YR00000-0</small>",
+                  "kind": "world",
+                  "uwp": "YR00000-0",
+                  "distance": {
+                    "raw": "''<small><span style=\"color:#F0F0F0\">...</span> R= 2</small>''",
+                    "value": 2.0,
+                    "unit": "Radii"
+                  },
+                  "flags": [
+                    "dist-radii"
+                  ]
+                },
+                {
+                  "name": "Glyph",
+                  "name_raw": "»» <small>Glyph</small>",
+                  "raw": "<small>Y300000-0</small>",
+                  "kind": "world",
+                  "uwp": "Y300000-0",
+                  "distance": {
+                    "raw": "''<small><span style=\"color:#F0F0F0\">...</span> R= 5</small>''",
+                    "value": 5.0,
+                    "unit": "Radii"
+                  },
+                  "flags": [
+                    "dist-radii"
+                  ]
+                },
+                {
+                  "name": "Tybalt",
+                  "name_raw": "»» <small>Tybalt</small>",
+                  "raw": "<small>Y100000-0</small>",
+                  "kind": "world",
+                  "uwp": "Y100000-0",
+                  "distance": {
+                    "raw": "''<small><span style=\"color:#F0F0F0\">...</span> R= 7</small>''",
+                    "value": 7.0,
+                    "unit": "Radii"
+                  },
+                  "flags": [
+                    "dist-radii"
+                  ]
+                },
+                {
+                  "name": "Aamed",
+                  "name_raw": "»» <small>Aamed</small>",
+                  "raw": "<small>Y200000-0</small>",
+                  "kind": "world",
+                  "uwp": "Y200000-0",
+                  "distance": {
+                    "raw": "''<small><span style=\"color:#F0F0F0\">...</span> R= 13</small>''",
+                    "value": 13.0,
+                    "unit": "Radii"
+                  },
+                  "flags": [
+                    "dist-radii"
+                  ]
+                },
+                {
+                  "name": "Padenton",
+                  "name_raw": "»» <small>Padenton</small>",
+                  "raw": "<small>YS00000-0</small>",
+                  "kind": "world",
+                  "uwp": "YS00000-0",
+                  "distance": {
+                    "raw": "''<small><span style=\"color:#F0F0F0\">...</span> R= 55</small>''",
+                    "value": 55.0,
+                    "unit": "Radii"
+                  },
+                  "flags": [
+                    "dist-radii"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Brazhorno",
+          "raw": "<small>Y1A0102-B</small>",
+          "kind": "world",
+          "uwp": "Y1A0102-B",
+          "distance": {
+            "raw": "<br>1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Alec",
+              "raw": "<small>YS00000-0</small>",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''<small><span style=\"color:#F0F0F0\">..</span> R= 13</small>''",
+                "value": 13.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Cela",
+              "raw": "<small>GS00207-A</small>",
+              "kind": "world",
+              "uwp": "GS00207-A",
+              "distance": {
+                "raw": "''<small><span style=\"color:#F0F0F0\">..</span> R= 40</small>''",
+                "value": 40.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Mílano",
+          "raw": "<small>Y600000-0</small>",
+          "kind": "world",
+          "uwp": "Y600000-0",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Borges",
+          "raw": "<small>F410663-A</small>",
+          "kind": "world",
+          "uwp": "F410663-A",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Blanca",
+              "raw": "<small>Y100000-0</small>",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "''<small><span style=\"color:#F0F0F0\">..</span> R= 8</small>''",
+                "value": 8.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Sinai",
+              "raw": "<small>HS00107-B</small>",
+              "kind": "world",
+              "uwp": "HS00107-B",
+              "distance": {
+                "raw": "''<small><span style=\"color:#F0F0F0\">..</span> R= 35</small>''",
+                "value": 35.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Calyph Orga",
+          "raw": "<small>G500636-B</small>",
+          "kind": "world",
+          "uwp": "G500636-B",
+          "distance": {
+            "raw": "10.0",
+            "value": 10.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 8,
+          "name": "Mandrigora",
+          "raw": "<small>H643437-B</small>",
+          "kind": "world",
+          "uwp": "H643437-B",
+          "distance": {
+            "raw": "20.0",
+            "value": 20.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 9,
+          "name": "(Corusca VIII)",
+          "name_raw": "''(Corusca VIII)''",
+          "raw": "<small>???????-?</small>",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "40.0",
+            "value": 40.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 10,
+          "name": "(Corusca IX)",
+          "name_raw": "''(Corusca IX)''",
+          "raw": "<small>???????-?</small>",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "77.2",
+            "value": 77.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 11,
+          "name": "(Corusca X)",
+          "name_raw": "''(Corusca X)''",
+          "raw": "<small>???????-?</small>",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "154.0",
+            "value": 154.0,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Porozlo",
+    "UWP": "A867A74-B",
+    "Stellar": "M1 V M9 V",
+    "PBG": "201",
+    "Bases": "",
+    "Remarks": "Hi Ga"
+  }
+}

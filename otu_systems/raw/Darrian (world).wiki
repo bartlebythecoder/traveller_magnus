@@ -1,0 +1,220 @@
+[[File:Alien Moon 288-0 Small.jpg|250 px|right]]
+{{StellarDataQuery
+ |name= {{World|Darrian|Spinward Marches|Darrian|0627}} 
+ |Non-canon trade codes= Ht
+ |era = Milieu 1116
+}}
+{{InfoboxSystem
+ |name=Darrian
+ |subsector=Darrian
+ |sector=Spinward Marches
+ |hex=0627
+ |star=''<big>[[Tarnis (star)|Tarnis]]</big>''
+ |type=''<big>G1 V</big>''
+ |P0= Belt      |Dist0= 0.2   |UWP0= <small>G000021-8</small>
+ |P1= --        |Dist1= 0.4   |UWP1= 
+ |P2= --        |Dist2= 0.7   |UWP2= 
+ |P3= Daryen    |Dist3= 1.0   |UWP3= <small>A463955-G</small>
+ |P4= '''Leryin'''    |Dist4= 1.6   |UWP4= '''SGG'''
+ |P4M1= » Bebh   |Dist4M1= ''<small>R= 7</small>''|UWP4M1= ''<small>YS00001-F</small>''
+ |P4M2= » Telaret |Dist4M2= ''<small>R= 11</small>''|UWP4M2= ''<small>Y300366-G</small>''
+ |P4M3= » Zaladh  |Dist4M3= ''<small>R= 12</small>''|UWP4M3= ''<small>YS00127-F</small>''
+ |P4M4= » Iredh   |Dist4M4= ''<small>R= 25</small>''|UWP4M4= ''<small>G100000-G</small>''
+ |P4M5= » Zdos    |Dist4M5= ''<small>R= 45</small>''|UWP4M5= ''<small>YS00000-0</small>''
+ |P4M6= » Yimut   |Dist4M6= ''<small>R= 55</small>''|UWP4M6= ''<small>FS00400-F</small>''
+ |P4M7= » Lubhilzadh |Dist4M7= ''<small>R= 150</small>''|UWP4M7= ''<small>HS00300-F</small>''
+ |P5= '''Bidhes'''    |Dist5= 2.8   |UWP5= '''SGG'''
+ |P5M1= » Poror   |Dist5M1= ''<small>R=   8</small>''|UWP5M1= ''<small>Y200317-G</small>''
+ |P5M2= » Tildong |Dist5M2= ''<small>R=  55</small>''|UWP5M2= ''<small>F300263-F</small>''
+ |P5M3= » Zinadh  |Dist5M3= ''<small>R= 175</small>''|UWP5M3= ''<small>G300526-F</small>''
+ |P6= --        |Dist6= 5.2  |UWP6= 
+ |P7= --        |Dist7= 10.6 |UWP7= 
+ |P8= --        |Dist8= 19.8 |UWP8= <br><br>  
+ |P9= '''''Lilimes''''' |Dist9= '''40'''   |UWP9=<span style="color:#F0F0F0">.....</span> '''''<big> D</big>''''' <br>'''''<sup>(Companion)</sup>'''''
+ |P9M1= Belt   |Dist9M1= ''<small>0.2 <small>AU</small></small>''|UWP9M1= <small>G000000-F</small>
+ |P9M2= Ranyat |Dist9M2= ''<small>0.4 <small>AU</small></small>''|UWP9M2= <small>H100267-F</small>
+ |P9M3= Bangan |Dist9M3= ''<small>0.7 <small>AU</small></small>''|UWP9M3= <small>G100366-F</small>   
+ |P10= --         |Dist10=  <br>77 |UWP10= <br>
+ |P11= --         |Dist11= 152 |UWP11=  
+ |P12= --         |Dist12= 308 |UWP12= 
+ |P13= '''Panusam'''  |Dist13=615 |UWP13= '''LGG'''
+ |P13M1= » Nighis |Dist13M1= ''<small>R= 11</small>''|UWP13M1= ''<small>Y213324-F</small>''
+ |P13M2= » Nelyegh|Dist13M2= ''<small>R= 40</small>''|UWP13M2= ''<small>G300000-F</small>''
+ |P13M3= » Delung |Dist13M3= ''<small>R= 45</small>''|UWP13M3= ''<small>G640266-F</small>''
+ |P14= '''Renadh'''   |Dist14= 1230 |UWP14= '''SGG'''
+ |P15= '''Pondam'''   |Dist15= 2500 |UWP15= '''SGG'''
+}}
+
+* {{SpMain}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Darrian''' is a binary star system.
+* The primary is a yellow main sequence named ''Tarnis''.
+* The secondary is a white dwarf stellar remnant named ''Lilimes''.
+
+{{BinaryStarSystem
+|name            = Darrian
+|primary         = G1 V
+|secondary       = D
+|PrimaryName     = [[Tarnis (star)|Tarnis]]
+|PrimaryNotes    = ''Primary''
+|SecondaryName   = [[Lilimes (star)|Lilimes]]
+|SecondaryNotes  = ''Companion'' - [[White Dwarf (star type)|Degenerate Dwarf]]
+}}
+
+=== System Data ===
+The Darrian system was ravaged by a tragic accident many years ago known as the ''[[Maghiz]]'', a series of apocalyptic solar flares of disputed origin. 
+
+Darrian is a small world with low gravity. 
+
+=== [[Mainworld|Mainworld Data]] ===
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Darrian|Size= 4}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Darrian|Atmosphere= 6}}
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Darrian|Hydrosphere= 3}}
+
+=== Mainworld Geography & Topography ===
+The surface of Darrian is divided by long, high mountain ranges into 5 basins. Each basin is centered on a sea fed by rivers draining the surrounding country; thus, basins are the equivalent of continents. Each basin also contains the remains of a "Flame Pit", beds once two kilometres wide of glowing coals fed from below by geothermal action. Around each Pit stands the remnant of a [[Father tree]] Orchard. These trees are circular but have a cross-section of about 5 square meters. In early Darrian history, the trees were used as homes by Darrian families.
+
+The main five basins are:
+* [[Abh Basin|Abh]]
+* [[Boyr Basin|Boyr]]
+* [[Nyadh Basin|Nyadh]]
+* [[Rimb Basin|Rimb]]
+* [[Zlodh Basin|Zlodh]]
+
+=== Native Lifeforms ===
+''Darrian'' is rich with complex [[lifeform]]s. There is some evidence of extensive outside interference with the planet's indigenous biosphere. Lifeforms include:
+
+* [[Father tree]]
+* '''Yorin''': A falcon-like avian {{Page cite|name = 101 Vehicles|page=12}}
+
+=== Native Sophont: Daryen ===
+Darrian is the [[homeworld]] of the [[Daryen]], a [[Minor Human Race]].
+
+== History & Background ([[Dossier]]) ==
+The ''[[Te-Zlodh]]'' name for this world is ''Daryen'', which means "world" or "home."
+
+Darrian is the technological centre of the [[Darrian Confederation]], as {{WorldS|Mire (SM 0527)|Spinward Marches|0527}} is the political center. [[Scientist]]s are in charge of the [[government]] and industry, paying careful attention to possible consequences before allowing changes. There are restrictions on the export of any [[artifact]]s of pre-''[[Maghiz]]'' culture that still remain on Darrian.
+
+The military force of the Darrians is known as the [[Darrian Navy]].
+
+=== World Starport (St) ===
+{{Starport|name= Darrian|Starport= A}}
+
+=== World Population (P) ===
+{{WorldPop|name= Darrian|multiplier= 2|Population= 9}}
+[[File:Daryen-Female Liz-Danforth CT-Alien-Module-8 02-Oct-2019.png|200px|right]]
+
+==== World Demographics ====
+* [[Aslan]]: Around 10%
+* [[Darrian]]: Around 80%
+* [[Solomani]]: Around 10%
+
+==== Urbanization ====
+Cities include the following:
+# [[Drozh]]
+# [[Kilulga]]
+# [[Pororda]]
+# [[Rebhar]]
+# [[Zehn Nyak]]
+# [[Zlodh]]
+
+The most obvious of Darrian high-tech symbols have been the pictures of the world's [[Gravity control technology|grav cities]]. Four major cities on Darrian (one in each basin except Zlodh) are grav structures held aloft by grav modules, freeing them from the ordinary constraints of gravity on architecture. [[Rebhar]] was constructed as a mining construct, and it gradually makes its way along the mountainous rim of the [[Boyr Basin]] extracting metal ores from the rugged rock faces. [[Pororda]], now a tourist center in the [[Rimb Basin]], was originally designed as a sea farming center; it hovers above the waves of the Rimb Sea and provides amusement and recreation facilities. [[Kilulga]], in the [[Abh Basin]], hangs in the upper atmosphere above most of Darrian's cloud cover. [[Zehn Nyak]] in the [[Nyadh Basin]] is a migratory city, moving among seven different sites as the markets and seasons change.
+
+Zlodh technology made possible a great many wonders on Darrian. While many marvel at Darrian's flying cities, an equal wonder is the undersea city of [[Zlodh]]. Created as the bloom of grav technology spread across Darrian, it lies on the floor of the Polar Sea beneath the North Polar icecap.
+
+A network of grav generators mounted in a latticework of metal struts keeps the seawater at bay. Unlike the classic domed undersea structures, Zlodh's lattices snake in hundreds of directions, bulging out to cover settlements and factories, narrowing in again to cover transportation lines, small housing developments, and businesses. The grav generators constantly repel the waters above the lattice, creating strong currents around all of the city. Since the currents also carry waste heat upwards away from the city, the icecap above it has melted.
+
+Transportation to Zlodh takes two forms: the undersea tube line, a 500 km rail system which connects with [[Drozh]], a port city in the southeastern Zlodh basin; and the air terminal on the icecap directly above Zlodh with direct transport on a vertical grav shaft to the city 2000 m below.
+
+The city of Zlodh has two major attractions: the sea farms and the University of Zlodh. The sea farms are a major food resource for Darrian and provide a wide variety of tasty seafoods.
+
+=== [[Technology Level|World Technology Level]] (TL) ===
+{{WorldTech|name= Darrian|WorldTech=F}}
+* Technically, Darrian is classified as TL-16, and therefore has among the highest technology achievements in [[Charted Space]]. Though this is entirely due to recovered [[artifact]]s, it cannot be denied that Darrian society is full of brilliant scientists.
+
+=== World Law (L) ===
+{{WorldLaw|name= Darrian|Law= 5}}
+* The [[Taledh Code]] is the basis of Darrian law.
+
+===World Economy ===
+The following corporations do business here:
+* ''[[Pthanth Shipyards]]''
+* ''[[Tharnitia Denus]]''
+* ''[[Zloril]]''
+
+[[File:Logo Pthanth Shipyards.png|130 px]] [[File:Logo Tharnitia Denus.png|175 px]] [[File:Logo Zloril.png|175 px]]
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+* Circa [[-300000]]: [[Humans]] transplanted to Darrian by the [[Ancients]].
+* Circa [[-200000]]: The Flame Pits of Darrian begin to burn out.{{Page cite|name=Aliens of Charted Space: Volume 3|page=33-35|citeName=Ayys3}}
+* [[-1520]]: The [[Itzin Fleet]] arrives on Darrian.{{Page cite|citeName=Ayys3}}
+* [[-1511]]: The Itzin Fleet contacts the Darrians.{{Page cite|citeName=Ayys3}}
+* [[-1410]]: Darrians begin space exploration.{{Page cite|citeName=Ayys3}}
+* [[-1250]]: {{WorldS|Rorre|Spinward Marches|0526}} becomes first Darrian interstellar colony.{{Page cite|citeName=Ayys3}}
+* [[-935]]: Research station founded on Telaret, an inner moon of the gas giant Leryin, by the University of Zlodh as part of the [[Udh Project|Udh projects]].{{Page cite|citeName=Ayys3}}
+* [[-925]]: The [[Abh Project]] successfully probes the interior of Tarnis, Darrian's star.{{Page cite|citeName=Ayys3}}
+* [[-924]]: A second Abh probe is launched into Tarnis; the star destabilises, triggering the [[Maghiz]].{{Page cite|citeName=Ayys3}}
+* [[-860]]: All contact between Darrian worlds ceases.{{Page cite|citeName=Ayys3}}
+* [[-275]]: {{WorldS|Mire|Spinward Marches|0527}} regains jump capability.{{Page cite|citeName=Ayys3}}
+* [[-271]]: Mire takes the leadership role in rebuilding Darrian interstellar society.{{Page cite|citeName=Ayys3}}
+* [[-265]]: First contact between Darrians and the Sword Worlders.{{Page cite|citeName=Ayys3}}
+* [[-187]]: First contact between Darrians and the [[Zhodani]].{{Page cite|citeName=Ayys3}}
+* [[-165]]: Major setback in Darrian-Zhodani relations when Darrians discover Zhodani were aware of the Maghiz but not offered assistance.{{Page cite|citeName=Ayys3}}
+* [[0|The Year 0]]: The [[Third Imperium]] is founded.
+* [[148]]: Foundation of the [[Darrian Confederation]] which replaces the Darrian Community.{{Page cite|citeName=Ayys3}}
+* [[300]]-[[420]]: The {{Imperial}} [[First Survey]] charts the system.
+* [[390]]: Confederation Navy recovers a cache of TL16 ships of pre-Maghiz manufacture.{{Page cite|citeName=Ayys3}}
+* [[585]]: Several groups of [[Aslan]] ''[[ihatei]]'' offer to fight for the Darrian Confederation in return for lands.{{Page cite|citeName=Ayys3}}
+* [[589]]-[[604]]: [[First Frontier War]].
+* [[595]]: The Darrian Confederation and Third Imperium ally in response to the Sword Worlder invasion of the Entropic Worlds.{{Page cite|citeName=Ayys3}}
+* [[604]]-[[622]]: The [[Civil War]].
+* [[615]]-[[620]]: [[Second Frontier War]].
+* [[624]]: The [[Express Boat Network]] is established.
+* [[789]]: Research station re-established on Telaret, an inner moon of Leryin, by the [[University of Nyadh]] to study vacuum phenomena.{{Page cite|name=Darrians|version=Classic Traveller|page=37}}{{Page cite|name=Aliens of Charted Space: Volume 3|version=Mongoose 2nd|page=34}}
+* [[979]]-[[986]]: [[Third Frontier War]].
+* [[995]]-[[1065]]: The {{Imperial}} [[Second Survey]] charts the system.
+* [[1050]]: The [[University of Boyr]] establishes a research lab on Poror, a satellite of Bidhes.{{Page cite|citeName=Ayys3}}
+* [[1065]]: The [[Second Survey]] is published. Information about the system becomes widely available.
+* [[1082]]-[[1084]]: [[Fourth Frontier War]], also known as the ''False War''.
+* [[1084]]: Darrians lose the Entropic Worlds to the Sword Worlds but recapture {{WorldS|Cunnonic|Spinward Marches|0820}}.{{Page cite|citeName=Ayys3}}
+* [[1107]]-[[1110]]: [[Fifth Frontier War]].
+
+== References  ==
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=8-9}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name= Darrians |page= 16,22,32-33,38 |version= Classic Traveller}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=The Regency Sourcebook|page=44}}
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=49}}
+ | {{Ludography cite|name= Humaniti|version=GURPS Traveller|page=30-49}} (includes world map)
+ | {{Ludography cite|name=The Spinward States|page=108,110}}
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name= Darrians |page= TBD |version= Mongoose Traveller}}
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=80-84,86,88}} (UWP only)
+ | {{Ludography cite|name=Aliens of Charted Space: Volume 3|page=4}}
+ | [[Craig Janssen ]] - [http://www.caddocourt.com/traveller/daryen/astro.html TML Landgrab] '''''<small>(Tarnis system Info)</small>'''''
+ | [https://web.archive.org/web/20051018040032/http://www.netflames-rpg-bunker.us/darrian.html Another TML Landgrab]
+}}
+
+[[Category: Ancients Site worlds]]
+[[Category: Darrian Group worlds]]
+[[Category: Educational Institute]]
+[[Category: GT]]
+[[Category: Pthanth Shipyards worlds]]
+[[Category: Te-Zlodh worlds]]
+[[Category: University worlds]] 
+[[Category: Zlodh University worlds]]
+[[Category: Zloril worlds]]
+{{LE|T5 Second Survey worlds}}

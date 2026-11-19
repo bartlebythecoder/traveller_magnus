@@ -1,0 +1,108 @@
+[[File:Planets Orbiting Star.jpg|250 px|right]]
+'''[[Acton (world)|Acton]]''' is a poor, low-population world in [[Kursa Subsector]] of [[Aldebaran Sector]].
+* Its extensive [[System|system of worlds]] is detailed below.
+
+{{InfoboxSystem
+ |name= Acton |subsector= Kursa
+ |sector= Aldebaran |hex= 3220
+ |star= Endinho |type= M1 V
+ |P1=     Dan                               | Dist1= 0.279        | UWP1= YCB0000-0
+ |P2=     Acton                             | Dist2= 0.514        | UWP2= A631226-A
+ |P3=     Piojun                            | Dist3= 0.846        | UWP3= Y100000-0
+ |P4=     Natregun                          | Dist4= 1.25         | UWP4= Y6C5000-0
+ |P4M1=     Moon                            |   Dist4M1= 1 Diam   |   UWP4M1= Y200000-0
+ |P5=     Lotu                              | Dist5= 2.03         | UWP5= Y6A5000-0
+ |P6=     Elye Belt                         | Dist6= 2.54         | UWP6= Y000000-0
+ |P7=     Trepen                            | Dist7= 4.54         | UWP7= Large GG
+ |P7M1=     Moon                            |   Dist7M1= 7 Diam   |   UWP7M1= Y420000-0
+ |P8=     Rojunyen                          | Dist8= 6.74         | UWP8= Y200000-0
+ |P9=     Stasiki                           | Dist9= 12.6         | UWP9= YCFA000-0
+ |P9M1=     A Ring                          |   Dist9M1= 1 Diam   |   UWP9M1= YR00000-0
+ |P9M2=     Moon                            |   Dist9M2= 5 Diam   |   UWP9M2= Y200000-0
+ |P9M3=     Moon                            |   Dist9M3= 7 Diam   |   UWP9M3= Y100000-0
+ |P10=    Irke Belt                         | Dist10= 37.5        | UWP10= Y000000-0
+ |P11=    Nurtec                            | Dist11= 51.2        | UWP11= Large GG
+ |P11M1=    Moon                            |   Dist11M1= 1 Diam   |   UWP11M1= Y200000-0
+ |P11M2=    Moon                            |   Dist11M2= 3 Diam   |   UWP11M2= Y9AA000-0
+ |P11M3=    Moon                            |   Dist11M3= 4 Diam   |   UWP11M3= Y667000-0
+ |P11M4=    Moon                            |   Dist11M4= 7 Diam   |   UWP11M4= Y320000-0
+ |P11M5=    Moon                            |   Dist11M5= 10 Diam  |   UWP11M5= YDB9000-0
+ |P11M6=    Moon                            |   Dist11M6= 12 Diam  |   UWP11M6= Y100000-0
+ |P12=    Fillon                            | Dist12= 95.5         | UWP12= Large GG
+ |P12M1=     A Ring                         |   Dist12M1= 1 Diam   |   UWP12M1= YR00000-0
+ |P12M2=     A Ring                         |   Dist12M2= 2 Diam   |   UWP12M2= YR00000-0
+ |P12M3=     A Ring                         |   Dist12M3= 4 Diam   |   UWP12M3= YR00000-0
+ |P12M4=     A Ring                         |   Dist12M4= 6 Diam   |   UWP12M4= YR00000-0
+ |P12M5=    Moon                            |   Dist12M5= 7 Diam   |   UWP12M5= Y200000-0
+ |P12M6=    Moon                            |   Dist12M6= 8 Diam   |   UWP12M6= Y310000-0
+ |P12M7=    Moon                            |   Dist12M7= 10 Diam  |   UWP12M7= Y432000-0
+ |P12M8=    Moon                            |   Dist12M8= 12 Diam  |   UWP12M8= Y300000-0
+ |P12M9=    Moon                            |   Dist12M9= 13 Diam  |   UWP12M9= Y100000-0
+ |P12M10=   Moon                            |   Dist12M10=15 Diam  |   UWP12M10=Y100000-0
+ |P13=     Zan                              | Dist13= 141.1        | UWP13= Y4A6000-0
+ |P14=     Emman                            | Dist14= 153.6        | UWP14= Y100000-0
+}}
+
+== Description ([[Astrography]] & [[Planetology]])<ref>Additional system and world details by [[User:Nichollsr1970|Roger Nicholls]]</ref> ==  
+=== Stellar Data ===
+'''Acton''' has a solitary primary star.
+* It is a red main sequence named ''Endinho''.
+* The star and its system are c.8.5Gyr in age.
+
+{{MonostellarSystem
+|name           = Acton
+|primary        = M1 V 
+|PrimaryName    = Endinho
+|PrimaryNotes   = 
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+
+[[File:Chart Acton System Basic Large.jpg|800 px]]
+
+* The [[mainworld]].
+* x8 secondary [[world|rocky worlds]].
+** Dan, an [[inferno world]] orbiting in the [[habitable zone]].
+** Piojun, an [[ice world]] orbiting in the [[Outer World|outer system]].
+** Natregun, a [[radworld]] orbiting in the [[Outer World|outer system]].
+** Lotu, an [[ice world]] orbiting in the [[Outer World|outer system]].
+** Rojunyen, an [[ice world]] orbiting in the [[Outer World|outer system]].
+** Stasiki, a [[radworld]] orbiting in the [[Outer World|outer system]].
+** Zan, an [[ice world]] orbiting in the [[Outer World|outer system]].
+** Emma, a [[worldlet]] orbiting in the [[Outer World|outer system]].
+* x2 [[planetoid belt]]s.
+** The Irke Belt is a broad [[planetoid belt]] lying in the [[Outer World|outer system]]. It contains 5% metallic, 65% rocky/stony and 15% carbonaceous planetoids. In addition the remaining 15% of the planetoids are comprised of other poor mineral bodies.
+** The Elye Belt is a broad [[planetoid belt]] lying in the [[Outer World|outer system]]. It contains 0% metallic, 1% rocky/stony and 85% carbonaceous planetoids. In addition the remaining 14% of the planetoids are comprised of other poor mineral bodies.
+* x3 [[gas giant]]s.
+** Trepen, is a large gas giant orbiting in the [[Outer World|outer system]].
+** Nurtec, is a large gas giant orbiting in the [[Outer World|outer system]].
+** Fillon, is a large gas giant orbiting in the [[Outer World|outer system]].
+
+== History & Background (Dossier)<ref>Additional population and social details by [[User:Nichollsr1970|Roger Nicholls]]</ref> ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+[[Solomani Security]] keeps a close eye on things to ensure the security of the [[Solomani Confederation|Solomani State]] and the well-being of its loyal citizens. Almost anyone ''could'' be a [[Solomani Security|SolSec]] informant, passing on all sorts of useful information: some gain a reward or benefit for their actions, others are coerced, while many see it as an act of duty to help protect the [[Solomani Confederation|the State]] and its interests.
+
+== References & Contributors (Sources) ==
+{{Detail}}
+{{Sources
+|S1= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (A-M)|Supplement 8 Library Data (A-M)]]'', ([[Game Designers Workshop]], 1981), various pages. (Library data entries)
+|S2= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (N-Z)|Supplement 11 Library Data (N-Z)]]'', ([[Game Designers Workshop]], 1982), various pages. (Library data entries)
+|S3= {{Ludography cite|name= Solomani |version= Classic Traveller|page= IFC, pages 3, 28}} (sector named, background for the sector)
+|S4= {{Ludography cite|name= Solomani & Aslan |page= pages 8-11, various others}} (dot map locating the worlds of the sector, background for the sector)
+|S5= [[Steven Eric Schwartz]]. {{MT}} Periodical ''[[Imperiallines 2 (fanzine)|Imperiallines 2]]'', 1991, page 5. ([[Bootean Federation]], background for the sector) 
+|S6= {{Ludography cite|name= Fighting Ships of the Solomani|page= page 5}} (background for the sector)
+|S7= {{Ludography cite|name= Solomani |version= Mongoose Traveller|page= pages 50, 118, 119, various others}} (background for the sector)
+|S8= {{Ludography cite|name= The Order of Prometheus|page= various pages}} (scenarios and background for the sector)
+|S9= [http://zho.berka.com/data/CLASSIC/sector.pl?sector=ALDEBARA Zho Berka's Maps] (Classic Era [[Universal World Profile|UWP Data]] for the world)
+|S10= External Link: [https://www.ocean-of-storms.com/core/astrogat/jG.htm Ocean of Storms site] (Rebellion Era UWP Data for the sector)
+|S11= Author & Contributor: [[User:Garnfellow|Garnfellow]] (development of the sector)
+|S12= Author & Contributor: [[Leroy W.L. Guatney]] of the Federation Development Agency (FDA) (development of the sector)
+}}
+
+
+[[Category: Humaniti worlds]]
+[[Category: Solomani worlds]]
+[[Category: Solomani Sphere worlds]]
+[[Category: Terran Mercantile Community worlds]]
+{{LE|Era: Milieu 1116|T5 Second Survey}}

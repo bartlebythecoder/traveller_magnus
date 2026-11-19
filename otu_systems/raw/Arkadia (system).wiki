@@ -1,0 +1,48 @@
+Although the Arkadia [[Arkadia (world)|main world]] is on the cusp of indigenous space travel, its system remains largely unexplored.
+
+== Description (Specifications) ==
+No information yet available. 
+
+=== System Data ===
+No information yet available.
+
+{{InfoboxSystem
+  |name=Arkadia
+  |subsector=Vilis
+  |sector=Spinward Marches
+  |hex=1217
+  |star='''Launcelot'''
+  |type='''G8 V'''
+  |P1=Lupera
+  |Dist1=0.3|UWP1=X510000-0
+  |P2=Nakizra
+  |Dist2=0.5|UWP2=X300000-0
+  |P3=Arkadia
+  |Dist3=0.8|UWP3=E446845-6
+  |P4=Clementa
+  |Dist4=5|UWP4='''LGG'''
+  |P4M1=* ''Geristo'' 
+  |Dist4M1=|UWP4M1=X6D5000-0
+  |P4M2=* ''Pariiosi''
+  |Dist4M2=|UWP4M2=X3D5000-0
+  |P4M3=
+  |P4M4=
+  |P4M5=
+  |P5=Veriitis
+  |Dist5=17|UWP5='''SGG'''
+  |P5M1=* ''[unnamed]''
+  |Dist5M1=|UWP5M1=X201000-0
+  |P5M2=* ''[unnamed]''
+  |Dist5M2=|UWP5M2=X101000-0
+}}
+
+== History & Background (Dossier) ==
+No information yet available. 
+
+== References & Contributors (Sources) ==
+{{Incomplete}}
+{{JTAS Online|862}}
+{{Source}}
+
+
+{{LEN|}}

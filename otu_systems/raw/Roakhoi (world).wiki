@@ -1,0 +1,181 @@
+ {{UWP
+|name= {{World|Roakhoi|Reaver's Deep|Ea|1224}}
+|uc    = C969543-4
+|popc  = 7
+|zonec = green
+ |uf= 
+|alg     = NaHu
+|class   = Ni Pr / Lt / Asla5 Huma5                 
+|trade   = ni
+|climate = TBD
+|nblty   = -
+|bases   = -
+|primary = F5 V
+|belts   = 0
+|GGcount = 2
+}}
+{{World summary |name= Roakhoi |trade=Ni Pr}}
+{{World summary comment|trade=Lt}} 
+{{World summary NaHu|sector= Reaver's Deep |subsector=Ea}}
+* 50% of the population is composed of [[Aslan]].
+* The other 50% of the species is mostly comprised of [[human]]s.
+* This world has also been known as ''Roikhoi''.
+
+== Description (Astrography & Planetology) == 
+Roakhoi (also spelled Roikhoi) was explored and colonized by the [[Aslan Hierate]] late in the [[Long Night]].  
+
+This planet is best known as the setting for the traditional ballad "Bold Endeavour" which made the rounds of popular music in the [[Third Imperium|Imperium]] not long ago.
+
+The original colony of [[Aslan]] was decimated by an early disaster, resulting the loss of most of the high technology knowledge and items they brought with them. Not long after this, a [[human]] colony ship, the ''Bold Endeavour'', crash landed on the planet. When the two groups first met, there was bloodshed, but eventually the two groups united. The present population of 780,000 is about equal parts Aslan and Human.
+
+This [[system]] is part of the [[Kingston Cluster]]. 
+ 
+=== Stellar Data ===
+Roakhoi has a single star.
+* It is a yellow-white main sequence named ''Uwalraw''.
+
+{{MonostellarSystem
+|name           = Roakhoi
+|primary        = F5 V 
+|PrimaryName   = Uwalraw
+}}
+ 
+=== System Data ===
+The system consists of seven worlds. Roakhoi is the fourth, and the only habitable world. It has three notable moons, while the outer two gas giants have the usual collection of moons and rings found around such bodies (10 around Ryehaia, and 5 around Afyeaw).
+
+There is a small orbital port for loading and unloading vessels which cannot land.  
+
+''Primary'': Uwalraw, spectral class F5 V. Mass, 1.33 standard. Stellar diameter, 1.7 standard. Luminosity, 2.7 standard.
+
+''Planetary System'': Seven major bodies. One inhabited world (Roakhoi, IV). Two gas giants. No planetoid belts.
+
+{{InfoboxSystem
+ |name=Roikhoi|subsector=Ea|sector=Reaver's Deep|hex=1224
+ |star=Uwalraw|type=F5 V
+ |P1=Iserca
+ |Dist1=|UWP1=X100000-0
+ |P2=Ayua
+ |Dist2=|UWP2=X100000-0
+ |P3=Tryaloa
+ |Dist3=|UWP3=X6B0000-0
+ |P4=Roikhoi
+ |Dist4=|UWP4=C969543-4
+ |P4M1=* ''Fteatoah''
+ |Dist4M1=|UWP4M1=
+ |P4M2=* ''Sui'ikh''
+ |Dist4M2=|UWP4M2=
+ |P4M3=* ''Khoiaya''
+ |Dist4M3=|UWP4M3=
+ |P5=Rikhao
+ |Dist5=|UWP5=E430000-0
+ |P5M1=* ''Keo''
+ |Dist5M1=|UWP5M1=
+ |P6=Ryehaia
+ |Dist6=|UWP6='''GG'''
+ |P7=Afyeaw
+ |Dist7=|UWP7='''GG'''
+}}
+
+=== World Data===
+''IV Roakhoi''': 
+
+* Mean orbital radius: 359.04 million kilometers (2.4 AU)
+* Period: 1073.6 days
+* Three satellites (Fteatoah, Sui'ikh and Khoiaya)
+* Diameter: 15014 kilometers
+* Density: 1.07 standard
+* Mass: 1.74 standard
+* Mean surface gravity: 1.26 G
+* Rotation period: 22 hours, 4 minutes, 23 seconds
+* Axial inclination: 1°42'46.3"
+* Albedo: 0.24
+* Surface atmospheric pressure: 1. 01 atm
+* Composition: standard oxygen-nitrogen mix, breathable by humans without artificial assistance
+* Hydrographic percentage: 88%; composition, water and frozen water-ice
+* Mean surface temperature: 26.5° C.
+
+== History & Background (Dossier) ==
+Roakhoi was first colonized sometime during the [[Long Night]] (the exact time is uncertain due to the loss of early colony records) by a band of [[Aslan]] colonists led to the world by Leahyakhyen, a highly respected warrior who lost his landhold during a clan war with a rival family. Leahyakhyen and his followers fled the [[Aslan Hierate]] proper and eventually chose Roakhoi as the place to make a new beginning. The colony ships put down on the fertile island of Yae and established a thriving colony town at Araye. The origins of the colony are now largely forgotten save in a few legends and distorted histories. Some offworld historians and archeologists have, however, pieced together the background fairly well.
+
+For two generations all went well with the Roakhoi colony, but disaster -- first in the form of an eruption of the volcano Hoikheroihaihkaukh (the name is usually shortened by humans to Mt. Hoikhero), and then in the form of plague and famine -- caused a serious setback to the settlement effort. Araye was buried in a lava flow, as were the colony ships, the colony's library and computer banks, and other valuable equipment. The colonists were forced to flee; in the confusion that followed, many of their most valuable personnel including irreplaceable technicians and specialists died from disease or lack of food. All told, 3 out of 4 people of the Roakhoi colony were lost during the Time of Wrath. The survivors started out anew at another settlement, Eialali, but the harsh necessities of survival set back their technology and their culture by a thousand years or more. They were in far better shape but still a long way from recovering from the disaster when the first humans arrived on Roakhoi.
+
+It is established that the humans were colonists aboard the large colony vessel ''Bold Endeavour'', outbound from one of the petty interstellar states of the [[Urlaqqash Subsector]]. Attacked by a [[Reavers|Reaver]] squadron as it approached the {{WorldS|Andiros|Reaver's Deep|1328}} system (its intended destination), the ship took heavy damage before the crew engaged jump drives in desperation. Damage and the proximity of Andiros itself brought about a misjump and the ''Bold Endeavor'' arrived in the Roakhoi system.
+
+Third Officer Leurays, acting Captain of the badly damaged ship, was faced by a dangerous choice. With most of the ship's shuttles inoperative and several key systems failing, there was no time to go through any of the usual procedures for passenger debarkment and ''Bold Endeavour'' wasn't designed for planetary landings. Leurays brought the ship down anyway, crash-landing near the tiny island of Ayakea just off the coast of Yae. The colonists were revived from low berth and brought ashore as quickly as possible. Only a few people, surprisingly enough, were killed during the whole landing operation. Leurays died when the bridge flooded immediately after the crash, but his courageous decision in the face of a difficult dilemma proved to be the correct one and Leurays is still remembered as a hero in traditional ballads such as "Bold Endeavour."
+
+The human colonists were handicapped by the loss of the ship but their makeshift colony began to prosper despite the difficulties. Their worst problem was elbow-room, for Ayakea was too small to support a large group for long. When the colonists built a vessel to explore the nearby coast, they first encountered the Aslan colony; a meeting which ended in bloodshed, yet neither side could gain an upper hand. The humans had better technology and weapons but the Aslans had position, local knowledge and a military prowess lacking among the human settlers.
+
+Common sense prevailed in the long run; each group had much to offer the other. The Aslan colony was established and could offer food, shelter and a base for expansion. The humans retained enough knowledge from their lost ship to boost local technology considerably. The two groups gradually amalgamated and the resulting society proved to be a delightful and stimulating blend of cultures and ideologies. Legends and traditions of the colony's history are fairly well preserved. The information presented here represents the best reconstruction possible at this time.
+
+In the centuries since the amalgamation on Roakhoi, the joint colony flourished. By 1105 it comprises some 780,000 persons in a roughly equal racial mix. Most live on Yae and Ehle and the nearer small islands but settlements also cling to the coasts of Ooao, Wahe, Ayakea, Aia, and Ftiwe, with fisheries and small outposts throughout the Suastya Archipelago and in a few of the choicer parts of the southern coast of Oistea.
+
+Aside from these coastal communities, Oistea is unsettled, barred by inhospitable conditions and rugged terrain to all but the most hardy explorers. The distant isles of Hlail, Eea, Aseal, Arlea, and Eauh remain uncolonized as well. Native expeditions have set off for some of these distant points but have not returned. Even the coming of offworlders fifty years ago has done nothing to open these regions up; too much remains to be accomplished around the settlements and personnel are in short supply; two definite restraints on offworld scouting efforts.  
+
+Roakhoi was named for the leader of the so-called Seven Heroes of the ''Hkahaoseahe'' clan who perished defending ancestral lands from an army of invaders. Their story is set down in the clan ''[[Siyreakhaotoior]]''.
+
+=== [[Starport|World Starport]] (Sp) ===
+{{Starport|name= Roakhoi|Starport=C}}
+
+=== [[Population|World Population]] (P) ===
+{{WorldPop|name= Roakhoi|multiplier= 7|Population= 5}}
+
+==== World Languages ====
+The native language of Roakhoi is designated ''Herlookhtu'', and is of basically Aslan origin with considerable modifications and corruptions caused by human influences and the long isolation of the world. The language has been analyzed, and memclips for computer language translators are available at Roakhoi Starport. It should be noted that these memclips are largely unavailable off Roakhoi; unless purchased second-hand, it is unlikely that one will turn up elsewhere.
+
+Some natives speak [[Anglic]] or other principal languages of the Imperium, and many speak ''[[Trokh]]''; for the most part, understanding of these offworld languages goes down as Wayah and the starport are left behind. 
+
+''(in game terms, Roll 10+ for any particular native to understand an offworld language; allow a DM+2 for inhabitants of Wayah or Eialali)''
+
+The subtler nuances of offworld language may not be understood, and it is possible that messages will become garbled.
+
+==== Urbanization ====
+The 34 cities cluster on the coasts of the archipelago, leaving the less hospitable interior uninhabited. The starport is in the relatively small town of Wayah, but the city of Eialali if only 5 km away and is the largest city at 73,600 beings.
+
+=== World Culture ===
+Roikhoi has a strong Aslan tradition; feudal government, and a ritual code duello, strong family and clan ties, and a strong system of guilds characterize this. Humans fully participate in these traditions.  
+
+==== Philosophy and Religion ====
+A variety of philosophical and religious ideas and concepts vie for dominance on Roakhoi, just as they do on many worlds. The most unusual aspects on Roakhoi arise from the human/Aslan amalgamation.
+
+For example, the tradition of cultural pride and devotion to the whole concept of the Aslan Culture which is typically found among the Aslan has on Roakhoi been somewhat modified by the amalgamation. On Roakhoi, pride is bestowed upon the joint history of the colony and the accomplishments of all -- human and Aslan alike -- who have contributed to it. The story of the Third Officer Leurays manning the power console of ''Bold Endeavour'' as the water crashed into the bridge is as much a part of the Aslan tradition as the story of Hoikheroihaihkaukh and the unnamed Aslan youth who died saving the colony's last surviving doctor from the onrushing lava flow.
+
+Philosophy on Roakhoi tends to promote inner calm, manners and an encouragement towards unselfish assistance to individuals in need. For the most part, the noble families are the only ones who have time and the inclination to worry about such abstract concepts - the lower classes are too busy trying to earn a living. Nonetheless, a certain preoccupation with honor, pride, and strength of character clings to all but a few.
+
+Religions vary too, but often have many points in common. One common view is that Roakhoi is a place of punishment for the sins of those who have gone before, and that a time will come when all of Roakhoi's people will find a safe haven elsewhere. The tradition may have roots in history; the world was settled by refugees in both instances and old legends of the lost landhold of Leahyakhyen and the intended colony on Andiros have no doubt filtered into the religious traditions of the world.
+
+=== World Economy ===
+Despite the early problems which plagued settlers on Roakhoi, a stable and healthy civilization has developed here. The various islands and island subcontinents are fertile; agriculture and a thriving fishing industry are the mainstays of Roakhoi's economy. Raw materials are available in adequate, if not over-abundant, quantities on the islands, and preliminary orbital surveys have indicated the possibility of large deposits of various raw materials in the unexplored uplands of Oistea.
+
+Offworld trade is not yet a major factor in the economy of Roakhoi. The world has been classed 'Non-industrial', indicating a need for imported finished goods (particularly items of higher technology) in exchange for raw materials exports. Traders are usually most interested in the various spices of Roakhoi, particularly ''[[tlaosierlahrau]]'' ("tlaospice"). A gram of tlaospice can fetch up to Cr3 in some offworld markets; it is favored as a seasoning by both Aslan and humans on many planets.
+
+Since Roakhoi is still far from the mainstream of either Imperial or Hierate civilization, there is as yet no solid connection between its economy and those of the major interstellar communities. As a result, offworld currency is not valid on Roakhoi, and it is necessary to exchange such currency for Roakhoian money before making purchases on the world. An exchange facility is maintained at the Starport for this purpose.
+
+The basis of currency on Roakhoi is the ''awea'', a copper-based coin worth about Cr.025 Imperial. The exchange rate is set at 40 ''aweas'' to the Imperial credit. Purchases made within the starport compound may be made with Imperial or Hierate funds but outside the starport, only the ''awea'' and its supporting monetary units are used.
+
+ Table of Currency
+ 10 aawiw     = 1 ouweaui
+ 5 ouweaui    = 1 awea
+ 20 awea       = 1 erihar
+
+All of these forms of currency are coin, but guild-controlled banks do deal in drafts and letters of credit for large amounts of money. The primary weakness of this paper money is that it may not always be honored, especially in settlements on bad terms with the settlement where a draft was issued.
+
+== References ==
+{{Intermediate}}
+{{Detail}}
+{{Sources
+| {{Ludography cite|name= Atlas of the Imperium |version=Classic Traveller|page=27}} (dot map)
+| {{Ludography cite|name= Vilani & Vargr |version=MegaTraveller|page=11}} (dot map)
+| {{Ludography cite|name= Solomani & Aslan |version=MegaTraveller|page=11, 50}} (dot map)
+| {{Ludography cite|name= Reaver's Deep Sector Sourcebook |version=Classic Traveller|page=28}}
+| {{Ludography cite|name= Far Traveller 1 |version=Classic Traveller|page=56}}
+| {{Ludography cite|name= Escape |version=Classic Traveller|page=9}} (UWP)
+}}
+
+
+[[Category: Aquaculture worlds]]
+[[Category: Caledon Ventures worlds]]
+[[Category: Religion]]
+[[Category: Tlaosierlahrau worlds]]
+[[Category: Tlaserlaahel worlds]]
+[[Category: Kingston Cluster worlds]]
+{{LE|T5 Second Survey worlds}}

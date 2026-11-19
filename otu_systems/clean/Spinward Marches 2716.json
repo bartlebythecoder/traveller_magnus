@@ -1,0 +1,933 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "2716",
+  "sector_abbreviation": "Spin",
+  "subsector": "Rhylanor",
+  "name": "Rhylanor",
+  "sources": [
+    {
+      "page": "Rhylanor (world)",
+      "revid": 1084673,
+      "timestamp": "2026-10-20T01:24:08Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Rhylanor (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Icarus",
+          "type": "M2 V",
+          "notes": "Somewhat low-metallicity (Type V-VI)"
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Icarus",
+      "stars": [
+        {
+          "name": "Icarus",
+          "type": "M2 V"
+        }
+      ],
+      "labels": [
+        "Rhylanor"
+      ],
+      "pages": [
+        "Rhylanor (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Icarus Prime",
+          "name_raw": "''Icarus Prime''",
+          "raw": "<small>YA9A???-?</small>",
+          "kind": "world",
+          "uwp": "YA9A???-?",
+          "distance": {
+            "raw": "0.26",
+            "value": 0.26,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rhylanor (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "(\"I. Prime\" a)",
+              "name_raw": "<small>(\"I. Prime\" '''a''')</small>",
+              "raw": "<small>Y7B2000-0</small>",
+              "kind": "world",
+              "uwp": "Y7B2000-0",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Rhylanor (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "(\"I. Prime\" b)",
+              "name_raw": "<small>(\"I. Prime\" '''b''')</small>",
+              "raw": "<small>F775???-?</small>",
+              "kind": "world",
+              "uwp": "F775???-?",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Rhylanor (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Rhylanor",
+          "raw": "<small>A434934-F</small>",
+          "kind": "world",
+          "uwp": "A434934-F",
+          "distance": {
+            "raw": "0.36",
+            "value": 0.36,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rhylanor (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 2,
+          "name": "(\"Icarus II\")",
+          "name_raw": "''(\"Icarus II\")''",
+          "raw": "<small>YAB0000-0</small>",
+          "kind": "world",
+          "uwp": "YAB0000-0",
+          "distance": {
+            "raw": "0.52",
+            "value": 0.52,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rhylanor (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Lucid",
+              "name_raw": "<small>'''''Lucid'''''</small>",
+              "raw": "<small>YS00000-0</small>",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "0.55<small>AU</small>",
+                "value": 0.55,
+                "unit": "AU"
+              },
+              "sources": [
+                "Rhylanor (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Duria Belt",
+          "name_raw": "'''Duria Belt'''",
+          "raw": "<small>G000400-F</small>",
+          "kind": "world",
+          "uwp": "G000400-F",
+          "distance": {
+            "raw": "0.70",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rhylanor (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Schriekrieg",
+          "name_raw": "'''Schriekrieg'''",
+          "raw": "<small>F537726-F</small>",
+          "kind": "world",
+          "uwp": "F537726-F",
+          "distance": {
+            "raw": "0.94",
+            "value": 0.94,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rhylanor (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "(Inner Moon)",
+              "name_raw": "<small>(Inner Moon)</small>",
+              "raw": "<small>Y244000-0</small>",
+              "kind": "world",
+              "uwp": "Y244000-0",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Rhylanor (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "(Outer Moon)",
+              "name_raw": "<small>(Outer Moon)</small>",
+              "raw": "<small>Y237000-0</small>",
+              "kind": "world",
+              "uwp": "Y237000-0",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Rhylanor (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "\"Icarus V\"a",
+          "name_raw": "''\"Icarus V\"'''a'''''",
+          "raw": "<small>Y774000-0</small>",
+          "kind": "world",
+          "uwp": "Y774000-0",
+          "distance": {
+            "raw": "1.72",
+            "value": 1.72,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rhylanor (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "\"Icarus V\"b",
+              "name_raw": "<small>\"Icarus V\"'''b'''</small>",
+              "raw": "<small>Y58A000-0</small>",
+              "kind": "world",
+              "uwp": "Y58A000-0",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Rhylanor (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Ghalash",
+              "name_raw": "<small>'''Ghalash'''</small>",
+              "raw": "<small>H100267-E</small>",
+              "kind": "world",
+              "uwp": "H100267-E",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Rhylanor (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Radium",
+          "name_raw": "'''Radium'''",
+          "raw": "<small>F320217-E</small>",
+          "kind": "world",
+          "uwp": "F320217-E",
+          "distance": {
+            "raw": "3.28",
+            "value": 3.28,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rhylanor (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Telvoc",
+              "name_raw": "<small>'''Telvoc'''</small>",
+              "raw": "<small>Y100000-0</small>",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "''<small>R= 4</small>''",
+                "value": 4.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Rhylanor (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Roderick",
+          "name_raw": "'''Roderick'''",
+          "raw": "<small>Y202000-0</small>",
+          "kind": "world",
+          "uwp": "Y202000-0",
+          "distance": {
+            "raw": "5.60",
+            "value": 5.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rhylanor (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "(- Rings -)",
+              "name_raw": "<small>(- Rings -)</small>",
+              "raw": "<small>YR00000-0</small>",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "''<small>R= 2</small>''",
+                "value": 2.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Rhylanor (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Tulumne",
+              "name_raw": "<small>'''Tulumne'''</small>",
+              "raw": "<small>Y100000-0</small>",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "''<small>R= 40</small>''",
+                "value": 40.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Rhylanor (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Ebelhorn",
+              "name_raw": "<small>'''Ebelhorn'''</small>",
+              "raw": "<small>Y100000-0</small>",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "''<small>R= 50</small>''",
+                "value": 50.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Rhylanor (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Idulore",
+          "name_raw": "'''Idulore'''",
+          "raw": "<small>F130365-F</small>",
+          "kind": "world",
+          "uwp": "F130365-F",
+          "distance": {
+            "raw": "12.00",
+            "value": 12.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rhylanor (world)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "(\"Icarus IX\")",
+          "name_raw": "''(\"Icarus IX\")''",
+          "raw": "<small>Y110???-?</small>",
+          "kind": "world",
+          "uwp": "Y110???-?",
+          "distance": {
+            "raw": "18.00",
+            "value": 18.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rhylanor (world)"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "(\"Icarus X\")",
+          "name_raw": "''(\"Icarus X\")''",
+          "raw": "<small>Y8A7000-0</small>",
+          "kind": "world",
+          "uwp": "Y8A7000-0",
+          "distance": {
+            "raw": "57.50",
+            "value": 57.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rhylanor (world)"
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "(\"Icarus XI\")",
+          "name_raw": "''(\"Icarus XI\")''",
+          "raw": "<small>YCDA000-0</small>",
+          "kind": "world",
+          "uwp": "YCDA000-0",
+          "distance": {
+            "raw": "92.00",
+            "value": 92.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rhylanor (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "(Moonlet)",
+              "name_raw": "<small>(Moonlet)</small>",
+              "raw": "<small>Y120000-0</small>",
+              "kind": "world",
+              "uwp": "Y120000-0",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Rhylanor (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "(Icemoon)",
+              "name_raw": "<small>(Icemoon)</small>",
+              "raw": "<small>Y776000-0</small>",
+              "kind": "world",
+              "uwp": "Y776000-0",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Rhylanor (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 12,
+          "name": "(\"Icarus XII\")",
+          "name_raw": "''(\"Icarus XII\")''",
+          "raw": "<small>Y48A???-?</small>",
+          "kind": "world",
+          "uwp": "Y48A???-?",
+          "distance": {
+            "raw": "154.00",
+            "value": 154.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rhylanor (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Rhylanor (world)",
+      "label": "Rhylanor",
+      "stars": [
+        {
+          "name": "Icarus",
+          "type": "M2 V"
+        }
+      ],
+      "unused_fields": {
+        "P2b": "Lucid",
+        "Dist2b": "0.55",
+        "UWP2b": "<small>YS00000-0</small>",
+        "P5b": "Ghalash",
+        "Dist5b": "1.65",
+        "UWP5b": "<small>H100267-E</small>"
+      },
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Icarus Prime",
+          "name_raw": "''Icarus Prime''",
+          "raw": "<small>YA9A???-?</small>",
+          "kind": "world",
+          "uwp": "YA9A???-?",
+          "distance": {
+            "raw": "0.26",
+            "value": 0.26,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "(\"I. Prime\" a)",
+              "name_raw": "<small>(\"I. Prime\" '''a''')</small>",
+              "raw": "<small>Y7B2000-0</small>",
+              "kind": "world",
+              "uwp": "Y7B2000-0",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "(\"I. Prime\" b)",
+              "name_raw": "<small>(\"I. Prime\" '''b''')</small>",
+              "raw": "<small>F775???-?</small>",
+              "kind": "world",
+              "uwp": "F775???-?",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Rhylanor",
+          "raw": "<small>A434934-F</small>",
+          "kind": "world",
+          "uwp": "A434934-F",
+          "distance": {
+            "raw": "0.36",
+            "value": 0.36,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "(\"Icarus II\")",
+          "name_raw": "''(\"Icarus II\")''",
+          "raw": "<small>YAB0000-0</small>",
+          "kind": "world",
+          "uwp": "YAB0000-0",
+          "distance": {
+            "raw": "0.52",
+            "value": 0.52,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Lucid",
+              "name_raw": "<small>'''''Lucid'''''</small>",
+              "raw": "<small>YS00000-0</small>",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "0.55<small>AU</small>",
+                "value": 0.55,
+                "unit": "AU"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Duria Belt",
+          "name_raw": "'''Duria Belt'''",
+          "raw": "<small>G000400-F</small>",
+          "kind": "world",
+          "uwp": "G000400-F",
+          "distance": {
+            "raw": "0.70",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Schriekrieg",
+          "name_raw": "'''Schriekrieg'''",
+          "raw": "<small>F537726-F</small>",
+          "kind": "world",
+          "uwp": "F537726-F",
+          "distance": {
+            "raw": "0.94",
+            "value": 0.94,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "(Inner Moon)",
+              "name_raw": "<small>(Inner Moon)</small>",
+              "raw": "<small>Y244000-0</small>",
+              "kind": "world",
+              "uwp": "Y244000-0",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "(Outer Moon)",
+              "name_raw": "<small>(Outer Moon)</small>",
+              "raw": "<small>Y237000-0</small>",
+              "kind": "world",
+              "uwp": "Y237000-0",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "\"Icarus V\"a",
+          "name_raw": "''\"Icarus V\"'''a'''''",
+          "raw": "<small>Y774000-0</small>",
+          "kind": "world",
+          "uwp": "Y774000-0",
+          "distance": {
+            "raw": "1.72",
+            "value": 1.72,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "\"Icarus V\"b",
+              "name_raw": "<small>\"Icarus V\"'''b'''</small>",
+              "raw": "<small>Y58A000-0</small>",
+              "kind": "world",
+              "uwp": "Y58A000-0",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Ghalash",
+              "name_raw": "<small>'''Ghalash'''</small>",
+              "raw": "<small>H100267-E</small>",
+              "kind": "world",
+              "uwp": "H100267-E",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Radium",
+          "name_raw": "'''Radium'''",
+          "raw": "<small>F320217-E</small>",
+          "kind": "world",
+          "uwp": "F320217-E",
+          "distance": {
+            "raw": "3.28",
+            "value": 3.28,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Telvoc",
+              "name_raw": "<small>'''Telvoc'''</small>",
+              "raw": "<small>Y100000-0</small>",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "''<small>R= 4</small>''",
+                "value": 4.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Roderick",
+          "name_raw": "'''Roderick'''",
+          "raw": "<small>Y202000-0</small>",
+          "kind": "world",
+          "uwp": "Y202000-0",
+          "distance": {
+            "raw": "5.60",
+            "value": 5.6,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "(- Rings -)",
+              "name_raw": "<small>(- Rings -)</small>",
+              "raw": "<small>YR00000-0</small>",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "''<small>R= 2</small>''",
+                "value": 2.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Tulumne",
+              "name_raw": "<small>'''Tulumne'''</small>",
+              "raw": "<small>Y100000-0</small>",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "''<small>R= 40</small>''",
+                "value": 40.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Ebelhorn",
+              "name_raw": "<small>'''Ebelhorn'''</small>",
+              "raw": "<small>Y100000-0</small>",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "''<small>R= 50</small>''",
+                "value": 50.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Idulore",
+          "name_raw": "'''Idulore'''",
+          "raw": "<small>F130365-F</small>",
+          "kind": "world",
+          "uwp": "F130365-F",
+          "distance": {
+            "raw": "12.00",
+            "value": 12.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 9,
+          "name": "(\"Icarus IX\")",
+          "name_raw": "''(\"Icarus IX\")''",
+          "raw": "<small>Y110???-?</small>",
+          "kind": "world",
+          "uwp": "Y110???-?",
+          "distance": {
+            "raw": "18.00",
+            "value": 18.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 10,
+          "name": "(\"Icarus X\")",
+          "name_raw": "''(\"Icarus X\")''",
+          "raw": "<small>Y8A7000-0</small>",
+          "kind": "world",
+          "uwp": "Y8A7000-0",
+          "distance": {
+            "raw": "57.50",
+            "value": 57.5,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 11,
+          "name": "(\"Icarus XI\")",
+          "name_raw": "''(\"Icarus XI\")''",
+          "raw": "<small>YCDA000-0</small>",
+          "kind": "world",
+          "uwp": "YCDA000-0",
+          "distance": {
+            "raw": "92.00",
+            "value": 92.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "(Moonlet)",
+              "name_raw": "<small>(Moonlet)</small>",
+              "raw": "<small>Y120000-0</small>",
+              "kind": "world",
+              "uwp": "Y120000-0",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "(Icemoon)",
+              "name_raw": "<small>(Icemoon)</small>",
+              "raw": "<small>Y776000-0</small>",
+              "kind": "world",
+              "uwp": "Y776000-0",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 12,
+          "name": "(\"Icarus XII\")",
+          "name_raw": "''(\"Icarus XII\")''",
+          "raw": "<small>Y48A???-?</small>",
+          "kind": "world",
+          "uwp": "Y48A???-?",
+          "distance": {
+            "raw": "154.00",
+            "value": 154.0,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Rhylanor",
+    "UWP": "A434934-F",
+    "Stellar": "M2 V",
+    "PBG": "810",
+    "Bases": "NS",
+    "Remarks": "Hi Cp Llel4 Ht"
+  }
+}

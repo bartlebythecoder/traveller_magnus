@@ -1,0 +1,227 @@
+[[File:Alien Moon 282c-0.jpg|250 px|right]]
+{{UWP 
+|name    = {{World|Grande-Terre|Aldebaran|Star Bridge|0312}}
+|era     = Milieu 1116
+|uc      = C834720–9
+|popc    = 6
+|zonec   = green
+|alg     = SoFr
+|class   = - / Tu
+|trade   = -
+|climate = Tr
+|gravity = -
+|bases   = -
+|primary = K8 V M5 V
+|belts   = 1
+|GGcount = 2
+}}
+{{World summary |name= Grand-Terre|trade= -}}
+{{World summary SoFr|sector= Aldebaran|subsector= Star Bridge}}
+{{World summary comment|trade= Tu}}
+* It is home to a substantial community of [[Aslan]].
+
+{{InfoboxSystem
+ |name= Grande-Terre Primary |subsector= Star Bridge
+ |sector= Aldebaran |hex= 0312
+ |star= Prime |type= K8 V
+ |P1=     Planet 1                          | Dist1= 0.17         | UWP1= Y200000-0
+ |P2=     Roc                               | Dist2= 0.42         | UWP2= H210112-8
+ |P3=     Grande-Terre                      | Dist3= 0.68         | UWP3= C834720-9
+ |P4=     Planet 3                          | Dist4= 0.96         | UWP4= Y6C2000-0
+ |P5=     Planet 4                          | Dist5= 1.42         | UWP5= Y402000-0 
+ |P5M1=     Moon                            |   Dist5M1= 15 Diam  |   UWP5M1= HS00000-0
+ |P6=     Planet 5                          | Dist6= 2.75         | UWP6= G5A0562-8
+ |P7=     Nid                               | Dist7= 5.11         | UWP7= Large GG
+ |P7M1=     Poussin                         |   Dist7M1= 6 Diam   |   UWP7M1= H300000-0
+ |P7M2=     Oisillon                        |   Dist7M2= 11 Diam  |   UWP7M2= G302263-8
+ |P7M3=     Gonzesse                        |   Dist7M3= 20 Diam  |   UWP7M3= Y200000-0
+ |P7M4=     Débutant                        |   Dist7M4= 25 Diam  |   UWP7M4= G200311-9
+ |P8=     Planet 6                          | Dist8= 9.62         | UWP8= Y501000-0
+ |P8M1=     Moon                            |   Dist8M1= 9 Diam   |   UWP8M1= YS00000-0
+}}
+
+{{InfoboxSystem
+ |name= Grande-Terre Secondary |subsector= Star Bridge
+ |sector= Aldebaran |hex= 0312
+ |star= Second |type= M5 V
+ |P1=     Nichée                            | Dist1= 0.21         | UWP1= Small GG
+ |P1M1=     Cuite                           |   Dist1M1= 9 Diam   |   UWP1M1= H100000-0
+ |P2=     Débutante                         | Dist2= 1.04         | UWP2= H510000-0
+ |P3=     Planet 8                          | Dist3= 1.58         | UWP3= Y7B1000-0
+ |P4=     Planet 9                          | Dist4= 2.55         | UWP4= Y402000-0
+ |P4M1=     Moon                            |   Dist4M1= 9 Diam   |   UWP4M1= YS00000-0
+ |P5=     Outer Belt                        | Dist5= 5.12         | UWP5= Y000000-0
+ |P6=     Planet 10                         | Dist6= 8.35         | UWP6= Y503000-0
+ |P6M1=     Moon                            |   Dist6M1= 8 Diam   |   UWP6M1= YS00000-0
+ |P6M2=     Moon                            |   Dist6M2= 25 Diam  |   UWP6M2= H100000-0
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Grande-Terre''' is a binary star system.
+* The primary is an orange main sequence.
+* The secondary is a red main sequence.
+
+{{BinaryStarSystem
+|name            = Grande-Terre
+|primary         = K8 V 
+|secondary       = M5 V 
+|PrimaryName     = Primary
+|PrimaryNotes    = 
+|SecondaryName   = Secondary
+|SecondaryNotes  = [[Astronomical Unit|Approximately 80 AU]] from the primary.
+}}
+
+Both stars are relatively young, at around [[Year|3 billion years]] old.
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]], orbiting the orange primary star within its [[habitable zone]].
+* x10 secondary [[world|rocky worlds]]. Six orbit the orange primary star and four orbit the red secondary star.
+* x1 [[planetoid belt]], orbiting in the red secondary star's [[Outer World|outer system]].
+* x2 [[gas giant]]s. A [[Gas Giant|large gas giant]] named ''Nid'' orbits the orange primary star, while a [[Gas Giant|small gas giant]] named ''Nichée'' orbits the red secondary star.
+** Both retain families of [[Natural Satellite|moons]].
+
+=== Mainworld Data ===
+'''Grande-Terre''' orbits towards the outer edge of its star's [[habitable zone]].
+* It receives relatively low levels of [[Electromagnetic Spectrum|stellar energy]].
+
+[[File:Chart Orbit HZ- Region Detailed.png|600 px]]
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Grande-Terre|Size= 8}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Grande-Terre|Atmosphere= 3}}
+* It experiences [[Celsius|relatively low temperatures]].
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Grande-Terre|Hydrosphere= 4}}
+* The world's seas are crusted with pack ice.
+
+==== Mainworld Geography and Topography ====
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+Grande-Terre has large polar ice caps, with barren wastelands between them.
+
+[[File:Blank World Map Arid.png|500 px]] <br> (''Blank map, predominantly dry world''.)
+
+==== Native Lifeforms ====
+Abundant [[Lifeform|native life]] occupying every available ecological niche. Its metabolic functions drive the process of atmospheric renewal.
+* Native lifeforms are cryophilic - they thrive in [[Celsius|low temperatures]].
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Grande-Terre''' was settled on or about [[900s|955]] by colonists from [[Euxene (world)|Euxene]], following the troubled colonization of [[Soror (world)|Soror]]. Much like [[Soror (world)|Soror]], the Grande-Terre colonists were an opportunistic group of individualists who negotiated a land-rush contract with the government of [[Euxene (world)|Euxene]], primarily based on incomplete scans of the system and the [[mainworld]]. Given the lessons learned during the Soror debacle, [[Third Reformed French Confederate Republic|Republic]] military forces staked out a central fief in advance, and used it to guide and monitor incoming colonists. The site now contains the [[Downport]] and its [[startown]].
+
+Over 70 spacecraft departed at the same time from [[Euxene (world)|Euxene]] with the basic rules being that a successful craft landing on the solid surface of Grande-Terre would lay claim to [[Kilometer|100 km]] radius of land. Independent black-box devices provided by the [[Third Reformed French Confederate Republic|Republic]] and monitored by the military would verify each landing. Some larger vessels, of course, deployed secondary craft to exploit the rules. These colonists included a larger [[Aslan]] contingent than with the Soror colonization.
+
+Once settlements had been established by each group, and formally charted, the military withdrew. [[Third Reformed French Confederate Republic|Republic]] patrols occasionally pass thru the system from the base at [[Myrthe (world)|Myrthe]].
+
+Using an ancient Terran term, this world is a "wild, wild west" zone.  Rules are loose, possession is nine tenths of the law, and everyone is armed. That said, the owners of the industrial equipment who maintain ore production and launch rights become rapidly wealthy and retire young. Prices are high, but wages can be equally high: a lucky hard worker can make enough to comfortably retire to a core [[Third Reformed French Confederate Republic|Republic]] world in about [[Year|10 years]].
+
+While Grande-Terre has many accessible resources it has little in the way of comfort. It only has a [[very thin atmosphere]], it has a chilly climate, and much of its water is locked into vast polar glaciers. There are some vacuum settlements on the moons of [[Gas Giant|Nid]], the primary star's solitary [[gas giant]], where there are exposed veins of ore for the taking.
+
+=== [[Starport|World Starport]] (St) ===
+{{Starport|name= Grande-Terre|Starport= C}}
+
+There are 3 launch points in a single, basic [[downport]].
+
+=== [[Population|World Population]] (P) ===
+{{WorldPop|name= Grande-Terre|multiplier= 6|Population= 7}}
+* About 95% of the population (roughly 55 million individuals) is made up of [[Solomani]] humans.
+* Around 5% of the population (less than 5 million individuals) consists of [[Aslan]].
+
+[[File:Aslan Leader Ship T Bradstreet 2.jpg|250 px|right]]
+
+==== Linguistic Topography ====
+The most commonly heard [[language]]s are:
+* [[Euxene French (language)|Euxene French]], a [[Terran]] language principally spoken in the [[Euxene Cluster]].
+* [[Rim Anglic]], a dialect of [[Anglic]] and the principal language of the [[Solomani Confederation|Confederation]].
+* [[Trokh]], the principal language of the [[Aslan]].
+
+=== [[Technology Level|World Technology Level]] (T) ===
+{{WorldTech|name= Grande-Terre|WorldTech= 9}}
+
+=== [[Government|World Government]] (G) ===
+{{WorldGov|name= Grande-Terre|Government= 2}}
+
+Grand-Terre colonists adhered to the Euxene Colonization Agreement and send Departmental Parties to the planetary Parliament. Agreements have importance only if the quorum is large enough, or includes the more powerful groups.
+
+==== World Military ====
+Scattered groups work together at an almost tribal level.
+
+=== [[Law Level|World Law]] (L) ===
+{{WorldLaw|name= Grande-Terre|Law= 0}}
+ 
+There is very little law here beyond that which an employer demands, or the resources that one can bring to bear.
+
+=== Trade Data ===
+* [[Importance Extension|Importance]]: 0 (unimportant)
+
+=== World Economy ===
+The world's economy is centered around ore extraction and some refining. The majority of its commercial commodities consist of metals and bulk minerals. Much of its [[infrastructure]] is geared towards mineral extraction and processing and moving materials between sites.
+
+* [[Resource]]s:                       D (very abundant)
+* [[Labor]]:                           6 (millions)
+* [[Infrastructure]]:                  7 (generally available)
+* [[Efficiency]]:                      +1 (average)
+
+=== World Culture ===
+* [[Homogeneity|Heterogenity]]:        5 (harmonious)
+* [[Acceptance]]:                      7 (aloof)
+* [[Strangeness]]:                     9 (extremely confusing)
+* [[Symbol]]s:                         C (very abundant)
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+
+* [[-9235]]: far to [[coreward]], the [[Vilani]] discover [[jump drive]] technology. Over the centuries pioneers and settlers gradually spread across [[Charted Space]].
+* [[-4045]] to [[-2204]]: the [[First Imperium|Ziru Sirka]] controls vast territories.
+* [[-2431]]: [[Terran]]s discover [[jump drive]] technology.
+* [[-2404]] to [[-2215]]: the [[Interstellar Wars]]. The young [[Terran Confederation]] battles against the ancient [[Vilani]] [[First Imperium|Ziru Sirka]].
+* [[-2204]] to [[-1776]]: the [[Rule of Man]] administers the former [[First Imperium|Ziru Sirka]].
+* [[-1999]]: the [[Aslan]] gain [[jump drive]] technology.
+* [[-1862]] to [[-1110]]: the [[Terran Mercantile Community]] is active within the region.
+* [[-1776]] to [[0]]: the [[Long Night]].
+* [[-1118]] to [[380]]: the [[Aslan Border Wars]].
+* [[-1110]] to [[588]]: the [[Terran Mercantile Community]] gradually becomes the [[Old Earth Union]], shrinking to control the region around [[Terra]].
+* [[0|The Year 0]]: to [[coreward]], the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[380]]: the [[Peace of Ftahalr]] ends the ongoing [[Aslan Border Wars]] and establishes understandings regarding human and [[Aslan]] influence. 
+* [[588]]: the [[Old Earth Union]] and the former territories of the [[Terran Mercantile Community]] are annexed by the {{Imperium}}, moving its border adjacent to the [[Aslan Hierate]].
+* [[604]]-[[622]]: the {{Imperial}} [[Civil War]].
+* [[624]]: the {{Imperial}} [[Express Boat Network]] is established.
+* [[704]]: the [[Solomani Autonomous Region]] is formed.
+* [[800]]-[[820]]: the [[Psionics Suppressions]].
+* [[871]]: the [[Solomani Confederation]] is founded.
+* [[940]]: the [[Solomani Autonomous Region]] is dissolved.
+* [[990]]-[[1002]]: the [[Solomani Rim War]].
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] includes data for the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+
+== References & Contributors (Sources) ==
+{{Metadata}}
+{{Detail}}
+{{Sources
+|S1= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (A-M)|Supplement 8 Library Data (A-M)]]'', ([[Game Designers Workshop]], 1981), various pages. (Library data entries)
+|S2= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (N-Z)|Supplement 11 Library Data (N-Z)]]'', ([[Game Designers Workshop]], 1982), various pages. (Library data entries)
+|S3= {{Ludography cite|name= Solomani |version= Classic Traveller|page= IFC, pages 3, 28}} (sector named, background for the sector)
+|S4= {{Ludography cite|name= Solomani & Aslan |page= pages 8-11, various others}} (dot map locating the worlds of the sector, background for the sector)
+|S5= [[Steven Eric Schwartz]]. {{MT}} Periodical ''[[Imperiallines 2 (fanzine)|Imperiallines 2]]'', 1991, page 5. ([[Bootean Federation]], background for the sector) 
+|S6= {{Ludography cite|name= Fighting Ships of the Solomani|page= page 5}} (background for the sector)
+|S7= {{Ludography cite|name= Solomani |version= Mongoose Traveller|page= pages 50, 118, 119, various others}} (background for the sector)
+|S8= {{Ludography cite|name= The Order of Prometheus|page= various pages}} (scenarios and background for the sector)
+|S9= [http://zho.berka.com/data/CLASSIC/sector.pl?sector=ALDEBARA Zho Berka's Maps] (Classic Era [[Universal World Profile|UWP Data]] for the world)
+|S10= [http://111george.com/core/astrogat/jG.htm CORE Data Site] ([[Universal World Profile|UWP Data]] for the world)
+|S11= Author & Contributor: [[User:Garnfellow|Garnfellow]] (development of the sector)
+|S12= Author & Contributor: [[Leroy W.L. Guatney]] of the Federation Development Agency (FDA) (development of the sector)
+}}
+
+
+[[Category: Aslan worlds]]
+[[Category: Humaniti worlds]]
+[[Category: Solomani Sphere worlds]]
+[[Category: Solomani worlds]]
+[[Category: Terran Mercantile Community worlds]]
+{{LE|Era: Milieu 1116|T5 Second Survey}}

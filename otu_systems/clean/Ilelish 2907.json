@@ -1,0 +1,755 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Ilelish",
+  "hex": "2907",
+  "sector_abbreviation": "Ilel",
+  "subsector": "Ilelish",
+  "name": "Ilelish",
+  "sources": [
+    {
+      "page": "Ilelish (world)",
+      "revid": 1034308,
+      "timestamp": "2026-04-05T04:33:18Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Ilelish (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Vogut",
+          "type": "M0 V",
+          "notes": "Unusually stable star displaying almost no flare activity."
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Vogut",
+      "stars": [
+        {
+          "name": "Vogut",
+          "type": "M0 V"
+        }
+      ],
+      "labels": [
+        "Ilelish"
+      ],
+      "pages": [
+        "Ilelish (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Bakap",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "0.157",
+            "value": 0.157,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ilelish (world)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Ilelish",
+          "raw": "E674A83-A",
+          "kind": "world",
+          "uwp": "E674A83-A",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ilelish (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Komboko",
+              "raw": "?10076?-?",
+              "kind": "world",
+              "uwp": "?10076?-?",
+              "distance": {
+                "raw": "29 <small>Radii</small>",
+                "value": 29.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Ilelish (world)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 2,
+          "name": "Katlek",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "0.651",
+            "value": 0.651,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ilelish (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "?",
+              "raw": "?",
+              "kind": "unknown",
+              "distance": {
+                "raw": "? <small>Radii</small>",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "uwp-unknown",
+                "dist-unknown"
+              ],
+              "sources": [
+                "Ilelish (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "?",
+              "raw": "?",
+              "kind": "unknown",
+              "distance": {
+                "raw": "? <small>Radii</small>",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "uwp-unknown",
+                "dist-unknown"
+              ],
+              "sources": [
+                "Ilelish (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "?",
+              "raw": "?",
+              "kind": "unknown",
+              "distance": {
+                "raw": "? <small>Radii</small>",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "uwp-unknown",
+                "dist-unknown"
+              ],
+              "sources": [
+                "Ilelish (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "?",
+              "raw": "?",
+              "kind": "unknown",
+              "distance": {
+                "raw": "? <small>Radii</small>",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "uwp-unknown",
+                "dist-unknown"
+              ],
+              "sources": [
+                "Ilelish (world)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "?",
+              "raw": "?",
+              "kind": "unknown",
+              "distance": {
+                "raw": "? <small>Radii</small>",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "uwp-unknown",
+                "dist-unknown"
+              ],
+              "sources": [
+                "Ilelish (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Maklob",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1.03",
+            "value": 1.03,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ilelish (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "? <small>Radii</small>",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Ilelish (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "?",
+              "raw": "?",
+              "kind": "unknown",
+              "distance": {
+                "raw": "? <small>Radii</small>",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "uwp-unknown",
+                "dist-unknown"
+              ],
+              "sources": [
+                "Ilelish (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Navop",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1.61",
+            "value": 1.61,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ilelish (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "?",
+              "raw": "?",
+              "kind": "unknown",
+              "distance": {
+                "raw": "? <small>Radii</small>",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "uwp-unknown",
+                "dist-unknown"
+              ],
+              "sources": [
+                "Ilelish (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "?",
+              "raw": "?",
+              "kind": "unknown",
+              "distance": {
+                "raw": "? <small>Radii</small>",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "uwp-unknown",
+                "dist-unknown"
+              ],
+              "sources": [
+                "Ilelish (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "?",
+              "raw": "?",
+              "kind": "unknown",
+              "distance": {
+                "raw": "? <small>Radii</small>",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "uwp-unknown",
+                "dist-unknown"
+              ],
+              "sources": [
+                "Ilelish (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "?",
+              "raw": "?",
+              "kind": "unknown",
+              "distance": {
+                "raw": "? <small>Radii</small>",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "uwp-unknown",
+                "dist-unknown"
+              ],
+              "sources": [
+                "Ilelish (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Zaklotak",
+          "raw": "H311000-0",
+          "kind": "world",
+          "uwp": "H311000-0",
+          "distance": {
+            "raw": "2.68",
+            "value": 2.68,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ilelish (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Watok",
+          "raw": "Y000210-9",
+          "kind": "world",
+          "uwp": "Y000210-9",
+          "distance": {
+            "raw": "4.06",
+            "value": 4.06,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ilelish (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Patlobat",
+          "raw": "H000401-B",
+          "kind": "world",
+          "uwp": "H000401-B",
+          "distance": {
+            "raw": "6.58",
+            "value": 6.58,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ilelish (world)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Nakanto",
+          "raw": "YDC8030-5",
+          "kind": "world",
+          "uwp": "YDC8030-5",
+          "distance": {
+            "raw": "10.3",
+            "value": 10.3,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ilelish (world)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Mavoto",
+          "raw": "Y110011-7",
+          "kind": "world",
+          "uwp": "Y110011-7",
+          "distance": {
+            "raw": "16.9",
+            "value": 16.9,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ilelish (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Ilelish (world)",
+      "label": "Ilelish",
+      "stars": [
+        {
+          "name": "Vogut",
+          "type": "M0 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Bakap",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "0.157",
+            "value": 0.157,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Ilelish",
+          "raw": "E674A83-A",
+          "kind": "world",
+          "uwp": "E674A83-A",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Komboko",
+              "raw": "?10076?-?",
+              "kind": "world",
+              "uwp": "?10076?-?",
+              "distance": {
+                "raw": "29 <small>Radii</small>",
+                "value": 29.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Katlek",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "0.651",
+            "value": 0.651,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "?",
+              "raw": "?",
+              "kind": "unknown",
+              "distance": {
+                "raw": "? <small>Radii</small>",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "uwp-unknown",
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "?",
+              "raw": "?",
+              "kind": "unknown",
+              "distance": {
+                "raw": "? <small>Radii</small>",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "uwp-unknown",
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "?",
+              "raw": "?",
+              "kind": "unknown",
+              "distance": {
+                "raw": "? <small>Radii</small>",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "uwp-unknown",
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "?",
+              "raw": "?",
+              "kind": "unknown",
+              "distance": {
+                "raw": "? <small>Radii</small>",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "uwp-unknown",
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "?",
+              "raw": "?",
+              "kind": "unknown",
+              "distance": {
+                "raw": "? <small>Radii</small>",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "uwp-unknown",
+                "dist-unknown"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Maklob",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1.03",
+            "value": 1.03,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "? <small>Radii</small>",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "?",
+              "raw": "?",
+              "kind": "unknown",
+              "distance": {
+                "raw": "? <small>Radii</small>",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "uwp-unknown",
+                "dist-unknown"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Navop",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1.61",
+            "value": 1.61,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "?",
+              "raw": "?",
+              "kind": "unknown",
+              "distance": {
+                "raw": "? <small>Radii</small>",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "uwp-unknown",
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "?",
+              "raw": "?",
+              "kind": "unknown",
+              "distance": {
+                "raw": "? <small>Radii</small>",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "uwp-unknown",
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "?",
+              "raw": "?",
+              "kind": "unknown",
+              "distance": {
+                "raw": "? <small>Radii</small>",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "uwp-unknown",
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "?",
+              "raw": "?",
+              "kind": "unknown",
+              "distance": {
+                "raw": "? <small>Radii</small>",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "uwp-unknown",
+                "dist-unknown"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Zaklotak",
+          "raw": "H311000-0",
+          "kind": "world",
+          "uwp": "H311000-0",
+          "distance": {
+            "raw": "2.68",
+            "value": 2.68,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Watok",
+          "raw": "Y000210-9",
+          "kind": "world",
+          "uwp": "Y000210-9",
+          "distance": {
+            "raw": "4.06",
+            "value": 4.06,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Patlobat",
+          "raw": "H000401-B",
+          "kind": "world",
+          "uwp": "H000401-B",
+          "distance": {
+            "raw": "6.58",
+            "value": 6.58,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 8,
+          "name": "Nakanto",
+          "raw": "YDC8030-5",
+          "kind": "world",
+          "uwp": "YDC8030-5",
+          "distance": {
+            "raw": "10.3",
+            "value": 10.3,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 9,
+          "name": "Mavoto",
+          "raw": "Y110011-7",
+          "kind": "world",
+          "uwp": "Y110011-7",
+          "distance": {
+            "raw": "16.9",
+            "value": 16.9,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Ilelish",
+    "UWP": "E674A83-A",
+    "Stellar": "M0 V",
+    "PBG": "204",
+    "Bases": "",
+    "Remarks": "Hi In (Suerrat)"
+  }
+}

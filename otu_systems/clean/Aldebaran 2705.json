@@ -1,0 +1,649 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Aldebaran",
+  "hex": "2705",
+  "sector_abbreviation": "Alde",
+  "subsector": "Firdausi",
+  "name": "Nova Prometheus",
+  "sources": [
+    {
+      "page": "Nova Prometheus (world)",
+      "revid": 960591,
+      "timestamp": "2025-07-19T10:44:51Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Nova Prometheus (world)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Primary",
+          "type": "G0 V",
+          "notes": null
+        },
+        {
+          "role": "Secondary",
+          "name": "Secondary",
+          "type": "M0 V",
+          "notes": "Approximately 0.03 AU from the primary."
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Primary",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "G0 V"
+        }
+      ],
+      "labels": [
+        "Nova Prometheus"
+      ],
+      "pages": [
+        "Nova Prometheus (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Secondary",
+          "name_raw": "'''Secondary'''",
+          "raw": "'''M0 V'''",
+          "kind": "star",
+          "type": "M0 V",
+          "distance": {
+            "raw": "0.03",
+            "value": 0.03,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ],
+          "sources": [
+            "Nova Prometheus (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Lativa",
+          "raw": "G700411-B",
+          "kind": "world",
+          "uwp": "G700411-B",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Nova Prometheus (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Tawter",
+          "raw": "G100315-B",
+          "kind": "world",
+          "uwp": "G100315-B",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Nova Prometheus (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Nova P.",
+          "name_raw": "'''Nova P.'''",
+          "raw": "B785568-B",
+          "kind": "world",
+          "uwp": "B785568-B",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Nova Prometheus (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 5,
+          "name": "Iseali",
+          "raw": "G323468-B",
+          "kind": "world",
+          "uwp": "G323468-B",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Nova Prometheus (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Cenoro",
+          "raw": "Y600000-0",
+          "kind": "world",
+          "uwp": "Y600000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Nova Prometheus (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Coa",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Nova Prometheus (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "C. Magna",
+              "raw": "G4A2315-B",
+              "kind": "world",
+              "uwp": "G4A2315-B",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Nova Prometheus (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Roato",
+          "raw": "G420416-B",
+          "kind": "world",
+          "uwp": "G420416-B",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Nova Prometheus (world)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Inner Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Nova Prometheus (world)"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Adserie",
+          "raw": "Y610000-0",
+          "kind": "world",
+          "uwp": "Y610000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Nova Prometheus (world)"
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Outer Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Nova Prometheus (world)"
+          ]
+        },
+        {
+          "orbit": 12,
+          "name": "Accapae",
+          "raw": "Y710000-0",
+          "kind": "world",
+          "uwp": "Y710000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Nova Prometheus (world)"
+          ]
+        },
+        {
+          "orbit": 13,
+          "name": "Exerie",
+          "raw": "Y400000-0",
+          "kind": "world",
+          "uwp": "Y400000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Nova Prometheus (world)"
+          ]
+        },
+        {
+          "orbit": 14,
+          "name": "Secrib",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Nova Prometheus (world)"
+          ]
+        },
+        {
+          "orbit": 15,
+          "name": "Break Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Nova Prometheus (world)"
+          ]
+        },
+        {
+          "orbit": 16,
+          "name": "Havisse",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Nova Prometheus (world)"
+          ]
+        },
+        {
+          "orbit": 17,
+          "name": "Gas Giant",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Nova Prometheus (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Nova Prometheus (world)",
+      "label": "Nova Prometheus",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "G0 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Secondary",
+          "name_raw": "'''Secondary'''",
+          "raw": "'''M0 V'''",
+          "kind": "star",
+          "type": "M0 V",
+          "distance": {
+            "raw": "0.03",
+            "value": 0.03,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Lativa",
+          "raw": "G700411-B",
+          "kind": "world",
+          "uwp": "G700411-B",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Tawter",
+          "raw": "G100315-B",
+          "kind": "world",
+          "uwp": "G100315-B",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Nova P.",
+          "name_raw": "'''Nova P.'''",
+          "raw": "B785568-B",
+          "kind": "world",
+          "uwp": "B785568-B",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Iseali",
+          "raw": "G323468-B",
+          "kind": "world",
+          "uwp": "G323468-B",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Cenoro",
+          "raw": "Y600000-0",
+          "kind": "world",
+          "uwp": "Y600000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Coa",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "C. Magna",
+              "raw": "G4A2315-B",
+              "kind": "world",
+              "uwp": "G4A2315-B",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Roato",
+          "raw": "G420416-B",
+          "kind": "world",
+          "uwp": "G420416-B",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Inner Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Adserie",
+          "raw": "Y610000-0",
+          "kind": "world",
+          "uwp": "Y610000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Outer Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 12,
+          "name": "Accapae",
+          "raw": "Y710000-0",
+          "kind": "world",
+          "uwp": "Y710000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 13,
+          "name": "Exerie",
+          "raw": "Y400000-0",
+          "kind": "world",
+          "uwp": "Y400000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 14,
+          "name": "Secrib",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 15,
+          "name": "Break Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 16,
+          "name": "Havisse",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 17,
+          "name": "Gas Giant",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Nova Prometheus",
+    "UWP": "B785568-B",
+    "Stellar": "G0 V M0 V",
+    "PBG": "133",
+    "Bases": "",
+    "Remarks": "Ag Ni Ga Pr O:2707"
+  }
+}

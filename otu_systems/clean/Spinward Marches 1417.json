@@ -1,0 +1,448 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "1417",
+  "sector_abbreviation": "Spin",
+  "subsector": "Vilis",
+  "name": "Ficant",
+  "sources": [
+    {
+      "page": "Ficant (world)",
+      "revid": 1071378,
+      "timestamp": "2026-08-29T17:57:57Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Ficant (world)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Netali",
+          "type": "M0 V",
+          "notes": "Young star: it is only 2 billion years old."
+        },
+        {
+          "role": "Secondary",
+          "name": "Netali Bis",
+          "type": "M1 V",
+          "notes": "Approximately 18.0 AU from the primary."
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Netali",
+      "stars": [
+        {
+          "name": "Netali",
+          "type": "M0 V"
+        }
+      ],
+      "labels": [
+        "Ficant"
+      ],
+      "pages": [
+        "Ficant (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Netali I",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "0.17",
+            "value": 0.17,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ficant (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Netali II",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "0.38",
+            "value": 0.38,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ficant (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Ficant",
+          "raw": "C567353-5",
+          "kind": "world",
+          "uwp": "C567353-5",
+          "distance": {
+            "raw": "0.57",
+            "value": 0.57,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ficant (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 4,
+          "name": "Netali IV",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "1.15",
+            "value": 1.15,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ficant (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Netali V",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "1.95",
+            "value": 1.95,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ficant (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Planetoid Belt",
+          "raw": "",
+          "kind": "world",
+          "distance": {
+            "raw": "3.35",
+            "value": 3.35,
+            "unit": "AU"
+          },
+          "uwp": "Y000000-0",
+          "flags": [
+            "belt-uwp-assumed"
+          ],
+          "sources": [
+            "Ficant (world)"
+          ]
+        }
+      ]
+    },
+    {
+      "star": "Netali Bis",
+      "stars": [
+        {
+          "name": "Netali Bis",
+          "type": "M1 V"
+        }
+      ],
+      "labels": [
+        "Ficant"
+      ],
+      "pages": [
+        "Ficant (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Bis I",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "0.15",
+            "value": 0.15,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ficant (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Bis II",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "0.31",
+            "value": 0.31,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ficant (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Bis III",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "0.64",
+            "value": 0.64,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ficant (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Bis IV",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "0.97",
+            "value": 0.97,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ficant (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Bis V",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "1.35",
+            "value": 1.35,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ficant (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Bis VI",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "1.85",
+            "value": 1.85,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ficant (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Bis VII",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "3.34",
+            "value": 3.34,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ficant (world)"
+          ]
+        }
+      ],
+      "placement": {
+        "orbit": null,
+        "au": 18.0,
+        "from": "star template notes"
+      }
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Ficant (world)",
+      "label": "Ficant",
+      "stars": [
+        {
+          "name": "Netali",
+          "type": "M0 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Netali I",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "0.17",
+            "value": 0.17,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Netali II",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "0.38",
+            "value": 0.38,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Ficant",
+          "raw": "C567353-5",
+          "kind": "world",
+          "uwp": "C567353-5",
+          "distance": {
+            "raw": "0.57",
+            "value": 0.57,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Netali IV",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "1.15",
+            "value": 1.15,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Netali V",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "1.95",
+            "value": 1.95,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Planetoid Belt",
+          "raw": "",
+          "kind": "world",
+          "distance": {
+            "raw": "3.35",
+            "value": 3.35,
+            "unit": "AU"
+          },
+          "uwp": "Y000000-0",
+          "flags": [
+            "belt-uwp-assumed"
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Ficant (world)",
+      "label": "Ficant",
+      "stars": [
+        {
+          "name": "Netali Bis",
+          "type": "M1 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Bis I",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "0.15",
+            "value": 0.15,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Bis II",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "0.31",
+            "value": 0.31,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Bis III",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "0.64",
+            "value": 0.64,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Bis IV",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "0.97",
+            "value": 0.97,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Bis V",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "1.35",
+            "value": 1.35,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Bis VI",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "1.85",
+            "value": 1.85,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Bis VII",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "3.34",
+            "value": 3.34,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Ficant",
+    "UWP": "E567353-5",
+    "Stellar": "M0 V M1 V",
+    "PBG": "910",
+    "Bases": "",
+    "Remarks": "Lo Lt"
+  }
+}

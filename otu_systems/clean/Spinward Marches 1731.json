@@ -1,0 +1,1169 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "1731",
+  "sector_abbreviation": "Spin",
+  "subsector": "Glisten",
+  "name": "Grote",
+  "sources": [
+    {
+      "page": "Grote (system)",
+      "revid": 963953,
+      "timestamp": "2025-08-06T09:10:36Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Grote (system)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Regis",
+          "type": "F8 V",
+          "notes": "None"
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Regis",
+      "stars": [
+        {
+          "name": "Regis",
+          "type": "F8 V"
+        }
+      ],
+      "labels": [
+        "Grote"
+      ],
+      "pages": [
+        "Grote (system)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Guthlac",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grote (system)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Horsa",
+          "raw": "H200400-B",
+          "kind": "world",
+          "uwp": "H200400-B",
+          "distance": {
+            "raw": "0.5",
+            "value": 0.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grote (system)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Godwin",
+          "raw": "G660300-B",
+          "kind": "world",
+          "uwp": "G660300-B",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grote (system)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Inner Belt",
+          "raw": "Y000100-A",
+          "kind": "world",
+          "uwp": "Y000100-A",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grote (system)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Aethelstan",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grote (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Grote (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Sequin",
+              "raw": "HS00112-A",
+              "kind": "world",
+              "uwp": "HS00112-A",
+              "distance": {
+                "raw": "5",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Grote (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Farthing",
+              "raw": "G334200-B",
+              "kind": "world",
+              "uwp": "G334200-B",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Grote (system)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Grote",
+              "raw": "A400404-B",
+              "kind": "world",
+              "uwp": "A400404-B",
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Grote (system)"
+              ],
+              "mainworld": true
+            },
+            {
+              "index": 5,
+              "name": "Standy",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "55",
+                "value": 55.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Grote (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Edward",
+          "raw": "Y641300-A",
+          "kind": "world",
+          "uwp": "Y641300-A",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grote (system)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Edith",
+          "raw": "Y933000-0",
+          "kind": "world",
+          "uwp": "Y933000-0",
+          "distance": {
+            "raw": "3.1",
+            "value": 3.1,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grote (system)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Cnut",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grote (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Harthacnut",
+              "raw": "Y300214-A",
+              "kind": "world",
+              "uwp": "Y300214-A",
+              "distance": {
+                "raw": "4",
+                "value": 4.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Grote (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Cnut-B",
+              "raw": "Y320000-0",
+              "kind": "world",
+              "uwp": "Y320000-0",
+              "distance": {
+                "raw": "6",
+                "value": 6.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Grote (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Cnut-C",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "10",
+                "value": 10.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Grote (system)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Cnut-D",
+              "raw": "Y540000-0",
+              "kind": "world",
+              "uwp": "Y540000-0",
+              "distance": {
+                "raw": "11",
+                "value": 11.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Grote (system)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Cnut-E",
+              "raw": "Y410000-0",
+              "kind": "world",
+              "uwp": "Y410000-0",
+              "distance": {
+                "raw": "25",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Grote (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Ethel",
+          "raw": "G400217-A",
+          "kind": "world",
+          "uwp": "G400217-A",
+          "distance": {
+            "raw": "8",
+            "value": 8.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grote (system)"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Outer Belt",
+          "raw": "H000365-B",
+          "kind": "world",
+          "uwp": "H000365-B",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grote (system)"
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Adele",
+          "name_raw": "Adele (SM 1731)",
+          "raw": "Y602000-0",
+          "kind": "world",
+          "uwp": "Y602000-0",
+          "distance": {
+            "raw": "12",
+            "value": 12.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grote (system)"
+          ]
+        },
+        {
+          "orbit": 12,
+          "name": "Ethelred",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "20",
+            "value": 20.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grote (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "HR00000-0",
+              "kind": "world",
+              "uwp": "HR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Grote (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Ethelred-A",
+              "raw": "Y650000-0",
+              "kind": "world",
+              "uwp": "Y650000-0",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Grote (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Ethelred-B",
+              "raw": "Y546000-0",
+              "kind": "world",
+              "uwp": "Y546000-0",
+              "distance": {
+                "raw": "10",
+                "value": 10.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Grote (system)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Ethelred-C",
+              "raw": "Y442000-0",
+              "kind": "world",
+              "uwp": "Y442000-0",
+              "distance": {
+                "raw": "20",
+                "value": 20.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Grote (system)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Ethelred-D",
+              "raw": "Y630000-0",
+              "kind": "world",
+              "uwp": "Y630000-0",
+              "distance": {
+                "raw": "25",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Grote (system)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Ethelred-E",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "36",
+                "value": 36.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Grote (system)"
+              ]
+            },
+            {
+              "index": 7,
+              "name": "Ethelred-F",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "40",
+                "value": 40.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Grote (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 13,
+          "name": "Hengist",
+          "raw": "Y100112-A",
+          "kind": "world",
+          "uwp": "Y100112-A",
+          "distance": {
+            "raw": "40",
+            "value": 40.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grote (system)"
+          ]
+        },
+        {
+          "orbit": 14,
+          "name": "Ethelbert",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "77",
+            "value": 77.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grote (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Inner Ring",
+              "raw": "HR00000-0",
+              "kind": "world",
+              "uwp": "HR00000-0",
+              "distance": {
+                "raw": "1",
+                "value": 1.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Grote (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Outer Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Grote (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Ethelbert-A",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "35",
+                "value": 35.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Grote (system)"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Grote (system)",
+      "label": "Grote",
+      "stars": [
+        {
+          "name": "Regis",
+          "type": "F8 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Guthlac",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Horsa",
+          "raw": "H200400-B",
+          "kind": "world",
+          "uwp": "H200400-B",
+          "distance": {
+            "raw": "0.5",
+            "value": 0.5,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Godwin",
+          "raw": "G660300-B",
+          "kind": "world",
+          "uwp": "G660300-B",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Inner Belt",
+          "raw": "Y000100-A",
+          "kind": "world",
+          "uwp": "Y000100-A",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Aethelstan",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Sequin",
+              "raw": "HS00112-A",
+              "kind": "world",
+              "uwp": "HS00112-A",
+              "distance": {
+                "raw": "5",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Farthing",
+              "raw": "G334200-B",
+              "kind": "world",
+              "uwp": "G334200-B",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Grote",
+              "raw": "A400404-B",
+              "kind": "world",
+              "uwp": "A400404-B",
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Standy",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "55",
+                "value": 55.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Edward",
+          "raw": "Y641300-A",
+          "kind": "world",
+          "uwp": "Y641300-A",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Edith",
+          "raw": "Y933000-0",
+          "kind": "world",
+          "uwp": "Y933000-0",
+          "distance": {
+            "raw": "3.1",
+            "value": 3.1,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 8,
+          "name": "Cnut",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Harthacnut",
+              "raw": "Y300214-A",
+              "kind": "world",
+              "uwp": "Y300214-A",
+              "distance": {
+                "raw": "4",
+                "value": 4.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Cnut-B",
+              "raw": "Y320000-0",
+              "kind": "world",
+              "uwp": "Y320000-0",
+              "distance": {
+                "raw": "6",
+                "value": 6.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Cnut-C",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "10",
+                "value": 10.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Cnut-D",
+              "raw": "Y540000-0",
+              "kind": "world",
+              "uwp": "Y540000-0",
+              "distance": {
+                "raw": "11",
+                "value": 11.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Cnut-E",
+              "raw": "Y410000-0",
+              "kind": "world",
+              "uwp": "Y410000-0",
+              "distance": {
+                "raw": "25",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Ethel",
+          "raw": "G400217-A",
+          "kind": "world",
+          "uwp": "G400217-A",
+          "distance": {
+            "raw": "8",
+            "value": 8.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 10,
+          "name": "Outer Belt",
+          "raw": "H000365-B",
+          "kind": "world",
+          "uwp": "H000365-B",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 11,
+          "name": "Adele",
+          "name_raw": "Adele (SM 1731)",
+          "raw": "Y602000-0",
+          "kind": "world",
+          "uwp": "Y602000-0",
+          "distance": {
+            "raw": "12",
+            "value": 12.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 12,
+          "name": "Ethelred",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "20",
+            "value": 20.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "HR00000-0",
+              "kind": "world",
+              "uwp": "HR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Ethelred-A",
+              "raw": "Y650000-0",
+              "kind": "world",
+              "uwp": "Y650000-0",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Ethelred-B",
+              "raw": "Y546000-0",
+              "kind": "world",
+              "uwp": "Y546000-0",
+              "distance": {
+                "raw": "10",
+                "value": 10.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Ethelred-C",
+              "raw": "Y442000-0",
+              "kind": "world",
+              "uwp": "Y442000-0",
+              "distance": {
+                "raw": "20",
+                "value": 20.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Ethelred-D",
+              "raw": "Y630000-0",
+              "kind": "world",
+              "uwp": "Y630000-0",
+              "distance": {
+                "raw": "25",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Ethelred-E",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "36",
+                "value": 36.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 7,
+              "name": "Ethelred-F",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "40",
+                "value": 40.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 13,
+          "name": "Hengist",
+          "raw": "Y100112-A",
+          "kind": "world",
+          "uwp": "Y100112-A",
+          "distance": {
+            "raw": "40",
+            "value": 40.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 14,
+          "name": "Ethelbert",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "77",
+            "value": 77.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Inner Ring",
+              "raw": "HR00000-0",
+              "kind": "world",
+              "uwp": "HR00000-0",
+              "distance": {
+                "raw": "1",
+                "value": 1.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Outer Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Ethelbert-A",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "35",
+                "value": 35.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Grote",
+    "UWP": "A400404-B",
+    "Stellar": "F8 V",
+    "PBG": "124",
+    "Bases": "",
+    "Remarks": "Ni Va"
+  }
+}

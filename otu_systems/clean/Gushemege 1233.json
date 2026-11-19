@@ -1,0 +1,343 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Gushemege",
+  "hex": "1233",
+  "sector_abbreviation": "Gush",
+  "subsector": "Laeth",
+  "name": "Mercator",
+  "sources": [
+    {
+      "page": "Mercator (world)",
+      "revid": 969159,
+      "timestamp": "2025-08-17T15:52:35Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Mercator (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Hymax",
+          "type": "G1 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Hymax",
+      "stars": [
+        {
+          "name": "Hymax",
+          "type": "G1 V"
+        }
+      ],
+      "labels": [
+        "Mercator"
+      ],
+      "pages": [
+        "Mercator (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Hymax 1",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mercator (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Hymax 2",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mercator (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Hymax 3",
+          "raw": "Y470000-0",
+          "kind": "world",
+          "uwp": "Y470000-0",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mercator (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Mercator",
+          "raw": "C540431-8",
+          "kind": "world",
+          "uwp": "C540431-8",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mercator (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 5,
+          "name": "Hymax 5",
+          "raw": "Y540000-0",
+          "kind": "world",
+          "uwp": "Y540000-0",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mercator (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Hymax 6",
+          "raw": "SGG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mercator (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Hymax 7",
+          "raw": "Y302000-0",
+          "kind": "world",
+          "uwp": "Y302000-0",
+          "distance": {
+            "raw": "3.3",
+            "value": 3.3,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mercator (world)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Hymax 8",
+          "raw": "SGG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mercator (world)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Hymax 9",
+          "raw": "SGG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mercator (world)"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Hymax10",
+          "raw": "Y978000-0",
+          "kind": "world",
+          "uwp": "Y978000-0",
+          "distance": {
+            "raw": "20",
+            "value": 20.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mercator (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Mercator (world)",
+      "label": "Mercator",
+      "stars": [
+        {
+          "name": "Hymax",
+          "type": "G1 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Hymax 1",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Hymax 2",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Hymax 3",
+          "raw": "Y470000-0",
+          "kind": "world",
+          "uwp": "Y470000-0",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Mercator",
+          "raw": "C540431-8",
+          "kind": "world",
+          "uwp": "C540431-8",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Hymax 5",
+          "raw": "Y540000-0",
+          "kind": "world",
+          "uwp": "Y540000-0",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Hymax 6",
+          "raw": "SGG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Hymax 7",
+          "raw": "Y302000-0",
+          "kind": "world",
+          "uwp": "Y302000-0",
+          "distance": {
+            "raw": "3.3",
+            "value": 3.3,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 8,
+          "name": "Hymax 8",
+          "raw": "SGG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 9,
+          "name": "Hymax 9",
+          "raw": "SGG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 10,
+          "name": "Hymax10",
+          "raw": "Y978000-0",
+          "kind": "world",
+          "uwp": "Y978000-0",
+          "distance": {
+            "raw": "20",
+            "value": 20.0,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Mercator",
+    "UWP": "C540431-8",
+    "Stellar": "G1 V",
+    "PBG": "503",
+    "Bases": "S",
+    "Remarks": "De He Ni Po"
+  }
+}

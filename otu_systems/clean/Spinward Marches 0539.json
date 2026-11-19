@@ -1,0 +1,294 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "0539",
+  "sector_abbreviation": "Spin",
+  "subsector": "Five Sisters",
+  "name": "Froin",
+  "sources": [
+    {
+      "page": "Froin (world)",
+      "revid": 1018409,
+      "timestamp": "2026-03-10T06:18:56Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Froin (world)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Oin",
+          "type": "M2 V",
+          "notes": "None"
+        },
+        {
+          "role": "Secondary",
+          "name": "Aoin",
+          "type": "M7 V",
+          "notes": "Approximately 102 AU from the primary."
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Oin",
+      "stars": [
+        {
+          "name": "Oin",
+          "type": "M2 V"
+        }
+      ],
+      "labels": [
+        "Froin"
+      ],
+      "pages": [
+        "Froin (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Gloin",
+          "raw": "'''Gas Giant'''",
+          "kind": "gas_giant",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-no-size-class"
+          ],
+          "sources": [
+            "Froin (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Gloin I",
+              "name_raw": "* ''Gloin I''",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Froin (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Gloin II",
+              "name_raw": "* ''Gloin II''",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Froin (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Gloin III",
+              "name_raw": "* ''Gloin III''",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Froin (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Froin",
+              "name_raw": "* ''[[Froin (world)|Froin]]''",
+              "raw": "C535225-9",
+              "kind": "world",
+              "uwp": "C535225-9",
+              "distance": {
+                "raw": "19 Diam",
+                "value": 19.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Froin (world)"
+              ],
+              "mainworld": true
+            },
+            {
+              "index": 5,
+              "name": "Gloin V",
+              "name_raw": "* ''Gloin V''",
+              "raw": "Y400000-0",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "35 Diam",
+                "value": 35.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Froin (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Aoin",
+          "name_raw": "'''Aoin'''",
+          "raw": "'''M7 V'''",
+          "kind": "star",
+          "type": "M7 V",
+          "distance": {
+            "raw": "102",
+            "value": 102.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ],
+          "sources": [
+            "Froin (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Froin (world)",
+      "label": "Froin",
+      "stars": [
+        {
+          "name": "Oin",
+          "type": "M2 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Gloin",
+          "raw": "'''Gas Giant'''",
+          "kind": "gas_giant",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-no-size-class"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Gloin I",
+              "name_raw": "* ''Gloin I''",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Gloin II",
+              "name_raw": "* ''Gloin II''",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Gloin III",
+              "name_raw": "* ''Gloin III''",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Froin",
+              "name_raw": "* ''[[Froin (world)|Froin]]''",
+              "raw": "C535225-9",
+              "kind": "world",
+              "uwp": "C535225-9",
+              "distance": {
+                "raw": "19 Diam",
+                "value": 19.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 5,
+              "name": "Gloin V",
+              "name_raw": "* ''Gloin V''",
+              "raw": "Y400000-0",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "35 Diam",
+                "value": 35.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Aoin",
+          "name_raw": "'''Aoin'''",
+          "raw": "'''M7 V'''",
+          "kind": "star",
+          "type": "M7 V",
+          "distance": {
+            "raw": "102",
+            "value": 102.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Froin",
+    "UWP": "C535225-9",
+    "Stellar": "M2 V M7 V",
+    "PBG": "601",
+    "Bases": "",
+    "Remarks": "Lo RsZ"
+  }
+}

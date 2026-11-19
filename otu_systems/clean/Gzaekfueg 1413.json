@@ -1,0 +1,414 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Gzaekfueg",
+  "hex": "1413",
+  "sector_abbreviation": "Gzae",
+  "subsector": "Teksuelats",
+  "name": "Dhillourr",
+  "sources": [
+    {
+      "page": "Dhillourr (system)",
+      "revid": 802834,
+      "timestamp": "2024-04-26T07:37:58Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Dhillourr (system)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": null,
+          "type": "F9 V",
+          "notes": "None"
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Rudha",
+      "stars": [
+        {
+          "name": "Rudha",
+          "type": "F9 V"
+        }
+      ],
+      "labels": [
+        "Dhillourr"
+      ],
+      "pages": [
+        "Dhillourr (system)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "InnerWorld",
+          "raw": "H586227-4",
+          "kind": "world",
+          "uwp": "H586227-4",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dhillourr (system)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "RadWorld",
+          "raw": "F883000-0",
+          "kind": "world",
+          "uwp": "F883000-0",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dhillourr (system)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Dhillourr",
+          "raw": "B110A7A-G",
+          "kind": "world",
+          "uwp": "B110A7A-G",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dhillourr (system)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 4,
+          "name": "Large GG",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dhillourr (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Bee",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "4",
+                "value": 4.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dhillourr (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Cee",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "5",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dhillourr (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Gee",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "5",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dhillourr (system)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Arr",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dhillourr (system)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Tee",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "7.4",
+                "value": 7.4,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dhillourr (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Large GG",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "77",
+            "value": 77.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dhillourr (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ell",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "6",
+                "value": 6.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dhillourr (system)"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Dhillourr (system)",
+      "label": "Dhillourr",
+      "stars": [
+        {
+          "name": "Rudha",
+          "type": "F9 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "InnerWorld",
+          "raw": "H586227-4",
+          "kind": "world",
+          "uwp": "H586227-4",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "RadWorld",
+          "raw": "F883000-0",
+          "kind": "world",
+          "uwp": "F883000-0",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Dhillourr",
+          "raw": "B110A7A-G",
+          "kind": "world",
+          "uwp": "B110A7A-G",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Large GG",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Bee",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "4",
+                "value": 4.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Cee",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "5",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Gee",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "5",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Arr",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Tee",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "7.4",
+                "value": 7.4,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Large GG",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "77",
+            "value": 77.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ell",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "6",
+                "value": 6.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Dhillourr",
+    "UWP": "B110A7A-G",
+    "Stellar": "F9 V",
+    "PBG": "102",
+    "Bases": "",
+    "Remarks": "Hi In Na Cp"
+  }
+}

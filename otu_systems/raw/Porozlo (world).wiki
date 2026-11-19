@@ -1,0 +1,266 @@
+{{Milieu header}}
+
+[[File:Alien Moon 224-0.jpg|250 px|right]]
+{{StellarDataQuery 
+ |name= {{World|Porozlo|Spinward Marches|Rhylanor|2715}} 
+ |era = Milieu 1116
+}}
+{{InfoboxSystem
+|name= Porozlo <ref><small>T5SS published data harmonized with modifications of Christopher Griffen's system configuration in RICE Paper 2715.</small></ref>
+|sector= Spinward Marches|subsector= Rhylanor|hex= 2715
+|star= ''[[Corusca (star)|<big>Corusca</big>]]''|type= ''<big>M1 V</big>''
+
+|P0= ''Corusca Prime'' |Dist0=0.2 |UWP0= <small>'''?'''??????-?</small>
+
+|P1= Porozlo|Dist1=0.4   |UWP1= <small>A867A74-B</small>
+|P1M1= Jelorba |Dist1M1= ''<small><span style="color:#F0F0F0">..</span> R= 50</small>''|UWP1M1= <small>G546467-B</small>
+
+|P2= --- |Dist2=0.7 |UWP2= <br><br><br>
+
+|P3= '''''Glint'''''|Dist3= '''1.0'''|UWP3= '''''<big>M9 V</big>''''' <br><small><sup>'''''(Companion)'''''</sup></small>
+|P3M1= '''Czaczezhnia'''|Dist3M1=<small><span style="color:#F0F0F0">..</span> 0.2 <small>AU</small></small>|UWP3M1= <small> - '''LGG''' - </small><br><small><sup>(Size=60)</sup></small>
+|P3M2= »» <small>(Ring 1)</small> |Dist3M2= ''<small><span style="color:#F0F0F0">...</span> R= 1</small>''|UWP3M2= <small>YR00000-0</small>
+|P3M3= »» <small>(Ring 2)</small> |Dist3M3= ''<small><span style="color:#F0F0F0">...</span> R= 2</small>''|UWP3M3= <small>YR00000-0</small>
+|P3M4= »» <small>Glyph</small>|Dist3M4= ''<small><span style="color:#F0F0F0">...</span> R= 5</small>'' |UWP3M4= <small>Y300000-0</small>
+|P3M5= »» <small>Tybalt</small>|Dist3M5= ''<small><span style="color:#F0F0F0">...</span> R= 7</small>'' |UWP3M5= <small>Y100000-0</small>
+|P3M6= »» <small>Aamed</small>|Dist3M6= ''<small><span style="color:#F0F0F0">...</span> R= 13</small>'' |UWP3M6= <small>Y200000-0</small>
+|P3M7= »» <small>Padenton</small>|Dist3M7= ''<small><span style="color:#F0F0F0">...</span> R= 55</small>'' |UWP3M7= <small>YS00000-0</small> 
+
+|P4= Brazhorno|Dist4= <br>1.6|UWP4= <small>Y1A0102-B</small>
+|P4M1= Alec |Dist4M1= ''<small><span style="color:#F0F0F0">..</span> R= 13</small>''|UWP4M1= <small>YS00000-0</small>
+|P4M2= Cela |Dist4M2= ''<small><span style="color:#F0F0F0">..</span> R= 40</small>''|UWP4M2= <small>GS00207-A</small>
+
+|P5= Mílano|Dist5=2.8|UWP5= <small>Y600000-0</small>
+
+|P6= Borges |Dist6=5.2   |UWP6= <small>F410663-A</small>
+|P6M1= Blanca |Dist6M1= ''<small><span style="color:#F0F0F0">..</span> R= 8</small>''|UWP6M1= <small>Y100000-0</small>
+|P6M2= Sinai |Dist6M2= ''<small><span style="color:#F0F0F0">..</span> R= 35</small>''|UWP6M2= <small>HS00107-B</small>
+
+|P7= Calyph Orga|Dist7=10.0|UWP7= <small>G500636-B</small>
+
+|P8= Mandrigora|Dist8=20.0|UWP8= <small>H643437-B</small>
+
+|P9= ''(Corusca VIII)''|Dist9= 40.0|UWP9= <small>???????-?</small>
+
+|P10= ''(Corusca IX)''|Dist10= 77.2|UWP10= <small>???????-?</small>
+
+|P11= ''(Corusca X)''|Dist11= 154.0|UWP11= <small>???????-?</small>
+}}
+* This world has the alternate orthography: ''Poroszlo''. {{Page cite|name= Mercenary  |page=21 |version=Classic Traveller |citeName= CTMerc1}} 
+* ''Porozlo'' is known to many as ''Warworld''. {{Page cite|name= Mercenary  |page=21 |version=Classic Traveller |citeName= CTMerc1}}
+* This world is a member of the [[Rhylanor Cluster]]. 
+* The bright supergiant star [[Deneb (star)|Deneb]] is visible in Porozlo's sky even during the daytime.  
+
+== Description (Specifications: Overview) == 
+=== UWP Listing ===
+{{WorldS|Porozlo|Spinward Marches|Rhylanor|2715}} - A867A74-B Hi Ga {+3} (D9E+1) [8D39] BE 201 11 ImDd M1 V M9 V
+
+
+== [[Astrography]] & [[Planetology]] ==
+=== Stellar Data ===
+'''Porozlo''' is a binary star system.
+* Both are red main sequence stars.
+
+{{BinaryStarSystem
+|name           = Porozlo
+|primary        = M1 V 
+|secondary      = M9 V 
+|PrimaryName    = Primary
+|PrimaryNotes   = 
+|SecondaryName  = Secondary
+|SecondaryNotes = 
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]].
+* x9 secondary [[world|rocky worlds]].
+* x1 [[gas giant]].
+
+=== Mainworld Data ===
+'''Porozlo''' orbits within its star's [[habitable zone]].
+* It receives moderate levels of [[Electromagnetic Spectrum|stellar energy]].
+
+[[File:Chart Orbit HZ Region Detailed.png|600 px]]
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Porozlo|Size= 8}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Porozlo|Atmosphere= 6}}
+* It experiences [[Celsius|generally moderate temperatures]]. The second sun in the system has some climatological and meteorological effects at the times of its planetary periastron.
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Porozlo|Hydrosphere= 7}}
+
+==== Mainworld Geography and Topography ====
+'''Porozlo''' is considered to be a [[Garden World]], with ideal living conditions for most [[sophont]]s with biological and environmental needs similar to [[Humaniti]], supporting a range of climatological and topographical environments inhabited by a significant range of biodiversity. The ''Karamak Mountain Range'' separates two of the major nation-states of Porozlo (each lying on opposite sides of the range).
+
+<br>
+
+[[File:Garden World Type 08e2.jpg|450px]] [[File:Garden World Type 20a4.jpg|450px]] 
+
+[[File:Twilight Zone World Horizon 10c2.jpg|450px]]
+
+<br>
+
+===== ''»» Mainworld Map'' =====
+[[File:Blank World Map Watery.png|500 px]] <br> (''Blank map, predominantly watery world''.)
+
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+== World Dossier ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Porozlo''' is a member of the Third Imperium but is a [[balkanized world]] that is bitterly torn on the issue of economic and industrial concentration. {{Page cite|name= Mercenary  |page=21 |version=Classic Traveller |citeName= CTMerc1}}
+
+=== [[Imperial Nobility#Distinguishment|Imperial Landed Nobility]] (N) ===
+{{Imperial Nobility|name= Porozlo|Noble=BE}}
+: ''See: [[Nobles of Porozlo]]''
+
+=== World Starport (St) ===
+{{Starport|name= Porozlo|Starport= A}}
+
+=== [[Importance Extension|World Importance]] {Ix} === 
+* Importance: {+3} Ordinary
+
+=== World Technology Level (T) ===
+{{WorldTech|name= Porozlo|WorldTech= B}}
+* Porozlo is early {{TL|B}}, having recently been reclassified by the [[IISS]] from {{TL|A}}, and thus may be considered borderline. <ref><small>''Comment by [[WHULorigan]], based on the retcon of CT material in CT Supplement 3: Spinward Marches vs. UWP in later materials''.</small></ref>
+
+=== Trade Data === 
+''[[Trade]] [[TC|Classifications]] for this [[world]]:''
+* Hi = Porozlo is a High-population world, with great opportunity for many markets. 
+* Ga = Porozlo is a Garden world that is considered ideal for Hominoid life.  
+
+''[[Trade route|Trade Lines with other worlds]]:''
+* No information yet available.
+   
+==== [[Economic Extension|World Economy]] (Ex) ====
+* Resources:      D (Very Abundant)
+* Labor:          9 (Billions)
+* Infrastructure: E (Comprehensive)
+* Efficiency:    +1 (Average)
+
+==== [[Infrastructure|World Infrastructure]] ====
+This [[world]] possesses a comprehensive infrastructure.
+
+=== Politics & Government ===
+
+==== [[Government|World Government]] (G) ====
+{{WorldGov|name= Porozlo|Government=7}}  
+
+Major nations of Porozlo include ''Stepozhevac'' and ''Morovic'' (each on opposite sides of the ''Karamak Mountains''). {{Page cite|name= Mercenary  |page=21 |version=Classic Traveller |citeName= CTMerc1}} Other nations of Porozlo include ''Nemso'' (formerly a member of the ''PO-bloc'') and ''Anasinta'' (neutral, but leaning towards the ''PO-bloc''). {{Page cite|name= 76 Patrons  |page=22, 25 & 43 |version=Classic Traveller |citeName= CT76 Patrons1}}
+
+* The '''Private Ownership bloc''' (PO-bloc), which comprises about two fifths of the nations and over half the population of the planet, severely limits the size of corporate concerns by intensive regulation, fearing the ability of large multi-world concerns to influence and dominate local governments. {{Page cite|name= Mercenary  |page=21 |version=Classic Traveller |citeName= CTMerc1}}
+
+* The '''Free Commerce bloc''' (FC-bloc) contains fewer nations, but is generally more industrialized and technologically advanced, and does not impose limits as do the PO-bloc nations. {{Page cite|name= Mercenary  |page=21 |version=Classic Traveller |citeName= CTMerc1}}
+
+==== [[Law Level|World Law]] (L) ====
+{{WorldLaw|name= Porozlo|Law= 4}}
+
+[[Universal Legal Profile]] (Lx): '''L - W D I Te Tv P  - [Tr Cr Cv F]'''
+* '''L'''  <small>(Overall Enforcement Level)</small> = 4 (General: Varies by nation)
+: --
+* '''W'''  <small>(Weapons)</small> = 4 (General: Varies by nation)
+* '''D'''  <small>(Drugs)</small> =  (General: Varies by nation)
+* '''I'''  <small>(Information)</small> =  (General: Varies by nation)
+* '''Te''' <small>(Technology)</small> =   (General: Varies by nation)
+* '''Tv''' <small>(Travellers)</small> =  (General: Varies by nation)
+* '''P'''  <small>(Psionics)</small> = 7 
+: --
+* '''Tr'''  <small>(Trade Law)</small> =  (General: Varies by nation)
+* '''Cr'''  <small>(Criminal Law)</small> =  (General: Varies by nation)
+* '''Cv'''  <small>(Civil Law)</small> =  (General: Varies by nation)
+* '''F''' <small>(Personal Freedom)</small> =  (General: Varies by nation)
+
+Values shown above are for the nation hosting the primary Starport in '''''Stepozhevac'''''.
+
+==== [[Military|World Military]] ====
+While all-out war has been avoided, constant brushfire wars erupt in the smaller nations of the world, as each side seeks to convert the other to its views.  As a result, mercenaries have given Porozlo the nickname ''"Warworld"''. {{Page cite|name= Mercenary  |page=21 |version=Classic Traveller |citeName= CTMerc1}}
+
+The system was the site of a major military engagement during the [[Third Frontier War]]: the [[Battle of Porozlo]], which resulted in an important [[Zhodani]] victory.
+
+=== World Population (P) ===
+{{WorldPop|name= Porozlo|multiplier= 2|Population= A}}
+
+==== World Demographics ====
+Humaniti, population 95% 
+* Other Sophonts, population 5%
+
+==== Linguistic Topography ====
+The following [[language]]s are most commonly heard:
+* ''[[Riftian|Riftian Galanglic]]:'' ''A regional dialect of one of the two official languages of the'' ''{{Imperium}}''.
+* ''[[Vilani (language)|Vilani]]:'' ''One of the two official languages of the'' ''{{Imperium}}''.
+* ''Regional ethnic dialects descended from the original settlers:''
+:» ''[[:Category:Baltoslavic Dialect|Baltoslavic Dialect]]s. 
+:» ''Various [[:Category:French Dialect|Southern Francophone Dialect]]s and/or [[Latin (language)|Italo-Romance Dialect]]s''.
+:» ''Various [[:Category:East Afrasian Dialect|East Afrasian Dialect]]s and [[:Category:West Afrasian Dialect|West Afrasian Dialect]]s''.
+
+==== [[Cultural Extension|World Culture]] [Cx] ====
+* Heterogenity: 8 (discordant)
+* Acceptance:   D (very xenophilic)
+* Strangeness:  3 (somewhat typical)
+* Symbols:      9 (somewhat abstract)
+
+Many nations of the world were settled by peoples of at least partial Solomani extraction, and based on the evidence of the names of both the world and the nation-states, by peoples with at least some ethnic background favoring the ''[[Wikipedia: Ugric|Ugric]]'' and ''[[Wikipedia: Balto-Slavic|Western Baltoslavic]]'' peoples. Later settlement patterns have added to the ethnic mix of both Solomani and non-Solomani ethnicities.
+
+==== Urbanization ====
+In addition to ''Porozlo Startown'', other major settlements on Porozlo include ''Geeka'', ''Seka'', ''Manier'', ''Bargugu'', ''Shununu'', and ''Irmudad''.
+
+== World History & Background ==
+The world of Porozlo was first officially settled by Imperial colonists during the early waves of Imperial settlement in the [[Spinward Marches Sector]] in the [[300s]], becoming an Imperial Client State not long afterward and completely absorbed as a full Imperial member world by ca [[400]]. 
+
+=== World Timeline ===
+Major events that have affected this world and the wider region that it lies within:
+* [[0|The Year 0]]: The [[Third Imperium]] is founded.
+* [[300]]-[[420]]: The {{Imperial}} [[First Survey]] charts the system.
+* [[522]]: [[Emperor]] [[Jerome]] creates the [[Duchy of Rhylanor]].
+* [[589]]-[[604]]: [[First Frontier War]].
+* [[602]]: [[Arbellatra Khatami Alkhalikoi]] inherits the [[Duchy of Rhylanor]] upon the death of her father.
+* [[604]]: [[Battle of Rhylanor (1FW)|Battle of Rhylanor <small>(1FW)</small>]]. 
+* [[604]]-[[622]]: The {{Imperial}} [[Civil War]]. "[[Emperors of the Flag]]".
+* [[615]]-[[620]]: [[Second Frontier War]].
+* [[624]]: The [[Express Boat Network]] is established.
+* [[979]]-[[986]]: [[Third Frontier War]].
+* [[986]]: [[Battle of Porozlo]] <small>(3FW)</small>. [[Third Frontier War]] ends after Zhodani drive at Rhylanor is turned back with reinforcements from [[Sabine Subsector]] in the [[Deneb Sector]].
+* [[995]]-[[1065]]: The {{Imperial}} [[Second Survey]] charts the system.
+* [[1065]]: The [[Second Survey]] is published. Information about the system becomes widely available.
+* [[1082]]-[[1084]]: [[Fourth Frontier War]], also known as the ''False War''.
+* [[1107]]-[[1110]]: [[Fifth Frontier War]].
+* [[1109]]: [[Battle of Rhylanor (5FW)|Battle of Rhylanor <small>(5FW)</small>]]. Major fleet battle involving both fleet and planetary elements of Imperial and Colonial forces and the Imperial Corridor Fleet vs. the Zhodani 40th Fleet.
+
+<br>
+----
+----
+
+== References & Contributors ([[Sources]]) ==
+{{metadata}}
+
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=Mercenary|version=Classic Traveller |page=21-22}}
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=30-31}}
+ | {{Ludography cite|name=Twilight's Peak|page=8, 9, 13, 14, 46, 48, 52 & 56}}
+ | {{Ludography cite|name=76 Patrons|page=22, 25 & 43}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=10,18-19,20,25,29}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=The Regency Sourcebook|page=43}} (UWP only)
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=107}}
+ | {{Ludography cite|name=The Spinward States|page=104}} (UWP only)
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=74-79}} (UWP only)
+ | [[Christopher Griffen]] - [http://www.mu.org/%7Ejoe/traveller/archive/Rice_Papers/SM-2715-Porozlo.txt RICE Paper SM 2715] 
+}}
+
+[[Category: Republic of Regina worlds]]
+[[Category: Battle of Porozlo worlds]]
+[[Category: Fifth Frontier War worlds]]
+[[Category: GT]]
+[[Category: Highport worlds]]
+[[Category: Orbital Facility]]
+[[Category: Rhylanor Cluster worlds]]
+[[Category: RICE]]
+[[Category: Transstar worlds]]
+{{LE|Binary Star System|T5 Second Survey worlds|Era: Milieu 1116}}
+{{LEN}}

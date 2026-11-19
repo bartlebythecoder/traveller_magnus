@@ -1,0 +1,77 @@
+{{InfoboxSystem
+  |name=Glisten
+  |subsector=Glisten
+  |sector=Spinward Marches
+  |hex=2036
+  |star='''[[Gliss (star)|Gliss]]'''
+  |type='''K9 V'''
+  |P0= -  |Dist0=0.2   |UWP0= <small>(Empty Orbit)</small>
+  |P1= -  |Dist1=0.4   |UWP1= <small>(Empty Orbit)</small>
+  |P2=Glisten
+  |Dist2=0.71|UWP2=A000986-F
+  |P3= -  |Dist3=1.0   |UWP3= <small>(Empty Orbit)</small>
+  |P4=Pluvis Belt
+  |Dist4=1.503|UWP4=?0009??-?
+  |P5=Nasmi
+  |Dist5=2.812|UWP5= '''Large GG'''
+}}
+
+Glisten is the collective name for a large number of settlements in the inner planetoid belt orbiting the solitary star [[Gliss (star)|Gliss]], located at Spinward Marches 2036.  The name derives from one of the early and primary settlements on the asteroid named ''Gliss Ten''.  
+* Glisten serves as the {{Imperial}} Subsector capital. 
+
+Please see [[Glisten (world)]] for more information.
+
+== Description (Specifications) ==
+{{MonostellarSystem
+|name           = [[Gliss (star)|Gliss]]
+|primary        = K9 V 
+|PrimaryNotes   = None
+}}
+
+Glisten is one of the major high-tech industrial centers of the Marches and consists of a number of separate planetoid cities, most of which specialize in a particular industry or social role.
+
+Glisten Belt occupies the life zone. The system contains no appreciable bodies outside of the two planetoid belts and the gas giant Nasmi. Glisten is the capital of the [[Duchy of Glisten]] and the subsector capital of the [[Glisten Subsector|Glisten]] subsector.
+
+=== Overview ===
+Glisten comprises a vast federation of individual asteroid colonies, each of which has accepted the [[Glisten Coordinating Authority]] as its central government. The various colonies govern themselves internally, but allow the GCA to administer the system's vast traffic control network, as well as legislate and enforce standards for trade and commerce. As a consequence, there's a remarkable degree of cohesion in the system. The various colonies coordinate their actions, ensuring that important services such as defense and public works are divided among them.
+
+The uniformity of administration is remarkable, considering the great diversity in local culture exhibited by the colonies. Each asteroid is home to a unique society, with its own customs, traditions, and way of life. This makes Glisten an incredibly diverse locale, and a popular spot for tourists in the [[Domain of Deneb]].
+
+Glisten is also a financial and industrial powerhouse of the Spinward Marches. It is home to several important shipyards. Merchants and traders from subsectors away are drawn to Glisten's markets. The system is sometimes called the "Gateway to [[District 268 Subsector|District 268]]" because of its significant ties to that frontier region.
+
+Glisten was the target of an ''[[ihatei]]'' incursion in [[1113]], and a few scattered ships still stubbornly lurk in the outer system, eluding their pursuers from the [[Imperial Navy]]. 
+
+'''Pluvis Belt:''' The outermost planetoid belt. Pluvis contains numerous mining stations, small ports, other industrial facilities (chief among these are the [[Bilstein Yards]], and the [[Glisten Imperial Naval Base]]. The Pluvis Belt has nearly 40% of the system's population.
+
+'''Starport:''' Glisten possesses a multitude of deep-space ports, but only [[Banfi Starport]] is a true starport. Banfi Starport is rated [[Starport|Class A]], and is held and administered by the {{Imperium}}, through the local [[Starport Authority]] port director.
+
+'''Size:''' Not applicable.
+
+'''Atmosphere:''' Not applicable.
+
+'''Hydrographic Percentage:''' Not applicable.
+
+'''Population:''' 8.38 billion permanent residents, augmented by transient miners, corporate employees, military personnel, and tourists. Depending on the time of year and the circumstances, the population of the system can swell to 9 billion.
+
+'''Laws:''' Glisten has numerous laws restricting the ownership of weapons of all sorts. This is done both as a form of social control and as a defense against damage to the system's many self-contained arcologies. The precariousness of life on an asteroid world is never far from the minds of Glistenites, making advanced weaponry anathema.
+
+In addition, local traffic control is extensive and rigorous, limiting both the movement of vessels and the use of certain communication channels. Violation of any of these regulations is a grave offense and the violator may be subject to harsh penalties, possibly with the concurrence of the Imperial Starport Authority.
+
+'''[[Technology level]]:''' Full Imperial Maximum. Local industry is exceptionally diverse, making the Glisten system extremely self-sufficient. Glisten is on the cutting edge in the areas of shipbuilding, zero-G manufacturing, and environmental controls, with some technologies edging into early TL 16. 
+
+'''IISS Advisory:''' Certain approach vectors require clearance from Glisten Imperial Naval Base or [[Glisten IISS Station]] (consult the latest [http://en.wikipedia.org/wiki/Ephemeris ephemeris] for details).
+
+=== Alternate Versions ===
+The RICE version of Glisten can be found [[Glisten (system)/RICE|here]].
+
+== History & Background (Dossier) ==
+No information yet available. 
+
+== References & Contributors (Sources) ==
+{{Incomplete}}
+{{Sources
+|S1= [[GURPS Traveller]] [[Planetary Survey 4 - Glisten]]
+}}
+
+
+{{LE}}

@@ -1,0 +1,551 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "1237",
+  "sector_abbreviation": "Spin",
+  "subsector": "District 268",
+  "name": "Collace",
+  "sources": [
+    {
+      "page": "Collace (world)",
+      "revid": 1019992,
+      "timestamp": "2026-03-11T22:26:17Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Collace (world)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Gorie",
+          "type": "F1 V",
+          "notes": null
+        },
+        {
+          "role": "Secondary",
+          "name": "Sonor",
+          "type": "M3 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Gorie Sonor",
+      "stars": [
+        {
+          "name": "Gorie",
+          "type": "F1 V"
+        },
+        {
+          "name": "Sonor",
+          "type": "M3 V"
+        }
+      ],
+      "labels": [
+        "Collace"
+      ],
+      "pages": [
+        "Collace (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "?",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Collace (world)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "?",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Collace (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "?",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Collace (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "?",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Collace (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Collace",
+          "raw": "B628843-D",
+          "kind": "world",
+          "uwp": "B628843-D",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Collace (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Kirkton",
+              "raw": "''<small>F200562-D</small>''",
+              "kind": "world",
+              "uwp": "F200562-D",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Collace (world)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 5,
+          "name": "Elkhorn",
+          "raw": "X100000-0",
+          "kind": "world",
+          "uwp": "X100000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Collace (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Enborne",
+          "name_raw": "'''Enborne'''",
+          "raw": "'''SGG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Collace (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Cathay",
+              "raw": "''<small>F311564-D</small>''",
+              "kind": "world",
+              "uwp": "F311564-D",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Collace (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Alcalall",
+              "raw": "''<small>GAA4262-C</small>''",
+              "kind": "world",
+              "uwp": "GAA4262-C",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Collace (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Innivar",
+              "raw": "''<small>H201315-A</small>''",
+              "kind": "world",
+              "uwp": "H201315-A",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Collace (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Orkist",
+              "raw": "''<small>H200200-9</small>''",
+              "kind": "world",
+              "uwp": "H200200-9",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Collace (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Hali.",
+          "raw": "X7A9000-0",
+          "kind": "world",
+          "uwp": "X7A9000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Collace (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Auros",
+              "raw": "''<small>XS00000-0</small>''",
+              "kind": "world",
+              "uwp": "XS00000-0",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Collace (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Scint",
+          "raw": "X211000-0",
+          "kind": "world",
+          "uwp": "X211000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Collace (world)"
+          ]
+        }
+      ],
+      "star_names_from": "star template"
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Collace (world)",
+      "label": "Collace",
+      "stars": [
+        {
+          "name": "Gorie Sonor",
+          "type": "F1 V"
+        },
+        {
+          "name": null,
+          "type": "M3 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "?",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "?",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "?",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "?",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Collace",
+          "raw": "B628843-D",
+          "kind": "world",
+          "uwp": "B628843-D",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Kirkton",
+              "raw": "''<small>F200562-D</small>''",
+              "kind": "world",
+              "uwp": "F200562-D",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Elkhorn",
+          "raw": "X100000-0",
+          "kind": "world",
+          "uwp": "X100000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Enborne",
+          "name_raw": "'''Enborne'''",
+          "raw": "'''SGG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Cathay",
+              "raw": "''<small>F311564-D</small>''",
+              "kind": "world",
+              "uwp": "F311564-D",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Alcalall",
+              "raw": "''<small>GAA4262-C</small>''",
+              "kind": "world",
+              "uwp": "GAA4262-C",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Innivar",
+              "raw": "''<small>H201315-A</small>''",
+              "kind": "world",
+              "uwp": "H201315-A",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Orkist",
+              "raw": "''<small>H200200-9</small>''",
+              "kind": "world",
+              "uwp": "H200200-9",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Hali.",
+          "raw": "X7A9000-0",
+          "kind": "world",
+          "uwp": "X7A9000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Auros",
+              "raw": "''<small>XS00000-0</small>''",
+              "kind": "world",
+              "uwp": "XS00000-0",
+              "distance": {
+                "raw": "''<small>R= ?</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Scint",
+          "raw": "X211000-0",
+          "kind": "world",
+          "uwp": "X211000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Collace",
+    "UWP": "B628943-D",
+    "Stellar": "F1 V M3 V",
+    "PBG": "101",
+    "Bases": "S",
+    "Remarks": "Hi In Ht"
+  }
+}

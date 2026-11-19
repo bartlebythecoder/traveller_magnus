@@ -1,0 +1,754 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Aldebaran",
+  "hex": "0111",
+  "sector_abbreviation": "Alde",
+  "subsector": "Star Bridge",
+  "name": "Elysee Primary",
+  "sources": [
+    {
+      "page": "Elysee (Al 0111) (world)",
+      "revid": 1020297,
+      "timestamp": "2026-03-13T09:51:14Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Elysee (Al 0111) (world)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Prime",
+          "type": "G5 V",
+          "notes": null
+        },
+        {
+          "role": "Secondary",
+          "name": "Deuxième",
+          "type": "K2 V",
+          "notes": "Approximately 120 AU from the primary."
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Prime",
+      "stars": [
+        {
+          "name": "Prime",
+          "type": "G5 V"
+        }
+      ],
+      "labels": [
+        "Elysee Primary"
+      ],
+      "pages": [
+        "Elysee (Al 0111) (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Planet 1",
+          "raw": "H100000-0",
+          "kind": "world",
+          "uwp": "H100000-0",
+          "distance": {
+            "raw": "0.17",
+            "value": 0.17,
+            "unit": "AU"
+          },
+          "sources": [
+            "Elysee (Al 0111) (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Planet 2",
+          "raw": "H310000-0",
+          "kind": "world",
+          "uwp": "H310000-0",
+          "distance": {
+            "raw": "0.32",
+            "value": 0.32,
+            "unit": "AU"
+          },
+          "sources": [
+            "Elysee (Al 0111) (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Planet 3",
+          "raw": "G6A0218-D",
+          "kind": "world",
+          "uwp": "G6A0218-D",
+          "distance": {
+            "raw": "0.63",
+            "value": 0.63,
+            "unit": "AU"
+          },
+          "sources": [
+            "Elysee (Al 0111) (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Elysee",
+          "raw": "A872AA9-E",
+          "kind": "world",
+          "uwp": "A872AA9-E",
+          "distance": {
+            "raw": "0.95",
+            "value": 0.95,
+            "unit": "AU"
+          },
+          "sources": [
+            "Elysee (Al 0111) (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Roche",
+              "raw": "GS00167-D",
+              "kind": "world",
+              "uwp": "GS00167-D",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Elysee (Al 0111) (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Lune",
+              "raw": "F32366A-E",
+              "kind": "world",
+              "uwp": "F32366A-E",
+              "distance": {
+                "raw": "20 Diam",
+                "value": 20.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Elysee (Al 0111) (world)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 5,
+          "name": "Planet 4",
+          "raw": "F642769-D",
+          "kind": "world",
+          "uwp": "F642769-D",
+          "distance": {
+            "raw": "1.42",
+            "value": 1.42,
+            "unit": "AU"
+          },
+          "sources": [
+            "Elysee (Al 0111) (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "HS00000-0",
+              "kind": "world",
+              "uwp": "HS00000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Elysee (Al 0111) (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Planet 5",
+          "raw": "G410316-D",
+          "kind": "world",
+          "uwp": "G410316-D",
+          "distance": {
+            "raw": "2.15",
+            "value": 2.15,
+            "unit": "AU"
+          },
+          "sources": [
+            "Elysee (Al 0111) (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Planet 6",
+          "raw": "H7A1000-0",
+          "kind": "world",
+          "uwp": "H7A1000-0",
+          "distance": {
+            "raw": "3.22",
+            "value": 3.22,
+            "unit": "AU"
+          },
+          "sources": [
+            "Elysee (Al 0111) (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y201000-0",
+              "kind": "world",
+              "uwp": "Y201000-0",
+              "distance": {
+                "raw": "40 Diam",
+                "value": 40.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Elysee (Al 0111) (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Gas Giant",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "9.62",
+            "value": 9.62,
+            "unit": "AU"
+          },
+          "sources": [
+            "Elysee (Al 0111) (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Elysee (Al 0111) (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "G302268-D",
+              "kind": "world",
+              "uwp": "G302268-D",
+              "distance": {
+                "raw": "11 Diam",
+                "value": 11.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Elysee (Al 0111) (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "H200000-0",
+              "kind": "world",
+              "uwp": "H200000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Elysee (Al 0111) (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Outer Belt",
+          "raw": "G000117-D",
+          "kind": "world",
+          "uwp": "G000117-D",
+          "distance": {
+            "raw": "19.1",
+            "value": 19.1,
+            "unit": "AU"
+          },
+          "sources": [
+            "Elysee (Al 0111) (world)"
+          ]
+        }
+      ]
+    },
+    {
+      "star": "Deuxième",
+      "stars": [
+        {
+          "name": "Deuxième",
+          "type": "K2 V"
+        }
+      ],
+      "labels": [
+        "Elysee Secondary"
+      ],
+      "pages": [
+        "Elysee (Al 0111) (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Inner Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "0.25",
+            "value": 0.25,
+            "unit": "AU"
+          },
+          "sources": [
+            "Elysee (Al 0111) (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Planet 7",
+          "raw": "Y421000-0",
+          "kind": "world",
+          "uwp": "Y421000-0",
+          "distance": {
+            "raw": "0.73",
+            "value": 0.73,
+            "unit": "AU"
+          },
+          "sources": [
+            "Elysee (Al 0111) (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Planet 8",
+          "raw": "H796000-0",
+          "kind": "world",
+          "uwp": "H796000-0",
+          "distance": {
+            "raw": "0.96",
+            "value": 0.96,
+            "unit": "AU"
+          },
+          "sources": [
+            "Elysee (Al 0111) (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "9 Diam",
+                "value": 9.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Elysee (Al 0111) (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Planet 9",
+          "raw": "Y302000-0",
+          "kind": "world",
+          "uwp": "Y302000-0",
+          "distance": {
+            "raw": "1.47",
+            "value": 1.47,
+            "unit": "AU"
+          },
+          "sources": [
+            "Elysee (Al 0111) (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Planet 10",
+          "raw": "Y8A0000-0",
+          "kind": "world",
+          "uwp": "Y8A0000-0",
+          "distance": {
+            "raw": "2.21",
+            "value": 2.21,
+            "unit": "AU"
+          },
+          "sources": [
+            "Elysee (Al 0111) (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Outer Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "4.37",
+            "value": 4.37,
+            "unit": "AU"
+          },
+          "sources": [
+            "Elysee (Al 0111) (world)"
+          ]
+        }
+      ],
+      "placement": {
+        "orbit": null,
+        "au": 120.0,
+        "from": "star template notes"
+      }
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Elysee (Al 0111) (world)",
+      "label": "Elysee Primary",
+      "stars": [
+        {
+          "name": "Prime",
+          "type": "G5 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Planet 1",
+          "raw": "H100000-0",
+          "kind": "world",
+          "uwp": "H100000-0",
+          "distance": {
+            "raw": "0.17",
+            "value": 0.17,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Planet 2",
+          "raw": "H310000-0",
+          "kind": "world",
+          "uwp": "H310000-0",
+          "distance": {
+            "raw": "0.32",
+            "value": 0.32,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Planet 3",
+          "raw": "G6A0218-D",
+          "kind": "world",
+          "uwp": "G6A0218-D",
+          "distance": {
+            "raw": "0.63",
+            "value": 0.63,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Elysee",
+          "raw": "A872AA9-E",
+          "kind": "world",
+          "uwp": "A872AA9-E",
+          "distance": {
+            "raw": "0.95",
+            "value": 0.95,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Roche",
+              "raw": "GS00167-D",
+              "kind": "world",
+              "uwp": "GS00167-D",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Lune",
+              "raw": "F32366A-E",
+              "kind": "world",
+              "uwp": "F32366A-E",
+              "distance": {
+                "raw": "20 Diam",
+                "value": 20.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Planet 4",
+          "raw": "F642769-D",
+          "kind": "world",
+          "uwp": "F642769-D",
+          "distance": {
+            "raw": "1.42",
+            "value": 1.42,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "HS00000-0",
+              "kind": "world",
+              "uwp": "HS00000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Planet 5",
+          "raw": "G410316-D",
+          "kind": "world",
+          "uwp": "G410316-D",
+          "distance": {
+            "raw": "2.15",
+            "value": 2.15,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Planet 6",
+          "raw": "H7A1000-0",
+          "kind": "world",
+          "uwp": "H7A1000-0",
+          "distance": {
+            "raw": "3.22",
+            "value": 3.22,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y201000-0",
+              "kind": "world",
+              "uwp": "Y201000-0",
+              "distance": {
+                "raw": "40 Diam",
+                "value": 40.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Gas Giant",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "9.62",
+            "value": 9.62,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "G302268-D",
+              "kind": "world",
+              "uwp": "G302268-D",
+              "distance": {
+                "raw": "11 Diam",
+                "value": 11.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "H200000-0",
+              "kind": "world",
+              "uwp": "H200000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Outer Belt",
+          "raw": "G000117-D",
+          "kind": "world",
+          "uwp": "G000117-D",
+          "distance": {
+            "raw": "19.1",
+            "value": 19.1,
+            "unit": "AU"
+          }
+        }
+      ]
+    },
+    {
+      "page": "Elysee (Al 0111) (world)",
+      "label": "Elysee Secondary",
+      "stars": [
+        {
+          "name": "Deuxième",
+          "type": "K2 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Inner Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "0.25",
+            "value": 0.25,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Planet 7",
+          "raw": "Y421000-0",
+          "kind": "world",
+          "uwp": "Y421000-0",
+          "distance": {
+            "raw": "0.73",
+            "value": 0.73,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Planet 8",
+          "raw": "H796000-0",
+          "kind": "world",
+          "uwp": "H796000-0",
+          "distance": {
+            "raw": "0.96",
+            "value": 0.96,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "9 Diam",
+                "value": 9.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Planet 9",
+          "raw": "Y302000-0",
+          "kind": "world",
+          "uwp": "Y302000-0",
+          "distance": {
+            "raw": "1.47",
+            "value": 1.47,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Planet 10",
+          "raw": "Y8A0000-0",
+          "kind": "world",
+          "uwp": "Y8A0000-0",
+          "distance": {
+            "raw": "2.21",
+            "value": 2.21,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Outer Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "4.37",
+            "value": 4.37,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Elysee",
+    "UWP": "A872AA9-E",
+    "Stellar": "G5 V K2 V",
+    "PBG": "331",
+    "Bases": "",
+    "Remarks": "He Hi In Ht"
+  }
+}

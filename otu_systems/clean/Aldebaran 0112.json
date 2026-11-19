@@ -1,0 +1,526 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Aldebaran",
+  "hex": "0112",
+  "sector_abbreviation": "Alde",
+  "subsector": "Star Bridge",
+  "name": "Algol ABC",
+  "sources": [
+    {
+      "page": "Algol (world)",
+      "revid": 1023247,
+      "timestamp": "2026-03-18T12:28:06Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Algol (world)",
+      "template": "TrinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "β Persei A",
+          "type": "B8 V",
+          "notes": "Active star: it produces high levels of EM noise."
+        },
+        {
+          "role": "Secondary",
+          "name": "β Persei B",
+          "type": "K0 IV",
+          "notes": "Approximately 0.062 AU from the primary: unstable active star that is losing mass."
+        },
+        {
+          "role": "Tertiary",
+          "name": "β Persei C",
+          "type": "A5 V",
+          "notes": "Approximately 2.69 AU from the primary."
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "β Persei A",
+      "stars": [
+        {
+          "name": "β Persei A",
+          "type": "B8 V"
+        }
+      ],
+      "labels": [
+        "Algol ABC"
+      ],
+      "pages": [
+        "Algol (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "β Persei B",
+          "name_raw": "'''β Persei B'''",
+          "raw": "'''K2 IV'''",
+          "kind": "star",
+          "type": "K2 IV",
+          "distance": {
+            "raw": "0.06",
+            "value": 0.06,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ],
+          "sources": [
+            "Algol (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "β Persei C",
+          "name_raw": "'''β Persei C'''",
+          "raw": "'''A5 V'''",
+          "kind": "star",
+          "type": "A5 V",
+          "distance": {
+            "raw": "2.69",
+            "value": 2.69,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ],
+          "sources": [
+            "Algol (world)"
+          ],
+          "subsystem": 1
+        },
+        {
+          "orbit": 3,
+          "name": "Rocky Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "13.6",
+            "value": 13.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Algol (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Planet 3",
+          "raw": "Y211000-0",
+          "kind": "world",
+          "uwp": "Y211000-0",
+          "distance": {
+            "raw": "15.9",
+            "value": 15.9,
+            "unit": "AU"
+          },
+          "sources": [
+            "Algol (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Planet 4",
+          "raw": "Y102000-0",
+          "kind": "world",
+          "uwp": "Y102000-0",
+          "distance": {
+            "raw": "18.4",
+            "value": 18.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Algol (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Planet 5",
+          "raw": "Y5A2000-0",
+          "kind": "world",
+          "uwp": "Y5A2000-0",
+          "distance": {
+            "raw": "25.3",
+            "value": 25.3,
+            "unit": "AU"
+          },
+          "sources": [
+            "Algol (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Planet 6",
+          "raw": "Y101000-0",
+          "kind": "world",
+          "uwp": "Y101000-0",
+          "distance": {
+            "raw": "26.8",
+            "value": 26.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Algol (world)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Perv",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "31.5",
+            "value": 31.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Algol (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Vert",
+              "raw": "H301000-0",
+              "kind": "world",
+              "uwp": "H301000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Algol (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Planet 7",
+          "raw": "Y9C1000-0",
+          "kind": "world",
+          "uwp": "Y9C1000-0",
+          "distance": {
+            "raw": "275",
+            "value": 275.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Algol (world)"
+          ]
+        }
+      ]
+    },
+    {
+      "star": "β Persei C",
+      "stars": [
+        {
+          "name": "β Persei C",
+          "type": "A5 V"
+        }
+      ],
+      "labels": [
+        "Algol C Sub"
+      ],
+      "pages": [
+        "Algol (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Imper",
+          "raw": "Hot GG",
+          "kind": "gas_giant",
+          "remark": "Hot GG",
+          "distance": {
+            "raw": "0.04",
+            "value": 0.04,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-no-size-class",
+            "gg-other-words"
+          ],
+          "sources": [
+            "Algol (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Planet 1",
+          "raw": "Y310000-0",
+          "kind": "world",
+          "uwp": "Y310000-0",
+          "distance": {
+            "raw": "0.14",
+            "value": 0.14,
+            "unit": "AU"
+          },
+          "sources": [
+            "Algol (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Planet 2",
+          "raw": "Y7B0000-0",
+          "kind": "world",
+          "uwp": "Y7B0000-0",
+          "distance": {
+            "raw": "0.26",
+            "value": 0.26,
+            "unit": "AU"
+          },
+          "sources": [
+            "Algol (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Mainworld",
+          "raw": "D000168-9",
+          "kind": "world",
+          "uwp": "D000168-9",
+          "distance": {
+            "raw": "0.51",
+            "value": 0.51,
+            "unit": "AU"
+          },
+          "sources": [
+            "Algol (world)"
+          ],
+          "mainworld": true
+        }
+      ],
+      "placement": {
+        "orbit": 2,
+        "au": 2.69,
+        "from": "orbit row"
+      }
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Algol (world)",
+      "label": "Algol ABC",
+      "stars": [
+        {
+          "name": "β Persei A",
+          "type": "B8 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "β Persei B",
+          "name_raw": "'''β Persei B'''",
+          "raw": "'''K2 IV'''",
+          "kind": "star",
+          "type": "K2 IV",
+          "distance": {
+            "raw": "0.06",
+            "value": 0.06,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "β Persei C",
+          "name_raw": "'''β Persei C'''",
+          "raw": "'''A5 V'''",
+          "kind": "star",
+          "type": "A5 V",
+          "distance": {
+            "raw": "2.69",
+            "value": 2.69,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Rocky Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "13.6",
+            "value": 13.6,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Planet 3",
+          "raw": "Y211000-0",
+          "kind": "world",
+          "uwp": "Y211000-0",
+          "distance": {
+            "raw": "15.9",
+            "value": 15.9,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Planet 4",
+          "raw": "Y102000-0",
+          "kind": "world",
+          "uwp": "Y102000-0",
+          "distance": {
+            "raw": "18.4",
+            "value": 18.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Planet 5",
+          "raw": "Y5A2000-0",
+          "kind": "world",
+          "uwp": "Y5A2000-0",
+          "distance": {
+            "raw": "25.3",
+            "value": 25.3,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Planet 6",
+          "raw": "Y101000-0",
+          "kind": "world",
+          "uwp": "Y101000-0",
+          "distance": {
+            "raw": "26.8",
+            "value": 26.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 8,
+          "name": "Perv",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "31.5",
+            "value": 31.5,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Vert",
+              "raw": "H301000-0",
+              "kind": "world",
+              "uwp": "H301000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Planet 7",
+          "raw": "Y9C1000-0",
+          "kind": "world",
+          "uwp": "Y9C1000-0",
+          "distance": {
+            "raw": "275",
+            "value": 275.0,
+            "unit": "AU"
+          }
+        }
+      ]
+    },
+    {
+      "page": "Algol (world)",
+      "label": "Algol C Sub",
+      "stars": [
+        {
+          "name": "β Persei C",
+          "type": "A5 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Imper",
+          "raw": "Hot GG",
+          "kind": "gas_giant",
+          "remark": "Hot GG",
+          "distance": {
+            "raw": "0.04",
+            "value": 0.04,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-no-size-class",
+            "gg-other-words"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Planet 1",
+          "raw": "Y310000-0",
+          "kind": "world",
+          "uwp": "Y310000-0",
+          "distance": {
+            "raw": "0.14",
+            "value": 0.14,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Planet 2",
+          "raw": "Y7B0000-0",
+          "kind": "world",
+          "uwp": "Y7B0000-0",
+          "distance": {
+            "raw": "0.26",
+            "value": 0.26,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Mainworld",
+          "raw": "D000168-9",
+          "kind": "world",
+          "uwp": "D000168-9",
+          "distance": {
+            "raw": "0.51",
+            "value": 0.51,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Algol",
+    "UWP": "D000168-9",
+    "Stellar": "K2 IV A5 V B8 V",
+    "PBG": "212",
+    "Bases": "",
+    "Remarks": "As Lo Va O:0111"
+  }
+}

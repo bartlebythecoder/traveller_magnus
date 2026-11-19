@@ -1,0 +1,5 @@
+{
+  "bodies": {
+    "Emerald (system)|Ashakha": { "distance": { "raw": "2,8", "value": 2.8, "unit": "AU" }, "distance_source": "Sean, 2026-11-16: a comma for a decimal point" }
+  }
+}

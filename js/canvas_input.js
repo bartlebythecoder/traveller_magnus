@@ -98,6 +98,14 @@ function setupCanvasEvents() {
             const detailsBtn = document.getElementById('ctx-world-details');
             if (detailsBtn) detailsBtn.style.display = (selectedHexes.size === 1 &&
                 canOpenHexEditor(hexStates.get([...selectedHexes][0]))) ? 'block' : 'none';
+            // v0.19.0 published systems: one hex = choose any snapshot system for it; several =
+            // load the ones that match (add_otu_system_info.js wires the click).
+            const publishedBtn = document.getElementById('ctx-load-published');
+            if (publishedBtn) {
+                const canLoad = selectedHexes.size > 0 && !!window.OTU_SNAPSHOT && !!window.PublishedSystems;
+                publishedBtn.style.display = canLoad ? 'block' : 'none';
+                publishedBtn.textContent = selectedHexes.size > 1 ? 'LOAD WIKI-PUBLISHED SYSTEMS' : 'LOAD WIKI-PUBLISHED SYSTEM…';
+            }
             if (selectedHexes.size === 1) {
                 const _seHexId = [...selectedHexes][0];
                 const _seState = hexStates.get(_seHexId);

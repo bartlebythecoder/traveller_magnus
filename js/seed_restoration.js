@@ -148,7 +148,15 @@
                     w.moons.unshift(mwMoon);
                 }
             }
-            w.moons = w.moons.slice(0, cap);
+            // Keep the seed's own moons (they carry the editor's _id; dice-rolled additions
+            // have none) ahead of rolled ones before slicing. The physics pass has already
+            // sorted moons by orbit, so slicing that order dropped a seeded outer moon in
+            // favour of a newly rolled inner one (Sean, 2026-11-18). Stable, so orbit order is
+            // kept within each group; the result is re-sorted by orbit afterwards.
+            const seeded = w.moons.filter(m => m._id != null);
+            const rolled = w.moons.filter(m => m._id == null);
+            w.moons = seeded.concat(rolled).slice(0, cap);
+            w.moons.sort((a, b) => (a.pd ?? Infinity) - (b.pd ?? Infinity));
         });
     }
 

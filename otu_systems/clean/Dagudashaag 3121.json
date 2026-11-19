@@ -1,0 +1,154 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Dagudashaag",
+  "hex": "3121",
+  "sector_abbreviation": "Dagu",
+  "subsector": "Gadde",
+  "name": "Depot",
+  "sources": [
+    {
+      "page": "Depot (Da 3121) (world)",
+      "revid": 999097,
+      "timestamp": "2026-01-09T18:49:22Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Depot (Da 3121) (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Minowara",
+          "type": "M1 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Minowara",
+      "stars": [
+        {
+          "name": "Minowara",
+          "type": "M1 V"
+        }
+      ],
+      "labels": [
+        "Depot"
+      ],
+      "pages": [
+        "Depot (Da 3121) (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Kasigi",
+          "raw": "A31046A-F",
+          "kind": "world",
+          "uwp": "A31046A-F",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Depot (Da 3121) (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 2,
+          "name": "Belt",
+          "raw": "F000167-F",
+          "kind": "world",
+          "uwp": "F000167-F",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Depot (Da 3121) (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Kure",
+          "raw": "F813000-0",
+          "kind": "world",
+          "uwp": "F813000-0",
+          "distance": {
+            "raw": "1",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Depot (Da 3121) (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Depot (Da 3121) (world)",
+      "label": "Depot",
+      "stars": [
+        {
+          "name": "Minowara",
+          "type": "M1 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Kasigi",
+          "raw": "A31046A-F",
+          "kind": "world",
+          "uwp": "A31046A-F",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Belt",
+          "raw": "F000167-F",
+          "kind": "world",
+          "uwp": "F000167-F",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Kure",
+          "raw": "F813000-0",
+          "kind": "world",
+          "uwp": "F813000-0",
+          "distance": {
+            "raw": "1",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Depot",
+    "UWP": "A31046A-F",
+    "Stellar": "M1 V",
+    "PBG": "310",
+    "Bases": "D",
+    "Remarks": "Ni Da Mr Ht"
+  }
+}

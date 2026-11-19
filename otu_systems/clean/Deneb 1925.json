@@ -1,0 +1,861 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Deneb",
+  "hex": "1925",
+  "sector_abbreviation": "Dene",
+  "subsector": "Usani",
+  "name": "Deneb",
+  "sources": [
+    {
+      "page": "Deneb (system)",
+      "revid": 1050196,
+      "timestamp": "2026-04-26T22:45:22Z"
+    },
+    {
+      "page": "Gashimuu (world)",
+      "revid": 1055120,
+      "timestamp": "2026-05-07T14:46:38Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Gashimuu (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Deneb",
+          "type": "A2 Ia",
+          "notes": "Deneb (Alpha Cygni)"
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Deneb Primary",
+      "stars": [
+        {
+          "name": "Deneb Primary",
+          "type": "A2 Ia"
+        }
+      ],
+      "labels": [
+        "Deneb",
+        "Deneb"
+      ],
+      "pages": [
+        "Deneb (system)",
+        "Gashimuu (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Deneb (system)",
+            "Gashimuu (world)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Deneb (system)",
+            "Gashimuu (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Deneb (system)",
+            "Gashimuu (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Deneb (system)",
+            "Gashimuu (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Deneb (system)",
+            "Gashimuu (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "2.0",
+            "value": 2.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Deneb (system)",
+            "Gashimuu (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Deneb (system)",
+            "Gashimuu (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Deneb VII Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Deneb (system)",
+            "Gashimuu (world)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "19.6",
+            "value": 19.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Deneb (system)",
+            "Gashimuu (world)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Deneb IX",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "38.8",
+            "value": 38.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Deneb (system)",
+            "Gashimuu (world)"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "77.2",
+            "value": 77.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Deneb (system)",
+            "Gashimuu (world)"
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Gashimuu",
+          "raw": "B660000-B",
+          "kind": "world",
+          "uwp": "B660000-B",
+          "distance": {
+            "raw": "154",
+            "value": 154.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Deneb (system)",
+            "Gashimuu (world)"
+          ]
+        },
+        {
+          "orbit": 12,
+          "name": "Deneb",
+          "raw": "B537ADD-C",
+          "kind": "world",
+          "uwp": "B537ADD-C",
+          "distance": {
+            "raw": "307.4",
+            "value": 307.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Deneb (system)",
+            "Gashimuu (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Cova",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "12",
+                "value": 12.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Deneb (system)",
+                "Gashimuu (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Liye",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "35",
+                "value": 35.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Deneb (system)",
+                "Gashimuu (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Shanuasifehaemo",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "50",
+                "value": 50.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Deneb (system)",
+                "Gashimuu (world)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 13,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "618.4",
+            "value": 618.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Deneb (system)",
+            "Gashimuu (world)"
+          ]
+        },
+        {
+          "orbit": 14,
+          "name": "Deneb XIV",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "1229.2",
+            "value": 1229.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Deneb (system)",
+            "Gashimuu (world)"
+          ]
+        },
+        {
+          "orbit": 15,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "2458",
+            "value": 2458.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Deneb (system)",
+            "Gashimuu (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Deneb (system)",
+      "label": "Deneb",
+      "stars": [
+        {
+          "name": "Deneb Primary",
+          "type": "A2 Ia"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "2.0",
+            "value": 2.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Deneb VII Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 8,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "19.6",
+            "value": 19.6,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 9,
+          "name": "Deneb IX",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "38.8",
+            "value": 38.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 10,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "77.2",
+            "value": 77.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 11,
+          "name": "Gashimuu",
+          "raw": "B660000-B",
+          "kind": "world",
+          "uwp": "B660000-B",
+          "distance": {
+            "raw": "154",
+            "value": 154.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 12,
+          "name": "Deneb",
+          "raw": "B537ADD-C",
+          "kind": "world",
+          "uwp": "B537ADD-C",
+          "distance": {
+            "raw": "307.4",
+            "value": 307.4,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Cova",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "12",
+                "value": 12.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Liye",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "35",
+                "value": 35.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Shanuasifehaemo",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "50",
+                "value": 50.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 13,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "618.4",
+            "value": 618.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 14,
+          "name": "Deneb XIV",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "1229.2",
+            "value": 1229.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 15,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "2458",
+            "value": 2458.0,
+            "unit": "AU"
+          }
+        }
+      ]
+    },
+    {
+      "page": "Gashimuu (world)",
+      "label": "Deneb",
+      "stars": [
+        {
+          "name": "Deneb Primary",
+          "type": "A2 Ia"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "2.0",
+            "value": 2.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Deneb VII Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 8,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "19.6",
+            "value": 19.6,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 9,
+          "name": "Deneb IX",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "38.8",
+            "value": 38.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 10,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "77.2",
+            "value": 77.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 11,
+          "name": "Gashimuu",
+          "raw": "B660000-B",
+          "kind": "world",
+          "uwp": "B660000-B",
+          "distance": {
+            "raw": "154",
+            "value": 154.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 12,
+          "name": "Deneb",
+          "raw": "B537ADD-C",
+          "kind": "world",
+          "uwp": "B537ADD-C",
+          "distance": {
+            "raw": "307.4",
+            "value": 307.4,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Cova",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "12",
+                "value": 12.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Liye",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "35",
+                "value": 35.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Shanuasifehaemo",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "50",
+                "value": 50.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 13,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "618.4",
+            "value": 618.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 14,
+          "name": "Deneb XIV",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "1229.2",
+            "value": 1229.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 15,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "2458",
+            "value": 2458.0,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Deneb",
+    "UWP": "B537ADD-C",
+    "Stellar": "A2 Ia",
+    "PBG": "610",
+    "Bases": "N",
+    "Remarks": "Hi An Cs Pz (Nenlat)4 Ht"
+  }
+}

@@ -1,0 +1,155 @@
+{{UWP 
+|name= {{World|Daedalus (Al 0606)|Aldebaran|Euxene|0606}}
+|system= 
+|uc    = A668889-9
+|popc  = 5
+|zonec = green
+ |u1= 
+|alg     = SoFr
+|class   = Ri Pa Ph / Dolp1 Solo9
+|trade   = pa
+|climate = TBD
+|gravity = TBD
+|nblty   = -
+|bases   = KM
+|primary = G6 V
+|belts   = 0
+|GGcount = 4
+}}
+{{World summary |name= Daedalus (Al 0606) |trade=Pa Ph Ri}}
+{{World summary SoFr|sector= Aldebaran |subsector=Euxene}}
+{{World summary bases|bases=KM}}
+* About 90% of the population is composed of baseline [[Solomani]] [[human]]s and other non-human [[sophont]]s.
+* About 10% of the population is composed of [[Dolphin]]s.
+* It is a member of the [[Euxene Cluster]].
+
+{{InfoboxSystem
+ |name= Daedalus |subsector= Euxene
+ |sector= Aldebaran |hex= 0606
+ |star= Primary |type= G6 V
+ |P1=     Sparc                             | Dist1= 0.15         | UWP1= Y200000-0
+ |P2=     Planet 2                          | Dist2= 0.35         | UWP2= H300117-9
+ |P3=     Daedalus                          | Dist3= 0.80         | UWP3= A668889-9
+ |P3M1=     Icarus                          |   Dist3M1= 20 Diam  |   UWP3M1= F100668-9
+ |P4=     Planet 3                          | Dist4= 1.15         | UWP4= G510366-8
+ |P5=     Minios                            | Dist5= 1.50         | UWP5= LGG
+ |P5M1=     Suscha                          |   Dist5M1= 7 Diam   |   UWP5M1= H300000-0
+ |P5M2=     Hespera                         |   Dist5M2= 10 Diam  |   UWP5M2= G4A1236-9
+ |P6=     Pasiphaë                          | Dist6= 2.25         | UWP6= LGG
+ |P6M1=     Ring                            |   Dist6M1= 2 Diam   |   UWP6M1= YR00000-0
+ |P6M2=     Bacchus                         |   Dist6M2= 15 Diam  |   UWP6M2= Y300000-0
+ |P6M3=     Talus                           |   Dist6M3= 25 Diam  |   UWP6M3= H202000-0
+ |P7=     Planet 7                          | Dist7= 4.60         | UWP7= Y9C3000-0
+ |P8=     Planet 8                          | Dist8= 6.95         | UWP8= Y210000-0
+ |P9=     Ariedne                           | Dist9= 10.5         | UWP9= SGG
+ |P9M1=     Ring                            |   Dist9M1= 1 Diam   |   UWP9M1= YR00000-0
+ |P6M3=     Aethna                          |   Dist9M2= 5 Diam   |   UWP9M2= H100000-0
+ |P10=    Dionysus                          | Dist10= 13.7        | UWP10= SGG
+ |P11=    Planet 11                         | Dist11= 17.9        | UWP11= Y100000-0
+ |P12=    Planet 12                         | Dist12= 19.1        | UWP12= Y103000-0
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Daedalus''' has a solitary primary star.
+* It is a yellow main sequence.
+
+{{MonostellarSystem
+|name           = Daedalus
+|primary        = G6 V
+|PrimaryName    = Primary
+|PrimaryNotes   = 
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]].
+* x8 secondary [[world|rocky worlds]].
+* x4 [[gas giant]]s.
+
+The system is characterized by its plethora of gas giants and its dense, metal-rich inner planets. The system age is roughly [[Year|5.5 billion years]].
+
+=== Mainworld Data ===
+'''Daedalus''' has a slow rotation period: one local day is equivalent to [[Day|5.7 standard days]] ([[Hours|136 standard hours]]).
+<ref>''Editor's Note'': Daedalus is noted as being a [[Locked World]]. Since it is not a [[Natural Satellite|satellite]] of a larger secondary world and it's star is not a good candidate to have a relatively temperate [[Twilight Zone World]], this noted characteristic has been changed to a longer rotation period.</ref>
+
+As a tidally-locked world, it has the expected cold-pole on its far-side, covered in a large mass of glaciers which comprises 50% of the world's total water.
+The hot-pole is a blasted desert with a temperature of over 60 standard degrees.
+
+The difference in temperature gives rise to a worldwide system of Hadley cells that extend around the planet. To explain, hot dry air on the sunward side causes the air to heat up, rise, and make a low pressure area. On the far side, the air currents cool down, fall, and cause a high pressure area. Because the air moves from high pressure to low pressure, it flows back around the planet toward the hot side, taking moisture with it. These hot and cold fronts will mix most around the terminator, causing intense storms that will bring rain and clouds, replenishing the circular world-ocean that has formed in that region.
+
+There are mountain ranges and hills on the sunward side, which help to induce rainfall over the ocean region, though strong storms will crest the hills on occasion.
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Daedalus''' is a member of the [[Euxene Cluster]], a small but important [[Main|cluster]] and a major [[Trade Route|trade center]] lying in the [[spinward]]-[[coreward]] quadrant of [[Aldebaran Sector]].
+
+[[Solomani Security]] keeps a close eye on things to ensure the security of the [[Solomani Confederation|Confederation]] and the well-being of its loyal citizens. Almost anyone ''could'' be a [[Solomani Security|SolSec]] informant, passing on all sorts of useful information: some gain a reward or benefit for their actions, others are coerced, but many see it as an act of duty to help protect the [[Solomani Confederation|Solomani state]] and its interests.
+
+=== World Starport ===
+{{Starport|name= Daedalus (Al 0606)|Starport=A}}
+
+==== World Demographics ====
+* [[Humaniti]], 90%
+* [[Dolphin]], 10%
+
+==== Urbanization ====
+There are several cities on both sides of the ocean, to take advantage of different climates.
+
+Two cities are located further into the nightward side. These cities still get some "late dusk" sunlight levels, and enjoy a cooler clime, as suits their populaces.
+
+=== World Technology Level ===
+{{WorldTech|name= Daedalus (Al 0606)|WorldTech=9}}
+
+=== World Government ===
+{{WorldGov|name= Daedalus (Al 0606)|Government=8}}  
+
+==== World Law Level ====
+{{WorldLaw|name= Daedalus (Al 0606)|Law=9}}  
+
+==== World Military ====
+The system hosts both a Republic [[Naval Base]] and a full-fledged [[Military Base]].
+
+=== World Economy ===
+Daedalus enjoys a steady stream of tourists from the Euxene core systems.
+
+==== Trade Data ====
+Local art and craftworks are often exported.
+
+=== World Culture ===
+The culture of Daedalus is relatively relaxed and accepting of visitors.
+
+=== Historical Data ===
+No information yet available. 
+
+==== World Timeline ====
+No information yet available.
+
+==== UWP Listing ====
+A 6 6 8 8 8 9 – 9
+
+== References & Contributors / Sources ==
+{{Metadata}}
+{{Detail}}
+{{Sources
+|S1= {{CT}} [[Solomani (Alien Module)|Alien Module 6: Solomani]] (named but no further data)
+|S2= {{MT}} [[Alien - Solomani & Aslan|Solomani & Aslan]] (dot map provided)
+|S3= [[Mongoose Traveller: Solomani]]
+|S4= External Link: [http://111george.com/core/astrogat/jG.htm CORE Data Site]
+|S5= External Link: [http://home.earthlink.net/~ngc5139/FDA/aldebarn.html Federation Development Agency]
+|S6= External Link: [http://zho.berka.com/data/CLASSIC/sector.pl?sector=ALDEBARA Zho Berka's Maps]
+|S7= Author & Contributor: [[User:Garnfellow|Garnfellow]] 
+|S8= Author & Contributor: [[Leroy W.L. Guatney]] of the Federation Development Agency (FDA)
+}}
+
+
+[[Category: Dolphin worlds]]
+[[Category: Euxene Cluster worlds]]
+[[Category: Humaniti worlds]]
+[[Category: Rule of Man worlds]]
+[[Category: Second Imperium worlds]]
+[[Category: Solomani worlds]]
+[[Category: Solomani Sphere worlds]]
+[[Category: Terran Confederation worlds]]
+[[Category: Terran Mercantile Community worlds]]
+{{LE|T5 Second Survey worlds}}

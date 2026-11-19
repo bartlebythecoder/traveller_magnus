@@ -1,0 +1,784 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Aldebaran",
+  "hex": "0411",
+  "sector_abbreviation": "Alde",
+  "subsector": "Star Bridge",
+  "name": "Soror",
+  "sources": [
+    {
+      "page": "Soror (world)",
+      "revid": 1020310,
+      "timestamp": "2026-03-13T10:03:42Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Soror (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Primary",
+          "type": "K1 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Prime",
+      "stars": [
+        {
+          "name": "Prime",
+          "type": "K1 V"
+        }
+      ],
+      "labels": [
+        "Soror"
+      ],
+      "pages": [
+        "Soror (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Claire",
+          "raw": "Hot GG",
+          "kind": "gas_giant",
+          "remark": "Hot GG",
+          "distance": {
+            "raw": "0.03",
+            "value": 0.03,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-no-size-class",
+            "gg-other-words"
+          ],
+          "sources": [
+            "Soror (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Planet 1",
+          "raw": "H310000-0",
+          "kind": "world",
+          "uwp": "H310000-0",
+          "distance": {
+            "raw": "0.67",
+            "value": 0.67,
+            "unit": "AU"
+          },
+          "sources": [
+            "Soror (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Soror",
+          "raw": "B659721-B",
+          "kind": "world",
+          "uwp": "B659721-B",
+          "distance": {
+            "raw": "0.83",
+            "value": 0.83,
+            "unit": "AU"
+          },
+          "sources": [
+            "Soror (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Frere",
+              "raw": "F200263-B",
+              "kind": "world",
+              "uwp": "F200263-B",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Soror (world)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 4,
+          "name": "Planet 2",
+          "raw": "G432533-B",
+          "kind": "world",
+          "uwp": "G432533-B",
+          "distance": {
+            "raw": "1.15",
+            "value": 1.15,
+            "unit": "AU"
+          },
+          "sources": [
+            "Soror (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Planet 3",
+          "raw": "H300000-0",
+          "kind": "world",
+          "uwp": "H300000-0",
+          "distance": {
+            "raw": "1.31",
+            "value": 1.31,
+            "unit": "AU"
+          },
+          "sources": [
+            "Soror (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "HS00000-0",
+              "kind": "world",
+              "uwp": "HS00000-0",
+              "distance": {
+                "raw": "12 Diam",
+                "value": 12.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Soror (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Planet 4",
+          "raw": "Y101000-0",
+          "kind": "world",
+          "uwp": "Y101000-0",
+          "distance": {
+            "raw": "2.49",
+            "value": 2.49,
+            "unit": "AU"
+          },
+          "sources": [
+            "Soror (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Planet 5",
+          "raw": "Y610000-0",
+          "kind": "world",
+          "uwp": "Y610000-0",
+          "distance": {
+            "raw": "3.87",
+            "value": 3.87,
+            "unit": "AU"
+          },
+          "sources": [
+            "Soror (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "40 Diam",
+                "value": 40.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Soror (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Planet 6",
+          "raw": "H512000-0",
+          "kind": "world",
+          "uwp": "H512000-0",
+          "distance": {
+            "raw": "5.88",
+            "value": 5.88,
+            "unit": "AU"
+          },
+          "sources": [
+            "Soror (world)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Planet 7",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "8.62",
+            "value": 8.62,
+            "unit": "AU"
+          },
+          "sources": [
+            "Soror (world)"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Planet 8",
+          "raw": "YBA3000-0",
+          "kind": "world",
+          "uwp": "YBA3000-0",
+          "distance": {
+            "raw": "10.5",
+            "value": 10.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Soror (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "H302000-0",
+              "kind": "world",
+              "uwp": "H302000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Soror (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y400000-0",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "13 Diam",
+                "value": 13.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Soror (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Dominique",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "11.4",
+            "value": 11.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Soror (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Soror (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y301000-0",
+              "kind": "world",
+              "uwp": "Y301000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Soror (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "H212000-0",
+              "kind": "world",
+              "uwp": "H212000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Soror (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 12,
+          "name": "Julia",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "17.8",
+            "value": 17.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Soror (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Soror (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "H201000-0",
+              "kind": "world",
+              "uwp": "H201000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Soror (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 13,
+          "name": "Jeanne",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "27.0",
+            "value": 27.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Soror (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y400000-0",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Soror (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 14,
+          "name": "Planet 9",
+          "raw": "Y9A0000-0",
+          "kind": "world",
+          "uwp": "Y9A0000-0",
+          "distance": {
+            "raw": "55.1",
+            "value": 55.1,
+            "unit": "AU"
+          },
+          "sources": [
+            "Soror (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Soror (world)",
+      "label": "Soror",
+      "stars": [
+        {
+          "name": "Prime",
+          "type": "K1 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Claire",
+          "raw": "Hot GG",
+          "kind": "gas_giant",
+          "remark": "Hot GG",
+          "distance": {
+            "raw": "0.03",
+            "value": 0.03,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-no-size-class",
+            "gg-other-words"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Planet 1",
+          "raw": "H310000-0",
+          "kind": "world",
+          "uwp": "H310000-0",
+          "distance": {
+            "raw": "0.67",
+            "value": 0.67,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Soror",
+          "raw": "B659721-B",
+          "kind": "world",
+          "uwp": "B659721-B",
+          "distance": {
+            "raw": "0.83",
+            "value": 0.83,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Frere",
+              "raw": "F200263-B",
+              "kind": "world",
+              "uwp": "F200263-B",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Planet 2",
+          "raw": "G432533-B",
+          "kind": "world",
+          "uwp": "G432533-B",
+          "distance": {
+            "raw": "1.15",
+            "value": 1.15,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Planet 3",
+          "raw": "H300000-0",
+          "kind": "world",
+          "uwp": "H300000-0",
+          "distance": {
+            "raw": "1.31",
+            "value": 1.31,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "HS00000-0",
+              "kind": "world",
+              "uwp": "HS00000-0",
+              "distance": {
+                "raw": "12 Diam",
+                "value": 12.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Planet 4",
+          "raw": "Y101000-0",
+          "kind": "world",
+          "uwp": "Y101000-0",
+          "distance": {
+            "raw": "2.49",
+            "value": 2.49,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Planet 5",
+          "raw": "Y610000-0",
+          "kind": "world",
+          "uwp": "Y610000-0",
+          "distance": {
+            "raw": "3.87",
+            "value": 3.87,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "40 Diam",
+                "value": 40.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Planet 6",
+          "raw": "H512000-0",
+          "kind": "world",
+          "uwp": "H512000-0",
+          "distance": {
+            "raw": "5.88",
+            "value": 5.88,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 9,
+          "name": "Planet 7",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "8.62",
+            "value": 8.62,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 10,
+          "name": "Planet 8",
+          "raw": "YBA3000-0",
+          "kind": "world",
+          "uwp": "YBA3000-0",
+          "distance": {
+            "raw": "10.5",
+            "value": 10.5,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "H302000-0",
+              "kind": "world",
+              "uwp": "H302000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y400000-0",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "13 Diam",
+                "value": 13.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Dominique",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "11.4",
+            "value": 11.4,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y301000-0",
+              "kind": "world",
+              "uwp": "Y301000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "H212000-0",
+              "kind": "world",
+              "uwp": "H212000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 12,
+          "name": "Julia",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "17.8",
+            "value": 17.8,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "H201000-0",
+              "kind": "world",
+              "uwp": "H201000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 13,
+          "name": "Jeanne",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "27.0",
+            "value": 27.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y400000-0",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 14,
+          "name": "Planet 9",
+          "raw": "Y9A0000-0",
+          "kind": "world",
+          "uwp": "Y9A0000-0",
+          "distance": {
+            "raw": "55.1",
+            "value": 55.1,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Soror",
+    "UWP": "B659721-B",
+    "Stellar": "K1 V",
+    "PBG": "104",
+    "Bases": "",
+    "Remarks": ""
+  }
+}

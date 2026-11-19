@@ -1,0 +1,277 @@
+[[File:Alien Moon 261c-0 Small.jpg|250 px|right]]
+{{UWP
+|name    = {{World|The Maralee|Massilia|Palasha|2512}}
+|system  = The Maralee (system)
+|uc      = D57379A-6 
+ |u0     = E573100-4
+|popc    = 8
+|zonec   = green
+|alg     = ImDc
+|class   = Pi
+|trade   = pi
+|climate = 
+|nblty   = BD
+|bases   = -
+|primary = K7 V 
+|belts   = 0
+|GGcount = 3
+}}
+{{World summary |name= The Maralee |trade= Pi}}
+{{World summary ImDc|sector= Massilia|subsector= Palasha}}
+* It lies on the [[Delphi Main]].
+* It is a member world of the [[Duchy of Forquee]].
+* At the founding of the {{Imperium}} this world was known as ''Uumbuu''.
+
+{{InfoboxSystem
+ |name= The Maralee |subsector= Palasha
+ |sector= Massilia |hex= 2512
+ |star= Tuus |type= K7 V
+ |P1=     Vivera                            | Dist1= 0.09         | UWP1= Y6B0000-0
+ |P2=     Thadikar                          | Dist2= 0.183        | UWP2= Small GG
+ |P3=     Vadopia                           | Dist3= 0.248        | UWP3= Small GG
+ |P3M1=     A Ring                          |   Dist3M1= 1 Diam   |   UWP3M1= YR00000-0
+ |P3M2=     Moon                            |   Dist3M2= 2 Diam   |   UWP3M2= YS00000-0
+ |P3M3=     B Ring                          |   Dist3M3= 3 Diam   |   UWP3M3= YR00000-0
+ |P3M4=     Moon                            |   Dist3M4= 9 Diam   |   UWP3M4= Y100000-0
+ |P4=     Prao                              | Dist4= 0.313        | UWP4= Small GG
+ |P5=     Foxan                             | Dist5= 0.327        | UWP5= Y200000-0
+ |P6=     Delopia                           | Dist6= 0.376        | UWP6= YC9A000-0
+ |P6M1=     Ring                            |   Dist6M1= 2 Diam   |   UWP6M1= YR00000-0
+ |P7=     Poolreus                          | Dist7= 0.432        | UWP7= Y7A1000-0
+ |P8=     The Maralee                       | Dist8= 0.516        | UWP8= D57379A-6
+ |P9=     Niibos                            | Dist9= 0.592        | UWP9= Y310000-0
+ |P10=    Biule                             | Dist10= 0.634       | UWP10= YBFA000-0
+}}
+
+== Description ([[Astrography]] & [[Planetology]])<ref>Additional system and world details by [[User:Nichollsr1970|Roger Nicholls]]</ref> ==
+
+=== Stellar Data === 
+'''The Maralee''' has a solitary primary star.
+* It is an orange main sequence named ''Tuus''.
+
+{{MonostellarSystem
+|name           = The Maralee
+|primary        = K7 V 
+|PrimaryName    = Tuus
+|PrimaryNotes   = 
+}}
+
+The star and its system of worlds is around [[Year|6.7 Gyr]] old.
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]]. It orbits towards the inner edge of the [[habitable zone]].
+
+* x6 secondary [[world|rocky worlds]]. These are (in order out from the star):
+** Vivera, an [[inferno world]] orbiting in the [[Inner World|inner system]].
+** Foxan, a [[vacuum world]] orbiting in the [[Inner World|inner system]].
+** Delopia, a ringed [[Big World|bigworld]] orbiting in the [[Inner World|inner system]].
+** Poolreus, an [[exotic atmosphere]] world orbiting in the [[Inner World|inner system]].
+** Niibos, a [[Rad World|radiation world]] orbiting in the middle of the [[habitable zone]].
+** Biule, a chilly, watery [[Big World|bigworld]] orbiting towards the outer edge of the [[habitable zone]].
+
+* x3 [[gas giant]]s. These are (in order out from the star):
+** Thadikar, a small gas giant orbiting in the [[Inner World|inner system]].
+** Vadopia, a small ringed gas giant orbiting in the [[Inner World|inner system]].
+** Prao, a small gas giant orbiting in the [[Inner World|inner system]].
+
+[[File:Chart The Maralee System Basic.jpg|800 px]]
+
+=== Mainworld Data ===
+* The planet has an axial tilt of 15.43 degrees.
+* The Maralee has a sidereal day length of 33.29 hours.
+* The planet takes 271.48 days to rotate around its sun.
+* The planet only has 2 tectonic plates; however, the movement of these plates has resulted in a significant number of small volcanoes and regions containing geysers.
+* Native life does exist on the planet, however there are no sophont species. The flora is mainly hardy grasses that are often silver or have a bluish sheen in colour. Across the sea bed coral-like structures grow in abundance. The native fauna is insectoid in nature or very simple microbial creatures. The flora and fauna is not edible and is in fact poisonous to all known species except for those native to the planet.
+* The planet has been surveyed and classified as habitable with proper protective equipment being used where required and necessary precautions being taken where needed.
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= The Maralee|Size= 5}}
+* The planet has been extensively surveyed and the diameter has been accurately established now as [[Kilometer|7957 km]].
+* The planetary survey confirmed that The Maralee has a metal core with a density of 1.42 Standard (7.82 g/cc).
+* Surface gravity of the planet is 0.89g
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= The Maralee|Atmosphere= 7}}
+* The Maralee has an atmosphere tainted with sulphur dioxide compounds as a result of the extensive volcanic and seismic activity on the planet's surface. The severity of this taint is hazardous enough that filter masks must be worn at all times when outside of any sealed facility. The severity of the taint does shift throughout the day dependent upon prevailing weather conditions but this also brings with it other hazards related to weather conditions.
+* The weather conditions of the planet are heavily monitored due to the sulphur dioxide taint. Rain can be problematic as the sulphur effectively falls as sulfurous acidic rain. Such storms can be hazardous to those caught outside without effective protective equipment although they are extremely rare. The most extreme and dangerous weather that can occur is a thick sulphuric fog. This weather condition causes external operation to cease and locals know to not venture outside at such times. 
+* The constant scent of sulphur in the air often catches visitors off guard but locals are almost "immune" to the smell and only seem to notice it if its pointed out to them.
+* The mean surface temperature of the planet is [[Celsius|26.8°C]] / 80.2f. There are regions of the planet surface however where the temperature is more extreme. There are a number of desert regions where the highest recorded temperature has been [[Celsius|67°C]]/153f and around the south pole the lowest recorded temperature has been [[Celsius|-34°C]]/-29f.
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= The Maralee|Hydrosphere= 3}}
+* The Maralee has 3 small seas. The water is drinkable but only after extensive treatment due to the sulphuric taint from the atmosphere. The population of the planet makes use of the oceans by locating their urban areas alongside the water and next to large processing plants that provide the drinking water required by the population.
+* The seas are fairly shallow with the deepest parts being no more than 750ft / [[Meter|230 meters]]. The water quickly becomes dark and murky. Even in these hostile conditions though life does exist with small microbial creatures existing amongst vivid coloured coral like structures that live on the sea bed. 
+
+Local water treatment facilities have been especially strengthened with extensive filters to ensure sulphur compounds do not make it into the drinking water supply.
+
+==== Mainworld Geography and Topography ====
+A world map of The Maralee showing the seas (blue), the great plains (green), desert regions (yellow), and mountains (brown).
+* Major volcanic regions are marked.
+
+[[File:The Maralee Map Basic.png|600 px]]
+
+== History & Background (Dossier)<ref>Additional population and social details by [[User:Nichollsr1970|Roger Nicholls]]</ref> ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''The Maralee''' lies at the furthest reach of the [[Delphi Main]], an important [[trade route]] straddling the border between [[Massilia Sector]] and [[Delphi Sector]].
+* Its location, although part of the [[Delphi Main]], has at this point not provided the impetus for development that was hoped for. Repeated attempts to encourage megacorporations to take an interest in the planet have met with limited success. There are small corporations on the planet actively engaged in sulphur mining operations but the minimal investment in the starport has held the world back from being truly able to exploit its natural resources. 
+* A recent engagement with ''[[Grencon Industries]]'' has resulted in a small amount of investment from the [[Kaggushus (world)|Kaggushus]] system. This engagement has resulted in a small contingent (less than 100) of [[Kaggushus|Kaggushan]] scientists and engineers moving to The Maralee to look for investment opportunities that can be exploited for the benefit of all. 
+
+=== World Starport (St) ===
+{{Starport|name= The Maralee|Starport= D}}
+*The port on The Maralee is poorly maintained. At best it can accommodate a total ship tonnage of c400 tons at any one time. The majority of ships that stop at The Maralee are small 100- or 200-ton independent trading vessels.
+*Maintenance facilities are limited, with work usually carried out by the ship's crew themselves with whatever materials can be obtained at the starport. Extensive repairs will often require a layover whilst parts are procured from out system and brought to The Maralee.
+*Its location on the [[Delphi Main]] means there are still ships arriving most weeks but they arrive at an average rate of 1-2 vessels per week. It is rare for them to stay for extended periods and it's usual for them to be delivering mail or seeking to refuel.
+
+=== World Population (P) ===
+{{WorldPop|name= The Maralee|multiplier= 8|Population= 7}}
+
+==== Urbanization ====
+There are six major cities.
+
+'''Bluemont''' (Capital city and the location of the [[starport]]): population c.4,416,000
+* Located on the shores of the northern polar sea. The city is dominated by large skyscrapers constructed in a harsh industrial style. The city has good local infrastructure and is the heart of government on the planet.
+'''Vadan''': population c.3,312,000
+* Located on the shores of the northern polar sea but almost [[Kilometer|3000 km]] from the capital at Bluemont and its associated [[starport]]. A road network connects the two cities along with a small seaport and airport for movement of products and passengers.
+'''Carollan''': population c.9,200,000
+* Carollan is the major mining hub of the The Maralee. Located alongside extensive sulphur mines the city is a practical, unrefined place and populated by miners and their families. The environment of the region is tough with higher temperatures than most of the other cities and the air is often full of extensive dust clouds from the constant mining operations that spread out for hundreds of miles from the city.
+** Carollan is the only city that is not located next to an expanse of water. As a result the city draws water from deep below the planetary surface from deep wells that have been drilled.
+'''Binham''': population c.3,750,000
+* Binham is often nicknamed the "Greenhouse". The city houses a significant amount of the agricultural facilities that provide the population with food. The "food factories" are all long established greenhouse type arrangements that are huge in scale and often can be 2-3 kms in length. 
+'''Winarth''': population c.4,200,000
+* Located on the shores of the south polar sea. The only access to this city is via aircraft. The city is centred around ocean exploration and exploitation. The government hope to open up a new revenue stream for the planet after finding potential mineral resource deep beneath the ocean floor. As a result engineers and their families have been located in a new purpose built city to carry that exploration and development out. 
+'''Menhoun''': population c.3,242,000
+* In many ways Menhoun is a twin to Winarth. Both cities were established for the same reason but their location several thousand kilometres apart is allowing exploration to be expanded across a further region of the south polar sea.
+
+The remaining c51.8 million people are scattered across hundreds of small communities across the planet. These communities are usually centred around the extensive agricultural factories and mining sites that provide both food and income to the population.
+
+==== Linguistic Topography ====
+The most commonly heard [[language]]s are:
+* [[Anglic]], one of the two official languages of the {{Imperium}}.
+* [[Vilani (language)|Vilani]], one of the two official languages of the {{Imperium}}.
+
+=== World Technology Level (T) ===
+{{WorldTech|name= The Maralee|WorldTech= 6}}
+*The following tech levels can be applied to the The Maralee
+**High Common TL:6
+** Low Common TL:3
+** Further Subcategories:-
+***Energy TL:7 (Geothermal power is the standard across the planet utilising super heated steam leveraging volcanic and geyser activity to produce a very efficient energy supply that is readily available across the planet.)
+***Electronics TL:5 (Radio is the most common form of communication with radio stations transmitting across the planet, computers are still huge machines that fill rooms and buildings and television is still in its infancy)
+***Manufacturing TL:5 (Manufacturing is based upon the principle of heavy industry. Large machines, lots of labour resource and repetitive tasks carried out on assembly lines. It should be noted that The Maralee is not an Industrial world however. The factory facilities on the planet produce what the population needs and little else. Such needs are linked to the extensive mining industry and the infrastructure needed to support that.)
+***Medical TL:5 (Hospital facilities are well established although nowhere near as high tech as many in The Imperium. The most advanced forms of technology in use in the hospital on The Maralee are X-Ray machines and equivalent)
+***Environmental TL:6 (Air conditioning linked to air filtration systems are the norm across all structures, even temporary dwellings will have portable air cleaners and recyclers.)
+***Land Transport TL:7 (High speed trains have been developed and tracks are slowly being laid connecting cities across the surface. It should be noted they are used for moving goods not people though)
+***Water Transport TL:7 (Hovercraft are the standard form of water transport due to the shallow relatively calm seas on the planet)
+***Air Transport TL:5 (Planes are in use on the planet although mainly used to transport goods.)
+***Space Transport TL:6 (The government has expanded its education system to develop more capabilities linked to "space based technologies" and at present this involves space planes rather actual starships)
+***Personal Military TL:5 (The most advanced form of technology in use by local militaristic groups eg law enforcement are rifles.)
+***Heavy Military TL:5 (The most advanced form of technology used that is classified as heavy military are the armoured patrol vehicles utilised by planetary law enforcement)
+
+=== World Government (G) ===
+{{WorldGov|name= The Maralee|Government= 9}}
+
+The government on the planet is a unitary power base with the dominant government infrastructure located in the city of Bluemont.
+
+The government operates via the use of various Executive Authorities that make up the government departments. The main departments are:
+* Department of Justice
+* Department of Trade
+* Department of Mining & Prospecting
+* Department of Labour
+* Department of Commerce
+* Department of Education
+
+Interlinking all the departments and sub-departments are multiple councils all with their own often very niche and bespoke requirements
+
+Despite the grumblings of the local populace the government has always been this way. Lots of bureaucracy, meetings and paperwork with no real alternate faction or challenge to its authority.
+
+=== World Law (L) ===
+{{WorldLaw|name= The Maralee|Law= A}}
+* The justice system on The Maralee is best described as "Inquisitorial". Its often defined as an administrative legal system. A group of 3 "justices" investigate each offence to establish if a crime as been committed based upon prior legal precedents and statutes. Decisions of guilt are based upon a majority decision by the 3 justices. 
+* The law applies to all and there is no discrimination based on any external influence. 
+* There is no presumption of innocence in place. The justices are looking to establish the severity of the offence as once a suspect has been brought in front of the justices by the law enforcement officers it is assumed the individual did commit an offence. At this stage in the process it is more a case of which laws were broken and to what level.
+* The maximum penalty is death and although it is rarely handed out it does exist. More common is life imprisonment at a labour camp in a particularly hostile environment on the planet.
+* The majority of sentences that are handed out on The Maralee are fines or some level of community service. Prison sentences tend to be measured in months and up to 10 years apart from the most extreme crimes.
+* The law level like all worlds has differing levels and categories and the following levels apply.
+**Overall Level: A
+**Weapons and Armour: 8 (Effectively 98% of weapons and all visible forms of armour are illegal in the general populace)
+**Economic: A (Arduous permitting and zoning exists in all areas of society and day to day life)
+**Criminal Law: B (Arbitrary and potentially indefinite detention is allowed)
+**Private Law: B (Arbitrary government adjudication exists and government level approval is required for all contracts)
+**Personal Rights: A (Restriction on personal movement and also where individuals and their families can live)
+*The Maralee law enforcement organisation also operates in a multi-role capability serving as law enforcement, border control at the starport and finally as a standing army to protect the citizens of The Maralee. The only other military personnel located on the planet for any extended period is a small contingent of Imperial Marines who serve as a defence force for the 2 Imperial Nobles who have facilities located on the planet. Whilst the nobles are in attendance the Marine force is c100 individuals however during leaves of absence this force reduces down to c40 personnel.
+
+=== Imperial Landed Nobility ===
+{{Imperial Nobility|name= The Maralee|Noble= BD}}
+* The estate and facilities owned and operated by the two Imperial nobles are located adjacent to the Starport and situated 25km from the capital of Bluemont. 
+* Lord Urshi Gashgumii maintains almost permanent residence on planet acting as the day to day liaison for the Marquis, his liege lord. 
+* Marquis Liik Molec is rarely in attendance preferring to maintain his residency in more appropriate surroundings.
+
+=== Trade Data ===
+* Importance:     -2 (very unimportant)
+* Additional Economic indicators:-
+** Gross World Product per Capita: 3840cr
+** World Trade Number: 7
+** Inequality Rating: 49
+*** c.49% of the population are living at a lower standard than the rest of the population. These individuals are likely to be living in older, substandard facilities and having to work extended hours to provide for themselves.
+**Development Score: 2
+** Tariffs - High
+***The government of The Maralee imposes high tariffs on goods that are imported onto the planet that dont sit within current society norms eg high rating technology items. It is not uncommon for taxes equating to an additional 20% charge to be applied for such items.
+
+=== World Economy ===
+* Resources:      9 (moderate)
+**The planet has extensive sulphur mines where the compound is extracted. This material is utilised in other industries both on and off planet although at the point there has been no significant megacorp exploitation activities.
+**In addition to sulphur there are other significant mineral extraction activities taking place across the planet linked to other metals such as copper, zinc and lithium.
+* Labor:          6 (millions)
+* Infrastructure: 5 (limited)
+* Efficiency:     +1 (average)
+
+=== World Culture ===
+* Heterogenity: 9 (discordant)
+**Society on The Maralee is not all completed aligned. Diversity in the community does exist between various groups eg miners, office workers, agricultural workers etc. All have very differing views of life on The Maralee and this creates some level of social conflict.
+* Acceptance:   5 (very aloof)
+**The people of The Maralee can appear aloof to outsiders. There world view is one not so much based on superiority to outsiders but more of a "what would you know about our life" approach. Life on The Maralee isnt easy and it is heavily structured and controlled but the local people that is the norm.
+**The people of The Maralee are very conservative in their views. They like the status quo that exists, they may grumble about it but its their way of life and it works for them. They do not easily take to external influences trying to change there cultural mindset.
+* Strangeness:  7 (confusing)
+**The Maralee is no more strange than another world to an off-worlder. Things are different and confusing.
+* Symbols:      8 (somewhat abstract)
+**The use of symbols to define travel zones, living areas, access points etc is common across the planet. Locals are raised to recognise and understand them. Off-worlders will find them confusing and conflicting on occasion. 
+
+=== Historical Data ===
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+
+* [[Ancients|circa -250,000]]: The [[Ancient]]s are active within the sector.
+* [[-9000s|circa -9,000]]: The [[Geonee]] encounter the [[Vilani]].
+* [[-5400]] to [[-4015]]: The [[Vilani]] [[Consolidation Wars]].
+* [[-4045]] to [[-2204]]: The region is part of the ''[[First Imperium|Ziru Sirka]]''.
+* [[-2204]] to [[-1776]]: The region becomes part of the [[Rule of Man]].
+* [[-1776]] to [[0]]: The [[Long Night]].
+* [[0|The Year 0]]: The [[Third Imperium]] is founded.
+* [[300]]-[[420]]: The {{Imperial}} [[First Survey]] charts the system.
+* [[604]]-[[622]]: The [[Civil War]].
+* [[624]]: The [[Express Boat Network]] is established.
+* [[995]]-[[1065]]: The {{Imperial}} [[Second Survey]] charts the system.
+* [[1065]]: The [[Second Survey]] is published. Information about the system becomes widely available.
+
+== References & Contributors (Sources) ==
+{{Detail}}
+{{Sources
+|S1= {{Ludography cite|name= Atlas of the Imperium |page= page 22|version= Classic Traveller}} (world location and some additional system data)
+|S2= [[John Harshman]], [[Marc Miller]]. ''[[Solomani (Alien Module)|Solomani]]'' ([[Game Designers Workshop]], 1986), pages 5, 7, 20. (sector background and history)
+|S3= {{Ludography cite|name= The Travellers' Digest 11 |page= pages 6-25}} (sector background and history, plus details for the [[Geonee]])
+|S4= {{Ludography cite|name= Vilani & Vargr |page= page 11}} (dot map provided, locating the world)
+|S5= {{Ludography cite|name= Knightfall |page= pages 74-80}} (sector data including the world, sector background and history)
+|S6= {{Ludography cite|name= First Survey |page= pages 4, 38-41, 102-109}} (sector data including the world circa [[0|The Year 0]]) 
+|S7= {{Ludography cite|name= Solomani |page= pages 57, 59|version= Mongoose Traveller}} (sector background and history)
+}}
+
+
+[[Category: Delphi Main worlds]].
+[[Category: Duchy of Forquee worlds]].
+[[Category: First Imperium worlds]]
+[[Category: Kaggushus worlds]].
+[[Category: Rule of Man worlds]]
+[[Category: Second Imperium worlds]]
+{{LE|Era: Milieu 1116|T5 Second Survey worlds|}}

@@ -1,0 +1,203 @@
+[[File:Alien Moon 239b-0 Small.jpg|250 px|right]]
+{{UWP 
+|name= {{World|Inchin|Spinward Marches|District 268|0938}} 
+ |era= Milieu 1116
+|uc    = D42035A-A
+|popc  = 8
+|zonec = green
+ |u1= 
+|alg     = NaHu
+|class   = De He Lo Po
+|trade   = de
+|bases   = -
+|primary = F0 V
+|belts   = 2
+|GGcount = 3
+}}
+{{InfoboxSystem
+|name= Inchin
+|sector=Spinward Marches|subsector=District 268|hex=0938
+|star= ''Erwon'' |type= ''F0 V'' 
+|P0= -          |Dist0 = ? |UWP0= <small>(Empty Orbit)</small>
+|P1= Sillybin   |Dist1 = ? |UWP1= '''LGG'''
+ |P1M1= Sil-0    |Dist1M1 = ''?'' |UWP1M1= ''X400000-0''
+ |P1M2= Sil-1    |Dist1M2 = ''?'' |UWP1M2= ''X300000-0''
+ |P1M3= Sil-2    |Dist1M3 = ''?'' |UWP1M3= ''X200000-0''
+ |P1M4= Sil-3    |Dist1M4 = ''?'' |UWP1M4= ''X400000-0''
+|P2= Hodi       |Dist2 = ? |UWP2= X100000-0
+|P3= Inner Belt |Dist3 = ? |UWP3= H000269-9
+|P4= Hastings   |Dist4 = ? |UWP4= '''SGG'''
+ |P4M1= Ardour   |Dist4M1 = ''?'' |UWP4M1= ''XS00000-0''
+ |P4M2= Sentil   |Dist4M2 = ''?'' |UWP4M2= ''X200000-0''
+ |P4M3= Inchin   |Dist4M3 = ''?'' |UWP4M3= ''D42035A-A''
+|P5= The Crone  |Dist5 = ? |UWP5= X201000-0
+|P6= Yyndymia   |Dist6 = ? |UWP6= '''LGG'''
+ |P6M1= Yyn-0    |Dist6M1 = ''?'' |UWP6M1= ''X200000-0''
+ |P6M2= Brodie   |Dist6M2 = ''?'' |UWP6M2= ''G30016A-9''
+ |P6M3= Yyn-2    |Dist6M3 = ''?'' |UWP6M3= ''XS00000-0''
+ |P6M4= Yyn-3    |Dist6M4 = ''?'' |UWP6M4= ''X301000-0''
+ |P6M5= Yyn-4    |Dist6M5 = ''?'' |UWP6M5= ''X200000-0''
+|P7= Outer Belt |Dist7 = ? |UWP7= G000200-8
+}}
+{{World summary |name= Inchin|trade= De He Lo Po}}
+{{World summary NaHu|sector= Spinward Marches|subsector= District 268}}
+* {{SpMain}}
+* It lies on the [[Collace Arm]].
+
+== Astrography & Planetology == 
+=== Stellar Data ===
+'''Inchin''' has a solitary primary star.
+* It is a white main sequence.
+
+{{MonostellarSystem
+|name           = Inchin
+|primary        = F0 V 
+|PrimaryName    = Erwon
+|PrimaryNotes   = 
+}}
+
+=== System Data{{Unpublished cite|author=[[User:BackworldTraveller|BackworldTraveller]]}} ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]].
+* x2 secondary [[world|rocky worlds]].
+** Chadur, [[Twilight Zone World|tidally locked]] to the star
+** Armasush, a shepherd world for the Kori Belt's inner edge
+* x2 [[planetoid belt]]s.
+** the Kori Belt, an [[Inner World|inner system]] [[planetoid belt]] too hot for volatiles
+** the Salacca Belt, an [[Outer World|outer system]] [[planetoid belt]] still mostly too hot for volatiles
+* x3 [[gas giant]]s.
+** Naragos, a [[Hot World|hot]] [[Inner World|inner system]] [[Gas Giant|small gas giant]]
+** Khoranu, a [[Gas Giant|large gas giant]] orbiting in the [[Outer World|deep outer system]] 
+** Ulloget, a [[Gas Giant|small gas giant]] orbiting in the [[Outer World|far outer system]] 
+
+[[Natural Satellite|Various moons]] are not noted.
+* These orbit the system's [[gas giant]] worlds.
+* Seven of those moons are inhabited.
+
+=== Mainworld ===
+Inchin only exists to provide a starport as this is the only one of two mains that allow ships to travel from Glisten to Five Sisters, around the [[Greater Collace Rift|Collace rift]]. It has recently opened a trade agreement with the ''[[Mewey Empire]]'', the grandly-named worlds dominated by the [[Mewey]], for the provision of food supplies in exchange for technology. {{Page cite|name=Behind the Claw|version=GURPS Traveller|page=73}}
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Inchin|Size= 4}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Inchin|Atmosphere= 2}}
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Inchin|Hydrosphere= 0}}
+
+[[File:Arid World Flat Type 02a1.jpg|600 px]]
+
+==== Mainworld Geography and Topography ====
+A basic map of Inchin showing rugged terrain and uplands (paler brown), high mountains (darker brown), and the sulfur-sand deserts (shades of tan depending on latitude).
+
+[[File:World Map Inchin Basic.png|600 px]]
+
+==== Native Lifeforms ====
+None Known
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+Although the colonization of Inchin followed millennia-old precedents on occupying uninhabited planets in unclaimed territory, Rowri's title of "Baron of Inchin" is recognized by no interstellar state. Indeed, several political entities -- including the Imperium and the government of [[Collace (world)|Collace]] -- that initially accepted the legitimacy of Rowri's regime have now withdrawn recognition.
+
+Many of Rowri's tirades focus on ''[[Avastan Portways]] Inc''., which operates the starport in the neighboring [[Avastan (world)|Avastan]] system. He accuses ''[[Avastan Portways|API]]'' of trying to prevent Inchin from becoming a competitor on the [[Collace Arm]] of the J-1 [[Spinward Main]] by sending covert agents to foment labor unrest. The Baronial Guard is constantly on the hunt for [[Avastan Portways|API]] agents (real or imagined) and has dealt harshly with several suspects.
+
+It is part of the [[Kaharoht Run]], a [[Mewey]] trade route that forms part of the [[Collace Arm]] of the [[Spinward Main]].
+
+=== World Starport (St) ===
+{{Starport|name= Inchin|Starport= D}}
+
+=== World Population (P) ===
+{{WorldPop|name= Inchin|multiplier= 8|Population= 3}}
+
+In the survey update of [[1102]], the planet was noted as having a population of 8000. Labour for the various projects is drawn from many nearby worlds with [[Collace (world)|Collace]] providing the technical expertise, and the labour coming from [[Pavabid (world)|Pavabid]], [[Mewey (world)|Mewey]] and [[Lakou (world)|Lakou]]. Some labourers are the non-[[Human]] [[Mewey]].
+
+==== Urbanization ====
+Almost all the population live and work in the Baron's main city or the nearby starport.
+
+==== Linguistic Topography ====
+The language of Inchin is derived from the [[Anglic]] spoken by its immigrant workforce. 
+
+=== World Technology Level (T) ===
+{{WorldTech|name= Inchin|WorldTech= A}}
+
+=== World Government (G) ===
+{{WorldGov|name= Inchin|Government= 5}}
+
+=== World Law (L) ===
+{{WorldLaw|name= Inchin|Law= A}}
+
+=== Trade Data ===
+* Importance:     -1 (unimportant)
+
+Inchin is part of a trade route known as the [[Kaharoht Run]], reaching across [[District 268 Subsector]]. [[Mewey]] merchant ships maintain regular waystations along this route.
+
+Inchin trades high-end technology for agricultural products and processed materials, and provides the [[Mewey Empire]] with an entire landing area at the starport. Adventurous Mewey settlers arrive in the hopes of creating an established settlement here, while a lucrative tourism trade has begun, with Ichin citizens seeking a reprieve on [[Mewey (world)|Mewey]] and [[Ochecate (world)|Ochecate]].
+
+=== World Economy ===
+* Resources:      A (abundant)
+* Labor:          2 (hundreds)
+* Infrastructure: 0 (non-existent)
+* Efficiency:     +1 (average)
+
+=== World Culture ===
+* Heterogenity: 5 (harmonious)
+* Acceptance:   2 (very xenophobic)
+* Strangeness:  7 (confusing)
+* Symbols:      C (very abstract)
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+* [[0|The Year 0]]: the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[589]]-[[604]]: [[First Frontier War]].
+* [[604]]-[[622]]: the [[Civil War]].
+* [[615]]-[[620]]: [[Second Frontier War]].
+* [[624]]: the [[Express Boat Network]] is established.
+* [[979]]-[[986]]: [[Third Frontier War]].
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] charts the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+* [[1082]]-[[1084]]: [[Fourth Frontier War]], also known as the ''False War''.
+* [[1107]]-[[1110]]: [[Fifth Frontier War]].
+
+=== Historical Data ===
+[[District 268 Subsector|District 268]] contains many inhabited [[planet]]s with unpleasant or downright inhospitable [[environment]]s, but most of these either possess valuable resources ([[Dallia (world)|Dallia]], [[Trexalon (world)|Trexalon]], [[Kuai Qing (world)|Kuai Qing]], etc.) or were settled more or less by accident ([[Singer (world)|Singer]]). Inchin stands out as just about the only inhospitable planet in the subsector that was deliberately settled despite its lack of any meaningful natural resources. The reasons for its unattractiveness are many and daunting. It has minimal gravity, no water, an uncomfortably high surface temperature, and a very thin, tainted atmosphere. Its dreary, featureless plains of yellow (sulfur-rich) sand and rock do not even possess the kind of stark natural beauty that is the redeeming feature of many other desert worlds. 
+
+The fact that Inchin is inhabited can be credited to [[Iarl Rowri]], the youthful heir to a shipping fortune on {{WorldS|Collace|Spinward Marches|1237}}. Like many others, [[Iarl Rowri|Rowri]] was impressed by the ample profits that [[Avastan Portways]], Inc. (API) reaped after constructing a C-class starport on {{WorldS|Avastan|Spinward Marches|1037}} in the early [[1000s]]. [[Iarl Rowri|Rowri]] decided to do API one better by using his huge inheritance to construct an A-class starport on neighboring Inchin. He reckoned that, as the only A-class starport in District 268 and on the entire length of the [[Main|J-1 main]] running between the [[Glisten Subsector|Glisten]] and [[Five Sisters Subsector]]s, the new facility would soon come to dominate the lucrative starship repair business in the subsector.
+
+The business plan was a good one, insofar as it went, but from the very beginning its execution was terrible. [[Iarl Rowri|Rowri's]] first error was to choose Inchin as the site for his starport. This choice was made because Inchin had the shallowest gravity well of any body in the system that possessed an oxygen-nitrogen atmosphere - which merely had to be compressed and filtered to be made breathable (eliminating the need to build costly air generation plants). However, the complete absence of water on Inchin meant that there was no naturally-occurring source of hydrogen to be refined for fuel - much less water necessary to sustain the lives of future residents. [[Iarl Rowri|Rowri]] intended to remedy this by importing ice asteroids from the system’s two [[planetoid belt]]s, but this proved to be far more complex and expensive than anticipated.
+
+The real problem, however, was [[Iarl Rowri|Rowri]] himself, who refused from the start to treat the project as a hard-headed business enterprise. Instead, he began pursuing a grandiose vision of self-aggrandizement by declaring himself [[Iarl Rowri|“Baron of Inchin”]], and ordering the construction of a luxurious palace and city on the planetary surface as the capital of his “fief”. From the moment the first construction crews arrived in [[1086]], their energies were divided between the starport and the capital city. Worse yet, at [[Iarl Rowri|Rowri's]] insistence, construction of the city tended to take precedence over progress on the starport, which was definitely putting the cart before the horse. The original plan had been to complete the starport first so that it could generate revenue that would allow completion of the rest of the project. In the end, any pretence of a coherent plan was abandoned, and construction proceeded in fits and starts as workers and money were constantly shifted back and forth between various priorities according to [[Iarl Rowri|Rowri's]] fickle whim.
+
+As delays stretched the planned three standard year project into its eleventh year, costs snowballed to the point where Rowri alone could no longer afford to finish it. With great reluctance he solicited outside financing, but [[Iarl Rowri|Rowri's]] reputation for mismanagement scared off investors and he refused to allow anyone else to oversee the execution of his grand vision. Strangled by insufficient funds, construction sputtered to a halt in [[1097]] and has barely progressed since. [[Iarl Rowri|Rowri]] then became obsessed with the idea that the Inchin system contained rich mineral deposits whose discovery would solve all of his financial problems at a stroke. Therefore, beginning in early [[1098]], he launched a full-scale survey of the entire system. Research facilities are still in operation on no less ten planetary and lunar surfaces, but to date no major strikes have been made.
+
+Some 8,000 workers remain on what’s come to be known as “Rowri’s Folly”, most of them engaged in trying to prevent the half-finished city and starport from falling completely into ruin. Living and working conditions are so bleak and unpleasant that, in order to retain laborers, [[Iarl Rowri|Rowri]] must offer unusually high wages - and oblige workers to sign contracts that bind them to remain on Inchin for three years. The small, but heavily-armed “Baronial Guard”, ever fearful of uprisings among the workers, upholds an oppressive law enforcement regime and clamps down on even the mildest signs of disaffection. Private ownership of any kind of weapons has been prohibited, including within the starport’s boundaries, but the workers have ready access to improvised knives, swords and spears.
+ 
+In better times, [[Iarl Rowri|Rowri]] was a congenial, good-natured sort whose impulsive and sometimes eccentric behavior was found charming by most. Since his fortunes began to decline, however, [[Iarl Rowri|Rowri's]] behavior has become ever more erratic and capricious, bouncing unpredictably back and forth from one extreme to another. [[Iarl Rowri|“Baron” Iarl I]] now rarely leaves the uncompleted shell of his palace, from whence he issues florid proclamations to his “subjects” that seem increasingly indicative of mental instability. Outbursts of uncharacteristic anger and vindictiveness can give way suddenly and without explanation to reflective moods of self-doubt and apology, and even to acts of compulsive generosity. On several occasions, [[Iarl Rowri|Rowri]] has tried to dampen labor discontent by impulsively promising large, across-the-board bonuses that it later proved impossible for him to pay more than a small fraction of.
+
+==== Alternate World Map ====
+[[File:Inchin UWP D42035A-A world map.png|400px]]
+
+Map at [http://members.ozemail.com.au/~jonoreita/T5%20World%20Map%20Generator/t5_map.html?hex=0938&sector=Spinward%20Marches&name=Inchin&uwp=D42035A-A&tc=De&tc=He&tc=Lo&tc=Po&iX=-1&eX=(A21%2B1)&cX=%5B527C%5D&pbg=823&worlds=8&bases=&travelZone=&nobz=&allegiance=NaHu&seed=09380938&place_nobz=1 Traveller Worlds: World Map]
+
+== References & Contributors (Sources) ==
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=The Regency Sourcebook|page=48-49}} (UWP only)
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=73}}
+ | {{Ludography cite|name=The Spinward States|page=110}} (UWP only)
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=123-127}} (UWP only)
+ | {{Ludography cite|name=Enemy of My Enemy | version=Mongoose 2nd|page=34-35}} (World map included)
+ | Contributor: [[User:Vendarth|Vendarth]]
+}}
+
+[[Category: Avastan Portways worlds]]
+[[Category: Humaniti worlds]]
+[[Category: Kaharoht Run worlds]]
+{{LE|GT|T5 Second Survey worlds}}
+{{LEN|Collace Arm worlds}}

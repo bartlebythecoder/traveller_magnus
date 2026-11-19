@@ -2137,6 +2137,15 @@
         tSection(`Classifications: ${body.name || body.type} Orbit ${body.orbitId !== undefined ? body.orbitId.toFixed(2) : (body.pd !== undefined ? body.pd.toFixed(1) + 'r' : 'Unknown')}`);
         body.classifications = body.classifications || [];
 
+        // A typed (seeded) TL is never changed by the Mining / Research Base / Military Base
+        // TL rules below (Sean, 2026-11-18): the world still gets the classification, and the
+        // dice are still rolled (same rolls as before), but its TL stays as typed.
+        const _tlTyped = Array.isArray(body._manualFields) && body._manualFields.includes('tl');
+        const _keepTypedTl = (label, target) => {
+            if (_tlTyped && body.tl !== target) tResult(`Tech Level (${label})`, `Kept typed TL ${body.tl} (rule would set ${target})`);
+            return _tlTyped;
+        };
+
         const diff = body.orbitId !== undefined ? getEffectiveHzcoDeviation(body.orbitId, body.worldHzco || sys.hzco) : 99;
 
         // Farming
@@ -2157,7 +2166,7 @@
                 // WBH Guidelines: Mining Facility TL = max(MW TL, Floor)
                 const floor = getMgT2EMinSusTL(body.atmCode || 0);
                 const targetTl = Math.max(mw.tl, floor);
-                if (body.tl < targetTl) {
+                if (body.tl < targetTl && !_keepTypedTl('Mining', targetTl)) {
                     tOverride('Tech Level (Mining)', body.tl, targetTl, 'Higher of Mainworld TL or Floor per WBH guidelines');
                     body.tl = targetTl;
                     syncUWP(body);
@@ -2174,7 +2183,7 @@
                 body.classifications.push("Research Base");
                 
                 // WBH Guidelines: Research Base TL = Mainworld TL (Set Directly)
-                if (body.tl !== mw.tl) {
+                if (body.tl !== mw.tl && !_keepTypedTl('Research Base', mw.tl)) {
                     tOverride('Tech Level (Research Base)', body.tl, mw.tl, 'Forced to match Mainworld TL per WBH guidelines');
                     body.tl = mw.tl;
                     syncUWP(body);
@@ -2189,7 +2198,7 @@
                 body.classifications.push("Military Base");
                 
                 // WBH Guidelines: Military Base TL = Mainworld TL (Set Directly)
-                if (body.tl !== mw.tl) {
+                if (body.tl !== mw.tl && !_keepTypedTl('Military Base', mw.tl)) {
                     tOverride('Tech Level (Military Base)', body.tl, mw.tl, 'Forced to match Mainworld TL per WBH guidelines');
                     body.tl = mw.tl;
                     syncUWP(body);

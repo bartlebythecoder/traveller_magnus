@@ -1,0 +1,262 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Gushemege",
+  "hex": "1033",
+  "sector_abbreviation": "Gush",
+  "subsector": "Laeth",
+  "name": "Nukyls",
+  "sources": [
+    {
+      "page": "Nukyls (world)",
+      "revid": 1036852,
+      "timestamp": "2026-04-07T14:57:09Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Nukyls (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Yradon",
+          "type": "K2 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Yradon",
+      "stars": [
+        {
+          "name": "Yradon",
+          "type": "K2 V"
+        }
+      ],
+      "labels": [
+        "Nukyls"
+      ],
+      "pages": [
+        "Nukyls (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Yradon 1",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Nukyls (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Yradon 2",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Nukyls (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Nukyls",
+          "raw": "B540610-A",
+          "kind": "world",
+          "uwp": "B540610-A",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Nukyls (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 4,
+          "name": "Yradon 4",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Nukyls (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Yradon 5",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Nukyls (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Yradon 6",
+          "raw": "Y502000-0",
+          "kind": "world",
+          "uwp": "Y502000-0",
+          "distance": {
+            "raw": "1.8",
+            "value": 1.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Nukyls (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Yradon 7",
+          "raw": "YAA7000-0",
+          "kind": "world",
+          "uwp": "YAA7000-0",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Nukyls (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Nukyls (world)",
+      "label": "Nukyls",
+      "stars": [
+        {
+          "name": "Yradon",
+          "type": "K2 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Yradon 1",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Yradon 2",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Nukyls",
+          "raw": "B540610-A",
+          "kind": "world",
+          "uwp": "B540610-A",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Yradon 4",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Yradon 5",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Yradon 6",
+          "raw": "Y502000-0",
+          "kind": "world",
+          "uwp": "Y502000-0",
+          "distance": {
+            "raw": "1.8",
+            "value": 1.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Yradon 7",
+          "raw": "YAA7000-0",
+          "kind": "world",
+          "uwp": "YAA7000-0",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Nukyls",
+    "UWP": "B540610-A",
+    "Stellar": "K2 V",
+    "PBG": "711",
+    "Bases": "N",
+    "Remarks": "De He Ni Po"
+  }
+}

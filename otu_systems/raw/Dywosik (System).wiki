@@ -1,0 +1,48 @@
+{{InfoboxSystem
+|name=Dywosik
+|sector=Corridor|subsector=Ian|hex=0614
+|star=''Hannichuzik''|type=''G5 IV''
+|P0= Saagh|Dist0=0.13   |UWP0= YS00000-0
+|P1= Deedo|Dist1=0.2   |UWP1= Y500000-0
+|P2= Inner Belt|Dist2=0.46   |UWP2= Y000000-9
+|P3= Outer Belt|Dist3=0.8   |UWP3= H00026A-9
+|P4= Jadan|Dist4=1.2   |UWP4= '''Small GG'''
+|P4M1= <Unnamed> |Dist4M1= |UWP4M1= 
+|P4M2= <Unnamed> |Dist4M2= |UWP4M2= 
+|P4M3= <Unnamed> |Dist4M3= |UWP4M3= 
+|P4M4= <Unnamed> |Dist4M4= |UWP4M4= 
+|P5= Dywosik|Dist5=2.33 |UWP5= C247547-A
+}}
+{{InfoboxSystem
+|name=Companion: Dywosik Companion
+|sector=Corridor|subsector=Ian|hex=0614
+|star=''<Unnamed>''|type=''M8 V''
+|P0= Zannai|Dist0=0.12   |UWP0= Y100000-0
+|P0M1= <Unnamed> |Dist0M1= |UWP0M1= YS00000-0
+|P1= Gentilli|Dist1=0.25   |UWP1= G100466-9
+|P2= Gaydos|Dist2=0.62   |UWP2= H440500-9
+|P2M1= <Unnamed> |Dist2M1= |UWP2M1= 
+|P2M2= <Unnamed> |Dist2M2= |UWP2M2= 
+|P2M3= <Unnamed> |Dist2M3= |UWP2M3= 
+|P3= Murph|Dist3=1.0   |UWP3= Y300100-9
+|P4= Zulli|Dist4=1.5   |UWP4= Y553000-0
+|P4M1= <Unnamed> |Dist4M1= |UWP4M1= 
+|P5= Pardoe Belt|Dist5=2.8 |UWP5= Y000518-9
+}}
+== Description (Specifications) ==
+
+{{BinaryStarSystem
+|name           = Dywosik
+|primary        = G5 V  
+|secondary      = M8 V 
+|PrimaryNotes   = Hannichuzik
+|SecondaryNotes = In Orbit 11
+}}
+
+{{Metadata}}
+{{Sources
+|S1= {{Ludography cite|name=MegaTraveller Journal 2|article=Defying The Wolf |page=4}}
+|S2= Contributor: [[User:BackworldTraveller|BackworldTraveller]]
+}}
+
+{{LEN|Systems}}

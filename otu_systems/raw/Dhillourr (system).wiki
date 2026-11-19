@@ -1,0 +1,29 @@
+{{InfoboxSystem
+ |name=Dhillourr
+ |subsector=Teksuelats
+ |sector=Gzaekfueg
+ |hex=1413
+ |star=Rudha
+ |type=F9 V
+ |P1=InnerWorld|Dist1=0.2|UWP1=H586227-4
+ |P2=RadWorld|Dist2=0.7|UWP2=F883000-0
+ |P3=Dhillourr|Dist3=1.6|UWP3=B110A7A-G
+ |P4=Large GG|Dist4=10|UWP4=LGG
+ |P4M1=Bee|Dist4M1=4|UWP4M1=
+ |P4M2=Cee|Dist4M2=5|UWP4M2=
+ |P4M3=Gee|Dist4M3=5|UWP4M3=
+ |P4M4=Arr|Dist4M4=7|UWP4M4=
+ |P4M5=Tee|Dist4M5=7.4|UWP4M5= 
+ |P5=Large GG|Dist5=77|UWP5=LGG
+ |P5M1=Ell|Dist5M1=6|UWP5M1=
+}}
+== Description ([[Astrography]] & [[Planetology]]) == 
+'''Dhillourr''' has a solitary primary star named ''Rudha''.
+* It is a white main sequence.
+
+[[File:Solitary F Type 2.jpg|300 px]]
+{{MonostellarSystem
+|name           = Rudha
+|primary        = F9 V 
+|PrimaryNotes   = None
+}}

@@ -1,0 +1,263 @@
+[[File:Alien Moon 271c-0.jpg|250 px|right]]
+{{UWP
+|name    = {{World|Atina|Massilia|Palasha|2513}}
+|uc      = B6318A8-A
+ |u0     = C631222-7
+|popc    = 9
+|zonec   = green
+|alg     = ImDc
+|class   = Na Po Ph
+|trade   = po
+|climate = 
+|nblty   = Be
+|bases   = -
+|primary = M3 V 
+|belts   = 0
+|GGcount = 2
+}}
+{{World summary |name= Atina|trade= Na Po Ph}}
+{{World summary ImDc|sector= Massilia|subsector= Palasha}}
+* It lies on the [[Delphi Main]].
+* At the founding of the {{Imperium}} this world was known as ''Ervlan''.
+
+{{InfoboxSystem
+ |name= Atina |subsector= Palasha
+ |sector= Massilia |hex= 2513
+ |star= Lumara |type= M3 V
+ |P1=     Miutus                            | Dist1= 0.44         | UWP1= Large GG
+ |P1M1=   A Ring                            |   Dist1M1= 1 Diam   |   UWP1M1= YR00000-0
+ |P1M2=   B Ring                            |   Dist1M2= 2 Diam   |   UWP1M2= YR00000-0
+ |P1M3=   Moon                              |   Dist1M3= 3 Diam   |   UWP1M3= Y310000-0
+ |P1M4=   Moon                              |   Dist1M4= 5 Diam   |   UWP1M4= Y320000-0
+ |P1M5=   Moon                              |   Dist1M5= 9 Diam   |   UWP1M5= Y100000-0
+ |P1M6=   Moon                              |   Dist1M6= 11 Diam  |   UWP1M6= Y510000-0
+ |P2=     Atina                             | Dist2= 0.747        | UWP2= B6318A8-A
+ |P3=     Ophus                             | Dist3= 1.29         | UWP3= F5A9268-9
+ |P3M1=     A Ring                          |   Dist3M1= 1 Diam   |   UWP3M1= YR00000-0
+ |P4=     Drade                             | Dist4= 2.7          | UWP4= YAB7000-0
+ |P5=     Aigantu                           | Dist5= 4.56         | UWP5= YBCA000-0
+ |P5M1=   Moon                              |   Dist5M1= 4 Diam   |   UWP5M1= Y200000-0
+ |P5M2=   Moon                              |   Dist5M2= 5 Diam   |   UWP5M2= Y100000-0
+ |P5M3=   Moon                              |   Dist5M3= 8 Diam   |   UWP5M3= Y200000-0
+ |P5M4=   Moon                              |   Dist5M4= 10 Diam  |   UWP5M4= Y200000-0
+ |P6=     Vurn                              | Dist6= 6.37         | UWP6= Y400000-0
+ |P7=     Suipra                            | Dist7= 14.7         | UWP7= Y9A3000-0
+ |P8=     Llomia                            | Dist8= 31.9         | UWP8= Large GG
+ |P8M1=   A Ring                            |   Dist8M1= 2 Diam   |   UWP8M1= YR00000-0
+ |P8M2=   Moon                              |   Dist8M2= 3 Diam   |   UWP8M2= Y100000-0
+ |P8M3=   Moon                              |   Dist8M3= 4 Diam   |   UWP8M3= Y100000-0
+ |P8M4=   Moon                              |   Dist8M4= 5 Diam   |   UWP8M4= Y310000-0
+ |P8M5=   Moon                              |   Dist8M5= 10 Diam  |   UWP8M5= Y200000-0
+ |P8M6=   Moon                              |   Dist8M6= 13 Diam  |   UWP8M6= Y510000-0
+ |P9=     Mocarro                           | Dist9= 74.2         | UWP9= Y200000-0
+ |P9M1=   Moon                              |   Dist9M1= 3 Diam   |   UWP9M1= Y100000-0
+ |P9M2=   Moon                              |   Dist9M2= 4 Diam   |   UWP9M2= Y000000-0
+ |P9M3=   Moon                              |   Dist9M3= 7 Diam   |   UWP9M3= Y000000-0
+ |P10=    Varvis                            | Dist10= 96.4        | UWP10= Y100000-0
+}}
+
+== Description ([[Astrography]] & [[Planetology]])<ref>Additional system and world details by [[User:Nichollsr1970|Roger Nicholls]]</ref> == 
+'''Atina''' has a solitary primary star.
+ 
+{{MonostellarSystem
+|name           = Atina
+|primary        = M3 V 
+|PrimaryName    = Lumara
+|PrimaryNotes   = 
+}}
+
+The star and its system of worlds is around [[Year|8.9 Gyr]] old.
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]].
+* x7 secondary [[world|rocky worlds]].
+** Ophus, an [[ice world]] orbiting in the [[Outer World|outer system]].
+** Drade, an [[ice world]] orbiting in the [[Outer World|outer system]].
+** Aigantu, an [[bigworld]] orbiting in the [[Outer World|outer system]].
+** Vurn, an [[ice world]] orbiting in the [[Outer World|outer system]].
+** Suipra, an [[ice world]] orbiting in the [[Outer World|outer system]].
+** Mocarro, an [[ice world]] orbiting in the [[Outer World|outer system]].
+** Varvis, a [[worldlet]] orbiting in the [[Outer World|outer system]].
+
+* x2 [[gas giant]]s.
+** Miutus, a large gas giant orbiting in the [[Outer World|outer system]].
+** Llomia, a large gas giant orbiting in the [[Outer World|outer system]].
+
+[[File:Chart Atina System Basic.jpg|800 px]]
+
+=== Mainworld Data ===
+* The planet has an axial tilt of 20.93 degrees
+* Atina has a sidereal day length of 28.1 hours
+* The planet takes 310.96 days to rotate around its sun.
+* No tectonic plate activity exists on the planet.
+* No life has so far been found on the planet even at microbiology level.
+* The planet is barely habitable and full protective gear is required outside.
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Atina|Size= 6}}
+* The planet has been extensively surveyed and the diameter has been accurately established now as [[Kilometer|9762 km]].
+* The planetary survey confirmed that Atina has a core that is mostly rock with a density of 0.71 Standard
+* Surface gravity of the planet is 0.54g which is classified as Low Gravity
+* The mass of Atina is 0.32 standard
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Atina|Atmosphere= 3}}
+* Atmospheric pressure measured in bar is 0.147
+* The mean surface temperature on Atina is -161.32c and is clearly too cold for human life to exist outside without protective equipment and survival gear.
+* Although the atmosphere is breathable with appropriate equipment eg respirator, there are slightly higher amounts of nitrogen.
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Atina|Hydrosphere= 1}}
+* Atina has one small and completely frozen sea that covers c.10% of the worlds surface. The planet as a whole is covered in a thin sheet of ice crystals across vast open plains. The perpetual twilight from its red dwarf (M3 V Star) causes the plains ice to glisten.
+* Although the water, if appropriately purified, is drinkable there is not enough of a water supply on the planet to support the population, as such water is imported from elsewhere in the Atina System.
+
+==== Mainworld Geography and Topography ====
+
+[[File:Blank World Map Arid.png|500 px]] <br> (''Blank map, predominantly dry world''.)
+
+== History & Background (Dossier)<ref>Additional population and social details by [[User:Nichollsr1970|Roger Nicholls]]</ref> ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Atina''' lies on the [[Delphi Main]], an important [[trade route]] straddling the border between [[Massilia Sector]] and [[Delphi Sector]].
+
+=== World Starport (St) ===
+{{Starport|name= Atina|Starport= B}}
+* Atina is in the process of trying to improve its starport facilities to a Grade A status. One of the most significant elements is that the construction of a "beanstalk" is now underway that ultimately will connect to an orbital starport within the next 10 years.
+* An orbital starport is currently under construction but it several years away from being operational.
+* The Atina starport sees a steady flow of ships from outside of the system on a daily basis with an average 3 new vessels arriving and leaving the system daily.
+** Most weeks c18-21 vessels pass through.
+** In addition to the ships from out system there are many more in system vessels bringing ice / water supplies to the Atina from other planets in the system.
+
+=== World Population (P) ===
+{{WorldPop|name= Atina|multiplier= 9|Population= 8}}
+* Atina has 11 major cities located across the planets surface.
+** Cities on Atina take advantage of the low gravity and consist of huge towering skyscrapers interconnected with sealed walkways. 
+** Each city is located near to a large ore field and the city provides the workforce and their families to mine the ore. 
+** Each city also has an extensive spaceport facility to enable water suppliers to be brought directly to the system from other planets within the Atina system.
+* The capital city on Atina is named Betina. 
+** Betina's population is c120,000,000 and this vast metropolis is visible for miles in every direction. Huge skyscrapers, 100's of metres high house homes, offices, schools, gardens and parks. Surrounding the towers are huge facilities where food is grown to ensure the population is fed and vast water tanks are maintained to ensure water is readily availble.
+** Betina is also home to the planets main starport facility and the associated infrastructure spreads out around it.
+
+==== Linguistic Topography ====
+The most commonly heard [[language]]s are:
+* [[Anglic]], one of the two official languages of the {{Imperium}}.
+* [[Vilani (language)|Vilani]], one of the two official languages of the {{Imperium}}.
+
+=== World Technology Level (T) ===
+{{WorldTech|name= Atina|WorldTech= A}}
+*The following tech levels can be applied to Atina
+**High Common TL:A
+** Low Common TL:5
+** Further Subcategories:-
+***Energy TL:A (Basic fusion+ power stations provided energy for the planets cities with improved power cells being utilised away from urban areas.)
+***Electronics TL:9 (Core computers are the norm on Atina as are interactive holographic projectors)
+***Manufacturing TL:A (Improved fabrication facilities along with robotic production lines)
+***Medical TL:9 (Hospitals on Atina have the capabilities to clone replacement organs and indeed carry out skin regrowth for severe injuries)
+***Environmental TL:A (Buildings on Atina are environmentally controlled to maintain an excellent standard of living whilst within them. There are several smaller complexes that utilise grav technology to simply hover above the ground.)
+***Land Transport TL:A (Grav vehicles are the norm on Atina although wheeled and tracked vehicles can be found in some areas)
+***Water Transport TL:A (Grav vehicles are the norm on Atina)
+***Air Transport TL:A (Grav vehicles are the norm on Atina)
+***Space Transport TL:A (Atina has the technological capability to build and maintain Jump-1 technology.)
+***Personal Military TL:9 (The military on Atina utilises laser weaponry as its common form of firearm)
+***Heavy Military TL:9 (Grav tanks fitted with lasers are the standard heavy military capability found on Atina)
+
+=== World Government (G) ===
+{{WorldGov|name= Atina|Government= A}}
+* The planet of Atina is led by the High Chancellor. This individual is a charismatic figure who has gained the trust and admiration of the populace.
+* The High Chancellor is supported in their role by the Council of Advisors. The Council are a group of trusted advisors from various sectors (science, magic, industry) who provide counsel and provide subject matter expertise as needed to the High Chancellor. They are experts in their fields and help shape policies.
+* At the lowest level of government on Atina there are the regular Public Assemblies. These regular gatherings are where citizens can voice their concerns and suggestions. While the High Chancellor has the final say, these assemblies ensure that the people's voices are heard.
+* The society is united under the vision of the High Chancellor. There is a strong sense of purpose and collective effort to survive and thrive in the harsh environment of Atina. The government has invested heavily in scientific research and technological advancements, aiming to improve living conditions, explore new frontiers and exploit the planets natural resources for the betterment of the Atinans. Education is highly valued, with free access to schools and universities and the government ensures that basic needs like food, shelter, and healthcare are met for all citizens.
+* The government facilities are predominantly based in the capital city of Betina and smaller local facilities are maintained in the other 10 cities across the planet.
+* Atina has no major factions opposed to the government on planet. The population are content with the government they have and this has been the case for several generations. Careful development of the next High Chancellor is at the heart of the Atina system as the role is for life.
+
+=== World Law (L) ===
+{{WorldLaw|name= Atina|Law= 8}}
+* The justice system of Atina is classified as "Traditional"
+** Although the laws are clearly documented, defined and appropriately policed the guilt of an individual is determined by an appropriately qualified "Justice" who presides over the ruling. 
+** The Justice determines guilt by listening to the facts as presented, looking for precedent and then either utilising that precedent or setting new ones. 
+* The law is universally applied across the planet with all cities etc following the same system.
+* There is no system of presumed innocence on Atina. The Justice has to define the level of guilt and pass sentence accordingly. Great faith is placed in the planetary law enforcement organisation and the well defined laws that exist. 
+* The death penalty can, and is applied on Atina although often the sentence is commuted to life in prison.
+* The law level like all worlds has differing levels and categories and the following levels apply.
+**Overall Level: 8
+**Weapons and Armour: 7 (Effectively all firearms and ranged weapons are banned on the planet. There is no justifiable reason for owning one unless you are an active member of the military or law enforcement.)
+**Economic: 8 (Restrictive zones and permitting laws exist because such things maintain order.)
+**Criminal Law: A (Pre-emptive detention is allowed if enough suspicion exists)
+**Private Law: 6 (Government venues are utilised for the arbitration of all legal disputes)
+**Personal Rights: 8 (There is no right that individuals have for the protection of personal data)
+
+=== Imperial Landed Nobility ===
+{{Imperial Nobility|name= Atina|Noble= Be}}
+
+=== Trade Data ===
+* Importance:     2 (ordinary)
+** Gross World Product per Capita: 19,008cr
+** World Trade Number: 10
+** Inequality Rating: 29
+*** c.29% of the population are living at a lower standard than the rest of the population. These individuals are in roles that are traditionally seen as menial or lower grade roles. In addition such individuals and there families  are likely to be living in older, substandard facilities and having to work extended hours to provide for themselves.
+**Development Rating: 13
+** Tariffs - Moderate Tariffs
+*** The government applies trade tariffs typically at a flat rate of 3% for goods and services arriving at and leaving the system.
+
+=== World Economy ===
+* Resources:      C (very abundant)
+** Extensive iron and nickel deposits are located across the planetary surface and are now being extensively mined for export off planet. In addition magnesium sulfate is being extracted from the ice sea in small quantities.
+** The iron and nickel deposits are extensive and news of the size of the ore fields is starting to get the attention of megacorporations who have the resources to truly exploit them. At present small, more local corporations are working the fields and generating good profits from onwards selling the ore.
+** Key industries, such as mining, energy, and transportation, are state-controlled to ensure fair distribution of resources and prevent exploitation however the small local corporations are encouraged to engage with the government and operate under special licence.
+* Labor:          7 (tens of millions)
+* Infrastructure: B (very extensive)
+** Huge infrastructure projects are underway with extensive intercity connectivity being the main driver. In addition the planned expansion of the starport and its associated beanstalk are pulling in significant resource and interest from off planet.
+* Efficiency:     +2 (good)
+
+=== World Culture ===
+* Heterogenity: 8 (discordant)
+** Although the people of Atina re all of the same cultural heritage each city has its own unique style and local customs/traditions. This has led to a culture where based upon dress or subtle changes in accent and tone of speech it is very easy for locals to recognise individuals from other cities.
+* Acceptance:   A (very friendly)
+** The locals of Atina are very welcoming to outsiders and will often engage in trivial conversation and simple engagements with no prior prompts.
+* Strangeness:  5 (distinct)
+** The culture of Atina is unique compared to other systems in this subsector. They are very traditional and firmly believe in their way of life.
+* Symbols:      A (abstract)
+** The people of Atina on a daily basis swear allegiance to the High Councillor whose image is located in classrooms, offices etc across the planet.
+* Cohesion:9
+** Society on Atina is very much focussed on "the group" rather than the individual.
+* Progressiveness:2
+** The people of Atina are very traditional. They dont believe they have any reason to change how the live. Its been this way for generations and it works for them.
+* Expansionism: 5
+** Expansion beyond the Atina system at this point is not even being considered on any level. There is a recognition that within their own solar system the people of Atina have a significant amount of resources that can be exploited for the ongoing growth and develop of the people who make their home here.
+* Militancy: 6
+** Atina society is not especially militant. It has a standing army and small fleet of space faring naval vessels for protection only.
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+
+* [[Ancients|circa -250,000]]: the [[Ancient]]s are active within the sector.
+* [[-9000s|circa -9,000]]: the [[Geonee]] encounter the [[Vilani]].
+* [[-5400]] to [[-4015]]: the [[Vilani]] [[Consolidation Wars]].
+* [[-4045]] to [[-2204]]: the region is part of the [[First Imperium|Ziru Sirka]].
+* [[-2204]] to [[-1776]]: the region becomes part of the [[Rule of Man]].
+* [[-1776]] to [[0]]: the [[Long Night]].
+* [[0|The Year 0]]: the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[604]]-[[622]]: the [[Civil War]].
+* [[624]]: the [[Express Boat Network]] is established.
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] charts the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+
+== References & Contributors (Sources) ==
+{{Detail}}
+{{Sources
+|S1= {{Ludography cite|name= Atlas of the Imperium |page= page 22|version= Classic Traveller}} (world location and some additional system data)
+|S2= [[John Harshman]], [[Marc Miller]]. ''[[Solomani (Alien Module)|Solomani]]'' ([[Game Designers Workshop]], 1986), pages 5, 7, 20. (sector background and history)
+|S3= {{Ludography cite|name= The Travellers' Digest 11 |page= pages 6-25}} (sector background and history, plus details for the [[Geonee]])
+|S4= {{Ludography cite|name= Vilani & Vargr |page= page 11}} (dot map provided, locating the world)
+|S5= {{Ludography cite|name= Knightfall |page= pages 74-80}} (sector data including the world, sector background and history)
+|S6= {{Ludography cite|name= First Survey |page= pages 4, 38-41, 102-109}} (sector data including the world circa [[0|The Year 0]]) 
+|S7= {{Ludography cite|name= Solomani |page= pages 57, 59|version= Mongoose Traveller}} (sector background and history)
+}}
+
+
+[[Category: Delphi Main worlds]].
+[[Category: First Imperium worlds]]
+[[Category: Rule of Man worlds]]
+[[Category: Second Imperium worlds]]
+{{LE|Era: Milieu 1116|T5 Second Survey worlds|}}

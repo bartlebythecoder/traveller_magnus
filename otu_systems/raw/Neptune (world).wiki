@@ -1,0 +1,244 @@
+[[File:Neptune.jpg|200px|thumb|right|Neptune]]
+{{UWP
+|name   = {{World|Neptune|Solomani Rim|Sol|1827}}
+|system = Terra (system)
+|uc    = SGG
+|popc  = 0
+|zonec = green
+ |uf= 
+|alg     = ImDs
+|class   = Ba Fl He
+|trade   = fl
+|climate = Va
+|orbit   = TBD
+|gravity = TBD
+|nblty   = -
+|bases   = -
+|primary = G2 V
+|belts   = 1
+|GGcount = 4
+}}
+{{World summary |name= Neptune|trade= Ba Fl He}}
+{{World summary ImDs|sector= Solomani Rim |subsector=Sol}}
+* It is an [[Gas Giant|ice giant]] with a [[Planetary Ring|ring system]] and [[Natural Satellite|many moon]]s.
+* It is a secondary world within the [[Terra (system)|Terra system]].
+
+{{InfoboxSystem
+|name= Neptune / Terra
+|subsector= Sol
+|sector= Solomani Rim
+|hex= 1827
+|star= [[Sol (star)|Sol]]
+|type= G2 V
+|P9= Neptune|Dist9= 29.90|UWP9= Small GG
+ |P9M1= Rings|Dist9M1= 1.0 Diam|UWP9M1= YR00000-0
+ |P9M2= Galatea|Dist9M2= 1.3 Diam|UWP9M2= YS00000-0
+ |P9M3= Larissa|Dist9M3= 1.5 Diam|UWP9M3= YS00000-0
+ |P9M4= Proteus|Dist9M4= 2.4 Diam|UWP9M4= YS00000-0
+ |P9M5= Triton|Dist9M5= 7.2 Diam|UWP9M5= H210169-E
+ |P9M6= Nereid|Dist9M6= 112 Diam|UWP9M6= YS00000-0
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+'''Neptune''' orbits [[Sol (star)|Sol]], a solitary primary star.
+* It is a yellow main sequence.
+
+{{MonostellarSystem
+|name           = Neptune /Sol
+|primary        = G2 V 
+|PrimaryName    = [[Sol (star)| Sol]]
+|PrimaryNotes   = Orbit #8.5: Neptune / Neptunian System 
+}}
+=== System Data ===
+The primary of the [[Terra (system)|Terra system]] is [[Sol (star)|Sol]], an ordinary yellow main sequence [[star]]. It has a luminosity of 1 Sol, a mass of 1 Sol, and a diameter of 1.391 million km. [[Sol (star)|Sol]] retains a family of four inner rocky worlds ([[Mercury (SR 1827) (world)|Mercury]], [[Venus (SR 1827) (world)|Venus]], [[Terra (SR 1827) (world)|Terra]], and [[Mars (world)|Mars]]), a stony [[Asteroid Belt (SR 1827) (world)|planetoid belt]], and four outer [[gas giant]] worlds ([[Jupiter (world)|Jupiter]], [[Saturn (world)|Saturn]], [[Uranus (world)|Uranus]], and Neptune). The [[Kuiper Belt]], an outer icy [[planetoid belt]], exists at the system fringe but is rarely counted as a distinct world, despite containing a number of significant bodies. The system is named for [[Terra (world)|Terra]], the [[mainworld]], the third world out from the star and orbiting within its [[habitable zone]].
+
+[[File:Chart Terra System Basic.png|700 px]]
+# [[Mercury (SR 1827) (world)|Mercury]]
+# [[Venus (SR 1827) (world)|Venus]]
+# [[Terra (SR 1827) (world)|Terra]] ''<small>(including [[Luna (SR 1827) (world)|Luna]])</small>''
+# [[Mars (world)|Mars]]
+# [[Asteroid Belt (SR 1827) (world)|Ceres Belt]] ''<small>(including Ceres, Vesta, Pallas, Juno, and Amor, et al)</small>''
+# [[Jupiter (world)|Jupiter]] ''<small>(including [[Jupiter (world)#Ganymede|Ganymede]] & [[Jupiter (world)#Callisto|Callisto]])</small>''
+# [[Saturn (world)|Saturn]] ''<small>(including [[Saturn (world)#Mainworld Data|Enceladus]], [[Saturn (world)#Mainworld Data|Rhea]] & [[Saturn (world)#Mainworld Data|Titan]])</small>''
+# [[Uranus (world)|Uranus]] ''<small>(including [[Uranus_(world)#Titania|Titania]])</small>''
+# [[Neptune (world)|Neptune]] ''<small>(including [[Neptune_(world)#Triton|Triton]])</small>''
+# [[Kuiper Belt (world)|Kuiper Belt]] ''<small>(including [[Pluto (world)|Pluto]]-[[Pluto_(world)#Charon|Charon]])</small>''
+
+Neptune is the outermost of the four outer [[gas giant]] worlds. It is classified as an [[Gas Giant|ice giant]] and orbits within the [[Outer World|outer system]].
+* Neptune retains five [[Neptune_(world)#Major Satellites|major moons]] and nine minor moons. Traditionally, only the major moons are listed on the world's [[UWP|UWP Listing]].
+* Some [[UWP|UWP Listings]] only include Triton, the [[Natural Satellite|largest moon]], and Nereid (considered broadly representative of the world's many smaller moons).
+* A mining facility that also serves as a refueling station is located on Triton.
+
+The [[Terra (system)|Terra system]] has been settled for thousands of years and is dotted with facilities and constructions, space stations, satellites and probes, and numerous sophont-made objects and debris.
+
+<pre>
+NEPTUNE and its moons:
+
+ Orbit            Name                 UWP          Remarks                        Orbital Period
+----------------- -------------------- ------------ ------------------------------ -------------------
+Primary           Sol                  G2 V
+29.9 AU           Neptune              SGG          Diameter 49,244 km             164 years 299 days
+     1.0 Diam        Naiad             YD00000-0                                       7.1 hours
+     1.0 Diam        Ring System       YR00000-0                                          --
+     1.0 Diam        Thalassa          YD00000-0                                       7.5 hours
+     1.1 Diam        Despina           YD00000-0                                       8.0 hours
+     1.3 Diam        Galatea           YS00000-0                                      10.3 hours
+ --------------  -------------------  ------------ -------------------------------  --------------
+     1.5 Diam        Larissa           YS00000-0                                      13.3 hours
+     2.2 Diam        Hippocamp         YD00000-0                                      23.0 hours
+     2.4 Diam        Proteus           YS00000-0                                      26.9 hours
+     7.2 Diam        Triton            H210169-E    Refuelling station                 5.9 days
+ --------------  -------------------  ------------ -------------------------------  --------------
+   112.0 Diam        Nereid            YS00000-0                                     360.1 days
+   339.0 Diam        Halimede          YD00000-0                                       5.1 years
+   460.0 Diam        Sao               YD00000-0                                       8.0 years
+   480.0 Diam        Laomedeia         YD00000-0                                       8.7 years
+   949.0 Diam        Psamathe          YD00000-0                                      25.7 years
+  1021.0 Diam        Neso              YD00000-0                                      26.7 years
+</pre>
+
+=== World Data ===
+Neptune has a [[UWP]] classification of "SGG" and is categorised as an [[ice giant]] (IG). It orbits [[Sol (star)|Sol]] at a mean distance of 29.9 AU (778.5 million km) and has an orbital period of [[Year|164 years]] [[Day|299 days]]. It has a mean rotation period (a local day) of [[Hour|16.1 standard hours]], although the surface is not rigid and different regions of (and altitudes within) the world rotate at different rates. Neptune has a diameter of [[Kilometer|49,244 km]], a mean density of 1.64 g/cm³, a surface gravity of 1.14 G, and a complex layered internal structure.
+* Its surface is defined as the point within the upper atmosphere where the mean pressure equals [[Atmospheric Pressure|one atm]] ([[Atmospheric Pressure|760.0 mm Hg]]), equivalent to the mean surface [[atmospheric pressure]] of [[Terra (world)|Terra]].
+
+==== Core ====
+[[File:Ice Giant Structure.png|300 px|right]]
+The core of the world is large and rocky and relatively metal-rich compared to other types of [[gas giant]] worlds. It has a radius of [[Kilometer|approximately 7,500 km]]. It is primarily composed of small quantities of heavy elements such as nickel (Ni) and iron (Fe), trace elements including thorium (Th) and uranium (U), and substantial concentrations of silicates (SiO<sup><small> 4–</small></sup>). The core temperatures [[Celsius|exceed 7,000°C]] and pressures exceed 7 megabars. The core is dynamic and active, retaining residual heat from its formation and generating additional heat through gravitational pressure and the decay of radioactive elements contained within it.
+
+==== Mantle ====
+Above the core is a dense mantle with a depth of [[Kilometer|around 5,000 km]]. It is a superheated region where temperatures can reach as high as [[Celsius|4500°C]]. It has a composition of water (H<sub><small>2</small></sub>O), methane (CH<sub><small>4</small></sub>), and ammonia (NH<sub><small>3</small></sub>) in the form of extremely compressed high temperature ices and slush. It is hot and extremely viscous, though it is able to flow throughout its entire depth: this movement generates the worlds magnetosphere.
+* Under the intense pressures within the upper mantle methane molecules (CH<sub><small>4</small></sub>) break apart, releasing their carbon and hydrogen. The carbon bonds with other free carbon present in the dense chemical mix, forming long chains: these continue bonding, creating crystalline structures resembling diamonds. The dense diamond formations then drop down through the layers of the mantle until they vaporize, becoming free carbon again.
+
+==== Deep Atmosphere ====
+The deep atmosphere has a depth of [[Kilometer|around 9,000 km]]. It has a composition of 80% Hydrogen (H<small><sub>2</sub></small>), 18% Helium (He), and 2% methane (CH<small><sub>4</sub></small>), ammonia (NH<small><sub>3</sub></small>), water (H<small><sub>2</sub></small>O), and other trace gases. The water-ammonia ocean that forms the upper mantle graduallty transitions into gases, with concentrations decreasing with altitude. Clouds made up of ammonia and hydrogen sulfide exist at higher pressures.
+
+==== Upper Atmosphere ====
+The upper atmosphere begins at the altitude within the ice giant where the mean [[atmospheric pressure]] equals [[Atmospheric Pressure|1 atm]], equivant to the surface [[atmospheric pressure]] of [[Terra (world)|Terra]]: this is considered to be the ''surface'' of the world. The upper atmosphere has a depth of [[Kilometer|around 3,100 km]] and is divided into the troposhere, the thermosphere, the stratosphere, and the exosphere, and gives way to the vacuum of space when the mean pressure drops [[Atmospheric Pressure|below 0.001 atm]]. It primarily consists of hydrogen (H<small><sub>2</sub></small>) and helium (He), with trace amounts of other gases including methane (CH<small><sub>4</sub></small>), ammonia (NH<small><sub>3</sub></small>), and water vapor (H<small><sub>2</sub></small>O). The upper atmosphere is generally transparent or hazy, with white ammonia or water vapor clouds carried by extremely high speed winds.
+
+==== Coloration ====
+The methane (CH<small><sub>4</sub></small>) present in Neptune's atmosphere absorbs red wavelengths of light but reflects blue wavelengths back into space, giving the world its characteristic blue color.
+
+==== Weather Systems ====
+Neptune has the strongest winds of any world within the [[Terra (system)|Terra system]]. Winds whip clouds of frozen methane across the planet at speeds of around 2000 kph. Storms can form within hours and expand to become thousands of kilometers in diameter.
+* Storms generate powerful bolts of lightning, frequently measuring hundreds of kilometers in length and arcing between banks of clouds. Electrical storms can occur anywhere within the atmosphere but are most common within water vapor (H<sub><small>2</small></sub>O) clouds within the troposphere.
+* Different types of precipitation occur within certain regions and altitudes of the atmosphere and can take the form of hazes, fogs, rain, chemical snow, or even solid silicates: the deeper within the atmosphere, the more extreme the nature of the precipitation. The chemical nature of the precipitation is closely associated with the clouds prevalent at the level at which the precipitation occurs. Deep within the world's mantle the precipitation takes the form of diamonds.
+
+==== Magnetosphere ====
+Neptune's magnetic fields are caused by convective motions in the electrically conductive fluids of the mantle. The world's magnetosphere balloons out to around [[Kilometer|600,000 km]] (around 13 Neptune diameters) towards [[Sol (star)|Sol, the systems star]] and trails out to [[Kilometer|1.75 million km]] (around 36 Neptune diameters) in the solar wind. The magnetosphere creates a cavity in the solar wind that the ''Shepherd Moons'' and ''Inner Moons'' orbit within. Beyond the magnetosphere is the magnetopause, where Neptune’s magnetic field becomes weak and the solar wind interacts with matter originating from the planet.
+* Powerful electrical currents generated deep within the mantle of Neptune create the worlds magnetic fields.
+* Near the planet, the magnetic fields trap swarms of charged particles and accelerate them to very high energies, creating belts of [[Rad (metric)|intense radiation]].
+* The rings, the Shepherd Moons, and the Inner Moons are saturated with [[Rad (metric)|high levels of radiation]].
+
+=== Rings and Satellites ===
+
+==== Ring System ====
+Neptune has five [[Planetary Ring|distinct rings]] represented by the single [[UWP|UWP Code]] YR00000-0. They are named the Galle, Le Verrier, Lassell, Arago, and Adams rings. The world's ''Shepherd Moons'' orbit among them.
+* The Galle ring is about [[Kilometer|2000 km]] wide and lies between [[Kilometer|41,000 km–43,000 km]] (from 0.83 diameters to 0.88 diameters) from Neptune. It is a faint ring largely composed of dust.
+* The Le Verrier ring is about [[Kilometer|110 km]] wide and lies at approximately [[Kilometer|53,100 km]] (about 1.08 diameters) from Neptune. It lies within (but is a separate structure to) the inner edge of the Lassell ring.
+* The Lassell ring is [[Kilometer|about 4000 km]] wide and lies around [[Kilometer|53,000 km–57,000 km]] (from 1.08 diameters to around 1.16 diameters) from Neptune. It is a faint ring composed of icy fragments and dust.
+* The Arago ring is [[Kilometer|about 100 km]] wide and lies at approximately [[Kilometer|57,100 km]] (about 1.16 diameters) from Neptune. It lies within (but is a separate structure to) the outer edge of the Lassell ring.
+* The Adams ring is [[Kilometer|about 35 km]] wide and lies at approximately [[Kilometer|64,000 km]] (about 1.30 diameters) from Neptune. It is narrow, inclined, and is slightly eccentric. The small moon Galatea, which orbits just inside of the ring, shepherds the ring particles, keeping them inside a narrow range of orbital radii.
+
+==== Satellites ====
+Neptune has fourteen moons. Of these, five are considered ''major'' (denoted by names in bold) and the remaining nine are considered ''minor''. They also fall into three distinct groups, labelled ''Shepherd Moons'', ''Inner Moons'', and ''Outer Moons'':
+
+'''Shepherd Moons''', orbiting between the ice giant's faint rings and helping to maintain their form and structure.
+: Naiad ([[Planetary Size|diameter 66 km]], orbiting at 0.97 Neptune diameters), Thalassa ([[Planetary Size|diameter 80 km]], orbiting at 1.02 Neptune diameters), Despina ([[Planetary Size|diameter 152 km]], orbiting at 1.07 Neptune diameters), and '''Galatea''' ([[Planetary Size|diameter 204 km]], orbiting at 1.26 Neptune diameters).
+
+'''Inner Moons''', lying beyond Neptune's ring system but orbiting within the world's magnetosphere.
+: '''Larissa''' ([[Planetary Size|diameter 216 km]], orbiting at 1.50 Neptune diameters), Hippocamp ([[Planetary Size|diameter 35 km]], orbiting at 2.14 Neptune diameters), '''Proteus''',  ([[Planetary Size|diameter 424 km]], orbiting at 2.39 Neptune diameters), and '''Triton''' ([[Planetary Size|diameter 2700 km]], orbiting at 7.20 Neptune diameters).
+
+'''Outer Moons''', orbiting at huge distances from Neptune, far beyond the world's magnetosphere.
+: '''Nereid''' ([[Planetary Size|diameter 340 km]], orbiting at 112 Neptune diameters), Halimede ([[Planetary Size|diameter 62 km]], orbiting at 339 Neptune diameters), Sao ([[Planetary Size|diameter 44 km]], orbiting at 460 Neptune diameters), Laomedeia ([[Planetary Size|diameter 42 km]], orbiting at 480 Neptune diameters), Psamathe ([[Planetary Size|diameter 38 km]], orbiting at 949 Neptune diameters), and Neso ([[Planetary Size|diameter 30 km]], orbiting at 1021 Neptune diameters).
+
+=== Major Satellites ===
+The terms major and minor are related to the satellite's size: Neptune's major satellites have diameters of [[Planetary Size|200 km or more]], while minor satellites are smaller and have [[Planetary Size|Size Code D]] (denoting Debris, an object too small to be self-rounding due to its own gravity). The major satellites were all discovered during the early period of [[Terra]]ns studying their home system, while most of the minor moons were discovered later, when a robotic deep space mission launched from [[Terra (world)|Terra]] passed by Neptune [[-2530|in -2530]].
+
+==== Galatea ====
+[[File:Galatea (moon).jpg|100px|thumb|right|Galatea]]
+''Galatea'' ([[UWP]] YS00000-0) is the inner of the five major moons of Neptune and is classified as a [[worldlet]]. It orbits its parent world at a mean distance of 1.26 diameters ([[Kilometer|62,000 km]]), with an orbital period of [[Hour|10.3 hours]]: it is [[tidally locked]] to Neptune. Galatea is an irregular spheroid with a long axis of [[Kilometer|204 km]], a density of 0.75 g/cm³ and a surface gravity of 0.0018 G. The atmosphere is rated as [[vacuum]]. The world has no surface hydrosphere. Mean surface temperature: -222°C. It is composed of a mixture of crystalline water-ice (H<sub><small>2</small></sub>O) and crystalline methane-ice (CH<sub><small>4</small></sub>), with small quantities of frozen ammonia (NH<sub><small>3</small></sub>), nitrogen (N<sub><small>2</small></sub>) and silicates (SiO<sup><small> 4–</small></sup>). The crust is broadly similar in composition to the interior and contains trace amounts of tholins.
+* Galatea is the largest and outermost of Neptune's ''Shepherd Moons'', orbiting just within the outer [[Planetary Ring|Adams ring]] and helping to maintain that structure.
+
+==== Larissa ====
+[[File:Larissa (moon).jpg|100px|thumb|right|Larissa]]
+''Larissa'' ([[UWP]] YS00000-0) is the second of the five major moons of Neptune and is classified as a [[worldlet]]. It orbits Neptune at a mean distance of 1.50 diameters ([[Kilometer|73,500 km]]), with an orbital period of [[Hour|13.3 hours]]. Larissa is an irregular flattened spheroid with a long axis of [[Kilometer|216 km]] and a maximum thickness of [[Kilometer|168 km]], a density of 1.2 g/cm³, and a surface gravity of 0.003 G. The world has no surface hydrosphere. Mean surface temperature: -223°C. It is composed of a mixture of crystalline water-ice (H<sub><small>2</small></sub>O) and crystalline methane-ice (CH<sub><small>4</small></sub>), with small quantities of nitrogen (N<sub><small>2</small></sub>) and silicates (SiO<sup><small> 4–</small></sup>). The crust is broadly similar in composition to the interior.
+* The tiny moon is slowly spiralling inward towards Neptune due to tidal deceleration. It may eventually break up into a [[planetary ring]] upon passing its parent world's Roche limit.
+
+==== Proteus ====
+[[File:Proteus (moon).jpg|100px|thumb|right|Proteus]]
+''Proteus'' ([[UWP]] YS00000-0) is the third of the five major moons of Neptune and is classified as a [[worldlet]]. It orbits Neptune at a mean distance of 2.39 diameters ([[Kilometer|117,600 km]]), with an orbital period of [[Hour|26.9 hours]]. Proteus is an irregular spheroid with a long axis of [[Kilometer|424 km]], a density of 1.3 g/cm³, and a surface gravity of 0.007 G. The world has no surface hydrosphere. Mean surface temperature: -222°C. It is composed of a mixture of crystalline water-ice (H<sub><small>2</small></sub>O) and crystalline methane-ice (CH<sub><small>4</small></sub>), with small quantities of nitrogen (N<sub><small>2</small></sub>) and silicates (SiO<sup><small> 4–</small></sup>).
+* Proteus is heavily cratered and is rugged, with many rilles and ridges across its surface. The largest crater is called Pharos and has a diameter of [[Kilometer|around 250 km]] and a depth of [[Kilometer|around 15 km]].
+
+==== Triton ====
+''Triton'' ([[UWP]] H210169-E) is the fourth and largest of the five major moons of Neptune and is classified as a [[worldlet]]. It orbits Neptune at a mean distance of 7.20 diameters ([[Kilometer|355,000 km]]), with an orbital period of [[Hour|141.5 hours]]. It has a retrograde orbit (it orbits in the opposite direction to Neptune's rotation), it orbits at an angle of 157° relative to Neptune's equatorial plane, and has a rotation period of [[Hour|141.5 hours]] (the same as its orbital period): it permanently keeps one face towards Neptune.
+* Triton is believed to be a large [[Kuiper Belt|Kuiper Belt Object]] captured by Neptune's gravity many millions of years ago.
+
+[[File:Triton Moon Neptune.png|100px|thumb|right|Triton]]
+The world has a diameter of approximately [[Kilometer|2700 km]], a density of 2.06 g/cc, and a surface gravity of 0.08 G. It has a crust consisting of frozen nitrogen over an icy mantle surrounding a small core composed of silicates and metals. The surface is cratered and fractured and covered in layers of dust, regolith, and deposited material. The mean surface temperature is [[Celsius|-235°C]]. Triton's mean atmospheric pressure is below [[Atmospheric Pressure|0.001 atmospheres]], qualifying it as a [[vacuum world]]: what miniscule trace of atmosphere there is consists of 99.9% nitrogen and 0.1% methane. Energy from [[Sol (star)|Sol]] irradiates this gaseous mixture, producing tholins, pinkish nitrogen-rich organic (but non-biological) substances that drop onto and stain large areas of the worlds surface.
+
+[[File:Triton World Map Basic.png|600 px]] <br> A basic map of Triton.
+
+Energy from [[Sol (star)|Sol]] causes nitrogen to sublimate within the crust: tidal stresses on the world cause weak spots, allowing geysers to erupt that spew icy material from the mantle upward to more than [[Kilometer|8 kilometers]] above the surface. The majority of ice geysers occur within the southern regions of the world, in the Boyne Suici and Uhlanga Regio regions.
+* Multiple geysers can be active at the same time and their ejected material drifts for hundreds of kilometers before settling. In the extremely low gravity the falling material can take many hours to reach the surface: this falling icy material is represented by the world's [[trace atmosphere]] rating.
+* A refuelling station serviced by a [[Class H Spaceport]] is located on the surface. A small outpost supports operations and has a population of a few dozen individuals. It is part of the Leverrier Complex, an aging mining facility.
+
+[[File:Ice Plume.jpg|500 px]] <br> An ice geyser erupting from the surface of Triton.
+
+==== Nereid ====
+[[File:Nereid (moon).jpg|100px|thumb|right|Nereid]]
+''Nereid'' ([[UWP]] YS00000-0) is the outer of the five major moons of Neptune and is classified as a [[worldlet]]. It orbits Neptune at a mean distance of 112 diameters ([[Kilometer|5.504 million km]]), with an orbital period of [[Day|360.1 days]]. Nereid is an irregular spheroid with a long axis of [[Kilometer|357 km]], a density of 1.5 g/cm³, and a surface gravity of 0.007 G. The world has no surface hydrosphere. Mean surface temperature: -222°C. It is composed of a mixture of crystalline water-ice (H<sub><small>2</small></sub>O), silicates (SiO<sup><small> 4–</small></sup>), crystalline methane-ice (CH<sub><small>4</small></sub>), and small quantities of nitrogen (N<sub><small>2</small></sub>).
+* Halimede, a tiny minor moon orbiting at 339 diameters, displays very similar physical characteristics to Nereid: it may be a fragment of Nereid that was broken off as a result of a collision.
+
+=== Native Lifeforms ===
+No lifeforms are known to exist within Neptune's atmosphere or on any of its moons.
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Neptune''' is an ''[[Gas Giant|ice giant]]'', a type of [[Gas Giant|small gas giant]], located in the [[Outer World|outer fringe]] of the [[Terra (system)|Terra system]] in [[Sol Subsector]] of the [[Solomani Rim Sector|Solomani Rim]]. The world was first observed by [[Terran]] astronomers [[-2673|in -2673]] and was first visited [[-2530|in -2530]], by a deep space robotic probe. The world orbits very close to the inner edge of the [[Kuiper Belt]].
+
+=== World Spaceport (St) ===
+'''Neptune''' does not have a spaceport.
+
+=== World Demographics (P) ===
+'''Neptune''' is unpopulated.
+
+=== World Technology Level (T) ===
+'''Neptune''' possesses a [[Tech Level]] of {{TL|0}}.
+* The world has no technological base.
+
+=== World Government (G) ===
+'''Neptune''' has no government or direct ruling authority of any kind.
+
+=== World Law (L) ===
+'''Neptune''' has no law level. No laws of any kind are enforced.
+
+=== Imperial Landed Nobility ===
+Only the [[mainworld]] of a [[system]] possesses an officially appointed or ''landed'' [[Imperial Noble]]. 
+* The ''landed'' nobles of this system are located at [[Terra (world)|Terra]], the [[mainworld]] of the system.
+* Landed Nobles may possess territories on the satellites of this world as part of their in-system non-mainworld fief land grants.
+
+=== Image Repository ===
+[[TravellerMap]] <small>([[T5SS]])</small>: <br> [https://travellermap.com/?options=58363&x=14.289&y=-107&scale=128]
+
+== References ==
+{{Intermediate}}
+{{Detail}}
+{{Sources
+| Board Game: [[Imperium]]
+| {{CT}} [[Signal GK (book)]]
+| {{Ludography cite|name=Solomani|version=Classic Traveller|page=1-48|article=}}
+| {{Ludography cite|name=The Solomani Rim|page=TBD|article=}} (Supplement 10)
+| {{Ludography cite|name=Vilani & Vargr|page=11,47|article=}} (dotmap provided)
+| {{TDref |13}} in Article: "The Trouble With Kids" 
+| {{Ludography cite|name=Traveller Chronicle 10|page=TBD|article=}} 
+| {{Ludography cite|name=Traveller Chronicle 11|page=TBD|article=}} 
+| {{Ludography cite|name=Traveller Chronicle 12|page=TBD|article=}} 
+| {{TDref|13}}
+| {{Ludography cite|name=Rim of Fire|page=}}
+| [[GURPS Traveller: Interstellar Wars]]
+| [[Mongoose Traveller: Solomani Rim]]
+| External Link: [http://zho.berka.com/data/TNE/writeup.pl?loc=2325&planY=Kaguk&sector=SOLRIM&realsubname=Sol&subsector=SEC_K.DAT&subsectorletter=K The Zhodani Base]
+}}
+ 
+
+{{LE|Terra (system) worlds}}

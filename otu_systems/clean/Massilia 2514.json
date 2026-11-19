@@ -1,0 +1,626 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Massilia",
+  "hex": "2514",
+  "sector_abbreviation": "Mass",
+  "subsector": "Palasha",
+  "name": "Rovick / Noera-Solox",
+  "sources": [
+    {
+      "page": "Rovick (world)",
+      "revid": 865970,
+      "timestamp": "2024-12-06T10:45:44Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Rovick (world)",
+      "template": "TrinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Noera",
+          "type": "M1 V",
+          "notes": null
+        },
+        {
+          "role": "Secondary",
+          "name": "Solox",
+          "type": "M3 V",
+          "notes": "Close companion: approximately 0.02 AU from Noera."
+        },
+        {
+          "role": "Tertiary",
+          "name": "Cuvis",
+          "type": "M5 V",
+          "notes": "Approximately 11.5 AU from Noera."
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Noera Solox",
+      "stars": [
+        {
+          "name": "Noera",
+          "type": "M1 V"
+        },
+        {
+          "name": "Solox",
+          "type": "M3 V"
+        }
+      ],
+      "labels": [
+        "Rovick / Noera-Solox"
+      ],
+      "pages": [
+        "Rovick (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Rovick",
+          "raw": "E554420-7",
+          "kind": "world",
+          "uwp": "E554420-7",
+          "distance": {
+            "raw": "0.184",
+            "value": 0.184,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rovick (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 2,
+          "name": "Gestriar",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "0.461",
+            "value": 0.461,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rovick (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rovick (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rovick (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rovick (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Moon",
+              "raw": "Y000000-0",
+              "kind": "world",
+              "uwp": "Y000000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rovick (world)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Moon",
+              "raw": "Y210000-0",
+              "kind": "world",
+              "uwp": "Y210000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rovick (world)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rovick (world)"
+              ]
+            },
+            {
+              "index": 7,
+              "name": "Moon",
+              "raw": "Y000000-0",
+              "kind": "world",
+              "uwp": "Y000000-0",
+              "distance": {
+                "raw": "13 Diam",
+                "value": 13.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rovick (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Fractelle Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "0.732",
+            "value": 0.732,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rovick (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Gliimaar Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "0.88",
+            "value": 0.88,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rovick (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Konao",
+          "raw": "Y421000-0",
+          "kind": "world",
+          "uwp": "Y421000-0",
+          "distance": {
+            "raw": "1.25",
+            "value": 1.25,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rovick (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rovick (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rovick (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rovick (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Adespo",
+          "raw": "Y310000-0",
+          "kind": "world",
+          "uwp": "Y310000-0",
+          "distance": {
+            "raw": "2.79",
+            "value": 2.79,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rovick (world)"
+          ]
+        }
+      ],
+      "star_names_from": "star template"
+    },
+    {
+      "star": "Cuvis",
+      "stars": [
+        {
+          "name": "Cuvis",
+          "type": "M5 V"
+        }
+      ],
+      "labels": [
+        "Rovick / Cuvis"
+      ],
+      "pages": [
+        "Rovick (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Rawai",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "0.16",
+            "value": 0.16,
+            "unit": "AU"
+          },
+          "sources": [
+            "Rovick (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Rovick (world)"
+              ]
+            }
+          ]
+        }
+      ],
+      "placement": {
+        "orbit": null,
+        "au": 11.5,
+        "from": "star template notes"
+      }
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Rovick (world)",
+      "label": "Rovick / Noera-Solox",
+      "stars": [
+        {
+          "name": "Noera Solox",
+          "type": "M1 V"
+        },
+        {
+          "name": null,
+          "type": "M3 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Rovick",
+          "raw": "E554420-7",
+          "kind": "world",
+          "uwp": "E554420-7",
+          "distance": {
+            "raw": "0.184",
+            "value": 0.184,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Gestriar",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "0.461",
+            "value": 0.461,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Moon",
+              "raw": "Y000000-0",
+              "kind": "world",
+              "uwp": "Y000000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 5,
+              "name": "Moon",
+              "raw": "Y210000-0",
+              "kind": "world",
+              "uwp": "Y210000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 6,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 7,
+              "name": "Moon",
+              "raw": "Y000000-0",
+              "kind": "world",
+              "uwp": "Y000000-0",
+              "distance": {
+                "raw": "13 Diam",
+                "value": 13.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Fractelle Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "0.732",
+            "value": 0.732,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Gliimaar Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "0.88",
+            "value": 0.88,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Konao",
+          "raw": "Y421000-0",
+          "kind": "world",
+          "uwp": "Y421000-0",
+          "distance": {
+            "raw": "1.25",
+            "value": 1.25,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Adespo",
+          "raw": "Y310000-0",
+          "kind": "world",
+          "uwp": "Y310000-0",
+          "distance": {
+            "raw": "2.79",
+            "value": 2.79,
+            "unit": "AU"
+          }
+        }
+      ]
+    },
+    {
+      "page": "Rovick (world)",
+      "label": "Rovick / Cuvis",
+      "stars": [
+        {
+          "name": "Cuvis",
+          "type": "M5 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Rawai",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "0.16",
+            "value": 0.16,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Rovick",
+    "UWP": "E554420-7",
+    "Stellar": "M1 V M3 V M5 V",
+    "PBG": "822",
+    "Bases": "",
+    "Remarks": "Ni Pa"
+  }
+}

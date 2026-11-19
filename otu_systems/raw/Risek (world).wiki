@@ -1,0 +1,184 @@
+[[File:Alien Moon 233d-0 Small.jpg|250 px|right]]
+{{StellarDataQuery
+ |name= {{World|Risek|Spinward Marches|Rhylanor|2712}}
+ |era= Milieu 1116
+}}
+* {{SpMain}}
+
+{{InfoboxSystem
+ |name=Risek
+ |subsector=Rhylanor
+ |sector=Spinward Marches
+ |hex=2712
+ |star='''Orb'''
+ |type='''M2 V'''
+ |P1=Risek|Dist1=0.4|UWP1=A325579-A
+ |P2=Rissona|Dist2=5|UWP2='''Gas Giant'''
+ |P2M1=* ''Shepard Moons''|Dist2M1=<7|UWP2M1=
+ |P2M2=* ''Rison''|Dist2M2=20|UWP2M2=
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Risek''' is a binary star system.
+* Both are red main sequence stars.
+
+{{BinaryStarSystem
+|name            = Risek
+|primary         = M2 V
+|secondary       = M3 V
+|PrimaryName     = Primary
+|PrimaryNotes    = 
+|SecondaryName   = Secondary
+|SecondaryNotes  = 
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]].
+* x9 secondary [[world|rocky worlds]].
+* x1 [[Gas Giant|large gas giant]]. It is named ''Rissona'' and has a relatively sparse family of moons.
+
+The Risek system is characterized by its ancient, binary star system. The main central star, Orb, is a small red star orbited by a red dwarf, Ball. System age is roughly 7.5 billion years.
+
+{| border="1"
+!Main Contents           !!Stars                                !!Orbital Distances (AU)
+|-
+|* Central star         ||* Primary Orb, M2 V  ||* Inner limit 0.3
+|-
+|* 1 terrestrial world ||* Temperature (K) 5400            ||* Inner life 0.200
+|-
+|* Inner belt           ||* Luminosity (sols) 0.6            ||* Outer life 0.700
+|-
+|* Large Gas giant      ||* Mass (sols) 0.85            ||* Snow line 1.04
+|-
+|* Outer belt           ||* Radius (AU) 0.0070          ||* Outer limit 20.0
+|-
+|*                      ||* Stable life N/A             || --
+|}
+
+The [[Octagon Society]] built a shelter in orbit of Risek, in the form of an octahedral space station. The station is still in existence, although now under the management of the Risek Space Authority.
+
+=== Mainworld Data ===
+A brief summary would describe the Risek system as a small, chilly, rock-and-ice ball with a booming interstellar "pass through" trade market.
+
+It orbits within its star's [[habitable zone]].
+* It receives moderate levels of [[Electromagnetic Spectrum|stellar energy]].
+
+[[File:Chart Orbit HZ Region Simple.png|600 px]]
+
+=== World Data ===
+{| border="1"
+!Orbit!!SubOrbit!!Name!!Diameter!!Density!!Gravity!!Rotation!!Revolution!!e!!World Type
+|-
+|0.9|| --||Risek||3100||6.5||0.32||48.0h||89.5d||0.00||Terrestrial
+|-
+|6|| --||Rissona||75400||1.4||1.07||15.2h||13.3y||0.01||Gas Giant
+|-
+|6||<10||7 shepherd moons||<400||5.7|| --|| --|| --||0.01||Terrestrial
+|-
+|6||21||Riso||900||6.1||0.04||tl||16.1d||0.01||Terrestrial
+|}
+
+'''Units'''
+*Orbit is in AU or planetary radii for satellites
+*Diam = diameter in miles (X 1.609 for km)
+*Dens = average density in g/cc
+*Grav = 'surface' gravity in G's
+*Rot/Rev = rotation or revolution period in hours (h), days (d), or years (y) ; tl = tide-locked
+*e = orbital eccentricity
+*Type = G:Space/FI classification
+
+==== Risek World Data ====
+* Mass : 0.45 earth
+* Apparent day length : 48.0 hours
+* Axial Tilt : 20.0 degrees
+* Atmospheric pressure : 0.3 atm
+* Atmospheric composition : nitrogen 62%, oxygen 14%, CO2 20%, others 4%
+* Hydrographics : 20%, water oceans
+* Albedo : 0.45
+* Greenhouse effect : 0.42
+* Average surface temperature (G:Space) : 283 K (Cool)
+* Weather factor : 4 (Earth=10, so more stable)
+* Life : microbial
+
+* Moons: none
+** Tidal : G:FI tidal factor
+** Other units are as per the World table, above.
+
+==== Mainworld Geography and Topography ====
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+The planet itself is less than inviting. It has light gravity (.37g) and a very thin, tainted atmosphere that requires a combination mask-respirator. Equatorial temperatures average 10&deg;C, rising to 20&deg;C in the summer and diving to -10&deg;C in the winter. Axial tilt is 20 degrees. Most of the planetary water is locked in the polar ice caps. Weather, such as it is, includes constant high winds, with thin precipitation on occasion. Geologically, it is an old world with broad plateaus and few mountains. The high plains are hard-pan desert.
+
+[[File:Blank World Map Arid.png|500 px]] <br> (''Blank map, predominantly dry world''.)
+
+==== Native Lifeforms ====
+Primitive [[Lifeform|native life]] occupying a number of ecological niches. Its metabolic functions drive the process of atmospheric renewal.
+
+====Notable Creatures====
+Several interesting microbes have been found on the surface.
+
+== History & Background (Dossier) ==
+Prior to the [[Fifth Frontier War]], the [[Naval Base]] hosted elements of the [[212th Fleet]], and after the war was hosting elements of the [[23rd Fleet]]. 
+
+=== Imperial Landed Nobility ===
+{{Imperial Nobility|name= Risek|Noble=B}}
+
+=== Basics ===
+The small population of this world largely live in orbital space [[Arcology|arcologies]], each of which maintains it own system of government and is in "coopitition" with the others.
+
+There are a total of 5 large arcologies:
+* Risek-Central,
+* Spinward-1,
+* Spinward-2,
+* Trailing and
+* Alexandria.
+
+Each system maintains a [[downport]] of various sizes and abilities on the planet itself, and is associated with a handful of "shallow" arcologies. The orbital arcologies maintain an effective defensive capability in and of themselves, and typically have 2-4 lightly armed SDCs for "emergencies". The SDC armament is closely monitored by the Naval authorities.
+
+=== Government ===
+Risek is an independently administrated system.This system is governed by an Imperial Baron, who maintains an official residence at the local Naval base, and minor residences on each of the arcologies and the planet. Strategically, it underpins the defenses of the Aramis and Regina systems. As such, '''Risek''' has a full, and well-equipped [[Naval Base]].
+
+Alternate Timeline.
+Risek is the home planet for Tibbetts Inc.  This major corporation is a significant giant of industry and run by one family.  Responsible for all the employment on planet that is not imperial businesses, military operations or privately owned.  The Tibbetts are a powerful family and the father Archduke Carstairs Tibbetts oversees all business personally and his children Duke Masrick Tibbetts (1st born son), Daughter Duchess Zephyr Tibbetts (1st born daughter) And Count Theodore Tibbetts (2nd born son) have always been his eyes ears and voice when they were on site and off planet.  Recently (1077) Tibbitts elder son vanishes with his yacht the Monarch.
+
+===Economy===
+Population 45,000
+
+Economically, the planet has been mined extensively for lead and other heavy metal deposits in deep mines. Many of the ancient, shallower mines have been consolidated into underground arcologies. These "shallow" arcologies have living quarters with augmented gravity areas, though the reliability, and the settings, of the systems vary.
+
+The main wealth of the system comes from its location. There is a large amount of Jump-1 traffic through Risek, and each orbital arcology competes to grab and hold as much of the trade associated with that traffic as it can. The laws, cultures, subcultures, local politics and random events make this port a dynamic and confusing experience.
+
+===Culture===
+Socially, the peoples of the Risek system are balkanized. Each arcology, whether orbital or "shallow", has its own distinct cultural flavour and strong group identity. Since the groups are separated by hundreds of kilometers or by hard vacuum, there is little fear of military aggression, but there is a strong sense of competition in the inter-arcology sports system. Visiting merchants from other arcologies and even the occasional tourist are also treated with suspicion. All arcologies have strict weapons restrictions.
+
+In the "shallow" arcologies, agoraphobia has been a common mental illness in some sections. The surface is rarely visited by the citizenry, excepting organized youth groups and individualists. Those people raised on the planet have a love-hate relationship with the orbital arcologies. While fascinated by the idea of going into orbit, most will not accept a ride up, preferring to remain "inside".
+
+The orbital citizenry typically considers itself cosmopolitan, having frequent contact with visitors passing through the system. However, there is an expectation of "loyalty". If a merchant enters the system and does business at Risek-Central, that fact will be noted. It will also not be taken lightly, if the merchant decides to dock at Alexandria the next trip in.
+
+===Recent History===
+The current Baron, Admiral Romeo Bianchi, is an experienced administrator with naval experience. He is an older gentleman at 65 years old, but in good health. He attempts to govern with a light hand, not involving himself in local politics unless they affect the system as a whole. He is known to be on good terms with the current Celepinan Count, [[Celepina, Count Knowin of | Knowln]].
+
+== References ==
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=30-31}}
+ | {{Ludography cite|name=Twilight's Peak|version=Classic Traveller|page=14}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=The Regency Sourcebook|page=43}} (UWP only)
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=107}}
+ | {{Ludography cite|name=The Spinward States|page=104}} (UWP only)
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=74-79}} (UWP only)
+ | Author & Contributor: [[User:Dochsavage|Doch Savage]]
+}}
+
+[[Category: 23rd Fleet worlds]]
+[[Category: Megastructures]]
+[[Category: Republic of Regina worlds]]
+[[Category: Red Dwarf worlds]]
+[[Category: Worlds with a X-Boat Station]]
+{{LE|T5 Second Survey worlds}}

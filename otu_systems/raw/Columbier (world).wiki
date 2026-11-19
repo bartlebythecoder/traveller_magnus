@@ -1,0 +1,226 @@
+[[File:Alien Moon 300a-0 Small.jpg|250 px|right]]
+{{UWP 
+|name    = {{World|Columbier|Aldebaran|Euxene|0807}}
+|era     = Milieu 1116
+|uc      = A745574-D
+|popc    = 1
+|zonec   = green
+|alg     = SoFr
+|class   = Ag Ni / Tu Ht
+|trade   = ag
+|climate = Tu
+|gravity = -
+|bases   = KM
+|primary = F7 V M0 V
+|belts   = 0
+|GGcount = 1
+}}
+{{World summary |name= Columbier|trade= Ag Ni}}
+{{World summary SoFr|sector= Aldebaran|subsector= Euxene}}
+{{World summary comment|trade= Tu}}
+{{World summary comment|trade= Ht}}
+{{World summary bases|bases= KM}}
+* It is a member of the [[Euxene Cluster]].
+* It is home to a small community of [[Kwaz]].
+
+{{InfoboxSystem
+ |name= Columbier Primary |subsector= Euxene
+ |sector= Aldebaran |hex= 0807
+ |star= Prime |type= F7 V
+ |P1=     Brionnais                         | Dist1= 0.68         | UWP1= Y300000-0
+ |P2=     Côte-d'Or                         | Dist2= 1.16         | UWP2= G410111-C
+ |P3=     Columbier                         | Dist3= 2.04         | UWP3= A745574-D
+ |P3M1=     Luna                            | Dist3M1= 30 Diam    | UWP3M1= F310366-D
+ |P4=     Saugnieu                          | Dist4= 7.02         | UWP4= H301000-0
+ |P5=     Planet 4                          | Dist5= 12.5         | UWP5= Y9C2000-0
+ |P6=     Gas Giant                         | Dist6= 26.0         | UWP6= Large GG
+ |P6M1=     Moon                            | Dist6M1= 8 Diam     | UWP6M1= G100463-D
+ |P6M2=     Moon                            | Dist6M2= 15 Diam    | UWP6M2= Y4A1000-0
+}}
+
+{{InfoboxSystem
+ |name= Columbier Secondary |subsector= Euxene
+ |sector= Aldebaran |hex= 0807
+ |star= Minor |type= M0 V
+ |P1=     Allier                            | Dist1= 0.25         | UWP1= Y310000-0
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Columbier''' is a binary star system.
+* The primary is a white main sequence named ''Prime''.
+* The secondary is a red main sequence named ''Minor''.
+ 
+{{BinaryStarSystem
+|name            = Columbier
+|primary         = F7 V 
+|secondary       = M0 V 
+|PrimaryName     = Prime
+|PrimaryNotes    = 
+|SecondaryName   = Minor
+|SecondaryNotes  = [[Astronomical Unit|Approximately 110 AU]] from the primary.
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]].
+* x5 secondary [[world|rocky worlds]].
+* x1 [[gas giant]].
+
+=== Mainworld Data ===
+'''Columbier''' orbits towards the outer edge of the primary star's [[habitable zone]].
+* It receives relatively low levels of [[Electromagnetic Spectrum|stellar energy]].
+
+[[File:Chart Orbit HZ- Region Detailed.png|600 px]]
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Columbier|Size= 7}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Columbier|Atmosphere= 4}}
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Columbier|Hydrosphere= 5}}
+* The world's seas are often crusted with pack ice.
+
+==== Satellites ====
+'''Columbier''' retains a single [[Natural Satellite|vacuum moon]] named ''Luna''.
+* It orbits once every few weeks.
+
+[[File:Alien Moon 05a-1.jpg|600 px]]
+
+==== Mainworld Geography and Topography ====
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+[[File:Blank World Map Arid.png|500 px]] <br> (''Blank map, predominantly dry world''.)
+
+==== Native Lifeforms ====
+Abundant [[Lifeform|native life]] occupying every available ecological niche. Its metabolic functions drive the process of atmospheric renewal.
+* Native lifeforms are cryophilic - they thrive in [[Celsius|low temperatures]].
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Columbier''' is a member of the [[Euxene Cluster]], a small but important [[Main|cluster]] and a major [[Trade Route|trade center]] lying in the [[spinward]]-[[coreward]] quadrant of [[Aldebaran Sector]].
+
+It lies just outside the Aldebaran high-technology triangle ([[Darsei (world)|Darsei]]-[[Euxene (world)|Euxene]]-[[Home (world)|Home]]), and has benefited from that propinquity.
+
+During the [[Solomani Rim War|Rim War]] the [[Solomani Confederation|Confederation]] attempted to "relocate" a number of non-human races to other worlds, principally to fill gaps in the labor market caused by humans serving in the military. Large numbers of [[Kwaz]] were shipped to the world to assist with agricultural tasks. Their services are in demand, they have integrated relatively well, and generally they are thriving.
+
+[[Solomani Security]] keeps a close eye on things to ensure the security of the [[Solomani Confederation|Confederation]] and the well-being of its loyal citizens. Almost anyone ''could'' be a [[Solomani Security|SolSec]] informant, passing on all sorts of useful information: some gain a reward or benefit for their actions, others are coerced, but many see it as an act of duty to help protect the [[Solomani Confederation|Solomani state]] and its interests.
+
+=== [[Starport|World Starport]] (St) ===
+{{Starport|name= Columbier|Starport=A}}
+* This world is host to a [[Third Reformed French Confederate Republic|Republic]] [[Naval Base]].
+* This world is host to a major [[Military Base]].
+
+The operation and maintenance of the [[Highport|Columbier Highport]] is handled by the [[Third Reformed French Confederate Republic|Republic Navy]]. They also collect half the profits.
+
+Each Columbien nation maintains its own [[Downport|surface downport]], competing with other states to offer better facilities or services.
+
+=== [[Population|World Population]] (P) ===
+[[File:Kwaz Sophont Comparison.jpg|300 px|right]]
+{{WorldPop|name= Columbier|multiplier= 1|Population= 5}}
+* About 95% of the population (roughly 95,000 individuals) is made up of [[Solomani]] humans.
+* Around 5% of the population (approximately 5,000 individuals) consists of [[Kwaz]].
+
+==== Urbanization ====
+The [[Kwaz]] present on the world live in their own communities, generally built close to human settlements. Structures are constructed to serve their physiological needs and are generally far too small for humans to comfortably enter.
+
+==== Linguistic Topography ====
+The most commonly heard [[language]]s are:
+* [[Euxene French (language)|Euxene French]], a [[Terran]] language principally spoken in the [[Euxene Cluster]].
+* Native [[Kwaz]] languages.
+* [[Rim Anglic]], a dialect of [[Anglic]] and the principal language of the [[Solomani Confederation|Confederation]].
+
+=== [[Technology Level|World Technology Level]] (T) ===
+{{WorldTech|name= Columbier|WorldTech= D}}
+
+=== [[Government|World Government]] (G) ===
+{{WorldGov|name= Columbier|Government=7}}  
+
+The nations of the world Columbier are:
+* Marseilles: an [[Impersonal Bureaucracy]] that enforces a local [[Law Level|Law Level of 5]].
+* Padua: controlled by a [[Charismatic Dictatorship]].
+* America: it is a [[Balkanization|balkanized nation]] made up of many minor states under a Confederation agreement.
+* Florida: under the sway of a [[Charismatic Dictatorship]].
+* Antigua: an [[Impersonal Bureaucracy]].
+
+Each nation lies close to one of the large surface seas.
+
+=== [[Law Level|World Law]] (L) ===
+{{WorldLaw|name= Columbier|Law= 4}}
+
+=== Trade Data ===
+* [[Importance Extension|Importance]]: 3 (ordinary)
+
+=== World Economy ===
+* [[Resource]]s:                       8 (moderate)
+* [[Labor]]:                           4 (tens of thousands)
+* [[Infrastructure]]:                  4 (very limited)
+* [[Efficiency]]:                      +1 (average)
+
+=== World Culture ===
+The culture of Columbier mirrors the culture of [[Euxene (world)|Euxene]] in most respects.
+
+* [[Homogeneity|Heterogenity]]:        7 (discordant)
+* [[Acceptance]]:                      8 (friendly)
+* [[Strangeness]]:                     4 (somewhat distinct)
+* [[Symbol]]s:                         B (abstract)
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+
+* [[-9235]]: far to [[coreward]], the [[Vilani]] discover [[jump drive]] technology. Over the centuries pioneers and settlers gradually spread across [[Charted Space]].
+* [[-4045]] to [[-2204]]: the [[First Imperium|Ziru Sirka]] controls vast territories.
+* [[-2431]]: [[Terran]]s discover [[jump drive]] technology.
+* [[-2404]] to [[-2215]]: the [[Interstellar Wars]]. The young [[Terran Confederation]] battles against the ancient [[Vilani]] [[First Imperium|Ziru Sirka]].
+* [[-2204]] to [[-1776]]: the [[Rule of Man]] administers the former [[First Imperium|Ziru Sirka]].
+* [[-1999]]: the [[Aslan]] gain [[jump drive]] technology.
+* [[-1862]] to [[-1110]]: the [[Terran Mercantile Community]] is active within the region.
+* [[-1776]] to [[0]]: the [[Long Night]].
+* [[-1118]] to [[380]]: the [[Aslan Border Wars]].
+* [[-1110]] to [[588]]: the [[Terran Mercantile Community]] gradually becomes the [[Old Earth Union]], shrinking to control the region around [[Terra]].
+* [[0|The Year 0]]: to [[coreward]], the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[380]]: the [[Peace of Ftahalr]] ends the ongoing [[Aslan Border Wars]] and establishes understandings regarding human and [[Aslan]] influence. 
+* [[588]]: the [[Old Earth Union]] and the former territories of the [[Terran Mercantile Community]] are annexed by the {{Imperium}}, moving its border adjacent to the [[Aslan Hierate]].
+* [[604]]-[[622]]: the {{Imperial}} [[Civil War]].
+* [[624]]: the {{Imperial}} [[Express Boat Network]] is established.
+* [[704]]: the [[Solomani Autonomous Region]] is formed.
+* [[800]]-[[820]]: the [[Psionics Suppressions]].
+* [[871]]: the [[Solomani Confederation]] is founded.
+* [[940]]: the [[Solomani Autonomous Region]] is dissolved.
+* [[990]]-[[1002]]: the [[Solomani Rim War]].
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] includes data for the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+
+== References & Contributors / Sources ==
+{{Metadata}}
+{{Detail}}
+{{Sources
+|S1= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (A-M)|Supplement 8 Library Data (A-M)]]'', ([[Game Designers Workshop]], 1981), various pages. (Library data entries)
+|S2= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (N-Z)|Supplement 11 Library Data (N-Z)]]'', ([[Game Designers Workshop]], 1982), various pages. (Library data entries)
+|S3= {{Ludography cite|name= Solomani |version= Classic Traveller|page= IFC, pages 3, 28}} (sector named, background for the sector)
+|S4= {{Ludography cite|name= Solomani & Aslan |page= pages 8-11, various others}} (dot map locating the worlds of the sector, background for the sector)
+|S5= [[Steven Eric Schwartz]]. {{MT}} Periodical ''[[Imperiallines 2 (fanzine)|Imperiallines 2]]'', 1991, page 5. ([[Bootean Federation]], background for the sector) 
+|S6= {{Ludography cite|name= Fighting Ships of the Solomani|page= page 5}} (background for the sector)
+|S7= {{Ludography cite|name= Solomani |version= Mongoose Traveller|page= pages 28, 50, 118, 119, various others}} (The [[Kwaz]], background for the sector)
+|S8= {{Ludography cite|name= The Order of Prometheus|page= various pages}} (scenarios and background for the sector)
+|S9= [http://zho.berka.com/data/CLASSIC/sector.pl?sector=ALDEBARA Zho Berka's Maps] (Classic Era [[Universal World Profile|UWP Data]] for the world)
+|S10= [http://111george.com/core/astrogat/jG.htm CORE Data Site] ([[Universal World Profile|UWP Data]] for the world)
+|S11= Author & Contributor: [[User:Garnfellow|Garnfellow]] (development of the sector)
+|S12= Author & Contributor: [[Leroy W.L. Guatney]] of the Federation Development Agency (FDA) (development of the sector)
+|S13= Author & Contributor: [[User:Dochsavage|Dochsavage]] 
+}}
+
+
+[[Category: Euxene Cluster worlds]]
+[[Category: Humaniti worlds]]
+[[Category: Kwaz worlds]]
+[[Category: Rule of Man worlds]]
+[[Category: Second Imperium worlds]]
+[[Category: Solomani worlds]]
+[[Category: Solomani Sphere worlds]]
+[[Category: Terran Confederation worlds]]
+[[Category: Terran Mercantile Community worlds]]
+{{LE|Era: Milieu 1116|T5 Second Survey}}

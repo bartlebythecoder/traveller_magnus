@@ -1,0 +1,210 @@
+[[File:Alien Moon 312c-0 Tiny.jpg|250 px|right]]
+{{UWP 
+|name    = {{World|Asterope|Aldebaran|Euxene|0706}}
+|era     = Milieu 1116
+|uc      = C201151-A 
+|popc    = 6
+|zonec   = green
+|alg     = SoFr
+|class   = Ic Lo Va / Tz
+|trade   = ic
+|climate = Va
+|gravity = -
+|bases   = 
+|primary = M5 V M6 V 
+|belts   = 0
+|GGcount = 0
+}}
+{{World summary |name= Asterope|trade= Ic Lo Va}}
+{{World summary SoFr|sector= Aldebaran|subsector= Euxene}}
+* It orbits the system's secondary star.
+{{World summary comment|trade= Tz}}
+* It is a member of the [[Euxene Cluster]].
+
+{{InfoboxSystem
+ |name= Asterope Primary |subsector= Euxene
+ |sector= Aldebaran |hex= 0706
+ |star= Primary |type= M5 V
+ |P1=     Planetoid                         | Dist1= 0.32         | UWP1= YS00000-0
+}}
+
+{{InfoboxSystem
+ |name= Asterope Secondary |subsector= Euxene
+ |sector= Aldebaran |hex= 0706
+ |star= Secondary |type= M6 V
+ |P1=     Qui                               | Dist1= 0.05         | UWP1= Y100000-0
+ |P2=     Asterope                          | Dist2= 0.11         | UWP2= C201151-A
+ |P3=     Zunsaipah                         | Dist3= 0.50         | UWP3= H102000-0
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Asterope''' is a binary star system.
+* Both are red main sequence stars.
+
+{{BinaryStarSystem
+|name           = Asterope
+|primary        = M5 V 
+|secondary      = M6 V 
+|PrimaryName    = Primary
+|PrimaryNotes   = [[Flare Star]].
+|SecondaryName  = Secondary
+|SecondaryNotes = [[Flare Star]]. [[Astronomical Unit|Approximately 75 AU]] from the primary.
+}}
+
+[[File:Diagram Binary Stars Orbits 01.png|300 px|right]]
+
+==== Notes ====
+The two stars of the Asterope system have an average separation of [[Astronomical Unit|75 AU]] and orbit a barycenter that lies between them.
+* Both stars have [[Orbital Eccentricity|elliptical orbits]] around one another, with an average orbital eccentricity ('''<big>e</big>''') of 0.1.
+* They have an orbital period around one another of [[Year|1,264 standard years]].
+
+The system does not orbit the actual star ''[[Asterope (star)|Asterope]]'', which lies in the [[Pleiades Cluster]], in [[Holowon Sector]] to [[rimward]].
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]], orbiting the secondary star.
+* x2 secondary [[world|rocky worlds]], both orbiting the secondary star.
+** A single tiny planetoid, with a diameter of around [[Kilometer|75 km]], orbits the primary star.
+
+=== Mainworld Data ===
+'''Asterope''' is [[Twilight Zone World|tidally locked]] to the system's secondary star.
+* The star is always high in the sky on the bright face, it hangs on the horizon in the [[Twilight Zone World|twilight zone]], while the cold dark face is in permanent darkness.
+* The world experiences libration - a regular wobble - as it orbits, causing the star to move in the sky.
+
+[[File:Vacuum World Single Red Type 01b2.jpg|600 px]]
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Asterope|Size= 2}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Asterope|Atmosphere= 0}}
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+'''Asterope''' has 05-15% of its surface covered by ice, either in vast sheets or contained deep within craters or fractures on the surface. Wilderness refueling is possible. Water for the inhabitants can be got by mining and melting ice.
+* The surface of the world is composed of a crust of ice many kilometers thick.
+* Much of the surface is cratered and covered in thick layers of regolith and dust of meteoric origin, leaving only a part of the icy outer shell exposed.
+* Below the outer icy shell there may be a world-ocean of liquid water.
+
+==== Mainworld Geography and Topography ====
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+The [[mainworld]] is a [[Twilight Zone World|tidally locked]], ice-capped rock orbiting a tiny but dangerously temperamental red star. Most surface features are impact craters.
+* The main settlement can be found in such a crater on the planetary terminator, near the local ecliptic.
+
+[[File:Blank World Map Gray.png|500 px]] <br> (''Blank map, vacuum world''.)
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Asterope''' is a member of the [[Euxene Cluster]], a small but important [[Main|cluster]] and a major [[Trade Route|trade center]] lying in the [[spinward]]-[[coreward]] quadrant of [[Aldebaran Sector]].
+
+A mixture of outcasts and scavengers make up the bulk of the population.
+
+The system's two stars experience regular bouts of [[Flare Star|flare activity]], which causes interference, strange tones and noises, and heavy static on [[Ship Sensor Suite|commo and sensors]].
+* During major outbursts of [[Flare Star|flare activity]] [[Rad (metric)|radiation levels]] within the system are dangerously high.
+* Exposure to elevated [[Rad (metric)|radiation levels]] causes serious health issues and may damage unshielded electronic devices.
+
+[[Solomani Security]] keeps a close eye on things to ensure the security of the [[Solomani Confederation|Confederation]] and the well-being of its loyal citizens. Almost anyone ''could'' be a [[Solomani Security|SolSec]] informant, passing on all sorts of useful information: some gain a reward or benefit for their actions, others are coerced, but many see it as an act of duty to help protect the [[Solomani Confederation|Solomani state]] and its interests.
+
+=== [[Starport|World Starport]] (St) ===
+{{Starport|name= Asterope|Starport= C}}
+
+The world's primary [[downport]] facilities are named ''Port Willis''.
+
+=== [[Population|World Population]] (P) ===
+{{WorldPop|name= Asterope|multiplier= 6|Population= 1}}
+* The population almost entirely consists of [[Solomani]] humans.
+
+==== Urbanization ====
+Port Willis is the main settlement on this planet, located in a large terminator crater. It is ruled by a Governor Louis, who holds power by virtue of the fact that his supporters are numerous and better armed than competing groups. The main trade is in copper ores, mined within the crater deep point.
+
+There is a mining settlement [[Kilometer|200 km]] north along the terminator, ''Espirit de Pierre'', with what might generously be called a [[Class G Spaceport]]. This settlement has an elected Mayor, called Philippe Artoi. The settlement was founded over a set of large veins of iron, precious metals, and pitchblende. Mayor Artoi apparently seeks a means by which the ores can be exported directly, but currently is beholden to use Starport Willis.
+
+==== Linguistic Topography ====
+The most commonly heard [[language]]s are:
+* [[Euxene French (language)|Euxene French]], a [[Terran]] language principally spoken in the [[Euxene Cluster]].
+* [[Rim Anglic]], a dialect of [[Anglic]] and the principal language of the [[Solomani Confederation|Confederation]].
+
+=== [[Technology Level|World Technology Level]] (T) ===
+{{WorldTech|name= Asterope|WorldTech= A}}
+
+=== [[Government|World Government]] (G) ===
+{{WorldGov|name= Asterope|Government= 5}}
+
+=== [[Law Level|World Law]] (L) ===
+{{WorldLaw|name= Asterope|Law= 1}}
+
+=== Trade Data ===
+* [[Importance Extension|Importance]]: 0 (unimportant)
+
+=== World Economy ===
+The economy revolves around the extraction of metal ores, mining, and various service economies.
+
+* [[Resource]]s:                       6 (few)
+* [[Labor]]:                           0 (none available)
+* [[Infrastructure]]:                  0 (non-existent)
+* [[Efficiency]]:                      -3 (poor)
+
+=== World Culture ===
+* [[Homogeneity|Heterogenity]]:        1 (monolithic)
+* [[Acceptance]]:                      1 (extremely xenophobic)
+* [[Strangeness]]:                     5 (distinct)
+* [[Symbol]]s:                         B (abstract)
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+
+* [[-9235]]: far to [[coreward]], the [[Vilani]] discover [[jump drive]] technology. Over the centuries pioneers and settlers gradually spread across [[Charted Space]].
+* [[-4045]] to [[-2204]]: the [[First Imperium|Ziru Sirka]] controls vast territories.
+* [[-2431]]: [[Terran]]s discover [[jump drive]] technology.
+* [[-2404]] to [[-2215]]: the [[Interstellar Wars]]. The young [[Terran Confederation]] battles against the ancient [[Vilani]] [[First Imperium|Ziru Sirka]].
+* [[-2204]] to [[-1776]]: the [[Rule of Man]] administers the former [[First Imperium|Ziru Sirka]].
+* [[-1999]]: the [[Aslan]] gain [[jump drive]] technology.
+* [[-1862]] to [[-1110]]: the [[Terran Mercantile Community]] is active within the region.
+* [[-1776]] to [[0]]: the [[Long Night]].
+* [[-1118]] to [[380]]: the [[Aslan Border Wars]].
+* [[-1110]] to [[588]]: the [[Terran Mercantile Community]] gradually becomes the [[Old Earth Union]], shrinking to control the region around [[Terra]].
+* [[0|The Year 0]]: to [[coreward]], the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[380]]: the [[Peace of Ftahalr]] ends the ongoing [[Aslan Border Wars]] and establishes understandings regarding human and [[Aslan]] influence. 
+* [[588]]: the [[Old Earth Union]] and the former territories of the [[Terran Mercantile Community]] are annexed by the {{Imperium}}, moving its border adjacent to the [[Aslan Hierate]].
+* [[604]]-[[622]]: the {{Imperial}} [[Civil War]].
+* [[624]]: the {{Imperial}} [[Express Boat Network]] is established.
+* [[704]]: the [[Solomani Autonomous Region]] is formed.
+* [[800]]-[[820]]: the [[Psionics Suppressions]].
+* [[871]]: the [[Solomani Confederation]] is founded.
+* [[940]]: the [[Solomani Autonomous Region]] is dissolved.
+* [[990]]-[[1002]]: the [[Solomani Rim War]].
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] includes data for the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+
+== References & Contributors (Sources) ==
+{{Metadata}}
+{{Detail}}
+{{Sources
+|S1= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (A-M)|Supplement 8 Library Data (A-M)]]'', ([[Game Designers Workshop]], 1981), various pages. (Library data entries)
+|S2= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (N-Z)|Supplement 11 Library Data (N-Z)]]'', ([[Game Designers Workshop]], 1982), various pages. (Library data entries)
+|S3= {{Ludography cite|name= Solomani |version= Classic Traveller|page= IFC, pages 3, 28}} (sector named, background for the sector)
+|S4= {{Ludography cite|name= Solomani & Aslan |page= pages 8-11, various others}} (dot map locating the worlds of the sector, background for the sector)
+|S5= [[Steven Eric Schwartz]]. {{MT}} Periodical ''[[Imperiallines 2 (fanzine)|Imperiallines 2]]'', 1991, page 5. ([[Bootean Federation]], background for the sector) 
+|S6= {{Ludography cite|name= Fighting Ships of the Solomani|page= page 5}} (background for the sector)
+|S7= {{Ludography cite|name= Solomani |version= Mongoose Traveller|page= pages 50, 118, 119, various others}} (background for the sector)
+|S8= {{Ludography cite|name= The Order of Prometheus|page= various pages}} (scenarios and background for the sector)
+|S9= [http://zho.berka.com/data/CLASSIC/sector.pl?sector=ALDEBARA Zho Berka's Maps] (Classic Era [[Universal World Profile|UWP Data]] for the world)
+|S10= [http://111george.com/core/astrogat/jG.htm CORE Data Site] ([[Universal World Profile|UWP Data]] for the world)
+|S11= Author & Contributor: [[User:Garnfellow|Garnfellow]] (development of the sector)
+|S12= Author & Contributor: [[Leroy W.L. Guatney]] of the Federation Development Agency (FDA) (development of the sector)
+|S13= Author & Contributor: [[User:Dochsavage|Dochsavage]] 
+}}
+
+
+[[Category: Euxene Cluster worlds]]
+[[Category: Flare Star worlds]]
+[[Category: Humaniti worlds]]
+[[Category: Rule of Man worlds]]
+[[Category: Second Imperium worlds]]
+[[Category: Solomani worlds]]
+[[Category: Solomani Sphere worlds]]
+[[Category: Terran Confederation worlds]]
+[[Category: Terran Mercantile Community worlds]]
+{{LE|Era: Milieu 1116|T5 Second Survey}}

@@ -1,0 +1,612 @@
+{
+  "fetched": "2026-11-16",
+  "checked": "2026-11-17",
+  "pages": {
+    "Acton (system)": {
+      "file": "Acton (system).wiki",
+      "pageid": 105556,
+      "revid": 1019842,
+      "timestamp": "2026-03-11T20:22:23Z"
+    },
+    "Aerfor (system)": {
+      "file": "Aerfor (system).wiki",
+      "pageid": 73765,
+      "revid": 754599,
+      "timestamp": "2023-10-03T18:58:09Z"
+    },
+    "Algol (world)": {
+      "file": "Algol (world).wiki",
+      "pageid": 34335,
+      "revid": 1023247,
+      "timestamp": "2026-03-18T12:28:06Z"
+    },
+    "Alzirr (world)": {
+      "file": "Alzirr (world).wiki",
+      "pageid": 34337,
+      "revid": 902460,
+      "timestamp": "2025-02-19T08:26:03Z"
+    },
+    "Antares (system)": {
+      "file": "Antares (system).wiki",
+      "pageid": 6280,
+      "revid": 1009750,
+      "timestamp": "2026-02-17T21:13:25Z"
+    },
+    "Antares (system)/meta": {
+      "file": "Antares (system)_meta.wiki",
+      "pageid": 97106,
+      "revid": 867517,
+      "timestamp": "2024-12-09T15:16:31Z"
+    },
+    "Arkadia (system)": {
+      "file": "Arkadia (system).wiki",
+      "pageid": 9202,
+      "revid": 199926,
+      "timestamp": "2016-07-03T00:16:17Z"
+    },
+    "Asterope (world)": {
+      "file": "Asterope (world).wiki",
+      "pageid": 34342,
+      "revid": 1029392,
+      "timestamp": "2026-03-29T08:01:20Z"
+    },
+    "Atina (world)": {
+      "file": "Atina (world).wiki",
+      "pageid": 25456,
+      "revid": 960424,
+      "timestamp": "2025-07-18T16:11:12Z"
+    },
+    "Burtson (system)": {
+      "file": "Burtson (system).wiki",
+      "pageid": 94346,
+      "revid": 960415,
+      "timestamp": "2025-07-18T15:38:36Z"
+    },
+    "Caladbolg (world)": {
+      "file": "Caladbolg (world).wiki",
+      "pageid": 8541,
+      "revid": 1028644,
+      "timestamp": "2026-03-28T16:41:29Z"
+    },
+    "Celepina (world)": {
+      "file": "Celepina (world).wiki",
+      "pageid": 8986,
+      "revid": 947471,
+      "timestamp": "2025-06-15T16:30:46Z"
+    },
+    "Cipango (system)": {
+      "file": "Cipango (system).wiki",
+      "pageid": 100946,
+      "revid": 927623,
+      "timestamp": "2025-05-25T19:53:04Z"
+    },
+    "Collace (world)": {
+      "file": "Collace (world).wiki",
+      "pageid": 5596,
+      "revid": 1019992,
+      "timestamp": "2026-03-11T22:26:17Z"
+    },
+    "Collette (System)": {
+      "file": "Collette (System).wiki",
+      "pageid": 60637,
+      "revid": 486089,
+      "timestamp": "2019-03-28T13:38:41Z"
+    },
+    "Columbier (world)": {
+      "file": "Columbier (world).wiki",
+      "pageid": 45851,
+      "revid": 1020488,
+      "timestamp": "2026-03-13T12:05:31Z"
+    },
+    "Cordillon (world)": {
+      "file": "Cordillon (world).wiki",
+      "pageid": 3455,
+      "revid": 1061623,
+      "timestamp": "2026-06-27T14:42:04Z"
+    },
+    "Corella (world)": {
+      "file": "Corella (world).wiki",
+      "pageid": 44844,
+      "revid": 1067655,
+      "timestamp": "2026-08-06T22:09:17Z"
+    },
+    "Corinna (world)": {
+      "file": "Corinna (world).wiki",
+      "pageid": 45567,
+      "revid": 1020363,
+      "timestamp": "2026-03-13T10:35:55Z"
+    },
+    "Daedalus (Al 0606) (world)": {
+      "file": "Daedalus (Al 0606) (world).wiki",
+      "pageid": 45568,
+      "revid": 910993,
+      "timestamp": "2025-03-23T08:17:49Z"
+    },
+    "Darrian (world)": {
+      "file": "Darrian (world).wiki",
+      "pageid": 2305,
+      "revid": 1059939,
+      "timestamp": "2026-06-04T03:20:10Z"
+    },
+    "Dashi (world)": {
+      "file": "Dashi (world).wiki",
+      "pageid": 7975,
+      "revid": 1059368,
+      "timestamp": "2026-05-28T22:48:11Z"
+    },
+    "Deneb (system)": {
+      "file": "Deneb (system).wiki",
+      "pageid": 38134,
+      "revid": 1050196,
+      "timestamp": "2026-04-26T22:45:22Z"
+    },
+    "Depot (Da 3121) (world)": {
+      "file": "Depot (Da 3121) (world).wiki",
+      "pageid": 19666,
+      "revid": 999097,
+      "timestamp": "2026-01-09T18:49:22Z"
+    },
+    "Dhillourr (system)": {
+      "file": "Dhillourr (system).wiki",
+      "pageid": 88251,
+      "revid": 802834,
+      "timestamp": "2024-04-26T07:37:58Z"
+    },
+    "Divad (world)": {
+      "file": "Divad (world).wiki",
+      "pageid": 7069,
+      "revid": 1036222,
+      "timestamp": "2026-04-06T23:20:32Z"
+    },
+    "Dril (system)": {
+      "file": "Dril (system).wiki",
+      "pageid": 12965,
+      "revid": 878614,
+      "timestamp": "2024-12-30T20:01:50Z"
+    },
+    "Dynam (world)": {
+      "file": "Dynam (world).wiki",
+      "pageid": 9675,
+      "revid": 1088519,
+      "timestamp": "2026-10-29T00:50:11Z"
+    },
+    "Dywosik (System)": {
+      "file": "Dywosik (System).wiki",
+      "pageid": 70078,
+      "revid": 603153,
+      "timestamp": "2020-05-10T07:11:04Z"
+    },
+    "Elysee (Al 0111) (world)": {
+      "file": "Elysee (Al 0111) (world).wiki",
+      "pageid": 45832,
+      "revid": 1020297,
+      "timestamp": "2026-03-13T09:51:14Z"
+    },
+    "Emerald (system)": {
+      "file": "Emerald (system).wiki",
+      "pageid": 100898,
+      "revid": 925874,
+      "timestamp": "2025-05-21T21:40:20Z"
+    },
+    "Ficant (world)": {
+      "file": "Ficant (world).wiki",
+      "pageid": 4587,
+      "revid": 1071378,
+      "timestamp": "2026-08-29T17:57:57Z"
+    },
+    "Flexos (world)": {
+      "file": "Flexos (world).wiki",
+      "pageid": 7358,
+      "revid": 1028298,
+      "timestamp": "2026-03-28T03:42:02Z"
+    },
+    "Fomalhaut (SR 1024) (system)": {
+      "file": "Fomalhaut (SR 1024) (system).wiki",
+      "pageid": 13448,
+      "revid": 633446,
+      "timestamp": "2021-02-08T21:09:45Z"
+    },
+    "Froin (world)": {
+      "file": "Froin (world).wiki",
+      "pageid": 5810,
+      "revid": 1018409,
+      "timestamp": "2026-03-10T06:18:56Z"
+    },
+    "Gankhaka (world)": {
+      "file": "Gankhaka (world).wiki",
+      "pageid": 39485,
+      "revid": 643151,
+      "timestamp": "2021-04-12T01:14:54Z"
+    },
+    "Garoo (world)": {
+      "file": "Garoo (world).wiki",
+      "pageid": 4585,
+      "revid": 964544,
+      "timestamp": "2025-08-07T13:00:41Z"
+    },
+    "Gashimuu (world)": {
+      "file": "Gashimuu (world).wiki",
+      "pageid": 40165,
+      "revid": 1055120,
+      "timestamp": "2026-05-07T14:46:38Z"
+    },
+    "Gateway (Da 1331) (world)": {
+      "file": "Gateway (Da 1331) (world).wiki",
+      "pageid": 7664,
+      "revid": 1039108,
+      "timestamp": "2026-04-09T00:15:45Z"
+    },
+    "Glisten (system)": {
+      "file": "Glisten (system).wiki",
+      "pageid": 5404,
+      "revid": 633442,
+      "timestamp": "2021-02-08T21:05:12Z"
+    },
+    "Grande-Terre (world)": {
+      "file": "Grande-Terre (world).wiki",
+      "pageid": 45850,
+      "revid": 959835,
+      "timestamp": "2025-07-16T11:19:19Z"
+    },
+    "Grille (world)": {
+      "file": "Grille (world).wiki",
+      "pageid": 9119,
+      "revid": 1063882,
+      "timestamp": "2026-07-19T14:49:37Z"
+    },
+    "Grote (system)": {
+      "file": "Grote (system).wiki",
+      "pageid": 93977,
+      "revid": 963953,
+      "timestamp": "2025-08-06T09:10:36Z"
+    },
+    "Guru (world)": {
+      "file": "Guru (world).wiki",
+      "pageid": 12000,
+      "revid": 996384,
+      "timestamp": "2026-01-04T19:05:52Z"
+    },
+    "Hiemalis (world)": {
+      "file": "Hiemalis (world).wiki",
+      "pageid": 45786,
+      "revid": 1017695,
+      "timestamp": "2026-03-09T13:49:50Z"
+    },
+    "Home (Al 1009) (world)": {
+      "file": "Home (Al 1009) (world).wiki",
+      "pageid": 2777,
+      "revid": 1030492,
+      "timestamp": "2026-03-30T18:11:48Z"
+    },
+    "Icon (world)": {
+      "file": "Icon (world).wiki",
+      "pageid": 24739,
+      "revid": 1072094,
+      "timestamp": "2026-09-14T14:07:40Z"
+    },
+    "Ilelish (world)": {
+      "file": "Ilelish (world).wiki",
+      "pageid": 4743,
+      "revid": 1034308,
+      "timestamp": "2026-04-05T04:33:18Z"
+    },
+    "Inchin (world)": {
+      "file": "Inchin (world).wiki",
+      "pageid": 5643,
+      "revid": 1050598,
+      "timestamp": "2026-04-28T22:11:20Z"
+    },
+    "Ishdaga (world)": {
+      "file": "Ishdaga (world).wiki",
+      "pageid": 39595,
+      "revid": 1054224,
+      "timestamp": "2026-05-05T19:46:11Z"
+    },
+    "Ivraie (world)": {
+      "file": "Ivraie (world).wiki",
+      "pageid": 45842,
+      "revid": 1014835,
+      "timestamp": "2026-03-01T02:44:11Z"
+    },
+    "Jae Tellona (world)": {
+      "file": "Jae Tellona (world).wiki",
+      "pageid": 5907,
+      "revid": 1058542,
+      "timestamp": "2026-05-25T17:31:38Z"
+    },
+    "Jupiter (world)": {
+      "file": "Jupiter (world).wiki",
+      "pageid": 13205,
+      "revid": 1040493,
+      "timestamp": "2026-04-10T03:34:18Z"
+    },
+    "Kaggushus (world)": {
+      "file": "Kaggushus (world).wiki",
+      "pageid": 11944,
+      "revid": 956768,
+      "timestamp": "2025-07-09T16:54:16Z"
+    },
+    "Kemshigesh (world)": {
+      "file": "Kemshigesh (world).wiki",
+      "pageid": 25066,
+      "revid": 1037287,
+      "timestamp": "2026-04-07T23:54:26Z"
+    },
+    "Kerak (world)": {
+      "file": "Kerak (world).wiki",
+      "pageid": 25452,
+      "revid": 1089967,
+      "timestamp": "2026-11-04T22:14:39Z"
+    },
+    "Kirur (system)": {
+      "file": "Kirur (system).wiki",
+      "pageid": 34525,
+      "revid": 687830,
+      "timestamp": "2022-05-05T02:36:16Z"
+    },
+    "Kuiper Belt (world)": {
+      "file": "Kuiper Belt (world).wiki",
+      "pageid": 44535,
+      "revid": 1040498,
+      "timestamp": "2026-04-10T03:37:00Z"
+    },
+    "Kusyu (world)": {
+      "file": "Kusyu (world).wiki",
+      "pageid": 276,
+      "revid": 1063751,
+      "timestamp": "2026-07-18T08:02:39Z"
+    },
+    "Kuzu (system)": {
+      "file": "Kuzu (system).wiki",
+      "pageid": 5402,
+      "revid": 845006,
+      "timestamp": "2024-10-18T19:38:29Z"
+    },
+    "Kwan (world)": {
+      "file": "Kwan (world).wiki",
+      "pageid": 45919,
+      "revid": 1020360,
+      "timestamp": "2026-03-13T10:35:03Z"
+    },
+    "Lair (system)": {
+      "file": "Lair (system).wiki",
+      "pageid": 5679,
+      "revid": 936167,
+      "timestamp": "2025-06-02T13:17:26Z"
+    },
+    "Lair (system)/secret": {
+      "file": "Lair (system)_secret.wiki",
+      "pageid": 34487,
+      "revid": 941499,
+      "timestamp": "2025-06-06T22:36:37Z"
+    },
+    "Liilirsi (world)": {
+      "file": "Liilirsi (world).wiki",
+      "pageid": 39484,
+      "revid": 643157,
+      "timestamp": "2021-04-12T01:16:20Z"
+    },
+    "Likhukam (world)": {
+      "file": "Likhukam (world).wiki",
+      "pageid": 12282,
+      "revid": 996366,
+      "timestamp": "2026-01-04T18:21:45Z"
+    },
+    "Masiruu (world)": {
+      "file": "Masiruu (world).wiki",
+      "pageid": 12287,
+      "revid": 996355,
+      "timestamp": "2026-01-04T18:11:07Z"
+    },
+    "Mercator (world)": {
+      "file": "Mercator (world).wiki",
+      "pageid": 24738,
+      "revid": 969159,
+      "timestamp": "2025-08-17T15:52:35Z"
+    },
+    "Merope (world)": {
+      "file": "Merope (world).wiki",
+      "pageid": 34343,
+      "revid": 934525,
+      "timestamp": "2025-06-01T10:34:46Z"
+    },
+    "Mire (SM 0527) (world)": {
+      "file": "Mire (SM 0527) (world).wiki",
+      "pageid": 9103,
+      "revid": 960595,
+      "timestamp": "2025-07-19T12:28:29Z"
+    },
+    "Mora (world)": {
+      "file": "Mora (world).wiki",
+      "pageid": 1936,
+      "revid": 1058206,
+      "timestamp": "2026-05-23T01:05:39Z"
+    },
+    "Mu'izzi (world)": {
+      "file": "Mu'izzi (world).wiki",
+      "pageid": 45637,
+      "revid": 964922,
+      "timestamp": "2025-08-08T09:13:40Z"
+    },
+    "Myrthe (world)": {
+      "file": "Myrthe (world).wiki",
+      "pageid": 84681,
+      "revid": 1020357,
+      "timestamp": "2026-03-13T10:33:03Z"
+    },
+    "Neptune (world)": {
+      "file": "Neptune (world).wiki",
+      "pageid": 13208,
+      "revid": 1040496,
+      "timestamp": "2026-04-10T03:36:19Z"
+    },
+    "Nova Prometheus (world)": {
+      "file": "Nova Prometheus (world).wiki",
+      "pageid": 45649,
+      "revid": 960591,
+      "timestamp": "2025-07-19T10:44:51Z"
+    },
+    "Nukyls (world)": {
+      "file": "Nukyls (world).wiki",
+      "pageid": 24732,
+      "revid": 1036852,
+      "timestamp": "2026-04-07T14:57:09Z"
+    },
+    "Pallique (SM 3029) (world)": {
+      "file": "Pallique (SM 3029) (world).wiki",
+      "pageid": 29989,
+      "revid": 1063838,
+      "timestamp": "2026-07-19T14:22:56Z"
+    },
+    "Pax Rulin (system)": {
+      "file": "Pax Rulin (system).wiki",
+      "pageid": 69889,
+      "revid": 799955,
+      "timestamp": "2024-04-13T01:56:34Z"
+    },
+    "Porozlo (world)": {
+      "file": "Porozlo (world).wiki",
+      "pageid": 5908,
+      "revid": 1058541,
+      "timestamp": "2026-05-25T17:30:45Z"
+    },
+    "Regina (system)": {
+      "file": "Regina (system).wiki",
+      "pageid": 1976,
+      "revid": 633329,
+      "timestamp": "2021-02-08T13:19:33Z"
+    },
+    "Rhylanor (world)": {
+      "file": "Rhylanor (world).wiki",
+      "pageid": 1939,
+      "revid": 1084673,
+      "timestamp": "2026-10-20T01:24:08Z"
+    },
+    "Risek (world)": {
+      "file": "Risek (world).wiki",
+      "pageid": 9097,
+      "revid": 959217,
+      "timestamp": "2025-07-14T15:24:17Z"
+    },
+    "Roakhoi (world)": {
+      "file": "Roakhoi (world).wiki",
+      "pageid": 3729,
+      "revid": 873605,
+      "timestamp": "2024-12-22T18:23:40Z"
+    },
+    "Rode (world)": {
+      "file": "Rode (world).wiki",
+      "pageid": 25453,
+      "revid": 1089961,
+      "timestamp": "2026-11-04T21:46:31Z"
+    },
+    "Rovick (world)": {
+      "file": "Rovick (world).wiki",
+      "pageid": 25390,
+      "revid": 865970,
+      "timestamp": "2024-12-06T10:45:44Z"
+    },
+    "Ruie (world)": {
+      "file": "Ruie (world).wiki",
+      "pageid": 1789,
+      "revid": 1043785,
+      "timestamp": "2026-04-16T20:46:19Z"
+    },
+    "Rydem (world)": {
+      "file": "Rydem (world).wiki",
+      "pageid": 94972,
+      "revid": 947864,
+      "timestamp": "2025-06-16T16:13:54Z"
+    },
+    "Sandbox": {
+      "file": "Sandbox.wiki",
+      "pageid": 7,
+      "revid": 551036,
+      "timestamp": "2019-07-31T23:47:25Z"
+    },
+    "Soror (world)": {
+      "file": "Soror (world).wiki",
+      "pageid": 76627,
+      "revid": 1020310,
+      "timestamp": "2026-03-13T10:03:42Z"
+    },
+    "Talak (system)": {
+      "file": "Talak (system).wiki",
+      "pageid": 6530,
+      "revid": 836052,
+      "timestamp": "2024-08-31T10:37:58Z"
+    },
+    "Terra (system)": {
+      "file": "Terra (system).wiki",
+      "pageid": 12964,
+      "revid": 1040505,
+      "timestamp": "2026-04-10T04:04:07Z"
+    },
+    "The Maralee (world)": {
+      "file": "The Maralee (world).wiki",
+      "pageid": 25455,
+      "revid": 1075808,
+      "timestamp": "2026-09-26T17:45:42Z"
+    },
+    "Trin (SM 3235) (world)": {
+      "file": "Trin (SM 3235) (world).wiki",
+      "pageid": 6479,
+      "revid": 1022663,
+      "timestamp": "2026-03-17T18:43:14Z"
+    },
+    "Uumgadi (star)": {
+      "file": "Uumgadi (star).wiki",
+      "pageid": 39596,
+      "revid": 1054225,
+      "timestamp": "2026-05-05T19:46:13Z"
+    },
+    "Valhalla (SM 2811) (system)": {
+      "file": "Valhalla (SM 2811) (system).wiki",
+      "pageid": 101084,
+      "revid": 962835,
+      "timestamp": "2025-07-30T17:05:20Z"
+    },
+    "Vland (system)": {
+      "file": "Vland (system).wiki",
+      "pageid": 7051,
+      "revid": 945859,
+      "timestamp": "2025-06-12T22:09:11Z"
+    },
+    "WIllbo (system)": {
+      "file": "WIllbo (system).wiki",
+      "pageid": 69903,
+      "revid": 660443,
+      "timestamp": "2021-08-20T18:20:04Z"
+    },
+    "Walston (world)": {
+      "file": "Walston (world).wiki",
+      "pageid": 9144,
+      "revid": 1041695,
+      "timestamp": "2026-04-10T22:27:46Z"
+    },
+    "Whanga (world)/landgrab": {
+      "file": "Whanga (world)_landgrab.wiki",
+      "pageid": 4950,
+      "revid": 368399,
+      "timestamp": "2018-05-13T19:24:48Z"
+    },
+    "Zhdant (system)": {
+      "file": "Zhdant (system).wiki",
+      "pageid": 5400,
+      "revid": 710609,
+      "timestamp": "2023-02-25T10:32:14Z"
+    },
+    "Ziruushda (world)": {
+      "file": "Ziruushda (world).wiki",
+      "pageid": 10185,
+      "revid": 1038236,
+      "timestamp": "2026-04-08T19:49:09Z"
+    },
+    "Zivije (world)": {
+      "file": "Zivije (world).wiki",
+      "pageid": 9101,
+      "revid": 977433,
+      "timestamp": "2025-09-26T04:07:56Z"
+    }
+  }
+}

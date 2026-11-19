@@ -1,0 +1,196 @@
+[[File:Alien Moon 64d-0 Small.jpg|250 px|right]]
+{{UWP 
+|name={{World|Caladbolg|Spinward Marches|Sword Worlds|1329}}
+ |era=Milieu 1116
+|uc    = B565776-A
+|popc  = 7
+|zonec = green
+ |u1= 
+|alg     = ImDd
+|class   = Ag Ri / Tp
+|trade   = ag
+|nblty   = BCf
+|bases   = S
+|primary = F7 V M0 V M4 V
+|belts   = 1
+|GGcount = 0
+}}
+{{InfoboxSystem
+|name=Caladbolg
+|sector= Spinward Marches | subsector= Sword Worlds | hex= 1329
+|star= [[Escalibor (star)|Escalibor]] |type= F7 V
+|P1= Câliburn                    |Dist1= 0.38       |UWP1= <small>Y?00???-? </small>
+|P1M1= <small>Moonlet 1</small>  |Dist1M1= 2 Diam   |UWP1M1= <small>YS00000-0</small>
+|P1M2= <small>Moonlet 2</small>  |Dist1M2= 4 Diam   |UWP1M2= <small>YS00000-0</small>
+|P1M3= <small>Moonlet 3</small>  |Dist1M3= 5 Diam   |UWP1M3= <small>YS00000-0</small>
+|P2= Broken Stone                |Dist2= 0.65       |UWP2= <small>Y000000-0</small>
+|P3= Inner Planet                |Dist3= 0.98       |UWP3= <small>???0???-?</small>
+|P4= Inner Planet                |Dist4= 1.34       |UWP4= <small>???0???-?</small>
+|P5= Caladbolg                   |Dist5= 1.75       |UWP5= <small>B565776-A</small>
+|P6= Outer Planet                |Dist6= 2.63       |UWP6= <small>???????-?</small>
+|P7= Outer Planet                |Dist7= 4.59       |UWP7= <small>???????-?</small>
+|P8= Outer Planet                |Dist8= 9.22       |UWP8= <small>???????-?</small>
+|P9= Outer Planet                |Dist9= 13.8       |UWP9= <small>???????-?</small>
+|P10= '''Companion 1'''          |Dist10= 83.3      |UWP10= '''M0 V'''
+|P11= '''Companion 2'''          |Dist11= 339       |UWP11= '''M4 V'''
+}}
+{{World summary |name= Caladbolg|trade= Ag Ri}}
+{{World summary ImDd|sector= Spinward Marches|subsector= Sword Worlds}}
+{{World summary comment|trade= Tp}}
+{{World summary bases|bases= S}}
+* {{SpMain}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Caladbolg''' is a trinary star system.
+* The primary is a white main sequence named ''Escalibor''.
+* The secondary is a red main sequence.
+* The tertiary is a red main sequence.
+
+{{TrinaryStarSystem
+|name           = Caladbolg
+|primary        = F7 V 
+|secondary      = M0 V 
+|tertiary       = M4 V
+|PrimaryName    = Escalibor
+|SecondaryName  = Companion 1
+|TertiaryName   = Companion 2
+|PrimaryNotes   = Escalibor {{Page cite|name= The Travellers' Digest 16|citeName= TD16-1 |article= Sword of Arthur|page= 20}}
+|SecondaryNotes = [[Astronomical Unit|Approximately 83.3 AU]] from the primary.
+|TertiaryNotes  = [[Astronomical Unit|Approximately 339 AU]] from the primary.
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been partially surveyed. They consist of:
+* The [[mainworld]].
+* x7 secondary [[world|rocky worlds]].
+** The innermost is named ''Câliburn'' and has three tiny [[planetoid]] moons. It is a shepherd world for the Broken Stone Belt.
+** None of the other worlds are named and little survey data regarding them (other than their orbital distances) is known to exist.
+* x1 [[planetoid belt]], named the ''Broken Stone Belt''.
+
+=== Mainworld Data ===
+The [[mainworld]] orbits within the [[star]]'s [[Habitable Zone]].
+* It lies within the zone's prime '''H''' region.
+* It receives moderate levels of [[Electromagnetic Spectrum|stellar energy]].
+
+[[File:Chart Orbit HZ Region Detailed.png|600 px]]
+
+Caladbolg sits near the center of the [[system]]'s [[habitable zone]] and has an ideal [[climate]] for human habitation. Its [[atmosphere]] is pure and ecological legislation is strict.
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Caladbolg|Size= 5}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Caladbolg|Atmosphere= 6}}
+* It experiences [[Celsius|moderate temperatures]].
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Caladbolg|Hydrosphere= 5}}
+
+[[File:Water World Shore Type 14a3.jpg|600 px]]
+
+==== Mainworld Geography and Topography ====
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+[[File:Blank World Map Watery.png|500 px]] <br> (''Blank map, predominantly watery world''.)
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Caladbolg''', with a current population of roughly 70 million, was first colonized in [[-321]]. These colonists were from the Solomani worlds and invited by the Sword worlders via their cruiser "Robert the Bruce"; only a few of the settlers from the original Gram Fleet settled here.{{Page cite|name=Sword Worlds|version=Mongoose 2nd|citeName= MGSW#1|page=5}}
+
+The planet enjoys an active tourist trade and goes to great lengths to promote itself as a modern "Garden of Eden". Much of its economy depends on either the tourist trade or the vast farmlands which cover many portions of the world's surface. 
+
+Rumors insist that the world is the headquarters of the [[Order of the White Star]].
+
+[[wikipedia:Caladbolg|Caladbolg]] is the sword of Fergus mac Róich from the Ulster Cycle of [[wikipedia:Irish mythology|Irish mythology]]. It was said to be a two-handed sword that made a circle like an arc of rainbow when swung, and to have the power to slice the tops off hills and slaughter an entire army. 
+
+=== World Starport (St) ===
+{{Starport|name= Caladbolg|Starport= B}}
+* The world is host to a [[Scout Base]].
+
+Although this facility is small, it is a sophisticated, high-tech operation.
+
+=== World Population (P) ===
+{{WorldPop|name= Caladbolg|multiplier= 7|Population= 7}}
+
+==== Urbanization ====
+The citizens of Caladbolg are divided into 17 independent regions known as Colonies. Although there is a degree of competition between the Colonies, they have strong economic ties with each other and friction is minimal. There has never been a major war between them.
+* ''Camelot City'' is the capital and home to the world's only [[starport]]. In addition it provided a neutral meeting place for the Congress, the world's government.
+
+=== World Technology Level (T) ===
+{{WorldTech|name= Caladbolg|WorldTech= A}}
+
+=== World Government (G) ===
+{{WorldGov|name= Caladbolg|Government= 7}}
+
+Planetary policy is established by the Colonial Congress which meets in an ongoing session in the jointly operated Camelot City, the planet's only major population center. This body regulates any disputes between the Colonies that cannot be independently resolved. The System Defense Fleet, composed of citizens from each of the Colonies, answers directly to the Congress. 
+
+==== Military ====
+The System Defense Fleet's primary job is to defend Caladbolg from the asteroids in the Broken Stone belt. The Broken Stone belt is an unusually diffuse belt, with asteroids regularly crossing the orbit of Caladbolg and Caliburn (a world on an orbit inward of the belt).
+
+=== World Law (L) ===
+{{WorldLaw|name= Caladbolg|Law= 6}}
+
+=== Imperial Landed Nobility ===
+{{Imperial Nobility|name= Caladbolg|Noble=BCf}}
+* It holds the estate of the [[Count]]ess of Caladbolg. {{Page cite|name= Sword Worlds|version= GURPS Traveller|citeName= GTSW#1|page= 78}}
+: ''See: [[Nobles of Caladbolg]]''
+
+=== Trade Data ===
+* Importance:     4 (important)
+
+=== World Economy ===
+* Resources:      A (abundant)
+* Labor:          6 (millions)
+* Infrastructure: D (comprehensive)
+* Efficiency:     +3 (improved)
+
+Over the centuries, the people of Caladbolg have developed an agricultural economy and supply important agricultural resources to many worlds in the [[Sword Worlds Subsector]], but they have always been separate from the core Sword World culture as a result of their early colonization history.{{Page cite|name=Sword Worlds|version=Mongoose 2nd|citeName= MGSW#1|page=5}} 
+
+=== World Culture ===
+* Heterogenity: 6 (harmonious)
+* Acceptance:   B (extremely friendly)
+* Strangeness:  4 (somewhat distinct)
+* Symbols:      9 (somewhat abstract)
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+* [[0|The Year 0]]: the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[589]]-[[604]]: [[First Frontier War]].
+* [[604]]-[[622]]: the [[Civil War]].
+* [[615]]-[[620]]: [[Second Frontier War]].
+* [[624]]: the [[Express Boat Network]] is established.
+* [[979]]-[[986]]: [[Third Frontier War]].
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] charts the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+* [[1082]]-[[1084]]: [[Fourth Frontier War]], also known as the ''False War''.
+* [[1107]]-[[1110]]: [[Fifth Frontier War]].
+
+== References & Contributors (Sources) ==
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=16-17}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=The Travellers' Digest 16|article=Sword of Arthur|page=19-24}}
+ | {{Ludography cite|name=The Travellers' Digest 17|article=Psionic Knights|page=19-24}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=The Regency Sourcebook|page=44-45}} (UWP only)
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=70-71}}
+ | {{Ludography cite|name=Sword Worlds|version=GURPS Traveller|page=78}}
+ | {{Ludography cite|name=Bowman Arm|page=9-10}}
+ | {{Ludography cite|name=The Spinward States|page=109}} (UWP only)
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller|page=94, 96}} (UWP only)
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=89-92,96-97}} (UWP only)
+ | {{Ludography cite|name=Sword Worlds | version=Mongoose 2nd}}
+ | [[Tony Jones]] - [https://web.archive.org/web/20130612091443/http://www.wolfram.demon.co.uk/rp_tr_wo_caladbolg.html The Caladbolg system] - Memory Lapse Megatraveller campaign
+}}
+
+[[Category: Celtic Dialect Worlds]]
+[[Category: GT]]
+[[Category: Order of the White Star worlds]]
+[[Category: Psionics Institute worlds]]
+[[Category: Psionics worlds]]
+[[Category: Worlds with a X-Boat Station]]
+{{LE|T5 Second Survey worlds|Trinary Star System}}

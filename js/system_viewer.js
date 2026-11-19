@@ -1774,10 +1774,14 @@ const SystemViewer = (() => {
         // moon-size-roll-of-'R' branches, which push({}) onto w.rings instead of w.moons. Not
         // interleaved with the moon index sequence above, so rings get their own close-in offset.
         const rings = w.rings || [];
+        // Hit areas are pushed after the world's own (below): the hover test runs last-pushed
+        // first, and the world's radius (r + 9) covers the first ring, so pushed before it a
+        // ring could never be hovered. The planet disc itself (within r + 3) still hits the world.
+        const ringHits = [];
         if (!_hideMoons) rings.forEach((rg, ri) => {
             const rDist = r + 6 + ri * 5;
             _drawStaticRing(ctx, px, py, rDist);
-            _hitBodies.push({ kind: 'ring', body: rg, cx: px, cy: py, r: rDist + 3, innerR: rDist - 3 });
+            ringHits.push({ kind: 'ring', body: rg, parent: w, ringIdx: ri, ringCount: rings.length, cx: px, cy: py, r: rDist + 3, innerR: rDist - 3 });
         });
 
         if (w.type === 'Mainworld' && w.name && !_hideMainworldHighlight) {
@@ -1790,6 +1794,7 @@ const SystemViewer = (() => {
         }
 
         _hitBodies.push({ kind: 'world', body: w, cx: px, cy: py, r: Math.max(r + 9, 14) });
+        ringHits.forEach(h => _hitBodies.push(h));
     }
 
     function _drawBeltRing(ctx, cx, cy, r, isMainworld = false, dashOffset = 0) {
@@ -1958,6 +1963,15 @@ const SystemViewer = (() => {
             if (w.meanTempK)       html += `<div>Mean Temp: ${Math.round(w.meanTempK - 273.15)}°C</div>`;
             const moons = (w.moons || []).filter(m => m.type !== 'Empty');
             if (moons.length)      html += `<div style="margin-top:4px">Moons: ${moons.length}</div>`;
+            if (w.rings && w.rings.length) html += `<div>Rings: ${w.rings.length}</div>`;
+
+        } else if (hit.kind === 'ring') {
+            // MgT2E ring (w.rings[]) — it had no tooltip at all before 2026-11-18.
+            const p = hit.parent || {};
+            const ringNo = hit.ringCount > 1 ? ` ${hit.ringIdx + 1} of ${hit.ringCount}` : '';
+            html += `<div style="color:${TH};margin-bottom:5px;border-bottom:1px solid ${TBORDER};padding-bottom:4px">`;
+            html += `Ring${ringNo} <span style="color:${TSUB}">(Ring System)</span></div>`;
+            if (p.name || p.type)  html += `<div>Around: ${p.name || p.type}</div>`;
 
         } else if (hit.kind === 'moon') {
             const m           = body;

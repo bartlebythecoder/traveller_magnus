@@ -1,0 +1,192 @@
+[[File:Alien Moon 272b-0.jpg|250 px|right]]
+{{UWP 
+|name    = {{World|Nova Prometheus|Aldebaran|Firdausi|2705}}
+|era     = Milieu 1116
+|uc      = B785568-B
+|popc    = 1
+|zonec   = green
+|alg     = SoCf
+|class   = Ag Ni Ga Pr / Tp
+|trade   = ga
+|climate = Tp
+|gravity = -
+|bases   = -
+|primary = G0 V M0 V
+|belts   = 3
+|GGcount = 3
+}}
+{{World summary |name= Nova Prometheus|trade= Ag Ni Ga Pr}}
+{{World summary SoCf|sector= Aldebaran|subsector= Firdausi}}
+{{World summary comment|trade= Tp}}
+* It is a member of the [[Palermo Cluster]]. 
+
+{{InfoboxSystem
+ |name= Nova Prometheus |subsector= Firdausi
+ |sector= Aldebaran |hex= 2705
+ |star= Primary |type= G0 V
+ |P1=     '''Secondary'''                   | Dist1= 0.03         | UWP1= '''M0 V'''
+ |P2=     Lativa                            | Dist2= ?            | UWP2= G700411-B 
+ |P3=     Tawter                            | Dist3= ?            | UWP3= G100315-B
+ |P4=     '''Nova P.'''                     | Dist4= ?            | UWP4= B785568-B 
+ |P5=     Iseali                            | Dist5= ?            | UWP5= G323468-B 
+ |P6=     Cenoro                            | Dist6= ?            | UWP6= Y600000-0 
+ |P7=     Coa                               | Dist7= ?            | UWP7= Small GG
+ |P7M1=     C. Magna                        |   Dist7M1= ? Diam   |  UWP7M1= G4A2315-B 
+ |P8=     Roato                             | Dist8= ?            | UWP8= G420416-B
+ |P9=     Inner Belt                        | Dist9= ?            | UWP9= Y000000-0
+ |P10=    Adserie                           | Dist10= ?           | UWP10= Y610000-0
+ |P11=    Outer Belt                        | Dist11= ?           | UWP11= Y000000-0
+ |P12=    Accapae                           | Dist12= ?           | UWP12= Y710000-0
+ |P13=    Exerie                            | Dist13= ?           | UWP13= Y400000-0
+ |P14=    Secrib                            | Dist14= ?           | UWP14= Y200000-0
+ |P15=    Break Belt                        | Dist15= ?           | UWP15= Y000000-0
+ |P16=    Havisse                           | Dist16= ?           | UWP16= Small GG
+ |P17=    Gas Giant                         | Dist17= ?           | UWP17= Small GG
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Nova Prometheus''' is a binary star system.
+* The primary is a yellow main sequence.
+* The secondary is a red main sequence.
+** The two stars are close companions.
+
+{{BinaryStarSystem
+|name            = Nova Prometheus
+|primary         = G0 V 
+|secondary       = M0 V 
+|PrimaryName     = Primary
+|PrimaryNotes    = 
+|SecondaryName   = Secondary
+|SecondaryNotes  = [[Astronomical Unit|Approximately 0.03 AU]] from the primary.
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]].
+* x9 secondary [[world|rocky worlds]].
+* x3 [[planetoid belt]]s.
+* x3 [[gas giant]]s.
+
+Tawter, a secondary [[vacuum world]] orbiting in the [[Inner World|inner system]], is a corporate holding that is nominally independent but following guidance from [[Firdausi (world)|Firdausi]].
+* ''[[Tawtercorp]]'' is a business group with interests in shipping and related areas based on the world.
+
+=== Mainworld Data ===
+'''Nova Prometheus''' orbits within the prime region of the two star's combined [[habitable zone]].
+
+[[File:Chart Orbit HZ Region Detailed.png|600 px]]
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Nova Prometheus|Size= 7}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Nova Prometheus|Atmosphere= 8}}
+* It experiences [[Celsius|generally moderate temperatures]].
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Nova Prometheus|Hydrosphere= 5}}
+
+==== Mainworld Geography and Topography ====
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+[[File:Blank World Map Arid.png|500 px]] <br> (''Blank map, predominantly dry world''.)
+
+==== Native Lifeforms ====
+Abundant [[Lifeform|native life]] occupying every available ecological niche. Its metabolic functions drive the process of atmospheric renewal.
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Nova Prometheus''' is a member of the [[Palermo Cluster]], a small but important [[trade route]] lying close to the [[coreward]]-[[trailing]] edge of [[Aldebaran Sector]].
+
+The world is governed from [[Firdausi (world)|Firdausi]], while policing the system is the responsibility of the flotilla at [[Swelter (world)|Swelter]].
+
+There is an extensive food processing industry on the mainworld. Resource extraction throughout the system – including on the mainworld – is conducted on a license basis. In practice it is something of a free-for-all, with licenses routinely traded between firms.
+
+[[Solomani Security]] keeps a close eye on things to ensure the security of the [[Solomani Confederation|Confederation]] and the well-being of its loyal citizens. Almost anyone ''could'' be a [[Solomani Security|SolSec]] informant, passing on all sorts of useful information: some gain a reward or benefit for their actions, others are coerced, but many see it as an act of duty to help protect the [[Solomani Confederation|Solomani state]] and its interests.
+
+=== [[Starport|World Starport]] (St) ===
+{{Starport|name= Nova Prometheus|Starport= B}}
+
+=== [[Population|World Population]] (P) ===
+{{WorldPop|name= Nova Prometheus|multiplier= 1|Population= 5}}
+* The population almost entirely consists of [[Solomani]] humans.
+
+==== Linguistic Topography ====
+The most commonly heard [[language]]s are:
+* [[Rim Anglic]], a dialect of [[Anglic]] and the principal language of the [[Solomani Confederation|Confederation]].
+
+=== [[Technology Level|World Technology Level]] (T) ===
+{{WorldTech|name= Nova Prometheus|WorldTech= B}}
+
+=== [[Government|World Government]] (G) ===
+{{WorldGov|name= Nova Prometheus|Government= 6}}
+
+=== [[Law Level|World Law]] (L) ===
+{{WorldLaw|name= Nova Prometheus|Law= 8}}
+
+=== Trade Data ===
+* [[Importance Extension|Importance]]: 2 (ordinary)
+
+=== World Economy ===
+* [[Resource]]s:                       F (extremely abundant)
+* [[Labor]]:                           4 (tens of thousands)
+* [[Infrastructure]]:                  8 (generally available)
+* [[Efficiency]]:                      +2 (good)
+
+=== World Culture ===
+In contrast to the vibrant and colourful dress popular on [[Palermo (world)|Palermo]], fashions among the ordinary people of Nova Prometheus are sober and utilitarian (with the exception of the elite and their hangers-on).
+
+* [[Homogeneity|Heterogenity]]:        7 (discordant)
+* [[Acceptance]]:                      7 (aloof)
+* [[Strangeness]]:                     6 (very distinct)
+* [[Symbol]]s:                         A (abstract)
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+
+* [[-9235]]: far to [[coreward]], the [[Vilani]] discover [[jump drive]] technology. Over the centuries pioneers and settlers gradually spread across [[Charted Space]].
+* [[-4045]] to [[-2204]]: the [[First Imperium|Ziru Sirka]] controls vast territories.
+* [[-2431]]: [[Terran]]s discover [[jump drive]] technology.
+* [[-2404]] to [[-2215]]: the [[Interstellar Wars]].
+* [[-2204]] to [[-1776]]: the [[Rule of Man]] administers the former [[First Imperium|Ziru Sirka]].
+* [[-1776]] to [[0]]: the [[Long Night]].
+* [[0|The Year 0]]: to [[coreward]], the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[604]]-[[622]]: the {{Imperial}} [[Civil War]].
+* [[624]]: the {{Imperial}} [[Express Boat Network]] is established.
+* [[704]]: the [[Solomani Autonomous Region]] is formed.
+* [[800]]-[[820]]: the [[Psionics Suppressions]].
+* [[871]]: the [[Solomani Confederation]] is founded.
+* [[940]]: the [[Solomani Autonomous Region]] is dissolved.
+* [[990]]-[[1002]]: the [[Solomani Rim War]].
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] includes data for the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+
+== References & Contributors (Sources) ==
+{{Detail}}
+{{Sources
+|S1= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (A-M)|Supplement 8 Library Data (A-M)]]'', ([[Game Designers Workshop]], 1981), various pages. (Library data entries)
+|S2= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (N-Z)|Supplement 11 Library Data (N-Z)]]'', ([[Game Designers Workshop]], 1982), various pages. (Library data entries)
+|S3= {{Ludography cite|name= Solomani |version= Classic Traveller|page= IFC, pages 3, 28}} (sector named, background for the sector)
+|S4= {{Ludography cite|name= Solomani & Aslan |page= pages 8-11, various others}} (dot map locating the worlds of the sector, background for the sector)
+|S5= [[Steven Eric Schwartz]]. {{MT}} Periodical ''[[Imperiallines 2 (fanzine)|Imperiallines 2]]'', 1991, page 5. ([[Bootean Federation]], background for the sector) 
+|S6= {{Ludography cite|name= Fighting Ships of the Solomani|page= page 5}} (background for the sector)
+|S7= {{Ludography cite|name= Solomani |version= Mongoose Traveller|page= pages 50, 118, 119, various others}} (background for the sector)
+|S8= {{Ludography cite|name= The Order of Prometheus|page= pages 28-31}} (world details, plus background for the [[Palermo Cluster|Cluster]], subsector, and sector)
+|S9= [http://zho.berka.com/data/CLASSIC/sector.pl?sector=ALDEBARA Zho Berka's Maps] (Classic Era [[Universal World Profile|UWP Data]] for the world)
+|S10= [http://111george.com/core/astrogat/jG.htm CORE Data Site] ([[Universal World Profile|UWP Data]] for the world)
+|S11= Author & Contributor: [[User:Garnfellow|Garnfellow]] (development of the sector)
+|S12= Author & Contributor: [[Leroy W.L. Guatney]] of the Federation Development Agency (FDA) (development of the sector)
+}}
+
+
+[[Category: Humaniti worlds]]
+[[Category: Palermo Cluster worlds]]
+[[Category: Rule of Man worlds]]
+[[Category: Second Imperium worlds]]
+[[Category: Solomani Sphere worlds]]
+[[Category: Solomani worlds]]
+[[Category: Tawtercorp worlds]]
+[[Category: Terran Confederation worlds]]
+[[Category: Terran Mercantile Community worlds]]
+{{LE|Era: Milieu 1116|T5 Second Survey}}

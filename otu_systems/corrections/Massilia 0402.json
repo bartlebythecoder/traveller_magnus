@@ -1,0 +1,41 @@
+{
+  "page_priority": [
+    "Kaggushus (world)"
+  ],
+  "page_priority_source": "Sean, 2026-11-16",
+  "name": "Kaggushus",
+  "infobox_stars": {
+    "Gankhaka (world)": [
+      {
+        "name": "Uumgadi",
+        "type": "M1 V"
+      }
+    ],
+    "Ishdaga (world)": [
+      {
+        "name": "Uumgadi",
+        "type": "M1 V"
+      }
+    ],
+    "Kaggushus (world)": [
+      {
+        "name": "Uumgadi",
+        "type": "M1 V"
+      }
+    ],
+    "Liilirsi (world)": [
+      {
+        "name": "Uumgadi",
+        "type": "M1 V"
+      }
+    ],
+    "Uumgadi (star)": [
+      {
+        "name": "Uumgadi",
+        "type": "M1 V"
+      }
+    ]
+  },
+  "stars_source": "travellermap.com Stellar (Sean, 2026-11-16: TravellerMap wins where the wiki contradicts itself)",
+  "stars_settled": true
+}

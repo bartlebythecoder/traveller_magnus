@@ -1,0 +1,920 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Trojan Reach",
+  "sector_as_written": "Trojan Reaches",
+  "hex": "2204",
+  "sector_abbreviation": "Troj",
+  "subsector": "Pax Rulin",
+  "name": "Pax Rulin",
+  "sources": [
+    {
+      "page": "Pax Rulin (system)",
+      "revid": 799955,
+      "timestamp": "2024-04-13T01:56:34Z"
+    },
+    {
+      "page": "WIllbo (system)",
+      "revid": 660443,
+      "timestamp": "2021-08-20T18:20:04Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Pax Rulin (system)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Prime",
+          "type": "M8 III",
+          "notes": "Prime (Pax Rulin System Primary)"
+        }
+      ]
+    },
+    {
+      "page": "WIllbo (system)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": null,
+          "type": "M8 III",
+          "notes": "Prime (Pax Rulin System Primary)"
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Prime",
+      "stars": [
+        {
+          "name": "Prime",
+          "type": "M8 III"
+        }
+      ],
+      "labels": [
+        "Pax Rulin",
+        "Pax Rulin"
+      ],
+      "pages": [
+        "Pax Rulin (system)",
+        "WIllbo (system)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Heddwch",
+          "raw": "Y000158-D",
+          "kind": "world",
+          "uwp": "Y000158-D",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Pax Rulin (system)",
+            "WIllbo (system)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Pax Rulin",
+          "raw": "A402231-E",
+          "kind": "world",
+          "uwp": "A402231-E",
+          "distance": {
+            "raw": "19.6",
+            "value": 19.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Pax Rulin (system)",
+            "WIllbo (system)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 2,
+          "name": "Tentrem",
+          "raw": "F435123-D",
+          "kind": "world",
+          "uwp": "F435123-D",
+          "distance": {
+            "raw": "38.8",
+            "value": 38.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Pax Rulin (system)",
+            "WIllbo (system)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Heiwa",
+          "raw": "G856101-D",
+          "kind": "world",
+          "uwp": "G856101-D",
+          "distance": {
+            "raw": "77.2",
+            "value": 77.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Pax Rulin (system)",
+            "WIllbo (system)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Shaanti",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "614.8",
+            "value": 614.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Pax Rulin (system)",
+            "WIllbo (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "'Kankad",
+              "name_raw": "'Kankad'",
+              "raw": "H440000-0",
+              "kind": "world",
+              "uwp": "H440000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Pax Rulin (system)",
+                "WIllbo (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "'Chattaan",
+              "name_raw": "'Chattaan'",
+              "raw": "H134000-0",
+              "kind": "world",
+              "uwp": "H134000-0",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Pax Rulin (system)",
+                "WIllbo (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "'Boldar",
+              "name_raw": "'Boldar'",
+              "raw": "H89A147-D",
+              "kind": "world",
+              "uwp": "H89A147-D",
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Pax Rulin (system)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "'Bada Chaand",
+              "name_raw": "'Bada Chaand'",
+              "raw": "GC89145-D",
+              "kind": "world",
+              "uwp": "GC89145-D",
+              "distance": {
+                "raw": "9",
+                "value": 9.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Pax Rulin (system)",
+                "WIllbo (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "'Boldar in the round",
+              "name_raw": "'Boldar in the round'",
+              "raw": "H89A147-D",
+              "kind": "world",
+              "uwp": "H89A147-D",
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "WIllbo (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Tinchlik",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1229.5",
+            "value": 1229.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Pax Rulin (system)",
+            "WIllbo (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "'Oy",
+              "name_raw": "'Oy'",
+              "raw": "GABA100-D",
+              "kind": "world",
+              "uwp": "GABA100-D",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Pax Rulin (system)",
+                "WIllbo (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "'Tosh",
+              "name_raw": "'Tosh'",
+              "raw": "F361166-D",
+              "kind": "world",
+              "uwp": "F361166-D",
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Pax Rulin (system)",
+                "WIllbo (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Śānti",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "2458",
+            "value": 2458.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Pax Rulin (system)",
+            "WIllbo (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "'Nuri",
+              "name_raw": "'Nuri'",
+              "raw": "Y243010-D",
+              "kind": "world",
+              "uwp": "Y243010-D",
+              "distance": {
+                "raw": "1",
+                "value": 1.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Pax Rulin (system)",
+                "WIllbo (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "'Sila",
+              "name_raw": "'Sila'",
+              "raw": "Y618002-0",
+              "kind": "world",
+              "uwp": "Y618002-0",
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Pax Rulin (system)",
+                "WIllbo (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "'Candra",
+              "name_raw": "'Candra'",
+              "raw": "HFDA115-D",
+              "kind": "world",
+              "uwp": "HFDA115-D",
+              "distance": {
+                "raw": "12",
+                "value": 12.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Pax Rulin (system)",
+                "WIllbo (system)"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Pax Rulin (system)",
+      "label": "Pax Rulin",
+      "stars": [
+        {
+          "name": "Prime",
+          "type": "M8 III"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Heddwch",
+          "raw": "Y000158-D",
+          "kind": "world",
+          "uwp": "Y000158-D",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Pax Rulin",
+          "raw": "A402231-E",
+          "kind": "world",
+          "uwp": "A402231-E",
+          "distance": {
+            "raw": "19.6",
+            "value": 19.6,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Tentrem",
+          "raw": "F435123-D",
+          "kind": "world",
+          "uwp": "F435123-D",
+          "distance": {
+            "raw": "38.8",
+            "value": 38.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Heiwa",
+          "raw": "G856101-D",
+          "kind": "world",
+          "uwp": "G856101-D",
+          "distance": {
+            "raw": "77.2",
+            "value": 77.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Shaanti",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "614.8",
+            "value": 614.8,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "'Kankad",
+              "name_raw": "'Kankad'",
+              "raw": "H440000-0",
+              "kind": "world",
+              "uwp": "H440000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "'Chattaan",
+              "name_raw": "'Chattaan'",
+              "raw": "H134000-0",
+              "kind": "world",
+              "uwp": "H134000-0",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "'Boldar",
+              "name_raw": "'Boldar'",
+              "raw": "H89A147-D",
+              "kind": "world",
+              "uwp": "H89A147-D",
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "'Bada Chaand",
+              "name_raw": "'Bada Chaand'",
+              "raw": "GC89145-D",
+              "kind": "world",
+              "uwp": "GC89145-D",
+              "distance": {
+                "raw": "9",
+                "value": 9.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Tinchlik",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1229.5",
+            "value": 1229.5,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "'Oy",
+              "name_raw": "'Oy'",
+              "raw": "GABA100-D",
+              "kind": "world",
+              "uwp": "GABA100-D",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "'Tosh",
+              "name_raw": "'Tosh'",
+              "raw": "F361166-D",
+              "kind": "world",
+              "uwp": "F361166-D",
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Śānti",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "2458",
+            "value": 2458.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "'Nuri",
+              "name_raw": "'Nuri'",
+              "raw": "Y243010-D",
+              "kind": "world",
+              "uwp": "Y243010-D",
+              "distance": {
+                "raw": "1",
+                "value": 1.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "'Sila",
+              "name_raw": "'Sila'",
+              "raw": "Y618002-0",
+              "kind": "world",
+              "uwp": "Y618002-0",
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "'Candra",
+              "name_raw": "'Candra'",
+              "raw": "HFDA115-D",
+              "kind": "world",
+              "uwp": "HFDA115-D",
+              "distance": {
+                "raw": "12",
+                "value": 12.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page": "WIllbo (system)",
+      "label": "Pax Rulin",
+      "stars": [
+        {
+          "name": "Prime",
+          "type": "M8 III"
+        }
+      ],
+      "unused_fields": {
+        "bodystyle": "width:100"
+      },
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Heddwch",
+          "raw": "Y000158-D",
+          "kind": "world",
+          "uwp": "Y000158-D",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Pax Rulin",
+          "raw": "A402231-E",
+          "kind": "world",
+          "uwp": "A402231-E",
+          "distance": {
+            "raw": "19.6",
+            "value": 19.6,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Tentrem",
+          "raw": "F435123-D",
+          "kind": "world",
+          "uwp": "F435123-D",
+          "distance": {
+            "raw": "38.8",
+            "value": 38.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Heiwa",
+          "raw": "G856101-D",
+          "kind": "world",
+          "uwp": "G856101-D",
+          "distance": {
+            "raw": "77.2",
+            "value": 77.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Shaanti",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "614.8",
+            "value": 614.8,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "'Kankad",
+              "name_raw": "'Kankad'",
+              "raw": "H440000-0",
+              "kind": "world",
+              "uwp": "H440000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "'Chattaan",
+              "name_raw": "'Chattaan'",
+              "raw": "H134000-0",
+              "kind": "world",
+              "uwp": "H134000-0",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "'Boldar in the round",
+              "name_raw": "'Boldar in the round'",
+              "raw": "H89A147-D",
+              "kind": "world",
+              "uwp": "H89A147-D",
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "'Bada Chaand",
+              "name_raw": "'Bada Chaand'",
+              "raw": "GC89145-D",
+              "kind": "world",
+              "uwp": "GC89145-D",
+              "distance": {
+                "raw": "9",
+                "value": 9.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Tinchlik",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1229.5",
+            "value": 1229.5,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "'Oy",
+              "name_raw": "'Oy'",
+              "raw": "GABA100-D",
+              "kind": "world",
+              "uwp": "GABA100-D",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "'Tosh",
+              "name_raw": "'Tosh'",
+              "raw": "F361166-D",
+              "kind": "world",
+              "uwp": "F361166-D",
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Śānti",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "2458",
+            "value": 2458.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "'Nuri",
+              "name_raw": "'Nuri'",
+              "raw": "Y243010-D",
+              "kind": "world",
+              "uwp": "Y243010-D",
+              "distance": {
+                "raw": "1",
+                "value": 1.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "'Sila",
+              "name_raw": "'Sila'",
+              "raw": "Y618002-0",
+              "kind": "world",
+              "uwp": "Y618002-0",
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "'Candra",
+              "name_raw": "'Candra'",
+              "raw": "HFDA115-D",
+              "kind": "world",
+              "uwp": "HFDA115-D",
+              "distance": {
+                "raw": "12",
+                "value": 12.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Pax Rulin",
+    "UWP": "A402231-E",
+    "Stellar": "M8 III",
+    "PBG": "413",
+    "Bases": "N",
+    "Remarks": "Ic Lo Va Cp Ht"
+  }
+}

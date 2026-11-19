@@ -1,0 +1,137 @@
+ {{UWP 
+|name= {{World|Gankhaka|Massilia|Kerr|0402}}
+|image = 
+|system= 
+|uc    = H52030B-B
+|popc  = 
+|zonec = green
+ |u1= 
+|alg     = 
+|class   = 
+|trade   = 
+|climate = TBD
+|orbit   = TBD
+|gravity = TBD
+|worlds  = TBD
+|impoex  = {?}
+|econex  = (???+?)
+|cultex  = [????] 
+|nblty   = 
+|bases   = 
+|primary = 
+|belts   = 
+|GGcount = 
+}}
+[[Gankhaka (world)]] is a non-mainworld.
+* It is part of the system with the [[mainworld]] of [[Kaggushus (world)]].
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+No information yet available. 
+
+=== Image Repository ===
+[[TravellerMap]] <small>([[T5SS]])</small>: <br> [https://travellermap.com/?options=58355&x=2.165&y=-2&scale=128]
+
+=== System Data ===
+{{InfoboxSystem
+|name=Kaggushus
+|subsector=Kerr
+|sector=Massilia
+|hex=0402
+|star='''Uumgadi'''
+|type='''F1 V'''
+|P1= -
+|Dist1=
+|UWP1= <small>(Empty Orbit)</small>
+|P2=Liilirsi  
+|Dist2=0.4  
+|UWP2=GS0051B-C
+|P3=Dirmida   
+|Dist3=0.7  
+|UWP3=Y200000-0
+|P4=Gankhaka  
+|Dist4=1.0  
+|UWP4=H52030B-B
+|P4M1* ''Shimmi''   
+|Dist4M1=10 
+|UWP4M1=Y300000-0
+|P5= -    
+|Dist5=     
+|UWP5= <small>(Empty Orbit)</small>
+|P6=Kaggushus 
+|Dist6=2.8  
+|UWP6=A442AAB-C
+|P6M1=* ''Shuushan''
+|Dist6M1=3  
+|UWP6M1=GS00219-B
+|P7=Apdiga    
+|Dist7=5.2  
+|UWP7=YS00000-0
+|P7M1=* ''Igesh''   
+|Dist7M1=45 
+|UWP7M1=FS00328-B
+|P8=Ashmu     
+|Dist8=10   
+|UWP8='''SGG''' <small>(Size 90)</small>
+|P8M1=* ''Alpha''   
+|Dist8M1=5  
+|UWP8M1=H300000-0
+|P8M2=* ''Beta''    
+|Dist8M2=50 
+|UWP8M2=YS00000-0
+|P9=Lankadir  
+|Dist9=20   
+|UWP9='''LGG''' <small>(Size 160)</small>
+|P9M1=* ''Ring''    
+|Dist9M1=2  
+|UWP9M1=YR00000-0
+|P9M2=* ''Ring''    
+|Dist9M2=3  
+|UWP9M2=YR00000-0
+|P9M3=* ''Alpha''   
+|Dist9M3=6  
+|UWP9M3=YS00000-0
+|P9M4=* ''Beta''    
+|Dist9M4=8  
+|UWP9M4=Y200000-0
+|P9M5=* ''Gamma''   
+|Dist9M5=15 
+|UWP9M5=H10016A-C Re
+|P9M6=* ''Delta''   
+|Dist9M6=45 
+|UWP9M6=Y400000-0
+|P10=Sigdashku|Dist10=40  
+|UWP10='''SGG''' <small>(Size 70)</small>
+|P10M1=* ''Ring''   
+|Dist10M1=2 
+|UWP10M1=YR00000-0
+|P10M2=* ''Alpha''  
+|Dist10M2=7 
+|UWP10M2=Y300000-0
+|P10M3=* ''[[Ishdaga]]''
+|Dist10M3=45 
+|UWP10M3=G6A511A-C Re
+|P11=Larkun   |Dist11=154 |UWP11='''SGG''' <small>(Size 70)</small>
+|P11M1=* ''Alpha''  
+|Dist11M1=5 
+|UWP11M1=Y400000-0
+|P11M2=* ''Beta''   
+|Dist11M2=9 
+|UWP11M2=YS00000-0
+}}
+
+== History & Background ([[Dossier]]) ==
+''[[Gankhaka (world)|Gankhaka]]'' officially has no government; in reality it is the site of several former Imperial era installations. Free lancers under the hire of [[Mynoris Corporation]] carry out excavations under the cover of prospecting operations. Several noble backers of the company do not want public notification of these operations to attract looters and competitors.
+
+== References & Contributors ([[Sources]]) ==
+{{Intermediate}}
+{{Detail}}
+{{Sources
+|S10= [[Traveller Wiki Editorial Team]]
+|S11= Author & Contributor: [[Norma Guye]] of the [[TNE-RCES Mailing List]] 
+|S12= Author & Contributor: Lord (Marquis) and Master of Sophontology [[Maksim-Smelchak]] of the [[Ministry of Science]]
+}}
+
+
+[[Category: Mynoris Corporation]]
+[[Category: Mynoris Corporation worlds]]
+{{LE|T5 Second Survey worlds}}

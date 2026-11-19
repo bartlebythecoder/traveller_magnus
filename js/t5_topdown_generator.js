@@ -196,6 +196,9 @@
                 star.distAU = star.distAU != null ? star.distAU : T5_COMPANION_AU;
                 return;
             }
+            // System Editor: a companion whose orbit is unchanged keeps its stored distance
+            // (a published system's own AU) instead of the orbit's table value (Sean, 2026-11-16).
+            if (star.keepDistAU && star.distAU != null) return;
             const tbl  = T5_Data.ORBIT_AU;
             const idx  = Math.floor(orbitIdVal);
             const frac = orbitIdVal - idx;
@@ -625,7 +628,16 @@
         function createBodyPlaceholder(category, seedOverride) {
             let base;
             if (category === 'GG') {
-                const stats = generateGasGiantStats();
+                let stats = generateGasGiantStats();
+                // A seeded gas giant already has its class (Small/Large) but may have no size
+                // letter yet (a published system): roll the letter within its own class, so a
+                // Small never gets a Large letter (Sean, 2026-11-16). Rerolling the same 2D table
+                // keeps the table's odds within the class.
+                const wantType = seedOverride && seedOverride.size === undefined ? seedOverride.type : null;
+                if (wantType === 'Small Gas Giant' || wantType === 'Large Gas Giant') {
+                    for (let guard = 0; stats.type !== wantType && guard < 200; guard++) stats = generateGasGiantStats();
+                    if (stats.type !== wantType) stats = { type: wantType, size: wantType === 'Small Gas Giant' ? 'M' : 'P' };
+                }
                 base = { type: stats.type, size: stats.size, _manualFields: [] };
             } else if (category === 'BELT') {
                 base = { type: 'Planetoid Belt', size: 0, worldType: 'Belt', _manualFields: [] };

@@ -1,0 +1,115 @@
+The [[Grote (system)|Grote system]] lies within the [[Glisten Subsector]] of the {{Sm}}.
+* The mainworld of the system is [[Grote (world)|Grote]].
+
+Note that this is an '''alternative version''' of the [[Grote (world)|Grote system]], containing far more rocky secondary worlds than the [[T5SS]] data indicates.
+
+[[File:Alien Moon 106c-0 Small.jpg|250 px|right]]
+{{InfoboxSystem
+ |name = Grote|subsector = Glisten|sector = Spinward Marches|hex = 1731
+ |star = Regis |type = F8 V
+ |P1 = Guthlac           |Dist1= 0.2   |UWP1=    YS00000-0
+ |P2 = Horsa             |Dist2= 0.5   |UWP2=    H200400-B
+ |P3 = Godwin            |Dist3= 0.7   |UWP3=    G660300-B
+ |P4 = Inner Belt        |Dist4= 1.0   |UWP4=    Y000100-A
+ |P5 = Aethelstan        |Dist5= 1.6   |UWP5=    Small GG
+   |P5M1 = Ring          |Dist5M1= 2   |UWP5M1=  YR00000-0
+   |P5M2 = Sequin        |Dist5M2= 5   |UWP5M2=  HS00112-A
+   |P5M3 = Farthing      |Dist5M3= 7   |UWP5M3=  G334200-B
+   |P5M4 = Grote         |Dist5M4= 8   |UWP5M4=  A400404-B
+   |P5M5 = Standy        |Dist5M5= 55  |UWP5M5=  Y300000-0
+ |P6 = Edward            |Dist6= 2.8   |UWP6=    Y641300-A
+ |P7 = Edith             |Dist7= 3.1   |UWP7=    Y933000-0
+ |P8 = Cnut              |Dist8= 5.2   |UWP8=    Large GG
+   |P8M1 = Harthacnut    |Dist8M1= 4   |UWP8M1=  Y300214-A
+   |P8M2 = Cnut-B        |Dist8M2= 6   |UWP8M2=  Y320000-0
+   |P8M3 = Cnut-C        |Dist8M3= 10  |UWP8M3=  YS00000-0
+   |P8M4 = Cnut-D        |Dist8M4= 11  |UWP8M4=  Y540000-0
+   |P8M5 = Cnut-E        |Dist8M5= 25  |UWP8M5=  Y410000-0
+ |P9 = Ethel             |Dist9= 8     |UWP9=    G400217-A
+ |P10 = Outer Belt       |Dist10= 10   |UWP10=   H000365-B
+ |P11 = Adele (SM 1731)  |Dist11= 12   |UWP11=   Y602000-0
+ |P12 = Ethelred         |Dist12= 20   |UWP12=   Large GG
+   |P12M1 = Ring         |Dist12M1= 2  |UWP12M1= HR00000-0
+   |P12M2 = Ethelred-A       |Dist12M2= 7  |UWP12M2= Y650000-0
+   |P12M3 = Ethelred-B       |Dist12M3= 10 |UWP12M3= Y546000-0
+   |P12M4 = Ethelred-C       |Dist12M4= 20 |UWP12M4= Y442000-0
+   |P12M5 = Ethelred-D       |Dist12M5= 25 |UWP12M5= Y630000-0
+   |P12M6 = Ethelred-E       |Dist12M6= 36 |UWP12M6= YS00000-0
+   |P12M7 = Ethelred-F       |Dist12M7= 40 |UWP12M7= Y300000-0
+ |P13 = Hengist          |Dist13= 40   |UWP13=   Y100112-A
+ |P14 = Ethelbert        |Dist14= 77   |UWP14=   Small GG
+   |P14M1 = Inner Ring       |Dist14M1= 1  |UWP14M1= HR00000-0
+   |P14M2 = Outer Ring       |Dist14M2= 2  |UWP14M2= YR00000-0
+   |P14M3 = Ethelbert-A       |Dist14M3= 35 |UWP14M3= YS00000-0
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stars ===
+'''Grote''' has a solitary primary star named ''Regis''.
+* It is a white main sequence.
+
+{{MonostellarSystem
+|name           = Grote
+|primary        = F8 V 
+|PrimaryName    = Regis 
+|PrimaryNotes   = None
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]]. It is the [[Natural Satellite|largest moon]] of the large [[gas giant]] [[Gas Giant|Aethelstan]].
+* x8 secondary [[world|rocky worlds]]:
+** Guthlac, a tiny [[Hot World|hot]] [[planetoid]] orbiting at [[Astronomical Unit|0.2 AU]].
+** Horsa, a [[Hot World|hot]] [[vacuum world]] orbiting at [[Astronomical Unit|0.5 AU]].
+** Godwin, a [[Hot World|hot]] [[standard atmosphere]] [[desert world]] orbiting at [[Astronomical Unit|0.7 AU]].
+** Edward, a [[Cold World|cold]] [[thin atmosphere]] [[hell world]] orbiting at [[Astronomical Unit|2.8 AU]].
+** Edith, a [[Frozen World|frozen]] [[Big World|superterran world]] orbiting at [[Astronomical Unit|3.1 AU]].
+** Ethel, a [[Cold World|cold]] [[vacuum world]] orbiting at [[Astronomical Unit|8.0 AU]].
+** Adele, a [[Frozen World|frozen]] [[ice capped world]] orbiting at [[Astronomical Unit|12.0 AU]].
+** Hengest, a tiny [[Frozen World|frozen]] [[vacuum world]] orbiting at [[Astronomical Unit|40.0 AU]].
+* x2 [[planetoid belt]]s:
+** The Inner Belt, orbiting at [[Astronomical Unit|1.0 AU]].
+** The Outer Belt, orbiting at [[Astronomical Unit|10 AU]].
+* x4 [[gas giant]]s:
+** Aethelstan, a [[Gas Giant|small gas giant]] orbiting at [[Astronomical Unit|1.6 AU]]. <br> [[Grote (world)|Grote]], the [[mainworld]], is its largest moon.
+** Cnut, a [[Gas Giant|large gas giant]] orbiting at [[Astronomical Unit|5.2 AU]].
+** Ethelred, a [[Gas Giant|large gas giant]] orbiting at [[Astronomical Unit|20 AU]].
+** Ethelbert, a [[Gas Giant|small gas giant]] orbiting at [[Astronomical Unit|77 AU]].
+
+All of the [[gas giant]]s and most of the secondary rocky worlds [[Natural Satellite|retain moons]].
+
+=== Mainworld Data ===
+Grote is the [[Natural Satellite|largest moon]] of the [[Gas Giant|small gas giant]] ''Aethelstan''.
+
+[[File:Gas Giant Moons 09d.jpg|600 px]]
+
+The [[mainworld]] and its [[gas giant]] primary orbit within the [[star]]'s [[Habitable Zone]].
+* They lie within the zones prime '''H''' region.
+* They receive moderate levels of [[Electromagnetic Spectrum|stellar energy]].
+* The gas giant is "puffy", warm and swollen due to the energy it receives from the star.
+
+[[File:Chart Orbit HZ Region Detailed Satellite.png|600 px]]
+
+== History & Background (Dossier) ==
+The inhabitants of Grote more or less exclusively operate the starport and its associated facilities. The locals make their way as traders and ship-builders, with custom built small ships a specialty.{{Page cite|name=Behind the Claw|version=GURPS Traveller|page=95}}
+
+=== Imperial Landed Nobility ===
+{{Imperial Nobility|name= Grote|Noble= B}}
+
+== References & Contributors (Sources) ==
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=26-27}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=The Regency Sourcebook|page=50-51}} (UWP only)
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=95}}
+ | {{Ludography cite|name=The Spinward States|page=114}} (UWP only)
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=128-132}} (UWP only)
+ | [[Rob Dean]] - [https://zhodani.space/data/CLASSIC/writeup.cgi?loc&#61;1731&planY&#61;Grote&sector&#61;SPINMAR&realsubname&#61;Glisten&subsector&#61;GLISTEN.DAT&subsectorletter&#61;O The Zhodani Base] 
+}}
+
+{{LE|T5 Second Survey worlds}}
+{{LEN|Collace Arm worlds}}

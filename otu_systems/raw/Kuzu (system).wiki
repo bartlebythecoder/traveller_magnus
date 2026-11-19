@@ -1,0 +1,87 @@
+{{InfoboxSystem
+  |name=Kusyu
+  |subsector=Yataw
+  |sector=Dark Nebula
+  |hex=1226
+  |star='''[[Tyeyo (star)|Tyeyo / Saietaie]]'''
+  |type='''G5 V / D'''
+|P0=Htoiweloa
+  |Dist0=0.18|UWP0=FS002H9-D
+|P1=Iyih
+  |Dist1=0.34|UWP1=XS00000-0
+|P2=Uirlea
+  |Dist2=0.61|UWP2=D410467-D
+|P3=Kusyu
+  |Dist3=1.00|UWP3=A876976-E
+  |P3M1=[[Aoshi]]
+  |Dist3M1=8|UWP3M1=BS00668-D
+  |P3M2=[[Aoka'ah]]
+  |Dist3M2=15|UWP3M2=XS00000-0  
+|P4=Tyehohi
+  |Dist4=1.60|UWP4=C630366-D
+  |P4M1=Oikhyu
+  |Dist4M1=|UWP4M1=ES00165-9
+|P5=Areih
+  |Dist5=2.68|UWP5='''Large GG'''
+  |P5M1=Uiro
+  |Dist5M1=|UWP5M1=B200766-E
+  |P5M2=Aiwuar
+  |Dist5M2=|UWP5M2=C200667-D
+  |P5M3=Kaleal
+  |Dist5M3=|UWP5M3=E312666-D
+|P6=Htuitei
+  |Dist6=6.10|UWP6='''Large GG'''
+  |P6M1=Iyuou
+  |Dist6M1=|UWP6M1=B100867-E
+  |P6M2=Oikhoah
+  |Dist6M2=|UWP6M2=B4A0668-E
+|P7=Hroueiu
+  |Dist7=10.0|UWP7='''Small GG'''
+  |P7M1=Ring
+  |Dist7M1=|UWP7M1=XR00000-0
+  |P7M2=Yeofa
+  |Dist7M2=|UWP7M2=C100461-C
+|P8=Kyeele
+  |Dist8=18.0|UWP8=B5A1568-E
+  |P8M1=Hyeiyr
+  |Dist8M1=|UWP8M1=X100000-0
+|
+}}
+
+The world [[Kuzu (world)|Kuzu]] orbits a close binary pair pf stars consisting of [[Tyeyo (star)|Tyeyo]], a G4V star with Luminosity 0.77, radius 0.93 Sol and Mass 0.96 Sol, and its companion [[Saietaie]] which orbits at a distance of 4.2 Million Km (0.03 AU) and is a DA star with luminosity 0.0003 L<sub>Sol</sub>, radius 0.01 R<sub>Sol</sub> and mass 0.36 M<sub>Sol</sub>.
+
+== Description (Specifications) ==
+{{BinaryStarSystem
+|name           = Kusyu 
+|PrimaryName    = Tyeyo
+|primary        = G4 V 
+|SecondaryName  = Saietaie
+|secondary      = DA
+|PrimaryNotes   = [[Tyeyo (star)|Tyeyo]]
+|SecondaryNotes = [[Tyeyo (star)|Saietaie]]
+}}
+
+=== Inner system ===
+* The innermost world of the [[Kusyu (world)|Ksuyu]] system is '''''Htealas''''', which is little more than a baked rockball that is inhabited solely for its mineral deposits.  
+* '''''Ulyei''''' is the home of the ''Uihaua Laboratory'', a multi-disciplinary research facility owned by the ''Khaukheairl''-backed ''Oakhowus corporation''.  
+
+=== Outer system ===
+* '''''Tresahyaiy''''' has cold but sizeable oceans which are heated by undersea geothermal vents, and boast a wide array of indigenous aquatic life.  The ''Faowaou Clan'' sponsors a small facility on the world that studies these life forms.  Though its moon ''Kawirlea'' has both an atmosphere and an ocean, it is currently undeveloped.  
+* '''''Ahehoi''''' is a large golden-red gas giant orbited by four major moons.  ''Kihyalriy'' contains many sizeable veins of various ores, while ''Huikoahe'' hosts an astronomical research facility owned by the ''Faiekhas'' corporation of the ''Tralyeaeawi Clan''.  
+* '''''Hkiyai''''' is the largest gas giant in the [[Kusyu (world)|Kusyu]] system, and is the primary stopover for wilderness refueling operations.   
+* Famed for its beautiful ring system, '''''Hiyuahuahro''''' is a small gas giant whose atmosphere has a reputation for significant storm activity.  
+* '''''Kyoloil''''' is an outer icy-rocky world whose atmosphere is primarily a dense envelope of ammonia.  ''Kyoloil'' is a hereditary landhold of ''Clan Esoeisye''' and maintains the [[Kusyu (world)|Kusyu]] system's outer defensive perimeter.
+
+== History & Background (Dossier) ==
+No information yet available. 
+
+
+== References & Contributors (Sources) ==
+{{Sources
+ |S1= {{Ludography cite|name=Aslan|version=Classic Traveller|page=37}}
+ |S2= {{Ludography cite|name=Solomani & Aslan|page=11,50}}
+ |S3= {{Ludography cite|name=Alien Races 2}}
+ |S4= {{Ludography cite|name=The Deep and the Dark|page=243-244}}
+}}
+
+{{LE|Systems}}

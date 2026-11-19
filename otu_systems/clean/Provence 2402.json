@@ -1,0 +1,875 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Provence",
+  "hex": "2402",
+  "sector_abbreviation": "Prov",
+  "subsector": "Grnouf",
+  "name": "Lloelldegh (\"Lair\")",
+  "sources": [
+    {
+      "page": "Lair (system)",
+      "revid": 936167,
+      "timestamp": "2025-06-02T13:17:26Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Lair (system)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Kneng",
+          "type": "G5 V",
+          "notes": "None"
+        }
+      ]
+    },
+    {
+      "page": "Lair (system)/secret",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Fyutinyu",
+          "type": "G5 V",
+          "notes": "Fyutinyu is an artificially ignited star; its characteristics do not actually match the listed data for a standard star on the main-sequence"
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Kneng",
+      "stars": [
+        {
+          "name": "Kneng",
+          "type": "G5 V"
+        }
+      ],
+      "labels": [
+        "Lloelldegh (\"Lair\")"
+      ],
+      "pages": [
+        "Lair (system)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Og Orz",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "0.08",
+            "value": 0.08,
+            "unit": "AU"
+          },
+          "sources": [
+            "Lair (system)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Erzikh Dhadh",
+          "raw": "H310300-F",
+          "kind": "world",
+          "uwp": "H310300-F",
+          "distance": {
+            "raw": "0.21",
+            "value": 0.21,
+            "unit": "AU"
+          },
+          "sources": [
+            "Lair (system)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Foulours",
+          "raw": "Y630000-0",
+          "kind": "world",
+          "uwp": "Y630000-0",
+          "distance": {
+            "raw": "0.39",
+            "value": 0.39,
+            "unit": "AU"
+          },
+          "sources": [
+            "Lair (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Servonaz",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Lair (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Olou",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Lair (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Lair",
+          "raw": "A8859B9-F",
+          "kind": "world",
+          "uwp": "A8859B9-F",
+          "distance": {
+            "raw": "0.70",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Lair (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Errgh",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Lair (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Sanko",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "4 Diam",
+                "value": 4.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Lair (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Ouksado Fan",
+              "raw": "F20031C-F",
+              "kind": "world",
+              "uwp": "F20031C-F",
+              "distance": {
+                "raw": "60 Diam",
+                "value": 60.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Lair (system)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 4,
+          "name": "Goullaengrak",
+          "raw": "'''Large GG''' <br> <small>(Size=220)</small>",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "size_value": "220",
+          "distance": {
+            "raw": "1.05",
+            "value": 1.05,
+            "unit": "AU"
+          },
+          "sources": [
+            "Lair (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Raekfong",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Lair (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Raekgzoe",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Lair (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Knoen",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Lair (system)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Suekh",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Lair (system)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Vadze Aengkoe",
+              "raw": "Y330000-0",
+              "kind": "world",
+              "uwp": "Y330000-0",
+              "distance": {
+                "raw": "30 Diam",
+                "value": 30.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Lair (system)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Fi Itsoudzi",
+              "raw": "G40011B-E",
+              "kind": "world",
+              "uwp": "G40011B-E",
+              "distance": {
+                "raw": "45 Diam",
+                "value": 45.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Lair (system)"
+              ]
+            },
+            {
+              "index": 7,
+              "name": "Uerul",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "60 Diam",
+                "value": 60.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Lair (system)"
+              ]
+            },
+            {
+              "index": 8,
+              "name": "Dzaer",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "90 Diam",
+                "value": 90.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Lair (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Garzingnall Belt",
+          "raw": "Y000100-E <br> <small>(Size=0.5<small>AU</small>)</small>",
+          "kind": "world",
+          "uwp": "Y000100-E",
+          "remark": "(Size=0.5AU)",
+          "distance": {
+            "raw": "1.66",
+            "value": 1.66,
+            "unit": "AU"
+          },
+          "flags": [
+            "uwp-with-remark"
+          ],
+          "sources": [
+            "Lair (system)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Saghurrkhoer",
+          "raw": "'''Small GG'''  <br> <small>(Size=80)</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "80",
+          "distance": {
+            "raw": "2.69",
+            "value": 2.69,
+            "unit": "AU"
+          },
+          "sources": [
+            "Lair (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Atourrkou",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Lair (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Rror Usuersogh",
+              "raw": "H300000-0",
+              "kind": "world",
+              "uwp": "H300000-0",
+              "distance": {
+                "raw": "65 Diam",
+                "value": 65.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Lair (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Ngolkfaedh",
+          "raw": "'''Small GG'''   <br> <small>(Size=60)</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "60",
+          "distance": {
+            "raw": "5.42",
+            "value": 5.42,
+            "unit": "AU"
+          },
+          "sources": [
+            "Lair (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Uzil",
+              "raw": "H400167-E",
+              "kind": "world",
+              "uwp": "H400167-E",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Lair (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Olahgz",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Lair (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Knoka Llan",
+              "raw": "Y5A0000-0",
+              "kind": "world",
+              "uwp": "Y5A0000-0",
+              "distance": {
+                "raw": "11 Diam",
+                "value": 11.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Lair (system)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Dhuggzung",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "60 Diam",
+                "value": 60.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Lair (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Rrallan Ang",
+          "raw": "H9A5239-E",
+          "kind": "world",
+          "uwp": "H9A5239-E",
+          "distance": {
+            "raw": "11.2",
+            "value": 11.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Lair (system)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Lair (system)",
+      "label": "Lloelldegh (\"Lair\")",
+      "stars": [
+        {
+          "name": "Kneng",
+          "type": "G5 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Og Orz",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "0.08",
+            "value": 0.08,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Erzikh Dhadh",
+          "raw": "H310300-F",
+          "kind": "world",
+          "uwp": "H310300-F",
+          "distance": {
+            "raw": "0.21",
+            "value": 0.21,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Foulours",
+          "raw": "Y630000-0",
+          "kind": "world",
+          "uwp": "Y630000-0",
+          "distance": {
+            "raw": "0.39",
+            "value": 0.39,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Servonaz",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Olou",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Lair",
+          "raw": "A8859B9-F",
+          "kind": "world",
+          "uwp": "A8859B9-F",
+          "distance": {
+            "raw": "0.70",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Errgh",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Sanko",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "4 Diam",
+                "value": 4.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Ouksado Fan",
+              "raw": "F20031C-F",
+              "kind": "world",
+              "uwp": "F20031C-F",
+              "distance": {
+                "raw": "60 Diam",
+                "value": 60.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Goullaengrak",
+          "raw": "'''Large GG''' <br> <small>(Size=220)</small>",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "size_value": "220",
+          "distance": {
+            "raw": "1.05",
+            "value": 1.05,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Raekfong",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Raekgzoe",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Knoen",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Suekh",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 5,
+              "name": "Vadze Aengkoe",
+              "raw": "Y330000-0",
+              "kind": "world",
+              "uwp": "Y330000-0",
+              "distance": {
+                "raw": "30 Diam",
+                "value": 30.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 6,
+              "name": "Fi Itsoudzi",
+              "raw": "G40011B-E",
+              "kind": "world",
+              "uwp": "G40011B-E",
+              "distance": {
+                "raw": "45 Diam",
+                "value": 45.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 7,
+              "name": "Uerul",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "60 Diam",
+                "value": 60.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 8,
+              "name": "Dzaer",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "90 Diam",
+                "value": 90.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Garzingnall Belt",
+          "raw": "Y000100-E <br> <small>(Size=0.5<small>AU</small>)</small>",
+          "kind": "world",
+          "uwp": "Y000100-E",
+          "remark": "(Size=0.5AU)",
+          "distance": {
+            "raw": "1.66",
+            "value": 1.66,
+            "unit": "AU"
+          },
+          "flags": [
+            "uwp-with-remark"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Saghurrkhoer",
+          "raw": "'''Small GG'''  <br> <small>(Size=80)</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "80",
+          "distance": {
+            "raw": "2.69",
+            "value": 2.69,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Atourrkou",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Rror Usuersogh",
+              "raw": "H300000-0",
+              "kind": "world",
+              "uwp": "H300000-0",
+              "distance": {
+                "raw": "65 Diam",
+                "value": 65.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Ngolkfaedh",
+          "raw": "'''Small GG'''   <br> <small>(Size=60)</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "60",
+          "distance": {
+            "raw": "5.42",
+            "value": 5.42,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Uzil",
+              "raw": "H400167-E",
+              "kind": "world",
+              "uwp": "H400167-E",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Olahgz",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Knoka Llan",
+              "raw": "Y5A0000-0",
+              "kind": "world",
+              "uwp": "Y5A0000-0",
+              "distance": {
+                "raw": "11 Diam",
+                "value": 11.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Dhuggzung",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "60 Diam",
+                "value": 60.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Rrallan Ang",
+          "raw": "H9A5239-E",
+          "kind": "world",
+          "uwp": "H9A5239-E",
+          "distance": {
+            "raw": "11.2",
+            "value": 11.2,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Lair",
+    "UWP": "A8859B9-E",
+    "Stellar": "G5 V",
+    "PBG": "213",
+    "Bases": "K",
+    "Remarks": "Hi Ga Cx Pr Pz [Vargr] Ht"
+  }
+}

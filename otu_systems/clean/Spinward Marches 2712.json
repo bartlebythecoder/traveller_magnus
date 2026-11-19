@@ -1,0 +1,229 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "2712",
+  "sector_abbreviation": "Spin",
+  "subsector": "Rhylanor",
+  "name": "Risek",
+  "sources": [
+    {
+      "page": "Risek (world)",
+      "revid": 959217,
+      "timestamp": "2025-07-14T15:24:17Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Risek (world)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Primary",
+          "type": "M2 V",
+          "notes": null
+        },
+        {
+          "role": "Secondary",
+          "name": "Secondary",
+          "type": "M3 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Orb",
+      "stars": [
+        {
+          "name": "Orb",
+          "type": "M2 V"
+        },
+        {
+          "name": "Secondary",
+          "type": "M3 V"
+        }
+      ],
+      "labels": [
+        "Risek"
+      ],
+      "pages": [
+        "Risek (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Risek",
+          "raw": "A325579-A",
+          "kind": "world",
+          "uwp": "A325579-A",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Risek (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 2,
+          "name": "Rissona",
+          "raw": "'''Gas Giant'''",
+          "kind": "gas_giant",
+          "distance": {
+            "raw": "5",
+            "value": 5.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-no-size-class"
+          ],
+          "sources": [
+            "Risek (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Shepard Moons",
+              "name_raw": "* ''Shepard Moons''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "<7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true,
+                "qualifier": "<"
+              },
+              "flags": [
+                "dist-approximate",
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Risek (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Rison",
+              "name_raw": "* ''Rison''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "20",
+                "value": 20.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Risek (world)"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Risek (world)",
+      "label": "Risek",
+      "stars": [
+        {
+          "name": "Orb",
+          "type": "M2 V"
+        },
+        {
+          "name": "Secondary",
+          "type": "M3 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Risek",
+          "raw": "A325579-A",
+          "kind": "world",
+          "uwp": "A325579-A",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Rissona",
+          "raw": "'''Gas Giant'''",
+          "kind": "gas_giant",
+          "distance": {
+            "raw": "5",
+            "value": 5.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-no-size-class"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Shepard Moons",
+              "name_raw": "* ''Shepard Moons''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "<7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true,
+                "qualifier": "<"
+              },
+              "flags": [
+                "dist-approximate",
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Rison",
+              "name_raw": "* ''Rison''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "20",
+                "value": 20.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        }
+      ],
+      "stars_as_written": [
+        {
+          "name": "Orb",
+          "type": "M2 V"
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Risek",
+    "UWP": "A425579-A",
+    "Stellar": "M2 V M3 V",
+    "PBG": "401",
+    "Bases": "N",
+    "Remarks": "Ni"
+  }
+}

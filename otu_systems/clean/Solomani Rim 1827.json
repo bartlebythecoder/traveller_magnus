@@ -1,0 +1,2365 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Solomani Rim",
+  "hex": "1827",
+  "sector_abbreviation": "Solo",
+  "subsector": "Sol",
+  "name": "Terra (\"Sol\")",
+  "sources": [
+    {
+      "page": "Jupiter (world)",
+      "revid": 1040493,
+      "timestamp": "2026-04-10T03:34:18Z"
+    },
+    {
+      "page": "Kuiper Belt (world)",
+      "revid": 1040498,
+      "timestamp": "2026-04-10T03:37:00Z"
+    },
+    {
+      "page": "Neptune (world)",
+      "revid": 1040496,
+      "timestamp": "2026-04-10T03:36:19Z"
+    },
+    {
+      "page": "Terra (system)",
+      "revid": 1040505,
+      "timestamp": "2026-04-10T04:04:07Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Jupiter (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Sol",
+          "type": "G2 V",
+          "notes": "Orbit #6: Jupiter / Jovian System"
+        }
+      ]
+    },
+    {
+      "page": "Kuiper Belt (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Sol",
+          "type": "G2 V",
+          "notes": "Orbits 9-11: Kuiper Belt"
+        }
+      ]
+    },
+    {
+      "page": "Neptune (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Sol",
+          "type": "G2 V",
+          "notes": "Orbit #8.5: Neptune / Neptunian System"
+        }
+      ]
+    },
+    {
+      "page": "Terra (system)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Sol",
+          "type": "G2 V",
+          "notes": "aka \"The Sun\""
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Sol",
+      "stars": [
+        {
+          "name": "Sol",
+          "type": "G2 V"
+        }
+      ],
+      "labels": [
+        "Terra (\"Sol\")",
+        "Jupiter / Terra",
+        "The Kuiper Belt, forming the outer fringe of the Terra",
+        "Neptune / Terra"
+      ],
+      "pages": [
+        "Terra (system)",
+        "Jupiter (world)",
+        "Kuiper Belt (world)",
+        "Neptune (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Terra (system)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Mercury",
+          "name_raw": "Mercury (SR 1827)",
+          "raw": "G30046A-E",
+          "kind": "world",
+          "uwp": "G30046A-E",
+          "distance": {
+            "raw": "0.39",
+            "value": 0.39,
+            "unit": "AU"
+          },
+          "sources": [
+            "Terra (system)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Venus",
+          "name_raw": "Venus (SR 1827)",
+          "raw": "G8B0168-E",
+          "kind": "world",
+          "uwp": "G8B0168-E",
+          "distance": {
+            "raw": "0.72",
+            "value": 0.72,
+            "unit": "AU"
+          },
+          "sources": [
+            "Terra (system)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Terra",
+          "name_raw": "Terra (SR 1827)",
+          "raw": "A867A69-F",
+          "kind": "world",
+          "uwp": "A867A69-F",
+          "distance": {
+            "raw": "1.00",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Terra (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Luna",
+              "name_raw": "* [[Luna (SR 1827) (world)|Luna]]",
+              "raw": "''F20076C-F''",
+              "kind": "world",
+              "uwp": "F20076C-F",
+              "distance": {
+                "raw": "''60''",
+                "value": 60.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 4,
+          "name": "Mars",
+          "raw": "F43056A-F",
+          "kind": "world",
+          "uwp": "F43056A-F",
+          "distance": {
+            "raw": "1.50",
+            "value": 1.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Terra (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Phobos",
+              "name_raw": "* Phobos",
+              "raw": "''YS0026A-F''",
+              "kind": "world",
+              "uwp": "YS0026A-F",
+              "distance": {
+                "raw": "''2.75''",
+                "value": 2.75,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Ceres Belt",
+          "raw": "F00066B-E",
+          "kind": "world",
+          "uwp": "F00066B-E",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Terra (system)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Jupiter",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "5.20",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Terra (system)",
+            "Jupiter (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring System",
+              "name_raw": "* [[Jupiter_(world)#Ring_System|Ring System]]",
+              "raw": "''YR00000-0''",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "''2''",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Io",
+              "name_raw": "* [[Jupiter_(world)#Io|Io]]",
+              "raw": "''Y210000-0''",
+              "kind": "world",
+              "uwp": "Y210000-0",
+              "distance": {
+                "raw": "''6''",
+                "value": 6.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)",
+                "Jupiter (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Europa",
+              "name_raw": "* [[Jupiter_(world)#Europa|Europa]]",
+              "raw": "''H200000-0''",
+              "kind": "world",
+              "uwp": "H200000-0",
+              "distance": {
+                "raw": "''9''",
+                "value": 9.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)",
+                "Jupiter (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Ganymede",
+              "name_raw": "* [[Jupiter_(world)#Ganymede|Ganymede]]",
+              "raw": "''F300468-F''",
+              "kind": "world",
+              "uwp": "F300468-F",
+              "distance": {
+                "raw": "''15''",
+                "value": 15.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)",
+                "Jupiter (world)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Callisto",
+              "name_raw": "* [[Jupiter_(world)#Callisto|Callisto]]",
+              "raw": "''H30016A-F''",
+              "kind": "world",
+              "uwp": "H30016A-F",
+              "distance": {
+                "raw": "''25''",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)",
+                "Jupiter (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Saturn",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "9.50",
+            "value": 9.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Terra (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring System",
+              "name_raw": "* Ring System",
+              "raw": "''YR00000-0''",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "''2''",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Janus",
+              "name_raw": "* Janus",
+              "raw": "''YS00000-0''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''3''",
+                "value": 3.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Mimas",
+              "name_raw": "* Mimas",
+              "raw": "''YS00000-0''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''3''",
+                "value": 3.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Enceladus",
+              "name_raw": "* Enceladus",
+              "raw": "''GS00268-F''",
+              "kind": "world",
+              "uwp": "GS00268-F",
+              "distance": {
+                "raw": "''4''",
+                "value": 4.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Tethys",
+              "name_raw": "* Tethys",
+              "raw": "''YS00000-0''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''5''",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Dione",
+              "name_raw": "* Dione",
+              "raw": "''YS00000-0''''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''6''",
+                "value": 6.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)"
+              ]
+            },
+            {
+              "index": 7,
+              "name": "Rhea",
+              "name_raw": "* Rhea",
+              "raw": "''H100468-E''",
+              "kind": "world",
+              "uwp": "H100468-E",
+              "distance": {
+                "raw": "''9''",
+                "value": 9.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)"
+              ]
+            },
+            {
+              "index": 8,
+              "name": "Titan",
+              "name_raw": "* Titan",
+              "raw": "''H3A0168-E''",
+              "kind": "world",
+              "uwp": "H3A0168-E",
+              "distance": {
+                "raw": "''20''",
+                "value": 20.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)"
+              ]
+            },
+            {
+              "index": 9,
+              "name": "Hyperion",
+              "name_raw": "* Hyperion",
+              "raw": "''ES00000-0''",
+              "kind": "world",
+              "uwp": "ES00000-0",
+              "distance": {
+                "raw": "''25''",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)"
+              ]
+            },
+            {
+              "index": 10,
+              "name": "Iapetus",
+              "name_raw": "* Iapetus",
+              "raw": "''E100000-0''",
+              "kind": "world",
+              "uwp": "E100000-0",
+              "distance": {
+                "raw": "''60''",
+                "value": 60.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)"
+              ]
+            },
+            {
+              "index": 11,
+              "name": "Phoebe",
+              "name_raw": "* Phoebe",
+              "raw": "''E100000-0''",
+              "kind": "world",
+              "uwp": "E100000-0",
+              "distance": {
+                "raw": "''225''",
+                "value": 225.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Uranus",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "19.20",
+            "value": 19.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Terra (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring System",
+              "name_raw": "* Ring System",
+              "raw": "''YR00000-0''",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "''2''",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Puck",
+              "name_raw": "* Puck",
+              "raw": "''YS00000-0''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''2''",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Miranda",
+              "name_raw": "* Miranda",
+              "raw": "''YS00000-0''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''5''",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Ariel",
+              "name_raw": "* Ariel",
+              "raw": "''Y100000-0''",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "''7''",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Umbriel",
+              "name_raw": "* Umbriel",
+              "raw": "''HS00269-E''",
+              "kind": "world",
+              "uwp": "HS00269-E",
+              "distance": {
+                "raw": "''10''",
+                "value": 10.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Titania",
+              "name_raw": "* Titania",
+              "raw": "''H100168-E''",
+              "kind": "world",
+              "uwp": "H100168-E",
+              "distance": {
+                "raw": "''15''",
+                "value": 15.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)"
+              ]
+            },
+            {
+              "index": 7,
+              "name": "Oberon",
+              "name_raw": "* Oberon",
+              "raw": "''Y100000-0''",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "''20''",
+                "value": 20.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Neptune",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "30.10",
+            "value": 30.1,
+            "unit": "AU"
+          },
+          "sources": [
+            "Terra (system)",
+            "Neptune (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring System",
+              "name_raw": "* Ring System",
+              "raw": "''YR00000-0''",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "''1''",
+                "value": 1.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Galatea",
+              "name_raw": "* Galatea",
+              "raw": "''YS00000-0''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''2.5''",
+                "value": 2.5,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)",
+                "Neptune (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Larissa",
+              "name_raw": "* Larissa",
+              "raw": "''YS00000-0''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''3''",
+                "value": 3.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)",
+                "Neptune (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Proteus",
+              "name_raw": "* Proteus",
+              "raw": "''YS00000-0''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''5''",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)",
+                "Neptune (world)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Triton",
+              "name_raw": "* Triton",
+              "raw": "''H210169-E''",
+              "kind": "world",
+              "uwp": "H210169-E",
+              "distance": {
+                "raw": "''15''",
+                "value": 15.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)",
+                "Neptune (world)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Nereid",
+              "name_raw": "* Nereid",
+              "raw": "''YS00000-0''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''20''",
+                "value": 20.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Terra (system)",
+                "Neptune (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Kuiper Belt",
+          "raw": "<small>( - variable - )</small>",
+          "kind": "belt",
+          "remark": "( - variable - )",
+          "distance": {
+            "raw": "30-100",
+            "value": null,
+            "min": 30.0,
+            "max": 100.0,
+            "unit": "AU"
+          },
+          "belt_source": "Sean, 2026-11-16: a planetoid belt, no UWP, 30-100 AU; the objects listed under it stay inside it",
+          "corrected": true,
+          "sources": [
+            "Terra (system)",
+            "Kuiper Belt (world)"
+          ],
+          "objects": [
+            {
+              "index": 1,
+              "name": "Orcus",
+              "name_raw": "* [[Kuiper_Belt_(world)#Orcus|Orcus]]",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "39.40<small>AU</small>",
+                "value": 39.4,
+                "unit": "AU"
+              },
+              "sources": [
+                "Terra (system)",
+                "Kuiper Belt (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Pluto",
+              "name_raw": "* [[Pluto (world)|Pluto]]",
+              "raw": "F10046C-F",
+              "kind": "world",
+              "uwp": "F10046C-F",
+              "distance": {
+                "raw": "39.48<small>AU</small>",
+                "value": 39.48,
+                "unit": "AU"
+              },
+              "sources": [
+                "Terra (system)",
+                "Kuiper Belt (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Ixion",
+              "name_raw": "* [[Kuiper_Belt_(world)#Ixion|Ixion]]",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "39.67<small>AU</small>",
+                "value": 39.67,
+                "unit": "AU"
+              },
+              "sources": [
+                "Terra (system)",
+                "Kuiper Belt (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Salacia",
+              "name_raw": "* [[Kuiper_Belt_(world)#Salacia|Salacia]]",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "41.88<small>AU</small>",
+                "value": 41.88,
+                "unit": "AU"
+              },
+              "sources": [
+                "Terra (system)",
+                "Kuiper Belt (world)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Varuna",
+              "name_raw": "* [[Kuiper_Belt_(world)#Varuna|Varuna]]",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "42.90<small>AU</small>",
+                "value": 42.9,
+                "unit": "AU"
+              },
+              "sources": [
+                "Terra (system)",
+                "Kuiper Belt (world)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Quaoar",
+              "name_raw": "* [[Kuiper_Belt_(world)#Quaoar|Quaoar]]",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "42.80<small>AU</small>",
+                "value": 42.8,
+                "unit": "AU"
+              },
+              "sources": [
+                "Terra (system)",
+                "Kuiper Belt (world)"
+              ]
+            },
+            {
+              "index": 7,
+              "name": "Haumea",
+              "name_raw": "* [[Kuiper_Belt_(world)#Haumea|Haumea]]",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "43.22<small>AU</small>",
+                "value": 43.22,
+                "unit": "AU"
+              },
+              "sources": [
+                "Terra (system)",
+                "Kuiper Belt (world)"
+              ]
+            },
+            {
+              "index": 8,
+              "name": "Ultima Thule",
+              "name_raw": "* [[Kuiper_Belt_(world)#Ultima_Thule|Ultima Thule]]",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "44.58<small>AU</small>",
+                "value": 44.58,
+                "unit": "AU"
+              },
+              "sources": [
+                "Terra (system)"
+              ]
+            },
+            {
+              "index": 9,
+              "name": "Chaos",
+              "name_raw": "* [[Kuiper_Belt_(world)#Chaos|Chaos]]",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "45.60<small>AU</small>",
+                "value": 45.6,
+                "unit": "AU"
+              },
+              "sources": [
+                "Terra (system)",
+                "Kuiper Belt (world)"
+              ]
+            },
+            {
+              "index": 10,
+              "name": "Varda",
+              "name_raw": "* [[Kuiper_Belt_(world)#Varda|Varda]]",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "45.64<small>AU</small>",
+                "value": 45.64,
+                "unit": "AU"
+              },
+              "sources": [
+                "Terra (system)",
+                "Kuiper Belt (world)"
+              ]
+            },
+            {
+              "index": 11,
+              "name": "Makemake",
+              "name_raw": "* [[Kuiper_Belt_(world)#Makemake|Makemake]]",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "45.72<small>AU</small>",
+                "value": 45.72,
+                "unit": "AU"
+              },
+              "sources": [
+                "Terra (system)",
+                "Kuiper Belt (world)"
+              ]
+            },
+            {
+              "index": 12,
+              "name": "Eris",
+              "name_raw": "* [[Kuiper_Belt_(world)#Eris|Eris]]",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "67.78<small>AU</small>",
+                "value": 67.78,
+                "unit": "AU"
+              },
+              "sources": [
+                "Terra (system)",
+                "Kuiper Belt (world)"
+              ]
+            },
+            {
+              "index": 13,
+              "name": "Sedna",
+              "name_raw": "* [[Kuiper_Belt_(world)#Sedna|Sedna]]",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "539<small>AU</small>",
+                "value": 539.0,
+                "unit": "AU"
+              },
+              "sources": [
+                "Terra (system)",
+                "Kuiper Belt (world)"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Jupiter (world)",
+      "label": "Jupiter / Terra",
+      "stars": [
+        {
+          "name": "Sol",
+          "type": "G2 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 6,
+          "name": "Jupiter",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "5.20",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 2,
+              "name": "Io",
+              "name_raw": "[[Jupiter_(world)#Io|Io]]",
+              "raw": "Y210000-0",
+              "kind": "world",
+              "uwp": "Y210000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Europa",
+              "name_raw": "[[Jupiter_(world)#Europa|Europa]]",
+              "raw": "H200000-0",
+              "kind": "world",
+              "uwp": "H200000-0",
+              "distance": {
+                "raw": "9 Diam",
+                "value": 9.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Ganymede",
+              "name_raw": "[[Jupiter_(world)#Ganymede|Ganymede]]",
+              "raw": "F300468-F",
+              "kind": "world",
+              "uwp": "F300468-F",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 5,
+              "name": "Callisto",
+              "name_raw": "[[Jupiter_(world)#Callisto|Callisto]]",
+              "raw": "H30016A-F",
+              "kind": "world",
+              "uwp": "H30016A-F",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Kuiper Belt (world)",
+      "label": "The Kuiper Belt, forming the outer fringe of the Terra",
+      "stars": [
+        {
+          "name": "Sol",
+          "type": "G2 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 10,
+          "name": "Kuiper Belt",
+          "raw": "<small>(variable)</small>",
+          "kind": "belt",
+          "remark": "(variable)",
+          "distance": {
+            "raw": "30-100",
+            "value": null,
+            "min": 30.0,
+            "max": 100.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Orcus",
+              "name_raw": "[[Kuiper_Belt_(world)#Orcus|Orcus]]",
+              "raw": "<small>YS00000-0</small>",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "39.40<small>AU</small>",
+                "value": 39.4,
+                "unit": "AU"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Pluto",
+              "name_raw": "[[Pluto (world)|Pluto]]",
+              "raw": "<small>F10046C-F</small>",
+              "kind": "world",
+              "uwp": "F10046C-F",
+              "distance": {
+                "raw": "39.48<small>AU</small>",
+                "value": 39.48,
+                "unit": "AU"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Ixion",
+              "name_raw": "[[Kuiper_Belt_(world)#Ixion|Ixion]]",
+              "raw": "<small>Y100000-0</small>",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "39.67<small>AU</small>",
+                "value": 39.67,
+                "unit": "AU"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Salacia",
+              "name_raw": "[[Kuiper_Belt_(world)#Salacia|Salacia]]",
+              "raw": "<small>Y100000-0</small>",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "41.88<small>AU</small>",
+                "value": 41.88,
+                "unit": "AU"
+              }
+            },
+            {
+              "index": 5,
+              "name": "Varuna",
+              "name_raw": "[[Kuiper_Belt_(world)#Varuna|Varuna]]",
+              "raw": "<small>YS00000-0</small>",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "42.90<small>AU</small>",
+                "value": 42.9,
+                "unit": "AU"
+              }
+            },
+            {
+              "index": 6,
+              "name": "Quaoar",
+              "name_raw": "[[Kuiper_Belt_(world)#Quaoar|Quaoar]]",
+              "raw": "<small>YS00000-0</small>",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "42.80<small>AU</small>",
+                "value": 42.8,
+                "unit": "AU"
+              }
+            },
+            {
+              "index": 7,
+              "name": "Haumea",
+              "name_raw": "[[Kuiper_Belt_(world)#Haumea|Haumea]]",
+              "raw": "<small>Y100000-0</small>",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "43.22<small>AU</small>",
+                "value": 43.22,
+                "unit": "AU"
+              }
+            },
+            {
+              "index": 9,
+              "name": "Chaos",
+              "name_raw": "[[Kuiper_Belt_(world)#Chaos|Chaos]]",
+              "raw": "<small>YS00000-0</small>",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "45.60<small>AU</small>",
+                "value": 45.6,
+                "unit": "AU"
+              }
+            },
+            {
+              "index": 10,
+              "name": "Varda",
+              "name_raw": "[[Kuiper_Belt_(world)#Varda|Varda]]",
+              "raw": "<small>YS00000-0</small>",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "45.64<small>AU</small>",
+                "value": 45.64,
+                "unit": "AU"
+              }
+            },
+            {
+              "index": 11,
+              "name": "Makemake",
+              "name_raw": "[[Kuiper_Belt_(world)#Makemake|Makemake]]",
+              "raw": "<small>Y100000-0</small>",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "45.72<small>AU</small>",
+                "value": 45.72,
+                "unit": "AU"
+              }
+            },
+            {
+              "index": 12,
+              "name": "Eris",
+              "name_raw": "[[Kuiper_Belt_(world)#Eris|Eris]]",
+              "raw": "<small>Y100000-0</small>",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "67.78<small>AU</small>",
+                "value": 67.78,
+                "unit": "AU"
+              }
+            },
+            {
+              "index": 13,
+              "name": "Sedna",
+              "name_raw": "[[Kuiper_Belt_(world)#Sedna|Sedna]]",
+              "raw": "<small>Y100000-0</small>",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "539<small>AU</small>",
+                "value": 539.0,
+                "unit": "AU"
+              }
+            }
+          ],
+          "belt_source": "Sean, 2026-11-16: a planetoid belt, no UWP, 30-100 AU; the objects listed under it stay inside it",
+          "corrected": true
+        }
+      ]
+    },
+    {
+      "page": "Neptune (world)",
+      "label": "Neptune / Terra",
+      "stars": [
+        {
+          "name": "Sol",
+          "type": "G2 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 9,
+          "name": "Neptune",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "29.90",
+            "value": 29.9,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 2,
+              "name": "Galatea",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "1.3 Diam",
+                "value": 1.3,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Larissa",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "1.5 Diam",
+                "value": 1.5,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Proteus",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "2.4 Diam",
+                "value": 2.4,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 5,
+              "name": "Triton",
+              "raw": "H210169-E",
+              "kind": "world",
+              "uwp": "H210169-E",
+              "distance": {
+                "raw": "7.2 Diam",
+                "value": 7.2,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 6,
+              "name": "Nereid",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "112 Diam",
+                "value": 112.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Terra (system)",
+      "label": "Terra (\"Sol\")",
+      "stars": [
+        {
+          "name": "Sol",
+          "type": "G2 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Mercury",
+          "name_raw": "Mercury (SR 1827)",
+          "raw": "G30046A-E",
+          "kind": "world",
+          "uwp": "G30046A-E",
+          "distance": {
+            "raw": "0.39",
+            "value": 0.39,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Venus",
+          "name_raw": "Venus (SR 1827)",
+          "raw": "G8B0168-E",
+          "kind": "world",
+          "uwp": "G8B0168-E",
+          "distance": {
+            "raw": "0.72",
+            "value": 0.72,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Terra",
+          "name_raw": "Terra (SR 1827)",
+          "raw": "A867A69-F",
+          "kind": "world",
+          "uwp": "A867A69-F",
+          "distance": {
+            "raw": "1.00",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Luna",
+              "name_raw": "* [[Luna (SR 1827) (world)|Luna]]",
+              "raw": "''F20076C-F''",
+              "kind": "world",
+              "uwp": "F20076C-F",
+              "distance": {
+                "raw": "''60''",
+                "value": 60.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Mars",
+          "raw": "F43056A-F",
+          "kind": "world",
+          "uwp": "F43056A-F",
+          "distance": {
+            "raw": "1.50",
+            "value": 1.5,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Phobos",
+              "name_raw": "* Phobos",
+              "raw": "''YS0026A-F''",
+              "kind": "world",
+              "uwp": "YS0026A-F",
+              "distance": {
+                "raw": "''2.75''",
+                "value": 2.75,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Ceres Belt",
+          "raw": "F00066B-E",
+          "kind": "world",
+          "uwp": "F00066B-E",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Jupiter",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "5.20",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring System",
+              "name_raw": "* [[Jupiter_(world)#Ring_System|Ring System]]",
+              "raw": "''YR00000-0''",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "''2''",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Io",
+              "name_raw": "* [[Jupiter_(world)#Io|Io]]",
+              "raw": "''Y210000-0''",
+              "kind": "world",
+              "uwp": "Y210000-0",
+              "distance": {
+                "raw": "''6''",
+                "value": 6.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Europa",
+              "name_raw": "* [[Jupiter_(world)#Europa|Europa]]",
+              "raw": "''H200000-0''",
+              "kind": "world",
+              "uwp": "H200000-0",
+              "distance": {
+                "raw": "''9''",
+                "value": 9.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Ganymede",
+              "name_raw": "* [[Jupiter_(world)#Ganymede|Ganymede]]",
+              "raw": "''F300468-F''",
+              "kind": "world",
+              "uwp": "F300468-F",
+              "distance": {
+                "raw": "''15''",
+                "value": 15.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Callisto",
+              "name_raw": "* [[Jupiter_(world)#Callisto|Callisto]]",
+              "raw": "''H30016A-F''",
+              "kind": "world",
+              "uwp": "H30016A-F",
+              "distance": {
+                "raw": "''25''",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Saturn",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "9.50",
+            "value": 9.5,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring System",
+              "name_raw": "* Ring System",
+              "raw": "''YR00000-0''",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "''2''",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Janus",
+              "name_raw": "* Janus",
+              "raw": "''YS00000-0''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''3''",
+                "value": 3.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Mimas",
+              "name_raw": "* Mimas",
+              "raw": "''YS00000-0''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''3''",
+                "value": 3.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Enceladus",
+              "name_raw": "* Enceladus",
+              "raw": "''GS00268-F''",
+              "kind": "world",
+              "uwp": "GS00268-F",
+              "distance": {
+                "raw": "''4''",
+                "value": 4.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Tethys",
+              "name_raw": "* Tethys",
+              "raw": "''YS00000-0''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''5''",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Dione",
+              "name_raw": "* Dione",
+              "raw": "''YS00000-0''''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''6''",
+                "value": 6.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 7,
+              "name": "Rhea",
+              "name_raw": "* Rhea",
+              "raw": "''H100468-E''",
+              "kind": "world",
+              "uwp": "H100468-E",
+              "distance": {
+                "raw": "''9''",
+                "value": 9.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 8,
+              "name": "Titan",
+              "name_raw": "* Titan",
+              "raw": "''H3A0168-E''",
+              "kind": "world",
+              "uwp": "H3A0168-E",
+              "distance": {
+                "raw": "''20''",
+                "value": 20.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 9,
+              "name": "Hyperion",
+              "name_raw": "* Hyperion",
+              "raw": "''ES00000-0''",
+              "kind": "world",
+              "uwp": "ES00000-0",
+              "distance": {
+                "raw": "''25''",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 10,
+              "name": "Iapetus",
+              "name_raw": "* Iapetus",
+              "raw": "''E100000-0''",
+              "kind": "world",
+              "uwp": "E100000-0",
+              "distance": {
+                "raw": "''60''",
+                "value": 60.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 11,
+              "name": "Phoebe",
+              "name_raw": "* Phoebe",
+              "raw": "''E100000-0''",
+              "kind": "world",
+              "uwp": "E100000-0",
+              "distance": {
+                "raw": "''225''",
+                "value": 225.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Uranus",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "19.20",
+            "value": 19.2,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring System",
+              "name_raw": "* Ring System",
+              "raw": "''YR00000-0''",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "''2''",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Puck",
+              "name_raw": "* Puck",
+              "raw": "''YS00000-0''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''2''",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Miranda",
+              "name_raw": "* Miranda",
+              "raw": "''YS00000-0''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''5''",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Ariel",
+              "name_raw": "* Ariel",
+              "raw": "''Y100000-0''",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "''7''",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Umbriel",
+              "name_raw": "* Umbriel",
+              "raw": "''HS00269-E''",
+              "kind": "world",
+              "uwp": "HS00269-E",
+              "distance": {
+                "raw": "''10''",
+                "value": 10.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Titania",
+              "name_raw": "* Titania",
+              "raw": "''H100168-E''",
+              "kind": "world",
+              "uwp": "H100168-E",
+              "distance": {
+                "raw": "''15''",
+                "value": 15.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 7,
+              "name": "Oberon",
+              "name_raw": "* Oberon",
+              "raw": "''Y100000-0''",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "''20''",
+                "value": 20.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Neptune",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "30.10",
+            "value": 30.1,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring System",
+              "name_raw": "* Ring System",
+              "raw": "''YR00000-0''",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "''1''",
+                "value": 1.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Galatea",
+              "name_raw": "* Galatea",
+              "raw": "''YS00000-0''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''2.5''",
+                "value": 2.5,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Larissa",
+              "name_raw": "* Larissa",
+              "raw": "''YS00000-0''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''3''",
+                "value": 3.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Proteus",
+              "name_raw": "* Proteus",
+              "raw": "''YS00000-0''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''5''",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Triton",
+              "name_raw": "* Triton",
+              "raw": "''H210169-E''",
+              "kind": "world",
+              "uwp": "H210169-E",
+              "distance": {
+                "raw": "''15''",
+                "value": 15.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Nereid",
+              "name_raw": "* Nereid",
+              "raw": "''YS00000-0''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''20''",
+                "value": 20.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Kuiper Belt",
+          "raw": "<small>( - variable - )</small>",
+          "kind": "belt",
+          "remark": "( - variable - )",
+          "distance": {
+            "raw": "30-100",
+            "value": null,
+            "min": 30.0,
+            "max": 100.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Orcus",
+              "name_raw": "* [[Kuiper_Belt_(world)#Orcus|Orcus]]",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "39.40<small>AU</small>",
+                "value": 39.4,
+                "unit": "AU"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Pluto",
+              "name_raw": "* [[Pluto (world)|Pluto]]",
+              "raw": "F10046C-F",
+              "kind": "world",
+              "uwp": "F10046C-F",
+              "distance": {
+                "raw": "39.48<small>AU</small>",
+                "value": 39.48,
+                "unit": "AU"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Ixion",
+              "name_raw": "* [[Kuiper_Belt_(world)#Ixion|Ixion]]",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "39.67<small>AU</small>",
+                "value": 39.67,
+                "unit": "AU"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Salacia",
+              "name_raw": "* [[Kuiper_Belt_(world)#Salacia|Salacia]]",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "41.88<small>AU</small>",
+                "value": 41.88,
+                "unit": "AU"
+              }
+            },
+            {
+              "index": 5,
+              "name": "Varuna",
+              "name_raw": "* [[Kuiper_Belt_(world)#Varuna|Varuna]]",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "42.90<small>AU</small>",
+                "value": 42.9,
+                "unit": "AU"
+              }
+            },
+            {
+              "index": 6,
+              "name": "Quaoar",
+              "name_raw": "* [[Kuiper_Belt_(world)#Quaoar|Quaoar]]",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "42.80<small>AU</small>",
+                "value": 42.8,
+                "unit": "AU"
+              }
+            },
+            {
+              "index": 7,
+              "name": "Haumea",
+              "name_raw": "* [[Kuiper_Belt_(world)#Haumea|Haumea]]",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "43.22<small>AU</small>",
+                "value": 43.22,
+                "unit": "AU"
+              }
+            },
+            {
+              "index": 8,
+              "name": "Ultima Thule",
+              "name_raw": "* [[Kuiper_Belt_(world)#Ultima_Thule|Ultima Thule]]",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "44.58<small>AU</small>",
+                "value": 44.58,
+                "unit": "AU"
+              }
+            },
+            {
+              "index": 9,
+              "name": "Chaos",
+              "name_raw": "* [[Kuiper_Belt_(world)#Chaos|Chaos]]",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "45.60<small>AU</small>",
+                "value": 45.6,
+                "unit": "AU"
+              }
+            },
+            {
+              "index": 10,
+              "name": "Varda",
+              "name_raw": "* [[Kuiper_Belt_(world)#Varda|Varda]]",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "45.64<small>AU</small>",
+                "value": 45.64,
+                "unit": "AU"
+              }
+            },
+            {
+              "index": 11,
+              "name": "Makemake",
+              "name_raw": "* [[Kuiper_Belt_(world)#Makemake|Makemake]]",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "45.72<small>AU</small>",
+                "value": 45.72,
+                "unit": "AU"
+              }
+            },
+            {
+              "index": 12,
+              "name": "Eris",
+              "name_raw": "* [[Kuiper_Belt_(world)#Eris|Eris]]",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "67.78<small>AU</small>",
+                "value": 67.78,
+                "unit": "AU"
+              }
+            },
+            {
+              "index": 13,
+              "name": "Sedna",
+              "name_raw": "* [[Kuiper_Belt_(world)#Sedna|Sedna]]",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "539<small>AU</small>",
+                "value": 539.0,
+                "unit": "AU"
+              }
+            }
+          ],
+          "belt_source": "Sean, 2026-11-16: a planetoid belt, no UWP, 30-100 AU; the objects listed under it stay inside it",
+          "corrected": true
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Terra",
+    "UWP": "A867A69-F",
+    "Stellar": "G2 V",
+    "PBG": "114",
+    "Bases": "NW",
+    "Remarks": "Hi Ga [Solomani] Dolp0 Mr Ht"
+  }
+}

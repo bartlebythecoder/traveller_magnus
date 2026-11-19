@@ -1,0 +1,391 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Aldebaran",
+  "hex": "0807",
+  "sector_abbreviation": "Alde",
+  "subsector": "Euxene",
+  "name": "Columbier Primary",
+  "sources": [
+    {
+      "page": "Columbier (world)",
+      "revid": 1020488,
+      "timestamp": "2026-03-13T12:05:31Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Columbier (world)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Prime",
+          "type": "F7 V",
+          "notes": null
+        },
+        {
+          "role": "Secondary",
+          "name": "Minor",
+          "type": "M0 V",
+          "notes": "Approximately 110 AU from the primary."
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Prime",
+      "stars": [
+        {
+          "name": "Prime",
+          "type": "F7 V"
+        }
+      ],
+      "labels": [
+        "Columbier Primary"
+      ],
+      "pages": [
+        "Columbier (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Brionnais",
+          "raw": "Y300000-0",
+          "kind": "world",
+          "uwp": "Y300000-0",
+          "distance": {
+            "raw": "0.68",
+            "value": 0.68,
+            "unit": "AU"
+          },
+          "sources": [
+            "Columbier (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Côte-d'Or",
+          "raw": "G410111-C",
+          "kind": "world",
+          "uwp": "G410111-C",
+          "distance": {
+            "raw": "1.16",
+            "value": 1.16,
+            "unit": "AU"
+          },
+          "sources": [
+            "Columbier (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Columbier",
+          "raw": "A745574-D",
+          "kind": "world",
+          "uwp": "A745574-D",
+          "distance": {
+            "raw": "2.04",
+            "value": 2.04,
+            "unit": "AU"
+          },
+          "sources": [
+            "Columbier (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Luna",
+              "raw": "F310366-D",
+              "kind": "world",
+              "uwp": "F310366-D",
+              "distance": {
+                "raw": "30 Diam",
+                "value": 30.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Columbier (world)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 4,
+          "name": "Saugnieu",
+          "raw": "H301000-0",
+          "kind": "world",
+          "uwp": "H301000-0",
+          "distance": {
+            "raw": "7.02",
+            "value": 7.02,
+            "unit": "AU"
+          },
+          "sources": [
+            "Columbier (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Planet 4",
+          "raw": "Y9C2000-0",
+          "kind": "world",
+          "uwp": "Y9C2000-0",
+          "distance": {
+            "raw": "12.5",
+            "value": 12.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Columbier (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Gas Giant",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "26.0",
+            "value": 26.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Columbier (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "G100463-D",
+              "kind": "world",
+              "uwp": "G100463-D",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Columbier (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y4A1000-0",
+              "kind": "world",
+              "uwp": "Y4A1000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Columbier (world)"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "star": "Minor",
+      "stars": [
+        {
+          "name": "Minor",
+          "type": "M0 V"
+        }
+      ],
+      "labels": [
+        "Columbier Secondary"
+      ],
+      "pages": [
+        "Columbier (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Allier",
+          "raw": "Y310000-0",
+          "kind": "world",
+          "uwp": "Y310000-0",
+          "distance": {
+            "raw": "0.25",
+            "value": 0.25,
+            "unit": "AU"
+          },
+          "sources": [
+            "Columbier (world)"
+          ]
+        }
+      ],
+      "placement": {
+        "orbit": null,
+        "au": 110.0,
+        "from": "star template notes"
+      }
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Columbier (world)",
+      "label": "Columbier Primary",
+      "stars": [
+        {
+          "name": "Prime",
+          "type": "F7 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Brionnais",
+          "raw": "Y300000-0",
+          "kind": "world",
+          "uwp": "Y300000-0",
+          "distance": {
+            "raw": "0.68",
+            "value": 0.68,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Côte-d'Or",
+          "raw": "G410111-C",
+          "kind": "world",
+          "uwp": "G410111-C",
+          "distance": {
+            "raw": "1.16",
+            "value": 1.16,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Columbier",
+          "raw": "A745574-D",
+          "kind": "world",
+          "uwp": "A745574-D",
+          "distance": {
+            "raw": "2.04",
+            "value": 2.04,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Luna",
+              "raw": "F310366-D",
+              "kind": "world",
+              "uwp": "F310366-D",
+              "distance": {
+                "raw": "30 Diam",
+                "value": 30.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Saugnieu",
+          "raw": "H301000-0",
+          "kind": "world",
+          "uwp": "H301000-0",
+          "distance": {
+            "raw": "7.02",
+            "value": 7.02,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Planet 4",
+          "raw": "Y9C2000-0",
+          "kind": "world",
+          "uwp": "Y9C2000-0",
+          "distance": {
+            "raw": "12.5",
+            "value": 12.5,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Gas Giant",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "26.0",
+            "value": 26.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "G100463-D",
+              "kind": "world",
+              "uwp": "G100463-D",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y4A1000-0",
+              "kind": "world",
+              "uwp": "Y4A1000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Columbier (world)",
+      "label": "Columbier Secondary",
+      "stars": [
+        {
+          "name": "Minor",
+          "type": "M0 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Allier",
+          "raw": "Y310000-0",
+          "kind": "world",
+          "uwp": "Y310000-0",
+          "distance": {
+            "raw": "0.25",
+            "value": 0.25,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Columbier",
+    "UWP": "A745574-D",
+    "Stellar": "F7 V M0 V",
+    "PBG": "101",
+    "Bases": "KM",
+    "Remarks": "Ag Ni Ht"
+  }
+}

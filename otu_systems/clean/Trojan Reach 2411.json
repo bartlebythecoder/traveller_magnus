@@ -1,0 +1,866 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Trojan Reach",
+  "hex": "2411",
+  "sector_abbreviation": "Troj",
+  "subsector": "Sindal",
+  "name": "Cordillon",
+  "sources": [
+    {
+      "page": "Cordillon (world)",
+      "revid": 1061623,
+      "timestamp": "2026-06-27T14:42:04Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Cordillon (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Bizitza",
+          "type": "K1 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Bizitza",
+      "stars": [
+        {
+          "name": "Bizitza",
+          "type": "K1 V"
+        }
+      ],
+      "labels": [
+        "Cordillon"
+      ],
+      "pages": [
+        "Cordillon (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Ash",
+          "raw": "X200000-0",
+          "kind": "world",
+          "uwp": "X200000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Cordillon (world)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Castille",
+          "raw": "X300000-0",
+          "kind": "world",
+          "uwp": "X300000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Cordillon (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Inner Belt",
+          "raw": "X000000-0",
+          "kind": "world",
+          "uwp": "X000000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Cordillon (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Cordillon",
+          "raw": "C431210-C",
+          "kind": "world",
+          "uwp": "C431210-C",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Cordillon (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Watchtower",
+              "raw": "G100160-C",
+              "kind": "world",
+              "uwp": "G100160-C",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Cordillon (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Pinzen",
+              "raw": "XS00000-0",
+              "kind": "world",
+              "uwp": "XS00000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Cordillon (world)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 4,
+          "name": "Ghourgia",
+          "raw": "X300000-0",
+          "kind": "world",
+          "uwp": "X300000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Cordillon (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Outer Belt",
+          "raw": "G000160-C",
+          "kind": "world",
+          "uwp": "G000160-C",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Cordillon (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Cimarron",
+          "raw": "SGG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Cordillon (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring System",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "0 Diam",
+                "value": 0.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Cordillon (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Ingot",
+              "raw": "X100000-0",
+              "kind": "world",
+              "uwp": "X100000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Cordillon (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Byz",
+              "raw": "X200000-0",
+              "kind": "world",
+              "uwp": "X200000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Cordillon (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Dryb",
+              "raw": "XS00000-0",
+              "kind": "world",
+              "uwp": "XS00000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Cordillon (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Goget",
+          "raw": "X200000-0",
+          "kind": "world",
+          "uwp": "X200000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Cordillon (world)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Doxing",
+          "raw": "X501000-0",
+          "kind": "world",
+          "uwp": "X501000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Cordillon (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Prime",
+              "raw": "X100000-0",
+              "kind": "world",
+              "uwp": "X100000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Cordillon (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Malinge",
+          "raw": "X300000-0",
+          "kind": "world",
+          "uwp": "X300000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Cordillon (world)"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Hoard",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Cordillon (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Hoard–0",
+              "raw": "X100000-0",
+              "kind": "world",
+              "uwp": "X100000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Cordillon (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Hoard–1",
+              "raw": "X100000-0",
+              "kind": "world",
+              "uwp": "X100000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Cordillon (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Hoard–2",
+              "raw": "X200000-0",
+              "kind": "world",
+              "uwp": "X200000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Cordillon (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Hoard–3",
+              "raw": "X100000-0",
+              "kind": "world",
+              "uwp": "X100000-0",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Cordillon (world)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Hoard–4",
+              "raw": "X501000-0",
+              "kind": "world",
+              "uwp": "X501000-0",
+              "distance": {
+                "raw": "12 Diam",
+                "value": 12.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Cordillon (world)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Hoard–5",
+              "raw": "X300000-0",
+              "kind": "world",
+              "uwp": "X300000-0",
+              "distance": {
+                "raw": "16 Diam",
+                "value": 16.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Cordillon (world)"
+              ]
+            },
+            {
+              "index": 7,
+              "name": "Hoard–6",
+              "raw": "XS00000-0",
+              "kind": "world",
+              "uwp": "XS00000-0",
+              "distance": {
+                "raw": "22 Diam",
+                "value": 22.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Cordillon (world)"
+              ]
+            },
+            {
+              "index": 8,
+              "name": "Hoard–7",
+              "raw": "X400000-0",
+              "kind": "world",
+              "uwp": "X400000-0",
+              "distance": {
+                "raw": "30 Diam",
+                "value": 30.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Cordillon (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Bakartik",
+          "raw": "X200000-0",
+          "kind": "world",
+          "uwp": "X200000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Cordillon (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Cordillon (world)",
+      "label": "Cordillon",
+      "stars": [
+        {
+          "name": "Bizitza",
+          "type": "K1 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Ash",
+          "raw": "X200000-0",
+          "kind": "world",
+          "uwp": "X200000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Castille",
+          "raw": "X300000-0",
+          "kind": "world",
+          "uwp": "X300000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Inner Belt",
+          "raw": "X000000-0",
+          "kind": "world",
+          "uwp": "X000000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Cordillon",
+          "raw": "C431210-C",
+          "kind": "world",
+          "uwp": "C431210-C",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Watchtower",
+              "raw": "G100160-C",
+              "kind": "world",
+              "uwp": "G100160-C",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Pinzen",
+              "raw": "XS00000-0",
+              "kind": "world",
+              "uwp": "XS00000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Ghourgia",
+          "raw": "X300000-0",
+          "kind": "world",
+          "uwp": "X300000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Outer Belt",
+          "raw": "G000160-C",
+          "kind": "world",
+          "uwp": "G000160-C",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Cimarron",
+          "raw": "SGG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring System",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "0 Diam",
+                "value": 0.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Ingot",
+              "raw": "X100000-0",
+              "kind": "world",
+              "uwp": "X100000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Byz",
+              "raw": "X200000-0",
+              "kind": "world",
+              "uwp": "X200000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Dryb",
+              "raw": "XS00000-0",
+              "kind": "world",
+              "uwp": "XS00000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Goget",
+          "raw": "X200000-0",
+          "kind": "world",
+          "uwp": "X200000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Doxing",
+          "raw": "X501000-0",
+          "kind": "world",
+          "uwp": "X501000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Prime",
+              "raw": "X100000-0",
+              "kind": "world",
+              "uwp": "X100000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Malinge",
+          "raw": "X300000-0",
+          "kind": "world",
+          "uwp": "X300000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Hoard",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Hoard–0",
+              "raw": "X100000-0",
+              "kind": "world",
+              "uwp": "X100000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Hoard–1",
+              "raw": "X100000-0",
+              "kind": "world",
+              "uwp": "X100000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Hoard–2",
+              "raw": "X200000-0",
+              "kind": "world",
+              "uwp": "X200000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Hoard–3",
+              "raw": "X100000-0",
+              "kind": "world",
+              "uwp": "X100000-0",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 5,
+              "name": "Hoard–4",
+              "raw": "X501000-0",
+              "kind": "world",
+              "uwp": "X501000-0",
+              "distance": {
+                "raw": "12 Diam",
+                "value": 12.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 6,
+              "name": "Hoard–5",
+              "raw": "X300000-0",
+              "kind": "world",
+              "uwp": "X300000-0",
+              "distance": {
+                "raw": "16 Diam",
+                "value": 16.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 7,
+              "name": "Hoard–6",
+              "raw": "XS00000-0",
+              "kind": "world",
+              "uwp": "XS00000-0",
+              "distance": {
+                "raw": "22 Diam",
+                "value": 22.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 8,
+              "name": "Hoard–7",
+              "raw": "X400000-0",
+              "kind": "world",
+              "uwp": "X400000-0",
+              "distance": {
+                "raw": "30 Diam",
+                "value": 30.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Bakartik",
+          "raw": "X200000-0",
+          "kind": "world",
+          "uwp": "X200000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Cordillon",
+    "UWP": "C431210-B",
+    "Stellar": "K1 V",
+    "PBG": "922",
+    "Bases": "",
+    "Remarks": "Lo Po"
+  }
+}

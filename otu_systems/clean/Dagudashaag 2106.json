@@ -1,0 +1,258 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Dagudashaag",
+  "hex": "2106",
+  "sector_abbreviation": "Dagu",
+  "subsector": "Arnakhish",
+  "name": "Masiruu",
+  "sources": [
+    {
+      "page": "Masiruu (world)",
+      "revid": 996355,
+      "timestamp": "2026-01-04T18:11:07Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Masiruu (world)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Urudu",
+          "type": "K4 V",
+          "notes": null
+        },
+        {
+          "role": "Secondary",
+          "name": "Urudu Companion",
+          "type": "M9 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Urudu",
+      "stars": [
+        {
+          "name": "Urudu",
+          "type": "K4 V"
+        }
+      ],
+      "labels": [
+        "Masiruu"
+      ],
+      "pages": [
+        "Masiruu (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Kinshasa",
+          "raw": "F465538-A",
+          "kind": "world",
+          "uwp": "F465538-A",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Masiruu (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "UN",
+          "raw": "X1000000-0",
+          "kind": "world",
+          "uwp_malformed": null,
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "uwp": "X100000-0",
+          "uwp_source": "Sean, 2026-11-16",
+          "corrected": true,
+          "sources": [
+            "Masiruu (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "UN",
+          "raw": "X2000000-0",
+          "kind": "world",
+          "uwp_malformed": null,
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "uwp": "X200000-0",
+          "uwp_source": "Sean, 2026-11-16",
+          "corrected": true,
+          "sources": [
+            "Masiruu (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "UN",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Masiruu (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "UN",
+          "raw": "M9 V",
+          "kind": "star",
+          "type": "M9 V",
+          "distance": {
+            "raw": "5000",
+            "value": 5000.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ],
+          "planets": [
+            {
+              "name": "Masiruu",
+              "raw": "B0006B7-A",
+              "kind": "world",
+              "uwp": "B0006B7-A",
+              "distance": {
+                "raw": "0.17AU",
+                "value": 0.17,
+                "unit": "AU"
+              },
+              "mainworld": true
+            }
+          ],
+          "sources": [
+            "Masiruu (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Masiruu (world)",
+      "label": "Masiruu",
+      "stars": [
+        {
+          "name": "Urudu",
+          "type": "K4 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Kinshasa",
+          "raw": "F465538-A",
+          "kind": "world",
+          "uwp": "F465538-A",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "UN",
+          "raw": "X1000000-0",
+          "kind": "world",
+          "uwp_malformed": null,
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "uwp": "X100000-0",
+          "uwp_source": "Sean, 2026-11-16",
+          "corrected": true
+        },
+        {
+          "orbit": 3,
+          "name": "UN",
+          "raw": "X2000000-0",
+          "kind": "world",
+          "uwp_malformed": null,
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "uwp": "X200000-0",
+          "uwp_source": "Sean, 2026-11-16",
+          "corrected": true
+        },
+        {
+          "orbit": 4,
+          "name": "UN",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "UN",
+          "raw": "M9 V",
+          "kind": "star",
+          "type": "M9 V",
+          "distance": {
+            "raw": "5000",
+            "value": 5000.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ],
+          "planets": [
+            {
+              "name": "Masiruu",
+              "raw": "B0006B7-A",
+              "kind": "world",
+              "uwp": "B0006B7-A",
+              "distance": {
+                "raw": "0.17AU",
+                "value": 0.17,
+                "unit": "AU"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Masiruu",
+    "UWP": "B0006B7-A",
+    "Stellar": "K4 V M9 V",
+    "PBG": "411",
+    "Bases": "N",
+    "Remarks": "As Na Ni Va"
+  }
+}

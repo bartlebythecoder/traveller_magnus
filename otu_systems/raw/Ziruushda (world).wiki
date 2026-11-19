@@ -1,0 +1,153 @@
+[[File:Alien Moon 198b-0.jpg|250 px|right]]
+{{StellarDataQuery
+ |name={{World|Ziruushda|Dagudashaag|Old Suns|1204}}
+ |First Survey name= Gaash Iish
+}}
+{{InfoboxSystem 
+ |name=Ziruushda 
+ |subsector=Old Suns
+ |sector=Dagudashaag
+ |hex=1204
+ |star='''Hawayeil'''|type='''M5 V'''
+ |P1=Ziruushda |Dist1=0.3 |UWP1=A977377-A
+ |P1M1=* ''Takhara'' |Dist1M1=  |UWP1M1=YS04377-9
+ |P2=Piz       |Dist2=0.7 |UWP2=Y744327-9
+ |P2M1=* ''Lak''     |Dist2M1=  |UWP2M1=YS00000-0
+ |P2M2=* ''Cregud''  |Dist2M2=  |UWP2M2=HS00000-0
+ |P2M3=* ''Gres''    |Dist2M3=  |UWP2M3=YS00000-0
+ |P3=Latilym   |Dist3=1.0 |UWP3=YAAB000-0
+ |P3M1=* ''Lenix''   |Dist3M1=  |UWP3M1=YS00000-0
+ |P3M2=* ''Ruhag''   |Dist3M2=  |UWP3M2=YS00000-0
+ |P3M3=* ''Nucyw''  |Dist3M3=  |UWP3M3=HS00000-0
+ |P3M4=* ''Gopypuf'' |Dist3M4=  |UWP3M4=H300318-9
+ |P3M5=* ''Cavysot'' |Dist3M5=  |UWP3M5=Y376000-0
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+Ziruushda is a member of the [[Gvadh Cluster]].
+
+=== Stellar Data ===
+Ziruushda orbits a single, M-type primary, named ''Hawayeil''.
+
+{{MonostellarSystem
+|name           = Ziruushda
+|primary        = M1 V 
+|PrimaryName   = Hawayeil
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]]
+* x9 secondary [[world|rocky worlds]]
+
+===  [[Mainworld|Mainworld Data]] ===
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Ziruushda|Size= 9}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Ziruushda|Atmosphere= 7}}
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Ziruushda|Hydrosphere= 7}}
+
+===Mainworld Topography and Geography===
+* Ghelukhi Archipelago: The main [[Hamaran]] colony and site of the starport.
+** Aaba: Westernmost island in the archipelago. 
+*** Aaba-hÜ Monastery
+** Cha: A solitary island to the south of the archipelago
+** Kaÿ (Ghelukhi Prime)
+*** Ridge of Gheò: An area constantly covered in thick mist, home to the Hagruhä Cloudwalkers
+* Pinnacle of Oracles: The highest mountain on Ziruushda.
+* Shaol
+** Talä: A great chasm
+* Tagäz: The largest island continent; apart from a single ridge of mountains to the west, primarily a mixture of jungle and swamp. 
+** HagÜ: A mountain range
+*** HagÜ Monastery, upon the ridge of the Dagaä.
+
+===Native Lifeforms===
+Abundant [[Lifeform|native life]] occupying every available ecological niche. Its metabolic functions drive the process of atmospheric renewal.
+
+* ''[[DiaÜ]]'': A type of tree
+
+== History & Background (Dossier) ==
+[[File:Hamaran1.jpg|200px|right|thumbnail]]
+[[Ziruushda (world)|Ziruushda]] is primarily a [[Hamaran]] colony. As such, the official population figure is misleading, as Hamaran custom leaves large numbers of their people off of any census. 
+
+Ships arriving in-system are contacted immediately regarding docking requirements. Cargo ships are handled by the Ziruushdan Trade Confederation Orbital Administration, while passenger facilities are franchised out to ''[[Medurma Main StarLines]]'', who give priority to their own ships.
+
+=== Point of Interest: Mysterious Statues ===
+This world is famous mostly for the thousands of statues that lie along its coasts and under its shallow seas. These statues apparently depict all known races within [[Dagudashaag Sector]] as well as several unknown, possibly extinct races. It is believed that the statues were left by one of those now extinct races, the [[Gograhhah]] Reivers, though the planet was apparently never colonized.
+
+=== Point of Interest: Böru Religion ===
+The planet is now home to a unique form of the ''[[Böru]]'' religion. The planet was declared an Amber Zone in [[1102]] after 42 Hamaran priests burnt themselves to death as a protest after a group of forwarder tourists insisted on filming and taking souvenirs from a local funeral ceremony. [[IISS]] has now restricted access to prevent any further disturbances of a similar nature.
+
+Note that Ziruushda is also home to the Hagruhä, a small clan of Hamaran that purposely dwell apart in utter isolation. The Hagruhä are total atheists and utterly shunned by all others of their race. Most Hamaran believe that they are utterly insane and can't comprehend how members of their species could hope to exist without ''Böru''.
+
+===Imperial Landed Nobility (N)===
+Ziruushda, as a member world of the [[Third Imperium]], has a member of the Imperial Nobility overseeing the world.
+
+It holds the estate of an Imperial knight.
+
+=== World Starport (St) ===
+{{Starport|name= Ziruushda|Starport= A}}
+
+=== World Population (P) ===
+{{WorldPop|name= Ziruushda|multiplier= 4|Population= 3}}
+* By Hamaran religious tradition, most of the Hamaran population are not included in this figure. Subadults and religious figures (the latter a significant percentage of the Hamaran population) are left off of any census. 
+* The listed population is that of the [[Downport]] and its surrounds. Even without accounting for Hamaran custom, the true population is considerably higher. 
+
+====World Demographics====
+* [[Hamaran]], 88% 
+* Humaniti, 10% 
+** [[Aquan]], 8%
+** Mixed Imperial, 2% 
+* [[Bwap]], 1% 
+* Other minor races, 1%
+
+==== Linguistic Topography ====
+* ''[[Kiriani]]''
+** Most Hamaran inhabitants speak pure ''Kiriani'', though one of the requirements for entry into the ''Hachar Gyasö'' (Government) or working at the starport is a fluency in ''Galanglic'' and ''[[Galaach]]''. 
+* ''[[Na]]'': Used by Aquans
+* ''[[Vilani (language)|Vilani]]'', ''[[Sfuizia]]'' and ''[[Kehuu]]'' may also be spoken but not beyond the Ghelukhi Archipelago.
+
+==== Urbanization ====
+Settlements include the following:
+
+* Ghelukhi Archipelago: 3,500, A-class Starport
+* Shaol: Spaceport, class-G
+* BhughÜ: Spaceport
+
+===World Government===
+World Government is non-existent. The functions of administration and local government are carried out by ''Gyasö'' (monks and nuns) of the various Hachar Monasteries, with the legal, judicial and tithe functions being handled by elite councils made up of those ''Hachar Gyasö'' who are also members of the ''Sahki Tas'' (lawgivers interest group). 
+
+The Shaol settlement governs itself according to [[Scanian]] law. Scanian legal procedures are as follows:
+
+* The Gate ''Bakamaa'' deals with all monetary matters
+* The Gate ''Bah'ezi'' deals with contract law, including marriage contracts.
+* The Gate ''Babha'ti'' deals with governmental law. 
+* Criminal law is dealt with by the Court of judgement; trial by three judges. 
+* In minor matters a person can elect to have his case heard by ''Hedyo't''. This consists of any three Scanians who are considered totally impartial, and any judgement reached is considered legal.
+
+=== World Technology Level (T) ===
+{{WorldTech|name= Ziruushda|WorldTech= A}}
+
+== References & Contributors / Sources ==
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=Signal-GK 04|page=18-24|article=Port of call: Ziruushda}} - {{HIWG}}
+ | {{Ludography cite|name=Signal-GK 04|page=51|article=Library Data: Old Suns}} - {{HIWG}}
+ | {{Ludography cite|name=First Survey|page=79}}
+ | {{Ludography cite|name= Encyclopaedia Dagudashaag|page=377}}
+}}
+
+
+[[Category: Böru worlds]]
+[[Category: Die Back World worlds]]
+[[Category: First Imperium worlds]]
+[[Category: Gvadh Cluster worlds]] 
+[[Category: Humaniti worlds]]
+[[Category: Rule of Man worlds]]
+[[Category: Second Imperium worlds]]
+[[Category: S'mrii ConSentiency worlds]]
+[[Category: Ziru Sirka worlds]]
+{{LE|T5 Second Survey worlds}}

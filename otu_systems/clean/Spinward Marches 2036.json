@@ -1,0 +1,229 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "2036",
+  "sector_abbreviation": "Spin",
+  "subsector": "Glisten",
+  "name": "Glisten",
+  "sources": [
+    {
+      "page": "Glisten (system)",
+      "revid": 633442,
+      "timestamp": "2021-02-08T21:05:12Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Glisten (system)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": null,
+          "type": "K9 V",
+          "notes": "None"
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Gliss",
+      "stars": [
+        {
+          "name": "Gliss",
+          "type": "K9 V"
+        }
+      ],
+      "labels": [
+        "Glisten"
+      ],
+      "pages": [
+        "Glisten (system)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Glisten (system)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Glisten (system)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Glisten",
+          "raw": "A000986-F",
+          "kind": "world",
+          "uwp": "A000986-F",
+          "distance": {
+            "raw": "0.71",
+            "value": 0.71,
+            "unit": "AU"
+          },
+          "sources": [
+            "Glisten (system)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 3,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Glisten (system)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Pluvis Belt",
+          "raw": "?0009??-?",
+          "kind": "world",
+          "uwp": "?0009??-?",
+          "distance": {
+            "raw": "1.503",
+            "value": 1.503,
+            "unit": "AU"
+          },
+          "sources": [
+            "Glisten (system)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Nasmi",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "2.812",
+            "value": 2.812,
+            "unit": "AU"
+          },
+          "sources": [
+            "Glisten (system)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Glisten (system)",
+      "label": "Glisten",
+      "stars": [
+        {
+          "name": "Gliss",
+          "type": "K9 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Glisten",
+          "raw": "A000986-F",
+          "kind": "world",
+          "uwp": "A000986-F",
+          "distance": {
+            "raw": "0.71",
+            "value": 0.71,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Pluvis Belt",
+          "raw": "?0009??-?",
+          "kind": "world",
+          "uwp": "?0009??-?",
+          "distance": {
+            "raw": "1.503",
+            "value": 1.503,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Nasmi",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "2.812",
+            "value": 2.812,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Glisten",
+    "UWP": "A000986-F",
+    "Stellar": "K9 V",
+    "PBG": "811",
+    "Bases": "NS",
+    "Remarks": "As Hi In Na Va Cp Ht"
+  }
+}

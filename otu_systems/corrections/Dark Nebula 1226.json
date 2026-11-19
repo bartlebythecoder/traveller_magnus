@@ -1,0 +1,36 @@
+{
+  "page_priority": [
+    "Kuzu (system)"
+  ],
+  "page_priority_source": "Sean, 2026-11-16",
+  "infobox_stars": {
+    "Kusyu (world)": [
+      {
+        "name": "Tyeyo",
+        "type": "G4 V"
+      },
+      {
+        "name": "Saietaie",
+        "type": "D"
+      }
+    ],
+    "Kuzu (system)": [
+      {
+        "name": "Tyeyo",
+        "type": "G4 V"
+      },
+      {
+        "name": "Saietaie",
+        "type": "D"
+      }
+    ]
+  },
+  "stars_source": "travellermap.com Stellar (Sean, 2026-11-16: TravellerMap wins where the wiki contradicts itself)",
+  "stars_settled": true,
+  "bodies": {
+    "Kusyu (world)|Tehkuhiye Ring@7": {
+      "drop": true,
+      "why": "Sean, 2026-11-16: same ring as Kuzu (system)'s 'Ring'"
+    }
+  }
+}

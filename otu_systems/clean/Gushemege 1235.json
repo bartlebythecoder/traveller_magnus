@@ -1,0 +1,370 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Gushemege",
+  "hex": "1235",
+  "sector_abbreviation": "Gush",
+  "subsector": "Laeth",
+  "name": "Icon",
+  "sources": [
+    {
+      "page": "Icon (world)",
+      "revid": 1072094,
+      "timestamp": "2026-09-14T14:07:40Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Icon (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Harbane",
+          "type": "K1 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Harbane",
+      "stars": [
+        {
+          "name": "Harbane",
+          "type": "K1 V"
+        }
+      ],
+      "labels": [
+        "Icon"
+      ],
+      "pages": [
+        "Icon (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Harbane 1",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Icon (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Harbane 2",
+          "raw": "H00036B-7",
+          "kind": "world",
+          "uwp": "H00036B-7",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Icon (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Icon",
+          "raw": "E434567-5",
+          "kind": "world",
+          "uwp": "E434567-5",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Icon (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 4,
+          "name": "Harbane 4",
+          "raw": "G32026F-7",
+          "kind": "world",
+          "uwp": "G32026F-7",
+          "distance": {
+            "raw": "0.8",
+            "value": 0.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Icon (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Harbane 5",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1.3",
+            "value": 1.3,
+            "unit": "AU"
+          },
+          "sources": [
+            "Icon (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Harbane 6",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Icon (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Harbane 7",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Icon (world)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Harbane 8",
+          "raw": "Y532000-0",
+          "kind": "world",
+          "uwp": "Y532000-0",
+          "distance": {
+            "raw": "4.9",
+            "value": 4.9,
+            "unit": "AU"
+          },
+          "sources": [
+            "Icon (world)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Harbane 9",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Icon (world)"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Harbane 10",
+          "raw": "SGG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Icon (world)"
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Harbane 11",
+          "raw": "Y542000-0",
+          "kind": "world",
+          "uwp": "Y542000-0",
+          "distance": {
+            "raw": "12",
+            "value": 12.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Icon (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Icon (world)",
+      "label": "Icon",
+      "stars": [
+        {
+          "name": "Harbane",
+          "type": "K1 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Harbane 1",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Harbane 2",
+          "raw": "H00036B-7",
+          "kind": "world",
+          "uwp": "H00036B-7",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Icon",
+          "raw": "E434567-5",
+          "kind": "world",
+          "uwp": "E434567-5",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Harbane 4",
+          "raw": "G32026F-7",
+          "kind": "world",
+          "uwp": "G32026F-7",
+          "distance": {
+            "raw": "0.8",
+            "value": 0.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Harbane 5",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1.3",
+            "value": 1.3,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Harbane 6",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Harbane 7",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 8,
+          "name": "Harbane 8",
+          "raw": "Y532000-0",
+          "kind": "world",
+          "uwp": "Y532000-0",
+          "distance": {
+            "raw": "4.9",
+            "value": 4.9,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 9,
+          "name": "Harbane 9",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 10,
+          "name": "Harbane 10",
+          "raw": "SGG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 11,
+          "name": "Harbane 11",
+          "raw": "Y542000-0",
+          "kind": "world",
+          "uwp": "Y542000-0",
+          "distance": {
+            "raw": "12",
+            "value": 12.0,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Icon",
+    "UWP": "D434678-7",
+    "Stellar": "K1 V",
+    "PBG": "715",
+    "Bases": "",
+    "Remarks": "Ni"
+  }
+}

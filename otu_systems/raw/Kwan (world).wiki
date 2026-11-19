@@ -1,0 +1,205 @@
+[[File:Alien Moon 327-0.jpg|250 px|right]]
+{{UWP 
+|name    = {{World|Kwan|Aldebaran|Theta Aurigae|1431}}
+|era     = Milieu 1116
+|uc      = A786231–8
+|popc    = 6
+|zonec   = green
+|alg     = SoCf
+|class   = Lo Ga / Tp
+|trade   = ga
+|climate = -
+|gravity = -
+|bases   = -
+|primary = K5 V M4 V
+|belts   = 1
+|GGcount = 1
+}}
+{{World summary |name= Kwan|trade= Lo Ga}}
+{{World summary SoCf|sector= Aldebaran|subsector= Theta Aurigae}}
+{{World summary comment|trade= Tp}}
+
+{{InfoboxSystem
+ |name= Kwan Primary |subsector= Theta Aurigae
+ |sector= Aldebaran |hex= 1431
+ |star= Primary |type= K5 V
+ |P1=     Planet 1                          | Dist1= 0.38         | UWP1= Y410000-0
+ |P2=     Kwan                              | Dist2= 0.75         | UWP2= A786231-8
+ |P2M1=     Moon                            |   Dist2M1= 30 Diam  |   UWP2M1= G200111-8
+ |P3=     Planet 2                          | Dist3= 1.45         | UWP3= YBB0000-0
+ |P3M1=     Moon                            |   Dist3M1= 10 Diam  |   UWP3M1= Y301000-0
+ |P4=     Icy Belt                          | Dist4= 2.87         | UWP4= Y000000-0
+ |P5=     Gas Giant                         | Dist5= 6.15         | UWP5= LGG
+ |P5M1=     Ring                            |   Dist5M1= 1 Diam   |   UWP5M1= YR00000-0
+ |P5M2=     Moon                            |   Dist5M2= 8 Diam   |   UWP5M2= Y3A1000-0
+ |P5M3=     Moon                            |   Dist5M3= 11 Diam  |   UWP5M3= Y200000-0
+ |P5M4=     Moon                            |   Dist5M4= 25 Diam  |   UWP5M4= Y102000-0
+}}
+
+{{InfoboxSystem
+ |name= Kwan Secondary |subsector= Theta Aurigae
+ |sector= Aldebaran |hex= 1431
+ |star= Primary |type= M4 V
+ |P1=     Planet 3                          | Dist1= 0.11         | UWP1= Y311000-0
+ |P2=     Planet 4                          | Dist2= 0.26         | UWP2= YBC4000-0
+ |P3=     Planet 5                          | Dist3= 0.74         | UWP3= Y9B1000-0
+ |P3M1=     Moon                            |   Dist3M1= 15 Diam  |   UWP3M1= Y202000-0
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Kwan''' is a binary star system.
+* The primary is an orange main sequence.
+* The secondary is a red main sequence.
+
+{{BinaryStarSystem
+|name            = Kwan
+|primary         = K5 V 
+|secondary       = M4 V 
+|PrimaryName     = Primary
+|PrimaryNotes    = 
+|SecondaryName   = Secondary
+|SecondaryNotes  = [[Astronomical Unit|Approximately 210 AU]] from the primary.
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]].
+* x5 secondary [[world|rocky worlds]].
+** Two orbit the primary star, three orbit the secondary star.
+* x1 [[planetoid belt]], orbiting the primary star.
+* x1 [[gas giant]], orbiting the primary star.
+
+=== Mainworld Data ===
+'''Kwan''' is a pristine garden world orbiting in the center of the primary star's [[habitable zone]]. 
+
+[[File:Chart Orbit HZ Region Detailed.png|600 px]]
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Kwan|Size= 7}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Kwan|Atmosphere= 8}}
+* It experiences [[Celsius|generally moderate temperatures]].
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Kwan|Hydrosphere= 6}}
+
+==== Satellites ====
+'''Kwan''' retains a single [[Natural Satellite|small moon]].
+* It orbits once every few weeks.
+
+[[File:Alien Moon 17d-1.jpg|600 px]]
+
+==== Mainworld Geography and Topography ====
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+[[File:Blank World Map Watery.png|500 px]] <br> (''Blank map, predominantly watery world''.)
+
+==== Native Lifeforms ====
+Abundant [[Lifeform|native life]] occupying every available ecological niche. Its metabolic functions drive the process of atmospheric renewal.
+
+Kwan has a wide variety of both local flora and fauna.  The seas have a variety of life, including edible species for most sophonts.
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Kwan''' was claimed and named by Captain Jon Smið (sic) of the colony vessel ''Waiferar'' (massing over [[Ton|4000 dTons]] and rated at [[Jump Drive|Jump-4]]).
+
+As was his wont, Captain Smið insisted on naming the planet but held off on the decision, saying he would do it when he arrived with colonists. Unfortunately, the Captain was highly inebriated when he filed his survey data at his base: he only recorded accurate data for the barren, inhospitable worlds orbiting the system's red secondary star, instead providing faulty data that listed all of the primary star's planets as arid [[vacuum world]]s. This was then logged as the official [[Universal World Profile|UWP data]] for the system. Thinking no more of it, Smið spent years creating a colony mission but only recruited around 1000 individuals. This was largely due to the official data conflicting with reports from other captains regarding the nature of the [[mainworld]].
+
+The final leg of the journey was from [[Victori_(world)|Victori]], and Captain Smið decided to follow the example of his friend, Capitain Antoine de Bougainville of the Colony ship ''Voyageur'' (from the world of [[Ivraie (world)|Ivraie]]), and held a celebratory party – becoming quite drunk – before entering the final [[astrogation]] jump values. The jump was a miracle; the ''Waiferar'' arrived exactly at the target planet – to be clear, the ship dropped out of [[jump space]] at the edge of the [[Atmosphere|atmospheric blanket]], at speed.  
+
+Between the (now quite sober) captain's quick reflexes and the automated systems, the ship managed to pull up from a dive in a [[Gravity|10 G turn]]. The ship then skipped across the waves and ramped off a beach into the coastal forest beyond, coming to rest between 2 hills with its nose on a third. The turn and ocean impact event itself probably killed over a hundred, and many were injured by the final impact on land, including the Captain.
+
+Norbert Kwan, the ship's first mate, found the Captain at the forward area of the bridge, where he had been thrown. The Captain was grievously injured, but the mate, himself stunned, asked "What do you name the planet, Captain?"
+
+The Captain looked up, said, "Kwan?"... and died. And so the Captain named his last system.
+
+The Scout Service discovered the survivors a few years later, on a routine follow up on the registered colonization mission. The population declared that they would be happy to join the [[Solomani Confederation]] if they were provided with a modern Class A starport for their pristine [[garden world]]. And so, a deal was struck.
+
+[[Solomani Security]] keeps a close eye on things to ensure the security of the [[Solomani Confederation|Confederation]] and the well-being of its loyal citizens. Almost anyone ''could'' be a [[Solomani Security|SolSec]] informant, passing on all sorts of useful information: some gain a reward or benefit for their actions, others are coerced, but many see it as an act of duty to help protect the [[Solomani Confederation|Solomani state]] and its interests.
+
+=== [[Starport|World Starport]] (St) ===
+{{Starport|name= Kwan|Starport= A}}
+
+The Downport is dubbed Norbertport, after the surviving first mate of the colony ship.
+
+The port also contains a large, popular bar which profanely dubbed ''F... the Captain''. It is occasionally referred to as ''Captain F...'' (only they don't say F.)
+
+=== [[Population|World Population]] (P) ===
+{{WorldPop|name= Kwan|multiplier= 6|Population= 2}}
+* The population almost entirely consists of [[Solomani]] humans.
+
+==== Linguistic Topography ====
+The most commonly heard [[language]]s are:
+* [[Grand United States of Quesada|Quesadan]] [[Spanish]], a [[Terran]] [[language]] principally spoken in the [[Grand United States of Quesada]].
+* [[Rim Anglic]], a dialect of [[Anglic]] and the principal language of the [[Solomani Confederation|Confederation]].
+
+=== [[Technology Level|World Technology Level]] (T) ===
+{{WorldTech|name= Kwan|WorldTech= 8}}
+
+=== [[Government|World Government]] (G) ===
+{{WorldGov|name= Kwan|Government= 3}}
+
+=== [[Law Level|World Law]] (L) ===
+{{WorldLaw|name= Kwan|Law= 1}}
+
+=== Trade Data ===
+* [[Importance Extension|Importance]]: -1 (unimportant)
+
+=== World Economy ===
+* [[Resource]]s:                       8 (moderate)
+* [[Labor]]:                           1 (descriptor)
+* [[Infrastructure]]:                  0 (descriptor)
+* [[Efficiency]]:                      +3 (descriptor)
+
+=== World Culture ===
+* [[Homogeneity|Heterogenity]]:        5 (harmonious)
+* [[Acceptance]]:                      1 (extremely xenophobic)
+* [[Strangeness]]:                     4 (somewhat distinct)
+* [[Symbol]]s:                         A (abstract)
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+
+* [[-9235]]: far to [[coreward]], the [[Vilani]] discover [[jump drive]] technology. Over the centuries pioneers and settlers gradually spread across [[Charted Space]].
+* [[-4045]] to [[-2204]]: the [[First Imperium|Ziru Sirka]] controls vast territories.
+* [[-2431]]: [[Terran]]s discover [[jump drive]] technology.
+* [[-2404]] to [[-2215]]: the [[Interstellar Wars]].
+* [[-2204]] to [[-1776]]: the [[Rule of Man]] administers the former [[First Imperium|Ziru Sirka]].
+* [[-1776]] to [[0]]: the [[Long Night]].
+* [[0|The Year 0]]: to [[coreward]], the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[604]]-[[622]]: the {{Imperial}} [[Civil War]].
+* [[624]]: the {{Imperial}} [[Express Boat Network]] is established.
+* [[704]]: the [[Solomani Autonomous Region]] is formed.
+* [[800]]-[[820]]: the [[Psionics Suppressions]].
+* [[871]]: the [[Solomani Confederation]] is founded.
+* [[940]]: the [[Solomani Autonomous Region]] is dissolved.
+* [[990]]-[[1002]]: the [[Solomani Rim War]].
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] includes data for the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+
+== References & Contributors (Sources) ==
+{{Detail}}
+{{Sources
+|S1= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (A-M)|Supplement 8 Library Data (A-M)]]'', ([[Game Designers Workshop]], 1981), various pages. (Library data entries)
+|S2= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (N-Z)|Supplement 11 Library Data (N-Z)]]'', ([[Game Designers Workshop]], 1982), various pages. (Library data entries)
+|S3= {{Ludography cite|name= Solomani |version= Classic Traveller|page= IFC, pages 3, 28}} (sector named, background for the sector)
+|S4= {{Ludography cite|name= Solomani & Aslan |page= pages 8-11, various others}} (dot map locating the worlds of the sector, background for the sector)
+|S5= [[Steven Eric Schwartz]]. {{MT}} Periodical ''[[Imperiallines 2 (fanzine)|Imperiallines 2]]'', 1991, page 5. ([[Bootean Federation]], background for the sector) 
+|S6= {{Ludography cite|name= Solomani |version= Mongoose Traveller|page= pages 50, 118, 119, various others}} (background for the sector)
+|S7= {{Ludography cite|name= The Order of Prometheus|page= various pages}} (scenarios and background for the sector)
+|S8= [http://zho.berka.com/data/CLASSIC/sector.pl?sector=ALDEBARA Zho Berka's Maps] (Classic Era [[Universal World Profile|UWP Data]] for the world)
+|S9= [http://111george.com/core/astrogat/jG.htm CORE Data Site] ([[Universal World Profile|UWP Data]] for the world)
+|S10= Author & Contributor: [[User:Garnfellow|Garnfellow]] (development of the sector)
+|S11= Author & Contributor: [[Leroy W.L. Guatney]] of the Federation Development Agency (FDA) (development of the sector)
+|S12= Author & Contributor: [[User:Dochsavage|Dochsavage]] 
+}}
+
+
+[[Category: Humaniti worlds]]
+[[Category: Solomani Sphere worlds]]
+[[Category: Solomani worlds]]
+[[Category: Terran Mercantile Community worlds]]
+{{LE|Era: Milieu 1116|T5 Second Survey}}

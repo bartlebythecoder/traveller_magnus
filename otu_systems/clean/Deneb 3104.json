@@ -1,0 +1,551 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Deneb",
+  "hex": "3104",
+  "sector_abbreviation": "Dene",
+  "subsector": "Million",
+  "name": "Aerfor",
+  "sources": [
+    {
+      "page": "Aerfor (system)",
+      "revid": 754599,
+      "timestamp": "2023-10-03T18:58:09Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Aerfor (system)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": null,
+          "type": "F7 V",
+          "notes": "None"
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Aerfor Primary",
+      "stars": [
+        {
+          "name": "Aerfor Primary",
+          "type": "F7 V"
+        }
+      ],
+      "labels": [
+        "Aerfor"
+      ],
+      "pages": [
+        "Aerfor (system)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Oerreg",
+          "raw": "YS10000-0",
+          "kind": "world",
+          "uwp": "YS10000-0",
+          "distance": {
+            "raw": "0.253",
+            "value": 0.253,
+            "unit": "AU"
+          },
+          "sources": [
+            "Aerfor (system)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Uazaelg",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "0.397",
+            "value": 0.397,
+            "unit": "AU"
+          },
+          "sources": [
+            "Aerfor (system)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Udall",
+          "raw": "Y220000-0",
+          "kind": "world",
+          "uwp": "Y220000-0",
+          "distance": {
+            "raw": "0.585",
+            "value": 0.585,
+            "unit": "AU"
+          },
+          "sources": [
+            "Aerfor (system)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Goukrrol",
+          "raw": "Y4C8000-0",
+          "kind": "world",
+          "uwp": "Y4C8000-0",
+          "distance": {
+            "raw": "0.860",
+            "value": 0.86,
+            "unit": "AU"
+          },
+          "sources": [
+            "Aerfor (system)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Kerzvoe",
+          "raw": "Y521000-0",
+          "kind": "world",
+          "uwp": "Y521000-0",
+          "distance": {
+            "raw": "1.31",
+            "value": 1.31,
+            "unit": "AU"
+          },
+          "sources": [
+            "Aerfor (system)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Afak",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "2.01",
+            "value": 2.01,
+            "unit": "AU"
+          },
+          "sources": [
+            "Aerfor (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Aerfor",
+              "name_raw": "* '''Aerfor'''",
+              "raw": "A584520-D",
+              "kind": "world",
+              "uwp": "A584520-D",
+              "distance": {
+                "raw": "45",
+                "value": 45.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Aerfor (system)"
+              ],
+              "mainworld": true
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Agnau",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "3.41",
+            "value": 3.41,
+            "unit": "AU"
+          },
+          "sources": [
+            "Aerfor (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "name_raw": "* '''Ring'''",
+              "raw": "Ring",
+              "kind": "ring",
+              "distance": {
+                "raw": "1",
+                "value": 1.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Aerfor (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Inner Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "6.21",
+            "value": 6.21,
+            "unit": "AU"
+          },
+          "sources": [
+            "Aerfor (system)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Uvuegh",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "11.81",
+            "value": 11.81,
+            "unit": "AU"
+          },
+          "sources": [
+            "Aerfor (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "name_raw": "* '''Ring'''",
+              "raw": "Ring",
+              "kind": "ring",
+              "distance": {
+                "raw": "1",
+                "value": 1.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Aerfor (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Ring",
+              "name_raw": "* '''Ring'''",
+              "raw": "Ring",
+              "kind": "ring",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Aerfor (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Middle Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "11.81",
+            "value": 11.81,
+            "unit": "AU"
+          },
+          "sources": [
+            "Aerfor (system)"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Energh",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "23.01",
+            "value": 23.01,
+            "unit": "AU"
+          },
+          "sources": [
+            "Aerfor (system)"
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Outer Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "45.41",
+            "value": 45.41,
+            "unit": "AU"
+          },
+          "sources": [
+            "Aerfor (system)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Aerfor (system)",
+      "label": "Aerfor",
+      "stars": [
+        {
+          "name": "Aerfor Primary",
+          "type": "F7 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Oerreg",
+          "raw": "YS10000-0",
+          "kind": "world",
+          "uwp": "YS10000-0",
+          "distance": {
+            "raw": "0.253",
+            "value": 0.253,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Uazaelg",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "0.397",
+            "value": 0.397,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Udall",
+          "raw": "Y220000-0",
+          "kind": "world",
+          "uwp": "Y220000-0",
+          "distance": {
+            "raw": "0.585",
+            "value": 0.585,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Goukrrol",
+          "raw": "Y4C8000-0",
+          "kind": "world",
+          "uwp": "Y4C8000-0",
+          "distance": {
+            "raw": "0.860",
+            "value": 0.86,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Kerzvoe",
+          "raw": "Y521000-0",
+          "kind": "world",
+          "uwp": "Y521000-0",
+          "distance": {
+            "raw": "1.31",
+            "value": 1.31,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Afak",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "2.01",
+            "value": 2.01,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Aerfor",
+              "name_raw": "* '''Aerfor'''",
+              "raw": "A584520-D",
+              "kind": "world",
+              "uwp": "A584520-D",
+              "distance": {
+                "raw": "45",
+                "value": 45.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Agnau",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "3.41",
+            "value": 3.41,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "name_raw": "* '''Ring'''",
+              "raw": "Ring",
+              "kind": "ring",
+              "distance": {
+                "raw": "1",
+                "value": 1.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Inner Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "6.21",
+            "value": 6.21,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 8,
+          "name": "Uvuegh",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "11.81",
+            "value": 11.81,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "name_raw": "* '''Ring'''",
+              "raw": "Ring",
+              "kind": "ring",
+              "distance": {
+                "raw": "1",
+                "value": 1.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Ring",
+              "name_raw": "* '''Ring'''",
+              "raw": "Ring",
+              "kind": "ring",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Middle Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "11.81",
+            "value": 11.81,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 10,
+          "name": "Energh",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "23.01",
+            "value": 23.01,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 11,
+          "name": "Outer Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "45.41",
+            "value": 45.41,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Aerfor",
+    "UWP": "A584520-D",
+    "Stellar": "F7 V",
+    "PBG": "534",
+    "Bases": "",
+    "Remarks": "Ag Ni Pr RsD Sa Ht"
+  }
+}

@@ -1,0 +1,268 @@
+[[File:Alien Moon 341d-0.jpg|250 px|right]]
+{{UWP 
+|name    = {{World|Ruie|Spinward Marches|Regina|1809}}
+ |era    = Milieu 1116
+|uc      = C776977-7
+|popc    = 7
+|zonec   = amber
+ |u1= 
+|alg     = NaHu
+|class   = Hi In / Tp Pz / Di(Daccamites)
+|trade   = hi
+|nblty   = B
+|bases   = -
+|primary = G5 V
+|belts   = 0
+|GGcount = 1
+}}
+{{World summary |name= Ruie|trade= Hi In}}
+{{World summary NaHu|sector= Spinward Marches|subsector= Regina}}
+{{World summary comment|trade= Tp}}
+* It is the former [[homeworld]] of the [[Daccamite]]s, an extinct [[sophont]] [[minor race]].
+{{World summary comment|trade= Di}}
+{{World summary comment|trade= Pz}}
+* {{SpMain}}
+* It is part of the [[Regina Cluster]].
+{{InfoboxSystem
+|name= Ruie
+|sector=Spinward Marches|subsector=Regina|hex=1809
+|star= ''Ohrreit''
+|type= ''G5 V''
+|P0= -          |Dist0   = 0.1       |UWP0 = <small>(Empty Orbit)</small>
+|P1= Sustro     |Dist1   = 0.3       |UWP1 = X300000-0
+|P2= Qorgon     |Dist2   = 0.7       |UWP2 = X111000-0
+|P3= Ruie       |Dist3   = 1.0       |UWP3 = C776977-7
+|P4= Peori      |Dist4   = 1.6       |UWP4= X505000-0
+|P5= Orissa     |Dist5   = 2.4       |UWP5= X310000-0 
+|P6= Nustir     |Dist6   = 5.0       |UWP6= X705000-0
+|P7= Renli      |Dist7   = 10        |UWP7= '''LGG'''
+|P8= Mennet     |Dist8   = 19        |UWP8= X211000-0
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Ruie''' has a solitary primary star.
+* It is a yellow main sequence named ''Wahrheit''{{Source cite|author=[[Hans Rancke-Madsen]]|source="Ruie". ''[[JTAS Online]]'' (February 20, 2001)|citeName=JTAS1}} or ''Ohrreit''{{Page cite|name=Compendium 2|page=111|article=Rescue On Ruie|citeName=Comp}} depending on nation{{Source cite|author=Un-|source= non-canon conjecture by ''[[Gabriel G. A. B. Fonseca]]''.|citeName= GAB}}.
+
+{{MonostellarSystem
+|name            = Ruie
+|primary         = G5 V 
+|PrimaryName     = Wahrheit
+|PrimaryNotes    = 
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]].
+* x7 secondary [[world|rocky worlds]].
+* x1 [[gas giant]].
+
+=== Mainworld Data ===
+Ruie is an industrialized, high-population planet orbiting in the [[habitable zone]] of Wahrheit, a yellow main sequence star.
+* It receives moderate levels of [[Electromagnetic Spectrum|stellar energy]].
+
+[[File:Chart Orbit HZ Region Simple.png|600 px]]
+
+It has an orbital period [[Day|359.91 standard days]] (347.6 local days) and a rotation period of 24h 51m 06s. The axial tilt is 22 degrees, giving the world seasons.
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Ruie|Size= 7}}
+* It is a large, molten-core planet with a diameter of [[Kilometer|11,998 km]]. 
+* The density is [[Gram|5.6 grams]] per cubic centimeter (1.02 times the density of [[Terra]]), resulting in a mass of 0.84 Terran masses and a gravity of [[Gravity|0.95 G]].
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Ruie|Atmosphere= 7}}
+* The base [[Celsius|temperature]] is 25°C. The highest [[Celsius|summer temperature]] reaches 62°C at the equator and the lowest [[Celsius|winter temperature]] falls to -51°C at the poles. 
+* The atmosphere is tainted by industrial gases and fungal spores.
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Ruie|Hydrosphere= 6}}
+
+==== Satellites ====
+'''Ruie''' retains a single [[Natural Satellite|small moon]] named ''Tugend''.
+* It orbits at a distance of 22,370 miles.{{Source cite|citeName=JTAS1}}
+* It completes an orbit once every few days.
+
+[[File:Alien Moon 11c-1.jpg|600 px]]
+
+==== Mainworld Geography & Topography ====
+A basic map of Ruie showing the oceans (blue), lowlands and plains (tan), uplands and rough terrain (brown), wetlands (pale green), and the polar caps (pale blue).
+* Sub-ice landmasses are outlined.
+* Major urban centers are shown in red. Each (except for the swamp city of Feistad on the continent of Jingar) has its own [[spaceport]] facilities.
+
+[[File:World Map Ruie Basic.png|600 px]]
+
+Ruie's land mass is unusually dispersed, being split into four major continental landmasses and ten minor subcontinents. There are nine major islands, six archipelagoes, and uncounted smaller islands. {{Source cite|citeName=JTAS1}}
+
+The four major continents are:
+* '''Comors''': the location of the nation of ''Kastin'' and the ''Comors Union'', a trade bloc made up of city-states.
+* '''Emagi''': the location of the dictatorial, extremely religious nation of ''[[Nebelthorn]]'' and the site of the [[Daccamite|Daccam Ruins]].
+** The island-nation of ''Carius'' lies between them.
+* '''Feist''': the location of the nation of ''Strolojka'' and a number of sites of interest including the Crystal Canyon.
+* '''Jingar''': the location of the ''[[Canaday Republican Union]]''. The [[Canaday Republican Union|CRU's]] principal nation is ''Jingarlu'' – the state is frequently referred to by that name, which the citizens of Jingarlu don't mind about at all.
+** Other smaller [[Canaday Republican Union|CRU member states]] include ''Cork River'' and ''Salt Moore''.
+** The island-nation of ''Godarlj'' lies to the south of Jingar.
+
+Significant locations include:
+# Boiling Ocean.
+# The swamp city of Feistad and Mount Pelst.
+# [[Daccamite|Daccam Ruins]].
+# Giant's Footprints.
+# Crystal Canyon.
+
+[[File:Cucuitt Creature Silhouette 2.jpg|350 px|right]]
+
+==== Native Lifeforms ====
+Abundant [[Lifeform|native life]] occupying every available ecological niche. Its metabolic functions drive the process of atmospheric renewal.{{Source cite|citeName=JTAS1}}
+* Native species include the ''[[Cucuitt]]''.
+
+==== Native Sophont ====
+"[[Daccamite]]" is the name given to a [[sophont]] [[minor race]] believed to have been the dominant species on Ruie pre-settlement (circa [[-2200s|-2200]]). Very little information regarding the [[Daccamite]] [[civilization]] is known.{{Source cite|citeName=JTAS1}}
+* The race are believed to have been bipedal [[reptillianoid]]s.
+* They have been extinct for at least 3000 years.
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Ruie''' is a ''[[Amber Zone|Puzzle World]]'' and is designated as an [[Amber Zone]]. It presents particular risks and dangers due to the [[environment]] or [[Life Form|native life forms]], [[Law Level|laws]] or [[Custom|customs]], or other conditions that are not well understood.
+* Visitors are advised to act with caution.
+
+Ruie is a balkanized, industrialized autonomous world just beyond the {{Imperial}} border. Its [[Amber Zone]] classification was posted due to antipathy against the {{Imperium}} and {{Imperial}}s by some local nations. Ruie was offered membership of the {{Imperium}} in [[235]], but refused. 
+
+The planet was the [[homeworld]] of an extinct [[Sophont|sophont species]], known as the [[Daccamite]]s.
+
+The [[University of Kim on the Ren]] -- named for the mighty river on which it stands -- has a [[Daccamite|Daccamite Studies department]] which is devoted to promoting the study of all things relating to the [[Daccamite]]s.
+* As of [[1103]] Professor Carlin Poyntee was the head of this department and widely considered the leading scientific authority on [[Daccamite]]s within the Canaday Republican Union. 
+
+Considering that the fossil record and most artifacts relating to the [[Daccamite]]s are all found within the nation of [[Nebelthorn]], accurate information can be somewhat problematic. Study of Daccamites within Nebelthorn is generally frowned upon as sacrilegious. Further knowledge of the [[Daccamite]] culture, technology and such would require a significant change in attitude from the Nebelthorn Government. An attempt from the [[IISS]] to learn more about the [[Daccamite]] ruins in Nebelthorn territory occurred in [[1051]]. A scout survey team member named Abbot Phillips ventured into Nebelthorn to request information from the local government regarding [[Daccamite]]s. The visit was not officially authorized by the survey leader and Phillips was never seen again.
+
+=== World Starport ===
+{{Starport|name= Ruie|Starport=C}}
+
+The [[starport]] is located within the [[Canaday Republican Union]]. The Starport is adjacent to the city state of Canaday. Canaday is noted for "medieval" architecture consisting of stone block curtain walls situated next to the Ren, a large river similar to the Amazon or Missouri on [[Terra]].
+
+=== World Population (P) ===
+{{WorldPop|name= Ruie|multiplier= 7|Population= 9}}
+
+==== Urbanization ====
+In addition to Ruie Startown, other major settlements on the world include Siirgi City, Sula, Khagin, Irshi, and Kisi.
+
+==== Linguistic Topography ====
+The following [[language]]s are most commonly heard:
+* [[Anglic]], one of the two official languages of the {{Imperium}}.
+* [[Vilani (language)|Vilani]], one of the two official languages of the {{Imperium}}.
+
+=== World Technology Level (T) ===
+{{WorldTech|name= Ruie|WorldTech= 7}}
+
+=== World Government (G) ===
+{{WorldGov|name= Ruie|Government= 7}}
+
+A number of nation-states exist on the world. The nations have different technological proficiencies and tend to lean anti- or pro-{{Imperium}}:
+* [[Nebelthorn]]: advancing {{TL|6}}, anti-{{Imperial}}.
+* Comors Union: {{TL|7}}, broadly pro-{{Imperial}}.
+* [[Canaday Republican Union]]: emerging {{TL|8}}, pro-{{Imperial}}.
+
+The [[Canaday Republican Union]] consists of the countries of Jingarlu, Cork River and Salt Moore and boasts a robust technology and manufacturing base, whilst the opposing country of [[Nebelthorn]] has a lower technology base and a large military. Most Nebelthorn citizens are poor and they have less access to technology due to their oppressive system of government. Nebelthorn is dictatorial, keeping the citizens impoverished whilst seeking high tech weapons systems for the military.
+
+==== World Military ====
+An arms race exists amongst the various nation-states and most militaries are maintaining their forces at the [[TL:7-9]] (Midtech) level. A few [[polities]] maintain forces at a lower [[TL]] or use expensive mercenaries with higher [[TL]] equipment.
+
+Nebelthorn has a massive conscript army poised to attack, but the CRU has hired a high tech mercenary regiment to offset that. (See Col. Alois Hammer){{Source cite|citeName=JTAS1}}
+
+=== World Law (L) ===
+{{WorldLaw|name= Ruie|Law= 7}}
+
+=== Trade Data ===
+* Importance:     1 (ordinary)
+
+=== World Economy ===
+* Resources:      B (abundant)
+* Labor:          8 (hundreds of millions)
+* Infrastructure: A (extensive)
+* Efficiency:     +1 (average)
+
+=== World Culture ===
+* Heterogenity: 9 (discordant)
+* Acceptance:   A (very friendly)
+* Strangeness:  5 (distinct)
+* Symbols:      7 (somewhat concrete)
+
+Institutions of note include the [[University of Kim on the Ren]], an important institution of learning lying within the [[Canaday Republican Union]], a pro-{{imperial}} nation.
+
+=== Historical Data ===
+Ruie was the homeworld of a now-extinct alien race called the [[Daccamite]]s (after the location where the first evidence of their existence was found, the Daccam Ruins in the extremely religious country of Nebelthorn). Information about them is still very limited.{{Source cite|citeName=JTAS1}}
+
+Ruie was settled around [[-2200]] by a group of [[Ziru Sirka|First Imperium]] refugees. The colony survived for a while but died out around [[-1700]]. Little evidence of their tenure survives.{{Source cite|citeName=JTAS1}}
+
+Ruie was settled once more in [[78]], only three years after the neighboring world of [[Regina (world)|Regina]], by a group of religious utopians from the {{Imperial}} core. From the start, the settlers avoided contact with neighboring worlds. Ruie is often referred to as a [[Lost colony|lost colony]], even though it was not lost in the strictest sense — lying as it does next to [[Regina (world)|Regina]], which kept in contact with the {{Imperium}} from the first, Ruie was never cut off from its parent [[civilization]] by distance and/or loss of jump capability. However, the early settlers were very determined to have nothing to do with the {{Imperium}} or any other offworlders, and they stuck to this desire so fiercely that, since Ruie possessed nothing in the way of unusual [[resource]]s, their neighbors left them alone, and the colony suffered the effects of technological regression typical for true lost colonies.{{Source cite|citeName=JTAS1}}
+
+The outside world didn't leave them alone forever, though. In [[323]], when the [[Scout]]s made a clandestine survey of Ruie as part of the [[First Survey]], they found the [[colony]], then at {{TL|2}}, being exploited as [[slave labor]] by an offworld mining outfit. The Scouts stopped the exploitation but were nonetheless unable to make friends with the locals, who had had all their prejudices about offworlders confirmed by their recent treatment. In the end, the Scouts elected to [[Red Zone|interdict]] Ruie, leaving them once again to their own devices.{{Source cite|citeName=JTAS1}}
+
+For the next seven centuries, the people of Ruie spread out across their world, squabbling and fighting as Humans are wont to do. Ruie's near-[[Terra]]n conditions allowed many splinter groups to evolve and survive, and for a long time, there was plenty of room to escape to. Not until the [[800s|ninth century]] did Ruie see large-scale warfare.{{Source cite|citeName=JTAS1}}
+
+==== Imperial Recontact ====
+In [[1051]], Ruie was again surveyed, and was found to have worked itself back up to {{TL|6}}. The survey commander recommended a sociological study of the world to determine whether they were ripe for recontact. Those results were favorable, so in [[1073]], the [[Red Zone|Interdict]] was lifted and the following year a contact mission was sent to Ruie.{{Source cite|citeName=JTAS1}}
+
+Contact quickly led the Scouts to allow limited trade relations with Ruie, although diplomatic relations didn't develop as satisfactorily. A few nations accepted client status, but most held aloof - and some were downright hostile. Following long-standing {{Imperial}} policy as well as his own inclinations, [[Duke]] [[Aledon, Norris Aella|Norris]] didn't press the point.{{Source cite|citeName=JTAS1}}
+
+Nebelthorn is anti-{{Imperium}} and hostile to the Canaday Republican Union, and it wants control what is considered the world's primary [[starport]].
+
+==== Fifth Frontier War ====
+All that changed when the [[Zhodani]] used Ruie as a stepping stone in an attack on Regina in [[1107]], touching off the [[Fifth Frontier War]]. When the war ended in [[1110]], Duke Norris stationed a strong fleet in Ruie System and informed the nations of Ruie that while the world itself would not be interfered with, the [[system]] would be under {{Imperial}} "protection" until such time as Ruie was able to defend the system on its own. Despite the fact that the fleet has since been scaled down to a small destroyer squadron, no one doubts that the {{Imperial}}s are there to stay.{{Source cite|citeName=JTAS1}}
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+* [[-2200]]: Ruie is settled by a group of [[Ziru Sirka|First Imperium]] refugees.{{Source cite|citeName=JTAS1}}
+* [[-1700s|circa -1700]]: the colony dies out.{{Source cite|citeName=JTAS1}}
+* [[0|The Year 0]]: the [[Third Imperium]] is founded.
+* [[78]]: Ruie is settled once more, only three years after the neighbouring world of [[Regina (world)|Regina]], by a group of religious utopians from the {{Imperial}} core.{{Source cite|citeName=JTAS1}}
+* [[235]]: Ruie is presented with the opportunity to join the Imperium, but it declines.{{Page cite|citeName=Comp}}
+* [[323]]: The Scouts make a clandestine survey of Ruie as part of the [[First Survey]], and find the colony now at TL-2.{{Source cite|citeName=JTAS1}} Knights of the Order of the Arrow end unscrupulous offworld exploitation.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[589]]-[[604]]: [[First Frontier War]].
+* [[604]]-[[622]]: the [[Civil War]].
+* [[615]]-[[620]]: [[Second Frontier War]].
+* [[624]]: the [[Express Boat Network]] is established.
+* [[979]]-[[986]]: [[Third Frontier War]].
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] charts the system.
+* [[1051]]: Ruie is again surveyed, and is found to have worked itself back up to TL-6. 
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+* [[1073]]: An IISS Interdict is lifted; the following year a contact mission is sent to Ruie.
+* [[1082]]-[[1084]]: [[Fourth Frontier War]], also known as the ''False War''.
+* [[1107]]: The Zhodani invade, touching off the [[Fifth Frontier War]].
+* [[1110]]: The [[Fifth Frontier War]] ends, and Duke Norris stations a strong fleet in the Ruie System.
+
+== References & Contributors ([[Sources]]) ==
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name= Journal of the Travellers' Aid Society 01|page=12|article=Rescue On Ruie (Amber Zone)}}
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=20-21}} (UWP only)
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=19}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name= Megatraveller 2: Quest for the Ancients |page=}} 
+ | {{Ludography cite|name=The Regency Sourcebook|page=38}} (UWP only)
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=80}}
+ | [[Hans Rancke-Madsen]]. "Ruie". ''[[JTAS Online]]'' (February 20, 2001)
+ | [[Hans Rancke-Madsen]]. "Worlds Within Jump-6 of Regina", ''[[JTAS Online]]'' (July 18, 2006)
+ | {{Ludography cite|name=The Spinward States|page=103}} (UWP only)
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name=Compendium 2|page=111|article=Rescue On Ruie}}
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=40,41}}
+ | {{Ludography cite|name=Journal of the Travellers' Aid Society volume 3 | article=Rescue on Ruie | page=17-28}}
+ | Ruie Campaign Notes [[Trouble in the Spinward Marches (CT) Play By Email Campaign]]
+}}
+
+[[Category: Daccamite worlds]]
+[[Category: Die Back World worlds]]
+[[Category: Fifth Frontier War worlds]]
+[[Category: Homeworld]]
+[[Category: Namon Systems worlds]]
+[[Category: Pasco Cargo Carriers worlds]]
+[[Category: Regina Cluster worlds]]
+[[Category: Slave worlds]]
+[[Category: University of Kim on the Ren]]
+[[Category: University of Kim on the Ren worlds]]
+[[Category: University worlds]] 
+{{LE|T5 Second Survey worlds}}
+{{LEN|GT|Mining worlds}}

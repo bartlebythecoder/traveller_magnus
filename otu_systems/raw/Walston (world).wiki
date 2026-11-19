@@ -1,0 +1,187 @@
+[[File:Alien Moon 282c-0 Small.jpg|250 px|right]]
+{{UWP 
+|name = {{World|Walston|Spinward Marches|District 268|1232}} 
+ |era=Milieu 1116
+|uc    = C544338–8
+|popc  = 3
+|zonec = green
+ |u1= 
+|alg     = CsIm
+|class   = Lo / Tu / Varg7
+|trade   = lo
+|bases   = S
+|primary = M2 V
+|belts   = 0
+|GGcount = 2
+}}
+{{World summary |name= Walston|trade= Lo}}
+{{World summary CsIm|sector= Spinward Marches|subsector= District 268}}
+{{World summary comment|trade= Tu}}
+{{World summary bases|bases= S}}
+* Around 70% of the population are [[Vargr]].
+* {{SpMain}}
+* It lies on the [[Bowman Arm]].
+{{InfoboxSystem
+|name= Walston
+|sector=Spinward Marches|subsector=District 268|hex=1232
+|star= [[Albin's Star (star)|Albin's Star]] |type= M2 V 
+|P0= Pert       |Dist0   = 0.18    |UWP0= Y100000-0
+|P1= Roberts    |Dist1   = 0.27    |UWP1= H621000-0
+|P2= Walston    |Dist2   = 0.38    |UWP2= C544338-8
+|P3= Greenish   |Dist3   = 0.97    |UWP3= SGG
+|P3M1= Ring     |Dist3M1 = 1 Diam  |UWP3M1= YR00000-0
+|P3M2= Proclux  |Dist3M2 = 4 Diam  |UWP3M2= Y100000-0
+|P3M3= Molstor  |Dist3M3 = 9 Diam  |UWP3M3= Y4A0000-0
+|P3M4= Iddine   |Dist3M4 = 15 Diam |UWP3M4= Y203000-0
+|P4= Victir     |Dist4   = 1.34    |UWP4= Y401000-0
+|P5= Temine     |Dist5   = 1.91    |UWP5= H311000-0
+|P6= Scales     |Dist6   = 3.31    |UWP6= G9A0169-8
+|P6M1= Salipoc  |Dist6M1 = 35 Diam |UWP6M1 = YS00000-0
+|P7= Insive     |Dist7   = 5.66    |UWP7= SGG
+|P7M1= Alpha    |Dist7M1 = 12 Diam |UWP7M1= Y200000-0
+}}
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Walston''' has a solitary primary star named ''[[Albin's Star (star)|Albin's Star]]''.
+* It is a red main sequence.
+
+{{MonostellarSystem
+|name         = Walston
+|primary      = M2 V  
+|PrimaryName  = [[Albin's Star (star)|Albin's Star]]
+|PrimaryNotes = 
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* Walston, the [[mainworld]], orbiting towards the outer edge of the [[habitable zone]].
+* x5 secondary [[world|rocky worlds]]. These are:
+** Pert, a [[Hot World|scorched]] [[Inner World|inner system]] [[vacuum world]],
+** Roberts, a [[Hot World|hot, arid]], dusty world with microscopic native life orbiting just within the [[habitable zone]], 
+** Victir, a [[Cold World|cold]] [[Outer World|outer system]] [[Vacuum World|vacuum]] [[ice world]], 
+** Temine, a [[Cold World|cold]] [[Outer World|outer system]] [[ice world]] with a [[trace atmosphere]] and a sub-ice liquid water ocean, and
+** Scales, a [[Frozen World|frigid]] [[Outer World|outer system]] [[exotic atmosphere]] [[Big World|superterran world]].
+* x2 [[Gas Giant|small gas giants]] named Greenish and Insive, both orbiting within the cold [[Outer World|outer system]].
+** Both retain [[Natural Satellite|families of moons]].
+
+=== Mainworld Data ===
+'''Walston''' is a planet of unusual stillness. The shores keep their height at all hours, with no astral bodies to pull the tides. The winds, thin as they are, scarcely brush the ice off of the mountains, and on luckier, warmer days, one might be fortunate enough to see rainfall on the rocky coasts, where mountains cast shadows over deserts. Small islands and fortunate coasts enjoy some small bounty, as the deep sea vents keep the waters relatively warm, and cast life-giving moisture across an otherwise arid landscape. In these oases of warmer, wetter weather, the land is very much alive.{{Page cite|name=High and Dry|page=6|citeName=HighDry6}}
+
+It orbits within the [[star]]'s [[Habitable Zone]].
+* It lies within the zone's colder outer '''H-''' region.
+* It receives relatively low levels of [[Electromagnetic Spectrum|stellar energy]].
+
+[[File:Chart Orbit HZ- Region Detailed.png|600 px]]
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Walston|Size= 5}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Walston|Atmosphere= 4}}
+* The world experiences [[Celsius|low temperatures]].
+* The atmospheric taint is a mild pollutant of biological origin affecting low-elevation areas.
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Walston|Hydrosphere= 4}}
+* The world's lakes and seas are littered with icebergs and pack ice.
+
+[[File:Twilight Zone World Horizon Cold Type 01b2.jpg|600 px]]
+
+==== Mainworld Geography and Topography ====
+A centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+[[File:Walston World Map.jpg|600 px]] <br> ''(canon map provided by Mongoose High & Dry module)''
+
+==== Native Lifeforms ==== 
+The primary biomes of the planet are ice sheets and cold deserts, with some amount of cold, arid plains near the coasts. Native lifeforms are cryophilic and exist in close relationship to the waters of Walston, which are teeming with life.{{Page cite|name=High and Dry|page=6-7}}
+
+Local fauna on land is primarily small, crawling insects and a number of furry egg-laying burrowers -- such as the [[Walston (animal)|Walston]], named for the planet. The seas of Walston are much more verdant, however, harboring much larger beasts, such as the [[Alderson's Coastal Hunter]], or the [[Deep-Water Brakarr]]. {{Page cite|name=High and Dry|page=8-10}}
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+Walston's [[starport]] and the relatively hospitable [[environment]] makes it a popular stopover point on the [[Bowman Arm]]. 
+
+Its subsistence-based economy depends largely on aquaculture and more conventional agriculture.
+
+=== [[Starport|World Starport]] (St) ===
+{{Starport|name= Walston|Starport= C}}
+* The world is host to a [[Scout Base]].
+
+=== [[Population|World Population]] (P) ===
+{{WorldPop|name= Walston|multiplier= 3|Population= 3}}
+* Approximately 70% of the world's population are [[Vargr]] who settled after the [[Fourth Frontier War]].
+
+[[File:Vargr DJ Barr The Traveller Adventure Pg 151.jpg|225 px|right]]
+
+==== Urbanization ====
+The only inhabited region of the world is ''Settlement Island'', which includes the capital at ''Central Lake''.
+
+=== [[Technology Level|World Technology Level]] (T) ===
+{{WorldTech|name= Walston|WorldTech= 8}}
+
+=== [[Government|World Government]] (G) ===
+{{WorldGov|name= Walston|Government= 3}}
+
+While the Survey's [[UWP]] describes the government as a self-perpetuating oligarchy, it is known to some as a dictatorship – although the term is used loosely.
+
+The [[government]] is controlled by a human elite and the [[Vargr]] resident on the world are treated as distinctly second-class citizens.
+
+==== World Military ====
+Despite the high [[Law Level]], the planet's military consists of not much more than the dictator's personal guard, the settlement's own sheriffs, and starport security.{{Page cite|name=High and Dry|page=8}}
+
+=== [[Law Level|World Law]] (L) ===
+{{WorldLaw|name= Walston|Law= 8}}
+
+=== Trade Data ===
+* Importance:     -2 (very unimportant)
+
+=== World Economy ===
+* Resources:      7 (few)
+* Labor:          2 (hundreds)
+* Infrastructure: 0 (non-existent)
+* Efficiency:     -2 (fair)
+
+=== World Culture ===
+* Heterogenity: 3 (monolithic)
+* Acceptance:   1 (extremely xenophobic)
+* Strangeness:  5 (distinct)
+* Symbols:      8 (somewhat abstract)
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+* [[0|The Year 0]]: the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[589]]-[[604]]: [[First Frontier War]].
+* [[604]]-[[622]]: the [[Civil War]].
+* [[615]]-[[620]]: [[Second Frontier War]].
+* [[624]]: the [[Express Boat Network]] is established.
+* [[979]]-[[986]]: [[Third Frontier War]].
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] charts the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+* [[1082]]-[[1084]]: [[Fourth Frontier War]], also known as the ''False War''.
+* [[1107]]-[[1110]]: [[Fifth Frontier War]].
+
+== References & Contributors (Sources) ==
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=The Travellers' Digest 15|article=Mistaken Identity|page=15-18}}
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=The Regency Sourcebook|page=48-49}} (UWP only)
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=75}}
+ | {{Ludography cite|name=The Spinward States|page=110}} (UWP only)
+ | {{Ludography cite|name= Type S |page=}}
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name=Bowman Arm|page=17-27}}
+ | {{Ludography cite|name=The Bowman Arm | version=Mongoose 2nd |page=11-18}}
+ | {{Ludography cite|name= High and Dry |page=6-10}}
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=123-127}} (UWP only)
+}}
+
+[[Category: Humaniti worlds]]
+[[Category: Imperial Vargr worlds]]
+[[Category: Vargr worlds]]
+{{LE|T5 Second Survey worlds}}
+{{LEN|Bowman Arm worlds|GT}}

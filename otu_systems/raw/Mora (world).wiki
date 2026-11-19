@@ -1,0 +1,244 @@
+{{Milieu header}}
+
+[[File:Alien Moon 51b-0.jpg|250 px|right]]
+{{StellarDataQuery
+  |name= {{World|Mora|Spinward Marches|Mora|3124}} 
+  |era= Milieu 1116
+}}
+{{World summary |name= Mora|trade= Hi In}}
+{{World summary comment|trade= Ht}}
+{{World summary comment|trade= Cs}}
+{{World summary bases|bases= NS}}
+* {{SpMain}}
+* It lies on the [[Mora Arm]].
+
+{{InfoboxSystem
+ | name= Mora
+ | sector = Spinward Marches
+ | subsector = Mora
+ | hex = 3124
+ | star = ''<big>Dimoph</big>''
+ | type = ''<big>F0 V</big>''
+ | P1 = Murguil | Dist1 = 0.96 | UWP1=
+ | P2 = Elicar  | Dist2 = 1.35 | UWP2=
+ | P3 = Iyrne   | Dist3 = 1.74 | UWP3=
+ | P4 = Mora    | Dist4 = 2.52 | UWP4= AA99AC7-F
+ | P5 = Forigi  | Dist5 = 4.08 | UWP5=
+ | P6 = Guarek Belt | Dist6= 7.20 | UWP6= F000???-F
+ | P7 = Gigig    | Dist7= 13.44 | UWP7= '''Gas Giant'''
+ | P8 = Gogog    | Dist8= 25.92 | UWP8= '''Gas Giant'''
+ | P9 = Erstine  | Dist9= 50.88 | UWP9= 
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Mora''' has a solitary primary star named ''Dimoph''.
+* It is a white main sequence.
+
+{{MonostellarSystem
+|name            = Mora
+|primary         = F0 V 
+|PrimaryName     = Dimoph
+|PrimaryNotes    = None
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]], Mora.
+* x5 secondary [[world|rocky worlds]].
+** They are named ''Murguil'', ''Elicar'', ''Iyrne'', ''Forigi'', and ''Erstine''.
+* x1 [[planetoid belt]], named the ''Guarek Belt''.
+* x2 [[gas giant]]s, named ''Gigig'' and ''Gogog''.
+
+The Mora system has mining operations and high-technology industrial research and manufacturing centers spread throughout its star system. Close in to the planet are four moons, the largest of which is a vast military complex which is home to the Imperial [[73rd Fleet]], the Duchy Fleet, and the System Defense Force.
+
+The Mora system's belt is home to most of the significant biotech industries in the Spinward Marches. The belt environment has provided them with a safe and flexible environment for research while being positioned at a large nexus of trade routes.
+
+==== Naming Conventions ====
+Mora is named after a harvest goddess of an old [[Sylean]] pantheon: its principal continent, Batadis, is named after her cornucopia-like Basket of Plenty, and other prominent geographical features on the world are named after artifacts belonging to other gods. The sun is named after the Sun God and the other inner planets after other gods. The biggest planetoids in the belt are named for members of the Guarek, a race of small mischievous supernatural beings akin to the elves, trolls, and dwarves of Old Terra and the ''gishkan'' of Old [[Vland (world)|Vland]]. The two gas giants are named for two of the giants who hold up the sky, and the major planetoids in Gigig's trojan points -- Borranek (The Vanguards) and Surranek (The Rearguards) -- are named after heroes listed in the Heavenly Muster chapter in an epic describing the Dawn War between the gods and the primal forces that opposed the creation of Sylea. Erstine, the tiny outermost planet, is named after a dog-like animal belonging to Forigi, the Goddess of the Hunt.
+
+=== Mainworld Data ===
+Mora has a rotation period (a local day) of [[Hour|23 hours]] [[Minute|51 minutes]]. It takes 1,162 local days ([[Day|1154.3 Standard days]]) to circle its star.
+
+Mora has four seasons, named Rise (with mostly [[Celsius|moderate temperatures]]), Summer (with [[Celsius|high temperatures]]), Fall (with generally [[Celsius|moderate temperatures]]), and Winter (marked by [[Celsius|low temperatures]]). Each season is roughly ([[Day|290 Standard days]]) long.
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Mora|Size= A}}
+* Mora is a large, molten-core world with a diameter of 15,567 km (9,673 miles). It has a surface gravity of [[Gravity|1.19 G]].
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Mora|Atmosphere= 9}}
+* It experiences [[Celsius|generally moderate temperatures]].
+* A relatively high axial tilt of 33 degrees combined with an orbital eccentricity of 0.02 means equatorial temperatures can reach [[Celsius|up to 60°C]] in summer. In the polar regions ice sheets cover large areas of the sea, with temperatures falling to as low as [[Celsius|-65°C]] in winter.
+
+The dense oxygen-nitrogen [[atmosphere]] is tainted with industrial pollutants from its past but over the last hundred years this has been reduced to a minor irritant by various environmental ‘clean up’ measures. As a result, almost all inhabitants and most visitors suffer no ill effects, though those of a sensitive constitution may prefer to wear some form of [[filter mask]] when outside the sealed areas of the [[arcology|arcologies]].
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Mora|Hydrosphere= 9}}
+* Around 92% of the planet is covered with water, with only one small continent (Batadis), a few large islands, a few archipelagos, and a smattering of lesser islands rising above the surface of the sea.
+
+[[File:Water World Ocean Type 10b2.jpg|600 px]]
+
+==== Satellites ====
+'''Mora''' retains two tiny [[Natural Satellite|planetoid moons]] and two [[Natural Satellite|larger moons]].
+* The two planetoid moons are of great age. Current theories hold that they are cometary remains.
+* Its family of satellites orbit once every few weeks.
+
+[[File:Alien Moon 136e-0.jpg|250 px|right]]
+
+[[File:Alien Moon 04a-2.jpg|600 px]]
+
+==== Mainworld Geography and Topography ====
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+[[File:Blank World Map Watery.png|500 px]] <br> (''Blank map, predominantly watery world''.)
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+Mora is known as the "Gateway to the Marches" as it sits at a convenient location on the [[jump route]]s through which much the Spinward Marches is reached from [[Deneb Sector]] and the rest of the Imperium. As a result, it became the seat of both the Duchy government and the Sector administration and accumulated a disproportionate amount of wealth and influence. 
+
+Surveys for a chain of star systems leading from [[Vland (world)|Vland]] to Mora were officially filed around year [[60]]{{Page cite|name=Deneb Sector|page=10}}. In the year [[75]], [[Regina (world)|Regina]] and its surrounding worlds in the [[Spinward Marches]] were settled, which shifted the centre of trade from [[Deneb (world)|Deneb]] to Mora{{Page cite|name=Deneb Sector|page=11}}. [[Star Lane Subsector|Starlane subsector]] (originally [[District|District 220]]) was admitted to the {{Imperium}} in [[424]], when Mora was divested of much of its territory in the reorganisation of the [[Spinward Marches]]{{Page cite|name=Deneb Sector|page=11}}.
+
+Mora is an {{Imperial}} industrial world with a population of over ten billions located in the [[Mora Subsector]] of [[Spinward Marches Sector]] in the [[Domain of Deneb]]. It is the capital of the Spinward Marches, and site of the first major Imperial establishment in that sector. The current ruler is Duchess [[Delphine Adorania Muudashir]] in her capacity of [[Matriarch of Mora]].
+
+=== World Starport (St) ===
+{{Starport|name= Mora|Starport= A}}
+* The world is host to a [[Naval Base]]. It is the HQ of the [[73rd Fleet]].
+* The world is host to a [[Scout Base]]. The world [[Scout Base]] It serves as the HQ for Scout activities in the Marches.
+
+Mora Imperial Downport is located on an island in the Fakla River estuary, adjacent to the capital Wavecrest City on the east coast of Batadis. Two of the other arcologies have spaceports and most have some form of airborne access, being built in sufficiently shallow water for their uppermost levels to be above the surface of the sea. Given Mora’s economic, astrographical and political importance, its downport is huge (140 square kilometers) and one of the busiest in the Marches. There is an equivalently large highport, handling bigger, unstreamlined starships as well as orbiting space habitats, space industry complexes and megacorporation docks. Instell Arms megacorporation has it's corporate headquarters in Wavecrest City the historic Ling Standard Products district.
+
+Not only is the downport very large but in a fairly uncommon arrangement the associated startown is inside the extrality fence so the port’s boundaries are swelled by residential areas, warehousing districts, and an extensive diplomatic district housing hundreds of ambassadors and their staffs, as well as the ducal palace. As a result, the extrality fence encloses an area of roughly 140 square kilometers.
+
+A [[Scout base]] and secondary [[naval base]] are also located in the secondary [[planetoid belt]], the former being the [[IISS]] regional headquarters for the Spinward Marches. As a result, the system is full of every kind of vessel, from heavy battle squadrons to high-performance Scout Couriers. The naval base is the headquarters of the [[73rd Fleet]]
+
+==== Personal Weaponry ====
+Mora’s law requires all visitors to store personal firearms in secure facilities inside the extrality fence before leaving the Imperial Enclave. The only weaponry allowed outside the extrality fence are stunners, small blades, larger blades if of appropriate social status or career background, and clubs or similar.
+
+==== Point of Interest: Mora Highport ====
+There is a very large [[Highport]], handling bigger, unstreamlined starships as well as orbiting space habitats, space industry complexes and megacorporation docks. This major space station was financed by an economic coalition of the following corporations and [[megacorporation]]s: [[Delgado Trading]], [[Imperial Lines]], [[Tukera Lines]], [[Imperiallines]], [[Ling-Standard Products]], and [[Zirunkariish]].
+
+=== World Population (P) ===
+{{WorldPop|name= Mora|multiplier= 1|Population= A}}
+
+==== Urbanization ====
+Mora’s population of over ten billion mostly live in huge self-contained arcologies, about one-eleventh of which are built on dry land on to the continent of Batadis and the various islands, though most of the available arable land surface is dedicated to intensive agriculture. The remainder are spread across the sea floor, mainly in the equatorial regions and often have seabed farms around them. Arcologies may be home to tens or even hundreds of millions of inhabitants. Around 300 million people live in space habitats spread out across the star system.
+
+The various names applied in connection with the urban agglomeration at the [[starport]] and the Fakla River estuary are often confused and mixed up. ‘Wavecrest City’ is strictly speaking only the part that lies outside the extrality fence, but is often used to include the part inside. The part inside the fence is officially the {{Imperial}} Enclave, but is often referred to indiscriminately as '[[Startown|the startown]]' or '[[Starport|the starport]]', since there is no real separation of the two.
+
+==== Point of Interest: Giyachii Archology‎ ====
+This archology contains the residence of the [[Duke of Regina]] (Later [[The Regent]])
+
+==== Linguistic Topography ====
+The following [[language]]s are most commonly heard:
+* [[Riftian|Riftian Galanglic]], the regional principal dialect of one of the two official languages of the {{Imperium}}.
+* [[Vilani (language)|Vilani]], one of the two official languages of the {{Imperium}}.
+
+=== World Technology Level (T) ===
+{{WorldTech|name= Mora|WorldTech= F}}
+
+=== World Government (G) ===
+{{WorldGov|name= Mora|Government= C}}
+
+The planetary government of Mora is split into three authorities – the Judiciary (an elite council known as “The Eleven Brides”); the Executive (another elite council, of 33 women called “The Caucus”); and the Legislative authority which is theoretically held by the Duchess of Mora in her capacity as Matriarch, but in practice exercised by a large bureaucracy appointed by her.
+
+Over the last millennium, Mora has suffered various conflicts – mostly between the merchant lords who sought to control it for its strategic position and trade value. However, for the last 400 years the strong rule of a steady line of matriarchs has provided a relatively stable and tranquil environment. The current Matriarch is Delphine Adorania Muudashir, 15th Duchess of Mora, who has reached the remarkable age of 135 years, has ruled Mora for more than 100 years, and is generally regarded warmly by Mora’s population. As Mora also hosts the Imperial Sector Administration, the political and economic power-play of the whole of the Spinward Marches revolves around the Duchess’ world.
+
+Mora’s matriarchal bias extends across many of its government positions with males prevented (by law) from rising above specified levels of responsibility.
+
+=== World Law (L) ===
+{{WorldLaw|name= Mora|Law= 7}}
+
+Components of each of the military services provide law enforcement and first-response teams for the emergency services, with close day-to-day liaison with the judiciary run by The Eleven Brides. However, the Matriarch has overall control of the planet’s military and can mobilize any and all of its units in a crisis situation. The world’s laws are fairly strict and somewhat intrusive.
+
+Police units are armed, never hesitate to point their weapons at potential criminals and can call on military assault teams at very short notice. They expect all civilians to be obedient and produce identity documents whenever asked for, etc. There is also a high degree of video surveillance around the arcologies. The police are not thugs; most of them are very approachable and helpful. However, they are capable and ready to deal with those who break the law.
+
+=== Imperial High & Landed Nobility ===
+{{Imperial Nobility|name= Mora|Noble=BEF}} 
+: ''See: [[Nobles of Mora]]'' <sup>†</sup>
+:* ''Mora is the center of the Local Subsector Government.''
+:* ''Mora is the acting center of the Spinward Marches Sector Government.''
+
+=== Trade Data ===
+* Importance:     5 (very important)
+
+=== World Economy ===
+* Resources:      F (extremely abundant)
+* Labor:          9 (billions)
+* Infrastructure: H (very comprehensive)
+* Efficiency:     +5 (very advanced)
+
+=== World Culture ===
+* Heterogenity: A (discordant)
+* Acceptance:   F (extremely xenophobic)
+* Strangeness:  5 (distinct)
+* Symbols:      F (extremely abstract)
+
+Mora is home of the [[Imperial Mora University]] and the (less prestigious) [[Mora Technical Institute]].{{Page cite|name=Behind the Claw|version=Mongoose 2nd|page=106}}
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+* [[0|The Year 0]]: the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[589]]-[[604]]: [[First Frontier War]].
+* [[604]]-[[622]]: the [[Civil War]].
+* [[615]]-[[620]]: [[Second Frontier War]].
+* [[624]]: the [[Express Boat Network]] is established.
+* [[979]]-[[986]]: [[Third Frontier War]].
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] charts the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+* [[1082]]-[[1084]]: [[Fourth Frontier War]], also known as the ''False War''.
+* [[1107]]-[[1110]]: [[Fifth Frontier War]].
+
+
+<br>
+: ----
+: <sup>†</sup> <small>''Between 1116-1117 Duke Norris Aella Aledon of Regina will be appointed the 1st Archduke of Deneb Domain and will establish the official Capital of the Domain at Mora/Mora (Spinward Marches 3124). All administrative apparatus of the Domain will commence being transferred from Deneb to Mora at that time.''</small>
+
+== References ==
+{{Advanced}}
+{{Sources
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=32-33}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller Journal 1|article=A Guide to the Domain of Deneb|page=25}}
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=The Regency Sourcebook|page=47}}
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=115-116}}
+ | [[Hans Rancke-Madsen]]. "Mora -- Year 100". ''[[JTAS Online]] published  February 21, 2000''. (2000)
+ | {{Ludography cite|name=Starports|version=GURPS Traveller|page=106,115-117}}
+ | {{Ludography cite|name=The Spinward States|page=114,117}}
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name=Compendium 2|page=66}}
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=14,22,103,106-107}}
+ | {{Ludography cite|name=Imperiallines 14 |page=4}}
+| External Link: [https://www.sjgames.com/gurps/traveller/tns-oldnews2.html GURPS Traveller News Service] [[SJG]]
+}}
+
+[[Category: 73rd Fleet worlds]]
+[[Category: Adamantium worlds]]
+[[Category: Al Morai worlds]]
+[[Category: Archduke worlds]]
+[[Category: Delgado Trading worlds]]
+[[Category: Gishdag Khuulam Aid Organisation worlds]]
+[[Category: Groat worlds]]
+[[Category: Highport worlds]]
+[[Category: Imperial Lines worlds]]
+[[Category: Imperiallines worlds]]
+[[Category: Imperial Mora University worlds]]
+[[Category: Ling-Standard Products worlds]]
+[[Category: Matriarchy worlds]]
+[[Category: Megastructure worlds]]
+[[Category: MindGames worlds]]
+[[Category: Mining worlds]]
+[[Category: Mora Arm worlds]]
+[[Category: Mora Technical Institute worlds]]
+[[Category: OPT Worlds worlds]]
+[[Category: Safari worlds]]
+[[Category: Sylean University of Mora worlds]]
+[[Category: Transstar Deneb worlds]]
+[[Category: Tukera Lines worlds]]
+[[Category: University worlds]] 
+[[Category: Worlds with a X-Boat Station]]
+[[Category: Zirunkariish worlds]]
+{{LE|T5 Second Survey worlds|}}

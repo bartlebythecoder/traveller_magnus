@@ -1,0 +1,496 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "0705",
+  "sector_abbreviation": "Spin",
+  "subsector": "Cronor",
+  "name": "Cipango",
+  "sources": [
+    {
+      "page": "Cipango (system)",
+      "revid": 927623,
+      "timestamp": "2025-05-25T19:53:04Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Cipango (system)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Cipango-Taiyoo",
+          "type": "G2 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Cipango-Taiyoo",
+      "stars": [
+        {
+          "name": "Cipango-Taiyoo",
+          "type": "G2V"
+        }
+      ],
+      "labels": [
+        "Cipango"
+      ],
+      "pages": [
+        "Cipango (system)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Zero-Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "0.5",
+            "value": 0.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Cipango (system)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Himawari",
+          "raw": "HS00000-0",
+          "kind": "world",
+          "uwp": "HS00000-0",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Cipango (system)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Kusai",
+          "raw": "F596267-C",
+          "kind": "world",
+          "uwp": "F596267-C",
+          "distance": {
+            "raw": "0.9",
+            "value": 0.9,
+            "unit": "AU"
+          },
+          "sources": [
+            "Cipango (system)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Cipango",
+          "raw": "A886865-C",
+          "kind": "world",
+          "uwp": "A886865-C",
+          "distance": {
+            "raw": "1.1",
+            "value": 1.1,
+            "unit": "AU"
+          },
+          "sources": [
+            "Cipango (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Yubiwa-Ring",
+              "name_raw": "* ''Yubiwa-Ring''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Cipango (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Tsuki-Shivva",
+              "name_raw": "* ''Tsuki-Shivva''",
+              "raw": "F646668-C",
+              "kind": "world",
+              "uwp": "F646668-C",
+              "distance": {
+                "raw": "25",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Cipango (system)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 5,
+          "name": "Yon-Belt",
+          "raw": "G000268-C",
+          "kind": "world",
+          "uwp": "G000268-C",
+          "distance": {
+            "raw": "1.5",
+            "value": 1.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Cipango (system)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Doitsu",
+          "raw": "H7A0167-B",
+          "kind": "world",
+          "uwp": "H7A0167-B",
+          "distance": {
+            "raw": "2.3",
+            "value": 2.3,
+            "unit": "AU"
+          },
+          "sources": [
+            "Cipango (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Bavaria-32",
+              "name_raw": "* ''Bavaria-32''",
+              "raw": "H100363-B",
+              "kind": "world",
+              "uwp": "H100363-B",
+              "distance": {
+                "raw": "12",
+                "value": 12.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Cipango (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Fukuzawa",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "7.1",
+            "value": 7.1,
+            "unit": "AU"
+          },
+          "sources": [
+            "Cipango (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "F-8",
+              "name_raw": "* ''F-8''",
+              "raw": "HS00167-B",
+              "kind": "world",
+              "uwp": "HS00167-B",
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Cipango (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "F-11 prim",
+              "name_raw": "* ''F-11 prim''",
+              "raw": "HS00000-0",
+              "kind": "world",
+              "uwp": "HS00000-0",
+              "distance": {
+                "raw": "11",
+                "value": 11.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Cipango (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "F-11 bis",
+              "name_raw": "* ''F-11 bis''",
+              "raw": "HS00163-B",
+              "kind": "world",
+              "uwp": "HS00163-B",
+              "distance": {
+                "raw": "11",
+                "value": 11.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Cipango (system)"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Cipango (system)",
+      "label": "Cipango",
+      "stars": [
+        {
+          "name": "Cipango-Taiyoo",
+          "type": "G2V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Zero-Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "0.5",
+            "value": 0.5,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Himawari",
+          "raw": "HS00000-0",
+          "kind": "world",
+          "uwp": "HS00000-0",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Kusai",
+          "raw": "F596267-C",
+          "kind": "world",
+          "uwp": "F596267-C",
+          "distance": {
+            "raw": "0.9",
+            "value": 0.9,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Cipango",
+          "raw": "A886865-C",
+          "kind": "world",
+          "uwp": "A886865-C",
+          "distance": {
+            "raw": "1.1",
+            "value": 1.1,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Yubiwa-Ring",
+              "name_raw": "* ''Yubiwa-Ring''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Tsuki-Shivva",
+              "name_raw": "* ''Tsuki-Shivva''",
+              "raw": "F646668-C",
+              "kind": "world",
+              "uwp": "F646668-C",
+              "distance": {
+                "raw": "25",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Yon-Belt",
+          "raw": "G000268-C",
+          "kind": "world",
+          "uwp": "G000268-C",
+          "distance": {
+            "raw": "1.5",
+            "value": 1.5,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Doitsu",
+          "raw": "H7A0167-B",
+          "kind": "world",
+          "uwp": "H7A0167-B",
+          "distance": {
+            "raw": "2.3",
+            "value": 2.3,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Bavaria-32",
+              "name_raw": "* ''Bavaria-32''",
+              "raw": "H100363-B",
+              "kind": "world",
+              "uwp": "H100363-B",
+              "distance": {
+                "raw": "12",
+                "value": 12.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Fukuzawa",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "7.1",
+            "value": 7.1,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "F-8",
+              "name_raw": "* ''F-8''",
+              "raw": "HS00167-B",
+              "kind": "world",
+              "uwp": "HS00167-B",
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "F-11 prim",
+              "name_raw": "* ''F-11 prim''",
+              "raw": "HS00000-0",
+              "kind": "world",
+              "uwp": "HS00000-0",
+              "distance": {
+                "raw": "11",
+                "value": 11.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "F-11 bis",
+              "name_raw": "* ''F-11 bis''",
+              "raw": "HS00163-B",
+              "kind": "world",
+              "uwp": "HS00163-B",
+              "distance": {
+                "raw": "11",
+                "value": 11.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Cipango",
+    "UWP": "A886865-C",
+    "Stellar": "G2 V",
+    "PBG": "121",
+    "Bases": "KM",
+    "Remarks": "Ga Ri Pa Ph O:0304 Ht"
+  }
+}

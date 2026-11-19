@@ -1,0 +1,131 @@
+ {{UWP 
+|name= {{World|Mercator|Gushemege|Laeth|1233}}
+|image = 
+|system= 
+|uc    = C540431-8
+|popc  = 5
+|zonec = green
+ |u1= 
+|alg     = ImDv
+|class   = De He Ni Po
+|trade   = he
+|climate = TBD
+|orbit   = TBD
+|gravity = TBD
+|nblty   = B
+|bases   = S
+|primary = G1 V 
+|belts   = 0
+|GGcount = 3
+}}
+{{InfoboxSystem
+ |name=Mercator 
+ |subsector=Laeth
+ |sector=Gushemege
+ |hex=1233
+ |star=Hymax
+ |type=G1 V
+ |P1=Hymax 1
+ |Dist1=0.2
+ |UWP1=YS00000-0
+ |P2=Hymax 2
+ |Dist2=0.4
+ |UWP2=Y100000-0
+ |P3=Hymax 3
+ |Dist3=0.7
+ |UWP3=Y470000-0
+ |P4=Mercator 
+ |Dist4=1.0
+ |UWP4=C540431-8
+ |P5=Hymax 5
+ |Dist5=1.6
+ |UWP5=Y540000-0
+ |P6=Hymax 6
+ |Dist6=2.8
+ |UWP6=SGG
+ |P7=Hymax 7
+ |Dist7=3.3
+ |UWP7=Y302000-0
+ |P8=Hymax 8
+ |Dist8=5.2
+ |UWP8=SGG
+ |P9=Hymax 9
+ |Dist9=10
+ |UWP9=SGG
+ |P10=Hymax10
+ |Dist10=20
+ |UWP10=Y978000-0
+}}
+{{World summary |name= Mercator|trade=De He Ni Po}}
+{{World summary ImDv|sector= Gushemege |subsector=Laeth}}
+{{World summary bases|bases=S}}
+* {{Alternate world name|name=Kadkaagi}}
+
+== Description (Astrography & Planetology) ==
+This world is part of the [[Sidurii Cluster]].
+
+=== Stellar Data ===
+{{MonostellarSystem
+|name           = Mercator
+|primary        = G1 V 
+|PrimaryName  = Hymax
+}}
+
+=== System Data ===
+No information yet available. 
+ 
+=== Mainworld Data ===
+No information yet available.
+
+==== Mainworld Geography & Topography ====
+No information yet available.
+
+==== Mainworld Map ====
+No information yet available.
+
+=== Native Lifeforms ===
+Native life is minimal, consisting of algae and simple worms in damp sub-surface soil pockets.
+
+== History & Background (Dossier) ==
+This world was known to the [[Vilani]] as Kadkaagi.
+
+During the [[Long Night]], it became a colony of [[Sidur Ishki (world)|Sidur Ishki]]. When [[Gumahl]] raiders first threatened the colony, the Sidurii naval forces stationed there chased them out of the system. However, an administrative error later halted local funding for the navy.
+
+=== Imperial Landed Nobility ===
+{{Imperial Nobility|name= Mercator|Noble=B}}
+
+=== World Starport ===
+{{Starport|name= Mercator|Starport=C}}
+
+=== World Technology Level ===
+{{WorldTech|name= Mercator|WorldTech=8}}
+
+=== World Government ===
+{{WorldGov|name= Mercator|Government=3}}
+
+==== World Law Level ====
+No information yet available. 
+
+==== World Military ====
+No information yet available.
+
+== References  ==
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name= Journal of the Travellers' Aid Society 15|page=13-20|article=Contact: Ael Yael}}
+ | {{Ludography cite|name=Atlas of the Imperium|page=13}}
+ | {{Ludography cite|name= Arrival Vengeance |page= TBD }} 
+ | {{Ludography cite|name=First Survey|page= 73}}
+ | {{Ludography cite|name=Long Way Home|page=54}}
+ | {{Ludography cite|name= Alien Races 4 |page= TBD}} ([[Ael Yael]])
+ | {{Ludography cite|name= Aslan |page= TBD |version= Mongoose Traveller}} 
+ | {{Ludography cite|name= Library Data|page= TBD}}
+ | EXTERNAL LINK: [http://rpg.sw-architect.de/trav/maps/galactic_maps/maps.travellercentral.com/sec_/fe.gushemege_worlds.html Gushemege Worlds] {{dead link}}
+ | Author & Contributor: [[David Burden]] of the {{HIWG}}
+}}
+
+
+[[Category: 39th Fleet worlds]]
+[[Category: Sidurii Cluster worlds]]
+[[Category: Vilani Main worlds]]
+{{LE|T5 Second Survey worlds}}

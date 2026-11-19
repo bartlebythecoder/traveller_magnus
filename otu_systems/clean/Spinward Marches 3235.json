@@ -1,0 +1,553 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "3235",
+  "sector_abbreviation": "Spin",
+  "subsector": "Trin's Veil",
+  "name": "Trin",
+  "sources": [
+    {
+      "page": "Trin (SM 3235) (world)",
+      "revid": 1022663,
+      "timestamp": "2026-03-17T18:43:14Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Trin (SM 3235) (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Zaiden",
+          "type": "G0 V",
+          "notes": "None"
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Zaiden",
+      "stars": [
+        {
+          "name": "Zaiden",
+          "type": "G0 V"
+        }
+      ],
+      "labels": [
+        "Trin"
+      ],
+      "pages": [
+        "Trin (SM 3235) (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Karita",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Trin (SM 3235) (world)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Teermad",
+          "raw": "Y410000-0",
+          "kind": "world",
+          "uwp": "Y410000-0",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Trin (SM 3235) (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Scorcher",
+          "raw": "F420668-E",
+          "kind": "world",
+          "uwp": "F420668-E",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Trin (SM 3235) (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "--",
+          "raw": "''<small>\"Empty Orbit\"</small>''",
+          "kind": "empty",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Trin (SM 3235) (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Trin",
+          "raw": "A894A96-F",
+          "kind": "world",
+          "uwp": "A894A96-F",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Trin (SM 3235) (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Veil",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "''<small>R= 1</small>''",
+                "value": 1.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Trin (SM 3235) (world)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 5,
+          "name": "LSP Spinward",
+          "raw": "F738414-E",
+          "kind": "world",
+          "uwp": "F738414-E",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Trin (SM 3235) (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Featherwind",
+          "raw": "C859205-F",
+          "kind": "world",
+          "uwp": "C859205-F",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Trin (SM 3235) (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Orslei",
+          "raw": "'''LGG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Trin (SM 3235) (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Marianne",
+              "raw": "Y400000-0",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "''<small>R= 5</small>''",
+                "value": 5.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Trin (SM 3235) (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Desseloss",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "''<small>R= 7</small>''",
+                "value": 7.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Trin (SM 3235) (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Desparon",
+              "raw": "G500366-E",
+              "kind": "world",
+              "uwp": "G500366-E",
+              "distance": {
+                "raw": "''<small>R= 13</small>''",
+                "value": 13.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Trin (SM 3235) (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Hendeford",
+              "raw": "Y4A1000-0",
+              "kind": "world",
+              "uwp": "Y4A1000-0",
+              "distance": {
+                "raw": "''<small>R= 30</small>''",
+                "value": 30.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Trin (SM 3235) (world)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Lythic",
+              "raw": "Y606000-0",
+              "kind": "world",
+              "uwp": "Y606000-0",
+              "distance": {
+                "raw": "''<small>R= 45</small>''",
+                "value": 45.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Trin (SM 3235) (world)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Desmond",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "''<small>R= 50</small>''",
+                "value": 50.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Trin (SM 3235) (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Armin",
+          "raw": "Y400000-0",
+          "kind": "world",
+          "uwp": "Y400000-0",
+          "distance": {
+            "raw": "19.6",
+            "value": 19.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Trin (SM 3235) (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Trin (SM 3235) (world)",
+      "label": "Trin",
+      "stars": [
+        {
+          "name": "Zaiden",
+          "type": "G0 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Karita",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Teermad",
+          "raw": "Y410000-0",
+          "kind": "world",
+          "uwp": "Y410000-0",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Scorcher",
+          "raw": "F420668-E",
+          "kind": "world",
+          "uwp": "F420668-E",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "--",
+          "raw": "''<small>\"Empty Orbit\"</small>''",
+          "kind": "empty",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Trin",
+          "raw": "A894A96-F",
+          "kind": "world",
+          "uwp": "A894A96-F",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Veil",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "''<small>R= 1</small>''",
+                "value": 1.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "LSP Spinward",
+          "raw": "F738414-E",
+          "kind": "world",
+          "uwp": "F738414-E",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Featherwind",
+          "raw": "C859205-F",
+          "kind": "world",
+          "uwp": "C859205-F",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Orslei",
+          "raw": "'''LGG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Marianne",
+              "raw": "Y400000-0",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "''<small>R= 5</small>''",
+                "value": 5.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Desseloss",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "''<small>R= 7</small>''",
+                "value": 7.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Desparon",
+              "raw": "G500366-E",
+              "kind": "world",
+              "uwp": "G500366-E",
+              "distance": {
+                "raw": "''<small>R= 13</small>''",
+                "value": 13.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Hendeford",
+              "raw": "Y4A1000-0",
+              "kind": "world",
+              "uwp": "Y4A1000-0",
+              "distance": {
+                "raw": "''<small>R= 30</small>''",
+                "value": 30.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Lythic",
+              "raw": "Y606000-0",
+              "kind": "world",
+              "uwp": "Y606000-0",
+              "distance": {
+                "raw": "''<small>R= 45</small>''",
+                "value": 45.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Desmond",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "''<small>R= 50</small>''",
+                "value": 50.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Armin",
+          "raw": "Y400000-0",
+          "kind": "world",
+          "uwp": "Y400000-0",
+          "distance": {
+            "raw": "19.6",
+            "value": 19.6,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Trin",
+    "UWP": "A894A96-F",
+    "Stellar": "G0 V",
+    "PBG": "101",
+    "Bases": "NS",
+    "Remarks": "Hi In Cp Ht"
+  }
+}

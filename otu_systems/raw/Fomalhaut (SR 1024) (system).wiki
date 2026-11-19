@@ -1,0 +1,67 @@
+{{InfoboxSystem
+  |name=Fomalhaut (SR 1024)
+  |subsector=Dingir
+  |sector=Solomani Rim
+  |hex=1024
+  |star=[[Fomalhaut (star)|Fomalhaut A]]
+  |type=A3 V
+  |P1=Fomalhaut Prime
+  |Dist1=(?)|UWP1=B8C8469-C
+  |P2=
+  |Dist2=
+  |P3=
+  |Dist3=
+  |P4=
+  |Dist4=
+  |P5=
+  |Dist5=
+  |P6=
+  |Dist6=
+  |P7=Nepal-in-Exile
+  |Dist7=~100|UWP7=D6A0436-A
+  |P8=Dagon
+  |Dist8=~115|UWP8=???????-?
+  |P9=Fomalhaut B
+  |Dist9=60000|UWP9=K5 V
+  |P10=Fomalhaut C
+  |Dist10=166667|UWP10=M4 V
+}}
+
+The '''Fomalhaut System''', also known as '''Alpha Piscis Austrini''', is located on the [[Rim Main]] within [[Dingir Subsector]] of the [[Solomani Rim Sector|Solomani Rim]]. 
+
+== Description (Specifications) ==
+Fomalhaut's primary ('''[[Fomalhaut (star)|Fomalhaut]] A''') is a blue-white main sequence star, with a yellow-orange main sequence companion star ('''[[Fomalhaut (star)|Fomalhaut]] B''', also known as '''TW Piscis Austrini''').  A second very far companion of spectral type M4 V, '''[[Fomalhaut (star)|Fomalhaut]] C''' (also known as '''LP 876-10''') is also associated with the system.  
+
+* The system contains two gas giants as well as the the mainworld, [[Fomalhaut (SR 1024) (world)|Fomalhaut Prime]], and 10 other worlds -- including a captured rogue planet that revolves around the primary star in a highly eccentric orbit.
+
+{{TrinaryStarSystem
+|name           = Fomalhaut
+|primary        = A3 V 
+|PrimaryName    = Fomalhaut
+|secondary      = K5 V 
+|SecondaryName  = ɑ-Piscis Austrini B
+|tertiary       = M4 V 
+|TertiaryName   = ɑ-Piscis Austrini C
+|PrimaryNotes   = [[Fomalhaut (star)|Alpha Piscis Austrini A]]
+|SecondaryNotes = [[Fomalhaut (star)|Alpha Piscis Austrini B (TW Piscis Austrini)]] 
+|TertiaryNotes = [[Fomalhaut (star)|Alpha Piscis Austrini C (LP 876-10)]] 
+}}
+
+== History & Background (Dossier) ==
+No information yet available. 
+
+== References & Contributors (Sources) ==
+{{metadata}}
+{{Secret}}
+
+{{Sources
+|S1= {{CT}} [[Solomani (Alien Module)]]
+|S2= [[GURPS Traveller: Rim of Fire]]
+|S3= 
+|S4= 
+}}
+
+{{Wikipedia|Fomalhaut}}
+
+
+{{LE|Era: Milieu 1116}}

@@ -1,0 +1,141 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Dagudashaag",
+  "hex": "2005",
+  "sector_abbreviation": "Dagu",
+  "subsector": "Arnakhish",
+  "name": "Guru",
+  "sources": [
+    {
+      "page": "Guru (world)",
+      "revid": 996384,
+      "timestamp": "2026-01-04T19:05:52Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Guru (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Sage",
+          "type": "M1 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Sage",
+      "stars": [
+        {
+          "name": "Sage",
+          "type": "M1 V"
+        }
+      ],
+      "labels": [
+        "Guru"
+      ],
+      "pages": [
+        "Guru (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Guru",
+          "raw": "B51077B-9",
+          "kind": "world",
+          "uwp": "B51077B-9",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Guru (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Delphi",
+              "name_raw": "* ''Delphi''",
+              "raw": "F40046A-9",
+              "kind": "world",
+              "uwp": "F40046A-9",
+              "distance": {
+                "raw": "30",
+                "value": 30.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Guru (world)"
+              ]
+            }
+          ],
+          "mainworld": true
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Guru (world)",
+      "label": "Guru",
+      "stars": [
+        {
+          "name": "Sage",
+          "type": "M1 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Guru",
+          "raw": "B51077B-9",
+          "kind": "world",
+          "uwp": "B51077B-9",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Delphi",
+              "name_raw": "* ''Delphi''",
+              "raw": "F40046A-9",
+              "kind": "world",
+              "uwp": "F40046A-9",
+              "distance": {
+                "raw": "30",
+                "value": 30.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Guru",
+    "UWP": "B51077B-9",
+    "Stellar": "M1 V",
+    "PBG": "600",
+    "Bases": "",
+    "Remarks": "Na Pi"
+  }
+}

@@ -1,0 +1,514 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "2811",
+  "sector_abbreviation": "Spin",
+  "subsector": "Rhylanor",
+  "name": "Valhalla",
+  "sources": [
+    {
+      "page": "Valhalla (SM 2811) (system)",
+      "revid": 962835,
+      "timestamp": "2025-07-30T17:05:20Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Valhalla (SM 2811) (system)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Losteye",
+          "type": "G4 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Losteye",
+      "stars": [
+        {
+          "name": "Losteye",
+          "type": "G4 V"
+        }
+      ],
+      "labels": [
+        "Valhalla"
+      ],
+      "pages": [
+        "Valhalla (SM 2811) (system)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Anvil",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "0.9",
+            "value": 0.9,
+            "unit": "AU"
+          },
+          "sources": [
+            "Valhalla (SM 2811) (system)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Valhalla",
+          "name_raw": "Valhalla (SM 2811)",
+          "raw": "E365432-5",
+          "kind": "world",
+          "uwp": "E365432-5",
+          "distance": {
+            "raw": "2.5",
+            "value": 2.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Valhalla (SM 2811) (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Eye",
+              "name_raw": "* ''Eye''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "12",
+                "value": 12.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Valhalla (SM 2811) (system)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 3,
+          "name": "Hammer",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "3.6",
+            "value": 3.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Valhalla (SM 2811) (system)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Inner Belt",
+          "raw": "",
+          "kind": "world",
+          "distance": {
+            "raw": "3.9",
+            "value": 3.9,
+            "unit": "AU"
+          },
+          "uwp": "Y000000-0",
+          "flags": [
+            "belt-uwp-assumed"
+          ],
+          "sources": [
+            "Valhalla (SM 2811) (system)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Freya",
+          "raw": "'''Gas Giant'''",
+          "kind": "gas_giant",
+          "distance": {
+            "raw": "5",
+            "value": 5.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-no-size-class"
+          ],
+          "sources": [
+            "Valhalla (SM 2811) (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Shepherd Moons",
+              "name_raw": "* ''Shepherd Moons''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "<5",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true,
+                "qualifier": "<"
+              },
+              "flags": [
+                "dist-approximate",
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Valhalla (SM 2811) (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Hunter",
+              "name_raw": "* ''Hunter''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "20",
+                "value": 20.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Valhalla (SM 2811) (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Outer Belt",
+          "raw": "",
+          "kind": "world",
+          "distance": {
+            "raw": "7",
+            "value": 7.0,
+            "unit": "AU"
+          },
+          "uwp": "Y000000-0",
+          "flags": [
+            "belt-uwp-assumed"
+          ],
+          "sources": [
+            "Valhalla (SM 2811) (system)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Odin",
+          "raw": "'''Ice Giant'''",
+          "kind": "gas_giant",
+          "remark": "Ice Giant",
+          "distance": {
+            "raw": "11",
+            "value": 11.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-no-size-class",
+            "gg-other-words"
+          ],
+          "sources": [
+            "Valhalla (SM 2811) (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Shepherd Moons",
+              "name_raw": "* ''Shepherd Moons''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "<5",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true,
+                "qualifier": "<"
+              },
+              "flags": [
+                "dist-approximate",
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Valhalla (SM 2811) (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Blitz",
+              "name_raw": "* ''Blitz''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "9",
+                "value": 9.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Valhalla (SM 2811) (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Donner",
+              "name_raw": "* ''Donner''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "16",
+                "value": 16.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Valhalla (SM 2811) (system)"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Valhalla (SM 2811) (system)",
+      "label": "Valhalla",
+      "stars": [
+        {
+          "name": "Losteye",
+          "type": "G4 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Anvil",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "0.9",
+            "value": 0.9,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Valhalla",
+          "name_raw": "Valhalla (SM 2811)",
+          "raw": "E365432-5",
+          "kind": "world",
+          "uwp": "E365432-5",
+          "distance": {
+            "raw": "2.5",
+            "value": 2.5,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Eye",
+              "name_raw": "* ''Eye''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "12",
+                "value": 12.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Hammer",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "3.6",
+            "value": 3.6,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Inner Belt",
+          "raw": "",
+          "kind": "world",
+          "distance": {
+            "raw": "3.9",
+            "value": 3.9,
+            "unit": "AU"
+          },
+          "uwp": "Y000000-0",
+          "flags": [
+            "belt-uwp-assumed"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Freya",
+          "raw": "'''Gas Giant'''",
+          "kind": "gas_giant",
+          "distance": {
+            "raw": "5",
+            "value": 5.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-no-size-class"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Shepherd Moons",
+              "name_raw": "* ''Shepherd Moons''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "<5",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true,
+                "qualifier": "<"
+              },
+              "flags": [
+                "dist-approximate",
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Hunter",
+              "name_raw": "* ''Hunter''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "20",
+                "value": 20.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Outer Belt",
+          "raw": "",
+          "kind": "world",
+          "distance": {
+            "raw": "7",
+            "value": 7.0,
+            "unit": "AU"
+          },
+          "uwp": "Y000000-0",
+          "flags": [
+            "belt-uwp-assumed"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Odin",
+          "raw": "'''Ice Giant'''",
+          "kind": "gas_giant",
+          "remark": "Ice Giant",
+          "distance": {
+            "raw": "11",
+            "value": 11.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-no-size-class",
+            "gg-other-words"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Shepherd Moons",
+              "name_raw": "* ''Shepherd Moons''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "<5",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true,
+                "qualifier": "<"
+              },
+              "flags": [
+                "dist-approximate",
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Blitz",
+              "name_raw": "* ''Blitz''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "9",
+                "value": 9.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Donner",
+              "name_raw": "* ''Donner''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "16",
+                "value": 16.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Valhalla",
+    "UWP": "E565432-5",
+    "Stellar": "G4 V",
+    "PBG": "622",
+    "Bases": "",
+    "Remarks": "Ni Pa Lt"
+  }
+}

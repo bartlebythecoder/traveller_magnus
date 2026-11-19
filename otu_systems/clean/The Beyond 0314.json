@@ -1,0 +1,1183 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "The Beyond",
+  "hex": "0314",
+  "sector_abbreviation": "Beyo",
+  "subsector": "Corella",
+  "name": "Corella",
+  "sources": [
+    {
+      "page": "Corella (world)",
+      "revid": 1067655,
+      "timestamp": "2026-08-06T22:09:17Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Corella (world)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": null,
+          "type": "G2 V",
+          "notes": null
+        },
+        {
+          "role": "Secondary",
+          "name": null,
+          "type": "G8 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Corella A",
+      "stars": [
+        {
+          "name": "Corella A",
+          "type": "G2 V"
+        },
+        {
+          "name": "Corella B",
+          "type": "G8 V"
+        }
+      ],
+      "labels": [
+        "Corella"
+      ],
+      "pages": [
+        "Corella (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "P. Belt I",
+          "raw": "?000???-?",
+          "kind": "world",
+          "uwp": "?000???-?",
+          "distance": {
+            "raw": "0.46",
+            "value": 0.46,
+            "unit": "AU"
+          },
+          "sources": [
+            "Corella (world)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Aab I",
+          "raw": "?CB3???-?",
+          "kind": "world",
+          "uwp": "?CB3???-?",
+          "distance": {
+            "raw": "0.64",
+            "value": 0.64,
+            "unit": "AU"
+          },
+          "sources": [
+            "Corella (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Aab II",
+          "raw": "GS3",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "3",
+          "distance": {
+            "raw": "0.91",
+            "value": 0.91,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-code-notation"
+          ],
+          "sources": [
+            "Corella (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Condor",
+              "raw": "?672???-?",
+              "kind": "world",
+              "uwp": "?672???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Corella (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "?",
+              "raw": "?100???-?",
+              "kind": "world",
+              "uwp": "?100???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Corella (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "?",
+              "raw": "?200???-?",
+              "kind": "world",
+              "uwp": "?200???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Corella (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "?",
+              "raw": "?S00???-?",
+              "kind": "world",
+              "uwp": "?S00???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Corella (world)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "?",
+              "raw": "?S00???-?",
+              "kind": "world",
+              "uwp": "?S00???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Corella (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Corella",
+          "raw": "A864855-D",
+          "kind": "world",
+          "uwp": "A864855-D",
+          "distance": {
+            "raw": "1.18",
+            "value": 1.18,
+            "unit": "AU"
+          },
+          "sources": [
+            "Corella (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Steady",
+              "raw": "GS00565-D",
+              "kind": "world",
+              "uwp": "GS00565-D",
+              "distance": {
+                "raw": "7.1 Diam",
+                "value": 7.1,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Corella (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Flake",
+              "raw": "GS00364-D",
+              "kind": "world",
+              "uwp": "GS00364-D",
+              "distance": {
+                "raw": "16.3 Diam",
+                "value": 16.3,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Corella (world)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 4,
+          "name": "Aab IV",
+          "raw": "GS4",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "4",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-code-notation"
+          ],
+          "sources": [
+            "Corella (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "?R00???-?",
+              "kind": "world",
+              "uwp": "?R00???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Corella (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "?",
+              "raw": "?100???-?",
+              "kind": "world",
+              "uwp": "?100???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Corella (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "?",
+              "raw": "?211???-?",
+              "kind": "world",
+              "uwp": "?211???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Corella (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "?",
+              "raw": "?100???-?",
+              "kind": "world",
+              "uwp": "?100???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Corella (world)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "?",
+              "raw": "?S00???-?",
+              "kind": "world",
+              "uwp": "?S00???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Corella (world)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "?",
+              "raw": "?200???-?",
+              "kind": "world",
+              "uwp": "?200???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Corella (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "P. Belt II",
+          "raw": "?000???-?",
+          "kind": "world",
+          "uwp": "?000???-?",
+          "distance": {
+            "raw": "2.56",
+            "value": 2.56,
+            "unit": "AU"
+          },
+          "sources": [
+            "Corella (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Aab V",
+          "raw": "?3A4???-?",
+          "kind": "world",
+          "uwp": "?3A4???-?",
+          "distance": {
+            "raw": "4.96",
+            "value": 4.96,
+            "unit": "AU"
+          },
+          "sources": [
+            "Corella (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Cassandra",
+          "raw": "?9A4???-?",
+          "kind": "world",
+          "uwp": "?9A4???-?",
+          "distance": {
+            "raw": "8.56",
+            "value": 8.56,
+            "unit": "AU"
+          },
+          "sources": [
+            "Corella (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "?",
+              "raw": "?400???-?",
+              "kind": "world",
+              "uwp": "?400???-?",
+              "distance": {
+                "raw": "?",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Corella (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Aab VII",
+          "raw": "GLG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "14.0",
+            "value": 14.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-code-notation"
+          ],
+          "sources": [
+            "Corella (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "?R00???-?",
+              "kind": "world",
+              "uwp": "?R00???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Corella (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "?",
+              "raw": "?S00???-?",
+              "kind": "world",
+              "uwp": "?S00???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Corella (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "?",
+              "raw": "?S00???-?",
+              "kind": "world",
+              "uwp": "?S00???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Corella (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "?",
+              "raw": "?100???-?",
+              "kind": "world",
+              "uwp": "?100???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Corella (world)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "?",
+              "raw": "?S00???-?",
+              "kind": "world",
+              "uwp": "?S00???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Corella (world)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "?",
+              "raw": "?4A7???-?",
+              "kind": "world",
+              "uwp": "?4A7???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Corella (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Aab VIII",
+          "raw": "GS4",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "4",
+          "distance": {
+            "raw": "22.0",
+            "value": 22.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-code-notation"
+          ],
+          "sources": [
+            "Corella (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "?",
+              "raw": "?S00???-?",
+              "kind": "world",
+              "uwp": "?S00???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Corella (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "?",
+              "raw": "?100???-?",
+              "kind": "world",
+              "uwp": "?100???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Corella (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "?",
+              "raw": "?S00???-?",
+              "kind": "world",
+              "uwp": "?S00???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Corella (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "P. Belt III",
+          "raw": "?000???-?",
+          "kind": "world",
+          "uwp": "?000???-?",
+          "distance": {
+            "raw": "34.0",
+            "value": 34.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Corella (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Corella (world)",
+      "label": "Corella",
+      "stars": [
+        {
+          "name": "Corella A",
+          "type": "G2 V"
+        },
+        {
+          "name": "Corella B",
+          "type": "G8 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "P. Belt I",
+          "raw": "?000???-?",
+          "kind": "world",
+          "uwp": "?000???-?",
+          "distance": {
+            "raw": "0.46",
+            "value": 0.46,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Aab I",
+          "raw": "?CB3???-?",
+          "kind": "world",
+          "uwp": "?CB3???-?",
+          "distance": {
+            "raw": "0.64",
+            "value": 0.64,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Aab II",
+          "raw": "GS3",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "3",
+          "distance": {
+            "raw": "0.91",
+            "value": 0.91,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-code-notation"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Condor",
+              "raw": "?672???-?",
+              "kind": "world",
+              "uwp": "?672???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "?",
+              "raw": "?100???-?",
+              "kind": "world",
+              "uwp": "?100???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "?",
+              "raw": "?200???-?",
+              "kind": "world",
+              "uwp": "?200???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "?",
+              "raw": "?S00???-?",
+              "kind": "world",
+              "uwp": "?S00???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "?",
+              "raw": "?S00???-?",
+              "kind": "world",
+              "uwp": "?S00???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Corella",
+          "raw": "A864855-D",
+          "kind": "world",
+          "uwp": "A864855-D",
+          "distance": {
+            "raw": "1.18",
+            "value": 1.18,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Steady",
+              "raw": "GS00565-D",
+              "kind": "world",
+              "uwp": "GS00565-D",
+              "distance": {
+                "raw": "7.1 Diam",
+                "value": 7.1,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Flake",
+              "raw": "GS00364-D",
+              "kind": "world",
+              "uwp": "GS00364-D",
+              "distance": {
+                "raw": "16.3 Diam",
+                "value": 16.3,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Aab IV",
+          "raw": "GS4",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "4",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-code-notation"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "?R00???-?",
+              "kind": "world",
+              "uwp": "?R00???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "?",
+              "raw": "?100???-?",
+              "kind": "world",
+              "uwp": "?100???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "?",
+              "raw": "?211???-?",
+              "kind": "world",
+              "uwp": "?211???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "?",
+              "raw": "?100???-?",
+              "kind": "world",
+              "uwp": "?100???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "?",
+              "raw": "?S00???-?",
+              "kind": "world",
+              "uwp": "?S00???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "?",
+              "raw": "?200???-?",
+              "kind": "world",
+              "uwp": "?200???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "P. Belt II",
+          "raw": "?000???-?",
+          "kind": "world",
+          "uwp": "?000???-?",
+          "distance": {
+            "raw": "2.56",
+            "value": 2.56,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Aab V",
+          "raw": "?3A4???-?",
+          "kind": "world",
+          "uwp": "?3A4???-?",
+          "distance": {
+            "raw": "4.96",
+            "value": 4.96,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Cassandra",
+          "raw": "?9A4???-?",
+          "kind": "world",
+          "uwp": "?9A4???-?",
+          "distance": {
+            "raw": "8.56",
+            "value": 8.56,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "?",
+              "raw": "?400???-?",
+              "kind": "world",
+              "uwp": "?400???-?",
+              "distance": {
+                "raw": "?",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Aab VII",
+          "raw": "GLG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "14.0",
+            "value": 14.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-code-notation"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "?R00???-?",
+              "kind": "world",
+              "uwp": "?R00???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "?",
+              "raw": "?S00???-?",
+              "kind": "world",
+              "uwp": "?S00???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "?",
+              "raw": "?S00???-?",
+              "kind": "world",
+              "uwp": "?S00???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "?",
+              "raw": "?100???-?",
+              "kind": "world",
+              "uwp": "?100???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "?",
+              "raw": "?S00???-?",
+              "kind": "world",
+              "uwp": "?S00???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "?",
+              "raw": "?4A7???-?",
+              "kind": "world",
+              "uwp": "?4A7???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Aab VIII",
+          "raw": "GS4",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "4",
+          "distance": {
+            "raw": "22.0",
+            "value": 22.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-code-notation"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "?",
+              "raw": "?S00???-?",
+              "kind": "world",
+              "uwp": "?S00???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "?",
+              "raw": "?100???-?",
+              "kind": "world",
+              "uwp": "?100???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "?",
+              "raw": "?S00???-?",
+              "kind": "world",
+              "uwp": "?S00???-?",
+              "distance": {
+                "raw": "? Diam",
+                "value": null,
+                "unit": "Diam"
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "P. Belt III",
+          "raw": "?000???-?",
+          "kind": "world",
+          "uwp": "?000???-?",
+          "distance": {
+            "raw": "34.0",
+            "value": 34.0,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Corella",
+    "UWP": "A864855-D",
+    "Stellar": "G2 V G8 V",
+    "PBG": "834",
+    "Bases": "KM",
+    "Remarks": "Ri Pa Ph Cx Ht"
+  }
+}

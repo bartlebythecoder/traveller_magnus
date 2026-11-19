@@ -1,0 +1,257 @@
+[[File:Jupiter.jpg|250px|thumb|right|Jupiter]]
+{{UWP
+|name  = {{World|Jupiter|Solomani Rim|Sol|1827}}
+|image = 
+|system= Terra (system)
+|uc    = LGG
+|popc  = 
+|zonec = green
+ |uf= 
+|alg     = ImDs
+|class   = Ba Fl He
+|trade   = fl
+|climate = Va
+|orbit   = TBD
+|gravity = TBD
+|nblty   = -
+|bases   = -
+|primary = G2 V
+|belts   = 1
+|GGcount = 4
+}}
+{{World summary |name= Jupiter|trade= Ba Fl He}}
+{{World summary ImDs|sector= Solomani Rim |subsector= Sol}}
+* It is a large [[gas giant]] with many [[moon]]s.
+* It is a secondary world within the [[Terra (system)|Terra system]].
+
+{{InfoboxSystem
+|name= Jupiter / Terra 
+|subsector= Sol
+|sector= Solomani Rim
+|hex= 1827
+|star= [[Sol (star)|Sol]]
+|type= G2 V
+|P6= Jupiter|Dist6=5.20|UWP6= Large GG
+ |P6M1= [[Jupiter_(world)#Ring_System|Rings]]|Dist6M1= 2 Diam|UWP6M1=YR00000-0
+ |P6M2= [[Jupiter_(world)#Io|Io]]|Dist6M2= 6 Diam|UWP6M2=Y210000-0
+ |P6M3= [[Jupiter_(world)#Europa|Europa]]|Dist6M3= 9 Diam|UWP6M3=H200000-0
+ |P6M4= [[Jupiter_(world)#Ganymede|Ganymede]]|Dist6M4= 15 Diam|UWP6M4=F300468-F
+ |P6M5= [[Jupiter_(world)#Callisto|Callisto]]|Dist6M5= 25 Diam|UWP6M5=H30016A-F
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+'''Jupiter''' orbits [[Sol (star)|Sol]], a solitary primary star.
+* It is a yellow main sequence.
+
+{{MonostellarSystem
+|name           = Jupiter /Sol
+|primary        = G2 V 
+|PrimaryName    = [[Sol (star)| Sol]]
+|PrimaryNotes   = Orbit #6: Jupiter / Jovian System 
+}}
+=== System Data ===
+The primary of the [[Terra (system)|Terra system]] is [[Sol (star)|Sol]], an ordinary yellow main sequence [[star]]. It has a luminosity of 1 Sol, a mass of 1 Sol, and a diameter of 1.391 million km. [[Sol (star)|Sol]] retains a family of four inner rocky worlds ([[Mercury (SR 1827) (world)|Mercury]], [[Venus (SR 1827) (world)|Venus]], [[Terra (SR 1827) (world)|Terra]], and [[Mars (world)|Mars]]), a stony [[Asteroid Belt (SR 1827) (world)|planetoid belt]], and four outer [[gas giant]] worlds (Jupiter, [[Saturn (world)|Saturn]], [[Uranus (world)|Uranus]], and [[Neptune (world)|Neptune]]). The [[Kuiper Belt]], an outer icy [[planetoid belt]], exists at the system fringe but is rarely counted as a distinct world, despite containing a number of significant bodies. The system is named for [[Terra (world)|Terra]], the [[mainworld]], the third world out from the star and orbiting within its [[habitable zone]].
+
+[[File:Chart Terra System Basic.png|700 px]]
+# [[Mercury (SR 1827) (world)|Mercury]]
+# [[Venus (SR 1827) (world)|Venus]]
+# [[Terra (SR 1827) (world)|Terra]] ''<small>(including [[Luna (SR 1827) (world)|Luna]])</small>''
+# [[Mars (world)|Mars]]
+# [[Asteroid Belt (SR 1827) (world)|Ceres Belt]] ''<small>(including Ceres, Vesta, Pallas, Juno, and Amor, et al)</small>''
+# [[Jupiter (world)|Jupiter]] ''<small>(including [[Jupiter (world)#Ganymede|Ganymede]] & [[Jupiter (world)#Callisto|Callisto]])</small>''
+# [[Saturn (world)|Saturn]] ''<small>(including [[Saturn (world)#Mainworld Data|Enceladus]], [[Saturn (world)#Mainworld Data|Rhea]] & [[Saturn (world)#Mainworld Data|Titan]])</small>''
+# [[Uranus (world)|Uranus]] ''<small>(including [[Uranus_(world)#Titania|Titania]])</small>''
+# [[Neptune (world)|Neptune]] ''<small>(including [[Neptune_(world)#Triton|Triton]])</small>''
+# [[Kuiper Belt (world)|Kuiper Belt]] ''<small>(including [[Pluto (world)|Pluto]]-[[Pluto_(world)#Charon|Charon]])</small>''
+
+Jupiter is the innermost of the system's four [[gas giant]] worlds. It orbits within the [[Outer World|outer system]].
+* It is the largest planet in the system.
+* It has strong [[Jupiter_(world)#Magnetosphere|magnetic fields]] and dangerous [[Rad (metric)|radiation belts]].
+* It retains [[Jupiter_(world)#Satellites|four major moons]] known as the ''Gallilean Moons'' (collectively named after an ancient Terran astronomer): they are ''Io'', ''Europa'', ''Ganymede'', and ''Callisto''. The huge world also retains a large number of minor satellites.
+
+The [[Terra (system)|Terra system]] has been settled for thousands of years and is dotted with facilities and constructions, space stations, satellites and probes, and numerous sophont-made objects and debris.
+
+=== World Data ===
+Jupiter has a [[UWP|UWP classification]] of "LGG" and is categorised as a Sudarsky Class I large [[gas giant]]. It orbits [[Sol (star)|Sol]] at a mean distance of [[Astronomical Unit|5.2 AU]] ([[Kilometer|778.5 million km]]) and has an orbital period of [[Year|11 years]] [[Day|315 days]]. It has a mean rotation period (a local day) of [[Hour|9.9 standard hours]], although the surface is not rigid and different regions of (and altitudes within) the world rotate at different rates. Jupiter has a diameter of [[Kilometer|139,822 km]], a mean density of 1.33 g/cm³, and a surface gravity of 2.53 G.
+* The world has a complex layered internal structure: its surface is defined as the point within the atmosphere where the mean pressure equals [[Atmospheric Pressure|one atm]] (760.0 mm Hg), equivalent to the mean surface [[atmospheric pressure]] of [[Terra (world)|Terra]].
+
+==== Core ====
+[[File:Gas Giant Structure.png|400 px|right]]
+The core of the world has a radius of approximately [[Kilometer|16,000 km]] and is primarily composed of heavy elements such as nickel (Ni) and iron (Fe), and substantial concentrations of silicates (SiO<sup><small> 4–</small></sup>). It also contains large quantities of superionic hydrogen (H<sub><small>2</small></sub>) and helium (He), as well as trace amounts of radioactives such as thorium (Th) and uranium (U). The core temperatures exceed 20,000°C and pressures exceed 40 megabars. The world is still contracting as part of its formation process: as it contracts the gravitational energy of material falling towards the center generates huge amounts of heat, the primary source of the high internal temperatures. The core is dynamic and active.
+
+==== Mantle ====
+Above the core regions is a dense mantle with a depth of approximately [[Kilometer|50,000 km]]. It is composed of around 75% hydrogen (H<sub><small>2</small></sub>), more than 24% helium (He), and less than 1% methane (CH<sub><small>4</small></sub>), ammonia (NH<sub><small>3</small></sub>) and other trace substances including oxygen (O<sub><small>2</small></sub>) and sulfur (S). The hydrogen and helium within the lower third of the mantle is in a liquid metallic phase and is electrically conductive. At higher levels the hydrogen and helium transition into liquid phases until the point where the pressure falls to around two megabars, where they begin to transition into atomic gases and form the deep atmosphere. Temperatures within the mantle decrease with altitude, dropping to as low as -160°C within the outer transition layers.
+* The mantle is extremely viscous, though it is able to flow throughout its entire depth.
+* The world's rapid rotation generates powerful electrical currents within the dense liquid-metallic layers of the mantle. These help to create the planet's intense [[Jupiter_(world)#Magnetosphere|magnetic fields]].
+
+==== Deep Atmosphere ====
+Above the mantle is the deep atmosphere, composed of 90% atomic hydrogen (H<sub><small>2</small></sub>), 10% helium (He), and trace quantities of methane (CH<sub><small>4</small></sub>), carbon monoxide (CO), ammonia (NH<sub><small>3</small></sub>), neon (Ne), ozone (O<sub><small>3</small></sub>), phosphine (PH<sub><small>3</small></sub>), sulfur (S), hydrogen peroxide (H<sub><small>2</small></sub>O<sub><small>2</small></sub>), ammonia hydrosulfide (H<sub><small>5</small></sub>NS) and various other gases and compounds. The deep atmosphere has an approximate depth of [[Kilometer|2500 km]] and experiences pressures that range from 2 megabars at the deepest levels (where the gases begin to transition into a liquid phase) to around [[Atmospheric Pressure|one atm]] of pressure at its upper levels (the region considered to be the surface of the world). Temperatures range from -160°C at the transition zone to around -100°C at the surface. It is murky and dark, with visual ranges measured in meters at best.
+* The deep atmosphere is extremely turbulent, with constant high-velocity winds, violent wind shear effects and gusts exceeding 600 kph.
+* Within the deep atmosphere the lowest layers of clouds are made up of salts of perovskite (CaTiO<sub><small>3</small></sub>) and corundum (Al<sub><small>2</small></sub>O<sub><small>3</small></sub>).
+* Mid-level deep clouds are composed of lithium fluoride (LiF), sodium sulfide (Na<sub><small>2</small></sub>S), and Lithium sulfide (Li<sub><small>2</small></sub>S).
+* High-level deep clouds (also occuring within the lower troposphere) are composed of calcium chloride (CaCl<sub><small>2</small></sub>), rubidium chloride (RbCl<sub><small>2</small></sub>), and potassium chloride (KCl).
+** The cloud layers within the deep atmosphere are chemically active, helping to regulate the composition and the dynamics of the world.
+* A large percentage of the atomic helium present within the gas mix condenses into helium rain and falls back into the deeper levels of the world. This rain leeches out a significant percentage of other gases, such as neon.
+
+==== Upper Atmosphere ====
+The surface regions have a mean atmospheric pressure of [[Atmospheric Pressure|one atm]] and a composition of 90% atomic hydrogen (H<sub><small>2</small></sub>), 10% helium (He), and trace amounts of methane (CH<sub><small>4</small></sub>), carbon monoxide (CO), ammonia (NH<sub><small>3</small></sub>), and other trace gases similar to those found within the deep atmosphere.
+
+===== ''Troposphere'' =====
+The troposphere extends from the surface regions to an altitude of approximately 50 km, where the mean atmospheric pressure equals [[Atmospheric Pressure|approximately 0.1 atm]]. Temperatures are around -100°C within the surface regions and fall to as low as -160°C within its upper levels. Wind speeds within the troposphere regularly exceed 250 kph and there is a great deal of turbulence. Above the clouds the gas mixture is transparent. Below the clouds the atmosphere is dark and opaque, with visibility rarely exceeding a few kilometers.
+* The lowest layers of cloud are composed of calcium chloride (CaCl<sub><small>2</small></sub>), rubidium chloride (RbCl<sub><small>2</small></sub>), and potassium chloride (KCl).
+* The upper cloud layers consist of red and brown-tinted ammonium hydrosulfide ((NH<sub><small>4</small></sub>)HS) and white-grey condensed ammonia (NH<sub><small>3</small></sub>), which form the world's distinctive. The colder white bands are known as zones while the darker red bands are called belts: gases rise within the zones and fall within the belts. When these opposing flows interact powerful storms and turbulence occur.
+* The troposphere also contains dense clouds of water vapor (H<sub><small>2</small></sub>O). These help to regulate the temperature and dynamics of the atmospheric layer.
+
+===== ''Stratosphere'' =====
+The stratosphere extends from around 50 km to around 320 km above the surface and is characterised by elevated levels of methane (CH<sub><small>4</small></sub>). Pressures range [[Atmospheric Pressure|from 0.1 atm]] at its lower levels to [[Atmospheric Pressure|0.01 atm]] within the upper regions. Temperatures within the lower stratosphere are typically around -160°C and climb to around -100°C within its upper levels. Wind speeds within the stratosphere regularly exceed 300 kph. The gas mixture is transparent.
+* Under certain conditions (the correct combination of temperature, wind speed and UV exposure) hydrocarbon hazes made up of substances such as acetylene (C<sub><small>2</small></sub>H<sub><small>2</small></sub>), ethane (C<sub><small>2</small></sub>H<sub><small>6</small></sub>) and benzene (C<sub><small>6</small></sub>H<sub><small>6</small></sub>) may form.
+
+===== ''Thermosphere'' =====
+The thermosphere lies above the stratosphere. It extends to an approximate altitude of 1,000 km and has mean atmospheric pressures of [[Atmospheric Pressure|less than 0.01 atm]]. Temperatures within it rise from approximately -100°C to around 725°C. Temperature differentials cause powerful winds, with average wind speeds exceeding 300 kph. The gas mixture is transparent.
+* The thermosphere is heated by particles from the magnetosphere and by energy radiating from the sun. This can cause it to emit a weak light known as airglow that keeps the night sky from becoming completely dark.
+* The northern and southern polar aurora occur within the thermosphere.
+
+===== ''Exosphere'' =====
+The outermost layer of Jupiter's atmosphere is the exosphere. It is considered to start at an altitude of approximately 1,000 km, where the mean atmospheric pressure is [[Atmospheric Pressure|less than 0.001 atm]]. It has no clear upper boundary but is generally considered to [[Kilometer|exceed 1,000 km]] in depth. Temperatures within the exosphere fall rapidly with altitude until they match the temperature of the local interstellar medium. Wind speeds vary from relatively stationary to hundreds of kilometers per hour. The gas mixture is transparent.
+* Only the innermost edge of the exosphere counts towards Jupiter's diameter.
+* Gas particles bleed from the exosphere into interstellar space.
+
+==== Weather Systems ====
+Jupiter experiences violent but predictable weather patterns which generally take the form of zonal jets, similar to sub-tropical jet streams on [[Terra (world)|Terra]]. In these weather fronts wind speeds of 360 kph are common. Storms can form within hours and expand to become thousands of kilometers in diameter.
+* Storms generate powerful bolts of lightning, frequently measuring hundreds of kilometers in length and arcing between banks of clouds. Electrical storms can occur anywhere within the atmosphere but are most common within water vapor (H<sub><small>2</small></sub>O) clouds within the troposphere.
+* Different types of precipitation occur within certain regions of the atmosphere and can take the form of hazes, fogs, rain, chemical snow, or even solid silicates. The chemical nature of the precipitation is closely associated with the clouds prevalent at the level at which the precipitation occurs. Within the deep atmosphere, neon and other gases are leeched out of the gas mix by combining with condensed helium and then raining down to lower atmospheric levels.
+
+==== Great Red Spot ====
+Jupiter boasts a prominent feature known as the Great Red Spot. The feature was first identified from the surface of [[Terra (world)|Terra]] circa [[-2800]] Imperial following the development of sophisticated optical imaging devices (telescopes) on that world. The Spot is a persistent high-pressure region producing a violent anticyclonic storm and has dimensions that vary between 24–40,000 km × 12–14,000 km over a period of decades. It is located 22° south of the planet's equator and takes about six standard days to completely rotate. Its composition is broadly similar to that of the gases surrounding it. The spot is colder than the surrounding gases and has a higher mean altitude, with its internal cloud tops some 8 km taller than those of the bands. Currents within the Spot are stagnant, with little inflow or outflow, though winds passing around its edges are at around 430 kilometers per hour. The atmosphere directly above the Great Red Spot is significantly warmer than surrounding regions.
+
+==== Ring System ====
+Jupiter retains a system of rings consisting of four main components:
+* The inner ring is a thick torus composed of dust particles and is known as the Halo Ring. It lies between 90,000–120,000 km from Jupiter and is approximately 12,500 km thick. The tiny moon ''Metis'', the innermost of Jupiter's many satellites, with an orbital distance of 0.9 diameters (128,000 km), helps to define its structure.
+* The second ring is a relatively bright, very thin torus of dust and irregular pebbles called the Main Ring. It lies between 125,000–130,000 km from Jupiter and is approximately 300 km thick. It is bounded by the tiny moon ''Adrastea''.
+* The third ring is a thick, wide, but faint torus composed of dust particles and named the Amalthea Gossamer Ring. It lies between 130,000–180,000 km from Jupiter and is approximately 2,000 km thick. Its structure is connected to the tiny irregular moon ''Amalthea''. The Amalthea Gossamer Ring, although it is a distinct structure, lies within the larger Thebe Gossamer Ring.
+* The outer ring is a thick, wide, but faint torus composed of dust particles and is named the Thebe Gossamer Ring. It lies between 130,000–225,000 km from Jupiter and is approximately 8,400 km thick. Its structure is connected to the tiny irregular moon ''Thebe'', which orbits within its inner edge. It entirely encloses the Amalthea Gossamer Ring.
+
+The rings are composed of small dark particles and were formed by dust and debris kicked up by interplanetary meteoroids impacting the small inner moons that orbit among them. They are difficult to see with the naked eye except when backlit by the Sun but are clearly visible to broad spectrum [[Ship Sensor Suite|sensors]].
+
+==== Magnetosphere ====
+Jupiter has a strong magnetic field. Its strength ranges between 0.42 mT at the equator to as much as 1.4 mT at the poles. It balloons to up to 3 million kilometers toward the Sun and tapers into a long tail extending more than 1 billion kilometers behind the world. It creates a cavity in the solar wind that all of the world's major moons orbit within. Beyond the magnetosphere is the magnetopause, where the planet’s magnetic field becomes weak and the solar wind interacts with matter originating from the planet.
+* Powerful electrical currents generated deep within the mantle of Jupiter create a series of magnetic fields.
+* Near the planet, the magnetic fields trap swarms of charged particles and accelerate them to very high energies, creating intense radiation.
+* Jupiter's inner magnetic field intersects the upper atmosphere of the world and extends out to more than 9 diameters (1.25 million km). It saturates the surfaces of Io, Europa, and to a lesser extent Ganymede, which lie within it, with high levels of radiation.
+* The electromagnetic storms generated by the magnetosphere can be heard by communications and sensor equipment throughout the [[Terra (world)|Terra system]]. At times, Jupiter can produce significantly more powerful radio signals than the sun.
+
+=== Native Lifeforms ===
+No lifeforms are known to exist within Jupiter.
+* Circumstantial evidence suggests that [[jovionoid]] organisms may have been accidentally introduced into the world's atmosphere via vessels performing wilderness refuelling. Whether they are extant – or indeed anything other than a tall story – remains unknown.
+
+=== Major Satellites ===
+Jupiter has four major satellites (known as the ''Gallilean Moons'', named after an ancient Terran astronomer): these are Io, Europa, Ganymede, and Callisto. Additionally, Jupiter hosts numerous smaller moons and asteroidal moonlets.
+
+==== Io ====
+[[File:Io (moon).jpg|100px|thumb|right|Io]]
+Io ([[UWP]] Y210000-0) is the inner of the four major moons of Jupiter and is classified as a [[worldlet]]. It orbits its parent world at a mean distance of 3 diameters (422,000 km), with an orbital period of 42 hours: it is [[tidally locked]] to Jupiter and in Laplace resonance with Europa and Ganymede (their orbital periods are multiples of one another). Io has a diameter of 1,822 km, a density of 3.50 g/cm³ and a surface gravity of 0.183 G. Tidal stresses generated by the gravitational pull of Jupiter cause extreme geological activity and the surface is dotted with active volcanoes. The atmosphere is rated as [[trace atmosphere|Trace]], with a mean surface pressures of [[Atmospheric Pressure|less than 0.0001 atm]] and a typical composition of 90% sulfur dioxide (SO<sub><small>2</small></sub>), and 10% sulfur monoxide (SO), sodium chloride (NaCl), atomic sulfur (S) and oxygen (O<sub><small>2</small></sub>) – the exact composition is dependent on geographical location. The world has no hydrosphere. Mean surface temperature: -130°C. Temperatures around volcanic vents and can exceed 1,650°C.
+* Io receives about 36 Sv ([[Rad (metric)|3,600 Rads]]) of ionizing radiation per day.
+* Io has a small core composed of nickel (Ni), iron (Fe) and silicates (SiO<sup><small> 4–</small></sup>) at high levels of compression, surrounded by a thick mantle of silicates. Io's atmosphere is largely sustained by sunlight-driven sublimation of surface SO<sub><small>2</small></sub> and to a lesser extent by volcanic outgassing from geologially active regions: denser plumes of gases hundreds of kilometers tall hang over volcanic regions. The gases in Io's atmosphere are in turn stripped away by Jupiter's magnetosphere or condense back onto the surface. The entire surface of the world is stained many shades of yellow, orange and red by its crust of sulfur and sulfur compounds.
+
+==== Europa ====
+[[File:Europa (moon).jpg|100px|thumb|right|Europa]]
+Europa ([[UWP]] H200000-0) is the second of the four major moons of Jupiter and is classified as a [[worldlet]]. It orbits its parent world at a mean distance of 5 diameters (671,000 km), with an orbital period of 85 hours: it is [[tidally locked]] to Jupiter and in Laplace resonance with Io and Ganymede (their orbital periods are multiples of one another). Europa has a diameter of 3,122 km, a density of 3.01 g/cm³and a surface gravity of 0.134 G. Tidal stresses generated by the gravitational pull of Jupiter cause interal heating of the world. The atmosphere is rated as [[vacuum]]. The world has no surface hydrosphere. Mean surface temperature: -160°C. Its surface is extremely smooth and is striated by cracks and streaks.
+* Europa receives about 5.4 Sv ([[Rad (metric)|540 Rads]]) of ionising radiation per day.
+* Europa has a small core composed of nickel (Ni), iron (Fe) and silicates (SiO<sup><small>4–</small></sup>) at high levels of compression, surrounded by a thick mantle of silicates (SiO<sup><small>4–</small></sup>) and water-ices (H<sub><small>2</small></sub>O). The surface of the world consists of a smooth crust of solid water-ice with an average thickness of around 6 km.
+* A world-ocean composed of liquid water (H<sub><small>2</small></sub>O) and with a mean depth of approximately 100 km lies directly below the crust. The ocean is relatively warm, with near-crust temperatures averaging around 4.5°C. It is kept liquid by the high pressure and by geothermal heat generated by Jupiter's gravitational flexing of the world. Within its uppermost regions and at its deepest levels the world-ocean's water begins to transition into exotic forms of ice.
+* Primitive native organisms are believed to dwell in the world-ocean.
+
+==== Ganymede ====
+[[File:Ganymede (moon).jpg|100px|thumb|right|Ganymede]]
+Ganymede ([[UWP]] F300468-F M) is the third of the four major moons of Jupiter and is classified as a [[worldlet]]. It orbits its parent world at a mean distance of 8 diameters (1.07 million km), with an orbital period of 7 days 3 hours: it is [[tidally locked]] to Jupiter and in Laplace resonance with Io and Europa (their orbital periods are multiples of one another). Ganymede has a diameter of 5,268 km, a density of 1.94 g/cm³ and a surface gravity of 0.146 G. Tidal stresses generated by the gravitational pull of Jupiter cause occasional geological activity. The atmosphere is rated as [[Vacuum]]: what minimal trace of atmosphere the world retains consists of ozone (O<sub><small>3</small></sub>), created by molecules of water-ice being hit by particles accelerated by Jupiter's magnetosphere. The world has no hydrosphere. Mean surface temperature: [[Centigrade|-113°C in daylight]], [[Centigrade|-183°C in darkness]].
+* Ganymede receives about 0.08 Sv ([[Rad (metric)|8 Rads]]) of ionising radiation per day.
+* Ganymede has a small magnetic field generated by the core of the world. Charged particles trapped by this field create small aurora over the poles.
+* The interior of Ganymede consists a tiny core composed of nickel (Ni), iron (Fe) and silicates (SiO<sup><small>4–</small></sup>) at high levels of compression, surrounded by a thick mantle composed of a combination of silicates (SiO<sup><small>4–</small></sup>) and slushy water-ices (H<sub><small>2</small></sub>O). The surface of the world consists of a striated crust of solid water-ice with an average thickness of around 6 km.
+* A world-ocean composed of liquid water (H<sub><small>2</small></sub>O) and with a mean depth of approximately 100 km lies directly below the crust. The ocean is relatively warm, with near-crust temperatures averaging [[Centigrade|around 3°C]]. It is kept liquid by the high pressure and by geothermal heat generated by Jupiter's gravitational flexing of the world. At its deepest levels the world-ocean's water begins to transition into exotic forms of ice.
+* Primitive native organisms are believed to inhabit the world-ocean.
+
+[[File:Ganymede World Map Basic.png|600 px]] <br> A basic map of Ganymede: different colors represent areas of chemical staining.
+
+Ganymede was the site of a major [[Terran]] colony that was abandoned early in the [[Rule of Man]] period. Today the world still hosts several facilities:  
+* The ''Kensington Armed Forces Testing Center'', a naval research laboratory.  
+* The ''Zeus Institute'' is a branch of the ''University of Terra'' studying gas giants and their dynamics.
+
+==== Callisto ====
+[[File:Callisto (moon).jpg|100px|thumb|right|Callisto]]
+Callisto ([[UWP]] H30016A-F R) is the outer of the four major moons of Jupiter and is classified as a [[worldlet]]. It orbits its parent world at a mean distance of 13 diameters (1.883 million km), with an orbital period of 16 days 15 hours: it is [[tidally locked]] to Jupiter. Callisto has a diameter of 4,820 km, a density of 1.83 g/cm³ and a surface gravity of 0.126 G. Tidal stresses generated by the gravitational pull of Jupiter cause occasional geological activity. The atmosphere is rated as [[Vacuum]]. The world has no hydrosphere. Mean surface temperature: [[Centigrade|-139°C]].
+* The interior of Callisto consists of a combination of silicates (SiO<sup><small> 4–</small></sup>) and water-ices (H<sub><small>2</small></sub>O). The cratered, rugged surface is covered in a layer of pulverised rock and dust deposited by interstellar meteorites over hundreds of millions of years: its surface is the most heavily cratered of any object in the solar system.
+* Callisto is the second largest of Jupiter's moons and the third largest moon in the solar system.
+
+[[File:Callisto World Map Basic 2.png|600 px]] <br> A basic map of Callisto.
+
+Originally a [[Solomani Confederation]] military research and development center, the base was captured intact in a [[Imperial Marines|Marine Commando]] raid during the [[Invasion of Terra]] and is now operated by Imperial Naval Intelligence. Under Imperial authority, the facility is dedicated to the study of Jovian meteorology.
+* Callisto is home to an Imperial fighter and system defense boat base that patrols the Jovian system and the outer gas giants.
+* It hosts the ''Byahnn Research Facility'' deep beneath its ice.
+
+=== Minor Satellites ===
+In addition to the four major moons, Jupiter retains a family of 65 lesser worlds. These are named in order outward from Jupiter - the four major moons are included for reference.
+* All of Jupiter's minor satellites have [[Planetary Size|UWPs of YD00000-0]] (their long axis is [[Kilometer|less than 200 km]]).
+
+==== Shepherd Moons ====
+Metis, Adrastea, Amalthea, and Thebe.
+* ''Metis'' is the innermost of Jupiter's moons. It is an irregular body with a long axis of 60 km and an orbital distance of 0.91 diameters (127,700 km). It helps define the inner edge of Jupiter's [[Jupiter_(world)#Ring_System|ring system]].
+* The moons ''Adrastea'', ''Amalthea'', and ''Thebe'' orbit within Jupiter's [[Jupiter_(world)#Ring_System|ring system]] and help to define its composition and structure.
+
+==== Inner Moons ====
+Io, Europa, Ganymede, and Callisto.
+* These are Jupiter's four major moons. They orbit within the world's magnetosphere.
+
+==== Outer Moons ====
+Themisto, Leda, Himalia, Lysithea, Elara, Dia, Carpo, S/2003 J12, Euporie, S/2003 J3, S/2011 J1, S/2003 J18, S/2010 J2, Thelxinoe, Euanthe, Helike, Orthosie, S/2016 J1, Iocaste, S/2003 J16, Praxidike, Harpalyke, Mneme, Hermippe, Thyone, Ananke, Herse, Aitne, Kale, Taygete, S/2003 J19, Chaldene, S/2003 J15, S/2003 J10, S/2003 J23, Erinome, Aoede, Kallichore, Kalyke, Carme, Callirrhoe, Eurydome, Pasithee, S/2010 J1, Kore, Cyllene, S/2011 J2, Eukelade, S/2017 J1, S/2003 J4, Pasiphae, Hegemone, Arche, Isonoe, S/2003 J9, S/2003 J5, Sinope, Sponde, Autonoe, Megaclite, and S/2003 J2.
+* These worlds orbit beyond Jupiter's magnetosphere, passing through the long tail of its magnetic field as they reach aphelion.
+* ''Ananke'', ''Carme'', ''Metis'', ''Pasiphae'' and ''Sinope'' are the largest of these bodies, with diameters measured in tens of kilometers and densities of around 2.6 g/cc. The remainder are tiny chunks of rock and ice measuring a few kilometers in length at most.
+* ''S/2003 J2'' is the outermost of Jupiter's moons. It is an irregular rock with a long axis of 2 km and an orbital distance of 204.3 diameters (28.6 million km).
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+During the early stages of the [[Solomani Rim War]], fierce battles were fought in Jupiter's upper atmosphere and among its dark rings between {{Imperial}} ships and [[Solomani Confederation]] [[System Defense Boat|system defense boats]].
+
+=== World Starport ===
+{{Starport|name= Jupiter|Starport=F}}
+* An automated highport and a number of automated fuel processing facilities are maintained within Jupiter's upper atmosphere.
+
+=== World Demographics (P) ===
+'''Jupiter''' is unpopulated.
+* Jupiter's facilities are entirely automated.
+
+=== World Technology Level ===
+{{WorldTech|name= Jupiter|WorldTech=C}}
+
+=== World Government ===
+{{WorldGov|name= Jupiter|Government=6}}
+* Governmental oversight is only maintained within Jupiter's atmospheric facilities.
+
+=== World Law (L) ===
+{{WorldLaw|name= Jupiter|Law=9}}
+* Local laws only apply within facilities.
+
+=== Imperial High / Landed Nobility ===
+Only the [[mainworld]] of a [[system]] possesses an officially appointed or ''landed'' [[Imperial Noble]]. 
+* The ''landed'' nobles of this system are located at [[Terra (world)|Terra]], the [[mainworld]] of the system.
+* Landed Nobles may possess territories on the satellites of this world as part of their in-system non-mainworld fief land grants.
+
+=== Image Repository ===
+[[TravellerMap]] <small>([[T5SS]])</small>: <br> [https://travellermap.com/?options=58363&x=14.289&y=-107&scale=128]
+
+== References & Contributors (Sources) ==
+{{Intermediate}}
+{{Detail}}
+{{Sources
+|S1= {{Ludography cite|name=Solomani|version=Classic Traveller|page=1-48|article=}}
+|S2= {{Ludography cite|name=The Solomani Rim|page=TBD|article=}}
+|S3= {{Ludography cite|name=Vilani & Vargr|page=11,47|article=}} (dotmap provided)
+|S4= {{Ludography cite|name=The Travellers' Digest 13|article=The Terra System|page=21-22}}
+|S5= {{Ludography cite|name=Rim of Fire|page=1-144|article=}} 
+|S6= {{Ludography cite|name=Interstellar Wars|page=}}
+|S7= {{Ludography cite|name=Solomani Rim|version=Mongoose Traveller|page=}}
+|S8= Author & Contributor: Lord (Marquis) and Master Scout Emeritus [[User: Alagoric|Adie Alegoric Stewart]] of the [[IISS]]
+ 
+}}
+
+ 
+{{LE|Terra (system) worlds}}

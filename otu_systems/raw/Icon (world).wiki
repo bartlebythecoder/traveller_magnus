@@ -1,0 +1,143 @@
+ {{UWP 
+|name= {{World|Icon|Gushemege|Laeth|1235}}
+|image = 
+|system= 
+|uc    = D434678-7 
+|popc  = 7
+|zonec = green
+ |u1= 
+|alg     = ImDv
+|class   = Ni 
+|trade   = ni
+|climate = TBD
+|orbit   = TBD
+|gravity = TBD
+|nblty   = B
+|bases   = -
+|primary = K1 V 
+|belts   = 1
+|GGcount = 5
+}}
+{{InfoboxSystem
+ |name=Icon
+ |subsector=Laeth
+ |sector=Gushemege
+ |hex=1235
+ |star=Harbane
+ |type=K1 V
+ |P1=Harbane 1
+ |Dist1=0.2
+ |UWP1=YS00000-0
+ |P2=Harbane 2
+ |Dist2=0.4
+ |UWP2=H00036B-7
+ |P3=Icon
+ |Dist3=0.7
+ |UWP3=E434567-5
+ |P4=Harbane 4
+ |Dist4=0.8
+ |UWP4=G32026F-7
+ |P5=Harbane 5
+ |Dist5=1.3
+ |UWP5=LGG
+ |P6=Harbane 6
+ |Dist6=1.6
+ |UWP6=LGG
+ |P7=Harbane 7
+ |Dist7=2.8
+ |UWP7=LGG
+ |P8=Harbane 8
+ |Dist8=4.9
+ |UWP8=Y532000-0
+ |P9=Harbane 9
+ |Dist9=5.2
+ |UWP9=LGG
+ |P10=Harbane 10
+ |Dist10=10
+ |UWP10=SGG
+ |P11=Harbane 11
+ |Dist11=12
+ |UWP11=Y542000-0
+}}
+{{World summary |name= Icon|trade=Ni}}
+{{World summary ImDv|sector= Gushemege |subsector=Laeth}}
+* {{Alternate world name|name=Iinka}}
+
+== Description (Astrography & Planetology) ==
+This system is part of the [[Sidurii Cluster]].
+
+=== Stellar Data ===
+This world orbits the K-type main sequence star, Harbane.
+
+{{MonostellarSystem
+|name           = Icon
+|primary        = K1 V  
+|PrimaryName   = Harbane
+}}
+
+=== System Data ===
+No information yet available. 
+ 
+=== Mainworld Data ===
+No information yet available.
+
+==== Mainworld Geography & Topography ====
+No information yet available.
+
+==== Mainworld Map ====
+No information yet available.
+
+=== Native Lifeforms ===
+Extensive native life. The following are among them:
+
+* Carnivorous plants with vines capable of grasping slow-moving creatures which pass by, holding on to prey until the creatures die of hunger or exhaustion.
+* Cat-sized hexapods with sharp teeth which act threatening to scare competitors but only attack if themselves attacked.
+* Flying intimidators; small flying bat-like creatures which follow a vulture-like lifestyle but will bite viciously if cornered. Their lairs consist of hanging dried mud cocoons.
+* An eel-like creature about 3 metres long which strikes from a hidden lair.
+* Dog-size hexapods with large claws; similar to a spotted hyena in their habits.
+
+== History & Background (Dossier) ==
+At the dawn of the [[Third Imperium]], settlements had been established here by the [[Gumahl]]. The Imperium would later restrict the aggressive Gumahl to their home system.
+
+=== Imperial High (Landed Nobility) ===
+{{Imperial Nobility|name= Icon|Noble=B}}
+
+=== World Starport ===
+{{Starport|name= Icon|Starport=D}}
+
+=== World Technology Level ===
+{{WorldTech|name= Icon|WorldTech=7}}
+
+=== World Government ===
+{{WorldGov|name= Icon|Government=7}}
+
+==== World Law Level ====
+No information yet available. 
+
+==== World Military ====
+No information yet available.
+
+== References & Contributors (Sources) ==
+{{Intermediate}}
+{{Detail}}
+{{Sources
+|S1= {{Ludography cite|name= Best of the Journal 04 |page= TBD}} 
+|S2= {{Ludography cite|name= Journal of the Travellers' Aid Society 15 |page=13-20 |article=Contact: Ael Yael}}
+|S3= {{Ludography cite|name= Atlas of the Imperium|page=13}}
+|S4= {{Ludography cite|name= Aslan |page= TBD |version= Classic Traveller}} (named but no further data)
+|S5= {{Ludography cite|name= Vilani & Vargr |page= 11,47}} (dotmap provided)
+|S6= {{Ludography cite|name= Solomani & Aslan |page= 11,50}} (dotmap provided)
+|S7= {{Ludography cite|name= Arrival Vengeance |page= TBD }} 
+|S8= {{Ludography cite|name= First Survey|page= 73}}
+|S9= {{Ludography cite|name= Long Way Home|page=53}}
+|S10= {{Ludography cite|name= Alien Races 4 |page= TBD}} ([[Ael Yael]])
+|S11= {{Ludography cite|name= Aslan |page= TBD |version= Mongoose Traveller}} 
+|S12= {{Ludography cite|name= Library Data|page= TBD}}
+|S13= [http://rpg.sw-architect.de/trav/maps/galactic_maps/maps.travellercentral.com/sec_/fe.gushemege_worlds.html Gushemege Worlds] 
+|S14= [[Traveller Wiki Editorial Team]]
+|S15= Author & Contributor: [[David Burden]] of the {{HIWG}}
+  
+}}
+
+
+{{LE|T5 Second Survey worlds}}

@@ -1,0 +1,63 @@
+{{InfoboxSystem
+|name= [[Pax Rulin (system)|Pax Rulin]]
+|sector=Trojan Reaches 
+|subsector=Pax Rulin
+|hex=2204
+|star=''Prime''|type=''M8 III''
+|P0=Heddwch|Dist0=10|UWP0=Y000158-D
+|P1=Pax Rulin|Dist1=19.6|UWP1=A402231-E
+|P2=Tentrem|Dist2=38.8|UWP2=F435123-D
+|P3=Heiwa|Dist3=77.2|UWP3=G856101-D
+|P4=Shaanti|Dist4=614.8|UWP4='''Large GG'''
+|P4M1='Kankad'|Dist4M1=2|UWP4M1=H440000-0
+|P4M2='Chattaan'|Dist4M2=7|UWP4M2=H134000-0
+|P4M3='Boldar'|Dist4M3=8|UWP4M3=H89A147-D
+|P4M4='Bada Chaand'|Dist4M4=9|UWP4M4=GC89145-D
+|P5=Tinchlik|Dist5=1229.5|UWP5='''Large GG'''
+|P5M1='Oy'|Dist5M1=7|UWP5M1=GABA100-D
+|P5M2='Tosh'|Dist5M2=8|UWP5M2=F361166-D
+|P6=Śānti|Dist6=2458|UWP6='''Small GG'''
+|P6M1='Nuri'|Dist6M1=1|UWP6M1=Y243010-D
+|P6M2='Sila'|Dist6M2=8|UWP6M2=Y618002-0
+|P6M3='Candra'|Dist6M3=12|UWP6M3=HFDA115-D
+}}
+The Pax Rulin system is a Single star system 
+*  six planets and 9 satellites in the system.
+
+== Description (Specifications) ==
+[[Pax Rulin (world)|Pax Rulin]] is only one of eight worlds in the systems which boast a population, and only one of three habitable planets in the life zone of Prime. With the best conditions of the group for a naval depot, it was settled first and soon dominated the system.
+* Pax Rulin boasts the highest population; but many of the other planets and satellites in the system  have also been settled, albeit sparsely.
+* Many planets in the system  are named using the word Peace in english but from several Terren Languages. the satellites are named in the same way but in the order of Pebble, Rock Boulder and Moon.
+* The entire system is a Naval Base and one day may become a Depot as originally planned. 
+
+=== Single Solar System ===
+'''Pax Rulin''' is a Single star system. Specifically, the [[Pax Rulin (system)|Pax Rulin system]] is composed of '''Prime''' and no companions. 
+
+{{MonostellarSystem
+|name           = Pax Rulin
+|primary        = M8 III 
+|PrimaryName    = Prime
+|PrimaryNotes   = '''Prime''' (Pax Rulin System Primary)
+}}
+
+== History & Background ==
+The Pax Rulin System was settled long ago during the time of Cleon I. Originally the Imperium had planned to make this system a Training ground and Depot for its navy. However, with several wars being fought on different fronts, the relatively peaceful Trojan Reach, and the Pax Rulin Subsector quickly became something of a backwater area. With funds going elsewhere, the subsector duke was unable to make much of any improvements in the system. However, the Dukes here did manage to slowly build up the system’s mothballed fleet and repair facilities.  Just prior to the Fifth Frontier war this system was well on its way to becoming the Depot it was supposed to be. Unfortunately,  with the advent of this latest war, the Naval personnel and families were moved to other more important locations, leaving the system mostly empty. 
+
+
+Tactically, the system is fairly easy to defend, the habitable zone is fully within Prime's jump shadow forcing fleets to enter the system at a distance that gives the worlds in the habitable zone plenty of warning of an impending attack.
+
+== Roaming Behind The Claw (Musings of a Rear Admiral, Volume 3), Sir Dieter Taussent, Imperial Navy Rear Admiral (retired) ==
+''Pax Rulin is a forgotten bastion of the frontier, a cold little world under a burning red sky. Founded very early as an outpost of the Third Imperium to protect the rapidly growing community of colonies further coreward, it rose and declined at the whims of sector politics and, allegedly, mishandled Imperial budgets. No one can prove a thing now, a thousand years later, but the Naval facility is considerably larger than the squadrons assigned here require. Those stationed at Pax Rulin take their posting very seriously, and the base has a stronger "imperial" feel than any other world in the sector aside from Tobia. I understand the personnel stationed at Pax Rulin were further reduced after the Fifth Frontier War, but that's after my time there, and the Navy stopped humoring my deployment inquiries when I retired (in 1088).''
+
+''A small population of camp followers, civilian logistics personnel, and stranded drunkards barely register on the Second Survey, but didn't seem inclined to go anywhere when I was there.''
+
+== References & Contributors (Sources) ==
+{{Detail}}
+{{Sources
+|S1= {{T5}} Book 3 Worlds and Adventures
+|S2= {{CT}} Adventure 4 Leviathan
+|S3= Author & Contributor: [[William Richards]]
+}}
+
+
+{{LE|Systems}}

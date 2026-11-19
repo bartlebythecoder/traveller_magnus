@@ -1,0 +1,73 @@
+{{InfoboxSystem
+|name=Pliebr
+|sector=Zhodane|subsector=Gaval|hex=2719
+|star='''[[Pliebr (star)|Pliebr]]'''|type='''K0 V'''
+|P0=Adrablsish|Dist0=|UWP0=??00???-?
+|P1=Pliantshotl|Dist1=|UWP1=??00???-?
+|P2=Zhdant|Dist2=<small>0.769</small>|UWP2=A6547C8-F
+|P2M1=* ''[[Viepchakl (world)|Viepchakl]]''|Dist2M1=|UWP2M1=???????-?
+|P3=Dlemstiats Tsiaqr|Dist3=|UWP3= ?000???-?
+|P4=Brovlekal|Dist4=|UWP4= [[Gas Giant|LGG]]
+|P4M1=* ''LMoon 1''|Dist4M1=|UWP4M1=???????-?
+|P4M2=* ''LMoon 2''|Dist4M2=|UWP4M2=???????-?
+|P4M3=* ''LMoon 3''|Dist4M3=|UWP4M3=???????-?
+|P4M4=* ''SMoon 1''|Dist4M4=|UWP4M4=???????-?
+|P4M5=* ''SMoon 2''|Dist4M5=|UWP4M5=???????-?
+|P4M6=* ''SMoon 3''|Dist4M6=|UWP4M6=???????-?
+|P4M7=* ''SMoon 4''|Dist4M7=|UWP4M7=???????-?
+|P4M8=* ''SMoon 5''|Dist4M8=|UWP4M8=???????-?
+|P4M9=* ''SMoon 6''|Dist4M9=|UWP4M9=???????-?
+|P5=Emkachdraf|Dist5=|UWP5=??0A???-?
+}}
+The '''Zhdant''' system lies within hex 2719 of [[Gaval Subsector]], within [[Zhdant Sector]]. 
+* [[Zhdant (world)|Zhdant]], the [[mainworld]] of the system, is the [[homeworld]] of the [[Zhodani]].
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+The system is centered on the star ''[[Pliebr (star)|Pliebr]]''.
+* It is a yellow-orange main sequence.
+
+[[File:Solitary K Type.jpg|300 px]]
+{{MonostellarSystem
+|name           = Zhdant
+|PrimaryName    = [[Pliebr (star)|Pliebr]]
+|primary        = K0 V 
+|PrimaryNotes   = None.
+}}
+
+=== System Data ===
+The [[Zhdant (system)|worlds of the system]] have been surveyed. They consist of:
+#'''[[Adrablsish (world)|Adrablsish]]''': Innermost "hot-rockball" planet tidally locked to [[Pliebr (star)|Pliebr]]. Robot mining is carried out here.
+#'''Pliantshotl''': Second planet. Bare rock previously used as [[Zhodani]] Hostile environment training area
+#'''[[Zhdant (world)|Zhdant]]''': [[Zhodani]] Home world.  '''[[Zhdant (world)|Zhdant]]''' is 9620 km in diameter, and orbits [[Pliebr (star)|Pliebr ]] at a distance of 0.769<small>AU</small>, completing one orbit every 275.2 standard days.  It rotates once on its axis every 27.02 standard days.  
+::* A single large tidally-locked reddish-pink moon named '''[[Viepchakl (world)|Viepchakl]]''' which possesses a very thin atmosphere orbits '''[[Zhdant (world)|Zhdant]]'''.  '''[[Viepchakl (world)|Viepchakl]]''' orbits '''[[Zhdant (world)|Zhdant]]''' once every 40.7 local days at a distance of 379,500 km.  
+#'''Dlemstiats Tsiaqr''': Asteroid Belt. Still major mining source.
+#'''[[Brovlekal (world)|Brovlekal]]''': Only gas giant. This planet has three large satellites and six small ones.  The satellites are home to traffic-control installations and large naval system-defense bases. 
+#'''Emkachdraf''': Small airless iceball. There is a minor robotic system defense base located on the surface.
+
+== History & Background (Dossier) ==
+The system is bustling. There is a considerable amount of in-system activity.
+* There are multiple orbital and surface facilities.
+* Commercial vessels arrive and depart constantly
+* Commo is buzzing with chatter and signals. Communications are in [[Zdetl]].
+* Multiple navigation beacons are active.
+* Vessels regularly travel among the other worlds and moons that make up the system.
+* Naval vessels are active in the system.
+
+==== System Timeline ====
+* [[300]]-[[420]]: the [[First Survey]] charts the system.
+* [[995]]-[[1065]]: the [[Second Survey]] charts the system.
+* [[1065]]: the [[Second Survey]] is published.
+
+== References & Contributors (Sources) ==
+{{Detail}}
+{{Sources
+|S1= [[GURPS Traveller: Alien Races 1]]
+|S2= [[Mongoose Traveller: Zhodani]] Alien Module 4
+|S3= 
+|S4= 
+}}
+
+
+[[Category: Robotics]]
+[[Category: Zhodani]]
+{{LE|Systems}}

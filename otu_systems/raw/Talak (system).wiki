@@ -1,0 +1,62 @@
+{{InfoboxSystem
+ |name=Talak
+ |subsector=Cabala
+ |sector=Far Frontiers
+ |hex=1537
+ |star='''Nijet'''
+ |type='''G7 III'''
+ |P1=Vahjdi
+ |Dist1=8.7|UWP1=G651769-4
+ |P2=Talak
+ |Dist2=10.8|UWP2=D687839-6
+ |P3=Monkodo
+ |Dist3=14.2|UWP3=Y9B1000-0
+ |P4=Galsimar
+ |Dist4=18.7|UWP4=LGG
+ |P5=Kasama Belt
+ |Dist5=25.0|UWP5=Y000000-0
+}}
+
+The '''[[Talak (world)|Talak system]]''' has two inhabited planets, presumably both colonized by the same long-forgotten expedition.
+
+== Description (Specifications) {{Unpublished cite|author= the Wiki editorial team: the system's published characteristics (provided in ''[[Uragyad'n of the Seven Pillars]]'') have been significantly updated, bringing the background data more in line with the current canon system data.}} ==
+The system is centered on a solitary primary star named ''Nijet''.
+{{MonostellarSystem
+|name           = Talak
+|primary        = G7 III 
+|PrimaryName    = Nijet
+|PrimaryNotes   = Unstable pulsating star. It occasionally experiences powerful [[Flare Star|flare activity]], causing [[Electromagnetic Spectrum|intense EM noise]].
+}}
+
+=== System Data ===
+The worlds of the [[Talak (system)|system]] have been surveyed. They consist of:
+* The [[mainworld]], Talak, orbiting at [[Astronomical Unit|10.8 AU]].
+* x2 secondary [[world|rocky worlds]]. These are inhabited [[Vahjdi (world)|Vahjdi]], orbiting at [[Astronomical Unit|8.7 AU]], and [[corrosive atmosphere]] Monkodo, orbiting at [[Astronomical Unit|14.2 AU]].
+* x1 [[Gas Giant|large gas giant]], Galsimar, orbiting at [[Astronomical Unit|18.7 AU]].
+** It retains a number of [[Natural Satellite|large moons]].
+* x1 [[planetoid belt]], the Kasama Belt, lying at a mean distance of [[Astronomical Unit|25.0 AU]].
+
+[[File:System Map Talak Basic.png|500 px]]
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+==== Talak ====
+[[Talak (world)|Talak]], the second world out from the star and the [[mainworld]] of the system, has an orbital period of [[Year|18 years]] [[Day|335 days]] ([[Day|6,909 standard days]]).
+
+==== Vahjdi ====
+The innermost world, [[Vahjdi (world)|Vahjdi]], has an orbital period of [[Year|13 years]] [[Day|247 days]] ([[Day|4,995 standard days]]). It has a very slow rotation period: one local day is equivalent to [[Day|70 standard days]] ([[Hour|almost 1700 standard hours]]).
+* There are 71.4 local days in a local year.
+* During the local day, the world experiences around [[Hour|100 hours]] of dawn, [[Hour|750 hours]] of daylight, [[Hour|100 hours]] of twilight, and [[Hour|750 hours]] of night.
+
+It retains a fairly close, [[Natural Satellite|relatively large moon]] that orbits once every [[Week|standard week]].
+* Vahjdi experiences libration, a characteristic wobble with a frequency of [[Hour|33 hours]], caused by [[Natural Satellite|the moon]] and the [[mainworld]] orbiting their barycenter.
+* This wobble causes the star to rise and fall in the sky during the long local day, giving brighter and darker periods.
+
+== References ==
+{{Metadata}}
+{{Detail}}
+{{Sources
+| {{Ludography cite|name=Uragyad'n of the Seven Pillars}}
+}}
+
+{{LE|Systems}}

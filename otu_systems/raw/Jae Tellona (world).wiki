@@ -1,0 +1,325 @@
+[[File:Alien Moon 239b-0 Small.jpg|250 px|right]]
+{{Milieu header}}
+{{StellarDataQuery
+ |name= {{World|Jae Tellona|Spinward Marches|Rhylanor|2814}} 
+ |era= Milieu 1116
+}}
+{{InfoboxSystem
+|name=Jae Tellona <ref><small>MgT & T5SS published data harmonized with modifications of Christopher Griffen's system configuration in RICE Paper 2814.</small></ref>
+|sector= Spinward Marches|subsector= Rhylanor|hex= 2814
+|star= ''[[Dikaai (star)|<big>Dikaai</big>]]''|type= ''<big>F9 IV-V</big>''
+|P0= Ráke |Dist0=0.2 |UWP0= <small>Y400000-0</small>
+|P1= Pilot |Dist1=0.4|UWP1= <small>Y320000-0</small>
+|P2= Carlotta |Dist2=0.7|UWP2= <small>Y500000-0</small>
+|P2M1= Mabry |Dist2M1= ''<small>R= 9</small>'' |UWP2M1= <small>Y200000-0</small>
+|P2M2= Wake |Dist2M2= ''<small>R= 25</small>'' |UWP2M2= <small>Y200000-0</small>
+|P3= Sillica Belt|Dist3=1.0 |UWP3= <small>Y000000-0</small>
+|P4= '''Uunkida Gar''' |Dist4=1.6|UWP4= <small>'''LGG'''</small>
+|P4M1= (BigMoon)|Dist4M1= ''<small>R= 60</small>''|UWP4M1= <small>Y???0000-0</small>
+|P4M2= (Moon1)|Dist4M2= ''<small>R= ??</small>''|UWP4M2= <small>Y???0000-0</small>
+|P4M3= (Moon2)|Dist4M3= ''<small>R= ??</small>''|UWP4M3= <small>Y???0000-0</small>
+|P4M4= (Moon3)|Dist4M4= ''<small>R= ??</small>''|UWP4M4= <small>Y???0000-0</small>
+|P5= Jae Tellona|Dist5= 1.66|UWP5= <small>A560565-8</small>
+|P6= --- |Dist6=2.8|UWP6= <small>''(Empty Orbit)''</small>
+|P7= --- |Dist7=5.2|UWP7= <small>''(Empty Orbit)''</small>
+|P8= '''Argenta''' |Dist8=10.0|UWP8= <small>'''SGG'''</small>
+|P8M1= Giilushum |Dist8M1= ''<small>R= 8</small>''|UWP8M1= <small>Y2A1000-0</small>
+|P8M2= Rizid |Dist8M2= ''<small>R= 50</small>''|UWP8M2= <small>Y200000-0</small>
+|P9= '''Caloyka''' |Dist9=10.0 |UWP9= <small>'''SGG'''</small>
+|P9M1= Tregent |Dist9M1= ''<small>R= 10</small>''|UWP9M1= <small>YS00000-0</small>
+|P9M2= Silas |Dist9M2= ''<small>R= 13</small>''|UWP9M2= <small>Y400000-0</small>
+|P10= Macon Malloy |Dist10=19.6 |UWP10= <small>Y742000-0</small>
+|P10M1= Cartosy |Dist10M1= ''<small>R= 10</small>''|UWP10M1= <small>Y553000-0</small>
+}}
+{{World summary comment|trade= Pr}}
+* It is a member of the [[Rhylanor Cluster]]. 
+* The bright supergiant star [[Deneb (star)|Deneb]] is visible in Jae Tellona's sky even during the daytime.  
+* Jae Tellona has alternate orthographies of: 
+:* ''Jae Tallona'' 
+:* ''Jae Taellona''
+
+== Description (Specifications: Overview) ==
+=== UWP Listing ===
+{{WorldS|Jae Tellona|Spinward Marches|Rhylanor|2814}} - A560565-8 De Ni Pr Mr {-1} (B43-3) [3436] Bc N  913 9 ImDd F9 V
+
+== [[Astrography]] & [[Planetology]] == 
+=== Stellar Data ===
+'''Jae Tellona''' has a solitary primary star.
+* It is a white main sequence.
+
+{{MonostellarSystem
+|name           = Jae Tellona
+|primary        = F9 V
+|PrimaryName    = Dikaai
+|PrimaryNotes   = Luminosity Class IV-V
+}}
+
+=== System Data === 
+The worlds of the [[system]] have been surveyed. 
+They consist of:
+
+:* The mainworld.
+:* x4 secondary rocky worlds.
+:* x1 planetoid belt.
+::* ''The Sillica Belt''.
+:* x3 gas giants. 
+::* ''1 Large Gas Giant: Uunkida Gar''
+::* ''2 Small Gas Giants''
+
+: '''Jae Tellona''' is the only inhabited [[world]] of this system. In addition to the mainworld, the system contains one large [[gas giant]] with an impressive satellite system of its own, a "linked" binary-pair of twin small gas giants that orbit about a barycenter with a relatively high periodicity, an asteroid belt, and a number of unremarkable planetoid–sized bodies scattered in between. {{Page cite|name=Compendium 1|page=12-13|citeName=Mongoose Traveller: Compendium 1}}
+
+==== Details ====
+----
+ '''<big>Orbit</big>'''  '''<big>Name</big>'''           '''<big>UWP</big>'''            '''<big>Notes</big>'''
+ _______________________________________________________________________________________________________________ 
+ 
+ '''Primary''' '''<big>Dikaai</big>'''         '''<big>F9 IV-V</big>'''         ''White Subgiant''
+ 
+ 0 	Rake 	        Y400000-0      ''("Dikaai Prime")'' (0.2 <small>AU</small>)
+ 1       Pilot           Y320000-0      ''(Dikaai I)'' (0.4 <small>AU</small>)
+ 2	Carlotta        Y500000-0      ''(Dikaai II)'' (0.7 <small>AU</small>)
+     (9)   ''Mabry''           ''Y200000-0''
+    (25)   ''Wake''            ''Y200000-0''
+ 3	Sillica Belt    Y000000-0      ''(Dikaai III)'' (1.0 <small>AU</small>)
+  
+ 4[a]     '''Uunkida Gar'''     '''LGG'''           ''(Dikaai IV'''a''')'' (1.60 <small>AU</small>)
+     (60)  ''(Big Moon)''       ''Y???000-0''
+     (?)   ''(Moon1)''          ''Y???000-0''
+     (?)   ''(Moon2)''          ''Y???000-0''
+     (?)   ''(Moon3)''          ''Y???000-0''
+ '''4[b]'''     '''Jae Tellona'''     '''A560565-8'''     ''(Dikaai IV'''b''')'' (1.66 <small>AU</small>) '''Mainworld'''.   
+  
+ 5 	-- ''(Empty Orbit)'' --         
+ 6 	-- ''(Empty Orbit)'' --          
+ 
+ 7[a]	'''Argenta'''         '''SGG'''            Binary Gas Giant - Paired with Caloyka ''(Dikaai VII'''b''')'' (10.0 <small>AU</small>)
+     (8)   ''Giilushum''       ''Y2A1000-0''
+    (50)   ''Rizid''           ''Y200000-0''
+ 7[b] 	'''Caloyka'''         '''SGG'''            Binary Gas Giant - Paired with Argenta ''(Dikaai VII'''a''')'' (10.0 <small>AU</small>)
+    (10)   ''Tregent''         ''YS00000-0''  
+    (13)   ''Silas''           ''Y400000-0''
+ 
+ 8       Macon Malloy    Y742000-0      CO<sub>2</sub>/N<sub>2</sub>/O<sub>2</sub>/NH<sub>3</sub> atmosphere; Ice-capped  (19.6 <small>AU</small>)
+    (10)   ''Cartosy''         ''Y553000-0''    N<sub>2</sub>/Ar atmosphere; Ice-capped
+  
+ 9-12 	''<« (Empty Orbits) »>''       
+ 13-21   ''<« Remote System »>''            ''Sparse/Tenuous Scattered Disc & Cometary Cloud''
+----
+
+=== [[Mainworld|Mainworld Data]] ===
+'''Jae Tellona''' orbits within its star's [[habitable zone]] ('''H<sub>0</sub>''').
+* It lies within the zone's prime '''H''' region.
+* It receives moderate levels of [[Electromagnetic Spectrum|stellar energy]].
+
+[[File:Chart Orbit HZ Region Detailed.png|600 px]]
+
+: '''''Orbital Characteristics''':''
+:* '''Orbital Distance''': 
+:* '''Orbital Period''': 2.2 years
+:* '''Orbital Eccentricity''': 
+:* '''Rotational Period''': 36 hours
+:* '''Axial Tilt''': 25°
+:* '''Average Surface Temperature''': ''Torrid <small>(day)</small> / Frigid <small>(night)</small>''
+
+: The Jae Tellonan year is approximately 2.2 standard years in duration, and the world has a 25&deg; axial tilt relative to the plane of its orbit. A Jae Tellonan day is approximately 36 hours long in the mid–latitudes, but days at the polar regions are a little over an Imperial Standard year long. Jae Tellona has a diameter of 8,109 km, and a surface gravity of 0.625g. {{Page cite|name=Mongoose Traveller: Compendium 1|page=12-13|citeName=Mongoose Traveller: Compendium 1}} 
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Jae Tellona|Size= 5}}
+
+* '''Diameter''': 8,109 km
+* '''Density''': 
+* '''Surface Gravity''': 0.625 G
+* '''Crust/Core size & composition''': 
+* '''Magnetic Field''': ~1000 μT
+
+: Jae Tellona boasts a powerful magnetic field at its poles, approximately two orders of magnitude greater than the magnetic field of Terra, which causes the night months to often be lit by spectacular auroras. The aurora-light is often so bright that it is possible to see without visual aids. The interaction of the ions in the upper atmosphere with the planetary magnetic field can sometimes cause great problems in with sensors, contragravity lifters, and communications equipment. {{Page cite|name=Mongoose Traveller: Compendium 1|page=12-13|citeName=Mongoose Traveller: Compendium 1}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Jae Tellona|Atmosphere= 6}}
+
+* '''Composition (Gas Mix)''': Standard N<sub>2</sub> / O<sub>2</sub>
+
+: Depending on latitude, temperatures on Jae Tellona can be torrid and even deadly. Crossing the desert without a vehicle or environment suit is often lethal. Those not acclimated to the harsh wind and the lack of water-vapor in the air discover that exposed skin chaffs and blisters, often causing injury before the afflicted is even aware of the problem. Dehydration and heat stroke often follow if exposure occurs during the daylight hours. In the open desert, terrible windstorms are often generated by pockets of pressure differential due to thermal differentials coupled with the effects of gravity and geomagnetism where flesh-rending winds are accompanied by multicolored lightning bolts due to electrostatic forces. Unless a traveller's mouth and nose are covered, the extremely fine sands that these winds can whip up will make it impossible to breathe. {{Page cite|name=Mongoose Traveller: Compendium 1|page=12-13|citeName=Mongoose Traveller: Compendium 1}}
+
+==== [[Hydrosphere|Mainworld Hydrographics]] (H) ====
+{{WorldHydro|name= Jae Tellona|Hydrosphere= 0}} Having no free-standing water at all, most off-worlders find the environment outside the underground complexes uncomfortable. {{Page cite|name=Mongoose Traveller: Compendium 1|page=12-13|citeName=Mongoose Traveller: Compendium 1}}
+
+==== Geography & Topography ==== 
+
+[[File:World Surface Large Moon 03a.jpg|500px|thumb|left|''<small>Jae Tellona "reddened" by an approaching dust storm</small>'']] [[File:Arid World Rugged Type 07c1.jpg|500px]]
+''<small>Jae Tellona under an Aurora sky</small>''
+
+<br>
+===== ''»» Mainworld Map'' =====
+[[File:Blank World Map Arid.png|500 px]] <br> (''Blank map, predominantly dry world''.)
+
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+==== [[Lifeform|Native Lifeforms]] ====
+There is little native animal life on Jae Tellona, and the few muticellular life–forms that do exist are mostly insect-analogs. The dominant native life on Jae Tellona is a motile form of oxygen-producing desert algae that exists in extensive "carpets" in the planet's temperate zones, along with a variety of single–celled organisms and "insectoids" that exist in symbiosis with it as part of the planet's ecological cycle. Desert algal carpets and the parasites they host typically move at a maximum rate of about 10 km a week. {{Page cite|name=Mongoose Traveller: Compendium 1|page=12-13|citeName=Mongoose Traveller: Compendium 1}}
+
+== World Dossier ==
+'''Jae Tellona''' is a member-world of the [[Third Imperium]] and is directly overseen by the [[Imperial Navy]] via the local {{Imperial}} [[Naval Base]]. As a captive/colony type government, the colony falls nominally under Imperial Law, operating under charter by [[Sternmetal Horizons|Sternmetal Horizons, LIC]], and is overseen by the [[Imperial Navy]]. Planetary law enforcement agents are mostly corporate security personnel, without much real power, but enough to make them better avoided than crossed. {{Page cite|name=Mongoose Traveller: Compendium 1|page=12-13|citeName=Mongoose Traveller: Compendium 1}}
+
+=== [[Imperial Nobility#Distinguishment|Imperial Landed Nobility]] (N) ===
+'''Jae Tellona''', as a member world of the [[Third Imperium]], holds the estate of an {{Imperial}} [[knight]] who acts as an Imperial representative to the world, and the estate of a member of the [[Imperial Nobility#Distinguishment|Imperial Landed Nobility]], who oversees affairs regarding the world at an Interstellar and Imperial level.
+*It contains the estate of an Imperial Baronet: [[Jae Tellona (world), Nobles of|The Baronet of Jae Tellona]]
+*It contains the estate of an Imperial Knight: [[Jae Tellona (world), Nobles of|The Honourable Knight of Jae Tellona]], the Imperial representative to the world.
+: ''See: [[Nobles of Jae Tellona]] <small>(aka "[[Nobles of Jae Tellona|Nobles of Jae]]")</small>''
+
+=== [[Starport|World Starport]] (St) ===
+{{Starport|name= Jae Tellona|Starport= A}}
+* ''An Imperial Naval Base is present, which is also ultimately the local government oversight for this world.''
+
+'''''Primary Starports''':'' 
+* Northern Polar City: '''Starport Artica'''
+* Southern Polar City: '''Starport Antartica'''
+ 
+: '''Jae Tellona''' has two [[Starport]] facilities, one located at each polar region that service the two shifting circumpolar population centers of the world. Since the majority of the world population is migratory with the world's seasons, regulations generally stipulate that most civilian traffic is routed to the port that is currently in darkness, though each Starport remains fully operational throughout the year, as military and corporate traffic are exempt from this rule.  {{Page cite|name=Mongoose Traveller: Compendium 1|page=12-13|citeName=Mongoose Traveller: Compendium 1}} 
+
+: Due to the powerful magnetic storms that Jae Tellona experiences in it's upper atmosphere, ships will occasionally be grounded by the Starport authority. Lifting off during such an emergency grounding is a serious offense under Jae Tellonan Starport regulations and local law (and backed up by Imperial Naval Regulations of the local base). Offenders will be pursued and when caught will be sentenced to a punishment delineated by local Starport Authority regulations, with severity to be determined by the local Starport Judge Advocate General. The exact punishment for violating a flight ban is well within the discretion of the Starport Authority JAG Officer-On-Duty, and can range anywhere from a Cr10,000 fine up to 3 years hard labor at a penal mining colony. {{Page cite|name=Mongoose Traveller: Compendium 1|page=12-13|citeName=Mongoose Traveller: Compendium 1}} 
+
+: Travellers should be advised that while the SPA has become quite adept at detection and early warning, ion storms on Jae Taellona can last for indefinite periods of time, sometime for days or even weeks at a time. {{Page cite|name=Mongoose Traveller: Compendium 1|page=12-13|citeName=Mongoose Traveller: Compendium 1}}
+
+=== [[Importance Extension|World Importance]] {Ix} === 
+Importance: {-1}
+* '''Jae Tellona''' is considered ''Unimportant''.
+
+=== World Technology Level (T) ===
+{{WorldTech|name= Jae Tellona|WorldTech= 8}}
+
+=== Trade Data === 
+[[File:Sternmetal Horizons.jpg|100 px|right]]
+Most commercial enterprise on Jae Tellona is conducted by [[Sternmetal Horizons]], the corporate entity contracted by the [[Imperial Navy]] to handle the affairs of government for the world. Sternmetal engages in a profitable mining and resource extraction industry on the world.  
+
+''[[Trade]] [[TC|Classifications]] for this [[world]]:''
+* '''De''': Jae Tellona is classified as a ''Desert World''.
+* '''Ni''': Jae Tellona is classified as a ''Non-Industrial World'' and requires off-world imports for many of its societal needs.
+* '''Pr''':  Jae Tellona is classified as a ''Pre-Rich World''. With the proper economic supervision and management, it may one day become a ''Rich World''.
+
+''[[Trade route|Trade Lines with other worlds]]:''
+* '''Jae Tellona''' is part of the ''[[Rhylanor Cluster]]'' (also known as the ''"Rhylanor Trace"'') and is somewhat isolated astrographically from the worlds around it. Most trade passes to Jae Tellona from Celepina moving toward Rhylanor, though some trade also comes to Jae Tellona via the Fulacin-Porozlo link.  
+   
+==== [[Economic Extension|World Economy]] (Ex) ====
+* Resources:       B (Abundant)
+* Labor:           4 (Tens of Thousands)
+* Infrastructure:  3 (Very Limited)
+* Efficiency:     -3 (Poor)
+
+==== [[Infrastructure|World Infrastructure]] ====
+'''Jae Tellona''' possesses ''very limited'' infrastructure.
+
+=== Politics & Government ===
+[[File:Traveller Imperial Navy Sunburst logo.svg|100 px|right]]
+
+==== [[Government|World Government]] (G) ====
+{{WorldGov|name= Jae Tellona|Government=6}}  
+''Jae Tellona''' is ultimately overseen by the local Imperial Naval Base but farms out the day-to-day responsibility of government to corporate concerns who run the world on its behalf. As a captive/colony type government, the colony falls nominally under Imperial Law, operating under charter by [[Sternmetal Horizons|Sternmetal Horizons, LIC]], while still being overseen by the [[Imperial Navy]]. Planetary law enforcement agents are mostly corporate security personnel, without much real power, but enough to make them better avoided than crossed. {{Page cite|name=Mongoose Traveller: Compendium 1|page=12-13|citeName=Mongoose Traveller: Compendium 1}}
+
+==== [[Law Level|World Law]] (L) ====
+{{WorldLaw|name= Jae Tellona|Law= 5}}
+
+[[Universal Legal Profile]] (Lx): '''L - W D I Te Tv P  - [Tr Cr Cv F]'''
+* '''L'''  <small>(Overall Enforcement Level)</small> = 5
+: --
+* '''W'''  <small>(Weapons)</small> = 5
+* '''D'''  <small>(Drugs)</small> = 1
+* '''I'''  <small>(Information)</small> = 1
+* '''Te''' <small>(Technology)</small> = 4
+* '''Tv''' <small>(Travellers)</small> = 4
+* '''P'''  <small>(Psionics)</small> = 7
+: --
+* '''Tr'''  <small>(Trade Law)</small> = 3
+* '''Cr'''  <small>(Criminal Law)</small> = 4
+* '''Cv'''  <small>(Civil Law)</small> = 7
+* '''F''' <small>(Personal Freedom)</small> = 6
+
+Although Jae Tellona's law level is nominally 5, many of the world's inhabitants are rough–cut miners who work hard and play hard. Mining colonies are found mostly underground, but are also periodically dispersed throughout the regions of desert and mountains. {{Page cite|name=Mongoose Traveller: Compendium 1|page=12|citeName=Mongoose Traveller: Compendium 1}} Recreational drugs are often freely available upon Jae Tellona and prostitution has evolved into an institution with benefits and pensions. As a result, Jae Tellona has tended to become a haven for criminal elements. {{Page cite|name=Mongoose Traveller: Compendium 1|page=12-13|citeName=Mongoose Traveller: Compendium 1}}
+
+Planetary law enforcement is handled mostly by Sternmetal corporate security personnel who have the authority to make arrests. Many in the ranks of Jae Tellonan law enforcement are corrupt, and a significant percentage of both the police establishment and economic concerns are controlled by criminal organizations, collectively known on Jae Tellona as the "Affiliation". It is rumored that those who cross the Affiliation are taken out to the deep desert near the equator via air/raft and left there without supplies or survival gear. {{Page cite|name=Mongoose Traveller: Compendium 1|page=12-13|citeName=Mongoose Traveller: Compendium 1}}
+
+Should it be deemed necessary due to the outbreak of real trouble (e.g. terrorism, civil unrest, labor strikes encouraging civil disobedience, etc.), Sternmetal has full legal authority to request assistance from local Imperial troops to restore order. Though such Imperial forces will usually attempt to imprison rioting laborers, they are not above using lethal force if the situation calls for it. {{Page cite|name=Mongoose Traveller: Compendium 1|page=12-13|citeName=Mongoose Traveller: Compendium 1}}
+
+==== World Military ====
+As a world ultimately under Imperial military rule, world military forces are provided for by local Imperial forces.
+
+=== World Population (P) ===
+{{WorldPop|name= Jae Tellona|multiplier= 9|Population= 5}}
+
+==== World Demographics ====
+[[Humaniti]], population 95% 
+* Other [[Sophont]]s, population 5%
+
+==== Linguistic Topography ==== 
+The following [[language]]s are most commonly heard:
+* [[Riftian|Riftian Galanglic]]: One of the principal dialects of one of the two primary languages of the {{Imperium}}.
+* [[Vilani (language)|Vilani]]: One of the two primary languages of the {{Imperium}}
+
+==== [[Cultural Extension|World Culture]] [Cx] ====
+* Heterogenity: 3 (Monolithic)
+* Acceptance:   4 (Extremely Aloof)
+* Strangeness:  3 (Somewhat Typical)
+* Symbols:      6 (Somewhat Concrete)
+
+==== Urbanization ====
+The population of Jae Tellona congregates at the two geographic polar regions of the planet within its polar circles, since the 25° axial tilt guarantees that the poles will alternately experience 13 months of perpetual daylight and 13 months of perpetual night-time over the course of the Jae Tellonan local year of 2.2 Imperial standard years, and is also the location on the planet where the temperatures are the most "temperate" overall during the Jae Tellonan "summer". Many of the wealthier inhabitants of Jae Tellona fly to the opposite pole every 13 months in order to always reside on the night-side of the world.  Though the night-side is just as frigid as the day-side is torrid (and just as deadly to the unprotected), many prefer the frigid environment as compared to the high temperatures of the day-side. Each urban region has a Pop=3 stationary population, with a Pop=4 migratory population alternately taking up residence at one or the other as the seasons shift. {{Page cite|name=Mongoose Traveller: Compendium 1|page=12-13|citeName=Mongoose Traveller: Compendium 1}}
+
+'''Jae Tellona''' boasts two major population centers, one located at each of its two magnetic poles, which also happen to lie within the polar circle region of the world geographically. The northern-polar city is known as ''Stargate Artica'', while the southern-polar city is known as ''Stargate Antartica''. The majority of the population in each of these cities exists underground, though both cities also have some hardy surface dwellers who see living on the surface as a sign of superiority. ''Stargate Artica'' is the older of the two cities, and is slightly larger and more developed in terms of its underground complex. The underground complex of ''Stargate Artica'' is divided into eight color-coded Sectors. The sectors are connected by an extensive underground electrical railway system reminiscent of the subways employed in the undercities of the larger population centers of many lower tech worlds. ''Stargate Antartica'' has a similar system of classification but is far less developed and has only five sectors. {{Page cite|name=Mongoose Traveller: Compendium 1|page=12-13|citeName=Mongoose Traveller: Compendium 1}}  
+
+Various installations all over the planet serve as access points to the extensive network of mines and tunnels throughout the planet’s crust. The buildings and installations of these access points often function as temporary cities. Most of these access points are located in the equatorial and tropical regions, often concentrated in the hills and mountains. {{Page cite|name=Mongoose Traveller: Compendium 1|page=12-13|citeName=Mongoose Traveller: Compendium 1}}
+
+== History & Background ==
+The world of Jae Tellona was first officially settled by Imperial colonists during the early waves of Imperial settlement in the [[Spinward Marches Sector]] in the [[300s]], becoming an Imperial Client State not long afterward and completely absorbed as a full Imperial member world by ca [[400]].  
+
+=== World Timeline ===
+Major events that have affected this world and the wider region that it lies within:
+* [[0|The Year 0]]: the [[Third Imperium]] is founded.
+* [[76]]-[[120]]: [[Pacification Campaigns]]
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[589]]-[[604]]: [[First Frontier War]].
+* [[604]]-[[622]]: the [[Civil War]].
+* [[615]]-[[620]]: [[Second Frontier War]].
+* [[624]]: the [[Express Boat Network]] is established.
+* [[800]]-[[826]]: [[Psionics Suppressions]]
+* [[979]]-[[986]]: [[Third Frontier War]].
+* [[990]]-[[1002]]: [[Solomani Rim War]]
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] charts the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+* [[1082]]-[[1084]]: [[Fourth Frontier War]], also known as the ''False War''.
+* [[1107]]-[[1110]]: [[Fifth Frontier War]].
+
+<br>
+----
+----
+
+== References ==
+{{metadata}}
+
+{{conflict}}
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=30-31}}
+ | {{Ludography cite|name=Twilight's Peak|version=Classic Traveller|page=12}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=The Regency Sourcebook|page=43}} (UWP only)
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=107}}
+ | {{Ludography cite|name=The Spinward States|page=104}} (UWP only)
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name=Compendium 1|page=12}} 
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=74-79}} (UWP only)
+ | {{Ludography cite|name=Whispers on the Abyss|page=42-52}}
+ | [[Christopher Griffen]] - [http://www.mu.org/%7Ejoe/traveller/archive/Rice_Papers/SM-2814-Jae.Tellona.txt RICE Paper SM 2814] 
+}}
+
+[[Category: 23rd Fleet worlds]]
+[[Category: Republic of Regina worlds]]
+[[Category: Answerin worlds]]
+[[Category: General Products worlds]]
+[[Category: Humaniti worlds]]
+[[Category: Rhylanor Cluster worlds]]
+[[Category: RICE]]
+[[Category: Sternmetal Horizons worlds]]
+[[Category: Worlds with a X-Boat Station]]
+{{LE|T5 Second Survey worlds|Era: Milieu 1116}}

@@ -1,0 +1,709 @@
+{
+  "fetched": "2026-11-17",
+  "source": "travellermap.com /api/sec?type=TabDelimited (mainworld only)",
+  "worlds": {
+    "Aldebaran 0111": {
+      "Name": "Elysee",
+      "UWP": "A872AA9-E",
+      "Stellar": "G5 V K2 V",
+      "PBG": "331",
+      "Bases": "",
+      "Remarks": "He Hi In Ht"
+    },
+    "Aldebaran 0112": {
+      "Name": "Algol",
+      "UWP": "D000168-9",
+      "Stellar": "K2 IV A5 V B8 V",
+      "PBG": "212",
+      "Bases": "",
+      "Remarks": "As Lo Va O:0111"
+    },
+    "Aldebaran 0209": {
+      "Name": "Corinna",
+      "UWP": "B687464-A",
+      "Stellar": "G1 V",
+      "PBG": "203",
+      "Bases": "M",
+      "Remarks": "Ni Ga Pa (Neozinga) Re"
+    },
+    "Aldebaran 0309": {
+      "Name": "Ivraie",
+      "UWP": "B758799-A",
+      "Stellar": "G8 V",
+      "PBG": "202",
+      "Bases": "",
+      "Remarks": "Ag"
+    },
+    "Aldebaran 0312": {
+      "Name": "Grande-Terre",
+      "UWP": "C834720-9",
+      "Stellar": "K8 V M5 V",
+      "PBG": "612",
+      "Bases": "",
+      "Remarks": ""
+    },
+    "Aldebaran 0411": {
+      "Name": "Soror",
+      "UWP": "B659721-B",
+      "Stellar": "K1 V",
+      "PBG": "104",
+      "Bases": "",
+      "Remarks": ""
+    },
+    "Aldebaran 0425": {
+      "Name": "Hiemalis",
+      "UWP": "B78748C-B",
+      "Stellar": "K5 III M1 V",
+      "PBG": "301",
+      "Bases": "",
+      "Remarks": "Ni Ga Pa Da Tu Tz"
+    },
+    "Aldebaran 0512": {
+      "Name": "Myrthe",
+      "UWP": "A662559-C",
+      "Stellar": "K8 V",
+      "PBG": "131",
+      "Bases": "KM",
+      "Remarks": "Ni Pr Ht"
+    },
+    "Aldebaran 0606": {
+      "Name": "Daedalus",
+      "UWP": "A668889-9",
+      "Stellar": "G6 V",
+      "PBG": "504",
+      "Bases": "KM",
+      "Remarks": "Ri Pa Ph Dolp1 Lk"
+    },
+    "Aldebaran 0706": {
+      "Name": "Asterope",
+      "UWP": "C201151-A",
+      "Stellar": "M1 V M6 V",
+      "PBG": "600",
+      "Bases": "",
+      "Remarks": "Ic Lo Va Co Tz"
+    },
+    "Aldebaran 0807": {
+      "Name": "Columbier",
+      "UWP": "A745574-D",
+      "Stellar": "F7 V M0 V",
+      "PBG": "101",
+      "Bases": "KM",
+      "Remarks": "Ag Ni Ht"
+    },
+    "Aldebaran 1009": {
+      "Name": "Home",
+      "UWP": "A86699A-E",
+      "Stellar": "G2 V",
+      "PBG": "121",
+      "Bases": "KM",
+      "Remarks": "Hi Ga Cx Pr Ht"
+    },
+    "Aldebaran 1431": {
+      "Name": "Kwan",
+      "UWP": "A786231-8",
+      "Stellar": "K5 V M4 V",
+      "PBG": "611",
+      "Bases": "",
+      "Remarks": "Lo Ga"
+    },
+    "Aldebaran 2504": {
+      "Name": "Alzirr",
+      "UWP": "E410455-9",
+      "Stellar": "F5 IV",
+      "PBG": "201",
+      "Bases": "",
+      "Remarks": "Ni Lk"
+    },
+    "Aldebaran 2604": {
+      "Name": "Merope",
+      "UWP": "D7647A7-6",
+      "Stellar": "G3 V",
+      "PBG": "223",
+      "Bases": "",
+      "Remarks": "Ag Ri Dolp0"
+    },
+    "Aldebaran 2705": {
+      "Name": "Nova Prometheus",
+      "UWP": "B785568-B",
+      "Stellar": "G0 V M0 V",
+      "PBG": "133",
+      "Bases": "",
+      "Remarks": "Ag Ni Ga Pr O:2707"
+    },
+    "Aldebaran 2805": {
+      "Name": "Mu'izzi",
+      "UWP": "B765744-A",
+      "Stellar": "M0 V",
+      "PBG": "202",
+      "Bases": "",
+      "Remarks": "Ag Ga Ri"
+    },
+    "Aldebaran 3220": {
+      "Name": "Acton",
+      "UWP": "A631226-A",
+      "Stellar": "M1 V",
+      "PBG": "123",
+      "Bases": "KM",
+      "Remarks": "Lo Po Tz"
+    },
+    "Antares 2421": {
+      "Name": "Antares",
+      "UWP": "A000ADA-D",
+      "Stellar": "M1 Ib B3 V",
+      "PBG": "800",
+      "Bases": "NS",
+      "Remarks": "As Hi In Na Va Cs Pz Ht"
+    },
+    "Corridor 0614": {
+      "Name": "Dywosik",
+      "UWP": "C547547-9",
+      "Stellar": "G5 V M8 V",
+      "PBG": "931",
+      "Bases": "",
+      "Remarks": "Ag Ni"
+    },
+    "Corridor 2238": {
+      "Name": "Divad",
+      "UWP": "C8C0885-9",
+      "Stellar": "M5 V",
+      "PBG": "422",
+      "Bases": "S",
+      "Remarks": "He Ph Pz (Brinn)9"
+    },
+    "Dagudashaag 1204": {
+      "Name": "Ziruushda",
+      "UWP": "A977377-A",
+      "Stellar": "M1 V",
+      "PBG": "400",
+      "Bases": "",
+      "Remarks": "Lo Da Hama8 Aqua1 Bwap0 Di(Gograhhah)"
+    },
+    "Dagudashaag 1331": {
+      "Name": "Gateway",
+      "UWP": "B98A654-D",
+      "Stellar": "M1 V M9 V",
+      "PBG": "701",
+      "Bases": "N",
+      "Remarks": "Ni Ri Wa Ht"
+    },
+    "Dagudashaag 1723": {
+      "Name": "Dashi",
+      "UWP": "C55098B-A",
+      "Stellar": "M2 V",
+      "PBG": "404",
+      "Bases": "",
+      "Remarks": "De Hi Po Asla0 S'mr0"
+    },
+    "Dagudashaag 2005": {
+      "Name": "Guru",
+      "UWP": "B51077B-9",
+      "Stellar": "M1 V",
+      "PBG": "600",
+      "Bases": "",
+      "Remarks": "Na Pi"
+    },
+    "Dagudashaag 2106": {
+      "Name": "Masiruu",
+      "UWP": "B0006B7-A",
+      "Stellar": "K4 V M9 V",
+      "PBG": "411",
+      "Bases": "N",
+      "Remarks": "As Na Ni Va"
+    },
+    "Dagudashaag 2204": {
+      "Name": "Likhukam",
+      "UWP": "B200953-F",
+      "Stellar": "M5 III",
+      "PBG": "501",
+      "Bases": "NS",
+      "Remarks": "Hi In Na Va Cp Sa Ht"
+    },
+    "Dagudashaag 2725": {
+      "Name": "Collette",
+      "UWP": "A542644-C",
+      "Stellar": "M3 V",
+      "PBG": "414",
+      "Bases": "NS",
+      "Remarks": "He Ni Po Cp Ht"
+    },
+    "Dagudashaag 3121": {
+      "Name": "Depot",
+      "UWP": "A31046A-F",
+      "Stellar": "M1 V",
+      "PBG": "310",
+      "Bases": "D",
+      "Remarks": "Ni Da Mr Ht"
+    },
+    "Dark Nebula 1226": {
+      "Name": "Kusyu",
+      "UWP": "A876976-E",
+      "Stellar": "G4 V D",
+      "PBG": "403",
+      "Bases": "RT",
+      "Remarks": "Hi In Cx [Aslan] Ht"
+    },
+    "Deneb 1925": {
+      "Name": "Deneb",
+      "UWP": "B537ADD-C",
+      "Stellar": "A2 Ia",
+      "PBG": "610",
+      "Bases": "N",
+      "Remarks": "Hi An Cs Pz (Nenlat)4 Ht"
+    },
+    "Deneb 3104": {
+      "Name": "Aerfor",
+      "UWP": "A584520-D",
+      "Stellar": "F7 V",
+      "PBG": "534",
+      "Bases": "",
+      "Remarks": "Ag Ni Pr RsD Sa Ht"
+    },
+    "Far Frontiers 1537": {
+      "Name": "Talak",
+      "UWP": "D687838-6",
+      "Stellar": "G7 III",
+      "PBG": "411",
+      "Bases": "",
+      "Remarks": "Ga Ri Pa Ph"
+    },
+    "Gushemege 1033": {
+      "Name": "Nukyls",
+      "UWP": "B540610-A",
+      "Stellar": "K2 V",
+      "PBG": "711",
+      "Bases": "N",
+      "Remarks": "De He Ni Po"
+    },
+    "Gushemege 1133": {
+      "Name": "Kemshigesh",
+      "UWP": "D532544-8",
+      "Stellar": "K2 V M8 V",
+      "PBG": "613",
+      "Bases": "",
+      "Remarks": "Ni Po"
+    },
+    "Gushemege 1233": {
+      "Name": "Mercator",
+      "UWP": "C540431-8",
+      "Stellar": "G1 V",
+      "PBG": "503",
+      "Bases": "S",
+      "Remarks": "De He Ni Po"
+    },
+    "Gushemege 1235": {
+      "Name": "Icon",
+      "UWP": "D434678-7",
+      "Stellar": "K1 V",
+      "PBG": "715",
+      "Bases": "",
+      "Remarks": "Ni"
+    },
+    "Gzaekfueg 1413": {
+      "Name": "Dhillourr",
+      "UWP": "B110A7A-G",
+      "Stellar": "F9 V",
+      "PBG": "102",
+      "Bases": "",
+      "Remarks": "Hi In Na Cp"
+    },
+    "Ilelish 2907": {
+      "Name": "Ilelish",
+      "UWP": "E674A83-A",
+      "Stellar": "M0 V",
+      "PBG": "204",
+      "Bases": "",
+      "Remarks": "Hi In (Suerrat)"
+    },
+    "Lishun 1219": {
+      "Name": "Depot",
+      "UWP": "A78846A-D",
+      "Stellar": "F7 V M0 V",
+      "PBG": "510",
+      "Bases": "D",
+      "Remarks": "Ni Pa Da Mr Ht"
+    },
+    "Massilia 0402": {
+      "Name": "Kaggushus",
+      "UWP": "A542AA7-F",
+      "Stellar": "M1 V",
+      "PBG": "904",
+      "Bases": "",
+      "Remarks": "He Hi In Po Cp (Kaggushus) Ht"
+    },
+    "Massilia 2411": {
+      "Name": "Kerak",
+      "UWP": "B100576-D",
+      "Stellar": "M2 V",
+      "PBG": "604",
+      "Bases": "S",
+      "Remarks": "Ni Va Ht"
+    },
+    "Massilia 2414": {
+      "Name": "Rode",
+      "UWP": "B755220-B",
+      "Stellar": "M2 V",
+      "PBG": "403",
+      "Bases": "",
+      "Remarks": "Lo Ga"
+    },
+    "Massilia 2512": {
+      "Name": "The Maralee",
+      "UWP": "D57379A-6",
+      "Stellar": "K7 V",
+      "PBG": "803",
+      "Bases": "",
+      "Remarks": "Pi"
+    },
+    "Massilia 2513": {
+      "Name": "Atina",
+      "UWP": "B6318A8-A",
+      "Stellar": "M3 V",
+      "PBG": "902",
+      "Bases": "",
+      "Remarks": "Na Po Ph"
+    },
+    "Massilia 2514": {
+      "Name": "Rovick",
+      "UWP": "E554420-7",
+      "Stellar": "M1 V M3 V M5 V",
+      "PBG": "822",
+      "Bases": "",
+      "Remarks": "Ni Pa"
+    },
+    "Provence 2402": {
+      "Name": "Lair",
+      "UWP": "A8859B9-E",
+      "Stellar": "G5 V",
+      "PBG": "213",
+      "Bases": "K",
+      "Remarks": "Hi Ga Cx Pr Pz [Vargr] Ht"
+    },
+    "Reaver's Deep 1224": {
+      "Name": "Roakhoi",
+      "UWP": "C969543-5",
+      "Stellar": "F5 V",
+      "PBG": "702",
+      "Bases": "",
+      "Remarks": "Ni Pr Asla5 Lt"
+    },
+    "Ruupiin 1315": {
+      "Name": "Kirur",
+      "UWP": "B863ARK-F",
+      "Stellar": "F5 V",
+      "PBG": "113",
+      "Bases": "K",
+      "Remarks": "Hi (K'kree)"
+    },
+    "Solomani Rim 1024": {
+      "Name": "Fomalhaut",
+      "UWP": "B8C8469-C",
+      "Stellar": "A3 V K5 V",
+      "PBG": "802",
+      "Bases": "",
+      "Remarks": "Fl Ni Da Mr Ht"
+    },
+    "Solomani Rim 1827": {
+      "Name": "Terra",
+      "UWP": "A867A69-F",
+      "Stellar": "G2 V",
+      "PBG": "114",
+      "Bases": "NW",
+      "Remarks": "Hi Ga [Solomani] Dolp0 Mr Ht"
+    },
+    "Spinward Marches 0130": {
+      "Name": "Garoo",
+      "UWP": "A2008CB-A",
+      "Stellar": "M1 V M5 V",
+      "PBG": "210",
+      "Bases": "",
+      "Remarks": "Na Va Ph Pi Pz (Garoo)"
+    },
+    "Spinward Marches 0527": {
+      "Name": "Mire",
+      "UWP": "A665A95-C",
+      "Stellar": "K6 V",
+      "PBG": "110",
+      "Bases": "KM",
+      "Remarks": "Hi Ga Cx Dary8 Asla1 Ht"
+    },
+    "Spinward Marches 0539": {
+      "Name": "Froin",
+      "UWP": "C535225-9",
+      "Stellar": "M2 V M7 V",
+      "PBG": "601",
+      "Bases": "",
+      "Remarks": "Lo RsZ"
+    },
+    "Spinward Marches 0627": {
+      "Name": "Darrian",
+      "UWP": "A463955-G",
+      "Stellar": "G1 V D",
+      "PBG": "225",
+      "Bases": "",
+      "Remarks": "Hi An Pr (Daryen)8 Asla0 Ht"
+    },
+    "Spinward Marches 0705": {
+      "Name": "Cipango",
+      "UWP": "A886865-C",
+      "Stellar": "G2 V",
+      "PBG": "121",
+      "Bases": "KM",
+      "Remarks": "Ga Ri Pa Ph O:0304 Ht"
+    },
+    "Spinward Marches 0938": {
+      "Name": "Inchin",
+      "UWP": "D42035A-A",
+      "Stellar": "F0 V",
+      "PBG": "823",
+      "Bases": "",
+      "Remarks": "De He Lo Po Sa"
+    },
+    "Spinward Marches 1006": {
+      "Name": "Emerald",
+      "UWP": "B766555-B",
+      "Stellar": "M1 V",
+      "PBG": "534",
+      "Bases": "S",
+      "Remarks": "Ag Ni Ga Pr"
+    },
+    "Spinward Marches 1217": {
+      "Name": "Arkadia",
+      "UWP": "E546845-6",
+      "Stellar": "G8 V",
+      "PBG": "402",
+      "Bases": "",
+      "Remarks": "Pa Ph Pi"
+    },
+    "Spinward Marches 1232": {
+      "Name": "Walston",
+      "UWP": "C544338-8",
+      "Stellar": "M2 V",
+      "PBG": "302",
+      "Bases": "S",
+      "Remarks": "Lo Varg7"
+    },
+    "Spinward Marches 1233": {
+      "Name": "Flexos",
+      "UWP": "E5A1422-8",
+      "Stellar": "M1 V M2 V",
+      "PBG": "610",
+      "Bases": "",
+      "Remarks": "Fl He Ni"
+    },
+    "Spinward Marches 1237": {
+      "Name": "Collace",
+      "UWP": "B628943-D",
+      "Stellar": "F1 V M3 V",
+      "PBG": "101",
+      "Bases": "S",
+      "Remarks": "Hi In Ht"
+    },
+    "Spinward Marches 1329": {
+      "Name": "Caladbolg",
+      "UWP": "B565776-A",
+      "Stellar": "F7 V M0 V M4 V",
+      "PBG": "710",
+      "Bases": "S",
+      "Remarks": "Ag Ri"
+    },
+    "Spinward Marches 1417": {
+      "Name": "Ficant",
+      "UWP": "E567353-5",
+      "Stellar": "M0 V M1 V",
+      "PBG": "910",
+      "Bases": "",
+      "Remarks": "Lo Lt"
+    },
+    "Spinward Marches 1731": {
+      "Name": "Grote",
+      "UWP": "A400404-B",
+      "Stellar": "F8 V",
+      "PBG": "124",
+      "Bases": "",
+      "Remarks": "Ni Va"
+    },
+    "Spinward Marches 1809": {
+      "Name": "Ruie",
+      "UWP": "C776977-7",
+      "Stellar": "G5 V",
+      "PBG": "701",
+      "Bases": "",
+      "Remarks": "Hi In Pz Di(Daccamites)"
+    },
+    "Spinward Marches 1910": {
+      "Name": "Regina",
+      "UWP": "A788899-C",
+      "Stellar": "F7 V BD M3 V",
+      "PBG": "703",
+      "Bases": "NS",
+      "Remarks": "Ri Pa Ph An Cp (Amindii)2 Varg0 Asla0 Sa Ht"
+    },
+    "Spinward Marches 2036": {
+      "Name": "Glisten",
+      "UWP": "A000986-F",
+      "Stellar": "K9 V",
+      "PBG": "811",
+      "Bases": "NS",
+      "Remarks": "As Hi In Na Va Cp Ht"
+    },
+    "Spinward Marches 2534": {
+      "Name": "Burtson",
+      "UWP": "C562667-8",
+      "Stellar": "G4 V",
+      "PBG": "402",
+      "Bases": "",
+      "Remarks": "Ni Ri O:2733"
+    },
+    "Spinward Marches 2712": {
+      "Name": "Risek",
+      "UWP": "A425579-A",
+      "Stellar": "M2 V M3 V",
+      "PBG": "401",
+      "Bases": "N",
+      "Remarks": "Ni"
+    },
+    "Spinward Marches 2715": {
+      "Name": "Porozlo",
+      "UWP": "A867A74-B",
+      "Stellar": "M1 V M9 V",
+      "PBG": "201",
+      "Bases": "",
+      "Remarks": "Hi Ga"
+    },
+    "Spinward Marches 2716": {
+      "Name": "Rhylanor",
+      "UWP": "A434934-F",
+      "Stellar": "M2 V",
+      "PBG": "810",
+      "Bases": "NS",
+      "Remarks": "Hi Cp Llel4 Ht"
+    },
+    "Spinward Marches 2811": {
+      "Name": "Valhalla",
+      "UWP": "E565432-5",
+      "Stellar": "G4 V",
+      "PBG": "622",
+      "Bases": "",
+      "Remarks": "Ni Pa Lt"
+    },
+    "Spinward Marches 2812": {
+      "Name": "Zivije",
+      "UWP": "C6B199C-B",
+      "Stellar": "G6 V",
+      "PBG": "421",
+      "Bases": "",
+      "Remarks": "Fl He Hi In Pz"
+    },
+    "Spinward Marches 2814": {
+      "Name": "Jae Tellona",
+      "UWP": "A560565-8",
+      "Stellar": "F9 V",
+      "PBG": "913",
+      "Bases": "N",
+      "Remarks": "De Ni Pr Mr"
+    },
+    "Spinward Marches 2913": {
+      "Name": "Celepina",
+      "UWP": "B434456-9",
+      "Stellar": "M2 V",
+      "PBG": "201",
+      "Bases": "NS",
+      "Remarks": "Ni"
+    },
+    "Spinward Marches 3026": {
+      "Name": "Grille",
+      "UWP": "E410335-7",
+      "Stellar": "M2 V M2 V",
+      "PBG": "701",
+      "Bases": "",
+      "Remarks": "Lo"
+    },
+    "Spinward Marches 3029": {
+      "Name": "Palique",
+      "UWP": "A511965-E",
+      "Stellar": "M0 V M1 V",
+      "PBG": "320",
+      "Bases": "",
+      "Remarks": "Hi Ic In Na Pz O:3025 Ht"
+    },
+    "Spinward Marches 3124": {
+      "Name": "Mora",
+      "UWP": "AA99AC7-F",
+      "Stellar": "F0 V",
+      "PBG": "112",
+      "Bases": "NS",
+      "Remarks": "Hi In Cs Ht"
+    },
+    "Spinward Marches 3235": {
+      "Name": "Trin",
+      "UWP": "A894A96-F",
+      "Stellar": "G0 V",
+      "PBG": "101",
+      "Bases": "NS",
+      "Remarks": "Hi In Cp Ht"
+    },
+    "The Beyond 0314": {
+      "Name": "Corella",
+      "UWP": "A864855-D",
+      "Stellar": "G2 V G8 V",
+      "PBG": "834",
+      "Bases": "KM",
+      "Remarks": "Ri Pa Ph Cx Ht"
+    },
+    "Trojan Reach 2204": {
+      "Name": "Pax Rulin",
+      "UWP": "A402231-E",
+      "Stellar": "M8 III",
+      "PBG": "413",
+      "Bases": "N",
+      "Remarks": "Ic Lo Va Cp Ht"
+    },
+    "Trojan Reach 2411": {
+      "Name": "Cordillon",
+      "UWP": "C431210-B",
+      "Stellar": "K1 V",
+      "PBG": "922",
+      "Bases": "",
+      "Remarks": "Lo Po"
+    },
+    "Vland 1717": {
+      "Name": "Vland",
+      "UWP": "A967A9A-F",
+      "Stellar": "F8 V",
+      "PBG": "310",
+      "Bases": "N",
+      "Remarks": "Hi Cs [Vilani] Ht"
+    },
+    "Zhodane 2719": {
+      "Name": "Zhdant",
+      "UWP": "A654AC8-F",
+      "Stellar": "M0 V",
+      "PBG": "811",
+      "Bases": "KM",
+      "Remarks": "Hi Cx An [Zhodani] Ht"
+    }
+  },
+  "sector_abbreviations": {
+    "Aldebaran": "Alde",
+    "Antares": "Anta",
+    "Corridor": "Corr",
+    "Dagudashaag": "Dagu",
+    "Dark Nebula": "Dark",
+    "Deneb": "Dene",
+    "Far Frontiers": "FarF",
+    "Gushemege": "Gush",
+    "Gzaekfueg": "Gzae",
+    "Ilelish": "Ilel",
+    "Lishun": "Lish",
+    "Massilia": "Mass",
+    "Provence": "Prov",
+    "Reaver's Deep": "Reav",
+    "Ruupiin": "Ruup",
+    "Solomani Rim": "Solo",
+    "Spinward Marches": "Spin",
+    "The Beyond": "Beyo",
+    "Trojan Reach": "Troj",
+    "Vland": "Vlan",
+    "Zhodane": "Zhda"
+  }
+}

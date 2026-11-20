@@ -26,6 +26,7 @@ For a deep dive on routes specifically, see the [Route Manager Help Manual](help
 16. [How do I filter and colour the map?](#16-how-do-i-filter-and-colour-the-map)
 17. [How do I make a players' version?](#17-how-do-i-make-a-players-version)
 18. [How do I change how the map looks?](#18-how-do-i-change-how-the-map-looks)
+19. [Where can I send feedback?](#19-where-can-i-send-feedback)
 
 ---
 
@@ -946,6 +947,15 @@ Worlds hidden by the filter don't count, except while **Shift + F** shows them. 
 view the map draws no symbols, so the legend says so instead. The setting saves with the map. It
 starts off, and maps saved before it existed open without it. The legend doesn't appear in
 exports.
+
+---
+
+## 19. Where can I send feedback?
+
+Bug reports, questions and suggestions are welcome. You can find me on the forums:
+
+- **Citizens of the Imperium (COTI):** Bartleby
+- **Mongoose Publishing forums:** bartlebyfosco
 
 ---
 

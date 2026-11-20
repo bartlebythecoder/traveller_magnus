@@ -335,9 +335,15 @@
             if (expSorted.join(' ') !== actSorted.join(' ')) {
                 const label = w.isLunarMainworld ? 'Lunar Mainworld' : 'Mainworld';
                 const msg = `Trade Codes: ${label} at orbit ${w.orbitId || 'Moon'} generated [${actSorted.join(' ')}] but physics dictate [${expSorted.join(' ')}].`;
-                _log(`[FAIL] ${msg}`);
-                results.errors.push({ orbitId: w.orbitId || null, message: msg });
-                dataErrors++;
+                // An expand that keeps the user's codes accepts a mismatch on purpose
+                // (Sean, 2026-11-19 — manifest §0.0.D): log it as a warning, not a failure.
+                if (typeof expandTradeCodeMode === 'function' && expandTradeCodeMode()) {
+                    _log(`[WARN] ${msg} Kept as the user's codes.`);
+                } else {
+                    _log(`[FAIL] ${msg}`);
+                    results.errors.push({ orbitId: w.orbitId || null, message: msg });
+                    dataErrors++;
+                }
             }
         });
 

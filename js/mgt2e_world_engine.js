@@ -801,7 +801,11 @@
 
             // 1. Base Atmosphere Code
             writeLogLine("--- ATMOSPHERE PHYSICS ---");
-            let isMainworldLocked = (w.type === 'Mainworld' && mainworldBase && mainworldBase.atm !== undefined);
+            // A lunar mainworld reaches here as a faux moon relabelled type 'Satellite' (moon pass
+            // below), so it is recognised by its flag too — without that its atmosphere was rolled
+            // fresh and only patched back later by the socio pass (manifest §0.0.D, 2026-11-19).
+            const _isMainworldBody = (w.type === 'Mainworld' || w.isLunarMainworld === true);
+            let isMainworldLocked = (_isMainworldBody && mainworldBase && mainworldBase.atm !== undefined);
             let isAtmSeeded = !isMainworldLocked && Array.isArray(w._manualFields) && w._manualFields.includes('atmCode') && w.atmCode !== undefined;
             // A typed (seeded) atmosphere is protected exactly like a locked mainworld's (Sean,
             // 2026-11-18): Runaway Greenhouse still rolls and still flags the world Boiling but
@@ -1433,7 +1437,7 @@
             tSection('Hydrographics');
             const _seedHydro = Array.isArray(w._manualFields) && w._manualFields.includes('hydroCode') && w.hydroCode !== undefined ? w.hydroCode : undefined;
             w.hydroCode = 0;
-            if (w.type === 'Mainworld' && mainworldBase && mainworldBase.hydro !== undefined) {
+            if (_isMainworldBody && mainworldBase && mainworldBase.hydro !== undefined) {
                 tSkip('Mainworld Hydro Inherited');
                 w.hydroCode = mainworldBase.hydro;
             } else if (_seedHydro !== undefined) {

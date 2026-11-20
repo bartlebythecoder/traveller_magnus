@@ -153,6 +153,18 @@
     }
 
     /**
+     * The mainworld's trade codes during a top-down pass. Normally a fresh calculation; while an
+     * expand keeps the user's codes (core.js beginExpandTradeCodes, manifest §0.0.D 2026-11-19)
+     * the original codes are kept and, in 'add' mode, Sa is added if placement made it a moon.
+     */
+    function mainworldTradeCodes(w) {
+        const calculated = calculateMgT2ETradeCodes(w);
+        return (typeof resolveExpandTradeCodes === 'function')
+            ? resolveExpandTradeCodes(calculated, [['Sa']])
+            : calculated;
+    }
+
+    /**
      * Generate subordinate world social characteristics
      * @param {Object} body - World or moon object
      * @param {Object} mainworld - Mainworld baseline data
@@ -405,7 +417,7 @@
         syncUWP(w); 
 
         // Apply trade codes (recognizing its status)
-        w.tradeCodes = calculateMgT2ETradeCodes(w);
+        w.tradeCodes = mainworldTradeCodes(w);
 
         w.navalBase = mainworldBase.navalBase;
         w.scoutBase = mainworldBase.scoutBase;
@@ -562,7 +574,7 @@
             delete base._extSocioFrozen;
             if (mainworld && base !== mainworld) {
                 Object.assign(mainworld, base);
-                mainworld.tradeCodes = calculateMgT2ETradeCodes(mainworld);
+                mainworld.tradeCodes = mainworldTradeCodes(mainworld);
                 delete mainworld._extSocioFrozen;
             }
             tResult('Extended Socioeconomics', 'Carried forward unchanged (frozen)');
@@ -2052,9 +2064,9 @@
             // codes (e.g. no Hi/Ht/Lo/Sa) that differ from MgT2E expectations, which
             // would cause the post-generation audit to flag a trade-code mismatch for
             // every system expanded from a CT mainworld baseline.
-            mainworld.tradeCodes = calculateMgT2ETradeCodes(mainworld);
+            mainworld.tradeCodes = mainworldTradeCodes(mainworld);
         }
-    
+
         return sys;
     }
 
@@ -2694,4 +2706,5 @@
     exports.generateExtendedSocioeconomics = generateExtendedSocioeconomics;
     exports.finalizeSubordinateSocial = finalizeSubordinateSocial;
     exports.generateMainworldUWP = generateMainworldUWP;
+    exports.calculateMgT2ETradeCodes = calculateMgT2ETradeCodes; // the expand dialog's UWP check
 }));

@@ -981,6 +981,15 @@ const SystemEditor = (() => {
             if (el.open) openStarIds.add(el.getAttribute('data-star-id'));
         });
         const primaryStarOpen = !!(treeEl.querySelector('details[data-primary-star]') || {}).open;
+        // A star's "Derived Properties" group too — without this, every edit in it closed it
+        // (user report, 2026-11-19).
+        const openDerivedStarIds = new Set();
+        treeEl.querySelectorAll('details[data-derived-star-id]').forEach(el => {
+            if (el.open) openDerivedStarIds.add(el.getAttribute('data-derived-star-id'));
+        });
+        // And the field the user had moved to, so typing can go on after the rebuild.
+        const _ae = document.activeElement;
+        const focusKey = (_ae && treeEl.contains(_ae)) ? _ae.getAttribute('data-se-key') : null;
         treeEl.innerHTML = '';
 
         const P = {
@@ -1050,7 +1059,7 @@ const SystemEditor = (() => {
         }
 
         // ── Helper: numeric input row for derived stellar properties (null = auto-derive)
-        function _derivedRow(labelText, value, unit, onSet) {
+        function _derivedRow(labelText, value, unit, onSet, key) {
             const row = document.createElement('div');
             Object.assign(row.style, { display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px', fontSize: '11px' });
             const lbl = document.createElement('label');
@@ -1061,6 +1070,7 @@ const SystemEditor = (() => {
             inp.type = 'number'; inp.step = 'any';
             inp.value = value != null ? String(+value.toFixed(5)) : '';
             inp.placeholder = 'auto';
+            if (key) inp.setAttribute('data-se-key', key);
             Object.assign(inp.style, {
                 width: '78px', background: 'transparent',
                 border: `1px solid ${P.border}`,
@@ -1079,7 +1089,11 @@ const SystemEditor = (() => {
                     if (!isNaN(n)) {
                         inp.style.color = P.accent;
                         onSet(n);
-                        _preview();
+                        // Deferred: 'change' fires as focus leaves this box, before the click or
+                        // Tab lands in the next one. Previewing now rebuilds the tree under that
+                        // click, so focus was lost. After a tick, the rebuild sees the new focus
+                        // and restores it (focusKey in _renderEditorTree).
+                        setTimeout(_preview, 0);
                     }
                 }
             });
@@ -1091,6 +1105,8 @@ const SystemEditor = (() => {
             const clearBtn = document.createElement('button');
             clearBtn.textContent = '×';
             clearBtn.title = 'Clear — engine auto-derives on next update';
+            // Out of the Tab order, so Tab goes field to field (emptying a field clears it too).
+            clearBtn.tabIndex = -1;
             Object.assign(clearBtn.style, {
                 background: 'none', border: 'none', color: P.dim,
                 cursor: 'pointer', fontSize: '13px', padding: '0 2px', lineHeight: '1',
@@ -1157,6 +1173,8 @@ const SystemEditor = (() => {
         function _buildDerivedGroup(star) {
             const grp = document.createElement('details');
             Object.assign(grp.style, { marginTop: '4px', fontSize: '11px' });
+            grp.setAttribute('data-derived-star-id', star._id);
+            if (openDerivedStarIds.has(star._id)) grp.open = true;
             const sum = document.createElement('summary');
             sum.textContent = 'Derived Properties';
             Object.assign(sum.style, { cursor: 'pointer', color: P.sub, userSelect: 'none', padding: '1px 0' });
@@ -1169,7 +1187,7 @@ const SystemEditor = (() => {
                 pad.appendChild(_derivedRow(label, fmt(star[field]), unit, val => {
                     _pushHistory(); star[field] = val;
                     _setManualField(star, field, val != null);
-                }));
+                }, `${star._id}:${field}`));
             });
 
             grp.appendChild(pad);
@@ -2028,6 +2046,11 @@ const SystemEditor = (() => {
 
         primaryEl.appendChild(primaryBodyContainer);
         treeEl.appendChild(primaryEl);
+
+        if (focusKey) {
+            const back = treeEl.querySelector(`[data-se-key="${CSS.escape(focusKey)}"]`);
+            if (back) back.focus();
+        }
     }
 
     // ── Build editor panel ────────────────────────────────────────────────────
@@ -2470,9 +2493,11 @@ const SystemEditor = (() => {
     }
 
     // Restores the pre-preview hexStates snapshot, redraws, and refreshes the viewer.
-    function _restorePreview() {
-        if (!_previewOriginalState) return;
-        const { hexId, existed, state } = _previewOriginalState;
+    // Takes the snapshot as an argument: the Discard handler closes the editor first (which
+    // clears _previewOriginalState) and passes the snapshot it saved.
+    function _restorePreview(snapshot) {
+        if (!snapshot) return;
+        const { hexId, existed, state } = snapshot;
         _previewOriginalState = null;
         if (typeof hexStates !== 'undefined') {
             if (!existed) {
@@ -2789,7 +2814,15 @@ const SystemEditor = (() => {
             _showWarn('Discard Changes?',
                 'You have unsaved changes. Discard them and close the editor?',
                 [
-                    { label: 'Discard',      cls: 'btn-cancel', onClick: () => { _restorePreview(); _forceClose(); } },
+                    // Close first, then restore. _restorePreview closes the System Viewer, which
+                    // calls SystemEditor.close() again; with the editor still open and dirty that
+                    // showed "Discard Changes?" a second time (2026-11-19). Same order as
+                    // _finishFillAndSave.
+                    { label: 'Discard',      cls: 'btn-cancel', onClick: () => {
+                        const snapshot = _previewOriginalState;
+                        _forceClose();
+                        _restorePreview(snapshot);
+                    } },
                     { label: 'Keep Editing', cls: 'btn-save',   onClick: () => {} },
                 ]
             );

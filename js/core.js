@@ -5,7 +5,7 @@
 // -----------------------------------------------------------------------------
 // Global Constants
 // -----------------------------------------------------------------------------
-const APP_VERSION = "v0.19.0";
+const APP_VERSION = "v0.19.0.1";
 
 // -----------------------------------------------------------------------------
 // Application State
@@ -760,6 +760,69 @@ function clearManual(obj, field) {
     } else {
         obj._manualFields = obj._manualFields.filter(f => f !== field);
     }
+}
+
+// =====================================================================
+// EXPAND TRADE-CODE MODES (rulings, Sean, 2026-11-19 — manifest §0.0.D)
+// =====================================================================
+// Every Expand System (CT, MgT2E, T5) asks how to treat the mainworld's trade codes:
+//   'add'    — keep every existing code; obey the placement codes it has (Sa, and in T5 Lk,
+//              Tz and the climate codes); placement codes it lacks are rolled and added.
+//   'exact'  — keep the codes exactly; placement must fit them (no Sa → never a moon).
+//   'recalc' — today's behaviour: every code rebuilt from the UWP and the new placement.
+// The expand handler opens a session per hex around the engine call; the engines read it
+// through the functions below. No session (or 'recalc') means every engine behaves as before,
+// so full Generate System runs and the System Editor are untouched.
+
+let _expandTradeCodeSession = null;
+
+/** Trade codes as an array: saves and imports carry either an array or a space-separated string. */
+function normalizeTradeCodeList(codes) {
+    if (Array.isArray(codes)) return codes.filter(c => typeof c === 'string' && c.trim()).map(c => c.trim());
+    if (typeof codes === 'string') return codes.split(/[\s,]+/).filter(Boolean);
+    return null;
+}
+
+/**
+ * Opens a trade-code session for one hex's expand. A mainworld with no trade-code list at all
+ * has nothing to keep, so it falls back to 'recalc' (as before).
+ * @returns {string} the mode actually in force for this hex.
+ */
+function beginExpandTradeCodes(mode, baseData) {
+    _expandTradeCodeSession = null;
+    if (mode !== 'add' && mode !== 'exact') return 'recalc';
+    const original = normalizeTradeCodeList(baseData ? baseData.tradeCodes : null);
+    if (!original) return 'recalc';
+    _expandTradeCodeSession = { mode, original };
+    return mode;
+}
+
+function endExpandTradeCodes() { _expandTradeCodeSession = null; }
+
+/** 'add' or 'exact' while an expand keeps codes; null when codes are recalculated (or no expand). */
+function expandTradeCodeMode() { return _expandTradeCodeSession ? _expandTradeCodeSession.mode : null; }
+
+/** Does the mainworld being expanded carry this code (as it was before the expand)? */
+function expandOriginalHas(code) {
+    return !!_expandTradeCodeSession && _expandTradeCodeSession.original.includes(code);
+}
+
+/**
+ * The mainworld's final trade codes for an expand.
+ * @param {string[]} calculated - what the engine worked out (UWP + placement).
+ * @param {string[][]} placementGroups - the edition's placement codes, grouped so only one
+ *        group member is added ('add' mode adds a group's codes only when the world had none).
+ */
+function resolveExpandTradeCodes(calculated, placementGroups) {
+    const calc = normalizeTradeCodeList(calculated) || [];
+    if (!_expandTradeCodeSession) return calc;
+    const codes = _expandTradeCodeSession.original.slice();
+    if (_expandTradeCodeSession.mode === 'exact') return codes;
+    (placementGroups || []).forEach(group => {
+        if (group.some(c => codes.includes(c))) return;
+        calc.filter(c => group.includes(c)).forEach(c => { if (!codes.includes(c)) codes.push(c); });
+    });
+    return codes;
 }
 
 /**

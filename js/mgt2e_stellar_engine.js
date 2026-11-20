@@ -1541,9 +1541,18 @@
         // 4. Planetoid Belts
         // 5. Terrestrial Planets
 
+        // Expand trade-code modes (Sean, 2026-11-19 — manifest §0.0.D): when the expand keeps
+        // the mainworld's codes, its Sa alone decides whether it is a moon — never an isMoon
+        // flag left over from an earlier expand. 'exact' also forbids the anchor-collision
+        // demotion below for a world without Sa.
+        const _tcMode = (typeof expandTradeCodeMode === 'function') ? expandTradeCodeMode() : null;
+        const _tcWantsSa = !!_tcMode && expandOriginalHas('Sa');
+        const _tcForbidMoon = _tcMode === 'exact' && !_tcWantsSa;
+
         let queue = [];
         if (mainworldBase) {
-            const isPreMoon = mainworldBase.isMoon || (mainworldBase.tradeCodes && mainworldBase.tradeCodes.includes('Sa'));
+            const isPreMoon = _tcMode ? _tcWantsSa
+                : (mainworldBase.isMoon || (mainworldBase.tradeCodes && mainworldBase.tradeCodes.includes('Sa')));
             if (isPreMoon) {
                 if (sys.gasGiants === 0) {
                     sys.gasGiants = 1;
@@ -1569,10 +1578,10 @@
         // For pre-defined lunar mainworlds (isPreMoon flag or 'Sa' trade code),
         // guarantee the parent body occupies the baseline orbit BEFORE random
         // placement begins. This removes reliance on probabilistic GG collision.
-        const interceptNeeded = mainworldBase && (
+        const interceptNeeded = mainworldBase && (_tcMode ? _tcWantsSa : (
             mainworldBase.isPreMoon === true ||
             (mainworldBase.tradeCodes && mainworldBase.tradeCodes.includes('Sa'))
-        );
+        ));
 
         if (interceptNeeded && slots.length > 0) {
             // Locate a parent first — only dequeue the Mainworld if a valid parent exists
@@ -1694,7 +1703,7 @@
                 // If the slot is the Mainworld's Anchor index, we MUST trigger the demotion rule (Item 4).
                 // Guard: only fires ONCE. After the first demotion, subsequent bodies at targetIdx use
                 // normal bumping — without this guard, GG2/GG3 wrongly get isLunarMainworld=true.
-                if (mainworldBase && currentIdx === targetIdx && wInfo.type !== 'Mainworld' && !mainworldDemoted) {
+                if (mainworldBase && currentIdx === targetIdx && wInfo.type !== 'Mainworld' && !mainworldDemoted && !_tcForbidMoon) {
                     // Logic: GG always overlaps Mainworld. Belt overlaps Size 1 Mainworld.
                     let shouldOverlap = (wInfo.type === 'Gas Giant') || (wInfo.type === 'Planetoid Belt' && (mainworldBase.size || 7) === 1);
 
@@ -1717,7 +1726,7 @@
                                 uwpSecondary: mainworldBase.uwpSecondary,
                                 starport: mainworldBase.starport,
                                 travelZone: mainworldBase.travelZone,
-                                tradeCodes: mainworldBase.tradeCodes,
+                                tradeCodes: Array.isArray(mainworldBase.tradeCodes) ? [...mainworldBase.tradeCodes] : mainworldBase.tradeCodes,
                                 size: (mainworldBase.size !== undefined) ? mainworldBase.size : 7,
                                 atm: mainworldBase.atm,
                                 hydro: mainworldBase.hydro,
@@ -1836,7 +1845,9 @@
                         world.uwpSecondary = mainworldBase.uwpSecondary;
                         world.starport = mainworldBase.starport;
                         world.travelZone = mainworldBase.travelZone;
-                        world.tradeCodes = mainworldBase.tradeCodes;
+                        // A copy: the demotion below pushes Sa into this list, which must not
+                        // reach back into mainworldBase (the hex's saved mainworld).
+                        world.tradeCodes = Array.isArray(mainworldBase.tradeCodes) ? [...mainworldBase.tradeCodes] : mainworldBase.tradeCodes;
                         world.pop = mainworldBase.pop;
                         world.gov = mainworldBase.gov;
                         world.law = mainworldBase.law;

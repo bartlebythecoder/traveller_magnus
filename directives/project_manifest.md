@@ -80,7 +80,7 @@ with measured numbers, give ONE recommendation, ask with the question tool, buil
    himself. **Do not record commit hashes or the commit position in this document.** If you
    need to know what is committed, ask him.
 
-### 0.0.D HANDOFF — v0.19.0 in progress (updated 2026-11-18). START HERE.
+### 0.0.D HANDOFF — v0.19.0 in progress (updated 2026-11-19). START HERE.
 
 **v0.19.0 is built but not released** (changelog "In Progress", not dated). Built: the
 wiki-published systems work (fetcher, parser, build step, loader, import checkboxes, menu
@@ -701,6 +701,255 @@ for every engine but CT. Generation rolls them (moon-size result R, `mgt2e_world
   giant and the planet each hoverable). `sectors/solo_6.json` (no `rings` field anywhere): +Ring
   on 8 systems kept, no-edit Save of 12 adds none, save → `applyLoadedMapData` round trip keeps
   all 8; no console errors.
+
+#### USER BUG REPORT 2026-11-19 — MgT2E System Editor (K7 V system, hex 0708) — NOT STARTED
+
+The user rebuilt a World Builder's Handbook system by hand on the **live site**
+(`bartlebythecoder.github.io/traveller_magnus/hex_map.html`), MgT2E. Two reports.
+
+**Bug A — "Derived Properties" collapses after every star field edit.** Typing a value (mass,
+luminosity …) and clicking the next box closes the group; values do persist.
+* Likely cause (read, not yet proven): `_derivedRow`'s `change` handler (`system_editor.js`
+  ~1070) calls `_preview()`, which backfills and re-renders the tree via `_renderEditorTree`
+  (~969). That function saves the open state of body, companion-star and primary-star
+  `<details>` but **not** the `<details>` built by `_buildDerivedGroup` (~1157), so it is
+  rebuilt closed. The click on the next box also lands on an element that is then destroyed,
+  so focus is lost too.
+**BUILT 2026-11-19 (v0.19.0.1 changelog item 1).** Cause confirmed: `_preview()` backfills and
+calls `_renderEditorTree()`, which rebuilt the group closed. As built, all in `system_editor.js`:
+* The group carries `data-derived-star-id`; `_renderEditorTree` records open groups with the
+  other open sets and reopens them.
+* Each derived input carries `data-se-key` (`<starId>:<field>`); the rebuild refocuses the
+  input that had focus. Generic: any input given a `data-se-key` gets the same.
+* `_derivedRow`'s change handler runs `setTimeout(_preview, 0)`, not `_preview()`: `change` fires
+  as focus leaves, *before* the click/Tab lands in the next box, so a synchronous rebuild saw no
+  new focus. If Save is clicked first, the deferred Preview is a no-op (`_workingCopy` null).
+* The × clear buttons are `tabIndex = -1`, so Tab goes field to field (emptying a field also
+  clears it). Without this, Tab landed on the × and focus was lost on the rebuild.
+* Only this `<details>` lacked open-state handling (body, companion, primary already had it).
+  No saved field touched.
+**Verified (Playwright, real clicks/keys):** MgT2E primary: type Mass → click Lum → group open,
+focus Lum; type + Tab → Diam; Tab → Temp; Shift+Tab back. Every star group in 8 systems each of
+MgT2E/CT/T5: 35 groups (11 companions), all stay open with focus on the clicked field, value
+kept, no page errors. With the fix switched off: group closed, focus on `<body>` — as reported.
+
+**FOUND WHILE TESTING — FIXED 2026-11-19 (v0.19.0.1 changelog item 2), Sean approved:** after an edit, Cancel → Discard
+shows "Discard Changes?" a **second** time (editor already closed; the dialog just sits there).
+Cause: the Discard handler runs `_restorePreview()`, which calls `SystemViewer.close()`, which
+calls `SystemEditor.close()` re-entrantly *before* `_forceClose()` has cleared `_workingCopy`, so
+`_isDirty()` is still true. `_finishFillAndSave` already avoids this (comment at ~2701) by force-
+closing first. **As built:** the Discard onClick saves `_previewOriginalState`, calls
+`_forceClose()`, then `_restorePreview(snapshot)` (which now takes the snapshot as an argument;
+it has no other caller). **Verified, real clicks:** Cancel → Discard: one dialog, map restored,
+orrery reopened; closing the orrery with unsaved edits → Discard: one dialog, map restored,
+orrery closed; Cancel → Keep Editing: editor stays open with the edit. With the old order the
+stray dialog returns and blocks the next editor's buttons. No page errors.
+
+**Test-harness trap (cost this session one false result):** `SystemEditor.openEdit()` is a
+silent no-op while an editor is already open, and the second Discard dialog above covers the
+next editor. A loop over systems must close the editor (and the orrery) and check the panel
+shows the new hexId, or it re-tests the first system over and over and reports clean.
+
+**Bug B — adding moons to any planet puts rings round the first gas giant (0708-III, GS, which
+has no moons).** Screenshot: ~12 concentric rings on 0708-III; its orrery tooltip has **no
+"Rings: N" line**, so the live site predates the 2026-11-18 ring work above.
+* Strong hypothesis: this is the bug fixed in that work — the MgT2E adapter's `write()` passed
+  the saved map's own `_raw.rings` array to the engine, which `push()`ed rolled rings into it on
+  every Preview, so rings accumulate with each +Moon/Preview. Moons shift the dice, so where a
+  ring roll lands moves around, which fits "any planet's moons → the first GG".
+Next steps:
+1. [x] **Asked Sean 2026-11-19:** the live site is **older** than the 2026-11-18 ring/adapter
+   work: the user runs **v0.18.3**. So the user's build has the `_raw.rings` aliasing bug, and
+   the unreleased v0.19.0 fix (adapter `write()` sends fresh ring copies) may already cure it.
+   Step 2 tests current code to confirm; if clean, Bug B closes as "fixed in v0.19.0".
+2. [x] **Current code is clean (2026-11-19).** Playwright, real MgT2E bottom-up map (8×10
+   block, 42 systems): on 40 systems (each confirmed open in the editor), two rounds of +Moon on
+   every body (814 clicks, each an auto-Preview), ring totals in `hexStates` after each →
+   **0 systems grew**; Cancel → Discard restored every ring count; on 20 systems +Moon ×3 →
+   Save, then Preview + Save twice → ring counts stable. No page errors. (A first run reported
+   1,040 clean clicks but had silently re-tested system 0102 only — see the harness trap under
+   Bug A.) Script: session scratchpad only (not committed).
+3. [x] **Cause proven.** With the adapter's `write()` switched back to passing `_raw.rings`
+   directly: system 0102 climbed 3 → 13 rings across the +Moon clicks, and **Cancel → Discard
+   did not undo it** (Preto VII 2 → 7, Preto XIII 0 → 5 stayed in the map). Only 1 of 40
+   systems did it: the bug needs a world that already has rolled rings. Fix restored, re-run.
+   **So Bug B = fixed in v0.19.0, by the 2026-11-18 adapter change. Ships with v0.19.0.**
+4. [—] Not needed: current code does not grow rings.
+5. [ ] Check a **saved map already damaged** on the old build: do the extra rings now persist
+   in the user's save? (Step 3 says yes: the extra rings land in the map itself, even after
+   Discard, so any later map save keeps them. v0.19.0 will not remove them.)
+   **Ruling, Sean 2026-11-19 — do not reopen: no repair.** Extra rings already saved by
+   v0.18.3 are left as they are; the user can delete them in the editor (✕ on each ring). Decide with Sean whether to offer a repair (rings beyond what one
+   generation can roll) or leave it. Ruling needed — don't build a repair unasked.
+6. [ ] Reply to the user once both are understood (Sean sends it).
+
+#### USER BUG REPORT 2026-11-19 — EXPAND DROPS TYPED TRADE CODES (rulings, Sean, 2026-11-19) — BUILT (v0.19.0.1 items 3–8)
+
+**The report.** A user generated an MgT2E mainworld, edited its UWP, name and trade codes in
+the hex editor, then ran MgT2E Expand System and Expand Social. The typed codes were lost and
+some of the original generated codes came back.
+
+**Reproduced 2026-11-19 (browser, v0.19.0.1).** MgT2E: generated `B330ABC-G` "De Hi Ht Na Po",
+edited to `B36554C-G` "Ag Ri" → after Expand System "De Hi Ht Na Po Sa". CT: typed codes lost
+on 6/6 hexes; a typed Sa never made a moon. T5: typed codes mostly kept, but 5/30 typed "Ag Ri"
+worlds became moons and had their codes recalculated, and climate codes were added.
+
+**Causes found (read and reproduced):**
+1. **Stale UWP copies.** A generated MgT2E mainworld stores each digit twice (`atm`/`atmCode`,
+   `hydro`/`hydroCode`, `pop`/`popCode`, `gov`/`govCode`, `law`/`lawCode`, `tl`/`tlCode`;
+   `mgt2e_socio_engine.js` ~2683). `saveHexEditorChanges` (`hex_editor.js` ~3154) updates only
+   the plain digits. `generateExtendedSocioeconomics` copies the old copies onto the placed
+   mainworld (`Object.assign(mainworld, base)`, ~2050) and `calculateMgT2ETradeCodes` reads the
+   `*Code` fields first (~56) → the pre-edit codes return. It also leaves `atm` 6 / `atmCode` 3.
+2. **Expands always recalculate the mainworld's codes.** MgT2E: `refreshMainworldSocialInPlace`
+   (~408), the frozen-snapshot branch (~565) and ~2055; Sa is also pushed at
+   `mgt2e_stellar_engine.js` ~1623 and ~1741. CT: `ct_topdown_generator.js` ~418, and the
+   handler copies the result over `ctData` (`ui_menus.js` ~620). T5: the lunar recompute
+   (`t5_topdown_generator.js` ~537) and the ungated climate step (~586–594).
+   MgT2E Expand Social on its own keeps them (`mgt2e_topdown_generator.js` ~353 copies back).
+3. **Hex editor saves a lunar mainworld's edits onto the wrong body.** It looks only in the
+   top-level list (`hex_editor.js` ~3295) and falls back to `worlds[0]` (a gas giant was
+   renamed "Testworld" and given the UWP and codes).
+4. **MgT2E lunar mainworld skips the atmosphere and hydrographics locks.** The moon pass
+   relabels it `type = 'Satellite'` (`mgt2e_world_engine.js` ~1571); the locks test
+   `type === 'Mainworld'` (~804, ~1436). Atmosphere was rolled 0 instead of 6 and only patched
+   later, so values derived from it in between may be wrong. Not yet traced further.
+5. **Placement ignores the codes.** MgT2E: a gas giant landing on the mainworld's anchor slot
+   demotes it to a moon whatever the codes say (`mgt2e_stellar_engine.js` ~1697); `isMoon` left
+   over from an earlier expand also forces a moon (~1546). CT: never reads Sa; the mainworld
+   is a moon only if it needs the HZ orbit and a gas giant sits there (`ct_topdown_generator.js`
+   ~314). T5: Sa/Lk place a moon (~426), but a Flux roll can make a world with no Sa/Lk a moon
+   (~451).
+6. **T5 Expand System never writes back to `t5Data`** (`ui_menus.js` ~765), so the hex and its
+   `t5System.mainworld` can disagree.
+
+**The conundrum (why a dialog).** A newly generated mainworld never carries Sa, Lk, Tz or a
+climate code in any edition: those describe placement, which isn't decided until the expand.
+Treating every code as fixed would mean an expanded generated mainworld is never a moon and a
+T5 one is nearly always temperate. So the user chooses, per expand.
+
+**Rulings (Sean, 2026-11-19) — decided; do not reopen:**
+1. **Every expand asks how to treat trade codes**, in a dialog shown once per expand action for
+   all selected hexes: CT, MgT2E and T5 Expand System, and MgT2E Expand Social when the hex
+   has no system yet (it runs a full top-down expand). Last choice remembered for the session.
+   1. **Keep codes, add placement codes — the default.** The mainworld's existing codes are
+      never removed or changed. Existing placement codes are obeyed: Sa (T5: Sa or Lk) makes it
+      a moon; T5 Tz puts it in orbit 0 or 1; a T5 climate code moves its orbit to fit. If it
+      has none, placement is rolled as today and the codes that placement produces are added.
+   2. **Keep codes exactly.** Nothing added or removed. Placement must fit the codes: no Sa →
+      never a moon; a T5 world with no climate code stays off HZ ±1 and off orbits 0–1.
+   3. **Recalculate all codes.** Today's behaviour: rebuilt from the UWP and the new placement.
+2. **Codes that contradict the UWP:** warn, then accept the user's codes (e.g. Ag on a world
+   with no water). The same applies where a code can't be reached (Ho/Tr when the HZ is orbit 0).
+   The audit logs a warning, not a FAIL (`mgt2e_uwp_auditor.js` ~335 and the CT/T5 auditors).
+3. **Mongoose expanding a T5 world: only Sa controls placement.** T5-only codes (Lk, Fr, Co,
+   Ho, Tz …) are kept as written but don't shape the system; the dialog warns that results may
+   look unusual. In T5's own expand, Lk keeps forcing a Close satellite as it does today.
+4. **T5 expand: a climate code moves the orbit to match Chart D** (`rules/t5_data.js` ~222:
+   Tr/Ho at HZ −1, Tu/Co at HZ +1, Fr at HZ +2 or beyond; Tz orbit 0/1, standalone only).
+   This narrows the 2026-11-01 ruling "the climate code follows the world's position" for
+   expands that keep codes; option 3 keeps the old behaviour.
+5. **Where a code allows several orbits (Fr, Tz), take the nearest valid orbit** to the rolled
+   target (HZ + variance). If it is taken, the next-free-orbit search stays within valid orbits.
+6. **CT: Sa in a system with no gas giant adds one** and makes the mainworld its moon, as
+   MgT2E already does (`mgt2e_stellar_engine.js` ~1548). The hex's gas giant flag follows.
+7. **Scope:** all three editions. Not affected: full Generate System (top-down and bottom-up),
+   the System Editor, and codes on bodies other than the mainworld.
+8. **Only for a hex with a mainworld already** (entered manually or from Generate Mainworld).
+
+**Engineering decisions (no ruling needed):**
+* No new saved field: the dialog's choice covers all of a world's codes, whoever set them, so
+  the hex editor need not mark typed codes and older saves load as before.
+* One warning list in the dialog (UWP contradictions; Mongoose-on-T5), not separate pop-ups.
+* Fix causes 1, 3, 4 and 6 in the same change: the hex editor writes the `*Code` copies with
+  the plain digits and finds a lunar mainworld recursively; the MgT2E locks cover a lunar
+  mainworld; T5 Expand System writes its mainworld back to `t5Data`.
+* Placement codes must be judged from the codes, not from leftover `isMoon`/`isLunarMainworld`.
+
+**Next steps:**
+1. [x] Build the dialog and the three modes in all three editions (2026-11-19).
+2. [x] Verify (2026-11-19, below).
+3. [x] Changelog v0.19.0.1 items 3–8 and the identical README copy.
+4. [x] **RULED (Sean, 2026-11-19): Recalculate rerolls moons.** T5 Expand System writes its
+   final codes back to `t5Data`, and T5's engine reads Sa/Lk there as "make it a moon" with no
+   session, so a Recalculate expand would have kept every earlier moon. BUILT: in recalc mode the
+   `ctx-expand-physical-t5` handler hands the generator a copy of the base with Sa/Lk removed
+   (`genBase`); the hex's own `t5Data` is untouched until the final codes are written back.
+   Only the Expand handler does this: Generate System and the System Editor still read Sa/Lk.
+   Verified: 40 hexes typed "Ag Ri Sa", expanded 'add' (40/40 moons, Sa saved), then 'recalc'
+   → 8/40 moons (the lunar Flux rate), 0 Sa-without-moon, 0 moon-without-Sa, hex = system 40/40.
+   Fix off → 40/40 stayed moons. Full harness re-run unchanged, no page errors.
+
+**AS BUILT (2026-11-19):**
+* `core.js` (beside `markManual`): `beginExpandTradeCodes(mode, base)` / `endExpandTradeCodes()`
+  open a per-hex session; `expandTradeCodeMode()` ('add'|'exact'|null), `expandOriginalHas(code)`,
+  `resolveExpandTradeCodes(calculated, placementGroups)` (exact → original; add → original plus
+  a placement group's codes only when the world had none of that group), `normalizeTradeCodeList`.
+  No session or 'recalc' = every engine exactly as before; a mainworld with no trade-code list
+  falls back to 'recalc'. Nothing is saved: no new field.
+* `ui_menus.js`: `askExpandTradeCodeMode(edition, items, note)` (modal `#expand-tc-modal`,
+  default 'add', last choice remembered for the session, Esc/Cancel/backdrop cancels, Enter
+  expands), warnings via `_expandTradeCodeWarnings` (codes vs the expanding edition's own
+  UWP codes, compared within that edition's code list; T5-only placement codes under CT/MgT2E).
+  Wired into CT/MgT2E/T5 Expand System and MgT2E Expand Socioeconomics (asked only when a
+  selected hex has no `mgtSystem`). The T5 handler's old `confirm()` (stars regenerate /
+  manual overrides kept) is now a note inside the dialog, so there is one prompt.
+* MgT2E: `allocateOrbits` takes moon status from Sa only while a session is open, and 'exact'
+  without Sa skips the anchor-collision demotion (the gas giant bumps instead); the mainworld's
+  `tradeCodes` copies are now real copies. `mainworldTradeCodes()` in `mgt2e_socio_engine.js`
+  replaces the three recalcs; `calculateMgT2ETradeCodes` is exported for the dialog. The
+  auditor logs `[WARN]`, not FAIL, for a kept mismatch. `generateMgT2ESystemTopDown` syncs each
+  `*Code` copy to its plain digit (repairs maps already saved with stale copies).
+  `generateAtmospherics` locks atmosphere and hydrographics for `isLunarMainworld` too.
+* CT (`ct_topdown_generator.js` 5a-ii): Sa → a gas giant is added if none (rolled 1D ≤3 Large,
+  as `rollSystemSkeleton` does), the nearest gas giant moves into the HZ target orbit when the
+  world needs it, and the mainworld becomes its moon (`attachAsMoon`); 'exact' without Sa moves
+  a gas giant out of the HZ target orbit and never displaces onto one. Moon flags carried in from
+  an earlier expand are stripped before placement (all modes).
+* T5 (`t5_topdown_generator.js`): Sa/Lk decide moon status while a session is open; 'exact'
+  skips the lunar Flux roll; `_climateFitOrbit` places the mainworld (or its parent) at the
+  nearest free orbit whose Chart D code matches the kept climate code ('' in 'exact' when it has
+  none), else by the code's position alone, else normally (all logged with `_tResult`).
+  `findAvailableOrbit` gained an optional `allowOrbit` filter. The handler copies the final
+  codes back to `t5Data` (T5 mainworlds only).
+* Hex editor: writes `atmCode … tlCode` with the plain digits on the MgT2E objects, and finds a
+  lunar mainworld recursively.
+
+**Found while building (fixed, outside the rulings — tell Sean):**
+* **CT asteroid mainworld** (`ct_topdown_generator.js` 5d): the mainworld was copied onto the
+  belt object, so `sys.mainworld` (→ `ctData`) was a second object the later passes never
+  touched and kept its old codes. Now one object, same fields (changelog item 7).
+
+**Things that behave differently now (deliberate, tell Sean):**
+* The lunar-mainworld atmosphere lock changes **fresh** MgT2E generation too: a lunar
+  mainworld no longer rolls its atmosphere, so the dice after that point shift and such a hex
+  generates a different system than v0.19.0 did from the same seed. Saved maps are unaffected
+  until re-expanded. Same seed + same version is still deterministic.
+* T5 'exact' with no climate code can be impossible (HZ at orbit 0 and a world that qualifies
+  for Fr: orbits 0–1 give Tz, 2+ give Fr). The codes are kept as ruled and the trace says why;
+  the dialog does not warn about it in advance (placement isn't known yet).
+
+**Verified 2026-11-19 (Playwright, fresh browser; harness in the session scratchpad only):**
+* MgT2E: the user's case (`B330ABC-G` "De Hi Ht Na Po" edited to `B36554C-G` "Ag Ri") → "Ag Ri
+  Sa" (it rolled a moon), `atmCode` 6 = `atm`, Expand Socioeconomics keeps it and asks nothing.
+  40 hexes typed "Ag Ri": add 40/40 kept, 13 moons, only Sa added; exact 40/40 exactly, 0
+  moons; recalc 40/40 match the UWP. Typed Sa: 15/15 moons in add and exact. Lunar-mainworld
+  hex-editor save lands on the moon; `worlds[0]` untouched. Expand Socioeconomics on a hex with
+  no system shows the dialog and honours 'exact'.
+* CT (30 hexes each): add/exact keep codes (exact: 0 moons), recalc 30/30 match; typed Sa 30/30
+  moons, every system has a gas giant, Sa ⇔ moon everywhere.
+* T5 (30 hexes each): codes kept in add/exact; exact 0 moons without Sa; typed Sa 30/30 moons;
+  hex codes = system codes 180/180; every orbit that doesn't give the kept climate code is a
+  ruled case (UWP can't give it, or its HZ ±1 orbit is star-locked orbit 1).
+* Cross-edition: MgT2E on T5 worlds warns for Fr/Lk; CT on MgT2E worlds keeps "Ht Ri Sa" and
+  makes the moon. Cancel changes nothing; the remembered choice preselects.
+* `sectors/solo_6.json` (v0.13.3): MgT2E expand of 25 hexes keeps all codes; T5 expand of 25;
+  CT expand of 20 MgT2E hexes; no page errors. Full Generate System (MgT2E top-down and
+  bottom-up, 30 hexes each): no dialog, no errors, 9/9 lunar mainworlds `atm` = `atmCode`.
+* **Fix-off runs** (each switched off with Edit, run, restored, re-run green): no
+  `resolveExpandTradeCodes` in MgT2E → typed codes kept 4/40; flat hex-editor search → edits
+  land on `worlds[0]`; T5 lunar roll not gated → 7 moons without Sa in 'exact'; CT `attachAsMoon`
+  off → Sa without a moon on 10/30 and 8/30.
 
 #### OPEN ITEMS — none scheduled; ask Sean before starting any, one question at a time
 

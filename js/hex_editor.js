@@ -3237,10 +3237,15 @@ function saveHexEditorChanges() {
     if (typeof window.invalidateMapLabelCaches === 'function') window.invalidateMapLabelCaches();
     stateObj.notes = notes;
 
+    // MgT2E bodies store each UWP digit twice (atm and atmCode, …) and its trade-code
+    // calculation reads the *Code copy first. Writing only the plain digit left the copy stale,
+    // so an expand brought the pre-edit trade codes back (manifest §0.0.D, 2026-11-19).
+    const mgtCodeCopies = { atmCode: atm, hydroCode: hydro, popCode: pop, govCode: gov, lawCode: law, tlCode: tl };
+
     // 1. Update MgT2E Socio Profile (Expansion or Native)
     // CRITICAL: We update this independently so expansions on T5 worlds persist.
     if (stateObj.mgtSocio) {
-        Object.assign(stateObj.mgtSocio, sharedData, pbgData, mgtSocioInputs, { name });
+        Object.assign(stateObj.mgtSocio, sharedData, mgtCodeCopies, pbgData, mgtSocioInputs, { name });
     }
 
     // 2. Update T5 Socio Overlay
@@ -3255,7 +3260,7 @@ function saveHexEditorChanges() {
             Object.assign(stateObj.t5System.mainworld, sharedData, pbgData, t5SocioInputs, { name });
         }
     } else if (stateObj.mgt2eData) {
-        stateObj.mgt2eData = { ...stateObj.mgt2eData, ...sharedData, ...pbgData, name };
+        stateObj.mgt2eData = { ...stateObj.mgt2eData, ...sharedData, ...mgtCodeCopies, ...pbgData, name };
     } else if (stateObj.ctData) {
         stateObj.ctData = { ...stateObj.ctData, ...sharedData, ...pbgData, name };
     } else if (stateObj.rttData) {
@@ -3291,9 +3296,19 @@ function saveHexEditorChanges() {
     }
 
     // 4. Update internal Mongoose System if present (Multi-layer consistency)
+    // The mainworld may be a moon (lunar mainworld), so search the whole tree: a top-level-only
+    // search fell back to worlds[0] and wrote the edits onto that body instead (2026-11-19).
     if (stateObj.mgtSystem) {
-        let mw = stateObj.mgtSystem.worlds.find(w => w.type === 'Mainworld' || w.type === 'Main World') || stateObj.mgtSystem.worlds[0];
-        if (mw) Object.assign(mw, sharedData, pbgData, mgtSocioInputs, { name });
+        const findMW = (list) => {
+            for (const w of (list || [])) {
+                if (w.type === 'Mainworld' || w.type === 'Main World' || w.isLunarMainworld) return w;
+                const inMoons = findMW(w.moons);
+                if (inMoons) return inMoons;
+            }
+            return null;
+        };
+        let mw = findMW(stateObj.mgtSystem.worlds) || stateObj.mgtSystem.worlds[0];
+        if (mw) Object.assign(mw, sharedData, mgtCodeCopies, pbgData, mgtSocioInputs, { name });
     }
 
     // Re-derive system counts if PBG was edited explicitly

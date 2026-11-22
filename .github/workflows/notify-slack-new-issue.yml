@@ -1,0 +1,50 @@
+# Sends a Slack message whenever a new issue is opened in this repository.
+# Setup: add a repository secret named SLACK_WEBHOOK_URL
+# (Settings -> Secrets and variables -> Actions -> New repository secret).
+
+name: Notify Slack on new issue
+
+on:
+  issues:
+    types: [opened]
+
+permissions: {}   # the job needs no access to the repository
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Post to Slack
+        env:
+          # Issue fields go in through env vars, never pasted straight into the
+          # script, so a malicious issue title can't run shell commands.
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number }}
+          TITLE: ${{ github.event.issue.title }}
+          URL: ${{ github.event.issue.html_url }}
+          AUTHOR: ${{ github.event.issue.user.login }}
+          LABELS: ${{ join(github.event.issue.labels.*.name, ', ') }}
+          BODY: ${{ github.event.issue.body }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_URL secret is not set"; exit 1
+          fi
+          SNIPPET=$(printf '%s' "${BODY:-No description.}" | head -c 400)
+          jq -n \
+            --arg repo "$REPO" --arg num "$NUMBER" --arg title "$TITLE" \
+            --arg url "$URL" --arg author "$AUTHOR" --arg labels "$LABELS" \
+            --arg body "$SNIPPET" '
+            {
+              text: "New issue in \($repo): #\($num) \($title)",
+              blocks: [
+                { type: "section",
+                  text: { type: "mrkdwn",
+                          text: ":new: *<\($url)|#\($num) \($title)>*\nin `\($repo)` by *\($author)*\(if $labels != "" then " | labels: \($labels)" else "" end)" } },
+                { type: "section",
+                  text: { type: "mrkdwn", text: ">\($body | gsub("\n"; "\n>"))" } }
+              ]
+            }' > payload.json
+          curl -sS --fail-with-body -X POST -H 'Content-Type: application/json' \
+            --data @payload.json "$SLACK_WEBHOOK_URL"

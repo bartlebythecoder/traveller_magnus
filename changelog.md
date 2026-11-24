@@ -8,6 +8,7 @@
 7. **Fixed — CT asteroid mainworld trade codes:** expanding a CT system whose mainworld is an asteroid belt now updates the trade codes shown for the hex as well.
 8. **Fixed — T5 hex and system trade codes:** after a T5 Expand System the hex panel shows the same trade codes as the system, climate code included.
 9. **Fixed — T5 Recalculate rerolls moons:** a T5 Expand System with **Recalculate all codes** now rolls afresh whether the mainworld is a moon, instead of keeping it a moon because an earlier expand left Sa or Lk in its codes.
+10. **Changed — Expand System replaces the whole system:** Expand System in CT, MgT2E or T5 (and MgT2E Expand Socioeconomics when it builds a new system) now removes any other edition's system from the hex, including a wiki-published one, where it used to keep the old system hidden behind the new one or hide the new one behind the old, and its dialog now warns which systems will be replaced while every mainworld you imported or typed is kept.
 
 ### [v0.19.0] - 2026-11-19
 1. **New — Wiki-published system data:** 85 systems published on the Traveller wiki (wiki.travellerrpg.com), cleaned into a snapshot taken 2026-11-16 and shipped with the app, can now be loaded as full T5 systems with their stars, planets, moons, rings and belts as published, then edited in the System Editor and exported like any other system.

@@ -783,6 +783,34 @@ Next steps:
    generation can roll) or leave it. Ruling needed — don't build a repair unasked.
 6. [ ] Reply to the user once both are understood (Sean sends it).
 
+#### EXPAND SYSTEM REPLACES THE WHOLE SYSTEM (rulings, Sean, 2026-11-24) — BUILT (v0.19.0.1 item 10)
+
+**Found.** Testing for the FAQ showed that a hex can hold several editions' systems, and the
+orrery, System Sheet and exports show only one (AoW, then MgT2E, CT, T5, RTT). T5 Expand replaced
+only its own system, so on a hex with an MgT2E system the new T5 system was hidden; CT/MgT2E Expand
+on a wiki-published hex kept the published T5 system stored but hidden.
+
+**Rulings (Sean, 2026-11-24).**
+1. Every Expand System (CT, MgT2E, T5) overwrites, as T5 did: keeping and hiding data is not
+   healthy. MgT2E Expand Socioeconomics follows the same rule when it builds a new system (a hex
+   with no MgT2E system).
+2. **Systems only.** Other editions' systems (`ctSystem`, `mgtSystem`, `t5System`, `aowSystem`,
+   `rttSystem`) and the legacy `*Physical` copies are removed. Every edition's mainworld record
+   (`ctData`, `mgt2eData`, `t5Data`, `rttData`) and the socio records stay, so imported or typed
+   mainworlds survive and can be expanded in another edition later.
+3. The dialog warns before anything is replaced.
+
+**As built.** `js/ui_menus.js`: `clearOtherEditionSystems(state, keepEdition)` runs in each handler
+only after a system was actually built; `_expandOverwriteWarnings()` feeds a red box at the top of
+the trade-code dialog (count of hexes with a system, wiki-published ones listed with their snapshot
+date, other-edition ones listed with their editions; Ctrl+Z undoes). The T5 handler's old "Stars
+and orbits will be regenerated" note is replaced by that box; its manual-override note stays. Save
+format unchanged. Verified in-browser 2026-11-24: wiki hex expanded in CT / MgT2E / T5 / MgT2E socio
+each leaves one system, the new one shown, `t5Data` kept; MgT2E→T5 now shows T5; no warning on a
+hex without a system; Ctrl+Z restores the wiki system; Hex Editor opens with no console errors;
+`solo_6.json` (v0.13.3) expanded in all three editions cleanly. Switching the MgT2E clear off made
+the check fail (MgT2E + T5 both kept), as expected.
+
 #### USER BUG REPORT 2026-11-19 — EXPAND DROPS TYPED TRADE CODES (rulings, Sean, 2026-11-19) — BUILT (v0.19.0.1 items 3–8)
 
 **The report.** A user generated an MgT2E mainworld, edited its UWP, name and trade codes in

@@ -457,7 +457,7 @@ function setupGenerationHandlers() {
         const askItems = _expandItems(needsSystem, pickBase);
         if (askItems.length > 0) {
             tcChoice = await askExpandTradeCodeMode('MgT2E', askItems,
-                'Hexes that already have a system keep their codes and placement; this choice is for the ones that don\'t.');
+                'Hexes that already have an MgT2E system keep their codes and placement; this choice is for the ones that don\'t.');
             if (!tcChoice) return;
         }
 
@@ -488,6 +488,8 @@ function setupGenerationHandlers() {
                     } finally {
                         endExpandTradeCodes();
                     }
+                    // A new system replaces any other edition's (Sean, 2026-11-24).
+                    if (newSys) clearOtherEditionSystems(stateObj, 'MgT2E');
                 }
 
                 if (newSys) {
@@ -646,6 +648,8 @@ function setupGenerationHandlers() {
                     } finally {
                         endExpandTradeCodes();
                     }
+                    // A new system replaces any other edition's (Sean, 2026-11-24).
+                    if (sys) clearOtherEditionSystems(stateObj, 'CT');
                     stateObj.ctSystem = sys;
                     if (sys && sys.mainworld) stateObj.ctData = sys.mainworld; // Sync post-expansion mainworld (lunar flags, gasGiant, etc.)
                 }
@@ -704,7 +708,9 @@ function setupGenerationHandlers() {
                     endExpandTradeCodes();
                 }
 
-                // 2. Map the data back to stateObj
+                // 2. Map the data back to stateObj. A new system replaces any other
+                //    edition's (Sean, 2026-11-24).
+                if (newSys) clearOtherEditionSystems(stateObj, 'MgT2E');
                 stateObj.mgtSystem = newSys;
 
                 // Find the mainworld to map the UWP (Recursive to handle Lunar Mainworlds)
@@ -778,9 +784,8 @@ function setupGenerationHandlers() {
             const s = hexStates.get(hexId);
             if (s && s.t5System) totalManualBodies += countT5ManualBodies(s.t5System);
         });
-        const anyExisting = hexList.some(h => { const s = hexStates.get(h); return s && s.t5System; });
-        const note = (anyExisting ? 'Stars and orbits will be regenerated.' : '') +
-            (totalManualBodies > 0 ? ` ${totalManualBodies} body/bodies have manual field overrides; these will be preserved.` : '');
+        // The "will be replaced" warning now comes from the dialog itself (all editions).
+        const note = totalManualBodies > 0 ? `${totalManualBodies} body/bodies have manual field overrides; these will be preserved.` : '';
         const tcChoice = await askExpandTradeCodeMode('T5', _expandItems(hexList, pickBase), note.trim());
         if (!tcChoice) return;
 
@@ -825,6 +830,8 @@ function setupGenerationHandlers() {
                 if (baseData === stateObj.t5Data && sys && sys.mainworld && Array.isArray(sys.mainworld.tradeCodes)) {
                     stateObj.t5Data.tradeCodes = [...sys.mainworld.tradeCodes];
                 }
+                // A new system replaces any other edition's (Sean, 2026-11-24).
+                if (sys) clearOtherEditionSystems(stateObj, 'T5');
                 stateObj.t5System = sys;
                 stateObj.t5Physical = null;
                 stateObj.ctPhysical = null;
@@ -1540,12 +1547,28 @@ function askExpandTradeCodeMode(edition, items, note = '') {
                 </ul>
             </div>`;
 
+        const over = _expandOverwriteWarnings(edition, items);
+        const listHtml = (title, lines) => lines.length === 0 ? '' : `
+                <div style="color:#e0b04a; font-size:0.78rem; margin:8px 0 4px;">${esc(title)}</div>
+                <ul style="margin:0; padding-left:18px; color:#c5c6c7; font-size:0.78rem; max-height:110px; overflow-y:auto;">
+                    ${lines.slice(0, MAX_LINES).map(w => `<li>${esc(w)}</li>`).join('')}
+                    ${lines.length > MAX_LINES ? `<li>…and ${lines.length - MAX_LINES} more</li>` : ''}
+                </ul>`;
+        const overHtml = !over ? '' : `
+            <div id="expand-overwrite-warning" style="border:1px solid #c0392b; background:rgba(192,57,43,0.12); border-radius:6px; padding:10px 12px;">
+                <div style="color:#ff8a7a; font-size:0.82rem; font-weight:bold; margin-bottom:4px;">This replaces existing systems</div>
+                <div style="color:#c5c6c7; font-size:0.78rem;">${esc(over.headline)}</div>
+                ${listHtml('Wiki-published systems that will be lost (LOAD WIKI-PUBLISHED SYSTEM… brings one back):', over.wiki)}
+                ${listHtml(`Systems from other editions that will be removed:`, over.other)}
+            </div>`;
+
         const modal = document.createElement('div');
         modal.id = 'expand-tc-modal';
         modal.style.cssText = 'display:flex; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); z-index:2000; align-items:center; justify-content:center;';
         modal.innerHTML = `
             <div style="background:#1f2833; border:1px solid #45a29e; border-radius:8px; padding:24px; width:520px; max-width:calc(100vw - 32px); max-height:85vh; overflow-y:auto; display:flex; flex-direction:column; gap:14px; box-shadow:0 8px 32px rgba(0,0,0,0.6);">
                 <h3 style="margin:0; color:#66fcf1; font-size:1.1rem;">Expand ${esc(edition)} System — Trade Codes</h3>
+                ${overHtml}
                 <div style="color:#8b9398; font-size:0.8rem;">${items.length} hex(es). How should the mainworld's trade codes be treated?${note ? '<br>' + esc(note) : ''}</div>
                 <div style="display:flex; flex-direction:column; gap:10px;">
                     ${EXPAND_TC_OPTIONS.map(o => `
@@ -1593,6 +1616,59 @@ function _expandItems(hexIds, pickBase) {
         if (base) items.push({ hexId, base, fromT5: !!stateObj.t5Data && base === stateObj.t5Data });
     });
     return items;
+}
+
+// ============================================================================
+// EXPAND OVERWRITES THE SYSTEM (ruling, Sean, 2026-11-24 — manifest §0.0.D)
+// ============================================================================
+// A hex shows one system: the orrery, System Sheet and exports pick AoW, then MgT2E, CT, T5,
+// RTT. So an expand that left another edition's system in place either hid the new system
+// (T5 behind MgT2E/CT) or kept the old one hidden (a wiki-published T5 system behind MgT2E/CT).
+// Every expand that builds a system now removes the other editions' systems. Every edition's
+// mainworld record (ctData, mgt2eData, t5Data, rttData) and the socio records stay, so
+// imported or typed mainworlds survive and can be expanded in another edition later.
+
+const EXPAND_SYSTEM_FIELDS = { CT: 'ctSystem', MgT2E: 'mgtSystem', T5: 't5System', AoW: 'aowSystem', RTT: 'rttSystem' };
+
+/** Removes every system except keepEdition's, plus the legacy *Physical copies. */
+function clearOtherEditionSystems(stateObj, keepEdition) {
+    if (!stateObj) return;
+    Object.keys(EXPAND_SYSTEM_FIELDS).forEach(ed => {
+        if (ed !== keepEdition) stateObj[EXPAND_SYSTEM_FIELDS[ed]] = null;
+    });
+    stateObj.ctPhysical = null;
+    stateObj.mgtPhysical = null;
+    stateObj.t5Physical = null;
+}
+
+/** The systems already in a hex, as edition names, e.g. ['T5'] or ['MgT2E', 'T5']. */
+function _existingSystemEditions(stateObj) {
+    if (!stateObj) return [];
+    return Object.keys(EXPAND_SYSTEM_FIELDS).filter(ed => stateObj[EXPAND_SYSTEM_FIELDS[ed]] != null);
+}
+
+/** Warning lines for the expand dialog: which hexes lose a system, and which are wiki-published. */
+function _expandOverwriteWarnings(edition, items) {
+    let replaced = 0;
+    const wiki = [], other = [];
+    items.forEach(({ hexId }) => {
+        const s = hexStates.get(hexId);
+        const eds = _existingSystemEditions(s);
+        if (!eds.length) return;
+        replaced++;
+        const label = `${hexId.split('-').pop()} ${(s && s.name) || ''}`.trim();
+        const snap = s.t5System && s.t5System.wikiSnapshot;
+        if (snap) wiki.push(`${label} (wiki-published, snapshot ${snap.snapshot || 'unknown date'})`);
+        const others = eds.filter(ed => ed !== edition);
+        if (others.length && !snap) other.push(`${label} (${others.join(', ')})`);
+    });
+    if (!replaced) return null;
+    return {
+        headline: `${replaced} hex${replaced === 1 ? ' already has a system' : 'es already have systems'}. ` +
+            `Expanding replaces ${replaced === 1 ? 'it' : 'them'}: stars, planets and moons are generated afresh, ` +
+            `and any other edition's system in the hex is removed. Ctrl+Z undoes this.`,
+        wiki, other
+    };
 }
 
 function _buildRouteExportModal() {

@@ -30,3 +30,8 @@ Thumbs.db
 # Editor / IDE (local to one machine, not part of the app)
 *.code-workspace
 .vscode/
+
+# Scripts that contact the Traveller wiki (API or scraping). Kept local only, so
+# nothing in the repo can hit the wiki. The offline wiki_parse.py / wiki_build.py stay.
+utilities/scrape_wiki.py
+utilities/wiki_fetch.py

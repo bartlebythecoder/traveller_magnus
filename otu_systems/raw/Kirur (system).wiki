@@ -1,0 +1,50 @@
+[[File: Wiki Navy.png|right]]
+{{InfoboxSystem
+|name=Kirur
+|sector=Ruupiin|subsector=Kirarurr!Ka|hex=1315
+|star='''[[Gzang (star)|Gzang]]'''|type='''F5 V'''
+|P1=???|Dist1=|UWP1=???????-?
+|P2=???|Dist2=|UWP2=???????-?
+|P3=Kirur|Dist3=1.9|UWP3=B863A03-F
+  |P3M1=* ''Kirrixur''|Dist3M1=|UWP3M1=F779A03-C
+|P4=???|Dist4=|UWP4=???????-?
+|P5=???|Dist5=|UWP5=???????-?
+|P6=???|Dist6=|UWP6=???????-?
+|P7=???|Dist7=|UWP7=???????-?
+|P8=???|Dist8=|UWP8=???????-?
+|P9=???|Dist9=|UWP9=???????-?
+|P10=???|Dist10=|UWP10=???????-?
+|P11=???|Dist11=|UWP11=???????-?
+}}
+The worlds of the [[Kirur (system)|Kirur system]], home of the [[K'kree]],  revolve around [[Gzang (star)|Gzang]], a white main sequence star both hotter and brighter then [[Sol (star)|Sol]]. 
+ 
+== Description ([[Specifications]]) ==
+The double-planet [[Kirur (world)|Kirur]]-[[Kirrixur (world)|Kirrixur]] occupies the third orbit from its primary star, [[Gzang (star)|Gzang]], and is the third planet in its star system. Aside from [[Kirur (world)|Kirur]]-[[Kirrixur (world)|Kirrixur]] itself, the [[Kirur (system)|Kirur system]] contains three gas giants, a hot greenhouse world, a hot rock, an asteroid belt, and four iceball-worlds. 
+
+{{MonostellarSystem
+|name           = Kirur
+|PrimaryName    = Gzang
+|primary        = F5 V 
+|PrimaryNotes   = [[Gzang (star)|Gzang]]
+}}
+
+=== The Inner System ===
+''No information currently available.'' 
+
+=== The Outer System ===
+''No information currently available.''
+
+== History & Background ([[Dossier]]) ==
+''No information currently available.'' 
+
+== References & Contributors ([[Sources]]) ==
+{{Intermediate}}
+{{Detail}}
+{{Sources
+|S1= [[K'kree (Alien Module)|K'kree]] (Alien Module 2)
+|S2= [[GURPS Traveller: Alien Races 2]]
+}}
+
+
+[[Category: K'kree]]
+{{LE|System}}

@@ -1,0 +1,34 @@
+{
+  "bodies": {
+    "Jae Tellona (world)|(BigMoon)": {
+      "uwp": "Y???000-0",
+      "uwp_malformed": null,
+      "uwp_source": "Sean, 2026-11-16"
+    },
+    "Jae Tellona (world)|(Moon1)": {
+      "uwp": "Y???000-0",
+      "uwp_malformed": null,
+      "uwp_source": "Sean, 2026-11-16"
+    },
+    "Jae Tellona (world)|(Moon2)": {
+      "uwp": "Y???000-0",
+      "uwp_malformed": null,
+      "uwp_source": "Sean, 2026-11-16"
+    },
+    "Jae Tellona (world)|(Moon3)": {
+      "uwp": "Y???000-0",
+      "uwp_malformed": null,
+      "uwp_source": "Sean, 2026-11-16"
+    }
+  },
+  "infobox_stars": {
+    "Jae Tellona (world)": [
+      {
+        "name": "Dikaai",
+        "type": "F9 V"
+      }
+    ]
+  },
+  "stars_source": "travellermap.com Stellar (Sean, 2026-11-16: TravellerMap wins where the wiki contradicts itself)",
+  "stars_settled": true
+}

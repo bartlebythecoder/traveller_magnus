@@ -1,0 +1,54 @@
+{{InfoboxSystem
+|name=Collette
+|subsector=Gadde
+|sector=Dagudashaag
+|hex=2725
+|star=Primary
+|type=M3 V
+|P0=Collette |Dist0=0.2|UWP0= <small>A542644-C</small>
+|P1=Yoshua |Dist1=0.4|UWP1=<small>Large GG</small>
+ |P1M1=<small>Ring System</small>|Dist1M1=2|UWP1M1=<small>YR00000-0</small>
+ |P1M2=<small>Satellite</small>|Dist1M2=6|UWP1M2=
+ |P1M3=<small>Satellite</small>|Dist1M3=7|UWP1M3=
+ |P1M4=[[Halthome (world)|Halthome]]|Dist1M4=11|UWP1M4=<small>A686510-7</small>
+|P2=Caleb Belt|Dist2=0.7|UWP2=<small>?000???-?</small>
+|P3=Shammua|Dist3=1.0|UWP3=<small>Large GG</small>
+|P4=Maurice|Dist4=1.6|UWP4=
+|P5=Henri|Dist5=2.8|UWP5=
+|P6=Claude|Dist6=5.2|UWP6=
+|P7=Bertran|Dist7=10.0|UWP7=
+|P8=Ammiel|Dist8=19.6|UWP8=<small>Small GG</small>
+|P9=Sidonie|Dist9=38.8|UWP9=
+|P10=Hoshea|Dist10=77.6|UWP10=<small>Small GG</small>
+}}
+The '''Collette [[system]]''' contains a solitary red main sequence [[star]], nine [[world|major bodies]] (of which four are [[gas giant]]s), numerous [[asteroid|minor bodies]], and one [[planetoid belt]]. 
+* The [[mainworld]] in this [[star system]] is the inner planet, named [[Collette (world)|'''Collette''']].
+* [[Halthome (world)|Halthome]] is the outer [[satellite]] of Yoshua, a [[large gas giant]] lying in orbit 1.
+
+== Description ([[Specifications]]) ==
+The major settlements within the [[system]] are located on [[Collette (world)|Collette]], the [[mainworld]], and on [[Halthome (world)|Halthome]], the outer moon of Yoshua.
+* [[Collette (world)|Collette]] is the [[subsector]] [[capital]].
+* It is the location of a [[Naval Base]].
+* It is the site of a [[Scout Base]].
+
+== History & Background ([[Dossier]]) ==
+During the [[Long Night]] Collette was named ''Madaa''.
+
+The [[planetoid belt]] and the [[Gas Giant]]s within the [[system]] are named for ancient [[Terra]]n religious figures. Smaller rocky worlds are named for individuals associated with the pre-[[Interstellar Wars]] era [[Terra]]n literary figure Collette.
+ 
+=== Image Repository ===
+[[TravellerMap]] <small>([[T5SS]])</small>: <br> [https://travellermap.com/?x=-5.629&y=15.5&scale=128]
+
+== References & Contributors ([[Sources]]) ==
+{{Intermediate}}
+{{Sources
+|S1= {{Ludography cite|name=Signal-GK 06|page=5|article=Library Data: Gadde}}
+|S2= {{Ludography cite|name=Encyclopaedia Dagudashaag|page=71}}
+|S3= [[Dagudashaag Development Team]]
+|S4= [[Traveller Wiki Editorial Team]]
+|S5= Author & Contributor: Lord (Marquis) and Master Scout Emeritus [[Adie Alegoric Stewart]] of the [[IISS]]
+|S6= Author & Contributor: Lord (Marquis) and Master of Sophontology [[Maksim-Smelchak]] of the [[Ministry of Science]]
+}}
+
+
+{{LEN|T5 Second Survey worlds}}

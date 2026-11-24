@@ -1,0 +1,602 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Aldebaran",
+  "hex": "0606",
+  "sector_abbreviation": "Alde",
+  "subsector": "Euxene",
+  "name": "Daedalus",
+  "sources": [
+    {
+      "page": "Daedalus (Al 0606) (world)",
+      "revid": 910993,
+      "timestamp": "2025-03-23T08:17:49Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Daedalus (Al 0606) (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Primary",
+          "type": "G6 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Primary",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "G6 V"
+        }
+      ],
+      "labels": [
+        "Daedalus"
+      ],
+      "pages": [
+        "Daedalus (Al 0606) (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Sparc",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "0.15",
+            "value": 0.15,
+            "unit": "AU"
+          },
+          "sources": [
+            "Daedalus (Al 0606) (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Planet 2",
+          "raw": "H300117-9",
+          "kind": "world",
+          "uwp": "H300117-9",
+          "distance": {
+            "raw": "0.35",
+            "value": 0.35,
+            "unit": "AU"
+          },
+          "sources": [
+            "Daedalus (Al 0606) (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Daedalus",
+          "raw": "A668889-9",
+          "kind": "world",
+          "uwp": "A668889-9",
+          "distance": {
+            "raw": "0.80",
+            "value": 0.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Daedalus (Al 0606) (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Icarus",
+              "raw": "F100668-9",
+              "kind": "world",
+              "uwp": "F100668-9",
+              "distance": {
+                "raw": "20 Diam",
+                "value": 20.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Daedalus (Al 0606) (world)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 4,
+          "name": "Planet 3",
+          "raw": "G510366-8",
+          "kind": "world",
+          "uwp": "G510366-8",
+          "distance": {
+            "raw": "1.15",
+            "value": 1.15,
+            "unit": "AU"
+          },
+          "sources": [
+            "Daedalus (Al 0606) (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Minios",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1.50",
+            "value": 1.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Daedalus (Al 0606) (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Suscha",
+              "raw": "H300000-0",
+              "kind": "world",
+              "uwp": "H300000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Daedalus (Al 0606) (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Hespera",
+              "raw": "G4A1236-9",
+              "kind": "world",
+              "uwp": "G4A1236-9",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Daedalus (Al 0606) (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Pasiphaë",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "2.25",
+            "value": 2.25,
+            "unit": "AU"
+          },
+          "sources": [
+            "Daedalus (Al 0606) (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Daedalus (Al 0606) (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Bacchus",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Daedalus (Al 0606) (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Aethna",
+              "raw": "H202000-0",
+              "kind": "world",
+              "uwp": "H202000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Daedalus (Al 0606) (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Planet 7",
+          "raw": "Y9C3000-0",
+          "kind": "world",
+          "uwp": "Y9C3000-0",
+          "distance": {
+            "raw": "4.60",
+            "value": 4.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Daedalus (Al 0606) (world)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Planet 8",
+          "raw": "Y210000-0",
+          "kind": "world",
+          "uwp": "Y210000-0",
+          "distance": {
+            "raw": "6.95",
+            "value": 6.95,
+            "unit": "AU"
+          },
+          "sources": [
+            "Daedalus (Al 0606) (world)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Ariedne",
+          "raw": "SGG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "10.5",
+            "value": 10.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Daedalus (Al 0606) (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Daedalus (Al 0606) (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Dionysus",
+          "raw": "SGG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "13.7",
+            "value": 13.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Daedalus (Al 0606) (world)"
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Planet 11",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "17.9",
+            "value": 17.9,
+            "unit": "AU"
+          },
+          "sources": [
+            "Daedalus (Al 0606) (world)"
+          ]
+        },
+        {
+          "orbit": 12,
+          "name": "Planet 12",
+          "raw": "Y103000-0",
+          "kind": "world",
+          "uwp": "Y103000-0",
+          "distance": {
+            "raw": "19.1",
+            "value": 19.1,
+            "unit": "AU"
+          },
+          "sources": [
+            "Daedalus (Al 0606) (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Daedalus (Al 0606) (world)",
+      "label": "Daedalus",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "G6 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Sparc",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "0.15",
+            "value": 0.15,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Planet 2",
+          "raw": "H300117-9",
+          "kind": "world",
+          "uwp": "H300117-9",
+          "distance": {
+            "raw": "0.35",
+            "value": 0.35,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Daedalus",
+          "raw": "A668889-9",
+          "kind": "world",
+          "uwp": "A668889-9",
+          "distance": {
+            "raw": "0.80",
+            "value": 0.8,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Icarus",
+              "raw": "F100668-9",
+              "kind": "world",
+              "uwp": "F100668-9",
+              "distance": {
+                "raw": "20 Diam",
+                "value": 20.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Planet 3",
+          "raw": "G510366-8",
+          "kind": "world",
+          "uwp": "G510366-8",
+          "distance": {
+            "raw": "1.15",
+            "value": 1.15,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Minios",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1.50",
+            "value": 1.5,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Suscha",
+              "raw": "H300000-0",
+              "kind": "world",
+              "uwp": "H300000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Hespera",
+              "raw": "G4A1236-9",
+              "kind": "world",
+              "uwp": "G4A1236-9",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Pasiphaë",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "2.25",
+            "value": 2.25,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Bacchus",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Aethna",
+              "raw": "H202000-0",
+              "kind": "world",
+              "uwp": "H202000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Planet 7",
+          "raw": "Y9C3000-0",
+          "kind": "world",
+          "uwp": "Y9C3000-0",
+          "distance": {
+            "raw": "4.60",
+            "value": 4.6,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 8,
+          "name": "Planet 8",
+          "raw": "Y210000-0",
+          "kind": "world",
+          "uwp": "Y210000-0",
+          "distance": {
+            "raw": "6.95",
+            "value": 6.95,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 9,
+          "name": "Ariedne",
+          "raw": "SGG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "10.5",
+            "value": 10.5,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Dionysus",
+          "raw": "SGG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "13.7",
+            "value": 13.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 11,
+          "name": "Planet 11",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "17.9",
+            "value": 17.9,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 12,
+          "name": "Planet 12",
+          "raw": "Y103000-0",
+          "kind": "world",
+          "uwp": "Y103000-0",
+          "distance": {
+            "raw": "19.1",
+            "value": 19.1,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Daedalus",
+    "UWP": "A668889-9",
+    "Stellar": "G6 V",
+    "PBG": "504",
+    "Bases": "KM",
+    "Remarks": "Ri Pa Ph Dolp1 Lk"
+  }
+}

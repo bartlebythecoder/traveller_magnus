@@ -1,0 +1,465 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Dagudashaag",
+  "hex": "1723",
+  "sector_abbreviation": "Dagu",
+  "subsector": "Pact",
+  "name": "Dashi",
+  "sources": [
+    {
+      "page": "Dashi (world)",
+      "revid": 1059368,
+      "timestamp": "2026-05-28T22:48:11Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Dashi (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Hemen",
+          "type": "M2 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Hemen",
+      "stars": [
+        {
+          "name": "Hemen",
+          "type": "M2 V"
+        }
+      ],
+      "labels": [
+        "Dashi"
+      ],
+      "pages": [
+        "Dashi (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Dashi",
+          "raw": "C55098B-E",
+          "kind": "world",
+          "uwp": "C55098B-E",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dashi (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Splinter",
+              "raw": "YS00100-D",
+              "kind": "world",
+              "uwp": "YS00100-D",
+              "distance": {
+                "raw": "17",
+                "value": 17.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dashi (world)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 2,
+          "name": "Kaltra",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dashi (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Necros",
+              "raw": "FS0056B-D",
+              "kind": "world",
+              "uwp": "FS0056B-D",
+              "distance": {
+                "raw": "10",
+                "value": 10.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dashi (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Dalin",
+              "raw": "HS00300-D",
+              "kind": "world",
+              "uwp": "HS00300-D",
+              "distance": {
+                "raw": "20",
+                "value": 20.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dashi (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Bellatrix",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dashi (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Angros",
+              "raw": "Y630000-0",
+              "kind": "world",
+              "uwp": "Y630000-0",
+              "distance": {
+                "raw": "5",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dashi (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Debendra",
+              "raw": "Y610000-0",
+              "kind": "world",
+              "uwp": "Y610000-0",
+              "distance": {
+                "raw": "10",
+                "value": 10.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dashi (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Vestri",
+              "raw": "Y430000-0",
+              "kind": "world",
+              "uwp": "Y430000-0",
+              "distance": {
+                "raw": "25",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dashi (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Koshi",
+              "raw": "CS0036A-E",
+              "kind": "world",
+              "uwp": "CS0036A-E",
+              "distance": {
+                "raw": "50",
+                "value": 50.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Dashi (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Aprisal",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dashi (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Avende",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1.7",
+            "value": 1.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dashi (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Dashi (world)",
+      "label": "Dashi",
+      "stars": [
+        {
+          "name": "Hemen",
+          "type": "M2 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Dashi",
+          "raw": "C55098B-E",
+          "kind": "world",
+          "uwp": "C55098B-E",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Splinter",
+              "raw": "YS00100-D",
+              "kind": "world",
+              "uwp": "YS00100-D",
+              "distance": {
+                "raw": "17",
+                "value": 17.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Kaltra",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Necros",
+              "raw": "FS0056B-D",
+              "kind": "world",
+              "uwp": "FS0056B-D",
+              "distance": {
+                "raw": "10",
+                "value": 10.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Dalin",
+              "raw": "HS00300-D",
+              "kind": "world",
+              "uwp": "HS00300-D",
+              "distance": {
+                "raw": "20",
+                "value": 20.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Bellatrix",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Angros",
+              "raw": "Y630000-0",
+              "kind": "world",
+              "uwp": "Y630000-0",
+              "distance": {
+                "raw": "5",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Debendra",
+              "raw": "Y610000-0",
+              "kind": "world",
+              "uwp": "Y610000-0",
+              "distance": {
+                "raw": "10",
+                "value": 10.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Vestri",
+              "raw": "Y430000-0",
+              "kind": "world",
+              "uwp": "Y430000-0",
+              "distance": {
+                "raw": "25",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Koshi",
+              "raw": "CS0036A-E",
+              "kind": "world",
+              "uwp": "CS0036A-E",
+              "distance": {
+                "raw": "50",
+                "value": 50.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Aprisal",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Avende",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1.7",
+            "value": 1.7,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Dashi",
+    "UWP": "C55098B-A",
+    "Stellar": "M2 V",
+    "PBG": "404",
+    "Bases": "",
+    "Remarks": "De Hi Po Asla0 S'mr0"
+  }
+}

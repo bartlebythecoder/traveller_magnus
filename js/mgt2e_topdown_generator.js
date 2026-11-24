@@ -71,6 +71,16 @@
         let mainworldBase = null;
         if (mwOverride) {
             mainworldBase = mwOverride;
+            // A generated mainworld stores each UWP digit twice (atm and atmCode, …). The hex
+            // editor used to update only the plain digit, leaving the *Code copy stale, and the
+            // trade-code calculation reads *Code first — so the pre-edit codes came back
+            // (manifest §0.0.D, 2026-11-19). The plain digit is what the UWP shows; sync to it.
+            [['atm', 'atmCode'], ['hydro', 'hydroCode'], ['pop', 'popCode'],
+             ['gov', 'govCode'], ['law', 'lawCode'], ['tl', 'tlCode']].forEach(([plain, coded]) => {
+                if (typeof mainworldBase[plain] === 'number' && mainworldBase[coded] != null) {
+                    mainworldBase[coded] = mainworldBase[plain];
+                }
+            });
         } else if (SocioEngine && SocioEngine.generateMainworldUWP) {
             mainworldBase = SocioEngine.generateMainworldUWP(hexId);
         } else {

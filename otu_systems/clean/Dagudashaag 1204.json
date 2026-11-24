@@ -1,0 +1,415 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Dagudashaag",
+  "hex": "1204",
+  "sector_abbreviation": "Dagu",
+  "subsector": "Old Suns",
+  "name": "Ziruushda",
+  "sources": [
+    {
+      "page": "Ziruushda (world)",
+      "revid": 1038236,
+      "timestamp": "2026-04-08T19:49:09Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Ziruushda (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Hawayeil",
+          "type": "M1 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Hawayeil",
+      "stars": [
+        {
+          "name": "Hawayeil",
+          "type": "M1 V"
+        }
+      ],
+      "labels": [
+        "Ziruushda"
+      ],
+      "pages": [
+        "Ziruushda (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Ziruushda",
+          "raw": "A977377-A",
+          "kind": "world",
+          "uwp": "A977377-A",
+          "distance": {
+            "raw": "0.3",
+            "value": 0.3,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ziruushda (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Takhara",
+              "name_raw": "* ''Takhara''",
+              "raw": "YS04377-9",
+              "kind": "world",
+              "uwp": "YS04377-9",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Ziruushda (world)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 2,
+          "name": "Piz",
+          "raw": "Y744327-9",
+          "kind": "world",
+          "uwp": "Y744327-9",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ziruushda (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Lak",
+              "name_raw": "* ''Lak''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Ziruushda (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Cregud",
+              "name_raw": "* ''Cregud''",
+              "raw": "HS00000-0",
+              "kind": "world",
+              "uwp": "HS00000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Ziruushda (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Gres",
+              "name_raw": "* ''Gres''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Ziruushda (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Latilym",
+          "raw": "YAAB000-0",
+          "kind": "world",
+          "uwp": "YAAB000-0",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ziruushda (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Lenix",
+              "name_raw": "* ''Lenix''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Ziruushda (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Ruhag",
+              "name_raw": "* ''Ruhag''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Ziruushda (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Nucyw",
+              "name_raw": "* ''Nucyw''",
+              "raw": "HS00000-0",
+              "kind": "world",
+              "uwp": "HS00000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Ziruushda (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Gopypuf",
+              "name_raw": "* ''Gopypuf''",
+              "raw": "H300318-9",
+              "kind": "world",
+              "uwp": "H300318-9",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Ziruushda (world)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Cavysot",
+              "name_raw": "* ''Cavysot''",
+              "raw": "Y376000-0",
+              "kind": "world",
+              "uwp": "Y376000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Ziruushda (world)"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Ziruushda (world)",
+      "label": "Ziruushda",
+      "stars": [
+        {
+          "name": "Hawayeil",
+          "type": "M1 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Ziruushda",
+          "raw": "A977377-A",
+          "kind": "world",
+          "uwp": "A977377-A",
+          "distance": {
+            "raw": "0.3",
+            "value": 0.3,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Takhara",
+              "name_raw": "* ''Takhara''",
+              "raw": "YS04377-9",
+              "kind": "world",
+              "uwp": "YS04377-9",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Piz",
+          "raw": "Y744327-9",
+          "kind": "world",
+          "uwp": "Y744327-9",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Lak",
+              "name_raw": "* ''Lak''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            },
+            {
+              "index": 2,
+              "name": "Cregud",
+              "name_raw": "* ''Cregud''",
+              "raw": "HS00000-0",
+              "kind": "world",
+              "uwp": "HS00000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            },
+            {
+              "index": 3,
+              "name": "Gres",
+              "name_raw": "* ''Gres''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Latilym",
+          "raw": "YAAB000-0",
+          "kind": "world",
+          "uwp": "YAAB000-0",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Lenix",
+              "name_raw": "* ''Lenix''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            },
+            {
+              "index": 2,
+              "name": "Ruhag",
+              "name_raw": "* ''Ruhag''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            },
+            {
+              "index": 3,
+              "name": "Nucyw",
+              "name_raw": "* ''Nucyw''",
+              "raw": "HS00000-0",
+              "kind": "world",
+              "uwp": "HS00000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            },
+            {
+              "index": 4,
+              "name": "Gopypuf",
+              "name_raw": "* ''Gopypuf''",
+              "raw": "H300318-9",
+              "kind": "world",
+              "uwp": "H300318-9",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            },
+            {
+              "index": 5,
+              "name": "Cavysot",
+              "name_raw": "* ''Cavysot''",
+              "raw": "Y376000-0",
+              "kind": "world",
+              "uwp": "Y376000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            }
+          ]
+        }
+      ],
+      "stars_as_written": [
+        {
+          "name": "Hawayeil",
+          "type": "M5 V"
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Ziruushda",
+    "UWP": "A977377-A",
+    "Stellar": "M1 V",
+    "PBG": "400",
+    "Bases": "",
+    "Remarks": "Lo Da Hama8 Aqua1 Bwap0 Di(Gograhhah)"
+  }
+}

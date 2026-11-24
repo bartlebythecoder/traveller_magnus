@@ -1,0 +1,152 @@
+{{UWP 
+|name= {{World|Kemshigesh|Gushemege|Laeth|1133}}
+|uc    = D532544-8 
+|popc  = 6
+|zonec = green
+ |u1= 
+|alg     = ImDv
+|class   = Ni Po
+|trade   = ni
+|climate = TBD
+|orbit   = TBD
+|gravity = TBD
+|nblty   = B
+|bases   = -
+|primary = K2 V M8 V 
+|belts   = 1
+|GGcount = 3
+}}
+{{InfoboxSystem
+ |name=Kemshigesh
+ |subsector=Laeth
+ |sector=Gushemege
+ |hex=1133
+ |star=Kyan A
+ |type=K2 V
+ |P1=Kyan A 1
+ |Dist1=0.7
+ |UWP1=LGG
+ |P2=Kyan A 2
+ |Dist2=1.0
+ |UWP2=SGG
+ |P3=Kyan B
+ |Dist3=5.2
+ |UWP3=M8 V
+ |P4=Kyan B 1
+ |Dist4=0.4
+ |UWP4=Y000000-0
+ |P5=Kemshigesh
+ |Dist5=0.7
+ |UWP5=D532544-8
+ |P6=Kyan B 3
+ |Dist6=1.0
+ |UWP6=SGG
+}}
+{{World summary |name= Kemshigesh |trade=Ni Po}}
+{{World summary ImDv|sector= Gushemege |subsector=Laeth}}
+* {{Alternate world name|name=Digur}}
+
+== Description (Astrography & Planetology) ==
+This system is part of the [[Sidurii Cluster]].
+
+=== Stellar Data ===
+{{BinaryStarSystem
+|name           = Kemshigesh 
+|PrimaryName    = Kyan A
+|primary        = K2 V
+|SecondaryName  = Kyan B
+|secondary      = M8 V 
+|PrimaryNotes   =
+|SecondaryNotes =
+}}
+
+=== System Data ===
+There is substantial mining of the inner [[asteroid belt]]. All inhabited bodies except the [[main world]] are [[military base]]s. 
+ 
+=== Mainworld Data ===
+The world's orbit around Kyan B causes its surface temperature to vary from near-freezing point (when furthest from Kyan A), to a warm 45°C (when nearest to the primary star). The effects might be even more pronounced were it not for the world's seas, which even out some of this heating-cooling process. The world develops dense cloud cover during the high temperature part of its orbit, acting as a shield against direct sunlight.
+
+==== Mainworld Geography & Topography ====
+No information yet available.
+
+==== Mainworld Map ====
+No information yet available.
+
+=== Native Lifeforms ===
+It possesses complex, advanced [[lifeform]]s including the:
+* [[Gianduja]]
+
+== History & Background (Dossier) ==
+This is an old [[Scanian]] colony. The [[Solomani]] conducted the experiments that led to the Scanian variant race on Gaea in [[Dagudashaag Sector]] (later known as [[Akiva (world)|Akiva]]), but before they abandoned that planet around -1,800 they transplanted small numbers of Scanians to a couple of other worlds in Dagudashaag and Gushemege. One such colony was established on Kemshigesh, known to Solomani as Digur, a world already teeming with waterlife.
+
+=== Imperial Landed Nobility ===
+{{Imperial Nobility|name= Kemshigesh|Noble=B}}
+
+=== World Starport ===
+{{Starport|name= Kemshigesh|Starport=D}}
+
+==== Linguistic Topography ====
+The following [[language]]s are among the most commonly used here:
+* [[Anglic]]: One of the two official languages of the [[Third Imperium]].
+* ''[[Göheimsan]]'': A ceremonial language used by the [[Scanian]] culture; apparently descended from 22nd Century Terran [[Hebraic (language)|Hebrew]], [[Arabic (language)|Arabic]], and [[Russian (language)|Russian]].
+** Since the reestablishment of contact with the Scanians of Akiva, the local Scanians have assimilated much of their culture, language included.
+
+=== World Technology Level ===
+{{WorldTech|name= Kemshigesh|WorldTech=8}}
+
+=== World Government ===
+{{WorldGov|name= Kemshigesh|Government=4}}  
+
+==== World Law Level ====
+{{WorldLaw|name= Kemshigesh|Law=4}} 
+
+This world follows Scanian legal procedures:
+
+* The Gate ''Bakamaa'' deals with all monetary matters
+* The Gate ''Bah'ezi'' deals with contract law, including marriage contracts.
+* The Gate ''Babha'ti'' deals with governmental law. 
+* Criminal law is dealt with by the Court of judgement; trial by three judges. 
+* In minor matters a person can elect to have his case heard by ''Hedyo't''. This consists of any three Scanians who are considered totally impartial, and any judgement reached is considered legal.
+
+==== World Military ====
+No information yet available. 
+
+=== World Economy ===
+No information yet available. 
+
+==== Trade Data ====
+No information yet available. 
+
+==== Urbanization ====
+No information yet available. 
+
+==== World Infrastructure ====
+No information yet available. 
+
+=== Historical Data ===
+No information yet available. 
+
+==== World Timeline ====
+No information yet available.
+
+==== UWP Listing ====
+No information yet available.
+
+== References & Contributors (Sources) ==
+{{Intermediate}}
+{{Detail}}
+{{Sources
+|S1= {{Ludography cite|name=Atlas of the Imperium|page=13}}
+|S2= {{Ludography cite|name=Solomani & Aslan|page=11,50}} (dotmap provided)
+|S3= {{Ludography cite|name=Vilani & Vargr|page=11,47}} (dotmap provided)
+|S4= {{Ludography cite|name=First Survey|page=72}}
+|S5= {{Ludography cite|name=Long Way Home|page=52}}
+|S6= Author & Contributor: [[David Burden]] of the {{HIWG}}
+ 
+}}
+ 
+
+[[Category: Sidurii Cluster worlds]]
+[[Category: Vilani Main worlds]]
+[[Category: Scanian worlds]]
+{{LE|Binary Star System|T5 Second Survey worlds}}

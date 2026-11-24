@@ -1,0 +1,82 @@
+{{InfoboxSystem
+|name= [[Aerfor (system)|Aerfor]]
+  |sector=Deneb
+  |subsector=Million
+  |hex=3104
+  |star='''[[Aerfor Primary]]'''|type='''F7 V'''
+  |P0=Oerreg|Dist0=0.253|UWP0=YS10000-0
+  |P1=Uazaelg|Dist1=0.397|UWP1=Y100000-0
+  |P2=Udall|Dist2=0.585|UWP2=Y220000-0
+  |P3=Goukrrol|Dist3=0.860|UWP3=Y4C8000-0
+  |P4=Kerzvoe|Dist4=1.31|UWP4=Y521000-0
+  |P5=Afak|Dist5=2.01|UWP5='''Small GG'''
+  |P5M1=* '''Aerfor'''|Dist5M1=45|UWP5M1=A584520-D
+  |P6=Agnau|Dist6=3.41|UWP6='''Small GG'''
+  |P6M1=* '''Ring'''|Dist6M1=1|UWP6M1=Ring
+  |P7=Inner Belt|Dist7=6.21|UWP7=Y000000-0
+  |P8=Uvuegh|Dist8=11.81|UWP8='''Large GG'''
+  |P8M1=* '''Ring'''|Dist8M1=1|UWP8M1=Ring
+  |P8M2=* '''Ring'''|Dist8M2=2|UWP8M2=Ring
+  |P9=Middle Belt|Dist9=11.81|UWP9=Y000000-0
+  |P10=Energh|Dist10=23.01|UWP10='''Small GG'''
+  |P11=Outer Belt|Dist11=45.41|UWP11=Y000000-0
+}}
+
+== Description (Specifications) ==
+{{MonostellarSystem
+|name           = Aerfor Primary
+|primary        = F7 V 
+|PrimaryNotes   = None
+}}
+===Oerreg===
+Studied by the Research Station's Inner group.
+:Diameter: 900km
+:Density Anomalies
+===Uazaelg===
+Uninteresting Rock
+===Udall===
+Studied by the Research Station's Inner group.
+:Diameter:3600km
+:Density Anomalies
+===Goukrrol===
+:Diameter:6400km
+:Acid Lakes on 80% of the surface
+:Density Anomalies
+Studied by the Research Station's Goukrrol group.
+===Kerzvoe===
+:Diameter:9000km
+:Polar Icecaps
+:Density Anomalies
+===Afak===
+Afak's moon is the [[Mainworld]] for the system: [[Aerfor (world)|Aefor]]
+
+This is the only gas-giant in a Circular Orbit
+===Agnau===
+Eccentric elliptical Orbit: Average given above
+===Inner Belt===
+Highly disrupted
+===Uvuegh===
+Eccentric elliptical Orbit: Average given above
+:Diameter:80,000km
+===Middle Belt===
+Highly disrupted
+===Energh===
+Eccentric elliptical Orbit: Average given above.
+===Outer Belt===
+Highly disrupted
+
+== History & Background (Dossier) ==
+The other Gas Giants (Agnau, Uvuegh, and Enegh) are all in eccentric orbits and have systematically reduced the outer system to rubble. Surviving worlds and moons are heavily cratered as a result{{Page cite|name=Deneb Sector|page=32|citeName=DS32}}. 
+
+Agnau and Uvuegh passed within 5,000,000km of each other 300,000 years ago{{Page cite|name=Deneb Sector|page=32|citeName=DS32}}.
+
+The Research Station's outer group studies the outer system's belts, rubble and oort clouds.
+
+None of the bodies (other than [[Aerfor (world)|Aerfor]]) has an official population - that is not to say that the planets don't attract illegal transient prospectors or transient researchers, but they are not counted as residents.
+
+== References & Contributors (Sources) ==
+{{Metadata}}
+{{Sources
+| {{Ludography cite|name=Deneb Sector|page=31-32}}
+}}
+{{LEN|Systems}}

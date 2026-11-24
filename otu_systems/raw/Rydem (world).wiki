@@ -1,0 +1,105 @@
+{{StellarDataQuery
+ |name= {{World|Rydem (SM 0527)|Spinward Marches|Darrian|0527}}
+ |Non-canon trade codes= Ht 
+ |era= Milieu 1116
+}}
+{{InfoboxSystem|name=Rydem
+ |subsector=Darrian|sector=Spinward Marches|hex=0527
+ |star='''Primary'''|type='''K6 V'''
+ |P0=Mire (SM 0527)|Dist0=0.2|UWP0=A665A95-B
+ |P1=Rydem|Dist1=0.4|UWP1=F765866-A
+ |P2=Gamma|Dist2=0.7|UWP2=Y100200-A
+ |P3=Delta|Dist3=1.0|UWP3=Y133533-A
+ |P4=Esse|Dist4=1.7|UWP4=Y202569-B
+ |P5=Firzhen|Dist5=2.2|UWP5=Y564416-A
+ |P5M1=* ''One''|Dist5M1=7|UWP5M1=Y203200-B
+ |P5M2=* ''Two''|Dist5M2=25|UWP5M2=G100300-A
+ |P5M3=* ''Vuhlnoh''|Dist5M3=55|UWP5M3=G462667-A
+ |P6=Epsilon|Dist6=3.3|UWP6=Y200000-0
+ |P6M1=* ''Ring''|Dist6M1=1|UWP6M1=YR00000-0
+ |P6M2=* ''One''|Dist6M2=35|UWP6M2=YS00210-A
+ |P6M3=* ''Two''|Dist6M3=40|UWP6M3=GS00533-A
+ |P7=Sigma|Dist7=4.4|UWP7=G451167-B
+ |P8=Psi|Dist8=5.5|UWP8=Y000000-0
+}}
+== Astrography & Planetology ==
+Rydem is a colony world of [[Mire (SM 0527) (world)|Mire]].
+
+Rydem is a small world orbiting relatively close to the system mainworld.  
+
+=== Stellar Data ===
+{{MonostellarSystem
+|name           = Rydem (SM 0527), secondary system world,
+|primary        = K6 V 
+|PrimaryNotes   =
+}}
+
+=== World Data ===
+
+==== World Size ====
+{{WorldSize|name=Rydem|Size=7}}  
+
+==== World Atmosphere ====
+{{WorldAtmo|name= Rydem|Atmosphere=5}}  
+
+==== World Hydrosphere ====
+{{WorldHydro|name=Rydem|Hydrosphere=6}}
+
+== History & Background ([[Dossier]]) ==
+Rydem is a trophy colony world, maintained by the system mainworld, [[Mire_(world)|Mire]].
+
+Pre-''[[Maghiz]]'', it was colonized for scientific reasons. The entire population died as the result of the ''[[Maghiz]]'' as they were completely dependent on technology and continual resupply from Mire. It wasn't until many years after ''[[Maghiz]]'', when Mire regained Tech-8 capacity, that Rydem was re-colonized.
+
+Currently, Rydem is a comfortable world in its own right, with a substantial population. It has several T-10 cities with impressive skyscraper towers and corresponding subterreanean grotto constructs, both enabled by the relatively low gravity of Rydem. Structures tend to be over-engineered with additional low-tech back-up systems.
+
+The main power grid of Rydem is based on modern fusion plants, but there is a backup to the main grid based on simpler fission nuclear plants using molten salt reactors (MSR) that have analog gauges and controls, and can be manually operated. Likewise, spare parts and manufactured raw materials are stored and maintained in dedicated storehouses. Rydem law also requires that physical publications be created for all technical works, and that these be stored in the various municipal Libraries.
+
+=== [[Starport|World Starport]] (Sp) ===
+{{Starport|name= Rydem|Starport= F}}
+
+=== World Technology Level ===
+{{WorldTech|name= Rydem|WorldTech=A}}
+
+=== World Population ===
+{{WorldPop|name= Rydem|Population=8}}  
+
+====World Demographics====
+[[Darrian]], population 95% 
+* Aslan, population 5%
+
+====World Languages====
+* ''[[Te-Zlodh]]''
+
+=== World Government ===
+{{WorldGov|name= Rydem|Government=6}}  
+
+==== World Law Level ====
+{{WorldLaw|name= Rydem|Law=6}}
+* The [[Taledh Code]] is the basis of Darrian law.  
+
+===Economic ===
+
+== References & Contributors ([[Sources]]) ==
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=8-9}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name= Darrians|version=Classic Traveller|page=23,32}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=The Regency Sourcebook|page=44}}
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=48}}
+ | {{Ludography cite|name=The Spinward States|page=108}} (UWP only)
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=80-84,86,88}} (UWP only)
+ | Author & Contributor: [[User:Dochsavage|Doch Savage]]
+}}
+
+[[Category: Aslan worlds]]
+[[Category: Darrian Group worlds]]
+[[Category: Daryen worlds]]
+[[Category: Dhoshu Systems worlds]]
+[[Category: Highport worlds]]
+[[Category: Psionics worlds]]
+{{LE|T5 Second Survey worlds}}
+{{LEN}}

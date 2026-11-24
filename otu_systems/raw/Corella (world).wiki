@@ -1,0 +1,175 @@
+[[File:Alien Moon 288-0.jpg|250 px|right]]
+{{UWP 
+|name= {{World|Corella|Beyond|Corella|0314}}
+|system= 
+|u2    = A864855-D
+|popc  = 5
+|zonec = green
+ |u1= 
+|alg     = NaXX
+|class   = Ri Pa
+|trade   = 
+|climate = Ho
+|gravity = TBD
+|nblty   = -
+|bases   = KMV
+|primary = G2 V G8 V
+|belts   = 3
+|GGcount = 4
+}}
+{{World summary |name= Corella |trade= Ri}}
+{{World summary bases|bases=K}}
+{{World summary bases|bases=M}}
+{{World summary bases|bases=V}}
+* It is the capital of the [[Corellan League]].
+* It has direct colonies at [[Al Mustan (world)|Al Mustan]] and [[Aytah (world)|Aytah]].
+{{InfoboxSystem
+|name= Corella
+|sector=The Beyond|subsector=Corella|hex=0314
+|star= Corella A & Corella B |type= G2 V G8 V 
+|P0= P. Belt I   |Dist0   = 0.46    |UWP0= ?000???-?
+|P1= Aab I       |Dist1   = 0.64    |UWP1= ?CB3???-?
+|P2= Aab II      |Dist2   = 0.91    |UWP2= GS3
+|P2M1= Condor    |Dist2M1 = ? Diam  |UWP2M1= ?672???-?
+|P2M2= ?         |Dist2M2 = ? Diam  |UWP2M2= ?100???-?
+|P2M3= ?         |Dist2M3 = ? Diam  |UWP2M3= ?200???-?
+|P2M4= ?         |Dist2M4 = ? Diam  |UWP2M4= ?S00???-?
+|P2M5= ?         |Dist2M5 = ? Diam  |UWP2M5= ?S00???-?
+|P3= Corella     |Dist3   = 1.18    |UWP3= A864855-D
+|P3M1= Steady    |Dist3M1 = 7.1 Diam|UWP3M1= GS00565-D
+|P3M2= Flake     |Dist3M2 =16.3 Diam|UWP3M2= GS00364-D
+|P4= Aab IV      |Dist4   = 1.6     |UWP4= GS4
+|P4M1= Ring      |Dist4M1 = ? Diam  |UWP4M1= ?R00???-?
+|P4M2= ?         |Dist4M2 = ? Diam  |UWP4M2= ?100???-?
+|P4M3= ?         |Dist4M3 = ? Diam  |UWP4M3= ?211???-?
+|P4M4= ?         |Dist4M4 = ? Diam  |UWP4M4= ?100???-?
+|P4M5= ?         |Dist4M5 = ? Diam  |UWP4M5= ?S00???-?
+|P4M6= ?         |Dist4M6 = ? Diam  |UWP4M6= ?200???-?
+|P5= P. Belt II  |Dist5   = 2.56    |UWP5= ?000???-?
+|P6= Aab V       |Dist6   = 4.96    |UWP6= ?3A4???-?
+|P7= Cassandra   |Dist7   = 8.56    |UWP7= ?9A4???-?
+|P7M1= ?         |Dist7M1 = ?       |UWP7M1= ?400???-?
+|P8= Aab VII     |Dist8   = 14.0    |UWP8= GLG
+|P8M1= Ring      |Dist8M1 = ? Diam  |UWP8M1= ?R00???-?
+|P8M2= ?         |Dist8M2 = ? Diam  |UWP8M2= ?S00???-?
+|P8M3= ?         |Dist8M3 = ? Diam  |UWP8M3= ?S00???-?
+|P8M4= ?         |Dist8M4 = ? Diam  |UWP8M4= ?100???-?
+|P8M5= ?         |Dist8M5 = ? Diam  |UWP8M5= ?S00???-?
+|P8M6= ?         |Dist8M6 = ? Diam  |UWP8M6= ?4A7???-?
+|P9= Aab VIII    |Dist9   = 22.0    |UWP9= GS4
+|P9M1= ?         |Dist9M1 = ? Diam  |UWP9M1= ?S00???-?
+|P9M2= ?         |Dist9M2 = ? Diam  |UWP9M2= ?100???-?
+|P9M3= ?         |Dist9M3 = ? Diam  |UWP9M3= ?S00???-?
+|P10= P. Belt III|Dist10  = 34.0    |UWP10= ?000???-?
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+
+=== Stellar Data ===
+{{BinaryStarSystem
+|name           = Corella
+|primary        = G2 V 
+|secondary      = G8 V
+|PrimaryNotes   =
+|SecondaryNotes =
+}}
+
+=== System Data ===
+No information yet available. 
+ 
+=== [[Mainworld|Mainworld Data]] ===
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Corella|Size= 8}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Corella|Atmosphere= 6}}
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Corella|Hydrosphere= 4}}
+
+==== Mainworld Geography & Topography ====
+Corella has three small oceans and deserts noted for spectacular coloured sands.
+
+==== Mainworld Map ====
+No information yet available.
+
+=== Native Lifeforms ===
+Abundant [[Lifeform|native life]] occupying every available ecological niche. Its metabolic functions drive the process of atmospheric renewal.
+
+== History & Background / Dossier ==
+Corella is the oldest continually inhabited Human world in the sector, not counting [[Mal'Gnar El (world)|Mal'Gnar El]].
+
+While the government is captured by special interests from oligarchic Great Houses and the Consortia (a group of multi-world conglomerates dominating League commerce) Corella has successfully maintained a fairly free, peaceful society for most of its existence. It remains the heart of Human civilization in The Beyond.
+
+=== World Starport ===
+{{Starport|name= Corella|Starport=A}}
+* There is an associated [[Naval Base]] of the Corellan League Star Fleet, to which Corella is a key contributor.
+
+=== World Population (P) ===
+{{WorldPop|name= Corella|multiplier= 8|Population= 8}}
+
+==== World Demographics ====
+* Human, 95%
+* Small minorities of [[Kemlae]], [[Freni]], and others.
+* The Aniyun Community of the Stars is an [[Aniyun]] population living at the orbital habitat to conduct League business.
+
+==== Linguistic Topography ====
+The common language is "[[Corellan Galanglic (language)|Corellan Galanglic]]", a distinct dialect of [[Anglic]].
+
+==== Urbanization ====
+No information yet available.
+
+=== World Technology Level ===
+{{WorldTech|name= Corella|WorldTech=E}}
+
+=== World Government ===
+{{WorldGov|name= Corella|Government=4}}  
+
+==== World Law Level ====
+No information yet available. 
+
+==== World Military ====
+No information yet available. 
+
+=== World Economy ===
+No information yet available. 
+
+==== Trade Data ====
+No information yet available. 
+
+=== World Culture ===
+Members of the 36 recognised Great Houses have a status akin to unofficial nobility. 
+
+=== Historical Data ===
+No information yet available. 
+
+==== World Timeline ====
+* [[-1597]]: Corella settled by refugees from [[Htoleakh (world)|Oberon]].
+* -1570: Settlement of [[Freya (Be 1414) (world)|Freya]] by loyalists of the [[Sindalian Empire]]. This original settlement is a forward base for an invasion of Corella that never takes place; most of the strike force is later withdrawn to deal with problems closer to home.
+* -306: Vardarian Acts codify the gradual shift in power to the Great Houses and Consortia, granting them essentially monopolistic rights to certain industries.
+
+==== UWP Listing ====
+No information yet available.
+
+== References & Contributors / Sources ==
+{{Intermediate}}
+{{Detail}}
+{{Sources
+| {{Ludography cite|name=Beyond|version=Classic Traveller}}
+| {{Ludography cite|name=Vanguard Reaches|version=Classic Traveller}}
+| {{Ludography cite|name=Solomani & Aslan|version=MegaTraveller}} (dotmap provided)
+| {{Ludography cite|name=World Builder's Handbook|version=Mongoose 2nd|page=35, 62, 65, 143-144, 216-217}}
+| {{CT}} [[Paranoia Press]] "[[Beyond]]" 1991 online updates by [[Chuck Kallenbach]]
+| {{CT}} [[Paranoia Press]] "[[Vanguard Reaches]]" 1991 online updates by [[Chuck Kallenbach]]
+| External Link: [http://www.darkhstarr.com/Beyond2.html  High Tortuga] by Author & Contributor: [[Michael J. Maley]] AKA [[Darkhstarr]] 
+| External Link: [http://dedzone.net/traveller/sectors/beyond/history.html Beyond Library] {{dead link}} by Author & Contributor:  [[Peter Gray]]
+| External Link: [http://www.downport.com/amv/GMC/Jneril.htm Downport]
+| Author & Contributor:  [[Andrea Vallance]]
+}}
+
+
+[[Category: Homeworld]]
+[[Category: Corellan League worlds]]
+[[Category: Polities & Worlds of Beyond & Vanguard Reaches]]
+{{LEN|Binary Star System|}}

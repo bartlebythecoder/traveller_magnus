@@ -1,0 +1,186 @@
+[[File:Alien Moon 180c-0 Small.jpg|250 px|right]]
+{{UWP 
+|name= {{World|Flexos|Spinward Marches|District 268|1233}}
+ |era=Milieu 1116
+|uc    = E5A1422-8
+|popc  = 6
+|zonec = green
+ |u1= 
+|alg     = NaHu
+|class   = Fl He Ni
+|trade   = fl
+|bases   = -
+|primary = M1 V M2 V
+|belts   = 1
+|GGcount = 0
+}}
+{{InfoboxSystem
+ |name=Flexos |subsector=District 268 |sector= Spinward Marches |hex=1233
+ |star=Girehredh  | type= M1 V
+ |P1 = Onu        | Dist1 = 0.04|UWP1= M2 V
+ |P2 = Flexos     | Dist2 = 0.2       | UWP2 = E5A1422-6
+ |P2M1 = Rerihld  | Dist2M1 = 6 Diam  | UWP2M1 = YS00000-0
+ |P2M2 = Dinetas  | Dist2M2 = 20 Diam | UWP2M2 = H202231-6
+ |P3 = Nilungedh  | Dist3=0.5         | UWP3 = Y101114-6
+ |P4 = Gihlabh    | Dist4 = 0.7       | UWP4 = H100365-6
+ |P5 = Bagihmeh   | Dist5 = 1.0       | UWP5 = YCB1000-0
+ |P5M1 = Zem      | Dist5M1=4 Diam    | UWP5M1 = Y231000-0
+ |P5M2 = Narihdea | Dist5M2=7 Diam    | UWP5M2 = Y300000-0
+ |P5M3 = Reren    | Dist5M3=15 Diam   | UWP5M3 = Y400212-6
+ |P6 = Dizeneh    | Dist6 = 1.3       | UWP6 = Y627000-0
+ |P6M1 = Dabeh    | Dist6M1=5 Diam    | UWP6M1= Y200000-0
+ |P7 = Leyr       | Dist7 = 1.5       | UWP7 = Y200000-0
+ |P7M1 = Behrel   | Dist7M1 = 6 Diam  | UWP7M1 = YS00000-0
+ |P7M2 = Yuldeh   | Dist7M2 = 10 Diam | UWP7M2 = FS00362-6 
+ |P7M3 = Zdeyr    | Dist7M3 = 15 Diam | UWP7M3 = YS00000-0
+ |P8 = Gugh       | Dist8 = 2.0       | UWP8 = H401263-6
+ |P8M1 = Ldeh     | Dist8M1 = 6 Diam  | UWP8M1 = Y310000-0
+ |P9 = Asagh Belt | Dist9 = 9.5       | UWP9 = Y000000-0
+}}
+{{World summary |name= Flexos|trade= Fl He Ni}}
+{{World summary NaHu|sector= Spinward Marches|subsector= District 268}}
+* {{SpMain}}
+* It lies on the [[Bowman Arm]]. 
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Flexos''' is a binary star system.
+* Both are red main sequence stars named ''Girehredh'' and ''Onu'' respectively.
+* They are close companions.
+
+{{BinaryStarSystem
+|name            = Flexos
+|primary         = M1 V 
+|secondary       = M2 V
+|PrimaryName     = Girehredh
+|PrimaryNotes    = 
+|SecondaryName   = Onu
+|SecondaryNotes  = [[Astronomical Unit|Approximately 0.04 AU]] from the primary.
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]], orbiting close to the two stars. It has an elliptical orbit influenced by the [[Big World|superterran]] secondary world ''Bagimeh''.
+* x6 secondary [[world|rocky worlds]]. These are:
+** tiny Nilungedh-Obhekeny (typically shortened to ''Nilungedh'') and Gihlabhanih (typically shortened to ''Gihlabh''), with elliptical orbits matching that of Bagimeh.
+** Bagihmeh, a [[Big World|superterran world]] with three large moons that influences the orbits of all the other worlds in the system.
+** Dizeneh, a large cold world with a [[Very Thin Atmosphere|very thin]] abiotic atmosphere and a single [[Natural Satellite|large moon]].
+** Leyr, an [[Outer World|outer system]] [[vacuum world]] with three tiny [[planetoid]] [[Natural Satellite|moons]].
+** Larger Gugh and smaller Ldeh, frozen [[Double World|binary worlds]] spiralling around one another at the fringe of the system.
+* x1 [[planetoid belt]].
+** the Asagh Belt, a sparse icy belt lying in the [[Outer World|far outer system]].
+
+=== Mainworld Data ===
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Flexos|Size= 5}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Flexos|Atmosphere= A}}
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+'''Flexos''' has 05-15% of its surface covered by liquid water or ice heavily tainted with other substances, which makes it dangerous, corrosive, or toxic. Wilderness refueling will be difficult. Water for the inhabitants needs to be imported and extensively recycled. These worlds may be [[Hell World]]s.
+* The water on the surface may be unsuitable for use or consumption without extensive filtering and purification.
+* Refining for fuel may cause issues with shipboard [[Fuel Treatment Plant|purification plants]].
+
+[[File:Water World Shore Type 03a1.jpg|600 px]]
+
+==== Satellites ====
+'''Flexos''' retains two small [[Vacuum World|vacuum moons]].
+* The innermost is a tiny [[planetoid]] a few tens of kilometers in diameter named ''Rerihld''.
+* The outer is a large [[vacuum world]] named ''Dinetas''.
+* They orbit once every few days.
+
+[[File:World Green Moons 01a-2.jpg|600 px]]
+
+==== Mainworld Geography and Topography ====
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+[[File:Blank World Map Exotic Aqua.png|500 px]] <br> (''Blank map, exotic world''.)
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+Flexos is a low-population backwater typical of the region. With only 60,000 people in its mid-tech communities, and further handicapped by having to contend with an exotic atmosphere, the world exports little and can afford few imports. Without substantial offworld investment Flexos will probably remain at the subsistence level forever. 
+
+Investment in such a marginal world tends to be cheap (though it is often not worth doing anyway). This may be one reason why a variety of survey teams and explorers have recently arrived on Flexos. There are rumors of chemical- extraction processes that may turn Flexos’ fluid oceans into an economic asset, but no hard data is available.
+
+Assisting in the [[terraforming]] process are a group of [[Darrian]] scientists. A number of small [[Aslan]] [[Ahriy|prides]] have also chosen Flexos as their new home. 
+
+=== World Starport (St) ===
+{{Starport|name= Flexos|Starport= E}}
+
+=== World Population (P) ===
+{{WorldPop|name= Flexos|multiplier= 6|Population= 4}}
+
+=== World Technology Level (T) ===
+{{WorldTech|name= Flexos|WorldTech= 8}}
+
+=== World Government (G) ===
+{{WorldGov|name= Flexos|Government= 2}}
+
+==== World Military ====
+Flexos has a small permanent military force that is armed with portable energy weapons such as Laser Rifles that have been smuggled in from off-planet since it does not have the technology to build its own. Apart from the Laser Rifles, the arsenal of this army consists mostly of projectile weapons and should be chosen from the Planetary Defense Force (PDF) lists. 
+
+There is also a Planetary Militia. All citizens must undertake basic training (usually 1 year) followed by a minimum of two weeks' training each year thereafter. The Planetary Militia are organized the same as the Gaea Prime PDF.
+
+=== World Law (L) ===
+{{WorldLaw|name= Flexos|Law= 2}}
+
+==== Flexos Police Force ====
+The Police Force on Flexos consists of temporarily serving militia members and is treated exactly as the Planetary Militia, except that, when on patrol, they will carry Pistols and Nightsticks (One-handed Weapon) rather than Assault Rifles. One Shotgun is carried in each Police Cruiser too. Thanks to the off-world smugglers, the police have Comm Links. 
+
+==== Tactical Response Units ====
+The Tactical Response Units are a special branch of the police. They will arrive on the scene with heavy firepower, and should be treated exactly as the Flexos Planetary Militia, with the same range of weapons, although high-explosives will tend not to be used, because of damage to property. Like the police, they have Comm Links.
+
+=== Trade Data ===
+* Importance:     -3 (very unimportant)
+
+=== World Economy ===
+* Resources:      7 (few)
+* Labor:          3 (thousands)
+* Infrastructure: 1 (extremely limited)
+* Efficiency:     -5 (extremely poor)
+
+=== World Culture ===
+* Heterogenity: 1 (monolithic)
+* Acceptance:   1 (extremely xenophobic)
+* Strangeness:  1 (very typical)
+* Symbols:      4 (concrete)
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+* [[0|The Year 0]]: the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[589]]-[[604]]: [[First Frontier War]].
+* [[604]]-[[622]]: the [[Civil War]].
+* [[615]]-[[620]]: [[Second Frontier War]].
+* [[624]]: the [[Express Boat Network]] is established.
+* [[979]]-[[986]]: [[Third Frontier War]].
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] charts the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+* [[1082]]-[[1084]]: [[Fourth Frontier War]], also known as the ''False War''.
+* [[1107]]-[[1110]]: [[Fifth Frontier War]].
+
+== References & Contributors (Sources) ==
+{{Sources
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=The Regency Sourcebook|page=48-49}} (UWP only)
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=75}}
+ | {{Ludography cite|name=Bowman Arm|page=12}}
+ | {{Ludography cite|name=System Guide 2: Flexos|page=5-12}}
+ | {{Ludography cite|name=The Spinward States|page=110}} (UWP only)
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name=The Bowman Arm|page=}}
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=123-127}} (UWP only)
+ | [[Tony Barr]] - [http://ermtony.pbwiki.com/Flexos Tony Barr's Wargames Notebook]
+}}
+
+[[Category: Aslan worlds]]
+[[Category: Bowman Arm worlds]]
+[[Category: Daryen worlds]]
+[[Category: GT]]
+[[Category: Spinward Main worlds]]
+{{LE|Binary Star System|T5 Second Survey worlds}}

@@ -1,8 +1,8 @@
 /**
  * PROJECT AS ABOVE, SO BELOW
  * Module: OTU Importer
- * Description: Handles the "Import the Imperium", "Import the Universe" and
- *   "Import a Neighbourhood" (chosen sector + 8 neighbours) features.
+ * Description: Handles the "Import the Imperium", "Import the OTU Universe" and
+ *   "Import an OTU Neighbourhood" (chosen sector + 8 neighbours) features.
  *   Imperium:
  *   - Loads the sector list from /sectors/imperium.tsv
  *   - Presents a modal for sector selection and slot assignment
@@ -449,8 +449,9 @@
         // Clearing a slot and the metadata pass can both change subsector names.
         if (window.dbManager) window.dbManager.saveSubsectorNames();
 
+        // Published system data goes only into the sectors just imported (Sean, 2026-11-16).
         if (opts.importSystemData && typeof applyOtuSystemData === 'function') {
-            applyOtuSystemData();
+            applyOtuSystemData(selected.map(sel => sectorSlotToNumber(sel.slot)));
         }
 
         requestAnimationFrame(draw);
@@ -729,8 +730,9 @@
         // Clearing a slot and the metadata pass can both change subsector names.
         if (window.dbManager) window.dbManager.saveSubsectorNames();
 
+        // Published system data goes only into the sectors just imported (Sean, 2026-11-16).
         if (opts.importSystemData && typeof applyOtuSystemData === 'function') {
-            applyOtuSystemData();
+            applyOtuSystemData(sectors.map(s => sectorSlotToNumber(s.slot)));
         }
 
         // An in-place import kept the rest of the map in the DB, so persist the
@@ -857,7 +859,7 @@
             return;
         }
         opts.mixonForeven     = document.getElementById('neighbourhood-opt-mixon-foreven')?.checked ?? false;
-        opts.importSystemData = false;
+        opts.importSystemData = document.getElementById('neighbourhood-opt-system-data')?.checked ?? false;
 
         // Place the 3×3 block in the middle of the current canvas (rounding
         // up-left on an even dimension) and leave every other sector alone.
@@ -892,12 +894,12 @@
     // roughly 230 MB, inside the 250 MB single-file save. The danger is what comes
     // after: a generated system is ~10x an imported one, which is what the >WARN
     // confirm spells out.
-    const CUSTOM_OTU_WARN_SECTORS     = 128;   // Import the Universe's size — proven
+    const CUSTOM_OTU_WARN_SECTORS     = 128;   // Import the OTU Universe's size — proven
     const CUSTOM_OTU_MAX_SECTORS      = 400;   // hard cap, enforced at Import
     const CUSTOM_OTU_SAVE_MB_PER      = 0.57;
     const CUSTOM_OTU_SECONDS_UNCACHED = 2.5;
 
-    // The Import the Universe block, outlined on the map for orientation.
+    // The Import the OTU Universe block, outlined on the map for orientation.
     const UNIVERSE_BLOCK = { x1: -8, y1: -3, x2: 7, y2: 4 };
 
     const customOtu = {
@@ -992,7 +994,7 @@
             });
         }
 
-        // Import the Universe block, for orientation.
+        // Import the OTU Universe block, for orientation.
         ctx.setLineDash([4, 3]);
         ctx.strokeStyle = 'rgba(197,198,199,0.7)';
         ctx.lineWidth = 1;
@@ -1045,7 +1047,7 @@
             lines.push(`<span style="color:#e74c3c;">Too many sectors: ${n} of a ${CUSTOM_OTU_MAX_SECTORS} maximum. Shrink the rectangle.</span>`);
             blocked = true;
         } else if (n > CUSTOM_OTU_WARN_SECTORS) {
-            lines.push(`<span style="color:#f39c12;">Larger than Import the Universe (${CUSTOM_OTU_WARN_SECTORS} sectors). ` +
+            lines.push(`<span style="color:#f39c12;">Larger than Import the OTU Universe (${CUSTOM_OTU_WARN_SECTORS} sectors). ` +
                        `You will be asked to confirm the risks before it starts.</span>`);
         }
         el.innerHTML = lines.join('<br>');
@@ -1152,7 +1154,7 @@
             return;
         }
         opts.mixonForeven     = document.getElementById('custom-otu-opt-mixon-foreven')?.checked ?? false;
-        opts.importSystemData = false;
+        opts.importSystemData = document.getElementById('custom-otu-opt-system-data')?.checked ?? false;
 
         if (n > CUSTOM_OTU_WARN_SECTORS) {
             const uncached = customOtu.cached ? entries.filter(e => !customOtu.cached.has(e.name)).length : n;
@@ -1160,7 +1162,7 @@
             const saveMB = Math.round(n * CUSTOM_OTU_SAVE_MB_PER);
             const ok = confirm(
                 `You are about to import ${n} sectors onto a ${width} × ${height} canvas — ` +
-                `more than the ${CUSTOM_OTU_WARN_SECTORS} of Import the Universe.\n\n` +
+                `more than the ${CUSTOM_OTU_WARN_SECTORS} of Import the OTU Universe.\n\n` +
                 `Risks:\n` +
                 `• Your browser may slow down or run out of memory, especially zoomed out or on a computer with little RAM.\n` +
                 `• ${uncached > 0 ? `${uncached} sectors must be downloaded, which takes about ${mins} minute${mins > 1 ? 's' : ''}. Keep this tab open.` : 'All sectors are cached, so the download step is quick.'}\n` +
@@ -1259,7 +1261,7 @@
             btnImperium.addEventListener('click', openImperiumModal);
         }
 
-        // "Import the Universe" settings button — opens modal
+        // "Import the OTU Universe" settings button — opens modal
         const btnUniverse = document.getElementById('btn-import-universe');
         if (btnUniverse) {
             btnUniverse.addEventListener('click', openUniverseModal);
@@ -1292,7 +1294,7 @@
             });
         }
 
-        // "Import a Neighbourhood" settings button — opens modal
+        // "Import an OTU Neighbourhood" settings button — opens modal
         const btnNeighbourhood = document.getElementById('btn-import-neighbourhood');
         if (btnNeighbourhood) {
             btnNeighbourhood.addEventListener('click', openNeighbourhoodModal);

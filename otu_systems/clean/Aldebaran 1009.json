@@ -1,0 +1,808 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Aldebaran",
+  "hex": "1009",
+  "sector_abbreviation": "Alde",
+  "subsector": "Aldebaran",
+  "name": "Home",
+  "sources": [
+    {
+      "page": "Dril (system)",
+      "revid": 878614,
+      "timestamp": "2024-12-30T20:01:50Z"
+    },
+    {
+      "page": "Home (Al 1009) (world)",
+      "revid": 1030492,
+      "timestamp": "2026-03-30T18:11:48Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Dril (system)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Dril",
+          "type": "G2 V",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "page": "Home (Al 1009) (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Dril",
+          "type": "G2 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Dril",
+      "stars": [
+        {
+          "name": "Dril",
+          "type": "G2 V"
+        }
+      ],
+      "labels": [
+        "Home",
+        "Home"
+      ],
+      "pages": [
+        "Dril (system)",
+        "Home (Al 1009) (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Planet 1",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "0.18",
+            "value": 0.18,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dril (system)",
+            "Home (Al 1009) (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Planet 2",
+          "raw": "H300168-D",
+          "kind": "world",
+          "uwp": "H300168-D",
+          "distance": {
+            "raw": "0.35",
+            "value": 0.35,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dril (system)",
+            "Home (Al 1009) (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Planet 3",
+          "raw": "F52066B-D",
+          "kind": "world",
+          "uwp": "F52066B-D",
+          "distance": {
+            "raw": "0.71",
+            "value": 0.71,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dril (system)",
+            "Home (Al 1009) (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Dril (system)",
+                "Home (Al 1009) (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Home",
+          "raw": "A86699A-E",
+          "kind": "world",
+          "uwp": "A86699A-E",
+          "distance": {
+            "raw": "1.01",
+            "value": 1.01,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dril (system)",
+            "Home (Al 1009) (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 5,
+          "name": "Stony Belt",
+          "raw": "F000769-E",
+          "kind": "world",
+          "uwp": "F000769-E",
+          "distance": {
+            "raw": "1.45",
+            "value": 1.45,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dril (system)",
+            "Home (Al 1009) (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Jovian",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "2.89",
+            "value": 2.89,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dril (system)",
+            "Home (Al 1009) (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "G201228-D",
+              "kind": "world",
+              "uwp": "G201228-D",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Dril (system)",
+                "Home (Al 1009) (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "H2A0000-0",
+              "kind": "world",
+              "uwp": "H2A0000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Dril (system)",
+                "Home (Al 1009) (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "G300109-D",
+              "kind": "world",
+              "uwp": "G300109-D",
+              "distance": {
+                "raw": "20 Diam",
+                "value": 20.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Dril (system)",
+                "Home (Al 1009) (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Planet 4",
+          "raw": "GDC121B-D",
+          "kind": "world",
+          "uwp": "GDC121B-D",
+          "distance": {
+            "raw": "5.35",
+            "value": 5.35,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dril (system)",
+            "Home (Al 1009) (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y310000-0",
+              "kind": "world",
+              "uwp": "Y310000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Dril (system)",
+                "Home (Al 1009) (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Planet 5",
+          "raw": "G403318-D",
+          "kind": "world",
+          "uwp": "G403318-D",
+          "distance": {
+            "raw": "11.1",
+            "value": 11.1,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dril (system)",
+            "Home (Al 1009) (world)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Planet 6",
+          "raw": "F20056C-E",
+          "kind": "world",
+          "uwp": "F20056C-E",
+          "distance": {
+            "raw": "15.4",
+            "value": 15.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dril (system)",
+            "Home (Al 1009) (world)"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Icy Belt",
+          "raw": "H000117-D",
+          "kind": "world",
+          "uwp": "H000117-D",
+          "distance": {
+            "raw": "25.7",
+            "value": 25.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dril (system)",
+            "Home (Al 1009) (world)"
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Planet 7",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "165.0",
+            "value": 165.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dril (system)",
+            "Home (Al 1009) (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "9 Diam",
+                "value": 9.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Dril (system)",
+                "Home (Al 1009) (world)"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Dril (system)",
+      "label": "Home",
+      "stars": [
+        {
+          "name": "Dril",
+          "type": "G2 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Planet 1",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "0.18",
+            "value": 0.18,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Planet 2",
+          "raw": "H300168-D",
+          "kind": "world",
+          "uwp": "H300168-D",
+          "distance": {
+            "raw": "0.35",
+            "value": 0.35,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Planet 3",
+          "raw": "F52066B-D",
+          "kind": "world",
+          "uwp": "F52066B-D",
+          "distance": {
+            "raw": "0.71",
+            "value": 0.71,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Home",
+          "raw": "A86699A-E",
+          "kind": "world",
+          "uwp": "A86699A-E",
+          "distance": {
+            "raw": "1.01",
+            "value": 1.01,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Stony Belt",
+          "raw": "F000769-E",
+          "kind": "world",
+          "uwp": "F000769-E",
+          "distance": {
+            "raw": "1.45",
+            "value": 1.45,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Jovian",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "2.89",
+            "value": 2.89,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "G201228-D",
+              "kind": "world",
+              "uwp": "G201228-D",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "H2A0000-0",
+              "kind": "world",
+              "uwp": "H2A0000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "G300109-D",
+              "kind": "world",
+              "uwp": "G300109-D",
+              "distance": {
+                "raw": "20 Diam",
+                "value": 20.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Planet 4",
+          "raw": "GDC121B-D",
+          "kind": "world",
+          "uwp": "GDC121B-D",
+          "distance": {
+            "raw": "5.35",
+            "value": 5.35,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y310000-0",
+              "kind": "world",
+              "uwp": "Y310000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Planet 5",
+          "raw": "G403318-D",
+          "kind": "world",
+          "uwp": "G403318-D",
+          "distance": {
+            "raw": "11.1",
+            "value": 11.1,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 9,
+          "name": "Planet 6",
+          "raw": "F20056C-E",
+          "kind": "world",
+          "uwp": "F20056C-E",
+          "distance": {
+            "raw": "15.4",
+            "value": 15.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 10,
+          "name": "Icy Belt",
+          "raw": "H000117-D",
+          "kind": "world",
+          "uwp": "H000117-D",
+          "distance": {
+            "raw": "25.7",
+            "value": 25.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 11,
+          "name": "Planet 7",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "165.0",
+            "value": 165.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "9 Diam",
+                "value": 9.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Home (Al 1009) (world)",
+      "label": "Home",
+      "stars": [
+        {
+          "name": "Dril",
+          "type": "G2 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Planet 1",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "0.18",
+            "value": 0.18,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Planet 2",
+          "raw": "H300168-D",
+          "kind": "world",
+          "uwp": "H300168-D",
+          "distance": {
+            "raw": "0.35",
+            "value": 0.35,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Planet 3",
+          "raw": "F52066B-D",
+          "kind": "world",
+          "uwp": "F52066B-D",
+          "distance": {
+            "raw": "0.71",
+            "value": 0.71,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Home",
+          "raw": "A86699A-E",
+          "kind": "world",
+          "uwp": "A86699A-E",
+          "distance": {
+            "raw": "1.02",
+            "value": 1.02,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Stony Belt",
+          "raw": "F000769-E",
+          "kind": "world",
+          "uwp": "F000769-E",
+          "distance": {
+            "raw": "1.45",
+            "value": 1.45,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Gas Giant",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "2.89",
+            "value": 2.89,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "G201228-D",
+              "kind": "world",
+              "uwp": "G201228-D",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "H2A0000-0",
+              "kind": "world",
+              "uwp": "H2A0000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "G300109-D",
+              "kind": "world",
+              "uwp": "G300109-D",
+              "distance": {
+                "raw": "20 Diam",
+                "value": 20.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Planet 4",
+          "raw": "GDC121B-D",
+          "kind": "world",
+          "uwp": "GDC121B-D",
+          "distance": {
+            "raw": "5.35",
+            "value": 5.35,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y310000-0",
+              "kind": "world",
+              "uwp": "Y310000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Planet 5",
+          "raw": "G403318-D",
+          "kind": "world",
+          "uwp": "G403318-D",
+          "distance": {
+            "raw": "11.1",
+            "value": 11.1,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 9,
+          "name": "Planet 6",
+          "raw": "F20056C-E",
+          "kind": "world",
+          "uwp": "F20056C-E",
+          "distance": {
+            "raw": "15.4",
+            "value": 15.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 10,
+          "name": "Icy Belt",
+          "raw": "H000117-D",
+          "kind": "world",
+          "uwp": "H000117-D",
+          "distance": {
+            "raw": "25.7",
+            "value": 25.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 11,
+          "name": "Planet 7",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "165.0",
+            "value": 165.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "9 Diam",
+                "value": 9.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Home",
+    "UWP": "A86699A-E",
+    "Stellar": "G2 V",
+    "PBG": "121",
+    "Bases": "KM",
+    "Remarks": "Hi Ga Cx Pr Ht"
+  }
+}

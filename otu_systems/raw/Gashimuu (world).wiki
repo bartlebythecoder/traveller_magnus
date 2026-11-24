@@ -1,0 +1,156 @@
+{{UWP 
+|name= {{World|Gashimuu|Deneb|Usani|1925}}
+|uc    = B660000-B
+|popc  = 0
+|zonec = green
+ |u1= 
+|alg     = ImDd
+|class   = 
+|trade   = 
+|climate = TBD
+|nblty   = 
+|bases   = 
+|primary = 
+|belts   = 
+|GGcount = 
+}} 
+{{World summary |name= Gashimuu |trade=Ni}}
+{{World summary ImDd|sector= Deneb |subsector=Usani}}
+
+{{InfoboxSystem
+|name=Deneb
+|sector=Deneb|subsector=Usani|hex=1925
+|star='''[[Deneb (star)|Deneb Primary]]'''|type='''A2 Ia'''
+|P0= - |Dist0=0.2|UWP0= <small>(Empty Orbit)</small>
+|P1= - |Dist1=0.4|UWP1= <small>(Empty Orbit)</small>
+|P2= - |Dist2=0.7|UWP2= <small>(Empty Orbit)</small>
+|P3= - |Dist3=1.0|UWP3= <small>(Empty Orbit)</small>
+|P4= - |Dist4=1.6|UWP4= <small>(Empty Orbit)</small>
+|P5= - |Dist5=2.0|UWP5= <small>(Empty Orbit)</small>
+|P6= - |Dist6=5.2|UWP6= <small>(Empty Orbit)</small>
+|P7=Deneb VII Belt|Dist7=10|UWP7=Y000000-0
+|P8= - |Dist8=19.6|UWP8= <small>(Empty Orbit)</small>
+|P9=Deneb IX|Dist9=38.8|UWP9=Y000000-0
+|P10= - |Dist10=77.2|UWP10= <small>(Empty Orbit)</small>
+|P11=Gashimuu|Dist11=154|UWP11=B660000-B
+|P12=Deneb|Dist12=307.4|UWP12=B537ADD-C
+|P12M1=Cova|Dist12M1=12|UWP12M1=Y100000-0
+|P12M2=Liye|Dist12M2=35|UWP12M2=YS00000-0
+|P12M3=Shanuasifehaemo|Dist12M3=50|UWP12M3=YS00000-0
+|P13= - |Dist13=618.4|UWP13= <small>(Empty Orbit)</small>
+|P14=Deneb XIV|Dist14=1229.2|UWP14=Y000000-0
+|P15= - |Dist15=2458|UWP15= <small>(Empty Orbit)</small>
+}}
+
+== Description / Astrography & Planetology == 
+[[Gashimuu (world)|Gashimuu]], a world orbiting the star [[Deneb (star)|Deneb]] in the life zone, one orbit in from the world [[Deneb (world)|Deneb]].
+
+{{InfoboxStar
+  |name=Deneb
+  |image= [[File: Traveller_Imperial_Science_Societies_Sunburst_logo.svg|45px]]
+  |spectral=A2 Ia
+  |type=Supergiant <br> <small>(Alpha Cygni variable)</small>
+  |multiple=
+  |radius= 200-300 
+  |rrank= 31<sup>st</sup>
+  |lum= 60,000-250,000 
+  |mag= -8.73
+  |lref= 1.25 (19<sup>th</sup>)|lrworld=[[Terra (SR 1827) (world)|Terra]]
+  |lref2= -4.7 (1<sup>st</sup>?)|lrworld2=[[Vland (world)|Vland]]
+  |temp= 8,400 
+  |mass= 20-25 
+  |mrank=
+  |companion=
+}}
+{{MonostellarSystem
+|name           = Deneb
+|primary        = A2 Ia 
+|PrimaryName    = [[Deneb (star)|Deneb]]
+|PrimaryNotes   = [[Deneb (star)|Deneb (Alpha Cygni)]]
+}}
+
+=== System Data ===
+No information yet available. 
+ 
+=== Otherworld Data ===
+No information yet available.
+
+==== Otherworld Geography & Topography ====
+No information yet available.
+
+=== Native Lifeforms ===
+No information yet available.
+
+== History & Background / Dossier ==
+[[Gashimuu (world)|Gashimuu]] was settled around [[-2400]] by [[Vilani]] fleeing the [[Rule of Man]]. Like most such colonies, it regressed technologically, but not as far as many, and it regained jump capability around [[-80]].  A lot of heavy industry had already been placed on the next world out from [[Gashimuu (world)|Gashimuu]], a world inhabited by the [[Nenlat]], and as the years went by, this world finally overtook [[Gashimuu (world)|Gashimuu]] as the system [[mainworld]]. Inevitably, it became known as [[Deneb_(world)|Deneb]].
+
+=== Imperial High / Landed Nobility ===
+This is not a [[mainworld]] and does not have assigned nobles.
+* Imperial Nobility may nevertheless possess grants to territories on this world that are part of their larger total Land Grants associated with titles and enfeoffments styled elsewhere.
+
+=== World Starport ===
+* ''[[Trans Galactic Starlines]]'', in partnership with [[Vilani]] [[megacorporation]] ''[[Zirunkariish]]'' have set-up alternate starports for ease of access and use with connecting in-system service provided to passengers; in the [[Deneb (world)|Deneb]] system, [[Gashimuu (world)|Gashimuu]] is used. This alternate starport has a ''[[Brubek's]]'' gastropub and a [[Medel's Mega Mart]]. 
+
+=== World Technology Level ===
+{{WorldTech|name= TBD|WorldTech=C}}
+
+=== World Government ===
+No information yet available.  
+
+==== World Military ====
+No information yet available. 
+
+=== World Economy ===
+[[Vilani]] [[megacorporation]] [[Zirunkariish]] has offices here, including a major trading clearinghouse and both the [[Deneb Sector]] and [[Usani Subsector]] headquarters offices.
+
+'''[[Deneb (system)|Deneb]] Co-Prosperity Development Trust:''' - This [[Zirunkariish]] subsidiary is committed to economic development of the [[Deneb (system)|Deneb system]] through direct investment and other projects anywhere within the [[Deneb (system)|Deneb system]], except on the mainworld of [[Deneb (world)|Deneb]].  It is headquartered on [[Gashimuu (world)|Gashimuu]].  Ownership: [[Zirunkariish]]--50%, [[Shiishuginsa family]]--25%, [[Sharurshid]] Trust--15%, [[House Zhunastu|Zhunastu family]]--10%.
+
+
+==== Trade Data ====
+No information yet available.
+
+=== World Demographics ===
+No information yet available. 
+
+=== World Culture ===
+No information yet available. 
+
+==== Urbanization ====
+No information yet available. 
+
+=== Historical Data ===
+No information yet available. 
+
+==== World Timeline ====
+No information yet available.
+
+==== UWP Listing ====
+No information yet available.
+
+=== Image Repository ===
+[[TravellerMap]] <small>([[T5SS]])</small>: <br> [https://travellermap.com/?options=58363&scale=128&y=55.5&x=-67.983]
+
+== References & Contributors / Sources ==
+{{Intermediate}}
+{{Detail}}
+{{Sources
+|S1= {{Ludography cite|name=The Travellers' Digest 01|article=Library Data of the Deneb Sector|page=26}}
+|S2= {{Ludography cite|name=The Travellers' Digest 12|article=Adventuring in the Shattered Imperium|page=39-40}}
+|S3= {{Ludography cite|name=The Travellers' Digest 18|article=A Concise History of the Third Imperium|page=21-29}}
+|S4= {{Ludography cite|name=The Travellers' Digest 19|article=Data/Library: Deneb|page=24-30}}
+|S5= {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}}
+|S6= {{Ludography cite|name=The Regency Sourcebook|page=62}}
+|S7= [[Mongoose Traveller: Deneb Sector]] (UWP only)
+|S8= External Link: [http://zho.berka.com/data/CLASSIC/subsector.pl?subsector=SEC_K.DAT&realsubnameY=Usani&sector=DENEB&subsectorletter=K&javascii=ASCII Sunbane data]
+|S9= [[JTAS Online]] ''Mora – Year 100'' by Hans Rancke-Madsen published February 22, 2000
+|S10= External Link: [http://seegras.discordia.ch/Roleplay/Traveller/Space/Sectors/deneb/sec_j.html#deneb InfoData Library] - Peter Keel
+ 
+|S12= Author & Contributor: [[User:FarScout275|FarScout275]]
+}}
+
+
+[[Category: Medel's Mega Mart worlds]]
+[[Category:Sharurshid worlds]]
+[[Category: Trans Galactic Starlines worlds]]
+{{LEN}}
+[[Category:Zirunkariish worlds]]

@@ -1,0 +1,39 @@
+{{InfoboxSystem|name=Burtson|
+ |sector=Spinward Marches|subsector=Trin's Veil|hex=2534
+ |star='''Burtson'''|type='''G4 V'''
+ |P0=Burtson|Dist0=0.2|UWP0=C462667-8
+ |P0M1=* ''Satellite''|Dist0M1=20|UWP0M1=Y100235-7
+ |P0M2=* ''Satellite''|Dist0M2=45|UWP0M2=F220168-7
+ |P2=Gas Giant|Dist2=0.7|UWP2='''Small GG'''
+ |P2M1=* ''Satellite''|Dist2M1=6|UWP2M1=Y100000-0
+ |P2M2=* ''Satellite''|Dist2M2=35|UWP2M2=Y100000-0
+ |P2M3=* ''Satellite''|Dist2M3=65|UWP2M3=Y100000-0
+ |P4=Gas Giant|Dist4=1.5|UWP4='''Large GG'''
+ |P4M1=* ''Ring''|Dist4M1=2|UWP4M1=YR00000-0
+ |P4M2=* ''Satellite''|Dist4M2=4|UWP4M2=Y200000-0
+ |P4M3=* ''Satellite''|Dist4M3=9|UWP4M3=Y723000-0
+ |P4M4=* ''Satellite''|Dist4M4=20|UWP4M4=Y300000-0
+ |P4M5=* ''Satellite''|Dist4M5=25|UWP4M5=Y330000-0
+ |P4M6=* ''Satellite''|Dist4M6=40|UWP4M6=Y200000-0
+ |P4M7=* ''Satellite''|Dist4M7=55|UWP4M7=Y230000-0
+ |P6=World|Dist6=5|UWP6=YS00000-0
+}}
+([[Burtson (world)|Return to main Burtson article]])
+
+=== Stellar Data ===
+'''Burtson''' has a solitary primary star.
+* It is a yellow main sequence.
+
+{{MonostellarSystem
+|name           = Burtson
+|primary        = G4 V 
+|PrimaryName    = Primary
+|PrimaryNotes   = None
+}}
+
+=== Non-Canon ===
+Editor's Note: a non-canon version of the system exists (see right).
+
+It does not agree with the data presented in [[T5SS]], and as such has been moved out of the main [[Burtson (world)|Burtson]] article.
+
+The [[mainworld]] is noted as orbiting very close to the star, at a distance where water couldn't exist on the surface and the atmosphere would likely have been stripped away by the intense stellar activity.

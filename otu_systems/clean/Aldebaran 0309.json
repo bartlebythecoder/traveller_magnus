@@ -1,0 +1,575 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Aldebaran",
+  "hex": "0309",
+  "sector_abbreviation": "Alde",
+  "subsector": "Star Bridge",
+  "name": "Ivraie",
+  "sources": [
+    {
+      "page": "Ivraie (world)",
+      "revid": 1014835,
+      "timestamp": "2026-03-01T02:44:11Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Ivraie (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Primary",
+          "type": "G8 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Primary",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "G8 V"
+        }
+      ],
+      "labels": [
+        "Ivraie"
+      ],
+      "pages": [
+        "Ivraie (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Planet 1",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "0.24",
+            "value": 0.24,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ivraie (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Planet 2",
+          "raw": "Y7C0000-0",
+          "kind": "world",
+          "uwp": "Y7C0000-0",
+          "distance": {
+            "raw": "0.47",
+            "value": 0.47,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ivraie (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Verre",
+          "raw": "F320218-9",
+          "kind": "world",
+          "uwp": "F320218-9",
+          "distance": {
+            "raw": "0.72",
+            "value": 0.72,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ivraie (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Ivraie",
+          "raw": "B758799-A",
+          "kind": "world",
+          "uwp": "B758799-A",
+          "distance": {
+            "raw": "0.94",
+            "value": 0.94,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ivraie (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Coupe",
+              "raw": "G20056A-A",
+              "kind": "world",
+              "uwp": "G20056A-A",
+              "distance": {
+                "raw": "16 Diam",
+                "value": 16.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Ivraie (world)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 5,
+          "name": "Magnum",
+          "raw": "G7A2319-9",
+          "kind": "world",
+          "uwp": "G7A2319-9",
+          "distance": {
+            "raw": "1.63",
+            "value": 1.63,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ivraie (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Planet 5",
+          "raw": "Y610000-0",
+          "kind": "world",
+          "uwp": "Y610000-0",
+          "distance": {
+            "raw": "3.51",
+            "value": 3.51,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ivraie (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y210000-0",
+              "kind": "world",
+              "uwp": "Y210000-0",
+              "distance": {
+                "raw": "35 Diam",
+                "value": 35.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Ivraie (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Bouteille",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "5.27",
+            "value": 5.27,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ivraie (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Champan",
+              "raw": "Y201000-0",
+              "kind": "world",
+              "uwp": "Y201000-0",
+              "distance": {
+                "raw": "9 Diam",
+                "value": 9.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Ivraie (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Rose",
+              "raw": "G5A2435-9",
+              "kind": "world",
+              "uwp": "G5A2435-9",
+              "distance": {
+                "raw": "11 Diam",
+                "value": 11.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Ivraie (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Rouge",
+              "raw": "H312000-0",
+              "kind": "world",
+              "uwp": "H312000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Ivraie (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Noir",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "20 Diam",
+                "value": 20.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Ivraie (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Planet 6",
+          "raw": "Y302000-0",
+          "kind": "world",
+          "uwp": "Y302000-0",
+          "distance": {
+            "raw": "8.84",
+            "value": 8.84,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ivraie (world)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Capitaine",
+          "raw": "G9C1167-A",
+          "kind": "world",
+          "uwp": "G9C1167-A",
+          "distance": {
+            "raw": "13.1",
+            "value": 13.1,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ivraie (world)"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Noah",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "26.2",
+            "value": 26.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ivraie (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "H313000-0",
+              "kind": "world",
+              "uwp": "H313000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Ivraie (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Planet 8",
+          "raw": "Y204000-0",
+          "kind": "world",
+          "uwp": "Y204000-0",
+          "distance": {
+            "raw": "125",
+            "value": 125.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Ivraie (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Ivraie (world)",
+      "label": "Ivraie",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "G8 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Planet 1",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "0.24",
+            "value": 0.24,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Planet 2",
+          "raw": "Y7C0000-0",
+          "kind": "world",
+          "uwp": "Y7C0000-0",
+          "distance": {
+            "raw": "0.47",
+            "value": 0.47,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Verre",
+          "raw": "F320218-9",
+          "kind": "world",
+          "uwp": "F320218-9",
+          "distance": {
+            "raw": "0.72",
+            "value": 0.72,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Ivraie",
+          "raw": "B758799-A",
+          "kind": "world",
+          "uwp": "B758799-A",
+          "distance": {
+            "raw": "0.94",
+            "value": 0.94,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Coupe",
+              "raw": "G20056A-A",
+              "kind": "world",
+              "uwp": "G20056A-A",
+              "distance": {
+                "raw": "16 Diam",
+                "value": 16.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Magnum",
+          "raw": "G7A2319-9",
+          "kind": "world",
+          "uwp": "G7A2319-9",
+          "distance": {
+            "raw": "1.63",
+            "value": 1.63,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Planet 5",
+          "raw": "Y610000-0",
+          "kind": "world",
+          "uwp": "Y610000-0",
+          "distance": {
+            "raw": "3.51",
+            "value": 3.51,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y210000-0",
+              "kind": "world",
+              "uwp": "Y210000-0",
+              "distance": {
+                "raw": "35 Diam",
+                "value": 35.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Bouteille",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "5.27",
+            "value": 5.27,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Champan",
+              "raw": "Y201000-0",
+              "kind": "world",
+              "uwp": "Y201000-0",
+              "distance": {
+                "raw": "9 Diam",
+                "value": 9.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Rose",
+              "raw": "G5A2435-9",
+              "kind": "world",
+              "uwp": "G5A2435-9",
+              "distance": {
+                "raw": "11 Diam",
+                "value": 11.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Rouge",
+              "raw": "H312000-0",
+              "kind": "world",
+              "uwp": "H312000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Noir",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "20 Diam",
+                "value": 20.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Planet 6",
+          "raw": "Y302000-0",
+          "kind": "world",
+          "uwp": "Y302000-0",
+          "distance": {
+            "raw": "8.84",
+            "value": 8.84,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 9,
+          "name": "Capitaine",
+          "raw": "G9C1167-A",
+          "kind": "world",
+          "uwp": "G9C1167-A",
+          "distance": {
+            "raw": "13.1",
+            "value": 13.1,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 10,
+          "name": "Noah",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "26.2",
+            "value": 26.2,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "H313000-0",
+              "kind": "world",
+              "uwp": "H313000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Planet 8",
+          "raw": "Y204000-0",
+          "kind": "world",
+          "uwp": "Y204000-0",
+          "distance": {
+            "raw": "125",
+            "value": 125.0,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Ivraie",
+    "UWP": "B758799-A",
+    "Stellar": "G8 V",
+    "PBG": "202",
+    "Bases": "",
+    "Remarks": "Ag"
+  }
+}

@@ -1,0 +1,87 @@
+{{InfoboxSystem
+|name= [[Regina (system)|Regina]]
+  |sector=Spinward Marches
+  |subsector=Regina
+  |hex=1910
+  |star='''[[Lusor]]'''/'''[[Speck]]'''|type='''F7 V''' / '''BD'''
+  |P0=Clement|Dist0=0.2|UWP0=Y100000-0
+  |P1=Ausun|Dist1=0.4|UWP1=Y300169-9
+  |P2=Burgund |Dist2=1|UWP2='''Small GG'''
+  |P2M1=* ''Cent'' |Dist2M1=3|UWP2M1=Y400367-9
+  |P2M2=* ''Thermidor''|Dist2M2=7|UWP2M2=Y560000-0
+  |P3=Olybrius|Dist3=1.5|UWP3=F75022A-9
+  |P3M1=* ''Alise''|Dist3M1=25|UWP3M1=Y20016C-9
+  |P4=Assiniboia|Dist4=3|UWP4='''Large GG'''
+  |P4M1=* ''Redes''|Dist4M1=3|UWP4M1=F595269-9
+  |P4M2=* ''Printemps''|Dist4M2=6|UWP4M2=F20036C-A
+  |P4M3=* ''Brumaire''|Dist4M3=7|UWP4M3=F564669-9
+  |P4M4=* ''Harcourt''|Dist4M4=30|UWP4M4=H43556C-A
+  |P4M5=* '''''[[Regina (world)|Regina]]'''''|Dist4M5=55|UWP4M5=A788899-C
+}}
+
+{{InfoboxSystem
+|name= Far Companion: Darida
+ |sector=Spinward Marches|subsector=Regina|hex=1910
+ |star='''[[Darida]]'''|type='''M3 V'''
+ |P0=Augur|Dist0=0.2|UWP0=YS00000-0
+ |P1=Kirunda|Dist1=0.4|UWP1=Y210000-0
+ |P1M1=* ''Irkirka''|Dist1M1=8|UWP1M1=YS00000-0
+ |P1M2=* ''Arkurer''|Dist1M2=11|UWP1M2=HS00137-9
+ |P1M3=* ''Irgurkar''|Dist1M3=13|UWP1M3=Y10046A-A
+ |P2=Elazair|Dist2=1|UWP2='''Small GG'''
+ |P2M1=* ''Lashir''|Dist2M1=3|UWP2M1=YS00000-0
+ |P2M2=* ''Diuur lmar''|Dist2M2=8|UWP2M2=G2200269-9
+ |P2M3=* ''Shamardae''|Dist2M3=9|UWP2M3=Y500000-0
+ |P2M4=* ''Arapan''|Dist2M4=20|UWP2M4=Y200000-0
+ |P2M5=* ''Edaku''|Dist2M5=50|UWP2M5=Y210000-0
+ |P2M6=* ''Gagamshir''|Dist2M6=125|UWP2M6=F534328-A
+}}
+
+The Regina system is a triple star system - the primary [[Lusor]] and its brown dwarf companion [[Speck]] form the major system, while the dim red dwarf [[Darida]] orbits at about 5,000 AU distance.
+* There are three stars, eight planets and 17 satellites in the system.
+
+== Description (Specifications) ==
+[[Regina (world)|Regina]] is only one of seven worlds in the systems which boast a breathable atmosphere, and only one of four habitable planets in the life zone of [[Lusor]], in orbit around the gas giant ''Assiniboia''. With the best conditions of the group, it was settled first and soon dominated the system.
+* Regina boasts the highest population; its companion satellites of ''Brumaire'' and ''Harcourt'' (along with a few other lesser worlds) have been colonized. 
+* Many planets orbiting [[Lusor]] (the primary star) and its dwarf companion [[Speck]] are named for persons or places associated with ''St. Regina''. Worlds orbiting [[Darida]] ([[Lusor|Lusor's]] far companion) are named in the [[Vilani]] language after famous [[Vilani]] authors."
+
+=== Trinary Solar System ===
+'''Regina''' is a trinary star system. Specifically, the [[Regina (system)|Regina system]] is composed of a binary system ('''[[Lusor]]''' with its companion '''[[Speck]]''') with a gravitationally subordinate subsystem, the '''[[Darida]]''' star and subsystem, which is part of the greater [[Regina (system)|Regina star system]].
+
+{{TrinaryStarSystem
+|name           = Regina
+|PrimaryName    = Lusor
+|primary        = F7 V 
+|SecondaryName  = Speck
+|secondary      = BD
+|TertiaryName   = Darida
+|tertiary       = M3 V
+|PrimaryNotes   = '''[[Lusor]]''' Regina System Primary
+|SecondaryNotes = '''[[Speck]]''' ''Close Companion. Pink/Cerise/Magenta-hued Brown Dwarf companion in close orbit to "Lusor"''
+|TertiaryNotes  = '''[[Darida]]''' ''Far Companion - Subsystem. 5,000 AU distance from Regina system.''
+}}
+
+=== Darida Subsystem ===
+The [[Darida]] subsystem proved much less hospitable, and has been only minimally exploited. 
+* It does boast a military outpost, and a few small settlements devoted to prospecting and mining available ores.
+* A few scientific and technical survey stations and a small military base maintained by the Imperial Navy occupy the relatively desolate Darida system.
+
+== History & Background (Dossier) ==
+No information yet available.
+
+== References & Contributors (Sources) ==
+{{Metadata}}
+{{Detail}}
+{{Sources
+|S1= {{Ludography cite|name=Scouts|page=}} (pgs. 54-55)
+|S2= {{CT}} [[DGP]] [[Grand Census]]
+|S3= {{CT}} [[DGP]] [[Grand Survey (book)]]
+|S4= {{CT}} Supplement 3 [[The Spinward Marches (CT)|Spinward Marches]] (pg. 20)
+|S5= {{CT}} [[The Spinward Marches Campaign]]
+|S6= {{CT}} [[The Traveller Book ]]
+|S7= 
+|S8= 
+}}
+
+
+{{LE|Mining worlds|Systems|Trinary Star System}}

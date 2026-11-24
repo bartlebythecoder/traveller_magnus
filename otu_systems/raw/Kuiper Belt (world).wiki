@@ -1,0 +1,249 @@
+[[File: Wiki Navy.png|right]]
+{{InfoboxSystem
+|name=The Kuiper Belt, forming the <br>outer fringe of the Terra
+|subsector=Sol
+|sector=Solomani Rim
+|hex=1827
+|star=[[Sol (star)|Sol]]
+|type=G2 V
+|P10=Kuiper Belt|Dist10=30-100|UWP10=<small>(variable)</small>
+ |P10M1=[[Kuiper_Belt_(world)#Orcus|Orcus]] |Dist10M1=39.40<small>AU</small>|UWP10M1=<small>YS00000-0</small>
+ |P10M2=[[Pluto (world)|Pluto]] |Dist10M2=39.48<small>AU</small>|UWP10M2=<small>F10046C-F</small>
+ |P10M3=[[Kuiper_Belt_(world)#Ixion|Ixion]] |Dist10M3=39.67<small>AU</small>|UWP10M3=<small>Y100000-0</small>
+ |P10M4=[[Kuiper_Belt_(world)#Salacia|Salacia]] |Dist10M4=41.88<small>AU</small>|UWP10M4=<small>Y100000-0</small>
+ |P10M5=[[Kuiper_Belt_(world)#Varuna|Varuna]] |Dist10M5=42.90<small>AU</small>|UWP10M5=<small>YS00000-0</small>
+ |P10M6=[[Kuiper_Belt_(world)#Quaoar|Quaoar]] |Dist10M6=42.80<small>AU</small>|UWP10M6=<small>YS00000-0</small>
+ |P10M7=[[Kuiper_Belt_(world)#Haumea|Haumea]] |Dist10M7=43.22<small>AU</small>|UWP10M7=<small>Y100000-0</small>
+ |P10M8=[[Kuiper_Belt_(world)#Ultima_Thule|Ultima Thule <small>(Arrokoth)</small>]] |Dist10M8=44.58<small>AU</small>|UWP10M8=<small>YS00000-0</small>
+ |P10M9=[[Kuiper_Belt_(world)#Chaos|Chaos]] |Dist10M9=45.60<small>AU</small>|UWP10M9=<small>YS00000-0</small>
+ |P10M10=[[Kuiper_Belt_(world)#Varda|Varda]] |Dist10M10=45.64<small>AU</small>|UWP10M10=<small>YS00000-0</small>
+ |P10M11=[[Kuiper_Belt_(world)#Makemake|Makemake]] |Dist10M11=45.72<small>AU</small>|UWP10M11=<small>Y100000-0</small>
+ |P10M12=[[Kuiper_Belt_(world)#Eris|Eris]] |Dist10M12=67.78<small>AU</small>|UWP10M12=<small>Y100000-0</small>
+ |P10M13=[[Kuiper_Belt_(world)#Sedna|Sedna]] |Dist10M13=539<small>AU</small>|UWP10M13=<small>Y100000-0</small>
+}}
+
+The [[Kuiper Belt (world)|Kuiper Belt]] is a collection of [[Worldlet|dwarf worlds]] and icy [[planetoid]]s lying at the outer edge of the '''[[Terra (system)|Terra system]]'''.
+* The Kuiper Belt possesses a number of [[Trans-Neptunian Object]]s. 
+* It is the location of the [[Heliosphere]] to [[Heliopause]] to the [[Interstellar Medium]]. 
+* It lies at the far edge of the [[Outer System]]. 
+* The Inner and Main Belt regions occupy [[Orbit]] 9. 
+* The Outer Belt region occupies [[Orbit]]s 10-11.
+* It can extend up to two [[Light Week]]s away from its [[Primary Star]].
+
+== Description ([[Astrography]] & [[Planetology]]) ==
+'''The Kuiper Belt''' orbits [[Sol (star)|Sol]], a solitary primary star.
+* It is a yellow main sequence.
+
+{{MonostellarSystem
+|name           = Kuiper Belt /Sol
+|primary        = G2 V 
+|PrimaryName    = [[Sol (star)| Sol]]
+|PrimaryNotes   = Orbits 9-11: Kuiper Belt 
+}}
+=== System Data ===
+The primary of the [[Terra (system)|Terra system]] is [[Sol (star)|Sol]], an ordinary yellow main sequence [[star]]. It has a luminosity of 1 Sol, a mass of 1 Sol, and a diameter of 1.391 million km. [[Sol (star)|Sol]] retains a family of four inner rocky worlds ([[Mercury (SR 1827) (world)|Mercury]], [[Venus (SR 1827) (world)|Venus]], [[Terra (SR 1827) (world)|Terra]], and [[Mars (world)|Mars]]), a stony [[Asteroid Belt (SR 1827) (world)|planetoid belt]], and four outer [[gas giant]] worlds ([[Jupiter (world)|Jupiter]], [[Saturn (world)|Saturn]], [[Uranus (world)|Uranus]], and Neptune). 
+
+The [[Kuiper Belt]], an outer icy [[planetoid belt]], exists at the system fringe but is rarely counted as a distinct world, despite containing a number of significant bodies. The system is named for [[Terra (world)|Terra]], the [[mainworld]], the third world out from the star and orbiting within its [[habitable zone]]. The Kuiper Belt contains a few thousand bodies with diameters in excess of 100 km, and an estimated trillion or more "dirty snowballs" of varying sizes, but typically with diameters of less than 10 km. As many as 1 in 6 are binary objects.
+
+[[File:Chart Terra System Basic.png|700 px]]
+# [[Mercury (SR 1827) (world)|Mercury]]
+# [[Venus (SR 1827) (world)|Venus]]
+# [[Terra (SR 1827) (world)|Terra]] ''<small>(including [[Luna (SR 1827) (world)|Luna]])</small>''
+# [[Mars (world)|Mars]]
+# [[Asteroid Belt (SR 1827) (world)|Ceres Belt]] ''<small>(including Ceres, Vesta, Pallas, Juno, and Amor, et al)</small>''
+# [[Jupiter (world)|Jupiter]] ''<small>(including [[Jupiter (world)#Ganymede|Ganymede]] & [[Jupiter (world)#Callisto|Callisto]])</small>''
+# [[Saturn (world)|Saturn]] ''<small>(including [[Saturn (world)#Mainworld Data|Enceladus]], [[Saturn (world)#Mainworld Data|Rhea]] & [[Saturn (world)#Mainworld Data|Titan]])</small>''
+# [[Uranus (world)|Uranus]] ''<small>(including [[Uranus_(world)#Titania|Titania]])</small>''
+# [[Neptune (world)|Neptune]] ''<small>(including [[Neptune_(world)#Triton|Triton]])</small>''
+# [[Kuiper Belt (world)|Kuiper Belt]] ''<small>(including [[Pluto (world)|Pluto]]-[[Pluto_(world)#Charon|Charon]])</small>''
+
+=== Belt Structure ===
+The structure of the Kuiper Belt is governed by orbital resonances between its various worlds and the [[gas giant]] [[Neptune (world)|Neptune]].
+* An orbital resonance is expressed as a small integer, such as 1:2 or 2:3. In this case they describe a balanced gravitational relationship between [[Neptune (world)|Neptune]] and various Kuiper Belt objects. The integer denotes how many complete orbits of [[Sol (star)|Sol]], the [[Terra]] [[system]]'s central star, the Kuyper Belt object will do compared to [[Neptune (world)|Neptune]].
+
+==== Inner Belt Region ====
+The inner part of the Kuiper Belt is considered to lie between 30 [[AU]] and 40 [[AU]] from [[Sol (star)|Sol]] (Near Orbit 9).
+* Objects orbiting within this region have a 2:3 orbital resonance with [[Neptune (world)|Neptune]]. They are known as ''plutinos''.
+* [[Neptune (world)|Neptune]], with an orbital distance of 30.1 [[AU]] from [[Sol (star)|Sol]], lies just within the inner edge of the Kuiper Belt.
+
+==== Main Belt Region ====
+The main part of the Kuiper Belt is considered to lie between 40 [[AU]] and 48 [[AU]] from [[Sol (star)|Sol]] (Far Orbit 9).
+* Objects orbiting within this region are known as ''cubewanos''. The name derives from QB1 ("cue bee one"), short for (15760) 1992 QB1, the first such object discovered in the region. QB1 is now known as Albion: it is a 108 km body composed of silicates and ices with a mean orbital distance of 43.7 [[AU]].
+* The majority of Kuiper Belt objects are concentrated within this region.
+** The main part of the belt is generally accepted to extend from the 2:3 mean-motion orbital resonance region with [[Neptune (world)|Neptune]] (the orbit of Pluto, at approximately 40 [[AU]]) to the 1:2 resonance region (beyond the orbit of Chaos, at roughly 48 [[AU]]).
+
+==== Outer Belt Region ====
+The outer part of the Kuiper Belt is considered to lie between 48 [[AU]] and 100 [[AU]] from [[Sol (star)|Sol]] (Orbits 10-11), though the orbits of some objects take them far beyond this limit. It is referred to as the ''Scattered Disc'' region.
+* 48 [[AU]] (the 1:2 orbital resonance region with [[Neptune (world)|Neptune]]) marks a distinct boundary in the structure of the belt, where object sizes dramatically reduce. This is known as the ''Kuiper Cliff''.
+* Objects orbiting within this region are known as ''twotinos''. The name is a play on ''plutino'' and refers to their 2:1 orbital resonance with [[Neptune (world)|Neptune]].
+
+=== Inner Belt Objects ===
+Objects orbiting within the Inner Belt region – with mean orbital distances of between 30 [[AU]] and 40 [[AU]] from [[Sol (star)|Sol]] (Inner Orbit 9), within the mean orbit of Pluto – are referred to as ''plutinos''.
+
+==== Orcus ====
+Orcus ([[UWP]] Y100000-0) is a ''plutino'' Kuiper Belt object and is classified as a [[worldlet]]. It orbits [[Sol (star)|Sol]] at a mean distance of 39.4 [[AU]] (5.9 billion km) and has an orbital period of 247 [[year]]s 106 [[day]]s. Its rotation period is 13.2 [[hour]]s. Orcus has a diameter of 910 km, a mean density of 1.5 g/cm³, and a surface gravity of 0.019 G. The atmosphere is rated as [[Vacuum]]. The world has no hydrosphere. Mean surface temperature: -241°C. Orcus is a rugged, pale reddish, generally spherical body with a light degree of cratering. It has a relatively high albedo.
+* Orcus is in 2:3 orbital resonance with [[Neptune (world)|Neptune]].
+* Orcus has a high orbital eccentricity. At perihelion it lies at 30.73 [[AU]] from [[Sol (star)|Sol]] and at aphelion it lies at 48.07 [[AU]].
+* Orcus's orbit is out of alignment with the plane of the Solar system: its orbit is inclined at an angle of 20.6°.
+* Orcus has a differentiated internal structure consisting of a core composed of silicates, crystalline water-ice water-ice (H<sub><small>2</small></sub>O), amorphous carbon (ac), crystalline methane-ice (CH<sub><small>4</small></sub>), and frozen nitrogen (N<sub><small>2</small></sub>). Its crust consists of a mixture of water, methane and nitrogen ices containing substantial traces of tholins.
+
+===== ''Vanth'' =====
+Vanth ([[UWP]] YS00000-0) is the only satellite of Orcus and is classified as a [[worldlet]]. It orbits its parent world at a mean separation of 9.3 diameters (9,000 km) and has an orbital period of 9.6 [[day]]s. It is [[tidally locked]] to Orcus. Vanth has a diameter of 280 km, a mean density of 1.5 g/cm³, and a surface gravity of 0.0006 G. The atmosphere is rated as [[Vacuum]]. The world has no hydrosphere. Mean surface temperature: -242°C. Vanth is a rugged, pale grey-red, irregularly shaped spheroid with little cratering.
+* Vanth is composed of silicates, crystalline water-ice (H<sub><small>2</small></sub>O) and crystalline methane-ice (CH<sub><small>4</small></sub>) and contains relatively high levels of tholins.
+
+==== [[Pluto (world)|Pluto]] ====
+[[File:Pluto.jpg|100px|thumb|right|Pluto]]
+[[File:Charon.jpg|100px|thumb|right|Charon]]
+[[Pluto (world)|Pluto]] ([[UWP]] F20046C-F N Px Rs) is a large ''plutino'' Kuiper Belt object and the namesake of its type: it is classified as a [[worldlet]]. It and its family of satellites orbit [[Sol (star)|Sol]] at a mean distance of 39.48 [[AU]] and have an orbital period of 247 [[year]]s 344 [[day]]s.
+* [[Pluto (world)|Pluto]] is in 2:3 orbital resonance with Neptune.
+* [[Pluto (world)|Pluto]] has a high orbital eccentricity. At perihelion it lies at 29.7 [[AU]] from [[Sol (star)|Sol]] (within the orbit of [[Neptune (world)|Neptune]]), and at aphelion it lies at 49.3 [[AU]].
+* [[Pluto (world)|Pluto]]'s orbit is out of alignment with the plane of the Solar system: its orbit is inclined at an angle of 17°.
+* [[Pluto (world)|Pluto]] is the location of an [[Third Imperium|Imperial]] [[Naval Base]].
+* [[Pluto (world)|Pluto]] is the site of a [[Prison World|prison]].
+* [[Pluto (world)|Pluto]] is the location of a research facility.
+** Popular opinion holds that Pluto is an [[Ancients]] site.
+* Any approach to [[Pluto (world)|Pluto]] closer than 1 [[AU]] (150 million km) is expressly forbidden.
+
+===== ''Satellites'' =====
+[[Pluto_(world)|Pluto]] has one major satellite:
+* [[Pluto_(world)#Charon|Charon]] (orbital period of 6 days 9 hours around the Pluto-Charon barycenter).
+
+It has four minor satellites:
+* [[Pluto_(world)#Styx|Styx]] (orbital period of 20 days 4 hours around [[Pluto_(world)|Pluto]]).
+* [[Pluto_(world)#Nix|Nix]] (orbital period of 24 days 21 hours around [[Pluto_(world)|Pluto]]).
+* [[Pluto_(world)#Kerberos|Kerberos]] (orbital period of 32 days 4 hours around [[Pluto_(world)|Pluto]]).
+* [[Pluto_(world)#Hydra|Hydra]] (orbital period of 38 days 5 hours around [[Pluto_(world)|Pluto]]).
+
+==== Ixion ====
+Ixion ([[UWP]] Y100000-0) is a ''plutino'' Kuiper Belt object and is classified as a [[worldlet]]. It orbits [[Sol (star)|Sol]] at a mean distance of 39.67 [[AU]] (5.9 billion km) and has an orbital period of 249 [[year]]s 67 [[day]]s. Its rotation period is 12.4 [[hour]]s. Ixion has a diameter of 801 km, a mean density of 1.5 g/cm³, and a surface gravity of 0.0041 G. The atmosphere is rated as [[Vacuum]]. The world has no hydrosphere. Mean surface temperature: -244°C. Ixion is a rugged, pale reddish, generally spherical body with a light degree of cratering. It has a relatively high albedo.
+* Ixion is in 2:3 orbital resonance with Neptune.
+* Ixion has a high orbital eccentricity. At perihelion it lies at 30.08 [[AU]] from [[Sol (star)|Sol]] and at aphelion it lies at 49.26 [[AU]].
+* Ixion's orbit is out of alignment with the plane of the Solar system: its orbit is inclined at an angle of 19.5°.
+* Ixion has a differentiated internal structure consisting of silicates, crystalline water-ice (H<sub><small>2</small></sub>O), amorphous carbon (ac), crystalline methane-ice (CH<sub><small>4</small></sub>), and frozen nitrogen (N<sub><small>2</small></sub>). The crust is composed of methane, water and nitrogen ices and contains significant quantities of tholins, which give it its red tint.
+
+=== Main Belt Objects ===
+Objects orbiting within the Main Belt region – with mean orbital distances of between 40 [[AU]] and 48 [[AU]] from [[Sol (star)|Sol]] (Outer Orbit 9) – are referred to as ''cubewanos''.
+
+==== Salacia ====
+Salacia ([[UWP]] Y100000-0) is a ''cubewano'' Kuiper Belt object and is classified as a [[worldlet]]. It orbits [[Sol (star)|Sol]] at a mean distance of 41.88 [[AU]] (6.3 billion km) and has an orbital period of 270 [[year]]s 357 [[day]]s. Its rotation period is 6.1 [[hour]]s. Salacia has a diameter of 854 km, a mean density of 1.29 g/cm³, and a surface gravity of 0.008 G. The atmosphere is rated as [[Vacuum]]. The world has no hydrosphere. Mean surface temperature: -238°C. Salacia is a rugged, mottled grey sphere with a moderate degree of cratering.
+* Salacia has a high orbital eccentricity. At perihelion it lies at 37.27 [[AU]] from [[Sol (star)|Sol]] and at aphelion it lies at 46.48 [[AU]].
+* Salacia's orbit is out of alignment with the plane of the Solar system: its orbit is inclined at an angle of 24°.
+* Salacia is composed of a mixture of silicates, crystalline water-ice (H<sub><small>2</small></sub>O) and crystalline methane-ice (CH<sub><small>4</small></sub>). The crust consists of a mixture of methane and water ices containing trace amounts of tholins.
+
+===== ''Actaea'' =====
+Actaea ([[UWP]] YS00000-0) is the only satellite of Salacia and is classified as a [[worldlet]]. It orbits its parent world at a mean separation of 6.6 diameters (5,600 km) and has an orbital period of 5.5 [[day]]s. Actaea has a diameter of 286 km, a mean density of 1.2 g/cm³, and a surface gravity of 0.0005 G. The atmosphere is rated as [[Vacuum]]. The world has no hydrosphere. Mean surface temperature: -239°C. Actaea is a rugged, pale grey-red, irregularly shaped spheroid with little cratering.
+* Actaea is largely composed of crystalline water-ice (H<sub><small>2</small></sub>O) and amorphous carbon (ac), mixed with smaller quantities of silicates. Crystalline water-ice containing trace amounts of tholins forms the predominant surface material.
+
+==== Quaoar ====
+Quaoar ([[UWP]] Y100000-0) is a ''cubewano'' Kuiper Belt object and is classified as a [[worldlet]]. It orbits [[Sol (star)|Sol]] at a mean distance of 42.8 [[AU]] and has an orbital period of 287 [[year]]s 194 [[day]]s. Its rotation period is 17.7 [[hour]]s. Quaoar has a diameter of 1,074 km, a mean density of 2.2 g/cm³, and a surface gravity of 0.034 G. The atmosphere is rated as [[Vacuum]]. The world has no hydrosphere. Mean surface temperature: -231°C. Quaoar is a rugged grey sphere with a moderate degree of cratering.
+* Quaoar has a near-circular orbit and is not significantly perturbed by Neptune.
+* Quaoar has a relatively high orbital eccentricity. At perihelion it lies at 41.98 [[AU]] from [[Sol (star)|Sol]] and at aphelion it lies at 43.62 [[AU]].
+* Quaoar's orbit is out of alignment with the plane of the Solar system: its orbit is inclined at an angle of 8°.
+* Quaoar has a differentiated internal structure consisting of a small rocky core overlaid by a thin mantle composed of silicates, crystalline methane-ice (CH<sub><small>4</small></sub>) and crystalline water-ice (H<sub><small>2</small></sub>O). The crust consists of a mixture of methane and water ices containing trace amounts of tholins. 
+
+===== ''Weywot'' =====
+Weywot ([[UWP]] YS00000-0) is the only satellite of Quaoar and is classified as a [[worldlet]]. It orbits its parent world at a mean separation of 13.5 diameters (14,500 km) and has an orbital period of 12.5 [[day]]s. Its rotation period is 8.8 [[hour]]s. Weywot has a diameter of 74 km, a mean density of 1.9 g/cm³, and a surface gravity of less than 0.001 G. The atmosphere is rated as [[Vacuum]]. The world has no hydrosphere. Mean surface temperature: -233°C. Weywot is a tiny, rugged grey spheroid with a moderate degree of cratering.
+* Weywot is largely composed crystalline water-ice (H<sub><small>2</small></sub>O) mixed with smaller quantities of silicates. Crystalline water-ice forms the predominant surface material.
+
+==== Varuna ====
+Varuna ([[UWP]] YS00000-0) is a ''cubewano'' Kuiper Belt object and is classified as a [[worldlet]]. It orbits [[Sol (star)|Sol]] at a mean distance of 42.95 [[AU]] (6.4 billion km) and has an orbital period of 285 [[year]]s 165 [[day]]s. Its rotation period is 6.4 [[hour]]s. Varuna has a diameter of 668 km, a mean density of 0.99 g/cm³, and a surface gravity of 0.005 G. The atmosphere is rated as [[Vacuum]]. The world has no hydrosphere. Mean surface temperature: -244°C. Varuna is a rugged, uniformly red-grey, elongated spheroid with a light degree of cratering.
+* Varuna has a near-circular orbit. It is in a 2:3 orbital resonance with [[Neptune (world)|Neptune]].
+* Varuna has a high orbital eccentricity. At perihelion it lies at 40.74 [[AU]] from [[Sol (star)|Sol]] and at aphelion it lies at 45.16 [[AU]].
+* Varuna's orbit is out of alignment with the plane of the Solar system: its orbit is inclined at an angle of 17°.
+* Varuna is largely composed of crystalline water-ice (H<sub><small>2</small></sub>O), crystalline methane-ice (CH<sub><small>4</small></sub>) and frozen nitrogen (N<sub><small>2</small></sub>) mixed with smaller quantities of silicates. Crystalline water-ice with significant traces of tholins forms the predominant surface material.
+
+==== Haumea ====
+Haumea ([[UWP]] Y100000-0) is a ''cubewano'' Kuiper Belt object and is classified as a [[worldlet]]. It orbits [[Sol (star)|Sol]] at a mean distance of 43.22 [[AU]] (6.5 billion km) and has an orbital period of 285 [[year]]s 165 [[day]]s. Its rotation period is 3.9 [[hour]]s. Haumea has a diameter of 1,630 km, a mean density of 1.89 g/cm³, and a surface gravity of 0.04 G. The atmosphere is rated as [[Vacuum]]. The world has no hydrosphere. Mean surface temperature: -241°C. Haumea is a rugged, mottled grey, very oblate spheroid with a moderate degree of cratering.
+* Haumea is in a 7:12 orbital resonance with [[Neptune (world)|Neptune]].
+* Haumea has a high orbital eccentricity. At perihelion it lies at 34.95 [[AU]] from [[Sol (star)|Sol]] and at aphelion it lies at 51.48 [[AU]].
+* Haumea's orbit is out of alignment with the plane of the Solar system: its orbit is inclined at an angle of 28°.
+* Makemake has a differentiated internal structure consisting of a small rocky core overlaid by a thin mantle composed of silicates, crystalline methane-ice (CH<sub><small>4</small></sub>) and crystalline water-ice (H<sub><small>2</small></sub>O). The crust consists of a mixture of methane and water ices containing trace amounts of tholins. 
+** Haumea's unusual shape and rapid rotation are considered to be the result of an ancient collision with another Kuyper Belt object.
+
+===== ''Ring System'' =====
+Haumea's ring system ([[UWP]] YR00000-0) lies at a mean distance of 2,300 km from Haumea. It forms a narrow torus around its parent world and has a mean width of 40 km. It is composed of tens of thousands of irregular fragments of dust, silicates, and crystalline water-ice (H<sub><small>2</small></sub>O) with diameters ranging from a few millimeters to tens of centimeters.
+* The ring system objects are considered to be the remnants of an ancient collision between Haumea and another Kuyper Belt object.
+* The rings are relatively dark in comparison to Haumea and its satellites.
+
+===== ''Namaka'' =====
+Namaka ([[UWP]] YS00000-0) is the inner satellite of Haumea and is classified as a [[worldlet]]. It has an elliptical orbit around its parent world with a mean separation of 15.7 diameters (25,600 km) and an orbital period of 18 [[day]]s. It is [[tidally locked]] to Haumea. Namaka has a diameter of 170 km, a mean density of 1.5 g/cm³, and a surface gravity of 0.0016 G. The atmosphere is rated as [[Vacuum]]. The world has no hydrosphere. Mean surface temperature: -242°C. Namaka is a tiny, rugged, pale grey irregular spheroid with little cratering.
+* Namaka is largely composed crystalline water-ice (H<sub><small>2</small></sub>O) and amorphous carbon (ac), mixed with smaller quantities of silicates. Crystalline water-ice forms the predominant surface material.
+* Namaka is considered to be a remnant of an ancient collision between Haumea and another Kuyper Belt object.
+
+===== ''Hi'iaka'' =====
+Hi'iaka ([[UWP]] YS00000-0) is the outer satellite of Haumea and is classified as a [[worldlet]]. It orbits Haumea at a mean distance of 30.7 diameters (49,900 km) and has an orbital period of 49 [[day]]s 3 [[hour]]s. Its rotation period is 9.8 [[hour]]s. Hi'iaka has a diameter of 320 km, a mean density of 1.5 g/cm³, and a surface gravity of 0.0031 G. The atmosphere is rated as [[Vacuum]]. The world has no hydrosphere. Mean surface temperature: -240°C. Hi'iaka is a rugged, pale grey irregular spheroid with little cratering.
+* Hi'iaka is largely composed crystalline water-ice (H<sub><small>2</small></sub>O) and amorphous carbon (ac), mixed with smaller quantities of silicates. Crystalline water-ice forms the predominant surface material.
+* Hi'iaka (which has a very rapid rotation) is considered to be a remnant of an ancient collision between Haumea and another Kuyper Belt object.
+
+==== Ultima Thule (Arrokoth) ====
+[[File:Ultima Thule.jpg|100px|thumb|right|Ultima Thule]]
+Ultima Thule ([[UWP]] YS00000-0) (also known as "''Arrokoth''") is a ''cubewano'' Kuiper Belt object and is classified as a [[worldlet]]. It orbits Sol at a mean distance of 44.58 [[AU]] (6.7 billion km), it has an orbital period of 298 [[year]]s and a rotation period of 15 [[hour]]s. The tiny world is a contact binary with a total length of 31 km and consists of two joined bodies, 19 km ''Ultima'' and 14 km ''Thule''. It has a mean density of approximately 1.3 g/cm³ and a surface gravity of less than 0.001 G. The world is geologically inert. The atmosphere is rated as [[Vacuum]]. The world has no hydrosphere. Mean surface temperature: -240°C. Ultima Thule is a red-tinged two-lobed object with a moderate degree of cratering.
+* Ultima Thule has a weak internal heat source created by the radioactive decay of radionuclides.
+* Ultima Thule is composed of mostly crystalline water-ice (H<sub><small>2</small></sub>O), amorphous carbon (ac), silicates, and frozen methane (CH<sub><small>4</small></sub>). The icy surface material contains significant traces of tholins.
+
+==== Chaos ====
+Chaos ([[UWP]] YS00000-0) is a ''cubewano'' Kuiper Belt object and is classified as a [[worldlet]]. It orbits [[Sol (star)|Sol]] at a mean distance of 45.6 [[AU]] (6.8 billion km), it has an orbital period of 309 [[year]]s 336 [[day]]s and a rotation period of 3 [[day]]s 23 [[hour]]s. Chaos has a diameter of 290 km, a mean density of 1.6 g/cm³ and a surface gravity of 0.0015 G. The atmosphere is rated as [[Vacuum]]. The world has no hydrosphere. Mean surface temperature: -245°C. Chaos is a very rugged, reddish colored spheroid with a light degree of cratering.
+* Chaos's orbit is out of alignment with the plane of the Solar system: its orbit is inclined at an angle of 12°.
+* Chaos has a high orbital eccentricity. At perihelion it lies at 40.92 [[AU]] from [[Sol (star)|Sol]] and at aphelion it lies at 50.27 [[AU]].
+* Chaos is largely composed crystalline water-ice (H<sub><small>2</small></sub>O), amorphous carbon (ac), crystalline water-ice (CH<sub><small>4</small></sub>), and frozen nitrogen (N<sub><small>2</small></sub>), mixed with smaller quantities of silicates. The icy surface material contains significant traces of tholins.
+
+==== Varda ====
+Varda ([[UWP]] YS00000-0) is a ''cubewano'' Kuiper Belt object and is classified as a [[worldlet]]. It orbits [[Sol (star)|Sol]] at a mean distance of 45.64 [[AU]] (6.8 billion km), it has an orbital period of 308 [[year]]s 102 [[day]]s and a rotation period of 6 [[hour]]s. Eris has a diameter of 705 km, a mean density of 1.27 g/cm³ and a surface gravity of 0.0034 G. The world is geologically inert. The atmosphere is rated as [[Vacuum]]. The world has no hydrosphere. Mean surface temperature: -231°C. Eris is a rugged, red-tinged pale grey sphere with a moderate degree of cratering.
+* Varda has a high orbital eccentricity. At perihelion it lies at 39.17 [[AU]] from [[Sol (star)|Sol]] and at aphelion it lies at 52.1 [[AU]].
+* Varda's orbit is out of alignment with the plane of the Solar system: its orbit is inclined at an angle of 21°.
+* Varda is largely composed crystalline water-ice (H<sub><small>2</small></sub>O), amorphous carbon (ac), crystalline methane-ice (CH<sub><small>4</small></sub>), and frozen nitrogen (N<sub><small>2</small></sub>), mixed with smaller quantities of silicates. The icy surface material contains significant traces of tholins.
+
+===== ''Ilmarë'' =====
+Ilmarë ([[UWP]] YS00000-0) is the only satellite of Varda and is classified as a [[worldlet]]. It orbits its parent world at a mean separation of 6.8 diameters (4,800 km) and has an orbital period of 5 [[day]]s 18 [[hour]]s: Ilmarë is [[tidally locked]] to Varda. Ilmarë has a diameter of 361 km, a mean density of 1.2 g/cm³ and a surface gravity of less than 0.0031 G. The world is geologically inert. The atmosphere is rated as [[Vacuum]]. The world has no hydrosphere. Mean surface temperature: -231°C. Eris is a rugged, red-tinged pale grey sphere with a moderate degree of cratering.
+* Ilmarë is largely composed crystalline water-ice (H<sub><small>2</small></sub>O) mixed with smaller quantities of silicates. Crystalline water-ice forms the predominant surface material.
+
+==== Makemake ====
+Makemake ([[UWP]] Y100000-0) is a ''cubewano'' Kuiper Belt object and is classified as a [[worldlet]]. It orbits [[Sol (star)|Sol]] at a mean distance of 45.72 [[AU]] (6.8 billion km) and has an orbital period of 309 [[year]]s 35 [[day]]s. Its rotation period is 22.5 [[hour]]s. Makemake has a diameter of 1,420 km, a mean density of 1.7 g/cm³, and a surface gravity of 0.051 G. The atmosphere is rated as [[Vacuum]]. The world has no hydrosphere. Mean surface temperature: -239°C. Makemake is a rugged, reddish-grey sphere with a moderate degree of cratering and a high albedo.
+* Makemake has a high orbital eccentricity. At perihelion it lies at 38.59 [[AU]] from [[Sol (star)|Sol]] and at aphelion it lies at 52.84 [[AU]].
+* Makemake's orbit is out of alignment with the plane of the Solar system: its orbit is inclined at an angle of 29°.
+* Makemake has a differentiated internal structure consisting of a rocky core and a crust composed mainly of methane ices (CH<sub><small>4</small></sub>), nitrogen ices (N<sub><small>2</small></sub>), and ethane ices (C<sub><small>2</small></sub>H<sub><small>6</small></sub>), with a thin covering of fine dust. Its reddish appearance is due to strong concentrations of tholins within the hydrocarbon surface material.
+
+===== ''S/2015 (136472) 1'' =====
+S/2015 (136472) 1 (more commonly called MK 2) ([[UWP]] YS00000-0) is the only satellite of Makemake and is classified as a [[worldlet]]. It orbits its parent world at a mean separation of 14.8 diameters (21,100 km) and has an orbital period of 12 [[day]]s. MK 2 has a diameter of 175 km, a mean density of 1.6 g/cm³, and a surface gravity of 0.0012 G. The atmosphere is rated as [[Vacuum]]. The world has no hydrosphere. Mean surface temperature: -240°C. MK 2 is a tiny rugged grey sphere with a moderate degree of cratering.
+* MK 2 is composed of a mixture of silicates and crystalline water-ice (H<sub><small>2</small></sub>O).
+
+=== Outer Belt Objects ===
+The outer part of the Kuiper Belt is called the scattered disc region and is considered to lie between 48 [[AU]] and 100 [[AU]] from [[Sol (star)|Sol]] (Orbits 10-11). It contains a much lower density of large objects relative to the main region of the belt. Objects located within the outer region are referred to as ''twotinos''.
+* The outer belt region is considered to start at the point where there is a 1:2 orbital resonance between [[Neptune (world)|Neptune]] and Kuiper Belt objects.
+** Within this region the sizes of Kuiper Belt objects reduces dramatically: this is known as the ''Kuiper Cliff''.
+
+==== Eris ====
+Eris ([[UWP]] Y100000-0) is a ''twotino'' Kuiper Belt object and is classified as a [[worldlet]]. It orbits [[Sol (star)|Sol]] at a mean distance of 67.78 [[AU]] (10.1 billion km), it has an orbital period of 561.4 [[year]]s and a rotation period of 8 [[hour]]s. Eris has a diameter of 2,326 km, a mean density of 2.52 g/cm³ and a surface gravity of 0.084 G. The world is geologically inert. The atmosphere is rated as [[Vacuum]]. The world has no hydrosphere. Mean surface temperature: -231°C. Eris is a rugged, red-tinged pale grey sphere with a moderate degree of cratering.
+* Eris has a high orbital eccentricity. At perihelion it lies at 37.91 [[AU]] from [[Sol (star)|Sol]] and at aphelion it lies at 97.65 [[AU]].
+* Eris's orbit is out of alignment with the plane of the Solar system: its orbit is inclined at an angle of 44°.
+* Eris has a differentiated internal structure consisting of a core composed of silicates, crystalline water-ice (H<sub><small>2</small></sub>O), amorphous carbon (ac), crystalline methane-ice (CH<sub><small>4</small></sub>), and frozen nitrogen (N<sub><small>2</small></sub>). The crust is largely composed of methane, water and nitrogen ices. Its distinct reddish appearance is due to concentrations of tholins within the surface material.
+
+===== ''Dysnomia'' =====
+Dysnomia ([[UWP]] YS00000-0) is the only satellite of Eris and is classified as a [[worldlet]]. It orbits its parent world at a mean separation of 16 diameters (37,350 km) and has an orbital period of 16 [[day]]s. Dysnomia has a diameter of 685 km, a mean density of 1.8 g/cm³, and a surface gravity of 0.0014 G. The atmosphere is rated as [[Vacuum]]. The world has no hydrosphere. Mean surface temperature: -237°C. Dysnomia is a tiny, rugged, dark grey sphere with a moderate degree of cratering.
+* Dysnomia is composed of a mixture of silicates and crystalline water-ice (H<sub><small>2</small></sub>O).
+
+==== Sedna ====
+Sedna ([[UWP]] Y100000-0) is a ''scattered disc'' Kuiper Belt object and is classified as a [[worldlet]]. It orbits [[Sol (star)|Sol]] at a mean distance of 506 [[AU]] (75.7 billion km) (~ Orbit 13), thus it is technically a part of Terra's ''Remote System''.  It has an orbital period of 11,408 [[year]]s and a rotation period of 10.3 [[hour]]s. Sedna has a diameter of 1,180 km, a mean density of 2.01 g/cm³ and a surface gravity of 0.045 G. The atmosphere is rated as [[Vacuum]]. The world has no hydrosphere. Mean surface temperature: -240°C. Sedna is a rugged, reddish colored sphere with a moderate degree of cratering.
+* Sedna has a very high orbital eccentricity. At perihelion it lies at 76.09 [[AU]] from [[Sol (star)|Sol]] and at aphelion it lies at 936 [[AU]] (approximately 0.015 [[light-year]]s).
+* Sedna's orbit is out of alignment with the plane of the Solar system: its orbit is inclined at an angle of 12°.
+* Sedna has a differentiated internal structure consisting of a rocky core and a crust composed of frozen methane (CH<sub><small>4</small></sub>) and methanol (CH<sub><small>3</small></sub>OH), with a very thin covering of fine dust. Its distinct reddish appearance is due to the high concentrations of tholins within the hydrocarbon ices that form the surface.
+
+=== Native Lifeforms ===
+No body within the Kuiper Belt is known to have native life. However, [[Pluto (world)|Pluto]] is believed to have subsurface oceans lying tens or hundreds of [[kilometer]]s below the frozen surface of the [[world]]. These deep seas are formed of water (H<sub><small>2</small></sub>O) and kept liquid by the intense pressure, tidal forces generated by [[Pluto_(world)#Charon|Charon]], and by the radioactive decay of radionuclides deep within its core. Similar marginal environments have proven to be suitable for [[Unconventional Life|unconventional]] or [[exotic life]]forms throughout [[Charted Space]], and there is reason to suspect that [[Pluto (world)|Pluto]] continues this pattern.
+
+== History & Background ([[Dossier]]) ==
+[[Pluto (world)|Pluto]] was the first Kuiper Belt object to be discovered, in the [[year]] [[-2592]], by observations using an [[Optical Telescope]] from the surface of [[Terra (world)|Terra]]. A significant surface feature, the Tombaugh Planitia, is named for the astronomer that first identified the [[world]].
+
+=== Image Repository ===
+[[TravellerMap]] <small>([[T5SS]])</small>: <br> [https://travellermap.com/?options=58363&x=14.289&y=-107&scale=128]
+
+== References & Contributors ([[Sources]]) ==
+{{Intermediate}}
+{{Sources
+|S1= [[Traveller Wiki Editorial Team]]
+|S2= Author & Contributor: Lord (Marquis) and Master Scout Emeritus [[Adie Alegoric Stewart]] of the [[IISS]] 
+|S3= Author & Contributor: Lord (Marquis) and Master of Sophontology [[Maksim-Smelchak]] of the [[Ministry of Science]]
+}}
+
+
+{{LEN|Terra (system) worlds}}

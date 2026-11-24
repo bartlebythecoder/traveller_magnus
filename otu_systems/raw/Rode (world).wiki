@@ -1,0 +1,230 @@
+[[File:Alien Moon 53c-0.jpg|250 px|right]]
+{{UWP
+|name    = {{World|Rode|Massilia|Forquee|2414}}
+|uc      = B755220-B  
+|popc    = 4
+|zonec   = green
+ |u0     = C755000-9
+|alg     = ImDc
+|class   = Lo Ga / Tp
+|trade   = ga
+|climate = Tp
+|nblty   = B
+|bases   = -
+|primary = M2 V   
+|belts   = 0
+|GGcount = 3
+}}
+{{World summary |name= Rode|trade= Lo Ga}}
+{{World summary ImDc|sector= Massilia|subsector= Forquee}}
+{{World summary comment|trade= Tp}}
+* It lies on the [[Delphi Main]].
+* At the founding of the {{Imperium}} this world was known as ''Uuruun''.
+
+{{InfoboxSystem
+ |name= Rode |subsector= Forquee
+ |sector= Massilia |hex= 2414
+ |star= Ustrelli |type= M2 V
+ |P1=     Rode                              | Dist1= 0.242        | UWP1= B755220-B
+ |P2=     Nollanus                          | Dist2= 0.969        | UWP2= YBG9000-0
+ |P3=     Bocosie                           | Dist3= 2.57         | UWP3= Y7A7000-0
+ |P3M1=     Moon                            |   Dist3M1= 3 Diam   |   UWP3M1= Y100000-0
+ |P4=     Gaduurshi                         | Dist4= 6.21         | UWP4= Large GG
+ |P4M1=     Moon                            |   Dist4M1= 1 Diam   |   UWP4M1= Y100000-0
+ |P4M2=     Moon                            |   Dist4M2= 2 Diam   |   UWP4M2= Y100000-0
+ |P4M3=     Moon                            |   Dist4M3= 6 Diam   |   UWP4M3= Y200000-0
+ |P5=     Kaalanii                          | Dist5= 19.9         | UWP5= Y6A1000-0
+ |P6=     Hiibos                            | Dist6= 37.7         | UWP6= Large GG
+ |P6M1=     A Ring                          |   Dist6M1= 6 Diam   |   UWP6M1= YR00000-0
+ |P6M2=     Moon                            |   Dist6M2= 8 Diam   |   UWP6M2= Y310000-0
+ |P6M3=     Moon                            |   Dist6M3= 10 Diam  |   UWP6M3= Y200000-0
+ |P6M4=     Moon                            |   Dist6M4= 14 Diam  |   UWP6M4= Y100000-0
+ |P6M5=     Moon                            |   Dist6M5= 18 Diam  |   UWP6M5= Y411000-0
+ |P7=     Zyke                              | Dist7= 45.42        | UWP7= Large GG
+ |P7M1=     Moon                            |   Dist7M1= 1 Diam   |   UWP7M1= YS00000-0
+ |P7M2=     Moon                            |   Dist7M2= 4 Diam   |   UWP7M2= Y100000-0
+ |P7M3=     Moon                            |   Dist7M3= 6 Diam   |   UWP7M3= Y200000-0
+ |P7M4=     Moon                            |   Dist7M4= 8 Diam   |   UWP7M4= Y200000-0
+ |P7M5=     Moon                            |   Dist7M5= 10 Diam  |   UWP7M5= Y200000-0
+ |P7M6=     Moon                            |   Dist7M6= 15 Diam  |   UWP7M6= YS00000-0
+}}
+
+== Description ([[Astrography]] & [[Planetology]])<ref>Additional system and world details by [[User:Nichollsr1970|Roger Nicholls]]</ref> == 
+
+=== Stellar Data ===
+'''Rode''' has a solitary primary star.
+* It is a red main sequence.
+
+{{MonostellarSystem
+|name           = Rode
+|primary        = M2 V  
+|PrimaryName    = Ustrelli
+|PrimaryNotes   = 
+}}
+
+* The Rode system is c9.6 Gyr in age.
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]].
+* x3 secondary [[world|rocky worlds]].
+* x3 [[gas giant]]s.
+
+[[File:Chart Rode System Basic.png|700 px]]
+
+=== Mainworld Data ===
+* The planet has an axial tilt of 37.05 degrees.
+* Rode has a standard day of 30.23 hours.
+* The planet takes 299.83 days to orbit its star.
+* Rode is located in the [[habitable zone]] of its star.
+* Native life exists on the planet but no sign of sophont intelligence has yet been identified. The planet does have a very biodiverse environment ranging from single cell organisms up to considerably larger creatures, flowering flora etc.
+* The planet has no significant tectonic activity.
+* The land surface of the planet is dominated by rolling hills, vast plains and gentle valleys.
+* The planet, although not a reserve, is currently used as an "exclusive" resort hotel for the rich and famous who like to take their vacations away from the rest of society.
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Rode|Size= 7}}
+* The planet has been extensively surveyed and has a confirmed diameter of 11,704km
+* The planetary survey confirmed that Rode has a mostly rock core with a density of 0.68 standard.
+* Surface gravity on Rode has been measured as 0.625 standard.
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Rode|Atmosphere= 5}}
+* Atmospheric pressure on the planet's surface measured in bar is 0.56
+* Average mean temperature on Rode is 16.5c
+* Although breathing equipment is not required on Rode visitors usually need a few days to acclimatise.
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Rode|Hydrosphere= 5}}
+* c55% of the planets surface is covered in liquid water. 
+* The planet has one "super continent surrounded by a single large ocean. The continent itself also has several small seas and lakes located upon it.
+
+==== Mainworld Geography and Topography ====
+
+[[File:Blank World Map Arid.png|500 px]] <br> (''Blank map, predominantly dry world''.)
+
+== History & Background (Dossier)<ref>Additional population and social details by [[User:Nichollsr1970|Roger Nicholls]]</ref> ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Rode''' lies on the [[Delphi Main]], an important [[trade route]] straddling the border between [[Massilia Sector]] and [[Delphi Sector]].
+
+At the dawn of the {{Imperium}} this world had no permanent population. Facilities were being constructed and infrastructure was being emplaced, funded by speculators and investors in anticipation of large-scale settlement and commercial development and designed to give the world a predetermined basic [[Tech Level]]. There were often hundreds of personnel and specialists working or operating within the system, but they were not considered residents.
+
+=== World Starport (St) ===
+{{Starport|name= Rode|Starport= B}}
+* The starport at Rode has a small number of locals working within its facilities, however the majority of work at the facility is handled by [[robot]]s of various types.
+
+=== World Population (P) ===
+{{WorldPop|name= Rode|multiplier= 4|Population= 2}}
+* 96% of the planet's population lives in the only "major" urban area on the surface, located alongside a large lake surrounded by rolling hills in the northern hemisphere.
+* The major area is actually the hotel accommodation that consists of living quarters for staff and their families, the hotel complex itself and its associated buildings, recreation areas etc. 
+* The citizens that live away from this area are actually still employees of the hotel but are usually operating from some of the more remote facilities for those guests that prefer complete isolation.
+
+==== Linguistic Topography ====
+The most commonly heard [[language]]s are:
+* [[Anglic]], one of the two official languages of the {{Imperium}}.
+* [[Vilani (language)|Vilani]], one of the two official languages of the {{Imperium}}.
+
+=== World Technology Level (T) ===
+{{WorldTech|name= Rode|WorldTech= B}}
+* Rode has no manufacturing capability at all on the planet. It has the tools and equipment to carry out repairs and general maintenance but is entirely reliant on parts and materials to be brough to the planet from other systems.
+* The Tech Levels listed are for the items commonly found on the planet and do not reflect a capability of the population on Rode to produce their own. In addition it should be noted that the TLs for the most part are slightly lower than would be expected. This is driven by the need to obtain easily sourced parts from off world and this is often of a lower tech level. 
+**High Common TL:B
+** Low Common TL:6
+** Further Subcategories:-
+*** Energy TL:8 (Energy provision on the planet is provided by basic fusion reactors and power cells.)
+*** Electronics TL:9 (Core Computers, Holographic projectors)
+*** Manufacturing TL:9 (External fabrications)
+*** Medical TL:9 (Spare part clones)
+*** Environmental TL:9 (Underwater cities and early weather control)
+*** Land Transport TL:9 (Superconducting mono-rail train)
+*** Water Transport TL:9 (Autonomous ships)
+*** Air Transport TL:9 (Grav car)
+*** Space Transport TL:9 (M-drive, Jump 1)
+*** Personal Military TL:9 (Laser Rifle)
+*** Heavy Military TL:9 (Laser Gun, Grav Tank, Rail Gun)
+
+=== World Government (G) ===
+{{WorldGov|name= Rode|Government= 2}}
+* The planet of Rode is classified as having a Participating Democracy and this is true. Rules and legislation are agreed following the advice and consent of the citizens of the planet. The planet is in many ways a "play thing" for the Imperial noble who has established it as a vacation place for the rich who wish to get away from the hustle and stress of daily life. He leaves the day to day government of the planet to its population. As a result the local population led by the management team of the vacation complex make the decisions on the day to day running of their planet.
+* The government, for what it actually is, is defined as being Unitary with all main functions operating in a centralised approach.
+* The Authority is best defined as Legislative with clear rules and guidelines in place for all aspects of life on Rode.
+* The entire adult population has a role to play and do actively participate in decision making and establishment of legislation that affects the citizens and indeed visitors to the planet.
+
+=== World Law (L) ===
+{{WorldLaw|name= Rode|Law= 0}}
+* Although there is no true "system of law" on Rode there are rules. These rules are akin to law levels as defined across The Imperium and as such they are defined below. There is no law enforcement organisation on Rode but there is security who will act against those who break the rules. If an individual commits serious crime there are locations that can be secured where an individual can be held until such time as a ruling can be determined regarding their fate. This is usually overseen by the Imperial Noble who owns the onsite facility and it is upon their decisions that an individual may simply be deported or taken elsewhere for trial / punishment.
+* To establish if an offence has taken place the hotel senior management will usually meet with the accused and the accusers and make an initial judgement. The approach is universal across both those who live on the planet and those who are visiting.
+* Its important to note that individuals are always assumed to be innocent and that disputes are usually a result of a misunderstanding.
+**Overall Level: 0
+**Weapons and Armour: 0 (No restrictions)
+**Economic: 0 (No contract law or licences required)
+**Criminal Law: 0 (No formal legal system)
+**Private Law: 1 (Duelling is restricted, contract law is enforceable)
+**Personal Rights: 0 (No restrictions)
+
+=== Imperial Landed Nobility ===
+{{Imperial Nobility|name= Rode|Noble= B}}
+
+=== Trade Data ===
+* Importance:     1 (ordinary)
+* Additional Economic indicators:-
+** Gross World Product per Capita: 3,800cr
+** World Trade Number: 5
+** Inequality Rating: 62
+*** c.62% of the population are living at a lower standard than the rest of The Imperium would find acceptable. These individuals are in roles that are traditionally seen as menial or lower grade roles. In addition such individuals and their families  are likely to be living in older, substandard facilities and having to work extended hours to provide for themselves.
+** Development Score: 1
+** Tariffs - Free Trade Zone
+
+=== World Economy ===
+* Resources:      7 (few)
+** The planet does have a wide array of natural resources however it lacks the infrastructure or indeed population to exploit them at all. Its place in the subsector as a "Vacation Spot" means that at least for now its unlikely that anybody is going to look at exploiting any resources that are there.
+* Labor:          1 (tens)
+** The planets low population restricts the labour pool to a small number. Operating on the planet there are however almost twice as many robots as there are humans who carry out a lot of the basic menial lifting and handling workload.
+* Infrastructure: 1 (extremely limited)
+** Almost no infrastructure outside of the starport and "hotel complex" exists.
+* Efficiency:     -3 (poor)
+
+=== World Culture ===
+* Heterogenity: 1 (monolithic)
+** Due to the small population on Rode the culture is consistent with almost no diversity.
+* Acceptance:   3 (xenophobic)
+** The general population appear to visitors as welcoming due to the role their society plays, however, the majority of locals who do not have to interact directly with visitors avoid spending any time with them and stay with their own local community.
+* Strangeness:  1 (very typical)
+** The culture of Rode is very stereotypical of the majority of worlds across The Imperium.
+* Symbols:      6 (somewhat concrete)
+** For the most part there is no difference on Rode with symbology as used across The Imperium.
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+
+* [[Ancients|circa -250,000]]: The [[Ancient]]s are active within the sector.
+* [[-9000s|circa -9,000]]: The [[Geonee]] encounter the [[Vilani]].
+* [[-5400]] to [[-4015]]: The [[Vilani]] [[Consolidation Wars]].
+* [[-4045]] to [[-2204]]: The region is part of the ''[[First Imperium|Ziru Sirka]]''.
+* [[-2204]] to [[-1776]]: The region becomes part of the [[Rule of Man]].
+* [[-1776]] to [[0]]: The [[Long Night]].
+* [[0|The Year 0]]: The [[Third Imperium]] is founded.
+* [[300]]-[[420]]: The {{Imperial}} [[First Survey]] charts the system.
+* [[604]]-[[622]]: The [[Civil War]].
+* [[624]]: The [[Express Boat Network]] is established.
+* [[995]]-[[1065]]: The {{Imperial}} [[Second Survey]] charts the system.
+* [[1065]]: The [[Second Survey]] is published. Information about the system becomes widely available.
+
+== References & Contributors (Sources) ==
+{{Detail}}
+{{Sources
+|S1= {{Ludography cite|name= Atlas of the Imperium |page= page 22|version= Classic Traveller}} (world location and some additional system data)
+|S2= [[John Harshman]], [[Marc Miller]]. ''[[Solomani (Alien Module)|Solomani]]'' ([[Game Designers Workshop]], 1986), pages 5, 7, 20. (sector background and history)
+|S3= {{Ludography cite|name= The Travellers' Digest 11 |page= pages 6-25}} (sector background and history, plus details for the [[Geonee]])
+|S4= {{Ludography cite|name= Vilani & Vargr |page= page 11}} (dot map provided, locating the world)
+|S5= {{Ludography cite|name= Knightfall |page= pages 74-80}} (sector data including the world, sector background and history)
+|S6= {{Ludography cite|name= First Survey |page= pages 4, 38-41, 102-109}} (sector data including the world circa [[0|The Year 0]]) 
+|S7= {{Ludography cite|name= Solomani |page= pages 57, 59|version= Mongoose Traveller}} (sector background and history)
+}}
+
+
+[[Category: Delphi Main worlds]].
+[[Category: First Imperium worlds]]
+[[Category: Rule of Man worlds]]
+[[Category: Second Imperium worlds]]
+{{LE|Era: Milieu 1116|T5 Second Survey worlds|}}

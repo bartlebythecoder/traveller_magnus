@@ -1,0 +1,528 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Vland",
+  "hex": "1717",
+  "sector_abbreviation": "Vlan",
+  "subsector": "Vland",
+  "name": "Vland",
+  "sources": [
+    {
+      "page": "Vland (system)",
+      "revid": 945859,
+      "timestamp": "2025-06-12T22:09:11Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Vland (system)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Urakkalan",
+          "type": "F8 V",
+          "notes": "See Urakkalan for additional data."
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Urakkalan",
+      "stars": [
+        {
+          "name": "Urakkalan",
+          "type": "F8 V"
+        }
+      ],
+      "labels": [
+        "Vland"
+      ],
+      "pages": [
+        "Vland (system)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "-",
+          "raw": "''<small>(Empty Orbit)</small>''",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Vland (system)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Sagadir",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Vland (system)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Umiggash",
+          "raw": "Y500000-0",
+          "kind": "world",
+          "uwp": "Y500000-0",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Vland (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Dinnika",
+              "raw": "''<small>Y400000-0</small>''",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "''<small>R= 35</small>''",
+                "value": 35.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Vland (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Khamiur Belt",
+          "raw": "F00026C-E",
+          "kind": "world",
+          "uwp": "F00026C-E",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Vland (system)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Vland",
+          "raw": "A967A9A-F",
+          "kind": "world",
+          "uwp": "A967A9A-F",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Vland (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Irukka",
+              "raw": "''<small>G42422C-E</small>''",
+              "kind": "world",
+              "uwp": "G42422C-E",
+              "distance": {
+                "raw": "''<small>R= 12</small>''",
+                "value": 12.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Vland (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Gashema",
+              "name_raw": "[[Gashema (world)|Gashema]]",
+              "raw": "''<small>F43456C-F</small>''",
+              "kind": "world",
+              "uwp": "F43456C-F",
+              "distance": {
+                "raw": "''<small>R= 35</small>''",
+                "value": 35.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Vland (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Kalaguur",
+              "raw": "''<small>H7A2220-E</small>''",
+              "kind": "world",
+              "uwp": "H7A2220-E",
+              "distance": {
+                "raw": "''<small>R= 50</small>''",
+                "value": 50.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Vland (system)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 5,
+          "name": "-",
+          "raw": "''<small>(Empty Orbit)</small>''",
+          "kind": "empty",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Vland (system)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Lirshaia",
+          "raw": "Y400000-0",
+          "kind": "world",
+          "uwp": "Y400000-0",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Vland (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Agu",
+              "raw": "''<small>YS00000-0</small>''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''<small>R= 45</small>''",
+                "value": 45.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Vland (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Bikamakhu",
+          "raw": "Y523000-0",
+          "kind": "world",
+          "uwp": "Y523000-0",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Vland (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Kaniirer",
+              "raw": "''<small>Y100000-0</small>''",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "''<small>R= 5</small>''",
+                "value": 5.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Vland (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Luukad",
+          "raw": "F9A466B-F",
+          "kind": "world",
+          "uwp": "F9A466B-F",
+          "distance": {
+            "raw": "19.6",
+            "value": 19.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Vland (system)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Vland (system)",
+      "label": "Vland",
+      "stars": [
+        {
+          "name": "Urakkalan",
+          "type": "F8 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "-",
+          "raw": "''<small>(Empty Orbit)</small>''",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Sagadir",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Umiggash",
+          "raw": "Y500000-0",
+          "kind": "world",
+          "uwp": "Y500000-0",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Dinnika",
+              "raw": "''<small>Y400000-0</small>''",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "''<small>R= 35</small>''",
+                "value": 35.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Khamiur Belt",
+          "raw": "F00026C-E",
+          "kind": "world",
+          "uwp": "F00026C-E",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Vland",
+          "raw": "A967A9A-F",
+          "kind": "world",
+          "uwp": "A967A9A-F",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Irukka",
+              "raw": "''<small>G42422C-E</small>''",
+              "kind": "world",
+              "uwp": "G42422C-E",
+              "distance": {
+                "raw": "''<small>R= 12</small>''",
+                "value": 12.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Gashema",
+              "name_raw": "[[Gashema (world)|Gashema]]",
+              "raw": "''<small>F43456C-F</small>''",
+              "kind": "world",
+              "uwp": "F43456C-F",
+              "distance": {
+                "raw": "''<small>R= 35</small>''",
+                "value": 35.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Kalaguur",
+              "raw": "''<small>H7A2220-E</small>''",
+              "kind": "world",
+              "uwp": "H7A2220-E",
+              "distance": {
+                "raw": "''<small>R= 50</small>''",
+                "value": 50.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "-",
+          "raw": "''<small>(Empty Orbit)</small>''",
+          "kind": "empty",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Lirshaia",
+          "raw": "Y400000-0",
+          "kind": "world",
+          "uwp": "Y400000-0",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Agu",
+              "raw": "''<small>YS00000-0</small>''",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''<small>R= 45</small>''",
+                "value": 45.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Bikamakhu",
+          "raw": "Y523000-0",
+          "kind": "world",
+          "uwp": "Y523000-0",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Kaniirer",
+              "raw": "''<small>Y100000-0</small>''",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "''<small>R= 5</small>''",
+                "value": 5.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Luukad",
+          "raw": "F9A466B-F",
+          "kind": "world",
+          "uwp": "F9A466B-F",
+          "distance": {
+            "raw": "19.6",
+            "value": 19.6,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Vland",
+    "UWP": "A967A9A-F",
+    "Stellar": "F8 V",
+    "PBG": "310",
+    "Bases": "N",
+    "Remarks": "Hi Cs [Vilani] Ht"
+  }
+}

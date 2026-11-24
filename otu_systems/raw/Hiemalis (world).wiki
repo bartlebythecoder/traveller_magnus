@@ -1,0 +1,240 @@
+[[File:Alien Moon 300a-0 Small.jpg|250 px|right]]
+{{UWP 
+|name    = {{World|Hiemalis|Aldebaran|The Barrens (Al I)|0425}}
+|era     = Milieu 1116
+|uc      = B78748C–B
+|popc    = 3
+|zonec   = amber
+|alg     = NaHu
+|class   = Ni Ga Pa / Tu Da
+|trade   = ga
+|climate = Tu
+|gravity = -
+|bases   = 
+|primary = K5 III M1 V
+|belts   = 0
+|GGcount = 1
+}}
+{{World summary |name= Hiemalis|trade= Ni Ga Pa}}
+{{World summary NaHu|sector= Aldebaran|subsector= Barrens}}
+* It orbits the system's secondary star.
+* This world has an extreme degree of [[Axial Tilt]].
+{{World summary comment|trade= Tu}}
+{{World summary comment|trade= Da}}
+
+{{InfoboxSystem
+ |name= Hiemalis |subsector= The Barrens
+ |sector= Massilia |hex= 0425
+ |star= Alseran |type= K5 III
+ |P1=     Planet 1                          | Dist1= 37.9         | UWP1= YCC0000-0
+ |P1M1=     Moon                            |   Dist1M1= 25 Diam  |   UWP1M1= Y300000-0
+}}
+
+{{InfoboxSystem
+ |name= Hiemalis |subsector= The Barrens
+ |sector= Massilia |hex= 0425
+ |star= Tork |type= M1 V
+ |P1=     Planet 2                          | Dist1= 0.24         | UWP1= G5A020B-A
+ |P2=     Planet 3                          | Dist2= 0.33         | UWP2= F54132B-B
+ |P3=     Hiemalis                          | Dist3= 0.49         | UWP3= B78748C-B
+ |P4=     Planet 4                          | Dist4= 7.65         | UWP4= Y310000-0
+ |P5=     Planet 5                          | Dist5= 10.3         | UWP5= Y200000-0
+ |P6=     Planet 6                          | Dist6= 12.8         | UWP6= Y5A0000-0
+ |P7=     Gas Giant                         | Dist7= 15.5         | UWP7= Large GG
+ |P7M1=     Ring                            |   Dist7M1= 1 Diam   |   UWP7M1= YR00000-0
+ |P7M2=     Moon                            |   Dist7M2= 11 Diam  |   UWP7M2= Y4A1000-0
+ |P7M3=     Moon                            |   Dist7M3= 20 Diam  |   UWP7M3= G30231A-B
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Hiemalis''' is a binary star system.
+* The primary is a turbulent orange giant named ''Alseran''.
+* The secondary is a red main sequence named ''Tork''.
+
+{{BinaryStarSystem
+|name            = Hiemalis
+|primary         = K5 III 
+|secondary       = M1 V 
+|PrimaryName     = Alseran
+|PrimaryNotes    = Unstable pulsating star. It produces high levels of [[Electromagnetic Spectrum|EM noise]].
+|SecondaryName   = Tork
+|SecondaryNotes  = [[Astronomical Unit|Approximately 1700 AU]] from Alseran.
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]], orbiting Tork, the system's secondary star.
+* x6 secondary [[world|rocky worlds]].
+* x1 [[gas giant]]s.
+
+==== Tork Secondary System ====
+Two [[World|rocky secondary worlds]] (identified as Planets 2 and 3) and the [[mainworld]] orbit within Tork's inner system and [[habitable zone]]. The inner two are [[Twilight Zone World|tidally locked]] to the star. All three share an orbital resonance, with related orbital periods. Beyond the [[mainworld]] is a [[Astronomical Unit|7 AU wide]] region known as the ''Great Gap'' containing no planetary bodies.
+
+The system's solitary [[gas giant]] lies in Tork's [[Outer World|far outer system]] and has an elliptical orbit.
+* The three frozen rocky planets (identified as Planets 4, 5, and 6) orbiting inward of the [[gas giant]] are believed to be escaped moons.
+* All three have a similar orbital eccentricity to the system's [[gas giant]].
+
+=== Mainworld Data ===
+[[File:Diagram Axial Tilt Basic.png|400 px|right|thumb|High Axial Tilt]]
+'''Hiemalis''' has an orbital period of [[Day|48 days]] around Tork, the system's red secondary star.
+* It has an [[Axial Tilt]] of 85° – considered very high – and a rotational period around this axis (a [[Day|local day]]) of [[hour|22.5 standard hours]].<ref>''Editor's note'': Hiemalis is noted as being a [[Twilight Zone World]] on [[Traveller Map]], but had later been designed as a world with an extreme degree of [[Axial Tilt]]: the editing of this article respects (and enlarges on) that element of development.</ref>
+
+* The poles of the world always face in the same direction out-system as it orbits the star. The northern pole of Hiemalis happens to be pointing towards the blue giant star [[Beta Tauri (world)|Beta Tauri]], about [[Parsec|11 parsecs]] to [[trailing]]: it is known locally as the ''Pole Star''.
+* Each pole experiences a [[Day|12 Day long]] ''Light Season'', a [[Day|12 Day long]] ''Days Season'', a [[Day|12 Day long]] ''Dark Season'', and a second [[Day|12 Day long]] ''Days Season'' during the course of a [[Year|complete orbit]] around Tork (a ''[[Year|local year]]'').
+* It experiences seasonally based climate shifts and weather events.
+
+The world orbits towards the outer edge of Tork's [[habitable zone]].
+* It receives relatively low levels of [[Electromagnetic Spectrum|stellar energy]].
+
+[[File:Chart Orbit HZ- Region Detailed.png|600 px]]
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Hiemalis|Size= 7}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Hiemalis|Atmosphere= 8}}
+* The atmosphere contains high concentrations of noble gases.
+* The world's average temperature is [[Celsius|relatively low]].
+** [[Celsius|Temperatures]] can [[Celsius|become high]] during a polar Light Season.
+** [[Celsius|Temperatures]] plummet to [[Celsius|low levels]] during a polar Dark Season.
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Hiemalis|Hydrosphere= 7}}
+* During the height of Dark Season the seas may briefly become crusted with pack ice.
+
+==== Mainworld Geography and Topography ====
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+Hiemalis has vast oceans, with three large continents, four smaller subcontinental landmasses, and a plethora of archipelagoes and islands. One of the large continents is centered under the southern pole, while a deep oceanic depression marks the northern pole. The world has a high level of tectonic activity.
+
+[[File:Blank World Map Watery.png|500 px]] <br> (''Blank map, predominantly watery world''.)
+
+==== Native Lifeforms ====
+Abundant [[Lifeform|native life]] occupying every available ecological niche. Its metabolic functions drive the process of atmospheric renewal.
+* Native lifeforms are generally cryophilic - they thrive in [[Celsius|low temperatures]] – but can adapt to (or wait out) a wide range of climatic conditions.
+
+A vast array of local flora and fauna exist on Hiemalis. Most species are large compared to humaniti.
+
+Examples of flora include:
+* Tall "trees" with bases [[Meter|40 meters]] across the bole. Many have primitive sensory organs and can accurately drop heavy seed pods onto passing organisms from great heights. The falling pods kill their targets, and the decomposing bodies provide nutrients for the growing plant and its offspring.
+* Dense tangled stands of plants displaying colorful [[Centimeter|20 cm]] flowers and bearing multi-stoned fruits that swell to over [[Centimeter|30 cm]] in size. While the fruits can be got by foraging organisms, the inner parts of the stand are protected by long sharp spines that can easily penetrate hides (or fabrics). Some species appear to be able sense infra-red, and are able to explosively fire spines towards the heat source.
+
+[[File:Garden World Type 06a1.jpg|600 px]]
+
+Fauna tends to be armored or hard-shelled, typically with multiple legs. Eyes tend to be grouped as two pairs, one pair looking upwards for defense, one pair looking forwards for hunting or foraging. Most organisms display remarkable regenerative abilities.
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Hiemalis''' is a ''[[Amber Zone|Danger World]]'' and is designated as an [[Amber Zone]]. It presents particular risks and dangers due to the [[environment]] or [[Life Form|native life forms]], [[Law Level|laws]] or [[Custom|customs]], or other conditions that are not well understood.
+
+DANGER: Flora and fauna on Hiemalis is aggressive and will actively hunt visiting [[sophont]]s.
+* Visitors are advised to act with caution.
+
+The world is a [[Solomani Church]] settlement. The Church carefully hand-selected all 30,000 individuals that represented their ideals, from the highest leadership to the simplest layfolk. As a result, the beliefs and mindset of the population is the very definition of "monolithic".
+* A considerable number of monastic orders exist here.
+
+Although it lies within the territory of the [[Solomani Confederation|Confederation]], the world is not officially a member of that state, choosing instead to remain as a technically [[Non-Aligned|neutral world]]. Despite its [[Non-Aligned|neutral status]], it relies on the [[Solomani Confederation|Confederation]] for trade and defense and actively cooperates with [[Solomani]] interests.
+
+The system's huge primary star causes interference, strange tones and noises, and heavy static on [[Ship Sensor Suite|commo and sensors]].
+
+[[Solomani Security]] keeps a close eye on things to ensure the security of the [[Solomani Confederation|Confederation]] and the well-being of its loyal citizens. Almost anyone ''could'' be a [[Solomani Security|SolSec]] informant, passing on all sorts of useful information: some gain a reward or benefit for their actions, others are coerced, but many see it as an act of duty to help protect the [[Solomani Confederation|Solomani state]] and its interests.
+
+=== [[Starport|World Starport]] (St) ===
+{{Starport|name= Hiemalis|Starport= B}}
+
+Hiemalis downport is located on a plateau [[Kilometer|20 km]] from the coast of the largest continent. 
+
+Hiemalis highport is a [[Class B Starport]] only by technical definition: it is a barebones operation at best. The highport is understaffed, and clearly does not expect regular traffic.
+
+=== [[Population|World Population]] (P) ===
+{{WorldPop|name= Hiemalis|multiplier= 3|Population= 4}}
+* The population almost entirely consists of [[Solomani]] humans.
+
+==== Urbanization ====
+The only major city is Heavensgate, something of a metropolis with a population in excess of 20,000 individuals. It is surrounded by a few smaller satellite communities, and by farms, ranches, and mining operations.
+
+==== Linguistic Topography ====
+The most commonly heard [[language]]s are:
+* [[Rim Anglic]], a dialect of [[Anglic]] and the principal language of the [[Solomani Confederation|Confederation]].
+
+=== [[Technology Level|World Technology Level]] (T) ===
+{{WorldTech|name= Hiemalis|WorldTech= B}}
+
+=== [[Government|World Government]] (G) ===
+{{WorldGov|name= Hiemalis|Government= 8}}
+
+==== World Military ====
+By local mandate, all citizens have continual military training requirements. 
+
+A number of long-range missile systems are positioned in strategic sites, each maintained by a specific Church brotherhood or sisterhood.
+
+=== [[Law Level|World Law]] (L) ===
+{{WorldLaw|name= Hiemalis|Law= C}}
+
+Church law is the only law recognized on the world. Travellers should expect no privacy and to be constantly critiqued and judged.
+* [[Sophont|Non-human sophonts]] explicitly are ''persona non grata''. They are offered a chance to leave upon detection.
+
+=== Trade Data ===
+* [[Importance Extension|Importance]]: 1 (ordinary)
+
+=== World Economy ===
+* [[Resource]]s:                       A (abundant)
+* [[Labor]]:                           3 (thousands)
+* [[Infrastructure]]:                  2 (extremely limited)
+* [[Efficiency]]:                      +5 (very advanced)
+
+=== World Culture ===
+The population have deeply held religious beliefs.
+
+* [[Homogeneity|Heterogenity]]:        1 (monolithic)
+* [[Acceptance]]:                      5 (very aloof)
+* [[Strangeness]]:                     5 (distinct)
+* [[Symbol]]s:                         9 (somewhat abstract)
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+
+* [[-9235]]: far to [[coreward]], the [[Vilani]] discover [[jump drive]] technology. Over the centuries pioneers and settlers gradually spread across [[Charted Space]].
+* [[-4045]] to [[-2204]]: the [[First Imperium|Ziru Sirka]] controls vast territories.
+* [[-2431]]: [[Terran]]s discover [[jump drive]] technology.
+* [[-2404]] to [[-2215]]: the [[Interstellar Wars]].
+* [[-2204]] to [[-1776]]: the [[Rule of Man]] administers the former [[First Imperium|Ziru Sirka]].
+* [[-1776]] to [[0]]: the [[Long Night]].
+* [[0|The Year 0]]: to [[coreward]], the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[604]]-[[622]]: the {{Imperial}} [[Civil War]].
+* [[624]]: the {{Imperial}} [[Express Boat Network]] is established.
+* [[704]]: the [[Solomani Autonomous Region]] is formed.
+* [[800]]-[[820]]: the [[Psionics Suppressions]].
+* [[871]]: the [[Solomani Confederation]] is founded.
+* [[940]]: the [[Solomani Autonomous Region]] is dissolved.
+* [[990]]-[[1002]]: the [[Solomani Rim War]].
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] includes data for the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+
+== References & Contributors (Sources) ==
+{{Detail}}
+{{Sources
+|S1= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (A-M)|Supplement 8 Library Data (A-M)]]'', ([[Game Designers Workshop]], 1981), various pages. (Library data entries)
+|S2= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (N-Z)|Supplement 11 Library Data (N-Z)]]'', ([[Game Designers Workshop]], 1982), various pages. (Library data entries)
+|S3= {{Ludography cite|name= Solomani |version= Classic Traveller|page= IFC, pages 3, 28}} (sector named, background for the sector)
+|S4= {{Ludography cite|name= Solomani & Aslan |page= pages 8-11, various others}} (dot map locating the worlds of the sector, background for the sector)
+|S5= [[Steven Eric Schwartz]]. {{MT}} Periodical ''[[Imperiallines 2 (fanzine)|Imperiallines 2]]'', 1991, page 5. ([[Bootean Federation]], background for the sector) 
+|S6= {{Ludography cite|name= Fighting Ships of the Solomani|page= page 5}} (background for the sector)
+|S7= {{Ludography cite|name= Solomani |version= Mongoose Traveller|page= pages 50, 118, 119, various others}} (background for the sector)
+|S8= {{Ludography cite|name= The Order of Prometheus|page= various pages}} (scenarios and background for the sector)
+|S9= [http://zho.berka.com/data/CLASSIC/sector.pl?sector=ALDEBARA Zho Berka's Maps] (Classic Era [[Universal World Profile|UWP Data]] for the world)
+|S10= [http://111george.com/core/astrogat/jG.htm CORE Data Site] ([[Universal World Profile|UWP Data]] for the world)
+|S11= Author & Contributor: [[User:Garnfellow|Garnfellow]] (development of the sector)
+|S12= Author & Contributor: [[Leroy W.L. Guatney]] of the Federation Development Agency (FDA) (development of the sector)
+|S13= Author & Contributor: [[User:Dochsavage|Dochsavage]] 
+}}
+
+
+[[Category: Humaniti worlds]]
+[[Category: Solomani Church worlds]]
+[[Category: Solomani Sphere worlds]]
+[[Category: Solomani worlds]]
+[[Category: Terran Mercantile Community worlds]]
+{{LE|Era: Milieu 1116|T5 Second Survey}}

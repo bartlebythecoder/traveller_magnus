@@ -1,0 +1,463 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "1232",
+  "sector_abbreviation": "Spin",
+  "subsector": "District 268",
+  "name": "Walston",
+  "sources": [
+    {
+      "page": "Walston (world)",
+      "revid": 1041695,
+      "timestamp": "2026-04-10T22:27:46Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Walston (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Albin's Star",
+          "type": "M2 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Albin's Star",
+      "stars": [
+        {
+          "name": "Albin's Star",
+          "type": "M2 V"
+        }
+      ],
+      "labels": [
+        "Walston"
+      ],
+      "pages": [
+        "Walston (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Pert",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "0.18",
+            "value": 0.18,
+            "unit": "AU"
+          },
+          "sources": [
+            "Walston (world)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Roberts",
+          "raw": "H621000-0",
+          "kind": "world",
+          "uwp": "H621000-0",
+          "distance": {
+            "raw": "0.27",
+            "value": 0.27,
+            "unit": "AU"
+          },
+          "sources": [
+            "Walston (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Walston",
+          "raw": "C544338-8",
+          "kind": "world",
+          "uwp": "C544338-8",
+          "distance": {
+            "raw": "0.38",
+            "value": 0.38,
+            "unit": "AU"
+          },
+          "sources": [
+            "Walston (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 3,
+          "name": "Greenish",
+          "raw": "SGG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "0.97",
+            "value": 0.97,
+            "unit": "AU"
+          },
+          "sources": [
+            "Walston (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Walston (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Proclux",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "4 Diam",
+                "value": 4.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Walston (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Molstor",
+              "raw": "Y4A0000-0",
+              "kind": "world",
+              "uwp": "Y4A0000-0",
+              "distance": {
+                "raw": "9 Diam",
+                "value": 9.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Walston (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Iddine",
+              "raw": "Y203000-0",
+              "kind": "world",
+              "uwp": "Y203000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Walston (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Victir",
+          "raw": "Y401000-0",
+          "kind": "world",
+          "uwp": "Y401000-0",
+          "distance": {
+            "raw": "1.34",
+            "value": 1.34,
+            "unit": "AU"
+          },
+          "sources": [
+            "Walston (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Temine",
+          "raw": "H311000-0",
+          "kind": "world",
+          "uwp": "H311000-0",
+          "distance": {
+            "raw": "1.91",
+            "value": 1.91,
+            "unit": "AU"
+          },
+          "sources": [
+            "Walston (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Scales",
+          "raw": "G9A0169-8",
+          "kind": "world",
+          "uwp": "G9A0169-8",
+          "distance": {
+            "raw": "3.31",
+            "value": 3.31,
+            "unit": "AU"
+          },
+          "sources": [
+            "Walston (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Salipoc",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "35 Diam",
+                "value": 35.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Walston (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Insive",
+          "raw": "SGG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "5.66",
+            "value": 5.66,
+            "unit": "AU"
+          },
+          "sources": [
+            "Walston (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Alpha",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "12 Diam",
+                "value": 12.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Walston (world)"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Walston (world)",
+      "label": "Walston",
+      "stars": [
+        {
+          "name": "Albin's Star",
+          "type": "M2 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Pert",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "0.18",
+            "value": 0.18,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Roberts",
+          "raw": "H621000-0",
+          "kind": "world",
+          "uwp": "H621000-0",
+          "distance": {
+            "raw": "0.27",
+            "value": 0.27,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Walston",
+          "raw": "C544338-8",
+          "kind": "world",
+          "uwp": "C544338-8",
+          "distance": {
+            "raw": "0.38",
+            "value": 0.38,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Greenish",
+          "raw": "SGG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "0.97",
+            "value": 0.97,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Proclux",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "4 Diam",
+                "value": 4.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Molstor",
+              "raw": "Y4A0000-0",
+              "kind": "world",
+              "uwp": "Y4A0000-0",
+              "distance": {
+                "raw": "9 Diam",
+                "value": 9.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Iddine",
+              "raw": "Y203000-0",
+              "kind": "world",
+              "uwp": "Y203000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Victir",
+          "raw": "Y401000-0",
+          "kind": "world",
+          "uwp": "Y401000-0",
+          "distance": {
+            "raw": "1.34",
+            "value": 1.34,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Temine",
+          "raw": "H311000-0",
+          "kind": "world",
+          "uwp": "H311000-0",
+          "distance": {
+            "raw": "1.91",
+            "value": 1.91,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Scales",
+          "raw": "G9A0169-8",
+          "kind": "world",
+          "uwp": "G9A0169-8",
+          "distance": {
+            "raw": "3.31",
+            "value": 3.31,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Salipoc",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "35 Diam",
+                "value": 35.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Insive",
+          "raw": "SGG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "5.66",
+            "value": 5.66,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Alpha",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "12 Diam",
+                "value": 12.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Walston",
+    "UWP": "C544338-8",
+    "Stellar": "M2 V",
+    "PBG": "302",
+    "Bases": "S",
+    "Remarks": "Lo Varg7"
+  }
+}

@@ -26,6 +26,8 @@ For a deep dive on routes specifically, see the [Route Manager Help Manual](help
 16. [How do I filter and colour the map?](#16-how-do-i-filter-and-colour-the-map)
 17. [How do I make a players' version?](#17-how-do-i-make-a-players-version)
 18. [How do I change how the map looks?](#18-how-do-i-change-how-the-map-looks)
+19. [What happens to my trade codes when I expand a system?](#19-what-happens-to-my-trade-codes-when-i-expand-a-system)
+20. [Where can I send feedback?](#20-where-can-i-send-feedback)
 
 ---
 
@@ -55,7 +57,10 @@ Run the stages yourself, which lets you stop and inspect (or hand-edit) between 
    undetermined.)
 2. **GENERATE MAINWORLD →** *CT / MgT2E / T5* — rolls the mainworld UWP only.
 3. **EXPAND SYSTEM →** *Book 6 (CT) / MgT2E / T5* — builds the stars, planets, belts, gas
-   giants, and moons around that mainworld. (The fourth entry, **RTT (Re-run Biographer Only)**,
+   giants, and moons around that mainworld. It replaces any system already in the hex,
+   whichever edition built it (a warning lists them first), but keeps the mainworld. CT, MgT2E
+   and T5 also ask how to treat the mainworld's existing trade codes (see
+   [question 19](#19-what-happens-to-my-trade-codes-when-i-expand-a-system)). (The fourth entry, **RTT (Re-run Biographer Only)**,
    is different: on a system RTT has already built, it re-rolls each body's physical biography
    and social stats while leaving the stars and orbits alone. RTT systems themselves come from
    the **BOTTOM UP** commands.)
@@ -139,7 +144,7 @@ Five generation engines, each implementing its own edition's rules end to end:
 |---|---|
 | **Classic Traveller (CT)** | Book 6 *Scouts* system generation. Top-down and bottom-up. |
 | **Mongoose Traveller 2nd Edition (MgT2E)** | Includes the *World Builder's Handbook* physical model. Top-down and bottom-up. |
-| **Traveller 5 (T5)** | Full T5 world and system generation, including the Ix / Ex / Cx extensions. Top-down only. |
+| **Traveller 5 (T5)** | Full T5 world and system generation, including the Ix / Ex / Cx extensions. Top-down only. Wiki-published OTU systems also load as T5 systems (see [question 4](#4-can-i-download-otu-systems)). |
 | **RTT WorldGen (RTT)** | Revised Traveller. Bottom-up only. |
 | **Architect of Worlds (AoW)** | Physical star-and-planet modelling, paired with the MgT2E *World Builder's Handbook* for the socioeconomic layer. Bottom-up only. |
 
@@ -149,7 +154,9 @@ and *Use Min TL* (MgT2E), and *Settlement Centuries*, *Tech Level*, and *Show In
 
 Each system remembers which engine built it, and that choice is fixed for the life of the
 system — the System Editor won't let you convert a T5 system into a Mongoose one, for example.
-You can freely mix engines *across* hexes in the same sector.
+Running **EXPAND SYSTEM** in another edition doesn't convert it either: it replaces the system
+with a new one, keeping only the mainworld. You can freely mix engines *across* hexes in the
+same sector.
 
 **System Editor support** currently covers **MgT2E**, **CT**, and **T5**. RTT and AoW systems
 generate normally and display normally, but cannot be hand-edited yet — their editor support is
@@ -229,10 +236,49 @@ touching world data. Useful for layering community route files onto a map you al
 ### What you actually get
 
 An import gives you each world's **UWP, bases, trade codes, travel zone, allegiance, and stellar
-data** — the sector-level record. It does *not* include planet-by-planet system detail, because
-that isn't published data. To get moons, belts, gas giants, and orbital positions for an imported
-world, select it and run one of the **EXPAND SYSTEM** commands; the expansion is generated to be
-consistent with the imported UWP.
+data**, the sector-level record from TravellerMap. You can get the rest of the system in one of two ways:
+
+- **Published systems (85 of them):** tick **Wiki-Published System Data (planets & moons)** when
+  you import, or use one of the other two ways in the next section. You get the stars, planets,
+  moons, rings and belts as the Traveller wiki published them.
+- **Everything else:** select the world and run one of the **EXPAND SYSTEM** commands. This
+  *generates* a new system that fits the imported UWP and, by default, its trade codes (see
+  [question 19](#19-what-happens-to-my-trade-codes-when-i-expand-a-system)). It doesn't download
+  or look up anything.
+
+### Wiki-published systems (planets & moons)
+
+The app ships with a snapshot of **85 systems** whose stars, planets, moons, rings and belts are
+published on the Traveller wiki (wiki.travellerrpg.com).
+
+**The snapshot was taken on 16 November 2026** and reflects the wiki as it stood that day. The
+app never contacts the wiki, so later edits there won't appear until a future release refreshes
+the snapshot. The wiki's tables vary from page to page, so each system was cleaned by hand, and
+where the wiki and TravellerMap disagreed about a mainworld, TravellerMap's version was used.
+
+There are three ways to use it:
+
+- **While importing:** tick **Wiki-Published System Data (planets & moons)** in Import the
+  Imperium, Import the OTU Universe, Import an OTU Neighbourhood or Custom OTU Import. Each
+  imported world that has a wiki-published system gets it, and its mainworld stays exactly as
+  TravellerMap gives it.
+- **On a map you already have:** **Settings → Import / Export → Import Wiki-Published Systems**
+  loads the published system into every world whose sector, hex and name match one, including
+  sectors loaded from a .tsv file. It asks before replacing any system that already has planets
+  and moons.
+- **One hex at a time:** select one hex and right-click → **LOAD WIKI-PUBLISHED SYSTEM…** to pick
+  any of the 85 systems from a searchable list and put it into that hex whole, the wiki's own
+  mainworld included. With several hexes selected, it loads the matching system into each one.
+
+A wiki-published system loads as an ordinary **T5** system: you can view it, edit it in the
+System Editor and export it like any other. Only the bodies the wiki lists are added, and values
+the wiki doesn't give are left blank rather than rolled.
+
+> **Don't expand a wiki-published system unless you mean to replace it.** **EXPAND SYSTEM**, in
+> any edition, throws away the published stars, planets and moons and generates new ones around
+> the mainworld. The expand dialog warns you first and names each wiki-published system it would
+> replace. **Ctrl + Z** undoes it, and running **LOAD WIKI-PUBLISHED SYSTEM…** on the hex again
+> puts the published system back.
 
 > **Import the Universe advice:** save the result to JSON immediately (see
 > [question 5](#5-can-i-save-my-work-and-load-it-later)) so you never have to re-import. The map
@@ -346,7 +392,9 @@ The top section holds the editable mainworld fields:
 Type your changes and click **Save**. **Cancel** discards them.
 
 Values you type by hand are respected: the app tracks which fields you edited and won't overwrite
-them the next time that system is regenerated or re-expanded.
+them the next time that system is regenerated or re-expanded. Trade codes are the one field you
+decide on each time you expand; see
+[question 19](#19-what-happens-to-my-trade-codes-when-i-expand-a-system).
 
 Below the fields, a set of accordion sections shows the read-only generated detail for that
 system — physical data, socioeconomics, and the full body-by-body system inventory, one section
@@ -360,7 +408,8 @@ To change a field across many systems at once, select them (**Shift + Drag**, **
 
 > Editing the mainworld UWP does not re-expand the system around it. If you change Size or
 > Atmosphere significantly and want the physical system rebuilt to match, re-run
-> **EXPAND SYSTEM** on that hex.
+> **EXPAND SYSTEM** on that hex, and choose **Recalculate all codes** so the trade codes follow
+> the new digits.
 
 ---
 
@@ -946,6 +995,42 @@ Worlds hidden by the filter don't count, except while **Shift + F** shows them. 
 view the map draws no symbols, so the legend says so instead. The setting saves with the map. It
 starts off, and maps saved before it existed open without it. The legend doesn't appear in
 exports.
+
+---
+
+## 19. What happens to my trade codes when I expand a system?
+
+Every **EXPAND SYSTEM** in CT, MgT2E and T5 asks how to handle the mainworld's trade codes before
+it builds anything. So does MgT2E **EXPAND SOCIOECONOMIC** on a hex that has no system yet. There
+are three choices:
+
+| Choice | What happens |
+|---|---|
+| **Keep codes, add placement codes** *(default)* | Existing codes are never removed. Codes that say where the world sits are obeyed: **Sa** makes the mainworld a moon, and in T5 so do **Lk**, while **Tz** and the climate codes (**Tr Ho Tu Co Fr**) move it to a matching orbit. Placement codes it doesn't already have are rolled and added. |
+| **Keep codes exactly** | Nothing is added or removed, and the system is built to fit the codes. Without **Sa**, the mainworld is never a moon. |
+| **Recalculate all codes** | Every code is rebuilt from the UWP and the new placement, which is how expanding worked before. In T5 this also rolls afresh whether the mainworld is a moon. |
+
+The app remembers your last choice until you close the tab.
+
+**Warnings in the dialog.** If a hex's codes don't match what its UWP would give (because you
+typed codes by hand or edited the UWP, for example), the dialog lists that hex so you can decide
+before expanding. It also warns when a world carries T5-only codes such as Lk or Tz and you expand
+it in CT or MgT2E: those codes are kept but don't shape the system, so the results may look
+unusual.
+
+**Worlds imported from TravellerMap** carry T5 trade codes, placement codes like **Sa** included.
+Under the default choice, an imported world marked Sa stays a moon in the system you generate for
+it. This only affects the generated system. To get a world's *published* planets and moons, see
+[Wiki-published systems](#wiki-published-systems-planets--moons) in question 4.
+
+---
+
+## 20. Where can I send feedback?
+
+Bug reports, questions and suggestions are welcome. You can find me on the forums:
+
+- **Citizens of the Imperium (COTI):** Bartleby
+- **Mongoose Publishing forums:** bartlebyfosco
 
 ---
 

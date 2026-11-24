@@ -155,6 +155,23 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
     const mainworldNeedsHZ = (!isAsteroidMW && ![0, 1, 10, 11, 12, 13, 14, 15].includes(mwAtm));
 
     // 5a. Gas Giant Placement (First) - Normalized H/O Priority
+    // Diameter placeholder — see the matching comment in ct_bottomup_generator.js's
+    // Step 2G Gas Giant placement: CT has no Book 6 gas giant diameter table, so this
+    // borrows MgT2E's dice-rolled-diameter × 12800 km/unit convention until a real
+    // source is found. Without it, the orrery's moon-orbit-period calc fell back to
+    // Earth's diameter for every gas giant, making its moons orbit far too fast.
+    const gasGiantContents = (ggSize) => {
+        const ggDiamKm = ggSize === 'Large'
+            ? (tRoll2D('Placeholder GG Diameter (Large, 2D+6)') + 6) * 12800
+            : (Math.ceil(tRoll1D('Placeholder GG Diameter (Small) D3') / 2) + Math.ceil(tRoll1D('Placeholder GG Diameter (Small) D3') / 2)) * 12800;
+        return {
+            type: 'Gas Giant',
+            size: ggSize,
+            gravity: (ggSize === 'Large' ? 2.5 : 0.8),
+            mass: (ggSize === 'Large' ? 300 : 50),
+            diamKm: ggDiamKm
+        };
+    };
     const eligibleSlots = sys.orbits.filter(o => ['H', 'O'].includes(o.zone) && !o.contents);
     skeleton.ggs.forEach(gg => {
         let slot;
@@ -165,28 +182,63 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
             // Book 6 Failsafe: no eligible slot — create one in the outer zone
             slot = CT_StellarEngine.spawnFailsafeOrbit(sys.orbits);
         }
-        if (slot) {
-            // Diameter placeholder — see the matching comment in ct_bottomup_generator.js's
-            // Step 2G Gas Giant placement: CT has no Book 6 gas giant diameter table, so this
-            // borrows MgT2E's dice-rolled-diameter × 12800 km/unit convention until a real
-            // source is found. Without it, the orrery's moon-orbit-period calc fell back to
-            // Earth's diameter for every gas giant, making its moons orbit far too fast.
-            const ggDiamKm = gg.size === 'Large'
-                ? (tRoll2D('Placeholder GG Diameter (Large, 2D+6)') + 6) * 12800
-                : (Math.ceil(tRoll1D('Placeholder GG Diameter (Small) D3') / 2) + Math.ceil(tRoll1D('Placeholder GG Diameter (Small) D3') / 2)) * 12800;
-            slot.contents = {
-                type: 'Gas Giant',
-                size: gg.size,
-                gravity: (gg.size === 'Large' ? 2.5 : 0.8),
-                mass: (gg.size === 'Large' ? 300 : 50),
-                diamKm: ggDiamKm
-            };
-        }
+        if (slot) slot.contents = gasGiantContents(gg.size);
     });
+
+    // 5a-ii. Expand trade-code modes (Sean, 2026-11-19 — manifest §0.0.D). When the expand
+    // keeps the mainworld's codes, its Sa alone decides whether it is a moon:
+    //   * Sa → it becomes a moon of a gas giant; a system with none gets one (as MgT2E does).
+    //     A world that needs the HZ orbit takes the gas giant nearest that orbit into it.
+    //   * no Sa, 'exact' → a gas giant sitting in the HZ target orbit moves out of it.
+    //   * no Sa, 'add' → placement is rolled as before (a gas giant there still makes a moon).
+    const tcMode = (typeof expandTradeCodeMode === 'function') ? expandTradeCodeMode() : null;
+    const wantsSa = !!tcMode && expandOriginalHas('Sa');
+    let saHostSlot = null;
+    let addedGasGiant = false;
+    const ggSlotsNow = () => sys.orbits.filter(o => o.contents && o.contents.type === 'Gas Giant');
+    const nearestTo = (slots, orbit) => slots.reduce((best, o) =>
+        (!best || Math.abs(o.orbit - orbit) < Math.abs(best.orbit - orbit)) ? o : best, null);
+    const freeOuterSlot = (exceptOrbit) =>
+        sys.orbits.find(o => ['H', 'O'].includes(o.zone) && !o.contents && o.orbit !== exceptOrbit) ||
+        ((typeof CT_StellarEngine !== 'undefined') ? CT_StellarEngine.spawnFailsafeOrbit(sys.orbits) : null);
+    const targetSlotNow = sys.orbits.find(o => o.orbit === targetOrbit);
+
+    if (wantsSa) {
+        if (ggSlotsNow().length === 0) {
+            const sizeRoll = tRoll1D('Added GG Size Roll (Sa mainworld)');
+            const ggSize = (sizeRoll <= 3) ? 'Large' : 'Small';
+            const slot = (mainworldNeedsHZ && targetSlotNow && !targetSlotNow.contents) ? targetSlotNow : freeOuterSlot(null);
+            if (slot) {
+                slot.contents = gasGiantContents(ggSize);
+                addedGasGiant = true;
+                tResult('Gas Giant Added', `${ggSize} at Orbit ${slot.orbit} (mainworld has Sa)`, 'CT 1.3: Satellite Hierarchy');
+            }
+        }
+        if (mainworldNeedsHZ && targetSlotNow && !(targetSlotNow.contents && targetSlotNow.contents.type === 'Gas Giant')) {
+            const mover = nearestTo(ggSlotsNow(), targetOrbit);
+            if (mover && !targetSlotNow.contents) {
+                targetSlotNow.contents = mover.contents;
+                mover.contents = null;
+                tResult('Gas Giant Moved', `Orbit ${mover.orbit} → ${targetOrbit} to hold the Sa mainworld`, 'CT 1.3: Satellite Hierarchy');
+            }
+        }
+        saHostSlot = (mainworldNeedsHZ && targetSlotNow && targetSlotNow.contents && targetSlotNow.contents.type === 'Gas Giant')
+            ? targetSlotNow
+            : nearestTo(ggSlotsNow(), targetOrbit);
+    } else if (tcMode === 'exact' && mainworldNeedsHZ && targetSlotNow &&
+               targetSlotNow.contents && targetSlotNow.contents.type === 'Gas Giant') {
+        const dest = freeOuterSlot(targetOrbit);
+        if (dest) {
+            dest.contents = targetSlotNow.contents;
+            targetSlotNow.contents = null;
+            tResult('Gas Giant Moved', `Orbit ${targetOrbit} → ${dest.orbit} (mainworld has no Sa)`, 'CT 1.3: Satellite Hierarchy');
+        }
+    }
 
     // 5b. Planetoid Belt Placement (Second) - Tiered Proximity Rule
     let beltsToPlace = totalBelts;
-    if (isAsteroidMW) beltsToPlace = Math.max(0, beltsToPlace - 1); // Mainworld will be placed in Step 5d
+    // Mainworld will be placed in Step 5d — unless it is an Sa moon, which takes no belt slot.
+    if (isAsteroidMW && !saHostSlot) beltsToPlace = Math.max(0, beltsToPlace - 1);
 
     const ggOrbits = sys.orbits.filter(o => o.contents && o.contents.type === 'Gas Giant').map(o => o.orbit);
     
@@ -245,16 +297,60 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
 
     // 5d. Mainworld Placement (Last)
     const mainworld = Object.assign({}, mainworldUWP, { type: 'Mainworld' });
+    // Placement is decided afresh below. Moon flags carried in from an earlier expand would
+    // otherwise add Sa (generateTradeCodes reads them) to a world now placed as a planet.
+    ['isSatellite', 'isMoon', 'isLunarMainworld', 'parentBody', 'parentType'].forEach(f => { delete mainworld[f]; });
+    if (addedGasGiant) mainworld.gasGiant = true;
     let mwOrbit = targetOrbit;
     let mwZone = 'H';
 
-    if (!mainworldNeedsHZ) {
+    // Satellite logic: the mainworld becomes a moon of the gas giant in `ggSlot`.
+    const attachAsMoon = (ggSlot) => {
+        if (!ggSlot.contents.satellites) ggSlot.contents.satellites = [];
+        ggSlot.contents.satellites.push(mainworld);
+
+        mainworld.isSatellite = true;
+        mainworld.isMoon = true; // Extra flag for robustness
+        mainworld.isLunarMainworld = true;
+        mainworld.parentBody = 'Gas Giant';
+        mainworld.parentType = 'Gas Giant';
+
+        if (typeof tResult !== 'undefined') tResult('Mainworld Status', 'LUNAR SELECTION', 'CT 1.3: Satellite Hierarchy');
+        if (typeof writeLogLine !== 'undefined') writeLogLine(`[MAINWORLD LOG]: Mainworld placed as a MOON of Gas Giant at Orbit ${ggSlot.orbit}`);
+
+        mainworld.orbit = ggSlot.orbit;
+        mainworld.zone = ggSlot.zone;
+        mainworld.distAU = orbitalAU[Math.min(ggSlot.orbit, orbitalAU.length - 1)] || 1.0;
+
+        // Assign a planetary distance (radii) for the UI, using a 'Close' orbit by default for Mainworlds
+        if (satOrbitsTable && satOrbitsTable.Close) {
+            const roll = tRoll2D('Mainworld Satellite Orbit Roll');
+            const distIdx = Math.min(roll, satOrbitsTable.Close.length - 1);
+            mainworld.pd = satOrbitsTable.Close[distIdx] || 10;
+            tResult('Mainworld Distance', `${mainworld.pd}r`, 'CT 1.3: Satellite Hierarchy');
+        } else {
+            mainworld.pd = 10;
+            tResult('Mainworld Distance', '10r (default)', 'CT 1.3: Satellite Hierarchy');
+        }
+        mwOrbit = ggSlot.orbit;
+        mwZone = ggSlot.zone;
+    };
+
+    if (saHostSlot) {
+        attachAsMoon(saHostSlot);
+    } else if (!mainworldNeedsHZ) {
         // Can be anywhere. Find a random open terrestrial slot or belt slot if asteroid.
         if (isAsteroidMW) {
             let slot = sys.orbits.find(o => o.contents && o.contents.type === 'Planetoid Belt');
             if (slot) {
-                Object.assign(slot.contents, mainworld);
-                slot.contents.type = 'Mainworld'; // Overwrite
+                // The belt becomes the mainworld. Keep ONE object (the belt's own fields under
+                // the mainworld's, as before): copying the mainworld onto the belt left
+                // sys.mainworld a separate object the later passes never touched, so the hex's
+                // saved mainworld kept its old trade codes (found 2026-11-19).
+                const belt = slot.contents;
+                Object.keys(belt).forEach(k => { if (!(k in mainworld)) mainworld[k] = belt[k]; });
+                mainworld.type = 'Mainworld'; // Overwrite
+                slot.contents = mainworld;
             } else {
                 // If everything is full, extend the system by one orbit
                 const newOrbit = sys.orbits.length;
@@ -292,7 +388,8 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
             let closest = null;
             let closestDist = Infinity;
             for (const o of sys.orbits) {
-                const canDisplace = !o.contents || o.contents.type === 'Gas Giant';
+                // 'exact' with no Sa must never land on a gas giant (it would become a moon).
+                const canDisplace = !o.contents || (o.contents.type === 'Gas Giant' && tcMode !== 'exact');
                 if (!canDisplace) continue;
                 const dist = Math.abs(o.orbit - targetOrbit);
                 if (dist < closestDist) { closestDist = dist; closest = o; }
@@ -342,7 +439,12 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
                 tResult('Mainworld Distance', '10r (default)', 'CT 1.3: Satellite Hierarchy');
             }
         } else {
-            // Terrestrial HZ Slot
+            // Terrestrial HZ Slot (no survivor at all: extend the system by one orbit)
+            if (!slot) {
+                slot = { orbit: sys.orbits.length ? Math.max(...sys.orbits.map(o => o.orbit)) + 1 : 0, zone: 'H', contents: null };
+                sys.orbits.push(slot);
+                targetOrbit = slot.orbit;
+            }
             slot.contents = mainworld;
             mainworld.orbit = targetOrbit;
             mainworld.zone = 'H';
@@ -415,7 +517,12 @@ function generateTopDownSystem(mainworldUWP, primaryStar = null) {
         systemWalker(sys, (body) => {
             if (body.type === 'Mainworld') {
                 if (tradeCodesGen) {
-                    body.tradeCodes = tradeCodesGen(body);
+                    // While an expand keeps the user's codes (manifest §0.0.D, 2026-11-19), the
+                    // original codes stand; 'add' mode adds Sa if placement made it a moon.
+                    const calculated = tradeCodesGen(body);
+                    body.tradeCodes = (typeof resolveExpandTradeCodes === 'function')
+                        ? resolveExpandTradeCodes(calculated, [['Sa']])
+                        : calculated;
                     // Sean Protocol: Explicitly log the final codes to verify Sa flag
                     if (typeof tResult !== 'undefined' && (body.isMoon || body.isSatellite)) {
                         tResult('Final Lunar Trade Codes', body.tradeCodes.join(' '), 'CT 4.1: Starports & Bases');

@@ -444,17 +444,31 @@ function setupGenerationHandlers() {
         requestAnimationFrame(draw);
     });
 
-    document.getElementById('ctx-expand-socio-mgt2e').addEventListener('click', () => {
+    document.getElementById('ctx-expand-socio-mgt2e').addEventListener('click', async () => {
         if (!validateSelection('socio')) return;
+
+        const pickBase = s => s.t5Data || s.mgt2eData || s.ctData;
+        const hexList = [...selectedHexes];
+        document.getElementById('context-menu').classList.remove('visible');
+        // Only a hex with no system yet runs a full top-down expand (placement and all), so
+        // only those need the trade-code choice (manifest §0.0.D, 2026-11-19).
+        const needsSystem = hexList.filter(h => { const s = hexStates.get(h); return s && !s.mgtSystem; });
+        let tcChoice = 'recalc';
+        const askItems = _expandItems(needsSystem, pickBase);
+        if (askItems.length > 0) {
+            tcChoice = await askExpandTradeCodeMode('MgT2E', askItems,
+                'Hexes that already have an MgT2E system keep their codes and placement; this choice is for the ones that don\'t.');
+            if (!tcChoice) return;
+        }
 
         saveHistoryState('Expand MgT2E Socioeconomics');
         if (window.isLoggingEnabled) window.batchLogData = [];
         let missingData = false;
-        selectedHexes.forEach(hexId => {
+        hexList.forEach(hexId => {
             let stateObj = hexStates.get(hexId);
             let baseData = null;
             if (stateObj) {
-                baseData = stateObj.t5Data || stateObj.mgt2eData || stateObj.ctData;
+                baseData = pickBase(stateObj);
             }
 
             if (baseData) {
@@ -468,7 +482,14 @@ function setupGenerationHandlers() {
                 } else {
                     // No system yet (mainworld UWP only). Generate top-down first, which
                     // includes the socio pass, then surface the result.
-                    newSys = generateMgT2ESystemTopDown(hexId, baseData);
+                    beginExpandTradeCodes(tcChoice, baseData);
+                    try {
+                        newSys = generateMgT2ESystemTopDown(hexId, baseData);
+                    } finally {
+                        endExpandTradeCodes();
+                    }
+                    // A new system replaces any other edition's (Sean, 2026-11-24).
+                    if (newSys) clearOtherEditionSystems(stateObj, 'MgT2E');
                 }
 
                 if (newSys) {
@@ -509,14 +530,13 @@ function setupGenerationHandlers() {
         }
 
         if (window.isLoggingEnabled && window.batchLogData.length > 0) {
-            downloadBatchLog('MgT2E_Socio', selectedHexes.size);
+            downloadBatchLog('MgT2E_Socio', hexList.length);
         }
 
-        document.getElementById('context-menu').classList.remove('visible');
-        showToast(`Expanded MgT2E Socioeconomics for ${selectedHexes.size} hex(es)`);
-        
+        showToast(`Expanded MgT2E Socioeconomics for ${hexList.length} hex(es)`);
+
         // Sean Protocol: Sync Rule Engine and Filters with updated socio data
-        if (typeof writeLogLine === 'function') writeLogLine(`Refreshing rules for ${selectedHexes.size} updated systems (Socio Expansion).`);
+        if (typeof writeLogLine === 'function') writeLogLine(`Refreshing rules for ${hexList.length} updated systems (Socio Expansion).`);
         if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
         if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
 
@@ -597,25 +617,39 @@ function setupGenerationHandlers() {
     });
 
     // Physical System Expansion
-    document.getElementById('ctx-expand-physical-ct').addEventListener('click', () => {
+    document.getElementById('ctx-expand-physical-ct').addEventListener('click', async () => {
         if (!validateSelection('physical')) return;
+
+        const pickBase = s => s.ctData || s.mgt2eData || s.t5Data;
+        const hexList = [...selectedHexes];
+        document.getElementById('context-menu').classList.remove('visible');
+        const tcChoice = await askExpandTradeCodeMode('CT', _expandItems(hexList, pickBase));
+        if (!tcChoice) return;
 
         saveHistoryState('Expand CT System');
         let missingData = false;
 
         if (window.isLoggingEnabled) window.batchLogData = [];
 
-        selectedHexes.forEach(hexId => {
+        hexList.forEach(hexId => {
             let stateObj = hexStates.get(hexId);
-            let baseData = stateObj ? (stateObj.ctData || stateObj.mgt2eData || stateObj.t5Data) : null;
+            let baseData = stateObj ? pickBase(stateObj) : null;
 
             if (baseData) {
                 if (window.CT_Generator) {
-                    const sys = window.CT_Generator.generateSystem({
-                        mode: 'top-down',
-                        mainworldUWP: baseData,
-                        hexId: hexId
-                    });
+                    beginExpandTradeCodes(tcChoice, baseData);
+                    let sys;
+                    try {
+                        sys = window.CT_Generator.generateSystem({
+                            mode: 'top-down',
+                            mainworldUWP: baseData,
+                            hexId: hexId
+                        });
+                    } finally {
+                        endExpandTradeCodes();
+                    }
+                    // A new system replaces any other edition's (Sean, 2026-11-24).
+                    if (sys) clearOtherEditionSystems(stateObj, 'CT');
                     stateObj.ctSystem = sys;
                     if (sys && sys.mainworld) stateObj.ctData = sys.mainworld; // Sync post-expansion mainworld (lunar flags, gasGiant, etc.)
                 }
@@ -633,14 +667,13 @@ function setupGenerationHandlers() {
         }
 
         if (window.isLoggingEnabled && window.batchLogData && window.batchLogData.length > 0) {
-            downloadBatchLog('CT_Systems', selectedHexes.size);
+            downloadBatchLog('CT_Systems', hexList.length);
         }
 
-        document.getElementById('context-menu').classList.remove('visible');
-        showToast(`Expanded CT System for ${selectedHexes.size} hex(es)`);
-        
+        showToast(`Expanded CT System for ${hexList.length} hex(es)`);
+
         // Sean Protocol: Sync Rule Engine and Filters with updated physical data
-        if (typeof writeLogLine === 'function') writeLogLine(`Refreshing rules for ${selectedHexes.size} updated systems (Physical Expansion).`);
+        if (typeof writeLogLine === 'function') writeLogLine(`Refreshing rules for ${hexList.length} updated systems (Physical Expansion).`);
         if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
         if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
 
@@ -649,21 +682,35 @@ function setupGenerationHandlers() {
     });
 
 
-    document.getElementById('ctx-expand-physical-mgt2e').addEventListener('click', () => {
+    document.getElementById('ctx-expand-physical-mgt2e').addEventListener('click', async () => {
         if (!validateSelection('physical')) return;
+
+        const pickBase = s => s.mgt2eData || s.t5Data || s.ctData || s.rttData;
+        const hexList = [...selectedHexes];
+        document.getElementById('context-menu').classList.remove('visible');
+        const tcChoice = await askExpandTradeCodeMode('MgT2E', _expandItems(hexList, pickBase));
+        if (!tcChoice) return;
 
         saveHistoryState('Expand MgT2E System');
         if (window.isLoggingEnabled) window.batchLogData = [];
         let missingData = false;
-        selectedHexes.forEach(hexId => {
+        hexList.forEach(hexId => {
             let stateObj = hexStates.get(hexId);
-            let baseData = stateObj ? (stateObj.mgt2eData || stateObj.t5Data || stateObj.ctData || stateObj.rttData) : null;
+            let baseData = stateObj ? pickBase(stateObj) : null;
 
             if (baseData) {
-                // 1. Call the new Orchestrator
-                let newSys = generateMgT2ESystemTopDown(hexId, baseData);
+                // 1. Call the new Orchestrator, with the chosen trade-code mode in force
+                beginExpandTradeCodes(tcChoice, baseData);
+                let newSys;
+                try {
+                    newSys = generateMgT2ESystemTopDown(hexId, baseData);
+                } finally {
+                    endExpandTradeCodes();
+                }
 
-                // 2. Map the data back to stateObj
+                // 2. Map the data back to stateObj. A new system replaces any other
+                //    edition's (Sean, 2026-11-24).
+                if (newSys) clearOtherEditionSystems(stateObj, 'MgT2E');
                 stateObj.mgtSystem = newSys;
 
                 // Find the mainworld to map the UWP (Recursive to handle Lunar Mainworlds)
@@ -709,14 +756,13 @@ function setupGenerationHandlers() {
         }
 
         if (window.isLoggingEnabled && window.batchLogData.length > 0) {
-            downloadBatchLog('MgT2E_Systems', selectedHexes.size);
+            downloadBatchLog('MgT2E_Systems', hexList.length);
         }
 
-        document.getElementById('context-menu').classList.remove('visible');
-        showToast(`Expanded MgT2E Physical system for ${selectedHexes.size} hex(es)`);
-        
+        showToast(`Expanded MgT2E Physical system for ${hexList.length} hex(es)`);
+
         // Sean Protocol: Sync Rule Engine and Filters with updated physical data
-        if (typeof writeLogLine === 'function') writeLogLine(`Refreshing rules for ${selectedHexes.size} updated systems (Physical Expansion).`);
+        if (typeof writeLogLine === 'function') writeLogLine(`Refreshing rules for ${hexList.length} updated systems (Physical Expansion).`);
         if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
         if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
 
@@ -724,44 +770,68 @@ function setupGenerationHandlers() {
         requestAnimationFrame(draw);
     });
 
-    document.getElementById('ctx-expand-physical-t5').addEventListener('click', () => {
+    document.getElementById('ctx-expand-physical-t5').addEventListener('click', async () => {
         if (!validateSelection('physical')) return;
 
-        // Warn if any selected hex has manual field overrides that will be preserved
+        const pickBase = s => s.t5Data || s.mgt2eData || s.ctData;
+        const hexList = [...selectedHexes];
+        document.getElementById('context-menu').classList.remove('visible');
+
+        // The re-expand note (stars and orbits regenerate; manual overrides kept) now sits in
+        // the trade-code dialog instead of a separate confirm, so there is one prompt.
         let totalManualBodies = 0;
-        selectedHexes.forEach(hexId => {
+        hexList.forEach(hexId => {
             const s = hexStates.get(hexId);
             if (s && s.t5System) totalManualBodies += countT5ManualBodies(s.t5System);
         });
-        const manualNote = totalManualBodies > 0
-            ? `\n\n${totalManualBodies} body/bodies have manual field overrides. These will be preserved.`
-            : '';
-        if (!confirm(`Re-expand the T5 system for ${selectedHexes.size} hex(es). Stars and orbits will be regenerated.${manualNote}\n\nProceed?`)) {
-            return;
-        }
+        // The "will be replaced" warning now comes from the dialog itself (all editions).
+        const note = totalManualBodies > 0 ? `${totalManualBodies} body/bodies have manual field overrides; these will be preserved.` : '';
+        const tcChoice = await askExpandTradeCodeMode('T5', _expandItems(hexList, pickBase), note.trim());
+        if (!tcChoice) return;
 
         saveHistoryState('Expand T5 System');
         if (window.isLoggingEnabled) window.batchLogData = [];
         let missingData = false;
-        selectedHexes.forEach(hexId => {
+        hexList.forEach(hexId => {
             let stateObj = hexStates.get(hexId);
             let baseData = null;
             if (stateObj) {
-                baseData = stateObj.t5Data || stateObj.mgt2eData || stateObj.ctData;
+                baseData = pickBase(stateObj);
             }
 
             if (baseData) {
                 let sys = null;
                 const oldSys = stateObj.t5System || null;
-                if (window.System_Driver && window.System_Driver.generateT5SystemPreservingManuals) {
-                    sys = window.System_Driver.generateT5SystemPreservingManuals(baseData, oldSys);
-                } else if (window.T5_TopDown_Generator) {
-                    sys = window.T5_TopDown_Generator.generateT5System(baseData);
-                } else {
-                    sys = generateT5SystemChunk1(baseData, stateObj.t5System, hexId);
-                    sys = generateT5SystemChunk2(sys, baseData);
-                    sys = generateT5SystemChunk3(sys, baseData);
+                // Recalculate rolls moon status afresh (Sean, 2026-11-19): T5's engine reads a
+                // saved Sa or Lk as "make it a moon", and an earlier expand writes its codes back
+                // to the hex, so the generator gets a copy without them.
+                let genBase = baseData;
+                const savedCodes = normalizeTradeCodeList(baseData.tradeCodes);
+                if (tcChoice === 'recalc' && savedCodes && savedCodes.some(c => c === 'Sa' || c === 'Lk')) {
+                    genBase = { ...baseData, tradeCodes: savedCodes.filter(c => c !== 'Sa' && c !== 'Lk') };
                 }
+                beginExpandTradeCodes(tcChoice, genBase);
+                try {
+                    if (window.System_Driver && window.System_Driver.generateT5SystemPreservingManuals) {
+                        sys = window.System_Driver.generateT5SystemPreservingManuals(genBase, oldSys);
+                    } else if (window.T5_TopDown_Generator) {
+                        sys = window.T5_TopDown_Generator.generateT5System(genBase);
+                    } else {
+                        sys = generateT5SystemChunk1(genBase, stateObj.t5System, hexId);
+                        sys = generateT5SystemChunk2(sys, genBase);
+                        sys = generateT5SystemChunk3(sys, genBase);
+                    }
+                } finally {
+                    endExpandTradeCodes();
+                }
+                // The hex's own mainworld shows the system's final codes, so the two can't
+                // disagree (manifest §0.0.D, 2026-11-19). Only for a T5 mainworld: another
+                // edition's mainworld keeps its own codes.
+                if (baseData === stateObj.t5Data && sys && sys.mainworld && Array.isArray(sys.mainworld.tradeCodes)) {
+                    stateObj.t5Data.tradeCodes = [...sys.mainworld.tradeCodes];
+                }
+                // A new system replaces any other edition's (Sean, 2026-11-24).
+                if (sys) clearOtherEditionSystems(stateObj, 'T5');
                 stateObj.t5System = sys;
                 stateObj.t5Physical = null;
                 stateObj.ctPhysical = null;
@@ -776,14 +846,13 @@ function setupGenerationHandlers() {
         }
 
         if (window.isLoggingEnabled && window.batchLogData.length > 0) {
-            downloadBatchLog('T5_Systems', selectedHexes.size);
+            downloadBatchLog('T5_Systems', hexList.length);
         }
 
-        document.getElementById('context-menu').classList.remove('visible');
-        showToast(`Expanded T5 Physical system for ${selectedHexes.size} hex(es)`);
-        
+        showToast(`Expanded T5 Physical system for ${hexList.length} hex(es)`);
+
         // Sean Protocol: Sync Rule Engine and Filters with updated physical data
-        if (typeof writeLogLine === 'function') writeLogLine(`Refreshing rules for ${selectedHexes.size} updated systems (Physical Expansion).`);
+        if (typeof writeLogLine === 'function') writeLogLine(`Refreshing rules for ${hexList.length} updated systems (Physical Expansion).`);
         if (typeof window.reapplyAllRules === 'function') window.reapplyAllRules();
         if (typeof window.applyActiveFilters === 'function') window.applyActiveFilters();
 
@@ -1389,6 +1458,217 @@ function _getRouteExportValue(fieldId, hexId, state, data) {
         case 'milbase':   return data.militaryBase ? 'Y' : '-';
         default:          return '-';
     }
+}
+
+// ============================================================================
+// EXPAND TRADE-CODE DIALOG (rulings, Sean, 2026-11-19 — manifest §0.0.D)
+// ============================================================================
+// Every Expand System asks how to treat the mainworld's trade codes. The engines read the
+// choice through core.js beginExpandTradeCodes(); 'add' is the default, and the last choice is
+// remembered for the session.
+
+let _lastExpandTradeCodeMode = 'add';
+
+const EXPAND_TC_OPTIONS = [
+    { mode: 'add',    label: 'Keep codes, add placement codes',
+      help: 'Existing codes are never removed. Codes that say where the world sits are obeyed (Sa makes it a moon; in T5, Lk, Tz and climate codes too). Ones it lacks are rolled and added.' },
+    { mode: 'exact',  label: 'Keep codes exactly',
+      help: 'Nothing is added or removed. The system is built to fit the codes: no Sa means the mainworld is never a moon.' },
+    { mode: 'recalc', label: 'Recalculate all codes',
+      help: 'Every code is rebuilt from the UWP and the new placement (the old behaviour).' }
+];
+
+/** The codes the expanding edition would give this UWP, and the codes it can ever give. */
+function _expandUwpCodes(edition, base) {
+    const uwp = { size: base.size, atm: base.atm, hydro: base.hydro, pop: base.pop, gov: base.gov, law: base.law, tl: base.tl, travelZone: base.travelZone };
+    try {
+        if (edition === 'MgT2E' && typeof MgT2ESocioEngine !== 'undefined' && MgT2ESocioEngine.calculateMgT2ETradeCodes && typeof MgT2EData !== 'undefined') {
+            return { codes: MgT2ESocioEngine.calculateMgT2ETradeCodes(uwp), vocab: Object.keys(MgT2EData.tradeCodes) };
+        }
+        if (edition === 'CT' && window.CT_World_Engine && typeof CT_CONSTANTS !== 'undefined') {
+            return { codes: window.CT_World_Engine.generateTradeCodes(uwp), vocab: CT_CONSTANTS.TRADE_CODES.map(c => c.code) };
+        }
+        if (edition === 'T5' && typeof T5_World_Engine !== 'undefined' && typeof T5_Data !== 'undefined') {
+            return { codes: T5_World_Engine.calculateT5TradeCodes(uwp), vocab: T5_Data.TRADE_CODES.map(c => c.code) };
+        }
+    } catch (err) {
+        console.warn('[Expand dialog] UWP trade-code check failed:', err);
+    }
+    return null;
+}
+
+/** One warning line per hex whose codes need the user's attention under the keep options. */
+function _expandTradeCodeWarnings(edition, items) {
+    const lines = [];
+    const T5_ONLY_PLACEMENT = ['Lk', 'Tz', 'Tr', 'Tu', 'Fr', 'Ho', 'Co'];
+    items.forEach(({ hexId, base, fromT5 }) => {
+        const codes = normalizeTradeCodeList(base && base.tradeCodes);
+        if (!codes) return;
+        const label = `${hexId.split('-').pop()} ${base.name || ''}`.trim();
+        const check = _expandUwpCodes(edition, base);
+        if (check) {
+            const have = codes.filter(c => check.vocab.includes(c)).sort();
+            const want = check.codes.filter(c => check.vocab.includes(c)).sort();
+            if (have.join(' ') !== want.join(' ')) {
+                lines.push(`${label}: codes ${have.join(' ') || '(none)'} — its UWP gives ${want.join(' ') || '(none)'}.`);
+            }
+        }
+        if (fromT5 && edition !== 'T5') {
+            const t5Only = codes.filter(c => T5_ONLY_PLACEMENT.includes(c));
+            if (t5Only.length) {
+                lines.push(`${label}: T5 codes ${t5Only.join(' ')} are kept but don't shape a ${edition} system, so results may look unusual.`);
+            }
+        }
+    });
+    return lines;
+}
+
+/**
+ * Asks how the expand treats trade codes.
+ * @param {string} edition - 'CT', 'MgT2E' or 'T5'
+ * @param {{hexId, base, fromT5}[]} items - the hexes about to expand and their mainworlds
+ * @param {string} [note] - extra line shown above the options (e.g. the T5 re-expand note)
+ * @returns {Promise<string|null>} 'add' | 'exact' | 'recalc', or null if cancelled
+ */
+function askExpandTradeCodeMode(edition, items, note = '') {
+    return new Promise(resolve => {
+        const old = document.getElementById('expand-tc-modal');
+        if (old) old.remove();
+
+        const warnings = _expandTradeCodeWarnings(edition, items);
+        const MAX_LINES = 12;
+        const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+        const warnHtml = warnings.length === 0 ? '' : `
+            <div style="border-top:1px solid #2a3a3a; padding-top:10px;">
+                <div style="color:#e0b04a; font-size:0.78rem; margin-bottom:6px;">With a keep option these codes stay as they are:</div>
+                <ul style="margin:0; padding-left:18px; color:#c5c6c7; font-size:0.78rem; max-height:150px; overflow-y:auto;">
+                    ${warnings.slice(0, MAX_LINES).map(w => `<li>${esc(w)}</li>`).join('')}
+                    ${warnings.length > MAX_LINES ? `<li>…and ${warnings.length - MAX_LINES} more</li>` : ''}
+                </ul>
+            </div>`;
+
+        const over = _expandOverwriteWarnings(edition, items);
+        const listHtml = (title, lines) => lines.length === 0 ? '' : `
+                <div style="color:#e0b04a; font-size:0.78rem; margin:8px 0 4px;">${esc(title)}</div>
+                <ul style="margin:0; padding-left:18px; color:#c5c6c7; font-size:0.78rem; max-height:110px; overflow-y:auto;">
+                    ${lines.slice(0, MAX_LINES).map(w => `<li>${esc(w)}</li>`).join('')}
+                    ${lines.length > MAX_LINES ? `<li>…and ${lines.length - MAX_LINES} more</li>` : ''}
+                </ul>`;
+        const overHtml = !over ? '' : `
+            <div id="expand-overwrite-warning" style="border:1px solid #c0392b; background:rgba(192,57,43,0.12); border-radius:6px; padding:10px 12px;">
+                <div style="color:#ff8a7a; font-size:0.82rem; font-weight:bold; margin-bottom:4px;">This replaces existing systems</div>
+                <div style="color:#c5c6c7; font-size:0.78rem;">${esc(over.headline)}</div>
+                ${listHtml('Wiki-published systems that will be lost (LOAD WIKI-PUBLISHED SYSTEM… brings one back):', over.wiki)}
+                ${listHtml(`Systems from other editions that will be removed:`, over.other)}
+            </div>`;
+
+        const modal = document.createElement('div');
+        modal.id = 'expand-tc-modal';
+        modal.style.cssText = 'display:flex; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); z-index:2000; align-items:center; justify-content:center;';
+        modal.innerHTML = `
+            <div style="background:#1f2833; border:1px solid #45a29e; border-radius:8px; padding:24px; width:520px; max-width:calc(100vw - 32px); max-height:85vh; overflow-y:auto; display:flex; flex-direction:column; gap:14px; box-shadow:0 8px 32px rgba(0,0,0,0.6);">
+                <h3 style="margin:0; color:#66fcf1; font-size:1.1rem;">Expand ${esc(edition)} System — Trade Codes</h3>
+                ${overHtml}
+                <div style="color:#8b9398; font-size:0.8rem;">${items.length} hex(es). How should the mainworld's trade codes be treated?${note ? '<br>' + esc(note) : ''}</div>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    ${EXPAND_TC_OPTIONS.map(o => `
+                        <label style="display:flex; gap:8px; align-items:flex-start; cursor:pointer;">
+                            <input type="radio" name="expand-tc-mode" value="${o.mode}" ${o.mode === _lastExpandTradeCodeMode ? 'checked' : ''} style="margin-top:3px; accent-color:#66fcf1;">
+                            <span><span style="color:#c5c6c7; font-size:0.88rem;">${esc(o.label)}${o.mode === 'add' ? ' <span style="color:#8b9398;">(default)</span>' : ''}</span><br>
+                            <span style="color:#8b9398; font-size:0.76rem;">${esc(o.help)}</span></span>
+                        </label>`).join('')}
+                </div>
+                ${warnHtml}
+                <div style="display:flex; gap:8px; justify-content:flex-end;">
+                    <button id="expand-tc-cancel" class="menu-btn" style="padding:8px 20px;">Cancel</button>
+                    <button id="expand-tc-go" class="menu-btn" style="padding:8px 20px; background:#45a29e; color:#0b0c10; border-color:#45a29e;">Expand</button>
+                </div>
+            </div>`;
+        document.body.appendChild(modal);
+
+        const finish = (mode) => {
+            document.removeEventListener('keydown', onKey, true);
+            modal.remove();
+            if (mode) _lastExpandTradeCodeMode = mode;
+            resolve(mode);
+        };
+        const onKey = (e) => {
+            if (e.key === 'Escape') { e.stopPropagation(); finish(null); }
+            else if (e.key === 'Enter') { e.stopPropagation(); e.preventDefault(); modal.querySelector('#expand-tc-go').click(); }
+        };
+        document.addEventListener('keydown', onKey, true);
+        modal.querySelector('#expand-tc-cancel').addEventListener('click', () => finish(null));
+        modal.querySelector('#expand-tc-go').addEventListener('click', () => {
+            const picked = modal.querySelector('input[name="expand-tc-mode"]:checked');
+            finish(picked ? picked.value : 'add');
+        });
+        modal.addEventListener('click', e => { if (e.target === modal) finish(null); });
+        modal.querySelector('#expand-tc-go').focus();
+    });
+}
+
+/** The hexes an expand will act on, each with the mainworld data the handler will pass. */
+function _expandItems(hexIds, pickBase) {
+    const items = [];
+    hexIds.forEach(hexId => {
+        const stateObj = hexStates.get(hexId);
+        const base = stateObj ? pickBase(stateObj) : null;
+        if (base) items.push({ hexId, base, fromT5: !!stateObj.t5Data && base === stateObj.t5Data });
+    });
+    return items;
+}
+
+// ============================================================================
+// EXPAND OVERWRITES THE SYSTEM (ruling, Sean, 2026-11-24 — manifest §0.0.D)
+// ============================================================================
+// A hex shows one system: the orrery, System Sheet and exports pick AoW, then MgT2E, CT, T5,
+// RTT. So an expand that left another edition's system in place either hid the new system
+// (T5 behind MgT2E/CT) or kept the old one hidden (a wiki-published T5 system behind MgT2E/CT).
+// Every expand that builds a system now removes the other editions' systems. Every edition's
+// mainworld record (ctData, mgt2eData, t5Data, rttData) and the socio records stay, so
+// imported or typed mainworlds survive and can be expanded in another edition later.
+
+const EXPAND_SYSTEM_FIELDS = { CT: 'ctSystem', MgT2E: 'mgtSystem', T5: 't5System', AoW: 'aowSystem', RTT: 'rttSystem' };
+
+/** Removes every system except keepEdition's, plus the legacy *Physical copies. */
+function clearOtherEditionSystems(stateObj, keepEdition) {
+    if (!stateObj) return;
+    Object.keys(EXPAND_SYSTEM_FIELDS).forEach(ed => {
+        if (ed !== keepEdition) stateObj[EXPAND_SYSTEM_FIELDS[ed]] = null;
+    });
+    stateObj.ctPhysical = null;
+    stateObj.mgtPhysical = null;
+    stateObj.t5Physical = null;
+}
+
+/** The systems already in a hex, as edition names, e.g. ['T5'] or ['MgT2E', 'T5']. */
+function _existingSystemEditions(stateObj) {
+    if (!stateObj) return [];
+    return Object.keys(EXPAND_SYSTEM_FIELDS).filter(ed => stateObj[EXPAND_SYSTEM_FIELDS[ed]] != null);
+}
+
+/** Warning lines for the expand dialog: which hexes lose a system, and which are wiki-published. */
+function _expandOverwriteWarnings(edition, items) {
+    let replaced = 0;
+    const wiki = [], other = [];
+    items.forEach(({ hexId }) => {
+        const s = hexStates.get(hexId);
+        const eds = _existingSystemEditions(s);
+        if (!eds.length) return;
+        replaced++;
+        const label = `${hexId.split('-').pop()} ${(s && s.name) || ''}`.trim();
+        const snap = s.t5System && s.t5System.wikiSnapshot;
+        if (snap) wiki.push(`${label} (wiki-published, snapshot ${snap.snapshot || 'unknown date'})`);
+        const others = eds.filter(ed => ed !== edition);
+        if (others.length && !snap) other.push(`${label} (${others.join(', ')})`);
+    });
+    if (!replaced) return null;
+    return {
+        headline: `${replaced} hex${replaced === 1 ? ' already has a system' : 'es already have systems'}. ` +
+            `Expanding replaces ${replaced === 1 ? 'it' : 'them'}: stars, planets and moons are generated afresh, ` +
+            `and any other edition's system in the hex is removed. Ctrl+Z undoes this.`,
+        wiki, other
+    };
 }
 
 function _buildRouteExportModal() {

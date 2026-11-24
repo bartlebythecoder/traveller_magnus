@@ -1,0 +1,45 @@
+{
+  "exclude_pages": [
+    "Sandbox"
+  ],
+  "page_priority": [
+    "Terra (system)"
+  ],
+  "page_priority_source": "Sean, 2026-11-16: Neptune and its moons follow Terra (system)",
+  "bodies": {
+    "Terra (system)|Kuiper Belt@10": {
+      "kind": "belt",
+      "distance": {
+        "raw": "30-100",
+        "value": null,
+        "min": 30.0,
+        "max": 100.0,
+        "unit": "AU"
+      },
+      "belt_source": "Sean, 2026-11-16: a planetoid belt, no UWP, 30-100 AU; the objects listed under it stay inside it"
+    },
+    "Kuiper Belt (world)|Kuiper Belt@10": {
+      "kind": "belt",
+      "distance": {
+        "raw": "30-100",
+        "value": null,
+        "min": 30.0,
+        "max": 100.0,
+        "unit": "AU"
+      },
+      "belt_source": "Sean, 2026-11-16: a planetoid belt, no UWP, 30-100 AU; the objects listed under it stay inside it"
+    },
+    "Kuiper Belt (world)|Ultima Thule (Arrokoth)@10": {
+      "drop": true,
+      "why": "same object as Terra (system)'s 'Ultima Thule' (44.58 AU); names differ, so the merge could not pair them"
+    },
+    "Jupiter (world)|Rings@6": {
+      "drop": true,
+      "why": "same ring as Terra (system)'s 'Ring System' (names differ, so the merge could not pair them)"
+    },
+    "Neptune (world)|Rings@9": {
+      "drop": true,
+      "why": "same ring as Terra (system)'s 'Ring System' (names differ, so the merge could not pair them)"
+    }
+  }
+}

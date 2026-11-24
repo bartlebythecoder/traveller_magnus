@@ -1,0 +1,381 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Ruupiin",
+  "hex": "1315",
+  "sector_abbreviation": "Ruup",
+  "subsector": "Kirarurr!Ka",
+  "name": "Kirur",
+  "sources": [
+    {
+      "page": "Kirur (system)",
+      "revid": 687830,
+      "timestamp": "2022-05-05T02:36:16Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Kirur (system)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Gzang",
+          "type": "F5 V",
+          "notes": "Gzang"
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Gzang",
+      "stars": [
+        {
+          "name": "Gzang",
+          "type": "F5 V"
+        }
+      ],
+      "labels": [
+        "Kirur"
+      ],
+      "pages": [
+        "Kirur (system)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "???",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "sources": [
+            "Kirur (system)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "???",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "sources": [
+            "Kirur (system)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Kirur",
+          "raw": "B863A03-F",
+          "kind": "world",
+          "uwp": "B863A03-F",
+          "distance": {
+            "raw": "1.9",
+            "value": 1.9,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kirur (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Kirrixur",
+              "name_raw": "* ''Kirrixur''",
+              "raw": "F779A03-C",
+              "kind": "world",
+              "uwp": "F779A03-C",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Kirur (system)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 4,
+          "name": "???",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "sources": [
+            "Kirur (system)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "???",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "sources": [
+            "Kirur (system)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "???",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "sources": [
+            "Kirur (system)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "???",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "sources": [
+            "Kirur (system)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "???",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "sources": [
+            "Kirur (system)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "???",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "sources": [
+            "Kirur (system)"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "???",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "sources": [
+            "Kirur (system)"
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "???",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "sources": [
+            "Kirur (system)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Kirur (system)",
+      "label": "Kirur",
+      "stars": [
+        {
+          "name": "Gzang",
+          "type": "F5 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "???",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "???",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Kirur",
+          "raw": "B863A03-F",
+          "kind": "world",
+          "uwp": "B863A03-F",
+          "distance": {
+            "raw": "1.9",
+            "value": 1.9,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Kirrixur",
+              "name_raw": "* ''Kirrixur''",
+              "raw": "F779A03-C",
+              "kind": "world",
+              "uwp": "F779A03-C",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "???",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "???",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "???",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "???",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        },
+        {
+          "orbit": 8,
+          "name": "???",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        },
+        {
+          "orbit": 9,
+          "name": "???",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        },
+        {
+          "orbit": 10,
+          "name": "???",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        },
+        {
+          "orbit": 11,
+          "name": "???",
+          "raw": "???????-?",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Kirur",
+    "UWP": "B863ARK-F",
+    "Stellar": "F5 V",
+    "PBG": "113",
+    "Bases": "K",
+    "Remarks": "Hi (K'kree)"
+  }
+}

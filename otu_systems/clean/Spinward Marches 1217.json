@@ -1,0 +1,311 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "1217",
+  "sector_abbreviation": "Spin",
+  "subsector": "Vilis",
+  "name": "Arkadia",
+  "sources": [
+    {
+      "page": "Arkadia (system)",
+      "revid": 199926,
+      "timestamp": "2016-07-03T00:16:17Z"
+    }
+  ],
+  "star_templates": [],
+  "systems": [
+    {
+      "star": "Launcelot",
+      "stars": [
+        {
+          "name": "Launcelot",
+          "type": "G8 V"
+        }
+      ],
+      "labels": [
+        "Arkadia"
+      ],
+      "pages": [
+        "Arkadia (system)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Lupera",
+          "raw": "X510000-0",
+          "kind": "world",
+          "uwp": "X510000-0",
+          "distance": {
+            "raw": "0.3",
+            "value": 0.3,
+            "unit": "AU"
+          },
+          "sources": [
+            "Arkadia (system)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Nakizra",
+          "raw": "X300000-0",
+          "kind": "world",
+          "uwp": "X300000-0",
+          "distance": {
+            "raw": "0.5",
+            "value": 0.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Arkadia (system)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Arkadia",
+          "raw": "E446845-6",
+          "kind": "world",
+          "uwp": "E446845-6",
+          "distance": {
+            "raw": "0.8",
+            "value": 0.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Arkadia (system)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 4,
+          "name": "Clementa",
+          "raw": "'''LGG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "5",
+            "value": 5.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Arkadia (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Geristo",
+              "name_raw": "* ''Geristo''",
+              "raw": "X6D5000-0",
+              "kind": "world",
+              "uwp": "X6D5000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Arkadia (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Pariiosi",
+              "name_raw": "* ''Pariiosi''",
+              "raw": "X3D5000-0",
+              "kind": "world",
+              "uwp": "X3D5000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Arkadia (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Veriitis",
+          "raw": "'''SGG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "17",
+            "value": 17.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Arkadia (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "[unnamed]",
+              "name_raw": "* ''[unnamed]''",
+              "raw": "X201000-0",
+              "kind": "world",
+              "uwp": "X201000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Arkadia (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "[unnamed]",
+              "name_raw": "* ''[unnamed]''",
+              "raw": "X101000-0",
+              "kind": "world",
+              "uwp": "X101000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Arkadia (system)"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Arkadia (system)",
+      "label": "Arkadia",
+      "stars": [
+        {
+          "name": "Launcelot",
+          "type": "G8 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Lupera",
+          "raw": "X510000-0",
+          "kind": "world",
+          "uwp": "X510000-0",
+          "distance": {
+            "raw": "0.3",
+            "value": 0.3,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Nakizra",
+          "raw": "X300000-0",
+          "kind": "world",
+          "uwp": "X300000-0",
+          "distance": {
+            "raw": "0.5",
+            "value": 0.5,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Arkadia",
+          "raw": "E446845-6",
+          "kind": "world",
+          "uwp": "E446845-6",
+          "distance": {
+            "raw": "0.8",
+            "value": 0.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Clementa",
+          "raw": "'''LGG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "5",
+            "value": 5.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Geristo",
+              "name_raw": "* ''Geristo''",
+              "raw": "X6D5000-0",
+              "kind": "world",
+              "uwp": "X6D5000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            },
+            {
+              "index": 2,
+              "name": "Pariiosi",
+              "name_raw": "* ''Pariiosi''",
+              "raw": "X3D5000-0",
+              "kind": "world",
+              "uwp": "X3D5000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Veriitis",
+          "raw": "'''SGG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "17",
+            "value": 17.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "[unnamed]",
+              "name_raw": "* ''[unnamed]''",
+              "raw": "X201000-0",
+              "kind": "world",
+              "uwp": "X201000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            },
+            {
+              "index": 2,
+              "name": "[unnamed]",
+              "name_raw": "* ''[unnamed]''",
+              "raw": "X101000-0",
+              "kind": "world",
+              "uwp": "X101000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Arkadia",
+    "UWP": "E546845-6",
+    "Stellar": "G8 V",
+    "PBG": "402",
+    "Bases": "",
+    "Remarks": "Pa Ph Pi"
+  }
+}

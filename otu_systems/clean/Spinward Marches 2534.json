@@ -1,0 +1,637 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "2534",
+  "sector_abbreviation": "Spin",
+  "subsector": "Trin's Veil",
+  "name": "Burtson",
+  "sources": [
+    {
+      "page": "Burtson (system)",
+      "revid": 960415,
+      "timestamp": "2025-07-18T15:38:36Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Burtson (system)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Primary",
+          "type": "G4 V",
+          "notes": "None"
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Burtson",
+      "stars": [
+        {
+          "name": "Burtson",
+          "type": "G4 V"
+        }
+      ],
+      "labels": [
+        "Burtson"
+      ],
+      "pages": [
+        "Burtson (system)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Burtson",
+          "raw": "C462667-8",
+          "kind": "world",
+          "uwp": "C462667-8",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Burtson (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Satellite",
+              "name_raw": "* ''Satellite''",
+              "raw": "Y100235-7",
+              "kind": "world",
+              "uwp": "Y100235-7",
+              "distance": {
+                "raw": "20",
+                "value": 20.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Burtson (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Satellite",
+              "name_raw": "* ''Satellite''",
+              "raw": "F220168-7",
+              "kind": "world",
+              "uwp": "F220168-7",
+              "distance": {
+                "raw": "45",
+                "value": 45.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Burtson (system)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 2,
+          "name": "Gas Giant",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Burtson (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Satellite",
+              "name_raw": "* ''Satellite''",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "6",
+                "value": 6.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Burtson (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Satellite",
+              "name_raw": "* ''Satellite''",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "35",
+                "value": 35.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Burtson (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Satellite",
+              "name_raw": "* ''Satellite''",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "65",
+                "value": 65.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Burtson (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Gas Giant",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1.5",
+            "value": 1.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Burtson (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "name_raw": "* ''Ring''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Burtson (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Satellite",
+              "name_raw": "* ''Satellite''",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "4",
+                "value": 4.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Burtson (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Satellite",
+              "name_raw": "* ''Satellite''",
+              "raw": "Y723000-0",
+              "kind": "world",
+              "uwp": "Y723000-0",
+              "distance": {
+                "raw": "9",
+                "value": 9.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Burtson (system)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Satellite",
+              "name_raw": "* ''Satellite''",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "20",
+                "value": 20.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Burtson (system)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Satellite",
+              "name_raw": "* ''Satellite''",
+              "raw": "Y330000-0",
+              "kind": "world",
+              "uwp": "Y330000-0",
+              "distance": {
+                "raw": "25",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Burtson (system)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Satellite",
+              "name_raw": "* ''Satellite''",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "40",
+                "value": 40.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Burtson (system)"
+              ]
+            },
+            {
+              "index": 7,
+              "name": "Satellite",
+              "name_raw": "* ''Satellite''",
+              "raw": "Y230000-0",
+              "kind": "world",
+              "uwp": "Y230000-0",
+              "distance": {
+                "raw": "55",
+                "value": 55.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Burtson (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "World",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "5",
+            "value": 5.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Burtson (system)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Burtson (system)",
+      "label": "Burtson",
+      "stars": [
+        {
+          "name": "Burtson",
+          "type": "G4 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Burtson",
+          "raw": "C462667-8",
+          "kind": "world",
+          "uwp": "C462667-8",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Satellite",
+              "name_raw": "* ''Satellite''",
+              "raw": "Y100235-7",
+              "kind": "world",
+              "uwp": "Y100235-7",
+              "distance": {
+                "raw": "20",
+                "value": 20.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Satellite",
+              "name_raw": "* ''Satellite''",
+              "raw": "F220168-7",
+              "kind": "world",
+              "uwp": "F220168-7",
+              "distance": {
+                "raw": "45",
+                "value": 45.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Gas Giant",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Satellite",
+              "name_raw": "* ''Satellite''",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "6",
+                "value": 6.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Satellite",
+              "name_raw": "* ''Satellite''",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "35",
+                "value": 35.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Satellite",
+              "name_raw": "* ''Satellite''",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "65",
+                "value": 65.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Gas Giant",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1.5",
+            "value": 1.5,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "name_raw": "* ''Ring''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Satellite",
+              "name_raw": "* ''Satellite''",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "4",
+                "value": 4.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Satellite",
+              "name_raw": "* ''Satellite''",
+              "raw": "Y723000-0",
+              "kind": "world",
+              "uwp": "Y723000-0",
+              "distance": {
+                "raw": "9",
+                "value": 9.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Satellite",
+              "name_raw": "* ''Satellite''",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "20",
+                "value": 20.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Satellite",
+              "name_raw": "* ''Satellite''",
+              "raw": "Y330000-0",
+              "kind": "world",
+              "uwp": "Y330000-0",
+              "distance": {
+                "raw": "25",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Satellite",
+              "name_raw": "* ''Satellite''",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "40",
+                "value": 40.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 7,
+              "name": "Satellite",
+              "name_raw": "* ''Satellite''",
+              "raw": "Y230000-0",
+              "kind": "world",
+              "uwp": "Y230000-0",
+              "distance": {
+                "raw": "55",
+                "value": 55.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "World",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "5",
+            "value": 5.0,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Burtson",
+    "UWP": "C562667-8",
+    "Stellar": "G4 V",
+    "PBG": "402",
+    "Bases": "",
+    "Remarks": "Ni Ri O:2733"
+  }
+}

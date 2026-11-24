@@ -1,0 +1,1165 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Dark Nebula",
+  "hex": "1226",
+  "sector_abbreviation": "Dark",
+  "subsector": [
+    "Kilrai",
+    "Yataw"
+  ],
+  "name": "Kusyu",
+  "sources": [
+    {
+      "page": "Kusyu (world)",
+      "revid": 1063751,
+      "timestamp": "2026-07-18T08:02:39Z"
+    },
+    {
+      "page": "Kuzu (system)",
+      "revid": 845006,
+      "timestamp": "2024-10-18T19:38:29Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Kusyu (world)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Tyeyo",
+          "type": "G4 V",
+          "notes": "Tyeyo"
+        },
+        {
+          "role": "Secondary",
+          "name": "Saietaie",
+          "type": "DA",
+          "notes": "Saietaie"
+        }
+      ]
+    },
+    {
+      "page": "Kuzu (system)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Tyeyo",
+          "type": "G4 V",
+          "notes": "Tyeyo"
+        },
+        {
+          "role": "Secondary",
+          "name": "Saietaie",
+          "type": "DA",
+          "notes": "Saietaie"
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Tyeyo",
+      "stars": [
+        {
+          "name": "Tyeyo",
+          "type": "G4 V"
+        },
+        {
+          "name": "Saietaie",
+          "type": "D"
+        }
+      ],
+      "labels": [
+        "Kusyu",
+        "Kusyu"
+      ],
+      "pages": [
+        "Kuzu (system)",
+        "Kusyu (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Htoiweloa",
+          "raw": "FS002H9-D",
+          "kind": "world",
+          "uwp": "FS002H9-D",
+          "distance": {
+            "raw": "0.18",
+            "value": 0.18,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kuzu (system)",
+            "Kusyu (world)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Iyih",
+          "raw": "XS00000-0",
+          "kind": "world",
+          "uwp": "XS00000-0",
+          "distance": {
+            "raw": "0.34",
+            "value": 0.34,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kuzu (system)",
+            "Kusyu (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Uirlea",
+          "raw": "D410467-D",
+          "kind": "world",
+          "uwp": "D410467-D",
+          "distance": {
+            "raw": "0.61",
+            "value": 0.61,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kuzu (system)",
+            "Kusyu (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Kusyu",
+          "raw": "A876976-E",
+          "kind": "world",
+          "uwp": "A876976-E",
+          "distance": {
+            "raw": "1.00",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kuzu (system)",
+            "Kusyu (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Aoshi",
+              "name_raw": "[[Aoshi]]",
+              "raw": "BS00668-D",
+              "kind": "world",
+              "uwp": "BS00668-D",
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Kuzu (system)",
+                "Kusyu (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Aoka'ah",
+              "name_raw": "[[Aoka'ah]]",
+              "raw": "XS00000-0",
+              "kind": "world",
+              "uwp": "XS00000-0",
+              "distance": {
+                "raw": "15",
+                "value": 15.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Kuzu (system)",
+                "Kusyu (world)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 4,
+          "name": "Tyehohi",
+          "raw": "C630366-D",
+          "kind": "world",
+          "uwp": "C630366-D",
+          "distance": {
+            "raw": "1.60",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kuzu (system)",
+            "Kusyu (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Oikhyu",
+              "raw": "ES00165-9",
+              "kind": "world",
+              "uwp": "ES00165-9",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Kuzu (system)",
+                "Kusyu (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Areih",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "2.68",
+            "value": 2.68,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kuzu (system)",
+            "Kusyu (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Uiro",
+              "raw": "B200766-E",
+              "kind": "world",
+              "uwp": "B200766-E",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Kuzu (system)",
+                "Kusyu (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Aiwuar",
+              "raw": "C200667-D",
+              "kind": "world",
+              "uwp": "C200667-D",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Kuzu (system)",
+                "Kusyu (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Kaleal",
+              "raw": "E312666-D",
+              "kind": "world",
+              "uwp": "E312666-D",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Kuzu (system)",
+                "Kusyu (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Huikoahe",
+              "name_raw": "<small>Huikoahe</small>",
+              "raw": "<small><small>HS001G7-E</small></small>",
+              "kind": "world",
+              "uwp": "HS001G7-E",
+              "distance": {
+                "raw": "30 <small>Radii</small>",
+                "value": 30.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Kusyu (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Htuitei",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "6.10",
+            "value": 6.1,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kuzu (system)",
+            "Kusyu (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Iyuou",
+              "raw": "B100867-E",
+              "kind": "world",
+              "uwp": "B100867-E",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Kuzu (system)",
+                "Kusyu (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Oikhoah",
+              "raw": "B4A0668-E",
+              "kind": "world",
+              "uwp": "B4A0668-E",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Kuzu (system)",
+                "Kusyu (world)"
+              ]
+            },
+            {
+              "index": 1,
+              "name": "Aryalriy",
+              "name_raw": "<small>Aryalriy</small>",
+              "raw": "<small><small>YS00000-0</small></small>",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "8 <small>Radii</small>",
+                "value": 8.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Kusyu (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Iyseiai",
+              "name_raw": "<small>Iyseiai</small>",
+              "raw": "<small><small>Y200000-0</small></small>",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "65 <small>Radii</small>",
+                "value": 65.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Kusyu (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Hroueiu",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "10.0",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kuzu (system)",
+            "Kusyu (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "XR00000-0",
+              "kind": "world",
+              "uwp": "XR00000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Kuzu (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Yeofa",
+              "raw": "C100461-C",
+              "kind": "world",
+              "uwp": "C100461-C",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Kuzu (system)",
+                "Kusyu (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Iehiyl",
+              "name_raw": "<small>Iehiyl</small>",
+              "raw": "<small><small>Y100000-0</small></small>",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "9 <small>Radii</small>",
+                "value": 9.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Kusyu (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Kyeele",
+          "raw": "B5A1568-E",
+          "kind": "world",
+          "uwp": "B5A1568-E",
+          "distance": {
+            "raw": "18.0",
+            "value": 18.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kuzu (system)",
+            "Kusyu (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Hyeiyr",
+              "raw": "X100000-0",
+              "kind": "world",
+              "uwp": "X100000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Kuzu (system)",
+                "Kusyu (world)"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Kusyu (world)",
+      "label": "Kusyu",
+      "stars": [
+        {
+          "name": "Tyeyo",
+          "type": "G4 V"
+        },
+        {
+          "name": "Saietaie",
+          "type": "D"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Htoiweloa (Htealas)",
+          "raw": "<small><small>''YS00000-0''</small></small> <br><small><small>''(\"Worldlet\")''</small></small>",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "remark": "(\"Worldlet\")",
+          "distance": {
+            "raw": "0.18",
+            "value": 0.18,
+            "unit": "AU"
+          },
+          "flags": [
+            "uwp-with-remark"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Iyih (Iaoau)",
+          "raw": "<small><small>Y200000-0</small></small>",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "0.34",
+            "value": 0.34,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Uirlea (Ulyei)",
+          "raw": "<small><small>D410467-D</small></small>",
+          "kind": "world",
+          "uwp": "D410467-D",
+          "distance": {
+            "raw": "0.61",
+            "value": 0.61,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Kusyu",
+          "raw": "<small><small>A876976-E</small></small>",
+          "kind": "world",
+          "uwp": "A876976-E",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Aoshi",
+              "name_raw": "<small>Aoshi</small>",
+              "raw": "<small><small>FS00668-D</small></small>",
+              "kind": "world",
+              "uwp": "FS00668-D",
+              "distance": {
+                "raw": "8 <small>Radii</small>",
+                "value": 8.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Aoka'ah",
+              "name_raw": "<small>Aoka'ah</small>",
+              "raw": "<small><small>YS00000-0</small></small>",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "15 <small>Radii</small>",
+                "value": 15.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Tyehohi (Tresahyaiy)",
+          "raw": "<small><small>C630366-D</small></small>",
+          "kind": "world",
+          "uwp": "C630366-D",
+          "distance": {
+            "raw": "1.60",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Oikhyu (Kawirlea / Iseieao)",
+              "name_raw": "<small>Oikhyu <br><small>(Kawirlea / Iseieao)</small></small>",
+              "raw": "<small><small>HS00165-9</small></small>",
+              "kind": "world",
+              "uwp": "HS00165-9",
+              "distance": {
+                "raw": "?",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Areih (Ahehoi)",
+          "name_raw": "'''Areih''' (Ahehoi)",
+          "raw": "<small>'''LGG''' <small>'''(Size=180)'''</small></small>",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "size_value": "180",
+          "distance": {
+            "raw": "2.68",
+            "value": 2.68,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Kaleal (Kihyalriy)",
+              "name_raw": "<small>Kaleal <small>(Kihyalriy)</small></small>",
+              "raw": "<small><small>H312666-D</small></small>",
+              "kind": "world",
+              "uwp": "H312666-D",
+              "distance": {
+                "raw": "6 <small>Radii</small>",
+                "value": 6.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Uiro (Oaiyah)",
+              "name_raw": "<small>Uiro <small>(Oaiyah)</small></small>",
+              "raw": "<small><small>F200766-E</small></small>",
+              "kind": "world",
+              "uwp": "F200766-E",
+              "distance": {
+                "raw": "15 <small>Radii</small>",
+                "value": 15.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Huikoahe",
+              "name_raw": "<small>Huikoahe</small>",
+              "raw": "<small><small>HS001G7-E</small></small>",
+              "kind": "world",
+              "uwp": "HS001G7-E",
+              "distance": {
+                "raw": "30 <small>Radii</small>",
+                "value": 30.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Aiwuar (Tearair)",
+              "name_raw": "<small>Aiwuar <small>(Tearair</small>)</small>",
+              "raw": "<small><small>G200667-D</small></small>",
+              "kind": "world",
+              "uwp": "G200667-D",
+              "distance": {
+                "raw": "45 <small>Radii</small>",
+                "value": 45.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Htuitei (Hkiyai)",
+          "name_raw": "'''Htuitei''' (Hkiyai)",
+          "raw": "<small>'''LGG''' <small>'''(Size=200)'''</small></small>",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "size_value": "200",
+          "distance": {
+            "raw": "6.10",
+            "value": 6.1,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Aryalriy",
+              "name_raw": "<small>Aryalriy</small>",
+              "raw": "<small><small>YS00000-0</small></small>",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "8 <small>Radii</small>",
+                "value": 8.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Iyuou (Oahwao)",
+              "name_raw": "<small>Iyuou <small>(Oahwao)</small></small>",
+              "raw": "<small><small>F100867-E</small></small>",
+              "kind": "world",
+              "uwp": "F100867-E",
+              "distance": {
+                "raw": "20 <small>Radii</small>",
+                "value": 20.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Oikhoah (Akhoarlui)",
+              "name_raw": "<small>Oikhoah <small>(Akhoarlui)</small></small>",
+              "raw": "<small><small>F4A0668-E</small></small>",
+              "kind": "world",
+              "uwp": "F4A0668-E",
+              "distance": {
+                "raw": "35 <small>Radii</small>",
+                "value": 35.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Iyseiai",
+              "name_raw": "<small>Iyseiai</small>",
+              "raw": "<small><small>Y200000-0</small></small>",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "65 <small>Radii</small>",
+                "value": 65.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Hroueiu (Hiyuahuahro)",
+          "name_raw": "'''Hroueiu''' (Hiyuahuahro)",
+          "raw": "<small>'''SGG''' <small>'''(Size=30)'''</small></small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "30",
+          "distance": {
+            "raw": "10.00",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 2,
+              "name": "Yeofa (Youfayes)",
+              "name_raw": "<small>Yeofa <small>(Youfayes)</small></small>",
+              "raw": "<small><small>G100461-C</small></small>",
+              "kind": "world",
+              "uwp": "G100461-C",
+              "distance": {
+                "raw": "5 <small>Radii</small>",
+                "value": 5.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Iehiyl",
+              "name_raw": "<small>Iehiyl</small>",
+              "raw": "<small><small>Y100000-0</small></small>",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "9 <small>Radii</small>",
+                "value": 9.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Kyeele (Kyoloil)",
+          "raw": "<small><small>B5A1568-E</small></small>",
+          "kind": "world",
+          "uwp": "B5A1568-E",
+          "distance": {
+            "raw": "18.00",
+            "value": 18.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Hyeiyr (Yafualoi)",
+              "name_raw": "<small>Hyeiyr <small>(Yafualoi)</small></small>",
+              "raw": "<small><small>Y100000-0</small></small>",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "7 <small>Radii</small>",
+                "value": 7.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        }
+      ],
+      "stars_as_written": [
+        {
+          "name": "Tyeyo Saietaie",
+          "type": "G4 V"
+        },
+        {
+          "name": null,
+          "type": "D"
+        }
+      ]
+    },
+    {
+      "page": "Kuzu (system)",
+      "label": "Kusyu",
+      "stars": [
+        {
+          "name": "Tyeyo",
+          "type": "G4 V"
+        },
+        {
+          "name": "Saietaie",
+          "type": "D"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Htoiweloa",
+          "raw": "FS002H9-D",
+          "kind": "world",
+          "uwp": "FS002H9-D",
+          "distance": {
+            "raw": "0.18",
+            "value": 0.18,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Iyih",
+          "raw": "XS00000-0",
+          "kind": "world",
+          "uwp": "XS00000-0",
+          "distance": {
+            "raw": "0.34",
+            "value": 0.34,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Uirlea",
+          "raw": "D410467-D",
+          "kind": "world",
+          "uwp": "D410467-D",
+          "distance": {
+            "raw": "0.61",
+            "value": 0.61,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Kusyu",
+          "raw": "A876976-E",
+          "kind": "world",
+          "uwp": "A876976-E",
+          "distance": {
+            "raw": "1.00",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Aoshi",
+              "name_raw": "[[Aoshi]]",
+              "raw": "BS00668-D",
+              "kind": "world",
+              "uwp": "BS00668-D",
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Aoka'ah",
+              "name_raw": "[[Aoka'ah]]",
+              "raw": "XS00000-0",
+              "kind": "world",
+              "uwp": "XS00000-0",
+              "distance": {
+                "raw": "15",
+                "value": 15.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Tyehohi",
+          "raw": "C630366-D",
+          "kind": "world",
+          "uwp": "C630366-D",
+          "distance": {
+            "raw": "1.60",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Oikhyu",
+              "raw": "ES00165-9",
+              "kind": "world",
+              "uwp": "ES00165-9",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Areih",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "2.68",
+            "value": 2.68,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Uiro",
+              "raw": "B200766-E",
+              "kind": "world",
+              "uwp": "B200766-E",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            },
+            {
+              "index": 2,
+              "name": "Aiwuar",
+              "raw": "C200667-D",
+              "kind": "world",
+              "uwp": "C200667-D",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            },
+            {
+              "index": 3,
+              "name": "Kaleal",
+              "raw": "E312666-D",
+              "kind": "world",
+              "uwp": "E312666-D",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Htuitei",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "6.10",
+            "value": 6.1,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Iyuou",
+              "raw": "B100867-E",
+              "kind": "world",
+              "uwp": "B100867-E",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            },
+            {
+              "index": 2,
+              "name": "Oikhoah",
+              "raw": "B4A0668-E",
+              "kind": "world",
+              "uwp": "B4A0668-E",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Hroueiu",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "10.0",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "XR00000-0",
+              "kind": "world",
+              "uwp": "XR00000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            },
+            {
+              "index": 2,
+              "name": "Yeofa",
+              "raw": "C100461-C",
+              "kind": "world",
+              "uwp": "C100461-C",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Kyeele",
+          "raw": "B5A1568-E",
+          "kind": "world",
+          "uwp": "B5A1568-E",
+          "distance": {
+            "raw": "18.0",
+            "value": 18.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Hyeiyr",
+              "raw": "X100000-0",
+              "kind": "world",
+              "uwp": "X100000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            }
+          ]
+        }
+      ],
+      "stars_as_written": [
+        {
+          "name": "Tyeyo",
+          "type": "G5 V"
+        },
+        {
+          "name": "Saietaie",
+          "type": "D"
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Kusyu",
+    "UWP": "A876976-E",
+    "Stellar": "G4 V D",
+    "PBG": "403",
+    "Bases": "RT",
+    "Remarks": "Hi In Cx [Aslan] Ht"
+  }
+}

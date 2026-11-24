@@ -1,0 +1,625 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Aldebaran",
+  "hex": "0512",
+  "sector_abbreviation": "Alde",
+  "subsector": "Star Bridge",
+  "name": "Myrthe",
+  "sources": [
+    {
+      "page": "Myrthe (world)",
+      "revid": 1020357,
+      "timestamp": "2026-03-13T10:33:03Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Myrthe (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Primary",
+          "type": "K8 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Primary",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "K8 V"
+        }
+      ],
+      "labels": [
+        "Myrthe"
+      ],
+      "pages": [
+        "Myrthe (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Planet 1",
+          "raw": "H100000-0",
+          "kind": "world",
+          "uwp": "H100000-0",
+          "distance": {
+            "raw": "0.24",
+            "value": 0.24,
+            "unit": "AU"
+          },
+          "sources": [
+            "Myrthe (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Planet 2",
+          "raw": "H200000-0",
+          "kind": "world",
+          "uwp": "H200000-0",
+          "distance": {
+            "raw": "0.47",
+            "value": 0.47,
+            "unit": "AU"
+          },
+          "sources": [
+            "Myrthe (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Joke",
+          "raw": "G6B0227-B",
+          "kind": "world",
+          "uwp": "G6B0227-B",
+          "distance": {
+            "raw": "0.72",
+            "value": 0.72,
+            "unit": "AU"
+          },
+          "sources": [
+            "Myrthe (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Myrthe",
+          "raw": "A662559-C",
+          "kind": "world",
+          "uwp": "A662559-C",
+          "distance": {
+            "raw": "0.95",
+            "value": 0.95,
+            "unit": "AU"
+          },
+          "sources": [
+            "Myrthe (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Riddle",
+              "raw": "F210468-C",
+              "kind": "world",
+              "uwp": "F210468-C",
+              "distance": {
+                "raw": "28 Diam",
+                "value": 28.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Myrthe (world)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 5,
+          "name": "Kevine",
+          "raw": "F7A3217-C",
+          "kind": "world",
+          "uwp": "F7A3217-C",
+          "distance": {
+            "raw": "1.66",
+            "value": 1.66,
+            "unit": "AU"
+          },
+          "sources": [
+            "Myrthe (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Inner Belt",
+          "raw": "G000318-C",
+          "kind": "world",
+          "uwp": "G000318-C",
+          "distance": {
+            "raw": "3.45",
+            "value": 3.45,
+            "unit": "AU"
+          },
+          "sources": [
+            "Myrthe (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Blaguemort",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "5.27",
+            "value": 5.27,
+            "unit": "AU"
+          },
+          "sources": [
+            "Myrthe (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ios",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Myrthe (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "deBains",
+              "raw": "G213269-B",
+              "kind": "world",
+              "uwp": "G213269-B",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Myrthe (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Hygién",
+              "raw": "H3A1000-0",
+              "kind": "world",
+              "uwp": "H3A1000-0",
+              "distance": {
+                "raw": "11 Diam",
+                "value": 11.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Myrthe (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Merde",
+              "raw": "H100000-0",
+              "kind": "world",
+              "uwp": "H100000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Myrthe (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Edselle",
+          "raw": "G20436A-B",
+          "kind": "world",
+          "uwp": "G20436A-B",
+          "distance": {
+            "raw": "8.84",
+            "value": 8.84,
+            "unit": "AU"
+          },
+          "sources": [
+            "Myrthe (world)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Planet 6",
+          "raw": "Y201000-0",
+          "kind": "world",
+          "uwp": "Y201000-0",
+          "distance": {
+            "raw": "13.1",
+            "value": 13.1,
+            "unit": "AU"
+          },
+          "sources": [
+            "Myrthe (world)"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Planet 7",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "18.6",
+            "value": 18.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Myrthe (world)"
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Middle Belt",
+          "raw": "H000000-0",
+          "kind": "world",
+          "uwp": "H000000-0",
+          "distance": {
+            "raw": "30.2",
+            "value": 30.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Myrthe (world)"
+          ]
+        },
+        {
+          "orbit": 12,
+          "name": "Planet 8",
+          "raw": "YBC0000-0",
+          "kind": "world",
+          "uwp": "YBC0000-0",
+          "distance": {
+            "raw": "35.0",
+            "value": 35.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Myrthe (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "H400000-0",
+              "kind": "world",
+              "uwp": "H400000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Myrthe (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 13,
+          "name": "Outer Belt",
+          "raw": "H000000-0",
+          "kind": "world",
+          "uwp": "H000000-0",
+          "distance": {
+            "raw": "62.5",
+            "value": 62.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Myrthe (world)"
+          ]
+        },
+        {
+          "orbit": 14,
+          "name": "Planet 9",
+          "raw": "Y102000-0",
+          "kind": "world",
+          "uwp": "Y102000-0",
+          "distance": {
+            "raw": "230",
+            "value": 230.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Myrthe (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Myrthe (world)",
+      "label": "Myrthe",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "K8 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Planet 1",
+          "raw": "H100000-0",
+          "kind": "world",
+          "uwp": "H100000-0",
+          "distance": {
+            "raw": "0.24",
+            "value": 0.24,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Planet 2",
+          "raw": "H200000-0",
+          "kind": "world",
+          "uwp": "H200000-0",
+          "distance": {
+            "raw": "0.47",
+            "value": 0.47,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Joke",
+          "raw": "G6B0227-B",
+          "kind": "world",
+          "uwp": "G6B0227-B",
+          "distance": {
+            "raw": "0.72",
+            "value": 0.72,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Myrthe",
+          "raw": "A662559-C",
+          "kind": "world",
+          "uwp": "A662559-C",
+          "distance": {
+            "raw": "0.95",
+            "value": 0.95,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Riddle",
+              "raw": "F210468-C",
+              "kind": "world",
+              "uwp": "F210468-C",
+              "distance": {
+                "raw": "28 Diam",
+                "value": 28.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Kevine",
+          "raw": "F7A3217-C",
+          "kind": "world",
+          "uwp": "F7A3217-C",
+          "distance": {
+            "raw": "1.66",
+            "value": 1.66,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Inner Belt",
+          "raw": "G000318-C",
+          "kind": "world",
+          "uwp": "G000318-C",
+          "distance": {
+            "raw": "3.45",
+            "value": 3.45,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Blaguemort",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "5.27",
+            "value": 5.27,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ios",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "deBains",
+              "raw": "G213269-B",
+              "kind": "world",
+              "uwp": "G213269-B",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Hygién",
+              "raw": "H3A1000-0",
+              "kind": "world",
+              "uwp": "H3A1000-0",
+              "distance": {
+                "raw": "11 Diam",
+                "value": 11.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Merde",
+              "raw": "H100000-0",
+              "kind": "world",
+              "uwp": "H100000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Edselle",
+          "raw": "G20436A-B",
+          "kind": "world",
+          "uwp": "G20436A-B",
+          "distance": {
+            "raw": "8.84",
+            "value": 8.84,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 9,
+          "name": "Planet 6",
+          "raw": "Y201000-0",
+          "kind": "world",
+          "uwp": "Y201000-0",
+          "distance": {
+            "raw": "13.1",
+            "value": 13.1,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 10,
+          "name": "Planet 7",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "18.6",
+            "value": 18.6,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 11,
+          "name": "Middle Belt",
+          "raw": "H000000-0",
+          "kind": "world",
+          "uwp": "H000000-0",
+          "distance": {
+            "raw": "30.2",
+            "value": 30.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 12,
+          "name": "Planet 8",
+          "raw": "YBC0000-0",
+          "kind": "world",
+          "uwp": "YBC0000-0",
+          "distance": {
+            "raw": "35.0",
+            "value": 35.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "H400000-0",
+              "kind": "world",
+              "uwp": "H400000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 13,
+          "name": "Outer Belt",
+          "raw": "H000000-0",
+          "kind": "world",
+          "uwp": "H000000-0",
+          "distance": {
+            "raw": "62.5",
+            "value": 62.5,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 14,
+          "name": "Planet 9",
+          "raw": "Y102000-0",
+          "kind": "world",
+          "uwp": "Y102000-0",
+          "distance": {
+            "raw": "230",
+            "value": 230.0,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Myrthe",
+    "UWP": "A662559-C",
+    "Stellar": "K8 V",
+    "PBG": "131",
+    "Bases": "KM",
+    "Remarks": "Ni Pr Ht"
+  }
+}

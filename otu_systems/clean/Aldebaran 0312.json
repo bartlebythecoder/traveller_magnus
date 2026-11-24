@@ -1,0 +1,785 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Aldebaran",
+  "hex": "0312",
+  "sector_abbreviation": "Alde",
+  "subsector": "Star Bridge",
+  "name": "Grande-Terre Primary",
+  "sources": [
+    {
+      "page": "Grande-Terre (world)",
+      "revid": 959835,
+      "timestamp": "2025-07-16T11:19:19Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Grande-Terre (world)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Primary",
+          "type": "K8 V",
+          "notes": null
+        },
+        {
+          "role": "Secondary",
+          "name": "Secondary",
+          "type": "M5 V",
+          "notes": "Approximately 80 AU from the primary."
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Prime",
+      "stars": [
+        {
+          "name": "Prime",
+          "type": "K8 V"
+        }
+      ],
+      "labels": [
+        "Grande-Terre Primary"
+      ],
+      "pages": [
+        "Grande-Terre (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Planet 1",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "0.17",
+            "value": 0.17,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grande-Terre (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Roc",
+          "raw": "H210112-8",
+          "kind": "world",
+          "uwp": "H210112-8",
+          "distance": {
+            "raw": "0.42",
+            "value": 0.42,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grande-Terre (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Grande-Terre",
+          "raw": "C834720-9",
+          "kind": "world",
+          "uwp": "C834720-9",
+          "distance": {
+            "raw": "0.68",
+            "value": 0.68,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grande-Terre (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 4,
+          "name": "Planet 3",
+          "raw": "Y6C2000-0",
+          "kind": "world",
+          "uwp": "Y6C2000-0",
+          "distance": {
+            "raw": "0.96",
+            "value": 0.96,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grande-Terre (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Planet 4",
+          "raw": "Y402000-0",
+          "kind": "world",
+          "uwp": "Y402000-0",
+          "distance": {
+            "raw": "1.42",
+            "value": 1.42,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grande-Terre (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "HS00000-0",
+              "kind": "world",
+              "uwp": "HS00000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Grande-Terre (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Planet 5",
+          "raw": "G5A0562-8",
+          "kind": "world",
+          "uwp": "G5A0562-8",
+          "distance": {
+            "raw": "2.75",
+            "value": 2.75,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grande-Terre (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Nid",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "5.11",
+            "value": 5.11,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grande-Terre (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Poussin",
+              "raw": "H300000-0",
+              "kind": "world",
+              "uwp": "H300000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Grande-Terre (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Oisillon",
+              "raw": "G302263-8",
+              "kind": "world",
+              "uwp": "G302263-8",
+              "distance": {
+                "raw": "11 Diam",
+                "value": 11.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Grande-Terre (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Gonzesse",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "20 Diam",
+                "value": 20.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Grande-Terre (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Débutant",
+              "raw": "G200311-9",
+              "kind": "world",
+              "uwp": "G200311-9",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Grande-Terre (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Planet 6",
+          "raw": "Y501000-0",
+          "kind": "world",
+          "uwp": "Y501000-0",
+          "distance": {
+            "raw": "9.62",
+            "value": 9.62,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grande-Terre (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "9 Diam",
+                "value": 9.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Grande-Terre (world)"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "star": "Second",
+      "stars": [
+        {
+          "name": "Second",
+          "type": "M5 V"
+        }
+      ],
+      "labels": [
+        "Grande-Terre Secondary"
+      ],
+      "pages": [
+        "Grande-Terre (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Nichée",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "0.21",
+            "value": 0.21,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grande-Terre (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Cuite",
+              "raw": "H100000-0",
+              "kind": "world",
+              "uwp": "H100000-0",
+              "distance": {
+                "raw": "9 Diam",
+                "value": 9.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Grande-Terre (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Débutante",
+          "raw": "H510000-0",
+          "kind": "world",
+          "uwp": "H510000-0",
+          "distance": {
+            "raw": "1.04",
+            "value": 1.04,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grande-Terre (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Planet 8",
+          "raw": "Y7B1000-0",
+          "kind": "world",
+          "uwp": "Y7B1000-0",
+          "distance": {
+            "raw": "1.58",
+            "value": 1.58,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grande-Terre (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Planet 9",
+          "raw": "Y402000-0",
+          "kind": "world",
+          "uwp": "Y402000-0",
+          "distance": {
+            "raw": "2.55",
+            "value": 2.55,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grande-Terre (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "9 Diam",
+                "value": 9.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Grande-Terre (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Outer Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "5.12",
+            "value": 5.12,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grande-Terre (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Planet 10",
+          "raw": "Y503000-0",
+          "kind": "world",
+          "uwp": "Y503000-0",
+          "distance": {
+            "raw": "8.35",
+            "value": 8.35,
+            "unit": "AU"
+          },
+          "sources": [
+            "Grande-Terre (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Grande-Terre (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "H100000-0",
+              "kind": "world",
+              "uwp": "H100000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Grande-Terre (world)"
+              ]
+            }
+          ]
+        }
+      ],
+      "placement": {
+        "orbit": null,
+        "au": 80.0,
+        "from": "star template notes"
+      }
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Grande-Terre (world)",
+      "label": "Grande-Terre Primary",
+      "stars": [
+        {
+          "name": "Prime",
+          "type": "K8 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Planet 1",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "0.17",
+            "value": 0.17,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Roc",
+          "raw": "H210112-8",
+          "kind": "world",
+          "uwp": "H210112-8",
+          "distance": {
+            "raw": "0.42",
+            "value": 0.42,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Grande-Terre",
+          "raw": "C834720-9",
+          "kind": "world",
+          "uwp": "C834720-9",
+          "distance": {
+            "raw": "0.68",
+            "value": 0.68,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Planet 3",
+          "raw": "Y6C2000-0",
+          "kind": "world",
+          "uwp": "Y6C2000-0",
+          "distance": {
+            "raw": "0.96",
+            "value": 0.96,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Planet 4",
+          "raw": "Y402000-0",
+          "kind": "world",
+          "uwp": "Y402000-0",
+          "distance": {
+            "raw": "1.42",
+            "value": 1.42,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "HS00000-0",
+              "kind": "world",
+              "uwp": "HS00000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Planet 5",
+          "raw": "G5A0562-8",
+          "kind": "world",
+          "uwp": "G5A0562-8",
+          "distance": {
+            "raw": "2.75",
+            "value": 2.75,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Nid",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "5.11",
+            "value": 5.11,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Poussin",
+              "raw": "H300000-0",
+              "kind": "world",
+              "uwp": "H300000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Oisillon",
+              "raw": "G302263-8",
+              "kind": "world",
+              "uwp": "G302263-8",
+              "distance": {
+                "raw": "11 Diam",
+                "value": 11.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Gonzesse",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "20 Diam",
+                "value": 20.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Débutant",
+              "raw": "G200311-9",
+              "kind": "world",
+              "uwp": "G200311-9",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Planet 6",
+          "raw": "Y501000-0",
+          "kind": "world",
+          "uwp": "Y501000-0",
+          "distance": {
+            "raw": "9.62",
+            "value": 9.62,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "9 Diam",
+                "value": 9.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Grande-Terre (world)",
+      "label": "Grande-Terre Secondary",
+      "stars": [
+        {
+          "name": "Second",
+          "type": "M5 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Nichée",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "0.21",
+            "value": 0.21,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Cuite",
+              "raw": "H100000-0",
+              "kind": "world",
+              "uwp": "H100000-0",
+              "distance": {
+                "raw": "9 Diam",
+                "value": 9.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Débutante",
+          "raw": "H510000-0",
+          "kind": "world",
+          "uwp": "H510000-0",
+          "distance": {
+            "raw": "1.04",
+            "value": 1.04,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Planet 8",
+          "raw": "Y7B1000-0",
+          "kind": "world",
+          "uwp": "Y7B1000-0",
+          "distance": {
+            "raw": "1.58",
+            "value": 1.58,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Planet 9",
+          "raw": "Y402000-0",
+          "kind": "world",
+          "uwp": "Y402000-0",
+          "distance": {
+            "raw": "2.55",
+            "value": 2.55,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "9 Diam",
+                "value": 9.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Outer Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "5.12",
+            "value": 5.12,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Planet 10",
+          "raw": "Y503000-0",
+          "kind": "world",
+          "uwp": "Y503000-0",
+          "distance": {
+            "raw": "8.35",
+            "value": 8.35,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "H100000-0",
+              "kind": "world",
+              "uwp": "H100000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Grande-Terre",
+    "UWP": "C834720-9",
+    "Stellar": "K8 V M5 V",
+    "PBG": "612",
+    "Bases": "",
+    "Remarks": ""
+  }
+}

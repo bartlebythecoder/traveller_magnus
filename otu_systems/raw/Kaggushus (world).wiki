@@ -1,0 +1,230 @@
+[[File:Alien Moon 256b-0 Small.jpg|250 px|right]]
+* ''Note:'' Not to be confused with {{WorldS|Ershur|Massilia|0504}}.
+{{UWP 
+|name    = {{World|Kaggushus|Massilia|Kerr|0402}}
+ |u0     = B542799-D 
+ |pop0   = 2
+ |zone0  = green
+ |ur     = A542AAB-C 
+ |popr   = 3
+ |zoner  = green
+|uc      = A542AA7-F 
+|popc    = 9
+|zonec   = green
+|alg     = ImDc
+|class   = He Hi In Po / Cp Ht / (Kaggushus)W / C:0304, 0602
+|trade   = he
+|climate = TBD
+|nblty   = BEF
+|bases   = -
+|primary = M1 V
+|belts   = 0
+|GGcount = 4
+}}
+{{World summary |name= Kaggushus|trade= He Hi In Po}}
+{{World summary ImDc|sector= Massilia|subsector= Kerr}}
+{{World summary comment|trade= Ht}}
+{{World summary comment|trade= Cp}}
+* It is [[homeworld]] of a [[Minor Human Race]], the [[Kaggushus]].
+* This world has colonies at [[Chamati (world)|Chamati]] and [[Fournier (world)|Fournier]]
+* During the [[Rule of Man]] it was known as ''Ershur (Ma 0402)'' and ''Hub/Ershur''.
+* During the [[Long Night]], the world eventually reverted to its old name ''Kaggushus''.
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+
+=== Stellar Data ===
+'''Kaggushus''' has a solitary primary star.
+* It is a red main sequence named ''[[Uumgadi (star)|Uumgadi]]''.
+
+{{MonostellarSystem
+|name           = Kaggushus
+|primary        = M1 V 
+|PrimaryName    = [[Uumgadi (star)|Uumgadi]]
+|PrimaryNotes   = 
+}}
+
+=== [[Mainworld|Mainworld Data]] ===
+Kaggushus is a dry, stifling world. Its thin [[atmosphere]] is difficult to breathe due to its sulfur content, the result of residual volcanism. The world is quite old, and it possesses few important resources. Flat ground is at a premium, as most of the world is cut into steep canyons and gullies cut through ancient mountain ranges by desert rainstorms. The world's crust is thin, and new columns of lava rock are pushed to the surface on a perpetual basis. In the past massive volcanic eruptions resurfaced the planet entirely. 
+
+It possesses a broad, hazy ring system.
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Kaggushus|Size= 5}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Kaggushus|Atmosphere= 4}}
+* Kaggushus is a [[cool world]] with a thin, sulfur-tainted atmosphere. 
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Kaggushus|Hydrosphere= 2}}
+
+==== Mainworld Geography & Topography ====
+The sole body of water, the Sea of Arsanus, is an impact basin formed millions of years ago; because it lies below the level of the land, it became a collection point for rain and volcanic runoff.
+
+[[File:Blank World Map Arid.png|500 px]] <br> (''Blank map, predominantly dry world''.)
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Kaggushus''' is the [[capital]] of [[Kerr Subsector]]. It is a poor, heavily industrialized, high-population {{Imperial}} world. 
+
+It is the [[homeworld]] of the [[Kaggushus]], a [[minor human race]].
+
+==== The Vilani ====
+Despite its poverty, the [[Ziru Sirka]] settled it about six thousand years ago. Its central location at the crossroads of their empire made it a natural place to establish an auxiliary capitol for ruling the vast reaches of the empire that lay rimward of Vland. Bureaux offices and bureaucracy eventually attracted major industrialization and trade. The first settlers set down in the lowlands along the Arsanus Sea, where higher air pressure and water vapor made the sulfur laden air easier to breathe. Later they moved into the interior, building unusual cliff side settlements carved into the sheer walls of canyons.
+* The Vilani rulers set up their capitol on Arsanus Island, a giant impact spike in the middle of the sea that towers nearly [[Meter|3000 meters]] above sea level. The dramatic view from the top inspired the local administrators with ideas of their own invincibility. As they were virtually independent of their superiors on Vland they had complete access to the commodities and tax revenue of the empire coming through the Hub, and they skimmed enough off to lavish themselves with monumental building projects and opulent lifestyles. They commissioned magnificent palaces and sepulchral towers of immense dimension, even to the point that they dwarfed the Emperor's Palace on Vland. Advanced gravitic and material technology permitted risky new architecture that reflected the confidence and ego of the local leadership. These officials became so inflated with their own importance, but yet so unwilling to rock the boat by seceding from Vland to rule in their own right, that they enjoyed the wealth of empire but not the ultimate responsibility for governing it. Many historians think that the deception and duplicity of Kaggushus and its elite was a major contributing factor to the stagnation of the Ziru Sirka.
+
+==== The Terrans ====
+The world fell to the Terran fleet during the final stages of the [[Interstellar Wars]]. The [[Plague of Duskir]] decimated the local defense forces, preventing an effective stand. Fighting destroyed most of the grand structures on Arsanus, but what remained of these huge fairy-tale edifices deeply impressed the Terran grand admiral, [[Hiroshi Tokugawa Estigarribia|Hiroshi Estigarribia]]. It is unclear how much those ruins influenced his decisions, but he chose to ignore the authority of Terra, and declared the [[Rule of Man]] from the Central Palace on Arsanus in [[-2304]]. Hiroshi did not assume the throne, and he died while pacifying the coreward territories. His chief of staff was crowned on Kaggushus as Emperor Hiroshi II a few years later.
+* The world held a crucial historical role in the [[Rule of Man]] period. Emperor [[Yev Gennaz Estigarribia|Hiroshi II]] transferred all governmental functions from both [[Vland (world)|Vland]] and [[Dingir (world)|Dingir]] to Kaggushus, which was more centrally located in Massilia sector. The world was renamed bilingually [[Hub/Ershur]] and was to remain the capital of the [[Rule of Man]] for the next four hundred years. The emperors reconstructed many of the monumental buildings.
+* Alas the ROM did not measure up to the task of ruling the vast empire they had conquered. Life on Kaggushus in that time had a curious insulated feeling, like a ship in a bottle that had been painted over to prevent seeing outside. While the former Vilani Imperium continued to crumble, ROM emperors went on a bacchanalian spending spree in increasing inverse proportion to the poverty of its subjects. 
+* In [[-1776]] the Treasury at Hub/Ershur refused to honor a monetary issue of the branch treasury at [[Antares Sector|Antares]]. The resulting lack of confidence within monetary circles marked the end of large-scale interstellar trade and of effective governmental power within the Rule of Man. This event is generally cited by historians as marking the beginning of [[Twilight]].
+* In the later years of the empire, local nobles accumulated large private armies to protect their estates from attack. When the empire fell in -1776, open warfare erupted between these militias, and Arsanus was ruined by heavy shelling and street-to-street fighting. When the last ROM emperor died in [[-1744]], a consortium of nobles recaptured Arsanus, pacified the world, and founded the first Hub Worlds confederacy.
+
+==== The Third Imperium ====
+Under the Third Imperium the world prospered once again, attaining a population of about ninety billion and a {{TL|15}}. After the [[Civil War]], the [[Nolanar family|Nolanar-Ahiiki]] line was granted the title of [[Count of Kaggushus]].
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+
+=== World Starport (St) ===
+{{Starport|name= Kaggushus|Starport= A}}
+
+=== World Population (P) ===
+{{WorldPop|name= Kaggushus|multiplier= 9|Population= A}}
+* Around 95% of the population (approximately 85 billion individuals) consists of baseline humans, various [[minor human race]]s, and other [[sophont]]s.
+* About 5% of the population (roughly 5 billion individuals) claim to be of ethnic [[Kaggushus]] heritage.
+
+==== Linguistic Topography ====
+The most commonly heard [[language]]s are:
+* [[Anglic]], one of the two official languages of the {{Imperium}}.
+* [[Vilani (language)|Vilani]], one of the two official languages of the {{Imperium}}.
+
+=== World Technology Level (T) ===
+{{WorldTech|name= Kaggushus|WorldTech= F}}
+
+=== World Government (G) ===
+{{WorldGov|name= Kaggushus|Government= A}}
+
+=== World Law (L) ===
+{{WorldLaw|name= Kaggushus|Law= 7}}
+
+=== Imperial Landed Nobility ===
+{{Imperial Nobility|name= Kaggushus|Noble=BEF}}
+
+=== Trade Data ===
+* Importance:     4 (important)
+
+=== World Economy ===
+* Resources:      G (extremely abundant)
+* Labor:          9 (billions)
+* Infrastructure: G (very comprehensive)
+* Efficiency:     +4 (advanced)
+
+=== World Culture ===
+* Heterogenity: A (discordant)
+* Acceptance:   E (extremely xenophilic)
+* Strangeness:  5 (distinct)
+* Symbols:      F (extremely abstract)
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+
+* [[Ancients|circa -250,000]]: the [[Ancient]]s are active within the sector.
+* [[-9000s|circa -9,000]]: the [[Geonee]] encounter the [[Vilani]].
+* [[-5400]] to [[-4015]]: the [[Vilani]] [[Consolidation Wars]].
+* [[-4045]] to [[-2204]]: the region is part of the [[First Imperium|Ziru Sirka]].
+* [[-2204]] to [[-1776]]: the region becomes part of the [[Rule of Man]].
+* [[-1776]] to [[0]]: the [[Long Night]].
+* [[0|The Year 0]]: the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[604]]-[[622]]: the [[Civil War]].
+* [[624]]: the [[Express Boat Network]] is established.
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] charts the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+
+----
+
+=== Later Historical Eras ===
+Details of the Kaggushus system circa [[1200]] are provided to the right.
+{{InfoboxSystem
+ |name= Kaggushus (ca 1200) |subsector= Kerr
+ |sector= Massilia |hex= 0402
+ |star= [[Uumgadi (star)|Uumgadi]] |type= F1 V
+ |P1=     –                                 | Dist1= 0.2          | UWP1= (Empty)
+ |P2=     Liilirsi                          | Dist2= 0.4          | UWP2= GS0051B-C
+ |P3=     Dirmida                           | Dist3= 0.7          | UWP3= Y200000-0
+ |P4=     Gankhaka                          | Dist4= 1.0          | UWP4= H52030B-B
+ |P4M1      Shimmi                          |   Dist4M1= 10 Diam  |   UWP4M1= Y300000-0
+ |P5=     –                                 | Dist5= 1.6          | UWP5= (Empty)
+ |P6=     Kaggushus                         | Dist6= 2.8          | UWP6= A442AAB-C
+ |P6M1=     Shuushan                        |   Dist6M1= 3 Diam   |   UWP6M1= GS00219-B
+ |P7=     Apdiga                            | Dist7= 5.2          | UWP7= YS00000-0
+ |P7M1=     Igesh                           |   Dist7M1= 45 Diam  |   UWP7M1= FS00328-B
+ |P8=     Ashmu                             | Dist8= 10           | UWP8= '''SGG''' <small>(Siz 90)</small>
+ |P8M1=     Alpha                           |   Dist8M1= 5 Diam   |   UWP8M1= H300000-0
+ |P8M2=     Beta                            |   Dist8M2= 50 Diam  |   UWP8M2= YS00000-0
+ |P9=     Lankadir                          | Dist9= 20           | UWP9= '''LGG''' <small>(Siz 160)</small>
+ |P9M1=    A Ring                           |   Dist9M1= 2 Diam   |   UWP9M1= YR00000-0
+ |P9M2=    B Ring                           |   Dist9M2= 3 Diam   |   UWP9M2= YR00000-0
+ |P9M3=    Alpha                            |   Dist9M3= 6 Diam   |   UWP9M3= YS00000-0
+ |P9M4=    Beta                             |   Dist9M4= 8 Diam   |   UWP9M4= Y200000-0
+ |P9M5=    Gamma                            |   Dist9M5= 15 Diam  |   UWP9M5= H10016A-C Re
+ |P9M6=    Delta                            |   Dist9M6= 45 Diam  |   UWP9M6= Y400000-0
+ |P10=    Sigdashku                         | Dist10= 40          | UWP10= '''SGG''' <small>(Siz 70)</small>
+ |P10M1=    Ring                            |   Dist10M1= 2 Diam  | UWP10M1= YR00000-0
+ |P10M2=    Alpha                           |   Dist10M2= 7 Diam  | UWP10M2= Y300000-0
+ |P10M3=    [[Ishdaga (world)|Ishdaga]]     |   Dist10M3= 45 Diam | UWP10M3= G6A511A-C Re
+ |P11=    Larkun                            | Dist11= 154         | UWP11= '''SGG''' <small>(Size 70)</small>
+ |P11M1=    Alpha                           |   Dist11M1= 5 Diam  | UWP11M1=Y400000-0
+ |P11M2=    Beta                            |   Dist11M2= 9 Diam  | UWP11M2=YS00000-0
+}}
+
+==== History-Era: New Era ====
+The same pattern of rags to riches to rags that Kaggushus had always experienced repeated itself during the {{Imperial}} [[Second Civil War|Final War]]. Ilelishi commerce raiders severely damaged the local merchant fleet, and the troubled politics of Lucan's faction led to increasing violence between local nobility. Even before the [[Collapse]] the rule of the [[Nolonar-Akiihi]] family had been undermined in many regions, several small brushfire wars were raging between would be successors. 
+* When [[Virus]] hit the world, more than seventy billion people were killed in nuclear bombardment, or from disease and starvation. Civil war erupted between several noble factions on Arsanus, and the planet was laid low for several decades by genocidal fighting. The former ruling family was able to secure several surviving arcologies, and helping stem the nosedive of the local tech level. Finally under the lead of Count Eric Nolonar, loyal armies crushed the rebellious factions in a series of quick reconquests, and the world was declared pacified in [[1169]].
+* The main starport and local shipyards were found to be in salvageable condition, and Kaggushus was able to begin construction of new starships in [[1174]]. Using a fleet of small exploration craft, it managed to recontact the other former [[Hub Worlds]], in some cases helping them to repacify warring factions. In [[1181]] it led the convention that reformed the Confederacy. Arsanus has been rebuilt yet again, and contains the government seat for both the Nolonars and the Hub World government. Ruined and abandoned arcologies cover the planet, many of them off limits because of suspected lingering Viral infection.
+* Most of the population has concentrated around the Arsanus Sea again, but salvage missions are slowly clearing damaged arcologies for resettlement. The government is slowly transitioning to a impersonal bureaucracy that (it is hoped) will smooth out the bitter controversies that exist between it and other Hub Worlds.
+
+----
+
+=== Kaggushus System: Points of Interest ===
+==== Ishdaga ==== 
+[[Ishdaga (world)|Ishdaga]] (UWP G6A511A-C) is the only major moon of the [[gas giant]] Sigdashku, orbiting in the [[Outer World|outer system]]. It is controlled by the [[Kaggushus Intermural Finance Foundation]] (KIFF) which operates a number of industrial facilities. 
+* Unlike the world of [[Liilirsi (world)|Liilirsi]], public tours and visits are welcomed and even encouraged. 
+* A number of [[Second Civil War|antebellum]] {{TL|16}} facilities remain in near pristine condition, and KIFF is using the proceeds from paid tours and public donations to fund future salvage operations.
+
+==== Liilirsi ==== 
+[[Liilirsi (world)|Liilirsi]] (UWP GS0051B-C) is a tiny ball of rock orbiting in the hot [[Inner World|inner system]]. is a private fief of the [[Hauptmann Corporation]], a business venture of several local noble families.
+* It is a private facility off limits to uninvited guests, with a pair of old but well maintained patrol cruisers to guarantee security.
+
+==== Gankhaka ==== 
+[[Gankhaka (world)|Gankhaka]] officially has no government; in reality it is the site of several former {{Imperial}} era installations. Freelancers under the hire of the [[Mynoris Corporation]] carry out excavations under the cover of prospecting operations.
+* Several noble backers of the company do not want public notification of these operations as that would attract looters and competitors.
+
+== References  ==
+{{Intermediate}}
+{{Detail}}
+{{Sources
+| {{CT}} [[Library Data (N-Z)|Supplement 11 Library Data (N-Z)]]
+| {{CT}} [[Solomani (Alien Module)]]
+| [[The New Era]] Main Rulebook (pgs. 174-5)
+| [[Marc Miller's Traveller]] [[T4 First Survey]]
+| {{Ludography cite|name=The Third Imperium|page=60}}
+| [https://groups.yahoo.com/neo/groups/silent-tower-tne-rces/conversations/topics/314 The Hub Worlds Pt.1] from the [[TNE-RCES Mailing List]]
+}}
+ 
+[[Category: First Imperium worlds]]
+[[Category: Hauptmann Corporation worlds]]
+[[Category: Homeworld]]
+[[Category: Hub Worlds worlds]]
+[[Category: Humaniti worlds]]
+[[Category: Kaggushus worlds]]
+[[Category: Kaggushus Intermural Finance Foundation worlds]]
+[[Category: Megastructure]]
+[[Category: Mynoris Corporation worlds]]
+[[Category: Pilgra Portal Tourlines worlds]]
+[[Category: Rule of Man worlds]]
+[[Category: Second Imperium worlds]]
+[[Category: Thunderball worlds]]
+
+{{LE|T5 Second Survey worlds}}

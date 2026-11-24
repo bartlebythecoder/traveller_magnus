@@ -1,0 +1,208 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Far Frontiers",
+  "hex": "1537",
+  "sector_abbreviation": "FarF",
+  "subsector": "Cabala",
+  "name": "Talak",
+  "sources": [
+    {
+      "page": "Talak (system)",
+      "revid": 836052,
+      "timestamp": "2024-08-31T10:37:58Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Talak (system)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Nijet",
+          "type": "G7 III",
+          "notes": "Unstable pulsating star. It occasionally experiences powerful flare activity, causing intense EM noise."
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Nijet",
+      "stars": [
+        {
+          "name": "Nijet",
+          "type": "G7 III"
+        }
+      ],
+      "labels": [
+        "Talak"
+      ],
+      "pages": [
+        "Talak (system)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Vahjdi",
+          "raw": "G651769-4",
+          "kind": "world",
+          "uwp": "G651769-4",
+          "distance": {
+            "raw": "8.7",
+            "value": 8.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Talak (system)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Talak",
+          "raw": "D687839-6",
+          "kind": "world",
+          "uwp": "D687839-6",
+          "distance": {
+            "raw": "10.8",
+            "value": 10.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Talak (system)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 3,
+          "name": "Monkodo",
+          "raw": "Y9B1000-0",
+          "kind": "world",
+          "uwp": "Y9B1000-0",
+          "distance": {
+            "raw": "14.2",
+            "value": 14.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Talak (system)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Galsimar",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "18.7",
+            "value": 18.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Talak (system)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Kasama Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "25.0",
+            "value": 25.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Talak (system)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Talak (system)",
+      "label": "Talak",
+      "stars": [
+        {
+          "name": "Nijet",
+          "type": "G7 III"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Vahjdi",
+          "raw": "G651769-4",
+          "kind": "world",
+          "uwp": "G651769-4",
+          "distance": {
+            "raw": "8.7",
+            "value": 8.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Talak",
+          "raw": "D687839-6",
+          "kind": "world",
+          "uwp": "D687839-6",
+          "distance": {
+            "raw": "10.8",
+            "value": 10.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Monkodo",
+          "raw": "Y9B1000-0",
+          "kind": "world",
+          "uwp": "Y9B1000-0",
+          "distance": {
+            "raw": "14.2",
+            "value": 14.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Galsimar",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "18.7",
+            "value": 18.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Kasama Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "25.0",
+            "value": 25.0,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Talak",
+    "UWP": "D687838-6",
+    "Stellar": "G7 III",
+    "PBG": "411",
+    "Bases": "",
+    "Remarks": "Ga Ri Pa Ph"
+  }
+}

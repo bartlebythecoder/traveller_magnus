@@ -145,7 +145,18 @@
         return { type, decimal, size, name, tFlux, sFlux };
     }
 
-    /** 
+    /**
+    * A star's luminosity (Solar units) from its spectral type letter alone.
+    * T5 has no official luminosity rule (Sean, 2026-11-17): this is a display-only
+    * approximation, shared by generated and OTU-imported stars so the two always agree.
+    * Nothing in T5 generation reads it (habitable zones come from HZ_DATA via getStarHZ).
+    */
+    function estimateT5Luminosity(type) {
+        const TYPE_MAP = { 'O': 50, 'B': 10, 'A': 2, 'F': 1.5, 'G': 1.0, 'K': 0.7, 'M': 0.2, 'BD': 0.05, 'D': 1.0 };
+        return Math.pow(TYPE_MAP[type] || 1.0, 3.5);
+    }
+
+    /**
     * Generates a single star.
     */
     function generateStar(role, orbitID, importedName = null, isSecondary = false, pTypeFlux = 0, pSizeFlux = 0) {
@@ -168,8 +179,7 @@
             sFlux = profile.sFlux;
         }
 
-        const TYPE_MAP = { 'O': 50, 'B': 10, 'A': 2, 'F': 1.5, 'G': 1.0, 'K': 0.7, 'M': 0.2, 'BD': 0.05, 'D': 1.0 };
-        let luminosity = Math.pow(TYPE_MAP[type] || 1.0, 3.5);
+        let luminosity = estimateT5Luminosity(type);
         _tResult('Luminosity', luminosity.toFixed(3) + ' L_Sol', 'T5 1.1: Stellar Generation');
 
         // NEW: Calculate the physical diameter using the Universal Math Chassis
@@ -431,6 +441,7 @@
         parseT5Stellar,
         generateT5StellarProfile,
         generateStar,
+        estimateT5Luminosity,
         determineStellarConstellation,
         getStarHZ,
         calculateOrbitalConstraints,

@@ -1,0 +1,78 @@
+The [[Emerald (system)|Emerald system]] lies within the {{Sm}}.
+* It is a [[star system]] containing multiple worlds.
+* The [[mainworld]] is [[Emerald (world)|Emerald]].
+
+{{InfoboxSystem
+|name=Emerald
+ |sector=Spinward Marches
+ |subsector=Jewell
+ |hex=1006
+ |star='''Lustre'''
+ |type='''M1 V'''
+|P0=Emerald|Dist0=0.2|UWP0=B766555-B
+|P1=Phantome|Dist1=0.4|UWP1='''Large GG'''
+ |P1M1=* ''Ring System''|Dist1M1=1|UWP1M1=YR00000-0
+ |P1M2=* ''Ring System''|Dist1M2=2|UWP1M2=YR00000-0
+ |P1M3=* ''Mitchell''|Dist1M3=6|UWP1M3=Y300267-B
+ |P1M4=* ''Ruapehu''|Dist1M4=7|UWP1M4=Y200000-0
+ |P1M5=* ''Sacrist''|Dist1M5=9|UWP1M5=Y410000-0
+ |P1M6=* ''Alcharam''|Dist1M6=10|UWP1M6=Y732000-0
+ |P1M7=* ''Dervish''|Dist1M7=25|UWP1M7=Y510000-0
+ |P1M8=* ''Minime''|Dist1M8=40|UWP1M8=YS00000-0
+ |P1M9=* ''Stoly''|Dist1M9=45|UWP1M9=YS00000-0
+|P2=Planetoid Belt|Dist2=0.7|UWP2=Y000000-0
+|P3=Siishisha|Dist3=1.0|UWP3='''Large GG'''
+ |P3M1=* ''Ring System''|Dist3M1=2|UWP3M1=YR00000-0
+ |P3M2=* ''Khudalin''|Dist3M2=5|UWP3M2=YS00000-0
+ |P3M3=* ''Gakhidar''|Dist3M3=40|UWP3M3=Y100000-0
+ |P3M4=* ''Khuulamdiir''|Dist3M4=55|UWP3M4=Y401000-0
+ |P3M5=* ''Gamuur''|Dist3M5=300|UWP3M5=Y320000-0
+|P4=Planetoid Belt|Dist4=1.6|UWP4=Y000000-0
+|P5=Ashakha|Dist5=2,8|UWP5='''Small GG'''
+ |P5M1=* ''Shimgeru''|Dist5M1=7|UWP5M1=YS00000-0
+|P6=Planetoid Belt|Dist6=5.2|UWP6=Y000000-0
+|P7=Karaku|Dist7=10|UWP7='''Small GG'''
+ |P7M1=* ''Ring System''|Dist7M1=1|UWP7M1=YR00000-0
+|P8=Chasseur|Dist8=27.4|UWP8=Y100000-0
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''[[Emerald (world)|Emerald]]''' has a solitary primary star.
+* It is a red main sequence.
+
+{{MonostellarSystem
+|name            = Emerald 
+|primary         = M1 V 
+|PrimaryName     = Lustre
+|PrimaryNotes    = 
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]].
+* x4 secondary [[world|rocky worlds]].
+* x3 [[planetoid belt]]s.
+* x4 [[gas giant]]s.
+
+== References & Contributors (Sources) ==
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=12-13}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=Alien Realms|page=10-11}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=The Regency Sourcebook|page=37}} (UWP only)
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=59}}
+ | {{Ludography cite|name=The Spinward States|page=99}} (UWP only)
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=32}} (UWP only)
+ | [[Michael Bailey]] - [http://mu.org/~joe/traveller/archive/Rice_Papers/SM-1006-Emerald.txt Rice Papers SM 1006] 
+}}
+
+[[Category: Fifth Frontier War worlds]]
+[[Category: General Products worlds]]
+[[Category: GT]]
+{{LE|T5 Second Survey worlds|Jewell Cluster worlds}}
+{{LEN}}

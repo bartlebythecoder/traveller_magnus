@@ -1,0 +1,761 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "2814",
+  "sector_abbreviation": "Spin",
+  "subsector": "Rhylanor",
+  "name": "Jae Tellona",
+  "sources": [
+    {
+      "page": "Jae Tellona (world)",
+      "revid": 1058542,
+      "timestamp": "2026-05-25T17:31:38Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Jae Tellona (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Dikaai",
+          "type": "F9 V",
+          "notes": "Luminosity Class IV-V"
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Dikaai",
+      "stars": [
+        {
+          "name": "Dikaai",
+          "type": "F9 V"
+        }
+      ],
+      "labels": [
+        "Jae Tellona"
+      ],
+      "pages": [
+        "Jae Tellona (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Ráke",
+          "raw": "<small>Y400000-0</small>",
+          "kind": "world",
+          "uwp": "Y400000-0",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Jae Tellona (world)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Pilot",
+          "raw": "<small>Y320000-0</small>",
+          "kind": "world",
+          "uwp": "Y320000-0",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Jae Tellona (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Carlotta",
+          "raw": "<small>Y500000-0</small>",
+          "kind": "world",
+          "uwp": "Y500000-0",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Jae Tellona (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Mabry",
+              "raw": "<small>Y200000-0</small>",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "''<small>R= 9</small>''",
+                "value": 9.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Jae Tellona (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Wake",
+              "raw": "<small>Y200000-0</small>",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "''<small>R= 25</small>''",
+                "value": 25.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Jae Tellona (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Sillica Belt",
+          "raw": "<small>Y000000-0</small>",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Jae Tellona (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Uunkida Gar",
+          "name_raw": "'''Uunkida Gar'''",
+          "raw": "<small>'''LGG'''</small>",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Jae Tellona (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "(BigMoon)",
+              "raw": "<small>Y???0000-0</small>",
+              "kind": "world",
+              "uwp_malformed": null,
+              "distance": {
+                "raw": "''<small>R= 60</small>''",
+                "value": 60.0,
+                "unit": "Radii"
+              },
+              "uwp": "Y???000-0",
+              "uwp_source": "Sean, 2026-11-16",
+              "corrected": true,
+              "sources": [
+                "Jae Tellona (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "(Moon1)",
+              "raw": "<small>Y???0000-0</small>",
+              "kind": "world",
+              "uwp_malformed": null,
+              "distance": {
+                "raw": "''<small>R= ??</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "uwp": "Y???000-0",
+              "uwp_source": "Sean, 2026-11-16",
+              "corrected": true,
+              "sources": [
+                "Jae Tellona (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "(Moon2)",
+              "raw": "<small>Y???0000-0</small>",
+              "kind": "world",
+              "uwp_malformed": null,
+              "distance": {
+                "raw": "''<small>R= ??</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "uwp": "Y???000-0",
+              "uwp_source": "Sean, 2026-11-16",
+              "corrected": true,
+              "sources": [
+                "Jae Tellona (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "(Moon3)",
+              "raw": "<small>Y???0000-0</small>",
+              "kind": "world",
+              "uwp_malformed": null,
+              "distance": {
+                "raw": "''<small>R= ??</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "uwp": "Y???000-0",
+              "uwp_source": "Sean, 2026-11-16",
+              "corrected": true,
+              "sources": [
+                "Jae Tellona (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Jae Tellona",
+          "raw": "<small>A560565-8</small>",
+          "kind": "world",
+          "uwp": "A560565-8",
+          "distance": {
+            "raw": "1.66",
+            "value": 1.66,
+            "unit": "AU"
+          },
+          "sources": [
+            "Jae Tellona (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 6,
+          "name": "---",
+          "raw": "<small>''(Empty Orbit)''</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Jae Tellona (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "---",
+          "raw": "<small>''(Empty Orbit)''</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Jae Tellona (world)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Argenta",
+          "name_raw": "'''Argenta'''",
+          "raw": "<small>'''SGG'''</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "10.0",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Jae Tellona (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Giilushum",
+              "raw": "<small>Y2A1000-0</small>",
+              "kind": "world",
+              "uwp": "Y2A1000-0",
+              "distance": {
+                "raw": "''<small>R= 8</small>''",
+                "value": 8.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Jae Tellona (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Rizid",
+              "raw": "<small>Y200000-0</small>",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "''<small>R= 50</small>''",
+                "value": 50.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Jae Tellona (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Caloyka",
+          "name_raw": "'''Caloyka'''",
+          "raw": "<small>'''SGG'''</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "10.0",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Jae Tellona (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Tregent",
+              "raw": "<small>YS00000-0</small>",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''<small>R= 10</small>''",
+                "value": 10.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Jae Tellona (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Silas",
+              "raw": "<small>Y400000-0</small>",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "''<small>R= 13</small>''",
+                "value": 13.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Jae Tellona (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Macon Malloy",
+          "raw": "<small>Y742000-0</small>",
+          "kind": "world",
+          "uwp": "Y742000-0",
+          "distance": {
+            "raw": "19.6",
+            "value": 19.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Jae Tellona (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Cartosy",
+              "raw": "<small>Y553000-0</small>",
+              "kind": "world",
+              "uwp": "Y553000-0",
+              "distance": {
+                "raw": "''<small>R= 10</small>''",
+                "value": 10.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ],
+              "sources": [
+                "Jae Tellona (world)"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Jae Tellona (world)",
+      "label": "Jae Tellona",
+      "stars": [
+        {
+          "name": "Dikaai",
+          "type": "F9 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Ráke",
+          "raw": "<small>Y400000-0</small>",
+          "kind": "world",
+          "uwp": "Y400000-0",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Pilot",
+          "raw": "<small>Y320000-0</small>",
+          "kind": "world",
+          "uwp": "Y320000-0",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Carlotta",
+          "raw": "<small>Y500000-0</small>",
+          "kind": "world",
+          "uwp": "Y500000-0",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Mabry",
+              "raw": "<small>Y200000-0</small>",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "''<small>R= 9</small>''",
+                "value": 9.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Wake",
+              "raw": "<small>Y200000-0</small>",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "''<small>R= 25</small>''",
+                "value": 25.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Sillica Belt",
+          "raw": "<small>Y000000-0</small>",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Uunkida Gar",
+          "name_raw": "'''Uunkida Gar'''",
+          "raw": "<small>'''LGG'''</small>",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "(BigMoon)",
+              "raw": "<small>Y???0000-0</small>",
+              "kind": "world",
+              "uwp_malformed": null,
+              "distance": {
+                "raw": "''<small>R= 60</small>''",
+                "value": 60.0,
+                "unit": "Radii"
+              },
+              "uwp": "Y???000-0",
+              "uwp_source": "Sean, 2026-11-16",
+              "corrected": true
+            },
+            {
+              "index": 2,
+              "name": "(Moon1)",
+              "raw": "<small>Y???0000-0</small>",
+              "kind": "world",
+              "uwp_malformed": null,
+              "distance": {
+                "raw": "''<small>R= ??</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "uwp": "Y???000-0",
+              "uwp_source": "Sean, 2026-11-16",
+              "corrected": true
+            },
+            {
+              "index": 3,
+              "name": "(Moon2)",
+              "raw": "<small>Y???0000-0</small>",
+              "kind": "world",
+              "uwp_malformed": null,
+              "distance": {
+                "raw": "''<small>R= ??</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "uwp": "Y???000-0",
+              "uwp_source": "Sean, 2026-11-16",
+              "corrected": true
+            },
+            {
+              "index": 4,
+              "name": "(Moon3)",
+              "raw": "<small>Y???0000-0</small>",
+              "kind": "world",
+              "uwp_malformed": null,
+              "distance": {
+                "raw": "''<small>R= ??</small>''",
+                "value": null,
+                "unit": "Radii"
+              },
+              "uwp": "Y???000-0",
+              "uwp_source": "Sean, 2026-11-16",
+              "corrected": true
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Jae Tellona",
+          "raw": "<small>A560565-8</small>",
+          "kind": "world",
+          "uwp": "A560565-8",
+          "distance": {
+            "raw": "1.66",
+            "value": 1.66,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "---",
+          "raw": "<small>''(Empty Orbit)''</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "---",
+          "raw": "<small>''(Empty Orbit)''</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 8,
+          "name": "Argenta",
+          "name_raw": "'''Argenta'''",
+          "raw": "<small>'''SGG'''</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "10.0",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Giilushum",
+              "raw": "<small>Y2A1000-0</small>",
+              "kind": "world",
+              "uwp": "Y2A1000-0",
+              "distance": {
+                "raw": "''<small>R= 8</small>''",
+                "value": 8.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Rizid",
+              "raw": "<small>Y200000-0</small>",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "''<small>R= 50</small>''",
+                "value": 50.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Caloyka",
+          "name_raw": "'''Caloyka'''",
+          "raw": "<small>'''SGG'''</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "10.0",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Tregent",
+              "raw": "<small>YS00000-0</small>",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "''<small>R= 10</small>''",
+                "value": 10.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Silas",
+              "raw": "<small>Y400000-0</small>",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "''<small>R= 13</small>''",
+                "value": 13.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Macon Malloy",
+          "raw": "<small>Y742000-0</small>",
+          "kind": "world",
+          "uwp": "Y742000-0",
+          "distance": {
+            "raw": "19.6",
+            "value": 19.6,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Cartosy",
+              "raw": "<small>Y553000-0</small>",
+              "kind": "world",
+              "uwp": "Y553000-0",
+              "distance": {
+                "raw": "''<small>R= 10</small>''",
+                "value": 10.0,
+                "unit": "Radii"
+              },
+              "flags": [
+                "dist-radii"
+              ]
+            }
+          ]
+        }
+      ],
+      "stars_as_written": [
+        {
+          "name": "Dikaai",
+          "type": "F9 IV-V"
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Jae Tellona",
+    "UWP": "A560565-8",
+    "Stellar": "F9 V",
+    "PBG": "913",
+    "Bases": "N",
+    "Remarks": "De Ni Pr Mr"
+  }
+}

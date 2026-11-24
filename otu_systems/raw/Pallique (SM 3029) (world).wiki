@@ -1,0 +1,176 @@
+[[File:Alien Moon 210c-0 Small.jpg|250 px|right]]
+{{UWP 
+|name    = {{World|Pallique (SM 3029)|Spinward Marches|Mora|3029}}
+ |era    = Milieu 1116
+|uc      = A511965-E
+|popc    = 3
+|zonec   = amber
+ |u1= 
+|alg     = ImDd
+|class   = Hi Ic In Na / Ht Pz / O:3025
+|trade   = ic
+|nblty   = BEf
+|bases   = -
+|primary = M0 V M1 V
+|belts   = 2
+|GGcount = 0
+}}
+{{World summary |name= Pallique|trade= Hi Ic In Na}}
+{{World summary ImDd|sector= Spinward Marches|subsector= Mora}}
+{{World summary comment|trade= Ht}}
+{{World summary comment|trade= Pz}}
+* Pallique is a member of (and the namesake of) the [[Pallique Cluster]]. 
+* It is directly controlled by [[Fornice (world)|Fornice]].
+* The world's name is misspelled ''Palique'' in one source (Supplement 03).
+
+{{InfoboxSystem
+ | name= Pallique
+ | sector = Spinward Marches
+ | subsector = Mora
+ | hex = 3029
+ | star = Primary
+ | type = M0 V
+ | P1  = '''Companion''' | Dist1  = 0.03 | UWP1  = '''M1 V'''
+ | P2  = Shepherd        | Dist2  = 0.18 | UWP2  = H100213-D
+ | P3  = Inner Belt      | Dist3  = 0.35 | UWP3  = F000615-D
+ | P4  = Pallique        | Dist4  = 0.53 | UWP4  = A511965-E
+ | P5  = Outer Belt      | Dist5  = 0.76 | UWP5  = G000516-D
+ | P6  = Herder          | Dist6  = 1.57 | UWP6  = G200366-D
+}}
+[[File:Diagram Pallique Orbits Basic.png|300 px|right]]
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Pallique''' is a binary star system.
+* Both are red main sequence stars.
+** They are close companions.
+
+{{BinaryStarSystem
+|name            = Pallique
+|primary         = M0 V 
+|secondary       = M1 V
+|PrimaryName     = Primary
+|PrimaryNotes    = 
+|SecondaryName   = Secondary
+|SecondaryNotes  = [[Astronomical Unit|Approximately 0.03 AU]] from the primary.
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]].
+* x2 secondary [[world|rocky worlds]].
+* x2 [[planetoid belt]]s.
+
+Pallique is a captured planet; its eccentric orbit is inclined almost perpendicularly to the system's ecliptic plane. Pallique suffers a series of planetary impacts twice each local year as the planet passes through the inner edge of the outer [[planetoid belt]]. As a result of the navigation hazards the [[IISS]] has registered the world as an [[Amber Zone]]. {{Page cite|name=The Regency Sourcebook|page=47}}
+
+=== Mainworld Data ===
+'''Pallique''' is an icy planet with only a [[Trace Atmosphere|trace nitrogen atmosphere]]; its eccentric orbit results in a highly variable climate. 
+
+It orbits within its star's [[habitable zone]].
+* It receives moderate levels of [[Electromagnetic Spectrum|stellar energy]].
+
+[[File:Chart Orbit HZ Region Simple.png|600 px]]
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Pallique|Size= 5}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Pallique|Atmosphere= 1}}
+* Throughout most of the local year it experiences [[Celsius|very low temperatures]].
+* During the two "bombardment seasons", at the world's two perihelia, temperatures may reach [[Celsius|moderate levels]].
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+'''Pallique''' has 05-15% of its surface covered by ice, either in vast sheets or contained deep within craters or fractures on the surface. Wilderness refueling is possible. Water for the inhabitants can be obtained by mining and melting ice.
+* The surface of the world is composed of a crust of ice many kilometers thick.
+* Much of the surface is cratered and covered in thick layers of regolith and dust of meteoric origin, leaving only a part of the icy outer shell exposed.
+* Below the outer icy shell there may be a world-ocean of liquid water.
+
+[[File:Twilight Zone World Horizon Type 07p3.jpg|600 px]]
+
+==== Mainworld Geography and Topography ====
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+[[File:Blank World Map Trace.png|500 px]] <br> (''Blank map, trace atmosphere world''.)
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Pallique''' is a ''[[Amber Zone|Puzzle World]]'' and is designated as an [[Amber Zone]]. It presents particular risks and dangers due to the [[environment]] or [[Life Form|native life forms]], [[Law Level|laws]] or [[Custom|customs]], or other conditions that are not well understood.
+* Visitors are advised to act with caution.
+
+Pallique suffers a series of planetary impacts twice each local year due to its orbit carrying it through a [[planetoid belt]]. As a result of the hazard the [[IISS]] has registered the world as an [[Amber Zone]].{{Page cite|name=The Regency Sourcebook|page=47}}
+
+The system's two extremely rich [[planetoid belt]]s provided the primary draw for settlement and development. Despite its inhospitable nature, Pallique's location and abundant resources have led it to become a high-population, high-technology world. Among the most famed exports are its vacuum survival gear. 
+
+=== World Starport (St) ===
+{{Starport|name= Pallique|Starport= A}}
+
+=== World Population (P) ===
+{{WorldPop|name= Pallique|multiplier= 3|Population= 9}}
+
+==== Linguistic Topography ====
+The following [[language]]s are most commonly heard:
+* [[Anglic]], one of the two official languages of the {{Imperium}}.
+* [[Vilani (language)|Vilani]], one of the two official languages of the {{Imperium}}.
+
+=== World Technology Level (T) ===
+{{WorldTech|name= Pallique|WorldTech= E}}
+
+=== World Government (G) ===
+{{WorldGov|name= Pallique|Government= 6}}
+
+This world is directly administered by the authorities on [[Fornice (world)|Fornice]].
+
+=== World Law (L) ===
+{{WorldLaw|name= Pallique|Law= 5}}
+
+=== Imperial Landed Nobility ===
+{{Imperial Nobility|name= Pallique|Noble= BEf}}
+
+=== Trade Data ===
+* Importance:     4 (important)
+
+=== World Economy ===
+* Resources:      D (very abundant)
+* Labor:          8 (hundreds of millions)
+* Infrastructure: G (very comprehensive)
+* Efficiency:     +2 (good)
+
+=== World Culture ===
+* Heterogenity: 7 (discordant)
+* Acceptance:   D (very xenophilic)
+* Strangeness:  3 (somewhat typical)
+* Symbols:      C (very abstract)
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+* [[0|The Year 0]]: the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[589]]-[[604]]: [[First Frontier War]].
+* [[604]]-[[622]]: the [[Civil War]].
+* [[615]]-[[620]]: [[Second Frontier War]].
+* [[624]]: the [[Express Boat Network]] is established.
+* [[979]]-[[986]]: [[Third Frontier War]].
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] charts the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+* [[1082]]-[[1084]]: [[Fourth Frontier War]], also known as the ''False War''.
+* [[1107]]-[[1110]]: [[Fifth Frontier War]].
+
+== References ==
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=32-33}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=The Regency Sourcebook|page=46-47}} (UWP only)
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=114}}
+ | {{Ludography cite|name=The Spinward States|page=114}} (UWP only)
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=105}}
+ | {{Ludography cite|name= Journal of the Travellers' Aid Society Volume 15 | article=Palique School of Engineering|page=71}}
+}}
+
+[[Category: Ling-Standard Products worlds]]
+[[Category: Pallique Cluster worlds]]
+[[Category: Worlds with a X-Boat Station]]
+{{LE|T5 Second Survey worlds|}}

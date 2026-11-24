@@ -1,0 +1,247 @@
+[[File:Alien Moon 142b-0 Small.jpg|250 px|right]]
+{{UWP
+|name    = {{World|Rovick|Massilia|Palasha|2514}}
+|uc      = E554420-7 
+ |u0     = E554000-6
+|popc    = 8
+|zonec   = green
+|alg     = ImDc
+|class   = Ni Pa 
+|trade   = ni
+|climate = 
+|nblty   = Bc
+|bases   = -
+|primary = M1 V M3 V M5 V
+|belts   = 2
+|GGcount = 2
+}}
+{{World summary |name= Rovick |trade= Ni Pa}}
+{{World summary ImDc|sector= Massilia|subsector= Palasha}}
+* It lies on the [[Delphi Main]].
+* At the founding of the {{Imperium}} this world was known as ''Gaiid''.
+
+{{InfoboxSystem
+ |name= Rovick / Noera-Solox|subsector= Palasha
+ |sector= Massilia |hex= 2514
+ |star= Noera  <br> Solox|type= M1 V <br> M3 V
+ |P1=     Rovick                            | Dist1= 0.184        | UWP1= E554420-7
+ |P2=     Gestriar                          | Dist2= 0.461        | UWP2= Large GG
+ |P2M1=   A Ring                            |   Dist2M1= 1 Diam   |   UWP2M1= YR00000-0
+ |P2M2=   A Ring                            |   Dist2M2= 2 Diam   |   UWP2M2= YR00000-0
+ |P2M3=   Moon                              |   Dist2M3= 5 Diam   |   UWP2M3= Y100000-0
+ |P2M4=   Moon                              |   Dist2M4= 7 Diam   |   UWP2M4= Y000000-0
+ |P2M5=   Moon                              |   Dist2M5= 8 Diam   |   UWP2M5= Y210000-0
+ |P2M6=   Moon                              |   Dist2M6= 10 Diam  |   UWP2M6= Y100000-0
+ |P2M7=   Moon                              |   Dist2M7= 13 Diam  |   UWP2M7= Y000000-0
+ |P3=     Fractelle Belt                    | Dist3= 0.732        | UWP3= Y000000-0
+ |P4=     Gliimaar Belt                     | Dist4= 0.88         | UWP4= Y000000-0
+ |P5=     Konao                             | Dist5= 1.25         | UWP5= Y421000-0
+ |P5M1=   Moon                              |   Dist5M1= 2 Diam   |   UWP5M1= Y100000-0
+ |P5M2=   Moon                              |   Dist5M2= 3 Diam   |   UWP5M2= Y100000-0
+ |P5M3=   Moon                              |   Dist5M3= 5 Diam   |   UWP5M3= Y200000-0
+ |P6=     Adespo                            | Dist6= 2.79         | UWP6= Y310000-0
+}}
+
+{{InfoboxSystem
+ |name= Rovick / Cuvis|subsector= Palasha
+ |sector= Massilia |hex= 2514
+ |star= Cuvis |type= M5 V                    
+ |P1=     Rawai                             | Dist1= 0.16         | UWP1= Large GG
+ |P1M1=   A Ring                            |   Dist1M1= 2 Diam   |   UWP1M1= YR00000-0
+}}
+
+== Description ([[Astrography]] & [[Planetology]])<ref>Additional system and world details by [[User:Nichollsr1970|Roger Nicholls]]</ref> == 
+'''Rovick''' is a trinary star system.
+*The system is c5.6 Gyr in age.
+* All three are red main sequence stars. They are named ''Noera'', ''Solox'', and ''Cuvis'' respectively.
+** Noera and Solox are close companions.
+
+{{TrinaryStarSystem
+|name           = Rovick
+|primary        = M1 V  
+|secondary      = M3 V 
+|tertiary       = M5 V
+|PrimaryName    = Noera
+|PrimaryNotes   = 
+|SecondaryName  = Solox
+|SecondaryNotes = Close companion: [[Astronomical Unit|approximately 0.02 AU]] from Noera.
+|TertiaryName   = Cuvis
+|TertiaryNotes  = [[Astronomical Unit|Approximately 11.5 AU]] from Noera.
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]].
+* x2 secondary [[world|rocky worlds]].
+** Konao, an [[ice world]] orbiting in the [[Outer World|outer system]].
+** Adespo, an [[ice world]] orbiting in the [[Outer World|outer system]].
+* x2 [[planetoid belt]]s.
+** The Fractelle Belt is a broad [[planetoid belt]] lying in the [[Outer World|outer system]]. It contains 3% metallic, 15% rocky/stony and 65% carbonaceous planetoids. In addition the remaining 17% of the planetoids are comprised of other poor mineral bodies.
+** The Gliimaar Belt is a narrow [[planetoid belt]] lying in the [[Outer World|outer system]]. It contains 2% metallic, 20% rocky/stony and 55% carbonaceous planetoids. In addition the remaining 23% of the planetoids are comprised of other poor mineral bodies.
+* x2 [[gas giant]]s.
+** Gestriar, a large gas giant orbiting in the [[Outer World|outer system]] of the binary stars Noera and Solox
+** Rawai, a small gas giant orbiting in the [[habitable zone]] of the M5 V star, Cuvis.
+
+A basic orbital chart of the system:
+
+[[File:Chart Rovick System Basic.jpg|700 px]]
+
+=== Mainworld Data ===
+* The planet has an axial tilt of 22.28 degrees
+* Rovick has a sidereal day length of 43.36 hours
+* The planet takes 34.61 days to rotate around its sun.
+* Rovick has 2 tectonic plates that have created a huge rift on the planets surface. Near the rift area there is regular seismic activity with frequent tremors causing the surface to crack further.
+* Life does exist on the planet in the form of insects that are both ground based and flying whilst in the oceans shell fish and other aquatic life exists. The planet has numerous dense forests of giant fern like plant life along with grass filled plains.
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Rovick|Size= 5}}
+* The planetary surface has been surveyed and has an established diameter of 7301 km.
+* The survey carried out has confirmed the planetary core is mostly rock with a density of 0.74 of standard
+* The surface gravity of the world has been confirmed as 0.424 standard and is defined as low gravity.
+* The mass of Rovick is 0.139 of standard.
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Rovick|Atmosphere= 5}}
+* Atmospheric pressure measured in bar is 0.52
+* The mean surface temperature on Rovick is 12c.
+* The atmosphere although thin is breathable without equipment. External visitors to the planet may find they suffer from headaches and fatigue until they become acclimatised.
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Rovick|Hydrosphere= 4}}
+* 38% of the planetary surface is covered in liquid water.
+** There are no major oceans but there are several seas scatted across the surface with the largest being located on the southern pole.
+
+==== Mainworld Geography and Topography ====
+
+[[File:Blank World Map Arid.png|500 px]] <br> (''Blank map, predominantly dry world''.)
+
+== History & Background (Dossier)<ref>Additional population and social details by [[User:Nichollsr1970|Roger Nicholls]]</ref> ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Rovick''' lies on the [[Delphi Main]], an important [[trade route]] straddling the border between [[Massilia Sector]] and [[Delphi Sector]].
+
+At the dawn of the {{Imperium}} this world had no permanent population. Facilities were being constructed and infrastructure was being emplaced, funded by speculators and investors in anticipation of large-scale settlement and commercial development and designed to give the world a predetermined basic [[Tech Level]]. There were often hundreds of personnel and specialists working or operating within the system, but they were not considered residents.
+
+=== World Starport (St) ===
+{{Starport|name= Rovick|Starport= E}}
+* The starport is little more than concrete slabs, chainlink fences and ramshackle warehousing. There is a very basic accommodation block for starship crews but there are none of the usual facilities you would expect at a starport.
+
+=== World Population (P) ===
+{{WorldPop|name= Rovick|multiplier= 8|Population= 4}}
+* Rovick has 3 cities, more akin to large towns located on its surface. These cities have c81% of the worlds population living in them.
+** Garenne is located along the shore of the most southern sea and has a population of c25,900
+** Umadon is located in the southern hemisphere and is often described as the jewel of Rovick due its fern forest surroundings and idyllic climate. Umadon has a small population of c15,560
+** Tepama is also home to the planets meagre starport and is also located alongside the southern most sea. The population of Tepama is c23,340
+* The remaining 19% population of the planet who are not living in the urban areas live in scattered homesteads across the planet in small, usually family groupings of homesteads carving out a life for themselves and living off the land.
+
+==== Linguistic Topography ====
+The most commonly heard [[language]]s are:
+* [[Anglic]], one of the two official languages of the {{Imperium}}.
+* [[Vilani (language)|Vilani]], one of the two official languages of the {{Imperium}}.
+
+=== World Technology Level (T) ===
+{{WorldTech|name= Rovick|WorldTech= 7}}
+*The following tech levels can be applied to Rovick
+**High Common TL:7
+** Low Common TL:4
+** Further Subcategories:-
+***Energy TL:8 (Basic fusion power stations provide energy for the planets cities)
+***Electronics TL:9 (Core computers are the norm on Rovick as are interactive holographic projectors)
+***Manufacturing TL:6 (Basic automation does exist in the limited factories on Rovick but is not common place)
+***Medical TL:9 (Hospitals on Rovick have the capabilities to clone replacement organs and indeed carry out skin regrowth for severe injuries)
+***Environmental TL:6 (Buildings on Rovick do have robust air conditioning and heating systems.)
+***Land Transport TL:8 (Autonomous road vehicles are the norm on Rovick along with Walkers)
+***Water Transport TL:7 (Hovercraft are used extensively on the seas and also open plains of Rovick)
+***Air Transport TL:6 (Helicopters are utilised for Air Transport across Rovick)
+***Space Transport TL:6 (Rovick has the technology to create rocket motors but to date has not exploited this capability)
+***Personal Military TL:8 (The military on Rovick utilises stun weaponry as its common form of firearm)
+***Heavy Military TL:6 (Rovick has the technical capability to develop missiles with nuclear warheads however at this point never has)
+
+=== World Government (G) ===
+{{WorldGov|name= Rovick|Government= 2}}
+* The government on Rovick operates in a Confederated style with each city having its own locally elected government. In turn the leaders of each city regularly meet along with other senior elected officials to ensure that each city is aligned to the common good whilst also ensuring local sovereignty is protected. 
+* The government acts in a legislative style defining the laws and regulations that the local population and visiting outsiders have to abide by.
+** Due to the local legislation it a requirement that all citizens of Rovick take part in any local votes that take place. It is the role of the citizen to ensure their voice is heard and to subsequently accept the decision. Citizens take pride in their very proactive engagement in local and planet wide political debates and engagements.
+* Outside of the city governments that are no other significant factions that provide opposition to the over-arching government approach on Rovick. The alignment between the local city governments and the overarching planetary council is fundamental to how society is governed on Rovick.
+* Imperial nobles who have been granted estates on Rovick regularly take part in the planetary wide council. Their role is to help ensure Rovick is still kept "aligned" to The Imperium whilst being respectful of local decisions. Their presence is tolerated by the somewhat isolationist citizenry of Rovick.
+
+=== World Law (L) ===
+{{WorldLaw|name= Rovick|Law= 0}}
+* Rovick officially has no pre-establish consistent form of law, however locals understand the difference between "right and wrong" and as such their is a level of common law that is applied where cases of theft, murder etc occurs. Such crimes usually result in a "court" being established for the purpose of a trial and the accused is brought before it. Evidence is heard and then the court members decide the persons fate. 
+* This approach to the law is universally accepted as the norm across the planet with local meeting houses being used a court rooms as needed. Each city does maintain a jail and criminals are sentenced to time there where deemed necessary.
+* There is a presumption of innocence when an accused person is brought before a court and sentences can range from simple fines and jail time right up to the death penalty for the worst crimes. 
+* The law level like all worlds has differing levels and categories and the following levels apply.
+**Overall Level: 0
+**Weapons and Armour: 0 (No restrictions)
+**Economic: 0 (No contract law or licences are required)
+**Criminal Law: 2 (Moderate and serious crimes are prosecuted)
+**Private Law: 0 (No formal legal system exists)
+**Personal Rights: 0 (No restrictions)
+
+=== Imperial Landed Nobility ===
+{{Imperial Nobility|name= Rovick|Noble= Bc}}
+
+=== Trade Data ===
+* Importance:     -3 (very unimportant)
+** Gross World Product per Capita: 302cr
+** World Trade Number: 7
+** Inequality Rating: 67
+*** c.67% of the population are living at a lower standard than the rest of the population. This is mainly driven by the lack of robust infrastructure and industry so a lot of the population live very much at the lower end of the social spectrum.
+**Development Rating: 1
+** Tariffs - No Tariffs are in place and effectively Rovick operates as a free trade zone
+
+=== World Economy ===
+* Resources:      6 (few)
+** There are mineral resources on Rovick that could be exploited however these are predominantly located along the great rift located on the planets surface. Due to the often violent earthquakes that occur there at this time they have not been exploited at all. 
+** The planet does have significant natural resources located in the flora that grows on the planet and this has been used to develop medicines used locally. With the desire of the population to remain relatively isolated such medicines have not been exploited outside of the Rovick system.
+* Labor:          3 (thousands)
+** The low population on the planet means that the quantity of working age adults remains limited
+* Infrastructure: 1 (extremely limited)
+** There is almost no infrastructure outside of the city limits across the planet.
+* Efficiency:     -5 (extremely poor)
+** Efficiency is extremely poor due to lack of resource and robust infrastructure.
+
+=== World Culture ===
+* Heterogenity: 1 (monolithic)
+** The culture on Rovick is consistent across the planet. There are no significant subcultures present and society is very static in terms of cultural diversity.
+* Acceptance:   1 (extremely xenophobic)
+** Outsiders are not welcome to Rovick at all. The locals are a hardy folk and have placed no emphasis on improving or developing the simple and somewhat run down starport facilities in an effort to maintain their isolationist attitude.
+** There is a recognition that external supplies are needed to ensure certain technology is maintained on the planet however such imports are pre-arranged via agents and ship crews are rarely permitted to leave the starport.
+* Strangeness:  1 (very typical)
+** Despite their desire to be isolated and distinct from the rest of Imperium culture there is very little that is different about the local culture that wouldn't be recognised by visitors to the planet.
+* Symbols:      2 (concrete)
+** As with "Strangeness" the people of Rovick have for the most part utilised symbology that is recognisable across The Imperium.
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+
+* [[Ancients|circa -250,000]]: the [[Ancient]]s are active within the sector.
+* [[-9000s|circa -9,000]]: the [[Geonee]] encounter the [[Vilani]].
+* [[-5400]] to [[-4015]]: the [[Vilani]] [[Consolidation Wars]].
+* [[-4045]] to [[-2204]]: the region is part of the [[First Imperium|Ziru Sirka]].
+* [[-2204]] to [[-1776]]: the region becomes part of the [[Rule of Man]].
+* [[-1776]] to [[0]]: the [[Long Night]].
+* [[0|The Year 0]]: the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[604]]-[[622]]: the [[Civil War]].
+* [[624]]: the [[Express Boat Network]] is established.
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] charts the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+
+== References & Contributors (Sources) ==
+{{Detail}}
+{{Sources
+|S1= {{Ludography cite|name= Atlas of the Imperium |page= page 22|version= Classic Traveller}} (world location and some additional system data)
+|S2= [[John Harshman]], [[Marc Miller]]. ''[[Solomani (Alien Module)|Solomani]]'' ([[Game Designers Workshop]], 1986), pages 5, 7, 20. (sector background and history)
+|S3= {{Ludography cite|name= The Travellers' Digest 11 |page= pages 6-25}} (sector background and history, plus details for the [[Geonee]])
+|S4= {{Ludography cite|name= Vilani & Vargr |page= page 11}} (dot map provided, locating the world)
+|S5= {{Ludography cite|name= Knightfall |page= pages 74-80}} (sector data including the world, sector background and history)
+|S6= {{Ludography cite|name= First Survey |page= pages 4, 38-41, 102-109}} (sector data including the world circa [[0|The Year 0]]) 
+|S7= {{Ludography cite|name= Solomani |page= pages 57, 59|version= Mongoose Traveller}} (sector background and history)
+}}
+
+
+[[Category: Delphi Main worlds]].
+[[Category: First Imperium worlds]]
+[[Category: Rule of Man worlds]]
+[[Category: Second Imperium worlds]]
+{{LE|Era: Milieu 1116|T5 Second Survey worlds|}}

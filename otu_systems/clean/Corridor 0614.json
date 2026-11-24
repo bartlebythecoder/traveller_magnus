@@ -1,0 +1,734 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Corridor",
+  "hex": "0614",
+  "sector_abbreviation": "Corr",
+  "subsector": "Ian",
+  "name": "Dywosik",
+  "sources": [
+    {
+      "page": "Dywosik (System)",
+      "revid": 603153,
+      "timestamp": "2020-05-10T07:11:04Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Dywosik (System)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": null,
+          "type": "G5 V",
+          "notes": "Hannichuzik"
+        },
+        {
+          "role": "Secondary",
+          "name": null,
+          "type": "M8 V",
+          "notes": "In Orbit 11"
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Hannichuzik",
+      "stars": [
+        {
+          "name": "Hannichuzik",
+          "type": "G5 V"
+        }
+      ],
+      "labels": [
+        "Dywosik"
+      ],
+      "pages": [
+        "Dywosik (System)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Saagh",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "0.13",
+            "value": 0.13,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dywosik (System)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Deedo",
+          "raw": "Y500000-0",
+          "kind": "world",
+          "uwp": "Y500000-0",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dywosik (System)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Inner Belt",
+          "raw": "Y000000-9",
+          "kind": "world",
+          "uwp": "Y000000-9",
+          "distance": {
+            "raw": "0.46",
+            "value": 0.46,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dywosik (System)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Outer Belt",
+          "raw": "H00026A-9",
+          "kind": "world",
+          "uwp": "H00026A-9",
+          "distance": {
+            "raw": "0.8",
+            "value": 0.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dywosik (System)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Jadan",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1.2",
+            "value": 1.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dywosik (System)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": null,
+              "name_raw": "<Unnamed>",
+              "raw": "",
+              "kind": "empty",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "flags": [
+                "placeholder-row-empty"
+              ],
+              "sources": [
+                "Dywosik (System)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": null,
+              "name_raw": "<Unnamed>",
+              "raw": "",
+              "kind": "empty",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "flags": [
+                "placeholder-row-empty"
+              ],
+              "sources": [
+                "Dywosik (System)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": null,
+              "name_raw": "<Unnamed>",
+              "raw": "",
+              "kind": "empty",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "flags": [
+                "placeholder-row-empty"
+              ],
+              "sources": [
+                "Dywosik (System)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": null,
+              "name_raw": "<Unnamed>",
+              "raw": "",
+              "kind": "empty",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "flags": [
+                "placeholder-row-empty"
+              ],
+              "sources": [
+                "Dywosik (System)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Dywosik",
+          "raw": "C247547-A",
+          "kind": "world",
+          "uwp": "C247547-A",
+          "distance": {
+            "raw": "2.33",
+            "value": 2.33,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dywosik (System)"
+          ],
+          "mainworld": true
+        }
+      ]
+    },
+    {
+      "star": null,
+      "stars": [
+        {
+          "name": null,
+          "type": "M8 V"
+        }
+      ],
+      "labels": [
+        "Companion: Dywosik Companion"
+      ],
+      "pages": [
+        "Dywosik (System)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Zannai",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "0.12",
+            "value": 0.12,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dywosik (System)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": null,
+              "name_raw": "<Unnamed>",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Dywosik (System)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Gentilli",
+          "raw": "G100466-9",
+          "kind": "world",
+          "uwp": "G100466-9",
+          "distance": {
+            "raw": "0.25",
+            "value": 0.25,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dywosik (System)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Gaydos",
+          "raw": "H440500-9",
+          "kind": "world",
+          "uwp": "H440500-9",
+          "distance": {
+            "raw": "0.62",
+            "value": 0.62,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dywosik (System)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": null,
+              "name_raw": "<Unnamed>",
+              "raw": "",
+              "kind": "empty",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "flags": [
+                "placeholder-row-empty"
+              ],
+              "sources": [
+                "Dywosik (System)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": null,
+              "name_raw": "<Unnamed>",
+              "raw": "",
+              "kind": "empty",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "flags": [
+                "placeholder-row-empty"
+              ],
+              "sources": [
+                "Dywosik (System)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": null,
+              "name_raw": "<Unnamed>",
+              "raw": "",
+              "kind": "empty",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "flags": [
+                "placeholder-row-empty"
+              ],
+              "sources": [
+                "Dywosik (System)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Murph",
+          "raw": "Y300100-9",
+          "kind": "world",
+          "uwp": "Y300100-9",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dywosik (System)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Zulli",
+          "raw": "Y553000-0",
+          "kind": "world",
+          "uwp": "Y553000-0",
+          "distance": {
+            "raw": "1.5",
+            "value": 1.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dywosik (System)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": null,
+              "name_raw": "<Unnamed>",
+              "raw": "",
+              "kind": "empty",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "flags": [
+                "placeholder-row-empty"
+              ],
+              "sources": [
+                "Dywosik (System)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Pardoe Belt",
+          "raw": "Y000518-9",
+          "kind": "world",
+          "uwp": "Y000518-9",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Dywosik (System)"
+          ]
+        }
+      ],
+      "placement": {
+        "orbit": 11,
+        "au": null,
+        "from": "star template notes"
+      }
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Dywosik (System)",
+      "label": "Dywosik",
+      "stars": [
+        {
+          "name": "Hannichuzik",
+          "type": "G5 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Saagh",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "0.13",
+            "value": 0.13,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Deedo",
+          "raw": "Y500000-0",
+          "kind": "world",
+          "uwp": "Y500000-0",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Inner Belt",
+          "raw": "Y000000-9",
+          "kind": "world",
+          "uwp": "Y000000-9",
+          "distance": {
+            "raw": "0.46",
+            "value": 0.46,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Outer Belt",
+          "raw": "H00026A-9",
+          "kind": "world",
+          "uwp": "H00026A-9",
+          "distance": {
+            "raw": "0.8",
+            "value": 0.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Jadan",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1.2",
+            "value": 1.2,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": null,
+              "name_raw": "<Unnamed>",
+              "raw": "",
+              "kind": "empty",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "flags": [
+                "placeholder-row-empty"
+              ]
+            },
+            {
+              "index": 2,
+              "name": null,
+              "name_raw": "<Unnamed>",
+              "raw": "",
+              "kind": "empty",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "flags": [
+                "placeholder-row-empty"
+              ]
+            },
+            {
+              "index": 3,
+              "name": null,
+              "name_raw": "<Unnamed>",
+              "raw": "",
+              "kind": "empty",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "flags": [
+                "placeholder-row-empty"
+              ]
+            },
+            {
+              "index": 4,
+              "name": null,
+              "name_raw": "<Unnamed>",
+              "raw": "",
+              "kind": "empty",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "flags": [
+                "placeholder-row-empty"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Dywosik",
+          "raw": "C247547-A",
+          "kind": "world",
+          "uwp": "C247547-A",
+          "distance": {
+            "raw": "2.33",
+            "value": 2.33,
+            "unit": "AU"
+          }
+        }
+      ],
+      "stars_as_written": [
+        {
+          "name": "Hannichuzik",
+          "type": "G5 IV"
+        }
+      ]
+    },
+    {
+      "page": "Dywosik (System)",
+      "label": "Companion: Dywosik Companion",
+      "stars": [
+        {
+          "name": null,
+          "type": "M8 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Zannai",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "0.12",
+            "value": 0.12,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": null,
+              "name_raw": "<Unnamed>",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Gentilli",
+          "raw": "G100466-9",
+          "kind": "world",
+          "uwp": "G100466-9",
+          "distance": {
+            "raw": "0.25",
+            "value": 0.25,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Gaydos",
+          "raw": "H440500-9",
+          "kind": "world",
+          "uwp": "H440500-9",
+          "distance": {
+            "raw": "0.62",
+            "value": 0.62,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": null,
+              "name_raw": "<Unnamed>",
+              "raw": "",
+              "kind": "empty",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "flags": [
+                "placeholder-row-empty"
+              ]
+            },
+            {
+              "index": 2,
+              "name": null,
+              "name_raw": "<Unnamed>",
+              "raw": "",
+              "kind": "empty",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "flags": [
+                "placeholder-row-empty"
+              ]
+            },
+            {
+              "index": 3,
+              "name": null,
+              "name_raw": "<Unnamed>",
+              "raw": "",
+              "kind": "empty",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "flags": [
+                "placeholder-row-empty"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Murph",
+          "raw": "Y300100-9",
+          "kind": "world",
+          "uwp": "Y300100-9",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Zulli",
+          "raw": "Y553000-0",
+          "kind": "world",
+          "uwp": "Y553000-0",
+          "distance": {
+            "raw": "1.5",
+            "value": 1.5,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": null,
+              "name_raw": "<Unnamed>",
+              "raw": "",
+              "kind": "empty",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "flags": [
+                "placeholder-row-empty"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Pardoe Belt",
+          "raw": "Y000518-9",
+          "kind": "world",
+          "uwp": "Y000518-9",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Dywosik",
+    "UWP": "C547547-9",
+    "Stellar": "G5 V M8 V",
+    "PBG": "931",
+    "Bases": "",
+    "Remarks": "Ag Ni"
+  }
+}

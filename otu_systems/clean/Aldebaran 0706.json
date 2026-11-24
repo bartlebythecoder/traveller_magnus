@@ -1,0 +1,221 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Aldebaran",
+  "hex": "0706",
+  "sector_abbreviation": "Alde",
+  "subsector": "Euxene",
+  "name": "Asterope Primary",
+  "sources": [
+    {
+      "page": "Asterope (world)",
+      "revid": 1029392,
+      "timestamp": "2026-03-29T08:01:20Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Asterope (world)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Primary",
+          "type": "M5 V",
+          "notes": "Flare Star."
+        },
+        {
+          "role": "Secondary",
+          "name": "Secondary",
+          "type": "M6 V",
+          "notes": "Flare Star. Approximately 75 AU from the primary."
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Primary",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "M5 V"
+        }
+      ],
+      "labels": [
+        "Asterope Primary"
+      ],
+      "pages": [
+        "Asterope (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Planetoid",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "0.32",
+            "value": 0.32,
+            "unit": "AU"
+          },
+          "sources": [
+            "Asterope (world)"
+          ]
+        }
+      ]
+    },
+    {
+      "star": "Secondary",
+      "stars": [
+        {
+          "name": "Secondary",
+          "type": "M6 V"
+        }
+      ],
+      "labels": [
+        "Asterope Secondary"
+      ],
+      "pages": [
+        "Asterope (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Qui",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "0.05",
+            "value": 0.05,
+            "unit": "AU"
+          },
+          "sources": [
+            "Asterope (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Asterope",
+          "raw": "C201151-A",
+          "kind": "world",
+          "uwp": "C201151-A",
+          "distance": {
+            "raw": "0.11",
+            "value": 0.11,
+            "unit": "AU"
+          },
+          "sources": [
+            "Asterope (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 3,
+          "name": "Zunsaipah",
+          "raw": "H102000-0",
+          "kind": "world",
+          "uwp": "H102000-0",
+          "distance": {
+            "raw": "0.50",
+            "value": 0.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Asterope (world)"
+          ]
+        }
+      ],
+      "placement": {
+        "orbit": null,
+        "au": 75.0,
+        "from": "star template notes"
+      }
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Asterope (world)",
+      "label": "Asterope Primary",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "M5 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Planetoid",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "0.32",
+            "value": 0.32,
+            "unit": "AU"
+          }
+        }
+      ]
+    },
+    {
+      "page": "Asterope (world)",
+      "label": "Asterope Secondary",
+      "stars": [
+        {
+          "name": "Secondary",
+          "type": "M6 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Qui",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "0.05",
+            "value": 0.05,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Asterope",
+          "raw": "C201151-A",
+          "kind": "world",
+          "uwp": "C201151-A",
+          "distance": {
+            "raw": "0.11",
+            "value": 0.11,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Zunsaipah",
+          "raw": "H102000-0",
+          "kind": "world",
+          "uwp": "H102000-0",
+          "distance": {
+            "raw": "0.50",
+            "value": 0.5,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Asterope",
+    "UWP": "C201151-A",
+    "Stellar": "M1 V M6 V",
+    "PBG": "600",
+    "Bases": "",
+    "Remarks": "Ic Lo Va Co Tz"
+  }
+}

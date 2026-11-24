@@ -1,0 +1,928 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "1006",
+  "sector_abbreviation": "Spin",
+  "subsector": "Jewell",
+  "name": "Emerald",
+  "sources": [
+    {
+      "page": "Emerald (system)",
+      "revid": 925874,
+      "timestamp": "2025-05-21T21:40:20Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Emerald (system)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Lustre",
+          "type": "M1 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Lustre",
+      "stars": [
+        {
+          "name": "Lustre",
+          "type": "M1 V"
+        }
+      ],
+      "labels": [
+        "Emerald"
+      ],
+      "pages": [
+        "Emerald (system)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Emerald",
+          "raw": "B766555-B",
+          "kind": "world",
+          "uwp": "B766555-B",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Emerald (system)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 1,
+          "name": "Phantome",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Emerald (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring System",
+              "name_raw": "* ''Ring System''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1",
+                "value": 1.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Emerald (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Ring System",
+              "name_raw": "* ''Ring System''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Emerald (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Mitchell",
+              "name_raw": "* ''Mitchell''",
+              "raw": "Y300267-B",
+              "kind": "world",
+              "uwp": "Y300267-B",
+              "distance": {
+                "raw": "6",
+                "value": 6.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Emerald (system)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Ruapehu",
+              "name_raw": "* ''Ruapehu''",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Emerald (system)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Sacrist",
+              "name_raw": "* ''Sacrist''",
+              "raw": "Y410000-0",
+              "kind": "world",
+              "uwp": "Y410000-0",
+              "distance": {
+                "raw": "9",
+                "value": 9.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Emerald (system)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Alcharam",
+              "name_raw": "* ''Alcharam''",
+              "raw": "Y732000-0",
+              "kind": "world",
+              "uwp": "Y732000-0",
+              "distance": {
+                "raw": "10",
+                "value": 10.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Emerald (system)"
+              ]
+            },
+            {
+              "index": 7,
+              "name": "Dervish",
+              "name_raw": "* ''Dervish''",
+              "raw": "Y510000-0",
+              "kind": "world",
+              "uwp": "Y510000-0",
+              "distance": {
+                "raw": "25",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Emerald (system)"
+              ]
+            },
+            {
+              "index": 8,
+              "name": "Minime",
+              "name_raw": "* ''Minime''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "40",
+                "value": 40.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Emerald (system)"
+              ]
+            },
+            {
+              "index": 9,
+              "name": "Stoly",
+              "name_raw": "* ''Stoly''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "45",
+                "value": 45.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Emerald (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Planetoid Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Emerald (system)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Siishisha",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Emerald (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring System",
+              "name_raw": "* ''Ring System''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Emerald (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Khudalin",
+              "name_raw": "* ''Khudalin''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "5",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Emerald (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Gakhidar",
+              "name_raw": "* ''Gakhidar''",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "40",
+                "value": 40.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Emerald (system)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Khuulamdiir",
+              "name_raw": "* ''Khuulamdiir''",
+              "raw": "Y401000-0",
+              "kind": "world",
+              "uwp": "Y401000-0",
+              "distance": {
+                "raw": "55",
+                "value": 55.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Emerald (system)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Gamuur",
+              "name_raw": "* ''Gamuur''",
+              "raw": "Y320000-0",
+              "kind": "world",
+              "uwp": "Y320000-0",
+              "distance": {
+                "raw": "300",
+                "value": 300.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Emerald (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Planetoid Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Emerald (system)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Ashakha",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "2,8",
+            "value": 2.8,
+            "unit": "AU"
+          },
+          "distance_source": "Sean, 2026-11-16: a comma for a decimal point",
+          "corrected": true,
+          "sources": [
+            "Emerald (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Shimgeru",
+              "name_raw": "* ''Shimgeru''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Emerald (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Planetoid Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Emerald (system)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Karaku",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Emerald (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring System",
+              "name_raw": "* ''Ring System''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1",
+                "value": 1.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Emerald (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Chasseur",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "27.4",
+            "value": 27.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Emerald (system)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Emerald (system)",
+      "label": "Emerald",
+      "stars": [
+        {
+          "name": "Lustre",
+          "type": "M1 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Emerald",
+          "raw": "B766555-B",
+          "kind": "world",
+          "uwp": "B766555-B",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Phantome",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring System",
+              "name_raw": "* ''Ring System''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1",
+                "value": 1.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Ring System",
+              "name_raw": "* ''Ring System''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Mitchell",
+              "name_raw": "* ''Mitchell''",
+              "raw": "Y300267-B",
+              "kind": "world",
+              "uwp": "Y300267-B",
+              "distance": {
+                "raw": "6",
+                "value": 6.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Ruapehu",
+              "name_raw": "* ''Ruapehu''",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Sacrist",
+              "name_raw": "* ''Sacrist''",
+              "raw": "Y410000-0",
+              "kind": "world",
+              "uwp": "Y410000-0",
+              "distance": {
+                "raw": "9",
+                "value": 9.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Alcharam",
+              "name_raw": "* ''Alcharam''",
+              "raw": "Y732000-0",
+              "kind": "world",
+              "uwp": "Y732000-0",
+              "distance": {
+                "raw": "10",
+                "value": 10.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 7,
+              "name": "Dervish",
+              "name_raw": "* ''Dervish''",
+              "raw": "Y510000-0",
+              "kind": "world",
+              "uwp": "Y510000-0",
+              "distance": {
+                "raw": "25",
+                "value": 25.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 8,
+              "name": "Minime",
+              "name_raw": "* ''Minime''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "40",
+                "value": 40.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 9,
+              "name": "Stoly",
+              "name_raw": "* ''Stoly''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "45",
+                "value": 45.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Planetoid Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Siishisha",
+          "raw": "'''Large GG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring System",
+              "name_raw": "* ''Ring System''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Khudalin",
+              "name_raw": "* ''Khudalin''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "5",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Gakhidar",
+              "name_raw": "* ''Gakhidar''",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "40",
+                "value": 40.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Khuulamdiir",
+              "name_raw": "* ''Khuulamdiir''",
+              "raw": "Y401000-0",
+              "kind": "world",
+              "uwp": "Y401000-0",
+              "distance": {
+                "raw": "55",
+                "value": 55.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Gamuur",
+              "name_raw": "* ''Gamuur''",
+              "raw": "Y320000-0",
+              "kind": "world",
+              "uwp": "Y320000-0",
+              "distance": {
+                "raw": "300",
+                "value": 300.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Planetoid Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Ashakha",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "2,8",
+            "value": 2.8,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Shimgeru",
+              "name_raw": "* ''Shimgeru''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ],
+          "distance_source": "Sean, 2026-11-16: a comma for a decimal point",
+          "corrected": true
+        },
+        {
+          "orbit": 6,
+          "name": "Planetoid Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Karaku",
+          "raw": "'''Small GG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring System",
+              "name_raw": "* ''Ring System''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1",
+                "value": 1.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Chasseur",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "27.4",
+            "value": 27.4,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Emerald",
+    "UWP": "B766555-B",
+    "Stellar": "M1 V",
+    "PBG": "534",
+    "Bases": "S",
+    "Remarks": "Ag Ni Ga Pr"
+  }
+}

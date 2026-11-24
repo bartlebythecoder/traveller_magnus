@@ -1,0 +1,48 @@
+{{StellarDataQuery
+|name= {{World|Guru|Dagudashaag|Arnakhish|2005}}
+|First Survey name=Ladi
+}}
+{{InfoboxSystem
+ |name=Guru
+ |subsector=Arnakhish
+ |sector=Dagudashaag
+ |hex=2005
+ |star='''Sage'''
+ |type='''M1 V'''
+ |P1=Guru|Dist1=0.2|UWP1=B51077B-9
+ |P1M1=* ''Delphi''|Dist1M1=30|UWP1M1=F40046A-9
+}}
+
+== Astrography and Planetology == 
+Guru is a member of the [[Shegimuud Trace]].
+
+=== Stellar Data ===
+The Guru System is centered on a cool red star called [[Sage (star)|Sage]]. Guru and its satellite ''Delphi'' are the only major bodies, orbiting at 0.2AU.
+ 
+{{MonostellarSystem
+|name           = Guru
+|primary        = M1 V 
+|PrimaryName    = Sage
+}}
+
+== History & Background (Dossier) ==
+The system is divided into three major power blocs who each control regions of Guru and Delphi. The largest state is the [[Republic of Arasht]], an impersonal bureaucracy headed by a military junta with a poor [[sophont]]s rights record. It is opposed by [[Berengeria]] and [[Pavax]], two closely allied democracies. Both are technologically advanced but neither is powerful enough to independently face Arasht.
+
+In the [[700s]] the tensions between the three nations began to increase. Informed observers began to predict open warfare. By [[1110]] the tensions had reached all time highs, with draconian new security measures implemented in all three countries, and all three nations have begun military build-ups and maneuvers along their respective borders. 
+
+=== World Starport (St) ===
+{{Starport|name= Guru|Starport= B}}
+
+== References and Contributors ==
+{{Intermediate}}
+{{Sources
+|S1= {{Ludography cite|name=Signal-GK 10|page=51|article=Library Data: Arnakhish Subsector}} via. {{HIWG}}
+|S2= {{Ludography cite|name=First Survey|page=79}}
+|S3= {{Ludography cite|name=Encyclopaedia Dagudashaag|page=136}}
+}}
+
+[[Category: Humaniti worlds]]
+[[Category: Rule of Man worlds]]
+[[Category: Second Imperium worlds]]
+[[Category: Shegimuud Trace worlds]]
+{{LE|T5 Second Survey worlds}}

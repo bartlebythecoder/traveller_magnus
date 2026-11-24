@@ -1,0 +1,364 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Reaver's Deep",
+  "hex": "1224",
+  "sector_abbreviation": "Reav",
+  "subsector": "Ea",
+  "name": "Roikhoi",
+  "sources": [
+    {
+      "page": "Roakhoi (world)",
+      "revid": 873605,
+      "timestamp": "2024-12-22T18:23:40Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Roakhoi (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Uwalraw",
+          "type": "F5 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Uwalraw",
+      "stars": [
+        {
+          "name": "Uwalraw",
+          "type": "F5 V"
+        }
+      ],
+      "labels": [
+        "Roikhoi"
+      ],
+      "pages": [
+        "Roakhoi (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Iserca",
+          "raw": "X100000-0",
+          "kind": "world",
+          "uwp": "X100000-0",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "sources": [
+            "Roakhoi (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Ayua",
+          "raw": "X100000-0",
+          "kind": "world",
+          "uwp": "X100000-0",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "sources": [
+            "Roakhoi (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Tryaloa",
+          "raw": "X6B0000-0",
+          "kind": "world",
+          "uwp": "X6B0000-0",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "sources": [
+            "Roakhoi (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Roikhoi",
+          "raw": "C969543-4",
+          "kind": "world",
+          "uwp": "C969543-4",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "sources": [
+            "Roakhoi (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Fteatoah",
+              "name_raw": "* ''Fteatoah''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Roakhoi (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Sui'ikh",
+              "name_raw": "* ''Sui'ikh''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Roakhoi (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Khoiaya",
+              "name_raw": "* ''Khoiaya''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Roakhoi (world)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 5,
+          "name": "Rikhao",
+          "raw": "E430000-0",
+          "kind": "world",
+          "uwp": "E430000-0",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "sources": [
+            "Roakhoi (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Keo",
+              "name_raw": "* ''Keo''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Roakhoi (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Ryehaia",
+          "raw": "'''GG'''",
+          "kind": "gas_giant",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "flags": [
+            "gg-no-size-class"
+          ],
+          "sources": [
+            "Roakhoi (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Afyeaw",
+          "raw": "'''GG'''",
+          "kind": "gas_giant",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "flags": [
+            "gg-no-size-class"
+          ],
+          "sources": [
+            "Roakhoi (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Roakhoi (world)",
+      "label": "Roikhoi",
+      "stars": [
+        {
+          "name": "Uwalraw",
+          "type": "F5 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Iserca",
+          "raw": "X100000-0",
+          "kind": "world",
+          "uwp": "X100000-0",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Ayua",
+          "raw": "X100000-0",
+          "kind": "world",
+          "uwp": "X100000-0",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Tryaloa",
+          "raw": "X6B0000-0",
+          "kind": "world",
+          "uwp": "X6B0000-0",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Roikhoi",
+          "raw": "C969543-4",
+          "kind": "world",
+          "uwp": "C969543-4",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Fteatoah",
+              "name_raw": "* ''Fteatoah''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            },
+            {
+              "index": 2,
+              "name": "Sui'ikh",
+              "name_raw": "* ''Sui'ikh''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            },
+            {
+              "index": 3,
+              "name": "Khoiaya",
+              "name_raw": "* ''Khoiaya''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Rikhao",
+          "raw": "E430000-0",
+          "kind": "world",
+          "uwp": "E430000-0",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Keo",
+              "name_raw": "* ''Keo''",
+              "raw": "",
+              "kind": "unknown",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Ryehaia",
+          "raw": "'''GG'''",
+          "kind": "gas_giant",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "flags": [
+            "gg-no-size-class"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Afyeaw",
+          "raw": "'''GG'''",
+          "kind": "gas_giant",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "flags": [
+            "gg-no-size-class"
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Roakhoi",
+    "UWP": "C969543-5",
+    "Stellar": "F5 V",
+    "PBG": "702",
+    "Bases": "",
+    "Remarks": "Ni Pr Asla5 Lt"
+  }
+}

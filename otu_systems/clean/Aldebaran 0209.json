@@ -1,0 +1,687 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Aldebaran",
+  "hex": "0209",
+  "sector_abbreviation": "Alde",
+  "subsector": "Euxene",
+  "name": "Corinna",
+  "sources": [
+    {
+      "page": "Corinna (world)",
+      "revid": 1020363,
+      "timestamp": "2026-03-13T10:35:55Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Corinna (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Primary",
+          "type": "G1 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Primary",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "G1 V"
+        }
+      ],
+      "labels": [
+        "Corinna"
+      ],
+      "pages": [
+        "Corinna (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Planet 1",
+          "raw": "Y400000-0",
+          "kind": "world",
+          "uwp": "Y400000-0",
+          "distance": {
+            "raw": "0.15",
+            "value": 0.15,
+            "unit": "AU"
+          },
+          "sources": [
+            "Corinna (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Planet 2",
+          "raw": "Y310000-0",
+          "kind": "world",
+          "uwp": "Y310000-0",
+          "distance": {
+            "raw": "0.32",
+            "value": 0.32,
+            "unit": "AU"
+          },
+          "sources": [
+            "Corinna (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Whateer",
+          "raw": "G200325-9",
+          "kind": "world",
+          "uwp": "G200325-9",
+          "distance": {
+            "raw": "0.66",
+            "value": 0.66,
+            "unit": "AU"
+          },
+          "sources": [
+            "Corinna (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Corinna",
+          "raw": "B687464-A",
+          "kind": "world",
+          "uwp": "B687464-A",
+          "distance": {
+            "raw": "1.05",
+            "value": 1.05,
+            "unit": "AU"
+          },
+          "sources": [
+            "Corinna (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Bone",
+              "raw": "F100266-A",
+              "kind": "world",
+              "uwp": "F100266-A",
+              "distance": {
+                "raw": "19 Diam",
+                "value": 19.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Corinna (world)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 5,
+          "name": "Planet 4",
+          "raw": "Y521000-0",
+          "kind": "world",
+          "uwp": "Y521000-0",
+          "distance": {
+            "raw": "1.51",
+            "value": 1.51,
+            "unit": "AU"
+          },
+          "sources": [
+            "Corinna (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Planet 5",
+          "raw": "Y7B3000-0",
+          "kind": "world",
+          "uwp": "Y7B3000-0",
+          "distance": {
+            "raw": "2.58",
+            "value": 2.58,
+            "unit": "AU"
+          },
+          "sources": [
+            "Corinna (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "22 Diam",
+                "value": 22.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Corinna (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "30 Diam",
+                "value": 30.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Corinna (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Proxima",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "6.01",
+            "value": 6.01,
+            "unit": "AU"
+          },
+          "sources": [
+            "Corinna (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Proxy",
+              "raw": "Y201000-0",
+              "kind": "world",
+              "uwp": "Y201000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Corinna (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Nice",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "14 Diam",
+                "value": 14.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Corinna (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Vacation",
+              "raw": "G3A1265-A",
+              "kind": "world",
+              "uwp": "G3A1265-A",
+              "distance": {
+                "raw": "20 Diam",
+                "value": 20.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Corinna (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Eisen",
+              "raw": "Y202000-0",
+              "kind": "world",
+              "uwp": "Y202000-0",
+              "distance": {
+                "raw": "30 Diam",
+                "value": 30.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Corinna (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Distante",
+          "raw": "H7A3112-A",
+          "kind": "world",
+          "uwp": "H7A3112-A",
+          "distance": {
+            "raw": "11.8",
+            "value": 11.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Corinna (world)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Johnson",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "15.5",
+            "value": 15.5,
+            "unit": "AU"
+          },
+          "sources": [
+            "Corinna (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y310000-0",
+              "kind": "world",
+              "uwp": "Y310000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Corinna (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "20 Diam",
+                "value": 20.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Corinna (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Planet 7",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "24.7",
+            "value": 24.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Corinna (world)"
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Planet 8",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "26.3",
+            "value": 26.3,
+            "unit": "AU"
+          },
+          "sources": [
+            "Corinna (world)"
+          ]
+        },
+        {
+          "orbit": 12,
+          "name": "Gas Giant",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "75.6",
+            "value": 75.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Corinna (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y2A0000-0",
+              "kind": "world",
+              "uwp": "Y2A0000-0",
+              "distance": {
+                "raw": "13 Diam",
+                "value": 13.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Corinna (world)"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Corinna (world)",
+      "label": "Corinna",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "G1 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Planet 1",
+          "raw": "Y400000-0",
+          "kind": "world",
+          "uwp": "Y400000-0",
+          "distance": {
+            "raw": "0.15",
+            "value": 0.15,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Planet 2",
+          "raw": "Y310000-0",
+          "kind": "world",
+          "uwp": "Y310000-0",
+          "distance": {
+            "raw": "0.32",
+            "value": 0.32,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Whateer",
+          "raw": "G200325-9",
+          "kind": "world",
+          "uwp": "G200325-9",
+          "distance": {
+            "raw": "0.66",
+            "value": 0.66,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Corinna",
+          "raw": "B687464-A",
+          "kind": "world",
+          "uwp": "B687464-A",
+          "distance": {
+            "raw": "1.05",
+            "value": 1.05,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Bone",
+              "raw": "F100266-A",
+              "kind": "world",
+              "uwp": "F100266-A",
+              "distance": {
+                "raw": "19 Diam",
+                "value": 19.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Planet 4",
+          "raw": "Y521000-0",
+          "kind": "world",
+          "uwp": "Y521000-0",
+          "distance": {
+            "raw": "1.51",
+            "value": 1.51,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Planet 5",
+          "raw": "Y7B3000-0",
+          "kind": "world",
+          "uwp": "Y7B3000-0",
+          "distance": {
+            "raw": "2.58",
+            "value": 2.58,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "22 Diam",
+                "value": 22.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "30 Diam",
+                "value": 30.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Proxima",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "6.01",
+            "value": 6.01,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Proxy",
+              "raw": "Y201000-0",
+              "kind": "world",
+              "uwp": "Y201000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Nice",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "14 Diam",
+                "value": 14.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Vacation",
+              "raw": "G3A1265-A",
+              "kind": "world",
+              "uwp": "G3A1265-A",
+              "distance": {
+                "raw": "20 Diam",
+                "value": 20.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Eisen",
+              "raw": "Y202000-0",
+              "kind": "world",
+              "uwp": "Y202000-0",
+              "distance": {
+                "raw": "30 Diam",
+                "value": 30.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Distante",
+          "raw": "H7A3112-A",
+          "kind": "world",
+          "uwp": "H7A3112-A",
+          "distance": {
+            "raw": "11.8",
+            "value": 11.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 9,
+          "name": "Johnson",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "15.5",
+            "value": 15.5,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y310000-0",
+              "kind": "world",
+              "uwp": "Y310000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "20 Diam",
+                "value": 20.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Planet 7",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "24.7",
+            "value": 24.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 11,
+          "name": "Planet 8",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "26.3",
+            "value": 26.3,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 12,
+          "name": "Gas Giant",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "75.6",
+            "value": 75.6,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y2A0000-0",
+              "kind": "world",
+              "uwp": "Y2A0000-0",
+              "distance": {
+                "raw": "13 Diam",
+                "value": 13.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Corinna",
+    "UWP": "B687464-A",
+    "Stellar": "G1 V",
+    "PBG": "203",
+    "Bases": "M",
+    "Remarks": "Ni Ga Pa (Neozinga) Re"
+  }
+}

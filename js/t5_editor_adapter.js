@@ -151,7 +151,9 @@
         const seeded = SE().applyUwpSeed({ ...uwpLock, _manualFields: [...extraMF] }, b._uwpSeed);
         return {
             _id: b._id,
-            type: b.type === 'Gas Giant' ? (b.ggType === 'GS' ? 'Small Gas Giant' : 'Large Gas Giant')
+            // Only an explicit Large is Large: an unclassed gas giant (ggType 'GM') is Small, which
+            // is also what the editor's Size dropdown shows for it (Sean, 2026-11-16).
+            type: b.type === 'Gas Giant' ? (b.ggType === 'GL' ? 'Large Gas Giant' : 'Small Gas Giant')
                 : b.type === 'Belt' ? 'Planetoid Belt' : 'Terrestrial World',
             name: b.name || '', uwp: b.uwp || null,
             worldType: seeded.worldType, size: seeded.size, atm: seeded.atm, hydro: seeded.hydro,

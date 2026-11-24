@@ -1,0 +1,249 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "3029",
+  "sector_abbreviation": "Spin",
+  "subsector": "Mora",
+  "name": "Pallique",
+  "sources": [
+    {
+      "page": "Pallique (SM 3029) (world)",
+      "revid": 1063838,
+      "timestamp": "2026-07-19T14:22:56Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Pallique (SM 3029) (world)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Primary",
+          "type": "M0 V",
+          "notes": null
+        },
+        {
+          "role": "Secondary",
+          "name": "Secondary",
+          "type": "M1 V",
+          "notes": "Approximately 0.03 AU from the primary."
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Primary",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "M0 V"
+        }
+      ],
+      "labels": [
+        "Pallique"
+      ],
+      "pages": [
+        "Pallique (SM 3029) (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Companion",
+          "name_raw": "'''Companion'''",
+          "raw": "'''M1 V'''",
+          "kind": "star",
+          "type": "M1 V",
+          "distance": {
+            "raw": "0.03",
+            "value": 0.03,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ],
+          "sources": [
+            "Pallique (SM 3029) (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Shepherd",
+          "raw": "H100213-D",
+          "kind": "world",
+          "uwp": "H100213-D",
+          "distance": {
+            "raw": "0.18",
+            "value": 0.18,
+            "unit": "AU"
+          },
+          "sources": [
+            "Pallique (SM 3029) (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Inner Belt",
+          "raw": "F000615-D",
+          "kind": "world",
+          "uwp": "F000615-D",
+          "distance": {
+            "raw": "0.35",
+            "value": 0.35,
+            "unit": "AU"
+          },
+          "sources": [
+            "Pallique (SM 3029) (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Pallique",
+          "raw": "A511965-E",
+          "kind": "world",
+          "uwp": "A511965-E",
+          "distance": {
+            "raw": "0.53",
+            "value": 0.53,
+            "unit": "AU"
+          },
+          "sources": [
+            "Pallique (SM 3029) (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 5,
+          "name": "Outer Belt",
+          "raw": "G000516-D",
+          "kind": "world",
+          "uwp": "G000516-D",
+          "distance": {
+            "raw": "0.76",
+            "value": 0.76,
+            "unit": "AU"
+          },
+          "sources": [
+            "Pallique (SM 3029) (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Herder",
+          "raw": "G200366-D",
+          "kind": "world",
+          "uwp": "G200366-D",
+          "distance": {
+            "raw": "1.57",
+            "value": 1.57,
+            "unit": "AU"
+          },
+          "sources": [
+            "Pallique (SM 3029) (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Pallique (SM 3029) (world)",
+      "label": "Pallique",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "M0 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Companion",
+          "name_raw": "'''Companion'''",
+          "raw": "'''M1 V'''",
+          "kind": "star",
+          "type": "M1 V",
+          "distance": {
+            "raw": "0.03",
+            "value": 0.03,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Shepherd",
+          "raw": "H100213-D",
+          "kind": "world",
+          "uwp": "H100213-D",
+          "distance": {
+            "raw": "0.18",
+            "value": 0.18,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Inner Belt",
+          "raw": "F000615-D",
+          "kind": "world",
+          "uwp": "F000615-D",
+          "distance": {
+            "raw": "0.35",
+            "value": 0.35,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Pallique",
+          "raw": "A511965-E",
+          "kind": "world",
+          "uwp": "A511965-E",
+          "distance": {
+            "raw": "0.53",
+            "value": 0.53,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Outer Belt",
+          "raw": "G000516-D",
+          "kind": "world",
+          "uwp": "G000516-D",
+          "distance": {
+            "raw": "0.76",
+            "value": 0.76,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Herder",
+          "raw": "G200366-D",
+          "kind": "world",
+          "uwp": "G200366-D",
+          "distance": {
+            "raw": "1.57",
+            "value": 1.57,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Palique",
+    "UWP": "A511965-E",
+    "Stellar": "M0 V M1 V",
+    "PBG": "320",
+    "Bases": "",
+    "Remarks": "Hi Ic In Na Pz O:3025 Ht"
+  }
+}

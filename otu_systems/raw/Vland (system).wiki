@@ -1,0 +1,116 @@
+{{InfoboxSystem
+|name=Vland
+|sector=Vland|subsector=Vland|hex=1717
+|star=<big>''[[Urakkalan (star)|Urakkalan]]''</big>|type=<big>''F8 V''</big>
+|P0= -  |Dist0= 0.2  |UWP0= ''<small>(Empty Orbit)</small>''
+|P1= Sagadir|Dist1=0.4|UWP1=Y100000-0
+|P2= Umiggash|Dist2=0.7|UWP2=Y500000-0
+|P2M1= Dinnika |Dist2M1= ''<small>R= 35</small>''|UWP2M1=''<small>Y400000-0</small>''
+|P3= Khamiur Belt|Dist3=1.0|UWP3=F00026C-E
+|P4= Vland|Dist4=1.6|UWP4=A967A9A-F
+|P4M1= Irukka |Dist4M1= ''<small>R= 12</small>''|UWP4M1=''<small>G42422C-E</small>''
+|P4M2= [[Gashema (world)|Gashema]] |Dist4M2= ''<small>R= 35</small>''|UWP4M2=''<small>F43456C-F</small>''
+|P4M3= Kalaguur |Dist4M3= ''<small>R= 50</small>''|UWP4M3=''<small>H7A2220-E</small>''
+|P5= -  |Dist5= 2.8   |UWP5= ''<small>(Empty Orbit)</small>''
+|P6= Lirshaia|Dist6=5.2|UWP6=Y400000-0
+|P6M1= Agu |Dist6M1= ''<small>R= 45</small>''|UWP6M1=''<small>YS00000-0</small>''
+|P7= Bikamakhu|Dist7=10|UWP7=Y523000-0
+|P7M1= Kaniirer |Dist7M1= ''<small>R= 5</small>''|UWP7M1=''<small>Y100000-0</small>''
+|P8= Luukad|Dist8=19.6|UWP8=F9A466B-F
+}}
+The worlds of the [[Vland (system)|Vland system]] orbit around [[Urakkalan (star)|Urakkalan]], a yellow-white main sequence star both hotter and brighter then [[Sol (star)|Sol]]. 
+* It is the [[Homeworld|home system]] of the branch of [[Humaniti]] known as the [[Vilani]].
+
+== Description (Specifications) ==
+
+=== Primary Star ===
+The Vland system has a solitary primary star named ''[[Urakkalan (star)|Urakkalan]]''.
+* It is a white main sequence.
+
+{{MonostellarSystem
+|name           = Vland
+|PrimaryName    = [[Urakkalan (star)|Urakkalan]]
+|primary        = F8 V 
+|PrimaryNotes   = See ''[[Urakkalan (star)|Urakkalan]]'' for additional data.
+}}
+
+=== The Inner System ===
+The inner system contains two intensely hot worlds and a [[planetoid belt]]:
+* They receive very high levels of [[Electromagnetic Spectrum|stellar energy]].
+
+[[File:Chart Orbit Inner Region Simple.png|600 px]]
+
+'''Sagadir'''is the system's innermost world and experiences scorching temperatures.
+* It is rarely visited.
+
+'''Umiggash''', and Umiggahs's large moon '''Dinnika''' remain undeveloped balls of rock. 
+* Umiggash and Dinnika are somewhat unusual, as their similarity in size makes them a [[Double World|double-planet system]]. 
+*  These worlds are rarely visited, being of interest mainly to scientists.
+
+The '''Khamiur Belt''' lies just starward of the [[habitable zone]].
+* The belt's resources were mostly mined out by the start of the [[Interstellar Wars]]. Prospecting efforts continue, however, in a search for other, less valuable deposits. 
+
+----
+
+=== The [[Habitable Zone]] ===
+[[Vland (world)|Vland]], the [[mainworld]] of the system, and its three moons orbit within the star's [[habitable zone]]:
+
+[[File:Chart Orbit HZ Region Detailed.png|600 px]]
+
+==== Vland's Moons ====
+'''[[Vland (world)|Vland]]''' has three natural satellites; innermost ''Irukka'', well-colonized ''Gashema'', and large, distant ''Kalaguur''. The combined illumination provided by these three moons make dark nights virtually unknown. When all three moons are full, the night-time light level makes outdoor reading possible without artificial aid. 
+
+* '''Irukka''' ia barren ball of rock orbiting roughly 170,000 km from [[Vland (world)|Vland]]. A small corporate mining and fueling station is maintained here, along with a government-operated weather surveillance post. The latter installation coordinates information from thousands of weather satellites circling [[Vland (world)|Vland]] in geostationary orbits. 
+
+* '''[[Gashema (world)|Gashema]]''' is marginally habitable with its thin atmosphere and significant amount of free water. Orbiting [[Vland (world)|Vland]] at a distance 550,000 km, [[Gashema (world)|Gashema]] supports a thriving colony, a [[psychohistory|psychohistorical]] research station, and a military base - The operational headquarters of [[Vland (world)|Vland's]] [[COACC]]. 
+
+* '''Kalaquur''' is a large satellite, nearly large enough to be a twin planet. A distant 720,000 km from Vland, Kalaquur is seldom visited. Its atmosphere - rich with sulfur compounds - is poisonous, and the only local settlement is a small corporate mining colony.
+
+----
+
+===The Outer System===
+The outer system contains three frigidly cold worlds:
+
+[[File:Chart Orbit Outer Region.png|600 px]]
+
+'''Lirshala''' is a barren, uninhabited world.
+* Lishala's small moon, '''Aga''', is equally barren.
+
+'''Bikamakku''' is the next world out from Lirshala and is noteworthy only for its thin atmosphere and sizable ice caps.
+* Bikamakhu has one satellite, '''Kaniirer''', an irregular body pockmarked with craters. 
+
+'''Luukad''' is the outermost world in the Vland system. Beneath its dense methane atmosphere lie the majority of in-system naval facilities, including a capable shipyard.
+* Despite Luukad's hostile environment, over three million people make their homes there.
+
+== History & Background (Dossier) ==
+
+==== System Timeline ====
+Major events that have affected this system and the wider region that it lies within:
+* [[-4045]] to [[-2204]]: the [[First Imperium|Ziru Sirka]] claims and settles worlds across the region.
+* [[-2404]] to [[-2215]]: the [[Interstellar Wars]].
+* [[-2204]] to [[-1776]]: the [[Rule of Man]] administers the worlds of the region.
+* [[-1776]] to [[0]]: the [[Long Night]]. There is widespread regression within the area and some worlds [[Barren World|become barren]].
+* [[0|The Year 0]]: the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the [[First Survey]] charts the system.
+* [[604]] to [[622]]: the {{Imperial}} [[Civil War]]. The region suffers disruption and widespread economic issues.
+* [[624]]: the [[Express Boat Network]] is established, facilitating communications, trade, and economic growth within the area.
+* [[995]]-[[1065]]: the [[Second Survey]] charts the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+
+== References & Contributors (Sources) ==
+{{Detail}}
+{{Sources
+|S1= {{MT}} [[Vilani & Vargr]]
+|S2= 
+|S3= 
+|S4= 
+}}
+
+[[Category: Aasha Ziru Sirka worlds]]
+[[Category: Era: Interstellar Wars]]
+[[Category: Psychohistory]]
+[[Category: Psychohistory worlds]]
+[[Category: Shipyard]]
+[[Category: Shipyard worlds]]
+[[Category: Vilani]]
+{{LE|Systems}}

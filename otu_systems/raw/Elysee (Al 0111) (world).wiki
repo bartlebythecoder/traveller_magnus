@@ -1,0 +1,222 @@
+[[File:Alien Moon 263c-0.jpg|250 px|right]]
+{{UWP 
+|name    = {{World|Elysee (Al 0111)|Aldebaran|Star Bridge|0111}}
+|era     = Milieu 1116
+|uc      = A872AA9-E
+|popc    = 3
+|zonec   = green
+|alg     = SoFr
+|class   = He Hi In / Ht
+|trade   = he
+|climate = -
+|gravity = -
+|orbit   = -
+|bases   = -
+|primary = G5 V K2 V
+|belts   = 3
+|GGcount = 1
+}}
+{{World summary |name= Elysee|trade= He Hi In}}
+{{World summary SoFr|sector= Aldebaran|subsector= Star Bridge}}
+{{World summary comment|trade= Ht}}
+
+{{InfoboxSystem
+ |name= Elysee Primary |subsector= Star Bridge
+ |sector= Aldebaran |hex= 0111
+ |star= Prime |type= G5 V
+ |P1=     Planet 1                          | Dist1= 0.17         | UWP1= H100000-0
+ |P2=     Planet 2                          | Dist2= 0.32         | UWP2= H310000-0
+ |P3=     Planet 3                          | Dist3= 0.63         | UWP3= G6A0218-D
+ |P4=     Elysee                            | Dist4= 0.95         | UWP4= A872AA9-E
+ |P4M1=     Roche                           |   Dist4M1= 8 Diam   |   UWP4M1= GS00167-D
+ |P4M2=     Lune                            |   Dist4M2= 20 Diam  |   UWP4M2= F32366A-E
+ |P5=     Planet 4                          | Dist5= 1.42         | UWP5= F642769-D
+ |P5M1=     Moon                            |   Dist5M1= 15 Diam  |   UWP5M1= HS00000-0
+ |P6=     Planet 5                          | Dist6= 2.15         | UWP6= G410316-D
+ |P7=     Planet 6                          | Dist7= 3.22         | UWP7= H7A1000-0
+ |P7M1=     Moon                            |   Dist7M1= 40 Diam  |   UWP7M1= Y201000-0
+ |P8=     Gas Giant                         | Dist8= 9.62         | UWP8= Large GG
+ |P8M1=     Moon                            |   Dist8M1= 6 Diam   |   UWP8M1= Y100000-0
+ |P8M2=     Moon                            |   Dist8M2= 11 Diam  |   UWP8M2= G302268-D
+ |P8M3=     Moon                            |   Dist8M3= 25 Diam  |   UWP8M3= H200000-0
+ |P9=     Outer Belt                        | Dist9= 19.1         | UWP9= G000117-D
+}}
+
+{{InfoboxSystem
+ |name= Elysee Secondary |subsector= Star Bridge
+ |sector= Aldebaran |hex= 0111
+ |star= Deuxième |type= K2 V
+ |P1=     Inner Belt                        | Dist1= 0.25         | UWP1= Y000000-0
+ |P2=     Planet 7                          | Dist2= 0.73         | UWP2= Y421000-0
+ |P3=     Planet 8                          | Dist3= 0.96         | UWP3= H796000-0
+ |P3M1=     Moon                            |   Dist3M1= 9 Diam   |   UWP3M1= YS00000-0
+ |P4=     Planet 9                          | Dist4= 1.47         | UWP4= Y302000-0
+ |P5=     Planet 10                         | Dist5= 2.21         | UWP5= Y8A0000-0
+ |P6=     Outer Belt                        | Dist6= 4.37         | UWP6= Y000000-0
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Elysee''' is a binary star system.
+* The primary is a yellow main sequence named ''Elysee Prime''. It is usually simply called ''Prime''.
+* The secondary is an orange main sequence named ''Elysee II''. It is commonly called ''Deuxième''.
+ 
+{{BinaryStarSystem
+|name            = Elysee
+|primary         = G5 V
+|secondary       = K2 V
+|PrimaryName     = Prime
+|PrimaryNotes    = 
+|SecondaryName   = Deuxième
+|SecondaryNotes  = [[Astronomical Unit|Approximately 120 AU]] from the primary.
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]]. It orbits within the primary star's [[habitable zone]].
+* x10 secondary [[world|rocky worlds]]. Six orbit the primary star, four orbit the secondary star.
+* x3 [[planetoid belt]]s. One orbits the primary star, two orbit the secondary star.
+* x1 [[Gas Giant|large gas giant]]. It orbits within the primary star's [[Outer World|far outer system]].
+
+=== Mainworld Data ===
+'''Elysee''' orbits within the central part of the yellow primary star's [[habitable zone]].
+
+[[File:Chart Orbit HZ Region Detailed.png|600 px]]
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Elysee|Size= 8}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Elysee|Atmosphere= 7}}
+* The atmosphere consists of 81% nitrogen, 11% oxygen, and around 8% carbon dioxide, giving it both [[Tainted Atmosphere|low oxygen]] and [[Tainted Atmosphere|high CO<small><sub>2</sub></small>]] [[Tainted Atmosphere|atmospheric taints]].
+* Equatorial temperatures [[Celsius|average 60°C]], and polar temperatures [[Celsius|average 15°C]]. The averages are climbing.
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Elysee|Hydrosphere= 2}}
+
+==== Satellites ====
+'''Elysee''' retains a tiny [[Planetoid|planetoid moon]] named ''Roche'' and a larger [[Natural Satellite|temperate moon]] named ''Lune''.
+* They orbit once every few weeks.
+* Roche is rarely visible in the sky
+
+[[File:Alien Moon 18a-1.jpg|600 px]]
+
+==== Mainworld Geography and Topography ====
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+Elysee has a mid-sized northern polar ocean. It gives way to scattered lakes and then arid lands to the south. The increasing level of carbon dioxide in the atmosphere mix has led to a gradual but continuous planetary warming, which to date has overridden all natural buffers.
+
+With increasing temperatures the polar ocean is becoming more acidic with disastrous effects on the [[aquaculture]] industry. Many subequatorial regions that hold mineral resources or were previously viable farmland now experience [[Celsius|temperatures]] that can prove lethal.
+
+[[File:Blank World Map Arid.png|500 px]] <br> (''Blank map, predominantly dry world''.)
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Elysee''' has a plethora of resources, manufactories, [[Agriculture|farmlands]], [[aquaculture]] bases, and the many elements of a mature service economy. It is also leveraging its huge population by investing in new education programs to retrain entire segments of society to become effective teachers, technicians, engineers, and scientists. [[Robotics]] and [[Artificial Intelligence]] are much lauded, despite the fears expressed by older generations. [[Robotics|Robotics specialists]] are needed as some particularly rich resources are found in areas that present significant dangers to [[sophont]]s.
+
+When the world was first settled during the later [[Rule of Man]] period the climate was warm and arid but it was considered manageable. Despite the marginal conditions the population increased during the [[Long Night]], putting considerable pressure on local resources: when the world was recontacted during the early {{Imperial}} period the explorers found conditions of absolute squalor and poverty. The rapid implementation of advanced technologies and the construction of vast chained arcologies immeasurably improved the lives of the inhabitants, but the population continued to grow faster than it previously had. As industry expanded so did pollution and as a consequence serious environmental problems.
+
+Dangerous criminals from the world are sent to the [[Prison World|prison outpost]] on [[Redi (world)|Redi]], in [[Canopus Sector]].
+ 
+[[Solomani Security]] keeps a close eye on things to ensure the security of the [[Solomani Confederation|Confederation]] and the well-being of its loyal citizens. Almost anyone ''could'' be a [[Solomani Security|SolSec]] informant, passing on all sorts of useful information: some gain a reward or benefit for their actions, others are coerced, but many see it as an act of duty to help protect the [[Solomani Confederation|Solomani state]] and its interests.
+
+=== [[Starport|World Starport]] (St) ===
+{{Starport|name= Elysee|Starport= A}}
+
+The main [[Downport|Elysee Downport]] is at the 75° latitude and is a fascinating example of architectural design, automation, and efficiency. A counter-example is the now abandoned open-air [[downport]] that was originally situated at the equator, with its once-famed heavy-launch facilities. The twenty world-cities (each with populations in excess of 800 million [[sophont]]s) each have a dedicated [[Downport|Downport / Gravport]] to facilitate travel, with the remaining large cities having high-capacity industrial and light gravtrain systems to the nearest [[downport]].
+
+=== [[Population|World Population]] (P) ===
+{{WorldPop|name= Elysee|multiplier= 3|Population= A}}
+* The population almost entirely consists of [[Solomani]] humans.
+
+==== Urbanization ====
+Newer cities, constructed of hyper-advanced, connected arcologies are located on the retreating shores of the polar ocean.  The older cities are located along the dried lakes and riverbeds that are now used as grav routes, and typically have a ring of outer arcologies around a dead core of older, uninhabitable buildings.
+
+==== Linguistic Topography ====
+The most commonly heard [[language]]s are:
+* [[Euxene French (language)|Euxene French]], a [[Terran]] language principally spoken in the [[Euxene Cluster]].
+* [[Rim Anglic]], a dialect of [[Anglic]] and the principal language of the [[Solomani Confederation|Confederation]].
+
+=== [[Technology Level|World Technology Level]] (T) ===
+{{WorldTech|name= Elysee|WorldTech= E}}
+
+The regulation of "dirty" industries and the use of advanced [[Power Plant|fusion plants]], which provide the society with abundant energy and power equipment dedicated to carbon capture, are starting to slow the temperature rise.
+
+=== [[Government|World Government]] (G) ===
+{{WorldGov|name= Elysee|Government= A}}
+
+The ruler of the world is The World President For Life, Adam Martinette. Among other expansive policy statements he has declared a new ''War on Space'': he is encouraging industries that will allow additional expansion into orbital habitats and improve conditions on the many secondary world and [[Natural Satellite|their moons]] within the Elysee Prime system. He has expansively targeted the presently uninhabited ''Worlds of Deuxième'', the secondary star, for rapid colonization.
+
+==== World Military ====
+Elysee maintains a handful of advanced [[System Defense Boat]]s ([[System Defense Boat|SDBs]]) that are [[Jump Drive|jump capable]]. The President has expansively boasted that he will "lay the keel" of the first Elyseen destroyer "soon".
+
+In the meantime, Elysee depends on the frequent port-calls of [[Third Reformed French Confederate Republic|Republic]] capital ships to reassure the population and unsettle potential pirates.
+
+=== [[Law Level|World Law]] (L) ===
+{{WorldLaw|name= Elysee|Law= 9}}
+
+=== Trade Data ===
+* [[Importance Extension|Importance]]: 4 (important)
+
+=== World Economy ===
+* [[Resource]]s:                       C (very abundant)
+* [[Labor]]:                           9 (billions)
+* [[Infrastructure]]:                  B (very extensive)
+* [[Efficiency]]:                      +4 (important)
+
+=== World Culture ===
+* [[Homogeneity|Heterogenity]]:        B (discordant)
+* [[Acceptance]]:                      E (extremely xenophobic)
+* [[Strangeness]]:                     1 (very typical)
+* [[Symbol]]s:                         9 (somewhat abstract)
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+
+* [[-9235]]: far to [[coreward]], the [[Vilani]] discover [[jump drive]] technology. Over the centuries pioneers and settlers gradually spread across [[Charted Space]].
+* [[-4045]] to [[-2204]]: the [[First Imperium|Ziru Sirka]] controls vast territories.
+* [[-2431]]: [[Terran]]s discover [[jump drive]] technology.
+* [[-2404]] to [[-2215]]: the [[Interstellar Wars]]. The young [[Terran Confederation]] battles against the ancient [[Vilani]] [[First Imperium|Ziru Sirka]].
+* [[-2204]] to [[-1776]]: the [[Rule of Man]] administers the former [[First Imperium|Ziru Sirka]].
+* [[-1999]]: the [[Aslan]] gain [[jump drive]] technology.
+* [[-1862]] to [[-1110]]: the [[Terran Mercantile Community]] is active within the region.
+* [[-1776]] to [[0]]: the [[Long Night]].
+* [[-1118]] to [[380]]: the [[Aslan Border Wars]].
+* [[-1110]] to [[588]]: the [[Terran Mercantile Community]] gradually becomes the [[Old Earth Union]], shrinking to control the region around [[Terra]].
+* [[0|The Year 0]]: to [[coreward]], the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[380]]: the [[Peace of Ftahalr]] ends the ongoing [[Aslan Border Wars]] and establishes understandings regarding human and [[Aslan]] influence. 
+* [[588]]: the [[Old Earth Union]] and the former territories of the [[Terran Mercantile Community]] are annexed by the {{Imperium}}, moving its border adjacent to the [[Aslan Hierate]].
+* [[604]]-[[622]]: the {{Imperial}} [[Civil War]].
+* [[624]]: the {{Imperial}} [[Express Boat Network]] is established.
+* [[704]]: the [[Solomani Autonomous Region]] is formed.
+* [[800]]-[[820]]: the [[Psionics Suppressions]].
+* [[871]]: the [[Solomani Confederation]] is founded.
+* [[940]]: the [[Solomani Autonomous Region]] is dissolved.
+* [[990]]-[[1002]]: the [[Solomani Rim War]].
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] includes data for the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+
+== References & Contributors (Sources) ==
+{{Detail}}
+{{Sources
+|S1= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (A-M)|Supplement 8 Library Data (A-M)]]'', ([[Game Designers Workshop]], 1981), various pages. (Library data entries)
+|S2= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (N-Z)|Supplement 11 Library Data (N-Z)]]'', ([[Game Designers Workshop]], 1982), various pages. (Library data entries)
+|S3= {{Ludography cite|name= Solomani |version= Classic Traveller|page= IFC, pages 3, 28}} (sector named, background for the sector)
+|S4= {{Ludography cite|name= Solomani & Aslan |page= pages 8-11, various others}} (dot map locating the worlds of the sector, background for the sector)
+|S5= [[Steven Eric Schwartz]]. {{MT}} Periodical ''[[Imperiallines 2 (fanzine)|Imperiallines 2]]'', 1991, page 5. ([[Bootean Federation]], background for the sector) 
+|S6= {{Ludography cite|name= Fighting Ships of the Solomani|page= page 5}} (background for the sector)
+|S7= {{Ludography cite|name= Solomani |version= Mongoose Traveller|page= pages 50, 118, 119, various others}} (background for the sector)
+|S8= {{Ludography cite|name= The Order of Prometheus|page= various pages}} (scenarios and background for the sector)
+|S9= [http://zho.berka.com/data/CLASSIC/sector.pl?sector=ALDEBARA Zho Berka's Maps] (Classic Era [[Universal World Profile|UWP Data]] for the world)
+|S10= [http://111george.com/core/astrogat/jG.htm CORE Data Site] ([[Universal World Profile|UWP Data]] for the world)
+|S11= Author & Contributor: [[User:Garnfellow|Garnfellow]] (development of the sector)
+|S12= Author & Contributor: [[Leroy W.L. Guatney]] of the Federation Development Agency (FDA) (development of the sector)
+}}
+
+
+[[Category: Humaniti worlds]]
+[[Category: Solomani Sphere worlds]]
+[[Category: Solomani worlds]]
+[[Category: Terran Mercantile Community worlds]]
+{{LE|Era: Milieu 1116|T5 Second Survey}}

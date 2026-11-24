@@ -1,0 +1,160 @@
+{{InfoboxSystem
+  |name=Lloelldegh ("Lair")
+  |subsector=Grnouf
+  |sector=Provence
+  |hex=2402
+  |star= [[Kneng (star)|Kneng]]
+  |type= G5 V
+ 
+  |P0= Og Orz
+  |Dist0= 0.08|UWP0=YS00000-0
+
+  |P1= Erzikh Dhadh 
+  |Dist1= 0.21 |UWP1=H310300-F
+
+  |P2= Foulours
+  |Dist2= 0.39|UWP2=Y630000-0
+    |P2M1= Servonaz
+    |Dist2M1= 1 Diam|UWP2M1=YR00000-0
+    |P2M2= Olou
+    |Dist2M2= 5 Diam|UWP2M2=Y300000-0
+
+  |P3= Lair
+  |Dist3= 0.70|UWP3=A8859B9-F
+    |P3M1= Errgh
+    |Dist3M1= 2 Diam|UWP3M1=YS00000-0
+    |P3M2= Sanko
+    |Dist3M2= 4 Diam|UWP3M2=YS00000-0  
+    |P3M3= Ouksado Fan
+    |Dist3M3= 60 Diam|UWP3M3=F20031C-F
+
+  |P4= Goullaengrak
+  |Dist4= 1.05|UWP4='''Large GG''' <br> <small>(Size=220)</small>
+    |P4M1= Raekfong
+    |Dist4M1= 1 Diam|UWP4M1=YR00000-0
+    |P4M2= Raekgzoe
+    |Dist4M2= 3 Diam|UWP4M2=YR00000-0
+    |P4M3= Knoen
+    |Dist4M3= 7 Diam|UWP4M3=Y100000-0
+    |P4M4= Suekh
+    |Dist4M4= 8 Diam|UWP4M4=Y100000-0
+    |P4M5= Vadze Aengkoe
+    |Dist4M5= 30 Diam|UWP4M5=Y330000-0
+    |P4M6= Fi Itsoudzi
+    |Dist4M6= 45 Diam|UWP4M6=G40011B-E
+    |P4M7= Uerul
+    |Dist4M7= 60 Diam|UWP4M7=YS00000-0
+    |P4M8= Dzaer
+    |Dist4M8= 90 Diam|UWP4M8=Y200000-0
+
+  |P5= Garzingnall Belt 
+  |Dist5= 1.66|UWP5=Y000100-E <br> <small>(Size=0.5<small>AU</small>)</small>
+ 
+  |P6=Saghurrkhoer
+  |Dist6= 2.69|UWP6='''Small GG'''  <br> <small>(Size=80)</small>
+    |P6M1= Atourrkou
+    |Dist6M1= 7 Diam|UWP6M1=Y300000-0
+    |P6M2= Rror Usuersogh
+    |Dist6M2=65 Diam|UWP6M2=H300000-0
+
+  |P7=Ngolkfaedh
+  |Dist7= 5.42|UWP7='''Small GG'''   <br> <small>(Size=60)</small>
+    |P7M1= Uzil
+    |Dist7M1= 6 Diam|UWP7M1= H400167-E
+    |P7M2= Olahgz
+    |Dist7M2= 8 Diam|UWP7M2= YS00000-0
+    |P7M3= Knoka Llan
+    |Dist7M3= 11 Diam|UWP7M3= Y5A0000-0
+    |P7M4= Dhuggzung
+    |Dist7M4= 60 Diam|UWP7M4= YS00000-0
+
+  |P8=Rrallan Ang
+  |Dist8= 11.2|UWP8= H9A5239-E
+}}
+The [[Lair (system)|Lloelldegh system]] (aka ''"'''Lair'''"'') is centered on [[Kneng (star)|Kneng]], an ordinary yellow main sequence star.
+* The system consists of seven [[World|major planetary bodies]], one [[planetoid belt]], and three [[gas giant]] worlds.
+
+== Description (Specifications) ==
+=== Stellar Data ===
+'''[[Kneng (star)|Kneng]]''', the system primary, is a solitary star.
+* It is a yellow main sequence.
+
+{{MonostellarSystem
+|name            = [[Kneng (star)|Kneng]]
+|primary         = G5 V
+|PrimaryName     = Kneng
+|PrimaryNotes    = None
+}}
+
+=== The Lair System ===
+[[File:System Map Lair Basic.png|700 px]]
+<br> 
+: <small> ''A simple chart depicting the Lair system. </small>
+
+=== Inner System ===
+'''[[Og Orz (world)|Og Orz]]''': [[Universal World Profile|UWP]] YS00000-0, [[Astronomical Unit|orbiting at 0.08 AU]] <small>'''(Companion Orbit)'''</small>, with an orbital period of [[Day|8.5 standard days]]. <br> It is an insignificant scorched ball of rock, dwarfed by many of the system's moons. Its rocky metal-poor structure discourages prospecting efforts. 
+
+'''[[Erzikh Dhadh (world)|Erzikh Dhadh]]:''' [[Universal World Profile|UWP]] H310300-F, [[Astronomical Unit|orbiting at 0.21 AU]] <small>'''(Orbit 0)'''</small>, with an orbital period of [[Day|36.3 standard days]]. <br> It is a small rocky world that retains a [[Trace Atmosphere|trace carbon dioxide atmosphere]]. Unlike Og Orz, [[Hot World|intensely hot]] Erhihk Dhadh is rich with minerals and has enormous mining potential.
+* Erzikh Dhadh has been the site of many boom / bust mining operations focused on harvesting various different minerals in the millennia since the [[Vargr]] first achieved space flight.
+* In [[1113]], the [[Dhufokh Corporation]] located major deposits of rare crystals deep within the world's crust. [[Dhufokh Corporation|Dhufokh]] quickly laid claim to the deposits, but the company is unsure how to proceed. A research station was designed and built to harness this new discovery.
+
+'''[[Foulours (world)|Foulours]]:''' [[Universal World Profile|UWP]] Y630000-0, [[Astronomical Unit|orbiting at 0.39 AU]] <small>'''(Orbit 1)'''</small>, with an orbital period of [[Day|91.8 standard days]]. <br> It is a [[Hot World|very hot]], [[Poor World|very poor]] [[desert world]] that is unusual in that it retains a [[Very Thin Atmosphere|very thin oxygen-nitrogen atmosphere]] despite its [[Celsius|high surface temperatures]].
+* Unusually for an [[Inner World|inner system world]], it retains a [[Planetary Ring|ring system]] and a [[Natural Satellite|single major moon]].
+* It has extremely primitive single celled thermophilic native life that survives in the most marginal of conditions.
+
+----
+==== ''Habitable Zone'' ====
+: '''[[Lair (world)|Lloelldegh]] ([[Lair (world)|Lair]]):''' [[Universal World Profile|UWP]] A8859B9-F, [[Astronomical Unit|orbiting at 0.70 AU]] <small>'''(Orbit 2)'''</small>, with an orbital period of [[Day|220.6 standard days]]. <br> It is a [[Temperate World|temperate]] [[garden world]] and the '''[[Homeworld]] of the [[Vargr]]'''.
+:* Two small planetoid moons, ''Errgh'' and ''Sanko'', orbit close to the world at 2 and 4 diameters distance, respectively.
+:* A small [[Vacuum World|vacuum moon]] ''(Ouksado Fan)'' orbits at approximately 60 diameters.
+----
+
+'''[[Goullaengrak (world)|Goullaengrak]]:''' [[Universal World Profile|UWP]] LGG ([[Kilometer|diameter 220,000 km]]), [[Astronomical Unit|orbiting at 1.05 AU]] <small>'''(Orbit 3)'''</small>, with an orbital period of [[Day|405 standard days]]. <br> It is a huge [[gas giant]], the largest planetary body within the system
+* It has a spectacular [[Planetary Ring|double ring system]] and six [[Natural Satellite|major moons]].
+** One moon, ''Vadze Aengkoe'', was the site of an early [[Terraforming]] project and saw a major space battle in the early years of [[Vargr]] expansion out from [[Lair (world)|Lair]].
+** Another satellite, ''Fi Itsoudzi'', today plays host to a small tourist hostel.
+
+'''[[Garzingnall Belt (world)|Garzingnall Belt]]:''' [[Universal World Profile|UWP]] Y000100-E, a mean width of [[Astronomical Unit|around 0.5 AU]] <small>'''(Orbit 4)'''</small>, [[Astronomical Unit|orbiting at 1.66 AU]], with a mean orbital period of [[Year|2.21 standard years]]. <br> The once rich belt has been largely mined out.
+* It supports a small indigenous population of miners, but most prospectors who come to the belt are transients or optimists. 
+
+'''Saghurrkhoer:''' [[Kilometer|diameter 80,000 km]], [[Astronomical Unit|orbiting at 2.69 AU]] <small>'''(Orbit 5)'''</small>, with an orbital period of [[Year|4.55 standard years]]. <br> Considered to be a large [[gas giant]], though it displays characteristics more closely related to smaller [[Gas Giant|ice giant worlds]].
+* It has two sizable but otherwise insignificant [[Natural Satellite|major moons]].
+
+=== Outer system ===
+'''Ngolkfaedh:''' [[Kilometer|diameter 60,000 km]], [[Astronomical Unit|orbiting at 5.42 AU]] <small>'''(Orbit 6)'''</small>, with an orbital period of [[Year|13.01 standard years]]. <br> The outermost and smallest of the system's three [[gas giant]] worlds. It is a large example of an [[Gas Giant|ice giant world]].
+* It has four [[Natural Satellite|major moons]]
+** Its innermost satellite, ''Uzil'', has rudimentary living facilities. A government science team currently occupies those facilities, engaged in astronomical studies. 
+
+'''[[Rrallan Ang (world)|Rrallan Ang]]:''' [[Universal World Profile|UWP]] H9A5239-E, [[Astronomical Unit|orbiting at 11.18 AU]] <small>'''(Orbit 7)'''</small>, with an orbital period of [[Year|38.56 standard years]]. <br> It is a large, [[Frozen World|frigidly cold]], ammonia-swathed rock with hydrocarbon seas.
+* The leaders of [[Lair (world)|Lair's]] nations were ousted from power in [[923]]. Many of those administrators voluntarily took up a life of exile on lonely Rrallan Ang. Their descendants today number in the hundreds.
+
+==== Far Outer System ====
+Three small [[vacuum world]]s (all with [[Universal World Profile|UWPs]] of Y100000-0) orbit at the very outer edge of the system  <small>'''~ (Orbit 11)'''</small>.
+* All three share a similar orbital distance from [[Kneng (star)|Kneng]]: 
+** The innermost world orbits at [[Astronomical Unit|approximately 150 AU]] and has an orbital period of [[Year|1895 Years]].
+** The middle world orbits at [[Astronomical Unit|approximately 160 AU]] and has an orbital period of [[Year|2088 Years]].
+** The outermost world orbits at [[Astronomical Unit|approximately 175 AU]] and has an orbital period of [[Year|2388 Years]].
+* None retain [[Natural Satellite|any significant satellites]].
+
+They are collectively referred to as '''Arraghar Eroghara''', or the ''three lost brothers''.
+
+== History & Background (Dossier) ==
+Around [[-3810]] the [[Vargr]] discovered [[Jump Drive|jump technology]] and began [[First Vargr Diaspora|an era of expansion]]. They had been exploring within the [[Lair (world)|Lair system]] for centuries before, using [[NAFAL|sublight drives]] to found outposts and colonies on some of its worlds and moons.
+
+=== Image Repository ===
+[[TravellerMap]] <small>([[T5SS]])</small>: <br> [https://travellermap.com/?options=58367&x=-35.94&y=118&scale=128]
+
+== References & Contributors (Sources) ==
+{{secret}}
+{{Intermediate}}
+{{Detail}}
+{{Sources
+|S1= {{CT}} Alien Module 3: [[Vargr (Alien Module)|Vargr]]
+|S2= {{MT}} [[Alien - Vilani & Vargr]]
+|S3= [[GURPS Traveller: Alien Races 1]]
+|S4= {{T4}} [[Aliens Volume 1]] ([[Imperium Games]])
+|S5= 
+}}
+
+
+{{LE|Star System|Systems}}

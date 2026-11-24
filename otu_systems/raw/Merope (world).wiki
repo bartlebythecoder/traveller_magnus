@@ -1,0 +1,193 @@
+{{UWP 
+|name= {{World|Merope|Aldebaran|Firdausi|2604}}
+|uc    = D7647A7-6 
+|popc  = 2
+|zonec = green
+ |u1= 
+|alg     = SoCf
+|class   = Ag Ri / Dolp0 Huma9
+|trade   = ag
+|climate = TBD
+|gravity = TBD
+|nblty   = -
+|bases   = -
+|primary = G3 V 
+|belts   = 2
+|GGcount = 3
+}}
+{{World summary |name= Merope |trade= Ag Ri}}
+{{World summary SoCf|sector= Aldebaran |subsector= Firdausi}}
+* It is a member of the [[Palermo Cluster]]. 
+* A little under 10% of the population consists of [[Dolphin]]s.
+
+{{InfoboxSystem
+ |name= Merope |subsector= Firdausi
+ |sector= Aldebaran |hex= 2604
+ |star= Sisyphus |type= G3 V
+ |P1=     Amceden                           | Dist1= ?         | UWP1= Y7CA000-0
+ |P2=     Merope                            | Dist2= ?         | UWP2= D7647A7-6
+ |P3=     Cor. Belt                         | Dist3= ?         | UWP3= F000575-A
+ |P4=     Braci                             | Dist4= ?         | UWP4= G111467-A
+ |P5=     Comab's W.                        | Dist5= ?         | UWP5= G6AA514-A
+ |P6=     Trab                              | Dist6= ?         | UWP6= Small GG
+ |P7=     Strufacc                          | Dist7= ?         | UWP7= G5A3467-A
+ |P8=     Murid                             | Dist8= ?         | UWP8= Large GG
+ |P9=     Theban Belt                       | Dist9= ?         | UWP9= G000418-A
+ |P10=    Intueste                          | Dist10= ?        | UWP10= G411367-A
+ |P11=    Ceimti                            | Dist11= ?        | UWP11= G610468-A
+ |P12=    Intuebi                           | Dist12= ?        | UWP12= HAA1318-A
+ |P13=    Entramme                          | Dist13= ?        | UWP13= Y9A1000-0
+ |P14=    Inarrio                           | Dist14= ?        | UWP14= Y400000-0
+ |P15=    Spatahae                          | Dist15= ?        | UWP15= GAA3475-A
+ |P16=    Fortise                           | Dist16= ?        | UWP16= Small GG
+}}
+ 
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Merope''' has a solitary primary star known as ''Sisyphus''.
+* It is a yellow main sequence.
+ 
+{{MonostellarSystem
+|name           = Merope
+|primary        = G3 V 
+|PrimaryName    = Sisyphus
+|PrimaryNotes   = 
+}}
+
+'''Note:''' The system's primary star is ''not'' the canonical B type late main sequence star ''[[Merope (star)|Merope]]'', though it is in the same local area of space and likely lends the world its name.
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]].
+* x10 secondary [[world|rocky worlds]].
+* x2 [[planetoid belt]]s.
+* x3 [[gas giant]]s.
+
+Braci, a secondary world orbiting in the outer part of the [[habitable zone]], features a few large mining camps located atop the most promising mineral deposits.
+
+The stony Corinthian Belt, which marks the edge of the cold [[Outer World|outer system]], is the location of Boutak City, one of the system's main [[spaceport]]s and trade hubs.
+
+=== Mainworld Data ===
+'''Merope''' orbits within the prime region of its star's [[habitable zone]].
+
+[[File:Chart Orbit HZ Region Detailed.png|600 px]]
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Merope|Size= 7}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Merope|Atmosphere= 6}}
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Merope|Hydrosphere= 4}}
+
+==== Mainworld Geography and Topography ====
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+[[File:Blank World Map Arid.png|500 px]] <br> (''Blank map, predominantly dry world''.)
+
+==== Native Lifeforms ====
+Abundant [[Lifeform|native life]] occupying every available ecological niche. Its metabolic functions drive the process of atmospheric renewal.
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Merope''' is a member of the [[Palermo Cluster]], a small but important [[trade route]] lying close to the [[coreward]]-[[trailing]] edge of [[Aldebaran Sector]].
+
+The [[mainworld]] itself is not very important, but the system as a whole is the center of the [[Palermo Cluster|Cluster's]] raw materials extraction industry.
+
+=== [[Starport|World Starport]] (St) ===
+{{Starport|name= Merope|Starport= D}}
+
+=== [[Population|World Population]] (P) ===
+{{WorldPop|name= Merope|multiplier= 2|Population= 7}}
+* More than 90% of the population (in excess of 18 million individuals) is made up of [[Solomani]] humans.
+* Less than 10% of the population (fewer than 2 million individuals) consists of [[Dolphin]]s.
+
+[[File:Dolphin Liz Danforth 1980 JTAS06 p38.jpg|350 px|right]]
+
+==== Urbanization ====
+Small cities are dispersed around the globe; each has its own small [[spaceport]].
+
+==== Linguistic Topography ====
+The most commonly heard [[language]]s are:
+* [[Delphinic Trinary]], the principal language of [[Dolphin]]s.
+* [[Rim Anglic]], a dialect of [[Anglic]] and the principal language of the [[Solomani Confederation|Confederation]].
+
+=== [[Technology Level|World Technology Level]] (T) ===
+{{WorldTech|name= Merope|WorldTech= 6}}
+
+=== [[Government|World Government]] (G) ===
+{{WorldGov|name= Merope|Government= A}}
+
+There is some nationalist feeling among communities within the Merope system, mainly directed at gaining a higher proportion of the system's income. It is currently disorganized.
+
+=== [[Law Level|World Law]] (L) ===
+{{WorldLaw|name= Merope|Law= 7}}
+
+=== Trade Data ===
+* [[Importance Extension|Importance]]: 0 (unimportant)
+
+=== World Economy ===
+* [[Resource]]s:                       8 (moderate)
+* [[Labor]]:                           6 (millions)
+* [[Infrastructure]]:                  7 (generally available)
+* [[Efficiency]]:                      -5 (extremely poor)
+
+=== World Culture ===
+Associations and businesses of all kinds have their own business uniforms, formal dress being simply a more elaborate and less practical variant. 
+
+* [[Homogeneity|Heterogenity]]:        9 (discordant)
+* [[Acceptance]]:                      7 (aloof)
+* [[Strangeness]]:                     3 (somewhat typical)
+* [[Symbol]]s:                         4 (concrete)
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+
+* [[-9235]]: far to [[coreward]], the [[Vilani]] discover [[jump drive]] technology. Over the centuries pioneers and settlers gradually spread across [[Charted Space]].
+* [[-4045]] to [[-2204]]: the [[First Imperium|Ziru Sirka]] controls vast territories.
+* [[-2431]]: [[Terran]]s discover [[jump drive]] technology.
+* [[-2404]] to [[-2215]]: the [[Interstellar Wars]].
+* [[-2204]] to [[-1776]]: the [[Rule of Man]] administers the former [[First Imperium|Ziru Sirka]].
+* [[-1776]] to [[0]]: the [[Long Night]].
+* [[0|The Year 0]]: to [[coreward]], the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[604]]-[[622]]: the {{Imperial}} [[Civil War]].
+* [[624]]: the {{Imperial}} [[Express Boat Network]] is established.
+* [[704]]: the [[Solomani Autonomous Region]] is formed.
+* [[800]]-[[820]]: the [[Psionics Suppressions]].
+* [[871]]: the [[Solomani Confederation]] is founded.
+* [[940]]: the [[Solomani Autonomous Region]] is dissolved.
+* [[990]]-[[1002]]: the [[Solomani Rim War]].
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] includes data for the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+
+== References & Contributors (Sources) ==
+{{Detail}}
+{{Sources
+|S1= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (A-M)|Supplement 8 Library Data (A-M)]]'', ([[Game Designers Workshop]], 1981), various pages. (Library data entries)
+|S2= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (N-Z)|Supplement 11 Library Data (N-Z)]]'', ([[Game Designers Workshop]], 1982), various pages. (Library data entries)
+|S3= {{Ludography cite|name= Solomani |version= Classic Traveller|page= IFC, pages 3, 28}} (sector named, background for the sector)
+|S4= {{Ludography cite|name= Solomani & Aslan |page= pages 8-11, various others}} (dot map locating the worlds of the sector, background for the sector)
+|S5= [[Steven Eric Schwartz]]. {{MT}} Periodical ''[[Imperiallines 2 (fanzine)|Imperiallines 2]]'', 1991, page 5. ([[Bootean Federation]], background for the sector) 
+|S6= {{Ludography cite|name= Fighting Ships of the Solomani|page= page 5}} (background for the sector)
+|S7= {{Ludography cite|name= Solomani |version= Mongoose Traveller|page= pages 50, 118, 119, various others}} (background for the sector)
+|S8= {{Ludography cite|name= The Order of Prometheus|page= pages 20-23}} (world details, plus background for the [[Palermo Cluster|Cluster]], subsector, and sector)
+|S9= [http://zho.berka.com/data/CLASSIC/sector.pl?sector=ALDEBARA Zho Berka's Maps] (Classic Era [[Universal World Profile|UWP Data]] for the world)
+|S10= [http://111george.com/core/astrogat/jG.htm CORE Data Site] ([[Universal World Profile|UWP Data]] for the world)
+|S11= Author & Contributor: [[User:Garnfellow|Garnfellow]] (development of the sector)
+|S12= Author & Contributor: [[Leroy W.L. Guatney]] of the Federation Development Agency (FDA) (development of the sector)
+}}
+
+
+[[Category: Dolphin worlds]]
+[[Category: Humaniti worlds]]
+[[Category: Palermo Cluster worlds]]
+[[Category: Rule of Man worlds]]
+[[Category: Second Imperium worlds]]
+[[Category: Solomani Sphere worlds]]
+[[Category: Solomani worlds]]
+[[Category: Terran Confederation worlds]]
+[[Category: Terran Mercantile Community worlds]]
+[[Category: Uplift worlds]]
+{{LE|Era: Milieu 1116|T5 Second Survey|Uplift}}

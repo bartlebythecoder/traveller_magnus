@@ -578,6 +578,11 @@
             }
 
             // 3. Hill Sphere & Roche Limit
+            // Protected from the three destruction rules below (Hill Sphere Wipe, Moon
+            // Discarded, Roche Shred): the mainworld moon, and a moon the user added in the
+            // System Editor (editorAdded — Sean, 2026-11-18). Only the mainworld moon also
+            // triggers the gas giant upscale; an added moon never resizes its parent.
+            const _isProtectedMoon = m => m.type === 'Mainworld' || m.isMoon || !!m.editorAdded;
             if (w.mass > 0 && w.diamKm > 0) {
                 const _hsPlanetSolar = w.mass * 0.000003;
                 const _hsAU = w.au * (1 - (w.eccentricity || 0)) * Math.pow(_hsPlanetSolar / (3 * primary.mass), 1 / 3);
@@ -617,18 +622,22 @@
                     }
 
                     // Fallback to existing protection logic
-                    let hasProtectedMoon = w.moons.some(m => m.type === 'Mainworld' || m.isMoon);
+                    let hasProtectedMoon = w.moons.some(_isProtectedMoon);
                     if (!hasProtectedMoon && w.moons.length > 0) {
                         tResult('Hill Sphere Wipe', 'Insignificant satellites destroyed');
                         w.moons = [];
                         w.rings.push({});
                     } else if (hasProtectedMoon) {
                         tResult('WBH Protection', 'Mainworld/Protected Moon maintained despite low Hill Sphere margin');
-                        w.moons = w.moons.filter(m => m.type === 'Mainworld' || m.isMoon);
+                        w.moons = w.moons.filter(_isProtectedMoon);
                     }
                 }
                 if (hillLimit < 0.5) {
-                    w.rings = []; // Rings destroyed
+                    // Rings destroyed — except a ring the user added in the System Editor
+                    // (editorAdded), which is protected like an added moon (Sean, 2026-11-18).
+                    const _keptRings = w.rings.filter(r => r && r.editorAdded);
+                    if (_keptRings.length > 0) tResult('WBH Protection', `${_keptRings.length} editor-added ring(s) kept despite Hill Sphere limit ${hillLimit} < 0.5`);
+                    w.rings = _keptRings;
                 }
 
                 let numM = w.moons.length;
@@ -661,7 +670,7 @@
                         
                         // WBH Errata: If a moon is created above the HSML, then it is discarded.
                         // Exception: mainworld/protected moons are anchored inside the Hill Sphere instead.
-                        const isProtectedMoon = (w.moons[mn].type === 'Mainworld' || w.moons[mn].isMoon);
+                        const isProtectedMoon = _isProtectedMoon(w.moons[mn]);
                         if (pdTarget > hillLimit) {
                             if (!isProtectedMoon) {
                                 tResult('Moon Discarded', `Target orbit ${pdTarget.toFixed(2)} pd exceeds Hill Sphere Limit (${hillLimit})`);
@@ -709,7 +718,7 @@
                     // WBH Protection: Mainworld/protected moons (isMoon) are never shredded.
                     let finalMoons = [];
                     for (let m = 0; m < w.moons.length; m++) {
-                        const isProtectedMoon = (w.moons[m].type === 'Mainworld' || w.moons[m].isMoon);
+                        const isProtectedMoon = _isProtectedMoon(w.moons[m]);
                         if (!isProtectedMoon && w.moons[m].pd > hillLimit) {
                             tResult('Roche Shred', `Moon pushed to ${w.moons[m].pd.toFixed(2)} pd which exceeded HSML (${hillLimit}). Moon destroyed.`);
                         } else {
@@ -792,8 +801,16 @@
 
             // 1. Base Atmosphere Code
             writeLogLine("--- ATMOSPHERE PHYSICS ---");
-            let isMainworldLocked = (w.type === 'Mainworld' && mainworldBase && mainworldBase.atm !== undefined);
+            // A lunar mainworld reaches here as a faux moon relabelled type 'Satellite' (moon pass
+            // below), so it is recognised by its flag too — without that its atmosphere was rolled
+            // fresh and only patched back later by the socio pass (manifest §0.0.D, 2026-11-19).
+            const _isMainworldBody = (w.type === 'Mainworld' || w.isLunarMainworld === true);
+            let isMainworldLocked = (_isMainworldBody && mainworldBase && mainworldBase.atm !== undefined);
             let isAtmSeeded = !isMainworldLocked && Array.isArray(w._manualFields) && w._manualFields.includes('atmCode') && w.atmCode !== undefined;
+            // A typed (seeded) atmosphere is protected exactly like a locked mainworld's (Sean,
+            // 2026-11-18): Runaway Greenhouse still rolls and still flags the world Boiling but
+            // keeps the code, and Auto-Taint adjusts ppo to fit the code instead of flipping it.
+            let isAtmFixed = isMainworldLocked || isAtmSeeded;
 
             if ((w.size === 'S' || w.size === 0 || w.size === 1) && !isMainworldLocked && !isAtmSeeded) {
                 tSkip('Size 0, 1, S forces Atmosphere 0');
@@ -944,7 +961,7 @@
                         else if (rRoll <= 4) newAtmCode = 11;
                         else newAtmCode = 12;
 
-                        if (isMainworldLocked) {
+                        if (isAtmFixed) {
                             tResult('Runaway Shift', `Locked.`, 'MgT2E 2.4: Thermal Logic');
                             writeLogLine(`Expanded Method Simulation: Runaway Greenhouse WOULD have shifted Atmosphere from ${toEHex(oldCode)} to ${toEHex(newAtmCode)}`);
                         } else {
@@ -1086,7 +1103,7 @@
                     let needsFlip = (w.atmCode === 5 || w.atmCode === 6 || w.atmCode === 8);
 
                     if (needsFlip) {
-                        if (isMainworldLocked) {
+                        if (isAtmFixed) {
                             tResult('Top-Down Gospel', 'Forcing Physics to match UWP Atmosphere');
                             // Remove the taint
                             if (!isManual(w, 'taints')) w.taints = w.taints.filter(t => t !== "Low Oxygen" && t !== "High Oxygen");
@@ -1119,7 +1136,7 @@
                             }
                             writeLogLine(`Auto-Taint Triggered: ppo ${w.ppoBar.toFixed(3)} is outside safe limits. Atm changed to ${w.atmCode.toString(16).toUpperCase()}.`);
                         }
-                    } else if (isMainworldLocked) {
+                    } else if (isAtmFixed) {
                         writeLogLine(`[PHYSICS VERIFIED] UWP Gospel: Tainted Atm ${w.atmCode.toString(16).toUpperCase()} correctly validated with unsafe ppo ${w.ppoBar.toFixed(3)}.`);
                     }
                 }
@@ -1420,7 +1437,7 @@
             tSection('Hydrographics');
             const _seedHydro = Array.isArray(w._manualFields) && w._manualFields.includes('hydroCode') && w.hydroCode !== undefined ? w.hydroCode : undefined;
             w.hydroCode = 0;
-            if (w.type === 'Mainworld' && mainworldBase && mainworldBase.hydro !== undefined) {
+            if (_isMainworldBody && mainworldBase && mainworldBase.hydro !== undefined) {
                 tSkip('Mainworld Hydro Inherited');
                 w.hydroCode = mainworldBase.hydro;
             } else if (_seedHydro !== undefined) {
@@ -2107,6 +2124,17 @@
                     let isPType = currentOrbitType === 'P-Type';
                     body.eccentricity = determineMgT2EEccentricity(false, 0, sys.age, body.orbitId, false, isPType ? -2 : -2);
                     tResult('Locked Ecc Override', body.eccentricity.toFixed(3));
+                    // The Hill Sphere limit was worked out in generatePhysicals with the
+                    // pre-lock eccentricity. Recompute it with the final one (Sean, 2026-11-18),
+                    // same formula and star as there, so the stored figure matches the world
+                    // and an editor Save (which seeds the final eccentricity) gets the same
+                    // limit. Moons already placed are left alone: a lower eccentricity only
+                    // widens the limit, so they still fit.
+                    if (body.hillSpanPd != null && body.mass > 0 && body.diamKm > 0 && sys.stars && sys.stars[0]) {
+                        const _oldHill = body.hillSpanPd;
+                        body.hillSpanPd = MgT2EMath.calculateHillSphereLimit(body.au, body.eccentricity, body.mass, sys.stars[0].mass, body.diamKm);
+                        if (body.hillSpanPd !== _oldHill) tResult('Hill Sphere Limit (final eccentricity)', `${_oldHill} → ${body.hillSpanPd}`);
+                    }
                 }
             }
 

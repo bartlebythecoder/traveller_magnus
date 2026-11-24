@@ -1,0 +1,703 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "0938",
+  "sector_abbreviation": "Spin",
+  "subsector": "District 268",
+  "name": "Inchin",
+  "sources": [
+    {
+      "page": "Inchin (world)",
+      "revid": 1050598,
+      "timestamp": "2026-04-28T22:11:20Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Inchin (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Erwon",
+          "type": "F0 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Erwon",
+      "stars": [
+        {
+          "name": "Erwon",
+          "type": "F0 V"
+        }
+      ],
+      "labels": [
+        "Inchin"
+      ],
+      "pages": [
+        "Inchin (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Inchin (world)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Sillybin",
+          "raw": "'''LGG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Inchin (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Sil-0",
+              "raw": "''X400000-0''",
+              "kind": "world",
+              "uwp": "X400000-0",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Inchin (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Sil-1",
+              "raw": "''X300000-0''",
+              "kind": "world",
+              "uwp": "X300000-0",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Inchin (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Sil-2",
+              "raw": "''X200000-0''",
+              "kind": "world",
+              "uwp": "X200000-0",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Inchin (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Sil-3",
+              "raw": "''X400000-0''",
+              "kind": "world",
+              "uwp": "X400000-0",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Inchin (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Hodi",
+          "raw": "X100000-0",
+          "kind": "world",
+          "uwp": "X100000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Inchin (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Inner Belt",
+          "raw": "H000269-9",
+          "kind": "world",
+          "uwp": "H000269-9",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Inchin (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Hastings",
+          "raw": "'''SGG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Inchin (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ardour",
+              "raw": "''XS00000-0''",
+              "kind": "world",
+              "uwp": "XS00000-0",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Inchin (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Sentil",
+              "raw": "''X200000-0''",
+              "kind": "world",
+              "uwp": "X200000-0",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Inchin (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Inchin",
+              "raw": "''D42035A-A''",
+              "kind": "world",
+              "uwp": "D42035A-A",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Inchin (world)"
+              ],
+              "mainworld": true
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "The Crone",
+          "raw": "X201000-0",
+          "kind": "world",
+          "uwp": "X201000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Inchin (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Yyndymia",
+          "raw": "'''LGG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Inchin (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Yyn-0",
+              "raw": "''X200000-0''",
+              "kind": "world",
+              "uwp": "X200000-0",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Inchin (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Brodie",
+              "raw": "''G30016A-9''",
+              "kind": "world",
+              "uwp": "G30016A-9",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Inchin (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Yyn-2",
+              "raw": "''XS00000-0''",
+              "kind": "world",
+              "uwp": "XS00000-0",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Inchin (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Yyn-3",
+              "raw": "''X301000-0''",
+              "kind": "world",
+              "uwp": "X301000-0",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Inchin (world)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Yyn-4",
+              "raw": "''X200000-0''",
+              "kind": "world",
+              "uwp": "X200000-0",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ],
+              "sources": [
+                "Inchin (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Outer Belt",
+          "raw": "G000200-8",
+          "kind": "world",
+          "uwp": "G000200-8",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Inchin (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Inchin (world)",
+      "label": "Inchin",
+      "stars": [
+        {
+          "name": "Erwon",
+          "type": "F0 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Sillybin",
+          "raw": "'''LGG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Sil-0",
+              "raw": "''X400000-0''",
+              "kind": "world",
+              "uwp": "X400000-0",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Sil-1",
+              "raw": "''X300000-0''",
+              "kind": "world",
+              "uwp": "X300000-0",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Sil-2",
+              "raw": "''X200000-0''",
+              "kind": "world",
+              "uwp": "X200000-0",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Sil-3",
+              "raw": "''X400000-0''",
+              "kind": "world",
+              "uwp": "X400000-0",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Hodi",
+          "raw": "X100000-0",
+          "kind": "world",
+          "uwp": "X100000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Inner Belt",
+          "raw": "H000269-9",
+          "kind": "world",
+          "uwp": "H000269-9",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Hastings",
+          "raw": "'''SGG'''",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ardour",
+              "raw": "''XS00000-0''",
+              "kind": "world",
+              "uwp": "XS00000-0",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Sentil",
+              "raw": "''X200000-0''",
+              "kind": "world",
+              "uwp": "X200000-0",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Inchin",
+              "raw": "''D42035A-A''",
+              "kind": "world",
+              "uwp": "D42035A-A",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "The Crone",
+          "raw": "X201000-0",
+          "kind": "world",
+          "uwp": "X201000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Yyndymia",
+          "raw": "'''LGG'''",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Yyn-0",
+              "raw": "''X200000-0''",
+              "kind": "world",
+              "uwp": "X200000-0",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Brodie",
+              "raw": "''G30016A-9''",
+              "kind": "world",
+              "uwp": "G30016A-9",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Yyn-2",
+              "raw": "''XS00000-0''",
+              "kind": "world",
+              "uwp": "XS00000-0",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Yyn-3",
+              "raw": "''X301000-0''",
+              "kind": "world",
+              "uwp": "X301000-0",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Yyn-4",
+              "raw": "''X200000-0''",
+              "kind": "world",
+              "uwp": "X200000-0",
+              "distance": {
+                "raw": "''?''",
+                "value": null
+              },
+              "flags": [
+                "dist-unknown"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Outer Belt",
+          "raw": "G000200-8",
+          "kind": "world",
+          "uwp": "G000200-8",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Inchin",
+    "UWP": "D42035A-A",
+    "Stellar": "F0 V",
+    "PBG": "823",
+    "Bases": "",
+    "Remarks": "De He Lo Po Sa"
+  }
+}

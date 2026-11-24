@@ -1,4 +1,4 @@
-# As Above, So Below (v0.18.3)
+# As Above, So Below (v0.19.0.1)
 
 **"As Above, So Below"** is a star system generator and sector management tool for the Traveller TTRPG. It provides a seamless transition between sector mapping and the granular physical reality of individual worlds and moons.
 ---
@@ -11,6 +11,11 @@ This tool is an unofficial fan project and is not affiliated with Mongoose Publi
 ## 📖 Documentation
 - **[FAQ](faq.md)** — creating systems and sectors, saving and sharing, editing worlds, images, and routes. Start here.
 - **[Route Manager Manual](help_routes.md)** — every route type, parameter, and troubleshooting step in detail.
+
+## 💬 Feedback
+Bug reports, questions and suggestions are welcome. You can find me on the forums:
+- **Citizens of the Imperium (COTI):** Bartleby
+- **Mongoose Publishing forums:** bartlebyfosco
 
 ---
 
@@ -34,7 +39,7 @@ This workbench allows Game Masters and world-builders to generate, import, and e
 
 ## Usage
 1. **Launch the App:** Click the [Live Demo](https://bartlebythecoder.github.io/traveller_magnus/hex_map.html) link above.
-2. **Import Data:** Click the settings gear (top right) → **Import / Export** → **Import Sector (.tsv)** to load a standard TravellerMap file. The same panel offers **Import the Imperium** (35 sectors) and **Import the Universe** (experimental, 128 sectors), both fetched live from travellermap.com.
+2. **Import Data:** Click the settings gear (top right) → **Import / Export** → **Import Sector (.tsv)** to load a standard TravellerMap file. The same panel offers **Import the Imperium** (35 sectors) and **Import the OTU Universe** (experimental, 128 sectors), both fetched live from travellermap.com.
     - **Save your work:** settings gear → **Map Files** → **Save Map JSON**. The browser keeps an automatic copy between sessions, but only the JSON survives a browser reset or moves between machines.
 3. **Advanced Manual Routing:** Hold a route slot's shortcut key and drag between two adjacent hexes to draw a segment; repeating the drag over an existing segment deletes it. Slots are assigned keys **1–9** by default — **1** = XBoat (green), **2** = Trading (red), **3** = Secondary (yellow), **4–9** = spare slots. Names, colours, and shortcut keys are all editable in the Route Manager (**R**).
     - **Ctrl + Z / Ctrl + Shift + Z:** Undo and Redo cartography or expansion actions.
@@ -64,13 +69,40 @@ Want to replace any of these sectors with your own file?
 5)  Select your file - choose the sector number you noted (#36 for Foreven)
 
 **Notes on Size Limits as of v0.8**:
-1) 4GB RAM: Import the Universe freely. Expand systems via WBH for 8-10 sectors before risk. Ideal use case: full OTU political/astrographic view (T5 only) with a handful of deep-dived WBH sectors.
+1) 4GB RAM: Import the OTU Universe freely. Expand systems via WBH for 8-10 sectors before risk. Ideal use case: full OTU political/astrographic view (T5 only) with a handful of deep-dived WBH sectors.
 2) 8GB RAM: The Imperium (35 sectors) fully expanded is viable. The full Universe expanded is not.
 3) 16GB RAM: Half the Universe expanded is realistic for a patient user.
 4) 32-64GB RAM: The full Universe expanded is theoretically possible.
 
 ---
 ## 📜 Changelog
+
+### [v0.19.0.1] - In Progress
+1. **Fixed — Star Derived Properties in the System Editor:** a star's **Derived Properties** group now stays open while you change its mass, luminosity, diameter, temperature or MAO, and clicking or tabbing to the next box leaves you in it ready to type, where the group used to close after every value.
+2. **Fixed — Discard Changes asked twice:** choosing **Discard** after editing a system in the System Editor now closes the editor and puts the system back as it was in one step, where a second "Discard Changes?" box used to appear and stay on screen.
+3. **New — Trade codes when expanding:** Expand System in CT, MgT2E and T5 (and MgT2E Expand Socioeconomics on a hex with no system yet) now asks how to treat the mainworld's trade codes — keep them and add only the codes its placement gives (the default), keep them exactly, or recalculate them all — so codes you typed are no longer lost and the system is built to fit them, with Sa making the mainworld a moon and a T5 climate code moving it to a matching orbit.
+4. **Fixed — Old trade codes coming back:** changing an MgT2E mainworld's UWP in the Hex Editor and then expanding it no longer brings back the trade codes of its old UWP.
+5. **Fixed — Hex Editor edits to a moon mainworld:** saving an expanded MgT2E mainworld that is a moon in the Hex Editor now changes that moon, where its new name, UWP and trade codes used to be written onto the system's first world instead.
+6. **Fixed — MgT2E moon mainworld atmosphere:** an MgT2E mainworld that is a moon now keeps its UWP atmosphere and hydrographics all through generation, so its temperature and other details are worked out from the right atmosphere.
+7. **Fixed — CT asteroid mainworld trade codes:** expanding a CT system whose mainworld is an asteroid belt now updates the trade codes shown for the hex as well.
+8. **Fixed — T5 hex and system trade codes:** after a T5 Expand System the hex panel shows the same trade codes as the system, climate code included.
+9. **Fixed — T5 Recalculate rerolls moons:** a T5 Expand System with **Recalculate all codes** now rolls afresh whether the mainworld is a moon, instead of keeping it a moon because an earlier expand left Sa or Lk in its codes.
+10. **Changed — Expand System replaces the whole system:** Expand System in CT, MgT2E or T5 (and MgT2E Expand Socioeconomics when it builds a new system) now removes any other edition's system from the hex, including a wiki-published one, where it used to keep the old system hidden behind the new one or hide the new one behind the old, and its dialog now warns which systems will be replaced while every mainworld you imported or typed is kept.
+
+### [v0.19.0] - 2026-11-19
+1. **New — Wiki-published system data:** 85 systems published on the Traveller wiki (wiki.travellerrpg.com), cleaned into a snapshot taken 2026-11-16 and shipped with the app, can now be loaded as full T5 systems with their stars, planets, moons, rings and belts as published, then edited in the System Editor and exported like any other system.
+2. **New — Wiki-Published System Data on import:** a new **Wiki-Published System Data (planets & moons)** checkbox in Import the Imperium, Import the OTU Universe, Import an OTU Neighbourhood and Custom OTU Import loads the wiki-published system into each imported world that has one, keeping the mainworld exactly as TravellerMap gives it and leaving every sector you did not import untouched.
+3. **New — Import Wiki-Published Systems:** a new **Import Wiki-Published Systems** button in the import menu loads the wiki-published system into every world on the map whose sector, hex and name match one, including sectors imported from a .tsv file, and asks first before replacing any system that already has its planets and moons.
+4. **New — Load Wiki-Published System:** right-click → **LOAD WIKI-PUBLISHED SYSTEM…** on one selected hex lets you choose any of the 85 wiki-published systems from a searchable list and puts it into that hex whole, its wiki mainworld included, while with several hexes selected it loads the matching wiki-published system into each of them.
+5. **Fixed — Star names in the System Editor:** saving a system in the System Editor now keeps each star's own name instead of renaming it after its spectral type, and a T5 companion star keeps its own distance unless you move it to another orbit.
+6. **Fixed — T5 gas giant sizes in the System Editor:** saving a T5 system in the System Editor now gives a gas giant that has no size yet one from its own class, so a Small gas giant can no longer come out with a Large size, and a gas giant marked as neither is saved as Small instead of Large.
+7. **New — Import/Export hover text:** hovering over any button in Settings → Import / Export now explains what it does, including which imports erase the current map, and Import the Universe and Import a Neighbourhood are now called Import the OTU Universe and Import an OTU Neighbourhood.
+8. **Fixed — Star luminosity in wiki-published systems:** stars loaded from a wiki-published system now show a luminosity worked out the same way as for stars in a generated T5 system, where they used to show "?".
+9. **Fixed — Typed MgT2E atmospheres changing on Save:** an atmosphere you type into a world's or moon's UWP in the MgT2E System Editor now stays as typed when you save, where about one save in three changed it (a 6 to a 7, or to A, B or C on a hot world), and a hot world can still be marked as a runaway greenhouse while keeping your atmosphere.
+10. **Fixed — Added MgT2E moons disappearing on Save:** a moon you add with **+Moon** in the MgT2E System Editor is now always kept when you save, where about four in ten disappeared or were swapped for a different moon, it is now placed inside its world's Hill Sphere with a warning when the world has little room for it, and it can no longer take another moon's name.
+11. **Fixed — Moon room on tidally locked MgT2E worlds:** the System Editor now works out how much room a tidally locked MgT2E world has for moons from its final orbit, the same figure a newly generated map uses, so **+Moon** no longer squeezes a new moon in close or warns that such a world is crowded when it is not.
+12. **Fixed — Typed MgT2E tech levels changing on Save:** a tech level you type into a populated world's or moon's UWP in the MgT2E System Editor now stays as typed when you save, where a Research Base, Military Base or Mining world could change it to the mainworld's, and the world still gets its classification.
+13. **New — MgT2E rings in the System Editor:** a new **+Ring** button on each MgT2E world and gas giant adds a ring that is always kept when you save, each world's rings are listed with a ✕ to remove one, the hex panel now shows a world's ring count, and hovering a ring in the orrery names it and the world it circles.
 
 ### [v0.18.3] - 2026-11-14
 1. **New — Ringed Gas Giant icon:** a new setting under Settings → Visual Options rings the map's gas giant symbol only when the mainworld actually orbits a gas giant, so a mainworld that is a moon of a rocky world or of an RTT Chthonian, or whose parent is not known, now shows the plain symbol; it starts on for new and older maps, and turning it off shows the plain symbol everywhere.

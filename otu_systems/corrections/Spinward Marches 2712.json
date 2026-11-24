@@ -1,0 +1,16 @@
+{
+  "infobox_stars": {
+    "Risek (world)": [
+      {
+        "name": "Orb",
+        "type": "M2 V"
+      },
+      {
+        "name": "Secondary",
+        "type": "M3 V"
+      }
+    ]
+  },
+  "stars_source": "travellermap.com Stellar (Sean, 2026-11-16: TravellerMap wins where the wiki contradicts itself)",
+  "stars_settled": true
+}

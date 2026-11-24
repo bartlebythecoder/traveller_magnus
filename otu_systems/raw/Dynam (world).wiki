@@ -1,0 +1,196 @@
+ {{UWP
+|name= {{World|Dynam|Lishun|Masionia|1219}}
+|u0    = E788100-4
+|pop0  = 4
+|zone0 = green
+ |u2= 
+|uc    = A78846A-D 
+|popc  = 5
+|zonec = amber
+ |u1= 
+|alg     = ImDa (Was: D78846A-D)
+|class   = Ni Pa / Da Ht Mr 
+|trade   = pa
+|climate = TBD
+|nblty   = Bc
+|bases   = D
+|primary = F7 V M0 V
+|belts   = 1
+|GGcount = 0
+}}
+{{World summary |name= Dynam |trade=Ni Pa}}
+{{World summary comment|trade=Da}}
+{{World summary comment|trade=Ht}}
+{{World summary comment|trade=Mr}}
+{{World summary ImDa|sector= Lishun |subsector=Masionia}}
+{{World summary bases|bases=D}} 
+* ''Dynam'' contains a major [[Naval Depot]], and the [[system]] is sometimes known simply as "Depot."
+* This world has also been known as:
+** {{Alternate world name|name=Gamkuuruu}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+* A low-population, non-industrial {{Imperial}} world located in the [[Masionia Subsector]] of the [[Lishun Sector]]. 
+* This [[world]] is part of the [[Dynam Cluster]].
+
+=== Stellar Data ===
+{{BinaryStarSystem
+|name           = Dynam
+|PrimaryName    = [[Erg (star)|Erg]]
+|primary        = F7 V
+|SecondaryName  = [[Shushan (star)|Shushan]]
+|secondary      = M0 V  
+|PrimaryNotes   = None
+|SecondaryNotes = None 
+}}
+=== [[System|System Data]] ===
+This is a rough data file on this [[star system]]:
+{{InfoboxSystem
+ |name=Dynam
+ |subsector=Masionia
+ |sector=Lishun
+ |hex=1219
+ |star='''Erg'''
+ |type='''F7 V'''
+ |P1=Dynam |Dist1=0.2 |UWP1=D788367-7
+ |P2=Trojan|Dist2=0.4 |UWP2='''Small GG'''
+ |P2M1=* ''Calescene''  | Dist2M1=9  |UWP2M1=Y300000-0
+ |P2M2=*''Candescene'' | Dist2M2=11 |UWP2M2=C210365-D
+ |P2M3=* ''Calefact'' | Dist2M3=35 |UWP2M3=Y756000-0
+ |P2M4=* ''Cryomet''  | Dist2M4=45 |UWP2M4=G500169-D
+ |P3=Belt    |Dist3=0.7   |UWP3=G000000-0
+ |P4= -  |Dist4=1.0   |UWP4= <small>(Empty Orbit)</small>
+ |P5=Electra |Dist5=1.6   |UWP5='''Small GG'''
+ |P5M1=* ''Ring''  | Dist5M1=1  | UWP5M1=YR00000-0
+ |P5M2=* ''Pyros'' | Dist5M2=4  | UWP5M2=Y410000-0
+ |P5M3=* ''Radia'' | Dist5M3=7  | UWP5M3=Y701000-0
+ |P5M4=* ''Calea'' | Dist5M4=9  | UWP5M4=Y310000-0
+ |P5M5=* ''Tepe''  | Dist5M5=10 | UWP5M5=Y700000-0
+ |P5M6=* ''Torre'' | Dist5M6=11 | UWP5M6=Y100000-0
+ |P5M7=* ''Teura'' | Dist5M7=30 | UWP5M7=Y420000-0
+ |P5M8=* ''Tropa'' | Dist5M8=45 | UWP5M8=Y420000-0
+ |P6='''Shushan''' | Dist6=2.8  | UWP6='''M0 V Companion'''
+ |P7=Anema   | Dist7=5.2  | UWP7=Y500000-0
+ |P7M1=* ''Aama''  | Dist7M1=3  | UWP7M1=Y310000-0
+ |P7M2=* ''Nipuum'' | Dist7M2=10 | UWP7M2=Y300000-0
+}} 
+
+=== [[Mainworld|Mainworld Data]] ===
+No information yet available.
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+No information yet available.
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Dynam|Atmosphere=8}}
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+No information yet available.
+
+==== Mainworld Geography & Topography ====
+No information yet available.
+
+==== Mainworld Map ====
+No information yet available.
+
+=== [[Lifeform|Native Lifeforms]] ===
+No information yet available.
+
+== History & Background ([[Dossier]]) ==
+'''Dynam''' is the proper name for and location of the {{Imperial}} [[Naval Depot]] '' '''(Depot - Lishun (1219))''' '' in [[Lishun Sector]]. 
+
+=== [[Imperial Nobility|Imperial Landed Nobility]] (N) ===
+{{Imperial Nobility|name= Dynam|Noble=Bc}}
+
+=== [[Starport|World Starport]] (Sp) ===
+{{Starport|name= Dynam|Starport=A}}
+
+=== [[Population|World Population]] (P) ===
+No information yet available. 
+
+==== World Demographics ====
+[[Humaniti]], population 100% 
+
+=== [[Government|World Government]] (G) ===
+{{WorldGov|name= Dynam|Government=6}}    
+
+=== [[Law Level|World Law Level]] (L) ===
+No information yet available. 
+
+=== [[Technology Level|World Technology Level]] (TL) ===
+{{WorldTech|name= Dynam|WorldTech=D}}
+
+=== [[Military|World Military]] ===
+No information yet available. 
+
+=== [[Economic Extension|World Economy]] ===
+No information yet available.
+
+==== Trade Data ====
+No information yet available. 
+
+==== [[Urb]]anization ====
+No information yet available. 
+
+==== [[Infrastructure|World Infrastructure]] ====
+This [[world]] possesses TBD infrastructure. 
+
+=== [[Cultural Extension|World Culture]] ===
+No information yet available.
+
+==== [[Language|World Language/s]] ====
+* [[Anglic]]
+* [[Vilani (language)|Vilani]]
+
+=== Historical Data ===
+The early years of the [[Third Imperium]] saw the belt as an active mining community. 
+
+==== World Timeline ====
+* By [[520]] the belter activity had ceased due to lack of finds. 
+* In [[690]] the [[Imperial Navy]] first established a naval depot in the Dynam system, around the moon Cryomet. 
+* [[800s]] Project LONGBOW was initiated.  LONGBOW is an acronym for “Long Baseline Observation Window,” the name for a system created for observation of the galactic core and the [[Zhodani]] axis of exploration toward the core.  The Longbow collector plane was located in the {{WorldS|Depot (Li 1219)|Lishun|1219}} system as part of a sprawling [[Imperial Navy]] facility there, aiding in its concealment.
+* By [[940]] depot operations began to wind down. 
+* In [[990]], following the [[Third Frontier War]], the Navy decided to use the system as a center for mothballing reserve ships. The initial set of 150 obsolete ships from the [[Spinward Marches Sector]] were put into orbit around Candescene. 
+* In [[1002]], after the [[Solomani Rim War]] another 300 ships were added to the graveyard. 
+* By [[1010]], the original depot on Cryomet was completely shutdown. 
+** Over the years more ships have been added to the depot. 
+* By [[1100]] there were more than a thousand mothballed ships. 
+
+==== [[UWP|UWP Listing]] ====
+No information yet available.
+
+== References & Contributors ([[Sources]]) ==
+{{Intermediate}}
+{{Detail}}
+{{Sources
+|S1= {{CT}} [[Atlas of the Imperium]]
+|S2= {{CT}} [[Vargr (Alien Module)|Alien Module 3: Vargr]] (named but no further data)
+|S3= {{CT}} {{TDref|6}} in article: "The Most Valuable Prey" 
+|S4= {{CT}} {{TDref|7}} in article: "The Dynam System" & "The Masionia Subsector"
+|S5= {{MT}} [[Imperial Encyclopedia]]
+|S6= {{MT}} [[Alien - Vilani & Vargr]] (dot map provided) in article: "The Vargr Extents"
+|S7= {{MT}} [[Rebellion Sourcebook]] in article: "Imperial Navy Depots"  
+|S8= Article: "DIS Newsbriefs" from Periodical: [[MegaTraveller Journal 4]] 
+|S9= Periodical: {{JTASref|17}} by Author & Contributor: [[Phil Masters]] 
+|S10= Periodical: {{JTASref|18}} in article: "A Concise History of the Third Imperium" 
+|S11= [[Marc Miller's Traveller]] [[T4 First Survey]]
+|S12= [[GURPS Traveller: Alien Races 4]]
+|S13= Novel: [[Agent of the Imperium]] by [[Marc Miller]]
+|S14= External Link: [http://dev.glendale.org.uk/traveller/system/35707.html Glendale.org.uk] by Author & Contributor: [[Samuel Penn]]
+|S15= External Link: [http://www.downport.com/bard/bard/cari/cari9004.html Downport CARI] by Author & Contributor: [[Paul J. Drye]] 
+|S16= [[Traveller Wiki Editorial Team]]
+|S17= Author & Contributor: Lord (Marquis) and Master of Sophontology [[Maksim-Smelchak]] of the [[Ministry of Science]] 
+}}
+
+
+[[Category: First Imperium worlds]]
+[[Category: Humaniti worlds]]
+[[Category: JumpStart worlds]]
+[[Category: Longbow worlds]]
+[[Category: Longbow Corporation worlds]]
+[[Category: Mining worlds]]
+[[Category: OPT Worlds_worlds]]
+[[Category: Naval Depot worlds]]
+[[Category: Rule of Man worlds]]
+[[Category: Second Imperium worlds]]
+[[Category: Ziru Sirka worlds]]
+{{LE|Binary Star System|T5 Second Survey worlds}}

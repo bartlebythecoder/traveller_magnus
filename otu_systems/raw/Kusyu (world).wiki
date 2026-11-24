@@ -1,0 +1,322 @@
+{{UWP
+|name= {{World|Kusyu|Dark Nebula|Kilrai'|1226}}
+|image = 
+|system= 
+|uc    = A876976-E
+|popc  = 7
+|zonec = green
+ |u0= 
+|alg     = AsSc
+|class   = Hi In / Cx Ht Tr / (Aslan)W
+|trade   = in
+|climate = Tr
+|orbit   = Orbit 3
+|gravity = 1.02
+|worlds  = TBD
+|impoex  = {?}
+|econex  = (???+?)
+|cultex  = [????] 
+|nblty   = -
+|bases   = RT
+|primary = G4 V D
+|belts   = 0
+|GGcount = 3
+}}
+
+{{World summary |name= Kusyu |trade=Hi In}}
+{{World summary comment|trade=Cx}}
+{{World summary comment|trade=Ht}}
+{{World summary comment|trade=Tr}}
+{{World summary AsSc|sector= Dark Nebula |subsector=Kilrai'}}
+{{World summary bases|bases=R}}
+{{World summary bases|bases=T}}
+* ''Kusyu'' is the homeworld of the [[Aslan]] and capital of the [[Aslan Hierate]]. 
+* Its name comes from the ''[[Trokh]]'' word for "motherland" or "home". 
+  
+== Description ([[Astrography]] & [[Planetology]]) ==
+'''Kusyu''' lies in the center of what Humans know as the [[Dark Nebula Sector]] (or [[I'aheako]], to those of the Hierate). It is part of the [[Kilrai' Cluster]].
+* It is the [[homeworld]] of the [[major race]] calling itself the [[Fteirle]], which Humans know as the [[Aslan]]. 
+
+=== Stellar Data ===
+{{BinaryStarSystem
+|name           = Kusyu 
+|PrimaryName    = [[Tyeyo (star)|Tyeyo]]
+|primary        = G4 V 
+|SecondaryName  = [[Tyeyo (star)|Saietaie]]
+|secondary      = DA
+|PrimaryNotes   = [[Tyeyo (star)|Tyeyo]]
+|SecondaryNotes = [[Tyeyo (star)|Saietaie]]
+}}
+=== System Data ===
+{{InfoboxSystem
+|name=Kusyu
+|sector= Dark Nebula|subsector= Kilrai'|hex= 1226
+|star= ''[[Tyeyo (star)|<big>Tyeyo</big> <br>Saietaie]]''|type= ''<big>G4 V</big>'' <br>''D''
+|P0= Htoiweloa (Htealas)|Dist0= 0.18|UWP0= <small><small>''YS00000-0''</small></small> <br><small><small>''("Worldlet")''</small></small>
+|P1= Iyih (Iaoau)|Dist1= 0.34|UWP1= <small><small>Y200000-0</small></small>
+|P2= Uirlea (Ulyei)|Dist2= 0.61|UWP2= <small><small>D410467-D</small></small>
+|P3= Kusyu|Dist3= 1.0|UWP3= <small><small>A876976-E</small></small>
+|P3M1= <small>Aoshi</small>|Dist3M1= 8 <small>Radii</small>|UWP3M1= <small><small>FS00668-D</small></small>
+|P3M2= <small>Aoka'ah</small>|Dist3M2= 15 <small>Radii</small>|UWP3M2= <small><small>YS00000-0</small></small>
+|P4= Tyehohi (Tresahyaiy)|Dist4= 1.60|UWP4= <small><small>C630366-D</small></small>
+|P4M1= <small>Oikhyu <br><small>(Kawirlea / Iseieao)</small></small>|Dist4M1= ? |UWP4M1= <small><small>HS00165-9</small></small>
+|P5= '''Areih''' (Ahehoi)|Dist5= 2.68 |UWP5= <small>'''LGG''' <small>'''(Size=180)'''</small></small>
+|P5M1= <small>Kaleal <small>(Kihyalriy)</small></small>|Dist5M1= 6 <small>Radii</small>|UWP5M1= <small><small>H312666-D</small></small>
+|P5M2= <small>Uiro <small>(Oaiyah)</small></small>|Dist5M2= 15 <small>Radii</small>|UWP5M2= <small><small>F200766-E</small></small>
+|P5M3= <small>Huikoahe</small>|Dist5M3= 30 <small>Radii</small>|UWP5M3= <small><small>HS001G7-E</small></small>
+|P5M4= <small>Aiwuar <small>(Tearair</small>)</small>|Dist5M4= 45 <small>Radii</small>|UWP5M4= <small><small>G200667-D</small></small>
+|P6= '''Htuitei''' (Hkiyai)|Dist6= 6.10|UWP6= <small>'''LGG''' <small>'''(Size=200)'''</small></small>
+|P6M1= <small>Aryalriy</small>|Dist6M1= 8 <small>Radii</small>|UWP6M1= <small><small>YS00000-0</small></small>
+|P6M2= <small>Iyuou <small>(Oahwao)</small></small>|Dist6M2= 20 <small>Radii</small>|UWP6M2= <small><small>F100867-E</small></small>
+|P6M3= <small>Oikhoah <small>(Akhoarlui)</small></small>|Dist6M3= 35 <small>Radii</small>|UWP6M3= <small><small>F4A0668-E</small></small>
+|P6M4= <small>Iyseiai</small>|Dist6M4= 65 <small>Radii</small>|UWP6M4= <small><small>Y200000-0</small></small>
+|P7= '''Hroueiu''' (Hiyuahuahro)|Dist7= 10.00|UWP7= <small>'''SGG''' <small>'''(Size=30)'''</small></small>
+|P7M1= <small>Tehkuhiye Ring</small>|Dist7M1= 1 <small>Radius</small>|UWP7M1= <small><small>YR00000-0</small>
+|P7M2= <small>Yeofa <small>(Youfayes)</small></small>|Dist7M2= 5 <small>Radii</small>|UWP7M2= <small><small>G100461-C</small></small>
+|P7M3= <small>Iehiyl</small>|Dist7M3= 9 <small>Radii</small>|UWP7M3= <small><small>Y100000-0</small></small>
+|P8= Kyeele (Kyoloil)|Dist8= 18.00|UWP8= <small><small>B5A1568-E</small></small>
+|P8M1= <small>Hyeiyr <small>(Yafualoi)</small></small>|Dist8M1= 7 <small>Radii</small>|UWP8M1= <small><small>Y100000-0</small></small>
+}}
+''Kusyu /Kilrai' <small>("Kilane")</small> /Dark Nebula 1226''
+* A8769H6-E  U  Hi, In                     703  As  G4V  D
+: Primary: Close binary system. Tyeyo, spectral class G4V. ICN S5G0309G4V. 
+: Mass .96 standard. 
+: Stellar diameter .934 standard. 
+: Luminosity .778 standard. Saietaie, spectral class D. ICN S5G0309M0VII. 
+: Mass .154 standard. 
+: Stellar diameter .256 standard. 
+: Luminosity .011 standard. 
+* Planetary System: 
+** Eight major bodies. 
+** Three inhabited [[world]]s (Kusyu, IV; Aoshi, IVa; Kyoloil, IX). 
+** Three [[gas giant]]s. 
+** No [[planetoid belt]]s.
+* [[Kusyu (world)|Kusyu]] has two moons: [[Aoshi]] and [[Aoka'ah]]{{Page cite|name=Solomani & Aslan|page=65}}.
+
+=== Mainworld Data ===
+: Mean orbital radius, 150.3 million kilometers (1.004 AU). 
+: Period 320.2 standard days.
+: Two satellites. 
+: Diameter, 12,980 kilometers. 
+: Density, .99 standard. 
+: Mass, 1.05 standard. 
+: Mean surface gravity, 1.02G. 
+: Rotation period: 36 hours, 2 minutes, 23 seconds. 
+: Axial inclination 2°2.1". 
+: Albedo, 0.268. 
+: Surface atmospheric pressure, 1.1 atm. 
+: Composition, oxygen-nitrogen mix, with industrial pollutants.
+: Hydrographic percentage, 63%; 
+: composition, water and frozen water-ice. 
+: Mean surface temperature, 9.1°C. 
+
+The climate of Kusyu shifted dramatically about 1.8 million years ago. Though the cause is uncertain, the archaeological and geological evidence is clear. This alteration in climate resulted in a sudden change in atmospheric content from one with a heavy sulfurous taint to one with a far higher carbon dioxide content. At the same time, average planetary temperature seems to have increased by several degrees, accompanied by a subsequent decrease of annual rainfall. Likewise at this time, Kusyu seems to have suddenly developed magnetic poles and the species diversity dramatically decreased. It is not clear whether these significant changes were the result of natural events (such as the stellar evolution of Tyeyo's companion star, Saietaie, into its current white dwarf form) or the result of some type of technological interference. Notably, no Aslan artifacts dating from prior to the climatic shift have ever been discovered. The only suggestion that anything like the Aslan lived before the great change comes from the fragmentary, fossilized remains of unintelligent four-limbed carnivores dubbed "[[Uealwokh]]". {{Page cite|name=Aliens Volume 1|page=8-10|citeName=T4 Aliens}}
+
+==== Mainworld Geography & Topography ====
+Centrally held map of the world within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records:
+
+[[File:Kusyu World Map.jpg|500 px]] <br> ''<small>(Canon map provided by Megatraveller Alien Vol 2 Solomani and Aslan)</small>''
+
+Kusyu has two major continents, both in the same hemisphere, and both straddling the equator. Several large archipelagoes lie off the continents' shores. North and south polar ice-caps, anchored by island groups, cover about 15% of the total world surface. 
+
+* Eahailr subcontinent, encircling the southern polar cap.
+* Tafohti, the larger, northern continent.
+** [[Ekhtiysakhoikhailr]] city
+** Firuahfahr city, on the southern coast
+** Hakah: Major subcontinent. The land is mostly rugged or barren, divided between the Hakaiye Mountains to the north and the Syialah Desert.
+*** Hakaiye Mountains 
+*** Hkai River
+*** Htoihelu city
+*** Ka'htesu canyon
+*** Syialah Desert
+** [[Hwiaoheahrih]] city
+** [[Ihraaohealraoa]] city
+** Khoikh city
+** Khtyereahlaoh city
+** Reahloah city
+** [[Seaoul]] city
+* Hroliarl, major continent south and east of Tafohti, divided into a western half and an eastern half, the two segments connected by a narrow land bridge just south of the equator.
+** Eisieiyu city 
+** [[Erloiryo]] city
+** Foftya city
+** Htekhir city 
+** Hwioiheaolyah city
+** Salya city
+** Stausye' Ashrerheah city
+** Tarouhoatleih city
+
+Kusyu has minimal axial tilt and orbital eccentricity. Average temperature for the world is about 9 degrees C.
+
+==== Mainworld Map ====
+No information yet available.
+
+==== Locations ====
+Of particular geosocial interest is the fact that Kusyu has no capital, per se. 
+* '''[[Dictionary:Hyufteirlerye|Hyufteirlerye]] Cities:'''
+** Each clan has its own ''[[Dictionary:Hyufteirlerye|hyufteirlerye]]'' -- the word refers to a meeting place and could be translated as "city" -- but there is no one city or administrative center which speaks for the entire planet. Individual cities are identified with specific clans (''Huiha''), and each clan large enough to control several such cities generally has one ''[[Dictionary:Htahyu|htahyu]]'', a "first place", where judgements are made, challenges accepted, and records kept. 
+
+* '''[[Tlaukhu]]:'''
+** The Aslan "Council of the Twenty-nine", the ''[[Tlaukhu]]'', meets periodically at agreed-upon sites in rotation. The Great Meeting Hall of the ''[[Tlaukhu]]'' is located within the [[L'Ihahtoi]] ("Floating Gardens") Complex at [[Firuahfahr]] Starport.  
+
+* '''[[Firuahfahr]] Starport:''' 
+** The principal starport is [[Firuahfahr]], an excellent class-A facility on the south coast of the continent of [[Tafohti]]. The site is perhaps the closest thing on Kusyu to an international city, since all the major clans and many of the minor ones maintain trading and mercantile houses here, convenient to the port. The port itself is directly administered by the ''[[Tlaukhu]]'', which maintains a legal presence within the floating complex known as the [[L'Ihahtoi]] ("Floating Gardens"). 
+
+* '''[[L'Ihahtoi]] ("Floating Gardens"):''' 
+** Being a tourist attraction as much as a practical structure, the Floating Gardens is a vast, saucer-shaped building hanging 2 kilometers above the starport's ground terminal. Housed here are certain administrative functions of the starport as well the world's principal human enclave. Hotels, bars, shops, restaurants, and other facilities catering to humans and other non-Aslan line the gaily decorated boulevards. 
+
+* Other notable places of interest on Kusyu include: 
+** The '''Cataracts of [[Saukhaeeah Falls]]''', cutting through crystal-encrusted cliffs along the upper reaches of the [[Tiyrl River]]. 
+** The Plains of the Hero, watered by the Hkai River, hold special meaning for Aslan as the location of the Battle of Uktaihelu, the ''[[Hkaiyerlikhelu]]'' of legend. 
+** The isolated splendor of the '''Mountain City of [[Stausye'asarereah]]''' provides a breath-taking panorama of the terrain below. 
+** The '''Five Cities of Aslan Legend''' on the [[Tafohti Continent]] allow you to drink deeply of [[Aslan]] history and lore.
+*** [[Ihraaohealraoa]]
+*** [[Ekhtiysakhoikhailr]]
+*** [[Hwiaoheahrih]]
+*** [[Khtyereahlaoh]]
+*** [[Seaoul]]
+
+* '''Near Orbit Complexes:''' 
+** '''Kusyu Moons :''' Kusyu has two natural satellites, [[Aoshi]] ("Swift Spirit") and [[Aoka'ah]] ("Slow Spirit"). Both are planetoids with diameters of only about 400 kilometers. As such, they appear merely as bright stars from the surface of the planet. There is little to interest outsiders, here. 
+*** The innermost moon, [[Aoshi]], is characterized by its multi‑clan naval base. It orbits at 51,000 km.
+*** While the outermost moon [[Aoka'ah]] is a barren sphere. It orbits at 96,000 km.
+** '''[[LaGrange]] [[Highport]]s of Kusyu:''' In addition, there are numerous orbital facilities, including two large habitats in what would be the inner [[LaGrange]] positions (L1 points), if the moons were more massive.
+
+=== Native Lifeforms ===
+The world is much like [[Terra (world)|Terra]] in many respects, with similar mass, density, and gravity. The mean surface temperature is somewhat cooler, but the minimal axial tilt and orbital eccentricity results in a stable, year-round climate with a continuous growing season. 
+
+Kusyu's equatorial temperatures are quite comfortable for Humans. The slightly larger land surface area has resulted in greater desert and tundra regions than on the Solomani homeworld. Despite the extreme territorial nature of Kusyu's natives, large tracts of less hospitable land have been kept as wilderness. 
+
+Kusyu's temperate regions are characterized by broadleafed plant life, heavily pigmented a blue-green color. This lush flora, rich in color and form, tends to give much of the planet's surface a jungle-like feel.
+
+Flora:
+
+* ''Harlyeyo'': A common tree originating on the northern continent. 
+* ''Ketri'eaeo'': A fruiting tree.
+* ''[[T'khearl]]'': A tree with great ceremonial importance.
+* ''Tuiweaftokeataeh'': A tall, fruiting tree.
+
+Fauna:
+
+* ''[[Afeahylhtow]]'' (known to Humans as the batsting, winger, or falconbat); flying animals domesticated by Aslan hunters long before they achieved star flight.
+* ''Atekteia'': Poisonous insects who lay their eggs in ''aua'' dung.
+* ''[[Aua]]'': A staple livestock.
+* ''Aua'ka'': Huge, dangerous animals rare outside reservations.
+* ''Ayakhyulr'': A carnivore known for both its speed and its ferocity.
+* ''Hleakakhea'': An air-breathing aquatic animal living in warm coastal estuaries across the planet. 
+* ''I'oio'': A nimble, four-legged herbivore.
+* ''Khta'': Fast-moving predators that the Aslan have domesticated and trained to use as mounts. 
+* ''Stii'': Small furry simian-like creatures about the size of a human child; omnivorous scavengers. The Aslan consider them a tasty snack and also keep them as living garbage disposals in small communities.
+* ''Syo'': A flightless avian, native to the equatorial regions. 
+* ''Yatlahwua'': A small nocturnal omnivore, closely related to Aslan.
+* ''Yoois'': ("meat-worms"); a common reducer invertebrate.
+
+=== Native Sophont ([[NIL]]): [[Aslan]] ===
+It is the [[homeworld]] of the [[major race]] calling itself the [[Fteirle]], which humans know as the [[Aslan]].
+* The [[Aslan]], a [[sophont]]ic species of much infamy.
+
+== History & Background ([[Dossier]]) ==
+''Canon Conflict:'' Different canonical sources have reported Kusyu as located in different places. 
+* Please see the [[Ulane Hoax]] for a possible explanation for the confusion. See the metadata page for more information.
+
+=== World Starport ===
+{{Starport|name= Kusyu|Starport=A}}
+
+==== World Demographics ====
+[[File:Aslan Sophont Comparison.jpg|150 px|right]]
+Kusyu has a population of 4.6 billion, which includes the population of the artificial satellites and of several undersea colonies. There are less than 600,000 non-[[Aslan]] on Kusyu.
+
+==== World Languages ====
+The common language on Kusyu is ''[[Trokh]]''.
+
+==== Urbanization ====
+Aslan architecture tends to the organic and the rounded. They favour artistry over efficiency in the design of their buildings -- every Aslan structure is different. Even in mass-produced housing, residents will strive to make their territory uniquely theirs.
+* Since Aslan descend from predators and enjoy open terrain, their buildings often feature both open rooms of great size and a number of concealed rooms, balconies, hidden passageways and hideaways.
+
+Kusyu has no capital, per se. Each clan has its own ''[[Dictionary:Hyufteirlerye|hyufteirlerye]]'' -- the word refers to a meeting place and could be translated as "city" -- but there is no one city or administrative centre which speaks for the entire planet. Individual cities are identified with specific clans, and each clan large enough to control several such cities generally has one ''[[Dictionary:Htahyu|htahyu]]'', a "first place" where judgements are made, challenges accepted, and the records kept. 
+
+The ''[[Tlaukhu]]'' ("Council of the Twenty-nine") meets periodically at agreed-upon sites in rotation. There is a central meeting site known as the Greet Meeting Hall of the ''[[Tlaukhu]]'', located on neutral land. All of the 29 ''[[Tlaukhu]]'' clans (and about 300 others) have landholds on Kusyu. Aslan consider land on Kusyu especially valuable, and clans gain both power and status from their landholds on Kusyu.
+
+Cities and their controlling clans include:
+
+* Eeah, Clan ''[[Seieakh]]'' (population 92 million) 
+* Eisieiyu, Clan ''[[Ikhtealyo]]'' (population 50 million) 
+* [[Erloiryo]], Clan ''[[Syoisuis]]'' (population 192 million)
+* Firuahfahr, split control (population 529 million) 
+* Foftya, Clan ''[[Tralyeaeawi]]'' (population 265 million)
+* Htekhir, Clan ''[[Yulraleh]]'' (population 40 million) 
+* Htoihelu, Clan ''[[Yerlyaruiwo]]'' (population 109 million)
+* [[Hwiaoheahrih]], Clan ''[[Hrawoao]]'' (population 44 million) 
+* Hwioiheaolyah, Clan ''[[Eisohiyw]]'' (population 79 million) 
+* [[Ihraaohealraoa]], Clan Estoieie' (population 32 million)
+* Khoikh, Clan ''[[Hrasua]]'' (population 52 million) 
+* [[Khtyereahlaoh]]
+* Reahloah, Clan ''[[Uiktawa]]'' (population 60 million)
+* Salya, Clan ''[[Hlyueawi]]'' (population 40 million)
+* [[Seaoul]], Clan ''[[Khaukheairl]]'' (population 145 million)
+* Stausye' Ashrerheah, Clan Eteawyolei' (population 63 million)
+* Tarouhoatleih, Clan ''[[Aokhalte]]'' (population 33 million)
+
+=== World Technology Level ===
+{{WorldTech|name= Kusyu|WorldTech=E}}
+
+=== World Government ===
+{{WorldGov|name= Kusyu|Government=7}}  
+
+Humans classify the government of Kusyu as civil service bureaucracy, but [[Aslan]] classify the nature of the government as split control, similar in nature to a “balkanized” government for humans. All of the 29 Tlaukhu clans (and about 300 others) have landholds on Kusyu.  
+
+==== World Law Level ====
+Weapons restrictions are about equivalent to human law level 4 (military weapons prohibited).
+
+Criminal acts are rare but not unheard of in Aslan society. Crimes are different from the insults or slurs that provoke duels, and are classified into three categories: crimes of passion, crimes with victims, and crimes of honour. 
+* Crimes of passion involve misbehavior prompted by temper, anger, or provocation. The accused is judged by the head of the family, pride, or clan involved.
+* Crimes with victims involve taking money or items of value, or violating the person of another for profit (kidnapping, terrorism, piracy). General practice is to have an impartial ''[[Dictionary:Earleatrais|earleatrais]]'' consider the case and present findings.
+* Crimes of honour involve failure to observe the rituals established for social behaviour. Judgement is made by the pride or clan head, depending on the severity of the crime. Crimes of honour are the most serious in Aslan society; in practice, most are never tried as a duel to the death occurs first.
+
+==== World Military ====
+No information yet available.
+
+=== World Economy ===
+No information yet available. 
+
+==== Trade Data ====
+No information yet available. 
+
+=== World Culture ===
+No information yet available. 
+
+==== World Infrastructure ====
+No information yet available. 
+
+=== Historical Data ===
+No information yet available. 
+
+==== World Timeline ====
+No information yet available.
+
+==== UWP Listing ====
+No information yet available.
+
+== References ==
+{{Metadata}}
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=Twilight's Peak}}
+ | {{Ludography cite|name=Aslan|version=Classic Traveller}}
+ | {{Ludography cite|name=Library Data (A-M)}}
+ | {{Ludography cite|name=Solomani & Aslan}}
+ | {{Ludography cite|name=Aliens Volume 1}}
+ | {{Ludography cite|name=The Trojan Reach|version=Mongoose 2nd|page=41}}
+ | {{Ludography cite|name= The Deep and the Dark|page=240}}
+}}
+
+
+[[Category: Afeahylhtow worlds]]
+[[Category: Highport worlds]]
+[[Category: Homeworld]]
+[[Category: Kilrai' Cluster worlds]]
+[[Category: Orbital Facility]]
+[[Category: Tlasayerlahel worlds]]
+[[Category: Tlektaowa worlds]]
+[[Category: Tyeyo Fteahrao Yolr worlds]]
+[[Category: Uealwokh worlds]]
+{{LE|Aslan Hierate Worlds|T5 Second Survey worlds}}

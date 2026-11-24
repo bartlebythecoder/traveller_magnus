@@ -1,0 +1,38 @@
+{{InfoboxSystem
+|name=Terra
+|subsector=Sol
+|sector=Solomani Rim
+|hex=1827
+|star=Sol
+|type=G2 V
+|P1=Mercury|Dist1=0.2|UWP1=G30046A-E
+|P2=Venus|Dist2=1|UWP2=G8B0168-E
+|P3=Terra|Dist3=1|UWP3=A867A69-F
+|P4=Mars|Dist4=1|UWP4=F43056A-F
+|P5=Planetoid Belt|Dist5=1|UWP5=F00066B-E
+|P6=Jupiter|Dist6=1|UWP6=Large GG
+|P7=Saturn|Dist7=1|UWP7=Large GG
+|P8=Uranus|Dist8=1|UWP8=Small GG
+|P9=Neptune|Dist9=1|UWP9=Large GG
+|P10=Pluto|Dist10=1|UWP10=F10046C-F
+}}
+
+
+{{Octal|-1}}
+{{#len:Test string}}
+{{#sub:This is Another Test|8|12}}
+{{#sub:This is Yet Another|-3|1}}
+
+[[Test Reference]]
+[[Test Reference|Two]]
+{{GDW}}
+
+{{#sub:[[Test Reference]]|2|-2}}
+{{#sub:[[Test Reference|Two]]|2|-2}}
+{{#sub:{{GDW}}|2|-2}}
+{{#pos:[[Test Reference|Two]]|{{!}}}}
+{{#if:{{#pos:string|{{!}}}}|{{#sub:string|2|{{#expr:{{#pos:string|{{!}}}}-2}}}}|{{#sub:string|2|-2}}}}
+
+{{#if:{{#pos:{{GDW}}|{{!}}}}|{{#sub:{{GDW}}|2|{{#expr:{{#pos:{{GDW}}|{{!}}}}-2}}}}|{{#sub:{{GDW}}|2|-2}}}}
+
+<hr>

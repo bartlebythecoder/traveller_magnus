@@ -1,0 +1,51 @@
+{{InfoboxSystem
+|name= [[Pax Rulin (system)|Pax Rulin]]
+|bodystyle= width:100
+|sector=Trojan Reaches 
+|subsector=Pax Rulin
+|hex=2204
+|star=''Prime''|type=''M8 III''
+|P0=Heddwch|Dist0=10|UWP0=Y000158-D
+|P1=Pax Rulin|Dist1=19.6|UWP1=A402231-E
+|P2=Tentrem|Dist2=38.8|UWP2=F435123-D
+|P3=Heiwa|Dist3=77.2|UWP3=G856101-D
+|P4=Shaanti|Dist4=614.8|UWP4='''Large GG'''
+|P4M1='Kankad'|Dist4M1=2|UWP4M1=H440000-0
+|P4M2='Chattaan'|Dist4M2=7|UWP4M2=H134000-0
+|P4M3='Boldar in the round'|Dist4M3=8|UWP4M3=H89A147-D
+|P4M4='Bada Chaand'|Dist4M4=9|UWP4M4=GC89145-D
+|P5=Tinchlik|Dist5=1229.5|UWP5='''Large GG'''
+|P5M1='Oy'|Dist5M1=7|UWP5M1=GABA100-D
+|P5M2='Tosh'|Dist5M2=8|UWP5M2=F361166-D
+|P6=Śānti|Dist6=2458|UWP6='''Small GG'''
+|P6M1='Nuri'|Dist6M1=1|UWP6M1=Y243010-D
+|P6M2='Sila'|Dist6M2=8|UWP6M2=Y618002-0
+|P6M3='Candra'|Dist6M3=12|UWP6M3=HFDA115-D
+}}
+The Pax Rulin system is a Single star system 
+*  six planets and 9 satellites in the system.
+
+== Description ==
+[[Pax Rulin (world)|Pax Rulin]] is only one of seven worlds in the systems which boast a breathable atmosphere, and only one of four habitable planets in the life zone of [[Lusor]], in orbit around the gas giant ''Assiniboia''. With the best conditions of the group, it was settled first and soon dominated the system.
+* Pax Rulin boasts the highest population; its companion satellites of ''Brumaire'' and ''Harcourt'' (along with a few other lesser worlds) have been colonized. 
+* Many planets in the system  are named using the word Peace in english but from several Terren Languages.
+
+=== Single Solar System ===
+'''Pax Rulin''' is a Single star system. Specifically, the [[Pax Rulin (system)|Pax Rulin system]] is composed of '''Prime''' and no companions. 
+
+{{MonostellarSystem
+|name           = Pax Rulin
+|primary        = M8 III 
+|
+|PrimaryNotes   = '''Prime''' <small>(Pax Rulin System Primary)</small>
+}}
+
+== Sources==
+{{Detail}}
+{{Sources
+|S1= {{T5}} Book 3 Worlds and Adventures
+|S2= {{CT}} Adventure 4 Leviathan
+|S3= [[Willbo| Will Richards]]
+}}
+
+{{LE|Systems}}

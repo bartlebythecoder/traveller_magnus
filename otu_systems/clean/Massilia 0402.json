@@ -1,0 +1,2732 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Massilia",
+  "hex": "0402",
+  "sector_abbreviation": "Mass",
+  "subsector": "Kerr",
+  "name": "Kaggushus",
+  "sources": [
+    {
+      "page": "Gankhaka (world)",
+      "revid": 643151,
+      "timestamp": "2021-04-12T01:14:54Z"
+    },
+    {
+      "page": "Ishdaga (world)",
+      "revid": 1054224,
+      "timestamp": "2026-05-05T19:46:11Z"
+    },
+    {
+      "page": "Kaggushus (world)",
+      "revid": 956768,
+      "timestamp": "2025-07-09T16:54:16Z"
+    },
+    {
+      "page": "Liilirsi (world)",
+      "revid": 643157,
+      "timestamp": "2021-04-12T01:16:20Z"
+    },
+    {
+      "page": "Uumgadi (star)",
+      "revid": 1054225,
+      "timestamp": "2026-05-05T19:46:13Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Kaggushus (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Uumgadi",
+          "type": "M1 V",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "page": "Uumgadi (star)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Uumgadi",
+          "type": "M1 V",
+          "notes": "Uumgadi"
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Uumgadi",
+      "stars": [
+        {
+          "name": "Uumgadi",
+          "type": "M1 V"
+        }
+      ],
+      "labels": [
+        "Kaggushus (ca 1200)",
+        "Kaggushus",
+        "Kaggushus",
+        "Kaggushus",
+        "Kaggushus"
+      ],
+      "pages": [
+        "Kaggushus (world)",
+        "Gankhaka (world)",
+        "Ishdaga (world)",
+        "Liilirsi (world)",
+        "Uumgadi (star)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "–",
+          "raw": "(Empty)",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kaggushus (world)",
+            "Gankhaka (world)",
+            "Ishdaga (world)",
+            "Liilirsi (world)",
+            "Uumgadi (star)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Liilirsi",
+          "raw": "GS0051B-C",
+          "kind": "world",
+          "uwp": "GS0051B-C",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kaggushus (world)",
+            "Gankhaka (world)",
+            "Ishdaga (world)",
+            "Liilirsi (world)",
+            "Uumgadi (star)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Dirmida",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kaggushus (world)",
+            "Gankhaka (world)",
+            "Ishdaga (world)",
+            "Liilirsi (world)",
+            "Uumgadi (star)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Gankhaka",
+          "raw": "H52030B-B",
+          "kind": "world",
+          "uwp": "H52030B-B",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kaggushus (world)",
+            "Gankhaka (world)",
+            "Ishdaga (world)",
+            "Liilirsi (world)",
+            "Uumgadi (star)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "–",
+          "raw": "(Empty)",
+          "kind": "empty",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kaggushus (world)",
+            "Gankhaka (world)",
+            "Ishdaga (world)",
+            "Liilirsi (world)",
+            "Uumgadi (star)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Kaggushus",
+          "raw": "A442AAB-C",
+          "kind": "world",
+          "uwp": "A442AAB-C",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kaggushus (world)",
+            "Gankhaka (world)",
+            "Ishdaga (world)",
+            "Liilirsi (world)",
+            "Uumgadi (star)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Shuushan",
+              "raw": "GS00219-B",
+              "kind": "world",
+              "uwp": "GS00219-B",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kaggushus (world)",
+                "Gankhaka (world)",
+                "Ishdaga (world)",
+                "Liilirsi (world)",
+                "Uumgadi (star)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 7,
+          "name": "Apdiga",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kaggushus (world)",
+            "Gankhaka (world)",
+            "Ishdaga (world)",
+            "Liilirsi (world)",
+            "Uumgadi (star)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Igesh",
+              "raw": "FS00328-B",
+              "kind": "world",
+              "uwp": "FS00328-B",
+              "distance": {
+                "raw": "45 Diam",
+                "value": 45.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kaggushus (world)",
+                "Gankhaka (world)",
+                "Ishdaga (world)",
+                "Liilirsi (world)",
+                "Uumgadi (star)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Ashmu",
+          "raw": "'''SGG''' <small>(Siz 90)</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "90",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kaggushus (world)",
+            "Gankhaka (world)",
+            "Ishdaga (world)",
+            "Liilirsi (world)",
+            "Uumgadi (star)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Alpha",
+              "raw": "H300000-0",
+              "kind": "world",
+              "uwp": "H300000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kaggushus (world)",
+                "Gankhaka (world)",
+                "Ishdaga (world)",
+                "Liilirsi (world)",
+                "Uumgadi (star)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Beta",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "50 Diam",
+                "value": 50.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kaggushus (world)",
+                "Gankhaka (world)",
+                "Ishdaga (world)",
+                "Liilirsi (world)",
+                "Uumgadi (star)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Lankadir",
+          "raw": "'''LGG''' <small>(Siz 160)</small>",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "size_value": "160",
+          "distance": {
+            "raw": "20",
+            "value": 20.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kaggushus (world)",
+            "Gankhaka (world)",
+            "Ishdaga (world)",
+            "Liilirsi (world)",
+            "Uumgadi (star)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kaggushus (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "B Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kaggushus (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Alpha",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kaggushus (world)",
+                "Gankhaka (world)",
+                "Ishdaga (world)",
+                "Liilirsi (world)",
+                "Uumgadi (star)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Beta",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kaggushus (world)",
+                "Gankhaka (world)",
+                "Ishdaga (world)",
+                "Liilirsi (world)",
+                "Uumgadi (star)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Gamma",
+              "raw": "H10016A-C Re",
+              "kind": "world",
+              "uwp": "H10016A-C",
+              "trade_codes": [
+                "Re"
+              ],
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              },
+              "flags": [
+                "uwp-trade-code-re"
+              ],
+              "sources": [
+                "Kaggushus (world)",
+                "Gankhaka (world)",
+                "Ishdaga (world)",
+                "Liilirsi (world)",
+                "Uumgadi (star)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Delta",
+              "raw": "Y400000-0",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "45 Diam",
+                "value": 45.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kaggushus (world)",
+                "Gankhaka (world)",
+                "Ishdaga (world)",
+                "Liilirsi (world)",
+                "Uumgadi (star)"
+              ]
+            },
+            {
+              "index": 1,
+              "name": "Ring",
+              "name_raw": "* ''Ring''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Gankhaka (world)",
+                "Ishdaga (world)",
+                "Liilirsi (world)",
+                "Uumgadi (star)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Ring",
+              "name_raw": "* ''Ring''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "3",
+                "value": 3.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ],
+              "sources": [
+                "Gankhaka (world)",
+                "Ishdaga (world)",
+                "Liilirsi (world)",
+                "Uumgadi (star)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Sigdashku",
+          "raw": "'''SGG''' <small>(Siz 70)</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "70",
+          "distance": {
+            "raw": "40",
+            "value": 40.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kaggushus (world)",
+            "Gankhaka (world)",
+            "Ishdaga (world)",
+            "Liilirsi (world)",
+            "Uumgadi (star)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kaggushus (world)",
+                "Gankhaka (world)",
+                "Ishdaga (world)",
+                "Liilirsi (world)",
+                "Uumgadi (star)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Alpha",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kaggushus (world)",
+                "Gankhaka (world)",
+                "Ishdaga (world)",
+                "Liilirsi (world)",
+                "Uumgadi (star)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Ishdaga",
+              "name_raw": "[[Ishdaga (world)|Ishdaga]]",
+              "raw": "G6A511A-C Re",
+              "kind": "world",
+              "uwp": "G6A511A-C",
+              "trade_codes": [
+                "Re"
+              ],
+              "distance": {
+                "raw": "45 Diam",
+                "value": 45.0,
+                "unit": "Diam"
+              },
+              "flags": [
+                "uwp-trade-code-re"
+              ],
+              "sources": [
+                "Kaggushus (world)",
+                "Gankhaka (world)",
+                "Ishdaga (world)",
+                "Liilirsi (world)",
+                "Uumgadi (star)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Larkun",
+          "raw": "'''SGG''' <small>(Size 70)</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "70",
+          "distance": {
+            "raw": "154",
+            "value": 154.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kaggushus (world)",
+            "Gankhaka (world)",
+            "Ishdaga (world)",
+            "Liilirsi (world)",
+            "Uumgadi (star)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Alpha",
+              "raw": "Y400000-0",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kaggushus (world)",
+                "Gankhaka (world)",
+                "Ishdaga (world)",
+                "Liilirsi (world)",
+                "Uumgadi (star)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Beta",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "9 Diam",
+                "value": 9.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kaggushus (world)",
+                "Gankhaka (world)",
+                "Ishdaga (world)",
+                "Liilirsi (world)",
+                "Uumgadi (star)"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Gankhaka (world)",
+      "label": "Kaggushus",
+      "stars": [
+        {
+          "name": "Uumgadi",
+          "type": "M1 V"
+        }
+      ],
+      "unused_fields": {
+        "1": "P4M1* ''Shimmi''"
+      },
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Liilirsi",
+          "raw": "GS0051B-C",
+          "kind": "world",
+          "uwp": "GS0051B-C",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Dirmida",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Gankhaka",
+          "raw": "H52030B-B",
+          "kind": "world",
+          "uwp": "H52030B-B",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Kaggushus",
+          "raw": "A442AAB-C",
+          "kind": "world",
+          "uwp": "A442AAB-C",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Shuushan",
+              "name_raw": "* ''Shuushan''",
+              "raw": "GS00219-B",
+              "kind": "world",
+              "uwp": "GS00219-B",
+              "distance": {
+                "raw": "3",
+                "value": 3.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Apdiga",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Igesh",
+              "name_raw": "* ''Igesh''",
+              "raw": "FS00328-B",
+              "kind": "world",
+              "uwp": "FS00328-B",
+              "distance": {
+                "raw": "45",
+                "value": 45.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Ashmu",
+          "raw": "'''SGG''' <small>(Size 90)</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "90",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Alpha",
+              "name_raw": "* ''Alpha''",
+              "raw": "H300000-0",
+              "kind": "world",
+              "uwp": "H300000-0",
+              "distance": {
+                "raw": "5",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Beta",
+              "name_raw": "* ''Beta''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "50",
+                "value": 50.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Lankadir",
+          "raw": "'''LGG''' <small>(Size 160)</small>",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "size_value": "160",
+          "distance": {
+            "raw": "20",
+            "value": 20.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "name_raw": "* ''Ring''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Ring",
+              "name_raw": "* ''Ring''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "3",
+                "value": 3.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Alpha",
+              "name_raw": "* ''Alpha''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "6",
+                "value": 6.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Beta",
+              "name_raw": "* ''Beta''",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Gamma",
+              "name_raw": "* ''Gamma''",
+              "raw": "H10016A-C Re",
+              "kind": "world",
+              "uwp": "H10016A-C",
+              "trade_codes": [
+                "Re"
+              ],
+              "distance": {
+                "raw": "15",
+                "value": 15.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "uwp-trade-code-re",
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Delta",
+              "name_raw": "* ''Delta''",
+              "raw": "Y400000-0",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "45",
+                "value": 45.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Sigdashku",
+          "raw": "'''SGG''' <small>(Size 70)</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "70",
+          "distance": {
+            "raw": "40",
+            "value": 40.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "name_raw": "* ''Ring''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Alpha",
+              "name_raw": "* ''Alpha''",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Ishdaga",
+              "name_raw": "* ''[[Ishdaga]]''",
+              "raw": "G6A511A-C Re",
+              "kind": "world",
+              "uwp": "G6A511A-C",
+              "trade_codes": [
+                "Re"
+              ],
+              "distance": {
+                "raw": "45",
+                "value": 45.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "uwp-trade-code-re",
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Larkun",
+          "raw": "'''SGG''' <small>(Size 70)</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "70",
+          "distance": {
+            "raw": "154",
+            "value": 154.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Alpha",
+              "name_raw": "* ''Alpha''",
+              "raw": "Y400000-0",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "5",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Beta",
+              "name_raw": "* ''Beta''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "9",
+                "value": 9.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        }
+      ],
+      "stars_as_written": [
+        {
+          "name": "Uumgadi",
+          "type": "F1 V"
+        }
+      ]
+    },
+    {
+      "page": "Ishdaga (world)",
+      "label": "Kaggushus",
+      "stars": [
+        {
+          "name": "Uumgadi",
+          "type": "M1 V"
+        }
+      ],
+      "unused_fields": {
+        "1": "P4M1* ''Shimmi''"
+      },
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Liilirsi",
+          "raw": "GS0051B-C",
+          "kind": "world",
+          "uwp": "GS0051B-C",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Dirmida",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Gankhaka",
+          "raw": "H52030B-B",
+          "kind": "world",
+          "uwp": "H52030B-B",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Kaggushus",
+          "raw": "A442AAB-C",
+          "kind": "world",
+          "uwp": "A442AAB-C",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Shuushan",
+              "name_raw": "* ''Shuushan''",
+              "raw": "GS00219-B",
+              "kind": "world",
+              "uwp": "GS00219-B",
+              "distance": {
+                "raw": "3",
+                "value": 3.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Apdiga",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Igesh",
+              "name_raw": "* ''Igesh''",
+              "raw": "FS00328-B",
+              "kind": "world",
+              "uwp": "FS00328-B",
+              "distance": {
+                "raw": "45",
+                "value": 45.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Ashmu",
+          "raw": "'''SGG''' <small>(Size 90)</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "90",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Alpha",
+              "name_raw": "* ''Alpha''",
+              "raw": "H300000-0",
+              "kind": "world",
+              "uwp": "H300000-0",
+              "distance": {
+                "raw": "5",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Beta",
+              "name_raw": "* ''Beta''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "50",
+                "value": 50.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Lankadir",
+          "raw": "'''LGG''' <small>(Size 160)</small>",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "size_value": "160",
+          "distance": {
+            "raw": "20",
+            "value": 20.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "name_raw": "* ''Ring''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Ring",
+              "name_raw": "* ''Ring''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "3",
+                "value": 3.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Alpha",
+              "name_raw": "* ''Alpha''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "6",
+                "value": 6.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Beta",
+              "name_raw": "* ''Beta''",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Gamma",
+              "name_raw": "* ''Gamma''",
+              "raw": "H10016A-C Re",
+              "kind": "world",
+              "uwp": "H10016A-C",
+              "trade_codes": [
+                "Re"
+              ],
+              "distance": {
+                "raw": "15",
+                "value": 15.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "uwp-trade-code-re",
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Delta",
+              "name_raw": "* ''Delta''",
+              "raw": "Y400000-0",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "45",
+                "value": 45.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Sigdashku",
+          "raw": "'''SGG''' <small>(Size 70)</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "70",
+          "distance": {
+            "raw": "40",
+            "value": 40.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "name_raw": "* ''Ring''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Alpha",
+              "name_raw": "* ''Alpha''",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Ishdaga",
+              "name_raw": "* ''[[Ishdaga (world)|Ishdaga]]''",
+              "raw": "G6A511A-C Re",
+              "kind": "world",
+              "uwp": "G6A511A-C",
+              "trade_codes": [
+                "Re"
+              ],
+              "distance": {
+                "raw": "45",
+                "value": 45.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "uwp-trade-code-re",
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Larkun",
+          "raw": "'''SGG''' <small>(Size 70)</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "70",
+          "distance": {
+            "raw": "154",
+            "value": 154.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Alpha",
+              "name_raw": "* ''Alpha''",
+              "raw": "Y400000-0",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "5",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Beta",
+              "name_raw": "* ''Beta''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "9",
+                "value": 9.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        }
+      ],
+      "stars_as_written": [
+        {
+          "name": "Uumgadi",
+          "type": "F1 V"
+        }
+      ]
+    },
+    {
+      "page": "Kaggushus (world)",
+      "label": "Kaggushus (ca 1200)",
+      "stars": [
+        {
+          "name": "Uumgadi",
+          "type": "M1 V"
+        }
+      ],
+      "unused_fields": {
+        "1": "P4M1      Shimmi"
+      },
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "–",
+          "raw": "(Empty)",
+          "kind": "empty",
+          "distance": {
+            "raw": "0.2",
+            "value": 0.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Liilirsi",
+          "raw": "GS0051B-C",
+          "kind": "world",
+          "uwp": "GS0051B-C",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Dirmida",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Gankhaka",
+          "raw": "H52030B-B",
+          "kind": "world",
+          "uwp": "H52030B-B",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "–",
+          "raw": "(Empty)",
+          "kind": "empty",
+          "distance": {
+            "raw": "1.6",
+            "value": 1.6,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Kaggushus",
+          "raw": "A442AAB-C",
+          "kind": "world",
+          "uwp": "A442AAB-C",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Shuushan",
+              "raw": "GS00219-B",
+              "kind": "world",
+              "uwp": "GS00219-B",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Apdiga",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Igesh",
+              "raw": "FS00328-B",
+              "kind": "world",
+              "uwp": "FS00328-B",
+              "distance": {
+                "raw": "45 Diam",
+                "value": 45.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Ashmu",
+          "raw": "'''SGG''' <small>(Siz 90)</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "90",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Alpha",
+              "raw": "H300000-0",
+              "kind": "world",
+              "uwp": "H300000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Beta",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "50 Diam",
+                "value": 50.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Lankadir",
+          "raw": "'''LGG''' <small>(Siz 160)</small>",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "size_value": "160",
+          "distance": {
+            "raw": "20",
+            "value": 20.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "B Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Alpha",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "6 Diam",
+                "value": 6.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Beta",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 5,
+              "name": "Gamma",
+              "raw": "H10016A-C Re",
+              "kind": "world",
+              "uwp": "H10016A-C",
+              "trade_codes": [
+                "Re"
+              ],
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              },
+              "flags": [
+                "uwp-trade-code-re"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Delta",
+              "raw": "Y400000-0",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "45 Diam",
+                "value": 45.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Sigdashku",
+          "raw": "'''SGG''' <small>(Siz 70)</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "70",
+          "distance": {
+            "raw": "40",
+            "value": 40.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Alpha",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Ishdaga",
+              "name_raw": "[[Ishdaga (world)|Ishdaga]]",
+              "raw": "G6A511A-C Re",
+              "kind": "world",
+              "uwp": "G6A511A-C",
+              "trade_codes": [
+                "Re"
+              ],
+              "distance": {
+                "raw": "45 Diam",
+                "value": 45.0,
+                "unit": "Diam"
+              },
+              "flags": [
+                "uwp-trade-code-re"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Larkun",
+          "raw": "'''SGG''' <small>(Size 70)</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "70",
+          "distance": {
+            "raw": "154",
+            "value": 154.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Alpha",
+              "raw": "Y400000-0",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Beta",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "9 Diam",
+                "value": 9.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        }
+      ],
+      "stars_as_written": [
+        {
+          "name": "Uumgadi",
+          "type": "F1 V"
+        }
+      ]
+    },
+    {
+      "page": "Liilirsi (world)",
+      "label": "Kaggushus",
+      "stars": [
+        {
+          "name": "Uumgadi",
+          "type": "M1 V"
+        }
+      ],
+      "unused_fields": {
+        "1": "P4M1* ''Shimmi''"
+      },
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Liilirsi",
+          "raw": "GS0051B-C",
+          "kind": "world",
+          "uwp": "GS0051B-C",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Dirmida",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Gankhaka",
+          "raw": "H52030B-B",
+          "kind": "world",
+          "uwp": "H52030B-B",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Kaggushus",
+          "raw": "A442AAB-C",
+          "kind": "world",
+          "uwp": "A442AAB-C",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Shuushan",
+              "name_raw": "* ''Shuushan''",
+              "raw": "GS00219-B",
+              "kind": "world",
+              "uwp": "GS00219-B",
+              "distance": {
+                "raw": "3",
+                "value": 3.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Apdiga",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Igesh",
+              "name_raw": "* ''Igesh''",
+              "raw": "FS00328-B",
+              "kind": "world",
+              "uwp": "FS00328-B",
+              "distance": {
+                "raw": "45",
+                "value": 45.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Ashmu",
+          "raw": "'''SGG''' <small>(Size 90)</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "90",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Alpha",
+              "name_raw": "* ''Alpha''",
+              "raw": "H300000-0",
+              "kind": "world",
+              "uwp": "H300000-0",
+              "distance": {
+                "raw": "5",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Beta",
+              "name_raw": "* ''Beta''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "50",
+                "value": 50.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Lankadir",
+          "raw": "'''LGG''' <small>(Size 160)</small>",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "size_value": "160",
+          "distance": {
+            "raw": "20",
+            "value": 20.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "name_raw": "* ''Ring''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Ring",
+              "name_raw": "* ''Ring''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "3",
+                "value": 3.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Alpha",
+              "name_raw": "* ''Alpha''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "6",
+                "value": 6.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Beta",
+              "name_raw": "* ''Beta''",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Gamma",
+              "name_raw": "* ''Gamma''",
+              "raw": "H10016A-C Re",
+              "kind": "world",
+              "uwp": "H10016A-C",
+              "trade_codes": [
+                "Re"
+              ],
+              "distance": {
+                "raw": "15",
+                "value": 15.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "uwp-trade-code-re",
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Delta",
+              "name_raw": "* ''Delta''",
+              "raw": "Y400000-0",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "45",
+                "value": 45.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Sigdashku",
+          "raw": "'''SGG''' <small>(Size 70)</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "70",
+          "distance": {
+            "raw": "40",
+            "value": 40.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "name_raw": "* ''Ring''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Alpha",
+              "name_raw": "* ''Alpha''",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Ishdaga",
+              "name_raw": "* ''[[Ishdaga]]''",
+              "raw": "G6A511A-C Re",
+              "kind": "world",
+              "uwp": "G6A511A-C",
+              "trade_codes": [
+                "Re"
+              ],
+              "distance": {
+                "raw": "45",
+                "value": 45.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "uwp-trade-code-re",
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Larkun",
+          "raw": "'''SGG''' <small>(Size 70)</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "70",
+          "distance": {
+            "raw": "154",
+            "value": 154.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Alpha",
+              "name_raw": "* ''Alpha''",
+              "raw": "Y400000-0",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "5",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Beta",
+              "name_raw": "* ''Beta''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "9",
+                "value": 9.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        }
+      ],
+      "stars_as_written": [
+        {
+          "name": "Uumgadi",
+          "type": "F1 V"
+        }
+      ]
+    },
+    {
+      "page": "Uumgadi (star)",
+      "label": "Kaggushus",
+      "stars": [
+        {
+          "name": "Uumgadi",
+          "type": "M1 V"
+        }
+      ],
+      "unused_fields": {
+        "1": "P4M1* ''Shimmi''"
+      },
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Liilirsi",
+          "raw": "GS0051B-C",
+          "kind": "world",
+          "uwp": "GS0051B-C",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Dirmida",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Gankhaka",
+          "raw": "H52030B-B",
+          "kind": "world",
+          "uwp": "H52030B-B",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "-",
+          "raw": "<small>(Empty Orbit)</small>",
+          "kind": "empty",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Kaggushus",
+          "raw": "A442AAB-C",
+          "kind": "world",
+          "uwp": "A442AAB-C",
+          "distance": {
+            "raw": "2.8",
+            "value": 2.8,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Shuushan",
+              "name_raw": "* ''Shuushan''",
+              "raw": "GS00219-B",
+              "kind": "world",
+              "uwp": "GS00219-B",
+              "distance": {
+                "raw": "3",
+                "value": 3.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Apdiga",
+          "raw": "YS00000-0",
+          "kind": "world",
+          "uwp": "YS00000-0",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Igesh",
+              "name_raw": "* ''Igesh''",
+              "raw": "FS00328-B",
+              "kind": "world",
+              "uwp": "FS00328-B",
+              "distance": {
+                "raw": "45",
+                "value": 45.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Ashmu",
+          "raw": "'''SGG''' <small>(Size 90)</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "90",
+          "distance": {
+            "raw": "10",
+            "value": 10.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Alpha",
+              "name_raw": "* ''Alpha''",
+              "raw": "H300000-0",
+              "kind": "world",
+              "uwp": "H300000-0",
+              "distance": {
+                "raw": "5",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Beta",
+              "name_raw": "* ''Beta''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "50",
+                "value": 50.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Lankadir",
+          "raw": "'''LGG''' <small>(Size 160)</small>",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "size_value": "160",
+          "distance": {
+            "raw": "20",
+            "value": 20.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "name_raw": "* ''Ring''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Ring",
+              "name_raw": "* ''Ring''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "3",
+                "value": 3.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Alpha",
+              "name_raw": "* ''Alpha''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "6",
+                "value": 6.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Beta",
+              "name_raw": "* ''Beta''",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "8",
+                "value": 8.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Gamma",
+              "name_raw": "* ''Gamma''",
+              "raw": "H10016A-C Re",
+              "kind": "world",
+              "uwp": "H10016A-C",
+              "trade_codes": [
+                "Re"
+              ],
+              "distance": {
+                "raw": "15",
+                "value": 15.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "uwp-trade-code-re",
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Delta",
+              "name_raw": "* ''Delta''",
+              "raw": "Y400000-0",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "45",
+                "value": 45.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Sigdashku",
+          "raw": "'''SGG''' <small>(Size 70)</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "70",
+          "distance": {
+            "raw": "40",
+            "value": 40.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "name_raw": "* ''Ring''",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2",
+                "value": 2.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Alpha",
+              "name_raw": "* ''Alpha''",
+              "raw": "Y300000-0",
+              "kind": "world",
+              "uwp": "Y300000-0",
+              "distance": {
+                "raw": "7",
+                "value": 7.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Ishdaga",
+              "name_raw": "* ''[[Ishdaga (world)|Ishdaga]]''",
+              "raw": "G6A511A-C Re",
+              "kind": "world",
+              "uwp": "G6A511A-C",
+              "trade_codes": [
+                "Re"
+              ],
+              "distance": {
+                "raw": "45",
+                "value": 45.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "uwp-trade-code-re",
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Larkun",
+          "raw": "'''SGG''' <small>(Size 70)</small>",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "size_value": "70",
+          "distance": {
+            "raw": "154",
+            "value": 154.0,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Alpha",
+              "name_raw": "* ''Alpha''",
+              "raw": "Y400000-0",
+              "kind": "world",
+              "uwp": "Y400000-0",
+              "distance": {
+                "raw": "5",
+                "value": 5.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Beta",
+              "name_raw": "* ''Beta''",
+              "raw": "YS00000-0",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "9",
+                "value": 9.0,
+                "unit": "Diam",
+                "unit_assumed": true
+              },
+              "flags": [
+                "dist-moon-no-unit"
+              ]
+            }
+          ]
+        }
+      ],
+      "stars_as_written": [
+        {
+          "name": "Uumgadi",
+          "type": "F1 V"
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Kaggushus",
+    "UWP": "A542AA7-F",
+    "Stellar": "M1 V",
+    "PBG": "904",
+    "Bases": "",
+    "Remarks": "He Hi In Po Cp (Kaggushus) Ht"
+  }
+}

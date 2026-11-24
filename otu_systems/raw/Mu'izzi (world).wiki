@@ -1,0 +1,185 @@
+[[File:Alien Moon 61d-0.jpg|250 px|right]]
+{{UWP 
+|name    = {{World|Mu'izzi|Aldebaran|Firdausi|2805}}
+|era     = Milieu 1116
+|uc      = B765744-A
+|popc    = 2
+|zonec   = green
+|alg     = SoCf
+|class   = Ag Ga Ri
+|trade   = ga
+|climate = -
+|gravity = -
+|bases   = -
+|primary = M0 V
+|belts   = 0
+|GGcount = 2
+}}
+{{World summary |name= Mu'izzi|trade= Ag Ga Ri}}
+{{World summary SoCf|sector= Aldebaran|subsector= Firdausi}}
+{{World summary comment|trade= Tp}}
+* It is a member of the [[Palermo Cluster]]. 
+
+{{InfoboxSystem
+ |name= Mu'izzi |subsector= Firdausi
+ |sector= Aldebaran |hex= 2805
+ |star= Primary |type= M0 V
+ |P1=     Fosaw                             | Dist1= ?         | UWP1= Y600000-0 
+ |P2=     Mu'izzi                           | Dist2= ?         | UWP2= B765744-A 
+ |P3=     Clibique                          | Dist3= ?         | UWP3= F652517-A 
+ |P4=     Occqui                            | Dist4= ?         | UWP4= Y100000-0 
+ |P5=     Thea'exep                         | Dist5= ?         | UWP5= Small GG
+ |P6=     Colquex                           | Dist6= ?         | UWP6= Y200000-0 
+ |P7=     Moquev                            | Dist7= ?         | UWP7= Large GG 
+ |P8=     Ashadd                            | Dist8= ?         | UWP8= Y510000-0 
+ |P9=     Uvawe                             | Dist9= ?         | UWP9= Y100000-0
+ |P10=    Hasconn                           | Dist10= ?        | UWP10= Y300000-0
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Mu'izzi''' has a solitary primary star.
+* It is a red main sequence.
+
+{{MonostellarSystem
+|name           = Mu'izzi
+|primary        = M0 V 
+|PrimaryName    = Primary
+|PrimaryNotes   = 
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]]. It orbits within the [[habitable zone]].
+* x7 secondary [[world|rocky worlds]].
+* x2 [[gas giant]]s, named ''Thea'exep'' and ''Moquev''.
+
+A modest industrial centre was built on Clibique, an otherwise undesirable [[Cold World|cold secondary world]] orbiting in the outer part of the [[habitable zone]], in order to avoid being beholden (and paying taxes) to the [[mainworld]] government.
+
+=== Mainworld Data ===
+'''Mu'izzi''' orbits within the prime region of its star's [[habitable zone]].
+
+[[File:Chart Orbit HZ Region Detailed.png|600 px]]
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Mu'izzi|Size= 7}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Mu'izzi|Atmosphere= 6}}
+* It experiences [[Celsius|generally moderate temperatures]].
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Mu'izzi|Hydrosphere= 5}}
+
+==== Mainworld Geography and Topography ====
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+[[File:Blank World Map Arid.png|500 px]] <br> (''Blank map, predominantly dry world''.)
+
+==== Native Lifeforms ====
+Abundant [[Lifeform|native life]] occupying every available ecological niche. Its metabolic functions drive the process of atmospheric renewal.
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Mu'izzi''' is a member of the [[Palermo Cluster]], a small but important [[trade route]] lying close to the [[coreward]]-[[trailing]] edge of [[Aldebaran Sector]].
+
+The Mu'izzi system is the [[trailing]] entry and exit point for the [[Palermo Cluster|Cluster]], providing [[Jump Drive|jump-2]] links to [[Firdausi (world)|Firdausi]], [[Rudaki (world)|Rudaki]] and [[Acerbas (world)|Acerbas]]. This in turn gives access to the economic zones to [[trailing]], [[rimward]], and even (via [[Firdausi (world)|Firdausi]]) to the [[Grand United States of Quesada]]. 
+
+The system isn't as well developed as others in the [[Palermo Cluster|cluster]], with most industry centered on the [[mainworld]].
+
+=== [[Starport|World Starport]] (St) ===
+{{Starport|name= Mu'izzi|Starport= B}}
+* The [[downport]] and [[startown]] are located in an artificial oasis, surrounded by a sandy desert. A series of concentric walls and berms keep most sand out of the city, with automated street-clearing vehicles in constant action to remove any that does get in. Buildings have transparent or slightly opaque roofs in public areas, with lush green parks between them. Although visually impressive, the downport has a rather strained elegance, noted for overpriced shops and a rather unwelcoming attitude.
+
+=== [[Population|World Population]] (P) ===
+{{WorldPop|name= Mu'izzi|multiplier= 2|Population= 7}}
+* The population almost entirely consists of [[Solomani]] humans.
+
+==== Linguistic Topography ====
+The most commonly heard [[language]]s are:
+* [[Rim Anglic]], a dialect of [[Anglic]] and the principal language of the [[Solomani Confederation|Confederation]].
+
+==== Urbanization ====
+Cities include Nueva Cadaques.
+
+Mu'izzi is noted for the wide-gauge transcontinental railways linking its [[startown]] to all other major cities.
+
+The planet was settled in an uncoordinated manner by multiple groups which then joined together to create a world state in fits and starts. As a result the cities were laid out in a haphazard manner which made internal logistics a problem. The solution to this was to move industry to the outskirts and build manufacturing zones with their own rail terminals.
+
+=== [[Technology Level|World Technology Level]] (T) ===
+{{WorldTech|name= Mu'izzi|WorldTech= A}}
+
+=== [[Government|World Government]] (G) ===
+{{WorldGov|name= Mu'izzi|Government= 4}}
+
+==== World Military ====
+Mu'izzi's military craft consist mainly of short-range interceptors operating around the homeworld and low-end patrol craft in the 600–800 ton range. These are set up for lengthy sublight operations rather than heavy combat.
+
+=== [[Law Level|World Law]] (L) ===
+{{WorldLaw|name= Mu'izzi|Law= 4}}
+
+=== Trade Data ===
+* [[Importance Extension|Importance]]: 4 (important)
+
+=== World Economy ===
+* [[Resource]]s:                       9 (moderate)
+* [[Labor]]:                           6 (millions)
+* [[Infrastructure]]:                  9 (extensive)
+* [[Efficiency]]:                      -2 (fair)
+
+=== World Culture ===
+The people of Mu'izzi are generally reserved; not hostile, but generally unwilling to fully trust outsiders until a good relationship has been established. This is reflected in the practice of charging "offworlder prices" for most goods and an unwillingness to negotiate despite it being commonplace among locals. 
+
+* [[Homogeneity|Heterogenity]]:        A (discordant)
+* [[Acceptance]]:                      B (extremely friendly)
+* [[Strangeness]]:                     2 (typical)
+* [[Symbol]]s:                         A (abstract)
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+
+* [[-9235]]: far to [[coreward]], the [[Vilani]] discover [[jump drive]] technology. Over the centuries pioneers and settlers gradually spread across [[Charted Space]].
+* [[-4045]] to [[-2204]]: the [[First Imperium|Ziru Sirka]] controls vast territories.
+* [[-2431]]: [[Terran]]s discover [[jump drive]] technology.
+* [[-2404]] to [[-2215]]: the [[Interstellar Wars]].
+* [[-2204]] to [[-1776]]: the [[Rule of Man]] administers the former [[First Imperium|Ziru Sirka]].
+* [[-1776]] to [[0]]: the [[Long Night]].
+* [[0|The Year 0]]: to [[coreward]], the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[604]]-[[622]]: the {{Imperial}} [[Civil War]].
+* [[624]]: the {{Imperial}} [[Express Boat Network]] is established.
+* [[704]]: the [[Solomani Autonomous Region]] is formed.
+* [[800]]-[[820]]: the [[Psionics Suppressions]].
+* [[871]]: the [[Solomani Confederation]] is founded.
+* [[940]]: the [[Solomani Autonomous Region]] is dissolved.
+* [[990]]-[[1002]]: the [[Solomani Rim War]].
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] includes data for the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+
+== References & Contributors (Sources) ==
+{{Detail}}
+{{Sources
+|S1= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (A-M)|Supplement 8 Library Data (A-M)]]'', ([[Game Designers Workshop]], 1981), various pages. (Library data entries)
+|S2= [[John Harshman]], [[Marc Miller]], [[Loren Wiseman]]. {{CT}} ''[[Library Data (N-Z)|Supplement 11 Library Data (N-Z)]]'', ([[Game Designers Workshop]], 1982), various pages. (Library data entries)
+|S3= {{Ludography cite|name= Solomani |version= Classic Traveller|page= IFC, pages 3, 28}} (sector named, background for the sector)
+|S4= {{Ludography cite|name= Solomani & Aslan |page= pages 8-11, various others}} (dot map locating the worlds of the sector, background for the sector)
+|S5= [[Steven Eric Schwartz]]. {{MT}} Periodical ''[[Imperiallines 2 (fanzine)|Imperiallines 2]]'', 1991, page 5. ([[Bootean Federation]], background for the sector) 
+|S6= {{Ludography cite|name= Fighting Ships of the Solomani|page= page 5}} (background for the sector)
+|S7= {{Ludography cite|name= Solomani |version= Mongoose Traveller|page= pages 50, 118, 119, various others}} (background for the sector)
+|S8= {{Ludography cite|name= The Order of Prometheus|page= pages 32-34}} (world details, plus background for the [[Palermo Cluster|Cluster]], subsector, and sector)
+|S9= [http://zho.berka.com/data/CLASSIC/sector.pl?sector=ALDEBARA Zho Berka's Maps] (Classic Era [[Universal World Profile|UWP Data]] for the world)
+|S10= [http://111george.com/core/astrogat/jG.htm CORE Data Site] ([[Universal World Profile|UWP Data]] for the world)
+|S11= Author & Contributor: [[User:Garnfellow|Garnfellow]] (development of the sector)
+|S12= Author & Contributor: [[Leroy W.L. Guatney]] of the Federation Development Agency (FDA) (development of the sector)
+}}
+
+
+[[Category: Humaniti worlds]]
+[[Category: Palermo Cluster worlds]]
+[[Category: Rule of Man worlds]]
+[[Category: Second Imperium worlds]]
+[[Category: Solomani Sphere worlds]]
+[[Category: Solomani worlds]]
+[[Category: Terran Confederation worlds]]
+[[Category: Terran Mercantile Community worlds]]
+{{LE|Era: Milieu 1116|T5 Second Survey}}

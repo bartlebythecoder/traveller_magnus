@@ -1,0 +1,217 @@
+{{StellarDataQuery
+ |name= {{World|Celepina|Spinward Marches|Rhylanor|2913}}
+ |era=Milieu 1116
+}}
+
+* {{SpMain}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Celepina''' has a solitary primary star.
+* It is a red main sequence.
+
+{{MonostellarSystem
+|name           = Celepina
+|primary        = M2 V
+|PrimaryName    = Primary
+|PrimaryNotes   = 
+}}
+
+Celepina is a small world with a thin atmosphere.  This atmosphere is tainted with heavy metal dust.  These conditions require that humans wear protective gear equipped with a respirator when venturing outside. Celepina is a junction in the [[Express Boat Network|Xboat link]] connecting the [[Aramis Subsector|Aramis]], [[Lanth Subsector|Lanth]], and [[Star Lane Subsector|Star Lane]] subsectors. 
+
+=== World Data ===
+*Mass : 0.5 earth
+*Apparent day length : 25.0 hours
+*Axial Tilt : 16.5 degrees
+*Atmospheric pressure : 0.3 atm
+*Atmospheric composition : nitrogen 78%, oxygen 20%, others 2%
+*Hydrographics : 40%, no oceans
+*Albedo : 0.55
+*Greenhouse effect : 0.16
+*Average surface temperature (G:Space) : 284 K (Cool)
+*Weather factor : 2 (Earth=10, so more stable)
+*Life : complex animals, max IQ 4 (no primate/cetacean equivalents); 
+*Moons: 0 
+
+==== World Geography ====
+'''Celepina''' is an old world, with little geologic activity.  It has some low mountain ranges, the highest being 1200m at its summit. There is a network of deep valleys in the southern hemisphere, close to the equator. Many of these are filled with water; thus, they are called the Deeps. The Deeps average a depth of 1 km below the planetary plains, and some have been further excavated to greater depths in an attempt to increase atmospheric pressure both on the surface and within the submerged living areas. Most of the urban structures reside in this region.
+
+Climate is generally cool at the equator, averaging 20 Celsius.  Weather is mild and predictable.
+
+==== Local Lifeforms ====
+There is some surface plant life, but all native animal life is aquatic. By most accounts, the fishing is bad, and "fish" taste worse.
+
+=== System Overview ===
+This system is dominated by the large central star, a red giant star with a radius of slightly more than 1 AU. While its size makes the closest planet an oven, its cooler surface temperature creates a narrower life band than warmer stars. The world Celepina falls towards the outer edge of this warm region. Historically, the Celepinian system names seem to have been derived from an obscure Terran tragedy from the region of Italy or Spain in roughly 1800 CE. Culturally, the origins of Celepina are from a Terran Slavic culture, possibly Russian.
+
+{| border="1"
+!Main Contents           !!Stars                                !!Orbital Distances (AU)
+|-
+|* Central star         ||* Primary Red Giant, M2 V  ||* Inner limit 1.9
+|-
+|* 4 terrestrial worlds ||* Temperature (K) 5400            ||* Inner life 1.600
+|-
+|* 3 Large Gas giants   ||* Mass (sols) 1.55            ||* Snow line 4.02
+|}
+
+{{InfoboxSystem|name=Celepina
+ |subsector=Rhylanor
+ |sector=Spinward Marches
+ |hex=2913
+ |star='''(Primary)'''
+ |type='''M2 V'''
+ |P1=Ugolino |Dist1=1.5 |UWP1=X100000-0
+ |P2=Celepina|Dist2=2.75|UWP2=B434456-9
+ |P3=Faleri  |Dist3=5.5 |UWP3=X200000-0
+ |P4=Arlecchino |Dist4=12|UWP4='''Gas Giant'''
+ |P4M1=* ''Grappa'' |Dist4M1=20|UWP4M1=XS00000-0
+ |P5=Feltna  |Dist5=18  |UWP5='''Gas Giant'''
+ |P6=Riccoboni|Dist6=28 |UWP6='''Gas Giant'''
+ |P7=Czarina |Dist7=35  |UWP7=X100000-0
+ |
+}}
+
+==== System Navigation ====
+Celepina system can be divided into 3 distinct traffic areas. The inner planet is rarely visited, having been nicknamed "Oven". Celepina, Faleri, and the inner Gas Giant Arlecchino have a regular traffic pattern, with fuel tenders, Navy and Scout ships patrolling and training in the area. Faleri is used primarily as a military base and prison planet; as it lies outside the frostline, it is nicknamed "Icebox". Going outwards, there are two other Gas Giants and a small planet. This area has traffic control sensors and navigation beacons, but ships have no reason to visit.
+
+===Worlds===
+{| border="1"
+!Orbit!!SubOrbit!!Name!!Diameter!!Density!!Gravity!!Rotation!!Revolution!!e!!World Type
+|-
+|1.5||--||Ugolino||1500||6.2||0.2||34.2h||630d||0.4||Terrestrial
+|-
+|2.75||--||Celepina||3400||6.1||0.40||21.2h||1666.25d||0.02||Terrestrial
+|-
+|5.5||--||Faleri||2000||6.0||0.25||tl||34.2h||0.05||Terrestrial
+|-
+|12||--||Arlecchino||19400||1.4||1.2||17.1h||41.5y||0.01||Gas Giant
+|-
+|12||<5||8 shepherd moons (Mimians or Mimes)||<400||3.4||--||--||--||0.01||Terrestrial
+|-
+|12||20||Grappa||500||3.4||0.06||tl||20d||0.01||Terrestrial
+|-
+|18||--||Feltna||13500||1.2||1.12||13.5h||76.33y||0.08||Gas Giant
+|-
+|28||--||Riccoboni||15000||1.1||1.04||11h||148y||0.03||Gas Giant
+|-
+|35||--||Czarina||1500||4.2||0.13||96h||207y||0.2||Terrestrial
+|}
+
+'''Units'''
+*Orbit is in AU or planetary radii for satellites
+*Diam = diameter in miles (X 1.609 for km)
+*Dens = average density in g/cc
+*Grav = 'surface' gravity in G's
+*Rot/Rev = rotation or revolution period in hours (h), days (d), or years (y) ; tl = tide-locked
+*e = orbital eccentricity
+*Type = G:Space/FI classification
+
+====Arlecchino ====
+A large gas giant with many moons.   These moons are called the Mimes, and host system telemetry systems and military bases.
+
+====Feltna====
+A large gas giant with few moons.   
+
+====Riccoboni====
+A large gas giant with few moons.   
+
+====Czarina====
+A minor planet on the fringes of the system, which houses telemetry and scientific equipment.
+
+== History & Background (Dossier) ==
+A significant population of [[Llellewyloly]] exists on this world.
+
+=== Imperial Landed Nobility ===
+{{Imperial Nobility|name= Celepina|Noble=B}}
+* It also holds the [[fiefdom]] of the [[House Knowln|Count of Celepina]] for historical reasons, owing fealty to the [[Duke]] of [[Rhylanor (world)|Rhylanor]].
+: ''See: [[Nobles of Celepina]]''
+
+=== World Government ===
+The government of '''Celepina''' is a Feudal Technocracy, dominated by the technician class.  
+
+Historically, the overriding concern of the first settlers on Celepina was to ensure that the technology that protected them from the hostile conditions on the world's surface remained in good order. The technicians who knew how quickly realized that they could rule if they held on to the knowledge themselves.
+
+Although the majority of citizens do not have a vote, the system is not considered repressive. Government is seen as a service that enables Celepinan society to function.
+"The effectiveness of government can be measured" is a common phrase.
+
+The ruling council, the [[Seemvouleeo]], is comprised of Tehneetees elected by their peers. The Seemvouleeo elects an Arheegos who rules for 5 years. The Arheegos acts as the voice of the council and can not act without their consent.
+
+Each week, the Seemvouleeo Office publishes an account of the repair and maintenance status of the colony, showing what needs to be done and the state of any work in progress.  Air loss rates, breakdowns and failures are published regularly and publicly. A government can find itself in difficulties due to a software problem that causes drinks dispensers to stop working.  
+"The prime purpose of government is to ensure that tomorrow, we can still breathe".
+
+The Arheegos sets tax levels, regulates trade, and manages relations with the Scouts, Navy and the Imperium. The Seemvouleeo can introduce and pass laws within these areas as they see fit. Laws that regulate commercial and social behavior can only be introduced by non-tehneetees. 
+
+The Arheegos and Seemvouleeo members still work at their trades, still meet with the ordinary citizens and (unlike many other rulers) have to justify all decisions. The Seemvouleeo members tend to live at Makinsk. This location was suggested by the citizens as a way of preventing disruption to their own lives caused by a series of demonstrations outside the homes of Seemvouleeo members following a decision to restrict imports of technical journals.
+
+The government is considered fairly liberal and Celepinan society is considered just and worthwhile by the citizens. 
+
+==== Facilities ====
+Celepina has a large orbital port (called Tarsanas) and a groundport for shuttles and smaller starships. The construction yard at the orbital port has a reputation for high quality work but delivery times are considered excessive (about 30% longer than might otherwise be expected). The shipyard is sustained by Navy and Scout contracts for repairs and maintenance with only a small part of its income coming from passing trade. Ship owners wanting Annual Maintenance will find that the contract holders are always given first call on the facilities. Even work in progress has been suspended to deal with an urgent job for the Navy or Scouts. Read the small print before signing any service or repair authorizations if there are deadlines to be met!
+
+The port is essentially two cruciform structures on the end of a long cylinder. The external pipework is part of the Spaceport heating system. Fluid is pumped through the skin of the pipes and cools the side of the port in the sunlight and warms the side in shadow. The end structure is the ship construction and repair yard, the inner cross is where starships can dock and transfer cargo. Note that Celepina Spaceport does not provide internal pressurized docking for ships. The main body of the port houses a city whose culture will be more familiar to travellers. All the services of a B class starport are present including security, bonded warehouses and chandlers. The commercial area has banks, hotels, bars and restaurants, shops selling military surplus and catering to military tastes.
+
+Celepina customs officials have a reputation for thoroughness. Weaponry is not needed on surface and any attempt to use deadly force on the Spaceport will result in a swift and effective response. As Celepina is used as a training base, there are always unexpected tests. The staff on duty might be young and inexperienced, but they tend to do 110% of the job.
+
+=== Economy ===
+'''Population'''
+
+The population centers are:<br/>
+<ul>
+<li>Makinsk, in the Makinsk Deep.</li>
+<li>Mermansk, in the Mermansk Deep.</li>
+<li>Petrov, in the Petrov Deep.</li>
+</ul>
+
+Celapina's primary export is manufactured goods.
+
+The pay of the Tehneetees is subject to a formula, based on the effectiveness of their work. A major air loss or breakdown can put individual members into debt.
+
+===System Military===
+<u>Navy Details</u>
+
+The Navy owns two establishments in system. The largest installation is the SDB Training School at Chiaravalle, 15 kilometers from Celepina Port. The SDB Training School trains recruits from the subsector in basic training before they progress on to the simulators. There are 8 interiors and two retired boats at Chiaravalle, representing a variety of common types. The Navy also has a Protected Operations School, where trainee Marines learn vacuum suit operations. Both schools have good reputations, the SDB school is well know for the quality of its engineering graduates.
+
+There are usually no more than 10 SDBs in the system at any time, as Celepina is not considered a priority for defense. The primary base is Faleri. This base is not elaborate, but has a fully functional spaceport capable of servicing the system SDBs. Two to four SDBs are stationed here, with regular deployments to reinforce operations at Arlecchino. Two SDBs are usually hidden at Arlecchino. The SDBs in system have a small outpost on the eighth moon (Alatri) of the Gas Giant Arlecchino. This base has a minimal staff and is mainly a place to store food, spares and munitions. Two SDBs are found on local patrol around the orbital port. The last two are hidden in the Deeps at Celepina.
+
+The Navy also has a variety of shuttles in system. Visitors will also see Destroyers and transports delivering and collecting trainees.
+	 
+<u>Scout Service Details</u>
+
+The Scouts have a building at Celepina Port and have an outpost on Arlecchino moon 9 (Grappa). The Scouts maintain four traffic beacons in system. Celepina orbital port has local control of traffic, there is a beacon at Arlecchino and then two more, 60 degrees ahead of Arlecchino and 60 degrees behind the Gas Giant along its orbit path at the LaGrange points. These manage the in-system traffic. There is a weekly shuttle service to the Scout base at Grappa. Two X-boat Tenders are assigned to deal with incoming and departing traffic, one is operated by the Scout Services' own Operational Training Department. There are also two Suileman class Scout/Couriers, one held on 10 minutes launch as a rescue vehicle.
+
+=== Culture ===
+Celepinans tend to grow tall in the low gravity of their homeworld. The average adult female is over 2 meters, males reach 2 meters 30 cm. The population tends towards olive skin, with brown or black hair. Eye color is usually green or green-brown. The population numbers tend to stay at the same level. Many youths leave the planet, the greater majority join the military services. On retirement, they return, often with partners and children. The ruling class of technicians resent off-world ideas and particularly resent those who return with technical skills. The technicians do not like their monopoly eroded. In general, Celepinans are friendly and welcoming, particularly so towards people in military service.
+
+Social mobility is high. All children are tested at age 9. Although families do tend to follow their parent's trade, that is nothing more than tradition. The daughter of a Tehneetees is likely to have some background skills and understanding from her parents and is likely to have a better chance in the exams because of it. She would be expected to make a better Tehneetees than the daughter of a shopkeeper, if only due to the experience of her family that can be drawn on.
+
+The locals pronounce the name of their planet with a hard "k" at the start (Kell-ee-peena) although Galanglic speakers usually say it "Sell-ee-peena". All writing uses the Cyrillic (Old High Russian, Terra) script, but the spoken language is Galanglic. In the spaceport all essential signs are in both scripts. Several attempts to introduce standard script have failed, the Celepinans see their script as one of the few things that distinguishes them from an increasingly homogeneous Imperium.
+
+Celepinans have little concept of modesty and will happily undress in a shop to try on clothes. Body paint (in lieu of clothes) is considered acceptable, although sexual behaviour is not tolerated in public. (In the same way that spitting inside a restaurant will get you thrown out.) Toilets are unisex; there are no taboos. 
+
+=== Recent History ===
+In recent years, teenagers have been causing minor acts of sabotage to bring the ruling technicians into disrepute.
+
+[[Celepina, Count Knowin of|Count Knowln]] maintains an official residence in the Knowln Deep, a small Deep with an excavated bottom.  The residence is said to have been dug from the living rock, with artistic guidance from the sculptors from the Valhalla system.
+
+== References ==
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=Twilight's Peak|version=Classic Traveller|page=11}}
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=30-31}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=The Regency Sourcebook|page=43}} (UWP only)
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=109}}
+ | {{Ludography cite|name=The Spinward States|page=104}} (UWP only)
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=74-79}} (UWP only)
+ | Author & Contributor: [[User:Dochsavage|Doch Savage]]
+}}
+
+[[Category: 23rd Fleet worlds]]
+[[Category: Aquaculture worlds]]
+[[Category: Llellewyloly worlds]]
+[[Category: Shipyard worlds]]
+[[Category: Worlds with a X-Boat Station]]
+{{LE|T5 Second Survey worlds}}

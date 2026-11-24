@@ -1,0 +1,247 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Gushemege",
+  "hex": "1133",
+  "sector_abbreviation": "Gush",
+  "subsector": "Laeth",
+  "name": "Kemshigesh",
+  "sources": [
+    {
+      "page": "Kemshigesh (world)",
+      "revid": 1037287,
+      "timestamp": "2026-04-07T23:54:26Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Kemshigesh (world)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Kyan A",
+          "type": "K2 V",
+          "notes": null
+        },
+        {
+          "role": "Secondary",
+          "name": "Kyan B",
+          "type": "M8 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Kyan A",
+      "stars": [
+        {
+          "name": "Kyan A",
+          "type": "K2 V"
+        }
+      ],
+      "labels": [
+        "Kemshigesh"
+      ],
+      "pages": [
+        "Kemshigesh (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Kyan A 1",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kemshigesh (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Kyan A 2",
+          "raw": "SGG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kemshigesh (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Kyan B",
+          "raw": "M8 V",
+          "kind": "star",
+          "type": "M8 V",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ],
+          "sources": [
+            "Kemshigesh (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Kyan B 1",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kemshigesh (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Kemshigesh",
+          "raw": "D532544-8",
+          "kind": "world",
+          "uwp": "D532544-8",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kemshigesh (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 6,
+          "name": "Kyan B 3",
+          "raw": "SGG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kemshigesh (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Kemshigesh (world)",
+      "label": "Kemshigesh",
+      "stars": [
+        {
+          "name": "Kyan A",
+          "type": "K2 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Kyan A 1",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Kyan A 2",
+          "raw": "SGG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Kyan B",
+          "raw": "M8 V",
+          "kind": "star",
+          "type": "M8 V",
+          "distance": {
+            "raw": "5.2",
+            "value": 5.2,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Kyan B 1",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "0.4",
+            "value": 0.4,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Kemshigesh",
+          "raw": "D532544-8",
+          "kind": "world",
+          "uwp": "D532544-8",
+          "distance": {
+            "raw": "0.7",
+            "value": 0.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Kyan B 3",
+          "raw": "SGG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "1.0",
+            "value": 1.0,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Kemshigesh",
+    "UWP": "D532544-8",
+    "Stellar": "K2 V M8 V",
+    "PBG": "613",
+    "Bases": "",
+    "Remarks": "Ni Po"
+  }
+}

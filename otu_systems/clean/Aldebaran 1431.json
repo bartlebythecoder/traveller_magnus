@@ -1,0 +1,534 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Aldebaran",
+  "hex": "1431",
+  "sector_abbreviation": "Alde",
+  "subsector": "Theta Aurigae",
+  "name": "Kwan Primary",
+  "sources": [
+    {
+      "page": "Kwan (world)",
+      "revid": 1020360,
+      "timestamp": "2026-03-13T10:35:03Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Kwan (world)",
+      "template": "BinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Primary",
+          "type": "K5 V",
+          "notes": null
+        },
+        {
+          "role": "Secondary",
+          "name": "Secondary",
+          "type": "M4 V",
+          "notes": "Approximately 210 AU from the primary."
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Primary",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "K5 V"
+        }
+      ],
+      "labels": [
+        "Kwan Primary"
+      ],
+      "pages": [
+        "Kwan (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Planet 1",
+          "raw": "Y410000-0",
+          "kind": "world",
+          "uwp": "Y410000-0",
+          "distance": {
+            "raw": "0.38",
+            "value": 0.38,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kwan (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Kwan",
+          "raw": "A786231-8",
+          "kind": "world",
+          "uwp": "A786231-8",
+          "distance": {
+            "raw": "0.75",
+            "value": 0.75,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kwan (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "G200111-8",
+              "kind": "world",
+              "uwp": "G200111-8",
+              "distance": {
+                "raw": "30 Diam",
+                "value": 30.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kwan (world)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 3,
+          "name": "Planet 2",
+          "raw": "YBB0000-0",
+          "kind": "world",
+          "uwp": "YBB0000-0",
+          "distance": {
+            "raw": "1.45",
+            "value": 1.45,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kwan (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y301000-0",
+              "kind": "world",
+              "uwp": "Y301000-0",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kwan (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Icy Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "2.87",
+            "value": 2.87,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kwan (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Gas Giant",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "6.15",
+            "value": 6.15,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kwan (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kwan (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y3A1000-0",
+              "kind": "world",
+              "uwp": "Y3A1000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kwan (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "11 Diam",
+                "value": 11.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kwan (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Moon",
+              "raw": "Y102000-0",
+              "kind": "world",
+              "uwp": "Y102000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kwan (world)"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "star": "Primary",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "M4 V"
+        }
+      ],
+      "labels": [
+        "Kwan Secondary"
+      ],
+      "pages": [
+        "Kwan (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Planet 3",
+          "raw": "Y311000-0",
+          "kind": "world",
+          "uwp": "Y311000-0",
+          "distance": {
+            "raw": "0.11",
+            "value": 0.11,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kwan (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Planet 4",
+          "raw": "YBC4000-0",
+          "kind": "world",
+          "uwp": "YBC4000-0",
+          "distance": {
+            "raw": "0.26",
+            "value": 0.26,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kwan (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Planet 5",
+          "raw": "Y9B1000-0",
+          "kind": "world",
+          "uwp": "Y9B1000-0",
+          "distance": {
+            "raw": "0.74",
+            "value": 0.74,
+            "unit": "AU"
+          },
+          "sources": [
+            "Kwan (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y202000-0",
+              "kind": "world",
+              "uwp": "Y202000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Kwan (world)"
+              ]
+            }
+          ]
+        }
+      ],
+      "placement": {
+        "orbit": null,
+        "au": 210.0,
+        "from": "star template notes"
+      }
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Kwan (world)",
+      "label": "Kwan Primary",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "K5 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Planet 1",
+          "raw": "Y410000-0",
+          "kind": "world",
+          "uwp": "Y410000-0",
+          "distance": {
+            "raw": "0.38",
+            "value": 0.38,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Kwan",
+          "raw": "A786231-8",
+          "kind": "world",
+          "uwp": "A786231-8",
+          "distance": {
+            "raw": "0.75",
+            "value": 0.75,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "G200111-8",
+              "kind": "world",
+              "uwp": "G200111-8",
+              "distance": {
+                "raw": "30 Diam",
+                "value": 30.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Planet 2",
+          "raw": "YBB0000-0",
+          "kind": "world",
+          "uwp": "YBB0000-0",
+          "distance": {
+            "raw": "1.45",
+            "value": 1.45,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y301000-0",
+              "kind": "world",
+              "uwp": "Y301000-0",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Icy Belt",
+          "raw": "Y000000-0",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "2.87",
+            "value": 2.87,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Gas Giant",
+          "raw": "LGG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "6.15",
+            "value": 6.15,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y3A1000-0",
+              "kind": "world",
+              "uwp": "Y3A1000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "11 Diam",
+                "value": 11.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Moon",
+              "raw": "Y102000-0",
+              "kind": "world",
+              "uwp": "Y102000-0",
+              "distance": {
+                "raw": "25 Diam",
+                "value": 25.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "page": "Kwan (world)",
+      "label": "Kwan Secondary",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "M4 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Planet 3",
+          "raw": "Y311000-0",
+          "kind": "world",
+          "uwp": "Y311000-0",
+          "distance": {
+            "raw": "0.11",
+            "value": 0.11,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Planet 4",
+          "raw": "YBC4000-0",
+          "kind": "world",
+          "uwp": "YBC4000-0",
+          "distance": {
+            "raw": "0.26",
+            "value": 0.26,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Planet 5",
+          "raw": "Y9B1000-0",
+          "kind": "world",
+          "uwp": "Y9B1000-0",
+          "distance": {
+            "raw": "0.74",
+            "value": 0.74,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y202000-0",
+              "kind": "world",
+              "uwp": "Y202000-0",
+              "distance": {
+                "raw": "15 Diam",
+                "value": 15.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Kwan",
+    "UWP": "A786231-8",
+    "Stellar": "K5 V M4 V",
+    "PBG": "611",
+    "Bases": "",
+    "Remarks": "Lo Ga"
+  }
+}

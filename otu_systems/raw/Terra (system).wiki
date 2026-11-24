@@ -1,0 +1,300 @@
+{{InfoboxSystem
+|name=[[File:Solitary_G_Type.jpg|300px|]]<br>Terra ("Sol")
+|subsector=Sol
+|sector=Solomani Rim
+|hex=1827
+|star=''[[Sol (star)|Sol]]''
+|type=''G2 V''
+|P0= -  |Dist0=0.2   |UWP0= <small>(Empty Orbit)</small>
+|P1=Mercury (SR 1827)|Dist1=0.39|UWP1=G30046A-E
+|P2=Venus (SR 1827)|Dist2=0.72|UWP2=G8B0168-E
+|P3=Terra (SR 1827)|Dist3=1.00|UWP3=A867A69-F
+ |P3M1=* [[Luna (SR 1827) (world)|Luna]]|Dist3M1=''60''|UWP3M1=''F20076C-F''
+|P4=Mars|Dist4=1.50|UWP4=F43056A-F
+ |P4M1=* Phobos|Dist4M1=''2.75''|UWP4M1=''YS0026A-F''
+|P5=Ceres Belt|Dist5=2.8|UWP5=F00066B-E
+|P6=Jupiter|Dist6=5.20|UWP6='''Large GG'''
+ |P6M1=* [[Jupiter_(world)#Ring_System|Ring System]]|Dist6M1=''2''|UWP6M1=''YR00000-0''
+ |P6M2=* [[Jupiter_(world)#Io|Io]]|Dist6M2=''6''|UWP6M2=''Y210000-0''
+ |P6M3=* [[Jupiter_(world)#Europa|Europa]]|Dist6M3=''9''|UWP6M3=''H200000-0''
+ |P6M4=* [[Jupiter_(world)#Ganymede|Ganymede]]|Dist6M4=''15''|UWP6M4=''F300468-F''
+ |P6M5=* [[Jupiter_(world)#Callisto|Callisto]]|Dist6M5=''25''|UWP6M5=''H30016A-F''
+|P7=Saturn|Dist7=9.50|UWP7='''Large GG'''
+ |P7M1=* Ring System|Dist7M1=''2''|UWP7M1=''YR00000-0''
+ |P7M2=* Janus|Dist7M2=''3''|UWP7M2=''YS00000-0''
+ |P7M3=* Mimas|Dist7M3=''3''|UWP7M3=''YS00000-0''
+ |P7M4=* Enceladus|Dist7M4=''4''|UWP7M4=''GS00268-F''
+ |P7M5=* Tethys|Dist7M5=''5''|UWP7M5=''YS00000-0''
+ |P7M6=* Dione|Dist7M6=''6''|UWP7M6=''YS00000-0''''
+ |P7M7=* Rhea|Dist7M7=''9''|UWP7M7=''H100468-E''
+ |P7M8=* Titan|Dist7M8=''20''|UWP7M8=''H3A0168-E''
+ |P7M9=* Hyperion|Dist7M9=''25''|UWP7M9=''ES00000-0''
+ |P7M10=* Iapetus|Dist7M10=''60''|UWP7M10=''E100000-0''
+ |P7M11=* Phoebe|Dist7M11=''225''|UWP7M11=''E100000-0''
+|P8=Uranus|Dist8=19.20|UWP8='''Small GG'''
+ |P8M1=* Ring System|Dist8M1=''2''|UWP8M1=''YR00000-0''
+ |P8M2=* Puck|Dist8M2=''2''|UWP8M2=''YS00000-0''
+ |P8M3=* Miranda|Dist8M3=''5''|UWP8M3=''YS00000-0''
+ |P8M4=* Ariel|Dist8M4=''7''|UWP8M4=''Y100000-0''
+ |P8M5=* Umbriel|Dist8M5=''10''|UWP8M5=''HS00269-E''
+ |P8M6=* Titania|Dist8M6=''15''|UWP8M6=''H100168-E''
+ |P8M7=* Oberon|Dist8M7=''20''|UWP8M7=''Y100000-0''
+|P9=Neptune|Dist9=30.10|UWP9='''Small GG'''
+ |P9M1=* Ring System|Dist9M1=''1''|UWP9M1=''YR00000-0''
+ |P9M2=* Galatea|Dist9M2=''2.5''|UWP9M2=''YS00000-0''
+ |P9M3=* Larissa|Dist9M3=''3''|UWP9M3=''YS00000-0''
+ |P9M4=* Proteus|Dist9M4=''5''|UWP9M4=''YS00000-0''
+ |P9M5=* Triton|Dist9M5=''15''|UWP9M5=''H210169-E''
+ |P9M6=* Nereid|Dist9M6=''20''|UWP9M6=''YS00000-0''
+|P10=Kuiper Belt|Dist10=30-100|UWP10=<small>( - variable - )</small>
+ |P10M1=* [[Kuiper_Belt_(world)#Orcus|Orcus]]|Dist10M1=39.40<small>AU</small>|UWP10M1=YS00000-0
+ |P10M2=* [[Pluto (world)|Pluto]]|Dist10M2=39.48<small>AU</small>|UWP10M2=F10046C-F
+ |P10M3=* [[Kuiper_Belt_(world)#Ixion|Ixion]]|Dist10M3=39.67<small>AU</small>|UWP10M3=Y100000-0
+ |P10M4=* [[Kuiper_Belt_(world)#Salacia|Salacia]]|Dist10M4=41.88<small>AU</small>|UWP10M4=Y100000-0
+ |P10M5=* [[Kuiper_Belt_(world)#Varuna|Varuna]]|Dist10M5=42.90<small>AU</small>|UWP10M5=YS00000-0
+ |P10M6=* [[Kuiper_Belt_(world)#Quaoar|Quaoar]]|Dist10M6=42.80<small>AU</small>|UWP10M6=YS00000-0
+ |P10M7=* [[Kuiper_Belt_(world)#Haumea|Haumea]]|Dist10M7=43.22<small>AU</small>|UWP10M7=Y100000-0
+ |P10M8=* [[Kuiper_Belt_(world)#Ultima_Thule|Ultima Thule]]|Dist10M8=44.58<small>AU</small>|UWP10M8=YS00000-0
+ |P10M9=* [[Kuiper_Belt_(world)#Chaos|Chaos]]|Dist10M9=45.60<small>AU</small>|UWP10M9=YS00000-0
+ |P10M10=* [[Kuiper_Belt_(world)#Varda|Varda]]|Dist10M10=45.64<small>AU</small>|UWP10M10=YS00000-0
+ |P10M11=* [[Kuiper_Belt_(world)#Makemake|Makemake]]|Dist10M11=45.72<small>AU</small>|UWP10M11=Y100000-0
+ |P10M12=* [[Kuiper_Belt_(world)#Eris|Eris]]|Dist10M12=67.78<small>AU</small>|UWP10M12=Y100000-0
+ |P10M13=* [[Kuiper_Belt_(world)#Sedna|Sedna]]|Dist10M13=539<small>AU</small>|UWP10M13=Y100000-0
+}}
+The [[Terra (system)|Terra system]] contains a solitary star, [[Sol (star)|Sol]], eight major bodies, numerous minor bodies, one planetoid belt, and one outer cometary belt. 
+* The [[mainworld]] in this [[star system]] is the third planet called [[Terra (SR 1827) (world)|'''Terra''']], which is often still referred to by locals by its archaic name "''Earth''".  Terra has one orbiting minor body known as "Luna" (simply called "''the Moon''" by locals).
+* The Terran star system, sometimes referred to as the ''Solar System'' by its residents or ''Sol system'' by [[Solomani]] in general, is unusual in that many marginal worlds that would be ignored in other star systems have been colonized, though many of these settlements have long since been abandoned.
+* [[Terra]] is the homeworld of one of the major branches of [[Humaniti]], the [[Solomani]].  It is widely believed that Terra is also the ultimate origin of all branches of [[Humaniti]] in the very distant past.  
+ 
+== Description (Specifications) ==
+The system is centered on [[Sol (star)|Sol]], a solitary primary star.
+* It is a yellow main sequence.
+
+{{MonostellarSystem
+|name           = [[Terra (SR 1827) (world)|Terra]] /[[Sol (star)|Sol]]
+|primary        = G2 V 
+|PrimaryName    = [[Sol (star)|Sol]]
+|PrimaryNotes   = aka [[Sol (star)|"The Sun"]]
+}}
+
+=== Sol System ===
+Today the major settlements in the Terra system are located on Terra and its moon [[Luna (world)|Luna]], on [[Mars (world)|Mars]] and in the main planetoid belt, the [[Asteroid Belt (SR 1827) (world)|Main Belt]] or [[Asteroid Belt (SR 1827) (world)|Ceres Belt]]. 
+* Smaller settlements exist on [[Mercury (SR 1827) (world)|Mercury]], Ganymede, Rhea, and [[Pluto (world)|Pluto]]. 
+* Outposts on [[Venus (SR 1827) (world)|Venus]] and a few satellites have been established for scientific or commercial purposes. 
+* Luna’s [[Copernicus Down]] Spaceport handles traffic control for Terra. 
+* Traffic in the outer system is controlled from Rhea.
+
+[[File:Chart Terra System Basic.png|700 px]]
+
+ '''<big>Orbit</big>'''  '''<big>Name</big>'''           '''<big>UWP</big>'''            '''<big>Notes</big>'''
+ _______________________________________________________________________________________________________________________ 
+ 
+ '''Primary''' '''Sol'''             '''G2 V'''
+ 
+ 0 	''(Empty Orbit)'' 	--              --
+ 1 	Mercury	        G30046A-E       Chao Meng-Fu Settlement / Syuki Solar Observatory
+ 2	Venus           G8B0168-E 	<small>Atm: CO<sub>2</sub> / P=90 Atm / T=900K</small>
+ '''3'''	'''Terra'''           '''A867A69-F'''       "'''Earth'''"
+    60    Luna            F20076C-F      Multiple Major Settlements / ''<small>(Terra Inner-System traffic Control)</small>''
+ 4 	Mars 	        F43056A-F       <small>Atm: O<sub>2</sub> (N<sub>2</sub>)/(CO<sub>2</sub>)</small> / Settlement: Martian Restoration Project (Colony) / Elysium Plateau Imperial Marine Base 
+          Phobos          YS0026A-F
+          Deimos Ring     YR00000-0      ''<small>(Former Moonlet Deimos shattered during Solomani Rim War / Very thin dark band of dust and rubble)</small>''
+ 5 	Main Belt 	F00066B-E       Ceres Colony / Amor Dolphin Colony  
+ 6 	Jupiter 	'''LGG'''          <small>Size= T (90)</small>  
+     2    ''Ring System''     ''YR00000-0''      ''Faint/Thin Dust Rings''	        
+     6    Io              Y210000-0      Rocky moon / Rad-world / <small>Atm: SO<sub>2</sub></small>
+     9    Europa          H200000-0      Rocky-Ice Moon / Rad-world / Deep Subsurface Ocean
+    15    Ganymede        F300468-F      Rocky-Ice Moon / Zeus Institute / Kensington Armed Forces Testing Center
+    25    Callisto        H30016A-F      Rocky-Ice Moon / Byahnn Research Facility
+ 7	Saturn 	        '''LGG'''          <small>Size= R (70)</small> 
+     2    ''Ring System''     ''YR00000-0''      ''Bright/Icy Rings''
+     3    Janus           YS00000-0      Ice Moon
+     3    Mimas           YS00000-0      Ice Moon
+     4    Enceladus       GS00268-F      Ice Moon / Huygens Astrophysical Outpost
+     5    Tethys          YS00000-0      Ice Moon    
+     6    Dione           YS00000-0      Ice Moon
+     9    Rhea            H100468-E      Ice Moon / Cassini Spaceport ''<small>(outer system traffic control center)</small>'' / IISS Base
+    20    Titan           H3A?168-E      Rocky-Ice Moon / <small>Atm: N<sub>2</sub> (CH<sub>4</sub>)/ P=1.45 Atm / T=94K / Polar CH<sub>4</sub>-Lakes</small> / Ancient site
+    25    Hyperion        ES00000-0      Ice Moon
+    60    Iapetus         E100000-0      Ice Moon
+   225    Phoebe          E100000-0      Ice Moon
+ 8 	Uranus          '''SGG'''/'''IG'''       <small>Size= M (30)</small> 
+     2    ''Ring System''     ''YR00000-0''      ''Dark Organic/Ice Rings''             
+     2    Puck            YS00000-0      Ice Moon
+     5    Miranda         YS00000-0      Ice Moon
+     7    Ariel           Y100000-0      Ice Moon
+    10    Umbriel         HS00269-E      Ice Moon / Scientific station
+    15    Titania         H100168-E      Ice Moon / Scientific station
+    20    Oberon          Y100000-0      Ice Moon
+ 8.5 	Neptune         '''SGG'''/'''IG'''       <small>Size= M (30)</small> 
+     1    ''Ring System''     ''YR00000-0''      ''Dark Organic/Ice/Dust Rings''	
+    2.5   Galatea         YS00000-0      Ice Moon
+     3    Larissa         YS00000-0      Ice Moon
+     5    Proteus         YS00000-0      Ice Moon
+    15    Triton          H210169-E      Ice Moon / Leverrier Complex
+    20    Nereid          YS00000-0      Ice Moon
+ 9  	Kuiper Belt    "KBOs"           ''Inner Belt <small>(Main Belt)</small>''
+     *    ''KBO: Pluto-Charon''  ''F10046C-F''	  ''Imperial Orbital Naval Base / Research Facility. Civilian travel restricted within 1.0 <small>AU</small> radius''                     	         
+ 10-11   Kuiper Belt    "KBOs"           ''Outer Belt <small>(Scattered Disc)</small>''
+
+== Details ==
+=== [[Inner System]] ===
+
+==== Orbit 0: <small>[Empty Orbit]</small> ==== 
+
+==== Orbit 1: [[Mercury (SR 1827) (world)|Mercury]] ==== 
+* '''''Caloris Basin''''': ''No information currently available.''
+* '''''Chao Meng-Fu Settlement''''': Main settlement on Mercury, built into the ''Chao Meng-Fu Crater'' at the world's southern pole.  
+* '''''Syuki Solar Observatory''''': The Syuki Solar Observatory is a large facility comprised of over 10000 people conducting many and varied studies of the Terran system's central star.
+
+<br>
+----
+=== [[Habitable Zone]] ''<small>(HZ<sub>-1</sub> / HZ<sub>0</sub> / HZ<sub>+1</sub>)</small>'' ===
+==== Orbit 2 <small>(HZ<sub>-1</sub>)</small>: [[Venus (SR 1827) (world)|Venus]] ==== 
+* Venus has a dense atmosphere of 96.5% CO<sub><small>2</small></sub> and 3.5% N<sub><small>2</small></sub>, with an atmospheric pressure of 90 atm and an average surface temperature of 460<sup>o</sup> Celsius. Sulfuric acid rain falls in the upper atmosphere, but does not reach the surface.  
+* Largely unexplored, manned expeditions beginning in AD 2830 revealed evidence of long extinct life, and that Venus had once been the site of an unfinished Ancients terraforming project that had been been interrupted (apparently) by the Final War.  The current conditions on Venus are the result of the ensuing and uncontrolled runaway greenhouse.  There is an orbital science station that still studies these Ancient ruins, of which most have been almost completely destroyed by the local environmental conditions.
+
+==== ''Orbit 3 <small>(HZ<sub>0</sub>)</small>: [[Terra (SR 1827) (world)|Terra]]'' ====
+: '''Terra ('''"'''Earth'''"'''):''' [[Universal World Profile|UWP]] A867A69-F, [[Astronomical Unit|orbiting at 1.00 AU]] <small>'''(Orbit 3)'''</small>, with an orbital period of [[Day|365.25 standard days]]. <br> It is a [[Temperate World|temperate]] [[garden world]] and the '''[[Homeworld]] of the [[Solomani]]''', and ultimately of all [[Humaniti]].
+: See article at '''''[[Terra (SR 1827) (world)|Terra]]'''''. 
+: It has one large satellite:
+
+===== ''[[Luna (SR 1827) (world)|· Satellite: Luna]]'' =====
+: '''Luna''' is the proper name for Terra's single large satellite, though most locals simply call it "The Moon". 
+:: It has a political status equivalent to one of Terra's continents, and has a number of prominent settlements:  
+::* '''''Archimedes Settlement''''':  ''Domed lunar city''.  Archimedes is Luna's oldest settlement and main mining and industrial center.  
+::: ''[[Archimedes Station]]'': ''No information currently available.''
+::* '''''Copernicus Settlement''''':    ''Domed lunar city''.  Copernicus is the seat of government on Luna, and the center of travel and trade.  ''Copernicus Down Spaceport'' handles traffic control for Terra.  Since the Solomani Rim War, more than half of the terminals, bays, and warehouse facilities of the spaceport lie unused and in vacuum.  
+::* '''''Plato Settlement''''':    Domed lunar city. Plato is an academic and cultural center, and the location of the '''University of Luna''' which is famous for work in high-energy physics and astronomy. 
+
+::* '''''Clavius''''': Clavius crater is the site of a high-technology industrial park producing electronic and gravitic components, vacuum-process equipment, and thin-film devices.  It is currently operated by [[GSbAG]].  
+::: ''Clavius Particle Research Complex'' is run jointly by the [[Imperial Navy]] and [[Naasirka]].  Current research is highly classified.  
+::* '''''Farside Research Station''''': Farside Station is famous for work in cosmic ray research and radio-astronomy. It is operated as a branch of the University of Luna, and its vast distributed arrays cover cover thousands of square kilometers on the lunar hemisphere facing away from Terra.  Development and travel on the far side of Luna is restricted in order to avoid interfering with the institute's research programs.  
+::* '''''Montes Appeninus Mining Station''''':  ''No information currently available.''
+::* '''''Sinus Iridium Mining Station''''':  ''No information currently available.''
+::* '''''Theophilus Naval Base''''': Theophilus Crater is the location of ''Imperial Navy Base Luna''.  
+::* '''''Tycho Crater''''': ''No information currently available.''
+
+==== Orbit 4 <small>(HZ<sub>+1</sub>)</small>: [[Mars (world)|Mars]] ==== 
+Mars began to be terraformed by the Solomani beginning in approximately Imperial year [[400]].  The former trace CO<sub>2</sub> atmosphere has been greatly thickened by the addition of O<sub><small>2</small></sub>, raising the atmospheric code of the world to "Very Thin".  There is the possibility that within the next century hydrological weather patterns will begin to form. <br>
+· '''''Satellite: Phobos <small>(Planetoidal-moonlet)</small>''''': ''No information available.'' <br>
+· '''''Ring: Deimos <small>(Shattered moonlet)</small>''''': This former asteroidal-moon of Mars was shattered during the [[Solomani Rim War]], at which time it was the location of a Solomani naval installation. It is a very thin dark band of dust and rubble. <br>
+:
+* '''''The Martian Restoration Project''''': This settlement includes the majority of the world's inhabitants.  
+* '''''Elysium Plateau Imperial Marine Base''''': ''No information available.''
+* '''''Olympus Mons''''': ''No information available.''
+* '''''Candor Chasma''''': Location of Martian capital city.
+
+<br>
+----
+==== Orbit 5: [[Asteroid Belt (SR 1827) (world)|Main Belt Colonies]] ==== 
+The '''Main Belt''' of the Sol system, aka the "'''Ceres Belt'''", is the original location of the discovery of Jump Drive by the ancient Solomani.  
+
+* '''''[[Asteroid Belt (SR 1827) (world)|Ceres]]''''': Ceres is a dwarf planet and the largest member of Sol's ''Main Belt'' at almost 1000 km in diameter.   It is the site of the largest settlement in the Belt.  
+* '''''[[Asteroid Belt (SR 1827) (world)|Vesta]]''''': ''No information available.''
+* '''''[[Asteroid Belt (SR 1827) (world)|Pallas]]''''': ''No information available.''
+* '''''[[Asteroid Belt (SR 1827) (world)|Juno]]''''': ''No information available.''
+* '''''[[Asteroid Belt (SR 1827) (world)|Amor]]''''': This asteroid has been hollowed out and currently houses a colony of Dolphins, most of whom are artists.
+
+<br>
+-----
+
+=== [[Outer System]] ===
+==== Orbit 6: [[Jupiter (world)|The Jovian System]] (significant bodies) ==== 
+[[Jupiter (world)|Jupiter]] is the largest of the four Gas Giants in the Terra system, and has four significant satellites, known as the ''Galilean satellites''.  
+* '''''[[Jupiter_(world)#Io|Io]]''''': Io is a heavily irradiated world with a trace atmosphere largely composed of sulfur dioxide (SO<sub><small>2</small></sub>). Outgassing as a result of active volacanism on the surface produces both sulfur (S) and sulfur dioxide (SO<sub><small>2</small></sub>).
+* '''''[[Jupiter_(world)#Europa|Europa]]''''': Europa is an irradiated [[vacuum]] world with subsurface liquid water oceans.
+* '''''[[Jupiter_(world)#Ganymede|Ganymede]]''''': Ganymede is the largest moon in the [[Terra (system)|Terra system]].  Once a major colony, today Ganymede still hosts several facilities.  
+: The ''Kensington Armed Forces Testing Center'' is a naval research laboratory.  
+: The ''Zeus Institute'' is a branch of the ''University of Terra'', studying gas giants and their dynamics.  
+* '''''[[Jupiter_(world)#Callisto|Callisto]]''''': Callisto hosts the ''Byahnn Research Facility''.  Originally a Solomani weapons center, under Imperial authority it is dedicated to the study of Jovian meteorology.  Callisto is also home to an Imperial fighter and system defense boat base that patrols the Jovian system and the outer gas giants.
+
+==== Orbit 7: [[Saturn (world)|The Saturnian System]] (significant bodies) ==== 
+Saturn is the second largest of the four Gas Giants in the Terra system, and possesses a brilliant ring system of reflective small ice-bodies that is used extensively for refuelling.  
+* '''''Janus''''': ''No information available.''
+* '''''Mimas''''': ''No information available.''
+* '''''Enceladus''''': Enceladus is home to the ''Huygens Astrophysical Outpost''.  While the research is secret, speculations suggest that the facility may be devoted to antimatter research.  
+* '''''Tethys''''':''No information available.''
+* '''''Dione''''': ''No information available.''
+* '''''Rhea''''': Rhea hosts the ''Cassini Spaceport'', which serves as the traffic control center for Terra's outer system. It also houses an associated underground base currently run by the [[IISS]].  
+* '''''Titan''''': Titan has a thick atmosphere (~ 1.4 atm) composed of 98.5% N<sub>2</sub> and 1.5% CH<sub>4</sub>.  The surface tempertaure of 93.7K is close to the triple-point of methane (CH<sub>4</sub>), meaning that methane can be found in solid, liquid, and gaseous phases. Its icy surface is pock-marked with methane and hydrocarbon lakes.  Currently there is only a single domed facility active on Titan which studies evolving methane-based bacteriological life in Titan's lakes. The origin of this life seems to be a result of contamination by ancient industrial processes active during the [[Long Night]].  Titan is also known as an Ancient site.  
+* '''''Hyperion''''': ''No information available.''
+* '''''Iapetus''''': ''No information available.''
+* '''''Phoebe''''':  ''No information available.''
+
+==== Orbit 8: [[Uranus (world)|The Uranian System]] (significant bodies) ==== 
+Uranus is the first of the smaller Ice Giants in Terra's outer system.  Small refueling stations exist on the largest Uranian moons.  
+* '''''Puck''''': ''No information available.''
+* '''''Miranda''''': ''No information available.''
+* '''''Ariel''''': ''No information available.''
+* '''''Umbriel''''': Umbriel houses a scientific station that studies Uranus's bizarre magnetic fields.
+* '''''Titania''''': Titania houses a scientific station that studies Uranus's superheated liquid ice-ocean surface. 
+* '''''Oberon''''': ''No information available.''
+
+==== Orbit 8.5: [[Neptune (world)|The Neptunian System]] (significant bodies) ==== 
+[[Neptune (world)|Neptune]] is the second of the smaller Ice Giants in Terra's [[Outer World|outer system]]. A small refueling station exists on the largest Neptunian moon.  
+* '''''Galatea''''': ''No information available.''
+* '''''Larissa''''': ''No information available.''
+* '''''Proteus''''': ''No information available.''
+* '''''Triton''''': Triton has a trace nitrogen (N<sub><small>2</small></sub>) atmosphere of 0.000014 atm.  The ''Leverrier Complex'' on Triton is an aging mining facility.
+* '''''Nereid''''': ''No information available.''
+
+
+'''''<big>Note</big>''''': Objects lying beyond the orbit of Neptune have eccentric orbits (some highly so); the orbital distances of the bodies below are averages based on the semi-major axis of the given orbit.
+----
+==== Orbit 9: The [[Kuiper Belt (world)|Kuiper Belt]] (30–48 AU) - Inner/Main Belt (significant bodies) ==== 
+* '''''[[Kuiper_Belt_(world)#Orcus|Orcus]]''''' (~ 39.4 AU): A ''plutino'' object. Orcus retains a single small satellite named ''[[Kuiper_Belt#Vanth|Vanth]]''.
+
+* '''''[[Pluto (world)|Pluto-Charon]]''''' (~ 39.48 AU): ''[[Pluto_(world)#Charon|Charon]]'' is approximately half the diameter of Pluto and orbits at a distance of 29 radii. It has four additional (and much smaller) moons: ''[[Pluto_(world)#Styx|Styx]]'', ''[[Pluto_(world)#Nix|Nix]]'', ''[[Pluto_(world)#Kerberos|Kerberos]]'', and ''[[Pluto_(world)#Hydra|Hydra]]''.
+** In orbit above [[Pluto (world)|Pluto]] is a major Imperial Naval Base and Research Facility.
+** Civilian travel is restricted within a 1.0 AU radius, with no explanation given.  
+
+* '''''[[Kuiper_Belt_(world)#Ixion|Ixion]]''''' (~ 39.67 AU): a ''plutino'' Kuiper Belt object.
+
+* '''''[[Kuiper_Belt_(world)#Salacia|Salacia]]''''' (~ 41.88 AU): a ''cubewano'' Kuiper Belt object. Salacia retains a single small satellite named ''[[Kuiper_Belt#Actaea|Actaea]]''.
+
+* '''''[[Kuiper_Belt#Quaoar|Quaoar]]''''' (~ 42.80 AU): a ''cubewano'' Kuiper Belt object. Quaoar retains a single small satellite named ''[[Kuiper_Belt#Weywot|Weywot]]''.
+
+* '''''[[Kuiper_Belt_(world)#Varuna|Varuna]]''''' (~ 42.95 AU): a ''cubewano'' Kuiper Belt object.
+
+* '''''[[Kuiper_Belt_(world)#Haumea|Haumea]]''''' (~ 43.22 AU): a ''cubewano'' Kuiper Belt object. Haumea retains a ''[[Kuiper_Belt_(world)#Ring_System|ring system]]'' and two small satellites named ''[[Kuiper_Belt_(world)#Namaka|Namaka]]'' and ''[[Kuiper_Belt_(world)#Hi.27iaka|Hi'iaka]]''.
+
+* '''''[[Kuiper_Belt_(world)#Ultima_Thule|Ultima Thule]]''''' (~ 44.58 AU): a ''cubewano'' Kuiper Belt object.
+
+* '''''[[Kuiper_Belt_(world)#Chaos|Chaos]]''''' (~ 45.60 AU): a ''cubewano'' Kuiper Belt object.
+
+* '''''[[Kuiper_Belt_(world)#Varda|Varda]]''''' (~ 45.64 AU): a ''cubewano'' Kuiper Belt object. Varda retains a single small satellite named ''[[Kuiper_Belt_(world)#Ilmar.C3.AB|Ilmarë]]''.
+
+* '''''[[Kuiper_Belt#Makemake|Makemake]]''''' (~ 45.72 AU): a ''cubewano'' Kuiper Belt object. Makemake retains a single small satellite named ''[[Kuiper_Belt#S.2F2015_.28136472.29_1|MK 2]]''.
+
+==== Orbits 10-11: The [[Kuiper Belt (world)|Kuiper Belt]] (48-100 AU) - Outer Belt (Scattered Disc Objects) (significant bodies) ==== 
+* '''''[[Kuiper_Belt_(world)#Eris|Eris]]''''' (~ 67.78 AU) '''<small>Orbit 10</small>''': a ''twotino'' Kuiper Belt object. ''Eris'' has an eccentric orbit, approaching [[Sol (star)|Sol]] at a perihelion of 37.91 <small>AU</small> and having an aphelion of 97.65 <small>AU</small>. Eris retains a single small satellite named ''[[Kuiper_Belt_(world)#Dysnomia|Dysnomia]]''.
+
+<br>
+----
+
+=== [[Remote System]] ===
+==== Orbits 13-21: Remote System & Oort Cloud ==== 
+* '''''[[Kuiper_Belt#Sedna|Sedna]]''''' (~ 506 AU) '''<small>Orbit 13</small>''': a ''scattered disc'' Kuiper Belt object. ''Sedna'' has a highly eccentric orbit, approaching [[Sol (star)|Sol]] at a perihelion of ~76.09 <small>AU</small> and swinging out to an aphelion of ~936 <small>AU</small>.  It completes one orbit of [[Sol (star)|Sol]] approximately every 11,400 years.
+<br>
+----
+<br>
+
+== History & Background (Dossier) ==
+Many marginally habitable environments within the Terran system were populated before the advent of FTL spaceflight. Many of these marginally habitable environments have since been abandoned.
+
+=== Image Repository ===
+[[TravellerMap]] <small>([[T5SS]])</small>: <br> [https://travellermap.com/?options=58363&x=14.289&y=-107&scale=128]
+
+== References & Contributors (Sources) ==
+{{Advanced}}
+{{Sources
+|S1= {{CT}} [[Solomani (Alien Module)|Alien Module 6: Solomani]]
+|S2= {{MT}} [[Alien - Solomani & Aslan]]
+|S3= [[GURPS Traveller: Rim of Fire]]
+|S4= [[GURPS Traveller: Interstellar Wars]]
+|S5= [[Mongoose Traveller: Solomani]]
+}}
+
+
+{{LE}}

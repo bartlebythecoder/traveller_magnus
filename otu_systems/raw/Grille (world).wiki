@@ -1,0 +1,261 @@
+[[File:Alien Moon 374-0 Small.jpg|250 px|right]]
+{{UWP 
+|name    = {{World|Grille|Spinward Marches|Mora|3026}} 
+ |era    = Milieu 1116
+|uc      = E410335-7
+|popc    = 7
+|zonec   = green
+ |u1= 
+|alg     = ImDd
+|class   = Lo / Sa Tu
+|trade   = lo
+|nblty   = B
+|bases   = -
+|primary = M2 V M2 V
+|belts   = 0
+|GGcount = 1
+}}
+{{World summary |name= Grille|trade= Lo}}
+{{World summary ImDd|sector= Spinward Marches|subsector= Mora}}
+* It orbits the secondary star.
+{{World summary comment|trade= Sa}}
+{{World summary comment|trade= Tu}}
+* {{SpMain}}
+* It lies on the [[Mora Arm]].
+
+{{InfoboxSystem
+ | name= Grille
+ | sector = Spinward Marches
+ | subsector = Mora
+ | hex = 3026
+ | star = 
+ | type = M2 V
+ | P1  = Rocky World | Dist1  = 0.09 | UWP1  = ???????-?
+ | P2  = Rocky World | Dist2  = 0.17 | UWP2  = ???????-?
+ | P3  = Rocky World | Dist3  = 0.26 | UWP3  = ???????-?
+ | P4  = Rocky World | Dist4  = 0.35 | UWP4  = ???????-?
+ | P5  = Rocky World | Dist5  = 0.44 | UWP5  = ???????-?
+ | P6  = Rocky World | Dist6  = 0.61 | UWP6  = ???????-?
+ | P7  = Rocky World | Dist7  = 0.88 | UWP7  = ???????-?
+ | P8  = Icy World   | Dist8  = 1.21 | UWP8  = ???????-?
+ | P9  = Icy World   | Dist9  = 1.66 | UWP9  = ???????-?
+ | P10 = Icy World   | Dist10 = 2.35 | UWP10 = ???????-?
+}}
+{{InfoboxSystem
+ | name= Grille Companion
+ | sector = Spinward Marches
+ | subsector = Mora
+ | hex = 3026
+ | star = 
+ | type = M2 V
+ | P1   = Vengeance |Dist1   = 0.43    | UWP1   = Large GG
+ | P1M1 = Nashorn   |Dist1M1 = 4 Diam  | UWP1M1 = Y200000-0
+ | P1M2 = Wespe     |Dist1M2 = 7 Diam  | UWP1M2 = H3A0000-0
+ | P1M3 = Ziege     |Dist1M3 = 11 Diam | UWP1M3 = Y100000-0
+ | P1M4 = Gepard    |Dist1M4 = 20 Diam | UWP1M4 = Y200000-0
+ | P1M5 = Grille    |Dist1M5 = 35 Diam | UWP1M5 = E410335-7
+}}
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Grille''' is a binary star system.
+* Both are red main sequence stars.
+
+{{BinaryStarSystem
+|name            = Grille
+|primary         = M2 V  
+|secondary       = M2 V
+|PrimaryName     = Primary
+|PrimaryNotes    = 
+|SecondaryName   = Companion
+|SecondaryNotes  = [[Astronomical Unit|Approximately 100 AU]] from the primary.
+}}
+
+=== System Data ===
+Grille is a [[binary star system]] with two nearly identical small red stars, which orbit around a common center of gravity at a mean separation of [[Astronomical Unit|100 AU]]. The slightly larger of the two is designated the primary and has a family of ten very small rocky and icy planets orbiting it. These have few exploitable resources. The very slightly smaller secondary star's planetary system consists of a single [[gas giant]], orbiting in the outer part of its [[habitable zone]].
+
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]]. It is the [[Natural Satellite|largest moon]] of the system's only [[gas giant]].
+* x10 secondary [[world|rocky worlds]], all orbiting the system's primary star.
+** The third, fourth, and fifth planets orbit within the primary star's [[habitable zone]].
+* x1 [[gas giant]], named ''Vengeance'', orbiting the system's secondary star.
+** The [[mainworld]] is the largest of its five [[Natural Satellite|major moons]].
+
+=== Mainworld Data ===
+'''Grille''' is the [[Natural Satellite|largest moon]] of the system's solitary [[gas giant]], ''Vengeance''.
+
+[[File:Gas Giant Moons 04b.jpg|600 px]]
+
+The [[mainworld]] and its [[gas giant]] primary orbit within the secondary [[star]]'s [[Habitable Zone]].
+* They lie within the zone's colder outer '''H-''' region.
+* They receive lower levels of [[Electromagnetic Spectrum|stellar energy]].
+
+[[File:Chart Orbit HZ- Region Detailed Satellite.png|600 px]]
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Grille|Size= 4}}
+
+The initial survey of Grille indicated its density was higher than would be expected for an object of its size. This led to the assumption that it contained a significant amount of heavy elements.
+* Prospectors have located deposits of gold, platinum, palladium and cobalt. None of the deposits has been particularly large. 
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Grille|Atmosphere= 1}}
+* It experiences [[Celsius|low temperatures]].
+
+The world has an abiotic oxygen atmosphere.
+* Oxygen is produced by photocatalytic conversion of surface materials by stellar energy.
+* Fresh surface material is constantly exposed through processes such as seismic activity, volcanism, or erosion.
+* The oxygen rapidly depletes from the atmosphere through oxidization with surface materials: a rough equilibrium between production and depletion exists.
+* The world has a low oxygen taint: the percentage of oxygen in the atmosphere varies according to the density of global cloud cover.
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Grille|Hydrosphere= 0}}
+
+[[File:Trace Atmos World Arid 02a1.jpg|600 px]]
+
+==== Mainworld Geography and Topography ====
+Grille is a rocky and barren world with a trace atmosphere containing nitrogen and a small amount of oxygen. Residents of the community on Grille generate breathable air by drawing in and concentrating this atmosphere. There is no open water on Grille and only minimal amounts of water ice on its surface.
+
+It and its [[gas giant]] primary world orbit towards the outer edge of the star's habitable zone. Temperatures range from [[Celsius|very low (-40°C)]] to [[Celsius|frigid (-140°C)]]. Despite this, the lack of appreciable atmosphere will cause objects in direct starlight to become super-heated. The world is within Vengeance's magnetic field, partially shielding it from harmful stellar radiation.
+
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+[[File:Blank World Map Trace.png|500 px]] <br> (''Blank map, trace atmosphere world''.)
+
+==== Native Lifeforms ====
+Grille has no native life.
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+Grille was first visited at an unknown date during the [[Long Night]]. Remnants of a prospecting outpost and a navigation beacon were discovered by an [[IISS]] survey ship in the mid-[[400s]], but at that time the world was uninhabited. It is not known exactly when the world was resettled, but immigrants likely arrived gradually between the [[800s]] and [[1000s]]. As different transient individuals and groups came to prospect for minerals, some remained on a more permanent basis.
+
+Grille has been known as a mining colony since the [[800s|mid-800s]].
+
+=== World Starport (St) ===
+{{Starport|name= Grille|Starport= E}}
+
+Grille Downport is a small leveled pad. At various times in the past it has offered refined fuel for sale but there is currently no ongoing operation to fill its reserve tanks. A restaurant is available and minimal supplies available at {{TL|7}} may be purchased at an adjacent store.
+
+=== World Population (P) ===
+{{WorldPop|name= Grille|multiplier= 7|Population= 3}}
+
+Grille's population is entirely made up of {{Imperial}} humans of mixed [[Vilani]] / [[Solomani]] descent. As of [[1103]] there were 7037 residents, of whom roughly 2000 were considered "permanent" and 5000 were regarded as "transitory".
+* Most of the population is non-native, having moved to the world from [[Maitz (world)|Maitz]], [[Fornice (world)|Fornice]], or [[Mora (world)|Mora]].
+
+Approximately 70% of the population is made up of transient prospectors and miners who move to exploit mineral deposits as they are located. The rest of the population exists to service this only industry.
+
+==== Urbanization ====
+The entire population of Grille resides in a single permanent community near the [[downport]] resembling a town of connected pressure-tight buildings. The buildings are designed so that there are multiple connections and backups, so that a single leak will not isolate sections or expose the entire town to vacuum. 
+
+==== Linguistic Topography ====
+The following [[language]]s are most commonly heard:
+* [[Anglic]], one of the two official languages of the {{Imperium}}.
+* [[Vilani (language)|Vilani]], one of the two official languages of the {{Imperium}}.
+
+=== World Technology Level (T) ===
+{{WorldTech|name= Grille|WorldTech= 7}}
+
+Grille's tech level of 7 represents the current manufacturing level. Residents of the world generally possess sufficient equipment to survive, nearly everyone owns at least one vacc suit for instance. Prospectors and miners typically come from offworld with equipment suited for operations in the near-vacuum.
+
+=== World Government (G) ===
+{{WorldGov|name= Grille|Government= 3}}
+
+While the non-existent Baronet Westland is the titular leader, a group of long-term residents and business owners form a council that makes important decisions and levies taxes in the Baronet's name.
+
+==== World Military ====
+There is no {{Imperial}} or local military force on Grille. The world used to have a Scout/Courier which was intended as an emergency measure to call for help in the event of invasion, but the ship was either lost or stolen in [[1093]] and has not been returned.
+
+=== World Law (L) ===
+{{WorldLaw|name= Grille|Law= 5}}
+
+The small community of Grille has a police department consisting of a constable and six deputies. These law enforcers are armed and authorized to conduct arrests anywhere on the moon. In practice they rarely leave the settlement. Because everyone lives in connected pressurized dwellings, the possession of firearms capable of penetrating such dwellings is prohibited when at the settlement. Gear carried outside of the settlement is not monitored or restricted.
+
+=== Imperial Landed Nobility ===
+{{Imperial Nobility|name= Grille|Noble= B}}
+
+Grille is nominally governed as a fiefdom of the Baronet of Westland. However that title is not currently in use by any member of the Imperial aristocracy. The last titleholder died without issue in [[1032]] and the title returned to the {{Imperial}} Crown. As yet it has not been granted to anyone else.
+
+=== Trade Data ===
+* Importance:     -3 (very unimportant)
+
+Grille is not on a major [[trade route]] (apart from being a member of the [[Spinward Main]]), but is often visited by ships refueling between [[Maitz (world)|Maitz]] and [[Fornice (world)|Fornice]]. There have been occasional reports of piracy in the system.
+
+=== World Economy ===
+* Resources:      5 (scarce)
+* Labor:          2 (hundreds)
+* Infrastructure: 0 (non-existent)
+* Efficiency:     -5 (extremely poor)
+
+Grille's economy is based entirely on servicing miners who come to the world to exploit its mineral resources. Occasionally vessels will stop for some other reason, typically to trade with the locals, but most ships use the [[gas giant]] as a refueling stop and do not call at the [[mainworld]].
+
+While Grille has had some successful mining concerns, it is not known for making people rich. The significant surface deposits that were once found here have mostly been depleted and deeper mining operations have been started in several places. These have a higher cost, due to the lack of atmosphere and local resources, so profits have suffered. No major corporations still operate mines: the remainder are small private firms hoping to find something the big companies missed.
+
+=== World Culture ===
+* Heterogenity: 1 (monolithic)
+* Acceptance:   1 (extremely xenophobic)
+* Strangeness:  3 (somewhat typical)
+* Symbols:      5 (concrete)
+
+Grille's native population is too small to support a unique culture. Cultural norms from [[Fornice (world)|Fornice]] are most common.
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+* between [[-1776]] and [[0|The Year 0]]: (during the [[Long Night]]). Grille is believed to have been first colonized. The colony later died out.
+* [[0|The Year 0]]: the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[400s]]: The [[IISS]] discovers ruins and remnants of an earlier colony.
+* [[589]]-[[604]]: [[First Frontier War]].
+* [[604]]-[[622]]: the [[Civil War]].
+* [[615]]-[[620]]: [[Second Frontier War]].
+* [[624]]: the [[Express Boat Network]] is established.
+* [[800s]]: A new colony is slowly reestablished on the world by mining interests.
+* [[979]]-[[986]]: [[Third Frontier War]].
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] charts the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+* [[1082]]-[[1084]]: [[Fourth Frontier War]], also known as the ''False War''.
+* [[1107]]-[[1110]]: [[Fifth Frontier War]].
+
+----
+
+{{GURPS Worlds paragraph 
+|hex=3026 
+|gtZone= 
+|name=Grille 
+|alg=Imperial 
+|gtStarport=Class I 
+|gtBase= 
+|gtDiameter=4052 
+|gtGravity= 
+|gtAtmosphere=Trace oxygen-nitrogen 
+|gtHydro=None 
+|gtClimate=Normal 
+|gtPopulation=2,000 
+|gtGovernment=Oligarchy (hereditary nobility) 
+|gtCL=2 
+|gtTL=7 
+|gtWTN=2.0
+}}
+
+== References ==
+{{Advanced}}
+{{Sources
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=32-33}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=The Regency Sourcebook|page=46-47}} (UWP only)
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=114}}
+ | {{Ludography cite|name=The Spinward States|page=114}} (UWP only)
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=103-107}} (UWP only)
+ | {{Ludography cite|name=Journal of the Travellers' Aid Society Volume 16|article=Grille:A Summary|page=38-43}}
+ | Contributor: --[[user: Matthew Kerwin|Matthew Kerwin]] Baron [[Thon (world)|Thon]]
+}}
+
+[[Category: GT]]
+[[Category: Humaniti worlds]]
+[[Category: Mining worlds]]
+[[Category: Mora Arm worlds]]
+[[Category: Rule of Man worlds]]
+[[Category: Second Imperium worlds]]
+{{LE|T5 Second Survey worlds}}

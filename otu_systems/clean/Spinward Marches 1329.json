@@ -1,0 +1,489 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "1329",
+  "sector_abbreviation": "Spin",
+  "subsector": "Sword Worlds",
+  "name": "Caladbolg",
+  "sources": [
+    {
+      "page": "Caladbolg (world)",
+      "revid": 1028644,
+      "timestamp": "2026-03-28T16:41:29Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Caladbolg (world)",
+      "template": "TrinaryStarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Escalibor",
+          "type": "F7 V",
+          "notes": "Escalibor"
+        },
+        {
+          "role": "Secondary",
+          "name": "Companion 1",
+          "type": "M0 V",
+          "notes": "Approximately 83.3 AU from the primary."
+        },
+        {
+          "role": "Tertiary",
+          "name": "Companion 2",
+          "type": "M4 V",
+          "notes": "Approximately 339 AU from the primary."
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Escalibor",
+      "stars": [
+        {
+          "name": "Escalibor",
+          "type": "F7 V"
+        }
+      ],
+      "labels": [
+        "Caladbolg"
+      ],
+      "pages": [
+        "Caladbolg (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Câliburn",
+          "raw": "<small>Y?00???-? </small>",
+          "kind": "world",
+          "uwp": "Y?00???-?",
+          "distance": {
+            "raw": "0.38",
+            "value": 0.38,
+            "unit": "AU"
+          },
+          "sources": [
+            "Caladbolg (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moonlet 1",
+              "name_raw": "<small>Moonlet 1</small>",
+              "raw": "<small>YS00000-0</small>",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Caladbolg (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moonlet 2",
+              "name_raw": "<small>Moonlet 2</small>",
+              "raw": "<small>YS00000-0</small>",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "4 Diam",
+                "value": 4.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Caladbolg (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Moonlet 3",
+              "name_raw": "<small>Moonlet 3</small>",
+              "raw": "<small>YS00000-0</small>",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Caladbolg (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Broken Stone",
+          "raw": "<small>Y000000-0</small>",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "0.65",
+            "value": 0.65,
+            "unit": "AU"
+          },
+          "sources": [
+            "Caladbolg (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Inner Planet",
+          "raw": "<small>???0???-?</small>",
+          "kind": "world",
+          "uwp": "???0???-?",
+          "distance": {
+            "raw": "0.98",
+            "value": 0.98,
+            "unit": "AU"
+          },
+          "sources": [
+            "Caladbolg (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Inner Planet",
+          "raw": "<small>???0???-?</small>",
+          "kind": "world",
+          "uwp": "???0???-?",
+          "distance": {
+            "raw": "1.34",
+            "value": 1.34,
+            "unit": "AU"
+          },
+          "sources": [
+            "Caladbolg (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Caladbolg",
+          "raw": "<small>B565776-A</small>",
+          "kind": "world",
+          "uwp": "B565776-A",
+          "distance": {
+            "raw": "1.75",
+            "value": 1.75,
+            "unit": "AU"
+          },
+          "sources": [
+            "Caladbolg (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 6,
+          "name": "Outer Planet",
+          "raw": "<small>???????-?</small>",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "2.63",
+            "value": 2.63,
+            "unit": "AU"
+          },
+          "sources": [
+            "Caladbolg (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Outer Planet",
+          "raw": "<small>???????-?</small>",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "4.59",
+            "value": 4.59,
+            "unit": "AU"
+          },
+          "sources": [
+            "Caladbolg (world)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Outer Planet",
+          "raw": "<small>???????-?</small>",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "9.22",
+            "value": 9.22,
+            "unit": "AU"
+          },
+          "sources": [
+            "Caladbolg (world)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Outer Planet",
+          "raw": "<small>???????-?</small>",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "13.8",
+            "value": 13.8,
+            "unit": "AU"
+          },
+          "sources": [
+            "Caladbolg (world)"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Companion 1",
+          "name_raw": "'''Companion 1'''",
+          "raw": "'''M0 V'''",
+          "kind": "star",
+          "type": "M0 V",
+          "distance": {
+            "raw": "83.3",
+            "value": 83.3,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ],
+          "sources": [
+            "Caladbolg (world)"
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Companion 2",
+          "name_raw": "'''Companion 2'''",
+          "raw": "'''M4 V'''",
+          "kind": "star",
+          "type": "M4 V",
+          "distance": {
+            "raw": "339",
+            "value": 339.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ],
+          "sources": [
+            "Caladbolg (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Caladbolg (world)",
+      "label": "Caladbolg",
+      "stars": [
+        {
+          "name": "Escalibor",
+          "type": "F7 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Câliburn",
+          "raw": "<small>Y?00???-? </small>",
+          "kind": "world",
+          "uwp": "Y?00???-?",
+          "distance": {
+            "raw": "0.38",
+            "value": 0.38,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moonlet 1",
+              "name_raw": "<small>Moonlet 1</small>",
+              "raw": "<small>YS00000-0</small>",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moonlet 2",
+              "name_raw": "<small>Moonlet 2</small>",
+              "raw": "<small>YS00000-0</small>",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "4 Diam",
+                "value": 4.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Moonlet 3",
+              "name_raw": "<small>Moonlet 3</small>",
+              "raw": "<small>YS00000-0</small>",
+              "kind": "world",
+              "uwp": "YS00000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Broken Stone",
+          "raw": "<small>Y000000-0</small>",
+          "kind": "world",
+          "uwp": "Y000000-0",
+          "distance": {
+            "raw": "0.65",
+            "value": 0.65,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Inner Planet",
+          "raw": "<small>???0???-?</small>",
+          "kind": "world",
+          "uwp": "???0???-?",
+          "distance": {
+            "raw": "0.98",
+            "value": 0.98,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Inner Planet",
+          "raw": "<small>???0???-?</small>",
+          "kind": "world",
+          "uwp": "???0???-?",
+          "distance": {
+            "raw": "1.34",
+            "value": 1.34,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Caladbolg",
+          "raw": "<small>B565776-A</small>",
+          "kind": "world",
+          "uwp": "B565776-A",
+          "distance": {
+            "raw": "1.75",
+            "value": 1.75,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Outer Planet",
+          "raw": "<small>???????-?</small>",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "2.63",
+            "value": 2.63,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Outer Planet",
+          "raw": "<small>???????-?</small>",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "4.59",
+            "value": 4.59,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 8,
+          "name": "Outer Planet",
+          "raw": "<small>???????-?</small>",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "9.22",
+            "value": 9.22,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 9,
+          "name": "Outer Planet",
+          "raw": "<small>???????-?</small>",
+          "kind": "world",
+          "uwp": "???????-?",
+          "distance": {
+            "raw": "13.8",
+            "value": 13.8,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 10,
+          "name": "Companion 1",
+          "name_raw": "'''Companion 1'''",
+          "raw": "'''M0 V'''",
+          "kind": "star",
+          "type": "M0 V",
+          "distance": {
+            "raw": "83.3",
+            "value": 83.3,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ]
+        },
+        {
+          "orbit": 11,
+          "name": "Companion 2",
+          "name_raw": "'''Companion 2'''",
+          "raw": "'''M4 V'''",
+          "kind": "star",
+          "type": "M4 V",
+          "distance": {
+            "raw": "339",
+            "value": 339.0,
+            "unit": "AU"
+          },
+          "flags": [
+            "star-in-orbit-row"
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Caladbolg",
+    "UWP": "B565776-A",
+    "Stellar": "F7 V M0 V M4 V",
+    "PBG": "710",
+    "Bases": "S",
+    "Remarks": "Ag Ri"
+  }
+}

@@ -1,0 +1,565 @@
+{{Milieu header}}
+
+[[File:Alien Moon 303-0 Small.jpg|250 px|right]]
+{{StellarDataQuery
+  |name= {{World|Rhylanor|Spinward Marches|Rhylanor|2716}} 
+  |era= Milieu 1116
+}}
+{{InfoboxSystem
+|name=Rhylanor <ref><small>T5SS & Milieu-adjusted X-Boat SS-2 published data harmonized with modifications of Christopher Griffen's system configuration in RICE Paper 2716.</small></ref>
+|sector= Spinward Marches|subsector= Rhylanor|hex= 2716
+|star= ''[[Icarus (star)|<big>Icarus</big>]]''|type= ''<big>M2 V</big>''
+|P0= ''Icarus Prime'' |Dist0=0.26   |UWP0= <small>YA9A???-?</small>
+|P0M1= <small>("I. Prime" '''a''')</small> |Dist0M1= ''<small>R= ?</small>''|UWP0M1= <small>Y7B2000-0</small>
+|P0M2= <small>("I. Prime" '''b''')</small> |Dist0M2= ''<small>R= ?</small>''|UWP0M2= <small>F775???-?</small>
+|P1= Rhylanor|Dist1=0.36   |UWP1= <small>A434934-F</small>
+|P2= ''("Icarus II")''|Dist2=0.52|UWP2= <small>YAB0000-0</small>
+|P2M1= <small>'''''Lucid'''''</small> |Dist2M1= 0.55<small>AU</small>|UWP2M1= <small>YS00000-0</small>
+|P2b= Lucid|Dist2b=0.55|UWP2b= <small>YS00000-0</small>
+|P3= '''Duria Belt'''|Dist3=0.70|UWP3= <small>G000400-F</small>
+|P4= '''Schriekrieg'''|Dist4=0.94|UWP4= <small>F537726-F</small>
+|P4M1= <small>(Inner Moon)</small> |Dist4M1= ''<small>R= ?</small>''|UWP4M1= <small>Y244000-0</small>
+|P4M2= <small>(Outer Moon)</small> |Dist4M2= ''<small>R= ?</small>''|UWP4M2= <small>Y237000-0</small>
+|P5= ''"Icarus V"'''a'''''|Dist5=1.72|UWP5= <small>Y774000-0</small>
+|P5M1= <small>"Icarus V"'''b'''</small>|Dist5M1= ''<small>R= ?</small>''|UWP5M1= <small>Y58A000-0</small>
+|P5M2= <small>'''Ghalash'''</small>|Dist5M2= ''<small>R= ?</small>''|UWP5M2= <small>H100267-E</small>
+|P5b= Ghalash|Dist5b=1.65|UWP5b= <small>H100267-E</small>
+|P6= '''Radium'''  |Dist6=3.28  |UWP6= <small>F320217-E</small>
+|P6M1= <small>'''Telvoc'''</small> |Dist6M1= ''<small>R= 4</small>''|UWP6M1= <small>Y100000-0</small>
+|P7= '''Roderick'''|Dist7=5.60|UWP7= <small>Y202000-0</small>
+|P7M1= <small>(- Rings -)</small> |Dist7M1= ''<small>R= 2</small>''|UWP7M1= <small>YR00000-0</small>
+|P7M2= <small>'''Tulumne'''</small> |Dist7M2= ''<small>R= 40</small>''|UWP7M2= <small>Y100000-0</small>
+|P7M3= <small>'''Ebelhorn'''</small> |Dist7M3= ''<small>R= 50</small>''|UWP7M3= <small>Y100000-0</small>
+|P8= '''Idulore'''|Dist8=12.00|UWP8= <small>F130365-F</small>
+|P9= ''("Icarus IX")''|Dist9=18.00|UWP9= <small>Y110???-?</small>
+|P10= ''("Icarus X")''|Dist10=57.50|UWP10= <small>Y8A7000-0</small>
+|P11= ''("Icarus XI")''|Dist11=92.00|UWP11= <small>YCDA000-0</small>
+|P11M1= <small>(Moonlet)</small> |Dist11M1= ''<small>R= ?</small>''|UWP11M1= <small>Y120000-0</small>
+|P11M2= <small>(Icemoon)</small> |Dist11M2= ''<small>R= ?</small>''|UWP11M2= <small>Y776000-0</small>
+|P12= ''("Icarus XII")''|Dist12=154.00|UWP12= <small>Y48A???-?</small>
+}}
+{{World summary comment|trade= Tp}}
+* {{Deneb visible}}
+* Around 40% of the population consists of [[Llellewyloly]] that live in a separate but parallel society alongside [[Humaniti]] and other [[sophont]]s.
+* It is a member of the [[Rhylanor Cluster|Rhylanor Trace]]. 
+* Rhylanor controls the world ''[[Kegena (world)|Kegena]]''.
+
+== Description (Specifications: Overview) == 
+=== UWP Listing ===
+{{WorldS|Rhylanor|Spinward Marches|2716}} - A434934-F Hi Ht Cp Llel4 {4} (C8G+2) [7D3D] BEF NS 810 12 Im M2 V
+
+== [[Astrography]] & [[Planetology]] ==
+=== Stellar Data ===
+'''Rhylanor''' has a solitary primary star.
+* It is a red main sequence / subdwarf named ''Icarus''.
+
+{{MonostellarSystem
+|name           = Rhylanor
+|primary        = M2 V
+|PrimaryName    = Icarus
+|PrimaryNotes   = Somewhat low-metallicity (Type V-VI)
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* Rhylanor, the [[mainworld]].
+* x10 secondary [[world|rocky worlds]].
+** In order, some of the named worlds outward from Rhylanor and their colonies include: a quasi-satellite of ''Icarus II'' ("''Lucid''"), the major colony-world of ''Schriekrieg'', an inhabited moonlet ("''Ghalash''") of the large double-radworld at ''Icarus V'', ''Radium'', ''Roderick'', and the minor near outer-system colony on ''Idulore''. {{Unpublished cite|citeName=RICE2716|author= Christoper Griffen}} {{Page cite|name=  Xboat Special Supplement 2: The Far Far Future|page= 47|citeName= SS2#1|author= Rob Eaglestone}} {{Unpublished cite|citeName=XB-SS2&RICE-2716#1|author= WHULorigan - Harmonization of XBoat Special Supplement 2 & RICE-Paper2716}}
+** Four additional unnamed worlds lie farther out in the [[Outer World|near outer system]]. {{Unpublished cite|name= Traveller Map|citeName= TravMap#1|author= Traveller Map Second Survey Data}} {{Page cite|citeName= SS2#1}} 
+* x1 [[planetoid belt]], known as the ''Duria Belt'', a planetoid belt in a close [[Outer World|outer-system]] orbit.
+
+=== Details ===
+----
+ '''<big>Orbit</big>'''  '''<big>Name</big>'''           '''<big>UWP</big>'''            '''<big>Notes</big>'''
+ _______________________________________________________________________________________________________________ 
+ 
+ '''Primary''' '''<big>Icarus</big>'''         '''<big>M2 V/VI</big>'''       ''Low-Metallicity/Old Main-sequence Red Dwarf-Star''
+ 
+ 0       ''(Icarus Prime)''  YA9A???-?       Bigworld. Cloud-enshrouded Torrid-Waterworld.
+     ?    ''(Inner-Moon)''    ''Y7B2000-0''      Stormworld Moon. <small>(Corrosive turbulent atmosphere)</small>
+     ?    ''(Outer-Moon)''    ''F775???-?''      Innerworld Moon.          
+ 1 	'''Rhylanor''' 	'''A434934-F'''       '''Mainworld'''. 
+ 1.5     ''(Icarus II)''     YAB0000-0       Inferno world. 
+  ''1.5b''    ·Lucid	        YS00000-0       Worldlet/Dwarf-planet. [[wikipedia: Quasi-satellite|Quasi-satellite]] of ''(Icarus II)''. 
+ 2	Duria Belt      G000400-F 	Planetoid Belt @ 0.87<small>AU</small>/Outliers as far inward as 0.70<small>AU</small>. "Free-belter" settlements. 
+ 3	Schriekrieg     F537726-F       Iceworld. Major colonial settlements. <small>(Frozen N<sub>2</sub>/O<sub>2</sub> atmosphere) - [Frozen Atm. sublimates - increases to 5 during Summer]</small>
+     ?    ''(Inner-Moon)''    ''Y244000-0''      ''RadWorld-Moon'' <small>(Irradiated CO<sub>2</sub>/O<sub>2</sub> atmosphere)</small>
+     ?    ''(Outer-Moon)''    ''Y237000-0''      ''RadWorld-Moon'' <small>(Irradiated N<sub>2</sub>/O<sub>2</sub> atmosphere)</small>
+ 4       ''(Icarus V'''a''')''     Y774000-0       '''Double-Planet''' /RadWorld <small>(Irradiated CO<sub>2</sub>/N<sub>2</sub>/O<sub>2</sub> atmosphere)</small>
+     ?    ''(Icarus V'''b''')''     ''Y58A000-0''      '''Double-Planet''' /''RadWorld-Moon <small>(Large)</small>'' <small>(Irradiated N<sub>2</sub>/O<sub>2</sub> atmosphere)</small>
+     ?    ''Ghalash'' 	 ''H100267-E''      ''Worldlet-Moon''. Far-Orbit of Double-world barycenter. Minor Installation. 
+ 5 	Radium 	        F320217-E       Ice/Radworld. Corporate mining/extraction/processing settlement.  
+     4    ''Telvoc''          ''Y100000-0''      ''Worldlet-Moon''
+ 6 	Roderick 	Y202000-0       Iceworld. (Dia. = 2400km). Thick crustal ices and ice-cap hydrosphere sublimate into (Atm=3 pressure) gas during summer. ==» (Y130000-0)
+     2    ''Ring System''     ''YR00000-0''      ''Ring System''	        
+    40    ''Tulumne''         ''Y100000-0''      ''Worldlet-Moon''
+    50    ''Ebelhorn''        ''Y100000-0''      ''Radworldlet-Moon''
+ 7	Idulore 	F130365-F       Worldlet. Minor out-system settlement. 
+ 8 	''(Icarus IX)''     Y110???-?       Worldlet.
+ 9.5 	''(Icarus X)''      Y8A7000-0       Radworld. <small>(Irradiated CH<sub>4</sub>/NH<sub>3</sub>/N<sub>2</sub> atmosphere)</small>
+ 10  	''(Icarus XI)''     YCDA000-0       Radworld. (Big/Iceworld). <small>Very high-density atmosphere at low-altitude / Irradiated at other altitudes.</small> 
+     ?    ''(Inner-Moon)''    ''Y120000-0''      ''Worldlet-Moon'' <small>(N<sub>2</sub> atmosphere)</small>
+     ?    ''(Outer-Moon)''    ''Y776000-0''      ''Large Iceworld-Moon'' <small>(Frozen N<sub>2</sub> atmosphere)</small>                  	         
+ 11      ''(Icarus XII)''    Y48A???-?       Iceworld. <small>(Frozen N<sub>2</sub> atmosphere)</small>
+ 12         ---                          ''[ - Empty Orbit - ]''
+ 13-21   ''<« Remote System »>''           ''Sparse/Tenuous Scattered Disc & Cometary Cloud''
+----
+
+=== - [[Habitable Zone]] - ''<small>(HZ<sub>-1</sub> / HZ<sub>0</sub> / HZ<sub>+1</sub>)</small>'' === 
+==== · Orbit 0 ''<small>([[Habitable Zone|HZ<sub>-1</sub>]])</small>'': ''[[Rhylanor (world)|("Icarus Prime")]]'' ==== 
+:·  ''("[[Rhylanor (world)|Icarus Prime]]")'' is a ''[[Bigworld]]'' and a Waterworld that is characterized by Torrid high-temperatures and humidity and is constantly enshrouded by cloud-cover. {{Unpublished cite|citeName=XB-SS2&RICE-2716#1|author= WHULorigan - Harmonization of XBoat Special Supplement 2 & RICE-Paper2716}}
+===== ''[[Rhylanor (world)|· -> Satellite: (Inner Moon)]]'' ===== 
+:· ''Icarus Prime's inner satellite is a [[Storm World|StormWorld-Moon]], characterized by high temperatures and constant atmospheric turbulence.'' {{Unpublished cite|citeName=XB-SS2&RICE-2716#1|author= WHULorigan - Harmonization of XBoat Special Supplement 2 & RICE-Paper2716}}
+::* ''No further information currently available'' 
+===== ''[[Rhylanor (world)|· -> Satellite: (Outer Moon)]]'' ===== 
+:· ''Icarus Prime's outer satellite is an [[Inner World|InnerWorld-Moon]], characterized by high temperature and bathed in high levels of stellar radiation.'' {{Unpublished cite|citeName=XB-SS2&RICE-2716#1|author= WHULorigan - Harmonization of XBoat Special Supplement 2 & RICE-Paper2716}} 
+::* ''No further information currently available''
+ 
+==== · Orbit 1 ''<small>([[Habitable Zone|HZ<sub>0</sub>]])</small>'': ''[[Rhylanor (world)|· Mainworld: Rhylanor]]'' ==== 
+:· '''Rhylanor''': <small>[[UWP]] A434A34-F</small>, orbiting <small>@</small> 0.36<small>AU</small>, is the mainworld of the Icarus star system. 
+:* ''See below for [[Rhylanor_(world)#Mainworld_Data|mainworld data]]''.
+
+==== · Orbit 1.5 ''<small>([[Habitable Zone|HZ<sub>0/+1</sub>]])</small>'': ''[[Rhylanor (world)|("Icarus II")]]'' ==== 
+:·  ''("[[Rhylanor (world)|Icarus II]]")'' is an ''[[Inferno world]]'' or ''[[Hellworld]]'', characterized by extreme weather patterns, constant atmospheric turbulence of its corrosive atmosphere, and very high temperatures trapped by its greenhouse gases and its local crustal volcanism.  {{Unpublished cite|citeName=XB-SS2&RICE-2716#1|author= WHULorigan - Harmonization of XBoat Special Supplement 2 & RICE-Paper2716}}
+:*  ''No further information currently available''
+
+==== ''· <Orbit 1.5b> <small>([[Worldlet]])</small>: [[Rhylanor (world)|Lucid]]'' ==== 
+:·  ''[[Rhylanor (world)|Lucid]]'' is a small dwarf-planet, or ''[[Worldlet]]'' that is a [[wikipedia: Quasi-satellite|Quasi-satellite]] of ''Icarus II''. {{Unpublished cite|citeName=XB-SS2&RICE-2716#1|author= WHULorigan - Harmonization of XBoat Special Supplement 2 & RICE-Paper2716}}
+:*  ''Lucid'' orbits its primary at an average distance of ~ 0.52 <small>AU</small>, but with an eccentricity that takes it out as far as 0.55 <small>AU</small> at apastron. {{Unpublished cite|citeName=XB-SS2&RICE-2716#1|author= WHULorigan - Harmonization of XBoat Special Supplement 2 & RICE-Paper2716}} 
+
+==== Orbit 2 ''<small>([[Habitable Zone|HZ<sub>+1</sub>]])</small>'': ''[[Rhylanor (world)|Duria Belt]]'' ==== 
+· The main region of the '''''[[Rhylanor (world)|Duria Belt]]''''' is centered at ~0.87<small>AU</small> but has some outlier-members that stray as far inward as ~0.70<small>AU</small>. {{Unpublished cite|citeName=XB-SS2&RICE-2716#1|author= WHULorigan - Harmonization of XBoat Special Supplement 2 & RICE-Paper2716}}
+*  ''Duria'', the largest member of the planetoid belt, is a dwarf planet and also the site of the largest settlement of "Free-Belters" in the Belt.  {{Unpublished cite|citeName=WHULorigan#1|author= WHULorigan}} 
+* Total non-transient belt population as a whole is believed to be about 50,000 individuals, with a reasonable margin of error in either direction. 
+
+<br>
+----
+
+=== - [[System|Close/Outer System]] - ===
+==== Orbit 3: ''[[Rhylanor (world)|Schriekrieg]]'' ==== 
+· ''[[Rhylanor (world)|Schriekrieg]]'' is an arid and frozen ''[[Iceworld]]'', but nevertheless is the site of major close out-system colony settlements totalling 10s of millions of [[sophont]]s governing their mutual affairs via a form of technologically assisted participatory democracy.   
+===== ''[[Rhylanor (world)|· -> Satellite: (Inner Moon)]]'' ===== 
+:· ''Schriekrieg's inner satellite is a [[Rad World|RadWorld-Moon]], characterized by high levels of radiation at its surface.'' {{Unpublished cite|citeName=XB-SS2&RICE-2716#1|author= WHULorigan - Harmonization of XBoat Special Supplement 2 & RICE-Paper2716}}
+::* ''No further information currently available'' 
+===== ''[[Rhylanor (world)|· -> Satellite: (Outer Moon)]]'' ===== 
+:· ''Schriekrieg's outer satellite is a [[Rad World|RadWorld-Moon]], characterized by high levels of radiation at its surface.'' {{Unpublished cite|citeName=XB-SS2&RICE-2716#1|author= WHULorigan - Harmonization of XBoat Special Supplement 2 & RICE-Paper2716}} 
+::* ''No further information currently available''
+
+==== Orbit 4: ''[[Rhylanor (world)|("Icarus V")]]'' ==== 
+· ''("[[Rhylanor (world)|Icarus V]]")'' is a ''[[Rad World|RadWorld]]'', characterized by high levels of radiation at its surface. {{Unpublished cite|citeName=XB-SS2&RICE-2716#1|author= WHULorigan - Harmonization of XBoat Special Supplement 2 & RICE-Paper2716}}  
+*  ''No information currently available.'' 
+===== ''[[Rhylanor (world)|· -> Satellite: (Big-Moon)]]'' =====
+: Icarus V's primary satellite is a [[Rad World|RadWorld-Moon]], characterized by high levels of radiation at its surface. It is also of significant size, being almost 2/3 the size of its parent world and as large as many significant mainworlds, making this world and its parent world a near double-planet as they orbit each other about a clear external barycenter.'' {{Unpublished cite|citeName=XB-SS2&RICE-2716#1|author= WHULorigan - Harmonization of XBoat Special Supplement 2 & RICE-Paper2716}}
+::*  ''No further information currently available.''
+
+===== ''[[Rhylanor (world)|· -> Satellite: Ghalash]]'' ===== 
+:· ''[[Rhylanor (world)|Ghalash]]'' is a ''[[Worldlet|Worldlet-moon]]'' that is the site of a minor installation. {{Unpublished cite|citeName=XB-SS2&RICE-2716#1|author= WHULorigan - Harmonization of XBoat Special Supplement 2 & RICE-Paper2716}}  
+::*  ''No further information currently available''
+
+==== Orbit 5: ''[[Rhylanor (world)|Radium]]'' ==== 
+· As its name suggests, the ''[[Iceworld]] of ''[[Rhylanor (world)|Radium]]'' is also a ''[[Rad World|RadWorld]]'' characterized by high levels of radiation at its surface. 
+: The radioactivity endemic to the surface stems both from the lack of protection from particle radiation caused by the hard vacuum environment, as well as from sub-surface radioactivity generated by the decay of various naturally occurring radioactive isotopes within its crust and ice-salts and other minerals brought up by deep volcanic vents. {{Unpublished cite|citeName=WHULorigan#1|author= WHULorigan}}
+: It is populated by a small corporate mining colony in a heavily shielded enclave who mine and process the various ores for off-world transport to potential industrial concerns and other buyers. {{Unpublished cite|citeName=WHULorigan#1|author= WHULorigan}}
+
+===== ''[[Rhylanor (world)|· -> Satellite: Telvoc]]'' =====
+:*  ''No information currently available''
+<br>
+
+-----
+
+=== - [[System|Near/Outer System]] - ===
+==== Orbit 6: ''[[Rhylanor (world)|Roderick]]'' ==== 
+· ''[[Rhylanor (world)|Roderick]]'' is a vacuum-''[[Ice World|iceworld]] approximately 2400km in diameter {{Unpublished cite|citeName=XB-SS2&RICE-2716#1|author= WHULorigan - Harmonization of XBoat Special Supplement 2 & RICE-Paper2716}} with a ring system encircling it at a distance of about two planetary radii''. 
+* ''Roderick'' orbits its primary with an eccentricity that takes it between 5.2 <small>AU</small> at periastron and 5.6 <small>AU</small> at apastron. {{Unpublished cite|citeName=XB-SS2&RICE-2716#1|author= WHULorigan - Harmonization of XBoat Special Supplement 2 & RICE-Paper2716}}
+* The beginnings of a basic long-term geological engineering project have commenced with the goal of releasing trapped oxygen along with nitrogen and carbon dioxide ices within the frozen surface water that have already begun to produce a tenuous trace atmospheric envelope. The project engineers likewise plan to take advantage of the increased greenhouse effect caused by the gas mix to raise the temperature of the surface to a frigid but low-end tolerable level for assisted sophont habitation in general, and [[Llellewyloly]] environmental habitat conditions in particular. {{Unpublished cite|citeName=XB-SS2&RICE-2716#1|author= WHULorigan - Harmonization of XBoat Special Supplement 2 & RICE-Paper2716}}  
+
+===== ''[[Rhylanor (world)|· -> Satellite: Tulumne]]'' =====  
+:*  ''Tulumne'' is a vacuum ''[[Ice World|Ice-Worldlet]], part of the surface of which is being used as a stellar-radiation reflector for the Roderick geological engineering project. {{Unpublished cite|citeName=XB-SS2&RICE-2716#1|author= WHULorigan - Harmonization of XBoat Special Supplement 2 & RICE-Paper2716}}  
+===== ''[[Rhylanor (world)|· -> Satellite: Ebelhorn]]'' ===== 
+:*  ''Ebelhorn'' is a vacuum ''[[Rad World|Rad-Worldlet]], part of the surface of which is being used as a stellar-radiation reflector for the Roderick geological engineering project. {{Unpublished cite|citeName=XB-SS2&RICE-2716#1|author= WHULorigan - Harmonization of XBoat Special Supplement 2 & RICE-Paper2716}}
+
+==== Orbit 7: ''[[Rhylanor (world)|Idulore]]'' ==== 
+· ''[[Rhylanor (world)|Idulore]]'' is a ''[[Worldlet]]'' that is the site of a minor out-system colony. 
+*  ''Idulore'' orbits its primary ''Icarus'' in a highly eccentric orbit varying between 10.0 <small>AU</small> at periastron and 12.0 <small>AU</small> at apastron. {{Unpublished cite|citeName=XB-SS2&RICE-2716#1|author= WHULorigan - Harmonization of XBoat Special Supplement 2 & RICE-Paper2716}}
+
+==== Orbit 8: ''[[Rhylanor (world)|("Icarus IX")]]'' ==== 
+· ''("[[Rhylanor (world)|Icarus IX]]")'' is a ''[[Worldlet]]''  
+*  ''No information currently available''
+
+==== Orbit 9.5: ''[[Rhylanor (world)|("Icarus X")]]'' ==== 
+· ''("[[Rhylanor (world)|Icarus X]]")'' is a ''[[Rad World|RadWorld]]'', characterized by high levels of radiation at its surface.
+*  ''No information currently available''
+
+==== Orbit 10: ''[[Rhylanor (world)|("Icarus XI")]]'' ==== 
+· ''("[[Rhylanor (world)|Icarus XI]]")'' is both a ''[[Big World|BigWorld]]'' and an a ''[[Ice World|Iceworld]]'', as well as a ''[[Rad World|RadWorld]]'' characterized by high levels of radiation at its surface. It has a very dense atmosphere that requires special protective equipment at low altitudes. 
+*  ''No further information currently available'' 
+===== ''[[Rhylanor (world)|· -> Satellite: (Inner Moon)]]'' ===== 
+:· ''[[Worldlet|Worldlet-Moon]].''
+::* ''No information currently available'' 
+===== ''[[Rhylanor (world)|· -> Satellite: (Outer Moon)]]'' ===== 
+:· ''[[Ice World|Iceworld-Moon]].'' - This large ''[[Iceworld]]'' orbits a ''[[Big World|BigWorld]]'' as a satellite.   
+::* ''No information currently available''
+
+==== Orbit 11: ''[[Rhylanor (world)|("Icarus XII")]]'' ==== 
+· ''("[[Rhylanor (world)|Icarus XII]]")'' is an ''[[Iceworld]]''  
+*  ''No information currently available''   
+<br>
+
+''' Orbit 12: ''<small>[ - Empty Orbit - ]</small>'' '''
+
+<br>
+-----
+
+=== - [[System|Far/Remote System]] - ===
+==== Orbits 13-21: ''Sparse/Tenuous Scattered Disc & Cometary Cloud'' ==== 
+*  ''No information currently available''
+<br>
+----
+----
+=== Mainworld Data ===
+'''Rhylanor''' is a smallish, normal [[climate]] planet with a very thin oxygen-nitrogen [[atmosphere]] located in a [[Rhylanor Cluster|cluster of three star systems]] just off the [[Spinward Main]]. As such it provides a useful short cut for high-Jump vessels and [[Xboat]]s but is inaccessible to most commercial ships. The majority of traffic into Rhylanor comes via the [[Celepina (world)|Celepina]]-[[Jae Tellona (world)|Jae Tellona]] link or from [[Fulacin (world)|Fulacin]] to [[Porozlo (world)|Porozlo]].
+
+It orbits within the [[star]]'s [[Habitable Zone]], receiving moderate levels of [[Electromagnetic Spectrum|stellar energy]].
+
+[[File:Chart Orbit HZ Region Detailed.png|600 px]]
+
+'''Orbital Characteristics''':
+* '''Orbital Distance''': 0.36 <small>AU</small>
+* '''Orbital Period''': 118.9 standard days
+* '''Rotational Period''': 11.89 standard days (285.4 standard hours) (Retrograde)
+* '''Axial Tilt''': 15°
+* '''Average Surface Temperature''': 21.3°C
+
+Rhylanor occupies the innermost orbit of its star system, at a distance of [[Astronomical Unit|0.36 AU]] from its primary, with an orbital period of about [[Day|118.9 standard days]]. Both the "Hot" (H<sub><small>+1</small></sub>) and "Inferno"/Inner System regions of the system lie to starward of all of the standard orbits occupied by most star-system configurations. Rhylanor's axis is tilted to the plane of its orbit by approximately 15°. Its retrograde rotational period of [[Day|11.89 standard days]] causes Rhylanor to make exactly ten rotations per revolution about its sun. From the vantage point of Rhylanor's surface, the sun rises in the west and travels eastward, completing one local day every [[Hour|285.4 standard hours]], sunrise to sunrise. {{Page cite|name=First In|page=56, 61, 63, 75, 97, 104, 107|citeName=First In}} <ref>Corrected for updated stellar data: See Discussion Page & Metadata.</ref>
+
+* ''<small>(Editor's Note: The original data [[Rhylanor (world)/meta#Editor.27s Note|can be found here]])</small>''.
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Rhylanor|Size= 4}}
+* '''''Rhylanor''' has a diameter of about 6400 km, and has a large, dense core, resulting in a surface gravity of about 0.50g. ''{{Page cite|citeName=First In}} Rhylanor's weak natural gravity is augmented in urban areas by immense artificial gravity grids.  Rhylanori technology also defies the planet's weak planetary electromagnetism for the purpose of maintaining its maglev public transportation network.  EMP generators are maintained at intervals along the maglev public transportation web. The generators enable maglev to operate on the planet despite Rhylanor's weak natural electromagnetism. {{Unpublished cite|citeName=RICE2716|author= Christoper Griffen}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Rhylanor|Atmosphere= 3}}
+
+* '''''Rhylanor''' has an N<sub>2</sub> / O<sub>2</sub> atmosphere with a surface atmospheric pressure of about 0.4 atm.''{{Page cite|citeName=First In}} The very thin atmosphere of Rhylanor freely admits stellar radiation from Icarus, making the planet typically hot, averaging 21.3 degrees C.  The atmosphere and axial tilt of Rhylanor (15 degrees) combined with its slow relative rotation, however, result in large daily and seasonal temperature fluctuations.  Because of these extremes, nearly all Rhylanori own compressors, and frequently carry and use them if they must go outside the pressure-domed cities and enclosures.  Those who engage in prolonged exposure to the elements own vacc suits and PLSS systems. {{Unpublished cite|citeName=RICE2716}}
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Rhylanor|Hydrosphere= 4}}
+Rhylanor's seas support undersea settlements whose main business is the distillation of valuable ore products that seep forth from Rhylanor's multitude of undersea vents.
+
+==== Mainworld Geography & Topography ====
+The surface of Rhylanor presents a slate and obsidian color pattern to the observer from orbit due to its rocky composition and mineral-rich oceans, relieved intermittently by immense amber and brown splotches of urban sprawl in various places along the surface. Several impact craters are in evidence on the continents around the planetary surface. 
+* '''''Point of Interest: Primitive [[Llellewyloly]] Colony''''' — One significant crater lies close to the planetary equator, which serves as the location of a "primitive" [[Llellewyloly]] colony. 
+* '''''Point of Interest: "Mount Whatsit" (a.k.a. "Mount Zhitar")''''' — One of the primary mountain peaks on Rhylanor is known as ''Mount Whatsit'' (a.k.a. ''"Zhitar"''). It is an apparent Ancients artifact in the form of a "Glass Mountain" striated with veins of various exotic minerals.
+<br>
+
+[[File:Garden World Type 05f2.jpg|475 px]] [[File:Garden World Type 12b2.jpg|475 px]]
+
+[[File:Water World Shore 08a1.jpg|475 px]] [[File:Garden World Type 10c2.jpg|475 px]] 
+
+[[File:World Rugged Mountains 03a1.jpg|475 px]] [[File:Garden World Type 20a4.jpg|475px]]
+
+<br>
+
+===== ''»» Mainworld Map'' =====
+[[File:World Map Rhylanor Basic.png|600 px]]
+
+<br>
+
+==== Lifeform ====
+[[File:Kian Darker Outline W H Keith.jpg|225px|thumbnail|right|'''Kian''']]
+Rhylanor has primitive multi-celled [[Lifeform|native life]] (...similar to lichens of a brownish-grey to dark coloration) which maintains some free oxygen in the [[atmosphere]], though it is not enough for humans to breathe without mechanical assistance.{{Page cite|citeName=First In}} Other autotrophic life or foliage that has been transplanted to Rhylanor tends to darker colorations (such as dark green-black or charcoal / brown-black), as these pigmentations are common among life that thrives by utilizing the radiant energy of stars that emit primarily in the infra-red wavelengths, such as Rhylanor's M-type primary. {{Unpublished cite|author= WHULorigan|citeName= WHULorigan#1}}  
+
+A large variety of imported flora and fauna inhabit the world. Among these are ''[[Kian]]'', native to [[Prilissa (world)|Prilissa]] in [[Trin's Veil Subsector]].
+[[File:Kian-Unpublished-2018-A-Suorez-R-Caswell 18-June-2018a.jpeg|thumbnail|300px|left|'''Kian-mounted Imperial Household Cavalry''']] <br>
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+== World Dossier ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+'''Rhylanor''' is a member world of the [[Third Imperium]].
+
+'''''Notes of Interest''''': 
+* ''Rhylanor'' is the birthplace of [[Olav]] hault-[[Plankwell family|Plankwell]] -- the first of the [[Emperors of the Flag]].  As [[Grand Admiral of the Marches]], Olav led the March Fleet against the [[Outworld Coalition]] in the [[First Frontier War]] and subsequently marched upon [[Capital (world)|Capital]] with his fleets upon the conclusion of the War to seize the [[Iridium Throne]], beginning the period known as the [[Emperors of the Flag]] and the start of the {{Imperial}} [[Civil War]]. 
+
+* ''Rhylanor'' is also the birthplace of Duchess [[Arbellatra]] [[Khatami family|Khatami]] [[Alkhalikoi family|Alkhalikoii]], 3rd Duchess of [[Rhylanor Subsector|Rhylanor]].  As [[Grand Admiral of the Marches]] during the [[Second Frontier War]], Arbellatra brought an end to the [[Second Frontier War]], subsequently allowing her in her turn to march upon [[Capital (world)|Capital]] and bring an end to the concurrent [[Civil War|Imperial Civil War]] as well, leading to her appointment as Regent of the [[Third Imperium]], and later as 1st [[Emperor]] of the [[House Alkhalikoi|Alkhalikoi dynasty]].
+
+=== [[Imperial Nobility#Distinguishment|Imperial Landed Nobility]] (N) ===
+'''Rhylanor''', as a member world of the [[Third Imperium]], holds the estate of an {{Imperial}} [[knight]] who acts as an Imperial representative to the world, and the [[fiefdom]]s of two members of the [[Imperial Nobility#Distinguishment|Imperial Landed Nobility]], who oversee affairs regarding the world at an Interstellar and Imperial level.
+* This world is the fiefdom of an Imperial Subsector Duke: [[Rhylanor (world), Nobles of|His/Her Grace the Duke of Rhylanor]], who also conducts affairs regarding the entire subsector at the Interstellar and Imperial level.
+* It contains the fiefdom of an Imperial Count: [[Rhylanor (world), Nobles of|His/Her Lordship the Count of Rhylanor]]
+* It contains the estate of an Imperial Knight: [[Rhylanor (world), Nobles of|The Honourable Knight of Rhylanor]], the Imperial representative to the world.
+
+: ''See: [[Nobles of Rhylanor]]''
+:* ''Rhylanor is the center of the local Subsector Government.''
+:* ''Rhylanor controls the world [[Kegena (world)|Kegena]] as a colonial intersystem possession''.
+
+=== World Starport (St) ===
+{{Starport|name= Rhylanor|Starport= A}}
+: While the modern ''Rhylanor Highport'' is extensive and sees major traffic, the older ''Stanford-torus style highport'' that was built in the year [[606]] (known affectionately as "''Old Station''" to locals) still sees its fair share of visitors and through-traffic. 
+
+: '''Rhylanor Highport''' <br> 
+: The modern Rhylanor Highport is a self-sufficient sealed habitat sustained by more than 20 bio-domes which maintain its atmosphere and contain sufficient hydroponics bays to support the entire indigenous population as well as livestock.  While the majority of the facility is maintained to accommodate human and human-like biological needs, the great diversity of travellers who pass through the station has resulted in the maintenance of a number of ''Alternate Atmosphere Districts'', collectively known as the "''Alien Quarter''". One of the most famous landmarks on Rhylanor Highport is the "''Admiral's Fountain''" - an enormous water-spout that issues from the Rhylanor Shipping Tower.  The spray dissipates into a fine mist [[Kilometer|almost 2 km wide]] which catches the rays of the rising sun over the planetary horizon below, creating an iridescent rainbow that locals refer to as "''the Jewels of Rhylanor''". {{Page cite|name=Starports|page=66-71|version=Mongoose Traveller| citeName=MGS}}
+
+: '''Rhylanor "Old Station" Highport''' <br> Rhylanor "Old Station" Highport, on the other hand, is of a dual-torus construction with an overall diameter for each "wheel" of 2100 meters, and a rim-diameter of 150 meters.  One of the two tori is the main habitat (including the approximately 500 shops and businesses of ''Old Station's'' famous "Main Concourse" spanning four separate levels), while the other torus is given over to the agricultural needs of the station. {{Page cite|name=Cirque|page=68}}
+
+: '''Rhylanor Downport''' <br> While the main Rhylanor Highport is an immense orbital city, Rhylanor Down is, by comparison, a meager affair occupying only several square kilometers, and its associated Startown is a somewhat "scruffy" place filled with those who were unsuccessful in their attempts to "strike it big". {{Page cite|citeName=MGS}}
+
+:» ''The '''Rhylanor Downport''' is located at the '''Rhylanor Arcology'''. 
+:» ''The '''Kharginir Arcology''' and '''Joliswell Arcology''' each maintain their own local '''Spaceports'''''. 
+:» ''The '''Kikhimaa City arcology''' maintains its own small '''Spaceport'''''. {{Page cite|name= Whispers on the Abyss |citeName= WotA#1 |pages= 39}}
+
+==== Point of Interest: Naval Base ====
+Rhylanor has an important [[Naval Base]]. The subsector fleet has its headquarters at this facility, and there is a very powerful system squadron. Rhylanor also boasts a large naval academy where young officers-to-be undergo their education and training.
+
+The Rhylanor naval base does not build starships. The Rhylanor yard maintains and modifies fleet vessels including prototypes or experimental variants.
+{{Page cite|name=Whispers on the Abyss |page=35-36|citeName=WA-1}}
+
+Prior to the [[Fifth Frontier War]], the naval base hosted the [[212th Fleet (SM)|212th Fleet]]. During the war, the fleet was used to defend the [[Jewell Subsector]] and subsequently moved there. After the war, the [[23rd Fleet]] was moved to Rhylanor from the [[Lanth Subsector]]. {{Page cite|name=The Spinward Marches Campaign|page=9}} {{Page cite|name=Rebellion Sourcebook|page=26}}
+
+==== Point of Interest: Scout Base ====
+Rhylanor also has a large [[Scout Base]] that acts as a communications depot for the [[X-Boat|Xboat]] routes as well as a regional planning and command center. The facility is quite extensive and contains training facilities for some of the more specialized scout roles. 
+* ''An X-Boat route runs through the Rhylanor system between [[Equus (world)|Equus]] and [[Jae Tellona (world)|Jae Tellona]]''.
+
+==== Point of Interest: Warships' Graveyard ====
+During the [[Fifth Frontier War]] Rhylanor was the site of several critical naval battles between the Imperial and [[Zhodani Consulate|Zhodani]] fleets. The Rhylanor system still contains relics of the climactic battle, in the form of the [[Warships Graveyard]], where the shattered hulks of disabled vessels were gathered together by tugs in order to prevent their being a hazard to navigation. The whole graveyard is classified as a red zone, and patrolled to prevent any but licensed salvage operatives from entering. The area is designated as a war grave by both [[Zhodani]] and {{Imperial}} authorities.
+
+=== [[Importance Extension|World Importance]] {Ix} === 
+Importance {Ix}: +4
+* '''Rhylanor''' is an ''Important world''.
+
+=== World Technology Level (T) ===
+{{WorldTech|name= Rhylanor|WorldTech= F}}
+
+=== Trade Data ===
+'''Rhylanor''' is a ''High Technology'', ''High Population'' world that is also the center of the Subsector Government. 
+
+''[[Trade route|Trade Lines with other worlds]]:''
+* Rhylanor is part of the ''[[Rhylanor Cluster]]'' (also known as the ''"Rhylanor Trace"'') and is somewhat isolated astrographically from the worlds around it. Most trade passes to Rhylanor along the J-2 Celepina-Jae Tellona-Rhylanor link, which then continues along the Rhylanor-Equus J-3 corridor for higher-jump liners. Some trade also comes to Rhylanor via the Fulacin-Porozlo link.  
+
+==== [[Economic Extension|World Economy]] (Ex) ====
+* Resources:      C (very abundant)
+* Labor:          8 (hundreds of millions)
+* Infrastructure: G (very comprehensive)
+* Efficiency:     +2 (good)
+
+==== [[Infrastructure|World Infrastructure]] ====
+'''Rhylanor''' possesses Very Comprehensive infrastructure.
+
+
+Several [[Megacorporation]]s have their regional headquarters on Rhylanor, or at least a major installation. Some of Rhylanor's extensive shipyards are privately owned but most are either Megacorporate subsidiaries or at least partially funded by Megacorp money.  Corporations with offices and facilities on Rhylanor include:
+* [[Blackhawk Enterprises]]
+* [[Cirque duh Sirka Foundation, LIC]]
+* [[Clan Severn]]
+* [[Daarnulud Design Bureau|Daarnulud Design Bureau LIC]]
+* [[First Bank of Rhylanor]], [[LIC]]
+* [[Golden Pharma]]
+* [[General Products|General Products LIC]]
+* [[Imperium Mail|Imperium Mail LIC]]
+* [[Ling-Standard Products]]
+* [[MindGames]]
+* [[Oberlindes Lines]]
+* [[Rhylanor Shipping|Rhylanor Shipping LIC]]
+* [[Rhylanor Freight Services|Rhylanor Freight Services LIC]] {{Page cite|name= Whispers on the Abyss |citeName= WotA#2 |pages= 46}}
+* [[Tukera Lines]], [[LIC]]
+* [[Venturprise]]
+
+'''Rhylanor''' is also a center for industry, commerce and education. The ''[[Rhylanor Institute of Technology]]'' is one of the most prominent hard-science and technological-research institutions in the entire Imperium, with notable accolades in the fields of robotics and computer engineering and heuristics. It is almost certainly the foremost such facility this side of [[Corridor Sector]].  The ''[[Rhylanor Polytechnic]]'' also provides advanced technical education in a number of technology-related fields. The ''[[University of Rhylanor]]'' boasts a strong hard science and technical curriculum among its many varied and diverse degree programs but is principally a planetary university serving the needs of the local citizenry of Rhylanor. Rhylanor is also home to both the prestigious ''[[Imperial University of Rhylanor]]'' and to ''[[Plankwell University]]''. The ''[[Imperial Museum of Rhylanor]]'' is also a significant repository of historical and archaeological artifacts, and a center of research.
+
+=== Politics & Government ===
+==== World Government (G) ====
+{{WorldGov|name= Rhylanor|Government= 3}}
+
+: Rhylanor is nominally headed by a monarch (who is also usually an Imperial ceremonial noble), who acts as ceremonial head of state. The monarch is not an absolute ruler and operates within strict constitutional guidelines, consulting with his Privy Council whose members are drawn from the planet’s higher nobility.  His power is limited by the authority of the other branches of Rhylanor's government. {{Page cite|name=First In|page=56, 61, 63, 75, 97, 104, 107|citeName=First In}} 
+
+: Rhylanor's government primarily consists of two groups, both of which are filled with Rhylanor's nobles. Membership in the government is either handed down to the oldest child in a noble family after the death of the parent, or granted by elevation due to meritorious service or achievement. {{Page cite|name=Grand Census|page=25|citeName=Grand Census}}
+
+: One group is known as the "''Three Councils''"·, which make laws and determine the guilt or innocence of lawbreakers. Each council is in charge of one area of law. The ''Council of Rhylanor'' makes all local laws. The ''Council of Space'' makes all laws concerning visitors to the planet and relations of the planetary government to the Imperium and other worlds. The ''Council of Revenue'' sets taxes. {{Page cite|name=Grand Census|page=25|citeName=Grand Census}} The planet’s ''High Court'' is a small council (drawn from the membership of the Three Councils) whose members inherit their posts.  It  consists of seven of the highest planetary nobles. These seven ''Law Lords'' rule on the most important cases, and also oversee all lower courts for the planet. {{Page cite|name=First In|page=56, 61, 63, 75, 97, 104, 107|citeName=First In}} 
+
+: The second main group in Rhylanor's government, performing the executive function, is known as the ·"''Little Council''". Its fifteen members each oversee the activities of the government in one of fifteen administrative areas. Thus separate police and armed forces are organized differently in each area, although all must enforce the same laws set by the Three Councils. {{Page cite|name=Grand Census|page=25|citeName=Grand Census}}
+
+: The current government is relatively new to Rhylanor, the result of a constitutional convention held in 1056. {{Page cite|name=Grand Census|page=25|citeName=Grand Census}}
+
+* ''Rhylanor controls the world [[Kegena (world)|Kegena]] as a colonial intersystem possession''.
+
+==== [[Law Level|World Law]] (L) ====
+{{WorldLaw|name= Rhylanor|Law= 4}}
+
+[[Universal Legal Profile]] (Lx): '''L - W D I Te Tv P  - [Tr Cr Cv F]'''
+* '''L'''  <small>(Overall Enforcement Level)</small> = 4    
+: --
+* '''W'''  <small>(Weapons)</small> = 4
+* '''D'''  <small>(Drugs)</small> = 
+* '''I'''  <small>(Information)</small> = 
+* '''Te''' <small>(Technology)</small> = 1
+* '''Tv''' <small>(Travellers)</small> = 1
+* '''P'''  <small>(Psionics)</small> = 7
+: --
+* '''Tr'''  <small>(Trade Law)</small> = 7
+* '''Cr'''  <small>(Criminal Law)</small> = 5
+* '''Cv'''  <small>(Civil Law)</small> = 4
+* '''F''' <small>(Personal Freedom)</small> = 1
+
+==== World Military ====
+* ''No information currently available''. 
+
+=== World Population (P) ===
+{{WorldPop|name= Rhylanor|multiplier= 8|Population= 9}}
+[[File:Llellewyloly small.jpg|right]]
+A significant population of ''[[Llellewyloly]]'' exists on this world, living out in the open very-thin atmosphere environment somewhat apart from the rest of the sophont-population of the world as a ''"shadow-population"'' and comprising approximately 40% of the total world population (roughly 2.5 billion individuals). 
+The remaining 60% of the population (approximately 6.5 billion individuals) consists of humans and other non-human [[sophont]]s. 
+
+===== ''World Residents of Note'' =====
+* ''Lord Hollis'', the administrative assistant to ''[[Duke]] [[Leonard Stephanos Kirgashii|Leonard]] [[House Stephanos|Stephanos]] [[House Kirgashii|Kirgashii]] of Rhylanor'', resides at the ''Ducal estate''. {{Page cite|name= Megatraveller 2: Quest for the Ancients |citeName= MT2-QftA  |pages=}}
+* The [[Tukera Lines]] [[Rhylanor Subsector]] Chief, ''Roald Bululo'', has his residence in ''Liduka''. {{Page cite|name= Megatraveller 2: Quest for the Ancients |citeName= MT2-QftA  |pages=}}
+* ''Doctor Gnoskh'' is an acclaimed ''Professor of [[Astrophysics]]'' at the ''[[Rhylanor Polytechnic]]''. {{Page cite|name= Imperiallines 7 |article= TRAVELLER NEWS SERVICE BULLETINS|page= 22|version= Traveller 5th}}
+* ''[[Dr. Theodore Krenstein|Doctor Theodore Krenstein]]'' is an acclaimed ''Professor of Robotics and Cybernetics'' at the ''[[Rhylanor Institute of Technology]]''.   {{Page cite|name= The Travellers' Digest 01|citeName= TD1#1}}
+
+==== Linguistic Topography ====
+The following [[language]]s are most commonly heard:
+* ''[[Riftian|Riftian Galanglic]]:'' A regional dialect of one of the two official languages of the ''{{Imperium}}''.
+* ''[[Hulloyuo-co (language)|Hulloyuo-co]]:'' A synthetic language trilled and whistled by the ''[[Llellewyloly]]''.
+* ''[[Vilani (language)|Vilani]]:'' One of the two official languages of the ''{{Imperium}}''.
+* ''[[:Category: Celtic Dialect|Local Celitc Dialects]]:'' <small>''(Derived from some of the early settlers of ''Rhylanor'' and the [[Kegena (world)|local region]] that have survived locally in some areas):''</small>  <ref>''Speculative detail by [[WHULorigan]] based on current and historical trends of associated names of some placenames, businesses, and citizens on-world in canon.''</ref> 
+:» <small>''[[Kheilig (language)|Kheilig<small>(h)</small>]] / [[Kehlish (language)|Kehlish]]:'' ''Mixed [[:Category: Celtic Dialect|Brythonic-Goidhellic]]-derived dialect(s) of the local region.</small> ''<ref>''Language name(s) invented by [[WHULorigan]].''</ref>  
+:» <small>''[[Khemricg (language)|Khemricg]]:'' ''A [[:Category: Celtic Dialect|Brythonic]]-derived dialect of the local region.''</small> <ref>''Language name(s) invented by [[WHULorigan]].''</ref>
+
+==== [[Cultural Extension|World Culture]] [Cx] ====
+* Heterogenity: 7 (discordant)
+* Acceptance:   D (very xenophilic)
+* Strangeness:  3 (somewhat typical)
+* Symbols:      D (very abstract)
+
+Rhylanor has a fairly moderate society with liberal laws; most citizens view their government as a meritocracy. Entry to the world's ruling elite is most commonly gained through power and achievement. Elevation for achievement is generally linked with service to the Imperium or to Rhylanor's armed forces, though accomplishments in other areas such as science or entertainment are also rewarded in this way. Rhylanor's economy is relatively free, and taxes are low. With a law level of 4, inhabitants of Rhylanor live peaceful lives. Police are occasionally visible, but citizens are not harassed and have nothing to fear from governmental excesses.
+
+==== World Arts ====
+Rhylanor has a thriving art community. Of particular preference and popularity are live theater and non-digitized performances. {{Page cite|name=Cirque|page=}} The computerized strategy game called [[Dhage]] was originally developed on Rhylanor in the sixth century. {{Page cite|name=MegaTraveller Journal 1|page= 45}}
+
+==== Urbanization ====
+[[File:Rhylanor Feature Map 2.png|thumbnail|right|800 px]]
+Most of Rhylanor's population live in [[arcology|arcologies]] (either pressure-dome cities or underground habitats), though many of these are built into hills and mountainsides. Major settlements on Rhylanor include: 
+* ''[[Rhylanor Arcology]]'' (including ''[[Downport|Rhylanor Down]] (Main) [[Starport]]'' and ''"[[Startown]]"'') {{Unpublished cite|author= Gregory P. Lee in Cirque (Unpublished Novel) |citeName= Cirque-Rhylanor}}
+* ''[[Hhagirnur Arcology]]'' ''<small>(aka [[Kharginir Arcology|"Kharginir" Arcology]])</small>'' {{Unpublished cite|author= Gregory P. Lee in Cirque (Unpublished Novel) |citeName= Cirque-Rhylanor}}
+* ''[[Joliswell Arcology]]'' {{Unpublished cite|author= Gregory P. Lee in Cirque (Unpublished Novel) |citeName= Cirque-Rhylanor}}
+* ''Kikhimaa City'' ''<small>(an arcology with its own small spaceport)</small>'' {{Page cite|name= Whispers on the Abyss |citeName= WotA#1  |pages= 39}} {{Page cite|name= Megatraveller 2: Quest for the Ancients |citeName= MT2-QftA  |pages=}}
+* ''Leba'' {{Page cite|name= Megatraveller 2: Quest for the Ancients |citeName= MT2-QftA |pages=}}
+* ''Liduka'' {{Page cite|name= Megatraveller 2: Quest for the Ancients |citeName= MT2-QftA  |pages=}}
+* ''Hegra'' {{Page cite|name= Megatraveller 2: Quest for the Ancients |citeName= MT2-QftA  |pages=}}
+* ''Panish'' {{Page cite|name= Megatraveller 2: Quest for the Ancients |citeName= MT2-QftA  |pages=}}
+
+The ''[[Hhagirnur Arcology]]'' is famous as the birthplace of [[Grand Admiral]] [[Olav hault-Plankwell]], who later ascended to the [[Imperial]] Throne as [[Emperor]] [[Olav|Olav I]], 15th Emperor of the [[Imperium]] and first of the [[Emperors of the Flag]].{{Unpublished cite|author= Gregory P. Lee in Cirque (Unpublished Novel) |citeName= Cirque-Rhylanor}}
+
+The [[Llellewyloly]] settlements on Rhylanor generally prefer the open-air very-thin atmosphere environment. [[Llellewyloly]] settlements include:
+* ''Llynhonnaulloely''  {{Unpublished cite|author= Gregory P. Lee in Cirque (Unpublished Novel) |citeName= Cirque-Rhylanor}}
+* ''Llygolyballondoor''  {{Unpublished cite|author= Gregory P. Lee in Cirque (Unpublished Novel) |citeName= Cirque-Rhylanor}}
+* ''Gweunyllgoontolygololy''  {{Unpublished cite|author= Gregory P. Lee in Cirque (Unpublished Novel) |citeName= Cirque-Rhylanor}}
+* ''Baradwysraidantyllew''  {{Unpublished cite|author= Gregory P. Lee in Cirque (Unpublished Novel) |citeName= Cirque-Rhylanor}}
+
+* ''Primitivist Llellewyloly Reserve:'' A [[Llellewyloly]] "primitivist" colony is located in an impact crater at about 30<sup>o</sup> north latitude and is known to human locals as the "Dandy Reserve".  {{Unpublished cite|author= Gregory P. Lee in Cirque (Unpublished Novel) |citeName= Cirque-Rhylanor}} This colony preserves the culture of the original Llellewyloly Colony that thrived on Rhylanor when it was first settled by Humans. No one is quite sure how long the Llellewyloly (who are indigenous to [[Junidy (world)|Junidy]]) have lived on Rhylanor or when they first arrived, or how they got there.
+
+== History & Background ==
+The world of Rhylanor was first officially settled by Imperial colonists during the early waves of Imperial settlement in the [[Spinward Marches Sector]] in the [[300s]], becoming an Imperial Client State not long afterward and completely absorbed as a full Imperial member world by ca [[400]]. The first settlers who arrived on Rhylanor discovered the presence of a non-native [[sophont]] species already present on-world at a primitive level of technological development that were later discovered to be the minor race known as the [[Llellewyloly]] of [[Junidy (world)|Junidy]] that were native to that same world.  As the Llellewyloly of Junidy and Rhylanor were both nearly identical primitive minor races when first contacted, no one was quite sure when the Llellewyloly had initially arrived on Rhylanor or by what means they had got there. Nevertheless, since Llellewyloly preferred the natural conditions provided by the open environment of Rhylanor as compared to the tolerances of Humaniti and similar sophonts, Imperial settlement of the world occurred alongside but apart from the Llelleweloly enclaves in separate regions, the two peoples maintaining distinct side-by-side cultures that did not overlap or significantly interact. In the ensuing centuries with recontact between the Junidian and Rhylanorian branches of the Llellewyloly species, many Llellewyloly have migrated to the Rhylanor outback and colonized the surface regions considered inhospitable to unaided Humaniti, forming a substantial shadow-culture on Rhylanor alongside the more familiar and mainstream cultures of Humaniti and similar sophonts who live under the pressure-domed cities and arcologies of the world. The enduring mystery of the original primitivist Llellewyloly presence on Rhylanor is one that puzzles paleosophontologists to the present day. {{Unpublished cite|author= [[user:rje|Robert Eaglestone]]|citeName= rje#1}} 
+
+Rhylanor was first charted in detail by Imperial astrographers of the [[Imperial Grand Survey]] (IGS) during the years of the {{Imperial}} [[First Survey]] between [[300]] and [[420]].  By this time Rhylanor had come under the jurisdiction and oversight of the [[Duchy of Mora]]. As colonization into the Spinward Frontier continued, Emperor Jerome reorganized the Marches in [[522]], for the first time creating the independent [[Duchy of Rhylanor]] at the same time as the creation of several other Spinward Duchies, raising the 3rd Baron [[House Alkhalikoi|Alkhalikoi]] of Rhylanor to be the 1st [[Duke]] of the 1st Creation of the Dukes of Rhylanor.
+
+During the [[First Frontier War]] [[Grand Admiral]] of the [[Spinward Marches Sector|Marches]] [[Olav hault-Plankwell]] led the [[March Fleet]] against the [[Outworld Coalition]] of the [[Zhodani Consulate]] and their [[Vargr]] allies, stemming the tide of the invaders advance into Imperial territory. At the [[Battle of Rhylanor (1FW)|Battle of Rhylanor]] Duchess Arbellatra Khatami Alkhalikoii, 3rd Duchess of Rhylanor, commanded the system defenses, receiving her commission as a [[Captain (IN)|Captain]] in the [[Imperial Navy]] from [[Grand Admiral]] hault-Plankwell himself after the battle. [[Grand Admiral]] hault-Plankwell eventually smashed the gathered Zhodani/Vargr expeditionary fleet in the climactic [[Battle of Zivije]], crippling the Zhodani capability to prosecute the war fully but also inflicting enough losses on the Imperial squadrons to force a stalemate. The negotiated armistice in [[604]] allowed the Imperium to claim a large amount of previously unincorporated territory to replace the parts of [[Cronor Subsector]] ceded to the Zhodani. Though Admiral hault-Plankwell claimed victory for the Imperium, he simultaneously castigated the central Imperial authority for its lack of support during the war and subsequently led an expedition to [[Capital (world)|Capital]] and assassinated the [[Empress]] [[Jaqueline I]], seizing the [[Iridium Throne]] and beginning the {{Imperial}} [[Civil War]] and the period known to Imperial history as the [[Emperors of the Flag]].
+
+During the [[Second Frontier War]] Duchess Arbellatra, now [[Grand Admiral of the Marches]], brought an end to the War, subsequently allowing her in her turn to march upon [[Capital (world)|Capital]] and bring an end to the concurrent {{Imperial}} [[Civil War]] as well, leading to her appointment as Regent of the [[Third Imperium]], and later as 1st [[Emperor]] of the [[House Alkhalikoi|Alkhalikoi dynasty]].
+
+
+=== World Timeline ===
+Major events that have affected this world and the wider region that it lies within:
+* [[0|The Year 0]]: The [[Third Imperium]] is founded.
+* [[300]]-[[420]]: The {{Imperial}} [[First Survey]] charts the system.
+* [[522]]: [[Emperor]] [[Jerome]] creates the [[Duchy of Rhylanor]].
+* [[532]]: [[Olav hault-Plankwell]] born in ''Kharginir Arcology'' on Rhylanor.
+* [[589]]-[[604]]: [[First Frontier War]].
+* [[602]]: [[Arbellatra Khatami Alkhalikoi]] inherits the [[Duchy of Rhylanor]] upon the death of her father.
+* [[604]]: [[Battle of Rhylanor (1FW)|Battle of Rhylanor <small>(1FW)</small>]]. Duchess Arbellatra commands the system defenses, receiving her commission as a Captain in the [[Imperial Navy]] from Grand Admiral hault-Plankwell after the battle.
+* [[604]]: [[Grand Admiral]] Olav hault-Plankwell of Rhylanor leads his victorious fleets to Capital and assassinates Empress [[Jaqueline I]], declaring himself Emperor [[Olav I]] by Right of Fleet Control.
+* [[604]]-[[622]]: The {{Imperial}} [[Civil War]]. "[[Emperors of the Flag]]".
+* [[615]]-[[620]]: [[Second Frontier War]].
+* [[622]]: [[Grand Admiral]] the Duchess Arbellatra Khatami Alkhalikoi of Rhylanor leads her victorious fleets to Capital and defeats the current claimant to the Iridium Throne, Emperor [[Gustus]], in a Naval battle and declares herself Regent of the Imperium until a suitable Imperial claimant or heir can be found.
+* [[624]]: The [[Express Boat Network]] is established.
+* [[629]]: [[Grand Admiral]] the Duchess Arbellatra Khatami Alkhalikoi of Rhylanor is offered the Imperial Crown and assumes the Iridium Throne as Empress Arbellatra I, 1st Emperor of the Alkhalikoi dynasty.
+* [[979]]-[[986]]: [[Third Frontier War]].
+* [[986]]: [[Battle of Porozlo]] <small>(3FW)</small>. [[Third Frontier War]] ends after Zhodani drive at Rhylanor is turned back with reinforcements from [[Sabine Subsector]] in the [[Deneb Sector]].
+* [[995]]-[[1065]]: The {{Imperial}} [[Second Survey]] charts the system.
+* [[1042]]:  Dr. Theodor Krenstein born on Rhylanor.
+* [[1065]]: The [[Second Survey]] is published. Information about the system becomes widely available.
+* [[1082]]-[[1084]]: [[Fourth Frontier War]], also known as the ''False War''.
+* [[1107]]-[[1110]]: [[Fifth Frontier War]].
+* [[1109]]: [[Battle of Rhylanor (5FW)|Battle of Rhylanor <small>(5FW)</small>]]. Major fleet battle involving both fleet and planetary elements of Imperial and Colonial forces and the Imperial Corridor Fleet vs. the Zhodani 40th Fleet.
+* [[1110]]: [[IISS]] is in negotiations to establish an X-Boat link from Rhylanor to Regina.
+
+<br>
+----
+----
+
+== References ==
+{{secret}}
+{{metadata}}
+
+{{conflict}}
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name= The Spinward Marches|version= Classic Traveller|page= 30-31}}
+ | {{Ludography cite|name= Twilight's Peak|version= Classic Traveller|page= 14}}
+ | {{Ludography cite|name= The Spinward Marches Campaign|version= Classic Traveller|page= 18-19,20,27}}
+ | {{Ludography cite|name= Grand Census|page= 25}}
+ | {{Ludography cite|name= The Regency Sourcebook|page= 43}} (UWP only)
+ | {{Ludography cite|name= Behind the Claw|version= GURPS Traveller|page= 107}}
+ | {{Ludography cite|name= First In|version= GURPS Traveller|page= 56, 61, 63, 75, 97, 104, 107}}
+ | {{Ludography cite|name= Starports|version= GURPS Traveller|page= 66-71}}
+ | {{Ludography cite|name= The Spinward States|page= 104}} (UWP only)
+ | {{Ludography cite|name= The Spinward Marches|version= Mongoose Traveller|page= 86}}
+ | {{Ludography cite|name= Cirque|page= 58-67}}
+ | {{Ludography cite|name= Behind the Claw | version= Mongoose 2nd|page= 76-77}}
+ | {{Ludography cite|name= Whispers on the Abyss|page= 35-41}}
+ | {{Ludography cite|name= Xboat Special Supplement 2: The Far Far Future |page= TBD}}
+ | {{Ludography cite|name= Zhodani|version= Mongoose Traveller|page= }}
+ | {{Ludography cite|name= Aliens of Charted Space 1|version= Mongoose 2nd|page= }}
+ | Traveller Series No. 41 - Fifth Frontier War: The Imperium Against the Zhodani ([[Far Future Enterprises]] (2026))
+ | [[Christopher Griffen]] - http://www.mu.org/%7Ejoe/traveller/archive/Rice_Papers/SM-2716-Rhylanor.txt RICE Paper SM 2716
+ | [[Gregory P. Lee]] - [https://travellermap.s3.amazonaws.com/images/maps/Spin%202716.jpg Rhylanor map] - Cirque (Unpublished Novel)
+ | [[Tony Jones]] - [https://web.archive.org/web/20120506163614/http://www.wolfram.demon.co.uk/rp_tr_wo_rhylanor.html The Rhylanor system] - Memory Lapse Megatraveller campaign
+}}
+
+[[Category: 23rd Fleet worlds]]
+[[Category: Adamantium worlds]]
+[[Category: Aslan worlds]]
+[[Category: Battle of Porozlo worlds]]
+[[Category: Blackhawk Enterprises worlds]]
+[[Category: Celtic Dialect Worlds]]
+[[Category: Fifth Frontier War worlds]]
+[[Category: GT]]
+[[Category: Humaniti worlds]]
+[[Category: Imperial Aslan worlds]]
+[[Category: Imperial University of Rhylanor]]
+[[Category: Imperial University of Rhylanor worlds]]
+[[Category: Ine Givar worlds]]
+[[Category: Kian worlds]]
+[[Category: Ling-Standard Products worlds]]
+[[Category: Llellewyloly worlds]]
+[[Category: MindGames worlds]]
+[[Category: Plankwell University worlds]]
+[[Category: Rhylanor Cluster worlds]]
+[[Category: Rhylanor Institute of Technology worlds]]
+[[Category: RICE]]
+[[Category: University worlds]] 
+[[Category: University of Rhylanor]]
+[[Category: University of Rhylanor worlds]]
+[[Category: Venturprise worlds]]
+[[Category: Worlds with a X-Boat Station]]
+{{LE|T5 Second Survey worlds|Era: Milieu 1116}}

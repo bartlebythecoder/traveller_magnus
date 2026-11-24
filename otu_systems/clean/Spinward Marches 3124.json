@@ -1,0 +1,314 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Spinward Marches",
+  "hex": "3124",
+  "sector_abbreviation": "Spin",
+  "subsector": "Mora",
+  "name": "Mora",
+  "sources": [
+    {
+      "page": "Mora (world)",
+      "revid": 1058206,
+      "timestamp": "2026-05-23T01:05:39Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Mora (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Dimoph",
+          "type": "F0 V",
+          "notes": "None"
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Dimoph",
+      "stars": [
+        {
+          "name": "Dimoph",
+          "type": "F0 V"
+        }
+      ],
+      "labels": [
+        "Mora"
+      ],
+      "pages": [
+        "Mora (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Murguil",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "0.96",
+            "value": 0.96,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mora (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Elicar",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "1.35",
+            "value": 1.35,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mora (world)"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Iyrne",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "1.74",
+            "value": 1.74,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mora (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Mora",
+          "raw": "AA99AC7-F",
+          "kind": "world",
+          "uwp": "AA99AC7-F",
+          "distance": {
+            "raw": "2.52",
+            "value": 2.52,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mora (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 5,
+          "name": "Forigi",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "4.08",
+            "value": 4.08,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mora (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Guarek Belt",
+          "raw": "F000???-F",
+          "kind": "world",
+          "uwp": "F000???-F",
+          "distance": {
+            "raw": "7.20",
+            "value": 7.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mora (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Gigig",
+          "raw": "'''Gas Giant'''",
+          "kind": "gas_giant",
+          "distance": {
+            "raw": "13.44",
+            "value": 13.44,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-no-size-class"
+          ],
+          "sources": [
+            "Mora (world)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Gogog",
+          "raw": "'''Gas Giant'''",
+          "kind": "gas_giant",
+          "distance": {
+            "raw": "25.92",
+            "value": 25.92,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-no-size-class"
+          ],
+          "sources": [
+            "Mora (world)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Erstine",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "50.88",
+            "value": 50.88,
+            "unit": "AU"
+          },
+          "sources": [
+            "Mora (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Mora (world)",
+      "label": "Mora",
+      "stars": [
+        {
+          "name": "Dimoph",
+          "type": "F0 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Murguil",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "0.96",
+            "value": 0.96,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Elicar",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "1.35",
+            "value": 1.35,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Iyrne",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "1.74",
+            "value": 1.74,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Mora",
+          "raw": "AA99AC7-F",
+          "kind": "world",
+          "uwp": "AA99AC7-F",
+          "distance": {
+            "raw": "2.52",
+            "value": 2.52,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Forigi",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "4.08",
+            "value": 4.08,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 6,
+          "name": "Guarek Belt",
+          "raw": "F000???-F",
+          "kind": "world",
+          "uwp": "F000???-F",
+          "distance": {
+            "raw": "7.20",
+            "value": 7.2,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Gigig",
+          "raw": "'''Gas Giant'''",
+          "kind": "gas_giant",
+          "distance": {
+            "raw": "13.44",
+            "value": 13.44,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-no-size-class"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Gogog",
+          "raw": "'''Gas Giant'''",
+          "kind": "gas_giant",
+          "distance": {
+            "raw": "25.92",
+            "value": 25.92,
+            "unit": "AU"
+          },
+          "flags": [
+            "gg-no-size-class"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Erstine",
+          "raw": "",
+          "kind": "unknown",
+          "distance": {
+            "raw": "50.88",
+            "value": 50.88,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Mora",
+    "UWP": "AA99AC7-F",
+    "Stellar": "F0 V",
+    "PBG": "112",
+    "Bases": "NS",
+    "Remarks": "Hi In Cs Ht"
+  }
+}

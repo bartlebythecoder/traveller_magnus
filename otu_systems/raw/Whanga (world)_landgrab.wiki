@@ -1,0 +1,87 @@
+<pre>
+Location: Spinward Marches Sector, Regina Subsector, Grid 0206. 
+Neighbors: Alell to spinward, Uakye to coreward, Knorbes to rimward.
+Astrographic Data: 2 Asteroid Belts, 4 Gas Giants
+Allegiance: Imperial (Fiefdom in perpetuity of the Duke of Regina)
+
+Starport: Frontier Installation 
+Size: 9760 km/dia
+	Density: molten core, 0.9 terra
+	Mass: 0.38 terra
+	Gravity: 0.675 G
+	Planet Orbital Period
+		Stellar mass: 3.0 Sol, Binary is 1.11 Sol
+		Orbital Distance: 10.0 AU
+		Orbital Period: 10,962.983 standard days
+	Rotation Period: 21.111 standard hours
+	Axial Tilt: 23 degrees
+	Orbital Eccentricity: 0.005
+	Seismic Stress (Tidal) factor: 0.0
+Atmosphere: Standard Nitrogen/Oxygen mix, tainted by volcanic action
+Hydrographic: 64% Surface water, small polar ice caps, climatically very
+active
+Population: 28, Solomani "Maori/Polynesian" cultural subset
+Government: Participatory democracy
+Law Level: 6
+Tech Level: Pre-Stellar (7)
+
+People
+
+Population: 28
+Age Structure:0-14 years: 	 10.71% (male: 2; female: 1)
+		 15-64 years: 	 71.43% (male: 10; female: 10)
+		  65 years and older: 17.86% (male: 2; female: 3)
+Population Growth Rate: 1.14%
+Birth Rate: 2.234 births/1000 population
+Death Rate: 1.15 deaths/1000 population
+Net Migration Rate: .622 migrants/1000 population
+Infant Mortality Rate: 6.28 deaths/1000 live births
+Life expectancy at birth:	Total population: 78.99 standard years
+				Male: 75.01 standard years
+				Female: 81.1 standard years	
+Total Fertility Rate: 1.8 children born/woman
+Nationality: 	Noun: Whangan, Maori
+		Adjective: Whanga, Maori
+Ethnic/Racial Groups: Solomani (Maori) 93%, Vilanii 7%
+Religion: Anglican 24%, Other or Unspecified 76%
+Languages: Anglic (Official), Te Reo Maori
+</pre>
+
+===Background===
+Until recently, '''Whanga''', previously identified as '''824-179''', was an uninhabited, unexploited system held in [[Interdiction|interdicted Imperial reserve]] due to the discovery by [[IISS]] survey teams of what was initially believed to be [[Ancient]] ruins on several of the worlds and moons in the system.  Later exploration by IISS and IN archeologists and xenopaleontologists has ruled out an Ancient origin for the various sites, instead attributing them to an unknown [[Minor Race]] that apparently died out some 30,000+ years ago.  The cause of their demise is unknown.  The system was granted to the [[Duke of Regina]] by the [[Archduke of Deneb]] as a fiefdom-in-perpetuity in [[1099]]. In [[1107]], the Duke changed the name of the system to Whanga and granted colonisation rights to the [[Whanganui Corporation]].  The Corporation is a not-for-profit organization attempting to create a new homeworld for their people, a Solomani/Terran subculture known as the Maori.  Currently a team of scientists and support personnel are living on Whanga, preparing for the first group of colonists from Terra, expected to arrive some time in [[1120]].
+
+==Astrography==
+
+'''Warning''': Whanga is a particularly active stellar system, with much higher
+than average amounts of orbital debris moving under the influence of
+unusually strong and complex gravitational forces.  Grav currents, eddies,
+radiation belts and electrostatic discharges in the vicinity of the systems'
+four gas giants and M1 D binary star can pose an extreme threat to
+navigation, especially during refuelling operations.  All crews are advised
+that there are no collision avoidance, EW/D monitors, or rescue/repair
+facilities in the system. 
+
+===Atmosphere, Weather and Climate===
+The climate of Whanga is unstable at best. Severe weather extremes are the rule, rather than the exception. Due to intense geological activity, various volcanic gases taint the Nitrogen/Oxygen atmosphere, most notably sulfur dioxide (SO2) and carbon dioxide (C02 ). There are also smaller amounts of others gases, including hydrogen sulfide (H2S), hydrogen (H2), carbon monoxide (CO), hydrogen chloride (HCL), hydrogen fluoride (HF), and helium (He). There is a notably high concentration of very fine tephra suspended in the air, causing occasional difficulty with filtration systems and providing a condensation medium for precipitation. Filter masks are required when outdoors for any length of time. Environmental suits are strongly recommended for rain and fog conditions due to the often high concentrations of sulfuric and hydrochloric acids present in precipitation. Precipitation pH levels have been measured as low as 4.6, with the average being 5.7 or better. Thunderstorms, Lightning strikes, tornados, hailstorms and hurricanes are all common, especially during periods of heavy volcanic activity. Mean planetary temperature is 40 Deg. C, and is affected by the cooling effect of particulate matter in the air, versus the relative effects of the abundance of greenhouse gasses in the atmosphere.
+ 
+===Starport=== 
+There is a single rough-surface landing pad, capable of accommodating small craft and ships up to 800 tons displacement. It is located just outside of Wharenui Village, the only permanent settlement on the planet.  There is an automated flight control beacon located inside a small shed on the site.  There have recently been a series of low rock-built blast walls erected around the perimeter of the site.  There are plans to build a repair shed and a fueling depot, but funds and materials have not yet been allocated.  There are no repair facilities at this time.  There is a standard 20-ton launch berthed at the port for utility purposes.
+
+==People==
+===Population Notes===
+The population is uniquely [[Solomani]], being from a small Terran subculture called the Maori.  They have only recently been accorded settlement rights by the Duke of Regina and now hold a land grant to develop the planet for future colonization by their people.  Legally, the mainworld is held by the community in quasi-fief pending the ratification of the Colonial Charter by the Duke.  The primary and binary stars in the system, and all other bodies in orbit around them are administered remotely by the Ducal Offices on Uakye.
+
+===Government===
+The Duke of Regina is considered the titular Head of State. As their cultural customs dictate, government is maintained through a system of participitory democracy for those men and women who have reached their age of maturity, usually around 16 standard years old. 
+
+===Culture=== 
+The Maori are a unique and ancient culture originating in the oceanic regions of Terra, primarily the island archipelago of New Zeelan. Theirs is a tribal culture, but all those men and women who are of age (usually 16 std yrs) have a voice in tribal councils. Tribal councils are usually preceeded by a ceremonial blessing, performed by the consumption of an beverage known to the Maori as Kava. Kava can be mildly hallucinogenic in large amounts, and in fact may have some Psi-enhancing poperties, although this has not been tested . Under the influence of kava, the Maori feel better able to cope with the decision-making process. The Maori are known amonst the Solomani for maintaining their traditions of facial and body tatooing, primitive body piercing and never cutting their hair.  Family groups are large and patriarchal.  Notably, new brides traditionally live with and serve the family of the groom for a year before marriage, while the groom stays with and works for the father of the bride.  After the marriage, the new couple stays with the groom's family for a year or more, serving and working for them.  When this time of servitude is completed, the Groom's father releases the couple and they strike out on their own. All of these traditions have been maintained even in the face of Solomani persecution and attempts at "cultural norming." The Maori, after Terra fell to the Imperial Navy, asked for and were granted the opportunity to leave Terra and colonise within the Imperium.
+
+
+{{Sources
+|S1= [[Jeff Greenly]] via the TML Landgrab
+}}
+
+
+[[Category: Religion]]
+[[Category:Systems]]

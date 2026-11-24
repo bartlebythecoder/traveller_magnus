@@ -1,0 +1,383 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Aldebaran",
+  "hex": "2805",
+  "sector_abbreviation": "Alde",
+  "subsector": "Firdausi",
+  "name": "Mu'izzi",
+  "sources": [
+    {
+      "page": "Mu'izzi (world)",
+      "revid": 964922,
+      "timestamp": "2025-08-08T09:13:40Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Mu'izzi (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Primary",
+          "type": "M0 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Primary",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "M0 V"
+        }
+      ],
+      "labels": [
+        "Mu'izzi"
+      ],
+      "pages": [
+        "Mu'izzi (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Fosaw",
+          "raw": "Y600000-0",
+          "kind": "world",
+          "uwp": "Y600000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Mu'izzi (world)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Mu'izzi",
+          "raw": "B765744-A",
+          "kind": "world",
+          "uwp": "B765744-A",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Mu'izzi (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 3,
+          "name": "Clibique",
+          "raw": "F652517-A",
+          "kind": "world",
+          "uwp": "F652517-A",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Mu'izzi (world)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Occqui",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Mu'izzi (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Thea'exep",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Mu'izzi (world)"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Colquex",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Mu'izzi (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Moquev",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Mu'izzi (world)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Ashadd",
+          "raw": "Y510000-0",
+          "kind": "world",
+          "uwp": "Y510000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Mu'izzi (world)"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Uvawe",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Mu'izzi (world)"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Hasconn",
+          "raw": "Y300000-0",
+          "kind": "world",
+          "uwp": "Y300000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ],
+          "sources": [
+            "Mu'izzi (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Mu'izzi (world)",
+      "label": "Mu'izzi",
+      "stars": [
+        {
+          "name": "Primary",
+          "type": "M0 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Fosaw",
+          "raw": "Y600000-0",
+          "kind": "world",
+          "uwp": "Y600000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Mu'izzi",
+          "raw": "B765744-A",
+          "kind": "world",
+          "uwp": "B765744-A",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Clibique",
+          "raw": "F652517-A",
+          "kind": "world",
+          "uwp": "F652517-A",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Occqui",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Thea'exep",
+          "raw": "Small GG",
+          "kind": "gas_giant",
+          "size_class": "Small",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Colquex",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Moquev",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Ashadd",
+          "raw": "Y510000-0",
+          "kind": "world",
+          "uwp": "Y510000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Uvawe",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Hasconn",
+          "raw": "Y300000-0",
+          "kind": "world",
+          "uwp": "Y300000-0",
+          "distance": {
+            "raw": "?",
+            "value": null
+          },
+          "flags": [
+            "dist-unknown"
+          ]
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Mu'izzi",
+    "UWP": "B765744-A",
+    "Stellar": "M0 V",
+    "PBG": "202",
+    "Bases": "",
+    "Remarks": "Ag Ga Ri"
+  }
+}

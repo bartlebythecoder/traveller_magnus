@@ -1,0 +1,903 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Massilia",
+  "hex": "2513",
+  "sector_abbreviation": "Mass",
+  "subsector": "Palasha",
+  "name": "Atina",
+  "sources": [
+    {
+      "page": "Atina (world)",
+      "revid": 960424,
+      "timestamp": "2025-07-18T16:11:12Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Atina (world)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Lumara",
+          "type": "M3 V",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Lumara",
+      "stars": [
+        {
+          "name": "Lumara",
+          "type": "M3 V"
+        }
+      ],
+      "labels": [
+        "Atina"
+      ],
+      "pages": [
+        "Atina (world)"
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Miutus",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "0.44",
+            "value": 0.44,
+            "unit": "AU"
+          },
+          "sources": [
+            "Atina (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Atina (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "B Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Atina (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y310000-0",
+              "kind": "world",
+              "uwp": "Y310000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Atina (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Moon",
+              "raw": "Y320000-0",
+              "kind": "world",
+              "uwp": "Y320000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Atina (world)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "9 Diam",
+                "value": 9.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Atina (world)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Moon",
+              "raw": "Y510000-0",
+              "kind": "world",
+              "uwp": "Y510000-0",
+              "distance": {
+                "raw": "11 Diam",
+                "value": 11.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Atina (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Atina",
+          "raw": "B6318A8-A",
+          "kind": "world",
+          "uwp": "B6318A8-A",
+          "distance": {
+            "raw": "0.747",
+            "value": 0.747,
+            "unit": "AU"
+          },
+          "sources": [
+            "Atina (world)"
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 3,
+          "name": "Ophus",
+          "raw": "F5A9268-9",
+          "kind": "world",
+          "uwp": "F5A9268-9",
+          "distance": {
+            "raw": "1.29",
+            "value": 1.29,
+            "unit": "AU"
+          },
+          "sources": [
+            "Atina (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Atina (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Drade",
+          "raw": "YAB7000-0",
+          "kind": "world",
+          "uwp": "YAB7000-0",
+          "distance": {
+            "raw": "2.7",
+            "value": 2.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Atina (world)"
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Aigantu",
+          "raw": "YBCA000-0",
+          "kind": "world",
+          "uwp": "YBCA000-0",
+          "distance": {
+            "raw": "4.56",
+            "value": 4.56,
+            "unit": "AU"
+          },
+          "sources": [
+            "Atina (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "4 Diam",
+                "value": 4.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Atina (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Atina (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Atina (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Atina (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Vurn",
+          "raw": "Y400000-0",
+          "kind": "world",
+          "uwp": "Y400000-0",
+          "distance": {
+            "raw": "6.37",
+            "value": 6.37,
+            "unit": "AU"
+          },
+          "sources": [
+            "Atina (world)"
+          ]
+        },
+        {
+          "orbit": 7,
+          "name": "Suipra",
+          "raw": "Y9A3000-0",
+          "kind": "world",
+          "uwp": "Y9A3000-0",
+          "distance": {
+            "raw": "14.7",
+            "value": 14.7,
+            "unit": "AU"
+          },
+          "sources": [
+            "Atina (world)"
+          ]
+        },
+        {
+          "orbit": 8,
+          "name": "Llomia",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "31.9",
+            "value": 31.9,
+            "unit": "AU"
+          },
+          "sources": [
+            "Atina (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Atina (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Atina (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "4 Diam",
+                "value": 4.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Atina (world)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "Moon",
+              "raw": "Y310000-0",
+              "kind": "world",
+              "uwp": "Y310000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Atina (world)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Atina (world)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "Moon",
+              "raw": "Y510000-0",
+              "kind": "world",
+              "uwp": "Y510000-0",
+              "distance": {
+                "raw": "13 Diam",
+                "value": 13.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Atina (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Mocarro",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "74.2",
+            "value": 74.2,
+            "unit": "AU"
+          },
+          "sources": [
+            "Atina (world)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Atina (world)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y000000-0",
+              "kind": "world",
+              "uwp": "Y000000-0",
+              "distance": {
+                "raw": "4 Diam",
+                "value": 4.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Atina (world)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y000000-0",
+              "kind": "world",
+              "uwp": "Y000000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              },
+              "sources": [
+                "Atina (world)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Varvis",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "96.4",
+            "value": 96.4,
+            "unit": "AU"
+          },
+          "sources": [
+            "Atina (world)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Atina (world)",
+      "label": "Atina",
+      "stars": [
+        {
+          "name": "Lumara",
+          "type": "M3 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 1,
+          "name": "Miutus",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "0.44",
+            "value": 0.44,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "B Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y310000-0",
+              "kind": "world",
+              "uwp": "Y310000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Moon",
+              "raw": "Y320000-0",
+              "kind": "world",
+              "uwp": "Y320000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 5,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "9 Diam",
+                "value": 9.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 6,
+              "name": "Moon",
+              "raw": "Y510000-0",
+              "kind": "world",
+              "uwp": "Y510000-0",
+              "distance": {
+                "raw": "11 Diam",
+                "value": 11.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Atina",
+          "raw": "B6318A8-A",
+          "kind": "world",
+          "uwp": "B6318A8-A",
+          "distance": {
+            "raw": "0.747",
+            "value": 0.747,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 3,
+          "name": "Ophus",
+          "raw": "F5A9268-9",
+          "kind": "world",
+          "uwp": "F5A9268-9",
+          "distance": {
+            "raw": "1.29",
+            "value": 1.29,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "1 Diam",
+                "value": 1.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Drade",
+          "raw": "YAB7000-0",
+          "kind": "world",
+          "uwp": "YAB7000-0",
+          "distance": {
+            "raw": "2.7",
+            "value": 2.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 5,
+          "name": "Aigantu",
+          "raw": "YBCA000-0",
+          "kind": "world",
+          "uwp": "YBCA000-0",
+          "distance": {
+            "raw": "4.56",
+            "value": 4.56,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "4 Diam",
+                "value": 4.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "8 Diam",
+                "value": 8.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 6,
+          "name": "Vurn",
+          "raw": "Y400000-0",
+          "kind": "world",
+          "uwp": "Y400000-0",
+          "distance": {
+            "raw": "6.37",
+            "value": 6.37,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 7,
+          "name": "Suipra",
+          "raw": "Y9A3000-0",
+          "kind": "world",
+          "uwp": "Y9A3000-0",
+          "distance": {
+            "raw": "14.7",
+            "value": 14.7,
+            "unit": "AU"
+          }
+        },
+        {
+          "orbit": 8,
+          "name": "Llomia",
+          "raw": "Large GG",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "31.9",
+            "value": 31.9,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "A Ring",
+              "raw": "YR00000-0",
+              "kind": "world",
+              "uwp": "YR00000-0",
+              "distance": {
+                "raw": "2 Diam",
+                "value": 2.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "4 Diam",
+                "value": 4.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 4,
+              "name": "Moon",
+              "raw": "Y310000-0",
+              "kind": "world",
+              "uwp": "Y310000-0",
+              "distance": {
+                "raw": "5 Diam",
+                "value": 5.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 5,
+              "name": "Moon",
+              "raw": "Y200000-0",
+              "kind": "world",
+              "uwp": "Y200000-0",
+              "distance": {
+                "raw": "10 Diam",
+                "value": 10.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 6,
+              "name": "Moon",
+              "raw": "Y510000-0",
+              "kind": "world",
+              "uwp": "Y510000-0",
+              "distance": {
+                "raw": "13 Diam",
+                "value": 13.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 9,
+          "name": "Mocarro",
+          "raw": "Y200000-0",
+          "kind": "world",
+          "uwp": "Y200000-0",
+          "distance": {
+            "raw": "74.2",
+            "value": 74.2,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Moon",
+              "raw": "Y100000-0",
+              "kind": "world",
+              "uwp": "Y100000-0",
+              "distance": {
+                "raw": "3 Diam",
+                "value": 3.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 2,
+              "name": "Moon",
+              "raw": "Y000000-0",
+              "kind": "world",
+              "uwp": "Y000000-0",
+              "distance": {
+                "raw": "4 Diam",
+                "value": 4.0,
+                "unit": "Diam"
+              }
+            },
+            {
+              "index": 3,
+              "name": "Moon",
+              "raw": "Y000000-0",
+              "kind": "world",
+              "uwp": "Y000000-0",
+              "distance": {
+                "raw": "7 Diam",
+                "value": 7.0,
+                "unit": "Diam"
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 10,
+          "name": "Varvis",
+          "raw": "Y100000-0",
+          "kind": "world",
+          "uwp": "Y100000-0",
+          "distance": {
+            "raw": "96.4",
+            "value": 96.4,
+            "unit": "AU"
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Atina",
+    "UWP": "B6318A8-A",
+    "Stellar": "M3 V",
+    "PBG": "902",
+    "Bases": "",
+    "Remarks": "Na Po Ph"
+  }
+}

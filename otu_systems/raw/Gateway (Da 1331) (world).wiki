@@ -1,0 +1,342 @@
+[[File:Alien Moon 290c-0.jpg|250 px|right]]
+{{StellarDataQuery
+|name                 = {{World|Gateway (Da 1331)|Dagudashaag|Argi|1331}}
+|First Survey name    =Urkuur
+|Non-canon trade codes=Ht
+|Remarks              = Nexus world
+}}
+{{InfoboxSystem
+|name=Gateway
+|subsector=Argi
+|sector=Dagudashaag
+|hex=1331
+|star='''Ukaa'''
+|type='''M1 V'''
+|P0='''Gagamshuu'''
+|Dist0=<0.1
+|UWP0='''M9 D'''
+|P1=Gateway
+|Dist1=0.2
+|UWP1=B98A654-D
+|P1M1=* ''Ukumikuug''
+|Dist1M1=7
+|UWP1M1=FS00250-C
+|P1M2=* ''Shir''
+|Dist1M2=12
+|UWP1M2=FS11310-C
+|P1M3=* ''Lishashukh''
+|Dist1M3=25
+|UWP1M3=FS32310-C
+|P2=Piileirkhash
+|Dist2=1.0
+|UWP2='''LGG'''
+|P2M1=* ''Shaidamina''
+|Dist2M1=12
+|UWP2M1=H321110-A
+|P2M2=* ''lir''
+|Dist2M2=25
+|UWP2M2=YS00000-0
+|P3=Kukamashni
+|Dist3=1.7
+|UWP3=Y420000-0
+|P4=Luuashegakhu
+|Dist4=2.5
+|UWP4=F431452-D
+}}
+* It also very well known for its advanced-technology [[Beanstalk]]. 
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+{{DaMain}}
+
+=== Stellar Data ===
+{{BinaryStarSystem
+|name           = Gateway
+|primary        = M1 V  
+|secondary      = M9 V
+|PrimaryName   = Ukaa
+|SecondaryName = Gagamshuu
+}}
+
+=== Mainworld Data ===
+Gateway is one of the most well-developed planets in [[Charted Space]], a major tourist destination, and a major economic hub of the [[Third Imperium]].  
+
+Much of the planet has yet to be explored and the majority of current settlements are sited around the Tower complex. 
+
+=== Mainworld Topography and Geography ===
+Living area on Gateway is limited so many Gateway citizens live on the water. [[Scanian]] houseboat colonies exist, sheltered within the eight 25 kilometre lagoons made by massive tidal docks used to control tides around the islands. All other non-tower residences on Gateway are floating because of the current instability. Several major [[terraforming]] experiments are currently underway which should help to tame the wild magma heart of the planet.
+
+* Bhaki Archipelago
+** Bhaki Prime
+* Glass Sea
+* Hades (polar base)
+** Caverns of Hkarha
+* Hajaan Major (landmass)
+* Lava Rivers of S'mulla
+* Ruins of Rhula (submerged)
+
+=== Point of Interest: Cargo Orbitals & Agri-business ===
+This prosperous system is notable for having massive orbital warehousing and bulk-cargo handling facilities.
+
+With the amount of agriculture passing through the system, extensive orbital facilities were built around Gateway arc; these gradually extended into the massive L5 station now known as "Stargate Control". 
+
+Massive cargo storage units were built starting in Imperial Year [[300]]. The system now has over 30 million tonnes of cargo facilities in orbit in the sky above Gateway. 
+
+The system acts as a trans-shipment point for the dozens of multi-kiloton agriproduct bulk carriers travelling weekly to [[Argi (world)|Argi]] from the agricultural worlds of: 
+# {{WorldS|Akigir|Dagudashaag|1129}}
+# {{WorldS|Liikiir|Dagudashaag|1029}} 
+# {{WorldS|Shidka|Dagudashaag|1032}} 
+# {{WorldS|Sii (Da 0932)|Dagudashaag|0932}}
+
+=== Point of Interest: Gateway Beanstalk ===
+The advanced-technology '''Gateway [[Beanstalk]]''' or ''Space Elevator'', is one of the technological wonders of the [[Third Imperium]] and is a celebrated [[Megastructure]] throughout [[Charted Space]]. The ''Gateway [[Beanstalk]]'', sometimes known locally as the "Tower", is the only one of its kind in the sector and acts both as a means of transport and as a massive solar still. The tower itself was constructed of carbon nanotubes and sheathed with a layer of foamed [[plasteel]] covering hundreds of monofilaments
+
+As a result of the [[Beanstalk]], the sea level on Gateway has gone down by 78 metres since the tower was opened and any [[starship]] visiting can obtain free oxygen and refined fuel courtesy of the planet. 
+
+Each Highway city (Stations 3-6 and 8) revolves round the tower to provide a cheap, effective (centrifugal) gravity. 
+
+Inhabitants of the city use the lift level as their city designation thus ''Highway One'' is known as 90/1 to 90/300 depending on which level they live on and ''Highway Three'', a freeport with a reputation for wildness unique among [[Scanian]]s, is known locally as 220/1 to 220/500.
+
+:{| class="wikitable sortable" width="100%"
+|+ Gateway (Da 1331) Beanstalk (Space Elevator) Technical Specifications
+! Section Height
+! Sphere (Atmosphere)
+! Superstructure (Location)
+! Subsection (Station)
+! Section Designation
+! Acronym
+! Lift Level
+! Primary Purpose
+! Secondary Purpose/s
+! Note/s 
+|- valign="top"
+| -6.0km to 0.0km 
+| Lithosphere
+| Base (Subterranean)
+| Station B "Basement"
+| Mooring 
+| M0-B  
+| B/1 to B/300
+| Cargo Station
+| Infrastucture (Structural support)
+| Secure warehousing & distribution
+|- valign="top"
+| 0.0m to 300.0m 
+| Troposphere
+| Base (Terrestrial)
+| Station 1 "Ground"
+| Manufactory One 
+| M1-1
+| 30/1 to 30/30
+| Surface Still (Resource processing factory)
+| Cargo Station 
+| Nearby cities provide worker housing, i.e. "Startown"
+|- valign="top"
+| 300.0m to 5.0km 
+| Troposphere
+| Base (Terrestrial)
+| Station 2 "Sky" 
+| Platform One 
+| P1-2
+| 60/1 to 60/300
+| Cargo Station 
+| Residential zone
+| None
+|- valign="top"
+| 5.0km to 28.0km 
+| Stratosphere (Transition)
+| Tower (Orbital)
+| Station 3
+| Highway One 
+| H1-3
+| 90/1 to 90/300
+| Transportation Hub 
+| Residential zone (Argian Orbital Station)
+| Extrality point & Tower Travel Terminus Centre (T3c)
+|- valign="top"
+| 28.0km to 32.5km 
+| Stratosphere
+| Tower (Orbital)
+| Station 4
+| Highway Two 
+| H2-4
+| 120/1 to 120/300
+| Transportation Hub 
+| Solar Still (Resource processing factory) 
+| None
+|- valign="top"
+| 32.5km to 34.0km 
+| Stratosphere
+| Tower (Orbital)
+| Station 5
+| Manufactory Two 
+| M2-5
+| 150/1 to 150/300
+| Solar Still (Resource processing factory)  
+| Residential zone
+| (Halo) rainbow-like effluent offshoot
+|- valign="top"
+| 34.0km to 55.0km 
+| Stratosphere (Transition)
+| Tower (Orbital)
+| Station 6
+| Highway Three 
+| H3-6
+| 220/1 to 220/500
+| Transportation hub 
+| Residential zone
+| Freeport
+|- valign="top"
+| 55.0km to 57.0km
+| Mesosphere
+| Tower (Orbital)
+| Station 7 "Beamer"
+| Power Station 
+| PS-7 
+| 250/1 to 250/300
+| Meson Power Transmitter (Beamer)
+| Infrastucture (Power)
+| Transmits power to [[Argian Stargate]]
+|- valign="top"
+| 57.0km to 60.0km 
+| Mesosphere
+| Tower (Orbital)
+| Station 8 "Highway Port"
+| Platform Two  
+| P2-8
+| 280/1 to 280/300  
+| Fuel & Cargo Depot ([[Highport]])
+| Residential zone
+| None
+|- valign="top"
+| 60.0km to 260.0km (End)
+| Thermosphere (Transition) 
+| Tower (Orbital)
+| Station 9 "Anchor"
+| Anchor's End 
+| AE-9
+| 310/1 to 310/300
+| Asteroidal Anchor (Counterweight)
+| Belter establishments
+| None
+|- valign="top"
+| Deep Space 
+| Exosphere
+| Not part of the [[Beanstalk]] (Deep space)
+| Station 10 "Stargate"
+| [[Argian Stargate]] 
+| AS-10
+| Not part of the [[Beanstalk]] 
+| Stargate
+| FTL transfer point
+| None
+|}
+
+==== Subsection B Mooring "Basement" (-6.0km to 0.0km) ====
+The '''Mooring''' of the tower is secured deep within the planetary crust (6 kilometres below sea level) at "Hajaan" where the seabed is one kilometer below sea level, which is one of the only stable points on the whole planet.
+
+==== Subsection 1 Manufactory One "Ground" (0.0m to 300.0m) ====
+The '''Base''' tapers from 15 kilometres across at the base to 3 kilometres at sea level.
+
+The '''Still''', which covers the tower surface to a depth of three meters, siphons water in continually through the base of the tower and uses suction to maintain a flow of water up the tower. Within the center are a number of the vertical grav-lifts which supply transportation to each of the orbital platforms. 
+
+The main [[Aquan]] settlements are based around the siphon ducts (known as Deep 1 to 6) and the tower itself has an entire settlement contained within the spine.
+
+==== Subsection 2 Platform One "Sky" (300.0m to 5.0km) ====
+From Station 1, the tower tapers down to a mere 200 meters across as it stretches to the next major settlement up the tower shaft, at "Sky". This platform is 500 metres across and 300 metres high and is based five kilometres above sea level. The view of the world from its glass bottomed floor is breathtaking. 
+
+==== Subsection 3 Highway One (5.0km to 28.0km) ====
+From Station 2, the tower is purely a siphon and transport system and tapers to a mere 100 meters in diameter. This continues to the first orbital platform, '''Highway One''' at a distance of 20,000 km up. 
+
+Here the tower, known as the "Highway", has been extended by using a derelict Argian Orbital Station to create a ring of living accommodations. This marks the point of the tower's extrality and, apart from extensive living quarters, shopping centres etc., the city has extensive docks, engineering facilities, communications as well as the Tower Travel Terminus Centre (T3c). 
+
+==== Subsection 4 Highway Two (28.0km to 32.5km) ====
+From Station 3 until Highway Two is reached at 28,000 km, the entire Highway skin is designated as a massive solar still which is used to separate the water into gases and extracted minerals. 
+
+==== Subsection 5 Manufactory Two (32.5km to 34.0km) ====
+In addition, heat exchangers turn the excess heat into electrical power. By Highway Two and Manufactory Two, the entire cargo of sea water has been separated and the waste products, mainly helium and salt crystals, expelled into orbit. Over the years these have formed a massive doughnut shape round the planet known as the “Halo”. Due to solar ionisation the combination of crystals and helium gas sparkles like a circular rainbow.
+
+==== Subsection 6 Highway Three (34.0km to 55.0km) ====
+At 32,500 km the tower expands into Manufactory Two and Highway Three. 
+
+==== Subsection 7 Power Station (55.0km to 57.0km) ====
+At Station 7, massive maser units have been built to beam excess energy to the receiver satellites at the [[Argian Stargate]]. 
+
+==== Subsection 8 Platform Two Highway Port (57.0km to 60.0km) ====
+At 55,050 km, the fuel depot at Highway Port is reached. 
+
+==== Subsection 9 Anchor's End (60.0km to 260.0km End) ====
+The end of the tower is tethered to a hollowed-out asteroid known as "Anchor's End" situated another 200km out. 
+
+==== Station 10 Argian Stargate (Deep Space) ====
+The [[Argian Stargate]], in deep space, but still within the star system, serves as an FTL transit point.
+
+== History and Background ==
+Originally an [[Argi (world)|Argian]] settlement, the fierce waves, extensive volcanic activity and lack of land prevented planetary habitation, though minimal settlements were made on Luuashegakhu and Gateway's two moons, Shir and Lishashukh. 
+
+=== Imperial High (Landed) Nobility ===
+{{Imperial Nobility|name= Gateway (Da 1331)|Noble=B}}
+
+=== World Starport (St) ===
+{{Starport|name= Gateway|Starport= B}}
+* There is an associated Imperial [[Naval Base]], hosting elements of the [[159th Fleet]].
+
+==== Linguistic Topography ====
+The following [[language]]s are among the most commonly used here:
+
+* ''[[Aarani]]'': The old language of the [[Aakhri Empire]], derived from Old High Vilani with Solomani Chinese influence.
+* [[Anglic]]: One of the two official languages of the [[Third Imperium]].
+* ''[[Göheimsan]]'': A ceremonial language used by the [[Scanian]] culture; apparently descended from 22nd Century Terran Hebrew, Arabic, and Russian.
+* ''[[Na]]'': A form of underwater sign language used by [[Aquan]]s.
+* [[Vilani (language)|Vilani]]: One of the two official languages of the [[Third Imperium]].
+
+=== Point of Interest: Khaarkhi Cult & Disaster ===
+Gateway itself remained un-colonized until [[350]] when members of the [[Khaarkhi cult]] built several cities on the landmasses. Within 35 years the entire settlement was completely destroyed and thousands of colonists were dead as a result of volcanic activity which caused the city of Rhula to sink (visitors to Gateway can hire guides to sail them over the seaweed-bannered towers of the city, now encrusted with multi-hued corals and inhabited only with the silent denizens of the sea.) At the same time the continent of Yakor rose to within 2 metres of the surface, forming the massive seaweed-covered shallow sea. The volcanic mountains of Bhaki erupted, burying the entire region under many metres of grey volcanic dust. A whole new continent rose up out of the Glass Sea (so called because the waves rarely grow above 10 metres) and then sank again 32 years later. Its place is marked only by the dangerous shoals of White Water Pass. The surviving Khaarkhi fled and Gateway was once more uninhabited.
+
+=== Point of Interest: Scanian Period ===
+In [[568]] a deal was struck with the [[Scania]]ns which gave them control of the planet in return for extracted minerals. During the rebellion years the Scanian colonists apparently stopped, voluntarily, all contact with their homeworld of [[Akiva (world)|Akiva]], though they were one of the first worlds to sign trade agreements with the ''[[Twin Lines Shipping]]'' merchant fleet. 
+
+In [[924]] Gateway's Scanians proposed a plan to build an orbital tower designed to siphon off large amounts of the planet's water and provide more land for development. The money for the project was obtained from the Argian government and the [[Scanian Traveller's Aid Fund]] (STAF). The Scanians of Gateway never suffered severe persecution and have built up a reputation for extremely high quality workmanship.
+
+=== Point of Interest: Tourist's Paradise ===
+Gateway is a tourist's dream; the hedonistic pleasures of the Highway (particularly Highway Three) and the pure, unspoiled paradise of the surface. The weather conditions are extreme with severe tidal conditions, especially round the equatorial regions where 160 metre waves are common. Despite this there are several places worth visiting: 
+
+* A ring of undersea volcanic mountains illuminates the sea around the Bhaki archipelago. 
+* The islands themselves are covered in several metres of grey ash and are totally without life. 
+* There are excavated Khaarkhi settlements on Bhaki Prime. The islands themselves are still active volcanoes and care must be taken when visiting. 
+* The Lava rivers of S'mulla are home to the fire-resistant [[Takai Lizard]]. This lizard can live in temperatures up to 300ºC and can grow to a length of 30 centimetres. 
+* Hajaan Major to the North of the Glass Sea is the only occupied landmass. 
+* At the polar base of Hades one can take a trip in a heat-resistant sub through the magma-filled caverns of Hkarha. 
+* The submerged city of Rhula can be visited, and it is possible to dive amidst the sunken streets.
+
+== References & Contributors ([[Sources]]) ==
+{{Advanced}}
+{{Sources
+|S1= {{Ludography cite|name= Signal-GK 01|page=28-30|article=Port of call: Gateway}} via {{HIWG}}  
+|S2= {{Ludography cite|name= First Survey|page=82}}
+|S3= {{Ludography cite|name= Encyclopaedia Dagudashaag|page=121}}
+}}
+
+[[Category: 159th Fleet worlds]]
+[[Category: Aquan worlds]]
+[[Category: Argian Stargate worlds]]
+[[Category: Beanstalk worlds]]
+[[Category: Drexen Corporation worlds]]
+[[Category: Free University of Ushra]]
+[[Category: Free University of Ushra worlds]]
+[[Category: Gravitics Technology worlds]]
+[[Category: Highport worlds]]
+[[Category: Humaniti worlds]]
+[[Category: JumpStart worlds]]
+[[Category: Medurma Main StarLines worlds]]
+[[Category: Megastructure worlds]]
+[[Category: Megastructure]]
+[[Category: Mining worlds]]
+[[Category: OPT Worlds worlds]]
+[[Category: Orbital Facility]]
+[[Category: Rule of Man worlds]]
+[[Category: Scanian worlds]]
+[[Category: Göheimsan Dialect Worlds]]
+[[Category: Second Imperium worlds]]
+[[Category: Tourism worlds]]
+[[Category: Terraforming worlds]]
+{{LEN|T5 Second Survey worlds}}

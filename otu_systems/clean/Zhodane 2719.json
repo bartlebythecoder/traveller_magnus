@@ -1,0 +1,503 @@
+{
+  "parser_version": 20,
+  "snapshot": "2026-11-16",
+  "sector": "Zhodane",
+  "hex": "2719",
+  "sector_abbreviation": "Zhda",
+  "subsector": "Gaval",
+  "name": "Pliebr",
+  "sources": [
+    {
+      "page": "Zhdant (system)",
+      "revid": 710609,
+      "timestamp": "2023-02-25T10:32:14Z"
+    }
+  ],
+  "star_templates": [
+    {
+      "page": "Zhdant (system)",
+      "template": "MonostellarSystem",
+      "stars": [
+        {
+          "role": "Primary",
+          "name": "Pliebr",
+          "type": "K0 V",
+          "notes": "None."
+        }
+      ]
+    }
+  ],
+  "systems": [
+    {
+      "star": "Pliebr",
+      "stars": [
+        {
+          "name": "Pliebr",
+          "type": "K0 V"
+        }
+      ],
+      "labels": [
+        "Pliebr"
+      ],
+      "pages": [
+        "Zhdant (system)"
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Adrablsish",
+          "raw": "??00???-?",
+          "kind": "world",
+          "uwp": "??00???-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "sources": [
+            "Zhdant (system)"
+          ]
+        },
+        {
+          "orbit": 1,
+          "name": "Pliantshotl",
+          "raw": "??00???-?",
+          "kind": "world",
+          "uwp": "??00???-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "sources": [
+            "Zhdant (system)"
+          ]
+        },
+        {
+          "orbit": 2,
+          "name": "Zhdant",
+          "raw": "A6547C8-F",
+          "kind": "world",
+          "uwp": "A6547C8-F",
+          "distance": {
+            "raw": "<small>0.769</small>",
+            "value": 0.769,
+            "unit": "AU"
+          },
+          "sources": [
+            "Zhdant (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "Viepchakl",
+              "name_raw": "* ''[[Viepchakl (world)|Viepchakl]]''",
+              "raw": "???????-?",
+              "kind": "world",
+              "uwp": "???????-?",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Zhdant (system)"
+              ]
+            }
+          ],
+          "mainworld": true
+        },
+        {
+          "orbit": 3,
+          "name": "Dlemstiats Tsiaqr",
+          "raw": "?000???-?",
+          "kind": "world",
+          "uwp": "?000???-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "sources": [
+            "Zhdant (system)"
+          ]
+        },
+        {
+          "orbit": 4,
+          "name": "Brovlekal",
+          "raw": "[[Gas Giant|LGG]]",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "sources": [
+            "Zhdant (system)"
+          ],
+          "moons": [
+            {
+              "index": 1,
+              "name": "LMoon 1",
+              "name_raw": "* ''LMoon 1''",
+              "raw": "???????-?",
+              "kind": "world",
+              "uwp": "???????-?",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Zhdant (system)"
+              ]
+            },
+            {
+              "index": 2,
+              "name": "LMoon 2",
+              "name_raw": "* ''LMoon 2''",
+              "raw": "???????-?",
+              "kind": "world",
+              "uwp": "???????-?",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Zhdant (system)"
+              ]
+            },
+            {
+              "index": 3,
+              "name": "LMoon 3",
+              "name_raw": "* ''LMoon 3''",
+              "raw": "???????-?",
+              "kind": "world",
+              "uwp": "???????-?",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Zhdant (system)"
+              ]
+            },
+            {
+              "index": 4,
+              "name": "SMoon 1",
+              "name_raw": "* ''SMoon 1''",
+              "raw": "???????-?",
+              "kind": "world",
+              "uwp": "???????-?",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Zhdant (system)"
+              ]
+            },
+            {
+              "index": 5,
+              "name": "SMoon 2",
+              "name_raw": "* ''SMoon 2''",
+              "raw": "???????-?",
+              "kind": "world",
+              "uwp": "???????-?",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Zhdant (system)"
+              ]
+            },
+            {
+              "index": 6,
+              "name": "SMoon 3",
+              "name_raw": "* ''SMoon 3''",
+              "raw": "???????-?",
+              "kind": "world",
+              "uwp": "???????-?",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Zhdant (system)"
+              ]
+            },
+            {
+              "index": 7,
+              "name": "SMoon 4",
+              "name_raw": "* ''SMoon 4''",
+              "raw": "???????-?",
+              "kind": "world",
+              "uwp": "???????-?",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Zhdant (system)"
+              ]
+            },
+            {
+              "index": 8,
+              "name": "SMoon 5",
+              "name_raw": "* ''SMoon 5''",
+              "raw": "???????-?",
+              "kind": "world",
+              "uwp": "???????-?",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Zhdant (system)"
+              ]
+            },
+            {
+              "index": 9,
+              "name": "SMoon 6",
+              "name_raw": "* ''SMoon 6''",
+              "raw": "???????-?",
+              "kind": "world",
+              "uwp": "???????-?",
+              "distance": {
+                "raw": "",
+                "value": null
+              },
+              "sources": [
+                "Zhdant (system)"
+              ]
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Emkachdraf",
+          "raw": "??0A???-?",
+          "kind": "world",
+          "uwp": "??0A???-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "sources": [
+            "Zhdant (system)"
+          ]
+        }
+      ]
+    }
+  ],
+  "infoboxes": [
+    {
+      "page": "Zhdant (system)",
+      "label": "Pliebr",
+      "stars": [
+        {
+          "name": "Pliebr",
+          "type": "K0 V"
+        }
+      ],
+      "orbits": [
+        {
+          "orbit": 0,
+          "name": "Adrablsish",
+          "raw": "??00???-?",
+          "kind": "world",
+          "uwp": "??00???-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        },
+        {
+          "orbit": 1,
+          "name": "Pliantshotl",
+          "raw": "??00???-?",
+          "kind": "world",
+          "uwp": "??00???-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        },
+        {
+          "orbit": 2,
+          "name": "Zhdant",
+          "raw": "A6547C8-F",
+          "kind": "world",
+          "uwp": "A6547C8-F",
+          "distance": {
+            "raw": "<small>0.769</small>",
+            "value": 0.769,
+            "unit": "AU"
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "Viepchakl",
+              "name_raw": "* ''[[Viepchakl (world)|Viepchakl]]''",
+              "raw": "???????-?",
+              "kind": "world",
+              "uwp": "???????-?",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 3,
+          "name": "Dlemstiats Tsiaqr",
+          "raw": "?000???-?",
+          "kind": "world",
+          "uwp": "?000???-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        },
+        {
+          "orbit": 4,
+          "name": "Brovlekal",
+          "raw": "[[Gas Giant|LGG]]",
+          "kind": "gas_giant",
+          "size_class": "Large",
+          "distance": {
+            "raw": "",
+            "value": null
+          },
+          "moons": [
+            {
+              "index": 1,
+              "name": "LMoon 1",
+              "name_raw": "* ''LMoon 1''",
+              "raw": "???????-?",
+              "kind": "world",
+              "uwp": "???????-?",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            },
+            {
+              "index": 2,
+              "name": "LMoon 2",
+              "name_raw": "* ''LMoon 2''",
+              "raw": "???????-?",
+              "kind": "world",
+              "uwp": "???????-?",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            },
+            {
+              "index": 3,
+              "name": "LMoon 3",
+              "name_raw": "* ''LMoon 3''",
+              "raw": "???????-?",
+              "kind": "world",
+              "uwp": "???????-?",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            },
+            {
+              "index": 4,
+              "name": "SMoon 1",
+              "name_raw": "* ''SMoon 1''",
+              "raw": "???????-?",
+              "kind": "world",
+              "uwp": "???????-?",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            },
+            {
+              "index": 5,
+              "name": "SMoon 2",
+              "name_raw": "* ''SMoon 2''",
+              "raw": "???????-?",
+              "kind": "world",
+              "uwp": "???????-?",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            },
+            {
+              "index": 6,
+              "name": "SMoon 3",
+              "name_raw": "* ''SMoon 3''",
+              "raw": "???????-?",
+              "kind": "world",
+              "uwp": "???????-?",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            },
+            {
+              "index": 7,
+              "name": "SMoon 4",
+              "name_raw": "* ''SMoon 4''",
+              "raw": "???????-?",
+              "kind": "world",
+              "uwp": "???????-?",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            },
+            {
+              "index": 8,
+              "name": "SMoon 5",
+              "name_raw": "* ''SMoon 5''",
+              "raw": "???????-?",
+              "kind": "world",
+              "uwp": "???????-?",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            },
+            {
+              "index": 9,
+              "name": "SMoon 6",
+              "name_raw": "* ''SMoon 6''",
+              "raw": "???????-?",
+              "kind": "world",
+              "uwp": "???????-?",
+              "distance": {
+                "raw": "",
+                "value": null
+              }
+            }
+          ]
+        },
+        {
+          "orbit": 5,
+          "name": "Emkachdraf",
+          "raw": "??0A???-?",
+          "kind": "world",
+          "uwp": "??0A???-?",
+          "distance": {
+            "raw": "",
+            "value": null
+          }
+        }
+      ]
+    }
+  ],
+  "travellermap": {
+    "checked": "2026-11-17",
+    "Name": "Zhdant",
+    "UWP": "A654AC8-F",
+    "Stellar": "M0 V",
+    "PBG": "811",
+    "Bases": "KM",
+    "Remarks": "Hi Cx An [Zhodani] Ht"
+  }
+}

@@ -1,0 +1,212 @@
+[[File:Alien Moon 301a-0 Small.jpg|250 px|right]]
+{{UWP 
+|name    = {{World|Froin|Spinward Marches|Five Sisters|0539}}
+ |era    = Milieu 1116
+|uc      = C535225-9
+|popc    = 6
+|zonec   = green
+ |u1= 
+|alg     = ImDd
+|class   = Lo / Sa Tu Rs
+|trade   = lo
+|nblty   = B
+|bases   = -
+|primary = M2 V M7 V
+|belts   = 0
+|GGcount = 1
+}}
+{{InfoboxSystem|
+ |name=Froin
+ |subsector=Five Sisters
+ |sector=Spinward Marches
+ |hex=0539
+ |star= '''Oin'''
+ |type='''M2 V'''
+ |P1=Gloin|Dist1=0.4|UWP1='''Gas Giant'''
+ |P1M1=* ''Gloin I'' |Dist1M1=3 Diam|UWP1M1=Y300000-0
+ |P1M2=* ''Gloin II'' |Dist1M2=6 Diam|UWP1M2=Y300000-0
+ |P1M3=* ''Gloin III'' |Dist1M3=8 Diam|UWP1M3=Y300000-0
+ |P1M4=* ''[[Froin (world)|Froin]]'' |Dist1M4=19 Diam|UWP1M4=C535225-9
+ |P1M5=* ''Gloin V'' |Dist1M5=35 Diam|UWP1M5=Y400000-0
+ |P2='''Aoin'''|Dist2=102|UWP2='''M7 V'''
+ |}}
+{{World summary |name= Froin|trade= Lo}}
+{{World summary ImDd|sector= Spinward Marches|subsector= Five Sisters}}
+{{World summary comment|trade= Sa}}
+{{World summary comment|trade= Tu}}
+{{World summary comment|trade= Rs}}
+* {{SpMain}} 
+* It is a member of the [[Collace Arm]]. 
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Froin''' is a binary star system.
+* Both are red main sequence stars.
+* They are named ''Oin'' and ''Aoin''.
+
+{{BinaryStarSystem
+|name           = Froin
+|primary        = M2 V 
+|secondary      = M7 V  
+|PrimaryName    = Oin
+|PrimaryNotes   = None
+|SecondaryName  = Aoin
+|SecondaryNotes = [[Astronomical Unit|Approximately 102 AU]] from the primary.
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* The [[mainworld]]. It is the fourth [[Natural Satellite|major moon]] of the system's only [[gas giant]].
+* x10 secondary [[world|rocky worlds]], 
+** None are currently named or surveyed.
+* x1 [[gas giant]] named ''Gloin'', orbiting the primary star within the [[habitable zone]].
+** It has a family of five [[Natural Satellite|major moons]].
+
+([[Froin (world)/meta|Expanded system data is available here]].)
+
+=== Mainworld Data ===
+'''Froin''' is the [[Natural Satellite|fourth moon]] of the [[gas giant]] ''Gloin''.
+
+[[File:Gas Giant Moons 05h.jpg|600 px]]
+
+The [[mainworld]] and its [[gas giant]] primary orbit within the [[star]]'s [[Habitable Zone]].
+* They lie within the zone's colder outer '''H-''' region.
+* They receive lower levels of [[Electromagnetic Spectrum|stellar energy]].
+
+[[File:Chart Orbit HZ- Region Detailed Satellite.png|600 px]]
+
+The Froin system is characterized by its old central [[Star|red dwarf]], its single [[gas giant]], and smaller companion [[Star|red dwarf star]], Aoin. The system age is roughly 9 billion years.
+
+Gloin is a [[Gas Giant|large gas giant]] with a family of five [[Natural Satellite|major moons]]. Of its satellites only Froin, the fourth out from the giant world, is habitable: the others are small dead [[Vacuum World|vacuum rocks]] with navigational beacons planted on their surfaces.
+* Currently, the beacons on Gloin I and II are not functional.
+
+==== [[Planetary Size|Mainworld Size]] (S) ====
+{{WorldSize|name= Froin|Size= 5}}
+
+==== [[Atmosphere|Mainworld Atmosphere]] (A) ====
+{{WorldAtmo|name= Froin|Atmosphere= 3}}
+* It experiences [[Celsius|low temperatures]].
+
+==== [[Hydrosphere|Mainworld Hydrosphere]] (H) ====
+{{WorldHydro|name= Froin|Hydrosphere= 5}}
+* The world's sea are littered with icebergs and pack ice.
+
+[[File:Cold World Type 07h3.jpg|600 px]]
+
+==== Mainworld Geography and Topography ====
+No centrally held map of the world exists within [[Argushiigi Admegulasha Bilanidin|AAB]] [[Library Data]] records.
+
+[[File:Blank World Map Arid.png|500 px]] <br> (''Blank map, predominantly dry world''.)
+
+==== Geographical Features ====
+Froin is an old rock with a fair amount of metals, mostly radioactive endpoint elements. The core is still warm due to gravitational stretching from its giant neighbor. There is a large icepack around each of the polar regions. Two large, interlinked craters are evident on the "spinward" side of Froin. The main settlement is located in the smaller crater, Crater Deep; the downport is located in the center of the second crater, Crater Shallow. The downport Crater is approximately [[Kilometer|80 km]] in diameter and [[Kilometer|13 km]] deep at center.  A two-trackway pressurized transit system connects the starport/town to the settlement.
+
+A crater impact that carved a semicircular zone into the edge of the southern icepack houses an {{Imperial}} Research Area known as [[Research Station Zeta (Spinward Marches)|Research Station Zeta]]. Crater Zeta is around [[Kilometer|30 km]] across.
+
+== History & Background (Dossier) ==
+[[File:Comp-Prog-Dav-R-Deitrick-Starter-Trav-Page-16 16-July-2018a.jpg|right]]
+Froin was a ball of low grade rock with few resources and nothing to attract major settlement. It was first discovered by the [[Darrians]] in the pre-[[Maghiz]] period, who accorded it no importance. It was equally ignored by the [[Third Imperium]] during their expansion into [[Five Sisters Subsector|District 267]] in the [[400s]]. This isolation eventually attracted the Ministry of Science's attention, when it was looking for a world to build the Spinward Marches' [[Research Station Zeta (Spinward Marches)|Research Station Zeta]].
+
+The world is commonly referred to as being on the "ass-end of space". It is a cold, dim nowhere with no real neighbors and few visitors. While there is a settlement focused on mining rich seams of ores exposed by the meteor strike that created the smaller crater, some 90% of the population is employed at the Crater Downport. The main activity here is to serve the enterprising (or foolish) traders that made it out this far.
+
+=== World Starport (St) ===
+{{Starport|name= Froin|Starport= C}}
+
+The Shallow Downport and the Shallow Startown make up the bulk of employment and trade opportunities. Employment is offered in all areas of administration, engineering, gravitics, jump-tech, material working, robotics, etc. Lower tech trades are also present: Chandlers, freight workers, warehousing, longshoremen, animal handlers, etc. In addition, several technical and trade schools are based at the port. The planetary post office is also present here.
+
+=== World Population (P) ===
+{{WorldPop|name= Froin|multiplier= 6|Population= 2}}
+
+==== Urbanization ====
+The Settlement in the Crater Deep is focused on mining metal ores, refining them, and transporting them to the starport. Structures tend to be mostly underground, connected by tunnels or pressurized tubes over the surface.  Public transit is commonly available, but dirty and generally in a barely functional state.  Family abodes tend to be grouped in Inverts, which are a series of chambers cut into the rock off of a central shaft, in a manner somewhat like an inverted skyscraper of other worlds.  Family and sub-cultural structure are strong in the Settlement.  Schools are grouped by Invert and Invert-hex.
+
+There are advanced communications networks in place with triple redundancy throughout the Craters. Only wireless communications exist with [[Research Station Zeta (Spinward Marches)|Research Station Zeta]]; that and a hard overland trek to the security checkpoint.
+
+==== Linguistic Topography ====
+The following [[language]]s are most commonly heard:
+* [[Anglic]], one of the two official languages of the {{Imperium}}.
+* [[Vilani (language)|Vilani]], one of the two official languages of the {{Imperium}}.
+
+=== World Technology Level (T) ===
+{{WorldTech|name= Froin|WorldTech= 9}}
+
+=== World Government (G) ===
+{{WorldGov|name= Froin|Government= 2}}
+
+Froin runs itself as a democracy; everyone who has spent at least 200 days on the surface over the last standard year who registers to vote at least 10 days before an electoral event is a legal voter.
+
+There is an elected President, Vice-President, a unicameral Board of Laws (32 members) and a Judicial Court of Law.  3 Common Courts handle most cases; appeals and special cases are heard by the Judicial Court.  The Vice-President administrates the meetings of the Board of Laws, and may break ties.
+
+=== World Law (L) ===
+{{WorldLaw|name= Froin|Law= 5}}
+
+=== Imperial Landed Nobility ===
+{{Imperial Nobility|name= Froin|Noble= B}}
+
+=== Trade Data ===
+* Importance:     -1 (unimportant)
+
+Froin's primary export are metals, primarily lead, depleted uranium, and bismuth.
+
+=== World Economy ===
+* Resources:      5 (scarce)
+* Labor:          1 (tens)
+* Infrastructure: 0 (non-existent)
+* Efficiency:     -3 (poor)
+
+=== World Culture ===
+* Heterogenity: 1 (monolithic)
+* Acceptance:   1 (extremely xenophobic)
+* Strangeness:  3 (somewhat typical)
+* Symbols:      7 (somewhat concrete)
+
+Local culture is disjointed, with many disparate sub-cultures based on common origins, species, and interests.  Many races have arrived here over the years. Imperial humans are the majority, but [[Darrian]]s, Sword Worlders, a [[Vargr]] pack, and a [[Mewey]] trading enclave also make their home here. No Zhodani are known to live on Froin.
+
+Sports are a central theme in the overall culture, and fuel stories, politics and occasional riots.  Various sports are popular across the sub-cultures, and form a major bonds across otherwise different groups.  There are 3 major arenas in the Crater Shallow Startown, and 2 in the Crater Deep Settlement.  Smaller gyms and arenas exist.
+
+Education is provided to age of 18, focusing on trade-based education and starship-repair professions. A small university exists in the startown, called Hope University.
+
+Marriage customs vary by subcultural standards, but generally follow Imperium norms.  Marriages are generally considered a religious custom, and accompanied by relatively large celebrations.  Local government will register any marriage recognized by any clergy, but clergy-recognition is required.  Couples are the norm, though some plural marriages exist, including at least one group marriage which is a sub-culture unto its own.
+
+Burial customs also vary by subcultural standards, but are ruled by economics.  Simple burial under a meter of frozen soil on the open surface is most common.  Other groups excavate catacombs; these can span multiple levels for hundreds of meters.  Burial customs typically involve wrapping the deceased with fabric inscribed with messages and adorned with small items..  The deceased is then frozen solid for burial.
+
+==== World Timeline ====
+Major events that have affected this world and the wider region that it lies within:
+* [[0|The Year 0]]: the [[Third Imperium]] is founded.
+* [[300]]-[[420]]: the {{Imperial}} [[First Survey]] charts the system.
+* [[589]]-[[604]]: [[First Frontier War]].
+* [[604]]-[[622]]: the [[Civil War]].
+* [[615]]-[[620]]: [[Second Frontier War]].
+* [[624]]: the [[Express Boat Network]] is established.
+* [[979]]-[[986]]: [[Third Frontier War]].
+* [[995]]-[[1065]]: the {{Imperial}} [[Second Survey]] charts the system.
+* [[1065]]: the [[Second Survey]] is published. Information about the system becomes widely available.
+* [[1082]]-[[1084]]: [[Fourth Frontier War]], also known as the ''False War''.
+* [[1107]]-[[1110]]: [[Fifth Frontier War]].
+
+=== Later Historical Eras ===
+==== Post-Collapse ====
+But the world underwent a major expansion after the [[Collapse]]. While not as important as [[Iderati_(world)|Iderati]] or [[Emape_(world)|Emape]], about twenty percent of all the [[Gold Road|Mortal Coil]]'s traffic passes through its huge port. Most ships that pass through are low jump independents that are making an interface from the [[Gold Road|Coil]] along the lower Spin Main into [[District 268|Plankwell]] on their way to [[Collace (world)|Collace]] or [[Forine (world)|Forine]]. About ninety percent of the  population is employed at the starport at this point. The port becomes the fourth largest in Five Sisters, and unsupervised automation became a necessity out of the huge traffic load and the overworked staff.
+
+== References & Contributors (Sources) ==
+{{Metadata}}
+{{Intermediate}}
+{{Sources
+ | {{Ludography cite|name=The Spinward Marches|version=Classic Traveller|page=10-11}}
+ | {{Ludography cite|name=The Spinward Marches Campaign|version=Classic Traveller|page=18-19}}
+ | {{Ludography cite|name=Imperial Encyclopedia|page=94-100}} (UWP only)
+ | {{Ludography cite|name=MegaTraveller Journal 3|article=Domain of Deneb: Sector Data|page=47-58}} (UWP only)
+ | {{Ludography cite|name=The Regency Sourcebook|page=48}} (UWP only)
+ | {{Ludography cite|name=Behind the Claw|version=GURPS Traveller|page=54}}
+ | {{Ludography cite|name=The Spinward States|page=109}} (UWP only)
+ | {{Ludography cite|name=The Spinward Marches|version=Mongoose Traveller}}
+ | {{Ludography cite|name=Behind the Claw | version=Mongoose 2nd|page=98-102,114-115}}
+ | [[Peter Gray]] - [https://web.archive.org/web/20110103025529/http://www.downport.com/bard/bard/opal/opal9511.html BARD OPAL 9511]
+ | Contributor: [[User:Dochsavage|Doch Savage]] 
+}}
+
+[[Category: Collace Arm worlds]]
+[[Category: GT]]
+[[Category: Science]]
+{{LE|Binary Star System|T5 Second Survey worlds|}}
+{{LEN|BARD}}

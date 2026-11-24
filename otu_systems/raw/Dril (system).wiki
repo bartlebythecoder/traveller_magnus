@@ -1,0 +1,50 @@
+{{InfoboxSystem
+ |name= Home |subsector= Aldebaran
+ |sector= Aldebaran |hex= 1009
+ |star= Dril |type= G2 V
+ |P1=     Planet 1                          | Dist1= 0.18         | UWP1= Y100000-0
+ |P2=     Planet 2                          | Dist2= 0.35         | UWP2= H300168-D
+ |P3=     Planet 3                          | Dist3= 0.71         | UWP3= F52066B-D
+ |P3M1=     Moon                            |   Dist3M1= 7 Diam   |   UWP3M1= YS00000-0
+ |P4=     Home                              | Dist4= 1.01         | UWP4= A86699A-E
+ |P5=     Stony Belt                        | Dist5= 1.45         | UWP5= F000769-E
+ |P6=     Jovian                            | Dist6= 2.89         | UWP6= LGG
+ |P6M1=     Moon                            |   Dist6M1= 8 Diam   |   UWP6M1= G201228-D
+ |P6M2=     Moon                            |   Dist6M2= 15 Diam  |   UWP6M2= H2A0000-0
+ |P6M3=     Moon                            |   Dist6M3= 20 Diam  |   UWP6M3= G300109-D
+ |P7=     Planet 4                          | Dist7= 5.35         | UWP7= GDC121B-D
+ |P7M1=     Moon                            |   Dist7M1= 25 Diam  |   UWP7M1= Y310000-0
+ |P8=     Planet 5                          | Dist8= 11.1         | UWP8= G403318-D
+ |P9=     Planet 6                          | Dist9= 15.4         | UWP9= F20056C-E
+ |P10=    Icy Belt                          | Dist10= 25.7        | UWP10= H000117-D
+ |P11=    Planet 7                          | Dist11= 165.0       | UWP11= Y100000-0
+ |P11M1=    Moon                            |   Dist11M1= 9 Diam  |   UWP11M1= YS00000-0
+}}
+
+[[Home (Al 1009) (world)|Home]] orbits [[Dril (system)|Dril]], a solitary yellow main sequence star nearly identical to [[Sol (system)|Sol]]. Home is the third planet from Dril, orbiting at an average distance of 152,000,000 km with a period of 376.24 days. The system contains two gas giants. An inner asteroid belt close to Home’s orbit creates frequent and spectacular meteor showers.
+
+== Description ([[Astrography]] & [[Planetology]]) == 
+=== Stellar Data ===
+'''Home''' has a solitary primary star.
+* It is a yellow main sequence named ''Dril''.
+
+{{MonostellarSystem
+|name           = Home
+|primary        = G2 V
+|PrimaryName    = Dril
+|PrimaryNotes   = 
+}}
+
+=== System Data ===
+The worlds of the [[system]] have been surveyed. They consist of:
+* [[Home (world)|Home]], the [[mainworld]].
+* x7 secondary [[world|rocky worlds]].
+* x2 [[planetoid belt]]s.
+* x1 [[gas giant]].
+
+== References & Contributors (Sources) ==
+{{Sources
+|S1=[[Mongoose Traveller: Solomani]]
+}}
+
+{{LE}}
